@@ -1,0 +1,53 @@
+.fp-system-settings-element {
+  margin-bottom: 20px;  
+}
+
+.fp-system-settings-textfield input {
+  width: 80%;
+}
+
+.fp-system-settings-element textarea {
+  width: 80%;
+  height: 75px;
+}
+
+.fp-system-settings-input {
+  padding-left: 10px;
+}
+
+.fp-system-settings-element label {  
+  font-weight: bold;
+}
+
+.fp-system-settings-element-description {
+  font-size: 0.8em;
+  padding-left: 10px;
+  color: #888;
+}
+
+.fp-system-modules-table {
+  font-size: 0.8em;
+  margin-bottom: 20px;
+  width: 100%;
+}
+.fp-system-modules-type {
+  background-color: #ddd;
+  padding: 3px;
+  font-size: 0.8em;
+}
+
+.fp-system-modules-row td {
+  padding: 3px;
+}
+.fp-system-modules-row-odd
+{
+  background-color: 	#EDF9FF;
+}
+
+.fp-system-modules-machine-name
+{
+  font-size: 0.85em;
+  font-style: italic;
+  padding-left: 30px;
+}
+

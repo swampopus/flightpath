@@ -1,0 +1,46 @@
+FlightPath Changelog
+====================
+
+--- v3.1.1
+
+2012-01-03
+Cleaned up queries in admin.php to use new replacement pattern system.
+
+2011-12-22
+Modified queries throughout the various classes and php files to 
+use new replacement pattern system, to make them less
+vulnerable to SQL-injection attacks.
+
+2011-11-25
+Created new replacement pattern system for DatabaseHandler::dbQuery function,
+to help protect against SQL-injection attacks.
+
+--- v3.1
+
+7-14-2011
+FlightPath is now capable of handling courses with 0 hours.
+It actually, internally, tracks them as 1 hour courses, but
+displays them as 0 hour courses.  The pseudo-hour which is 
+attributed to it is known as a "Ghost hour" in the system.
+
+5-4-2011
+Fixed a small bug relating to degree options.  If a student
+has a particular option selected, then changes catalog years,
+and that option (track code) no longer exists, then FP was just
+display no degree plan.  It will now default back to the
+base degree plan.
+
+
+--- v3.0.1b
+
+4-11-2011
+Made "deCanSwitchUsers" be its own permission, instead
+of simply testing for full_admin status.
+
+Made theme change to remove "ULM" from the default banner image.
+
+--- v3.0b ---
+
+4-8-2011
+This is the initial release of FlightPath as open source,
+debuting as version 3.0b.

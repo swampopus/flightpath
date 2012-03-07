@@ -1,0 +1,1560 @@
+<?php
+/*
+FlightPath was originally designed and programmed by the 
+University of Louisiana at Monroe. The original source is 
+copyright (C) 2011-present by the University of Louisiana at Monroe.
+
+FlightPath is considered "open source" under the 
+GNU General Public License, version 3 or any later version. 
+This covers any related files and documentation packaged with 
+FlightPath. 
+
+The license is defined in full here: http://www.gnu.org/licenses/gpl.html,
+and reproduced in the LICENSE.txt file.
+
+You may modify FlightPath's source code, but this copyright and license
+notice must not be modified, and must be included with the source code.
+------------------------------
+*/
+
+/*
+Display statistics about FlightPath.
+*/
+
+
+
+function stats_init() {
+  $GLOBALS["stats_db"] = getGlobalDatabaseHandler();
+  
+}
+
+
+
+/**
+ * Implementation of hook_menu().
+ * This tells other parts of FlightPath where to display links
+ * to this module, and what to include in the URL.
+ *
+ */
+function stats_menu() {
+  
+  $items = array();
+  
+  $items[] = array(
+    "title" => "Usage Stats & Reports",
+    "url" => getModuleActionURL("stats"),
+    "target" => "_blank",
+    "description" => "",
+    "location" => "admin_tools",
+    "icon" => $GLOBALS["fpSystemSettings"]["theme"] . "/images/popup.gif",
+    "weight" => 100,
+    "permission" => "canAccessStats",
+  );
+    
+  return $items;
+}
+
+
+
+/**
+ * Implementation of hook_perm().
+ * Expects to return an array of permissions recognized by
+ * this module.
+ * 
+ * Ex:   $a = array( 
+ *          "deCanDoSomething" => array ( 
+ *              "title" => "Can Do Something",
+ *              "description" => "Allow the user to do something." 
+ *          )
+ *        );
+ *
+ */
+function stats_perm() {
+  
+  $perms = array (
+    "canAccessStats" => array(
+      "title" => "Can access/view stats",
+      "description" => "This allows the user to access the stats module, letting them run
+                        reports on usage.",
+    ),    
+  );
+
+  return $perms;
+  
+}
+
+
+function stats_page_switchboard() {
+
+  if (!userHasPermission("canAccessStats")) {
+    displayAccessDenied("Stats");
+  }
+  
+  $screen = new AdvisingScreen("", null, "notAdvising");
+  $screen->boolPrint = true;
+  $GLOBALS["stats_screen"] = $screen;
+  
+  
+  $performAction = $_REQUEST["performAction"];
+
+  if ($performAction == "" || $performAction == "menu") {
+    stats_displayMainMenu();
+  }
+  
+  if ($performAction == "displayAccessStats") {
+    stats_displayAccessStats();
+  }
+  
+  if ($performAction == "displayDraftCourses") {
+    stats_displayDraftCourses();
+  }
+  
+  
+  if ($performAction == "displayAdvisorReport") {
+    stats_displayAdvisorReport();
+  }
+  
+  if ($performAction == "displayUseReport") {
+    stats_displayUseReport();
+  }
+  
+  if ($performAction == "displayIncorrectCourseIds") {
+    stats_displayIncorrectCourseIds();
+  }
+  
+  
+  if ($performAction == "displayStudentAdvisingHistory") {
+    stats_displayStudentAdvisingHistory();
+  }
+  
+  if ($performAction == "displaySubstitutionUseReport") {
+    stats_displaySubstitutionUseReport();
+  }
+  
+  
+  if ($performAction == "displayFailedSubs") {
+    stats_displayFailedSubs();
+  }
+  
+  
+  if ($performAction == "displayMajorCounts") {
+    stats_displayMajorCounts();
+  }
+  
+  if ($performAction == "displaySelectedDegreeOptions") {
+    stats_displaySelectedDegreeOptions();
+  }
+  
+}
+
+
+
+
+function stats_displayDraftCourses()
+{
+  // Get our global variables...
+  $db = $GLOBALS["stats_db"];
+  $screen = $GLOBALS["stats_screen"];
+  $moduleActionURL = getModuleActionURL("stats");
+
+  
+  $year = $_GET["year"];
+  $letter = $_GET["letter"];
+  $letterTo = $_GET["letterTo"];
+  if ($letter == "") {
+    $letter = "A";
+    $letterTo = "A";
+  }
+  
+  $pC = "";
+  $pC .= "<a href='$moduleActionURL'>Main Menu</a><br><br>
+          <h2>Draft Courses for $year</h2>";
+  
+  $pC .= "View by letter:<br>
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=A&letterTo=A'>A</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=B&letterTo=B'>B</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=C&letterTo=C'>C</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=D&letterTo=D'>D</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=E&letterTo=E'>E</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=F&letterTo=F'>F</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=G&letterTo=G'>G</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=H&letterTo=H'>H</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=I&letterTo=L'>I-L</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=M&letterTo=M'>M</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=N&letterTo=O'>N-O</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=P&letterTo=P'>P</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=Q&letterTo=R'>Q-R</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=S&letterTo=S'>S</a> &nbsp;
+        <a href='$moduleActionURL&performAction=displayDraftCourses&year=$year&letter=T&letterTo=Z'>T-Z</a> 
+        
+        <br><br>
+        <b>Use keyboard shortcut CTRL-F to find courses quickly.</b>
+        <hr><br>
+";
+  
+  $res = $db->dbQuery("SELECT * FROM draft_courses
+                        WHERE subject_id BETWEEN '$letter' AND '$letterTo" . "ZZZZZ'
+                        AND catalog_year = '$year'
+                        AND delete_flag = 0
+                        ORDER BY subject_id, course_num");
+  while ($cur = $db->dbFetchArray($res))
+  {
+    extract($cur, 3, "db");
+    //var_dump($cur);
+    $ex = $exstyle = "";
+    if ($db_exclude == '1') {
+      $ex = " - - <b>excluded</b>";
+      $exstyle = "color: gray; font-style: italic;";
+    }
+    $pC .= "<div style='$exstyle'>
+              <div><b>$db_subject_id $db_course_num - $db_title</b>$ex</div>
+              <div>$db_min_hours, $db_max_hours, $db_repeat_hours &nbsp; &nbsp; &nbsp; (min, max, repeat hrs)</div>
+              <div>$db_description</div>
+            </div>  
+            <br><br>";
+  }
+  
+  
+  
+  
+  $screen->pageContent = $pC;
+  $screen->pageTitle = "FP Stats and Reports";
+  $screen->outputToBrowser();
+  
+}
+
+
+function stats_displayIncorrectCourseIds() {
+  // Get our global variables...
+  $db = $GLOBALS["stats_db"];
+  $screen = $GLOBALS["stats_screen"];
+  $moduleActionURL = getModuleActionURL("stats");
+
+
+  $pC = "";
+  
+  $courseToIDArray = array();
+  $courseIDToArray = array();
+  
+  $pC .= "<a href='$moduleActionURL'>Main Menu</a><br><br>
+        <h2 style='margin:0px; padding=0px;'>Incorrect Course Ids</h2>
+        
+        <style>
+        li
+        {
+          margin-bottom: 15px;
+          font-size: 11pt;
+        }
+        li.excluded {
+          font-style: italic;
+          background-color: #ccc;
+        }
+        </style>
+        
+        <b>Draft Degree Requirements...</b><ul>";
+  $drCount = 0;
+  $res = $db->dbQuery("SELECT * FROM draft_degree_requirements a,
+                        draft_degrees b
+                        WHERE data_entry_value != '' 
+                        AND a.degree_id = b.degree_id 
+                        ORDER BY catalog_year, title");
+  while ($cur = $db->dbFetchArray($res)) {
+    extract($cur, 3, "db");
+    $dev = strtoupper($cur["data_entry_value"]);
+    $temp = explode("~", $dev);
+    
+    if (key_exists($dev, $courseToIDArray)) {
+      $check_id = $courseToIDArray[$dev];
+    }
+    else {
+      // Look up what this course ID is supposed to be.
+      //$temp[1] is the course num.  It might have a :number after it.  Take
+      // that off.
+      $tempc = explode(":", $temp[1]);
+      $temp[1] = $tempc[0];
+      
+      $res2 = $db->dbQuery("SELECT course_id FROM draft_courses
+                            WHERE subject_id = '{$temp[0]}' 
+                            AND course_num = '{$temp[1]}' ");
+      $cur2 = $db->dbFetchArray($res2);
+      $check_id = $cur2["course_id"];
+      
+      $courseToIDArray[$dev] = $check_id;
+    }
+    
+    // Does the check_id match what's in the db?
+    if ($check_id != $cur["course_id"])
+    {
+      $checkmsg = "";
+       if ($check_id == "") {
+        $checkmsg = "<br><b>Course $dev has blank id.  Possibly its been deleted?</b>";
+      }
+      $ex = ($db_exclude == "1")?"excluded":"";
+      
+      // Figure out which course $db_course_id is!
+      $found_course = "";
+      if (key_exists($cur["course_id"], $courseIDToArray)) {
+        $found_course = $courseIDToArray[$cur["course_id"]];
+      } else {
+        $res2 = $db->dbQuery("SELECT * FROM draft_courses
+                              where course_id = '$db_course_id'
+                              ORDER BY exclude ");
+        $cur2 = $db->dbFetchArray($res2);
+        $found_course = $cur2["subject_id"] . "~" . $cur2["course_num"];
+        $courseIDToArray[$db_course_id] = $found_course;
+      }
+      
+      $pC .= "<li class='$ex'>$db_catalog_year - $db_major_code - $db_title $ex<br>
+                  Semester Block#: " . ($db_semester_num + 1) . "<br>
+                  $dev was typed in and should be $check_id.  $db_course_id ($found_course) found instead.
+                  $checkmsg
+              </li>";
+      $drCount++;
+    }
+    
+  }
+  
+  $pC .= "</ul>";
+  
+  $pC .= "<b>$drCount Problem Draft Degree Requirements Found</b><hr>";
+  
+  
+  
+  $pC .= "<b>Draft Group Requirements...</b><ul>";
+  $grCount = 0;
+  $res = $db->dbQuery("SELECT * FROM draft_group_requirements a,
+                        draft_groups b
+                        WHERE data_entry_value != '' 
+                        AND a.group_id = b.group_id 
+                        AND delete_flag != '1'
+                        ORDER BY catalog_year, title");
+  while ($cur = $db->dbFetchArray($res)) {
+    extract($cur, 3, "db");
+    $dev = strtoupper($cur["data_entry_value"]);
+    $temp = explode("~", $dev);
+    
+    if (key_exists($dev, $courseToIDArray)) {
+      $check_id = $courseToIDArray[$dev];
+    }
+    else {
+      // Look up what this course ID is supposed to be.
+      //$temp[1] is the course num.  It might have a :number after it.  Take
+      // that off.
+      $tempc = explode(":", $temp[1]);
+      $temp[1] = $tempc[0];
+      
+      $res2 = $db->dbQuery("SELECT course_id FROM draft_courses
+                            WHERE subject_id = '{$temp[0]}' 
+                            AND course_num = '{$temp[1]}' ");
+      $cur2 = $db->dbFetchArray($res2);
+      $check_id = $cur2["course_id"];
+      
+      
+      $courseToIDArray[$dev] = $check_id;
+
+    }
+    
+    // Does the check_id match what's in the db?
+    if ($check_id != $cur["course_id"])
+    {
+      $checkmsg = "";
+       if ($check_id == "") {
+        $checkmsg = "<br><b>Course $dev has blank id.  Possibly its been deleted?</b>";
+      }
+      
+      $found_course = "";
+      if (key_exists($cur["course_id"], $courseIDToArray)) {
+        $found_course = $courseIDToArray[$cur["course_id"]];
+      } else {
+        $res2 = $db->dbQuery("SELECT * FROM draft_courses
+                              where course_id = '$db_course_id'
+                              ORDER BY exclude ");
+        $cur2 = $db->dbFetchArray($res2);
+        $found_course = $cur2["subject_id"] . "~" . $cur2["course_num"];
+        $courseIDToArray[$db_course_id] = $found_course;
+      }
+      
+      
+      $pC .= "<li>$db_catalog_year - $db_group_name - $db_title <br>
+                  $dev was typed in and should be $check_id.  $db_course_id ($found_course) found instead.
+                  $checkmsg
+              </li>";
+      $grCount++;
+    }
+    
+  }
+  
+  
+  
+  
+  
+  $pC .= "</ul>";
+  $pC .= "<b>$grCount Problem Draft Group Requirements Found</b><hr>";  
+  
+  
+  $screen->pageContent = $pC;
+  $screen->pageTitle = "FP Stats and Reports";
+  $screen->outputToBrowser();
+  
+}
+
+
+function stats_displayFailedSubs()
+{
+  // Get our global variables...
+  $db = $GLOBALS["stats_db"];
+  $screen = $GLOBALS["stats_screen"];
+  $moduleActionURL = getModuleActionURL("stats");
+
+
+  $pC = "";
+
+  
+  $pC .= "<a href='$moduleActionURL'>Main Menu</a><br><br>
+			<h2 style='margin:0px; padding=0px;'>Failed Subs (only works for local, non-transfer credits)</h2>
+			Remember that some subs might be outdated!
+			<br><br><!--NUM-->
+			";	
+  $c = 0;
+  // First, get a list of all the students with subs...
+  $res = $db->dbQuery("SELECT DISTINCT(student_id) FROM student_substitutions
+						WHERE `sub_transfer_flag`='0'
+							AND	`delete_flag`='0' ");
+  while($cur = $db->dbFetchArray($res))
+  {
+    extract($cur,3,"db");
+
+    // Now, load the student's records.
+    $student = new Student("", $db);
+    $student->loadStudent();
+    $student->studentID = $db_student_id;
+    $student->loadCoursesTaken(false);
+    $student->loadStudentSubstitutions();
+    //adminDebug($db_student_id);
+    // Now, go through the subs, and see what the grade is
+    // for each course.  If you find a "retake" display status,
+    // then it's bad.
+    $student->listSubstitutions->resetCounter();
+    while($student->listSubstitutions->hasMore())
+    {
+      $substitution = $student->listSubstitutions->getNext();
+      //$cr = $substitution->courseRequirement;
+      $subCourse = $substitution->courseListSubstitutions->getFirst();
+      $subCourse->assignDisplayStatus();
+
+      if ($subCourse->displayStatus == "retake")
+      {
+        $pC .= "<div>
+							$db_student_id - sub of $subCourse->subjectID
+											$subCourse->courseNum
+											- grade: $subCourse->grade
+						</div>";
+        $c++;
+      }
+
+    }
+
+
+
+  }
+
+
+
+  $pC = str_replace("<!--NUM-->","$c failed subs found.<br><br>",$pC);
+
+  
+  $screen->pageContent = $pC;
+  $screen->pageTitle = "FP Stats and Reports";
+  $screen->outputToBrowser();
+
+}
+
+
+function stats_displaySelectedDegreeOptions()
+{
+  // Get our global variables...
+  $db = $GLOBALS["stats_db"];
+  $screen = $GLOBALS["stats_screen"];
+  $moduleActionURL = getModuleActionURL("stats");
+
+  $pC = "";
+
+  // What major have they selected?
+  $major = trim($_GET["major"]);
+
+  $pC .= "<a href='$moduleActionURL'>Main Menu</a><br><br>
+			<h2 style='margin:0px; padding=0px;'>Selected Degree Options</h2>
+			<form action='$moduleActionURL' method='GET'>
+			<input type='hidden' name='n' value='stats'>
+			
+			<input type='hidden' name='performAction' value='displaySelectedDegreeOptions'>";
+  $pC .= stats_drawMajorsPulldown($major, true);
+  $pC .= "</form>";
+
+  if ($major != "")
+  {
+    $countInMajor = 0;
+    $degreeOptionCount = array();
+    
+    // Let's pull the needed variables out of our settings, so we know what
+  	// to query, because this is a non-FlightPath table.
+  	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:students"];
+  	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+  	$tableName = $tsettings["tableName"];				
+  	$sql = "SELECT * FROM $tableName
+  	        WHERE substring_index($tf->majorCode, '|', 1) = '$major'
+  	        AND $tf->rankCode IN %RANKIN%
+  	        %ENROLLED_STUDENTSEARCH_CONDITIONS% ";	    
+    
+    /*$result = mysql_query("select * from human_resources.students
+								where `new_major`='$major' 
+								and `enrolled`='1'
+								and `rank` in ('FR', 'SO', 'JR', 'SR')
+								and `student_id` not in (select student_id from human_resources.deceased_students) 
+																							
+								") or die(mysql_error());*/
+
+
+    $rankIn = "( '" . join("', '", $GLOBALS["fpSystemSettings"]["allowedStudentRanks"]) . "' )";    
+    $sql = str_replace("%RANKIN%", $rankIn, $sql);  	
+  	$sql = str_replace("%ENROLLED_STUDENTSEARCH_CONDITIONS%", $GLOBALS["fpSystemSettings"]["enrolledStudentSearchConditions"], $sql);  
+
+    $result = $db->dbQuery($sql);
+    
+    while($cur = $db->dbFetchArray($result))
+    {
+      extract($cur, 3, "db");
+      $countInMajor++;
+
+      $track = "";
+      // Does this student have a track (degree option) specified?
+      $studentSettings = $db->getStudentSettings($db_student_id);
+      //var_dump($studentSettings);
+      if ($studentSettings["majorCode"] == $major)
+      {
+        $track = $studentSettings["trackCode"];
+      }
+      //$track = get_student_track($db_student_id, $major);
+
+
+      if ($track == "")
+      {
+        $track = "<i>None selected</i>";
+      }
+
+      // Init if not already...
+      $degreeOptionCount[$track] = $degreeOptionCount[$track]*1;
+
+      $degreeOptionCount[$track]++;
+    }
+
+    arsort($degreeOptionCount);
+
+    $pC .= "<table border='1'>
+				<tr>
+					<td valign='top'><b>Degree Option</td>
+					<td valign='top'><b>Count</td>
+					<td valign='top'><b>Description</td>
+				</tr>";
+
+    foreach($degreeOptionCount as $dOption => $value)
+    {
+      //$desc = get_track_title($major,$dOption);
+      // figure out the title of the track...
+      $temp = split("-", $db_catalog_year);
+      $cy = $temp[0];
+      $degreeID = $db->getDegreeID($major . "|_" . $dOption, $cy);
+
+      $dp = new DegreePlan();
+      $dp->degreeID = $degreeID;
+      $dp->loadDescriptiveData();
+      $desc = $dp->trackTitle;
+
+
+      $pC .= "<tr><td valign='top'>
+							$dOption
+						</td>
+						<td valign='top'>
+							$value
+						</td>
+						<td valign='top'>
+							$desc
+						</td>
+						
+					</tr>";
+    }
+
+    $pC .= "</table>Total # of results: $countInMajor.";
+
+  }
+
+
+  $screen->pageContent = $pC;
+  $screen->pageTitle = "FP Stats & Reports";
+  $screen->outputToBrowser();
+}
+
+
+
+
+
+function stats_drawMajorsPulldown($smajor = "", $displaySubmit = false)
+{
+
+  // Get our global variables...
+  $db = $GLOBALS["stats_db"];
+  $screen = $GLOBALS["stats_screen"];
+  $moduleActionURL = getModuleActionURL("stats");
+
+  $majorArray = array();
+
+  $settings = $db->getFlightPathSettings();
+
+  $currentCatalogYear = trim($settings["currentCatalogYear"]);
+
+  $mACount = 0;
+  $query = "SELECT * FROM degrees
+				WHERE `catalog_year`='$currentCatalogYear'
+				AND `exclude`='0'
+				ORDER BY `title`  ";
+  $result = $db->dbQuery($query);
+  if ($result)
+  {
+    while ($curRow = $db->dbFetchArray($result))
+    {
+      $major = trim($curRow["major_code"]);
+      if (!$db->getDegreeTracks($major, $currentCatalogYear))
+      { // only get majors that also have tracks!
+        continue;
+      }
+      $description = trim($curRow["title"]);
+      $type = trim($curRow["degree_type"]);
+      $majorArray[$mACount]["description"] = $description;
+      $majorArray[$mACount]["major"] = $major;
+      $majorArray[$mACount]["type"] = $type;
+
+      $mACount++;
+
+
+    }
+  }
+
+  //var_dump($majorArray);
+
+  $rtn .= "
+			<table border='0'>
+			
+          <td valign='middle'>
+          
+         <select name='major' id='major'><option value=''>Please select a major with degree options</option>
+                      <option value=''>-----------------------------------</option>";
+
+  for ($t = 0; $t < $mACount; $t++)
+  {
+    $sel = "";
+    if ($majorArray[$t]["major"] == $smajor && $smajor != "")
+    {
+      $sel = "selected";
+    }
+    $hyph = "-";
+    if ($majorArray[$t]["type"] == "" || $majorArray[$t]["type"] == "NA")
+    {
+      $hyph = "";
+      $majorArray[$t]["type"] = "";
+    }
+
+    $rtn .= "<option value='" . $majorArray[$t]["major"] . "' $sel>
+					" . $majorArray[$t]["description"] . " $hyph " . $majorArray[$t]["type"] . "
+					</option>";
+  }
+
+
+  $rtn .= "                </select> </td>";
+  if ($displaySubmit == true)
+  {
+    $rtn .= "<td valign='middle'><input type='submit' value='Select'></td>";
+  }
+
+  $rtn .= "</table>";
+
+  return $rtn;
+
+}
+
+
+
+
+
+
+function stats_displayMajorCounts()
+{
+  // Get our global variables...
+  $db = $GLOBALS["stats_db"];
+  $screen = $GLOBALS["stats_screen"];
+  $moduleActionURL = getModuleActionURL("stats");
+
+  // Displays how many students are currently in each major and concentration.
+  $pC = "";
+
+  $total = 0;
+  $pC .= "<a href='$moduleActionURL'>Main Menu</a><br><br>
+	<h2 style='margin:0px; padding=0px;'>Major Counts</h2>
+	This shows how many enrolled students are listed
+	in each major or major|concentration available in FlightPath. 
+			";
+
+  $pC .= "<table border='1'>
+				<tr>
+					<td valign='top'><b>Major</td>
+					<td valign='top'><b>Count</td>
+					<td valign='top' colspan='2'><b>Description</td>
+					
+				</tr>";
+  
+
+  $result = $db->dbQuery("SELECT * FROM degrees
+                          GROUP BY major_code 
+                          ORDER BY title, major_code ");
+  while ($cur = $db->dbFetchArray($result)) {
+    $count = 0;
+    $majorCode = $cur["major_code"];
+    $title = $cur["title"];
+    $degreeType = $cur["degree_type"];
+    
+    // If this is a degree option, skip it, as we do not expect
+    // the students table to record degree option choices.
+    if (strstr($majorCode, "|_")) continue;
+    
+    // Find out how many students have this major.
+    // Let's pull the needed variables out of our settings, so we know what
+  	// to query, because this is a non-FlightPath table.
+  	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:students"];
+  	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+  	$tableName = $tsettings["tableName"];				
+  	$sql = "SELECT count($tf->studentID) AS count FROM $tableName
+  	        WHERE $tf->majorCode = '$majorCode'
+  	        AND $tf->rankCode IN %RANKIN%
+  	        %ENROLLED_STUDENTSEARCH_CONDITIONS% ";	    
+    
+    $rankIn = "( '" . join("', '", $GLOBALS["fpSystemSettings"]["allowedStudentRanks"]) . "' )";    
+    $sql = str_replace("%RANKIN%", $rankIn, $sql);  	
+  	$sql = str_replace("%ENROLLED_STUDENTSEARCH_CONDITIONS%", $GLOBALS["fpSystemSettings"]["enrolledStudentSearchConditions"], $sql);  
+    
+  	$res2 = $db->dbQuery($sql);
+  	$cur2 = $db->dbFetchArray($res2);
+  	
+  	if (is_numeric($cur2["count"])) {
+  	 $total += $cur2["count"];
+  	}
+  	$resArray[$majorCode]["count"] = $cur2["count"] * 1;
+    $resArray[$majorCode]["desc"] = $title;
+    $resArray[$majorCode]["type"] = $degreeType;
+  	
+  }
+  
+  /*  $result = mysql_query("select * from human_resources.majors
+							where `level`='U' 
+								order by `major_description`, `major_id` ") or die(mysql_error());
+
+  
+
+  while($cur = mysql_fetch_array($result))
+  {
+    extract($cur,3,"db");
+    $count = 0;
+    // Find out how many students have this major...
+
+    $res2 = mysql_query("select count(student_id) as count from human_resources.students
+								where `new_major`='$db_major_id' 
+								and `enrolled`='1'
+								and `rank` in ('FR', 'SO', 'JR', 'SR')
+								and `student_id` not in (select student_id from human_resources.deceased_students) 
+						
+								") or die(mysql_error());
+    if (mysql_num_rows($res2) > 0)
+    {
+      $cur = mysql_fetch_array($res2);
+      $count = $cur["count"];
+    }
+
+    $resArray[$db_major_id]["count"] = $count;
+    $resArray[$db_major_id]["desc"] = $db_major_description;
+    $resArray[$db_major_id]["type"] = $db_degree_type;
+
+    $total += $count;
+
+  }
+
+  */
+  
+/*
+  // Let's pull the needed variables out of our settings, so we know what
+	// to query, because this is a non-FlightPath table.
+	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:students"];
+	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+	$tableName = $tsettings["tableName"];				
+	$sql = "SELECT * FROM $tableName
+	        WHERE $tf->rankCode IN %RANKIN%
+	        %ENROLLED_STUDENTSEARCH_CONDITIONS% ";	    
+  
+  $rankIn = "( '" . join("', '", $GLOBALS["fpSystemSettings"]["allowedStudentRanks"]) . "' )";    
+  $sql = str_replace("%RANKIN%", $rankIn, $sql);  	
+	$sql = str_replace("%ENROLLED_STUDENTSEARCH_CONDITIONS%", $GLOBALS["fpSystemSettings"]["enrolledStudentSearchConditions"], $sql);  
+
+  $result = $db->dbQuery($sql);
+  while ($cur = $db->dbFetchArray($result)) {
+    
+  }
+  */
+
+  foreach($resArray as $major => $value)
+  {
+
+    $pC .= "<tr>
+					<td valign='top' class='tenpt'>$major</td>
+					<td valign='top' class='tenpt'>{$value["count"]}</td>
+					<td valign='top' class='tenpt'>{$value["type"]}</td>
+					<td valign='top' class='tenpt'>{$value["desc"]}</td>
+				</tr>";
+  }
+
+  $pC .= "</table>
+			Total student records: $total.";
+
+
+
+  $screen->pageContent = $pC;
+  $screen->pageTitle = "FP Stats";
+  $screen->outputToBrowser();
+
+}
+
+function stats_displayStudentAdvisingHistory()
+{
+  // Get our global variables...
+  $db = $GLOBALS["stats_db"];
+  $screen = $GLOBALS["stats_screen"];
+  $moduleActionURL = getModuleActionURL("stats");
+
+  
+  
+  $studentID = mysql_real_escape_string(trim($_REQUEST["studentID"]));
+  $studentName = $db->getStudentName($studentID);
+  $student = new Student($studentID);
+    $officialDegreePlan = $student->getDegreePlan(false, true);
+    $officialDegreePlan->loadDescriptiveData();
+    $officialDegreeTitle = $officialDegreePlan->getTitle(true);
+
+  $curMajor = $officialDegreePlan->majorCode . " $officialDegreeTitle";
+  
+  $pC .= "
+		<h2>FlightPath Student Advising History for $studentName ($studentID)</h2>
+		<a href='$moduleActionURL' class='tenpt'>Back to Main Menu</a>
+		<br><br>
+		<b>Student's current official Major:</b> $curMajor <br><br>
+		<div class='tenpt' style='border: 1px solid grey; padding: 5px;'>
+		Legend:  The 'b' by itself means this was a blank submission.  It is
+		not normally displayed to the user, but is shown here for debugging 
+		purposes.  The 'wi' means What If mode.</div>
+		
+		
+
+		
+		<table border='0' cellpadding='2' class='tenpt' width='750'>
+		";
+
+  $res = $db->dbQuery("select * from advising_sessions
+							where `student_id`='$studentID'
+							and `is_draft`='0'
+							order by `datetime` desc, `term_id` desc ");
+  while($cur = $db->dbFetchArray($res))
+  {
+    extract($cur, 3, "db");
+    $dt = date("n/j/y g:ia",strtotime($db_datetime));
+    $facName = $db->getFacultyName($db_faculty_id, false);
+    $isEmpty = ($db_is_empty == "0")? "" : "b";
+    $isWhatIf = ($db_is_whatif == "0")? "" : "wi";
+    
+    $testDT = strtotime($db_datetime);
+    if ($oldSessionDT < ($testDT - 5) || $oldSessionDT > ($testDT + 5))
+    {
+      $p = "20px;";
+      if ($aCount == 0)
+      {
+        $p = "10px;";
+      }
+
+      $oldSessionDT = $testDT;
+      $advisedBy = "<div style='padding-top: $p'>
+							<b>Advised by " . $db->getFacultyName($db_faculty_id, false) . "</b>
+						</div>";
+
+      
+      $pC .= "<tr><td colspan='10' class='tenpt'>
+							<hr><!--$advisedBy-->
+						</td>
+					</tr>";
+      
+    }
+    
+    $coursesAdvised = "";
+    $res2 = $db->dbQuery("select * from advised_courses
+                          where `advising_session_id` = '$db_advising_session_id' ");
+    while($cur2 = $db->dbFetchArray($res2))
+    {
+      //$coursesAdvised .= $cur2["entry_value"] . ", ";
+      $course = new Course();
+      $course->courseID = $cur2["course_id"];
+      $course->loadDescriptiveData();
+
+      $group = new Group();
+      $group->groupID = $cur2["group_id"];
+      $group->loadDescriptiveData();
+      
+      $coursesAdvised .= "<div>" . $course->getAllNames(true, false) . "</div>";     
+      $coursesAdvised .= "<div style='padding-left: 30px;'>group: " . $group->title . "</div>";
+      $coursesAdvised .= "<div style='padding-left: 30px;'>sem: " . $cur2["semester_num"] . "</div>";
+      $coursesAdvised .= "<br>";
+           
+      
+      
+    }
+    
+    $coursesAdvised = str_replace("~", " ", $coursesAdvised);
+    $coursesAdvised = preg_replace("/:a[0-9]*,/", " ", $coursesAdvised);
+    
+    
+    $pC .= "<tr>
+              <td valign='top' width='18%'>$dt</td>
+              <td valign='top'>$db_term_id</td>
+              <td valign='top' width='20%'>$facName</td>
+              <td valign='top'>$db_major_code</td>
+              <td valign='top'>$isWhatIf</td>
+              <td valign='top'>$isEmpty</td>
+              <td valign='top'>$coursesAdvised</td>
+            </tr>";
+    
+  }
+  
+  $pC .= "</table>";
+
+
+  $screen->pageContent = $pC;
+  $screen->pageTitle = "FP Stats & Reports - FlightPath Student Advising History";
+  $screen->outputToBrowser();
+
+}
+
+
+function stats_displayUseReport()
+{
+  // Get our global variables...
+  $db = $GLOBALS["stats_db"];
+  $screen = $GLOBALS["stats_screen"];
+  $moduleActionURL = getModuleActionURL("stats");
+
+
+  $startDate = trim(addslashes($_REQUEST["startDate"]));
+  $endDate = trim(addslashes($_REQUEST["endDate"]));
+
+  $pC .= "
+  <style>
+    .s-mobile {
+      padding-left: 50px;
+      font-style: italic;
+    }
+  </style>
+		<h2>FlightPath Use Report for $startDate to $endDate</h2>
+		<a href='$moduleActionURL' class='tenpt'>Back to Main Menu</a>
+		<br><br>
+		";
+
+  $startDate .= " 00:00:00";  // make it start at midnight of the startDate.
+  $endDate .= " 23:59:59";  // make it go through to midnight of the endDate.
+  // Okay, now we get our various counts....
+
+  // Logins...
+  $uStudent = stats_getLogCount("login","",true,$startDate,$endDate,true);
+  $tStudent = stats_getLogCount("login","",false,$startDate,$endDate,true);
+  $uStaff = stats_getLogCount("login","",true,$startDate,$endDate,false);
+  $tStaff = stats_getLogCount("login","",false,$startDate,$endDate,false);
+  $pC .= "<b>System Logins</b>
+			<blockquote>
+				Unique student logins: $uStudent<br>
+				Total student logins: $tStudent<br>
+				------- <br>
+				Unique faculty/staff logins: $uStaff<br>
+				Total faculty/staff logins: $tStaff
+			</blockquote>
+			";
+
+  // Advisings...
+  $regularAdvisings = stats_getLogCount("save_adv_active","",false,$startDate,$endDate,false);
+  $wiAdvisings = stats_getLogCount("save_adv_active_whatif","",false,$startDate,$endDate,false);
+  $totalAdvisings = $regularAdvisings + $wiAdvisings;
+  $pC .= "<b>Advisings</b>
+			<blockquote>
+				Total student advisings: $totalAdvisings <br>
+				------- <br>
+				Regular advisings: $regularAdvisings<br>
+				What If advisings: $wiAdvisings
+			</blockquote>
+			";
+
+  // Comments...
+  $total = stats_getLogCount("save_comment","",false,$startDate,$endDate,false);
+  $unique = stats_getLogCount("save_comment","",true,$startDate,$endDate,false);
+  $pC .= "<b>Comments</b>
+			<blockquote>
+				Total comments saved: $total <br>
+				------- <br>
+				Unique faculty/staff commentors: $unique
+			</blockquote>
+			";
+
+  // Course search...
+  $uStudent = stats_getLogCount("course_search","",true,$startDate,$endDate,true);
+  $umStudent = stats_getLogCount("course_search","",true,$startDate,$endDate,true,true);
+  $tStudent = stats_getLogCount("course_search","",false,$startDate,$endDate,true);
+  $tmStudent = stats_getLogCount("course_search","",false,$startDate,$endDate,true, true);
+  
+  $uStaff = stats_getLogCount("course_search","",true,$startDate,$endDate,false);
+  $tStaff = stats_getLogCount("course_search","",false,$startDate,$endDate,false);
+  $tmStaff = stats_getLogCount("course_search","",false,$startDate,$endDate,false, true);
+  $pC .= "<b>Course Search</b>
+			<blockquote>
+				Unique student users: $uStudent    <span class='s-mobile'>($umStudent mobile)</span><br>
+				Total student uses: $tStudent    <span class='s-mobile'>($tmStudent mobile)</span><br>
+				------- <br>
+				Unique faculty/staff users: $uStaff<br>
+				Total faculty/staff (and anonymous) uses: $tStaff <span class='s-mobile'>($tmStaff mobile)</span>
+			</blockquote>
+			";
+
+  
+  // Degree search...
+  $uStudent = stats_getLogCount("blank_degrees","",true,$startDate,$endDate,true);
+  $umStudent = stats_getLogCount("blank_degrees","",true,$startDate,$endDate,true,true);
+  $tStudent = stats_getLogCount("blank_degrees","",false,$startDate,$endDate,true);
+  $tmStudent = stats_getLogCount("blank_degrees","",false,$startDate,$endDate,true, true);
+  $uStaff = stats_getLogCount("blank_degrees","",true,$startDate,$endDate,false);
+  $tStaff = stats_getLogCount("blank_degrees","",false,$startDate,$endDate,false);
+  $tmStaff = stats_getLogCount("blank_degrees","",false,$startDate,$endDate,false, true);
+  $pC .= "<b>Degree Search (blank degrees)</b>
+			<blockquote>
+				Unique student users: $uStudent    <span class='s-mobile'>($umStudent mobile)</span><br>
+				Total student uses: $tStudent    <span class='s-mobile'>($tmStudent mobile)</span><br>
+				------- <br>
+				Unique faculty/staff users: $uStaff<br>
+				Total faculty/staff (and anonymous) uses: $tStaff <span class='s-mobile'>($tmStaff mobile)</span>
+			</blockquote>
+			";
+  
+  
+  // View preferences
+  $tStudentY = stats_getLogCount("view_by_year","",false,$startDate,$endDate,true);
+  $tmStudentY = stats_getLogCount("view_by_year","",false,$startDate,$endDate,true, true);
+  $uStudentY = stats_getLogCount("view_by_year","",true,$startDate,$endDate,true);
+  $umStudentY = stats_getLogCount("view_by_year","",true,$startDate,$endDate,true, true);
+  
+  $tStaffY = stats_getLogCount("view_by_year","",false,$startDate,$endDate,false);
+
+  $tStudentT = stats_getLogCount("view_by_type","",false,$startDate,$endDate,true);
+  $tmStudentT = stats_getLogCount("view_by_type","",false,$startDate,$endDate,true, true);
+  $uStudentT = stats_getLogCount("view_by_type","",true,$startDate,$endDate,true);
+  $umStudentT = stats_getLogCount("view_by_type","",true,$startDate,$endDate,true, true);
+  
+  
+  $tStaffT = stats_getLogCount("view_by_type","",false,$startDate,$endDate,false);
+  $pC .= "<b>View Preferences</b>
+			<blockquote>
+			  Unique student view-by-year: $uStudentY    <span class='s-mobile'>($umStudentY mobile)</span><br>
+			  Total student view-by-year: $tStudentY    <span class='s-mobile'>($tmStudentY mobile)</span><br>
+				Total faculty/staff view-by-year: $tStaffY<br>
+				------- <br>
+				Unqiue student view-by-type: $uStudentT    <span class='s-mobile'>($umStudentT mobile)</span><br>
+				Total student view-by-type: $tStudentT    <span class='s-mobile'>($tmStudentT mobile)</span><br>
+				Total faculty/staff view-by-type: $tStaffT<br>
+			</blockquote>
+			";
+
+  // Substitutions
+  $tStaff = stats_getLogCount("save_substitution","",false,$startDate,$endDate,false);
+  $uStaff = stats_getLogCount("save_substitution","",true,$startDate,$endDate,false);
+  $pC .= "<b>Substitutions</b>
+			<blockquote>
+				Unique substitutors: $uStaff<br>
+				Total substitutions: $tStaff<br>
+			</blockquote>
+			";
+
+
+
+
+  $screen->pageContent = $pC;
+  $screen->pageTitle = "FP Stats & Reports - Use Report";
+  $screen->outputToBrowser();
+
+
+}
+
+function stats_getLogCount($action = "", $actionArray = "", $boolDistinct = false, $startDate, $endDate, $boolStudents = true, $boolMobileOnly = false)
+{
+  // Return a count from the log where action1 or action2...
+  // Get our global variables...
+  $db = $GLOBALS["stats_db"];
+  $screen = $GLOBALS["stats_screen"];
+  $moduleActionURL = getModuleActionURL("stats");
+
+
+  $actionLine = " `action` = '$action' ";
+  if (count($actionArray) > 1)
+  {
+    $actionLine = "";
+    $actionLine .= "( ";
+    foreach($actionArray as $action)
+    {
+      $actionLine .= " `action`='$action' OR";
+    }
+    $actionLine = substr($actionLine, 0, -2);
+    $actionLine .= ") ";
+  }
+
+  $count = "count(id)";
+  if ($boolDistinct)
+  {
+    $count = "count(distinct `user_id`)";
+  }
+
+  $userType = "";
+  if ($boolStudents)
+  {
+    $userType = " `user_type`='student' ";
+  } else {
+    $userType = " `user_type` != 'student' ";
+  }
+
+  if ($boolMobileOnly) {
+    $actionLine .= "  AND notes LIKE 'M:%' ";
+  }
+  
+  $res = $db->dbQuery("SELECT $count AS count FROM log
+					WHERE
+						`datetime` BETWEEN '$startDate' AND '$endDate'
+					AND $userType
+					AND
+						$actionLine
+					");
+  $cur = $db->dbFetchArray($res);
+  return $cur["count"] * 1;
+
+
+}
+
+
+
+function stats_displaySubstitutionUseReport()
+{
+  // Get our global variables...
+  $db = $GLOBALS["stats_db"];
+  $screen = $GLOBALS["stats_screen"];
+  $moduleActionURL = getModuleActionURL("stats");
+
+
+  $startDate = trim(addslashes($_REQUEST["startDate"]));
+  $endDate = trim(addslashes($_REQUEST["endDate"]));
+
+  $startDate .= " 00:00:00";  // make it start at midnight of the startDate.
+  $endDate .= " 23:59:59";  // make it go through to midnight of the endDate.
+
+  // Now, what we're doing here is we want the names of the advisors,
+  // and how many advisings they actually completed for each,
+  // as well as which college or department they belong to.  They need
+  // to be sorted by college/department.
+  $fArray = array();
+  $sArray = array();
+
+  // Let's pull the needed variables out of our settings, so we know what
+	// to query, because this is a non-FlightPath table.
+	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:faculty_staff"];
+	$tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+	$tableName_b = $tsettings["tableName"];  
+  
+  $result = $db->dbQuery("SELECT * FROM log a,
+						$tableName_b b
+						WHERE 
+						a.datetime BETWEEN '$startDate' AND '$endDate'
+						AND
+						(a.action = 'save_substitution' OR a.action = 'remove_substitution')
+						AND a.user_id = b.$tfb->facultyID	");
+
+
+  while($cur = $db->dbFetchArray($result))
+  {
+    $faculty_id = trim($cur[$tfb->facultyID]);
+
+    $fArray[$faculty_id] = $fArray[$faculty_id] * 1; // make it a number.
+    $fArray[$faculty_id]++;
+
+    $sArray[$faculty_id]["name"] = ucwords(strtolower(trim($cur[$tfb->fName]) . " " . trim($cur[$tfb->lName])));
+    $sArray[$faculty_id]["dept_name"] = ucwords(strtolower(trim($cur[$tfb->deptName])));
+    
+
+
+
+  }
+  
+
+  // Sort based on who has substituted the most...
+  arsort($fArray);
+
+  $startDate = trim(addslashes($_REQUEST["startDate"]));
+  $endDate = trim(addslashes($_REQUEST["endDate"]));
+
+  // Now, output the results...
+  $pC .= "
+    <h2>FlightPath Substitution Use Report for $startDate to $endDate</h2>
+    <a href='$moduleActionURL' class='tenpt'>Back to Main Menu</a>
+    <br><br>
+    <div class='tenpt'>This report displays use of the substitution system, including
+    both adding and removing substitutions.</div>
+
+    <table border='1' width='650'>
+    	<tr>
+    		<td><b>Name</td>
+    		<td><b>Dept</b></td>
+    		<td><b>#</td>
+    	</tr>";
+  foreach($fArray as $faculty_id => $value)
+  {
+    $name = $sArray[$faculty_id]["name"];
+    $dept_name = $sArray[$faculty_id]["dept_name"];
+
+    $pC .= "<tr>
+			 <td valign='top'>$name</td>
+			 <td valign='top'>$dept_name</td>
+			 <td valign='top' align='center'>$value</td>
+			</tr>
+			
+	   ";
+  }
+  $pC .= "</table>";
+
+  $screen->pageContent = $pC;
+  $screen->pageTitle = "Substitution Use Report";
+  $screen->outputToBrowser();
+
+
+}
+
+
+
+function stats_displayAdvisorReport()
+{
+  // Get our global variables...
+  $db = $GLOBALS["stats_db"];
+  $screen = $GLOBALS["stats_screen"];
+  $moduleActionURL = getModuleActionURL("stats");
+
+  $startDate = trim(addslashes($_REQUEST["startDate"]));
+  $endDate = trim(addslashes($_REQUEST["endDate"]));
+
+  $startDate .= " 00:00:00";  // make it start at midnight of the startDate.
+  $endDate .= " 23:59:59";  // make it go through to midnight of the endDate.
+
+  // Now, what we're doing here is we want the names of the advisors,
+  // and how many advisings they actually completed for each,
+  // as well as which college or department they belong to.  They need
+  // to be sorted by college/department.
+  $fArray = array();
+  $sArray = array();
+
+  // Let's pull the needed variables out of our settings, so we know what
+	// to query, because this is a non-FlightPath table.
+	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:faculty_staff"];
+	$tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+	$tableName_b = $tsettings["tableName"];  
+  
+  $result = $db->dbQuery("SELECT * FROM log a,
+						$tableName_b b
+						WHERE 
+						a.datetime BETWEEN '$startDate' AND '$endDate'
+						AND
+						(a.action = 'save_adv_active' OR a.action = 'save_adv_active_whatif')
+						AND a.user_id = b.$tfb->facultyID
+						ORDER BY b.$tfb->deptName ");
+
+  while($cur = $db->dbFetchArray($result))
+  {
+    $faculty_id = trim($cur[$tfb->facultyID]);
+
+    $fArray[$faculty_id] = $fArray[$faculty_id] * 1; // make it a number.
+    $fArray[$faculty_id]++;
+
+    $sArray[$faculty_id]["dept_name"] = ucwords(strtolower(trim($cur[$tfb->deptName])));
+    $sArray[$faculty_id]["college_name"] = ucwords(strtolower(trim($cur[$tfb->collegeName])));
+    $sArray[$faculty_id]["name"] = ucwords(strtolower(trim($cur[$tfb->fName]) . " " . trim($cur[$tfb->lName])));
+
+
+
+  }
+  
+
+
+  // Sort based on who has advised the most...
+  //arsort($fArray);
+
+  $startDate = trim(addslashes($_REQUEST["startDate"]));
+  $endDate = trim(addslashes($_REQUEST["endDate"]));
+
+  // Now, output the results...
+  $pC .= "
+<h2>FlightPath Advisor Report for $startDate to $endDate</h2>
+	<a href='$moduleActionURL' class='tenpt'>Back to Main Menu</a>
+	<br><br>
+
+<table border='1' width='650'>
+		<tr>
+			<td><b>Name</td>
+		<!--	<td><b>College</td> -->
+			<td><b>Dept</td>
+			<td><b>#</td>
+		</tr>";
+  foreach($fArray as $faculty_id => $value)
+  {
+    $name = $sArray[$faculty_id]["name"];
+    $college_name = $sArray[$faculty_id]["college_name"];
+    $dept_name = $sArray[$faculty_id]["dept_name"];
+
+    $pC .= "<tr>
+			 <td valign='top'>$name</td>
+		<!--	 <td valign='top'>$college_name</td> -->
+			 <td valign='top'>$dept_name</td>
+			 <td valign='top' align='center'>$value</td>
+			</tr>
+			
+	";
+  }
+  $pC .= "</table>";
+
+  $screen->pageContent = $pC;
+  $screen->pageTitle = "Advisor Use Report";
+  $screen->outputToBrowser();
+
+
+}
+
+
+function stats_displayAccessStats()
+{
+  // Get our global variables...
+  $db = $GLOBALS["stats_db"];
+  $screen = $GLOBALS["stats_screen"];
+  $moduleActionURL = getModuleActionURL("stats");
+
+  $min = trim(addslashes($_REQUEST["min"]));
+  if ($min == "")
+  {
+    $min = "20";
+  }
+
+
+  $pC = "";
+  $pC .= "<h2>Access Stats</h2>
+			<a href='$moduleActionURL' class='tenpt'>Back to Main Menu</a>
+			<br><br>
+			<form action='$moduleActionURL' method='GET'>
+			<input type='hidden' name='n' value='stats'>
+			
+			<input type='hidden' name='performAction' value='displayAccessStats'>
+			Activity over the last 
+			<input type='text' name='min' value='$min' size='2'>
+			";
+
+
+
+  $pC .= "minutes: <input type='submit' value='->'>
+			</form>
+			Unique students in time frame: <!--STUDENTS-->. Unique faculty/staff in time frame: <!--STAFF--> <br>";
+
+  $pC .= "<table border='1' width='700'>";
+
+  $cwidArray = array();
+  $studentActions = $staffActions = 0;
+
+  $res = $db->dbQuery("select * from log
+							where `datetime` > NOW() - INTERVAL $min MINUTE
+							order by `datetime` desc 
+							 ");
+  while ($cur = $db->dbFetchArray($res))
+  {
+    extract ($cur, 3, "db");
+
+    $bgcol = "white";
+    if ($db_user_type == "student")
+    {
+      $bgcol = "lightblue";
+    }else if ($db_user_type == "advisor")
+    {	$bgcol = "pink";
+    } else if($db_user_type == "college_coordinator" || $db_user_type == "full_admin")
+    {	$bgcol = "beige";
+    }
+
+    $minago = round((strtotime("NOW") - strtotime($db_datetime)) / 60, 0);
+
+    $extraData = trim(substr($db_extra_data, 0, 18));
+    if (strlen($extraData) < strlen($db_extra_data))
+    {
+      $extraData .= "...";
+    }
+
+    $pC .= "<tr style='background-color:$bgcol'>
+					<td valign='top' class='tenpt'>$db_user_name</td>
+					<td valign='top' class='tenpt'>$db_user_type</td>
+					<td valign='top' class='tenpt'>$db_action - $extraData</td>
+					<td valign='top' class='tenpt'>$minago min ago &nbsp; <font size='1'>$db_datetime</font></td>
+				</tr>";
+
+    // Let's increase our counters, if this is a new CWID.
+    if (!in_array($db_user_id, $cwidArray))
+    {
+      $cwidArray[] = $db_user_id;
+      if ($db_user_type == "student")
+      {
+        $studentActions++;
+      } else if ($db_user_type != "")
+      {
+        $staffActions++;
+      }
+    }
+
+
+  }
+
+  // Add in our student and staff action counts
+  $pC = str_replace("<!--STUDENTS-->",$studentActions,$pC);
+  $pC = str_replace("<!--STAFF-->",$staffActions,$pC);
+
+
+
+
+  $screen->pageContent = $pC;
+  $screen->pageTitle = "FP Statistics";
+  $screen->outputToBrowser();
+
+}
+
+
+function stats_displayMainMenu()
+{
+  // Get our global variables...
+  $db = $GLOBALS["stats_db"];
+  $screen = $GLOBALS["stats_screen"];
+  $moduleActionURL = getModuleActionURL("stats");
+
+
+  $pC = "";
+  $pC .= "<h2>Main Menu</h2>
+			<ul>
+				<li><a href='$moduleActionURL&performAction=displayMajorCounts'>Major Counts</a>
+					- Displays the number of students within each major or major/concentration.
+					</li>
+				
+				<li><a href='$moduleActionURL&performAction=displaySelectedDegreeOptions'>Selected Degree Options</a>
+				 	- This report will display information about which degree 
+				 	options students/advisors are selecting for particular majors 
+				 	(ex: Gen. Studies). </li>
+			 	
+        <li><b>View Draft Courses</b>
+				 	 - This report lets you enter a year (ex: 2010) and view
+				 	 all of the 'draft' courses, which have not yet been made public.
+				  <form action='$moduleActionURL' method='GET'>
+				  <input type='hidden' name='n' value='stats'>
+				  
+					Year (ex: 2010):<input type='text' name='year' size='5'>
+				  <input type='submit' value='Go ->'>
+				  <input type='hidden' name='performAction' value='displayDraftCourses'>
+					</form>				 	
+				 	
+				 	
+					";
+
+  //if ($_SESSION["fpUserType"] == "full_admin")
+  if (userHasPermission("canAccessStats")) {
+    
+    $pC .= "<li><b>Detailed stats:</b>
+				<ul>
+				<li><a href='$moduleActionURL&performAction=displayAccessStats'>Access Stats</a>
+						</li>
+				<li>
+					<b>Use Reports:</b>
+				<form action='$moduleActionURL' method='GET'>
+				<input type='hidden' name='n' value='stats'>
+				
+				You can generate your own custom use reports: <br>
+				Make sure dates are in Year major order. YYYY-MM-DD.<br>
+				<table border='1' width='60%'><td class='elevenpt'>
+					Start:<input type='text' name='startDate' size='15'> to
+					End:<input type='text' name='endDate' size='15'>
+				<br>Select a report:
+				<blockquote style='margin-top:0px;'>
+				<input type='radio' name='performAction' value='displayAdvisorReport' checked> Advisor Use Report
+				<br><input type='radio' name='performAction' value='displayUseReport'> FlightPath Use Summary*
+				<br><input type='radio' name='performAction' value='displaySubstitutionUseReport'> Substitution Use Report
+				</blockquote>
+				* may take several seconds to run.
+				<div align='right'>
+				<input type='submit' value='Go ->'>
+				</div>
+				</form>
+				</td></table>
+
+				</li>
+				
+				
+				 <li><a href='$moduleActionURL&performAction=displayFailedSubs'>Failed Subs</a>
+				 	- This report will display substitutions for courses where the
+				 	student made a failing (or incomplete) grade.
+				 	<br><b>NOTE! This takes at least 1-2 minutes to run!  Please
+				 	be patient and click only once.  The page will take a couple
+				 	minutes to load!</b><br><br>
+				 	</li>
+				 	
+				 	<li><b>Complete Student Advising History</b>
+				 	 - This report lets you enter a student's CWID and get back
+				 	 a complete history of advising transactions for the student.
+				  <form action='$moduleActionURL' method='GET'>
+				  <input type='hidden' name='n' value='stats'>
+				  
+					Student CWID:<input type='text' name='studentID' size='15'>
+				  <input type='submit' value='Go ->'>
+				  <input type='hidden' name='performAction' value='displayStudentAdvisingHistory'>
+					</form>
+				 	 
+					<li><a href='$moduleActionURL&performAction=displayIncorrectCourseIds'>Incorrect Course IDs</a>
+					- This report displays degree and group requirements which, based on the
+					data_entry_value (the course actually typed), the wrong course ID is found.
+					This can happen because of eqv's being set and unset. <b>This can take
+					up to 1 minute to run.  Please be patient and click only once!</b>
+				
+				
+						
+				</ul>
+			</li>
+			";
+  }
+
+  $pC .= "
+						
+			</ul>
+	
+	
+			";
+
+
+
+
+  $screen->pageContent = $pC;
+  $screen->pageTitle = "FP Stats & Reports";
+  $screen->outputToBrowser();
+}

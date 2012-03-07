@@ -1,0 +1,5 @@
+<module>
+  <name>My Helper</name>
+  <description>Example helper module for FlightPath.  Contains custom hooks and such.</description>
+  <version>1.0</version>
+</module>

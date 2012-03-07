@@ -1,0 +1,10 @@
+.fpcopy-notice {
+  font-size: 0.7em;
+  text-align: center;
+  margin-top: 40px;
+  border-top: 1px solid #ccc;
+}
+
+body {
+  background-color: white;
+}

@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * This module is meant to be a starting point for the creation
+ * of a site-specific custom module.
+ * 
+ *
+ *
+ */
+
+
+
+// You may use these functions to override the login functions in functions.php.
+//
+// You should put whatever PHP code you need here to verify that the user's
+// username and password are valid.
+//
+// !!!If so, return their numeric user ID!!!
+//
+// Otherwise, just return FALSE.
+
+/*
+function functions_fp_verifyAllFacultyLogins($username, $password) {
+  
+  // Sample code.  Replace with your own code.
+  include_once("ws_common_functions.php");  
+  return verifyAllFacultyLogins($username, $password);
+  
+}
+
+
+function functions_fp_verifyAllStudentLogins($username, $password) {
+  
+  // Sample code.  Replace with your own code.
+  include_once("ws_common_functions.php");
+  return verifyAllStudentLogins($username, $password);
+ 
+}
+*/
+
+
+?>

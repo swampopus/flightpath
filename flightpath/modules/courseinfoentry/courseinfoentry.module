@@ -1,0 +1,1027 @@
+<?php
+/*
+FlightPath was originally designed and programmed by the 
+University of Louisiana at Monroe. The original source is 
+copyright (C) 2011-present by the University of Louisiana at Monroe.
+
+FlightPath is considered "open source" under the 
+GNU General Public License, version 3 or any later version. 
+This covers any related files and documentation packaged with 
+FlightPath. 
+
+The license is defined in full here: http://www.gnu.org/licenses/gpl.html,
+and reproduced in the LICENSE.txt file.
+
+You may modify FlightPath's source code, but this copyright and license
+notice must not be modified, and must be included with the source code.
+------------------------------
+*/
+
+/*
+This script lets authorized users upload/remove syllabi for
+certain courses, as well as set other information.
+
+*/
+
+
+
+/**
+ * Implementation of hook_init.  Gets called as soon as the module
+ * is included.
+ *
+ */
+function courseinfoentry_init() {
+
+  $db = getGlobalDatabaseHandler();
+  $GLOBALS["courseinfoentry_db"] = $db;
+  
+  
+  
+}
+
+
+
+/**
+ * Implementation of hook_menu().
+ * This tells other parts of FlightPath where to display links
+ * to this module, and what to include in the URL.
+ *
+ */
+function courseinfoentry_menu() {
+  
+  $items = array();
+  
+  $items[] = array(
+    "title" => "Course Syllabus & Schedule Entry",
+    "url" => getModuleActionURL("courseinfoentry"),
+    "target" => "_blank",
+    "description" => "Use this tool to update course syllabi & rotation schedules.",
+    "location" => "admin_tools",
+    "icon" => $GLOBALS["fpSystemSettings"]["theme"] . "/images/toolbox.gif",
+    "weight" => 100,
+    "permission" => "deCanUpdateCourseInfo",
+  );
+    
+  return $items;
+}
+
+
+/**
+ * Implementation of hook_perm().
+ * Expects to return an array of permissions recognized by
+ * this module.
+ * 
+ * Ex:   $a = array( 
+ *          "deCanDoSomething" => array ( 
+ *              "title" => "Can Do Something",
+ *              "description" => "Allow the user to do something." 
+ *          )
+ *        );
+ *
+ */
+function courseinfoentry_perm() {
+  
+  $perms = array (
+    "deCanUpdateCourseInfo" => array(
+      "title" => "Can update course info",
+      "description" => "This allows the user to access the Course Info Entry system
+                        and edit syllabi and rotation schedules.",
+    ),
+  );
+
+  return $perms;
+  
+}
+
+
+
+/**
+ * This implementation of hook_page_switchboard gets called whenever
+ * we want to go to a particular page in this module.  Therefor, it will
+ * look at REQUEST or GET or POST variables, to decide where to go.
+ *
+ */
+function courseinfoentry_page_switchboard() {
+  
+  $db = $GLOBALS["courseinfoentry_db"];
+  $screen = new AdvisingScreen();
+  $GLOBALS["courseinfoentry_screen"] = $screen;
+  
+  $settings = $db->getFlightPathSettings();
+  $deCatalogYear = $settings["currentCatalogYear"];
+  $GLOBALS["courseinfoentry_deCatalogYear"] = $deCatalogYear;    
+  
+  
+  
+  $performAction = trim(addslashes($_REQUEST["performAction"]));
+    
+  // Needs to happen first, since the session might not be init'd 
+  // (because of IE)
+  if ($performAction == "displayReportAntOffering") {
+    courseinfoentry_displayReportAntOffering();
+    return;
+  }  
+  
+  // Check to make sure the user has permission in this system.
+  if (!userHasPermission("deCanUpdateCourseInfo")) {
+    displayAccessDenied("Course Syllabus & Schedule Entry");
+  }
+  
+  /*
+  // Check to see if users are logged in and then perform actions.
+  if ($_SESSION["fpCourseInfoEntryLoggedIn"] != true && $performAction != "login")
+  {
+  	courseinfoentry_displayLogin();
+  	return;
+  }
+  
+  if ($performAction == "login")
+  {
+  	courseinfoentry_performLogin();
+  }
+  
+  if ($performAction == "logout")
+  {
+  	courseinfoentry_performLogout();
+    return;
+  }*/
+  
+  
+  if ($performAction == "" || $performAction == "listCourses")
+  {
+  	// By default, we are show a list of courses.
+  	courseinfoentry_displayListCourses();
+  }
+  
+  if ($performAction == "editSpecificCourse")
+  {
+  	courseinfoentry_displayEditSpecificCourse();
+  }
+  
+  if ($performAction == "performEditSpecificCourse")
+  {
+  	courseinfoentry_performEditSpecificCourse();
+  }
+  
+  if ($performAction == "displayReportsMenu") {
+    courseinfoentry_displayReportsMenu();
+  }
+  
+  
+
+
+}
+
+
+// TODO:  terms and such-- settings?
+function courseinfoentry_displayReportAntOffering() {
+	// Get our global variables.
+	$screen = $GLOBALS["courseinfoentry_screen"];
+	$db = $GLOBALS["courseinfoentry_db"];
+	$deCatalogYear = $GLOBALS["courseinfoentry_deCatalogYear"];
+	$moduleActionURL = getModuleActionURL("courseinfoentry");
+  
+  $pC = "";
+
+  $csv = "";
+  $csv .= "SUBJ, NUM, ";
+  
+  $courseTermArray = array();
+  $checkTermArray = array();
+  $termArray = array("60","mm","81","82","40","41");
+  $semArray = array("none"=>"","60"=>"Spring","mm"=>"May",
+	"81"=>"Sum1","82"=>"Sum2","40"=>"Fall","41"=>"Win");
+
+	for ($t = $deCatalogYear; $t <= $deCatalogYear + 5; $t++)
+	{
+		foreach($termArray as $x)
+		{
+		  $check_year = $t;
+		  if ($x == 40 || $x == 41) {
+		    $check_year = $check_year + 1;
+		  }
+		  
+			$term_id = $check_year . $x;
+			
+			$checkTermArray[] = $term_id;
+			
+			$csv .= " " . $semArray[$x] . " of " . $t . " ($term_id) ,";
+			
+			// While we are here, we are going to get an array of ALL the courses
+			// which have an entry for this term in our table.  This should make
+			// it faster to look up later.
+			$res = $db->dbQuery("SELECT * FROM course_rotation_schedule
+													WHERE `term_id`='?' ", $term_id);
+			while ($cur = $db->dbFetchArray($res)) {
+			  $courseTermArray[$term_id][$cur["course_id"]] = TRUE;
+			}
+			
+		}
+	}
+  
+	// Take off last comma of csv.
+	$csv = substr($csv, 0, -1);	
+
+	//var_dump($courseTermArray);
+	
+	//debugCT($csv);
+		
+	$csv .= "\n";
+	//return;
+   
+	$result = $db->dbQuery("SELECT * FROM courses
+                        WHERE 
+                        `catalog_year`='?'                         
+                        AND `delete_flag`='0'
+                        AND `exclude`='0'
+                        ORDER BY `subject_id`, `course_num` ", $deCatalogYear);
+	while ($cur = $db->dbFetchArray($result)) {
+	  extract($cur, 3, "db");
+	  //debugCT($db_subject_id . $db_course_num);
+	  
+	  $csv .= "$db_subject_id, $db_course_num, ";
+	  
+	  
+	  // Now, get course offerings for the next X terms...
+    foreach ($checkTermArray as $term_id) {
+			// See if this term is offered for this course
+			//var_dump($term_id);
+			//var_dump($courseTermArray[$term_id]);
+			//return;
+			if ($courseTermArray[$term_id][$db_course_id] == TRUE) {
+				//$che = "X";
+				$csv .= " X,";
+			}
+			else {
+			  //$che = "";
+			  $csv .= ",";
+			}     
+    }
+	  
+	  // Take off last comma of csv.
+    $csv = substr($csv, 0, -1);	
+    $csv .= "\n";
+    
+	}  
+  
+  header('Content-type: text/csv');
+  header('Content-Disposition: attachment; filename="report_ant_offering.csv"');
+  print $csv;
+  
+}
+
+/**
+ * Main menu for selecting a report you would like to see.
+ *
+ */
+function courseinfoentry_displayReportsMenu() {
+	// Get our global variables.
+	$screen = $GLOBALS["courseinfoentry_screen"];
+	$db = $GLOBALS["courseinfoentry_db"];
+	$deCatalogYear = $GLOBALS["courseinfoentry_deCatalogYear"];
+	$moduleActionURL = getModuleActionURL("courseinfoentry");
+
+  
+  $screen = new AdvisingScreen();
+  $pC = "";
+  
+  $pC .= "<a class='tenpt' href='$moduleActionURL'>Back to course list</a>
+          <h2 style='margin-bottom: 10px; margin-top: 3px;'>View Reports</h2>";
+  $pC .= "<ul>";
+
+  $pC .= "<li><a href='$moduleActionURL&nosession=true&performAction=displayReportAntOffering'>[CSV] Anticipated Offerings - All Courses</a>
+              - This report shows all courses in the catalog's anticipated offerings
+              for the next 5 years.  Will be downloaded as a CSV file.
+              <b>May take up to a minute to load.</b></li> ";
+  
+  $pC .= "</ul>";
+  
+  
+ 	$screen->pageContent = $pC;
+	$screen->pageHasSearch = false;
+	$screen->pageTitle = "CourseInfo - Reports Menu";
+	// send to the browser
+	$screen->outputToBrowser();
+
+}
+
+
+function courseinfoentry_displayLogin($msg = "")
+{
+	// Get our global variables.
+	$screen = $GLOBALS["courseinfoentry_screen"];
+	$db = $GLOBALS["courseinfoentry_db"];
+	$deCatalogYear = $GLOBALS["courseinfoentry_deCatalogYear"];
+	$moduleActionURL = getModuleActionURL("courseinfoentry");
+
+	
+	$pC .= "
+ 		<form action='$moduleActionURL' method='POST'>
+ 		<input type='hidden' name='performAction' value='login'>
+ 		$msg
+ 		Please login to the Course Info Entry system using your username and password.<br> 		
+		<br><br>
+ 		<table border='0'>
+		<tr>
+			<td>Username:</td><td><input type=text name='userID' id='cwid_box' size='20'></td>
+		</tr>
+		<tr>
+			<td>Password:</td><td><input type='password' name='password' size='20'></td>
+		</tr></table>
+          <input type='submit' value='Login -->'>
+          
+          
+</form>
+
+  		"; 
+
+	$screen->pageContent = $pC;
+	$screen->pageHasSearch = false;
+	$screen->pageOnLoad = "document.getElementById(\"cwid_box\").focus(); ";
+	$screen->pageTitle = "CourseInfo - Login";
+	// send to the browser
+	$screen->outputToBrowser();
+
+
+}
+
+/*
+function courseinfoentry_performLogout()
+{
+	// Get our global variables.
+	$screen = $GLOBALS["courseinfoentry_screen"];
+	$db = $GLOBALS["courseinfoentry_db"];
+	$deCatalogYear = $GLOBALS["courseinfoentry_deCatalogYear"];
+	$moduleActionURL = getModuleActionURL("courseinfoentry");
+
+	$_SESSION["fpCourseInfoEntryLoggedIn"] = false;
+	$msg = "<div style='color:green'>
+				You have been logged out of the Course Info Entry system.  
+				If you are on a computer which
+				is not your own, 
+				you should close the web browser for added security.
+							</div>"; 
+	courseinfoentry_displayLogin($msg);
+	$db->addToLog("courseinfo","logout");
+	
+}
+
+
+function courseinfoentry_performLogin()
+{
+	// Get our global variables.
+	$screen = $GLOBALS["courseinfoentry_screen"];
+	$db = $GLOBALS["courseinfoentry_db"];
+	$deCatalogYear = $GLOBALS["courseinfoentry_deCatalogYear"];
+	$moduleActionURL = getModuleActionURL("courseinfoentry");
+
+	// Is the user logging in a valid faculty member, and
+	// have user permissions to use this?
+	$userID = trim(addslashes($_POST["userID"]));
+	$password = trim(addslashes($_POST["password"]));
+
+	if (!($cwid = fp_verifyFacultyLDAPLogin($userID, $password)))
+	{
+		$msg = "<div style='color:red'>Your Email Username/Password combination is not valid.  Check your spelling
+						and try again.</div>";
+		courseinfoentry_displayLogin($msg);
+		return;		
+	}
+
+	// They made it through, but are they in the administrator's table?
+		
+	$res = $db->dbQuery("SELECT * FROM users WHERE `faculty_id`='$cwid'
+							AND `permissions` LIKE '%deCanUpdateCourseInfo%' ");
+	if ($db->dbNumRows($res) == 0)
+	{
+		$msg = "<div style='color:red'>You do not have access to the Course Info Entry System.
+							You must request permission to use this system.
+							Please <a href='javascript:popupreportcontact()'>click here</a> 
+							to send an email to the software
+							coordinator to request permission.</div>";
+		courseinfoentry_displayLogin($msg);
+		return;
+	}
+
+	// If we are here, then we have access.  Log us on in.
+	$_SESSION["fpCourseInfoEntryLoggedIn"] = true;
+	if ($_SESSION["fpUserID"] == "")
+	{
+		$_SESSION["fpUserID"] = $cwid;
+		$_SESSION["fpUserName"] = $db->getFacultyName($cwid);
+	}
+	$db->addToLog("courseinfo","login");
+	courseinfoentry_displayListCourses();
+	
+
+}
+*/
+
+
+function courseinfoentry_performEditSpecificCourse()
+{
+	// Update the database tables for a particular course.
+	// Get our global variables.
+	$screen = $GLOBALS["courseinfoentry_screen"];
+	$db = $GLOBALS["courseinfoentry_db"];
+	$deCatalogYear = $GLOBALS["courseinfoentry_deCatalogYear"];
+	$moduleActionURL = getModuleActionURL("courseinfoentry");
+
+
+	$courseID = mysql_real_escape_string($_REQUEST["courseID"]);
+	$subjectID = mysql_real_escape_string($_REQUEST["subjectID"]);
+	$courseNum = mysql_real_escape_string($_REQUEST["courseNum"]);
+	//$termArray = array("60","mm","81","82","40","41");
+	$termArray = getTermIDSuffixes();
+
+	$facultyID = $_SESSION["fpUserID"];
+
+	for ($t = 1; $t <= 6; $t++)
+	{
+		$year = mysql_real_escape_string($_REQUEST["year$t"]);
+		// delete the existing entries for this year & course here.
+		// del where `term_id` LIKE '$year%' and courseid=courseid etc.
+		$db->dbQuery("DELETE FROM course_rotation_schedule
+						WHERE `course_id`='?'
+						AND `term_id` LIKE '?%' ", $courseID, $year);
+		//debugCT("delete $courseID where $year% ");
+		/////////////////////////
+		// Now, for x = 1 to 5,
+		// if ($_request["cb_$year$x"] == "yes")
+		// then insert into table... blah blah...
+
+		foreach($termArray as $x)
+		{
+			if ($_REQUEST["cb_$year$x"] == "yes")
+			{
+				$db->dbQuery("INSERT INTO course_rotation_schedule
+								(`faculty_id`,`course_id`,`term_id`,`entry_value`,`datetime`)
+								values ('$facultyID', '$courseID', '$year$x', '$subjectID~$courseNum',NOW()) ");
+				//debugCT("insert for $year$x ");
+			}
+		}
+
+	}
+
+	// Not anticipated check?
+
+	// delete first...
+	$db->dbQuery("delete from course_rotation_schedule
+						where `course_id`='$courseID'
+						and `term_id` = 'NOTA' ");
+
+	if ($_REQUEST["not_anticipated"] == "yes")
+	{
+		$db->dbQuery("insert into course_rotation_schedule
+						(`faculty_id`,`course_id`,`term_id`,`entry_value`,`datetime`)
+						values ('$facultyID', '$courseID', 'NOTA', '$subjectID~$courseNum',NOW()) ");
+
+	}
+
+	// Should we delete the current syllabus?
+	if ($_REQUEST["del_syllabus"] == "yes")
+	{
+		$filename = courseinfoentry_getCurrentSyllabus("", "", $courseID);
+		if ($filename != "")
+		{
+			unlink("./custom/files/syllabi/$filename");
+			//$db->dbQuery("DELETE FROM course_syllabi
+			//				WHERE `course_perm_id`='$subjectID" . "_$courseNum' ");
+			$db->dbQuery("DELETE FROM course_syllabi
+							WHERE `course_id`='$courseID' ");
+			
+		}
+	}
+
+	// Did the user try to upload a file?
+	if (trim($_FILES["syllabus"]["tmp_name"]) != "")
+	{
+		$test = courseinfoentry_uploadAttachment($courseID, $subjectID, $courseNum);
+		if (!$test)
+		{
+			// there was an error.
+		} else {
+			// success.
+
+		}
+	}
+
+	$db->addToLog("courseinfo","edit,$subjectID" . "_$courseNum");
+
+	courseinfoentry_displayEditSpecificCourse(courseinfoentry_getSuccessMsg("$subjectID $courseNum was successfully
+								updated at " . date ("g:i:sa") . "."));
+
+}
+
+
+
+function courseinfoentry_getSuccessMsg($msg)
+{
+	return "<div style='color: green; font-size: 16pt; padding-bottom:20px;'>$msg
+			<div class='tenpt' style='color: black;'>You may continue editing, or return to the main menu
+				by following the link above.</div>
+			</div>
+			";
+}
+
+
+function courseinfoentry_getCurrentSyllabus($subjectID = "", $courseNum = "", $courseID = -1)
+{
+	// Get our global variables.
+	$screen = $GLOBALS["courseinfoentry_screen"];
+	$db = $GLOBALS["courseinfoentry_db"];
+	$deCatalogYear = $GLOBALS["courseinfoentry_deCatalogYear"];
+	$moduleActionURL = getModuleActionURL("courseinfoentry");
+
+
+	if ($courseID != -1) {
+	  $query = "select * from course_syllabi
+					where `course_id`='?' ";
+	  $res = $db->dbQuery($query, $courseID);
+	}
+	else {
+	  $query = "select * from course_syllabi
+					where `course_perm_id`='?" . "_?' ";	  
+	  $res = $db->dbQuery($query, $subjectID, $courseNum);
+	}
+	
+	$cur = $db->dbFetchArray($res);
+	$filename = $cur["filename"];
+
+	return $filename;
+}
+
+
+function courseinfoentry_displayEditSpecificCourse($msg = "", $boolScroll = true)
+{
+
+	// Get our global variables.
+	$screen = $GLOBALS["courseinfoentry_screen"];
+	$db = $GLOBALS["courseinfoentry_db"];
+	$deCatalogYear = $GLOBALS["courseinfoentry_deCatalogYear"];
+	$moduleActionURL = getModuleActionURL("courseinfoentry");
+	
+	
+	$courseID = $_REQUEST["courseID"];
+	$subjectID = $_REQUEST["subjectID"];
+	$courseNum = $_REQUEST["courseNum"];
+
+
+	$pC .= "<a class='tenpt' href='$moduleActionURL&performAction=listCourses'>Back to Course List</a>";
+
+	$course = new Course($courseID,false,null,false,$deCatalogYear);
+	$course->catalogYear = $deCatalogYear;  // Since it may be 1900, force it!
+	$course->loadDescriptiveData(false, true, false, true);
+
+
+	$pC .= "<h2 style='margin-bottom: 10px; margin-top: 3px;'>
+			Edit Course Info for $subjectID $courseNum</h2>$msg";
+
+	$pC .= "<form id='mainform' action='$moduleActionURL' method='POST' enctype='multipart/form-data'>
+			<input type='hidden' name='performAction' value='performEditSpecificCourse'>
+			<input type='hidden' name='courseID' value='$courseID'>
+			
+			<input type='hidden' name='subjectID' value='$subjectID'>
+			<input type='hidden' name='courseNum' value='$courseNum'>
+			
+			";
+	$course->catalogYear = $deCatalogYear;  // Since it may be 1900, force it!
+	// Find out filename/link of current syllabus.
+	$filelink = "- None currently entered -";
+	$filename = courseinfoentry_getCurrentSyllabus("", "", $courseID);
+	if ($filename != "")
+	{
+		$filelink = "$filename
+					<input type='checkbox' name='del_syllabus' value='yes'> delete?";
+	}
+
+	$pC .= "<div class='tenpt'>
+			<b>$course->title (" . $course->getCatalogHours() . " hrs.)</b>
+			<div class='tenpt'>$course->description</div>
+			
+			<br><br>
+			<div style='margin-bottom: 3px;'><b>Sample Course Syllabus:</b> $filelink</div>
+			<input type='file' name='syllabus' size='40'>
+			  <div style='font-size: 8pt;'>
+			  	Selecting a new file will replace any existing syllabus.
+			  	Remember to click Save after selecting a file.
+			  </div>";
+	if ($filename != "")
+	{
+
+	  // Require the course_search module...
+    includeModule("course_search");
+    
+    // Reset since it was overwritten in the above include.
+    $moduleActionURL = getModuleActionURL("courseinfoentry");
+
+    $syllabusDetails = course_search_getCourseSyllabusDetails("", "", $courseID);
+    $sURL = $syllabusDetails["url"];
+    
+    
+		$pC .= "<div style='margin-top: 5px;'>
+			Syllabus may be downloaded using this address:<br>
+			<a href='$sURL'>$sURL</a>
+			</div>";
+	}
+
+	$pC .= "
+			 <br><br>
+			<b>Course Rotation Schedule:</b><br>
+			Select semesters in which this course will be offered for
+			the next five years.
+			<br><br>
+			";
+	// We expect the termID to be in the form of YYYYT
+	// as in, 20021 or 20022.
+	//$termArray = array("1","m","2","3","4","5");
+	//$termArray = array("60","mm","81","82","40","41");
+	$termArray = getTermIDSuffixes();
+/*	$semArray = array("none"=>"","1"=>"Spring","m"=>"May",
+	"2"=>"Sum1","3"=>"Sum2","4"=>"Fall","5"=>"Win", "6"=>"Win");
+*/	
+  //$semArray = array("none"=>"","60"=>"Spring","mm"=>"May",
+	//"81"=>"Sum1","82"=>"Sum2","40"=>"Fall","41"=>"Win");
+
+	$y = 1;
+	for ($t = $deCatalogYear; $t <= $deCatalogYear + 5; $t++)
+	{
+		$pC .= "<input type='hidden' name='year$y' value='$t'>";
+		foreach($termArray as $x)
+		{
+		  
+		  $check_year = $t;
+		  
+		  //if ($x == 40 || $x == 41) {
+		  //  $check_year = $check_year + 1;
+		  //}
+		  
+			//$cbDispName = $semArray[$x] . " $t";
+			
+			$newCourse = new Course();
+			$newCourse->termID = $check_year . $x;
+			$cbDispName = $newCourse->getTermDescription(TRUE);
+			
+			$cbname = $newCourse->termID;
+			
+			
+			$che = "";
+			// See if this box should be checked...
+			$res = $db->dbQuery("select * from course_rotation_schedule
+								where `course_id`='?'
+								and `term_id`='$check_year$x' ", $courseID);
+			//debugCT("$t$x");
+			if ($db->dbNumRows($res) > 0)
+			{
+				$che = "checked";
+			}
+			$pC .= "<label><input type='checkbox' name='cb_$cbname' value='yes' $che> $cbDispName &nbsp;&nbsp;</label>";
+		}
+		$pC .= "<br><br>";
+		$y++;
+	}
+
+	$pC .= "</div>";
+
+	// Not anticipated check.
+	$cheNA = "";
+	$res = $db->dbQuery("SELECT * FROM course_rotation_schedule
+						WHERE `course_id`='?'
+						AND `term_id`='NOTA' ", $courseID);
+	//debugCT("$t$x");
+	if ($db->dbNumRows($res) > 0)
+	{
+		$cheNA = "checked";
+	}
+
+
+	$pC .= "<div style='border: 1px solid grey; padding: 10px;'>
+			<input type='checkbox' name='not_anticipated' value='yes' $cheNA> Not Anticipated
+				<div style='font-size: 9pt; margin-left: 20px;'>
+				Checking this box means that the course is not anticipated
+				to be offered within the time range above.  This will
+				override any selections made above.
+				</div>
+			</div>
+			<br>
+			<input type='submit' value='Save'>
+			
+			";
+
+	$pC .= "
+			</form>";
+
+	//$pC .= getJS();
+	$screen->pageTitle = "CourseInfo - Edit Course";
+
+	if ($boolScroll)
+	{
+		$screen->pageScrollTop = trim($_POST["scrollTop"]);
+	}
+	$screen->pageHideReportError = true;
+	
+
+	$screen->pageContent = $pC;
+	// send to the browser
+	$screen->outputToBrowser();
+
+
+	if ($_REQUEST["serialize"] != "")
+	{
+		print "<br><textarea rows=20 cols=80>" . serialize($course) . "</textarea>";
+	}
+
+
+}
+
+
+
+
+function courseinfoentry_uploadAttachment($courseID, $subjectID, $courseNum)
+{
+	// Get our global variables.
+	$screen = $GLOBALS["courseinfoentry_screen"];
+	$db = $GLOBALS["courseinfoentry_db"];
+	$deCatalogYear = $GLOBALS["courseinfoentry_deCatalogYear"];
+	$moduleActionURL = getModuleActionURL("courseinfoentry");
+
+	// If any files were attached, go ahead and upload them.
+
+	$differencetolocaltime = 0;
+	$universalDateTime     = date ("U") + $differencetolocaltime * 3600;
+	$datetime              = date ("Y-j-m_g-i-sa", $universalDateTime);
+
+
+	$tmp_filename = $_FILES["syllabus"]["tmp_name"];
+	if (trim($tmp_filename) != "")
+	{
+		// Meaning, yes, a file was uploaded.
+		$suffix = $datetime;
+		// Create the new filename, based on the id's its been assigned.
+		$original_filename = $_FILES["syllabus"]["name"];
+		// replace problem characters...
+		$original_filename = str_replace("'", "", $original_filename);
+		$original_filename = str_replace('"', '', $original_filename);
+		$original_filename = str_replace(",", "", $original_filename);
+
+		$temp = split("\.", $original_filename);
+		//$ext = substr($original_filename,strlen($original_filename) - 3);  // original ext.
+		$ext = $temp[count($temp) - 1];  // get the original extension.
+		$new_filename = $original_filename . ".$suffix.$ext";
+
+
+
+
+		// Try to copy...
+		if (!copy($tmp_filename, "./custom/files/syllabi/$new_filename"))
+		{
+			//add_to_log("error copying file~$original_filename $new_filename");
+			print "<br><br>
+					<h2>Oops!</h2>
+					We're sorry, but there has been an error while trying to 
+					copy your file.  Please
+					try again later.
+					";
+			return false;
+		}
+
+		// If we are here, then there is success!  We should update the
+		// table with the new filename, which is $new_filename.
+		// delete the existing entry, if any.
+
+		// We need to unlink any existing syllabus file...
+		$filename = courseinfoentry_getCurrentSyllabus($subjectID, $courseNum, $courseID);
+		if ($filename != "")
+		{
+			if (!unlink("./custom/files/syllabi/$filename"))
+			{
+				print "<br><br>
+					<h2>Oops!</h2>
+					We're sorry, but there has been an error while trying to 
+					copy your file.  The file $filename could not be deleted.
+					Checking to see if it exists...
+					";
+				if (file_exists("./custom/files/syllabi/$filename")) {
+				  print "<b>YES</b> the file does exist.  This may indicate
+				        a file permissions problem with the server.  Please
+				        inform your IT staff.";
+				}
+				else {
+				  print "<b>NO</b> the file does not exist.  Perhaps
+				          this is an old record, and the file was deleted
+				          at some point.  You may continue using the system
+				          normally.";
+				}
+
+			}
+		}
+
+		$db->dbQuery("delete from course_syllabi
+						where `course_id`='?'	", $courseID);
+
+		// Okay, now add the new entry.
+		$db->dbQuery("insert into course_syllabi
+						(`course_id`,`course_perm_id`,`filename`,`datetime`)
+						values ('?','?" . "_?','?',NOW() )", $courseID, $subjectID, $courseNum, $new_filename);
+
+
+
+	}
+
+}
+
+
+
+
+function courseinfoentry_displayListCourses($msg = "")
+{
+	// Get our global variables.
+	$screen = $GLOBALS["courseinfoentry_screen"];
+	$db = $GLOBALS["courseinfoentry_db"];
+	$deCatalogYear = $GLOBALS["courseinfoentry_deCatalogYear"];
+	$moduleActionURL = getModuleActionURL("courseinfoentry");
+
+
+  // Require the course_search module...
+  //require_once(getModulePath("course_search") . "/course_search.module");
+  includeModule("course_search");
+  // Reset since it was overwritten in the above include.
+  $moduleActionURL = getModuleActionURL("courseinfoentry");
+	
+	
+	$pC = "";
+
+	$cc = 1;
+
+	// Get the "upper range" (UR) and
+	// lower range (LR) of the courses in question...
+	$ur = trim($_GET["ur"]);
+	$lr = trim($_GET["lr"]);
+	if ($ur == "")
+	{ // meaning, no range was set.  Use A - AZZZZZ, so, all of the A's.
+		$ur = $_SESSION["dec_ur"];
+		$lr = $_SESSION["dec_lr"];
+		if ($ur == "")
+		{ // if still blank, assign it..
+			$ur = "A";
+			$lr = "AZZZZ";
+		}
+
+	}
+	$_SESSION["dec_ur"] = $ur;
+	$_SESSION["dec_lr"] = $lr;
+
+
+	$pC .= "<div class='tenpt'>
+				Welcome {$_SESSION["fpUserName"]}! 
+				<!-- <a href='$moduleActionURL&performAction=logout'>Logout?</a> -->
+			</div>
+			<h2 style='margin: 0px;'>Update Course Information</h2>$msg
+			<div class='tenpt' style='margin-bottom: 20px;'>
+				To update a course's sample syllabus or schedule,
+				please select the course from the list below.
+				<br>
+				<a href='javascript: popupHelpWindow(\"help.php?i=6\");'>
+					Need Help?  Click Here!</a>
+			  &nbsp; 
+			  - &nbsp;
+			  <a href='$moduleActionURL&performAction=displayReportsMenu'>View Reports</a>
+			</div>
+			";
+
+	$pC .= "<div style='margin-bottom:10px; text-align: center; padding: 3px;'>
+			<a href='$moduleActionURL&performAction=listCourses&ur=A&lr=AZZZ'>A</a> &nbsp;
+						<a href='$moduleActionURL&performAction=listCourses&ur=B&lr=BZZZ'>B</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=C&lr=CNZZ'>C-CN</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=CO&lr=CZZZ'>CO-CZ</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=D&lr=DZZZ'>D</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=E&lr=EZZZ'>E</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=F&lr=FZZZ'>F</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=G&lr=GZZZ'>G</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=H&lr=HZZZ'>H</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=I&lr=LZZZ'>I-L</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=M&lr=MRZZZ'>M-MR</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=MS&lr=MZZZ'>MS-MZ</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=N&lr=OZZZ'>N-O</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=P&lr=PZZZ'>P</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=Q&lr=RZZZ'>Q-R</a> &nbsp; 
+                       <a href='$moduleActionURL&performAction=listCourses&ur=S&lr=SOZZZ'>S-SO</a> &nbsp;
+                       <a href='$moduleActionURL&performAction=listCourses&ur=SP&lr=SPZZZ'>SP-SZ</a> &nbsp;
+                       <a href='$moduleActionURL&performAction=listCourses&ur=T&lr=ZZZZZ'>T-Z</a>
+				</div>                       
+                       <hr>
+                      
+                       ";
+
+
+
+	$pC .= "<table border='0' cellpadding='3' cellspacing='0'>
+			<tr>
+				<td class='tenpt' width='95%'>Course</td>
+				<td class='tenpt'>Sch</td>
+				<td class='tenpt'>Syl</td>
+				<td class='tenpt'>Updated</td>
+			</tr>";
+
+	$result = $db->dbQuery("SELECT * FROM courses
+                        WHERE 
+                        `catalog_year`='?' AND
+                        `subject_id` BETWEEN '?' AND '?'
+                        AND `delete_flag`='0'
+                        AND `exclude`='0'
+                        ORDER BY `subject_id`, `course_num` ", $deCatalogYear, $ur, $lr);
+	if (strlen($result))
+	{
+		while ($cur = mysql_fetch_array($result))
+		{
+			extract($cur, 3, "db");
+
+
+			$syl = $sch = $updated = "";
+			// Right here, maybe check to see if this course has
+			// a syllabus and/or schedule entered?
+			$filename = courseinfoentry_getCurrentSyllabus($db_subject_id, $db_course_num, $db_course_id);
+			if ($filename != "")
+			{
+        $details = course_search_getCourseSyllabusDetails("", "", $db_course_id);
+        $sURL = $details["url"];			  
+        
+				$syl = "<a href='$sURL'><img src='$screen->themeLocation/images/document_icon.gif' border='0'></a>";
+				
+				$updated = strtotime($details["datetime"]);
+			}
+			$scheduleArray = course_search_getCourseRotationSchedule($db_course_id, $deCatalogYear, 100, true);
+			$notAnt = course_search_getCourseRotationScheduleNotAnticipated($db_course_id);
+			if (count($scheduleArray) > 0 || $notAnt == true)
+			{
+				$sch = "<img src='$screen->themeLocation/images/small_check.gif'>";
+				if ($notAnt)
+				{
+					$sch = "NA";
+				}
+				// When was the schedule last updated?
+				$res2 = $db->dbQuery("SELECT * FROM course_rotation_schedule
+								WHERE `course_id`='?' limit 1", $db_course_id);
+				$cur2 = $db->dbFetchArray($res2);
+				$updated2 = strtotime($cur2["datetime"]);
+				if ($updated2 > $updated)
+				{
+					$updated = $updated2;
+				}
+			}
+
+			if ($updated != "")
+			{
+				$updated = date("n/d/y",$updated);
+			}
+
+
+			$tempCourse = new Course();
+			$db_title = $tempCourse->fixTitle($db_title);
+
+			$hrs = $db_min_hours;
+			if (trim($db_min_hours) != trim($db_max_hours))
+			{
+				$hrs .= " - $db_max_hours";
+			}
+
+			$hrs .= " hrs.";
+
+			$repHours = "";
+			if ($db_repeat_hours > $db_min_hours)
+			{
+				$repHours = " rep to $db_repeat_hours hrs.";
+			}
+
+			// remove special chars from subject_id...
+			$displaySubjectID = $db_subject_id;
+			$db_subject_id = urlencode($db_subject_id);
+
+
+			$pC .= "<tr style='$spanstyle'>
+					<td valign='top' width='90%'>";
+			$pC .= "<div style='padding:3px;'>
+						<a href='$moduleActionURL&performAction=editSpecificCourse&courseID=$db_course_id&subjectID=$db_subject_id&courseNum=$db_course_num'>$displaySubjectID $db_course_num - $db_title</a><!-- - $hrs$repHours --></div>";
+
+			$pC .= "</td>
+					<td align='center'>$sch</td>
+					<td align='center'>$syl</td>
+					<td align='center' style='font-size: 8pt;'>$updated</td>
+						</tr>";
+
+		} // while
+	}// if
+
+
+	$pC .= "</table>";
+
+	$pC .= $screen->getJavascriptCode();
+	$screen->pageTitle = "CourseInfo - Courses";
+	$screen->pageHideReportError = true;
+	$screen->pageContent = $pC;
+	// send to the browser
+	$screen->outputToBrowser();
+
+
+}
+

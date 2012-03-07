@@ -1,0 +1,628 @@
+body
+{
+	font-family: Arial;
+	background-color: #ECECDB;
+}
+
+.full_admin_top_options
+{
+	font-size: 10pt;
+	border: 1px solid maroon;
+	padding: 2px;
+	margin-left: 10px;
+}
+
+.admin-message
+{
+	padding: 5px;
+	margin: 5px;
+	font-size: 10pt;
+	background-color: beige;
+}
+
+.print-graphic
+{
+  background-image: url('images/print.gif');
+  width: 57px;
+  height: 20px;
+}
+
+
+/*
+	Gradiant buttons.... I have to write them out like this,
+	and use onmouse events or else IE won't display them correctly.
+	The onmouse events are like this:
+	
+		$onMouse = "onmouseover='this.className=\"gradbutton_hover hand\";'
+					onmouseout='this.className=\"gradbutton hand\";'
+					onmousedown='this.className=\"gradbutton_down hand\";'
+		";
+
+		And add it to a span like this:
+		<span $onMouse onClick='whateverFunction();'>Button 1</span>
+	
+*/
+
+span.gradbutton
+{  
+	background: url('images/buttonbg1.jpg') #fff bottom left repeat-x;
+	padding: 3px;
+	border: 1px solid #BBBBBB;	
+	/*min-width: 55px;	*/
+}
+span.gradbutton_hover
+{
+	border: 1px solid #808080;
+}
+
+span.gradbutton_down
+{
+	background: url('images/buttonbg1-down.jpg') #fff top left repeat-x;
+	border: 1px solid #808080;
+}
+
+
+.selectVariableClassHidden
+{
+	
+	visibility: hidden;
+	overflow: hidden;
+	background-color: #FFFFFF;
+}
+
+.selectVariableClass
+{
+	visibility: visible;
+}
+
+div.updateMsg
+{
+	border: 5px solid maroon;
+	background-color: white;
+	width: 200px;
+	text-align: center;
+	font-weight: bold;
+}
+
+.variableHoursList
+{
+ 	position: absolute;
+	background-color: white;
+	border: 1px solid #333333;
+	width: 150px;
+ 	/*z-index:12;*/
+ }
+ .variableHoursList a
+ {
+ 	text-decoration: none;
+ }
+ .variableHoursList a:hover
+ {
+ 	font-weight: bold;
+ }
+ 
+
+.tenpt
+{
+ font-size: 10pt;
+ font-family: Arial;
+}
+
+.elevenpt
+{
+	font-size: 11pt;
+	font-family: Arial;
+}
+
+.fixedlen
+{
+	font-family: Courier New;
+	font-size: 10pt;
+}
+
+.smallspace
+{
+	padding-left: 15px;
+}
+
+
+.viewSelectorActive
+{
+	font-weight: bold;
+	color: black;
+	text-decoration: none;
+}
+
+.viewSelectorInactive
+{
+	font-weight: normal;
+	text-decoration: none;
+}
+.viewSelectorInactive:hover
+{
+	font-weight: normal;
+	text-decoration: none;
+}
+
+
+.superscript
+{
+/* mimic the apearance of a superscript */
+	font-size: 7pt;
+	position: relative;
+	top: -5px;
+}
+
+.transfer_area
+{
+	background-color: white;
+	color: black;
+	border-style: solid;
+	border-color: gray;
+	width: 350px;
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
+	height: 150px;
+	font-size: 11px;
+	cursor: default;
+}
+
+a.nounderline
+{
+	text-decoration: none; 
+	color: blue;
+}
+
+a.nounderline2
+{
+	text-decoration: none;
+	color: blue;
+}
+
+a.nounderline:hover
+{
+	text-decoration: underline; 
+	color: blue;
+}
+
+.falseLink
+{
+	text-decoration: none;
+	color: blue;
+	cursor: pointer;
+}
+
+
+
+.smallinput 
+{
+ font-size: 8pt;
+ border-style: solid;
+ border-width: 1px;
+ border-color: #96a3dc;
+ }
+
+.smallbutton
+{
+ font-size: 8pt;
+ border-style: solid;
+ border-width: 1px;
+ border-color: blue;
+}
+
+.tabinput
+{
+ font-size: 8pt;
+ color: white;
+ border-style: solid;
+ border-width: 1px;
+ border-color: white;
+ background-color: maroon;
+}
+
+.tabbutton
+{
+ font-size: 8pt;
+ border-style: solid;
+ border-width: 1px;
+ border-color: white;
+}
+
+td.underline
+{
+	border-bottom: 1px solid black;
+}
+td.u
+{
+ background-image:URL('images/underline.gif');
+}
+
+.uhand
+{
+ background-image:URL('images/underline.gif'); 
+ cursor: pointer;
+}
+
+.hand
+{
+ cursor: pointer;
+}
+
+
+
+.blueTitle
+{
+	color: white;
+	background: url('images/grad_bg.gif') #660000 top left repeat-x;
+	
+}
+
+.hypo
+{
+	background-color: #FDFFBB; 
+	color: black;
+}
+
+.hypocolor
+{
+	color: black;
+}
+
+table.blueBorder
+{
+	border-bottom: solid 2px  #C1A599;	
+	border-right: solid 2px #C1A599;
+	border-left: solid 2px #C1A599;
+}
+
+
+
+
+.completed  /* student passed course  */
+{
+ color: #1d7bff;
+ text-decoration:none;
+}
+
+.eligible /* elegible courses (student may take) */
+{
+ color: black;
+ text-decoration:none;
+ 
+}
+
+.d  /*  developmental requirement */
+{
+ color: black;
+ font-style:italic;
+
+}
+
+
+.locked  /* not elegible.  Student may not take this course. */
+{
+ color: gray;
+ text-decoration:none;
+}
+
+.retake  /* student must re-take course.  Grade not good enough. */
+{
+ color: #ff5559;
+ text-decoration:none;
+}
+.enrolled /* student is currently enrolled in course. */
+{
+ color: green;
+ text-decoration:none;
+}
+
+blockquote.slo
+{
+           margin-top: 2px;
+           margin-left: 20px;
+           margin-bottom: 2px;
+           padding: 0px;
+}
+
+table.box
+{
+        border-width: 1px;
+        border-style: solid;
+        border-color: white;
+}
+
+td.box
+{
+        border-style: solid;
+        border-color: white;
+}
+
+table.saveoption
+{
+      border-style: solid;
+      border-width: 1px;
+      border-color: black;
+      background-color: #ffffcc;
+
+}
+
+table.announcement
+{
+      border-style: solid;
+      border-width: 1px;
+      border-color: black;
+      background-color: white;
+
+}
+
+
+.edit_col
+{
+ background-color: #ffffcc;
+}
+
+
+.rubric_col
+{
+ background-color: #CCFFFF;
+}
+
+.top_col
+{
+ background-color: #CCCCCC;
+}
+
+table.slo
+{
+        border-width: 1px;
+        border-style: solid;
+        border-color: white;
+}
+
+td.slo
+{
+        border-style: solid;
+        border-color: black;
+        border-width: 1px;
+}
+
+
+table.score
+{
+ border-width: 1px;
+ border-style: solid;
+ border-color: black;
+}
+
+td.score
+{
+ border-width: 1px;
+ border-style: solid;
+ border-color: black;
+}
+
+.side_padding {
+	padding-left: 3px;
+	padding-right: 3px;
+	padding-top: 1px;
+	padding-bottom: 1px;
+}
+
+.tab_text
+{
+	font-family: Arial;
+	font-size: 10pt;
+}
+
+td.tl {
+	background: url('images/tl.gif') #ECECDB top left no-repeat;
+	height: 17px;
+}
+
+td.top {
+	background: url('images/top.gif') #ECECDB top repeat-x;
+	height: 17px;
+}
+
+td.tr {
+	background: url('images/tr.gif') #ECECDB top right no-repeat;
+	height: 17px;
+}
+
+td.bl {
+	background: url('images/bl.gif') #ECECDB bottom left no-repeat;
+	height: 36px;
+}
+
+td.bottom {
+	background: url('images/bottom.gif') #ECECDB bottom repeat-x;
+	height: 36px;
+}
+
+td.br {
+	background: url('images/br.gif') #ECECDB bottom right no-repeat;
+	height: 36px;
+}
+
+td.tab_tl {
+	background: url('images/tab_tl.gif') #FFFFFF top left no-repeat;
+	height: 14px;
+}
+
+td.tab_top {
+	background: url('images/tab_top.gif') #FFFFFF top repeat-x;
+	height: 14px;
+}
+
+td.tab_tr {
+	background: url('images/tab_tr.gif') #FFFFFF top right no-repeat;
+	height: 14px;
+}
+
+td.tab_left {
+	background: url('images/tab_left_edge.gif') #FFFFFF top left repeat-y;
+	height: 1px;
+}
+
+td.tab_right {
+	background: url('images/tab_right_edge.gif') #FFFFFF top right repeat-y;
+	
+	height: 1px;
+}
+
+td.tab_center {
+	background: url('images/tab_center.gif') #FFFFFF top repeat-x;
+	height: 18px;
+	font-weight: bold;
+}
+
+td.tab_tl_i {
+	background: url('images/tab_tl_i.gif') #FFFFFF top left no-repeat;
+	height: 14px;
+}
+
+td.tab_top_i {
+	background: url('images/tab_top_i.gif') #FFFFFF top repeat-x;
+	height: 14px;
+}
+
+td.tab_tr_i {
+	background: url('images/tab_tr_i.gif') #FFFFFF top right no-repeat;
+	height: 14px;
+}
+
+td.tab_left_i {
+	background: url('images/tab_left_edge_i.gif') #FFFFFF top left repeat-y;
+	height: 1px;
+}
+
+td.tab_right_i {
+	background: url('images/tab_right_edge_i.gif') #FFFFFF top right repeat-y;
+	height: 1px;
+}
+
+td.tab_center_i {
+	background: url('images/tab_bottom_i.gif') #FFFFFF top repeat-x;
+	height: 18px;
+	font-weight: normal;
+}
+
+.active_tab {
+	position: relative;
+	top: 4px;
+	border-bottom: 1px solid white;
+	color: #660000;
+	cursor: default;
+}
+
+.inactive_tab {
+	position: relative;
+	top: 3px;
+	color: #A0A0A0;
+	border-bottom: 1px solid #A3A397;
+	
+}
+
+.inactive_tab_over {
+	position: relative;
+	top: 3px;
+	color: #660000;
+	border-bottom: 1px solid #A3A397;
+	cursor: pointer;
+}
+
+
+.inactive_tab_over_no_link {
+	position: relative;
+	top: 3px;
+	color: #A0A0A0;
+	border-bottom: 1px solid #A3A397;
+	cursor: default;
+}
+
+
+.tab_padding {
+	padding-right: 3px;
+}
+
+.nounderlink
+{
+	color: #1d7bff;
+	text-decoration: none;
+}
+
+.nounderlink:hover
+{
+	color: #1d7bff;
+	text-decoration: underline;
+}
+
+/*
+  This starts off a "box", like "Freshman Year" or "Excess Credits"
+*/
+table.fp-box-top {
+  margin-bottom: 10px;
+}
+
+.what-if-selector {
+  width: 90%;
+}
+
+/*
+Main
+*/
+.fp-menu-item {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  font-size: 0.8em;
+}
+
+.fp-menu-item-tight {
+  padding-bottom:0;
+}
+
+.fp-menu-item .fp-menu-item-description {
+  padding-left: 25px;
+}
+
+.fp-menu-item a {
+  text-decoration: none;
+  color: blue;
+}
+.fp-menu-item a:hover {
+  text-decoration: underline;
+}
+
+.fp-warn-grant-full {
+  font-size: 0.8em;
+  color: red;
+}
+
+
+/*
+Admin-console related
+*/
+.fp-user-management-permission 
+{
+  margin-bottom: 15px;
+  padding-left: 20px;
+}
+
+.fp-user-management-permission-disabled {
+  background-color: #eee;
+  font-style: italic;
+}
+
+.fp-user-management-permission .fp-user-management-permission-line {
+  padding-left: 20px;
+  font-size: 0.8em;
+}
+
+.fp-user-management-permission-module-name {
+  background-color: #eee;
+  padding: 3px;
+  margin-top: 10px;
+  margin-bottom: 3px;
+  font-weight: bold;
+}

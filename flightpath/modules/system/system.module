@@ -1,0 +1,633 @@
+<?php
+/*
+FlightPath was originally designed and programmed by the 
+University of Louisiana at Monroe. The original source is 
+copyright (C) 2011-present by the University of Louisiana at Monroe.
+
+FlightPath is considered "open source" under the 
+GNU General Public License, version 3 or any later version. 
+This covers any related files and documentation packaged with 
+FlightPath. 
+
+The license is defined in full here: http://www.gnu.org/licenses/gpl.html,
+and reproduced in the LICENSE.txt file.
+
+You may modify FlightPath's source code, but this copyright and license
+notice must not be modified, and must be included with the source code.
+------------------------------
+*/
+
+
+/**
+ * Implementation of hook_page_switchboard
+ *
+ */
+function system_page_switchboard() {
+  
+  // Check permissions right here.
+  if (!userHasPermission("deCanAdministerSystemSettings")) {
+    displayAccessDenied("System Module");
+  }
+  
+  $performAction = $_REQUEST["performAction"];
+  
+  if ($performAction == "editSettings") {
+    system_displaySettingsForm();
+  }
+  
+  if ($performAction == "performSubmitSettings") {
+    system_performSubmitSettings();
+  }
+  
+  
+  if ($performAction == "editModules") {
+    system_displayModulesForm();
+  }
+  
+  if ($performAction == "performSubmitModules") {
+    system_performSubmitModules();
+  }
+  
+  
+  
+}
+
+
+
+
+
+/**
+ * Implementation of hook_perm().
+ * Expects to return an array of permissions recognized by
+ * this module.
+ * 
+ * Ex:   $a = array( 
+ *          "deCanDoSomething" => array ( 
+ *              "title" => "Can Do Something",
+ *              "description" => "Allow the user to do something." 
+ *          )
+ *        );
+ *
+ */
+function system_perm() {
+  
+  $perms = array (
+      "deCanAccessAdminConsole" => array(
+      "title" => "Can access the Admin Console",
+      "description" => "This allows the user to log into the Admin Console.
+                        ",
+    ),
+
+    "deCanAdministerDataEntry" => array(
+      "title" => "Can administer Data Entry",
+      "description" => "This allows the user to edit, update, delete, etc, 
+                        the Data Entry components of FlightPath, like Courses,
+                        Groups, Degrees, and advising settings.",
+    ),
+    
+    "deCanAdministerUsers" => array(
+      "title" => "Can administer users",
+      "description" => "This allows the user to edit other users' permissions
+                        in the User Management system, including their own
+                        permissions.  Users will only be able to modify
+                        permissions which they themselves have been
+                        granted.",
+    ),
+
+    "deCanSwitchUsers" => array(
+      "title" => "Can switch users",
+      "description" => "This powerful permission allows a user to switch
+                        to any other user in the system.  Be sure to 
+                        only give to administrators.",
+    ),
+    
+    "deCanAdministerSystemSettings" => array(
+      "title" => "Can administer system settings",
+      "description" => "This allows the user to edit any of the FlightPath
+                        system settings.",
+    ),
+    
+    
+  );
+
+  return $perms;
+  
+}
+
+
+
+/**
+ * Implementation of hook_menu().
+ * This tells other parts of FlightPath where to display links
+ * to this module, and what to include in the URL.
+ *
+ */
+function system_menu() {
+  
+  $items = array();
+  
+  $items[] = array(
+    "title" => "Edit FlightPath System Settings",
+    "url" => getModuleActionURL("system") . "&performAction=editSettings",
+    "location" => "admin_console",
+    "icon" => $GLOBALS["fpSystemSettings"]["theme"] . "/images/toolbox.gif",
+    "weight" => 100,
+    "permission" => "deCanAdministerSystemSettings",
+  );
+  
+$items[] = array(
+    "title" => "Edit FlightPath Modules",
+    "url" => getModuleActionURL("system") . "&performAction=editModules",
+    "location" => "admin_console",
+    "icon" => $GLOBALS["fpSystemSettings"]["theme"] . "/images/toolbox.gif",
+    "weight" => 200,
+    "permission" => "deCanAdministerSystemSettings",
+  );  
+    
+  return $items;
+}
+
+
+
+/**
+ * This function will actually go through the POST and save to our
+ * flightpath_system table.
+ *
+ */
+function system_performSubmitSettings() {
+  
+  $db = getGlobalDatabaseHandler();
+  $csvToArray = $_SESSION["fp_system"]["csv_to_array"];
+  
+  $ignoreInPost = array("submit", "performAction", "n");  
+  
+  foreach ($_POST as $name => $value) {
+    if (in_array($name, $ignoreInPost)) continue;
+    
+    $serValue = serialize($value);
+    // We were supposed to convert this back to an array first?
+    if (in_array($name, $csvToArray)) {
+      $newArray = array();
+      $temp = explode(",", $value);
+      foreach ($temp as $t) {
+        $newArray[] = trim($t);
+      }
+      $serValue = serialize($newArray);
+    }
+    
+    // Alright, let's insert!
+    $res = $db->dbQuery("REPLACE INTO flightpath_system_settings (name, value)
+	                            VALUES ('?', '?') ", $name, $serValue);
+       
+  }
+  
+  // Reload back into the GLOBALS array...
+  $res = $db->dbQuery("SELECT * FROM flightpath_system_settings");
+  while ($cur = $db->dbFetchArray($res)) {
+    if ($val = unserialize($cur["value"])) {
+      $GLOBALS["fpSystemSettings"][$cur["name"]] = $val;
+    }
+  }  
+  
+  
+  system_displaySettingsForm("<font color='green'>Settings successfully saved on " .date ("g:i:sa") . ".</font><br><br>");
+  
+  
+}
+
+
+
+function system_performSubmitModules() {
+  $db = getGlobalDatabaseHandler();
+  
+  $modules = array();
+  
+  foreach ($_POST as $name => $value) {
+    
+    if (strstr($name, "module~~_~~")) {
+      $module = $value;
+      
+      $path = $_POST["path~~_~~$module"];
+      $version = $_POST["version~~_~~$module"];
+      $requires = $_POST["requires~~_~~$module"];
+      $weight = $_POST["weight~~_~~$module"];
+      $name = $_POST["name~~_~~$module"];
+      
+      $disabled = "no";
+      $enabled = $_POST["enabled~~_~~$module"];
+      if ($enabled != "yes") {
+        $disabled = "yes";
+      }
+      
+      // Okay, let's put everything into our modules array.
+      $modules[$module] = array(
+        "path" => $path,
+        "version" => $version,
+        "requires" => $requires,
+        "disabled" => $disabled,
+        "weight" => $weight,
+        "name" => $name,
+      );
+      
+    }
+    
+  }
+  
+  // Okay, now, serialize and add to our settings.
+  $serValue = serialize($modules);
+  
+  $res = $db->dbQuery("REPLACE INTO flightpath_system_settings (name, value)
+	                            VALUES ('modules', '?') ", $serValue);
+  
+  
+  // Reload back into the GLOBALS array...
+  $res = $db->dbQuery("SELECT * FROM flightpath_system_settings WHERE name='modules' ");
+  $cur = $db->dbFetchArray($res);
+  if ($val = unserialize($cur["value"])) {
+    $GLOBALS["fpSystemSettings"]["modules"] = $val;
+  }
+
+  
+  
+  system_displayModulesForm("<font color='green'>Modules successfully saved on " .date ("g:i:sa") . ".</font><br><br>");
+    
+  
+  
+}
+
+
+/**
+ * Similar to the modules page on Drupal, this page will scan various
+ * directories, looking for modules (denoted by their .info files)
+ * and present them to the user to enable or disable.
+ * 
+ * Core modules cannot be disabled.
+ *
+ * @param string $msg
+ */
+function system_displayModulesForm($msg = "") {
+  $moduleActionURL = getModuleActionURL("system");
+  $pC = "";
+  // for typing convenience...  
+  $g = $GLOBALS["fpSystemSettings"];
+  
+  $pC .= "<a class='tenpt' href='admin.php'>Back to main menu.</a><br>";
+  $pC .= "<h2>FlightPath Modules</h2>$msg
+          Use this form to enable or disable modules.  This scans the /modules/  and then /custom/modules/
+          directories.
+          <hr>
+          <form action='$moduleActionURL' method='POST'>
+          <input type='hidden' name='n' value='system'>
+                    
+          ";  
+  
+  // Begin by scanning the /modules/ directory.  Anything in there
+  // cannot be disabled.
+  $moduleDirs = array();
+  $moduleDirs[] = array("start" => "modules", "type" => "Core");
+  $moduleDirs[] = array("start" => "custom/modules", "type" => "Custom");
+    
+  foreach ($moduleDirs as $moduleDir) {
+    $startDir = $moduleDir["start"];
+     
+    if ($dh = opendir($startDir)) {
+      $pC .= "<div class='fp-system-modules-type'>{$moduleDir["type"]}</div>
+              <table class='fp-system-modules-table' cellpadding='0' cellspacing='0'>";
+      $pol = "even";
+      while ($file = readdir($dh)) {    
+        if ($file == "." || $file == "..") continue;
+        
+        if (is_dir($startDir . "/" . $file)) {  
+         
+          // Okay, now look inside and see if there is a .info.xml file.
+          if (file_exists("$startDir/$file/$file.info.xml")) {
+            $module = $file;
+            $infoXml = file_get_contents("$startDir/$file/$file.info.xml");
+            
+            if (!strstr($infoXml, "<module>")) {
+              print "<div>Error in $file.info.xml.  You MUST have &lt;module&gt;
+                      and &lt;/module&gt; tags around your XML.</div>";
+              continue;
+            }
+            
+            $xmlArray = fp_xmlToArray2($infoXml);
+            //var_dump($xmlArray);
+            $checked = "";
+            
+            if (isset($g["modules"][$file]["disabled"]) && $g["modules"][$file]["disabled"] != "yes") {
+              $checked = "checked=checked";              
+            }
+            
+            $cb = "<input type='checkbox' name='enabled~~_~~$file' value='yes' $checked>";
+            
+            if ($xmlArray["required"] == "true") {
+              // Required!  Must be enabled and readonly.
+              $cb = "<input type='checkbox' name='temp' value='' checked=checked disabled=disabled>
+                     <input type='hidden' name='enabled~~_~~$file' value='yes'>";
+            }
+            
+            $requires = "";
+            if ($xmlArray["requires"] != "") {
+              $requires = "<div class='fp-system-modules-requires hypo'>
+                            <b>Requires:</b> {$xmlArray["requires"]}
+                           </div>";
+            }
+            
+            $htmlSafeName = htmlspecialchars($xmlArray["name"], ENT_QUOTES);
+            
+            $hiddenVars = "
+              <input type='hidden' name='module~~_~~$file' value='$file'>
+              <input type='hidden' name='path~~_~~$file' value='$startDir/$file'>
+              <input type='hidden' name='version~~_~~$file' value='{$xmlArray["version"]}'>
+              <input type='hidden' name='requires~~_~~$file' value='{$xmlArray["requires"]}'>
+              <input type='hidden' name='weight~~_~~$file' value='{$xmlArray["weight"]}'>
+              <input type='hidden' name='name~~_~~$file' value='$htmlSafeName'>
+            ";
+            
+            $pC .= "<tr class='fp-system-modules-row fp-system-modules-row-$pol'>";
+            
+            $pC .= "<td width='35%'><label>
+                        $cb $hiddenVars ";
+            $pC .= "   {$xmlArray["name"]}
+                        <div class='fp-system-modules-machine-name'>$file</div></label></td>
+                    <td width='5%'>{$xmlArray["version"]}</td>
+                    <td>{$xmlArray["description"]}$requires</td>";
+            $pC .= "</tr>";
+            
+            $pol = ($pol == "even") ? "odd" : "even";
+            
+          } // if file_exists (xml file)        
+        } // if is_dir      
+      } // while file=readdir
+      $pC .= "</table>";
+    } // if opendir($startdir)
+  }// foreach moduledirs
+  
+  
+  
+  $pC .= "<input type='hidden' name='performAction' value='performSubmitModules'>
+          <input type='submit' value='Submit'>
+          </form>";
+  
+	$screen = new AdvisingScreen("",null,"notAdvising");
+	
+	$screen->addCss(getModulePath("system") . "/css/style.css");
+	
+	$screen->pageContent = $pC;
+	$screen->outputToBrowser();	  
+}
+
+
+/**
+ * This function will display the settings for to the user, so
+ * they may edit it.
+ *
+ */
+function system_displaySettingsForm($msg = "") {
+
+  $moduleActionURL = getModuleActionURL("system");
+    
+  $pC = "";
+  
+  // Wipe out our old csvToArray list...
+  unset($_SESSION["fp_system"]["csv_to_array"]);
+  
+  // for typing convenience...  
+  $g = $GLOBALS["fpSystemSettings"];
+  
+  $pC .= "<a class='tenpt' href='admin.php'>Back to main menu.</a><br>";
+  $pC .= "<h2>FlightPath System Settings</h2>$msg
+          Use this form to alter the various system settings in FlightPath.
+          Before making changes, it is always good policy to first back up
+          your database (or at least the flightpath_system_settings table).
+          <hr>
+          <form action='$moduleActionURL' method='POST'>
+          <input type='hidden' name='n' value='system'>
+          ";
+  
+  
+  $pC .= system_buildElement("contactEmailAddress", "", "", 
+                "Enter the email address to mail when someone uses
+                the Contact FlightPath Production Team popup.");
+  
+  $pC .= system_buildElement("selfURL", "", "URL to FlightPath", 
+                "Enter the URL (including http:// or https://) to access
+                FlightPath.  Do not use redirects; enter the true URL.");
+
+/*       
+  $pC .= system_buildElement("fileSystemPath", "", "File Path to FlightPath", 
+                "Enter the file system path to FlightPath.  Do not include
+                a trailing slash!<br>
+                Ex: /www/webservices/flightpath");
+*/
+                
+  $pC .= system_buildElement("theme", "", "Theme location", "Enter the file location for your theme. Do not put preceeding or trailing slashes.  Ex: themes/classic");
+  
+  $pC .= system_buildElement("schoolInitials", "", "School initials", "Ex: ULM or BPCC");
+  
+  $pC .= system_buildElement("loginHelpPageID", "", "", "This is the ID# of the help page for login help.  It is used when constructing the 'Need help logging-in?' link.  To use, you will need to create a help page for login instructions, then place its ID here.");
+  
+  $pC .= system_buildElement("earliestCatalogYear", "", "", 
+                "This is the earliest possible catalog year FlightPath may look 
+                up.  Typically, this is the earliest year for which you have 
+                data (ie, when FlightPath went online.
+                If FlightPath cannot figure out a catalog year to use,
+                it will default to this one.");
+  
+  $pC .= system_buildElement("graduateLevelCourseNum", "", "", 
+                "This is the course num which means 'graduate level', meaning
+                anything above it is considered a graduate level course.");  
+  
+  $pC .= system_buildElement("allowedStudentRanks", "", "Allowed student ranks (CSV)", 
+                "This is a list of which student ranks are allowed into FlightPath.
+                It should be separated by commas.  These ranks should exactly match
+                the rankCode from the human_resources:students table.
+                This also affects which students you may search for on the Advisees
+                tab (in studentsearch.php).", "", TRUE);  
+  
+  $pC .= system_buildElement("extraStudentSearchConditions", "textarea", "", 
+                "This is mysql which will get appended to end end of the WHERE clause of every query
+  relating to search for students.  It is so you can easily add global conditions, for example,
+  to check that the students are admitted or enrolled.  See the studentsearch.php to see
+  its use.  If this setting is not sufficient for customizing the student search, you will
+  need to use the hooks system to simply override the various functions there.
+  example:  \" AND (admitted = '1' OR enrolled = '1') \"");  
+                
+  $pC .= system_buildElement("enrolledStudentSearchConditions", "textarea", "", 
+                "  Similar to the one above it, this is a clause which will only bring up students
+  who are enrolled at the university, and taking courses.  This might be identical to the
+  one above it.  At the moment, this is only being used in the Stats module, and not
+  for any logic in FlightPath, so you might consider it optional.");  
+  
+                
+                
+  $pC .= system_buildElement("notAllowedStudentMessage", "textarea", "", 
+                "When a student is NOT allowed into FlightPath because of their
+                rank, this message will be displayed.");  
+
+  $pC .= system_buildElement("hidingGradesMessage", "textarea", "", 
+                "This message will be displayed when any course on the page
+                has its boolHideGrade set to TRUE.  If you are not using
+                this functionality, you can leave this blank.");  
+                
+
+  $pC .= system_buildElement("notifyApplyDraftChangesEmailAddress", "", "Email to notify when draft changes have been applied", 
+                "Enter 1 or more email addresses here to notify when
+                draft changes are applied from admin.php.  Leave blank to disable.");  
+                
+  $pC .= system_buildElement("notifyMySQLErrorEmailAddress", "", "Email to notify when a mysql error occurs", 
+                "Enter 1 or more email addresses here to notify when
+                a mysql error occurs.  Leave blank to disable.");  
+
+  $pC .= system_buildElement("displayMySQLErrors", "boolean", "", 
+                "If TRUE, FlightPath will display MySQL error messages on screen.");  
+
+  $pC .= system_buildElement("disableDebugCT", "boolean", "", 
+                "If TRUE, FlightPath will not display 'fpDebugCT' messages.");  
+  $pC .= system_buildElement("disableAdminDebug", "boolean", "", 
+                "If TRUE, FlightPath will not display 'adminDebug' messages.");  
+
+  $pC .= system_buildElement("adminTransferPasscode", "", "", 
+                "Enter a passcode (ie, password) which a Data Entry user must
+                  enter in order to apply draft changes to FlightPath.  This
+                  is an added security measure. Ex: p@ssWord3356");  
+                
+  $pC .= system_buildElement("retakeGrades", "", "Retake grades (CSV)", 
+                "List grades, separated by comma, which means 'the student must
+                retake this course. They did not earn credit.' Ex: F,W,I ", "", TRUE);  
+                
+  $pC .= system_buildElement("enrolledGrades", "", "Enrolled grades (CSV)", 
+                "List grades, separated by comma, which means 'the student is 
+                currently enrolled in this course.' Ex: E,AMID,BMID ", "", TRUE);  
+                  
+
+  $pC .= system_buildElement("bOrBetter", "", "B or better (CSV)", 
+                "List grades, separated by comma, 
+                which are either a B or better. ", "", TRUE);  
+                
+  $pC .= system_buildElement("cOrBetter", "", "C or better (CSV)", 
+                "List grades, separated by comma, 
+                which are either a C or better. ", "", TRUE);  
+
+  $pC .= system_buildElement("dOrBetter", "", "D or better (CSV)", 
+                "List grades, separated by comma, 
+                which are either a D or better. ", "", TRUE);  
+
+  $pC .= system_buildElement("ignoreCoursesFromHourCounts", "", "Ignore courses from hour counts (CSV)", 
+                "List courses, separated by comma, 
+                which should be ignored in hours counts.  This helps
+                remedial courses from being applied to hour counts.
+                Ex: MATH 093, ENGL 090, UNIV 1001 ", "", TRUE);  
+  
+
+  $pC .= system_buildElement("termIDStructure", "textarea", "Structure of termID's:", 
+                "Use this space to define termID structures, one per line.
+                Please see the FlightPath documentation on how to set up this field.
+                <br>Ex: 
+                <br>[Y4]60, Spring, Spring of [Y4], Spr '[Y2]
+                <br>[Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]
+                ");  
+
+                
+                
+                
+  $pC .= "<input type='hidden' name='performAction' value='performSubmitSettings'>
+          <input type='submit' value='Submit'>
+          </form>";
+  
+	$screen = new AdvisingScreen("",null,"notAdvising");
+	
+	$screen->addCss(getModulePath("system") . "/css/style.css");
+	
+	$screen->pageContent = $pC;
+	$screen->outputToBrowser();	
+  
+}
+
+
+/**
+ * Construct an HTML element and return it.
+ *
+ */
+function system_buildElement($name, $type = "", $label = "", $description = "", $default_value = "", $csvToArray = FALSE) {
+  
+  $rtn = "";
+  
+  if (!$default_value) {
+    $default_value = $GLOBALS["fpSystemSettings"][$name];
+  }
+  
+  if (is_array($default_value)) {
+    $default_value = @join(", ", $default_value);
+  }
+  
+  if (!$type) {
+    $type = "textfield";
+  }
+  
+  if (!$label) {
+    $label = $name;
+  }
+  
+  
+  if ($type == "textfield") {
+    $rtn .= "<div class='fp-system-settings-element fp-system-settings-textfield'>
+              <label>$label:</label>
+                <div class='fp-system-settings-input'>
+                  <input type='textfield' name='$name' value='$default_value'>
+                </div>
+              ";
+    if ($description) {
+      $rtn .= "<div class='fp-system-settings-element-description'>$description</div>";
+    }
+    $rtn .= "</div>";
+  }
+  
+  
+  if ($type == "textarea") {
+    $rtn .= "<div class='fp-system-settings-element fp-system-settings-textarea'>
+              <label>$label:</label>
+                <div class='fp-system-settings-input'>
+                  <textarea name='$name'>$default_value</textarea>
+                </div>
+              ";
+    if ($description) {
+      $rtn .= "<div class='fp-system-settings-element-description'>$description</div>";
+    }
+    $rtn .= "</div>";
+    
+  }
+  
+  if ($type == "boolean") {
+    $selF = $selT = "";
+    if ($default_value) {
+      $selT = "selected";
+    }    
+    $rtn .= "<div class='fp-system-settings-element fp-system-settings-boolean'>
+              <label>$label:</label>
+                <div class='fp-system-settings-input'>
+                  <select name='$name'>
+                    <option value='' $selF>FALSE</option>
+                    <option value='1' $selT>TRUE</option>
+                  </select>
+                </div>
+              ";
+    if ($description) {
+      $rtn .= "<div class='fp-system-settings-element-description'>$description</div>";
+    }
+    $rtn .= "</div>";
+    
+  }
+  
+  // We need to convert this CSV back into an array when we save it!
+  if ($csvToArray) {
+    if (!isset($_SESSION["fp_system"]["csv_to_array"])) {
+      $_SESSION["fp_system"]["csv_to_array"] = array();
+    }
+    // Add to our list.
+    $_SESSION["fp_system"]["csv_to_array"][] = $name;
+  }
+  
+  
+  return $rtn;
+}
