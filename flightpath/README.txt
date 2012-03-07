@@ -1,6 +1,6 @@
 FlightPath - The Electronic Student Advising System
 ===================================================
-Version 3.1.1 (alpha)
+Version 3.1.1 (alpha) 
 ===================================================
 
 At the time of this writing, you may visit:
