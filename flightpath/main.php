@@ -27,67 +27,67 @@ header("Cache-control: private");
 require_once("bootstrap.inc");
 
 
-$performAction = trim(addslashes($_REQUEST["performAction"]));
+$perform_action = trim(addslashes($_REQUEST["perform_action"]));
 
 /*
 If the user is NOT logged in, then show them the login screen.
 */
 $msg = "";
-if ($performAction == "clearCache")
+if ($perform_action == "clear_cache")
 {
   // Wipe out the cache, so joann doesn't have to log out
   // and back in.
 
-  clearCache(); 
-  //$_SESSION["clearCache"] = "yes";
+  clear_cache(); 
+  //$_SESSION["clear_cache"] = "yes";
   $msg = "The cache has been cleared.";
 }
 
 
 // Set/unset draft mode.
-if ($performAction == "draftModeYes")
+if ($perform_action == "draft_mode_yes")
 {
-  clearCache();
-  $_SESSION["fpDraftMode"] = "yes";
+  clear_cache();
+  $_SESSION["fp_draft_mode"] = "yes";
 
 }
-if ($performAction == "draftModeNo")
+if ($perform_action == "draft_mode_no")
 {
-  clearCache();
-  $_SESSION["fpDraftMode"] = "no";
+  clear_cache();
+  $_SESSION["fp_draft_mode"] = "no";
   $msg = "Now viewing in Regular Mode.
 			This is what regular users currently see in the system.";
 }
 
 
-if ($performAction == "performLogout")
+if ($perform_action == "perform_logout")
 {
-  performLogout();
+  perform_logout();
   die;
 }
 
-if ($performAction == "performLogin")
+if ($perform_action == "perform_login")
 {
-  performLogin();
+  perform_login();
   die;
-} else if ($_SESSION["fpLoggedIn"] != true)
+} else if ($_SESSION["fp_logged_in"] != true)
 {
 
-  displayLogin();
+  display_login();
   die;
 }
 
 
 
 
-if ($performAction == "switchUser" && userHasPermission("deCanSwitchUsers")) {
+if ($perform_action == "switch_user" && user_has_permission("de_can_switch_users")) {
 
-  clearCache();
-  //adminDebug("userid: " . $_REQUEST["switchUserID"]);
-  performLogin(true, $_REQUEST["switchUserID"]);
-  //adminDebug("right here");
+  clear_cache();
+  //admin_debug("userid: " . $_REQUEST["switch_user_id"]);
+  perform_login(true, $_REQUEST["switch_user_id"]);
+  //admin_debug("right here");
   die;
-} else if ($performAction == "switchUser" && !userHasPermission("deCanSwitchUsers"))
+} else if ($perform_action == "switch_user" && !user_has_permission("de_can_switch_users"))
 {
   die("You do not have access to this function.");
 }
@@ -98,7 +98,7 @@ if ($performAction == "switchUser" && userHasPermission("deCanSwitchUsers")) {
 ///  from a tab change?
 /////////////////////////////////////
 $fp = new FlightPath();
-$fp->processRequestSaveDraft();
+$fp->process_request_save_draft();
 
 /*if ($_REQUEST["saveDraft"] == "yes")
 {
@@ -110,198 +110,198 @@ $fp->saveAdvisingSessionFromPost(0,true);
 
 
 
-$screen = new AdvisingScreen("",null,"notAdvising");
-$screen->initAdvisingVariables(true);
+$screen = new AdvisingScreen("",null,"not_advising");
+$screen->init_advising_variables(true);
 
 
 
 // Display the main page...
-displayMain($msg);
+display_main($msg);
 die;
 
-function clearCache()
+function clear_cache()
 {
 
-  $_SESSION["fpCacheCourseInventory"] = "";
+  $_SESSION["fp_cache_course_inventory"] = "";
 
   foreach ($_SESSION as $skey=>$val)
   {
-    //adminDebug($skey);
+    //admin_debug($skey);
     if (strstr($skey, "cache"))
     {
-      //adminDebug("wiping $skey");
+      //admin_debug("wiping $skey");
       $_SESSION[$skey] = "";
     }
   }
 }
 
 
-function performLogout()
+function perform_logout()
 {
 
   // Check for hooks...
-  if (function_exists("main_performLogout")) {
-    return call_user_func("main_performLogout");
+  if (function_exists("main_perform_logout")) {
+    return call_user_func("main_perform_logout");
   }
 
   
   // This will log the user out of the system.
   // log the logout first...
   $db = new DatabaseHandler();
-  $db->addToLog("logout");
+  $db->add_to_log("logout");
 
 
-  $_SESSION["fpLoggedIn"] = false;
-  $_SESSION["fpUserID"] = false;
-  $_SESSION["fpUserType"] = false;
-  $_SESSION["fpCanAdvise"] = false;
-  $_SESSION["fpCanSearch"] = false;
-  $_SESSION["fpCanSubstitute"] = false;
-  $_SESSION["fpCacheCourseInventory"] = false;
-  $_SESSION["fpFacultyUserMajorCode"] = false;
+  $_SESSION["fp_logged_in"] = false;
+  $_SESSION["fp_user_id"] = false;
+  $_SESSION["fp_user_type"] = false;
+  $_SESSION["fp_can_advise"] = false;
+  $_SESSION["fp_can_search"] = false;
+  $_SESSION["fp_can_substitute"] = false;
+  $_SESSION["fp_cache_course_inventory"] = false;
+  $_SESSION["fp_faculty_user_major_code"] = false;
 
   // Just to make sure we get everything...
   session_destroy();
 
-  displayLogin($msg);
+  display_login($msg);
 
 }
 
 
 
-function performLogin($boolBypassVerification = false, $bypassUserID = "")
+function perform_login($bool_bypass_verification = false, $bypass_user_id = "")
 {
 
   // Check for hooks...
-  if (function_exists("main_performLogin")) {
+  if (function_exists("main_perform_login")) {
     
-    return call_user_func("main_performLogin", $boolBypassVerification, $bypassUserID);
+    return call_user_func("main_perform_login", $bool_bypass_verification, $bypass_user_id);
   }
 
   // Are we bypassing logins in the settings, and just giving this user
   // full_admin access?
-  if ($GLOBALS["fpSystemSettings"]["GRANT_FULL_ACCESS"] == TRUE) {
-    $_SESSION["fpLoggedIn"] = TRUE;
-    $_SESSION["fpUserID"] = 1;
-    $_SESSION["fpUserType"] = "full_admin";
-    $_SESSION["fpCanAdvise"] = TRUE;
-    $_SESSION["fpCanSearch"] = TRUE;
-    $_SESSION["fpCanSubstitute"] = TRUE;
-    $_SESSION["fpCacheCourseInventory"] = false;
-    $_SESSION["fpCanModifyComments"] = TRUE;
-    displayMain();
+  if ($GLOBALS["fp_system_settings"]["GRANT_FULL_ACCESS"] == TRUE) {
+    $_SESSION["fp_logged_in"] = TRUE;
+    $_SESSION["fp_user_id"] = 1;
+    $_SESSION["fp_user_type"] = "full_admin";
+    $_SESSION["fp_can_advise"] = TRUE;
+    $_SESSION["fp_can_search"] = TRUE;
+    $_SESSION["fp_can_substitute"] = TRUE;
+    $_SESSION["fp_cache_course_inventory"] = false;
+    $_SESSION["fp_can_modify_comments"] = TRUE;
+    display_main();
     return;
   }
   
   
   // First clear session vars
-  $_SESSION["fpLoggedIn"] = false;
-  $_SESSION["fpUserID"] = false;
-  $_SESSION["fpUserType"] = false;
-  $_SESSION["fpCanAdvise"] = false;
-  $_SESSION["fpCanSearch"] = false;
-  $_SESSION["fpCanSubstitute"] = false;
-  $_SESSION["fpCacheCourseInventory"] = false;
-  $_SESSION["fpFacultyUserMajorCode"] = false;
+  $_SESSION["fp_logged_in"] = false;
+  $_SESSION["fp_user_id"] = false;
+  $_SESSION["fp_user_type"] = false;
+  $_SESSION["fp_can_advise"] = false;
+  $_SESSION["fp_can_search"] = false;
+  $_SESSION["fp_can_substitute"] = false;
+  $_SESSION["fp_cache_course_inventory"] = false;
+  $_SESSION["fp_faculty_user_major_code"] = false;
 
   // Attempt to log the user into the system.
-  $userID = trim($_REQUEST["userID"]);
+  $user_id = trim($_REQUEST["user_id"]);
   $password = trim($_REQUEST["password"]);
   $db = new DatabaseHandler();
 
   // First thing we need to do -- check to make sure the settings
   // table contains a currentCatalogYear setting, since it's required.
-  $settings = $db->getFlightPathSettings();
-  if (trim($settings["currentCatalogYear"] == ""))
+  $settings = $db->get_flight_path_settings();
+  if (trim($settings["current_catalog_year"] == ""))
   {
-    displayLogin("<font color='red'>FlightPath is currently undergoing
+    display_login("<font color='red'>FlightPath is currently undergoing
 							routine system maintenance.  Please wait
 							a few minutes and try to log in again.</font>");
     die;
 
   }
 
-  if ($settings["offlineMode"] == "1")
+  if ($settings["offline_mode"] == "1")
   {  // We are not allowing logins right now.
-    displayLogin();
+    display_login();
     die;
   }
 
   // Are we using the "switch user" feature?
-  if ($boolBypassVerification == true)
+  if ($bool_bypass_verification == true)
   {
-    $userID = $bypassUserID;
-    $_SESSION["fpSwitchedUser"] = true;
-    $db->addToLog("switch_user","$userID");
+    $user_id = $bypass_user_id;
+    $_SESSION["fp_switched_user"] = true;
+    $db->add_to_log("switch_user","$user_id");
   }
 
-  $isStudent = $isFaculty = false;
-  $fromUsername = $userID;
+  $is_student = $is_faculty = false;
+  $from_username = $user_id;
   
   
   // Attempt to verify the user by the two user types.
-  $verifyFacultyLogin = fp_verifyAllFacultyLogins($userID, $password);
-  $verifyStudentLogin = fp_verifyAllStudentLogins($userID, $password);
+  $verify_faculty_login = fp_verify_all_faculty_logins($user_id, $password);
+  $verify_student_login = fp_verify_all_student_logins($user_id, $password);
   
-  if ($verifyFacultyLogin) $userID = $verifyFacultyLogin;
-  if ($verifyStudentLogin) $userID = $verifyStudentLogin;
+  if ($verify_faculty_login) $user_id = $verify_faculty_login;
+  if ($verify_student_login) $user_id = $verify_student_login;
   
   // What are this user's possible user types?
-  if (trim($db->getStudentName($userID)) != "")
+  if (trim($db->get_student_name($user_id)) != "")
   {
-    $isStudent = true;
+    $is_student = true;
   }
-  if (trim($db->getFacultyName($userID)) != "")
+  if (trim($db->get_faculty_name($user_id)) != "")
   {
-    $isFaculty = true;
+    $is_faculty = true;
   }
 
 
 
-  $userType = determineStaffUserType($userID);
+  $user_type = determine_staff_user_type($user_id);
 
 
-  $boolNoLogin = false;
-  if ((($userType != "limited_faculty_student")
-  && ($verifyFacultyLogin) || ($boolBypassVerification == true && $isFaculty)))
+  $bool_no_login = false;
+  if ((($user_type != "limited_faculty_student")
+  && ($verify_faculty_login) || ($bool_bypass_verification == true && $is_faculty)))
   {
 
     // The user is in the faculty/staff database.
 
-    $_SESSION["fpLoggedIn"] = true;
-    $_SESSION["fpUserID"] = $userID;
-    $_SESSION["fpUserName"] = $db->getFacultyName($userID, true);
+    $_SESSION["fp_logged_in"] = true;
+    $_SESSION["fp_user_id"] = $user_id;
+    $_SESSION["fp_user_name"] = $db->get_faculty_name($user_id, true);
     
     // Figure out their majorCode, if it exists.
-    //$_SESSION["fpFacultyUserMajorCode"] = determineFacultyUserMajorCode($userID);
-    $_SESSION["fpFacultyUserMajorCode"] = $db->getFacultyMajorCode($userID);
+    //$_SESSION["fp_faculty_user_major_code"] = determineFacultyUserMajorCode($user_id);
+    $_SESSION["fp_faculty_user_major_code"] = $db->get_faculty_major_code($user_id);
     
-    $_SESSION["fpUserType"] = $userType;
+    $_SESSION["fp_user_type"] = $user_type;
 
     // Figure out their privileges based on user type...
-    if ($userType == "full_admin" || $userType == "college_coordinator")
+    if ($user_type == "full_admin" || $user_type == "college_coordinator")
     {
-      $_SESSION["fpCanAdvise"] = true;
-      $_SESSION["fpCanSearch"] = true;
-      $_SESSION["fpCanSubstitute"] = true;
-      $_SESSION["fpCanModifyComments"] = true;
+      $_SESSION["fp_can_advise"] = true;
+      $_SESSION["fp_can_search"] = true;
+      $_SESSION["fp_can_substitute"] = true;
+      $_SESSION["fp_can_modify_comments"] = true;
     }
-    if ($userType == "advisor" || $userType == "adviser")
+    if ($user_type == "advisor" || $user_type == "adviser")
     {
-      $_SESSION["fpCanAdvise"] = true;
-      $_SESSION["fpCanSearch"] = true;
-      $_SESSION["fpCanSubstitute"] = false;
-      $_SESSION["fpCanModifyComments"] = true;
+      $_SESSION["fp_can_advise"] = true;
+      $_SESSION["fp_can_search"] = true;
+      $_SESSION["fp_can_substitute"] = false;
+      $_SESSION["fp_can_modify_comments"] = true;
     }
-    if ($userType == "viewer")
+    if ($user_type == "viewer")
     {
-      $_SESSION["fpCanAdvise"] = false;
-      $_SESSION["fpCanSearch"] = true;
-      $_SESSION["fpCanSubstitute"] = false;
-      $_SESSION["fpCanModifyComments"] = false;
+      $_SESSION["fp_can_advise"] = false;
+      $_SESSION["fp_can_search"] = true;
+      $_SESSION["fp_can_substitute"] = false;
+      $_SESSION["fp_can_modify_comments"] = false;
 
     }
-    if ($userType == "none" && $isStudent == false)
+    if ($user_type == "none" && $is_student == false)
     {
       // Users with a type of "none" may go to the Main tab,
       // but that is all!  Once there, they will see no other tabs,
@@ -309,21 +309,21 @@ function performLogin($boolBypassVerification = false, $bypassUserID = "")
       // in FP.
       // We let them in, so they can still access the Tools of FP.
 
-      $_SESSION["fpLoggedIn"] = true;
-      $_SESSION["fpCanAdvise"] = false;
-      $_SESSION["fpCanSearch"] = false;
-      $_SESSION["fpCanSubstitute"] = false;
-      $_SESSION["fpCanModifyComments"] = false;
-    } else if ($userType == "none" && $isStudent == true)
+      $_SESSION["fp_logged_in"] = true;
+      $_SESSION["fp_can_advise"] = false;
+      $_SESSION["fp_can_search"] = false;
+      $_SESSION["fp_can_substitute"] = false;
+      $_SESSION["fp_can_modify_comments"] = false;
+    } else if ($user_type == "none" && $is_student == true)
     { // is a student/staff member.  Attempt a student login.
-      $boolNoLogin = true;
+      $bool_no_login = true;
     }
 
 
     // Get the permissions for this user.
-    $res = $db->dbQuery("select * from flightpath.users
-								where `faculty_id`='$userID' ");
-    $cur = $db->dbFetchArray($res);
+    $res = $db->db_query("select * from flightpath.users
+								where `faculty_id`='$user_id' ");
+    $cur = $db->db_fetch_array($res);
     $temp = split(",",$cur["permissions"]);
     foreach ($temp as $perm)
     {
@@ -333,10 +333,10 @@ function performLogin($boolBypassVerification = false, $bypassUserID = "")
 
 
     // Okay, the user is logged in.  Proceed to the Main tab.
-    if (!$boolNoLogin)
+    if (!$bool_no_login)
     {
-      $db->addToLog("login", $fromUsername);
-      displayMain();
+      $db->add_to_log("login", $from_username);
+      display_main();
       die;
     }
 
@@ -347,64 +347,64 @@ function performLogin($boolBypassVerification = false, $bypassUserID = "")
 
 
   // Is the user a student?
-  if ($verifyStudentLogin || $boolBypassVerification == true)
+  if ($verify_student_login || $bool_bypass_verification == true)
   {
     // The user is a student.
 
-    $allowedStudentRanks = $GLOBALS["fpSystemSettings"]["allowedStudentRanks"];
+    $allowed_student_ranks = $GLOBALS["fp_system_settings"]["allowed_student_ranks"];
     
     // Before we let them in, we need to make sure they are undergrad,
     // As FP is only designed
-    $rank = $db->getStudentRank($userID);
-    if (!in_array($rank, $allowedStudentRanks))
+    $rank = $db->get_student_rank($user_id);
+    if (!in_array($rank, $allowed_student_ranks))
     { // Student is not an undergread (or, just not allowed in).
       $msg = "<font color='red'>
-          {$GLOBALS["fpSystemSettings"]["notAllowedStudentMessage"]}</font>";
-      $db->addToLog("login_fail", "grad student");
-      displayLogin($msg);
+          {$GLOBALS["fp_system_settings"]["not_allowed_student_message"]}</font>";
+      $db->add_to_log("login_fail", "grad student");
+      display_login($msg);
       die;
     }
 
     // The student is an undergrad, so go ahead and log them in.
-    $_SESSION["fpLoggedIn"] = true;
-    $_SESSION["fpUserID"] = $userID;
-    $_SESSION["fpUserName"] = $db->getStudentName($userID, true);
-    $_SESSION["fpUserType"] = "student";
-    $_SESSION["fpCanAdvise"] = false;
-    $_SESSION["fpCanSubstitute"] = false;
-    $_SESSION["fpCanModifyComments"] = false;
+    $_SESSION["fp_logged_in"] = true;
+    $_SESSION["fp_user_id"] = $user_id;
+    $_SESSION["fp_user_name"] = $db->get_student_name($user_id, true);
+    $_SESSION["fp_user_type"] = "student";
+    $_SESSION["fp_can_advise"] = false;
+    $_SESSION["fp_can_substitute"] = false;
+    $_SESSION["fp_can_modify_comments"] = false;
 
 
     // We also need to make it so that the student is "advising" themselves,
     // so that the View shows up correctly.
-    $_SESSION["advisingStudentID"] = $userID;
-    $GLOBALS["advisingStudentID"] = $userID;
+    $_SESSION["advising_student_id"] = $user_id;
+    $GLOBALS["advising_student_id"] = $user_id;
 
     // Get the student's major as it would have been gotten from
     // the search...
-    $majorCode = $db->getStudentMajorFromDB($userID);
-    $_SESSION["advisingMajorCode"] = $majorCode;
-    $GLOBALS["advisingMajorCode"] = $majorCode;
+    $major_code = $db->get_student_major_from_d_b($user_id);
+    $_SESSION["advising_major_code"] = $major_code;
+    $GLOBALS["advising_major_code"] = $major_code;
 
-    $_SESSION["advisingLoadActive"] = "yes";
-    $GLOBALS["advisingLoadActive"] = "yes";
+    $_SESSION["advising_load_active"] = "yes";
+    $GLOBALS["advising_load_active"] = "yes";
 
-    $_SESSION["clearSession"] = "yes";
-    $GLOBALS["clearSession"] = "yes";
+    $_SESSION["clear_session"] = "yes";
+    $GLOBALS["clear_session"] = "yes";
 
     // Okay, the user is logged in.  Proceed to the Main tab.
-    $db->addToLog("login", $fromUsername);
-    displayMain();
+    $db->add_to_log("login", $from_username);
+    display_main();
     die;
 
   }
 
 
-  if ($boolNoLogin == true)
+  if ($bool_no_login == true)
   {
     // We were unable to login as either faculty or staff, so kick them
     // out.
-    displayLogin("<font color='red'>We're sorry, but you are not allowed access in FlightPath.
+    display_login("<font color='red'>We're sorry, but you are not allowed access in FlightPath.
 			Please contact your department head for more information.</font>");
     die;
   }
@@ -415,24 +415,24 @@ function performLogin($boolBypassVerification = false, $bypassUserID = "")
 					Please check your spelling and try again.</font>
 			";
 
-  $db->addToLog("login_fail", $fromUsername);
-  displayLogin($msg);
+  $db->add_to_log("login_fail", $from_username);
+  display_login($msg);
 
 }
 
 
-function displayLogin($msg = "")
+function display_login($msg = "")
 {
   // Check for hooks...
-  if (function_exists("main_displayLogin")) {
-    return call_user_func("main_displayLogin", $msg);
+  if (function_exists("main_display_login")) {
+    return call_user_func("main_display_login", $msg);
   }
   
   
   // This is the login page for FlightPath.
   $screen = new AdvisingScreen();
 
-  $pC .= $screen->getJavascriptCode();
+  $pC .= $screen->get_javascript_code();
 
   $pC .= "
 	
@@ -441,18 +441,18 @@ function displayLogin($msg = "")
  		advising system!
  		</div><br>";
 
-  if ($screen->settings["urgentMsg"] != "")
+  if ($screen->settings["urgent_msg"] != "")
   {
     $pC .= "<div class='tenpt hypo' style='margin: 10px; padding: 5px;'>
-				<b>Important Notice:</b> " . $screen->convertBBCodeToHTML($screen->settings["urgentMsg"]) . "
+				<b>Important Notice:</b> " . $screen->convert_b_b_code_to_h_t_m_l($screen->settings["urgent_msg"]) . "
 				</div>";
   }
 
-  if ($screen->settings["offlineMode"] == "1") {
+  if ($screen->settings["offline_mode"] == "1") {
     // Logins have been disabled in the settings.  Do not display the login
     // form to the user.
     $pC .= "<div>";
-    $msg = trim($screen->convertBBCodeToHTML($screen->settings["offlineMsg"]));
+    $msg = trim($screen->convert_b_b_code_to_h_t_m_l($screen->settings["offline_msg"]));
     if ($msg != "") {
       $pC .= $msg;
     }
@@ -473,7 +473,7 @@ function displayLogin($msg = "")
             before continuing.
           </noscript>";
   
-  $importantNotice = "
+  $important_notice = "
    	 	<div class='hypo tenpt' style='padding:5px; text-align: justify;'>
    	 	<b>Important Notice:</b> This degree audit system is intended to assist you in determining 
    		your progress toward a degree, but is not an official transcript. 
@@ -488,9 +488,9 @@ function displayLogin($msg = "")
   ";
   
   $w1 = 300;
-  if ($screen->pageIsMobile) $w1 = "90%";
+  if ($screen->page_is_mobile) $w1 = "90%";
   
-  $loginBox = "
+  $login_box = "
    		<table border='0' width='$w1' align='center' class='blueBorder' cellpadding='0' cellspacing='0'>
    		<tr>
    		 <td class='blueTitle' align='center' height='20' colspan='2'>
@@ -511,7 +511,7 @@ function displayLogin($msg = "")
           <td align=center valign=top>
             <span style='color: #660000; '><b>PASS:</b></span></td>
           <td valign=top><input type='password' name='password'>
-          <br><span class='tenpt' ><a href='javascript: popupHelpWindow(\"help.php?i={$GLOBALS["fpSystemSettings"]["loginHelpPageID"]}\");' style='text-decoration:none;'>need help logging-in?</a></span>
+          <br><span class='tenpt' ><a href='javascript: popupHelpWindow(\"help.php?i={$GLOBALS["fp_system_settings"]["login_help_page_id"]}\");' style='text-decoration:none;'>need help logging-in?</a></span>
             </td>
         </tr>
         <tr>
@@ -534,14 +534,14 @@ function displayLogin($msg = "")
   
   $pC .= "
    		<form action='main.php' method='POST' id='mainform' onSubmit='showUpdate(true);'>
-   		<input type='hidden' name='performAction' value='performLogin'>
+   		<input type='hidden' name='performAction' value='perform_login'>
    	";
   
-  if ($screen->pageIsMobile == true) {
+  if ($screen->page_is_mobile == true) {
     // the user is viewing this on a mobile device, so make it look
     // a bit nicer.
-    $pC .= $screen->drawCFieldset($importantNotice, "View important notice", true);
-    $pC .= $loginBox; 
+    $pC .= $screen->draw_c_fieldset($important_notice, "View important notice", true);
+    $pC .= $login_box; 
   }
   else {
     // This is NOT mobile, this is a regular desktop browser.
@@ -549,10 +549,10 @@ function displayLogin($msg = "")
      	<table border='0'>
      	<tr>
      	 <td valign='top' width='40%'>
-     	  $importantNotice
+     	  $important_notice
      	 </td>
      	<td valign='middle'>
-        $loginBox   		
+        $login_box   		
   
        </td>
       </tr>
@@ -572,42 +572,42 @@ function displayLogin($msg = "")
 */  
   
   }
-  /*$pageContent = $pC;
-  $pageOnLoad = "document.getElementById(\"cwid_box\").focus();  ";
-  $pageHideReportError = true;
+  /*$page_content = $pC;
+  $page_on_load = "document.getElementById(\"cwid_box\").focus();  ";
+  $page_hide_report_error = true;
   include("template/fp_template.php");*/
 
-  $screen->pageContent = $pC;
-  $screen->pageHasSearch = false;
-  $screen->pageOnLoad = "document.getElementById(\"cwid_box\").focus(); ";
-  $page->pageHideReportError = true;
+  $screen->page_content = $pC;
+  $screen->page_has_search = false;
+  $screen->page_on_load = "document.getElementById(\"cwid_box\").focus(); ";
+  $page->page_hide_report_error = true;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
-function displayMain($msg = "")
+function display_main($msg = "")
 {
 
   // Check for hooks...
-  if (function_exists("main_displayMain")) {
-    return call_user_func("main_displayMain", $msg);
+  if (function_exists("main_display_main")) {
+    return call_user_func("main_display_main", $msg);
   }
 
   
-  $screen = new AdvisingScreen("",null,"notAdvising");
-  $screen->adminMessage = $msg;
+  $screen = new AdvisingScreen("",null,"not_advising");
+  $screen->admin_message = $msg;
 
   $pC = "";
 
-  $pC .= $screen->displayGreeting();
-  $pC .= $screen->displayBeginSemesterTable();
+  $pC .= $screen->display_greeting();
+  $pC .= $screen->display_begin_semester_table();
 
-  if ($_SESSION["fpUserType"] != "none")
+  if ($_SESSION["fp_user_type"] != "none")
   {
-    $pC .= $screen->drawCurrentlyAdvisingBox(true);
+    $pC .= $screen->draw_currently_advising_box(true);
   } else {
     // Let the user know they have no privileges in FP.
     $pC .= "<tr>
@@ -615,7 +615,7 @@ function displayMain($msg = "")
 				
 				 <div class='hypo tenpt' style='margin: 10px; padding: 10px;'>
 				   <div style='float:left; padding-right: 20px; height: 50px;'>
-					<img src='$screen->themeLocation/images/alert_lg.gif'>
+					<img src='$screen->theme_location/images/alert_lg.gif'>
 				   </div>
 				  <b>Please Note:</b>
 					At this time, you do not have access to student records in FlightPath.
@@ -630,23 +630,23 @@ function displayMain($msg = "")
   }
 
   
-  $announcements = getAnnouncements($screen);
-  $tools = getTools($screen);
-  $adminTools = getAdminTools($screen);
+  $announcements = get_announcements($screen);
+  $tools = get_tools($screen);
+  $admin_tools = get_admin_tools($screen);
   
-  if ($screen->pageIsMobile) {
-    $pC .= "<tr><td colspan='2'>$announcements $tools $adminTools</td></tr>";
+  if ($screen->page_is_mobile) {
+    $pC .= "<tr><td colspan='2'>$announcements $tools $admin_tools</td></tr>";
   }
   else {
     $pC .= "<tr><td width='50%' valign='top'  style='padding-right: 10px;'>";
     $pC .= $announcements;
     $pC .= "</td><td width='50%' valign='top' style='padding-left: 10px;'>";
     $pC .= $tools;
-    $pC .= $adminTools;
+    $pC .= $admin_tools;
     $pC .= "</td></tr>";
   }
   
-  $pC .= $screen->displayEndSemesterTable();
+  $pC .= $screen->display_end_semester_table();
   $pC .= "<form id='mainform' method='POST'>
 			<input type='hidden' id='scrollTop'>
 			<input type='hidden' id='performAction' name='performAction'>
@@ -654,66 +654,66 @@ function displayMain($msg = "")
 			<input type='hidden' id='currentStudentID' name='currentStudentID'>
 			</form>";
 
-  $pC .= $screen->getJavascriptCode();
+  $pC .= $screen->get_javascript_code();
 
   /*	$pageTabs = $screen->drawSystemTabs(0);
-  $pageHasSearch = true;
-  $pageContent = $pC;
+  $page_has_search = true;
+  $page_content = $pC;
   include("template/fp_template.php");
   */
 
-  $screen->pageContent = $pC;
-  $screen->pageHasSearch = true;
-  if ($_SESSION["fpUserType"] == "student" || $_SESSION["fpCanAdvise"] == false)
+  $screen->page_content = $pC;
+  $screen->page_has_search = true;
+  if ($_SESSION["fp_user_type"] == "student" || $_SESSION["fp_can_advise"] == false)
   {
-    $screen->pageHasSearch = false;
+    $screen->page_has_search = false;
   }
-  $screen->buildSystemTabs(0);
+  $screen->build_system_tabs(0);
 
-  adminDebug("--");
+  admin_debug("--");
   //////////////////////////////////////////////////////////
   // To cut down on how long it takes to load huge groups
   // like Free Electives, we will pre-load some of the course inventory here.
-  if ($_SESSION["fpCachedInventoryFlagOne"] != true)
+  if ($_SESSION["fp_cached_inventory_flag_one"] != true)
   {
-    $loadNumber = $GLOBALS["fpSystemSettings"]["loadCourseInventoryOnLoginNumber"];
-    if ($loadNumber > 1) {
+    $load_number = $GLOBALS["fp_system_settings"]["load_course_inventory_on_login_number"];
+    if ($load_number > 1) {
       $fp = new FlightPath();
-      $fp->cacheCourseInventory(0,$loadNumber);
-      $_SESSION["fpCachedInventoryFlagOne"] = true;
+      $fp->cache_course_inventory(0,$load_number);
+      $_SESSION["fp_cached_inventory_flag_one"] = true;
     }
   }
-  adminDebug("--");
+  admin_debug("--");
 
 
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 
 }
 
 
-function getAnnouncements($screen)
+function get_announcements($screen)
 {
   
   // Check for hooks...
-  if (function_exists("main_getAnnouncements")) {
-    return call_user_func("main_getAnnouncements", $screen);
+  if (function_exists("main_get_announcements")) {
+    return call_user_func("main_get_announcements", $screen);
   }
   
   
   $pC = "";
-  $pC .= $screen->drawCurvedTitle("Announcements");
+  $pC .= $screen->draw_curved_title("_announcements");
 
   $db = new DatabaseHandler();
-  $settings = $db->getFlightPathSettings();
+  $settings = $db->get_flight_path_settings();
 
-  $isEmpty = true;
+  $is_empty = true;
   // Pull out just the announcements XML and make it into its own array.
   if ($settings["announcements_xml"] != "")
   {
-    if ($xmlArray = fp_xmlToArray2($settings["announcements_xml"]))
+    if ($xml_array = fp_xml_to_array2($settings["announcements_xml"]))
     {
       // Expected format of the xmlArray:
       //[dt_timecode] = "announcement text."
@@ -721,18 +721,18 @@ function getAnnouncements($screen)
       // It begins with dt_ because in XML the start of
       // an element must be a letter, not a number.
 
-      krsort($xmlArray);  // sort by most recent.
+      krsort($xml_array);  // sort by most recent.
 
-      foreach($xmlArray as $datetime => $announcement)
+      foreach($xml_array as $datetime => $announcement)
       {
         $dt = str_replace("dt_", "", $datetime);
 
-        $dispTime = date("D, M jS Y  - h:ia", $dt);
+        $disp_time = date("D, M jS Y  - h:ia", $dt);
         // Re-enable HTML formatting in announcement...
         $temp = split(" ~~ ", $announcement);
         $visible = trim($temp[0]);
-        $announcementText = trim($temp[1]);
-        $announcementText = $screen->convertBBCodeToHTML($announcementText);
+        $announcement_text = trim($temp[1]);
+        $announcement_text = $screen->convert_b_b_code_to_h_t_m_l($announcement_text);
 
         if ($visible == "hide")
         {
@@ -740,14 +740,14 @@ function getAnnouncements($screen)
           continue;
         }
 
-        if ($visible == "faculty" && $_SESSION["fpUserType"] == "student")
+        if ($visible == "faculty" && $_SESSION["fp_user_type"] == "student")
         { // skip faculty-only comments if we are a student!
           continue;
         }
 
-        $pC .= "<div class='elevenpt' style='margin-top: 20px;'>$announcementText
+        $pC .= "<div class='elevenpt' style='margin-top: 20px;'>$announcement_text
 							<div align='right' class='tenpt' style='color: gray; padding-right: 10px;'>
-							<i>Posted $dispTime</i>
+							<i>Posted $disp_time</i>
 							</div>
 						</div>";
       }
@@ -761,57 +761,57 @@ function getAnnouncements($screen)
 
 
 
-function getTools($screen)
+function get_tools($screen)
 {
   
   // Check for hooks...
-  if (function_exists("main_getTools")) {
-    return call_user_func("main_getTools", $screen);
+  if (function_exists("main_get_tools")) {
+    return call_user_func("main_get_tools", $screen);
   }
 
   
   $pC = "";
 
   $db = new DatabaseHandler();
-  $settings = $db->getFlightPathSettings();
-  $currentCatalogYear = $settings["currentCatalogYear"];
+  $settings = $db->get_flight_path_settings();
+  $current_catalog_year = $settings["current_catalog_year"];
 
-  $pC .= $screen->drawCurvedTitle("Tools");
+  $pC .= $screen->draw_curved_title("_tools");
   
   // Get all of the menu items which should appear here
-  $menus = getModulesMenus();
+  $menus = get_modules_menus();
   
   //var_dump($menus);
   
-  $pC .= $screen->drawMenuItems($menus["tools"]);
+  $pC .= $screen->draw_menu_items($menus["tools"]);
     
   return $pC;
 }
 
 
-function getAdminTools($screen)
+function get_admin_tools($screen)
 {
   
   // Check for hooks...
-  if (function_exists("main_getAdminTools")) {
-    return call_user_func("main_getAdminTools", $screen);
+  if (function_exists("main_get_admin_tools")) {
+    return call_user_func("main_get_admin_tools", $screen);
   }
 
   $pC = "";
-  $isEmpty = TRUE;
+  $is_empty = TRUE;
   
   $pC .= "<div style='padding-top: 10px;'>&nbsp;</div>";
-  $pC .= $screen->drawCurvedTitle("Special Administrative Tools");
+  $pC .= $screen->draw_curved_title("Special Administrative Tools");
 
 
-  if (userHasPermission("deCanAccessAdminConsole")) {
-    $pC .= $screen->drawMenuItem("admin.php", "_blank", "<img src='$screen->themeLocation/images/toolbox.gif' border='0'>", "FlightPath Admin Console");
-    $isEmpty = FALSE;
+  if (user_has_permission("de_can_access_admin_console")) {
+    $pC .= $screen->draw_menu_item("admin.php", "_blank", "<img src='$screen->theme_location/images/toolbox.gif' border='0'>", "FlightPath Admin Console");
+    $is_empty = FALSE;
   }
   
-  if (userHasPermission("deCanSwitchUsers")) {
+  if (user_has_permission("de_can_switch_users")) {
 
-    $pC .= $screen->drawMenuItem("javascript:switchUser();", "", "<img src='$screen->themeLocation/images/group.png' border='0'>", "Switch User");
+    $pC .= $screen->draw_menu_item("javascript:switch_user();", "", "<img src='$screen->theme_location/images/group.png' border='0'>", "Switch User");
           
     $pC .= '
 			<script type="text/javascript">
@@ -827,39 +827,39 @@ function getAdminTools($screen)
 			';
   }
   
-  if (userHasPermission("deCanAdministerDataEntry")) {
+  if (user_has_permission("de_can_administer_data_entry")) {
     
-    $pC .= $screen->drawMenuItem("main.php?performAction=clearCache&currentStudentID=$csid", "", "-", "Clear Cache");
+    $pC .= $screen->draw_menu_item("main.php?perform_action=clear_cache&current_student_id=$csid", "", "-", "Clear Cache");
     
-    $csid = $GLOBALS["currentStudentID"];
-    $draftLink = $screen->drawMenuItem("main.php?performAction=draftModeYes&currentStudentID=$csid", "", "-", "Switch to Draft Mode");
-    if ($GLOBALS["boolUseDraft"] == true)
+    $csid = $GLOBALS["current_student_id"];
+    $draft_link = $screen->draw_menu_item("main.php?perform_action=draft_mode_yes&current_student_id=$csid", "", "-", "Switch to Draft Mode");
+    if ($GLOBALS["bool_use_draft"] == true)
     {
-      $draftLink = $screen->drawMenuItem("main.php?performAction=draftModeNo&currentStudentID=$csid", "", "-", "Switch to Regular Mode");
+      $draft_link = $screen->draw_menu_item("main.php?perform_action=draft_mode_no&current_student_id=$csid", "", "-", "Switch to Regular Mode");
     }
     
-    $pC .= $draftLink;
-    $isEmpty = FALSE;
+    $pC .= $draft_link;
+    $is_empty = FALSE;
     
   }
 
   // Get all of the menu items which should appear here
-  $menus = getModulesMenus();
+  $menus = get_modules_menus();
   // Now, let's look for menu items with the location "admin_tools"...
   if (is_array($menus["admin_tools"])) {
     
-    $adminToolsMenu = $screen->drawMenuItems($menus["admin_tools"]);  
-    //var_dump($adminToolsMenu);
-    if ($adminToolsMenu) {
-      $pC .= $adminToolsMenu;
-      $isEmpty = FALSE;
+    $admin_tools_menu = $screen->draw_menu_items($menus["admin_tools"]);  
+    //var_dump($admin_tools_menu);
+    if ($admin_tools_menu) {
+      $pC .= $admin_tools_menu;
+      $is_empty = FALSE;
     }  
     
       
   }
 
   
-  if ($isEmpty) {
+  if ($is_empty) {
     return "";
   }  
 

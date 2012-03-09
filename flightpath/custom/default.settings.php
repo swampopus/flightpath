@@ -20,7 +20,7 @@ error_reporting(E_ERROR | E_WARNING);
  * array.
  */
  
-$systemSettings = array();
+$system_settings = array();
 
 ////////////////////////////////////
 // !!!  *** IMPORTANT !!!  ***    //
@@ -29,7 +29,7 @@ $systemSettings = array();
 // will have full, admin access.
 // Only set this to TRUE when you are first installing FlightPath.
 // Otherwise, leave it set to FALSE!
-$systemSettings["GRANT_FULL_ACCESS"] = FALSE;
+$system_settings["GRANT_FULL_ACCESS"] = FALSE;
 ////////////////////////////////////
 
 // This should be the actual filesystem path to the directory
@@ -39,28 +39,28 @@ $systemSettings["GRANT_FULL_ACCESS"] = FALSE;
 // use the following line to help you figure out the fileSystemPath, by seeing
 // what the path is to this file:
 // print "<br>System path to settings.php: " . __FILE__ . "<br><br>";
-$systemSettings["fileSystemPath"] = "/www/webservices/flightpath";
+$system_settings["file_system_path"] = "/www/webservices/flightpath";
 
 // The baseURL is the actual URL a user would type to visit your site.
 // Do NOT enter a trailing slash!
 // Ex:  http://localhost/flightpath
-$systemSettings["baseURL"] = "http://localhost/flightpath-advising/flightpath";
+$system_settings["base_u_r_l"] = "http://localhost/flightpath-advising/flightpath";
 
 // The basePath is related to the baseURL.  It is the parth of the URL which comes after
 // your domain name.
 // It MUST begin with a preceeding slash.
 // Ex: If your site is example.com/dev/flightpath, then you should
 // enter  "/dev/flightpath" 
-$systemSettings["basePath"] = "/flightpath-advising/flightpath";
+$system_settings["base_path"] = "/flightpath-advising/flightpath";
 
 
 ////////////////////////////////////
 // *** Database-related settings ***
 ////////////////////////////////////
-$systemSettings["dbHost"] = "localhost"; // domain/ip address of the mysql host. ex: localhost or mysite.com:32145
-$systemSettings["dbUser"] = "fpuser"; 
-$systemSettings["dbPass"] = "fpuserpass"; 
-$systemSettings["dbName"] = "flightpath"; // Name of the actual database where
+$system_settings["db_host"] = "localhost"; // domain/ip address of the mysql host. ex: localhost or mysite.com:32145
+$system_settings["db_user"] = "fpuser"; 
+$system_settings["db_pass"] = "fpuserpass"; 
+$system_settings["db_name"] = "flightpath"; // Name of the actual database where
                                               // flightpath's tables are located.
                                               // Usually just "flightpath"
 
@@ -74,8 +74,8 @@ $systemSettings["dbName"] = "flightpath"; // Name of the actual database where
 // They will be overwritten in memory
 // once the flightpath_system_settings table is read in at the end of the file.
 // Do not alter them.
-$systemSettings["displayMySQLErrors"] = TRUE;
-$systemSettings["theme"] = "themes/classic";
+$system_settings["display_my_s_q_l_errors"] = TRUE;
+$system_settings["theme"] = "themes/classic";
 
 
 ////////////////////////////////////
@@ -84,7 +84,7 @@ $systemSettings["theme"] = "themes/classic";
 // To cut down on load times when the user loads a large elective group
 // containing many courses, FlightPath can load some of the course inventory
 // upon login.  Set the number of courses to load here.
-$systemSettings["loadCourseInventoryOnLoginNumber"] = 2000;
+$system_settings["load_course_inventory_on_login_number"] = 2000;
 
 
 ////////////////////////////////////
@@ -103,7 +103,7 @@ $systemSettings["loadCourseInventoryOnLoginNumber"] = 2000;
  For example, if the token is "qwss34frwquu" then to run the script you would need
  to use:   php cron.php qwss34frwquu
 */
-$systemSettings["cronSecurityToken"] = "abc123";
+$system_settings["cron_security_token"] = "abc123";
 
 // The cron will automatically delete log entries (in the log table)
 // older than this many days when it runs.  Logs can be very useful (and are
@@ -112,7 +112,7 @@ $systemSettings["cronSecurityToken"] = "abc123";
 // you know for sure that you will not need logs older than that.
 // For safety, you cannot set this lower than 30 days.
 // Comment out to disable.
-$systemSettings["cronDeleteLogsOlderThanDays"] = 400;
+$system_settings["cron_delete_logs_older_than_days"] = 400;
 
 ////////////////////////////////////
 // *** External Tables/Fields***
@@ -133,44 +133,44 @@ $systemSettings["cronDeleteLogsOlderThanDays"] = 400;
  
 */
 //human_resources:students
-$systemSettings["extraTables"]["human_resources:students"] = array(
-  "tableName" => "flightpath_extra_data.students",
+$system_settings["extra_tables"]["human_resources:students"] = array(
+  "table_name" => "flightpath_extra_data.students",
   "fields" => array(
-    "studentID" => "student_id",
-    "fName" => "f_name",
-    "lName" => "l_name",
-    "midName" => "mid_name",
-    "cumulativeHours" => "cumulative_hours",
+    "student_id" => "student_id",
+    "f_name" => "f_name",
+    "l_name" => "l_name",
+    "mid_name" => "mid_name",
+    "cumulative_hours" => "cumulative_hours",
     "gpa" => "GPA",
-    "rankCode" => "rank_code",
-    "majorCode" => "major_code",
-    "catalogYear" => "catalog_year",
+    "rank_code" => "rank_code",
+    "major_code" => "major_code",
+    "catalog_year" => "catalog_year",
   ),
 );
 
 
 // human_resources:faculty_staff
-$systemSettings["extraTables"]["human_resources:faculty_staff"] = array(
-  "tableName" => "flightpath_extra_data.faculty_staff",
+$system_settings["extra_tables"]["human_resources:faculty_staff"] = array(
+  "table_name" => "flightpath_extra_data.faculty_staff",
   "fields" => array(
-    "facultyID" => "faculty_id",
-    "fName" => "f_name",
-    "lName" => "l_name",
-    "midName" => "mid_name",
-    "majorCode" => "major_code",
-    "deptName" => "dept_name",
-    "collegeName" => "college_name",
-    "employeeType" => "employee_type",
+    "faculty_id" => "faculty_id",
+    "f_name" => "f_name",
+    "l_name" => "l_name",
+    "mid_name" => "mid_name",
+    "major_code" => "major_code",
+    "dept_name" => "dept_name",
+    "college_name" => "college_name",
+    "employee_type" => "employee_type",
   ),
 );
 
 
 // human_resources:advisor_student
-$systemSettings["extraTables"]["human_resources:advisor_student"] = array(
-  "tableName" => "flightpath_extra_data.advisor_student",
+$system_settings["extra_tables"]["human_resources:advisor_student"] = array(
+  "table_name" => "flightpath_extra_data.advisor_student",
   "fields" => array(
-    "facultyID" => "faculty_id",
-    "studentID" => "student_id",    
+    "faculty_id" => "faculty_id",
+    "student_id" => "student_id",    
   ),
 );
 
@@ -178,54 +178,54 @@ $systemSettings["extraTables"]["human_resources:advisor_student"] = array(
 
 
 //course_resources:student_courses
-$systemSettings["extraTables"]["course_resources:student_courses"] = array(
-  "tableName" => "flightpath_extra_data.student_courses",
+$system_settings["extra_tables"]["course_resources:student_courses"] = array(
+  "table_name" => "flightpath_extra_data.student_courses",
   "fields" => array(
-    "studentID" => "student_id",
-    "subjectID" => "subject_id",
-    "courseNum" => "course_num",
-    "hoursAwarded" => "hours_awarded",
+    "student_id" => "student_id",
+    "subject_id" => "subject_id",
+    "course_num" => "course_num",
+    "hours_awarded" => "hours_awarded",
     "grade" => "grade",
-    "termID" => "term_id",
+    "term_id" => "term_id",
   ),
 );
 
 
 // course_resources:student_transfer_courses
-$systemSettings["extraTables"]["course_resources:student_transfer_courses"] = array (
-  "tableName" => "flightpath_extra_data.student_transfer_courses",
+$system_settings["extra_tables"]["course_resources:student_transfer_courses"] = array (
+  "table_name" => "flightpath_extra_data.student_transfer_courses",
   "fields" => array(
-    "studentID" => "student_id",
-    "transferCourseID" => "transfer_course_id",
-    "studentSpecificCourseTitle" => "student_specific_course_title",
-    "termID" => "term_id",
+    "student_id" => "student_id",
+    "transfer_course_id" => "transfer_course_id",
+    "student_specific_course_title" => "student_specific_course_title",
+    "term_id" => "term_id",
     "grade" => "grade",
-    "hoursAwarded" => "hours_awarded",
+    "hours_awarded" => "hours_awarded",
   ),
 );
 
 
 // course_resources:transfer_courses
-$systemSettings["extraTables"]["course_resources:transfer_courses"] = array (
-  "tableName" => "flightpath_extra_data.transfer_courses",
+$system_settings["extra_tables"]["course_resources:transfer_courses"] = array (
+  "table_name" => "flightpath_extra_data.transfer_courses",
   "fields" => array (
-    "transferCourseID" => "transfer_course_id",
-    "institutionID" => "institution_id",
-    "subjectID" => "subject_id",
-    "courseNum" => "course_num",
+    "transfer_course_id" => "transfer_course_id",
+    "institution_id" => "institution_id",
+    "subject_id" => "subject_id",
+    "course_num" => "course_num",
     "title" => "title",
     "description" => "description",
-    "minHours" => "min_hours",
-    "maxHours" => "max_hours",
+    "min_hours" => "min_hours",
+    "max_hours" => "max_hours",
   ),
 );
 
 
 // course_resources:transfer_institutions
-$systemSettings["extraTables"]["course_resources:transfer_institutions"] = array (
-  "tableName" => "flightpath_extra_data.transfer_institutions",
+$system_settings["extra_tables"]["course_resources:transfer_institutions"] = array (
+  "table_name" => "flightpath_extra_data.transfer_institutions",
   "fields" => array (
-    "institutionID" => "institution_id",
+    "institution_id" => "institution_id",
     "name" => "name",
     "state" => "state",
   ),
@@ -234,61 +234,61 @@ $systemSettings["extraTables"]["course_resources:transfer_institutions"] = array
 
 
 // course_resources:transfer_eqv_per_student
-$systemSettings["extraTables"]["course_resources:transfer_eqv_per_student"] = array (
-  "tableName" => "flightpath_extra_data.transfer_eqv_per_student",
+$system_settings["extra_tables"]["course_resources:transfer_eqv_per_student"] = array (
+  "table_name" => "flightpath_extra_data.transfer_eqv_per_student",
   "fields" => array (
-    "studentID" => "student_id",
-    "transferCourseID" => "transfer_course_id",
-    "localCourseID" => "local_course_id",
-    "validTermID" => "valid_term_id",
-    "brokenID" => "broken_id",
+    "student_id" => "student_id",
+    "transfer_course_id" => "transfer_course_id",
+    "local_course_id" => "local_course_id",
+    "valid_term_id" => "valid_term_id",
+    "broken_id" => "broken_id",
   ),
 );
 
 
 
 // course_resources:subjects
-$systemSettings["extraTables"]["course_resources:subjects"] = array (
-  "tableName" => "flightpath_extra_data.subjects",
+$system_settings["extra_tables"]["course_resources:subjects"] = array (
+  "table_name" => "flightpath_extra_data.subjects",
   "fields" => array (
-    "subjectID" => "subject_id",
+    "subject_id" => "subject_id",
     "title" => "title",
   ),
 );
 
 
 // course_resources:student_developmentals
-$systemSettings["extraTables"]["course_resources:student_developmentals"] = array (
-  "tableName" => "flightpath_extra_data.student_developmentals",
+$system_settings["extra_tables"]["course_resources:student_developmentals"] = array (
+  "table_name" => "flightpath_extra_data.student_developmentals",
   "fields" => array (
-    "studentID" => "student_id",
+    "student_id" => "student_id",
     "requirement" => "requirement",
   ),
 );
 
 
 // flightpath_resources:student_tests
-$systemSettings["extraTables"]["flightpath_resources:student_tests"] = array (
-  "tableName" => "flightpath_extra_data.student_tests",
+$system_settings["extra_tables"]["flightpath_resources:student_tests"] = array (
+  "table_name" => "flightpath_extra_data.student_tests",
   "fields" => array (
-    "studentID" => "student_id",
-    "testID" => "test_id",
-    "categoryID" => "category_id",
+    "student_id" => "student_id",
+    "test_id" => "test_id",
+    "category_id" => "category_id",
     "score" => "score",
-    "dateTaken" => "datetime",
+    "date_taken" => "datetime",
   ),
 );
 
 
 // flightpath_resources:tests
-$systemSettings["extraTables"]["flightpath_resources:tests"] = array (
-  "tableName" => "flightpath_extra_data.tests",
+$system_settings["extra_tables"]["flightpath_resources:tests"] = array (
+  "table_name" => "flightpath_extra_data.tests",
   "fields" => array (
-    "testID" => "test_id",
-    "categoryID" => "category_id",
+    "test_id" => "test_id",
+    "category_id" => "category_id",
     "position" => "position",
-    "testDescription" => "test_description",
-    "categoryDescription" => "category_description",
+    "test_description" => "test_description",
+    "category_description" => "category_description",
   ),
 );
 
@@ -309,19 +309,19 @@ $systemSettings["extraTables"]["flightpath_resources:tests"] = array (
 /////////////////////////////////////
 // Do not alter or remove!!
 // This will load the contents of the flightpath_system_settings
-// table into the $systemSettings variable.  These are extra settings
+// table into the $system_settings variable.  These are extra settings
 // which were set via the web using the system module.
-$dbHost = $systemSettings["dbHost"];
-$dbUser = $systemSettings["dbUser"];
-$dbPass = $systemSettings["dbPass"];
-$dbName = $systemSettings["dbName"];
-$dbc = mysql_connect ($dbHost, $dbUser, $dbPass) or die('Could not connect to database: ' . mysql_error());
-mysql_select_db ($dbName);
+$db_host = $system_settings["db_host"];
+$db_user = $system_settings["db_user"];
+$db_pass = $system_settings["db_pass"];
+$db_name = $system_settings["db_name"];
+$dbc = mysql_connect ($db_host, $db_user, $db_pass) or die('Could not connect to database: ' . mysql_error());
+mysql_select_db ($db_name);
 
 $res = mysql_query("SELECT * FROM flightpath_system_settings");
 while ($cur = mysql_fetch_array($res)) {
   if ($val = unserialize($cur["value"])) {
-    $systemSettings[$cur["name"]] = $val;
+    $system_settings[$cur["name"]] = $val;
   }
 }
 mysql_close($dbc);
@@ -329,11 +329,11 @@ mysql_close($dbc);
 
 // We want to make sure the "system" module is enabled, so we will hard-code
 // its values.
-$systemSettings["modules"]["system"]["path"] = "modules/system";
-$systemSettings["modules"]["system"]["disabled"] = "no";
+$system_settings["modules"]["system"]["path"] = "modules/system";
+$system_settings["modules"]["system"]["disabled"] = "no";
 
 // Reorder the modules by weight.
-reorderModulesByWeight($systemSettings["modules"]);
+reorder_modules_by_weight($system_settings["modules"]);
 
 
 ////////////////////////////////////////////
@@ -341,5 +341,5 @@ reorderModulesByWeight($systemSettings["modules"]);
 // This must appear at the VERY end!  Nothing should come after it....
 //
 // Assign our systemSettings to the GLOBALS array so we can access it anywhere.
-$GLOBALS["fpSystemSettings"] = $systemSettings;
+$GLOBALS["fp_system_settings"] = $system_settings;
 ?>

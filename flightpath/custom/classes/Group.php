@@ -1,7 +1,7 @@
 <?php
 
 
-class Group extends _Group
+class Group extends __group
 {
   
   

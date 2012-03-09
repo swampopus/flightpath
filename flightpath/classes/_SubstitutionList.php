@@ -17,35 +17,35 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class _SubstitutionList extends ObjList
+class __substitution_list extends ObjList
 {
 
-	function findRequirement($courseRequirement, $boolExcludeHasBeenApplied = false, $groupID = 0)
+	function find_requirement($course_requirement, $bool_exclude_has_been_applied = false, $group_id = 0)
 	{
 		// Look through the array for a substitution which has this
 		// course requirement.
-		// If groupID == -1, no particular group is required.
-		for ($t = 0; $t < count($this->arrayList); $t++)
+		// If group_id == -1, no particular group is required.
+		for ($t = 0; $t < count($this->array_list); $t++)
 		{
-			$substitution = $this->arrayList[$t];
+			$substitution = $this->array_list[$t];
 
-			if ($boolExcludeHasBeenApplied == true && $substitution->boolHasBeenApplied == true)
+			if ($bool_exclude_has_been_applied == true && $substitution->bool_has_been_applied == true)
 			{
 				// Skip substitutions which we have already applied.
 				continue;
 			}
 
-			$cr = $substitution->courseRequirement;
-			//adminDebug($cr->courseID . " " . $courseRequirement->courseID);
-			if ($groupID == -1)
-			{ // No particular groupID is required...
-				if ($cr->courseID == $courseRequirement->courseID)
+			$cr = $substitution->course_requirement;
+			//adminDebug($cr->course_id . " " . $course_requirement->course_id);
+			if ($group_id == -1)
+			{ // No particular group_id is required...
+				if ($cr->course_id == $course_requirement->course_id)
 				{
 					return $substitution;
 				}
 			} else {
-				// ONLY check if it's in the supplied groupID...
-				if ($cr->courseID == $courseRequirement->courseID && $cr->assignedToGroupID == $groupID)
+				// ONLY check if it's in the supplied group_id...
+				if ($cr->course_id == $course_requirement->course_id && $cr->assigned_to_group_id == $group_id)
 				{
 					return $substitution;
 				}
@@ -56,30 +56,30 @@ class _SubstitutionList extends ObjList
 		return false;
 	}
 
-	function findGroupAdditions(Group $group)
+	function find_group_additions(Group $group)
 	{
-		$groupID = $group->groupID;
-		$rtnList = new CourseList();
-		// Find additions for this groupID and return them.
-		for ($t = 0; $t < count($this->arrayList); $t++)
+		$group_id = $group->group_id;
+		$rtn_list = new CourseList();
+		// Find additions for this group_id and return them.
+		for ($t = 0; $t < count($this->array_list); $t++)
 		{
-			$substitution = $this->arrayList[$t];
-			if ($substitution->boolGroupAddition == true)
+			$substitution = $this->array_list[$t];
+			if ($substitution->bool_group_addition == true)
 			{
-				$c = $substitution->courseRequirement;
-				if ($c->assignedToGroupID == $groupID)
+				$c = $substitution->course_requirement;
+				if ($c->assigned_to_group_id == $group_id)
 				{
-					$cc = $substitution->courseListSubstitutions->getFirst();
-					//adminDebug("~~ $cc->courseID");
-					$rtnList->add($cc);
+					$cc = $substitution->course_list_substitutions->get_first();
+					//adminDebug("~~ $cc->course_id");
+					$rtn_list->add($cc);
 				}
 			}
 
 		}
 
-		if (!$rtnList->isEmpty)
+		if (!$rtn_list->is_empty)
 		{
-			return $rtnList;
+			return $rtn_list;
 		} else {
 			return false;
 		}

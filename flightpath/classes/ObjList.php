@@ -20,51 +20,51 @@ notice must not be modified, and must be included with the source code.
 class ObjList
 {
 
-	public $arrayList, $i, $isEmpty, $count;
+	public $array_list, $i, $is_empty, $count;
 
 	function __construct()
 	{
-		$this->arrayList = array();
+		$this->array_list = array();
 		$this->i = 0;
 		$this->count = 0;
-		$this->isEmpty = true;
+		$this->is_empty = true;
 	}
 
 
-	function add($c, $boolAddToTop = false)
+	function add($c, $bool_add_to_top = false)
 	{
 		// Adds courses to the list.  Remember to perform
-		// resetCounter before using this list, or the count
+		// reset_counter before using this list, or the count
 		// variable will be off!
-		if ($boolAddToTop == false)
+		if ($bool_add_to_top == false)
 		{
-			$this->arrayList[] = $c;
+			$this->array_list[] = $c;
 			//adminDebug(".....adding course");
 		} else {
 			// We are going to add this to the top of the array, pushing
 			// everything else down.
-			$tempArray = array();
-			$tempArray[0] = $c;
+			$temp_array = array();
+			$temp_array[0] = $c;
 			
-			$newArray = array_merge($tempArray, $this->arrayList);
-			$this->arrayList = $newArray;
+			$new_array = array_merge($temp_array, $this->array_list);
+			$this->array_list = $new_array;
 			// adminDebug("adding to top...");
 		}
 		
-			$this->isEmpty = false;
-			$this->count = count($this->arrayList);
+			$this->is_empty = false;
+			$this->count = count($this->array_list);
 		
 		
 	}
 
-	function indexOf($objC)
+	function index_of($obj_c)
 	{
 		// Find in the array an object.equals(objC), and return the
 		// index.
 
-		for ($t = 0; $t < count($this->arrayList); $t++)
+		for ($t = 0; $t < count($this->array_list); $t++)
 		{
-			if ($this->arrayList[$t]->equals($objC))
+			if ($this->array_list[$t]->equals($obj_c))
 			{
 				return $t;
 			}
@@ -74,22 +74,22 @@ class ObjList
 
 	}
 
-	function checkIsEmpty()
+	function check_is_empty()
 	{
-		if (count($this->arrayList) > 0)
+		if (count($this->array_list) > 0)
 		{
-			$this->isEmpty = false;
+			$this->is_empty = false;
 		}
 	}
 
-	function objectIndexOf($objC)
+	function object_index_of($obj_c)
 	{
 		// This will return the array index of the exact object being requested.
 		// Not the ->equals(), but rather an == of the object (the reference is the same)
 
-		for ($t = 0; $t < count($this->arrayList); $t++)
+		for ($t = 0; $t < count($this->array_list); $t++)
 		{
-			if ($this->arrayList[$t] == $objC)
+			if ($this->array_list[$t] == $obj_c)
 			{
 				return $t;
 			}
@@ -101,82 +101,82 @@ class ObjList
 	}
 
 
-	function resetCounter()
+	function reset_counter()
 	{
 		$this->i = 0;
-		$this->count = count($this->arrayList);
+		$this->count = count($this->array_list);
 	}
 
-	function getFirst()
+	function get_first()
 	{
-		if ($this->getSize() > 0)
+		if ($this->get_size() > 0)
 		{
-			return $this->getElement(0);
+			return $this->get_element(0);
 		} else {
 			return false;
 		}
 	}
 
 
-	function getElement($c)
+	function get_element($c)
 	{
 
-		return $this->arrayList[$c];
+		return $this->array_list[$c];
 	}
 
 
 
-	function findMatch($objC)
+	function find_match($obj_c)
 	{ // This actually returns an object if it can find
-		// it using indexOf.
+		// it using index_of.
 
-		$c = $this->indexOf($objC);
+		$c = $this->index_of($obj_c);
 		if ($c > -1)
 		{
-			return $this->getElement($c);
+			return $this->get_element($c);
 		} else {
 			return false;
 		}
 	}
 
 
-	function insertAfterIndex($newI, $objC)
+	function insert_after_index($new_i, $obj_c)
 	{
 		$rtn = new ObjList();
-		for ($t = 0; $t < $newI; $t++)
+		for ($t = 0; $t < $new_i; $t++)
 		{
-			$rtn->add($this->arrayList[$t]);
+			$rtn->add($this->array_list[$t]);
 		}
 
-		$rtn->add($objC);
+		$rtn->add($obj_c);
 
-		for ($t = $newI; $t < count($this->arrayList); $t++)
+		for ($t = $new_i; $t < count($this->array_list); $t++)
 		{
-			$rtn->add($this->arrayList[$t]);
+			$rtn->add($this->array_list[$t]);
 		}
 
-		$this->arrayList = $rtn->arrayList;
-		$this->count = count($this->arrayList);
+		$this->array_list = $rtn->array_list;
+		$this->count = count($this->array_list);
 
 	}
 
 
-	function findAllMatches($objC)
+	function find_all_matches($obj_c)
 	{
 		// This will find all the matches of objC in the
 		// array, and return an ObjList of matches.
 		$rtn = new ObjList();
-		$boolNoMatches = true;
+		$bool_no_matches = true;
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			if ($this->arrayList[$t]->equals($objC))
+			if ($this->array_list[$t]->equals($obj_c))
 			{
-				$rtn->add($this->arrayList[$t]);
-				$boolNoMatches = false;
+				$rtn->add($this->array_list[$t]);
+				$bool_no_matches = false;
 			}
 		}
 
-		if ($boolNoMatches == false)
+		if ($bool_no_matches == false)
 		{
 			return $rtn;
 		} else {
@@ -186,29 +186,29 @@ class ObjList
 	}
 
 
-	function getSize()
+	function get_size()
 	{
-		return sizeof($this->arrayList);
+		return sizeof($this->array_list);
 	}
 
 
 
-	function toString()
+	function to_string()
 	{
 		// Return a string of every obj in this list.
 		$rtn = "";
 
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$rtn .= $this->arrayList[$t]->toString();
+			$rtn .= $this->array_list[$t]->to_string();
 		}
 
 		return $rtn;
 	}
 
-	function hasMore()
+	function has_more()
 	{
-		//adminDebug("here " . count($this->arrayList));
+		//adminDebug("here " . count($this->array_list));
 		if ($this->i < $this->count)
 		{
 			return true;
@@ -217,9 +217,9 @@ class ObjList
 		}
 	}
 
-	function getNext()
+	function get_next()
 	{
-		$s = $this->arrayList[$this->i];
+		$s = $this->array_list[$this->i];
 		$this->i++;
 		return $s;
 	}

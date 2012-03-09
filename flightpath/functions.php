@@ -28,7 +28,7 @@ notice must not be modified, and must be included with the source code.
  */
 function menu_rebuild_cache() {
   
-  foreach ($GLOBALS["fpSystemSettings"]["modules"] as $module => $value) {    
+  foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $value) {    
     if (isset($value["disabled"]) && $value["disabled"] == "yes") {
       // Module is not enabled.  Skip it.
       continue;
@@ -133,19 +133,19 @@ function menu_get_item($path) {
 
 
 function fp_add_message($str) {
-  $_SESSION["fpMessages"][] = $str;
+  $_SESSION["fp_messages"][] = $str;
 }
 
 function fp_add_css($path_to_css) {
-  $GLOBALS["fpExtraCss"][] = $path_to_css;
+  $GLOBALS["fp_extra_css"][] = $path_to_css;
 }
 
 function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bool_include_base_path = TRUE) {
   
-  $p = getModulePath($module, $bool_include_file_system_path);
+  $p = get_module_path($module, $bool_include_file_system_path);
     
   if ($bool_include_base_path) {
-    $p = $GLOBALS["fpSystemSettings"]["basePath"] . "/" . $p;
+    $p = $GLOBALS["fp_system_settings"]["base_path"] . "/" . $p;
   }
     
   return $p;
@@ -174,7 +174,7 @@ function l($text, $path, $query = "", $attributes = array()) {
     $query = "?" . $query;   
   }  
   
-  $rtn .= '<a href="' . $GLOBALS["fpSystemSettings"]["baseURL"] . '/' . $path . $query . '" ';
+  $rtn .= '<a href="' . $GLOBALS["fp_system_settings"]["base_u_r_l"] . '/' . $path . $query . '" ';
   
   foreach ($attributes as $key => $value) {
     $rtn .= $key . '="' . $value . '" ';
@@ -196,13 +196,13 @@ function l($text, $path, $query = "", $attributes = array()) {
    */
 function fp_screen_is_mobile(){
   
-  if (isset($GLOBALS["fpPageIsMobile"])) {
-    return $GLOBALS["fpPageIsMobile"];
+  if (isset($GLOBALS["fp_page_is_mobile"])) {
+    return $GLOBALS["fp_page_is_mobile"];
   }
   
-  $userAgent = $_SERVER['HTTP_USER_AGENT']; 
+  $user_agent = $_SERVER['HTTP_USER_AGENT']; 
 
-  $lookFor = array(
+  $look_for = array(
     "ipod", 
     "iphone", 
     "android", 
@@ -213,15 +213,15 @@ function fp_screen_is_mobile(){
     "(smartphone|iemobile)",
     );
   
-  foreach ($lookFor as $testAgent) {   
-    if (preg_match('/' . $testAgent . '/i',$userAgent)) {
+  foreach ($look_for as $test_agent) {   
+    if (preg_match('/' . $test_agent . '/i',$user_agent)) {
        $is_mobile = TRUE;
       break;
     }
   }  
   
   
-  $GLOBALS["fpPageIsMobile"] = $is_mobile;
+  $GLOBALS["fp_page_is_mobile"] = $is_mobile;
   return $is_mobile;
   
 } // ends function mobile_device_detect
@@ -233,32 +233,32 @@ function fp_screen_is_mobile(){
  */
 function fp_display_page($page) {
   
-  $screen = new AdvisingScreen("",null,"notAdvising");
-  $screen->pageTitle = $page["title"];
-  $screen->pageHasSearch = $page["router_item"]["page_settings"]["page_has_search"];
-  $screen->pageBannerIsLink = $page["router_item"]["page_settings"]["page_banner_is_link"];
-  $screen->pageHideReportError = $page["router_item"]["page_settings"]["page_hide_report_error"];
+  $screen = new AdvisingScreen("",null,"not_advising");
+  $screen->page_title = $page["title"];
+  $screen->page_has_search = $page["router_item"]["page_settings"]["page_has_search"];
+  $screen->page_banner_is_link = $page["router_item"]["page_settings"]["page_banner_is_link"];
+  $screen->page_hide_report_error = $page["router_item"]["page_settings"]["page_hide_report_error"];
   
   // If there are "messages" waiting, then let's add them to the top of content.
   $content_top = "";
-  if (count($_SESSION["fpMessages"]) > 0) {
+  if (count($_SESSION["fp_messages"]) > 0) {
     $content_top .= "<div class='fp-messages'>";
-    foreach ($_SESSION["fpMessages"] as $key => $msg) {
+    foreach ($_SESSION["fp_messages"] as $key => $msg) {
       $content_top .= "<div class='fp-message'>$msg</div>";      
     }
     $content_top .= "</div>";    
-    unset($_SESSION["fpMessages"]);
+    unset($_SESSION["fp_messages"]);
   }
   
-  $screen->pageContent = $content_top .= $page["content"];
+  $screen->page_content = $content_top .= $page["content"];
   // If there are CSS files to add, add those.
-  foreach ($GLOBALS["fpExtraCss"] as $filename) {
+  foreach ($GLOBALS["fp_extra_css"] as $filename) {
     //pretty_print ("adding $filename");
-    $screen->addCss($filename);
+    $screen->add_css($filename);
   }
   
   
-  $screen->outputToBrowser();  
+  $screen->output_to_browser();  
 }
 
 
@@ -266,7 +266,7 @@ function fp_display_page($page) {
  * Return the theme location
  */
 function fp_theme_location() {
-  return $GLOBALS["fpSystemSettings"]["basePath"] . "/" . $GLOBALS["fpSystemSettings"]["theme"];
+  return $GLOBALS["fp_system_settings"]["base_path"] . "/" . $GLOBALS["fp_system_settings"]["theme"];
 }
 
 
@@ -312,30 +312,30 @@ function db_query($query) {
   $args = func_get_args();
   array_shift($args);  
   
-  $db = getGlobalDatabaseHandler();  
-  $res = $db->dbQuery($query, $args);
+  $db = get_global_database_handler();  
+  $res = $db->db_query($query, $args);
 
   return $res;    
 }
 
 function db_fetch_array($result_handler) {
-  $db = getGlobalDatabaseHandler();
-  return $db->dbFetchArray($result_handler);
+  $db = get_global_database_handler();
+  return $db->db_fetch_array($result_handler);
 }
 
 function variable_get($name, $default_value = "") {
-  $db = getGlobalDatabaseHandler();
-  return $db->getVariable($name, $default_value);
+  $db = get_global_database_handler();
+  return $db->get_variable($name, $default_value);
 }
 
 function variable_set($name, $value) {
-  $db = getGlobalDatabaseHandler();
-  $db->setVariable($name, $value);  
+  $db = get_global_database_handler();
+  $db->set_variable($name, $value);  
 }
 
 function fp_get_system_settings() {
-  $db = getGlobalDatabaseHandler();
-  return $db->getFlightPathSettings();  
+  $db = get_global_database_handler();
+  return $db->get_flight_path_settings();  
 }
 
 
@@ -357,55 +357,55 @@ function pretty_print($var) {
  * databasehandler objects (and re-connecting to the database).
  *
  */
-function getGlobalDatabaseHandler() {
+function get_global_database_handler() {
   
-  if (!isset($GLOBALS["fpGlobalDatabaseHandler"]) || !is_object($GLOBALS["fpGlobalDatabaseHandler"])) {
-    $GLOBALS["fpGlobalDatabaseHandler"] = new DatabaseHandler();
+  if (!isset($GLOBALS["fp_global_database_handler"]) || !is_object($GLOBALS["fp_global_database_handler"])) {
+    $GLOBALS["fp_global_database_handler"] = new DatabaseHandler();
   }
   
-  return $GLOBALS["fpGlobalDatabaseHandler"];  
+  return $GLOBALS["fp_global_database_handler"];  
   
 }
 
 
 /**
  * Will output a debugCT statement only if the user
- * is a full_admin.  $_SESSION["fpUserType"] must == full_admin.
+ * is a full_admin.  $_SESSION["fp_user_type"] must == full_admin.
  *
  * 
  */
-function adminDebug($str, $varName = "")
+function admin_debug($str, $var_name = "")
 {
-	if ($GLOBALS["fpSystemSettings"]["disableAdminDebug"] == true)
+	if ($GLOBALS["fp_system_settings"]["disable_admin_debug"] == true)
 	{
 		return;
 	}
 	// Will output a debugCT only if the user is a full_admin.
-	$temp = $GLOBALS["fpSystemSettings"]["disableDebugCT"];  // save this....
-	$GLOBALS["fpSystemSettings"]["disableDebugCT"] = false;
+	$temp = $GLOBALS["fp_system_settings"]["disable_debug_c_t"];  // save this....
+	$GLOBALS["fp_system_settings"]["disable_debug_c_t"] = false;
 	
-	if ($_SESSION["fpUserType"] == "full_admin")
+	if ($_SESSION["fp_user_type"] == "full_admin")
 	{
-		fp_debugCT($str, $varName);
+		fp_debug_c_t($str, $var_name);
 	}
 	
-	$GLOBALS["fpSystemSettings"]["disableDebugCT"] = $temp;  // restore its original state.
+	$GLOBALS["fp_system_settings"]["disable_debug_c_t"] = $temp;  // restore its original state.
 	
 }
 
 
-function displayAccessDenied($systemName = "", $boolDieAtEnd = TRUE) {
+function display_access_denied($system_name = "", $bool_die_at_end = TRUE) {
   
   // Check for hooks...
-  if (function_exists("functions_displayAccessDenied")) {
-    return call_user_func("functions_displayAccessDenied", $systemName, $boolDieAtEnd);
+  if (function_exists("functions_display_access_denied")) {
+    return call_user_func("functions_display_access_denied", $system_name, $bool_die_at_end);
   }  
 
   $pC = "";
   
   $pC .= "<h2>Access Denied";
-  if ($systemName) {
-    $pC .= " for $systemName";
+  if ($system_name) {
+    $pC .= " for $system_name";
   }
   $pC .= "</h2>";
   
@@ -413,11 +413,11 @@ function displayAccessDenied($systemName = "", $boolDieAtEnd = TRUE) {
           to access this page.";
   
   
-  $screen = new AdvisingScreen("", null, "notAdvising");
-  $screen->pageContent = $pC;
-  $screen->outputToBrowser();
+  $screen = new AdvisingScreen("", null, "not_advising");
+  $screen->page_content = $pC;
+  $screen->output_to_browser();
   
-  if ($boolDieAtEnd) {
+  if ($bool_die_at_end) {
     die;
   }
 }
@@ -428,21 +428,21 @@ function displayAccessDenied($systemName = "", $boolDieAtEnd = TRUE) {
  * NON student user.  As in, are they admin, advisors, viewers, etc.
  * 
  *
- * @param unknown_type $userID
+ * @param unknown_type $user_id
  * @return unknown
  */
-function determineStaffUserType($userID)
+function determine_staff_user_type($user_id)
 {
   
   // Check for hooks...
-  if (function_exists("functions_determineStaffUserType")) {
-    return call_user_func("functions_determineStaffUserType", $userID);
+  if (function_exists("functions_determine_staff_user_type")) {
+    return call_user_func("functions_determine_staff_user_type", $user_id);
   }
   
  
   // If GRANT_FULL_ACCESS is turned on, then this person
   // is full_admin.
-  if ($GLOBALS["fpSystemSettings"]["GRANT_FULL_ACCESS"] == TRUE) {
+  if ($GLOBALS["fp_system_settings"]["GRANT_FULL_ACCESS"] == TRUE) {
     return "full_admin";
   }
   
@@ -453,57 +453,57 @@ function determineStaffUserType($userID)
   // Is the user a full admin?  Meaning they basically
   // have the same privileges as a college_coordinator,
   // but can also get into Data Entry.
-  $res = $db->dbQuery("SELECT * FROM administrators
-								       WHERE faculty_id = '?' ", $userID);
-  if ($db->dbNumRows($res) == 1)
+  $res = $db->db_query("SELECT * FROM administrators
+								       WHERE faculty_id = '?' ", $user_id);
+  if ($db->db_num_rows($res) == 1)
   {
     return "full_admin";
   }
 
   //////////////////////////////////////////////////////////////////
   // Does the user have a type specified in the User management system?
-  $res = $db->dbQuery("SELECT * FROM users
-								WHERE faculty_id = '?' ", $userID);
-  $cur = $db->dbFetchArray($res);
-  $userType = trim($cur["user_type"]);
+  $res = $db->db_query("SELECT * FROM users
+								WHERE faculty_id = '?' ", $user_id);
+  $cur = $db->db_fetch_array($res);
+  $user_type = trim($cur["user_type"]);
 
-  if ($userType != "")
+  if ($user_type != "")
   {
-    return $userType;
+    return $user_type;
   }
 
   /////////////////////////////////////////////////////////////////////
   // The user was not specifically found in the users table,
   // so let's try to determine what their user type might be...
-  // If your school uses the optional "employeeType" field of the
+  // If your school uses the optional "employee_type" field of the
   // human_resources:faculty_staff table to determine user type, then you
   // must override this function in a hook and change this section.
   
   // Let's pull the needed variables out of our settings, so we know what
 	// to query, because this is a non-FlightPath table.
-	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:faculty_staff"];
+	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
 	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-	$tableName = $tsettings["tableName"];    
+	$table_name = $tsettings["table_name"];    
   
-  $res = $db->dbQuery("SELECT * FROM $tableName
-								WHERE $tf->facultyID = '?' ", $userID);
-  $cur = $db->dbFetchArray($res);
-  $empType = $cur[$tf->employeeType];
+  $res = $db->db_query("SELECT * FROM $table_name
+								WHERE $tf->faculty_id = '?' ", $user_id);
+  $cur = $db->db_fetch_array($res);
+  $emp_type = $cur[$tf->employee_type];
   
-  if($empType == 10 ||
-  $empType == 20 ||
-  $empType == 30 ||
-  $empType == 40 ||
-  $empType == 50 ||
-  $empType == 99)
+  if($emp_type == 10 ||
+  $emp_type == 20 ||
+  $emp_type == 30 ||
+  $emp_type == 40 ||
+  $emp_type == 50 ||
+  $emp_type == 99)
   {
-    $userType = "advisor";
+    $user_type = "advisor";
   }
   else {
-    $userType = "none";
+    $user_type = "none";
   }
 
-  return $userType;
+  return $user_type;
 
 
 }
@@ -515,19 +515,19 @@ function determineStaffUserType($userID)
  * It will shorten a catalog year range of 2008-2009 to just
  *  "08-09" or "2008-09"  or even "09-2009".
  *
- * @param unknown_type $catRange
+ * @param unknown_type $cat_range
  */
-function getShorterCatalogYearRange($catRange, $abbrFirst = true, $abbrSecond = true) {
+function get_shorter_catalog_year_range($cat_range, $abbr_first = true, $abbr_second = true) {
   
-  $temp = explode("-", $catRange);
+  $temp = explode("-", $cat_range);
   
   $first = $temp[0];
   $second = $temp[1];
   
-  if ($abbrFirst) {
+  if ($abbr_first) {
     $first = substr($first, 2, 2);
   }
-  if ($abbrSecond) {
+  if ($abbr_second) {
     $second = substr($second, 2, 2);
   }
   
@@ -541,7 +541,7 @@ function getShorterCatalogYearRange($catRange, $abbrFirst = true, $abbrSecond = 
  * This function returns the path to a particular module, if it
  * exists (returns FALSE otherwise).
  * Example:
- * $x = getModulePath("course_search");
+ * $x = get_module_path("course_search");
  * will return:
  *   custom/modules/course_search
  * 
@@ -554,17 +554,17 @@ function getShorterCatalogYearRange($catRange, $abbrFirst = true, $abbrSecond = 
  * 
  * @param unknown_type $module
  */
-function getModulePath($module = "", $boolIncludeFileSystemPath = FALSE) {
+function get_module_path($module = "", $bool_include_file_system_path = FALSE) {
   
-  $systemPath = "";
+  $system_path = "";
   
-  if ($boolIncludeFileSystemPath) {
-    $systemPath = trim($GLOBALS["fpSystemSettings"]["fileSystemPath"]) . "/";
+  if ($bool_include_file_system_path) {
+    $system_path = trim($GLOBALS["fp_system_settings"]["file_system_path"]) . "/";
   }
     
   
-  if (isset($GLOBALS["fpSystemSettings"]["modules"][$module]["path"])) {
-    return $systemPath . $GLOBALS["fpSystemSettings"]["modules"][$module]["path"];
+  if (isset($GLOBALS["fp_system_settings"]["modules"][$module]["path"])) {
+    return $system_path . $GLOBALS["fp_system_settings"]["modules"][$module]["path"];
   }
   else {
     return FALSE;
@@ -578,21 +578,21 @@ function getModulePath($module = "", $boolIncludeFileSystemPath = FALSE) {
  * Will return TRUE or FALSE for success or failure to include
  * the module.
  *
- * Example use:  includeModule("course_search");
+ * Example use:  include_module("course_search");
  * 
  * @param string $module
  */
-function includeModule($module, $bool_call_init = TRUE) {
+function include_module($module, $bool_call_init = TRUE) {
 
-  $systemPath = trim($GLOBALS["fpSystemSettings"]["fileSystemPath"]);
+  $system_path = trim($GLOBALS["fp_system_settings"]["file_system_path"]);
   
-  if (isset($GLOBALS["fpSystemSettings"]["modules"][$module]["path"])) {
-    $path = $GLOBALS["fpSystemSettings"]["modules"][$module]["path"] . "/$module.module";
-    if (file_exists($systemPath . "/" . $path)) {
-      require_once($systemPath . "/" . $path);
+  if (isset($GLOBALS["fp_system_settings"]["modules"][$module]["path"])) {
+    $path = $GLOBALS["fp_system_settings"]["modules"][$module]["path"] . "/$module.module";
+    if (file_exists($system_path . "/" . $path)) {
+      require_once($system_path . "/" . $path);
     }
     else {
-      print "<br><b>Could not find module '$module' at '$systemPath/$path'</b><br>";
+      print "<br><b>Could not find module '$module' at '$system_path/$path'</b><br>";
     }
     // Now that we have included it, call the module's hook_init() method.
     if ($bool_call_init) {      
@@ -614,11 +614,11 @@ function includeModule($module, $bool_call_init = TRUE) {
  * 
  * For example, if the course_search module wants a form to submit something
  * to itself, it looks like:
- * <form action="' . getModuleActionURL("course_search") . '" method="POST">
+ * <form action="' . get_module_action_u_r_l("course_search") . '" method="POST">
  * 
  * To create a link to itself, it would look like:
  * 
- * <a href="' . getModuleActionURL("course_search") . "&year=1992&name=peacock">
+ * <a href="' . get_module_action_u_r_l("course_search") . "&year=1992&name=peacock">
  *
  * The returned URL will already have a ? starting the query string, so you may
  * begin any additional query with &.
@@ -629,9 +629,9 @@ function includeModule($module, $bool_call_init = TRUE) {
  * 
  * @param String $module
  */
-function getModuleActionURL($module = "") {
+function get_module_action_u_r_l($module = "") {
   
-  if (isset($GLOBALS["fpSystemSettings"]["modules"][$module])) {
+  if (isset($GLOBALS["fp_system_settings"]["modules"][$module])) {
     return "m.php?n=$module";
   }
   else {
@@ -648,7 +648,7 @@ function getModuleActionURL($module = "") {
  * @param unknown_type $xml_data
  * @return unknown
  */
-function fp_xmlToArray2($xml_data)
+function fp_xml_to_array2($xml_data)
 {
 	$xml_data = trim(utf8_encode($xml_data));
 	if ($xml_data == ""){return false;}
@@ -656,17 +656,17 @@ function fp_xmlToArray2($xml_data)
 	$na = array();
 	
 	try{
-    @$xmlObject = new SimpleXmlElement($xml_data);
-  	foreach($xmlObject->children() as $element => $value)
+    @$xml_object = new SimpleXmlElement($xml_data);
+  	foreach($xml_object->children() as $element => $value)
   	{
-  		$val = (String) $value;
+  		$val = (string) $value;
   		$na["$element"] =  $val;
   	}
 	
 	} catch(Exception $exception) {
 	   // Do nothing if this fails.  Just let us return an empty array. 
 	   // TODO:  a call to fp_add_message or some such would be good here!
-	   adminDebug("<b>WARNING:</b> Unable to parse XML: $xml_data");
+	   admin_debug("<b>WARNING:</b> Unable to parse XML: $xml_data");
 	}
 
 	
@@ -681,36 +681,36 @@ function fp_xmlToArray2($xml_data)
  *
  * @param String $permission
  */
-function userHasPermission($permission, $facultyID = "") {
+function user_has_permission($permission, $faculty_id = "") {
   
   // We will check the database table each time, so that the user doesn't
   // have to log out and back in before their permissions change.
   
-  $db = getGlobalDatabaseHandler();
+  $db = get_global_database_handler();
   
-  if ($facultyID == "") {
-    $facultyID = $_SESSION["fpUserID"];
+  if ($faculty_id == "") {
+    $faculty_id = $_SESSION["fp_user_id"];
   }
 
   // If the user is admin, always return TRUE.  Check the user type
-  $userType = determineStaffUserType($facultyID);
-  if ($userType == "full_admin") {
+  $user_type = determine_staff_user_type($faculty_id);
+  if ($user_type == "full_admin") {
     return TRUE;
   }  
     
   // Otherwise, check their permissions from the table.
   
-  $res = $db->dbQuery("SELECT * FROM users WHERE faculty_id = '?' ", $facultyID);
-  $cur = $db->dbFetchArray($res);
+  $res = $db->db_query("SELECT * FROM users WHERE faculty_id = '?' ", $faculty_id);
+  $cur = $db->db_fetch_array($res);
   
-  $pArray = array();
+  $p_array = array();
   
   $temp = explode("," , $cur["permissions"]);
   foreach ($temp as $t) {
-    $pArray[] = trim($t);
+    $p_array[] = trim($t);
   }
   
-  if (in_array($permission, $pArray)) {
+  if (in_array($permission, $p_array)) {
     return TRUE;
   }
   
@@ -724,21 +724,21 @@ function userHasPermission($permission, $facultyID = "") {
  * an array of only term suffixes (like 40, 60, mm, etc).
  *
  */
-function getTermIDSuffixes() {
+function get_term_id_suffixes() {
   
   $rtn = array();  
   
-  $temp = $GLOBALS["fpSystemSettings"]["termIDStructure"];
+  $temp = $GLOBALS["fp_system_settings"]["term_id_structure"];
   $structures = explode("\n", $temp);
     
   foreach ($structures as $structure) {      
     $tokens = explode(",", $structure);
-    $termDef = trim($tokens[0]);
+    $term_def = trim($tokens[0]);
     
     // Get rid of the replacement pattern.
     // Looks like:  [Y4]40.  We want the 40.
     // Simply explode on "]"
-    $temp = explode("]", $termDef);
+    $temp = explode("]", $term_def);
     $rtn[] = trim($temp[1]);    
   
   }
@@ -754,11 +754,11 @@ function getTermIDSuffixes() {
  * modules' hook_perm() function.
  *
  */
-function getModulesPermissions() {
+function get_modules_permissions() {
   $rtn = array();
   
   
-  foreach ($GLOBALS["fpSystemSettings"]["modules"] as $module => $value) {
+  foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $value) {
     
     if (isset($value["disabled"]) && $value["disabled"] == "yes") {
       // Module is not enabled.  Skip it.
@@ -782,11 +782,11 @@ function getModulesPermissions() {
  * It takes the $modules array by reference, so nothing
  * is returned.
  * 
- * Use:  reorderModulesByWeight($GLOBALS["fpSystemSettings"]["modules"]);
+ * Use:  reorder_modules_by_weight($GLOBALS["fp_system_settings"]["modules"]);
  *
  * @param unknown_type $modules
  */
-function reorderModulesByWeight(&$modules) {
+function reorder_modules_by_weight(&$modules) {
   
   $temp = array();
   foreach ($modules as $module => $value) {
@@ -804,29 +804,29 @@ function reorderModulesByWeight(&$modules) {
   // Now, sort $temp...
   sort($temp);  
     
-  $newArray = array();
+  $new_array = array();
   foreach ($temp as $t) {
     $vals = explode("~~", $t);
     $module = $vals[1];
-    $newArray[$module] = $modules[$module];
+    $new_array[$module] = $modules[$module];
   }
   
   // Reassign the $modules array and we're done!
-  $modules = $newArray;
+  $modules = $new_array;
   
 }
 
 
 /**
- * Similar to getModulesPermissions, this will scan through all installed
+ * Similar to get_modules_permissions, this will scan through all installed
  * modules' hook_menu() functions, and assemble an array which is sorted
  * by "location" and then by "weight".
  *
  */
-function getModulesMenus() {
+function get_modules_menus() {
   
   $menus = array();
-  foreach ($GLOBALS["fpSystemSettings"]["modules"] as $module => $value) {    
+  foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $value) {    
     if (isset($value["disabled"]) && $value["disabled"] == "yes") {
       // Module is not enabled.  Skip it.
       continue;
@@ -840,8 +840,8 @@ function getModulesMenus() {
   // Convert to a single dimensional array for easier sorting.
   $temp = array();
   foreach ($menus as $c => $value) {
-    foreach ($menus[$c] as $d => $menuData) {
-      $w = $menuData["weight"];
+    foreach ($menus[$c] as $d => $menu_data) {
+      $w = $menu_data["weight"];
       if ($w == "") $w = "0";
     
       // We need to front-pad $w with zeros, so it is the same length
@@ -857,7 +857,7 @@ function getModulesMenus() {
   sort($temp);
   //var_dump($temp);
   // Now, go back through $temp and get our new array...
-  $newArray = array();
+  $new_array = array();
   
   foreach ($temp as $t) {
     $vals = explode("~~", $t);
@@ -865,10 +865,10 @@ function getModulesMenus() {
     $d = $vals[2];
     
     // Place them into subarrays indexed by location
-    $newArray[$menus[$c][$d]["location"]][] = $menus[$c][$d];    
+    $new_array[$menus[$c][$d]["location"]][] = $menus[$c][$d];    
   }
   
-  return $newArray;
+  return $new_array;
   
 }
 
@@ -898,16 +898,16 @@ function fp_number_pad($number, $len) {
  * it is required.  If you don't know what to put, make it "xml_doc" or
  * something similar.
  * $xml_array is the array you want converted into XML.
- * $htmlSafe is a boolean.  If set to true, it will convert ' and "
+ * $html_safe is a boolean.  If set to true, it will convert ' and "
  * characters into their HTML equivalent.  I recommend always setting this
  * to true.
  *
  * @param String $root
  * @param Array $xml_array
- * @param boolean $htmlSafe
+ * @param boolean $html_safe
  * @return String
  */
-function fp_arrayToXml ($root, $xml_array, $htmlSafe = false)
+function fp_array_to_xml ($root, $xml_array, $html_safe = false)
 {
 	$memory = xmlwriter_open_memory ();       // Allocate memory for XML writer
 
@@ -934,7 +934,7 @@ function fp_arrayToXml ($root, $xml_array, $htmlSafe = false)
 	// Write each array element as the next XML tag.
 	foreach ($xml_array as $tag => $text)
 	{
-		$text = stripNonUTF8("$text", $htmlSafe);  // strip out non-utf8 chars.
+		$text = strip_non_u_t_f8("$text", $html_safe);  // strip out non-utf8 chars.
 		xmlwriter_write_element ($memory, $tag, $text);
 
 	}
@@ -958,16 +958,16 @@ function fp_arrayToXml ($root, $xml_array, $htmlSafe = false)
  * characters.  This is necessary for the XML functions
  * also present in this file.
  *  
- * if $htmlSafe is set to TRUE, then it will replace " and ' with
+ * if $html_safe is set to TRUE, then it will replace " and ' with
  * their HTML codes (&quot; and &#39;), ensuring that they can
  * pass through a mysql query or be set inside a value='' field
  * without causing problems.
  *
  * @param String $str
- * @param boolean $htmlSafe
+ * @param boolean $html_safe
  * @return String
  */
-function stripNonUTF8($str, $htmlSafe = false){
+function strip_non_u_t_f8($str, $html_safe = false){
 	$good[] = 9;  #tab
 	$good[] = 10; #nl
 	$good[] = 13; #cr
@@ -981,7 +981,7 @@ function stripNonUTF8($str, $htmlSafe = false){
 		}//fi
 	}//rof
 
-	if ($htmlSafe == true)
+	if ($html_safe == true)
 	{
 		$newstr = str_replace("'","&#39;",$newstr);
 		$newstr = str_replace('"','&quot;',$newstr);
@@ -995,14 +995,14 @@ function stripNonUTF8($str, $htmlSafe = false){
 
 
 
-function fp_debugCT($debugString = "", $var = "")
+function fp_debug_c_t($debug_string = "", $var = "")
 { // Shortcut to the other function.
-	if ($GLOBALS["fpSystemSettings"]["disableDebugCT"] == true)
+	if ($GLOBALS["fp_system_settings"]["disable_debug_c_t"] == true)
 	{
 		return;
 	}
 
-	fp_debugCurrentTimeMillis($debugString, false, $var);
+	fp_debug_current_time_millis($debug_string, false, $var);
 }
 
 
@@ -1012,7 +1012,7 @@ function fp_print_pre($str)
 }
 
 
-function fp_debugCurrentTimeMillis($debugString = "", $showCurrentTime = true, $var = "")
+function fp_debug_current_time_millis($debug_string = "", $show_current_time = true, $var = "")
 {
 	// Display the current time in milliseconds, and, if available,
 	// show how many milliseconds its been since the last time
@@ -1020,27 +1020,27 @@ function fp_debugCurrentTimeMillis($debugString = "", $showCurrentTime = true, $
 	// long a particular function takes to run.  Just place a call
 	// to this function before and after the function call.
 
-	$lastTime = $GLOBALS["currentTimeMillis" . $var] * 1;
+	$last_time = $GLOBALS["current_time_millis" . $var] * 1;
 
-	$curTime = microtime(true) * 1000;
+	$cur_time = microtime(true) * 1000;
 
-	//if ($debugString != "")
+	//if ($debug_string != "")
 	//{
-	$debugString = "<span style='color:red;'>DEBUG:</span>
-						<span style='color:green;'>$debugString</span>";
+	$debug_string = "<span style='color:red;'>DEBUG:</span>
+						<span style='color:green;'>$debug_string</span>";
 	//}
 
-	print "<div style='background-color: white;'>$debugString
+	print "<div style='background-color: white;'>$debug_string
 			";
-	if ($showCurrentTime == true)
+	if ($show_current_time == true)
 	{
 		print "<span style='color: red;'>TIME:</span>
-				<span style='color: green;'>$curTime" . "ms</span>";
+				<span style='color: green;'>$cur_time" . "ms</span>";
 	}
 
-	if ($lastTime > 1)
+	if ($last_time > 1)
 	{
-		$diff = round($curTime - $lastTime,2);
+		$diff = round($cur_time - $last_time,2);
 		print "<span style='color: blue;'> ($diff" . "ms since last check)</span>";
 	} else {
 		// Start of clock...
@@ -1048,8 +1048,8 @@ function fp_debugCurrentTimeMillis($debugString = "", $showCurrentTime = true, $
 	}
 
 	print "</div>";
-	$GLOBALS["currentTimeMillis" . $var] = $curTime;
-	$GLOBALS["currentTimeMillis"] = $curTime;
+	$GLOBALS["current_time_millis" . $var] = $cur_time;
+	$GLOBALS["current_time_millis"] = $cur_time;
 
 }
 
@@ -1074,20 +1074,20 @@ function fp_debugCurrentTimeMillis($debugString = "", $showCurrentTime = true, $
  * @param string $password
  * @return mixed
  */
-function fp_verifyAllFacultyLogins($username, $password) {
+function fp_verify_all_faculty_logins($username, $password) {
   
   // Check for hooks...
-  if (function_exists("functions_fp_verifyAllFacultyLogins")) {
-    return call_user_func("functions_fp_verifyAllFacultyLogins", $username, $password);
+  if (function_exists("functions_fp_verify_all_faculty_logins")) {
+    return call_user_func("functions_fp_verify_all_faculty_logins", $username, $password);
   }  
     
   // Authenticate by the user_auth table by default.
   $db = new DatabaseHandler();
-  $res = $db->dbQuery("SELECT * FROM user_auth
+  $res = $db->db_query("SELECT * FROM user_auth
                         WHERE user_name = '?'
                         AND password = '?' 
                         AND is_faculty = '1' ", $username, md5($password));
-  $cur = $db->dbFetchArray($res);
+  $cur = $db->db_fetch_array($res);
   if ($cur["user_name"] == $username) {
     return $cur["user_id"];
   }
@@ -1114,21 +1114,21 @@ function fp_verifyAllFacultyLogins($username, $password) {
  * @param string $password
  * @return mixed
  */
-function fp_verifyAllStudentLogins($username, $password) {
+function fp_verify_all_student_logins($username, $password) {
   
   // Check for hooks...
-  if (function_exists("functions_fp_verifyAllStudentLogins")) {
-    return call_user_func("functions_fp_verifyAllStudentLogins", $username, $password);
+  if (function_exists("functions_fp_verify_all_student_logins")) {
+    return call_user_func("functions_fp_verify_all_student_logins", $username, $password);
   }  
  
   
   // Authenticate by the user_auth table by default.
   $db = new DatabaseHandler();
-  $res = $db->dbQuery("SELECT * FROM user_auth
+  $res = $db->db_query("SELECT * FROM user_auth
                         WHERE user_name = '?'
                         AND password = '?' 
                         AND is_student = '1' ", $username, md5($password));
-  $cur = $db->dbFetchArray($res);
+  $cur = $db->db_fetch_array($res);
   if ($cur["user_name"] == $username) {
     return $cur["user_id"];
   }

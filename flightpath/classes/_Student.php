@@ -17,45 +17,45 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class _Student
+class __student
 {
-	public $studentID, $name, $majorCode, $gpa, $cumulativeHours, $catalogYear;
-	public $listCoursesTaken, $listCoursesAdvised, $listCoursesAdded, $db, $rank;
-	public $listStandardizedTests, $listSubstitutions;
-	public $listTransferEqvsUnassigned;
-	public $arraySettings, $arraySignificantCourses, $arrayHideGradesTerms;
+	public $student_id, $name, $major_code, $gpa, $cumulative_hours, $catalog_year;
+	public $list_courses_taken, $list_courses_advised, $list_courses_added, $db, $rank;
+	public $list_standardized_tests, $list_substitutions;
+	public $list_transfer_eqvs_unassigned;
+	public $array_settings, $array_significant_courses, $array_hide_grades_terms;
 	
 	/*
-	* $studentID		The student's (database-generated) Campus Wide ID.
+	* $student_id		The student's (database-generated) Campus Wide ID.
 	* $name				The student's name by which they'll be referred to on screen.
-	* $majorCode		ACCT, CSCI, etc.
+	* $major_code		ACCT, CSCI, etc.
 	* $gpa				Grade point average. Ex: 3.12, 2.97, etc.
-	* $cumulativeHours	How many hours the student has earned to date.
-	* $catalogYear		What catalog are the listed as? Ex: 2007, 2008, etc.
-	* $listCoursesTaken This is a list of all the courses the student has taken.
+	* $cumulative_hours	How many hours the student has earned to date.
+	* $catalog_year		What catalog are the listed as? Ex: 2007, 2008, etc.
+	* $list_courses_taken This is a list of all the courses the student has taken.
 	It is made up of Course objects.
 	*/
 
 
-	function __construct($studentID = "", DatabaseHandler $db = NULL)
+	function __construct($student_id = "", DatabaseHandler $db = NULL)
 	{
-		$this->studentID = $studentID;
-		$this->arrayHideGradesTerms = array();
-		$this->arraySignificantCourses = array();  // array of courseIDs
+		$this->student_id = $student_id;
+		$this->array_hide_grades_terms = array();
+		$this->array_significant_courses = array();  // array of course_ids
 		// the student has taken, or has subs for (or transfer eqv's).
 		// used later to help speed up assignCoursesToList in FlightPath.
 
 		$this->db = $db;
 		if ($db == NULL)
 		{
-			$this->db = getGlobalDatabaseHandler();
+			$this->db = get_global_database_handler();
 		}
 		// If a cwid was specified, then go ahead and load and assemble
 		// all information in the database on this student.
-		if ($studentID != "")
+		if ($student_id != "")
 		{
-		  $this->determineTermsToHideGrades();
-			$this->loadStudent();
+		  $this->determine_terms_to_hide_grades();
+			$this->load_student();
 		}
 
 	}
@@ -74,40 +74,40 @@ class _Student
 	 * 
 	 *
 	 */
-  function determineTermsToHideGrades()
+  function determine_terms_to_hide_grades()
 	{
 	  return;
 	}		
 	
 	
-	function loadStudent()
+	function load_student()
 	{
 
-		$this->listTransferEqvsUnassigned = new CourseList();
-		$this->listCoursesTaken = new CourseList();
-		$this->listCoursesAdded = new CourseList();
+		$this->list_transfer_eqvs_unassigned = new CourseList();
+		$this->list_courses_taken = new CourseList();
+		$this->list_courses_added = new CourseList();
 
-		$this->listSubstitutions = new SubstitutionList();
+		$this->list_substitutions = new SubstitutionList();
 
-		$this->listStandardizedTests = new ObjList();
-		$this->arraySettings = array();
+		$this->list_standardized_tests = new ObjList();
+		$this->array_settings = array();
 
-		if ($this->studentID != "")
+		if ($this->student_id != "")
 		{
-			$this->loadTransferEqvsUnassigned();
-			$this->loadCoursesTaken();
-			$this->loadStudentData();
-			$this->loadTestScores();
-			$this->loadSettings();
-			$this->loadSignificantCourses();
-			//$this->loadUnassignments();
-			//$this->loadStudentSubstitutions();
+			$this->load_transfer_eqvs_unassigned();
+			$this->load_courses_taken();
+			$this->load_student_data();
+			$this->load_test_scores();
+			$this->load_settings();
+			$this->load_significant_courses();
+			//$this->load_unassignments();
+			//$this->load_student_substitutions();
 		}
 	}
 
-	function loadSignificantCourses()
+	function load_significant_courses()
 	{
-		// This will attempt to add as much to the arraySignificantCourses
+		// This will attempt to add as much to the array_significant_courses
 		// as we can, which was not previously determined.
 		// For example: courses we were advised to take and/or
 		// substitutions.
@@ -115,7 +115,7 @@ class _Student
 		// Now, when this gets called, it's actually *before* we
 		// write any subs or advisings to the database, so what we
 		// actually need to do is go through the POST
-		// and add any courseID's we find.
+		// and add any course_id's we find.
 		// In the future, perhaps it would be more efficient
 		// to have just one POST variable to look at, perhaps
 		// comma-seperated.
@@ -123,133 +123,133 @@ class _Student
 
 		// Look in the database of advised courses for ANY course advised in
 		// the range of advisingTermIDs.
-		$advisingTermIDs = $GLOBALS["settingAvailableAdvisingTermIDs"];
-		$temp = split(",",$advisingTermIDs);
-		foreach ($temp as $termID)
+		$advising_term_ids = $GLOBALS["setting_available_advising_term_ids"];
+		$temp = split(",",$advising_term_ids);
+		foreach ($temp as $term_id)
 		{
-			$termID = trim($termID);
-			//adminDebug($termID);
-			$res = $this->db->dbQuery("SELECT * FROM advising_sessions a,
+			$term_id = trim($term_id);
+			//admin_debug($term_id);
+			$res = $this->db->db_query("SELECT * FROM advising_sessions a,
 							advised_courses b
 							WHERE a.student_id='?'
 							AND a.advising_session_id = b.advising_session_id
 							AND a.term_id = '?' 
-							AND a.is_draft = '0' ", $this->studentID, $termID);
-			while ($cur = $this->db->dbFetchArray($res))
+							AND a.is_draft = '0' ", $this->student_id, $term_id);
+			while ($cur = $this->db->db_fetch_array($res))
 			{
-				$this->arraySignificantCourses[$cur["course_id"]] = true;
+				$this->array_significant_courses[$cur["course_id"]] = true;
 			}
 		}
 
 
 		// Now, look for any course which a substitution might have been
 		// performed for...
-		$res = $this->db->dbQuery("SELECT * FROM student_substitutions
-										WHERE student_id='?' ", $this->studentID);
-		while ($cur = $this->db->dbFetchArray($res))
+		$res = $this->db->db_query("SELECT * FROM student_substitutions
+										WHERE student_id='?' ", $this->student_id);
+		while ($cur = $this->db->db_fetch_array($res))
 		{
-			$this->arraySignificantCourses[$cur["required_course_id"]] = true;
+			$this->array_significant_courses[$cur["required_course_id"]] = true;
 		}
 
 
 	}
 
-	function loadSignificantCoursesFromListCoursesTaken()
+	function load_significant_courses_from_list_courses_taken()
 	{
-		// Build the arraySignificantCourses
-		// entriely from listCoursesTaken.
-		$this->listCoursesTaken->resetCounter();
-		while($this->listCoursesTaken->hasMore())
+		// Build the array_significant_courses
+		// entriely from list_courses_taken.
+		$this->list_courses_taken->reset_counter();
+		while($this->list_courses_taken->has_more())
 		{
-			$c = $this->listCoursesTaken->getNext();
-			$this->arraySignificantCourses[$c->courseID] = true;
+			$c = $this->list_courses_taken->get_next();
+			$this->array_significant_courses[$c->course_id] = true;
 		}
 	}
 	
 	
-	function loadSettings()
+	function load_settings()
 	{
-		// This will load & set up the arraySettings variable for this
+		// This will load & set up the array_settings variable for this
 		// student.
-		$res = $this->db->dbQuery("SELECT * FROM student_settings
+		$res = $this->db->db_query("SELECT * FROM student_settings
 									WHERE 
-									student_id='?' ", $this->studentID);
-		$cur = $this->db->dbFetchArray($res);
+									student_id='?' ", $this->student_id);
+		$cur = $this->db->db_fetch_array($res);
 
 		$xml = $cur["settings_xml"];
-		if ($arr = fp_xmlToArray2($xml))
+		if ($arr = fp_xml_to_array2($xml))
 		{
-			$this->arraySettings = $arr;
+			$this->array_settings = $arr;
 		}
 
 	}
 
-	function loadTransferEqvsUnassigned()
+	function load_transfer_eqvs_unassigned()
 	{
-		$res = $this->db->dbQuery("SELECT * FROM student_unassign_transfer_eqv
+		$res = $this->db->db_query("SELECT * FROM student_unassign_transfer_eqv
 									WHERE
 									student_id='?' 
 									AND delete_flag='0'
-									ORDER BY id ", $this->studentID);
-		while($cur = $this->db->dbFetchArray($res))
+									ORDER BY id ", $this->student_id);
+		while($cur = $this->db->db_fetch_array($res))
 		{
 			extract ($cur, 3, "db");
-			$newCourse = new Course();
-			$newCourse->boolTransfer = true;
-			$newCourse->courseID = $db_transfer_course_id;
-			$newCourse->dbUnassignTransferID = $db_id;
-			//adminDebug($newCourse->courseID);
-			$this->listTransferEqvsUnassigned->add($newCourse);
+			$new_course = new Course();
+			$new_course->bool_transfer = true;
+			$new_course->course_id = $db_transfer_course_id;
+			$new_course->db_unassign_transfer_id = $db_id;
+			//admin_debug($new_course->course_id);
+			$this->list_transfer_eqvs_unassigned->add($new_course);
 
 		}
 	}
 
 
-	function initSemesterCoursesAdded()
+	function init_semester_courses_added()
 	{
 		// The "Add a Course" box on screen is really just a
 		// semester, with the number -88, with a single group,
 		// also numbered -88.
-		$this->semesterCoursesAdded = new Semester(-88);
-		$this->semesterCoursesAdded->title = "Courses Added by Advisor";
+		$this->semester_courses_added = new Semester(-88);
+		$this->semester_courses_added->title = "Courses Added by Advisor";
 
 		// Now, we want to add the Add a Course group...
 		$g = new Group();
-		$g->groupID = -88;
+		$g->group_id = -88;
 		// Since it would take a long time during page load, we will
 		// leave this empty of courses for now.  It doesn't matter anyway,
 		// as we will not be checking this group for course membership
 		// anyway.  We only need to load it in the popup.
-		$g->hoursRequired = 99999;  // Nearly infinite selections may be made.
-		$g->assignedToSemesterNum = -88;
+		$g->hours_required = 99999;  // Nearly infinite selections may be made.
+		$g->assigned_to_semester_num = -88;
 		$g->title = "Add an Additional Course";
 
-		$this->semesterCoursesAdded->listGroups->add($g);
+		$this->semester_courses_added->list_groups->add($g);
 
 	}
 
 
-	function loadUnassignments()
+	function load_unassignments()
 	{
 		// Load courses which have been unassigned from groups
 		// or the bare degree plan.
-		$res = $this->db->dbQuery("SELECT * FROM student_unassign_group
+		$res = $this->db->db_query("SELECT * FROM student_unassign_group
 							WHERE 
 								student_id='?' 
-								AND delete_flag='0' ", $this->studentID);
-		while($cur = $this->db->dbFetchArray($res))
+								AND delete_flag='0' ", $this->student_id);
+		while($cur = $this->db->db_fetch_array($res))
 		{
 			extract ($cur, 3, "db");
 
-			if ($takenCourse = $this->listCoursesTaken->findSpecificCourse($db_course_id, $db_term_id, (bool) $db_transfer_flag, true))
+			if ($taken_course = $this->list_courses_taken->find_specific_course($db_course_id, $db_term_id, (bool) $db_transfer_flag, true))
 			{
-				// Add the groupID to this courses' list of unassigned groups.
-				$newGroup = new Group();
-				$newGroup->groupID = $db_group_id;
-				$newGroup->dbUnassignGroupID = $db_id;
+				// Add the group_id to this courses' list of unassigned groups.
+				$new_group = new Group();
+				$new_group->group_id = $db_group_id;
+				$new_group->db_unassign_group_id = $db_id;
 
 
-				$takenCourse->groupListUnassigned->add($newGroup);
+				$taken_course->group_list_unassigned->add($new_group);
 			}
 
 		}
@@ -260,7 +260,7 @@ class _Student
 
 
 
-	function loadTestScores()
+	function load_test_scores()
 	{
 		// If the student has any scores (from standardized tests)
 		// then load them here.
@@ -270,50 +270,50 @@ class _Student
 		
     // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this is a non-FlightPath table.
-		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["flightpath_resources:student_tests"];
+		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["flightpath_resources:student_tests"];
 		$tfa = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$tableName_a = $tsettings["tableName"];
+		$table_name_a = $tsettings["table_name"];
 				
-		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["flightpath_resources:tests"];
+		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["flightpath_resources:tests"];
 		$tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$tableName_b = $tsettings["tableName"];
+		$table_name_b = $tsettings["table_name"];
 		
-		$res = $this->db->dbQuery("		          
-		          SELECT * FROM $tableName_a a,$tableName_b b 
+		$res = $this->db->db_query("		          
+		          SELECT * FROM $table_name_a a,$table_name_b b 
 							WHERE 
-								$tfa->studentID = '?' 
-								AND a.$tfa->testID = b.$tfb->testID
-								AND a.$tfa->categoryID = b.$tfb->categoryID
-							ORDER BY $tfa->dateTaken DESC, $tfb->position ", $this->studentID);		
-		while($cur = $this->db->dbFetchArray($res))
+								$tfa->student_id = '?' 
+								AND a.$tfa->test_id = b.$tfb->test_id
+								AND a.$tfa->category_id = b.$tfb->category_id
+							ORDER BY $tfa->date_taken DESC, $tfb->position ", $this->student_id);		
+		while($cur = $this->db->db_fetch_array($res))
 		{
 			
 		  $c++;
 		  
 		  $db_position = $cur[$tfb->position];
-		  $db_datetime = $cur[$tfa->dateTaken];		  
-		  $db_test_id = $cur[$tfb->testID];
-		  $db_test_description = $cur[$tfb->testDescription];
-		  $db_category_description = $cur[$tfb->categoryDescription];
-		  $db_category_id = $cur[$tfb->categoryID];
+		  $db_datetime = $cur[$tfa->date_taken];		  
+		  $db_test_id = $cur[$tfb->test_id];
+		  $db_test_description = $cur[$tfb->test_description];
+		  $db_category_description = $cur[$tfb->category_description];
+		  $db_category_id = $cur[$tfb->category_id];
 		  $db_score = $cur[$tfa->score];
 		  
 		  
-			if (!(($db_datetime . $db_test_id) == $oldRow))
+			if (!(($db_datetime . $db_test_id) == $old_row))
 			{
 				// We are at a new test.  Add the old test to our list.
 				if ($st != null)
 				{
-					//adminDebug("adding " . $st->toString());
-					$this->listStandardizedTests->add($st);
+					//admin_debug("adding " . $st->to_string());
+					$this->list_standardized_tests->add($st);
 
 				}
 
 				$st = new StandardizedTest();
-				$st->testID = $db_test_id;
-				$st->dateTaken = $db_datetime;
+				$st->test_id = $db_test_id;
+				$st->date_taken = $db_datetime;
 				$st->description = $db_test_description;
-				$oldRow = $db_datetime . $db_test_id;
+				$old_row = $db_datetime . $db_test_id;
 
 			}
 
@@ -321,163 +321,163 @@ class _Student
 			$st->categories[$db_position . $c]["category_id"] = $db_category_id;
 			$st->categories[$db_position . $c]["score"] = $db_score;
 
-			//adminDebug(count($st->categories));
+			//admin_debug(count($st->categories));
 
 		}
 
 		// Add the last one created.
 		if ($st != null)
 		{
-			$this->listStandardizedTests->add($st);
+			$this->list_standardized_tests->add($st);
 		}
 
-		//print_pre($this->listStandardizedTests->toString());
+		//print_pre($this->list_standardized_tests->to_string());
 
 	}
 
 
-	function loadStudentSubstitutions()
+	function load_student_substitutions()
 	{
 		// Load the substitutions which have been made for
 		// this student.
 		
-		// Meant to be called AFTER loadCoursesTaken.
-		$this->listSubstitutions = new SubstitutionList();
+		// Meant to be called AFTER load_courses_taken.
+		$this->list_substitutions = new SubstitutionList();
 		
-		$res = $this->db->dbQuery("SELECT * FROM
+		$res = $this->db->db_query("SELECT * FROM
 						student_substitutions
 						WHERE student_id='?'
-						AND delete_flag='0' ", $this->studentID);
-		while($cur = $this->db->dbFetchArray($res))
+						AND delete_flag='0' ", $this->student_id);
+		while($cur = $this->db->db_fetch_array($res))
 		{
 
-			$subID = $cur["id"];
-			$subCourseID = $cur["sub_course_id"];
-			$subTermID = $cur["sub_term_id"];
-			$subBoolTransfer = (bool) $cur["sub_transfer_flag"];
-			$subHours = $cur["sub_hours"];
-			$subRemarks = trim($cur["sub_remarks"]);
-			$facultyID = $cur["faculty_id"];
+			$sub_id = $cur["id"];
+			$sub_course_id = $cur["sub_course_id"];
+			$sub_term_id = $cur["sub_term_id"];
+			$sub_bool_transfer = (bool) $cur["sub_transfer_flag"];
+			$sub_hours = $cur["sub_hours"];
+			$sub_remarks = trim($cur["sub_remarks"]);
+			$faculty_id = $cur["faculty_id"];
 
-			if (strstr($subTermID, "9999"))
+			if (strstr($sub_term_id, "9999"))
 			{
 				// was an unknown semester.  Let's set it lower so
 				// it doesn't screw up my sorting.
-				$subTermID = 11111;
+				$sub_term_id = 11111;
 			}
 
 
 			// Okay, look to see if we can find the course specified by this
 			// courseSubstitution within the list of courses which the student
-			// has taken.  If the subHours is less than the hoursAwarded for the
+			// has taken.  If the subHours is less than the hours_awarded for the
 			// particular course, it means the course has been split up!
 
-			if($takenCourse = $this->listCoursesTaken->findSpecificCourse($subCourseID, $subTermID, $subBoolTransfer, true))
+			if($taken_course = $this->list_courses_taken->find_specific_course($sub_course_id, $sub_term_id, $sub_bool_transfer, true))
 			{
 				
 								
 				// If this takenCourse is a transfer credit, then we want to remove
 				// any automatic eqv it may have set.
-				// We can do this easily by setting its courseID to 0.
-				if ($subBoolTransfer == true)
+				// We can do this easily by setting its course_id to 0.
+				if ($sub_bool_transfer == true)
 				{
-					$takenCourse->tempOldCourseID = $takenCourse->courseID;
-					$takenCourse->courseID = 0;
+					$taken_course->temp_old_course_id = $taken_course->course_id;
+					$taken_course->course_id = 0;
 				}
 
-				if ($subHours == 0)
+				if ($sub_hours == 0)
 				{ // If none specified, assume its the full amount.
-					$subHours = $takenCourse->hoursAwarded;
+					$sub_hours = $taken_course->hours_awarded;
 				}
 
 
-				if (($takenCourse->hoursAwarded > $subHours))
+				if (($taken_course->hours_awarded > $sub_hours))
 				{
 					// Okay, now this means that the course which we are
 					// using in the substitution-- the course which the student
 					// has actually taken-- is being split up in the substitution.
 					// We are only using a portion of its hours.
-					$remainingHours = $takenCourse->hoursAwarded - $subHours;
+					$remaining_hours = $taken_course->hours_awarded - $sub_hours;
 					
 					// Create a clone of the course with the leftover hours, and add
-					// it back into the listCoursesTaken.
-					$newCourseString = $takenCourse->toDataString();
-					$newCourse = new Course();
-					$newCourse->loadCourseFromDataString($newCourseString);
+					// it back into the list_courses_taken.
+					$new_course_string = $taken_course->to_data_string();
+					$new_course = new Course();
+					$new_course->load_course_from_data_string($new_course_string);
 
-					$newCourse->boolSubstitutionSplit = true;
-					$newCourse->boolSubstitutionNewFromSplit = true;
+					$new_course->bool_substitution_split = true;
+					$new_course->bool_substitution_new_from_split = true;
 
-          $newCourse->subjectID = $takenCourse->subjectID;
-          $newCourse->courseNum = $takenCourse->courseNum;
+          $new_course->subject_id = $taken_course->subject_id;
+          $new_course->course_num = $taken_course->course_num;
 					
-					$newCourse->hoursAwarded = $remainingHours;
-					if (is_object($newCourse->courseTransfer))
+					$new_course->hours_awarded = $remaining_hours;
+					if (is_object($new_course->course_transfer))
 					{
-						$newCourse->courseTransfer->hoursAwarded = $remainingHours;
+						$new_course->course_transfer->hours_awarded = $remaining_hours;
 					}
 
-					$takenCourse->boolSubstitutionSplit = true;
-					$takenCourse->hoursAwarded = $subHours;
-					if (is_object($takenCourse->courseTransfer))
+					$taken_course->bool_substitution_split = true;
+					$taken_course->hours_awarded = $sub_hours;
+					if (is_object($taken_course->course_transfer))
 					{
-						$takenCourse->courseTransfer->hoursAwarded = $subHours;
+						$taken_course->course_transfer->hours_awarded = $sub_hours;
 					}
 
 
 					
-					// Add the newCourse back into the student's listCoursesTaken.
-					$this->listCoursesTaken->add($newCourse);
+					// Add the newCourse back into the student's list_courses_taken.
+					$this->list_courses_taken->add($new_course);
 
 				}
 
 
-				$takenCourse->substitutionHours = $subHours;
-				$takenCourse->boolSubstitution = true;
-				$takenCourse->displayStatus = "completed";
-				$takenCourse->dbSubstitutionID = $subID;
+				$taken_course->substitution_hours = $sub_hours;
+				$taken_course->bool_substitution = true;
+				$taken_course->display_status = "completed";
+				$taken_course->db_substitution_id = $sub_id;
 
 
 				$substitution = new Substitution();
 
 				if ($cur["required_course_id"] > 0)
 				{
-					$courseRequirement = new Course($cur["required_course_id"]);
+					$course_requirement = new Course($cur["required_course_id"]);
 					
-					$this->arraySignificantCourses[$courseRequirement->courseID] = true;
+					$this->array_significant_courses[$course_requirement->course_id] = true;
 
 				} else {
 					// This is a group addition!
-					$courseRequirement = new Course($subCourseID, $subBoolTransfer);
-					$this->arraySignificantCourses[$subCourseID] = true;					
-					$substitution->boolGroupAddition = true;
+					$course_requirement = new Course($sub_course_id, $sub_bool_transfer);
+					$this->array_significant_courses[$sub_course_id] = true;					
+					$substitution->bool_group_addition = true;
 				}
 
-				$courseRequirement->assignedToGroupID = $cur["required_group_id"];
-				$courseRequirement->assignedToSemesterNum = $cur["required_semester_num"];
-				$takenCourse->assignedToGroupID = $cur["required_group_id"];
-				$takenCourse->assignedToSemesterNum = $cur["required_semester_num"];
+				$course_requirement->assigned_to_group_id = $cur["required_group_id"];
+				$course_requirement->assigned_to_semester_num = $cur["required_semester_num"];
+				$taken_course->assigned_to_group_id = $cur["required_group_id"];
+				$taken_course->assigned_to_semester_num = $cur["required_semester_num"];
 
-				$substitution->courseRequirement = $courseRequirement;
+				$substitution->course_requirement = $course_requirement;
 
 				
-				$substitution->courseListSubstitutions->add($takenCourse);
+				$substitution->course_list_substitutions->add($taken_course);
 				
 
-				$substitution->remarks = $subRemarks;
-				$substitution->facultyID = $facultyID;
-				$this->listSubstitutions->add($substitution);
+				$substitution->remarks = $sub_remarks;
+				$substitution->faculty_id = $faculty_id;
+				$this->list_substitutions->add($substitution);
 
 
 
 			} else {
-				//adminDebug("Taken course not found. $subCourseID $subTermID transfer: $subBoolTransfer");
+				//admin_debug("Taken course not found. $sub_course_id $sub_term_id transfer: $sub_bool_transfer");
 			}
 
 		}
 
-		//print_pre($this->listCoursesTaken->toString());
-		//print_pre($this->listSubstitutions->toString());
+		//print_pre($this->list_courses_taken->to_string());
+		//print_pre($this->list_substitutions->to_string());
 
 
 	}
@@ -487,56 +487,56 @@ class _Student
 	 * This loads a student's personal data, like name and so forth.
 	 *
 	 */
-	function loadStudentData()
+	function load_student_data()
 	{
 
 	  // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this is a non-FlightPath table.
-		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:students"];
+		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
 		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$tableName = $tsettings["tableName"];
+		$table_name = $tsettings["table_name"];
 
 		
 	  // Let's perform our queries.
-		$res = $this->db->dbQuery("SELECT * FROM $tableName 
-						          WHERE $tf->studentID = '?' ", $this->studentID);
-		$cur = $this->db->dbFetchArray($res);
+		$res = $this->db->db_query("SELECT * FROM $table_name 
+						          WHERE $tf->student_id = '?' ", $this->student_id);
+		$cur = $this->db->db_fetch_array($res);
 
 		
 
-		$this->cumulativeHours = $cur[$tf->cumulativeHours];
+		$this->cumulative_hours = $cur[$tf->cumulative_hours];
 		$this->gpa = $cur[$tf->gpa];
-		$this->rank = $this->getRankDescription($cur[$tf->rankCode]);
-		$this->majorCode = $cur[$tf->majorCode];
+		$this->rank = $this->get_rank_description($cur[$tf->rank_code]);
+		$this->major_code = $cur[$tf->major_code];
 
-		$this->name = ucwords(strtolower($cur[$tf->fName] . " " . $cur[$tf->lName]));
+		$this->name = ucwords(strtolower($cur[$tf->f_name] . " " . $cur[$tf->l_name]));
 
-		$catalog = $cur[$tf->catalogYear];
+		$catalog = $cur[$tf->catalog_year];
 		
 		// If this is written in the format 2006-2007, then we just want
 		// the first part.  Luckily, this will still work even if there WASN'T
 		// a - in there ;)
 	  $temp = explode("-", $catalog);
-	  $this->catalogYear = $temp[0];
+	  $this->catalog_year = $temp[0];
 
 	}
 
 	
 	/**
-	 * Given a rankCode like FR, SO, etc., get the english
+	 * Given a rank_code like FR, SO, etc., get the english
 	 * description. For example: Freshman, Sophomore, etc.
 	 *	 
 	 */
-	function getRankDescription($rankCode = "") {
-    $rankArray = array(
-      "FR"=>"Freshman", 
-      "SO"=>"Sophomore",
-      "JR"=>"Junior", 
-      "SR"=>"Senior", 
-      "PR"=>"Professional"
+	function get_rank_description($rank_code = "") {
+    $rank_array = array(
+      "FR"=>"_freshman", 
+      "SO"=>"_sophomore",
+      "JR"=>"_junior", 
+      "SR"=>"_senior", 
+      "PR"=>"_professional"
     );	  
     
-    return $rankArray[$rankCode];
+    return $rank_array[$rank_code];
         
 	}
 	
@@ -546,22 +546,22 @@ class _Student
 	 * Returns a student's degree plan object.
 	 *
 	 */
-	function getDegreePlan($boolLoadFull = true, $boolIgnoreSettings = false)
+	function get_degree_plan($bool_load_full = true, $bool_ignore_settings = false)
 	{
 		
-	  $tMajorCode = $this->getMajorAndTrackCode($boolIgnoreSettings);
-		//adminDebug($tMajorCode);
-		$degreeID = $this->db->getDegreeID($tMajorCode, $this->catalogYear);
-		if ($boolLoadFull)
+	  $t_major_code = $this->get_major_and_track_code($bool_ignore_settings);
+		//admin_debug($t_major_code);
+		$degree_id = $this->db->get_degree_id($t_major_code, $this->catalog_year);
+		if ($bool_load_full)
 		{
-			$degreePlan = new DegreePlan($degreeID, $this->db);
+			$degree_plan = new DegreePlan($degree_id, $this->db);
 		} else {
-			$degreePlan = new DegreePlan();
-			$degreePlan->degreeID = $degreeID;
-			$degreePlan->loadDescriptiveData();
+			$degree_plan = new DegreePlan();
+			$degree_plan->degree_id = $degree_id;
+			$degree_plan->load_descriptive_data();
 		}
 
-		return $degreePlan;
+		return $degree_plan;
 	}
 
 
@@ -571,40 +571,40 @@ class _Student
 	 *  MAJOR|CONC_TRACK
 	 *  Though usually it will be:
 	 * MAJR|_TRCK
-	 * Asumes you have already called "loadSettings()";
+	 * Asumes you have already called "load_settings()";
 	 */
-	function getMajorAndTrackCode($boolIgnoreSettings = false)
+	function get_major_and_track_code($bool_ignore_settings = false)
 	{
 
 		$rtn = "";
-		$majorCode = "";
+		$major_code = "";
 
-		if ($this->arraySettings["majorCode"] != "")
+		if ($this->array_settings["major_code"] != "")
 		{ // If they have settings saved, use those...
-			if ($this->arraySettings["trackCode"] != "")
+			if ($this->array_settings["track_code"] != "")
 			{
 				// if it does NOT have a | in it already....
-				if (!strstr($this->arraySettings["majorCode"], "|"))
+				if (!strstr($this->array_settings["major_code"], "|"))
 				{
-					$rtn = $this->arraySettings["majorCode"] . "|_" . $this->arraySettings["trackCode"];
+					$rtn = $this->array_settings["major_code"] . "|_" . $this->array_settings["track_code"];
 				} else {
 					// it DOES have a | already, so we join with just a _.  This would
 					// be the case if we have a track AND an concentration.
-					$rtn = $this->arraySettings["majorCode"] . "_" . $this->arraySettings["trackCode"];
+					$rtn = $this->array_settings["major_code"] . "_" . $this->array_settings["track_code"];
 				}
 			} else {
-				$rtn = $this->arraySettings["majorCode"];
+				$rtn = $this->array_settings["major_code"];
 			}
-			$majorCode = $this->arraySettings["majorCode"];
+			$major_code = $this->array_settings["major_code"];
 		} else {
-			$rtn = $this->majorCode;
+			$rtn = $this->major_code;
 		}
 
-		//adminDebug($this->arraySettings["majorCode"]);
+		//admin_debug($this->array_settings["major_code"]);
 		
-		if ($boolIgnoreSettings == true)
+		if ($bool_ignore_settings == true)
 		{
-			$rtn = $this->majorCode;
+			$rtn = $this->major_code;
 		}
 
 
@@ -614,78 +614,78 @@ class _Student
 
 	
 	
-	function loadCoursesTaken($boolLoadTransferCredits = true)
+	function load_courses_taken($bool_load_transfer_credits = true)
 	{
 
-	  $retakeGrades = $GLOBALS["fpSystemSettings"]["retakeGrades"];
+	  $retake_grades = $GLOBALS["fp_system_settings"]["retake_grades"];
 	  // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this involves non-FlightPath tables.
-		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:student_courses"];
+		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:student_courses"];
 		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$tableName = $tsettings["tableName"];
+		$table_name = $tsettings["table_name"];
 
-		// This will create and load the listCoursesTaken list.
-		// contains SQL queries to fully create the listCoursesTaken.
-		$res = $this->db->dbQuery("SELECT *	FROM $tableName									
+		// This will create and load the list_courses_taken list.
+		// contains SQL queries to fully create the list_courses_taken.
+		$res = $this->db->db_query("SELECT *	FROM $table_name									
                 							 WHERE 
-                								$tf->studentID = '?' ", $this->studentID);
+                								$tf->student_id = '?' ", $this->student_id);
 	
-		while($cur = $this->db->dbFetchArray($res))
+		while($cur = $this->db->db_fetch_array($res))
 		{
 
 			// Create a course object for this course...
-			$isTransfer = false;
-			$courseID = $this->db->getCourseID($cur[$tf->subjectID], $cur[$tf->courseNum]);
+			$is_transfer = false;
+			$course_id = $this->db->get_course_id($cur[$tf->subject_id], $cur[$tf->course_num]);
 
-			if (!$courseID)
+			if (!$course_id)
 			{
-				adminDebug("Course not found while trying to load student data: {$cur[$tf->subjectID]} {$cur[$tf->courseNum]}");
+				admin_debug("Course not found while trying to load student data: {$cur[$tf->subject_id]} {$cur[$tf->course_num]}");
 				continue;
 			}
 
-			$newCourse = new Course();
-			$newCourse->courseID = $courseID;
+			$new_course = new Course();
+			$new_course->course_id = $course_id;
 
 			// Load descriptive data for this course from the catalog (so we can get min, max, and repeat hours)
-			$newCourse->loadDescriptiveData();
+			$new_course->load_descriptive_data();
 
 			// Now, over-write whatever we got from the descriptive data with what the course was called
 			// when the student took it.
-			$newCourse->subjectID = $cur[$tf->subjectID];
-			$newCourse->courseNum = $cur[$tf->courseNum];
-			$newCourse->grade = $cur[$tf->grade];
-			$newCourse->termID = $cur[$tf->termID];
+			$new_course->subject_id = $cur[$tf->subject_id];
+			$new_course->course_num = $cur[$tf->course_num];
+			$new_course->grade = $cur[$tf->grade];
+			$new_course->term_id = $cur[$tf->term_id];
 			
 			// Is this grade supposed to be hidden from students?
-			if (in_array($newCourse->termID, $this->arrayHideGradesTerms)
-			  && $_SESSION["fpUserType"] == "student")
+			if (in_array($new_course->term_id, $this->array_hide_grades_terms)
+			  && $_SESSION["fp_user_type"] == "student")
 			{
-			  $newCourse->boolHideGrade = true;
+			  $new_course->bool_hide_grade = true;
 			}			
 			
-			$newCourse->hoursAwarded = trim($cur[$tf->hoursAwarded]);
-			$newCourse->displayStatus = "completed";
-			$newCourse->boolTaken = true;
+			$new_course->hours_awarded = trim($cur[$tf->hours_awarded]);
+			$new_course->display_status = "completed";
+			$new_course->bool_taken = true;
 			
 			// Was this course worth 0 hours but they didn't fail it?
 			// If so, we need to set it to actually be 1 hour, and
 			// indicate this is a "ghost hour."
-			if (!in_array($newCourse->grade, $retakeGrades) 
-			     && $newCourse->hoursAwarded == 0) 			
+			if (!in_array($new_course->grade, $retake_grades) 
+			     && $new_course->hours_awarded == 0) 			
 			{
-			  $newCourse->hoursAwarded = 1;
-			  $newCourse->boolGhostHour = TRUE;
+			  $new_course->hours_awarded = 1;
+			  $new_course->bool_ghost_hour = TRUE;
 			}			
 			
 			// Now, add the course to the list_courses_taken...
-			$this->listCoursesTaken->add($newCourse);
-			$this->arraySignificantCourses[$courseID] = true;
+			$this->list_courses_taken->add($new_course);
+			$this->array_significant_courses[$course_id] = true;
 			
 		}
 
 
 		
-		if ($boolLoadTransferCredits == false) {
+		if ($bool_load_transfer_credits == false) {
 			return;
 		}
 		
@@ -693,84 +693,84 @@ class _Student
 		// Tranfer credits?  Get those too...
 	  // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this involves non-FlightPath tables.
-		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:student_transfer_courses"];
+		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:student_transfer_courses"];
 		$tfa = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$tableName_a = $tsettings["tableName"];
+		$table_name_a = $tsettings["table_name"];
 			
-		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:transfer_courses"];
+		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:transfer_courses"];
 		$tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$tableName_b = $tsettings["tableName"];
+		$table_name_b = $tsettings["table_name"];
 		
 		
-		$res = $this->db->dbQuery("
+		$res = $this->db->db_query("
                   			SELECT *
-                  			FROM $tableName_a a, 
-                  			     $tableName_b b 
-                  			WHERE a.$tfa->transferCourseID = b.$tfb->transferCourseID
-                  			AND a.$tfa->studentID = '?' ", $this->studentID);
+                  			FROM $table_name_a a, 
+                  			     $table_name_b b 
+                  			WHERE a.$tfa->transfer_course_id = b.$tfb->transfer_course_id
+                  			AND a.$tfa->student_id = '?' ", $this->student_id);
 
-		while($cur = $this->db->dbFetchArray($res))
+		while($cur = $this->db->db_fetch_array($res))
 		{
-			$transferCourseID = $cur[$tfa->transferCourseID];
-			$institutionID = $cur[$tfb->institutionID];
+			$transfer_course_id = $cur[$tfa->transfer_course_id];
+			$institution_id = $cur[$tfb->institution_id];
 
-			$newCourse = new Course();
+			$new_course = new Course();
 
 			// Find out if this course has an eqv.
-			if ($courseID = $this->getTransferCourseEqv($transferCourseID, false, $cur[$tfa->termID]))
+			if ($course_id = $this->get_transfer_course_eqv($transfer_course_id, false, $cur[$tfa->term_id]))
 			{
-				$newCourse = new Course($courseID);
-				$this->arraySignificantCourses[$courseID] = true;
+				$new_course = new Course($course_id);
+				$this->array_significant_courses[$course_id] = true;
 			}
 
 
 
-			$tCourse = new Course();
-			$tCourse->subjectID = $cur[$tfb->subjectID];
-			$tCourse->courseNum = $cur[$tfb->courseNum];
-			$tCourse->courseID = $transferCourseID;
-			$tCourse->boolTransfer = true;
-			$tCourse->institutionID = $institutionID;
+			$t_course = new Course();
+			$t_course->subject_id = $cur[$tfb->subject_id];
+			$t_course->course_num = $cur[$tfb->course_num];
+			$t_course->course_id = $transfer_course_id;
+			$t_course->bool_transfer = true;
+			$t_course->institution_id = $institution_id;
 
-			$newCourse->boolTransfer = true;
+			$new_course->bool_transfer = true;
 
-			$newCourse->courseTransfer = $tCourse;
-			$newCourse->grade = $cur[$tfb->grade];
-			$tCourse->grade = $cur[$tfb->grade];
+			$new_course->course_transfer = $t_course;
+			$new_course->grade = $cur[$tfb->grade];
+			$t_course->grade = $cur[$tfb->grade];
 
-			$newCourse->hoursAwarded = $cur[$tfb->hoursAwarded];
-			$tCourse->hoursAwarded = $cur[$tfb->hoursAwarded];
+			$new_course->hours_awarded = $cur[$tfb->hours_awarded];
+			$t_course->hours_awarded = $cur[$tfb->hours_awarded];
 			
 			
 		  // Was this course worth 0 hours but they didn't fail it?
 			// If so, we need to set it to actually be 1 hour, and
 			// indicate this is a "ghost hour."
-			if (!in_array($newCourse->grade, $retakeGrades) 
-			     && $newCourse->hoursAwarded == 0) 			
+			if (!in_array($new_course->grade, $retake_grades) 
+			     && $new_course->hours_awarded == 0) 			
 			{
-			  $newCourse->hoursAwarded = 1;
-			  $newCourse->boolGhostHour = TRUE;
-			  $tCourse->hoursAwarded = 1;
-			  $tCourse->boolGhostHour = TRUE;
+			  $new_course->hours_awarded = 1;
+			  $new_course->bool_ghost_hour = TRUE;
+			  $t_course->hours_awarded = 1;
+			  $t_course->bool_ghost_hour = TRUE;
 			}						
 			
-			$newCourse->boolTaken = true;
-			$tCourse->boolTaken = true;
+			$new_course->bool_taken = true;
+			$t_course->bool_taken = true;
 			
 
-			$newCourse->termID = $cur[$tfb->termID];
-			if (strstr($newCourse->termID, "9999"))
+			$new_course->term_id = $cur[$tfb->term_id];
+			if (strstr($new_course->term_id, "9999"))
 			{
 				// was an unknown semester.  Let's set it lower so
 				// it doesn't screw up my sorting.
-				$newCourse->termID = 11111;
+				$new_course->term_id = 11111;
 			}
-      $tCourse->termID = $newCourse->termID;
-			$newCourse->displayStatus = "completed";
+      $t_course->term_id = $new_course->term_id;
+			$new_course->display_status = "completed";
 
-			$this->listCoursesTaken->add($newCourse);
+			$this->list_courses_taken->add($new_course);
 		}
-		//		print_pre($this->listCoursesTaken->toString());
+		//		print_pre($this->list_courses_taken->to_string());
 
 	}
 
@@ -781,15 +781,15 @@ class _Student
 	 * Find a transfer eqv for this student, for this course in question.
 	 *
 	 */
-	function getTransferCourseEqv($transferCourseID, $boolIgnoreUnassigned = false, $requireValidTermID = "")
+	function get_transfer_course_eqv($transfer_course_id, $bool_ignore_unassigned = false, $require_valid_term_id = "")
 	{
 		
 	  // First, make sure that this transfer course hasn't
 		// been unassigned.  Do this by checking through
 		// the student's courseListUnassignedTransferEQVs.
-		$tempCourse = new Course();
-		$tempCourse->courseID = $transferCourseID;
-		if ($boolIgnoreUnassigned == false && $this->listTransferEqvsUnassigned->findMatch($tempCourse)) {
+		$temp_course = new Course();
+		$temp_course->course_id = $transfer_course_id;
+		if ($bool_ignore_unassigned == false && $this->list_transfer_eqvs_unassigned->find_match($temp_course)) {
 			// The transfer course in question has had its eqv removed,
 			// so skip it!
 			return false;
@@ -798,29 +798,29 @@ class _Student
     
 	  // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this involves non-FlightPath tables.
-		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:transfer_eqv_per_student"];
+		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:transfer_eqv_per_student"];
 		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$tableName = $tsettings["tableName"];
+		$table_name = $tsettings["table_name"];
 
 		
-    $validTermLine = "";
-    if ($requireValidTermID != "") {
+    $valid_term_line = "";
+    if ($require_valid_term_id != "") {
       // We are requesting eqv's only from a particular valid term, so, amend
       // the query.
-      $validTermLine = "AND $tf->validTermID = $requireValidTermID ";
+      $valid_term_line = "AND $tf->valid_term_id = $require_valid_term_id ";
     }
 		
         
 		// Does the supplied transfer course ID have an eqv?
-		$res = $this->db->dbQuery("
-			SELECT * FROM $tableName
-			WHERE $tf->transferCourseID = '?'
-			AND $tf->studentID = '?'
-			AND $tf->brokenID = '0'
-			$validTermLine 	", $transferCourseID, $this->studentID);
+		$res = $this->db->db_query("
+			SELECT * FROM $table_name
+			WHERE $tf->transfer_course_id = '?'
+			AND $tf->student_id = '?'
+			AND $tf->broken_id = '0'
+			$valid_term_line 	", $transfer_course_id, $this->student_id);
 
-		if ($cur = $this->db->dbFetchArray($res)) {
-			return $cur[$tf->localCourseID];
+		if ($cur = $this->db->db_fetch_array($res)) {
+			return $cur[$tf->local_course_id];
 		}
  
 		return false;
@@ -828,10 +828,10 @@ class _Student
 	}
 	
 	
-	function toString()	{
+	function to_string()	{
 		$rtn = "Student Information:\n";
 		$rtn .= " Courses Taken:\n";
-		$rtn .= $this->listCoursesTaken->toString();
+		$rtn .= $this->list_courses_taken->to_string();
 		return $rtn;
 	}
 

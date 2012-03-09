@@ -1,6 +1,6 @@
 <?php
 
-class DatabaseHandler extends _DatabaseHandler
+class DatabaseHandler extends __database_handler
 {
 
 }

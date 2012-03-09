@@ -1,7 +1,7 @@
 <?php
-class Course extends _Course
+class Course extends __course
 {
-  // This custom class is overriding the course class of _Course.
+  // This custom class is overriding the course class of __course.
   
   
   

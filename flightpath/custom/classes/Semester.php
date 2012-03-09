@@ -1,6 +1,6 @@
 <?php
 
-class Semester extends _Semester
+class Semester extends __semester
 {
   
   

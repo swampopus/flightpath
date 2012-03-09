@@ -27,69 +27,69 @@ flightpath team.
 
 require_once("bootstrap.inc");
 
-$screen = new AdvisingScreen("",null,"notAdvising");
+$screen = new AdvisingScreen("",null,"not_advising");
 $db = new DatabaseHandler();
 
-if ($_SESSION["fpLoggedIn"] != true)
+if ($_SESSION["fp_logged_in"] != true)
 {
-  displayPleaseLogin();
+  display_please_login();
   die;
 }
 
 
 
-$action = trim($_POST["performAction"]);
+$action = trim($_POST["perform_action"]);
 if ($action == "")
 {
-	displayErrorForm();
+	display_error_form();
 }
 
 if ($action == "send")
 {
-	performSend();
+	perform_send();
 }
 
 die;
 
-function displayPleaseLogin() {
+function display_please_login() {
   
   // Check for hooks...
-  if (function_exists("popup_report_contact_displayPleaseLogin")) {
-    return call_user_func("popup_report_contact_displayPleaseLogin");
+  if (function_exists("popup_report_contact_display_please_login")) {
+    return call_user_func("popup_report_contact_display_please_login");
   }  
   
   $screen = new AdvisingScreen();
-  $screen->pageIsPopup = TRUE;
+  $screen->page_is_popup = TRUE;
 
-	$tabArray[0]["title"] = "Contact";
-	$tabArray[0]["active"] = TRUE;
-	$screen->pageTabs = $screen->drawTabs($tabArray);
+	$tab_array[0]["title"] = "_contact";
+	$tab_array[0]["active"] = TRUE;
+	$screen->page_tabs = $screen->draw_tabs($tab_array);
 	
-	$pageContent .= $screen->drawCurvedTitle("Please login first...");
-	$pageContent .= "For security reasons, you must be signed in to FlightPath to use
+	$page_content .= $screen->draw_curved_title("Please login first...");
+	$page_content .= "For security reasons, you must be signed in to FlightPath to use
 			this contact system.  <br><br>If you are having trouble
 			signing on FlightPath, 
 			visit <a href='javascript: popupHelpWindow(\"help.php?i=5\");'>this help page</a>,
 			or call the Computing Center help desk
 			at 342-3333.  Thank you.";
-	$screen->pageHideReportError = TRUE;
-	$pageContent .= "<script type='text/javascript'>
+	$screen->page_hide_report_error = TRUE;
+	$page_content .= "<script type='text/javascript'>
 						var csid=0;";
-	$pageContent .= $screen->getJS_popupHelpWindow();
-	$pageContent .= "</script>";
+	$page_content .= $screen->get_j_s_popup_help_window();
+	$page_content .= "</script>";
 
-	$screen->pageContent = $pageContent;
-	$screen->outputToBrowser();
+	$screen->page_content = $page_content;
+	$screen->output_to_browser();
 	
 }
 
-function performSend()
+function perform_send()
 {
   global $db;
   
   // Check for hooks...
-  if (function_exists("popup_report_contact_performSend")) {
-    return call_user_func("popup_report_contact_performSend");
+  if (function_exists("popup_report_contact_perform_send")) {
+    return call_user_func("popup_report_contact_perform_send");
   }  
   
 
@@ -97,21 +97,21 @@ function performSend()
 	
 	// This function will email out the error reporting thing.
 	$onscreen = addslashes(trim($_POST["onscreen"]));
-	$cwid = $_SESSION["fpUserID"];
-	$usertype = $_SESSION["fpUserType"];
+	$cwid = $_SESSION["fp_user_id"];
+	$usertype = $_SESSION["fp_user_type"];
 	if ($usertype == "student")
 	{
-		$username = $db->getStudentName($cwid, false);
+		$username = $db->get_student_name($cwid, false);
 	} else {
-		$username = $db->getFacultyName($cwid, false);
+		$username = $db->get_faculty_name($cwid, false);
 	}
 	
-	$da_possible_student = $_SESSION["advisingStudentID"];
+	$da_possible_student = $_SESSION["advising_student_id"];
 	$problem = trim($_POST["problem"]);
 
 	if ($problem == "")
 	{
-		displayErrorForm();
+		display_error_form();
 		die;
 	}
 	
@@ -136,57 +136,57 @@ function performSend()
 
 		$msg = addslashes($msg);
 		
-		mail($GLOBALS["fpSystemSettings"]["contactEmailAddress"],$subject,$msg,$headers);
+		mail($GLOBALS["fp_system_settings"]["contact_email_address"],$subject,$msg,$headers);
 
 	} 
 
 	$_SESSION["da_error_report_md5"] = $themd5;
 
-	$screen->pageIsPopup = TRUE;
-	$tabArray[0]["title"] = "Contact";
-	$tabArray[0]["active"] = TRUE;
-	$screen->pageHideReportError = TRUE;
-	$screen->pageTabs = $screen->drawTabs($tabArray);
+	$screen->page_is_popup = TRUE;
+	$tab_array[0]["title"] = "_contact";
+	$tab_array[0]["active"] = TRUE;
+	$screen->page_hide_report_error = TRUE;
+	$screen->page_tabs = $screen->draw_tabs($tab_array);
 	$pC = "";
 
-	$pC .= $screen->drawCurvedTitle("Contact the FlightPath Production Team");
+	$pC .= $screen->draw_curved_title("Contact the FlightPath Production Team");
 	$pC .= "Thank you very much for your submission!  Your message
 			has been forwarded to the FlightPath production team.
 			<br><br>
 			You may now close this window.";
 
 
-	//$pageContent = $pC;
-	$screen->pageContent = $pC;
+	//$page_content = $pC;
+	$screen->page_content = $pC;
 	
 	// send to the browser
-	$screen->outputToBrowser();
+	$screen->output_to_browser();
 	
 
 } // doPerformSend
 
 
 
-function displayErrorForm()
+function display_error_form()
 {
 
   // Check for hooks...
-  if (function_exists("popup_report_contact_displayErrorForm")) {
-    return call_user_func("popup_report_contact_displayErrorForm");
+  if (function_exists("popup_report_contact_display_error_form")) {
+    return call_user_func("popup_report_contact_display_error_form");
   }  
   
   
 	$screen = new AdvisingScreen();
 	
-	$screen->pageIsPopup = TRUE;
-	$tabArray[0]["title"] = "Contact";
-	$tabArray[0]["active"] = TRUE;
-	$screen->pageHideReportError = TRUE;
-	$screen->pageTabs = $screen->drawTabs($tabArray);
+	$screen->page_is_popup = TRUE;
+	$tab_array[0]["title"] = "_contact";
+	$tab_array[0]["active"] = TRUE;
+	$screen->page_hide_report_error = TRUE;
+	$screen->page_tabs = $screen->draw_tabs($tab_array);
 
 	$pC = "";
 	
-	$pC .= $screen->drawCurvedTitle("Contact the FlightPath Production Team");
+	$pC .= $screen->draw_curved_title("Contact the FlightPath Production Team");
 	$pC .= "<div style='margin-top: 5px;' class='elevenpt'>
 			If you've noticed an error, have a suggestion, or just wish to 
 			contact the developers of FlightPath,
@@ -235,10 +235,10 @@ function displayErrorForm()
 			 </form>
 			 ";
 
-	$screen->pageContent = $pC;
+	$screen->page_content = $pC;
 	// send to the browser
-	$screen->pageHideReportError = TRUE;
-	$screen->outputToBrowser();
+	$screen->page_hide_report_error = TRUE;
+	$screen->output_to_browser();
 	
 }
 

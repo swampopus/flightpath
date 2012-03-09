@@ -28,13 +28,13 @@ header("Cache-control: private");
 
 require_once("bootstrap.inc");
 
-if ($_SESSION["fpLoggedIn"] != true)
+if ($_SESSION["fp_logged_in"] != true)
 { // If not logged in, show the login screen.
 	header("Location: main.php");
 	die;
 }
 
-if ($_SESSION["fpUserType"] == "student" || $_SESSION["fpCanSearch"] == false)
+if ($_SESSION["fp_user_type"] == "student" || $_SESSION["fp_can_search"] == false)
 { // keep hacker kids out.
 	session_destroy();
 	die ("You do not have access to this function. <a href='main.php'>Log back into FlightPath.</a>");
@@ -46,7 +46,7 @@ if ($_SESSION["fpUserType"] == "student" || $_SESSION["fpCanSearch"] == false)
 ///  from a tab change?
 /////////////////////////////////////
 $fp = new FlightPath();
-$fp->processRequestSaveDraft();
+$fp->process_request_save_draft();
 
 
 
@@ -56,64 +56,64 @@ $fp->processRequestSaveDraft();
 //$_SESSION["fpUserBudgetCode"] = "10520";  // biology
 
 
-$screen = new AdvisingScreen("",null,"notAdvising");
-$screen->initAdvisingVariables(true);
+$screen = new AdvisingScreen("",null,"not_advising");
+$screen->init_advising_variables(true);
 
-$student = new Student($GLOBALS["advisingStudentID"]);
+$student = new Student($GLOBALS["advising_student_id"]);
 $screen->student = $student;
 $db = new DatabaseHandler();
 
 
-$performAction = trim(addslashes($_REQUEST["performAction"]));
+$perform_action = trim(addslashes($_REQUEST["perform_action"]));
 
 // Get search results from POST -or- past search attempts
 // from the session.
-$searchFor = trim($_REQUEST["searchFor"]);
-if ($searchFor == "")
+$search_for = trim($_REQUEST["search_for"]);
+if ($search_for == "")
 {
-	$searchFor = trim($_SESSION["studentSearchFor"]);
+	$search_for = trim($_SESSION["student_search_for"]);
 }
 
 
-if ($performAction == "")
+if ($perform_action == "")
 {
-	if ($searchFor == "")
+	if ($search_for == "")
 	{
-		$performAction = "list";
+		$perform_action = "list";
 	} else {
-		$performAction = "search";
+		$perform_action = "search";
 	}
 }
 
 
 
 
-if ($performAction == "search")
+if ($perform_action == "search")
 { // by default, go to the search page.
-	displayAdviseeSearch();
+	display_advisee_search();
 	die;
 }
 
-if ($performAction == "list")
+if ($perform_action == "list")
 { // Just the list of advisees.
-	displayAdviseeList();
+	display_advisee_list();
 	die;
 }
 
-if ($performAction == "majors")
+if ($perform_action == "majors")
 { // Just the list of advisees.
-	displayAdviseeMajors();
+	display_advisee_majors();
 	die;
 }
 
 
 
 
-function getAdvisees($sql = "")
+function get_advisees($sql = "")
 {
   // Check for hooks...
-  if (function_exists("studentsearch_getAdvisees")) {
-    return call_user_func("studentsearch_getAdvisees", $sql);
+  if (function_exists("studentsearch_get_advisees")) {
+    return call_user_func("studentsearch_get_advisees", $sql);
   }
 
   
@@ -122,90 +122,90 @@ function getAdvisees($sql = "")
 
 	// Let's pull the needed variables out of our settings, so we know what
 	// to query, because this is a non-FlightPath table.
-	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:advisor_student"];
+	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:advisor_student"];
 	$tfa = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-	$tableName_a = $tsettings["tableName"];		
+	$table_name_a = $tsettings["table_name"];		
 
 	// Let's pull the needed variables out of our settings, so we know what
 	// to query, because this is a non-FlightPath table.
-	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:students"];
+	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
 	$tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-	$tableName_b = $tsettings["tableName"];			
+	$table_name_b = $tsettings["table_name"];			
 
-  $rankIn = "( '" . join("', '", $GLOBALS["fpSystemSettings"]["allowedStudentRanks"]) . "' )";
+  $rank_in = "( '" . join("', '", $GLOBALS["fp_system_settings"]["allowed_student_ranks"]) . "' )";
 	
 	
-  $orderBy = " $tfb->majorCode, $tfb->lName, $tfb->fName ";
+  $order_by = " $tfb->major_code, $tfb->l_name, $tfb->f_name ";
   
 	if ($sql == "")
 	{
 		// By default, just list for me whatever students are in
 		// the table as being my advisees.
-		$userID = $_SESSION["fpUserID"];
+		$user_id = $_SESSION["fp_user_id"];
 		$sql = "
-			SELECT * FROM $tableName_a a, $tableName_b b
-							WHERE a.$tfa->studentID = b.$tfb->studentID
-							AND a.$tfa->facultyID = '$userID' 
-							AND $tfb->rankCode IN %RANKIN%
+			SELECT * FROM $table_name_a a, $table_name_b b
+							WHERE a.$tfa->student_id = b.$tfb->student_id
+							AND a.$tfa->faculty_id = '$user_id' 
+							AND $tfb->rank_code IN %RANKIN%
 							%EXTRA_STUDENTSEARCH_CONDITIONS%
 							ORDER BY %ORDERBY%
 			";
 	}
 
 	// Replace the replacement portion with our derrived variables.
-	$sql = str_replace("%RANKIN%", $rankIn, $sql);
-	$sql = str_replace("%ORDERBY%", $orderBy, $sql);
-	$sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $GLOBALS["fpSystemSettings"]["extraStudentSearchConditions"], $sql);
+	$sql = str_replace("%RANKIN%", $rank_in, $sql);
+	$sql = str_replace("%ORDERBY%", $order_by, $sql);
+	$sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $GLOBALS["fp_system_settings"]["extra_student_search_conditions"], $sql);
   
-	//debugCT($sql);
+	//debug_c_t($sql);
 	// Returns an array of all of this teacher's advisees.
-	$rtnArray = array();
+	$rtn_array = array();
 	$r = 0;
 	
-	$result = $db->dbQuery($sql);
-	while ($cur = $db->dbFetchArray($result))
+	$result = $db->db_query($sql);
+	while ($cur = $db->db_fetch_array($result))
 	{
 
-		$studentID = trim($cur[$tfb->studentID]);
-		$rtnArray[$r]["studentID"] = $studentID;
-		$rtnArray[$r]["firstName"] = ucwords(strtolower($cur[$tfb->fName]));
-		$rtnArray[$r]["lastName"] = ucwords(strtolower($cur[$tfb->lName]));
-		$rtnArray[$r]["rank"] = $cur[$tfb->rankCode];
-		$rtnArray[$r]["catalogYear"] = $cur[$tfb->catalogYear];
-		$rtnArray[$r]["major"] = $cur[$tfb->majorCode];
+		$student_id = trim($cur[$tfb->student_id]);
+		$rtn_array[$r]["student_id"] = $student_id;
+		$rtn_array[$r]["first_name"] = ucwords(strtolower($cur[$tfb->f_name]));
+		$rtn_array[$r]["last_name"] = ucwords(strtolower($cur[$tfb->l_name]));
+		$rtn_array[$r]["rank"] = $cur[$tfb->rank_code];
+		$rtn_array[$r]["catalog_year"] = $cur[$tfb->catalog_year];
+		$rtn_array[$r]["major"] = $cur[$tfb->major_code];
 		
 
 		// We should also mark if the student has been advised for this semester
 		// or not.
-		//debugCT("{$GLOBALS["settingAdvisingTermID"]}");
-		$advisedImage = "&nbsp;";
-		$advisingSessionID = "";
+		//debug_c_t("{$_g_l_o_b_a_l_s["setting_advising_term_id"]}");
+		$advised_image = "&nbsp;";
+		$advising_session_id = "";
 		$res2 = mysql_query("SELECT * FROM advising_sessions WHERE
-							`student_id`='$studentID' AND
-							`term_id` = '{$GLOBALS["settingAdvisingTermID"]}' 
+							`student_id`='$student_id' AND
+							`term_id` = '{$GLOBALS["setting_advising_term_id"]}' 
 							 AND `is_draft`='0' 
 							ORDER BY `datetime` DESC") or die(mysql_error());
 		if (mysql_num_rows($res2) > 0)
 		{
 			$cur = mysql_fetch_array($res2);
 
-			$advisedImage = "<img src='$screen->themeLocation/images/small_check.gif' class='advisedImage'>";
+			$advised_image = "<img src='$screen->theme_location/images/small_check.gif' class='advisedImage'>";
 
 			if ($cur["is_whatif"] == "1")
 			{ // Last advising was a What If advising.
-				$advisedImage = "<span title='This student was last advised in What If mode.'><img src='$screen->themeLocation/images/small_check.gif'><sup>wi</sup></span>";
-				$dbMajor = $cur["major_code"];
-				$temp = split("\|_",$dbMajor);
-				$rtnArray[$r]["whatIfMajorCode"] = trim($temp[0]);
-				$rtnArray[$r]["whatIfTrackCode"] = trim($temp[1]);
+				$advised_image = "<span title='This student was last advised in What If mode.'><img src='$screen->theme_location/images/small_check.gif'><sup>wi</sup></span>";
+				$db_major = $cur["major_code"];
+				$temp = split("\|_",$db_major);
+				$rtn_array[$r]["what_if_major_code"] = trim($temp[0]);
+				$rtn_array[$r]["what_if_track_code"] = trim($temp[1]);
 			}
-			//$advisingSessionID = trim($cur["advising_session_id"]);
+			//$advising_session_id = trim($cur["advising_session_id"]);
 		}
 
 
-		$rtnArray[$r]["advisingSessionID"] = $advising_session_id;
-		//$rtnArray[$r]["hypo_settings"] = $hypo_settings;
-		$rtnArray[$r]["advisedImage"] = $advisedImage;
+		$rtn_array[$r]["advising_session_id"] = $advising_session_id;
+		//$rtn_array[$r]["hypo_settings"] = $hypo_settings;
+		$rtn_array[$r]["advised_image"] = $advised_image;
 
 
 		$r++;
@@ -213,17 +213,17 @@ function getAdvisees($sql = "")
 
 
 
-	return $rtnArray;
+	return $rtn_array;
 } // get_advisees
 
 
 
-function displayAdviseeMajors()
+function display_advisee_majors()
 {
   
   // Check for hooks...
-  if (function_exists("studentsearch_displayAdviseeMajors")) {
-    return call_user_func("studentsearch_displayAdviseeMajors");
+  if (function_exists("studentsearch_display_advisee_majors")) {
+    return call_user_func("studentsearch_display_advisee_majors");
   }
   
   
@@ -231,62 +231,62 @@ function displayAdviseeMajors()
 	$pC = "";
 
 	// clear search strings
-	$pC .= getJS_functions();
-	$pC .= $screen->displayGreeting();
-	$pC .= drawViewSelector("majors");
+	$pC .= get_j_s_functions();
+	$pC .= $screen->display_greeting();
+	$pC .= draw_view_selector("majors");
 
-	$pC .= $screen->displayBeginSemesterTable();
-	$pC .= $screen->drawCurrentlyAdvisingBox(true);
+	$pC .= $screen->display_begin_semester_table();
+	$pC .= $screen->draw_currently_advising_box(true);
 
-	$facultyUserMajorCode = $_SESSION["fpFacultyUserMajorCode"];
+	$faculty_user_major_code = $_SESSION["fp_faculty_user_major_code"];
 
 	
 	// Let's pull the needed variables out of our settings, so we know what
 	// to query, because this is a non-FlightPath table.
-	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:students"];
+	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
 	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-	$tableName = $tsettings["tableName"];				
-	$sql = "SELECT * FROM $tableName
-	        WHERE substring_index($tf->majorCode, '|', 1) = '$facultyUserMajorCode'
-	        AND $tf->rankCode IN %RANKIN%
+	$table_name = $tsettings["table_name"];				
+	$sql = "SELECT * FROM $table_name
+	        WHERE substring_index($tf->major_code, '|', 1) = '$faculty_user_major_code'
+	        AND $tf->rank_code IN %RANKIN%
 	        %EXTRA_STUDENTSEARCH_CONDITIONS%
 	        ORDER BY %ORDERBY%";	
 	
 
-	$advArray = getAdvisees($sql);
+	$adv_array = get_advisees($sql);
 	$pC .= "<tr><td valign='top'>";
-	$degreePlan = $db->getDegreePlan($facultyUserMajorCode);
+	$degree_plan = $db->get_degree_plan($faculty_user_major_code);
 	$mm = "";
-	if (is_object($degreePlan)) {
-	  $mm = ": " . $degreePlan->title;
+	if (is_object($degree_plan)) {
+	  $mm = ": " . $degree_plan->title;
 	}
 	
-	$s = (count($advArray) == 1) ? "" : "s";	
-  $pC .= drawAdvisees($advArray, "Advisees in Major$mm &nbsp; ( " . count($advArray) . " student$s )");	
+	$s = (count($adv_array) == 1) ? "" : "s";	
+  $pC .= draw_advisees($adv_array, "Advisees in Major$mm &nbsp; ( " . count($adv_array) . " student$s )");	
 	
 	$pC .= "</td></tr>";
 
 
-	$db->addToLog("student_search_major", "$mm");
+	$db->add_to_log("student_search_major", "$mm");
 
-	$pC .= $screen->displayEndSemesterTable();
+	$pC .= $screen->display_end_semester_table();
 
-	$screen->pageContent = $pC;
-	$screen->pageHasSearch = true;
-	$screen->buildSystemTabs(1);
+	$screen->page_content = $pC;
+	$screen->page_has_search = true;
+	$screen->build_system_tabs(1);
 	// send to the browser
-	$screen->outputToBrowser();
+	$screen->output_to_browser();
 
 
 } // doDisplayAdviseeMajors
 
 
 
-function displayAdviseeList()
+function display_advisee_list()
 {
   // Check for hooks...
-  if (function_exists("studentsearch_displayAdviseeList")) {
-    return call_user_func("studentsearch_displayAdviseeList");
+  if (function_exists("studentsearch_display_advisee_list")) {
+    return call_user_func("studentsearch_display_advisee_list");
   }
 
   
@@ -295,51 +295,51 @@ function displayAdviseeList()
 	// advisor.
 	$pC = "";
 
-	$_SESSION["studentSearchFor"] = "";
+	$_SESSION["student_search_for"] = "";
 	
-	$pC .= getJS_functions();
-	$pC .= $screen->displayGreeting();
-	$pC .= drawViewSelector("advisees");
+	$pC .= get_j_s_functions();
+	$pC .= $screen->display_greeting();
+	$pC .= draw_view_selector("advisees");
 
-	$pC .= $screen->displayBeginSemesterTable();
-	$pC .= $screen->drawCurrentlyAdvisingBox(true);
+	$pC .= $screen->display_begin_semester_table();
+	$pC .= $screen->draw_currently_advising_box(true);
 
 	// Get my list of advisees...
-	$advArray = getAdvisees();
+	$adv_array = get_advisees();
 
 	$pC .= "<tr><td valign='top'>";
-	$s = (count($advArray) == 1) ? "" : "s";	
-  $pC .= drawAdvisees($advArray, "List of Advisees &nbsp; ( " . count($advArray) . " student$s )");	
+	$s = (count($adv_array) == 1) ? "" : "s";	
+  $pC .= draw_advisees($adv_array, "List of Advisees &nbsp; ( " . count($adv_array) . " student$s )");	
 
 	$pC .= "</td></tr>";
-	$pC .= $screen->displayEndSemesterTable();
+	$pC .= $screen->display_end_semester_table();
 
 
-	/*	$pageHasSearch = true;
+	/*	$page_has_search = true;
 	$pageTabs = getTabs();
-	$pageContent = $pC;
+	$page_content = $pC;
 	include("./template/fp_template.php");
 	*/
 
-	$db->addToLog("student_search_advisees");
+	$db->add_to_log("student_search_advisees");
 
-	$screen->pageContent = $pC;
-	$screen->pageHasSearch = true;
-	$screen->buildSystemTabs(1);
+	$screen->page_content = $pC;
+	$screen->page_has_search = true;
+	$screen->build_system_tabs(1);
 	// send to the browser
-	$screen->outputToBrowser();
+	$screen->output_to_browser();
 
 
 } // doDisplayAdviseeList
 
 
 
-function drawAdvisees($advArray, $title)
+function draw_advisees($adv_array, $title)
 {
   
   // Check for hooks...
-  if (function_exists("studentsearch_drawAdvisees")) {
-    return call_user_func("studentsearch_drawAdvisess", $advArray, $title);
+  if (function_exists("studentsearch_draw_advisees")) {
+    return call_user_func("studentsearch_draw_advisess", $adv_array, $title);
   }
 
   
@@ -348,14 +348,14 @@ function drawAdvisees($advArray, $title)
 	// the advisees listed in the advArray.
 	$rtn = "";
 
-	$rtn .= $screen->drawCurvedTitle($title);
+	$rtn .= $screen->draw_curved_title($title);
 
 
 	$rtn .= "<table width='100%' align='left'
  border='0' cellpadding='0' cellspacing='0'>";
 
 	// Do not show headers at all if mobile
-	if (!$screen->pageIsMobile) {
+	if (!$screen->page_is_mobile) {
 	 $rtn .= "
   	  <td width='5%' valign='top'>&nbsp; </td>
       <td width='12%' valign='top' class='tenpt'><b>CWID</b></td>
@@ -370,44 +370,44 @@ function drawAdvisees($advArray, $title)
 	$rtn .= "
     </tr>";	
 
-	for ($t = 0; $t < count($advArray); $t++)
+	for ($t = 0; $t < count($adv_array); $t++)
 	{
-		$studentID = $advArray[$t]["studentID"];
-		$firstName = $advArray[$t]["firstName"];
-		$lastName = $advArray[$t]["lastName"];
-		$major = $advArray[$t]["major"];
-		$advisingWhatIf = $advArray[$t]["advisingWhatIf"];
-		$whatIfMajorCode = $advArray[$t]["whatIfMajorCode"];
-		$whatIfTrackCode = $advArray[$t]["whatIfTrackCode"];
-		$degreeID = $advArray[$t]["degreeID"];
-		$rank = $advArray[$t]["rank"];
-		$catalogYear = $advArray[$t]["catalogYear"];
-		if ($screen->pageIsMobile) {
-		  $catalogYear = getShorterCatalogYearRange($catalogYear, false, true);
+		$student_id = $adv_array[$t]["student_id"];
+		$first_name = $adv_array[$t]["first_name"];
+		$last_name = $adv_array[$t]["last_name"];
+		$major = $adv_array[$t]["major"];
+		$advising_what_if = $adv_array[$t]["advising_what_if"];
+		$what_if_major_code = $adv_array[$t]["what_if_major_code"];
+		$what_if_track_code = $adv_array[$t]["what_if_track_code"];
+		$degree_id = $adv_array[$t]["degree_id"];
+		$rank = $adv_array[$t]["rank"];
+		$catalog_year = $adv_array[$t]["catalog_year"];
+		if ($screen->page_is_mobile) {
+		  $catalog_year = get_shorter_catalog_year_range($catalog_year, false, true);
 		}
-		$advisingSessionID = $advArray[$t]["advisingSessionID"];
-		$advisedImage = $advArray[$t]["advisedImage"];
+		$advising_session_id = $adv_array[$t]["advising_session_id"];
+		$advised_image = $adv_array[$t]["advised_image"];
 
-		$onMouse = "onmouseover=\"style.backgroundColor='#FFFF99'\"
+		$on_mouse = "onmouseover=\"style.backgroundColor='#FFFF99'\"
                onmouseout=\"style.backgroundColor='white'\"
                 ";
-		if ($screen->pageIsMobile) $onMouse = ""; // Causes problems on mobile devices.
+		if ($screen->page_is_mobile) $on_mouse = ""; // Causes problems on mobile devices.
 		
 		$rtn .= "
 	    <tr height='19'>
           <td colspan='7'>
 		     <table border='0' 
-		          $onMouse
-               onClick='selectStudent(\"$studentID\",\"$major\",\"$whatIfMajorCode\",\"$whatIfTrackCode\")'
+		          $on_mouse
+               onClick='selectStudent(\"$student_id\",\"$major\",\"$what_if_major_code\",\"$what_if_track_code\")'
                width='100%' >
               <tr height='20'>
-               	<td width='5%' class='hand'>$advisedImage</td>  
-		       	<td width='12%' class='hand'><font size='2'>$studentID</font></td>
-        	   	<td width='15%' class='hand'><font size='2'>$firstName </font></td>
-        		<td width='20%' class='hand'><font size='2'>$lastName </font></td>    
+               	<td width='5%' class='hand'>$advised_image</td>  
+		       	<td width='12%' class='hand'><font size='2'>$student_id</font></td>
+        	   	<td width='15%' class='hand'><font size='2'>$first_name </font></td>
+        		<td width='20%' class='hand'><font size='2'>$last_name </font></td>    
 	    		<td width='15%' class='hand'><font size='2'>$major</td>
         		<td width='10%' class='hand'><font size='2'>$rank</td>
-        		<td width='15%' class='hand'><font size='2'>$catalogYear</td>
+        		<td width='15%' class='hand'><font size='2'>$catalog_year</td>
         	   </tr>
               </table>
             </td>	
@@ -439,12 +439,12 @@ function drawAdvisees($advArray, $title)
 } //draw_advisees
 
 
-function drawViewSelector($selectedView)
+function draw_view_selector($selected_view)
 {
   
   // Check for hooks...
-  if (function_exists("studentsearch_drawViewSelector")) {
-    return call_user_func("studentsearch_drawViewSelector", $selectedView);
+  if (function_exists("studentsearch_draw_view_selector")) {
+    return call_user_func("studentsearch_draw_view_selector", $selected_view);
   }
 
   
@@ -452,14 +452,14 @@ function drawViewSelector($selectedView)
 
 	$rtn .= "<div class='tenpt'>";
 
-	$lArray = array("advisees"=>"List My Advisees~studentsearch.php?performAction=list",
+	$l_array = array("advisees"=>"List My Advisees~studentsearch.php?performAction=list",
 	"majors"=>"List Majors~studentsearch.php?performAction=majors",
 	"search"=>"Search For Advisees~studentsearch.php?performAction=search");
-	foreach($lArray as $key => $value)
+	foreach($l_array as $key => $value)
 	{
 		$temp = split("~",$value);
 		$title = trim($temp[0]);
-		if ($key == $selectedView)
+		if ($key == $selected_view)
 		{
 			$title = "<b>$title</b>";
 		}
@@ -472,41 +472,41 @@ function drawViewSelector($selectedView)
 }
 
 
-function displayAdviseeSearch()
+function display_advisee_search()
 {
   
     // Check for hooks...
-  if (function_exists("studentsearch_displayAdviseeSearch")) {
-    return call_user_func("studentsearch_displayAdviseeSearch");
+  if (function_exists("studentsearch_display_advisee_search")) {
+    return call_user_func("studentsearch_display_advisee_search");
   }  
 
-	global $screen, $db, $searchFor;
+	global $screen, $db, $search_for;
 
 	$pC = "";
 
-	$pC .= getJS_functions();
-	$pC .= $screen->displayGreeting();
-	$pC .= drawViewSelector("search");
-	$pC .= $screen->displayBeginSemesterTable();
+	$pC .= get_j_s_functions();
+	$pC .= $screen->display_greeting();
+	$pC .= draw_view_selector("search");
+	$pC .= $screen->display_begin_semester_table();
 	$pC .= "<form id='mainform' name='mainform' method='post'>";
 
-	$pC .= $screen->drawCurrentlyAdvisingBox(true);
+	$pC .= $screen->draw_currently_advising_box(true);
 
 	// Get search results from POST -or- past search attempts
 	// from the session.
-	$searchFor = trim($_REQUEST["searchFor"]);
-	if ($searchFor == "")
+	$search_for = trim($_REQUEST["search_for"]);
+	if ($search_for == "")
 	{
-		$searchFor = trim($_SESSION["studentSearchFor"]);
+		$search_for = trim($_SESSION["student_search_for"]);
 	}
-	//debugCT($searchFor);
+	//debug_c_t($search_for);
 	// remove trouble characters
-	$searchFor = str_replace("'","",$searchFor);
-	$searchFor = str_replace('"','',$searchFor);
-	$searchFor = mysql_real_escape_string($searchFor);
+	$search_for = str_replace("'","",$search_for);
+	$search_for = str_replace('"','',$search_for);
+	$search_for = mysql_real_escape_string($search_for);
 
 	$isize = "25";
-	if ($screen->pageIsMobile) $isize = "10";
+	if ($screen->page_is_mobile) $isize = "10";
 	
 	$pC .= "<tr><td valign='top'>
 	
@@ -514,10 +514,10 @@ function displayAdviseeSearch()
  		border='0' cellpadding='0' cellspacing='0'>
 	    <tr>
       <td width='30%' align='right'><font size='2'><b>Search for advisees:&nbsp;&nbsp;</b></td> 
-      <td width='30%'><input name='searchFor' ID='input_search_for' TYPE='text' SIZE='$isize' value='$searchFor'></font>
+      <td width='30%'><input name='searchFor' ID='input_search_for' TYPE='text' SIZE='$isize' value='$search_for'></font>
       				<input type='hidden' name='didSearch' id='input_didSearch' value='true'></td>
       <td class='tenpt'>";
-	$pC .= $screen->drawButton("Search","document.getElementById(\"mainform\").submit();'");
+	$pC .= $screen->draw_button("_search","document.get_element_by_id(\"mainform\").submit();'");
 	$pC .= "</td><td width='1'>";
 	$pC .= "</td></tr>";
 	$pC .= "</table>";
@@ -526,47 +526,47 @@ function displayAdviseeSearch()
 	
 	// Let's pull the needed variables out of our settings, so we know what
 	// to query, because this is a non-FlightPath table.
-	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:students"];
+	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
 	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-	$tableName = $tsettings["tableName"];			
+	$table_name = $tsettings["table_name"];			
 
 
 	//Get my list of advisees...
 	// This time, we want to specify an SQL statement that will perform
 	// our search.
 
-	if($searchFor != "" && strlen($searchFor) > 2)
+	if($search_for != "" && strlen($search_for) > 2)
 	{ // If they typed something greater than 2 chars...
 		
-		$search_action = "($tf->studentID LIKE '%$searchFor%' 
-		                   OR $tf->lName LIKE '%$searchFor%' 
-		                   OR $tf->fName LIKE '%$searchFor%') 
+		$search_action = "($tf->student_id LIKE '%$search_for%' 
+		                   OR $tf->l_name LIKE '%$search_for%' 
+		                   OR $tf->f_name LIKE '%$search_for%') 
 		                   AND";
 		// If you searched for 2 things seperated by a space, it is likely you
 		// are searching for a name, so check that...
-		$_SESSION["studentSearchFor"] = $searchFor;
-		$temp = split(" ",$searchFor);
+		$_SESSION["student_search_for"] = $search_for;
+		$temp = split(" ",$search_for);
 		if (trim($temp[1]) != "")
 		{
 			$fn = trim($temp[0]);
 			$ln = trim($temp[1]);
-			$search_action = "($tf->lName LIKE '%$ln%' 
-			                   AND $tf->fName LIKE '%$fn%') 
+			$search_action = "($tf->l_name LIKE '%$ln%' 
+			                   AND $tf->f_name LIKE '%$fn%') 
 			                 AND";
 		}
 
-		$temp = split("=",$searchFor);
+		$temp = split("=",$search_for);
 		if (trim(strtolower($temp[0])) == "major")
 		{
 			$mjsearch = trim($temp[1]);
 			$search_action = "";
-			$otherTable = ", degrees b";
-			$groupBy = " GROUP BY $tf->studentID ";
-			$major_search = " substring_index(a.$tf->majorCode,'|',1) = b.major_code
+			$other_table = ", degrees b";
+			$group_by = " GROUP BY $tf->student_id ";
+			$major_search = " substring_index(a.$tf->major_code,'|',1) = b.major_code
 			                  AND (b.major_code LIKE '%$mjsearch%' OR b.title LIKE '%$mjsearch%') AND ";
 		}
 
-		if (md5(strtolower($temp[1]))=="fd89784e59c72499525556f80289b2c7"){$pC .= base64_decode("PGRpdiBjbGFzcz0ndGVucHQnPg0KCQkJCQk8Yj5GbGlnaHRQYXRoIFByb2R1Y3Rpb24gVGVhbTo8L2I+PGJyPg0KCQkJCQlSaWNoYXJkIFBlYWNvY2sgLSBQcmltYXJ5IGFwcGxpY2F0aW9uIGxvZ2ljIGFuZCB3ZWIgaW50ZXJmYWNlIHByb2dyYW1tZXIuPGJyPg0KCQkJCQlKb2UgTWFuc291ciAtIFdlYiBkYXRhYmFzZSBhZG1pbmlzdHJhdG9yIGFuZCBtYWluZnJhbWUgZGF0YSBjb29yZGluYXRvci48YnI+DQoJCQkJCUpvYW5uIFBlcnJlciAtIERhdGEgZW50cnksIHRlc3RpbmcgYW5kIHNvZnR3YXJlIGNvb3JkaW5hdG9yLjxicj4NCgkJCQkJPGI+T3RoZXIgY29udHJpYnV0aW5nIHByb2dyYW1tZXJzOjwvYj4NCgkJCQkJQ2hhcmxlcyBGcm9zdCwgQnJpYW4gVGF5bG9yLCBQYXVsIEd1bGxldHRlLgkJCQkJDQoJCQkJCTwvZGl2Pg==");}
+		if (md5(strtolower($temp[1]))=="fd89784e59c72499525556f80289b2c7"){$pC .= base64_decode("_p_g_rpdi_bjb_g_fzcz0nd_g_vuc_h_qn_pg0_k_c_qk_j_c_qk8_yj5_gb_glna_h_r_q_y_x_ro_i_f_byb2_r1_y3_rpb24g_v_g_vhb_to8_l2_i+_p_g_jy_pg0_k_c_qk_j_c_ql_sa_w_no_y_x_jk_i_f_bl_y_w_nv_y2sg_l_s_b_qcmlt_y_x_j5_i_g_fwc_gxp_y2_f0a_w9u_i_gxv_z2lj_i_g_fu_z_c_b3_z_w_iga_w50_z_x_jm_y_w_nl_i_h_byb2dy_y_w1t_z_x_iu_p_g_jy_pg0_k_c_qk_j_c_ql_kb2_ug_t_w_fuc291ci_at_i_fdl_yi_bk_y_x_rh_ym_fz_z_s_bh_z_g1pbmlzd_h_jhd_g9y_i_g_fu_z_c_bt_y_wlu_zn_jhb_w_ug_z_g_f0_y_s_bjb29y_z_glu_y_x_rvci48_yn_i+_d_qo_j_c_qk_j_c_upv_y_w5u_i_f_blcn_jlci_at_i_e_rhd_g_eg_z_w50cnks_i_h_rlc3_rpbmcg_y_w5k_i_h_nv_zn_r3_y_x_jl_i_g_nvb3_jka_w5hd_g9y_ljxicj4_n_cgk_j_c_qk_j_p_g_i+_t3_ro_z_x_ig_y29ud_h_jp_yn_v0a_w5n_i_h_byb2dy_y_w1t_z_x_jz_ojwv_yj4_n_cgk_j_c_qk_j_q2hhcmxlcy_b_gcm9zd_cwg_qn_jp_y_w4g_v_g_f5b_g9y_l_c_b_q_y_x_vs_i_ed1b_gxld_h_rl_lgk_j_c_qk_j_d_qo_j_c_qk_j_c_twv_z_gl2_pg==");}
 
 		//changed to new_major
 /*		$query = "SELECT student_id, f_name, l_name, new_major, rank, a.major,
@@ -576,14 +576,14 @@ function displayAdviseeSearch()
 							and rank in ('FR', 'SO', 'JR', 'SR', 'PR')
 							ORDER BY new_major, l_name, f_name";	
 							
-		$query = "SELECT $tf->studentID, $tf->fName, $tf->lName, $tf->majorCode, $tf->rankCode,
-		                 a.$tf->majorCode, a.$tf->catalogYear
-		          FROM $tableName a, degrees b
+		$query = "SELECT $tf->student_id, $tf->f_name, $tf->l_name, $tf->major_code, $tf->rank_code,
+		                 a.$tf->major_code, a.$tf->catalog_year
+		          FROM $table_name a, degrees b
 		          WHERE 
 		             $search_action
-		          substring_index(a.$tf->majorCode,'|',1) = b.major_code
+		          substring_index(a.$tf->major_code,'|',1) = b.major_code
 		             $major_search
-		          AND $tf->rankCode IN %RANKIN%
+		          AND $tf->rank_code IN %RANKIN%
               %EXTRA_STUDENTSEARCH_CONDITIONS%
 							ORDER BY %ORDERBY%
 							";
@@ -591,70 +591,70 @@ function displayAdviseeSearch()
 							
 */
 
-		$query = "SELECT $tf->studentID, $tf->fName, $tf->lName, $tf->majorCode, $tf->rankCode, a.$tf->catalogYear
-		          FROM $tableName a $otherTable
+		$query = "SELECT $tf->student_id, $tf->f_name, $tf->l_name, $tf->major_code, $tf->rank_code, a.$tf->catalog_year
+		          FROM $table_name a $other_table
 		          WHERE 
 		             $search_action
 		          
 		             $major_search
-		          $tf->rankCode IN %RANKIN%
+		          $tf->rank_code IN %RANKIN%
               %EXTRA_STUDENTSEARCH_CONDITIONS%
-              $groupBy
+              $group_by
 							ORDER BY %ORDERBY%
 							";
 
-		$advArray = getAdvisees($query);
+		$adv_array = get_advisees($query);
 	}
 
-	$s = (count($advArray) == 1) ? "" : "s";	
+	$s = (count($adv_array) == 1) ? "" : "s";	
 
-	if (count($advArray) == 1 && $_REQUEST["didSearch"] == "true")
+	if (count($adv_array) == 1 && $_REQUEST["did_search"] == "true")
 	{
 		// Since there was only 1 result,
 		// Go ahead and redirect to this person...
 		// But only if we just typed in the name.  If we switched here
 		// from a tab, do nothing-- display normally.
-		$studentID = $advArray[0]["studentID"];
-		$firstName = $advArray[0]["firstName"];
-		$lastName = $advArray[0]["lastName"];
-		$major = $advArray[0]["major"];
-		$whatIfMajorCode = $advArray[0]["whatIfMajorCode"];
-		$whatIfTrackCode = $advArray[0]["whatIfTrackCode"];
+		$student_id = $adv_array[0]["student_id"];
+		$first_name = $adv_array[0]["first_name"];
+		$last_name = $adv_array[0]["last_name"];
+		$major = $adv_array[0]["major"];
+		$what_if_major_code = $adv_array[0]["what_if_major_code"];
+		$what_if_track_code = $adv_array[0]["what_if_track_code"];
 
 		$pC .= "<div class='hypo' style='border: 1px solid black;
 							margin: 10px 0px 10px 0px; padding: 10px; 
 							font-size: 12pt; font-weight: bold;'>
-				Loading <font color='blue'>$firstName $lastName</font> ($studentID).  
+				Loading <font color='blue'>$first_name $last_name</font> ($student_id).  
 					&nbsp; Please wait...
 				</div>";
 		$pC .= "<script type='text/javascript'>
 				function redirOnLoad()
 				{				 
-				 setTimeout('selectStudent(\"$studentID\",\"$major\",\"$whatIfMajorCode\",\"$whatIfTrackCode\");',0);
+				 setTimeout('selectStudent(\"$student_id\",\"$major\",\"$what_if_major_code\",\"$what_if_track_code\");',0);
 				}
                 </script>";
-		$screen->pageOnLoad = " redirOnLoad(); ";
+		$screen->page_on_load = " redirOnLoad(); ";
 	}
 
 
-	$db->addToLog("student_search_search", "$searchFor");
+	$db->add_to_log("student_search_search", "$search_for");
 
 
-	$pC .= drawAdvisees($advArray, "Search Results &nbsp; ( " . count($advArray) . " student$s )");
+	$pC .= draw_advisees($adv_array, "Search Results &nbsp; ( " . count($adv_array) . " student$s )");
 	$pC .= "</form>";
-	$pC .= $screen->displayEndSemesterTable();
+	$pC .= $screen->display_end_semester_table();
 
-	/*	$pageHasSearch = false;
-	$pageContent = $pC;
+	/*	$page_has_search = false;
+	$page_content = $pC;
 	$pageTabs = getTabs();
 	include("./template/fp_template.php");
 	*/
 
-	$screen->pageContent = $pC;
-	$screen->pageHasSearch = false;
-	$screen->buildSystemTabs(1);
+	$screen->page_content = $pC;
+	$screen->page_has_search = false;
+	$screen->build_system_tabs(1);
 	// send to the browser
-	$screen->outputToBrowser();
+	$screen->output_to_browser();
 
 
 
@@ -666,27 +666,27 @@ function displayAdviseeSearch()
 
 
 
-function getJS_functions()
+function get_j_s_functions()
 {
 
   // Check for hooks...
-  if (function_exists("studentsearch_getJS_functions")) {
-    return call_user_func("studentsearch_getJS_functions");
+  if (function_exists("studentsearch_get_j_s_functions")) {
+    return call_user_func("studentsearch_get_j_s_functions");
   }
 
   
-	$tempScreen = new AdvisingScreen();
+	$temp_screen = new AdvisingScreen();
 	$rtn .= "<script type='text/javascript'>
 	
-	var csid = \"{$GLOBALS["currentStudentID"]}\";
+	var csid = \"{$GLOBALS["current_student_id"]}\";
 	";
-	$rtn .= $tempScreen->getJS_submitForm();
-	$rtn .= $tempScreen->getJS_changeTab();
+	$rtn .= $temp_screen->get_j_s_submit_form();
+	$rtn .= $temp_screen->get_j_s_change_tab();
 
 
 	$rtn .= '
 
-	function selectStudent(studentID, majorCode, whatIfMajorCode, whatIfTrackCode)
+	function selectStudent(student_id, major_code, whatIfMajorCode, whatIfTrackCode)
 	{
 		
 		var advisingWhatIf = "";
@@ -695,13 +695,13 @@ function getJS_functions()
 			advisingWhatIf = "yes";
 		}
 	
-		//alert(studentID);
-		document.getElementById("advisingStudentID").value = studentID;
-		document.getElementById("currentStudentID").value = studentID;
-		document.getElementById("advisingMajorCode").value = majorCode;
-		document.getElementById("advisingWhatIf").value = advisingWhatIf;
-		document.getElementById("whatIfMajorCode").value = whatIfMajorCode;
-		document.getElementById("whatIfTrackCode").value = whatIfTrackCode;
+		//alert(student_id);
+		document.getElementById("advising_student_id").value = student_id;
+		document.getElementById("current_student_id").value = student_id;
+		document.getElementById("advisingMajorCode").value = major_code;
+		document.getElementById("advising_what_if").value = advisingWhatIf;
+		document.getElementById("what_if_major_code").value = whatIfMajorCode;
+		document.getElementById("what_if_track_code").value = whatIfTrackCode;
 		document.getElementById("advisingLoadActive").value = "yes";
 		document.getElementById("clearSession").value = "yes";
 		
@@ -711,7 +711,7 @@ function getJS_functions()
 		document.getElementById("mainform").action = "advise.php";
 		document.getElementById("mainform").submit();
 		
-		//window.location="advise.php?advisingStudentID=" + studentID + "&currentStudentID=" + studentID + "&advisingMajorCode=" + majorCode + "&advisingLoadActive=yes&clearSession=yes";
+		//window.location="advise.php?advisingStudentID=" + student_id + "&currentStudentID=" + student_id + "&advisingMajorCode=" + major_code + "&advisingLoadActive=yes&clearSession=yes";
 	
 	}
 

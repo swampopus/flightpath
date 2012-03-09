@@ -17,165 +17,165 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class _FlightPath
+class __flight_path
 {
-	public $student, $degreePlan, $db, $boolWhatIf;
-	public $courseListAdvisedCourses;
+	public $student, $degree_plan, $db, $bool_what_if;
+	public $course_list_advised_courses;
 
 
-	function __construct($student = "", $degreePlan = "", DatabaseHandler $db = null, $boolPerformFullInit = false)
+	function __construct($student = "", $degree_plan = "", DatabaseHandler $db = null, $bool_perform_full_init = false)
 	{
 		if ($student != "")
 		{
 			$this->student = $student;
 		}
-		if ($degreePlan != "")
+		if ($degree_plan != "")
 		{
-			$this->degreePlan = $degreePlan;
+			$this->degree_plan = $degree_plan;
 		}
 
 		if ($db != null)
 		{
 			$this->db = $db;
 		} else {
-			$this->db = getGlobalDatabaseHandler();
+			$this->db = get_global_database_handler();
 		}
 
-		if ($boolPerformFullInit == true)
+		if ($bool_perform_full_init == true)
 		{
 			$this->init(true);
 		}
 
-		$this->courseListAdvisedCourses = new CourseList();
+		$this->course_list_advised_courses = new CourseList();
 
 	}
 
 
-	function init($boolInitAdvisingVariables = false, $boolIgnoreWhatIfAdvisingVariables = false, $boolLoadFull = true)
+	function init($bool_init_advising_variables = false, $bool_ignore_what_if_advising_variables = false, $bool_load_full = true)
 	{
 		// This will initialize this flightPath object
 		// based on what is available in the global variables.
 		// Takes the place of what was going on at the beginning
 		// of advise.php.
 
-		if ($boolInitAdvisingVariables == true)
+		if ($bool_init_advising_variables == true)
 		{
-			$tempScreen = new AdvisingScreen();
-			$tempScreen->initAdvisingVariables($boolIgnoreWhatIfAdvisingVariables);
+			$temp_screen = new AdvisingScreen();
+			$temp_screen->init_advising_variables($bool_ignore_what_if_advising_variables);
 		}
 
-		$majorCode = $GLOBALS["advisingMajorCode"];
-		$trackCode = $GLOBALS["advisingTrackCode"];
-		$studentID = $GLOBALS["advisingStudentID"];
-		$advisingTermID = $GLOBALS["advisingTermID"];
-		$availableTerms = $GLOBALS["settingAvailableAdvisingTermIDs"];
+		$major_code = $GLOBALS["advising_major_code"];
+		$track_code = $GLOBALS["advising_track_code"];
+		$student_id = $GLOBALS["advising_student_id"];
+		$advising_term_id = $GLOBALS["advising_term_id"];
+		$available_terms = $GLOBALS["setting_available_advising_term_ids"];
 
 
 
-		$this->boolWhatIf = false;
+		$this->bool_what_if = false;
 
 		// Are we in WhatIf mode?
-		if ($GLOBALS["advisingWhatIf"] == "yes")
+		if ($GLOBALS["advising_what_if"] == "yes")
 		{
-			$majorCode = $GLOBALS["whatIfMajorCode"];
-			$trackCode = $GLOBALS["whatIfTrackCode"];
-			//adminDebug("trackCode: $trackCode");
-			//$majorCode = "ART";
-			$this->boolWhatIf = true;
-			//adminDebug("here");
+			$major_code = $GLOBALS["what_if_major_code"];
+			$track_code = $GLOBALS["what_if_track_code"];
+			//admin_debug("trackCode: $track_code");
+			//$major_code = "ART";
+			$this->bool_what_if = true;
+			//admin_debug("here");
 
 		}
 
-		if ($boolLoadFull == false)
+		if ($bool_load_full == false)
 		{	// not trying to load anything, so return.
 			return;
 		}
 
-		//adminDebug("going through");
-		//adminDebug($majorCode);
+		//admin_debug("going through");
+		//admin_debug($major_code);
 		$db = $this->db;
 
 
-		if ($boolLoadFull == true)
+		if ($bool_load_full == true)
 		{
-			$student = new Student($studentID);
+			$student = new Student($student_id);
 		} else {
 			$student = new Student();
-			$student->studentID = $studentID;
+			$student->student_id = $student_id;
 
 		}
 
 
 
-		$settings = $db->getFlightPathSettings();
+		$settings = $db->get_flight_path_settings();
 
-		$catalogYear = $student->catalogYear;
-		if ($this->boolWhatIf)
+		$catalog_year = $student->catalog_year;
+		if ($this->bool_what_if)
 		{
-			$catalogYear = $settings["currentCatalogYear"];
+			$catalog_year = $settings["current_catalog_year"];
 		}
 
 		// make sure their catalog year is not past the system's current
 		// year setting.
-		if ($catalogYear > $settings["currentCatalogYear"]
-		&& $settings["currentCatalogYear"] > $GLOBALS["fpSystemSettings"]["earliestCatalogYear"])
+		if ($catalog_year > $settings["current_catalog_year"]
+		&& $settings["current_catalog_year"] > $GLOBALS["fp_system_settings"]["earliest_catalog_year"])
 		{ // Make sure degree plan is blank if it is!
-			$catalogYear = 99999;
+			$catalog_year = 99999;
 		}
 
-		if ($GLOBALS["advisingUpdateStudentSettingsFlag"] != "")
+		if ($GLOBALS["advising_update_student_settings_flag"] != "")
 		{
-			$student->arraySettings["trackCode"] = $trackCode;
-			$student->arraySettings["majorCode"] = $majorCode;
+			$student->array_settings["track_code"] = $track_code;
+			$student->array_settings["major_code"] = $major_code;
 		}
 
-		$tMajorCode = $majorCode;
+		$t_major_code = $major_code;
 
-		if ($trackCode != "")
+		if ($track_code != "")
 		{
-			// Does the majorCode already have a | in it?
-			if (!strstr($tMajorCode, "|"))
+			// Does the major_code already have a | in it?
+			if (!strstr($t_major_code, "|"))
 			{
-				$tMajorCode .= "|_" . $trackCode;
+				$t_major_code .= "|_" . $track_code;
 			} else {
 				// it DOES have a | in it already, so just add the
 				// trackCode using _.  This is most likely because
 				// we are dealing with a track AND a concentration.
-				$tMajorCode .= "_" . $trackCode;
+				$t_major_code .= "_" . $track_code;
 			}
 		}
 
 
-		$degreeID = $db->getDegreeID($tMajorCode, $catalogYear);
-    //adminDebug($degreeID);
+		$degree_id = $db->get_degree_id($t_major_code, $catalog_year);
+    //admin_debug($degree_id);
 		
-		//adminDebug($tMajorCode);
+		//admin_debug($t_major_code);
 
-		if ($student->arraySettings["trackCode"] != "" && $this->boolWhatIf == false
-		&& $student->arraySettings["majorCode"] == $majorCode)
+		if ($student->array_settings["track_code"] != "" && $this->bool_what_if == false
+		&& $student->array_settings["major_code"] == $major_code)
 		{
 			// The student has a selected track in their settings,
 			// so use that (but only if it is for their current major-- settings
 			// could be old!)
 
-			$tMajorCode = $student->getMajorAndTrackCode();
-			$tempDegreeID = $db->getDegreeID($tMajorCode, $student->catalogYear);
-			if ($tempDegreeID) {
-			  $degreeID = $tempDegreeID;
+			$t_major_code = $student->get_major_and_track_code();
+			$temp_degree_id = $db->get_degree_id($t_major_code, $student->catalog_year);
+			if ($temp_degree_id) {
+			  $degree_id = $temp_degree_id;
 			}
 		}
 
-		//adminDebug($degreeID);
+		//admin_debug($degree_id);
 
 
-		if ($boolLoadFull == true)
+		if ($bool_load_full == true)
 		{
 			$this->student = $student;
-			//adminDebug(" .. yy");
-			$degreePlan = new DegreePlan($degreeID, $db, false, $student->arraySignificantCourses);
-			//adminDebug(" .. yy");
-			$degreePlan->addSemesterDevelopmental($student->studentID);
-			$this->degreePlan = $degreePlan;
+			//admin_debug(" .. yy");
+			$degree_plan = new DegreePlan($degree_id, $db, false, $student->array_significant_courses);
+			//admin_debug(" .. yy");
+			$degree_plan->add_semester_developmental($student->student_id);
+			$this->degree_plan = $degree_plan;
 		}
 
 
@@ -189,39 +189,39 @@ class _FlightPath
 	 *	of all of FP's "tab" pages, like Main, Comments, etc.
 	 *
 	 */
-	function processRequestSaveDraft()
+	function process_request_save_draft()
 	{
 
 		/////////////////////////////////////
 		///  Are we trying to save the draft
 		///  from a tab change?
 		/////////////////////////////////////
-		if ($_REQUEST["saveDraft"] == "yes")
+		if ($_REQUEST["save_draft"] == "yes")
 		{
 			$this->init(true, false, false);
 			// If we are coming from the WhatIf tab, we need to save
 			// as WhatIf.  Else, save as normal.
-			if ($_REQUEST["fromWI"] == "yes")
+			if ($_REQUEST["from_w_i"] == "yes")
 			{
 				// Yes, we are coming from WhatIf mode, so
 				// save under WhatIf.
-				//adminDebug("Coming from What If");
-				$GLOBALS["advisingWhatIf"] = "yes";
+				//admin_debug("Coming from What If");
+				$GLOBALS["advising_what_if"] = "yes";
 				$this->init(false);
-				//$GLOBALS["advisingWhatIf"] = "no";
+				//$GLOBALS["advising_what_if"] = "no";
 			} else {
 				// NOT coming from WhatIf mode.  Save as a normal draft.
-				$GLOBALS["advisingWhatIf"] = "no";
+				$GLOBALS["advising_what_if"] = "no";
 				$this->init(true, true);
-				//$GLOBALS["advisingWhatIf"] = "yes";
+				//$GLOBALS["advising_what_if"] = "yes";
 			}
-			$this->saveAdvisingSessionFromPost(0,true);
+			$this->save_advising_session_from_post(0,true);
 		}
 
 	}
 
 
-	function assignCoursesToGroups()
+	function assign_courses_to_groups()
 	{
 		// This method will look at the student's courses
 		// and decide which groups they should be fit into.
@@ -229,13 +229,13 @@ class _FlightPath
 		// We will be going through the degree plan's master list
 		// of groups to decide this.
 		$student = $this->student;
-		$this->degreePlan->listGroups->sortPriority();
-		$this->degreePlan->listGroups->resetCounter();
-		while($this->degreePlan->listGroups->hasMore())
+		$this->degree_plan->list_groups->sort_priority();
+		$this->degree_plan->list_groups->reset_counter();
+		while($this->degree_plan->list_groups->has_more())
 		{
-			$g = $this->degreePlan->listGroups->getNext();
+			$g = $this->degree_plan->list_groups->get_next();
 
-			if ($g->groupID == -88)
+			if ($g->group_id == -88)
 			{
 				// Add a course group.  Skip.
 				continue;
@@ -245,48 +245,48 @@ class _FlightPath
 			// group?  Technically it is a substitution.
 			// We will add them in now, because we do not take additions
 			// into consideration when figuring out branches.
-			//adminDebug("_____Working on group $g->title");
-			//print_pre($g->toString());
-			if ($courseListAdditions = $student->listSubstitutions->findGroupAdditions($g))
+			//admin_debug("_____Working on group $g->title");
+			//print_pre($g->to_string());
+			if ($course_list_additions = $student->list_substitutions->find_group_additions($g))
 			{
-				$courseListAdditions->resetCounter();
-				while($courseListAdditions->hasMore())
+				$course_list_additions->reset_counter();
+				while($course_list_additions->has_more())
 				{
-					$cA = $courseListAdditions->getNext();
-					$newCourse = new Course();
-					$newCourse->courseID = $cA->courseID;
+					$cA = $course_list_additions->get_next();
+					$new_course = new Course();
+					$new_course->course_id = $cA->course_id;
 
-					if ($cA->boolTransfer == true)
+					if ($cA->bool_transfer == true)
 					{
-						if ($cA->courseID == 0 && is_object($cA->courseTransfer))
+						if ($cA->course_id == 0 && is_object($cA->course_transfer))
 						{ // This is a transfer course which has been added.
-							$newCourse->courseID = $cA->courseTransfer->courseID;
+							$new_course->course_id = $cA->course_transfer->course_id;
 						}
-						$newCourse->boolTransfer = true;
+						$new_course->bool_transfer = true;
 					}
 
-					$newCourse->assignedToSemesterNum = $g->assignedToSemesterNum;
-					$newCourse->requirementType = $g->requirementType;
+					$new_course->assigned_to_semester_num = $g->assigned_to_semester_num;
+					$new_course->requirement_type = $g->requirement_type;
 					// Add this course as a requirement.
-					//$newCourse->loadDescriptiveData();
-					//adminDebug("Found group addition for " . $g->title . ". It is " . $newCourse->toString());
-					$g->listCourses->add($newCourse, true);
-					// Later on, when we do assignCoursesToList, it
+					//$new_course->load_descriptive_data();
+					//admin_debug("Found group addition for " . $g->title . ". It is " . $new_course->toString());
+					$g->list_courses->add($new_course, true);
+					// Later on, when we do assign_courses_to_list, it
 					// will automatically find this course and apply the
 					// substitution.
 				}
 			}
-			//print_pre($g->toString());
+			//print_pre($g->to_string());
 
 
 			// First we see if there are any bare courses at this level.  If there
 			// are, then this group has NO branches!  Otherwise, the courses must
 			// always be contained in a branch!
-			if (!$g->listCourses->isEmpty)
+			if (!$g->list_courses->is_empty)
 			{
 				// Yes, there are courses here.  So, assign them at this level.
-				//$this->assignCoursesToList($g->listCourses, $this->student, true, $g);
-				$this->assignCoursesToList($g->listCourses, $this->student, true, $g, true);
+				//$this->assign_courses_to_list($g->list_courses, $this->student, true, $g);
+				$this->assign_courses_to_list($g->list_courses, $this->student, true, $g, true);
 				// Okay, if we have fulfilled our courses at this level.
 
 				// then we can continue on to the next "top level" group.
@@ -294,7 +294,7 @@ class _FlightPath
 			}
 
 
-			if (!$g->listGroups->isEmpty)
+			if (!$g->list_groups->is_empty)
 			{
 				/*
 				Now we've got some trouble.  This is our first level of groups.
@@ -303,44 +303,44 @@ class _FlightPath
 				groups, we need to find out which group has the most matches, and THEN
 				we will assign them.
 				*/
-				//adminDebug("She's got branches!");
-				$g->reloadMissingCourses();
-				//print_pre($g->toString());
-				$highCount = -1;
-				$bestBranch = -1;
-				$g->listGroups->resetCounter();
-				while($g->listGroups->hasMore())
+				//admin_debug("She's got branches!");
+				$g->reload_missing_courses();
+				//print_pre($g->to_string());
+				$high_count = -1;
+				$best_branch = -1;
+				$g->list_groups->reset_counter();
+				while($g->list_groups->has_more())
 				{
-					$branchOne = $g->listGroups->getNext();
-					if (!$branchOne->listCourses->isEmpty)
+					$branch_one = $g->list_groups->get_next();
+					if (!$branch_one->list_courses->is_empty)
 					{
 						// This does not actually assign.  Just counts.
-						//adminDebug("..just get count..");
-						//$count = $this->assignCoursesToList($branchOne->listCourses, $this->student, false, $g, true);
-						$count = $this->getCountOfMatches($branchOne, $this->student, $g);
-						$branchOne->countOfMatches = $count;
+						//admin_debug("..just get count..");
+						//$count = $this->assign_courses_to_list($branch_one->list_courses, $this->student, false, $g, true);
+						$count = $this->get_count_of_matches($branch_one, $this->student, $g);
+						$branch_one->count_of_matches = $count;
 
 
-						if ($count > $highCount)
+						if ($count > $high_count)
 						{
-							$highCount = $count;
-							//adminDebug("$branchOne->groupID $highCount");
-							$bestBranch = $g->listGroups->objectIndexOf($branchOne);
-							//$bestBranch = $branchOne;
+							$high_count = $count;
+							//admin_debug("$branch_one->group_id $high_count");
+							$best_branch = $g->list_groups->object_index_of($branch_one);
+							//$best_branch = $branch_one;
 						}
 					}
 
 				}
 				// Okay, coming out of that, we should know which branch has the best count (number
 				// of matches).  So, let's assign courses to that branch.
-				if ($bestBranch != -1)
+				if ($best_branch != -1)
 				{
-					$winningBranch = $g->listGroups->getElement($bestBranch);
-					$winningBranch->boolWinningBranch = true;
-					//adminDebug($highCount . " brid:" . $winningBranch->groupID);
-					//adminDebug(".. actually assign..");
-					$this->assignCoursesToList($winningBranch->listCourses, $this->student, true, $g, true);
-					//print_pre($winningBranch->toString());
+					$winning_branch = $g->list_groups->get_element($best_branch);
+					$winning_branch->bool_winning_branch = true;
+					//admin_debug($high_count . " brid:" . $winning_branch->group_id);
+					//admin_debug(".. actually assign..");
+					$this->assign_courses_to_list($winning_branch->list_courses, $this->student, true, $g, true);
+					//print_pre($winning_branch->to_string());
 				}
 
 			}
@@ -351,46 +351,46 @@ class _FlightPath
 	}
 
 
-	function getCountOfMatches($branch, $student, $group)
+	function get_count_of_matches($branch, $student, $group)
 	{
-		return $this->assignCoursesToList($branch->listCourses, $student, false, $group, true);
+		return $this->assign_courses_to_list($branch->list_courses, $student, false, $group, true);
 	}
 
-	function flagOutdatedSubstitutions()
+	function flag_outdated_substitutions()
 	{
 		// Go through the student's substitutions and flag ones that
-		// do not apply to this degree plan.  Also, unset any boolSubstitution
+		// do not apply to this degree plan.  Also, unset any bool_substitution
 		// variables which were set.
 
-		$this->student->listSubstitutions->resetCounter();
-		while ($this->student->listSubstitutions->hasMore())
+		$this->student->list_substitutions->reset_counter();
+		while ($this->student->list_substitutions->has_more())
 		{
-			$substitution = $this->student->listSubstitutions->getNext();
+			$substitution = $this->student->list_substitutions->get_next();
 
-			$requiredGroupID = $substitution->courseRequirement->assignedToGroupID;
-			//adminDebug("found sub for group $requiredGroupID ");
+			$required_group_id = $substitution->course_requirement->assigned_to_group_id;
+			//admin_debug("found sub for group $required_group_id ");
 			// First check-- does this degree even have this group ID?
-			$outdatedNote = "";
-			if ($requiredGroupID == 0)
+			$outdated_note = "";
+			if ($required_group_id == 0)
 			{
 				// bare degree plan.
-				// Does the bare degree plan list the courseRequirement
+				// Does the bare degree plan list the course_requirement
 				// anywhere?
-				$boolSubValid = false;
-				$this->degreePlan->listSemesters->resetCounter();
-				while($this->degreePlan->listSemesters->hasMore() && $boolSubValid == false)
+				$bool_sub_valid = false;
+				$this->degree_plan->list_semesters->reset_counter();
+				while($this->degree_plan->list_semesters->has_more() && $bool_sub_valid == false)
 				{
-					$sem = $this->degreePlan->listSemesters->getNext();
-					if ($sem->listCourses->findMatch($substitution->courseRequirement))
+					$sem = $this->degree_plan->list_semesters->get_next();
+					if ($sem->list_courses->find_match($substitution->course_requirement))
 					{
-						$boolSubValid = true;
+						$bool_sub_valid = true;
 					} else {
 						// Could not find the course requirement in question.
-						$boolSubValid = false;
-						$scr = $substitution->courseRequirement;
-						$scr->loadDescriptiveData();
-						$outdatedNote = "This substitution is for the course $scr->subjectID
-											$scr->courseNum (id: $scr->courseID) on the 
+						$bool_sub_valid = false;
+						$scr = $substitution->course_requirement;
+						$scr->load_descriptive_data();
+						$outdated_note = "This substitution is for the course $scr->subject_id
+											$scr->course_num (id: $scr->course_id) on the 
 											bare degree plan, but the student's current degree does
 											not specify this course.";
 					}
@@ -400,43 +400,43 @@ class _FlightPath
 			} else {
 				// requiredGroupID != 0.  So, does this
 				// degree plan have a group with this id?
-				$boolSubValid = false;
-				if ($g = $this->degreePlan->findGroup($requiredGroupID))
+				$bool_sub_valid = false;
+				if ($g = $this->degree_plan->find_group($required_group_id))
 				{
-					$boolSubValid = true;
+					$bool_sub_valid = true;
 				} else {
-					// Could not find the group in question.  Add an "outdatedNote"
+					// Could not find the group in question.  Add an "outdated_note"
 					// to the sub...
-					$boolSubValid = false;
-					$newGroup = new Group();
-					$newGroup->groupID = $requiredGroupID;
-					$newGroup->loadDescriptiveData();
-					$groupName = "";
-					if ($_SESSION["fpUserType"] == "full_admin")
+					$bool_sub_valid = false;
+					$new_group = new Group();
+					$new_group->group_id = $required_group_id;
+					$new_group->load_descriptive_data();
+					$group_name = "";
+					if ($_SESSION["fp_user_type"] == "full_admin")
 					{ // only show if we are full admin.
-						$groupName = "<i>$newGroup->groupName,</i>";
+						$group_name = "<i>$new_group->group_name,</i>";
 					}
-					$outdatedNote = "This substitution is for the group $newGroup->title
-									(id: $newGroup->groupID, $groupName $newGroup->catalogYear),
+					$outdated_note = "This substitution is for the group $new_group->title
+									(id: $new_group->group_id, $group_name $new_group->catalog_year),
 									but the student's current degree does not call for this 
 									specific group.";
 				}
 			}
 
 
-			if ($boolSubValid == false)
+			if ($bool_sub_valid == false)
 			{
-				//adminDebug("Could not find degree sub for " . $substitution->courseRequirement->toString());
+				//admin_debug("Could not find degree sub for " . $substitution->course_requirement->toString());
 				// Couldn't find a match, so remove this sub!
-				$substitution->boolOutdated = true;
-				$substitution->outdatedNote = $outdatedNote;
-				$substitution->courseListSubstitutions->getFirst()->boolOutdatedSub = true;
-				$substitution->courseListSubstitutions->getFirst()->boolSubstitution = false;
-				if ($substitution->courseListSubstitutions->getFirst()->tempOldCourseID > 0)
-				{ // Restore the courseID *if* it was set to 0 on purpose. (happens
+				$substitution->bool_outdated = true;
+				$substitution->outdated_note = $outdated_note;
+				$substitution->course_list_substitutions->get_first()->bool_outdated_sub = true;
+				$substitution->course_list_substitutions->get_first()->bool_substitution = false;
+				if ($substitution->course_list_substitutions->get_first()->temp_old_course_id > 0)
+				{ // Restore the course_id *if* it was set to 0 on purpose. (happens
 					// when there is a sub of a transfer to kill the transfer eqv.  This will
 					// restore it).
-					$substitution->courseListSubstitutions->getFirst()->courseID = $substitution->courseListSubstitutions->getFirst()->tempOldCourseID;
+					$substitution->course_list_substitutions->get_first()->course_id = $substitution->course_list_substitutions->get_first()->temp_old_course_id;
 				}
 			}
 
@@ -449,40 +449,40 @@ class _FlightPath
 	}
 
 
-	function assignCoursesToList(ObjList $listRequirements, Student $student, $boolPerformAssignment = true, Group $group = null, $boolCheckSignificantCourses = false)
+	function assign_courses_to_list(ObjList $list_requirements, Student $student, $bool_perform_assignment = true, Group $group = null, $bool_check_significant_courses = false)
 	{
 		$count = 0;
 
 		if ($group == null)
 		{
 			$group = new Group();
-			$group->groupID = 0;
+			$group->group_id = 0;
 		}
 
-		$groupID = $group->groupID;
-		// If the groupID == 0, we may be talking about the bare degree plan.
+		$group_id = $group->group_id;
+		// If the group_id == 0, we may be talking about the bare degree plan.
 
-		$hoursRequired = $group->hoursRequired*1;
-		$hoursAssigned = $group->hoursAssigned;
-		//adminDebug("---------- hoursRequired: $hoursRequired, $groupID, $group->title");
-		if ($hoursRequired*1 < 1 || $hoursRequired == "")
+		$hours_required = $group->hours_required*1;
+		$hours_assigned = $group->hours_assigned;
+		//admin_debug("---------- hours_required: $hours_required, $group_id, $group->title");
+		if ($hours_required*1 < 1 || $hours_required == "")
 		{
-			$hoursRequired = 999999;
+			$hours_required = 999999;
 		}
 
-		//print_pre($listRequirements->toString());
-		$listRequirements->sortSmallestHoursFirst();
-		$listRequirements->sortSubstitutionsFirst($student->listSubstitutions, $groupID);
-		$listRequirements->resetCounter();
-		while($listRequirements->hasMore())
+		//print_pre($list_requirements->to_string());
+		$list_requirements->sort_smallest_hours_first();
+		$list_requirements->sort_substitutions_first($student->list_substitutions, $group_id);
+		$list_requirements->reset_counter();
+		while($list_requirements->has_more())
 		{
-			$courseRequirement = $listRequirements->getNext();
+			$course_requirement = $list_requirements->get_next();
 
-			if ($boolCheckSignificantCourses == true)
+			if ($bool_check_significant_courses == true)
 			{
-				// Only look for the courseRequirement if it is in the student's
-				// arraySignificantCourses array.
-				if ($student->arraySignificantCourses[$courseRequirement->courseID] != true)
+				// Only look for the course_requirement if it is in the student's
+				// array_significant_courses array.
+				if ($student->array_significant_courses[$course_requirement->course_id] != true)
 				{// course was not in there, so skip!
 					continue;
 				}
@@ -490,34 +490,34 @@ class _FlightPath
 
 
 
-			//adminDebug(".looking at CR $courseRequirement->courseID $courseRequirement->subjectID $courseRequirement->courseNum. lc: $listRequirements->count");
-			if ($courseRequirement->boolSpecifiedRepeat == true)
+			//admin_debug(".looking at CR $course_requirement->course_id $course_requirement->subject_id $course_requirement->course_num. lc: $list_requirements->count");
+			if ($course_requirement->bool_specified_repeat == true)
 			{
 				// Since this requirement has specified repeats, we want
 				// to make all of the student's taken courses (for this course)
 				// also have specified repeats.
-				$student->listCoursesTaken->setSpecifiedRepeats($courseRequirement, $courseRequirement->specifiedRepeats);
+				$student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);
 			}
 
-			//print_pre($student->listSubstitutions->toString());
+			//print_pre($student->list_substitutions->toString());
 
-			//adminDebug("looking in group ID: $groupID");
+			//admin_debug("looking in group ID: $group_id");
 			// Does the student have any substitutions for this requirement?
-			if ($substitution = $student->listSubstitutions->findRequirement($courseRequirement, true, $groupID))
+			if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id))
 			{
-				//adminDebug($substitution->toString());
+				//admin_debug($substitution->toString());
 				// Since the substitution was made, I don't really care about
 				// min grades or the like.  Let's just put it in.
 
 				// Make sure this isn't a group addition and we are *currently*
 				// NOT looking at the group it is being added to.  This is to
 				// correct a bug.
-				if ($substitution->boolGroupAddition == true)
+				if ($substitution->bool_group_addition == true)
 				{
-					//adminDebug("Group addition for req:" . $courseRequirement->toString() . " curgid: $groupID");
-					if ($substitution->courseRequirement->assignedToGroupID != $groupID)
+					//admin_debug("Group addition for req:" . $course_requirement->toString() . " curgid: $group_id");
+					if ($substitution->course_requirement->assigned_to_group_id != $group_id)
 					{
-						//adminDebug("skipping $courseRequirement->subjectID $courseRequirement->courseNum");
+						//admin_debug("skipping $course_requirement->subject_id $course_requirement->course_num");
 
 						continue;
 					}
@@ -525,44 +525,44 @@ class _FlightPath
 				}
 
 
-				//adminDebug($courseRequirement->toString() . " " . $courseRequirement->getHours());
+				//admin_debug($course_requirement->toString() . " " . $course_requirement->get_hours());
 
-				if ($boolPerformAssignment == true)
+				if ($bool_perform_assignment == true)
 				{
-					// If the courseRequirement's minHours are greater than
+					// If the course_requirement's min_hours are greater than
 					// the substitution's hours, then we have to split the
 					// coureRequirement into 2 pieces, and add the second piece just
 					// after this one in the list.
-					$courseSub = $substitution->courseListSubstitutions->getFirst();
-					if ($courseRequirement->minHours*1 > $courseSub->hoursAwarded*1)
+					$course_sub = $substitution->course_list_substitutions->get_first();
+					if ($course_requirement->min_hours*1 > $course_sub->hours_awarded*1)
 					{
-						$remainingHours = $courseRequirement->minHours - $courseSub->hoursAwarded;
-						//adminDebug(" original: " . $courseRequirement->toString() . " hrs: $courseRequirement->minHours, remaining hours: $remainingHours. sub awarded: $courseSub->hoursAwarded");
+						$remaining_hours = $course_requirement->min_hours - $course_sub->hours_awarded;
+						//admin_debug(" original: " . $course_requirement->toString() . " hrs: $course_requirement->min_hours, remaining hours: $remaining_hours. sub awarded: $course_sub->hours_awarded");
 
-						$newCourseString = $courseRequirement->toDataString();
-						$newCourse = new Course();
-						$newCourse->loadCourseFromDataString($newCourseString);
-						$newCourse->minHours = $newCourse->maxHours = $remainingHours;
-						$newCourse->boolSubstitutionSplit = true;
-						$newCourse->boolSubstitutionNewFromSplit = true;
-						$newCourse->requirementType = $courseRequirement->requirementType;
+						$new_course_string = $course_requirement->to_data_string();
+						$new_course = new Course();
+						$new_course->load_course_from_data_string($new_course_string);
+						$new_course->min_hours = $new_course->max_hours = $remaining_hours;
+						$new_course->bool_substitution_split = true;
+						$new_course->bool_substitution_new_from_split = true;
+						$new_course->requirement_type = $course_requirement->requirement_type;
 
-						$courseRequirement->boolSubstitutionSplit = true;
-						$courseRequirement->boolSubstitutionNewFromSplit = false;
+						$course_requirement->bool_substitution_split = true;
+						$course_requirement->bool_substitution_new_from_split = false;
 
-						// Now, add this into the list, right after the courseRequirement.
-						$currentI = $listRequirements->i;
-						$listRequirements->insertAfterIndex($currentI, $newCourse);
+						// Now, add this into the list, right after the course_requirement.
+						$current_i = $list_requirements->i;
+						$list_requirements->insert_after_index($current_i, $new_course);
 
 					}
 
-					$courseRequirement->courseListFulfilledBy = $substitution->courseListSubstitutions;
+					$course_requirement->course_list_fulfilled_by = $substitution->course_list_substitutions;
 
-					$substitution->courseListSubstitutions->assignGroupID($groupID);
-					$substitution->courseListSubstitutions->setHasBeenAssigned(true);
-					$substitution->courseListSubstitutions->setBoolSubstitution(true);
-					$substitution->courseListSubstitutions->setCourseSubstitution($courseRequirement, $substitution->remarks);
-					$substitution->boolHasBeenApplied = true;
+					$substitution->course_list_substitutions->assign_group_id($group_id);
+					$substitution->course_list_substitutions->set_has_been_assigned(true);
+					$substitution->course_list_substitutions->set_bool_substitution(true);
+					$substitution->course_list_substitutions->set_course_substitution($course_requirement, $substitution->remarks);
+					$substitution->bool_has_been_applied = true;
 
 
 				}
@@ -572,107 +572,107 @@ class _FlightPath
 
 
 			// Has the student taken this course requirement?
-			if ($c = $student->listCoursesTaken->findBestMatch($courseRequirement, $courseRequirement->minGrade, true))
+			if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, true))
 			{
 
-        $hGetHours = $c->getHours();
-				if ($c->boolGhostHour) {
-				  // If this is a ghost hour, then $hGetHours would == 0 right now,
+        $h_get_hours = $c->get_hours();
+				if ($c->bool_ghost_hour) {
+				  // If this is a ghost hour, then $h_get_hours would == 0 right now,
 				  // instead, use the the adjusted value (probably 1).
-				  $hGetHours = $c->hoursAwarded;
-				  //adminDebug("hGetHours == " . $hGetHours);
+				  $h_get_hours = $c->hours_awarded;
+				  //admin_debug("hGetHours == " . $h_get_hours);
 				}			  
 			  
 				// Can we assign any more hours to this group?  Are we
 				// out of hours, and should stop?
-				if ($hoursAssigned >= $hoursRequired)
+				if ($hours_assigned >= $hours_required)
 				{
-					//adminDebug("out of hours, continuing. assigned: $hoursAssigned. req: $hoursrequired. ");
+					//admin_debug("out of hours, continuing. assigned: $hours_assigned. req: $hoursrequired. ");
 					continue;
 				}
 
-				// Will the hours of this course put us over the hoursRequired limit?
-				if ($hoursAssigned + $c->hoursAwarded > $hoursRequired)
+				// Will the hours of this course put us over the hours_required limit?
+				if ($hours_assigned + $c->hours_awarded > $hours_required)
 				{
-					//adminDebug("right here $c->subjectID $c->courseNum.  Skipping $group->title");
+					//admin_debug("right here $c->subject_id $c->course_num.  Skipping $group->title");
 					continue;
 				}
 
 				// Do not apply substitutionSplit courses to anything automatically.
 				// They must be applied by substitutions.
-				if ($c->boolSubstitutionNewFromSplit == true)
+				if ($c->bool_substitution_new_from_split == true)
 				{
-					//adminDebug("skipping " . $c->toString());
+					//admin_debug("skipping " . $c->toString());
 					continue;
 				}
 
 
 				// Make sure the course meets min grade requirements.
-				if (!$c->meetsMinGradeRequirementOf($courseRequirement))
+				if (!$c->meets_min_grade_requirement_of($course_requirement))
 				{
-					//adminDebug("Bad min grade " . $c->toString());
+					//admin_debug("Bad min grade " . $c->toString());
 
-					//adminDebug($courseRequirement->minGrade);
+					//admin_debug($course_requirement->min_grade);
 
 
 					continue;
 				}
 
-				if ($c->groupListUnassigned->isEmpty == false)
+				if ($c->group_list_unassigned->is_empty == false)
 				{
-					//adminDebug("~" . $c->toString() . " unassigned " . $c->groupListUnassigned->toString() . " cur group: $groupID");
+					//admin_debug("~" . $c->toString() . " unassigned " . $c->group_list_unassigned->toString() . " cur group: $group_id");
 				}
 
 				// Has the course been unassigned from this group?
-				if ($c->groupListUnassigned->findMatch($group))
+				if ($c->group_list_unassigned->find_match($group))
 				{
-					//adminDebug("unassigned! " . $c->toString() . "");
+					//admin_debug("unassigned! " . $c->toString() . "");
 					continue;
 				}
 
 				// Prereq checking would also go here.
-				//	adminDebug("Examining: " . $c->toString());
+				//	admin_debug("Examining: " . $c->toString());
 
 				// Make sure $c is not being used in a substitution.
-				if ($c->boolSubstitution == true)
+				if ($c->bool_substitution == true)
 				{
-					//adminDebug("- - - don't use!  A sub!");
+					//admin_debug("- - - don't use!  A sub!");
 					continue;
 				}
 
-				if ($c->boolHasBeenAssigned != true)
+				if ($c->bool_has_been_assigned != true)
 				{//Don't count courses which have already been placed in other groups.
-					//adminDebug("A match for $c->subjectID $c->courseNum ");
+					//admin_debug("A match for $c->subject_id $c->course_num ");
 
 					// Has another version of this course already been
 					// assigned?  And if so, are repeats allowed for this
 					// course?  And if so, then how many hours of the
-					// repeatHours have I used up?  If I cannot do any more
+					// repeat_hours have I used up?  If I cannot do any more
 					// repeats, then quit.  Otherwise, let it continue...
-					//adminDebug("rep hours: $courseRequirement->subjectID $courseRequirement->courseNum rep hours: $courseRequirement->repeatHours ");
+					//admin_debug("rep hours: $course_requirement->subject_id $course_requirement->course_num rep hours: $course_requirement->repeat_hours ");
 
-					$courseListRepeats = $student->listCoursesTaken->getPreviousAssignments($c->courseID);
+					$course_list_repeats = $student->list_courses_taken->get_previous_assignments($c->course_id);
 
 
-					if ($courseListRepeats->getSize() > 0)
+					if ($course_list_repeats->get_size() > 0)
 					{
-						//adminDebug("loading inside group: $groupID");
+						//admin_debug("loading inside group: $group_id");
 						// So, a copy of this course has been assigned more than once...
 						// Get the total number of hours taken up by this course.
-						$cc = $courseListRepeats->countHours();
-						//adminDebug($cc);
-						// have we exceeded the number of available repeatHours
+						$cc = $course_list_repeats->count_hours();
+						//admin_debug($cc);
+						// have we exceeded the number of available repeat_hours
 						// for this course?
-						if ($courseRequirement->repeatHours < 1)
+						if ($course_requirement->repeat_hours < 1)
 						{
-							$courseRequirement->loadDescriptiveData();
+							$course_requirement->load_descriptive_data();
 						}
 
-						//if ($cc + $c->getHours() > $courseRequirement->repeatHours*1)
-						if ($cc + $hGetHours > $courseRequirement->repeatHours*1)
+						//if ($cc + $c->get_hours() > $course_requirement->repeat_hours*1)
+						if ($cc + $h_get_hours > $course_requirement->repeat_hours*1)
 						{
 							// Do not allow the repeat.
-							//adminDebug("kicking out. " . $courseRequirement->toString() . " $courseRequirement->repeatHours , cc: $cc from group $group->title");
+							//admin_debug("kicking out. " . $course_requirement->toString() . " $course_requirement->repeat_hours , cc: $cc from group $group->title");
 							continue;
 						}
 
@@ -685,176 +685,176 @@ class _FlightPath
 					// so that they can't be used in other groups.  --
 					// unless they are able to be repeated.  BARF!
 
-					// Inc hoursAssigned, even if we aren't actually
+					// Inc hours_assigned, even if we aren't actually
 					// performing an assignment.  This helps us accurately
 					// calculate the count.
 					
-					$hoursAssigned = $hoursAssigned + $hGetHours;
+					$hours_assigned = $hours_assigned + $h_get_hours;
 
-					if ($boolPerformAssignment == true)
+					if ($bool_perform_assignment == true)
 					{
-						//$courseRequirement->courseFulfilledBy = $c;
-						$courseRequirement->courseListFulfilledBy->add($c);
-						$courseRequirement->grade = $c->grade;
-						$courseRequirement->hoursAwarded = $c->hoursAwarded;
-						$courseRequirement->boolGhostHour = $c->boolGhostHour;
+						//$course_requirement->courseFulfilledBy = $c;
+						$course_requirement->course_list_fulfilled_by->add($c);
+						$course_requirement->grade = $c->grade;
+						$course_requirement->hours_awarded = $c->hours_awarded;
+						$course_requirement->bool_ghost_hour = $c->bool_ghost_hour;
 						
-						$c->boolHasBeenAssigned = true;
-						//adminDebug(" -- -- assigning ... $courseRequirement->subjectID $courseRequirement->courseNum with " . $c->toString() );
-						$c->requirementType = $courseRequirement->requirementType;
-						$c->assignedToGroupID = $groupID;
-						$group->hoursAssigned = $hoursAssigned;
+						$c->bool_has_been_assigned = true;
+						//admin_debug(" -- -- assigning ... $course_requirement->subject_id $course_requirement->course_num with " . $c->toString() );
+						$c->requirement_type = $course_requirement->requirement_type;
+						$c->assigned_to_group_id = $group_id;
+						$group->hours_assigned = $hours_assigned;
 						// Should check for:
 						// Can it be assigned, based on the number of allowed course repeats?
-						if ($courseRequirement->boolSpecifiedRepeat == true)
+						if ($course_requirement->bool_specified_repeat == true)
 						{
 							// $c is what they actually took.
-							$c->boolSpecifiedRepeat = true;
-							$c->specifiedRepeats = $courseRequirement->specifiedRepeats;
-							//adminDebug($c->toString());
-							$listRequirements->decSpecifiedRepeats($c);
+							$c->bool_specified_repeat = true;
+							$c->specified_repeats = $course_requirement->specified_repeats;
+							//admin_debug($c->toString());
+							$list_requirements->dec_specified_repeats($c);
 						}
 					}
 
 
 					$count++;
 				} else {
-					//adminDebug(" .. .. .. skipping " . $c->toString());
+					//admin_debug(" .. .. .. skipping " . $c->toString());
 				}
 			}
 
 		}
 
 
-		//adminDebug($count);
+		//admin_debug($count);
 		return $count;
 	}
 
 
 
-	function assignCoursesToSemesters()
+	function assign_courses_to_semesters()
 	{
 		// This method will look at the student's courses
 		// and decide if they should be assigned to degree requirements
 		// which have been spelled out in each semester.  This
 		// is not where it looks into groups.
-		//adminDebug("- - - - - - - doing semesters - - - - -- ");
-		$this->degreePlan->listSemesters->resetCounter();
-		while($this->degreePlan->listSemesters->hasMore())
+		//admin_debug("- - - - - - - doing semesters - - - - -- ");
+		$this->degree_plan->list_semesters->reset_counter();
+		while($this->degree_plan->list_semesters->has_more())
 		{
-			$semester = $this->degreePlan->listSemesters->getNext();
+			$semester = $this->degree_plan->list_semesters->get_next();
 
 			// Okay, let's look at the courses (not groups) in this
 			// semester...
 			//print "looking in semester $semester->semesterNum <br>";
-			$this->assignCoursesToList($semester->listCourses, $this->student);
+			$this->assign_courses_to_list($semester->list_courses, $this->student);
 
 		}
 
-		//adminDebug("- - - - - - - done w/ semesters - - - - -- ");
+		//admin_debug("- - - - - - - done w/ semesters - - - - -- ");
 
 	}
 
 
-	function getSubjectTitle($subjectID)
+	function get_subject_title($subject_id)
 	{
-		// From the subjectID, get the title.
+		// From the subject_id, get the title.
 		// Example: COSC = Computer Science.
 
 		// Let's pull the needed variables out of our settings, so we know what
 		// to query, because this is a non-FlightPath table.
-		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:subjects"];
+		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:subjects"];
 		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$tableName = $tsettings["tableName"];
+		$table_name = $tsettings["table_name"];
 		
-		$res = $this->db->dbQuery("SELECT * FROM $tableName
-							WHERE $tf->subjectID = '?' LIMIT 1 ", $subjectID);
-		$cur = $this->db->dbFetchArray($res);
+		$res = $this->db->db_query("SELECT * FROM $table_name
+							WHERE $tf->subject_id = '?' LIMIT 1 ", $subject_id);
+		$cur = $this->db->db_fetch_array($res);
 		return trim($cur[$tf->title]);
 
 	}
 
 
 
-	function getAllCoursesInCatalogYear($catalogYear = "2006", $boolLoadDescriptiveData = false, $limitStart = 0, $limitSize = 0)
+	function get_all_courses_in_catalog_year($catalog_year = "2006", $bool_load_descriptive_data = false, $limit_start = 0, $limit_size = 0)
 	{
 		// Returns a CourseList object of all the
 		// undergraduate courses in the
-		// supplied catalogYear.
+		// supplied catalog_year.
 
-		$limLine = "";
-		if ($limitSize > 0)
+		$lim_line = "";
+		if ($limit_size > 0)
 		{
-			$limLine = " limit $limitStart, $limitSize ";
+			$lim_line = " limit $limit_start, $limit_size ";
 		}
-		$rtnList = new CourseList();
-		$cArray = array();
-		$result = $this->db->dbQuery("SELECT * FROM courses
+		$rtn_list = new CourseList();
+		$c_array = array();
+		$result = $this->db->db_query("SELECT * FROM courses
 							WHERE 
 								catalog_year = '?'
-								AND course_num < '{$GLOBALS["fpSystemSettings"]["graduateLevelCourseNum"]}'
+								AND course_num < '{$GLOBALS["fp_system_settings"]["graduate_level_course_num"]}'
 							ORDER BY subject_id, course_num
-							$limLine
-							", $catalogYear);
+							$lim_line
+							", $catalog_year);
 
-		while($cur = $this->db->dbFetchArray($result))
+		while($cur = $this->db->db_fetch_array($result))
 		{ 
 
 
 			$course = new Course();
-			$course->courseID = $cur["course_id"];
-			$course->subjectID = $cur["subject_id"];
-			$course->courseNum = $cur["course_num"];
-			$course->minHours = $cur["min_hours"];
-			$course->maxHours = $cur["max_hours"];
+			$course->course_id = $cur["course_id"];
+			$course->subject_id = $cur["subject_id"];
+			$course->course_num = $cur["course_num"];
+			$course->min_hours = $cur["min_hours"];
+			$course->max_hours = $cur["max_hours"];
 
-			if ($boolLoadDescriptiveData == true)
+			if ($bool_load_descriptive_data == true)
 			{
-				$course->loadDescriptiveData();
+				$course->load_descriptive_data();
 			}
 
-			$rtnList->add($course);
+			$rtn_list->add($course);
 		}
 
-		return $rtnList;
+		return $rtn_list;
 
 	}
 
-	function cacheCourseInventory($limitStart = 0, $limitSize = 4000)
+	function cache_course_inventory($limit_start = 0, $limit_size = 4000)
 	{
 		// Load courses from the inventory into the inventory cache...
 		// Attempt to load the course inventory cache...
-		if ($courseInventory = unserialize($_SESSION["fpCacheCourseInventory"]))
+		if ($course_inventory = unserialize($_SESSION["fp_cache_course_inventory"]))
 		{
-			$GLOBALS["fpCourseInventory"] = $courseInventory;
+			$GLOBALS["fp_course_inventory"] = $course_inventory;
 		}
 
-		$result = $this->db->dbQuery("SELECT DISTINCT course_id FROM courses
+		$result = $this->db->db_query("SELECT DISTINCT course_id FROM courses
 							WHERE 
-								course_num < '{$GLOBALS["fpSystemSettings"]["graduateLevelCourseNum"]}'
-								LIMIT $limitStart, $limitSize
+								course_num < '{$GLOBALS["fp_system_settings"]["graduate_level_course_num"]}'
+								LIMIT $limit_start, $limit_size
 							");
 
-		while($cur = $this->db->dbFetchArray($result))
+		while($cur = $this->db->db_fetch_array($result))
 		{
-			$courseID = $cur["course_id"];
+			$course_id = $cur["course_id"];
 
-			$this->db->loadCourseDescriptiveData(null, $courseID);
+			$this->db->load_course_descriptive_data(null, $course_id);
 
 		}
 
 		// Should we re-cache the course inventory?  If there have been any changes
 		// to it, then we will see that in a GLOBALS variable...
-		if ($GLOBALS["cacheCourseInventory"] == true)
+		if ($GLOBALS["cache_course_inventory"] == true)
 		{
-			$_SESSION["fpCacheCourseInventory"] = serialize($GLOBALS["fpCourseInventory"]);
+			$_SESSION["fp_cache_course_inventory"] = serialize($GLOBALS["fp_course_inventory"]);
 		}
 
 
 	}
 
 
-	function replaceMissingCourseInGroup($courseID, $groupID)
+	function replace_missing_course_in_group($course_id, $group_id)
 	{
 		// Given a group in the degree plan, this will
 		// make sure that course is actually in the group.  If it
@@ -865,12 +865,12 @@ class _FlightPath
 		// then that course probably was originally removed
 		// from the group.  So, put it back in.
 
-		//adminDebug("replace $courseID in group $groupID ...");
+		//admin_debug("replace $course_id in group $group_id ...");
 
 		// First, find the group.
-		if (!$group = $this->degreePlan->findGroup($groupID))
+		if (!$group = $this->degree_plan->find_group($group_id))
 		{
-			adminDebug(" ~~ could not find group $groupID for replacemMissingCourseInGroup");
+			admin_debug(" ~~ could not find group $group_id for replacemMissingCourseInGroup");
 			return;
 		}
 
@@ -878,60 +878,60 @@ class _FlightPath
 		// in the group.  This is made easy, because we have
 		// the dbGroupRequirementID, which is the actual id from the
 		// row in group_requirements that this course was advised from.
-		$group->replaceMissingCourse($courseID);
+		$group->replace_missing_course($course_id);
 
 
 
 	}
 
 
-	function saveAdvisingSessionFromPost($facultyID = 0, $boolDraft = true)
+	function save_advising_session_from_post($faculty_id = 0, $bool_draft = true)
 	{
-	  //var_dump($_POST);
+	  //var_dump($__p_o_s_t);
 		// This method will, only by looking at variables in the
 		// POST, save an advising session into the database.
 		$db = new DatabaseHandler();
-		if ($facultyID == 0)
+		if ($faculty_id == 0)
 		{ // if none supplied, use the one from the session of
 			// whomever is currently logged in.
-			$facultyID = $_SESSION["fpUserID"];
+			$faculty_id = $_SESSION["fp_user_id"];
 		}
 
-		$boolFoundUpdateMatch = false;
-		$studentID = $this->student->studentID;
-		$degreeID = $this->degreePlan->degreeID;
-		$majorCode = $this->degreePlan->majorCode;
-		$availableTerms = $GLOBALS["settingAvailableAdvisingTermIDs"];
+		$bool_found_update_match = false;
+		$student_id = $this->student->student_id;
+		$degree_id = $this->degree_plan->degree_id;
+		$major_code = $this->degree_plan->major_code;
+		$available_terms = $GLOBALS["setting_available_advising_term_ids"];
 
 		// Do we need to update the student's settings?
-		if (trim($_POST["advisingUpdateStudentSettingsFlag"]) != "")
+		if (trim($_POST["advising_update_student_settings_flag"]) != "")
 		{
-			// We are to assume that the student's arraySettings
+			// We are to assume that the student's array_settings
 			// have already been updated by this point, so we will
 			// simply convert them to XML and store in the database.
-			$xml = fp_arrayToXml("settings", $this->student->arraySettings);
-			$result = $db->dbQuery("REPLACE INTO student_settings
+			$xml = fp_array_to_xml("settings", $this->student->array_settings);
+			$result = $db->db_query("REPLACE INTO student_settings
 									(`student_id`,`settings_xml`,`datetime`)
-									VALUES ('?','?', NOW() )	", $studentID, $xml);
-			$db->addToLog("update_student_settings", "$studentID");
+									VALUES ('?','?', NOW() )	", $student_id, $xml);
+			$db->add_to_log("update_student_settings", "$student_id");
 
 		}
 
 
-		// Is there anything in "logAddition" which we should write to the log?
-		if ($_POST["logAddition"] != "")
+		// Is there anything in "log_addition" which we should write to the log?
+		if ($_POST["log_addition"] != "")
 		{
-			//adminDebug("add" . $_POST["logAddition"]);
-			$temp = explode("_",$_POST["logAddition"]);
-			if ($temp[0] == "changeTerm")
+			//admin_debug("add" . $_POST["log_addition"]);
+			$temp = explode("_",$_POST["log_addition"]);
+			if ($temp[0] == "change_term")
 			{
-				$db->addToLog("change_term","$studentID," . $temp[1]);
+				$db->add_to_log("change_term","$student_id," . $temp[1]);
 			}
 
-			if ($temp[0] == "changeTrack")
+			if ($temp[0] == "change_track")
 			{
 
-				$db->addToLog("change_track","$studentID," . $temp[1]);
+				$db->add_to_log("change_track","$student_id," . $temp[1]);
 			}
 
 
@@ -939,7 +939,7 @@ class _FlightPath
 
 
 		// If this user cannot advise, then just return right now.
-		if ($_SESSION["fpCanAdvise"] != true)
+		if ($_SESSION["fp_can_advise"] != true)
 		{
 			return;
 		}
@@ -952,57 +952,57 @@ class _FlightPath
 		// which matches this.  If we find it, we delete it so the
 		// new one will display instead.
 		// Only delete if its a draft copy!
-		$isDraft = intval($boolDraft);
-		$isWhatIf = intval($this->boolWhatIf);
+		$is_draft = intval($bool_draft);
+		$is_what_if = intval($this->bool_what_if);
 
 		// Since we only want one draft copy per term/per student,
 		// let's delete
 		// any draft copies already in existence, if we are saving a draft.
-		$result = $db->dbQuery("DELETE FROM advising_sessions
+		$result = $db->db_query("DELETE FROM advising_sessions
 									WHERE `student_id`='?'
 									AND `is_draft`='1'
 									AND `degree_id`='?'
-									AND `is_whatif`='?' ", $studentID, $degreeID, $isWhatIf);
+									AND `is_whatif`='?' ", $student_id, $degree_id, $is_what_if);
 
 
 		// The first thing we need to do is go through the availableTerms,
 		// create new entries for them in the table, and store what their
 		// session ID's are in an array.
-		$advisingSessionIDArray = array();
-		$advisingSessionIDArrayCount = array();
+		$advising_session_id_array = array();
+		$advising_session_id_array_count = array();
 
-		$temp = explode(",",$availableTerms);
-		foreach ($temp as $termID)
+		$temp = explode(",",$available_terms);
+		foreach ($temp as $term_id)
 		{
-			$termID = trim($termID);
+			$term_id = trim($term_id);
 
-			if ($termID == "") { continue; }
+			if ($term_id == "") { continue; }
 
 			// Okay, now create a new entry in the system for that term.
 			// We create entries for all available terms, whether we
 			// are going to use them later or not.
-			$result = $db->dbQuery("INSERT INTO advising_sessions
+			$result = $db->db_query("INSERT INTO advising_sessions
 								(`student_id`,`faculty_id`,`term_id`,`degree_id`,
 								`major_code`,
 								`catalog_year`,`datetime`,`is_whatif`,`is_draft`)
 								VALUES
 								('?', '?','?','?','?','?',NOW(),'?','?') 
-								", $studentID, $facultyID,$termID,$degreeID, $majorCode, $catalogYear, $isWhatIf, $isDraft);
-			$advisingSessionID = mysql_insert_id();
-			$advisingSessionIDArray[$termID] = $advisingSessionID;
-			$advisingSessionIDArrayCount[$termID] = 0;
+								", $student_id, $faculty_id,$term_id,$degree_id, $major_code, $catalog_year, $is_what_if, $is_draft);
+			$advising_session_id = mysql_insert_id();
+			$advising_session_id_array[$term_id] = $advising_session_id;
+			$advising_session_id_array_count[$term_id] = 0;
 		}
-		//adminDebug($advisingSessionID);
+		//admin_debug($advising_session_id);
 
 
 		$wi = "";
-		if ($isWhatIf == "1"){$wi = "_whatif";}
+		if ($is_what_if == "1"){$wi = "_whatif";}
 
-		if ($boolDraft)
+		if ($bool_draft)
 		{
-			$db->addToLog("save_adv_draft$wi", "$studentID,majorCode:$majorCode");
+			$db->add_to_log("save_adv_draft$wi", "$student_id,major_code:$major_code");
 		} else {
-			$db->addToLog("save_adv_active$wi", "$studentID,majorCode:$majorCode");
+			$db->add_to_log("save_adv_active$wi", "$student_id,major_code:$major_code");
 		}
 
 
@@ -1010,12 +1010,12 @@ class _FlightPath
 		// phrase "advisecourse_" in the name of the variables.
 		// There should be one of these for every course that was
 		// on the page.  It looks like this:
-		// advisecourse_courseID_semesterNum_groupID_varHours_randomID
+		// advisecourse_course_id_semesterNum_group_id_varHours_randomID
 		foreach($_POST as $key => $value)
 		{
 			if (!strstr($key,"advisecourse_"))
 			{ // Skip vars which don't have this as part of the name.
-				//adminDebug("skipping $key");
+				//admin_debug("skipping $key");
 				continue;
 			}
 			if ($value != "true")
@@ -1024,24 +1024,24 @@ class _FlightPath
 				continue;
 			}
 
-			//adminDebug($key);
+			//admin_debug($key);
 			$temp = explode("_",$key);
-			$courseID = trim($temp[1]);
-			$semesterNum = trim($temp[2]);
-			$groupID = trim($temp[3]);
-			$varHours = trim($temp[4]);
-			$randomID = trim($temp[5]);
-			$advisedTermID = trim($temp[6]);
-			$dbGroupRequirementID = trim($temp[7]);
+			$course_id = trim($temp[1]);
+			$semester_num = trim($temp[2]);
+			$group_id = trim($temp[3]);
+			$var_hours = trim($temp[4]);
+			$random_id = trim($temp[5]);
+			$advised_term_id = trim($temp[6]);
+			$db_group_requirement_id = trim($temp[7]);
 
-			$advisingSessionID = $advisingSessionIDArray[$advisedTermID];
+			$advising_session_id = $advising_session_id_array[$advised_term_id];
 
-			$newCourse = new Course($courseID);
-			$newCourse->loadDescriptiveData();
-			$entryValue = "$newCourse->subjectID~$newCourse->courseNum";
+			$new_course = new Course($course_id);
+			$new_course->load_descriptive_data();
+			$entry_value = "$new_course->subject_id~$new_course->course_num";
 
 
-			//adminDebug("$advisedTermID $entryValue");
+			//admin_debug("$advised_term_id $entry_value");
 
 			// Some particular course should be updated.  Possibly this one.
 			// Updates happen because of a student changing the
@@ -1050,72 +1050,72 @@ class _FlightPath
 			{
 				$temp2 = explode("_",trim($_POST["updatecourse"]));
 
-				$tcourseID = $temp2[0];
-				$tgroupID = $temp2[1] * 1;
-				$tsemesterNum = $temp2[2] * 1;
-				$tvarHours = $temp2[3];
-				$trandomID = $temp2[4];
-				$tadvisedTermID = $temp2[5];
+				$tcourse_id = $temp2[0];
+				$tgroup_id = $temp2[1] * 1;
+				$tsemester_num = $temp2[2] * 1;
+				$tvar_hours = $temp2[3];
+				$trandom_id = $temp2[4];
+				$tadvised_term_id = $temp2[5];
 
 				// Do we have a match?
-				if ($courseID == $tcourseID && $randomID == $trandomID)
+				if ($course_id == $tcourse_id && $random_id == $trandom_id)
 				{
 					// We have a match, so update with the new information.
-					$varHours = $tvarHours;
-					$boolFoundUpdateMatch = true;
+					$var_hours = $tvar_hours;
+					$bool_found_update_match = true;
 				}
 
 
 			}
 
 
-			if ($groupID != 0)
+			if ($group_id != 0)
 			{
-				$this->replaceMissingCourseInGroup($courseID, $groupID);
+				$this->replace_missing_course_in_group($course_id, $group_id);
 			}
 
 
 			// Okay, write it to the table...
-			$result = $db->dbQuery("INSERT INTO advised_courses
+			$result = $db->db_query("INSERT INTO advised_courses
 									(`advising_session_id`,`course_id`,
 									`entry_value`,`semester_num`,
 										`group_id`,`var_hours`,`term_id`)
 									VALUES
 									('?','?','?','?','?','?','?')
-									", $advisingSessionID,$courseID,$entryValue,$semesterNum,$groupID,$varHours,$advisedTermID);
+									", $advising_session_id,$course_id,$entry_value,$semester_num,$group_id,$var_hours,$advised_term_id);
 
-			$advisingSessionIDArrayCount[$advisedTermID]++;
+			$advising_session_id_array_count[$advised_term_id]++;
 
 		}
 
 		// Did we have to perform an update-- but no course was found?
-		if (trim($_POST["updatecourse"]) != "" && $boolFoundUpdateMatch == false)
+		if (trim($_POST["updatecourse"]) != "" && $bool_found_update_match == false)
 		{
 			// This means that the course was probably on the bare
 			// degree program, and not already checked for advising.  So,
 			// let's add it to the advised_courses table, so it DOES
 			// get checked for advising.
 			$temp2 = explode("_",trim($_POST["updatecourse"]));
-			$courseID = $temp2[0];
-			$groupID = $temp2[1] * 1;
-			$semesterNum = $temp2[2] * 1;
-			$varHours = $temp2[3];
-			$advisedTermID = $temp2[5];
+			$course_id = $temp2[0];
+			$group_id = $temp2[1] * 1;
+			$semester_num = $temp2[2] * 1;
+			$var_hours = $temp2[3];
+			$advised_term_id = $temp2[5];
 
-			$advisingSessionID = $advisingSessionIDArray[$advisedTermID];
+			$advising_session_id = $advising_session_id_array[$advised_term_id];
 
-			$result = $db->dbQuery("INSERT INTO advised_courses
+			$result = $db->db_query("INSERT INTO advised_courses
 									(`advising_session_id`,`course_id`,`semester_num`,
 										`group_id`,`var_hours`,`term_id`)
 									VALUES
 									('?','?','?','?','?','?')
-									", $advisingSessionID,$courseID,$semesterNum,$groupID,$varHours,$advisedTermID);
+									", $advising_session_id,$course_id,$semester_num,$group_id,$var_hours,$advised_term_id);
 
-			$advisingSessionIDArrayCount[$advisedTermID]++;
+			$advising_session_id_array_count[$advised_term_id]++;
 
-			if ($groupID != 0)
+			if ($group_id != 0)
 			{
-				$this->replaceMissingCourseInGroup($courseID, $groupID);
+				$this->replace_missing_course_in_group($course_id, $group_id);
 			}
 
 
@@ -1130,55 +1130,55 @@ class _FlightPath
 		if (trim($_POST["savesubstitution"]) != "")
 		{
 			$temp = explode("_",trim($_POST["savesubstitution"]));
-			$courseID = $temp[0];  // required course
-			$groupID = $temp[1] * 1;
-			$semesterNum = $temp[2] * 1;
+			$course_id = $temp[0];  // required course
+			$group_id = $temp[1] * 1;
+			$semester_num = $temp[2] * 1;
 
-			$subCourseID = $temp[3];
-			$subTermID = $temp[4];
-			$subTransferFlag = $temp[5];
-			$subHours = $temp[6];
-			$subAddition = $temp[7];
-			$subRemarks = urldecode($temp[8]);
+			$sub_course_id = $temp[3];
+			$sub_term_id = $temp[4];
+			$sub_transfer_flag = $temp[5];
+			$sub_hours = $temp[6];
+			$sub_addition = $temp[7];
+			$sub_remarks = urldecode($temp[8]);
 
-			if ($subAddition == "true")
+			if ($sub_addition == "true")
 			{
-				$courseID = 0;
+				$course_id = 0;
 			}
 
-			//adminDebug($subCourseID);
+			//admin_debug($sub_course_id);
 			// Figure out the entry values for the required course & sub course...
-			$requiredEntryValue = $subEntryValue = "";
-			if ($courseID > 0)
+			$required_entry_value = $sub_entry_value = "";
+			if ($course_id > 0)
 			{
-				$newCourse = new Course($courseID);
-				$newCourse->loadDescriptiveData();
-				$requiredEntryValue = "$newCourse->subjectID~$newCourse->courseNum";
+				$new_course = new Course($course_id);
+				$new_course->load_descriptive_data();
+				$required_entry_value = "$new_course->subject_id~$new_course->course_num";
 			}
 
-			if ($subTransferFlag != 1)
+			if ($sub_transfer_flag != 1)
 			{
-				$newCourse = new Course($subCourseID);
-				$newCourse->loadDescriptiveData();
-				$subEntryValue = "$newCourse->subjectID~$newCourse->courseNum";
+				$new_course = new Course($sub_course_id);
+				$new_course->load_descriptive_data();
+				$sub_entry_value = "$new_course->subject_id~$new_course->course_num";
 
 			}
 
-			if ($groupID != 0 && $courseID != 0)
+			if ($group_id != 0 && $course_id != 0)
 			{
-				$this->replaceMissingCourseInGroup($courseID, $groupID);
+				$this->replace_missing_course_in_group($course_id, $group_id);
 			}
 
 
-			$result = $db->dbQuery("INSERT INTO student_substitutions
+			$result = $db->db_query("INSERT INTO student_substitutions
 									(`student_id`,`faculty_id`,`required_course_id`,`required_entry_value`,
 									`required_group_id`,`required_semester_num`,`sub_course_id`,`sub_entry_value`,
 									`sub_term_id`,`sub_transfer_flag`,`sub_hours`,`sub_remarks`,`datetime`)
 									VALUES
 									('?','?','?','?','?','?','?','?','?','?','?','?',NOW())
-									", $studentID,$facultyID,$courseID,$requiredEntryValue,$groupID,$semesterNum,$subCourseID,$subEntryValue,$subTermID,$subTransferFlag,$subHours,$subRemarks);
+									", $student_id,$faculty_id,$course_id,$required_entry_value,$group_id,$semester_num,$sub_course_id,$sub_entry_value,$sub_term_id,$sub_transfer_flag,$sub_hours,$sub_remarks);
 
-			$db->addToLog("save_substitution", "$studentID,groupID:$groupID,insertID:" . mysql_insert_id());
+			$db->add_to_log("save_substitution", "$student_id,group_id:$group_id,insert_id:" . mysql_insert_id());
 
 		}
 
@@ -1186,13 +1186,13 @@ class _FlightPath
 		if (trim($_POST["removesubstitution"]) != "")
 		{
 			$temp = explode("_",trim($_POST["removesubstitution"]));
-			$subID = trim($temp[0]) * 1;
+			$sub_id = trim($temp[0]) * 1;
 
-			$result = $db->dbQuery("UPDATE student_substitutions
+			$result = $db->db_query("UPDATE student_substitutions
 									SET `delete_flag`='1'
-									WHERE `id`='?'	", $subID);
+									WHERE `id`='?'	", $sub_id);
 
-			$db->addToLog("remove_substitution", "$studentID,subID:$subID");
+			$db->add_to_log("remove_substitution", "$student_id,sub_id:$sub_id");
 
 		}
 
@@ -1206,36 +1206,36 @@ class _FlightPath
 		if (trim($_POST["unassign_group"]) != "")
 		{
 			$temp = explode("_",trim($_POST["unassign_group"]));
-			$courseID = $temp[0];
-			$termID = $temp[1];
-			$transferFlag = $temp[2];
-			$groupID = $temp[3];
+			$course_id = $temp[0];
+			$term_id = $temp[1];
+			$transfer_flag = $temp[2];
+			$group_id = $temp[3];
 
-			$result = $db->dbQuery("INSERT INTO student_unassign_group
+			$result = $db->db_query("INSERT INTO student_unassign_group
 									(`student_id`,`faculty_id`,`course_id`,
 									`term_id`,`transfer_flag`,`group_id`,
 									`datetime`)
 									VALUES
 									('?','?','?','?','?','?',NOW())
-									", $studentID,$facultyID,$courseID,$termID,$transferFlag,$groupID);
+									", $student_id,$faculty_id,$course_id,$term_id,$transfer_flag,$group_id);
 
-			$db->addToLog("save_unassign_group", "$studentID,groupID:$groupID");
+			$db->add_to_log("save_unassign_group", "$student_id,group_id:$group_id");
 
 		}
 
 		if (trim($_POST["restore_unassign_group"]) != "")
 		{
 			$temp = explode("_",trim($_POST["restore_unassign_group"]));
-			$unassignID = trim($temp[0]) * 1;
+			$unassign_id = trim($temp[0]) * 1;
 
-			//adminDebug($unassignID);
+			//admin_debug($unassign_id);
 			//die;
 
-			$result = $db->dbQuery("UPDATE student_unassign_group
+			$result = $db->db_query("UPDATE student_unassign_group
 									SET `delete_flag`='1'
-									WHERE `id`='?' ", $unassignID);
+									WHERE `id`='?' ", $unassign_id);
 
-			$db->addToLog("restore_unassign_group", "$studentID,unassignID:$unassignID");
+			$db->add_to_log("restore_unassign_group", "$student_id,unassign_id:$unassign_id");
 
 		}
 
@@ -1248,29 +1248,29 @@ class _FlightPath
 		if (trim($_POST["unassign_transfer_eqv"]) != "")
 		{
 			$temp = explode("_",trim($_POST["unassign_transfer_eqv"]));
-			$courseID = $temp[0];
+			$course_id = $temp[0];
 
-			$result = $db->dbQuery("INSERT INTO student_unassign_transfer_eqv
+			$result = $db->db_query("INSERT INTO student_unassign_transfer_eqv
 									(`student_id`,`faculty_id`,`transfer_course_id`,
 									`datetime`)
 									VALUES
 									('?','?','?',NOW())
-									", $studentID, $facultyID, $courseID);
+									", $student_id, $faculty_id, $course_id);
 
-			$db->addToLog("save_unassign_transfer", "$studentID,courseID:$courseID");
+			$db->add_to_log("save_unassign_transfer", "$student_id,course_id:$course_id");
 
 		}
 
 		if (trim($_POST["restore_transfer_eqv"]) != "")
 		{
 			$temp = explode("_",trim($_POST["restore_transfer_eqv"]));
-			$unassignID = trim($temp[0]) * 1;
+			$unassign_id = trim($temp[0]) * 1;
 
-			$result = $db->dbQuery("UPDATE student_unassign_transfer_eqv
+			$result = $db->db_query("UPDATE student_unassign_transfer_eqv
 									SET `delete_flag`='1'
-									WHERE `id`='?' ", $unassignID);
+									WHERE `id`='?' ", $unassign_id);
 
-			$db->addToLog("restore_unassign_transfer", "$studentID,unassignID:$unassignID");
+			$db->add_to_log("restore_unassign_transfer", "$student_id,unassign_id:$unassign_id");
 
 		}
 
@@ -1284,78 +1284,78 @@ class _FlightPath
 		// show up under the student's history.
 		// Only flag non-draft empty ones.  If they are draft,
 		// let them be.
-		// We just look at $advisingSessionIDArrayCount[] to see
+		// We just look at $advising_session_id_array_count[] to see
 		// if any of the counts are still 0.  If they are, delete
 		// that advisingSessionID from the table.
-		if ($isDraft == 0)
+		if ($is_draft == 0)
 		{
-			foreach ($advisingSessionIDArray as $termID => $advisingSessionID)
+			foreach ($advising_session_id_array as $term_id => $advising_session_id)
 			{
-				if ($advisingSessionIDArrayCount[$termID] == 0)
+				if ($advising_session_id_array_count[$term_id] == 0)
 				{
 
 					// This one is blank!  Delete it!
-					$res = $db->dbQuery("UPDATE advising_sessions
+					$res = $db->db_query("UPDATE advising_sessions
 								SET `is_empty`='1'	
-								WHERE `advising_session_id`='?' ", $advisingSessionID);
-					$advisingSessionIDArray[$termID] = "";
+								WHERE `advising_session_id`='?' ", $advising_session_id);
+					$advising_session_id_array[$term_id] = "";
 				}
 			}
 		}
 
-		return $advisingSessionIDArray;
+		return $advising_session_id_array;
 
 
 	}
 
 
-	function loadAdvisingSessionfromDatabase($facultyID = 0, $termID = "", $boolWhatIf = false, $boolDraft = true, $advisingSessionID = 0)
+	function load_advising_sessionfrom_database($faculty_id = 0, $term_id = "", $bool_what_if = false, $bool_draft = true, $advising_session_id = 0)
 	{
 		// This method will load an advising session for a particular
 		// student, and modify the degree plan object to reflect
 		// the advisings.
     $db = new DatabaseHandler();
-		$isWhatIf = "0";
-		$isDraft = "0";
-		if ($boolWhatIf == true){$isWhatIf = "1";}
-		if ($boolDraft == true){$isDraft = "1";}
+		$is_what_if = "0";
+		$is_draft = "0";
+		if ($bool_what_if == true){$is_what_if = "1";}
+		if ($bool_draft == true){$is_draft = "1";}
 
-		$degreeID = $this->degreePlan->degreeID;
-		$studentID = $this->student->studentID;
-		$availableTerms = $GLOBALS["settingAvailableAdvisingTermIDs"];
+		$degree_id = $this->degree_plan->degree_id;
+		$student_id = $this->student->student_id;
+		$available_terms = $GLOBALS["setting_available_advising_term_ids"];
 
 
 
-		$advisingSessionLine = " `advising_session_id`='$advisingSessionID' ";
+		$advising_session_line = " `advising_session_id`='$advising_session_id' ";
 		// First, find the advising session id...
-		if ($advisingSessionID < 1 && $availableTerms == "")
+		if ($advising_session_id < 1 && $available_terms == "")
 		{
-			$advisingSessionID = $this->db->getAdvisingSessionID($facultyID,$studentID,$termID,$degreeID,$boolWhatIf,$boolDraft);
-			$advisingSessionLine = " `advising_session_id`='$advisingSessionID' ";
+			$advising_session_id = $this->db->get_advising_session_id($faculty_id,$student_id,$term_id,$degree_id,$bool_what_if,$bool_draft);
+			$advising_session_line = " `advising_session_id`='$advising_session_id' ";
 
 
-		} else if ($advisingSessionID < 1 && $availableTerms != "")
+		} else if ($advising_session_id < 1 && $available_terms != "")
 		{
 			// Meaning, we are looking for more than one term.
-			$advisingSessionLine = "(";
-			$temp = explode(",",$availableTerms);
+			$advising_session_line = "(";
+			$temp = explode(",",$available_terms);
 			for ($t = 0; $t < count($temp); $t++)
 			{
-				$tID = trim($temp[$t]);
+				$t_id = trim($temp[$t]);
 
-				$asid = $this->db->getAdvisingSessionID($facultyID,$studentID,$tID,$degreeID,$boolWhatIf,$boolDraft);
+				$asid = $this->db->get_advising_session_id($faculty_id,$student_id,$t_id,$degree_id,$bool_what_if,$bool_draft);
 				if ($asid != 0)
 				{
-					$advisingSessionLine .= " advising_session_id='$asid' || ";
+					$advising_session_line .= " advising_session_id='$asid' || ";
 				}
 			}
 			// Take off the last 3 chars...
-			$advisingSessionLine = substr($advisingSessionLine, 0, -3);
-			$advisingSessionLine .= ")";
-			if ($advisingSessionLine == ")")
+			$advising_session_line = substr($advising_session_line, 0, -3);
+			$advising_session_line .= ")";
+			if ($advising_session_line == ")")
 			{  // Found NO previously advised semesters, so just
 				// use a dummy value which guarantees it pulls up nothing.
-				$advisingSessionLine = " advising_session_id='-99999'";
+				$advising_session_line = " advising_session_id='-99999'";
 			}
 
 		}
@@ -1363,91 +1363,91 @@ class _FlightPath
 		// Now, look up the courses they were advised to take.
 		$query = "SELECT * FROM advised_courses
 								WHERE 
-								 $advisingSessionLine
+								 $advising_session_line
 								ORDER BY `id` ";
-		//adminDebug($query);
-		$result = $db->dbQuery($query);
-		while($cur = $db->dbFetchArray($result))
+		//admin_debug($query);
+		$result = $db->db_query($query);
+		while($cur = $db->db_fetch_array($result))
 		{
-			$courseID = trim($cur["course_id"]);
-			$semesterNum = trim($cur["semester_num"]);
-			$groupID = trim($cur["group_id"]);
-			$varHours = trim($cur["var_hours"]);
-			$advisedTermID = trim($cur["term_id"]);
+			$course_id = trim($cur["course_id"]);
+			$semester_num = trim($cur["semester_num"]);
+			$group_id = trim($cur["group_id"]);
+			$var_hours = trim($cur["var_hours"]);
+			$advised_term_id = trim($cur["term_id"]);
 			$id = trim($cur["id"]);
-			//adminDebug("course $courseID sem:$semesterNum group:$groupID $varHours");
+			//admin_debug("course $course_id sem:$semester_num group:$group_id $var_hours");
 
 			// Add this course to the generic list of advised courses.  Useful
 			// if we are using this to pull up an advising summary.
-			$tempCourse = new Course($courseID);
-			$tempCourse->advisedHours = $varHours;
-			$this->courseListAdvisedCourses->add($tempCourse);
+			$temp_course = new Course($course_id);
+			$temp_course->advised_hours = $var_hours;
+			$this->course_list_advised_courses->add($temp_course);
 
-			if ($semesterNum == -88)
+			if ($semester_num == -88)
 			{
 				// This was a courses added by the advisor.
-				$this->assignCourseToCoursesAddedList($courseID, $varHours, $id, $advisedTermID);
+				$this->assign_course_to_courses_added_list($course_id, $var_hours, $id, $advised_term_id);
 				continue;
 			}
 
-			// Now, we need to modify the degreePlan object to
+			// Now, we need to modify the degree_plan object to
 			// show these advisings.
-			if ($courseList = $this->degreePlan->findCourses($courseID, $groupID, $semesterNum))
+			if ($course_list = $this->degree_plan->find_courses($course_id, $group_id, $semester_num))
 			{
-				//adminDebug("in here");
-				//adminDebug(count($courseList->arrayList));
+				//admin_debug("in here");
+				//admin_debug(count($course_list->arrayList));
 
 				// This course may exist in several different branches of a group, so we need
 				// to mark all the branches as having been advised to take.  Usually, this CourseList
 				// will probably only have 1 course object in it.  But, better safe than sorry.
-				$courseList->resetCounter();
-				if ($course = $courseList->getNext())
+				$course_list->reset_counter();
+				if ($course = $course_list->get_next())
 				{
-					//adminDebug($course->toString());
+					//admin_debug($course->toString());
 					// make sure the hour count has been loaded correctly.
-					if ($course->getCatalogHours() < 1)
+					if ($course->get_catalog_hours() < 1)
 					{
-						$course->loadDescriptiveData();
+						$course->load_descriptive_data();
 					}
 
 					// Let's start by looking at the first course.  Is it
 					// supposed to be repeated?
-					if ($course->boolSpecifiedRepeat==true
-					&& $course->specifiedRepeats >= 0 )
+					if ($course->bool_specified_repeat==true
+					&& $course->specified_repeats >= 0 )
 					{
 						// This is a course which is supposed to be repeated.
 						// We need to cycle through and find an instance
 						// of this course which has not been advised yet.
-						//adminDebug("Specified to be repeated. $course->specifiedRepeats.");
+						//admin_debug("Specified to be repeated. $course->specified_repeats.");
 
 
-						$courseList->resetCounter();
-						while($courseList->hasMore())
+						$course_list->reset_counter();
+						while($course_list->has_more())
 						{
-							$course = $courseList->getNext();
+							$course = $course_list->get_next();
 
 							// make sure the hour count has been loaded correctly.
-							if ($course->getCatalogHours() < 1)
+							if ($course->get_catalog_hours() < 1)
 							{
-								$course->loadDescriptiveData();
+								$course->load_descriptive_data();
 							}
 
-							//if ($course->boolAdvisedToTake != true && !is_object($course->courseFulfilledBy))
-							if ($course->boolAdvisedToTake != true && $course->courseListFulfilledBy->isEmpty == true)
+							//if ($course->bool_advised_to_take != true && !is_object($course->courseFulfilledBy))
+							if ($course->bool_advised_to_take != true && $course->course_list_fulfilled_by->is_empty == true)
 							{
-								//adminDebug("here for " . $course->toString());
+								//admin_debug("here for " . $course->toString());
 								// Okay, this course is supposed to be taken/advised
 								// more than once.  So, I will mark this one as
 								// advised, and then break out of the loop, since
 								// I don't want to mark all occurances as advised.
-								$course->boolAdvisedToTake = true;
-								$course->assignedToSemesterNum = $semesterNum;
-								//adminDebug("Putting it in $semesterNum." . $course->toString(" ",true));
-								$course->assignedToGroupID = $groupID;
-								$course->advisedHours = $varHours;
-								$course->advisedTermID = $advisedTermID;
-								$course->dbAdvisedCoursesID = $id;
-								$courseList->decSpecifiedRepeats($course);
+								$course->bool_advised_to_take = true;
+								$course->assigned_to_semester_num = $semester_num;
+								//admin_debug("Putting it in $semester_num." . $course->toString(" ",true));
+								$course->assigned_to_group_id = $group_id;
+								$course->advised_hours = $var_hours;
+								$course->advised_term_id = $advised_term_id;
+								$course->db_advised_courses_id = $id;
+								$course_list->dec_specified_repeats($course);
 								break;
 							}
 						}
@@ -1459,54 +1459,54 @@ class _FlightPath
 				// We're here, because it was not a repeatable course.
 				// ** We should only go through THIS loop once!  So,
 				// we will break after we make our assignment.
-				$courseList->resetCounter();
-				while($courseList->hasMore())
+				$course_list->reset_counter();
+				while($course_list->has_more())
 				{
-					$course = $courseList->getNext();
-					//adminDebug($course->toString());
+					$course = $course_list->get_next();
+					//admin_debug($course->toString());
 					// make sure the hour count has been loaded correctly.
-					if ($course->getCatalogHours() < 1)
+					if ($course->get_catalog_hours() < 1)
 					{
-						$course->loadDescriptiveData();
+						$course->load_descriptive_data();
 					}
 
 					// make sure it has not already been advised to take.
 					// Would occur if the same course is specified more
 					// than once in a semester.
-					if ($course->boolAdvisedToTake == true)
+					if ($course->bool_advised_to_take == true)
 					{
 						continue;
 					}
 
 					// Has this course already been fulfilled by something?
 					// If so, we cannot attempt to say it's been advised!
-					if (!$course->courseListFulfilledBy->isEmpty)
+					if (!$course->course_list_fulfilled_by->is_empty)
 					{
 						// meaning, this course HAS been fulfilled.
 						// So, let's move this advising to the "added by advisor"
 						// spot.
-						$this->assignCourseToCoursesAddedList($courseID, $varHours, $id, $advisedTermID);
+						$this->assign_course_to_courses_added_list($course_id, $var_hours, $id, $advised_term_id);
 						break;
 					}
 					
 					
-					$course->boolAdvisedToTake = true;
-					$course->assignedToSemesterNum = $semesterNum;
-					//adminDebug("NOW Putting it in $semesterNum." . $course->toString(" ",true));
-					$course->assignedToGroupID = $groupID;
-					$course->advisedHours = $varHours;
-					$course->advisedTermID = $advisedTermID;
-					$course->dbAdvisedCoursesID = $id;
-					if ($course->requiredOnBranchID > 0)
+					$course->bool_advised_to_take = true;
+					$course->assigned_to_semester_num = $semester_num;
+					//admin_debug("NOW Putting it in $semester_num." . $course->toString(" ",true));
+					$course->assigned_to_group_id = $group_id;
+					$course->advised_hours = $var_hours;
+					$course->advised_term_id = $advised_term_id;
+					$course->db_advised_courses_id = $id;
+					if ($course->required_on_branch_id > 0)
 					{
 						// In other words, this course was found on a branch, so we need
-						// to increment that branch's countOfMatches.
-						if ($branch = $this->degreePlan->findGroup($course->requiredOnBranchID))
+						// to increment that branch's count_of_matches.
+						if ($branch = $this->degree_plan->find_group($course->required_on_branch_id))
 						{
-							//adminDebug($branch->toString());
-							$branch->countOfMatches++;
+							//admin_debug($branch->toString());
+							$branch->count_of_matches++;
 						} else {
-							adminDebug("Error: Could not find branch.");
+							admin_debug("Error: Could not find branch.");
 						}
 
 					}
@@ -1515,9 +1515,9 @@ class _FlightPath
 					// break after we make our assignment.
 					break;
 
-					//print_pre($course->toString());
+					//print_pre($course->to_string());
 				}
-				//adminDebug("out of loop");
+				//admin_debug("out of loop");
 
 			}
 
@@ -1527,48 +1527,48 @@ class _FlightPath
 		// group's course lists, so that the advised courses are lower
 		// than the fulfilled courses.
 
-		//$this->degreePlan->sortGroupsFulfilledFirst();
-		//print_pre($this->degreePlan->listGroups->toString());
+		//$this->degree_plan->sortGroupsFulfilledFirst();
+		//print_pre($this->degree_plan->list_groups->toString());
 
 	} // function loadAdvisingSessionFromDatabase
 
 
-	function splitRequirementsBySubstitutions()
+	function split_requirements_by_substitutions()
 	{
 		// Go through all the required courses on the degree plan,
 		// and if there is a partial substitution specified in the student's
 		// list of substitutions, then split that requirement into 2 courses,
 		// one with enough hours to satisfy the sub, and the remaining hours.
-		$degreePlan = $this->degreePlan;
+		$degree_plan = $this->degree_plan;
 		$student = $this->student;
 
-		$student->listSubstitutions->resetCounter();
-		while($student->listSubstitutions->hasMore())
+		$student->list_substitutions->reset_counter();
+		while($student->list_substitutions->has_more())
 		{
-			$substitution = $student->listSubstitutions->getNext();
+			$substitution = $student->list_substitutions->get_next();
 
-			$courseRequirement = $substitution->courseRequirement;
-			$courseSub = $substitution->courseListSubstitutions->getFirst();
+			$course_requirement = $substitution->course_requirement;
+			$course_sub = $substitution->course_list_substitutions->get_first();
 
-			// Check to see if the courseSub's hoursAwarded are less than the
-			// courseRequirement's min hours...
-			if ($courseRequirement->minHours > $courseSub->hoursAwarded)
+			// Check to see if the courseSub's hours_awarded are less than the
+			// course_requirement's min hours...
+			if ($course_requirement->min_hours > $course_sub->hours_awarded)
 			{
 				// Meaning the original course requirement is not being
 				// fully satisfied by this substitution!  The original
 				// course requirement has hours left over which must be
 				// fulfilled somehow.
-				$remainingHours = $courseRequirement->minHours - $courseSub->hoursAwarded;
-				//adminDebug($courseRequirement->toString() . " remaining hours: $remainingHours");
+				$remaining_hours = $course_requirement->min_hours - $course_sub->hours_awarded;
+				//admin_debug($course_requirement->toString() . " remaining hours: $remaining_hours");
 				// This means that the course requirement needs to be split.
 				// So, find this course in the degree plan.
-				$requiredCourseID = $courseRequirement->courseID;
-				$requiredGroupID = $courseRequirement->assignedToGroupID;
-				$requiredSemesterNum = $courseRequirement->assignedToSemesterNum;
+				$required_course_id = $course_requirement->course_id;
+				$required_group_id = $course_requirement->assigned_to_group_id;
+				$required_semester_num = $course_requirement->assigned_to_semester_num;
 
-				if ($foundCourses = $degreePlan->findCourses($requiredCourseID, $requiredGroupID, $requiredSemesterNum))
+				if ($found_courses = $degree_plan->find_courses($required_course_id, $required_group_id, $required_semester_num))
 				{
-					//print_pre($foundCourses->toString());
+					//print_pre($found_courses->to_string());
 
 				}
 
@@ -1583,22 +1583,22 @@ class _FlightPath
 
 
 
-	function assignCourseToCoursesAddedList($courseID, $varHours = 0, $dbAdvisedCoursesID = 0, $advisedTermID = 0)
+	function assign_course_to_courses_added_list($course_id, $var_hours = 0, $db_advised_courses_id = 0, $advised_term_id = 0)
 	{
 		// Set the supplied course as "advised to take" in the degree plan's
 		// special added courses group, which is number -88.
 
-		$course = new Course($courseID, false, $this->db);
-		$course->boolAdvisedToTake = true;
-		$course->assignedToSemesterNum = -88;
-		$course->assignedToGroupID = -88;
-		$course->advisedHours = $varHours;
-		$course->dbAdvisedCoursesID = $dbAdvisedCoursesID;
-		$course->advisedTermID = $advisedTermID;
+		$course = new Course($course_id, false, $this->db);
+		$course->bool_advised_to_take = true;
+		$course->assigned_to_semester_num = -88;
+		$course->assigned_to_group_id = -88;
+		$course->advised_hours = $var_hours;
+		$course->db_advised_courses_id = $db_advised_courses_id;
+		$course->advised_term_id = $advised_term_id;
 
-		if ($group = $this->degreePlan->findGroup(-88))
+		if ($group = $this->degree_plan->find_group(-88))
 		{
-			$group->listCourses->add($course);
+			$group->list_courses->add($course);
 		}
 
 		// Done!

@@ -2,42 +2,42 @@
 /**
 *This script expects several variables to be set before it is included.
 *
-* $pageContent		The actual content of the page which appears in the
+* $page_content		The actual content of the page which appears in the
 *					center.
-* $pageOnLoad			If the page performs any javascript onLoad, it goes here.
+* $page_on_load			If the page performs any javascript onLoad, it goes here.
 *					Should include the onLoad command.  Ex:
-*					$pageOnLoad = "setVars()";
-* $pageOnUnload		If the page is supposed to perform something when the user
+*					$page_on_load = "setVars()";
+* $page_on_unload		If the page is supposed to perform something when the user
 *					closes it, set it here.
-* $pageTabs			Contains the HTML to draw the correct tabs at the top of the page.
-* $pageIsPopup		Set to either TRUE or FALSE.  If TRUE, do not display the header,
+* $page_tabs			Contains the HTML to draw the correct tabs at the top of the page.
+* $page_is_popup		Set to either TRUE or FALSE.  If TRUE, do not display the header,
 *					and possibly have different layout parameters.  These are booleans
 *					and not strings.
-* $pageTitle			The HTML title of the browser window.
-* $pageHasSearch		Either TRUE or FALSE.  Is a boolean, not a string.  If set to
+* $page_title			The HTML title of the browser window.
+* $page_has_search		Either TRUE or FALSE.  Is a boolean, not a string.  If set to
 *					TRUE, the page will have a search bar at the top.
-* $pageScrollTop		If set, the page will automatically scroll to this position (and
+* $page_scroll_top		If set, the page will automatically scroll to this position (and
 *					the one below it) on load.
-* $pageScrollLeft		The page will scroll to this position on load.  pageScrollTop
+* $page_scroll_left		The page will scroll to this position on load.  pageScrollTop
 *					must also be set for this to happen.
-* $pageScrollTo		If set, the page will automatically scroll to the named anchor
+* $page_scroll_to		If set, the page will automatically scroll to the named anchor
 * 					specified in this variable.  For example, if it is set to "bob", then
 * 					on load, the page will scroll to where that anchor is on the page.
 * $pageHelpTopic	If the page has a help entry associated with it, enter the topic
 * 					in this variable.  It will cause the page to present a help icon.
-* $pageHideReportError     if set to TRUE, the page will not display the link to report
+* $page_hide_report_error     if set to TRUE, the page will not display the link to report
 * 							an error.
-* $pageBannerIsLink   true or false.  If true, the banner at the top will load FP in a
+* $page_banner_is_link   true or false.  If true, the banner at the top will load FP in a
 *						new window.
 * 
 **/
-$themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSystemSettings"]["theme"];
+$theme_location = $GLOBALS["fp_system_settings"]["base_u_r_l"] . "/" . $GLOBALS["fp_system_settings"]["theme"];
 ?> 
 <html>
 	<head>
 	
 	
-		<script src="<?php print $GLOBALS["fpSystemSettings"]["basePath"]; ?>/inc/jquery-1.3.2.min.js" type="text/javascript"></script>
+		<script src="<?php print $GLOBALS["fp_system_settings"]["base_path"]; ?>/inc/jquery-1.3.2.min.js" type="text/javascript"></script>
 		
 		<script type='text/javascript'>
 
@@ -45,12 +45,12 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 		{
 			<?php
 
-			print $pageOnLoad;
+			print $page_on_load;
 			// If the page had a scrollTo set, we should also
 			// perform that here...
-			if ($pageScrollTo != "")
+			if ($page_scroll_to != "")
 			{
-				print "location.href = \"#$pageScrollTo\"; \n";
+				print "location.href = \"#$page_scroll_to\"; \n";
 			}
 
 			?>
@@ -138,12 +138,12 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 		
 		<?php
 		 // Load this theme's CSS file(s)
-		 print "<link rel='stylesheet' type='text/css' href='$themeLocation/style.css'>";
+		 print "<link rel='stylesheet' type='text/css' href='$theme_location/style.css'>";
 		 
 		 // Load any extra CSS files which addon modules might have added.
-		 if (is_array($pageExtraCssFiles) && count($pageExtraCssFiles) > 0) {
-		   foreach ($pageExtraCssFiles as $cssFileName) {
-		     print "<link rel='stylesheet' type='text/css' href='$cssFileName'>";
+		 if (is_array($page_extra_css_files) && count($page_extra_css_files) > 0) {
+		   foreach ($page_extra_css_files as $css_file_name) {
+		     print "<link rel='stylesheet' type='text/css' href='$css_file_name'>";
 		   }
 		 }
 		 
@@ -151,26 +151,26 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
 		
 		<title><?php 
-		if ($pageTitle == "")
+		if ($page_title == "")
 		{ // By default, page title is this...
-			$pageTitle = $GLOBALS["fpSystemSettings"]["schoolInitials"] . " FlightPath";
+			$page_title = $GLOBALS["fp_system_settings"]["school_initials"] . " FlightPath";
 		}
-		print $pageTitle;
+		print $page_title;
 
 		?></title>
 	</head>
 	
 	<?php
 	$scroll = "";
-	if (trim($pageScrollTop != ""))
+	if (trim($page_scroll_top != ""))
 	{
-		$pageScrollLeft = 0;
-		$scroll = " scrollTo($pageScrollLeft, $pageScrollTop);";
+		$page_scroll_left = 0;
+		$scroll = " scrollTo($page_scroll_left, $page_scroll_top);";
 	}
 	$onclose = "";
-	if (trim($pageOnUnload != ""))
+	if (trim($page_on_unload != ""))
 	{
-		$onclose = "onUnload='$pageOnUnload'";
+		$onclose = "on_unload='$page_on_unload'";
 	}
 
 
@@ -184,7 +184,7 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 
 
 	// If the page is a popup, do not display header..
-	if ($pageIsPopup != TRUE)
+	if ($page_is_popup != TRUE)
 	{
 
 		print "<table width='800' cellpadding='0' cellspacing='0' bgcolor='white' align='center'>";
@@ -198,32 +198,32 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 				
 							
 			
-				<td align="left" width="28" valign="baseline" bgcolor="#ECECDB" style="background: url('<?php print "$themeLocation/images/"; ?>tl.gif') #ECECDB top left no-repeat;" height="17">
+				<td align="left" width="28" valign="baseline" bgcolor="#ECECDB" style="background: url('<?php print "$theme_location/images/"; ?>tl.gif') #ECECDB top left no-repeat;" height="17">
 					<!--<img src="tl.gif" width="28" height="17" style="margin: 0px; padding: 0px;">-->
 				</td>
-	<td valign="baseline" style="background: url('<?php print "$themeLocation/images/"; ?>top.gif') #ECECDB repeat-x; width: 800px;"></td>
-				<td align="right" width="33" valign="baseline" bgcolor="#ECECDB" style="background: url('<?php print "$themeLocation/images/"; ?>tr.gif') #ECECDB top right no-repeat;">
+	<td valign="baseline" style="background: url('<?php print "$theme_location/images/"; ?>top.gif') #ECECDB repeat-x; width: 800px;"></td>
+				<td align="right" width="33" valign="baseline" bgcolor="#ECECDB" style="background: url('<?php print "$theme_location/images/"; ?>tr.gif') #ECECDB top right no-repeat;">
 					<!--<img src="tr.gif" width="33" height="17" style="margin: 0px; padding: 0px;">-->
 				</td>
 			</tr>
 			<tr>
 				<td align="center" colspan="3">
-					<div style="background: url('<?php print "$themeLocation/images/"; ?>left.gif') repeat-y top left;">
-					<div style="background: url('<?php print "$themeLocation/images/"; ?>right.gif') repeat-y top right;">
+					<div style="background: url('<?php print "$theme_location/images/"; ?>left.gif') repeat-y top left;">
+					<div style="background: url('<?php print "$theme_location/images/"; ?>right.gif') repeat-y top right;">
 						<table width="90%" cellpadding="0" cellpadding="0" >
 							<tr>
 								<td align="left">
                                 	<?php
                                 	// ***************** Header Content   *****************
                                 	// *****************      *****************
-                                	if ($pageBannerIsLink == true)
+                                	if ($page_banner_is_link == true)
                                 	{
-                                		print "<a href='{$GLOBALS["fpSystemSettings"]["selfURL"]}' target='_blank'>";
+                                		print "<a href='{$GLOBALS["fp_system_settings"]["self_u_r_l"]}' target='_blank'>";
                                 	}
 		                            ?>
-		                            <img src='<?php print "$themeLocation/images/"; ?>fp_banner_default.png' border='0'>
+		                            <img src='<?php print "$theme_location/images/"; ?>fp_banner_default.png' border='0'>
 	                            <?php
-	                            if ($pageBannerIsLink == true)
+	                            if ($page_banner_is_link == true)
 	                            {
 	                            	print "</a>";
 	                            }
@@ -237,12 +237,12 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 				</td>
 			</tr>
 			<tr>
-				<td align="left" valign="bottom" style="background: url('<?php print "$themeLocation/images/"; ?>bl.gif') #ECECDB no-repeat;">
-					<img src="<?php print "$themeLocation/images/"; ?>spacer.gif" width="33" height="36">
+				<td align="left" valign="bottom" style="background: url('<?php print "$theme_location/images/"; ?>bl.gif') #ECECDB no-repeat;">
+					<img src="<?php print "$theme_location/images/"; ?>spacer.gif" width="33" height="36">
 				</td>
-				<td valign="bottom" style="background: url('<?php print "$themeLocation/images/"; ?>bottom.gif') #ECECDB repeat-x;"></td>
-				<td align="right" valign="bottom" style="background: url('<?php print "$themeLocation/images/"; ?>br.gif') #ECECDB no-repeat;">
-					<img src="<?php print "$themeLocation/images/"; ?>spacer.gif" width="33" height="36">
+				<td valign="bottom" style="background: url('<?php print "$theme_location/images/"; ?>bottom.gif') #ECECDB repeat-x;"></td>
+				<td align="right" valign="bottom" style="background: url('<?php print "$theme_location/images/"; ?>br.gif') #ECECDB no-repeat;">
+					<img src="<?php print "$theme_location/images/"; ?>spacer.gif" width="33" height="36">
 				</td>
 			</tr>			
 		</table>	
@@ -263,7 +263,7 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 
 	// Set the page width based on whether or not
 	// we're in a popup window.
-	if ($pageIsPopup == TRUE)
+	if ($page_is_popup == TRUE)
 	{
 		print "<table width='100%' cellpadding='0' cellspacing='0' bgcolor='White' align='center'>";
 	} else {
@@ -285,7 +285,7 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 									<tr>
 										<td align="left">
 
-										<?php print $pageTabs; ?>
+										<?php print $page_tabs; ?>
 										
 										</td>
 									</tr>
@@ -297,7 +297,7 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 							<?php
 							// Insert a search bar if there is one.
 
-							if ($pageHasSearch == TRUE )
+							if ($page_has_search == TRUE )
 							{
 								print "<div style='padding-bottom: 2px;'>
 										 <input type='text' class='smallinput' size='30' name='search' id='search_bar_value' 
@@ -312,7 +312,7 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 
 							}
 
-							if ($pageBannerIsLink == true)
+							if ($page_banner_is_link == true)
 							{
 								print "<table cellpadding='0' cellspacing='0'
 										style='padding: 3px;
@@ -320,8 +320,8 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 										border: 1px solid black;
 										background-color: white;' 
 										class='tenpt'><td>
-										 <a href='{$GLOBALS["fpSystemSettings"]["selfURL"]}' target='_blank' class='nounderline'>
-										 <img src='$themeLocation/images/popup.gif' border='0'>
+										 <a href='{$GLOBALS["fp_system_settings"]["self_u_r_l"]}' target='_blank' class='nounderline'>
+										 <img src='$theme_location/images/popup.gif' border='0'>
 										 Click here to launch FlightPath!</a>
 										</td></table>
 									</td>
@@ -340,24 +340,24 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 			<tr>
 			
 			
-				<td align="left" valign="baseline" bgcolor="#ECECDB" style="background: url('<?php print "$themeLocation/images/"; ?>tl.gif') #ECECDB top left no-repeat;" height="17">
+				<td align="left" valign="baseline" bgcolor="#ECECDB" style="background: url('<?php print "$theme_location/images/"; ?>tl.gif') #ECECDB top left no-repeat;" height="17">
 					<!--<img src="tl.gif" width="28" height="17" style="margin: 0px; padding: 0px;">-->
 				</td>
-				<td valign="baseline" style="background: url('<?php print "$themeLocation/images/"; ?>top.gif') #ECECDB repeat-x; width: 800px;"></td>
-				<td align="right" valign="baseline" bgcolor="#ECECDB" style="background: url('<?php print "$themeLocation/images/"; ?>tr.gif') #ECECDB top right no-repeat;">
+				<td valign="baseline" style="background: url('<?php print "$theme_location/images/"; ?>top.gif') #ECECDB repeat-x; width: 800px;"></td>
+				<td align="right" valign="baseline" bgcolor="#ECECDB" style="background: url('<?php print "$theme_location/images/"; ?>tr.gif') #ECECDB top right no-repeat;">
 					<!--<img src="tr.gif" width="33" height="17" style="margin: 0px; padding: 0px;">-->
 				</td>
 			</tr>
 			<tr>
 				<td align="center" colspan="3">
-					<div style="background: url('<?php print "$themeLocation/images/"; ?>left.gif') repeat-y top left;">
-					<div style="background: url('<?php print "$themeLocation/images/"; ?>right.gif') repeat-y top right;">
+					<div style="background: url('<?php print "$theme_location/images/"; ?>left.gif') repeat-y top left;">
+					<div style="background: url('<?php print "$theme_location/images/"; ?>right.gif') repeat-y top right;">
 						<table width="90%" 
 							<?php
 							//------------------------------------------------------
 							// Force height if page is popup...
 							//------------------------------------------------------
-							if ($pageIsPopup)
+							if ($page_is_popup)
 							{
 								print " height='250' ";
 							}
@@ -372,7 +372,7 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 								<?php
                                 	// ***************** Page specific content will be in here *****************
 
-                                	print($pageContent);
+                                	print($page_content);
 
 
                                 	// ***************** Page specific content was in here     *****************
@@ -388,12 +388,12 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 				</td>
 			</tr>
 			<tr>
-				<td align="left" valign="bottom" style="background: url('<?php print "$themeLocation/images/"; ?>bl.gif') #ECECDB no-repeat;">
-					<img src="<?php print "$themeLocation/images/"; ?>spacer.gif" width="33" height="36">
+				<td align="left" valign="bottom" style="background: url('<?php print "$theme_location/images/"; ?>bl.gif') #ECECDB no-repeat;">
+					<img src="<?php print "$theme_location/images/"; ?>spacer.gif" width="33" height="36">
 				</td>
-				<td valign="bottom" style="background: url('<?php print "$themeLocation/images/"; ?>bottom.gif') #ECECDB repeat-x;" width="100%"></td>
-				<td align="right" valign="bottom" style="background: url('<?php print "$themeLocation/images/"; ?>br.gif') #ECECDB no-repeat;">
-					<img src="<?php print "$themeLocation/images/"; ?>spacer.gif" width="33" height="36">
+				<td valign="bottom" style="background: url('<?php print "$theme_location/images/"; ?>bottom.gif') #ECECDB repeat-x;" width="100%"></td>
+				<td align="right" valign="bottom" style="background: url('<?php print "$theme_location/images/"; ?>br.gif') #ECECDB no-repeat;">
+					<img src="<?php print "$theme_location/images/"; ?>spacer.gif" width="33" height="36">
 				</td>		
 			
 			
@@ -410,7 +410,7 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 
 		// Set the page width based on whether or not
 		// we're in a popup window.
-		if ($pageIsPopup == TRUE)
+		if ($page_is_popup == TRUE)
 		{
 			print "100%";
 		} else {
@@ -421,7 +421,7 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 		<td width='15'>&nbsp; </td>
 		<td style='font-size: 8pt;'>
 		<?php
-		if ($pageHideReportError != TRUE)
+		if ($page_hide_report_error != TRUE)
 		{
 			print "<a class='nounderline' href='javascript: popupreportcontact()'>Contact the FlightPath production team</a>";
 		}
@@ -430,7 +430,7 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSys
 		</table>
 		
 		<?php
-		if ($pageIsPopup != true)
+		if ($page_is_popup != true)
 		{
 			print "<div align='center' style='font-size: 8pt;'>&copy; <a href='http://www.ulm.edu'>University of Louisiana at Monroe</a>, all rights reserved</div>";
 		}

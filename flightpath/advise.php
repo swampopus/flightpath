@@ -28,24 +28,24 @@ header("Cache-control: private");
 
 require_once("bootstrap.inc");
 
-if ($_SESSION["fpLoggedIn"] != true && $_REQUEST["blankDegreeID"] == "")
+if ($_SESSION["fp_logged_in"] != true && $_REQUEST["blank_degree_id"] == "")
 { // If not logged in, show the login screen.
   header("Location: main.php");
   die;
 }
 
-$boolLoogedIn = true;
+$bool_looged_in = true;
 // We do this, because we might be allowed in if we are only
 // looking at blank degree plans.
-if ($_SESSION["fpLoggedIn"] != true)
-{$boolLoggedIn = false;}
+if ($_SESSION["fp_logged_in"] != true)
+{$bool_logged_in = false;}
 
 
 // Not essential.  This will help me keep track of
 // details later, possibly....
-$GLOBALS["adminNotesArray"] = array();
+$GLOBALS["admin_notes_array"] = array();
 
-$windowMode = trim(addslashes($_REQUEST["windowMode"]));
+$window_mode = trim(addslashes($_REQUEST["window_mode"]));
 
 
 /////////////////////////////////////
@@ -53,37 +53,37 @@ $windowMode = trim(addslashes($_REQUEST["windowMode"]));
 ///  from a tab change?
 /////////////////////////////////////
 $fp = new FlightPath();
-$fp->processRequestSaveDraft();
+$fp->process_request_save_draft();
 
 
 
 
-if ($_REQUEST["clearSession"] == "yes")
+if ($_REQUEST["clear_session"] == "yes")
 {
-  $tempScreen = new AdvisingScreen();
-  $tempScreen->clearVariables();
+  $temp_screen = new AdvisingScreen();
+  $temp_screen->clear_variables();
 }
 
-$degreePlan = $student = $fp = "";
+$degree_plan = $student = $fp = "";
 
-if ($windowMode == "history" || $_REQUEST["performAction"] == "history")
+if ($window_mode == "history" || $_REQUEST["perform_action"] == "history")
 {
-  displayAdviseeHistory();
+  display_advisee_history();
 }
 
-if ($windowMode == "popup")
+if ($window_mode == "popup")
 {
-  displayPopup();
+  display_popup();
 }
 
-if ($windowMode == "" || $windowMode == "screen")
+if ($window_mode == "" || $window_mode == "screen")
 {
-  displayScreen();
+  display_screen();
 }
 
-if ($windowMode == "summary")
+if ($window_mode == "summary")
 {
-  displayPopupAdvisingSummary();
+  display_popup_advising_summary();
 }
 
 
@@ -91,62 +91,62 @@ die;
 
 
 
-function displayPopupAdvisingSummary()
+function display_popup_advising_summary()
 {
   // Check for hooks...
-  if (function_exists("advise_displayPopupAdvisingSummary")) {
-    return call_user_func("advise_displayPopupAdvisingSummary");
+  if (function_exists("advise_display_popup_advising_summary")) {
+    return call_user_func("advise_display_popup_advising_summary");
   }
   
   
-  $advisingSessionID = trim(addslashes($_GET["advisingSessionID"]));
+  $advising_session_id = trim(addslashes($_GET["advising_session_id"]));
 
-  $screen = new AdvisingScreen("",null,"notAdvising");
-  $screen->boolPrint = true;
+  $screen = new AdvisingScreen("",null,"not_advising");
+  $screen->bool_print = true;
   $db = new DatabaseHandler();
 
-  $res = $db->dbQuery("SELECT * FROM advising_sessions
-							       WHERE `advising_session_id`='$advisingSessionID' ");
-  if ($db->dbNumRows($res) > 0)
+  $res = $db->db_query("SELECT * FROM advising_sessions
+							       WHERE `advising_session_id`='$advising_session_id' ");
+  if ($db->db_num_rows($res) > 0)
   {
-    $cur = $db->dbFetchArray($res);
+    $cur = $db->db_fetch_array($res);
     extract($cur, 3, "db");
   }
   $dt = date("F jS, Y, g:ia",strtotime($db_datetime));
 
 
   $db = new DatabaseHandler();
-  $tempCourse = new Course();
-  $tempCourse->termID = $db_term_id;
-  $term = $tempCourse->getTermDescription();
-  $degreePlan = new DegreePlan();
-  $degreePlan->degreeID = $db_degree_id;
-  $degreePlan->loadDescriptiveData();
-  $degreeTitle = $degreePlan->getTitle(true);
+  $temp_course = new Course();
+  $temp_course->term_id = $db_term_id;
+  $term = $temp_course->get_term_description();
+  $degree_plan = new DegreePlan();
+  $degree_plan->degree_id = $db_degree_id;
+  $degree_plan->load_descriptive_data();
+  $degree_title = $degree_plan->get_title(true);
 
   $student = new Student($db_student_id, $db);
 
-  $whatIfMessage = "";
+  $what_if_message = "";
   if ($db_is_whatif == "1")
   {
-    $officialDegreePlan = $student->getDegreePlan(false, true);
-    $officialDegreePlan->loadDescriptiveData();
-    $officialDegreeTitle = $officialDegreePlan->getTitle(true);
+    $official_degree_plan = $student->get_degree_plan(false, true);
+    $official_degree_plan->load_descriptive_data();
+    $official_degree_title = $official_degree_plan->get_title(true);
 
-    $whatIfMessage = "<b>Note:</b>
+    $what_if_message = "<b>Note:</b>
 							This advising was saved using <b>What If</b> mode
-							for the $degreeTitle major.  According to {$GLOBALS["fpSystemSettings"]["schoolInitials"]} records,
-							the student's official major is <u>$officialDegreeTitle</u>.
+							for the $degree_title major.  According to {$GLOBALS["fp_system_settings"]["school_initials"]} records,
+							the student's official major is <u>$official_degree_title</u>.
 							";
   }
 
 
-  $w = ($screen->pageIsMobile) ? "100%" : "500";
+  $w = ($screen->page_is_mobile) ? "100%" : "500";
   
   $pC = "";
   $pC .= "<table width='$w'><td valign='top'>";
   
-  if ($screen->pageIsMobile) {
+  if ($screen->page_is_mobile) {
 
   }
   else {
@@ -158,7 +158,7 @@ function displayPopupAdvisingSummary()
 			 </tr>
 			 <tr>
 			  <td valign='top' width='15%'>Student:</td>
-			  <td valign='top' width='40%'>" . $db->getStudentName($db_student_id, false) . " ($db_student_id)</td>
+			  <td valign='top' width='40%'>" . $db->get_student_name($db_student_id, false) . " ($db_student_id)</td>
 			  <td valign='top' rowspan='3'>
 			  	<table width='100%' cellpadding='0' cellspacing='0'>
 				<tr height='20'>
@@ -187,7 +187,7 @@ function displayPopupAdvisingSummary()
 			 </tr>
 			 <tr>
 			  <td valign='top' width='10%'>Advisor:</td>
-			  <td valign='top'>" . $db->getFacultyName($db_faculty_id, false) . "</td>
+			  <td valign='top'>" . $db->get_faculty_name($db_faculty_id, false) . "</td>
 
 			 </tr>
 			 <tr>
@@ -196,7 +196,7 @@ function displayPopupAdvisingSummary()
 
 			 </tr>
 			 ";
-  if (!$screen->pageIsMobile) {
+  if (!$screen->page_is_mobile) {
     $pC .= "
 			 <tr>
 			  <td valign='top' colspan='2'>
@@ -210,24 +210,24 @@ function displayPopupAdvisingSummary()
 			 	<td valign='top' colspan='4'>
 			 	";
 
-  if ($degreeTitle != "")
+  if ($degree_title != "")
   {
-    $pC .= "Major: $degreeTitle";
+    $pC .= "Major: $degree_title";
   }
 
   $pC .= "
 			 </tr>
 			 </table>
 			 <div class='tenpt'><i>Submitted on $dt.</i></div>
-			 <div class='tenpt'>$whatIfMessage</div>
+			 <div class='tenpt'>$what_if_message</div>
 			 <br>
 		";
 
-  $pC .= $screen->drawCurvedTitle("Advised Courses");
+  $pC .= $screen->draw_curved_title("Advised Courses");
 
-  $fp = new FlightPath($student,$degreePlan, $db);
+  $fp = new FlightPath($student,$degree_plan, $db);
 
-  $fp->loadAdvisingSessionFromDatabase("","",false,false,$advisingSessionID);
+  $fp->load_advising_session_from_database("","",false,false,$advising_session_id);
 
   $pC .= "<table border='0' cellpadding='3'>
 			<tr>
@@ -245,27 +245,27 @@ function displayPopupAdvisingSummary()
 
 
   // Get a courseList of all the courses which are set as advised to take.
-  $advisedCoursesList = $fp->courseListAdvisedCourses;
-  $advisedCoursesList->loadCourseDescriptiveData();
-  $advisedCoursesList->sortAlphabeticalOrder();
-  $advisedCoursesList->resetCounter();
-  while ($advisedCoursesList->hasMore())
+  $advised_courses_list = $fp->course_list_advised_courses;
+  $advised_courses_list->load_course_descriptive_data();
+  $advised_courses_list->sort_alphabetical_order();
+  $advised_courses_list->reset_counter();
+  while ($advised_courses_list->has_more())
   {
-    $course = $advisedCoursesList->getNext();
-    // set the catalogYear from the termID.
-    $course->termID = $db_term_id;
-    $course->setCatalogYearFromTermID();
-    $course->loadDescriptiveData(false);
+    $course = $advised_courses_list->get_next();
+    // set the catalogYear from the term_id.
+    $course->term_id = $db_term_id;
+    $course->set_catalog_year_from_term_id();
+    $course->load_descriptive_data(false);
 
     $pC .= "<tr>
 					<td class='tenpt' valign='top'>
-					$course->subjectID $course->courseNum
+					$course->subject_id $course->course_num
 					</td>
 					<td class='tenpt' valign='top'>
 					$course->title
 					</td>
 					<td class='tenpt' valign='top' align='center'>
-					" . $course->getHours() . " 
+					" . $course->get_hours() . " 
 					</td>
 					
 				</tr>
@@ -274,14 +274,14 @@ function displayPopupAdvisingSummary()
 
   $pC .= "</table>
 			<div align='right' class='tenpt' style='padding-top: 10px; padding-right: 15px;'>
-			  <b>Total advised hours: &nbsp; " . $advisedCoursesList->countHours() . "</b>
+			  <b>Total advised hours: &nbsp; " . $advised_courses_list->count_hours() . "</b>
 			</div>
 			";
 
 
-  if (!$screen->pageIsMobile) {
+  if (!$screen->page_is_mobile) {
     $pC .= "<br>";
-    $pC .= $screen->drawCurvedTitle("Alternate Courses");
+    $pC .= $screen->draw_curved_title("Alternate Courses");
     $pC .= "<div class='tenpt'>
   			You may use this space to write in alternate courses 
   			the student should enroll in, in the event that an 
@@ -295,416 +295,416 @@ function displayPopupAdvisingSummary()
   $pC .= "</table>";
 
 
-  $screen->pageTitle = $db->getStudentName($db_student_id, false) . " ($db_student_id) $term Advising Summary";
-  $screen->pageContent = $pC;
-  $screen->outputToBrowser();
+  $screen->page_title = $db->get_student_name($db_student_id, false) . " ($db_student_id) $term Advising Summary";
+  $screen->page_content = $pC;
+  $screen->output_to_browser();
 
 
 
 }
 
 
-function displayPopupToolbox($screen, $performAction2)
+function display_popup_toolbox($screen, $perform_action2)
 {
   
   // Check for hooks...
-  if (function_exists("advise_displayPopupToolbox")) {
-    return call_user_func("advise_displayPopupToolbox", $screen, $performAction2);
+  if (function_exists("advise_display_popup_toolbox")) {
+    return call_user_func("advise_display_popup_toolbox", $screen, $perform_action2);
   }
   
   
-  global $degreePlan, $student, $fp;
+  global $degree_plan, $student, $fp;
 
-  $pageContent = "";
+  $page_content = "";
 
-  if ($_SESSION["fpCanSubstitute"] != true)
+  if ($_SESSION["fp_can_substitute"] != true)
   {
     die("Your user type is not allowed to access this function.");
   }
 
-  $pageContent .= $screen->getJavascriptCode();
-  $csid = $GLOBALS["currentStudentID"];
+  $page_content .= $screen->get_javascript_code();
+  $csid = $GLOBALS["current_student_id"];
 
-  if ($performAction2 == "substitutions")
+  if ($perform_action2 == "substitutions")
   {
     // Display the substitution management screen.
-    $pageContent .= $screen->displayToolboxSubstitutions();
+    $page_content .= $screen->display_toolbox_substitutions();
 
 
     // Create the tabs for the page...
-    $tabArray = array();
-    $tabArray[0]["title"] = "Transfers";
-    $tabArray[0]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=transfers&currentStudentID=' . $csid . '";';
+    $tab_array = array();
+    $tab_array[0]["title"] = "_transfers";
+    $tab_array[0]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=transfers&current_student_id=' . $csid . '";';
 
-    $tabArray[1]["title"] = "Substitutions";
-    $tabArray[1]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=substitutions&currentStudentID=' . $csid . '";';
-    $tabArray[1]["active"] = true;
+    $tab_array[1]["title"] = "_substitutions";
+    $tab_array[1]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=substitutions&current_student_id=' . $csid . '";';
+    $tab_array[1]["active"] = true;
 
-    $tabArray[2]["title"] = "Moved";
-    $tabArray[2]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=moved&currentStudentID=' . $csid . '";';
+    $tab_array[2]["title"] = "_moved";
+    $tab_array[2]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=moved&current_student_id=' . $csid . '";';
 
-    $tabArray[3]["title"] = "Courses";
-    $tabArray[3]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=name&currentStudentID=' . $csid . '";';
+    $tab_array[3]["title"] = "_courses";
+    $tab_array[3]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=courses&order=name&current_student_id=' . $csid . '";';
 
 
-    $screen->pageTabs = $screen->drawTabs($tabArray);
+    $screen->page_tabs = $screen->draw_tabs($tab_array);
   }
 
-  if ($performAction2 == "courses")
+  if ($perform_action2 == "courses")
   {
-    $pageContent .= $screen->displayToolboxCourses();
+    $page_content .= $screen->display_toolbox_courses();
 
     // Create the tabs for the page...
-    $tabArray = array();
-    $tabArray[0]["title"] = "Transfers";
-    $tabArray[0]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=transfers&currentStudentID=' . $csid . '";';
+    $tab_array = array();
+    $tab_array[0]["title"] = "_transfers";
+    $tab_array[0]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=transfers&current_student_id=' . $csid . '";';
 
-    $tabArray[1]["title"] = "Substitutions";
-    $tabArray[1]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=substitutions&currentStudentID=' . $csid . '";';
+    $tab_array[1]["title"] = "_substitutions";
+    $tab_array[1]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=substitutions&current_student_id=' . $csid . '";';
 
-    $tabArray[2]["title"] = "Moved";
-    $tabArray[2]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=moved&currentStudentID=' . $csid . '";';
+    $tab_array[2]["title"] = "_moved";
+    $tab_array[2]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=moved&current_student_id=' . $csid . '";';
 
-    $tabArray[3]["title"] = "Courses";
-    $tabArray[3]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=name&currentStudentID=' . $csid . '";';
-    $tabArray[3]["active"] = true;
+    $tab_array[3]["title"] = "_courses";
+    $tab_array[3]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=courses&order=name&current_student_id=' . $csid . '";';
+    $tab_array[3]["active"] = true;
 
-    $screen->pageTabs = $screen->drawTabs($tabArray);
+    $screen->page_tabs = $screen->draw_tabs($tab_array);
 
   }
 
 
 
-  if ($performAction2 == "" || $performAction2 == "transfers")
+  if ($perform_action2 == "" || $perform_action2 == "transfers")
   {
     // Display the transfer eqv management system.
-    $pageContent .= $screen->displayToolboxTransfers();
+    $page_content .= $screen->display_toolbox_transfers();
 
     // Create the tabs for the page...
-    $tabArray = array();
-    $tabArray[0]["title"] = "Transfers";
-    $tabArray[0]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=transfers&currentStudentID=' . $csid . '";';
-    $tabArray[0]["active"] = true;
+    $tab_array = array();
+    $tab_array[0]["title"] = "_transfers";
+    $tab_array[0]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=transfers&current_student_id=' . $csid . '";';
+    $tab_array[0]["active"] = true;
 
-    $tabArray[1]["title"] = "Substitutions";
-    $tabArray[1]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=substitutions&currentStudentID=' . $csid . '";';
+    $tab_array[1]["title"] = "_substitutions";
+    $tab_array[1]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=substitutions&current_student_id=' . $csid . '";';
 
-    $tabArray[2]["title"] = "Moved";
-    $tabArray[2]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=moved&currentStudentID=' . $csid . '";';
+    $tab_array[2]["title"] = "_moved";
+    $tab_array[2]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=moved&current_student_id=' . $csid . '";';
 
-    $tabArray[3]["title"] = "Courses";
-    $tabArray[3]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=name&currentStudentID=' . $csid . '";';
+    $tab_array[3]["title"] = "_courses";
+    $tab_array[3]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=courses&order=name&current_student_id=' . $csid . '";';
 
 
-    $screen->pageTabs = $screen->drawTabs($tabArray);
+    $screen->page_tabs = $screen->draw_tabs($tab_array);
 
   }
 
-  if ($performAction2 == "moved")
+  if ($perform_action2 == "moved")
   {
     // Display the moved courses management system.
-    $pageContent .= $screen->displayToolboxMoved();
+    $page_content .= $screen->display_toolbox_moved();
 
     // Create the tabs for the page...
-    $tabArray = array();
-    $tabArray[0]["title"] = "Transfers";
-    $tabArray[0]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=transfers&currentStudentID=' . $csid . '";';
+    $tab_array = array();
+    $tab_array[0]["title"] = "_transfers";
+    $tab_array[0]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=transfers&current_student_id=' . $csid . '";';
 
-    $tabArray[1]["title"] = "Substitutions";
-    $tabArray[1]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=substitutions&currentStudentID=' . $csid . '";';
+    $tab_array[1]["title"] = "_substitutions";
+    $tab_array[1]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=substitutions&current_student_id=' . $csid . '";';
 
-    $tabArray[2]["title"] = "Moved";
-    $tabArray[2]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=moved&currentStudentID=' . $csid . '";';
-    $tabArray[2]["active"] = true;
+    $tab_array[2]["title"] = "_moved";
+    $tab_array[2]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=moved&current_student_id=' . $csid . '";';
+    $tab_array[2]["active"] = true;
 
-    $tabArray[3]["title"] = "Courses";
-    $tabArray[3]["onClick"] = 'window.location="advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=name&currentStudentID=' . $csid . '";';
+    $tab_array[3]["title"] = "_courses";
+    $tab_array[3]["on_click"] = 'window.location="advise.php?window_mode=popup&perform_action=toolbox&perform_action2=courses&order=name&current_student_id=' . $csid . '";';
 
-    $screen->pageTabs = $screen->drawTabs($tabArray);
+    $screen->page_tabs = $screen->draw_tabs($tab_array);
 
   }
 
 
 
-  $screen->pageIsPopup = true;
-  $screen->pageContent = $pageContent;
-  $screen->outputToBrowser();
+  $screen->page_is_popup = true;
+  $screen->page_content = $page_content;
+  $screen->output_to_browser();
 
 }
 
 
-function displayPopupChangeTerm($screen, $performAction2)
+function display_popup_change_term($screen, $perform_action2)
 {
   // Check for hooks...
-  if (function_exists("advise_displayPopupChangeTerm")) {
-    return call_user_func("advise_displayPopupChangeTerm", $screen, $performAction2);
+  if (function_exists("advise_display_popup_change_term")) {
+    return call_user_func("advise_display_popup_change_term", $screen, $perform_action2);
   }
   
   
-  global $degreePlan, $student, $fp;
+  global $degree_plan, $student, $fp;
 
-  $pageContent = "";
-  $pageContent .= $screen->getJavascriptCode();
+  $page_content = "";
+  $page_content .= $screen->get_javascript_code();
 
 
-  $pageContent .= $screen->displayChangeTerm();
+  $page_content .= $screen->display_change_term();
 
 
   // Create the tabs for the page...
-  $tabArray = array();
-  $tabArray[0]["title"] = "Select";
-  $tabArray[0]["active"] = true;
+  $tab_array = array();
+  $tab_array[0]["title"] = "_select";
+  $tab_array[0]["active"] = true;
 
-  $screen->pageTabs = $screen->drawTabs($tabArray);
+  $screen->page_tabs = $screen->draw_tabs($tab_array);
 
 
 
-  $screen->pageIsPopup = true;
-  $screen->pageContent = $pageContent;
-  $screen->outputToBrowser();
+  $screen->page_is_popup = true;
+  $screen->page_content = $page_content;
+  $screen->output_to_browser();
 
 
 }
 
 
-function displayPopupChangeTrack($screen, $performAction2)
+function display_popup_change_track($screen, $perform_action2)
 {
   // Check for hooks...
-  if (function_exists("advise_displayPopupChangeTrack")) {
-    return call_user_func("advise_displayPopupChangeTrack", $screen, $performAction2);
+  if (function_exists("advise_display_popup_change_track")) {
+    return call_user_func("advise_display_popup_change_track", $screen, $perform_action2);
   }
 
-  global $degreePlan, $student, $fp;
+  global $degree_plan, $student, $fp;
 
-  $pageContent = "";
-  $pageContent .= $screen->getJavascriptCode();
+  $page_content = "";
+  $page_content .= $screen->get_javascript_code();
 
 
-  $pageContent .= $screen->displayChangeTrack();
+  $page_content .= $screen->display_change_track();
 
 
   // Create the tabs for the page...
-  $tabArray = array();
-  $tabArray[0]["title"] = "Select";
-  $tabArray[0]["active"] = true;
+  $tab_array = array();
+  $tab_array[0]["title"] = "_select";
+  $tab_array[0]["active"] = true;
 
-  $screen->pageTabs = $screen->drawTabs($tabArray);
+  $screen->page_tabs = $screen->draw_tabs($tab_array);
 
 
-  $screen->pageIsPopup = true;
-  $screen->pageContent = $pageContent;
-  $screen->outputToBrowser();
+  $screen->page_is_popup = true;
+  $screen->page_content = $page_content;
+  $screen->output_to_browser();
 
 
 }
 
 
 
-function displayPopup()
+function display_popup()
 {
   // Check for hooks...
-  if (function_exists("advise_displayPopup")) {
-    return call_user_func("advise_displayPopup");
+  if (function_exists("advise_display_popup")) {
+    return call_user_func("advise_display_popup");
   }
   
   
-  global $degreePlan, $student, $fp;
+  global $degree_plan, $student, $fp;
 
   // This is a popup window, so, we need to figure out what
   // the user is trying to do.
-  $performAction = trim(addslashes($_GET["performAction"]));
-  $performAction2 = trim(addslashes($_GET["performAction2"]));
+  $perform_action = trim(addslashes($_GET["perform_action"]));
+  $perform_action2 = trim(addslashes($_GET["perform_action2"]));
 
   // Since this is a popup, I know we can load from the cache.
-  $_REQUEST["loadFromCache"] = "yes";
+  $_REQUEST["load_from_cache"] = "yes";
 
-  initScreen();
+  init_screen();
 
 
   $db = new DatabaseHandler();
-  $settings = $db->getFlightPathSettings();
+  $settings = $db->get_flight_path_settings();
 
 
-  $pageContent = "";
+  $page_content = "";
   $screen = new AdvisingScreen("advise.php", $fp, "popup");
 
-  $blankDegreeID = "";
-  if ($_REQUEST["blankDegreeID"] != "")
+  $blank_degree_id = "";
+  if ($_REQUEST["blank_degree_id"] != "")
   { // Should contain the ID of the blank degree plan.
-    $screen->boolBlank = true;
-    $degreePlan = new DegreePlan($_REQUEST["blankDegreeID"]);
-    $screen->degreePlan = $degreePlan;
-    $blankDegreeID = $_REQUEST["blankDegreeID"];
+    $screen->bool_blank = true;
+    $degree_plan = new DegreePlan($_REQUEST["blank_degree_id"]);
+    $screen->degree_plan = $degree_plan;
+    $blank_degree_id = $_REQUEST["blank_degree_id"];
 
   }
 
 
-  if ($performAction == "toolbox")
+  if ($perform_action == "toolbox")
   {
-    displayPopupToolbox($screen, $performAction2);
+    display_popup_toolbox($screen, $perform_action2);
     return;
   }
 
-  if ($performAction == "changeTerm")
+  if ($perform_action == "change_term")
   {
-    displayPopupChangeTerm($screen, $performAction2);
+    display_popup_change_term($screen, $perform_action2);
     return;
   }
 
-  if ($performAction == "changeTrack")
+  if ($perform_action == "change_track")
   {
-    displayPopupChangeTrack($screen, $performAction2);
+    display_popup_change_track($screen, $perform_action2);
     return;
   }
 
 
-  if ($performAction == "displayDescription")
+  if ($perform_action == "display_description")
   {
-    $dataString = trim($_GET["dataString"]);
+    $data_string = trim($_GET["data_string"]);
     $course = new Course();
-    if ($dataString != "")
+    if ($data_string != "")
     {
       
-      $course->loadCourseFromDataString($dataString);
+      $course->load_course_from_data_string($data_string);
      
     }
 
 
-    $pageContent .= $screen->getJavascriptCode();
-    $pageContent .= $screen->displayPopupCourseDescription("", $course);
+    $page_content .= $screen->get_javascript_code();
+    $page_content .= $screen->display_popup_course_description("", $course);
     // Create the tabs for the page...
-    $tabArray = array();
-    $tabArray[0]["title"] = "Description";
-    $tabArray[0]["active"] = true;
+    $tab_array = array();
+    $tab_array[0]["title"] = "_description";
+    $tab_array[0]["active"] = true;
 
-    if ($_SESSION["fpCanSubstitute"] == true && !$screen->boolBlank)
+    if ($_SESSION["fp_can_substitute"] == true && !$screen->bool_blank)
     {
-      if ($course->boolSubstitution != true && $course->grade == "")
+      if ($course->bool_substitution != true && $course->grade == "")
       { // By checking grade, we are making sure this course has NOT already
         // been taken by the student.  In other words, verify that this course
         // is an unfulfilled requirement on the degree plan ONLY.
-        $extraVars = "hoursAvail=$course->maxHours";
-        $tabArray[1]["title"] = "Substitute";
-        $tabArray[1]["onClick"] = "popupSubstituteSelected(\"$course->courseID\",\"$course->assignedToGroupID\",\"$course->assignedToSemesterNum\",\"$extraVars\");";
+        $extra_vars = "hours_avail=$course->max_hours";
+        $tab_array[1]["title"] = "_substitute";
+        $tab_array[1]["on_click"] = "popup_substitute_selected(\"$course->course_id\",\"$course->assigned_to_group_id\",\"$course->assigned_to_semester_num\",\"$extra_vars\");";
       }
     }
 
-    $screen->pageTabs = $screen->drawTabs($tabArray);
+    $screen->page_tabs = $screen->draw_tabs($tab_array);
   }
 
 
-  if ($_SESSION["fpCanSubstitute"] == true)
+  if ($_SESSION["fp_can_substitute"] == true)
   {
-    if ($performAction == "substituteSelected")
+    if ($perform_action == "substitute_selected")
     {
-      $courseID = trim($_GET["courseID"]);
-      $groupID = trim(addslashes($_GET["groupID"]));
-      $semesterNum = trim(addslashes($_GET["semesterNum"]));
-      $groupHoursRemaining = trim(addslashes($_GET["groupHoursRemaining"]));
+      $course_id = trim($_GET["course_id"]);
+      $group_id = trim(addslashes($_GET["group_id"]));
+      $semester_num = trim(addslashes($_GET["semester_num"]));
+      $group_hours_remaining = trim(addslashes($_GET["group_hours_remaining"]));
 
-      $pageContent .= $screen->getJavascriptCode();
-      $pageContent .= $screen->displayPopupSubstitute($courseID, $groupID, $semesterNum, $groupHoursRemaining);
+      $page_content .= $screen->get_javascript_code();
+      $page_content .= $screen->display_popup_substitute($course_id, $group_id, $semester_num, $group_hours_remaining);
 
     }
   }
 
 
-  if ($performAction == "displayGroupSelect")
+  if ($perform_action == "display_group_select")
   {
-    $courseID = trim($_GET["courseID"]);
-    $groupID = trim(addslashes($_GET["groupID"]));
-    $groupHoursRemaining = trim(addslashes($_GET["groupHoursRemaining"]));
-    $semesterNum = trim(addslashes($_GET["semesterNum"]));
+    $course_id = trim($_GET["course_id"]);
+    $group_id = trim(addslashes($_GET["group_id"]));
+    $group_hours_remaining = trim(addslashes($_GET["group_hours_remaining"]));
+    $semester_num = trim(addslashes($_GET["semester_num"]));
 
-    if (!$group = $degreePlan->findPlaceholderGroup($groupID, $semesterNum))
+    if (!$group = $degree_plan->find_placeholder_group($group_id, $semester_num))
     {
-      adminDebug("Could not find group $groupID in semester $semesterNum.");
+      admin_debug("Could not find group $group_id in semester $semester_num.");
     }
 
-    if ($groupID == -88)
+    if ($group_id == -88)
     { // This is the Add a Course group.  We must initialize it, as it
       // does not exist yet.
       // We need to populate this group now.
-      $group->listCourses = $fp->getAllCoursesInCatalogYear($settings["currentCatalogYear"]);
+      $group->list_courses = $fp->get_all_courses_in_catalog_year($settings["current_catalog_year"]);
       $group->title = "Add an Additional Course";
-      $group->listCourses->assignGroupID($groupID);
-      $group->listCourses->loadCourseDescriptiveData();
+      $group->list_courses->assign_group_id($group_id);
+      $group->list_courses->load_course_descriptive_data();
     }
 
 
-    if ($courseID != "")
+    if ($course_id != "")
     {
-      // Meaning, a courseID was specified, so make sure
+      // Meaning, a course_id was specified, so make sure
       // it is "selected" inside the group and branches.
 
       $course = new Course();
-      $course->courseID = $courseID;
+      $course->course_id = $course_id;
 
-      $tempCourseList = $group->findCourses($course);
-      if (!$tempCourseList)
+      $temp_course_list = $group->find_courses($course);
+      if (!$temp_course_list)
       {
-        $tempCourseList = $degreePlan->findCourses($courseID, $groupID, $semesterNum);
+        $temp_course_list = $degree_plan->find_courses($course_id, $group_id, $semester_num);
       }
 
-      if ($tempCourseList)
+      if ($temp_course_list)
       {
-        $tempCourseList->resetCounter();
-        while($tempCourseList->hasMore())
+        $temp_course_list->reset_counter();
+        while($temp_course_list->has_more())
         {
-          $tempCourse = $tempCourseList->getNext();
-          $tempCourse->boolSelected = true;
-          //$tempCourse->assignedToSemesterNum = $semesterNum;
+          $temp_course = $temp_course_list->get_next();
+          $temp_course->bool_selected = true;
+          //$temp_course->assigned_to_semester_num = $semester_num;
         }
       }
 
       
     }
 
-    if ($performAction2 == "" || $performAction2 == "select")
+    if ($perform_action2 == "" || $perform_action2 == "select")
     {
-      $pageContent .= $screen->getJavascriptCode();
+      $page_content .= $screen->get_javascript_code();
       if ($group)
       {
-        $pageContent .= $screen->displayPopupGroupSelect($group, $groupHoursRemaining);
+        $page_content .= $screen->display_popup_group_select($group, $group_hours_remaining);
       }
       // Create the tabs for the page...
-      $tabArray = array();
-      $tabArray[0]["title"] = "Description";
-      $tabArray[0]["onClick"] = "popupDescribeSelected(\"$groupID\",\"$semesterNum\",\"0\",\"\",\"groupHoursRemaining=$groupHoursRemaining&blankDegreeID=$blankDegreeID\");";
-      $tabArray[1]["title"] = "Select";
-      $tabArray[1]["active"] = true;
+      $tab_array = array();
+      $tab_array[0]["title"] = "_description";
+      $tab_array[0]["on_click"] = "popup_describe_selected(\"$group_id\",\"$semester_num\",\"0\",\"\",\"group_hours_remaining=$group_hours_remaining&blank_degree_id=$blank_degree_id\");";
+      $tab_array[1]["title"] = "_select";
+      $tab_array[1]["active"] = true;
 
       // If we are allowed to substitute....
-      if ($_SESSION["fpCanSubstitute"] == true && $groupID != -88 && !$screen->boolBlank)
+      if ($_SESSION["fp_can_substitute"] == true && $group_id != -88 && !$screen->bool_blank)
       {
-        $tabArray[2]["title"] = "Substitute";
-        $tabArray[2]["onClick"] = "popupSubstituteSelected(\"0\",\"$groupID\",\"$semesterNum\",\"groupHoursRemaining=$groupHoursRemaining\");";
+        $tab_array[2]["title"] = "_substitute";
+        $tab_array[2]["on_click"] = "popup_substitute_selected(\"0\",\"$group_id\",\"$semester_num\",\"group_hours_remaining=$group_hours_remaining\");";
       }
 
-      $screen->pageTabs = $screen->drawTabs($tabArray);
+      $screen->page_tabs = $screen->draw_tabs($tab_array);
     }
 
-    if ($performAction2 == "describeCourse")
+    if ($perform_action2 == "describe_course")
     {
-      $pageContent .= $screen->getJavascriptCode();
-      $pageContent .= $screen->displayPopupCourseDescription($courseID,null,$group, true);
+      $page_content .= $screen->get_javascript_code();
+      $page_content .= $screen->display_popup_course_description($course_id,null,$group, true);
       // Create the tabs for the page...
-      $tabArray = array();
-      $tabArray[0]["title"] = "Description";
-      $tabArray[0]["active"] = true;
-      $tabArray[1]["title"] = "Select";
-      $subject = trim($_GET["selectedSubject"]);
+      $tab_array = array();
+      $tab_array[0]["title"] = "_description";
+      $tab_array[0]["active"] = true;
+      $tab_array[1]["title"] = "_select";
+      $subject = trim($_GET["selected_subject"]);
 
-      $tabArray[1]["onClick"] = "popupBackToGroupSelect(\"$courseID\",\"$groupID\",\"$semesterNum\",\"selectedSubject=$subject&groupHoursRemaining=$groupHoursRemaining&blankDegreeID=$blankDegreeID\");";
+      $tab_array[1]["on_click"] = "popup_back_to_group_select(\"$course_id\",\"$group_id\",\"$semester_num\",\"selected_subject=$subject&group_hours_remaining=$group_hours_remaining&blank_degree_id=$blank_degree_id\");";
 
       // If we are allowed to substitute....
-      if ($_SESSION["fpCanSubstitute"] == true && $groupID != -88 && !$screen->boolBlank)
+      if ($_SESSION["fp_can_substitute"] == true && $group_id != -88 && !$screen->bool_blank)
       {
-        $tabArray[2]["title"] = "Substitute";
-        $tabArray[2]["onClick"] = "popupSubstituteSelected(\"$courseID\",\"$groupID\",\"$semesterNum\",\"groupHoursRemaining=$groupHoursRemaining\");";
+        $tab_array[2]["title"] = "_substitute";
+        $tab_array[2]["on_click"] = "popup_substitute_selected(\"$course_id\",\"$group_id\",\"$semester_num\",\"group_hours_remaining=$group_hours_remaining\");";
       }
 
-      $screen->pageTabs = $screen->drawTabs($tabArray);
+      $screen->page_tabs = $screen->draw_tabs($tab_array);
 
     }
 
@@ -713,46 +713,46 @@ function displayPopup()
   }
 
 
-  $screen->pageIsPopup = true;
-  $screen->pageHideReportError = true;
-  $screen->pageContent = $pageContent;
-  $screen->outputToBrowser();
+  $screen->page_is_popup = true;
+  $screen->page_hide_report_error = true;
+  $screen->page_content = $page_content;
+  $screen->output_to_browser();
 
 
   // Should we re-cache the course inventory?  If there have been any changes
   // to it, then we will see that in a GLOBALS variable...
-  if ($GLOBALS["cacheCourseInventory"] == true)
+  if ($GLOBALS["cache_course_inventory"] == true)
   {
-    $_SESSION["fpCacheCourseInventory"] = serialize($GLOBALS["fpCourseInventory"]);
+    $_SESSION["fp_cache_course_inventory"] = serialize($GLOBALS["fp_course_inventory"]);
   }
 
 
-  //adminDebug("finsihed");
+  //admin_debug("finsihed");
 
 }
 
 
-function displayScreen()
+function display_screen()
 {
   // Check for hooks...
-  if (function_exists("advise_displayScreen")) {
-    return call_user_func("advise_displayScreen");
+  if (function_exists("advise_display_screen")) {
+    return call_user_func("advise_display_screen");
   }
   
-  global $degreePlan, $student, $fp;
+  global $degree_plan, $student, $fp;
   $db = new DatabaseHandler();
-  //adminDebug("Starting script...", "main");
-  initScreen();
+  //admin_debug("Starting script...", "main");
+  init_screen();
 
-  $pageContent = "";
-  $logAction = "view_by_year";
-  $logExtra = $student->studentID;
+  $page_content = "";
+  $log_action = "view_by_year";
+  $log_extra = $student->student_id;
 
-  if ($GLOBALS["advisingView"] == "type")
+  if ($GLOBALS["advising_view"] == "type")
   {
     $screen = new AdvisingScreenTypeView("advise.php", $fp);
     $screen->view = "type";
-    $logAction = "view_by_type";
+    $log_action = "view_by_type";
 
   } else {
 
@@ -760,124 +760,124 @@ function displayScreen()
     $screen = new AdvisingScreen("advise.php", $fp);
   }
 
-  if ($GLOBALS["printView"] == "yes")
+  if ($GLOBALS["print_view"] == "yes")
   {
-    $screen->boolPrint = true;
-    $screen->screenMode = "notAdvising";
-    $logExtra .= ",print_view";
+    $screen->bool_print = true;
+    $screen->screen_mode = "not_advising";
+    $log_extra .= ",print_view";
   }
 
 
-  $pageContent .= $screen->displayGreeting();
+  $page_content .= $screen->display_greeting();
 
-  if ($GLOBALS["advisingWhatIf"] == "yes" && $GLOBALS["whatIfMajorCode"] == "")
+  if ($GLOBALS["advising_what_if"] == "yes" && $GLOBALS["what_if_major_code"] == "")
   {
     // We are in WhatIf, but we have not selected a major, so give
     // the user a selection screen.
-    $screen->screenMode = "notAdvising";
-    $pageContent .= $screen->displayWhatIfSelection();
+    $screen->screen_mode = "not_advising";
+    $page_content .= $screen->display_what_if_selection();
   } else {
     // This is a normal advising screen.  Either View or WhatIf.
 
-    $pageContent .= $screen->displayViewOptions();
+    $page_content .= $screen->display_view_options();
 
-    $screen->buildScreenElements();
+    $screen->build_screen_elements();
 
-    $pageContent .= $screen->displayScreen();
+    $page_content .= $screen->display_screen();
 
   }
 
 
   // If we are in WhatIf mode, let's write something special to
   // the log.
-  if ($GLOBALS["advisingWhatIf"] == "yes" && $GLOBALS["whatIfMajorCode"] != "")
+  if ($GLOBALS["advising_what_if"] == "yes" && $GLOBALS["what_if_major_code"] != "")
   {
-    $logAction .= "_whatif";
-    $logExtra = $GLOBALS["whatIfMajorCode"] . " " . $GLOBALS["whatIfTrackCode"];
+    $log_action .= "_whatif";
+    $log_extra = $GLOBALS["what_if_major_code"] . " " . $GLOBALS["what_if_track_code"];
   }
 
-  $db->addToLog($logAction, $logExtra);
+  $db->add_to_log($log_action, $log_extra);
 
 
-  $screen->buildSystemTabs(2, true);
-  if ($GLOBALS["advisingWhatIf"] == "yes")
+  $screen->build_system_tabs(2, true);
+  if ($GLOBALS["advising_what_if"] == "yes")
   {
-    $screen->buildSystemTabs(5, true, true);
+    $screen->build_system_tabs(5, true, true);
   }
 
-  $screen->pageScrollTop = trim($_POST["scrollTop"]);
-  //adminDebug("Finished", "main");
-  //adminDebug(strlen($pageContent));
-  $screen->pageHasSearch = true;
-  if ($_SESSION["fpUserType"] == "student")
+  $screen->page_scroll_top = trim($_POST["scroll_top"]);
+  //admin_debug("Finished", "main");
+  //admin_debug(strlen($page_content));
+  $screen->page_has_search = true;
+  if ($_SESSION["fp_user_type"] == "student")
   {
-    $screen->pageHasSearch = false;
+    $screen->page_has_search = false;
   }
 
 
-  $screen->pageContent = $pageContent;
+  $screen->page_content = $page_content;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
-  //	print_pre($student->listCoursesTaken->toString());
+  //	print_pre($student->list_courses_taken->toString());
   // Should we re-cache the course inventory?  If there have been any changes
   // to it, then we will see that in a GLOBALS variable...
-  if ($GLOBALS["cacheCourseInventory"] == true)
+  if ($GLOBALS["cache_course_inventory"] == true)
   {
-    $_SESSION["fpCacheCourseInventory"] = serialize($GLOBALS["fpCourseInventory"]);
+    $_SESSION["fp_cache_course_inventory"] = serialize($GLOBALS["fp_course_inventory"]);
   }
 
 
-  //adminDebug("Finished", "main");
+  //admin_debug("Finished", "main");
 }
 
 
 
 
 
-function initScreen()
+function init_screen()
 {
   
   // Check for hooks...
-  if (function_exists("advise_initScreen")) {
-    return call_user_func("advise_initScreen");
+  if (function_exists("advise_init_screen")) {
+    return call_user_func("advise_init_screen");
   }
     
-  global $degreePlan, $student, $fp, $windowMode;
+  global $degree_plan, $student, $fp, $window_mode;
 
-  $performAction = trim(addslashes($_POST["performAction"]));
-  $tempScreen = new AdvisingScreen();
-  $tempScreen->initAdvisingVariables();
-  $boolWhatIf = false;
+  $perform_action = trim(addslashes($_POST["perform_action"]));
+  $temp_screen = new AdvisingScreen();
+  $temp_screen->init_advising_variables();
+  $bool_what_if = false;
   
-  $csid = $GLOBALS["currentStudentID"];
+  $csid = $GLOBALS["current_student_id"];
 
 
   $db = new DatabaseHandler();
-  $cache = $_SESSION["cacheFP$csid"];
+  $cache = $_SESSION["cache_f_p$csid"];
 
-  if ($GLOBALS["advisingWhatIf"] == "yes")
+  if ($GLOBALS["advising_what_if"] == "yes")
   {
-    $majorCode = $GLOBALS["whatIfMajorCode"];
-    $trackCode = $GLOBALS["whatIfTrackCode"];
-    //$majorCode = "ART";
-    $boolWhatIf = true;
-    //$GLOBALS["loadFromCache"] = "no";
-    $cache = $_SESSION["cacheWhatIf$csid"];
-    //adminDebug("here");
+    $major_code = $GLOBALS["what_if_major_code"];
+    $track_code = $GLOBALS["what_if_track_code"];
+    //$major_code = "ART";
+    $bool_what_if = true;
+    //$GLOBALS["load_from_cache"] = "no";
+    $cache = $_SESSION["cache_what_if$csid"];
+    //admin_debug("here");
   }
 
-  $boolDraft = true;
-  if ($GLOBALS["advisingLoadActive"] == "yes")
+  $bool_draft = true;
+  if ($GLOBALS["advising_load_active"] == "yes")
   { // If we are loading from Active, then rebuild the cache as well.
-    $boolDraft = false;
-    $GLOBALS["loadFromCache"] = "no";
+    $bool_draft = false;
+    $GLOBALS["load_from_cache"] = "no";
   }
 
-  if ($_SESSION["fpUserType"] == "student")
+  if ($_SESSION["fp_user_type"] == "student")
   {
-    $boolDraft = false;
+    $bool_draft = false;
     // never load a draft advising session if a student
     // is logged in!
   }
@@ -885,72 +885,72 @@ function initScreen()
 
   ///////////////////////
   ///  Disable student data Caching....
-  //$GLOBALS["loadFromCache"] = "no";
+  //$GLOBALS["load_from_cache"] = "no";
 
 
   // Attempt to load the course inventory cache...
-  if ($courseInventory = unserialize($_SESSION["fpCacheCourseInventory"]))
+  if ($course_inventory = unserialize($_SESSION["fp_cache_course_inventory"]))
   {
-    $GLOBALS["fpCourseInventory"] = $courseInventory;
+    $GLOBALS["fp_course_inventory"] = $course_inventory;
   }
 
 
-  if ($GLOBALS["loadFromCache"] == "yes" && $cache != "" && $fp = unserialize($cache))
+  if ($GLOBALS["load_from_cache"] == "yes" && $cache != "" && $fp = unserialize($cache))
   {
-    //adminDebug("Unserializing...");
+    //admin_debug("Unserializing...");
     $fp->db = new DatabaseHandler();
     $student = $fp->student;
-    $degreePlan = $fp->degreePlan;
+    $degree_plan = $fp->degree_plan;
     $student->db = new DatabaseHandler();
-    $degreePlan->db = new DatabaseHandler();
-    //adminDebug("Done Unserializing... $boolWhatIf");
+    $degree_plan->db = new DatabaseHandler();
+    //admin_debug("Done Unserializing... $bool_what_if");
 
   } else {
     $fp = new FlightPath();
-    //adminDebug("xx");
+    //admin_debug("xx");
     $fp->init();
-    //adminDebug("xx");
+    //admin_debug("xx");
     $student = $fp->student;
-    $degreePlan = $fp->degreePlan;
-    $GLOBALS["loadFromCache"] = "no";
-    //adminDebug($GLOBALS["advisingMajorCode"]);
+    $degree_plan = $fp->degree_plan;
+    $GLOBALS["load_from_cache"] = "no";
+    //admin_debug($GLOBALS["advisingMajorCode"]);
   }
 
 
   // Should we update the USER settings for anything?
-  if ($GLOBALS["fpUpdateUserSettingsFlag"] != "")
+  if ($GLOBALS["fp_update_user_settings_flag"] != "")
   {
     //$GLOBALS["userSettings_hideCharts"] = $_REQUEST["hideCharts"];
-    if (!$db->updateUserSettingsFromPost($_SESSION["fpUserID"]))
+    if (!$db->update_user_settings_from_post($_SESSION["fp_user_id"]))
     {
-      adminDebug("could not write user settings.");
+      admin_debug("could not write user settings.");
     }
   }
 
 
-  if ($performAction == "saveDraft")
+  if ($perform_action == "save_draft")
   {
     // Save, then reload the student.
 
-    $fp->saveAdvisingSessionFromPost(0,true);
+    $fp->save_advising_session_from_post(0,true);
 
   }
 
-  if ($performAction == "saveActive")
+  if ($perform_action == "save_active")
   {
     // Save, then go to the history screen.
-    $advIDArray = $fp->saveAdvisingSessionFromPost(0,false);
-    displayAdviseeHistory(true, $advIDArray);
+    $adv_id_array = $fp->save_advising_session_from_post(0,false);
+    display_advisee_history(true, $adv_id_array);
     die;
   }
 
 
   
-  if ($boolWhatIf == true && $GLOBALS["whatIfMajorCode"] == "")
+  if ($bool_what_if == true && $GLOBALS["what_if_major_code"] == "")
   {
     // In other words, we are on the WhatIf tab, but we have not
     // selected a major.  So, just exit out.  We will give the user
-    // a displayScreen later.
+    // a display_screen later.
     return;
   }
 
@@ -959,42 +959,42 @@ function initScreen()
 
 
   
-  if ($GLOBALS["loadFromCache"] != "yes")
+  if ($GLOBALS["load_from_cache"] != "yes")
   { // do not load from cache....
 
-    $student->loadStudent();
+    $student->load_student();
 
-    $student->loadStudentSubstitutions();
+    $student->load_student_substitutions();
 
-    $student->loadUnassignments();
+    $student->load_unassignments();
 
-    $student->listCoursesTaken->sortAlphabeticalOrder();
-    $student->listCoursesTaken->sortMostRecentFirst();
-    //	print_pre($student->listCoursesTaken->toString());
+    $student->list_courses_taken->sort_alphabetical_order();
+    $student->list_courses_taken->sort_most_recent_first();
+    //	print_pre($student->list_courses_taken->toString());
 
 
-    $fp->flagOutdatedSubstitutions();
-    $fp->assignCoursesToSemesters(); // bare degree plan. not groups.
-    $fp->assignCoursesToGroups();
+    $fp->flag_outdated_substitutions();
+    $fp->assign_courses_to_semesters(); // bare degree plan. not groups.
+    $fp->assign_courses_to_groups();
     
   }
 
-  //adminDebug("Serializing...");
-  if ($GLOBALS["saveToCache"] != "no" && $windowMode != "popup")
+  //admin_debug("Serializing...");
+  if ($GLOBALS["save_to_cache"] != "no" && $window_mode != "popup")
   {
-    if ($boolWhatIf == false)
+    if ($bool_what_if == false)
     { // NOT in whatIf mode.  Normal.
-      //adminDebug("start serialize");
+      //admin_debug("start serialize");
 
-      $_SESSION["cacheFP$csid"] = serialize($fp);
+      $_SESSION["cache_f_p$csid"] = serialize($fp);
       
-      //adminDebug(strlen($_SESSION["cacheFP$csid"]));
-      //adminDebug("Done Serializing...normal");
+      //admin_debug(strlen($_SESSION["cache_f_p$csid"]));
+      //admin_debug("Done Serializing...normal");
       
     } else {
       // We are in WhatIf mode.
-      $_SESSION["cacheWhatIf$csid"] = serialize($fp);      
-      //adminDebug("Done Serializing...what if");
+      $_SESSION["cache_what_if$csid"] = serialize($fp);      
+      //admin_debug("Done Serializing...what if");
 
 
     }
@@ -1004,17 +1004,17 @@ function initScreen()
 
 
 
-  $fp->loadAdvisingSessionFromDatabase(0,$advisingTermID,$boolWhatIf,$boolDraft,0);
+  $fp->load_advising_session_from_database(0,$advising_term_id,$bool_what_if,$bool_draft,0);
 
-  //adminDebug("load advising session");
+  //admin_debug("load advising session");
 
   // Once we have loaded the advising session, we should always try to load
   // from draft from then on out.
-  $GLOBALS["advisingLoadActive"] = "";
+  $GLOBALS["advising_load_active"] = "";
 
-  //adminDebug("mem:" .  round(memory_get_usage(true)/1024/1024,1) . "mb");
+  //admin_debug("mem:" .  round(memory_get_usage(true)/1024/1024,1) . "mb");
 
-  //print_pre($student->listCoursesTaken->toString());
+  //print_pre($student->list_courses_taken->toString());
     
   
 }
@@ -1022,66 +1022,66 @@ function initScreen()
 
 
 
-function displayAdviseeHistory($boolFromSave = false, $advisingSessionIDArray = "")
+function display_advisee_history($bool_from_save = false, $advising_session_id_array = "")
 {
 
   // Check for hooks...
-  if (function_exists("advise_displayAdviseeHistory")) {
-    return call_user_func("advise_displayAdviseeHistory", $boolFromSave, $advisingSessionIDArray);
+  if (function_exists("advise_display_advisee_history")) {
+    return call_user_func("advise_display_advisee_history", $bool_from_save, $advising_session_id_array);
   }
 
   
-  $screen = new AdvisingScreen("",null,"notAdvising");
+  $screen = new AdvisingScreen("",null,"not_advising");
   $db = new DatabaseHandler();
 
 
-  //if (!$boolFromSave)
+  //if (!$bool_from_save)
   //{
-  $screen->initAdvisingVariables(true);
+  $screen->init_advising_variables(true);
   //}
 
 
-  $studentID = $GLOBALS["advisingStudentID"];
+  $student_id = $GLOBALS["advising_student_id"];
 
 
   $pC = "";
 
-  $pC .= $screen->getJavascriptCode();
-  $pC .= $screen->displayGreeting();
-  $pC .= $screen->displayBeginSemesterTable();
-  $pC .= $screen->drawCurrentlyAdvisingBox(true);
+  $pC .= $screen->get_javascript_code();
+  $pC .= $screen->display_greeting();
+  $pC .= $screen->display_begin_semester_table();
+  $pC .= $screen->draw_currently_advising_box(true);
 
   //-------------------------------------------------------------
   //----   If we are coming back from a perm save, then we should display
   //----   a message and a convienent link to allow the advisor to get the
   //----   advising summary.
   //-------------------------------------------------------------
-  if ($boolFromSave == true)
+  if ($bool_from_save == true)
   {
 
     // We should have the advising session ID's in the
     // advisingSessionIDArray array.
-    $clickLinks = "";
+    $click_links = "";
 
-    foreach($advisingSessionIDArray as $termID=>$value)
+    foreach($advising_session_id_array as $term_id=>$value)
     {
-      $aid = $advisingSessionIDArray[$termID];
+      $aid = $advising_session_id_array[$term_id];
       if ($aid != "")
       {
-        $newCourse = new Course();
-        $newCourse->termID = $termID;
-        $termName = $newCourse->getTermDescription();
-        $clickLinks .= "<li>
-								<a href='javascript: popupPrintWindow(\"advise.php?windowMode=summary&advisingSessionID=$aid\");'>
-								<img src='$screen->themeLocation/images/popup.gif' border='0'>
-								$termName</a>";
+        $new_course = new Course();
+        $new_course->term_id = $term_id;
+        $term_name = $new_course->get_term_description();
+        $click_links .= "<li>
+								<a href='javascript: popup_print_window(\"advise.php?window_mode=summary&advising_session_id=$aid\");'>
+								<img src='$screen->theme_location/images/popup.gif' border='0'>
+								$term_name</a>";
 
 
       }
     }
 
 
-    // onClick='popupPrintWindow(\"advise.php?windowMode=summary&advisingSessionID=ADVID\");'
+    // onClick='popup_print_window(\"advise.php?window_mode=summary&advising_session_id=ADVID\");'
     $pC .= "
 				<tr>
 					<td colspan='2' width='100%'>
@@ -1090,11 +1090,11 @@ function displayAdviseeHistory($boolFromSave = false, $advisingSessionIDArray = 
 				align='left' style='border: 1px solid black;
 							margin: 10px 0px 10px 0px; padding: 10px; 
 							font-size: 12pt; font-weight: bold;'>
-				You have successfully advised " . $db->getStudentName($studentID) . " ($studentID).
+				You have successfully advised " . $db->get_student_name($student_id) . " ($student_id).
 				<br><span style='color: blue;'>Click 
 				 to view a pop-up printable summary for: 
 				 <ul style='margin-top: 5px; margin-bottom: 5px;'>
-				$clickLinks
+				$click_links
 				</ul></span></div>
 				
 				</td>
@@ -1109,21 +1109,21 @@ function displayAdviseeHistory($boolFromSave = false, $advisingSessionIDArray = 
   //////////////////////////////////////////////////
   /////////  Advising History
   ///////////////////////////////////////////////////
-  $pC .= $screen->drawCurvedTitle("Advising History");
+  $pC .= $screen->draw_curved_title("Advising History");
   $pC .= "<table border='0' cellspacing='0'>";
-  $oldSessionDT = 0;
-  $aCount = 0;
-  $isEmpty = true;
-  $firstStyle = "color: maroon; font-weight:bold;";
-  $onMouseOver = "onmouseover=\"style.backgroundColor='#FFFF99'\"
+  $old_session_d_t = 0;
+  $a_count = 0;
+  $is_empty = true;
+  $first_style = "color: maroon; font-weight:bold;";
+  $on_mouse_over = "onmouseover=\"style.backgroundColor='#FFFF99'\"
            onmouseout=\"style.backgroundColor='white'\" ";
 
-  $res = $db->dbQuery("SELECT * FROM advising_sessions
-							WHERE `student_id`='$studentID'
+  $res = $db->db_query("SELECT * FROM advising_sessions
+							WHERE `student_id`='$student_id'
 							AND `is_draft`='0'
 							AND `is_empty`='0'
 							ORDER BY `datetime` DESC, `term_id` DESC ");
-  while($cur = $db->dbFetchArray($res))
+  while($cur = $db->db_fetch_array($res))
   {
     extract($cur, 3, "db");
 
@@ -1134,44 +1134,44 @@ function displayAdviseeHistory($boolFromSave = false, $advisingSessionIDArray = 
     // of the same advising session.  Otherwise, this is a NEW
     // advising session.  The if statement below is testing is this
     // a new advising session.
-    $testDT = strtotime($db_datetime);
-    //adminDebug($oldSessionDT . " - " . $testDT);
-    if ($oldSessionDT < ($testDT - 5) || $oldSessionDT > ($testDT + 5))
+    $test_d_t = strtotime($db_datetime);
+    //admin_debug($old_session_d_t . " - " . $test_d_t);
+    if ($old_session_d_t < ($test_d_t - 5) || $old_session_d_t > ($test_d_t + 5))
     {
       $p = "20px;";
-      if ($aCount == 0)
+      if ($a_count == 0)
       {
         $p = "10px;";
       }
 
-      $oldSessionDT = $testDT;
-      $advisedBy = "<div style='padding-top: $p'>
-							<b>Advised by " . $db->getFacultyName($db_faculty_id, false) . "</b>
+      $old_session_d_t = $test_d_t;
+      $advised_by = "<div style='padding-top: $p'>
+							<b>Advised by " . $db->get_faculty_name($db_faculty_id, false) . "</b>
 						</div>";
 
       $pC .= "<tr><td colspan='2' class='tenpt'>
-							$advisedBy
+							$advised_by
 						</td>
 					</tr>";
-      $aCount++;
+      $a_count++;
 
     }
-    $isEmpty = false;
+    $is_empty = false;
 
-    if ($aCount > 1)
+    if ($a_count > 1)
     {
-      $firstStyle = "";
+      $first_style = "";
     }
 
 
-    $onClick = "popupPrintWindow(\"advise.php?windowMode=summary&advisingSessionID=$db_advising_session_id\");";
+    $on_click = "popup_print_window(\"advise.php?window_mode=summary&advising_session_id=$db_advising_session_id\");";
 
-    $newCourse = new Course();
-    $newCourse->termID = $db_term_id;
-    $term = $newCourse->getTermDescription();
+    $new_course = new Course();
+    $new_course->term_id = $db_term_id;
+    $term = $new_course->get_term_description();
 
-    $pC .= "<tr $onMouseOver style='cursor: pointer; $firstStyle'
-					onClick='$onClick'>
+    $pC .= "<tr $on_mouse_over style='cursor: pointer; $first_style'
+					on_click='$on_click'>
 					<td valign='top' class='tenpt'
 						style='padding-left:20px;'
 						width='165'>
@@ -1193,7 +1193,7 @@ function displayAdviseeHistory($boolFromSave = false, $advisingSessionIDArray = 
 			</form>";
 
 
-  if ($isEmpty == true) {
+  if ($is_empty == true) {
     $pC .= "<div class='tenpt'>No advising history available.</div>";
   }
 
@@ -1202,70 +1202,70 @@ function displayAdviseeHistory($boolFromSave = false, $advisingSessionIDArray = 
   //------------------------------ COMMENT HISTORY -----------------------------------------
   //----------------------------------------------------------------------------------------
   $pC .= "</td><td width='50%' valign='top'>";
-  $pC .= $screen->drawCurvedTitle("Comment History");
+  $pC .= $screen->draw_curved_title("Comment History");
   $pC .= "<table border='0' cellspacing='0'>";
 
-  $oldTermID = "";
-  $firstStyle = "first";
-  $isEmpty = true;
-  $hasAdminCategory = false;
-  $accessLine = "";
-  if ($_SESSION["fpUserType"] == "student")
+  $old_term_id = "";
+  $first_style = "first";
+  $is_empty = true;
+  $has_admin_category = false;
+  $access_line = "";
+  if ($_SESSION["fp_user_type"] == "student")
   { // May not be necessary, since students don't see this tab anyway...
-    $accessLine = "and `access_type`='public' ";
+    $access_line = "and `access_type`='public' ";
   }
   
   $pC .= "<tr><td colspan='3' class='tenpt'>
-				<!--STARTCOM$catType--><div style='padding-top: 10px;'>
+				<!--STARTCOM$cat_type--><div style='padding-top: 10px;'>
 					<b>Advising Comments</b>
 					&nbsp; 
 				<a href='javascript: popupPrintWindow(\"comments.php?performAction=displayComment&category=all\");' 
-					class='nounderline'><img src='$screen->themeLocation/images/popup.gif' border='0'>view/print all</a>
-				</div><!--ENDCOM$catType-->
+					class='nounderline'><img src='$screen->theme_location/images/popup.gif' border='0'>view/print all</a>
+				</div><!--ENDCOM$cat_type-->
 				</td></tr>";
 
-  $res = $db->dbQuery("select * from advising_comments
-						where `student_id`='$studentID' 
+  $res = $db->db_query("select * from advising_comments
+						where `student_id`='$student_id' 
 						and `delete_flag`='0'
-						$accessLine
-						$catLine
+						$access_line
+						$cat_line
 						order by `datetime` desc ");
-  while ($cur = $db->dbFetchArray($res))
+  while ($cur = $db->db_fetch_array($res))
   {
     extract($cur, 3, "db");
     $dt = date("n/j/y g:ia",strtotime($db_datetime));
 
 
-    if ($firstStyle == "first")
+    if ($first_style == "first")
     {
-      $firstStyle = "color: maroon; font-weight:bold;
+      $first_style = "color: maroon; font-weight:bold;
 					";
     }
 
 
 
 
-    $onClick = "popupPrintWindow(\"comments.php?performAction=displayComment&id=$db_id\");";
-    $pC .= "<tr $onMouseOver style='cursor:pointer; $firstStyle $extraStyle'
-					onClick='$onClick'>
+    $on_click = "popup_print_window(\"comments.php?perform_action=display_comment&id=$db_id\");";
+    $pC .= "<tr $on_mouse_over style='cursor:pointer; $first_style $extra_style'
+					on_click='$on_click'>
 					<td valign='top' width='165' class='tenpt'
 						style='padding-left: 20px;'>
-						" . $db->getFacultyName($db_faculty_id, false) . "
+						" . $db->get_faculty_name($db_faculty_id, false) . "
 					</td>
 					<td valign='top' class='tenpt'>
 					$dt$ast
 					</td>
 				</tr>";
 
-    $isEmpty = false;
-    $firstStyle = "";
+    $is_empty = false;
+    $first_style = "";
   }
 
-  if ($isEmpty == true) {
+  if ($is_empty == true) {
     
     $pC .= "<tr><td colspan='4' class='tenpt'>
 						<div style='padding-left: 20px;'>
-							No $catType comment history available.</div></td></tr>";
+							No $cat_type comment history available.</div></td></tr>";
   }
 
   $pC .= "</table>";
@@ -1276,20 +1276,20 @@ function displayAdviseeHistory($boolFromSave = false, $advisingSessionIDArray = 
 
 
 
-  $pC .= $screen->displayEndSemesterTable();
+  $pC .= $screen->display_end_semester_table();
 
-  $pC .= "<script type='text/javascript'>" . $screen->getJS_popupPrintWindow() . "</script>";
+  $pC .= "<script type='text/javascript'>" . $screen->get_j_s_popup_print_window() . "</script>";
 
-  $screen->pageContent = $pC;
-  $screen->pageHasSearch = true;
-  if ($_SESSION["fpUserType"] == "student")
+  $screen->page_content = $pC;
+  $screen->page_has_search = true;
+  if ($_SESSION["fp_user_type"] == "student")
   {
-    $screen->pageHasSearch = false;
+    $screen->page_has_search = false;
   }
-  $screen->buildSystemTabs(4);
-  $screen->pageTitle = "FlightPath - History";
+  $screen->build_system_tabs(4);
+  $screen->page_title = "FlightPath - History";
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
   die;
 

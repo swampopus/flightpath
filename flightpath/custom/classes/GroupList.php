@@ -1,6 +1,6 @@
 <?php
 
-class GroupList extends _GroupList
+class GroupList extends __group_list
 {
   
   

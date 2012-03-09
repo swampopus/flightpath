@@ -17,42 +17,42 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class _Substitution
+class __substitution
 {
-	public $courseRequirement; // The original degree requirement.
-	public $courseListSubstitutions; // The course(s) which are
+	public $course_requirement; // The original degree requirement.
+	public $course_list_substitutions; // The course(s) which are
 	//filling in for that requirement.
-	public $boolHasBeenApplied;
-	public $boolGroupAddition;
-	public $facultyID;  // The faculty member that made the substitution.
+	public $bool_has_been_applied;
+	public $bool_group_addition;
+	public $faculty_id;  // The faculty member that made the substitution.
 
-	public $boolOutdated;  // set to true if this is an outdated sub (for an old major or the like)
+	public $bool_outdated;  // set to true if this is an outdated sub (for an old major or the like)
 	public $remarks; // like a comment for the substitution.
 
-	public $outdatedNote; // will contain information about WHY this was outdated.
+	public $outdated_note; // will contain information about WHY this was outdated.
 	
 	function __construct()
 	{
 
-		$this->courseRequirement = new Course();
-		$this->courseListSubstitutions = new CourseList();
-		$this->boolGroupAddition = false;
-		$this->boolOutdated = false;
+		$this->course_requirement = new Course();
+		$this->course_list_substitutions = new CourseList();
+		$this->bool_group_addition = false;
+		$this->bool_outdated = false;
 	}
 
-	function toString()
+	function to_string()
 	{
 		$rtn = "";
-		if ($this->boolGroupAddition)
+		if ($this->bool_group_addition)
 		{
 			$ga = "group addition ";
 		}
-		$rtn .= "Substitution: $ga " . $this->courseRequirement->toString() . " fulfilled by ";
-		$rtn .= $this->courseListSubstitutions->toString() . "\n";
-		$tcrgroup = new Group($this->courseRequirement->assignedToGroupID);
-		$rtn .= "CR group: " . $tcrgroup->title . " CR semester num: " . $this->courseRequirement->assignedToSemesterNum . "\n";
-		$tsubgroup = new Group($this->courseListSubstitutions->getFirst()->assignedToGroupID);
-		$rtn .= "Sub group: " . $tsubgroup->title . " Sub semester num: " . $this->courseListSubstitutions->getFirst()->assignedToSemesterNum . "\n";
+		$rtn .= "Substitution: $ga " . $this->course_requirement->to_string() . " fulfilled by ";
+		$rtn .= $this->course_list_substitutions->to_string() . "\n";
+		$tcrgroup = new Group($this->course_requirement->assigned_to_group_id);
+		$rtn .= "CR group: " . $tcrgroup->title . " CR semester num: " . $this->course_requirement->assigned_to_semester_num . "\n";
+		$tsubgroup = new Group($this->course_list_substitutions->get_first()->assigned_to_group_id);
+		$rtn .= "Sub group: " . $tsubgroup->title . " Sub semester num: " . $this->course_list_substitutions->get_first()->assigned_to_semester_num . "\n";
 
 
 		return $rtn;

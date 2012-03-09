@@ -17,18 +17,18 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class _AdvisingScreen
+class __advising_screen
 {
-	public $widthArray, $popupWidthArray, $scriptFilename, $isOnLeft, $boxArray;
-	public $degreePlan, $student, $boolPopup, $footnoteArray, $flightPath;
-	public $screenMode, $db, $boolPrint, $view, $settings, $userSettings;
-	public $boolBlank, $boolHidingGrades;
-	public $adminMessage, $earliestCatalogYear;
+	public $width_array, $popup_width_array, $script_filename, $is_on_left, $box_array;
+	public $degree_plan, $student, $bool_popup, $footnote_array, $flight_path;
+	public $screen_mode, $db, $bool_print, $view, $settings, $user_settings;
+	public $bool_blank, $bool_hiding_grades;
+	public $admin_message, $earliest_catalog_year;
 
 	// Variables for the template/theme output...
-	public $themeLocation, $pageContent, $pageHasSearch, $pageTabs, $pageOnLoad;
-	public $pageHideReportError, $pageScrollTop, $pageIsPopup, $pageIsMobile;
-	public $pageTitle, $pageExtraCssFiles;
+	public $theme_location, $page_content, $page_has_search, $page_tabs, $page_on_load;
+	public $page_hide_report_error, $page_scroll_top, $page_is_popup, $page_is_mobile;
+	public $page_title, $page_extra_css_files;
   
 
 
@@ -36,59 +36,59 @@ class _AdvisingScreen
 	 * This is the constructor.  Must be named this for inheritence to work
 	 * correctly.
 	 *
-	 * @param string $scriptFilename
+	 * @param string $script_filename
 	 *   - This is the script which forms with POST to.  Ex: "advise.php"
 	 * 
-	 * @param FlightPath $flightPath   
+	 * @param FlightPath $flight_path   
 	 *   - FlightPath object.
 	 *
-	 * @param string $screenMode
+	 * @param string $screen_mode
 	 *   - A string describing what "mode" we are in.  
 	 *     - If left blank, we assume it is full-screen and normal.
 	 *     - If set to "popup" then we are in a popup window, and we will
 	 *       not draw certain elements.
 	 *  
 	 */
-	function __construct($scriptFilename = "", FlightPath $flightPath = null, $screenMode = "")
+	function __construct($script_filename = "", FlightPath $flight_path = null, $screen_mode = "")
 	{
-		$this->widthArray = Array("10%", "10%","10%", "15%", "26%", "10%", "10%", "9%");
-		$this->popupWidthArray = Array("17%", "1%", "1%", "15%", "26%", "15%", "15%", "10%");
+		$this->width_array = Array("10%", "10%","10%", "15%", "26%", "10%", "10%", "9%");
+		$this->popup_width_array = Array("17%", "1%", "1%", "15%", "26%", "15%", "15%", "10%");
 		
-		$this->scriptFilename = $scriptFilename;
-		$this->isOnLeft = true;
-		$this->boxArray = array();
-		$this->footnoteArray = array();
+		$this->script_filename = $script_filename;
+		$this->is_on_left = true;
+		$this->box_array = array();
+		$this->footnote_array = array();
 		
-		$this->pageExtraCssFiles = array();
+		$this->page_extra_css_files = array();
 
-		$this->flightPath = $flightPath;
-		$this->degreePlan = $flightPath->degreePlan;
-		$this->student = $flightPath->student;
+		$this->flight_path = $flight_path;
+		$this->degree_plan = $flight_path->degree_plan;
+		$this->student = $flight_path->student;
 
-		$this->db = getGlobalDatabaseHandler();
+		$this->db = get_global_database_handler();
 
-		if ($screenMode == "popup")
+		if ($screen_mode == "popup")
 		{
-			$this->boolPopup = true;
+			$this->bool_popup = true;
 		}
 
-		$this->boolBlank = false;
+		$this->bool_blank = false;
 
-		$this->screenMode = $screenMode;
+		$this->screen_mode = $screen_mode;
 
-		$this->settings = $this->db->getFlightPathSettings();
-		$this->userSettings = $this->db->getUserSettings($_SESSION["fpUserID"]);
+		$this->settings = $this->db->get_flight_path_settings();
+		$this->user_settings = $this->db->get_user_settings($_SESSION["fp_user_id"]);
 
-		$this->themeLocation = $GLOBALS["fpSystemSettings"]["theme"];
-		if ($this->themeLocation == "") {
+		$this->theme_location = $GLOBALS["fp_system_settings"]["theme"];
+		if ($this->theme_location == "") {
 		  // Force a default!
-		  $this->themeLocation = "themes/classic";
+		  $this->theme_location = "themes/classic";
 		}
 		
 		
-		$this->earliestCatalogYear = $GLOBALS["fpSystemSettings"]["earliestCatalogYear"];
+		$this->earliest_catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
 		
-		$this->determineMobileDevice();
+		$this->determine_mobile_device();
 				
 	}
 
@@ -97,13 +97,13 @@ class _AdvisingScreen
 	/**
 	 * This function will attempt to determine automatically
 	 * if we are on a mobile device.  If so, it will set
-	 * $this->pageIsMobile = TRUE
+	 * $this->page_is_mobile = TRUE
 	 *
 	 */
-function determineMobileDevice(){
-  $userAgent = $_SERVER['HTTP_USER_AGENT']; 
+function determine_mobile_device(){
+  $user_agent = $_SERVER['HTTP_USER_AGENT']; 
 
-  $lookFor = array(
+  $look_for = array(
     "ipod", 
     "iphone", 
     "android", 
@@ -114,15 +114,15 @@ function determineMobileDevice(){
     "(smartphone|iemobile)",
     );
   
-  foreach ($lookFor as $testAgent) {   
-    if (preg_match('/' . $testAgent . '/i',$userAgent)) {
-       $this->pageIsMobile = true;
+  foreach ($look_for as $test_agent) {   
+    if (preg_match('/' . $test_agent . '/i',$user_agent)) {
+       $this->page_is_mobile = true;
        break;
     }
   }  
   
   
-  $GLOBALS["fp_page_is_mobile"] = $this->pageIsMobile;
+  $GLOBALS["fp_page_is_mobile"] = $this->page_is_mobile;
   
 } // ends function mobile_device_detect
 	
@@ -134,10 +134,10 @@ function determineMobileDevice(){
  *
  * @param String $content
  * @param String $legend
- * @param bool $boolStartClosed
+ * @param bool $bool_start_closed
  * @return String
  */
-function drawCFieldset($content, $legend = "Click to expand/collapse", $boolStartClosed = false)
+function draw_c_fieldset($content, $legend = "Click to expand/collapse", $bool_start_closed = false)
 {
   
   // Create a random ID for this fieldset, js, and styles.
@@ -147,7 +147,7 @@ function drawCFieldset($content, $legend = "Click to expand/collapse", $boolStar
   $fsstate = "open";
   $content_style = "";
   
-  if ($boolStartClosed) {
+  if ($bool_start_closed) {
     $start_js_val = 0;
     $fsstate = "closed";
     $content_style = "display: none;";
@@ -218,13 +218,13 @@ function drawCFieldset($content, $legend = "Click to expand/collapse", $boolStar
  *
  * @return string
  */
-function drawMenuItem($url, $target, $icon_img, $title, $description = "") {
+function draw_menu_item($url, $target, $icon_img, $title, $description = "") {
   
   $rtn = "";
   
-  if (!$description) $extraClass = "fp-menu-item-tight";
+  if (!$description) $extra_class = "fp-menu-item-tight";
   
-  $rtn .= "<div class='fp-menu-item $extraClass'>
+  $rtn .= "<div class='fp-menu-item $extra_class'>
             <div class='fp-menu-item-link-line'>
               <a href='$url' target='$target'>$icon_img $title</a>
             </div>
@@ -239,30 +239,30 @@ function drawMenuItem($url, $target, $icon_img, $title, $description = "") {
 
 
 /**
- * Uses the drawMenuItem method to draw the HTML for
+ * Uses the draw_menu_item method to draw the HTML for
  * all the supplied menu items, assuming the user has
  * permission to view them.
  * 
  * Returns the HTML or "" if no menus could be drawn.
  *
- * @param unknown_type $menuArray
+ * @param unknown_type $menu_array
  */
-function drawMenuItems($menuArray) {
+function draw_menu_items($menu_array) {
 
   $rtn = "";
   
-  if (count($menuArray) == 0) return "";
+  if (count($menu_array) == 0) return "";
   
   
-  foreach($menuArray as $item) {
+  foreach($menu_array as $item) {
     $url = $item["url"];
     $target = $item["target"];
     $icon = $item["icon"];
     if ($icon) {
-      $iconImg = "<img src='$icon' border='0'>";
+      $icon_img = "<img src='$icon' border='0'>";
     }
     else {
-      $iconImg = "<span class='fp-menu-item-no-icon'></span>";
+      $icon_img = "<span class='fp-menu-item-no-icon'></span>";
     }
     
     $title = $item["title"];
@@ -270,13 +270,13 @@ function drawMenuItems($menuArray) {
     
     // Make sure they have permission!
     if ($item["permission"] != "") {
-      if (!userHasPermission($item["permission"])) {
+      if (!user_has_permission($item["permission"])) {
         // User did NOT have permission to view this link.
         continue;
       }
     }    
     
-    $rtn .= $this->drawMenuItem($url, $target, $iconImg, $title, $description);
+    $rtn .= $this->draw_menu_item($url, $target, $icon_img, $title, $description);
     
   }      
   
@@ -291,33 +291,33 @@ function drawMenuItems($menuArray) {
 	 * must be placed into certain variables before the include happens.
 	 * 
 	 */
-	function outputToBrowser()
+	function output_to_browser()
 	{
 		// This method will output the screen to the browser.
-		// outputs the $pageContent variable.
+		// outputs the $page_content variable.
 				
-		$pageContent = $this->pageContent;
-		$pageTabs = $this->pageTabs;
-		$pageHasSearch = $this->pageHasSearch;
-		$pageOnLoad = $this->pageOnLoad;
-		$pageScrollTop = $this->pageScrollTop;
-		$pageIsPopup = $this->pageIsPopup;
-		$pageTitle = $this->pageTitle;
-		$pageHideReportError = $this->pageHideReportError;
-    $pageExtraCssFiles = $this->pageExtraCssFiles;		
+		$page_content = $this->page_content;
+		$page_tabs = $this->page_tabs;
+		$page_has_search = $this->page_has_search;
+		$page_on_load = $this->page_on_load;
+		$page_scroll_top = $this->page_scroll_top;
+		$page_is_popup = $this->page_is_popup;
+		$page_title = $this->page_title;
+		$page_hide_report_error = $this->page_hide_report_error;
+    $page_extra_css_files = $this->page_extra_css_files;		
 		
-		$printOption = "";
-		if ($this->boolPrint == true)
+		$print_option = "";
+		if ($this->bool_print == true)
 		{
-			$printOption = "print_";
+			$print_option = "print_";
 		}
 
-		if ($this->pageIsMobile == true)
+		if ($this->page_is_mobile == true)
 		{
-		  $printOption = "mobile_";
+		  $print_option = "mobile_";
 		}
 					
-		include("$this->themeLocation/fp_" . $printOption . "template.php");
+		include("$this->theme_location/fp_" . $print_option . "template.php");
 	}
 
 	
@@ -329,13 +329,13 @@ function drawMenuItems($menuArray) {
 	 * The filename needs to be from the reference of the base
 	 * FlightPath install.
 	 * 
-	 * Ex:  $screen->addCss("modules/course_search/css/style.css");
+	 * Ex:  $screen->add_css("modules/course_search/css/style.css");
 	 *
 	 * @param String $filename
 	 */
-	function addCss($filename) {
+	function add_css($filename) {
 
-	  $this->pageExtraCssFiles[] = $filename;
+	  $this->page_extra_css_files[] = $filename;
 	  
 	}
 	
@@ -347,7 +347,7 @@ function drawMenuItems($menuArray) {
 	 * @param string $str
 	 * @return string
 	 */
-	function convertBBCodeToHTML($str)
+	function convert_b_b_code_to_h_t_m_l($str)
 	{
 		// This will accept a string with BBcode tags in it,
 		// and convert them to HTML tags.
@@ -380,15 +380,15 @@ function drawMenuItems($menuArray) {
 		$str = preg_replace("(\[color=(.+?)\](.+?)\[\/color\])is","<span style='color:$1;'>$2</span>",$str);
 
 		// valid URL characters...
-		$urlSearchString = " a-zA-Z0-9\:\/\-\?\&\.\=\_\~\#\'";
+		$url_search_string = " a-zA-Z0-9\:\/\-\?\&\.\=\_\~\#\'";
 		// Check for a link...
-		$str = preg_replace("(\[url\=([$urlSearchString]*)\](.+?)\[/url\])", "<a href='$1' target='_blank' class='nounderline'>$2</a>", $str);
+		$str = preg_replace("(\[url\=([$url_search_string]*)\](.+?)\[/url\])", "<a href='$1' target='_blank' class='nounderline'>$2</a>", $str);
 		// check for a link that does NOT load in a new window (URL2)
-		$str = preg_replace("(\[url2\=([$urlSearchString]*)\](.+?)\[/url2\])", "<a href='$1'>$2</a>", $str);
+		$str = preg_replace("(\[url2\=([$url_search_string]*)\](.+?)\[/url2\])", "<a href='$1'>$2</a>", $str);
 		// check for a link to a popup....
-		$str = preg_replace("(\[popup\=([$urlSearchString]*)\](.+?)\[/popup\])", "<a href='javascript: popupHelpWindow(\"$1\");' class='nounderline'>$2</a>", $str);
+		$str = preg_replace("(\[popup\=([$url_search_string]*)\](.+?)\[/popup\])", "<a href='javascript: popupHelpWindow(\"$1\");' class='nounderline'>$2</a>", $str);
 		// Images...  (looks like: [img]http://www.image.jpg[/img]
-		//$str = preg_replace("(\[img\]([$urlSearchString]*)\](.+?)\[/img\])", "<img src='$1' border='0'>", $str);
+		//$str = preg_replace("(\[img\]([$url_search_string]*)\](.+?)\[/img\])", "<img src='$1' border='0'>", $str);
 
 		// Images
 		// [img]pathtoimage[/img]
@@ -407,21 +407,21 @@ function drawMenuItems($menuArray) {
  * Clear the session varibles.
  *
  */
-	function clearVariables()
+	function clear_variables()
 	{
 		// Clear the session variables.
-		$csid = $_REQUEST["currentStudentID"];
+		$csid = $_REQUEST["current_student_id"];
 
-		$_SESSION["advisingStudentID$csid"] = "";
-		$_SESSION["advisingStudentID"] = "";
-		$_SESSION["advisingMajorCode$csid"] = "";
-		$_SESSION["advisingTrackCode$csid"] = "";
-		$_SESSION["advisingTermID$csid"] = "";
-		$_SESSION["advisingWhatIf$csid"] = "";
-		$_SESSION["whatIfMajorCode$csid"] = "";
+		$_SESSION["advising_student_id$csid"] = "";
+		$_SESSION["advising_student_id"] = "";
+		$_SESSION["advising_major_code$csid"] = "";
+		$_SESSION["advising_track_code$csid"] = "";
+		$_SESSION["advising_term_id$csid"] = "";
+		$_SESSION["advising_what_if$csid"] = "";
+		$_SESSION["what_if_major_code$csid"] = "";
 
-		$_SESSION["cacheFP$csid"] = "";
-		$_SESSION["cacheWhatIf$csid"] = "";
+		$_SESSION["cache_f_p$csid"] = "";
+		$_SESSION["cache_what_if$csid"] = "";
 
 	}
 
@@ -432,7 +432,7 @@ function drawMenuItems($menuArray) {
 	 *
 	 * @return string
 	 */
-	function displayGreeting()
+	function display_greeting()
 	{
 		// Displays the greeting message & log off link at the top of the page.
 		// Also displays the urgentMsg, if it exists.
@@ -440,7 +440,7 @@ function drawMenuItems($menuArray) {
 
 		// Check to see if the GRANT_FULL_ACCESS flag is set.  If so, it
 		// represents a major security risk, and the user should be informed.
-		if ($GLOBALS["fpSystemSettings"]["GRANT_FULL_ACCESS"] == TRUE) {
+		if ($GLOBALS["fp_system_settings"]["GRANT_FULL_ACCESS"] == TRUE) {
 		  $pC .= "<div class='fp-warn-grant-full'>
 		            <b>Warning:</b> The 'GRANT_FULL_ACCESS' flag has been
 		            set in the settings.php file.  This means that any user
@@ -451,7 +451,7 @@ function drawMenuItems($menuArray) {
 		}
 
 		
-		if ($this->boolPrint)
+		if ($this->bool_print)
 		{ // Don't display in Print View.
 			return "";
 		}
@@ -459,60 +459,60 @@ function drawMenuItems($menuArray) {
 		$name = "";
 		$dt = date("D, F jS, Y",time("today"));
 
-		if ($_SESSION["fpUserType"] == "student")
+		if ($_SESSION["fp_user_type"] == "student")
 		{
-			$name = $this->db->getStudentName($_SESSION["fpUserID"], false);
+			$name = $this->db->get_student_name($_SESSION["fp_user_id"], false);
 		} else {
-			$name = $this->db->getFacultyName($_SESSION["fpUserID"], false);
+			$name = $this->db->get_faculty_name($_SESSION["fp_user_id"], false);
 		}
 
 		$pC .= "<div class='tenpt'>
 					Welcome $name.  ";
-		if (!$this->pageIsMobile) {
+		if (!$this->page_is_mobile) {
 		  $pC .= "Today is $dt. &nbsp;";
 		}
 		$pC .= "<a href='main.php?performAction=performLogout'>Logout?</a>
 				</div>
 					";
 
-		if ($GLOBALS["boolUseDraft"] == true)
+		if ($GLOBALS["bool_use_draft"] == true)
 		{
-			$this->adminMessage .= "<div style='text-align: center;'>Now viewing in <b>Draft</b> Mode.
+			$this->admin_message .= "<div style='text-align: center;'>Now viewing in <b>Draft</b> Mode.
 				<br>Substitutions and advisings will still be saved normally.		
 				</div>";
 		}
 
-		if ($_SESSION["fpSwitchedUser"] == true)
+		if ($_SESSION["fp_switched_user"] == true)
 		{
-			$this->adminMessage .= "<div>
+			$this->admin_message .= "<div>
 										As an admin user, you have switched profiles
 										and are now seeing FlightPath as though you were
-										<b>{$_SESSION["fpUserName"]}</b>.  To return to your own account, log out,
+										<b>{$_SESSION["fp_user_name"]}</b>.  To return to your own account, log out,
 										then back in.
 									</div>";
 		}
 
 
-		if ($this->adminMessage != "")
+		if ($this->admin_message != "")
 		{
 			$pC .= "<div class='admin-message'>
-						<b>Admin Message:</b> $this->adminMessage						
+						<b>Admin Message:</b> $this->admin_message						
 					</div>";
 		}
 
 
 
 		$uM = "";
-		if ($this->settings["urgentMsg"] != "")
+		if ($this->settings["urgent_msg"] != "")
 		{
 
 			$uM = "<div class='tenpt hypo' style='margin: 10px; padding: 5px;'>
 					<b>Important Notice:</b> 
-					" . $this->convertBBCodeToHTML($this->settings["urgentMsg"]) . "
+					" . $this->convert_b_b_code_to_h_t_m_l($this->settings["urgent_msg"]) . "
 					</div>";
 		}
 
-		if ($this->settings["maintenanceMode"]*1 > 0)
+		if ($this->settings["maintenance_mode"]*1 > 0)
 		{
 			// We are in maintenance mode.  Display an appropriate
 			// message as an urgentMsg.
@@ -542,49 +542,49 @@ function drawMenuItems($menuArray) {
 	 * the student's transfer credits
 	 *
 	 */
-	function buildTransferCredit()
+	function build_transfer_credit()
 	{
 		$pC = "";
-		$isEmpty = true;
-		$pC .= $this->drawSemesterBoxTop("Transfer Credit", true);
+		$is_empty = true;
+		$pC .= $this->draw_semester_box_top("Transfer Credit", true);
 		// Basically, go through all the courses the student has taken,
 		// And only show the transfers.  This is similar to Excess credit.
 
 
 
-		$this->student->listCoursesTaken->sortAlphabeticalOrder(false, true);
-		$this->student->listCoursesTaken->resetCounter();
-		while($this->student->listCoursesTaken->hasMore())
+		$this->student->list_courses_taken->sort_alphabetical_order(false, true);
+		$this->student->list_courses_taken->reset_counter();
+		while($this->student->list_courses_taken->has_more())
 		{
-			$course = $this->student->listCoursesTaken->getNext();
+			$course = $this->student->list_courses_taken->get_next();
 
 			// Skip non transfer credits.
-			if ($course->boolTransfer != true)
+			if ($course->bool_transfer != true)
 			{
 				continue;
 			}
 
-			$boolAddFootnote = false;
-			if ($course->boolHasBeenDisplayed == true)
+			$bool_add_footnote = false;
+			if ($course->bool_has_been_displayed == true)
 			{ // Show the footnote if this has already been displayed
 				// elsewhere on the page.
-				$boolAddFootnote = true;
+				$bool_add_footnote = true;
 			}
 
-			$pC .= $this->drawCourseRow($course,"","",false,false,$boolAddFootnote,true);
-			$isEmpty = false;
+			$pC .= $this->draw_course_row($course,"","",false,false,$bool_add_footnote,true);
+			$is_empty = false;
 
 		}
 
 
 
-		if ($GLOBALS["advisingCourseHasAsterisk"] == true)
+		if ($GLOBALS["advising_course_has_asterisk"] == true)
 		{
 			$pC .= "<tr>
 				<td colspan='10'>
 				<div class='tenpt' style='margin-top: 10px; padding: 3px;'>
 				<b>*</b> Courses marked with an asterisk (*) have
-					equivalencies at {$GLOBALS["fpSystemSettings"]["schoolInitials"]}.  
+					equivalencies at {$GLOBALS["fp_system_settings"]["school_initials"]}.  
 					Click on the course for more
 					details.			
 				</div>		
@@ -593,11 +593,11 @@ function drawMenuItems($menuArray) {
 				";
 		}
 
-		$pC .= $this->drawSemesterBoxBottom();
+		$pC .= $this->draw_semester_box_bottom();
 
-		if (!$isEmpty)
+		if (!$is_empty)
 		{
-			$this->addToScreen($pC);
+			$this->add_to_screen($pC);
 		}
 
 	}
@@ -610,16 +610,16 @@ function drawMenuItems($menuArray) {
 	 * by an advisor.
 	 *
 	 */
-	function buildAddedCourses()
+	function build_added_courses()
 	{
 
 		$pC = "";
 
 
 		$semester = new Semester(-88);
-		if ($newSemester = $this->degreePlan->listSemesters->findMatch($semester))
+		if ($new_semester = $this->degree_plan->list_semesters->find_match($semester))
 		{
-			$this->addToScreen($this->displaySemester($newSemester));
+			$this->add_to_screen($this->display_semester($new_semester));
 		}
 	}
 
@@ -629,49 +629,49 @@ function drawMenuItems($menuArray) {
    * Constructs the HTML to show the Excess Credits list.
    *
    */
-	function buildExcessCredit()
+	function build_excess_credit()
 	{
 
 		$pC = "";
-		$pC .= $this->drawSemesterBoxTop("Excess Credits");
-		$isEmpty = true;
+		$pC .= $this->draw_semester_box_top("Excess Credits");
+		$is_empty = true;
 
 		// Basically, go through all the courses the student has taken,
 		// selecting out the ones that are not fulfilling any
 		// requirements.
-		$this->student->listCoursesTaken->sortAlphabeticalOrder();
-		$this->student->listCoursesTaken->resetCounter();
-		while($this->student->listCoursesTaken->hasMore())
+		$this->student->list_courses_taken->sort_alphabetical_order();
+		$this->student->list_courses_taken->reset_counter();
+		while($this->student->list_courses_taken->has_more())
 		{
-			$course = $this->student->listCoursesTaken->getNext();
+			$course = $this->student->list_courses_taken->get_next();
 
-			if ($course->boolHasBeenDisplayed == true)
+			if ($course->bool_has_been_displayed == true)
 			{ // Skip ones which have been assigned to groups or semesters.
 				continue;
 			}
 
 			// Skip transfer credits.
-			if ($course->boolTransfer == true)
+			if ($course->bool_transfer == true)
 			{
 				continue;
 			}
 
 			// Skip substitutions
-			if ($course->boolSubstitution == true)
+			if ($course->bool_substitution == true)
 			{
 				continue;
 			}
       
-			$pC .= $this->drawCourseRow($course,"","",false,false);
-			$isEmpty = false;
+			$pC .= $this->draw_course_row($course,"","",false,false);
+			$is_empty = false;
 		}
 
 
-		$pC .= $this->drawSemesterBoxBottom();
+		$pC .= $this->draw_semester_box_bottom();
 
-		if (!$isEmpty)
+		if (!$is_empty)
 		{
-			$this->addToScreen($pC);
+			$this->add_to_screen($pC);
 		}
 	}
 
@@ -681,36 +681,36 @@ function drawMenuItems($menuArray) {
 	 * and transfer credits.
 	 *
 	 */
-	function buildFootnotes()
+	function build_footnotes()
 	{
 		// Display the footnotes & messages.
 
 		$pC = "";
-		$isEmpty = true;
-		$pC .= $this->drawSemesterBoxTop("Footnotes & Messages", true);
+		$is_empty = true;
+		$pC .= $this->draw_semester_box_top("Footnotes & Messages", true);
 
 		$pC .= "<tr><td colspan='8' class='tenpt'>
 					";
-		$fnTypeArray = array("substitution","transfer");
-		$fnChar = array("substitution"=>"S", "transfer"=>"T");
-		$fnName = array("substitution"=>"Substitutions", 
+		$fn_type_array = array("substitution","transfer");
+		$fn_char = array("substitution"=>"S", "transfer"=>"T");
+		$fn_name = array("substitution"=>"_substitutions", 
 		                "transfer"=>"Transfer Equivalency Footnotes");
-		$fnBetween = array("substitution"=>"for",
-		                   "transfer"=>"for {$GLOBALS["fpSystemSettings"]["schoolInitials"]}'s");
+		$fn_between = array("substitution"=>"for",
+		                   "transfer"=>"for {$GLOBALS["fp_system_settings"]["school_initials"]}'s");
 		for ($xx = 0; $xx <= 1; $xx++)
 		{
-			$fnType = $fnTypeArray[$xx];
-			if (count($this->footnoteArray[$fnType]) < 1)
+			$fn_type = $fn_type_array[$xx];
+			if (count($this->footnote_array[$fn_type]) < 1)
 			{
 				continue;
 			}
 
 			$pC .= "<div style='padding-bottom: 10px;'>
-						<b>{$fnName[$fnType]}</b>";
-			$isEmpty = false;
-			for ($t = 1; $t <= count($this->footnoteArray[$fnType]); $t++)
+						<b>{$fn_name[$fn_type]}</b>";
+			$is_empty = false;
+			for ($t = 1; $t <= count($this->footnote_array[$fn_type]); $t++)
 			{
-				$line = $this->footnoteArray[$fnType][$t];
+				$line = $this->footnote_array[$fn_type][$t];
 
 				if ($line == "")
 				{
@@ -720,26 +720,26 @@ function drawMenuItems($menuArray) {
 				$extra = ".";
 
 				$temp = split(" ~~ ", $line);
-				$oCourse = trim($temp[0]);
-				$newCourse = trim($temp[1]);
-				$usingHours = trim($temp[2]);
-				if ($usingHours != "")
+				$o_course = trim($temp[0]);
+				$new_course = trim($temp[1]);
+				$using_hours = trim($temp[2]);
+				if ($using_hours != "")
 				{
-					$usingHours = "($usingHours hrs)";
+					$using_hours = "($using_hours hrs)";
 				}
-				$inGroup = trim($temp[3]);
+				$in_group = trim($temp[3]);
 
-				$fbetween = $fnBetween[$fnType];
+				$fbetween = $fn_between[$fn_type];
 
-				if ($inGroup > 0 && $fnType=="substitution")
+				if ($in_group > 0 && $fn_type=="substitution")
 				{
-					$newGroup = new Group();
-					$newGroup->groupID = $inGroup;
-					$newGroup->loadDescriptiveData();
-					$extra = "<div style='padding-left:45px;'><i>in $newGroup->title.</i></div>";
-					if ($newCourse == $oCourse || $oCourse == "")
+					$new_group = new Group();
+					$new_group->group_id = $in_group;
+					$new_group->load_descriptive_data();
+					$extra = "<div style='padding-left:45px;'><i>in $new_group->title.</i></div>";
+					if ($new_course == $o_course || $o_course == "")
 					{
-						$oCourse = "was added";
+						$o_course = "was added";
 						$fbetween = "";
 						$extra = str_replace("<i>in", "<i>to", $extra);
 					}
@@ -748,8 +748,8 @@ function drawMenuItems($menuArray) {
 
 
 				$pC .= "<div class='tenpt'>&nbsp; &nbsp;
-					<sup>{$fnChar[$fnType]}$t</sup>
-					$newCourse $usingHours $fbetween $oCourse$extra</div>";
+					<sup>{$fn_char[$fn_type]}$t</sup>
+					$new_course $using_hours $fbetween $o_course$extra</div>";
 
 			}
 			$pC .= "</div>";
@@ -758,41 +758,41 @@ function drawMenuItems($menuArray) {
 
 		////////////////////////////////////
 		////  Moved Courses...
-		$mIsEmpty = true;
+		$m_is_empty = true;
 		$pC .= "<!--MOVEDCOURSES-->";
-		$this->student->listCoursesTaken->sortAlphabeticalOrder();
-		$this->student->listCoursesTaken->resetCounter();
-		while($this->student->listCoursesTaken->hasMore())
+		$this->student->list_courses_taken->sort_alphabetical_order();
+		$this->student->list_courses_taken->reset_counter();
+		while($this->student->list_courses_taken->has_more())
 		{
-			$c = $this->student->listCoursesTaken->getNext();
+			$c = $this->student->list_courses_taken->get_next();
 			// Skip courses which haven't had anything moved.
-			if ($c->groupListUnassigned->isEmpty == true)
+			if ($c->group_list_unassigned->is_empty == true)
 			{	continue;	}
 
-			if ($c->courseID > 0)
-			{	$c->loadDescriptiveData();	}
+			if ($c->course_id > 0)
+			{	$c->load_descriptive_data();	}
 
-			$lSI = $c->subjectID;
-			$lCN = $c->courseNum;
-			$lTerm = $c->getTermDescription(true);
+			$l_s_i = $c->subject_id;
+			$l_c_n = $c->course_num;
+			$l_term = $c->get_term_description(true);
 
 			$pC .= "<div class='tenpt' style='padding-left: 10px; padding-bottom: 5px;'>
-							$lSI $lCN ($c->hoursAwarded hrs) - $c->grade - $lTerm
+							$l_s_i $l_c_n ($c->hours_awarded hrs) - $c->grade - $l_term
 								";
 			
-			$c->groupListUnassigned->resetCounter();
-			while($c->groupListUnassigned->hasMore())
+			$c->group_list_unassigned->reset_counter();
+			while($c->group_list_unassigned->has_more())
 			{
-				$group = $c->groupListUnassigned->getNext();
-				$group->loadDescriptiveData();
-				$groupTitle = "";
-				if ($group->groupID > 0)
+				$group = $c->group_list_unassigned->get_next();
+				$group->load_descriptive_data();
+				$group_title = "";
+				if ($group->group_id > 0)
 				{
-					$groupTitle = "<i>$group->title</i>";
+					$group_title = "<i>$group->title</i>";
 				} else {
-					$groupTitle = "the degree plan";
+					$group_title = "the degree plan";
 				}
-				$pC .= "was removed from $groupTitle.
+				$pC .= "was removed from $group_title.
 							";
 			}
 
@@ -800,11 +800,11 @@ function drawMenuItems($menuArray) {
 
 			$pC .= "</div>";
 
-			$mIsEmpty = false;
-			$isEmpty = false;
+			$m_is_empty = false;
+			$is_empty = false;
 		}
 
-		if ($mIsEmpty == false)
+		if ($m_is_empty == false)
 		{
 			$mtitle = "<div style='padding-bottom: 10px;'>
 						<div style='padding-bottom: 5px;'>
@@ -818,25 +818,25 @@ function drawMenuItems($menuArray) {
 
 
 		// For admins only....
-		if ($_SESSION["fpCanSubstitute"] == true)
+		if ($_SESSION["fp_can_substitute"] == true)
 		{
-			if ($this->boolPrint != true)
+			if ($this->bool_print != true)
 			{// Don't display in print view.
 				$pC .= "<div style='tenpt'>
-					<a href='javascript: popupWindow2(\"toolbox\",\"\");'><img src='$this->themeLocation/images/toolbox.gif' border='0'>Administrator's Toolkit</a>
+					<a href='javascript: popupWindow2(\"toolbox\",\"\");'><img src='$this->theme_location/images/toolbox.gif' border='0'>Administrator's Toolkit</a>
 				</div>";
-				$isEmpty = false;
+				$is_empty = false;
 			}
 		}
 
 
 		$pC .= "</td></tr>";
 
-		$pC .= $this->drawSemesterBoxBottom();
+		$pC .= $this->draw_semester_box_bottom();
 
-		if (!$isEmpty)
+		if (!$is_empty)
 		{
-			$this->addToScreen($pC);
+			$this->add_to_screen($pC);
 		}
 	}
 
@@ -847,65 +847,65 @@ function drawMenuItems($menuArray) {
    *
    * @return string
    */
-	function displayToolboxSubstitutions()
+	function display_toolbox_substitutions()
 	{
 		$pC = "";
 		// This will display the substitution management screen.
 
-		$pC .= $this->drawCurvedTitle("Manage Substitutions");
+		$pC .= $this->draw_curved_title("Manage Substitutions");
 
 		$pC .= "<div class='tenpt'>
 				The following substitutions have been made for this student:
 				<br><br>
 				";
-		$isEmpty = true;
+		$is_empty = true;
 
-		//adminDebug($this->student->listSubstitutions->getSize());
+		//admin_debug($this->student->list_substitutions->get_size());
 
-		$this->student->listSubstitutions->resetCounter();
-		while ($this->student->listSubstitutions->hasMore())
+		$this->student->list_substitutions->reset_counter();
+		while ($this->student->list_substitutions->has_more())
 		{
-			$substitution = $this->student->listSubstitutions->getNext();
+			$substitution = $this->student->list_substitutions->get_next();
 
-			$courseRequirement = $substitution->courseRequirement;
-			$subbedCourse = $substitution->courseListSubstitutions->getFirst();
+			$course_requirement = $substitution->course_requirement;
+			$subbed_course = $substitution->course_list_substitutions->get_first();
 
-			$subSI = $subbedCourse->subjectID;
-			$subCN = $subbedCourse->courseNum;
+			$sub_s_i = $subbed_course->subject_id;
+			$sub_c_n = $subbed_course->course_num;
 
-			$crSI = $courseRequirement->subjectID;
-			$crCN = $courseRequirement->courseNum;
-			$crHrs = $courseRequirement->getHours();
+			$cr_s_i = $course_requirement->subject_id;
+			$cr_c_n = $course_requirement->course_num;
+			$cr_hrs = $course_requirement->get_hours();
 
-			$inGroup = ".";
-			if ($subbedCourse->assignedToGroupID > 0)
+			$in_group = ".";
+			if ($subbed_course->assigned_to_group_id > 0)
 			{
-				$newGroup = new Group();
-				$newGroup->groupID = $subbedCourse->assignedToGroupID;
-				$newGroup->loadDescriptiveData();
+				$new_group = new Group();
+				$new_group->group_id = $subbed_course->assigned_to_group_id;
+				$new_group->load_descriptive_data();
 
-				$inGroup = " in $newGroup->title.";
+				$in_group = " in $new_group->title.";
 			}
 
-			$subAction = "was substituted for";
-			$subTransNotice = "";
-			if ($substitution->boolGroupAddition == true)
+			$sub_action = "was substituted for";
+			$sub_trans_notice = "";
+			if ($substitution->bool_group_addition == true)
 			{
-				$subAction = "was added to";
-				$crSI = $crCN = "";
-				$inGroup = str_replace("in","",$inGroup);
+				$sub_action = "was added to";
+				$cr_s_i = $cr_c_n = "";
+				$in_group = str_replace("in","",$in_group);
 			}
 
-			if ($subbedCourse->boolTransfer == true && is_object($subbedCourse->courseTransfer))
+			if ($subbed_course->bool_transfer == true && is_object($subbed_course->course_transfer))
 			{
-				$subSI = $subbedCourse->courseTransfer->subjectID;
-				$subCN = $subbedCourse->courseTransfer->courseNum;
-				$subTransNotice = "[transfer]";
+				$sub_s_i = $subbed_course->course_transfer->subject_id;
+				$sub_c_n = $subbed_course->course_transfer->course_num;
+				$sub_trans_notice = "[transfer]";
 			}
 
 			$by = $remarks = "";
-			$temp = $this->db->getSubstitutionDetails($subbedCourse->dbSubstitutionID);
-			$by = $this->db->getFacultyName($temp["facultyID"], false);
+			$temp = $this->db->get_substitution_details($subbed_course->db_substitution_id);
+			$by = $this->db->get_faculty_name($temp["faculty_id"], false);
 			$remarks = $temp["remarks"];
 			$ondate = date("n/d/Y h:i:sa", strtotime($temp["datetime"]));
 			
@@ -922,31 +922,31 @@ function drawMenuItems($menuArray) {
 
 
 			$extra = "";
-			if ($substitution->boolOutdated)
+			if ($substitution->bool_outdated)
 			{
 				$extra = " <span style='color:red'>[OUTDATED: ";
-				$extra .= $substitution->outdatedNote;
+				$extra .= $substitution->outdated_note;
 				$extra .= "]</span>";
 			}
 
 			$pC .= "<div class='tenpt' style='margin-bottom: 20px;'>
-						$subSI $subCN $subTransNotice ($subbedCourse->substitutionHours hrs) $subAction
-						$crSI $crCN$inGroup $by$remarks $extra
+						$sub_s_i $sub_c_n $sub_trans_notice ($subbed_course->substitution_hours hrs) $sub_action
+						$cr_s_i $cr_c_n$in_group $by$remarks $extra
 						<br>
-							<a href='javascript: popupRemoveSubstitution(\"$subbedCourse->dbSubstitutionID\");'>Remove substitution?</a>
+							<a href='javascript: popupRemoveSubstitution(\"$subbed_course->db_substitution_id\");'>Remove substitution?</a>
 					</div>";
 
-			$isEmpty = false;
+			$is_empty = false;
 		}
 
-		if ($isEmpty == true)
+		if ($is_empty == true)
 		{
 			$pC .= "<div align='center'>No substitutions have been made for this student.</div>";
 		}
 
 		$pC .= "</div>";
 
-		$this->db->addToLog("toolkit", "substitutions");
+		$this->db->add_to_log("toolkit", "substitutions");
 
 		return $pC;
 	}
@@ -957,99 +957,99 @@ function drawMenuItems($menuArray) {
    *
    * @return string
    */
-	function displayToolboxTransfers()
+	function display_toolbox_transfers()
 	{
 		$pC = "";
 		// This will display the substitution management screen.
 
-		$pC .= $this->drawCurvedTitle("Manage Transfer Equivalencies");
+		$pC .= $this->draw_curved_title("Manage Transfer Equivalencies");
 
 		$pC .= "<div class='tenpt'>
 				This student has the following transfer credits and equivalencies.
 				<br><br>
 				";
-		$isEmpty = true;
+		$is_empty = true;
 
-		$this->student->listCoursesTaken->sortAlphabeticalOrder(false, true);
-		$this->student->listCoursesTaken->resetCounter();
-		while($this->student->listCoursesTaken->hasMore())
+		$this->student->list_courses_taken->sort_alphabetical_order(false, true);
+		$this->student->list_courses_taken->reset_counter();
+		while($this->student->list_courses_taken->has_more())
 		{
-			$c = $this->student->listCoursesTaken->getNext();
+			$c = $this->student->list_courses_taken->get_next();
 
 			// Skip non transfer credits.
-			if ($c->boolTransfer != true)
+			if ($c->bool_transfer != true)
 			{
 				continue;
 			}
 
-			if ($c->courseID > 0)
+			if ($c->course_id > 0)
 			{
-				$c->loadDescriptiveData();
+				$c->load_descriptive_data();
 			}
-			$course = $c->courseTransfer;
-			//adminDebug($course->courseID);
-			$course->loadDescriptiveTransferData();
-			//$course->loadCourse($course->courseID, true);  // reload data for this course.
+			$course = $c->course_transfer;
+			//admin_debug($course->course_id);
+			$course->load_descriptive_transfer_data();
+			//$course->load_course($course->course_id, true);  // reload data for this course.
 
-			$lSI = $c->subjectID;
-			$lCN = $c->courseNum;
-			$lTitle = $this->fixCourseTitle($c->title);
+			$l_s_i = $c->subject_id;
+			$l_c_n = $c->course_num;
+			$l_title = $this->fix_course_title($c->title);
 
-			$tSI = $course->subjectID;
-			$tCN = $course->courseNum;
-			$tTerm = $c->getTermDescription(true);
+			$t_s_i = $course->subject_id;
+			$t_c_n = $course->course_num;
+			$t_term = $c->get_term_description(true);
 			$grade = $c->grade;
 			if ($grade == "W" || $grade == "F" || $grade == "NC" || $grade == "I")
 			{
 				$grade = "<span style='color: red;'>$grade</span>";
 			}
-			//$tCourseTitle = $this->fixCourseTitle($course->title);
-			$tInst = $this->fixInstitutionName($course->institutionName);
+			//$tCourseTitle = $this->fix_course_title($course->title);
+			$t_inst = $this->fix_institution_name($course->institution_name);
 
 			$pC .= "<div class='tenpt' style='padding-bottom: 15px;'>
-							<b>$tSI $tCN</b> ($c->hoursAwarded hrs) - $grade - $tTerm - $tInst
+							<b>$t_s_i $t_c_n</b> ($c->hours_awarded hrs) - $grade - $t_term - $t_inst
 								";
-			if ($c->boolSubstitutionSplit == true)
+			if ($c->bool_substitution_split == true)
 			{
 				$pC .= "<div class='tenpt'><b> +/- </b> This course's hours were split in a substitution.</div>";
 			}
-			$initials = $GLOBALS["fpSystemSettings"]["schoolInitials"];
+			$initials = $GLOBALS["fp_system_settings"]["school_initials"];
 			// Does this course NOT have an equivalency?
-			if ($c->courseID == 0)
+			if ($c->course_id == 0)
 			{
 				// But, has the eqv been removed?  If so, display a link to restore it,
 				// if not, show a link to remove it!
-				if ($rC = $this->student->listTransferEqvsUnassigned->findMatch($course))
+				if ($rC = $this->student->list_transfer_eqvs_unassigned->find_match($course))
 				{
 					// Yes, the eqv WAS removed (or unassigned)
 					$pC .= "<div class='tenpt'>This course's $initials equivalency was removed for this student.<br>
-							<a href='javascript: popupRestoreTransferEqv(\"$rC->dbUnassignTransferID\")'>Restore?</a></div>";
+							<a href='javascript: popupRestoreTransferEqv(\"$rC->db_unassign_transfer_id\")'>_restore?</a></div>";
 				} else {
 					$pC .= "<div class='tenpt'>$initials equivalency not yet entered (or is not applicable).</div>";
 				}
 			} else {
 				// This course *DOES* have an equivalency.
-				$pC .= "<div class='tenpt'>$initials eqv: $lSI $lCN - $lTitle</div>";
+				$pC .= "<div class='tenpt'>$initials eqv: $l_s_i $l_c_n - $l_title</div>";
 
 				$pC .= "<div class='tenpt' align='right'>
-							<a href='javascript: popupUnassignTransferEqv(\"" . $course->courseID . "\");'>Remove this equivalency?</a>
+							<a href='javascript: popupUnassignTransferEqv(\"" . $course->course_id . "\");'>Remove this equivalency?</a>
 							</div>";
 
 			}
 
 			$pC .= "</div>";
 
-			$isEmpty = false;
+			$is_empty = false;
 		}
 
-		if ($isEmpty == true)
+		if ($is_empty == true)
 		{
 			$pC .= "<div align='center'>There are no transfer equivalencies for this student.</div>";
 		}
 
 		$pC .= "</div>";
 
-		$this->db->addToLog("toolkit", "transfers");
+		$this->db->add_to_log("toolkit", "transfers");
 
 		return $pC;
 	}
@@ -1060,11 +1060,11 @@ function drawMenuItems($menuArray) {
 	 *
 	 * @return string
 	 */
-	function displayWhatIfSelection($boolUndergradOnly = TRUE)
+	function display_what_if_selection($bool_undergrad_only = TRUE)
 	{
 		$pC = "";
 
-		if ($this->boolPrint)
+		if ($this->bool_print)
 		{
 			return "";
 		}
@@ -1072,54 +1072,54 @@ function drawMenuItems($menuArray) {
 		$db = new DatabaseHandler();
 
 		$pC .= "<form action='advise.php' id='mainform' method='POST'>";
-		$pC .= $this->getJavascriptCode();
-		$pC .= $this->displayBeginSemesterTable();
+		$pC .= $this->get_javascript_code();
+		$pC .= $this->display_begin_semester_table();
 
-		$pC .= $this->drawCurrentlyAdvisingBox();
+		$pC .= $this->draw_currently_advising_box();
 		$pC .= "<tr><td colspan='2'>";
 
-		$pC .= $this->drawCurvedTitle("What if I change my major to...");
+		$pC .= $this->draw_curved_title("What if I change my major to...");
 
 		$pC .= "<br>
-				Major: <select name='whatIfMajorCode' class='what-if-selector'>
+				Major: <select name='what_if_major_code' class='what-if-selector'>
 					<option value=''>Please select a major</option>
 					<option value=''>------------------------------</option>\n
 					";
-		$currentCatalogYear = $this->settings["currentCatalogYear"];
-		//$boolUseDraft = $GLOBALS["boolUseDraft"];
-		$boolUseDraft = FALSE;  // leave as false for now.  Because you can't select
+		$current_catalog_year = $this->settings["current_catalog_year"];
+		//$bool_use_draft = $GLOBALS["bool_use_draft"];
+		$bool_use_draft = FALSE;  // leave as false for now.  Because you can't select
 		                      // degree options, and if you click submit it really does
 		                      // save it.  Better to just use blank degrees.
-		if ($degreeArray = $db->getDegreesInCatalogYear($currentCatalogYear, false, $boolUseDraft, $boolUndergradOnly))
+		if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, false, $bool_use_draft, $bool_undergrad_only))
 		{
-			foreach($degreeArray as $majorCode => $value)
+			foreach($degree_array as $major_code => $value)
 			{
 				if (trim($value["title"]) == ""){continue;}
-				$pC .= "<option value='$majorCode'>{$value["title"]}</option> \n";
+				$pC .= "<option value='$major_code'>{$value["title"]}</option> \n";
 			}
 		}
 
-		$csid = $GLOBALS["currentStudentID"];
+		$csid = $GLOBALS["current_student_id"];
 		$pC .= "</select>
 				<br><br>";
 
 		$pC .= "
 				<div align='right'>
-				" . $this->drawButton("Try It Out!", "showUpdate(true);submitForm();") . "				
+				" . $this->draw_button("Try It Out!", "show_update(true);submit_form();") . "				
 				<!--	<input type='button' value='Try It Out!' onClick='showUpdate(true);submitForm();'>   -->
 					
 					<input type='hidden' name='loadFromCache' value='no'>
 					<input type='hidden' name='windowMode' value='screen'>
 					<input type='hidden' id='scrollTop'>
 					<input type='hidden' id='performAction' name='performAction'>
-					<input type='hidden' id='advisingWhatIf' name='advisingWhatIf' value='yes'>
+					<input type='hidden' id='advising_what_if' name='advising_what_if' value='yes'>
 					<input type='hidden' id='currentStudentID' name='currentStudentID' value='$csid'>
 					
 				</div>
 				<br><br>
 				<div class='hypo tenpt'>
 				 <b>Important Notice:</b> What If displays degree plans
-				 from the most recent catalog year ($currentCatalogYear-" . ($currentCatalogYear + 1) . "), 
+				 from the most recent catalog year ($current_catalog_year-" . ($current_catalog_year + 1) . "), 
 				 as any major change would place the student into the 
 				 most recent catalog. 
 				</div>";
@@ -1127,8 +1127,8 @@ function drawMenuItems($menuArray) {
 
 
 		$pC .= "</td></tr>";
-		$pC .= $this->displayEndSemesterTable();
-		//$pC .= $this->getHiddenAdvisingVariables("");
+		$pC .= $this->display_end_semester_table();
+		//$pC .= $this->get_hidden_advising_variables("");
 
 		$pC .= "</form>
 				";
@@ -1144,13 +1144,13 @@ function drawMenuItems($menuArray) {
    *
    * @return string
    */
-	function displayToolboxCourses()
+	function display_toolbox_courses()
 	{
 		$pC = "";
 
-		$pC .= $this->drawCurvedTitle("All Student Courses");
+		$pC .= $this->draw_curved_title("All Student Courses");
 
-		$csid = $_REQUEST["currentStudentID"];
+		$csid = $_REQUEST["current_student_id"];
 		$order = $_REQUEST["order"];
 		if ($order == "name")
 		{
@@ -1165,91 +1165,91 @@ function drawMenuItems($menuArray) {
 					<a href='javascript: popupHelpWindow(\"help.php?i=7\");'>Confused? Click here.</a>
 				<br><br>
 				Order by: &nbsp; &nbsp;";
-		$pC .= "<a $ns href='advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=name&currentStudentID=$csid'>Name</a>
+		$pC .= "<a $ns href='advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=name&current_student_id=$csid'>Name</a>
 				&nbsp; &nbsp;";
-		$pC .= "<a $os href='advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=date&currentStudentID=$csid'>Date Taken</a>";
+		$pC .= "<a $os href='advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=date&current_student_id=$csid'>Date Taken</a>";
 
 		$pC .= "<hr>
 				<table border='0' cellpadding='2'>
 					";
-		$isEmpty = true;
+		$is_empty = true;
 		if ($order == "name")
 		{
-			$this->student->listCoursesTaken->sortAlphabeticalOrder();
+			$this->student->list_courses_taken->sort_alphabetical_order();
 		} else {
-			$this->student->listCoursesTaken->sortMostRecentFirst();
+			$this->student->list_courses_taken->sort_most_recent_first();
 		}
-		$this->student->listCoursesTaken->resetCounter();
-		while($this->student->listCoursesTaken->hasMore())
+		$this->student->list_courses_taken->reset_counter();
+		while($this->student->list_courses_taken->has_more())
 		{
-			$c = $this->student->listCoursesTaken->getNext();
+			$c = $this->student->list_courses_taken->get_next();
 
-			if ($c->courseID > 0)
+			if ($c->course_id > 0)
 			{
-				$c->loadDescriptiveData();
+				$c->load_descriptive_data();
 			}
 
-			$lSI = $c->subjectID;
-			$lCN = $c->courseNum;
-			$eqvLine = "";
+			$l_s_i = $c->subject_id;
+			$l_c_n = $c->course_num;
+			$eqv_line = "";
 
-			if ($c->courseTransfer->courseID > 0)
+			if ($c->course_transfer->course_id > 0)
 			{
-				if ($c->courseID > 0)
+				if ($c->course_id > 0)
 				{
-					$eqvLine = "<tr>
+					$eqv_line = "<tr>
 							<td colspan='8' class='tenpt'
 								style='padding-left: 20px;'>
-								<i>*eqv to {$GLOBALS["fpSystemSettings"]["schoolInitials"]} $lSI $lCN</i></td>
+								<i>*eqv to {$GLOBALS["fp_system_settings"]["school_initials"]} $l_s_i $l_c_n</i></td>
 							</tr>";
 				}
-				$lSI = $c->courseTransfer->subjectID;
-				$lCN = $c->courseTransfer->courseNum;
+				$l_s_i = $c->course_transfer->subject_id;
+				$l_c_n = $c->course_transfer->course_num;
 
 			}
 
 
-			$lTitle = $this->fixCourseTitle($c->title);
-			$lTerm = $c->getTermDescription(true);
+			$l_title = $this->fix_course_title($c->title);
+			$l_term = $c->get_term_description(true);
 
 			//$pC .= "<div class='tenpt' style='padding-bottom: 15px;'>
-			//					<b>$lSI $lCN</b> ($c->hoursAwarded hrs) - $c->grade - $lTerm
+			//					<b>$l_s_i $l_c_n</b> ($c->hours_awarded hrs) - $c->grade - $l_term
 			//						";
 			//$pC .= "</div>";
 
-			$h = $c->hoursAwarded;
-			if ($c->boolGhostHour) {
+			$h = $c->hours_awarded;
+			if ($c->bool_ghost_hour) {
 			  $h .= "(ghost<a href='javascript:alertSubGhost()'>?</a>)";
 			}
 			
 			$pC .= "<tr>
-						<td valign='top' class='tenpt'>$lSI</td>
-						<td valign='top' class='tenpt'>$lCN</td>
+						<td valign='top' class='tenpt'>$l_s_i</td>
+						<td valign='top' class='tenpt'>$l_c_n</td>
 						<td valign='top' class='tenpt'>$h</td>
 						<td valign='top' class='tenpt'>$c->grade</td>
-						<td valign='top' class='tenpt'>$c->termID</td>
+						<td valign='top' class='tenpt'>$c->term_id</td>
 						";
 			$pC .= "<td valign='top' class='tenpt'>";
 
-			if ($c->boolTransfer) {$pC .= "T ";}
+			if ($c->bool_transfer) {$pC .= "T ";}
 			//$pC .= "</td>";
 
 			//$pC .= "<td valign='top' class='tenpt'>";
-			if ($c->boolSubstitution) {$pC .= "S ";}
+			if ($c->bool_substitution) {$pC .= "S ";}
 			//$pC .= "</td>";
 
 			//$pC .= "<td valign='top' class='tenpt'>";
-			if ($c->boolHasBeenAssigned)
+			if ($c->bool_has_been_assigned)
 			{
 				$pC .= "A:";
-				if ($c->assignedToGroupID == 0)
+				if ($c->assigned_to_group_id == 0)
 				{
 					$pC .= "degree plan";
 				} else {
-					$tempGroup = new Group();
-					$tempGroup->groupID = $c->assignedToGroupID;
-					$tempGroup->loadDescriptiveData();
-					$pC .= $tempGroup->title;
+					$temp_group = new Group();
+					$temp_group->group_id = $c->assigned_to_group_id;
+					$temp_group->load_descriptive_data();
+					$pC .= $temp_group->title;
 				}
 
 
@@ -1258,12 +1258,12 @@ function drawMenuItems($menuArray) {
 
 
 
-			$pC .= "</tr>$eqvLine";
+			$pC .= "</tr>$eqv_line";
 
-			$isEmpty = false;
+			$is_empty = false;
 		}
 
-		if ($isEmpty == true)
+		if ($is_empty == true)
 		{
 			$pC .= "<div align='center'>No courses have been moved for this student.</div>";
 		}
@@ -1272,7 +1272,7 @@ function drawMenuItems($menuArray) {
 
 		$pC .= "</div>";
 
-		$this->db->addToLog("toolkit", "courses,$order");
+		$this->db->add_to_log("toolkit", "courses,$order");
 
 		return $pC;
 	}
@@ -1285,65 +1285,65 @@ function drawMenuItems($menuArray) {
    *
    * @return string
    */
-	function displayToolboxMoved()
+	function display_toolbox_moved()
 	{
 		$pC = "";
 
 
-		$pC .= $this->drawCurvedTitle("Manage Moved Courses");
+		$pC .= $this->draw_curved_title("Manage Moved Courses");
 
 		$pC .= "<div class='tenpt'>
 				This student has the following course movements.
 				<br><br>
 				";
-		$isEmpty = true;
+		$is_empty = true;
 
-		$this->student->listCoursesTaken->sortAlphabeticalOrder();
-		$this->student->listCoursesTaken->resetCounter();
-		while($this->student->listCoursesTaken->hasMore())
+		$this->student->list_courses_taken->sort_alphabetical_order();
+		$this->student->list_courses_taken->reset_counter();
+		while($this->student->list_courses_taken->has_more())
 		{
-			$c = $this->student->listCoursesTaken->getNext();
+			$c = $this->student->list_courses_taken->get_next();
 
 			// Skip courses which haven't had anything moved.
-			if ($c->groupListUnassigned->isEmpty == true)
+			if ($c->group_list_unassigned->is_empty == true)
 			{
 				continue;
 			}
 
 
-			if ($c->courseID > 0)
+			if ($c->course_id > 0)
 			{
-				$c->loadDescriptiveData();
+				$c->load_descriptive_data();
 			}
 
-			$lSI = $c->subjectID;
-			$lCN = $c->courseNum;
-			$lTitle = $this->fixCourseTitle($c->title);
-			$lTerm = $c->getTermDescription(true);
+			$l_s_i = $c->subject_id;
+			$l_c_n = $c->course_num;
+			$l_title = $this->fix_course_title($c->title);
+			$l_term = $c->get_term_description(true);
 
-			$h = $c->hoursAwarded;
-			if ($c->boolGhostHour) {
+			$h = $c->hours_awarded;
+			if ($c->bool_ghost_hour) {
 			  $h .= " [ghost<a href='javascript:alertSubGhost();'>?</a>] ";
 			}
 			
 			$pC .= "<div class='tenpt' style='padding-bottom: 15px;'>
-							<b>$lSI $lCN</b> ($h hrs) - $c->grade - $lTerm
+							<b>$l_s_i $l_c_n</b> ($h hrs) - $c->grade - $l_term
 								";
-			//adminDebug($c->groupListUnassigned->getSize());
-			$c->groupListUnassigned->resetCounter();
-			while($c->groupListUnassigned->hasMore())
+			//admin_debug($c->group_list_unassigned->get_size());
+			$c->group_list_unassigned->reset_counter();
+			while($c->group_list_unassigned->has_more())
 			{
-				$group = $c->groupListUnassigned->getNext();
-				$group->loadDescriptiveData();
-				$groupTitle = "";
-				if ($group->groupID > 0)
+				$group = $c->group_list_unassigned->get_next();
+				$group->load_descriptive_data();
+				$group_title = "";
+				if ($group->group_id > 0)
 				{
-					$groupTitle = "<i>$group->title</i>";
+					$group_title = "<i>$group->title</i>";
 				} else {
-					$groupTitle = "the degree plan";
+					$group_title = "the degree plan";
 				}
-				$pC .= "<div class='tenpt'>This course was removed from $groupTitle.<br>
-							<a href='javascript: popupRestoreUnassignFromGroup(\"$group->dbUnassignGroupID\")'>Restore?</a>
+				$pC .= "<div class='tenpt'>This course was removed from $group_title.<br>
+							<a href='javascript: popupRestoreUnassignFromGroup(\"$group->db_unassign_group_id\")'>_restore?</a>
 							</div>
 							";
 			}
@@ -1352,17 +1352,17 @@ function drawMenuItems($menuArray) {
 
 			$pC .= "</div>";
 
-			$isEmpty = false;
+			$is_empty = false;
 		}
 
-		if ($isEmpty == true)
+		if ($is_empty == true)
 		{
 			$pC .= "<div align='center'>No courses have been moved for this student.</div>";
 		}
 
 		$pC .= "</div>";
 
-		$this->db->addToLog("toolkit", "moved");
+		$this->db->add_to_log("toolkit", "moved");
 
 		return $pC;
 	}
@@ -1372,20 +1372,20 @@ function drawMenuItems($menuArray) {
  * Constructs the HTML to show the student's test scores.
  *
  */
-	function buildTestScores()
+	function build_test_scores()
 	{
 		// This function will build our Test Scores box.
 		// Only do this if the student actually has any test scores.
 
-		if ($this->student->listStandardizedTests->isEmpty)
+		if ($this->student->list_standardized_tests->is_empty)
 		{
 			return;
 		}
 
-		$topScores = array();
+		$top_scores = array();
 
 		$pC = "";
-		$pC .= $this->drawSemesterBoxTop("Test Scores", true);
+		$pC .= $this->draw_semester_box_top("Test Scores", true);
 
 		$pC .= "<tr><td colspan='8' class='tenpt'>
 					<!--TOP_ACT_SCORES-->
@@ -1402,33 +1402,33 @@ function drawMenuItems($menuArray) {
 					";
 
 		// Go through and find all the test scores for the student...
-		$this->student->listStandardizedTests->resetCounter();
-		while($this->student->listStandardizedTests->hasMore())
+		$this->student->list_standardized_tests->reset_counter();
+		while($this->student->list_standardized_tests->has_more())
 		{
-			$st = $this->student->listStandardizedTests->getNext();
-			$dt = strtotime($st->dateTaken);
+			$st = $this->student->list_standardized_tests->get_next();
+			$dt = strtotime($st->date_taken);
 			$ddate = date("M jS, Y", $dt);
 
 			// TODO:  I am not sure if this is used anymore... the pre-2003 thing.
-			if ($st->testID == "ACT") // old one
+			if ($st->test_id == "ACT") // old one
 			{ $st->description = "ACT - Pre-2003 Version";	}
 
 			$pC .= "<div>
 						<b>$st->description</b> - $ddate
 						<ul>";
-			foreach($st->categories as $position => $catArray)
+			foreach($st->categories as $position => $cat_array)
 			{
-				$pC .= "<li>{$catArray["description"]} - {$catArray["score"]}</li>";
+				$pC .= "<li>{$cat_array["description"]} - {$cat_array["score"]}</li>";
 
 
-				if (strstr($st->testID,"A05"))
+				if (strstr($st->test_id,"A05"))
 				{
 					// If we are dealing with an ACT score,
 					// get the top scores in each category.
-					if ($catArray["score"] > $topScores[$catArray["category_id"]] * 1)
+					if ($cat_array["score"] > $top_scores[$cat_array["category_id"]] * 1)
 					{
-						//$topScores[$catArray["description"]] = $catArray["score"];
-						$topScores[$catArray["category_id"]] = $catArray["score"];
+						//$top_scores[$cat_array["description"]] = $cat_array["score"];
+						$top_scores[$cat_array["category_id"]] = $cat_array["score"];
 					}
 				}
 
@@ -1449,36 +1449,36 @@ function drawMenuItems($menuArray) {
 				</span></td></tr>";
 
 		// Add in the top ACT scores...
-		if (count($topScores))
+		if (count($top_scores))
 		{
-			$topLine = "<b>Highest ACT scores from all tests:</b>
+			$top_line = "<b>Highest ACT scores from all tests:</b>
 				<ul>
-					<li> English - {$topScores["A01"]} </li>
-					<li> Mathematics - {$topScores["A02"]} </li>
-					<li> Composite - {$topScores["A05"]} </li>					
+					<li> English - {$top_scores["A01"]} </li>
+					<li> Mathematics - {$top_scores["A02"]} </li>
+					<li> Composite - {$top_scores["A05"]} </li>					
 				</ul>
 				";
-			$pC = str_replace("<!--TOP_ACT_SCORES-->",$topLine, $pC);
+			$pC = str_replace("<!--TOP_ACT_SCORES-->",$top_line, $pC);
 
 		}
 
 
-		$pC .= $this->drawSemesterBoxBottom();
+		$pC .= $this->draw_semester_box_bottom();
 
-		$this->addToScreen($pC);
+		$this->add_to_screen($pC);
 	}
 
 
 
 /**
  * This function is used by the "build" functions most often.  It very
- * simply adds a block of HTML to an array called boxArray.
+ * simply adds a block of HTML to an array called box_array.
  *
- * @param string $contentBox
+ * @param string $content_box
  */
-	function addToScreen($contentBox)
+	function add_to_screen($content_box)
 	{
-		$this->boxArray[] = $contentBox;
+		$this->box_array[] = $content_box;
 	}
 
 
@@ -1487,23 +1487,23 @@ function drawMenuItems($menuArray) {
 	 * the View or What If tabs in FlightPath.
 	 *
 	 */
-	function buildScreenElements()
+	function build_screen_elements()
 	{
 		// This function will build & assemble all of the onscreen
 		// elements for the advising screen.  It should be
-		// called before displayScreen();
+		// called before display_screen();
 
-		$this->buildSemesterList();
-		//$this->buildDevelopmentalRequirements();
-		$this->buildExcessCredit();
-		$this->buildTestScores();
+		$this->build_semester_list();
+		//$this->build_developmental_requirements();
+		$this->build_excess_credit();
+		$this->build_test_scores();
 
-		$this->buildTransferCredit();
+		$this->build_transfer_credit();
 
-		if (!$this->boolBlank)
+		if (!$this->bool_blank)
 		{ // Don't show if this is a blank degree plan.
-			$this->buildFootnotes();
-			$this->buildAddedCourses();
+			$this->build_footnotes();
+			$this->build_added_courses();
 		}
 
 	}
@@ -1515,41 +1515,41 @@ function drawMenuItems($menuArray) {
 	 *
 	 * @return string
 	 */
-	function displayChangeTerm()
+	function display_change_term()
 	{
 		$pC = "";
 
-		$tempCourse = new Course();
-		$tempCourse->termID = $GLOBALS["advisingTermID"];
-		$currentTerm = $tempCourse->getTermDescription();
-		$currentTermID = $tempCourse->termID;
+		$temp_course = new Course();
+		$temp_course->term_id = $GLOBALS["advising_term_id"];
+		$current_term = $temp_course->get_term_description();
+		$current_term_id = $temp_course->term_id;
 
 
-		$pC .= $this->drawCurvedTitle("Select an Advising Term");
+		$pC .= $this->draw_curved_title("Select an Advising Term");
 		$pC .= "<div class='tenpt'>
 				You may advise this student for future semesters.  Please select which
 				advising term you would like to advise for from the list below.  If you
 				are unsure, simply close this window and continue to advise for the current
-				term of <b>$currentTerm</b>.
+				term of <b>$current_term</b>.
 				</div>";
 
 		$pC .= "<ul>";
 
-		$temp = split(",",$GLOBALS["settingAvailableAdvisingTermIDs"]);
+		$temp = split(",",$GLOBALS["setting_available_advising_term_ids"]);
 		for ($t = 0; $t < count($temp); $t++)
 		{
-			$termID = trim($temp[$t]);
+			$term_id = trim($temp[$t]);
 
-			$tempCourse = new Course();
-			$tempCourse->termID = $termID;
+			$temp_course = new Course();
+			$temp_course->term_id = $term_id;
 
-			$termDesc = $tempCourse->getTermDescription();
-			if ($termID == $currentTermID)
+			$term_desc = $temp_course->get_term_description();
+			if ($term_id == $current_term_id)
 			{
-				$termDesc = "<b>$termDesc</b> - current";
+				$term_desc = "<b>$term_desc</b> - current";
 			}
 
-			$pC .= "<li class='tenpt' style='padding:3px;'><a href='javascript: popupChangeTerm(\"$termID\");'>$termDesc</a></li>";
+			$pC .= "<li class='tenpt' style='padding:3px;'><a href='javascript: popupChangeTerm(\"$term_id\");'>$term_desc</a></li>";
 
 		}
 
@@ -1565,15 +1565,15 @@ function drawMenuItems($menuArray) {
 	 *
 	 * @return string
 	 */
-	function displayChangeTrack()
+	function display_change_track()
 	{
 		// This displays the popup window which lets the user select a different
 		// track for their major.
 
 		$pC = "";
 
-		$this->degreePlan->loadDescriptiveData();
-		$pC .= $this->drawCurvedTitle("Select a Degree Option");
+		$this->degree_plan->load_descriptive_data();
+		$pC .= $this->draw_curved_title("Select a Degree Option");
 		$pC .= "<div class='tenpt'>
 				This major has one or more degree options, which affects which courses are required. 
 				Please select a degree option (or track) from the list below.
@@ -1581,11 +1581,11 @@ function drawMenuItems($menuArray) {
 				If you are unsure of what to do, simply close this window.
 				";
 
-		$pC .= "<br><br><b>" . $this->degreePlan->title . "</b> degree options:</div><!--DEFAULT-->
+		$pC .= "<br><br><b>" . $this->degree_plan->title . "</b> degree options:</div><!--DEFAULT-->
 				<ul>";
 
 		// Get the list of available tracks for this student.
-		if (!$tracks = $this->degreePlan->getAvailableTracks())
+		if (!$tracks = $this->degree_plan->get_available_tracks())
 		{
 			$pC .= "<li>This major has no degree options.</li>";
 		}
@@ -1597,21 +1597,21 @@ function drawMenuItems($menuArray) {
 		// If we find this, then this is the default description
 		// which applies to all the tracks, and it should be displayed
 		// at the top.
-		$boolDefaultDescription = false;
+		$bool_default_description = false;
 		for ($t = 0; $t < count($tracks); $t++)
 		{
 			$temp = split(" ~~ ", $tracks[$t]);
-			$trackCode = trim($temp[0]);
-			$trackTitle = trim($temp[1]);
-			$trackDescription = trim($temp[2]);
+			$track_code = trim($temp[0]);
+			$track_title = trim($temp[1]);
+			$track_description = trim($temp[2]);
 
-			if (strstr($trackDescription, "DEFAULT:"))
+			if (strstr($track_description, "DEFAULT:"))
 			{
 				// Yes!  We found a default message.
-				$boolDefaultDescription = true;
-				$trackDescription = $this->convertBBCodeToHTML(trim(str_replace("DEFAULT:", "", $trackDescription)));
-				$trackDescription = "<div style='padding-top: 10px;' class='tenpt'>$trackDescription</div>";
-				$pC = str_replace("<!--DEFAULT-->",$trackDescription, $pC);
+				$bool_default_description = true;
+				$track_description = $this->convert_b_b_code_to_h_t_m_l(trim(str_replace("DEFAULT:", "", $track_description)));
+				$track_description = "<div style='padding-top: 10px;' class='tenpt'>$track_description</div>";
+				$pC = str_replace("<!--DEFAULT-->",$track_description, $pC);
 				break;
 			}
 
@@ -1621,42 +1621,42 @@ function drawMenuItems($menuArray) {
 		for ($t = 0; $t < count($tracks); $t++)
 		{
 			$temp = split(" ~~ ", $tracks[$t]);
-			$trackCode = trim($temp[0]);
-			$trackTitle = trim($temp[1]);
-			$trackDescription = "";
+			$track_code = trim($temp[0]);
+			$track_title = trim($temp[1]);
+			$track_description = "";
 
-			// If this is the current trackCode, mark it as such.
-			if ($this->student->arraySettings["trackCode"] == $trackCode
-			&& $this->student->arraySettings["majorCode"] == $this->degreePlan->majorCode)
+			// If this is the current track_code, mark it as such.
+			if ($this->student->array_settings["track_code"] == $track_code
+			&& $this->student->array_settings["major_code"] == $this->degree_plan->major_code)
 			{
-				$trackTitle .= " <b>(current)</b>";
+				$track_title .= " <b>(current)</b>";
 			}
 
-			if ($boolDefaultDescription == false)
+			if ($bool_default_description == false)
 			{
-				$trackDescription = $this->convertBBCodeToHTML(trim($temp[2]));
-				if ($trackDescription != "")
+				$track_description = $this->convert_b_b_code_to_h_t_m_l(trim($temp[2]));
+				if ($track_description != "")
 				{
-					$trackDescription = " - $trackDescription";
+					$track_description = " - $track_description";
 				}
 			}
 
-			$tempTC = $trackCode;
-			if ($tempTC == "")
+			$temp_t_c = $track_code;
+			if ($temp_t_c == "")
 			{
-				$tempTC = "none";
+				$temp_t_c = "none";
 			}
 
 
-			$onClick = "popupChangeTrack(\"$tempTC\");";
-			if ($GLOBALS["advisingWhatIf"] == "yes")
+			$on_click = "popup_change_track(\"$temp_t_c\");";
+			if ($GLOBALS["advising_what_if"] == "yes")
 			{
-				$onClick = "popupChangeWhatIfTrack(\"$tempTC\");";
+				$on_click = "popup_change_what_if_track(\"$temp_t_c\");";
 
 			}
 
 			$pC .= "<li class='tenpt' style='padding:3px;'>
-					<a href='javascript: $onClick'>$trackTitle</a> $trackDescription</li>";
+					<a href='javascript: $on_click'>$track_title</a> $track_description</li>";
 
 		}
 
@@ -1672,11 +1672,11 @@ function drawMenuItems($menuArray) {
 	 *
 	 * @param string $title
 	 * 
-	 * @param float $topValue
-	 *         - The top part of a ratio.  Ex: for 1/2, $topValue = 1.
+	 * @param float $top_value
+	 *         - The top part of a ratio.  Ex: for 1/2, $top_value = 1.
 	 *
-	 * @param float $bottomValue
-	 *         - The bottom part of a ratio.  For 1/2, $bottomValue = 2.
+	 * @param float $bottom_value
+	 *         - The bottom part of a ratio.  For 1/2, $bottom_value = 2.
 	 *         - Do not let this equal zero.  If it does, the calculation
 	 *           for the pie chart will never be evaluated.
 	 * @param string $pal
@@ -1689,42 +1689,42 @@ function drawMenuItems($menuArray) {
 	 * 
 	 * @return string
 	 */
-	function drawPieChartBox($title, $topValue, $bottomValue, $pal)
+	function draw_pie_chart_box($title, $top_value, $bottom_value, $pal)
 	{
 		$pC = "";
 
 				
-		if ($bottomValue > 0)
+		if ($bottom_value > 0)
 		{
-			$val = round(($topValue / $bottomValue)*100);
+			$val = round(($top_value / $bottom_value)*100);
 		}
 		if ($val > 100) { $val = 99; }
     
 		$leftval = 100 - $val;
 		
-		$backCol = "660000";
-		$foreCol = "FFCC33";
+		$back_col = "660000";
+		$fore_col = "FFCC33";
 		
     if ($pal == "major")
     {
-    	$foreCol = "93D18B";
+    	$fore_col = "93D18B";
     }
     
     if ($pal == "cumulative")
     {
-    	$foreCol = "5B63A5";
+    	$fore_col = "5B63A5";
     }
     
     $vval = $val;
     if ($vval < 1) $vval = 1;
     
 		// Create a graph using google's chart API		
-		$google_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$foreCol|$backCol&chp=91.1";
+		$google_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
 		
 		$pC .= "<table border='0' width='100%'  height='100' class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
  						<tr>
   							<td class='blueTitle' align='center' height='20'>
-    				" . $this->drawSquareTitle($title) . "
+    				" . $this->draw_square_title($title) . "
   							</td>
  						</tr>
  						<tr>
@@ -1736,8 +1736,8 @@ function drawMenuItems($menuArray) {
  								</td>
  								<td class='elevenpt'>
  								    <span style='color: blue;'>$val% Complete</span><br>
- 								    ( <span style='color: blue;'>$topValue</span>
- 									 / <span style='color: gray;'>$bottomValue hours</span> )
+ 								    ( <span style='color: blue;'>$top_value</span>
+ 									 / <span style='color: gray;'>$bottom_value hours</span> )
 								</td>
 								</table>
  							</td>
@@ -1755,58 +1755,58 @@ function drawMenuItems($menuArray) {
 	 *
 	 * @return string
 	 */
-	function drawProgressBoxes()
+	function draw_progress_boxes()
 	{
 		// Draw the boxes for student progress (where
 		// the pie charts go!)
 		$pC = "";
 
 
-		//adminDebug("getting stuff --------  ");
+		//admin_debug("getting stuff --------  ");
 
-		if ($this->degreePlan->totalDegreeHours < 1)
+		if ($this->degree_plan->total_degree_hours < 1)
 		{
-			$this->degreePlan->calculateProgressHours();
+			$this->degree_plan->calculate_progress_hours();
 		}
 
-		$totalMajorHours = $this->degreePlan->totalMajorHours;
-		$totalCoreHours = $this->degreePlan->totalCoreHours;
-		$totalDegreeHours = $this->degreePlan->totalDegreeHours;
-		$fulfilledMajorHours = $this->degreePlan->fulfilledMajorHours;
-		$fulfilledCoreHours = $this->degreePlan->fulfilledCoreHours;
-		$fulfilledDegreeHours = $this->degreePlan->fulfilledDegreeHours;
+		$total_major_hours = $this->degree_plan->total_major_hours;
+		$total_core_hours = $this->degree_plan->total_core_hours;
+		$total_degree_hours = $this->degree_plan->total_degree_hours;
+		$fulfilled_major_hours = $this->degree_plan->fulfilled_major_hours;
+		$fulfilled_core_hours = $this->degree_plan->fulfilled_core_hours;
+		$fulfilled_degree_hours = $this->degree_plan->fulfilled_degree_hours;
 
 
 		$pC .= "<tr><td colspan='2'>
 				";
 
-		if ($this->userSettings["hideCharts"] != "hide" && $this->boolPrint == false && $this->boolBlank == false && $this->pageIsMobile == false)
+		if ($this->user_settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false && $this->page_is_mobile == false)
 		{ // Display the pie charts unless the student's settings say to hide them.
 
 
-			/*			$totalMajorHours = $this->degreePlan->getProgressHours("m");
-			$totalCoreHours = $this->degreePlan->getProgressHours("c");
-			$totalDegreeHours = $this->degreePlan->getProgressHours("");
-			//adminDebug("fulfilled major: ");
-			$fulfilledMajorHours = $this->degreePlan->getProgressHours("m", false);
-			//adminDebug("fulfilled core:  ");
-			$fulfilledCoreHours = $this->degreePlan->getProgressHours("c", false);
-			//adminDebug("fulfilled -degree:  ");
-			$fulfilledDegreeHours = $this->degreePlan->getProgressHours("", false);
+			/*			$total_major_hours = $this->degree_plan->getProgressHours("m");
+			$total_core_hours = $this->degree_plan->getProgressHours("c");
+			$total_degree_hours = $this->degree_plan->getProgressHours("");
+			//admin_debug("fulfilled major: ");
+			$fulfilled_major_hours = $this->degree_plan->getProgressHours("m", false);
+			//admin_debug("fulfilled core:  ");
+			$fulfilled_core_hours = $this->degree_plan->getProgressHours("c", false);
+			//admin_debug("fulfilled -degree:  ");
+			$fulfilled_degree_hours = $this->degree_plan->getProgressHours("", false);
 			*/
 			$pC .= "
 				<div style='margin-bottom: 10px;'>
 				<table width='100%' cellspacing='0' cellpadding='0' border='0'>
 				<td width='33%' style='padding-right:5px;'>
-					" . $this->drawPieChartBox("Progress - Core Courses",$fulfilledCoreHours, $totalCoreHours, "core") . "
+					" . $this->draw_pie_chart_box("Progress - Core Courses",$fulfilled_core_hours, $total_core_hours, "core") . "
 				</td>
 				
 				<td width='33%' style='padding-right: 5px;'>
-					" . $this->drawPieChartBox("Progress - Major Courses",$fulfilledMajorHours, $totalMajorHours, "major") . "
+					" . $this->draw_pie_chart_box("Progress - Major Courses",$fulfilled_major_hours, $total_major_hours, "major") . "
 				</td>
 				
 				<td width='33%'>
-					" . $this->drawPieChartBox("Progress - Degree",$fulfilledDegreeHours, $totalDegreeHours, "cumulative") . "
+					" . $this->draw_pie_chart_box("Progress - Degree",$fulfilled_degree_hours, $total_degree_hours, "cumulative") . "
 				</td>
 				
 
@@ -1828,18 +1828,18 @@ function drawMenuItems($menuArray) {
  			<table border='0' width='100%'  class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
  			<tr>
   				<td colspan='4' class='blueTitle' align='center' height='20'>
-    			" . $this->drawSquareTitle("Progress") . "
+    			" . $this->draw_square_title("_progress") . "
   				</td>
  			</tr>
  			<tr>
  				<td class='tenpt' width='33%' align='center'>
- 					Core: $fulfilledCoreHours / $totalCoreHours
+ 					Core: $fulfilled_core_hours / $total_core_hours
  				</td>
  				<td class='tenpt' width='33%' align='center'>
- 					Major: $fulfilledMajorHours / $totalMajorHours
+ 					Major: $fulfilled_major_hours / $total_major_hours
  				</td>
  				<td class='tenpt' width='33%' align='center'>
- 					Degree: $fulfilledDegreeHours / $totalDegreeHours
+ 					Degree: $fulfilled_degree_hours / $total_degree_hours
  				</td>
  				
  			</tr>
@@ -1847,7 +1847,7 @@ function drawMenuItems($menuArray) {
 			</table>
 			";
 
-			if ($this->boolPrint != true && $this->boolBlank != true && $this->pageIsMobile != true)
+			if ($this->bool_print != true && $this->bool_blank != true && $this->page_is_mobile != true)
 			{
 
 				$pC .= "<div style='font-size: 8pt; text-align:right;'>
@@ -1872,194 +1872,194 @@ function drawMenuItems($menuArray) {
 	 * Draws the CurrentlyAdvisingBox which appears at the top of the screen,
 	 * containing the student's information like name, major, etc.
 	 *
-	 * @param bool $boolHideCatalogWarning
+	 * @param bool $bool_hide_catalog_warning
 	 *       - If set to TRUE, FP will not display a warning which tells
 	 *         the user that they are working under an outdated catalog year.
 	 * 
 	 * @return string
 	 */
-	function drawCurrentlyAdvisingBox($boolHideCatalogWarning = false)
+	function draw_currently_advising_box($bool_hide_catalog_warning = false)
 	{
 		// This will draw the box which contains student information,
 		// like Name, Major, etc.
 		$pC = "";
 		
-		$csid = $GLOBALS["currentStudentID"];
+		$csid = $GLOBALS["current_student_id"];
 		if ($this->student == null)
 		{
 			$this->student = new Student();
-			$this->student->studentID = $GLOBALS["advisingStudentID"];
-			$this->student->loadStudentData();
+			$this->student->student_id = $GLOBALS["advising_student_id"];
+			$this->student->load_student_data();
 		}
 
-		$forTerm = $whatif = $whatIfSelect = $hypoclass = "";
-		if ($GLOBALS["advisingTermID"] != "" && $this->screenMode != "notAdvising"
-		&& $_SESSION["fpUserType"] != "student")
+		$for_term = $whatif = $what_if_select = $hypoclass = "";
+		if ($GLOBALS["advising_term_id"] != "" && $this->screen_mode != "not_advising"
+		&& $_SESSION["fp_user_type"] != "student")
 		{
-			$tempCourse = new Course();
-			$tempCourse->termID = $GLOBALS["advisingTermID"];
-			$tTermID = $GLOBALS["advisingTermID"];
-			$forTerm = " for " . $tempCourse->getTermDescription();
+			$temp_course = new Course();
+			$temp_course->term_id = $GLOBALS["advising_term_id"];
+			$t_term_id = $GLOBALS["advising_term_id"];
+			$for_term = " for " . $temp_course->get_term_description();
 
 			// If this is an advisor or above
-			$forTerm .= "<span style='font-size: 8pt; font-weight:normal;'>
-						 - <a href='javascript: popupWindow(\"changeTerm\",\"advisingTermID=$tTermID\");' style='color:blue; background-color: white; border: 1px solid black; padding-left: 3px; padding-right: 3px;'>change<img src='$this->themeLocation/images/calendar1.jpg' height='13' border='0' style='vertical-align: bottom;'></a>
+			$for_term .= "<span style='font-size: 8pt; font-weight:normal;'>
+						 - <a href='javascript: popupWindow(\"changeTerm\",\"advising_term_id=$t_term_id\");' style='color:blue; background-color: white; border: 1px solid black; padding-left: 3px; padding-right: 3px;'>change<img src='$this->theme_location/images/calendar1.jpg' height='13' border='0' style='vertical-align: bottom;'></a>
 						</span>";
 
 
 		}
 
-		if ($GLOBALS["advisingWhatIf"] == "yes" && !$this->boolBlank)
+		if ($GLOBALS["advising_what_if"] == "yes" && !$this->bool_blank)
 		{
 			$whatif = " (in \"What If\" mode) ";
 			$hypoclass = "hypo";
 			// latest cat year because its what if.
-			$this->student->catalogYear = $this->settings["currentCatalogYear"];
-			if ($this->boolPrint != true)
+			$this->student->catalog_year = $this->settings["current_catalog_year"];
+			if ($this->bool_print != true)
 			{
-				$whatIfSelect = "<div class='tenpt'><b>
-					<a href='advise.php?advisingWhatIf=yes&whatIfMajorCode=none&whatIfTrackCode=none&currentStudentID=$csid'>Change What If Settings</a></b></div>";
+				$what_if_select = "<div class='tenpt'><b>
+					<a href='advise.php?advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&current_student_id=$csid'>Change What If Settings</a></b></div>";
 			}
 		}
 
 		$ca = "Currently Advising";
-		if ($_SESSION["fpUserType"] == "student" || $_SESSION["fpUserType"] == "viewer")
+		if ($_SESSION["fp_user_type"] == "student" || $_SESSION["fp_user_type"] == "viewer")
 		{
 			$ca = "Student Details";
 		}
 
-		if ($this->boolBlank == true)
+		if ($this->bool_blank == true)
 		{
 			$ca = "Viewing Blank Degree Plan";
 		}
 
 		$pC .= "<tr><td colspan='2' style='padding-bottom: 10px;'>
-				$whatIfSelect
+				$what_if_select
  			<table border='0' width='100%'  class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
  			<tr>
   				<td colspan='4' class='blueTitle' align='center' height='20'>
-    			" . $this->drawSquareTitle("$ca$whatif$forTerm") . "
+    			" . $this->draw_square_title("$ca$whatif$for_term") . "
   				</td>
  			</tr>
  			";
 
 		// Okay, let's build up the display array.
-		$displayArray = array();
+		$display_array = array();
 
-		// How to display the catalogYear...
-		$catYear = $this->student->catalogYear . "-" . ($this->student->catalogYear + 1);
+		// How to display the catalog_year...
+		$cat_year = $this->student->catalog_year . "-" . ($this->student->catalog_year + 1);
 
 		// Should we display a catalog year warning?  This is
 		// something that can be part of a settings table.
-		if ($this->student->catalogYear < $this->earliestCatalogYear)
+		if ($this->student->catalog_year < $this->earliest_catalog_year)
 		{
-			$catYear = "<b>$catYear</b>";
-			$boolCatalogWarning = true;
+			$cat_year = "<b>$cat_year</b>";
+			$bool_catalog_warning = true;
 		}
 
-		if ($this->settings["currentCatalogYear"] > $this->earliestCatalogYear)
+		if ($this->settings["current_catalog_year"] > $this->earliest_catalog_year)
 		{
 			// Is the student's catalog set beyond the range that
 			// FP has data for?  If so, show a warning.
-			if ($this->student->catalogYear > $this->settings["currentCatalogYear"])
+			if ($this->student->catalog_year > $this->settings["current_catalog_year"])
 			{
-				$catYear = "<b>$catYear</b>";
-				$boolFutureCatalogWarning = true;
+				$cat_year = "<b>$cat_year</b>";
+				$bool_future_catalog_warning = true;
 
 			}
 		}
 
 
-		if ($this->degreePlan != null)
+		if ($this->degree_plan != null)
 		{
-			$degreeTitle = $this->degreePlan->getTitle2();
+			$degree_title = $this->degree_plan->get_title2();
 		}
-		if ($degreeTitle == "")
+		if ($degree_title == "")
 		{
 			// Attempt to load the degree from the student's information.			
-			$degreePlan = $this->db->getDegreePlan($this->student->majorCode, $this->student->catalogYear, true);
-			$degreeTitle = $degreePlan->getTitle2();
+			$degree_plan = $this->db->get_degree_plan($this->student->major_code, $this->student->catalog_year, true);
+			$degree_title = $degree_plan->get_title2();
 		}
 
-		if (!$this->boolBlank)
+		if (!$this->bool_blank)
 		{
-			array_push($displayArray, "Name: ~~ " . $this->student->name);
-			array_push($displayArray, "CWID: ~~ " . $this->student->studentID);
+			array_push($display_array, "Name: ~~ " . $this->student->name);
+			array_push($display_array, "CWID: ~~ " . $this->student->student_id);
 		}
-		array_push($displayArray, "Major: ~~ " . $degreeTitle);
+		array_push($display_array, "Major: ~~ " . $degree_title);
 		// If this degree has tracks, we must display something about it here.
 
-		if ($this->degreePlan->boolHasTracks)
+		if ($this->degree_plan->bool_has_tracks)
 		{
-			$extraVars = "";
+			$extra_vars = "";
 
-			/*if ($GLOBALS["advisingWhatIf"] == "yes")
+			/*if ($GLOBALS["advising_what_if"] == "yes")
 			{
-			$extraVars .= "whatIfMajorCode={$GLOBALS["whatIfMajorCode"]}";
-			$extraVars .= "&whatIfTrackCode={$GLOBALS["whatIfTrackCode"]}";
-			$extraVars .= "&advisingWhatIf=yes";
+			$extra_vars .= "what_if_major_code={$GLOBALS["what_if_major_code"]}";
+			$extra_vars .= "&what_if_track_code={$GLOBALS["what_if_track_code"]}";
+			$extra_vars .= "&advising_what_if=yes";
 			}*/
 			
-			$opLink = "<a href='javascript: popupWindow(\"changeTrack\",\"$extraVars\");'><img
-							src='$this->themeLocation/images/popup.gif' border='0' 
+			$op_link = "<a href='javascript: popupWindow(\"changeTrack\",\"$extra_vars\");'><img
+							src='$this->theme_location/images/popup.gif' border='0' 
 							title='Click to change degree options.'></a>";
-			$opText = "Click to select: $opLink";
+			$op_text = "Click to select: $op_link";
 
-			if ($this->screenMode == "notAdvising")
+			if ($this->screen_mode == "not_advising")
 			{
-				$opText = "None selected";
-				$opLink = "";
+				$op_text = "None selected";
+				$op_link = "";
 			}
 
-			if ($_SESSION["fpCanAdvise"] != true)
+			if ($_SESSION["fp_can_advise"] != true)
 			{
 			  
-				if ($GLOBALS["advisingWhatIf"] != "yes")
+				if ($GLOBALS["advising_what_if"] != "yes")
 				{
 					// In other words, we do not have permission to advise,
 					// and we are not in whatIf, so take out the link.
-					$opLink = "";
-					$opText = "None selected";
+					$op_link = "";
+					$op_text = "None selected";
 
 				}
 			}
 
 
 			// Did has the student already selected an option?
-			if ($this->degreePlan->trackCode != "")
+			if ($this->degree_plan->track_code != "")
 			{
-				$opText = $this->degreePlan->trackTitle . " $opLink";
+				$op_text = $this->degree_plan->track_title . " $op_link";
 			}
 
 
-			array_push($displayArray, "Option: ~~ " . $opText);
+			array_push($display_array, "Option: ~~ " . $op_text);
 		}
-		if (!$this->boolBlank)
+		if (!$this->bool_blank)
 		{
-			array_push($displayArray, "Rank: ~~ " . $this->student->rank);
+			array_push($display_array, "Rank: ~~ " . $this->student->rank);
 		}
-		array_push($displayArray, "Catalog Year: ~~ " . $catYear);
-		if (!$this->boolBlank)
+		array_push($display_array, "Catalog Year: ~~ " . $cat_year);
+		if (!$this->bool_blank)
 		{
-			array_push($displayArray, "Cumulative: ~~ " . $this->student->cumulativeHours . " hrs. &nbsp;" . $this->student->gpa . " GPA");
+			array_push($display_array, "Cumulative: ~~ " . $this->student->cumulative_hours . " hrs. &nbsp;" . $this->student->gpa . " GPA");
 		}
 
-		if ($this->student->studentID > 1 || $this->boolBlank == true)
+		if ($this->student->student_id > 1 || $this->bool_blank == true)
 		{ // Make sure we have selected a student! (or are viewing a blank plan)
 			// Now, go through the array and display it.
-			for ($t = 0; $t < count($displayArray); $t = $t + 2)
+			for ($t = 0; $t < count($display_array); $t = $t + 2)
 			{
-				$temp = split(" ~~ ",$displayArray[$t]);
+				$temp = split(" ~~ ",$display_array[$t]);
 				$name1 = trim($temp[0]);
 				$value1 = trim($temp[1]);
 
 
-				$temp = split(" ~~ ",$displayArray[$t+1]);
+				$temp = split(" ~~ ",$display_array[$t+1]);
 				$name2 = trim($temp[0]);
 				$value2 = trim($temp[1]);
 
 
-				if ($this->pageIsMobile) {
+				if ($this->page_is_mobile) {
 				  // Mobile screen.  Needs to be more condensed.
 				  $pC .= "<tr class='$hypoclass'>
 				          <td valign='top'>$value1</td>
@@ -2094,25 +2094,25 @@ function drawMenuItems($menuArray) {
 			$pC .= "<tr height='60'>
 				<td align='center'> No advisee selected. </td>
 			</tr>";
-			$boolHideCatalogWarning = true;
+			$bool_hide_catalog_warning = true;
 		}
 
 		$pC .= "</table>";
 
-		if ($boolCatalogWarning == true && !$boolHideCatalogWarning)
+		if ($bool_catalog_warning == true && !$bool_hide_catalog_warning)
 		{
 			$pC .= "
 			
 			<div class='tenpt hypo' style='margin-top: 4px; padding: 2px;'>
 			<table border='0' cellspacing='0' cellpadding='0'>
 			<td valign='top'>
-				<img src='$this->themeLocation/images/alert_lg.gif' >	
+				<img src='$this->theme_location/images/alert_lg.gif' >	
 			</td>
 			<td valign='middle' class='tenpt' style='padding-left: 8px;'>
 				<b>Important Notice: </b>
 				FlightPath cannot display degree plans from 
-				catalogs earlier than $this->earliestCatalogYear-" . ($this->earliestCatalogYear + 1) . ".  
-				The above student's catalog year is $catYear, which means 
+				catalogs earlier than $this->earliest_catalog_year-" . ($this->earliest_catalog_year + 1) . ".  
+				The above student's catalog year is $cat_year, which means 
 				that the degree plan below may not accurately 
 				display this student's degree requirements.
 			</td>
@@ -2122,21 +2122,21 @@ function drawMenuItems($menuArray) {
 		"; 
 		}
 
-		if ($boolFutureCatalogWarning == true && !$boolHideCatalogWarning)
+		if ($bool_future_catalog_warning == true && !$bool_hide_catalog_warning)
 		{
 			$pC .= "
 			
 			<div class='tenpt hypo' style='margin-top: 4px; padding: 2px;'>
 			<table border='0' cellspacing='0' cellpadding='0'>
 			<td valign='top'>
-				<img src='$this->themeLocation/images/alert_lg.gif' >	
+				<img src='$this->theme_location/images/alert_lg.gif' >	
 			</td>
 			<td valign='middle' class='tenpt' style='padding-left: 8px;'>
 				<b>Important Notice: </b>
-				This student's catalog year is $catYear, 
+				This student's catalog year is $cat_year, 
 				and specific curriculum requirements are not yet 
 				available for this year.  
-				To advise this student according to {$this->settings["currentCatalogYear"]}-" . ($this->settings["currentCatalogYear"] + 1) . "
+				To advise this student according to {$this->settings["current_catalog_year"]}-" . ($this->settings["current_catalog_year"] + 1) . "
 				requirements, select the student's major using What If.
 			</td>
 			</table>
@@ -2161,7 +2161,7 @@ function drawMenuItems($menuArray) {
 	 * @param string $title
 	 * @return string
 	 */
-	function drawSquareTitle($title)
+	function draw_square_title($title)
 	{
 		$pC = "";
 
@@ -2192,12 +2192,12 @@ function drawMenuItems($menuArray) {
 	 * Initializes important advising variables from the REQUEST
 	 * or SESSION, accordingly.
 	 *
-	 * @param bool $boolIgnoreWhatIfVariables
+	 * @param bool $bool_ignore_what_if_variables
 	 *         - If set to TRUE, variables involving What If mode
 	 *           will be ignored.
 	 * 
 	 */
-	function initAdvisingVariables($boolIgnoreWhatIfVariables = false)
+	function init_advising_variables($bool_ignore_what_if_variables = false)
 	{
 		// This function loads the various "advising variables"
 		// into the $GLOBALS array.
@@ -2209,34 +2209,34 @@ function drawMenuItems($menuArray) {
 		// window open at a time, with multiple students.
 		// Therefor, this should never go into the session.
 		// Annoyingly, we must pass carry this around on each page in the system.
-		$GLOBALS["currentStudentID"] = $_REQUEST["currentStudentID"];
-		if ($GLOBALS["currentStudentID"] == "")
+		$GLOBALS["current_student_id"] = $_REQUEST["current_student_id"];
+		if ($GLOBALS["current_student_id"] == "")
 		{
-			$GLOBALS["currentStudentID"] = $_REQUEST["advisingStudentID"];
+			$GLOBALS["current_student_id"] = $_REQUEST["advising_student_id"];
 		}
 
-		$csid = $GLOBALS["currentStudentID"];
+		$csid = $GLOBALS["current_student_id"];
 
-		//adminDebug("csid: $csid");
+		//admin_debug("csid: $csid");
 		// Get the student ID.
-		$GLOBALS["advisingStudentID"] = $_REQUEST["advisingStudentID"];
-		if ($GLOBALS["advisingStudentID"] == "")
+		$GLOBALS["advising_student_id"] = $_REQUEST["advising_student_id"];
+		if ($GLOBALS["advising_student_id"] == "")
 		{
-			$GLOBALS["advisingStudentID"] = $_SESSION["advisingStudentID$csid"];
-			if ($GLOBALS["advisingStudentID"] == "")
+			$GLOBALS["advising_student_id"] = $_SESSION["advising_student_id$csid"];
+			if ($GLOBALS["advising_student_id"] == "")
 			{ // Default value...
-				//$GLOBALS["advisingStudentID"] = "10035744";
+				//$GLOBALS["advising_student_id"] = "10035744";
 			}
 		}
 
 
 		// Should we load from the Draft advising session?  or the active?
-		$GLOBALS["advisingLoadActive"] = $_REQUEST["advisingLoadActive"];
-		if ($GLOBALS["advisingLoadActive"] == "")
+		$GLOBALS["advising_load_active"] = $_REQUEST["advising_load_active"];
+		if ($GLOBALS["advising_load_active"] == "")
 		{ // values will either be "yes" or "" (any other value than "yes" is
 			// considered to be negative.
 			// Default value...
-			$GLOBALS["advisingLoadActive"] = "";
+			$GLOBALS["advising_load_active"] = "";
 
 		}
 
@@ -2255,39 +2255,39 @@ function drawMenuItems($menuArray) {
 		}
 		*/
 
-		// Get the majorCode.
-		$GLOBALS["advisingMajorCode"] = $_REQUEST["advisingMajorCode"];
-		//adminDebug($GLOBALS["advisingMajorCode"]);
-		if ($GLOBALS["advisingMajorCode"] == "")
+		// Get the major_code.
+		$GLOBALS["advising_major_code"] = $_REQUEST["advising_major_code"];
+		//admin_debug($GLOBALS["advising_major_code"]);
+		if ($GLOBALS["advising_major_code"] == "")
 		{
-			$GLOBALS["advisingMajorCode"] = $_SESSION["advisingMajorCode$csid"];
-			if ($GLOBALS["advisingMajorCode"] == "")
+			$GLOBALS["advising_major_code"] = $_SESSION["advising_major_code$csid"];
+			if ($GLOBALS["advising_major_code"] == "")
 			{ // Default value...
-				//$GLOBALS["advisingMajorCode"] = "COSC";
+				//$GLOBALS["advising_major_code"] = "COSC";
 			}
 		}
 
 
 
 
-		// Get the trackCode.
-		$GLOBALS["advisingTrackCode"] = $_REQUEST["advisingTrackCode"];
-		if ($GLOBALS["advisingTrackCode"] == "")
+		// Get the track_code.
+		$GLOBALS["advising_track_code"] = $_REQUEST["advising_track_code"];
+		if ($GLOBALS["advising_track_code"] == "")
 		{
-			$GLOBALS["advisingTrackCode"] = $_SESSION["advisingTrackCode$csid"];
-			if ($GLOBALS["advisingTrackCode"] == "")
+			$GLOBALS["advising_track_code"] = $_SESSION["advising_track_code$csid"];
+			if ($GLOBALS["advising_track_code"] == "")
 			{ // Default value...
 
 			}
 		}
 
 		// Update the student's settings?
-		$GLOBALS["advisingUpdateStudentSettingsFlag"] = $_POST["advisingUpdateStudentSettingsFlag"];
+		$GLOBALS["advising_update_student_settings_flag"] = $_POST["advising_update_student_settings_flag"];
 		// Make it only come from the POST, for safety.
-		if ($GLOBALS["advisingUpdateStudentSettingsFlag"] == "")
+		if ($GLOBALS["advising_update_student_settings_flag"] == "")
 		{
-			$GLOBALS["advisingUpdateStudentSettingsFlag"] = $_SESSION["advisingUpdateStudentSettingsFlag$csid"];
-			if ($GLOBALS["advisingUpdateStudentSettingsFlag"] == "")
+			$GLOBALS["advising_update_student_settings_flag"] = $_SESSION["advising_update_student_settings_flag$csid"];
+			if ($GLOBALS["advising_update_student_settings_flag"] == "")
 			{ // Default value...
 
 			}
@@ -2295,12 +2295,12 @@ function drawMenuItems($menuArray) {
 
 
 		// Update the logged-in user's settings?
-		$GLOBALS["fpUpdateUserSettingsFlag"] = $_POST["fpUpdateUserSettingsFlag"];
+		$GLOBALS["fp_update_user_settings_flag"] = $_POST["fp_update_user_settings_flag"];
 		// Make it only come from the POST, for safety.
-		if ($GLOBALS["fpUpdateUserSettingsFlag"] == "")
+		if ($GLOBALS["fp_update_user_settings_flag"] == "")
 		{
-			$GLOBALS["fpUpdateUserSettingsFlag"] = $_SESSION["fpUpdateUserSettingsFlag$csid"];
-			if ($GLOBALS["fpUpdateUserSettingsFlag"] == "")
+			$GLOBALS["fp_update_user_settings_flag"] = $_SESSION["fp_update_user_settings_flag$csid"];
+			if ($GLOBALS["fp_update_user_settings_flag"] == "")
 			{ // Default value...
 
 			}
@@ -2311,124 +2311,124 @@ function drawMenuItems($menuArray) {
 		$settings = $this->settings;
 
 
-		$GLOBALS["advisingTermID"] = $_REQUEST["advisingTermID"];  // Get it from the GET or POST.
-		if ($GLOBALS["advisingTermID"] == "")
+		$GLOBALS["advising_term_id"] = $_REQUEST["advising_term_id"];  // Get it from the GET or POST.
+		if ($GLOBALS["advising_term_id"] == "")
 		{
 			// Set to the default advising term.
-			$GLOBALS["advisingTermID"] = $_SESSION["advisingTermID$csid"];
-			if ($GLOBALS["advisingTermID"] == "")
+			$GLOBALS["advising_term_id"] = $_SESSION["advising_term_id$csid"];
+			if ($GLOBALS["advising_term_id"] == "")
 			{
 				// default value:
-				$GLOBALS["advisingTermID"] = $settings["advisingTermID"];
+				$GLOBALS["advising_term_id"] = $settings["advising_term_id"];
 			}
 		}
 
 		// Are we currently in WhatIf mode?
-		$GLOBALS["advisingWhatIf"] = $_REQUEST["advisingWhatIf"];  // Get it from the GET or POST.
-		if ($GLOBALS["advisingWhatIf"] == "")
+		$GLOBALS["advising_what_if"] = $_REQUEST["advising_what_if"];  // Get it from the GET or POST.
+		if ($GLOBALS["advising_what_if"] == "")
 		{
 			// Will equal "yes" if we ARE in whatIf mode.
-			$GLOBALS["advisingWhatIf"] = $_SESSION["advisingWhatIf$csid"];
-			if ($GLOBALS["advisingWhatIf"] == "")
+			$GLOBALS["advising_what_if"] = $_SESSION["advising_what_if$csid"];
+			if ($GLOBALS["advising_what_if"] == "")
 			{
 				// Default value:
-				$GLOBALS["advisingWhatIf"] = "no";
+				$GLOBALS["advising_what_if"] = "no";
 			}
 		}
 
-		$GLOBALS["whatIfMajorCode"] = $_REQUEST["whatIfMajorCode"];  // Get it from the GET or POST.
-		if ($GLOBALS["whatIfMajorCode"] == "")
+		$GLOBALS["what_if_major_code"] = $_REQUEST["what_if_major_code"];  // Get it from the GET or POST.
+		if ($GLOBALS["what_if_major_code"] == "")
 		{
 			// Will equal "yes" if we ARE in whatIf mode.
-			$GLOBALS["whatIfMajorCode"] = $_SESSION["whatIfMajorCode$csid"];
-			if ($GLOBALS["whatIfMajorCode"] == "")
+			$GLOBALS["what_if_major_code"] = $_SESSION["what_if_major_code$csid"];
+			if ($GLOBALS["what_if_major_code"] == "")
 			{
 				// Default value:
-				$GLOBALS["whatIfMajorCode"] = "";
+				$GLOBALS["what_if_major_code"] = "";
 			}
 		}
 
-		$GLOBALS["whatIfTrackCode"] = $_REQUEST["whatIfTrackCode"];  // Get it from the GET or POST.
-		if ($GLOBALS["whatIfTrackCode"] == "")
+		$GLOBALS["what_if_track_code"] = $_REQUEST["what_if_track_code"];  // Get it from the GET or POST.
+		if ($GLOBALS["what_if_track_code"] == "")
 		{
 			// Will equal "yes" if we ARE in whatIf mode.
-			$GLOBALS["whatIfTrackCode"] = $_SESSION["whatIfTrackCode$csid"];
-			if ($GLOBALS["whatIfTrackCode"] == "")
+			$GLOBALS["what_if_track_code"] = $_SESSION["what_if_track_code$csid"];
+			if ($GLOBALS["what_if_track_code"] == "")
 			{
 				// Default value:
-				$GLOBALS["whatIfTrackCode"] = "";
+				$GLOBALS["what_if_track_code"] = "";
 			}
 		}
 
 
-		if ($GLOBALS["whatIfMajorCode"] == "none")
+		if ($GLOBALS["what_if_major_code"] == "none")
 		{
-			$GLOBALS["whatIfMajorCode"] = "";
+			$GLOBALS["what_if_major_code"] = "";
 		}
-		if ($GLOBALS["whatIfTrackCode"] == "none")
+		if ($GLOBALS["what_if_track_code"] == "none")
 		{
-			$GLOBALS["whatIfTrackCode"] = "";
+			$GLOBALS["what_if_track_code"] = "";
 		}
-		if ($GLOBALS["advisingTrackCode"] == "none")
+		if ($GLOBALS["advising_track_code"] == "none")
 		{
-			$GLOBALS["advisingTrackCode"] = "";
+			$GLOBALS["advising_track_code"] = "";
 		}
 
 
 		// Settings... (from the database)
-		$GLOBALS["settingAvailableAdvisingTermIDs"] = $settings["availableAdvisingTermIDs"];
-		$GLOBALS["settingAdvisingTermID"] = $settings["advisingTermID"];
-		$GLOBALS["settingCurrentCatalogYear"] = $settings["currentCatalogYear"];
-		$GLOBALS["settingCurrentDraftCatalogYear"] = $settings["currentDraftCatalogYear"];
+		$GLOBALS["setting_available_advising_term_ids"] = $settings["available_advising_term_ids"];
+		$GLOBALS["setting_advising_term_id"] = $settings["advising_term_id"];
+		$GLOBALS["setting_current_catalog_year"] = $settings["current_catalog_year"];
+		$GLOBALS["setting_current_draft_catalog_year"] = $settings["current_draft_catalog_year"];
 
 		// Are we in Print View?
-		$GLOBALS["printView"] = $_REQUEST["printView"];
+		$GLOBALS["print_view"] = $_REQUEST["print_view"];
 
 		// Should we try to load from the cache?
-		$GLOBALS["loadFromCache"] = $_REQUEST["loadFromCache"];
-		if ($GLOBALS["loadFromCache"] == "")
+		$GLOBALS["load_from_cache"] = $_REQUEST["load_from_cache"];
+		if ($GLOBALS["load_from_cache"] == "")
 		{
 			// By default, attempt to load from cache.
-			$GLOBALS["loadFromCache"] = "yes";
+			$GLOBALS["load_from_cache"] = "yes";
 		}
 
 		// What "view" are we in?  View by Year or by Type?
 		// Not the same as printView.  printView should work regardless
-		// of our advisingView.
-		$GLOBALS["advisingView"] = $_REQUEST["advisingView"];
-		if ($GLOBALS["advisingView"] == "")
+		// of our advising_view.
+		$GLOBALS["advising_view"] = $_REQUEST["advising_view"];
+		if ($GLOBALS["advising_view"] == "")
 		{
-			$GLOBALS["advisingView"] = $_SESSION["advisingView$csid"];
+			$GLOBALS["advising_view"] = $_SESSION["advising_view$csid"];
 		}
 
 
 		// Place values into session.
-		$_SESSION["advisingStudentID$csid"] = $GLOBALS["advisingStudentID"];
-		$_SESSION["advisingStudentID"] = $GLOBALS["advisingStudentID"]; // used ONLY in the error report popup!
-		$_SESSION["advisingMajorCode$csid"] = $GLOBALS["advisingMajorCode"];
-		$_SESSION["advisingTrackCode$csid"] = $GLOBALS["advisingTrackCode"];
-		$_SESSION["advisingTermID$csid"] = $GLOBALS["advisingTermID"];
-		$_SESSION["advisingWhatIf$csid"] = $GLOBALS["advisingWhatIf"];
-		$_SESSION["whatIfMajorCode$csid"] = $GLOBALS["whatIfMajorCode"];
-		$_SESSION["whatIfTrackCode$csid"] = $GLOBALS["whatIfTrackCode"];
-		$_SESSION["advisingView$csid"] = $GLOBALS["advisingView"];
+		$_SESSION["advising_student_id$csid"] = $GLOBALS["advising_student_id"];
+		$_SESSION["advising_student_id"] = $GLOBALS["advising_student_id"]; // used ONLY in the error report popup!
+		$_SESSION["advising_major_code$csid"] = $GLOBALS["advising_major_code"];
+		$_SESSION["advising_track_code$csid"] = $GLOBALS["advising_track_code"];
+		$_SESSION["advising_term_id$csid"] = $GLOBALS["advising_term_id"];
+		$_SESSION["advising_what_if$csid"] = $GLOBALS["advising_what_if"];
+		$_SESSION["what_if_major_code$csid"] = $GLOBALS["what_if_major_code"];
+		$_SESSION["what_if_track_code$csid"] = $GLOBALS["what_if_track_code"];
+		$_SESSION["advising_view$csid"] = $GLOBALS["advising_view"];
 
 
-		if ($boolIgnoreWhatIfVariables == true)
+		if ($bool_ignore_what_if_variables == true)
 		{
-			$GLOBALS["advisingWhatIf"] = "";
-			$GLOBALS["whatIfMajorCode"] = "";
-			$GLOBALS["whatIfTrackCode"] = "";
+			$GLOBALS["advising_what_if"] = "";
+			$GLOBALS["what_if_major_code"] = "";
+			$GLOBALS["what_if_track_code"] = "";
 		}
 
 
 
-		if ($_SESSION["fpUserType"] == "student")
+		if ($_SESSION["fp_user_type"] == "student")
 		{
 			// The student can only pull up their own information.  This
 			// check is to try and prevent a hacker student from trying
 			// to pull up someone else's information.
-			if ($_SESSION["advisingStudentID"] != $_SESSION["fpUserID"])
+			if ($_SESSION["advising_student_id"] != $_SESSION["fp_user_id"])
 			{
 				session_destroy();
 				die("You do not have access to that function.  Please log back in: <a href='main.php'>Log into FlightPath.</a>");
@@ -2436,11 +2436,11 @@ function drawMenuItems($menuArray) {
 		}
 
 		// Are we in draft mode?
-		if ($_SESSION["fpDraftMode"] == "yes")
+		if ($_SESSION["fp_draft_mode"] == "yes")
 		{
-			$GLOBALS["boolUseDraft"] = true;
+			$GLOBALS["bool_use_draft"] = true;
 		} else {
-			$GLOBALS["boolUseDraft"] = false;
+			$GLOBALS["bool_use_draft"] = false;
 		}
 
 
@@ -2455,17 +2455,17 @@ function drawMenuItems($menuArray) {
    *
    * @return string
    */
-	function drawPublicNote()
+	function draw_public_note()
 	{
 		// This will display a "public note" to the user about
 		// this degree.  The public note was entered in Data Entry.
 
-		if ($this->degreePlan->publicNote == "")
+		if ($this->degree_plan->public_note == "")
 		{
 			return "";
 		}
 
-		$publicNote = $this->convertBBCodeToHTML($this->degreePlan->publicNote);
+		$public_note = $this->convert_b_b_code_to_h_t_m_l($this->degree_plan->public_note);
 
 		$pC = "";
 
@@ -2474,7 +2474,7 @@ function drawMenuItems($menuArray) {
 						style='border: 5px double #C1A599;
 								padding: 5px;
 								margin: 10px;'>
-					<b>Important Message:</b> $publicNote
+					<b>Important Message:</b> $public_note
 					</div>
 					</td></tr>";
 
@@ -2488,22 +2488,22 @@ function drawMenuItems($menuArray) {
 	
 	/**
 	 * This function generates the HTML to display the screen.  Should
-	 * be used in conjunction with outputToBrowser()
+	 * be used in conjunction with output_to_browser()
 	 *
 	 * @return string
 	 */	
-	function displayScreen()
+	function display_screen()
 	{
 		// This will generate the html to display the screen.
 		$pC = "";
 
 
-		$pC .= "<form action='$this->scriptFilename' id='mainform' method='POST'>";
+		$pC .= "<form action='$this->script_filename' id='mainform' method='POST'>";
 
-		$pC .= $this->getJavascriptCode();
-		$pC .= $this->displayBeginSemesterTable();
+		$pC .= $this->get_javascript_code();
+		$pC .= $this->display_begin_semester_table();
 
-		if ($this->boolHidingGrades && !$this->boolPrint && $GLOBALS["fpSystemSettings"]["hidingGradesMessage"] != "")
+		if ($this->bool_hiding_grades && !$this->bool_print && $GLOBALS["fp_system_settings"]["hiding_grades_message"] != "")
 		{
 		  // Display the message about us hiding grades.
 		  $pC .= "
@@ -2512,10 +2512,10 @@ function drawMenuItems($menuArray) {
           			 padding: 2px; border: 1px solid maroon;'>
           			<table border='0' cellspacing='0' cellpadding='0'>
           			<td valign='top'>
-          				<img src='$this->themeLocation/images/alert_lg.gif' >	
+          				<img src='$this->theme_location/images/alert_lg.gif' >	
           			</td>
           			<td valign='middle' class='tenpt' style='padding-left: 8px;'>
-          			{$GLOBALS["fpSystemSettings"]["hidingGradesMessage"]}
+          			{$GLOBALS["fp_system_settings"]["hiding_grades_message"]}
           			</td>
           			</table>
           			</div>
@@ -2524,71 +2524,71 @@ function drawMenuItems($menuArray) {
 		}
 		
 		
-		$pC .= $this->drawCurrentlyAdvisingBox();
-		$pC .= $this->drawProgressBoxes();
+		$pC .= $this->draw_currently_advising_box();
+		$pC .= $this->draw_progress_boxes();
 		
     
 		
-		$pC .= $this->drawPublicNote();
+		$pC .= $this->draw_public_note();
 
-		for ($t = 0; $t < count($this->boxArray); $t++)
+		for ($t = 0; $t < count($this->box_array); $t++)
 		{
 
 			$align = "right";
-			if ($this->isOnLeft)
+			if ($this->is_on_left)
 			{
 				$pC .= "<tr>";
 				$align= "left";
 			}
 			
 			$pC .= "<td valign='top' align='$align' class='fp-boxes'>";
-			$pC .= $this->boxArray[$t];
+			$pC .= $this->box_array[$t];
 			$pC .= "</td>";
 			
-			if ($this->pageIsMobile) {
+			if ($this->page_is_mobile) {
 			 // If we are on a mobile device, force it to use
 			 // only one column. 
-			 $this->isOnLeft = false;
+			 $this->is_on_left = false;
 			}
 			
-			if (!$this->isOnLeft) // on right of page
+			if (!$this->is_on_left) // on right of page
 			{
 				$pC .= "</tr>";
 			}
-			$this->isOnLeft = !$this->isOnLeft;
+			$this->is_on_left = !$this->is_on_left;
 		}
 
-		if (!$this->isOnLeft) // on right of the page.
+		if (!$this->is_on_left) // on right of the page.
 		{ // close up any loose ends.
 			$pC .= "</tr>";
 		}
 
 
-		if ($_SESSION["fpCanAdvise"] == true)
+		if ($_SESSION["fp_can_advise"] == true)
 		{
-			if (!$this->boolPrint && !$this->boolBlank)
+			if (!$this->bool_print && !$this->bool_blank)
 			{
       
 			  $pC .= "<tr>";
 			  
-        if (!$this->pageIsMobile) {
+        if (!$this->page_is_mobile) {
           $pC .= "<td>&nbsp;</td>";
         }
 			  
 				$pC .= "<td align='center'>
 						<div class='tenpt' style='margin-top:35px; margin-bottom:10px; padding: 10px; width: 200px;'>
-						" . $this->drawButton("Submit","submitSaveActive();") . "					
+						" . $this->draw_button("_submit","submit_save_active();") . "					
 						</div>
 						</td></tr>
 						";		
 
 
-				//$this->addToScreen("<input type='button' value='Submit' onClick='submitSaveActive();'>");
+				//$this->add_to_screen("<input type='button' value='Submit' onClick='submitSaveActive();'>");
 			}
 		}
 
-		$pC .= $this->displayEndSemesterTable();
-		$pC .= $this->getHiddenAdvisingVariables("saveDraft");
+		$pC .= $this->display_end_semester_table();
+		$pC .= $this->get_hidden_advising_variables("save_draft");
 
 		$pC .= "</form>
 				";
@@ -2601,32 +2601,32 @@ function drawMenuItems($menuArray) {
 	 * Returns the HTML to draw a pretty button.
 	 *
 	 * @param string $title
-	 * @param string $onClick
-	 * @param bool $boolPadd
+	 * @param string $on_click
+	 * @param bool $bool_padd
 	 * @param string $style
 	 * @return string
 	 */
-	function drawButton($title, $onClick, $boolPadd = true, $style = "")
+	function draw_button($title, $on_click, $bool_padd = true, $style = "")
 	{
 		// Style is expected to look like:
 		// style='some:thing;'
 		// with SINGLE apostrophes!  not quotes.
 
-		$onMouse = "onmouseover='this.className=\"gradbutton gradbutton_hover hand\";'
+		$on_mouse = "onmouseover='this.className=\"gradbutton gradbutton_hover hand\";'
 					onmouseout='this.className=\"gradbutton hand\";'
 					onmousedown='this.className=\"gradbutton gradbutton_down hand\";'
 					onmouseup='this.className=\"gradbutton gradbutton_hover hand\";'
 					";
 
-		if ($this->pageIsMobile) $onMouse = "";  // Causes problems for some mobile devices.
+		if ($this->page_is_mobile) $on_mouse = "";  // Causes problems for some mobile devices.
 		
-		if ($boolPadd)
+		if ($bool_padd)
 		{
 			$padd = "&nbsp; &nbsp;";
 		}
 
 
-		$rtn = "<span class='gradbutton hand' onClick='$onClick' $onMouse $style >
+		$rtn = "<span class='gradbutton hand' onClick='$on_click' $on_mouse $style >
 				$padd $title $padd
 				</span>
 
@@ -2641,7 +2641,7 @@ function drawMenuItems($menuArray) {
 	 *
 	 * @return string
 	 */
-	function displayBeginSemesterTable()
+	function display_begin_semester_table()
 	{
 		// Return the HTML that starts off the "semester table"
 		// in the middle of the page.  Ie, it should look like
@@ -2657,24 +2657,24 @@ function drawMenuItems($menuArray) {
 	 * Constructs the HTML to display the list of semesters for the student.
 	 *
 	 */
-	function buildSemesterList()
+	function build_semester_list()
 	{
 
-		$listSemesters = $this->degreePlan->listSemesters;
+		$list_semesters = $this->degree_plan->list_semesters;
 		// Go through each semester and add it to the screen...
-		$listSemesters->resetCounter();
+		$list_semesters->reset_counter();
 
-		while($listSemesters->hasMore())
+		while($list_semesters->has_more())
 		{
-			$semester = $listSemesters->getNext();
-			$semester->resetListCounters();
-			if ($semester->semesterNum == -88)
+			$semester = $list_semesters->get_next();
+			$semester->reset_list_counters();
+			if ($semester->semester_num == -88)
 			{ // These are the "added by advisor" courses.  Skip them.
 				continue;
 			}
 
 
-			$this->addToScreen($this->displaySemester($semester, true));
+			$this->add_to_screen($this->display_semester($semester, true));
 
 		}
 
@@ -2682,42 +2682,42 @@ function drawMenuItems($menuArray) {
 
 
 	/**
-	 * Constructs the tabs (using drawSystemTabs) that are used on the
+	 * Constructs the tabs (using draw_system_tabs) that are used on the
 	 * main FlightPath pages.  For descriptions of each parameter, see
-	 * drawSystemTabs().
+	 * draw_system_tabs().
 	 *
-	 * @param int $activeTabNumber
-	 * @param bool $boolSaveDraft
-	 * @param bool $boolFromWhatIf
-	 * @param bool $boolWarnChange
+	 * @param int $active_tab_number
+	 * @param bool $bool_save_draft
+	 * @param bool $bool_from_what_if
+	 * @param bool $bool_warn_change
 	 */
-	function buildSystemTabs($activeTabNumber = 0, $boolSaveDraft = false, $boolFromWhatIf = false, $boolWarnChange = false)
+	function build_system_tabs($active_tab_number = 0, $bool_save_draft = false, $bool_from_what_if = false, $bool_warn_change = false)
 	{
-		// assemble the pageTabs...
-		$this->pageTabs = $this->drawSystemTabs($activeTabNumber, $boolSaveDraft, $boolFromWhatIf, $boolWarnChange);
+		// assemble the page_tabs...
+		$this->page_tabs = $this->draw_system_tabs($active_tab_number, $bool_save_draft, $bool_from_what_if, $bool_warn_change);
 
 	}
 
 	/**
 	 * Returns the HTML to draw out the main FlightPath tabs.
 	 *
-	 * @param int $activeTabNumber
+	 * @param int $active_tab_number
 	 *       - The number of the current tab
 	 * 
-	 * @param bool $boolSaveDraft
+	 * @param bool $bool_save_draft
 	 *       - Should the tab attempt to save a draft when the user switches?
 	 *       - Should be set to TRUE on View and What If.
 	 * 
-	 * @param bool $boolFromWhatIf
+	 * @param bool $bool_from_what_if
 	 *       - Are we comming from WhatIf mode?
 	 * 
-	 * @param bool $boolWarnChange
+	 * @param bool $bool_warn_change
 	 *       - Should we warn the user with a javascript confirm box
 	 *         that they have unsaved changes on the page?
 	 * 
 	 * @return string
 	 */
-	function drawSystemTabs($activeTabNumber = 0, $boolSaveDraft = false, $boolFromWhatIf = false, $boolWarnChange = false)
+	function draw_system_tabs($active_tab_number = 0, $bool_save_draft = false, $bool_from_what_if = false, $bool_warn_change = false)
 	{
 		// Returns the HTML to draw out the primary system tabs,
 		// for example, Main, View, Comments, etc.
@@ -2726,19 +2726,19 @@ function drawMenuItems($menuArray) {
 		// if we are on the View or What If tabs.
 
 		$sd = "";
-		if ($boolSaveDraft == true)
+		if ($bool_save_draft == true)
 		{
-			$sd = "&saveDraft=yes";
+			$sd = "&save_draft=yes";
 		}
 
 		$fwi = "";
-		if ($boolFromWhatIf == true)
+		if ($bool_from_what_if == true)
 		{
-			$fwi="&fromWI=yes";
+			$fwi="&from_w_i=yes";
 		}
 
 		$warn = "";
-		if ($boolWarnChange == true)
+		if ($bool_warn_change == true)
 		{
 			// Warn the user that they are about to change tabs, and
 			// do not change tabs if they click "cancel."
@@ -2746,68 +2746,68 @@ function drawMenuItems($menuArray) {
 		}
 
 
-		$tabArray = array();
+		$tab_array = array();
 
-		$tabArray[0]["title"] = "Main";
-		$tabArray[0]["onClick"] = "changeTab(\"main.php?a=vt$sd$fwi\",\"\", \"no\",\"$warn\");";
+		$tab_array[0]["title"] = "_main";
+		$tab_array[0]["on_click"] = "change_tab(\"main.php?a=vt$sd$fwi\",\"\", \"no\",\"$warn\");";
 
-		if ($_SESSION["fpUserType"] != "none")
+		if ($_SESSION["fp_user_type"] != "none")
 		{
 
-			if ($_SESSION["fpUserType"] != "student")
+			if ($_SESSION["fp_user_type"] != "student")
 			{ // not for students.
-				$tabArray[1]["title"] = "Advisees";
-				$tabArray[1]["onClick"] = "changeTab(\"studentsearch.php?a=vt$sd$fwi\",\"\", \"no\",\"$warn\");";
+				$tab_array[1]["title"] = "_advisees";
+				$tab_array[1]["on_click"] = "change_tab(\"studentsearch.php?a=vt$sd$fwi\",\"\", \"no\",\"$warn\");";
 			} else {
-				$tabArray[1]["title"] = "";
+				$tab_array[1]["title"] = "";
 			}
 
-			if ($GLOBALS["advisingStudentID"] != "")
+			if ($GLOBALS["advising_student_id"] != "")
 			{
-				$tabArray[2]["title"] = "View";
-				$tabArray[2]["onClick"] = "changeTab(\"advise.php?a=vt$sd$fwi\",\"\",\"no\",\"$warn\");";
+				$tab_array[2]["title"] = "_view";
+				$tab_array[2]["on_click"] = "change_tab(\"advise.php?a=vt$sd$fwi\",\"\",\"no\",\"$warn\");";
 
-				if ($_SESSION["fpUserType"] != "student")
+				if ($_SESSION["fp_user_type"] != "student")
 				{ // not for students.
-					$tabArray[3]["title"] = "Comments";
-					$tabArray[3]["onClick"] = "changeTab(\"comments.php?a=vt$sd$fwi\",\"\",\"no\",\"$warn\");";
+					$tab_array[3]["title"] = "_comments";
+					$tab_array[3]["on_click"] = "change_tab(\"comments.php?a=vt$sd$fwi\",\"\",\"no\",\"$warn\");";
 				} else {
-					$tabArray[3]["title"] = "";
+					$tab_array[3]["title"] = "";
 				}
 
-				$tabArray[4]["title"] = "History";
-				$tabArray[4]["onClick"] = "changeTab(\"advise.php?windowMode=history$sd$fwi\",\"history\", \"no\",\"$warn\");";
+				$tab_array[4]["title"] = "_history";
+				$tab_array[4]["on_click"] = "change_tab(\"advise.php?window_mode=history$sd$fwi\",\"history\", \"no\",\"$warn\");";
 
-				$tabArray[5]["title"] = "What If";
-				$tabArray[5]["onClick"] = "changeTab(\"advise.php?a=vt$sd$fwi\",\"\", \"yes\",\"$warn\");";
+				$tab_array[5]["title"] = "What If";
+				$tab_array[5]["on_click"] = "change_tab(\"advise.php?a=vt$sd$fwi\",\"\", \"yes\",\"$warn\");";
 			} else {
 				// No student selected yet!
-				$onClick = "alert(\"Please first select a student from the \\nAdvisees tab at the top of the page.\");";
-				$tabArray[2]["title"] = "View";
-				$tabArray[2]["onClick"] = $onClick;
-				if ($_SESSION["fpUserType"] != "student")
+				$on_click = "alert(\"Please first select a student from the \\nAdvisees tab at the top of the page.\");";
+				$tab_array[2]["title"] = "_view";
+				$tab_array[2]["on_click"] = $on_click;
+				if ($_SESSION["fp_user_type"] != "student")
 				{ // not for students.
-					$tabArray[3]["title"] = "Comments";
-					$tabArray[3]["onClick"] = $onClick;
+					$tab_array[3]["title"] = "_comments";
+					$tab_array[3]["on_click"] = $on_click;
 				} else {
-					$tabArray[3]["title"] = "";
+					$tab_array[3]["title"] = "";
 				}
 
 
-				$tabArray[4]["title"] = "History";
-				$tabArray[4]["onClick"] = $onClick;
+				$tab_array[4]["title"] = "_history";
+				$tab_array[4]["on_click"] = $on_click;
 
-				$tabArray[5]["title"] = "What If";
-				$tabArray[5]["onClick"] = $onClick;
+				$tab_array[5]["title"] = "What If";
+				$tab_array[5]["on_click"] = $on_click;
 
 			}
 		}
 
-		$tabArray[$activeTabNumber]["active"] = true;
+		$tab_array[$active_tab_number]["active"] = true;
 
 
 
-		return $this->drawTabs($tabArray);
+		return $this->draw_tabs($tab_array);
 
 	}
 
@@ -2817,17 +2817,17 @@ function drawMenuItems($menuArray) {
 	 *
 	 * @return string
 	 */	
-	function displayViewOptions()
+	function display_view_options()
 	{
 		// Draw the available views the user may select from.
 		$pC = "";
 
-		if ($this->boolPrint)
+		if ($this->bool_print)
 		{ // Don't display in Print View.
 			return "";
 		}
 
-		$csid = $GLOBALS["currentStudentID"];
+		$csid = $GLOBALS["current_student_id"];
 
 		$ystyle = "style='text-decoration: none; color: black; font-weight: bold;'";
 		$tstyle = "style='color: blue;'";
@@ -2837,39 +2837,39 @@ function drawMenuItems($menuArray) {
 			$ystyle = "style='color: blue;'";
 		}
 
-		$onMouse = "onmouseover='this.className=\"gradbutton_hover hand\";'
+		$on_mouse = "onmouseover='this.className=\"gradbutton_hover hand\";'
 					onmouseout='this.className=\"gradbutton hand\";'
 					onmousedown='this.className=\"gradbutton_down hand\";'
 		";
 
-		if ($this->pageIsMobile) $onMouse = "";  // Causes problems for some mobile devices.
+		if ($this->page_is_mobile) $on_mouse = "";  // Causes problems for some mobile devices.
 		
 
 
 		$pC .= "<div class='tenpt' style='margin-top:5px; margin-bottom:10px;'>";
-		if ($this->boolBlank == false)
+		if ($this->bool_blank == false)
 		{
-			$pC .= "" . $this->drawButton("Display by Year", "changeView(\"year\");", false, $ystyle) . "
-					" . $this->drawButton("Display by Type", "changeView(\"type\");", false, $tstyle) . "
+			$pC .= "" . $this->draw_button("Display by Year", "change_view(\"year\");", false, $ystyle) . "
+					" . $this->draw_button("Display by Type", "change_view(\"type\");", false, $tstyle) . "
 					";
-			if (!$this->pageIsMobile) {
+			if (!$this->page_is_mobile) {
   			$pC .= "&nbsp;&nbsp;
-  					<a href='javascript:launchPrintView();' class='nounderline'>Print View <img src='$this->themeLocation/images/popup.gif' border='0'></a>
+  					<a href='javascript:launchPrintView();' class='nounderline'>Print View <img src='$this->theme_location/images/popup.gif' border='0'></a>
   					";
   
   			// If this is a full_admin, show them special options...
-  			if ($_SESSION["fpUserType"] == "full_admin")
+  			if ($_SESSION["fp_user_type"] == "full_admin")
   			{
-  				$draftLink = "<a href='main.php?performAction=draftModeYes&currentStudentID=$csid' class='nounderline'>Switch to Draft Mode</a>";
-  				if ($GLOBALS["boolUseDraft"] == true)
+  				$draft_link = "<a href='main.php?performAction=draftModeYes&current_student_id=$csid' class='nounderline'>Switch to Draft Mode</a>";
+  				if ($GLOBALS["bool_use_draft"] == true)
   				{
-  					$draftLink = "<a href='main.php?performAction=draftModeNo&currentStudentID=$csid' class='nounderline'>Switch to Regular Mode</a>";
+  					$draft_link = "<a href='main.php?performAction=draftModeNo&current_student_id=$csid' class='nounderline'>Switch to Regular Mode</a>";
   				}
   				$pC .= "<span class='full_admin_top_options'>
   						<b>Admin Options:</b>
-  						<a href='main.php?performAction=clearCache&currentStudentID=$csid' class='nounderline'>Clear cache</a> 
+  						<a href='main.php?performAction=clearCache&current_student_id=$csid' class='nounderline'>Clear cache</a> 
   						- 
-  						$draftLink
+  						$draft_link
   						
   					</span>";
   			}
@@ -2878,22 +2878,22 @@ function drawMenuItems($menuArray) {
 
 		}else{
 			// We are viewing a blank degree plan
-			$blankDegreeID = $this->degreePlan->degreeID;
+			$blank_degree_id = $this->degree_plan->degree_id;
 
-			$moduleActionURL = getModuleActionURL("blank_degrees");
+			$module_action_u_r_l = get_module_action_u_r_l("blank_degrees");
 			
-			$pC .= "" . $this->drawButton("Display by Year", "window.location=\"$moduleActionURL&blankDegreeID=$blankDegreeID&blankView=year\";", false, $ystyle) . "
-					" . $this->drawButton("Display by Type", "window.location=\"$moduleActionURL&blankDegreeID=$blankDegreeID&blankView=type\";", false, $tstyle) . "
+			$pC .= "" . $this->draw_button("Display by Year", "window.location=\"$module_action_u_r_l&blank_degree_id=$blank_degree_id&blank_view=year\";", false, $ystyle) . "
+					" . $this->draw_button("Display by Type", "window.location=\"$module_action_u_r_l&blank_degree_id=$blank_degree_id&blank_view=type\";", false, $tstyle) . "
 
 					";
-			if (!$this->pageIsMobile) {
+			if (!$this->page_is_mobile) {
   			$pC .= "&nbsp;&nbsp;
-  					<a href='$moduleActionURL&blankDegreeID=$blankDegreeID&blankView=$this->view&blankPrint=yes' class='nounderline' target='_blank'>Print View <img src='$this->themeLocation/images/popup.gif' border='0'></a>
+  					<a href='$module_action_u_r_l&blank_degree_id=$blank_degree_id&blank_view=$this->view&blankPrint=yes' class='nounderline' target='_blank'>Print View <img src='$this->theme_location/images/popup.gif' border='0'></a>
   					";
 			}
 
 
-				if ($GLOBALS["boolUseDraft"] == true)
+				if ($GLOBALS["bool_use_draft"] == true)
 				{
 					$pC .= "&nbsp; &nbsp; &nbsp; Viewing in <b>DRAFT</b> mode.";
 				}
@@ -2921,15 +2921,15 @@ function drawMenuItems($menuArray) {
 	 * browser.  We have to handle tab rendering differently
 	 * in order to make them all fit. 
 	 *
-	 * @param unknown_type $tabArray
+	 * @param unknown_type $tab_array
 	 */
-	function drawMobileTabs($tabArray) {
+	function draw_mobile_tabs($tab_array) {
 	  
 	  $rtn = "";
 	  
-	  $jsVars = "var mobileTabSelections = new Array(); ";
+	  $js_vars = "var mobileTabSelections = new Array(); ";
 
-	  if (count($tabArray) <= 1) return "";
+	  if (count($tab_array) <= 1) return "";
 	  
 	  
 	  $rtn .= "<table border='0' width='200' cellpadding='0' cellspacing='0' class='fp-mobile-tabs'>
@@ -2937,9 +2937,9 @@ function drawMenuItems($menuArray) {
 	           <b>Display: </b>";
 	  
 	  
-/*	  if (count($tabArray) == 1) {
+/*	  if (count($tab_array) == 1) {
 	    // Just one element, no need to render the select list.
-	    $rtn .= $tabArray[0]["title"];
+	    $rtn .= $tab_array[0]["title"];
 	    $rtn .= "</td></table>";
 	    return $rtn;
 	  }
@@ -2947,11 +2947,11 @@ function drawMenuItems($menuArray) {
 	  
 	  $rtn .= "<select onChange='executeSelection()' id='mobileTabsSelect'>";
 	  
-	  for ($t = 0; $t < count($tabArray); $t++)
+	  for ($t = 0; $t < count($tab_array); $t++)
 		{
-			$title = $tabArray[$t]["title"];
-			$active = $tabArray[$t]["active"];
-			$onClick = $tabArray[$t]["onClick"];
+			$title = $tab_array[$t]["title"];
+			$active = $tab_array[$t]["active"];
+			$on_click = $tab_array[$t]["on_click"];
 
 			if ($title == "")
 			{
@@ -2961,7 +2961,7 @@ function drawMenuItems($menuArray) {
 			
 			$rtn .= "<option $sel value='$t'>$title</option>";
 						
-			$jsVars .= "mobileTabSelections[$t] = '$onClick'; \n";
+			$js_vars .= "mobile_tab_selections[$t] = '$on_click'; \n";
 			
 		}	  
 	  
@@ -2971,12 +2971,12 @@ function drawMenuItems($menuArray) {
 		
 		$rtn .= '
 		  <script type="text/javascript">
-		  ' . $jsVars . '		  
+		  ' . $js_vars . '		  
 		  
 		  function executeSelection() {
 		    var sel = document.getElementById("mobileTabsSelect").value;
 		    
-		    var statement = mobileTabSelections[sel];
+		    var statement = mobile_tab_selections[sel];
 		    // Lets execute the statement...
 		    eval(statement);
 		    
@@ -2994,24 +2994,24 @@ function drawMenuItems($menuArray) {
 	 * Given a propperly formatted tabArray, this will return the HTML
 	 * to draw it on a page.
 	 *
-	 * @param array $tabArray
+	 * @param array $tab_array
 	 *       - Array should have this structure:
-	 *         - $tabArray[i]["title"] = The title or caption of the tab. "Main", or "Edit", etc.
-	 *         - $tabArray[i]["active"] = boolean.  True if this is the tab we are currently looking at.
-	 *         - $tabArray[i]["onClick"] = This is a valid onClick='blah blah' that is the result of clicking the tab.
+	 *         - $tab_array[i]["title"] = The title or caption of the tab. "_main", or "Edit", etc.
+	 *         - $tab_array[i]["active"] = boolean.  True if this is the tab we are currently looking at.
+	 *         - $tab_array[i]["on_click"] = This is a valid onClick='blah blah' that is the result of clicking the tab.
 	 * 
 	 * @return string
 	 */
-	function drawTabs($tabArray)
+	function draw_tabs($tab_array)
 	{
 		// This function will return the HTML to draw out
 		// page tabs.  It assumes the tabArray is setup thusly:
-		// $tabArray[i]["title"] = The title or caption of the tab. "Main", or "Edit", etc.
-		// $tabArray[i]["active"] = boolean.  True if this is the tab we are currently looking at.
-		// $tabArray[i]["onClick"] = This is a valid onClick='blah blah' that is the result of clicking the tab.
+		// $tab_array[i]["title"] = The title or caption of the tab. "_main", or "Edit", etc.
+		// $tab_array[i]["active"] = boolean.  True if this is the tab we are currently looking at.
+		// $tab_array[i]["on_click"] = This is a valid onClick='blah blah' that is the result of clicking the tab.
 
-		if ($this->pageIsMobile) {
-		  return $this->drawMobileTabs($tabArray);
+		if ($this->page_is_mobile) {
+		  return $this->draw_mobile_tabs($tab_array);
 		}
 		
 		$rtn = "";
@@ -3020,14 +3020,14 @@ function drawMenuItems($menuArray) {
 			<tr>
 			";
 
-		$imgPath = $this->themeLocation . "/images";
+		$img_path = $this->theme_location . "/images";
 
 
-		for ($t = 0; $t < count($tabArray); $t++)
+		for ($t = 0; $t < count($tab_array); $t++)
 		{
-			$title = $tabArray[$t]["title"];
-			$active = $tabArray[$t]["active"];
-			$onClick = $tabArray[$t]["onClick"];
+			$title = $tab_array[$t]["title"];
+			$active = $tab_array[$t]["active"];
+			$on_click = $tab_array[$t]["on_click"];
 
 			if ($title == "")
 			{
@@ -3048,7 +3048,7 @@ function drawMenuItems($menuArray) {
 
 				$theclass = "inactive_tab hand";
 				$overclass = "inactive_tab_over";
-				if ($onClick == "")
+				if ($on_click == "")
 				{
 					$theclass = "inactive_tab";
 					$overclass = "inactive_tab_over_no_link";
@@ -3056,7 +3056,7 @@ function drawMenuItems($menuArray) {
 
 				$rtn .= "
 			
-			<table align='left' cellpadding='0' onClick='$onClick' cellspacing='0' class='$theclass' onmouseover='this.className=\"$overclass\";' onmouseout='this.className=\"inactive_tab\";'>
+			<table align='left' cellpadding='0' onClick='$on_click' cellspacing='0' class='$theclass' onmouseover='this.className=\"$overclass\";' onmouseout='this.className=\"inactive_tab\";'>
 			<tr>
 				<td class='tab_tl_i' align='left' valign='baseline'  width='12'></td>
 				<td class='tab_top_i' valign='baseline' ></td>
@@ -3064,13 +3064,13 @@ function drawMenuItems($menuArray) {
 			</tr>
 			<tr>
 			 <td class='tab_left_i' align='left' valign='baseline' width='12'>
-				<img src='$imgPath/tab_left_i.gif' width='12' height='18'>
+				<img src='$img_path/tab_left_i.gif' width='12' height='18'>
 			</td>
 			<td align='left' nowrap class='tab_center_i'>
 			 <div style='padding-bottom: 3px; margin-top: -2px;' class='tab_text'>$title</div>
 			</td>
 			<td class='tab_right_i' align='right' valign='baseline'>
-			 <img src='$imgPath/tab_right_i.gif' width='12' height='18'>
+			 <img src='$img_path/tab_right_i.gif' width='12' height='18'>
 			</td>
 			</tr>
 			</table>
@@ -3088,13 +3088,13 @@ function drawMenuItems($menuArray) {
 				</tr>
 				<tr>
 					<td class='tab_left' align='left' valign='baseline' width='12'>
-					<img src='$imgPath/tab_left.gif' width='12' height='18'>
+					<img src='$img_path/tab_left.gif' width='12' height='18'>
 					</td>
 					<td align='left' nowrap class='tab_center'>
 						<div style='padding-bottom: 3px; margin-top: -2px;' class='tab_text'>$title</div>
 					</td>
 					<td class='tab_right' align='right' valign='baseline'>
-						<img src='$imgPath/tab_right.gif' width='12' height='18'>
+						<img src='$img_path/tab_right.gif' width='12' height='18'>
 					</td>
 				</tr>
 			</table>			
@@ -3120,44 +3120,44 @@ function drawMenuItems($menuArray) {
   /**
    * Displays the contents of the Descripton tab for the course popup.
    *
-   * @param int $courseID
-   *        - The courseID of the course to show.  Leave blank if supplying
+   * @param int $course_id
+   *        - The course_id of the course to show.  Leave blank if supplying
    *          the object instead.
    * 
    * @param Course $course
    *        - The course object to display.  Leave as NULL if supplying
-   *          the courseID instead.
+   *          the course_id instead.
    * 
    * @param Group $group
    *        - The Group object that this course has been placed into.
    * 
-   * @param bool $showAdvisingButtons
+   * @param bool $show_advising_buttons
    *        - Should we show the advising buttons in this popup?  Would be
    *          set to false for student view, or for anyone who is not
    *          allowed to advise this course into a group for the student.
    * 
    * @return string
    */
-	function displayPopupCourseDescription($courseID = "", Course $course = null, $group = null, $showAdvisingButtons = false)
+	function display_popup_course_description($course_id = "", Course $course = null, $group = null, $show_advising_buttons = false)
 	{
 		$pC = "";
 
 		//$course = new Course();
 		
-		if ($courseID != "" && $courseID != 0) {
+		if ($course_id != "" && $course_id != 0) {
 		  
-			$course = new Course($courseID);
+			$course = new Course($course_id);
 		}
 
-		//adminDebug($course->toString());
-		$dbGroupRequirementID = $_REQUEST["dbGroupRequirementID"];
-		//adminDebug("RequirmentID: $dbGroupRequirementID");
+		//admin_debug($course->toString());
+		$db_group_requirement_id = $_REQUEST["db_group_requirement_id"];
+		//admin_debug("RequirmentID: $db_group_requirement_id");
   
 
 		if ($course == null)
 		{
 			// No course available!
-			$pC .= $this->drawCurvedTitle("Description");
+			$pC .= $this->draw_curved_title("_description");
 			$pC .= "<div class='tenpt'>No course was selected.  Please
 					click the Select tab at the top of the screen.
 					</div>";
@@ -3165,78 +3165,78 @@ function drawMenuItems($menuArray) {
 		}
 
 
-		$advisingTermID = $GLOBALS["advisingTermID"];
-		//adminDebug($advisingTermID);
+		$advising_term_id = $GLOBALS["advising_term_id"];
+		//admin_debug($advising_term_id);
     
-		$course->loadDescriptiveData();
-		//adminDebug($course->title);
-		$courseHours = $course->getHours();
-		//adminDebug("Information for courseID: $course->courseID");
-		if ($course->boolTransfer)
+		$course->load_descriptive_data();
+		//admin_debug($course->title);
+		$course_hours = $course->get_hours();
+		//admin_debug("Information for course_id: $course->course_id");
+		if ($course->bool_transfer)
 		{
-			//adminDebug(" -- transfer courseid: " . $course->courseTransfer->courseID );
+			//admin_debug(" -- transfer courseid: " . $course->course_transfer->course_id );
 
 		}
-		//$courseHours = $course->hoursAwarded;
+		//$course_hours = $course->hours_awarded;
 
-		//var_dump($course->arrayValidNames);
+		//var_dump($course->array_valid_names);
 
 		// Does this course have more than one valid (non-excluded) name?
-		$otherValidNames = "";
-		if (count($course->arrayValidNames) > 1)
+		$other_valid_names = "";
+		if (count($course->array_valid_names) > 1)
 		{
-			for ($t = 0; $t < count($course->arrayValidNames); $t++)
+			for ($t = 0; $t < count($course->array_valid_names); $t++)
 			{
-				$name = $course->arrayValidNames[$t];
-				if ($name == "$course->subjectID~$course->courseNum")
+				$name = $course->array_valid_names[$t];
+				if ($name == "$course->subject_id~$course->course_num")
 				{
 					continue;
 				}
-				$otherValidNames .= ", " . str_replace("~"," ",$name);
+				$other_valid_names .= ", " . str_replace("~"," ",$name);
 			}
 		}
 
-		//adminDebug($course->toString());
-		//print_pre($this->student->listCoursesTaken->toString());
-		$course->fixTitle();
+		//admin_debug($course->toString());
+		//print_pre($this->student->list_courses_taken->toString());
+		$course->fix_title();
 
-    $initials = $GLOBALS["fpSystemSettings"]["schoolInitials"];
+    $initials = $GLOBALS["fp_system_settings"]["school_initials"];
 		
-		$pC .= $this->drawCurvedTitle("$course->subjectID $course->courseNum$otherValidNames <!--EQV1-->");
-		$boolTransferEqv = true;
-		if ($course->boolTransfer)
+		$pC .= $this->draw_curved_title("$course->subject_id $course->course_num$other_valid_names <!--EQV1-->");
+		$bool_transferEqv = true;
+		if ($course->bool_transfer)
 		{
 			// This is a transfer course.  Begin by displaying the transfer credit's
 			// information.
 			
-			$course->courseTransfer->loadDescriptiveTransferData($this->student->studentID);
-			$hrs = $course->courseTransfer->getHours()*1;
+			$course->course_transfer->load_descriptive_transfer_data($this->student->student_id);
+			$hrs = $course->course_transfer->get_hours()*1;
 			if ($hrs == 0)
 			{
-				$hrs = $course->getHours();
+				$hrs = $course->get_hours();
 			}
 						
 			// make transfer course titles all caps.
-			$course->courseTransfer->title = strtoupper($course->courseTransfer->title);
+			$course->course_transfer->title = strtoupper($course->course_transfer->title);
 
 			$pC .= "<div style='margin-top: 13px;' class='tenpt'>
 				<b>Transfer Credit Information:</b><br>
 				<div style='margin-left: 20px;' class='tenpt'>
-					Course: " . $course->courseTransfer->subjectID . " " . $course->courseTransfer->courseNum . " 
-					- " . $course->courseTransfer->title . " ($hrs hrs)<br>
-					Institution: " . $this->fixInstitutionName($course->courseTransfer->institutionName) . "<br>
-					Term: " . $course->getTermDescription() . "<br>
+					Course: " . $course->course_transfer->subject_id . " " . $course->course_transfer->course_num . " 
+					- " . $course->course_transfer->title . " ($hrs hrs)<br>
+					Institution: " . $this->fix_institution_name($course->course_transfer->institution_name) . "<br>
+					Term: " . $course->get_term_description() . "<br>
 					<!-- Grade: " . $course->grade . "<br> -->
 					";
 
-			$transferEqvText = $course->courseTransfer->transferEqvText;
-			if ($transferEqvText == "")
+			$transfer_eqv_text = $course->course_transfer->transfer_eqv_text;
+			if ($transfer_eqv_text == "")
 			{
-				$transferEqvText = "Not entered or not applicable.";
-				$boolTransferEqv = false;
+				$transfer_eqv_text = "Not entered or not applicable.";
+				$bool_transferEqv = false;
 			}
 
-			$pC .= "$initials Eqv: $transferEqvText<br>
+			$pC .= "$initials Eqv: $transfer_eqv_text<br>
 				</div>
 					</div>";
 
@@ -3246,22 +3246,22 @@ function drawMenuItems($menuArray) {
 		$pC .= "
 		   	<div style='margin-top: 13px;'>
 				<div class='tenpt'>";
-		if ($course->courseID != 0)
+		if ($course->course_id != 0)
 		{
-		  $useHours = $courseHours;
-			if ($course->boolTransfer)
+		  $use_hours = $course_hours;
+			if ($course->bool_transfer)
 			{
 				$pC .= "<b>$initials Equivalent Course Information:</b><br>
-						<b>$course->subjectID $course->courseNum</b> - ";
-				$newCourse = new Course();
-				$newCourse->courseID = $course->courseID;
-				$newCourse->loadDescriptiveData();
-				$useHours = $newCourse->getCatalogHours();
+						<b>$course->subject_id $course->course_num</b> - ";
+				$new_course = new Course();
+				$new_course->course_id = $course->course_id;
+				$new_course->load_descriptive_data();
+				$use_hours = $new_course->get_catalog_hours();
 			}
 			$pC .= "
-					<b>$course->title ($useHours hrs)</b>";
+					<b>$course->title ($use_hours hrs)</b>";
 		}
-		if ($course->boolSubstitutionNewFromSplit || $course->boolSubstitutionSplit)
+		if ($course->bool_substitution_new_from_split || $course->bool_substitution_split)
 		{
 			$pC .= "<div class='tenpt' style='margin-bottom:5px;'>
 						<i>This course's hours were split in a substitution.</i> 
@@ -3271,7 +3271,7 @@ function drawMenuItems($menuArray) {
 
 		$pC .= "</div>";
 
-		if ($course->courseID != 0)
+		if ($course->course_id != 0)
 		{
 			$pC .= "
 			<div class='tenpt'>
@@ -3281,7 +3281,7 @@ function drawMenuItems($menuArray) {
 				"; 
 		}
 
-		if ($course->boolTransfer == true && $course->courseID < 1 && $course->boolSubstitution == false)
+		if ($course->bool_transfer == true && $course->course_id < 1 && $course->bool_substitution == false)
 		{ // No local eqv!
 
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'><b>Note:</b> ";
@@ -3290,17 +3290,17 @@ function drawMenuItems($menuArray) {
 			<b>Note:</b> This course is a transfer credit which
 			the student completed at <i>";
 
-			$pC .= $this->fixInstitutionName($course->courseTransfer->institutionName) . "</i>.";
+			$pC .= $this->fix_institution_name($course->course_transfer->institution_name) . "</i>.";
 			*/
 			$pC = str_replace("<!--EQV1-->"," (Transfer Credit)",$pC);
-			if (!$boolTransferEqv)
+			if (!$bool_transferEqv)
 			{
-				$tMsg = "This course does not have an assigned $initials equivalency, or the equivalency
+				$t_msg = "This course does not have an assigned $initials equivalency, or the equivalency
 							has been removed for this student.
 						Ask your advisor if this course will count towards your degree.
 					</div>"; 
 			} else {
-				$tMsg = "FlightPath cannot assign this course to a $initials equivalency on
+				$t_msg = "FlightPath cannot assign this course to a $initials equivalency on
 							the student's degree plan, 
 							or the equivalency
 							has been removed for this student.
@@ -3308,31 +3308,31 @@ function drawMenuItems($menuArray) {
 					</div>"; 				
 			}
 
-			$pC .= $tMsg;
+			$pC .= $t_msg;
 
-		} elseif ($course->boolTransfer == true && $course->courseID > 0 && $course->boolSubstitution == false)
+		} elseif ($course->bool_transfer == true && $course->course_id > 0 && $course->bool_substitution == false)
 		{ // Has a local eqv!
 
-			$tSI = $course->courseTransfer->subjectID;
-			$tCN = $course->courseTransfer->courseNum;
+			$t_s_i = $course->course_transfer->subject_id;
+			$t_c_n = $course->course_transfer->course_num;
 			/*			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
 			<b>Note:</b> The course listed above is equivalent
-			to <b>$tSI $tCN</b>,
+			to <b>$t_s_i $t_c_n</b>,
 			which the student completed at <i>";
 
 			// Replace the temporary comment <!--EQV1--> in the header with
 			// the new eqv information.
 			*/
-			$pC = str_replace("<!--EQV1-->"," (Transfer Credit $tSI $tCN)",$pC);
-			/*			$pC .= $this->fixInstitutionName($course->courseTransfer->institutionName);
+			$pC = str_replace("<!--EQV1-->"," (Transfer Credit $t_s_i $t_c_n)",$pC);
+			/*			$pC .= $this->fix_institution_name($course->course_transfer->institution_name);
 			$pC .= "</i>.";
 			*/
 			// Admin function only.
-			if ($_SESSION["fpCanSubstitute"] == true)
+			if ($_SESSION["fp_can_substitute"] == true)
 			{
 				$pC .= "<div align='left' class='tenpt'>
 					<b>Special administrative function:</b>
-						<a href='javascript: popupUnassignTransferEqv(\"" . $course->courseTransfer->courseID . "\");'>Remove this equivalency?</a></div>";
+						<a href='javascript: popupUnassignTransferEqv(\"" . $course->course_transfer->course_id . "\");'>Remove this equivalency?</a></div>";
 				$pC .= "</div>";
 			}
 
@@ -3341,12 +3341,12 @@ function drawMenuItems($menuArray) {
 		}
 
 
-		if ($course->termID != "" && $course->termID != "11111" && $course->displayStatus != "eligible" && $course->displayStatus != "disabled")
+		if ($course->term_id != "" && $course->term_id != "11111" && $course->display_status != "eligible" && $course->display_status != "disabled")
 		{
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
-						The student enrolled in this course in " . $course->getTermDescription() . ".
+						The student enrolled in this course in " . $course->get_term_description() . ".
 					</div>";
-		} else if ($course->termID == "11111")
+		} else if ($course->term_id == "11111")
 		{
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
 						The exact date that the student enrolled in this course
@@ -3356,37 +3356,37 @@ function drawMenuItems($menuArray) {
 
 		}
 
-		if ($course->assignedToGroupID*1 > 0 && $course->grade != "" && $course->boolTransfer != true && $course->boolSubstitution != true)
+		if ($course->assigned_to_group_id*1 > 0 && $course->grade != "" && $course->bool_transfer != true && $course->bool_substitution != true)
 		{
-			//$g = new Group($course->assignedToGroupID);
+			//$g = new Group($course->assigned_to_group_id);
 			$g = new Group();
-			$g->groupID = $course->assignedToGroupID;
-			$g->loadDescriptiveData();
+			$g->group_id = $course->assigned_to_group_id;
+			$g->load_descriptive_data();
 
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
-						<img src='$this->themeLocation/images/icons/$g->iconFilename' width='19' height='19'>
+						<img src='$this->theme_location/images/icons/$g->icon_filename' width='19' height='19'>
 						&nbsp;
 						This course is a member of $g->title.
 					";
 			// If user is an admin...
-			if ($_SESSION["fpCanSubstitute"] == true)
+			if ($_SESSION["fp_can_substitute"] == true)
 			{
-				$tflag = intval($course->boolTransfer);
+				$tflag = intval($course->bool_transfer);
 				$pC .= "<div align='left' class='tenpt'>
 					<b>Special administrative function:</b>
-						<a href='javascript: popupUnassignFromGroup(\"$course->courseID\",\"$course->termID\",\"$tflag\",\"$g->groupID\");'>Remove from this group?</a></div>";
+						<a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"$g->group_id\");'>Remove from this group?</a></div>";
 				$pC .= "</div>";
 			}
 
-		} else if ($course->grade != "" && $course->boolTransfer != true && $course->boolSubstitution != true && $course->boolHasBeenAssigned == true) {
-			// Course is not assigned to a group; it's on the bare degree plan.  groupID = 0.
+		} else if ($course->grade != "" && $course->bool_transfer != true && $course->bool_substitution != true && $course->bool_has_been_assigned == true) {
+			// Course is not assigned to a group; it's on the bare degree plan.  group_id = 0.
 			// If user is an admin...
-			if ($_SESSION["fpCanSubstitute"] == true)
+			if ($_SESSION["fp_can_substitute"] == true)
 			{
-				$tflag = intval($course->boolTransfer);
+				$tflag = intval($course->bool_transfer);
 				$pC .= "<div align='left' class='tenpt'>
 					<b>Special administrative function:</b>
-						<a href='javascript: popupUnassignFromGroup(\"$course->courseID\",\"$course->termID\",\"$tflag\",\"0\");'>Remove from the degree plan?</a></div>";
+						<a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"0\");'>Remove from the degree plan?</a></div>";
 				$pC .= "</div>";
 			}
 
@@ -3394,7 +3394,7 @@ function drawMenuItems($menuArray) {
 
 
 		// Substitutors get extra information:
-		if ($_SESSION["fpCanSubstitute"] == true && $course->assignedToGroupID > 0)
+		if ($_SESSION["fp_can_substitute"] == true && $course->assigned_to_group_id > 0)
 		{
 			
 			
@@ -3410,21 +3410,21 @@ function drawMenuItems($menuArray) {
 					";
 
 			// Course is assigned to a group.
-			if ($course->assignedToGroupID > 0) {
+			if ($course->assigned_to_group_id > 0) {
   			$group = new Group();
-  			$group->groupID = $course->assignedToGroupID;
-  			$group->loadDescriptiveData();
+  			$group->group_id = $course->assigned_to_group_id;
+  			$group->load_descriptive_data();
   			
   			$pC .= "
   					Course is assigned to group:<br>
-  					&nbsp; Group ID: $group->groupID<br>
+  					&nbsp; Group ID: $group->group_id<br>
   					&nbsp; Title: $group->title<br>";
-  			if ($_SESSION["fpUserType"] == "full_admin")
+  			if ($_SESSION["fp_user_type"] == "full_admin")
   			{ // only show if we are full admin.
-  				$pC .= "&nbsp; <i>Internal name: $group->groupName</i><br>";
+  				$pC .= "&nbsp; <i>Internal name: $group->group_name</i><br>";
   			}
   			
-  			$pC .= "&nbsp; Catalog year: $group->catalogYear
+  			$pC .= "&nbsp; Catalog year: $group->catalog_year
   			";
 			}
 			$pC .= "
@@ -3434,14 +3434,14 @@ function drawMenuItems($menuArray) {
 		}
 
 
-		if ($course->boolSubstitution == true)
+		if ($course->bool_substitution == true)
 		{
 			// Find out who did it and if they left any remarks.
 			$db = $this->db;
-			$temp = $db->getSubstitutionDetails($course->dbSubstitutionID);
-			$by = $db->getFacultyName($temp["facultyID"], false);
+			$temp = $db->get_substitution_details($course->db_substitution_id);
+			$by = $db->get_faculty_name($temp["faculty_id"], false);
 			$remarks = $temp["remarks"];
-			$ondate = date("n/d/Y", strtotime($temp["datetime"]));
+			$ondate = date("n/d/_y", strtotime($temp["datetime"]));
 			
 			
 			if ($by != "")
@@ -3455,9 +3455,9 @@ function drawMenuItems($menuArray) {
 			}
 
 			$forthecourse = "for the original course
-						requirement of <b>" . $course->courseSubstitution->subjectID . " 
-						" . $course->courseSubstitution->courseNum . "</b>";
-			if ($temp["requiredCourseID"]*1 == 0)
+						requirement of <b>" . $course->course_substitution->subject_id . " 
+						" . $course->course_substitution->course_num . "</b>";
+			if ($temp["required_course_id"]*1 == 0)
 			{
 				$forthecourse = "";
 			}
@@ -3468,18 +3468,18 @@ function drawMenuItems($menuArray) {
 						$by$remarks";
 
 			
-			if ($_SESSION["fpCanSubstitute"] == true)
+			if ($_SESSION["fp_can_substitute"] == true)
 			{
 				$pC .= "<div align='left' class='tenpt' style='padding-left: 10px;'>
 					<b>Special administrative function:</b>
-					<a href='javascript: popupRemoveSubstitution(\"$course->dbSubstitutionID\");'>Remove substitution?</a>
+					<a href='javascript: popupRemoveSubstitution(\"$course->db_substitution_id\");'>Remove substitution?</a>
 					</div>";
 			}
 
 		}
 
 		// Only show if the course has not been taken...
-		if ($course->hasVariableHours() && $course->grade == "")
+		if ($course->has_variable_hours() && $course->grade == "")
 		{
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
 					This course has variable hours.<br>Please select 
@@ -3489,15 +3489,15 @@ function drawMenuItems($menuArray) {
 					";
 			
 			// Correct for ghost hours, if they are there.
-			$minH = $course->minHours;
-			$maxH = $course->maxHours;
-			if ($course->boolGhostMinHour) $minH = 0;
-			if ($course->boolGhostHour) $maxH = 0;
+			$min_h = $course->min_hours;
+			$max_h = $course->max_hours;
+			if ($course->bool_ghost_min_hour) $min_h = 0;
+			if ($course->bool_ghost_hour) $max_h = 0;
 			
-			for($t = $minH; $t <= $maxH; $t++)
+			for($t = $min_h; $t <= $max_h; $t++)
 			{
 				$sel = "";
-				if ($t == $course->advisedHours){ $sel = "SELECTED"; }
+				if ($t == $course->advised_hours){ $sel = "SELECTED"; }
 				$pC .= "<option value='$t' $sel>$t</option>";
 			}
 			$pC .= "</select> hours.<br>
@@ -3505,43 +3505,43 @@ function drawMenuItems($menuArray) {
 					</center>
 					</div>";
 
-			if ($course->advisedHours > -1)
+			if ($course->advised_hours > -1)
 			{
-				$varHoursDefault = $course->advisedHours;
+				$var_hours_default = $course->advised_hours;
 			} else {
-				$varHoursDefault = $minH;
+				$var_hours_default = $min_h;
 			}
 
 		}
 
 
 
-		if ($showAdvisingButtons == true && !$this->boolBlank)
+		if ($show_advising_buttons == true && !$this->bool_blank)
 		{
 
 			// Insert a hidden radio button so the javascript works okay...
-			$pC .= "<input type='radio' name='course' value='$course->courseID' checked='checked'
+			$pC .= "<input type='radio' name='course' value='$course->course_id' checked='checked'
 					style='display: none;'>
-					<input type='hidden' name='varHours' id='varHours' value='$varHoursDefault'>";
+					<input type='hidden' name='varHours' id='varHours' value='$var_hours_default'>";
 
-			if ($_SESSION["fpCanAdvise"] == true)
+			if ($_SESSION["fp_can_advise"] == true)
 			{
 				$pC .= "<div style='margin-top: 20px;'>
-				" . $this->drawButton("Select Course", "popupAssignSelectedCourseToGroup(\"$group->assignedToSemesterNum\", \"$group->groupID\",\"$advisingTermID\",\"$dbGroupRequirementID\");", true, "style='font-size: 10pt;'") . "
+				" . $this->draw_button("Select Course", "popup_assign_selected_course_to_group(\"$group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"$db_group_requirement_id\");", true, "style='font-size: 10pt;'") . "
 				</div>
 				
 				";
 			}
-		} elseif ($showAdvisingButtons == false && $course->hasVariableHours() == true && $course->grade == "")
+		} elseif ($show_advising_buttons == false && $course->has_variable_hours() == true && $course->grade == "")
 		{
-			// Show an "update" button, and use the course's assignedToGroupID and
-			// assignedToSemesterNum.
+			// Show an "update" button, and use the course's assigned_to_group_id and
+			// assigned_to_semester_num.
 			$pC .= "
-					<input type='hidden' name='varHours' id='varHours' value='$varHoursDefault'>";
+					<input type='hidden' name='varHours' id='varHours' value='$var_hours_default'>";
 
 
 			$pC .= "<input type='button' value='Update'
-				onClick='popupUpdateSelectedCourse(\"$course->courseID\",\"$course->assignedToGroupID\",\"$course->assignedToSemesterNum\",\"$course->randomID\",\"$advisingTermID\");'>";
+				onClick='popupUpdateSelectedCourse(\"$course->course_id\",\"$course->assigned_to_group_id\",\"$course->assigned_to_semester_num\",\"$course->random_id\",\"$advising_term_id\");'>";
 
 		}
 
@@ -3562,22 +3562,22 @@ function drawMenuItems($menuArray) {
 	 * @param string $str
 	 * @return string
 	 */
-	function fixInstitutionName($str)
+	function fix_institution_name($str)
 	{
 		$str = str_replace("-", " - ", $str);
 		$str = ucwords(strtolower($str));
 		$str = str_replace(" Of ", " of ", $str);
 		$str = str_replace("clep", "CLEP", $str);
-		$str = str_replace("Clep", "CLEP", $str);
-		$str = str_replace("Act", "ACT", $str);
-		$str = str_replace("Sat", "SAT", $str);
+		$str = str_replace("_clep", "CLEP", $str);
+		$str = str_replace("_act", "ACT", $str);
+		$str = str_replace("_sat", "SAT", $str);
 		$str = str_replace("Ap ", "AP ", $str);
-		$str = str_replace("Dsst", "DSST", $str);
+		$str = str_replace("_dsst", "DSST", $str);
 		
 		// Fix school initials.
 		// Turns "Ulm" into "ULM"
-	  $schoolInitials = $GLOBALS["fpSystemSettings"]["schoolInitials"];
-		$str = str_replace(ucwords(strtolower($schoolInitials)), $schoolInitials, $str);		
+	  $school_initials = $GLOBALS["fp_system_settings"]["school_initials"];
+		$str = str_replace(ucwords(strtolower($school_initials)), $school_initials, $str);		
 		
 
 		if ($str == "")
@@ -3592,12 +3592,12 @@ function drawMenuItems($menuArray) {
 
 	/**
 	 * Left in for legacy reasons, this function uses a new Course object's
-	 * method of $course->fixTitle to make a course's title more readable.
+	 * method of $course->fix_title to make a course's title more readable.
 	 *
 	 * @param string $str
 	 * @return stromg
 	 */
-	function fixCourseTitle($str)
+	function fix_course_title($str)
 	{
 		/*		$str = str_replace("&", " & ", $str);
 
@@ -3615,8 +3615,8 @@ function drawMenuItems($menuArray) {
 		*/
 
 
-		$newCourse = new Course();
-		$str = $newCourse->fixTitle($str);
+		$new_course = new Course();
+		$str = $new_course->fix_title($str);
 
 
 		return $str;
@@ -3628,54 +3628,54 @@ function drawMenuItems($menuArray) {
 	 * to the screen.
 	 *
 	 * @param Semester $semester
-	 * @param bool $boolDisplayHourCount
+	 * @param bool $bool_display_hour_count
 	 *       - If set to TRUE, it will display a small "hour count" message
 	 *         at the bottom of each semester, showing how many hours are in
 	 *         the semester.  Good for debugging purposes.
 	 * 
 	 * @return string
 	 */
-	function displaySemester(Semester $semester, $boolDisplayHourCount = false)
+	function display_semester(Semester $semester, $bool_display_hour_count = false)
 	{
 		// Display the contents of a semester object
 		// on the screen (in HTML)
 		$pC = "";
-		$pC .= $this->drawSemesterBoxTop($semester->title);
+		$pC .= $this->draw_semester_box_top($semester->title);
 
-		$countHoursCompleted = 0;
+		$count_hoursCompleted = 0;
 
 		// First, display the list of bare courses.
 
-		$semester->listCourses->sortAlphabeticalOrder();
-		$semester->listCourses->resetCounter();
-		//print_pre($semester->listCourses->toString());
-		while($semester->listCourses->hasMore())
+		$semester->list_courses->sort_alphabetical_order();
+		$semester->list_courses->reset_counter();
+		//print_pre($semester->list_courses->toString());
+		while($semester->list_courses->has_more())
 		{
-			$course = $semester->listCourses->getNext();
+			$course = $semester->list_courses->get_next();
 			//$pC .= "<tr><td colspan='8'>";
 			// Is this course being fulfilled by anything?
 
 			//if (is_object($course->courseFulfilledBy))
-			if (!($course->courseListFulfilledBy->isEmpty))
+			if (!($course->course_list_fulfilled_by->is_empty))
 			{ // this requirement is being fulfilled by something the student took...
 
-				//$pC .= $this->drawCourseRow($course->courseFulfilledBy);
-				$pC .= $this->drawCourseRow($course->courseListFulfilledBy->getFirst());
-				$course->courseListFulfilledBy->getFirst()->boolHasBeenDisplayed = true;
+				//$pC .= $this->draw_course_row($course->courseFulfilledBy);
+				$pC .= $this->draw_course_row($course->course_list_fulfilled_by->get_first());
+				$course->course_list_fulfilled_by->get_first()->bool_has_been_displayed = true;
 
-				//$countHoursCompleted += $course->courseFulfilledBy->hoursAwarded;
-				if ($course->courseListFulfilledBy->getFirst()->displayStatus == "completed")
+				//$count_hoursCompleted += $course->courseFulfilledBy->hours_awarded;
+				if ($course->course_list_fulfilled_by->get_first()->display_status == "completed")
 				{ // We only want to count completed hours, no midterm or enrolled courses.
-					$h = $course->courseListFulfilledBy->getFirst()->hoursAwarded;
-					if ($course->courseListFulfilledBy->getFirst()->boolGhostHour == TRUE) {
+					$h = $course->course_list_fulfilled_by->get_first()->hours_awarded;
+					if ($course->course_list_fulfilled_by->get_first()->bool_ghost_hour == TRUE) {
 					  $h = 0;
 					}
-					$countHoursCompleted += $h;
+					$count_hoursCompleted += $h;
 				}
 
 			} else {
 				// This requirement is not being fulfilled...
-				$pC .= $this->drawCourseRow($course);
+				$pC .= $this->draw_course_row($course);
 
 			}
 
@@ -3685,24 +3685,24 @@ function drawMenuItems($menuArray) {
 
 
 		// Now, draw all the groups.
-		$semester->listGroups->sortAlphabeticalOrder();
-		$semester->listGroups->resetCounter();
-		while($semester->listGroups->hasMore())
+		$semester->list_groups->sort_alphabetical_order();
+		$semester->list_groups->reset_counter();
+		while($semester->list_groups->has_more())
 		{
-			//adminDebug("dddd");
-			$group = $semester->listGroups->getNext();
+			//admin_debug("dddd");
+			$group = $semester->list_groups->get_next();
 			$pC .= "<tr><td colspan='8'>";
-			$pC .= $this->displayGroup($group);
-			$countHoursCompleted += $group->hoursFulfilledForCredit;
+			$pC .= $this->display_group($group);
+			$count_hoursCompleted += $group->hours_fulfilled_for_credit;
 			$pC .= "</td></tr>";
 		}
 
 		// Add hour count to the bottom...
-		if ($boolDisplayHourCount == true && $countHoursCompleted > 0)
+		if ($bool_display_hour_count == true && $count_hoursCompleted > 0)
 		{
 			$pC .= "<tr><td colspan='8'>
 				<div class='tenpt' style='text-align:right; margin-top: 10px;'>
-				Completed hours: $countHoursCompleted
+				Completed hours: $count_hoursCompleted
 				</div>
 				";
 			$pC .= "</td></tr>";
@@ -3719,7 +3719,7 @@ function drawMenuItems($menuArray) {
 					</td></tr>";
 		}
 
-		$pC .= $this->drawSemesterBoxBottom();
+		$pC .= $this->draw_semester_box_bottom();
 
 		return $pC;
 	}
@@ -3731,10 +3731,10 @@ function drawMenuItems($menuArray) {
 	 * rows, filled in with courses, or as a "blank row" for the user to click
 	 * on.
 	 *
-	 * @param Group $placeGroup
+	 * @param Group $place_group
 	 * @return string
 	 */
-	function displayGroup(Group $placeGroup)
+	function display_group(Group $place_group)
 	{
 		// Display a group, either filled in with courses,
 		// and/or with a "blank row" for the user to
@@ -3742,26 +3742,26 @@ function drawMenuItems($menuArray) {
 		$pC = "";
 
 		// Now, if you will recall, all of the groups and their courses, etc,
-		// are in the degreePlan's listGroups.  The $placeGroup object here
+		// are in the degree_plan's list_groups.  The $place_group object here
 		// is just a placeholder.  So, get the real group...
 
-		if (!$group = $this->degreePlan->findGroup($placeGroup->groupID))
+		if (!$group = $this->degree_plan->find_group($place_group->group_id))
 		{
-			adminDebug("Group not found.");
+			admin_debug("Group not found.");
 			return;
 		}
 
 		if ($group->title == "Core Fine Arts" )
 		{
-			//print_pre($group->toString());
-			//adminDebug($group->getFulfilledHours());
+			//print_pre($group->to_string());
+			//admin_debug($group->get_fulfilled_hours());
 		}
 
 
 
 		$title = $group->title;
 
-		$displayCourseList = new CourseList();
+		$display_course_list = new CourseList();
 
 		/*
 		// Display the title of the Group...
@@ -3771,89 +3771,89 @@ function drawMenuItems($menuArray) {
 		*/
 		// Okay, first look for courses in the first level
 		// of the group.
-		//$group->listCourses->sortAlphabeticalOrder();
+		//$group->list_courses->sort_alphabetical_order();
 
-		$displaySemesterNum = $placeGroup->assignedToSemesterNum;
-		//adminDebug("$group->title $displaySemesterNum");
+		$display_semesterNum = $place_group->assigned_to_semester_num;
+		//admin_debug("$group->title $display_semesterNum");
 
-		$group->listCourses->removeUnfulfilledAndUnadvisedCourses();
-		/*		if ($group->groupID == 660701)
+		$group->list_courses->remove_unfulfilled_and_unadvised_courses();
+		/*		if ($group->group_id == 660701)
 		{
-		//print_pre($group->toString());
+		//print_pre($group->to_string());
 		}
-		*/		$group->listCourses->resetCounter();
-		while($group->listCourses->hasMore())
+		*/		$group->list_courses->reset_counter();
+		while($group->list_courses->has_more())
 		{
-			$course = $group->listCourses->getNext();
+			$course = $group->list_courses->get_next();
 
 			// Do we have enough hours to keep going?
-			$fulfilledHours = $displayCourseList->countHours();
-			$remaining = $placeGroup->hoursRequired - $fulfilledHours;
-			//adminDebug("$group->title ff: $fulfilledHours rem: $remaining c:" . $course->toString());
+			$fulfilled_hours = $display_course_list->count_hours();
+			$remaining = $place_group->hours_required - $fulfilled_hours;
+			//admin_debug("$group->title ff: $fulfilled_hours rem: $remaining c:" . $course->toString());
 
 			// If the course in question is part of a substitution that is not
 			// for this group, then we should skip it.
-			if (!($course->courseListFulfilledBy->isEmpty))
+			if (!($course->course_list_fulfilled_by->is_empty))
 			{
-				$tryC = $course->courseListFulfilledBy->getFirst();
-				if ($tryC->boolSubstitution == true && $tryC->assignedToGroupID != $group->groupID)
+				$try_c = $course->course_list_fulfilled_by->get_first();
+				if ($try_c->bool_substitution == true && $try_c->assigned_to_group_id != $group->group_id)
 				{
-					//adminDebug($tryC->toString() . " subbed not in group $group->title.");
+					//admin_debug($try_c->toString() . " subbed not in group $group->title.");
 					continue;
 				}
 			}
 
 
-			//adminDebug($course->toString());
-			//if (is_object($course->courseFulfilledBy) && $course->courseFulfilledBy->boolHasBeenDisplayed != true && $course->boolHasBeenDisplayed != true)
-			if (!($course->courseListFulfilledBy->isEmpty) && $course->courseListFulfilledBy->getFirst()->boolHasBeenDisplayed != true && $course->boolHasBeenDisplayed != true)
+			//admin_debug($course->toString());
+			//if (is_object($course->courseFulfilledBy) && $course->courseFulfilledBy->bool_has_been_displayed != true && $course->bool_has_been_displayed != true)
+			if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->bool_has_been_displayed != true && $course->bool_has_been_displayed != true)
 			{
 				//$pC .= "<tr><td colspan='8'>";
-				//$titleText = "This course is a member of $group->title.";
-				//$pC .= $this->drawCourseRow($course->courseFulfilledBy, $group->iconFilename, $titleText);
+				//$title_text = "This course is a member of $group->title.";
+				//$pC .= $this->draw_course_row($course->courseFulfilledBy, $group->icon_filename, $title_text);
 				//$pC .= "</td></tr>";
 				//$c = $course->courseFulfilledBy;
-				$c = $course->courseListFulfilledBy->getFirst();
-				if ($remaining < $c->getHours())
+				$c = $course->course_list_fulfilled_by->get_first();
+				if ($remaining < $c->get_hours())
 				{
-					//adminDebug("here for " . $c->toString());
+					//admin_debug("here for " . $c->toString());
 					continue;
 				}
 
-				//adminDebug("here $c->courseID $group->title " . $c->toString());
-				$c->tempFlag = false;
-				$c->iconFilename = $group->iconFilename;
-				$c->titleText = "This course is a member of $group->title.";
-				//if (!$displayCourseList->findMatch($c))
+				//admin_debug("here $c->course_id $group->title " . $c->toString());
+				$c->temp_flag = false;
+				$c->icon_filename = $group->icon_filename;
+				$c->title_text = "This course is a member of $group->title.";
+				//if (!$display_course_list->find_match($c))
 				//{ // Make sure it isn't already in the display list.
-				$displayCourseList->add($c);
+				$display_course_list->add($c);
 				//}
 
-				//adminDebug("display " . $c->toString());
+				//admin_debug("display " . $c->toString());
 
 
 			}
 
-			if ($course->boolAdvisedToTake && $course->boolHasBeenDisplayed != true && $course->assignedToSemesterNum == $displaySemesterNum)
+			if ($course->bool_advised_to_take && $course->bool_has_been_displayed != true && $course->assigned_to_semester_num == $display_semesterNum)
 			{
 				//$pC .= "<tr><td colspan='8'>";
-				//$titleText = "The student has been advised to take this course to fulfill a $group->title requirement.";
-				//$pC .= $this->drawCourseRow($course, $group->iconFilename, $titleText, true);
+				//$title_text = "The student has been advised to take this course to fulfill a $group->title requirement.";
+				//$pC .= $this->draw_course_row($course, $group->icon_filename, $title_text, true);
 				//$pC .= "</td></tr>";
 				$c = $course;
-				if ($remaining < $c->getHours())
+				if ($remaining < $c->get_hours())
 				{
 					continue;
 				}
 
-				$c->tempFlag = true;
-				$c->iconFilename = $group->iconFilename;
-				$c->titleText = "The student has been advised to take this course to fulfill a $group->title requirement.";
-				//if (!$displayCourseList->findMatch($c))
+				$c->temp_flag = true;
+				$c->icon_filename = $group->icon_filename;
+				$c->title_text = "The student has been advised to take this course to fulfill a $group->title requirement.";
+				//if (!$display_course_list->find_match($c))
 				//{ // Make sure it isn't already in the display list.
-				$displayCourseList->add($c);
+				$display_course_list->add($c);
 				//}
-				//adminDebug($c->toString());
+				//admin_debug($c->toString());
 
 				// Take off remaining hours!
 
@@ -3863,86 +3863,86 @@ function drawMenuItems($menuArray) {
 
 		// Alright, now we will see if this group has any branches
 		// (groups within groups).
-		//adminDebug("-_-_-_-_ Looking in Group $group->title -_-");
-		//print_pre($group->toString());
+		//admin_debug("-_-_-_-_ Looking in Group $group->title -_-");
+		//print_pre($group->to_string());
 
-		$group->listGroups->resetCounter();
-		while($group->listGroups->hasMore())
+		$group->list_groups->reset_counter();
+		while($group->list_groups->has_more())
 		{
-			$branch = $group->listGroups->getNext();
+			$branch = $group->list_groups->get_next();
 			// look for courses at this level...
-			if (!$branch->listCourses->isEmpty)
+			if (!$branch->list_courses->is_empty)
 			{
 
-				$branch->listCourses->sortAlphabeticalOrder();
-				$branch->listCourses->resetCounter();
-				while($branch->listCourses->hasMore())
+				$branch->list_courses->sort_alphabetical_order();
+				$branch->list_courses->reset_counter();
+				while($branch->list_courses->has_more())
 				{
-					$course = $branch->listCourses->getNext();
-					//adminDebug("Examining course " . $course->toString());
+					$course = $branch->list_courses->get_next();
+					//admin_debug("Examining course " . $course->toString());
 					// Do we have enough hours to keep going?
-					$fulfilledHours = $displayCourseList->countHours();
-					$remaining = $placeGroup->hoursRequired - $fulfilledHours;
-					//adminDebug($course->boolHasBeenDisplayed);
-					//if (is_object($course->courseFulfilledBy) && $course->courseFulfilledBy->boolHasBeenDisplayed != true && $course->boolHasBeenDisplayed != true)
-					if (!($course->courseListFulfilledBy->isEmpty) && $course->courseListFulfilledBy->getFirst()->boolHasBeenDisplayed != true && $course->boolHasBeenDisplayed != true)
+					$fulfilled_hours = $display_course_list->count_hours();
+					$remaining = $place_group->hours_required - $fulfilled_hours;
+					//admin_debug($course->bool_has_been_displayed);
+					//if (is_object($course->courseFulfilledBy) && $course->courseFulfilledBy->bool_has_been_displayed != true && $course->bool_has_been_displayed != true)
+					if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->bool_has_been_displayed != true && $course->bool_has_been_displayed != true)
 					{
-						//adminDebug("got in here");
+						//admin_debug("got in here");
 						//$pC .= "<tr><td colspan='8'>";
-						//$titleText = "This course is a member of $group->title.";
-						//$pC .= $this->drawCourseRow($course->courseFulfilledBy, $group->iconFilename, $titleText);
+						//$title_text = "This course is a member of $group->title.";
+						//$pC .= $this->draw_course_row($course->courseFulfilledBy, $group->icon_filename, $title_text);
 						//$pC .= "</td></tr>";
 
 						//$c = $course->courseFulfilledBy;
-						$c = $course->courseListFulfilledBy->getFirst();
-						if ($remaining < $c->getHours() || $remaining < 1)
+						$c = $course->course_list_fulfilled_by->get_first();
+						if ($remaining < $c->get_hours() || $remaining < 1)
 						{
-							//adminDebug(" - Skip course because remaining hours are gone.");
+							//admin_debug(" - Skip course because remaining hours are gone.");
 							continue;
 						}
 
-						$c->tempFlag = false;
-						$c->iconFilename = $group->iconFilename;
-						$c->titleText = "This course is a member of $group->title.";
-						//						adminDebug("-- Add fulfulled course to display list.");
-						if (!$displayCourseList->findMatch($c))
+						$c->temp_flag = false;
+						$c->icon_filename = $group->icon_filename;
+						$c->title_text = "This course is a member of $group->title.";
+						//						admin_debug("-- Add fulfulled course to display list.");
+						if (!$display_course_list->find_match($c))
 						{ // Make sure it isn't already in the display list.
-							//adminDebug("adding course!");
-							$displayCourseList->add($c);
-						} else if (is_object($c->courseTransfer))
+							//admin_debug("adding course!");
+							$display_course_list->add($c);
+						} else if (is_object($c->course_transfer))
 						{
-							if (!$displayCourseList->findMatch($c->courseTransfer))
+							if (!$display_course_list->find_match($c->course_transfer))
 							{ // Make sure it isn't already in the display list.
-								//adminDebug("adding transfer course!");
-								$displayCourseList->add($c);
+								//admin_debug("adding transfer course!");
+								$display_course_list->add($c);
 							}
 						}
 
 
 					}
 
-					if ($course->boolAdvisedToTake && $course->boolHasBeenDisplayed != true && $course->assignedToSemesterNum == $displaySemesterNum)
+					if ($course->bool_advised_to_take && $course->bool_has_been_displayed != true && $course->assigned_to_semester_num == $display_semesterNum)
 					{
-						//adminDebug($course->toString());
+						//admin_debug($course->toString());
 						//$pC .= "<tr><td colspan='8'>";
-						//$titleText = "The student has been advised to take this course to fulfill a $group->title requirement.";
-						//$pC .= $this->drawCourseRow($course, $group->iconFilename, $titleText, true);
+						//$title_text = "The student has been advised to take this course to fulfill a $group->title requirement.";
+						//$pC .= $this->draw_course_row($course, $group->icon_filename, $title_text, true);
 						//$pC .= "</td></tr>";
-						//adminDebug($course->toString() . " - " . $course->boolHasBeenDisplayed);
+						//admin_debug($course->toString() . " - " . $course->bool_has_been_displayed);
 
 						$c = $course;
-						if ($remaining < $c->getHours() || $remaining < 1)
+						if ($remaining < $c->get_hours() || $remaining < 1)
 						{
-							//adminDebug(" - Skip course because remaining hours are gone.");
+							//admin_debug(" - Skip course because remaining hours are gone.");
 							continue;
 						}
 
-						$c->tempFlag = true;
-						$c->iconFilename = $group->iconFilename;
-						$c->titleText = "The student has been advised to take this course to fulfill a $group->title requirement.";
-						if (!$displayCourseList->findMatch($c))
+						$c->temp_flag = true;
+						$c->icon_filename = $group->icon_filename;
+						$c->title_text = "The student has been advised to take this course to fulfill a $group->title requirement.";
+						if (!$display_course_list->find_match($c))
 						{
-							$displayCourseList->add($c);
+							$display_course_list->add($c);
 						}
 
 					}
@@ -3958,37 +3958,37 @@ function drawMenuItems($menuArray) {
 
 
 
-		//$displayCourseList->removeDuplicates();
-		//$displayCourseList->sortAlphabeticalOrder();
+		//$display_course_list->remove_duplicates();
+		//$display_course_list->sort_alphabetical_order();
 
-		$displayCourseList->sortAdvisedLastAlphabetical();
+		$display_course_list->sort_advised_last_alphabetical();
 
 
-		$pC .= $this->displayGroupCourseList($displayCourseList, $group, $displaySemesterNum);
+		$pC .= $this->display_group_course_list($display_course_list, $group, $display_semesterNum);
 		//if ($group->title == "Major Ensemble"){print_pre($group->toString());	}
 
-		$fulfilledHours = $displayCourseList->countHours("", false, false, true);
-		$fulfilledCreditHours = $displayCourseList->countCreditHours("",false,true);
+		$fulfilled_hours = $display_course_list->count_hours("", false, false, true);
+		$fulfilled_credit_hours = $display_course_list->count_credit_hours("",false,true);
 		
 
-		$testHours = $fulfilledHours;
+		$test_hours = $fulfilled_hours;
 		// if the fulfilledCreditHours is > than the fulfilledHours,
 		// then assign the fulfilledCreditHours to the testHours.
-		if ($fulfilledCreditHours > $fulfilledHours)
+		if ($fulfilled_credit_hours > $fulfilled_hours)
 		{ // done to fix a bug involving splitting hours in a substitution.		  
-			$testHours = $fulfilledCreditHours;
+			$test_hours = $fulfilled_credit_hours;
 		} 
 		// If there are any remaining hours in this group,
 		// draw a "blank" selection row.
-		$remaining = $placeGroup->hoursRequired - $testHours;
-		//adminDebug("$placeGroup->title $placeGroup->hoursRequired $testHours");
-		$placeGroup->hoursRemaining = $remaining;
-		$placeGroup->hoursFulfilled = $fulfilledHours;
-		$placeGroup->hoursFulfilledForCredit = $fulfilledCreditHours;
+		$remaining = $place_group->hours_required - $test_hours;
+		//admin_debug("$place_group->title $place_group->hours_required $test_hours");
+		$place_group->hours_remaining = $remaining;
+		$place_group->hours_fulfilled = $fulfilled_hours;
+		$place_group->hours_fulfilled_for_credit = $fulfilled_credit_hours;
 		if ($remaining > 0)
 		{
 			$pC .= "<tr><td colspan='8' class='tenpt'>";
-			$pC .= $this->drawGroupSelectRow($placeGroup, $remaining);
+			$pC .= $this->draw_group_select_row($place_group, $remaining);
 			$pC .= "</td></tr>";
 		}
 
@@ -4003,27 +4003,27 @@ function drawMenuItems($menuArray) {
 	 * @param Group $group
 	 * @param Course $course
 	 */
-	function markCourseAsDisplayed(Group $group, Course $course)
+	function mark_course_as_displayed(Group $group, Course $course)
 	{
 		// Find all instances of $course in $group,
 		// and mark as displayed.
 
-		if ($objList = $group->listCourses->findAllMatches($course))
+		if ($obj_list = $group->list_courses->find_all_matches($course))
 		{
-			$courseList = CourseList::cast($objList);
-			//adminDebug("marking all displayed: " . $course->toString());
-			$courseList->markAsDisplayed();
+			$course_list = CourseList::cast($obj_list);
+			//admin_debug("marking all displayed: " . $course->toString());
+			$course_list->mark_as_displayed();
 		}
 		// Now, go through all the course lists within each branch...
-		$group->listGroups->resetCounter();
-		while($group->listGroups->hasMore())
+		$group->list_groups->reset_counter();
+		while($group->list_groups->has_more())
 		{
-			$g = $group->listGroups->getNext();
-			if ($objList = $g->listCourses->findAllMatches($course))
+			$g = $group->list_groups->get_next();
+			if ($obj_list = $g->list_courses->find_all_matches($course))
 			{
 
-				$courseList = CourseList::cast($objList);
-				$courseList->markAsDisplayed($semesterNum);
+				$course_list = CourseList::cast($obj_list);
+				$course_list->mark_as_displayed($semester_num);
 			}
 		}
 
@@ -4034,31 +4034,31 @@ function drawMenuItems($menuArray) {
 
   /**
    * Displays all the courses in a CourseList object, using 
-   * the drawCourseRow function.
+   * the draw_course_row function.
    * 
-   * It looks like the group and semesterNum are not being used
+   * It looks like the group and semester_num are not being used
    * anymore.
    * 
    * @todo Check on unused variables.
    *
-   * @param CourseList $courseList
+   * @param CourseList $course_list
    * @param unknown_type $group
-   * @param unknown_type $semesterNum
+   * @param unknown_type $semester_num
    * @return unknown
    */
-	function displayGroupCourseList($courseList, $group, $semesterNum)
+	function display_group_course_list($course_list, $group, $semester_num)
 	{
-		$courseList->resetCounter();
-		while($courseList->hasMore())
+		$course_list->reset_counter();
+		while($course_list->has_more())
 		{
-			$course = $courseList->getNext();
+			$course = $course_list->get_next();
 
-			//adminDebug("disp: $group->title : " . $course->toString());
-			if ($course->boolTransfer == true)
+			//admin_debug("disp: $group->title : " . $course->toString());
+			if ($course->bool_transfer == true)
 			{
-				if (is_object($course->courseTransfer))
+				if (is_object($course->course_transfer))
 				{
-					//	debugCT (" - - trns: " . $course->courseTransfer->toString());
+					//	debugCT (" - - trns: " . $course->course_transfer->toString());
 				} else {
 					//debugCT (" - - trns_noeqv: " . $course->toString());
 				}
@@ -4066,25 +4066,25 @@ function drawMenuItems($menuArray) {
 
 
 			//$pC .= "<tr><td colspan='8'>";
-			$pC .= $this->drawCourseRow($course, $course->iconFilename, $course->titleText, $course->tempFlag);
+			$pC .= $this->draw_course_row($course, $course->icon_filename, $course->title_text, $course->temp_flag);
 
 			// Doesn't matter if its a specified repeat or not.  Just
 			// mark it as having been displayed.
-			$course->boolHasBeenDisplayed = true;
+			$course->bool_has_been_displayed = true;
 			/*
 			if ($course->boolSpecifiedRepeat != true)
 			{
 			// Regular, non-repeat courses.  Mark all of them
 			// as displayed, in all branches.
-			//$this->markCourseAsDisplayed($group, $course);
+			//$this->mark_course_as_displayed($group, $course);
 
-			$course->boolHasBeenDisplayed = true;
-			adminDebug("Marking displayed: " . $course->toString());
+			$course->bool_has_been_displayed = true;
+			admin_debug("Marking displayed: " . $course->toString());
 			} else {
 			// This is a course which is supposed to be repeated.
 			// So, only mark this one instance as displayed.
 
-			$course->boolHasBeenDisplayed = true;
+			$course->bool_has_been_displayed = true;
 
 			}
 			*/
@@ -4100,73 +4100,73 @@ function drawMenuItems($menuArray) {
 	 * the user to click on it to select a course from the popup.
 	 *
 	 * @param Group $group
-	 * @param int $remainingHours
+	 * @param int $remaining_hours
 	 * @return string
 	 */
-	function drawGroupSelectRow(Group $group, $remainingHours)
+	function draw_group_select_row(Group $group, $remaining_hours)
 	{
 		$pC = "";
-		$imgPath = $this->themeLocation . "/images";
-		$onMouseOver = " onmouseover=\"style.backgroundColor='#FFFF99'\"
+		$img_path = $this->theme_location . "/images";
+		$on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
       				onmouseout=\"style.backgroundColor='white'\" ";
 
-		if ($this->pageIsMobile) $onMouseOver = "";  // Causes problems for some mobile devices.
+		if ($this->page_is_mobile) $on_mouse_over = "";  // Causes problems for some mobile devices.
 		
-		$w1_1 = $this->widthArray[0];
-		$w1_2 = $this->widthArray[1];
-		$w1_3 = $this->widthArray[2];
-		$w2 = $this->widthArray[3];
-		$w3 = $this->widthArray[4];
-		$w4 = $this->widthArray[5];
-		$w5 = $this->widthArray[6];
-		$w6 = $this->widthArray[7];
+		$w1_1 = $this->width_array[0];
+		$w1_2 = $this->width_array[1];
+		$w1_3 = $this->width_array[2];
+		$w2 = $this->width_array[3];
+		$w3 = $this->width_array[4];
+		$w4 = $this->width_array[5];
+		$w5 = $this->width_array[6];
+		$w6 = $this->width_array[7];
 
 		$s = "s";
-		if ($remainingHours < 2)
+		if ($remaining_hours < 2)
 		{
 			$s = "";
 		}
-		$selectIcon = "<img src='$imgPath/select.gif' border='0'>";
-		$iconLink = "<img src='$imgPath/icons/$group->iconFilename' width='19' height='19' border='0' alt='$titleText' title='$titleText'>";
+		$select_icon = "<img src='$img_path/select.gif' border='0'>";
+		$icon_link = "<img src='$img_path/icons/$group->icon_filename' width='19' height='19' border='0' alt='$title_text' title='$title_text'>";
 
-		$blankDegreeID = "";
-		if ($this->boolBlank)
+		$blank_degree_id = "";
+		if ($this->bool_blank)
 		{
-			$blankDegreeID = $this->degreePlan->degreeID;
+			$blank_degree_id = $this->degree_plan->degree_id;
 		}
 
-		$jsCode = "selectCourseFromGroup(\"$group->groupID\", \"$group->assignedToSemesterNum\", \"$remainingHours\", \"$blankDegreeID\");";
+		$js_code = "select_course_from_group(\"$group->group_id\", \"$group->assigned_to_semester_num\", \"$remaining_hours\", \"$blank_degree_id\");";
 
-		$rowMsg = "<i>Click <font color='red'>&gt;&gt;</font> to select $remainingHours hour$s.</i>";
-		$handClass = "hand";
+		$row_msg = "<i>Click <font color='red'>&gt;&gt;</font> to select $remaining_hours hour$s.</i>";
+		$hand_class = "hand";
 
-		if ($this->boolPrint)
+		if ($this->bool_print)
 		{
 			// In print view, disable all popups and mouseovers.
-			$onMouseOver = "";
-			$jsCode = "";
-			$handClass = "";
-			$rowMsg = "<i>Select $remainingHours hour$s from $group->title.</i>";
+			$on_mouse_over = "";
+			$js_code = "";
+			$hand_class = "";
+			$row_msg = "<i>Select $remaining_hours hour$s from $group->title.</i>";
 		}
 
 
-		if ($group->groupID == -88)
+		if ($group->group_id == -88)
 		{ // This is the Add a Course group.
-			$rowMsg = "<i>Click to add an additional course.</i>";
-			$selectIcon = "<span style='font-size: 16pt; color:blue;'>+</span>";
-			$iconLink = "";
+			$row_msg = "<i>Click to add an additional course.</i>";
+			$select_icon = "<span style='font-size: 16pt; color:blue;'>+</span>";
+			$icon_link = "";
 		}
 
 
 		$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
-     	<tr height='20' class='$handClass'
-      		$onMouseOver title='$group->title'>
+     	<tr height='20' class='$hand_class'
+      		$on_mouse_over title='$group->title'>
       		<td width='$w1_1' align='left'>&nbsp;</td>
-      		<td width='$w1_2' align='left' onClick='$jsCode'>$iconLink</td>
-      		<td width='$w1_3' align='left' onClick='$jsCode'>$selectIcon</td>
-      		<td align='left' colspan='5' class='tenpt underline' onClick='$jsCode'>
-      		$rowMsg
+      		<td width='$w1_2' align='left' onClick='$js_code'>$icon_link</td>
+      		<td width='$w1_3' align='left' onClick='$js_code'>$select_icon</td>
+      		<td align='left' colspan='5' class='tenpt underline' onClick='$js_code'>
+      		$row_msg
        				
      	</tr>
      	</table>";		
@@ -4179,29 +4179,29 @@ function drawMenuItems($menuArray) {
 	}
 
 	/**
-	 * Uses the drawBoxTop function, specifically for semesters.
+	 * Uses the draw_box_top function, specifically for semesters.
 	 *
 	 * @param string $title
 	 * @param bool $hideheaders
 	 * @return string
 	 */
-	function drawSemesterBoxTop($title, $hideheaders = false)
+	function draw_semester_box_top($title, $hideheaders = false)
 	{
 
 	  $w = 300;
-	  if ($this->pageIsMobile) $w = "100%";
-		return $this->drawBoxTop($title, $hideheaders, $w);
+	  if ($this->page_is_mobile) $w = "100%";
+		return $this->draw_box_top($title, $hideheaders, $w);
 	}
 
 	/**
-	 * Uses the drawBoxBottom function, specifically for semesters.
-	 * Actually, this function is a straight alias for $this->drawBoxBottom().
+	 * Uses the draw_box_bottom function, specifically for semesters.
+	 * Actually, this function is a straight alias for $this->draw_box_bottom().
 	 *
 	 * @return string
 	 */
-	function drawSemesterBoxBottom()
+	function draw_semester_box_bottom()
 	{
-		return $this->drawBoxBottom();
+		return $this->draw_box_bottom();
 	}
 
 	/**
@@ -4209,7 +4209,7 @@ function drawMenuItems($menuArray) {
 	 *
 	 * @return string
 	 */
-	function drawBoxBottom()
+	function draw_box_bottom()
 	{
 		return "</table>";
 	}
@@ -4222,61 +4222,61 @@ function drawMenuItems($menuArray) {
 	 * @param bool $hideheaders
 	 *       - If TRUE, then the course/hrs/grd headers will not be displayed.
 	 * 
-	 * @param int $tableWidth
+	 * @param int $table_width
 	 *       - The HTML table width, in pixels.  If not set, it will default
 	 *         to 300 pixels wide.
 	 * 
 	 * @return string
 	 */
-	function drawBoxTop($title, $hideheaders=false, $tableWidth = 300)
+	function draw_box_top($title, $hideheaders=false, $table_width = 300)
 	{ // returns the beginnings of the year tables...
 
-		// Get width values from widthArray (supplied by calling function,
+		// Get width values from width_array (supplied by calling function,
 		// for example, draw_year_box_top
-		$w1_1 = $this->widthArray[0];
-		$w1_2 = $this->widthArray[1];
-		$w1_3 = $this->widthArray[2];
-		$w2 = $this->widthArray[3];
-		$w3 = $this->widthArray[4];
-		$w4 = $this->widthArray[5];
-		$w5 = $this->widthArray[6];
-		$w6 = $this->widthArray[7];
+		$w1_1 = $this->width_array[0];
+		$w1_2 = $this->width_array[1];
+		$w1_3 = $this->width_array[2];
+		$w2 = $this->width_array[3];
+		$w3 = $this->width_array[4];
+		$w4 = $this->width_array[5];
+		$w5 = $this->width_array[6];
+		$w6 = $this->width_array[7];
 
-		if ($this->boolPopup == true)
+		if ($this->bool_popup == true)
 		{
-			$w1_1 = $this->popupWidthArray[0];
-			$w1_2 = $this->popupWidthArray[1];
-			$w1_3 = $this->popupWidthArray[2];
-			$w2 = $this->popupWidthArray[3];
-			$w3 = $this->popupWidthArray[4];
-			$w4 = $this->popupWidthArray[5];
-			$w5 = $this->popupWidthArray[6];
-			$w6 = $this->popupWidthArray[7];
+			$w1_1 = $this->popup_width_array[0];
+			$w1_2 = $this->popup_width_array[1];
+			$w1_3 = $this->popup_width_array[2];
+			$w2 = $this->popup_width_array[3];
+			$w3 = $this->popup_width_array[4];
+			$w4 = $this->popup_width_array[5];
+			$w5 = $this->popup_width_array[6];
+			$w6 = $this->popup_width_array[7];
 		}
 
 
 		$headers = array();
 		if ($hideheaders != true)
 		{
-			$headers[0] = "Course";
-			$headers[1] = "Hrs";
-			$headers[2] = "Grd";
-			$headers[3] = "Pts";
+			$headers[0] = "_course";
+			$headers[1] = "_hrs";
+			$headers[2] = "_grd";
+			$headers[3] = "_pts";
 		}
 
 
 		$rtn = "
-		   <table border='0' width='$tableWidth' cellpadding='0' cellspacing='0' class='fp-box-top'>
+		   <table border='0' width='$table_width' cellpadding='0' cellspacing='0' class='fp-box-top'>
    			<tr>
     		<td colspan='8' class='blueTitle' align='center' valign='top'>
     				";
-		$rtn .= $this->drawCurvedTitle($title);
+		$rtn .= $this->draw_curved_title($title);
 
 		$rtn .= "
     		</td>
    			</tr>
    					";
-		if (!$hideHeaders)
+		if (!$hide_headers)
 		{
 			$rtn .= "
    			<tr height='20'>
@@ -4323,24 +4323,24 @@ function drawMenuItems($menuArray) {
 	 * @param string $title
 	 * @return string
 	 */
-	function drawCurvedTitle($title)
+	function draw_curved_title($title)
 	{
 		// Will simply draw a curved title bar containing the $title
 		// as the text.
-		$imgPath = $this->themeLocation . "/images";
+		$img_path = $this->theme_location . "/images";
 
 		$rtn = "
      <table border='0' class='blueTitle' width='100%' cellpadding='0' cellspacing='0'>
        <tr>
-        <td width='10%' align='left' valign='top'><img src='$imgPath/corner_tl.gif'></td>
+        <td width='10%' align='left' valign='top'><img src='$img_path/corner_tl.gif'></td>
         <td width='80%' align='center' rowspan='2'>
          <span class='tenpt'><b>$title</b></span>
         </td>
-        <td width='10%' align='right' valign='top'><img src='$imgPath/corner_tr.gif'></td>
+        <td width='10%' align='right' valign='top'><img src='$img_path/corner_tr.gif'></td>
        </tr>
        <tr>
-        <td align='left' valign='bottom'><img src='$imgPath/corner_bl.gif'></td>
-        <td align='right' valign='bottom'><img src='$imgPath/corner_br.gif'></td>
+        <td align='left' valign='bottom'><img src='$img_path/corner_bl.gif'></td>
+        <td align='right' valign='bottom'><img src='$img_path/corner_br.gif'></td>
        </tr> 
       </table>
 	";
@@ -4357,162 +4357,162 @@ function drawMenuItems($menuArray) {
 	 * as any necessary icons next to it.
 	 *
 	 * @param Course $course
-	 * @param string $iconFilename
-	 * @param string $titleText
-	 * @param bool $jsToggleAndSave
+	 * @param string $icon_filename
+	 * @param string $title_text
+	 * @param bool $js_toggle_and_save
 	 *         - If set to TRUE, when the checkbox next to this course is clicked,
 	 *           the page will be submitted and a draft will be saved.
 	 * 
-	 * @param bool $boolDisplayCheck
+	 * @param bool $bool_display_check
 	 *         - If set to FALSE, no checkbox will be displayed for this course row.
 	 * 
-	 * @param bool $boolAddFootnote
-	 * @param bool $boolAddAsteriskToTransfers
+	 * @param bool $bool_add_footnote
+	 * @param bool $bool_add_asterisk_to_transfers
 	 *
 	 * @return string
 	 */
-	function drawCourseRow(Course $course, $iconFilename = "", $titleText = "", $jsToggleAndSave = false, $boolDisplayCheck = true, $boolAddFootnote = true, $boolAddAsteriskToTransfers = false)
+	function draw_course_row(Course $course, $icon_filename = "", $title_text = "", $js_toggle_and_save = false, $bool_display_check = true, $bool_add_footnote = true, $bool_add_asterisk_to_transfers = false)
 	{
 		// Display a course itself...
 		$pC = "";
-		$w1_1 = $this->widthArray[0];
-		$w1_2 = $this->widthArray[1];
-		$w1_3 = $this->widthArray[2];
-		$w2 = $this->widthArray[3];
-		$w3 = $this->widthArray[4];
-		$w4 = $this->widthArray[5];
-		$w5 = $this->widthArray[6];
-		$w6 = $this->widthArray[7];
+		$w1_1 = $this->width_array[0];
+		$w1_2 = $this->width_array[1];
+		$w1_3 = $this->width_array[2];
+		$w2 = $this->width_array[3];
+		$w3 = $this->width_array[4];
+		$w4 = $this->width_array[5];
+		$w5 = $this->width_array[6];
+		$w6 = $this->width_array[7];
 
-		$imgPath = $this->themeLocation . "/images";
+		$img_path = $this->theme_location . "/images";
 		
 		// The current term we are advising for.
-		$advisingTermID = $GLOBALS["advisingTermID"];
+		$advising_term_id = $GLOBALS["advising_term_id"];
 
-		$course->assignDisplayStatus();
+		$course->assign_display_status();
 		// If the course has already been advised in a different semester,
-		// we should set the advisingTermID to that and disable unchecking.
-		if ($course->advisedTermID*1 > 0 && $course->boolAdvisedToTake == true && $course->advisedTermID != $advisingTermID)
+		// we should set the advising_term_id to that and disable unchecking.
+		if ($course->advised_term_id*1 > 0 && $course->bool_advised_to_take == true && $course->advised_term_id != $advising_term_id)
 		{
-			$course->displayStatus = "disabled";
-			$advisingTermID = $course->advisedTermID;
+			$course->display_status = "disabled";
+			$advising_term_id = $course->advised_term_id;
 		}
 
 
-		if ($course->subjectID == "")
+		if ($course->subject_id == "")
 		{
-			$course->loadDescriptiveData();
+			$course->load_descriptive_data();
 		}
 
 
-		$subjectID = $course->subjectID;
-		$courseNum = $course->courseNum;
+		$subject_id = $course->subject_id;
+		$course_num = $course->course_num;
 
 
-		$oSubjectID = $subjectID;
-		$oCourseNum = $courseNum;
+		$o_subject_id = $subject_id;
+		$o_course_num = $course_num;
 
 		$footnote = "";
 		$ast = "";
 		// Is this actually a transfer course?  If so, display its
-		// original subjectID and courseNum.
-		if ($course->boolTransfer == true)
+		// original subject_id and course_num.
+		if ($course->bool_transfer == true)
 		{
-			$subjectID = $course->courseTransfer->subjectID;
-			$courseNum = $course->courseTransfer->courseNum;
-			$institutionName = $course->courseTransfer->institutionName;
+			$subject_id = $course->course_transfer->subject_id;
+			$course_num = $course->course_transfer->course_num;
+			$institution_name = $course->course_transfer->institution_name;
 
-			if ($boolAddAsteriskToTransfers == true)
+			if ($bool_add_asterisk_to_transfers == true)
 			{
-				$course->courseTransfer->loadDescriptiveTransferData($this->student->studentID);
-				if ($course->courseTransfer->transferEqvText != "")
+				$course->course_transfer->load_descriptive_transfer_data($this->student->student_id);
+				if ($course->course_transfer->transfer_eqv_text != "")
 				{
 					$ast = "*";
-					$GLOBALS["advisingCourseHasAsterisk"] = true;
+					$GLOBALS["advising_course_has_asterisk"] = true;
 				}
 			}
 
 			// Apply a footnote if it has a local eqv.
-			if ($boolAddFootnote == true && $course->courseID > 0)
+			if ($bool_add_footnote == true && $course->course_id > 0)
 			{
 				$footnote = "";
 
 				$footnote .= "<span class='superscript'>T";
-				$fcount = count($this->footnoteArray["transfer"]) + 1;
-				if ($course->boolHasBeenDisplayed == true)
+				$fcount = count($this->footnote_array["transfer"]) + 1;
+				if ($course->bool_has_been_displayed == true)
 				{ // If we've already displayed this course once, and are
 					// now showing it again (like in the Transfer Credit list)
 					// we do not want to increment the footnote counter.
-					$fcount = $course->transferFootnote;
+					$fcount = $course->transfer_footnote;
 				}
-				$course->transferFootnote = $fcount;
+				$course->transfer_footnote = $fcount;
 				$footnote .= "$fcount</span>";
-				$this->footnoteArray["transfer"][$fcount] = "$oSubjectID $oCourseNum ~~ $subjectID $courseNum ~~  ~~ $institutionName";
+				$this->footnote_array["transfer"][$fcount] = "$o_subject_id $o_course_num ~~ $subject_id $course_num ~~  ~~ $institution_name";
 			}
 		}
 
 
-		if ($course->boolSubstitution == true )
+		if ($course->bool_substitution == true )
 		{
 
-			if ($course->courseSubstitution->subjectID == "")
-			{ // Reload subjectID, courseNum, etc, for the substitution course,
+			if ($course->course_substitution->subject_id == "")
+			{ // Reload subject_id, course_num, etc, for the substitution course,
 				// which is actually the original requirement.
-				if (is_object($course->courseSubstitution))
+				if (is_object($course->course_substitution))
 				{
-					$course->courseSubstitution->loadDescriptiveData();
+					$course->course_substitution->load_descriptive_data();
 				} 
 				
 			}
 
-			$oSubjectID = $course->courseSubstitution->subjectID;
-			$oCourseNum = $course->courseSubstitution->courseNum;
+			$o_subject_id = $course->course_substitution->subject_id;
+			$o_course_num = $course->course_substitution->course_num;
 
-			if ($boolAddFootnote == true)
+			if ($bool_add_footnote == true)
 			{
 				$footnote = "";
 				$footnote .= "<span class='superscript'>S";
-				$fcount = count($this->footnoteArray["substitution"]) + 1;
-				if ($course->boolHasBeenDisplayed == true)
+				$fcount = count($this->footnote_array["substitution"]) + 1;
+				if ($course->bool_has_been_displayed == true)
 				{ // If we've already displayed this course once, and are
 					// now showing it again (like in the Transfer Credit list)
 					// we do not want to increment the footnote counter.
-					$fcount = $course->substitutionFootnote;
+					$fcount = $course->substitution_footnote;
 				}
-				$course->substitutionFootnote = $fcount;
+				$course->substitution_footnote = $fcount;
 				$footnote .= "$fcount</span>";
-				$this->footnoteArray["substitution"][$fcount] = "$oSubjectID $oCourseNum ~~ $subjectID $courseNum ~~ $course->substitutionHours ~~ $course->assignedToGroupID";
+				$this->footnote_array["substitution"][$fcount] = "$o_subject_id $o_course_num ~~ $subject_id $course_num ~~ $course->substitution_hours ~~ $course->assigned_to_group_id";
 				
 			}
 		}
 
-		$hours = $course->hoursAwarded;
+		$hours = $course->hours_awarded;
 
 		if ($hours*1 < 1)
 		{
-			$hours = $course->getCatalogHours();
+			$hours = $course->get_catalog_hours();
 		}
 
 		$hours = $hours * 1;
 
-		$varHourIcon = "&nbsp;";
+		$var_hour_icon = "&nbsp;";
 		
 		
-		if ($course->hasVariableHours() == true && !$course->boolTaken)
+		if ($course->has_variable_hours() == true && !$course->bool_taken)
 		{
-		  // The boolTaken part of this IF statement is because if the course
-		  // has been completed, we should only use the hoursAwarded.
+		  // The bool_taken part of this IF statement is because if the course
+		  // has been completed, we should only use the hours_awarded.
 		  
-			$varHourIcon = "<img src='$this->themeLocation/images/var_hour.gif'
+			$var_hour_icon = "<img src='$this->theme_location/images/var_hour.gif'
 								title='This course has variable hours.'
 								alt='This course has variable hours.'>";
-			$hours = $course->getAdvisedHours();
+			$hours = $course->get_advised_hours();
 
 		}
 
-		if ($course->boolGhostHour == TRUE) {
+		if ($course->bool_ghost_hour == TRUE) {
 		  // This course was given a "ghost hour", meaning it is actually
-		  // worth 0 hours, not 1, even though it's hoursAwarded is currently
+		  // worth 0 hours, not 1, even though it's hours_awarded is currently
 		  // set to 1.  So, let's just make the display be 0.
 		  $hours = "0";
 		}
@@ -4528,189 +4528,189 @@ function drawMenuItems($menuArray) {
 			$dispgrade = "";
 		}
 
-		if ($course->boolHideGrade)
+		if ($course->bool_hide_grade)
 		{
 		  $dispgrade = "--";
-		  $this->boolHidingGrades = true;
+		  $this->bool_hiding_grades = true;
 		}
 		
-		$displayStatus =  $course->displayStatus;
+		$display_status =  $course->display_status;
 
-		if ($displayStatus == "completed")
+		if ($display_status == "completed")
 		{
-			$pts = $this->getQualityPoints($grade, $hours);
+			$pts = $this->get_quality_points($grade, $hours);
 		}
 
-		$courseID = $course->courseID;
-		$semesterNum = $course->assignedToSemesterNum;
-		$groupID = $course->assignedToGroupID;
-		$randomID = $course->randomID;
-		$advisedHours = $course->advisedHours;
+		$course_id = $course->course_id;
+		$semester_num = $course->assigned_to_semester_num;
+		$group_id = $course->assigned_to_group_id;
+		$random_id = $course->random_id;
+		$advised_hours = $course->advised_hours;
 
-		$uniqueID = $courseID . "_" . $semesterNum . "_" . rand(1,9999);
-		$hidName = "advisecourse_$courseID" . "_$semesterNum" . "_$groupID" . "_$advisedHours" . "_$randomID" . "_$advisingTermID" . "_random" . rand(1,9999);
-		$hidValue = "";
+		$unique_id = $course_id . "_" . $semester_num . "_" . rand(1,9999);
+		$hid_name = "advisecourse_$course_id" . "_$semester_num" . "_$group_id" . "_$advised_hours" . "_$random_id" . "_$advising_term_id" . "_random" . rand(1,9999);
+		$hid_value = "";
 		$opchecked = "";
-		if ($course->boolAdvisedToTake == true)
+		if ($course->bool_advised_to_take == true)
 		{
-			$hidValue = "true";
+			$hid_value = "true";
 			$opchecked = "-check";
 		}
 
-		$opOnClickFunction = "toggleSelection";
-		if ($jsToggleAndSave == true)
+		$op_on_click_function = "toggle_selection";
+		if ($js_toggle_and_save == true)
 		{
-			$opOnClickFunction = "toggleSelectionAndSave";
+			$op_on_click_function = "toggle_selection_and_save";
 		}
 
-		$extraJSVars = "";
-		if ($course->displayStatus == "disabled")
+		$extra_j_s_vars = "";
+		if ($course->display_status == "disabled")
 		{ // Checkbox needs to be disabled because this was advised in another
 			// term.
-			$opOnClickFunction = "toggleDisabledChangeTerm";
-			$course->termID = $course->advisedTermID;
-			$extraJSVars = $course->getTermDescription();
+			$op_on_click_function = "toggle_disabled_change_term";
+			$course->term_id = $course->advised_term_id;
+			$extra_j_s_vars = $course->get_term_description();
 
 		}
 
-		if ($course->displayStatus == "completed" || $course->displayStatus == "enrolled")
+		if ($course->display_status == "completed" || $course->display_status == "enrolled")
 		{
-			$opOnClickFunction = "toggleDisabledCompleted";
+			$op_on_click_function = "toggle_disabled_completed";
 			$opchecked = "";
-			$extraJSVars = $course->displayStatus;
+			$extra_j_s_vars = $course->display_status;
 		}
 
-		if ($course->displayStatus == "retake")
+		if ($course->display_status == "retake")
 		{
 			// this course was probably subbed in while the student
 			// was still enrolled, and they have since made an F or W.
 			// So, disable it.
-			$opOnClickFunction = "dummyToggleSelection";
+			$op_on_click_function = "dummy_toggle_selection";
 			$opchecked = "";
 		}
 
 
-		if ($this->boolPrint || $this->boolBlank)
+		if ($this->bool_print || $this->bool_blank)
 		{
 			// If this is print view, disable clicking.
-			$opOnClickFunction = "dummyToggleSelection";
+			$op_on_click_function = "dummy_toggle_selection";
 		}
 
-		if ($_SESSION["fpCanAdvise"] != true)
+		if ($_SESSION["fp_can_advise"] != true)
 		{
 			// This user does not have the abilty to advise,
 			// so take away the ability to toggle anything (like
 			// we are in print view).
-			$opOnClickFunction = "dummyToggleSelection";
+			$op_on_click_function = "dummy_toggle_selection";
 		}
 
-		$op = "<img src='$imgPath/cb_" . $displayStatus . "$opchecked.gif'
+		$op = "<img src='$img_path/cb_" . $display_status . "$opchecked.gif'
 					border='0'
-					id='cb_$uniqueID'
-					onClick='$opOnClickFunction(\"$uniqueID\",\"$displayStatus\",\"$extraJSVars\");'
+					id='cb_$unique_id'
+					on_click='$op_on_click_function(\"$unique_id\",\"$display_status\",\"$extra_j_s_vars\");'
 					>";
-		$hid = "<input type='hidden' name='$hidName'
-						id='advisecourse_$uniqueID' value='$hidValue'>";
+		$hid = "<input type='hidden' name='$hid_name'
+						id='advisecourse_$unique_id' value='$hid_value'>";
 
 		// Okay, we can't actually serialize a course, as it takes too much space.
 		// It was slowing down the page load significantly!  So, I am going
-		// to use a function I wrote called toDataString().
+		// to use a function I wrote called to_data_string().
 
-		$dataString = $course->toDataString();
-		$blankDegreeID = "";
-		if ($this->boolBlank == true)
+		$data_string = $course->to_data_string();
+		$blank_degree_id = "";
+		if ($this->bool_blank == true)
 		{
-			$blankDegreeID = $this->degreePlan->degreeID;
+			$blank_degree_id = $this->degree_plan->degree_id;
 		}
 
-		$jsCode = "describeCourse(\"$dataString\",\"$blankDegreeID\");";
+		$js_code = "describe_course(\"$data_string\",\"$blank_degree_id\");";
 
-		$iconLink = "";
-		//adminDebug($course->toString() . " RT: " . $course->requirementType);
-		if ($course->requirementType == "um" || $course->requirementType == "uc")
+		$icon_link = "";
+		//admin_debug($course->toString() . " RT: " . $course->requirement_type);
+		if ($course->requirement_type == "um" || $course->requirement_type == "uc")
 		{
-			$iconFilename = "ucap.gif";
-			$titleText = "This course is a University Capstone.";
+			$icon_filename = "ucap.gif";
+			$title_text = "This course is a University Capstone.";
 		}
 
-		if ($iconFilename != "")
+		if ($icon_filename != "")
 		{
-			$iconLink = "<img src='$this->themeLocation/images/icons/$iconFilename' width='19' height='19' border='0' alt='$titleText' title='$titleText'>";
+			$icon_link = "<img src='$this->theme_location/images/icons/$icon_filename' width='19' height='19' border='0' alt='$title_text' title='$title_text'>";
 		}
 
-		$onMouseOver = " onmouseover=\"style.backgroundColor='#FFFF99'\"
+		$on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
       				onmouseout=\"style.backgroundColor='white'\" ";
 
-		if ($this->pageIsMobile) $onMouseOver = "";  // Causes problems for some mobile devices.
+		if ($this->page_is_mobile) $on_mouse_over = "";  // Causes problems for some mobile devices.
 		
-		$handClass = "hand";
+		$hand_class = "hand";
 
-		if ($boolDisplayCheck == false)
+		if ($bool_display_check == false)
 		{
 			$op = $hid = "";
 		}
 
 
-		if ($this->boolPrint)
+		if ($this->bool_print)
 		{
 			// In print view, disable all popups and mouseovers.
-			$onMouseOver = "";
-			$jsCode = "";
-			$handClass = "";
+			$on_mouse_over = "";
+			$js_code = "";
+			$hand_class = "";
 		}
 
 
 		$pC .= "<tr><td colspan='8'>";
 
 
-		if ($course->boolSubstitutionNewFromSplit != true || ($course->boolSubstitutionNewFromSplit == true && $course->displayStatus != "eligible"))
+		if ($course->bool_substitution_new_from_split != true || ($course->bool_substitution_new_from_split == true && $course->display_status != "eligible"))
 		{
 
-			if ($course->boolSubstitution == true)
+			if ($course->bool_substitution == true)
 			{
-				//adminDebug($subjectID . $courseNum . " $footnote $hours");
+				//admin_debug($subject_id . $course_num . " $footnote $hours");
 
 			}
 
-			if ($courseNum == "")
+			if ($course_num == "")
 			{
-				$courseNum = "&nbsp;";
+				$course_num = "&nbsp;";
 			}
 
 
 
 			$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
-     	<tr height='20' class='$handClass $displayStatus'
-      		$onMouseOver title='$titleText'>
+     	<tr height='20' class='$hand_class $display_status'
+      		$on_mouse_over title='$title_text'>
       		<td width='$w1_1' align='left'>$op$hid</td>
-      		<td width='$w1_2' align='left' onClick='$jsCode'>$iconLink</td>
-      		<td width='$w1_3' align='left' onClick='$jsCode'>&nbsp;$ast</td>
-      		<td align='left' width='$w2' class='tenpt underline' onClick='$jsCode'>
-       				$subjectID</td>
+      		<td width='$w1_2' align='left' onClick='$js_code'>$icon_link</td>
+      		<td width='$w1_3' align='left' onClick='$js_code'>&nbsp;$ast</td>
+      		<td align='left' width='$w2' class='tenpt underline' onClick='$js_code'>
+       				$subject_id</td>
        		<td class='tenpt underline' width='$w3' align='left' 
-       			onClick='$jsCode'>
-        			$courseNum$footnote</td>
-	       <td class='tenpt underline' width='$w4' onClick='$jsCode'>$hours$varHourIcon</td>
-       	   <td class='tenpt underline' width='$w5' onClick='$jsCode'>$dispgrade&nbsp;</td>
-       	   <td class='tenpt underline' width='$w6' onClick='$jsCode'>$pts&nbsp;</td>
+       			onClick='$js_code'>
+        			$course_num$footnote</td>
+	       <td class='tenpt underline' width='$w4' onClick='$js_code'>$hours$var_hour_icon</td>
+       	   <td class='tenpt underline' width='$w5' onClick='$js_code'>$dispgrade&nbsp;</td>
+       	   <td class='tenpt underline' width='$w6' onClick='$js_code'>$pts&nbsp;</td>
      	</tr>
      	</table>";
 
 		} else {
 			// These are the leftover hours from a partial substitution.
-			//adminDebug("here");
+			//admin_debug("here");
 			$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
-     	<tr height='20' class='hand $displayStatus'
-      		$onMouseOver title='$titleText'>
+     	<tr height='20' class='hand $display_status'
+      		$on_mouse_over title='$title_text'>
       		<td width='$w1_1' align='left'>$op$hid</td>
-      		<td width='$w1_2' align='left' onClick='$jsCode'>$iconLink</td>
-      		<td width='$w1_3' align='left' onClick='$jsCode'>&nbsp;</td>
-      		<td align='left' class='tenpt underline' onClick='$jsCode'
+      		<td width='$w1_2' align='left' onClick='$js_code'>$icon_link</td>
+      		<td width='$w1_3' align='left' onClick='$js_code'>&nbsp;</td>
+      		<td align='left' class='tenpt underline' onClick='$js_code'
       			colspan='4'>
-       				&nbsp; &nbsp; $subjectID &nbsp;
-        			$courseNum$footnote
+       				&nbsp; &nbsp; $subject_id &nbsp;
+        			$course_num$footnote
 	       			&nbsp; ($hours hrs left)
        	   	</td>
      	</tr>
@@ -4732,7 +4732,7 @@ function drawMenuItems($menuArray) {
 	 * @param int $hours
 	 * @return int
 	 */
-	function getQualityPoints($grade, $hours){
+	function get_quality_points($grade, $hours){
 
 		switch ($grade) {
 			case 'A':
@@ -4758,122 +4758,122 @@ function drawMenuItems($menuArray) {
    * a radio button next to it, so the user can select it.
    *
    * @param Course $course
-   * @param int $groupHoursRemaining
+   * @param int $group_hours_remaining
    * 
    * @return string
    */
-	function drawPopupGroupSelectCourseRow(Course $course, $groupHoursRemaining = 0)
+	function draw_popup_group_select_course_row(Course $course, $group_hours_remaining = 0)
 	{
 		// Display a course itself...
 		$pC = "";
-		$w1_1 = $this->popupWidthArray[0];
-		$w1_2 = $this->popupWidthArray[1];
-		$w1_3 = $this->popupWidthArray[2];
-		$w2 = $this->popupWidthArray[3];
-		$w3 = $this->popupWidthArray[4];
-		$w4 = $this->popupWidthArray[5];
-		$w5 = $this->popupWidthArray[6];
-		$w6 = $this->popupWidthArray[7];
+		$w1_1 = $this->popup_width_array[0];
+		$w1_2 = $this->popup_width_array[1];
+		$w1_3 = $this->popup_width_array[2];
+		$w2 = $this->popup_width_array[3];
+		$w3 = $this->popup_width_array[4];
+		$w4 = $this->popup_width_array[5];
+		$w5 = $this->popup_width_array[6];
+		$w6 = $this->popup_width_array[7];
 
-		if ($course->subjectID == "")
+		if ($course->subject_id == "")
 		{
 			// Lacking course's display data, so reload it from the DB.
-			$course->loadCourse($course->courseID);
+			$course->load_course($course->course_id);
 		}
 
 
-		$subjectID = $course->subjectID;
-		$courseNum = $course->courseNum;
-		$hours = $course->getCatalogHours();
-		$displayStatus = $course->displayStatus;
-		$dbGroupRequirementID = $course->dbGroupRequirementID;
+		$subject_id = $course->subject_id;
+		$course_num = $course->course_num;
+		$hours = $course->get_catalog_hours();
+		$display_status = $course->display_status;
+		$db_group_requirement_id = $course->db_group_requirement_id;
 		$grade = $course->grade;
-		$repeats = $course->specifiedRepeats;
+		$repeats = $course->specified_repeats;
 		if ($repeats > 0)
 		{
 			$w3 = "15%";
 		}
 
-		$courseID = $course->courseID;
-		$groupID = $course->assignedToGroupID;
-		$semesterNum = $course->assignedToSemesterNum;
+		$course_id = $course->course_id;
+		$group_id = $course->assigned_to_group_id;
+		$semester_num = $course->assigned_to_semester_num;
 
-		$varHourIcon = "&nbsp;";
-		if ($course->hasVariableHours() == true)
+		$var_hour_icon = "&nbsp;";
+		if ($course->has_variable_hours() == true)
 		{
-			$varHourIcon = "<img src='$this->themeLocation/images/var_hour.gif'
+			$var_hour_icon = "<img src='$this->theme_location/images/var_hour.gif'
 								title='This course has variable hours.'
 								alt='This course has variable hours.'>";
 		}
 
 
 		$checked = "";
-		if ($course->boolSelected == true)
+		if ($course->bool_selected == true)
 		{
 			$checked = " checked='checked' ";
 		}
-		$op = "<input type='radio' name='course' value='$courseID' $checked>";
-		$hid = "<input type='hidden' name='$courseID" . "_subject'
-						id='$courseID" . "_subject' value='$subjectID'>
-					<input type='hidden' name='$courseID" . "_dbGroupRequirementID'
-						id='$courseID" . "_dbGroupRequirementID' value='$dbGroupRequirementID'>";
+		$op = "<input type='radio' name='course' value='$course_id' $checked>";
+		$hid = "<input type='hidden' name='$course_id" . "_subject'
+						id='$course_id" . "_subject' value='$subject_id'>
+					<input type='hidden' name='$course_id" . "_db_group_requirement_id'
+						id='$course_id" . "_db_group_requirement_id' value='$db_group_requirement_id'>";
 
-		$blankDegreeID = "";
-		if ($this->boolBlank)
+		$blank_degree_id = "";
+		if ($this->bool_blank)
 		{
-			$blankDegreeID = $this->degreePlan->degreeID;
+			$blank_degree_id = $this->degree_plan->degree_id;
 		}
 
 		//$serializedCourse = urlencode(serialize($course));
-		$jsCode = "popupDescribeSelected(\"$groupID\",\"$semesterNum\",\"$courseID\",\"$subjectID\",\"groupHoursRemaining=$groupHoursRemaining&dbGroupRequirementID=$dbGroupRequirementID&blankDegreeID=$blankDegreeID\");";
+		$js_code = "popup_describe_selected(\"$group_id\",\"$semester_num\",\"$course_id\",\"$subject_id\",\"group_hours_remaining=$group_hours_remaining&db_group_requirement_id=$db_group_requirement_id&blank_degree_id=$blank_degree_id\");";
 
-		$onMouseOver = " onmouseover=\"style.backgroundColor='#FFFF99'\"
+		$on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
       				onmouseout=\"style.backgroundColor='white'\" ";
 		
-		if ($this->pageIsMobile) $onMouseOver = "";  // Causes problems for some mobile devices.
+		if ($this->page_is_mobile) $on_mouse_over = "";  // Causes problems for some mobile devices.
 		
-		$handClass = "hand";
-		$extraStyle = "";
+		$hand_class = "hand";
+		$extra_style = "";
 
-		if ($course->boolUnselectable == true)
+		if ($course->bool_unselectable == true)
 		{
 			// Cannot be selected, so remove that ability!
-			$handClass = "";
-			$onMouseOver = "";
-			$jsCode = "";
+			$hand_class = "";
+			$on_mouse_over = "";
+			$js_code = "";
 			$op = "";
-			$extraStyle = "style='font-style: italic; color:gray;'";
+			$extra_style = "style='font-style: italic; color:gray;'";
 		}
 
 
 		$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
-     	<tr height='20' class='$handClass $displayStatus'
-      		$onMouseOver title='$titleText'>
+     	<tr height='20' class='$hand_class $display_status'
+      		$on_mouse_over title='$title_text'>
       		<td width='$w1_1' align='left'>$op$hid</td>
-      		<td width='$w1_2' align='left' onClick='$jsCode'>$iconLink</td>
-      		<td width='$w1_3' align='left' onClick='$jsCode'>&nbsp;</td>
+      		<td width='$w1_2' align='left' onClick='$js_code'>$icon_link</td>
+      		<td width='$w1_3' align='left' onClick='$js_code'>&nbsp;</td>
       		<td align='left' width='$w2' class='tenpt underline' 
-      				onClick='$jsCode' $extraStyle>
-       				$subjectID</td>
-       		<td class='tenpt underline' $extraStyle width='$w3' align='left' 
-       			onClick='$jsCode'>
-        			$courseNum</td>
+      				onClick='$js_code' $extra_style>
+       				$subject_id</td>
+       		<td class='tenpt underline' $extra_style width='$w3' align='left' 
+       			onClick='$js_code'>
+        			$course_num</td>
         	";
 		if ($repeats > 0)
 		{
 			$pC .= "
 				<td class='tenpt underline' style='color: gray;' 
-					onClick='$jsCode' colspan='3'>
+					onClick='$js_code' colspan='3'>
 				<i>May take up to <span style='color: blue;'>" . ($repeats + 1) . "</span> times.</i>
 				</td>
 			";
 		} else {
 
 			$pC .= "
-	       <td class='tenpt underline' width='$w4' onClick='$jsCode' $extraStyle>$hours&nbsp;$varHourIcon</td>
-       	   <td class='tenpt underline' width='$w5' onClick='$jsCode'>$grade&nbsp;</td>
-       	   <td class='tenpt underline' width='$w6' onClick='$jsCode'>$pts&nbsp;</td>
+	       <td class='tenpt underline' width='$w4' onClick='$js_code' $extra_style>$hours&nbsp;$var_hour_icon</td>
+       	   <td class='tenpt underline' width='$w5' onClick='$js_code'>$grade&nbsp;</td>
+       	   <td class='tenpt underline' width='$w6' onClick='$js_code'>$pts&nbsp;</td>
        	   ";
 		}
 
@@ -4891,64 +4891,64 @@ function drawMenuItems($menuArray) {
 	 * This is used to display the substitution popup to a user, to let them
 	 * actually make a substitution.
 	 *
-	 * @param int $courseID
-	 * @param int $groupID
-	 * @param int $semesterNum
-	 * @param int $hoursAvail
+	 * @param int $course_id
+	 * @param int $group_id
+	 * @param int $semester_num
+	 * @param int $hours_avail
 	 * 
 	 * @return string
 	 */
-	function displayPopupSubstitute($courseID = 0, $groupID, $semesterNum, $hoursAvail = "")
+	function display_popup_substitute($course_id = 0, $group_id, $semester_num, $hours_avail = "")
 	{
 		// This lets the user make a substitution for a course.
 		$pC = "";
 
-		$course = new Course($courseID);
-		$boolSubAdd = false;
+		$course = new Course($course_id);
+		$bool_sub_add = false;
 
-		$cTitle = "Substitute for $course->subjectID $course->courseNum";
-		if ($courseID == 0)
+		$c_title = "Substitute for $course->subject_id $course->course_num";
+		if ($course_id == 0)
 		{
-			$cTitle = "Substitute an additional course";
-			$boolSubAdd = true;
+			$c_title = "Substitute an additional course";
+			$bool_sub_add = true;
 		}
-		$pC .= $this->drawCurvedTitle($cTitle);
+		$pC .= $this->draw_curved_title($c_title);
 
 		$extra = ".<input type='checkbox' id='cbAddition' value='true' style='display:none;'>";
-		if ($groupID > 0)
+		if ($group_id > 0)
 		{
-			$newGroup = new Group($groupID);
+			$new_group = new Group($group_id);
 			$checked = "";
-			if ($boolSubAdd == true){$checked = "checked disabled";}
-			$extra = " in the group <i>$newGroup->title</i>.
+			if ($bool_sub_add == true){$checked = "checked disabled";}
+			$extra = " in the group <i>$new_group->title</i>.
 			Addition only: <input type='checkbox' id='cbAddition' value='true' $checked> 
 			   <a href='javascript: alertSubAddition();'>?</a>";
 		}
 
-		$cHours = $course->maxHours*1;
-		$cGhostHour = "";
-		if ($course->boolGhostHour == TRUE) {
-		  $cGhostHour = "ghost<a href='javascript: alertSubGhost();'>?</a>";
+		$c_hours = $course->max_hours*1;
+		$c_ghost_hour = "";
+		if ($course->bool_ghost_hour == TRUE) {
+		  $c_ghost_hour = "ghost<a href='javascript: alertSubGhost();'>?</a>";
 		}
 
-		if (($hoursAvail*1 > 0 && $hoursAvail < $cHours) || ($cHours < 1))
+		if (($hours_avail*1 > 0 && $hours_avail < $c_hours) || ($c_hours < 1))
 		{
-			//adminDebug($hoursAvail);
+			//admin_debug($hours_avail);
 			// Use the remaining hours if we have fewer hours left in
 			// the group than the course we are subbing for.
-			$cHours = $hoursAvail;
+			$c_hours = $hours_avail;
 		}
 
-		if ($hoursAvail == "" || $hoursAvail*1 < 1)
+		if ($hours_avail == "" || $hours_avail*1 < 1)
 		{
-			$hoursAvail = $cHours;
+			$hours_avail = $c_hours;
 		}
 
-		//adminDebug("c hours $cHours, hoursAvail $hoursAvail");
+		//admin_debug("c hours $c_hours, hoursAvail $hours_avail");
 
 		$pC .= "<div class='tenpt'>
 					Please select a course to substitute
-				for <b>$course->subjectID $course->courseNum ($cHours $cGhostHour hrs)</b>$extra
+				for <b>$course->subject_id $course->course_num ($c_hours $c_ghost_hour hrs)</b>$extra
 				</div>
 				
 				<div class='tenpt' 
@@ -4957,106 +4957,106 @@ function drawMenuItems($menuArray) {
 					
 					";
     
-		$this->student->listCoursesTaken->sortAlphabeticalOrder(false, true);
+		$this->student->list_courses_taken->sort_alphabetical_order(false, true);
     
 		for ($t = 0; $t <= 1; $t++)
 		{
-			if ($t == 0) {$theTitle = "{$GLOBALS["fpSystemSettings"]["schoolInitials"]} Credits"; $boolTransferTest = true;}
-			if ($t == 1) {$theTitle = "Transfer Credits"; $boolTransferTest = false;}
+			if ($t == 0) {$the_title = "{$GLOBALS["fp_system_settings"]["school_initials"]} Credits"; $bool_transferTest = true;}
+			if ($t == 1) {$the_title = "Transfer Credits"; $bool_transferTest = false;}
 
 			$pC .= "<tr><td colspan='3' valign='top' class='tenpt' style='padding-bottom: 10px;'>
-				$theTitle
+				$the_title
 				</td>
 				<td class='tenpt' valign='top' >Hrs</td>
 				<td class='tenpt' valign='top' >Grd</td>
 				<td class='tenpt' valign='top' >Term</td>
 				</tr>";
 			
-			$isEmpty = true;
-			$this->student->listCoursesTaken->resetCounter();
-			while($this->student->listCoursesTaken->hasMore())
+			$is_empty = true;
+			$this->student->list_courses_taken->reset_counter();
+			while($this->student->list_courses_taken->has_more())
 			{
-				$c = $this->student->listCoursesTaken->getNext();
+				$c = $this->student->list_courses_taken->get_next();
 				
-				if ($c->boolTransfer == $boolTransferTest)
+				if ($c->bool_transfer == $bool_transferTest)
 				{
 					continue;
 				}
 
 				
-				if (!$c->meetsMinGradeRequirementOf(null, "D"))
+				if (!$c->meets_min_grade_requirement_of(null, "D"))
 				{// Make sure the grade is OK.
 					continue;
 				}
 
-				$tFlag = 0;
-				if ($c->boolTransfer == true)
+				$t_flag = 0;
+				if ($c->bool_transfer == true)
 				{
-					$tFlag = 1;
+					$t_flag = 1;
 				}
-				$isEmpty = false;
+				$is_empty = false;
 
-				$subjectID = $c->subjectID;
-				$courseNum = $c->courseNum;
-				$tcourseID = $c->courseID;
+				$subject_id = $c->subject_id;
+				$course_num = $c->course_num;
+				$tcourse_id = $c->course_id;
 
-				if ($boolTransferTest == false)
+				if ($bool_transferTest == false)
 				{
 					// Meaning, we are looking at transfers now.
 					// Does the transfer course have an eqv set up?  If so,
 					// we want *that* course to appear.
-					if (is_object($c->courseTransfer))
+					if (is_object($c->course_transfer))
 					{
-						$subjectID = $c->courseTransfer->subjectID;
-						$courseNum = $c->courseTransfer->courseNum;
-						$tcourseID = $c->courseTransfer->courseID;
-						$tFlag = 1;
+						$subject_id = $c->course_transfer->subject_id;
+						$course_num = $c->course_transfer->course_num;
+						$tcourse_id = $c->course_transfer->course_id;
+						$t_flag = 1;
 					}
 				}
-				//adminDebug($courseID);
-				$mHours = $c->hoursAwarded*1;
+				//admin_debug($course_id);
+				$m_hours = $c->hours_awarded*1;
 
-				if ($c->maxHours*1 < $mHours)
+				if ($c->max_hours*1 < $m_hours)
 				{
-					$mHours = $c->maxHours*1;
+					$m_hours = $c->max_hours*1;
 
 				}
 
-				if (($hoursAvail*1 > 0 && $hoursAvail < $mHours) || ($mHours < 1))
+				if (($hours_avail*1 > 0 && $hours_avail < $m_hours) || ($m_hours < 1))
 				{
-					$mHours = $hoursAvail;
+					$m_hours = $hours_avail;
 				}
 
-				// is maxHours more than the original course's hours?
-				if ($mHours > $cHours)
+				// is max_hours more than the original course's hours?
+				if ($m_hours > $c_hours)
 				{
-					$mHours = $cHours;
+					$m_hours = $c_hours;
 				}
 
-				if ($mHours > $c->hoursAwarded)
+				if ($m_hours > $c->hours_awarded)
 				{
-					$mHours = $c->hoursAwarded;
+					$m_hours = $c->hours_awarded;
 				}
 
-				//adminDebug("$mHours , $hoursAvail");
-				//adminDebug("looking at " . $c->toString());
-				if ($c->boolSubstitution != true && $c->boolOutdatedSub != true)
+				//admin_debug("$m_hours , $hours_avail");
+				//admin_debug("looking at " . $c->toString());
+				if ($c->bool_substitution != true && $c->bool_outdated_sub != true)
 				{
-				  $h = $c->hoursAwarded;
-				  if ($c->boolGhostHour == TRUE) {
+				  $h = $c->hours_awarded;
+				  if ($c->bool_ghost_hour == TRUE) {
 				    $h .= "(ghost<a href='javascript: alertSubGhost();'>?</a>)";
 				  }
-					//adminDebug("here");
+					//admin_debug("here");
 					$pC .= "<tr>
 						<td valign='top' class='tenpt' width='15%'>
-							<input type='radio' name='subCourse' id='subCourse' value='$tcourseID'
-							 onClick='popupUpdateSubData(\"$mHours\",\"$c->termID\",\"$tFlag\",\"$hoursAvail\",\"$c->hoursAwarded\");'>
+							<input type='radio' name='subCourse' id='subCourse' value='$tcourse_id'
+							 onClick='popupUpdateSubData(\"$m_hours\",\"$c->term_id\",\"$t_flag\",\"$hours_avail\",\"$c->hours_awarded\");'>
 						</td>
 						<td valign='top' class='tenpt underline' width='13%'>
-							$subjectID
+							$subject_id
 						</td>
 						<td valign='top' class='tenpt underline' width='15%'>
-							$courseNum
+							$course_num
 						</td>
 						
 
@@ -5067,7 +5067,7 @@ function drawMenuItems($menuArray) {
 							$c->grade
 						</td>
 						<td valign='top' class='tenpt underline'>
-							" . $c->getTermDescription(true) . "
+							" . $c->get_term_description(true) . "
 						</td>
 
 						
@@ -5077,22 +5077,22 @@ function drawMenuItems($menuArray) {
 
 
 
-					if (is_object($c->courseSubstitution) && $c->courseSubstitution->subjectID == "")
-					{ // Load subjectID and courseNum of the original
+					if (is_object($c->course_substitution) && $c->course_substitution->subject_id == "")
+					{ // Load subject_id and course_num of the original
 						// requirement.
-						$c->courseSubstitution->loadDescriptiveData();
+						$c->course_substitution->load_descriptive_data();
 					}
 
 					$extra = "";
-					if ($c->assignedToGroupID > 0)
+					if ($c->assigned_to_group_id > 0)
 					{
-						$newGroup = new Group($c->assignedToGroupID);
-						$extra = " in $newGroup->title";
+						$new_group = new Group($c->assigned_to_group_id);
+						$extra = " in $new_group->title";
 					}
-					if ($c->boolOutdatedSub == true)
+					if ($c->bool_outdated_sub == true)
 					{
-						$helpLink = "<a href='javascript: popupHelpWindow(\"help.php?i=9\");' class='nounderline'>(?)</a>";
-						$extra .= " <span style='color:red;'>[Outdated$helpLink]</span>";
+						$help_link = "<a href='javascript: popupHelpWindow(\"help.php?i=9\");' class='nounderline'>(?)</a>";
+						$extra .= " <span style='color:red;'>[Outdated$help_link]</span>";
 					}
 
 					// It has already been substituted!
@@ -5101,11 +5101,11 @@ function drawMenuItems($menuArray) {
 						 Sub:
 						</td>
 						<td valign='top' class='tenpt' colspan='5'>
-							$subjectID 
+							$subject_id 
 						
-							$courseNum ($c->substitutionHours)
-							 -> " . $c->courseSubstitution->subjectID . "
-							 " . $c->courseSubstitution->courseNum . "$extra
+							$course_num ($c->substitution_hours)
+							 -> " . $c->course_substitution->subject_id . "
+							 " . $c->course_substitution->course_num . "$extra
 						</td>
 
 						
@@ -5116,7 +5116,7 @@ function drawMenuItems($menuArray) {
 
 			}
 
-			if ($isEmpty == true)
+			if ($is_empty == true)
 			{
 				// Meaning, there were no credits (may be the case with
 				// transfer credits)
@@ -5139,7 +5139,7 @@ function drawMenuItems($menuArray) {
 		</div>
 		<input type='hidden' name='subTransferFlag' id='subTransferFlag' value=''>
 		<input type='hidden' name='subTermID' id='subTermID' value=''>
-		<input type='button' value='Save Substitution' onClick='popupSaveSubstitution(\"$courseID\",\"$groupID\",\"$semesterNum\");'>
+		<input type='button' value='Save Substitution' onClick='popupSaveSubstitution(\"$course_id\",\"$group_id\",\"$semester_num\");'>
 		
 		<div class='tenpt' style='padding-top: 5px;'><b>Optional</b> - Enter remarks: 
 		<input type='text' name='subRemarks' id='subRemarks' value='' size='30' maxlength='254'>
@@ -5157,31 +5157,31 @@ function drawMenuItems($menuArray) {
 	 * This function displays the popup which lets a user select a course to be
 	 * advised into a group.
 	 *
-	 * @param Group $placeGroup
-	 * @param int $groupHoursRemaining
+	 * @param Group $place_group
+	 * @param int $group_hours_remaining
 	 * @return string
 	 */
-	function displayPopupGroupSelect(Group $placeGroup, $groupHoursRemaining = 0)
+	function display_popup_group_select(Group $place_group, $group_hours_remaining = 0)
 	{
 		$pC = "";
 
-		$advisingTermID = $GLOBALS["advisingTermID"];
+		$advising_term_id = $GLOBALS["advising_term_id"];
 
-		if ($placeGroup->groupID != -88)
+		if ($place_group->group_id != -88)
 		{
 			// This is NOT the Add a Course group.
 
-			if (!$group = $this->degreePlan->findGroup($placeGroup->groupID))
+			if (!$group = $this->degree_plan->find_group($place_group->group_id))
 			{
-				adminDebug("Group not found.");
+				admin_debug("Group not found.");
 				return;
 			}
 		} else {
 			// This is the Add a Course group.
-			$group = $placeGroup;
+			$group = $place_group;
 		}
 
-		$groupID = $group->groupID;
+		$group_id = $group->group_id;
 
 		// So now we have a group object, $group, which is most likely
 		// missing courses.  This is because when we loaded & cached it
@@ -5189,174 +5189,174 @@ function drawMenuItems($menuArray) {
 		// meaning, the student didn't have credit for it or the like.
 		// So what we need to do now is reload the group, being careful
 		// to preserve the existing courses / sub groups in the group.
-		//print_pre($group->toString());
-		$group->reloadMissingCourses();
-		//print_pre($group->toString());
+		//print_pre($group->to_string());
+		$group->reload_missing_courses();
+		//print_pre($group->to_string());
 
-		if ($groupHoursRemaining == 0)
+		if ($group_hours_remaining == 0)
 		{
 			// Attempt to figure out the remaining hours (NOT WORKING IN ALL CASES!)
 			// This specifically messes up when trying to get fulfilled hours in groups
 			// with branches.
-			$groupFulfilledHours = $group->getFulfilledHours(true, true, false, $placeGroup->assignedToSemesterNum);
-			$groupHoursRemaining = $placeGroup->hoursRequired - $groupFulfilledHours;
-			//adminDebug("count hours for semester $placeGroup->assignedToSemesterNum");
+			$group_fulfilled_hours = $group->get_fulfilled_hours(true, true, false, $place_group->assigned_to_semester_num);
+			$group_hours_remaining = $place_group->hours_required - $group_fulfilled_hours;
+			//admin_debug("count hours for semester $place_group->assigned_to_semester_num");
 
-			//adminDebug("req:$placeGroup->hoursRequired fulfilled:$groupFulfilledHours");
+			//admin_debug("req:$place_group->hours_required fulfilled:$group_fulfilled_hours");
 
 		}
 
 
 
-		//adminDebug("placegroup hrs rem: " . $placeGroup->getHoursRemaining());
-		$displaySemesterNum = $placeGroup->assignedToSemesterNum;
+		//admin_debug("placegroup hrs rem: " . $place_group->get_hoursRemaining());
+		$display_semesterNum = $place_group->assigned_to_semester_num;
 		$pC .= "<!--MSG--><!--MSG2--><!--BOXTOP-->";
 
-		$boolDisplaySubmit = true;
-		$boolDisplayBackToSubjectSelect = false;
-		$boolSubjectSelect = false;
-		$boolUnselectableCourses = false;
-		$finalCourseList = new CourseList();
-		//adminDebug("here");
-		//print_pre($group->toString());
+		$bool_display_submit = true;
+		$bool_display_back_to_subject_select = false;
+		$bool_subject_select = false;
+		$bool_unselectableCourses = false;
+		$final_course_list = new CourseList();
+		//admin_debug("here");
+		//print_pre($group->to_string());
 
-		$group->listCourses->resetCounter();
-		if (!($group->listCourses->isEmpty))
+		$group->list_courses->reset_counter();
+		if (!($group->list_courses->is_empty))
 		{
 
-			$group->listCourses->assignSemesterNum($displaySemesterNum);
+			$group->list_courses->assign_semester_num($display_semesterNum);
 
-			$newCourseList = $group->listCourses;
+			$new_course_list = $group->list_courses;
 			// Is this list so long that we first need to ask the user to
 			// select a subject?
-			if ($newCourseList->getSize() > 30)
+			if ($new_course_list->get_size() > 30)
 			{
 
 				// First, we are only going to do this if there are more
 				// than 30 courses, AND more than 2 subjects in the list.
-				$newCourseList->sortAlphabeticalOrder();
-				$subjectArray = $newCourseList->getCourseSubjects();
-				//print_pre($newCourseList->toString());
-				//var_dump($subjectArray);
-				if (count($subjectArray) > 2)
+				$new_course_list->sort_alphabetical_order();
+				$subject_array = $new_course_list->get_course_subjects();
+				//print_pre($new_course_list->to_string());
+				//var_dump($subject_array);
+				if (count($subject_array) > 2)
 				{
 					// First, check to see if the user has already
 					// selected a subject.
-					$selectedSubject = trim(addslashes($_GET["selectedSubject"]));
-					if ($selectedSubject == "")
+					$selected_subject = trim(addslashes($_GET["selected_subject"]));
+					if ($selected_subject == "")
 					{
 						// Prompt them to select a subject first.
-						$pC .= $this->drawPopupGroupSubjectSelect($subjectArray, $group->groupID, $displaySemesterNum, $groupHoursRemaining);
-						$newCourseList = new CourseList(); // empty it
-						$boolDisplaySubmit = false;
-						$boolSubjectSelect = true;
+						$pC .= $this->draw_popup_group_subject_select($subject_array, $group->group_id, $display_semesterNum, $group_hours_remaining);
+						$new_course_list = new CourseList(); // empty it
+						$bool_display_submit = false;
+						$bool_subject_select = true;
 					} else {
 						// Reduce the newCourseList to only contain the
 						// subjects selected.
-						$newCourseList->excludeAllSubjectsExcept($selectedSubject);
-						$boolDisplayBackToSubjectSelect = true;
+						$new_course_list->exclude_all_subjects_except($selected_subject);
+						$bool_display_back_to_subject_select = true;
 					}
 				}
 			}
 
-			$newCourseList->resetCounter();			
-			$newCourseList->sortAlphabeticalOrder();
+			$new_course_list->reset_counter();			
+			$new_course_list->sort_alphabetical_order();
 
 			
 
-			$finalCourseList->addList($newCourseList);
+			$final_course_list->add_list($new_course_list);
 		}
 
-		if (!($group->listGroups->isEmpty))
+		if (!($group->list_groups->is_empty))
 		{
 			// Basically, this means that this group
 			// has multiple subgroups.  We need to find out
 			// which branches the student may select from
 			// (based on what they have already taken, or been
 			// advised to take), and display it (excluding duplicates).
-			//print_pre($group->toString());
+			//print_pre($group->to_string());
 			// The first thing we need to do, is find the subgroup
 			// or subgroups with the most # of matches.
-			$newCourseList = new CourseList();
-			$allZero= true;
+			$new_course_list = new CourseList();
+			$all_zero= true;
 
 			// Okay, this is a little squirely.  What I need to do
 			// first is get a course list of all the courses which
 			// are currently either fulfilling or advised for all branches
 			// of this group.
-			$faCourseList = new CourseList();
-			$group->listGroups->resetCounter();
-			while($group->listGroups->hasMore())
+			$fa_course_list = new CourseList();
+			$group->list_groups->reset_counter();
+			while($group->list_groups->has_more())
 			{
-				$branch = $group->listGroups->getNext();
-				$faCourseList->addList($branch->listCourses->getFulfilledOrAdvised(true));
+				$branch = $group->list_groups->get_next();
+				$fa_course_list->add_list($branch->list_courses->get_fulfilled_or_advised(true));
 			}
-			$faCourseList->removeDuplicates();
-			//print_pre($faCourseList->toString());
+			$fa_course_list->remove_duplicates();
+			//print_pre($fa_course_list->to_string());
 			// Alright, now we create a fake student and set their
-			// listCoursesTaken, so that we can use this student
-			// to recalculate the countOfMatches in just a moment.
-			$newStudent = new Student();
-			$newStudent->loadStudent();
-			$newStudent->listCoursesTaken = $faCourseList;
-			$newStudent->loadSignificantCoursesFromListCoursesTaken();
+			// list_courses_taken, so that we can use this student
+			// to recalculate the count_of_matches in just a moment.
+			$new_student = new Student();
+			$new_student->load_student();
+			$new_student->list_courses_taken = $fa_course_list;
+			$new_student->load_significant_courses_from_list_courses_taken();
 
 			// Okay, now we need to go through and re-calculate our
-			// countOfMatches for each branch.  This is because we
+			// count_of_matches for each branch.  This is because we
 			// have cached this value, and after some advisings, it may
 			// not be true any longer.
 
-			$highestMatchCount = 0;
-			$group->listGroups->resetCounter();
-			while($group->listGroups->hasMore())
+			$highest_match_count = 0;
+			$group->list_groups->reset_counter();
+			while($group->list_groups->has_more())
 			{
-				$branch = $group->listGroups->getNext();
-				// recalculate countOfMatches here.
-				$cloneBranch = new Group();
-				$cloneBranch->listCourses = $branch->listCourses->getClone(true);
-				$matchesCount = $this->flightPath->getCountOfMatches($cloneBranch, $newStudent, null);
-				//print_pre($branch->toString());
-				$branch->countOfMatches = $matchesCount;
-				//adminDebug($matchesCount);
-				if ($matchesCount >= $highestMatchCount)
+				$branch = $group->list_groups->get_next();
+				// recalculate count_of_matches here.
+				$clone_branch = new Group();
+				$clone_branch->list_courses = $branch->list_courses->get_clone(true);
+				$matches_count = $this->flight_path->get_count_of_matches($clone_branch, $new_student, null);
+				//print_pre($branch->to_string());
+				$branch->count_of_matches = $matches_count;
+				//admin_debug($matches_count);
+				if ($matches_count >= $highest_match_count)
 				{ // Has more than one match on this branch.
-					//			adminDebug($branch->groupID . " " . $branch->countOfMatches);
-					$highestMatchCount = $matchesCount;
+					//			admin_debug($branch->group_id . " " . $branch->count_of_matches);
+					$highest_match_count = $matches_count;
 				}
 			}
-			//adminDebug("going with $highestMatchCount");
+			//admin_debug("going with $highest_match_count");
 			// If highestMatchCount > 0, then get all the branches
 			// which have that same match count.
-			if ($highestMatchCount > 0)
+			if ($highest_match_count > 0)
 			{
-				$group->listGroups->resetCounter();
-				while($group->listGroups->hasMore())
+				$group->list_groups->reset_counter();
+				while($group->list_groups->has_more())
 				{
-					$branch = $group->listGroups->getNext();
-					//print_pre($branch->toString());
-					if ($branch->countOfMatches == $highestMatchCount)
+					$branch = $group->list_groups->get_next();
+					//print_pre($branch->to_string());
+					if ($branch->count_of_matches == $highest_match_count)
 					{ // This branch has the right number of matches.  Add it.
-						//adminDebug($branch->groupID . " " . $branch->countOfMatches);
+						//admin_debug($branch->group_id . " " . $branch->count_of_matches);
 
-						$newCourseList->addList($branch->listCourses);
-						$allZero = false;
+						$new_course_list->add_list($branch->list_courses);
+						$all_zero = false;
 					}
 
 				}
 
 			}
 			
-			if ($allZero == true)
+			if ($all_zero == true)
 			{
 				// Meaning, all of the branches had 0 matches,
 				// so we should add all the branches to the
 				// newCourseList.
 
-				$group->listGroups->resetCounter();
-				while($group->listGroups->hasMore())
+				$group->list_groups->reset_counter();
+				while($group->list_groups->has_more())
 				{
-					$branch = $group->listGroups->getNext();
-					$newCourseList->addList($branch->listCourses);
+					$branch = $group->list_groups->get_next();
+					$new_course_list->add_list($branch->list_courses);
 				}
 			} else {
 				// Meaning that at at least one branch is favored.
@@ -5371,24 +5371,24 @@ function drawMenuItems($menuArray) {
 			// Okay, in the newCourseList object, we should
 			// now have a list of all the courses the student is
 			// allowed to take, but there are probably duplicates.
-			//print_pre($newCourseList->toString());
+			//print_pre($new_course_list->to_string());
 
 
-			$newCourseList->removeDuplicates();
+			$new_course_list->remove_duplicates();
 
-			$newCourseList->assignGroupID($group->groupID);
-			$newCourseList->assignSemesterNum($displaySemesterNum);
+			$new_course_list->assign_group_id($group->group_id);
+			$new_course_list->assign_semester_num($display_semesterNum);
 
-			$finalCourseList->addList($newCourseList);
+			$final_course_list->add_list($new_course_list);
 			
 		}
 
 
-		//print_pre($finalCourseList->toString());
+		//print_pre($final_course_list->to_string());
 		// Remove courses which have been marked as "exclude" in the database.
-		$finalCourseList->removeExcluded();
+		$final_course_list->remove_excluded();
 
-		//print_pre($finalCourseList->toString());
+		//print_pre($final_course_list->to_string());
 
 		// Here's a fun one:  We need to remove courses for which the student
 		// already has credit that *don't* have repeating hours.
@@ -5396,39 +5396,39 @@ function drawMenuItems($menuArray) {
 		// Core Math, then we should not see it as a choice for advising
 		// in Free Electives (or any other group except Add a Course).
 		// We also should not see it in other instances of Core Math.
-		if ($group->groupID != -88 && $this->boolBlank != TRUE)
+		if ($group->group_id != -88 && $this->bool_blank != TRUE)
 		{
 			// Only do this if NOT in Add a Course group...
 			// also, don't do it if we're looking at a "blank" degree.
-			$finalCourseList->removePreviouslyFulfilled($this->student->listCoursesTaken, $group->groupID, true, $this->student->listSubstitutions);
-			//print_pre($finalCourseList->toString());
+			$final_course_list->remove_previously_fulfilled($this->student->list_courses_taken, $group->group_id, true, $this->student->list_substitutions);
+			//print_pre($final_course_list->to_string());
 		}
-		//print_pre($this->student->listSubstitutions->toString());
-		//print_pre($finalCourseList->toString());
+		//print_pre($this->student->list_substitutions->toString());
+		//print_pre($final_course_list->to_string());
 
-		$finalCourseList->sortAlphabeticalOrder();
-		if (!$finalCourseList->hasAnyCourseSelected())
+		$final_course_list->sort_alphabetical_order();
+		if (!$final_course_list->has_any_course_selected())
 		{
-			//adminDebug("in here");
-			if ($c = $finalCourseList->findFirstSelectable())
+			//admin_debug("in here");
+			if ($c = $final_course_list->find_first_selectable())
 			{
-				$c->boolSelected = true;
-				//adminDebug($c->toString());
+				$c->bool_selected = true;
+				//admin_debug($c->toString());
 			}
 		}
 
 		// flag any courses with more hours than are available for this group.
-		if ($finalCourseList->assignUnselectableCoursesWithHoursGreaterThan($groupHoursRemaining))
+		if ($final_course_list->assign_unselectable_courses_with_hours_greater_than($group_hours_remaining))
 		{
 
-			$boolUnselectableCourses = true;
+			$bool_unselectableCourses = true;
 		}
 
 
-		$pC .= $this->displayPopupGroupSelectCourseList($finalCourseList, $groupHoursRemaining);
+		$pC .= $this->display_popup_group_select_course_list($final_course_list, $group_hours_remaining);
 
 		// If there were no courses in the finalCourseList, display a message.
-		if (count($finalCourseList->arrayList) < 1 && !$boolSubjectSelect)
+		if (count($final_course_list->array_list) < 1 && !$bool_subject_select)
 		{
 			$pC .= "<tr>
 					<td colspan='8'>
@@ -5440,7 +5440,7 @@ function drawMenuItems($menuArray) {
 						courses, which can be
 						displayed here.";
 
-			if ($_SESSION["fpCanAdvise"] == true)
+			if ($_SESSION["fp_can_advise"] == true)
 			{
 				// This is an advisor, so put in a little more
 				// information.
@@ -5454,24 +5454,24 @@ function drawMenuItems($menuArray) {
 			$pC .= "						</div>
 					</td>
 					</tr>";
-			$boolNoCourses = true;
+			$bool_no_courses = true;
 		}
 
-		$pC .= $this->drawSemesterBoxBottom();
+		$pC .= $this->draw_semester_box_bottom();
 
 		$s = "s";
-		//print_pre($placeGroup->toString());
+		//print_pre($place_group->to_string());
 
-		if ($groupHoursRemaining == 1){$s = "";}
-		if ($boolUnselectableCourses == true)
+		if ($group_hours_remaining == 1){$s = "";}
+		if ($bool_unselectableCourses == true)
 		{
-			$unselectableNotice = " <div class='tenpt'><i>(Courses worth more than $groupHoursRemaining hour$s
+			$unselectable_notice = " <div class='tenpt'><i>(Courses worth more than $group_hours_remaining hour$s
 								may not be selected.)</i></div>";
-			if ($_SESSION["fpCanAdvise"] == true)
+			if ($_SESSION["fp_can_advise"] == true)
 			{
 				// This is an advisor, so put in a little more
 				// information.
-				$unselectableNotice .= "
+				$unselectable_notice .= "
 									<div class='tenpt' style='padding-top: 5px;'><b>Special note to advisors:</b> You may still
 											advise a student to take a course, even if it is unselectable
 											in this list.  Use the \"add an additional course\" link at
@@ -5480,25 +5480,25 @@ function drawMenuItems($menuArray) {
 			}
 		}
 
-		if ($groupHoursRemaining < 100 && $boolNoCourses != true)
+		if ($group_hours_remaining < 100 && $bool_no_courses != true)
 		{ // Don't show for huge groups (like add-a-course)
 			$pC .= "<div class='elevenpt' style='margin-top:5px;'>
-					You may select <b>$groupHoursRemaining</b>
-						hour$s from this list.$unselectableNotice</div>";
+					You may select <b>$group_hours_remaining</b>
+						hour$s from this list.$unselectable_notice</div>";
 		}
-		//adminDebug($placeGroup->assignedToSemesterNum);
-		if ($boolDisplaySubmit == true && !$this->boolBlank && $boolNoCourses != true)
+		//admin_debug($place_group->assigned_to_semester_num);
+		if ($bool_display_submit == true && !$this->bool_blank && $bool_no_courses != true)
 		{
-			if ($_SESSION["fpCanAdvise"] == true)
+			if ($_SESSION["fp_can_advise"] == true)
 			{
 				$pC .= "<input type='hidden' name='varHours' id='varHours' value=''>
 					<div style='margin-top: 20px;'>
 					
 					
-				" . $this->drawButton("Select Course", "popupAssignSelectedCourseToGroup(\"$placeGroup->assignedToSemesterNum\", \"$group->groupID\",\"$advisingTermID\",\"-1\");", true, "style='font-size: 10pt;'") . "
+				" . $this->draw_button("Select Course", "popup_assign_selected_course_to_group(\"$place_group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"-1\");", true, "style='font-size: 10pt;'") . "
 				<!--
 					<input type='button' value='Select Course'
-				onClick='popupAssignSelectedCourseToGroup(\"$placeGroup->assignedToSemesterNum\", \"$group->groupID\",\"$advisingTermID\");'>
+				onClick='popup_assign_selected_course_to_group(\"$place_group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\");'>
 				-->
 					</div>
 				";
@@ -5507,7 +5507,7 @@ function drawMenuItems($menuArray) {
 		}
 
 		// Substitutors get extra information:
-		if ($_SESSION["fpCanSubstitute"] == true && $group->groupID != -88)
+		if ($_SESSION["fp_can_substitute"] == true && $group->group_id != -88)
 		{
 			$pC .= "<div class='tenpt' style='margin-top: 20px;'>
 					<b>Special administrative information:</b>
@@ -5519,35 +5519,35 @@ function drawMenuItems($menuArray) {
 					
 					<div style='padding-left: 20px; display:none;' id='admin_info'>
 					Information about this group:<br>
-					&nbsp; Group ID: $group->groupID<br>
+					&nbsp; Group ID: $group->group_id<br>
 					&nbsp; Title: $group->title<br>";
-			if ($_SESSION["fpUserType"] == "full_admin")
+			if ($_SESSION["fp_user_type"] == "full_admin")
 			{ // only show if we are full admin.
-				$pC .= "&nbsp; <i>Internal name: $group->groupName</i><br>";
+				$pC .= "&nbsp; <i>Internal name: $group->group_name</i><br>";
 			}
-			$pC .= "&nbsp; Catalog year: $group->catalogYear
+			$pC .= "&nbsp; Catalog year: $group->catalog_year
 					</div>
 					
 					</div>";						
 		}
 
 
-		if ($boolDisplayBackToSubjectSelect == true)
+		if ($bool_display_back_to_subject_select == true)
 		{
-			$csid = $GLOBALS["currentStudentID"];
-			$blankDegreeID = "";
-			if ($this->boolBlank)
+			$csid = $GLOBALS["current_student_id"];
+			$blank_degree_id = "";
+			if ($this->bool_blank)
 			{
-				$blankDegreeID = $this->degreePlan->degreeID;
+				$blank_degree_id = $this->degree_plan->degree_id;
 			}
-			$backLink = "<span class='tenpt'>
-						<a href='$this->scriptFilename?windowMode=popup&performAction=displayGroupSelect&groupID=$group->groupID&semesterNum=$displaySemesterNum&groupHoursRemaining=$groupHoursRemaining&currentStudentID=$csid&blankDegreeID=$blankDegreeID' 
+			$back_link = "<span class='tenpt'>
+						<a href='$this->script_filename?windowMode=popup&performAction=display_groupSelect&group_id=$group->group_id&semester_num=$display_semesterNum&group_hours_remaining=$group_hours_remaining&current_student_id=$csid&blank_degree_id=$blank_degree_id' 
 						class='nounderline'>Click here to return to subject selection.</a></span>";
-			$pC = str_replace("<!--MSG2-->",$backLink,$pC);
+			$pC = str_replace("<!--MSG2-->",$back_link,$pC);
 		}
 
-		$boxTop = $this->drawSemesterBoxTop("$group->title", !$boolDisplaySubmit);
-		$pC = str_replace("<!--BOXTOP-->",$boxTop,$pC);
+		$box_top = $this->draw_semester_box_top("$group->title", !$bool_display_submit);
+		$pC = str_replace("<!--BOXTOP-->",$box_top,$pC);
 
 		return $pC;
 	}
@@ -5558,29 +5558,29 @@ function drawMenuItems($menuArray) {
 	 * subjects, and the user first selects a subject.  This function will
 	 * draw out that select list.
 	 *
-	 * @param array $subjectArray
-	 * @param int $groupID
-	 * @param int $semesterNum
-	 * @param int $groupHoursRemaining
+	 * @param array $subject_array
+	 * @param int $group_id
+	 * @param int $semester_num
+	 * @param int $group_hours_remaining
 	 * @return string
 	 */
-	function drawPopupGroupSubjectSelect($subjectArray, $groupID, $semesterNum, $groupHoursRemaining = 0)
+	function draw_popup_group_subject_select($subject_array, $group_id, $semester_num, $group_hours_remaining = 0)
 	{
-		$csid = $GLOBALS["currentStudentID"];
-		$blankDegreeID = "";
-		if ($this->boolBlank)
+		$csid = $GLOBALS["current_student_id"];
+		$blank_degree_id = "";
+		if ($this->bool_blank)
 		{
-			$blankDegreeID = $this->degreePlan->degreeID;
+			$blank_degree_id = $this->degree_plan->degree_id;
 		}
 		$pC .= "<tr><td colspan='8' class='tenpt'>";
-		$pC .= "<form action='$this->scriptFilename' method='GET' style='margin:0px; padding:0px;' id='theform'>
+		$pC .= "<form action='$this->script_filename' method='GET' style='margin:0px; padding:0px;' id='theform'>
 					<input type='hidden' name='windowMode' value='popup'>
-					<input type='hidden' name='performAction' value='displayGroupSelect'>
-					<input type='hidden' name='groupID' value='$groupID'>
-					<input type='hidden' name='semesterNum' value='$semesterNum'>
-					<input type='hidden' name='groupHoursRemaining' value='$groupHoursRemaining'>
+					<input type='hidden' name='performAction' value='display_groupSelect'>
+					<input type='hidden' name='group_id' value='$group_id'>
+					<input type='hidden' name='semester_num' value='$semester_num'>
+					<input type='hidden' name='groupHoursRemaining' value='$group_hours_remaining'>
 					<input type='hidden' name='currentStudentID' value='$csid'>
-					<input type='hidden' name='blankDegreeID' value='$blankDegreeID'>
+					<input type='hidden' name='blankDegreeID' value='$blank_degree_id'>
 		
 					Please begin by selecting a subject from the list below.
 					<br><br>
@@ -5588,31 +5588,31 @@ function drawMenuItems($menuArray) {
 					<option value=''>Please select a subject...</option>
 					<option value=''>----------------------------------------</option>
 					";
-		$newArray = array();
-		foreach($subjectArray as $key => $subjectID)
+		$new_array = array();
+		foreach($subject_array as $key => $subject_id)
 		{
-			//adminDebug($subjectID);
-			if ($title = $this->flightPath->getSubjectTitle($subjectID)) {
-				$newArray[] = "$title ~~ $subjectID";
+			//admin_debug($subject_id);
+			if ($title = $this->flight_path->get_subject_title($subject_id)) {
+				$new_array[] = "$title ~~ $subject_id";
 			} else {
-			  $newArray[] = "$subjectID ~~ $subjectID";
+			  $new_array[] = "$subject_id ~~ $subject_id";
 			}
 			
 		}
 
-		sort($newArray);
+		sort($new_array);
 
-		foreach ($newArray as $key => $value)
+		foreach ($new_array as $key => $value)
 		{
 			$temp = split(" ~~ ",$value);
 			$title = trim($temp[0]);
-			$subjectID = trim($temp[1]);
-			$pC .= "<option value='$subjectID'>$title</option>";
+			$subject_id = trim($temp[1]);
+			$pC .= "<option value='$subject_id'>$title</option>";
 		}
 
 		$pC .= "</select>
 				<div style='margin: 20px;' align='left'>
-				" . $this->drawButton("Next ->","document.getElementById(\"theform\").submit();") . "
+				" . $this->draw_button("Next ->","document.get_element_by_id(\"theform\").submit();") . "
 				</div>
 					<!-- <input type='submit' value='submit'> -->
 					
@@ -5626,47 +5626,47 @@ function drawMenuItems($menuArray) {
 
 	/**
 	 * Accepts a CourseList object and draws it out to the screen. Meant to 
-	 * be called by displayPopupGroupSelect();
+	 * be called by display_popup_group_select();
 	 *
-	 * @param CourseList $courseList
-	 * @param int $groupHoursRemaining
+	 * @param CourseList $course_list
+	 * @param int $group_hours_remaining
 	 * @return string
 	 */
-	function displayPopupGroupSelectCourseList(CourseList $courseList = null, $groupHoursRemaining = 0)
+	function display_popup_group_select_course_list(CourseList $course_list = null, $group_hours_remaining = 0)
 	{
 		// Accepts a CourseList object and draws it out to the screen.  Meant to
-		// be called by displayPopupGroupSelect().
+		// be called by display_popup_group_select().
 		$pC = "";
 
-		if ($courseList == null)
+		if ($course_list == null)
 		{
-			//adminDebug("here");
+			//admin_debug("here");
 			return;
 		}
 
-		$oldCourse = null;
+		$old_course = null;
 
-		$courseList->resetCounter();
-		while($courseList->hasMore())
+		$course_list->reset_counter();
+		while($course_list->has_more())
 		{
-			$course = $courseList->getNext();
-			if ($course->equals($oldCourse))
+			$course = $course_list->get_next();
+			if ($course->equals($old_course))
 			{ // don't display the same course twice in a row.
 				continue;
 			}
 
-			//adminDebug($course->boolSelected);
+			//admin_debug($course->bool_selected);
 			$pC .= "<tr><td colspan='8'>";
 
-			//if (!is_object($course->courseFulfilledBy) && !$course->boolAdvisedToTake)
-			if ($course->courseListFulfilledBy->isEmpty && !$course->boolAdvisedToTake)
+			//if (!is_object($course->courseFulfilledBy) && !$course->bool_advised_to_take)
+			if ($course->course_list_fulfilled_by->is_empty && !$course->bool_advised_to_take)
 			{ // So, only display if it has not been fulfilled by anything.
-				$pC .= $this->drawPopupGroupSelectCourseRow($course, $groupHoursRemaining);
-				$oldCourse = $course;
+				$pC .= $this->draw_popup_group_select_course_row($course, $group_hours_remaining);
+				$old_course = $course;
 			} else {
 				// Do not display courses which the student has fulfilled,
 				// or courses for which the student has already been advised.
-				//$pC .= $this->drawPopupGroupSelectCourseRow($course->courseFulfilledBy);
+				//$pC .= $this->draw_popup_group_select_course_row($course->courseFulfilledBy);
 			}
 			$pC .= "</td></tr>";
 		}
@@ -5680,13 +5680,13 @@ function drawMenuItems($menuArray) {
 
 
   /**
-   * Depricated.  Same as drawBoxBottom()
+   * Depricated.  Same as draw_box_bottom()
    * 
    * @todo  Should this be removed?
    *
    * @return unknown
    */
-	function displayEndSemesterTable()
+	function display_end_semester_table()
 	{
 		// Return the HTML that ends & closes up the semester
 		// table.
@@ -5702,68 +5702,68 @@ function drawMenuItems($menuArray) {
 	 *
 	 * @return string
 	 */
-	function getJavascriptCode()
+	function get_javascript_code()
 	{
 		$rtn = "";
 
 		$rtn .= "<script type=\"text/javascript\">
-		var csid = \"{$GLOBALS["currentStudentID"]}\";
+		var csid = \"{$GLOBALS["current_student_id"]}\";
 		
 		";
 
-		$rtn .= $this->getJS_changeTab();
+		$rtn .= $this->get_j_s_change_tab();
 
-		$rtn .= $this->getJS_launchPrintView();
-		$rtn .= $this->getJS_hideShowCharts();
-		$rtn .= $this->getJS_changeView();
+		$rtn .= $this->get_j_s_launch_print_view();
+		$rtn .= $this->get_j_s_hide_show_charts();
+		$rtn .= $this->get_j_s_change_view();
 
 
 
-		$rtn .= $this->getJS_submitSaveActive();
-		$rtn .= $this->getJS_popupWindow();
-		$rtn .= $this->getJS_popupWindow2();
-		$rtn .= $this->getJS_popupPrintWindow();
-		$rtn .= $this->getJS_popupHelpWindow();
-		$rtn .= $this->getJS_popupChangeTerm();
-		$rtn .= $this->getJS_changeTerm();
+		$rtn .= $this->get_j_s_submit_save_active();
+		$rtn .= $this->get_j_s_popup_window();
+		$rtn .= $this->get_j_s_popup_window2();
+		$rtn .= $this->get_j_s_popup_print_window();
+		$rtn .= $this->get_j_s_popup_help_window();
+		$rtn .= $this->get_j_s_popup_change_term();
+		$rtn .= $this->get_j_s_change_term();
 
 		//$rtn .= $this->getJS_popupSubstitutionRemarks();
 
-		$rtn .= $this->getJS_popupChangeTrack();
-		$rtn .= $this->getJS_popupChangeWhatIfTrack();
-		$rtn .= $this->getJS_changeTrack();
+		$rtn .= $this->get_j_s_popup_change_track();
+		$rtn .= $this->get_j_s_popup_change_what_if_track();
+		$rtn .= $this->get_j_s_change_track();
 
-		$rtn .= $this->getJS_alertHelps();
-		$rtn .= $this->getJS_popupAssignSelectedCourseToGroup();
-		$rtn .= $this->getJS_assignSelectedCourseToGroup();
-		$rtn .= $this->getJS_updateSelectedCourse();
-		$rtn .= $this->getJS_toggleSelection();
-		$rtn .= $this->getJS_toggleSelectionAndSave();
-		$rtn .= $this->getJS_toggleDisabledChangeTerm();
-		$rtn .= $this->getJS_toggleDisabledCompleted();
-		$rtn .= $this->getJS_describeCourse();
-		$rtn .= $this->getJS_submitForm();
-		$rtn .= $this->getJS_selectCourseFromGroup();
-		$rtn .= $this->getJS_popupSetVarHours();
-		$rtn .= $this->getJS_popupUpdateSelectedCourse();
-		$rtn .= $this->getJS_popupSubstituteSelected();
-		$rtn .= $this->getJS_popupBackToGroupSelect();
-		$rtn .= $this->getJS_popupRemoveSubstitution();
-		$rtn .= $this->getJS_popupUpdateSubData();
-		$rtn .= $this->getJS_popupSaveSubstitution();
-		$rtn .= $this->getJS_removeSubstitution();
-		$rtn .= $this->getJS_setVar();
-		$rtn .= $this->getJS_saveSubstitution();
-		$rtn .= $this->getJS_popupDescribeSelected();
-		$rtn .= $this->getJS_popupUnassignFromGroup();
-		$rtn .= $this->getJS_unassignFromGroup();
-		$rtn .= $this->getJS_popupUnassignTransferEqv();
-		$rtn .= $this->getJS_unassignTransferEqv();
-		$rtn .= $this->getJS_restoreTransferEqv();
-		$rtn .= $this->getJS_popupRestoreTransferEqv();
+		$rtn .= $this->get_j_s_alert_helps();
+		$rtn .= $this->get_j_s_popup_assign_selected_course_to_group();
+		$rtn .= $this->get_j_s_assign_selected_course_to_group();
+		$rtn .= $this->get_j_s_update_selected_course();
+		$rtn .= $this->get_j_s_toggle_selection();
+		$rtn .= $this->get_j_s_toggle_selection_and_save();
+		$rtn .= $this->get_j_s_toggle_disabled_change_term();
+		$rtn .= $this->get_j_s_toggle_disabled_completed();
+		$rtn .= $this->get_j_s_describe_course();
+		$rtn .= $this->get_j_s_submit_form();
+		$rtn .= $this->get_j_s_select_course_from_group();
+		$rtn .= $this->get_j_s_popup_set_var_hours();
+		$rtn .= $this->get_j_s_popup_update_selected_course();
+		$rtn .= $this->get_j_s_popup_substitute_selected();
+		$rtn .= $this->get_j_s_popup_back_to_group_select();
+		$rtn .= $this->get_j_s_popup_remove_substitution();
+		$rtn .= $this->get_j_s_popup_update_sub_data();
+		$rtn .= $this->get_j_s_popup_save_substitution();
+		$rtn .= $this->get_j_s_remove_substitution();
+		$rtn .= $this->get_j_s_set_var();
+		$rtn .= $this->get_j_s_save_substitution();
+		$rtn .= $this->get_j_s_popup_describe_selected();
+		$rtn .= $this->get_j_s_popup_unassign_from_group();
+		$rtn .= $this->get_j_s_unassign_from_group();
+		$rtn .= $this->get_j_s_popup_unassign_transfer_eqv();
+		$rtn .= $this->get_j_s_unassign_transfer_eqv();
+		$rtn .= $this->get_j_s_restore_transfer_eqv();
+		$rtn .= $this->get_j_s_popup_restore_transfer_eqv();
 
-		$rtn .= $this->getJS_restoreUnassignFromGroup();
-		$rtn .= $this->getJS_popupRestoreUnassignFromGroup();
+		$rtn .= $this->get_j_s_restore_unassign_from_group();
+		$rtn .= $this->get_j_s_popup_restore_unassign_from_group();
 
 
 
@@ -5772,11 +5772,11 @@ function drawMenuItems($menuArray) {
 		return $rtn;
 	}
 
-	function getJS_changeTab()
+	function get_j_s_change_tab()
 	{
 		$rtn = '
 	
-	function changeTab(formAction, performAction, advisingWhatIf, warnChange)
+	function changeTab(formAction, performAction, advising_what_if, warnChange)
 	{
 	
 		if (warnChange == "warn")
@@ -5789,12 +5789,12 @@ function drawMenuItems($menuArray) {
 		}
 	
 		document.getElementById("performAction").value = performAction;
-		if (advisingWhatIf != "")
+		if (advising_what_if != "")
 		{
-			document.getElementById("advisingWhatIf").value = advisingWhatIf;
+			document.getElementById("advising_what_if").value = advising_what_if;
 		}
 		
-		document.getElementById("currentStudentID").value = csid;
+		document.getElementById("current_student_id").value = csid;
 		
 		document.getElementById("mainform").action = formAction;
 		submitForm(false);
@@ -5806,7 +5806,7 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_launchPrintView()
+	function get_j_s_launch_print_view()
 	{
 		$rtn = '
 	
@@ -5814,12 +5814,12 @@ function drawMenuItems($menuArray) {
 	{
 		var mf = document.getElementById("mainform");	
 		mf.target = "_blank";
-		document.getElementById("printView").value = "yes";
+		document.getElementById("print_view").value = "yes";
 		
 		submitForm(false);
 		
 		// Reset to default...
-		document.getElementById("printView").value = "";
+		document.getElementById("print_view").value = "";
 		mf.target = "";
 	}
 	
@@ -5829,7 +5829,7 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_submitSaveActive()
+	function get_j_s_submit_save_active()
 	{
 		$rtn = '
 		
@@ -5843,16 +5843,16 @@ function drawMenuItems($menuArray) {
 		return $rtn;
 	}
 
-	function getJS_popupChangeTerm()
+	function get_j_s_popup_change_term()
 	{
 		$rtn = '
 		
-		function popupChangeTerm(termID)
+		function popupChangeTerm(term_id)
 		{
 			var x = confirm("Are you sure you wish to change advising terms?");
 			if (x)
 			{
-				opener.changeTerm(termID);
+				opener.changeTerm(term_id);
 				window.close();
 			}
 		}
@@ -5860,16 +5860,16 @@ function drawMenuItems($menuArray) {
 		return $rtn;
 	}
 
-	function getJS_changeView()
+	function get_j_s_change_view()
 	{
 		$rtn = '
 		
 		function changeView(view)
 		{
-			document.getElementById("advisingView").value = view;
+			document.getElementById("advising_view").value = view;
 			
 			// rebuild the cache.
-			//document.getElementById("loadFromCache").value="no";
+			//document.getElementById("load_from_cache").value="no";
 						
 			
 			submitForm(true);
@@ -5881,17 +5881,17 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_changeTerm()
+	function get_j_s_change_term()
 	{
 		$rtn = '
 		
-		function changeTerm(termID)
+		function changeTerm(term_id)
 		{
-			document.getElementById("advisingTermID").value = termID;
-			document.getElementById("logAddition").value = "changeTerm_" + termID;
+			document.getElementById("advising_term_id").value = term_id;
+			document.getElementById("logAddition").value = "changeTerm_" + term_id;
 			
 			// rebuild the cache.
-			document.getElementById("loadFromCache").value="no";
+			document.getElementById("load_from_cache").value="no";
 			
 			
 			submitForm(true);
@@ -5900,16 +5900,16 @@ function drawMenuItems($menuArray) {
 		return $rtn;
 	}
 
-	function getJS_popupChangeTrack()
+	function get_j_s_popup_change_track()
 	{
 		$rtn = '
 		
-		function popupChangeTrack(trackCode)
+		function popupChangeTrack(track_code)
 		{
 			var x = confirm("Are you sure you wish to change degree options?");
 			if (x)
 			{
-				opener.changeTrack(trackCode);
+				opener.changeTrack(track_code);
 				window.close();
 			}
 		}
@@ -5918,18 +5918,18 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_popupChangeWhatIfTrack()
+	function get_j_s_popup_change_what_if_track()
 	{
 		$rtn = '
 		
-		function popupChangeWhatIfTrack(trackCode)
+		function popupChangeWhatIfTrack(track_code)
 		{
 			var x = confirm("Are you sure you wish to change degree options?");
 			if (x)
 			{
-				opener.document.getElementById("whatIfTrackCode").value = trackCode;
-				opener.document.getElementById("loadFromCache").value = "no";
-				opener.document.getElementById("logAddition").value = "changeTrack_" + trackCode;
+				opener.document.getElementById("what_if_track_code").value = track_code;
+				opener.document.getElementById("load_from_cache").value = "no";
+				opener.document.getElementById("logAddition").value = "changeTrack_" + track_code;
 				
 				opener.submitForm(true);
 				window.close();
@@ -5940,18 +5940,18 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_changeTrack()
+	function get_j_s_change_track()
 	{
 		$rtn = '
 		
-		function changeTrack(trackCode)
+		function changeTrack(track_code)
 		{
-			document.getElementById("advisingTrackCode").value = trackCode;
-			document.getElementById("advisingUpdateStudentSettingsFlag").value = "true";
-			document.getElementById("logAddition").value = "changeTrack_" + trackCode;
+			document.getElementById("advising_track_code").value = track_code;
+			document.getElementById("advising_update_student_settings_flag").value = "true";
+			document.getElementById("logAddition").value = "changeTrack_" + track_code;
 //alert(document.getElementById("logAddition").value);
 			// rebuild the cache.
-			document.getElementById("loadFromCache").value="no";
+			document.getElementById("load_from_cache").value="no";
 
 			submitForm(true);
 		}
@@ -5960,14 +5960,14 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_hideShowCharts()
+	function get_j_s_hide_show_charts()
 	{
 		$rtn = '
 		
 		function hideShowCharts(status)
 		{
-			document.getElementById("hideCharts").value = status;		
-			document.getElementById("fpUpdateUserSettingsFlag").value = "true";
+			document.getElementById("hide_charts").value = status;		
+			document.getElementById("fp_update_user_settings_flag").value = "true";
 
 
 			submitForm(true);
@@ -5978,7 +5978,7 @@ function drawMenuItems($menuArray) {
 
 
 
-	function getJS_alertHelps()
+	function get_j_s_alert_helps()
 	{
 		// Simple Javascript alerts meant for quick help or tips.
 		$rtn = '
@@ -6027,39 +6027,39 @@ function drawMenuItems($menuArray) {
 		return $rtn;
 	}
 
-	function getJS_popupUpdateSubData()
+	function get_j_s_popup_update_sub_data()
 	{
 		$rtn = '
 		
-		function popupUpdateSubData(maxHours, termID, transferFlag, groupHoursAvail, subCourseHours)
+		function popupUpdateSubData(max_hours, term_id, transferFlag, groupHoursAvail, subCourseHours)
 		{
-			document.getElementById("subTermID").value = termID;
+			document.getElementById("subTermID").value = term_id;
 			document.getElementById("subTransferFlag").value = transferFlag;
 			// if the addition checkbox is checked, use the groupHoursAvail as
 			// the max.
 			if (document.getElementById("cbAddition").checked == true)
 			{
-				maxHours = groupHoursAvail;
-				if (maxHours > subCourseHours)
+				max_hours = groupHoursAvail;
+				if (max_hours > subCourseHours)
 				{
-					maxHours = subCourseHours;
+					max_hours = subCourseHours;
 				}
 			}
 			
-			//alert(maxHours);
+			//alert(max_hours);
 			
 			var sel = document.getElementById("subHours");
 			
 			// Replace this pulldowns elements with a range of values from
-			// maxHours to 1.
+			// max_hours to 1.
 			
 			// First, remove all existing options.
 			sel.options.length = 0;
 
-			sel.options[0] = new Option(" Max (default) ", maxHours, true, true);
+			sel.options[0] = new Option(" Max (default) ", max_hours, true, true);
 			var c = 1;
 			// Now, add in the others.
-			for (var t = maxHours; t > 0; t--)
+			for (var t = max_hours; t > 0; t--)
 			{
 				sel.options[c] = new Option(" " + t + " ", t, false, false);
 				c++;
@@ -6073,16 +6073,16 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_popupUnassignTransferEqv()
+	function get_j_s_popup_unassign_transfer_eqv()
 	{
 		$rtn = '
 		
-		function popupUnassignTransferEqv(courseID)
+		function popupUnassignTransferEqv(course_id)
 		{
 			var x = confirm("Are you sure you wish to remove this transfer course equivalency?\n\nThis action will only affect the current student.  It will not impact any other student\'s records.");
 			if (x)
 			{
-				opener.unassignTransferEqv(courseID);
+				opener.unassignTransferEqv(course_id);
 				window.close();
 			}
 		}
@@ -6092,22 +6092,22 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_unassignTransferEqv()
+	function get_j_s_unassign_transfer_eqv()
 	{
 		$rtn = '
 		
-		function unassignTransferEqv(courseID)
+		function unassignTransferEqv(course_id)
 		{
 
 			var hiddenElements = document.getElementById("hiddenElements");
 			var e = document.createElement("input");
 			e.setAttribute("name","unassign_transfer_eqv");
 			e.setAttribute("type","hidden");
-			e.setAttribute("value","" + courseID + "_" + "");
+			e.setAttribute("value","" + course_id + "_" + "");
 			hiddenElements.appendChild(e);			
 			
 			// rebuild the cache.
-			document.getElementById("loadFromCache").value="no";
+			document.getElementById("load_from_cache").value="no";
 			
 			submitForm(true);
 			
@@ -6120,16 +6120,16 @@ function drawMenuItems($menuArray) {
 
 
 
-	function getJS_popupUnassignFromGroup()
+	function get_j_s_popup_unassign_from_group()
 	{
 		$rtn = '
 		
-		function popupUnassignFromGroup(courseID, termID, transferFlag, groupID)
+		function popupUnassignFromGroup(course_id, term_id, transferFlag, group_id)
 		{
 			var x = confirm("Are you sure you wish to remove this course?");
 			if (x)
 			{
-				opener.unassignFromGroup(courseID, termID, transferFlag, groupID);
+				opener.unassignFromGroup(course_id, term_id, transferFlag, group_id);
 				window.close();
 			}
 		}
@@ -6139,22 +6139,22 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_unassignFromGroup()
+	function get_j_s_unassign_from_group()
 	{
 		$rtn = '
 		
-		function unassignFromGroup(courseID, termID, transferFlag, groupID)
+		function unassignFromGroup(course_id, term_id, transferFlag, group_id)
 		{
 
 			var hiddenElements = document.getElementById("hiddenElements");
 			var e = document.createElement("input");
 			e.setAttribute("name","unassign_group");
 			e.setAttribute("type","hidden");
-			e.setAttribute("value","" + courseID + "_" + termID + "_" + transferFlag + "_" + groupID + "");
+			e.setAttribute("value","" + course_id + "_" + term_id + "_" + transferFlag + "_" + group_id + "");
 			hiddenElements.appendChild(e);			
 			
 			// rebuild the cache.
-			document.getElementById("loadFromCache").value="no";
+			document.getElementById("load_from_cache").value="no";
 			
 			
 			submitForm(true);
@@ -6188,11 +6188,11 @@ function drawMenuItems($menuArray) {
 	}
 
 	*/
-	function getJS_popupSaveSubstitution()
+	function get_j_s_popup_save_substitution()
 	{
 		$rtn = '
 		
-		function popupSaveSubstitution(courseID, groupID, semesterNum)
+		function popupSaveSubstitution(course_id, group_id, semester_num)
 		{
 			var subHours = document.getElementById("subHours").value;
 			var subCourseID = 0;
@@ -6214,7 +6214,7 @@ function drawMenuItems($menuArray) {
 				}
 			}
 			
-			//alert(courseID);
+			//alert(course_id);
 						
 			var subTermID = document.getElementById("subTermID").value;		
 			var subTransferFlag = document.getElementById("subTransferFlag").value;		
@@ -6231,7 +6231,7 @@ function drawMenuItems($menuArray) {
 				return;
 			}
 			
-			opener.saveSubstitution(courseID, groupID, semesterNum, subCourseID, subTermID, subTransferFlag, subHours, subAddition, subRemarks);
+			opener.saveSubstitution(course_id, group_id, semester_num, subCourseID, subTermID, subTransferFlag, subHours, subAddition, subRemarks);
 			window.close();
 		}
 		
@@ -6253,22 +6253,22 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_saveSubstitution()
+	function get_j_s_save_substitution()
 	{
 		$rtn = '
-		function saveSubstitution(courseID, groupID, semesterNum, subCourseID, subTermID, subTransferFlag, subHours, subAddition, subRemarks)
+		function saveSubstitution(course_id, group_id, semester_num, subCourseID, subTermID, subTransferFlag, subHours, subAddition, subRemarks)
 		{
-			//alert("The user to sub course " + courseID + " for group " + groupID + " in sem " + semesterNum + "for course " + subCourseID + " hours: " + subHours + " addition: " + subAddition + "remarks: " + subRemarks);
+			//alert("The user to sub course " + course_id + " for group " + group_id + " in sem " + semester_num + "for course " + subCourseID + " hours: " + subHours + " addition: " + subAddition + "remarks: " + subRemarks);
 				
 			var hiddenElements = document.getElementById("hiddenElements");
 			var e = document.createElement("input");
 			e.setAttribute("name","savesubstitution");
 			e.setAttribute("type","hidden");
-			e.setAttribute("value","" + courseID + "_" + groupID + "_" + semesterNum + "_" + subCourseID + "_" + subTermID + "_" + subTransferFlag + "_" + subHours + "_" + subAddition + "_" + subRemarks + "");
+			e.setAttribute("value","" + course_id + "_" + group_id + "_" + semester_num + "_" + subCourseID + "_" + subTermID + "_" + subTransferFlag + "_" + subHours + "_" + subAddition + "_" + subRemarks + "");
 			hiddenElements.appendChild(e);			
 			
 			// rebuild the cache.
-			document.getElementById("loadFromCache").value="no";
+			document.getElementById("load_from_cache").value="no";
 			
 			submitForm(true);
 			
@@ -6280,18 +6280,18 @@ function drawMenuItems($menuArray) {
 
 
 
-	function getJS_updateSelectedCourse()
+	function get_j_s_update_selected_course()
 	{
 		$rtn = '
-		function updateSelectedCourse(courseID, groupID, semesterNum, varHours, randomID, advisingTermID)
+		function updateSelectedCourse(course_id, group_id, semester_num, varHours, random_id, advising_term_id)
 		{
-			//alert("The user selected course " + courseID + " for group " + groupID + " in sem " + semesterNum + "for var hours " + varHours + "id: " + randomID + " term:" + advisingTermID);
+			//alert("The user selected course " + course_id + " for group " + group_id + " in sem " + semester_num + "for var hours " + varHours + "id: " + random_id + " term:" + advising_term_id);
 					
 			var hiddenElements = document.getElementById("hiddenElements");
 			var e = document.createElement("input");
 			e.setAttribute("name","updatecourse");
 			e.setAttribute("type","hidden");
-			e.setAttribute("value","" + courseID + "_" + groupID + "_" + semesterNum + "_" + varHours + "_" + randomID + "_" + advisingTermID);
+			e.setAttribute("value","" + course_id + "_" + group_id + "_" + semester_num + "_" + varHours + "_" + random_id + "_" + advising_term_id);
 			hiddenElements.appendChild(e);			
 			
 			submitForm(true);
@@ -6302,20 +6302,20 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_assignSelectedCourseToGroup()
+	function get_j_s_assign_selected_course_to_group()
 	{
 		// Meant to handle when a user selects a course for
 		// advising from the popup window.
 
 		$rtn = '
-		function assignSelectedCourseToGroup(courseID, semesterNum, groupID, varHours, advisingTermID, dbGroupRequirementID)
+		function assignSelectedCourseToGroup(course_id, semester_num, group_id, varHours, advising_term_id, db_group_requirement_id)
 		{
-			//alert("The user selected course " + courseID + " for group " + groupID + " in sem " + semesterNum + "for var hours " + varHours + " termid:" + advisingTermID + " grid:" + dbGroupRequirementID);
+			//alert("The user selected course " + course_id + " for group " + group_id + " in sem " + semester_num + "for var hours " + varHours + " termid:" + advising_term_id + " grid:" + db_group_requirement_id);
 			
 			varHours = varHours * 1;
 			var hiddenElements = document.getElementById("hiddenElements");
 			var e = document.createElement("input");
-			e.setAttribute("name","advisecourse_" + courseID + "_" + semesterNum + "_" + groupID + "_" + varHours + "_random34534534534" + "_" + advisingTermID + "_" + dbGroupRequirementID);
+			e.setAttribute("name","advisecourse_" + course_id + "_" + semester_num + "_" + group_id + "_" + varHours + "_random34534534534" + "_" + advising_term_id + "_" + db_group_requirement_id);
 			e.setAttribute("type","hidden");
 			e.setAttribute("value","true");
 			hiddenElements.appendChild(e);			
@@ -6327,7 +6327,7 @@ function drawMenuItems($menuArray) {
 		return $rtn;
 	}
 
-	function getJS_removeSubstitution()
+	function get_j_s_remove_substitution()
 	{
 
 		$rtn = '
@@ -6341,7 +6341,7 @@ function drawMenuItems($menuArray) {
 			hiddenElements.appendChild(e);			
 			
 			// rebuild the cache.
-			document.getElementById("loadFromCache").value="no";
+			document.getElementById("load_from_cache").value="no";
 			
 			
 			submitForm(true);
@@ -6352,21 +6352,21 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_restoreTransferEqv()
+	function get_j_s_restore_transfer_eqv()
 	{
 
 		$rtn = '
-		function restoreTransferEqv(dbUnassignTransferID)
+		function restoreTransferEqv(db_unassign_transfer_id)
 		{
 			var hiddenElements = document.getElementById("hiddenElements");
 			var e = document.createElement("input");
 			e.setAttribute("name","restore_transfer_eqv");
 			e.setAttribute("type","hidden");
-			e.setAttribute("value","" + dbUnassignTransferID + "_" + "");
+			e.setAttribute("value","" + db_unassign_transfer_id + "_" + "");
 			hiddenElements.appendChild(e);			
 			
 			// rebuild the cache.
-			document.getElementById("loadFromCache").value="no";
+			document.getElementById("load_from_cache").value="no";
 			
 			
 			submitForm(true);
@@ -6377,22 +6377,22 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_restoreUnassignFromGroup()
+	function get_j_s_restore_unassign_from_group()
 	{
 
 		$rtn = '
-		function restoreUnassignFromGroup(dbUnassignGroupID)
+		function restoreUnassignFromGroup(db_unassign_group_id)
 		{
 		
 			var hiddenElements = document.getElementById("hiddenElements");
 			var e = document.createElement("input");
 			e.setAttribute("name","restore_unassign_group");
 			e.setAttribute("type","hidden");
-			e.setAttribute("value","" + dbUnassignGroupID + "_" + "");
+			e.setAttribute("value","" + db_unassign_group_id + "_" + "");
 			hiddenElements.appendChild(e);			
 			
 			// rebuild the cache.
-			document.getElementById("loadFromCache").value="no";
+			document.getElementById("load_from_cache").value="no";
 			
 			
 			submitForm(true);
@@ -6404,7 +6404,7 @@ function drawMenuItems($menuArray) {
 
 
 
-	function getJS_submitForm()
+	function get_j_s_submit_form()
 	{
 
 		$rtn = '
@@ -6428,7 +6428,7 @@ function drawMenuItems($menuArray) {
 		return $rtn;
 	}
 
-	function getJS_popupRemoveSubstitution()
+	function get_j_s_popup_remove_substitution()
 	{
 
 		$rtn = '
@@ -6448,14 +6448,14 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_popupRestoreTransferEqv()
+	function get_j_s_popup_restore_transfer_eqv()
 	{
 
 		$rtn = '
-		function popupRestoreTransferEqv(dbUnassignTransferID)
+		function popupRestoreTransferEqv(db_unassign_transfer_id)
 		{
 		
-			opener.restoreTransferEqv(dbUnassignTransferID);
+			opener.restoreTransferEqv(db_unassign_transfer_id);
 			window.close();
 			//window.location=window.location;  // refresh popup window
 		
@@ -6465,14 +6465,14 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_popupRestoreUnassignFromGroup()
+	function get_j_s_popup_restore_unassign_from_group()
 	{
 
 		$rtn = '
-		function popupRestoreUnassignFromGroup(dbUnassignGroupID)
+		function popupRestoreUnassignFromGroup(db_unassign_group_id)
 		{
 		
-			opener.restoreUnassignFromGroup(dbUnassignGroupID);
+			opener.restoreUnassignFromGroup(db_unassign_group_id);
 			window.close();
 			//window.location=window.location;  // refresh popup window
 		
@@ -6483,7 +6483,7 @@ function drawMenuItems($menuArray) {
 
 
 
-	function getJS_popupSetVarHours()
+	function get_j_s_popup_set_var_hours()
 	{
 		// Meant to handle when a user selects a course for
 		// advising from the popup window.
@@ -6504,16 +6504,16 @@ function drawMenuItems($menuArray) {
 
 
 
-	function getJS_popupUpdateSelectedCourse()
+	function get_j_s_popup_update_selected_course()
 	{
 
 		$rtn = '
-		function popupUpdateSelectedCourse(courseID, groupID, semesterNum, randomID, advisingTermID)
+		function popupUpdateSelectedCourse(course_id, group_id, semester_num, random_id, advising_term_id)
 		{
 
 			var varHours = document.getElementById("varHours").value;
 
-			opener.updateSelectedCourse(courseID, groupID, semesterNum, varHours, randomID, advisingTermID);
+			opener.updateSelectedCourse(course_id, group_id, semester_num, varHours, random_id, advising_term_id);
 			window.close();
 
 		}
@@ -6522,13 +6522,13 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_popupAssignSelectedCourseToGroup()
+	function get_j_s_popup_assign_selected_course_to_group()
 	{
 		// Meant to handle when a user selects a course for
 		// advising from the popup window.
 
 		$rtn = '
-		function popupAssignSelectedCourseToGroup(semesterNum, groupID, advisingTermID, dbGroupRequirementID)
+		function popupAssignSelectedCourseToGroup(semester_num, group_id, advising_term_id, db_group_requirement_id)
 		{
 
 			var varHours = document.getElementById("varHours").value;
@@ -6538,14 +6538,14 @@ function drawMenuItems($menuArray) {
 			{
 				if (c[t].checked == true)
 				{ // Found users selection.
-					var courseID = c[t].value;
+					var course_id = c[t].value;
 					
-					if (dbGroupRequirementID == -1)
+					if (db_group_requirement_id == -1)
 					{
-						dbGroupRequirementID = document.getElementById("" + courseID + "_dbGroupRequirementID").value;
+						db_group_requirement_id = document.getElementById("" + course_id + "_db_group_requirement_id").value;
 					}
 					
-					opener.assignSelectedCourseToGroup(courseID, semesterNum, groupID, varHours, advisingTermID, dbGroupRequirementID);
+					opener.assignSelectedCourseToGroup(course_id, semester_num, group_id, varHours, advising_term_id, db_group_requirement_id);
 
 					window.close();
 				}
@@ -6559,12 +6559,12 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_selectCourseFromGroup()
+	function get_j_s_select_course_from_group()
 	{
 		$rtn = '
-		function selectCourseFromGroup(groupID, semesterNum, groupHoursRemaining, blankDegreeID)
+		function selectCourseFromGroup(group_id, semester_num, groupHoursRemaining, blankDegreeID)
 		{
-			popupWindow("displayGroupSelect","groupID=" + groupID + "&semesterNum=" + semesterNum + "&groupHoursRemaining=" + groupHoursRemaining + "&blankDegreeID=" + blankDegreeID);
+			popupWindow("display_groupSelect","group_id=" + group_id + "&semester_num=" + semester_num + "&group_hours_remaining=" + groupHoursRemaining + "&blank_degree_id=" + blankDegreeID);
 		}
 		';
 
@@ -6572,24 +6572,24 @@ function drawMenuItems($menuArray) {
 		return $rtn;
 	}
 
-	function getJS_describeCourse()
+	function get_j_s_describe_course()
 	{
-		$scriptFilename = $this->scriptFilename;
+		$script_filename = $this->script_filename;
 		$rtn = '
 		function describeCourse(dataString, blankDegreeID)
 		{
-			popupWindow("displayDescription","dataString=" + dataString + "&blankDegreeID=" + blankDegreeID);
+			popupWindow("displayDescription","dataString=" + dataString + "&blank_degree_id=" + blankDegreeID);
 		}
 		';
 		return $rtn;
 	}
 
 
-	function getJS_popupDescribeSelected()
+	function get_j_s_popup_describe_selected()
 	{
-		$scriptFilename = $this->scriptFilename;
+		$script_filename = $this->script_filename;
 		$rtn = '
-		function popupDescribeSelected(groupID, semesterNum, optionalCourseID, selectedSubject, extraVars)
+		function popupDescribeSelected(group_id, semester_num, optionalCourseID, selectedSubject, extraVars)
 		{
 			// This will go through the list of radio buttons
 			// on a group select screen (of a popup window),
@@ -6597,8 +6597,8 @@ function drawMenuItems($menuArray) {
 			// switch over to a description.  Meant to be
 			// called from clicking a tab. (The tabs onClick).
 
-			var courseID = optionalCourseID;
-			if (courseID < 1)
+			var course_id = optionalCourseID;
+			if (course_id < 1)
 			{ // CourseID wasnt specified, so try to figure it out...
 
 				var cbs = document.getElementsByName("course");
@@ -6609,19 +6609,19 @@ function drawMenuItems($menuArray) {
 					{
 						// In other words, this course
 						// was selected.
-						courseID = cb.value;
+						course_id = cb.value;
 						// Also attempt to figure out the selectedSubject, if
 						// one has not been supplied.
 						if (selectedSubject == "")
 						{
-							selectedSubject = document.getElementById("" + courseID + "_subject").value;
+							selectedSubject = document.getElementById("" + course_id + "_subject").value;
 						}
 						break;
 					}
 				}
 			}
 
-			window.location = "' . $scriptFilename . '?windowMode=popup&performAction=displayGroupSelect&performAction2=describeCourse&courseID=" + courseID + "&groupID=" + groupID + "&semesterNum=" + semesterNum + "&selectedSubject=" + selectedSubject + "&currentStudentID=" + csid + "&" + extraVars;
+			window.location = "' . $script_filename . '?windowMode=popup&performAction=display_groupSelect&performAction2=describeCourse&course_id=" + course_id + "&group_id=" + group_id + "&semester_num=" + semester_num + "&selectedSubject=" + selectedSubject + "&current_student_id=" + csid + "&" + extraVars;
 
 		}
 		';
@@ -6630,14 +6630,14 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_popupSubstituteSelected()
+	function get_j_s_popup_substitute_selected()
 	{
-		$scriptFilename = $this->scriptFilename;
+		$script_filename = $this->script_filename;
 		$rtn = '
-		function popupSubstituteSelected(courseID, groupID, semesterNum, extraVars)
+		function popupSubstituteSelected(course_id, group_id, semester_num, extraVars)
 		{
 
-			if (courseID < 1)
+			if (course_id < 1)
 			{ // CourseID wasnt specified, so try to figure it out...
 
 				var cbs = document.getElementsByName("course");
@@ -6648,14 +6648,14 @@ function drawMenuItems($menuArray) {
 					{
 						// In other words, this course
 						// was selected.
-						courseID = cb.value;
+						course_id = cb.value;
 						break;
 					}
 				}
 			}
 
 
-			window.location = "' . $scriptFilename . '?windowMode=popup&performAction=substituteSelected&courseID=" + courseID + "&groupID=" + groupID + "&semesterNum=" + semesterNum + "&currentStudentID=" + csid + "&" + extraVars;
+			window.location = "' . $script_filename . '?windowMode=popup&performAction=substituteSelected&course_id=" + course_id + "&group_id=" + group_id + "&semester_num=" + semester_num + "&current_student_id=" + csid + "&" + extraVars;
 		}
 		';
 		return $rtn;
@@ -6664,20 +6664,20 @@ function drawMenuItems($menuArray) {
 
 
 
-	function getJS_popupBackToGroupSelect()
+	function get_j_s_popup_back_to_group_select()
 	{
-		$scriptFilename = $this->scriptFilename;
+		$script_filename = $this->script_filename;
 		$rtn = '
-		function popupBackToGroupSelect(courseID, groupID, semesterNum, extraVars)
+		function popupBackToGroupSelect(course_id, group_id, semester_num, extraVars)
 		{
 			// This is meant to be called when switching back
 			// from a course description tab, while in the
 			// group select popup window.  So, this is like I
 			// am reading a description of a course, then I click
-			// the select tab to go back.  The courseID is the ID
+			// the select tab to go back.  The course_id is the ID
 			// of the course whose description I was just reading.
 
-			window.location = "' . $scriptFilename . '?windowMode=popup&performAction=displayGroupSelect&courseID=" + courseID + "&groupID=" + groupID + "&semesterNum=" + semesterNum + "&currentStudentID=" + csid + "&" + extraVars;
+			window.location = "' . $script_filename . '?windowMode=popup&performAction=display_groupSelect&course_id=" + course_id + "&group_id=" + group_id + "&semester_num=" + semester_num + "&current_student_id=" + csid + "&" + extraVars;
 
 		}
 		';
@@ -6686,13 +6686,13 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_popupWindow()
+	function get_j_s_popup_window()
 	{
-		$scriptFilename = $this->scriptFilename;
+		$script_filename = $this->script_filename;
 		$rtn = '
 		function popupWindow(action, extraVars)
 		{
-			var my_windowx = window.open("' . $scriptFilename . '?windowMode=popup&performAction=" + action + "&currentStudentID=" + csid + "&" + extraVars,
+			var my_windowx = window.open("' . $script_filename . '?windowMode=popup&performAction=" + action + "&current_student_id=" + csid + "&" + extraVars,
 			"courseinfox" + csid,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375");
 
 			my_windowx.focus();  // make sure the popup window is on top.
@@ -6703,13 +6703,13 @@ function drawMenuItems($menuArray) {
 
 	}
 
-	function getJS_popupWindow2()
+	function get_j_s_popup_window2()
 	{
-		$scriptFilename = $this->scriptFilename;
+		$script_filename = $this->script_filename;
 		$rtn = '
 		function popupWindow2(action, extraVars)
 		{
-			var my_windowx2 = window.open("' . $scriptFilename . '?windowMode=popup&performAction=" + action + "&currentStudentID=" + csid + "&" + extraVars,
+			var my_windowx2 = window.open("' . $script_filename . '?windowMode=popup&performAction=" + action + "&current_student_id=" + csid + "&" + extraVars,
 			"courseinfox2" + csid,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375");
 
 			my_windowx2.focus();  // make sure the popup window is on top.
@@ -6722,13 +6722,13 @@ function drawMenuItems($menuArray) {
 
 	}
 
-	function getJS_popupPrintWindow()
+	function get_j_s_popup_print_window()
 	{
 
 		$rtn = '
 		function popupPrintWindow(url)
 		{
-			var my_windowx2p = window.open(url + "&currentStudentID=" + csid,
+			var my_windowx2p = window.open(url + "&current_student_id=" + csid,
 			"courseinfoxprint" + csid,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=700,height=500");
 
 			my_windowx2p.focus();  // make sure the popup window is on top.
@@ -6739,12 +6739,12 @@ function drawMenuItems($menuArray) {
 		return $rtn;
 	}
 
-	function getJS_popupHelpWindow()
+	function get_j_s_popup_help_window()
 	{
 		$rtn = '
 		function popupHelpWindow(url)
 		{
-			var my_windowxhelp2p = window.open(url + "&currentStudentID=" + csid,
+			var my_windowxhelp2p = window.open(url + "&current_student_id=" + csid,
 			"courseinfoxhelp" + csid,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=700,height=500");
 
 			my_windowxhelp2p.focus();  // make sure the popup window is on top.
@@ -6757,7 +6757,7 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_toggleDisabledChangeTerm()
+	function get_j_s_toggle_disabled_change_term()
 	{
 		$rtn = '
 
@@ -6775,7 +6775,7 @@ function drawMenuItems($menuArray) {
 		return $rtn;
 	}
 
-	function getJS_toggleDisabledCompleted()
+	function get_j_s_toggle_disabled_completed()
 	{
 		$rtn = '
 
@@ -6799,11 +6799,11 @@ function drawMenuItems($menuArray) {
 	}
 
 
-	function getJS_toggleSelection()
+	function get_j_s_toggle_selection()
 	{
-		$imgPath = $this->themeLocation . "/images";
+		$img_path = $this->theme_location . "/images";
 		$rtn = '
-		function toggleSelection(uniqueID, displayStatus, warningMsg)
+		function toggleSelection(uniqueID, display_status, warningMsg)
 		{
 			// We expect this to be the graphic of the checkbox.
 			var img = document.getElementById("cb_" + uniqueID);
@@ -6816,7 +6816,7 @@ function drawMenuItems($menuArray) {
 				// Meaning, this course is currently selected.
 				// So, unselect it.
 				course.value = "";
-				img.src = "' . $imgPath . '/cb_" + displayStatus + ".gif";
+				img.src = "' . $img_path . '/cb_" + display_status + ".gif";
 			} else {
 				// Meaning, this is unselected, so lets select it.
 				if (warningMsg != "")
@@ -6829,7 +6829,7 @@ function drawMenuItems($menuArray) {
 				}
 
 				course.value = "true";
-				img.src = "' . $imgPath . '/cb_" + displayStatus + "-check.gif";
+				img.src = "' . $img_path . '/cb_" + display_status + "-check.gif";
 
 			}
 		}
@@ -6844,19 +6844,19 @@ function drawMenuItems($menuArray) {
 		return $rtn;
 	}
 
-	function getJS_toggleSelectionAndSave()
+	function get_j_s_toggle_selection_and_save()
 	{
 		$rtn = '
-		function toggleSelectionAndSave(uniqueID, displayStatus, warningMsg)
+		function toggleSelectionAndSave(uniqueID, display_status, warningMsg)
 		{
-			toggleSelection(uniqueID, displayStatus, warningMsg);
+			toggleSelection(uniqueID, display_status, warningMsg);
 			submitForm(true);
 		}
 		';
 		return $rtn;
 	}
 
-	function getJS_setVar()
+	function get_j_s_set_var()
 	{
 		$rtn = '
 		function setVar(id, newValue)
@@ -6872,40 +6872,40 @@ function drawMenuItems($menuArray) {
 	 * Returns a list of "hidden" HTML input tags which are used to keep
 	 * track of advising variables between page loads.
 	 *
-	 * @param string $performAction
+	 * @param string $perform_action
 	 *       - Used for when we submit the form, so that FlightPath will
 	 *         know what action we are trying to take.
 	 * 
 	 * @return string
 	 */
-	function getHiddenAdvisingVariables($performAction = "")
+	function get_hidden_advising_variables($perform_action = "")
 	{
 		$rtn = "";
 
 		$rtn .= "<span id='hiddenElements'>
 		
-			<input type='hidden' name='performAction' id='performAction' value='$performAction'>
+			<input type='hidden' name='performAction' id='performAction' value='$perform_action'>
 			<input type='hidden' name='performAction2' id='performAction2' value=''>
 			<input type='hidden' name='scrollTop' id='scrollTop' value=''>
 			<input type='hidden' name='loadFromCache' id='loadFromCache' value='yes'>
-			<input type='hidden' name='printView' id='printView' value='{$GLOBALS["printView"]}'>			
+			<input type='hidden' name='printView' id='printView' value='{$GLOBALS["print_view"]}'>			
 			<input type='hidden' name='hideCharts' id='hideCharts' value=''>
 			
-			<input type='hidden' name='advisingLoadActive' id='advisingLoadActive' value='{$GLOBALS["advisingLoadActive"]}'>
-			<input type='hidden' name='advisingStudentID' id='advisingStudentID' value='{$GLOBALS["advisingStudentID"]}'>
-			<input type='hidden' name='advisingTermID' id='advisingTermID' value='{$GLOBALS["advisingTermID"]}'>
-			<input type='hidden' name='advisingMajorCode' id='advisingMajorCode' value='{$GLOBALS["advisingMajorCode"]}'>
-			<input type='hidden' name='advisingTrackCode' id='advisingTrackCode' value='{$GLOBALS["advisingTrackCode"]}'>
-			<input type='hidden' name='advisingUpdateStudentSettingsFlag' id='advisingUpdateStudentSettingsFlag' value=''>
-			<input type='hidden' name='advisingWhatIf' id='advisingWhatIf' value='{$GLOBALS["advisingWhatIf"]}'>
-			<input type='hidden' name='whatIfMajorCode' id='whatIfMajorCode' value='{$GLOBALS["whatIfMajorCode"]}'>
-			<input type='hidden' name='whatIfTrackCode' id='whatIfTrackCode' value='{$GLOBALS["whatIfTrackCode"]}'>
-			<input type='hidden' name='advisingView' id='advisingView' value='{$GLOBALS["advisingView"]}'>
+			<input type='hidden' name='advisingLoadActive' id='advisingLoadActive' value='{$GLOBALS["advising_load_active"]}'>
+			<input type='hidden' name='advising_student_id' id='advising_student_id' value='{$GLOBALS["advising_student_id"]}'>
+			<input type='hidden' name='advising_term_id' id='advising_term_id' value='{$GLOBALS["advising_term_id"]}'>
+			<input type='hidden' name='advising_major_code' id='advising_major_code' value='{$GLOBALS["advising_major_code"]}'>
+			<input type='hidden' name='advising_track_code' id='advising_track_code' value='{$GLOBALS["advising_track_code"]}'>
+			<input type='hidden' name='advising_update_student_settings_flag' id='advising_update_student_settings_flag' value=''>
+			<input type='hidden' name='advising_what_if' id='advising_what_if' value='{$GLOBALS["advising_what_if"]}'>
+			<input type='hidden' name='what_if_major_code' id='what_if_major_code' value='{$GLOBALS["what_if_major_code"]}'>
+			<input type='hidden' name='what_if_track_code' id='what_if_track_code' value='{$GLOBALS["what_if_track_code"]}'>
+			<input type='hidden' name='advising_view' id='advising_view' value='{$GLOBALS["advising_view"]}'>
 
-			<input type='hidden' name='currentStudentID' id='currentStudentID' value='{$GLOBALS["currentStudentID"]}'>
+			<input type='hidden' name='currentStudentID' id='currentStudentID' value='{$GLOBALS["current_student_id"]}'>
 			<input type='hidden' name='logAddition' id='logAddition' value=''>
 			
-			<input type='hidden' name='fpUpdateUserSettingsFlag' id='fpUpdateUserSettingsFlag' value=''>
+			<input type='hidden' name='fp_update_user_settings_flag' id='fp_update_user_settings_flag' value=''>
 			
 			</span>
 			";

@@ -4,34 +4,34 @@
 	to be used with content which is supposed to get printed out.
 */
 
-if ($pageTitle == "")
+if ($page_title == "")
 { // By default, page title is this...
-	$pageTitle = $GLOBALS["fpSystemSettings"]["schoolInitials"] . " FlightPath";
+	$page_title = $GLOBALS["fp_system_settings"]["school_initials"] . " FlightPath";
 }
 
-$themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSystemSettings"]["theme"];
+$theme_location = $GLOBALS["fp_system_settings"]["base_u_r_l"] . "/" . $GLOBALS["fp_system_settings"]["theme"];
 
 print "
 <meta name='viewport' id='view' content='width=device-width;'/>
 <meta name='format-detection' content='telephone=no'>                
-<link rel='stylesheet' type='text/css' href='$themeLocation/style.css'>
-<link rel='stylesheet' type='text/css' href='$themeLocation/mobile.css'>";
+<link rel='stylesheet' type='text/css' href='$theme_location/style.css'>
+<link rel='stylesheet' type='text/css' href='$theme_location/mobile.css'>";
 
 // Load any extra CSS files which addon modules might have added.
-if (is_array($pageExtraCssFiles) && count($pageExtraCssFiles) > 0) {
- foreach ($pageExtraCssFiles as $cssFileName) {
-   print "<link rel='stylesheet' type='text/css' href='$cssFileName'>";
+if (is_array($page_extra_css_files) && count($page_extra_css_files) > 0) {
+ foreach ($page_extra_css_files as $css_file_name) {
+   print "<link rel='stylesheet' type='text/css' href='$css_file_name'>";
  }
 }
 
 
 print "
-<title>$pageTitle</title>
+<title>$page_title</title>
 ";
 
 ?>
 
-<script src="<?php print $GLOBALS["fpSystemSettings"]["basePath"]; ?>/inc/jquery-1.3.2.min.js" type="text/javascript"></script>
+<script src="<?php print $GLOBALS["fp_system_settings"]["base_path"]; ?>/inc/jquery-1.3.2.min.js" type="text/javascript"></script>
 
 <script type='text/javascript'>
 
@@ -39,12 +39,12 @@ function defaultOnLoad()
 		{
 			<?php
 
-			print $pageOnLoad;
+			print $page_on_load;
 			// If the page had a scrollTo set, we should also
 			// perform that here...
-			if ($pageScrollTo != "")
+			if ($page_scroll_to != "")
 			{
-				print "location.href = \"#$pageScrollTo\"; \n";
+				print "location.href = \"#$page_scroll_to\"; \n";
 			}
 
 			?>
@@ -127,15 +127,15 @@ function popuphelp(topic)
 
 <?php
 	$scroll = "";
-	if (trim($pageScrollTop != ""))
+	if (trim($page_scroll_top != ""))
 	{
-		$pageScrollLeft = 0;
-		$scroll = " scrollTo($pageScrollLeft, $pageScrollTop);";
+		$page_scroll_left = 0;
+		$scroll = " scrollTo($page_scroll_left, $page_scroll_top);";
 	}
 	$onclose = "";
-	if (trim($pageOnUnload != ""))
+	if (trim($page_on_unload != ""))
 	{
-		$onclose = "onUnload='$pageOnUnload'";
+		$onclose = "on_unload='$page_on_unload'";
 	}
 
 
@@ -143,21 +143,21 @@ function popuphelp(topic)
 
 	?>
 <!-- LOGO -->
-<img src='<?php print $themeLocation; ?>/images/fp_banner_default_226px.png' alt='FlightPath' title='FlightPath'>
+<img src='<?php print $theme_location; ?>/images/fp_banner_default_226px.png' alt='FlightPath' title='FlightPath'>
 		<div id='updateMsg' class='updateMsg' style='display: none;'>Updating...</div>
 		<div id='loadMsg' class='updateMsg' style='display: none;'>Loading...</div>
 
 <table border='0' width='100%' cellspacing='0' cellpadding='0'>
 
 <?php
-if ($pageTabs) {
+if ($page_tabs) {
   print "
   <tr>
    <td>
 			<table width='100%' cellpadding='0' cellspacing='0' align='left'>
 				<tr>
 					<td align='left'>
-					$pageTabs										
+					$page_tabs										
 					</td>
 				</tr>
 			</table>
@@ -170,7 +170,7 @@ if ($pageTabs) {
 <tr>
 <td valign='top'>
 <!-- PAGE CONTENT -->
-<?php print $pageContent; ?>
+<?php print $page_content; ?>
 </td> 
 </tr>
 </table>

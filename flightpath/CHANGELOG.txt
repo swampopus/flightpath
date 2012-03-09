@@ -1,6 +1,15 @@
 FlightPath Changelog
 ====================
 
+2012-03-09
+** BIG CHANGE **
+I ran a script to convert from camelCase to underscore_style.
+Now, only Class names are CamelCased.  Everything else-- variables and methods and functions,
+are all going to be underscore_style (also called K&R or C++ style).
+Even though I think this isn't as pretty, it is consistent, which is what I am more
+concerned about.
+
+
 2012-03-08
 Fixed a bug where definitions in groups, once entered could not be removed.
 

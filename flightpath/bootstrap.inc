@@ -26,25 +26,25 @@ notice must not be modified, and must be included with the source code.
  */
 
 
-// Note: $levelsDeep will have been set (or not) by another script.  This
+// Note: $levels_deep will have been set (or not) by another script.  This
 // is so that you can send "../../" or whatever if you need to.  Currently
 // used in routines/routines.php.
-if (!isset($levelsDeep)) $levelsDeep = "";
+if (!isset($levels_deep)) $levels_deep = "";
 
 
 // Should we load the functions file?  This variable should be
 // set prior to including this bootstrap file.
-if (!isset($skipFlightPathFunctions) || $skipFlightPathFunctions != TRUE) {
+if (!isset($skip_flight_path_functions) || $skip_flight_path_functions != TRUE) {
   // Load the common "functions.php" file.
-  require_once("$levelsDeep" . "functions.php");
+  require_once("$levels_deep" . "functions.php");
 }
 
 // Load the global system settings file.
-require_once("$levelsDeep" . "custom/settings.php");
+require_once("$levels_deep" . "custom/settings.php");
 
 
 // Load all of the classes, as well as the custom classes.
-require_once("$levelsDeep" . "classes/allClasses.php");
+require_once("$levels_deep" . "classes/all_classes.php");
 
 
 
@@ -57,13 +57,13 @@ define("MENU_NOT_FOUND", 5);
 
 
 // Include all of the enabled modules
-foreach ($GLOBALS["fpSystemSettings"]["modules"] as $module => $value) {
+foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $value) {
   if (isset($value["disabled"]) && $value["disabled"] == "yes") {
     // Module is not enabled.  Skip it.
     continue;
   }
   
-  includeModule($module, TRUE);
+  include_module($module, TRUE);
 }
 
 

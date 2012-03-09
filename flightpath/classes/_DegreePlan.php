@@ -17,67 +17,67 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class _DegreePlan
+class __degree_plan
 {
-  public $majorCode, $title, $degreeType, $degreeClass, $shortDescription, $longDescription;
-  public $listSemesters, $listDegreePlans, $listGroups, $db, $degreeID, $catalogYear;
-  public $trackCode, $trackTitle, $trackDescription, $studentArraySignificantCourses;
-  public $boolHasTracks, $arraySemesterTitles, $dbExclude;
-  public $publicNote;
+  public $major_code, $title, $degree_type, $degree_class, $short_description, $long_description;
+  public $list_semesters, $list_degree_plans, $list_groups, $db, $degree_id, $catalog_year;
+  public $track_code, $track_title, $track_description, $student_array_significant_courses;
+  public $bool_has_tracks, $array_semester_titles, $db_exclude;
+  public $public_note;
 
-  public $totalMajorHours, $totalCoreHours, $totalDegreeHours;
-  public $fulfilledMajorHours, $fulfilledCoreHours, $fulfilledDegreeHours;
+  public $total_major_hours, $total_core_hours, $total_degree_hours;
+  public $fulfilled_major_hours, $fulfilled_core_hours, $fulfilled_degree_hours;
 
-  public $boolUseDraft;
+  public $bool_use_draft;
 
   /**
-	* $majorCode		ACCT, CSCI, etc.
+	* $major_code		ACCT, CSCI, etc.
 	* $title			Accounting, Computer Science, etc.
-	* $degreeType		BBA, BS, AS, etc.
-	* $shortDescription	These are a text description of this degree plan.  Useful
+	* $degree_type		BBA, BS, AS, etc.
+	* $short_description	These are a text description of this degree plan.  Useful
 	*					for descriptions of "Tracks" or "Options." The short
-	* $longDescription	one appears in a pull down, the long one is a more
+	* $long_description	one appears in a pull down, the long one is a more
 	*					complete text description.  Will probably be unused
 	*					by most degrees.
-	* $listSemesters	A list of semesters that this DegreePlan requires.
-	* $listDegreePlans	If this degree plan has multiple tracks or options, then
+	* $list_semesters	A list of semesters that this DegreePlan requires.
+	* $list_degree_plans	If this degree plan has multiple tracks or options, then
 	*					they would be spelled out as other degree plans, and listed
 	*					here.  For example, Biology has multiple "tracks" which,
 	*					internally, should be treated as different degree plans.
 	**/
 
 
-  function __construct($degreeID = "", DatabaseHandler $db = NULL, $boolLoadMinimal = false, $arraySignificantCourses = false, $boolUseDraft = false)
+  function __construct($degree_id = "", DatabaseHandler $db = NULL, $bool_load_minimal = false, $array_significant_courses = false, $bool_use_draft = false)
   {
-    $this->listSemesters = new ObjList();
-    $this->listGroups = new GroupList();
-    $this->boolUseDraft = $boolUseDraft;
+    $this->list_semesters = new ObjList();
+    $this->list_groups = new GroupList();
+    $this->bool_use_draft = $bool_use_draft;
     // Always override if the global variable is set.
-    if ($GLOBALS["boolUseDraft"] == true)
+    if ($GLOBALS["bool_use_draft"] == true)
     {
-      $this->boolUseDraft = true;
+      $this->bool_use_draft = true;
     }
 
 
     $this->db = $db;
     if ($db == NULL)
     {
-      $this->db = getGlobalDatabaseHandler();
+      $this->db = get_global_database_handler();
     }
 
-    $this->studentArraySignificantCourses = $arraySignificantCourses;
+    $this->student_array_significant_courses = $array_significant_courses;
 
-    if ($degreeID != "")
+    if ($degree_id != "")
     {
 
-      $this->degreeID = $degreeID;
-      $this->loadDescriptiveData();
-      if (!$boolLoadMinimal)
+      $this->degree_id = $degree_id;
+      $this->load_descriptive_data();
+      if (!$bool_load_minimal)
       {
-        $this->loadDegreePlan();
+        $this->load_degree_plan();
       }
       // Add the "Add a Course" semester to the semester list.
-      $this->addSemesterCoursesAdded();
+      $this->add_semester_courses_added();
 
     }
 
@@ -86,87 +86,87 @@ class _DegreePlan
   }
 
 
-  function calculateProgressHours()
+  function calculate_progress_hours()
   {
-    $this->totalMajorHours = $this->getProgressHours("m");
-    $this->totalCoreHours = $this->getProgressHours("c");
-    $this->totalDegreeHours = $this->getProgressHours("");
+    $this->total_major_hours = $this->get_progress_hours("m");
+    $this->total_core_hours = $this->get_progress_hours("c");
+    $this->total_degree_hours = $this->get_progress_hours("");
     //adminDebug("fulfilled major: ");
-    $this->fulfilledMajorHours = $this->getProgressHours("m", false);
+    $this->fulfilled_major_hours = $this->get_progress_hours("m", false);
     //adminDebug("fulfilled core:  ");
-    $this->fulfilledCoreHours = $this->getProgressHours("c", false);
+    $this->fulfilled_core_hours = $this->get_progress_hours("c", false);
     //adminDebug("fulfilled -degree:  ");
-    $this->fulfilledDegreeHours = $this->getProgressHours("", false);
+    $this->fulfilled_degree_hours = $this->get_progress_hours("", false);
   }
 
 
-  function getProgressHours($requirementType = "", $boolRequiredHoursOnly = true)
+  function get_progress_hours($requirement_type = "", $bool_required_hours_only = true)
   {
     // Returns the number of hours required (or fulfilled) in a degree plan
-    // for courses & groups with the specified requirementType.
+    // for courses & groups with the specified requirement_type.
     // ex:  "m", "s", etc.  leave blank for ALL required hours.
     // if boolRequiredHours is FALSE, then we will only look for the courses
     // which got fulfilled.
 
     $hours = 0;
 
-    $this->listSemesters->resetCounter();
-    while ($this->listSemesters->hasMore())
+    $this->list_semesters->reset_counter();
+    while ($this->list_semesters->has_more())
     {
-      $sem = $this->listSemesters->getNext();
-      //adminDebug("taken courses re: $requirementType in " . $sem->semesterNum . ":: $temp");
-      if ($boolRequiredHoursOnly == true)
+      $sem = $this->list_semesters->get_next();
+      //adminDebug("taken courses re: $requirement_type in " . $sem->semesterNum . ":: $temp");
+      if ($bool_required_hours_only == true)
       {
         //adminDebug("regular count hours");
-        $hours += $sem->listCourses->countHours($requirementType, true, false);
+        $hours += $sem->list_courses->count_hours($requirement_type, true, false);
       } else {
-        $temp = $sem->listCourses->countCreditHours($requirementType, true, true);
+        $temp = $sem->list_courses->count_credit_hours($requirement_type, true, true);
         $hours += $temp;
       }
     }
 
     // Also, add in groups matching this requirement type.
-    $this->listGroups->resetCounter();
-    while ($this->listGroups->hasMore())
+    $this->list_groups->reset_counter();
+    while ($this->list_groups->has_more())
     {
-      $g = $this->listGroups->getNext();
-      if ($g->groupID < 0)
+      $g = $this->list_groups->get_next();
+      if ($g->group_id < 0)
       { // Skip Add a course group.
         continue;
       }
 
-      //print_pre($g->toString());
+      //print_pre($g->to_string());
 
-      $gHours = $g->hoursRequired;
-      if ($boolRequiredHoursOnly == false)
+      $g_hours = $g->hours_required;
+      if ($bool_required_hours_only == false)
       { // only count the fulfilled hours, then.
-        $gHours = $g->getFulfilledHours(true, false, true, -1, true);
-        //adminDebug("taken group re: $requirementType in " . $g->title . ":: $gHours");
+        $g_hours = $g->get_fulfilled_hours(true, false, true, -1, true);
+        //adminDebug("taken group re: $requirement_type in " . $g->title . ":: $g_hours");
       }
 
-      if ($requirementType == "")
+      if ($requirement_type == "")
       {
-        $hours += $gHours;
-        //adminDebug("here $group->title : $gHours rt: $requirementType");
+        $hours += $g_hours;
+        //adminDebug("here $group->title : $g_hours rt: $requirement_type");
       } else {
         // A requirement is specified, so make sure
         // the group is of this requirement.
 
-        if ($boolRequiredHoursOnly == true)
+        if ($bool_required_hours_only == true)
         {  // make sure it's of the right type.
-          $gHours = $g->hoursRequiredByType[$requirementType]*1;
-          $hours += $gHours;
+          $g_hours = $g->hours_required_by_type[$requirement_type]*1;
+          $hours += $g_hours;
           continue;
         }
         
-        if ($g->requirementType == $requirementType)
+        if ($g->requirement_type == $requirement_type)
         {
-          //if ($requirementType == "m")
+          //if ($requirement_type == "m")
           //{
-           // adminDebug("Hours required for " . $g->title . ": " . $g->hoursRequiredByType["m"]);
+           // adminDebug("Hours required for " . $g->title . ": " . $g->hours_required_by_type["m"]);
           //}
 
-          $hours += $gHours;
+          $hours += $g_hours;
         }
         
         
@@ -179,115 +179,115 @@ class _DegreePlan
 
   }
 
-  function loadDegreePlan()
+  function load_degree_plan()
   {
     // Load this degree plan from the database and fully
     // assemble it.
-    $degreeID = $this->degreeID;
+    $degree_id = $this->degree_id;
 
-    $oldSemester = "";
-    $tableName1 = "degrees";
-    $tableName2 = "degree_requirements";
-    if ($this->boolUseDraft) {
-      $tableName1 = "draft_$tableName1";
-      $tableName2 = "draft_$tableName2";
+    $old_semester = "";
+    $table_name1 = "degrees";
+    $table_name2 = "degree_requirements";
+    if ($this->bool_use_draft) {
+      $table_name1 = "draft_$table_name1";
+      $table_name2 = "draft_$table_name2";
     }
 
-    $res = $this->db->dbQuery("SELECT * FROM $tableName1 a, $tableName2 b
+    $res = $this->db->db_query("SELECT * FROM $table_name1 a, $table_name2 b
             							WHERE a.degree_id = '?'
             							AND a.degree_id = b.degree_id 
-            							ORDER BY semester_num ", $this->degreeID);
-    while ($cur = $this->db->dbFetchArray($res))
+            							ORDER BY semester_num ", $this->degree_id);
+    while ($cur = $this->db->db_fetch_array($res))
     {
       $this->title = $cur["title"];
-      $this->majorCode = $cur["major_code"];
-      $this->degreeClass = strtoupper(trim($cur["degree_class"]));
+      $this->major_code = $cur["major_code"];
+      $this->degree_class = strtoupper(trim($cur["degree_class"]));
 
-      $semesterNum = $cur["semester_num"];
-      if ($semesterNum != $oldSemester)
+      $semester_num = $cur["semester_num"];
+      if ($semester_num != $old_semester)
       {
         // This is a new semester object we are dealing with.
-        $oldSemester = $semesterNum;
-        $objSemester = new Semester($semesterNum);
-        $objSemester->title = trim($this->arraySemesterTitles[$semesterNum]);
-        if ($objSemester->title == "") { $objSemester->assignTitle(); }
-        $this->listSemesters->add($objSemester);
+        $old_semester = $semester_num;
+        $obj_semester = new Semester($semester_num);
+        $obj_semester->title = trim($this->array_semester_titles[$semester_num]);
+        if ($obj_semester->title == "") { $obj_semester->assign_title(); }
+        $this->list_semesters->add($obj_semester);
       }
 
       if ($cur["course_id"]*1 > 0)
       {
         // A course is the next degree requirement.
-        $catYear = "";
-        if ($this->boolUseDraft) $catYear = $this->catalogYear;        
+        $cat_year = "";
+        if ($this->bool_use_draft) $cat_year = $this->catalog_year;        
         
-        $courseC = new Course($cur["course_id"], false, $this->db, false, $catYear, $this->boolUseDraft);
-        $courseC->assignedToSemesterNum = $semesterNum;
-        $courseC->minGrade = trim(strtoupper($cur["course_min_grade"]));
-        if ($courseC->minGrade == "")
+        $course_c = new Course($cur["course_id"], false, $this->db, false, $cat_year, $this->bool_use_draft);
+        $course_c->assigned_to_semester_num = $semester_num;
+        $course_c->min_grade = trim(strtoupper($cur["course_min_grade"]));
+        if ($course_c->min_grade == "")
         { // By default, all courses have a
           // min grade requirement of D.
-          $courseC->minGrade = "D";
+          $course_c->min_grade = "D";
         }
-        $courseC->requirementType = trim($cur["course_requirement_type"]);
+        $course_c->requirement_type = trim($cur["course_requirement_type"]);
 
-        //adminDebug($courseC->toString() . $courseC->getCatalogHours());
+        //adminDebug($course_c->to_string() . $course_c->getCatalogHours());
         
-        $objSemester->listCourses->add($courseC);
+        $obj_semester->list_courses->add($course_c);
 
       }
 
       if ($cur["group_id"]*1 > 0)
       {
         // A group is the next degree requirement.
-        //$groupG = new Group($cur["group_id"], $this->db, $semesterNum);
+        //$group_g = new Group($cur["group_id"], $this->db, $semester_num);
 
         $title = "";
-        $iconFilename = "";
+        $icon_filename = "";
         // Add the real Group (with all the courses, branches, etc)
         // to the DegreePlan's group list!
         // First, see if this group alread exists.  If it does,
         // simply add the number of hours required to it.  If not,
         // create it fresh.
-        if ($newGroup = $this->findGroup($cur["group_id"]))
+        if ($new_group = $this->find_group($cur["group_id"]))
         {
           // Was already there (probably in another semester),
           // so, just increment the required hours.
-          $newGroup->hoursRequired = $newGroup->hoursRequired + $cur["group_hours_required"];
-          $newGroup->hoursRequiredByType[$cur["group_requirement_type"]] += $cur["group_hours_required"];
-          $title = $newGroup->title;
-          $iconFilename = $newGroup->iconFilename;
+          $new_group->hours_required = $new_group->hours_required + $cur["group_hours_required"];
+          $new_group->hours_required_by_type[$cur["group_requirement_type"]] += $cur["group_hours_required"];
+          $title = $new_group->title;
+          $icon_filename = $new_group->icon_filename;
         } else {
           // Was not already there; insert it.
-          $groupN = new Group($cur["group_id"], $this->db, $semesterNum, $this->studentArraySignificantCourses, $this->boolUseDraft);
-          $groupN->hoursRequired = $cur["group_hours_required"];
-          $groupN->hoursRequiredByType[$cur["group_requirement_type"]] += $groupN->hoursRequired;
+          $group_n = new Group($cur["group_id"], $this->db, $semester_num, $this->student_array_significant_courses, $this->bool_use_draft);
+          $group_n->hours_required = $cur["group_hours_required"];
+          $group_n->hours_required_by_type[$cur["group_requirement_type"]] += $group_n->hours_required;
           if (trim($cur["group_min_grade"]) != "")
           {
-            $groupN->assignMinGrade(trim(strtoupper($cur["group_min_grade"])));
+            $group_n->assign_min_grade(trim(strtoupper($cur["group_min_grade"])));
           }
-          $groupN->requirementType = $cur["group_requirement_type"];
-          $title = $groupN->title;
-          $iconFilename = $groupN->iconFilename;
-          $this->listGroups->add($groupN);
+          $group_n->requirement_type = $cur["group_requirement_type"];
+          $title = $group_n->title;
+          $icon_filename = $group_n->icon_filename;
+          $this->list_groups->add($group_n);
         }
 
 
         // Add a placeholder to the Semester....
-        $groupG = new Group();
-        $groupG->boolUseDraft = $this->boolUseDraft;
-        $groupG->groupID = $cur["group_id"];
-        $groupG->loadDescriptiveData();
-        $groupG->requirementType = $cur["group_requirement_type"];
+        $group_g = new Group();
+        $group_g->bool_use_draft = $this->bool_use_draft;
+        $group_g->group_id = $cur["group_id"];
+        $group_g->load_descriptive_data();
+        $group_g->requirement_type = $cur["group_requirement_type"];
         if (trim($cur["group_min_grade"]) != "")
         {
-          $groupG->assignMinGrade(trim(strtoupper($cur["group_min_grade"])));
+          $group_g->assign_min_grade(trim(strtoupper($cur["group_min_grade"])));
         }
-        $groupG->assignedToSemesterNum = $semesterNum;
-        $groupG->title = "$title";
-        $groupG->iconFilename = $iconFilename;
-        $groupG->hoursRequired = $cur["group_hours_required"];
-        $groupG->boolPlaceholder = true;
-        $objSemester->listGroups->add($groupG);
+        $group_g->assigned_to_semester_num = $semester_num;
+        $group_g->title = "$title";
+        $group_g->icon_filename = $icon_filename;
+        $group_g->hours_required = $cur["group_hours_required"];
+        $group_g->bool_placeholder = true;
+        $obj_semester->list_groups->add($group_g);
 
 
       }
@@ -299,22 +299,22 @@ class _DegreePlan
 
 
 
-    $this->listGroups->sortPriority();
+    $this->list_groups->sort_priority();
 
   }
 
 
-  function getTitle($boolIncludeTrack = false)
+  function get_title($bool_include_track = false)
   {
     // This will return the title of this degree, possibly
     // including the track's title as well.
 
     $rtn = $this->title;
-    if ($boolIncludeTrack == true)
+    if ($bool_include_track == true)
     {
-      if ($this->trackTitle != "")
+      if ($this->track_title != "")
       {
-        $rtn .= " with " . $this->trackTitle . "";
+        $rtn .= " with " . $this->track_title . "";
       }
     }
 
@@ -323,14 +323,14 @@ class _DegreePlan
   }
 
 
-  function getTitle2()
+  function get_title2()
   {
     // This will simply return the degree's title.  If it does not
-    // exist, it will try to find another degree with the same majorCode.
+    // exist, it will try to find another degree with the same major_code.
     // This is to fix the problem with students with catalog years outside
     // of FlightPath's database, but with major codes that have titles.
 
-    $this->loadDescriptiveData();
+    $this->load_descriptive_data();
 
     if ($this->title != "")
     {
@@ -339,14 +339,14 @@ class _DegreePlan
 
 
     // Still no title?  Try to load ANY degree title with this degree's
-    // majorCode.
-    $tableName = "degrees";
-    if ($this->boolUseDraft) {$tableName = "draft_$tableName";}
+    // major_code.
+    $table_name = "degrees";
+    if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 
-    $res = $this->db->dbQuery("SELECT * FROM $tableName
+    $res = $this->db->db_query("SELECT * FROM $table_name
             								WHERE major_code = '?' 
-            								ORDER BY catalog_year DESC LIMIT 1", $this->majorCode);
-    $cur = $this->db->dbFetchArray($res);
+            								ORDER BY catalog_year DESC LIMIT 1", $this->major_code);
+    $cur = $this->db->db_fetch_array($res);
     $this->title = $cur["title"];
 
     return $this->title;
@@ -354,61 +354,61 @@ class _DegreePlan
   }
 
 
-  function loadDescriptiveData()
+  function load_descriptive_data()
   {
-    $tableName = "degrees";
-    if ($this->boolUseDraft) {$tableName = "draft_$tableName";}
+    $table_name = "degrees";
+    if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 
-    $res = $this->db->dbQuery("SELECT * FROM $tableName
-								               WHERE degree_id = '?' ", $this->degreeID);
+    $res = $this->db->db_query("SELECT * FROM $table_name
+								               WHERE degree_id = '?' ", $this->degree_id);
 
-    if ($this->db->dbNumRows($res) > 0)
+    if ($this->db->db_num_rows($res) > 0)
     {
-      $cur = $this->db->dbFetchArray($res);
-      $this->majorCode = $cur["major_code"];
+      $cur = $this->db->db_fetch_array($res);
+      $this->major_code = $cur["major_code"];
       $this->title = $cur["title"];
-      $this->publicNote = $cur["public_note"];
-      $this->catalogYear = $cur["catalog_year"];
-      $this->degreeType = trim($cur["degree_type"]);
-      $this->dbExclude = trim($cur["exclude"]);
+      $this->public_note = $cur["public_note"];
+      $this->catalog_year = $cur["catalog_year"];
+      $this->degree_type = trim($cur["degree_type"]);
+      $this->db_exclude = trim($cur["exclude"]);
 
       // Get the semester titles.
       $temp = trim($cur["semester_titles_csv"]);
-      $this->arraySemesterTitles = split(",",$temp);
+      $this->array_semester_titles = split(",",$temp);
 
-      if (strstr($this->majorCode, "_"))
+      if (strstr($this->major_code, "_"))
       {
         // This means that there is a track.  Get all the information
         // you can about it.
-        $temp = split("_", $this->majorCode);
-        $this->trackCode = trim($temp[1]);
-        $this->majorCode = trim($temp[0]);
+        $temp = split("_", $this->major_code);
+        $this->track_code = trim($temp[1]);
+        $this->major_code = trim($temp[0]);
 
-        // The majorCode might now have a | at the very end.  If so,
+        // The major_code might now have a | at the very end.  If so,
         // get rid of it.
-        if (substr($this->majorCode, strlen($this->majorCode)-1, 1) == "|")
+        if (substr($this->major_code, strlen($this->major_code)-1, 1) == "|")
         {
-          $this->majorCode = str_replace("|","",$this->majorCode);
+          $this->major_code = str_replace("|","",$this->major_code);
         }
         // Now, look up information on the track.
-        $tableName = "degree_tracks";
-        if ($this->boolUseDraft) {$tableName = "draft_$tableName";}
+        $table_name = "degree_tracks";
+        if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 
-        $res = $this->db->dbQuery("SELECT * FROM $tableName
+        $res = $this->db->db_query("SELECT * FROM $table_name
                 								WHERE major_code = '?'
                 								AND track_code = '?'
-                								AND catalog_year = '?' ", $this->majorCode, $this->trackCode, $this->catalogYear);
-        $cur = $this->db->dbFetchArray($res);
+                								AND catalog_year = '?' ", $this->major_code, $this->track_code, $this->catalog_year);
+        $cur = $this->db->db_fetch_array($res);
 
-        $this->trackTitle = $cur["track_title"];
-        $this->trackDescription = $cur["track_description"];
+        $this->track_title = $cur["track_title"];
+        $this->track_description = $cur["track_description"];
 
       }
 
       // Does this major have any tracks at all?  If so, set a bool.
-      if ($this->db->getDegreeTracks($this->majorCode, $this->catalogYear))
+      if ($this->db->get_degree_tracks($this->major_code, $this->catalog_year))
       {
-        $this->boolHasTracks = true;
+        $this->bool_has_tracks = true;
       }
 
     }
@@ -416,56 +416,56 @@ class _DegreePlan
   }
 
 
-  function getAdvisedCoursesList()
+  function get_advised_courses_list()
   {
     // Return a courseList object containing every course
     // in this degreePlan which is marked as boolAdvisedToTake=true.
-    $rtnList = new CourseList();
+    $rtn_list = new CourseList();
 
-    $this->listSemesters->resetCounter();
-    while ($this->listSemesters->hasMore())
+    $this->list_semesters->reset_counter();
+    while ($this->list_semesters->has_more())
     {
-      $semester = $this->listSemesters->getNext();
-      $rtnList->addList($semester->listCourses->getAdvisedCoursesList());
+      $semester = $this->list_semesters->get_next();
+      $rtn_list->add_list($semester->list_courses->get_advised_courses_list());
     }
-    $rtnList->addList($this->listGroups->getAdvisedCoursesList());
+    $rtn_list->add_list($this->list_groups->get_advised_courses_list());
 
-    return $rtnList;
+    return $rtn_list;
   }
 
 
   /**
    * Returns a simple array with values seperated by " ~~ "
-   * in this order: trackCode ~~ trackTitle ~~ trackDesc
+   * in this order: track_code ~~ track_title ~~ trackDesc
    *
    * @return array
    */
-  function getAvailableTracks()
+  function get_available_tracks()
   {
-    $rtnArray = array();
+    $rtn_array = array();
 
-    $rtnArray[] = "  ~~ None ~~ Select this option to display
+    $rtn_array[] = "  ~~ None ~~ Select this option to display
 						the base degree plan (may not be available for all majors).";
-    $tableName = "degree_tracks";
-    if ($this->boolUseDraft) {$tableName = "draft_$tableName";}
+    $table_name = "degree_tracks";
+    if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 
-    $res = $this->db->dbQuery("SELECT * FROM $tableName
+    $res = $this->db->db_query("SELECT * FROM $table_name
               								WHERE major_code = '?'
               								AND catalog_year = '?' 
-              								ORDER BY track_title ", $this->majorCode, $this->catalogYear);
-    while($cur = $this->db->dbFetchArray($res))
+              								ORDER BY track_title ", $this->major_code, $this->catalog_year);
+    while($cur = $this->db->db_fetch_array($res))
     {
 
-      $trackCode = $cur["track_code"];
-      $trackTitle = $cur["track_title"];
-      $trackDescription = $cur["track_description"];
-      //adminDebug($trackCode);
-      $rtnArray[] = "$trackCode ~~ $trackTitle ~~ $trackDescription";
+      $track_code = $cur["track_code"];
+      $track_title = $cur["track_title"];
+      $track_description = $cur["track_description"];
+      //adminDebug($track_code);
+      $rtn_array[] = "$track_code ~~ $track_title ~~ $track_description";
     }
 
-    if (count($rtnArray))
+    if (count($rtn_array))
     {
-      return $rtnArray;
+      return $rtn_array;
     } else {
       return false;
     }
@@ -474,7 +474,7 @@ class _DegreePlan
   }
 
 
-  function addSemesterDevelopmental($studentID)
+  function add_semester_developmental($student_id)
   {
     // This will add the developmental courses in as
     // a semester.  Will check the studentID to see if any
@@ -482,20 +482,20 @@ class _DegreePlan
     // -55 is the developmental semester.
     $sem = new Semester(-55);
     $sem->title = "Developmental Requirements";
-    $isEmpty = true;
+    $is_empty = true;
 
-    $tempArray = $this->db->getDevelopmentalRequirements($studentID);
+    $temp_array = $this->db->get_developmental_requirements($student_id);
     // We expect this to give us back an array like:
     // 0 => ART~101
     // 1 => MATH~090
-    foreach($tempArray as $tempCourseName) {
-      $temp = explode("~", $tempCourseName);
-      $c = new Course($this->db->getCourseID($temp[0], $temp[1]));
-      $c->minGrade = "C";
-      $c->requirementType = "dev";
-      $sem->listCourses->add($c);
+    foreach($temp_array as $temp_course_name) {
+      $temp = explode("~", $temp_course_name);
+      $c = new Course($this->db->get_course_id($temp[0], $temp[1]));
+      $c->min_grade = "C";
+      $c->requirement_type = "dev";
+      $sem->list_courses->add($c);
       
-      $isEmpty = false;      
+      $is_empty = false;      
     }
     
     $sem->notice = "According to our records, you are required to
@@ -504,63 +504,63 @@ class _DegreePlan
 		not be complete. If you have any questions, 
 		please ask your advisor. ";
 
-    if (!$isEmpty)
+    if (!$is_empty)
     {
-      $this->listSemesters->add($sem);
+      $this->list_semesters->add($sem);
     }
 
   }
 
-  function addSemesterCoursesAdded()
+  function add_semester_courses_added()
   {
     // The "Add a Course" box on screen is really just a
     // semester, with the number -88, with a single group,
     // also numbered -88.
-    $semesterCoursesAdded = new Semester(-88);
-    $semesterCoursesAdded->title = "Courses Added by Advisor";
+    $semester_courses_added = new Semester(-88);
+    $semester_courses_added->title = "Courses Added by Advisor";
 
     // Now, we want to add the Add a Course group...
     $g = new Group();
-    $g->groupID = -88;
+    $g->group_id = -88;
     // Since it would take a long time during page load, we will
     // leave this empty of courses for now.  It doesn't matter anyway,
     // as we will not be checking this group for course membership
     // anyway.  We only need to load it in the popup.
-    $g->hoursRequired = 99999;  // Nearly infinite selections may be made.
-    $g->assignedToSemesterNum = -88;
+    $g->hours_required = 99999;  // Nearly infinite selections may be made.
+    $g->assigned_to_semester_num = -88;
 
-    $semesterCoursesAdded->listGroups->add($g);
+    $semester_courses_added->list_groups->add($g);
 
-    $this->listSemesters->add($semesterCoursesAdded);
+    $this->list_semesters->add($semester_courses_added);
 
     // Also, add it to the list of groups OUTSIDE of semesters.
-    $this->listGroups->add($g);
+    $this->list_groups->add($g);
 
   }
 
 
   
 
-  function findGroup($groupID)
+  function find_group($group_id)
   {
-    // Locate the group with groupID in the
+    // Locate the group with group_id in the
     // list of groups, and return it.
-    $this->listGroups->resetCounter();
-    while($this->listGroups->hasMore())
+    $this->list_groups->reset_counter();
+    while($this->list_groups->has_more())
     {
-      $group = $this->listGroups->getNext();
-      if ($group->groupID == $groupID)
+      $group = $this->list_groups->get_next();
+      if ($group->group_id == $group_id)
       {
         return $group;
       }
 
-      if (!$group->listGroups->isEmpty)
+      if (!$group->list_groups->is_empty)
       {
-        $group->listGroups->resetCounter();
-        while($group->listGroups->hasMore())
+        $group->list_groups->reset_counter();
+        while($group->list_groups->has_more())
         {
-          $branch = $group->listGroups->getNext();
-          if ($branch->groupID == $groupID)
+          $branch = $group->list_groups->get_next();
+          if ($branch->group_id == $group_id)
           {
             return $branch;
           }
@@ -574,50 +574,50 @@ class _DegreePlan
 
 
 
-  function findPlaceholderGroup($groupID, $semesterNum)
+  function find_placeholder_group($group_id, $semester_num)
   {
     // Locate the group within the semesters that matches
-    // this groupID and semesterNum.  The assumption here
+    // this group_id and semesterNum.  The assumption here
     // is that no one semester will list the same
     // group twice.  In other words, Core Fine Arts
     // can only have 1 entry for Freshman Year.
 
     // Create a dummy semester with the correct semesterNum...
-    $newSemester = new Semester($semesterNum);
+    $new_semester = new Semester($semester_num);
     // Create dummy group as well... don't use the constructor, just
-    // set the groupID manually to same time. (no DB calls)
-    $newGroup = new Group();
-    $newGroup->groupID = $groupID;
+    // set the group_id manually to same time. (no DB calls)
+    $new_group = new Group();
+    $new_group->group_id = $group_id;
 
-    //print_pre($this->listSemesters->toString());
+    //print_pre($this->list_semesters->to_string());
     // Find the semester in the list of semesters with this same semesterNum...
-    if (!$semester = $this->listSemesters->findMatch($newSemester))
+    if (!$semester = $this->list_semesters->find_match($new_semester))
     {
       // The semester wasn't found!
       return false;
     }
 
 
-    // Okay, now go through $semester and find the groupID...
-    if (!$group = $semester->listGroups->findMatch($newGroup))
+    // Okay, now go through $semester and find the group_id...
+    if (!$group = $semester->list_groups->find_match($new_group))
     {
       // It wasn't found in the top-level groups.  Look one deeper...
-      if (!$semester->listGroups->isEmpty)
+      if (!$semester->list_groups->is_empty)
       {
-        $semester->listGroups->resetCounter();
-        while($semester->listGroups->hasMore())
+        $semester->list_groups->reset_counter();
+        while($semester->list_groups->has_more())
         {
-          $group = $semester->listGroups->getNext();
-          if ($g = $group->listGroups->findMatch($newGroup))
+          $group = $semester->list_groups->get_next();
+          if ($g = $group->list_groups->find_match($new_group))
           {
-            //$g->assignToSemester($semesterNum);
+            //$g->assign_to_semester($semester_num);
             return $g;
           }
         }
       }
     } else {
       // Meaning, we found it!
-      //$group->assignToSemester($semesterNum);
+      //$group->assign_to_semester($semester_num);
       return $group;
     }
 
@@ -627,41 +627,41 @@ class _DegreePlan
 
 
 
-  function findCourses($courseID, $groupID = 0, $semesterNum)
+  function find_courses($course_id, $group_id = 0, $semester_num)
   {
     // This will locate a course within the degree plan, and return
     // back either that course object, or FALSE.
-    $newCourse = new Course($courseID);
-    $newSemester = new Semester($semesterNum);
-    $rtnCourseList = new CourseList();
+    $new_course = new Course($course_id);
+    $new_semester = new Semester($semester_num);
+    $rtn_course_list = new CourseList();
     // Okay, if the course is within a group, then
-    // we can first use the findGroup method.
-    if ($groupID != 0)
+    // we can first use the find_group method.
+    if ($group_id != 0)
     {
-      if ($group = $this->findGroup($groupID))
+      if ($group = $this->find_group($group_id))
       {
 
         //adminDebug("Right here, hon.");
-        if (!($group->listCourses->isEmpty))
+        if (!($group->list_courses->is_empty))
         {
-          if ($cL = $group->findCourses($newCourse))
+          if ($cL = $group->find_courses($new_course))
           {
-            $rtnCourseList->addList($cL);
-            //adminDebug(count($rtnCourseList->arrayList));
+            $rtn_course_list->add_list($cL);
+            //admin_debug(count($rtn_course_list->array_list));
           }
         }
-        if (!($group->listGroups->isEmpty))
+        if (!($group->list_groups->is_empty))
         {
           // Look within each sub group for the course...
-          $group->listGroups->resetCounter();
-          while($group->listGroups->hasMore())
+          $group->list_groups->reset_counter();
+          while($group->list_groups->has_more())
           {
-            $branch = $group->listGroups->getNext();
-            if (!$branch->listCourses->isEmpty)
+            $branch = $group->list_groups->get_next();
+            if (!$branch->list_courses->is_empty)
             {
-              if ($cL = $branch->findCourses($newCourse))
+              if ($cL = $branch->find_courses($new_course))
               {
-                $rtnCourseList->addList($cL);
+                $rtn_course_list->add_list($cL);
               }
             }
             // Here we can look for groups within groups...
@@ -670,34 +670,34 @@ class _DegreePlan
         }
       }
 
-      return $rtnCourseList;
+      return $rtn_course_list;
 
-    } else if ($semesterNum != -1) {
+    } else if ($semester_num != -1) {
       // No group specified.  This course is on the
       // bare degree plan.  We were given a specific semester,
       // so try to find it there...
-      if ($semester = $this->listSemesters->findMatch($newSemester))
+      if ($semester = $this->list_semesters->find_match($new_semester))
       {
 
-        if ($cL = $semester->listCourses->findAllMatches($newCourse))
+        if ($cL = $semester->list_courses->find_all_matches($new_course))
         {
-          $rtnCourseList->addList($cL);
-          return $rtnCourseList;
+          $rtn_course_list->add_list($cL);
+          return $rtn_course_list;
         }
       }
 
-    } else if ($semesterNum == -1)
+    } else if ($semester_num == -1)
     {
       // Meaning, we do not know which semester it goes in, so
       // attempt all semesters, and return with the first instance.
-      $this->listSemesters->resetCounter();
-      while($this->listSemesters->hasMore())
+      $this->list_semesters->reset_counter();
+      while($this->list_semesters->has_more())
       {
-        $sem = $this->listSemesters->getNext();
-        if ($cL = $sem->listCourses->findAllMatches($newCourse))
+        $sem = $this->list_semesters->get_next();
+        if ($cL = $sem->list_courses->find_all_matches($new_course))
         {
-          $rtnCourseList->addList($cL);
-          return $rtnCourseList;
+          $rtn_course_list->add_list($cL);
+          return $rtn_course_list;
         }
 
       }
@@ -709,16 +709,16 @@ class _DegreePlan
   }
 
 
-  function toString()
+  function to_string()
   {
     // Output this degree plan object in a helpful manner.
     $rtn = "";
 
-    $rtn .= "Degree Plan: $this->title ($this->majorCode) \n";
-    $rtn .= $this->listSemesters->toString();
+    $rtn .= "Degree Plan: $this->title ($this->major_code) \n";
+    $rtn .= $this->list_semesters->to_string();
     $rtn .= "----------------------------------------- \n";
     $rtn .= "--  ALL GROUPS   \n";
-    $rtn .= $this->listGroups->toString();
+    $rtn .= $this->list_groups->to_string();
 
 
 

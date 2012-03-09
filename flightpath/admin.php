@@ -26,286 +26,286 @@ and settings of FlightPath.  To be used only by administrators.
 session_start();
 header("Cache-control: private");
 
-$_SESSION["deAdvancedMode"] = true;
+$_SESSION["de_advanced_mode"] = true;
 
 require_once("bootstrap.inc");
 
  
 
 $screen = new AdvisingScreen();
-$screen->initAdvisingVariables();
-// We need to do this so that our course's loadDescriptiveData function
+$screen->init_advising_variables();
+// We need to do this so that our course's load_descriptive_data function
 // will load the most recent course names.
 
 $db = new DatabaseHandler();
 
-initHiddenVariables();
+init_hidden_variables();
 
-$performAction = trim($_REQUEST["performAction"]);
+$perform_action = trim($_REQUEST["perform_action"]);
 
 
-/*if ($_SESSION["fpDataEntryLoggedIn"] != true && $performAction != "login")
+/*if ($_SESSION["fpDataEntryLoggedIn"] != true && $perform_action != "login")
 {
   displayLogin();
   die;
 }
 
-if ($performAction == "login")
+if ($perform_action == "login")
 {
   performLogin();
 }
 
-if ($performAction == "logout")
+if ($perform_action == "logout")
 {
   performLogout();
   die;
 }
 */
 
-if (!userHasPermission("deCanAccessAdminConsole")) {
-  displayAccessDenied("Admin Console");
+if (!user_has_permission("de_can_access_admin_console")) {
+  display_access_denied("Admin Console");
 }
 
 
 
 
-if ($performAction == "" || $performAction == "menu")
+if ($perform_action == "" || $perform_action == "menu")
 {
-  displayMainMenu();
+  display_main_menu();
 }
 
-if ($performAction == "editAnnouncements")
+if ($perform_action == "edit_announcements")
 {
-  displayEditAnnouncements();
+  display_edit_announcements();
 }
 
-if ($performAction == "previewAnnouncement")
+if ($perform_action == "preview_announcement")
 {
-  displayPreviewAnnouncement();
-}
-
-
-if ($performAction == "editUrgentMsg")
-{
-  displayEditUrgentMsg();
-}
-
-if ($performAction == "editOfflineMode")
-{
-  displayEditOfflineMode();
+  display_preview_announcement();
 }
 
 
-if ($performAction == "editHelp")
+if ($perform_action == "edit_urgent_msg")
 {
-  displayEditHelp();
+  display_edit_urgent_msg();
 }
 
-if ($performAction == "editUsers")
+if ($perform_action == "edit_offline_mode")
 {
-  displayEditUsers();
-}
-
-
-if ($performAction == "transferData")
-{
-  displayTransferData();
-}
-
-if ($performAction == "performTransferData")
-{
-  performTransferData();
+  display_edit_offline_mode();
 }
 
 
-if ($performAction == "applyDraftChanges")
+if ($perform_action == "edit_help")
 {
-  displayApplyDraftChanges();
+  display_edit_help();
+}
+
+if ($perform_action == "edit_users")
+{
+  display_edit_users();
 }
 
 
-if ($performAction == "performClearJohnDoe")
+if ($perform_action == "transfer_data")
 {
-  performClearJohnDoe();
+  display_transfer_data();
+}
+
+if ($perform_action == "perform_transfer_data")
+{
+  perform_transfer_data();
 }
 
 
-if ($performAction == "performApplyDraftChanges")
+if ($perform_action == "apply_draft_changes")
 {
-  performApplyDraftChanges();
-}
-
-if ($performAction == "performProcessGroupDefinitions")
-{
-  performProcessGroupDefinitions();
-}
-
-if ($performAction == "copyDegree")
-{
-  displayCopyDegree();
-}
-
-if ($performAction == "performCopyDegree")
-{
-  performCopyDegree();
+  display_apply_draft_changes();
 }
 
 
-if ($performAction == "addNewDegree")
+if ($perform_action == "perform_clear_john_doe")
 {
-  displayAddNewDegree();
-}
-
-if ($performAction == "performAddNewDegree")
-{
-  performAddNewDegree();
+  perform_clear_john_doe();
 }
 
 
-if ($performAction == "performEditAnnouncements")
+if ($perform_action == "perform_apply_draft_changes")
 {
-  performEditAnnouncements();
+  perform_apply_draft_changes();
 }
 
-if ($performAction == "performEditFlightPathSettings")
+if ($perform_action == "perform_process_group_definitions")
 {
-  performEditFlightPathSettings();
+  perform_process_group_definitions();
 }
 
-if ($performAction == "performEditHelp")
+if ($perform_action == "copy_degree")
 {
-  performEditHelp();
+  display_copy_degree();
 }
 
-
-if ($performAction == "performEditUrgentMsg")
+if ($perform_action == "perform_copy_degree")
 {
-  performEditUrgentMsg();
-}
-
-if ($performAction == "performEditOfflineMode")
-{
-  performEditOfflineMode();
+  perform_copy_degree();
 }
 
 
-if ($performAction == "editFlightPathSettings")
+if ($perform_action == "add_new_degree")
 {
-  displayEditFlightPathSettings();
+  display_add_new_degree();
+}
+
+if ($perform_action == "perform_add_new_degree")
+{
+  perform_add_new_degree();
 }
 
 
-if ($performAction == "requestTransfer")
+if ($perform_action == "perform_edit_announcements")
 {
-  displayRequestDataTransfer();
-}
-if ($performAction == "performRequestTransfer")
-{
-  performRequestDataTransfer();
+  perform_edit_announcements();
 }
 
-
-if ($performAction == "editDegrees")
+if ($perform_action == "perform_edit_flight_path_settings")
 {
-  displayEditDegrees();
+  perform_edit_flight_path_settings();
 }
 
-if ($performAction == "editGroups")
+if ($perform_action == "perform_edit_help")
 {
-  displayEditGroups();
-}
-
-if ($performAction == "editCourses")
-{
-  displayEditCourses();
+  perform_edit_help();
 }
 
 
-if ($performAction == "popupAddGroup")
+if ($perform_action == "perform_edit_urgent_msg")
 {
-  popupAddGroup();
+  perform_edit_urgent_msg();
 }
 
-if ($performAction == "popupShowGroupUse")
+if ($perform_action == "perform_edit_offline_mode")
 {
-  popupShowGroupUse();
-}
-
-if ($performAction == "popupDegreesUsingCourse")
-{
-  popupDegreesUsingCourse();
-}
-
-if ($performAction == "popupGroupsUsingCourse")
-{
-  popupGroupsUsingCourse();
-}
-
-if ($performAction == "popupStudentsUsingCourse")
-{
-  popupStudentsUsingCourse();
+  perform_edit_offline_mode();
 }
 
 
-if ($performAction == "popupEditDefinition")
+if ($perform_action == "edit_flight_path_settings")
 {
-  popupEditDefinition();
-}
-
-if ($performAction == "popupSelectIcon")
-{
-  popupSelectIcon();
+  display_edit_flight_path_settings();
 }
 
 
-if ($performAction == "editSpecificGroup")
+if ($perform_action == "request_transfer")
 {
-  displayEditSpecificGroup();
+  display_request_data_transfer();
 }
-
-if ($performAction == "editSpecificCourse")
+if ($perform_action == "perform_request_transfer")
 {
-  displayEditSpecificCourse();
-}
-
-if ($performAction == "editSpecificUser")
-{
-  displayEditSpecificUser();
+  perform_request_data_transfer();
 }
 
 
-if ($performAction == "editSpecificDegree")
+if ($perform_action == "edit_degrees")
 {
-  displayEditSpecificDegree();
+  display_edit_degrees();
 }
 
-if ($performAction == "performEditSpecificDegree")
+if ($perform_action == "edit_groups")
 {
-  performEditSpecificDegree();
+  display_edit_groups();
 }
 
-if ($performAction == "performEditSpecificGroup")
+if ($perform_action == "edit_courses")
 {
-  performEditSpecificGroup();
-}
-
-if ($performAction == "performEditSpecificCourse")
-{
-  performEditSpecificCourse();
-}
-
-if ($performAction == "performEditSpecificUser")
-{
-  performEditSpecificUser();
+  display_edit_courses();
 }
 
 
-
-if ($performAction == "performSetCatalogYear")
+if ($perform_action == "popup_add_group")
 {
-  $catalogYear = trim($_POST["catalogYear"]);
-  $GLOBALS["deCatalogYear"] = $catalogYear;
-  displayMainMenu("<font color='green'>Catalog Year editing set to $catalogYear.</font><br>");
+  popup_add_group();
+}
+
+if ($perform_action == "popup_show_group_use")
+{
+  popup_show_group_use();
+}
+
+if ($perform_action == "popup_degrees_using_course")
+{
+  popup_degrees_using_course();
+}
+
+if ($perform_action == "popup_groups_using_course")
+{
+  popup_groups_using_course();
+}
+
+if ($perform_action == "popup_students_using_course")
+{
+  popup_students_using_course();
+}
+
+
+if ($perform_action == "popup_edit_definition")
+{
+  popup_edit_definition();
+}
+
+if ($perform_action == "popup_select_icon")
+{
+  popup_select_icon();
+}
+
+
+if ($perform_action == "edit_specific_group")
+{
+  display_edit_specific_group();
+}
+
+if ($perform_action == "edit_specific_course")
+{
+  display_edit_specific_course();
+}
+
+if ($perform_action == "edit_specific_user")
+{
+  display_edit_specific_user();
+}
+
+
+if ($perform_action == "edit_specific_degree")
+{
+  display_edit_specific_degree();
+}
+
+if ($perform_action == "perform_edit_specific_degree")
+{
+  perform_edit_specific_degree();
+}
+
+if ($perform_action == "perform_edit_specific_group")
+{
+  perform_edit_specific_group();
+}
+
+if ($perform_action == "perform_edit_specific_course")
+{
+  perform_edit_specific_course();
+}
+
+if ($perform_action == "perform_edit_specific_user")
+{
+  perform_edit_specific_user();
+}
+
+
+
+if ($perform_action == "perform_set_catalog_year")
+{
+  $catalog_year = trim($_POST["catalog_year"]);
+  $GLOBALS["de_catalog_year"] = $catalog_year;
+  display_main_menu("<font color='green'>Catalog Year editing set to $catalog_year.</font><br>");
 }
 
 
@@ -313,17 +313,17 @@ if ($performAction == "performSetCatalogYear")
 die;
 
 
-function performClearJohnDoe() {
+function perform_clear_john_doe() {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performClearJohnDoe";
+  $function = "admin_perform_clear_john_doe";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
@@ -332,28 +332,28 @@ function performClearJohnDoe() {
   // Clears advising comments, too.
   $cwid = "99999999";
   $db = new DatabaseHandler();
-  $res = $db->dbQuery("SELECT * FROM advising_sessions
+  $res = $db->db_query("SELECT * FROM advising_sessions
                        WHERE student_id = '?' ", $cwid);
-  while ($cur = $db->dbFetchArray($res)) {
+  while ($cur = $db->db_fetch_array($res)) {
     $aid = $cur["advising_session_id"];
-    $db->dbQuery("DELETE FROM advised_courses WHERE advising_session_id = '?' ", $aid);
+    $db->db_query("DELETE FROM advised_courses WHERE advising_session_id = '?' ", $aid);
   }
   
-  $db->dbQuery("DELETE FROM advising_sessions WHERE student_id = '?' ", $cwid);
-  $db->dbQuery("DELETE FROM advising_comments WHERE student_id = '?' ", $cwid);
+  $db->db_query("DELETE FROM advising_sessions WHERE student_id = '?' ", $cwid);
+  $db->db_query("DELETE FROM advising_comments WHERE student_id = '?' ", $cwid);
   
-  displayMainMenu(getSuccessMsg("Advising history and comments for John Doe successfully cleared."));
+  display_main_menu(get_success_msg("Advising history and comments for John Doe successfully cleared."));
   
 }
 
 
 
-function displayPreviewAnnouncement()
+function display_preview_announcement()
 {
 
   ///////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayPreviewAnnouncement";
+  $function = "admin_display_preview_announcement";
   if (function_exists($function)) {
     return call_user_func($function);
   }   
@@ -366,15 +366,15 @@ function displayPreviewAnnouncement()
   $ann = urldecode($ann);
 
   $screen = new AdvisingScreen();
-  $screen->pageIsPopup = true;
+  $screen->page_is_popup = true;
 
-  $ann = $screen->convertBBCodeToHTML($ann);
+  $ann = $screen->convert_b_b_code_to_h_t_m_l($ann);
 
   $pC .= "<table cellpadding='0' cellspacing='0' width='315'>
 			<tr><td valign='top'>";
 
   // Display announcements here...
-  $pC .= $screen->drawCurvedTitle("Preview Announcement...");
+  $pC .= $screen->draw_curved_title("Preview Announcement...");
   $pC .= "<div class='elevenpt' style='margin-top: 20px;'>$ann
 							<div align='right' class='tenpt' style='color: gray; padding-right: 10px;'>
 							<i>Posted xxxx-xxxx-xxx</i>
@@ -386,30 +386,30 @@ function displayPreviewAnnouncement()
 
 
 
-  $screen->pageContent = $pC;
-  $screen->outputToBrowser();
+  $screen->page_content = $pC;
+  $screen->output_to_browser();
 
 
 }
 
 
-function displayEditUsers($msg = "")
+function display_edit_users($msg = "")
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayEditUsers";
+  $function = "admin_display_edit_users";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerUsers")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_users")) {
+    display_access_denied();
   }
   
   
   global $db, $screen;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
 
   $cc = 1;
 
@@ -417,25 +417,25 @@ function displayEditUsers($msg = "")
 
 
   // First, let's get our list of departments...
-  $deptArray = array();
+  $dept_array = array();
   $d = 0;
   
   // Let's pull the needed variables out of our settings, so we know what
 	// to query, because this is a non-FlightPath table.
-	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:faculty_staff"];
+	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
 	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-	$tableName = $tsettings["tableName"];    
+	$table_name = $tsettings["table_name"];    
   
-  $res = $db->dbQuery("select distinct `$tf->deptName` from $tableName ORDER BY `$tf->deptName` ");
+  $res = $db->db_query("select distinct `$tf->dept_name` from $table_name ORDER BY `$tf->dept_name` ");
   if ($res)
   {
-    while ($cur = $db->dbFetchArray($res))
+    while ($cur = $db->db_fetch_array($res))
     {
-      if (trim($cur["$tf->deptName"]) == "")
+      if (trim($cur["$tf->dept_name"]) == "")
       {// skip if blank
         continue;
       }
-      $deptArray[$d] = trim(ucwords(strtolower($cur["$tf->deptName"])));
+      $dept_array[$d] = trim(ucwords(strtolower($cur["$tf->dept_name"])));
       $d++;
     }
   }
@@ -548,9 +548,9 @@ function displayEditUsers($msg = "")
   
   // Let's pull the needed variables out of our settings, so we know what
 	// to query, because this is a non-FlightPath table.
-	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:faculty_staff"];
+	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
 	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-	$tableName = $tsettings["tableName"];  
+	$table_name = $tsettings["table_name"];  
   
   
   if ($search != "" && !($_GET["deptsubmit"]))
@@ -563,24 +563,24 @@ function displayEditUsers($msg = "")
 
     $_SESSION["prev_user_search"] = "search%%$search";
     $displaying = $search;
-    $secondPart = "";
+    $second_part = "";
     if ($search2 != "")
     {
       // Two search terms, probably a name...
-      $result = $db->dbQuery("SELECT * FROM $tableName
+      $result = $db->db_query("SELECT * FROM $table_name
 					WHERE  
-					($tf->lName LIKE '%?%'
-					AND $tf->fName LIKE '%?%')
-					ORDER BY $tf->lName, $tf->fName ", $search2, $search1);
+					($tf->l_name LIKE '%?%'
+					AND $tf->f_name LIKE '%?%')
+					ORDER BY $tf->l_name, $tf->f_name ", $search2, $search1);
 
     }else {
 
       // One search term....
-      $result = $db->dbQuery("SELECT * FROM $tableName
-					WHERE $tf->facultyID LIKE '%?%' 
-					OR $tf->lName LIKE '%?%'
-					OR $tf->fName LIKE '%?%'  
-					ORDER BY $tf->lName, $tf->fName ", $search1, $search1, $search1);
+      $result = $db->db_query("SELECT * FROM $table_name
+					WHERE $tf->faculty_id LIKE '%?%' 
+					OR $tf->l_name LIKE '%?%'
+					OR $tf->f_name LIKE '%?%'  
+					ORDER BY $tf->l_name, $tf->f_name ", $search1, $search1, $search1);
     }
 
   }
@@ -589,17 +589,17 @@ function displayEditUsers($msg = "")
     // User select a department.  Look for it...
     $search = "";
     $_SESSION["prev_user_search"] = "dept%%$dept";
-    $result = $db->dbQuery("SELECT * FROM $tableName
-					WHERE $tf->deptName = '?' 
-					ORDER BY $tf->lName, $tf->fName ", $dept);
+    $result = $db->db_query("SELECT * FROM $table_name
+					WHERE $tf->dept_name = '?' 
+					ORDER BY $tf->l_name, $tf->f_name ", $dept);
     $displaying = $dept;
   }
   else
   { // No search, so look for the range...
-    $result = $db->dbQuery("SELECT * FROM $tableName
+    $result = $db->db_query("SELECT * FROM $table_name
                         WHERE 
-                        $tf->lName BETWEEN '?' AND '?'
-                        ORDER BY $tf->lName, $tf->fName ", $ur, $lr);
+                        $tf->l_name BETWEEN '?' AND '?'
+                        ORDER BY $tf->l_name, $tf->f_name ", $ur, $lr);
     $displaying = $ur;
   }
   $pC .= "<div class='tenpt' style='padding-bottom: 5px;'><b>Displaying:</b> $displaying</div>
@@ -614,17 +614,17 @@ function displayEditUsers($msg = "")
 				</tr>
 		
 		";
-  while ($cur = $db->dbFetchArray($result))
+  while ($cur = $db->db_fetch_array($result))
   {
 
-    $l_name = trim(ucwords(strtolower($cur[$tf->lName])));
-    $f_name = trim(ucwords(strtolower($cur[$tf->fName])));
-    $mid_name = trim(ucwords(strtolower($cur[$tf->midName])));
-    $faculty_id = trim($cur[$tf->facultyID]);
-    $dept_name = trim(ucwords(strtolower($cur[$tf->deptName])));
+    $l_name = trim(ucwords(strtolower($cur[$tf->l_name])));
+    $f_name = trim(ucwords(strtolower($cur[$tf->f_name])));
+    $mid_name = trim(ucwords(strtolower($cur[$tf->mid_name])));
+    $faculty_id = trim($cur[$tf->faculty_id]);
+    $dept_name = trim(ucwords(strtolower($cur[$tf->dept_name])));
         
     // Now, we find out this person's user type...
-    $user_type = determineStaffUserType($faculty_id);
+    $user_type = determine_staff_user_type($faculty_id);
 
 
     $ast = "";
@@ -651,7 +651,7 @@ function displayEditUsers($msg = "")
       				onmouseout=\"style.backgroundColor='$bgcol'\"
 					class='hand tenpt'
 					style='color: $fgcol'
-					onClick='window.location=\"admin.php?performAction=editSpecificUser&facultyID=$faculty_id&userType=$user_type\";'
+					onClick='window.location=\"admin.php?performAction=editSpecificUser&faculty_id=$faculty_id&user_type=$user_type\";'
       			>
       				
       				<td valign='top' width='15%'>$faculty_id</td>
@@ -671,43 +671,43 @@ function displayEditUsers($msg = "")
 
   // Put in the dept pulldown....
   $bC = "";
-  for ($t = 0; $t<count($deptArray); $t++)
+  for ($t = 0; $t<count($dept_array); $t++)
   {
-    $dd = $deptArray[$t];
+    $dd = $dept_array[$t];
 
     $sel = "";
     if ($dd == $dept)
     {
       $sel = "selected";
     }
-    $bC .= "<option value='$dd' $sel>{$deptArray[$t]}</option> \n";
+    $bC .= "<option value='$dd' $sel>{$dept_array[$t]}</option> \n";
   }
   $pC = str_replace("<!--DEPTSEARCH-->",$bC,$pC);
 
 
-  $screen->pageTitle = "FlightPath Admin - Users";
-  $screen->pageHideReportError = true;
-  $screen->pageContent = $pC;
+  $screen->page_title = "FlightPath Admin - Users";
+  $screen->page_hide_report_error = true;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 
 }
 
 
-function performApplyDraftChanges()
+function perform_apply_draft_changes()
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performApplyDraftChanges";
+  $function = "admin_perform_apply_draft_changes";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
@@ -715,25 +715,25 @@ function performApplyDraftChanges()
   // to the production tables.
   global $db;
   // Check to make sure they entered the transfer passcode correctly.
-  if ($_POST["passcode"] != $GLOBALS["fpSystemSettings"]["adminTransferPasscode"])
+  if ($_POST["passcode"] != $GLOBALS["fp_system_settings"]["admin_transfer_passcode"])
   {
-    displayApplyDraftChanges("<font color='red'>ERROR.  Transfer passcode incorrect.  Check with the FlightPath administrator
+    display_apply_draft_changes("<font color='red'>ERROR.  Transfer passcode incorrect.  Check with the FlightPath administrator
 								to learn the passcode.</font>");
     die;
 
   }
 
   // Save the entire post to the log.
-  $postXML = fp_arrayToXml("post",$_POST, true);
-  $db->addToLog("admin_perform_apply_draft_changes","begin",$postXML);
+  $post_x_m_l = fp_array_to_xml("post",$_POST, true);
+  $db->add_to_log("admin_perform_apply_draft_changes","begin",$post_x_m_l);
 
 
   // First, set maintenance mode...
-  $db->setMaintenanceMode("1");
+  $db->set_maintenance_mode("1");
 
   // Okay, so what we gotta do is truncate the production tables,
   // then copy the draft tables in.
-  $tableArray = array(
+  $table_array = array(
   "courses",
   "degree_requirements",
   "degree_tracks",
@@ -742,102 +742,102 @@ function performApplyDraftChanges()
   "groups",
   );
 
-  foreach($tableArray as $tableName)
+  foreach($table_array as $table_name)
   {
-    $draftTableName = "draft_$tableName";
-    $db->addToLog("admin_perform_apply_draft_changes","$tableName,$draftTableName");
+    $draft_table_name = "draft_$table_name";
+    $db->add_to_log("admin_perform_apply_draft_changes","$table_name,$draft_table_name");
     // First, truncate existing...
-    $query = "truncate table $tableName";
-    $res = $db->dbQuery($query);
+    $query = "truncate table $table_name";
+    $res = $db->db_query($query);
     // Now, copy in draft changes...
-    $query = "INSERT INTO $tableName
-						SELECT * FROM $draftTableName ";
-    $res = $db->dbQuery($query);
+    $query = "INSERT INTO $table_name
+						SELECT * FROM $draft_table_name ";
+    $res = $db->db_query($query);
   }
 
   $db2 = new DatabaseHandler();
   // Now, we need to go through the draft_instructions table,
   // and perform each instruction one at a time.
-  $res = $db->dbQuery("SELECT * FROM draft_instructions
+  $res = $db->db_query("SELECT * FROM draft_instructions
 						ORDER BY `id` ");
-  while($cur = $db->dbFetchArray($res))
+  while($cur = $db->db_fetch_array($res))
   {
     $instruction = trim($cur["instruction"]);
-    $db2->addToLog("admin_perform_apply_draft_changes",$instruction);
+    $db2->add_to_log("admin_perform_apply_draft_changes",$instruction);
 
     $temp = explode(",",$instruction);
 
-    if (trim($temp[0]) == "updateCourseID")
+    if (trim($temp[0]) == "update_course_id")
     {
-      $db2->updateCourseID(trim($temp[1]), trim($temp[2]));
+      $db2->update_course_id(trim($temp[1]), trim($temp[2]));
     }
 
-    if (trim($temp[0]) == "updateCourseRequirementFromName")
+    if (trim($temp[0]) == "update_course_requirement_from_name")
     {
-      $db2->updateCourseRequirementFromName(trim($temp[1]), trim($temp[2]), trim($temp[3]));
+      $db2->update_course_requirement_from_name(trim($temp[1]), trim($temp[2]), trim($temp[3]));
     }
   }
 
   // Once this is done, truncate the draft_instructions table.
-  $res = $db->dbQuery("TRUNCATE TABLE draft_instructions");
+  $res = $db->db_query("TRUNCATE TABLE draft_instructions");
 
 
   // And we are done!  Set maintenance mode back to 0.
-  $db->setMaintenanceMode("0");
-  $db->addToLog("admin_perform_apply_draft_changes","finished");
+  $db->set_maintenance_mode("0");
+  $db->add_to_log("admin_perform_apply_draft_changes","finished");
 
   // Send emails to notify programmers...
-  $notify = $GLOBALS["fpSystemSettings"]["notifyApplyDraftChangesEmailAddress"];
+  $notify = $GLOBALS["fp_system_settings"]["notify_apply_draft_changes_email_address"];
   if ($notify)
   {
     mail($notify, "FlightPath Apply Draft Changes", "Someone has applied draft changes to FlightPath, which updated degree plans, groups, and courses.");
   }
   // Send us back to the ApplyDraftChanges screen...
-  displayApplyDraftChanges(getSuccessMsg("Successfully updated the production database with draft changes at " . getCurrentTime() . ". Your changes are now live and visible on production."));
+  display_apply_draft_changes(get_success_msg("Successfully updated the production database with draft changes at " . get_current_time() . ". Your changes are now live and visible on production."));
 
 }
 
 
 
-function performEditHelp()
+function perform_edit_help()
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performEditHelp";
+  $function = "admin_perform_edit_help";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $db;
-  $pageID = trim($_POST["pageID"]);
-  if ($pageID == "new")
+  $page_id = trim($_POST["page_id"]);
+  if ($page_id == "new")
   {
     // Add a new page to the help system...
-    $res = $db->dbQuery("INSERT INTO help(`title`)
+    $res = $db->db_query("INSERT INTO help(`title`)
 								values ('') ");
-    $pageID = $db->dbInsertID();
-    $_POST["pageID"] = $pageID;
+    $page_id = $db->db_insert_id();
+    $_POST["page_id"] = $page_id;
   }
 
   // Save the entire post to the log.
-  $postXML = fp_arrayToXml("post",$_POST, true);
-  $db->addToLog("admin_edit_help","$pageID",$postXML);
+  $post_x_m_l = fp_array_to_xml("post",$_POST, true);
+  $db->add_to_log("admin_edit_help","$page_id",$post_x_m_l);
 
 
   $title = trim($_POST["title"]);
   $body = trim($_POST["body"]);
 
-  $res = $db->dbQuery("UPDATE help
+  $res = $db->db_query("UPDATE help
 							SET `title`='?',
 								`body`='?'
-							WHERE `id`='?' ", $title, $body, $pageID);
-  displayEditHelp(getSuccessMsg("Successfully updated Help page at " . getCurrentTime()));
+							WHERE `id`='?' ", $title, $body, $page_id);
+  display_edit_help(get_success_msg("Successfully updated Help page at " . get_current_time()));
 
 }
 
@@ -870,8 +870,8 @@ function performLogin()
 
   // They made it through, but are they in the administrator's table?
   $db = new DatabaseHandler();
-  $res = $db->dbQuery("SELECT * FROM administrators WHERE `faculty_id`='$userID' ");
-  if ($db->dbNumRows($res) == 0)
+  $res = $db->db_query("SELECT * FROM administrators WHERE `faculty_id`='$userID' ");
+  if ($db->db_num_rows($res) == 0)
   {
     $msg = "<div style='color:red'>You do not have access to Data Entry.  Only System Administrators
 							may log in.</div>";
@@ -881,8 +881,8 @@ function performLogin()
 
   // If we are here, then we have access.  Log us on in.
   $_SESSION["fpDataEntryLoggedIn"] = true;
-  $db->addToLog("admin_login");
-  displayMainMenu();
+  $db->add_to_log("admin_login");
+  display_main_menu();
   die;
 
 }
@@ -907,7 +907,7 @@ function performLogout()
 				you should log out of FlightPath as well and close the web browser for added security.
 							</div>"; 
   displayLogin($msg);
-  $db->addToLog("admin_logout");
+  $db->add_to_log("admin_logout");
   die;
 
 }
@@ -947,29 +947,29 @@ function displayLogin($msg = "")
   		"; 
 
   
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   $screen->pageHasSearch = false;
   $screen->pageOnLoad = "document.getElementById(\"cwid_box\").focus(); ";
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 */
 
 
-function displayEditSpecificUser($msg = "")
+function display_edit_specific_user($msg = "")
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayEditSpecificUser";
+  $function = "admin_display_edit_specific_user";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerUsers")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_users")) {
+    display_access_denied();
   }
   
   global $screen, $db;
@@ -981,27 +981,27 @@ function displayEditSpecificUser($msg = "")
 			$msg";
 
 
-  $facultyID = trim($_REQUEST["facultyID"]);
-  $userType = trim($_REQUEST["userType"]);
+  $faculty_id = trim($_REQUEST["faculty_id"]);
+  $user_type = trim($_REQUEST["user_type"]);
   //$myurl = trim($_GET["myurl"]);
 
   // Get faculty member details...
   
   // Let's pull the needed variables out of our settings, so we know what
 	// to query, because this is a non-FlightPath table.
-	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:faculty_staff"];
+	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
 	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-	$tableName = $tsettings["tableName"];     
+	$table_name = $tsettings["table_name"];     
   
-  $result = $db->dbQuery("SELECT * FROM $tableName
+  $result = $db->db_query("SELECT * FROM $table_name
                         WHERE 
-                        $tf->facultyID = '?' ", $facultyID) ;
-  $cur = $db->dbFetchArray($result);
+                        $tf->faculty_id = '?' ", $faculty_id) ;
+  $cur = $db->db_fetch_array($result);
 
-  $l_name = trim(ucwords(strtolower($cur[$tf->lName])));
-  $f_name = trim(ucwords(strtolower($cur[$tf->fName])));
-  $mid_name = trim(ucwords(strtolower($cur[$tf->midName])));
-  $dept_name = trim(ucwords(strtolower($cur[$tf->deptName])));
+  $l_name = trim(ucwords(strtolower($cur[$tf->l_name])));
+  $f_name = trim(ucwords(strtolower($cur[$tf->f_name])));
+  $mid_name = trim(ucwords(strtolower($cur[$tf->mid_name])));
+  $dept_name = trim(ucwords(strtolower($cur[$tf->dept_name])));
 
 
   $advisees = "";
@@ -1011,23 +1011,23 @@ function displayEditSpecificUser($msg = "")
   
   // Let's pull the needed variables out of our settings, so we know what
 	// to query, because this is a non-FlightPath table.
-	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:advisor_student"];
+	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:advisor_student"];
 	$tfa = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-	$tableName_a = $tsettings["tableName"];     
+	$table_name_a = $tsettings["table_name"];     
   
-	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["human_resources:students"];
+	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
 	$tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-	$tableName_b = $tsettings["tableName"];     
+	$table_name_b = $tsettings["table_name"];     
 
-	$res = $db->dbQuery("SELECT * FROM $tableName_a a, $tableName_b b
-						WHERE a.$tfa->facultyID = '?' 
-						AND a.$tfa->studentID = b.$tfb->studentID
-							ORDER BY $tfb->majorCode, $tfb->lName, $tfb->fName
-						", $facultyID);
-  while ($cur2 = $db->dbFetchArray($res))
+	$res = $db->db_query("SELECT * FROM $table_name_a a, $table_name_b b
+						WHERE a.$tfa->faculty_id = '?' 
+						AND a.$tfa->student_id = b.$tfb->student_id
+							ORDER BY $tfb->major_code, $tfb->l_name, $tfb->f_name
+						", $faculty_id);
+  while ($cur2 = $db->db_fetch_array($res))
   {
-    $name = ucwords(strtolower($cur2[$tfb->fName] . " " . $cur2[$tfb->lName]));
-    $advisees .= trim($cur2[$tfb->studentID]) . " {$cur2[$tfb->majorCode]}   $name \n";
+    $name = ucwords(strtolower($cur2[$tfb->f_name] . " " . $cur2[$tfb->l_name]));
+    $advisees .= trim($cur2[$tfb->student_id]) . " {$cur2[$tfb->major_code]}   $name \n";
   }
 
 
@@ -1037,21 +1037,21 @@ function displayEditSpecificUser($msg = "")
 
   //$catname = getCatalogName();
 
-  $sel[$userType] = "selected";
+  $sel[$user_type] = "selected";
   //{$sel["none"]}
   $pC .= "
          
      <form action='admin.php' method='POST' style='margin-top: 5px;'>
-     <input type='hidden' name='performAction' value='performEditSpecificUser'>
+     <input type='hidden' name='performAction' value='perform_edit_specific_user'>
      
 
-	User: &nbsp; <b>$f_name $mid_name $l_name ($facultyID)</b>
+	User: &nbsp; <b>$f_name $mid_name $l_name ($faculty_id)</b>
    &nbsp; &nbsp; &nbsp; &nbsp; Department: &nbsp; <b>$dept_name</b>
    <br>
-   Current user type: <b>$userType</b>
+   Current user type: <b>$user_type</b>
     
    
-   <input type='hidden' name='facultyID' value='$facultyID'>
+   <input type='hidden' name='faculty_id' value='$faculty_id'>
     <br>
     
     
@@ -1086,30 +1086,30 @@ function displayEditSpecificUser($msg = "")
   
   // Lets get an array of all available permissions from our various
   // modules.
-  $allPerms = getModulesPermissions();
+  $all_perms = get_modules_permissions();
     
-  foreach ($allPerms as $module => $val) {    
-    $moduleName = $GLOBALS["fpSystemSettings"]["modules"][$module]["name"];
-    if (!$moduleName) $moduleName = $module;
+  foreach ($all_perms as $module => $val) {    
+    $module_name = $GLOBALS["fp_system_settings"]["modules"][$module]["name"];
+    if (!$module_name) $module_name = $module;
     
-    $pC .= "<div class='fp-user-management-permission-module-name'>$moduleName</div>";
+    $pC .= "<div class='fp-user-management-permission-module-name'>$module_name</div>";
     
-    foreach ($allPerms[$module] as $permData) {
+    foreach ($all_perms[$module] as $perm_data) {
     
-      foreach ($permData as $permName => $permValues) {
+      foreach ($perm_data as $perm_name => $perm_values) {
         $checked = $cval = " ";
         
-        if (userHasPermission($permName, $facultyID)) {
+        if (user_has_permission($perm_name, $faculty_id)) {
           $checked = "checked";
           $cval = "X";
         }
           
         // Does the user editing this user have this permission?  If not,
         // they may not grant it for others!
-        if (userHasPermission($permName)) {
+        if (user_has_permission($perm_name)) {
           $pC .= "<div class='fp-user-management-permission'>
-                  <label><input type='checkbox' name='perm~~_~~$permName' value='yes' $checked>{$permValues["title"]}</label>
-                  <div class='fp-user-management-permission-line'>{$permValues["description"]}</div>
+                  <label><input type='checkbox' name='perm~~_~~$perm_name' value='yes' $checked>{$perm_values["title"]}</label>
+                  <div class='fp-user-management-permission-line'>{$perm_values["description"]}</div>
                   </div>";       
         }
         else {
@@ -1119,8 +1119,8 @@ function displayEditSpecificUser($msg = "")
                     You may not edit this permission for this user, as you do
                     not have this permission yourself.
                   </div>
-                  <label>[$cval] {$permValues["title"]}</label>
-                  <div class='fp-user-management-permission-line'>{$permValues["description"]}</div>
+                  <label>[$cval] {$perm_values["title"]}</label>
+                  <div class='fp-user-management-permission-line'>{$perm_values["description"]}</div>
                   </div>";       
           
         }
@@ -1132,9 +1132,9 @@ function displayEditSpecificUser($msg = "")
   
   /*
   $pciChecked = "";
-  $res = $db->dbQuery("SELECT * FROM users WHERE
-						`faculty_id`='$facultyID' ");
-  $cur = $db->dbFetchArray($res);
+  $res = $db->db_query("SELECT * FROM users WHERE
+						`faculty_id`='$faculty_id' ");
+  $cur = $db->db_fetch_array($res);
   if (stristr($cur["permissions"], "deCanUpdateCourseInfo"))
   {
     $pciChecked = "checked";
@@ -1154,88 +1154,88 @@ function displayEditSpecificUser($msg = "")
    
    ";
 
-  $pC .= getJS();
+  $pC .= get_j_s();
 
 
-  $screen->pageTitle = "FlightPath Admin - Edit User";
-  $screen->pageHideReportError = true;
-  $screen->pageContent = $pC;
+  $screen->page_title = "FlightPath Admin - Edit User";
+  $screen->page_hide_report_error = true;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
 
-function displayEditSpecificCourse($msg = "", $boolScroll = true)
+function display_edit_specific_course($msg = "", $bool_scroll = true)
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayEditSpecificCourse";
+  $function = "admin_display_edit_specific_course";
   if (function_exists($function)) {
-    return call_user_func($function, $msg, $boolScroll);
+    return call_user_func($function, $msg, $bool_scroll);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $screen, $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
-  $courseID = $_REQUEST["courseID"];
-  $subjectID = $_REQUEST["subjectID"];
-  $courseNum = $_REQUEST["courseNum"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
+  $course_id = $_REQUEST["course_id"];
+  $subject_id = $_REQUEST["subject_id"];
+  $course_num = $_REQUEST["course_num"];
 
-  $subjectID = str_replace("_A_","&",$subjectID);
+  $subject_id = str_replace("_A_","&",$subject_id);
 
-  $pC .= "<a class='tenpt' href='admin.php?performAction=editCourses&deCatalogYear=$deCatalogYear#course_$courseID'>Back to Course List</a>  &nbsp; - &nbsp;
-			<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu.</a>
+  $pC .= "<a class='tenpt' href='admin.php?performAction=editCourses&de_catalog_year=$de_catalog_year#course_$course_id'>Back to Course List</a>  &nbsp; - &nbsp;
+			<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu.</a>
 			";
-  if ($_SESSION["deAdvancedMode"] == true)
+  if ($_SESSION["de_advanced_mode"] == true)
   {
     $pC .= " <span class='tenpt' style='background-color: yellow; margin-left: 20px;'>
-					adv: courseID = $courseID. Used by:
-					<a href='javascript: popupWindow(\"admin.php?performAction=popupDegreesUsingCourse&courseID=$courseID\")'>[degrees]</a>
-					<a href='javascript: popupWindow(\"admin.php?performAction=popupGroupsUsingCourse&courseID=$courseID\")'>[groups]</a>
-					<a href='javascript: popupWindow(\"admin.php?performAction=popupStudentsUsingCourse&courseID=$courseID\")'>[students]</a>
+					adv: course_id = $course_id. Used by:
+					<a href='javascript: popupWindow(\"admin.php?performAction=popup_degrees_using_course&course_id=$course_id\")'>[degrees]</a>
+					<a href='javascript: popupWindow(\"admin.php?performAction=popup_groups_using_course&course_id=$course_id\")'>[groups]</a>
+					<a href='javascript: popupWindow(\"admin.php?performAction=popup_students_using_course&course_id=$course_id\")'>[students]</a>
 				  </span>";
   }
 
-  $course = new Course($courseID,false,null,false,$deCatalogYear, true);
-  //adminDebug($course->description);
-  $course->catalogYear = $deCatalogYear;  // Since it may be 1900, force it!
-  $course->loadDescriptiveData(false, true, false, true, true);
+  $course = new Course($course_id,false,null,false,$de_catalog_year, true);
+  //admin_debug($course->description);
+  $course->catalog_year = $de_catalog_year;  // Since it may be 1900, force it!
+  $course->load_descriptive_data(false, true, false, true, true);
 
 
 
-  $pC .= "<h2>Edit Course $subjectID $courseNum ($deCatalogYear)</h2>$msg";
+  $pC .= "<h2>Edit Course $subject_id $course_num ($de_catalog_year)</h2>$msg";
 
   $pC .= "<form id='mainform' action='admin.php' method='POST'>
-			<input type='hidden' name='performAction' value='performEditSpecificCourse'>
-			<input type='hidden' name='courseID' value='$courseID'>
+			<input type='hidden' name='performAction' value='perform_edit_specific_course'>
+			<input type='hidden' name='course_id' value='$course_id'>
 			
-			<input type='hidden' name='subjectID' value='$subjectID'>
-			<input type='hidden' name='courseNum' value='$courseNum'>
+			<input type='hidden' name='subject_id' value='$subject_id'>
+			<input type='hidden' name='course_num' value='$course_num'>
 			
 			";
-  $course->catalogYear = $deCatalogYear;  // Since it may be 1900, force it!
-  $pC .= getHiddenVariables();
-  $allNames = $course->getAllNames(true);
-  $warnEqv = "";
-  if (strstr($allNames, ","))
+  $course->catalog_year = $de_catalog_year;  // Since it may be 1900, force it!
+  $pC .= get_hidden_variables();
+  $all_names = $course->getAll_names(true);
+  $warn_eqv = "";
+  if (strstr($all_names, ","))
   {
-    $warnEqv = "yes";
+    $warn_eqv = "yes";
   }
   
   // Correct ghosthours, if they exist.
-  if ($course->boolGhostHour) {
-    $course->maxHours = 0;
+  if ($course->bool_ghost_hour) {
+    $course->max_hours = 0;
   }
-  if ($course->boolGhostMinHour) {
-    $course->minHours = 0;
+  if ($course->bool_ghost_min_hour) {
+    $course->min_hours = 0;
   }
   
   
@@ -1246,7 +1246,7 @@ function displayEditSpecificCourse($msg = "", $boolScroll = true)
 					Course name(s):
 				</td>
 				<td valign='top' class='tenpt'>
-					<input type='text' name='courseNames' value='$allNames' size='60'>
+					<input type='text' name='courseNames' value='$all_names' size='60'>
 					<a href='javascript: popupAlertHelp(\"course_names\");'>?</a> 	
 				</td>
 			</tr>
@@ -1264,7 +1264,7 @@ function displayEditSpecificCourse($msg = "", $boolScroll = true)
 					Min hours:
 				</td>
 				<td valign='top' class='tenpt'>
-					<input type='text' name='minHours' value='$course->minHours' size='5'>
+					<input type='text' name='min_hours' value='$course->min_hours' size='5'>
 					<a href='javascript: popupAlertHelp(\"course_min_hours\");'>?</a> 	
 				</td>
 			</tr>
@@ -1273,7 +1273,7 @@ function displayEditSpecificCourse($msg = "", $boolScroll = true)
 					Max hours:
 				</td>
 				<td valign='top' class='tenpt'>
-					<input type='text' name='maxHours' value='$course->maxHours' size='5'>
+					<input type='text' name='max_hours' value='$course->max_hours' size='5'>
 					<a href='javascript: popupAlertHelp(\"course_max_hours\");'>?</a> 	
 				</td>
 			</tr>
@@ -1282,7 +1282,7 @@ function displayEditSpecificCourse($msg = "", $boolScroll = true)
 					Repeat hours:
 				</td>
 				<td valign='top' class='tenpt'>
-					<input type='text' name='repeatHours' value='$course->repeatHours' size='5'>
+					<input type='text' name='repeat_hours' value='$course->repeat_hours' size='5'>
 					<a href='javascript: popupAlertHelp(\"course_repeat_hours\");'>?</a> 	
 				</td>
 			</tr>
@@ -1292,7 +1292,7 @@ function displayEditSpecificCourse($msg = "", $boolScroll = true)
 					Exclude:
 				</td>
 				<td valign='top' class='tenpt'>
-					<input type='text' name='exclude' value='$course->dbExclude' size='2'>
+					<input type='text' name='exclude' value='$course->db_exclude' size='2'>
 					<a href='javascript: popupAlertHelp(\"course_exclude\");'>?</a> [Default = 0]
 				</td>
 			</tr>
@@ -1301,16 +1301,16 @@ function displayEditSpecificCourse($msg = "", $boolScroll = true)
 			<div class='tenpt'>Description:
 			<textarea name='description' rows='4' cols='80'>$course->description</textarea>			
 			<br>
-			<input type='button' value='Save for $deCatalogYear' onClick='submitForm();'>
+			<input type='button' value='Save for $de_catalog_year' onClick='submitForm();'>
 			   <input type='checkbox' name='allYears' value='yes'> Update all years for this course. 
 			       <a href='javascript: popupAlertHelp(\"all_years\");'>?</a>
 			<br><br>
 			<b>[Optional]</b> Comment: (only seen by data entry administrators)<br>
-			<textarea name='dataEntryComment' rows='3' cols='80'>$course->dataEntryComment</textarea>
+			<textarea name='data_entry_comment' rows='3' cols='80'>$course->data_entry_comment</textarea>
 			<br>
 				<div align='right'>
-					Delete this course for $deCatalogYear? <input type='button' value='X'
-									onClick='deleteCourse(\"$courseID\",\"$deCatalogYear\",\"$warnEqv\");'>
+					Delete this course for $de_catalog_year? <input type='button' value='X'
+									onClick='deleteCourse(\"$course_id\",\"$de_catalog_year\",\"$warn_eqv\");'>
 				</div>			
 			</div>
 			
@@ -1320,19 +1320,19 @@ function displayEditSpecificCourse($msg = "", $boolScroll = true)
   $pC .= "
 			</form>";
 
-  $pC .= getJS();
-  $screen->pageTitle = "FlightPath Admin - Edit Course";
+  $pC .= get_j_s();
+  $screen->page_title = "FlightPath Admin - Edit Course";
 
-  if ($boolScroll)
+  if ($bool_scroll)
   {
-    $screen->pageScrollTop = trim($_POST["scrollTop"]);
+    $screen->page_scroll_top = trim($_POST["scroll_top"]);
   }
-  $screen->pageHideReportError = true;
+  $screen->page_hide_report_error = true;
   //include("template/fp_template.php");
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
   if ($_REQUEST["serialize"] != "")
@@ -1344,22 +1344,22 @@ function displayEditSpecificCourse($msg = "", $boolScroll = true)
 }
 
 
-function displayEditCourses($msg = "")
+function display_edit_courses($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayEditCourses";
+  $function = "admin_display_edit_courses";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $db, $screen;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
 
   $pC = "";
 
@@ -1394,32 +1394,32 @@ function displayEditCourses($msg = "")
   $_SESSION["dec_lr"] = $lr;
 
 
-  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu.</a><br>
-			<h2>Edit Courses for $deCatalogYear</h2>$msg
+  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu.</a><br>
+			<h2>Edit Courses for $de_catalog_year</h2>$msg
 			";
 
   $pC .= "<div style='background-color: beige; margin-bottom:10px; text-align: center; padding: 3px;'>
-			<a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=A&lr=AZZZ'>A</a> &nbsp;
-						<a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=B&lr=BZZZ'>B</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=C&lr=CNZZ'>C-CN</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=CO&lr=CZZZ'>CO-CZ</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=D&lr=DZZZ'>D</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=E&lr=EZZZ'>E</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=F&lr=FZZZ'>F</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=G&lr=GZZZ'>G</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=H&lr=HZZZ'>H</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=I&lr=LZZZ'>I-L</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=M&lr=MRZZZ'>M-MR</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=MS&lr=MZZZ'>MS-MZ</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=N&lr=OZZZ'>N-O</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=P&lr=PZZZ'>P</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=Q&lr=RZZZ'>Q-R</a> &nbsp; 
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=S&lr=SOZZZ'>S-SO</a> &nbsp;
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=SP&lr=SPZZZ'>SP-SZ</a> &nbsp;
-                       <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&ur=T&lr=ZZZZZ'>T-Z</a>
+			<a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=A&lr=AZZZ'>A</a> &nbsp;
+						<a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=B&lr=BZZZ'>B</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=C&lr=CNZZ'>C-CN</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=CO&lr=CZZZ'>CO-CZ</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=D&lr=DZZZ'>D</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=E&lr=EZZZ'>E</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=F&lr=FZZZ'>F</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=G&lr=GZZZ'>G</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=H&lr=HZZZ'>H</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=I&lr=LZZZ'>I-L</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=M&lr=MRZZZ'>M-MR</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=MS&lr=MZZZ'>MS-MZ</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=N&lr=OZZZ'>N-O</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=P&lr=PZZZ'>P</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=Q&lr=RZZZ'>Q-R</a> &nbsp; 
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=S&lr=SOZZZ'>S-SO</a> &nbsp;
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=SP&lr=SPZZZ'>SP-SZ</a> &nbsp;
+                       <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&ur=T&lr=ZZZZZ'>T-Z</a>
 				</div>                       
         <div class='tenpt'>			
-                       Missing a course?  <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editSpecificCourse&courseID=new'>Click Here to Add a Course</a><br>
+                       Missing a course?  <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editSpecificCourse&course_id=new'>Click Here to Add a Course</a><br>
                        
                        Legend:  <br>&nbsp; &nbsp;[e] = Course has at least one add'l excluded name.  
                        			&nbsp; &nbsp;[v] = Course has at least one add'l valid name.
@@ -1428,17 +1428,17 @@ function displayEditCourses($msg = "")
 
          ";
 
-  $excludeLine = "and exclude != 1";
+  $exclude_line = "and exclude != 1";
   if ($show_hidden == "yes")
   {
     $pC .= "<div class='tenpt'><b>Showing excluded courses.
-                  <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&show_hidden=no'>Hide?</a>
+                  <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&show_hidden=no'>Hide?</a>
         </b></div>";
-    $excludeLine = "";
+    $exclude_line = "";
 
   }  else {
     $pC .= "<div class='tenpt hypo'><b>Hiding excluded courses.
-              <a href='admin.php?deCatalogYear=$deCatalogYear&performAction=editCourses&show_hidden=yes'>Show?</a>
+              <a href='admin.php?deCatalogYear=$de_catalog_year&performAction=editCourses&show_hidden=yes'>Show?</a>
               </b></div>";
   }
 
@@ -1452,22 +1452,22 @@ function displayEditCourses($msg = "")
                         `catalog_year`='?' and
                         `subject_id` BETWEEN '?' AND '?'
                         AND `delete_flag`='0'
-                        $excludeLine
+                        $exclude_line
                         ORDER BY `subject_id`, `course_num`";
-  $result = $db->dbQuery($q, $deCatalogYear, $ur, $lr);
-  while ($cur = $db->dbFetchArray($result))
+  $result = $db->db_query($q, $de_catalog_year, $ur, $lr);
+  while ($cur = $db->db_fetch_array($result))
   {
     extract($cur, 3, "db");
 
-    $exNames = "";
-    $valNames = "";
+    $ex_names = "";
+    $val_names = "";
     // Check to see if this course has more than one name...
-    // removed AND `catalog_year`='$deCatalogYear' from query,
+    // removed AND `catalog_year`='$de_catalog_year' from query,
     // because we don't care what other cat year it came from.
-    $res2 = $db->dbQuery("SELECT * FROM draft_courses
+    $res2 = $db->db_query("SELECT * FROM draft_courses
 									WHERE `course_id`='?'
 										", $db_course_id);
-    while ($cur2 = $db->dbFetchArray($res2))
+    while ($cur2 = $db->db_fetch_array($res2))
     {
       if ($cur2["subject_id"] == $db_subject_id && $cur2["course_num"] == $db_course_num)
       {
@@ -1482,9 +1482,9 @@ function displayEditCourses($msg = "")
 
       if ($cur2["exclude"] == "1")
       {
-        $exNames = "[e]";
+        $ex_names = "[e]";
       } else {
-        $valNames = "[v]";
+        $val_names = "[v]";
       }
 
     }
@@ -1497,8 +1497,8 @@ function displayEditCourses($msg = "")
       $spanstyle = "background-color: lightgrey;";
     }
 
-    $tempCourse = new Course();
-    $db_title = $tempCourse->fixTitle($db_title);
+    $temp_course = new Course();
+    $db_title = $temp_course->fix_title($db_title);
 
     $hrs = $db_min_hours;
     if (trim($db_min_hours) != trim($db_max_hours))
@@ -1508,28 +1508,28 @@ function displayEditCourses($msg = "")
 
     $hrs .= " hrs.";
 
-    $repHours = "";
+    $rep_hours = "";
     if ($db_repeat_hours > $db_min_hours)
     {
-      $repHours = " rep to $db_repeat_hours hrs.";
+      $rep_hours = " rep to $db_repeat_hours hrs.";
     }
 
     // remove special chars from subject_id...
-    $displaySubjectID = $db_subject_id;
+    $display_subject_id = $db_subject_id;
     $db_subject_id = str_replace("&","_A_",$db_subject_id);
 
 
     $pC .= "<tr style='$spanstyle'>
 					<td valign='top' width='90%'><a name='course_$db_course_id'></a>";
-    $pC .= "<div style='$spanstyle padding:3px;'><a href='admin.php?performAction=editSpecificCourse&courseID=$db_course_id&subjectID=$db_subject_id&courseNum=$db_course_num&deCatalogYear=$deCatalogYear'>$displaySubjectID $db_course_num - $db_title</a> - $hrs$repHours</div>";
+    $pC .= "<div style='$spanstyle padding:3px;'><a href='admin.php?performAction=editSpecificCourse&course_id=$db_course_id&subject_id=$db_subject_id&course_num=$db_course_num&de_catalog_year=$de_catalog_year'>$display_subject_id $db_course_num - $db_title</a> - $hrs$rep_hours</div>";
 
     $pC .= "</td>
 					<td valign='top' width='5%'>
-					$exNames
+					$ex_names
 					</td>
 					
 					<td valign='top' width='5%'>
-					$valNames
+					$val_names
 					</td>
 				</tr>";
 
@@ -1538,101 +1538,101 @@ function displayEditCourses($msg = "")
   $pC .= "</table>";
 
 
-  $screen->pageTitle = "FlightPath Admin - Courses";
-  $screen->pageHideReportError = true;
+  $screen->page_title = "FlightPath Admin - Courses";
+  $screen->page_hide_report_error = true;
   //include("template/fp_template.php");
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
-function performEditSpecificCourse()
+function perform_edit_specific_course()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performEditSpecificCourse";
+  $function = "admin_perform_edit_specific_course";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
-  $courseID = trim($_REQUEST["courseID"]);
-  $courseNames = trim($_POST["courseNames"]);
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
+  $course_id = trim($_REQUEST["course_id"]);
+  $course_names = trim($_POST["course_names"]);
 
-  if ($courseNames == "")
+  if ($course_names == "")
   {
-    $courseNames = $_POST["subjectID"] . " " . $_POST["courseNum"];
+    $course_names = $_POST["subject_id"] . " " . $_POST["course_num"];
   }
 
   $title = trim($_POST["title"]);
-  $minHours = trim($_POST["minHours"]);
-  $maxHours = trim($_POST["maxHours"]);
-  $repeatHours = trim($_POST["repeatHours"]);
+  $min_hours = trim($_POST["min_hours"]);
+  $max_hours = trim($_POST["max_hours"]);
+  $repeat_hours = trim($_POST["repeat_hours"]);
   //$exclude = trim($_POST["exclude"]);
   $description = trim($_POST["description"]);
-  $dataEntryComment = trim($_POST["dataEntryComment"]);
+  $data_entry_comment = trim($_POST["data_entry_comment"]);
 
   // Save the entire post to the log.
-  $postXML = fp_arrayToXml("post",$_POST, true);
-  $db->addToLog("admin_edit_course","$courseID,$courseNames",$postXML);
+  $post_x_m_l = fp_array_to_xml("post",$_POST, true);
+  $db->add_to_log("admin_edit_course","$course_id,$course_names",$post_x_m_l);
 
   // Since we are making a change to the draft table(s), let's add a row
   // to draft instructions.
-  $db->addDraftInstruction("-");
+  $db->add_draft_instruction("-");
 
 
 
-  // Unlike the degrees and the groups, courseIDs are not
-  // unique.  Only a courseID + catalogYear pair are unique.  This
+  // Unlike the degrees and the groups, course_ids are not
+  // unique.  Only a course_id + catalog_year pair are unique.  This
   // is so we can handle equivalent courses more gracefully.
 
   // So, the first thing we need to do is delete *all* courses with the
-  // courseID and catalogYear listed above.  For most courses, this will
+  // course_id and catalog_year listed above.  For most courses, this will
   // only be one row.  For eqv courses, this will delete more than one row.
-  if ($courseID != "new")
+  if ($course_id != "new")
   {
-    // Don't delete!  Temporarily transfer to a temporary courseID.
+    // Don't delete!  Temporarily transfer to a temporary course_id.
     // Will possibly delete later.
 
     
     
-    $res = $db->dbQuery("UPDATE draft_courses
+    $res = $db->db_query("UPDATE draft_courses
 				  SET `course_id`='-12345'
 				  WHERE `course_id`='?'
-				AND `catalog_year`='?' ", $courseID, $deCatalogYear);
+				AND `catalog_year`='?' ", $course_id, $de_catalog_year);
   }
 
 
-  if ($_POST["performAction2"] == "delete_course")
+  if ($_POST["perform_action2"] == "delete_course")
   {
     // That's it.  All we wanted to do was delete the course.
     $query = "DELETE FROM draft_courses
 				  WHERE `course_id`='-12345'
 					";
-    //debugCT($query);
-    $res = $db->dbQuery($query);
-    displayEditCourses("<div><font color='green' size='4'>Course <i>$courseNames</i> successfully deleted for $deCatalogYear.</font></div>");
+    //debug_c_t($query);
+    $res = $db->db_query($query);
+    display_edit_courses("<div><font color='green' size='4'>Course <i>$course_names</i> successfully deleted for $de_catalog_year.</font></div>");
     die;
   }
 
-  // If the $courseID == new then create a new one.
-  if ($courseID == "new")
+  // If the $course_id == new then create a new one.
+  if ($course_id == "new")
   {
-    $courseID = $db->requestNewCourseID();
-    $_POST["courseID"] = $courseID;
-    $_GET["courseID"] = $courseID;
-    $_REQUEST["courseID"] = $courseID;
-    //debugCT("new course ID is $courseID. courseNames: [$courseNames" . "]");
+    $course_id = $db->request_new_course_id();
+    $_POST["course_id"] = $course_id;
+    $_GET["course_id"] = $course_id;
+    $_REQUEST["course_id"] = $course_id;
+    //debugCT("new course ID is $course_id. courseNames: [$course_names" . "]");
   }
 
 
@@ -1640,7 +1640,7 @@ function performEditSpecificCourse()
 
   // Now, we will split the courseNames on commas, and for each
   // token, we will insert a row into the database.
-  $courses = split(",", $courseNames);
+  $courses = split(",", $course_names);
   foreach($courses as $course)
   {
     $course = str_replace("  ", " ", $course);
@@ -1650,26 +1650,26 @@ function performEditSpecificCourse()
     if ($course == "") { continue; }
 
     $temp = split(" ", $course);
-    $subjectID = trim($temp[0]);
-    $courseNum = trim($temp[1]);
+    $subject_id = trim($temp[0]);
+    $course_num = trim($temp[1]);
 
     ////////////
     ///  Error conditions...
-    if (strtolower($courseNum) == "exclude")
+    if (strtolower($course_num) == "exclude")
     {
       $errors .= "<div style='color:red;'>
 						It appears you specified an excluded course
-						without a course number.  You entered <b>$subjectID $courseNum</b>.
+						without a course number.  You entered <b>$subject_id $course_num</b>.
 						Notice there is no course number. Please re-enter.
 						</div>";
       continue;
     }
 
-    if ($courseNum == "")
+    if ($course_num == "")
     {
       $errors .= "<div style='color:red;'>
 						It appears you specified a course
-						without a course number.  You entered <b>$subjectID $courseNum</b>.
+						without a course number.  You entered <b>$subject_id $course_num</b>.
 						Notice there is no course number. Please re-enter.
 						</div>";
       continue;
@@ -1681,31 +1681,31 @@ function performEditSpecificCourse()
     if (strtolower(trim($temp[2])) == "exclude")
     {
       $exclude = 1;
-      // Set ALL courses with this subjectID and courseNum to exclude!
-      $res = $db->dbQuery("UPDATE draft_courses
+      // Set ALL courses with this subject_id and course_num to exclude!
+      $res = $db->db_query("UPDATE draft_courses
 								SET `exclude`='1'
 								WHERE `subject_id`='?'
 								AND `course_num`='?' 
-								", $subjectID, $courseNum);
+								", $subject_id, $course_num);
 
 
     } else {
-      // Aet all courses with this subjectID and courseNum to NOT exclude!
-      $res = $db->dbQuery("UPDATE draft_courses
+      // Aet all courses with this subject_id and course_num to NOT exclude!
+      $res = $db->db_query("UPDATE draft_courses
 								SET `exclude`='0'
 								WHERE `subject_id`='?'
 								AND `course_num`='?' 
-								", $subjectID, $courseNum);
+								", $subject_id, $course_num);
 
     }
 
     // Did the user specify a course which already exists?  If so,
     // mark that course's ID as -12345...
-    $res = $db->dbQuery("UPDATE draft_courses
+    $res = $db->db_query("UPDATE draft_courses
 								SET `course_id`='-12345'
 								WHERE `subject_id`='?'
 								AND `course_num`='?' 
-								AND `catalog_year`='?' ", $subjectID, $courseNum, $deCatalogYear);
+								AND `catalog_year`='?' ", $subject_id, $course_num, $de_catalog_year);
 
 
 
@@ -1716,37 +1716,37 @@ function performEditSpecificCourse()
 						`title`,`description`,`min_hours`,`max_hours`,`repeat_hours`,
 						`exclude`,`data_entry_comment`)
 						values ('?','?','?','?','?','?','?','?','?','?','?') ";
-    //debugCT($query);
-    $res = $db->dbQuery($query, $courseID,$subjectID,$courseNum,$deCatalogYear,
-						$title,$description,$minHours,$maxHours,$repeatHours,
-						$exclude,$dataEntryComment);
+    //debug_c_t($query);
+    $res = $db->db_query($query, $course_id,$subject_id,$course_num,$de_catalog_year,
+						$title,$description,$min_hours,$max_hours,$repeat_hours,
+						$exclude,$data_entry_comment);
 
     // Now, this part is tricky.  Are there any courses which already
-    // existed with this subjectID and courseNum, but not this courseID?
+    // existed with this subject_id and course_num, but not this course_id?
     // This would happen if we add an eqv for a course that already existed
     // elsewhere.  We want to change that existing course's ID to match the
     // new one, but we also need to update EVERY table that used the old
-    // courseID with the new courseID, including degree plans, groups,
+    // course_id with the new course_id, including degree plans, groups,
     // substitutions, etc.
 
-    // query for subjectID and courseNum but != courseID.
+    // query for subject_id and course_num but != course_id.
     // get oldCourseID.
-    // call function updateCourseID(oldCourseID, newCourseID)
-    $res2 = $db->dbQuery("SELECT * FROM draft_courses WHERE
+    // call function update_course_id(oldCourseID, newCourseID)
+    $res2 = $db->db_query("SELECT * FROM draft_courses WHERE
 								`subject_id`='?'
 								AND `course_num`='?'
 								AND `course_id` != '?' 
-								AND `course_id` != '-12345' ", $subjectID, $courseNum, $courseID);
-    while ($cur2 = $db->dbFetchArray($res2))
+								AND `course_id` != '-12345' ", $subject_id, $course_num, $course_id);
+    while ($cur2 = $db->db_fetch_array($res2))
     {
-      $oldCourseID = $cur2["course_id"];
-      // Now, update all the existing references to $oldCourseID
-      // with the new courseID.
+      $old_course_id = $cur2["course_id"];
+      // Now, update all the existing references to $old_course_id
+      // with the new course_id.
       $db2 = new DatabaseHandler();
-      $db2->updateCourseID($oldCourseID, $courseID, true);
+      $db2->update_course_id($old_course_id, $course_id, true);
       // Now, add it to our list of things to update when we apply
       // the draft changes...
-      $db2->addDraftInstruction("updateCourseID,$oldCourseID,$courseID");
+      $db2->add_draft_instruction("update_course_id,$old_course_id,$course_id");
     }
 
 
@@ -1762,49 +1762,49 @@ function performEditSpecificCourse()
   // But they took out the comma.  So, only ACCT 101 just got written
   // to the database, while MATH 101 has been marked as -12345 and is
   // destined to be deleted.
-  // -- we need to give MATH 101 a new courseID and update that courseID
+  // -- we need to give MATH 101 a new course_id and update that course_id
   // for all years.
   // Then, we need to go through all our tables and update where it was
-  // actually spelled out that "MATH 101" be used with the new courseID.
+  // actually spelled out that "MATH 101" be used with the new course_id.
   // -- This process will ensure that no previous existing courses
   // will get deleted.  That they will remain as their own unique
   // courses.
 
-  // First thing's first.  Go through all the courses with the courseID
-  // of -12345.  If we find one that does not have the same subjectID
-  // and courseNum with the new ID, then this is a removed eqv, and
+  // First thing's first.  Go through all the courses with the course_id
+  // of -12345.  If we find one that does not have the same subject_id
+  // and course_num with the new ID, then this is a removed eqv, and
   // that is our cue that it should be it's own course.
-  $res = $db->dbQuery("SELECT * FROM draft_courses
+  $res = $db->db_query("SELECT * FROM draft_courses
 							WHERE `course_id`='-12345' ");
-  while ($cur = $db->dbFetchArray($res))
+  while ($cur = $db->db_fetch_array($res))
   {
-    $foundSI = $cur["subject_id"];
-    $foundCN = $cur["course_num"];
+    $found_s_i = $cur["subject_id"];
+    $found_c_n = $cur["course_num"];
     $db2 = new DatabaseHandler();
-    $res2 = $db2->dbQuery("SELECT * FROM draft_courses
+    $res2 = $db2->db_query("SELECT * FROM draft_courses
 							WHERE `course_id`='?'
 							AND `subject_id`='?'
 							AND `course_num`='?' 
-							AND `catalog_year`='?' ", $courseID, $foundSI, $foundCN, $deCatalogYear);
-    if ($db2->dbNumRows($res2) == 0)
+							AND `catalog_year`='?' ", $course_id, $found_s_i, $found_c_n, $de_catalog_year);
+    if ($db2->db_num_rows($res2) == 0)
     {
-      // Meaning, this course name is not listed with the courseID,
+      // Meaning, this course name is not listed with the course_id,
       // so this is a broken eqv.
-      // We should make a new courseID and all that for this course,
+      // We should make a new course_id and all that for this course,
       // for all available years.
-      //debugCT("removed eqv: $foundSI $foundCN");
-      $newCourseID = $db2->requestNewCourseID();
+      //debugCT("removed eqv: $found_s_i $found_c_n");
+      $new_course_id = $db2->request_new_course_id();
       $db3 = new DatabaseHandler();
-      $res3 = $db3->dbQuery("UPDATE draft_courses
+      $res3 = $db3->db_query("UPDATE draft_courses
 									SET `course_id`='?'
 									WHERE `subject_id`='?'
-									AND `course_num`='?' ", $newCourseID, $foundSI, $foundCN);
+									AND `course_num`='?' ", $new_course_id, $found_s_i, $found_c_n);
       // removed WHERE `course_id`='-12345' from query.  We want to UPDATE
       // this across all years for this course.
       // And also UPDATE every other table that specified foundSI &CN
       // as a requirement.
-      $db3->updateCourseRequirementFromName($foundSI, $foundCN, $newCourseID);
-      $db3->addDraftInstruction("updateCourseRequirementFromName,$foundSI,$foundCN,$newCourseID");
+      $db3->update_course_requirement_from_name($found_s_i, $found_c_n, $new_course_id);
+      $db3->add_draft_instruction("update_course_requirement_from_name,$found_s_i,$found_c_n,$new_course_id");
     }
   }
 
@@ -1812,33 +1812,33 @@ function performEditSpecificCourse()
 
 
 
-  // Was the "allYears" box checked?  If it was, then update all instances
+  // Was the "all_years" box checked?  If it was, then update all instances
   // of this course, across all available catalog years.
-  if ($_POST["allYears"] == "yes")
+  if ($_POST["all_years"] == "yes")
   {
-    $res = $db->dbQuery("UPDATE draft_courses
+    $res = $db->db_query("UPDATE draft_courses
 									SET `title`='?',
 									`description`='?',
 									`min_hours`='?',
 									`max_hours`='?',
 									`repeat_hours`='?'
-									WHERE `course_id`='?' ", $title, $description, $minHours, $maxHours, $repeatHours, $courseID);
+									WHERE `course_id`='?' ", $title, $description, $min_hours, $max_hours, $repeat_hours, $course_id);
   }
 
 
 
-  // Clean up.  Delete the temporary courseID...
+  // Clean up.  Delete the temporary course_id...
 
   $query = "DELETE FROM draft_courses
 				  WHERE `course_id`='-12345'
 					";
-  //debugCT($query);
-  $res = $db->dbQuery($query);
+  //debug_c_t($query);
+  $res = $db->db_query($query);
 
 
 
 
-  $msg = "<font color='green' size='4'>Course updated successfully at " . getCurrentTime() . ".</font>";
+  $msg = "<font color='green' size='4'>Course updated successfully at " . get_current_time() . ".</font>";
 
   if ($errors != "")
   {
@@ -1846,29 +1846,29 @@ function performEditSpecificCourse()
   }
 
 
-  displayEditSpecificCourse($msg);
+  display_edit_specific_course($msg);
 }
 
 
-function performEditSpecificUser()
+function perform_edit_specific_user()
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performEditSpecificUser";
+  $function = "admin_perform_edit_specific_user";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerUsers")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_users")) {
+    display_access_denied();
   }
   
   
   global $db;
 
-  $facultyID = $_REQUEST["facultyID"];
-  $userType = $_REQUEST["userType"];
+  $faculty_id = $_REQUEST["faculty_id"];
+  $user_type = $_REQUEST["user_type"];
   $permissions = "";
 
   
@@ -1877,7 +1877,7 @@ function performEditSpecificUser()
     if (strstr($key, "perm~~_~~") && $value == "yes") {
       $perm = trim(str_replace("perm~~_~~", "", $key));
       
-      if (userHasPermission($perm)) {
+      if (user_has_permission($perm)) {
         $permissions .= $perm . ",";
       }
       
@@ -1892,61 +1892,61 @@ function performEditSpecificUser()
 
   // First, delete the existing entry for this user
   // from the table.
-  $res = $db->dbQuery("DELETE FROM users WHERE `faculty_id`='?' ", $facultyID) ;
+  $res = $db->db_query("DELETE FROM users WHERE `faculty_id`='?' ", $faculty_id) ;
 
   // Now, insert.
-  $res = $db->dbQuery("INSERT INTO users
+  $res = $db->db_query("INSERT INTO users
 						(`faculty_id`,`user_type`,`permissions`)
-						values ('?','?','?') ", $facultyID, $userType, $permissions) ;
+						values ('?','?','?') ", $faculty_id, $user_type, $permissions) ;
 
 
-  displayEditSpecificUser(getSuccessMsg("Successfully updated user " . getCurrentTime()));
+  display_edit_specific_user(get_success_msg("Successfully updated user " . get_current_time()));
 
 
 }
 
 
-function performProcessGroupDefinitions()
+function perform_process_group_definitions()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performProcessGroupDefinitions";
+  $function = "admin_perform_process_group_definitions";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $db;
   $db2 = new DatabaseHandler();
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   $msg = "";
   $msg .= "<ul>";
   // This function will go through every group for this year and
   // re-run it's definition, saving the result.
 
   // First, find every group which has a definition set.
-  $res = $db->dbQuery("SELECT * FROM draft_groups
+  $res = $db->db_query("SELECT * FROM draft_groups
                        WHERE definition != '' 
                        AND catalog_year = '?' 
-                       AND delete_flag = 0 ", $deCatalogYear);
-  while($cur = $db->dbFetchArray($res))
+                       AND delete_flag = 0 ", $de_catalog_year);
+  while($cur = $db->db_fetch_array($res))
   {
     $def = $cur["definition"];
-    $groupID = $cur["group_id"];
-    $groupName = $cur["group_name"];
-    $temp = getCoursesFromDefinition($def);
+    $group_id = $cur["group_id"];
+    $group_name = $cur["group_name"];
+    $temp = get_courses_from_definition($def);
     $courses = trim($temp["text"]);
     $ccount = 0;
 
-    $msg .= "<li>Working on $groupName...</li>";
+    $msg .= "<li>Working on $group_name...</li>";
 
     // Remove all the existing group requirements for this group first.
-    $res2 = $db->dbQuery("DELETE FROM draft_group_requirements
-                        WHERE group_id = ? ", $groupID);
+    $res2 = $db->db_query("DELETE FROM draft_group_requirements
+                        WHERE group_id = ? ", $group_id);
 
 
     $lines = split("\n", $courses);
@@ -1967,46 +1967,46 @@ function performProcessGroupDefinitions()
         // Did NOT contain an ampersand (&), so this goes in the
         // regular course requirements.
         $tokens = split(" ", $line);
-        $subjectID = trim($tokens[0]);
-        $courseNum = trim($tokens[1]);
-        $minGrade = trim($tokens[2]);
-        $courseRepeats = trim($tokens[3]);
+        $subject_id = trim($tokens[0]);
+        $course_num = trim($tokens[1]);
+        $min_grade = trim($tokens[2]);
+        $course_repeats = trim($tokens[3]);
 
-        if (strstr($minGrade, "["))
+        if (strstr($min_grade, "["))
         {
           // This is actually a specified repeat, not a min grade.
-          $courseRepeats = $minGrade;
-          $minGrade = "";
+          $course_repeats = $min_grade;
+          $min_grade = "";
         }
 
-        $minGrade = str_replace("(","",$minGrade);
-        $minGrade = strtoupper(str_replace(")","",$minGrade));
+        $min_grade = str_replace("(","",$min_grade);
+        $min_grade = strtoupper(str_replace(")","",$min_grade));
 
-        $courseRepeats = str_replace("[","",$courseRepeats);
-        $courseRepeats = str_replace("]","",$courseRepeats);
-        $courseRepeats--;
-        if ($courseRepeats < 0) { $courseRepeats = 0; }
+        $course_repeats = str_replace("[","",$course_repeats);
+        $course_repeats = str_replace("]","",$course_repeats);
+        $course_repeats--;
+        if ($course_repeats < 0) { $course_repeats = 0; }
 
         // If the subject_id had a _A_ in it, convert this back
         // to an ampersand.
-        $subjectID = str_replace("_A_", "&", $subjectID);
+        $subject_id = str_replace("_A_", "&", $subject_id);
 
         // We don't care about catalog year anymore...
-        if ($courseID = $db->getCourseID($subjectID, $courseNum, "", true))
+        if ($course_id = $db->get_course_id($subject_id, $course_num, "", true))
         {
           $query = "INSERT INTO draft_group_requirements
 										(`group_id`,`course_id`,
 										`course_min_grade`,`course_repeats`,`data_entry_value`)
 										values ('?','?',
 										'?','?','?~?') ";
-          $res2 = $db->dbQuery($query, $groupID, $courseID, $minGrade, $courseRepeats, $subjectID, $courseNum);
+          $res2 = $db->db_query($query, $group_id, $course_id, $min_grade, $course_repeats, $subject_id, $course_num);
           $ccount++;
-          //debugCT($query);
+          //debug_c_t($query);
         } else {
-          // The courseID could not be found!
+          // The course_id could not be found!
           $msg .= "<li><font color='red'><b>Course Not Found!</b>
 							You specified the course
-							<b>$subjectID $courseNum</b> as a requirement in $groupName, but this course
+							<b>$subject_id $course_num</b> as a requirement in $group_name, but this course
 							could not be found in the catalog.
 							It was removed from the list of requirements.
 							Are you sure you typed it correctly?  Please check 
@@ -2016,7 +2016,7 @@ function performProcessGroupDefinitions()
       }
     }
 
-    $msg .= "<li>$groupName defintion processed.  $ccount courses added.</li>";
+    $msg .= "<li>$group_name defintion processed.  $ccount courses added.</li>";
 
 
   }
@@ -2024,77 +2024,77 @@ function performProcessGroupDefinitions()
 
   $msg = "<div class='hypo'><b>Processed group definitions.</b>  Log:<br>$msg</div>";
 
-  $db->addToLog("admin_proc_group_defs","$deCatalogYear");
+  $db->add_to_log("admin_proc_group_defs","$de_catalog_year");
   
-  displayEditGroups($msg);
+  display_edit_groups($msg);
 
 
 }
 
 
 
-function performEditSpecificGroup()
+function perform_edit_specific_group()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performEditSpecificGroup";
+  $function = "admin_perform_edit_specific_group";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $db;
   $db2 = new DatabaseHandler();
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
-  $groupID = $_REQUEST["groupID"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
+  $group_id = $_REQUEST["group_id"];
 
   // Okay, we are trying to save the details of this group.
-  // First thing we need to do is UPDATE the title, groupName,
+  // First thing we need to do is UPDATE the title, group_name,
   // priority, icon and comment.
-  $groupName = trim($_POST["groupName"]);
+  $group_name = trim($_POST["group_name"]);
   $title = trim($_POST["title"]);
   $priority = trim($_POST["priority"]);
-  $iconFilename = trim($_POST["iconFilename"]);
-  $dataEntryComment = trim($_POST["dataEntryComment"]);
+  $icon_filename = trim($_POST["icon_filename"]);
+  $data_entry_comment = trim($_POST["data_entry_comment"]);
 
   // Save the entire post to the log.
-  $postXML = fp_arrayToXml("post",$_POST, true);
-  $db->addToLog("admin_edit_group","$groupID,$groupName",$postXML);
+  $post_x_m_l = fp_array_to_xml("post",$_POST, true);
+  $db->add_to_log("admin_edit_group","$group_id,$group_name",$post_x_m_l);
 
   // Since we are making a change to the draft table(s), let's add a row
   // to draft instructions.
-  $db->addDraftInstruction("-");
+  $db->add_draft_instruction("-");
 
 
   // Are we trying to delete this group?
-  if ($_POST["performAction2"] == "delete_group")
+  if ($_POST["perform_action2"] == "delete_group")
   {
-    $res = $db->dbQuery("UPDATE draft_groups
+    $res = $db->db_query("UPDATE draft_groups
 								SET `delete_flag`='1'
 								WHERE `group_id`='?' 
 								AND `catalog_year`='?'
-								", $groupID, $deCatalogYear);
-    displayEditGroups("<font size='4' color='green'>The group $title ($groupName) has been deleted successfully for this year.</font>");
+								", $group_id, $de_catalog_year);
+    display_edit_groups("<font size='4' color='green'>The group $title ($group_name) has been deleted successfully for this year.</font>");
     die;
   }
 
-  // If the $groupID == new then create a new one.
-  if ($groupID == "new")
+  // If the $group_id == new then create a new one.
+  if ($group_id == "new")
   {
-    $groupID = $db->requestNewGroupID();
-    $res = $db->dbQuery("INSERT INTO draft_groups(`group_id`,`catalog_year`)
-								values ('?','?') ", $groupID, $deCatalogYear);
-    $_POST["groupID"] = $groupID;
-    $_GET["groupID"] = $groupID;
-    $_REQUEST["groupID"] = $groupID;
+    $group_id = $db->request_new_group_id();
+    $res = $db->db_query("INSERT INTO draft_groups(`group_id`,`catalog_year`)
+								values ('?','?') ", $group_id, $de_catalog_year);
+    $_POST["group_id"] = $group_id;
+    $_GET["group_id"] = $group_id;
+    $_REQUEST["group_id"] = $group_id;
   }
 
 
-  $res = $db->dbQuery("UPDATE draft_groups
+  $res = $db->db_query("UPDATE draft_groups
 							SET `group_name`='?',
 							`title`='?',
 							`priority`='?',
@@ -2102,42 +2102,42 @@ function performEditSpecificGroup()
 							`data_entry_comment`='?'
 							WHERE
 								`group_id`='?' ", 
-              $groupName, $title, $priority, $iconFilename, $dataEntryComment, $groupID);
+              $group_name, $title, $priority, $icon_filename, $data_entry_comment, $group_id);
 
   // We need to delete all the existing course & subgroup requirements from this group.
   // That entails first seeing what subgroups were required and deleting them,
   // then deleting the parent group's requirements.
   // First, find and delete the branches (child groups):
-  $res = $db->dbQuery("SELECT * FROM draft_group_requirements
+  $res = $db->db_query("SELECT * FROM draft_group_requirements
 							WHERE `group_id`='?'
-							AND `child_group_id` != '0' ", $groupID);
-  while ($cur = $db->dbFetchArray($res))
+							AND `child_group_id` != '0' ", $group_id);
+  while ($cur = $db->db_fetch_array($res))
   {
-    $cgID = $cur["child_group_id"];
-    $res2 = $db2->dbQuery("DELETE FROM draft_group_requirements
-								WHERE `group_id`='?' ", $cgID);
+    $cg_id = $cur["child_group_id"];
+    $res2 = $db2->db_query("DELETE FROM draft_group_requirements
+								WHERE `group_id`='?' ", $cg_id);
   }
   // Now delete the course requirements...
-  $res = $db->dbQuery("DELETE FROM draft_group_requirements
-								WHERE `group_id`='?' ", $groupID);
+  $res = $db->db_query("DELETE FROM draft_group_requirements
+								WHERE `group_id`='?' ", $group_id);
 
   $courses = trim($_POST["courses"]);
   // If a definition was set, then we will ignore what is in the POST
   // for the course requrements, and instead use the definition.
-  if (trim($_POST["setDefinition"] != ""))
+  if (trim($_POST["set_definition"] != ""))
   {
-    $def = urldecode(trim($_POST["setDefinition"]));
-    //$cc = trim(getCoursesFromDefinition($def, $deCatalogYear));
-    $temp2 = getCoursesFromDefinition($def);
+    $def = urldecode(trim($_POST["set_definition"]));
+    //$cc = trim(get_courses_from_definition($def, $de_catalog_year));
+    $temp2 = get_courses_from_definition($def);
     $cc = trim($temp2["text"]);
     if ($cc != "")
     {
       $courses = $cc;
       // UPDATE this group's definition!
-      $res = $db->dbQuery("UPDATE draft_groups
+      $res = $db->db_query("UPDATE draft_groups
 							SET `definition`='?'
 							WHERE
-								`group_id`='?' ", $def, $groupID);
+								`group_id`='?' ", $def, $group_id);
 
     }
     //print_pre($cc);
@@ -2146,10 +2146,10 @@ function performEditSpecificGroup()
     // In other words, the setDefinition WAS blank.
     // Let's update the table.  This is to fix a bug where they were unable
     // to clear definitions.
-      $res = $db->dbQuery("UPDATE draft_groups
+      $res = $db->db_query("UPDATE draft_groups
 							SET `definition`=''
 							WHERE
-								`group_id`='?' ", $groupID);    
+								`group_id`='?' ", $group_id);    
   }
 
   // Okay, now we look at the actual "courses" box and assemble the group
@@ -2172,7 +2172,7 @@ function performEditSpecificGroup()
       // This line DOES have an ampersand (&), so this is a sub group
       // within this group.
       // First, we need to request a new branchID for this new group.
-      if (!$branchID = $db->requestNewGroupID())
+      if (!$branch_id = $db->request_new_group_id())
       {
         die ("Error.  Could not create new group (branch) ID.");
       } else {
@@ -2180,55 +2180,55 @@ function performEditSpecificGroup()
         $query = "INSERT INTO draft_group_requirements
 										(`group_id`,`child_group_id`)
 										values ('?','?') ";
-        $res = $db->dbQuery($query, $groupID, $branchID);
-        //debugCT($query);
+        $res = $db->db_query($query, $group_id, $branch_id);
+        //debug_c_t($query);
 
       }
-      $cTokes = split("&",$line);
-      for ($cT = 0; $cT < count($cTokes); $cT++)
+      $c_tokes = split("&",$line);
+      for ($cT = 0; $cT < count($c_tokes); $cT++)
       {
-        $tokens = split(" ", trim($cTokes[$cT]));
-        $subjectID = trim($tokens[0]);
-        $courseNum = trim($tokens[1]);
-        $minGrade = trim($tokens[2]);
-        $courseRepeats = trim($tokens[3]);
+        $tokens = split(" ", trim($c_tokes[$cT]));
+        $subject_id = trim($tokens[0]);
+        $course_num = trim($tokens[1]);
+        $min_grade = trim($tokens[2]);
+        $course_repeats = trim($tokens[3]);
 
-        if (strstr($minGrade, "["))
+        if (strstr($min_grade, "["))
         {
           // This is actually a specified repeat, not a min grade.
-          $courseRepeats = $minGrade;
-          $minGrade = "";
+          $course_repeats = $min_grade;
+          $min_grade = "";
         }
 
-        $minGrade = str_replace("(","",$minGrade);
-        $minGrade = str_replace(")","",$minGrade);
+        $min_grade = str_replace("(","",$min_grade);
+        $min_grade = str_replace(")","",$min_grade);
 
-        $courseRepeats = str_replace("[","",$courseRepeats);
-        $courseRepeats = str_replace("]","",$courseRepeats);
-        $courseRepeats--;
-        if ($courseRepeats < 0) { $courseRepeats = 0; }
+        $course_repeats = str_replace("[","",$course_repeats);
+        $course_repeats = str_replace("]","",$course_repeats);
+        $course_repeats--;
+        if ($course_repeats < 0) { $course_repeats = 0; }
 
         // If the subject_id had a _A_ in it, convert this back
         // to an ampersand.
-        $subjectID = str_replace("_A_", "&", $subjectID);
+        $subject_id = str_replace("_A_", "&", $subject_id);
 
-        // Commenting out, because we do not care about catalogYear
+        // Commenting out, because we do not care about catalog_year
         // when specifying courses...
-        //if ($courseID = $db->getCourseID($subjectID, $courseNum, $deCatalogYear))
-        if ($courseID = $db->getCourseID($subjectID, $courseNum, "", true))
+        //if ($course_id = $db->get_course_id($subject_id, $course_num, $de_catalog_year))
+        if ($course_id = $db->get_course_id($subject_id, $course_num, "", true))
         {
           $query = "INSERT INTO draft_group_requirements
 										(`group_id`,`course_id`,
 										`course_min_grade`,`course_repeats`,`data_entry_value`)
 										values ('?','?',
 										'?','?','?~?') ";
-          $res = $db->dbQuery($query, $branchID, $courseID, $minGrade, $courseRepeats, $subjectID, $courseNum);
-          //debugCT($query);
+          $res = $db->db_query($query, $branch_id, $course_id, $min_grade, $course_repeats, $subject_id, $course_num);
+          //debug_c_t($query);
         } else {
-          // The courseID could not be found!
+          // The course_id could not be found!
           $errors .= "<br><font color='red'><b>Course Not Found!</b>
 							You specified the course
-							<b>$subjectID $courseNum</b> as a requirement, but this course
+							<b>$subject_id $course_num</b> as a requirement, but this course
 							could not be found in the catalog.
 							It was removed from the list of requirements.
 							Are you sure you typed it correctly?  Please check 
@@ -2243,45 +2243,45 @@ function performEditSpecificGroup()
       // Did NOT contain an ampersand (&), so this goes in the
       // regular course requirements.
       $tokens = split(" ", $line);
-      $subjectID = trim($tokens[0]);
-      $courseNum = trim($tokens[1]);
-      $minGrade = trim($tokens[2]);
-      $courseRepeats = trim($tokens[3]);
+      $subject_id = trim($tokens[0]);
+      $course_num = trim($tokens[1]);
+      $min_grade = trim($tokens[2]);
+      $course_repeats = trim($tokens[3]);
 
-      if (strstr($minGrade, "["))
+      if (strstr($min_grade, "["))
       {
         // This is actually a specified repeat, not a min grade.
-        $courseRepeats = $minGrade;
-        $minGrade = "";
+        $course_repeats = $min_grade;
+        $min_grade = "";
       }
 
-      $minGrade = str_replace("(","",$minGrade);
-      $minGrade = strtoupper(str_replace(")","",$minGrade));
+      $min_grade = str_replace("(","",$min_grade);
+      $min_grade = strtoupper(str_replace(")","",$min_grade));
 
-      $courseRepeats = str_replace("[","",$courseRepeats);
-      $courseRepeats = str_replace("]","",$courseRepeats);
-      $courseRepeats--;
-      if ($courseRepeats < 0) { $courseRepeats = 0; }
+      $course_repeats = str_replace("[","",$course_repeats);
+      $course_repeats = str_replace("]","",$course_repeats);
+      $course_repeats--;
+      if ($course_repeats < 0) { $course_repeats = 0; }
 
       // If the subject_id had a _A_ in it, convert this back
       // to an ampersand.
-      $subjectID = str_replace("_A_", "&", $subjectID);
+      $subject_id = str_replace("_A_", "&", $subject_id);
 
       // We don't care about catalog year anymore...
-      if ($courseID = $db->getCourseID($subjectID, $courseNum, "", true))
+      if ($course_id = $db->get_course_id($subject_id, $course_num, "", true))
       {
         $query = "INSERT INTO draft_group_requirements
 										(`group_id`,`course_id`,
 										`course_min_grade`,`course_repeats`,`data_entry_value`)
 										values ('?','?',
 										'?','?','?~?') ";
-        $res = $db->dbQuery($query, $groupID, $courseID, $minGrade, $courseRepeats, $subjectID, $courseNum);
-        //debugCT($query);
+        $res = $db->db_query($query, $group_id, $course_id, $min_grade, $course_repeats, $subject_id, $course_num);
+        //debug_c_t($query);
       } else {
-        // The courseID could not be found!
+        // The course_id could not be found!
         $errors .= "<br><font color='red'><b>Course Not Found!</b>
 							You specified the course
-							<b>$subjectID $courseNum</b> as a requirement, but this course
+							<b>$subject_id $course_num</b> as a requirement, but this course
 							could not be found in the catalog.
 							It was removed from the list of requirements.
 							Are you sure you typed it correctly?  Please check 
@@ -2296,157 +2296,157 @@ function performEditSpecificGroup()
   }
 
 
-  $msg = "<font color='green' size='4'>Group updated successfully at " . getCurrentTime() . ".</font>";
-  $boolScroll = true;
+  $msg = "<font color='green' size='4'>Group updated successfully at " . get_current_time() . ".</font>";
+  $bool_scroll = true;
   if ($errors != "")
   {
     $msg = $errors;
-    $boolScroll = false;
+    $bool_scroll = false;
   }
 
 
-  displayEditSpecificGroup($msg, $boolScroll);
+  display_edit_specific_group($msg, $bool_scroll);
 
 
 }
 
 
-function performCopyDegree()
+function perform_copy_degree()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performCopyDegree";
+  $function = "admin_perform_copy_degree";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
 
-  $sourceMajorCode = trim(strtoupper($_POST["sourceMajorCode"]));
-  $destinationMajorCode = trim(strtoupper($_POST["destinationMajorCode"]));
-  $includeTracks = $_POST["includeTracks"];
+  $source_major_code = trim(strtoupper($_POST["source_major_code"]));
+  $destination_major_code = trim(strtoupper($_POST["destination_major_code"]));
+  $include_tracks = $_POST["include_tracks"];
   
   // First thing's first.  Make sure the sourceMajorCode exists.
-  $res = $db->dbQuery("SELECT * FROM draft_degrees 
+  $res = $db->db_query("SELECT * FROM draft_degrees 
                     WHERE (major_code = '?'
                     OR major_code LIKE '?|%')
-                    AND catalog_year='?' ", $sourceMajorCode, $sourceMajorCode, $deCatalogYear) ;
-  if ($db->dbNumRows($res) == 0) {
+                    AND catalog_year='?' ", $source_major_code, $source_major_code, $de_catalog_year) ;
+  if ($db->db_num_rows($res) == 0) {
     // Meaning, it could not be found.
-    displayCopyDegree("<font color='red'>The source major, $sourceMajorCode, could
-                        not be found for $deCatalogYear.</font>");
+    display_copy_degree("<font color='red'>The source major, $source_major_code, could
+                        not be found for $de_catalog_year.</font>");
     return;
   }
 
   // Alright, if we got to here, we can proceed.  We need to 
   // delete everything involving the destination major.
   // First, get the degree_id's in a select...
-  $res = $db->dbQuery("SELECT * FROM draft_degrees 
+  $res = $db->db_query("SELECT * FROM draft_degrees 
                     WHERE (major_code = '?'
                     OR major_code LIKE '?|%')
-                    AND catalog_year='?' ", $destinationMajorCode, $destinationMajorCode, $deCatalogYear) ;
-  if ($db->dbNumRows($res) > 0) {
-    while ($cur = $db->dbFetchArray($res)) {
+                    AND catalog_year='?' ", $destination_major_code, $destination_major_code, $de_catalog_year) ;
+  if ($db->db_num_rows($res) > 0) {
+    while ($cur = $db->db_fetch_array($res)) {
       $degree_id = $cur["degree_id"];
-      $res2 = $db->dbQuery("DELETE FROM draft_degree_requirements
+      $res2 = $db->db_query("DELETE FROM draft_degree_requirements
                            WHERE degree_id='?' ", $degree_id) ;
       
-      $res2 = $db->dbQuery("DELETE FROM draft_degrees
+      $res2 = $db->db_query("DELETE FROM draft_degrees
                            WHERE degree_id = '?' ", $degree_id) ;      
     }
     // Now, delete the tracks.
-    $res2 = $db->dbQuery("DELETE FROM draft_degree_tracks
+    $res2 = $db->db_query("DELETE FROM draft_degree_tracks
                           WHERE major_code = '?' 
-                          AND catalog_year='?' ", $destinationMajorCode, $deCatalogYear) ;
+                          AND catalog_year='?' ", $destination_major_code, $de_catalog_year) ;
   }
 
   // Okay, with the destination major good and deleted, we can proceed with
   // the copy.
   
   // Let's build up an array of all the degrees we will be copying.
-  $sourceArray = array();
+  $source_array = array();
   // First, the base degree...
-  $res = $db->dbQuery("SELECT * FROM draft_degrees 
+  $res = $db->db_query("SELECT * FROM draft_degrees 
                     WHERE major_code = '?'
-                    AND catalog_year='?' ", $sourceMajorCode, $deCatalogYear) ;
-  $cur = $db->dbFetchArray($res);
-  $sourceArray[] = $cur;
+                    AND catalog_year='?' ", $source_major_code, $de_catalog_year) ;
+  $cur = $db->db_fetch_array($res);
+  $source_array[] = $cur;
   
   // Now, any tracks or concentrations?
-  if ($includeTracks == "yes") {
-    $res = $db->dbQuery("SELECT * FROM draft_degrees 
+  if ($include_tracks == "yes") {
+    $res = $db->db_query("SELECT * FROM draft_degrees 
                       WHERE major_code LIKE '?|%'
-                      AND catalog_year='?' ", $sourceMajorCode, $deCatalogYear) ;
-    while ($cur = $db->dbFetchArray($res)) {
-      $sourceArray[] = $cur;
+                      AND catalog_year='?' ", $source_major_code, $de_catalog_year) ;
+    while ($cur = $db->db_fetch_array($res)) {
+      $source_array[] = $cur;
     }
 
     // While we're here, let's go ahead and make a copy of the tracks.
-    $res = $db->dbQuery("SELECT * FROM draft_degree_tracks
+    $res = $db->db_query("SELECT * FROM draft_degree_tracks
                         WHERE (major_code = '?'
                         OR major_code LIKE '?|%' )
-                        AND catalog_year='?' ", $sourceMajorCode, $sourceMajorCode, $deCatalogYear) ;
-    while($cur = $db->dbFetchArray($res)) {
+                        AND catalog_year='?' ", $source_major_code, $source_major_code, $de_catalog_year) ;
+    while($cur = $db->db_fetch_array($res)) {
       extract($cur, 3, "db");
-      $destCode = $destinationMajorCode;
+      $dest_code = $destination_major_code;
       if (strstr($db_major_code, "|")) {
         // We need to adjust the destCode to match
         //the source.
-        $destCode = str_replace("$sourceMajorCode|", "$destinationMajorCode|", $db_major_code);
+        $dest_code = str_replace("$source_major_code|", "$destination_major_code|", $db_major_code);
       }
       
-      $res2 = $db->dbQuery("INSERT INTO draft_degree_tracks
+      $res2 = $db->db_query("INSERT INTO draft_degree_tracks
                           (catalog_year, major_code, track_code, 
                           track_title, track_short_title, track_description)
                           VALUES
                           ('?', '?', '?', '?', '?', '?') ",
-                          $deCatalogYear, $destCode, $db_track_code, 
+                          $de_catalog_year, $dest_code, $db_track_code, 
                           $db_track_title, $db_track_short_title, 
                           $db_track_description) ;
                           
     }       
   }
   
-  //var_dump($sourceArray);
+  //var_dump($source_array);
   // Okay, now it's time to go through the sourceArray
   // and duplicate them.
-  foreach ($sourceArray as $src) {
+  foreach ($source_array as $src) {
     extract($src, 3, "src");
     
-    $destCode = $destinationMajorCode;
+    $dest_code = $destination_major_code;
     if (strstr($src_major_code, "|")) {
       // We need to adjust the destCode to match
       //the source.
-      $destCode = str_replace("$sourceMajorCode|", "$destinationMajorCode|", $src_major_code);
+      $dest_code = str_replace("$source_major_code|", "$destination_major_code|", $src_major_code);
     }
     
-    //var_dump($destCode);
-    $destDegreeID = $db->requestNewDegreeID();
+    //var_dump($dest_code);
+    $dest_degree_id = $db->request_new_degree_id();
 
     // Create the entry in the degrees table.
-    $res = $db->dbQuery("INSERT INTO draft_degrees
+    $res = $db->db_query("INSERT INTO draft_degrees
                         (degree_id, major_code, degree_type, degree_class, title,
                          public_note, semester_titles_csv,
                          catalog_year, exclude)
                          VALUES   
                         ('?', '?', '?', '?', '?', '?', '?', '?', '?') ",
-                         $destDegreeID, $destCode, $src_degree_type, $src_degree_class, $src_title,
+                         $dest_degree_id, $dest_code, $src_degree_type, $src_degree_class, $src_title,
                          $src_public_note, $src_semester_titles_csv,
-                         $deCatalogYear, $src_exclude);
+                         $de_catalog_year, $src_exclude);
     
     // Now, go through the source's degree requirements and copy those over.
-    $res = $db->dbQuery("SELECT * FROM draft_degree_requirements
+    $res = $db->db_query("SELECT * FROM draft_degree_requirements
                          WHERE degree_id = '$src_degree_id' ");
-    while ($cur = $db->dbFetchArray($res)) {
+    while ($cur = $db->db_fetch_array($res)) {
       extract($cur, 3, "db");
       
-      $res2 = $db->dbQuery("INSERT INTO draft_degree_requirements
+      $res2 = $db->db_query("INSERT INTO draft_degree_requirements
                           (degree_id, semester_num, group_id,
                            group_requirement_type,
                            group_hours_required,
@@ -2460,7 +2460,7 @@ function performCopyDegree()
                            '?',
                            '?',
                            '?') ",
-                            $destDegreeID, $db_semester_num, $db_group_id,
+                            $dest_degree_id, $db_semester_num, $db_group_id,
                            $db_group_requirement_type,
                            $db_group_hours_required,
                            $db_group_min_grade, $db_course_id,
@@ -2474,67 +2474,67 @@ function performCopyDegree()
   
   // Make a - entry into the draft_instruction table so it will
   // remind the administrator to apply draft changes.
-  $res = $db->dbQuery("INSERT INTO draft_instructions
+  $res = $db->db_query("INSERT INTO draft_instructions
                         (instruction) VALUES ('-') ");
   
   
   
-  displayCopyDegree(getSuccessMsg("Degree $sourceMajorCode has been copied to $destinationMajorCode for $deCatalogYear."));
+  display_copy_degree(get_success_msg("Degree $source_major_code has been copied to $destination_major_code for $de_catalog_year."));
 }
 
 
-function performAddNewDegree()
+function perform_add_new_degree()
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performAddNewDegree";
+  $function = "admin_perform_add_new_degree";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   // This will be used to add a new degree (and possibly track)
   // to the database.
-  $majorCode = trim(strtoupper(($_POST["majorCode"])));
-  $trackCode = trim(strtoupper($_POST["trackCode"]));
+  $major_code = trim(strtoupper(($_POST["major_code"])));
+  $track_code = trim(strtoupper($_POST["track_code"]));
 
-  $newMajor = $_POST["newMajor"];
-  $newTrack = $_POST["newTrack"];
+  $new_major = $_POST["new_major"];
+  $new_track = $_POST["new_track"];
 
   //////////////////////////////////////////////
 
-  if ($majorCode == "")
+  if ($major_code == "")
   {
     $msg = "<div><font color='red' size='4'>You must enter
 					a major or major|concentration code.</font></div>";
-    displayAddNewDegree($msg);
+    display_add_new_degree($msg);
     die;
   }
 
-  if ($newTrack == "new" && $trackCode == "")
+  if ($new_track == "new" && $track_code == "")
   {
     $msg = "<div><font color='red' size='4'>You selected to add
 				a track, but did not specify a track code.</font></div>";
-    displayAddNewDegree($msg);
+    display_add_new_degree($msg);
     die;
   }
 
   // Make sure user did not enter an underscore (_) in either
   // the track or major code!
-  if (strstr($trackCode, "_") || strstr($majorCode, "_"))
+  if (strstr($track_code, "_") || strstr($major_code, "_"))
   {
     $msg = "<div><font color='red' size='4'>You are not allowed to enter
               underscores (_) in either the track code or major code.
               FlightPath will add that for you. Please re-enter your
               new degree w/o using an underscore.</font></div>";
-    displayAddNewDegree($msg);
+    display_add_new_degree($msg);
     die;
 
   }
@@ -2547,76 +2547,76 @@ function performAddNewDegree()
 
   // First, deal with the major/concentration.
   // Firstly, check to see if it already exists...
-  $res = $db->dbQuery("SELECT * FROM draft_degrees
+  $res = $db->db_query("SELECT * FROM draft_degrees
 					WHERE `catalog_year`='?'
-					AND `major_code`='?' ", $deCatalogYear, $majorCode);
-  if ($db->dbNumRows($res) > 0 && $newMajor == "new")
+					AND `major_code`='?' ", $de_catalog_year, $major_code);
+  if ($db->db_num_rows($res) > 0 && $new_major == "new")
   { // Meaning, it already exists, yet we are trying to add it as a new
     // major.  This is an error!
-    $msg = "<div><font color='red' size='4'>The major $majorCode already exists for $deCatalogYear.
+    $msg = "<div><font color='red' size='4'>The major $major_code already exists for $de_catalog_year.
 					You cannot add it as new.</font></div>";
-    displayAddNewDegree($msg);
+    display_add_new_degree($msg);
     die;
   }
-  if ($db->dbNumRows($res) == 0 && $newMajor == "existing")
+  if ($db->db_num_rows($res) == 0 && $new_major == "existing")
   { // This is another error.  We are trying to add a track to an existing
     // major code, but none was found.
-    $msg = "<div><font color='red' size='4'>The major $majorCode could not be found
-					in the system for $deCatalogYear. Perhaps you need to add it first?</font></div>";
-    displayAddNewDegree($msg);
+    $msg = "<div><font color='red' size='4'>The major $major_code could not be found
+					in the system for $de_catalog_year. Perhaps you need to add it first?</font></div>";
+    display_add_new_degree($msg);
     die;
   }
-  if ($db->dbNumRows($res) == 0 && $newMajor == "new")
+  if ($db->db_num_rows($res) == 0 && $new_major == "new")
   {
     // This means we are trying to add a new major to the degrees table.
     // We may proceed with this.
     $db2 = new DatabaseHandler();
-    $degree_id = $db2->requestNewDegreeID();
-    $db2->dbQuery("INSERT INTO draft_degrees
+    $degree_id = $db2->request_new_degree_id();
+    $db2->db_query("INSERT INTO draft_degrees
 						(`degree_id`,`major_code`,`catalog_year`)
-						values ('?', '?', '?') ", $degree_id, $majorCode, $deCatalogYear);
+						values ('?', '?', '?') ", $degree_id, $major_code, $de_catalog_year);
   }
 
 
-  if ($newTrack == "new")
+  if ($new_track == "new")
   {
     //////////////////////////////////////////////////
     // Now, let's see about adding ourself a track...
     // First, check to see if it exists...
-    $res = $db->dbQuery("SELECT * FROM draft_degree_tracks
+    $res = $db->db_query("SELECT * FROM draft_degree_tracks
 					WHERE `catalog_year`='?'
 					AND `major_code`='?' 
-					AND `track_code`='?' ", $deCatalogYear, $majorCode, $trackCode);	
+					AND `track_code`='?' ", $de_catalog_year, $major_code, $track_code);	
 
-    if ($db->dbNumRows($res) > 0)
+    if ($db->db_num_rows($res) > 0)
     {
       // Meaning, it already existed, so we can't create it.
-      $msg = "<div><font color='red' size='4'>The major and track $majorCode $trackCode already exists for $deCatalogYear.
+      $msg = "<div><font color='red' size='4'>The major and track $major_code $track_code already exists for $de_catalog_year.
 					You cannot add it as new.</font></div>";
-      displayAddNewDegree($msg);
+      display_add_new_degree($msg);
       die;
     } else {
       // We can add it to the tracks table...
       $db2 = new DatabaseHandler();
-      $db2->dbQuery("INSERT INTO draft_degree_tracks
+      $db2->db_query("INSERT INTO draft_degree_tracks
 							(`catalog_year`,`major_code`,`track_code`)
-							values ('?', '?', '?') ", $deCatalogYear, $majorCode, $trackCode);
+							values ('?', '?', '?') ", $de_catalog_year, $major_code, $track_code);
 
       // Now, we also need to add this major & track code to the degrees table.
-      $newMajorCode = $majorCode;
-      if (strstr($majorCode, "|"))
+      $new_major_code = $major_code;
+      if (strstr($major_code, "|"))
       {
         // Already has a pipe, so it has a concentration.
-        $newMajorCode .= "_$trackCode";
+        $new_major_code .= "_$track_code";
       } else {
         // No concentration...
-        $newMajorCode .= "|_$trackCode";
+        $new_major_code .= "|_$track_code";
       }
 
-      $degree_id = $db2->requestNewDegreeID();
-      $db2->dbQuery("INSERT INTO draft_degrees
+      $degree_id = $db2->request_new_degree_id();
+      $db2->db_query("INSERT INTO draft_degrees
 						(`degree_id`,`major_code`,`catalog_year`)
-						values ('?', '?', '?') ", $degree_id, $newMajorCode, $deCatalogYear);
+						values ('?', '?', '?') ", $degree_id, $new_major_code, $de_catalog_year);
 
     }
 
@@ -2627,7 +2627,7 @@ function performAddNewDegree()
   }
 
 
-  displayAddNewDegree(getSuccessMsg("New degree $majorCode $trackCode added successfully to $deCatalogYear.
+  display_add_new_degree(get_success_msg("New degree $major_code $track_code added successfully to $de_catalog_year.
 						You may add another degree, or use the menu at the top of the page to edit this new degree."));
 
 
@@ -2638,114 +2638,114 @@ function performAddNewDegree()
 
 
 
-function performEditSpecificDegree()
+function perform_edit_specific_degree()
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performEditSpecificDegree";
+  $function = "admin_perform_edit_specific_degree";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   // This will UPDATE a degree in the system with the courses
   // and groups that the user selected.
-  $performAction2 = trim($_POST["performAction2"]);
+  $perform_action2 = trim($_POST["perform_action2"]);
 
-  if (strstr($performAction2, "delGroup"))
+  if (strstr($perform_action2, "del_group"))
   {
-    $temp = split("_",$performAction2);
-    $delGroup = new Group();
-    $delGroup->boolUseDraft = true;
-    $delGroup->groupID = $temp[1];
-    $delGroup->assignedToSemesterNum = $temp[2];
+    $temp = split("_",$perform_action2);
+    $del_group = new Group();
+    $del_group->bool_use_draft = true;
+    $del_group->group_id = $temp[1];
+    $del_group->assigned_to_semester_num = $temp[2];
 
   }
-  //debugCT($performAction2);
+  //debug_c_t($perform_action2);
 
-  $majorCode = trim($_POST["majorCode"]);
-  if ($majorCode == ""){	die("Fatal error:  majorCode not found.");}
+  $major_code = trim($_POST["major_code"]);
+  if ($major_code == ""){	die("Fatal error:  major_code not found.");}
 
   // Since we are making a change to the draft table(s), let's add a row
   // to draft instructions.
-  $db->addDraftInstruction("-");
+  $db->add_draft_instruction("-");
 
 
-  $degreeID = "";
+  $degree_id = "";
   // First things first, if this degree already exists in this
   // catalog year, then we need to delete it first.
-  if ($degreeID = $db->getDegreeID($majorCode, $deCatalogYear, true))
+  if ($degree_id = $db->get_degree_id($major_code, $de_catalog_year, true))
   {
-    $degree = new DegreePlan($degreeID, null, false, false, true);
-    $degree->loadDescriptiveData();
+    $degree = new DegreePlan($degree_id, null, false, false, true);
+    $degree->load_descriptive_data();
 
     // Delete from degree_requirements WHERE this degree_id exists.
-    $res = $db->dbQuery("DELETE FROM draft_degree_requirements
-									WHERE `degree_id`='?' ", $degreeID);
+    $res = $db->db_query("DELETE FROM draft_degree_requirements
+									WHERE `degree_id`='?' ", $degree_id);
 
     // Are we trying to DELETE this degree?  If so, keep deleting!
-    if ($performAction2 == "delete_degree")
+    if ($perform_action2 == "delete_degree")
     {
-      $res = $db->dbQuery("DELETE FROM draft_degrees
-									WHERE `degree_id`='?' ", $degreeID);
+      $res = $db->db_query("DELETE FROM draft_degrees
+									WHERE `degree_id`='?' ", $degree_id);
 
       // Also need to get rid of the track, if there is one for this
       // degree.
-      $res = $db->dbQuery("DELETE FROM draft_degree_tracks
-									WHERE `major_code`='$degree->majorCode' 
-									AND `track_code`='$degree->trackCode'
-									AND `catalog_year` = '?' LIMIT 1", $deCatalogYear);
+      $res = $db->db_query("DELETE FROM draft_degree_tracks
+									WHERE `major_code`='$degree->major_code' 
+									AND `track_code`='$degree->track_code'
+									AND `catalog_year` = '?' LIMIT 1", $de_catalog_year);
 
       // Okay, we have deleted everything.  We need to go back to
       // just the list of degrees.
-      displayEditDegrees("<font color='green'><b>The degree $majorCode ($deCatalogYear) has been deleted.</b></font>");
+      display_edit_degrees("<font color='green'><b>The degree $major_code ($de_catalog_year) has been deleted.</b></font>");
       die;
     }
 
 
   } else {
-    // We need to generate a new degreeID for this majorCode and catalogYear,
+    // We need to generate a new degreeID for this major_code and catalog_year,
     // because one does not already exist!
-    if (!$degreeID = $db->requestNewDegreeID())
+    if (!$degree_id = $db->request_new_degree_id())
     {
       die ("Error.  Could not create new degreeID.");
     }
   }
 
   // Save the entire post to the log.
-  $postXML = fp_arrayToXml("post",$_POST, true);
-  $db->addToLog("admin_edit_degree","$degreeID,$majorCode",$postXML);
+  $post_x_m_l = fp_array_to_xml("post",$_POST, true);
+  $db->add_to_log("admin_edit_degree","$degree_id,$major_code",$post_x_m_l);
 
 
   $errors = "";
-  $semesterTitlesCSV = "";
-  $highestSemesterNum = 0;   // What is the largest semesterNum in the system?
+  $semester_titles_c_s_v = "";
+  $highest_semester_num = 0;   // What is the largest semester_num in the system?
   // Okay, now get the various courses...
-  for ($semesterNum = 0; $semesterNum < 50; $semesterNum++)
+  for ($semester_num = 0; $semester_num < 50; $semester_num++)
   {
     // Assuming no more than 50 semesters.
-    $courses = trim($_POST["courses_$semesterNum"]);
+    $courses = trim($_POST["courses_$semester_num"]);
     if ($courses == "")
     {
       continue;
     }
 
-    if ($semesterNum > $highestSemesterNum)
+    if ($semester_num > $highest_semester_num)
     {
-      $highestSemesterNum = $semesterNum;
+      $highest_semester_num = $semester_num;
     }
 
-    $courseRows = split("\n",$courses);
-    for ($t = 0; $t < count($courseRows); $t++)
+    $course_rows = split("\n",$courses);
+    for ($t = 0; $t < count($course_rows); $t++)
     {
-      $line = trim($courseRows[$t]);
+      $line = trim($course_rows[$t]);
       if ($line == "")
       {
         continue;
@@ -2757,32 +2757,32 @@ function performEditSpecificDegree()
       $line = str_replace("  ", " ", $line);
 
       $tokens = split(" ", $line);
-      $subjectID = $tokens[0];
-      $courseNum = $tokens[1];
-      $requirementType = strtolower($tokens[2]);
+      $subject_id = $tokens[0];
+      $course_num = $tokens[1];
+      $requirement_type = strtolower($tokens[2]);
 
-      if ($requirementType == "")
+      if ($requirement_type == "")
       { // major type by default.
-        $requirementType = "m";
+        $requirement_type = "m";
       }
 
-      $minGrade = strtoupper($tokens[3]);
+      $min_grade = strtoupper($tokens[3]);
 
-      if (strstr($requirementType, "("))
+      if (strstr($requirement_type, "("))
       {
-        // This means there was no requirementType specified, so it's "m",
-        // and a minGrade was found in its place.
-        $minGrade = strtoupper($requirementType);
-        $requirementType = "m";
+        // This means there was no requirement_type specified, so it's "m",
+        // and a min_grade was found in its place.
+        $min_grade = strtoupper($requirement_type);
+        $requirement_type = "m";
       }
 
-      $minGrade = str_replace("(","",$minGrade);
-      $minGrade = str_replace(")","",$minGrade);
+      $min_grade = str_replace("(","",$min_grade);
+      $min_grade = str_replace(")","",$min_grade);
 
       /////////////////////////////////////////////
       // Okay, we now have enough information to insert the course.
-      // Find out what the courseID is.
-      if ($courseID = $db->getCourseID($subjectID, $courseNum, "", true))  // don't care about catalog year.
+      // Find out what the course_id is.
+      if ($course_id = $db->get_course_id($subject_id, $course_num, "", true))  // don't care about catalog year.
       {
         $query = "INSERT INTO draft_degree_requirements
 										(`degree_id`,`semester_num`,`course_id`,
@@ -2790,13 +2790,13 @@ function performEditSpecificDegree()
 										 `data_entry_value`)
 										values ('?','?','?',
 										'?','?','?~?') ";
-        $res = $db->dbQuery($query, $degreeID, $semesterNum, $courseID, $minGrade, $requirementType, $subjectID, $courseNum);
-        //debugCT($query);
+        $res = $db->db_query($query, $degree_id, $semester_num, $course_id, $min_grade, $requirement_type, $subject_id, $course_num);
+        //debug_c_t($query);
       } else {
-        // The courseID could not be found!
+        // The course_id could not be found!
         $errors .= "<br><font color='red'><b>Course Not Found!</b>
-							In Block " . ($semesterNum+1) . ", you specified the course
-							<b>$subjectID $courseNum</b> as a requirement, but this course
+							In Block " . ($semester_num+1) . ", you specified the course
+							<b>$subject_id $course_num</b> as a requirement, but this course
 							could not be found.
 							It was removed from that block.
 							Are you sure you typed it correctly?  Please go to this
@@ -2818,73 +2818,73 @@ function performEditSpecificDegree()
     }
     // Only look at the groups...
     $temp = split("_", $value);
-    $groupID = $temp[0];
-    $semesterNum = $temp[1];
+    $group_id = $temp[0];
+    $semester_num = $temp[1];
     $hours = $temp[2];
     $type = $temp[3];
-    $minGrade = trim($temp[4]);
+    $min_grade = trim($temp[4]);
 
-    if ($semesterNum > $highestSemesterNum)
+    if ($semester_num > $highest_semester_num)
     {
-      $highestSemesterNum = $semesterNum;
+      $highest_semester_num = $semester_num;
     }
 
 
     // Do not add if we are supposed to be deleting this group!
-    if (is_object($delGroup))
+    if (is_object($del_group))
     {
-      if ($delGroup->groupID == $groupID && $delGroup->assignedToSemesterNum == $semesterNum)
+      if ($del_group->group_id == $group_id && $del_group->assigned_to_semester_num == $semester_num)
       {
         continue;
       }
     }
 
     // We now have enough information to insert this group.
-    //debugCT("group: $groupID $semesterNum $hours $type");
+    //debugCT("group: $group_id $semester_num $hours $type");
     $query = "INSERT INTO draft_degree_requirements
 										(`degree_id`,`semester_num`,`group_id`,
 										`group_requirement_type`,`group_hours_required`,`group_min_grade`)
 										values ('?','?','?',
 										'?','?','?') ";
-    $res = $db->dbQuery($query, $degreeID, $semesterNum, $groupID, $type, $hours, $minGrade);
-    //debugCT($query);
+    $res = $db->db_query($query, $degree_id, $semester_num, $group_id, $type, $hours, $min_grade);
+    //debug_c_t($query);
 
 
   }
 
 
   // Was there a group added or deleted?
-  if (strstr($performAction2,"addGroup"))
+  if (strstr($perform_action2,"add_group"))
   {
-    $temp = split("_",$performAction2);
-    $groupID = $temp[1];
-    $semesterNum = $temp[2];
+    $temp = split("_",$perform_action2);
+    $group_id = $temp[1];
+    $semester_num = $temp[2];
     $hours = trim($temp[3]);
     $type = $temp[4];
-    $minGrade = trim($temp[5]);
+    $min_grade = trim($temp[5]);
     $query = "INSERT INTO draft_degree_requirements
 										(`degree_id`,`semester_num`,`group_id`,
 										`group_requirement_type`,`group_hours_required`,`group_min_grade`)
 										VALUES ('?','?','?','?','?','?') ";
-    $res = $db->dbQuery($query, $degreeID, $semesterNum, $groupID, $type, $hours, $minGrade);
+    $res = $db->db_query($query, $degree_id, $semester_num, $group_id, $type, $hours, $min_grade);
 
   }
 
 
   // Make the semesterTitlesCSV...
-  for ($semesterNum = 0; $semesterNum <= $highestSemesterNum; $semesterNum++)
+  for ($semester_num = 0; $semester_num <= $highest_semester_num; $semester_num++)
   {
-    $semesterTitlesCSV .= trim($_POST["semester_title_$semesterNum"]) . ",";
+    $semester_titles_c_s_v .= trim($_POST["semester_title_$semester_num"]) . ",";
   }
 
   // Before we UPDATE, also grab the degree title, degree_type,
   // and exclude value, etc....
-  $degreeTitle = trim($_POST["title"]);
-  $degreeType = trim($_POST["degree_type"]);
-  $degreeClass = strtoupper(trim($_POST["degree_class"]));
+  $degree_title = trim($_POST["title"]);
+  $degree_type = trim($_POST["degree_type"]);
+  $degree_class = strtoupper(trim($_POST["degree_class"]));
   $exclude = trim($_POST["exclude"]);
-  $publicNote = trim($_POST["public_note"]);
-  $res = $db->dbQuery("UPDATE draft_degrees
+  $public_note = trim($_POST["public_note"]);
+  $res = $db->db_query("UPDATE draft_degrees
 							SET `semester_titles_csv`='?',
 							`title`='?',
 							`degree_type`='?',
@@ -2892,14 +2892,14 @@ function performEditSpecificDegree()
 							`exclude`='?',
 							`public_note`='?'
 							WHERE `degree_id`='?' ",
-              $semesterTitlesCSV, $degreeTitle, $degreeType, $degreeClass, $exclude, $publicNote, $degreeID);
+              $semester_titles_c_s_v, $degree_title, $degree_type, $degree_class, $exclude, $public_note, $degree_id);
 
   ////  Was there a track title/description?  If so, UPDATE that in the tracks
   // table...
-  if (strstr($majorCode, "_"))
+  if (strstr($major_code, "_"))
   {
     // There was a track. Update track description.
-    $temp = split("_",$majorCode);
+    $temp = split("_",$major_code);
     $major = trim($temp[0]);
     // major might now have a | at the end.  If so, take it out.
     if (substr($major, strlen($major)-1, 1) == "|")
@@ -2909,36 +2909,36 @@ function performEditSpecificDegree()
 
 
     $track = trim($temp[1]);
-    $trackDescription = trim($_POST["track_description"]);
-    $trackTitle = trim($_POST["track_title"]);
-    //debugCT($trackDescription);
-    $res = $db->dbQuery("UPDATE draft_degree_tracks
+    $track_description = trim($_POST["track_description"]);
+    $track_title = trim($_POST["track_title"]);
+    //debugCT($track_description);
+    $res = $db->db_query("UPDATE draft_degree_tracks
 								SET `track_description`='?',
 								`track_title`='?'
 								WHERE `track_code`='?'
 								AND `major_code`='?' 
-								AND `catalog_year`='?' ", $trackDescription, $trackTitle, $track, $major, $deCatalogYear);
+								AND `catalog_year`='?' ", $track_description, $track_title, $track, $major, $de_catalog_year);
   }
 
 
 
 
-  $msg = "<font color='green' size='4'>Degree updated successfully at " . getCurrentTime() . ".</font>";
-  $boolScroll = $boolButtonMsg = true;
+  $msg = "<font color='green' size='4'>Degree updated successfully at " . get_current_time() . ".</font>";
+  $bool_scroll = $bool_button_msg = true;
   if ($errors != "")
   {
     $msg = $errors;
-    $boolScroll = $boolButtonMsg = false;
+    $bool_scroll = $bool_button_msg = false;
   }
 
-  displayEditSpecificDegree($msg, $boolScroll, $boolButtonMsg);
+  display_edit_specific_degree($msg, $bool_scroll, $bool_button_msg);
 }
 
-function getCurrentTime()
+function get_current_time()
 {  
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_getCurrentTime";
+  $function = "admin_get_current_time";
   if (function_exists($function)) {
     return call_user_func($function);
   }
@@ -2951,11 +2951,11 @@ function getCurrentTime()
 
 
 
-function popupStudentsUsingCourse()
+function popup_students_using_course()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_popupStudentsUsingCourse";
+  $function = "admin_popup_students_using_course";
   if (function_exists($function)) {
     return call_user_func($function);
   }
@@ -2963,13 +2963,13 @@ function popupStudentsUsingCourse()
   
   
   global $db, $screen;
-  $courseID = $_REQUEST["courseID"];
-  $course = new course($courseID);
-  $course->boolUseDraft = true;
-  $course->loadDescriptiveData();
+  $course_id = $_REQUEST["course_id"];
+  $course = new course($course_id);
+  $course->bool_use_draft = true;
+  $course->load_descriptive_data();
 
   $pC = "";
-  $pC .= "<b>Top 150 Students who have taken $course->subjectID $course->courseNum ($courseID):</b>
+  $pC .= "<b>Top 150 Students who have taken $course->subject_id $course->course_num ($course_id):</b>
 			<br><br>
 	
 			<table border='1'>
@@ -2978,28 +2978,28 @@ function popupStudentsUsingCourse()
   
   // Let's pull the needed variables out of our settings, so we know what
 	// to query, because this involves non-FlightPath tables.
-	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:student_courses"];
+	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:student_courses"];
 	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-	$tableName = $tsettings["tableName"];  
+	$table_name = $tsettings["table_name"];  
   
-  $res = $db->dbQuery("
-						SELECT * FROM $tableName							
+  $res = $db->db_query("
+						SELECT * FROM $table_name							
 							WHERE 
-								$tf->subjectID = '$course->subjectID'
-								AND $tf->courseNum = '$course->courseNum'
+								$tf->subject_id = '$course->subject_id'
+								AND $tf->course_num = '$course->course_num'
 								LIMIT 150	") ;
 
-  while($cur = $db->dbFetchArray($res)) {
-    $studentID = $cur[$tf->studentID];
-    $hours = $cur[$tf->hoursAwarded];
+  while($cur = $db->db_fetch_array($res)) {
+    $student_id = $cur[$tf->student_id];
+    $hours = $cur[$tf->hours_awarded];
     $grade = $cur[$tf->grade];
-    $termID = $cur[$tf->termID];
+    $term_id = $cur[$tf->term_id];
     
     $pC .= "<tr>
-					<td valign='top' class='tenpt'>$studentID</td>
+					<td valign='top' class='tenpt'>$student_id</td>
 					<td valign='top' class='tenpt'>$hours</td>
 					<td valign='top' class='tenpt'>$grade</td>
-					<td valign='top' class='tenpt'>$termID</td>
+					<td valign='top' class='tenpt'>$term_id</td>
 				
 					
 				</tr>
@@ -3008,27 +3008,27 @@ function popupStudentsUsingCourse()
 
   $pC .= "</table>";
 
-  $screen->pageTitle = "FlightPath Admin - Students Taken Course";
-  $pC .= getJS();
+  $screen->page_title = "FlightPath Admin - Students Taken Course";
+  $pC .= get_j_s();
 
-  $screen->pageIsPopup = true;
-  $screen->pageHideReportError = true;
+  $screen->page_is_popup = true;
+  $screen->page_hide_report_error = true;
   //include("template/fp_template.php");
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
 
-function popupGroupsUsingCourse()
+function popup_groups_using_course()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_popupGroupsUsingCourse";
+  $function = "admin_popup_groups_using_course";
   if (function_exists($function)) {
     return call_user_func($function);
   }
@@ -3036,12 +3036,12 @@ function popupGroupsUsingCourse()
   
   
   global $db, $screen;
-  $courseID = $_REQUEST["courseID"];
-  $course = new course($courseID, false, null, false, "", true);
-  $course->loadDescriptiveData();
+  $course_id = $_REQUEST["course_id"];
+  $course = new course($course_id, false, null, false, "", true);
+  $course->load_descriptive_data();
 
   $pC = "";
-  $pC .= "<b>Groups using $course->subjectID $course->courseNum ($courseID),
+  $pC .= "<b>Groups using $course->subject_id $course->course_num ($course_id),
 				Only showing top level groups (will not display if course
 				only appears in branches):</b>
 			<br><br>
@@ -3049,19 +3049,19 @@ function popupGroupsUsingCourse()
 			<table border='1'>
 		";
 
-  $res = $db->dbQuery("SELECT * FROM draft_groups a,
+  $res = $db->db_query("SELECT * FROM draft_groups a,
 							draft_group_requirements b
 							WHERE course_id = '?'
-							and a.group_id = b.group_id ", $courseID) ;
+							and a.group_id = b.group_id ", $course_id) ;
   $c = 0;
-  while($cur = $db->dbFetchArray($res))
+  while($cur = $db->db_fetch_array($res))
   {
     extract ($cur, 3, "db");
     $pC .= "<tr>
 					<td valign='top' class='tenpt'>$db_title</td>
 					<td valign='top' class='tenpt'>$db_group_name</td>
 					<td valign='top' class='tenpt'>$db_catalog_year</td>
-					<td valign='top' class='tenpt'><a href='admin.php?performAction=popupShowGroupUse&groupID=$db_group_id'>degree use</a></td>
+					<td valign='top' class='tenpt'><a href='admin.php?performAction=popup_show_group_use&group_id=$db_group_id'>degree use</a></td>
 					
 				</tr>
 				";
@@ -3070,27 +3070,27 @@ function popupGroupsUsingCourse()
 
   $pC .= "</table>Count: $c";
 
-  $screen->pageTitle = "FlightPath Admin - Groups Using Course";
-  $pC .= getJS();
+  $screen->page_title = "FlightPath Admin - Groups Using Course";
+  $pC .= get_j_s();
 
-  $screen->pageIsPopup = true;
-  $screen->pageHideReportError = true;
+  $screen->page_is_popup = true;
+  $screen->page_hide_report_error = true;
   //include("template/fp_template.php");
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
-function popupDegreesUsingCourse()
+function popup_degrees_using_course()
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_popupDegreesUsingCourse";
+  $function = "admin_popup_degrees_using_course";
   if (function_exists($function)) {
     return call_user_func($function);
   }
@@ -3098,32 +3098,32 @@ function popupDegreesUsingCourse()
   
   
   global $db, $screen;
-  $courseID = $_REQUEST["courseID"];
-  $course = new course($courseID);
-  $course->boolUseDraft = true;
-  $course->loadDescriptiveData();
+  $course_id = $_REQUEST["course_id"];
+  $course = new course($course_id);
+  $course->bool_use_draft = true;
+  $course->load_descriptive_data();
 
   $pC = "";
-  $pC .= "<b>Degrees using $course->subjectID $course->courseNum ($courseID)
+  $pC .= "<b>Degrees using $course->subject_id $course->course_num ($course_id)
 				in the bare degree plan (not in groups):</b>
 			<br><br>
 	
 			<table border='1'>
 		";
 
-  $res = $db->dbQuery("SELECT * FROM draft_degrees a,
+  $res = $db->db_query("SELECT * FROM draft_degrees a,
 							draft_degree_requirements b
 							WHERE `course_id`='?'
-							and a.degree_id = b.degree_id ", $courseID) ;
+							and a.degree_id = b.degree_id ", $course_id) ;
   $c = 0;
-  while($cur = $db->dbFetchArray($res))
+  while($cur = $db->db_fetch_array($res))
   {
     extract ($cur, 3, "db");
     $pC .= "<tr>
 					<td valign='top' class='tenpt'>$db_title</td>
 					<td valign='top' class='tenpt'>$db_major_code</td>
 					<td valign='top' class='tenpt'>$db_catalog_year</td>
-					<td valign='top' class='tenpt'>" . getSemesterName($db_semester_num) . "</td>
+					<td valign='top' class='tenpt'>" . get_semester_name($db_semester_num) . "</td>
 				</tr>
 				";
     $c++;
@@ -3131,26 +3131,26 @@ function popupDegreesUsingCourse()
 
   $pC .= "</table>Count: $c";
 
-  $screen->pageTitle = "FlightPath Admin - Degrees Using Course";
-  $pC .= getJS();
+  $screen->page_title = "FlightPath Admin - Degrees Using Course";
+  $pC .= get_j_s();
 
-  $screen->pageIsPopup = true;
-  $screen->pageHideReportError = true;
+  $screen->page_is_popup = true;
+  $screen->page_hide_report_error = true;
   //include("template/fp_template.php");
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
-function popupShowGroupUse()
+function popup_show_group_use()
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_popupShowGroupUse";
+  $function = "admin_popup_show_group_use";
   if (function_exists($function)) {
     return call_user_func($function);
   }
@@ -3159,15 +3159,15 @@ function popupShowGroupUse()
   
   global $db, $screen;
 
-  $groupID = $_REQUEST["groupID"];
+  $group_id = $_REQUEST["group_id"];
   $group = new Group();
-  $group->groupID = $groupID;
-  $group->boolUseDraft = true;
-  $group->loadDescriptiveData();
+  $group->group_id = $group_id;
+  $group->bool_use_draft = true;
+  $group->load_descriptive_data();
 
 
   $pC = "";
-  $pC .= "<b>Degrees using $group->title (<i>$group->groupName</i>):</b>
+  $pC .= "<b>Degrees using $group->title (<i>$group->group_name</i>):</b>
 		<br><br>
 		<table border='0' cellspacing='5'>
 		<tr>
@@ -3178,12 +3178,12 @@ function popupShowGroupUse()
 		</tr>
 		";
 
-  $res = $db->dbQuery("SELECT * FROM draft_degrees a,
+  $res = $db->db_query("SELECT * FROM draft_degrees a,
     								draft_degree_requirements b
     							WHERE a.degree_id = b.degree_id
     							AND b.group_id = '?'
-    							ORDER BY a.title, a.major_code, b.semester_num ", $groupID);
-  while($cur = $db->dbFetchArray($res))
+    							ORDER BY a.title, a.major_code, b.semester_num ", $group_id);
+  while($cur = $db->db_fetch_array($res))
   {
     extract($cur, 3, "db");
     $pC .= "<tr>
@@ -3194,7 +3194,7 @@ function popupShowGroupUse()
 						$db_major_code
 					</td>
 					<td valign='top' class='tenpt' align='center'>
-						" . getSemesterName($db_semester_num) . "
+						" . get_semester_name($db_semester_num) . "
 					</td>
 					<td valign='top' class='tenpt' width='100'>
 						$db_catalog_year
@@ -3208,49 +3208,49 @@ function popupShowGroupUse()
 
   $pC .= "</table>";
 
-  $screen->pageTitle = "FlightPath Admin - Group Use";
-  $pC .= getJS();
+  $screen->page_title = "FlightPath Admin - Group Use";
+  $pC .= get_j_s();
 
-  $screen->pageIsPopup = true;
-  $screen->pageHideReportError = true;
+  $screen->page_is_popup = true;
+  $screen->page_hide_report_error = true;
   //include("template/fp_template.php");
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 
 }
 
-function getSemesterName($semesterNum)
+function get_semester_name($semester_num)
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_getSemesterName";
+  $function = "admin_get_semester_name";
   if (function_exists($function)) {
-    return call_user_func($function, $semesterNum);
+    return call_user_func($function, $semester_num);
   }
   //////////////////////////////////
   
   
   $ar = array("Freshman Year", "Sophomore Year", "Junior Year", "Senior Year");
-  $s = $ar[$semesterNum];
+  $s = $ar[$semester_num];
   if ($s == "")
   {
-    $s = "Year " . ($semesterNum + 1);
+    $s = "Year " . ($semester_num + 1);
   }
   return $s;
 }
 
 
 
-function popupSelectIcon()
+function popup_select_icon()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_popupSelectIcon";
+  $function = "admin_popup_select_icon";
   if (function_exists($function)) {
     return call_user_func($function);
   }
@@ -3259,19 +3259,19 @@ function popupSelectIcon()
   
   global $db, $screen;
 
-  $groupID = $_REQUEST["groupID"];
+  $group_id = $_REQUEST["group_id"];
   $group = new Group();
-  $group->groupID = $groupID;
-  $group->boolUseDraft = true;
-  $group->loadDescriptiveData();
+  $group->group_id = $group_id;
+  $group->bool_use_draft = true;
+  $group->load_descriptive_data();
 
-  $pC = "<b>Please Select an Icon to use for $group->title (<i>$group->groupName</i>):</b>
-			<div class='tenpt'>Current icon: <img src='$screen->themeLocation/images/icons/$group->iconFilename' width='19'>
-			$group->iconFilename.
+  $pC = "<b>Please Select an Icon to use for $group->title (<i>$group->group_name</i>):</b>
+			<div class='tenpt'>Current icon: <img src='$screen->theme_location/images/icons/$group->icon_filename' width='19'>
+			$group->icon_filename.
 			<br><br>
 			Available Icons:
 				<blockquote>";
-  $handle = opendir("$screen->themeLocation/images/icons/.");
+  $handle = opendir("$screen->theme_location/images/icons/.");
   $files = array();
 
 
@@ -3289,60 +3289,60 @@ function popupSelectIcon()
   foreach($files as $file)
   {
     $pC .= "<div style='padding: 5px;'>
-				<input type='button' value='Select -> ' onClick='popupSelectIcon(\"$file\");' >
+				<input type='button' value='Select -> ' onClick='popup_select_icon(\"$file\");' >
 				&nbsp; &nbsp;
-				<img src='$screen->themeLocation/images/icons/$file' width='19'>
+				<img src='$screen->theme_location/images/icons/$file' width='19'>
 				$file</div>";
   }
 
 
   $pC .= "</blockquote></div>";
-  $screen->pageTitle = "FlightPath Admin - Select Icon";
-  $pC .= getJS();
+  $screen->page_title = "FlightPath Admin - Select Icon";
+  $pC .= get_j_s();
 
-  $screen->pageIsPopup = true;
-  $screen->pageHideReportError = true;
+  $screen->page_is_popup = true;
+  $screen->page_hide_report_error = true;
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
-function popupAddGroup()
+function popup_add_group()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_popupAddGroup";
+  $function = "admin_popup_add_group";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $db,$screen;
-  $semesterNum = trim($_GET["semesterNum"]);
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $semester_num = trim($_GET["semester_num"]);
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   $pC = "";
 
-  $pC .= "<b>Add an elective group to semester: $semesterNum in $deCatalogYear</b><br>
+  $pC .= "<b>Add an elective group to semester: $semester_num in $de_catalog_year</b><br>
 				<span class='tenpt'>Use keyboard shortcut CTRL-F to find groups quickly.</span>
 				<br><br>
-				First, select a group (from $deCatalogYear):
+				First, select a group (from $de_catalog_year):
 				<div class='tenpt' 
 					style='height:200px; overflow-y: scroll; border: 1px solid black;
 					margin:5px;'>
 				<table border='0' cellspacing='5'>";
 
-  $res = $db->dbQuery("SELECT * FROM draft_groups
+  $res = $db->db_query("SELECT * FROM draft_groups
 							WHERE `catalog_year`='?'
 							AND `delete_flag`='0'
-							ORDER BY `title` ", $deCatalogYear);
-  while($cur = $db->dbFetchArray($res))
+							ORDER BY `title` ", $de_catalog_year);
+  while($cur = $db->db_fetch_array($res))
   {
     extract($cur, 3, "db");
     $pC .= "<tr><td valign='middle'>
@@ -3361,7 +3361,7 @@ function popupAddGroup()
 			<a href='javascript: popupAlertHelp(\"group_properties\");'>?</a>
 			<div class='tenpt' style='padding-top: 5px;'>
 			Hrs: <input type='text' name='hours' id='hours' size='2'>
-			Min Grade: <select name='minGrade' id='minGrade'>
+			Min Grade: <select name='min_grade' id='min_grade'>
 							<option value=''>--</option>
 							<option value='C'>C</option>
 							<option value='B'>B</option>
@@ -3376,43 +3376,43 @@ function popupAddGroup()
 					</select>
 				&nbsp; &nbsp;
 			<input type='button' value='Add Group ->'
-				onClick='popupAddGroup(\"$semesterNum\");'>
+				onClick='popup_add_group(\"$semester_num\");'>
 			</div>";
 
 
-  $screen->pageTitle = "FlightPath Admin - Add Group";
-  $pC .= getJS();
+  $screen->page_title = "FlightPath Admin - Add Group";
+  $pC .= get_j_s();
 
-  $screen->pageIsPopup = true;
-  $screen->pageHideReportError = true;
+  $screen->page_is_popup = true;
+  $screen->page_hide_report_error = true;
   //include("template/fp_template.php");
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
-function popupEditDefinition()
+function popup_edit_definition()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_popupEditDefinition";
+  $function = "admin_popup_edit_definition";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $db, $screen;
-  $groupID = trim($_REQUEST["groupID"]);
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
-  $group = new Group($groupID, null, -1, false, true);
-  $group->loadDescriptiveData();
+  $group_id = trim($_REQUEST["group_id"]);
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
+  $group = new Group($group_id, null, -1, false, true);
+  $group->load_descriptive_data();
 
   $definition = trim($_REQUEST["definition"]);
   if ($definition == "")
@@ -3420,13 +3420,13 @@ function popupEditDefinition()
     $definition = $group->definition;
   }
 
-  $results = getCoursesFromDefinition($definition);
-  //$results = getCoursesFromDefinition($definition, $deCatalogYear);
+  $results = get_courses_from_definition($definition);
+  //$results = get_courses_from_definition($definition, $de_catalog_year);
 
   $pC = "";
 
-  $pC .= "<b>Edit Definition for $group->title ($deCatalogYear)<br><i>$group->groupName</i></b>
-<br><br><form action='admin.php?performAction=popupEditDefinition&deCatalogYear=$deCatalogYear&groupID=$groupID' method='POST' id='mainform'>
+  $pC .= "<b>Edit Definition for $group->title ($de_catalog_year)<br><i>$group->group_name</i></b>
+<br><br><form action='admin.php?performAction=popup_edit_definition&de_catalog_year=$de_catalog_year&group_id=$group_id' method='POST' id='mainform'>
 	<table border='0'>
 	<tr>
 			<td valign='top' align='right'>
@@ -3457,33 +3457,33 @@ function popupEditDefinition()
 
 
 
-  $screen->pageTitle = "FlightPath Admin - Edit Definition";
-  $pC .= getJS();
+  $screen->page_title = "FlightPath Admin - Edit Definition";
+  $pC .= get_j_s();
 
-  $screen->pageIsPopup = true;
-  $screen->pageHideReportError = true;
+  $screen->page_is_popup = true;
+  $screen->page_hide_report_error = true;
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
-function getCoursesFromDefinition($definition, $catalogYear = "")
+function get_courses_from_definition($definition, $catalog_year = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_getCoursesFromDefinition";
+  $function = "admin_get_courses_from_definition";
   if (function_exists($function)) {
-    return call_user_func($function, $definition, $catalogYear);
+    return call_user_func($function, $definition, $catalog_year);
   }
   //////////////////////////////////
   
   
   
-  $groupArray = array();
+  $group_array = array();
 
   // Okay, first things first, let's trim this sucker and remove extra whitespace.
   $definition = trim($definition);
@@ -3492,42 +3492,42 @@ function getCoursesFromDefinition($definition, $catalogYear = "")
   $definition = str_replace("  "," ",$definition);
 
   // Okay, now let's break this up into lines...
-  $dLines = split("\n",$definition);
-  foreach($dLines as $line)
+  $d_lines = split("\n",$definition);
+  foreach($d_lines as $line)
   {
     $line = trim($line);
 
     // Let's get each of the parts... the instruction, and the course data.
     $tokens = split(" ", $line);
     $instruction = strtolower(trim($tokens[0]));
-    $courseData = trim($tokens[1]);
+    $course_data = trim($tokens[1]);
 
     // We know that the course data can also be broken up, by the .
-    $cTokens = split("\.", $courseData);
-    $subjectData = trim(strtoupper($cTokens[0]));
-    $courseNumData = trim(strtoupper($cTokens[1]));
+    $c_tokens = split("\.", $course_data);
+    $subject_data = trim(strtoupper($c_tokens[0]));
+    $course_numData = trim(strtoupper($c_tokens[1]));
 
     // Okay, so now, for this line, we have an instruction,
     // and some course data (possibly wild cards) to act on.
-    //debugCT("$instruction $subjectData $courseNumData");
+    //debugCT("$instruction $subject_data $course_numData");
 
-    $tArray = getCourseArrayFromDefinitionData($subjectData, $courseNumData, $catalogYear);
+    $t_array = get_course_array_from_definition_data($subject_data, $course_numData, $catalog_year);
     // Okay, we got our list.  Now what do we do with them?
     if ($instruction == "add" || $instruction == "+")
     {
-      $groupArray = array_merge($groupArray, $tArray);
-      $groupArray = array_unique($groupArray);
+      $group_array = array_merge($group_array, $t_array);
+      $group_array = array_unique($group_array);
     }
 
     if ($instruction == "remove" || $instruction == "rem" || $instruction == "-" || $instruction == "del")
     {
-      //print "<pre>" . print_r($tArray) . "</pre>";
-      //debugCT(count($groupArray));
-      //$groupArray = array_diff($groupArray, $tArray);
-      $groupArray = rp_array_diff($groupArray, $tArray);
+      //print "<pre>" . print_r($t_array) . "</pre>";
+      //debug_c_t(count($group_array));
+      //$group_array = array_diff($group_array, $t_array);
+      $group_array = rp_array_diff($group_array, $t_array);
 
-      $groupArray = array_unique($groupArray);
-      //debugCT(count($groupArray));
+      $group_array = array_unique($group_array);
+      //debug_c_t(count($group_array));
     }
 
 
@@ -3536,31 +3536,31 @@ function getCoursesFromDefinition($definition, $catalogYear = "")
 
   // Here's what we need to do:
   // In groupArray, we have the subject_id and course_num of every course in this definition.
-  // We need to convert them to courseID's from the table,
+  // We need to convert them to course_id's from the table,
   // and make sure we do not have duplicates.
-  // First, get an array of courseID from the groupArray...
-  $courseIDArray = $groupArray;
+  // First, get an array of course_id from the groupArray...
+  $course_idArray = $group_array;
   // Take out duplicate entries (caused by eqv courses)...
 
-  $courseIDArray = array_unique($courseIDArray);
-  //print_r($courseIDArray);
-  //debugCT(sizeof($courseIDArray));
+  $course_idArray = array_unique($course_idArray);
+  //print_r($course_idArray);
+  //debugCT(sizeof($course_idArray));
   // Now, convert BACK into the "groupArray" structure (subject_id and course_num)...
-  $groupArray2 = getCourseArrayFromCourseIDArray($courseIDArray);
+  $group_array2 = get_course_array_from_course_id_array($course_idArray);
 
-  //print_r($groupArray);
+  //print_r($group_array);
 
   // Place in alphabetical order.
-  sort($groupArray2);
+  sort($group_array2);
 
-  //var_dump($groupArray2);
+  //var_dump($group_array2);
 
   $rtn = array();
   $count = 1;
   // Now that we have the groupArray, we will turn it into a string...
-  for ($t = 0; $t < count($groupArray2); $t++)
+  for ($t = 0; $t < count($group_array2); $t++)
   {
-    $line = trim($groupArray2[$t]);
+    $line = trim($group_array2[$t]);
     if ($line == "~~" || $line == "") continue;
     $count++;
     $temp = split(" ~~ ", $line);
@@ -3572,76 +3572,76 @@ function getCoursesFromDefinition($definition, $catalogYear = "")
 
   }
   $rtn["text"] = str_replace("&", "_A_", $rtn["text"]);
-  //debugCT(count($groupArray));
+  //debug_c_t(count($group_array));
   $rtn["count"] = $count;
 
   return $rtn;
 }
 
-function getCourseArrayFromCourseIDArray($courseIDArray)
+function get_course_array_from_course_id_array($course_idArray)
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_getCourseArrayFromCourseIDArray";
+  $function = "admin_get_course_array_from_course_id_array";
   if (function_exists($function)) {
-    return call_user_func($function, $courseIDArray);
+    return call_user_func($function, $course_idArray);
   }
   //////////////////////////////////
   
   
   
-  // Convert an array of courseID's into their subjectID ~~ courseNum format.
+  // Convert an array of course_id's into their subject_id ~~ course_num format.
   // Pick non-excluded courses over excluded courses, when you have the option.
-  $rtnArray = array();
+  $rtn_array = array();
   $db = new DatabaseHandler();
 
 
   // MUST use foreach since we used array_unique earlier.  Can't use
   // count($arr) after you use array_unique!!
-  foreach($courseIDArray as $t => $value)
+  foreach($course_idArray as $t => $value)
   {
-    $newCourse = new Course();
-    $newCourse->boolUseDraft = true;
-    $newCourse->db = $db;
-    $newCourse->courseID = $courseIDArray[$t];
-    $newCourse->loadDescriptiveData(false);
-    array_push($rtnArray, "$newCourse->subjectID ~~ $newCourse->courseNum");
+    $new_course = new Course();
+    $new_course->bool_use_draft = true;
+    $new_course->db = $db;
+    $new_course->course_id = $course_idArray[$t];
+    $new_course->load_descriptive_data(false);
+    array_push($rtn_array, "$new_course->subject_id ~~ $new_course->course_num");
   }
-  return $rtnArray;
+  return $rtn_array;
 
 }
 
 
-function getCourseIDArrayFromCourseArray($courseArray)
+function get_course_id_array_from_course_array($course_array)
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_getCourseIDArrayFromCourseArray";
+  $function = "admin_get_course_id_array_from_course_array";
   if (function_exists($function)) {
-    return call_user_func($function, $courseArray);
+    return call_user_func($function, $course_array);
   }
   //////////////////////////////////
   
   
-  $rtnArray = array();
+  $rtn_array = array();
   $db = new DatabaseHandler();
 
   // MUST use foreach instead of for since we did
   // array_unique!  Can't trust count($arr)!
-  foreach($courseArray as $t => $value)
+  foreach($course_array as $t => $value)
   {
-    $line = trim($courseArray[$t]);
+    $line = trim($course_array[$t]);
     if ($line == "~~" || $line == "") continue;
     $count++;
     $temp = split(" ~~ ", $line);
     $si = trim($temp[0]);
     $cn = trim($temp[1]);
 
-    $courseID = $db->getCourseID($si, $cn, "", true);
-    $rtnArray[] = "$courseID";  // force into a string.
+    $course_id = $db->get_course_id($si, $cn, "", true);
+    $rtn_array[] = "$course_id";  // force into a string.
   }
 
-  return $rtnArray;
+  return $rtn_array;
 }
 
 
@@ -3679,31 +3679,31 @@ function rp_array_diff($array1, $array2)
 }
 
 
-function getCourseArrayFromDefinitionData($subjectData, $courseNumData, $catalogYear = "")
+function get_course_array_from_definition_data($subject_data, $course_numData, $catalog_year = "")
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_getCourseArrayFromDefinitionData";
+  $function = "admin_get_course_array_from_definition_data";
   if (function_exists($function)) {
-    return call_user_func($function, $subjectData, $courseNumData, $catalogYear);
+    return call_user_func($function, $subject_data, $course_numData, $catalog_year);
   }
   //////////////////////////////////
   
   
   global $db;
-  // Looks at the subjectData and courseNumData fields, and constructs
+  // Looks at the subjectData and course_numData fields, and constructs
   // a query to pull our every course which matches it.
 
-  $rtnArray = array();
+  $rtn_array = array();
 
-  $si = str_replace("*","%",$subjectData);
-  $cn = str_replace("*","%",$courseNumData);
+  $si = str_replace("*","%",$subject_data);
+  $cn = str_replace("*","%",$course_numData);
 
-  $catalogLine = "";
-  if ($catalogYear != "")
+  $catalog_line = "";
+  if ($catalog_year != "")
   {
-    $catalogLine = "AND `catalog_year`='$catalogYear'";
+    $catalog_line = "AND `catalog_year`='$catalog_year'";
   }
 
   
@@ -3712,30 +3712,30 @@ function getCourseArrayFromDefinitionData($subjectData, $courseNumData, $catalog
 					`subject_id` LIKE '?'
 				AND `course_num` LIKE '?'
 				AND `course_id` > 0
-				$catalogLine
+				$catalog_line
 				GROUP BY subject_id, course_num
 				";
-  $res = $db->dbQuery($query, $si, $cn) ;
-  while ($cur = $db->dbFetchArray($res))
+  $res = $db->db_query($query, $si, $cn) ;
+  while ($cur = $db->db_fetch_array($res))
   {
-    $courseID = $cur["course_id"];
+    $course_id = $cur["course_id"];
     
-    if (in_array($courseID, $rtnArray)) continue;
-    $rtnArray[] = $courseID;
+    if (in_array($course_id, $rtn_array)) continue;
+    $rtn_array[] = $course_id;
     
   }
 
-  return $rtnArray;
+  return $rtn_array;
 }
 
 
 
-function initHiddenVariables()
+function init_hidden_variables()
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_initHiddenVariables";
+  $function = "admin_init_hidden_variables";
   if (function_exists($function)) {
     return call_user_func($function);
   }
@@ -3743,26 +3743,26 @@ function initHiddenVariables()
   
   
   global $db;
-  $settings = $db->getFlightPathSettings();
+  $settings = $db->get_flight_path_settings();
 
 
-  $GLOBALS["deCatalogYear"] = trim($_REQUEST["deCatalogYear"]);
+  $GLOBALS["de_catalog_year"] = trim($_REQUEST["de_catalog_year"]);
 
-  if ($GLOBALS["deCatalogYear"] == "")
+  if ($GLOBALS["de_catalog_year"] == "")
   {
     // default value.
-    $GLOBALS["deCatalogYear"] = $settings["currentCatalogYear"];
+    $GLOBALS["de_catalog_year"] = $settings["current_catalog_year"];
   }
 }
 
 
-function getHiddenVariables()
+function get_hidden_variables()
 {
   // Supply the HTML for hidden variables needed by the data entry system.
   $rtn = "";
 
   $rtn .= "
-				<input type='hidden' name='deCatalogYear' value='{$GLOBALS["deCatalogYear"]}' id='deCatalogYear'>
+				<input type='hidden' name='deCatalogYear' value='{$GLOBALS["de_catalog_year"]}' id='deCatalogYear'>
 				
 				<input type='hidden' name='performAction2' value='' id='performAction2'>
 				<input type='hidden' name='scrollTop' value='' id='scrollTop'>
@@ -3773,50 +3773,50 @@ function getHiddenVariables()
 
 
 
-function displayEditSpecificGroup($msg = "", $boolScroll = true)
+function display_edit_specific_group($msg = "", $bool_scroll = true)
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayEditSpecificGroup";
+  $function = "admin_display_edit_specific_group";
   if (function_exists($function)) {
-    return call_user_func($function, $msg, $boolScroll);
+    return call_user_func($function, $msg, $bool_scroll);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $screen, $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
-  $groupID = $_REQUEST["groupID"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
+  $group_id = $_REQUEST["group_id"];
   $pC = "";
 
-  $pC .= "<a class='tenpt' href='admin.php?performAction=editGroups&deCatalogYear=$deCatalogYear#group_$groupID'>Back to Group List</a>  &nbsp; - &nbsp;
-			<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu.</a>
+  $pC .= "<a class='tenpt' href='admin.php?performAction=editGroups&de_catalog_year=$de_catalog_year#group_$group_id'>Back to Group List</a>  &nbsp; - &nbsp;
+			<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu.</a>
 			";
-  if ($_SESSION["deAdvancedMode"] == true)
+  if ($_SESSION["de_advanced_mode"] == true)
   {
     $pC .= " <span class='tenpt' style='background-color: yellow; margin-left: 20px;'>
-					adv: groupID = $groupID.
+					adv: group_id = $group_id.
 					Used by:
-					<a href='javascript: popupWindow(\"admin.php?performAction=popupShowGroupUse&groupID=$groupID\");'>[degrees]</a>
+					<a href='javascript: popupWindow(\"admin.php?performAction=popup_show_group_use&group_id=$group_id\");'>[degrees]</a>
 				  </span>";
   }
 
-  $group = new Group($groupID, null, -1, false, true);
-  //print_pre($group->toString());
-  $group->loadDescriptiveData();
+  $group = new Group($group_id, null, -1, false, true);
+  //print_pre($group->to_string());
+  $group->load_descriptive_data();
 
 
-  $pC .= "<h2>Edit Group: $group->title ($deCatalogYear)</h2>$msg";
+  $pC .= "<h2>Edit Group: $group->title ($de_catalog_year)</h2>$msg";
   $pC .= "<form action='admin.php' method='POST' id='mainform'>
-			<input type='hidden' name='deCatalogYear' value='$deCatalogYear'>
-			<input type='hidden' name='performAction' value='performEditSpecificGroup'>
+			<input type='hidden' name='deCatalogYear' value='$de_catalog_year'>
+			<input type='hidden' name='performAction' value='perform_edit_specific_group'>
 			<input type='hidden' name='performAction2' value='' id='performAction2'>
 			<input type='hidden' name='setDefinition' id='setDefinition' value=''>
 			<input type='hidden' name='scrollTop' id='scrollTop' value=''>
-			<input type='hidden' name='groupID' value='$groupID'>
+			<input type='hidden' name='group_id' value='$group_id'>
 			
 			<div class='tenpt'>
 			
@@ -3835,7 +3835,7 @@ function displayEditSpecificGroup($msg = "", $boolScroll = true)
 					Internal Group Name: 
 				</td>
 				<td valign='top' class='tenpt'>
-					<input type='text' name='groupName' value='$group->groupName' maxlength='100' size='50'> 
+					<input type='text' name='group_name' value='$group->group_name' maxlength='100' size='50'> 
 					<a href='javascript: popupAlertHelp(\"group_name\");'>?</a>
 				</td>
 			</tr>
@@ -3853,9 +3853,9 @@ function displayEditSpecificGroup($msg = "", $boolScroll = true)
 					Icon: 
 				</td>
 				<td valign='top' class='tenpt'>
-					<input type='hidden' name='iconFilename' id='iconFilename' value='$group->iconFilename'> 
-					<img src='$screen->themeLocation/images/icons/$group->iconFilename' width='19' id='iconSrc'> <span id='iconFn'>$group->iconFilename</span>
-						 - <a href='javascript: popupWindow(\"admin.php?performAction=popupSelectIcon&groupID=$groupID\");'>[select another]</a>
+					<input type='hidden' name='icon_filename' id='icon_filename' value='$group->icon_filename'> 
+					<img src='$screen->theme_location/images/icons/$group->icon_filename' width='19' id='iconSrc'> <span id='iconFn'>$group->icon_filename</span>
+						 - <a href='javascript: popupWindow(\"admin.php?performAction=popup_select_icon&group_id=$group_id\");'>[select another]</a>
 				</td>
 			</tr>
 			<tr>
@@ -3870,7 +3870,7 @@ function displayEditSpecificGroup($msg = "", $boolScroll = true)
   }
   $pC .= "
 				<td valign='top' class='tenpt'>
-					<a href='javascript: popupWindow(\"admin.php?performAction=popupEditDefinition&deCatalogYear=$deCatalogYear&groupID=$groupID\");'>[edit definition]</a>
+					<a href='javascript: popupWindow(\"admin.php?performAction=popup_edit_definition&de_catalog_year=$de_catalog_year&group_id=$group_id\");'>[edit definition]</a>
 					<div class='tenpt' style='overflow: auto; $dheight'>
 					<i>" . nl2br($group->definition) . "</i>
 					</div>
@@ -3881,14 +3881,14 @@ function displayEditSpecificGroup($msg = "", $boolScroll = true)
 			<hr>
 			";
 
-  $reqBoxExtra = $reqBoxStyle = $reqBoxExplain = "";
+  $req_box_extra = $req_box_style = $req_box_explain = "";
   if (trim($group->definition) != "")
   {
     // Meaning, we have a definition specified, so disable the
     // required courses box!
-    $reqBoxExtra = "readonly=readonly";
-    $reqBoxStyle = "background-color: lightgray;";
-    $reqBoxExplain = "<div class='tenpt' style='padding-top: 10px;'>
+    $req_box_extra = "readonly=readonly";
+    $req_box_style = "background-color: lightgray;";
+    $req_box_explain = "<div class='tenpt' style='padding-top: 10px;'>
 							<b>Note:</b> Because a definition was specified,
 							you cannot directly edit the Required Courses
 							box.  Please manage specific courses using the
@@ -3898,17 +3898,17 @@ function displayEditSpecificGroup($msg = "", $boolScroll = true)
 
   $courses = "";
   // Create the courses variable from all the requirements in this group.
-  $courses = getGroupCourses($group);
-  $pC .= "Required Courses: (<a href='javascript: popupAlertHelp(\"group_entry\");'>Help - entering min grades and/or repeats</a>)$reqBoxExplain<br>
-			<textarea name='courses' style='line-height: 1.5em;$reqBoxStyle' wrap='OFF' rows='17' cols='80' $reqBoxExtra>$courses</textarea>
+  $courses = get_group_courses($group);
+  $pC .= "Required Courses: (<a href='javascript: popupAlertHelp(\"group_entry\");'>Help - entering min grades and/or repeats</a>)$req_box_explain<br>
+			<textarea name='courses' style='line-height: 1.5em;$req_box_style' wrap='OFF' rows='17' cols='80' $req_box_extra>$courses</textarea>
 			<br>
-			<input type='button' value='Save for $deCatalogYear' onClick='submitForm();'><br><br>
+			<input type='button' value='Save for $de_catalog_year' onClick='submitForm();'><br><br>
 			<b>[Optional]</b> Comment: (only seen by data entry administrators)<br>
-			<textarea name='dataEntryComment' rows='3' cols='80'>$group->dataEntryComment</textarea>
+			<textarea name='data_entry_comment' rows='3' cols='80'>$group->data_entry_comment</textarea>
 			<br>
 				<div align='right'>
 					Delete this group? <input type='button' value='X'
-									onClick='deleteGroup(\"$groupID\");'>
+									onClick='deleteGroup(\"$group_id\");'>
 				</div>			
 			</div>
 			";
@@ -3918,19 +3918,19 @@ function displayEditSpecificGroup($msg = "", $boolScroll = true)
 
   $pC .= "</form>";
 
-  $pC .= getJS();
-  $screen->pageTitle = "FlightPath Admin - Edit Group";
+  $pC .= get_j_s();
+  $screen->page_title = "FlightPath Admin - Edit Group";
 
-  if ($boolScroll)
+  if ($bool_scroll)
   {
-    $screen->pageScrollTop = trim($_POST["scrollTop"]);
+    $screen->page_scroll_top = trim($_POST["scroll_top"]);
   }
-  $screen->pageHideReportError = true;
+  $screen->page_hide_report_error = true;
   //include("template/fp_template.php");
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
   if ($_REQUEST["serialize"] != "")
@@ -3940,11 +3940,11 @@ function displayEditSpecificGroup($msg = "", $boolScroll = true)
 }
 
 
-function getGroupCourses(Group $group)
+function get_group_courses(Group $group)
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_getGroupCourses";
+  $function = "admin_get_group_courses";
   if (function_exists($function)) {
     return call_user_func($function, $group);
   }
@@ -3957,74 +3957,74 @@ function getGroupCourses(Group $group)
 
   // courses not in branches...
   $courses = array();
-  $cCount = 0;
-  $group->listCourses->loadCourseDescriptiveData();
-  $group->listCourses->sortAlphabeticalOrder();
-  $group->listCourses->resetCounter();
-  while($group->listCourses->hasMore())
+  $c_count = 0;
+  $group->list_courses->load_course_descriptive_data();
+  $group->list_courses->sort_alphabetical_order();
+  $group->list_courses->reset_counter();
+  while($group->list_courses->has_more())
   {
-    $c = $group->listCourses->getNext();
-    if (strstr($c->subjectID , "&"))
+    $c = $group->list_courses->get_next();
+    if (strstr($c->subject_id , "&"))
     {
-      $c->subjectID = str_replace("&", "_A_", $c->subjectID);
+      $c->subject_id = str_replace("&", "_A_", $c->subject_id);
 
     }
-    $courseLine = "$c->subjectID $c->courseNum";
-    //$rtn .= "$c->subjectID $c->courseNum";
+    $course_line = "$c->subject_id $c->course_num";
+    //$rtn .= "$c->subject_id $c->course_num";
 
-    if ($c->minGrade != "" && $c->minGrade != "D")
+    if ($c->min_grade != "" && $c->min_grade != "D")
     {
-      //$rtn .= " ($c->minGrade)";
-      $courseLine .= " ($c->minGrade)";
+      //$rtn .= " ($c->min_grade)";
+      $course_line .= " ($c->min_grade)";
     }
 
     //$rtn .= "\n";
-    if ($courses[$courseLine] == "")
+    if ($courses[$course_line] == "")
     {
-      $courses[$courseLine] = 0;
+      $courses[$course_line] = 0;
     }
     // This is to check for specified repeats.
-    $courses[$courseLine]++;
+    $courses[$course_line]++;
 
   }
 
   // Go through the $courses array to check for specified repeats.
-  foreach($courses as $course => $repCount)
+  foreach($courses as $course => $rep_count)
   {
-    $repLine = " [$repCount]";
-    if ($repCount == 1)
+    $rep_line = " [$rep_count]";
+    if ($rep_count == 1)
     {
-      $repLine = "";
+      $rep_line = "";
     }
-    $rtn .= "$course$repLine\n";
+    $rtn .= "$course$rep_line\n";
   }
 
 
 
   // Now, get them branches!
-  if (!$group->listGroups->isEmpty)
+  if (!$group->list_groups->is_empty)
   {
-    $group->listGroups->resetCounter();
-    while ($group->listGroups->hasMore())
+    $group->list_groups->reset_counter();
+    while ($group->list_groups->has_more())
     {
-      $g = $group->listGroups->getNext();
+      $g = $group->list_groups->get_next();
 
-      $g->listCourses->loadCourseDescriptiveData();
-      $g->listCourses->sortAlphabeticalOrder();
-      $g->listCourses->resetCounter();
-      while($g->listCourses->hasMore())
+      $g->list_courses->load_course_descriptive_data();
+      $g->list_courses->sort_alphabetical_order();
+      $g->list_courses->reset_counter();
+      while($g->list_courses->has_more())
       {
-        $c = $g->listCourses->getNext();
-        if (strstr($c->subjectID , "&"))
+        $c = $g->list_courses->get_next();
+        if (strstr($c->subject_id , "&"))
         {
-          $c->subjectID = str_replace("&", "_A_", $c->subjectID);
+          $c->subject_id = str_replace("&", "_A_", $c->subject_id);
         }
 
-        $rtn .= "$c->subjectID $c->courseNum";
+        $rtn .= "$c->subject_id $c->course_num";
 
-        if ($c->minGrade != "" && $c->minGrade != "D")
+        if ($c->min_grade != "" && $c->min_grade != "D")
         {
-          $rtn .= " ($c->minGrade)";
+          $rtn .= " ($c->min_grade)";
         }
 
         $rtn .= "  &  ";
@@ -4045,64 +4045,64 @@ function getGroupCourses(Group $group)
   return $rtn;
 }
 
-function displayEditSpecificDegree($msg = "", $boolScrollPage = false, $boolButtonMsg = true)
+function display_edit_specific_degree($msg = "", $bool_scroll_page = false, $bool_button_msg = true)
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayEditSpecificDegree";
+  $function = "admin_display_edit_specific_degree";
   if (function_exists($function)) {
-    return call_user_func($function, $msg, $boolScrollPage, $boolButtonMsg);
+    return call_user_func($function, $msg, $bool_scroll_page, $bool_button_msg);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $screen, $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
-  $majorCode = $_REQUEST["majorCode"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
+  $major_code = $_REQUEST["major_code"];
 
   if ($msg == "")
   {
     $msg = "<font size='4'>&nbsp; &nbsp;</font>";
   }
 
-  $buttonMsg = $msg;
-  if ($boolButtonMsg == false) {$buttonMsg = "";}
+  $button_msg = $msg;
+  if ($bool_button_msg == false) {$button_msg = "";}
 
-  $degreeID = intval($db->getDegreeID($majorCode, $deCatalogYear, true));
+  $degree_id = intval($db->get_degree_id($major_code, $de_catalog_year, true));
   // The intval says, if it's false, make it = 0.  otherwise keep the number
   // that is returned.
-  $degree = new DegreePlan($degreeID, null, false, false, true);
-  $degree->loadDescriptiveData();
+  $degree = new DegreePlan($degree_id, null, false, false, true);
+  $degree->load_descriptive_data();
   //var_dump($degree);
 
 
   $pC = "";
 
-  $pC .= "<a class='tenpt' href='admin.php?performAction=editDegrees&deCatalogYear=$deCatalogYear#degree_$degreeID'>Back to Degree List</a>  &nbsp; - &nbsp;
-			<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu.</a>
+  $pC .= "<a class='tenpt' href='admin.php?performAction=editDegrees&de_catalog_year=$de_catalog_year#degree_$degree_id'>Back to Degree List</a>  &nbsp; - &nbsp;
+			<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu.</a>
 			
 			";
-  if ($_SESSION["deAdvancedMode"] == true)
+  if ($_SESSION["de_advanced_mode"] == true)
   {
     $pC .= " <span class='tenpt' style='background-color: yellow; margin-left: 20px;'>
-					advanced: degreeID = $degreeID.
+					advanced: degreeID = $degree_id.
 				  </span>";
   }
 
   $pC .= "<form id='mainform' action='admin.php' method='POST'>";
 
-  $pC .= "<div style='font-size: 16pt; font-weight:bold; padding-top: 20px;'>$degree->degreeType $degree->title<br>$majorCode ($deCatalogYear)</div>";
+  $pC .= "<div style='font-size: 16pt; font-weight:bold; padding-top: 20px;'>$degree->degree_type $degree->title<br>$major_code ($de_catalog_year)</div>";
   $pC .= "
 			<table>
 			 <tr>
 				<td valign='top' class='tenpt' width='15%'>Degree Type:</td>
-				<td valign='top' class='tenpt' width='15%'><input type='text' name='degree_type' value='$degree->degreeType' size='5' maxlength='20'></td>
+				<td valign='top' class='tenpt' width='15%'><input type='text' name='degree_type' value='$degree->degree_type' size='5' maxlength='20'></td>
 
 				<td valign='top' class='tenpt' width='15%'>Degree Class:</td>
-				<td valign='top' class='tenpt'><input type='text' name='degree_class' value='$degree->degreeClass' size='2' maxlength='1'>
+				<td valign='top' class='tenpt'><input type='text' name='degree_class' value='$degree->degree_class' size='2' maxlength='1'>
 				<a href='javascript: popupAlertHelp(\"degree_class\");'>?</a></td>
 			 </tr>
 				
@@ -4113,7 +4113,7 @@ function displayEditSpecificDegree($msg = "", $boolScrollPage = false, $boolButt
 			 </tr>
 			 <tr>
 				<td valign='top' class='tenpt'>Exclude:</td>
-				<td valign='top' class='tenpt' colspan='3'><input type='text' name='exclude' value='$degree->dbExclude' size='2' maxlength='1'>
+				<td valign='top' class='tenpt' colspan='3'><input type='text' name='exclude' value='$degree->db_exclude' size='2' maxlength='1'>
 				<a href='javascript: popupAlertHelp(\"degree_exclude\");'>?</a></td>
 			 </tr>
 			 
@@ -4121,15 +4121,15 @@ function displayEditSpecificDegree($msg = "", $boolScrollPage = false, $boolButt
 			 
 			</table> ";
 
-  if (strstr($majorCode, "_"))
+  if (strstr($major_code, "_"))
   {
     $pC .= "<b>Edit track information:</b>
 			<blockquote style='margin-top: 0px; margin-bottom: 0px;'>
-		<font size='2'>Track title: <input type='text' name='track_title' value='$degree->trackTitle' size='60' maxlength='100'></font><br>
+		<font size='2'>Track title: <input type='text' name='track_title' value='$degree->track_title' size='60' maxlength='100'></font><br>
 		<font size='2'>Track description: <a href='javascript: popupAlertHelp(\"edit_formatting\");'>(Help - Formatting)</a>
 						<a href='javascript: popupAlertHelp(\"track_description\");'>(Help - Track Descriptions)</a>
 		</font><br>
-		<textarea name='track_description' cols='60' rows='3'>" . convertHTMLToBBCode($degree->trackDescription) . "</textarea>
+		<textarea name='track_description' cols='60' rows='3'>" . convert_h_t_m_l_to_b_b_code($degree->track_description) . "</textarea>
 		</blockquote>
 		";
   }
@@ -4138,53 +4138,53 @@ function displayEditSpecificDegree($msg = "", $boolScrollPage = false, $boolButt
 			$msg";
 
   $pC .= "
-			<input type='hidden' name='performAction' value='performEditSpecificDegree'>
-			<input type='hidden' name='majorCode' value='$majorCode'> ";
+			<input type='hidden' name='performAction' value='perform_edit_specific_degree'>
+			<input type='hidden' name='major_code' value='$major_code'> ";
 
   $pC .= "
 				
 			
 			";
-  $pC .= getHiddenVariables();
+  $pC .= get_hidden_variables();
 
 
 
-  $degree->listSemesters->resetCounter();
-  while ($degree->listSemesters->hasMore())
+  $degree->list_semesters->reset_counter();
+  while ($degree->list_semesters->has_more())
   {
-    $semester = $degree->listSemesters->getNext();
-    if ($semester->semesterNum < 0)
+    $semester = $degree->list_semesters->get_next();
+    if ($semester->semester_num < 0)
     {
       continue;
     }
-    $semDefaultTitle = getSemesterName($semester->semesterNum);
-    if ($semester->title == $semDefaultTitle)
+    $sem_default_title = get_semester_name($semester->semester_num);
+    if ($semester->title == $sem_default_title)
     {
       $semester->title = "";
     }
 
     $pC .= "<div class='elevenpt' style='padding-bottom: 30px;'>
-					<b>Block number: " . ($semester->semesterNum +1) . "</b>
+					<b>Block number: " . ($semester->semester_num +1) . "</b>
 					&nbsp; &nbsp; &nbsp; &nbsp;
-					Default title: $semDefaultTitle
+					Default title: $sem_default_title
 					&nbsp; &nbsp;
-					Override: <input type='text' name='semester_title_$semester->semesterNum' value='$semester->title' size='20'>
+					Override: <input type='text' name='semester_title_$semester->semester_num' value='$semester->title' size='20'>
 					<a href='javascript: popupAlertHelp(\"semester_title\");'>?</a>
 					<table border='1' width='100%'>
 					";
     // Get the courses.
     $pC .= "<tr><td valign='top'>
-					<textarea name='courses_$semester->semesterNum' rows='10' cols='20'>";
-    $semester->listCourses->sortAlphabeticalOrder();
-    $semester->listCourses->resetCounter();
-    while($semester->listCourses->hasMore())
+					<textarea name='courses_$semester->semester_num' rows='10' cols='20'>";
+    $semester->list_courses->sort_alphabetical_order();
+    $semester->list_courses->reset_counter();
+    while($semester->list_courses->has_more())
     {
-      $course = $semester->listCourses->getNext();
-      $course->loadDescriptiveData();
-      $pC .= "$course->subjectID $course->courseNum $course->requirementType";
-      if ($course->minGrade != "D" && $course->minGrade != "")
+      $course = $semester->list_courses->get_next();
+      $course->load_descriptive_data();
+      $pC .= "$course->subject_id $course->course_num $course->requirement_type";
+      if ($course->min_grade != "D" && $course->min_grade != "")
       {
-        $pC .= " ($course->minGrade)";
+        $pC .= " ($course->min_grade)";
       }
       $pC .= "\n";
     }
@@ -4202,35 +4202,35 @@ function displayEditSpecificDegree($msg = "", $boolScrollPage = false, $boolButt
 						<td valign='top' class='tenpt' width='5'>grd</td>
 						<td valign='top' class='tenpt' width='5'>type</td>
 						</tr>";
-    $semester->listGroups->sortAlphabeticalOrder();
-    $semester->listGroups->resetCounter();
-    while($semester->listGroups->hasMore())
+    $semester->list_groups->sort_alphabetical_order();
+    $semester->list_groups->reset_counter();
+    while($semester->list_groups->has_more())
     {
-      $group = $semester->listGroups->getNext();
-      $group->loadDescriptiveData();
-      $pC .= "<tr><td valign='middle'><input type='button' value='x' style='width:15px; height:20px;' onClick='delGroup(\"$group->groupID\",\"$semester->semesterNum\");'></td>
+      $group = $semester->list_groups->get_next();
+      $group->load_descriptive_data();
+      $pC .= "<tr><td valign='middle'><input type='button' value='x' style='width:15px; height:20px;' onClick='delGroup(\"$group->group_id\",\"$semester->semester_num\");'></td>
 						<td valign='top' class='tenpt'>
-						$group->title<br><i>$group->groupName</i></td>
-						<td valign='top' class='tenpt'>$group->hoursRequired</td>
-						<td valign='top' class='tenpt'>$group->minGrade</td>
-						<td valign='top' class='tenpt'>$group->requirementType
-						<input type='hidden' name='group_" . $group->groupID . "_" . rand(1,999999) . "' value='$group->groupID" . "_$semester->semesterNum" . "_$group->hoursRequired" . "_$group->requirementType" . "_$group->minGrade'>
+						$group->title<br><i>$group->group_name</i></td>
+						<td valign='top' class='tenpt'>$group->hours_required</td>
+						<td valign='top' class='tenpt'>$group->min_grade</td>
+						<td valign='top' class='tenpt'>$group->requirement_type
+						<input type='hidden' name='group_" . $group->group_id . "_" . rand(1,999999) . "' value='$group->group_id" . "_$semester->semester_num" . "_$group->hours_required" . "_$group->requirement_type" . "_$group->min_grade'>
 						</td>";	
     }
     $pC .= "</table>
 				<div style='margin-top: 10px; margin-left: 20px;'>
-					<a href='javascript:popupWindow(\"admin.php?performAction=popupAddGroup&semesterNum=$semester->semesterNum&deCatalogYear=$deCatalogYear\");'>Add an elective group</a></div>
+					<a href='javascript:popupWindow(\"admin.php?performAction=popup_add_group&semester_num=$semester->semester_num&de_catalog_year=$de_catalog_year\");'>Add an elective group</a></div>
 		</td>";
 
 
-    $pC .= "</table><br><input type='button' onClick='submitForm();' value='Save for $deCatalogYear'> $buttonMsg</div>";
-    $sCount = $semester->semesterNum+1;
+    $pC .= "</table><br><input type='button' onClick='submitForm();' value='Save for $de_catalog_year'> $button_msg</div>";
+    $s_count = $semester->semester_num+1;
   }
 
   // Always add an additional 4 semesters to the bottom.
   for ($t = 0; $t < 4; $t++)
   {
-    $sem = $t + $sCount;
+    $sem = $t + $s_count;
     if ($sem > 49)
     {
       // Max number of semesters.  More or less arbitrarily set number.
@@ -4241,7 +4241,7 @@ function displayEditSpecificDegree($msg = "", $boolScrollPage = false, $boolButt
     $pC .= "<div class='elevenpt' style='padding-bottom: 30px;'>
 					<b>Block number: " . ($sem+1) . "</b>
 					&nbsp; &nbsp; &nbsp; &nbsp;
-					Default title: " . getSemesterName($sem) . "
+					Default title: " . get_semester_name($sem) . "
 					&nbsp; &nbsp;
 					Override: <input type='text' name='semester_title_$sem' value='' size='20'>
 					<a href='javascript: popupAlertHelp(\"semester_title\");'>?</a>
@@ -4265,11 +4265,11 @@ function displayEditSpecificDegree($msg = "", $boolScrollPage = false, $boolButt
 						</tr>";
     $pC .= "</table>
 				<div style='margin-top: 10px; margin-left: 20px;'>
-					<a href='javascript:popupWindow(\"admin.php?performAction=popupAddGroup&semesterNum=$sem&deCatalogYear=$deCatalogYear\");'>Add an elective group</a></div>
+					<a href='javascript:popupWindow(\"admin.php?performAction=popup_add_group&semester_num=$sem&de_catalog_year=$de_catalog_year\");'>Add an elective group</a></div>
 		</td>";
 
 
-    $pC .= "</table><br><input type='button' onClick='submitForm();' value='Save for $deCatalogYear'> $buttonMsg</div>";
+    $pC .= "</table><br><input type='button' onClick='submitForm();' value='Save for $de_catalog_year'> $button_msg</div>";
 
   }
   $pC .= "<div class='elevenpt'>If you need more semester boxes, simply save this page, and additional blank
@@ -4281,13 +4281,13 @@ function displayEditSpecificDegree($msg = "", $boolScrollPage = false, $boolButt
 			 <a href='javascript: popupAlertHelp(\"public_note\");'>(Help - Public Note)</a>
 			 <a href='javascript: popupAlertHelp(\"edit_formatting\");'>(Help - Formatting)</a>
 			<br>
-			<textarea name='public_note' rows='4' cols='80'>$degree->publicNote</textarea>
+			<textarea name='public_note' rows='4' cols='80'>$degree->public_note</textarea>
 			
 			
 			</div>
 			
 			
-			<input type='button' onClick='submitForm();' value='Save for $deCatalogYear'> $buttonMsg</div>
+			<input type='button' onClick='submitForm();' value='Save for $de_catalog_year'> $button_msg</div>
 			
 			"; 
 
@@ -4298,23 +4298,23 @@ function displayEditSpecificDegree($msg = "", $boolScrollPage = false, $boolButt
 
   $pC .= "				<div align='right'>
 					Delete this degree? <input type='button' value='X'
-									onClick='deleteDegree(\"$degreeID\");'>
+									onClick='deleteDegree(\"$degree_id\");'>
 				</div>			
         ";
 
 
-  $pC .= getJS();
-  $screen->pageTitle = "FlightPath Admin - Edit Degree";
+  $pC .= get_j_s();
+  $screen->page_title = "FlightPath Admin - Edit Degree";
 
-  if ($boolScrollPage == true)
+  if ($bool_scroll_page == true)
   {
-    $screen->pageScrollTop = trim($_POST["scrollTop"]);
+    $screen->page_scroll_top = trim($_POST["scroll_top"]);
   }
-  $screen->pageHideReportError = true;
+  $screen->page_hide_report_error = true;
   //include("template/fp_template.php");
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
   if ($_REQUEST["serialize"] != "")
@@ -4324,11 +4324,11 @@ function displayEditSpecificDegree($msg = "", $boolScrollPage = false, $boolButt
 
 }
 
-function convertHTMLToBBCode($str)
+function convert_h_t_m_l_to_b_b_code($str)
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_convertHTMLToBBCode";
+  $function = "admin_convert_h_t_m_l_to_b_b_code";
   if (function_exists($function)) {
     return call_user_func($function, $str);
   }
@@ -4346,31 +4346,31 @@ function convertHTMLToBBCode($str)
 }
 
 
-function displayEditDegrees($msg = "")
+function display_edit_degrees($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayEditDegrees";
+  $function = "admin_display_edit_degrees";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $screen, $db;
   $db2 = new DatabaseHandler();
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   $pC = "";
 
-  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu.</a><br>
-			<h2 style='margin-bottom: 5px;'>Edit Degrees for $deCatalogYear</h2>$msg
+  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu.</a><br>
+			<h2 style='margin-bottom: 5px;'>Edit Degrees for $de_catalog_year</h2>$msg
 			<div class='tenpt'>
-				<a href='admin.php?performAction=addNewDegree&deCatalogYear=$deCatalogYear'>Add new degree plan (major, concentration, or track)</a>.
+				<a href='admin.php?performAction=addNewDegree&de_catalog_year=$de_catalog_year'>Add new degree plan (major, concentration, or track)</a>.
 				&nbsp; &nbsp; | &nbsp; &nbsp;
-				<a href='admin.php?performAction=copyDegree&deCatalogYear=$deCatalogYear'>Copy a degree plan</a>.
+				<a href='admin.php?performAction=copyDegree&de_catalog_year=$de_catalog_year'>Copy a degree plan</a>.
 				<br><br>
 			</div>
 			<div class='tenpt' style='background-color: lightgray;'>
@@ -4383,11 +4383,11 @@ function displayEditDegrees($msg = "")
 			</div>
 			";
 
-  $res = $db->dbQuery("SELECT * FROM draft_degrees
+  $res = $db->db_query("SELECT * FROM draft_degrees
 							WHERE `catalog_year`='?'
-						 ORDER BY degree_type, major_code, title ", $deCatalogYear);
+						 ORDER BY degree_type, major_code, title ", $de_catalog_year);
 
-  while($cur = $db->dbFetchArray($res))
+  while($cur = $db->db_fetch_array($res))
   {
     $db_exclude = 0;
     extract($cur, 3, "db");
@@ -4404,7 +4404,7 @@ function displayEditDegrees($msg = "")
     }
 
     /*
-    $onMouseOver = " onmouseover=\"style.backgroundColor='#FFFF99'\"
+    $on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
     onmouseout=\"style.backgroundColor='$bgc'\" ";
     */
 
@@ -4412,42 +4412,42 @@ function displayEditDegrees($msg = "")
 
     // get JUST the major code...
     $temp = split("\|", $db_major_code);
-    $justMajor = trim($temp[0]);
-    $justConc = trim($temp[1]);
+    $just_major = trim($temp[0]);
+    $just_conc = trim($temp[1]);
     $outside = "";
 
-    //if ($justConc != "" && strstr($justConc, "_"))
-    if (strstr($justConc, "_"))
+    //if ($just_conc != "" && strstr($just_conc, "_"))
+    if (strstr($just_conc, "_"))
     {
       // If the concentration has an underscore, it's actually
       // a track.  Let's get the track title...
-      $temp2 = split("_",$justConc);
-      $justTrack = trim($temp2[1]);
+      $temp2 = split("_",$just_conc);
+      $just_track = trim($temp2[1]);
       // Might need to add the first part BACK onto the major...
       if (trim($temp2[0]) != "")
       {
-        $justMajor .= "|" . trim($temp2[0]);
+        $just_major .= "|" . trim($temp2[0]);
       }
 
 
-      $res2 = $db2->dbQuery("SELECT * FROM draft_degree_tracks
+      $res2 = $db2->db_query("SELECT * FROM draft_degree_tracks
 								WHERE `catalog_year`='?'
 								AND `major_code`='?'
-								AND `track_code`='?' ", $deCatalogYear, $justMajor, $justTrack);
-      if ($db2->dbNumRows($res2) > 0)
+								AND `track_code`='?' ", $de_catalog_year, $just_major, $just_track);
+      if ($db2->db_num_rows($res2) > 0)
       {
-        $cur2 = $db2->dbFetchArray($res2);
+        $cur2 = $db2->db_fetch_array($res2);
 
         $db_title = trim($cur2["track_title"]);
         $outside = "----&gt;";
-        if (strstr($justMajor, "|"))
+        if (strstr($just_major, "|"))
         { // both a conc AND a track. Denote it special.
           $outside = ">>" . $outside;
         }
         $db_degree_type = "";
 
       }
-    } else if($justConc != "")
+    } else if($just_conc != "")
     {
       // Meaning, this is a concentration, NOT a track.
       $db_degree_type = "";
@@ -4458,9 +4458,9 @@ function displayEditDegrees($msg = "")
 
     $pC .= "<a name='degree_$db_degree_id'></a>";
     $pC .= "<div class='elevenpt' style='padding-bottom: 3px; padding-top: 3px; background-color: $bgc'
-						$onMouseOver>
-					<img src='$screen->themeLocation/images/$img' width='16'> $outside
-						<a href='admin.php?performAction=editSpecificDegree&deCatalogYear=$deCatalogYear&majorCode=$db_major_code' class='degree-$db_degree_class'>
+						$on_mouse_over>
+					<img src='$screen->theme_location/images/$img' width='16'> $outside
+						<a href='admin.php?performAction=editSpecificDegree&de_catalog_year=$de_catalog_year&major_code=$db_major_code' class='degree-$db_degree_class'>
 							$db_degree_type $db_title $db_major_code</a>
 				</div>";
 
@@ -4480,46 +4480,46 @@ function displayEditDegrees($msg = "")
 
           </style>";
   
-  $screen->pageTitle = "FlightPath Admin - Degrees";
+  $screen->page_title = "FlightPath Admin - Degrees";
 
-  $screen->pageHideReportError = true;
+  $screen->page_hide_report_error = true;
   //include("template/fp_template.php");
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
 
-function displayEditGroups($msg = "")
+function display_edit_groups($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayEditGroups";
+  $function = "admin_display_edit_groups";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $screen, $db;
 
   $db2 = new DatabaseHandler();
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   $pC = "";
 
-  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu.</a><br>
-			<h2 style='margin-bottom:2px;'>Edit Groups for $deCatalogYear</h2>$msg
+  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu.</a><br>
+			<h2 style='margin-bottom:2px;'>Edit Groups for $de_catalog_year</h2>$msg
         Options:
 				<ul style='margin-top: 5px;'>
-				  <li><a href='admin.php?performAction=editSpecificGroup&groupID=new&deCatalogYear=$deCatalogYear'>Add a new group to this year</a><br>
+				  <li><a href='admin.php?performAction=editSpecificGroup&group_id=new&de_catalog_year=$de_catalog_year'>Add a new group to this year</a><br>
 					</li>
-					<li><a href='javascript: processDefinitions($deCatalogYear);'>Process all group definitions for this year</a>
+					<li><a href='javascript: processDefinitions($de_catalog_year);'>Process all group definitions for this year</a>
 					</li>
 				</ul>
 					<div align='center'>(Hint: use CTRL-F to search groups)</div>
@@ -4533,32 +4533,32 @@ function displayEditGroups($msg = "")
 				</tr>
 			";
 
-  $onMouseOver = " onmouseover=\"style.backgroundColor='#FFFF99'\"
+  $on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
       				onmouseout=\"style.backgroundColor='white'\" ";
 
-  $res = $db->dbQuery("SELECT * FROM draft_groups
+  $res = $db->db_query("SELECT * FROM draft_groups
 							WHERE `catalog_year`='?'
 							AND `delete_flag`='0'
-							ORDER BY `title`, `group_name` ", $deCatalogYear);
-  while($cur = $db->dbFetchArray($res))
+							ORDER BY `title`, `group_name` ", $de_catalog_year);
+  while($cur = $db->db_fetch_array($res))
   {
     extract($cur, 3, "db");
 
-    $useCount = 0;
+    $use_count = 0;
     // Find out how many degree plans are using this particular group...
 
-    $res2 = $db->dbQuery("SELECT count(id) AS count FROM draft_degree_requirements
+    $res2 = $db->db_query("SELECT count(id) AS count FROM draft_degree_requirements
 								WHERE `group_id`='$db_group_id' ");
-    if ($db->dbNumRows($res2) > 0)
+    if ($db->db_num_rows($res2) > 0)
     {
-      $cur2 = $db->dbFetchArray($res2);
-      $useCount = $cur2["count"];
+      $cur2 = $db->db_fetch_array($res2);
+      $use_count = $cur2["count"];
     }
 
-    $defFlag = "";
+    $def_flag = "";
     if (trim($db_definition) != "")
     {
-      $defFlag = " (*)";
+      $def_flag = " (*)";
     }
 
     if ($db_title == "")
@@ -4566,22 +4566,22 @@ function displayEditGroups($msg = "")
       $db_title = "[NO TITLE SPECIFIED]";
     }
 
-    $pC .= "<tr $onMouseOver>
+    $pC .= "<tr $on_mouse_over>
 					<td valign='top' class='tenpt'><a name='group_$db_group_id'></a>
-						<a href='admin.php?performAction=editSpecificGroup&groupID=$db_group_id&deCatalogYear=$deCatalogYear'>
+						<a href='admin.php?performAction=editSpecificGroup&group_id=$db_group_id&de_catalog_year=$de_catalog_year'>
 							$db_title</a>
 					</td>
 					<td valign='top' class='tenpt'>
-						<i>$db_group_name</i>$defFlag
+						<i>$db_group_name</i>$def_flag
 					</td>
 					<td valign='top' class='tenpt'>
 						$db_priority
 					</td>
 					<td valign='top' class='tenpt'>
-						<img src='$screen->themeLocation/images/icons/$db_icon_filename' width='19'>
+						<img src='$screen->theme_location/images/icons/$db_icon_filename' width='19'>
 					</td>
 					<td valign='top' class='tenpt'>
-						$useCount <a href='javascript: popupWindow(\"admin.php?performAction=popupShowGroupUse&groupID=$db_group_id\");'><img src='$screen->themeLocation/images/popup.gif' border='0'></a>
+						$use_count <a href='javascript: popupWindow(\"admin.php?performAction=popup_show_group_use&group_id=$db_group_id\");'><img src='$screen->theme_location/images/popup.gif' border='0'></a>
 					</td>
 
 					
@@ -4590,124 +4590,124 @@ function displayEditGroups($msg = "")
 
   $pC .= "</table>";
 
-  $pC .= getJS();
-  $screen->pageTitle = "FlightPath Admin - Groups";
+  $pC .= get_j_s();
+  $screen->page_title = "FlightPath Admin - Groups";
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
-function performEditUrgentMsg()
+function perform_edit_urgent_msg()
 {
   
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performEditUrgentMsg";
+  $function = "admin_perform_edit_urgent_msg";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   
   global $db;
 
-  $urgentMsg = trim(strip_tags($_POST["urgentMsg"]));
-  $db->setSettingsVariable("urgentMsg", $urgentMsg);
+  $urgent_msg = trim(strip_tags($_POST["urgent_msg"]));
+  $db->set_settings_variable("urgent_msg", $urgent_msg);
   
-  displayEditUrgentMsg(getSuccessMsg("Successfully updated urgent message at " . getCurrentTime()));
+  display_edit_urgent_msg(get_success_msg("Successfully updated urgent message at " . get_current_time()));
 }
 
 
 
-function performEditOfflineMode()
+function perform_edit_offline_mode()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performEditOfflineMode";
+  $function = "admin_perform_edit_offline_mode";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $db;
 
-  $offlineMsg = trim(strip_tags($_POST["offlineMsg"]));
-  $db->setSettingsVariable("offlineMsg", $offlineMsg);
+  $offline_msg = trim(strip_tags($_POST["offline_msg"]));
+  $db->set_settings_variable("offline_msg", $offline_msg);
   
-  $offlineMode = trim(strip_tags($_POST["offlineMode"]));
-  $db->setSettingsVariable("offlineMode", $offlineMode);
+  $offline_mode = trim(strip_tags($_POST["offline_mode"]));
+  $db->set_settings_variable("offline_mode", $offline_mode);
   
 
-  displayEditOfflineMode(getSuccessMsg("Successfully updated offline mode settings at " . getCurrentTime()));
+  display_edit_offline_mode(get_success_msg("Successfully updated offline mode settings at " . get_current_time()));
 }
 
 
-function performEditFlightPathSettings()
+function perform_edit_flight_path_settings()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performEditFlightPathSettings";
+  $function = "admin_perform_edit_flight_path_settings";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $db;
 
-  $availableAdvisingTermIDs = trim(strip_tags($_POST["availableAdvisingTermIDs"]));
-  $db->setSettingsVariable("availableAdvisingTermIDs", $availableAdvisingTermIDs);
+  $available_advising_term_ids = trim(strip_tags($_POST["available_advising_term_ids"]));
+  $db->set_settings_variable("available_advising_term_ids", $available_advising_term_ids);
   
-  $advisingTermID = trim(strip_tags($_POST["advisingTermID"]));
-  $db->setSettingsVariable("advisingTermID", $advisingTermID);
+  $advising_term_id = trim(strip_tags($_POST["advising_term_id"]));
+  $db->set_settings_variable("advising_term_id", $advising_term_id);
 
   
-  $currentCatalogYear = trim(strip_tags($_POST["currentCatalogYear"]));
-  $db->setSettingsVariable("currentCatalogYear", $currentCatalogYear);  
+  $current_catalog_year = trim(strip_tags($_POST["current_catalog_year"]));
+  $db->set_settings_variable("current_catalog_year", $current_catalog_year);  
 
-  $currentDraftCatalogYear = trim(strip_tags($_POST["currentDraftCatalogYear"]));
-  $db->setSettingsVariable("currentDraftCatalogYear", $currentDraftCatalogYear);
+  $current_draft_catalog_year = trim(strip_tags($_POST["current_draft_catalog_year"]));
+  $db->set_settings_variable("current_draft_catalog_year", $current_draft_catalog_year);
 
   // Save the entire post to the log.
-  $postXML = fp_arrayToXml("post",$_POST, true);
-  $db->addToLog("admin_edit_settings","",$postXML);
+  $post_x_m_l = fp_array_to_xml("post",$_POST, true);
+  $db->add_to_log("admin_edit_settings","",$post_x_m_l);
 
 
-  displayEditFlightPathSettings(getSuccessMsg("Successfully updated FlightPath advising settings at " . getCurrentTime()));
+  display_edit_flight_path_settings(get_success_msg("Successfully updated FlightPath advising settings at " . get_current_time()));
 }
 
 
-function performEditAnnouncements()
+function perform_edit_announcements()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_performEditAnnouncements";
+  $function = "admin_perform_edit_announcements";
   if (function_exists($function)) {
     return call_user_func($function);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $db;
-  $xmlArray = array();
+  $xml_array = array();
   // Saves the announcements in the POST.
   foreach($_POST as $key => $value)
   {
@@ -4722,8 +4722,8 @@ function performEditAnnouncements()
       {
         $dt = rand(1,99999);
       }
-      $announcementText = trim(strip_tags($_POST["announcement_$count"]));
-      if ($announcementText == "")
+      $announcement_text = trim(strip_tags($_POST["announcement_$count"]));
+      if ($announcement_text == "")
       {
         continue;
       }
@@ -4731,28 +4731,28 @@ function performEditAnnouncements()
       $visible = trim($_POST["visible_$count"]);
 
       // UPDATE the xmlArray...
-      $xmlArray["dt_$dt"] = "$visible ~~ $announcementText";
+      $xml_array["dt_$dt"] = "$visible ~~ $announcement_text";
 
     }
   }
   // Now, convert to XML and UPDATE the table.
-  $xml = fp_arrayToXml("announcements",$xmlArray);
-  $db->setSettingsVariable("announcements_xml", $xml);
+  $xml = fp_array_to_xml("announcements",$xml_array);
+  $db->set_settings_variable("announcements_xml", $xml);
   
   
   // Save the entire post to the log.
-  $postXML = fp_arrayToXml("post",$_POST, true);
-  $db->addToLog("admin_edit_announcements","",$postXML);
+  $post_x_m_l = fp_array_to_xml("post",$_POST, true);
+  $db->add_to_log("admin_edit_announcements","",$post_x_m_l);
 
 
-  displayEditAnnouncements(getSuccessMsg("Successfully updated announcements at " . getCurrentTime()));
+  display_edit_announcements(get_success_msg("Successfully updated announcements at " . get_current_time()));
 }
 
-function getSuccessMsg($msg)
+function get_success_msg($msg)
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_getSuccessMsg";
+  $function = "admin_get_success_msg";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
@@ -4767,64 +4767,64 @@ function getSuccessMsg($msg)
 }
 
 
-function displayEditFlightPathSettings($msg = "")
+function display_edit_flight_path_settings($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayEditFlightPathSettings";
+  $function = "admin_display_edit_flight_path_settings";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $screen, $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   $pC = "";
-  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu.</a><br>
+  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu.</a><br>
 			<h2>Edit FlightPath Advising Settings</h2>$msg
 			<div class='elevenpt'>
 			<form action='admin.php' method='post'>
-			<input type='hidden' name='performAction' value='performEditFlightPathSettings'>";
+			<input type='hidden' name='performAction' value='perform_edit_flight_path_settings'>";
 
-  $settings = $db->getFlightPathSettings();
+  $settings = $db->get_flight_path_settings();
 
   $pC .= "FP Term Quick Reference:";
   $sems = array(40,41, 60,81,82);
-  for($t = $settings["currentCatalogYear"]; $t <= $settings["currentCatalogYear"] + 2; $t++) {
+  for($t = $settings["current_catalog_year"]; $t <= $settings["current_catalog_year"] + 2; $t++) {
     $pC .= "<div style='padding-left: 15px;'>";
     foreach($sems as $sm) {
-      $tryYear = $t . $sm;
+      $try_year = $t . $sm;
       $course = new Course();
-      $course->termID = $tryYear;
-      $pC .= "" . $course->getTermDescription(true) . ": <b>$course->termID</b>, &nbsp; &nbsp; &nbsp;";
+      $course->term_id = $try_year;
+      $pC .= "" . $course->get_term_description(true) . ": <b>$course->term_id</b>, &nbsp; &nbsp; &nbsp;";
     }
     $pC .= "</div>";
   }  
   
   $pC .= "<br>
       Available Advising Terms: (seperate by commas. Ex: 200940,200941,200960)<br>
-			<input type='text' name='availableAdvisingTermIDs' value='{$settings["availableAdvisingTermIDs"]}' maxlength='100' size='40'>
+			<input type='text' name='availableAdvisingTermIDs' value='{$settings["available_advising_term_ids"]}' maxlength='100' size='40'>
 			<div style='font-size:8pt;'>* Make sure to list these in order, so they will appear in order in FP.</div>
 			<br>
 			Default advising term:<br>
-			<input type='text' name='advisingTermID' value='{$settings["advisingTermID"]}' maxlength='100' size='40'>
+			<input type='text' name='advisingTermID' value='{$settings["advising_term_id"]}' maxlength='100' size='40'>
 			<div style='font-size:8pt;'>* Of the Available Advising Terms, this should be the default that FlightPath is set to
 					when an advisor logs in. Ex: 200940.</div>
 			
 			<br>
 			Current catalog year:<br>
-			<input type='text' name='currentCatalogYear' value='{$settings["currentCatalogYear"]}' maxlength='100' size='40'>
+			<input type='text' name='currentCatalogYear' value='{$settings["current_catalog_year"]}' maxlength='100' size='40'>
 			<div style='font-size:8pt;'>* This is the year that What If loads degrees from, as well as several other important functions.  
 				Only change this once you have
 						fully loaded a new catalog year.</div>
 
 			<br>
 			Current <b>DRAFT</b> catalog year:<br>
-			<input type='text' name='currentDraftCatalogYear' value='{$settings["currentDraftCatalogYear"]}' maxlength='100' size='40'>
+			<input type='text' name='currentDraftCatalogYear' value='{$settings["current_draft_catalog_year"]}' maxlength='100' size='40'>
 			<div style='font-size:8pt;'>* <b>While in Draft mode</b>, this is the year that What If loads degrees from, as well as several other important functions.  
 				You may change this while working on a new catalog.  It will not
 				affect any other users of the system.  While not working on a new catalog,
@@ -4837,50 +4837,50 @@ function displayEditFlightPathSettings($msg = "")
 			</form></div>";
 
 
-  $pC .= getJS();
+  $pC .= get_j_s();
 
-  $screen->pageTitle = "FlightPath Admin - FlightPath Settings";
-  $screen->pageHideReportError = true;
+  $screen->page_title = "FlightPath Admin - FlightPath Settings";
+  $screen->page_hide_report_error = true;
   //include("template/fp_template.php");
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
-function displayCopyDegree($msg = "")
+function display_copy_degree($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayCopyDegree";
+  $function = "admin_display_copy_degree";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   
   global $screen, $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   $pC = "";
-  $pC .= "<a class='tenpt' href='admin.php?performAction=editDegrees&deCatalogYear=$deCatalogYear'>Back to Degrees List</a>
+  $pC .= "<a class='tenpt' href='admin.php?performAction=editDegrees&de_catalog_year=$de_catalog_year'>Back to Degrees List</a>
 			&nbsp; - &nbsp;
-			<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu</a>
+			<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu</a>
 			
 			<br>
-			<h2>Copy Degree for $deCatalogYear</h2>$msg
+			<h2>Copy Degree for $de_catalog_year</h2>$msg
       
       <div>Use this form to copy (duplicate) a degree plan <b>in this
       catalog year</b>.</div>
 					<br><br>
 			<form action='admin.php' method='post'>
-			 <input type='hidden' name='deCatalogYear' value='$deCatalogYear'>
-			 <input type='hidden' name='performAction' value='performCopyDegree'>
+			 <input type='hidden' name='deCatalogYear' value='$de_catalog_year'>
+			 <input type='hidden' name='performAction' value='perform_copy_degree'>
 			 
 			 Enter the SOURCE major code you wish to copy:<br>
 			 Source: <input type='text' name='sourceMajorCode' size='5'>
@@ -4900,7 +4900,7 @@ function displayCopyDegree($msg = "")
 			 <div style='font-size: 8pt'><b>Ex: CHEM or XYZ</b>. Do not enter any track or concentration codes here.
 			  <br>
 			  <b>Note:</b> if the destination major already exists, it, and <b>all its tracks and concentrations</b>
-			         will be deleted for <b>$deCatalogYear</b>!</div>
+			         will be deleted for <b>$de_catalog_year</b>!</div>
 			   
 			 
 			 <br><br>
@@ -4921,52 +4921,52 @@ function displayCopyDegree($msg = "")
 			
   ";  
   
-  $screen->pageTitle = "FlightPath Admin - Copy Degree";
+  $screen->page_title = "FlightPath Admin - Copy Degree";
 
   //include("template/fp_template.php");
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
   
 }
 
 
 
-function displayAddNewDegree($msg = "")
+function display_add_new_degree($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayAddNewDegree";
+  $function = "admin_display_add_new_degree";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
   //////////////////////////////////
     
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   global $screen, $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   $pC = "";
-  $pC .= "<a class='tenpt' href='admin.php?performAction=editDegrees&deCatalogYear=$deCatalogYear'>Back to Degrees List</a>
+  $pC .= "<a class='tenpt' href='admin.php?performAction=editDegrees&de_catalog_year=$de_catalog_year'>Back to Degrees List</a>
 			&nbsp; - &nbsp;
-			<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu</a>
+			<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu</a>
 			
 			<br>
-			<h2>Add New Degree for $deCatalogYear</h2>$msg
+			<h2>Add New Degree for $de_catalog_year</h2>$msg
 	
 			You may use this screen to add a new degree, by entering a new
 			major, concentration, or track (degree option).
 			
 			<form action='admin.php' method='post'>
-			<input type='hidden' name='deCatalogYear' value='$deCatalogYear'>
-			<input type='hidden' name='performAction' value='performAddNewDegree'>
+			<input type='hidden' name='deCatalogYear' value='$de_catalog_year'>
+			<input type='hidden' name='performAction' value='perform_add_new_degree'>
 			Please select an option:<br>
 				<blockquote>
 				<input type='radio' name='newMajor' value='new' checked>Enter a <b>new</b> major code [and concentration]<br>
 				<input type='radio' name='newMajor' value='existing'>Enter an <b>existing</b> major code [and concentration] (only adding a new track)<br>
-				&nbsp; &nbsp; Major|Conc code: <input type='text' name='majorCode' value='' size='8'>
+				&nbsp; &nbsp; Major|Conc code: <input type='text' name='major_code' value='' size='8'>
 					<div style='font-size: 9pt; padding-left: 20px;'>
 					To enter a concentration code, use MAJOR|CONC.  The | character is
 					call the pipe, and it should under the backspace key.
@@ -4981,7 +4981,7 @@ function displayAddNewDegree($msg = "")
 
 				<input type='radio' name='newTrack' value='new'>Enter a <b>new</b> track (degree option) code<br>
 				<input type='radio' name='newTrack' value='none' checked>N/A  (not adding a track. Leave blank)<br>
-				&nbsp; &nbsp; Track code: <input type='text' name='trackCode' value='' size='4'>
+				&nbsp; &nbsp; Track code: <input type='text' name='track_code' value='' size='4'>
 				
 				
 				</blockquote>
@@ -4996,40 +4996,40 @@ function displayAddNewDegree($msg = "")
 
 
 
-  $screen->pageTitle = "FlightPath Admin - Add New Degree";
+  $screen->page_title = "FlightPath Admin - Add New Degree";
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
-function displayApplyDraftChanges($msg = "")
+function display_apply_draft_changes($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayApplyDraftChanges";
+  $function = "admin_display_apply_draft_changes";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   
   global $screen, $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
-  $curCat = $screen->settings["currentCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
+  $cur_cat = $screen->settings["current_catalog_year"];
   $pC = "";
-  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu.</a><br>
+  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu.</a><br>
 			<h2>Apply Draft Changes</h2>$msg
 			<div class='elevenpt'>
-			<form action='admin.php?deCatalogYear=$deCatalogYear' method='post'>
-			<input type='hidden' name='performAction' value='performApplyDraftChanges'>";
+			<form action='admin.php?deCatalogYear=$de_catalog_year' method='post'>
+			<input type='hidden' name='performAction' value='perform_apply_draft_changes'>";
 
 
   $pC .= "	You can use this form to apply your draft changes to the production database,
@@ -5045,13 +5045,13 @@ function displayApplyDraftChanges($msg = "")
 			</form></div>";
 
 
-  $pC .= getJS();
+  $pC .= get_j_s();
 
-  $screen->pageTitle = "FlightPath Admin - Apply Draft Changes";
+  $screen->page_title = "FlightPath Admin - Apply Draft Changes";
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 }
 
@@ -5065,11 +5065,11 @@ function displayApplyDraftChanges($msg = "")
  * @param unknown_type $msg
  * @return unknown
  */
-function displayTransferData($msg = "")
+function display_transfer_data($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayTransferData";
+  $function = "admin_display_transfer_data";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
@@ -5077,14 +5077,14 @@ function displayTransferData($msg = "")
   
   
   global $screen, $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
-  $curCat = $screen->settings["currentCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
+  $cur_cat = $screen->settings["current_catalog_year"];
   $pC = "";
-  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu.</a><br>
+  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu.</a><br>
 			<h2>Transfer Data to Production Server</h2>$msg
 			<div class='elevenpt'>
-			<form action='admin.php?deCatalogYear=$deCatalogYear' method='post'>
-			<input type='hidden' name='performAction' value='performTransferData'>";
+			<form action='admin.php?deCatalogYear=$de_catalog_year' method='post'>
+			<input type='hidden' name='performAction' value='perform_transfer_data'>";
 
 
   $pC .= "For some small amounts of data, you can automatically transfer
@@ -5096,7 +5096,7 @@ function displayTransferData($msg = "")
 				Check what data you would like to transfer to production:
 				<blockquote>
 				<input type='radio' name='transfer' value='settings' checked=checked> Announcements, Urgent Msg, and FlightPath settings.<br>
-				&nbsp; &nbsp; &nbsp; &nbsp; (current catalog year is <b>$curCat</b>)<br>
+				&nbsp; &nbsp; &nbsp; &nbsp; (current catalog year is <b>$cur_cat</b>)<br>
 				<input type='radio' name='transfer' value='users'> User Privileges.<br>
 				<input type='radio' name='transfer' value='help'> Help pages.<br>
 				
@@ -5114,36 +5114,36 @@ function displayTransferData($msg = "")
 			</form></div>";
 
 
-  $pC .= getJS();
+  $pC .= get_j_s();
 
-  $screen->pageTitle = "FlightPath Admin - Transfer Data";
+  $screen->page_title = "FlightPath Admin - Transfer Data";
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 }
 
 
 
-function displayEditHelp($msg = "")
+function display_edit_help($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayEditHelp";
+  $function = "admin_display_edit_help";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $screen, $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   $pC = "";
-  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu.</a><br>
+  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu.</a><br>
 			<h2>Edit Help</h2>$msg
 			<div class='elevenpt'>
 			<form action='admin.php' method='post' name='form1' id='form1'>
@@ -5154,8 +5154,8 @@ function displayEditHelp($msg = "")
 					<option value='0'>-- Please select --</option>
 					";
 
-  $res = $db->dbQuery("SELECT * FROM help ORDER BY `id` ");
-  while ($cur = $db->dbFetchArray($res))
+  $res = $db->db_query("SELECT * FROM help ORDER BY `id` ");
+  while ($cur = $db->db_fetch_array($res))
   {
     $pC .= "<option value='{$cur["id"]}'>{$cur["id"]} : {$cur["title"]}</option> \n";
   }
@@ -5164,40 +5164,40 @@ function displayEditHelp($msg = "")
 		
 		<input type='submit' value='Load page ->'>
 		</form>";
-  $pageID = trim($_POST["pageID"]);
+  $page_id = trim($_POST["page_id"]);
 
-  if ($pageID < 1 && $pageID != "new") {$pageID = 1;} // default to main page.
+  if ($page_id < 1 && $page_id != "new") {$page_id = 1;} // default to main page.
 
-  $helpPage = $db->getHelpPage($pageID);
+  $help_page = $db->get_help_page($page_id);
 
-  $pageURL = "";
+  $page_u_r_l = "";
 
   $pC .= "
 		<hr>
 		<b>Editing page:</b> ";
-  if ($pageID != "new")
+  if ($page_id != "new")
   {
 
-    $pC .= "(<a href='help.php?i=$pageID' target='_blank'>click to load page in new window</a>)";
-    $pageURL = "<br>Page URL: <tt style='background-color: beige;'>help.php?i=$pageID</tt>
-						 <br>&nbsp; &nbsp; &nbsp; BBCode popup link (loads in a popup window): <span style='background-color: beige;'>[popup=help.php?i=$pageID]Click here![/popup]</span>
-						 <!-- <br>&nbsp; &nbsp; &nbsp; BBCode internal link (loads in same window): <span style='background-color: beige;'>[url2=help.php?i=$pageID]Click here![/url2]</span> -->
+    $pC .= "(<a href='help.php?i=$page_id' target='_blank'>click to load page in new window</a>)";
+    $page_u_r_l = "<br>Page URL: <tt style='background-color: beige;'>help.php?i=$page_id</tt>
+						 <br>&nbsp; &nbsp; &nbsp; BBCode popup link (loads in a popup window): <span style='background-color: beige;'>[popup=help.php?i=$page_id]Click here![/popup]</span>
+						 <!-- <br>&nbsp; &nbsp; &nbsp; BBCode internal link (loads in same window): <span style='background-color: beige;'>[url2=help.php?i=$page_id]Click here![/url2]</span> -->
 						 ";
-    $db->addToLog("admin_edit_help","$pageID");
+    $db->add_to_log("admin_edit_help","$page_id");
 
   }
   $pC .= "
 		<br>
 		<form method='post' action='admin.php' name='mainform' id='mainform'>
-		<input type='hidden' name='performAction' value='performEditHelp'>
+		<input type='hidden' name='performAction' value='perform_edit_help'>
 		<input type='hidden' name='scrollTop' id='scrollTop' value=''>
-		<input type='hidden' name='pageID' value='$pageID'>
+		<input type='hidden' name='pageID' value='$page_id'>
 		";		
 
 
-  $pC .= "Page: $pageID $pageURL<br>Title: <input type='text' name='title' value='{$helpPage["title"]}' maxlength='100' size='60'>
+  $pC .= "Page: $page_id $page_u_r_l<br>Title: <input type='text' name='title' value='{$help_page["title"]}' maxlength='100' size='60'>
 					<br>Body: <font size='1'><b>Trouble with Copy/Paste? Use keyboard shortcuts CTRL-C and CTRL-V.</b></font><br>
-					<textarea name='body' rows='20' cols='80'>{$helpPage["body"]}</textarea>
+					<textarea name='body' rows='20' cols='80'>{$help_page["body"]}</textarea>
 					<br><br>
 						";
 
@@ -5206,40 +5206,40 @@ function displayEditHelp($msg = "")
 			</form></div>";
 
 
-  $pC .= getJS();
-  $pC .= getJSTinyMCE();
+  $pC .= get_j_s();
+  $pC .= get_j_s_tiny_m_c_e();
 
-  $screen->pageTitle = "FlightPath Admin - Help";
+  $screen->page_title = "FlightPath Admin - Help";
 
-  $screen->pageHideReportError = true;
-  $screen->pageContent = $pC;
-  $screen->pageScrollTop = $_POST["scrollTop"];
+  $screen->page_hide_report_error = true;
+  $screen->page_content = $pC;
+  $screen->page_scroll_top = $_POST["scroll_top"];
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
 
-function displayEditUrgentMsg($msg = "")
+function display_edit_urgent_msg($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayEditUrgentMsg";
+  $function = "admin_display_edit_urgent_msg";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $screen, $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   $pC = "";
-  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu.</a><br>
+  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu.</a><br>
 			<h2>Edit Urgent Message</h2>$msg
 			<div class='elevenpt'>
 			Any message you enter here will be displayed at the top of every page
@@ -5250,13 +5250,13 @@ function displayEditUrgentMsg($msg = "")
 			<a href='javascript: popupAlertHelp(\"edit_formatting\");'>Click to view <b>formatting</b> help.</a>
 			</div>
 			<hr><div class='elevenpt'><form action='admin.php' method='post'>
-			<input type='hidden' name='performAction' value='performEditUrgentMsg'>";
+			<input type='hidden' name='performAction' value='perform_edit_urgent_msg'>";
 
-  $settings = $db->getFlightPathSettings();
+  $settings = $db->get_flight_path_settings();
 
   $pC .= "Urgent Message:
 					<br>
-					<textarea name='urgentMsg' rows='3' cols='60'>{$settings["urgentMsg"]}</textarea>
+					<textarea name='urgentMsg' rows='3' cols='60'>{$settings["urgent_msg"]}</textarea>
 					<br><br>
 						";
 
@@ -5265,40 +5265,40 @@ function displayEditUrgentMsg($msg = "")
 			</form></div>";
 
 
-  $pC .= getJS();
+  $pC .= get_j_s();
 
-  $screen->pageTitle = "FlightPath Admin - Urgent Message";
+  $screen->page_title = "FlightPath Admin - Urgent Message";
 
   //include("template/fp_template.php");
-  $screen->pageHideReportError = true;
-  $screen->pageContent = $pC;
+  $screen->page_hide_report_error = true;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
 
-function displayEditOfflineMode($msg = "")
+function display_edit_offline_mode($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayEditOfflineMode";
+  $function = "admin_display_edit_offline_mode";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   
   global $screen, $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   $pC = "";
-  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu.</a><br>
+  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu.</a><br>
 			<h2>Set/Unset Offline Mode</h2>$msg
 			<div class='elevenpt'>
 			If Offline Mode is enabled, logins will be disabled into FlightPath (though
@@ -5306,18 +5306,18 @@ function displayEditOfflineMode($msg = "")
 			directly to flightpath/admin.php).
 			</div>
 			<hr><div class='elevenpt'><form action='admin.php' method='post'>
-			<input type='hidden' name='performAction' value='performEditOfflineMode'>";
+			<input type='hidden' name='performAction' value='perform_edit_offline_mode'>";
 
-  $settings = $db->getFlightPathSettings();
+  $settings = $db->get_flight_path_settings();
 
   $pC .= "
           Offline Mode Setting:
-          <input type='text' name='offlineMode' size='2' value='{$settings["offlineMode"]}'>
+          <input type='text' name='offlineMode' size='2' value='{$settings["offline_mode"]}'>
           <div style='font-size: 9pt; padding-left: 10px;'>Enter <b>1</b> (one) to enable, <b>0</b> (zero) to disable</div>
           <br>
           Offline Message:
 					<br>
-					<textarea name='offlineMsg' rows='3' cols='60'>{$settings["offlineMsg"]}</textarea>
+					<textarea name='offlineMsg' rows='3' cols='60'>{$settings["offline_msg"]}</textarea>
           <div style='font-size: 9pt; padding-left: 10px;'>
             This message will be displayed instead of the login page when OfflineMode is enabled.
             Leave blank for a default message.  BBCode syntax is allowed for 
@@ -5332,39 +5332,39 @@ function displayEditOfflineMode($msg = "")
 			</form></div>";
 
 
-  $pC .= getJS();
+  $pC .= get_j_s();
 
-  $screen->pageTitle = "FlightPath Admin - Offline Mode";
+  $screen->page_title = "FlightPath Admin - Offline Mode";
 
   //include("template/fp_template.php");
-  $screen->pageHideReportError = true;
-  $screen->pageContent = $pC;
+  $screen->page_hide_report_error = true;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
 
-function displayEditAnnouncements($msg = "")
+function display_edit_announcements($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayEditAnnouncements";
+  $function = "admin_display_edit_announcements";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
   //////////////////////////////////
-  if (!userHasPermission("deCanAdministerDataEntry")) {
-    displayAccessDenied();
+  if (!user_has_permission("de_can_administer_data_entry")) {
+    display_access_denied();
   }
   
   
   global $screen, $db;
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   $pC = "";
-  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$deCatalogYear'>Back to main menu.</a><br>
+  $pC .= "<a class='tenpt' href='admin.php?deCatalogYear=$de_catalog_year'>Back to main menu.</a><br>
 			<h2>Edit Announcements</h2>$msg
 			<div class='elevenpt'>
 			These are the current announcements in the system.  To delete an
@@ -5379,26 +5379,26 @@ function displayEditAnnouncements($msg = "")
 			<a href='javascript: popupAlertHelp(\"edit_formatting\");'>Click to view <b>formatting</b> help.</a>
 			</div>
 			<hr><div class='elevenpt'><form action='admin.php' method='post'>
-			<input type='hidden' name='performAction' value='performEditAnnouncements'>";
+			<input type='hidden' name='performAction' value='perform_edit_announcements'>";
 
-  $settings = $db->getFlightPathSettings();
+  $settings = $db->get_flight_path_settings();
 
   $count = 0;
   // Pull out just the announcements XML and make it into its own array.
   if ($settings["announcements_xml"] != "")
   {
-    if ($xmlArray = fp_xmlToArray2($settings["announcements_xml"]))
+    if ($xml_array = fp_xml_to_array2($settings["announcements_xml"]))
     {
-      krsort($xmlArray);
+      krsort($xml_array);
       // Expected format of the xmlArray:
       //[dt_timecode] = "announcement text."
       // ex: dt_111234432.  Use strtotime to convert.
       // It begins with dt_ because in XML the start of
       // an element must be a letter, not a number.
-      foreach($xmlArray as $datetime => $announcement)
+      foreach($xml_array as $datetime => $announcement)
       {
         $dt = str_replace("dt_", "", $datetime);
-        $dispTime = date("Y-m-d H:i:s", $dt);
+        $disp_time = date("Y-m-d H:i:s", $dt);
         $pcheck = $fcheck = $hcheck = "";
         $pcheck = "checked=checked";
 
@@ -5406,7 +5406,7 @@ function displayEditAnnouncements($msg = "")
         // and the announcement itself.
         $temp = split(" ~~ ", $announcement);
         $vis = trim($temp[0]);
-        $announcementText = trim($temp[1]);
+        $announcement_text = trim($temp[1]);
 
         if ($vis == "faculty")
         {
@@ -5419,7 +5419,7 @@ function displayEditAnnouncements($msg = "")
           $hcheck = "checked=checked";
         }
 
-        $pC .= "Date/time: <input type='text' name='datetime_$count' value='$dispTime'>
+        $pC .= "Date/time: <input type='text' name='datetime_$count' value='$disp_time'>
 				         <a href='javascript: popupAlertHelp(\"datetime\");'>?</a>
 						<br>Visibility:
 							<input type='radio' name='visible_$count' value='public' $pcheck>Anyone (incl. students)
@@ -5430,7 +5430,7 @@ function displayEditAnnouncements($msg = "")
 							
 				        <br>Announcement:
 						<br>
-						<textarea name='announcement_$count' id='announcement_$count' rows='4' cols='70'>$announcementText</textarea>
+						<textarea name='announcement_$count' id='announcement_$count' rows='4' cols='70'>$announcement_text</textarea>
 						<div align='left'>
 						<a href='javascript: viewAnnouncementPreview(\"$count\");'>View Preview (in popup)</a>
 						</div>
@@ -5468,25 +5468,25 @@ function displayEditAnnouncements($msg = "")
 			</form></div>";
 
 
-  $pC .= getJS();
+  $pC .= get_j_s();
 
-  $screen->pageTitle = "FlightPath Admin - Announcements";
+  $screen->page_title = "FlightPath Admin - Announcements";
 
   //include("template/fp_template.php");
-  $screen->pageHideReportError = true;
-  $screen->pageContent = $pC;
+  $screen->page_hide_report_error = true;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
 
-function getJSTinyMCE()
+function get_j_s_tiny_m_c_e()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_getJSTinyMCE";
+  $function = "admin_get_j_s_tiny_m_c_e";
   if (function_exists($function)) {
     return call_user_func($function);
   }
@@ -5537,11 +5537,11 @@ function getJSTinyMCE()
 }
 
 
-function displayMainMenu($msg = "")
+function display_main_menu($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_displayMainMenu";
+  $function = "admin_display_main_menu";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
@@ -5552,9 +5552,9 @@ function displayMainMenu($msg = "")
 
   global $screen, $db;
 
-  $settings = $db->getFlightPathSettings();
+  $settings = $db->get_flight_path_settings();
 
-  $deCatalogYear = $GLOBALS["deCatalogYear"];
+  $de_catalog_year = $GLOBALS["de_catalog_year"];
   $pC = "";
 
   $sp = "&nbsp; &nbsp; &nbsp;";
@@ -5563,32 +5563,32 @@ function displayMainMenu($msg = "")
 			
 			Use the following options to edit the settings and data in FlightPath. <!--<a href='admin.php?performAction=logout'><b>Logout?</b> --></a>
 			";
-  if (userHasPermission("deCanAdministerUsers")) {
-    $pC .= $screen->drawMenuItem("admin.php?performAction=editUsers", "", "<img src='$screen->themeLocation/images/group.png' border='0'>",  "User Management");    
+  if (user_has_permission("de_can_administer_users")) {
+    $pC .= $screen->draw_menu_item("admin.php?perform_action=edit_users", "", "<img src='$screen->theme_location/images/group.png' border='0'>",  "User Management");    
   }
   
-  if (userHasPermission("deCanAdministerDataEntry")) {
+  if (user_has_permission("de_can_administer_data_entry")) {
         
-    $pC .= $screen->drawMenuItem("admin.php?performAction=editAnnouncements", "", "<img src='$screen->themeLocation/images/calendar_edit.png' border='0'>",  "Edit Announcements");
+    $pC .= $screen->draw_menu_item("admin.php?perform_action=edit_announcements", "", "<img src='$screen->theme_location/images/calendar_edit.png' border='0'>",  "Edit Announcements");
     
-    $pC .= $screen->drawMenuItem("admin.php?performAction=editUrgentMsg", "", "<img src='$screen->themeLocation/images/error.png' border='0'>",  "Edit Urgent Message");
+    $pC .= $screen->draw_menu_item("admin.php?perform_action=edit_urgent_msg", "", "<img src='$screen->theme_location/images/error.png' border='0'>",  "Edit Urgent Message");
     
-    $pC .= $screen->drawMenuItem("admin.php?performAction=editOfflineMode", "", "<img src='$screen->themeLocation/images/delete.png' border='0'>",  "Set/Unset Offline Mode");
+    $pC .= $screen->draw_menu_item("admin.php?perform_action=edit_offline_mode", "", "<img src='$screen->theme_location/images/delete.png' border='0'>",  "Set/Unset Offline Mode");
     
-    $pC .= $screen->drawMenuItem("admin.php?performAction=editHelp", "", "<img src='$screen->themeLocation/images/page_edit.png' border='0'>",  "Edit Help Pages");
+    $pC .= $screen->draw_menu_item("admin.php?perform_action=edit_help", "", "<img src='$screen->theme_location/images/page_edit.png' border='0'>",  "Edit Help Pages");
   }
 
 
   // Add module's menus....
-  $menus = getModulesMenus();  
+  $menus = get_modules_menus();  
   if (isset($menus["admin_console"])) {
-    $pC .= $screen->drawMenuItems($menus["admin_console"]);
+    $pC .= $screen->draw_menu_items($menus["admin_console"]);
   }
 
     
   
   
-  if (userHasPermission("deCanAdministerDataEntry")) {
+  if (user_has_permission("de_can_administer_data_entry")) {
     
     $pC .= "	
     <br><br>
@@ -5597,30 +5597,30 @@ function displayMainMenu($msg = "")
   			Data Entry<br><br> 
   			
   			$msg
-  			<form action='admin.php#demenu' method='post'> " . getHiddenVariables() . "
+  			<form action='admin.php#demenu' method='post'> " . get_hidden_variables() . "
   			<input type='hidden' name='performAction' value='performSetCatalogYear'>
-  			Editing Catalog Year: <select name='catalogYear'>
-  									" . getCatalogYearOptions($deCatalogYear, $settings["currentCatalogYear"]) . "
+  			Editing Catalog Year: <select name='catalog_year'>
+  									" . get_catalog_year_options($de_catalog_year, $settings["current_catalog_year"]) . "
   									</select>
   									<input type='submit' value='-&gt;'>
   			</form>
   			<ul>
-  				<li><a href='admin.php?performAction=editDegrees&deCatalogYear=$deCatalogYear' class='nounderline'>Edit Degree Plans
-  							(for $deCatalogYear)</a></li>
-  				<li><a href='admin.php?performAction=editGroups&deCatalogYear=$deCatalogYear' class='nounderline'>Edit Groups
-  							(for $deCatalogYear)</a></li>
-  				<li><a href='admin.php?performAction=editCourses&deCatalogYear=$deCatalogYear' class='nounderline'>Edit Courses
-  							(for $deCatalogYear)</a></li>
+  				<li><a href='admin.php?performAction=editDegrees&de_catalog_year=$de_catalog_year' class='nounderline'>Edit Degree Plans
+  							(for $de_catalog_year)</a></li>
+  				<li><a href='admin.php?performAction=editGroups&de_catalog_year=$de_catalog_year' class='nounderline'>Edit Groups
+  							(for $de_catalog_year)</a></li>
+  				<li><a href='admin.php?performAction=editCourses&de_catalog_year=$de_catalog_year' class='nounderline'>Edit Courses
+  							(for $de_catalog_year)</a></li>
   			</ul>
   					
   
   			";
     // Do we need to UPDATE any draft changes?
-    $res = $db->dbQuery("SELECT * FROM draft_instructions
+    $res = $db->db_query("SELECT * FROM draft_instructions
   	                   ");
-    if ($db->dbNumRows($res) > 0)
+    if ($db->db_num_rows($res) > 0)
     {
-      $needToApply = "<div class='hypo' style='font-size: 10pt;
+      $need_to_apply = "<div class='hypo' style='font-size: 10pt;
                                   padding: 5px;'>
                       <b>Note:</b> Draft changes have been made which have yet to be applied.
                       When you are ready for your draft changes to appear in
@@ -5629,13 +5629,13 @@ function displayMainMenu($msg = "")
     }
     $pC .= "
   
-  			$needToApply
+  			$need_to_apply
   			<ul>
   				<!--
-  				<li><a href='admin.php?performAction=transferData&deCatalogYear=$deCatalogYear' class='nounderline'>Transfer data to production server</a></li>
-  				<li><a href='admin.php?performAction=requestTransfer&deCatalogYear=$deCatalogYear' class='nounderline'>Request large data transfer to production server</a></li>
+  				<li><a href='admin.php?performAction=transferData&de_catalog_year=$de_catalog_year' class='nounderline'>Transfer data to production server</a></li>
+  				<li><a href='admin.php?performAction=requestTransfer&de_catalog_year=$de_catalog_year' class='nounderline'>Request large data transfer to production server</a></li>
   				-->
-  				<li><a href='admin.php?performAction=applyDraftChanges&deCatalogYear=$deCatalogYear' class='nounderline'>Apply Draft Changes</a></li>
+  				<li><a href='admin.php?performAction=applyDraftChanges&de_catalog_year=$de_catalog_year' class='nounderline'>Apply Draft Changes</a></li>
   			</ul>
   			</div> 
   			";
@@ -5646,10 +5646,10 @@ function displayMainMenu($msg = "")
   			 FlightPath Advising Settings<br>
   			
   			 <ul>
-  				<li>Available terms for advising: <b>{$settings["availableAdvisingTermIDs"]}</b> </li>
-  				<li>Default advising term: <b>{$settings["advisingTermID"]}</b> </li>
-  				<li>Current Catalog Year: <b>{$settings["currentCatalogYear"]}</b> </li>
-  				<li>Current Draft Catalog Year: <b>{$settings["currentDraftCatalogYear"]}</b> </li>
+  				<li>Available terms for advising: <b>{$settings["available_advising_term_ids"]}</b> </li>
+  				<li>Default advising term: <b>{$settings["advising_term_id"]}</b> </li>
+  				<li>Current Catalog Year: <b>{$settings["current_catalog_year"]}</b> </li>
+  				<li>Current Draft Catalog Year: <b>{$settings["current_draft_catalog_year"]}</b> </li>
   				
   			</ul>
   			<a href='admin.php?performAction=editFlightPathSettings'>Edit Settings</a>
@@ -5671,26 +5671,26 @@ function displayMainMenu($msg = "")
 			";
 
 
-  $pC .= getJS();
+  $pC .= get_j_s();
 
-  $screen->pageTitle = "FlightPath Admin - Main Menu";
+  $screen->page_title = "FlightPath Admin - Main Menu";
 
   //include("template/fp_template.php");
 
-  $screen->pageContent = $pC;
+  $screen->page_content = $pC;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 
 
 }
 
-function getCatalogYearOptions($selectedYear, $currentCatalogYear)
+function get_catalog_year_options($selected_year, $current_catalog_year)
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_getCatalogYearOptions";
+  $function = "admin_get_catalog_year_options";
   if (function_exists($function)) {
-    return call_user_func($function, $selectedYear, $currentCatalogYear);
+    return call_user_func($function, $selected_year, $current_catalog_year);
   }
   //////////////////////////////////
   
@@ -5702,12 +5702,12 @@ function getCatalogYearOptions($selectedYear, $currentCatalogYear)
   $years = array();
 
   // Check to make sure this has been configured!
-  $earliest = $GLOBALS["fpSystemSettings"]["earliestCatalogYear"];
+  $earliest = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
   if ($earliest == "") {
     return "<option value=''>DATA NOT AVAIL. CHECK SYSTEM SETTINGS</option>";
   }
   
-  for ($t = $currentCatalogYear + 1; $t >= $GLOBALS["fpSystemSettings"]["earliestCatalogYear"]; $t--)
+  for ($t = $current_catalog_year + 1; $t >= $GLOBALS["fp_system_settings"]["earliest_catalog_year"]; $t--)
   {
     $years[] = $t;
   }
@@ -5718,7 +5718,7 @@ function getCatalogYearOptions($selectedYear, $currentCatalogYear)
   foreach ($years as $year)
   {
     $sel = "";
-    if ($year == $selectedYear)
+    if ($year == $selected_year)
     {
       $sel = "SELECTED";
     }
@@ -5728,11 +5728,11 @@ function getCatalogYearOptions($selectedYear, $currentCatalogYear)
   return $rtn;
 }
 
-function getJS()
+function get_j_s()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_getJS";
+  $function = "admin_get_j_s";
   if (function_exists($function)) {
     return call_user_func($function);
   }
@@ -5982,14 +5982,14 @@ function getJS()
 		
 	}
 	
-	function popupSelectIcon(file)
+	function popup_select_icon(file)
 	{
-		opener.document.getElementById("iconFilename").value = file;
+		opener.document.getElementById("icon_filename").value = file;
 		opener.submitForm();
 		window.close();
 	}
 	
-	function deleteGroup(groupID)
+	function deleteGroup(group_id)
 	{
 		var x = confirm("Are you sure you wish to delete this group? Any degrees which point to it will need to be manually edited and re-saved remove this group requirement.\n\nClick OK to proceed and delete this group.");
 		if (!x)
@@ -5997,7 +5997,7 @@ function getJS()
 			return;
 		}
 		
-		document.getElementById("performAction2").value="delete_group";
+		document.getElementById("perform_action2").value="delete_group";
 		submitForm();
 		
 	}
@@ -6011,15 +6011,15 @@ function getJS()
 			return;
 		}
 		
-		document.getElementById("performAction2").value="delete_degree";
+		document.getElementById("perform_action2").value="delete_degree";
 		submitForm();
 		
 	}
 	
 	
-	function deleteCourse(courseID, catalogYear, warnEqv)
+	function deleteCourse(course_id, catalog_year, warnEqv)
 	{
-		var x = confirm("Are you sure you wish to delete this course for the catalog year " + catalogYear + "?  Any degrees or groups which use this course will have to be manually edited and re-saved to remove this course requirement.\n\nClick OK to proceed and delete this course.");
+		var x = confirm("Are you sure you wish to delete this course for the catalog year " + catalog_year + "?  Any degrees or groups which use this course will have to be manually edited and re-saved to remove this course requirement.\n\nClick OK to proceed and delete this course.");
 		//alert("Feature not available yet.");
 		if (!x)
 		{
@@ -6035,25 +6035,25 @@ function getJS()
 			}
 		}
 		
-		document.getElementById("performAction2").value="delete_course";
+		document.getElementById("perform_action2").value="delete_course";
 		submitForm();
 		
 		
 	}
 	
-	function processDefinitions(catalogYear)
+	function processDefinitions(catalog_year)
 	{
-	 var x = confirm("Are you sure you wish to process all group definitions for the year " + catalogYear + "?\n\nAll groups with definitions will be cleared, and their definitions re-run.\n\nNOTICE: This may take more than a minute to complete.\n\nClick OK to proceed.");
+	 var x = confirm("Are you sure you wish to process all group definitions for the year " + catalog_year + "?\n\nAll groups with definitions will be cleared, and their definitions re-run.\n\nNOTICE: This may take more than a minute to complete.\n\nClick OK to proceed.");
 	 if (x)
 	 {
-	   window.location = "admin.php?performAction=performProcessGroupDefinitions&deCatalogYear=" + catalogYear;
+	   window.location = "admin.php?performAction=perform_process_group_definitions&de_catalog_year=" + catalog_year;
 	 }
 	}
 	
-	function popupAddGroup(semesterNum)
+	function popup_add_group(semester_num)
 	{
 
-		var groupID = 0;
+		var group_id = 0;
 		
 		var cbs = document.getElementsByName("rgroups");
 		for (var t = 0; t < cbs.length; t++)
@@ -6063,22 +6063,22 @@ function getJS()
 			{
 				// In other words, this group
 				// was selected.
-				groupID = cb.value;
+				group_id = cb.value;
 			}
 		}
 		
 		var hours = document.getElementById("hours").value;
 		var type = document.getElementById("type").value;
-		var minGrade = document.getElementById("minGrade").value;
+		var min_grade = document.getElementById("min_grade").value;
 		
-		if (hours < 1 || groupID < 1)
+		if (hours < 1 || group_id < 1)
 		{
 			alert("Please select a group and number of hours!");
 			return;
 		}
 		
-		//alert(groupID + " " + hours + " " + type + " " + minGrade);
-		opener.document.getElementById("performAction2").value="addGroup_" + groupID + "_" + semesterNum + "_" + hours + "_" + type + "_" + minGrade;
+		//alert(group_id + " " + hours + " " + type + " " + min_grade);
+		opener.document.getElementById("perform_action2").value="addGroup_" + group_id + "_" + semester_num + "_" + hours + "_" + type + "_" + min_grade;
 		opener.submitForm();
 		window.close();
 				
@@ -6094,7 +6094,7 @@ function getJS()
 		}
 		
 		var def = encodeURI(document.getElementById("definition").value);
-		opener.document.getElementById("setDefinition").value = def;
+		opener.document.getElementById("set_definition").value = def;
 		opener.showUpdate();
 		opener.submitForm();
 		window.close();
@@ -6103,21 +6103,21 @@ function getJS()
 	
 	function submitForm()
 	{
-		document.getElementById("scrollTop").value = document.body.scrollTop;
+		document.getElementById("scroll_top").value = document.body.scrollTop;
 		document.getElementById("mainform").submit();
 	}	
 	
 	
-	function delGroup(groupID, semesterNum)
+	function delGroup(group_id, semester_num)
 	{
-		var dsn = Number(semesterNum) + 1;
+		var dsn = Number(semester_num) + 1;
 		var x = confirm("Are you sure you want to delete this group from block " + dsn + "?");
 		if (!x)
 		{
 			return;
 		}
 		
-		document.getElementById("performAction2").value="delGroup_" + groupID + "_" + semesterNum;
+		document.getElementById("perform_action2").value="delGroup_" + group_id + "_" + semester_num;
 		submitForm();
 		
 		
@@ -6128,7 +6128,7 @@ function getJS()
 	 var x = confirm("Are you sure you wish to clear the advising and comment history for John Doe (student 99999999)?");
 	 if (x) 
 	 {
-	   window.location = "admin.php?performAction=performClearJohnDoe";
+	   window.location = "admin.php?performAction=perform_clear_john_doe";
 	 }
 	}
 	

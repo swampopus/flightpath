@@ -23,8 +23,8 @@ function example_routine_module_cron() {
   my_oracle_connect();
   
   // Perform our population routines...
-  example_routine_module_populateSubjectsTable();
-  example_routine_module_populateTransferInstitutionsTable();
+  example_routine_module_populate_subjects_table();
+  example_routine_module_populate_transfer_institutions_table();
   
   
   // Tidy up by closing our oracle connection.
@@ -44,13 +44,13 @@ function example_routine_module_cron() {
  * in a table called flightpath_extra_data.subjects
  *
  */
-function example_routine_module_populateSubjectsTable() {
+function example_routine_module_populate_subjects_table() {
   
   global $db;
   
   
   // We must first truncate our mysql table.
-  $res = $db->dbQuery("TRUNCATE TABLE flightpath_extra_data.subjects");  
+  $res = $db->db_query("TRUNCATE TABLE flightpath_extra_data.subjects");  
   
   // Okay, let's perform our query.
   $query = "SELECT stvsubj_code as subjectID, stvsubj_desc as title 
@@ -61,13 +61,13 @@ function example_routine_module_populateSubjectsTable() {
   while ($cur = oracle_fetch_array($res)) {
     // Okay, we now have our results.  We can insert into our mysql table!
     // (Oracle has made our array indexes all uppercase)
-    $subjectID = mysql_real_escape_string($cur["SUBJECTID"]);
+    $subject_id = mysql_real_escape_string($cur["SUBJECTID"]);
     $title = mysql_real_escape_string($cur["TITLE"]);
     
     // Insert!
-    $db->dbQuery("INSERT INTO flightpath_extra_data.subjects
+    $db->db_query("INSERT INTO flightpath_extra_data.subjects
                   (subject_id, title)
-                  VALUES ('$subjectID', '$title') ");
+                  VALUES ('$subject_id', '$title') ");
     $c++;
   }
   
@@ -82,12 +82,12 @@ function example_routine_module_populateSubjectsTable() {
  * the relavent Banner tables.
  *
  */
-function example_routine_module_populateTransferInstitutionsTable() {
+function example_routine_module_populate_transfer_institutions_table() {
 
   global $db;  
   
   // We must first truncate our mysql table.
-  $res = $db->dbQuery("TRUNCATE TABLE flightpath_extra_data.transfer_institutions");  
+  $res = $db->db_query("TRUNCATE TABLE flightpath_extra_data.transfer_institutions");  
   
   // Okay, let's perform our oracle query.
   // This will look in Banner and pick out some information we need
@@ -102,14 +102,14 @@ function example_routine_module_populateTransferInstitutionsTable() {
   while ($cur = oracle_fetch_array($res)) {
     // Okay, we now have our results.  We can insert into our mysql table!
     // (Oracle has made our array indexes all uppercase)
-    $institutionID = mysql_real_escape_string($cur["INSTITUTIONID"]);
+    $institution_id = mysql_real_escape_string($cur["INSTITUTIONID"]);
     $name = mysql_real_escape_string($cur["NAME"]);
     $state = mysql_real_escape_string($cur["STATE"]);
     
     // Insert!
-    $db->dbQuery("INSERT INTO flightpath_extra_data.transfer_institutions
+    $db->db_query("INSERT INTO flightpath_extra_data.transfer_institutions
                   (institution_id, name, state)
-                  VALUES ('$institutionID', '$name', '$state') ");
+                  VALUES ('$institution_id', '$name', '$state') ");
     $c++;
   }
   

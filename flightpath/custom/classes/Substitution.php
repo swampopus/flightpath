@@ -1,6 +1,6 @@
 <?php
 
-class Substitution extends _Substitution
+class Substitution extends __substitution
 {
   
   

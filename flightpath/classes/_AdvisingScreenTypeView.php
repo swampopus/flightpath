@@ -20,7 +20,7 @@ notice must not be modified, and must be included with the source code.
 
 /**
  * This class is the View by Type view for FlightPath.  As such, it
- * inherits most of it's classes from _AdvisingScreen.
+ * inherits most of it's classes from __advising_screen.
  *
  *	The biggest difference with View by Type from the default
  *	View by Year is that we don't care about the original semesters
@@ -29,35 +29,35 @@ notice must not be modified, and must be included with the source code.
  *	most of the methods here will be about doing that.
  *
  */
-class _AdvisingScreenTypeView extends _AdvisingScreen
+class __advising_screen_type_view extends __advising_screen
 {
 
 
   /**
-   * In _AdvisingScreen, this method simply displays the degree plan's
+   * In __advising_screen, this method simply displays the degree plan's
    * semesters to the screen.  But here, we need to go through the 4
    * type categories: Core, Major, Supporting, and Electives,
    * and only display courses and groups from each semester fitting
    * that type.
    *
    */
-	function buildSemesterList()
+	function build_semester_list()
 	{
 
-		$listSemesters = $this->degreePlan->listSemesters;
+		$list_semesters = $this->degree_plan->list_semesters;
 		// Go through each semester and add it to the screen...
-		$listSemesters->resetCounter();
+		$list_semesters->reset_counter();
 
-		$this->addToScreen($this->displaySemesterList($listSemesters, "c", "Core Requirements", true));
-		$this->addToScreen($this->displaySemesterList($listSemesters, "m", "Major Requirements", true));
-		$this->addToScreen($this->displaySemesterList($listSemesters, "s", "Supporting Requirements", true));
-		$this->addToScreen($this->displaySemesterList($listSemesters, "e", "Electives", true));
+		$this->add_to_screen($this->display_semester_list($list_semesters, "c", "Core Requirements", true));
+		$this->add_to_screen($this->display_semester_list($list_semesters, "m", "Major Requirements", true));
+		$this->add_to_screen($this->display_semester_list($list_semesters, "s", "Supporting Requirements", true));
+		$this->add_to_screen($this->display_semester_list($list_semesters, "e", "_electives", true));
 
 		
-		$tempDS = new Semester(-55); // developmental requirements.
-		if ($devSem = $listSemesters->findMatch($tempDS))
+		$temp_d_s = new Semester(-55); // developmental requirements.
+		if ($dev_sem = $list_semesters->find_match($temp_d_s))
 		{
-			$this->addToScreen($this->displaySemester($devSem));
+			$this->add_to_screen($this->display_semester($dev_sem));
 		}
 						
 		
@@ -66,38 +66,38 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 
 	/**
 	 * Does the testType match the reqType?  This function is used
-	 * to make sure that courses or groups with a certain requirementType
+	 * to make sure that courses or groups with a certain requirement_type
 	 * are placed in the correct semester blocks on screen.
 	 *
-	 * @param string $testType
-	 * @param string $reqType
+	 * @param string $test_type
+	 * @param string $req_type
 	 * @return bool
 	 */
-	function matchRequirementType($testType, $reqType)
+	function match_requirement_type($test_type, $req_type)
 	{
 		// Does the testType match the reqType?
 		
-		if ($testType == $reqType)
+		if ($test_type == $req_type)
 		{
 			return true;
 		}
 		
-		if ($testType == "uc" && $reqType == "c")
+		if ($test_type == "uc" && $req_type == "c")
 		{  // university captone core.
 			return true;
 		}
 
-		if ($testType == "um" && $reqType == "m")
+		if ($test_type == "um" && $req_type == "m")
 		{  // university captone major
 			return true;
 		}
 		
 		
-		if ($reqType == "e")
+		if ($req_type == "e")
 		{
 			// type "elective."  test must not be c, s, or m.
-			if ($testType != "c" && $testType != "s" && $testType != "m"
-				&& $testType != "uc" && $testType != "um" && $testType != "dev")
+			if ($test_type != "c" && $test_type != "s" && $test_type != "m"
+				&& $test_type != "uc" && $test_type != "um" && $test_type != "dev")
 			{
 				return true;
 			}
@@ -109,118 +109,118 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 	
 	/**
 	 * Display contents of a semester list as a single semester,
-	 * only displaying courses matching the requirementType.
-	 * If the requirementType is "e", then we will look for anything
-	 * not containing an m, s, uc, um, or c as a requirementType.
+	 * only displaying courses matching the requirement_type.
+	 * If the requirement_type is "e", then we will look for anything
+	 * not containing an m, s, uc, um, or c as a requirement_type.
 	 *
-	 * @param SemesterList $listSemesters
-	 * @param string $requirementType
+	 * @param SemesterList $list_semesters
+	 * @param string $requirement_type
 	 * @param string $title
-	 * @param bool $boolDisplayHourCount
+	 * @param bool $bool_display_hour_count
 	 * @return string
 	 */
-	function displaySemesterList($listSemesters, $requirementType, $title, $boolDisplayHourCount = false)
+	function display_semester_list($list_semesters, $requirement_type, $title, $bool_display_hour_count = false)
 	{
 
 		// Display the contents of a semester object
 		// on the screen (in HTML)
 		$pC = "";
-		$pC .= $this->drawSemesterBoxTop($title);
+		$pC .= $this->draw_semester_box_top($title);
 
-		$countHoursCompleted = 0;
-		$listSemesters->resetCounter();
-		while($listSemesters->hasMore())
+		$count_hours_completed = 0;
+		$list_semesters->reset_counter();
+		while($list_semesters->has_more())
 		{
-			$semester = $listSemesters->getNext();
-			if ($semester->semesterNum == -88)
+			$semester = $list_semesters->get_next();
+			if ($semester->semester_num == -88)
 			{ // These are the "added by advisor" courses.  Skip them.
 				continue;
 			}
 			
 			// First, display the list of bare courses.
-			$semester->listCourses->sortAlphabeticalOrder();
-			$semester->listCourses->resetCounter();
-			$semIsEmpty = true;
-			$semRnd = rand(0,9999);
+			$semester->list_courses->sort_alphabetical_order();
+			$semester->list_courses->reset_counter();
+			$sem_is_empty = true;
+			$sem_rnd = rand(0,9999);
 			$pC .= "<tr><td colspan='4' class='tenpt'>
-					<b><!--SEMTITLE$semRnd--></b></td></tr>";
-			while($semester->listCourses->hasMore())
+					<b><!--SEMTITLE$sem_rnd--></b></td></tr>";
+			while($semester->list_courses->has_more())
 			{
-				$course = $semester->listCourses->getNext();
+				$course = $semester->list_courses->get_next();
 				// Make sure the requirement type matches!
-				if (!$this->matchRequirementType($course->requirementType, $requirementType))
+				if (!$this->match_requirement_type($course->requirement_type, $requirement_type))
 				{
 					continue;
 				}
 		
 				// Is this course being fulfilled by anything?
 				//if (is_object($course->courseFulfilledBy))
-				if (!($course->courseListFulfilledBy->isEmpty))
+				if (!($course->course_list_fulfilled_by->is_empty))
 				{ // this requirement is being fulfilled by something the student took...
-					//$pC .= $this->drawCourseRow($course->courseFulfilledBy);
-					$pC .= $this->drawCourseRow($course->courseListFulfilledBy->getFirst());
-					//$countHoursCompleted += $course->courseFulfilledBy->hoursAwarded;
-					$course->courseListFulfilledBy->getFirst()->boolHasBeenDisplayed = true;
+					//$pC .= $this->draw_course_row($course->courseFulfilledBy);
+					$pC .= $this->draw_course_row($course->course_list_fulfilled_by->get_first());
+					//$count_hours_completed += $course->courseFulfilledBy->hours_awarded;
+					$course->course_list_fulfilled_by->get_first()->bool_has_been_displayed = true;
 					
-					if ($course->courseListFulfilledBy->getFirst()->displayStatus == "completed")
+					if ($course->course_list_fulfilled_by->get_first()->display_status == "completed")
 					{ // We only want to count completed hours, no midterm or enrolled courses.
-						//$countHoursCompleted += $course->courseListFulfilledBy->getFirst()->hoursAwarded;
-            $h = $course->courseListFulfilledBy->getFirst()->hoursAwarded;
-					  if ($course->courseListFulfilledBy->getFirst()->boolGhostHour == TRUE) {
+						//$count_hours_completed += $course->course_list_fulfilled_by->get_first()->hours_awarded;
+            $h = $course->course_list_fulfilled_by->get_first()->hours_awarded;
+					  if ($course->course_list_fulfilled_by->get_first()->bool_ghost_hour == TRUE) {
 					   $h = 0;
 					  }
-					  $countHoursCompleted += $h;						
+					  $count_hours_completed += $h;						
 					}
 				} else {
 					// This requirement is not being fulfilled...
-					$pC .= $this->drawCourseRow($course);
+					$pC .= $this->draw_course_row($course);
 				}
 				//$pC .= "</td></tr>";
-				$semIsEmpty = false;
+				$sem_is_empty = false;
 			}
 
 			// Now, draw all the groups.
-			$semester->listGroups->sortAlphabeticalOrder();
-			$semester->listGroups->resetCounter();
-			while($semester->listGroups->hasMore())
+			$semester->list_groups->sort_alphabetical_order();
+			$semester->list_groups->reset_counter();
+			while($semester->list_groups->has_more())
 			{
-				//debugCT("dddd");
-				$group = $semester->listGroups->getNext();
-				if (!$this->matchRequirementType($group->requirementType, $requirementType))
+				//debug_c_t("dddd");
+				$group = $semester->list_groups->get_next();
+				if (!$this->match_requirement_type($group->requirement_type, $requirement_type))
 				{
 					continue;
 				}
 
 				$pC .= "<tr><td colspan='8'>";
-				$pC .= $this->displayGroup($group);
-				$countHoursCompleted += $group->hoursFulfilledForCredit;
+				$pC .= $this->display_group($group);
+				$count_hours_completed += $group->hours_fulfilled_for_credit;
 				$pC .= "</td></tr>";
-				$semIsEmpty = false;
+				$sem_is_empty = false;
 			}
 
-			if ($semIsEmpty == false)
+			if ($sem_is_empty == false)
 			{
 				// There WAS something in this semester, put in the title.
 				
-				//debugCT("replacing $semRnd with $semester->title");
-				$pC = str_replace("<!--SEMTITLE$semRnd-->",$semester->title,$pC);
+				//debugCT("replacing $sem_rnd with $semester->title");
+				$pC = str_replace("<!--SEMTITLE$sem_rnd-->",$semester->title,$pC);
 			}
 			
 		}
 		
 		
 		// Add hour count to the bottom...
-		if ($boolDisplayHourCount == true && $countHoursCompleted > 0)
+		if ($bool_display_hour_count == true && $count_hours_completed > 0)
 		{
 			$pC .= "<tr><td colspan='8'>
 				<div class='tenpt' style='text-align:right; margin-top: 10px;'>
-				Completed hours: $countHoursCompleted
+				Completed hours: $count_hours_completed
 				</div>
 				";
 			$pC .= "</td></tr>";
 		}
 
-		$pC .= $this->drawSemesterBoxBottom();
+		$pC .= $this->draw_semester_box_bottom();
 
 		return $pC;
 

@@ -1,6 +1,6 @@
 <?php
 
-class AdvisingScreen extends _AdvisingScreen
+class AdvisingScreen extends __advising_screen
 {
   
   

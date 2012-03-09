@@ -1,6 +1,6 @@
 <?php
 
-class Student extends _Student
+class Student extends __student
 {
 
 

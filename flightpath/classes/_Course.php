@@ -22,45 +22,45 @@ notice must not be modified, and must be included with the source code.
 Class definition for the Course object.
 */
 
-class _Course
+class __course
 {
   // Some public variables and what they are used for.
 
   // Database & misc related:
-  public $randomID, $dbAdvisedCoursesID;
-  public $boolPlaceholder, $db, $dbSubstitutionID, $dbUnassignTransferID;
-  public $dbExclude, $dataEntryComment, $arrayIndex, $dataEntryValue;
-  public $dbGroupRequirementID;  // the id from the group_requirements table where this was specified.
+  public $random_id, $db_advised_courses_id;
+  public $bool_placeholder, $db, $db_substitution_id, $db_unassign_transfer_id;
+  public $db_exclude, $data_entry_comment, $array_index, $data_entry_value;
+  public $db_group_requirement_id;  // the id from the group_requirements table where this was specified.
 
   // Course catalog data related:
-  public $subjectID, $courseNum, $courseID, $requirementType, $catalogYear;
-  public $minHours, $maxHours, $listPrereqs, $repeatHours;
-  public $arrayValidNames;
+  public $subject_id, $course_num, $course_id, $requirement_type, $catalog_year;
+  public $min_hours, $max_hours, $list_prereqs, $repeat_hours;
+  public $array_valid_names;
 
   // Student record related:
-  public $boolTaken, $termID, $sectionNumber, $grade, $hoursAwarded, $qualityPoints;
-  public $boolTransfer, $institutionID, $institutionName, $courseTransfer;
-  public $transferEqvText, $transferFootnote, $boolOutdatedSub;
-  public $boolSubstitution, $courseSubstitution, $substitutionHours, $subRemarks, $subFacultyID;
-  public $boolSubstitutionSplit, $substitutionFootnote, $boolSubstitutionNewFromSplit;
+  public $bool_taken, $term_id, $section_number, $grade, $hours_awarded, $quality_points;
+  public $bool_transfer, $institution_id, $institution_name, $course_transfer;
+  public $transfer_eqv_text, $transfer_footnote, $bool_outdated_sub;
+  public $bool_substitution, $course_substitution, $substitution_hours, $sub_remarks, $sub_faculty_id;
+  public $bool_substitution_split, $substitution_footnote, $bool_substitution_new_from_split;
 
   // Major or Group Requirement related:
-  public $minGrade, $specifiedRepeats, $boolSpecifiedRepeat, $requiredOnBranchID;
-  public $assignedToGroupID, $assignedToSemesterNum, $boolExcludeRepeat;
+  public $min_grade, $specified_repeats, $bool_specified_repeat, $required_on_branch_id;
+  public $assigned_to_group_id, $assigned_to_semester_num, $bool_exclude_repeat;
 
   // advising & in-system logic related:
-  public $advisedHours, $boolSelected, $boolAdvisedToTake;
-  public $courseListFulfilledBy; //$courseFulfilledBy,
-  public $boolHasBeenAssigned, $boolAddedCourse, $groupListUnassigned;
-  public $advisedTermID, $tempOldCourseID;
-  public $boolUseDraft;
-  //public $boolHasBeenAssignedToBareDegreePlan;
+  public $advised_hours, $bool_selected, $bool_advised_to_take;
+  public $course_list_fulfilled_by; //$course_fulfilled_by,
+  public $bool_has_been_assigned, $bool_added_course, $group_list_unassigned;
+  public $advised_term_id, $temp_old_course_id;
+  public $bool_use_draft;
+  //public $bool_has_been_assignedToBareDegreePlan;
 
   // Display related:
-  public $displayStatus, $iconFilename, $description, $title;
-  public $titleText, $tempFlag, $boolHasBeenDisplayed;
-  public $boolUnselectable;
-  public $boolHideGrade, $boolGhostHour, $boolGhostMinHour;
+  public $display_status, $icon_filename, $description, $title;
+  public $title_text, $temp_flag, $bool_has_been_displayed;
+  public $bool_unselectable;
+  public $bool_hide_grade, $bool_ghost_hour, $bool_ghost_min_hour;
 
   
 
@@ -68,69 +68,69 @@ class _Course
 /**
  * The constructor for a Course object.
  *
- * @param int $courseID
- *        - Numeric courseID of the course to try to load.  Leave blank
+ * @param int $course_id
+ *        - Numeric course_id of the course to try to load.  Leave blank
  *          if you simply wish to instantiate a course object.
  * 
- * @param bool $isTransfer
+ * @param bool $is_transfer
  *        - Is this course a transfer course?  Meaning, from another
  *          school.
  * 
  * @param DatabaseHandler $db
- * @param bool $isBlank
- * @param int $catalogYear
- *        - What catalogYear does this Course belong to?  This is
- *          used later when we call loadDescriptiveData() to get its 
+ * @param bool $is_blank
+ * @param int $catalog_year
+ *        - What catalog_year does this Course belong to?  This is
+ *          used later when we call load_descriptive_data() to get its 
  *          description, hour count, etc.
  * 
- * @param bool $boolUseDraft
+ * @param bool $bool_use_draft
  */
-  function __construct($courseID = "", $isTransfer = false, DatabaseHandler $db = NULL, $isBlank = false, $catalogYear = "", $boolUseDraft = false)
+  function __construct($course_id = "", $is_transfer = false, DatabaseHandler $db = NULL, $is_blank = false, $catalog_year = "", $bool_use_draft = false)
   {
     
-    $this->advisedHours = -1;
+    $this->advised_hours = -1;
         
-    if ($isBlank == true)
+    if ($is_blank == true)
     { // Do nothing if this is a "blank" course.
       return;
     }
 
-    $arrayValidNames = array();  // will hold all "valid" names for this course (non excluded names).
-    $this->courseID = $courseID*1;  // Force it to be numeric.
-    $this->tempOldCourseID = 0;  // Used in case we delete the courseID, we can get it back (good with substitutions of transfers that are outdated).
-    $this->catalogYear = $catalogYear;
-    $this->assignedToSemesterNum = -1;
-    $this->assignedToGroupID = 0;
-    $this->boolAdvisedToTake = false;
-    $this->boolAddedCourse = false;
-    $this->specifiedRepeats = 0;
-    $this->boolExcludeRepeat = false;
-    $this->boolSpecifiedRepeat = false;
-    $this->randomID = rand(1,9999);
-    $this->displayStatus = "eligible";
-    $this->courseListFulfilledBy = new CourseList();
-    $this->groupListUnassigned = new ObjList();
-    $this->boolUseDraft = $boolUseDraft;
+    $array_valid_names = array();  // will hold all "valid" names for this course (non excluded names).
+    $this->course_id = $course_id*1;  // Force it to be numeric.
+    $this->temp_old_course_id = 0;  // Used in case we delete the course_id, we can get it back (good with substitutions of transfers that are outdated).
+    $this->catalog_year = $catalog_year;
+    $this->assigned_to_semester_num = -1;
+    $this->assigned_to_group_id = 0;
+    $this->bool_advised_to_take = false;
+    $this->bool_added_course = false;
+    $this->specified_repeats = 0;
+    $this->bool_exclude_repeat = false;
+    $this->bool_specified_repeat = false;
+    $this->random_id = rand(1,9999);
+    $this->display_status = "eligible";
+    $this->course_list_fulfilled_by = new CourseList();
+    $this->group_list_unassigned = new ObjList();
+    $this->bool_use_draft = $bool_use_draft;
 
     // Always override if the global variable is set.
-    if ($GLOBALS["boolUseDraft"] == true)
+    if ($GLOBALS["bool_use_draft"] == true)
     {
-      $this->boolUseDraft = true;
+      $this->bool_use_draft = true;
     }
 
     $this->db = $db;
     if ($db == NULL)
     {
-      $this->db = getGlobalDatabaseHandler();;
+      $this->db = get_global_database_handler();;
       if (!is_object($this->db))
       {
         $this->db = new DatabaseHandler();
       }
     }
 
-    if ($courseID != "")
+    if ($course_id != "")
     {
-      $this->loadCourse($courseID, $isTransfer);
+      $this->load_course($course_id, $is_transfer);
     }
   }
 
@@ -148,62 +148,62 @@ class _Course
    * Important details about the course are put into a particular order,
    * separated by commas.  Booleans are converted to either 1 or 0.
    * 
-   * This function is the mirror of loadCourseFromDataString().
+   * This function is the mirror of load_course_from_data_string().
    *
    * @return string
    */
-  function toDataString()
+  function to_data_string()
   {
     $rtn = "";
 
-    $rtn .= $this->courseID . ",";
-    $rtn .= $this->assignedToSemesterNum . ",";
-    $rtn .= $this->assignedToGroupID . ",";
-    $rtn .= intval($this->boolAdvisedToTake) . ",";
-    $rtn .= $this->specifiedRepeats . ",";
-    $rtn .= intval($this->boolSpecifiedRepeat) . ",";
+    $rtn .= $this->course_id . ",";
+    $rtn .= $this->assigned_to_semester_num . ",";
+    $rtn .= $this->assigned_to_group_id . ",";
+    $rtn .= intval($this->bool_advised_to_take) . ",";
+    $rtn .= $this->specified_repeats . ",";
+    $rtn .= intval($this->bool_specified_repeat) . ",";
     $rtn .= $this->grade . ",";
-    $rtn .= $this->hoursAwarded . ",";
-    $rtn .= $this->termID . ",";
-    $rtn .= $this->advisedHours . ",";
+    $rtn .= $this->hours_awarded . ",";
+    $rtn .= $this->term_id . ",";
+    $rtn .= $this->advised_hours . ",";
 
-    $rtn .= intval($this->boolTransfer) . ",";
+    $rtn .= intval($this->bool_transfer) . ",";
 
     // If this is a transfer, then we will put in various information
     // about the original transfer course...
-    if ($this->boolTransfer == true)
+    if ($this->bool_transfer == true)
     {
-      $rtn .= $this->courseTransfer->courseID . ",";
+      $rtn .= $this->course_transfer->course_id . ",";
     } else {
       // Just enter blank.
       $rtn .= ",";
     }
 
-    $rtn .= intval($this->boolAddedCourse) . ",";
-    $rtn .= $this->dbAdvisedCoursesID . ",";
-    $rtn .= $this->randomID . ",";
+    $rtn .= intval($this->bool_added_course) . ",";
+    $rtn .= $this->db_advised_courses_id . ",";
+    $rtn .= $this->random_id . ",";
 
-    $rtn .= intval($this->boolSubstitution) . ",";
+    $rtn .= intval($this->bool_substitution) . ",";
     // If this is a substitution, what is the original requirement?
-    if ($this->boolSubstitution == true)
+    if ($this->bool_substitution == true)
     {
-      $rtn .= $this->courseSubstitution->courseID . ",";
+      $rtn .= $this->course_substitution->course_id . ",";
     } else {
       // Just enter blank.
       $rtn .= ",";
     }
 
-    $rtn .= $this->dbSubstitutionID . ",";
-    $rtn .= $this->minHours . ",";
-    $rtn .= $this->maxHours . ",";
+    $rtn .= $this->db_substitution_id . ",";
+    $rtn .= $this->min_hours . ",";
+    $rtn .= $this->max_hours . ",";
 
-    $rtn .= intval($this->boolSubstitutionNewFromSplit) . ",";
-    $rtn .= intval($this->boolSubstitutionSplit) . ",";
-    $rtn .= intval($this->boolHasBeenAssigned) . ",";
+    $rtn .= intval($this->bool_substitution_new_from_split) . ",";
+    $rtn .= intval($this->bool_substitution_split) . ",";
+    $rtn .= intval($this->bool_has_been_assigned) . ",";
 
-    $rtn .= $this->displayStatus . ",";
+    $rtn .= $this->display_status . ",";
     
-    $rtn .= intval($this->boolGhostHour) . ",";
+    $rtn .= intval($this->bool_ghost_hour) . ",";
 
 
 
@@ -213,71 +213,71 @@ class _Course
 
   /**
    * This will take a data string, as created by
-   * the function toDataString(), and make $this object
+   * the function to_data_string(), and make $this object
    * match the original object.  It is a poor man's
-   * unserialize.  See toDataString()'s description for a fuller
+   * unserialize.  See to_data_string()'s description for a fuller
    * picture of what is going on.
    * 
    * To use:  
    *  - $newCourse = new Course();
-   *  - $newCourse->loadCourseFromDataString($data);
+   *  - $newCourse->load_course_from_data_string($data);
    *          
    *
    * @param string $str
    */
-  function loadCourseFromDataString($str)
+  function load_course_from_data_string($str)
   {
     
     $temp = split(",",$str);
 
-    $this->courseID = 				$temp[0];
+    $this->course_id = 				$temp[0];
 
-    $this->loadCourse($this->courseID);
+    $this->load_course($this->course_id);
 
-    $this->assignedToSemesterNum = 	$temp[1];
-    $this->assignedToGroupID 	= 	$temp[2];
-    $this->boolAdvisedToTake 	= 		(bool) $temp[3];
-    $this->specifiedRepeats   	= 	$temp[4];
-    $this->boolSpecifiedRepeat 	= 	(bool) $temp[5];
+    $this->assigned_to_semester_num = 	$temp[1];
+    $this->assigned_to_group_id 	= 	$temp[2];
+    $this->bool_advised_to_take 	= 		(bool) $temp[3];
+    $this->specified_repeats   	= 	$temp[4];
+    $this->bool_specified_repeat 	= 	(bool) $temp[5];
     $this->grade   				= 	$temp[6];
-    $this->hoursAwarded			= 	$temp[7];
-    $this->termID				= 	$temp[8];
-    $this->advisedHours			=	$temp[9];
+    $this->hours_awarded			= 	$temp[7];
+    $this->term_id				= 	$temp[8];
+    $this->advised_hours			=	$temp[9];
 
-    $this->boolTransfer 		= 	(bool) $temp[10];
+    $this->bool_transfer 		= 	(bool) $temp[10];
 
     // Was this a transfer course?
-    if ($this->boolTransfer == true)
+    if ($this->bool_transfer == true)
     {
-      $tCourse = new Course($temp[11], true);
-      $tCourse->termID = $this->termID;
-      $this->courseTransfer = $tCourse;
+      $t_course = new Course($temp[11], true);
+      $t_course->term_id = $this->term_id;
+      $this->course_transfer = $t_course;
     }
 
-    $this->boolAddedCourse 		= 	(bool) $temp[12];
-    $this->dbAdvisedCoursesID	= 	$temp[13];
-    $this->randomID				= 	$temp[14];
+    $this->bool_added_course 		= 	(bool) $temp[12];
+    $this->db_advised_courses_id	= 	$temp[13];
+    $this->random_id				= 	$temp[14];
 
-    $this->boolSubstitution		= 	(bool) $temp[15];
+    $this->bool_substitution		= 	(bool) $temp[15];
 
     // Was this a substitution course?
-    if ($this->boolSubstitution == true)
+    if ($this->bool_substitution == true)
     {
-      $tCourse = new Course($temp[16]); // original course requirement.
-      $this->courseSubstitution = $tCourse;
+      $t_course = new Course($temp[16]); // original course requirement.
+      $this->course_substitution = $t_course;
     }
 
-    $this->dbSubstitutionID		= 	$temp[17];
-    $this->minHours				= 	$temp[18];
-    $this->maxHours				= 	$temp[19];
+    $this->db_substitution_id		= 	$temp[17];
+    $this->min_hours				= 	$temp[18];
+    $this->max_hours				= 	$temp[19];
 
-    $this->boolSubstitutionNewFromSplit	= 	(bool) $temp[20];
-    $this->boolSubstitutionSplit	= 	(bool) $temp[21];
-    $this->boolHasBeenAssigned	= 	(bool) $temp[22];
+    $this->bool_substitution_new_from_split	= 	(bool) $temp[20];
+    $this->bool_substitution_split	= 	(bool) $temp[21];
+    $this->bool_has_been_assigned	= 	(bool) $temp[22];
 
-    $this->displayStatus	= 	$temp[23];
+    $this->display_status	= 	$temp[23];
 
-    $this->boolGhostHour	= 	(bool) $temp[24];
+    $this->bool_ghost_hour	= 	(bool) $temp[24];
     
 
 
@@ -290,43 +290,43 @@ class _Course
    * 
    * This function is used by DataEntry primarily.
    *
-   * @param bool $boolAddWhiteSpace
-   * @param bool $boolAddExclude
+   * @param bool $bool_add_white_space
+   * @param bool $bool_add_exclude
    * @return string
    */
-  function getAllNames($boolAddWhiteSpace = false, $boolAddExclude = true)
+  function get_all_names($bool_add_white_space = false, $bool_add_exclude = true)
   {
     $rtn = "";
 
-    $usedArray = array();
+    $used_array = array();
 
-    $tableName = "courses";
-    if ($this->boolUseDraft) {$tableName = "draft_$tableName";}
-    // took out: and `catalog_year`='$this->catalogYear'
+    $table_name = "courses";
+    if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
+    // took out: and `catalog_year`='$this->catalog_year'
     // because we don't care what catalog year it comes from...
-    $res = $this->db->dbQuery("SELECT * FROM $tableName
+    $res = $this->db->db_query("SELECT * FROM $table_name
 						WHERE course_id = '?'
 						AND delete_flag = '0' 
-						ORDER BY subject_id, course_num ", $this->courseID);
-    while($cur = $this->db->dbFetchArray($res))
+						ORDER BY subject_id, course_num ", $this->course_id);
+    while($cur = $this->db->db_fetch_array($res))
     {
 
-      if (in_array($cur["subject_id"] . "~" . $cur["course_num"], $usedArray))
+      if (in_array($cur["subject_id"] . "~" . $cur["course_num"], $used_array))
       { // skip ones we have already seen.
         continue;
       }
 
-      $usedArray[] = $cur["subject_id"] . "~" . $cur["course_num"];
+      $used_array[] = $cur["subject_id"] . "~" . $cur["course_num"];
 
       $rtn .= $cur["subject_id"] . " " . $cur["course_num"];
 
-      if ($cur["exclude"] != '0' && $boolAddExclude == true)
+      if ($cur["exclude"] != '0' && $bool_add_exclude == true)
       {
         $rtn .= " exclude";
       }
 
       $rtn .= ",";
-      if ($boolAddWhiteSpace == true)
+      if ($bool_add_white_space == true)
       {
         $rtn .= " ";
       }
@@ -349,30 +349,30 @@ class _Course
    *
    * @return string
    */
-  function getCatalogHours()
+  function get_catalog_hours()
   {
     
-    if (!$this->hasVariableHours())
+    if (!$this->has_variable_hours())
     {
-      return $this->minHours;
+      return $this->min_hours;
     } else {
       // Meaning this does course have variable hours.
 
-      $minH = $this->minHours;
-      $maxH = $this->maxHours;
+      $min_h = $this->min_hours;
+      $max_h = $this->max_hours;
       
       
       // Convert back from ghosthours.
-      if ($this->boolGhostMinHour) {
-        $minH = 0;
+      if ($this->bool_ghost_min_hour) {
+        $min_h = 0;
       }
       
-      if ($this->boolGhostHour) {
-        $maxH = 0;
+      if ($this->bool_ghost_hour) {
+        $max_h = 0;
       }    
         
       
-      return "$minH-$maxH";
+      return "$min_h-$max_h";
     }
   }
 
@@ -383,55 +383,55 @@ class _Course
    * Returns how many hours this course has been advised for.
    * This is used with courses which have variable hours.  If
    * the course has not been advised for any particular number
-   * of hours, then it's minHours are returned.
+   * of hours, then it's min_hours are returned.
    *
    * @return unknown
    */
-  function getAdvisedHours()
+  function get_advised_hours()
   {
-    if ($this->advisedHours > -1)
+    if ($this->advised_hours > -1)
     {
-      return $this->advisedHours;
+      return $this->advised_hours;
     } else {
       // No, the user has not selected any hours yet.  So,
-      // just display the minHours.
+      // just display the min_hours.
       
       // Correct for ghost hours, if any.
-      $minH = $this->minHours;
-      if ($this->boolGhostMinHour) {
-        $minH = 0;
+      $min_h = $this->min_hours;
+      if ($this->bool_ghost_min_hour) {
+        $min_h = 0;
       }
       
-      return $minH;
+      return $min_h;
     }
 
   }
 
   /**
-   * This will assign the $this->displayStatus string
+   * This will assign the $this->display_status string
    * based on the grade the student has made on the course.
-   * The displayStatus is used by other display functions to decide
+   * The display_status is used by other display functions to decide
    * what color the course should show up as.
    *
    */
-  function assignDisplayStatus()
+  function assign_display_status()
   {
     // Assigns the display status, based on grade.
     $grade = $this->grade;
     // Get these grade definitions from our system settings
     // Configure them in custom/settings.php
-    $retakeGrades = $GLOBALS["fpSystemSettings"]["retakeGrades"];
-    $enrolledGrades = $GLOBALS["fpSystemSettings"]["enrolledGrades"];
+    $retake_grades = $GLOBALS["fp_system_settings"]["retake_grades"];
+    $enrolled_grades = $GLOBALS["fp_system_settings"]["enrolled_grades"];
 
 
-    if (in_array($grade, $retakeGrades))
+    if (in_array($grade, $retake_grades))
     {
-      $this->displayStatus = "retake";
+      $this->display_status = "retake";
     }
 
-    if (in_array($grade, $enrolledGrades))
+    if (in_array($grade, $enrolled_grades))
     {
-      $this->displayStatus = "enrolled";
+      $this->display_status = "enrolled";
     }
   }
 
@@ -442,25 +442,25 @@ class _Course
    *
    * @return bool
    */  
-  function isCompleted()
+  function is_completed()
   {
     // returns true if the course has been completed.
     $grade = $this->grade;
 
     // Get these grade definitions from our system settings
     // Configure them in custom/settings.php
-    $retakeGrades = $GLOBALS["fpSystemSettings"]["retakeGrades"];
-    $enrolledGrades = $GLOBALS["fpSystemSettings"]["enrolledGrades"];
+    $retake_grades = $GLOBALS["fp_system_settings"]["retake_grades"];
+    $enrolled_grades = $GLOBALS["fp_system_settings"]["enrolled_grades"];
 
     if ($grade == "") {
       return false;
     }
 
-    if (in_array($grade, $enrolledGrades)) {
+    if (in_array($grade, $enrolled_grades)) {
       return false;
     }
 
-    if (in_array($grade, $retakeGrades)) {
+    if (in_array($grade, $retake_grades)) {
       return false;
     }
 
@@ -472,68 +472,68 @@ class _Course
   /**
    * Does $this meed the minimum grade requirement of the
    * supplied course requirement?  You may specify either
-   * a Course object, or just enter the minGrade in the mGrade
+   * a Course object, or just enter the min_grade in the mGrade
    * variable.
    *
-   * @param Course $courseReq
+   * @param Course $course_req
    *      - The Course object who has the min grade requirement.
-   *        Set to NULL if using $mGrade.
+   *        Set to NULL if using $m_grade.
    * 
-   * @param string $mGrade
+   * @param string $m_grade
    *      - The min grade which $this must meet.  Do not use if using
-   *        $courseReq.
+   *        $course_req.
    * 
    * @return bool
    */
-  function meetsMinGradeRequirementOf(Course $courseReq = NULL, $mGrade = "")
+  function meets_min_grade_requirement_of(Course $course_req = NULL, $m_grade = "")
   {
     // Does $this course meet the min grade requirement
     // of the supplied course requirement?
 
     // Get these grade definitions from our system settings
     // Configure them in custom/settings.php
-    $bOrBetter = $GLOBALS["fpSystemSettings"]["bOrBetter"];
-    $cOrBetter = $GLOBALS["fpSystemSettings"]["cOrBetter"];
-    $dOrBetter = $GLOBALS["fpSystemSettings"]["dOrBetter"];
-    $enrolledGrades = $GLOBALS["fpSystemSettings"]["enrolledGrades"];
+    $b_or_better = $GLOBALS["fp_system_settings"]["b_or_better"];
+    $c_or_better = $GLOBALS["fp_system_settings"]["c_or_better"];
+    $d_or_better = $GLOBALS["fp_system_settings"]["d_or_better"];
+    $enrolled_grades = $GLOBALS["fp_system_settings"]["enrolled_grades"];
 
-    if ($courseReq != null) {
-      $minGrade = $courseReq->minGrade;
-      //adminDebug($minGrade);
+    if ($course_req != null) {
+      $min_grade = $course_req->min_grade;
+      //admin_debug($min_grade);
     } else {
-      $minGrade = $mGrade;
+      $min_grade = $m_grade;
     }
 
 
 
-    if ($minGrade == "")
+    if ($min_grade == "")
     { // There is no min grade requirement for this course.
       return true;
     }
 
     // If the student is currently enrolled, return true.
-    if (in_array($this->grade, $enrolledGrades))
+    if (in_array($this->grade, $enrolled_grades))
     {
       return true;
     }
 
 
-    if ($minGrade == "A" && $this->grade == "A")
+    if ($min_grade == "A" && $this->grade == "A")
     {
       return true;
     }
 
-    if ($minGrade == "B" && in_array($this->grade, $bOrBetter))
+    if ($min_grade == "B" && in_array($this->grade, $b_or_better))
     {
       return true;
     }
 
-    if ($minGrade == "C" && in_array($this->grade, $cOrBetter))
+    if ($min_grade == "C" && in_array($this->grade, $c_or_better))
     {
       return true;
     }
 
-    if ($minGrade == "D" && in_array($this->grade, $dOrBetter))
+    if ($min_grade == "D" && in_array($this->grade, $d_or_better))
     {
       return true;
     }
@@ -549,24 +549,24 @@ class _Course
    *
    * @return bool
    */
-  function hasVariableHours()
+  function has_variable_hours()
   {
     
-    $minH = $this->minHours;
-    $maxH = $this->maxHours;
+    $min_h = $this->min_hours;
+    $max_h = $this->max_hours;
     
     
     // Convert back from ghosthours, for the comparison.
-    if ($this->boolGhostMinHour) {
-      $minH = 0;
+    if ($this->bool_ghost_min_hour) {
+      $min_h = 0;
     }
     
-    if ($this->boolGhostHour) {
-      $maxH = 0;
+    if ($this->bool_ghost_hour) {
+      $max_h = 0;
     }
     
     
-    if ($minH == $maxH)
+    if ($min_h == $max_h)
     {
       return false;
     } else {
@@ -584,33 +584,33 @@ class _Course
    *
    * @return int
    */
-  function getHours()
+  function get_hours()
   {
 
     
        
-    // Do they have any hoursAwarded? (because they completed
+    // Do they have any hours_awarded? (because they completed
     // the course)
-    if ($this->hoursAwarded > 0)
+    if ($this->hours_awarded > 0)
     {
-      $h = $this->hoursAwarded;
+      $h = $this->hours_awarded;
       return $h;
     }
 
     
-    if ($this->hasVariableHours() && $this->advisedHours > -1) {
-      return $this->advisedHours;
+    if ($this->has_variable_hours() && $this->advised_hours > -1) {
+      return $this->advised_hours;
     }
     
     
     // This course might be set to 1 hour, but be a "ghost hour",
     // meaning the student actually earned 0 hours, but we recorded 1
     // to make FP's math work out.  So, let's return back 0 hours.
-    if ($this->boolGhostHour)
+    if ($this->bool_ghost_hour)
     {
-      adminDebug("here");
-      //$h = $this->hoursAwarded;
-      //if ($this->boolGhostHour) {
+      admin_debug("here");
+      //$h = $this->hours_awarded;
+      //if ($this->bool_ghost_hour) {
         $h = 0;
       //}
       
@@ -620,36 +620,36 @@ class _Course
 
 
     // No selected hours, but it's a variable hour course.
-    // So, return the minHours for this course.
-    return $this->minHours;
+    // So, return the min_hours for this course.
+    return $this->min_hours;
 
   }
 
 
   /**
-   * This function is used for comparing a course name to the subjectID
-   * and courseNum of $this.  
-   * We expect a space between the subjectID and CourseNum in $str.
+   * This function is used for comparing a course name to the subject_id
+   * and course_num of $this.  
+   * We expect a space between the subject_id and CourseNum in $str.
    * 
    * For example: MATH 1010
    * 
    * You may also ONLY specify a subject, ex: BIOL.  If you do that,
    * then only the subject will be compared.
    * 
-   * Example of use:  if ($c->nameEquals("ART 101")) then do this etc.
+   * Example of use:  if ($c->name_equals("ART 101")) then do this etc.
    *
    * @param string $str
    * @return bool
    */
-  function nameEquals($str)
+  function name_equals($str)
   {
     // We expect the str to be given to us
-    // with a space b/t the subjectID and courseNum.
+    // with a space b/t the subject_id and course_num.
     // ex:  MATH 111
     // may also ONLY specify the subject. ex:  BIOL
 
     $temp = split(" ",$str);
-    if ($this->subjectID == $temp[0] && ($this->courseNum == $temp[1] || trim($temp[1]) == ""))
+    if ($this->subject_id == $temp[0] && ($this->course_num == $temp[1] || trim($temp[1]) == ""))
     {
       return true;
     }
@@ -660,7 +660,7 @@ class _Course
 
   
   /**
-   * Convienience function.  Simply compare the courseID of
+   * Convienience function.  Simply compare the course_id of
    * another course to $this to see if they are equal.
    * 
    * This is also used by CourseList and ObjList to determine
@@ -668,12 +668,12 @@ class _Course
    * 
    * Usage:  if ($newCourse.equals($otherCourse)) { ... }
    *
-   * @param Course $courseC
+   * @param Course $course_c
    * @return bool
    */
-  function equals(Course $courseC = null)
+  function equals(Course $course_c = null)
   {
-    if ($this->courseID == $courseC->courseID)
+    if ($this->course_id == $course_c->course_id)
     {
       return true;
     }
@@ -684,77 +684,77 @@ class _Course
   
   
   /**
-   * Load $this as a new course based on the subjectID and courseNum,
-   * instead of the courseID.  This is a useful function for when you
-   * know a subjectID and courseNum, but not courseID (for example, if
+   * Load $this as a new course based on the subject_id and course_num,
+   * instead of the course_id.  This is a useful function for when you
+   * know a subject_id and course_num, but not course_id (for example, if
    * it comes from human input).
    *
-   * @param string $subjectID
-   * @param string $courseNum
+   * @param string $subject_id
+   * @param string $course_num
    */
-  function loadCourseFromName($subjectID, $courseNum)
+  function load_course_from_name($subject_id, $course_num)
   {
     // Load a course based on its name.  In otherwords,
     // find the CourseID this way first.
-    $courseID = $this->db->getCourseID($subjectID, $courseNum);
-    $this->loadCourse($courseID);
+    $course_id = $this->db->get_course_id($subject_id, $course_num);
+    $this->load_course($course_id);
   }
 
 
   /**
-   * Loads $this as a new course, based on courseID.
+   * Loads $this as a new course, based on course_id.
    *
-   * @param int $courseID
-   * @param bool $isTransfer
+   * @param int $course_id
+   * @param bool $is_transfer
    */
-  function loadCourse($courseID, $isTransfer = false)
+  function load_course($course_id, $is_transfer = false)
   {
 
     if ($this->db == NULL)
     {
-      $this->db = getGlobalDatabaseHandler();
+      $this->db = get_global_database_handler();
     }
 
 
-    $catalogLine = "";
-    if ($this->catalogYear != "") {
-      $catalogLine = " AND catalog_year = '$this->catalogYear' ";      
+    $catalog_line = "";
+    if ($this->catalog_year != "") {
+      $catalog_line = " AND catalog_year = '$this->catalog_year' ";      
     }
 
-    if ($isTransfer == false) {      
-      $this->loadDescriptiveData();
+    if ($is_transfer == false) {      
+      $this->load_descriptive_data();
     } else {
       // This is a transfer course.  Find out its eqv, if any...
       
       // Let's pull the needed variables out of our settings, so we know what
   		// to query, because this involves non-FlightPath tables.
-  		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:transfer_courses"];
+  		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:transfer_courses"];
   		$tfa = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  		$tableName_a = $tsettings["tableName"];
+  		$table_name_a = $tsettings["table_name"];
       
-  		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:transfer_institutions"];
+  		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:transfer_institutions"];
   		$tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  		$tableName_b = $tsettings["tableName"];
+  		$table_name_b = $tsettings["table_name"];
 
   		
       
-      $res = $this->db->dbQuery("SELECT * FROM
-										$tableName_a a,
-										$tableName_b b
+      $res = $this->db->db_query("SELECT * FROM
+										$table_name_a a,
+										$table_name_b b
 										WHERE 
-									   a.$tfa->transferCourseID = '?' 
-									   AND a.$tfa->institutionID = b.$tfb->institutionID ", $courseID);
-      $cur = $this->db->dbFetchArray($res);
-      $this->subjectID = $cur[$tfa->subjectID];
-      $this->courseNum = $cur[$tfa->courseNum];      
-      $this->courseID = $courseID;
-      $this->boolTransfer = true;
-      $this->institutionID = $cur[$tfa->institutionID];
-      $this->institutionName = $cur[$tfb->name];
+									   a.$tfa->transfer_course_id = '?' 
+									   AND a.$tfa->institution_id = b.$tfb->institution_id ", $course_id);
+      $cur = $this->db->db_fetch_array($res);
+      $this->subject_id = $cur[$tfa->subject_id];
+      $this->course_num = $cur[$tfa->course_num];      
+      $this->course_id = $course_id;
+      $this->bool_transfer = true;
+      $this->institution_id = $cur[$tfa->institution_id];
+      $this->institution_name = $cur[$tfb->name];
       
     }
 
-    $this->assignDisplayStatus();
+    $this->assign_display_status();
   }
 
 
@@ -766,7 +766,7 @@ class _Course
    * @return string
    * 
    */
-  function fixTitle($str = "")
+  function fix_title($str = "")
   {
 
     if ($str == "")
@@ -795,8 +795,8 @@ class _Course
     // convert to ucwords and fix some problems introduced by that.
     $str = trim(ucwords(strtolower($str)));
     
-    $str = str_replace("Iii", "III", $str);
-    $str = str_replace("Ii", "II", $str);
+    $str = str_replace("_iii", "III", $str);
+    $str = str_replace("_ii", "II", $str);
     $str = str_replace(" Iv"," IV",$str);
     $str = str_replace(" Vi"," VI",$str);
     $str = str_replace(" Of "," of ",$str);
@@ -809,10 +809,10 @@ class _Course
     $str = str_replace(" For "," for ",$str);
 
     // Strange words and abreviations which should be changed.
-    $str = str_replace("Afrotc","AFROTC",$str);
-    $str = str_replace("Gis","GIS",$str);
-    $str = str_replace("Dna","DNA",$str);
-    $str = str_replace("Cpr","CPR",$str);
+    $str = str_replace("_afrotc","AFROTC",$str);
+    $str = str_replace("_gis","GIS",$str);
+    $str = str_replace("_dna","DNA",$str);
+    $str = str_replace("_cpr","CPR",$str);
     $str = str_replace(" Rn"," RN",$str);
     $str = str_replace(" Micu"," MICU",$str);
     $str = str_replace(" Sicu"," SICU",$str);
@@ -865,260 +865,260 @@ class _Course
    * to the cache.
    * 
    *
-   * @param bool $boolLoadFromGlobalCache
+   * @param bool $bool_load_from_global_cache
    *        - If set to TRUE, this will attempt to load the course data
    *          from the "global cache", that is, the cache which is held in the
    *          GLOBALS array.  This should usually be set to TRUE, since this is
    *          much faster than querying the database.
    * 
-   * @param bool $boolIgnoreCatalogYearInCache
+   * @param bool $bool_ignore_catalog_year_in_cache
    *        - If set to TRUE, we will grab whatever is in the cache for this
-   *          course's courseID, regardless of if the catalog years match.
+   *          course's course_id, regardless of if the catalog years match.
    *          If set to FALSE, we will try to match the course's catalog year
    *          in the cache as well.
    * 
-   * @param bool $boolLimitCurrentCatalogYear
+   * @param bool $bool_limit_current_catalog_year
    *        - If set to TRUE, then we will only *query* for the course's
-   *          catalogYear in the db, and those before it (if we do not find
-   *          the exact catalogYear).  We will not look for any catalog years
+   *          catalog_year in the db, and those before it (if we do not find
+   *          the exact catalog_year).  We will not look for any catalog years
    *          after it.  If set to FALSE, we will look through any 
    *          valid catalog year.
    * 
-   * @param bool $boolForceCatalogYear
+   * @param bool $bool_force_catalog_year
    *        - If set to TRUE, we will only look for the course's catalog
    *          year in the database.
    * 
-   * @param bool $boolIgnoreExclude
+   * @param bool $bool_ignore_exclude
    *        - If set to TRUE, we will ignore courses marked as "exclude" in the
    *          database.
    * 
    */
-  function loadDescriptiveData($boolLoadFromGlobalCache = true, $boolIgnoreCatalogYearInCache = true, $boolLimitCurrentCatalogYear = true, $boolForceCatalogYear = false, $boolIgnoreExclude = false)
+  function load_descriptive_data($bool_load_from_global_cache = true, $bool_ignore_catalog_year_in_cache = true, $bool_limit_current_catalog_year = true, $bool_force_catalog_year = false, $bool_ignore_exclude = false)
   {
 
     if ($this->db == null)
     {
-      $this->db = getGlobalDatabaseHandler();
+      $this->db = get_global_database_handler();
     }
 
     $db = $this->db;
 
 
-    if ($this->catalogYear == "")
+    if ($this->catalog_year == "")
     {
-      $this->catalogYear = $GLOBALS["settingCurrentCatalogYear"];  // current catalogYear.
+      $this->catalog_year = $GLOBALS["setting_current_catalog_year"];  // current catalog_year.
     }
 
-    $settingCurrentCatalogYear = $GLOBALS["settingCurrentCatalogYear"]*1;
-    if ($this->boolUseDraft) {
-      $settingCurrentCatalogYear = $GLOBALS["settingCurrentDraftCatalogYear"]*1;
+    $setting_current_catalog_year = $GLOBALS["setting_current_catalog_year"]*1;
+    if ($this->bool_use_draft) {
+      $setting_current_catalog_year = $GLOBALS["setting_current_draft_catalog_year"]*1;
     }
     
-    $earliestCatalogYear = $GLOBALS["fpSystemSettings"]["earliestCatalogYear"];
+    $earliest_catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
     
     
-    if ($settingCurrentCatalogYear < $earliestCatalogYear)
+    if ($setting_current_catalog_year < $earliest_catalog_year)
     { // If it has not been set, assume the default.
-      $settingCurrentCatalogYear = $earliestCatalogYear;
+      $setting_current_catalog_year = $earliest_catalog_year;
     }
 
-    if ($boolLimitCurrentCatalogYear == true && $settingCurrentCatalogYear > $earliestCatalogYear)
+    if ($bool_limit_current_catalog_year == true && $setting_current_catalog_year > $earliest_catalog_year)
     {
-      if ($this->catalogYear*1 > $settingCurrentCatalogYear)
+      if ($this->catalog_year*1 > $setting_current_catalog_year)
       {
 
-        $this->catalogYear = $settingCurrentCatalogYear;  // current catalogYear.
+        $this->catalog_year = $setting_current_catalog_year;  // current catalog_year.
       }
     }
 
-    if ($this->catalogYear < $earliestCatalogYear && $this->catalogYear != 1900)
+    if ($this->catalog_year < $earliest_catalog_year && $this->catalog_year != 1900)
     {
       // Out of range, so set to default
-      $this->catalogYear = $earliestCatalogYear;
+      $this->catalog_year = $earliest_catalog_year;
     }
 
-    $catLine = "";
-    if ($boolForceCatalogYear == true)
+    $cat_line = "";
+    if ($bool_force_catalog_year == true)
     {
-      $catLine = " AND catalog_year = '$this->catalogYear' ";
+      $cat_line = " AND catalog_year = '$this->catalog_year' ";
     }
 
 
-    $cacheCatalogYear = $this->catalogYear;
-    if ($boolIgnoreCatalogYearInCache == true)
+    $cache_catalog_year = $this->catalog_year;
+    if ($bool_ignore_catalog_year_in_cache == true)
     {
-      $cacheCatalogYear = 0;
+      $cache_catalog_year = 0;
     }
 
-    if (!isset($this->arrayValidNames))
+    if (!isset($this->array_valid_names))
     {
-      $this->arrayValidNames = array();
+      $this->array_valid_names = array();
     }
 
 
     // First-- is this course in our GLOBALS cache for courses?
     // If it is, then load from that.
-    if ($boolLoadFromGlobalCache == true && $this->courseID != 0 &&
-    $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["subjectID"] != "")
+    if ($bool_load_from_global_cache == true && $this->course_id != 0 &&
+    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["subject_id"] != "")
     {
-      $this->subjectID = $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["subjectID"];
-      $this->courseNum = $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["courseNum"];
-      $this->title = $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["title"];
-      $this->description = $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["description"];
-      $this->minHours = $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["minHours"];
+      $this->subject_id = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["subject_id"];
+      $this->course_num = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["course_num"];
+      $this->title = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["title"];
+      $this->description = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["description"];
+      $this->min_hours = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["min_hours"];
       
       // Reset the ghosthours to default.
-      $this->boolGhostHour = $this->boolGhostMinHour = FALSE;
+      $this->bool_ghost_hour = $this->bool_ghost_min_hour = FALSE;
 
-      if ($this->minHours < 1) {
-        $this->minHours = 1;        
-        $this->boolGhostMinHour = TRUE;
+      if ($this->min_hours < 1) {
+        $this->min_hours = 1;        
+        $this->bool_ghost_min_hour = TRUE;
       }
       
-      $this->maxHours = $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["maxHours"];
+      $this->max_hours = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["max_hours"];
       
-      if ($this->maxHours < 1) {
-        $this->maxHours = 1;
-        $this->boolGhostHour = TRUE;
+      if ($this->max_hours < 1) {
+        $this->max_hours = 1;
+        $this->bool_ghost_hour = TRUE;
       }
       
       
-      $this->repeatHours = $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["repeatHours"];
-      $this->dbExclude = $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["dbExclude"];
-      $this->arrayValidNames = $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["arrayValidNames"];
-      //adminDebug("loaded from gb cache.");
+      $this->repeat_hours = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["repeat_hours"];
+      $this->db_exclude = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["db_exclude"];
+      $this->array_valid_names = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["array_valid_names"];
+      //admin_debug("loaded from gb cache.");
       return;
     }
 
 
-    if ($this->courseID != 0)
+    if ($this->course_id != 0)
     {
       
-      $excludeLine = " AND exclude = '0' ";
-      if ($boolIgnoreExclude) {
-        $excludeLine = "";
+      $exclude_line = " AND exclude = '0' ";
+      if ($bool_ignore_exclude) {
+        $exclude_line = "";
       }
       
-      $tableName = "courses";
-      if ($this->boolUseDraft) {$tableName = "draft_$tableName";}
-      $res = $this->db->dbQuery("SELECT * FROM $tableName
+      $table_name = "courses";
+      if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
+      $res = $this->db->db_query("SELECT * FROM $table_name
       							WHERE course_id = '?' 
       							AND catalog_year = '?' 
       							AND delete_flag = '0' 
-      							$excludeLine ", $this->courseID, $this->catalogYear);
-      $cur = $this->db->dbFetchArray($res);
+      							$exclude_line ", $this->course_id, $this->catalog_year);
+      $cur = $this->db->db_fetch_array($res);
 
-      //adminDebug("here i am" . $this->courseID);
+      //admin_debug("here i am" . $this->course_id);
       //var_dump($cur);
 
-      if ($this->db->dbNumRows($res) < 1)
+      if ($this->db->db_num_rows($res) < 1)
       {
         // No results found, so instead pick the most recent
         // entry.
 
-        $tableName = "courses";
-        if ($this->boolUseDraft) {$tableName = "draft_$tableName";}
-        $res2 = $db->dbQuery("SELECT * FROM $tableName
+        $table_name = "courses";
+        if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
+        $res2 = $db->db_query("SELECT * FROM $table_name
 							WHERE course_id = '?' 
 							AND subject_id != '' 
 							AND delete_flag = '0' 
-							$excludeLine
-							AND catalog_year <= '$settingCurrentCatalogYear'
-							$catLine
-							ORDER BY `catalog_year` DESC LIMIT 1", $this->courseID);
-        $cur = $db->dbFetchArray($res2);
+							$exclude_line
+							AND catalog_year <= '$setting_current_catalog_year'
+							$cat_line
+							ORDER BY `catalog_year` DESC LIMIT 1", $this->course_id);
+        $cur = $db->db_fetch_array($res2);
 
-        if ($db->dbNumRows($res2) < 1)
+        if ($db->db_num_rows($res2) < 1)
         {
           // Meaning, there were no results found that didn't have
           // the exclude flag set.
           // So, try to retrieve any course, even if it has
           // been excluded (but within our catalog year range)
           //$db3 = new DatabaseHandler();
-          $tableName = "courses";
-          if ($this->boolUseDraft) {$tableName = "draft_$tableName";}
-          $res3 = $db->dbQuery("SELECT * FROM $tableName
+          $table_name = "courses";
+          if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
+          $res3 = $db->db_query("SELECT * FROM $table_name
 							WHERE course_id = '?' 
 							AND subject_id != '' 
 							AND delete_flag = '0'
-							AND catalog_year <= '$settingCurrentCatalogYear'
-							$catLine
-							ORDER BY `catalog_year` DESC LIMIT 1", $this->courseID);
-          $cur = $db->dbFetchArray($res3);
+							AND catalog_year <= '$setting_current_catalog_year'
+							$cat_line
+							ORDER BY `catalog_year` DESC LIMIT 1", $this->course_id);
+          $cur = $db->db_fetch_array($res3);
 
         }
 
       }
 
 
-      $this->title = $this->fixTitle($cur["title"]);
+      $this->title = $this->fix_title($cur["title"]);
       $this->description = trim($cur["description"]);
-      $this->subjectID = trim(strtoupper($cur["subject_id"]));
-      $this->courseNum = trim(strtoupper($cur["course_num"]));
+      $this->subject_id = trim(strtoupper($cur["subject_id"]));
+      $this->course_num = trim(strtoupper($cur["course_num"]));
 
 
-      $this->minHours = $cur["min_hours"];
-      $this->maxHours = $cur["max_hours"];
+      $this->min_hours = $cur["min_hours"];
+      $this->max_hours = $cur["max_hours"];
 
       // Reset the ghosthours to default.
-      $this->boolGhostHour = $this->boolGhostMinHour = FALSE;
+      $this->bool_ghost_hour = $this->bool_ghost_min_hour = FALSE;
       
-      if ($this->minHours < 1) {
-        $this->minHours = 1;
-        $this->boolGhostMinHour = TRUE;
+      if ($this->min_hours < 1) {
+        $this->min_hours = 1;
+        $this->bool_ghost_min_hour = TRUE;
       }
-      if ($this->maxHours < 1) {
-        $this->maxHours = 1;
-        $this->boolGhostHour = TRUE;
+      if ($this->max_hours < 1) {
+        $this->max_hours = 1;
+        $this->bool_ghost_hour = TRUE;
       }
       
       
-      $this->repeatHours = $cur["repeat_hours"];
-      if ($this->repeatHours*1 < 1)
+      $this->repeat_hours = $cur["repeat_hours"];
+      if ($this->repeat_hours*1 < 1)
       {
-        $this->repeatHours = $this->maxHours;
+        $this->repeat_hours = $this->max_hours;
       }
 
-      $this->dbExclude = $cur["exclude"];
-      $this->dataEntryComment = $cur["data_entry_comment"];
+      $this->db_exclude = $cur["exclude"];
+      $this->data_entry_comment = $cur["data_entry_comment"];
 
       // Now, lets get a list of all the valid names for this course.
       // In other words, all the non-excluded names.  For most
       // courses, this will just be one name.  But for cross-listed
       // courses, this will be 2 or more (probably just 2 though).
       // Example: MATH 373 and CSCI 373 are both valid names for that course.
-      $tableName = "courses";
-      if ($this->boolUseDraft) {$tableName = "draft_$tableName";}
+      $table_name = "courses";
+      if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 
-      $res = $this->db->dbQuery("SELECT * FROM $tableName
+      $res = $this->db->db_query("SELECT * FROM $table_name
 										WHERE course_id = '?'
-										AND exclude = '0' ", $this->courseID);
-      while($cur = $this->db->dbFetchArray($res))
+										AND exclude = '0' ", $this->course_id);
+      while($cur = $this->db->db_fetch_array($res))
       {
         $si = $cur["subject_id"];
         $cn = $cur["course_num"];
-        if (in_array("$si~$cn", $this->arrayValidNames))
+        if (in_array("$si~$cn", $this->array_valid_names))
         {
           continue;
         }
-        $this->arrayValidNames[] = "$si~$cn";
+        $this->array_valid_names[] = "$si~$cn";
       }
 
 
-    } else if ($this->boolTransfer == true)
+    } else if ($this->bool_transfer == true)
     {
       // This is a transfer credit which did not have a local
-      // course eqv.  At the moment, the subjectID and
-      // courseNum are empty.  So, let's fill them in with the
+      // course eqv.  At the moment, the subject_id and
+      // course_num are empty.  So, let's fill them in with the
       // transfer credit's information.
-      if ($this->courseTransfer != null)
+      if ($this->course_transfer != null)
       {
 
-        $this->subjectID = $this->courseTransfer->subjectID;
-        $this->courseNum = $this->courseTransfer->courseNum;
-        if ($this->courseTransfer->hoursAwarded > 0)
+        $this->subject_id = $this->course_transfer->subject_id;
+        $this->course_num = $this->course_transfer->course_num;
+        if ($this->course_transfer->hours_awarded > 0)
         {
-          $this->hoursAwarded = $this->courseTransfer->hoursAwarded;
+          $this->hours_awarded = $this->course_transfer->hours_awarded;
         }
       }
 
@@ -1133,7 +1133,7 @@ class _Course
 
     if ($this->title == "")
     {
-      $this->title = "$this->subjectID $this->courseNum";
+      $this->title = "$this->subject_id $this->course_num";
     }
 
 
@@ -1142,116 +1142,116 @@ class _Course
 
     // We do need to go back and correct the ghost hours, setting them
     // back to 0 hrs, or else this will be a problem.
-    $minHours = $this->minHours;
-    $maxHours = $this->maxHours;
-    if ($this->boolGhostMinHour) $minHours = 0;
-    if ($this->boolGhostHour) $maxHours = 0;
+    $min_hours = $this->min_hours;
+    $max_hours = $this->max_hours;
+    if ($this->bool_ghost_min_hour) $min_hours = 0;
+    if ($this->bool_ghost_hour) $max_hours = 0;
     
-    $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["subjectID"] = $this->subjectID;
-    $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["courseNum"] = $this->courseNum;
-    $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["title"] = $this->title;
-    $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["description"] = $this->description;
-    $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["minHours"] = $minHours;
-    $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["maxHours"] = $maxHours;
-    $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["repeatHours"] = $this->repeatHours;
-    $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["dbExclude"] = $this->dbExclude;
-    $GLOBALS["fpCourseInventory"][$this->courseID][$cacheCatalogYear]["arrayValidNames"] = $this->arrayValidNames;
+    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["subject_id"] = $this->subject_id;
+    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["course_num"] = $this->course_num;
+    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["title"] = $this->title;
+    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["description"] = $this->description;
+    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["min_hours"] = $min_hours;
+    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["max_hours"] = $max_hours;
+    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["repeat_hours"] = $this->repeat_hours;
+    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["db_exclude"] = $this->db_exclude;
+    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["array_valid_names"] = $this->array_valid_names;
 
-    $GLOBALS["cacheCourseInventory"] = true;  //  rebuild this cache before it closes.
+    $GLOBALS["cache_course_inventory"] = true;  //  rebuild this cache before it closes.
 
 
   }
 
 
   /**
-   * Similar to loadDescriptiveData(), this will load whatever we have
+   * Similar to load_descriptive_data(), this will load whatever we have
    * for $this transfer course.
    *
-   * @param int $studentID
+   * @param int $student_id
    *        - If > 0, we will look for the course data which has been
    *          assigned for this particular student.  If it == 0, we will
    *          just use the first bit of data we find.
    * 
    */
-  function loadDescriptiveTransferData($studentID = 0)
+  function load_descriptive_transfer_data($student_id = 0)
   {
     // This method should be called to load transfer course data
-    // into THIS object.  It assumes that $this->courseID is a transfer
+    // into THIS object.  It assumes that $this->course_id is a transfer
     // course's ID, which can be looked up in flightpath.transfer_courses.
 
-    // If a studentID is specified, it will load eqv information.
+    // If a student_id is specified, it will load eqv information.
     if ($this->db == null)
     {
-      $this->db = getGlobalDatabaseHandler();
+      $this->db = get_global_database_handler();
     }
 
     
     // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this involves non-FlightPath tables.
-		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:transfer_courses"];
+		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:transfer_courses"];
 		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$tableName = $tsettings["tableName"];    
+		$table_name = $tsettings["table_name"];    
     
     
-    $res = $this->db->dbQuery("SELECT * FROM $tableName
-									     WHERE $tf->transferCourseID = '?' ", $this->courseID);
-    $cur = $this->db->dbFetchArray($res);
+    $res = $this->db->db_query("SELECT * FROM $table_name
+									     WHERE $tf->transfer_course_id = '?' ", $this->course_id);
+    $cur = $this->db->db_fetch_array($res);
 
-    $this->subjectID = $cur[$tf->subjectID];
-    $this->courseNum = $cur[$tf->courseNum];
-    $this->title = $this->fixTitle($cur[$tf->title]);
-    $this->minHours = $cur[$tf->minHours];
-    $this->maxHours = $cur[$tf->maxHours];
-    $this->institutionID = $cur[$tf->institutionID];
+    $this->subject_id = $cur[$tf->subject_id];
+    $this->course_num = $cur[$tf->course_num];
+    $this->title = $this->fix_title($cur[$tf->title]);
+    $this->min_hours = $cur[$tf->min_hours];
+    $this->max_hours = $cur[$tf->max_hours];
+    $this->institution_id = $cur[$tf->institution_id];
     // Try to figure out the institution name for this course...
-    $this->institutionName = $this->db->getInstitutionName($this->institutionID);
+    $this->institution_name = $this->db->get_institution_name($this->institution_id);
 
-    if ($studentID > 0)
+    if ($student_id > 0)
     {
       // Because transfer credit titles may differ from student
       // to student, let's look up the title in the sisdata table...
       
       // Let's pull the needed variables out of our settings, so we know what
   		// to query, because this involves non-FlightPath tables.
-  		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:student_transfer_courses"];
+  		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:student_transfer_courses"];
   		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  		$tableName = $tsettings["tableName"];    
+  		$table_name = $tsettings["table_name"];    
       
       
-      $termLine = "";
-      if ($this->termID > 1) {
-        $termLine = "AND $tf->termID = '$this->termID' ";
+      $term_line = "";
+      if ($this->term_id > 1) {
+        $term_line = "AND $tf->term_id = '$this->term_id' ";
       }
       
-      $res = $this->db->dbQuery("SELECT * FROM $tableName
-									WHERE $tf->studentID = '?'
-									AND $tf->transferCourseID = '?' 
-									$termLine ", $studentID, $this->courseID);
-      $cur = $this->db->dbFetchArray($res);
-      if (trim($cur[$tf->studentSpecificCourseTitle]) != "") {
-        $this->title = trim($cur[$tf->studentSpecificCourseTitle]);
+      $res = $this->db->db_query("SELECT * FROM $table_name
+									WHERE $tf->student_id = '?'
+									AND $tf->transfer_course_id = '?' 
+									$term_line ", $student_id, $this->course_id);
+      $cur = $this->db->db_fetch_array($res);
+      if (trim($cur[$tf->student_specific_course_title]) != "") {
+        $this->title = trim($cur[$tf->student_specific_course_title]);
       }
-      // Also assign hoursAwarded while we are here.
-      $this->hoursAwarded = $cur[$tf->hoursAwarded];
+      // Also assign hours_awarded while we are here.
+      $this->hours_awarded = $cur[$tf->hours_awarded];
 
 
       // Get EQV information....
       // Let's pull the needed variables out of our settings, so we know what
   		// to query, because this involves non-FlightPath tables.
-  		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:transfer_eqv_per_student"];
+  		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:transfer_eqv_per_student"];
   		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  		$tableName = $tsettings["tableName"];    
+  		$table_name = $tsettings["table_name"];    
       
       
-      $res2 = $this->db->dbQuery("SELECT * FROM $tableName
-            					WHERE $tf->studentID = '?'	
-            					AND $tf->transferCourseID = '?' 
-            					AND $tf->validTermID = '?' ", $studentID, $this->courseID, $this->termID);
-      while($cur2 = $this->db->dbFetchArray($res2))
+      $res2 = $this->db->db_query("SELECT * FROM $table_name
+            					WHERE $tf->student_id = '?'	
+            					AND $tf->transfer_course_id = '?' 
+            					AND $tf->valid_term_id = '?' ", $student_id, $this->course_id, $this->term_id);
+      while($cur2 = $this->db->db_fetch_array($res2))
       {        
-        $c = new Course($cur2[$tf->localCourseID]);
-        $this->transferEqvText .= "$c->subjectID $c->courseNum
-							(" . $c->getCatalogHours() . " hrs) ";
+        $c = new Course($cur2[$tf->local_course_id]);
+        $this->transfer_eqv_text .= "$c->subject_id $c->course_num
+							(" . $c->get_catalog_hours() . " hrs) ";
       }
 
     }
@@ -1261,11 +1261,11 @@ class _Course
 
   
   /**
-   * Based on $this->termID, set what catalog year should go with
+   * Based on $this->term_id, set what catalog year should go with
    * the course.
    *
    */
-  function setCatalogYearFromTermID()
+  function set_catalog_year_from_term_id()
   {
 
     if ($this->db == null)
@@ -1273,20 +1273,20 @@ class _Course
       $this->db = new DatabaseHandler();
     }
 
-    if (strstr($this->termID, "1111"))
+    if (strstr($this->term_id, "1111"))
     {
-      $this->catalogYear = $GLOBALS["fpSystemSettings"]["earliestCatalogYear"];
+      $this->catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
     }
 
-    $this->catalogYear = trim(substr($this->termID,0,4));
+    $this->catalog_year = trim(substr($this->term_id,0,4));
 
     // If the catalog year is greater than the currentCatalogYear
     // setting, then set it to that.
 
-    $settings = $this->db->getFlightPathSettings();
-    if ($this->catalogYear > $settings["currentCatalogYear"])
+    $settings = $this->db->get_flight_path_settings();
+    if ($this->catalog_year > $settings["current_catalog_year"])
     {
-      $this->catalogYear = $settings["currentCatalogYear"];
+      $this->catalog_year = $settings["current_catalog_year"];
     }
 
 
@@ -1294,30 +1294,30 @@ class _Course
   }
 
   /**
-   * Based on $this->termID, returns a plain english description
+   * Based on $this->term_id, returns a plain english description
    * of the term.  For example, 20061 would return "Spring of 2006".
    *
-   * @param bool $boolAbbreviate
+   * @param bool $bool_abbreviate
    *        - If set to TRUE, abbreviations will be used.  For example,
    *          Spring will be "Spr" and 2006 will be '06.
    * 
    * 
    * @return unknown
    */
-  function getTermDescription($boolAbbreviate = false)
+  function get_term_description($bool_abbreviate = false)
   {
     // Describe the term in plain english, for displays.
     // Ex:  "Fall of 2002."
     $rtn = "";
 
-    if (strstr($this->termID, "1111"))
+    if (strstr($this->term_id, "1111"))
     {
       return "(data unavailable at this time)";
     }
 
-    $year4 = trim(substr($this->termID, 0, 4));
-    $year2 = trim(substr($this->termID, 2, 2));
-    $ss = trim(substr($this->termID, 4, strlen($this->termID) - 4));
+    $year4 = trim(substr($this->term_id, 0, 4));
+    $year2 = trim(substr($this->term_id, 2, 2));
+    $ss = trim(substr($this->term_id, 4, strlen($this->term_id) - 4));
     
     $year4p1 = $year4 + 1;
     $year4m1 = $year4 - 1;
@@ -1326,13 +1326,13 @@ class _Course
     $year2p1 = fp_number_pad($year2 + 1, 2);
     $year2m1 = fp_number_pad($year2 - 1, 2);
         
-    // Let's look at the termIDStructure setting and attempt to match
+    // Let's look at the term_idStructure setting and attempt to match
     // what we have been supplied.
     // We expect this structure to look something like:
     // [Y4]60, Spring, Spring of [Y4], Spr '[Y2]
     // [Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]
     
-    $temp = $GLOBALS["fpSystemSettings"]["termIDStructure"];
+    $temp = $GLOBALS["fp_system_settings"]["term_idStructure"];
     $structures = explode("\n", $temp);
     
     foreach ($structures as $structure) {      
@@ -1346,17 +1346,17 @@ class _Course
       
       // Now, break up the structure to make it easier to work with.
       $tokens = explode(",", $structure);
-      $termDef = trim($tokens[0]);
-      $fullDescription = trim($tokens[2]);
-      $abbrDescription = trim($tokens[3]);
+      $term_def = trim($tokens[0]);
+      $full_description = trim($tokens[2]);
+      $abbr_description = trim($tokens[3]);
       
-      // Does our termID match the termDef?
-      if ($termDef == $this->termID) {
-        if ($boolAbbreviate) {
-          return $abbrDescription;
+      // Does our term_id match the termDef?
+      if ($term_def == $this->term_id) {
+        if ($bool_abbreviate) {
+          return $abbr_description;
         }
         else {
-          return $fullDescription;
+          return $full_description;
         }
       }
       
@@ -1367,31 +1367,31 @@ class _Course
 
   /**
    * Basically, this is a comparator function that will return true
-   * if $this equals many of the attributes of $courseC.  Useful for
+   * if $this equals many of the attributes of $course_c.  Useful for
    * seeing if $this is an "instance of" a particular course, but not
    * necessairily the course that the student took.  Example: if you want
    * to test if MATH 101 is part of a group.  You wouldn't use ==, since
    * all the attributes might not be the same.
    * 
-   * @param Course $courseC
+   * @param Course $course_c
    * 
    * @return bool
    */
-  function equalsPlaceholder(Course $courseC)
+  function equals_placeholder(Course $course_c)
   {
 
     // First, see if the courses are identical.
    
-    if ($this->equals($courseC)) 
+    if ($this->equals($course_c)) 
     {
       return true;
     }
     
     // Okay, now we go through and test for particular attributes
     // to be equal.
-    if ($this->subjectID == $courseC->subjectID
-    && $this->courseNum == $courseC->courseNum
-    && $this->institution == $courseC->institution)
+    if ($this->subject_id == $course_c->subject_id
+    && $this->course_num == $course_c->course_num
+    && $this->institution == $course_c->institution)
     {
       return true;
     }
@@ -1402,67 +1402,67 @@ class _Course
 
   
   /**
-   * This is the toString method for Course.  Because we want to pass it
-   * values, we are not using the magic method of "__toString".  So, to use,
+   * This is the to_string method for Course.  Because we want to pass it
+   * values, we are not using the magic method of "__to_string".  So, to use,
    * invoke this method directly.  Ex:
    * 
-   * $x = $newCourse->toString("", true);
+   * $x = $newCourse->to_string("", true);
    *
    * @param string $pad
    *        - How much padding to use.  Specified in the form of a string
    *          of spaces.  Ex:  "   "
    * 
-   * @param bool $boolShowRandom
+   * @param bool $bool_show_random
    *        - Display the randomly assigned number which goes with
    *          this course.
    * 
    * @return string
    */
-  function toString($pad = "      ", $boolShowRandom = false)
+  function to_string($pad = "      ", $bool_show_random = false)
   {
     $rtn = "";
 
-    if ($this->subjectID == "") {
-      $this->loadDescriptiveData();
+    if ($this->subject_id == "") {
+      $this->load_descriptive_data();
     }
 
-    if ($boolShowRandom) {$x = "rnd:$this->randomID -";}
+    if ($bool_show_random) {$x = "rnd:$this->random_id -";}
 
-    $rtn = $pad . "$this->courseID $x- $this->subjectID $this->courseNum ($this->hoursAwarded) $this->grade $this->termID";
+    $rtn = $pad . "$this->course_id $x- $this->subject_id $this->course_num ($this->hours_awarded) $this->grade $this->term_id";
 
-    if ($this->courseListFulfilledBy->isEmpty != true) {
+    if ($this->course_list_fulfilled_by->is_empty != true) {
       // In other words, if this is a requirement, and it is
       // being fulfilled by one of the student's courses,
       // then let's see it.
-      $rtn .= " ->fulfilled by " . $this->courseListFulfilledBy->getFirst()->toString("");
+      $rtn .= " ->fulfilled by " . $this->course_list_fulfilled_by->get_first()->to_string("");
     }
 
-    if ($this->boolTransfer == true && is_object($this->courseTransfer))
+    if ($this->bool_transfer == true && is_object($this->course_transfer))
     {
-      $rtn .= " - XFER eqv to " . $this->courseTransfer->toString("");
-    } else if ($this->boolTransfer == true){
+      $rtn .= " - XFER eqv to " . $this->course_transfer->to_string("");
+    } else if ($this->bool_transfer == true){
       $rtn .= " - XFER no eqv ";
     }
 
 
-    if ($this->boolAdvisedToTake) {
-      $rtn .= " - adv in sem " . $this->assignedToSemesterNum . ".";
+    if ($this->bool_advised_to_take) {
+      $rtn .= " - adv in sem " . $this->assigned_to_semester_num . ".";
     }
 
-    if ($this->boolSubstitution) {
+    if ($this->bool_substitution) {
       $rtn .= " - substitution.";
     }
 
-    if ($this->boolExcludeRepeat) {
+    if ($this->bool_exclude_repeat) {
       $rtn .= " - excluded repeat.";
     }
 
-    if ($this->dbExclude > 0) {
-      $rtn .= " - dbExclude = $this->dbExclude";
+    if ($this->db_exclude > 0) {
+      $rtn .= " - db_exclude = $this->db_exclude";
     }
 
-    if ($this->specifiedRepeats > 0) {
-      $rtn .= " reps: $this->specifiedRepeats";
+    if ($this->specified_repeats > 0) {
+      $rtn .= " reps: $this->specified_repeats";
     }
 
 
@@ -1494,28 +1494,28 @@ class _Course
     // of the variables which are supposed to be serialized.
 
     $arr = array(
-    "dbAdvisedCoursesID",
-    "dbSubstitutionID", "dbUnassignTransferID",
-    "dbExclude", "arrayIndex", "dbGroupRequirementID", "arrayValidNames",
-    "dataEntryValue",
+    "db_advised_courses_id",
+    "db_substitution_id", "db_unassign_transfer_id",
+    "db_exclude", "array_index", "db_group_requirement_id", "array_valid_names",
+    "data_entry_value",
 
-    "subjectID", "courseNum", "courseID", "requirementType", "catalogYear",
-    "minHours", "maxHours", "repeatHours", "boolOutdatedSub",
+    "subject_id", "course_num", "course_id", "requirement_type", "catalog_year",
+    "min_hours", "max_hours", "repeat_hours", "bool_outdated_sub",
 
-    "boolTaken", "termID", "sectionNumber", "grade", "hoursAwarded", "qualityPoints",
-    "boolTransfer", "institutionID", "institutionName", "courseTransfer", "transferFootnote",
-    "boolSubstitution", "courseSubstitution", "substitutionHours",
-    "boolSubstitutionSplit", "substitutionFootnote", "boolSubstitutionNewFromSplit",
+    "bool_taken", "term_id", "section_number", "grade", "hours_awarded", "quality_points",
+    "bool_transfer", "institution_id", "institution_name", "course_transfer", "transfer_footnote",
+    "bool_substitution", "course_substitution", "substitution_hours",
+    "bool_substitution_split", "substitution_footnote", "bool_substitution_new_from_split",
 
-    "minGrade", "specifiedRepeats", "boolSpecifiedRepeat", "requiredOnBranchID",
-    "assignedToGroupID", "assignedToSemesterNum",
+    "min_grade", "specified_repeats", "bool_specified_repeat", "required_on_branch_id",
+    "assigned_to_group_id", "assigned_to_semester_num",
 
-    "advisedHours", "boolSelected", "boolAdvisedToTake", "boolUseDraft",
-    "courseFulfilledBy", "courseListFulfilledBy",
-    "boolHasBeenAssigned", "boolAddedCourse", "groupListUnassigned",
+    "advised_hours", "bool_selected", "bool_advised_to_take", "bool_use_draft",
+    "course_fulfilled_by", "course_list_fulfilled_by",
+    "bool_has_been_assigned", "bool_added_course", "group_list_unassigned",
 
-    "displayStatus", "boolHasBeenDisplayed", "boolHideGrade", "boolGhostHour",
-    "boolGhostMinHour",
+    "display_status", "bool_has_been_displayed", "bool_hide_grade", "bool_ghost_hour",
+    "bool_ghost_min_hour",
     );
 
     // Okay, remove any variables we are not using

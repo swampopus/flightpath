@@ -25,10 +25,10 @@ notice must not be modified, and must be included with the source code.
  * and groups to be taken Freshman year.
  *
  */
-class _Semester
+class __semester
 {
-	public $title, $semesterNum, $notice;
-	public $listCourses, $listGroups;
+	public $title, $semester_num, $notice;
+	public $list_courses, $list_groups;
 	/*
 	* $title		Freshman, Sophomore, Summer II, etc.
 	* $rankNum		Numeric "rank" or order of the semester object. 1,2,3, etc.
@@ -36,24 +36,24 @@ class _Semester
 	* *** MIGHT SHOULD BE A GROUP INSTEAD? A group can be a list
 	*				of courses, and a list of groups.  That sounds like a semester
 	*				to me.  But, if not...
-	* $listCourses	This is a list of courses which are required
-	* $listGroups	This is a list of the groups which are required.
+	* $list_courses	This is a list of courses which are required
+	* $list_groups	This is a list of the groups which are required.
 	*/
 	
-	function __construct($semesterNum = "")
+	function __construct($semester_num = "")
 	{
-		$this->semesterNum = $semesterNum;
+		$this->semester_num = $semester_num;
 		
-		//$this->listCourses = new ObjList();
-		$this->listCourses = new CourseList();
-		$this->listGroups = new GroupList();
+		//$this->list_courses = new ObjList();
+		$this->list_courses = new CourseList();
+		$this->list_groups = new GroupList();
 		
-		$this->assignTitle();	
+		$this->assign_title();	
 	}
 	
 	function equals(Semester $semester)
 	{
-		if ($this->semesterNum == $semester->semesterNum)
+		if ($this->semester_num == $semester->semester_num)
 		{
 			return true;
 		}
@@ -61,47 +61,47 @@ class _Semester
 		return false;			
 	}
 	
-	function assignTitle()
+	function assign_title()
 	{
-		if ($this->semesterNum == 0)
+		if ($this->semester_num == 0)
 		{$this->title = "Freshman Year";}
-		if ($this->semesterNum == 1)
+		if ($this->semester_num == 1)
 		{$this->title = "Sophomore Year";}
-		if ($this->semesterNum == 2)
+		if ($this->semester_num == 2)
 		{$this->title = "Junior Year";}
-		if ($this->semesterNum == 3)
+		if ($this->semester_num == 3)
 		{$this->title = "Senior Year";}
-		if ($this->semesterNum == 4)
+		if ($this->semester_num == 4)
 		{$this->title = "Year 5";}
 		
 	}
 	
 	
-	function toString()
+	function to_string()
 	{
 		$rtn = "";
 		
-		$rtn .= " Semester: $this->semesterNum \n";
-		if (!$this->listCourses->isEmpty)
+		$rtn .= " Semester: $this->semester_num \n";
+		if (!$this->list_courses->is_empty)
 		{
-			$rtn .= $this->listCourses->toString();
+			$rtn .= $this->list_courses->to_string();
 		}
-		if (!$this->listGroups->isEmpty)
+		if (!$this->list_groups->is_empty)
 		{
-			$rtn .= $this->listGroups->toString();
+			$rtn .= $this->list_groups->to_string();
 		}
 		
 		return $rtn;
 	}
 	
-	function resetListCounters()
+	function reset_list_counters()
 	{
 		// Goes through all lists in the semester and
-		// calls function "resetCounter" on them.
+		// calls function "reset_counter" on them.
 		// Important to do before we start trying to use and
 		// work with the semesters.
-		$this->listCourses->resetCounter();
-		$this->listGroups->resetListCounters();
+		$this->list_courses->reset_counter();
+		$this->list_groups->reset_list_counters();
 	}
 	
 } // end class Semester

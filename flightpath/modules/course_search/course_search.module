@@ -67,21 +67,21 @@ function OLD__course_search_menu() {
   
   $items[] = array(
     "title" => "Course Search",
-    "url" => getModuleActionURL("course_search"),
+    "url" => get_module_action_u_r_l("course_search"),
     "target" => "_blank",
     "description" => "Use this tool to view course descriptions,
                       sample syllabi, and projected course offering
                       schedules.",
     "location" => "tools",
-    "icon" => $GLOBALS["fpSystemSettings"]["theme"] . "/images/book_glass_20.jpg",
+    "icon" => $GLOBALS["fp_system_settings"]["theme"] . "/images/book_glass_20.jpg",
     "weight" => 100,
   );
   
   $items[] = array(
     "title" => "Edit Course Search Settings",
-    "url" => getModuleActionURL("course_search") . "&a=displaySettings",
+    "url" => get_module_action_u_r_l("course_search") . "&a=display_settings",
     "location" => "admin_console",
-    "icon" => $GLOBALS["fpSystemSettings"]["theme"] . "/images/book_glass_20.jpg",
+    "icon" => $GLOBALS["fp_system_settings"]["theme"] . "/images/book_glass_20.jpg",
     "weight" => 300,
   );  
     
@@ -90,7 +90,7 @@ function OLD__course_search_menu() {
 
 
 function course_search_perm() {
-  return array("canAdministerCourseSearch" => array(
+  return array("can_administer_course_search" => array(
             "title" => "Can administer course search",
             "description" => "Users with this setting will be able
                               to modify settings for the Course Search module.",
@@ -106,7 +106,7 @@ function course_search_perm() {
  */
 function course_search_init() {
 
-  $db = getGlobalDatabaseHandler();
+  $db = get_global_database_handler();
   $GLOBALS["course_search_db"] = $db;
   
   // Did the user select a "mode?"  Valid modes: advanced, none (default)
@@ -124,42 +124,42 @@ function course_search_init() {
 function course_search_page_switchboard() {
 
   $db = $GLOBALS["course_search_db"];
-  $settings = $db->getFlightPathSettings();  
-  $GLOBALS["course_search_catalogYear"] = $settings["currentCatalogYear"];
+  $settings = $db->get_flight_path_settings();  
+  $GLOBALS["course_search_catalog_year"] = $settings["current_catalog_year"];
   
   
   $a = $_REQUEST["a"];
   
-  if ($a == "getSyllabus") {
-    course_search_getSyllabus();
+  if ($a == "get_syllabus") {
+    course_search_get_syllabus();
     return;
   }
   
-  if ($a == "displaySettings") {
-    if (!userHasPermission("canAdministerCourseSearch")) {
-      displayAccessDenied("Course Search Settings");
+  if ($a == "display_settings") {
+    if (!user_has_permission("can_administer_course_search")) {
+      display_access_denied("Course Search Settings");
     }
-    course_search_displaySettings();
+    course_search_display_settings();
     return;
   }
   
-  if ($a == "performSubmitSettings") {
-    if (!userHasPermission("canAdministerCourseSearch")) {
-      displayAccessDenied("Course Search Settings");
+  if ($a == "perform_submit_settings") {
+    if (!user_has_permission("can_administer_course_search")) {
+      display_access_denied("Course Search Settings");
     }
-    course_search_performSubmitSettings();
+    course_search_perform_submit_settings();
     return;
   }
   
   // Has the user selected a subject?
-  $subjectID = trim(addslashes($_REQUEST["subjectID"]));
-  if ($subjectID != "")
+  $subject_id = trim(addslashes($_REQUEST["subject_id"]));
+  if ($subject_id != "")
   {
-  	course_search_showCourses($subjectID);
+  	course_search_show_courses($subject_id);
   }
   else {  
     // If all else fails, go to the selection screen...
-    course_search_displaySearch();
+    course_search_display_search();
   }
   
 }
@@ -171,73 +171,73 @@ function course_search_page_switchboard() {
  * table.
  *
  */
-function course_search_performSubmitSettings() {
+function course_search_perform_submit_settings() {
   $db = $GLOBALS["course_search_db"];
   
-  $db->setVariable("course_search_availTermIDSuffixOrder", trim($_POST["availTermIDSuffixOrder"]));
-  $db->setVariable("course_search_availTermHeaders", trim($_POST["availTermHeaders"]));
-  $db->setVariable("course_search_availTermMobileHeaders", trim($_POST["availTermMobileHeaders"]));
+  $db->set_variable("course_search_avail_term_id_suffix_order", trim($_POST["avail_term_id_suffix_order"]));
+  $db->set_variable("course_search_avail_term_headers", trim($_POST["avail_term_headers"]));
+  $db->set_variable("course_search_avail_term_mobile_headers", trim($_POST["avail_term_mobile_headers"]));
   
-  course_search_displaySettings("<font color='green'>Settings successfully saved on " .date ("g:i:sa") . ".</font><br><br>");
+  course_search_display_settings("<font color='green'>Settings successfully saved on " .date ("g:i:sa") . ".</font><br><br>");
   
 }
 
 
 
-function course_search_displaySettings($msg = "") {
+function course_search_display_settings($msg = "") {
   $db = $GLOBALS["course_search_db"];
-  $moduleActionURL = getModuleActionURL("course_search");
+  $module_action_u_r_l = get_module_action_u_r_l("course_search");
     
   $pC = "";
   
   // for typing convenience...  
-  $g = $GLOBALS["fpSystemSettings"];
+  $g = $GLOBALS["fp_system_settings"];
   
   $pC .= "<a class='tenpt' href='admin.php'>Back to main menu.</a><br>";
   $pC .= "<h2>Course Search Settings</h2>$msg
           Use this form to alter the various system settings for the
           Course Search module.
           <hr>
-          <form action='$moduleActionURL' method='POST'>
+          <form action='$module_action_u_r_l' method='POST'>
           <input type='hidden' name='n' value='course_search'>
           ";
   
   // Use functions in the system module to make building this
   // for easier.
   
-  $pC .= system_buildElement("availTermIDSuffixOrder", "", "Available Term ID suffix order", 
+  $pC .= system_build_element("avail_term_id_suffix_order", "", "Available Term ID suffix order", 
                 "Enter the order of term ID suffixes, so that they will display
                 in the correct order in the table of available course
                 offerings.  Separate by comma.
                 <br>
-                Ex: 60, 40, 41, 80, 81, mm", $db->getVariable("course_search_availTermIDSuffixOrder"));
+                Ex: 60, 40, 41, 80, 81, mm", $db->get_variable("course_search_avail_term_id_suffix_order"));
   
 
-  $pC .= system_buildElement("availTermHeaders", "", "Available Term Table Headers", 
+  $pC .= system_build_element("avail_term_headers", "", "Available Term Table Headers", 
                 "Enter the table headers for the available table, in the same
                 order as the suffix order above.
                 <br>
-                Ex: Spring, May, Summer 1, Summer 2, Fall, Winter", $db->getVariable("course_search_availTermHeaders"));
+                Ex: Spring, May, Summer 1, Summer 2, Fall, Winter", $db->get_variable("course_search_avail_term_headers"));
                 
-  $pC .= system_buildElement("availTermMobileHeaders", "", "Available Term Mobile Table Headers", 
+  $pC .= system_build_element("avail_term_mobile_headers", "", "Available Term Mobile Table Headers", 
                 "Enter the table headers for the available table, in the same
                 order as the suffix order above, as it should be displayed
                 on a mobile device.
                 <br>
-                Ex: Spr, May, Sum1, Sum2, Fall, Win", $db->getVariable("course_search_availTermMobileHeaders"));
+                Ex: Spr, May, Sum1, Sum2, Fall, Win", $db->get_variable("course_search_avail_term_mobile_headers"));
 
                 
   $pC .= "<input type='hidden' name='a' value='performSubmitSettings'>
           <input type='submit' value='Submit'>
           </form>";
   
-	$screen = new AdvisingScreen("",null,"notAdvising");
+	$screen = new AdvisingScreen("",null,"not_advising");
 	
-	$screen->addCss(getModulePath("system") . "/css/style.css");
-	$screen->addCss(getModulePath("course_search") . "/css/style.css");
+	$screen->add_css(get_module_path("system") . "/css/style.css");
+	$screen->add_css(get_module_path("course_search") . "/css/style.css");
 	
-	$screen->pageContent = $pC;
-	$screen->outputToBrowser();	
+	$screen->page_content = $pC;
+	$screen->output_to_browser();	
   
 }
 
@@ -247,53 +247,53 @@ function course_search_displaySettings($msg = "") {
  * for download.
  *
  */
-function course_search_getSyllabus() {
+function course_search_get_syllabus() {
   // Get our global variables...
   $db = $GLOBALS["course_search_db"];
-  $catalogYear = $GLOBALS["course_search_catalogYear"];  
+  $catalog_year = $GLOBALS["course_search_catalog_year"];  
   $mode = $GLOBALS["course_search_mode"];
-  $moduleActionURL = getModuleActionURL("course_search");
+  $module_action_u_r_l = get_module_action_u_r_l("course_search");
 
   
   $c = trim(mysql_real_escape_string($_REQUEST["c"]));
   $id = trim(mysql_real_escape_string($_REQUEST["id"]));
   
   $temp = split("_", $c);
-  $subjectID = $temp[0];
-  $courseNum = $temp[1];
+  $subject_id = $temp[0];
+  $course_num = $temp[1];
   
   // Get the filename in question...
   $query = "select * from course_syllabi
-  					where course_perm_id = '$subjectID" . "_$courseNum' ";
+  					where course_perm_id = '$subject_id" . "_$course_num' ";
   if ($id != "") {
     $query = "select * from course_syllabi
   					where course_id = '$id' ";
   }
-  $res = $db->dbQuery($query);
-  $cur = $db->dbFetchArray($res);
+  $res = $db->db_query($query);
+  $cur = $db->db_fetch_array($res);
   $filename = $cur["filename"];
   
   $course_id = $cur["course_id"];
-  // Get the latest subjectID and courseNum for this course!
-  $newCourse = new Course();
-  $newCourse->courseID = $course_id;
-  $settings = $db->getFlightPathSettings();
-  $newCourse->catalogYear = $settings["currentCatalogYear"];
-  $newCourse->loadDescriptiveData(false, false, true);
+  // Get the latest subject_id and course_num for this course!
+  $new_course = new Course();
+  $new_course->course_id = $course_id;
+  $settings = $db->get_flight_path_settings();
+  $new_course->catalog_year = $settings["current_catalog_year"];
+  $new_course->load_descriptive_data(false, false, true);
   
-  $subjectID = $newCourse->subjectID;
-  $courseNum = $newCourse->courseNum;
+  $subject_id = $new_course->subject_id;
+  $course_num = $new_course->course_num;
   
   if ($filename == "" || !file_exists("./custom/files/syllabi/$filename"))
   { // Check to make sure the src file actually exists.
     // Display a message, letting the user know it does not
     // exist.
-    	$db->addToLog("syllabus", "fail,$c");
-  	course_search_displayFileNotFound($subjectID, $courseNum);
+    	$db->add_to_log("syllabus", "fail,$c");
+  	course_search_display_file_not_found($subject_id, $course_num);
   	return;
   }
   
-  $db->addToLog("syllabus", "get,$c");
+  $db->add_to_log("syllabus", "get,$c");
   
   $content_type = "application/plain";  // default, save as generic binary file.
   $temp = split("\.", $filename);
@@ -311,7 +311,7 @@ function course_search_getSyllabus() {
   
   
   
-  $fn = urlencode($subjectID . "_" . $courseNum . "_SAMPLE_SYLLABUS") .".$ext";  // make it a safe filename.
+  $fn = urlencode($subject_id . "_" . $course_num . "_SAMPLE_SYLLABUS") .".$ext";  // make it a safe filename.
   $fn = str_replace("+"," ",$fn); // restore spaces from + symbols...
   
   // Give it to the browser!
@@ -324,13 +324,13 @@ function course_search_getSyllabus() {
 
 
 
-function course_search_displayFileNotFound($subjectID, $courseNum)
+function course_search_display_file_not_found($subject_id, $course_num)
 {
   // Get our global variables...
   $db = $GLOBALS["course_search_db"];
-  $catalogYear = $GLOBALS["course_search_catalogYear"];  
+  $catalog_year = $GLOBALS["course_search_catalog_year"];  
   $mode = $GLOBALS["course_search_mode"];
-  $moduleActionURL = getModuleActionURL("course_search");
+  $module_action_u_r_l = get_module_action_u_r_l("course_search");
 
 
 	// Display a message to the user about the
@@ -341,7 +341,7 @@ function course_search_displayFileNotFound($subjectID, $courseNum)
 	$pC .= "<div style='font-size:16pt; font-weight:bold;'>File Not Found</div>
 			<br>
 			<div class='tenpt'>
-			We're sorry, but the syllabus file for $subjectID $courseNum
+			We're sorry, but the syllabus file for $subject_id $course_num
 			could not be found on the system.  It has either
 			been deleted, moved, or renamed.
 			<br><br>
@@ -353,9 +353,9 @@ function course_search_displayFileNotFound($subjectID, $courseNum)
 			";
 	
 		
-	$screen = new AdvisingScreen("",null,"notAdvising");
-	$screen->pageContent = $pC;
-	$screen->outputToBrowser();	
+	$screen = new AdvisingScreen("",null,"not_advising");
+	$screen->page_content = $pC;
+	$screen->output_to_browser();	
 	
 }
 
@@ -380,7 +380,7 @@ function course_search_display_courses() {
 
 
   $settings = fp_get_system_settings();
-  $current_catalog_year = $settings["currentCatalogYear"];
+  $current_catalog_year = $settings["current_catalog_year"];
 
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;  
@@ -388,15 +388,15 @@ function course_search_display_courses() {
 
   // Let's pull the needed variables out of our settings, so we know what
   // to query, because this is a non-FlightPath table.
-  $tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:subjects"];
+  $tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:subjects"];
   $tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  $tableName_a = $tsettings["tableName"];
+  $table_name_a = $tsettings["table_name"];
   
   
-  $query = "SELECT DISTINCT a.* from $tableName_a a,
+  $query = "SELECT DISTINCT a.* from $table_name_a a,
           courses b 
-          WHERE a.$tf->subjectID = '?'
-          AND a.$tf->subjectID = b.subject_id 
+          WHERE a.$tf->subject_id = '?'
+          AND a.$tf->subject_id = b.subject_id 
           AND catalog_year = '?'
           AND exclude = 0
           ORDER BY $tf->title ";
@@ -408,7 +408,7 @@ function course_search_display_courses() {
   
   Current catalog year: <b>$catalog_year-" . ($catalog_year +1) . "</b>   
       ";
-  $importantNotice = "              
+  $important_notice = "              
       <div class='tenpt hypo' style='padding: 5px;'>
       <b>Important Notice:</b> <ul style='margin-top: 5px;'>
       <li>Course descriptions are intended for unofficial use only.  Consult your catalog for the official listing.</li>
@@ -422,10 +422,10 @@ function course_search_display_courses() {
 
   if (fp_screen_is_mobile()) {
     // TODO:  implement the fieldset thingy.
-    //$pC .= $screen->drawCFieldset($importantNotice, "View important notice", true);   
+    //$pC .= $screen->draw_c_fieldset($important_notice, "View important notice", true);   
   }
   else {
-    $rtn .= $importantNotice;
+    $rtn .= $important_notice;
   }
   
   $rtn .= "      
@@ -438,7 +438,7 @@ function course_search_display_courses() {
       ";
   // Draw the term selector.
   $only_term = $_REQUEST["only_term"];
-  $rtn .= "<form id='term_form' action='" . $GLOBALS["fpSystemSettings"]["baseURL"] . "/tools/course-search/courses' method='GET'>           
+  $rtn .= "<form id='term_form' action='" . $GLOBALS["fp_system_settings"]["base_u_r_l"] . "/tools/course-search/courses' method='GET'>           
            <input type='hidden' name='mode' value='$subject_id'>
            <input type='hidden' name='subject_id' value='$subject_id'>
            
@@ -446,31 +446,31 @@ function course_search_display_courses() {
            <select name='only_term' onChange='document.getElementById(\"term_form\").submit();'>
              <option value=''>Any term</option>
              ";
-  //$termArray = array("60","mm","81","82","40","41");
-  $termArray = getTermIDSuffixes();
+  //$term_array = array("60","mm","81","82","40","41");
+  $term_array = get_term_id_suffixes();
   for ($t = $catalog_year; $t <= $catalog_year + 4; $t++)
   {
     $rtn .= "<option value=''>---------------------</option>";
-    foreach($termArray as $x)
+    foreach($term_array as $x)
     {
-      $scheduleText .= "<td class='tenpt' align='center'>";
-      $theTermID = $t . $x;
+      $schedule_text .= "<td class='tenpt' align='center'>";
+      $the_term_id = $t . $x;
       
       //if ($x == 40 || $x == 41) {
         // Fix cat year for fall and winter.
-      //  $theTermID = ($t + 1) . $x;
+      //  $the_term_id = ($t + 1) . $x;
     //  }
       
-      $tempCourse = new Course();
-      $tempCourse->termID = $theTermID;
-      $termDesc = $tempCourse->getTermDescription(false);
+      $temp_course = new Course();
+      $temp_course->term_id = $the_term_id;
+      $term_desc = $temp_course->get_term_description(false);
       
       $sel = "";
-      if ($only_term != "" && $only_term == "$theTermID") {
+      if ($only_term != "" && $only_term == "$the_term_id") {
         $sel = " selected";
       }
       
-      $rtn .= "<option value='$theTermID' $sel>$termDesc</option> \n";     
+      $rtn .= "<option value='$the_term_id' $sel>$term_desc</option> \n";     
     }   
     
   } 
@@ -479,18 +479,18 @@ function course_search_display_courses() {
          </form>";
   
   if ($only_term != "") {
-    $tempCourse = new Course();
-    $tempCourse->termID = $only_term;
-    $termDesc = $tempCourse->getTermDescription(false);
+    $temp_course = new Course();
+    $temp_course->term_id = $only_term;
+    $term_desc = $temp_course->get_term_description(false);
 
     $rtn .= "<div style='font-weight: bold; padding-bottom: 20px;'>
-             The following courses are currently scheduled to be offered during " . $termDesc . ".
+             The following courses are currently scheduled to be offered during " . $term_desc . ".
             </div>";
   }
   
   
-  $gradNoticeFlag = false;
-  $tempCourse = new Course();
+  $grad_notice_flag = false;
+  $temp_course = new Course();
   // removed course_num < 500 and
   $result = db_query("SELECT * FROM courses
               WHERE `catalog_year`='?' AND
@@ -508,7 +508,7 @@ function course_search_display_courses() {
       $title = ucwords(strtolower(trim($cur["title"])));
       // Fix formatting problems introduced by the ucwords command...
 
-      $title = $tempCourse->fixTitle($title);
+      $title = $temp_course->fix_title($title);
 
       $description = trim($cur["description"]);
       if ($description == "")
@@ -517,13 +517,13 @@ function course_search_display_courses() {
               the official course catalog for listings.";
       }
 
-      $syllabusText = "";     
-      $syllabusArray = course_search_getCourseSyllabusDetails("", "", $n_course_id);
+      $syllabus_text = "";     
+      $syllabus_array = course_search_get_course_syllabus_details("", "", $n_course_id);
       
-      if ($syllabusArray["url"] != "")
+      if ($syllabus_array["url"] != "")
       {
-        $syllabusText = "<div class='course-search-sample-syllabus'>
-                          <a href='{$syllabusArray["url"]}' class='nounderline'>
+        $syllabus_text = "<div class='course-search-sample-syllabus'>
+                          <a href='{$syllabus_array["url"]}' class='nounderline'>
                  <img src='" . fp_theme_location() . "/images/document_icon.gif' border='0' height='12'> 
                   Sample Syllabus</a>
                   
@@ -534,108 +534,108 @@ function course_search_display_courses() {
       //if ($mode == "advanced")
       //{
         // Look for all 5 years.
-        $longScheduleArray = course_search_getCourseRotationSchedule($n_course_id, $catalog_year, 100, true);
+        $long_schedule_array = course_search_get_course_rotation_schedule($n_course_id, $catalog_year, 100, true);
       //} else {
         // Only grab next 2 years.
-        $scheduleArray = course_search_getCourseRotationSchedule($n_course_id, $catalog_year);  
+        $schedule_array = course_search_get_course_rotation_schedule($n_course_id, $catalog_year);  
       //}
       
-      $fullScheduleArray = course_search_getCourseRotationSchedule($n_course_id);
-      $scheduleText = "";
+      $full_schedule_array = course_search_get_course_rotation_schedule($n_course_id);
+      $schedule_text = "";
 
-      if (count($longScheduleArray) > 0)
+      if (count($long_schedule_array) > 0)
       {
-        $scheduleText .= "
+        $schedule_text .= "
               <div>
                 <b>Anticipated availability:</b>
                 ";
-        $sDisp = "auto";
+        $s_disp = "auto";
         if ($mode != "advanced")
         { // only show this in the basic mode, not advanced.
-          foreach ($scheduleArray as $termID)
+          foreach ($schedule_array as $term_id)
           {
-            $tempCourse = new Course();
-            $tempCourse->termID = $termID;
-            $scheduleText .= " " . $tempCourse->getTermDescription(true) . ",";
+            $temp_course = new Course();
+            $temp_course->term_id = $term_id;
+            $schedule_text .= " " . $temp_course->get_term_description(true) . ",";
           }
-          $scheduleText = substr($scheduleText, 0, -1); // take off comma.
-          $rndDivID = rand(1,999999);
-          $scheduleText .= "
+          $schedule_text = substr($schedule_text, 0, -1); // take off comma.
+          $rnd_div_id = rand(1,999999);
+          $schedule_text .= "
             &nbsp; | &nbsp;
-            <a href='javascript: toggleHideDiv(\"$rndDivID\");' class='nounderline'>
-              <span id='SPAN$rndDivID'>
+            <a href='javascript: toggleHideDiv(\"$rnd_div_id\");' class='nounderline'>
+              <span id='SPAN$rnd_div_id'>
                 more&raquo;
                 </span></a> ";
-          $sDisp = "none";
+          $s_disp = "none";
         }
 
         // Consult our settings to find out what order our terms should be in.
-        $availOrder = variable_get("course_search_availTermIDSuffixOrder");
-        $termArray = explode(",", $availOrder);
-        foreach ($termArray as $k => $tt) {
-          $termArray[$k] = trim($tt);
+        $avail_order = variable_get("course_search_avail_term_id_suffix_order");
+        $term_array = explode(",", $avail_order);
+        foreach ($term_array as $k => $tt) {
+          $term_array[$k] = trim($tt);
         }
         
         // Get our table headers
-        $availHeaders = variable_get("course_search_availTermHeaders");
-        $availMobileHeaders = variable_get("course_search_availTermMobileHeaders");
+        $avail_headers = variable_get("course_search_avail_term_headers");
+        $avail_mobile_headers = variable_get("course_search_avail_term_mobile_headers");
         
-        $th = explode(",", $availHeaders);
+        $th = explode(",", $avail_headers);
         
         $twidth = "90%";
         $mleft = "20px;";
         if (fp_screen_is_mobile()) {
-          $th = explode(",", $availMobileHeaders);
+          $th = explode(",", $avail_mobile_headers);
           $twidth = "100%";
           $mleft = "0";
         }
         
-        $scheduleText .= "
+        $schedule_text .= "
               </div>
-            <div id='$rndDivID' style='display: $sDisp; margin-left: $mleft;'>
+            <div id='$rnd_div_id' style='display: $s_disp; margin-left: $mleft;'>
             <table border='1' width='$twidth' class='fp-course-search-avail'>
               <tr>
                <td>Year</td>
               ";
-        foreach ($th as $headerText) {
-          $scheduleText .= "<td>" . trim($headerText) . "</td>";
+        foreach ($th as $header_text) {
+          $schedule_text .= "<td>" . trim($header_text) . "</td>";
         }
-        $scheduleText .= "      </tr>";
-        //$termArray = array("60","mm","81","82","40","41");
+        $schedule_text .= "      </tr>";
+        //$term_array = array("60","mm","81","82","40","41");
         for ($t = $catalog_year; $t <= $catalog_year + 4; $t++)
         {
-          $scheduleText .= "<tr>
+          $schedule_text .= "<tr>
                     <td class='tenpt' align='center'>
                     <b>$t</b>
                     </td>";
-          foreach($termArray as $x)
+          foreach($term_array as $x)
           {
-            $scheduleText .= "<td class='tenpt' align='center'>";
-            $theTermID = $t . $x;
+            $schedule_text .= "<td class='tenpt' align='center'>";
+            $the_term_id = $t . $x;
             if ($x == 40 || $x == 41) {
               // Fix cat year for fall and winter.
-              $theTermID = ($t + 1) . $x;
+              $the_term_id = ($t + 1) . $x;
             }
             
-            if (in_array($theTermID, $fullScheduleArray))
+            if (in_array($the_term_id, $full_schedule_array))
             {
-              $scheduleText .= "<img src='" . fp_theme_location() . "/images/small_check.gif'>";             
+              $schedule_text .= "<img src='" . fp_theme_location() . "/images/small_check.gif'>";             
             }
             else {
-              if ($only_term != "" && $only_term == $theTermID) {
+              if ($only_term != "" && $only_term == $the_term_id) {
                 // Meaning, the term that the user selected is NOT in this 
                 // course's schedule.  So, we should hide it.
                 $bool_hide = TRUE;
               }
             }
-            $scheduleText .= "&nbsp;</td>";
+            $schedule_text .= "&nbsp;</td>";
 
           }
-          $scheduleText .= "</tr>";
+          $schedule_text .= "</tr>";
         }
 
 
-        $scheduleText .= "
+        $schedule_text .= "
             </table>
             </div>
                 ";
@@ -649,10 +649,10 @@ function course_search_display_courses() {
         $bool_hide = TRUE;
       }
 
-      if (course_search_getCourseRotationScheduleNotAnticipated($n_course_id))
+      if (course_search_get_course_rotation_schedule_not_anticipated($n_course_id))
       {
         // This course has no anticipated offerings!
-        $scheduleText = "<div><b>Anticipated availability:</b>
+        $schedule_text = "<div><b>Anticipated availability:</b>
               There are no anticipated course offerings
               at this time.</div>";
         if ($only_term != "") $bool_hide = TRUE;
@@ -677,9 +677,9 @@ function course_search_display_courses() {
       
       // Draw it on screen...
       if ($bool_hide != true) {     
-        if ($gradNoticeFlag == false && $course_num > 4999)
+        if ($grad_notice_flag == false && $course_num > 4999)
         {
-          $gradNoticeFlag = true;
+          $grad_notice_flag = true;
           $rtn .= "<div style='font-size: 10pt; font-weight: bold;
                 border-bottom: 1px solid black;
                 margin-left: 10px;
@@ -689,18 +689,18 @@ function course_search_display_courses() {
                 </div>";
         }
   
-        $details = $scheduleText . $syllabusText;
+        $details = $schedule_text . $syllabus_text;
 
         $hyp1 = " - ";
-        $onClick = "";
+        $on_click = "";
         if (fp_screen_is_mobile()) {
-          $onClick = "onClick='toggleCourseExtra(this);'";
+          $on_click = "on_click='toggle_course_extra(this);'";
           $hyp1 = "";
         }
         
         $rtn .= "<div class='course-search-course-block'>
                  <div class='course-search-course-title-row' 
-                      $onClick>
+                      $on_click>
                        <span class='course-search-course-name'>$n_subject_id $n_course_num</span>
                         $hyp1 
                         <span class='course-search-course-title'>$title</span> - $hours hrs.$repeat </div>
@@ -717,7 +717,7 @@ function course_search_display_courses() {
 
 
 
-  //$pC .= $screen->getJavaScriptCode();
+  //$pC .= $screen->get_java_script_code();
   $rtn .= '    
     <script type="text/javascript">
     function toggleHideDiv(rndDivID)
@@ -742,7 +742,7 @@ function course_search_display_courses() {
   
       ';
 
-  //$db->addToLog("course_search", "view,$subjectID,$catalogYear,$mode");
+  //$db->add_to_log("course_search", "view,$subject_id,$catalog_year,$mode");
 
   
   return $rtn;
@@ -750,22 +750,22 @@ function course_search_display_courses() {
 
 
 
-function OLD__course_search_showCourses($subjectID)
+function OLD__course_search_show_courses($subject_id)
 {
   
   // Get our global variables...
   $db = $GLOBALS["course_search_db"];
-  $catalogYear = $GLOBALS["course_search_catalogYear"];  
+  $catalog_year = $GLOBALS["course_search_catalog_year"];  
   $mode = $GLOBALS["course_search_mode"];
-  $moduleActionURL = getModuleActionURL("course_search");
+  $module_action_u_r_l = get_module_action_u_r_l("course_search");
   
   
-	$screen = new AdvisingScreen("",null,"notAdvising");
+	$screen = new AdvisingScreen("",null,"not_advising");
 	$pC = "";
 
-	$screen->addCss(getModulePath("course_search") . "/css/course_search_style.css");
-	if ($screen->pageIsMobile) {
-	  $screen->addCss(getModulePath("course_search") . "/css/course_search_mobile_style.css");
+	$screen->add_css(get_module_path("course_search") . "/css/course_search_style.css");
+	if ($screen->page_is_mobile) {
+	  $screen->add_css(get_module_path("course_search") . "/css/course_search_mobile_style.css");
 	}
 	
     
@@ -777,32 +777,32 @@ function OLD__course_search_showCourses($subjectID)
          <tr><td class='tenpt'>
 
     ";
-	$pC .= $screen->drawCurvedTitle("Course Search");
+	$pC .= $screen->draw_curved_title("Course Search");
 	
   // Let's pull the needed variables out of our settings, so we know what
 	// to query, because this is a non-FlightPath table.
-	$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:subjects"];
+	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:subjects"];
 	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-	$tableName_a = $tsettings["tableName"];
+	$table_name_a = $tsettings["table_name"];
 	
 	
-	$query = "SELECT DISTINCT a.* from $tableName_a a,
+	$query = "SELECT DISTINCT a.* from $table_name_a a,
 					courses b 
-					WHERE a.$tf->subjectID = '?'
-					AND a.$tf->subjectID = b.subject_id 
+					WHERE a.$tf->subject_id = '?'
+					AND a.$tf->subject_id = b.subject_id 
 					AND catalog_year = '?'
 					AND exclude = 0
 					ORDER BY $tf->title ";
-	$result = $db->dbQuery($query, $subjectID, $catalogYear);
-  $cur = $db->dbFetchArray($result);
+	$result = $db->db_query($query, $subject_id, $catalog_year);
+  $cur = $db->db_fetch_array($result);
 	$title = trim($cur[$tf->title]);
 
 
 	$pC .= "
 	
-	Current catalog year: <b>$catalogYear-" . ($catalogYear +1) . "</b>		
+	Current catalog year: <b>$catalog_year-" . ($catalog_year +1) . "</b>		
       ";
-	$importantNotice = "							
+	$important_notice = "							
 			<div class='tenpt hypo' style='padding: 5px;'>
 			<b>Important Notice:</b> <ul style='margin-top: 5px;'>
 			<li>Course descriptions are intended for unofficial use only.  Consult your catalog for the official listing.</li>
@@ -814,11 +814,11 @@ function OLD__course_search_showCourses($subjectID)
 			</div>
 			";
 
-	if ($screen->pageIsMobile) {
-    $pC .= $screen->drawCFieldset($importantNotice, "View important notice", true);	  
+	if ($screen->page_is_mobile) {
+    $pC .= $screen->draw_c_fieldset($important_notice, "View important notice", true);	  
 	}
 	else {
-	  $pC .= $importantNotice;
+	  $pC .= $important_notice;
 	}
 	
 	$pC .= "			
@@ -826,45 +826,45 @@ function OLD__course_search_showCourses($subjectID)
 			
 			<div style='margin: 10px 0 20px 10px; border-bottom: 2px solid black;'>
 			<span style='font-size: 14pt; font-weight:bold;'>$title</span>
-			<a href='$moduleActionURL&mode=$mode' class='nounderline'>[change]</a>			
+			<a href='$module_action_u_r_l&mode=$mode' class='nounderline'>[change]</a>			
 			</div>
 			";
 	// Draw the term selector.
 	$only_term = $_REQUEST["only_term"];
-	$pC .= "<form id='term_form' action='$moduleActionURL' method='GET'>
+	$pC .= "<form id='term_form' action='$module_action_u_r_l' method='GET'>
 	         <input type='hidden' name='n' value='course_search'>
-	         <input type='hidden' name='mode' value='$subjectID'>
-	         <input type='hidden' name='subjectID' value='$subjectID'>
+	         <input type='hidden' name='mode' value='$subject_id'>
+	         <input type='hidden' name='subject_id' value='$subject_id'>
 	         
 	         View courses offered:
 	         <select name='only_term' onChange='document.getElementById(\"term_form\").submit();'>
 	           <option value=''>Any term</option>
 	           ";
-  //$termArray = array("60","mm","81","82","40","41");
-  $termArray = getTermIDSuffixes();
-	for ($t = $catalogYear; $t <= $catalogYear + 4; $t++)
+  //$term_array = array("60","mm","81","82","40","41");
+  $term_array = get_term_id_suffixes();
+	for ($t = $catalog_year; $t <= $catalog_year + 4; $t++)
 	{
 	  $pC .= "<option value=''>---------------------</option>";
-		foreach($termArray as $x)
+		foreach($term_array as $x)
 		{
-			$scheduleText .= "<td class='tenpt' align='center'>";
-			$theTermID = $t . $x;
+			$schedule_text .= "<td class='tenpt' align='center'>";
+			$the_term_id = $t . $x;
 			
 			//if ($x == 40 || $x == 41) {
 			  // Fix cat year for fall and winter.
-			//  $theTermID = ($t + 1) . $x;
+			//  $the_term_id = ($t + 1) . $x;
 		//	}
 			
-			$tempCourse = new Course();
-			$tempCourse->termID = $theTermID;
-			$termDesc = $tempCourse->getTermDescription(false);
+			$temp_course = new Course();
+			$temp_course->term_id = $the_term_id;
+			$term_desc = $temp_course->get_term_description(false);
 			
 			$sel = "";
-			if ($only_term != "" && $only_term == "$theTermID") {
+			if ($only_term != "" && $only_term == "$the_term_id") {
 			  $sel = " selected";
 			}
 			
-			$pC .= "<option value='$theTermID' $sel>$termDesc</option> \n";			
+			$pC .= "<option value='$the_term_id' $sel>$term_desc</option> \n";			
 		}		
 		
 	}	
@@ -873,36 +873,36 @@ function OLD__course_search_showCourses($subjectID)
 	       </form>";
 	
 	if ($only_term != "") {
-		$tempCourse = new Course();
-		$tempCourse->termID = $only_term;
-		$termDesc = $tempCourse->getTermDescription(false);
+		$temp_course = new Course();
+		$temp_course->term_id = $only_term;
+		$term_desc = $temp_course->get_term_description(false);
 
 	  $pC .= "<div style='font-weight: bold; padding-bottom: 20px;'>
-	           The following courses are currently scheduled to be offered during " . $termDesc . ".
+	           The following courses are currently scheduled to be offered during " . $term_desc . ".
 	          </div>";
 	}
 	
 	
-	$gradNoticeFlag = false;
-	$tempCourse = new Course();
+	$grad_notice_flag = false;
+	$temp_course = new Course();
 	// removed course_num < 500 and
-	$result = $db->dbQuery("SELECT * FROM courses
+	$result = $db->db_query("SELECT * FROM courses
 							WHERE `catalog_year`='?' AND
 							`subject_id`='?' AND							
-							`exclude`='0' ORDER BY `course_num` ", $catalogYear, $subjectID);
+							`exclude`='0' ORDER BY `course_num` ", $catalog_year, $subject_id);
 	if ($result)
 	{
-		while ($cur = $db->dbFetchArray($result))
+		while ($cur = $db->db_fetch_array($result))
 		{
 			$subject_id = trim($cur["subject_id"]);
 			$course_num = trim($cur["course_num"]);
-			$courseID = $cur["course_id"];
+			$course_id = $cur["course_id"];
 			$bool_hide = FALSE;
 
 			$title = ucwords(strtolower(trim($cur["title"])));
 			// Fix formatting problems introduced by the ucwords command...
 
-			$title = $tempCourse->fixTitle($title);
+			$title = $temp_course->fix_title($title);
 
 			$description = trim($cur["description"]);
 			if ($description == "")
@@ -911,14 +911,14 @@ function OLD__course_search_showCourses($subjectID)
 							the official course catalog for listings.";
 			}
 
-			$syllabusText = "";			
-			$syllabusArray = course_search_getCourseSyllabusDetails("", "", $courseID);
+			$syllabus_text = "";			
+			$syllabus_array = course_search_get_course_syllabus_details("", "", $course_id);
 			
-			if ($syllabusArray["url"] != "")
+			if ($syllabus_array["url"] != "")
 			{
-				$syllabusText = "<div class='course-search-sample-syllabus'>
-				                  <a href='{$syllabusArray["url"]}' class='nounderline'>
-								 <img src='$screen->themeLocation/images/document_icon.gif' border='0' height='12'> 
+				$syllabus_text = "<div class='course-search-sample-syllabus'>
+				                  <a href='{$syllabus_array["url"]}' class='nounderline'>
+								 <img src='$screen->theme_location/images/document_icon.gif' border='0' height='12'> 
 								 	Sample Syllabus</a>
 								  
 								</div>
@@ -928,108 +928,108 @@ function OLD__course_search_showCourses($subjectID)
 			//if ($mode == "advanced")
 			//{
 				// Look for all 5 years.
-				$longScheduleArray = course_search_getCourseRotationSchedule($courseID, $catalogYear, 100, true);
+				$long_schedule_array = course_search_get_course_rotation_schedule($course_id, $catalog_year, 100, true);
 			//} else {
 				// Only grab next 2 years.
-				$scheduleArray = course_search_getCourseRotationSchedule($courseID, $catalogYear);	
+				$schedule_array = course_search_get_course_rotation_schedule($course_id, $catalog_year);	
 			//}
 			
-			$fullScheduleArray = course_search_getCourseRotationSchedule($courseID);
-			$scheduleText = "";
+			$full_schedule_array = course_search_get_course_rotation_schedule($course_id);
+			$schedule_text = "";
 
-			if (count($longScheduleArray) > 0)
+			if (count($long_schedule_array) > 0)
 			{
-				$scheduleText .= "
+				$schedule_text .= "
 							<div>
 								<b>Anticipated availability:</b>
 								";
-				$sDisp = "auto";
+				$s_disp = "auto";
 				if ($mode != "advanced")
 				{ // only show this in the basic mode, not advanced.
-					foreach ($scheduleArray as $termID)
+					foreach ($schedule_array as $term_id)
 					{
-						$tempCourse = new Course();
-						$tempCourse->termID = $termID;
-						$scheduleText .= " " . $tempCourse->getTermDescription(true) . ",";
+						$temp_course = new Course();
+						$temp_course->term_id = $term_id;
+						$schedule_text .= " " . $temp_course->get_term_description(true) . ",";
 					}
-					$scheduleText = substr($scheduleText, 0, -1); // take off comma.
-					$rndDivID = rand(1,999999);
-					$scheduleText .= "
+					$schedule_text = substr($schedule_text, 0, -1); // take off comma.
+					$rnd_div_id = rand(1,999999);
+					$schedule_text .= "
 						&nbsp; | &nbsp;
-						<a href='javascript: toggleHideDiv(\"$rndDivID\");' class='nounderline'>
-							<span id='SPAN$rndDivID'>
+						<a href='javascript: toggleHideDiv(\"$rnd_div_id\");' class='nounderline'>
+							<span id='SPAN$rnd_div_id'>
 								more&raquo;
 								</span></a> ";
-					$sDisp = "none";
+					$s_disp = "none";
 				}
 
 				// Consult our settings to find out what order our terms should be in.
-				$availOrder = $db->getVariable("course_search_availTermIDSuffixOrder");
-				$termArray = explode(",", $availOrder);
-				foreach ($termArray as $k => $tt) {
-				  $termArray[$k] = trim($tt);
+				$avail_order = $db->get_variable("course_search_avail_term_id_suffix_order");
+				$term_array = explode(",", $avail_order);
+				foreach ($term_array as $k => $tt) {
+				  $term_array[$k] = trim($tt);
 				}
 				
 				// Get our table headers
-				$availHeaders = $db->getVariable("course_search_availTermHeaders");
-				$availMobileHeaders = $db->getVariable("course_search_availTermMobileHeaders");
+				$avail_headers = $db->get_variable("course_search_avail_term_headers");
+				$avail_mobile_headers = $db->get_variable("course_search_avail_term_mobile_headers");
 				
-				$th = explode(",", $availHeaders);
+				$th = explode(",", $avail_headers);
 				
 				$twidth = "90%";
 				$mleft = "20px;";
-				if ($screen->pageIsMobile) {
-				  $th = explode(",", $availMobileHeaders);
+				if ($screen->page_is_mobile) {
+				  $th = explode(",", $avail_mobile_headers);
 				  $twidth = "100%";
 				  $mleft = "0";
 				}
 				
-				$scheduleText .= "
+				$schedule_text .= "
 							</div>
-						<div id='$rndDivID' style='display: $sDisp; margin-left: $mleft;'>
+						<div id='$rnd_div_id' style='display: $s_disp; margin-left: $mleft;'>
 						<table border='1' width='$twidth' class='fp-course-search-avail'>
 							<tr>
 							 <td>Year</td>
 							";
-				foreach ($th as $headerText) {
-				  $scheduleText .= "<td>" . trim($headerText) . "</td>";
+				foreach ($th as $header_text) {
+				  $schedule_text .= "<td>" . trim($header_text) . "</td>";
 				}
-				$scheduleText .= "			</tr>";
-				//$termArray = array("60","mm","81","82","40","41");
-				for ($t = $catalogYear; $t <= $catalogYear + 4; $t++)
+				$schedule_text .= "			</tr>";
+				//$term_array = array("60","mm","81","82","40","41");
+				for ($t = $catalog_year; $t <= $catalog_year + 4; $t++)
 				{
-					$scheduleText .= "<tr>
+					$schedule_text .= "<tr>
 										<td class='tenpt' align='center'>
 										<b>$t</b>
 										</td>";
-					foreach($termArray as $x)
+					foreach($term_array as $x)
 					{
-						$scheduleText .= "<td class='tenpt' align='center'>";
-						$theTermID = $t . $x;
+						$schedule_text .= "<td class='tenpt' align='center'>";
+						$the_term_id = $t . $x;
 						if ($x == 40 || $x == 41) {
 						  // Fix cat year for fall and winter.
-						  $theTermID = ($t + 1) . $x;
+						  $the_term_id = ($t + 1) . $x;
 						}
 						
-						if (in_array($theTermID, $fullScheduleArray))
+						if (in_array($the_term_id, $full_schedule_array))
 						{
-							$scheduleText .= "<img src='$screen->themeLocation/images/small_check.gif'>";							
+							$schedule_text .= "<img src='$screen->theme_location/images/small_check.gif'>";							
 						}
 						else {
-						  if ($only_term != "" && $only_term == $theTermID) {
+						  if ($only_term != "" && $only_term == $the_term_id) {
 						    // Meaning, the term that the user selected is NOT in this 
 						    // course's schedule.  So, we should hide it.
 						    $bool_hide = TRUE;
 						  }
 						}
-						$scheduleText .= "&nbsp;</td>";
+						$schedule_text .= "&nbsp;</td>";
 
 					}
-					$scheduleText .= "</tr>";
+					$schedule_text .= "</tr>";
 				}
 
 
-				$scheduleText .= "
+				$schedule_text .= "
 						</table>
 						</div>
 								";
@@ -1043,10 +1043,10 @@ function OLD__course_search_showCourses($subjectID)
 			  $bool_hide = TRUE;
 			}
 
-			if (course_search_getCourseRotationScheduleNotAnticipated($courseID))
+			if (course_search_get_course_rotation_schedule_not_anticipated($course_id))
 			{
 				// This course has no anticipated offerings!
-				$scheduleText = "<div><b>Anticipated availability:</b>
+				$schedule_text = "<div><b>Anticipated availability:</b>
 							There are no anticipated course offerings
 							at this time.</div>";
 				if ($only_term != "") $bool_hide = TRUE;
@@ -1071,9 +1071,9 @@ function OLD__course_search_showCourses($subjectID)
 			
 			// Draw it on screen...
 			if ($bool_hide != true) {			
-  			if ($gradNoticeFlag == false && $course_num > 4999)
+  			if ($grad_notice_flag == false && $course_num > 4999)
   			{
-  				$gradNoticeFlag = true;
+  				$grad_notice_flag = true;
   				$pC .= "<div style='font-size: 10pt; font-weight: bold;
   							border-bottom: 1px solid black;
   							margin-left: 10px;
@@ -1083,18 +1083,18 @@ function OLD__course_search_showCourses($subjectID)
   							</div>";
   			}
   
-  			$details = $scheduleText . $syllabusText;
+  			$details = $schedule_text . $syllabus_text;
 
         $hyp1 = " - ";
-  			$onClick = "";
-  			if ($screen->pageIsMobile) {
-  			  $onClick = "onClick='toggleCourseExtra(this);'";
+  			$on_click = "";
+  			if ($screen->page_is_mobile) {
+  			  $on_click = "on_click='toggle_course_extra(this);'";
   			  $hyp1 = "";
   			}
   			
   			$pC .= "<div class='course-search-course-block'>
       					 <div class='course-search-course-title-row' 
-      					      $onClick>
+      					      $on_click>
       					       <span class='course-search-course-name'>$subject_id $course_num</span>
       					        $hyp1 
       					        <span class='course-search-course-title'>$title</span> - $hours hrs.$repeat </div>
@@ -1114,7 +1114,7 @@ function OLD__course_search_showCourses($subjectID)
 	$pC .= "</td></tr></table>";
 
 
-	$pC .= $screen->getJavaScriptCode();
+	$pC .= $screen->get_java_script_code();
 	$pC .= '	  
 		<script type="text/javascript">
 		function toggleHideDiv(rndDivID)
@@ -1139,31 +1139,31 @@ function OLD__course_search_showCourses($subjectID)
 	
 			';
 
-	$db->addToLog("course_search", "view,$subjectID,$catalogYear,$mode");
+	$db->add_to_log("course_search", "view,$subject_id,$catalog_year,$mode");
 
-	$screen->pageTitle = "ULM FlightPath - Course Search";
-	$screen->pageHasSearch = false;
+	$screen->page_title = "ULM FlightPath - Course Search";
+	$screen->page_has_search = false;
 
-	$screen->pageBannerIsLink = true;
-	$screen->pageHideReportError = true;
+	$screen->page_banner_is_link = true;
+	$screen->page_hide_report_error = true;
 
 
-	$screen->pageContent = $pC;
-	$screen->outputToBrowser();
+	$screen->page_content = $pC;
+	$screen->output_to_browser();
 
 
 }
 
 
 
-function course_search_getCourseRotationScheduleNotAnticipated($courseID)
+function course_search_get_course_rotation_schedule_not_anticipated($course_id)
 {
 
   // Get our global variables...
   $db = $GLOBALS["course_search_db"];
-  $catalogYear = $GLOBALS["course_search_catalogYear"];  
+  $catalog_year = $GLOBALS["course_search_catalog_year"];  
   $mode = $GLOBALS["course_search_mode"];
-  $moduleActionURL = getModuleActionURL("course_search");
+  $module_action_u_r_l = get_module_action_u_r_l("course_search");
   
   
   
@@ -1171,11 +1171,11 @@ function course_search_getCourseRotationScheduleNotAnticipated($courseID)
 	// is a normal courses which has an offering, or a blank
 	// offering.  This will
 	// only return true if NOTA is set as a term for this course.
-	$res = $db->dbQuery("SELECT * FROM course_rotation_schedule
+	$res = $db->db_query("SELECT * FROM course_rotation_schedule
 							WHERE course_id = '?'
 							AND term_id = 'NOTA'
-							", $courseID);
-	if ($db->dbNumRows($res) > 0)
+							", $course_id);
+	if ($db->db_num_rows($res) > 0)
 	{
 		return true;
 	}
@@ -1184,24 +1184,24 @@ function course_search_getCourseRotationScheduleNotAnticipated($courseID)
 
 }
 
-function course_search_getCourseRotationSchedule($courseID, $year = "", $limit = 20, $boolIncludeNextFiveYears = false)
+function course_search_get_course_rotation_schedule($course_id, $year = "", $limit = 20, $bool_include_next_five_years = false)
 {
   // Get our global variables...
   $db = $GLOBALS["course_search_db"];
-  $catalogYear = $GLOBALS["course_search_catalogYear"];  
+  $catalog_year = $GLOBALS["course_search_catalog_year"];  
   $mode = $GLOBALS["course_search_mode"];
-  $moduleActionURL = getModuleActionURL("course_search");
+  $module_action_u_r_l = get_module_action_u_r_l("course_search");
 
   
   // return an array containing the terms that this course
 	// is going to be offered, if any.
-	$rtnArray = array();
+	$rtn_array = array();
 	$arr = array();
 	if ($year != "")
 	{ // if a year is entered, we will get the next few years, and the previous
 	  // one for good measure.
-		$yearLine = "and (`term_id` LIKE '$year%' or `term_id` LIKE '" . ($year+1) . "%') ";
-		if ($boolIncludeNextFiveYears)
+		$year_line = "and (`term_id` LIKE '$year%' or `term_id` LIKE '" . ($year+1) . "%') ";
+		if ($bool_include_next_five_years)
 		{
 			$yearm1 = $year - 1;
 			$year2 = $year + 1;
@@ -1210,7 +1210,7 @@ function course_search_getCourseRotationSchedule($courseID, $year = "", $limit =
 			$year5 = $year + 4;
 			$year6 = $year + 5;
 
-			$yearLine = "and (`term_id` LIKE '$year%'
+			$year_line = "and (`term_id` LIKE '$year%'
 							or `term_id` LIKE '$yearm1%'
 							or `term_id` LIKE '$year2%'
 							or `term_id` LIKE '$year3%'
@@ -1223,12 +1223,12 @@ function course_search_getCourseRotationSchedule($courseID, $year = "", $limit =
 	}
 
 
-	$res = $db->dbQuery("SELECT * FROM course_rotation_schedule
+	$res = $db->db_query("SELECT * FROM course_rotation_schedule
 							WHERE `course_id`='?'
-							$yearLine
+							$year_line
 							ORDER BY term_id
-							LIMIT $limit", $courseID);
-	while($cur = $db->dbFetchArray($res))
+							LIMIT $limit", $course_id);
+	while($cur = $db->db_fetch_array($res))
 	{
 		$t = $cur["term_id"];
 		// Get the term from the end.
@@ -1247,27 +1247,27 @@ function course_search_getCourseRotationSchedule($courseID, $year = "", $limit =
 	foreach($arr as $line)
 	{
 		$temp = split("~",$line);
-		$rtnArray[] = trim($temp[2]);
+		$rtn_array[] = trim($temp[2]);
 	}
 
-	return $rtnArray;
+	return $rtn_array;
 }
 
 
 
-function course_search_getCourseSyllabusDetails($subjectID = "", $courseNum = "", $courseID = -1)
+function course_search_get_course_syllabus_details($subject_id = "", $course_num = "", $course_id = -1)
 {
 
   // Get our global variables...
   $db = $GLOBALS["course_search_db"];
-  $catalogYear = $GLOBALS["course_search_catalogYear"];  
+  $catalog_year = $GLOBALS["course_search_catalog_year"];  
   $mode = $GLOBALS["course_search_mode"];
-  $moduleActionURL = getModuleActionURL("course_search");
+  $module_action_u_r_l = get_module_action_u_r_l("course_search");
   
   
 	// This will return an array containing information
 	// about a course's syllabus, if it exists.
-	$rtnArray = array();
+	$rtn_array = array();
 
 	$server = "webservices";
 	if (strstr($_SERVER["SERVER_NAME"], "orion"))
@@ -1277,29 +1277,29 @@ function course_search_getCourseSyllabusDetails($subjectID = "", $courseNum = ""
 
 	// Does this course have a syllabus?
 	$query = "SELECT * FROM course_syllabi
-				WHERE `course_perm_id`='$subjectID" . "_$courseNum'";
-	if ($courseID != -1) {
+				WHERE `course_perm_id`='$subject_id" . "_$course_num'";
+	if ($course_id != -1) {
 	  $query = "SELECT * FROM course_syllabi
-				WHERE `course_id`='$courseID' ";
+				WHERE `course_id`='$course_id' ";
 	}
 	
-	$res = $db->dbQuery($query);
-	$cur = $db->dbFetchArray($res);
+	$res = $db->db_query($query);
+	$cur = $db->db_fetch_array($res);
 	
-	//$url = $GLOBALS["fpSystemSettings"]["selfURL"] . "/" . getModulePath("course_search") . "/syllabus.php?id=" . $cur["course_id"];
-	$url = getModuleActionURL("course_search") . "&nosession=true&a=getSyllabus&id=" . $cur["course_id"];
+	//$url = $GLOBALS["fp_system_settings"]["selfURL"] . "/" . get_module_path("course_search") . "/syllabus.php?id=" . $cur["course_id"];
+	$url = get_module_action_u_r_l("course_search") . "&nosession=true&a=get_syllabus&id=" . $cur["course_id"];
 	
 	
 	
 	if ($cur["filename"] != "")
 	{
-		$rtnArray["url"] = $url;
-		$rtnArray["filename"] = $cur["filename"];
-		$rtnArray["datetime"] = $cur["datetime"];
+		$rtn_array["url"] = $url;
+		$rtn_array["filename"] = $cur["filename"];
+		$rtn_array["datetime"] = $cur["datetime"];
 	}
 
 
-	return $rtnArray;
+	return $rtn_array;
 
 }
 
@@ -1325,7 +1325,7 @@ function course_search_display_search() {
 
 
   $settings = fp_get_system_settings();
-  $current_catalog_year = $settings["currentCatalogYear"];
+  $current_catalog_year = $settings["current_catalog_year"];
 
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;
@@ -1334,11 +1334,11 @@ function course_search_display_search() {
   {
     $rtn .= "Please select an available catalog year from the
       list below.<br><br>
-      <form action='" . $GLOBALS["fpSystemSettings"]["baseURL"] . "/tools/course-search' method='GET' name='mainform' id='myform'>
+      <form action='" . $GLOBALS["fp_system_settings"]["base_u_r_l"] . "/tools/course-search' method='GET' name='mainform' id='myform'>
       <table align='center'>
       <td width='150' valign='bottom'>
         <select name='catalog_year'>";
-    for ($t = $current_catalog_year; $t >= $GLOBALS["fpSystemSettings"]["earliestCatalogYear"]; $t--)
+    for ($t = $current_catalog_year; $t >= $GLOBALS["fp_system_settings"]["earliest_catalog_year"]; $t--)
     {
       $rtn .= "<option value='$t'>$t - " . ($t+1) . "</option> \n";
 
@@ -1351,7 +1351,7 @@ function course_search_display_search() {
       </table>
       </form>";
 
-    //$db->addToLog("course_search", "select_year");
+    //$db->add_to_log("course_search", "select_year");
 
   } 
   else {
@@ -1362,7 +1362,7 @@ function course_search_display_search() {
         <br><br>
       Please select an available subject from the list below.<br>       
       <br>
-      <form action='" . $GLOBALS["fpSystemSettings"]["baseURL"] . "/tools/course-search/courses' method='GET' name='mainform' id='myform'>";
+      <form action='" . $GLOBALS["fp_system_settings"]["base_u_r_l"] . "/tools/course-search/courses' method='GET' name='mainform' id='myform'>";
     
     if (!fp_screen_is_mobile()) {
       $rtn .= "
@@ -1374,12 +1374,12 @@ function course_search_display_search() {
     
     // Let's pull the needed variables out of our settings, so we know what
     // to query, because this is a non-FlightPath table.
-    $tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:subjects"];
+    $tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:subjects"];
     $tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-    $tableName_a = $tsettings["tableName"];
+    $table_name_a = $tsettings["table_name"];
 
-    $query = "SELECT DISTINCT a.* FROM $tableName_a a, courses b
-          WHERE a.$tf->subjectID = b.subject_id 
+    $query = "SELECT DISTINCT a.* FROM $table_name_a a, courses b
+          WHERE a.$tf->subject_id = b.subject_id 
           AND catalog_year = '?'
           AND exclude = 0
           ORDER BY $tf->title, subject_id";
@@ -1395,8 +1395,8 @@ function course_search_display_search() {
       }
       else {
         $rtn .= "<a class='course-search-subject-select-line'
-                  href='$moduleActionURL&mode=$mode&subjectID=$subjectID'>
-                    <div class='course-search-dept-name'>$title ($subjectID)</div>
+                  href='$module_action_u_r_l&mode=$mode&subject_id=$subject_id'>
+                    <div class='course-search-dept-name'>$title ($subject_id)</div>
                   </a>";
       }
       
@@ -1413,7 +1413,7 @@ function course_search_display_search() {
         </div>";
     }
 
-    //$db->addToLog("course_search", "select_subject");
+    //$db->add_to_log("course_search", "select_subject");
     $rtn .= "</form>";
   
   }
@@ -1428,29 +1428,29 @@ function course_search_display_search() {
 
 
 
-function OLD__course_search_displaySearch()
+function OLD__course_search_display_search()
 {
   
 	// Displays the search pulldown for the user to use to
 	// find courses...
   // Get our global variables...
   $db = $GLOBALS["course_search_db"];
-  $catalogYear = $GLOBALS["course_search_catalogYear"];  
+  $catalog_year = $GLOBALS["course_search_catalog_year"];  
   $mode = $GLOBALS["course_search_mode"];
-  $moduleActionURL = getModuleActionURL("course_search");
+  $module_action_u_r_l = get_module_action_u_r_l("course_search");
 	
 	
-	$screen = new AdvisingScreen("",null,"notAdvising");
+	$screen = new AdvisingScreen("",null,"not_advising");
 	
 
-	$settings = $db->getFlightPathSettings();
-	$currentCatalogYear = $settings["currentCatalogYear"];
+	$settings = $db->get_flight_path_settings();
+	$current_catalog_year = $settings["current_catalog_year"];
 
 	$pC = "";
 	
-	$screen->addCss(getModulePath("course_search") . "/css/course_search_style.css");
-	if ($screen->pageIsMobile) {
-	  $screen->addCss(getModulePath("course_search") . "/css/course_search_mobile_style.css");
+	$screen->add_css(get_module_path("course_search") . "/css/course_search_style.css");
+	if ($screen->page_is_mobile) {
+	  $screen->add_css(get_module_path("course_search") . "/css/course_search_mobile_style.css");
 	}
 	
 	
@@ -1458,21 +1458,21 @@ function OLD__course_search_displaySearch()
          <table border='0' width='100%'>
          <tr><td class='tenpt'>
                   
-         <form action='$moduleActionURL' method='GET' name='mainform' id='myform'>
+         <form action='$module_action_u_r_l' method='GET' name='mainform' id='myform'>
          <input type='hidden' name='n' value='course_search'>
          
     ";
-	$pC .= $screen->drawCurvedTitle("Course Search");
+	$pC .= $screen->draw_curved_title("Course Search");
 
 
-	if ($catalogYear == "")
+	if ($catalog_year == "")
 	{
 		$pC .= "Please select an available catalog year from the
 			list below.<br><br>
 			<table align='center'>
 			<td width='150' valign='bottom'>
-				<select name='catalogYear'>";
-		for ($t = $currentCatalogYear; $t >= $GLOBALS["fpSystemSettings"]["earliestCatalogYear"]; $t--)
+				<select name='catalog_year'>";
+		for ($t = $current_catalog_year; $t >= $GLOBALS["fp_system_settings"]["earliest_catalog_year"]; $t--)
 		{
 			$pC .= "<option value='$t'>$t - " . ($t+1) . "</option> \n";
 
@@ -1484,58 +1484,58 @@ function OLD__course_search_displaySearch()
 			</td>
 			</table>";
 
-		$db->addToLog("course_search", "select_year");
+		$db->add_to_log("course_search", "select_year");
 
 	} else
 	{
 
 
-		$pC .= "Current catalog year: <b>$catalogYear-" . ($catalogYear +1) . "</b>
+		$pC .= "Current catalog year: <b>$catalog_year-" . ($catalog_year +1) . "</b>
 				
 				<br><br>
 			Please select an available subject from the list below.<br>				
 			<br>";
 		
-		if (!$screen->pageIsMobile) {
+		if (!$screen->page_is_mobile) {
   		$pC .= "
   			<div align='center'>
-  				<select name='subjectID' style='width: 80%;'>
+  				<select name='subject_id' style='width: 80%;'>
   			";  	
 		}
 
 		
     // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this is a non-FlightPath table.
-		$tsettings = $GLOBALS["fpSystemSettings"]["extraTables"]["course_resources:subjects"];
+		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:subjects"];
 		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$tableName_a = $tsettings["tableName"];
+		$table_name_a = $tsettings["table_name"];
 
-		$query = "SELECT DISTINCT a.* FROM $tableName_a a, courses b
-					WHERE a.$tf->subjectID = b.subject_id 
-					AND catalog_year = $catalogYear
+		$query = "SELECT DISTINCT a.* FROM $table_name_a a, courses b
+					WHERE a.$tf->subject_id = b.subject_id 
+					AND catalog_year = $catalog_year
 					AND exclude = 0
 					ORDER BY $tf->title, subject_id";
 
-		$result = $db->dbQuery($query);
-		while ($cur = $db->dbFetchArray($result))
+		$result = $db->db_query($query);
+		while ($cur = $db->db_fetch_array($result))
 		{
 			$title = trim($cur[$tf->title]);
-			$subjectID = trim($cur["subject_id"]);
+			$subject_id = trim($cur["subject_id"]);
 
-			if (!$screen->pageIsMobile) {
-			  $pC .= "<option value='$subjectID'>$title ($subjectID)</option>";
+			if (!$screen->page_is_mobile) {
+			  $pC .= "<option value='$subject_id'>$title ($subject_id)</option>";
 			}
 			else {
 			  $pC .= "<a class='course-search-subject-select-line'
-			            href='$moduleActionURL&mode=$mode&subjectID=$subjectID'>
-			              <div class='course-search-dept-name'>$title ($subjectID)</div>
+			            href='$module_action_u_r_l&mode=$mode&subject_id=$subject_id'>
+			              <div class='course-search-dept-name'>$title ($subject_id)</div>
 			            </a>";
 			}
 			
 			
 		}
 
-		if (!$screen->pageIsMobile) {
+		if (!$screen->page_is_mobile) {
   		$pC .= "
   				</select>				
   				<input type='hidden' name='mode' value='$mode'>
@@ -1545,7 +1545,7 @@ function OLD__course_search_displaySearch()
   			</div>";
 		}
 
-		$db->addToLog("course_search", "select_subject");
+		$db->add_to_log("course_search", "select_subject");
 
 	}
 
@@ -1557,13 +1557,13 @@ function OLD__course_search_displaySearch()
 
 	//$pC = get_js_functions() . $pC;  // get the javascript functions for this page. (at the top)
 
-	$screen->pageTitle = "ULM FlightPath - Course Search";
-	$screen->pageHasSearch = false;
+	$screen->page_title = "ULM FlightPath - Course Search";
+	$screen->page_has_search = false;
 
-	$screen->pageBannerIsLink = true;
-	$screen->pageHideReportError = true;
-	$screen->pageContent = $pC;
-	$screen->outputToBrowser();
+	$screen->page_banner_is_link = true;
+	$screen->page_hide_report_error = true;
+	$screen->page_content = $pC;
+	$screen->output_to_browser();
 
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-class CourseList extends _CourseList
+class CourseList extends __course_list
 {
   
   

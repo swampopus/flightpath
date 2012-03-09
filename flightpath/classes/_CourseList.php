@@ -17,9 +17,9 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-require_once("ObjList.php");
+require_once("_obj_list.php");
 
-class _CourseList extends ObjList
+class __course_list extends ObjList
 {
 	// This inherits most of its classes from ObjList,
 	// but, it has to be able to do special functions
@@ -39,12 +39,12 @@ class _CourseList extends ObjList
 	{ // This can be used to cast a regular ObjList
 		// into a CourseList object.
 		// Use the syntax:  CourseList::cast($x);
-		$newCL = new CourseList();
-		$newCL->arrayList = $obj->arrayList;
-		$newCL->isEmpty = $obj->isEmpty;
-		$newCL->resetCounter();
+		$new_c_l = new CourseList();
+		$new_c_l->array_list = $obj->array_list;
+		$new_c_l->is_empty = $obj->is_empty;
+		$new_c_l->reset_counter();
 
-		return $newCL;
+		return $new_c_l;
 
 	}
 
@@ -52,17 +52,17 @@ class _CourseList extends ObjList
 	/**
 	 * Give every course in the list a minimum grade.
 	 *
-	 * @param string $minGrade
+	 * @param string $min_grade
 	 */
-	function assignMinGrade($minGrade)
+	function assign_min_grade($min_grade)
 	{
 		// Go through the list and give every course the specified
 		// min grade.
 
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			$course->minGrade = $minGrade;
+			$course = $this->array_list[$t];
+			$course->min_grade = $min_grade;
 		}
 
 
@@ -85,91 +85,91 @@ class _CourseList extends ObjList
 	 * 
 	 * @return bool
 	 */
-	function assignUnselectableCoursesWithHoursGreaterThan($hours)
+	function assign_unselectable_courses_with_hours_greater_than($hours)
 	{
-		// Go through the list and assign boolUnselectable courses whose minHour
+		// Go through the list and assign bool_unselectable courses whose minHour
 		// is greater than $hours.
 		// Returns TRUE if it did assign something,
 		// false if it didn't.
 
-		$boolAssigned = false;
+		$bool_assigned = false;
 
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			if ($course->subjectID == "")
+			$course = $this->array_list[$t];
+			if ($course->subject_id == "")
 			{
-				$course->loadDescriptiveData();
+				$course->load_descriptive_data();
 			}
 			
-			if ($course->minHours > $hours)
+			if ($course->min_hours > $hours)
 			{
-				$course->boolUnselectable = true;
-				$boolAssigned = true;
+				$course->bool_unselectable = true;
+				$bool_assigned = true;
 			}
 		}
 
-		return $boolAssigned;
+		return $bool_assigned;
 
 	}
 
 	/**
 	 * Find and return a specific course from the list.
 	 *
-	 * @param int $courseID
-	 *       - The courseID to look for.  Do not set if using
-	 *         $useCourse.
+	 * @param int $course_id
+	 *       - The course_id to look for.  Do not set if using
+	 *         $use_course.
 	 * 
-	 * @param int $termID
-	 *       - The termID for the course to look for.  Do not set if using
-	 *         $useCourse.
+	 * @param int $term_id
+	 *       - The term_id for the course to look for.  Do not set if using
+	 *         $use_course.
 	 * 
-	 * @param bool $boolTransfer
+	 * @param bool $bool_transfer
 	 *       - Is the course we are looking for a transfer course?  Do not
-	 *         use if using $useCourse.
+	 *         use if using $use_course.
 	 * 
-	 * @param bool $boolExcludeSubstitutions
+	 * @param bool $bool_exclude_substitutions
 	 *       - If TRUE, we will not consider courses which have been used
 	 *         in a substitution.
 	 * 
-	 * @param Course $useCourse
+	 * @param Course $use_course
 	 *       - Optional.  If you already have a course object which can be used
 	 *         as a template to search for, specify it here.  Otherwise, set to
-	 *         NULL.  If using this, then $courseID, $termID, and $boolTransfer
+	 *         NULL.  If using this, then $course_id, $term_id, and $bool_transfer
 	 *         will be ignored.
 	 * 
 	 * 
 	 * @return Course
 	 */
-	function findSpecificCourse($courseID = 0, $termID = 0, $boolTransfer = false, $boolExcludeSubstitutions = true, Course $useCourse = null)
+	function find_specific_course($course_id = 0, $term_id = 0, $bool_transfer = false, $bool_exclude_substitutions = true, Course $use_course = null)
 	{
-		if ($useCourse != null && is_object($useCourse))
+		if ($use_course != null && is_object($use_course))
 		{
-			$courseID = $useCourse->courseID;
-			$termID = $useCourse->termID;
-			$boolTransfer = $useCourse->boolTransfer;
+			$course_id = $use_course->course_id;
+			$term_id = $use_course->term_id;
+			$bool_transfer = $use_course->bool_transfer;
 		}
 		// Look through the array for a course with this id, termId, and
 		// transfer credit status.
-		//adminDebug("Looking for $courseID $termID $boolTransfer ");
+		//admin_debug("Looking for $course_id $term_id $bool_transfer ");
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
+			$course = $this->array_list[$t];
 
-			$checkCourseID = $course->courseID;
-			//adminDebug("..... looking at $checkCourseID");
-			if ($boolTransfer == true && is_object($course->courseTransfer))
+			$check_course_id = $course->course_id;
+			//admin_debug("..... looking at $check_course_id");
+			if ($bool_transfer == true && is_object($course->course_transfer))
 			{
-				$checkCourseID = $course->courseTransfer->courseID;
-				//adminDebug("..... ..... using transfer $checkCourseID");
+				$check_course_id = $course->course_transfer->course_id;
+				//admin_debug("..... ..... using transfer $check_course_id");
 			}
 
-			if ($checkCourseID == $courseID && $course->termID == $termID && $course->boolTransfer == $boolTransfer)
+			if ($check_course_id == $course_id && $course->term_id == $term_id && $course->bool_transfer == $bool_transfer)
 			{
 
-				if ($boolExcludeSubstitutions == true)
+				if ($bool_exclude_substitutions == true)
 				{
-					if ($course->boolSubstitution == true)
+					if ($course->bool_substitution == true)
 					{
 						continue;
 					}
@@ -185,41 +185,41 @@ class _CourseList extends ObjList
 
 
 	/**
-	 * Call the $course->loadCourseDescriptiveData() on 
+	 * Call the $course->load_course_descriptive_data() on 
 	 * every course in the list.
 	 *
 	 */
-	function loadCourseDescriptiveData()
+	function load_course_descriptive_data()
 	{
-		// Call the loadDescriptiveData() method
+		// Call the load_descriptive_data() method
 		// for every course in the list.
 
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			$course->loadDescriptiveData();
+			$course = $this->array_list[$t];
+			$course->load_descriptive_data();
 		}
 	}
 
 
   /**
-   * Using the parent's function of findAllMatches, this
+   * Using the parent's function of find_all_matches, this
    * will return a CourseList of all courses which match
    * the Course object.
    *
-   * @param Course $courseC
+   * @param Course $course_c
    * @return CourseList
    */
-	function findAllMatches(Course $courseC)
+	function find_all_matches(Course $course_c)
 	{
-		if (!$listMatches =  parent::findAllMatches($courseC))
+		if (!$list_matches =  parent::find_all_matches($course_c))
 		{
 			return false;
 		}
 
 
-		$listMatches = CourseList::cast($listMatches);
-		return $listMatches;
+		$list_matches = CourseList::cast($list_matches);
+		return $list_matches;
 	}
 
 
@@ -229,10 +229,10 @@ class _CourseList extends ObjList
 	 * course requirement matches in a list which have not
 	 * yet been assigned.
 	 *
-	 * @param Course $courseC
+	 * @param Course $course_c
 	 * @return Course
 	 */
-	function findFirstUnfulfilledMatch(Course $courseC)
+	function find_first_unfulfilled_match(Course $course_c)
 	{
 		// Returns match to courseC which does not have
 		// any courses fulfilling it.  Useful for finding
@@ -241,9 +241,9 @@ class _CourseList extends ObjList
 
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			if ($this->arrayList[$t]->equals($courseC) && $this->arrayList[$t]->courseListFulfilledBy->isEmpty == true)
+			if ($this->array_list[$t]->equals($course_c) && $this->array_list[$t]->course_list_fulfilled_by->is_empty == true)
 			{
-				return $this->arrayList[$t];
+				return $this->array_list[$t];
 			}
 		}
 
@@ -251,7 +251,7 @@ class _CourseList extends ObjList
 	}
 
 	/**
-	 * Go through the list and set the $boolExcludeRepeat flag to TRUE
+	 * Go through the list and set the $bool_exclude_repeat flag to TRUE
 	 * for all matches of $course in this list.
 	 *
 	 * Returns FALSE if no matches could be found.
@@ -259,22 +259,22 @@ class _CourseList extends ObjList
 	 * @param Course $course
 	 * @return bool
 	 */
-	function markRepeatsExclude(Course $course)
+	function mark_repeats_exclude(Course $course)
 	{
-		// Set the boolExcludeRepeat flag to TRUE for all
+		// Set the bool_exclude_repeat flag to TRUE for all
 		// occurances of $course in THIS list.
 
-		if (!$listMatches =  parent::findAllMatches($course))
+		if (!$list_matches =  parent::find_all_matches($course))
 		{
 			return false;
 		}
 
-		$listMatches = CourseList::cast($listMatches);
-		$listMatches->resetCounter();
-		while($listMatches->hasMore())
+		$list_matches = CourseList::cast($list_matches);
+		$list_matches->reset_counter();
+		while($list_matches->has_more())
 		{
-			$c = $listMatches->getNext();
-			$c->boolExcludeRepeat = true;
+			$c = $list_matches->get_next();
+			$c->bool_exclude_repeat = true;
 		}
 
 		return true;
@@ -283,18 +283,18 @@ class _CourseList extends ObjList
 
 	/**
 	 * Find a list of matches to Course courseC, which fulfill 
-	 * the minGrade requirement, ordered by most recently taken.
+	 * the min_grade requirement, ordered by most recently taken.
 	 *
 	 * Returns FALSE if no matches were found, else it will 
 	 * return the matched Course object.
 	 * 
-	 * @param Course $courseC
-	 * @param string $minGrade
-	 * @param bool $boolMarkRepeatsExclude
+	 * @param Course $course_c
+	 * @param string $min_grade
+	 * @param bool $bool_mark_repeats_exclude
 	 * 
 	 * @return Course
 	 */
-	function findMostRecentMatch(Course $courseC, $minGrade = "D", $boolMarkRepeatsExclude = false)
+	function find_most_recent_match(Course $course_c, $min_grade = "D", $bool_mark_repeats_exclude = false)
 	{
 		// Get a list of all matches to courseC, and
 		// then order them by the most recently taken course
@@ -303,23 +303,23 @@ class _CourseList extends ObjList
 		// as well.
 
 
-		if (!$listMatches =  parent::findAllMatches($courseC))
+		if (!$list_matches =  parent::find_all_matches($course_c))
 		{
 			return false;
 		}
 
 
-		$listMatches = CourseList::cast($listMatches);
+		$list_matches = CourseList::cast($list_matches);
 
 
 		// Don't just return if it's only got a size of 1,
 		// so that it forces it to do the min grade checking.
-		/*		if ($listMatches->getSize() == 1)
+		/*		if ($list_matches->getSize() == 1)
 		{
-		return $listMatches->getNext();
+		return $list_matches->get_next();
 		}
 		*/
-		if ($listMatches->isEmpty)
+		if ($list_matches->is_empty)
 		{
 			return false;
 		}
@@ -329,36 +329,36 @@ class _CourseList extends ObjList
 		// into this course requirement.
 
 		// Sort the courses into most recently taken first.
-		//adminDebug("-------------------");
-		//print_pre($listMatches->toString());
-		$listMatches->sortMostRecentFirst();
+		//admin_debug("-------------------");
+		//print_pre($list_matches->to_string());
+		$list_matches->sort_most_recent_first();
 
-		//adminDebug("-------------------");
-		//print_pre($listMatches->toString());
-		//adminDebug("-------------------");
+		//admin_debug("-------------------");
+		//print_pre($list_matches->to_string());
+		//admin_debug("-------------------");
 
 		// So, now that it's sorted, we should look through the list,
 		// checking the min grade requirements (if any).  When we find
 		// a good one, we will select it.
 
-		$listMatches->resetCounter();
-		while($listMatches->hasMore())
+		$list_matches->reset_counter();
+		while($list_matches->has_more())
 		{
-			$c = $listMatches->getNext();
+			$c = $list_matches->get_next();
 			
-			if ($c->boolExcludeRepeat == true)
+			if ($c->bool_exclude_repeat == true)
 			{
 				continue;
 			}
 			//////////////////////////////////////////
 			///  Check for min grade, etc, here.
-			//adminDebug("checking min grade ($minGrade) for " . $c->toString());
-			if (!$c->meetsMinGradeRequirementOf(null, $minGrade))
+			//admin_debug("checking min grade ($min_grade) for " . $c->to_string());
+			if (!$c->meets_min_grade_requirement_of(null, $min_grade))
 			{
-				//adminDebug("skippin");
-				if ($boolMarkRepeatsExclude == true)
+				//admin_debug("skippin");
+				if ($bool_mark_repeats_exclude == true)
 				{
-					// Since this course does not meet the minGrade,
+					// Since this course does not meet the min_grade,
 					// check to see if it may be repeated.  If it can't,
 					// then we must mark ALL previous attempts at this
 					// course as being excluded from further consideration.
@@ -367,15 +367,15 @@ class _CourseList extends ObjList
 					// withdrew from a course...
 					if ($c->grade == "W") { continue; }
 
-          if ($c->minHours < 1 || $c->minHours == "") {
-					  $c->loadDescriptiveData();  // make sure we get hour data for this course.
+          if ($c->min_hours < 1 || $c->min_hours == "") {
+					  $c->load_descriptive_data();  // make sure we get hour data for this course.
 					}					
 					
-					if ($c->repeatHours <= $c->minHours)
+					if ($c->repeat_hours <= $c->min_hours)
 					{
 						// No repeats.
-						//adminDebug("no repeats allowed. rep hours:" . $c->repeatHours . " - minHours:" . $c->minHours);
-						$this->markRepeatsExclude($c);
+						//admin_debug("no repeats allowed. rep hours:" . $c->repeat_hours . " - min_hours:" . $c->min_hours);
+						$this->mark_repeats_exclude($c);
 						return false;
 
 					} else {
@@ -389,7 +389,7 @@ class _CourseList extends ObjList
 			}
 
 			// Has the course already been assigned?
-			if ($c->boolHasBeenAssigned)
+			if ($c->bool_has_been_assigned)
 			{ // Skip over it.  Now, this is an important part here, because actually, we should
 				// only skip it (and look at the next one) if this course is allowed to be
 				// repeated.  If it cannot be repeated, or if the student has taken the
@@ -408,9 +408,9 @@ class _CourseList extends ObjList
 	 * @todo implement this function.
 	 *
 	 */
-	function sortBestGradeFirst()
+	function sort_best_grade_first()
 	{
-		// This will look very similar to sortMostRecentFirst
+		// This will look very similar to sort_most_recent_first
 		// when I get a chance to fool with it.
 	}
 
@@ -418,65 +418,65 @@ class _CourseList extends ObjList
 	/**
 	 * Remove courses from THIS list which appear in listCourses under
 	 * these conditions:
-	 *   - the listCourses->"assignedToGroupID" != $groupID
-	 * This function is being used primarily with $listCourses being the
+	 *   - the listCourses->"assigned_to_group_id" != $group_id
+	 * This function is being used primarily with $list_courses being the
 	 * list of courses that students have taken.
 	 * Also checking substitutions for courses substituted into groups.
 
-	 * @param CourseList $listCourses
-	 * @param int $groupID
-	 * @param bool $boolKeepRepeatableCourses
-	 * @param SubstitutionList $listSubstitutions
+	 * @param CourseList $list_courses
+	 * @param int $group_id
+	 * @param bool $bool_keep_repeatable_courses
+	 * @param SubstitutionList $list_substitutions
 	 */
-	function removePreviouslyFulfilled(CourseList $listCourses, $groupID, $boolKeepRepeatableCourses = true, $listSubstitutions)
+	function remove_previously_fulfilled(CourseList $list_courses, $group_id, $bool_keep_repeatable_courses = true, $list_substitutions)
 	{
 
-		$rtnList = new CourseList();
+		$rtn_list = new CourseList();
 
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
+			$course = $this->array_list[$t];
 
-			if ($boolKeepRepeatableCourses == true)
+			if ($bool_keep_repeatable_courses == true)
 			{ // We can always keep repeatable courses in the list.
-				if ($course->repeatHours > $course->minHours)
+				if ($course->repeat_hours > $course->min_hours)
 				{
-					$rtnList->add($course);
+					$rtn_list->add($course);
 					continue;
 				}
 			}
 
-			//adminDebug($course->toString());
+			//admin_debug($course->to_string());
 			
 			// Has the course been substituted?
-			if ($testSub = $listSubstitutions->findRequirement($course,false, -1))
+			if ($test_sub = $list_substitutions->find_requirement($course,false, -1))
 			{
-				//adminDebug("found " . $testSub->toString());
+				//admin_debug("found " . $test_sub->to_string());
 				// it WAS substituted, so we should NOT add it to our
 				// rtnList.
 				continue;
 			}
 			
 			
-			// Okay, now check if $course is anywhere in $listCourses
-			if ($testCourse = $listCourses->findMatch($course))
+			// Okay, now check if $course is anywhere in $list_courses
+			if ($test_course = $list_courses->find_match($course))
 			{
 				// Yes, it found a match.
-				//adminDebug("Here!");
+				//admin_debug("Here!");
 				// I am taking out this part where I say if it is in
 				// this group then we can keep it.  I think that shouldn't
 				// be in.
 				// This course is in another group, so do nothing
 				// and skip it.
-				//adminDebug("found elsewhere in group: $testCourse->grade");
+				//admin_debug("found elsewhere in group: $test_course->grade");
 				
 				// perhaps the course is on the degreePlan in excess with a W
 				// or F?
-				if (!$testCourse->meetsMinGradeRequirementOf(null, "D"))
+				if (!$test_course->meets_min_grade_requirement_of(null, "D"))
 				{
 					// Meaning, this was a failed attempt, so we can add
 					// our original course back in.
-					$rtnList->add($course);
+					$rtn_list->add($course);
 					continue;
 				}
 				
@@ -484,123 +484,123 @@ class _CourseList extends ObjList
 				// this list because it did not meet the min grade
 				// requirements?  If this is the case, $course should
 				// still appear in THIS list.
-				if (!$testCourse->meetsMinGradeRequirementOf($course))
+				if (!$test_course->meets_min_grade_requirement_of($course))
 				{
 					// Meaning, this was attempt did not meet the
 					// min grade of the original requirement, so we can add
 					// our original requirement back in.
-					$rtnList->add($course);
+					$rtn_list->add($course);
 					continue;
 				}
 															
 			} else {
 				// The course was NOT found in the courseList,
 				// so its safe to add it back in.
-				$rtnList->add($course);
+				$rtn_list->add($course);
 			}
 
 		}
 
 
-		$this->arrayList = $rtnList->arrayList;
-		$this->resetCounter();
+		$this->array_list = $rtn_list->array_list;
+		$this->reset_counter();
 
 	}
 
 
 	/**
-	 * Returns an array containing the unique subjectID's of
+	 * Returns an array containing the unique subject_id's of
 	 * the courses in this list.  Its assumed to be ordered
 	 * already!
 	 *
-	 * @param bool $boolIgnoreExcluded
+	 * @param bool $bool_ignore_excluded
 	 * @return array
 	 */
-	function getCourseSubjects($boolIgnoreExcluded = true)
+	function get_course_subjects($bool_ignore_excluded = true)
 	{
-		// returns an array containing the unique subjectID's
+		// returns an array containing the unique subject_id's
 		// of the courses in this list.
 
 		// IMPORTANT:  The list is assumed to be ordered already!  Either
 		// alphabetically or reverse alphabetically.
-		$oldSubjectID = "";
-		$rtnArray = array();
+		$old_subject_id = "";
+		$rtn_array = array();
 
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			if ($course->subjectID == "")
+			$course = $this->array_list[$t];
+			if ($course->subject_id == "")
 			{
-				$course->loadDescriptiveData();
+				$course->load_descriptive_data();
 			}
 
 			
 			// Go through all valid names for this course.
-			for ($x = 0; $x < count($course->arrayValidNames); $x++)
+			for ($x = 0; $x < count($course->array_valid_names); $x++)
 			{
-				$temp = split("~",$course->arrayValidNames[$x]);
+				$temp = split("~",$course->array_valid_names[$x]);
 				$subj = strtoupper($temp[0]);
 
-				if (in_array($subj, $rtnArray))
+				if (in_array($subj, $rtn_array))
 				{ // skip ones with subjects we have already looked at.
 					continue;
 				}
 
-				if ($course->dbExclude == 1)
+				if ($course->db_exclude == 1)
 				{
-					//adminDebug("skipping " . $course->toString());
+					//admin_debug("skipping " . $course->to_string());
 					continue;
 				}
 
 
 				// We have a new subject.  Add it to the array.
-				$rtnArray[] = $subj;
+				$rtn_array[] = $subj;
 			}
 
 		}
 
-		return $rtnArray;
+		return $rtn_array;
 	}
 
 	/**
 	 * Go through the courseList and take out any course
-	 * which does not have the $subject as its subjectID.
+	 * which does not have the $subject as its subject_id.
 	 *
 	 * @param string $subject
-	 * @param bool $boolReassignValidName
+	 * @param bool $bool_reassign_valid_name
 	 *     - If set to TRUE, we will look at other possible valid names
 	 *       for this course.  If we find one, we will reassign the course's
-	 *       subjectID and courseNum to the new valid name.
+	 *       subject_id and course_num to the new valid name.
 	 * 
 	 */
-	function excludeAllSubjectsExcept($subject, $boolReassignValidName = true)
+	function exclude_all_subjects_except($subject, $bool_reassign_valid_name = true)
 	{
 
-		$newCourseList = new CourseList();
+		$new_course_list = new CourseList();
 
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			if ($course->subjectID == $subject)
+			$course = $this->array_list[$t];
+			if ($course->subject_id == $subject)
 			{
-				$newCourseList->add($course);
+				$new_course_list->add($course);
 				continue;
 			}
 			
 			// Not the right subject-- but perhaps the course has another
 			// valid name with this subject?  Ex: CSCI 373 and MATH 373.
 			
-			if ($boolReassignValidName == true && count($course->arrayValidNames) > 1)
+			if ($bool_reassign_valid_name == true && count($course->array_valid_names) > 1)
 			{
-				for ($x = 0; $x < count($course->arrayValidNames); $x++)
+				for ($x = 0; $x < count($course->array_valid_names); $x++)
 				{
-					if (strstr($course->arrayValidNames[$x], $subject))
+					if (strstr($course->array_valid_names[$x], $subject))
 					{
-						$temp = split("~",$course->arrayValidNames[$x]);
-						$course->subjectID = $temp[0];
-						$course->courseNum = $temp[1];
-						//adminDebug("use $course->subjectID $course->courseNum");
-						$newCourseList->add($course);
+						$temp = split("~",$course->array_valid_names[$x]);
+						$course->subject_id = $temp[0];
+						$course->course_num = $temp[1];
+						//admin_debug("use $course->subject_id $course->course_num");
+						$new_course_list->add($course);
 						continue;
 					}
 				}
@@ -611,7 +611,7 @@ class _CourseList extends ObjList
 		}
 
 		// Now, transfer ownership of the arraylist.
-		$this->arrayList = $newCourseList->arrayList;
+		$this->array_list = $new_course_list->array_list;
 
 	}
 
@@ -624,32 +624,32 @@ class _CourseList extends ObjList
 	 * show up correctly.
 	 * 
 	 */
-	function sortFulfilledFirstAlphabetical()
+	function sort_fulfilled_first_alphabetical()
 	{
 
 		$tarray = array();
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			//if (!is_object($this->arrayList[$t]->courseFulfilledBy))
-			if ($this->arrayList[$t]->courseListFulfilledBy->isEmpty == true)
+			//if (!is_object($this->array_list[$t]->courseFulfilledBy))
+			if ($this->array_list[$t]->course_list_fulfilled_by->is_empty == true)
 			{ // Skip if not fulfilled.
 				continue;
 			}
 
-			$c = $this->arrayList[$t];
-			$str = "$c->subjectID ~~ $c->courseNum ~~ $t";
+			$c = $this->array_list[$t];
+			$str = "$c->subject_id ~~ $c->course_num ~~ $t";
 			array_push($tarray,$str);
 		}
 
 		sort($tarray);
 
-		$newList = new CourseList();
+		$new_list = new CourseList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
 			$temp = split(" ~~ ",$tarray[$t]);
 			$i = $temp[2];
 
-			$newList->add($this->arrayList[$i]);
+			$new_list->add($this->array_list[$i]);
 		}
 
 
@@ -657,33 +657,33 @@ class _CourseList extends ObjList
 		$tarray = array();
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			//if (is_object($this->arrayList[$t]->courseFulfilledBy))
-			if ($this->arrayList[$t]->courseListFulfilledBy->isEmpty != true)
+			//if (is_object($this->array_list[$t]->courseFulfilledBy))
+			if ($this->array_list[$t]->course_list_fulfilled_by->is_empty != true)
 			{ // Skip if fulfilled.
 				continue;
 			}
 
-			$c = $this->arrayList[$t];
-			$str = "$c->subjectID ~~ $c->courseNum ~~ $t";
+			$c = $this->array_list[$t];
+			$str = "$c->subject_id ~~ $c->course_num ~~ $t";
 			array_push($tarray,$str);
 		}
 
 		sort($tarray);
 
-		$newList2 = new CourseList();
+		$new_list2 = new CourseList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
 			$temp = split(" ~~ ",$tarray[$t]);
 			$i = $temp[2];
 
-			$newList2->add($this->arrayList[$i]);
+			$new_list2->add($this->array_list[$i]);
 		}
 
 		// Now, combine the two lists.
-		$newList->addList($newList2);
+		$new_list->add_list($new_list2);
 
 		// And, transfer the newList into this list.
-		$this->arrayList = $newList->arrayList;
+		$this->array_list = $new_list->array_list;
 
 
 	}
@@ -697,19 +697,19 @@ class _CourseList extends ObjList
    * 
    *
    */
-	function sortAdvisedLastAlphabetical()
+	function sort_advised_last_alphabetical()
 	{
 
 		$tarray = array();
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			if ($this->arrayList[$t]->boolAdvisedToTake == true)
+			if ($this->array_list[$t]->bool_advised_to_take == true)
 			{ // Skip if not fulfilled.
 				continue;
 			}
 
-			$c = $this->arrayList[$t];
-			$str = "$c->subjectID ~~ $c->courseNum ~~ $t";
+			$c = $this->array_list[$t];
+			$str = "$c->subject_id ~~ $c->course_num ~~ $t";
 			array_push($tarray,$str);
 		}
 
@@ -720,13 +720,13 @@ class _CourseList extends ObjList
 		$t2array = array();
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			if ($this->arrayList[$t]->boolAdvisedToTake == false)
+			if ($this->array_list[$t]->bool_advised_to_take == false)
 			{ // Skip if not advised
 				continue;
 			}
 
-			$c = $this->arrayList[$t];
-			$str = "$c->subjectID ~~ $c->courseNum ~~ $t";
+			$c = $this->array_list[$t];
+			$str = "$c->subject_id ~~ $c->course_num ~~ $t";
 			array_push($t2array,$str);
 		}
 
@@ -734,17 +734,17 @@ class _CourseList extends ObjList
 
 		$t3array = array_merge($tarray, $t2array);
 
-		$newList = new CourseList();
+		$new_list = new CourseList();
 		for($t = 0; $t < count($t3array); $t++)
 		{
 			$temp = split(" ~~ ",$t3array[$t]);
 			$i = $temp[2];
 
-			$newList->add($this->arrayList[$i]);
+			$new_list->add($this->array_list[$i]);
 		}
 
 		// And, transfer the newList into this list.
-		$this->arrayList = $newList->arrayList;
+		$this->array_list = $new_list->array_list;
 
 
 	}
@@ -754,38 +754,38 @@ class _CourseList extends ObjList
 	 * This function will resort this courselist for which a substitution
 	 * has been made in listSubstitutions.
 	 *
-	 * @param SubstitutionList $listSubstitutions
-	 * @param int $groupID
+	 * @param SubstitutionList $list_substitutions
+	 * @param int $group_id
 	 */
-	function sortSubstitutionsFirst($listSubstitutions, $groupID = 0)
+	function sort_substitutions_first($list_substitutions, $group_id = 0)
 	{
 		// This will sort courses in a list for which
 		// a substitution has been made in listSubstitutions.
 		// It will place those courses at the top of the list.
 
-		$topArray = array();
+		$top_array = array();
 
 		// Since I need the indexes, I will have to go through the array
 		// myself...
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$c = $this->arrayList[$t];
+			$c = $this->array_list[$t];
 			// So-- does this course have a substitution somewhere in
 			// the list (for the supplied groupID) ?
-			if ($substitution = $listSubstitutions->findRequirement($c, true, $groupID))
+			if ($substitution = $list_substitutions->find_requirement($c, true, $group_id))
 			{
 				// yes, there is a sub for this group (or bare degree plan)
-				$topArray[] = $t;
+				$top_array[] = $t;
 			}
 
 		}
 
 		// Okay, we now have, in the topArray, a list of indexes which should
 		// appear at the top.
-		$newList = new CourseList();
-		for ($j = 0; $j < count($topArray); $j++)
+		$new_list = new CourseList();
+		for ($j = 0; $j < count($top_array); $j++)
 		{
-			$newList->add($this->arrayList[$topArray[$j]]);
+			$new_list->add($this->array_list[$top_array[$j]]);
 		}
 
 		// Now, add everything else in the array (except indecies
@@ -793,29 +793,29 @@ class _CourseList extends ObjList
 
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			if (in_array($t, $topArray))
+			if (in_array($t, $top_array))
 			{
 				continue;
 			}
-			$newList->add($this->arrayList[$t]);
+			$new_list->add($this->array_list[$t]);
 		}
 
-		$this->arrayList = $newList->arrayList;
-		$newList->resetCounter();
+		$this->array_list = $new_list->array_list;
+		$new_list->reset_counter();
 
 	}
 
 
 	/**
 	 * This will sort so that courses with the smallest hours
-	 * (first trying hoursAwarded, then minHours)
+	 * (first trying hours_awarded, then min_hours)
 	 * are at the top of the list.  If the list contains more
 	 * than one course with a set of hours (like there are 30   
 	 * courses all worth 3 hours) then it orders those as
 	 * most-recently-taken first. 
 	 *
 	 */
-	function sortSmallestHoursFirst()
+	function sort_smallest_hours_first()
 	{
 		
 		$tarray = array();
@@ -824,11 +824,11 @@ class _CourseList extends ObjList
 		// myself...
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$c = $this->arrayList[$t];
-			$hours = $c->hoursAwarded*1;
+			$c = $this->array_list[$t];
+			$hours = $c->hours_awarded*1;
 			if ($hours < 1)
 			{
-				$hours = $c->minHours*1;
+				$hours = $c->min_hours*1;
 			}
 			$str = "$hours ~~ $t";
 			array_push($tarray,$str);
@@ -840,18 +840,18 @@ class _CourseList extends ObjList
 		//print_pre(print_r($tarray));
 
 		// Now, convert the array back into a list of courses.
-		$newList = new CourseList();
+		$new_list = new CourseList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
 			$temp = split(" ~~ ",$tarray[$t]);
 			$i = $temp[1];
 
-			$newList->add($this->arrayList[$i]);
+			$new_list->add($this->array_list[$i]);
 		}
 
-		// Okay, now $newList should contain the correct values.
+		// Okay, now $new_list should contain the correct values.
 		// We will transfer over the reference.
-		$this->arrayList = $newList->arrayList;
+		$this->array_list = $new_list->array_list;
 
 
 	}
@@ -859,15 +859,15 @@ class _CourseList extends ObjList
 
 	/**
 	 * This method will sort by the most recently taken
-	 * courses (determined by the termID).
+	 * courses (determined by the term_id).
 	 * The easiest way I can think to do this is to temporarily
-	 * put their termID's and index#'s into an array, and then
+	 * put their term_id's and index#'s into an array, and then
 	 * have PHP sort the array itself.  PHP's sorting algorithm
 	 * is faster than anything I can program right now, anyway.
 	 *
-	 * @param bool $boolMaintainAlphaOrder
+	 * @param bool $bool_maintain_alpha_order
 	 */
-	function sortMostRecentFirst($boolMaintainAlphaOrder = true)
+	function sort_most_recent_first($bool_maintain_alpha_order = true)
 	{
 		$tarray = array();
 
@@ -876,24 +876,24 @@ class _CourseList extends ObjList
 		// myself...
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$c = $this->arrayList[$t];
+			$c = $this->array_list[$t];
 			$cn = "";
-			if ($boolMaintainAlphaOrder == true)
+			if ($bool_maintain_alpha_order == true)
 			{
 				// We say 1000- the course number in order to give
 				// us the complement of the number.  That is so it will
 				// reverse-sort in the correct order.  Strange, but it fixes
 				// a small display issue where PHYS 207 and PHYS 209, taken at
 				// the same time, causes PHYS 209 to be displayed first.
-				// We also reverse the subjectID, again, so that
+				// We also reverse the subject_id, again, so that
 				// MATH will be sorted above ZOOL, when taken at the same time.
 				// This might not work at all, though...
 				
-				$cn = strrev($c->subjectID) . "," . (1000 - $c->courseNum);
-				//adminDebug($cn);
+				$cn = strrev($c->subject_id) . "," . (1000 - $c->course_num);
+				//admin_debug($cn);
 			}
-			$str = "$c->termID ~~ $cn ~~ $t";
-			//adminDebug($str);
+			$str = "$c->term_id ~~ $cn ~~ $t";
+			//admin_debug($str);
 			array_push($tarray,$str);
 		}
 
@@ -903,81 +903,81 @@ class _CourseList extends ObjList
 		//print_pre(print_r($tarray));
 
 		// Now, convert the array back into a list of courses.
-		$newList = new CourseList();
+		$new_list = new CourseList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
 			$temp = split(" ~~ ",$tarray[$t]);
 			$i = $temp[2];
 
-			$newList->add($this->arrayList[$i]);
+			$new_list->add($this->array_list[$i]);
 		}
 
-		// Okay, now $newList should contain the correct values.
+		// Okay, now $new_list should contain the correct values.
 		// We will transfer over the reference.
-		$this->arrayList = $newList->arrayList;
+		$this->array_list = $new_list->array_list;
 
 	}
 
 	/**
-	 * Convienence function.  It simply calls sortAlphabeticalOrder(), but
+	 * Convienence function.  It simply calls sort_alphabetical_order(), but
 	 * passes the boolean value to make it be reversed.
 	 *
 	 */
-	function sortReverseAlphabeticalOrder()
+	function sort_reverse_alphabetical_order()
 	{
-		$this->sortAlphabeticalOrder(true);
+		$this->sort_alphabetical_order(true);
 	}
 
 
 	/**
-	 * Sorts the course list into alphabetical order.  If loadDescriptiveData()
+	 * Sorts the course list into alphabetical order.  If load_descriptive_data()
 	 * has not already been called for each course, it will call it.
 	 *
-	 * @param bool $boolReverseOrder
+	 * @param bool $bool_reverse_order
 	 *         - If set to TRUE, the list will be in reverse order.
 	 * 
-	 * @param unknown_type $boolOnlyTransfers
+	 * @param unknown_type $bool_only_transfers
 	 *         - Only sort the transfer courses.
 	 * 
-	 * @param unknown_type $boolSetArrayIndex
-	 *         - If set to true, it will set the $course->arrayIndex value
-	 *           to the index value in $this's arrayList array.
+	 * @param unknown_type $bool_set_array_index
+	 *         - If set to true, it will set the $course->array_index value
+	 *           to the index value in $this's array_list array.
 	 * 
 	 */
-	function sortAlphabeticalOrder($boolReverseOrder = false, $boolOnlyTransfers = false, $boolSetArrayIndex = false)
+	function sort_alphabetical_order($bool_reverse_order = false, $bool_only_transfers = false, $bool_set_array_index = false)
 	{
 		// Sort the list into alphabetical order, based
-		// on the subjectID and courseNum.
+		// on the subject_id and course_num.
 		$tarray = array();
 		// Since I need the indexes, I will have to go through the array
 		// myself...
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$c = $this->arrayList[$t];
-			if ($c->subjectID == "")
+			$c = $this->array_list[$t];
+			if ($c->subject_id == "")
 			{
-				$c->loadDescriptiveData();
+				$c->load_descriptive_data();
 			}
 
 
-			if ($boolOnlyTransfers == true)
+			if ($bool_only_transfers == true)
 			{
 				// Rarer.  We only want to sort the transfer credits.  If the course doesn not
 				// have transfers, don't skip, just put in the original.  Otherwise, we will be using
 				// the transfer credit's SI and CN.
-				if (is_object($c->courseTransfer))
+				if (is_object($c->course_transfer))
 				{
-					$str = $c->courseTransfer->subjectID . " ~~ " . $c->courseTransfer->courseNum ." ~~ $t";
+					$str = $c->course_transfer->subject_id . " ~~ " . $c->course_transfer->course_num ." ~~ $t";
 				} else {
 					// There was no transfer!
-					$str = "$c->subjectID ~~ $c->courseNum ~~ $t";
+					$str = "$c->subject_id ~~ $c->course_num ~~ $t";
 				}
 			} else {
 
 				// This is the one which will be run most often.  Just sort the list
 				// in alphabetical order.
 
-				$str = "$c->subjectID ~~ $c->courseNum ~~ $t";
+				$str = "$c->subject_id ~~ $c->course_num ~~ $t";
 			}
 			array_push($tarray,$str);
 		}
@@ -985,7 +985,7 @@ class _CourseList extends ObjList
 		// Now, sort the array...
 		//print_pre(print_r($tarray));
 
-		if ($boolReverseOrder == true)
+		if ($bool_reverse_order == true)
 		{
 			rsort($tarray);
 		} else {
@@ -994,67 +994,67 @@ class _CourseList extends ObjList
 		//print_pre(print_r($tarray));
 
 		// Now, convert the array back into a list of courses.
-		$newList = new CourseList();
+		$new_list = new CourseList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
 			$temp = split(" ~~ ",$tarray[$t]);
 			$i = $temp[2];
-			if ($boolSetArrayIndex == true)
+			if ($bool_set_array_index == true)
 			{
-				$this->arrayList[$i]->arrayIndex = $i;
+				$this->array_list[$i]->array_index = $i;
 			}
-			$newList->add($this->arrayList[$i]);
+			$new_list->add($this->array_list[$i]);
 		}
 
-		// Okay, now $newList should contain the correct values.
+		// Okay, now $new_list should contain the correct values.
 		// We will transfer over the reference.
-		$this->arrayList = $newList->arrayList;
+		$this->array_list = $new_list->array_list;
 
 	}
 
 
 	/**
-	 * Returns an array of dbGroupRequirementID's from the courses
+	 * Returns an array of db_group_requirement_id's from the courses
 	 * in this list.
 	 *
 	 * @return array
 	 */
-	function getGroupRequirementIDArray()
+	function get_group_requirement_id_array()
 	{
-		// Return an array of dbGroupRequirementID's
+		// Return an array of db_group_requirement_id's
 		// from the courses in this list, indexed by the
 		// id's.
 
-		$rtnArray = array();
+		$rtn_array = array();
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			$rtnArray[$course->dbGroupRequirementID] = true;
+			$course = $this->array_list[$t];
+			$rtn_array[$course->db_group_requirement_id] = true;
 		}
 
-		return $rtnArray;
+		return $rtn_array;
 	}
 
 	
 	
 	/**
 	 * Returns TRUE if this list has a course which contains
-	 * $id for it's dbGroupRequirementID property.
+	 * $id for it's db_group_requirement_id property.
 	 *
 	 * @param int $id
 	 *         - This is the id to test for.
 	 * 
 	 * @return bool
 	 */
-	function containsGroupRequirementID($id)
+	function contains_group_requirement_id($id)
 	{
 		// Returns true if the list has a course
-		// which contains $id for it's dbGroupRequirementID.
+		// which contains $id for it's db_group_requirement_id.
 		// False if it cannot be found.
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			if ($course->dbGroupRequirementID == $id)
+			$course = $this->array_list[$t];
+			if ($course->db_group_requirement_id == $id)
 			{
 				return true;
 			}
@@ -1076,39 +1076,39 @@ class _CourseList extends ObjList
    *
    * @return Course
    */
-	function findFirstSelectable()
+	function find_first_selectable()
 	{
 		/*
 
 		*/
-		$tempI = $this->i;  // preserve the counter.
-		$this->resetCounter();
+		$temp_i = $this->i;  // preserve the counter.
+		$this->reset_counter();
 
-		while($this->hasMore())
+		while($this->has_more())
 		{
-			$c = $this->getNext();
-			if ($c->boolAdvisedToTake == true)
+			$c = $this->get_next();
+			if ($c->bool_advised_to_take == true)
 			{
 				continue;
 			}
-			if (!$c->courseListFulfilledBy->isEmpty)
+			if (!$c->course_list_fulfilled_by->is_empty)
 			{
 				continue;
 			}
-			if ($c->boolUnselectable == true)
+			if ($c->bool_unselectable == true)
 			{
 				continue;
 			}
 
 			// $c is our valid course...
-			$this->i = $tempI;
-			//print_pre($c->toString());
+			$this->i = $temp_i;
+			//print_pre($c->to_string());
 			return $c;
 
 
 		}
 
-		$this->i = $tempI;
+		$this->i = $temp_i;
 		return false;
 
 	}
@@ -1120,96 +1120,96 @@ class _CourseList extends ObjList
 	 *
 	 * @return bool
 	 */
-	function hasAnyCourseSelected()
+	function has_any_course_selected()
 	{
 		/*
 		Returns TRUE if there is at least one course
 		in this list which is "selected."  FALSE, otherwise.
 		*/
-		$tempI = $this->i;  // preserve the counter.
-		$this->resetCounter();
+		$temp_i = $this->i;  // preserve the counter.
+		$this->reset_counter();
 		$rtn = false;
-		while($this->hasMore())
+		while($this->has_more())
 		{
-			$c = $this->getNext();
-			if ($c->boolSelected == true)
+			$c = $this->get_next();
+			if ($c->bool_selected == true)
 			{
 				$rtn = true;
 				break;
 			}
 		}
 
-		$this->i = $tempI;
+		$this->i = $temp_i;
 		return $rtn;
 	}
 
 
 	/**
-	 * Mark every course in this list as boolHasBeenDisplayed = true.
+	 * Mark every course in this list as bool_has_been_displayed = true.
 	 * Used for making sure we don't display the same course twice on
 	 * screen.
 	 * 
 	 * Returns FALSE if we did not mark any courses.
 	 *
-	 * @param int $semesterNum
+	 * @param int $semester_num
 	 *         - If > -1, we will first make sure the course
 	 *           falls into this semesterNum.  This way we can only
 	 *           perform this operation on a particular semester.
 	 * 
 	 * @return bool
 	 */
-	function markAsDisplayed($semesterNum = -1)
+	function mark_as_displayed($semester_num = -1)
 	{
 
-	  $tempI = $this->i;  // preserve the counter.
-		$this->resetCounter();
+	  $temp_i = $this->i;  // preserve the counter.
+		$this->reset_counter();
 		$rtn = false;
-		while($this->hasMore())
+		while($this->has_more())
 		{
-			$c = $this->getNext();
-			if ($semesterNum != -1)
+			$c = $this->get_next();
+			if ($semester_num != -1)
 			{ // A semesterNum was specified.
 				// Make sure the course is in the correct semester.
-				if ($c->assignedToSemesterNum != $semesterNum)
+				if ($c->assigned_to_semester_num != $semester_num)
 				{
 					continue;
 				}
 			}
 
-			$c->boolHasBeenDisplayed = true;
+			$c->bool_has_been_displayed = true;
 			$rtn = true;
 
 		}
 
-		$this->i = $tempI;
+		$this->i = $temp_i;
 		return $rtn;
 	}
 
 
 	/**
-	 * Returns a CourseList of all the courses matching courseID
-	 * that has boolHasBeenAssigned == TRUE.
+	 * Returns a CourseList of all the courses matching course_id
+	 * that has bool_has_been_assigned == TRUE.
 	 *
-	 * @param int $courseID
+	 * @param int $course_id
 	 * @return CourseList
 	 */
-	function getPreviousAssignments($courseID)
+	function get_previous_assignments($course_id)
 	{
 		// Return a courseList of all the times a course matching
-		// courseID has the boolHasBeenAssigned set to TRUE.
+		// course_id has the bool_has_been_assigned set to TRUE.
 
-		$rtnList = new CourseList();
+		$rtn_list = new CourseList();
 
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			if ($course->courseID == $courseID && $course->boolHasBeenAssigned == true)
+			$course = $this->array_list[$t];
+			if ($course->course_id == $course_id && $course->bool_has_been_assigned == true)
 			{
-				$rtnList->add($course);
+				$rtn_list->add($course);
 			}
 		}
 
-		return $rtnList;
+		return $rtn_list;
 
 	}
 
@@ -1224,16 +1224,16 @@ class _CourseList extends ObjList
 	 * most recent that meets the minimum requirements.
 	 * Other schools might simply take the best grade.
 	 *
-	 * @param Course $courseC
-	 * @param string $minGrade
-	 * @param bool $boolMarkRepeatsExclude
+	 * @param Course $course_c
+	 * @param string $min_grade
+	 * @param bool $bool_mark_repeats_exclude
 	 *
 	 * @return Course
 	 */
-	function findBestMatch(Course $courseC, $minGrade = "D", $boolMarkRepeatsExclude = false)
+	function find_best_match(Course $course_c, $min_grade = "D", $bool_mark_repeats_exclude = false)
 	{
 
-		return $this->findMostRecentMatch($courseC, $minGrade, $boolMarkRepeatsExclude);
+		return $this->find_most_recent_match($course_c, $min_grade, $bool_mark_repeats_exclude);
 
 	}
 
@@ -1242,15 +1242,15 @@ class _CourseList extends ObjList
 	/**
 	 * Adds the supplied CourseList to the bottom of $this's list.
 	 *
-	 * @param CourseList $courseL
+	 * @param CourseList $course_l
 	 */
-	function addList(CourseList $courseL)
+	function add_list(CourseList $course_l)
 	{
-		for ($t = 0; $t < count($courseL->arrayList); $t++)
+		for ($t = 0; $t < count($course_l->array_list); $t++)
 		{
-			//adminDebug($courseL->arrayList[$t]->assignedToSemesterNum);
-			//adminDebug("adding " . $courseL->arrayList[$t]->toString());
-			$this->add($courseL->arrayList[$t]);
+			//admin_debug($course_l->array_list[$t]->assigned_to_semester_num);
+			//admin_debug("adding " . $course_l->array_list[$t]->to_string());
+			$this->add($course_l->array_list[$t]);
 		}
 
 	}
@@ -1262,14 +1262,14 @@ class _CourseList extends ObjList
 	 * @todo The ignore list should be database-based.  Should just get it
 	 *       from the settings.
 	 * 
-	 * @param string $requirementType
+	 * @param string $requirement_type
 	 *         - If specified, we will only count courses which match this
-	 *           requirementType.
+	 *           requirement_type.
 	 * 
-	 * @param bool $boolUseIgnoreList
+	 * @param bool $bool_use_ignore_list
 	 * @return int
 	 */
-	function countHours($requirementType = "", $boolUseIgnoreList = false, $boolCorrectGhostHour = true, $boolForceZeroHoursToOneHour = false)
+	function count_hours($requirement_type = "", $bool_use_ignore_list = false, $bool_correct_ghost_hour = true, $bool_force_zero_hours_to_one_hour = false)
 	{
 		// Returns how many hours are being represented in this courseList.
 		// A requirement type of "uc" is the same as "c"
@@ -1279,21 +1279,21 @@ class _CourseList extends ObjList
 		$count = 0;
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
+			$course = $this->array_list[$t];
 
-			if ($boolUseIgnoreList == true)
+			if ($bool_use_ignore_list == true)
 			{
 				// Do ignore some courses...
-				$tempCourseName = $course->subjectID . " " . $course->courseNum;
+				$temp_course_name = $course->subject_id . " " . $course->course_num;
 				// Check in our settings to see if we should ignore this course
 				// (configured in /custom/settings.php)
-				if (in_array($tempCourseName, $GLOBALS["fpSystemSettings"]["ignoreCoursesFromHourCounts"])) {
+				if (in_array($temp_course_name, $GLOBALS["fp_system_settings"]["ignore_courses_from_hour_counts"])) {
 					continue;
 				}
 				
 			}
 			
-			if ($course->boolSubstitutionNewFromSplit == true)
+			if ($course->bool_substitution_new_from_split == true)
 			{
 				// Do not count the possible fragments that are created
 				// from a new substitution split.  This is causing problems
@@ -1301,54 +1301,54 @@ class _CourseList extends ObjList
 				
 				// BUT-- only skip if this new fragment isn't also being
 				// substituted somewhere else!
-				if ($course->boolSubstitution == false)
+				if ($course->bool_substitution == false)
 				{ // not being used in another sub, so skip it.
-					//adminDebug("skipping " . $course->toString());
+					//admin_debug("skipping " . $course->to_string());
 					continue;
 				}
 			}
 
-			$hGetHours = $course->getHours();
-			if ($boolCorrectGhostHour) {
+			$h_get_hours = $course->get_hours();
+			if ($bool_correct_ghost_hour) {
   			// If this course has a ghosthour, then use the
-  			// hoursAwarded (probably 1).  However, if it was substituted,
+  			// hours_awarded (probably 1).  However, if it was substituted,
   			// then we actually want the 0 hour.  Confusing, isn't it?
-  			if ($course->boolGhostHour) {
-  			  $hGetHours = $course->hoursAwarded;
+  			if ($course->bool_ghost_hour) {
+  			  $h_get_hours = $course->hours_awarded;
   			}
 			}
 			
-			if ($boolForceZeroHoursToOneHour) {			  
+			if ($bool_force_zero_hours_to_one_hour) {			  
 			  // We want to force anything with a 0 hour to be 1 hour.
 			  // Helps when selecting 0 hour courses from groups.
-			  if ($hGetHours == 0) {			    
-			    $hGetHours = 1;
+			  if ($h_get_hours == 0) {			    
+			    $h_get_hours = 1;
 			  }
 			}
 			
 			
-			if ($requirementType == "")
+			if ($requirement_type == "")
 			{
-				$count = $count + $hGetHours;
+				$count = $count + $h_get_hours;
 			} else {
 				// Requirement Type not blank, so only count these hours
 				// if it has the set requirement type.
-				if ($course->requirementType == $requirementType)
+				if ($course->requirement_type == $requirement_type)
 				{
-					$count = $count + $hGetHours;
-					//adminDebug($course->toString());
+					$count = $count + $h_get_hours;
+					//admin_debug($course->to_string());
 					continue;
 				}
 
 				// For specifically "university capstone" courses...
-				if ($course->requirementType == "uc" && $requirementType == "c")
+				if ($course->requirement_type == "uc" && $requirement_type == "c")
 				{
-					$count = $count + $hGetHours;
+					$count = $count + $h_get_hours;
 				}
 
-				if ($course->requirementType == "um" && $requirementType == "m")
+				if ($course->requirement_type == "um" && $requirement_type == "m")
 				{
-					$count = $count + $hGetHours;
+					$count = $count + $h_get_hours;
 				}
 
 
@@ -1363,58 +1363,58 @@ class _CourseList extends ObjList
 	 * Removes courses which have neither been fulfilled or advised.
 	 *
 	 */
-	function removeUnfulfilledAndUnadvisedCourses()
+	function remove_unfulfilled_and_unadvised_courses()
 	{
 		// remove courses from THIS list
 		// which have not been fulfilled AND
 		// are not currently advised.
-		$rtnList = new CourseList();
+		$rtn_list = new CourseList();
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			if ($course->courseListFulfilledBy->isEmpty == false)
+			$course = $this->array_list[$t];
+			if ($course->course_list_fulfilled_by->is_empty == false)
 			{
 				// something IS fulfilling it!
-				$rtnList->add($course);
+				$rtn_list->add($course);
 
-			} else if ($course->boolAdvisedToTake == true)
+			} else if ($course->bool_advised_to_take == true)
 			{
 				// Was not being fulfilled, but, it was advised
 				// to take.
-				$rtnList->add($course);
+				$rtn_list->add($course);
 			}
 
 
 
 		}
 
-		$this->arrayList = $rtnList->arrayList;
-		$this->resetCounter();
+		$this->array_list = $rtn_list->array_list;
+		$this->reset_counter();
 	}
 
 
 	/**
 	 * Removes courses from this list which have not been fulfilled
-	 * (ther courseListFulfilledBy is empty).
+	 * (ther course_list_fulfilled_by is empty).
 	 *
 	 */
-	function removeUnfulfilledCourses()
+	function remove_unfulfilled_courses()
 	{
 		// remove courses in THIS list
-		// which have nothing in their courseListFulfilledBy
+		// which have nothing in their course_list_fulfilled_by
 		// object.
-		$rtnList = new CourseList();
+		$rtn_list = new CourseList();
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			if ($course->courseListFulfilledBy->isEmpty == false)
+			$course = $this->array_list[$t];
+			if ($course->course_list_fulfilled_by->is_empty == false)
 			{
-				$rtnList->add($course);
+				$rtn_list->add($course);
 			}
 		}
 
-		$this->arrayList = $rtnList->arrayList;
-		$this->resetCounter();
+		$this->array_list = $rtn_list->array_list;
+		$this->reset_counter();
 
 	}
 
@@ -1422,38 +1422,38 @@ class _CourseList extends ObjList
 	/**
 	 * Returns a clone CourseList of $this.
 	 *
-	 * @param bool $boolReturnNewCourses
+	 * @param bool $bool_return_new_courses
 	 *         - If set to TRUE, it will create new Course objects
-	 *           based on the courseID's of the ones in $this's list.
+	 *           based on the course_id's of the ones in $this's list.
 	 *           If set to FALSE, this will add the exact same Course
 	 *           objects by reference to the new list.
 	 * 
 	 * @return CourseList
 	 */
-	function getClone($boolReturnNewCourses = false)
+	function get_clone($bool_return_new_courses = false)
 	{
 		// This will return a clone of this list.
 		// If boolReturnNewCourses is true, then it will
 		// return a new list of new instances of courses
 		// from this list.
-		$rtnList = new CourseList();
+		$rtn_list = new CourseList();
 		
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
+			$course = $this->array_list[$t];
 			
-			if ($boolReturnNewCourses == true)
+			if ($bool_return_new_courses == true)
 			{
-				$newCourse = new Course();
-				$newCourse->courseID = $course->courseID;
-				$rtnList->add($newCourse);
+				$new_course = new Course();
+				$new_course->course_id = $course->course_id;
+				$rtn_list->add($new_course);
 			} else {
-				$rtnList->add($course);
+				$rtn_list->add($course);
 			}	
 			
 		}	
 		
-		return $rtnList;
+		return $rtn_list;
 			
 	}
 	
@@ -1462,46 +1462,46 @@ class _CourseList extends ObjList
 	 * Returns a CourseList of all the fulfilled or advised courses
 	 * in $this's list.
 	 *
-	 * @param bool $boolReturnNewCourses
-	 *         - Works the same as getClone()'s boolReturnNewCourses
+	 * @param bool $bool_return_new_courses
+	 *         - Works the same as get_clone()'s boolReturnNewCourses
 	 *           variable.
 	 * 
 	 * @return Course
 	 */
-	function getFulfilledOrAdvised($boolReturnNewCourses = false)
+	function get_fulfilled_or_advised($bool_return_new_courses = false)
 	{
 		
-		$rtnList = new CourseList();
+		$rtn_list = new CourseList();
 		
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			$addCourse = $course;
+			$course = $this->array_list[$t];
+			$add_course = $course;
 			
-			if ($boolReturnNewCourses == true)
+			if ($bool_return_new_courses == true)
 			{
-				$addCourse = new Course();
-				$addCourse->courseID = $course->courseID;
+				$add_course = new Course();
+				$add_course->course_id = $course->course_id;
 			}
 			
-			if ($course->boolAdvisedToTake == true)
+			if ($course->bool_advised_to_take == true)
 			{
-				$rtnList->add($addCourse);
+				$rtn_list->add($add_course);
 			}
 			
 			// Several ways to tell if a course is here by credit...
-			if (!$course->courseListFulfilledBy->isEmpty)
+			if (!$course->course_list_fulfilled_by->is_empty)
 			{
-				$rtnList->add($addCourse);
+				$rtn_list->add($add_course);
 			} else if ($course->grade != "") {
-				$rtnList->add($addCourse);
-			} else if ($course->boolSubstitution == true)
+				$rtn_list->add($add_course);
+			} else if ($course->bool_substitution == true)
 			{
-				$rtnList->add($addCourse);
+				$rtn_list->add($add_course);
 			}			
 		}
 		
-		return $rtnList;
+		return $rtn_list;
 		
 	}
 	
@@ -1512,7 +1512,7 @@ class _CourseList extends ObjList
 	 *
 	 * @return int
 	 */
-	function countFulfilledOrAdvised()
+	function count_fulfilled_or_advised()
 	{
 		// This function returns the number of courses in this
 		// courseList which is either fulfilled or has been advised
@@ -1521,19 +1521,19 @@ class _CourseList extends ObjList
 		$count = 0;
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			if ($course->boolAdvisedToTake == true)
+			$course = $this->array_list[$t];
+			if ($course->bool_advised_to_take == true)
 			{
 				$count++;
 			}
 			
 			// Several ways to tell if a course is here by credit...
-			if (!$course->courseListFulfilledBy->isEmpty)
+			if (!$course->course_list_fulfilled_by->is_empty)
 			{
 				$count++;
 			} else if ($course->grade != "") {
 				$count++;
-			} else if ($course->boolSubstitution == true)
+			} else if ($course->bool_substitution == true)
 			{
 				$count++;
 			}			
@@ -1545,78 +1545,78 @@ class _CourseList extends ObjList
 	
 	
 	/**
-	 * Returns a CourseList of courses which have boolAdvisedToTake == true.
+	 * Returns a CourseList of courses which have bool_advised_to_take == true.
 	 *
 	 * @return CourseList
 	 */
-	function getAdvisedCoursesList()
+	function get_advised_courses_list()
 	{
 		// Return a courseList object of courses in THIS
-		// list which have boolAdvisedToTake == true.
-		$rtnList = new CourseList();
+		// list which have bool_advised_to_take == true.
+		$rtn_list = new CourseList();
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			if ($course->boolAdvisedToTake == true)
+			$course = $this->array_list[$t];
+			if ($course->bool_advised_to_take == true)
 			{
-				$rtnList->add($course);
+				$rtn_list->add($course);
 			}
 		}
 
-		return $rtnList;
+		return $rtn_list;
 
 	}
 
 
 	/**
-	 * Similar to countHours, but this will only count courses
+	 * Similar to count_hours, but this will only count courses
 	 * which have been taken and have a grade.
 	 * 
 	 * @todo ignore list should be db-based, in the settings.
 	 *
-	 * @param string $requirementType
-	 *         - If set, we will only look for courses matching this requirementType.
+	 * @param string $requirement_type
+	 *         - If set, we will only look for courses matching this requirement_type.
 	 * 
-	 * @param bool $boolUseIgnoreList
-	 * @param bool $boolIgnoreEnrolled
+	 * @param bool $bool_use_ignore_list
+	 * @param bool $bool_ignore_enrolled
 	 * @return CourseList
 	 */
-	function countCreditHours($requirementType = "", $boolUseIgnoreList = false, $boolIgnoreEnrolled = false)
+	function count_credit_hours($requirement_type = "", $bool_use_ignore_list = false, $bool_ignore_enrolled = false)
 	{
-		// Similar to countHours, but this will only
+		// Similar to count_hours, but this will only
 		// count courses which have been taken (have a grade).
 
 
 		$count = 0;
-		//adminDebug($requirementType);
+		//admin_debug($requirement_type);
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
+			$course = $this->array_list[$t];
 
-			if ($boolUseIgnoreList == true)
+			if ($bool_use_ignore_list == true)
 			{
 				// Do ignore some courses...
-        $tempCourseName = $course->subjectID . " " . $course->courseNum;
+        $temp_course_name = $course->subject_id . " " . $course->course_num;
 				// Check in our settings to see if we should ignore this course
 				// (configured in /custom/settings.php)
-				if (in_array($tempCourseName, $GLOBALS["fpSystemSettings"]["ignoreCoursesFromHourCounts"])) {
+				if (in_array($temp_course_name, $GLOBALS["fp_system_settings"]["ignore_courses_from_hour_counts"])) {
 					continue;
 				}				
 
 			}
 
 
-			if ($boolIgnoreEnrolled == true)
+			if ($bool_ignore_enrolled == true)
 			{
-				if ($course->isCompleted() == false)
+				if ($course->is_completed() == false)
 				{
-					//adminDebug("skip" . $course->toString());
-					if ($course->courseListFulfilledBy->isEmpty)
+					//admin_debug("skip" . $course->to_string());
+					if ($course->course_list_fulfilled_by->is_empty)
 					{
 
 						continue;
 					} else {
-						if ($course->courseListFulfilledBy->getFirst()->isCompleted() == false)
+						if ($course->course_list_fulfilled_by->get_first()->is_completed() == false)
 						{
 							continue;
 						}
@@ -1624,31 +1624,31 @@ class _CourseList extends ObjList
 				}
 			}
 
-			if ($course->grade != "")// || !($course->courseListFulfilledBy->isEmpty))
+			if ($course->grade != "")// || !($course->course_list_fulfilled_by->is_empty))
 			{
-				if ($requirementType == "")
+				if ($requirement_type == "")
 				{
-				  $h = $course->getHours();
+				  $h = $course->get_hours();
 					$count = $count + $h;
-					//adminDebug($course->toString());
-					//adminDebug($h);
+					//admin_debug($course->to_string());
+					//admin_debug($h);
 				} else {
-					if ($course->requirementType == $requirementType)
+					if ($course->requirement_type == $requirement_type)
 					{
-						$count = $count + $course->getHours();
-						//adminDebug($course->toString());
+						$count = $count + $course->get_hours();
+						//admin_debug($course->to_string());
 						continue;
 					}
 
 					// For specifically "university capstone" courses...
-					if ($course->requirementType == "uc" && $requirementType == "c")
+					if ($course->requirement_type == "uc" && $requirement_type == "c")
 					{
-						$count = $count + $course->getHours();
+						$count = $count + $course->get_hours();
 					}
 
-					if ($course->requirementType == "um" && $requirementType == "m")
+					if ($course->requirement_type == "um" && $requirement_type == "m")
 					{
-						$count = $count + $course->getHours();
+						$count = $count + $course->get_hours();
 					}
 
 
@@ -1656,40 +1656,40 @@ class _CourseList extends ObjList
 			} else {
 
 				// maybe it's a substitution?
-				if ($requirementType == "")
+				if ($requirement_type == "")
 				{
-					if ($course->courseListFulfilledBy->isEmpty == false)
+					if ($course->course_list_fulfilled_by->is_empty == false)
 					{
-						$cc = $course->courseListFulfilledBy->getFirst();
-						if ($cc->boolSubstitution)
+						$cc = $course->course_list_fulfilled_by->get_first();
+						if ($cc->bool_substitution)
 						{
 						  
-							$h = $cc->substitutionHours;
+							$h = $cc->substitution_hours;
 							
-							if ($cc->boolGhostHour) {
+							if ($cc->bool_ghost_hour) {
 							  $h = 0;
 							}
 							
 							$count = $count + $h;
-							adminDebug($cc->toString());
+							admin_debug($cc->to_string());
 						}
 					}
 				} else {
-					if ($requirementType == $course->requirementType)
+					if ($requirement_type == $course->requirement_type)
 					{
-						if ($course->courseListFulfilledBy->isEmpty == false)
+						if ($course->course_list_fulfilled_by->is_empty == false)
 						{
-							$cc = $course->courseListFulfilledBy->getFirst();
-							if ($cc->boolSubstitution)
+							$cc = $course->course_list_fulfilled_by->get_first();
+							if ($cc->bool_substitution)
 							{
-								$h = $cc->substitutionHours;
+								$h = $cc->substitution_hours;
 								
-                if ($cc->boolGhostHour) {
+                if ($cc->bool_ghost_hour) {
   							  $h = 0;
   							}								
 								
 								$count = $count + $h;
-								//adminDebug($cc->toString());
+								//admin_debug($cc->to_string());
 							}
 						}
 
@@ -1708,14 +1708,14 @@ class _CourseList extends ObjList
 	/**
 	 * Assign a groupID to every course in the list.
 	 *
-	 * @param int $groupID
+	 * @param int $group_id
 	 */
-	function assignGroupID($groupID)
+	function assign_group_id($group_id)
 	{
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			$course->assignedToGroupID = $groupID;
+			$course = $this->array_list[$t];
+			$course->assigned_to_group_id = $group_id;
 		}
 	}
 
@@ -1723,71 +1723,71 @@ class _CourseList extends ObjList
 	/**
 	 * Assign a semesterNum to every course in the list.
 	 *
-	 * @param int $semesterNum
+	 * @param int $semester_num
 	 */
-	function assignSemesterNum($semesterNum)
+	function assign_semester_num($semester_num)
 	{
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			$course->assignedToSemesterNum = $semesterNum;
+			$course = $this->array_list[$t];
+			$course->assigned_to_semester_num = $semester_num;
 		}
 	}
 
 	/**
-	 * Sets the boolHasBeenAssigned property of every course in
+	 * Sets the bool_has_been_assigned property of every course in
 	 * the list.
 	 *
-	 * @param bool $boolHasBeenAssigned
+	 * @param bool $bool_has_been_assigned
 	 *         - What to set each course's->boolhasBeenAssigned property
 	 *           to.
 	 * 
 	 */
-	function setHasBeenAssigned($boolHasBeenAssigned = true)
+	function set_has_been_assigned($bool_has_been_assigned = true)
 	{
-		// Set the boolHasBeenAssigned for all items
+		// Set the bool_has_been_assigned for all items
 		// in this list.
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			$course->boolHasBeenAssigned = $boolHasBeenAssigned;
+			$course = $this->array_list[$t];
+			$course->bool_has_been_assigned = $bool_has_been_assigned;
 		}
 
 	}
 
 
 	/**
-	 * Set's each course's boolSubstitution value.
+	 * Set's each course's bool_substitution value.
 	 *
-	 * @param bool $boolS
-	 *         - What to set each course's boolSubstitution value to.
+	 * @param bool $bool_s
+	 *         - What to set each course's bool_substitution value to.
 	 */
-	function setBoolSubstitution($boolS = true)
+	function set_bool_substitution($bool_s = true)
 	{
-		// Set the boolSubstitution for all items
+		// Set the bool_substitution for all items
 		// in this list.
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			$course->boolSubstitution = $boolS;
+			$course = $this->array_list[$t];
+			$course->bool_substitution = $bool_s;
 		}
 
 	}
 
 	/**
-	 * Sets each course's $courseSubstitution value to the supplied
+	 * Sets each course's $course_substitution value to the supplied
 	 * Course object.
 	 *
-	 * @param Course $courseS
-	 * @param string $subRemarks
+	 * @param Course $course_s
+	 * @param string $sub_remarks
 	 */
-	function setCourseSubstitution(Course $courseS, $subRemarks = "")
+	function set_course_substitution(Course $course_s, $sub_remarks = "")
 	{
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			$course->courseSubstitution = $courseS;
-			$course->subRemarks = $subRemarks;
+			$course = $this->array_list[$t];
+			$course->course_substitution = $course_s;
+			$course->sub_remarks = $sub_remarks;
 		}
 
 	}
@@ -1795,21 +1795,21 @@ class _CourseList extends ObjList
 
 
 	/**
-	 * Go through the list and decrement the specifiedRepeats
+	 * Go through the list and decrement the specified_repeats
 	 * value for all instances of Course $course.
 	 *
 	 * @param Course $course
 	 */
-	function decSpecifiedRepeats(Course $course)
+	function dec_specified_repeats(Course $course)
 	{
-		// Go through the list, and decrement the specifiedRepeats
+		// Go through the list, and decrement the specified_repeats
 		// value for all instances of $course.
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course2 = $this->arrayList[$t];
-			if ($course2->courseID == $course->courseID)
+			$course2 = $this->array_list[$t];
+			if ($course2->course_id == $course->course_id)
 			{
-				$course2->specifiedRepeats--;
+				$course2->specified_repeats--;
 			}
 		}
 
@@ -1817,21 +1817,21 @@ class _CourseList extends ObjList
 
 
 	/**
-	 * Go through the list and set the specifiedRepeats value to $num
+	 * Go through the list and set the specified_repeats value to $num
 	 * for all instances of $course.
 	 *
 	 * @param Course $course
 	 * @param int $num
 	 */
-	function setSpecifiedRepeats(Course $course, $num)
+	function set_specified_repeats(Course $course, $num)
 	{
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course2 = $this->arrayList[$t];
-			if ($course2->courseID == $course->courseID)
+			$course2 = $this->array_list[$t];
+			if ($course2->course_id == $course->course_id)
 			{
-				$course2->specifiedRepeats = $num;
-				$course2->boolSpecifiedRepeats = true;
+				$course2->specified_repeats = $num;
+				$course2->bool_specified_repeats = true;
 			}
 
 		}
@@ -1841,34 +1841,34 @@ class _CourseList extends ObjList
 
 	/**
 	 * Removes excluded courses from the list (courses that
-	 * have dbExclude == 1)
+	 * have db_exclude == 1)
 	 *
 	 */
-	function removeExcluded()
+	function remove_excluded()
 	{
-		// Removes courses from the list that have a dbExclude == 1.
-		$newList = new CourseList();
+		// Removes courses from the list that have a db_exclude == 1.
+		$new_list = new CourseList();
 		// Do this by adding elements to an array.
-		// courseID => index in list.
+		// course_id => index in list.
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
-			if ($course->subjectID == "")
+			$course = $this->array_list[$t];
+			if ($course->subject_id == "")
 			{ // load descriptive data (include exclude info)
-				$course->loadDescriptiveData();
+				$course->load_descriptive_data();
 			}
 			
-			if ($course->dbExclude == 1)
+			if ($course->db_exclude == 1)
 			{
 				continue;
 			}
 
-			$newList->add($course);
+			$new_list->add($course);
 
 		}
 
-		$this->arrayList = $newList->arrayList;
-		$this->resetCounter();
+		$this->array_list = $new_list->array_list;
+		$this->reset_counter();
 
 	}
 
@@ -1877,59 +1877,59 @@ class _CourseList extends ObjList
 	 * Removes null's and duplicate courses from the list.
 	 *
 	 */
-	function removeDuplicates()
+	function remove_duplicates()
 	{
 		// Go through and remove duplicates from the list.
 		// Also remove null's
 
 		$tarray = array();
-		$newList = new CourseList();
+		$new_list = new CourseList();
 		// Do this by adding elements to an array.
-		// courseID => index in list.
+		// course_id => index in list.
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
+			$course = $this->array_list[$t];
 			if ($course == null)
 			{
 				continue;
 			}
 
-			$tarray[$course->courseID] = -1;
+			$tarray[$course->course_id] = -1;
 		}
 
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$course = $this->arrayList[$t];
+			$course = $this->array_list[$t];
 			if ($course == null)
 			{
 				continue;
 			}
 
 			//if (is_object($course->courseFulfilledBy))
-			if (!($course->courseListFulfilledBy->isEmpty))
+			if (!($course->course_list_fulfilled_by->is_empty))
 			{
-				$tarray[$course->courseID] = $t;
+				$tarray[$course->course_id] = $t;
 				continue;
 			}
 
-			if ($tarray[$course->courseID]*1 < 0)
+			if ($tarray[$course->course_id]*1 < 0)
 			{
-				//adminDebug("empty $course->subjectID $course->courseNum ");
-				$tarray[$course->courseID] = $t;
+				//admin_debug("empty $course->subject_id $course->course_num ");
+				$tarray[$course->course_id] = $t;
 			}
 
 		}
 		//print_pre(print_r($tarray));
 
 		// Now, go through tarray and rebuild the newList.
-		foreach($tarray as $courseID => $i)
+		foreach($tarray as $course_id => $i)
 		{
-			$newList->add($this->arrayList[$i]);
+			$new_list->add($this->array_list[$i]);
 		}
 
 		// Switch over the reference.
-		$this->arrayList = $newList->arrayList;
-		$this->resetCounter();
+		$this->array_list = $new_list->array_list;
+		$this->reset_counter();
 
 	}
 

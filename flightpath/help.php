@@ -31,7 +31,7 @@ require_once("bootstrap.inc");
 
 
 $db = new DatabaseHandler();
-$screen = new AdvisingScreen("", null, "notAdvising");
+$screen = new AdvisingScreen("", null, "not_advising");
 
 // What page is the user trying to see?
 $i = trim(addslashes($_GET["i"])) * 1;
@@ -43,25 +43,25 @@ if ($i < 1)
 
 
 // Okay, get the page from the database...
-$helpPage = $db->getHelpPage($i);
+$help_page = $db->get_help_page($i);
 
 $pC = "";
 
-$pC .= "<div style='font-size: 16pt; font-weight: bold;'>FlightPath Help - " . $helpPage["title"] . "</div>";
-$body = trim($helpPage["body"]);
+$pC .= "<div style='font-size: 16pt; font-weight: bold;'>FlightPath Help - " . $help_page["title"] . "</div>";
+$body = trim($help_page["body"]);
 //$body = $screen->convertBBCodeToHTML($body);
 
 $pC .= "<div align='center'><div style='padding-top: 20px; width:90%; text-align: left;'>$body</div></div>";
 
 
-$screen->pageContent = $pC;
-$screen->pageHasSearch = false;
-$screen->pageIsPopup = true;
-$screen->pageTitle = "FlightPath Help - " . $helpPage["title"];
+$screen->page_content = $pC;
+$screen->page_has_search = false;
+$screen->page_is_popup = true;
+$screen->page_title = "FlightPath Help - " . $help_page["title"];
 // send to the browser
-$screen->outputToBrowser();
+$screen->output_to_browser();
 
-$db->addToLog("help","$i,{$helpPage["title"]}");
+$db->add_to_log("help","$i,{$help_page["title"]}");
 
 
 

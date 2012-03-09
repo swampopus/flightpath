@@ -1,6 +1,6 @@
 <?php
 
-class AdvisingScreenTypeView extends _AdvisingScreenTypeView
+class AdvisingScreenTypeView extends __advising_screen_type_view
 {	
   
   

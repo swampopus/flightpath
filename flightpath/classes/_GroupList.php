@@ -17,9 +17,9 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-require_once("ObjList.php");
+require_once("_obj_list.php");
 
-class _GroupList extends ObjList
+class __group_list extends ObjList
 {
 	/*
 	This class inherits mosts of its classes from ObjList
@@ -27,27 +27,27 @@ class _GroupList extends ObjList
 	*/
 
 	
-	function resetListCounters()
+	function reset_list_counters()
 	{
-		$this->resetCounter();
+		$this->reset_counter();
 		// Also, go through all groups in the list and call
-		// their "resetListCounters" method.
+		// their "reset_list_counters" method.
 		for ($t = 0; $t < $this->count; $t++)
 		{
-			$group = $this->arrayList[$t];
-			$group->resetListCounters();
+			$group = $this->array_list[$t];
+			$group->reset_list_counters();
 		}		
 	}
 	
 	
-	function containsGroupRequirementID($groupRequirementID)
+	function contains_group_requirement_id($group_requirement_id)
 	{
 		// Returns true if any of the lists of courses in these groups
 		// contain the group requirement ID.
-		for ($t = 0; $t < count($this->arrayList); $t++)
+		for ($t = 0; $t < count($this->array_list); $t++)
 		{
-			$group = $this->arrayList[$t];
-			if ($group->listCourses->containsGroupRequirementID($groupRequirementID))
+			$group = $this->array_list[$t];
+			if ($group->list_courses->contains_group_requirement_id($group_requirement_id))
 			{
 				return true;
 			}
@@ -58,44 +58,44 @@ class _GroupList extends ObjList
 	}
 	
 	
-	function getAdvisedCoursesList()
+	function get_advised_courses_list()
 	{
 		// Return a courseList object of courses in THIS
 		// group which have boolAdvisedToTake == true.
-		$rtnList = new CourseList();
-		for ($t = 0; $t < count($this->arrayList); $t++)
+		$rtn_list = new CourseList();
+		for ($t = 0; $t < count($this->array_list); $t++)
 		{
-			$group = $this->arrayList[$t];
-			$rtnList->addList($group->listCourses->getAdvisedCoursesList());
+			$group = $this->array_list[$t];
+			$rtn_list->add_list($group->list_courses->get_advised_courses_list());
 			
-			$group->listGroups->resetCounter();
-			while($group->listGroups->hasMore())
+			$group->list_groups->reset_counter();
+			while($group->list_groups->has_more())
 			{
-				$gg = $group->listGroups->getNext();
-				$rtnList->addList($gg->listCourses->getAdvisedCoursesList());
+				$gg = $group->list_groups->get_next();
+				$rtn_list->add_list($gg->list_courses->get_advised_courses_list());
 			}
 		}		
 		
-		$rtnList->removeDuplicates();
+		$rtn_list->remove_duplicates();
 		
-		return $rtnList;
+		return $rtn_list;
 		
 	}
 	
 	
-	function assignMinGrade($minGrade)
+	function assign_min_grade($min_grade)
 	{
 		// Assign a min grade to every group in this grouplist.
-		for ($t = 0; $t < count($this->arrayList); $t++)
+		for ($t = 0; $t < count($this->array_list); $t++)
 		{
-			$group = $this->arrayList[$t];
-			$group->assignMinGrade($minGrade);
+			$group = $this->array_list[$t];
+			$group->assign_min_grade($min_grade);
 		}					
 		
 		
 	}
 	
-	function sortPriority()
+	function sort_priority()
 	{
 		/*
 			Sort this list of groups by their priority number.
@@ -105,10 +105,10 @@ class _GroupList extends ObjList
 		$tarray = array();
 		// Since I need the indexes, I will have to go through the array
 		// myself...
-		for ($t = 0; $t < count($this->arrayList); $t++)
+		for ($t = 0; $t < count($this->array_list); $t++)
 		{
-			$g = $this->arrayList[$t];
-			$g->loadDescriptiveData();
+			$g = $this->array_list[$t];
+			$g->load_descriptive_data();
 			$pri = "" . ($g->priority*1) . "";
 			if (strlen($pri) == 1)
 			{
@@ -126,38 +126,38 @@ class _GroupList extends ObjList
 		rsort($tarray);
 
 		// Now, convert the array back into a list of groups.
-		$newList = new GroupList();
+		$new_list = new GroupList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
 			$temp = split(" ~~ ",$tarray[$t]);
 			$i = $temp[1];
 
-			$newList->add($this->arrayList[$i]);
+			$new_list->add($this->array_list[$i]);
 		}
 
-		// Okay, now $newList should contain the correct values.
+		// Okay, now $new_list should contain the correct values.
 		// We will transfer over the reference.
-		$this->arrayList = $newList->arrayList;
+		$this->array_list = $new_list->array_list;
 		
 		
 	}
 	
-	function sortAlphabeticalOrder($boolReverseOrder = false)
+	function sort_alphabetical_order($bool_reverse_order = false)
 	{
 
 		$tarray = array();
 		// Since I need the indexes, I will have to go through the array
 		// myself...
-		for ($t = 0; $t < count($this->arrayList); $t++)
+		for ($t = 0; $t < count($this->array_list); $t++)
 		{
-			$g = $this->arrayList[$t];
-			$g->loadDescriptiveData();
+			$g = $this->array_list[$t];
+			$g->load_descriptive_data();
 			$str = "$g->title ~~ $t";
 
 			array_push($tarray,$str);
 		}
 
-		if ($boolReverseOrder == true)
+		if ($bool_reverse_order == true)
 		{
 			rsort($tarray);
 		} else {
@@ -165,18 +165,18 @@ class _GroupList extends ObjList
 		}
 
 		// Now, convert the array back into a list of groups.
-		$newList = new GroupList();
+		$new_list = new GroupList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
 			$temp = split(" ~~ ",$tarray[$t]);
 			$i = $temp[1];
 
-			$newList->add($this->arrayList[$i]);
+			$new_list->add($this->array_list[$i]);
 		}
 
-		// Okay, now $newList should contain the correct values.
+		// Okay, now $new_list should contain the correct values.
 		// We will transfer over the reference.
-		$this->arrayList = $newList->arrayList;
+		$this->array_list = $new_list->array_list;
 		
 				
 	}

@@ -17,9 +17,9 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class _StandardizedTest
+class __standardized_test
 {
-	public $categories, $description, $testID, $dateTaken;
+	public $categories, $description, $test_id, $date_taken;
 
 
 
@@ -29,11 +29,11 @@ class _StandardizedTest
 	}
 
 
-	function toString()
+	function to_string()
 	{
 		$rtn = "";
 
-		$rtn .= "test: $this->dateTaken - $this->testID - $this->description : \n";
+		$rtn .= "test: $this->date_taken - $this->test_id - $this->description : \n";
 		if (count($this->categories))
 		{
 			foreach($this->categories as $position => $value)

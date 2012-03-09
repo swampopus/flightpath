@@ -26,7 +26,7 @@ notice must not be modified, and must be included with the source code.
  */
 function blank_degrees_init() {
 
-  $db = getGlobalDatabaseHandler();
+  $db = get_global_database_handler();
   $GLOBALS["blank_degrees_db"] = $db;
   
   
@@ -45,12 +45,12 @@ function blank_degrees_menu() {
   
   $items[] = array(
     "title" => "Degree Plan Search",
-    "url" => getModuleActionURL("blank_degrees"),
+    "url" => get_module_action_u_r_l("blank_degrees"),
     "target" => "_blank",
     "description" => "Browse through available degree plans as they appear
                       in FlightPath.",
     "location" => "tools",
-    "icon" => $GLOBALS["fpSystemSettings"]["theme"] . "/images/popup.gif",
+    "icon" => $GLOBALS["fp_system_settings"]["theme"] . "/images/popup.gif",
     "weight" => 200,
   );
     
@@ -66,87 +66,87 @@ function blank_degrees_menu() {
  */
 function blank_degrees_page_switchboard() {
   
-  $performAction = trim(addslashes($_REQUEST["performAction"]));
+  $perform_action = trim(addslashes($_REQUEST["perform_action"]));
   
   // Are we in draft mode?
-  if ($_SESSION["fpDraftMode"] == "yes")
+  if ($_SESSION["fp_draft_mode"] == "yes")
   {
-    $GLOBALS["boolUseDraft"] = true;
+    $GLOBALS["bool_use_draft"] = true;
   } else {
-    $GLOBALS["boolUseDraft"] = false;
+    $GLOBALS["bool_use_draft"] = false;
   }
   
-  $blankView = $_REQUEST["blankView"];
-  $blankPrint = $_REQUEST["blankPrint"];
-  $blankDegreeID = $_REQUEST["blankDegreeID"];
+  $blank_view = $_REQUEST["blank_view"];
+  $blank_print = $_REQUEST["blank_print"];
+  $blank_degree_id = $_REQUEST["blank_degree_id"];
   
-  if ($blankDegreeID == "" || $blankDegreeID < 1) {
+  if ($blank_degree_id == "" || $blank_degree_id < 1) {
     // Meaning, no degree has been selected.  Show the
     // selection screen.
-    blank_degrees_displayBlankDegreeSelection();
+    blank_degrees_display_blank_degree_selection();
   
   }
   else 
   {
     // We have all the information we need to display a blank degree.
-    blank_degrees_displayBlankDegree($blankDegreeID, $blankPrint, $blankView);
+    blank_degrees_display_blank_degree($blank_degree_id, $blank_print, $blank_view);
   }
 
 }
 
 
 
-function blank_degrees_displayBlankDegree($blankDegreeID, $blankPrint, $blankView) {
+function blank_degrees_display_blank_degree($blank_degree_id, $blank_print, $blank_view) {
   
       
   // Get our global variables...
   $db = $GLOBALS["blank_degrees_db"];
-  $moduleActionURL = getModuleActionURL("blank_degrees");
+  $module_action_u_r_l = get_module_action_u_r_l("blank_degrees");
 
 
   // We just want to init our catalog year correctly first...
-  $tempScreen = new AdvisingScreen();
-  $tempScreen->initAdvisingVariables();
+  $temp_screen = new AdvisingScreen();
+  $temp_screen->init_advising_variables();
   
   
   $student = new Student();
-  $student->loadStudent();
-  $student->studentID = "000000000";
+  $student->load_student();
+  $student->student_id = "000000000";
   $student->name = "Blank Degree";
-  $degreePlan = new DegreePlan($blankDegreeID);
-  $degreePlan->loadDescriptiveData();
-  $student->catalogYear = $degreePlan->catalogYear;
-  $fp = new FlightPath($student, $degreePlan);
-  $screen = new AdvisingScreen("advise.php", $fp, "notAdvising");
-  if ($blankView == "type")
+  $degree_plan = new DegreePlan($blank_degree_id);
+  $degree_plan->load_descriptive_data();
+  $student->catalog_year = $degree_plan->catalog_year;
+  $fp = new FlightPath($student, $degree_plan);
+  $screen = new AdvisingScreen("advise.php", $fp, "not_advising");
+  if ($blank_view == "type")
   {
-    $screen = new AdvisingScreenTypeView("advise.php", $fp, "notAdvising");
+    $screen = new AdvisingScreenTypeView("advise.php", $fp, "not_advising");
     $screen->view = "type";
   }
   
-  $screen->boolBlank = true;
+  $screen->bool_blank = true;
   
-  if ($blankPrint == "yes")
+  if ($blank_print == "yes")
   {
-    $screen->boolPrint = true;
+    $screen->bool_print = true;
   }
   
   
-  $screen->buildScreenElements();
+  $screen->build_screen_elements();
 
   
   
   
-  if (!$screen->boolPrint)
+  if (!$screen->bool_print)
   {
     
     $pC .= "
   		
   		<div style='font-size: 16pt; font-weight: bold;'>
-  		" . $degreePlan->getTitle(true) . " (" . $degreePlan->catalogYear . "-" . ($degreePlan->catalogYear+1) . ")
+  		" . $degree_plan->get_title(true) . " (" . $degree_plan->catalog_year . "-" . ($degree_plan->catalog_year+1) . ")
   		
   		<span class='tenpt' style='font-weight: normal;'>
-  				<a href='$moduleActionURL&blankCatalogYear=$degreePlan->catalogYear' class='nounderline'>
+  				<a href='$module_action_u_r_l&blank_catalog_year=$degree_plan->catalog_year' class='nounderline'>
   				[change]
   				</a>
   		</span>
@@ -164,16 +164,16 @@ function blank_degrees_displayBlankDegree($blankDegreeID, $blankPrint, $blankVie
   				";
   }
 
-  $pC .= $screen->displayViewOptions();
-  $pC .= $screen->displayScreen();
+  $pC .= $screen->display_view_options();
+  $pC .= $screen->display_screen();
   
-  $screen->pageContent = $pC;
-  $screen->pageHasSearch = false;
-  $screen->pageHideReportError = true;
+  $screen->page_content = $pC;
+  $screen->page_has_search = false;
+  $screen->page_hide_report_error = true;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
   
-  $db->addToLog("blank_degrees","$blankDegreeID,view:$blankView,print:$blankPrint", "" . $degreePlan->getTitle() . ",$degreePlan->catalogYear");
+  $db->add_to_log("blank_degrees","$blank_degree_id,view:$blank_view,print:$blank_print", "" . $degree_plan->get_title() . ",$degree_plan->catalog_year");
  
   
 }
@@ -181,62 +181,62 @@ function blank_degrees_displayBlankDegree($blankDegreeID, $blankPrint, $blankVie
 
 
 
-function blank_degrees_displayBlankDegreeSelection()
+function blank_degrees_display_blank_degree_selection()
 {
   // Get our global variables...
   $db = $GLOBALS["blank_degrees_db"];
-  $moduleActionURL = getModuleActionURL("blank_degrees");
+  $module_action_u_r_l = get_module_action_u_r_l("blank_degrees");
 
   
   $pC = "";
-  $screen = new AdvisingScreen("", null, "notAdvising");
+  $screen = new AdvisingScreen("", null, "not_advising");
   
   
-  if ($screen->pageIsMobile) {
-    $screen->addCss(getModulePath("blank_degrees") . "/css/mobile.css");
+  if ($screen->page_is_mobile) {
+    $screen->add_css(get_module_path("blank_degrees") . "/css/mobile.css");
   }
   
   
-  $settings = $db->getFlightPathSettings();
-  $currentCatalogYear = $settings["currentCatalogYear"];
-  if ($GLOBALS["boolUseDraft"] == true)
+  $settings = $db->get_flight_path_settings();
+  $current_catalog_year = $settings["current_catalog_year"];
+  if ($GLOBALS["bool_use_draft"] == true)
   {
-    $currentCatalogYear = $settings["currentDraftCatalogYear"];
+    $current_catalog_year = $settings["current_draft_catalog_year"];
   }
 
   //var_dump($settings);
 
-  if ($_REQUEST["blankCatalogYear"] == "")
+  if ($_REQUEST["blank_catalog_year"] == "")
   {
-    $_REQUEST["blankCatalogYear"] = $currentCatalogYear;
+    $_REQUEST["blank_catalog_year"] = $current_catalog_year;
   }
 
 
 
 
-  $pC .= $screen->drawCurvedTitle("Degree Plan Search");
+  $pC .= $screen->draw_curved_title("Degree Plan Search");
   $pC .= "
 			<br>
 			You may use this system to view degree plans as they
 			will appear in FlightPath.
 			<br><br>";
 
-  if ($GLOBALS["boolUseDraft"] == true)
+  if ($GLOBALS["bool_use_draft"] == true)
   {
     $pC .= "<div class='hypo tenpt'>Now viewing in <b>Draft</b> mode.</b></div>";
   }
   
-  $pC .= "<form action='$moduleActionURL' method='get'>
+  $pC .= "<form action='$module_action_u_r_l' method='get'>
           <input type='hidden' name='n' value='blank_degrees'>";
   // Has the user selected a catalog year?  If not, ask for that first.
-  if ($_REQUEST["blankCatalogYear"] == "select")
+  if ($_REQUEST["blank_catalog_year"] == "select")
   {
     $pC .= "Please select an available catalog year from the
 			list below.<br><br>
 			<table align='center'>
 			<td width='150' valign='bottom'>
 				<select name='blankCatalogYear'>";
-    for ($t = $currentCatalogYear; $t >= 2006; $t--)
+    for ($t = $current_catalog_year; $t >= 2006; $t--)
     {
       $pC .= "<option value='$t'>$t - " . ($t+1) . "</option> \n";
 
@@ -250,16 +250,16 @@ function blank_degrees_displayBlankDegreeSelection()
   } else {
     // Catalog year HAS been selected.  So now get a degree...
 
-    $pC .= "<input type='hidden' name='blankCatalogYear' value='{$_REQUEST["blankCatalogYear"]}'>
+    $pC .= "<input type='hidden' name='blankCatalogYear' value='{$_REQUEST["blank_catalog_year"]}'>
 					";
-    $pC .= "<b>Catalog year: {$_REQUEST["blankCatalogYear"]}-" . ($_REQUEST["blankCatalogYear"] + 1) . "</b>
+    $pC .= "<b>Catalog year: {$_REQUEST["blank_catalog_year"]}-" . ($_REQUEST["blank_catalog_year"] + 1) . "</b>
 				<span class='tenpt'>
-				  <a href='$moduleActionURL&blankCatalogYear=select' class='nounderline'>[change]</a>
+				  <a href='$module_action_u_r_l&blank_catalog_year=select' class='nounderline'>[change]</a>
 				</span>
 				<br><br>
-				Select a degree in {$_REQUEST["blankCatalogYear"]}-" . ($_REQUEST["blankCatalogYear"] + 1) . ": ";
+				Select a degree in {$_REQUEST["blank_catalog_year"]}-" . ($_REQUEST["blank_catalog_year"] + 1) . ": ";
     
-    if (!$screen->pageIsMobile) {
+    if (!$screen->page_is_mobile) {
       $pC .= "
 				<br>
 				<select name='blankDegreeID' style='width: 90%'>
@@ -267,14 +267,14 @@ function blank_degrees_displayBlankDegreeSelection()
 					<option value=''>--------------------------</option>\n
 					";
     }
-    if ($degreeArray = $db->getDegreesInCatalogYear($_REQUEST["blankCatalogYear"], true, $GLOBALS["boolUseDraft"], FALSE))
+    if ($degree_array = $db->get_degrees_in_catalog_year($_REQUEST["blank_catalog_year"], true, $GLOBALS["bool_use_draft"], FALSE))
     {
-      foreach($degreeArray as $majorCode => $value)
+      foreach($degree_array as $major_code => $value)
       {
         if (trim($value["title"]) == ""){continue;}
-        $degreeID = $value["degreeID"];
+        $degree_id = $value["degree_id"];
         $title = $value["title"];
-        if ($value["degreeClass"] == "G") {
+        if ($value["degree_class"] == "G") {
           $title = "(Graduate) " . $title;
         }
         // if title is too long, shorten it.
@@ -283,13 +283,13 @@ function blank_degrees_displayBlankDegreeSelection()
         {
           $title = substr($title, 0, $maxlen - 3) . "...";
         }
-        if (!$screen->pageIsMobile) {
-          $pC .= "<option value='$degreeID'>$title</option> \n";
+        if (!$screen->page_is_mobile) {
+          $pC .= "<option value='$degree_id'>$title</option> \n";
         }
         else {
           // We are on a mobile browser.
           $pC .= "<a class='degree-search-degree-row'
-                    href='$moduleActionURL&blankDegreeID=$degreeID&blankCatalogYear={$_REQUEST["blankCatalogYear"]}'>
+                    href='$module_action_u_r_l&blank_degree_id=$degree_id&blank_catalog_year={$_REQUEST["blank_catalog_year"]}'>
                       <div class='degree-search-degree-title'>$title</div>
                   </a>";
         }
@@ -297,7 +297,7 @@ function blank_degrees_displayBlankDegreeSelection()
       }
     }
 
-    if (!$screen->pageIsMobile) {
+    if (!$screen->page_is_mobile) {
       $pC .= "</select>
 		
 				<input type='submit' value='Select ->'>";
@@ -309,9 +309,9 @@ function blank_degrees_displayBlankDegreeSelection()
 
   $pC .= "</form>";
 
-  $screen->pageContent = $pC;
-  $screen->pageHasSearch = false;
-  $screen->pageHideReportError = true;
+  $screen->page_content = $pC;
+  $screen->page_has_search = false;
+  $screen->page_hide_report_error = true;
   // send to the browser
-  $screen->outputToBrowser();
+  $screen->output_to_browser();
 }
