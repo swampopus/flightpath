@@ -1,6 +1,6 @@
 <?php
 
-class SubstitutionList extends __substitution_list
+class SubstitutionList extends _SubstitutionList
 {
   
   

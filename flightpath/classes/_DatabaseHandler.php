@@ -17,7 +17,7 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class __database_handler
+class _DatabaseHandler
 {
 	//
 	public $dbc;

@@ -1,7 +1,7 @@
 <?php
 
 
-class FlightPath extends __flight_path
+class FlightPath extends _FlightPath
 {
   
   

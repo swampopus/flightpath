@@ -17,7 +17,7 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class __student
+class _Student
 {
 	public $student_id, $name, $major_code, $gpa, $cumulative_hours, $catalog_year;
 	public $list_courses_taken, $list_courses_advised, $list_courses_added, $db, $rank;

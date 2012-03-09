@@ -25,7 +25,7 @@ notice must not be modified, and must be included with the source code.
  * and groups to be taken Freshman year.
  *
  */
-class __semester
+class _Semester
 {
 	public $title, $semester_num, $notice;
 	public $list_courses, $list_groups;

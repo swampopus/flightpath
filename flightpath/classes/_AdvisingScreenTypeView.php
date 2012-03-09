@@ -29,7 +29,7 @@ notice must not be modified, and must be included with the source code.
  *	most of the methods here will be about doing that.
  *
  */
-class __advising_screen_type_view extends __advising_screen
+class _AdvisingScreenTypeView extends _AdvisingScreen
 {
 
 

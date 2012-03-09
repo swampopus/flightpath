@@ -22,7 +22,7 @@ notice must not be modified, and must be included with the source code.
 Class definition for the Course object.
 */
 
-class __course
+class _Course
 {
   // Some public variables and what they are used for.
 

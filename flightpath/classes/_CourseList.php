@@ -17,9 +17,9 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-require_once("_obj_list.php");
+require_once("ObjList.php");
 
-class __course_list extends ObjList
+class _CourseList extends ObjList
 {
 	// This inherits most of its classes from ObjList,
 	// but, it has to be able to do special functions

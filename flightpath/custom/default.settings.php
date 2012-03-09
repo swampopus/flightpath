@@ -44,7 +44,7 @@ $system_settings["file_system_path"] = "/www/webservices/flightpath";
 // The baseURL is the actual URL a user would type to visit your site.
 // Do NOT enter a trailing slash!
 // Ex:  http://localhost/flightpath
-$system_settings["base_u_r_l"] = "http://localhost/flightpath-advising/flightpath";
+$system_settings["base_url"] = "http://localhost/flightpath-advising/flightpath";
 
 // The basePath is related to the baseURL.  It is the parth of the URL which comes after
 // your domain name.
@@ -74,7 +74,7 @@ $system_settings["db_name"] = "flightpath"; // Name of the actual database where
 // They will be overwritten in memory
 // once the flightpath_system_settings table is read in at the end of the file.
 // Do not alter them.
-$system_settings["display_my_s_q_l_errors"] = TRUE;
+$system_settings["display_mysql_errors"] = TRUE;
 $system_settings["theme"] = "themes/classic";
 
 

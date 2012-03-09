@@ -1,8 +1,8 @@
 <?php
-//header("Location: main.php");
 
 session_start();
 header("Cache-control: private");
+
 
 require_once("bootstrap.inc");
 

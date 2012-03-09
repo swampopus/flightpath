@@ -17,7 +17,7 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class __standardized_test
+class _StandardizedTest
 {
 	public $categories, $description, $test_id, $date_taken;
 

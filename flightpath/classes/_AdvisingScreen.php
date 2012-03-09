@@ -17,7 +17,7 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class __advising_screen
+class _AdvisingScreen
 {
 	public $width_array, $popup_width_array, $script_filename, $is_on_left, $box_array;
 	public $degree_plan, $student, $bool_popup, $footnote_array, $flight_path;

@@ -1,7 +1,7 @@
 <?php
 
 
-class DegreePlan extends __degree_plan
+class DegreePlan extends _DegreePlan
 {
   
   

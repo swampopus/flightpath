@@ -17,7 +17,7 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class __substitution_list extends ObjList
+class _SubstitutionList extends ObjList
 {
 
 	function find_requirement($course_requirement, $bool_exclude_has_been_applied = false, $group_id = 0)

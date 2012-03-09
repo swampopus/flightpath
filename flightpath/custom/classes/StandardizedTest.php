@@ -1,7 +1,7 @@
 <?php
 
 
-class StandardizedTest extends __standardized_test
+class StandardizedTest extends _StandardizedTest
 {
   
   

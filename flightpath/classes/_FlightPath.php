@@ -17,7 +17,7 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class __flight_path
+class _FlightPath
 {
 	public $student, $degree_plan, $db, $bool_what_if;
 	public $course_list_advised_courses;

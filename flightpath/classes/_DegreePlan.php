@@ -17,7 +17,7 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-class __degree_plan
+class _DegreePlan
 {
   public $major_code, $title, $degree_type, $degree_class, $short_description, $long_description;
   public $list_semesters, $list_degree_plans, $list_groups, $db, $degree_id, $catalog_year;
