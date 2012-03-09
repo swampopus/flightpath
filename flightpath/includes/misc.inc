@@ -1,133 +1,9 @@
 <?php
-/*
-FlightPath was originally designed and programmed by the 
-University of Louisiana at Monroe. The original source is 
-copyright (C) 2011-present by the University of Louisiana at Monroe.
-
-FlightPath is considered "open source" under the 
-GNU General Public License, version 3 or any later version. 
-This covers any related files and documentation packaged with 
-FlightPath. 
-
-The license is defined in full here: http://www.gnu.org/licenses/gpl.html,
-and reproduced in the LICENSE.txt file.
-
-You may modify FlightPath's source code, but this copyright and license
-notice must not be modified, and must be included with the source code.
-------------------------------
-*/
-
-
-
-// This file contains common functions used in FlightPath.
 
 
 /**
- * Go through all installed modules and rebuild the menu_router table,
- * based on each module's hook_menu function.
+ * This file contains misc functions for FlightPath
  */
-function menu_rebuild_cache() {
-  
-  foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $value) {    
-    if (isset($value["disabled"]) && $value["disabled"] == "yes") {
-      // Module is not enabled.  Skip it.
-      continue;
-    }    
-    if (function_exists($module . "_menu")) {
-      $items = call_user_func($module . "_menu");
-      
-      // Okay, now go through the $items array, and write the needed information
-      // to the menu_router array.
-      foreach ($items as $path => $item) {
-        if (is_numeric($path)) continue; // problem, so skip.
-
-        // Update our menu_router table.
-        // Begin by deleting the existing path, if there is one.
-        db_query("DELETE FROM menu_router WHERE path = '?' ", $path);
-        // Now, insert the new one.
-        db_query("INSERT INTO menu_router
-                    (path, access_callback, access_arguments, page_callback, page_arguments, title, description, type, weight, icon, page_settings)
-                    VALUES
-                    ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
-                    ", $path, $item["access_callback"], serialize($item["access_arguments"]), $item["page_callback"],
-                       serialize($item['page_arguments']), $item['title'], $item['description'], $item['type'], $item['weight'], $item['icon'],
-                       serialize($item['page_settings']));
-      }              
-    }
-  }
-  
-  fp_add_message(t("The menu router has been rebuilt"));
-    
-}
-
-
-
-function menu_execute_page_request() {
-  $path = $_GET["q"];
-
-  //If the path is blank, figure out what the "font page" is, and use that path.
-  if ($path == "") {
-    $path = variable_get("front_page", "main");
-  }
-  if ($router_item = menu_get_item($path)) {
-   
-    // Let's figure out if the user has access to this menu item or not.
-    $access = FALSE;
-    if ($router_item["access_callback"] == 1) {
-      $access = TRUE;
-    }
-     
-    if ($access) {
-      if ($router_item['file']) {
-        require_once($router_item['file']);
-      }
-      $page = array();
-      $page["content"] = call_user_func_array($router_item['page_callback'], $router_item['page_arguments']);      
-      $page["path"] = $path;
-      // TODO:  Check to see if the user has overridden the title using the fp_set_title() command.
-      $page["title"] = $router_item["title"];
-      $page["router_item"] = $router_item;
-
-      return $page;    
-           
-    }
-    else {
-      return MENU_ACCESS_DENIED;
-    }
-  }
-  return MENU_NOT_FOUND;  
-}
-
-
-/**
- * Return array from menu_router for this item.
- */
-function menu_get_item($path) {
-  $res = db_query("SELECT * FROM menu_router WHERE path = '?' ", $path);
-  $cur = db_fetch_array($res);
-  
-  // Unserialize the things which are supposed to be unserialized.
-  $cur["page_arguments"] = unserialize($cur["page_arguments"]);
-  if (!is_array($cur["page_arguments"])) {
-    $cur["page_arguments"] = array();
-  }
-
-  $cur["access_arguments"] = unserialize($cur["access_arguments"]);
-  if (!is_array($cur["access_arguments"])) {
-    $cur["access_arguments"] = array();
-  }
-
-  $cur["page_settings"] = unserialize($cur["page_settings"]);
-  if (!is_array($cur["page_settings"])) {
-    $cur["page_settings"] = array();
-  }
-
-
-  return $cur;    
-    
-}
-
-
 
 /////////////////////////////////////////////////////////////////////
 
@@ -228,84 +104,6 @@ function fp_screen_is_mobile(){
 
 
 
-/**
- * Output the contents of the $page variable to the screen.
- */
-function fp_display_page($page) {
-  
-  $screen = new AdvisingScreen("",null,"not_advising");
-  $screen->page_title = $page["title"];
-  $screen->page_has_search = $page["router_item"]["page_settings"]["page_has_search"];
-  $screen->page_banner_is_link = $page["router_item"]["page_settings"]["page_banner_is_link"];
-  $screen->page_hide_report_error = $page["router_item"]["page_settings"]["page_hide_report_error"];
-  
-  // If there are "messages" waiting, then let's add them to the top of content.
-  $content_top = "";
-  if (count($_SESSION["fp_messages"]) > 0) {
-    $content_top .= "<div class='fp-messages'>";
-    foreach ($_SESSION["fp_messages"] as $key => $msg) {
-      $content_top .= "<div class='fp-message'>$msg</div>";      
-    }
-    $content_top .= "</div>";    
-    unset($_SESSION["fp_messages"]);
-  }
-  
-  $screen->page_content = $content_top .= $page["content"];
-  // If there are CSS files to add, add those.
-  if (is_array($GLOBALS["fp_extra_css"])) {
-    foreach ($GLOBALS["fp_extra_css"] as $filename) {
-      //pretty_print ("adding $filename");
-      $screen->add_css($filename);
-    }
-  }
-  
-  
-  $screen->output_to_browser();  
-}
-
-
-/**
- * Return the theme location
- */
-function fp_theme_location() {
-  return $GLOBALS["fp_system_settings"]["base_path"] . "/" . $GLOBALS["fp_system_settings"]["theme"];
-}
-
-
-/**
- * Will draw a string in a pretty curved box.  Used for displaying semester
- * titles.
- *
- * @param string $title
- * @return string
- */
-function fp_render_curved_line($text) {
-  // Will simply draw a curved title bar containing the $title
-  // as the text.
-  $img_path = fp_theme_location();
-  
-
-  $rtn = "
-   <table border='0' class='blueTitle' width='100%' cellpadding='0' cellspacing='0'>
-     <tr>
-      <td width='10%' align='left' valign='top'><img src='$img_path/images/corner_tl.gif'></td>
-      <td width='80%' align='center' rowspan='2'>
-       <span class='tenpt'><b>$text</b></span>
-      </td>
-      <td width='10%' align='right' valign='top'><img src='$img_path/images/corner_tr.gif'></td>
-     </tr>
-     <tr>
-      <td align='left' valign='bottom'><img src='$img_path/images/corner_bl.gif'></td>
-      <td align='right' valign='bottom'><img src='$img_path/images/corner_br.gif'></td>
-     </tr> 
-    </table>
-";
-
-  return $rtn;
-
-}
-
-
 
 ////////////////////////////////////////////////////////////////////
 
@@ -354,12 +152,6 @@ function fp_get_system_settings() {
     
 }
 
-
-function pretty_print($var) {
-  print "<pre>" . print_r($var, true) . "</pre>";
-}
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -392,50 +184,21 @@ function get_global_database_handler() {
  */
 function admin_debug($str, $var_name = "")
 {
-	if ($GLOBALS["fp_system_settings"]["disable_admin_debug"] == true)
-	{
-		return;
-	}
-	// Will output a debugCT only if the user is a full_admin.
-	$temp = $GLOBALS["fp_system_settings"]["disable_debug_c_t"];  // save this....
-	$GLOBALS["fp_system_settings"]["disable_debug_c_t"] = false;
-	
-	if ($_SESSION["fp_user_type"] == "full_admin")
-	{
-		fp_debug_c_t($str, $var_name);
-	}
-	
-	$GLOBALS["fp_system_settings"]["disable_debug_c_t"] = $temp;  // restore its original state.
-	
-}
-
-
-function display_access_denied($system_name = "", $bool_die_at_end = TRUE) {
-  
-  // Check for hooks...
-  if (function_exists("functions_display_access_denied")) {
-    return call_user_func("functions_display_access_denied", $system_name, $bool_die_at_end);
-  }  
-
-  $pC = "";
-  
-  $pC .= "<h2>Access Denied";
-  if ($system_name) {
-    $pC .= " for $system_name";
+  if ($GLOBALS["fp_system_settings"]["disable_admin_debug"] == true)
+  {
+    return;
   }
-  $pC .= "</h2>";
+  // Will output a debugCT only if the user is a full_admin.
+  $temp = $GLOBALS["fp_system_settings"]["disable_debug_c_t"];  // save this....
+  $GLOBALS["fp_system_settings"]["disable_debug_c_t"] = false;
   
-  $pC .= "Sorry, but you do not have sufficent permissions in FlightPath
-          to access this page.";
-  
-  
-  $screen = new AdvisingScreen("", null, "not_advising");
-  $screen->page_content = $pC;
-  $screen->output_to_browser();
-  
-  if ($bool_die_at_end) {
-    die;
+  if ($_SESSION["fp_user_type"] == "full_admin")
+  {
+    fp_debug_c_t($str, $var_name);
   }
+  
+  $GLOBALS["fp_system_settings"]["disable_debug_c_t"] = $temp;  // restore its original state.
+  
 }
 
 
@@ -470,7 +233,7 @@ function determine_staff_user_type($user_id)
   // have the same privileges as a college_coordinator,
   // but can also get into Data Entry.
   $res = $db->db_query("SELECT * FROM administrators
-								       WHERE faculty_id = '?' ", $user_id);
+                       WHERE faculty_id = '?' ", $user_id);
   if ($db->db_num_rows($res) == 1)
   {
     return "full_admin";
@@ -479,7 +242,7 @@ function determine_staff_user_type($user_id)
   //////////////////////////////////////////////////////////////////
   // Does the user have a type specified in the User management system?
   $res = $db->db_query("SELECT * FROM users
-								WHERE faculty_id = '?' ", $user_id);
+                WHERE faculty_id = '?' ", $user_id);
   $cur = $db->db_fetch_array($res);
   $user_type = trim($cur["user_type"]);
 
@@ -496,13 +259,13 @@ function determine_staff_user_type($user_id)
   // must override this function in a hook and change this section.
   
   // Let's pull the needed variables out of our settings, so we know what
-	// to query, because this is a non-FlightPath table.
-	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
-	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-	$table_name = $tsettings["table_name"];    
+  // to query, because this is a non-FlightPath table.
+  $tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
+  $tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+  $table_name = $tsettings["table_name"];    
   
   $res = $db->db_query("SELECT * FROM $table_name
-								WHERE $tf->faculty_id = '?' ", $user_id);
+                WHERE $tf->faculty_id = '?' ", $user_id);
   $cur = $db->db_fetch_array($res);
   $emp_type = $cur[$tf->employee_type];
   
@@ -666,27 +429,27 @@ function get_module_action_u_r_l($module = "") {
  */
 function fp_xml_to_array2($xml_data)
 {
-	$xml_data = trim(utf8_encode($xml_data));
-	if ($xml_data == ""){return false;}
+  $xml_data = trim(utf8_encode($xml_data));
+  if ($xml_data == ""){return false;}
 
-	$na = array();
-	
-	try{
+  $na = array();
+  
+  try{
     @$xml_object = new SimpleXmlElement($xml_data);
-  	foreach($xml_object->children() as $element => $value)
-  	{
-  		$val = (string) $value;
-  		$na["$element"] =  $val;
-  	}
-	
-	} catch(Exception $exception) {
-	   // Do nothing if this fails.  Just let us return an empty array. 
-	   // TODO:  a call to fp_add_message or some such would be good here!
-	   admin_debug("<b>WARNING:</b> Unable to parse XML: $xml_data");
-	}
+    foreach($xml_object->children() as $element => $value)
+    {
+      $val = (string) $value;
+      $na["$element"] =  $val;
+    }
+  
+  } catch(Exception $exception) {
+     // Do nothing if this fails.  Just let us return an empty array. 
+     // TODO:  a call to fp_add_message or some such would be good here!
+     admin_debug("<b>WARNING:</b> Unable to parse XML: $xml_data");
+  }
 
-	
-	return $na;
+  
+  return $na;
 
 }
 
@@ -925,46 +688,46 @@ function fp_number_pad($number, $len) {
  */
 function fp_array_to_xml ($root, $xml_array, $html_safe = false)
 {
-	$memory = xmlwriter_open_memory ();       // Allocate memory for XML writer
+  $memory = xmlwriter_open_memory ();       // Allocate memory for XML writer
 
-	// if $makeHTMLSafe is true, then " ' and < will be converted to their
-	// HTML characters.  Recommended for web uses.
+  // if $makeHTMLSafe is true, then " ' and < will be converted to their
+  // HTML characters.  Recommended for web uses.
 
-	//xmlwriter_set_indent      ($memory, true);// Indent the XML document
+  //xmlwriter_set_indent      ($memory, true);// Indent the XML document
 
-	// Start the XML document and create the DTD tag.
-	xmlwriter_start_document  ($memory, '1.0', 'UTF-8');
-	// xmlwriter_start_dtd       ($memory, 'html',
-	//    '-//WAPFORUM//DTD XHTML Mobile 1.0//EN',
-	//    'http://www.wapforum.org/DTD/xhtml-mobile10.dtd');
-	// xmlwriter_end_dtd         ($memory);
+  // Start the XML document and create the DTD tag.
+  xmlwriter_start_document  ($memory, '1.0', 'UTF-8');
+  // xmlwriter_start_dtd       ($memory, 'html',
+  //    '-//WAPFORUM//DTD XHTML Mobile 1.0//EN',
+  //    'http://www.wapforum.org/DTD/xhtml-mobile10.dtd');
+  // xmlwriter_end_dtd         ($memory);
 
-	// Start the XML document root tag.
-	xmlwriter_start_element   ($memory, $root);
+  // Start the XML document root tag.
+  xmlwriter_start_element   ($memory, $root);
 
-	// Define attributes for the document namespace and language.
-	// xmlwriter_write_attribute ($memory, 'xmlns',
-	//    'http://www.wapforum.org/DTD/xhtml-mobile10.dtd');
-	// xmlwriter_write_attribute ($memory, 'xm:lang', 'en');
+  // Define attributes for the document namespace and language.
+  // xmlwriter_write_attribute ($memory, 'xmlns',
+  //    'http://www.wapforum.org/DTD/xhtml-mobile10.dtd');
+  // xmlwriter_write_attribute ($memory, 'xm:lang', 'en');
 
-	// Write each array element as the next XML tag.
-	foreach ($xml_array as $tag => $text)
-	{
-		$text = strip_non_u_t_f8("$text", $html_safe);  // strip out non-utf8 chars.
-		xmlwriter_write_element ($memory, $tag, $text);
+  // Write each array element as the next XML tag.
+  foreach ($xml_array as $tag => $text)
+  {
+    $text = strip_non_u_t_f8("$text", $html_safe);  // strip out non-utf8 chars.
+    xmlwriter_write_element ($memory, $tag, $text);
 
-	}
+  }
 
-	// Generate the ending tag for the document root.
-	xmlwriter_end_element      ($memory);
+  // Generate the ending tag for the document root.
+  xmlwriter_end_element      ($memory);
 
-	// End the DTD for this XML document.
-	// xmlwriter_end_dtd          ($memory);
+  // End the DTD for this XML document.
+  // xmlwriter_end_dtd          ($memory);
 
-	// Output the data in "$memory" to a String variable "$xml".
-	$xml = xmlwriter_output_memory ($memory, true);
+  // Output the data in "$memory" to a String variable "$xml".
+  $xml = xmlwriter_output_memory ($memory, true);
 
-	return $xml;
+  return $xml;
 } // End function arrayToXml()
 
 
@@ -984,28 +747,28 @@ function fp_array_to_xml ($root, $xml_array, $html_safe = false)
  * @return String
  */
 function strip_non_u_t_f8($str, $html_safe = false){
-	$good[] = 9;  #tab
-	$good[] = 10; #nl
-	$good[] = 13; #cr
-	for($a=32;$a<127;$a++){
-		$good[] = $a;
-	}
-	$len = strlen($str);
-	for($b=0;$b < $len+1; $b++){
-		if(in_array(ord($str[$b]), $good)){
-			$newstr .= $str[$b];
-		}//fi
-	}//rof
+  $good[] = 9;  #tab
+  $good[] = 10; #nl
+  $good[] = 13; #cr
+  for($a=32;$a<127;$a++){
+    $good[] = $a;
+  }
+  $len = strlen($str);
+  for($b=0;$b < $len+1; $b++){
+    if(in_array(ord($str[$b]), $good)){
+      $newstr .= $str[$b];
+    }//fi
+  }//rof
 
-	if ($html_safe == true)
-	{
-		$newstr = str_replace("'","&#39;",$newstr);
-		$newstr = str_replace('"','&quot;',$newstr);
-		$newstr = str_replace("<","&lt;",$newstr);
+  if ($html_safe == true)
+  {
+    $newstr = str_replace("'","&#39;",$newstr);
+    $newstr = str_replace('"','&quot;',$newstr);
+    $newstr = str_replace("<","&lt;",$newstr);
 
-	}
+  }
 
-	return $newstr;
+  return $newstr;
 }
 
 
@@ -1013,59 +776,59 @@ function strip_non_u_t_f8($str, $html_safe = false){
 
 function fp_debug_c_t($debug_string = "", $var = "")
 { // Shortcut to the other function.
-	if ($GLOBALS["fp_system_settings"]["disable_debug_c_t"] == true)
-	{
-		return;
-	}
+  if ($GLOBALS["fp_system_settings"]["disable_debug_c_t"] == true)
+  {
+    return;
+  }
 
-	fp_debug_current_time_millis($debug_string, false, $var);
+  fp_debug_current_time_millis($debug_string, false, $var);
 }
 
 
 function fp_print_pre($str)
 {
-	print "<pre>" . $str . "</pre>";
+  print "<pre>" . $str . "</pre>";
 }
 
 
 function fp_debug_current_time_millis($debug_string = "", $show_current_time = true, $var = "")
 {
-	// Display the current time in milliseconds, and, if available,
-	// show how many milliseconds its been since the last time
-	// this function was called.  This helps programmers tell how
-	// long a particular function takes to run.  Just place a call
-	// to this function before and after the function call.
+  // Display the current time in milliseconds, and, if available,
+  // show how many milliseconds its been since the last time
+  // this function was called.  This helps programmers tell how
+  // long a particular function takes to run.  Just place a call
+  // to this function before and after the function call.
 
-	$last_time = $GLOBALS["current_time_millis" . $var] * 1;
+  $last_time = $GLOBALS["current_time_millis" . $var] * 1;
 
-	$cur_time = microtime(true) * 1000;
+  $cur_time = microtime(true) * 1000;
 
-	//if ($debug_string != "")
-	//{
-	$debug_string = "<span style='color:red;'>DEBUG:</span>
-						<span style='color:green;'>$debug_string</span>";
-	//}
+  //if ($debug_string != "")
+  //{
+  $debug_string = "<span style='color:red;'>DEBUG:</span>
+            <span style='color:green;'>$debug_string</span>";
+  //}
 
-	print "<div style='background-color: white;'>$debug_string
-			";
-	if ($show_current_time == true)
-	{
-		print "<span style='color: red;'>TIME:</span>
-				<span style='color: green;'>$cur_time" . "ms</span>";
-	}
+  print "<div style='background-color: white;'>$debug_string
+      ";
+  if ($show_current_time == true)
+  {
+    print "<span style='color: red;'>TIME:</span>
+        <span style='color: green;'>$cur_time" . "ms</span>";
+  }
 
-	if ($last_time > 1)
-	{
-		$diff = round($cur_time - $last_time,2);
-		print "<span style='color: blue;'> ($diff" . "ms since last check)</span>";
-	} else {
-		// Start of clock...
-		print "<span style='color: blue;'> --- </span>";
-	}
+  if ($last_time > 1)
+  {
+    $diff = round($cur_time - $last_time,2);
+    print "<span style='color: blue;'> ($diff" . "ms since last check)</span>";
+  } else {
+    // Start of clock...
+    print "<span style='color: blue;'> --- </span>";
+  }
 
-	print "</div>";
-	$GLOBALS["current_time_millis" . $var] = $cur_time;
-	$GLOBALS["current_time_millis"] = $cur_time;
+  print "</div>";
+  $GLOBALS["current_time_millis" . $var] = $cur_time;
+  $GLOBALS["current_time_millis"] = $cur_time;
 
 }
 
@@ -1154,5 +917,3 @@ function fp_verify_all_student_logins($username, $password) {
     
 }
 
-
-?>

@@ -27,12 +27,15 @@ function course_search_menu() {
   
   $items["tools/course-search"] = array(
     "title" => "Course Search",
+    "description" => "Use this tool to view course descriptions, sample syllabi, and projected course offering schedules.",
     "page_callback" => "course_search_display_search",
     "access_callback" => TRUE,
     "page_settings" => array(
       "page_has_search" => FALSE,
       "page_banner_is_link" => TRUE,
       "page_hide_report_error" => TRUE,
+      "target" => "_blank",
+      "menu_icon" => fp_theme_location() . "/images/book_glass_20.jpg",
     ),
     "type" => MENU_TYPE_NORMAL_ITEM,
   );

@@ -116,13 +116,245 @@ function system_perm() {
 
 
 
+function system_menu() {
+  $items = array();
+  
+  $items["main"] = array(
+    "title" => "Main",
+    "page_callback" => "system_display_main_page",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_TAB,
+  );
+  
+  return $items;
+}
+
+
+/**
+ * Display the "main" tab-page for FlightPath.  Displays announcements
+ * as well as the Tools menu, and the "special administrative tools" menu.
+ */
+function system_display_main_page() {
+  
+  $rtn = "";
+
+/*
+  $pC .= $screen->display_greeting();
+  $pC .= $screen->display_begin_semester_table();
+
+  if ($_SESSION["fp_user_type"] != "none")
+  {
+    $pC .= $screen->draw_currently_advising_box(true);
+  } else {
+    // Let the user know they have no privileges in FP.
+    $pC .= "<tr>
+        <td colspan='5'>
+        
+         <div class='hypo tenpt' style='margin: 10px; padding: 10px;'>
+           <div style='float:left; padding-right: 20px; height: 50px;'>
+          <img src='$screen->theme_location/images/alert_lg.gif'>
+           </div>
+          <b>Please Note:</b>
+          At this time, you do not have access to student records in FlightPath.
+          However, you may still access certain Tools, listed below.  If you feel
+          that you have reached this message in error, and you do require
+          access to student records, please speak with your department head or call
+          342-5554.
+          </div>
+        </td>
+        </tr>         
+        ";
+  }
+
+ */ 
+  
+  if ($_SESSION["fp_user_type"] != "none") {
+    $rtn .= fp_render_currently_advising_box($true);
+  }
+  else {
+    // Let the user they have no privileges in the system.
+    $pC .= "        
+         <div class='hypo tenpt' style='margin: 10px; padding: 10px;'>
+           <div style='float:left; padding-right: 20px; height: 50px;'>
+          <img src='" . fp_theme_location() . "/images/alert_lg.gif'>
+           </div>
+          <b>Please Note:</b>
+          At this time, you do not have access to student records in FlightPath.
+          However, you may still access certain Tools, listed below.  If you feel
+          that you have reached this message in error, and you do require
+          access to student records, please speak with your department head or the
+          FlightPath administrator.
+          </div>
+        ";    
+  }
+  
+  $rtn .= "<table class='fp-semester-table'>";
+  
+  fp_add_css(fp_get_module_path("system") . "/css/style.css");
+  
+  $announcements = system_render_announcements_block();
+  $tools = system_render_menu_block("Tools", "tools");
+  //$admin_tools = system_get_admin_tools();
+  
+  if (fp_screen_is_mobile()) {
+    $rtn .= "<tr><td colspan='2'>$announcements $tools $admin_tools</td></tr>";
+  }
+  else {
+    $rtn .= "<tr><td width='50%' valign='top'  style='padding-right: 10px;'>
+              $announcements
+              </td><td width='50%' valign='top' style='padding-left: 10px;'>
+                    $tools
+                    $admin_tools
+              </td></tr>";
+  }
+  
+  $rtn .= "</table>";
+  
+  $rtn .= "<form id='mainform' method='POST'>
+      <input type='hidden' id='scrollTop'>
+      <input type='hidden' id='performAction' name='performAction'>
+      <input type='hidden' id='advisingWhatIf' name='advisingWhatIf'>
+      <input type='hidden' id='currentStudentID' name='currentStudentID'>
+      </form>";
+
+  //$pC .= $screen->get_javascript_code();
+
+
+/*
+  $screen->page_content = $pC;
+  $screen->page_has_search = true;
+  if ($_SESSION["fp_user_type"] == "student" || $_SESSION["fp_can_advise"] == false)
+  {
+    $screen->page_has_search = false;
+  }
+  $screen->build_system_tabs(0);
+
+ */
+
+  //admin_debug("--");
+  //////////////////////////////////////////////////////////
+  // To cut down on how long it takes to load huge groups
+  // like Free Electives, we will pre-load some of the course inventory here.
+  if ($_SESSION["fp_cached_inventory_flag_one"] != true)
+  {
+    $load_number = $GLOBALS["fp_system_settings"]["load_course_inventory_on_login_number"];
+    if ($load_number > 1) {
+      $fp = new FlightPath();
+      $fp->cache_course_inventory(0,$load_number);
+      $_SESSION["fp_cached_inventory_flag_one"] = true;
+    }
+  }
+  //admin_debug("--");
+
+
+  // send to the browser
+  //$screen->output_to_browser();
+  
+  return $rtn;
+  
+}
+
+
+/**
+ * Get the current announcements (if any) and display them.
+ */
+function system_render_announcements_block() {
+  $rtn = "";
+  
+
+  $rtn .= fp_render_curved_line("Announcements");
+
+  $settings = fp_get_system_settings();
+
+  $is_empty = true;
+  // Pull out just the announcements XML and make it into its own array.
+  if ($settings["announcements_xml"] != "")
+  {
+    if ($xml_array = fp_xml_to_array2($settings["announcements_xml"]))
+    {
+      // Expected format of the xmlArray:
+      //[dt_timecode] = "announcement text."
+      // ex: dt_111234432.  Use strtotime to convert.
+      // It begins with dt_ because in XML the start of
+      // an element must be a letter, not a number.
+
+      krsort($xml_array);  // sort by most recent.
+
+      foreach($xml_array as $datetime => $announcement)
+      {
+        $dt = str_replace("dt_", "", $datetime);
+
+        $disp_time = date("D, M jS Y  - h:ia", $dt);
+        // Re-enable HTML formatting in announcement...
+        $temp = split(" ~~ ", $announcement);
+        $visible = trim($temp[0]);
+        $announcement_text = trim($temp[1]);
+        //$announcement_text = $screen->convert_b_b_code_to_h_t_m_l($announcement_text);
+
+        if ($visible == "hide")
+        {
+          // visibility set to "hidden"
+          continue;
+        }
+
+        if ($visible == "faculty" && $_SESSION["fp_user_type"] == "student")
+        { // skip faculty-only comments if we are a student!
+          continue;
+        }
+
+        $rtn .= "<div class='announcement-text'>$announcement_text
+              <div class='announcement-posted'>
+                Posted $disp_time
+              </div>
+            </div>";
+      }
+    }
+  }
+  
+  
+  
+  return $rtn;
+}
+
+
+/**
+ * Render a "menu" block of menu items which are all rooted at the menu_root.
+ * So if the menu root is tools, it might return items whose paths look like:
+ *   tools/fun
+ *   tools/here/there
+ * So long as the menu type is "MENU_TYPE_NORMAL_ITEM".  Other types will be ignored.
+ * 
+ * 
+ * We want to 
+ */
+function system_render_menu_block($title = "Tools", $menu_root = "tools") {
+  $rtn = "";
+  
+  $rtn .= fp_render_curved_line($title);
+  
+  $menu_items = menu_get_items_beginning_with($menu_root);
+  foreach ($menu_items as $item) {
+    if ($item["type"] == MENU_TYPE_NORMAL_ITEM) {
+      $rtn .= fp_render_menu_item($item);
+    }
+  }
+  
+  //pretty_print($menu_items);
+  
+  return $rtn;   
+  
+}
+
+
+
+
 /**
  * Implementation of hook_menu().
  * This tells other parts of FlightPath where to display links
  * to this module, and what to include in the URL.
  *
  */
-function system_menu() {
+function OLD__system_menu() {
   
   $items = array();
   

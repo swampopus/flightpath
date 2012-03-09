@@ -20,6 +20,13 @@ body
 	background-color: #FFFACD;
 }
 
+
+.fp-semester-table {
+  border-collapse: collapse;  
+  width: 100%;
+}
+
+
 .print-graphic
 {
   background-image: url('images/print.gif');

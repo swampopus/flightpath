@@ -35,8 +35,10 @@ if (!isset($levels_deep)) $levels_deep = "";
 // Should we load the functions file?  This variable should be
 // set prior to including this bootstrap file.
 if (!isset($skip_flightpath_functions) || $skip_flightpath_functions != TRUE) {
-  // Load the common "functions.php" file.
-  require_once("$levels_deep" . "functions.php");
+  // Load the includes files, for common functions.
+  require_once("$levels_deep" . "includes/theme.inc");
+  require_once("$levels_deep" . "includes/misc.inc");
+  require_once("$levels_deep" . "includes/menu.inc");
 }
 
 // Load the global system settings file.
@@ -45,15 +47,6 @@ require_once("$levels_deep" . "custom/settings.php");
 
 // Load all of the classes, as well as the custom classes.
 require_once("$levels_deep" . "classes/all_classes.php");
-
-
-
-// Define useful constants
-define("MENU_TYPE_NORMAL_ITEM", 1);
-define("MENU_TYPE_CALLBACK", 2);
-define("MENU_TYPE_TAB", 3);
-define("MENU_ACCESS_DENIED", 4);
-define("MENU_NOT_FOUND", 5);
 
 
 // Include all of the enabled modules
