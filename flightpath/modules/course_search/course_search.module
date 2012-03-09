@@ -124,7 +124,7 @@ function course_search_init() {
 function course_search_page_switchboard() {
 
   $db = $GLOBALS["course_search_db"];
-  $settings = $db->get_flight_path_settings();  
+  $settings = $db->get_flightpath_settings();  
   $GLOBALS["course_search_catalog_year"] = $settings["current_catalog_year"];
   
   
@@ -277,7 +277,7 @@ function course_search_get_syllabus() {
   // Get the latest subject_id and course_num for this course!
   $new_course = new Course();
   $new_course->course_id = $course_id;
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
   $new_course->catalog_year = $settings["current_catalog_year"];
   $new_course->load_descriptive_data(false, false, true);
   
@@ -1326,15 +1326,15 @@ function course_search_display_search() {
 
   $settings = fp_get_system_settings();
   $current_catalog_year = $settings["current_catalog_year"];
-
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;
 
   if ($catalog_year == "")
   {
+    
     $rtn .= "Please select an available catalog year from the
       list below.<br><br>
-      <form action='" . $GLOBALS["fp_system_settings"]["base_u_r_l"] . "/tools/course-search' method='GET' name='mainform' id='myform'>
+      <form action='" . $GLOBALS["fp_system_settings"]["base_path"] . "/tools/course-search' method='GET' name='mainform' id='myform'>
       <table align='center'>
       <td width='150' valign='bottom'>
         <select name='catalog_year'>";
@@ -1362,7 +1362,7 @@ function course_search_display_search() {
         <br><br>
       Please select an available subject from the list below.<br>       
       <br>
-      <form action='" . $GLOBALS["fp_system_settings"]["base_u_r_l"] . "/tools/course-search/courses' method='GET' name='mainform' id='myform'>";
+      <form action='" . $GLOBALS["fp_system_settings"]["base_path"] . "/tools/course-search/courses' method='GET' name='mainform' id='myform'>";
     
     if (!fp_screen_is_mobile()) {
       $rtn .= "
@@ -1383,7 +1383,7 @@ function course_search_display_search() {
           AND catalog_year = '?'
           AND exclude = 0
           ORDER BY $tf->title, subject_id";
-
+          
     $result = db_query($query, $catalog_year);
     while ($cur = db_fetch_array($result))
     {
@@ -1443,7 +1443,7 @@ function OLD__course_search_display_search()
 	$screen = new AdvisingScreen("",null,"not_advising");
 	
 
-	$settings = $db->get_flight_path_settings();
+	$settings = $db->get_flightpath_settings();
 	$current_catalog_year = $settings["current_catalog_year"];
 
 	$pC = "";

@@ -107,7 +107,7 @@ function courseinfoentry_page_switchboard() {
   $screen = new AdvisingScreen();
   $GLOBALS["courseinfoentry_screen"] = $screen;
   
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
   $de_catalog_year = $settings["current_catalog_year"];
   $GLOBALS["courseinfoentry_de_catalog_year"] = $de_catalog_year;    
   

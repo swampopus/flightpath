@@ -1136,7 +1136,7 @@ class _DatabaseHandler
 	}
 
 
-	function get_flight_path_settings()
+	function get_flightpath_settings()
 	{
 		// Returns an array of everything in the flightpath_settings table.
 		$rtn_array = array();

@@ -608,7 +608,7 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = false)
 
   $major_array = array();
 
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
 
   $current_catalog_year = trim($settings["current_catalog_year"]);
 

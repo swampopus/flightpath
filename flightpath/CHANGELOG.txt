@@ -9,6 +9,10 @@ are all going to be underscore_style (also called K&R or C++ style).
 Even though I think this isn't as pretty, it is consistent, which is what I am more
 concerned about.
 
+Fixed numerous capitalization problems.  I'm sure there's more after this.
+
+Gave important system_settings default values.
+
 
 2012-03-08
 Fixed a bug where definitions in groups, once entered could not be removed.

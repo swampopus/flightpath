@@ -31,7 +31,7 @@
 *						new window.
 * 
 **/
-$theme_location = $GLOBALS["fp_system_settings"]["base_u_r_l"] . "/" . $GLOBALS["fp_system_settings"]["theme"];
+$theme_location = $GLOBALS["fp_system_settings"]["base_path"] . "/" . $GLOBALS["fp_system_settings"]["theme"];
 ?> 
 <html>
 	<head>

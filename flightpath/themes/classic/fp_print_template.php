@@ -9,7 +9,7 @@ if ($page_title == "")
 	$page_title = $GLOBALS["fp_system_settings"]["school_initials"] . " FlightPath";
 }
 
-$theme_location = $GLOBALS["fp_system_settings"]["base_u_r_l"] . "/" . $GLOBALS["fp_system_settings"]["theme"];
+$theme_location = $GLOBALS["fp_system_settings"]["base_path"] . "/" . $GLOBALS["fp_system_settings"]["theme"];
 
 print "
 <link rel='stylesheet' type='text/css' href='$theme_location/style.css'>";

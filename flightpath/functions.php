@@ -64,11 +64,11 @@ function menu_rebuild_cache() {
 
 function menu_execute_page_request() {
   $path = $_GET["q"];
+
   //If the path is blank, figure out what the "font page" is, and use that path.
   if ($path == "") {
     $path = variable_get("front_page", "main");
   }
-  
   if ($router_item = menu_get_item($path)) {
    
     // Let's figure out if the user has access to this menu item or not.
@@ -174,7 +174,7 @@ function l($text, $path, $query = "", $attributes = array()) {
     $query = "?" . $query;   
   }  
   
-  $rtn .= '<a href="' . $GLOBALS["fp_system_settings"]["base_u_r_l"] . '/' . $path . $query . '" ';
+  $rtn .= '<a href="' . $GLOBALS["fp_system_settings"]["base_path"] . '/' . $path . $query . '" ';
   
   foreach ($attributes as $key => $value) {
     $rtn .= $key . '="' . $value . '" ';
@@ -252,9 +252,11 @@ function fp_display_page($page) {
   
   $screen->page_content = $content_top .= $page["content"];
   // If there are CSS files to add, add those.
-  foreach ($GLOBALS["fp_extra_css"] as $filename) {
-    //pretty_print ("adding $filename");
-    $screen->add_css($filename);
+  if (is_array($GLOBALS["fp_extra_css"])) {
+    foreach ($GLOBALS["fp_extra_css"] as $filename) {
+      //pretty_print ("adding $filename");
+      $screen->add_css($filename);
+    }
   }
   
   
@@ -335,7 +337,21 @@ function variable_set($name, $value) {
 
 function fp_get_system_settings() {
   $db = get_global_database_handler();
-  return $db->get_flight_path_settings();  
+  $settings = $db->get_flightpath_settings();
+  
+  // Make sure some important settings have _something_ set, or else it could cause
+  // problems for some modules.
+  if ($settings["current_catalog_year"] == "") {
+    $settings["current_catalog_year"] = 2006;
+  }  
+  if ($settings["earliest_catalog_year"] == "") {
+    $settings["earliest_catalog_year"] = 2006;
+  }  
+  
+
+  
+  return $settings;
+    
 }
 
 

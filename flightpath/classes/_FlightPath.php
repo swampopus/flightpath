@@ -107,7 +107,7 @@ class _FlightPath
 
 
 
-		$settings = $db->get_flight_path_settings();
+		$settings = $db->get_flightpath_settings();
 
 		$catalog_year = $student->catalog_year;
 		if ($this->bool_what_if)

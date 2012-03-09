@@ -197,7 +197,7 @@ function blank_degrees_display_blank_degree_selection()
   }
   
   
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
   $current_catalog_year = $settings["current_catalog_year"];
   if ($GLOBALS["bool_use_draft"] == true)
   {

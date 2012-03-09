@@ -1283,7 +1283,7 @@ class _Course
     // If the catalog year is greater than the currentCatalogYear
     // setting, then set it to that.
 
-    $settings = $this->db->get_flight_path_settings();
+    $settings = $this->db->get_flightpath_settings();
     if ($this->catalog_year > $settings["current_catalog_year"])
     {
       $this->catalog_year = $settings["current_catalog_year"];

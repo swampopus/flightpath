@@ -211,7 +211,7 @@ function perform_login($bool_bypass_verification = false, $bypass_user_id = "")
 
   // First thing we need to do -- check to make sure the settings
   // table contains a currentCatalogYear setting, since it's required.
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
   if (trim($settings["current_catalog_year"] == ""))
   {
     display_login("<font color='red'>FlightPath is currently undergoing
@@ -707,7 +707,7 @@ function get_announcements($screen)
   $pC .= $screen->draw_curved_title("_announcements");
 
   $db = new DatabaseHandler();
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
 
   $is_empty = true;
   // Pull out just the announcements XML and make it into its own array.
@@ -773,7 +773,7 @@ function get_tools($screen)
   $pC = "";
 
   $db = new DatabaseHandler();
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
   $current_catalog_year = $settings["current_catalog_year"];
 
   $pC .= $screen->draw_curved_title("_tools");

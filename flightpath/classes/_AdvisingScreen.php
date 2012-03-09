@@ -20,7 +20,7 @@ notice must not be modified, and must be included with the source code.
 class _AdvisingScreen
 {
 	public $width_array, $popup_width_array, $script_filename, $is_on_left, $box_array;
-	public $degree_plan, $student, $bool_popup, $footnote_array, $flight_path;
+	public $degree_plan, $student, $bool_popup, $footnote_array, $flightpath;
 	public $screen_mode, $db, $bool_print, $view, $settings, $user_settings;
 	public $bool_blank, $bool_hiding_grades;
 	public $admin_message, $earliest_catalog_year;
@@ -39,7 +39,7 @@ class _AdvisingScreen
 	 * @param string $script_filename
 	 *   - This is the script which forms with POST to.  Ex: "advise.php"
 	 * 
-	 * @param FlightPath $flight_path   
+	 * @param FlightPath $flightpath   
 	 *   - FlightPath object.
 	 *
 	 * @param string $screen_mode
@@ -49,7 +49,7 @@ class _AdvisingScreen
 	 *       not draw certain elements.
 	 *  
 	 */
-	function __construct($script_filename = "", FlightPath $flight_path = null, $screen_mode = "")
+	function __construct($script_filename = "", FlightPath $flightpath = null, $screen_mode = "")
 	{
 		$this->width_array = Array("10%", "10%","10%", "15%", "26%", "10%", "10%", "9%");
 		$this->popup_width_array = Array("17%", "1%", "1%", "15%", "26%", "15%", "15%", "10%");
@@ -61,9 +61,9 @@ class _AdvisingScreen
 		
 		$this->page_extra_css_files = array();
 
-		$this->flight_path = $flight_path;
-		$this->degree_plan = $flight_path->degree_plan;
-		$this->student = $flight_path->student;
+		$this->flightpath = $flightpath;
+		$this->degree_plan = $flightpath->degree_plan;
+		$this->student = $flightpath->student;
 
 		$this->db = get_global_database_handler();
 
@@ -76,7 +76,7 @@ class _AdvisingScreen
 
 		$this->screen_mode = $screen_mode;
 
-		$this->settings = $this->db->get_flight_path_settings();
+		$this->settings = $this->db->get_flightpath_settings();
 		$this->user_settings = $this->db->get_user_settings($_SESSION["fp_user_id"]);
 
 		$this->theme_location = $GLOBALS["fp_system_settings"]["theme"];
@@ -5314,7 +5314,7 @@ function draw_menu_items($menu_array) {
 				// recalculate count_of_matches here.
 				$clone_branch = new Group();
 				$clone_branch->list_courses = $branch->list_courses->get_clone(true);
-				$matches_count = $this->flight_path->get_count_of_matches($clone_branch, $new_student, null);
+				$matches_count = $this->flightpath->get_count_of_matches($clone_branch, $new_student, null);
 				//print_pre($branch->to_string());
 				$branch->count_of_matches = $matches_count;
 				//admin_debug($matches_count);
@@ -5592,7 +5592,7 @@ function draw_menu_items($menu_array) {
 		foreach($subject_array as $key => $subject_id)
 		{
 			//admin_debug($subject_id);
-			if ($title = $this->flight_path->get_subject_title($subject_id)) {
+			if ($title = $this->flightpath->get_subject_title($subject_id)) {
 				$new_array[] = "$title ~~ $subject_id";
 			} else {
 			  $new_array[] = "$subject_id ~~ $subject_id";

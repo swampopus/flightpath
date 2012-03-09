@@ -167,9 +167,9 @@ if ($perform_action == "perform_edit_announcements")
   perform_edit_announcements();
 }
 
-if ($perform_action == "perform_edit_flight_path_settings")
+if ($perform_action == "perform_edit_flightpath_settings")
 {
-  perform_edit_flight_path_settings();
+  perform_edit_flightpath_settings();
 }
 
 if ($perform_action == "perform_edit_help")
@@ -189,9 +189,9 @@ if ($perform_action == "perform_edit_offline_mode")
 }
 
 
-if ($perform_action == "edit_flight_path_settings")
+if ($perform_action == "edit_flightpath_settings")
 {
-  display_edit_flight_path_settings();
+  display_edit_flightpath_settings();
 }
 
 
@@ -3743,7 +3743,7 @@ function init_hidden_variables()
   
   
   global $db;
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
 
 
   $GLOBALS["de_catalog_year"] = trim($_REQUEST["de_catalog_year"]);
@@ -4654,11 +4654,11 @@ function perform_edit_offline_mode()
 }
 
 
-function perform_edit_flight_path_settings()
+function perform_edit_flightpath_settings()
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_perform_edit_flight_path_settings";
+  $function = "admin_perform_edit_flightpath_settings";
   if (function_exists($function)) {
     return call_user_func($function);
   }
@@ -4688,7 +4688,7 @@ function perform_edit_flight_path_settings()
   $db->add_to_log("admin_edit_settings","",$post_x_m_l);
 
 
-  display_edit_flight_path_settings(get_success_msg("Successfully updated FlightPath advising settings at " . get_current_time()));
+  display_edit_flightpath_settings(get_success_msg("Successfully updated FlightPath advising settings at " . get_current_time()));
 }
 
 
@@ -4767,11 +4767,11 @@ function get_success_msg($msg)
 }
 
 
-function display_edit_flight_path_settings($msg = "")
+function display_edit_flightpath_settings($msg = "")
 {
   //////////////////////////////////
   // Check for hooks...
-  $function = "admin_display_edit_flight_path_settings";
+  $function = "admin_display_edit_flightpath_settings";
   if (function_exists($function)) {
     return call_user_func($function, $msg);
   }
@@ -4788,9 +4788,9 @@ function display_edit_flight_path_settings($msg = "")
 			<h2>Edit FlightPath Advising Settings</h2>$msg
 			<div class='elevenpt'>
 			<form action='admin.php' method='post'>
-			<input type='hidden' name='performAction' value='perform_edit_flight_path_settings'>";
+			<input type='hidden' name='performAction' value='perform_edit_flightpath_settings'>";
 
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
 
   $pC .= "FP Term Quick Reference:";
   $sems = array(40,41, 60,81,82);
@@ -5252,7 +5252,7 @@ function display_edit_urgent_msg($msg = "")
 			<hr><div class='elevenpt'><form action='admin.php' method='post'>
 			<input type='hidden' name='performAction' value='perform_edit_urgent_msg'>";
 
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
 
   $pC .= "Urgent Message:
 					<br>
@@ -5308,7 +5308,7 @@ function display_edit_offline_mode($msg = "")
 			<hr><div class='elevenpt'><form action='admin.php' method='post'>
 			<input type='hidden' name='performAction' value='perform_edit_offline_mode'>";
 
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
 
   $pC .= "
           Offline Mode Setting:
@@ -5381,7 +5381,7 @@ function display_edit_announcements($msg = "")
 			<hr><div class='elevenpt'><form action='admin.php' method='post'>
 			<input type='hidden' name='performAction' value='perform_edit_announcements'>";
 
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
 
   $count = 0;
   // Pull out just the announcements XML and make it into its own array.
@@ -5552,7 +5552,7 @@ function display_main_menu($msg = "")
 
   global $screen, $db;
 
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
 
   $de_catalog_year = $GLOBALS["de_catalog_year"];
   $pC = "";

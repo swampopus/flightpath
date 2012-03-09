@@ -34,7 +34,7 @@ if (!isset($levels_deep)) $levels_deep = "";
 
 // Should we load the functions file?  This variable should be
 // set prior to including this bootstrap file.
-if (!isset($skip_flight_path_functions) || $skip_flight_path_functions != TRUE) {
+if (!isset($skip_flightpath_functions) || $skip_flightpath_functions != TRUE) {
   // Load the common "functions.php" file.
   require_once("$levels_deep" . "functions.php");
 }

@@ -522,7 +522,7 @@ function display_popup()
 
 
   $db = new DatabaseHandler();
-  $settings = $db->get_flight_path_settings();
+  $settings = $db->get_flightpath_settings();
 
 
   $page_content = "";
