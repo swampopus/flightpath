@@ -9,7 +9,7 @@ if ($pageTitle == "")
 	$pageTitle = $GLOBALS["fpSystemSettings"]["schoolInitials"] . " FlightPath";
 }
 
-$themeLocation = $GLOBALS["fpSystemSettings"]["theme"];
+$themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSystemSettings"]["theme"];
 
 print "
 <link rel='stylesheet' type='text/css' href='$themeLocation/style.css'>";

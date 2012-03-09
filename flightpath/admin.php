@@ -2141,7 +2141,15 @@ function performEditSpecificGroup()
 
     }
     //print_pre($cc);
-
+  }
+  else {
+    // In other words, the setDefinition WAS blank.
+    // Let's update the table.  This is to fix a bug where they were unable
+    // to clear definitions.
+      $res = $db->dbQuery("UPDATE draft_groups
+							SET `definition`=''
+							WHERE
+								`group_id`='?' ", $groupID);    
   }
 
   // Okay, now we look at the actual "courses" box and assemble the group

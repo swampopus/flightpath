@@ -9,12 +9,17 @@
  * from altering it.
  */
 
+// Set the PHP error reporting level for FlightPath.  In this case,
+// only show us errors and warnings. (Hide "notice" and "strict" messages)
+error_reporting(E_ERROR | E_WARNING);
+ 
+ 
 /**
  * All system settings will be placed (at the end of this script)
  * into a $GLOBALS variable, but for now will be placed into an
  * array.
  */
-
+ 
 $systemSettings = array();
 
 ////////////////////////////////////
@@ -29,13 +34,30 @@ $systemSettings["GRANT_FULL_ACCESS"] = FALSE;
 
 // This should be the actual filesystem path to the directory
 // where FlightPath is installed.  Do NOT include a trailing slash!
-// Ex: /var/www/public_html/flightpath
+// Ex: /var/www/public_html/flightpath  or, for Windows: C:/htdocs/flightpath
+// ** Depending on your webserver, you may be required to use forward-slashes! **
+// use the following line to help you figure out the fileSystemPath, by seeing
+// what the path is to this file:
+// print "<br>System path to settings.php: " . __FILE__ . "<br><br>";
 $systemSettings["fileSystemPath"] = "/www/webservices/flightpath";
+
+// The baseURL is the actual URL a user would type to visit your site.
+// Do NOT enter a trailing slash!
+// Ex:  http://localhost/flightpath
+$systemSettings["baseURL"] = "http://localhost/flightpath-advising/flightpath";
+
+// The basePath is related to the baseURL.  It is the parth of the URL which comes after
+// your domain name.
+// It MUST begin with a preceeding slash.
+// Ex: If your site is example.com/dev/flightpath, then you should
+// enter  "/dev/flightpath" 
+$systemSettings["basePath"] = "/flightpath-advising/flightpath";
+
 
 ////////////////////////////////////
 // *** Database-related settings ***
 ////////////////////////////////////
-$systemSettings["dbHost"] = "localhost"; // domain/ip address of the mysql host
+$systemSettings["dbHost"] = "localhost"; // domain/ip address of the mysql host. ex: localhost or mysite.com:32145
 $systemSettings["dbUser"] = "fpuser"; 
 $systemSettings["dbPass"] = "fpuserpass"; 
 $systemSettings["dbName"] = "flightpath"; // Name of the actual database where
@@ -55,6 +77,14 @@ $systemSettings["dbName"] = "flightpath"; // Name of the actual database where
 $systemSettings["displayMySQLErrors"] = TRUE;
 $systemSettings["theme"] = "themes/classic";
 
+
+////////////////////////////////////
+// *** Misc Settings ***
+////////////////////////////////////
+// To cut down on load times when the user loads a large elective group
+// containing many courses, FlightPath can load some of the course inventory
+// upon login.  Set the number of courses to load here.
+$systemSettings["loadCourseInventoryOnLoginNumber"] = 2000;
 
 
 ////////////////////////////////////

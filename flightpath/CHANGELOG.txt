@@ -1,6 +1,29 @@
 FlightPath Changelog
 ====================
 
+2012-03-08
+Fixed a bug where definitions in groups, once entered could not be removed.
+
+Adjusted default.settings.php file to have error reporting limited by default,
+as well as additional instructions for setting up through Windows.
+
+Added "user_auth" table to flightpath database.  Implemented default login
+attempts to that table (empty it to override and use another method)
+ - Created "admin" user by default.  user_id = 1, password = fpadminuser
+ 
+Made it so the number of courses to load (and cache) on login is configurable
+in the settings.
+
+Added menu_rebuild_cache(), pretty_print(), and db_query()
+
+Making other numerous changes, to make FlightPath more like Drupal.
+
+Changing naming convention to underscore style instead of camelCase,
+when not dealing with an object.
+
+Made a lot of progress in getting the primary display of course_search module
+to use the new menu system (piped through ?q=location/etc
+
 --- v3.1.1
 
 2012-01-03

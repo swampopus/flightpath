@@ -31,12 +31,13 @@
 *						new window.
 * 
 **/
-$themeLocation = $GLOBALS["fpSystemSettings"]["theme"];
+$themeLocation = $GLOBALS["fpSystemSettings"]["baseURL"] . "/" . $GLOBALS["fpSystemSettings"]["theme"];
 ?> 
 <html>
 	<head>
 	
 	
+		<script src="<?php print $GLOBALS["fpSystemSettings"]["basePath"]; ?>/inc/jquery-1.3.2.min.js" type="text/javascript"></script>
 		
 		<script type='text/javascript'>
 
@@ -367,6 +368,7 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["theme"];
 								<td align="left" valign='top'>
 								<div id='updateMsg' class='updateMsg' style='display: none;'>Updating...</div>
 								<div id='loadMsg' class='updateMsg' style='display: none;'>Loading...</div>
+								<div class='page-content'>
 								<?php
                                 	// ***************** Page specific content will be in here *****************
 
@@ -375,6 +377,7 @@ $themeLocation = $GLOBALS["fpSystemSettings"]["theme"];
 
                                 	// ***************** Page specific content was in here     *****************
 		                            ?>
+		          </div>
 								</td>
 								<td valign='top' align='right'>
 								</td>

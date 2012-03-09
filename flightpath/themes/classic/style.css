@@ -27,6 +27,18 @@ body
   height: 20px;
 }
 
+.fp-messages {
+  border: 1px solid #FFCC66;
+  background-color: #FFFFCC;
+  padding: 5px 20px 5px 20px;
+  
+  margin: 5px;
+  margin-bottom: 10px;
+}
+.fp-message {
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
 
 /*
 	Gradiant buttons.... I have to write them out like this,

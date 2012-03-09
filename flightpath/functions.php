@@ -22,6 +22,333 @@ notice must not be modified, and must be included with the source code.
 // This file contains common functions used in FlightPath.
 
 
+/**
+ * Go through all installed modules and rebuild the menu_router table,
+ * based on each module's hook_menu function.
+ */
+function menu_rebuild_cache() {
+  
+  foreach ($GLOBALS["fpSystemSettings"]["modules"] as $module => $value) {    
+    if (isset($value["disabled"]) && $value["disabled"] == "yes") {
+      // Module is not enabled.  Skip it.
+      continue;
+    }    
+    if (function_exists($module . "_menu")) {
+      $items = call_user_func($module . "_menu");
+      
+      // Okay, now go through the $items array, and write the needed information
+      // to the menu_router array.
+      foreach ($items as $path => $item) {
+        if (is_numeric($path)) continue; // problem, so skip.
+
+        // Update our menu_router table.
+        // Begin by deleting the existing path, if there is one.
+        db_query("DELETE FROM menu_router WHERE path = '?' ", $path);
+        // Now, insert the new one.
+        db_query("INSERT INTO menu_router
+                    (path, access_callback, access_arguments, page_callback, page_arguments, title, description, type, weight, icon, page_settings)
+                    VALUES
+                    ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
+                    ", $path, $item["access_callback"], serialize($item["access_arguments"]), $item["page_callback"],
+                       serialize($item['page_arguments']), $item['title'], $item['description'], $item['type'], $item['weight'], $item['icon'],
+                       serialize($item['page_settings']));
+      }              
+    }
+  }
+  
+  fp_add_message(t("The menu router has been rebuilt"));
+    
+}
+
+
+
+function menu_execute_page_request() {
+  $path = $_GET["q"];
+  //If the path is blank, figure out what the "font page" is, and use that path.
+  if ($path == "") {
+    $path = variable_get("front_page", "main");
+  }
+  
+  if ($router_item = menu_get_item($path)) {
+   
+    // Let's figure out if the user has access to this menu item or not.
+    $access = FALSE;
+    if ($router_item["access_callback"] == 1) {
+      $access = TRUE;
+    }
+     
+    if ($access) {
+      if ($router_item['file']) {
+        require_once($router_item['file']);
+      }
+      $page = array();
+      $page["content"] = call_user_func_array($router_item['page_callback'], $router_item['page_arguments']);      
+      $page["path"] = $path;
+      // TODO:  Check to see if the user has overridden the title using the fp_set_title() command.
+      $page["title"] = $router_item["title"];
+      $page["router_item"] = $router_item;
+
+      return $page;    
+           
+    }
+    else {
+      return MENU_ACCESS_DENIED;
+    }
+  }
+  return MENU_NOT_FOUND;  
+}
+
+
+/**
+ * Return array from menu_router for this item.
+ */
+function menu_get_item($path) {
+  $res = db_query("SELECT * FROM menu_router WHERE path = '?' ", $path);
+  $cur = db_fetch_array($res);
+  
+  // Unserialize the things which are supposed to be unserialized.
+  $cur["page_arguments"] = unserialize($cur["page_arguments"]);
+  if (!is_array($cur["page_arguments"])) {
+    $cur["page_arguments"] = array();
+  }
+
+  $cur["access_arguments"] = unserialize($cur["access_arguments"]);
+  if (!is_array($cur["access_arguments"])) {
+    $cur["access_arguments"] = array();
+  }
+
+  $cur["page_settings"] = unserialize($cur["page_settings"]);
+  if (!is_array($cur["page_settings"])) {
+    $cur["page_settings"] = array();
+  }
+
+
+  return $cur;    
+    
+}
+
+
+
+/////////////////////////////////////////////////////////////////////
+
+
+function fp_add_message($str) {
+  $_SESSION["fpMessages"][] = $str;
+}
+
+function fp_add_css($path_to_css) {
+  $GLOBALS["fpExtraCss"][] = $path_to_css;
+}
+
+function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bool_include_base_path = TRUE) {
+  
+  $p = getModulePath($module, $bool_include_file_system_path);
+    
+  if ($bool_include_base_path) {
+    $p = $GLOBALS["fpSystemSettings"]["basePath"] . "/" . $p;
+  }
+    
+  return $p;
+}
+
+/**
+ * Eventually, this function will be used to translate strings.  For now, just pass through.
+ */
+function t($str) {
+  return $str;
+}
+
+/**
+ * This works like Drupal's l() function for creating links.
+ * Ex:  l("Click here for course search!", "tools/course-search", "abc=xyz&hello=goodbye", array("class" => "my-class"));
+ * Do not include preceeding or trailing slashes.
+ */
+function l($text, $path, $query = "", $attributes = array()) {
+  $rtn = "";
+
+  if ($query != "") {
+    // Should begin with a ?
+    // TOOD:
+    // But NOT if we don't have clean URLs enabled.  If we don't, it will break, and it should
+    // begin with an &.
+    $query = "?" . $query;   
+  }  
+  
+  $rtn .= '<a href="' . $GLOBALS["fpSystemSettings"]["baseURL"] . '/' . $path . $query . '" ';
+  
+  foreach ($attributes as $key => $value) {
+    $rtn .= $key . '="' . $value . '" ';
+  }
+  
+  $rtn .= ">$text</a>";
+
+
+
+  return $rtn;
+}
+
+
+  /**
+   * This function will attempt to determine automatically
+   * if we are on a mobile device.  If so, it will set
+   * $this->pageIsMobile = TRUE
+   *
+   */
+function fp_screen_is_mobile(){
+  
+  if (isset($GLOBALS["fpPageIsMobile"])) {
+    return $GLOBALS["fpPageIsMobile"];
+  }
+  
+  $userAgent = $_SERVER['HTTP_USER_AGENT']; 
+
+  $lookFor = array(
+    "ipod", 
+    "iphone", 
+    "android", 
+    "opera mini", 
+    "blackberry",
+    "(pre\/|palm os|palm|hiptop|avantgo|plucker|xiino|blazer|elaine)",
+    "(iris|3g_t|windows ce|opera mobi|windows ce; smartphone;|windows ce; iemobile)",
+    "(smartphone|iemobile)",
+    );
+  
+  foreach ($lookFor as $testAgent) {   
+    if (preg_match('/' . $testAgent . '/i',$userAgent)) {
+       $is_mobile = TRUE;
+      break;
+    }
+  }  
+  
+  
+  $GLOBALS["fpPageIsMobile"] = $is_mobile;
+  return $is_mobile;
+  
+} // ends function mobile_device_detect
+
+
+
+/**
+ * Output the contents of the $page variable to the screen.
+ */
+function fp_display_page($page) {
+  
+  $screen = new AdvisingScreen("",null,"notAdvising");
+  $screen->pageTitle = $page["title"];
+  $screen->pageHasSearch = $page["router_item"]["page_settings"]["page_has_search"];
+  $screen->pageBannerIsLink = $page["router_item"]["page_settings"]["page_banner_is_link"];
+  $screen->pageHideReportError = $page["router_item"]["page_settings"]["page_hide_report_error"];
+  
+  // If there are "messages" waiting, then let's add them to the top of content.
+  $content_top = "";
+  if (count($_SESSION["fpMessages"]) > 0) {
+    $content_top .= "<div class='fp-messages'>";
+    foreach ($_SESSION["fpMessages"] as $key => $msg) {
+      $content_top .= "<div class='fp-message'>$msg</div>";      
+    }
+    $content_top .= "</div>";    
+    unset($_SESSION["fpMessages"]);
+  }
+  
+  $screen->pageContent = $content_top .= $page["content"];
+  // If there are CSS files to add, add those.
+  foreach ($GLOBALS["fpExtraCss"] as $filename) {
+    //pretty_print ("adding $filename");
+    $screen->addCss($filename);
+  }
+  
+  
+  $screen->outputToBrowser();  
+}
+
+
+/**
+ * Return the theme location
+ */
+function fp_theme_location() {
+  return $GLOBALS["fpSystemSettings"]["basePath"] . "/" . $GLOBALS["fpSystemSettings"]["theme"];
+}
+
+
+/**
+ * Will draw a string in a pretty curved box.  Used for displaying semester
+ * titles.
+ *
+ * @param string $title
+ * @return string
+ */
+function fp_render_curved_line($text) {
+  // Will simply draw a curved title bar containing the $title
+  // as the text.
+  $img_path = fp_theme_location();
+  
+
+  $rtn = "
+   <table border='0' class='blueTitle' width='100%' cellpadding='0' cellspacing='0'>
+     <tr>
+      <td width='10%' align='left' valign='top'><img src='$img_path/images/corner_tl.gif'></td>
+      <td width='80%' align='center' rowspan='2'>
+       <span class='tenpt'><b>$text</b></span>
+      </td>
+      <td width='10%' align='right' valign='top'><img src='$img_path/images/corner_tr.gif'></td>
+     </tr>
+     <tr>
+      <td align='left' valign='bottom'><img src='$img_path/images/corner_bl.gif'></td>
+      <td align='right' valign='bottom'><img src='$img_path/images/corner_br.gif'></td>
+     </tr> 
+    </table>
+";
+
+  return $rtn;
+
+}
+
+
+
+////////////////////////////////////////////////////////////////////
+
+function db_query($query) {
+  // Capture arguments to this function, to pass along to our $db object.
+  $args = func_get_args();
+  array_shift($args);  
+  
+  $db = getGlobalDatabaseHandler();  
+  $res = $db->dbQuery($query, $args);
+
+  return $res;    
+}
+
+function db_fetch_array($result_handler) {
+  $db = getGlobalDatabaseHandler();
+  return $db->dbFetchArray($result_handler);
+}
+
+function variable_get($name, $default_value = "") {
+  $db = getGlobalDatabaseHandler();
+  return $db->getVariable($name, $default_value);
+}
+
+function variable_set($name, $value) {
+  $db = getGlobalDatabaseHandler();
+  $db->setVariable($name, $value);  
+}
+
+function fp_get_system_settings() {
+  $db = getGlobalDatabaseHandler();
+  return $db->getFlightPathSettings();  
+}
+
+
+function pretty_print($var) {
+  print "<pre>" . print_r($var, true) . "</pre>";
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 /**
  * This method will return a globally-set DatabaseHandler object,
@@ -753,8 +1080,17 @@ function fp_verifyAllFacultyLogins($username, $password) {
   if (function_exists("functions_fp_verifyAllFacultyLogins")) {
     return call_user_func("functions_fp_verifyAllFacultyLogins", $username, $password);
   }  
-  
-  print "<b>You must implement the hook functions_fp_verifyAllFacultyLogins before using FlightPath.</b>";
+    
+  // Authenticate by the user_auth table by default.
+  $db = new DatabaseHandler();
+  $res = $db->dbQuery("SELECT * FROM user_auth
+                        WHERE user_name = '?'
+                        AND password = '?' 
+                        AND is_faculty = '1' ", $username, md5($password));
+  $cur = $db->dbFetchArray($res);
+  if ($cur["user_name"] == $username) {
+    return $cur["user_id"];
+  }
   
   // By default, return FALSE;
   return FALSE;
@@ -786,12 +1122,20 @@ function fp_verifyAllStudentLogins($username, $password) {
   }  
  
   
-  print "<b>You must implement the hook functions_fp_verifyAllStudentLogins before using FlightPath.</b>";
+  // Authenticate by the user_auth table by default.
+  $db = new DatabaseHandler();
+  $res = $db->dbQuery("SELECT * FROM user_auth
+                        WHERE user_name = '?'
+                        AND password = '?' 
+                        AND is_student = '1' ", $username, md5($password));
+  $cur = $db->dbFetchArray($res);
+  if ($cur["user_name"] == $username) {
+    return $cur["user_id"];
+  }
   
   // By default, return FALSE;
-  return FALSE;  
- 
-  
+  return FALSE;
+    
 }
 
 

@@ -311,6 +311,12 @@ class _DatabaseHandler
 	  // replacement patterns.
 	  $args = func_get_args();
 	  array_shift($args);
+    if (is_array($args[0])) {
+      // If the first argument was an array, it means we passed an array of values instead
+      // of passing them directly.  So use them directly as our args.
+      $args = $args[0];
+    }
+
 
     // The query may contain an escaped ?, meaning "??", so I will replace that with something
     // else first, then change it back afterwards.
@@ -860,11 +866,17 @@ class _DatabaseHandler
 	 *
 	 * @param string $name
 	 */
-	function getVariable($name) {
+	function getVariable($name, $defaultValue = "") {
 	  $res = $this->dbQuery("SELECT value FROM variables
 	                         WHERE name = '?' ", $name);
 	  $cur = $this->dbFetchArray($res);
-	  return $cur["value"];
+	  
+	  $val = $cur["value"];
+    if ($val == "") {
+      $val = $defaultValue;
+    }
+	  
+	  return $val;
 	}
 	
 	

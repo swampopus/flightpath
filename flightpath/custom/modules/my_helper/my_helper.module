@@ -19,22 +19,19 @@
 //
 // Otherwise, just return FALSE.
 
+
 /*
 function functions_fp_verifyAllFacultyLogins($username, $password) {
   
   // Sample code.  Replace with your own code.
-  include_once("ws_common_functions.php");  
-  return verifyAllFacultyLogins($username, $password);
-  
+   
 }
 
 
 function functions_fp_verifyAllStudentLogins($username, $password) {
   
   // Sample code.  Replace with your own code.
-  include_once("ws_common_functions.php");
-  return verifyAllStudentLogins($username, $password);
- 
+  
 }
 */
 

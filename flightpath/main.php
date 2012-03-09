@@ -174,6 +174,7 @@ function performLogin($boolBypassVerification = false, $bypassUserID = "")
 
   // Check for hooks...
   if (function_exists("main_performLogin")) {
+    
     return call_user_func("main_performLogin", $boolBypassVerification, $bypassUserID);
   }
 
@@ -181,7 +182,7 @@ function performLogin($boolBypassVerification = false, $bypassUserID = "")
   // full_admin access?
   if ($GLOBALS["fpSystemSettings"]["GRANT_FULL_ACCESS"] == TRUE) {
     $_SESSION["fpLoggedIn"] = TRUE;
-    $_SESSION["fpUserID"] = 111;
+    $_SESSION["fpUserID"] = 1;
     $_SESSION["fpUserType"] = "full_admin";
     $_SESSION["fpCanAdvise"] = TRUE;
     $_SESSION["fpCanSearch"] = TRUE;
@@ -675,10 +676,12 @@ function displayMain($msg = "")
   // like Free Electives, we will pre-load some of the course inventory here.
   if ($_SESSION["fpCachedInventoryFlagOne"] != true)
   {
-    $fp = new FlightPath();
-    $fp->cacheCourseInventory(0,2000);
-
-    $_SESSION["fpCachedInventoryFlagOne"] = true;
+    $loadNumber = $GLOBALS["fpSystemSettings"]["loadCourseInventoryOnLoginNumber"];
+    if ($loadNumber > 1) {
+      $fp = new FlightPath();
+      $fp->cacheCourseInventory(0,$loadNumber);
+      $_SESSION["fpCachedInventoryFlagOne"] = true;
+    }
   }
   adminDebug("--");
 
