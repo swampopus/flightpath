@@ -324,17 +324,19 @@ while ($cur = mysql_fetch_array($res)) {
     $system_settings[$cur["name"]] = $val;
   }
 }
-mysql_close($dbc);
 
+$res = mysql_query("SELECT * FROM modules WHERE enabled = 1
+                    ORDER BY weight");
+while ($cur = mysql_fetch_array($res)) {
+  $system_settings["modules"][$cur["name"]] = $cur;
+}
+
+mysql_close($dbc);
 
 // We want to make sure the "system" module is enabled, so we will hard-code
 // its values.
 $system_settings["modules"]["system"]["path"] = "modules/system";
 $system_settings["modules"]["system"]["disabled"] = "no";
-
-// Reorder the modules by weight.
-reorder_modules_by_weight($system_settings["modules"]);
-
 
 ////////////////////////////////////////////
 ////////////////////////////////////////////

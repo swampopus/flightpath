@@ -1,0 +1,4 @@
+name = Student Search
+description = This module allows users to search for students (advisees)
+version = 1.0b
+core = 4.x

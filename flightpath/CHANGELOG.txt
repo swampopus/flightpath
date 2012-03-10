@@ -1,6 +1,14 @@
 FlightPath Changelog
 ====================
 
+2012-03-10
+  Continuing work on making FP more like Drupal.
+  
+  Created "modules" table to better keep track of modules.
+  
+  Created student_search module.  Working on bringing in all of its functionality.
+  
+
 2012-03-09
   ** BIG CHANGE **
   I ran a script to convert from camelCase to underscore_style.

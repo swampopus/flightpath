@@ -17,7 +17,7 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-
+die("don't use main.php anymore, please");
 /*
 This is the first page users see when they log into the system.
 */

@@ -35,6 +35,40 @@ function t($str) {
 }
 
 /**
+ * Shortcut for getting the base_path variable from the global system settings.
+ */
+function base_path() {
+  return $GLOBALS["fp_system_settings"]["base_path"];
+}
+
+
+/**
+ * Redirect the user's browser to the specified internal path + query.
+ */
+function fp_goto($path, $query = "") {
+  if ($query != "") {
+    // Should begin with a ?
+    // TODO:
+    // But NOT if we don't have clean URLs enabled.  If we don't, it will break, and it should
+    // begin with an &.
+    $query = "?" . $query;   
+  }  
+  
+  // Close the seesion before we try to redirect.
+  session_write_close();
+  
+  if ($path == "<front>") {
+    $path = variable_get("front_page", "main");
+  }
+  
+  
+  header('Location: ' . base_path() . '/' . $path . $query);
+  exit();
+  
+}
+
+
+/**
  * This works like Drupal's l() function for creating links.
  * Ex:  l("Click here for course search!", "tools/course-search", "abc=xyz&hello=goodbye", array("class" => "my-class"));
  * Do not include preceeding or trailing slashes.
@@ -42,15 +76,19 @@ function t($str) {
 function l($text, $path, $query = "", $attributes = array()) {
   $rtn = "";
 
+  if ($path == "<front>") {
+    $path = variable_get("front_page", "main");
+  }
+
   if ($query != "") {
     // Should begin with a ?
-    // TOOD:
+    // TODO:
     // But NOT if we don't have clean URLs enabled.  If we don't, it will break, and it should
     // begin with an &.
     $query = "?" . $query;   
-  }  
+  } 
   
-  $rtn .= '<a href="' . $GLOBALS["fp_system_settings"]["base_path"] . '/' . $path . $query . '" ';
+  $rtn .= '<a href="' . base_path() . '/' . $path . $query . '" ';
   
   foreach ($attributes as $key => $value) {
     $rtn .= $key . '="' . $value . '" ';
@@ -553,6 +591,9 @@ function get_modules_permissions() {
   return $rtn;
 }
 
+
+
+// Commenting-out since we can now use MYSQL to order by weight.
 /**
  * This will look through the modules array (which we assume
  * is from $GLOBALS[fpSystemSettings][modules]
@@ -565,6 +606,7 @@ function get_modules_permissions() {
  *
  * @param unknown_type $modules
  */
+/*
 function reorder_modules_by_weight(&$modules) {
   
   $temp = array();
@@ -594,6 +636,7 @@ function reorder_modules_by_weight(&$modules) {
   $modules = $new_array;
   
 }
+*/
 
 
 /**

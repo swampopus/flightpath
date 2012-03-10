@@ -11,6 +11,23 @@
   text-align: right;
 }
 
+/* Login page */
+.login-welcome {
+  text-align: center;
+  font-size: 1.1em;    
+  margin-bottom: 10px;
+}
+
+.login-welcome .flightpath-name {
+  color: maroon;
+  font-weight: bold;
+  font-style: italic;
+}
+
+.logout-successful {
+  color: green;
+}
+
 
 
 /* Misc */

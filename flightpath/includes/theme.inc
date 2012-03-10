@@ -9,6 +9,8 @@
 
 /**
  * Output the contents of the $page variable to the screen.
+ * $page is an array containing details about the page, as well as
+ * its original menu item (router_item) definition.
  */
 function fp_display_page($page) {
   
@@ -18,8 +20,49 @@ function fp_display_page($page) {
   $screen->page_banner_is_link = $page["router_item"]["page_settings"]["page_banner_is_link"];
   $screen->page_hide_report_error = $page["router_item"]["page_settings"]["page_hide_report_error"];
   
+  // Was this page a tab?  And if so, are there any other tabs we need to display? //
+  if ($page["router_item"]["type"] == MENU_TYPE_TAB) {
+    // We know we should have at least 1 tab for this page.
+    $tab_array = Array();
+    
+    // look for other possible tabs, based on the "tab_family" value 
+    // TODO:  also check on access_callback, permissions, etc.   
+    $items = menu_get_items_in_tab_family($page["router_item"]["tab_family"]);
+    foreach ($items as $item) {
+      $title = $item["title"];
+      $path = $item["path"];
+      $active = FALSE;
+      $on_click = $page["page_settings"]["tab_on_click"];
+      if ($on_click == "") {
+        // Just a simple link to the path
+        $on_click = "window.location=\"" . base_path() . "/" . $path . "\"";
+      }
+            
+      if ($path == $page["path"]) {
+        // This is the current page we are on.
+        $active = TRUE;
+        $title = $page["title"];
+        $on_click = "";
+      }            
+
+      $tab_array[] = array(
+        "title" => $title,
+        "active" => $active,
+        "on_click" => $on_click,
+      );
+      
+    }
+    
+    $screen->page_tabs = fp_render_tab_array($tab_array);    
+  }
+  
+  
+  // Build up the content //
+  
+  $content_top = "";  
+  $content_top .= fp_render_greeting();
+  
   // If there are "messages" waiting, then let's add them to the top of content.
-  $content_top = "";
   if (count($_SESSION["fp_messages"]) > 0) {
     $content_top .= "<div class='fp-messages'>";
     foreach ($_SESSION["fp_messages"] as $key => $msg) {
@@ -28,6 +71,8 @@ function fp_display_page($page) {
     $content_top .= "</div>";    
     unset($_SESSION["fp_messages"]);
   }
+
+  // TODO:  content_top gets the Currently Advising box.    
   
   $screen->page_content = $content_top .= $page["content"];
   // If there are CSS files to add, add those.
@@ -41,6 +86,155 @@ function fp_display_page($page) {
   
   $screen->output_to_browser();  
 }
+
+
+/**
+ * This displays a friendly message to the user, and provides
+ * a logout link at the top.
+ */
+function fp_render_greeting() {
+  global $user;
+  if ($user->id < 1) {
+    // No one is logged in!  Don't display.
+    return "";
+  }
+  
+  $rtn = "";
+  
+  $today = date("D, F jS, Y",time("today"));
+  
+  $rtn .= "<div class='flightpath-greeting-message'>
+              Welcome $user->name! Today is $today. " . l("Log out?", "logout") . "
+          </div>";
+  
+  
+  return $rtn;  
+  
+}
+
+
+  /**
+   * Given a propperly formatted tab_array, this will return the HTML
+   * to draw it on a page.
+   *
+   * @param array $tab_array
+   *       - Array should have this structure:
+   *         - $tab_array[i]["title"] = The title or caption of the tab. "main", or "Edit", etc.
+   *         - $tab_array[i]["active"] = boolean.  True if this is the tab we are currently looking at.
+   *         - $tab_array[i]["on_click"] = This is a valid onClick='blah blah' that is the result of clicking the tab.
+   * 
+   * @return string
+   */
+  function fp_render_tab_array($tab_array)
+  {
+
+    // TODO:  fix mobile tabs
+    //if ($this->page_is_mobile) {
+    //  return $this->draw_mobile_tabs($tab_array);
+    //}
+    
+    $rtn = "";
+
+    $rtn .= "<table border='0' width='100%' cellpadding='0' cellspacing='0'>
+      <tr>
+      ";
+
+    $img_path = fp_theme_location() . "/images";
+
+
+    for ($t = 0; $t < count($tab_array); $t++)
+    {
+      $title = $tab_array[$t]["title"];
+      $active = $tab_array[$t]["active"];
+      $on_click = $tab_array[$t]["on_click"];
+
+      if ($title == "")
+      {
+        continue;
+      }
+
+      $padd = "30px;";
+      if ($t > 0)
+      {
+        $padd = "5px;";
+      }
+
+      $rtn .= "<td style='padding-right: $padd'></td>
+          <td>";
+
+      if ($active != TRUE)
+      { //innactive tabs...
+
+        $theclass = "inactive_tab hand";
+        $overclass = "inactive_tab_over";
+        if ($on_click == "")
+        {
+          $theclass = "inactive_tab";
+          $overclass = "inactive_tab_over_no_link";
+        }
+
+        $rtn .= "
+      
+      <table align='left' cellpadding='0' onClick='$on_click' cellspacing='0' class='$theclass' onmouseover='this.className=\"$overclass\";' onmouseout='this.className=\"inactive_tab\";'>
+      <tr>
+        <td class='tab_tl_i' align='left' valign='baseline'  width='12'></td>
+        <td class='tab_top_i' valign='baseline' ></td>
+        <td class='tab_tr_i' valign='baseline' align='right' width='12'></td>
+      </tr>
+      <tr>
+       <td class='tab_left_i' align='left' valign='baseline' width='12'>
+        <img src='$img_path/tab_left_i.gif' width='12' height='18'>
+      </td>
+      <td align='left' nowrap class='tab_center_i'>
+       <div style='padding-bottom: 3px; margin-top: -2px;' class='tab_text'>$title</div>
+      </td>
+      <td class='tab_right_i' align='right' valign='baseline'>
+       <img src='$img_path/tab_right_i.gif' width='12' height='18'>
+      </td>
+      </tr>
+      </table>
+
+      ";
+
+      } else {
+        // active tab...
+        $rtn .= "
+      <table align='left' cellpadding='0' cellspacing='0' class='active_tab'>
+        <tr>
+          <td class='tab_tl' align='left' valign='baseline' width='12'></td>
+          <td class='tab_top' valign='baseline'></td>
+          <td class='tab_tr' valign='baseline' align='right' width='12'></td>
+        </tr>
+        <tr>
+          <td class='tab_left' align='left' valign='baseline' width='12'>
+          <img src='$img_path/tab_left.gif' width='12' height='18'>
+          </td>
+          <td align='left' nowrap class='tab_center'>
+            <div style='padding-bottom: 3px; margin-top: -2px;' class='tab_text'>$title</div>
+          </td>
+          <td class='tab_right' align='right' valign='baseline'>
+            <img src='$img_path/tab_right.gif' width='12' height='18'>
+          </td>
+        </tr>
+      </table>      
+      ";
+
+      }
+
+      $rtn .= "</td>";
+
+    }
+
+
+    $rtn .= "
+       </tr>
+       </table>";
+
+    return $rtn;
+
+  }
+
+
 
 
 function display_not_found($msg = "") {

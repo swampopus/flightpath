@@ -9,11 +9,13 @@
  
 
 // Define useful constants
-define("MENU_TYPE_NORMAL_ITEM", 1);
-define("MENU_TYPE_CALLBACK", 2);
-define("MENU_TYPE_TAB", 3);
-define("MENU_ACCESS_DENIED", 4);
-define("MENU_NOT_FOUND", 5);
+define("MENU_TYPE_NORMAL_ITEM", 101);
+define("MENU_TYPE_CALLBACK", 102);
+define("MENU_TYPE_TAB", 103);
+define("MENU_TYPE_SUB_TAB", 104);
+/////
+define("MENU_ACCESS_DENIED", 201);
+define("MENU_NOT_FOUND", 202);
     
  
 /**
@@ -40,12 +42,12 @@ function menu_rebuild_cache() {
         db_query("DELETE FROM menu_router WHERE path = '?' ", $path);
         // Now, insert the new one.
         db_query("INSERT INTO menu_router
-                    (path, access_callback, access_arguments, page_callback, page_arguments, title, description, type, weight, icon, page_settings)
+                    (path, access_callback, access_arguments, page_callback, page_arguments, title, description, type, weight, icon, page_settings, tab_family)
                     VALUES
-                    ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
+                    ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
                     ", $path, $item["access_callback"], serialize($item["access_arguments"]), $item["page_callback"],
                        serialize($item['page_arguments']), $item['title'], $item['description'], $item['type'], $item['weight'], $item['icon'],
-                       serialize($item['page_settings']));
+                       serialize($item['page_settings']), $item['tab_family']);
       }              
     }
   }
@@ -100,17 +102,36 @@ function menu_execute_page_request() {
 function menu_get_items_beginning_with($menu_root) {
   $rtn = array();
   
-  $res = db_query("SELECT * FROM menu_router WHERE path LIKE '?%' 
+  $res = db_query("SELECT path FROM menu_router WHERE path LIKE '?%' 
                     ORDER BY weight, title", $menu_root);
   while ($cur = db_fetch_array($res)) {
     $path = $cur["path"];
-    $rtn[] = menu_get_item($path);
+    $item = menu_get_item($path);
+    if ($item) {
+      $rtn[] = $item;
+    }
   }
   
   
   return $rtn;
 }
 
+
+function menu_get_items_in_tab_family($tab_family) {
+  $rtn = array();
+  
+  $res = db_query("SELECT path FROM menu_router WHERE tab_family = '?'
+                   ORDER BY weight, title", $tab_family);
+  while ($cur = db_fetch_array($res)) {
+    $path = $cur["path"];
+    $item = menu_get_item($path);
+    if ($item) {
+      $rtn[] = $item;
+    }    
+  }
+    
+  return $rtn;
+}
 
 /**
  * Return array from menu_router for this item.
@@ -123,6 +144,12 @@ function menu_get_item($path) {
     // It was not found!
     return NULL;
   }  
+  
+  // Make sure the page_callback is a reachable function.  If it is not, 
+  // it means the module which defined it might be disabled.
+  if (!function_exists($cur["page_callback"])) {
+    return NULL;
+  }
   
   // Unserialize the things which are supposed to be unserialized.
   $cur["page_arguments"] = unserialize($cur["page_arguments"]);

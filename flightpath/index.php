@@ -7,7 +7,9 @@ header("Cache-control: private");
 
 require_once("bootstrap.inc");
 
-menu_rebuild_cache();
+// For development reasons only:
+// To rebuild the cache on every page load, uncomment the following line
+// menu_rebuild_cache();
 
 // FlightPath will now look at the request in the query to decide what page we are going to display.
 $page = menu_execute_page_request();

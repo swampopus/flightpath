@@ -12,6 +12,10 @@ body
 	margin-left: 10px;
 }
 
+.flightpath-greeting-message {
+  font-size: 0.8em;
+}
+
 .admin-message
 {
 	padding: 5px;

@@ -347,7 +347,7 @@ function draw_menu_items($menu_array) {
 	 * @param string $str
 	 * @return string
 	 */
-	function convert_b_b_code_to_h_t_m_l($str)
+	function convert_bbcode_to_html($str)
 	{
 		// This will accept a string with BBcode tags in it,
 		// and convert them to HTML tags.
@@ -508,7 +508,7 @@ function draw_menu_items($menu_array) {
 
 			$uM = "<div class='tenpt hypo' style='margin: 10px; padding: 5px;'>
 					<b>Important Notice:</b> 
-					" . $this->convert_b_b_code_to_h_t_m_l($this->settings["urgent_msg"]) . "
+					" . $this->convert_bbcode_to_html($this->settings["urgent_msg"]) . "
 					</div>";
 		}
 
@@ -1609,7 +1609,7 @@ function draw_menu_items($menu_array) {
 			{
 				// Yes!  We found a default message.
 				$bool_default_description = true;
-				$track_description = $this->convert_b_b_code_to_h_t_m_l(trim(str_replace("DEFAULT:", "", $track_description)));
+				$track_description = $this->convert_bbcode_to_html(trim(str_replace("DEFAULT:", "", $track_description)));
 				$track_description = "<div style='padding-top: 10px;' class='tenpt'>$track_description</div>";
 				$pC = str_replace("<!--DEFAULT-->",$track_description, $pC);
 				break;
@@ -1634,7 +1634,7 @@ function draw_menu_items($menu_array) {
 
 			if ($bool_default_description == false)
 			{
-				$track_description = $this->convert_b_b_code_to_h_t_m_l(trim($temp[2]));
+				$track_description = $this->convert_bbcode_to_html(trim($temp[2]));
 				if ($track_description != "")
 				{
 					$track_description = " - $track_description";
@@ -2465,7 +2465,7 @@ function draw_menu_items($menu_array) {
 			return "";
 		}
 
-		$public_note = $this->convert_b_b_code_to_h_t_m_l($this->degree_plan->public_note);
+		$public_note = $this->convert_bbcode_to_html($this->degree_plan->public_note);
 
 		$pC = "";
 
@@ -2989,6 +2989,7 @@ function draw_menu_items($menu_array) {
 	  return $rtn;
 	  
 	}
+	
 	
 	/**
 	 * Given a propperly formatted tabArray, this will return the HTML

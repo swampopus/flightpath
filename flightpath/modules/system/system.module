@@ -124,9 +124,224 @@ function system_menu() {
     "page_callback" => "system_display_main_page",
     "access_callback" => TRUE,
     "type" => MENU_TYPE_TAB,
+    "tab_family" => "system",
+    "weight" => 10,
   );
   
+  $items["login"] = array(
+    "title" => "Login",
+    "page_callback" => "system_display_login_page",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );
+
+  // TODO: This one needs admin access!
+  $items["admin-tools/clear-cache"] = array(
+    "title" => "Clear cache",
+    "page_callback" => "system_clear_cache",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );  
+  
+  $items["perform-login"] = array(
+    "title" => "Perform Login",
+    "page_callback" => "system_handle_login_submit",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_CALLBACK,
+  );
+
+  $items["logout"] = array(
+    "title" => "Logout",
+    "page_callback" => "system_handle_logout",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_CALLBACK,
+  );
+  
+           
   return $items;
+}
+
+
+function system_handle_logout() {
+  $_SESSION["fp_logged_in"] = FALSE;
+  session_destroy();
+  return system_display_login_page("<span class='logout-successful'>You have been logged out of FlightPath.</span>");
+}
+
+/**
+ * This function will clear our various caches, forcing
+ * them to be rebuilt.
+ */
+function system_clear_cache() {
+  
+  menu_rebuild_cache();
+  
+  fp_add_message("Cache has been cleared");
+  
+  fp_goto("<front>");
+  
+}
+
+
+/**
+ * Handles the submitting of login data.
+ */
+function system_handle_login_submit() {
+  // TODO:  Check for hooks which other modules might wish to hook into
+  // Are we bypassing logins in the settings, and just giving this user
+  // full_admin access?
+  if ($GLOBALS["fp_system_settings"]["GRANT_FULL_ACCESS"] == TRUE) {
+    $_SESSION["fp_logged_in"] = TRUE;
+    $_SESSION["fp_user_id"] = 1;
+    $_SESSION["fp_user_name"] = "FULL ACCESS USER";
+    // $_SESSION["fp_user_type"] = "full_admin";
+    // $_SESSION["fp_can_advise"] = TRUE;
+    // $_SESSION["fp_can_search"] = TRUE;
+    // $_SESSION["fp_can_substitute"] = TRUE;
+    // $_SESSION["fp_cache_course_inventory"] = false;
+    // $_SESSION["fp_can_modify_comments"] = TRUE;
+    $_SESSION["fp_user_rolls"][] = "administrator";
+    fp_goto("<front>");
+    return;
+  }  
+}
+
+
+function system_display_login_page($msg = "") {
+  $rtn = "";
+  
+  fp_add_css(fp_get_module_path("system") . "/css/style.css");  
+  
+  $rtn .= "
+    <div class='login-welcome'>
+    Welcome to <span class='flightpath-name'>FlightPath</span>, the electronic student
+    advising system!
+    </div>";
+
+  // if ($screen->settings["urgent_msg"] != "")
+  // {
+    // $pC .= "<div class='tenpt hypo' style='margin: 10px; padding: 5px;'>
+        // <b>Important Notice:</b> " . $screen->convert_b_b_code_to_h_t_m_l($screen->settings["urgent_msg"]) . "
+        // </div>";
+  // }
+// 
+  // if ($screen->settings["offline_mode"] == "1") {
+    // // Logins have been disabled in the settings.  Do not display the login
+    // // form to the user.
+    // $pC .= "<div>";
+    // $msg = trim($screen->convert_b_b_code_to_h_t_m_l($screen->settings["offline_msg"]));
+    // if ($msg != "") {
+      // $pC .= $msg;
+    // }
+    // else {
+      // $pC .= "FlightPath is currently offline at this time for maintenance and updates.
+             // We are sorry for the inconvenience.  Please try again later.";
+    // }
+//     
+    // $pC .= "</div>";
+  // }
+  // else {
+  
+  $rtn .= "<noscript>
+            <div style='padding: 5px; background-color: red; color: white; font-size: 12pt; font-weight: bold;'>
+            FlightPath requires JavaScript to be enabled in order to
+            function correctly.  Please enable JavaScript on your browser
+            before continuing.</div>
+          </noscript>";
+  
+  $important_notice = "
+      <div class='hypo tenpt' style='padding:5px; text-align: justify;'>
+      <b>Important Notice:</b> This degree audit system is intended to assist you in determining 
+      your progress toward a degree, but is not an official transcript. 
+      Although efforts are made to ensure the accuracy of this system, you 
+      should carefully review it and report any discrepancies to your advisor. 
+      It is your responsibility to confirm the status of major requirements by 
+      consulting a departmental advisor. It is also your responsibility to seek 
+      information on all college and major requirements in the undergraduate 
+      catalog to which you are assigned. Final confirmation of degree requirements is subject to approval 
+      by the major department and Dean.
+      </div>
+  ";
+  
+  $w1 = 300;
+  if (fp_screen_is_mobile()) $w1 = "90%";
+  
+  $login_box = "
+      <table border='0' width='$w1' align='center' class='blueBorder' cellpadding='0' cellspacing='0'>
+      <tr>
+       <td class='blueTitle' align='center' height='20' colspan='2'>
+       <span class='tenpt' style='color: white' ><b>Please login below...</b></span>
+       </td>
+      </tr>
+      <tr>
+      <td colspan=2> &nbsp;
+      </td>
+      </tr>
+      <tr>
+          <td align=center valign=top width='35%'>
+            
+            <span style='color: #660000; '><b>USER:</b></span></td><td valign=top><input type=text name='user_id' id='cwid_box'></td>
+          </td>
+        </tr>
+        <tr>
+          <td align=center valign=top>
+            <span style='color: #660000; '><b>PASS:</b></span></td>
+          <td valign=top><input type='password' name='password'>
+          <!-- <br><span class='tenpt' ><a href='javascript: popupHelpWindow(\"help.php?i={$GLOBALS["fp_system_settings"]["login_help_page_id"]}\");' style='text-decoration:none;'>need help logging-in?</a></span> -->
+            </td>
+        </tr>
+        <tr>
+          <td align=center>
+          </td>
+          <td align=left>
+        <br>     
+        <input type='hidden' name='scrollTop' id='scrollTop'>   
+              <input style='font-size: 12pt; color: #660000;' NAME='submit_fun' type='submit' value='Login' onClick='showUpdate(true);submitForm(false);'>
+            
+            
+            <BR><br>
+            
+  
+          </td>
+        </tr>
+      </table>
+   ";
+  
+  
+  $rtn .= "
+      <form action='" . base_path() . "/perform-login' method='POST' id='mainform' onSubmit='showUpdate(true);'>  
+    ";
+  
+  if (fp_screen_is_mobile()) {
+    // the user is viewing this on a mobile device, so make it look
+    // a bit nicer.
+    //$pC .= $screen->draw_c_fieldset($important_notice, "View important notice", true);
+    $rtn .= $login_box; 
+  }
+  else {
+    // This is NOT mobile, this is a regular desktop browser.
+    $rtn .= "
+      <table border='0'>
+      <tr>
+       <td valign='top' width='40%'>
+        $important_notice
+       </td>
+      <td valign='middle'>
+        $login_box      
+  
+       </td>
+      </tr>
+     </table>
+     ";
+  }
+  
+  $rtn .= "
+  </form>
+  <br>$msg
+  ";  
+  
+  
+  return $rtn;
 }
 
 
@@ -135,38 +350,16 @@ function system_menu() {
  * as well as the Tools menu, and the "special administrative tools" menu.
  */
 function system_display_main_page() {
-  
   $rtn = "";
 
-/*
-  $pC .= $screen->display_greeting();
-  $pC .= $screen->display_begin_semester_table();
-
-  if ($_SESSION["fp_user_type"] != "none")
-  {
-    $pC .= $screen->draw_currently_advising_box(true);
-  } else {
-    // Let the user know they have no privileges in FP.
-    $pC .= "<tr>
-        <td colspan='5'>
-        
-         <div class='hypo tenpt' style='margin: 10px; padding: 10px;'>
-           <div style='float:left; padding-right: 20px; height: 50px;'>
-          <img src='$screen->theme_location/images/alert_lg.gif'>
-           </div>
-          <b>Please Note:</b>
-          At this time, you do not have access to student records in FlightPath.
-          However, you may still access certain Tools, listed below.  If you feel
-          that you have reached this message in error, and you do require
-          access to student records, please speak with your department head or call
-          342-5554.
-          </div>
-        </td>
-        </tr>         
-        ";
+  // If we are not logged in, then we need to re-direct the user to 
+  // the login page!
+  if ($_SESSION["fp_logged_in"] != TRUE) {
+    fp_goto("login");
+    return;  
   }
 
- */ 
+
   
   if ($_SESSION["fp_user_type"] != "none") {
     $rtn .= fp_render_currently_advising_box($true);
@@ -194,7 +387,7 @@ function system_display_main_page() {
   
   $announcements = system_render_announcements_block();
   $tools = system_render_menu_block("Tools", "tools");
-  //$admin_tools = system_get_admin_tools();
+  $admin_tools = system_render_menu_block("Administrative Tools", "admin-tools");
   
   if (fp_screen_is_mobile()) {
     $rtn .= "<tr><td colspan='2'>$announcements $tools $admin_tools</td></tr>";
@@ -330,19 +523,45 @@ function system_render_announcements_block() {
 function system_render_menu_block($title = "Tools", $menu_root = "tools") {
   $rtn = "";
   
+  $is_empty = true;
   $rtn .= fp_render_curved_line($title);
   
   $menu_items = menu_get_items_beginning_with($menu_root);
   foreach ($menu_items as $item) {
     if ($item["type"] == MENU_TYPE_NORMAL_ITEM) {
       $rtn .= fp_render_menu_item($item);
+      $is_empty = false;
     }
   }
   
+  if ($is_empty) {
+    return "";
+  }
   //pretty_print($menu_items);
   
   return $rtn;   
   
+}
+
+
+/**
+ * Called on every page load.
+ */
+function system_init() {
+  // Let's see if the $user object (for the logged-in user) has been set up.
+  global $user;
+  $user = new stdClass();
+  $user->id = 0;
+  $user->name = "Anonymous";
+      
+  if ($_SESSION["fp_logged_in"] == TRUE) {
+    //pretty_print($_SESSION);
+    $user->id = $_SESSION["fp_user_id"];
+    $user->name = $_SESSION["fp_user_name"];
+    $user->rolls = $_SESSION["fp_user_rolls"];    
+  }
+     
+    
 }
 
 

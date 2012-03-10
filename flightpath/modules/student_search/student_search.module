@@ -1,0 +1,25 @@
+<?php
+
+
+function student_search_menu() {
+  $items = array();
+  
+  $items["student-search"] = array(
+    "title" => "Advisees",
+    "page_callback" => "student_search_display_search",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "system",
+    "weight" => 20,
+  );
+  
+  return $items;
+}
+
+function student_search_display_search() {
+  $rtn = "";
+  
+  $rtn = "hey";
+  
+  return $rtn;
+}
