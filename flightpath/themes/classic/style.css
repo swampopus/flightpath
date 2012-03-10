@@ -16,6 +16,17 @@ body
   font-size: 0.8em;
 }
 
+.sub-tabs {
+  margin-bottom: 10px;
+  margin-top: 10px;
+  font-size: 0.9em;
+}
+
+.sub-tabs .gradbutton-active {
+  font-weight: bold;
+}
+
+
 .admin-message
 {
 	padding: 5px;
