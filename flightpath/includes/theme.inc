@@ -53,17 +53,14 @@ function fp_display_page($page) {
     unset($_SESSION["fp_messages"]);
   }
 
-  // TODO:  content_top gets the Currently Advising box.    
+  // content_top gets the Currently Advising box.
+  if ($page["router_item"]["page_settings"]["display_currently_advising"] == TRUE) {
+    $content_top .= fp_render_currently_advising_box();
+  }    
   
   $screen->page_content = $content_top .= $page["content"];
   // If there are CSS files to add, add those.
-  if (is_array($GLOBALS["fp_extra_css"])) {
-    foreach ($GLOBALS["fp_extra_css"] as $filename) {
-      //pretty_print ("adding $filename");
-      $screen->add_css($filename);
-    }
-  }
-  
+    
   
   $screen->output_to_browser();  
 }
@@ -75,6 +72,8 @@ function fp_display_page($page) {
  * but it contains only this page's sub-tab siblings.
  */
 function fp_build_sub_tab_array($page) {
+  global $current_student_id;
+  
   $tab_array = array();
 
   $tab_family = $page["router_item"]["tab_family"];
@@ -89,7 +88,9 @@ function fp_build_sub_tab_array($page) {
     $on_click = $page["page_settings"]["tab_on_click"];
     if ($on_click == "") {
       // Just a simple link to the path
-      $on_click = "window.location=\"" . base_path() . "/" . $path . "\"";
+      // Add the current_student_id to the query!
+      $query = "&current_student_id=$current_student_id";
+      $on_click = "window.location=\"" . base_path() . "/" . $path . $query . "\"";
     }
           
     if ($path == $active_tab_path) {
@@ -116,6 +117,7 @@ function fp_build_sub_tab_array($page) {
  * Meant for the top of the screen.
  */
 function fp_build_tab_array($page) {
+    global $current_student_id;
     $tab_array = array();
     
     $tab_family = $page["router_item"]["tab_family"];
@@ -142,7 +144,10 @@ function fp_build_tab_array($page) {
       $on_click = $page["page_settings"]["tab_on_click"];
       if ($on_click == "") {
         // Just a simple link to the path
-        $on_click = "window.location=\"" . base_path() . "/" . $path . "\"";
+        // Include the current_student_id!
+        $query = "&current_student_id=$current_student_id";
+        
+        $on_click = "window.location=\"" . base_path() . "/" . $path . $query . "\"";
       }
             
       if ($path == $active_tab_path) {
@@ -162,6 +167,296 @@ function fp_build_tab_array($page) {
     
     return $tab_array;
 }
+
+
+
+
+  /**
+   * Draws the CurrentlyAdvisingBox which appears at the top of the screen,
+   * containing the student's information like name, major, etc.
+   *
+   * @param bool $bool_hide_catalog_warning
+   *       - If set to TRUE, FP will not display a warning which tells
+   *         the user that they are working under an outdated catalog year.
+   * 
+   * @return string
+   */
+  function fp_render_currently_advising_box($bool_hide_catalog_warning = false, $bool_blank = FALSE, $bool_print = FALSE, $degree_plan = NULL, $screen_mode = "") {
+    global $current_student_id;
+    
+    $rtn  = "";
+    
+    $csid = $current_student_id;
+    
+    $student = new Student();
+    $student->student_id = $csid;
+    $student->load_student_data();
+          
+    $settings = fp_get_system_settings();
+          
+    
+    $rtn .= "<table class='fp-currently-advising'>";
+  
+    
+    $for_term = $whatif = $what_if_select = $hypoclass = "";
+    if ($GLOBALS["fp_advising"]["advising_term_id"] != "" && $screen_mode != "not_advising"
+    && user_has_permission("can_advise_students"))
+    {
+      $temp_course = new Course();
+      $temp_course->term_id = $GLOBALS["fp_advising"]["advising_term_id"];
+      $t_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
+      $for_term = " for " . $temp_course->get_term_description();
+
+      // If this is an advisor or above
+      $for_term .= "<span style='font-size: 8pt; font-weight:normal;'>
+             - <a href='javascript: popupWindow(\"changeTerm\",\"advising_term_id=$t_term_id\");' style='color:blue; background-color: white; border: 1px solid black; padding-left: 3px; padding-right: 3px;'>change<img src='fp_theme_location()/images/calendar1.jpg' height='13' border='0' style='vertical-align: bottom;'></a>
+            </span>";
+
+
+    }
+
+    // TODO:  bool_blank? bool_print?
+    if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes" && !$bool_blank)
+    {
+      $whatif = " (in \"What If\" mode) ";
+      $hypoclass = "hypo";
+      // latest cat year because its what if.
+      $student->catalog_year = $settings["current_catalog_year"];
+      if ($bool_print != true) {
+        $what_if_select = "<div class='tenpt'><b>
+          <a href='advise.php?advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&current_student_id=$csid'>Change What If Settings</a></b></div>";
+      }
+    }
+
+    $ca = "Currently Advising";
+    // TODO:  should be based on roles instead of type
+    if ($_SESSION["fp_user_type"] == "student" || $_SESSION["fp_user_type"] == "viewer")
+    {
+      $ca = "Student Details";
+    }
+
+    if ($bool_blank == true) {
+      $ca = "Viewing Blank Degree Plan";
+    }
+
+    $rtn .= "<tr><td colspan='2' style='padding-bottom: 10px;'>
+        $what_if_select
+      <table border='0' width='100%'  class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
+      <tr>
+          <td colspan='4' class='blueTitle' align='center' height='20'>
+          " . fp_render_square_line("$ca$whatif$for_term") . "
+          </td>
+      </tr>
+      ";
+
+    // Okay, let's build up the display array.
+    $display_array = array();
+
+    // How to display the catalog_year...
+    $cat_year = $student->catalog_year . "-" . ($student->catalog_year + 1);
+
+    // Should we display a catalog year warning?  This is
+    // something that can be part of a settings table.
+    if ($student->catalog_year < $settings["earliest_catalog_year"]) {
+      $cat_year = "<b>$cat_year</b>";
+      $bool_catalog_warning = true;
+    }
+
+    if ($settings["current_catalog_year"] > $settings["earliest_catalog_year"]) {
+      // Is the student's catalog set beyond the range that
+      // FP has data for?  If so, show a warning.
+      if ($student->catalog_year > $settings["current_catalog_year"])
+      {
+        $cat_year = "<b>$cat_year</b>";
+        $bool_future_catalog_warning = true;
+
+      }
+    }
+
+    $db = get_global_database_handler();
+
+    if ($degree_plan != NULL) {
+      $degree_title = $degree_plan->get_title2();
+    }
+    if ($degree_title == "") {
+      // Attempt to load the degree from the student's information.     
+      $degree_plan = $db->get_degree_plan($student->major_code, $student->catalog_year, true);
+      $degree_title = $degree_plan->get_title2();
+    }
+
+    if (!$bool_blank) {
+      array_push($display_array, "Name: ~~ " . $student->name);
+      array_push($display_array, "CWID: ~~ " . $student->student_id);
+    }
+    array_push($display_array, "Major: ~~ " . $degree_title);
+    // If this degree has tracks, we must display something about it here.
+
+    if ($degree_plan->bool_has_tracks)
+    {
+      $extra_vars = "";
+
+      /*if ($GLOBALS["advising_what_if"] == "yes")
+      {
+      $extra_vars .= "what_if_major_code={$GLOBALS["what_if_major_code"]}";
+      $extra_vars .= "&what_if_track_code={$GLOBALS["what_if_track_code"]}";
+      $extra_vars .= "&advising_what_if=yes";
+      }*/
+      
+      $op_link = "<a href='javascript: popupWindow(\"changeTrack\",\"$extra_vars\");'><img
+              src='fp_theme_location()/images/popup.gif' border='0' 
+              title='Click to change degree options.'></a>";
+      $op_text = "Click to select: $op_link";
+
+      if ($screen_mode == "not_advising")
+      {
+        $op_text = "None selected";
+        $op_link = "";
+      }
+
+      if (!user_has_permission("can_advise_students")) {
+        
+        if ($GLOBALS["fp_advising"]["advising_what_if"] != "yes")
+        {
+          // In other words, we do not have permission to advise,
+          // and we are not in whatIf, so take out the link.
+          $op_link = "";
+          $op_text = "None selected";
+
+        }
+      }
+
+
+      // Did has the student already selected an option?
+      if ($degree_plan->track_code != "")
+      {
+        $op_text = $degree_plan->track_title . " $op_link";
+      }
+
+
+      array_push($display_array, "Option: ~~ " . $op_text);
+    }
+    if (!$bool_blank) {
+      array_push($display_array, "Rank: ~~ " . $student->rank);
+    }
+    array_push($display_array, "Catalog Year: ~~ " . $cat_year);
+    if (!$bool_blank) {
+      array_push($display_array, "Cumulative: ~~ " . $student->cumulative_hours . " hrs. &nbsp;" . $student->gpa . " GPA");
+    }
+
+    if ($student->student_id > 1 || $bool_blank == true)
+    { // Make sure we have selected a student! (or are viewing a blank plan)
+      // Now, go through the array and display it.
+      for ($t = 0; $t < count($display_array); $t = $t + 2)
+      {
+        $temp = split(" ~~ ",$display_array[$t]);
+        $name1 = trim($temp[0]);
+        $value1 = trim($temp[1]);
+
+
+        $temp = split(" ~~ ",$display_array[$t+1]);
+        $name2 = trim($temp[0]);
+        $value2 = trim($temp[1]);
+
+
+        if (fp_screen_is_mobile()) {
+          // Mobile screen.  Needs to be more condensed.
+          $rtn .= "<tr class='$hypoclass'>
+                  <td valign='top'>$value1</td>
+                  <td valign='top'>$value2</td>
+                  </tr>";
+        }
+        else {
+         // Regular desktop screen. 
+        
+          $rtn .= "
+        
+            <tr class='$hypoclass' >
+              <td valign='top' width='20%' class='side_padding' style='padding-top: 5px;'>
+                 $name1
+              </td>
+              <td width='30%' valign='top' class='side_padding elevenpt' style='padding-top: 5px;'>
+                $value1
+              </td>
+              <td valign='top' align='left' width='20%' class='side_padding elevenpt' style='padding-top: 5px;'>
+                   $name2
+              </td>
+               <td align='right' width='30%' valign='top' class='side_padding elevenpt' style='padding-top: 5px;'>
+                   $value2
+                </td>
+            </tr>  ";
+      
+        }
+        
+      }
+    } else {
+      // No student has been selected yet!
+      $rtn .= "<tr height='60'>
+        <td align='center'> No advisee selected. </td>
+      </tr>";
+      $bool_hide_catalog_warning = true;
+    }
+
+    $rtn .= "</table>";
+
+    if ($bool_catalog_warning == true && !$bool_hide_catalog_warning)
+    {
+      $rtn .= "
+      
+      <div class='tenpt hypo' style='margin-top: 4px; padding: 2px;'>
+      <table border='0' cellspacing='0' cellpadding='0'>
+      <td valign='top'>
+        <img src='fp_theme_location()/images/alert_lg.gif' >  
+      </td>
+      <td valign='middle' class='tenpt' style='padding-left: 8px;'>
+        <b>Important Notice: </b>
+        FlightPath cannot display degree plans from 
+        catalogs earlier than " . $settings["earliest_catalog_year"] . "-" . ($settings["earliest_catalog_year"] + 1) . ".  
+        The above student's catalog year is $cat_year, which means 
+        that the degree plan below may not accurately 
+        display this student's degree requirements.
+      </td>
+      </table>
+      </div>
+      
+    "; 
+    }
+
+    if ($bool_future_catalog_warning == true && !$bool_hide_catalog_warning)
+    {
+      $rtn .= "
+      
+      <div class='tenpt hypo' style='margin-top: 4px; padding: 2px;'>
+      <table border='0' cellspacing='0' cellpadding='0'>
+      <td valign='top'>
+        <img src='fp_theme_location()/images/alert_lg.gif' >  
+      </td>
+      <td valign='middle' class='tenpt' style='padding-left: 8px;'>
+        <b>Important Notice: </b>
+        This student's catalog year is $cat_year, 
+        and specific curriculum requirements are not yet 
+        available for this year.  
+        To advise this student according to {$settings["current_catalog_year"]}-" . ($settings["current_catalog_year"] + 1) . "
+        requirements, select the student's major using What If.
+      </td>
+      </table>
+      </div>
+      
+    "; 
+    }
+
+
+
+
+    $rtn .= "</td></tr>";
+
+    
+    $rtn .= "</table>";
+    
+    return $rtn;
+  }
+
+
+
 
 
 
@@ -195,6 +490,8 @@ function fp_render_greeting() {
  * Similar to render_tab_array.
  */
 function fp_render_sub_tab_array($tab_array) {
+  global $current_student_id;
+  
   $rtn = "";
   
   $rtn .= "<div class='sub-tabs'>";
@@ -465,6 +762,38 @@ function fp_render_curved_line($text) {
 }
 
 
+
+/**
+ * Will draw a string in a pretty square box.  Used for displaying semester
+ * titles.
+ *
+ * @param string $title
+ * @return string
+ */
+function fp_render_square_line($text) {
+  
+  $pC .= "
+        <table border='0' width='100%' cellpadding='0' cellspacing='0'>
+       <tr>
+        <td width='10%' align='left' valign='top'></td>
+        <td width='80%' align='center' rowspan='2'>
+         <span class='tenpt' style='color: white' ><b>$text</b></span>
+        </td>
+        <td width='10%' align='right' valign='top'></td>
+       </tr>
+       <tr>
+        <td align='left' valign='bottom'></td>
+        <td align='right' valign='bottom'></td>
+       </tr> 
+      </table>     
+    
+      ";
+
+  return $rtn;
+
+}
+
+
 function fp_render_menu_item($item) {
   $rtn = "";
   
@@ -495,10 +824,6 @@ function fp_render_menu_item($item) {
   return $rtn;
 }
 
-
-function fp_render_currently_advising_box() {
-  
-}
 
 
 

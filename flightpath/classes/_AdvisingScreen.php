@@ -79,12 +79,6 @@ class _AdvisingScreen
 		$this->settings = $this->db->get_flightpath_settings();
 		$this->user_settings = $this->db->get_user_settings($_SESSION["fp_user_id"]);
 
-		$this->theme_location = $GLOBALS["fp_system_settings"]["theme"];
-		if ($this->theme_location == "") {
-		  // Force a default!
-		  $this->theme_location = "themes/classic";
-		}
-		
 		
 		$this->earliest_catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
 		
@@ -304,8 +298,8 @@ function draw_menu_items($menu_array) {
 		$page_is_popup = $this->page_is_popup;
 		$page_title = $this->page_title;
 		$page_hide_report_error = $this->page_hide_report_error;
-    $page_extra_css_files = $this->page_extra_css_files;		
-		
+    $page_extra_css_files = $GLOBALS["fp_extra_css"];		
+		$page_extra_js_files = $GLOBALS["fp_extra_js"];
 		$print_option = "";
 		if ($this->bool_print == true)
 		{
@@ -317,7 +311,7 @@ function draw_menu_items($menu_array) {
 		  $print_option = "mobile_";
 		}
 					
-		include("$this->theme_location/fp_" . $print_option . "template.php");
+		include($GLOBALS["fp_system_settings"]["theme"] . "/fp_" . $print_option . "template.php");
 	}
 
 	
@@ -823,7 +817,7 @@ function draw_menu_items($menu_array) {
 			if ($this->bool_print != true)
 			{// Don't display in print view.
 				$pC .= "<div style='tenpt'>
-					<a href='javascript: popupWindow2(\"toolbox\",\"\");'><img src='$this->theme_location/images/toolbox.gif' border='0'>Administrator's Toolkit</a>
+					<a href='javascript: popupWindow2(\"toolbox\",\"\");'><img src='fp_theme_location()/images/toolbox.gif' border='0'>Administrator's Toolkit</a>
 				</div>";
 				$is_empty = false;
 			}
@@ -1903,7 +1897,7 @@ function draw_menu_items($menu_array) {
 
 			// If this is an advisor or above
 			$for_term .= "<span style='font-size: 8pt; font-weight:normal;'>
-						 - <a href='javascript: popupWindow(\"changeTerm\",\"advising_term_id=$t_term_id\");' style='color:blue; background-color: white; border: 1px solid black; padding-left: 3px; padding-right: 3px;'>change<img src='$this->theme_location/images/calendar1.jpg' height='13' border='0' style='vertical-align: bottom;'></a>
+						 - <a href='javascript: popupWindow(\"changeTerm\",\"advising_term_id=$t_term_id\");' style='color:blue; background-color: white; border: 1px solid black; padding-left: 3px; padding-right: 3px;'>change<img src='fp_theme_location()/images/calendar1.jpg' height='13' border='0' style='vertical-align: bottom;'></a>
 						</span>";
 
 
@@ -2001,7 +1995,7 @@ function draw_menu_items($menu_array) {
 			}*/
 			
 			$op_link = "<a href='javascript: popupWindow(\"changeTrack\",\"$extra_vars\");'><img
-							src='$this->theme_location/images/popup.gif' border='0' 
+							src='fp_theme_location()/images/popup.gif' border='0' 
 							title='Click to change degree options.'></a>";
 			$op_text = "Click to select: $op_link";
 
@@ -2106,7 +2100,7 @@ function draw_menu_items($menu_array) {
 			<div class='tenpt hypo' style='margin-top: 4px; padding: 2px;'>
 			<table border='0' cellspacing='0' cellpadding='0'>
 			<td valign='top'>
-				<img src='$this->theme_location/images/alert_lg.gif' >	
+				<img src='fp_theme_location()/images/alert_lg.gif' >	
 			</td>
 			<td valign='middle' class='tenpt' style='padding-left: 8px;'>
 				<b>Important Notice: </b>
@@ -2129,7 +2123,7 @@ function draw_menu_items($menu_array) {
 			<div class='tenpt hypo' style='margin-top: 4px; padding: 2px;'>
 			<table border='0' cellspacing='0' cellpadding='0'>
 			<td valign='top'>
-				<img src='$this->theme_location/images/alert_lg.gif' >	
+				<img src='fp_theme_location()/images/alert_lg.gif' >	
 			</td>
 			<td valign='middle' class='tenpt' style='padding-left: 8px;'>
 				<b>Important Notice: </b>
@@ -2498,10 +2492,6 @@ function draw_menu_items($menu_array) {
 		$pC = "";
 
 
-		$pC .= "<form action='$this->script_filename' id='mainform' method='POST'>";
-
-		$pC .= $this->get_javascript_code();
-		$pC .= $this->display_begin_semester_table();
 
 		if ($this->bool_hiding_grades && !$this->bool_print && $GLOBALS["fp_system_settings"]["hiding_grades_message"] != "")
 		{
@@ -2512,7 +2502,7 @@ function draw_menu_items($menu_array) {
           			 padding: 2px; border: 1px solid maroon;'>
           			<table border='0' cellspacing='0' cellpadding='0'>
           			<td valign='top'>
-          				<img src='$this->theme_location/images/alert_lg.gif' >	
+          				<img src='fp_theme_location()/images/alert_lg.gif' >	
           			</td>
           			<td valign='middle' class='tenpt' style='padding-left: 8px;'>
           			{$GLOBALS["fp_system_settings"]["hiding_grades_message"]}
@@ -2524,7 +2514,7 @@ function draw_menu_items($menu_array) {
 		}
 		
 		
-		$pC .= $this->draw_currently_advising_box();
+		//$pC .= $this->draw_currently_advising_box();
 		$pC .= $this->draw_progress_boxes();
 		
     
@@ -2564,7 +2554,7 @@ function draw_menu_items($menu_array) {
 		}
 
 
-		if ($_SESSION["fp_can_advise"] == true)
+		if (user_has_permission("can_advise_students"))
 		{
 			if (!$this->bool_print && !$this->bool_blank)
 			{
@@ -2577,7 +2567,7 @@ function draw_menu_items($menu_array) {
 			  
 				$pC .= "<td align='center'>
 						<div class='tenpt' style='margin-top:35px; margin-bottom:10px; padding: 10px; width: 200px;'>
-						" . $this->draw_button("_submit","submit_save_active();") . "					
+						" . $this->draw_button("Submit","submitSaveActive();") . "					
 						</div>
 						</td></tr>
 						";		
@@ -2586,13 +2576,7 @@ function draw_menu_items($menu_array) {
 				//$this->add_to_screen("<input type='button' value='Submit' onClick='submitSaveActive();'>");
 			}
 		}
-
-		$pC .= $this->display_end_semester_table();
-		$pC .= $this->get_hidden_advising_variables("save_draft");
-
-		$pC .= "</form>
-				";
-
+    
 		return $pC;
 
 	}
@@ -2854,7 +2838,7 @@ function draw_menu_items($menu_array) {
 					";
 			if (!$this->page_is_mobile) {
   			$pC .= "&nbsp;&nbsp;
-  					<a href='javascript:launchPrintView();' class='nounderline'>Print View <img src='$this->theme_location/images/popup.gif' border='0'></a>
+  					<a href='javascript:launchPrintView();' class='nounderline'>Print View <img src='fp_theme_location()/images/popup.gif' border='0'></a>
   					";
   
   			// If this is a full_admin, show them special options...
@@ -2888,7 +2872,7 @@ function draw_menu_items($menu_array) {
 					";
 			if (!$this->page_is_mobile) {
   			$pC .= "&nbsp;&nbsp;
-  					<a href='$module_action_u_r_l&blank_degree_id=$blank_degree_id&blank_view=$this->view&blankPrint=yes' class='nounderline' target='_blank'>Print View <img src='$this->theme_location/images/popup.gif' border='0'></a>
+  					<a href='$module_action_u_r_l&blank_degree_id=$blank_degree_id&blank_view=$this->view&blankPrint=yes' class='nounderline' target='_blank'>Print View <img src='fp_theme_location()/images/popup.gif' border='0'></a>
   					";
 			}
 
@@ -3021,7 +3005,7 @@ function draw_menu_items($menu_array) {
 			<tr>
 			";
 
-		$img_path = $this->theme_location . "/images";
+		$img_path = fp_theme_location() . "/images";
 
 
 		for ($t = 0; $t < count($tab_array); $t++)
@@ -3365,7 +3349,7 @@ function draw_menu_items($menu_array) {
 			$g->load_descriptive_data();
 
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
-						<img src='$this->theme_location/images/icons/$g->icon_filename' width='19' height='19'>
+						<img src='fp_theme_location()/images/icons/$g->icon_filename' width='19' height='19'>
 						&nbsp;
 						This course is a member of $g->title.
 					";
@@ -4107,7 +4091,7 @@ function draw_menu_items($menu_array) {
 	function draw_group_select_row(Group $group, $remaining_hours)
 	{
 		$pC = "";
-		$img_path = $this->theme_location . "/images";
+		$img_path = fp_theme_location() . "/images";
 		$on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
       				onmouseout=\"style.backgroundColor='white'\" ";
 
@@ -4328,7 +4312,7 @@ function draw_menu_items($menu_array) {
 	{
 		// Will simply draw a curved title bar containing the $title
 		// as the text.
-		$img_path = $this->theme_location . "/images";
+		$img_path = fp_theme_location() . "/images";
 
 		$rtn = "
      <table border='0' class='blueTitle' width='100%' cellpadding='0' cellspacing='0'>
@@ -4385,7 +4369,7 @@ function draw_menu_items($menu_array) {
 		$w5 = $this->width_array[6];
 		$w6 = $this->width_array[7];
 
-		$img_path = $this->theme_location . "/images";
+		$img_path = fp_theme_location() . "/images";
 		
 		// The current term we are advising for.
 		$advising_term_id = $GLOBALS["advising_term_id"];
@@ -4504,7 +4488,7 @@ function draw_menu_items($menu_array) {
 		  // The bool_taken part of this IF statement is because if the course
 		  // has been completed, we should only use the hours_awarded.
 		  
-			$var_hour_icon = "<img src='$this->theme_location/images/var_hour.gif'
+			$var_hour_icon = "<img src='" . fp_theme_location() . "/images/var_hour.gif'
 								title='This course has variable hours.'
 								alt='This course has variable hours.'>";
 			$hours = $course->get_advised_hours();
@@ -4558,27 +4542,27 @@ function draw_menu_items($menu_array) {
 			$opchecked = "-check";
 		}
 
-		$op_on_click_function = "toggle_selection";
+		$op_on_click_function = "toggleSelection";
 		if ($js_toggle_and_save == true)
 		{
-			$op_on_click_function = "toggle_selection_and_save";
+			$op_on_click_function = "toggleSelectionAndSave";
 		}
 
-		$extra_j_s_vars = "";
+		$extra_js_vars = "";
 		if ($course->display_status == "disabled")
 		{ // Checkbox needs to be disabled because this was advised in another
 			// term.
-			$op_on_click_function = "toggle_disabled_change_term";
+			$op_on_click_function = "toggleDisabledChangeTerm";
 			$course->term_id = $course->advised_term_id;
-			$extra_j_s_vars = $course->get_term_description();
+			$extra_js_vars = $course->get_term_description();
 
 		}
 
 		if ($course->display_status == "completed" || $course->display_status == "enrolled")
 		{
-			$op_on_click_function = "toggle_disabled_completed";
+			$op_on_click_function = "toggleDisabledCompleted";
 			$opchecked = "";
-			$extra_j_s_vars = $course->display_status;
+			$extra_js_vars = $course->display_status;
 		}
 
 		if ($course->display_status == "retake")
@@ -4586,7 +4570,7 @@ function draw_menu_items($menu_array) {
 			// this course was probably subbed in while the student
 			// was still enrolled, and they have since made an F or W.
 			// So, disable it.
-			$op_on_click_function = "dummy_toggle_selection";
+			$op_on_click_function = "dummyToggleSelection";
 			$opchecked = "";
 		}
 
@@ -4594,21 +4578,21 @@ function draw_menu_items($menu_array) {
 		if ($this->bool_print || $this->bool_blank)
 		{
 			// If this is print view, disable clicking.
-			$op_on_click_function = "dummy_toggle_selection";
+			$op_on_click_function = "dummyTtoggleSelection";
 		}
 
-		if ($_SESSION["fp_can_advise"] != true)
+		if (!user_has_permission("can_advise_students"))
 		{
 			// This user does not have the abilty to advise,
 			// so take away the ability to toggle anything (like
 			// we are in print view).
-			$op_on_click_function = "dummy_toggle_selection";
+			$op_on_click_function = "dummyToggleSelection";
 		}
 
 		$op = "<img src='$img_path/cb_" . $display_status . "$opchecked.gif'
 					border='0'
 					id='cb_$unique_id'
-					on_click='$op_on_click_function(\"$unique_id\",\"$display_status\",\"$extra_j_s_vars\");'
+					onclick='{$op_on_click_function}(\"$unique_id\",\"$display_status\",\"$extra_js_vars\");'
 					>";
 		$hid = "<input type='hidden' name='$hid_name'
 						id='advisecourse_$unique_id' value='$hid_value'>";
@@ -4624,7 +4608,7 @@ function draw_menu_items($menu_array) {
 			$blank_degree_id = $this->degree_plan->degree_id;
 		}
 
-		$js_code = "describe_course(\"$data_string\",\"$blank_degree_id\");";
+		$js_code = "describeCourse(\"$data_string\",\"$blank_degree_id\");";
 
 		$icon_link = "";
 		//admin_debug($course->toString() . " RT: " . $course->requirement_type);
@@ -4634,26 +4618,23 @@ function draw_menu_items($menu_array) {
 			$title_text = "This course is a University Capstone.";
 		}
 
-		if ($icon_filename != "")
-		{
-			$icon_link = "<img src='$this->theme_location/images/icons/$icon_filename' width='19' height='19' border='0' alt='$title_text' title='$title_text'>";
+		if ($icon_filename != "") {
+			$icon_link = "<img src='" . fp_theme_location() . "/images/icons/$icon_filename' width='19' height='19' border='0' alt='$title_text' title='$title_text'>";
 		}
 
 		$on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
       				onmouseout=\"style.backgroundColor='white'\" ";
 
-		if ($this->page_is_mobile) $on_mouse_over = "";  // Causes problems for some mobile devices.
+		if (fp_screen_is_mobile()) $on_mouse_over = "";  // Causes problems for some mobile devices.
 		
 		$hand_class = "hand";
 
-		if ($bool_display_check == false)
-		{
+		if ($bool_display_check == false) {
 			$op = $hid = "";
 		}
 
 
-		if ($this->bool_print)
-		{
+		if ($this->bool_print) {
 			// In print view, disable all popups and mouseovers.
 			$on_mouse_over = "";
 			$js_code = "";
@@ -4664,17 +4645,14 @@ function draw_menu_items($menu_array) {
 		$pC .= "<tr><td colspan='8'>";
 
 
-		if ($course->bool_substitution_new_from_split != true || ($course->bool_substitution_new_from_split == true && $course->display_status != "eligible"))
-		{
+		if ($course->bool_substitution_new_from_split != true || ($course->bool_substitution_new_from_split == true && $course->display_status != "eligible")){
 
-			if ($course->bool_substitution == true)
-			{
+			if ($course->bool_substitution == true)	{
 				//admin_debug($subject_id . $course_num . " $footnote $hours");
 
 			}
 
-			if ($course_num == "")
-			{
+			if ($course_num == ""){
 				$course_num = "&nbsp;";
 			}
 
@@ -4802,7 +4780,7 @@ function draw_menu_items($menu_array) {
 		$var_hour_icon = "&nbsp;";
 		if ($course->has_variable_hours() == true)
 		{
-			$var_hour_icon = "<img src='$this->theme_location/images/var_hour.gif'
+			$var_hour_icon = "<img src='fp_theme_location()/images/var_hour.gif'
 								title='This course has variable hours.'
 								alt='This course has variable hours.'>";
 		}
@@ -6799,10 +6777,10 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 	}
 
-
+ 
 	function get_j_s_toggle_selection()
 	{
-		$img_path = $this->theme_location . "/images";
+		$img_path = fp_theme_location() . "/images";
 		$rtn = '
 		function toggleSelection(uniqueID, display_status, warningMsg)
 		{

@@ -41,6 +41,11 @@ body
   width: 100%;
 }
 
+.fp-currently-advising {
+  border-collapse: collapse;
+  width: 100%;
+}
+
 
 .print-graphic
 {

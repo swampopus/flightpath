@@ -8,6 +8,14 @@ FlightPath Changelog
   
   Created student_search module.  Working on bringing in all of its functionality.
   
+  Added jquery 1.7.1 instead of 1.3.2.
+  
+  Added much of the Advise module
+  
+  Have a new concept of passing around the "current_student_id" from page to page,
+  and saving all other "advising variables" to a table, rather than keeping them in the POST
+  between every page.  This makes it much more tidy.
+  
 
 2012-03-09
   ** BIG CHANGE **

@@ -126,6 +126,9 @@ function system_menu() {
     "type" => MENU_TYPE_TAB,
     "tab_family" => "system",
     "weight" => 10,
+    "page_settings" => array(
+      "display_currently_advising" => TRUE,
+    ),
   );
   
   $items["login"] = array(
@@ -362,7 +365,7 @@ function system_display_main_page() {
 
   
   if ($_SESSION["fp_user_type"] != "none") {
-    $rtn .= fp_render_currently_advising_box($true);
+    //$rtn .= fp_render_currently_advising_box($true);
   }
   else {
     // Let the user they have no privileges in the system.
@@ -553,6 +556,7 @@ function system_init() {
   $user = new stdClass();
   $user->id = 0;
   $user->name = "Anonymous";
+  $user->rolls = array();
       
   if ($_SESSION["fp_logged_in"] == TRUE) {
     //pretty_print($_SESSION);

@@ -4,7 +4,6 @@ session_start();
 
 header("Cache-control: private");
 
-
 require_once("bootstrap.inc");
 
 // For development reasons only:
@@ -15,7 +14,7 @@ require_once("bootstrap.inc");
 $page = menu_execute_page_request();
 
 if (!is_int($page)) {
-  // Display the page!
+  // Display the page!  
   fp_display_page($page);
 }
 else {

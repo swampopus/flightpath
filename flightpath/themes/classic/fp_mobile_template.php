@@ -9,7 +9,7 @@ if ($page_title == "")
 	$page_title = $GLOBALS["fp_system_settings"]["school_initials"] . " FlightPath";
 }
 
-$theme_location = $GLOBALS["fp_system_settings"]["base_path"] . "/" . $GLOBALS["fp_system_settings"]["theme"];
+$theme_location = fp_theme_location();
 
 print "
 <meta name='viewport' id='view' content='width=device-width;'/>
@@ -31,7 +31,7 @@ print "
 
 ?>
 
-<script src="<?php print $GLOBALS["fp_system_settings"]["base_path"]; ?>/inc/jquery-1.3.2.min.js" type="text/javascript"></script>
+<script src="<?php print base_path() ?>/inc/jquery-1.7.1.min.js" type="text/javascript"></script>
 
 <script type='text/javascript'>
 
@@ -126,6 +126,16 @@ function popuphelp(topic)
 </script>
 
 <?php
+
+  // Add extra JS files.    
+    if (is_array($page_extra_js_files) && count($page_extra_js_files) > 0) {
+     foreach ($page_extra_js_files as $js_file_name) {
+       print "<script type='text/javascript' src='$js_file_name'></script> \n";
+     }        
+    }     
+
+
+
 	$scroll = "";
 	if (trim($page_scroll_top != ""))
 	{

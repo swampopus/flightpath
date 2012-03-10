@@ -9,7 +9,7 @@ function student_search_menu() {
     "page_callback" => "student_search_subtab_switchboard",
     "access_callback" => TRUE,
     "type" => MENU_TYPE_TAB,
-    "tab_family" => "system",
+    "tab_family" => "system",    
     "weight" => 20,
   );
   
@@ -20,6 +20,9 @@ function student_search_menu() {
     "type" => MENU_TYPE_SUB_TAB,
     "tab_family" => "student_search",
     "tab_parent" => "student-search",
+    "page_settings" => array (
+      "display_currently_advising" => TRUE,
+    ),
     "weight" => 10,
   );
   
@@ -30,6 +33,9 @@ function student_search_menu() {
     "type" => MENU_TYPE_SUB_TAB,
     "tab_family" => "student_search",
     "tab_parent" => "student-search",
+    "page_settings" => array (
+      "display_currently_advising" => TRUE,
+    ),    
     "weight" => 20,
   );
   
@@ -40,6 +46,9 @@ function student_search_menu() {
     "type" => MENU_TYPE_SUB_TAB,
     "tab_family" => "student_search",
     "tab_parent" => "student-search",
+    "page_settings" => array (
+      "display_currently_advising" => TRUE,
+    ),    
     "weight" => 30,
   );
 

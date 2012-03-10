@@ -335,8 +335,10 @@ mysql_close($dbc);
 
 // We want to make sure the "system" module is enabled, so we will hard-code
 // its values.
-$system_settings["modules"]["system"]["path"] = "modules/system";
-$system_settings["modules"]["system"]["disabled"] = "no";
+if ($system_settings["modules"]["system"]["enabled"] != 1) {
+  $system_settings["modules"]["system"]["path"] = "modules/system";
+  $system_settings["modules"]["system"]["enabled"] = 1;
+}
 
 ////////////////////////////////////////////
 ////////////////////////////////////////////
@@ -344,4 +346,9 @@ $system_settings["modules"]["system"]["disabled"] = "no";
 //
 // Assign our systemSettings to the GLOBALS array so we can access it anywhere.
 $GLOBALS["fp_system_settings"] = $system_settings;
-?>
+
+//////////////////////////////////////////////
+//////////////////////////////////////////////
+// PUT NOTHING BELOW THIS LINE!!!!
+
+

@@ -16,6 +16,11 @@ function fp_add_css($path_to_css) {
   $GLOBALS["fp_extra_css"][] = $path_to_css;
 }
 
+function fp_add_js($path_to_js) {
+  $GLOBALS["fp_extra_js"][] = $path_to_js;
+}
+
+
 function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bool_include_base_path = TRUE) {
   
   $p = get_module_path($module, $bool_include_file_system_path);
@@ -46,6 +51,13 @@ function base_path() {
  * Redirect the user's browser to the specified internal path + query.
  */
 function fp_goto($path, $query = "") {
+  global $current_student_id;
+    
+  if (!strstr($query, "current_student_id=")) {
+    // If the query doesn't contain the current_student_id, then add it in.
+    $query .= "&current_student_id=$current_student_id";
+  }
+
   if ($query != "") {
     // Should begin with a ?
     // TODO:
@@ -499,6 +511,13 @@ function fp_xml_to_array2($xml_data)
  * @param String $permission
  */
 function user_has_permission($permission, $faculty_id = "") {
+  global $user;  
+  
+  // If the user has the role "administrator", then they always have
+  // permission.
+  if (in_array("administrator", $user->rolls)) return TRUE;
+  
+  /*
   
   // We will check the database table each time, so that the user doesn't
   // have to log out and back in before their permissions change.
@@ -530,7 +549,7 @@ function user_has_permission($permission, $faculty_id = "") {
   if (in_array($permission, $p_array)) {
     return TRUE;
   }
-  
+  */
   return FALSE;
   
 }

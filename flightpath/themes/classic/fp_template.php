@@ -37,9 +37,17 @@ $theme_location = fp_theme_location();
 	<head>
 	
 	
-		<script src="<?php print base_path() ?>/inc/jquery-1.3.2.min.js" type="text/javascript"></script>
+		<script src="<?php print base_path() ?>/inc/jquery-1.7.1.min.js" type="text/javascript"></script>
 		
 		<script type='text/javascript'>
+    <?php
+    // java settings.
+      print " var FlightPath = new Object();
+              FlightPath.settings = new Object();
+              FlightPath.settings.themeLocation = '$theme_location'; 
+            ";
+    ?>
+    
 
 		function defaultOnLoad()
 		{
@@ -137,6 +145,15 @@ $theme_location = fp_theme_location();
 		
 		
 		<?php
+
+		// Add extra JS files.    
+      if (is_array($page_extra_js_files) && count($page_extra_js_files) > 0) {
+       foreach ($page_extra_js_files as $js_file_name) {
+         print "<script type='text/javascript' src='$js_file_name'></script> \n";
+       }        
+      } 		
+		
+		
 		 // Load this theme's CSS file(s)
 		 print "<link rel='stylesheet' type='text/css' href='$theme_location/style.css'>";
 		 

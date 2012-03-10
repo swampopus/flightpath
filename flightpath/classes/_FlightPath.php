@@ -1309,7 +1309,7 @@ class _FlightPath
 	}
 
 
-	function load_advising_sessionfrom_database($faculty_id = 0, $term_id = "", $bool_what_if = false, $bool_draft = true, $advising_session_id = 0)
+	function load_advising_session_from_database($faculty_id = 0, $term_id = "", $bool_what_if = false, $bool_draft = true, $advising_session_id = 0)
 	{
 		// This method will load an advising session for a particular
 		// student, and modify the degree plan object to reflect
