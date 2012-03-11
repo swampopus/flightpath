@@ -51,8 +51,9 @@ class _FlightPath
 	}
 
 
-	function init($bool_init_advising_variables = false, $bool_ignore_what_if_advising_variables = false, $bool_load_full = true)
-	{
+	function init($bool_init_advising_variables = false, $bool_ignore_what_if_advising_variables = false, $bool_load_full = true)	{
+	    
+	  global $current_student_id, $user;
 		// This will initialize this flightPath object
 		// based on what is available in the global variables.
 		// Takes the place of what was going on at the beginning
@@ -60,25 +61,26 @@ class _FlightPath
 
 		if ($bool_init_advising_variables == true)
 		{
-			$temp_screen = new AdvisingScreen();
-			$temp_screen->init_advising_variables($bool_ignore_what_if_advising_variables);
+			//$temp_screen = new AdvisingScreen();
+			//$temp_screen->init_advising_variables($bool_ignore_what_if_advising_variables);
+			advise_load_advising_variables_from_db($current_student_id, $user->id);
 		}
 
-		$major_code = $GLOBALS["advising_major_code"];
-		$track_code = $GLOBALS["advising_track_code"];
-		$student_id = $GLOBALS["advising_student_id"];
-		$advising_term_id = $GLOBALS["advising_term_id"];
-		$available_terms = $GLOBALS["setting_available_advising_term_ids"];
+		$major_code = $GLOBALS["fp_advising"]["advising_major_code"];
+		$track_code = $GLOBALS["fp_advising"]["advising_track_code"];
+		$student_id = $GLOBALS["fp_advising"]["advising_student_id"];
+		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
+		$available_terms = $GLOBALS["fp_advising"]["setting_available_advising_term_ids"];
 
 
 
 		$this->bool_what_if = false;
 
 		// Are we in WhatIf mode?
-		if ($GLOBALS["advising_what_if"] == "yes")
+		if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes")
 		{
-			$major_code = $GLOBALS["what_if_major_code"];
-			$track_code = $GLOBALS["what_if_track_code"];
+			$major_code = $GLOBALS["fp_advising"]["what_if_major_code"];
+			$track_code = $GLOBALS["fp_advising"]["what_if_track_code"];
 			//admin_debug("trackCode: $track_code");
 			//$major_code = "ART";
 			$this->bool_what_if = true;
@@ -107,7 +109,7 @@ class _FlightPath
 
 
 
-		$settings = $db->get_flightpath_settings();
+		$settings = fp_get_system_settings();
 
 		$catalog_year = $student->catalog_year;
 		if ($this->bool_what_if)
@@ -118,12 +120,12 @@ class _FlightPath
 		// make sure their catalog year is not past the system's current
 		// year setting.
 		if ($catalog_year > $settings["current_catalog_year"]
-		&& $settings["current_catalog_year"] > $GLOBALS["fp_system_settings"]["earliest_catalog_year"])
+		&& $settings["current_catalog_year"] > $settings["earliest_catalog_year"])
 		{ // Make sure degree plan is blank if it is!
 			$catalog_year = 99999;
 		}
 
-		if ($GLOBALS["advising_update_student_settings_flag"] != "")
+		if ($GLOBALS["fp_advising"]["advising_update_student_settings_flag"] != "")
 		{
 			$student->array_settings["track_code"] = $track_code;
 			$student->array_settings["major_code"] = $major_code;
@@ -939,8 +941,7 @@ class _FlightPath
 
 
 		// If this user cannot advise, then just return right now.
-		if ($_SESSION["fp_can_advise"] != true)
-		{
+		if (!user_has_permission("can_advise_students")) {
 			return;
 		}
 
@@ -1122,6 +1123,7 @@ class _FlightPath
 		}
 
 
+// TOOD:  check permissions for substitutions before saving
 		//------------------------------------------------------
 		//
 		//             Substitutions...

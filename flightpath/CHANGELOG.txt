@@ -1,6 +1,10 @@
 FlightPath Changelog
 ====================
 
+2012-03-11
+  Got many of the popups working on the "View" page.  Also, submitting a basic advising session works.
+
+
 2012-03-10
   Continuing work on making FP more like Drupal.
   

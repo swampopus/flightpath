@@ -18,39 +18,37 @@ define("MENU_ACCESS_DENIED", 201);
 define("MENU_NOT_FOUND", 202);
     
  
+ 
+ 
 /**
  * Go through all installed modules and rebuild the menu_router table,
  * based on each module's hook_menu function.
  */
 function menu_rebuild_cache() {
   
-  foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $value) {    
-    if (isset($value["disabled"]) && $value["disabled"] == "yes") {
-      // Module is not enabled.  Skip it.
-      continue;
-    }    
-    if (function_exists($module . "_menu")) {
-      $items = call_user_func($module . "_menu");
-      
-      // Okay, now go through the $items array, and write the needed information
-      // to the menu_router array.
-      foreach ($items as $path => $item) {
-        if (is_numeric($path)) continue; // problem, so skip.
+  $modules = modules_implement_hook("menu");
+  
+  foreach ($modules as $module) {
+    $items = call_user_func($module . "_menu");
+    
+    // Okay, now go through the $items array, and write the needed information
+    // to the menu_router array.
+    foreach ($items as $path => $item) {
+      if (is_numeric($path)) continue; // problem, so skip.
 
-        // Update our menu_router table.
-        // Begin by deleting the existing path, if there is one.
-        db_query("DELETE FROM menu_router WHERE path = '?' ", $path);
-        // Now, insert the new one.
-        db_query("INSERT INTO menu_router
-                    (path, access_callback, access_arguments, page_callback, page_arguments, title, description, type, weight, icon, page_settings, tab_family, tab_parent)
-                    VALUES
-                    ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
-                    ", $path, $item["access_callback"], serialize($item["access_arguments"]), $item["page_callback"],
-                       serialize($item['page_arguments']), $item['title'], $item['description'], $item['type'], $item['weight'], $item['icon'],
-                       serialize($item['page_settings']), $item['tab_family'], $item['tab_parent']);
-      }
+      // Update our menu_router table.
+      // Begin by deleting the existing path, if there is one.
+      db_query("DELETE FROM menu_router WHERE path = '?' ", $path);
+      // Now, insert the new one.
+      db_query("INSERT INTO menu_router
+                  (path, access_callback, access_arguments, page_callback, page_arguments, title, description, type, weight, icon, page_settings, tab_family, tab_parent)
+                  VALUES
+                  ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
+                  ", $path, $item["access_callback"], serialize($item["access_arguments"]), $item["page_callback"],
+                     serialize($item['page_arguments']), $item['title'], $item['description'], $item['type'], $item['weight'], $item['icon'],
+                     serialize($item['page_settings']), $item['tab_family'], $item['tab_parent']);
     }
-  }
+  }  
   
   fp_add_message(t("The menu router has been rebuilt"));
     

@@ -22,6 +22,7 @@ function student_search_menu() {
     "tab_parent" => "student-search",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
+      "display_greeting" => TRUE,
     ),
     "weight" => 10,
   );
@@ -35,6 +36,7 @@ function student_search_menu() {
     "tab_parent" => "student-search",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
+      "display_greeting" => TRUE,
     ),    
     "weight" => 20,
   );
@@ -48,6 +50,7 @@ function student_search_menu() {
     "tab_parent" => "student-search",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
+      "display_greeting" => TRUE,
     ),    
     "weight" => 30,
   );

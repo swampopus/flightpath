@@ -8,7 +8,23 @@
 /////////////////////////////////////////////////////////////////////
 
 
+/**
+ * If this program is called, it will override any other page tabs
+ * which might be getting constructed.  This lets the programmer,
+ * at run-time, completely control what tabs are at the top of the page.
+ */
+function fp_set_page_tabs($tab_array) {
+  $GLOBALS["fp_set_page_tabs"] = $tab_array;
+}
+
+
 function fp_add_message($str) {
+  
+  // Complex variable?  Change it to print_r.
+  if (is_array($str) || is_object($str)) {
+    $str = print_r($str, TRUE);
+  }
+  
   $_SESSION["fp_messages"][] = $str;
 }
 
@@ -208,6 +224,29 @@ function fp_get_system_settings() {
 
 
 
+ 
+/**
+ * Return an array of enabled modules which implement the provided hook.
+ * Do not include the preceeding "_" on the hook name!
+ */
+function modules_implement_hook($hook = "example_hook_here") {
+  $rtn = array();
+  
+  foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $value) {    
+    if (isset($value["enabled"]) && $value["enabled"] != "1") {
+      // Module is not enabled.  Skip it.
+      continue;
+    }
+    if (function_exists($module . '_' . $hook)) {
+      $rtn[] = $module;
+    }
+  }
+  
+  return $rtn;  
+}
+
+
+
 /**
  * This method will return a globally-set DatabaseHandler object,
  * creating it if it does not already exist.  This is for efficiency
@@ -227,10 +266,22 @@ function get_global_database_handler() {
 
 
 /**
+ * Alias for fp_add_message
+ */
+function fpm($str) {
+  fp_add_message($str);
+}
+
+/**
+ * Alias for fpm.
+ */
+function dpm($str) {
+  fpm($str);
+}
+
+/**
  * Will output a debugCT statement only if the user
- * is a full_admin.  $_SESSION["fp_user_type"] must == full_admin.
- *
- * 
+ * has access to view it. 
  */
 function admin_debug($str, $var_name = "")
 {
@@ -239,15 +290,15 @@ function admin_debug($str, $var_name = "")
     return;
   }
   // Will output a debugCT only if the user is a full_admin.
-  $temp = $GLOBALS["fp_system_settings"]["disable_debug_c_t"];  // save this....
-  $GLOBALS["fp_system_settings"]["disable_debug_c_t"] = false;
+  $temp = $GLOBALS["fp_system_settings"]["disable_debug_ct"];  // save this....
+  $GLOBALS["fp_system_settings"]["disable_debug_ct"] = false;
   
-  if ($_SESSION["fp_user_type"] == "full_admin")
+  if (user_has_permission("access_admin_debug"))
   {
-    fp_debug_c_t($str, $var_name);
+    fp_debug_ct($str, $var_name);
   }
   
-  $GLOBALS["fp_system_settings"]["disable_debug_c_t"] = $temp;  // restore its original state.
+  $GLOBALS["fp_system_settings"]["disable_debug_ct"] = $temp;  // restore its original state.
   
 }
 
@@ -836,14 +887,14 @@ function strip_non_u_t_f8($str, $html_safe = false){
 
 
 
-function fp_debug_c_t($debug_string = "", $var = "")
+function fp_debug_ct($debug_val = "", $var = "")
 { // Shortcut to the other function.
-  if ($GLOBALS["fp_system_settings"]["disable_debug_c_t"] == true)
+  if ($GLOBALS["fp_system_settings"]["disable_debug_ct"] == true)
   {
     return;
   }
 
-  fp_debug_current_time_millis($debug_string, false, $var);
+  fp_debug_current_time_millis($debug_val, false, $var);
 }
 
 
@@ -853,13 +904,18 @@ function fp_print_pre($str)
 }
 
 
-function fp_debug_current_time_millis($debug_string = "", $show_current_time = true, $var = "")
+function fp_debug_current_time_millis($debug_val = "", $show_current_time = true, $var = "")
 {
   // Display the current time in milliseconds, and, if available,
   // show how many milliseconds its been since the last time
   // this function was called.  This helps programmers tell how
   // long a particular function takes to run.  Just place a call
   // to this function before and after the function call.
+  
+  $debug_string = $debug_val;
+  if (is_array($debug_val) || is_object($debug_val)) {
+    $debug_string = "<pre>" . print_r($debug_val, true) . "</pre>";
+  }
 
   $last_time = $GLOBALS["current_time_millis" . $var] * 1;
 

@@ -74,40 +74,44 @@ function system_perm() {
   $perms = array (
       "de_can_access_admin_console" => array(
       "title" => "Can access the Admin Console",
-      "description" => "This allows the user to log into the Admin Console.
-                        ",
+      "description" => t("This allows the user to log into the Admin Console.
+                        "),
     ),
 
     "de_can_administer_data_entry" => array(
-      "title" => "Can administer Data Entry",
-      "description" => "This allows the user to edit, update, delete, etc, 
+      "title" => t("Can administer Data Entry"),
+      "description" => t("This allows the user to edit, update, delete, etc, 
                         the Data Entry components of FlightPath, like Courses,
-                        Groups, Degrees, and advising settings.",
+                        Groups, Degrees, and advising settings."),
     ),
     
     "de_can_administer_users" => array(
-      "title" => "Can administer users",
-      "description" => "This allows the user to edit other users' permissions
+      "title" => t("Can administer users"),
+      "description" => t("This allows the user to edit other users' permissions
                         in the User Management system, including their own
                         permissions.  Users will only be able to modify
                         permissions which they themselves have been
-                        granted.",
+                        granted."),
     ),
 
     "de_can_switch_users" => array(
-      "title" => "Can switch users",
-      "description" => "This powerful permission allows a user to switch
+      "title" => t("Can switch users"),
+      "description" => t("This powerful permission allows a user to switch
                         to any other user in the system.  Be sure to 
-                        only give to administrators.",
+                        only give to administrators."),
     ),
     
     "de_can_administer_system_settings" => array(
-      "title" => "Can administer system settings",
-      "description" => "This allows the user to edit any of the FlightPath
-                        system settings.",
+      "title" => t("Can administer system settings"),
+      "description" => t("This allows the user to edit any of the FlightPath
+                        system settings."),
     ),
-    
-    
+    "access_admin_debug" => array(
+      "title" => t("Access admin_debug function"),
+      "description" => t("The user may view output from the admin_debug function.
+                        Useful for developers."),
+    ),                      
+       
   );
 
   return $perms;
@@ -127,6 +131,7 @@ function system_menu() {
     "tab_family" => "system",
     "weight" => 10,
     "page_settings" => array(
+      "display_greeting" => TRUE,
       "display_currently_advising" => TRUE,
     ),
   );
@@ -141,7 +146,7 @@ function system_menu() {
   // TODO: This one needs admin access!
   $items["admin-tools/clear-cache"] = array(
     "title" => "Clear cache",
-    "page_callback" => "system_clear_cache",
+    "page_callback" => "system_perform_clear_cache",
     "access_callback" => TRUE,
     "type" => MENU_TYPE_NORMAL_ITEM,
   );  
@@ -172,16 +177,26 @@ function system_handle_logout() {
 }
 
 /**
- * This function will clear our various caches, forcing
- * them to be rebuilt.
+ * This function will clear our various caches by calling
+ * on the hook_clear_cache in each module.
+ */
+function system_perform_clear_cache() {
+  // Find modules which implement hook_clear_cache
+  $modules = modules_implement_hook("clear_cache");
+  foreach ($modules as $module) {
+    call_user_func($module . '_clear_cache');
+  }   
+  fp_goto("<front>");
+  
+}
+
+/**
+ * Implements hook_clear_cache
+ * Take care of clearing caches managed by this module
  */
 function system_clear_cache() {
   
   menu_rebuild_cache();
-  
-  fp_add_message("Cache has been cleared");
-  
-  fp_goto("<front>");
   
 }
 

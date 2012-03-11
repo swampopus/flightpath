@@ -2641,9 +2641,10 @@ function draw_menu_items($menu_array) {
 	 * Constructs the HTML to display the list of semesters for the student.
 	 *
 	 */
-	function build_semester_list()
-	{
-
+	function build_semester_list() {
+	  
+    //admin_debug($this->degree_plan);
+    
 		$list_semesters = $this->degree_plan->list_semesters;
 		// Go through each semester and add it to the screen...
 		$list_semesters->reset_counter();
@@ -4120,7 +4121,7 @@ function draw_menu_items($menu_array) {
 			$blank_degree_id = $this->degree_plan->degree_id;
 		}
 
-		$js_code = "select_course_from_group(\"$group->group_id\", \"$group->assigned_to_semester_num\", \"$remaining_hours\", \"$blank_degree_id\");";
+		$js_code = "selectCourseFromGroup(\"$group->group_id\", \"$group->assigned_to_semester_num\", \"$remaining_hours\", \"$blank_degree_id\");";
 
 		$row_msg = "<i>Click <font color='red'>&gt;&gt;</font> to select $remaining_hours hour$s.</i>";
 		$hand_class = "hand";
@@ -4213,8 +4214,8 @@ function draw_menu_items($menu_array) {
 	 * 
 	 * @return string
 	 */
-	function draw_box_top($title, $hideheaders=false, $table_width = 300)
-	{ // returns the beginnings of the year tables...
+	function draw_box_top($title, $hideheaders=false, $table_width = 300){ 
+	  // returns the beginnings of the year tables...
 
 		// Get width values from width_array (supplied by calling function,
 		// for example, draw_year_box_top
@@ -4243,10 +4244,10 @@ function draw_menu_items($menu_array) {
 		$headers = array();
 		if ($hideheaders != true)
 		{
-			$headers[0] = "_course";
-			$headers[1] = "_hrs";
-			$headers[2] = "_grd";
-			$headers[3] = "_pts";
+			$headers[0] = t("course");
+			$headers[1] = t("hrs");
+			$headers[2] = t("grd");
+			$headers[3] = t("pts");
 		}
 
 
@@ -4804,7 +4805,7 @@ function draw_menu_items($menu_array) {
 		}
 
 		//$serializedCourse = urlencode(serialize($course));
-		$js_code = "popup_describe_selected(\"$group_id\",\"$semester_num\",\"$course_id\",\"$subject_id\",\"group_hours_remaining=$group_hours_remaining&db_group_requirement_id=$db_group_requirement_id&blank_degree_id=$blank_degree_id\");";
+		$js_code = "popupDescribeSelected(\"$group_id\",\"$semester_num\",\"$course_id\",\"$subject_id\",\"group_hours_remaining=$group_hours_remaining&db_group_requirement_id=$db_group_requirement_id&blank_degree_id=$blank_degree_id\");";
 
 		$on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
       				onmouseout=\"style.backgroundColor='white'\" ";
@@ -5419,9 +5420,8 @@ function draw_menu_items($menu_array) {
 						courses, which can be
 						displayed here.";
 
-			if ($_SESSION["fp_can_advise"] == true)
-			{
-				// This is an advisor, so put in a little more
+			if (user_has_permission("can_advise_students")){
+			  // This is an advisor, so put in a little more
 				// information.
 				$pC .= "
 									<div class='tenpt' style='padding-top: 5px;'><b>Special note to advisors:</b> You may still
@@ -5468,17 +5468,12 @@ function draw_menu_items($menu_array) {
 		//admin_debug($place_group->assigned_to_semester_num);
 		if ($bool_display_submit == true && !$this->bool_blank && $bool_no_courses != true)
 		{
-			if ($_SESSION["fp_can_advise"] == true)
-			{
+			if (user_has_permission("can_advise_students")) {
 				$pC .= "<input type='hidden' name='varHours' id='varHours' value=''>
 					<div style='margin-top: 20px;'>
 					
 					
-				" . $this->draw_button("Select Course", "popup_assign_selected_course_to_group(\"$place_group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"-1\");", true, "style='font-size: 10pt;'") . "
-				<!--
-					<input type='button' value='Select Course'
-				onClick='popup_assign_selected_course_to_group(\"$place_group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\");'>
-				-->
+				" . $this->draw_button("Select Course", "popupAssignSelectedCourseToGroup(\"$place_group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"-1\");", true, "style='font-size: 10pt;'") . "
 					</div>
 				";
 			}
@@ -5486,7 +5481,7 @@ function draw_menu_items($menu_array) {
 		}
 
 		// Substitutors get extra information:
-		if ($_SESSION["fp_can_substitute"] == true && $group->group_id != -88)
+		if (user_has_permission("can_substitute") && $group->group_id != -88)
 		{
 			$pC .= "<div class='tenpt' style='margin-top: 20px;'>
 					<b>Special administrative information:</b>
@@ -5500,10 +5495,8 @@ function draw_menu_items($menu_array) {
 					Information about this group:<br>
 					&nbsp; Group ID: $group->group_id<br>
 					&nbsp; Title: $group->title<br>";
-			if ($_SESSION["fp_user_type"] == "full_admin")
-			{ // only show if we are full admin.
-				$pC .= "&nbsp; <i>Internal name: $group->group_name</i><br>";
-			}
+  		$pC .= "&nbsp; <i>Internal name: $group->group_name</i><br>";
+
 			$pC .= "&nbsp; Catalog year: $group->catalog_year
 					</div>
 					
@@ -5511,8 +5504,7 @@ function draw_menu_items($menu_array) {
 		}
 
 
-		if ($bool_display_back_to_subject_select == true)
-		{
+		if ($bool_display_back_to_subject_select == true) {
 			$csid = $GLOBALS["current_student_id"];
 			$blank_degree_id = "";
 			if ($this->bool_blank)
@@ -6861,27 +6853,27 @@ function draw_menu_items($menu_array) {
 	{
 		$rtn = "";
 
-		$rtn .= "<span id='hiddenElements'>
+		$rtn .= "<span id='hidden_elements'>
 		
-			<input type='hidden' name='performAction' id='performAction' value='$perform_action'>
-			<input type='hidden' name='performAction2' id='performAction2' value=''>
-			<input type='hidden' name='scrollTop' id='scrollTop' value=''>
-			<input type='hidden' name='loadFromCache' id='loadFromCache' value='yes'>
-			<input type='hidden' name='printView' id='printView' value='{$GLOBALS["print_view"]}'>			
-			<input type='hidden' name='hideCharts' id='hideCharts' value=''>
+			<input type='hidden' name='perform_action' id='perform_action' value='$perform_action'>
+			<input type='hidden' name='perform_action2' id='perform_action2' value=''>
+			<input type='hidden' name='scroll_top' id='scroll_top' value=''>
+			<input type='hidden' name='load_from_cache' id='load_from_cache' value='yes'>
+			<input type='hidden' name='print_view' id='print_view' value='{$GLOBALS["print_view"]}'>			
+			<input type='hidden' name='hide_charts' id='hide_charts' value=''>
 			
-			<input type='hidden' name='advisingLoadActive' id='advisingLoadActive' value='{$GLOBALS["advising_load_active"]}'>
-			<input type='hidden' name='advising_student_id' id='advising_student_id' value='{$GLOBALS["advising_student_id"]}'>
-			<input type='hidden' name='advising_term_id' id='advising_term_id' value='{$GLOBALS["advising_term_id"]}'>
-			<input type='hidden' name='advising_major_code' id='advising_major_code' value='{$GLOBALS["advising_major_code"]}'>
-			<input type='hidden' name='advising_track_code' id='advising_track_code' value='{$GLOBALS["advising_track_code"]}'>
+			<input type='hidden' name='advising_load_active' id='advising_load_active' value='{$GLOBALS["fp_advising"]["advising_load_active"]}'>
+			<input type='hidden' name='advising_student_id' id='advising_student_id' value='{$GLOBALS["fp_advising"]["advising_student_id"]}'>
+			<input type='hidden' name='advising_term_id' id='advising_term_id' value='{$GLOBALS["fp_advising"]["advising_term_id"]}'>
+			<input type='hidden' name='advising_major_code' id='advising_major_code' value='{$GLOBALS["fp_advising"]["advising_major_code"]}'>
+			<input type='hidden' name='advising_track_code' id='advising_track_code' value='{$GLOBALS["fp_advising"]["advising_track_code"]}'>
 			<input type='hidden' name='advising_update_student_settings_flag' id='advising_update_student_settings_flag' value=''>
-			<input type='hidden' name='advising_what_if' id='advising_what_if' value='{$GLOBALS["advising_what_if"]}'>
-			<input type='hidden' name='what_if_major_code' id='what_if_major_code' value='{$GLOBALS["what_if_major_code"]}'>
-			<input type='hidden' name='what_if_track_code' id='what_if_track_code' value='{$GLOBALS["what_if_track_code"]}'>
-			<input type='hidden' name='advising_view' id='advising_view' value='{$GLOBALS["advising_view"]}'>
+			<input type='hidden' name='advising_what_if' id='advising_what_if' value='{$GLOBALS["fp_advising"]["advising_what_if"]}'>
+			<input type='hidden' name='what_if_major_code' id='what_if_major_code' value='{$GLOBALS["fp_advising"]["what_if_major_code"]}'>
+			<input type='hidden' name='what_if_track_code' id='what_if_track_code' value='{$GLOBALS["fp_advising"]["what_if_track_code"]}'>
+			<input type='hidden' name='advising_view' id='advising_view' value='{$GLOBALS["fp_advising"]["advising_view"]}'>
 
-			<input type='hidden' name='currentStudentID' id='currentStudentID' value='{$GLOBALS["current_student_id"]}'>
+			<input type='hidden' name='current_student_id' id='current_student_id' value='{$GLOBALS["fp_advising"]["current_student_id"]}'>
 			<input type='hidden' name='logAddition' id='logAddition' value=''>
 			
 			<input type='hidden' name='fp_update_user_settings_flag' id='fp_update_user_settings_flag' value=''>

@@ -51,7 +51,7 @@ require_once("$levels_deep" . "classes/all_classes.php");
 
 // Include all of the enabled modules
 foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $value) {
-  if (isset($value["disabled"]) && $value["disabled"] == "yes") {
+  if (isset($value["enabled"]) && $value["enabled"] != "1") {
     // Module is not enabled.  Skip it.
     continue;
   }

@@ -19,6 +19,7 @@ function fp_display_page($page) {
   $screen->page_has_search = $page["router_item"]["page_settings"]["page_has_search"];
   $screen->page_banner_is_link = $page["router_item"]["page_settings"]["page_banner_is_link"];
   $screen->page_hide_report_error = $page["router_item"]["page_settings"]["page_hide_report_error"];
+  $screen->page_is_popup = $page["router_item"]["page_settings"]["page_is_popup"];
   
   // Was this page a tab?  And if so, are there any other tabs we need to display? //
   if ($page["router_item"]["type"] == MENU_TYPE_TAB || $page["router_item"]["tab_parent"] != "") {
@@ -27,12 +28,20 @@ function fp_display_page($page) {
     $screen->page_tabs = fp_render_tab_array($tab_array);    
   }
   
+  // Should we override the page_tabs with what is in "fp_set_page_tabs" ?
+  if (is_array($GLOBALS["fp_set_page_tabs"])) {
+    //fpm($GLOBALS["fp_set_page_tabs"]);
+    $screen->page_tabs = fp_render_tab_array($GLOBALS["fp_set_page_tabs"]);    
+  }
   
       
   // Build up the content //
   
   $content_top = "";  
-  $content_top .= fp_render_greeting();
+  
+  if ($page["router_item"]["page_settings"]["display_greeting"] == TRUE) {  
+    $content_top .= fp_render_greeting();
+  }
   
   // Any sub-tabs we need to render?
   if ($page["router_item"]["type"] == MENU_TYPE_SUB_TAB) {

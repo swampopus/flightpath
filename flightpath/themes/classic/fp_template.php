@@ -45,6 +45,8 @@ $theme_location = fp_theme_location();
       print " var FlightPath = new Object();
               FlightPath.settings = new Object();
               FlightPath.settings.themeLocation = '$theme_location'; 
+              FlightPath.settings.currentStudentId = '{$_REQUEST["current_student_id"]}';
+              FlightPath.settings.basePath = '" . base_path() . "';
             ";
     ?>
     
