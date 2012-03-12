@@ -641,7 +641,7 @@ function popupWindowNew(url, extraVars) {
 }
 
 function popupPrintWindow(url) {
-  var my_windowx2p = window.open(url + "&current_student_id=" + csid,
+  var my_windowx2p = window.open(url + "&current_student_id=" + FlightPath.settings.currentStudentId,
   "courseinfoxprint" + FlightPath.settings.currentStudentId,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=700,height=500");
 
   my_windowx2p.focus();  // make sure the popup window is on top.
@@ -650,7 +650,7 @@ function popupPrintWindow(url) {
 
 
 function popupHelpWindow(url) {
-  var my_windowxhelp2p = window.open(url + "&current_student_id=" + csid,
+  var my_windowxhelp2p = window.open(url + "&current_student_id=" + FlightPath.settings.currentStudentId,
   "courseinfoxhelp" + FlightPath.settings.currentStudentId,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=700,height=500");
 
   my_windowxhelp2p.focus();  // make sure the popup window is on top.
@@ -659,16 +659,22 @@ function popupHelpWindow(url) {
 
 
 
-function popupWindow(action, extraVars) {
-  
-  var my_windowx = window.open("' . $script_filename . '?windowMode=popup&performAction=" + action + "&current_student_id=" + csid + "&" + extraVars,
-  "courseinfox" + csid,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375");
+// function popupWindow(action, extraVars) {
+//   
+  // var my_windowx = window.open("' . $script_filename . '?windowMode=popup&performAction=" + action + "&current_student_id=" + csid + "&" + extraVars,
+  // "courseinfox" + csid,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375");
+// 
+  // my_windowx.focus();  // make sure the popup window is on top.
+// 
+// }
 
-  my_windowx.focus();  // make sure the popup window is on top.
+function popupWindow2(url, extraVars) {
+  var my_windowx2 = window.open(url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars,
+  "courseinfox2" + FlightPath.settings.currentStudentId,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375");
+
+  my_windowx2.focus();  // make sure the popup window is on top.
 
 }
-
-
 
 
 

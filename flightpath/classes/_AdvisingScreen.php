@@ -687,7 +687,7 @@ function draw_menu_items($menu_array) {
 					";
 		$fn_type_array = array("substitution","transfer");
 		$fn_char = array("substitution"=>"S", "transfer"=>"T");
-		$fn_name = array("substitution"=>"_substitutions", 
+		$fn_name = array("substitution"=>"Substitutions", 
 		                "transfer"=>"Transfer Equivalency Footnotes");
 		$fn_between = array("substitution"=>"for",
 		                   "transfer"=>"for {$GLOBALS["fp_system_settings"]["school_initials"]}'s");
@@ -812,19 +812,18 @@ function draw_menu_items($menu_array) {
 
 
 		// For admins only....
-		if (user_has_permission("can_substitute"))
-		{
+		if (user_has_permission("can_substitute")) {
 			if ($this->bool_print != true)
 			{// Don't display in print view.
-				$pC .= "<div style='tenpt'>
-					<a href='javascript: popupWindow2(\"toolbox\",\"\");'><img src='fp_theme_location()/images/toolbox.gif' border='0'>Administrator's Toolkit</a>
+				$pC .= "<div style='tenpt'>				
+					<a href='javascript: popupWindow2(\"" . base_path() . "/advise/popup-toolbox/transfers\",\"\");'><img src='" . fp_theme_location() . "/images/toolbox.gif' border='0'>" . t("Administrator's Toolbox") . "</a>
 				</div>";
 				$is_empty = false;
 			}
 		}
 
 
-		$pC .= "</td></tr>";
+  	$pC .= "</td></tr>";
 
 		$pC .= $this->draw_semester_box_bottom();
 
@@ -940,7 +939,7 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "</div>";
 
-		$this->db->add_to_log("toolkit", "substitutions");
+		$this->db->add_to_log("toolbox", "substitutions");
 
 		return $pC;
 	}
@@ -1043,7 +1042,7 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "</div>";
 
-		$this->db->add_to_log("toolkit", "transfers");
+		$this->db->add_to_log("toolbox", "transfers");
 
 		return $pC;
 	}
@@ -1148,20 +1147,22 @@ function draw_menu_items($menu_array) {
 		$order = $_REQUEST["order"];
 		if ($order == "name")
 		{
-			$ns = " style='font-weight: bold; color: black; text-decoration: none;' ";
+			$ns = "font-weight: bold; color: black; text-decoration: none;";
 		} else {
-			$os = " style='font-weight: bold; color: black; text-decoration: none;' ";
+			$os = "font-weight: bold; color: black; text-decoration: none;";
 		}
 
 		$pC .= "<div class='tenpt'>
 				This window displays all of the student's courses
 				which FlightPath is able to load.  
-					<a href='javascript: popupHelpWindow(\"help.php?i=7\");'>Confused? Click here.</a>
+					<!-- <a href='javascript: popupHelpWindow(\"help.php?i=7\");'>Confused? Click here.</a> -->
 				<br><br>
 				Order by: &nbsp; &nbsp;";
-		$pC .= "<a $ns href='advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=name&current_student_id=$csid'>Name</a>
-				&nbsp; &nbsp;";
-		$pC .= "<a $os href='advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=date&current_student_id=$csid'>Date Taken</a>";
+    $pC .= l("Name", "advise/popup-toolbox/courses", "order=name", array("style" => $ns)) . "&nbsp; &nbsp;";
+    $pC .= l("Date Taken", "advise/popup-toolbox/courses", "order=date", array("style" => $os));
+		//$pC .= "<a $ns href='advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=name&current_student_id=$csid'>Name</a>
+		//		&nbsp; &nbsp;";
+		//$pC .= "<a $os href='advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=date&current_student_id=$csid'>Date Taken</a>";
 
 		$pC .= "<hr>
 				<table border='0' cellpadding='2'>
@@ -1266,7 +1267,7 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "</div>";
 
-		$this->db->add_to_log("toolkit", "courses,$order");
+		$this->db->add_to_log("toolbox", "courses,$order");
 
 		return $pC;
 	}
@@ -1337,7 +1338,7 @@ function draw_menu_items($menu_array) {
 					$group_title = "the degree plan";
 				}
 				$pC .= "<div class='tenpt'>This course was removed from $group_title.<br>
-							<a href='javascript: popupRestoreUnassignFromGroup(\"$group->db_unassign_group_id\")'>_restore?</a>
+							<a href='javascript: popupRestoreUnassignFromGroup(\"$group->db_unassign_group_id\")'>restore?</a>
 							</div>
 							";
 			}
@@ -1356,7 +1357,7 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "</div>";
 
-		$this->db->add_to_log("toolkit", "moved");
+		$this->db->add_to_log("toolbox", "moved");
 
 		return $pC;
 	}
@@ -3510,7 +3511,7 @@ function draw_menu_items($menu_array) {
 			if (user_has_permission("can_advise_students"))
 			{
 				$pC .= "<div style='margin-top: 20px;'>
-				" . $this->draw_button("Select Course", "popup_assign_selected_course_to_group(\"$group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"$db_group_requirement_id\");", true, "style='font-size: 10pt;'") . "
+				" . $this->draw_button("Select Course", "popupAssignSelectedCourseToGroup(\"$group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"$db_group_requirement_id\");", true, "style='font-size: 10pt;'") . "
 				</div>
 				
 				";
@@ -5343,8 +5344,8 @@ function draw_menu_items($menu_array) {
 				// This also means that a user's course
 				// selections have been restricted as a result.
 				// Replace the MSG at the top saying so.
-				$msg = "<div class='tenpt'>Your selection of courses has been
-							restricted based on previous course selections.</div>";
+				$msg = "<div class='tenpt'>" . t("Your selection of courses has been
+							restricted based on previous course selections.") . "</div>";
 				$pC = str_replace("<!--MSG-->", $msg, $pC);
 			}
 
@@ -5414,11 +5415,11 @@ function draw_menu_items($menu_array) {
 					<td colspan='8'>
 						<div class='tenpt'>
 						<b>Please Note:</b> 
-						FlightPath could not find any eligible
+						" . t("FlightPath could not find any eligible
 						courses to display for this list.  Ask your advisor
 						if you have completed courses, or may enroll in
 						courses, which can be
-						displayed here.";
+						displayed here.");
 
 			if (user_has_permission("can_advise_students")){
 			  // This is an advisor, so put in a little more
@@ -5510,7 +5511,7 @@ function draw_menu_items($menu_array) {
 				$blank_degree_id = $this->degree_plan->degree_id;
 			}
 			$back_link = "<span class='tenpt'>
-						<a href='$this->script_filename?windowMode=popup&performAction=display_groupSelect&group_id=$group->group_id&semester_num=$display_semesterNum&group_hours_remaining=$group_hours_remaining&current_student_id=$csid&blank_degree_id=$blank_degree_id' 
+						<a href='" . base_path() . "/advise/popup-group-select&window_mode=popup&group_id=$group->group_id&semester_num=$display_semesterNum&group_hours_remaining=$group_hours_remaining&current_student_id=$csid&blank_degree_id=$blank_degree_id' 
 						class='nounderline'>Click here to return to subject selection.</a></span>";
 			$pC = str_replace("<!--MSG2-->",$back_link,$pC);
 		}
@@ -5542,18 +5543,17 @@ function draw_menu_items($menu_array) {
 			$blank_degree_id = $this->degree_plan->degree_id;
 		}
 		$pC .= "<tr><td colspan='8' class='tenpt'>";
-		$pC .= "<form action='$this->script_filename' method='GET' style='margin:0px; padding:0px;' id='theform'>
-					<input type='hidden' name='windowMode' value='popup'>
-					<input type='hidden' name='performAction' value='display_groupSelect'>
+		$pC .= "<form action='" . base_path() . "/advise/popup-group-select' method='GET' style='margin:0px; padding:0px;' id='theform'>
+					<input type='hidden' name='window_mode' value='popup'>
 					<input type='hidden' name='group_id' value='$group_id'>
 					<input type='hidden' name='semester_num' value='$semester_num'>
-					<input type='hidden' name='groupHoursRemaining' value='$group_hours_remaining'>
-					<input type='hidden' name='currentStudentID' value='$csid'>
-					<input type='hidden' name='blankDegreeID' value='$blank_degree_id'>
+					<input type='hidden' name='group_hours_remaining' value='$group_hours_remaining'>
+					<input type='hidden' name='current_student_id' value='$csid'>
+					<input type='hidden' name='blank_degree_id' value='$blank_degree_id'>
 		
 					Please begin by selecting a subject from the list below.
 					<br><br>
-					<select name='selectedSubject'>
+					<select name='selected_subject'>
 					<option value=''>Please select a subject...</option>
 					<option value=''>----------------------------------------</option>
 					";
@@ -5581,7 +5581,7 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "</select>
 				<div style='margin: 20px;' align='left'>
-				" . $this->draw_button("Next ->","document.get_element_by_id(\"theform\").submit();") . "
+				" . $this->draw_button("Next ->","document.getElementById(\"theform\").submit();") . "
 				</div>
 					<!-- <input type='submit' value='submit'> -->
 					

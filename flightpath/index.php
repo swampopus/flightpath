@@ -22,4 +22,3 @@ else {
     display_not_found();
   }
 }
-

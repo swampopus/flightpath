@@ -163,7 +163,7 @@ class _DatabaseHandler
 
 		if ($user_id*1 < 1)
 		{
-			//admin_debug("no userID specified.");
+			
 			return false;
 		}
 
@@ -182,12 +182,10 @@ class _DatabaseHandler
 			$user_settings_array["hide_charts"] = trim($_POST["hide_charts"]);
 		}
 
-		$xml = fp_array_to_xml("settings", $user_settings_array);
-
 		// Now, write it back to the settings table...
 		$res = $this->db_query("REPLACE INTO user_settings(user_id,
-								settings_xml, `datetime`)
-								VALUES ('?','?',NOW() )", $user_id, $xml);
+								settings, `datetime`)
+								VALUES ('?','?',NOW() )", $user_id, serialize($user_settings_array));
 
 		$db->add_to_log("update_user_settings", "hide_charts:{$user_settings_array["hide_charts"]}");
 
@@ -206,15 +204,12 @@ class _DatabaseHandler
 									user_id = '?' ", $user_id);
 		$cur = $this->db_fetch_array($res);
 
-		$xml = $cur["settings_xml"];
-		if ($arr = fp_xml_to_array2($xml))
-		{
-			return $arr;
-		} else {
-			return false;
-		}
-
-
+    if (!$rtn = unserialize($cur["settings"])) {
+      $rtn = array();
+    }
+    
+    return $rtn;
+    
 	}
 
 	
@@ -953,18 +948,12 @@ class _DatabaseHandler
 		}
 
 		$cur = $this->db_fetch_array($res);
-		$xml = $cur["settings_xml"];
-		if ($xml == "")
-		{
-			return false;
-		}
+    
+    if (!$rtn = unserialize($cur["settings"])) {
+      $rtn = array();
+    }
 
-		if (!$xml_array = fp_xml_to_array2($xml))
-		{
-			return false;
-		}
-
-		return $xml_array;
+		return $rtn;
 
 	}
 

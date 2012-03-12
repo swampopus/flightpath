@@ -63,7 +63,8 @@ class _FlightPath
 		{
 			//$temp_screen = new AdvisingScreen();
 			//$temp_screen->init_advising_variables($bool_ignore_what_if_advising_variables);
-			advise_load_advising_variables_from_db($current_student_id, $user->id);
+			//advise_load_advising_variables_from_db($current_student_id, $user->id);
+			advise_init_advising_variables();
 		}
 
 		$major_code = $GLOBALS["fp_advising"]["advising_major_code"];
@@ -916,11 +917,10 @@ class _FlightPath
 		{
 			// We are to assume that the student's array_settings
 			// have already been updated by this point, so we will
-			// simply convert them to XML and store in the database.
-			$xml = fp_array_to_xml("settings", $this->student->array_settings);
+			// simply convert them to XML and store in the database.			
 			$result = $db->db_query("REPLACE INTO student_settings
-									(`student_id`,`settings_xml`,`datetime`)
-									VALUES ('?','?', NOW() )	", $student_id, $xml);
+									(`student_id`,`settings`,`datetime`)
+									VALUES ('?','?', NOW() )	", $student_id, serialize($this->student->array_settings));
 			$db->add_to_log("update_student_settings", "$student_id");
 
 		}

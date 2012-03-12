@@ -63,18 +63,19 @@ function menu_execute_page_request() {
   if ($path == "") {
     $path = variable_get("front_page", "main");
   }
+  
   if ($router_item = menu_get_item($path)) {
-   
+       
     // Let's figure out if the user has access to this menu item or not.
     $access = FALSE;
     if ($router_item["access_callback"] == 1) {
       $access = TRUE;
     }
-     
     if ($access) {
-      if ($router_item['file']) {
+      if ($router_item['file']) {        
         require_once($router_item['file']);
       }
+          
       $page = array();
       $page["content"] = call_user_func_array($router_item['page_callback'], $router_item['page_arguments']);      
       $page["path"] = $path;
@@ -137,17 +138,11 @@ function menu_get_items_in_tab_family($tab_family) {
 function menu_get_item($path) {
   $res = db_query("SELECT * FROM menu_router WHERE path = '?' ", $path);
   $cur = db_fetch_array($res);
-  
+
   if ($cur["path"] != $path) {
     // It was not found!
     return NULL;
   }  
-  
-  // Make sure the page_callback is a reachable function.  If it is not, 
-  // it means the module which defined it might be disabled.
-  if (!function_exists($cur["page_callback"])) {
-    return NULL;
-  }
   
   // Unserialize the things which are supposed to be unserialized.
   $cur["page_arguments"] = unserialize($cur["page_arguments"]);

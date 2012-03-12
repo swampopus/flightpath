@@ -12,6 +12,11 @@ FlightPath Changelog
   
   Menus can specify a file to load as needed.  Like an additional .inc file where that page_callback is located.
 
+  Admin toolbox and hide/show pie charts
+  
+  Got rid of XML in FlightPath.  Now, we just serialize or nothing.  No sense in the extra overhead.  Still need to get rid of it
+  for module.info files.  Some are still .xml.  Will get to that when I do the Admin work. 
+  
 
 2012-03-10
   Continuing work on making FP more like Drupal.

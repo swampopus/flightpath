@@ -62,9 +62,69 @@ function advise_menu() {
   );
   
 
+  // Toolbox...
+
+  $items["advise/popup-toolbox/transfers"] = array(
+    "title" => "Transfers",
+    "page_callback" => "advise_display_popup_toolbox_transfers",
+    "access_callback" => TRUE,
+    "page_settings" => array(
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),
+    "weight" => 10,
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "advise-toolbox",
+    "file" => get_module_path("advise") . "/advise.toolbox.inc",
+  );
+  
+  $items["advise/popup-toolbox/substitutions"] = array(
+    "title" => "Substitutions",
+    "page_callback" => "advise_display_popup_toolbox_substitutions",
+    "access_callback" => TRUE,
+    "page_settings" => array(
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),
+    "weight" => 20,
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "advise-toolbox",
+    "file" => get_module_path("advise") . "/advise.toolbox.inc",
+  );
+    
+  $items["advise/popup-toolbox/moved"] = array(
+    "title" => "Moved",
+    "page_callback" => "advise_display_popup_toolbox_moved",
+    "access_callback" => TRUE,
+    "page_settings" => array(
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),
+    "weight" => 30,
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "advise-toolbox",
+    "file" => get_module_path("advise") . "/advise.toolbox.inc",
+  );
+  
+  $items["advise/popup-toolbox/courses"] = array(
+    "title" => "Courses",
+    "page_callback" => "advise_display_popup_toolbox_courses",
+    "access_callback" => TRUE,
+    "page_settings" => array(
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),
+    "weight" => 40,
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "advise-toolbox",
+    "file" => get_module_path("advise") . "/advise.toolbox.inc",
+  );
+    
+  
   
   return $items;
 }
+
 
 
 
@@ -289,7 +349,6 @@ function advise_display_view() {
   
   // Initialize everything we need to initialize for this advising session.
   advise_init_screen();      
-  
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");  
   
   if ($GLOBALS["advising_view"] == "type") {
@@ -1306,7 +1365,7 @@ function advise_init_screen() {
 
 
   // Should we update the USER settings for anything?
-  if ($GLOBALS["fp_update_user_settings_flag"] != "") {
+  if ($GLOBALS["fp_advising"]["fp_update_user_settings_flag"] != "") {
     if (!$db->update_user_settings_from_post($user->id)) {
       admin_debug("could not write user settings.");
     }

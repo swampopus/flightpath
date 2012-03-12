@@ -532,6 +532,7 @@ function get_module_action_u_r_l($module = "") {
  * @param unknown_type $xml_data
  * @return unknown
  */
+/*
 function fp_xml_to_array2($xml_data)
 {
   $xml_data = trim(utf8_encode($xml_data));
@@ -557,7 +558,7 @@ function fp_xml_to_array2($xml_data)
   return $na;
 
 }
-
+*/
 
 /**
  * Returns TRUE or FALSE if the logged in user has access based on the
@@ -803,6 +804,7 @@ function fp_number_pad($number, $len) {
  * @param boolean $html_safe
  * @return String
  */
+/*
 function fp_array_to_xml ($root, $xml_array, $html_safe = false)
 {
   $memory = xmlwriter_open_memory ();       // Allocate memory for XML writer
@@ -846,7 +848,7 @@ function fp_array_to_xml ($root, $xml_array, $html_safe = false)
 
   return $xml;
 } // End function arrayToXml()
-
+*/
 
 
 /**

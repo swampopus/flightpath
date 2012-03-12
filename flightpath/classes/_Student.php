@@ -176,12 +176,10 @@ class _Student
 									student_id='?' ", $this->student_id);
 		$cur = $this->db->db_fetch_array($res);
 
-		$xml = $cur["settings_xml"];
-		if ($arr = fp_xml_to_array2($xml))
-		{
+		if ($arr = unserialize($cur["settings"])) {
 			$this->array_settings = $arr;
 		}
-
+    
 	}
 
 	function load_transfer_eqvs_unassigned()
