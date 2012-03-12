@@ -812,7 +812,7 @@ function draw_menu_items($menu_array) {
 
 
 		// For admins only....
-		if ($_SESSION["fp_can_substitute"] == true)
+		if (user_has_permission("can_substitute"))
 		{
 			if ($this->bool_print != true)
 			{// Don't display in print view.
@@ -1514,7 +1514,7 @@ function draw_menu_items($menu_array) {
 		$pC = "";
 
 		$temp_course = new Course();
-		$temp_course->term_id = $GLOBALS["advising_term_id"];
+		$temp_course->term_id = $GLOBALS["fp_advising"]["advising_term_id"];
 		$current_term = $temp_course->get_term_description();
 		$current_term_id = $temp_course->term_id;
 
@@ -1643,7 +1643,7 @@ function draw_menu_items($menu_array) {
 
 
 			$on_click = "popup_change_track(\"$temp_t_c\");";
-			if ($GLOBALS["advising_what_if"] == "yes")
+			if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes")
 			{
 				$on_click = "popup_change_what_if_track(\"$temp_t_c\");";
 
@@ -1882,17 +1882,17 @@ function draw_menu_items($menu_array) {
 		if ($this->student == null)
 		{
 			$this->student = new Student();
-			$this->student->student_id = $GLOBALS["advising_student_id"];
+			$this->student->student_id = $GLOBALS["fp_advising"]["advising_student_id"];
 			$this->student->load_student_data();
 		}
 
 		$for_term = $whatif = $what_if_select = $hypoclass = "";
-		if ($GLOBALS["advising_term_id"] != "" && $this->screen_mode != "not_advising"
+		if ($GLOBALS["fp_advising"]["advising_term_id"] != "" && $this->screen_mode != "not_advising"
 		&& $_SESSION["fp_user_type"] != "student")
 		{
 			$temp_course = new Course();
-			$temp_course->term_id = $GLOBALS["advising_term_id"];
-			$t_term_id = $GLOBALS["advising_term_id"];
+			$temp_course->term_id = $GLOBALS["fp_advising"]["advising_term_id"];
+			$t_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
 			$for_term = " for " . $temp_course->get_term_description();
 
 			// If this is an advisor or above
@@ -1903,7 +1903,7 @@ function draw_menu_items($menu_array) {
 
 		}
 
-		if ($GLOBALS["advising_what_if"] == "yes" && !$this->bool_blank)
+		if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes" && !$this->bool_blank)
 		{
 			$whatif = " (in \"What If\" mode) ";
 			$hypoclass = "hypo";
@@ -2005,10 +2005,10 @@ function draw_menu_items($menu_array) {
 				$op_link = "";
 			}
 
-			if ($_SESSION["fp_can_advise"] != true)
+			if (!user_has_permission("can_advise_students"))
 			{
 			  
-				if ($GLOBALS["advising_what_if"] != "yes")
+				if ($GLOBALS["fp_advising"]["advising_what_if"] != "yes")
 				{
 					// In other words, we do not have permission to advise,
 					// and we are not in whatIf, so take out the link.
@@ -3151,7 +3151,7 @@ function draw_menu_items($menu_array) {
 		}
 
 
-		$advising_term_id = $GLOBALS["advising_term_id"];
+		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
 		//admin_debug($advising_term_id);
     
 		$course->load_descriptive_data();
@@ -3314,7 +3314,7 @@ function draw_menu_items($menu_array) {
 			$pC .= "</i>.";
 			*/
 			// Admin function only.
-			if ($_SESSION["fp_can_substitute"] == true)
+			if (user_has_permission("can_substitute"))
 			{
 				$pC .= "<div align='left' class='tenpt'>
 					<b>Special administrative function:</b>
@@ -3355,8 +3355,7 @@ function draw_menu_items($menu_array) {
 						This course is a member of $g->title.
 					";
 			// If user is an admin...
-			if ($_SESSION["fp_can_substitute"] == true)
-			{
+			if (user_has_permission("can_substitute")) {
 				$tflag = intval($course->bool_transfer);
 				$pC .= "<div align='left' class='tenpt'>
 					<b>Special administrative function:</b>
@@ -3367,7 +3366,7 @@ function draw_menu_items($menu_array) {
 		} else if ($course->grade != "" && $course->bool_transfer != true && $course->bool_substitution != true && $course->bool_has_been_assigned == true) {
 			// Course is not assigned to a group; it's on the bare degree plan.  group_id = 0.
 			// If user is an admin...
-			if ($_SESSION["fp_can_substitute"] == true)
+			if (user_has_permission("can_substitute"))
 			{
 				$tflag = intval($course->bool_transfer);
 				$pC .= "<div align='left' class='tenpt'>
@@ -3380,8 +3379,7 @@ function draw_menu_items($menu_array) {
 
 
 		// Substitutors get extra information:
-		if ($_SESSION["fp_can_substitute"] == true && $course->assigned_to_group_id > 0)
-		{
+		if (user_has_permission("can_substitute") && $course->assigned_to_group_id > 0) {
 			
 			
 			$pC .= "<div class='tenpt' style='margin-top: 20px;'>
@@ -3454,8 +3452,7 @@ function draw_menu_items($menu_array) {
 						$by$remarks";
 
 			
-			if ($_SESSION["fp_can_substitute"] == true)
-			{
+			if (user_has_permission("can_substitute")) {
 				$pC .= "<div align='left' class='tenpt' style='padding-left: 10px;'>
 					<b>Special administrative function:</b>
 					<a href='javascript: popupRemoveSubstitution(\"$course->db_substitution_id\");'>Remove substitution?</a>
@@ -3510,7 +3507,7 @@ function draw_menu_items($menu_array) {
 					style='display: none;'>
 					<input type='hidden' name='varHours' id='varHours' value='$var_hours_default'>";
 
-			if ($_SESSION["fp_can_advise"] == true)
+			if (user_has_permission("can_advise_students"))
 			{
 				$pC .= "<div style='margin-top: 20px;'>
 				" . $this->draw_button("Select Course", "popup_assign_selected_course_to_group(\"$group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"$db_group_requirement_id\");", true, "style='font-size: 10pt;'") . "
@@ -4373,7 +4370,10 @@ function draw_menu_items($menu_array) {
 		$img_path = fp_theme_location() . "/images";
 		
 		// The current term we are advising for.
-		$advising_term_id = $GLOBALS["advising_term_id"];
+		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
+    if (!$advising_term_id) {
+      $advising_term_id = 0;
+    }
 
 		$course->assign_display_status();
 		// If the course has already been advised in a different semester,
@@ -5145,7 +5145,7 @@ function draw_menu_items($menu_array) {
 	{
 		$pC = "";
 
-		$advising_term_id = $GLOBALS["advising_term_id"];
+		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
 
 		if ($place_group->group_id != -88)
 		{
@@ -5442,12 +5442,10 @@ function draw_menu_items($menu_array) {
 		//print_pre($place_group->to_string());
 
 		if ($group_hours_remaining == 1){$s = "";}
-		if ($bool_unselectableCourses == true)
-		{
+		if ($bool_unselectableCourses == true) {
 			$unselectable_notice = " <div class='tenpt'><i>(Courses worth more than $group_hours_remaining hour$s
 								may not be selected.)</i></div>";
-			if ($_SESSION["fp_can_advise"] == true)
-			{
+			if (user_has_permission("can_advise_students")) {
 				// This is an advisor, so put in a little more
 				// information.
 				$unselectable_notice .= "
@@ -5459,8 +5457,8 @@ function draw_menu_items($menu_array) {
 			}
 		}
 
-		if ($group_hours_remaining < 100 && $bool_no_courses != true)
-		{ // Don't show for huge groups (like add-a-course)
+		if ($group_hours_remaining < 100 && $bool_no_courses != true)	{ 
+		  // Don't show for huge groups (like add-a-course)
 			$pC .= "<div class='elevenpt' style='margin-top:5px;'>
 					You may select <b>$group_hours_remaining</b>
 						hour$s from this list.$unselectable_notice</div>";

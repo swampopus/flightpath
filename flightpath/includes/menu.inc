@@ -41,12 +41,12 @@ function menu_rebuild_cache() {
       db_query("DELETE FROM menu_router WHERE path = '?' ", $path);
       // Now, insert the new one.
       db_query("INSERT INTO menu_router
-                  (path, access_callback, access_arguments, page_callback, page_arguments, title, description, type, weight, icon, page_settings, tab_family, tab_parent)
+                  (path, access_callback, access_arguments, page_callback, page_arguments, title, description, type, weight, icon, page_settings, tab_family, tab_parent, file)
                   VALUES
-                  ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
+                  ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
                   ", $path, $item["access_callback"], serialize($item["access_arguments"]), $item["page_callback"],
                      serialize($item['page_arguments']), $item['title'], $item['description'], $item['type'], $item['weight'], $item['icon'],
-                     serialize($item['page_settings']), $item['tab_family'], $item['tab_parent']);
+                     serialize($item['page_settings']), $item['tab_family'], $item['tab_parent'], $item['file']);
     }
   }  
   

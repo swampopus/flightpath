@@ -19,12 +19,6 @@ function fp_set_page_tabs($tab_array) {
 
 
 function fp_add_message($str) {
-  
-  // Complex variable?  Change it to print_r.
-  if (is_array($str) || is_object($str)) {
-    $str = print_r($str, TRUE);
-  }
-  
   $_SESSION["fp_messages"][] = $str;
 }
 
@@ -266,17 +260,27 @@ function get_global_database_handler() {
 
 
 /**
- * Alias for fp_add_message
+ * Uses fp_add_message, but in this case, it also adds in the filename and line number
+ * which the message came from!
  */
 function fpm($str) {
-  fp_add_message($str);
-}
+  
+  // Complex variable?  Change it to print_r.
+  if (is_array($str) || is_object($str)) {
+    $str = "<pre>" . print_r($str, TRUE) . "</pre>";
+  }    
 
-/**
- * Alias for fpm.
- */
-function dpm($str) {
-  fpm($str);
+  $arr = debug_backtrace();
+  //pretty_print($arr);
+  $file = $arr[0]["file"];
+  if (strlen($file) > 70) {
+    $file = "..." . substr($file, strlen($file) - 70);
+  }
+  $str .= "<div class='fp-message-backtrace'>line {$arr[0]["line"]}: $file</div>";
+    
+  fp_add_message("&bull; " . $str);
+
+    
 }
 
 /**

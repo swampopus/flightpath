@@ -20,6 +20,11 @@ function fp_display_page($page) {
   $screen->page_banner_is_link = $page["router_item"]["page_settings"]["page_banner_is_link"];
   $screen->page_hide_report_error = $page["router_item"]["page_settings"]["page_hide_report_error"];
   $screen->page_is_popup = $page["router_item"]["page_settings"]["page_is_popup"];
+  $screen->screen_mode = $page["router_item"]["page_settings"]["screen_mode"];
+  
+  if ($_REQUEST["scroll_top"] != "") {
+    $screen->page_scroll_top = $_REQUEST["scroll_top"];
+  }
   
   // Was this page a tab?  And if so, are there any other tabs we need to display? //
   if ($page["router_item"]["type"] == MENU_TYPE_TAB || $page["router_item"]["tab_parent"] != "") {
@@ -64,7 +69,7 @@ function fp_display_page($page) {
 
   // content_top gets the Currently Advising box.
   if ($page["router_item"]["page_settings"]["display_currently_advising"] == TRUE) {
-    $content_top .= fp_render_currently_advising_box();
+    $content_top .= fp_render_currently_advising_box(false, false, false, NULL, $screen->screen_mode);
   }    
   
   $screen->page_content = $content_top .= $page["content"];
@@ -206,7 +211,7 @@ function fp_build_tab_array($page) {
     
     $rtn .= "<table class='fp-currently-advising'>";
   
-    
+  
     $for_term = $whatif = $what_if_select = $hypoclass = "";
     if ($GLOBALS["fp_advising"]["advising_term_id"] != "" && $screen_mode != "not_advising"
     && user_has_permission("can_advise_students"))
@@ -248,6 +253,7 @@ function fp_build_tab_array($page) {
       $ca = "Viewing Blank Degree Plan";
     }
 
+    
     $rtn .= "<tr><td colspan='2' style='padding-bottom: 10px;'>
         $what_if_select
       <table border='0' width='100%'  class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
@@ -781,7 +787,7 @@ function fp_render_curved_line($text) {
  */
 function fp_render_square_line($text) {
   
-  $pC .= "
+  $rtn .= "
         <table border='0' width='100%' cellpadding='0' cellspacing='0'>
        <tr>
         <td width='10%' align='left' valign='top'></td>

@@ -64,7 +64,13 @@ body
 }
 .fp-message {
   margin-top: 3px;
-  margin-bottom: 3px;
+  margin-bottom: 10px;
+}
+
+.fp-message .fp-message-backtrace {
+  font-size: 0.8em;
+  text-align: right;
+  font-style: italic;
 }
 
 /*

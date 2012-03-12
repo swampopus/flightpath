@@ -173,6 +173,7 @@ function advise_display_popup_substitute_selected() {
   $rtn = "";
   
   advise_init_screen();
+  fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
   
   $course_id = trim($_GET["course_id"]);
   $group_id = trim(addslashes($_GET["group_id"]));
@@ -327,7 +328,7 @@ function advise_display_view() {
     $rtn .= $screen->display_screen();
     $rtn .= "</table>";
     // Add in the required "advising variables"
-    $rtn .= $screen->get_hidden_advising_variables();
+    $rtn .= $screen->get_hidden_advising_variables("save_draft");
         
     $rtn .= "</form>";
 
@@ -392,8 +393,280 @@ function advise_load_advising_variables_from_db($student_id, $faculty_id) {
     $rtn = array();
   }
   
+  // Make sure certain variables always equal something valid...
+  if ($rtn["advising_term_id"] == "") {
+    $rtn["advising_term_id"] = "0";        
+  }  
+  
   return $rtn;
 }
+
+
+
+
+
+/**
+ * This function takes various variables from the REQUEST and stores them
+ * in our advising_session_variables table for more convenient use later on.
+ */
+function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) {
+  global $user;
+  
+  // begin by loading what we already have in the db.
+  $vars = advise_load_advising_variables_from_db($_REQUEST["current_student_id"], $user->id);
+    
+
+  // The current student ID is what we append to all session variables
+  // dealing with the current student.  We do this so that we will
+  // keep session variables unique, so that we can have more than one
+  // window open at a time, with multiple students.
+  // Therefor, this should never go into the session.
+  // Annoyingly, we must pass carry this around on each page in the system.
+  $vars["current_student_id"] = $_REQUEST["current_student_id"];
+  if ($vars["current_student_id"] == "")
+  {
+    $vars["current_student_id"] = $_REQUEST["advising_student_id"];
+  }
+
+  $csid = $vars["current_student_id"];
+
+  //admin_debug("csid: $csid");
+  // Get the student ID.
+  $vars["advising_student_id"] = $_REQUEST["advising_student_id"];
+  if ($vars["advising_student_id"] == "")
+  {
+    $vars["advising_student_id"] = $_SESSION["advising_student_id$csid"];
+    if ($vars["advising_student_id"] == "")
+    { // Default value...
+      //$vars["advising_student_id"] = "10035744";
+    }
+  }
+
+
+  // Should we load from the Draft advising session?  or the active?
+  $vars["advising_load_active"] = $_REQUEST["advising_load_active"];
+  if ($vars["advising_load_active"] == "")
+  { // values will either be "yes" or "" (any other value than "yes" is
+    // considered to be negative.
+    // Default value...
+    $vars["advising_load_active"] = "";
+
+  }
+
+
+
+  /*
+  // Get the degree ID.
+  $vars["advisingDegreeID"] = $_REQUEST["advisingDegreeID"];
+  if ($vars["advisingDegreeID"] == "")
+  {
+  $vars["advisingDegreeID"] = $_SESSION["advisingDegreeID"];
+  if ($vars["advisingDegreeID"] == "")
+  { // Default value...
+  $vars["advisingDegreeID"] = "586227"; // cosc
+  }
+  }
+  */
+
+  // Get the major_code.
+  $vars["advising_major_code"] = $_REQUEST["advising_major_code"];
+  //admin_debug($vars["advising_major_code"]);
+  if ($vars["advising_major_code"] == "")
+  {
+    $vars["advising_major_code"] = $_SESSION["advising_major_code$csid"];
+    if ($vars["advising_major_code"] == "")
+    { // Default value...
+      //$vars["advising_major_code"] = "COSC";
+    }
+  }
+
+
+
+
+  // Get the track_code.
+  $vars["advising_track_code"] = $_REQUEST["advising_track_code"];
+  if ($vars["advising_track_code"] == "")
+  {
+    $vars["advising_track_code"] = $_SESSION["advising_track_code$csid"];
+    if ($vars["advising_track_code"] == "")
+    { // Default value...
+
+    }
+  }
+
+  // Update the student's settings?
+  $vars["advising_update_student_settings_flag"] = $_REQUEST["advising_update_student_settings_flag"];
+  // Make it only come from the POST, for safety.
+  if ($vars["advising_update_student_settings_flag"] == "")
+  {
+    $vars["advising_update_student_settings_flag"] = $_SESSION["advising_update_student_settings_flag$csid"];
+    if ($vars["advising_update_student_settings_flag"] == "")
+    { // Default value...
+
+    }
+  }
+
+
+  // Update the logged-in user's settings?
+  $vars["fp_update_user_settings_flag"] = $_REQUEST["fp_update_user_settings_flag"];
+  // Make it only come from the POST, for safety.
+  if ($vars["fp_update_user_settings_flag"] == "")
+  {
+    $vars["fp_update_user_settings_flag"] = $_SESSION["fp_update_user_settings_flag$csid"];
+    if ($vars["fp_update_user_settings_flag"] == "")
+    { // Default value...
+
+    }
+  }
+
+
+
+  $settings = fp_get_system_settings();
+
+
+  $vars["advising_term_id"] = $_REQUEST["advising_term_id"];  // Get it from the GET or POST.
+  if ($vars["advising_term_id"] == "")
+  {
+    // Set to the default advising term.
+    $vars["advising_term_id"] = $_SESSION["advising_term_id$csid"];
+    if ($vars["advising_term_id"] == "")
+    {
+      // default value:
+      $vars["advising_term_id"] = $settings["advising_term_id"];
+      if ($vars["advising_term_id"] == "") {
+        // It's STILL blank?!  Just use 0 then.
+        $vars["advising_term_id"] = "0";
+      }
+    }
+  }
+
+  // Are we currently in WhatIf mode?
+  $vars["advising_what_if"] = $_REQUEST["advising_what_if"];  // Get it from the GET or POST.
+  if ($vars["advising_what_if"] == "")
+  {
+    // Will equal "yes" if we ARE in whatIf mode.
+    $vars["advising_what_if"] = $_SESSION["advising_what_if$csid"];
+    if ($vars["advising_what_if"] == "")
+    {
+      // Default value:
+      $vars["advising_what_if"] = "no";
+    }
+  }
+
+  $vars["what_if_major_code"] = $_REQUEST["what_if_major_code"];  // Get it from the GET or POST.
+  if ($vars["what_if_major_code"] == "")
+  {
+    // Will equal "yes" if we ARE in whatIf mode.
+    $vars["what_if_major_code"] = $_SESSION["what_if_major_code$csid"];
+    if ($vars["what_if_major_code"] == "")
+    {
+      // Default value:
+      $vars["what_if_major_code"] = "";
+    }
+  }
+
+  $vars["what_if_track_code"] = $_REQUEST["what_if_track_code"];  // Get it from the GET or POST.
+  if ($vars["what_if_track_code"] == "")
+  {
+    // Will equal "yes" if we ARE in whatIf mode.
+    $vars["what_if_track_code"] = $_SESSION["what_if_track_code$csid"];
+    if ($vars["what_if_track_code"] == "")
+    {
+      // Default value:
+      $vars["what_if_track_code"] = "";
+    }
+  }
+
+
+  if ($vars["what_if_major_code"] == "none")
+  {
+    $vars["what_if_major_code"] = "";
+  }
+  if ($vars["what_if_track_code"] == "none")
+  {
+    $vars["what_if_track_code"] = "";
+  }
+  if ($vars["advising_track_code"] == "none")
+  {
+    $vars["advising_track_code"] = "";
+  }
+
+
+  // Settings... (from the database)
+  $vars["setting_available_advising_term_ids"] = $settings["available_advising_term_ids"];
+  $vars["setting_advising_term_id"] = $settings["advising_term_id"];
+  $vars["setting_current_catalog_year"] = $settings["current_catalog_year"];
+  $vars["setting_current_draft_catalog_year"] = $settings["current_draft_catalog_year"];
+
+  // Are we in Print View?
+  $vars["print_view"] = $_REQUEST["print_view"];
+
+  // Should we try to load from the cache?
+  $vars["load_from_cache"] = $_REQUEST["load_from_cache"];
+  if ($vars["load_from_cache"] == "")
+  {
+    // By default, attempt to load from cache.
+    $vars["load_from_cache"] = "yes";
+  }
+
+  // What "view" are we in?  View by Year or by Type?
+  // Not the same as printView.  printView should work regardless
+  // of our advising_view.
+  $vars["advising_view"] = $_REQUEST["advising_view"];
+  if ($vars["advising_view"] == "")
+  {
+    $vars["advising_view"] = $_SESSION["advising_view$csid"];
+  }
+
+
+  // Place values into session.
+  $_SESSION["advising_student_id$csid"] = $vars["advising_student_id"];
+  $_SESSION["advising_student_id"] = $vars["advising_student_id"]; // used ONLY in the error report popup!
+  $_SESSION["advising_major_code$csid"] = $vars["advising_major_code"];
+  $_SESSION["advising_track_code$csid"] = $vars["advising_track_code"];
+  $_SESSION["advising_term_id$csid"] = $vars["advising_term_id"];
+  $_SESSION["advising_what_if$csid"] = $vars["advising_what_if"];
+  $_SESSION["what_if_major_code$csid"] = $vars["what_if_major_code"];
+  $_SESSION["what_if_track_code$csid"] = $vars["what_if_track_code"];
+  $_SESSION["advising_view$csid"] = $vars["advising_view"];
+
+
+  if ($bool_ignore_what_if_variables == true)
+  {
+    $vars["advising_what_if"] = "";
+    $vars["what_if_major_code"] = "";
+    $vars["what_if_track_code"] = "";
+  }
+
+
+
+// TODO:  not sure that I need this check any more.  Everything will be based on rolls instead.
+  if ($_SESSION["fp_user_type"] == "student")
+  {
+    // The student can only pull up their own information.  This
+    // check is to try and prevent a hacker student from trying
+    // to pull up someone else's information.
+    if ($_SESSION["advising_student_id"] != $_SESSION["fp_user_id"])
+    {
+      session_destroy();
+      die("You do not have access to that function.  Please log back in: <a href='main.php'>Log into FlightPath.</a>");
+    }
+  }
+
+  // Are we in draft mode?
+  if ($_SESSION["fp_draft_mode"] == "yes")
+  {
+    $vars["bool_use_draft"] = true;
+  } else {
+    $vars["bool_use_draft"] = false;
+  }
+
+
+  $GLOBALS["fp_advising"] = $vars;
+        
+}
+
+
 
 
 
@@ -923,8 +1196,9 @@ function advise_init() {
   global $current_student_id;
   $current_student_id = $_REQUEST["current_student_id"];
   // Insert our advising vars into the GLOBALS array for easy use later.
-  $GLOBALS["fp_advising"] = advise_load_advising_variables_from_db($current_student_id, $user->id);
-    
+  //$GLOBALS["fp_advising"] = advise_load_advising_variables_from_db($current_student_id, $user->id);
+  advise_init_advising_variables();
+      
 }
 
 
@@ -954,14 +1228,14 @@ function advise_init_screen() {
   $perform_action = trim(addslashes($_REQUEST["perform_action"]));
 
   if ($_REQUEST["clear_session"] == "yes") {
-    advise_save_advising_variables_to_db();
+    //advise_save_advising_variables_to_db();
     // reload our advising vars into the GLOBALS array for easy use later.
-    $GLOBALS["fp_advising"] = advise_load_advising_variables_from_db($current_student_id, $user->id);
+    //$GLOBALS["fp_advising"] = advise_load_advising_variables_from_db($current_student_id, $user->id);
       
   }
 
   // Insert our advising vars into the GLOBALS array for easy use later.
-  $GLOBALS["fp_advising"] = advise_load_advising_variables_from_db($current_student_id, $user->id);
+  //$GLOBALS["fp_advising"] = advise_load_advising_variables_from_db($current_student_id, $user->id);
    
   $bool_what_if = false;
   
@@ -977,19 +1251,22 @@ function advise_init_screen() {
   }
 
   $bool_draft = true;
+  
+  //fpm($GLOBALS["fp_advising"]);
   if ($GLOBALS["fp_advising"]["advising_load_active"] == "yes") { 
     // If we are loading from Active, then rebuild the cache as well.
     $bool_draft = false;
     $GLOBALS["load_from_cache"] = "no";
   }
 
+
   // TODO:  not sure that this is being used anymore!  Check with rolls and permissions
   // instead.
-  if ($_SESSION["fp_user_type"] == "student") {
-    $bool_draft = false;
+  //if ($_SESSION["fp_user_type"] == "student") {
+  //  $bool_draft = false;
     // never load a draft advising session if a student
     // is logged in!
-  }
+ // }
 
 
   ///////////////////////
@@ -1005,7 +1282,7 @@ function advise_init_screen() {
 
   $bool_loaded = FALSE;
   if ($GLOBALS["fp_advising"]["load_from_cache"] == "yes" && $cache != "" && $fp = unserialize($cache)) {
-    dpm("Loading student data from cache...");
+    //fpm("Loading student data from cache...");
     $bool_loaded = TRUE;    
     $fp->db = get_global_database_handler();
     $student = $fp->student;
@@ -1017,7 +1294,7 @@ function advise_init_screen() {
   } 
   
   if (!$bool_loaded) {
-    dpm("Loading student data fresh");    
+    //fpm("Loading student data fresh");    
     $fp = new FlightPath();
     $fp->init();    
     $student = $fp->student;
@@ -1040,7 +1317,8 @@ function advise_init_screen() {
     
     // Save, then reload the student.
     $fp->save_advising_session_from_post(0,true);
-    fpm("saved draft");
+    $bool_draft = TRUE;  // load draft, since we just saved it (and changed something)
+    //fpm("saved draft");
 
   }
 

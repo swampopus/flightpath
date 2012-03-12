@@ -3,6 +3,14 @@ FlightPath Changelog
 
 2012-03-11
   Got many of the popups working on the "View" page.  Also, submitting a basic advising session works.
+  
+  Moved over all of the Javascript into its own file (advise.js) instead of being locked up inside the
+  AdvisingScreen object.  It could be further split out into other files as well.
+  
+  Adding/Removing Substitutions, and removing courses from a degree plan, appear to be working
+  correctly.
+  
+  Menus can specify a file to load as needed.  Like an additional .inc file where that page_callback is located.
 
 
 2012-03-10

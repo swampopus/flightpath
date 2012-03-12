@@ -133,6 +133,7 @@ function system_menu() {
     "page_settings" => array(
       "display_greeting" => TRUE,
       "display_currently_advising" => TRUE,
+      "screen_mode" => "not_advising",
     ),
   );
   

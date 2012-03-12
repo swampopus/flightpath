@@ -889,14 +889,15 @@ class _FlightPath
 
 	function save_advising_session_from_post($faculty_id = 0, $bool_draft = true)
 	{
+	  global $user;
 	  //var_dump($__p_o_s_t);
 		// This method will, only by looking at variables in the
 		// POST, save an advising session into the database.
-		$db = new DatabaseHandler();
-		if ($faculty_id == 0)
-		{ // if none supplied, use the one from the session of
+		$db = get_global_database_handler();
+		if ($faculty_id == 0) { 
+		  // if none supplied, use the one from the session of
 			// whomever is currently logged in.
-			$faculty_id = $_SESSION["fp_user_id"];
+			$faculty_id = $user->id;
 		}
 
 		$bool_found_update_match = false;
@@ -904,7 +905,12 @@ class _FlightPath
 		$degree_id = $this->degree_plan->degree_id;
 		$major_code = $this->degree_plan->major_code;
 		$available_terms = $GLOBALS["setting_available_advising_term_ids"];
-
+    
+    if (!$available_terms) {
+      // Available terms couldn't be loaded.  Add in a fake term for the time being.
+      $available_terms = "0";
+    }        
+    
 		// Do we need to update the student's settings?
 		if (trim($_POST["advising_update_student_settings_flag"]) != "")
 		{
@@ -924,15 +930,12 @@ class _FlightPath
 		if ($_POST["log_addition"] != "")
 		{
 			//admin_debug("add" . $_POST["log_addition"]);
-			$temp = explode("_",$_POST["log_addition"]);
-			if ($temp[0] == "change_term")
-			{
+			$temp = explode("~",$_POST["log_addition"]);
+			if ($temp[0] == "change_term") {
 				$db->add_to_log("change_term","$student_id," . $temp[1]);
 			}
 
-			if ($temp[0] == "change_track")
-			{
-
+			if ($temp[0] == "change_track"){
 				$db->add_to_log("change_track","$student_id," . $temp[1]);
 			}
 
@@ -994,24 +997,24 @@ class _FlightPath
 			$advising_session_id_array_count[$term_id] = 0;
 		}
 		//admin_debug($advising_session_id);
-
-
+        
+    
 		$wi = "";
 		if ($is_what_if == "1"){$wi = "_whatif";}
 
-		if ($bool_draft)
-		{
+		if ($bool_draft) {
 			$db->add_to_log("save_adv_draft$wi", "$student_id,major_code:$major_code");
-		} else {
+		} 
+		else {
 			$db->add_to_log("save_adv_active$wi", "$student_id,major_code:$major_code");
 		}
-
 
 		// Go through the POST, looking for the
 		// phrase "advisecourse_" in the name of the variables.
 		// There should be one of these for every course that was
 		// on the page.  It looks like this:
 		// advisecourse_course_id_semesterNum_group_id_varHours_randomID
+		//fpm($_POST);
 		foreach($_POST as $key => $value)
 		{
 			if (!strstr($key,"advisecourse_"))
@@ -1032,7 +1035,7 @@ class _FlightPath
 			$group_id = trim($temp[3]);
 			$var_hours = trim($temp[4]);
 			$random_id = trim($temp[5]);
-			$advised_term_id = trim($temp[6]);
+			$advised_term_id = trim($temp[6]);			
 			$db_group_requirement_id = trim($temp[7]);
 
 			$advising_session_id = $advising_session_id_array[$advised_term_id];
@@ -1049,7 +1052,7 @@ class _FlightPath
 			// variable hours, for example.
 			if (trim($_POST["updatecourse"]) != "")
 			{
-				$temp2 = explode("_",trim($_POST["updatecourse"]));
+				$temp2 = explode("~",trim($_POST["updatecourse"]));
 
 				$tcourse_id = $temp2[0];
 				$tgroup_id = $temp2[1] * 1;
@@ -1096,7 +1099,7 @@ class _FlightPath
 			// degree program, and not already checked for advising.  So,
 			// let's add it to the advised_courses table, so it DOES
 			// get checked for advising.
-			$temp2 = explode("_",trim($_POST["updatecourse"]));
+			$temp2 = explode("~",trim($_POST["updatecourse"]));
 			$course_id = $temp2[0];
 			$group_id = $temp2[1] * 1;
 			$semester_num = $temp2[2] * 1;
@@ -1131,7 +1134,7 @@ class _FlightPath
 		//-------------------------------------------------------
 		if (trim($_POST["savesubstitution"]) != "")
 		{
-			$temp = explode("_",trim($_POST["savesubstitution"]));
+			$temp = explode("~",trim($_POST["savesubstitution"]));
 			$course_id = $temp[0];  // required course
 			$group_id = $temp[1] * 1;
 			$semester_num = $temp[2] * 1;
@@ -1187,7 +1190,7 @@ class _FlightPath
 
 		if (trim($_POST["removesubstitution"]) != "")
 		{
-			$temp = explode("_",trim($_POST["removesubstitution"]));
+			$temp = explode("~",trim($_POST["removesubstitution"]));
 			$sub_id = trim($temp[0]) * 1;
 
 			$result = $db->db_query("UPDATE student_substitutions
@@ -1207,7 +1210,7 @@ class _FlightPath
 		//-------------------------------------------------------
 		if (trim($_POST["unassign_group"]) != "")
 		{
-			$temp = explode("_",trim($_POST["unassign_group"]));
+			$temp = explode("~",trim($_POST["unassign_group"]));
 			$course_id = $temp[0];
 			$term_id = $temp[1];
 			$transfer_flag = $temp[2];
@@ -1227,7 +1230,7 @@ class _FlightPath
 
 		if (trim($_POST["restore_unassign_group"]) != "")
 		{
-			$temp = explode("_",trim($_POST["restore_unassign_group"]));
+			$temp = explode("~",trim($_POST["restore_unassign_group"]));
 			$unassign_id = trim($temp[0]) * 1;
 
 			//admin_debug($unassign_id);
@@ -1249,7 +1252,7 @@ class _FlightPath
 		//-------------------------------------------------------
 		if (trim($_POST["unassign_transfer_eqv"]) != "")
 		{
-			$temp = explode("_",trim($_POST["unassign_transfer_eqv"]));
+			$temp = explode("~",trim($_POST["unassign_transfer_eqv"]));
 			$course_id = $temp[0];
 
 			$result = $db->db_query("INSERT INTO student_unassign_transfer_eqv
@@ -1265,7 +1268,7 @@ class _FlightPath
 
 		if (trim($_POST["restore_transfer_eqv"]) != "")
 		{
-			$temp = explode("_",trim($_POST["restore_transfer_eqv"]));
+			$temp = explode("~",trim($_POST["restore_transfer_eqv"]));
 			$unassign_id = trim($temp[0]) * 1;
 
 			$result = $db->db_query("UPDATE student_unassign_transfer_eqv
@@ -1325,6 +1328,10 @@ class _FlightPath
 		$degree_id = $this->degree_plan->degree_id;
 		$student_id = $this->student->student_id;
 		$available_terms = $GLOBALS["setting_available_advising_term_ids"];
+    // Give available_terms a default if it's empty.
+    if (!$available_terms) {
+      $available_terms = "0";
+    }
 
 
 
@@ -1367,7 +1374,7 @@ class _FlightPath
 								WHERE 
 								 $advising_session_line
 								ORDER BY `id` ";
-		//admin_debug($query);
+		//fpm($query);
 		$result = $db->db_query($query);
 		while($cur = $db->db_fetch_array($result))
 		{
@@ -1377,7 +1384,7 @@ class _FlightPath
 			$var_hours = trim($cur["var_hours"]);
 			$advised_term_id = trim($cur["term_id"]);
 			$id = trim($cur["id"]);
-			//admin_debug("course $course_id sem:$semester_num group:$group_id $var_hours");
+			//fpm("course $course_id sem:$semester_num group:$group_id $var_hours");
 
 			// Add this course to the generic list of advised courses.  Useful
 			// if we are using this to pull up an advising summary.
