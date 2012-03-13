@@ -330,6 +330,10 @@ class _DatabaseHandler
 	    
 	    foreach ($args as $replacement) {
 	      // Escape the replacement...
+	      // The replacement might ALSO have a question mark in it.  Escape that too.
+	      if (strpos($replacement, "?") !== 0) {
+	        $replacement = str_replace("?", "~ESCAPED_Q_MARK~", $replacement);
+        }
 	      $replacement = mysql_real_escape_string($replacement);
 	      $sql_query = preg_replace("/\?/", $replacement, $sql_query, 1);	    
 	    }
@@ -339,7 +343,7 @@ class _DatabaseHandler
 	  $sql_query = str_replace("~ESCAPED_Q_MARK~", "?", $sql_query);	    
 	  
 	  //////////////////////////////////////////////
-	  
+	    	  
 		// Run the sqlQuery and return the result set.
 		$result = mysql_query($sql_query, $this->dbc);
 		if ($result)

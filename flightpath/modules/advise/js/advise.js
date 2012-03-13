@@ -13,6 +13,11 @@ function changeTerm(term_id) {
   submitForm(true);
 }
 
+function changeView(view) {
+  document.getElementById("advising_view").value = view;
+  
+  submitForm(true);
+}
 
 function popupChangeTrack(track_code) {
   var x = confirm("Are you sure you wish to change degree options?");

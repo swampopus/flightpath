@@ -7,6 +7,7 @@ function advise_menu() {
   $items["view"] = array(
     "title" => "View",
     "page_callback" => "advise_display_view",
+    "page_arguments" => array("view"),
     "access_callback" => TRUE,  
     "tab_family" => "system",
     "page_settings" => array (
@@ -16,6 +17,22 @@ function advise_menu() {
     "weight" => 30,
     "type" => MENU_TYPE_TAB,
   );
+
+  $items["what-if"] = array(
+    "title" => "What If?",
+    "page_callback" => "advise_display_view",
+    "page_arguments" => array("what-if"),
+    "access_callback" => TRUE,  
+    "tab_family" => "system",
+    "page_settings" => array (
+      "display_currently_advising" => TRUE,
+      "display_greeting" => TRUE,
+    ),    
+    "weight" => 50,
+    "type" => MENU_TYPE_TAB,
+  );
+
+
   
   $items["advise/handle-advising-submit"] = array(
     "page_callback" => "advise_handle_advising_submit",
@@ -343,25 +360,24 @@ function advise_handle_advising_submit() {
  * to see their advising session, or for an advisor to advise them.
  * 
  */
-function advise_display_view() {
+function advise_display_view($view = "view") {
   global $user, $fp, $degree_plan, $screen;
   $rtn = "";
-  
+
+  if ($view == "what-if") {
+    $GLOBALS["fp_advising"]["advising_what_if"] = "yes";  
+    $_REQUEST["advising_what_if"] = "yes";
+  }
+  else {
+    $GLOBALS["fp_advising"]["advising_what_if"] = "no";
+    $_REQUEST["advising_what_if"] = "no";
+  }
+
   // Initialize everything we need to initialize for this advising session.
   advise_init_screen();      
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");  
-  
-  if ($GLOBALS["advising_view"] == "type") {
-    $screen->view = "type";
-    $log_action = "view_by_type";
 
-  } 
-  else {
-
-    // Default advising view.  "View by Year"    
-  }
-
-  if ($GLOBALS["print_view"] == "yes") {
+  if ($GLOBALS["fp_advising"]["print_view"] == "yes") {
     $screen->bool_print = true;
     $screen->screen_mode = "not_advising";
     $log_extra .= ",print_view";
@@ -369,11 +385,11 @@ function advise_display_view() {
 
   //$page_content .= $screen->display_greeting();
 
-  if ($GLOBALS["advising_what_if"] == "yes" && $GLOBALS["what_if_major_code"] == "") {
+  if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes" && $GLOBALS["fp_advising"]["what_if_major_code"] == "") {
     // We are in WhatIf, but we have not selected a major, so give
     // the user a selection screen.
     $screen->screen_mode = "not_advising";
-    $rtn .= $screen->display_what_if_selection();
+    $rtn .= advise_display_what_if_selection();
   } 
   else {
     // This is a normal advising screen.  Either View or WhatIf.
@@ -382,7 +398,7 @@ function advise_display_view() {
 
     $screen->build_screen_elements();
 
-    $rtn .= "<form id='mainform' method='POST' action='" . base_path() . "/view'>";
+    $rtn .= "<form id='mainform' method='POST' action='" . base_path() . "/$view'>";
     $rtn .= "<table class='fp-semester-table'>";
     $rtn .= $screen->display_screen();
     $rtn .= "</table>";
@@ -390,42 +406,32 @@ function advise_display_view() {
     $rtn .= $screen->get_hidden_advising_variables("save_draft");
         
     $rtn .= "</form>";
-
+    
+    // Figure out what the page's sub-tabs should be, and set them.
+    $tab_array = array();
+    $tab_array[0]["title"] = "Display by Year";
+    $tab_array[0]["active"] = ($screen->view != "type");
+    $tab_array[0]["on_click"] = "changeView(\"year\");";
+        
+    $tab_array[1]["title"] = "Display by Type";
+    $tab_array[1]["active"] = ($screen->view == "type");
+    $tab_array[1]["on_click"] = "changeView(\"type\");";
+        
+    fp_set_page_sub_tabs($tab_array);
+    
+                    
   }
 
   // If we are in WhatIf mode, let's write something special to
   // the log.
-  if ($GLOBALS["advising_what_if"] == "yes" && $GLOBALS["what_if_major_code"] != "")
+  if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes" && $GLOBALS["fp_advising"]["what_if_major_code"] != "")
   {
     $log_action .= "_whatif";
-    $log_extra = $GLOBALS["what_if_major_code"] . " " . $GLOBALS["what_if_track_code"];
-  }
-
-  //$db->add_to_log($log_action, $log_extra);
-
-
-  //$screen->build_system_tabs(2, true);
-  //if ($GLOBALS["advising_what_if"] == "yes")
-  //{
-  //  $screen->build_system_tabs(5, true, true);
-  //}
-
-  /*
-  $screen->page_scroll_top = trim($_POST["scroll_top"]);
-  //admin_debug("Finished", "main");
-  //admin_debug(strlen($page_content));
-  $screen->page_has_search = true;
-  if ($_SESSION["fp_user_type"] == "student")
-  {
-    $screen->page_has_search = false;
+    $log_extra = $GLOBALS["fp_advising"]["what_if_major_code"] . " " . $GLOBALS["fp_advising"]["what_if_track_code"];
   }
 
 
-  $screen->page_content = $page_content;
-  // send to the browser
-  $screen->output_to_browser();
-  */
-
+  
   //  print_pre($student->list_courses_taken->toString());
   // Should we re-cache the course inventory?  If there have been any changes
   // to it, then we will see that in a GLOBALS variable...
@@ -436,6 +442,84 @@ function advise_display_view() {
    
   return $rtn;
 }
+
+
+
+
+/**
+ * Displays the pulldown select list for picking a new What If degree.
+ * Returns HTML.
+ *
+ * @return string
+ */
+function advise_display_what_if_selection($bool_undergrad_only = TRUE) {
+  global $screen, $current_student_id;
+    
+  $rtn = "";
+
+  if ($screen->bool_print) {
+    return "";
+  }
+
+  $db = get_global_database_handler();
+
+  $rtn .= "<form action='" . base_path() . "/what-if' id='mainform' method='POST'>";
+  $rtn .= fp_render_curved_line("What if I change my major to...");
+
+  $rtn .= "<br>
+      Major: <select name='what_if_major_code' class='what-if-selector'>
+        <option value=''>Please select a major</option>
+        <option value=''>------------------------------</option>\n
+        ";
+  $settings = fp_get_system_settings();
+  $current_catalog_year = $settings["current_catalog_year"];
+  //$bool_use_draft = $GLOBALS["bool_use_draft"];
+  $bool_use_draft = FALSE;  // leave as false for now.  Because you can't select
+                        // degree options, and if you click submit it really does
+                        // save it.  Better to just use blank degrees.
+  if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, false, $bool_use_draft, $bool_undergrad_only)) {
+    foreach($degree_array as $major_code => $value) {
+      if (trim($value["title"]) == ""){continue;}
+      $rtn .= "<option value='$major_code'>{$value["title"]}</option> \n";
+    }
+  }
+
+  $rtn .= "</select>
+      <br><br>";
+
+  $rtn .= "
+      <div align='right'>
+      " . fp_render_button("Try It Out!", "showUpdate(true);submitForm();") . "       
+   
+      </div>
+      <br><br>
+      <div class='hypo tenpt'>
+       <b>Important Notice:</b> What If displays degree plans
+       from the most recent catalog year ($current_catalog_year-" . ($current_catalog_year + 1) . "), 
+       as any major change would place the student into the 
+       most recent catalog. 
+      </div>";
+
+
+  // Include only certain variables, so we don't overwrite our selection of what_if_major_code.
+  $rtn .= "
+          <input type='hidden' name='load_from_cache' value='no'>
+          <input type='hidden' name='window_mode' value='screen'>
+          <input type='hidden' id='scroll_top'>
+          <input type='hidden' id='perform_action' name='perform_action'>
+          <input type='hidden' id='advising_what_if' name='advising_what_if' value='yes'>
+          <input type='hidden' id='current_student_id' name='current_student_id' value='$current_student_id'>
+  
+        ";
+
+  $rtn .= "</form>
+      ";
+
+
+  return $rtn;
+}
+
+
 
 
 
@@ -1254,9 +1338,8 @@ function OLD__advise_init_advising_variables($bool_ignore_what_if_variables = FA
 function advise_init() {
   global $current_student_id;
   $current_student_id = $_REQUEST["current_student_id"];
-  // Insert our advising vars into the GLOBALS array for easy use later.
-  //$GLOBALS["fp_advising"] = advise_load_advising_variables_from_db($current_student_id, $user->id);
-  advise_init_advising_variables();
+
+
       
 }
 
@@ -1283,6 +1366,10 @@ function advise_init_screen() {
   global $degree_plan, $student, $fp, $window_mode, $user, $current_student_id, $screen;
   
   $db = get_global_database_handler();
+  
+  // Insert our advising vars into the GLOBALS array for easy use later.
+  advise_init_advising_variables();    
+    
     
   $perform_action = trim(addslashes($_REQUEST["perform_action"]));
 
@@ -1315,7 +1402,7 @@ function advise_init_screen() {
   if ($GLOBALS["fp_advising"]["advising_load_active"] == "yes") { 
     // If we are loading from Active, then rebuild the cache as well.
     $bool_draft = false;
-    $GLOBALS["load_from_cache"] = "no";
+    $GLOBALS["fp_advising"]["load_from_cache"] = "no";
   }
 
 
@@ -1392,7 +1479,18 @@ function advise_init_screen() {
   }
 
 
-  $screen = new AdvisingScreen("", $fp);
+  // Is the user trying to view "by type" or by year?
+  if ($GLOBALS["fp_advising"]["advising_view"] == "type") {
+    $screen = new AdvisingScreenTypeView("", $fp);
+    $screen->view = "type";
+    $log_action = "view_by_type";
+
+  } else {
+    // Default advising view.  "View by Year"
+    $screen = new AdvisingScreen("", $fp);
+  }
+
+
   if ($_REQUEST["bool_blank"] == "true") {
     $screen->bool_blank = TRUE;
   }
@@ -1406,7 +1504,7 @@ function advise_init_screen() {
   }
 
 
-  if ($GLOBALS["load_from_cache"] != "yes") { 
+  if ($GLOBALS["fp_advising"]["load_from_cache"] != "yes") { 
     // do not load from cache....
     $student->load_student();
     $student->load_student_substitutions();
@@ -1451,7 +1549,7 @@ function advise_init_screen() {
 
   // Once we have loaded the advising session, we should always try to load
   // from draft from then on out.
-  $GLOBALS["advising_load_active"] = "";
+  $GLOBALS["fp_advising"]["advising_load_active"] = "";
 
   //admin_debug("mem:" .  round(memory_get_usage(true)/1024/1024,1) . "mb");
 

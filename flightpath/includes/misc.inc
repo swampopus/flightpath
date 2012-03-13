@@ -16,6 +16,10 @@
 function fp_set_page_tabs($tab_array) {
   $GLOBALS["fp_set_page_tabs"] = $tab_array;
 }
+function fp_set_page_sub_tabs($tab_array) {
+  $GLOBALS["fp_set_page_sub_tabs"] = $tab_array;
+}
+
 
 
 function fp_add_message($str) {

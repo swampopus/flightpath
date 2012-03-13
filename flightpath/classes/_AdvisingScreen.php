@@ -51,7 +51,7 @@ class _AdvisingScreen
 	 */
 	function __construct($script_filename = "", FlightPath $flightpath = null, $screen_mode = "")
 	{
-		$this->width_array = Array("10%", "10%","10%", "15%", "26%", "10%", "10%", "9%");
+		$this->width_array = Array("10%", "8%","8%", "17%", "26%", "10%", "10%", "9%");
 		$this->popup_width_array = Array("17%", "1%", "1%", "15%", "26%", "15%", "15%", "10%");
 		
 		$this->script_filename = $script_filename;
@@ -4172,7 +4172,7 @@ function draw_menu_items($menu_array) {
 	function draw_semester_box_top($title, $hideheaders = false)
 	{
 
-	  $w = 300;
+	  $w = 340;
 	  if ($this->page_is_mobile) $w = "100%";
 		return $this->draw_box_top($title, $hideheaders, $w);
 	}
@@ -4242,10 +4242,10 @@ function draw_menu_items($menu_array) {
 		$headers = array();
 		if ($hideheaders != true)
 		{
-			$headers[0] = t("course");
-			$headers[1] = t("hrs");
-			$headers[2] = t("grd");
-			$headers[3] = t("pts");
+			$headers[0] = t("Course");
+			$headers[1] = t("Hrs");
+			$headers[2] = t("Grd");
+			$headers[3] = t("Pts");
 		}
 
 

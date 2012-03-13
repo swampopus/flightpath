@@ -54,6 +54,11 @@ function fp_display_page($page) {
     $content_top .= fp_render_sub_tab_array($sub_tab_array);
   }
   
+  // Should we override the page sub-tabs with what is in "fp_set_page_sub_tabs" ?
+  if (is_array($GLOBALS["fp_set_page_sub_tabs"])) {
+    $content_top .= fp_render_sub_tab_array($GLOBALS["fp_set_page_sub_tabs"]);    
+  }
+
   
   
   
@@ -196,11 +201,15 @@ function fp_build_tab_array($page) {
    * @return string
    */
   function fp_render_currently_advising_box($bool_hide_catalog_warning = false, $bool_blank = FALSE, $bool_print = FALSE, $degree_plan = NULL, $screen_mode = "") {
-    global $current_student_id;
+    global $current_student_id, $screen;
     
     $rtn  = "";
     
     $csid = $current_student_id;
+    
+    if (is_object($screen) && is_object($screen->degree_plan)) {
+      $degree_plan = $screen->degree_plan;
+    }
     
     $student = new Student();
     $student->student_id = $csid;
@@ -210,7 +219,7 @@ function fp_build_tab_array($page) {
           
     
     $rtn .= "<table class='fp-currently-advising'>";
-  
+    
   
     $for_term = $whatif = $what_if_select = $hypoclass = "";
     if ($GLOBALS["fp_advising"]["advising_term_id"] != "" && $screen_mode != "not_advising"
@@ -238,7 +247,8 @@ function fp_build_tab_array($page) {
       $student->catalog_year = $settings["current_catalog_year"];
       if ($bool_print != true) {
         $what_if_select = "<div class='tenpt'><b>
-          <a href='advise.php?advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&current_student_id=$csid'>Change What If Settings</a></b></div>";
+          " . l("Change What If Settings", "what-if", "advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&current_student_id=$current_student_id") . "
+          </b></div>";
       }
     }
 
@@ -556,7 +566,7 @@ function fp_render_button($title, $on_click, $bool_padd = true, $style = "", $ex
   
   if ($bool_padd)
   {
-    $padd = "&nbsp; &nbsp;";
+    $padd = "&nbsp;&nbsp;";
   }
 
 

@@ -1,6 +1,13 @@
 FlightPath Changelog
 ====================
 
+2012-03-12
+  Got switching between Year view and Type view working.
+
+  Got What If working (I think).  Its a little bit screwy, and sometimes it seems to break when
+  it wants to, but it seems to be OK for the time being.
+
+  
 2012-03-11
   Got many of the popups working on the "View" page.  Also, submitting a basic advising session works.
   

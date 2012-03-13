@@ -72,10 +72,9 @@ function menu_execute_page_request() {
       $access = TRUE;
     }
     if ($access) {
-      if ($router_item['file']) {        
+      if ($router_item['file'] != "") {      
         require_once($router_item['file']);
       }
-          
       $page = array();
       $page["content"] = call_user_func_array($router_item['page_callback'], $router_item['page_arguments']);      
       $page["path"] = $path;
