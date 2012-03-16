@@ -202,7 +202,7 @@ function toggleSelection(uniqueID, display_status, warningMsg) {
   }
 }
 
-function dummyToggleSelection(x,y,x) {
+function dummyToggleSelection(x,y,z) {
   return;
 }
 

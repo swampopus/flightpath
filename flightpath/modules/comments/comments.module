@@ -1,0 +1,41 @@
+<?php
+
+/*
+* This is the Comments module for FlightPath, which lets advisors write comments
+* for students.
+*/
+
+
+function comments_menu() {
+  $items = array();
+  
+  $items["comments"] = array(
+    "title" => "Comments",
+    "page_callback" => "comments_display_main",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "system",
+    "page_settings" => array (
+      "display_currently_advising" => TRUE,
+      "display_greeting" => TRUE,
+    ),        
+    "weight" => 40,        
+  );
+  
+  
+  return $items;
+} 
+
+
+/**
+ * This displays the primary Comments tab, where we see past comments and can enter a
+ * new one (with the right permissions).
+ */
+function comments_display_main() {
+  $rtn = "";
+  
+  
+  $rtn .= "comments screen.";
+  
+  return $rtn;
+}
