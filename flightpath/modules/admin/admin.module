@@ -1,0 +1,109 @@
+<?php
+
+/*
+* The admin module for FlightPath.  Lets admins configure modules, users, etc, as well
+* as all of the degree plan and course data within FlightPath.
+*/
+ 
+function admin_menu() {
+  $items = array();
+   
+  $items["admin-tools/admin"] = array(
+     "title" => t("FlightPath Admin Console"),
+     "page_callback" => "admin_display_main",
+     "access_arguments" => array("can_access_admin"),
+     "page_settings" => array(
+       "page_has_search" => FALSE,
+       "page_banner_is_link" => TRUE,
+       "page_hide_report_error" => TRUE,
+       "target" => "_blank",        
+     ),     
+     "type" => MENU_TYPE_NORMAL_ITEM,
+  );
+  
+  $items["admin/config/urgent-message"] = array(
+    "title" => "Edit urgent message",
+    "page_callback" => "fp_system_settings_form",
+    "page_arguments" => array("admin_urgent_message_form"),
+    "access_arguments" => array("can_edit_urgent_message"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        "admin-tools/admin" => "Back to main menu",
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );     
+   
+   
+  return $items;
+}
+
+
+function admin_perm() {
+  return array(
+    "can_access_admin" => array(
+      "title" => t("Access administrative console"),
+      "description" => t("This is a powerful permission!  This allows a 
+                          user to access the 'admin console' for FlightPath."),
+    ),
+    "can_edit_urgent_message" => array(
+      "title" => t("Edit urgent message"),
+      "description" => t("The user may edit the 'Urgent Message' which appears at the top of every page, if set."),
+    ),    
+  );
+} 
+ 
+
+/**
+ * Meant to be fed into "fp_system_settings_form()", this function
+ * returns an array which will automatically save values to our "variables" table. 
+ */
+function admin_urgent_message_form() {
+  $form = array();
+
+  
+  $form["mark" . $m++] = array(
+    "type" => "markup",
+    "value" => "<p>" . t("Any message you enter here will be displayed at the top of every page in the system. 
+                  This is used to alert users that the system is about to be taken offline, or any other urgently-needed information.") . "</p>
+                  <p>" . t("To delete this message, simple delete all the text in the box and save.") . "</p>",
+  );
+  
+  $form["urgent_msg"] = array(
+    "type" => "textarea",
+    "label" => "Urgent message:",
+    "value" => variable_get("urgent_msg", ""),
+  );
+  
+  
+  
+  return $form;
+}
+ 
+  
+/**
+ * This is the "main" page for the admin module.  It's what the user
+ * first sees when the click to go to the Admin page.
+ */
+function admin_display_main() {
+  $rtn = "";
+
+  $rtn .= "<h2>FlightPath Admin Console - Main Menu</h2>";
+  $rtn .= "<table class='fp-semester-table'>
+           <tr>
+            <td valign='top' width='50%'>
+              " . fp_render_menu_block("System Configuration", "admin/config") . "
+            </td>
+            <td valign='top' width='50%'>
+            </td>
+                        
+           </tr>";
+
+
+  $rtn .= "</table>"; // close semester table
+  
+  return $rtn;
+}

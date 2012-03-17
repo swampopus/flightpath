@@ -55,7 +55,6 @@ function menu_rebuild_cache() {
 }
 
 
-
 function menu_execute_page_request() {
   $path = $_GET["q"];
 

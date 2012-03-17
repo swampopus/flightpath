@@ -887,9 +887,6 @@ class _DatabaseHandler
 	 */
 	function set_variable($name, $value) {	  
 
-	  $name = mysql_real_escape_string($name);
-	  $value = mysql_real_escape_string($value);
-	  
     $res2 = $this->db_query("REPLACE INTO variables (name, value)
 	                            VALUES ('?', '?') ", $name, $value);
 	  

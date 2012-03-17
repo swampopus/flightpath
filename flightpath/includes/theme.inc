@@ -7,12 +7,47 @@
  */
 
 
+
+/**
+ * Render a "menu" block of menu items which are all rooted at the menu_root.
+ * So if the menu root is tools, it might return items whose paths look like:
+ *   tools/fun
+ *   tools/here/there
+ * So long as the menu type is "MENU_TYPE_NORMAL_ITEM".  Other types will be ignored.
+ * 
+ * 
+ * We want to 
+ */
+function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
+  $rtn = "";
+  
+  $is_empty = true;
+  $rtn .= fp_render_curved_line($title);
+  
+  $menu_items = menu_get_items_beginning_with($menu_root);
+  foreach ($menu_items as $item) {
+    if ($item["type"] == MENU_TYPE_NORMAL_ITEM) {
+      $rtn .= fp_render_menu_item($item);
+      $is_empty = false;
+    }
+  }
+  
+  if ($is_empty) {
+    return "";
+  }
+  //pretty_print($menu_items);
+  
+  return $rtn;   
+  
+}
+
 /**
  * Output the contents of the $page variable to the screen.
  * $page is an array containing details about the page, as well as
  * its original menu item (router_item) definition.
  */
 function fp_display_page($page) {
+  global $current_student_id;
   
   $screen = new AdvisingScreen("",null,"not_advising");
   $screen->page_title = $page["title"];
@@ -46,6 +81,19 @@ function fp_display_page($page) {
   
   if ($page["router_item"]["page_settings"]["display_greeting"] == TRUE) {  
     $content_top .= fp_render_greeting();
+  }
+  
+  // Are there any "menu_link"s for this?  In order words, little links at the top of the page,
+  // where breadcrumbs might appear.
+  if (is_array($page["router_item"]["page_settings"]["menu_links"])) {
+    $content_top .= "<ul class='top-menu-links'>";
+    foreach ($page["router_item"]["page_settings"]["menu_links"] as $p => $t) {
+      $lclass = "";
+      if ($c == 0) $lclass='first';
+      $content_top .= "<li class='$lclass'>" . l($t, $p, "current_student_id=$current_student_id") . "</li>";
+      $c++;
+    }
+    $content_top .= "</ul>";
   }
   
   // Any sub-tabs we need to render?

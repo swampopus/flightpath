@@ -215,8 +215,10 @@ function variable_get($name, $default_value = "") {
 }
 
 function variable_set($name, $value) {
-  $db = get_global_database_handler();
-  $db->set_variable($name, $value);  
+  
+    db_query("REPLACE INTO variables (name, value)
+              VALUES ('?', '?') ", $name, $value);
+  
 }
 
 function fp_get_system_settings() {

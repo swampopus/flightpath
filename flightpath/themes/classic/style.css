@@ -18,7 +18,7 @@ body
 
 .sub-tabs {
   margin-bottom: 10px;
-  margin-top: 10px;
+  margin-top: 5px;
   font-size: 0.9em;
 }
 
@@ -92,7 +92,9 @@ span.gradbutton
 {  
 	background: url('images/buttonbg1.jpg') #fff bottom left repeat-x;
 	padding: 3px;
-	border: 1px solid #BBBBBB;	
+	border: 1px solid #BBBBBB;
+	display: inline-block;	
+	margin-top: 5px;
 	/*min-width: 55px;	*/
 }
 span.gradbutton_hover
@@ -671,3 +673,35 @@ Admin-console related
   margin-bottom: 3px;
   font-weight: bold;
 }
+
+ul.top-menu-links {
+  font-size: 0.8em;
+  padding: 0;
+  margin: 0;
+}
+
+ul.top-menu-links li {
+  display: inline;
+  padding-right: 20px;  
+}
+
+ul.top-menu-links li.first {
+  list-style: none;
+}
+
+
+
+/*
+ * Forms...
+ */
+.fp-form label {
+  display: block;
+  font-weight: bold;  
+}
+
+.fp-form textarea {
+  width: 100%;  
+}
+
+
+

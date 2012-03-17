@@ -146,12 +146,25 @@ function system_menu() {
 
   // TODO: This one needs admin access!
   $items["admin-tools/clear-cache"] = array(
-    "title" => "Clear cache",
+    "title" => "Clear all cache",
     "page_callback" => "system_perform_clear_cache",
     "access_callback" => TRUE,
     "type" => MENU_TYPE_NORMAL_ITEM,
   );  
+
+  $items["admin-tools/clear-menu-cache"] = array(
+    "title" => "Clear menu cache",
+    "page_callback" => "system_perform_clear_menu_cache",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );  
   
+  $items["system-handle-form-submit"] = array(
+    "page_callback" => "system_handle_form_submit",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_CALLBACK,
+  );  
+    
   $items["perform-login"] = array(
     "title" => "Perform Login",
     "page_callback" => "system_handle_login_submit",
@@ -168,6 +181,35 @@ function system_menu() {
   
            
   return $items;
+}
+
+
+/**
+ * Intercepts form submissions from System Settings Forms.
+ */
+function system_handle_form_submit() {
+    
+  $callback = $_POST["callback"];
+  $redirect = $_POST["redirect"];
+  $redirect_query = $_POST["redirect_query"];
+  
+  // Okay, what we need to do is go through the original form array, looking for elements,
+  // and then we write those elements to our variables table.  
+  if (function_exists($callback)) {
+    $form = call_user_func($callback);
+    foreach ($form as $name => $element) {
+      // If that "name" exists in the POST, pull it out!
+      if (isset($_POST[$name])) {
+        variable_set($name, $_POST[$name]);
+      }
+    }
+  }
+  
+
+  fp_add_message("Settings saved successfully.");
+  // Okay, go back to where we were!  
+  fp_goto($redirect, $redirect_query);
+   
 }
 
 
@@ -199,6 +241,14 @@ function system_clear_cache() {
   
   menu_rebuild_cache();
   
+}
+
+/**
+ * Clears only the menu cache
+ */
+function system_perform_clear_menu_cache() {
+  menu_rebuild_cache();
+  fp_goto("<front>");
 }
 
 
@@ -405,8 +455,8 @@ function system_display_main_page() {
   fp_add_css(fp_get_module_path("system") . "/css/style.css");
   
   $announcements = system_render_announcements_block();
-  $tools = system_render_menu_block("Tools", "tools");
-  $admin_tools = system_render_menu_block("Administrative Tools", "admin-tools");
+  $tools = fp_render_menu_block("Tools", "tools");
+  $admin_tools = fp_render_menu_block("Administrative Tools", "admin-tools");
   
   if (fp_screen_is_mobile()) {
     $rtn .= "<tr><td colspan='2'>$announcements $tools $admin_tools</td></tr>";
@@ -529,38 +579,6 @@ function system_render_announcements_block() {
 }
 
 
-/**
- * Render a "menu" block of menu items which are all rooted at the menu_root.
- * So if the menu root is tools, it might return items whose paths look like:
- *   tools/fun
- *   tools/here/there
- * So long as the menu type is "MENU_TYPE_NORMAL_ITEM".  Other types will be ignored.
- * 
- * 
- * We want to 
- */
-function system_render_menu_block($title = "Tools", $menu_root = "tools") {
-  $rtn = "";
-  
-  $is_empty = true;
-  $rtn .= fp_render_curved_line($title);
-  
-  $menu_items = menu_get_items_beginning_with($menu_root);
-  foreach ($menu_items as $item) {
-    if ($item["type"] == MENU_TYPE_NORMAL_ITEM) {
-      $rtn .= fp_render_menu_item($item);
-      $is_empty = false;
-    }
-  }
-  
-  if ($is_empty) {
-    return "";
-  }
-  //pretty_print($menu_items);
-  
-  return $rtn;   
-  
-}
 
 
 /**

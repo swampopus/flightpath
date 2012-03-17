@@ -38,6 +38,7 @@ if (!isset($skip_flightpath_functions) || $skip_flightpath_functions != TRUE) {
   // Load the includes files, for common functions.
   require_once("$levels_deep" . "includes/theme.inc");
   require_once("$levels_deep" . "includes/misc.inc");
+  require_once("$levels_deep" . "includes/forms.inc");
   require_once("$levels_deep" . "includes/menu.inc");
 }
 
