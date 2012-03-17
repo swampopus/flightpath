@@ -93,7 +93,6 @@ function fp_goto($path, $query = "") {
   
 }
 
-
 /**
  * This works like Drupal's l() function for creating links.
  * Ex:  l("Click here for course search!", "tools/course-search", "abc=xyz&hello=goodbye", array("class" => "my-class"));
@@ -170,6 +169,29 @@ function fp_screen_is_mobile(){
 
 
 ////////////////////////////////////////////////////////////////////
+
+define ('WATCHDOG_NOTICE', 101);
+define ('WATCHDOG_ALERT', 102);
+define ('WATCHDOG_ERROR', 103);
+define ('WATCHDOG_DEBUG', 103);
+/**
+ * Call other modules which implement the hook_watchdog function.
+ * Adapted from Drupal 6's watchdog function.
+ */
+function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE, $extra_data = "") {
+  // TODO:  implement me.  have the system_module implement a hook_watchdog.
+}
+
+/**
+ * Returns the faculty member's name based on the ID provided.
+ */
+function fp_get_faculty_name($faculty_id) {
+  $db = get_global_database_handler();
+  $name = $db->get_faculty_name($faculty_id);
+  if (!$name) $name = "Unknown Advisor";
+  return $name;
+}
+
 
 function db_query($query) {
   // Capture arguments to this function, to pass along to our $db object.
@@ -572,7 +594,6 @@ function fp_xml_to_array2($xml_data)
  */
 function user_has_permission($permission, $faculty_id = "") {
   global $user;  
-  
   // If the user has the role "administrator", then they always have
   // permission.
   if (in_array("administrator", $user->rolls)) return TRUE;

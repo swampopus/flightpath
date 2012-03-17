@@ -1,8 +1,10 @@
 FlightPath Changelog
 ====================
 
-2012-03-13
+2012-03-15
+  Finished up (mostly) Comments module.
   
+  Did work on getting access callback system working with permissions.  
 
 
 2012-03-12

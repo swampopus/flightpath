@@ -21,10 +21,74 @@ function comments_menu() {
     ),        
     "weight" => 40,        
   );
+
+  $items["comments/save-comment"] = array(
+    "page_callback" => "comments_perform_save_comment",
+    "access_arguments" => array("can_save_comments"),
+    "type" => MENU_TYPE_CALLBACK,
+  );
+
+  $items["comments/delete-comment"] = array(
+    "page_callback" => "comments_perform_delete_comment",
+    "access_arguments" => array("can_save_comments"),
+    "type" => MENU_TYPE_CALLBACK,
+  );
+
   
   
   return $items;
 } 
+
+/**
+ * "delete" a comment (actually, all we do is flag it as deleted)
+ */
+function comments_perform_delete_comment() {
+  global $current_student_id, $user;
+  
+  $comment_id = $_REQUEST["comment_id"];
+  // Let's get some details about the comment to make sure this user can delete it.
+  $comment = comments_get_comment($comment_id); 
+  
+  if ($comment["faculty_id"] == $user->id && user_has_permission("can_delete_own_comments_3_months")) {
+    // TODO:  We should really ALSO check to make sure it's been less than 3 months.
+    db_query("UPDATE advising_comments
+               SET delete_flag = '1'
+               WHERE `id` = '?' ", $comment_id);
+    fp_add_message("Comment has been deleted successfully.");
+  }
+  
+  fp_goto("comments");
+  
+  
+}
+
+
+/**
+ * Actually save the comment in the POST, then redirect us back to our main page.
+ */
+function comments_perform_save_comment() {
+  global $user, $current_student_id;
+  $faculty_id = $user->id;
+  $type = $_POST["type"];
+  $term_id = $_POST["term_id"];
+  $comment = trim($_POST["comment"]);
+  
+  // Perform the save!
+  if ($comment) {
+    db_query("INSERT INTO advising_comments
+              (student_id, faculty_id, term_id,
+                comment, datetime, access_type)
+                VALUES
+                ('?', '?', '?', '?', NOW(), '?')
+                ", $current_student_id, $faculty_id, $term_id, $comment, $type);
+               
+    fp_add_message("Comment saved successfully.");
+  }
+  
+  fp_goto("comments");
+    
+}
+
 
 
 /**
@@ -32,10 +96,146 @@ function comments_menu() {
  * new one (with the right permissions).
  */
 function comments_display_main() {
+  global $current_student_id;
   $rtn = "";
   
+  fp_add_js(fp_get_module_path("comments") . "/js/comments.js");
+  fp_add_css(fp_get_module_path("comments") . "/css/comments.css");
   
-  $rtn .= "comments screen.";
+  if (user_has_permission("can_save_comments")) {
+    $term_id = $GLOBALS["fp_advising"]["advising_term_id"];
+     
+    $form = "<b>" . t("Add a new comment") . "</b>
+      <form method='POST' id='cform' action='" . base_path() . "/comments/save-comment'>
+        <div class='comments-visible-input-row'>Visible to:
+            <label><input type='radio' name='type' value='public'>" . t("Anyone (including students)") . "</label> &nbsp; &nbsp; &nbsp;
+            <label><input type='radio' name='type' value='faculty' checked>" . t("Faculty/Staff only") . "</label>
+        </div>
+        <textarea id='comments-comment-textarea' name='comment'></textarea>
+         <div class='comments-copy-paste-help'><b>" . t("Trouble with Copy/Paste?") . "</b> " . t("Use keyboard shortcuts CTRL-C and CTRL-V.") . "</div>
+        <div class='comments-comment-buttons'>
+          " . fp_render_button(t('Save'), '$("#cform").submit();') . "
+        </div>
+        <input type='hidden' name='term_id' value='$term_id'>
+        <input type='hidden' name='current_student_id' value='$current_student_id'>
+      </form>";
+  
+    $rtn .= fp_render_c_fieldset($form, t("Click to enter comment"), true);
+  }
+    
+  $comments = comments_get_comments($current_student_id);
+  //fpm($comments);
+  foreach($comments as $comment) {
+      
+    $delete_link = "";
+    // Should we present a "delete link" to the user for this comment?
+    if (user_has_permission("can_delete_own_comments_3_months")) {
+      // See if this comment is younger than 3 months.
+      $del_range = strtotime("-3 month");
+      $then = strtotime($comment["datetime"]);
+
+      
+      if ($then > $del_range) {
+        $delete_link = fp_render_button("Delete", "deleteComment(\"{$comment["id"]}\");");
+      }      
+    }  
+      
+    
+    $rtn .= comments_render_comment($comment, $delete_link);
+  }
+  
   
   return $rtn;
 }
+
+
+/**
+ * Display the comment array in a pretty way.
+ */
+function comments_render_comment($comment, $delete_link = "") {
+  $rtn = "";
+
+  $rtn .= "<div class='comment-comment comment-comment-" . $comment["access_type"] . "'>
+              <div class='comment-by-line'>" .ucwords($comment["access_type"]) . " " . t("comment by") . " " . fp_get_faculty_name($comment["faculty_id"]) . "</div>
+              <div class='comment-datetime'>" . $comment["datetime"] . "</div>
+              <div class='comment-text'>" . $comment["comment"] . "</div>
+              ";
+  if ($delete_link) {
+    $rtn .= "<div class='comment-delete'>$delete_link</div>";
+  }
+  $rtn .= "
+            </div>";
+  
+    
+  return $rtn;
+}
+
+
+/**
+ * Returns an array of comments for this student, sorted most recent first.
+ */
+function comments_get_comments($student_id, $bool_included_deleted = FALSE, $access_type = "") {
+  $rtn = array();
+  
+  
+  $deleted_line = "AND delete_flag = 0";
+  if ($bool_included_deleted) {
+    $deleted_line = "";
+  }
+  
+  $access_type_line = "";
+  if ($access_type == "public" || $access_type == "faculty") {
+    $access_type_line = "AND access_type = '$access_type' ";
+  }
+  
+  $res = db_query("SELECT * FROM advising_comments
+                   WHERE student_id = '?'
+                   $deleted_line
+                   $access_type_line
+                   ORDER BY `datetime` DESC", $student_id);
+  while ($cur = db_fetch_array($res)) {
+    $rtn[$cur["id"]] = $cur;
+  }
+    
+  return $rtn;
+}
+
+
+function comments_get_comment($comment_id) {
+  $rtn = array();
+  
+  
+  $res = db_query("SELECT * FROM advising_comments
+                   WHERE `id` = '?'
+                   ", $comment_id);
+  $cur = db_fetch_array($res);
+    
+  return $cur;
+}
+
+
+
+
+
+function comments_perm() {
+
+  return array(
+    "can_save_comments" => array(
+      "title" => t("Can save comments"),
+      "description" => t("The user may save new comments, visible to either everyone or only faculty/staff."),
+    ),
+    "can_delete_own_comments_3_months" => array(
+      "title" => t("Can delete own comments for 3 months"),
+      "description" => t("The user may delete comments they have made for up to 3 months.  After 3 months, they 
+                          will not be able to delete their comment."),
+    ),
+    
+  );
+  
+}
+
+
+
+
+
+

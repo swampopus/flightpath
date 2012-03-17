@@ -87,6 +87,91 @@ function fp_display_page($page) {
 
 
 /**
+ * This function will return the HTML to contruct a collapsible fieldset,
+ * complete with javascript and style tags.
+ *
+ * @param String $content
+ * @param String $legend
+ * @param bool $bool_start_closed
+ * @return String
+ */
+function fp_render_c_fieldset($content, $legend = "Click to expand/collapse", $bool_start_closed = false)
+{
+  
+  // Create a random ID for this fieldset, js, and styles.
+  $id = md5(rand(9,99999) . time());
+  
+  $start_js_val = 1;
+  $fsstate = "open";
+  $content_style = "";
+  
+  if ($bool_start_closed) {
+    $start_js_val = 0;
+    $fsstate = "closed";
+    $content_style = "display: none;";
+  }
+  
+  $js = "<script type='text/javascript'>
+  
+  var fieldset_state_$id = $start_js_val;
+  
+  function toggle_fieldset_$id() {
+    
+    var content = document.getElementById('content_$id');
+    var fs = document.getElementById('fs_$id');
+      
+    if (fieldset_state_$id == 1) {
+      // Already open.  Let's close it.
+      fieldset_state_$id = 0;      
+      \$(content).slideUp('medium');
+      fs.className = 'c-fieldset-closed-$id';
+    }
+    else {
+      // Was closed.  let's open it.
+      fieldset_state_$id = 1;
+      
+      \$(content).slideDown('medium');
+      fs.className = 'c-fieldset-open-$id';      
+    }  
+  }  
+  </script>";
+  
+  $rtn = "  
+    <fieldset class='c-fieldset-$fsstate-$id' id='fs_$id'>
+      <legend><a href='javascript: toggle_fieldset_$id();' class='nounderline'>$legend</a></legend>
+      <div id='content_$id' style='$content_style'>
+        $content
+      </div>
+    </fieldset>
+    $js  
+    
+  <style>
+  fieldset.c-fieldset-open-$id {
+    border: 1px solid;
+  }
+
+  fieldset.c-fieldset-closed-$id {
+    border: 1px solid;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;    
+  }  
+
+  legend a {
+    text-decoration: none;
+  }
+  
+  </style>
+    
+  ";
+  
+  
+  return $rtn;
+}
+
+
+
+/**
  * Create a "sub-tab" array, which looks like a standard tab_array,
  * but it contains only this page's sub-tab siblings.
  */

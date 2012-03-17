@@ -9,13 +9,13 @@
  
 
 // Define useful constants
-define("MENU_TYPE_NORMAL_ITEM", 101);
-define("MENU_TYPE_CALLBACK", 102);
-define("MENU_TYPE_TAB", 103);
-define("MENU_TYPE_SUB_TAB", 104);
+define("MENU_TYPE_NORMAL_ITEM", 1);
+define("MENU_TYPE_CALLBACK", 2);
+define("MENU_TYPE_TAB", 3);
+define("MENU_TYPE_SUB_TAB", 4);
 /////
-define("MENU_ACCESS_DENIED", 201);
-define("MENU_NOT_FOUND", 202);
+define("MENU_ACCESS_DENIED", 61);
+define("MENU_NOT_FOUND", 62);
     
  
  
@@ -71,6 +71,20 @@ function menu_execute_page_request() {
     if ($router_item["access_callback"] == 1) {
       $access = TRUE;
     }
+    if (is_array($router_item["access_arguments"])) {
+      if ($router_item["access_callback"] == "") {
+        // If we specified access arguments, but not a callback, assume it
+        // is the function user_has_permission().
+        $router_item["access_callback"] = "user_has_permission";
+      }
+    }
+    
+    if (!$access && $router_item["access_callback"] != "") {
+      // We need to see if the user has the right permissions to use this item.  We will do this
+      // by calling the access_callback, passing it the access_arguments
+      $access = call_user_func_array($router_item["access_callback"], $router_item["access_arguments"]);
+    }    
+    
     if ($access) {
       if ($router_item['file'] != "") {      
         require_once($router_item['file']);
