@@ -92,7 +92,7 @@ function advise_menu() {
     "weight" => 10,
     "type" => MENU_TYPE_TAB,
     "tab_family" => "advise-toolbox",
-    "file" => get_module_path("advise") . "/advise.toolbox.inc",
+    "file" => menu_get_module_path("advise") . "/advise.toolbox.inc",
   );
   
   $items["advise/popup-toolbox/substitutions"] = array(
@@ -106,7 +106,7 @@ function advise_menu() {
     "weight" => 20,
     "type" => MENU_TYPE_TAB,
     "tab_family" => "advise-toolbox",
-    "file" => get_module_path("advise") . "/advise.toolbox.inc",
+    "file" => menu_get_module_path("advise") . "/advise.toolbox.inc",
   );
     
   $items["advise/popup-toolbox/moved"] = array(
@@ -120,7 +120,7 @@ function advise_menu() {
     "weight" => 30,
     "type" => MENU_TYPE_TAB,
     "tab_family" => "advise-toolbox",
-    "file" => get_module_path("advise") . "/advise.toolbox.inc",
+    "file" => menu_get_module_path("advise") . "/advise.toolbox.inc",
   );
   
   $items["advise/popup-toolbox/courses"] = array(
@@ -134,7 +134,7 @@ function advise_menu() {
     "weight" => 40,
     "type" => MENU_TYPE_TAB,
     "tab_family" => "advise-toolbox",
-    "file" => get_module_path("advise") . "/advise.toolbox.inc",
+    "file" => menu_get_module_path("advise") . "/advise.toolbox.inc",
   );
     
   

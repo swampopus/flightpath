@@ -9,7 +9,7 @@ function admin_menu() {
   $items = array();
    
   $items["admin-tools/admin"] = array(
-     "title" => t("FlightPath Admin Console"),
+     "title" => "FlightPath Admin Console",
      "page_callback" => "admin_display_main",
      "access_arguments" => array("can_access_admin"),
      "page_settings" => array(
@@ -37,8 +37,54 @@ function admin_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
   );     
    
+  $items["admin/degrees"] = array(
+    "title" => "Degrees",
+    "page_callback" => "admin_display_degrees",
+    "access_arguments" => array("can_access_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        "admin-tools/admin" => "Back to main menu",
+      ),
+    ),    
+    "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
+    "type" => MENU_TYPE_CALLBACK,
+  );
+   
+  $items["admin/degrees/edit-degree"] = array(
+    "title" => "Edit Degree",
+    "page_callback" => "admin_display_edit_degree",
+    "access_arguments" => array("can_edit_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        "admin-tools/admin" => "Back to main menu",
+        "admin/degrees" => "Back to Degrees list",
+      ),
+    ),    
+    "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
+    "type" => MENU_TYPE_CALLBACK,
+  );   
    
   return $items;
+}
+
+
+/**
+ * Get the "de_catalog_year" from the REQUEST.
+ * If it's not there or invalid, pull it from our system settings.
+ */
+function admin_get_de_catalog_year() {
+  $settings = fp_get_system_settings();
+  $de_catalog_year = $_REQUEST["de_catalog_year"];
+  if (!$de_catalog_year || $de_catalog_year > $settings["earliest_catalog_year"]) {
+    $de_catalog_year = $settings["earliest_catalog_year"];
+  }
+  return $de_catalog_year;  
 }
 
 
@@ -53,6 +99,19 @@ function admin_perm() {
       "title" => t("Edit urgent message"),
       "description" => t("The user may edit the 'Urgent Message' which appears at the top of every page, if set."),
     ),    
+    "can_access_data_entry" => array(
+      "title" => t("Access Data Entry"),
+      "description" => t("The user can access (view) the data-entry portion of the admin console. Degree plans, groups, and courses."),
+    ),
+    "can_edit_data_entry" => array(
+      "title" => t("Edit Data Entry"),
+      "description" => t("This is a powerful permission! The user can edit degree plans, groups, and courses."),
+    ),
+    "can_view_advanced" => array(
+      "title" => t("View advanced"),
+      "description" => t("The user may see advanced information on-screen, for example, internal ID numbers for degrees and courses."),
+    ),   
+            
   );
 } 
  
@@ -91,19 +150,47 @@ function admin_urgent_message_form() {
 function admin_display_main() {
   $rtn = "";
 
-  $rtn .= "<h2>FlightPath Admin Console - Main Menu</h2>";
+  $rtn .= "<h2>" . t("FlightPath Admin Console - Main Menu") . "</h2>";
   $rtn .= "<table class='fp-semester-table'>
            <tr>
             <td valign='top' width='50%'>
-              " . fp_render_menu_block("System Configuration", "admin/config") . "
+              " . fp_render_menu_block(t("System Configuration"), "admin/config") . "
             </td>
             <td valign='top' width='50%'>
             </td>
                         
            </tr>";
+  $rtn .= "</table><br>"; // close table
 
 
-  $rtn .= "</table>"; // close semester table
+  $settings = fp_get_system_settings();
   
+  if (user_has_permission("can_access_data_entry")) {
+    $rtn .= fp_render_curved_line("Data Entry");
+
+    // TODO:  Maybe have a pulldown here of years, then use javascript to hide/show relavant groups.
+    
+    for ($t = $settings["current_catalog_year"] +1; $t >= $settings["earliest_catalog_year"]; $t--) {
+      $rtn .= "<ul class='data-entry-for-cat data-entry-for-cat-$t'>";
+      $rtn .= "<li>" . l(t("Degree plans for @year", array("@year" => $t)), "admin/degrees", "de_catalog_year=$t") . "</li>";
+      $rtn .= "<li>" . l(t("Groups for @year", array("@year" => $t)), "path") . "</li>";
+      $rtn .= "<li>" . l(t("Courses for @year", array("@year" => $t)), "path") . "</li>";
+      $rtn .= "</ul>";
+    }
+    
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+    
   return $rtn;
 }
+
+
+
+

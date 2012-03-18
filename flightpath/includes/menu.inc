@@ -55,6 +55,20 @@ function menu_rebuild_cache() {
 }
 
 
+function menu_get_module_path($module) {
+
+  
+
+  if (isset($GLOBALS["fp_system_settings"]["modules"][$module]["path"])) {
+    return $system_path . $GLOBALS["fp_system_settings"]["modules"][$module]["path"];
+  }
+  else {
+    return FALSE;
+  }
+    
+}
+
+
 function menu_execute_page_request() {
   $path = $_GET["q"];
 

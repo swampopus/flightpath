@@ -7,6 +7,11 @@
  */
 
 
+// TODO:  Implement this functioN!
+function convert_html_to_bbcode($str) {
+  return $str;
+}
+
 
 /**
  * Render a "menu" block of menu items which are all rooted at the menu_root.

@@ -37,7 +37,7 @@ function fp_add_js($path_to_js) {
 
 function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bool_include_base_path = TRUE) {
   
-  $p = get_module_path($module, $bool_include_file_system_path);
+  $p = menu_get_module_path($module, $bool_include_file_system_path);
     
   if ($bool_include_base_path) {
     $p = $GLOBALS["fp_system_settings"]["base_path"] . "/" . $p;
@@ -48,8 +48,19 @@ function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bo
 
 /**
  * Eventually, this function will be used to translate strings.  For now, just pass through.
+ * Allows variable replacements.  Use like this:
+ * t("@name's blob", array("@name" => "Richard"));
+ * or simply
+ * t("My blob");  if you don't need replacements.
  */
-function t($str) {
+function t($str, $vars = array()) {
+    
+  if (count($vars) > 0) {
+    foreach ($vars as $var => $val) {
+      $str = str_replace($var, $val, $str);
+    }
+  }
+    
   return $str;
 }
 
@@ -466,6 +477,7 @@ function get_shorter_catalog_year_range($cat_range, $abbr_first = true, $abbr_se
  * 
  * @param unknown_type $module
  */
+/*
 function get_module_path($module = "", $bool_include_file_system_path = FALSE) {
   
   $system_path = "";
@@ -482,6 +494,7 @@ function get_module_path($module = "", $bool_include_file_system_path = FALSE) {
     return FALSE;
   }
 }
+*/
 
 /**
  * This will find and include the module in question, calling

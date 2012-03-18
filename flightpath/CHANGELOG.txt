@@ -1,19 +1,26 @@
 FlightPath Changelog
 ====================
 
+2012-03-18
+  Continued work on admin module.
+  
+  Got much of the Edit Degrees displaying correctly.  At this point, have not yet wired
+  it up so that you can submit changes to degree plans.
+
+
 2012-03-16
- Beginning work on the Admin module today.  I expect it to be huge and complicated.
+  Beginning work on the Admin module today.  I expect it to be huge and complicated.
  
- Urgent message Save/Load
+  Urgent message Save/Load
  
- Created simple Form API similar to Drupal (but much simpler)
+  Created simple Form API similar to Drupal (but much simpler)
  
- Created a concept of a system_settings_form which automatically writes values to the variables
- table upon save, so you don't have to create your own submit handler for forms.  Ideal for little
- one-form settings pages.
+  Created a concept of a system_settings_form which automatically writes values to the variables
+  table upon save, so you don't have to create your own submit handler for forms.  Ideal for little
+  one-form settings pages.
  
- New "page_setting" for menu items: menu_links.  Provides a way to place "breadcrumbs" and other
- types of links at the top of the page automatically.
+  New "page_setting" for menu items: menu_links.  Provides a way to place "breadcrumbs" and other
+  types of links at the top of the page automatically.
  
 
 2012-03-15

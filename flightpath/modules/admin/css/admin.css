@@ -1,0 +1,9 @@
+
+.admin-degrees-list-degree .list-degree-row {
+  padding-bottom: 3px; 
+  padding-top: 3px; 
+  font-size: 0.9em;
+}
+.list-degree-row-excluded {
+  background-color: #eee;
+}
