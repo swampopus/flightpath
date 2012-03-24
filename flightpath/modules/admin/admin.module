@@ -136,6 +136,32 @@ function admin_menu() {
     "type" => MENU_TYPE_CALLBACK,
   );     
   
+  $items["admin/degrees/copy-degree"] = array(
+    "title" => "Copy Degree",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("admin_copy_degree_form"),
+    "access_arguments" => array("can_edit_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to Degrees list",
+          "path" => "admin/degrees",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),   
+    "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
+    "type" => MENU_TYPE_CALLBACK,
+  );     
+  
   
      
   return $items;

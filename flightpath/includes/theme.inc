@@ -54,8 +54,13 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
 function fp_display_page($page) {
   global $current_student_id;
   
+  $page_title = $page["title"];
+  if ($GLOBALS["fp_set_title"] != "") {
+    $page_title = $GLOBALS["fp_set_title"];
+  }
+  
   $screen = new AdvisingScreen("",null,"not_advising");
-  $screen->page_title = $page["title"];
+  $screen->page_title = $page_title;
   $screen->page_has_search = $page["router_item"]["page_settings"]["page_has_search"];
   $screen->page_banner_is_link = $page["router_item"]["page_settings"]["page_banner_is_link"];
   $screen->page_hide_report_error = $page["router_item"]["page_settings"]["page_hide_report_error"];

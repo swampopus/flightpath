@@ -715,7 +715,9 @@ ul.top-menu-links li.first {
   padding: 5px;
 }
 
-label.label-for-radio {
+label.label-for-radio,
+label.label-for-checkbox
+{
   font-weight: normal;
 }
 
@@ -730,6 +732,11 @@ label.label-for-radio {
   font-weight: bold;
   font-size: 1.1em;
   padding-right: 5px;
+}
+
+.form-element-error {
+  border: 1px dotted red;
+  padding: 5px;
 }
 
 

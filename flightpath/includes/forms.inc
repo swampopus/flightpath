@@ -22,7 +22,10 @@ function fp_render_form($callback, $form_type = "") {
   // Figure out the current page's title and display it.
   $path = $_GET["q"];
   $menu_item = menu_get_item($path);
-  $rtn .= "<h2 class='title'>" . $menu_item["title"] . "</h2>";
+  $page_title = $menu_item["title"];
+  if ($GLOBALS["fp_set_title"] != "") $page_title = $GLOBALS["fp_set_title"];
+  
+  $rtn .= "<h2 class='title'>" . $page_title . "</h2>";
     
   if ($form["redirect"]) {
     $path = $form["redirect"];
@@ -149,6 +152,17 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   $suffix = $element["suffix"];
   $required = $element["required"];
 
+
+  $element_extra_css = "";
+  if (is_array($_SESSION["fp_form_errors"])) {
+    foreach ($_SESSION["fp_form_errors"] as $err) {
+      if ($err["name"] == $name) {
+        // There is an error on this element!  Add an extra CSS element.
+        $element_extra_css .= "form-element-error";
+      }
+    }
+  }
+
   if ($use_session_submission_values_for_callback) {
     // Check the SESSION for a previous value which we should use.
     $ignore_types = array("hidden", "markup", "submit");
@@ -158,7 +172,7 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   }
   
   
-  $rtn .= "<div id='element-wrapper-$name' class='form-element element-type-$type'>";
+  $rtn .= "<div id='element-wrapper-$name' class='form-element element-type-$type $element_extra_css'>";
 
   if ($prefix) {
     $rtn .= $prefix;
@@ -188,7 +202,7 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
     $value = htmlentities($value, ENT_QUOTES);    
     $rtn .= "<input type='text' name='$name' id='element-$name' size='$size' maxlength='$maxlength' value='$value'>";
   }
-
+  
   if ($type == "hidden") {
     $value = htmlentities($value, ENT_QUOTES);    
     $rtn .= "<input type='hidden' name='$name' id='element-$name' value='$value'>";
@@ -207,6 +221,22 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
     }
     $rtn .= "</div>";
   }
+
+  if ($type == "checkboxes") {
+    $rtn .= "<div class='form-checkboxes form-checkboxes-$name'>";
+    foreach ($options as $key => $val) {
+      $checked = "";     
+      if (is_array($value) && $value[$key] == $key) {
+        $checked = "checked=checked";
+      }
+      $rtn .= "<div class='checkbox-element checkbox-element-$key'>
+                 <label class='label-for-checkbox'><input type='checkbox' name='$name" . "[$key]' id='element-$name-$key' value='$key' $checked> $val</label>
+               </div>";
+    }
+    $rtn .= "</div>";
+  }
+
+
 
   if ($type == "submit") {
     $rtn .= "<input type='submit' value='$value'>";

@@ -20,6 +20,10 @@ function fp_set_page_sub_tabs($tab_array) {
   $GLOBALS["fp_set_page_sub_tabs"] = $tab_array;
 }
 
+function fp_set_title($title) {
+  $GLOBALS["fp_set_title"] = $title;
+}
+
 
 
 function fp_add_message($msg, $type = "status") {
