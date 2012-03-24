@@ -63,7 +63,7 @@ function fp_display_page($page) {
   $screen->screen_mode = $page["router_item"]["page_settings"]["screen_mode"];
   
   if ($_REQUEST["scroll_top"] != "") {
-    $screen->page_scroll_top = $_REQUEST["scroll_top"];
+    $screen->page_scroll_top = $_REQUEST["scroll_top"];    
   }
   
   // Was this page a tab?  And if so, are there any other tabs we need to display? //
@@ -92,10 +92,17 @@ function fp_display_page($page) {
   // where breadcrumbs might appear.
   if (is_array($page["router_item"]["page_settings"]["menu_links"])) {
     $content_top .= "<ul class='top-menu-links'>";
-    foreach ($page["router_item"]["page_settings"]["menu_links"] as $p => $t) {
+    foreach ($page["router_item"]["page_settings"]["menu_links"] as $item) {
       $lclass = "";
       if ($c == 0) $lclass='first';
-      $content_top .= "<li class='$lclass'>" . l($t, $p, "current_student_id=$current_student_id") . "</li>";
+      
+      $p = $item["path"];
+      $q = $item["query"];
+      $t = $item["text"];
+      $a = $item["attributes"];
+      if (!is_array($a)) $a = array();
+      
+      $content_top .= "<li class='$lclass'>" . l($t, $p, $q, $a) . "</li>";
       $c++;
     }
     $content_top .= "</ul>";

@@ -1,6 +1,22 @@
 FlightPath Changelog
 ====================
 
+2012-03-23
+  Continuing work on admin module.
+  
+  Can actually save degrees now, and add/remove elective groups
+  
+  Fixed some minor tweaks to make sure it scrolled back to the correct position.
+  
+  Changed the way the "menu_links" array is set up in the menu items, to allow for
+  more flexibility in the future.
+  
+  Invented a new hook.  hook_menu_handle_replacement_pattern ($st).  It will
+  let you pass things like de_catalog_year=%DE_CATALOG_YEAR% to the l() function,
+  which will then look for that hook to give each module the chance to act on that replacement
+  pattern.
+  
+
 2012-03-18
   Continued work on admin module.
   

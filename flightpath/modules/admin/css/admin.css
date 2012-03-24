@@ -7,3 +7,9 @@
 .list-degree-row-excluded {
   background-color: #eee;
 }
+
+.admin-button-msg {
+  padding-left: 30px;
+  font-style: italic;
+  color: #999;
+}

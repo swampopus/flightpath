@@ -30,12 +30,18 @@ function admin_menu() {
       "page_has_search" => FALSE,
       "page_banner_is_link" => TRUE,
       "page_hide_report_error" => TRUE,
-      "menu_links" => array(
-        "admin-tools/admin" => "Back to main menu",
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
       ),
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
   );     
+   
+  ////////////////////// Degree Editing /////////////////// 
    
   $items["admin/degrees"] = array(
     "title" => "Degrees",
@@ -46,7 +52,11 @@ function admin_menu() {
       "page_banner_is_link" => TRUE,
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
-        "admin-tools/admin" => "Back to main menu",
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
       ),
     ),    
     "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
@@ -62,13 +72,42 @@ function admin_menu() {
       "page_banner_is_link" => TRUE,
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
-        "admin-tools/admin" => "Back to main menu",
-        "admin/degrees" => "Back to Degrees list",
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to Degrees list",
+          "path" => "admin/degrees",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
       ),
-    ),    
+    ),   
     "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
     "type" => MENU_TYPE_CALLBACK,
   );   
+   
+  $items["admin/degrees/handle-edit-degree-submit"] = array(    
+    "page_callback" => "admin_handle_edit_degree_submit",
+    "access_arguments" => array("can_edit_data_entry"),
+    "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
+    "type" => MENU_TYPE_CALLBACK,
+  );      
+   
+
+  $items["admin/degrees/popup-add-group"] = array(
+    "title" => "Add Group",
+    "page_callback" => "admin_display_degrees_popup_add_group",
+    "access_arguments" => array("can_edit_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),   
+    "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
+    "type" => MENU_TYPE_CALLBACK,
+  );     
    
   return $items;
 }
@@ -81,10 +120,25 @@ function admin_menu() {
 function admin_get_de_catalog_year() {
   $settings = fp_get_system_settings();
   $de_catalog_year = $_REQUEST["de_catalog_year"];
-  if (!$de_catalog_year || $de_catalog_year > $settings["earliest_catalog_year"]) {
+  if (!$de_catalog_year || $de_catalog_year < $settings["earliest_catalog_year"]) {
     $de_catalog_year = $settings["earliest_catalog_year"];
   }
   return $de_catalog_year;  
+}
+
+
+/**
+ * This is an implementation of hook_menu_handle_replacement_pattern.
+ * It will search for and replace replacement patterns which we are aware of it in $str.
+ */
+function admin_menu_handle_replacement_pattern($str) {
+  
+  if (strpos($str, "%DE_CATALOG_YEAR%") !== 0) {
+    // It contains this replacement pattern!
+    $str = str_replace("%DE_CATALOG_YEAR%", admin_get_de_catalog_year(), $str);
+  }
+  
+  return $str;
 }
 
 

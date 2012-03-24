@@ -124,6 +124,17 @@ function l($text, $path, $query = "", $attributes = array()) {
     $query = "?" . $query;   
   } 
   
+  
+  // Does the query contain possible replacement patterns? (look for %)
+  if (strpos($query, "%") !== 0) {
+    // Find modules which implement the hook_menu_handle_replacement_pattern function.
+    $modules = modules_implement_hook("menu_handle_replacement_pattern");
+    foreach($modules as $module) {
+      $query = call_user_func($module . '_menu_handle_replacement_pattern', $query);
+    }
+  }
+  
+  
   $rtn .= '<a href="' . base_path() . '/' . $path . $query . '" ';
   
   foreach ($attributes as $key => $value) {

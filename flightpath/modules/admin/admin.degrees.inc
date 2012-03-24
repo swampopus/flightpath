@@ -1,5 +1,68 @@
 <?php
 
+
+
+function admin_display_degrees_popup_add_group() {
+  $semester_num = trim($_GET["semester_num"]);
+  $de_catalog_year = admin_get_de_catalog_year();
+  
+   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
+  
+  $rtn = "";
+
+  $rtn .= "<b>" . t("Add an elective group to semester: %semester_num in %de_catalog_year", array("%semester_num" => $semester_num, "%de_catalog_year" => $de_catalog_year)) . "</b><br>
+        <span class='tenpt'>" . t("Use keyboard shortcut CTRL-F to find groups quickly.") . "</span>
+        <br><br>
+        First, select a group (from $de_catalog_year):
+        <div class='tenpt' 
+          style='height:200px; overflow-y: scroll; border: 1px solid black;
+          margin:5px;'>
+        <table border='0' cellspacing='5'>";
+
+  $res = db_query("SELECT * FROM draft_groups
+              WHERE catalog_year = '?'
+              AND delete_flag = '0'
+              ORDER BY title ", $de_catalog_year);
+  while($cur = db_fetch_array($res)) {
+    extract($cur, 3, "db");
+    $rtn .= "<tr><td valign='middle'>
+                <input type='radio' name='rgroups' value='$db_group_id'></td>
+          <td valign='top' class='tenpt'>
+          $db_title<br><i>$db_group_name</i>
+          </td>
+        </tr>
+          
+        ";
+  }
+
+
+  $rtn .= "</table></div>
+      " . t("Next, select properties for this group:") . "
+      <a href='javascript: popupAlertHelp(\"group_properties\");'>?</a>
+      <div class='tenpt' style='padding-top: 5px;'>
+      Hrs: <input type='text' name='hours' id='hours' size='2'>
+      Min Grade: <select name='min_grade' id='min_grade'>
+              <option value=''>--</option>
+              <option value='C'>C</option>
+              <option value='B'>B</option>
+              <option value='A'>A</option>
+              
+            </select>
+      Type: <select name='type' id='type'>
+          <option value='m'>m - Major</option>
+          <option value='c'>c - Core</option>
+          <option value='s'>s - Supporting</option>
+          <option value='e'>e - Elective</option>
+          </select>
+        &nbsp; &nbsp;
+        " . fp_render_button("Add group &raquo;", "adminPopupAddGroup(\"$semester_num\");") . "
+      </div>";
+
+
+  return $rtn;
+}
+
+
 /*
 * These are functions related the data entry specifically for degree plans.
 */
@@ -102,6 +165,278 @@ function admin_display_degrees() {
 }
 
 
+function admin_handle_edit_degree_submit() {
+
+  $de_catalog_year = $_REQUEST["de_catalog_year"];
+  $db = get_global_database_handler();
+  
+  // This will UPDATE a degree in the system with the courses
+  // and groups that the user selected.
+  $perform_action2 = trim($_POST["perform_action2"]);
+
+  if (strstr($perform_action2, "delGroup")) {
+    $temp = explode("_",$perform_action2);
+    $del_group = new Group();
+    $del_group->bool_use_draft = true;
+    $del_group->group_id = $temp[1];
+    $del_group->assigned_to_semester_num = $temp[2];
+
+  }
+  //debug_c_t($perform_action2);
+
+  $major_code = trim($_POST["major_code"]);
+  if ($major_code == ""){ die("Fatal error:  major_code not found.");}
+
+  // Since we are making a change to the draft table(s), let's add a row
+  // to draft instructions.
+  $db->add_draft_instruction("-");
+
+
+  $degree_id = "";
+  // First things first, if this degree already exists in this
+  // catalog year, then we need to delete it first.
+  if ($degree_id = $db->get_degree_id($major_code, $de_catalog_year, true)) {
+    $degree = new DegreePlan($degree_id, null, false, false, true);
+    $degree->load_descriptive_data();
+
+    // Delete from degree_requirements WHERE this degree_id exists.
+    $res = db_query("DELETE FROM draft_degree_requirements
+                  WHERE degree_id = '?' ", $degree_id);
+
+    // Are we trying to DELETE this degree?  If so, keep deleting!
+    if ($perform_action2 == "delete_degree") {
+      $res = db_query("DELETE FROM draft_degrees
+                  WHERE  degree_id = '?' ", $degree_id);
+
+      // Also need to get rid of the track, if there is one for this
+      // degree.
+      $res = db_query("DELETE FROM draft_degree_tracks
+                  WHERE major_code = '$degree->major_code' 
+                  AND track_code = '$degree->track_code'
+                  AND catalog_year = '?' LIMIT 1", $de_catalog_year);
+
+      // Okay, we have deleted everything.  We need to go back to
+      // just the list of degrees.
+      //display_edit_degrees("<font color='green'><b>The degree $major_code ($de_catalog_year) has been deleted.</b></font>");
+      //die;
+      
+      fp_add_message("The degree $major_code ($de_catalog_year) has been deleted.");
+      fp_goto("admin/dgrees", "de_catalog_year=$de_catalog_year");
+      return; 
+      
+    }
+
+
+  } 
+  else {
+    // We need to generate a new degreeID for this major_code and catalog_year,
+    // because one does not already exist!
+    if (!$degree_id = $db->request_new_degree_id()) {
+      die ("Error.  Could not create new degreeID.");
+    }
+  }
+
+  // Save the entire post to the log.
+  //$post_x_m_l = fp_array_to_xml("post",$_POST, true);
+  //$db->add_to_log("admin_edit_degree","$degree_id,$major_code",$post_x_m_l);
+
+  $errors = "";
+  $semester_titles_c_s_v = "";
+  $highest_semester_num = 0;   // What is the largest semester_num in the system?
+  // Okay, now get the various courses...
+  for ($semester_num = 0; $semester_num < 50; $semester_num++)
+  {
+    // Assuming no more than 50 semesters.
+    $courses = trim($_POST["courses_$semester_num"]);
+    if ($courses == "") {
+      continue;
+    }
+
+    if ($semester_num > $highest_semester_num) {
+      $highest_semester_num = $semester_num;
+    }
+
+    $course_rows = explode("\n",$courses);
+    for ($t = 0; $t < count($course_rows); $t++) {
+      $line = trim($course_rows[$t]);
+      if ($line == "") {
+        continue;
+      }
+      // Take out extra whitespace between tokens.
+      $line = str_replace("   ", " ", $line);
+      $line = str_replace("  ", " ", $line);
+      $line = str_replace("  ", " ", $line);
+      $line = str_replace("  ", " ", $line);
+
+      $tokens = explode(" ", $line);
+      $subject_id = $tokens[0];
+      $course_num = $tokens[1];
+      $requirement_type = strtolower($tokens[2]);
+
+      if ($requirement_type == "") { 
+        // major type by default.
+        $requirement_type = "m";
+      }
+
+      $min_grade = strtoupper($tokens[3]);
+
+      if (strstr($requirement_type, "(")) {
+        // This means there was no requirement_type specified, so it's "m",
+        // and a min_grade was found in its place.
+        $min_grade = strtoupper($requirement_type);
+        $requirement_type = "m";
+      }
+
+      $min_grade = str_replace("(","",$min_grade);
+      $min_grade = str_replace(")","",$min_grade);
+
+      /////////////////////////////////////////////
+      // Okay, we now have enough information to insert the course.
+      // Find out what the course_id is.
+      if ($course_id = $db->get_course_id($subject_id, $course_num, "", true))  // don't care about catalog year.
+      {
+        $query = "INSERT INTO draft_degree_requirements
+                    (degree_id, semester_num, course_id, course_min_grade, course_requirement_type, data_entry_value)
+                    values ('?','?','?','?','?','?~?') ";
+        $res = db_query($query, $degree_id, $semester_num, $course_id, $min_grade, $requirement_type, $subject_id, $course_num);
+        //debug_c_t($query);
+      } else {
+        // The course_id could not be found!
+        $errors .= "<br><font color='red'><b>Course Not Found!</b>
+              In Block " . ($semester_num+1) . ", you specified the course
+              <b>$subject_id $course_num</b> as a requirement, but this course
+              could not be found.
+              It was removed from that block.
+              Are you sure you typed it correctly?  Please go to this
+              semester, check your spelling, and add the course again.</font>";
+
+      }
+
+    }
+
+
+  }
+
+  // Get the groups....
+  foreach($_POST as $key => $value) {
+    if (!strstr($key, "group_")) {
+      continue;
+    }
+    // Only look at the groups...
+    $temp = explode("_", $value);
+    $group_id = $temp[0];
+    $semester_num = $temp[1];
+    $hours = $temp[2];
+    $type = $temp[3];
+    $min_grade = trim($temp[4]);
+
+    if ($semester_num > $highest_semester_num) {
+      $highest_semester_num = $semester_num;
+    }
+
+
+    // Do not add if we are supposed to be deleting this group!
+    if (is_object($del_group)) {
+      if ($del_group->group_id == $group_id && $del_group->assigned_to_semester_num == $semester_num) {
+        continue;
+      }
+    }
+
+    // We now have enough information to insert this group.
+    //debugCT("group: $group_id $semester_num $hours $type");
+    $query = "INSERT INTO draft_degree_requirements
+                    (`degree_id`,`semester_num`,`group_id`,
+                    `group_requirement_type`,`group_hours_required`,`group_min_grade`)
+                    values ('?','?','?',
+                    '?','?','?') ";
+    $res = db_query($query, $degree_id, $semester_num, $group_id, $type, $hours, $min_grade);
+
+
+  }
+
+
+  // Was there a group added or deleted?
+  if (strstr($perform_action2,"addGroup")) {
+    $temp = explode("_",$perform_action2);
+    $group_id = $temp[1];
+    $semester_num = $temp[2];
+    $hours = trim($temp[3]);
+    $type = $temp[4];
+    $min_grade = trim($temp[5]);
+    $query = "INSERT INTO draft_degree_requirements
+                    (`degree_id`,`semester_num`,`group_id`,
+                    `group_requirement_type`,`group_hours_required`,`group_min_grade`)
+                    VALUES ('?','?','?','?','?','?') ";
+    $res = db_query($query, $degree_id, $semester_num, $group_id, $type, $hours, $min_grade);
+
+  }
+
+
+  // Make the semesterTitlesCSV...
+  for ($semester_num = 0; $semester_num <= $highest_semester_num; $semester_num++) {
+    $semester_titles_csv .= trim($_POST["semester_title_$semester_num"]) . ",";
+  }
+
+  // Before we UPDATE, also grab the degree title, degree_type,
+  // and exclude value, etc....
+  $degree_title = trim($_POST["title"]);
+  $degree_type = trim($_POST["degree_type"]);
+  $degree_class = strtoupper(trim($_POST["degree_class"]));
+  $exclude = trim($_POST["exclude"]);
+  $public_note = trim($_POST["public_note"]);
+  $res = db_query("UPDATE draft_degrees
+              SET `semester_titles_csv`='?',
+              `title`='?',
+              `degree_type`='?',
+              `degree_class`='?',
+              `exclude`='?',
+              `public_note`='?'
+              WHERE `degree_id`='?' ",
+              $semester_titles_csv, $degree_title, $degree_type, $degree_class, $exclude, $public_note, $degree_id);
+
+  ////  Was there a track title/description?  If so, UPDATE that in the tracks
+  // table...
+  if (strstr($major_code, "_"))  {
+    // There was a track. Update track description.
+    $temp = explode("_",$major_code);
+    $major = trim($temp[0]);
+    // major might now have a | at the end.  If so, take it out.
+    if (substr($major, strlen($major)-1, 1) == "|") {
+      $major = str_replace("|","",$major);
+    }
+
+
+    $track = trim($temp[1]);
+    $track_description = trim($_POST["track_description"]);
+    $track_title = trim($_POST["track_title"]);
+    //debugCT($track_description);
+    $res = db_query("UPDATE draft_degree_tracks
+                SET `track_description`='?',
+                `track_title`='?'
+                WHERE `track_code`='?'
+                AND `major_code`='?' 
+                AND `catalog_year`='?' ", $track_description, $track_title, $track, $major, $de_catalog_year);
+  }
+
+
+
+
+  //$msg = "<font color='green' size='4'>Degree updated successfully at " . get_current_time() . ".</font>";
+  fp_add_message("Degree updated succesfully.");
+  $bool_scroll = $bool_button_msg = true;
+  if ($errors != "")
+  {
+    fp_add_message("ERROR(s): $errors");
+    $bool_scroll = $bool_button_msg = false;
+  }
+
+
+  fp_goto("admin/degrees/edit-degree", "de_catalog_year=$de_catalog_year&major_code=$major_code&scroll_top=" . $_REQUEST["scroll_top"] . "&button_msg=" . urlencode("Degree updated successfully at " . date("H:i:s")));
+  return;    
+    
+}
+
+
 /**
  * This screen displays the form which allows the user to actually
  * edit a degree.
@@ -112,8 +447,11 @@ function admin_display_edit_degree() {
   
   $major_code = $_REQUEST["major_code"];
 
-  $button_msg = $msg;
-  if ($bool_button_msg == false) {$button_msg = "";}
+  // Add in our CSS and JS
+  fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
+  fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
+
+  $button_msg = trim(addslashes($_REQUEST["button_msg"]));  
   
   $db = get_global_database_handler();
 
@@ -130,7 +468,12 @@ function admin_display_edit_degree() {
           </span>";
   }
 
-  $rtn .= "<form id='mainform' action='admin.php' method='POST'>";
+  $rtn .= "<form id='mainform' action='" . base_path() . "/admin/degrees/handle-edit-degree-submit' method='POST'>
+            <input type='hidden' name='perform_action2' id='perform_action2'>
+            <input type='hidden' name='de_catalog_year' value='$de_catalog_year'>
+            <input type='hidden' name='scroll_top' id='scroll_top' value=''>
+            <input type='hidden' name='major_code' value='$major_code'>                        
+            ";
 
   $rtn .= "<div style='font-size: 16pt; font-weight:bold; padding-top: 20px;'>$degree->degree_type $degree->title<br>$major_code ($de_catalog_year)</div>";
   $rtn .= "
@@ -141,7 +484,7 @@ function admin_display_edit_degree() {
 
         <td valign='top' class='tenpt' width='15%'>Degree Class:</td>
         <td valign='top' class='tenpt'><input type='text' name='degree_class' value='$degree->degree_class' size='2' maxlength='1'>
-        <a href='javascript: popupAlertHelp(\"degree_class\");'>?</a></td>
+        <a href='javascript: adminPopupAlertHelp(\"degree_class\");'>?</a></td>
        </tr>
         
        </tr>
@@ -152,7 +495,7 @@ function admin_display_edit_degree() {
        <tr>
         <td valign='top' class='tenpt'>Exclude:</td>
         <td valign='top' class='tenpt' colspan='3'><input type='text' name='exclude' value='$degree->db_exclude' size='2' maxlength='1'>
-        <a href='javascript: popupAlertHelp(\"degree_exclude\");'>?</a></td>
+        <a href='javascript: adminPopupAlertHelp(\"degree_exclude\");'>?</a></td>
        </tr>
        
        
@@ -164,27 +507,14 @@ function admin_display_edit_degree() {
     $rtn .= "<b>Edit track information:</b>
       <blockquote style='margin-top: 0px; margin-bottom: 0px;'>
     <font size='2'>Track title: <input type='text' name='track_title' value='$degree->track_title' size='60' maxlength='100'></font><br>
-    <font size='2'>Track description: <a href='javascript: popupAlertHelp(\"edit_formatting\");'>(Help - Formatting)</a>
-            <a href='javascript: popupAlertHelp(\"track_description\");'>(Help - Track Descriptions)</a>
+    <font size='2'>Track description: <a href='javascript: adminPopupAlertHelp(\"edit_formatting\");'>(Help - Formatting)</a>
+            <a href='javascript: adminPopupAlertHelp(\"track_description\");'>(Help - Track Descriptions)</a>
     </font><br>
     <textarea name='track_description' cols='60' rows='3'>" . convert_html_to_bbcode($degree->track_description) . "</textarea>
     </blockquote>
     ";
   }
   $rtn .= "<div class='tenpt' align='center'>(Scroll to the bottom of the page for more options)</div>";
-
-  $rtn .= "
-      <input type='hidden' name='performAction' value='perform_edit_specific_degree'>
-      <input type='hidden' name='major_code' value='$major_code'> ";
-
-  $rtn .= "
-  
-      <input type='hidden' name='de_catalog_year' value='$de_catalog_year'>      
-      
-      ";
-  
-
-
 
   $degree->list_semesters->reset_counter();
   while ($degree->list_semesters->has_more()) {
@@ -203,7 +533,7 @@ function admin_display_edit_degree() {
           Default title: $sem_default_title
           &nbsp; &nbsp;
           Override: <input type='text' name='semester_title_$semester->semester_num' value='$semester->title' size='20'>
-          <a href='javascript: popupAlertHelp(\"semester_title\");'>?</a>
+          <a href='javascript: adminPopupAlertHelp(\"semester_title\");'>?</a>
           <table border='1' width='100%'>
           ";
     // Get the courses.
@@ -221,7 +551,7 @@ function admin_display_edit_degree() {
       $rtn .= "\n";
     }
     $rtn .= "</textarea>
-    <div class='tenpt'>(<a href='javascript: popupAlertHelp(\"degree_entry\");'>Help - entering requirements, min grades, and repeats</a>)</div>
+    <div class='tenpt'>(<a href='javascript: adminPopupAlertHelp(\"degree_entry\");'>Help - entering requirements, min grades, and repeats</a>)</div>
     </td>";
 
     // Get the groups...
@@ -241,7 +571,7 @@ function admin_display_edit_degree() {
       $group->load_descriptive_data();
       $rtn .= "<tr><td valign='middle'>
       
-            <a href='javascript:delGroup(\"$group->group_id\",\"$semester->semester_num\");'><img src='" . fp_theme_location() . "/images/delete.png' border='0'></a>
+            <a href='javascript: adminDelGroup(\"$group->group_id\",\"$semester->semester_num\");'><img src='" . fp_theme_location() . "/images/delete.png' border='0'></a>
                   
             <td valign='top' class='tenpt'>
             $group->title<br><i>$group->group_name</i></td>
@@ -253,13 +583,15 @@ function admin_display_edit_degree() {
     }
     $rtn .= "</table>
         <div style='margin-top: 10px; margin-left: 20px;'>
-          <a href='javascript:popupWindow(\"admin.php?performAction=popup_add_group&semester_num=$semester->semester_num&de_catalog_year=$de_catalog_year\");'>Add an elective group</a></div>
+          <a href='javascript: adminPopupWindow(\"" . base_path() . "/admin/degrees/popup-add-group&semester_num=$semester->semester_num&de_catalog_year=$de_catalog_year\");'>Add an elective group</a>
+        </div>
     </td>";
 
 
     $rtn .= "</table><br>
         
-    " . fp_render_button(t("Save for @year", array("@year" => $de_catalog_year)), "submitForm();") . "
+    " . fp_render_button(t("Save for @year", array("@year" => $de_catalog_year)), "adminSubmitForm();") . "
+      <span class='admin-button-msg'>$button_msg</span>
     
     </div>
     ";
@@ -271,7 +603,7 @@ function admin_display_edit_degree() {
     $sem = $t + $s_count;
     if ($sem > 99) {
       // Max number of semesters.  More or less arbitrarily set number.
-      $rtn .= "<br>Maximum number of semesters created.<br>";
+      $rtn .= "<br>" . t("Maximum number of semesters created.") . "<br>";
       break;
     }
 
@@ -281,7 +613,7 @@ function admin_display_edit_degree() {
           Default title: " . admin_degrees_get_semester_name($sem) . "
           &nbsp; &nbsp;
           Override: <input type='text' name='semester_title_$sem' value='' size='20'>
-          <a href='javascript: popupAlertHelp(\"semester_title\");'>?</a>
+          <a href='javascript: adminPopupAlertHelp(\"semester_title\");'>?</a>
           
           <table border='1' width='100%'>
           ";
@@ -302,13 +634,14 @@ function admin_display_edit_degree() {
             </tr>";
     $rtn .= "</table>
         <div style='margin-top: 10px; margin-left: 20px;'>
-          <a href='javascript:popupWindow(\"admin.php?performAction=popup_add_group&semester_num=$sem&de_catalog_year=$de_catalog_year\");'>Add an elective group</a></div>
+          <a href='javascript: adminPopupWindow(\"admin.php?performAction=popup_add_group&semester_num=$sem&de_catalog_year=$de_catalog_year\");'>Add an elective group</a></div>
     </td>";
 
 
     $rtn .= "</table><br>
     
-    " . fp_render_button(t("Save for @year", array("@year" => $de_catalog_year)), "submitForm();") . "
+    " . fp_render_button(t("Save for @year", array("@year" => $de_catalog_year)), "adminSubmitForm();") . "
+        <span class='admin-button-msg'>$button_msg</span>
     
     </div>";
 
@@ -319,8 +652,8 @@ function admin_display_edit_degree() {
       <br><br>
       <div class='elevenpt'><b>More Options:</b><br>
       Enter a public note for this degree: 
-       <a href='javascript: popupAlertHelp(\"public_note\");'>(Help - Public Note)</a>
-       <a href='javascript: popupAlertHelp(\"edit_formatting\");'>(Help - Formatting)</a>
+       <a href='javascript: adminPopupAlertHelp(\"public_note\");'>(Help - Public Note)</a>
+       <a href='javascript: adminPopupAlertHelp(\"edit_formatting\");'>(Help - Formatting)</a>
       <br>
       <textarea name='public_note' rows='4' cols='80'>$degree->public_note</textarea>
       
@@ -338,7 +671,7 @@ function admin_display_edit_degree() {
 
   $rtn .= "        <div align='right'>
           Delete this degree? <input type='button' value='X'
-                  onClick='deleteDegree(\"$degree_id\");'>
+                  onClick='adminDeleteDegree(\"$degree_id\");'>
         </div>      
         ";
 
