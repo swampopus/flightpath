@@ -125,8 +125,10 @@ function fp_display_page($page) {
   // If there are "messages" waiting, then let's add them to the top of content.
   if (count($_SESSION["fp_messages"]) > 0) {
     $content_top .= "<div class='fp-messages'>";
-    foreach ($_SESSION["fp_messages"] as $key => $msg) {
-      $content_top .= "<div class='fp-message'>$msg</div>";      
+    foreach ($_SESSION["fp_messages"] as $key => $tmsg) {
+      $type = $tmsg["type"];
+      $message = $tmsg["msg"];
+      $content_top .= "<div class='fp-message fp-message-$type'>$message</div>";
     }
     $content_top .= "</div>";    
     unset($_SESSION["fp_messages"]);

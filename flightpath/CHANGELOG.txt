@@ -1,6 +1,19 @@
 FlightPath Changelog
 ====================
 
+2012-03-24
+  Still working on admin module.
+  
+  Can now add new degree plans.
+  
+  Implemented a new, more robust Form API system similar
+  to Drupal.  You can have "required" fields, which
+  automatically fail validation if no value is entered.
+  
+  Have a new "form_error" function which creates an error
+  message for your form. 
+  
+
 2012-03-23
   Continuing work on admin module.
   

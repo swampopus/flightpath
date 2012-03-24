@@ -67,6 +67,10 @@ body
   margin-bottom: 10px;
 }
 
+.fp-message-error {
+  color: red;
+}
+
 .fp-message .fp-message-backtrace {
   font-size: 0.8em;
   text-align: right;
@@ -703,5 +707,29 @@ ul.top-menu-links li.first {
   width: 100%;  
 }
 
+.form-element {
+  margin-bottom: 20px;
+}
+
+.form-element .radio-element {
+  padding: 5px;
+}
+
+label.label-for-radio {
+  font-weight: normal;
+}
+
+.form-element-description {
+  font-size: 0.8em;
+  padding-left: 10px;
+  color: #444;
+}
+
+.form-required-ast {
+  color: red;
+  font-weight: bold;
+  font-size: 1.1em;
+  padding-right: 5px;
+}
 
 

@@ -193,20 +193,58 @@ function system_handle_form_submit() {
   $redirect = $_POST["redirect"];
   $redirect_query = $_POST["redirect_query"];
   
-  // Okay, what we need to do is go through the original form array, looking for elements,
-  // and then we write those elements to our variables table.  
+  $form_type = $_POST["form_type"];
+  $form_include = $_POST["form_include"];
+  
+  if ($form_include != "") {
+    // This is a file we need to include in order to complete the submission process.
+    include_once($form_include);
+  }
+
+  
+  // Let's get our set of allowed values, by looking at the original form,
+  // and grab what's in the POST which matches the name.
+
+  $values = array();
   if (function_exists($callback)) {
     $form = call_user_func($callback);
-    foreach ($form as $name => $element) {
-      // If that "name" exists in the POST, pull it out!
-      if (isset($_POST[$name])) {
-        variable_set($name, $_POST[$name]);
+    foreach ($form as $name => $element) {     
+      if (isset($_POST[$name])) {  
+        $values[$name] = $_POST[$name];
       }
+    }
+  }  
+    
+  // Let's store our values in the SESSION in case we need them later on.
+  $_SESSION["fp_form_submissions"][$callback]["values"] = $values;
+
+  // Let's pass this through our default form validator (mainly to check for required fields
+  // which do not have values entered)
+  form_basic_validate($form, array("values" => $values));  
+  
+  if (!form_has_errors()) {
+    // No errors from the basic_validate, so let's continue.
+    
+    // Is this a "system settings" form, or a normal form?
+    if ($form_type == "system_settings") {
+      // This is system settings, so let's save all of our values to the variables table.
+      
+      // Write our values array to our variable table.
+      foreach ($values as $name => $val) {
+        variable_set($name, $val);
+      }
+           
+      fp_add_message("Settings saved successfully.");      
+      
+    }
+    else if ($form_type == "normal" || $form_type == "") {
+      // Normal form.  Let the callback_submit() function have it, if it exists.
+      if (function_exists($callback . "_submit")) {
+        call_user_func_array($callback . "_submit", array($form, array("values" => $values)));
+      }    
     }
   }
   
-
-  fp_add_message("Settings saved successfully.");
   // Okay, go back to where we were!  
   fp_goto($redirect, $redirect_query);
    

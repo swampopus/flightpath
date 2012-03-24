@@ -63,9 +63,212 @@ function admin_display_degrees_popup_add_group() {
 }
 
 
-/*
-* These are functions related the data entry specifically for degree plans.
-*/
+
+/**
+ * This form lets the user add a degree to the database. 
+ */
+function admin_add_degree_form() {
+  
+  $form = array();
+  
+  $form["markup" . $m++] = array(
+    "type" => "markup",
+    "value" => t("You may use this screen to add a new degree,
+                  by entering a new major, concentration, or track (degree option)"),
+  );
+  
+
+  $form["de_catalog_year"] = array(
+    "type" => "hidden",
+    "value" => admin_get_de_catalog_year(),
+  );  
+
+  $form["new_major"] = array(
+    "type" => "radios",
+    "label" => t("Please select: are you entering a new major code [and concentration] 
+                  or an existing major code [and concentration] (so you can add a new track)?"),
+    "options" => array(
+      "new" => t("Entering a <b>new</b> major code [and concentration]"),
+      "existing" => t("Entering an <b>existing</b> major code [and concentration] (only adding a new track)"),
+    ),
+    "required" => TRUE,
+  );
+
+  
+  $form["major_code"] = array(
+    "type" => "textfield",
+    "size" => 15,
+    "label" => t("Major|Conc code:"),
+    "description" => t("To enter a concentration code, use MAJOR|CONC. 
+                      The | character is call the pipe, and it should under the backspace key. 
+                      If adding a new concentration to an existing major, you still put this in as a 
+                      NEW major code. Do not have any spaces in this box. The concentration code 
+                      is optional. If the major does not have a concentration, 
+                      then simply enter the major code by itself."),
+    "required" => TRUE,
+  );
+
+
+  $form["new_track"] = array(
+    "type" => "radios",
+    "label" => t("Please select: are you entering a new track code?"),
+    "options" => array(
+      "new" => t("Entering a <b>new</b> track code"),
+      "none" => t("None - Not adding a track.  Leave blank"),
+    ),
+    "required" => TRUE,
+  );
+
+
+  $form["track_code"] = array(
+    "type" => "textfield",
+    "size" => 15,
+    "label" => t("Track code:"),
+    "description" => t("Leave blank if you selected None above."),
+  );
+
+
+
+  // Make sure this file is reachable for the submit handler.
+  $form["form_include"] = menu_get_module_path("admin") . "/admin.degrees.inc";
+
+  // Our submit button.
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => "Submit",
+    "prefix" => "<hr>",
+  );
+  
+  
+  return $form;
+   
+}
+
+
+/**
+ * Submit handler for the add_degree_form.
+ */
+function admin_add_degree_form_submit($form, $form_submit) {
+  $values = $form_submit["values"];
+
+  $de_catalog_year = $values["de_catalog_year"];
+  // This will be used to add a new degree (and possibly track)
+  // to the database.
+  $major_code = trim(strtoupper($values["major_code"]));
+  $track_code = trim(strtoupper($values["track_code"]));
+
+  $new_major = $values["new_major"];
+  $new_track = $values["new_track"];
+
+  //////////////////////////////////////////////
+
+  if ($new_track == "new" && $track_code == "") {   
+    form_error("track_code", t("You selected to add a track, but did not specify a track code.")); 
+  }
+
+  // Make sure user did not enter an underscore (_) in either
+  // the track or major code!
+  if (strstr($track_code, "_") || strstr($major_code, "_")) {
+        
+    form_error("major_code", t("You are not allowed to enter underscores (_) in either the track code
+                    or major code.  FlightPath will add that for you.  Please re-enter
+                    your new degree without using an underscore.")); 
+
+  }
+
+  // Return since we have errors all ready.
+  if (form_has_errors()) {
+    return;
+  }
+
+
+  ////////////////////////////////////////////////////
+
+
+
+
+  // First, deal with the major/concentration.
+  // Firstly, check to see if it already exists...
+  $res = db_query("SELECT * FROM draft_degrees
+          WHERE catalog_year = '?'
+          AND major_code = '?' ", $de_catalog_year, $major_code);
+  if (db_num_rows($res) > 0 && $new_major == "new") { 
+    // Meaning, it already exists, yet we are trying to add it as a new
+    // major.  This is an error!
+    fp_add_message(t("The major code %major_code already exists for %year.  You cannot add it as a new major.", array("%major_code" => $major_code, "%year" => $de_catalog_year)), "error");
+    return;
+    
+  }
+  if (db_num_rows($res) == 0 && $new_major == "existing") { 
+    // This is another error.  We are trying to add a track to an existing
+    // major code, but none was found.
+    
+    fp_add_message(t("The major code %major_code could not be found in the system for %year.  Perhaps you need to add it first?", array("%major_code" => $major_code, "%year" => $de_catalog_year)), "error");    
+    return;
+  }
+  if (db_num_rows($res) == 0 && $new_major == "new") {
+    // This means we are trying to add a new major to the degrees table.
+    // We may proceed with this.
+    $db2 = new DatabaseHandler();
+    $degree_id = $db2->request_new_degree_id();
+    $db2->db_query("INSERT INTO draft_degrees
+            (degree_id, major_code, catalog_year)
+            values ('?', '?', '?') ", $degree_id, $major_code, $de_catalog_year);
+  }
+
+
+  if ($new_track == "new") {
+    //////////////////////////////////////////////////
+    // Now, let's see about adding ourself a track...
+    // First, check to see if it exists...
+    $res = db_query("SELECT * FROM draft_degree_tracks
+          WHERE catalog_year = '?'
+          AND major_code = '?' 
+          AND track_code = '?' ", $de_catalog_year, $major_code, $track_code);  
+
+    if (db_num_rows($res) > 0) {
+      // Meaning, it already existed, so we can't create it.      
+      fp_add_message(t("The major and track code %major_code already exists for %year.  You cannot add it as a new major/track code.", array("%major_code" => "$major_code $track_code", "%year" => $de_catalog_year)), "error");
+      return;      
+      
+    } 
+    else {
+      // We can add it to the tracks table...
+      $db2 = new DatabaseHandler();
+      $db2->db_query("INSERT INTO draft_degree_tracks
+              (catalog_year, major_code, track_code)
+              values ('?', '?', '?') ", $de_catalog_year, $major_code, $track_code);
+
+      // Now, we also need to add this major & track code to the degrees table.
+      $new_major_code = $major_code;
+      if (strstr($major_code, "|")) {
+        // Already has a pipe, so it has a concentration.
+        $new_major_code .= "_$track_code";
+      } 
+      else {
+        // No concentration...
+        $new_major_code .= "|_$track_code";
+      }
+
+      $degree_id = $db2->request_new_degree_id();
+      $db2->db_query("INSERT INTO draft_degrees
+            (degree_id, major_code, catalog_year)
+            values ('?', '?', '?') ", $degree_id, $new_major_code, $de_catalog_year);
+
+    }
+
+  }
+
+
+  // Success!  We are done.
+  fp_add_message(t("The new degree %major_code was added successfully for %year.  
+                      You may add another degree, or use the menu at the top of the page to return to your list
+                      of degrees, so you may begin editing the degree.", array("%major_code" => "$major_code $track_code", "%year" => $de_catalog_year)));
+  
+  clear_session_form_values("admin_add_degree_form");
+  
+}
+
 
 /*
  * This function lists all of our degrees on the screen, for a given year
@@ -77,6 +280,11 @@ function admin_display_degrees() {
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
 
   $rtn .= "<h2 class='title'>" . t("Degrees for @year", array("@year" => $de_catalog_year)) . "</h2>";  
+
+  $rtn .= "<div class='admin-degrees-upper-links'>";  
+  $rtn .= l("Add new degree plan (major, degree plan, or track)", "admin/degrees/add-degree", "de_catalog_year=$de_catalog_year");
+  $rtn .= "</div>";
+  
   
   $rtn .= "<div class='list-degree-row-excluded'>
         " . t("Majors or Tracks marked as \"exclude\" are shaded.  You may pull up students with these
@@ -169,7 +377,7 @@ function admin_handle_edit_degree_submit() {
 
   $de_catalog_year = $_REQUEST["de_catalog_year"];
   $db = get_global_database_handler();
-  
+
   // This will UPDATE a degree in the system with the courses
   // and groups that the user selected.
   $perform_action2 = trim($_POST["perform_action2"]);
@@ -182,7 +390,6 @@ function admin_handle_edit_degree_submit() {
     $del_group->assigned_to_semester_num = $temp[2];
 
   }
-  //debug_c_t($perform_action2);
 
   $major_code = trim($_POST["major_code"]);
   if ($major_code == ""){ die("Fatal error:  major_code not found.");}
@@ -221,7 +428,7 @@ function admin_handle_edit_degree_submit() {
       //die;
       
       fp_add_message("The degree $major_code ($de_catalog_year) has been deleted.");
-      fp_goto("admin/dgrees", "de_catalog_year=$de_catalog_year");
+      fp_goto("admin/degrees", "de_catalog_year=$de_catalog_year");
       return; 
       
     }
@@ -634,7 +841,7 @@ function admin_display_edit_degree() {
             </tr>";
     $rtn .= "</table>
         <div style='margin-top: 10px; margin-left: 20px;'>
-          <a href='javascript: adminPopupWindow(\"admin.php?performAction=popup_add_group&semester_num=$sem&de_catalog_year=$de_catalog_year\");'>Add an elective group</a></div>
+          <a href='javascript: adminPopupWindow(\"" . base_path() . "/admin/degrees/popup-add-group&semester_num=$sem&de_catalog_year=$de_catalog_year\");'>Add an elective group</a>
     </td>";
 
 

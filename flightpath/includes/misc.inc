@@ -22,8 +22,8 @@ function fp_set_page_sub_tabs($tab_array) {
 
 
 
-function fp_add_message($str) {
-  $_SESSION["fp_messages"][] = $str;
+function fp_add_message($msg, $type = "status") {
+  $_SESSION["fp_messages"][] = array("type" => $type, "msg" => $msg);
 }
 
 function fp_add_css($path_to_css) {
@@ -230,6 +230,12 @@ function db_fetch_array($result_handler) {
   $db = get_global_database_handler();
   return $db->db_fetch_array($result_handler);
 }
+
+function db_num_rows($result_handler) {
+  $db = get_global_database_handler();
+  return $db->db_num_rows($result_handler);
+}
+
 
 function variable_get($name, $default_value = "") {
   $db = get_global_database_handler();
