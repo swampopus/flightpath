@@ -190,8 +190,6 @@ function system_menu() {
 function system_handle_form_submit() {
     
   $callback = $_POST["callback"];
-  $redirect = $_POST["redirect"];
-  $redirect_query = $_POST["redirect_query"];
   
   $form_type = $_POST["form_type"];
   $form_include = $_POST["form_include"];
@@ -214,8 +212,7 @@ function system_handle_form_submit() {
       }
     }
   }  
-    
-  
+
   // Let's store our values in the SESSION in case we need them later on.
   // But only if this is NOT a system_settings form!
   if ($form_type != "system_settings") {
@@ -244,13 +241,25 @@ function system_handle_form_submit() {
     else if ($form_type == "normal" || $form_type == "") {
       // Normal form.  Let the callback_submit() function have it, if it exists.
       if (function_exists($callback . "_submit")) {
-        call_user_func_array($callback . "_submit", array($form, array("values" => $values)));
+        call_user_func_array($callback . "_submit", array(&$form, array("values" => $values)));
       }    
     }
   }
+
+  // Figure out where we are supposed to redirect the user.
+  $redirect_path = $redirect_query = "";
+
+  if (is_array($form["redirect"])) { 
+    $redirect_path = $form["redirect"]["path"];
+    $redirect_query = $form["redirect"]["query"];    
+  }
+  else {
+    $redirect_path = $_POST["default_redirect_path"];
+    $redirect_query = $_POST["default_redirect_query"];
+  }
   
   // Okay, go back to where we were!  
-  fp_goto($redirect, $redirect_query);
+  fp_goto($redirect_path, $redirect_query);
    
 }
 

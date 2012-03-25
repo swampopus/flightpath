@@ -240,8 +240,12 @@ function adminViewAnnouncementPreview(count) {
 }
 
 function adminPopupSelectIcon(file) {
-  opener.document.getElementById("icon_filename").value = file;
-  opener.adminadminSubmitForm();
+  opener.document.getElementById("element-icon_filename").value = file;
+  // Submit our form..
+  opener.showUpdate(false);
+  //opener.document.getElementById("element-scroll_top").value = opener.document.body.scrollTop;
+  opener.document.getElementById("sysform").submit();
+  // Close the window
   window.close();
 }
 
@@ -252,8 +256,8 @@ function adminDeleteGroup(group_id) {
     return;
   }
   
-  document.getElementById("perform_action2").value="delete_group";
-  adminSubmitForm();
+  document.getElementById("element-perform_action2").value="delete_group";
+  document.getElementById("sysform").submit();
   
 }
 
@@ -336,9 +340,9 @@ function adminPopupSaveDefinition() {
   }
   
   var def = encodeURI(document.getElementById("definition").value);
-  opener.document.getElementById("set_definition").value = def;
+  opener.document.getElementById("element-set_definition").value = def;
   opener.showUpdate();
-  opener.adminSubmitForm();
+  opener.document.getElementById("sysform").submit();
   window.close();
   
 }

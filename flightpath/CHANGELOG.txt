@@ -1,6 +1,21 @@
 FlightPath Changelog
 ====================
 
+2012-03-25
+  Still workin on admin module.
+  Focusing on the Groups section.
+  
+  Got changing icon working for edit-group page.
+  
+  Got definitions working on the edit-group page.
+  
+  Add new group and delete group works.
+  
+  Fixed bug where groups did not redirect to exactly the correct URL by default.
+  
+  Process all group definitions now works.
+
+
 2012-03-24
   Still working on admin module.
   

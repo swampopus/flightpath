@@ -900,8 +900,15 @@ function display_access_denied($system_name = "", $bool_die_at_end = TRUE) {
 /**
  * Return the theme location
  */
-function fp_theme_location() {
-  return $GLOBALS["fp_system_settings"]["base_path"] . "/" . $GLOBALS["fp_system_settings"]["theme"];
+function fp_theme_location($bool_include_base_path = TRUE) {
+  
+  $p = $GLOBALS["fp_system_settings"]["theme"];
+  
+  if ($bool_include_base_path) {
+    $p = base_path() . "/" . $p;    
+  }
+  
+  return $p;
 }
 
 

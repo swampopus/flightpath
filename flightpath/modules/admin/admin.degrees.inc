@@ -10,7 +10,7 @@ function admin_display_degrees_popup_add_group() {
   
   $rtn = "";
 
-  $rtn .= "<b>" . t("Add an elective group to semester: %semester_num in %de_catalog_year", array("%semester_num" => $semester_num, "%de_catalog_year" => $de_catalog_year)) . "</b><br>
+  $rtn .= "<b>" . t("Add an elective group to semester: @semester_num in @de_catalog_year", array("@semester_num" => $semester_num, "@de_catalog_year" => $de_catalog_year)) . "</b><br>
         <span class='tenpt'>" . t("Use keyboard shortcut CTRL-F to find groups quickly.") . "</span>
         <br><br>
         First, select a group (from $de_catalog_year):
@@ -78,7 +78,7 @@ function admin_copy_degree_form() {
     "value" => t("Use this form to duplicate a degree plan in this catalog year.
                   <b>IMPORTANT:</b> If you specify a destination major code which
                   already exists, <b>all of its tracks and concentrations</b> will be
-                  deleted for %year!", array("%year" => $de_catalog_year)),
+                  deleted for @year!", array("@year" => $de_catalog_year)),
   );
 
 
@@ -974,7 +974,7 @@ function admin_display_edit_degree() {
     if ($semester->semester_num < 0) {
       continue;
     }
-    $sem_default_title = admin_degrees_get_semester_name($semester->semester_num);
+    $sem_default_title = admin_get_semester_name($semester->semester_num);
     if ($semester->title == $sem_default_title) {
       $semester->title = "";
     }
@@ -1062,7 +1062,7 @@ function admin_display_edit_degree() {
     $rtn .= "<div class='elevenpt' style='padding-bottom: 30px;'>
           <b>Block number: " . ($sem+1) . "</b>
           &nbsp; &nbsp; &nbsp; &nbsp;
-          Default title: " . admin_degrees_get_semester_name($sem) . "
+          Default title: " . admin_get_semester_name($sem) . "
           &nbsp; &nbsp;
           Override: <input type='text' name='semester_title_$sem' value='' size='20'>
           <a href='javascript: adminPopupAlertHelp(\"semester_title\");'>?</a>
@@ -1138,20 +1138,5 @@ function admin_display_edit_degree() {
   
   
   return $rtn;
-}
-
-
-/**
- * Convienence function to get semester's default regular name.
- */
-function admin_degrees_get_semester_name($semester_num) {    
-  
-  $ar = array(t("Freshman Year"), t("Sophomore Year"), t("Junior Year"), t("Senior Year"));
-  $s = $ar[$semester_num];
-  if ($s == "")
-  {
-    $s = t("Year") . " " . ($semester_num + 1);
-  }
-  return $s;
 }
 

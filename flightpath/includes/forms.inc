@@ -21,16 +21,30 @@ function fp_render_form($callback, $form_type = "") {
   
   // Figure out the current page's title and display it.
   $path = $_GET["q"];
+  $default_path = $path;
+  // Figure out the "default_query" from $_GET
+  $new_query = array();
+  foreach ($_GET as $key => $val) {
+    if ($key != "q") {
+      $new_query[] = "$key=$val"; 
+    }
+  }
+  if (count($new_query)) {
+    $default_query = join("&", $new_query);
+  }
+  
+  
   $menu_item = menu_get_item($path);
   $page_title = $menu_item["title"];
   if ($GLOBALS["fp_set_title"] != "") $page_title = $GLOBALS["fp_set_title"];
   
   $rtn .= "<h2 class='title'>" . $page_title . "</h2>";
     
-  if (is_array($form["redirect"])) {
+/*  if (is_array($form["redirect"])) {
     $redirect_path = $form["redirect"]["path"];
     $redirect_query = $form["redirect"]["query"];
   }
+ */
     
   $form_include = "";
   if ($form["form_include"]) {
@@ -47,8 +61,9 @@ function fp_render_form($callback, $form_type = "") {
   $rtn .= "<input type='hidden' name='callback' value='$callback'>";
   $rtn .= "<input type='hidden' name='form_type' value='$form_type'>";
   $rtn .= "<input type='hidden' name='form_include' value='$form_include'>";
-  $rtn .= "<input type='hidden' name='redirect' value='$redirect_path'>";
-  $rtn .= "<input type='hidden' name='redirect_query' value='$redirect_query'>";
+  $rtn .= "<input type='hidden' name='default_redirect_path' value='$default_path'>";
+  $rtn .= "<input type='hidden' name='default_redirect_query' value='$default_query'>";
+  //$rtn .= "<input type='hidden' name='redirect_query' value='$redirect_query'>";
   $rtn .= "<input type='hidden' name='current_student_id' value='$current_student_id'>";
   
   foreach ($form as $name => $element) {
@@ -207,7 +222,7 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   if ($type == "markup") {
     $rtn .= "<div class='markup'>$value</div>";
   }
-  else {
+  else if ($type != "hidden") {
     $rtn .= "<label>$ast$label $popup_help_link</label>";
   }
 

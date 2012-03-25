@@ -222,8 +222,98 @@ function admin_menu() {
     "tab_parent" => "admin/groups",
   );     
      
+     
+  $items["admin/groups/popup-select-icon"] = array(
+    "title" => "Select Icon",
+    "page_callback" => "admin_display_groups_popup_select_icon",
+    "access_arguments" => array("can_edit_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),   
+    "file" => menu_get_module_path("admin") . "/admin.groups.inc",
+    "type" => MENU_TYPE_CALLBACK,
+  );     
+     
+  $items["admin/groups/popup-edit-definition"] = array(
+    "title" => "Edit Definition",
+    "page_callback" => "admin_display_groups_popup_edit_definition",
+    "access_arguments" => array("can_edit_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),   
+    "file" => menu_get_module_path("admin") . "/admin.groups.inc",
+    "type" => MENU_TYPE_CALLBACK,
+  );     
+
+  $items["admin/groups/popup-show-group-use"] = array(
+    "title" => "Group Use",
+    "page_callback" => "admin_display_groups_popup_show_group_use",
+    "access_arguments" => array("can_edit_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),   
+    "file" => menu_get_module_path("admin") . "/admin.groups.inc",
+    "type" => MENU_TYPE_CALLBACK,
+  );     
+
+  $items["admin/groups/process-all-definitions"] = array(
+    "title" => "Process all Definitions",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("admin_process_all_definitions_form"),
+    "access_arguments" => array("can_edit_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to Groups list",
+          "path" => "admin/groups",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),   
+    "file" => menu_get_module_path("admin") . "/admin.groups.inc",
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin/groups",
+  );     
+          
+     
+     
   return $items;
 }
+
+
+
+
+/**
+ * Convienence function to get semester's default regular name.
+ */
+function admin_get_semester_name($semester_num) {    
+  
+  $ar = array(t("Freshman Year"), t("Sophomore Year"), t("Junior Year"), t("Senior Year"));
+  $s = $ar[$semester_num];
+  if ($s == "")
+  {
+    $s = t("Year") . " " . ($semester_num + 1);
+  }
+  return $s;
+}
+
+
+
+
 
 
 /**

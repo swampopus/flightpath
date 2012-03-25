@@ -61,6 +61,12 @@ function t($str, $vars = array()) {
     
   if (count($vars) > 0) {
     foreach ($vars as $var => $val) {
+      
+      // If var begins with %, it means we want to italicize the val.
+      if (strstr($var, "%")) {
+        $val = "<em>$val</em>";
+      }
+      
       $str = str_replace($var, $val, $str);
     }
   }
