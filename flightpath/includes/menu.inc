@@ -78,6 +78,15 @@ function menu_execute_page_request() {
   }
   
   if ($router_item = menu_get_item($path)) {
+           
+    // If the menu item contains a "redirect", then we should perform
+    // an fp_goto to that immediately.
+    if (isset($router_item["page_settings"]["redirect"])) {
+      $p = $router_item["page_settings"]["redirect"]["path"];
+      $q = $router_item["page_settings"]["redirect"]["query"];
+      fp_goto($p, $q);
+      return;
+    }
        
     // Let's figure out if the user has access to this menu item or not.
     $access = FALSE;

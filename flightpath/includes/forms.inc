@@ -27,8 +27,9 @@ function fp_render_form($callback, $form_type = "") {
   
   $rtn .= "<h2 class='title'>" . $page_title . "</h2>";
     
-  if ($form["redirect"]) {
-    $path = $form["redirect"];
+  if (is_array($form["redirect"])) {
+    $redirect_path = $form["redirect"]["path"];
+    $redirect_query = $form["redirect"]["query"];
   }
     
   $form_include = "";
@@ -46,7 +47,8 @@ function fp_render_form($callback, $form_type = "") {
   $rtn .= "<input type='hidden' name='callback' value='$callback'>";
   $rtn .= "<input type='hidden' name='form_type' value='$form_type'>";
   $rtn .= "<input type='hidden' name='form_include' value='$form_include'>";
-  $rtn .= "<input type='hidden' name='redirect' value='$path'>";
+  $rtn .= "<input type='hidden' name='redirect' value='$redirect_path'>";
+  $rtn .= "<input type='hidden' name='redirect_query' value='$redirect_query'>";
   $rtn .= "<input type='hidden' name='current_student_id' value='$current_student_id'>";
   
   foreach ($form as $name => $element) {
@@ -148,10 +150,28 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   $label = $element["label"];
   $options = $element["options"];
   $description = $element["description"];
+  $popup_description = $element["popup_description"];
   $prefix = $element["prefix"];
   $suffix = $element["suffix"];
   $required = $element["required"];
+  $attributes = $element["attributes"];
 
+  $popup_help_link = "";
+  if ($popup_description) {
+    // Cheap hack to get rid of whitespace    
+    for ($t = 0; $t < 5; $t++) {
+      $popup_description = str_replace("  ", " ", $popup_description);
+    }
+    
+    $popup_description = str_replace("\n", "[NL]", $popup_description);
+    $popup_description = htmlentities($popup_description, ENT_QUOTES);
+    $popup_description = str_replace("&quot;", "\&quot;", $popup_description);
+    $popup_description = str_replace("[NL]", "\\n", $popup_description);
+    
+    
+    
+    $popup_help_link = " <a href='javascript: alert(\"" . $popup_description . "\");' class='form-popup-description'>[?]</a>";
+  }
 
   $element_extra_css = "";
   if (is_array($_SESSION["fp_form_errors"])) {
@@ -163,7 +183,7 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
     }
   }
 
-  if ($use_session_submission_values_for_callback) {
+  if ($use_session_submission_values_for_callback && is_array($_SESSION["fp_form_submissions"][$use_session_submission_values_for_callback]["values"])) {
     // Check the SESSION for a previous value which we should use.
     $ignore_types = array("hidden", "markup", "submit");
     if (!in_array($type, $ignore_types)) {
@@ -188,19 +208,19 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
     $rtn .= "<div class='markup'>$value</div>";
   }
   else {
-    $rtn .= "<label>$ast$label</label>";
+    $rtn .= "<label>$ast$label $popup_help_link</label>";
   }
 
   if ($type == "textarea") {
     $rows = ($element["rows"]) ? $element["rows"] : "5";
-    $rtn .= "<textarea name='$name' id='element-$name' rows='$rows'>$value</textarea>";
+    $rtn .= "<textarea name='$name' id='element-$name' rows='$rows' $attributes>$value</textarea>";
   }
 
   if ($type == "textfield") {
     $size = ($element["size"]) ? $element["size"] : "60";
     $maxlength = ($element["maxlength"]) ? $element["maxlength"] : "255";
     $value = htmlentities($value, ENT_QUOTES);    
-    $rtn .= "<input type='text' name='$name' id='element-$name' size='$size' maxlength='$maxlength' value='$value'>";
+    $rtn .= "<input type='text' name='$name' id='element-$name' size='$size' maxlength='$maxlength' value='$value' $attributes>";
   }
   
   if ($type == "hidden") {
@@ -221,6 +241,21 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
     }
     $rtn .= "</div>";
   }
+
+  if ($type == "select") {
+    $rtn .= "<select name='$name' id='element-$name'>
+            <option value=''>- Please select -</option>";
+    foreach ($options as $key => $val) {
+      $selected = "";
+      if ($value == $key) {
+        $selected = "selected";
+      }
+      $rtn .= "<option value='$key' $selected>$val</option>";
+    }
+    $rtn .= "</select>";
+  }
+
+
 
   if ($type == "checkboxes") {
     $rtn .= "<div class='form-checkboxes form-checkboxes-$name'>";

@@ -242,14 +242,33 @@ function db_num_rows($result_handler) {
 
 
 function variable_get($name, $default_value = "") {
-  $db = get_global_database_handler();
-  return $db->get_variable($name, $default_value);
+  $res = db_query("SELECT value FROM variables
+                         WHERE name = '?' ", $name);
+  $cur = db_fetch_array($res);
+  
+  $val = unserialize($cur["value"]);
+  if (!$val) {
+    $val = $default_value;
+  }
+  
+  if ($val == "BOOLEAN_FALSE_PLACEHOLDER") {
+    $val = FALSE;
+  }
+  
+  return $val;
 }
+
 
 function variable_set($name, $value) {
   
-    db_query("REPLACE INTO variables (name, value)
-              VALUES ('?', '?') ", $name, $value);
+  // Boolean FALSE presents unusual problems when we try to tell if it got unserialized correctly.
+  // We will convert it to a placeholder so we can positively store it.   
+  if ($value === FALSE) {
+    $value = "BOOLEAN_FALSE_PLACEHOLDER";
+  }
+    
+  db_query("REPLACE INTO variables (name, value)
+              VALUES ('?', '?') ", $name, serialize($value));
   
 }
 

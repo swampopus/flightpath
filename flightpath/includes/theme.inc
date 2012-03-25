@@ -31,7 +31,7 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
   
   $menu_items = menu_get_items_beginning_with($menu_root);
   foreach ($menu_items as $item) {
-    if ($item["type"] == MENU_TYPE_NORMAL_ITEM) {
+    if ($item["type"] != MENU_TYPE_CALLBACK) {
       $rtn .= fp_render_menu_item($item);
       $is_empty = false;
     }
@@ -294,7 +294,7 @@ function fp_build_tab_array($page) {
     $tab_family = $page["router_item"]["tab_family"];
     $active_tab_path = $page["path"];
     
-    if ($page["router_item"]["type"] == MENU_TYPE_SUB_TAB) {
+    if ($page["router_item"]["tab_parent"] != "") {
       // We want to know the PARENT's tab_family, so we can display the correct tabs at the top of the page.
       $tab_parent = $page["router_item"]["tab_parent"];
       

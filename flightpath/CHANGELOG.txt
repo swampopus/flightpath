@@ -19,6 +19,17 @@ FlightPath Changelog
   Can now "copy" a degree plan.  I believe this basically completes the degrees portion
   of the admin section.
   
+  Made some tweaks to the menus, so that in Admin there are tabs now to help the user
+  keep track of what screen they are looking at.
+  
+  Starting on "groups" for Admin.
+  
+  Created concepts of "popup_description" instead of just "description" in the form_api.
+  This causes a [?] link to appear in the label of the element, and, which clicked,
+  will popup the text therein.  It makes forms a bit more tidy.
+  
+  Have basic editing of groups mostly complete.
+  
 
 2012-03-23
   Continuing work on admin module.

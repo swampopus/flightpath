@@ -727,6 +727,11 @@ label.label-for-checkbox
   color: #444;
 }
 
+.form-element-description fieldset {
+  margin-top: 5px;
+  padding-bottom: 0px;
+}
+
 .form-required-ast {
   color: red;
   font-weight: bold;
@@ -739,4 +744,9 @@ label.label-for-checkbox
   padding: 5px;
 }
 
+a.form-popup-description {
+  font-weight: normal;
+  padding-left: 5px;
+  text-decoration: none;
+}
 

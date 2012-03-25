@@ -12,13 +12,14 @@ function admin_menu() {
      "title" => "FlightPath Admin Console",
      "page_callback" => "admin_display_main",
      "access_arguments" => array("can_access_admin"),
+     "tab_family" => "admin",
      "page_settings" => array(
        "page_has_search" => FALSE,
        "page_banner_is_link" => TRUE,
        "page_hide_report_error" => TRUE,
        "target" => "_blank",        
      ),     
-     "type" => MENU_TYPE_NORMAL_ITEM,
+     "type" => MENU_TYPE_TAB,
   );
   
   $items["admin/config/urgent-message"] = array(
@@ -39,8 +40,10 @@ function admin_menu() {
       ),
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
   );     
    
+   ///////////////////////////////////////////////////////
   ////////////////////// Degree Editing /////////////////// 
    
   $items["admin/degrees"] = array(
@@ -60,7 +63,8 @@ function admin_menu() {
       ),
     ),    
     "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
-    "type" => MENU_TYPE_CALLBACK,
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "admin_degrees",
   );
    
   $items["admin/degrees/edit-degree"] = array(
@@ -85,7 +89,8 @@ function admin_menu() {
       ),
     ),   
     "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
-    "type" => MENU_TYPE_CALLBACK,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin/degrees",
   );   
    
   $items["admin/degrees/handle-edit-degree-submit"] = array(    
@@ -133,7 +138,8 @@ function admin_menu() {
       ),
     ),   
     "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
-    "type" => MENU_TYPE_CALLBACK,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin/degrees",    
   );     
   
   $items["admin/degrees/copy-degree"] = array(
@@ -160,9 +166,61 @@ function admin_menu() {
     ),   
     "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
     "type" => MENU_TYPE_CALLBACK,
+    "tab_parent" => "admin/degrees",
   );     
   
-  
+
+
+   ///////////////////////////////////////////////////////
+  ////////////////////// Group Editing /////////////////// 
+   
+  $items["admin/groups"] = array(
+    "title" => "Groups",
+    "page_callback" => "admin_display_groups",
+    "access_arguments" => array("can_access_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "file" => menu_get_module_path("admin") . "/admin.groups.inc",
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "admin_groups",
+  );
+
+  $items["admin/groups/edit-group"] = array(
+    "title" => "Edit Group",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("admin_edit_group_form"),
+    "access_arguments" => array("can_edit_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to Groups list",
+          "path" => "admin/groups",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),   
+    "file" => menu_get_module_path("admin") . "/admin.groups.inc",
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin/groups",
+  );     
      
   return $items;
 }
@@ -246,8 +304,6 @@ function admin_urgent_message_form() {
     "value" => variable_get("urgent_msg", ""),
   );
   
-  
-  
   return $form;
 }
  
@@ -282,7 +338,7 @@ function admin_display_main() {
     for ($t = $settings["current_catalog_year"] +1; $t >= $settings["earliest_catalog_year"]; $t--) {
       $rtn .= "<ul class='data-entry-for-cat data-entry-for-cat-$t'>";
       $rtn .= "<li>" . l(t("Degree plans for @year", array("@year" => $t)), "admin/degrees", "de_catalog_year=$t") . "</li>";
-      $rtn .= "<li>" . l(t("Groups for @year", array("@year" => $t)), "path") . "</li>";
+      $rtn .= "<li>" . l(t("Groups for @year", array("@year" => $t)), "admin/groups", "de_catalog_year=$t") . "</li>";
       $rtn .= "<li>" . l(t("Courses for @year", array("@year" => $t)), "path") . "</li>";
       $rtn .= "</ul>";
     }

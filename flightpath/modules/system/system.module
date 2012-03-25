@@ -215,8 +215,12 @@ function system_handle_form_submit() {
     }
   }  
     
+  
   // Let's store our values in the SESSION in case we need them later on.
-  $_SESSION["fp_form_submissions"][$callback]["values"] = $values;
+  // But only if this is NOT a system_settings form!
+  if ($form_type != "system_settings") {
+    $_SESSION["fp_form_submissions"][$callback]["values"] = $values;
+  }
 
   // Let's pass this through our default form validator (mainly to check for required fields
   // which do not have values entered)
@@ -228,9 +232,9 @@ function system_handle_form_submit() {
     // Is this a "system settings" form, or a normal form?
     if ($form_type == "system_settings") {
       // This is system settings, so let's save all of our values to the variables table.
-      
       // Write our values array to our variable table.
       foreach ($values as $name => $val) {
+        
         variable_set($name, $val);
       }
            
