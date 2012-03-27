@@ -18,3 +18,12 @@
   font-size: 0.8em;
   margin-bottom: 5px;
 }
+
+
+.admin-courses-select-letter-bar {
+  background-color: #eee; 
+  margin-bottom:10px; 
+  text-align: center; 
+  padding: 3px; 
+  margin:3px;  
+}

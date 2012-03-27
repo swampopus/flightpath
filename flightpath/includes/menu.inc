@@ -69,6 +69,10 @@ function menu_get_module_path($module) {
 }
 
 
+
+
+
+
 function menu_execute_page_request() {
   $path = $_GET["q"];
 
@@ -167,8 +171,9 @@ function menu_get_items_in_tab_family($tab_family) {
   return $rtn;
 }
 
+
 /**
- * Return array from menu_router for this item.
+ * Return array from menu_router for this item. * 
  */
 function menu_get_item($path) {
   $res = db_query("SELECT * FROM menu_router WHERE path = '?' ", $path);

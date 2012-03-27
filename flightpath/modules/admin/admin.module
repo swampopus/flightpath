@@ -42,6 +42,49 @@ function admin_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
     "tab_parent" => "admin-tools/admin",    
   );     
+
+  $items["admin/edit-advising-settings"] = array(
+    "title" => "Edit advising settings",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("admin_advising_settings_form", "system_settings"),
+    "access_arguments" => array("can_edit_advising_settings"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  );     
+  
+     
+  $items["admin/apply-draft-changes"] = array(
+    "title" => "Apply draft changes",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("admin_apply_draft_changes_form"),
+    "access_arguments" => array("can_apply_draft_changes"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",      
+  );
    
    ///////////////////////////////////////////////////////
   ////////////////////// Degree Editing /////////////////// 
@@ -290,8 +333,135 @@ function admin_menu() {
   );     
           
      
+  /////////////////////////////////////////////////
+  /////////////////// Courses editing ////////////////
+  $items["admin/courses"] = array(
+    "title" => "Courses",
+    "page_callback" => "admin_display_courses",
+    "access_arguments" => array("can_access_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "file" => menu_get_module_path("admin") . "/admin.courses.inc",
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "admin_courses",
+  );  
+     
+  $items["admin/courses/edit-course"] = array(
+    "title" => "Edit Course",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("admin_edit_course_form"),
+    "access_arguments" => array("can_edit_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to Courses list",
+          "path" => "admin/courses",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),   
+    "file" => menu_get_module_path("admin") . "/admin.courses.inc",
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin/courses",
+  );     
+          
+     
      
   return $items;
+}
+
+
+
+/**
+ * This is a systems settings form, which lets
+ * the user edit advising variabled for FlightPath.
+ */
+function admin_advising_settings_form() {
+  $form = array();
+  
+  $settings = fp_get_system_settings();
+  
+  $mark = "";
+  // TODO: This needs to become genericized!  If it can't be, it should just be taken out.
+  
+  $sems = array(40,41, 60,81,82);
+  for($t = $settings["current_catalog_year"]; $t <= $settings["current_catalog_year"] + 2; $t++) {
+    $mark .= "<div style='padding-left: 15px;'>";
+    foreach($sems as $sm) {
+      $try_year = $t . $sm;
+      $course = new Course();
+      $course->term_id = $try_year;
+      $mark .= "" . $course->get_term_description(true) . ": <b>$course->term_id</b>, &nbsp; &nbsp; &nbsp;";
+    }
+    $mark .= "</div>";
+  }  
+  
+    
+  $form["mark" . $m++] = array(
+    "type" => "markup",
+    "value" => t("Term ID Quick Reference:") . $mark,
+  );
+  
+  $form["available_advising_term_ids"] = array(
+    "type" => "textfield",
+    "label" => t("Available advising term ids"),
+    "value" => variable_get("available_advising_term_ids", ""),
+    "description" => t("Separate by commas. Ex: 200940, 200941, 200960. Make sure to enter
+                        in the order that they should appear in FlightPath."),
+  );  
+
+  $form["advising_term_id"] = array(
+    "type" => "textfield",
+    "label" => t("Default advising term id"),
+    "value" => variable_get("advising_term_id", ""),
+    "description" => t("Of the available term ids above, this is the default that FlightPath
+                        is set to when an advisor logs in. Ex: 200940."),
+  );  
+
+
+  $form["current_catalog_year"] = array(
+    "type" => "textfield",
+    "size" => 10,
+    "label" => t("Current catalog year"),
+    "value" => variable_get("current_catalog_year", ""),
+    "description" => t("This is the year which What If loads degrees from, as well as other important functions.
+                        Only change this once you have fully loaded a new catalog year."),
+  );  
+
+  $form["current_draft_catalog_year"] = array(
+    "type" => "textfield",
+    "size" => 10,
+    "label" => t("Current DRAFT catalog year"),
+    "value" => variable_get("current_draft_catalog_year", ""),
+    "description" => t("While in Draft mode, this is the year which What If loads degrees from.
+                        You may change this while working on a new catalog.  It will not affect any other
+                        users of the system.  While not working on a new catalog, set this
+                        to the same as the Current catalog year."),
+  );  
+
+
+
+    
+  
+  return $form;
 }
 
 
@@ -312,6 +482,131 @@ function admin_get_semester_name($semester_num) {
 }
 
 
+
+/**
+ * This form lets the user apply draft changes (if they can supply the passcode)
+ */
+function admin_apply_draft_changes_form() {
+  $form = array();
+  
+  $form["mark" . $m++] = array(
+    "type" => "markup",
+    "value" => t("You can use this form to apply your draft changes to the production database, making changes
+                  to degrees, courses, and groups visible to all users of the system."),
+  );
+  
+  $form["passcode"] = array(
+    "type" => "password",
+    "label" => t("For added security, you must enter the transfer passcode:"),
+    "required" => TRUE,
+    "description" => t("This is a passcode set up in FlightPath's settings, to provide an extra layer
+                        of security for this powerful action."),
+        
+  );
+  
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => t("Submit"),
+    "description" => t("This action may take several minutes to complete!  Click only ONCE!"),
+    "prefix" => "<hr>",
+  );
+  
+  
+    
+  return $form;
+}
+
+
+/**
+ * Handles the actual moving of draft courses into production.
+ */
+function admin_apply_draft_changes_form_submit($form, $form_submit) {
+  $values = $form_submit["values"];
+  
+  $db = get_global_database_handler();
+  $de_catalog_year = admin_get_de_catalog_year();
+  
+  // Check to make sure they entered the transfer passcode correctly.
+    
+  if ($values["passcode"] != variable_get("admin_transfer_passcode", "changeME")) {
+
+    form_error("passcode", t("Error!  The passcode you entered is not correct.  Check with the FlightPath administrator
+                              (or check the admin settings pages) to learn the passcode."));
+    return;
+    
+  }
+   
+
+  // Save the entire post to the log.
+  //$post_x_m_l = fp_array_to_xml("post",$_POST, true);
+  //$db->add_to_log("admin_perform_apply_draft_changes","begin",$post_x_m_l);
+
+
+  // First, set maintenance mode...
+  $db->set_maintenance_mode("1");
+
+  // Okay, so what we gotta do is truncate the production tables,
+  // then copy the draft tables in.
+  $table_array = array(
+    "courses",
+    "degree_requirements",
+    "degree_tracks",
+    "degrees",
+    "group_requirements",
+    "groups",
+  );
+
+  foreach($table_array as $table_name) {
+    $draft_table_name = "draft_$table_name";
+    //$db->add_to_log("admin_perform_apply_draft_changes","$table_name,$draft_table_name");
+    // First, truncate existing...
+    $query = "truncate table $table_name";
+    $res = db_query($query);
+    // Now, copy in draft changes...
+    $query = "INSERT INTO $table_name
+            SELECT * FROM $draft_table_name ";
+    $res = db_query($query);
+  }
+
+  $db2 = new DatabaseHandler();
+  // Now, we need to go through the draft_instructions table,
+  // and perform each instruction one at a time.
+  $res = db_query("SELECT * FROM draft_instructions
+            ORDER BY `id` ");
+  while($cur = db_fetch_array($res))
+  {
+    $instruction = trim($cur["instruction"]);
+    //$db2->add_to_log("admin_perform_apply_draft_changes",$instruction);
+
+    $temp = explode(",",$instruction);
+
+    if (trim($temp[0]) == "update_course_id") {
+      $db2->update_course_id(trim($temp[1]), trim($temp[2]));
+    }
+
+    if (trim($temp[0]) == "update_course_requirement_from_name") {
+      $db2->update_course_requirement_from_name(trim($temp[1]), trim($temp[2]), trim($temp[3]));
+    }
+  }
+
+  // Once this is done, truncate the draft_instructions table.
+  $res = db_query("TRUNCATE TABLE draft_instructions");
+
+
+  // And we are done!  Set maintenance mode back to 0.
+  $db->set_maintenance_mode("0");
+  //$db->add_to_log("admin_perform_apply_draft_changes","finished");
+
+  // Send emails to notify programmers...
+  $notify = variable_get("notify_apply_draft_changes_email_address", "");  
+  if ($notify != "") {
+    mail($notify, "FlightPath Apply Draft Changes", "Someone has applied draft changes to FlightPath, which updated degree plans, groups, and courses.");
+  }
+  
+  fp_add_message(t("Successfully updated the production database with draft changes.  Your changes are now live and visible on production for all users."));
+ 
+  
+}
 
 
 
@@ -368,6 +663,15 @@ function admin_perm() {
       "title" => t("View advanced"),
       "description" => t("The user may see advanced information on-screen, for example, internal ID numbers for degrees and courses."),
     ),   
+    "can_apply_draft_changes" => array(
+      "title" => t("Apply draft changes"),
+      "description" => t("The user may move draft changes into production."),
+    ),   
+    "can_edit_advising_settings" => array(
+      "title" => t("Edit advising settings"),
+      "description" => t("The user may edit advising settings, like available term IDs and the current catalog year."),
+    ),   
+    
             
   );
 } 
@@ -425,13 +729,46 @@ function admin_display_main() {
 
     // TODO:  Maybe have a pulldown here of years, then use javascript to hide/show relavant groups.
     
+    $rtn .= "<div class='data-entry-cats'>";
+    
     for ($t = $settings["current_catalog_year"] +1; $t >= $settings["earliest_catalog_year"]; $t--) {
       $rtn .= "<ul class='data-entry-for-cat data-entry-for-cat-$t'>";
       $rtn .= "<li>" . l(t("Degree plans for @year", array("@year" => $t)), "admin/degrees", "de_catalog_year=$t") . "</li>";
       $rtn .= "<li>" . l(t("Groups for @year", array("@year" => $t)), "admin/groups", "de_catalog_year=$t") . "</li>";
-      $rtn .= "<li>" . l(t("Courses for @year", array("@year" => $t)), "path") . "</li>";
+      $rtn .= "<li>" . l(t("Courses for @year", array("@year" => $t)), "admin/courses", "de_catalog_year=$t") . "</li>";
       $rtn .= "</ul>";
     }
+    
+    $rtn .= "</div>";
+    
+    // Draft changes?
+    $res = db_query("SELECT * FROM draft_instructions");
+    if (db_num_rows($res) > 0) {
+      $rtn .= "<div class='draft-changes-waiting-msg'>
+                      " . t("Draft changes have been made which have yet to be applied.
+                      When you are ready for your draft changes to appear in
+                      production, click the link below.") . "</div>";
+    }
+    $rtn .= "<ul class='data-entry-draft-waiting'>
+              <li>" . l(t("Apply draft changes"), "admin/apply-draft-changes") . "</li>
+           </ul>";
+        
+  }
+
+  if (user_has_permission("can_edit_advising_settings")) {
+
+    // Advising Settings
+    $rtn .= fp_render_curved_line("Advising Settings");
+    $rtn .= "
+               
+         <ul>
+          <li>" . t("Available terms for advising: %v", array("%v" => variable_get("available_advising_term_ids", ""))) . "</li>
+          <li>" . t("Default advisint term: %v", array("%v" => variable_get("advising_term_id", ""))) . "</li>          
+          <li>" . t("Current catalog year: %v", array("%v" => variable_get("current_catalog_year", ""))) . "</li>       
+          <li>" . t("Current draft catalog year: %v", array("%v" => variable_get("current_draft_catalog_year", ""))) . "</li>             
+          
+        </ul>        
+        " . l(t("Edit Advising Settings"), "admin/edit-advising-settings");
     
   }
   

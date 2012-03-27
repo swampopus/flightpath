@@ -427,7 +427,7 @@ function admin_edit_group_form() {
   $form["mark" . $m++] = array(
     "type" => "markup",
     "value" => "<div align='right'>
-                      Delete this group? <input type='button' value='X'
+                      " . t("Delete this group?") . " <input type='button' value='X'
                       onClick='adminDeleteGroup(\"$group_id\");'>
                     </div>", 
   );

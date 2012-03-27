@@ -200,6 +200,11 @@ function system_handle_form_submit() {
   }
 
   
+  // TODO: We need to make sure the user has permission to submit this form!
+  // Get the original menu item from the callback.
+  // We need to run something here which checks this.  It is VITAL!
+
+  
   // Let's get our set of allowed values, by looking at the original form,
   // and grab what's in the POST which matches the name.
 

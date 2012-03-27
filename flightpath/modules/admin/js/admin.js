@@ -251,8 +251,7 @@ function adminPopupSelectIcon(file) {
 
 function adminDeleteGroup(group_id) {
   var x = confirm("Are you sure you wish to delete this group? Any degrees which point to it will need to be manually edited and re-saved remove this group requirement.\n\nClick OK to proceed and delete this group.");
-  if (!x)
-  {
+  if (!x) {
     return;
   }
   
@@ -288,9 +287,8 @@ function adminDeleteCourse(course_id, catalog_year, warnEqv) {
     }
   }
   
-  document.getElementById("perform_action2").value="delete_course";
-  adminSubmitForm();
-  
+  document.getElementById("element-perform_action2").value="delete_course";
+  document.getElementById("sysform").submit();   
   
 }
 

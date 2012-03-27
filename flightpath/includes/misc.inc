@@ -88,7 +88,7 @@ function base_path() {
 function fp_goto($path, $query = "") {
   global $current_student_id;
     
-  if (!strstr($query, "current_student_id=")) {
+  if ($current_student_id != "" && !strstr($query, "current_student_id=")) {
     // If the query doesn't contain the current_student_id, then add it in.
     $query .= "&current_student_id=$current_student_id";
   }
@@ -279,8 +279,27 @@ function variable_set($name, $value) {
 }
 
 function fp_get_system_settings() {
-  $db = get_global_database_handler();
-  $settings = $db->get_flightpath_settings();
+  //$db = get_global_database_handler();
+  //$settings = $db->get_flightpath_settings();
+  
+  if (isset($GLOBALS["fp_system_variables"])) {
+    return $GLOBALS["fp_system_variables"];
+  }
+  
+  // Get all of our settings from the variables table.
+  $res = db_query("SELECT * FROM variables");
+  while ($cur = db_fetch_array($res)) {
+    $name = $cur["name"];
+    $val = unserialize($cur["value"]);
+    
+    if ($val == "BOOLEAN_FALSE_PLACEHOLDER") {
+      $val = FALSE;
+    }
+    
+    $settings[$name] = $val;
+    
+  }
+  
   
   // Make sure some important settings have _something_ set, or else it could cause
   // problems for some modules.
@@ -291,7 +310,7 @@ function fp_get_system_settings() {
     $settings["earliest_catalog_year"] = 2006;
   }  
   
-
+  $GLOBALS["fp_system_variables"] = $settings;
   
   return $settings;
     

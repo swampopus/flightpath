@@ -66,9 +66,15 @@ function fp_render_form($callback, $form_type = "") {
   //$rtn .= "<input type='hidden' name='redirect_query' value='$redirect_query'>";
   $rtn .= "<input type='hidden' name='current_student_id' value='$current_student_id'>";
   
+  $use_callback = "";
+  if (form_has_errors()) {
+    // We will only pull previous POST's values if there are errors on the form.
+    $use_callback = $callback;
+  }
+  
   foreach ($form as $name => $element) {
     if (is_array($element) && isset($element["type"])) {
-      $rtn .= fp_render_form_element($name, $element, $callback);
+      $rtn .= fp_render_form_element($name, $element, $use_callback);
     }    
   }
       
@@ -231,11 +237,12 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
     $rtn .= "<textarea name='$name' id='element-$name' rows='$rows' $attributes>$value</textarea>";
   }
 
-  if ($type == "textfield") {
+  if ($type == "textfield" || $type == "password") {
+    if ($type == "textfield") $type = "text";
     $size = ($element["size"]) ? $element["size"] : "60";
     $maxlength = ($element["maxlength"]) ? $element["maxlength"] : "255";
     $value = htmlentities($value, ENT_QUOTES);    
-    $rtn .= "<input type='text' name='$name' id='element-$name' size='$size' maxlength='$maxlength' value='$value' $attributes>";
+    $rtn .= "<input type='$type' name='$name' id='element-$name' size='$size' maxlength='$maxlength' value='$value' $attributes>";
   }
   
   if ($type == "hidden") {

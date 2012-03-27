@@ -14,6 +14,10 @@ FlightPath Changelog
   Fixed bug where groups did not redirect to exactly the correct URL by default.
   
   Process all group definitions now works.
+  
+  Editing/Adding/Deleting courses now fully works.
+  
+  Apply draft changes done
 
 
 2012-03-24
