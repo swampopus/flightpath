@@ -25,6 +25,10 @@ define("MENU_NOT_FOUND", 62);
  * based on each module's hook_menu function.
  */
 function menu_rebuild_cache() {
+
+
+  // Begin by wiping out the menu_router table
+  db_query("TRUNCATE TABLE menu_router ");
   
   $modules = modules_implement_hook("menu");
   
@@ -37,8 +41,6 @@ function menu_rebuild_cache() {
       if (is_numeric($path)) continue; // problem, so skip.
 
       // Update our menu_router table.
-      // Begin by deleting the existing path, if there is one.
-      db_query("DELETE FROM menu_router WHERE path = '?' ", $path);
       // Now, insert the new one.
       db_query("INSERT INTO menu_router
                   (path, access_callback, access_arguments, page_callback, page_arguments, title, description, type, weight, icon, page_settings, tab_family, tab_parent, file)

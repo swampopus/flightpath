@@ -152,7 +152,7 @@ function system_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
   );  
 
-  $items["admin-tools/clear-menu-cache"] = array(
+  $items["admin/config/clear-menu-cache"] = array(
     "title" => "Clear menu cache",
     "page_callback" => "system_perform_clear_menu_cache",
     "access_callback" => TRUE,
@@ -304,7 +304,7 @@ function system_clear_cache() {
  */
 function system_perform_clear_menu_cache() {
   menu_rebuild_cache();
-  fp_goto("<front>");
+  fp_goto("admin-tools/admin");
 }
 
 

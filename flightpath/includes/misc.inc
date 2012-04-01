@@ -666,6 +666,49 @@ function fp_xml_to_array2($xml_data)
 }
 */
 
+
+
+/**
+ * Creates a javascript "confirm" link, so when clicked it asks the user a question, then proceeds
+ * if they select OK.  The main reason I want to do this is so I can pass the $question through
+ * my t() function. (do it when you call this function)
+ */
+function fp_get_js_confirm_link($question, $action_if_yes, $link_text) {
+  
+  $rtn = "";  
+
+  $question = htmlentities($question, ENT_QUOTES);
+
+  $rtn .= "<a href='javascript: if(confirm(\"$question\")) { $action_if_yes;  }'>$link_text</a>";
+
+      
+  return $rtn;
+}
+
+/**
+ * Creates a javascript "confirm" link, so when clicked it asks the user a question, then proceeds
+ * if they select OK.  The main reason I want to do this is so I can pass the $question through
+ * my t() function. (do it when you call this function)
+ */
+function fp_get_js_prompt_link($question, $default, $action_if_yes, $link_text) {
+  
+  $rtn = "";  
+
+  $question = htmlentities($question, ENT_QUOTES);
+
+  $rtn .= "<a href='javascript: var response = prompt(\"$question\", \"$default\");
+                                if (response != null) 
+                                {
+                                   $action_if_yes ;  
+                                }
+                                '>$link_text</a>";
+
+      
+  return $rtn;
+}
+
+
+
 /**
  * Returns TRUE or FALSE if the logged in user has access based on the
  * permission supplied.

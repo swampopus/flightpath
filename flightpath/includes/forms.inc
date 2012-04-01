@@ -73,7 +73,7 @@ function fp_render_form($callback, $form_type = "") {
   }
   
   foreach ($form as $name => $element) {
-    if (is_array($element) && isset($element["type"])) {
+    if (is_array($element) && (isset($element["type"]) || isset($element["value"]))) {
       $rtn .= fp_render_form_element($name, $element, $use_callback);
     }    
   }
@@ -166,7 +166,9 @@ function form_has_errors() {
 function fp_render_form_element($name, $element, $use_session_submission_values_for_callback = "") {
   $rtn = "";
 
-  $type = $element["type"];
+  $type = $element["type"]; 
+  if ($type == "") $type = "markup";
+  
   $value = $element["value"];
   $label = $element["label"];
   $options = $element["options"];

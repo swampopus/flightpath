@@ -1,6 +1,14 @@
 FlightPath Changelog
 ====================
 
+2012-04-01
+  Created permissions page, where users can set which rolls have which permissions.
+  
+
+2012-03-31
+  Added Rolls management page to admin module.
+
+
 2012-03-25
   Still workin on admin module.
   Focusing on the Groups section.
