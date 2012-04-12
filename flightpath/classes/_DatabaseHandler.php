@@ -353,7 +353,7 @@ class _DatabaseHandler
 			// Meaning, the query failed...
 			$err_screen = $this->db_error($sql_query);
 			$this->add_to_log("DB ERROR", mysql_real_escape_string(mysql_error()), mysql_real_escape_string($sql_query));
-			die($err_screen);
+			//die($err_screen);
 		}
 	}
 
@@ -377,7 +377,7 @@ class _DatabaseHandler
     			";
     
     	// If we are on production, email someone!
-    	if ($GLOBALS["fp_system_settings"]["notify_my_s_q_l_error_email_address"] != "")
+    	if ($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"] != "")
     	{
     	  $server = $_SERVER["SERVER_NAME"];
     		$email_msg = "A MYSQL error has occured in FlightPath.  
@@ -389,10 +389,10 @@ class _DatabaseHandler
     		Comments:
     		$msg
     		";
-    		mail($GLOBALS["fp_system_settings"]["notify_my_s_q_l_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
+    		mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
     	}
     
-    	if ($GLOBALS["fp_system_settings"]["display_my_s_q_l_errors"] == TRUE) {
+    	if (isset($GLOBALS["fp_system_settings"]["display_mysql_errors"]) &&  $GLOBALS["fp_system_settings"]["display_mysql_errors"] != FALSE) {
     	  $pC .= "<br><br>_error:<br>" . mysql_error();
     	}
     	

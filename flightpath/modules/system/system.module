@@ -22,6 +22,7 @@ notice must not be modified, and must be included with the source code.
  * Implementation of hook_page_switchboard
  *
  */
+/*
 function system_page_switchboard() {
   
   // Check permissions right here.
@@ -51,7 +52,7 @@ function system_page_switchboard() {
   
   
 }
-
+*/
 
 
 
@@ -152,6 +153,29 @@ function system_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
   );  
 
+  
+  $items["admin/config/system-settings"] = array(
+    "title" => "Edit system settings",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_settings_form", "system_settings"),
+    "access_arguments" => array("de_can_administer_system_settings"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  );
+  
+  
   $items["admin/config/clear-menu-cache"] = array(
     "title" => "Clear menu cache",
     "page_callback" => "system_perform_clear_menu_cache",
@@ -182,6 +206,239 @@ function system_menu() {
            
   return $items;
 }
+
+
+/**
+ * This is the "system settings" form.
+ */
+function system_settings_form() {
+  $form = array();
+  
+  $form["mark" . $m++] = array(
+    "value" => t("Use this form to alter the various system settings in FlightPath.
+                  Before making changes, it is always good policy to first back up your database."),
+                  
+  );
+  
+  $form["contact_email_address"] = array(
+    "type" => "textfield",
+    "label" => t("Contact email address:"),
+    "value" => variable_get("contact_email_address", ""),
+    "description" => t("Enter the email address to mail when a user accesses the
+                        Contact FlightPath Production Team popup."),
+    
+  );
+    
+  $form["theme"] = array(
+    "type" => "textfield",
+    "label" => t("Theme location:"),
+    "value" => variable_get("theme", "themes/classic"),
+    "description" => t("Enter the file location for your theme. Do not put preceeding or trailing slashes.  Ex: themes/classic"),    
+  );
+    
+
+  $form["school_initials"] = array(
+    "type" => "textfield",
+    "size" => 20,
+    "label" => t("School initials:"),
+    "value" => variable_get("school_initials", "DEMO"),
+    "description" => t("Ex: ULM or BPCC"),    
+  );
+                  
+
+  $form["earliest_catalog_year"] = array(
+    "type" => "textfield",
+    "size" => 20,
+    "label" => t("Earliest catalog year:"),
+    "value" => variable_get("earliest_catalog_year", "2006"),
+    "description" => t("This is the earliest possible catalog year FlightPath may look 
+                up.  Typically, this is the earliest year for which you have 
+                data (ie, when FlightPath went online.
+                If FlightPath cannot figure out a catalog year to use,
+                it will default to this one. Ex: 2006"),    
+  );
+  
+
+  $form["graduate_level_course_num"] = array(
+    "type" => "textfield",
+    "size" => 20,
+    "label" => t("Graduate level course num:"),
+    "value" => variable_get("graduate_level_course_num", "5000"),
+    "description" => t("This is the course num which means 'graduate level', meaning
+                anything above it is considered a graduate level course. Ex: 5000"),    
+  );
+  
+
+  $form["allowed_student_ranks"] = array(
+    "type" => "textfield",
+    "label" => t("Allowed student ranks (CSV):"),
+    "value" => variable_get("allowed_student_ranks", ""),
+    "description" => t("This is a list of which student ranks are allowed into FlightPath.
+                It should be separated by commas.  These ranks should exactly match
+                the rankCode from the human_resources:students table.
+                This also affects which students you may search for on the Advisees
+                tab. Ex: FR, SO, JR, SR"),    
+  );
+
+  $form["extra_student_search_conditions"] = array(
+    "type" => "textarea",
+    "label" => t("Extra student search conditions:"),
+    "value" => variable_get("extra_student_search_conditions", ""),
+    "description" => t("This is mysql which will get appended to end end of the WHERE clause of every query
+                    relating to search for students.  It is so you can easily add global conditions, for example,
+                    to check that the students are admitted or enrolled.  See the studentsearch.php to see
+                    its use.  If this setting is not sufficient for customizing the student search, you will
+                    need to use the hooks system to simply override the various functions there.
+                    example:  \" AND (admitted = '1' OR enrolled = '1') \""),    
+  );
+    
+  
+  $form["enrolled_student_search_conditions"] = array(
+    "type" => "textarea",
+    "label" => t("Enrolled student search conditions:"),
+    "value" => variable_get("enrolled_student_search_conditions", ""),
+    "description" => t("Similar to the one above it, this is a clause which will only bring up students
+                    who are enrolled at the university, and taking courses.  This might be identical to the
+                    one above it.  At the moment, this is only being used in the Stats module, and not
+                    for any logic in FlightPath, so you might consider it optional."),    
+  );
+
+
+  $form["not_allowed_student_message"] = array(
+    "type" => "textarea",
+    "label" => t("Not allowed student message:"),
+    "value" => variable_get("not_allowed_student_message", ""),
+    "description" => t("When a student is NOT allowed into FlightPath because of their
+                rank, this message will be displayed."),    
+  );
+    
+
+  $form["hiding_grades_message"] = array(
+    "type" => "textarea",
+    "label" => t("Hiding grades message:"),
+    "value" => variable_get("hiding_grades_message", ""),
+    "description" => t("This message will be displayed when any course on the page
+                has its boolHideGrade set to TRUE.  If you are not using
+                this functionality, you can leave this blank."),    
+  );
+
+
+  $form["notify_apply_draft_changes_email_address"] = array(
+    "type" => "textfield",
+    "label" => t("Notify apply draft changes email address:"),
+    "value" => variable_get("notify_apply_draft_changes_email_address", ""),
+    "description" => t("Enter 1 or more email addresses (separated by comma) to notify when
+                draft changes are applied from the admin console.  
+                Leave blank to disable."),    
+  );
+
+  $form["notify_mysql_error_email_address"] = array(
+    "type" => "textfield",
+    "label" => t("Notify MySQL error email address:"),
+    "value" => variable_get("notify_mysql_error_email_address", ""),
+    "description" => t("Enter 1 or more email addresses (separated by comma) to notify when
+                a mysql error occurs.  
+                Leave blank to disable."),    
+  );
+
+  $form["display_mysql_errors"] = array(
+    "type" => "select",
+    "label" => t("Display MySQL errors?"),
+    "options" => array("yes" => t("Yes"), "no" => t("No")),
+    "value" => variable_get("display_mysql_errors", array()),
+    "description" => t("If set to YES, FlightPath will display MySQL errors on screen."), 
+  );    
+    
+  
+  $form["admin_transfer_passcode"] = array(
+    "type" => "textfield",
+    "label" => t("Admin Apply Draft password:"),
+    "value" => variable_get("admin_transfer_passcode", "changeMe"),
+    "description" => t("Enter a password which an admin user must enter
+                        in order to apply draft changes to FlightPath.
+                        This is an added security measure. Ex: p@ssWord569w"),    
+  );
+    
+
+  $form["retake_grades"] = array(
+    "type" => "textfield",
+    "label" => t("Retake grades (CSV):"),
+    "value" => variable_get("retake_grades", ""),
+    "description" => t("List grades, separated by comma, which means 'the student must
+                retake this course. They did not earn credit.' Ex: F,W,I"),    
+  );
+         
+  $form["enrolled_grades"] = array(
+    "type" => "textfield",
+    "label" => t("Enrolled grades (CSV):"),
+    "value" => variable_get("enrolled_grades", ""),
+    "description" => t("List grades, separated by comma, which means 'the student is
+                currently enrolled in this course.' Ex: E,AMID,BMID "),    
+  );
+
+  $form["b_or_better"] = array(
+    "type" => "textfield",
+    "label" => t("B or better grades (CSV):"),
+    "value" => variable_get("b_or_better", ""),
+    "description" => t("List grades, separated by comma, which are either a B or better."),    
+  );
+
+  $form["c_or_better"] = array(
+    "type" => "textfield",
+    "label" => t("C or better grades (CSV):"),
+    "value" => variable_get("c_or_better", ""),
+    "description" => t("List grades, separated by comma, which are either a C or better."),    
+  );
+
+  $form["d_or_better"] = array(
+    "type" => "textfield",
+    "label" => t("D or better grades (CSV):"),
+    "value" => variable_get("d_or_better", ""),
+    "description" => t("List grades, separated by comma, which are either a D or better."),    
+  );
+
+  $form["ignore_courses_from_hour_counts"] = array(
+    "type" => "textfield",
+    "label" => t("Ignore courses from hour counts (CSV):"),
+    "value" => variable_get("ignore_courses_from_hour_counts", ""),
+    "description" => t("List courses, separated by comma, 
+                which should be ignored in hours counts.  This helps
+                remedial courses from being applied to hour counts.
+                Ex: MATH 093, ENGL 090, UNIV 1001"),    
+  );
+
+
+
+  $form["term_id_structure"] = array(
+    "type" => "textarea",
+    "label" => t("Structure of term ID's:"),
+    "value" => variable_get("term_id_structure", ""),
+    "description" => t("Use this space to define termID structures, one per line.
+                Please see the FlightPath documentation on how to set up this field.") . "
+                <br>" . t("Ex:") . " 
+                <br>[Y4]60, Spring, Spring of [Y4], Spr '[Y2]
+                <br>[Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]",    
+  );
+
+           
+  
+
+  $pC .= system_build_element("term_id_structure", "textarea", "Structure of termID's:", 
+                "Use this space to define termID structures, one per line.
+                Please see the FlightPath documentation on how to set up this field.
+                <br>Ex: 
+                <br>[Y4]60, Spring, Spring of [Y4], Spr '[Y2]
+                <br>[Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]
+                ");  
+
+                
+                
+                  
+  
+  
+  return $form;
+}
+
 
 
 /**

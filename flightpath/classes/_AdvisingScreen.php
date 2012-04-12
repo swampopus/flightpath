@@ -76,7 +76,7 @@ class _AdvisingScreen
 
 		$this->screen_mode = $screen_mode;
 
-		$this->settings = $this->db->get_flightpath_settings();
+		//$this->settings = $this->db->get_flightpath_settings();
 		$this->user_settings = $this->db->get_user_settings($_SESSION["fp_user_id"]);
 
 		
