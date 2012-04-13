@@ -353,9 +353,9 @@ function student_search_query_advisees($sql) {
   $tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
   $table_name_b = $tsettings["table_name"];     
 
-  $rank_in = "( '" . join("', '", $GLOBALS["fp_system_settings"]["allowed_student_ranks"]) . "' )";
   
-  
+  $rank_in = "( '" . join("', '", csv_to_array($GLOBALS["fp_system_settings"]["allowed_student_ranks"])) . "' )";
+    
   $order_by = " $tfb->major_code, $tfb->l_name, $tfb->f_name ";
   
   if ($sql == "")

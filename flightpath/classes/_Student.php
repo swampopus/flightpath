@@ -615,7 +615,7 @@ class _Student
 	function load_courses_taken($bool_load_transfer_credits = true)
 	{
 
-	  $retake_grades = $GLOBALS["fp_system_settings"]["retake_grades"];
+	  $retake_grades = csv_to_array($GLOBALS["fp_system_settings"]["retake_grades"]);
 	  // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this involves non-FlightPath tables.
 		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:student_courses"];

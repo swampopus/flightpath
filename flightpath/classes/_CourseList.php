@@ -1287,7 +1287,7 @@ class _CourseList extends ObjList
 				$temp_course_name = $course->subject_id . " " . $course->course_num;
 				// Check in our settings to see if we should ignore this course
 				// (configured in /custom/settings.php)
-				if (in_array($temp_course_name, $GLOBALS["fp_system_settings"]["ignore_courses_from_hour_counts"])) {
+				if (in_array($temp_course_name, csv_to_array($GLOBALS["fp_system_settings"]["ignore_courses_from_hour_counts"]))) {
 					continue;
 				}
 				
@@ -1599,7 +1599,7 @@ class _CourseList extends ObjList
         $temp_course_name = $course->subject_id . " " . $course->course_num;
 				// Check in our settings to see if we should ignore this course
 				// (configured in /custom/settings.php)
-				if (in_array($temp_course_name, $GLOBALS["fp_system_settings"]["ignore_courses_from_hour_counts"])) {
+				if (in_array($temp_course_name, csv_to_array($GLOBALS["fp_system_settings"]["ignore_courses_from_hour_counts"]))) {
 					continue;
 				}				
 

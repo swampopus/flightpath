@@ -363,6 +363,8 @@ function fp_build_tab_array($page) {
       $degree_plan = $screen->degree_plan;
     }
     
+    
+    
     $student = new Student();
     $student->student_id = $csid;
     $student->load_student_data();
@@ -372,15 +374,12 @@ function fp_build_tab_array($page) {
     
     $rtn .= "<table class='fp-currently-advising'>";
     
-  
     $for_term = $whatif = $what_if_select = $hypoclass = "";
     if ($GLOBALS["fp_advising"]["advising_term_id"] != "" && $screen_mode != "not_advising"
     && user_has_permission("can_advise_students"))
     {
-      $temp_course = new Course();
-      $temp_course->term_id = $GLOBALS["fp_advising"]["advising_term_id"];
       $t_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
-      $for_term = " for " . $temp_course->get_term_description();
+      $for_term = " for " . get_term_description($t_term_id);
 
       // If this is an advisor or above
       $for_term .= "<span style='font-size: 8pt; font-weight:normal;'>

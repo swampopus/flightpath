@@ -71,7 +71,7 @@ class _FlightPath
 		$track_code = $GLOBALS["fp_advising"]["advising_track_code"];
 		$student_id = $GLOBALS["fp_advising"]["advising_student_id"];
 		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
-		$available_terms = $GLOBALS["fp_advising"]["setting_available_advising_term_ids"];
+		$available_terms = $GLOBALS["fp_advising"]["available_advising_term_ids"];
 
 
 
@@ -905,12 +905,8 @@ class _FlightPath
 		$student_id = $this->student->student_id;
 		$degree_id = $this->degree_plan->degree_id;
 		$major_code = $this->degree_plan->major_code;
-		$available_terms = $GLOBALS["setting_available_advising_term_ids"];
+		$available_terms = variable_get("available_advising_term_ids", "0");
     
-    if (!$available_terms) {
-      // Available terms couldn't be loaded.  Add in a fake term for the time being.
-      $available_terms = "0";
-    }        
     
 		// Do we need to update the student's settings?
 		if (trim($_POST["advising_update_student_settings_flag"]) != "")
@@ -1327,11 +1323,7 @@ class _FlightPath
 
 		$degree_id = $this->degree_plan->degree_id;
 		$student_id = $this->student->student_id;
-		$available_terms = $GLOBALS["setting_available_advising_term_ids"];
-    // Give available_terms a default if it's empty.
-    if (!$available_terms) {
-      $available_terms = "0";
-    }
+		$available_terms = variable_get("available_advising_term_ids", "0");
 
 
 

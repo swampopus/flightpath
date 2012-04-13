@@ -1530,7 +1530,7 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "<ul>";
 
-		$temp = split(",",$GLOBALS["setting_available_advising_term_ids"]);
+		$temp = split(",", variable_get("available_advising_term_ids", "0"));
 		for ($t = 0; $t < count($temp); $t++)
 		{
 			$term_id = trim($temp[$t]);
@@ -1886,6 +1886,8 @@ function draw_menu_items($menu_array) {
 			$this->student->student_id = $GLOBALS["fp_advising"]["advising_student_id"];
 			$this->student->load_student_data();
 		}
+
+
 
 		$for_term = $whatif = $what_if_select = $hypoclass = "";
 		if ($GLOBALS["fp_advising"]["advising_term_id"] != "" && $this->screen_mode != "not_advising"
@@ -2371,10 +2373,10 @@ function draw_menu_items($menu_array) {
 
 
 		// Settings... (from the database)
-		$GLOBALS["setting_available_advising_term_ids"] = $settings["available_advising_term_ids"];
-		$GLOBALS["setting_advising_term_id"] = $settings["advising_term_id"];
-		$GLOBALS["setting_current_catalog_year"] = $settings["current_catalog_year"];
-		$GLOBALS["setting_current_draft_catalog_year"] = $settings["current_draft_catalog_year"];
+		//$GLOBALS["setting_available_advising_term_ids"] = $settings["available_advising_term_ids"];
+		//$GLOBALS["setting_advising_term_id"] = $settings["advising_term_id"];
+		//$GLOBALS["setting_current_catalog_year"] = $settings["current_catalog_year"];
+		//$GLOBALS["setting_current_draft_catalog_year"] = $settings["current_draft_catalog_year"];
 
 		// Are we in Print View?
 		$GLOBALS["print_view"] = $_REQUEST["print_view"];

@@ -420,8 +420,8 @@ class _Course
     $grade = $this->grade;
     // Get these grade definitions from our system settings
     // Configure them in custom/settings.php
-    $retake_grades = $GLOBALS["fp_system_settings"]["retake_grades"];
-    $enrolled_grades = $GLOBALS["fp_system_settings"]["enrolled_grades"];
+    $retake_grades = csv_to_array($GLOBALS["fp_system_settings"]["retake_grades"]);
+    $enrolled_grades = csv_to_array($GLOBALS["fp_system_settings"]["enrolled_grades"]);
 
 
     if (in_array($grade, $retake_grades))
@@ -449,8 +449,8 @@ class _Course
 
     // Get these grade definitions from our system settings
     // Configure them in custom/settings.php
-    $retake_grades = $GLOBALS["fp_system_settings"]["retake_grades"];
-    $enrolled_grades = $GLOBALS["fp_system_settings"]["enrolled_grades"];
+    $retake_grades = csv_to_array($GLOBALS["fp_system_settings"]["retake_grades"]);
+    $enrolled_grades = csv_to_array($GLOBALS["fp_system_settings"]["enrolled_grades"]);
 
     if ($grade == "") {
       return false;
@@ -492,10 +492,10 @@ class _Course
 
     // Get these grade definitions from our system settings
     // Configure them in custom/settings.php
-    $b_or_better = $GLOBALS["fp_system_settings"]["b_or_better"];
-    $c_or_better = $GLOBALS["fp_system_settings"]["c_or_better"];
-    $d_or_better = $GLOBALS["fp_system_settings"]["d_or_better"];
-    $enrolled_grades = $GLOBALS["fp_system_settings"]["enrolled_grades"];
+    $b_or_better = csv_to_array($GLOBALS["fp_system_settings"]["b_or_better"]);
+    $c_or_better = csv_to_array($GLOBALS["fp_system_settings"]["c_or_better"]);
+    $d_or_better = csv_to_array($GLOBALS["fp_system_settings"]["d_or_better"]);
+    $enrolled_grades = csv_to_array($GLOBALS["fp_system_settings"]["enrolled_grades"]);
 
     if ($course_req != null) {
       $min_grade = $course_req->min_grade;
@@ -1306,63 +1306,8 @@ class _Course
    */
   function get_term_description($bool_abbreviate = false)
   {
-    // Describe the term in plain english, for displays.
-    // Ex:  "Fall of 2002."
-    $rtn = "";
-
-    if (strstr($this->term_id, "1111"))
-    {
-      return "(data unavailable at this time)";
-    }
-
-    $year4 = trim(substr($this->term_id, 0, 4));
-    $year2 = trim(substr($this->term_id, 2, 2));
-    $ss = trim(substr($this->term_id, 4, strlen($this->term_id) - 4));
-    
-    $year4p1 = $year4 + 1;
-    $year4m1 = $year4 - 1;
-    
-    // left-pad these with 0's if needed.
-    $year2p1 = fp_number_pad($year2 + 1, 2);
-    $year2m1 = fp_number_pad($year2 - 1, 2);
-        
-    // Let's look at the term_idStructure setting and attempt to match
-    // what we have been supplied.
-    // We expect this structure to look something like:
-    // [Y4]60, Spring, Spring of [Y4], Spr '[Y2]
-    // [Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]
-    
-    $temp = $GLOBALS["fp_system_settings"]["term_idStructure"];
-    $structures = explode("\n", $temp);
-    
-    foreach ($structures as $structure) {      
-      // Perform the necessary replacement patterns on the structure.
-      $structure = str_replace("[Y4]", $year4, $structure);
-      $structure = str_replace("[Y2]", $year2, $structure);
-      $structure = str_replace("[Y4-1]", $year4m1, $structure);
-      $structure = str_replace("[Y2-1]", $year2m1, $structure);
-      $structure = str_replace("[Y4+1]", $year4p1, $structure);
-      $structure = str_replace("[Y2+1]", $year2p1, $structure);
-      
-      // Now, break up the structure to make it easier to work with.
-      $tokens = explode(",", $structure);
-      $term_def = trim($tokens[0]);
-      $full_description = trim($tokens[2]);
-      $abbr_description = trim($tokens[3]);
-      
-      // Does our term_id match the termDef?
-      if ($term_def == $this->term_id) {
-        if ($bool_abbreviate) {
-          return $abbr_description;
-        }
-        else {
-          return $full_description;
-        }
-      }
-      
-    }
-
-    return $rtn;
+    // Let's use the built-in FP function
+    return get_term_description($this->term_id, $bool_abbreviate);
   }
 
   /**
