@@ -12,14 +12,14 @@ function comments_menu() {
   $items["comments"] = array(
     "title" => "Comments",
     "page_callback" => "comments_display_main",
-    "access_callback" => TRUE,
+    "access_arguments" => array("view_comments"),
     "type" => MENU_TYPE_TAB,
     "tab_family" => "system",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
       "display_greeting" => TRUE,
     ),        
-    "weight" => 40,        
+    "weight" => 50,        
   );
 
   $items["comments/save-comment"] = array(
@@ -34,10 +34,55 @@ function comments_menu() {
     "type" => MENU_TYPE_CALLBACK,
   );
 
-  
+
+  $items["comments/popup-display-all-comments"] = array(
+    "title" => "Comments",
+    "page_callback" => "comments_popup_display_all_comments",
+    "access_arguments" => array("view_comments"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "bool_print" => TRUE,
+    ),   
+    "type" => MENU_TYPE_CALLBACK,
+  );     
+
+
+  $items["comments/popup-display-comment"] = array(
+    "title" => "Comment",
+    "page_callback" => "comments_popup_display_comment",
+    "access_arguments" => array("view_comments"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "bool_print" => TRUE,
+    ),   
+    "type" => MENU_TYPE_CALLBACK,
+  );     
   
   return $items;
 } 
+
+
+function comments_popup_display_comment() {
+  $rtn = "";
+  
+  fp_add_css(fp_get_module_path("comments") . "/css/comments.css");
+  
+  $id = $_REQUEST["id"];
+  
+  // Try to render this comment id.
+  $comment = comments_get_comment($id);
+  $rtn .= comments_render_comment($comment);
+      
+  return $rtn;
+}
+
+
+
+
 
 /**
  * "delete" a comment (actually, all we do is flag it as deleted)
@@ -123,7 +168,9 @@ function comments_display_main() {
     $rtn .= fp_render_c_fieldset($form, t("Click to enter comment"), true);
   }
     
-  $comments = comments_get_comments($current_student_id);
+  $access_type = (user_has_permission("view_faculty_comments")) ? "" : "public";
+    
+  $comments = comments_get_comments($current_student_id, FALSE, $access_type);
   //fpm($comments);
   foreach($comments as $comment) {
       
@@ -149,11 +196,45 @@ function comments_display_main() {
 }
 
 
+
+/**
+ * Displays all comments for a student in a popup window, meant for printing.
+ */
+function comments_popup_display_all_comments() {
+  global $current_student_id;  
+  $rtn = "";
+  
+  fp_add_css(fp_get_module_path("comments") . "/css/comments.css");
+  
+  $access_type = (user_has_permission("view_faculty_comments")) ? "" : "public";
+  
+  $comments = comments_get_comments($current_student_id, FALSE, $access_type);
+
+  foreach($comments as $comment) {    
+    $rtn .= comments_render_comment($comment, $delete_link);
+  }
+  
+  
+  return $rtn;
+}
+
+
+
+
 /**
  * Display the comment array in a pretty way.
  */
 function comments_render_comment($comment, $delete_link = "") {
   $rtn = "";
+
+  // Make sure the user has access to view it!
+  if (!user_has_permission("view_comments")) {
+    return "<p>" . t("Sorry, you do not have permission to view comments.") . "</p>";
+  }
+  if ($comment["access_type"] == "faculty" && !user_has_permission("view_faculty_comments")) {
+    return "<p>" . t("Sorry, but you do not have permission to view the requested comment (it is marked as faculty-only).") . "</p>";    
+  }
+
 
   $rtn .= "<div class='comment-comment comment-comment-" . $comment["access_type"] . "'>
               <div class='comment-by-line'>" .ucwords($comment["access_type"]) . " " . t("comment by") . " " . fp_get_faculty_name($comment["faculty_id"]) . "</div>
@@ -220,6 +301,14 @@ function comments_get_comment($comment_id) {
 function comments_perm() {
 
   return array(
+    "view_comments" => array(
+      "title" => t("Can view comments"),
+      "description" => t("The user may view comments (only public by default)."),
+    ),
+    "view_faculty_comments" => array(
+      "title" => t("View 'Faculty' comments"),
+      "description" => t("The user is allowed to view 'Faculty' comments."),
+    ),      
     "can_save_comments" => array(
       "title" => t("Can save comments"),
       "description" => t("The user may save new comments, visible to either everyone or only faculty/staff."),
@@ -231,6 +320,8 @@ function comments_perm() {
     ),
     
   );
+  
+  
   
 }
 

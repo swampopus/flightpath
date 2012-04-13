@@ -1,6 +1,14 @@
 FlightPath Changelog
 ====================
 
+2012-04-12
+  Laid the groundwork for the History tab.
+
+
+2012-04-11
+  Worked more on Admin, the variable system, and converting the concept of System variables
+  over to the variable system, to eliminate the extra "settings" tables which are unneeded.
+
 2012-04-01
   Created permissions page, where users can set which rolls have which permissions.
   

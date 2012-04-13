@@ -151,6 +151,10 @@ function get_term_description($term_id, $bool_abbreviate = false) {
       
     }
 
+    if (trim($rtn) == "") {
+      $rtn = t("Unknown term");
+    }
+
     return $rtn;
   }
 
@@ -299,6 +303,8 @@ function fp_get_faculty_name($faculty_id) {
   if (!$name) $name = "Unknown Advisor";
   return $name;
 }
+
+
 
 
 function db_query($query) {

@@ -1105,7 +1105,7 @@ class _DatabaseHandler
 	}
 		
 	
-	function get_student_major_from_d_b($student_id)
+	function get_student_major_from_db($student_id)
 	{
 		// Returns the student's major code from the DB.  Does not
 		// return the track code.

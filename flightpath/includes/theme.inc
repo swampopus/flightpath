@@ -66,6 +66,7 @@ function fp_display_page($page) {
   $screen->page_hide_report_error = $page["router_item"]["page_settings"]["page_hide_report_error"];
   $screen->page_is_popup = $page["router_item"]["page_settings"]["page_is_popup"];
   $screen->screen_mode = $page["router_item"]["page_settings"]["screen_mode"];
+  $screen->bool_print = $page["router_item"]["page_settings"]["bool_print"];
   
   if ($_REQUEST["scroll_top"] != "") {
     $screen->page_scroll_top = $_REQUEST["scroll_top"];    

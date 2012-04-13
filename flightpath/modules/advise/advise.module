@@ -18,6 +18,23 @@ function advise_menu() {
     "type" => MENU_TYPE_TAB,
   );
 
+
+  $items["history"] = array(
+    "title" => "History",
+    "page_callback" => "advise_display_history",
+    "access_callback" => TRUE,  
+    "tab_family" => "system",
+    "page_settings" => array (
+      "display_currently_advising" => TRUE,
+      "display_greeting" => TRUE,
+    ),    
+    "weight" => 40,
+    "type" => MENU_TYPE_TAB,
+    "file" => menu_get_module_path("advise") . "/advise.history.inc",
+  );
+
+
+
   $items["what-if"] = array(
     "title" => "What If?",
     "page_callback" => "advise_display_view",
@@ -28,7 +45,7 @@ function advise_menu() {
       "display_currently_advising" => TRUE,
       "display_greeting" => TRUE,
     ),    
-    "weight" => 50,
+    "weight" => 60,
     "type" => MENU_TYPE_TAB,
   );
 
@@ -42,6 +59,25 @@ function advise_menu() {
   
   
   // My popups....
+  
+
+  $items["advise/popup-display-summary"] = array(
+    "title" => "Advising Summary",
+    "page_callback" => "advise_popup_display_summary",
+    "access_callback" => "advise_user_can_view_advising_session_access_callback",
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "bool_print" => TRUE,
+    ),   
+    "type" => MENU_TYPE_CALLBACK,
+    "file" => menu_get_module_path("advise") . "/advise.history.inc",
+    
+  );     
+    
+  
+  
   
   $items["advise/popup-course-description"] = array(
     "title" => "Description",
@@ -142,6 +178,29 @@ function advise_menu() {
   return $items;
 }
 
+
+
+/**
+ * This is an access callback.  Can the user view the advising session specified
+ * in the REQUEST?
+ */
+function advise_user_can_view_advising_session_access_callback() {
+  global $user;
+     
+  if (user_has_permission("view_any_advising_session")) {
+    return TRUE;
+  }
+    
+  if (user_has_permission("view_own_advising_session")) {
+    // The user is only allowed to view their OWN advising sessions.
+    // So, make sure this advising session belongs to them!
+    $advising_session_id = $_REQUEST["advising_session_id"];
+    // TODO: make sure this belongs to $user->id;
+    return TRUE;
+  }
+  
+  return FALSE;
+}
 
 
 
@@ -320,6 +379,19 @@ function advise_display_popup_course_description() {
  */
 function advise_perm() {
   $perms = array();
+  
+  $perms["view_own_advising_session"] = array(
+    "title" => t("View own advising session"),
+    "description" => t("The user is allowed to view advising sessions for themselves.
+                        For example, the user is a student."),
+  );
+
+  $perms["view_any_advising_session"] = array(
+    "title" => t("View any advising session"),
+    "description" => t("The user is allowed to view any advising sessions for any user.
+                        For example, the user is an advisor."),
+  );
+
   
   $perms["can_advise_students"] = array(
     "title" => t("Can advise students"),

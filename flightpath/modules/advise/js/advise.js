@@ -638,7 +638,7 @@ function setVar(id, newValue) {
 ////////////////////////////////////////
 
 function popupWindowNew(url, extraVars) {
-  var my_windowx = window.open(url + "?window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars,
+  var my_windowx = window.open(url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars,
   "courseinfox" + FlightPath.settings.currentStudentId,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375");
 
   my_windowx.focus();  // make sure the popup window is on top.
@@ -646,7 +646,7 @@ function popupWindowNew(url, extraVars) {
 }
 
 function popupPrintWindow(url) {
-  var my_windowx2p = window.open(url + "&current_student_id=" + FlightPath.settings.currentStudentId,
+  var my_windowx2p = window.open(url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId,
   "courseinfoxprint" + FlightPath.settings.currentStudentId,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=700,height=500");
 
   my_windowx2p.focus();  // make sure the popup window is on top.
