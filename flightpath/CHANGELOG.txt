@@ -1,9 +1,11 @@
 FlightPath Changelog
 ====================
 
-2012-04-12
-  Laid the groundwork for the History tab.
+2012-04-13
+  Added ability to change tracks & terms on Degree Plans.
 
+2012-04-12
+  Finished the History tab
 
 2012-04-11
   Worked more on Admin, the variable system, and converting the concept of System variables

@@ -1510,7 +1510,7 @@ function draw_menu_items($menu_array) {
 	 *
 	 * @return string
 	 */
-	function display_change_term()
+	function z__display_change_term()
 	{
 		$pC = "";
 
@@ -1560,7 +1560,7 @@ function draw_menu_items($menu_array) {
 	 *
 	 * @return string
 	 */
-	function display_change_track()
+	function z__display_change_track()
 	{
 		// This displays the popup window which lets the user select a different
 		// track for their major.
@@ -1873,7 +1873,7 @@ function draw_menu_items($menu_array) {
 	 * 
 	 * @return string
 	 */
-	function draw_currently_advising_box($bool_hide_catalog_warning = false)
+	function z__draw_currently_advising_box($bool_hide_catalog_warning = false)
 	{
 		// This will draw the box which contains student information,
 		// like Name, Major, etc.
@@ -6874,7 +6874,7 @@ function draw_menu_items($menu_array) {
 			<input type='hidden' name='advising_view' id='advising_view' value='{$GLOBALS["fp_advising"]["advising_view"]}'>
 
 			<input type='hidden' name='current_student_id' id='current_student_id' value='{$GLOBALS["fp_advising"]["current_student_id"]}'>
-			<input type='hidden' name='logAddition' id='logAddition' value=''>
+			<input type='hidden' name='log_addition' id='log_addition' value=''>
 			
 			<input type='hidden' name='fp_update_user_settings_flag' id='fp_update_user_settings_flag' value=''>
 			

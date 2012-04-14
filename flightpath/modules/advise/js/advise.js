@@ -13,13 +13,14 @@ function changeTerm(term_id) {
   submitForm(true);
 }
 
+
 function changeView(view) {
   document.getElementById("advising_view").value = view;
   
   submitForm(true);
 }
 
-function popupChangeTrack(track_code) {
+function z__popupChangeTrack(track_code) {
   var x = confirm("Are you sure you wish to change degree options?");
   if (x) {
     opener.changeTrack(track_code);
@@ -27,8 +28,8 @@ function popupChangeTrack(track_code) {
   }
 }
 
-function popupChangeWhatIfTrack(track_code) {
-  var x = confirm("Are you sure you wish to change degree options?");
+function popupChangeWhatIfTrack(track_code, question) {
+  var x = confirm(question);
   if (x) {
     opener.document.getElementById("what_if_track_code").value = track_code;
     opener.document.getElementById("load_from_cache").value = "no";

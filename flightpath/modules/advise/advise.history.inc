@@ -23,7 +23,48 @@ function advise_display_history() {
   $rtn .= "<table class='fp-semester-table'>";
 
  
-  // TODO:  If coming here from a save, display info here.
+  // If coming here from a save, display info here.
+  if ($_REQUEST["adv_id_array_serialized"] != "") {
+    $click_links = "";
+    $advising_session_id_array = unserialize($_REQUEST["adv_id_array_serialized"]);
+
+    foreach($advising_session_id_array as $term_id=>$value) {
+      $aid = $advising_session_id_array[$term_id];
+      if ($aid != "")
+      {
+        $term_name = get_term_description($term_id);
+        $click_links .= "<li>
+                <a href='javascript: popupPrintWindow(\"" . base_path() . "/advise/popup-display-summary&advising_session_id=$aid\");'>
+                <img src='" . fp_theme_location() . "/images/popup.gif' border='0'>
+                $term_name</a>";
+
+      }
+    }
+
+
+    // onClick='popup_print_window(\"advise.php?window_mode=summary&advising_session_id=ADVID\");'
+    $rtn .= "
+        <tr>
+          <td colspan='2' width='100%'>
+          
+        <div class='hypo' 
+        align='left' style='border: 1px solid black;
+              margin: 10px 0px 10px 0px; padding: 10px; 
+              font-size: 12pt; font-weight: bold;'>
+        " . t("You have successfully advised") . " " . $db->get_student_name($student_id) . " ($student_id).
+        <br><span style='color: blue;'>" . t("Click 
+         to view a pop-up printable summary for:") . " 
+         <ul style='margin-top: 5px; margin-bottom: 5px;'>
+        $click_links
+        </ul></span></div>
+        
+        </td>
+        </tr>
+    ";
+
+  }
+    
+
    
 
 

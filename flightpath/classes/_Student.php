@@ -526,12 +526,13 @@ class _Student
 	 *	 
 	 */
 	function get_rank_description($rank_code = "") {
+	  // TODO:  Maybe this should be a setting somewhere instead of hard-coded?
     $rank_array = array(
-      "FR"=>"_freshman", 
-      "SO"=>"_sophomore",
-      "JR"=>"_junior", 
-      "SR"=>"_senior", 
-      "PR"=>"_professional"
+      "FR"=>t("Freshman"), 
+      "SO"=>t("Sophomore"),
+      "JR"=>t("Junior"), 
+      "SR"=>t("Senior"), 
+      "PR"=>t("Professional"),
     );	  
     
     return $rank_array[$rank_code];

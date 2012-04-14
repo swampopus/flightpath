@@ -792,6 +792,23 @@ function fp_get_js_prompt_link($question, $default, $action_if_yes, $link_text) 
 
 
 /**
+ * Does the user have the specified role?
+ */
+function user_has_role($roll, $faculty_if = "") {
+  global $user;
+  
+  // Admin always = TRUE
+  if (in_array("administrator", $user->rolls)) return TRUE;
+  
+  // Check for other users...
+  if (in_array($roll, $user->rolls)) return TRUE;
+  
+  return FALSE;
+  
+}
+
+
+/**
  * Returns TRUE or FALSE if the logged in user has access based on the
  * permission supplied.
  *

@@ -12,6 +12,11 @@ function convert_html_to_bbcode($str) {
   return $str;
 }
 
+// TODO: implement this!
+function convert_bbcode_to_html($str) {
+  return $str;
+}
+
 
 /**
  * Render a "menu" block of menu items which are all rooted at the menu_root.
@@ -380,11 +385,11 @@ function fp_build_tab_array($page) {
     && user_has_permission("can_advise_students"))
     {
       $t_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
-      $for_term = " for " . get_term_description($t_term_id);
+      $for_term = " " . t("for") . " " . get_term_description($t_term_id);
 
       // If this is an advisor or above
       $for_term .= "<span style='font-size: 8pt; font-weight:normal;'>
-             - <a href='javascript: popupWindow(\"changeTerm\",\"advising_term_id=$t_term_id\");' style='color:blue; background-color: white; border: 1px solid black; padding-left: 3px; padding-right: 3px;'>change<img src='fp_theme_location()/images/calendar1.jpg' height='13' border='0' style='vertical-align: bottom;'></a>
+             - <a href='javascript: popupWindow2(\"" . base_path() . "/advise/popup-change-term\",\"advising_term_id=$t_term_id\");' style='color:blue; background-color: white; border: 1px solid black; padding-left: 3px; padding-right: 3px;'>" . t("change") . "<img src='" . fp_theme_location() . "/images/calendar1.jpg' height='13' border='0' style='vertical-align: bottom;'></a>
             </span>";
 
 
@@ -393,26 +398,26 @@ function fp_build_tab_array($page) {
     // TODO:  bool_blank? bool_print?
     if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes" && !$bool_blank)
     {
-      $whatif = " (in \"What If\" mode) ";
+      $whatif = " (" . t("in \"What If\" mode") . ") ";
       $hypoclass = "hypo";
       // latest cat year because its what if.
       $student->catalog_year = $settings["current_catalog_year"];
       if ($bool_print != true) {
         $what_if_select = "<div class='tenpt'><b>
-          " . l("Change What If Settings", "what-if", "advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&current_student_id=$current_student_id") . "
+          " . l(t("Change What If Settings"), "what-if", "advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&current_student_id=$current_student_id") . "
           </b></div>";
       }
     }
 
-    $ca = "Currently Advising";
+    $ca = t("Currently Advising");
     // TODO:  should be based on roles instead of type
     if ($_SESSION["fp_user_type"] == "student" || $_SESSION["fp_user_type"] == "viewer")
     {
-      $ca = "Student Details";
+      $ca = t("Student Details");
     }
 
     if ($bool_blank == true) {
-      $ca = "Viewing Blank Degree Plan";
+      $ca = t("Viewing Blank Degree Plan");
     }
 
     
@@ -462,10 +467,10 @@ function fp_build_tab_array($page) {
     }
 
     if (!$bool_blank) {
-      array_push($display_array, "Name: ~~ " . $student->name);
-      array_push($display_array, "CWID: ~~ " . $student->student_id);
+      array_push($display_array, t("Name:") . " ~~ " . $student->name);
+      array_push($display_array, t("CWID:") . " ~~ " . $student->student_id);
     }
-    array_push($display_array, "Major: ~~ " . $degree_title);
+    array_push($display_array, t("Major:") . " ~~ " . $degree_title);
     // If this degree has tracks, we must display something about it here.
 
     if ($degree_plan->bool_has_tracks)
@@ -479,14 +484,14 @@ function fp_build_tab_array($page) {
       $extra_vars .= "&advising_what_if=yes";
       }*/
       
-      $op_link = "<a href='javascript: popupWindow(\"changeTrack\",\"$extra_vars\");'><img
-              src='fp_theme_location()/images/popup.gif' border='0' 
-              title='Click to change degree options.'></a>";
-      $op_text = "Click to select: $op_link";
+      $op_link = "<a href='javascript: popupWindow2(\"" . base_path() . "/advise/popup-change-track\",\"$extra_vars\");'><img
+              src='" . fp_theme_location() . "/images/popup.gif' border='0' 
+              title='" . t("Click to change degree options.") . "'></a>";
+      $op_text = t("Click to select:") . " $op_link";
 
       if ($screen_mode == "not_advising")
       {
-        $op_text = "None selected";
+        $op_text = t("None selected");
         $op_link = "";
       }
 
@@ -497,7 +502,7 @@ function fp_build_tab_array($page) {
           // In other words, we do not have permission to advise,
           // and we are not in whatIf, so take out the link.
           $op_link = "";
-          $op_text = "None selected";
+          $op_text = t("None selected");
 
         }
       }
@@ -510,14 +515,14 @@ function fp_build_tab_array($page) {
       }
 
 
-      array_push($display_array, "Option: ~~ " . $op_text);
+      array_push($display_array, t("Option:") . " ~~ " . $op_text);
     }
     if (!$bool_blank) {
-      array_push($display_array, "Rank: ~~ " . $student->rank);
+      array_push($display_array, t("Rank:") . " ~~ " . $student->rank);
     }
-    array_push($display_array, "Catalog Year: ~~ " . $cat_year);
+    array_push($display_array, t("Catalog Year:") . " ~~ " . $cat_year);
     if (!$bool_blank) {
-      array_push($display_array, "Cumulative: ~~ " . $student->cumulative_hours . " hrs. &nbsp;" . $student->gpa . " GPA");
+      array_push($display_array, t("Cumulative:") . " ~~ " . $student->cumulative_hours . " " . t("hrs") . ". &nbsp;" . $student->gpa . " " . t("GPA"));
     }
 
     if ($student->student_id > 1 || $bool_blank == true)

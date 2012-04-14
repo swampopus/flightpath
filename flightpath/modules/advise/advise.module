@@ -77,7 +77,30 @@ function advise_menu() {
   );     
     
   
+  $items["advise/popup-change-term"] = array(
+    "title" => "Change advising term",
+    "page_callback" => "advise_display_popup_change_term",
+    "access_arguments" => array("can_advise_students"),
+    "page_settings" => array(
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),
+    "type" => MENU_TYPE_CALLBACK,
+  );
   
+  $items["advise/popup-change-track"] = array(
+    "title" => "Change advising track",
+    "page_callback" => "advise_display_popup_change_track",
+    "access_callback" => "user_has_role",
+    "access_arguments" => array("authenticated user"),
+    "page_settings" => array(
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),
+    "type" => MENU_TYPE_CALLBACK,
+  );
+  
+      
   
   $items["advise/popup-course-description"] = array(
     "title" => "Description",
@@ -89,7 +112,7 @@ function advise_menu() {
     ),
     "weight" => 10,    
   );
-
+  
   
   $items["advise/popup-substitute-selected"] = array(
     "title" => "Substitute",
@@ -177,6 +200,161 @@ function advise_menu() {
   
   return $items;
 }
+
+
+
+/**
+ * Lets the user change the track for this major.
+ */
+function advise_display_popup_change_track() {
+  global $degree_plan, $student;
+  $rtn = "";
+  
+  advise_init_screen();
+  
+  fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
+  
+  
+
+  $degree_plan->load_descriptive_data();
+  $rtn .= fp_render_curved_line(t("Select a Degree Option"));
+  $rtn .= "<div class='tenpt'>
+      " . t("This major has one or more degree options, which affects which courses are required. 
+      Please select a degree option (or track) from the list below.") . "
+      <br><br>
+      " . t("If you are unsure of what to do, simply close this window.");
+
+  $rtn .= "<br><br><b>" . $degree_plan->title . "</b> " . t("degree options:") . "</div><!--DEFAULT-->
+      <ul>";
+
+  // Get the list of available tracks for this student.
+  if (!$tracks = $degree_plan->get_available_tracks())
+  {
+    $rtn .= "<li>" . t("This major has no degree options.") . "</li>";
+  }
+
+  // Is there a "default" message for all tracks, which will override
+  // any other track descriptions?
+  // We need to look through all the tracks for the
+  // characters:  "DEFAULT:"
+  // If we find this, then this is the default description
+  // which applies to all the tracks, and it should be displayed
+  // at the top.
+  $bool_default_description = false;
+  for ($t = 0; $t < count($tracks); $t++)
+  {
+    $temp = explode(" ~~ ", $tracks[$t]);
+    $track_code = trim($temp[0]);
+    $track_title = trim($temp[1]);
+    $track_description = trim($temp[2]);
+
+    if (strstr($track_description, "DEFAULT:")) {
+      // Yes!  We found a default message.
+      $bool_default_description = true;
+      $track_description = $this->convert_bbcode_to_html(trim(str_replace("DEFAULT:", "", $track_description)));
+      $track_description = "<div style='padding-top: 10px;' class='tenpt'>$track_description</div>";
+      $rtn = str_replace("<!--DEFAULT-->",$track_description, $rtn);
+      break;
+    }
+
+  }
+
+
+  for ($t = 0; $t < count($tracks); $t++)
+  {
+    $temp = explode(" ~~ ", $tracks[$t]);
+    $track_code = trim($temp[0]);
+    $track_title = trim($temp[1]);
+    $track_description = "";
+
+    // If this is the current track_code, mark it as such.
+    if ($student->array_settings["track_code"] == $track_code
+    && $student->array_settings["major_code"] == $degree_plan->major_code)
+    {
+      $track_title .= " <b>(" . t("current") . ")</b>";
+    }
+
+    if ($bool_default_description == false)
+    {
+      $track_description = convert_bbcode_to_html(trim($temp[2]));
+      if ($track_description != "")
+      {
+        $track_description = " - $track_description";
+      }
+    }
+
+    $temp_tc = $track_code;
+    if ($temp_tc == "")
+    {
+      $temp_tc = "none";
+    }
+
+
+    $link = fp_get_js_confirm_link(t("Are you sure you wish to change degree options?"), "opener.changeTrack(\"$temp_tc\"); window.close(); ", $track_title);
+    
+    if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
+      $link = "<a href='javascript: popupChangeWhatIfTrack(\"$temp_tc\", \"" . t("Are you sure you wish to change degree options?") . "\");'>$track_title</a>";      
+    }
+
+    $rtn .= "<li class='tenpt' style='padding:3px;'>
+        $link $track_description</li>";
+
+  }
+
+  $rtn .= "</ul>";    
+
+
+  
+  return $rtn;
+}
+
+
+
+/**
+ * This popup allows the advisor to change the advising term.
+ */
+function advise_display_popup_change_term() {
+  $rtn = "";
+  
+  fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
+  
+  $current_term_id = $_REQUEST["advising_term_id"];
+  $current_term = get_term_description($current_term_id);
+  
+
+  $rtn .= fp_render_curved_line(t("Select an Advising Term"));
+  $rtn .= "<div>
+      " . t("You may advise this student for future semesters.  Please select which
+      advising term you would like to advise for from the list below.  If you
+      are unsure, simply close this window and continue to advise for the current
+      term of %current_term.", array("%current_term" => $current_term)) . "
+      </div>";
+
+  $rtn .= "<ul>";
+
+  $temp = explode(",", variable_get("available_advising_term_ids", "0"));
+  for ($t = 0; $t < count($temp); $t++) {
+    $term_id = trim($temp[$t]);
+
+    
+    $term_desc = get_term_description($term_id);
+    if ($term_id == $current_term_id) {
+      $term_desc = "<b>$term_desc</b> - " . t("current");
+    }
+
+    $link = fp_get_js_confirm_link(t("Are you sure you wish to change advising terms?"), "opener.changeTerm(\"$term_id\"); window.close(); ", $term_desc);
+
+    $rtn .= "<li class='tenpt' style='padding:3px;'>$link</li>";
+
+  }
+
+  $rtn .= "</ul>";    
+  
+  
+  return $rtn;
+}
+
+
 
 
 
@@ -598,7 +776,7 @@ function advise_display_what_if_selection($bool_undergrad_only = TRUE) {
 /**
  * Load from our advising_session_variables and return the vars array.
  */
-function advise_load_advising_variables_from_db($student_id, $faculty_id) {
+function z__advise_load_advising_variables_from_db($student_id, $faculty_id) {
   $res = db_query("SELECT vars FROM advising_session_variables
                     WHERE faculty_id = '?'
                     AND student_id = '?'
@@ -628,8 +806,8 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   global $user;
   
   // begin by loading what we already have in the db.
-  $vars = advise_load_advising_variables_from_db($_REQUEST["current_student_id"], $user->id);
-    
+  //$vars = advise_load_advising_variables_from_db($_REQUEST["current_student_id"], $user->id);
+  $vars = array();
 
   // The current student ID is what we append to all session variables
   // dealing with the current student.  We do this so that we will
@@ -889,7 +1067,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
  * This function takes various variables from the REQUEST and stores them
  * in our advising_session_variables table for more convenient use later on.
  */
-function advise_save_advising_variables_to_db($bool_ignore_what_if_variables = FALSE) {
+function z__advise_save_advising_variables_to_db($bool_ignore_what_if_variables = FALSE) {
   global $user;
   
   // begin by loading what we already have in the db.
@@ -1543,11 +1721,13 @@ function advise_init_screen() {
   if ($perform_action == "save_active") {
     // Save, then go to the history screen.
     $adv_id_array = $fp->save_advising_session_from_post(0,false);
-        fpm("saved active");
-    // TODO: Use an fp_goto command here to go to the History screen
-    
-    //display_advisee_history(true, $adv_id_array);
-    //die;
+    // Use an fp_goto command here to go to the History screen
+    // Serialize the adv_id_array so we can send it along in our fp_goto command...
+    $adv_id_serialized = serialize($adv_id_array);
+
+    fp_goto("history", "adv_id_array_serialized=" . urlencode($adv_id_serialized));
+    return;
+            
   }
 
 
