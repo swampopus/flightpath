@@ -426,7 +426,7 @@ function draw_menu_items($menu_array) {
 	 *
 	 * @return string
 	 */
-	function display_greeting()
+	function z__display_greeting()
 	{
 		// Displays the greeting message & log off link at the top of the page.
 		// Also displays the urgentMsg, if it exists.
@@ -627,7 +627,7 @@ function draw_menu_items($menu_array) {
 	{
 
 		$pC = "";
-		$pC .= $this->draw_semester_box_top("Excess Credits");
+		$pC .= $this->draw_semester_box_top(t("Excess Credits"));
 		$is_empty = true;
 
 		// Basically, go through all the courses the student has taken,
@@ -681,16 +681,16 @@ function draw_menu_items($menu_array) {
 
 		$pC = "";
 		$is_empty = true;
-		$pC .= $this->draw_semester_box_top("Footnotes & Messages", true);
+		$pC .= $this->draw_semester_box_top(t("Footnotes & Messages"), true);
 
 		$pC .= "<tr><td colspan='8' class='tenpt'>
 					";
 		$fn_type_array = array("substitution","transfer");
-		$fn_char = array("substitution"=>"S", "transfer"=>"T");
-		$fn_name = array("substitution"=>"Substitutions", 
-		                "transfer"=>"Transfer Equivalency Footnotes");
-		$fn_between = array("substitution"=>"for",
-		                   "transfer"=>"for {$GLOBALS["fp_system_settings"]["school_initials"]}'s");
+		$fn_char = array("substitution" => "S", "transfer"=>"T");
+		$fn_name = array("substitution" => t("Substitutions"), 
+		                "transfer" => t("Transfer Equivalency Footnotes"));
+		$fn_between = array("substitution" => t("for"),
+		                   "transfer" => t("for") . " {$GLOBALS["fp_system_settings"]["school_initials"]}'s");
 		for ($xx = 0; $xx <= 1; $xx++)
 		{
 			$fn_type = $fn_type_array[$xx];
@@ -730,12 +730,12 @@ function draw_menu_items($menu_array) {
 					$new_group = new Group();
 					$new_group->group_id = $in_group;
 					$new_group->load_descriptive_data();
-					$extra = "<div style='padding-left:45px;'><i>in $new_group->title.</i></div>";
+					$extra = "<div style='padding-left:45px;'><i>" . t("in") . " $new_group->title.</i></div>";
 					if ($new_course == $o_course || $o_course == "")
 					{
-						$o_course = "was added";
+						$o_course = t("was added");
 						$fbetween = "";
-						$extra = str_replace("<i>in", "<i>to", $extra);
+						$extra = str_replace("<i>" . t("in"), "<i>" . t("to"), $extra);
 					}
 				}
 
@@ -771,7 +771,7 @@ function draw_menu_items($menu_array) {
 			$l_term = $c->get_term_description(true);
 
 			$pC .= "<div class='tenpt' style='padding-left: 10px; padding-bottom: 5px;'>
-							$l_s_i $l_c_n ($c->hours_awarded hrs) - $c->grade - $l_term
+							$l_s_i $l_c_n ($c->hours_awarded " . t("hrs") . ") - $c->grade - $l_term
 								";
 			
 			$c->group_list_unassigned->reset_counter();
@@ -784,10 +784,9 @@ function draw_menu_items($menu_array) {
 				{
 					$group_title = "<i>$group->title</i>";
 				} else {
-					$group_title = "the degree plan";
+					$group_title = t("the degree plan");
 				}
-				$pC .= "was removed from $group_title.
-							";
+				$pC .= t("was removed from") . " $group_title.";
 			}
 
 
@@ -802,9 +801,9 @@ function draw_menu_items($menu_array) {
 		{
 			$mtitle = "<div style='padding-bottom: 10px;'>
 						<div style='padding-bottom: 5px;'>
-						<b>Moved Courses</b><br>
-				Some courses have been moved out of their 
-				original positions on your degree plan.</div>";
+						<b>" . t("Moved Courses") . "</b><br>
+				" . t("Some courses have been moved out of their 
+				original positions on your degree plan.") . "</div>";
 			$pC = str_replace("<!--MOVEDCOURSES-->",$mtitle,$pC);
 			$pC .= "</div>";
 		}
@@ -1053,7 +1052,7 @@ function draw_menu_items($menu_array) {
 	 *
 	 * @return string
 	 */
-	function display_what_if_selection($bool_undergrad_only = TRUE)
+	function z__display_what_if_selection($bool_undergrad_only = TRUE)
 	{
 		$pC = "";
 
@@ -1380,7 +1379,7 @@ function draw_menu_items($menu_array) {
 		$top_scores = array();
 
 		$pC = "";
-		$pC .= $this->draw_semester_box_top("Test Scores", true);
+		$pC .= $this->draw_semester_box_top(t("Test Scores"), true);
 
 		$pC .= "<tr><td colspan='8' class='tenpt'>
 					<!--TOP_ACT_SCORES-->
@@ -1389,7 +1388,7 @@ function draw_menu_items($menu_array) {
 				onClick='document.getElementById(\"testscores\").style.display=\"\"; this.style.display=\"none\"; '
 				class='hand' style='color: blue;'
 				>
-						Click to view all available scores.
+						" . t("Click to view all available scores.") . "
 						<br><br>
 						</span>
 				
@@ -1438,7 +1437,7 @@ function draw_menu_items($menu_array) {
 		<span
 				onClick='document.getElementById(\"viewscorelink\").style.display=\"\"; document.getElementById(\"testscores\").style.display=\"none\"; '
 				class='hand' style='color: blue;'>
-						Click to hide scores.
+						" . t("Click to hide scores.") . "
 						
 						</span>
 				</span></td></tr>";
@@ -1719,7 +1718,7 @@ function draw_menu_items($menu_array) {
 		$pC .= "<table border='0' width='100%'  height='100' class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
  						<tr>
   							<td class='blueTitle' align='center' height='20'>
-    				" . $this->draw_square_title($title) . "
+    				" . fp_render_square_line($title) . "
   							</td>
  						</tr>
  						<tr>
@@ -1730,9 +1729,9 @@ function draw_menu_items($menu_array) {
  									<img src='$google_chart_url'>
  								</td>
  								<td class='elevenpt'>
- 								    <span style='color: blue;'>$val% Complete</span><br>
+ 								    <span style='color: blue;'>$val% " . t("Complete") . "</span><br>
  								    ( <span style='color: blue;'>$top_value</span>
- 									 / <span style='color: gray;'>$bottom_value hours</span> )
+ 									 / <span style='color: gray;'>$bottom_value " . t("hours") . "</span> )
 								</td>
 								</table>
  							</td>
@@ -1793,15 +1792,15 @@ function draw_menu_items($menu_array) {
 				<div style='margin-bottom: 10px;'>
 				<table width='100%' cellspacing='0' cellpadding='0' border='0'>
 				<td width='33%' style='padding-right:5px;'>
-					" . $this->draw_pie_chart_box("Progress - Core Courses",$fulfilled_core_hours, $total_core_hours, "core") . "
+					" . $this->draw_pie_chart_box(t("Progress - Core Courses"),$fulfilled_core_hours, $total_core_hours, "core") . "
 				</td>
 				
 				<td width='33%' style='padding-right: 5px;'>
-					" . $this->draw_pie_chart_box("Progress - Major Courses",$fulfilled_major_hours, $total_major_hours, "major") . "
+					" . $this->draw_pie_chart_box(t("Progress - Major Courses"),$fulfilled_major_hours, $total_major_hours, "major") . "
 				</td>
 				
 				<td width='33%'>
-					" . $this->draw_pie_chart_box("Progress - Degree",$fulfilled_degree_hours, $total_degree_hours, "cumulative") . "
+					" . $this->draw_pie_chart_box(t("Progress - Degree"),$fulfilled_degree_hours, $total_degree_hours, "cumulative") . "
 				</td>
 				
 
@@ -1812,7 +1811,7 @@ function draw_menu_items($menu_array) {
 			$pC .= "
 				
 				<div style='font-size: 8pt; text-align:right;'>
-					<a href='javascript:hideShowCharts(\"hide\");'>hide charts</a>
+					<a href='javascript:hideShowCharts(\"hide\");'>" . t("hide charts") . "</a>
 				</div>";
 
 			$pC .= "
@@ -1823,18 +1822,18 @@ function draw_menu_items($menu_array) {
  			<table border='0' width='100%'  class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
  			<tr>
   				<td colspan='4' class='blueTitle' align='center' height='20'>
-    			" . $this->draw_square_title("_progress") . "
+    			" . fp_render_square_line(t("Progress")) . "
   				</td>
  			</tr>
  			<tr>
  				<td class='tenpt' width='33%' align='center'>
- 					Core: $fulfilled_core_hours / $total_core_hours
+ 					" . t("Core:") . " $fulfilled_core_hours / $total_core_hours
  				</td>
  				<td class='tenpt' width='33%' align='center'>
- 					Major: $fulfilled_major_hours / $total_major_hours
+ 					" . t("Major:") . " $fulfilled_major_hours / $total_major_hours
  				</td>
  				<td class='tenpt' width='33%' align='center'>
- 					Degree: $fulfilled_degree_hours / $total_degree_hours
+ 					" . t("Degree:") . " $fulfilled_degree_hours / $total_degree_hours
  				</td>
  				
  			</tr>
@@ -1846,7 +1845,7 @@ function draw_menu_items($menu_array) {
 			{
 
 				$pC .= "<div style='font-size: 8pt; text-align:right;'>
-					<a href='javascript:hideShowCharts(\"show\");'>show charts</a>
+					<a href='javascript:hideShowCharts(\"show\");'>" . t("show charts") . "</a>
 				</div>
 					";
 			} else {
@@ -2158,7 +2157,7 @@ function draw_menu_items($menu_array) {
 	 * @param string $title
 	 * @return string
 	 */
-	function draw_square_title($title)
+	function z__draw_square_title($title)
 	{
 		$pC = "";
 
@@ -2538,7 +2537,7 @@ function draw_menu_items($menu_array) {
 			$pC .= $this->box_array[$t];
 			$pC .= "</td>";
 			
-			if ($this->page_is_mobile) {
+			if (fp_screen_is_mobile()) {
 			 // If we are on a mobile device, force it to use
 			 // only one column. 
 			 $this->is_on_left = false;
@@ -2564,13 +2563,13 @@ function draw_menu_items($menu_array) {
       
 			  $pC .= "<tr>";
 			  
-        if (!$this->page_is_mobile) {
+        if (!fp_screen_is_mobile()) {
           $pC .= "<td>&nbsp;</td>";
         }
 			  
 				$pC .= "<td align='center'>
 						<div class='tenpt' style='margin-top:35px; margin-bottom:10px; padding: 10px; width: 200px;'>
-						" . $this->draw_button("Submit","submitSaveActive();") . "					
+						" . fp_render_button(t("Submit"),"submitSaveActive();") . "					
 						</div>
 						</td></tr>
 						";		
@@ -2628,7 +2627,7 @@ function draw_menu_items($menu_array) {
 	 *
 	 * @return string
 	 */
-	function display_begin_semester_table()
+	function z__display_begin_semester_table()
 	{
 		// Return the HTML that starts off the "semester table"
 		// in the middle of the page.  Ie, it should look like
@@ -2679,7 +2678,7 @@ function draw_menu_items($menu_array) {
 	 * @param bool $bool_from_what_if
 	 * @param bool $bool_warn_change
 	 */
-	function build_system_tabs($active_tab_number = 0, $bool_save_draft = false, $bool_from_what_if = false, $bool_warn_change = false)
+	function z__build_system_tabs($active_tab_number = 0, $bool_save_draft = false, $bool_from_what_if = false, $bool_warn_change = false)
 	{
 		// assemble the page_tabs...
 		$this->page_tabs = $this->draw_system_tabs($active_tab_number, $bool_save_draft, $bool_from_what_if, $bool_warn_change);
@@ -2805,7 +2804,7 @@ function draw_menu_items($menu_array) {
 	 *
 	 * @return string
 	 */	
-	function display_view_options()
+	function z__display_view_options()
 	{
 		// Draw the available views the user may select from.
 		$pC = "";
@@ -2991,7 +2990,7 @@ function draw_menu_items($menu_array) {
 	 * 
 	 * @return string
 	 */
-	function draw_tabs($tab_array)
+	function z__draw_tabs($tab_array)
 	{
 		// This function will return the HTML to draw out
 		// page tabs.  It assumes the tabArray is setup thusly:
@@ -3146,9 +3145,9 @@ function draw_menu_items($menu_array) {
 		if ($course == null)
 		{
 			// No course available!
-			$pC .= $this->draw_curved_title("_description");
-			$pC .= "<div class='tenpt'>No course was selected.  Please
-					click the Select tab at the top of the screen.
+			$pC .= fp_render_curved_line(t("Description"));
+			$pC .= "<div class='tenpt'>" . t("No course was selected.  Please
+					click the Select tab at the top of the screen.") . "
 					</div>";
 			return $pC;
 		}
@@ -3191,7 +3190,7 @@ function draw_menu_items($menu_array) {
 
     $initials = $GLOBALS["fp_system_settings"]["school_initials"];
 		
-		$pC .= $this->draw_curved_title("$course->subject_id $course->course_num$other_valid_names <!--EQV1-->");
+		$pC .= fp_render_curved_line("$course->subject_id $course->course_num$other_valid_names <!--EQV1-->");
 		$bool_transferEqv = true;
 		if ($course->bool_transfer)
 		{
@@ -3209,19 +3208,18 @@ function draw_menu_items($menu_array) {
 			$course->course_transfer->title = strtoupper($course->course_transfer->title);
 
 			$pC .= "<div style='margin-top: 13px;' class='tenpt'>
-				<b>Transfer Credit Information:</b><br>
+				<b>" . t("Transfer Credit Information:") . "</b><br>
 				<div style='margin-left: 20px;' class='tenpt'>
-					Course: " . $course->course_transfer->subject_id . " " . $course->course_transfer->course_num . " 
+					" . t("Course:") . " " . $course->course_transfer->subject_id . " " . $course->course_transfer->course_num . " 
 					- " . $course->course_transfer->title . " ($hrs hrs)<br>
-					Institution: " . $this->fix_institution_name($course->course_transfer->institution_name) . "<br>
-					Term: " . $course->get_term_description() . "<br>
+					" . t("Institution:") . " " . $this->fix_institution_name($course->course_transfer->institution_name) . "<br>
+					" . t("Term:") . " " . $course->get_term_description() . "<br>
 					<!-- Grade: " . $course->grade . "<br> -->
 					";
 
 			$transfer_eqv_text = $course->course_transfer->transfer_eqv_text;
-			if ($transfer_eqv_text == "")
-			{
-				$transfer_eqv_text = "Not entered or not applicable.";
+			if ($transfer_eqv_text == "") {
+				$transfer_eqv_text = t("Not entered or not applicable.");
 				$bool_transferEqv = false;
 			}
 
@@ -3240,7 +3238,7 @@ function draw_menu_items($menu_array) {
 		  $use_hours = $course_hours;
 			if ($course->bool_transfer)
 			{
-				$pC .= "<b>$initials Equivalent Course Information:</b><br>
+				$pC .= "<b>$initials " . t("Equivalent Course Information:") . "</b><br>
 						<b>$course->subject_id $course->course_num</b> - ";
 				$new_course = new Course();
 				$new_course->course_id = $course->course_id;
@@ -3248,12 +3246,12 @@ function draw_menu_items($menu_array) {
 				$use_hours = $new_course->get_catalog_hours();
 			}
 			$pC .= "
-					<b>$course->title ($use_hours hrs)</b>";
+					<b>$course->title ($use_hours " . t("hrs") . ")</b>";
 		}
 		if ($course->bool_substitution_new_from_split || $course->bool_substitution_split)
 		{
 			$pC .= "<div class='tenpt' style='margin-bottom:5px;'>
-						<i>This course's hours were split in a substitution.</i> 
+						<i>" . t("This course's hours were split in a substitution.") . "</i> 
 						<a href='javascript: alertSplitSub();'>?</a>
 					</div>";
 		}
@@ -3281,19 +3279,19 @@ function draw_menu_items($menu_array) {
 
 			$pC .= $this->fix_institution_name($course->course_transfer->institution_name) . "</i>.";
 			*/
-			$pC = str_replace("<!--EQV1-->"," (Transfer Credit)",$pC);
+			$pC = str_replace("<!--EQV1-->"," (" . t("Transfer Credit") . ")",$pC);
 			if (!$bool_transferEqv)
 			{
-				$t_msg = "This course does not have an assigned $initials equivalency, or the equivalency
+				$t_msg = t("This course does not have an assigned @initials equivalency, or the equivalency
 							has been removed for this student.
-						Ask your advisor if this course will count towards your degree.
+						Ask your advisor if this course will count towards your degree.", array("@initials" => $initials)) . "
 					</div>"; 
 			} else {
-				$t_msg = "FlightPath cannot assign this course to a $initials equivalency on
+				$t_msg = t("FlightPath cannot assign this course to a @initials equivalency on
 							the student's degree plan, 
 							or the equivalency
 							has been removed for this student.
-						Ask your advisor if this course will count towards your degree.
+						Ask your advisor if this course will count towards your degree.", array("@initials" => $initials)) . "
 					</div>"; 				
 			}
 
@@ -3312,7 +3310,7 @@ function draw_menu_items($menu_array) {
 			// Replace the temporary comment <!--EQV1--> in the header with
 			// the new eqv information.
 			*/
-			$pC = str_replace("<!--EQV1-->"," (Transfer Credit $t_s_i $t_c_n)",$pC);
+			$pC = str_replace("<!--EQV1-->"," (" . t("Transfer Credit") . " $t_s_i $t_c_n)",$pC);
 			/*			$pC .= $this->fix_institution_name($course->course_transfer->institution_name);
 			$pC .= "</i>.";
 			*/
@@ -3320,8 +3318,8 @@ function draw_menu_items($menu_array) {
 			if (user_has_permission("can_substitute"))
 			{
 				$pC .= "<div align='left' class='tenpt'>
-					<b>Special administrative function:</b>
-						<a href='javascript: popupUnassignTransferEqv(\"" . $course->course_transfer->course_id . "\");'>Remove this equivalency?</a></div>";
+					<b>" . t("Special administrative function:") . "</b>
+						<a href='javascript: popupUnassignTransferEqv(\"" . $course->course_transfer->course_id . "\");'>" . t("Remove this equivalency?") . "</a></div>";
 				$pC .= "</div>";
 			}
 
@@ -3333,14 +3331,14 @@ function draw_menu_items($menu_array) {
 		if ($course->term_id != "" && $course->term_id != "11111" && $course->display_status != "eligible" && $course->display_status != "disabled")
 		{
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
-						The student enrolled in this course in " . $course->get_term_description() . ".
+						" . t("The student enrolled in this course in") . " " . $course->get_term_description() . ".
 					</div>";
 		} else if ($course->term_id == "11111")
 		{
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
-						The exact date that the student enrolled in this course
+						" . t("The exact date that the student enrolled in this course
 						cannot be retrieved at this time.  Please check the
-						student's official transcript for more details.
+						student's official transcript for more details.") . "
 					</div>";
 
 		}
@@ -3355,14 +3353,14 @@ function draw_menu_items($menu_array) {
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
 						<img src='fp_theme_location()/images/icons/$g->icon_filename' width='19' height='19'>
 						&nbsp;
-						This course is a member of $g->title.
+						" . t("This course is a member of") . " $g->title.
 					";
 			// If user is an admin...
 			if (user_has_permission("can_substitute")) {
 				$tflag = intval($course->bool_transfer);
 				$pC .= "<div align='left' class='tenpt'>
-					<b>Special administrative function:</b>
-						<a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"$g->group_id\");'>Remove from this group?</a></div>";
+					<b>" . t("Special administrative function:") . "</b>
+						<a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"$g->group_id\");'>" . t("Remove from this group?") . "</a></div>";
 				$pC .= "</div>";
 			}
 
@@ -3373,8 +3371,8 @@ function draw_menu_items($menu_array) {
 			{
 				$tflag = intval($course->bool_transfer);
 				$pC .= "<div align='left' class='tenpt'>
-					<b>Special administrative function:</b>
-						<a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"0\");'>Remove from the degree plan?</a></div>";
+					<b>" . t("Special administrative function:") . "</b>
+						<a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"0\");'>" . t("Remove from the degree plan?") . "</a></div>";
 				$pC .= "</div>";
 			}
 
@@ -3386,12 +3384,12 @@ function draw_menu_items($menu_array) {
 			
 			
 			$pC .= "<div class='tenpt' style='margin-top: 20px;'>
-					<b>Special administrative information:</b>
+					<b>" . t("Special administrative information:") . "</b>
 					
 				<span id='viewinfolink'
 				onClick='document.getElementById(\"admin_info\").style.display=\"\"; this.style.display=\"none\"; '
 				class='hand' style='color: blue;'
-				> - Click to show -</span>					
+				> - " . t("Click to show") . " -</span>					
 					
 					<div style='padding-left: 20px; display:none;' id='admin_info'>
 					";
@@ -3403,15 +3401,12 @@ function draw_menu_items($menu_array) {
   			$group->load_descriptive_data();
   			
   			$pC .= "
-  					Course is assigned to group:<br>
-  					&nbsp; Group ID: $group->group_id<br>
-  					&nbsp; Title: $group->title<br>";
-  			if ($_SESSION["fp_user_type"] == "full_admin")
-  			{ // only show if we are full admin.
-  				$pC .= "&nbsp; <i>Internal name: $group->group_name</i><br>";
-  			}
+  					" . t("Course is assigned to group:") . "<br>
+  					&nbsp; " . t("Group ID:") . " $group->group_id<br>
+  					&nbsp; " . t("Title:") . " $group->title<br>";
+				$pC .= "&nbsp; <i>" . t("Internal name:") . " $group->group_name</i><br>";
   			
-  			$pC .= "&nbsp; Catalog year: $group->catalog_year
+  			$pC .= "&nbsp; " . t("Catalog year:") . " $group->catalog_year
   			";
 			}
 			$pC .= "
@@ -3438,11 +3433,11 @@ function draw_menu_items($menu_array) {
 
 			if ($remarks != "")
 			{
-				$remarks = " Substitution remarks: <i>$remarks</i>.";
+				$remarks = " " . t("Substitution remarks:") . " <i>$remarks</i>.";
 			}
 
-			$forthecourse = "for the original course
-						requirement of <b>" . $course->course_substitution->subject_id . " 
+			$forthecourse = t("for the original course
+						requirement of") . " <b>" . $course->course_substitution->subject_id . " 
 						" . $course->course_substitution->course_num . "</b>";
 			if ($temp["required_course_id"]*1 == 0)
 			{
@@ -3450,15 +3445,15 @@ function draw_menu_items($menu_array) {
 			}
 
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
-						<b>Note:</b> This course was substituted into the 
-						degree plan $forthecourse
+						<b>" . t("Note:") . "</b> " . t("This course was substituted into the 
+						degree plan") . " $forthecourse
 						$by$remarks";
 
 			
 			if (user_has_permission("can_substitute")) {
 				$pC .= "<div align='left' class='tenpt' style='padding-left: 10px;'>
-					<b>Special administrative function:</b>
-					<a href='javascript: popupRemoveSubstitution(\"$course->db_substitution_id\");'>Remove substitution?</a>
+					<b>" . t("Special administrative function:") . "</b>
+					<a href='javascript: popupRemoveSubstitution(\"$course->db_substitution_id\");'>" . t("Remove substitution?") . "</a>
 					</div>";
 			}
 
@@ -3468,8 +3463,8 @@ function draw_menu_items($menu_array) {
 		if ($course->has_variable_hours() && $course->grade == "")
 		{
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
-					This course has variable hours.<br>Please select 
-					how many hours this course will be worth:<br>
+					" . t("This course has variable hours. Please select 
+					how many hours this course will be worth:") . "<br>
 					<center>
 					<select name='selHours' id='selHours' onChange='popupSetVarHours();'>
 					";
@@ -3486,7 +3481,7 @@ function draw_menu_items($menu_array) {
 				if ($t == $course->advised_hours){ $sel = "SELECTED"; }
 				$pC .= "<option value='$t' $sel>$t</option>";
 			}
-			$pC .= "</select> hours.<br>
+			$pC .= "</select> " . t("hours.") . "<br>
 					
 					</center>
 					</div>";
@@ -3502,8 +3497,7 @@ function draw_menu_items($menu_array) {
 
 
 
-		if ($show_advising_buttons == true && !$this->bool_blank)
-		{
+		if ($show_advising_buttons == true && !$this->bool_blank) {
 
 			// Insert a hidden radio button so the javascript works okay...
 			$pC .= "<input type='radio' name='course' value='$course->course_id' checked='checked'
@@ -3513,7 +3507,7 @@ function draw_menu_items($menu_array) {
 			if (user_has_permission("can_advise_students"))
 			{
 				$pC .= "<div style='margin-top: 20px;'>
-				" . $this->draw_button("Select Course", "popupAssignSelectedCourseToGroup(\"$group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"$db_group_requirement_id\");", true, "style='font-size: 10pt;'") . "
+				" . fp_render_button(t("Select Course"), "popupAssignSelectedCourseToGroup(\"$group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"$db_group_requirement_id\");", true, "style='font-size: 10pt;'") . "
 				</div>
 				
 				";
@@ -3526,8 +3520,7 @@ function draw_menu_items($menu_array) {
 					<input type='hidden' name='varHours' id='varHours' value='$var_hours_default'>";
 
 
-			$pC .= "<input type='button' value='Update'
-				onClick='popupUpdateSelectedCourse(\"$course->course_id\",\"$course->assigned_to_group_id\",\"$course->assigned_to_semester_num\",\"$course->random_id\",\"$advising_term_id\");'>";
+      $pC .= fp_render_button(t("Update"), "popupUpdateSelectedCourse(\"$course->course_id\",\"$course->assigned_to_group_id\",\"$course->assigned_to_semester_num\",\"$course->random_id\",\"$advising_term_id\");");
 
 		}
 
@@ -4493,8 +4486,8 @@ function draw_menu_items($menu_array) {
 		  // has been completed, we should only use the hours_awarded.
 		  
 			$var_hour_icon = "<img src='" . fp_theme_location() . "/images/var_hour.gif'
-								title='This course has variable hours.'
-								alt='This course has variable hours.'>";
+								title='" . t("This course has variable hours.") . "'
+								alt='" . t("This course has variable hours.") . "'>";
 			$hours = $course->get_advised_hours();
 
 		}
@@ -4510,7 +4503,7 @@ function draw_menu_items($menu_array) {
 
 		$dispgrade = $grade;
 		// If there is a MID, then this is a midterm grade.
-		$dispgrade = str_replace("MID","<span class='superscript'>mid</span>",$dispgrade);
+		$dispgrade = str_replace("MID","<span class='superscript'>" . t("mid") . "</span>",$dispgrade);
 
 		if (strtoupper($grade) == "E")
 		{ // Currently enrolled.  Show no grade.
@@ -4619,7 +4612,7 @@ function draw_menu_items($menu_array) {
 		if ($course->requirement_type == "um" || $course->requirement_type == "uc")
 		{
 			$icon_filename = "ucap.gif";
-			$title_text = "This course is a University Capstone.";
+			$title_text = t("This course is a University Capstone.");
 		}
 
 		if ($icon_filename != "") {
@@ -4694,7 +4687,7 @@ function draw_menu_items($menu_array) {
       			colspan='4'>
        				&nbsp; &nbsp; $subject_id &nbsp;
         			$course_num$footnote
-	       			&nbsp; ($hours hrs left)
+	       			&nbsp; ($hours " . t("hrs left") . ")
        	   	</td>
      	</tr>
      	</table>";		
@@ -4784,9 +4777,9 @@ function draw_menu_items($menu_array) {
 		$var_hour_icon = "&nbsp;";
 		if ($course->has_variable_hours() == true)
 		{
-			$var_hour_icon = "<img src='fp_theme_location()/images/var_hour.gif'
-								title='This course has variable hours.'
-								alt='This course has variable hours.'>";
+			$var_hour_icon = "<img src='" . fp_theme_location() . "/images/var_hour.gif'
+								title='" . t("This course has variable hours.") . "'
+								alt='" . t("This course has variable hours.") . "'>";
 		}
 
 
@@ -4848,7 +4841,7 @@ function draw_menu_items($menu_array) {
 			$pC .= "
 				<td class='tenpt underline' style='color: gray;' 
 					onClick='$js_code' colspan='3'>
-				<i>May take up to <span style='color: blue;'>" . ($repeats + 1) . "</span> times.</i>
+				<i>" . t("May take up to") . " <span style='color: blue;'>" . ($repeats + 1) . "</span> " . t("times.") . "</i>
 				</td>
 			";
 		} else {
@@ -5427,11 +5420,10 @@ function draw_menu_items($menu_array) {
 			  // This is an advisor, so put in a little more
 				// information.
 				$pC .= "
-									<div class='tenpt' style='padding-top: 5px;'><b>Special note to advisors:</b> You may still
+									<div class='tenpt' style='padding-top: 5px;'><b>" . t("Special note to advisors:") . "</b> " . t("You may still
 											advise a student to take a course, even if it is unselectable
 											in this list.  Use the \"add an additional course\" link at
-											the bottom of the page.</div>
-										";
+											the bottom of the page.") . "</div>";
 			}
 			$pC .= "						</div>
 					</td>
@@ -5446,25 +5438,24 @@ function draw_menu_items($menu_array) {
 
 		if ($group_hours_remaining == 1){$s = "";}
 		if ($bool_unselectableCourses == true) {
-			$unselectable_notice = " <div class='tenpt'><i>(Courses worth more than $group_hours_remaining hour$s
-								may not be selected.)</i></div>";
+			$unselectable_notice = " <div class='tenpt'><i>(" . t("Courses worth more than %hrs hour$s
+								may not be selected.", array("%hrs" => $group_hours_remaining)) . ")</i></div>";
 			if (user_has_permission("can_advise_students")) {
 				// This is an advisor, so put in a little more
 				// information.
 				$unselectable_notice .= "
-									<div class='tenpt' style='padding-top: 5px;'><b>Special note to advisors:</b> You may still
+									<div class='tenpt' style='padding-top: 5px;'><b>" . t("Special note to advisors:") . "</b> " . t("You may still
 											advise a student to take a course, even if it is unselectable
 											in this list.  Use the \"add an additional course\" link at
-											the bottom of the page.</div>
-										";
+											the bottom of the page.") . "</div>";
 			}
 		}
 
 		if ($group_hours_remaining < 100 && $bool_no_courses != true)	{ 
 		  // Don't show for huge groups (like add-a-course)
 			$pC .= "<div class='elevenpt' style='margin-top:5px;'>
-					You may select <b>$group_hours_remaining</b>
-						hour$s from this list.$unselectable_notice</div>";
+					" . t("You may select <b>@hrs</b>
+						hour$s from this list.", array("@hrs" => $group_hours_remaining)) . "$unselectable_notice</div>";
 		}
 		//admin_debug($place_group->assigned_to_semester_num);
 		if ($bool_display_submit == true && !$this->bool_blank && $bool_no_courses != true)
@@ -5474,7 +5465,7 @@ function draw_menu_items($menu_array) {
 					<div style='margin-top: 20px;'>
 					
 					
-				" . $this->draw_button("Select Course", "popupAssignSelectedCourseToGroup(\"$place_group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"-1\");", true, "style='font-size: 10pt;'") . "
+				" . fp_render_button(t("Select Course"), "popupAssignSelectedCourseToGroup(\"$place_group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"-1\");", true, "style='font-size: 10pt;'") . "
 					</div>
 				";
 			}
@@ -5485,20 +5476,20 @@ function draw_menu_items($menu_array) {
 		if (user_has_permission("can_substitute") && $group->group_id != -88)
 		{
 			$pC .= "<div class='tenpt' style='margin-top: 20px;'>
-					<b>Special administrative information:</b>
+					<b>" . t("Special administrative information:") . "</b>
 					
 				<span id='viewinfolink'
 				onClick='document.getElementById(\"admin_info\").style.display=\"\"; this.style.display=\"none\"; '
 				class='hand' style='color: blue;'
-				> - Click to show -</span>					
+				> - " . t("Click to show") . " -</span>					
 					
 					<div style='padding-left: 20px; display:none;' id='admin_info'>
-					Information about this group:<br>
-					&nbsp; Group ID: $group->group_id<br>
-					&nbsp; Title: $group->title<br>";
-  		$pC .= "&nbsp; <i>Internal name: $group->group_name</i><br>";
+					" . t("Information about this group:") . "<br>
+					&nbsp; " . t("Group ID:") . " $group->group_id<br>
+					&nbsp; " . t("Title:") . " $group->title<br>";
+  		$pC .= "&nbsp; <i>" . t("Internal name:") . " $group->group_name</i><br>";
 
-			$pC .= "&nbsp; Catalog year: $group->catalog_year
+			$pC .= "&nbsp; " . t("Catalog year:") . " $group->catalog_year
 					</div>
 					
 					</div>";						
@@ -5514,7 +5505,7 @@ function draw_menu_items($menu_array) {
 			}
 			$back_link = "<span class='tenpt'>
 						<a href='" . base_path() . "/advise/popup-group-select&window_mode=popup&group_id=$group->group_id&semester_num=$display_semesterNum&group_hours_remaining=$group_hours_remaining&current_student_id=$csid&blank_degree_id=$blank_degree_id' 
-						class='nounderline'>Click here to return to subject selection.</a></span>";
+						class='nounderline'>" . t("Click here to return to subject selection.") . "</a></span>";
 			$pC = str_replace("<!--MSG2-->",$back_link,$pC);
 		}
 
@@ -5553,10 +5544,10 @@ function draw_menu_items($menu_array) {
 					<input type='hidden' name='current_student_id' value='$csid'>
 					<input type='hidden' name='blank_degree_id' value='$blank_degree_id'>
 		
-					Please begin by selecting a subject from the list below.
+					" . t("Please begin by selecting a subject from the list below.") . "
 					<br><br>
 					<select name='selected_subject'>
-					<option value=''>Please select a subject...</option>
+					<option value=''>" . t("Please select a subject...") . "</option>
 					<option value=''>----------------------------------------</option>
 					";
 		$new_array = array();
@@ -5583,7 +5574,7 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "</select>
 				<div style='margin: 20px;' align='left'>
-				" . $this->draw_button("Next ->","document.getElementById(\"theform\").submit();") . "
+				" . fp_render_button(t("Next") . " ->","document.getElementById(\"theform\").submit();") . "
 				</div>
 					<!-- <input type='submit' value='submit'> -->
 					
@@ -5657,7 +5648,7 @@ function draw_menu_items($menu_array) {
    *
    * @return unknown
    */
-	function display_end_semester_table()
+	function z__display_end_semester_table()
 	{
 		// Return the HTML that ends & closes up the semester
 		// table.
@@ -5673,7 +5664,7 @@ function draw_menu_items($menu_array) {
 	 *
 	 * @return string
 	 */
-	function get_javascript_code()
+	function z__get_javascript_code()
 	{
 		$rtn = "";
 
@@ -5682,59 +5673,59 @@ function draw_menu_items($menu_array) {
 		
 		";
 
-		$rtn .= $this->get_j_s_change_tab();
+		$rtn .= $this->z__get_j_s_change_tab();
 
-		$rtn .= $this->get_j_s_launch_print_view();
-		$rtn .= $this->get_j_s_hide_show_charts();
-		$rtn .= $this->get_j_s_change_view();
+		$rtn .= $this->z__get_j_s_launch_print_view();
+		$rtn .= $this->z__get_j_s_hide_show_charts();
+		$rtn .= $this->z__get_j_s_change_view();
 
 
 
-		$rtn .= $this->get_j_s_submit_save_active();
-		$rtn .= $this->get_j_s_popup_window();
-		$rtn .= $this->get_j_s_popup_window2();
-		$rtn .= $this->get_j_s_popup_print_window();
-		$rtn .= $this->get_j_s_popup_help_window();
-		$rtn .= $this->get_j_s_popup_change_term();
-		$rtn .= $this->get_j_s_change_term();
+		$rtn .= $this->z__get_j_s_submit_save_active();
+		$rtn .= $this->z__get_j_s_popup_window();
+		$rtn .= $this->z__get_j_s_popup_window2();
+		$rtn .= $this->z__get_j_s_popup_print_window();
+		$rtn .= $this->z__get_j_s_popup_help_window();
+		$rtn .= $this->z__get_j_s_popup_change_term();
+		$rtn .= $this->z__get_j_s_change_term();
 
 		//$rtn .= $this->getJS_popupSubstitutionRemarks();
 
-		$rtn .= $this->get_j_s_popup_change_track();
-		$rtn .= $this->get_j_s_popup_change_what_if_track();
-		$rtn .= $this->get_j_s_change_track();
+		$rtn .= $this->z__get_j_s_popup_change_track();
+		$rtn .= $this->z__get_j_s_popup_change_what_if_track();
+		$rtn .= $this->z__get_j_s_change_track();
 
-		$rtn .= $this->get_j_s_alert_helps();
-		$rtn .= $this->get_j_s_popup_assign_selected_course_to_group();
-		$rtn .= $this->get_j_s_assign_selected_course_to_group();
-		$rtn .= $this->get_j_s_update_selected_course();
-		$rtn .= $this->get_j_s_toggle_selection();
-		$rtn .= $this->get_j_s_toggle_selection_and_save();
-		$rtn .= $this->get_j_s_toggle_disabled_change_term();
-		$rtn .= $this->get_j_s_toggle_disabled_completed();
-		$rtn .= $this->get_j_s_describe_course();
-		$rtn .= $this->get_j_s_submit_form();
-		$rtn .= $this->get_j_s_select_course_from_group();
-		$rtn .= $this->get_j_s_popup_set_var_hours();
-		$rtn .= $this->get_j_s_popup_update_selected_course();
-		$rtn .= $this->get_j_s_popup_substitute_selected();
-		$rtn .= $this->get_j_s_popup_back_to_group_select();
-		$rtn .= $this->get_j_s_popup_remove_substitution();
-		$rtn .= $this->get_j_s_popup_update_sub_data();
-		$rtn .= $this->get_j_s_popup_save_substitution();
-		$rtn .= $this->get_j_s_remove_substitution();
-		$rtn .= $this->get_j_s_set_var();
-		$rtn .= $this->get_j_s_save_substitution();
-		$rtn .= $this->get_j_s_popup_describe_selected();
-		$rtn .= $this->get_j_s_popup_unassign_from_group();
-		$rtn .= $this->get_j_s_unassign_from_group();
-		$rtn .= $this->get_j_s_popup_unassign_transfer_eqv();
-		$rtn .= $this->get_j_s_unassign_transfer_eqv();
-		$rtn .= $this->get_j_s_restore_transfer_eqv();
-		$rtn .= $this->get_j_s_popup_restore_transfer_eqv();
+		$rtn .= $this->z__get_j_s_alert_helps();
+		$rtn .= $this->z__get_j_s_popup_assign_selected_course_to_group();
+		$rtn .= $this->z__get_j_s_assign_selected_course_to_group();
+		$rtn .= $this->z__get_j_s_update_selected_course();
+		$rtn .= $this->z__get_j_s_toggle_selection();
+		$rtn .= $this->z__get_j_s_toggle_selection_and_save();
+		$rtn .= $this->z__get_j_s_toggle_disabled_change_term();
+		$rtn .= $this->z__get_j_s_toggle_disabled_completed();
+		$rtn .= $this->z__get_j_s_describe_course();
+		$rtn .= $this->z__get_j_s_submit_form();
+		$rtn .= $this->z__get_j_s_select_course_from_group();
+		$rtn .= $this->z__get_j_s_popup_set_var_hours();
+		$rtn .= $this->z__get_j_s_popup_update_selected_course();
+		$rtn .= $this->z__get_j_s_popup_substitute_selected();
+		$rtn .= $this->z__get_j_s_popup_back_to_group_select();
+		$rtn .= $this->z__get_j_s_popup_remove_substitution();
+		$rtn .= $this->z__get_j_s_popup_update_sub_data();
+		$rtn .= $this->z__get_j_s_popup_save_substitution();
+		$rtn .= $this->z__get_j_s_remove_substitution();
+		$rtn .= $this->z__get_j_s_set_var();
+		$rtn .= $this->z__get_j_s_save_substitution();
+		$rtn .= $this->z__get_j_s_popup_describe_selected();
+		$rtn .= $this->z__get_j_s_popup_unassign_from_group();
+		$rtn .= $this->z__get_j_s_unassign_from_group();
+		$rtn .= $this->z__get_j_s_popup_unassign_transfer_eqv();
+		$rtn .= $this->z__get_j_s_unassign_transfer_eqv();
+		$rtn .= $this->z__get_j_s_restore_transfer_eqv();
+		$rtn .= $this->z__get_j_s_popup_restore_transfer_eqv();
 
-		$rtn .= $this->get_j_s_restore_unassign_from_group();
-		$rtn .= $this->get_j_s_popup_restore_unassign_from_group();
+		$rtn .= $this->z__get_j_s_restore_unassign_from_group();
+		$rtn .= $this->z__get_j_s_popup_restore_unassign_from_group();
 
 
 
@@ -5743,7 +5734,7 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 	}
 
-	function get_j_s_change_tab()
+	function z__get_j_s_change_tab()
 	{
 		$rtn = '
 	
@@ -5777,7 +5768,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_launch_print_view()
+	function z__get_j_s_launch_print_view()
 	{
 		$rtn = '
 	
@@ -5800,7 +5791,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_submit_save_active()
+	function z__get_j_s_submit_save_active()
 	{
 		$rtn = '
 		
@@ -5814,7 +5805,7 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 	}
 
-	function get_j_s_popup_change_term()
+	function z__get_j_s_popup_change_term()
 	{
 		$rtn = '
 		
@@ -5831,7 +5822,7 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 	}
 
-	function get_j_s_change_view()
+	function z__get_j_s_change_view()
 	{
 		$rtn = '
 		
@@ -5852,7 +5843,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_change_term()
+	function z__get_j_s_change_term()
 	{
 		$rtn = '
 		
@@ -5871,7 +5862,7 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 	}
 
-	function get_j_s_popup_change_track()
+	function z__get_j_s_popup_change_track()
 	{
 		$rtn = '
 		
@@ -5889,7 +5880,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_popup_change_what_if_track()
+	function z__get_j_s_popup_change_what_if_track()
 	{
 		$rtn = '
 		
@@ -5911,7 +5902,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_change_track()
+	function z__get_j_s_change_track()
 	{
 		$rtn = '
 		
@@ -5931,7 +5922,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_hide_show_charts()
+	function z__get_j_s_hide_show_charts()
 	{
 		$rtn = '
 		
@@ -5949,7 +5940,7 @@ function draw_menu_items($menu_array) {
 
 
 
-	function get_j_s_alert_helps()
+	function z__get_j_s_alert_helps()
 	{
 		// Simple Javascript alerts meant for quick help or tips.
 		$rtn = '
@@ -5998,7 +5989,7 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 	}
 
-	function get_j_s_popup_update_sub_data()
+	function z__get_j_s_popup_update_sub_data()
 	{
 		$rtn = '
 		
@@ -6044,7 +6035,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_popup_unassign_transfer_eqv()
+	function z__get_j_s_popup_unassign_transfer_eqv()
 	{
 		$rtn = '
 		
@@ -6063,7 +6054,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_unassign_transfer_eqv()
+	function z__get_j_s_unassign_transfer_eqv()
 	{
 		$rtn = '
 		
@@ -6091,7 +6082,7 @@ function draw_menu_items($menu_array) {
 
 
 
-	function get_j_s_popup_unassign_from_group()
+	function z__get_j_s_popup_unassign_from_group()
 	{
 		$rtn = '
 		
@@ -6110,7 +6101,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_unassign_from_group()
+	function z__get_j_s_unassign_from_group()
 	{
 		$rtn = '
 		
@@ -6159,7 +6150,7 @@ function draw_menu_items($menu_array) {
 	}
 
 	*/
-	function get_j_s_popup_save_substitution()
+	function z__get_j_s_popup_save_substitution()
 	{
 		$rtn = '
 		
@@ -6224,7 +6215,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_save_substitution()
+	function z__get_j_s_save_substitution()
 	{
 		$rtn = '
 		function saveSubstitution(course_id, group_id, semester_num, subCourseID, subTermID, subTransferFlag, subHours, subAddition, subRemarks)
@@ -6251,7 +6242,7 @@ function draw_menu_items($menu_array) {
 
 
 
-	function get_j_s_update_selected_course()
+	function z__get_j_s_update_selected_course()
 	{
 		$rtn = '
 		function updateSelectedCourse(course_id, group_id, semester_num, varHours, random_id, advising_term_id)
@@ -6273,7 +6264,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_assign_selected_course_to_group()
+	function z__get_j_s_assign_selected_course_to_group()
 	{
 		// Meant to handle when a user selects a course for
 		// advising from the popup window.
@@ -6298,7 +6289,7 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 	}
 
-	function get_j_s_remove_substitution()
+	function z__get_j_s_remove_substitution()
 	{
 
 		$rtn = '
@@ -6323,7 +6314,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_restore_transfer_eqv()
+	function z__get_j_s_restore_transfer_eqv()
 	{
 
 		$rtn = '
@@ -6348,7 +6339,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_restore_unassign_from_group()
+	function z__get_j_s_restore_unassign_from_group()
 	{
 
 		$rtn = '
@@ -6375,7 +6366,7 @@ function draw_menu_items($menu_array) {
 
 
 
-	function get_j_s_submit_form()
+	function z__get_j_s_submit_form()
 	{
 
 		$rtn = '
@@ -6399,7 +6390,7 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 	}
 
-	function get_j_s_popup_remove_substitution()
+	function z__get_j_s_popup_remove_substitution()
 	{
 
 		$rtn = '
@@ -6419,7 +6410,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_popup_restore_transfer_eqv()
+	function z__get_j_s_popup_restore_transfer_eqv()
 	{
 
 		$rtn = '
@@ -6436,7 +6427,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_popup_restore_unassign_from_group()
+	function z__get_j_s_popup_restore_unassign_from_group()
 	{
 
 		$rtn = '
@@ -6454,7 +6445,7 @@ function draw_menu_items($menu_array) {
 
 
 
-	function get_j_s_popup_set_var_hours()
+	function z__get_j_s_popup_set_var_hours()
 	{
 		// Meant to handle when a user selects a course for
 		// advising from the popup window.
@@ -6475,7 +6466,7 @@ function draw_menu_items($menu_array) {
 
 
 
-	function get_j_s_popup_update_selected_course()
+	function z__get_j_s_popup_update_selected_course()
 	{
 
 		$rtn = '
@@ -6493,7 +6484,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_popup_assign_selected_course_to_group()
+	function z__get_j_s_popup_assign_selected_course_to_group()
 	{
 		// Meant to handle when a user selects a course for
 		// advising from the popup window.
@@ -6530,7 +6521,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_select_course_from_group()
+	function z__get_j_s_select_course_from_group()
 	{
 		$rtn = '
 		function selectCourseFromGroup(group_id, semester_num, groupHoursRemaining, blankDegreeID)
@@ -6543,7 +6534,7 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 	}
 
-	function get_j_s_describe_course()
+	function z__get_j_s_describe_course()
 	{
 		$script_filename = $this->script_filename;
 		$rtn = '
@@ -6556,7 +6547,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_popup_describe_selected()
+	function z__get_j_s_popup_describe_selected()
 	{
 		$script_filename = $this->script_filename;
 		$rtn = '
@@ -6601,7 +6592,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_popup_substitute_selected()
+	function z__get_j_s_popup_substitute_selected()
 	{
 		$script_filename = $this->script_filename;
 		$rtn = '
@@ -6635,7 +6626,7 @@ function draw_menu_items($menu_array) {
 
 
 
-	function get_j_s_popup_back_to_group_select()
+	function z__get_j_s_popup_back_to_group_select()
 	{
 		$script_filename = $this->script_filename;
 		$rtn = '
@@ -6657,7 +6648,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_popup_window()
+	function z__get_j_s_popup_window()
 	{
 		$script_filename = $this->script_filename;
 		$rtn = '
@@ -6674,7 +6665,7 @@ function draw_menu_items($menu_array) {
 
 	}
 
-	function get_j_s_popup_window2()
+	function z__get_j_s_popup_window2()
 	{
 		$script_filename = $this->script_filename;
 		$rtn = '
@@ -6693,7 +6684,7 @@ function draw_menu_items($menu_array) {
 
 	}
 
-	function get_j_s_popup_print_window()
+	function z__get_j_s_popup_print_window()
 	{
 
 		$rtn = '
@@ -6710,7 +6701,7 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 	}
 
-	function get_j_s_popup_help_window()
+	function z__get_j_s_popup_help_window()
 	{
 		$rtn = '
 		function popupHelpWindow(url)
@@ -6728,7 +6719,7 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	function get_j_s_toggle_disabled_change_term()
+	function z__get_j_s_toggle_disabled_change_term()
 	{
 		$rtn = '
 
@@ -6746,7 +6737,7 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 	}
 
-	function get_j_s_toggle_disabled_completed()
+	function z__get_j_s_toggle_disabled_completed()
 	{
 		$rtn = '
 
@@ -6770,7 +6761,7 @@ function draw_menu_items($menu_array) {
 	}
 
  
-	function get_j_s_toggle_selection()
+	function z__get_j_s_toggle_selection()
 	{
 		$img_path = fp_theme_location() . "/images";
 		$rtn = '
@@ -6815,7 +6806,7 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 	}
 
-	function get_j_s_toggle_selection_and_save()
+	function z__get_j_s_toggle_selection_and_save()
 	{
 		$rtn = '
 		function toggleSelectionAndSave(uniqueID, display_status, warningMsg)
@@ -6827,7 +6818,7 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 	}
 
-	function get_j_s_set_var()
+	function z__get_j_s_set_var()
 	{
 		$rtn = '
 		function setVar(id, newValue)

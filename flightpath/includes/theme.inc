@@ -721,8 +721,7 @@ function fp_render_button($title, $on_click, $bool_padd = true, $style = "", $ex
 
   if (fp_screen_is_mobile()) $on_mouse = "";  // Causes problems for some mobile devices.
   
-  if ($bool_padd)
-  {
+  if ($bool_padd) {
     $padd = "&nbsp;&nbsp;";
   }
 
