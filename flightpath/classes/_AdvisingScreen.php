@@ -4575,7 +4575,7 @@ function draw_menu_items($menu_array) {
 		if ($this->bool_print || $this->bool_blank)
 		{
 			// If this is print view, disable clicking.
-			$op_on_click_function = "dummyTtoggleSelection";
+			$op_on_click_function = "dummyToggleSelection";
 		}
 
 		if (!user_has_permission("can_advise_students"))

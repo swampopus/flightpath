@@ -9,7 +9,10 @@ function student_search_menu() {
     "page_callback" => "student_search_subtab_switchboard",
     "access_callback" => TRUE,
     "type" => MENU_TYPE_TAB,
-    "tab_family" => "system",    
+    "tab_family" => "system",
+    "page_settings" => array(
+      "page_has_search" => TRUE,
+    ),    
     "weight" => 20,
   );
   
@@ -24,6 +27,7 @@ function student_search_menu() {
       "display_currently_advising" => TRUE,
       "display_greeting" => TRUE,
       "screen_mode" => "not_advising",
+      "page_has_search" => TRUE,
     ),
     "weight" => 10,
   );
@@ -39,6 +43,7 @@ function student_search_menu() {
       "display_currently_advising" => TRUE,
       "display_greeting" => TRUE,
       "screen_mode" => "not_advising",
+      "page_has_search" => TRUE,      
     ),    
     "weight" => 20,
   );
@@ -54,10 +59,10 @@ function student_search_menu() {
       "display_currently_advising" => TRUE,
       "display_greeting" => TRUE,
       "screen_mode" => "not_advising",
+      "page_has_search" => TRUE,      
     ),    
     "weight" => 30,
   );
-
 
   
   return $items;
@@ -74,6 +79,69 @@ function student_search_subtab_switchboard() {
   fp_goto("student-search/search");
   
 }
+
+
+/**
+ * This is meant to be called directly from the theme template, to draw
+ * the small search box in the corner of the screen.
+ * 
+ * As such, we need to include any javascript we need here, rather than using
+ * fp_add_js.
+ */
+function student_search_render_small_search() {
+  global $current_student_id;
+  
+  $rtn = "";
+  $rtn .= "<form action='" . base_path() . "/student-search/search' method='post' id='small-search-form'
+              style='padding:0; margin:0; padding-bottom: 5px;'>
+                     <input type='text' class='smallinput' size='30' name='search' id='search_bar_value'                       
+                        placeholder = '" . t("Search by name or CWID") . "'>
+                     <input type='button' name='submit' value='=>' class='smallinput'>
+                     <input type='hidden' name='current_student_id' value='$current_student_id'>
+                    </form>
+                    ";
+ 
+  $rtn .= "
+  
+  <script type='text/javascript'>
+    
+
+    function small_search_perform_search()
+    {
+      
+      window.location='studentsearch.php?didSearch=true&searchFor=' + document.getElementById('search_bar_value').value;
+
+      return true;
+    }
+
+    function searchKeyPress(e)
+    {
+      // If they typed an ENTER key, then call doSearch...
+      if(e){
+        e = e
+      } else {
+        e = window.event
+      }
+
+      if(e.which){
+        var keycode = e.which
+      } else {
+        var keycode = e.keyCode
+      }
+
+      if(keycode == 13) {
+        doSearch();
+      }
+    }    
+    
+  </script>
+  
+  ";
+
+  return $rtn;
+                      
+}
+
 
 
 function student_search_display_my_advisees() {

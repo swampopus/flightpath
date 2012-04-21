@@ -18,6 +18,7 @@ function comments_menu() {
     "page_settings" => array (
       "display_currently_advising" => TRUE,
       "display_greeting" => TRUE,
+      "page_has_search" => TRUE,      
     ),        
     "weight" => 50,        
   );

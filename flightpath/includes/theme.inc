@@ -57,22 +57,28 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
  * its original menu item (router_item) definition.
  */
 function fp_display_page($page) {
-  global $current_student_id;
+  global $current_student_id, $screen;
   
   $page_title = $page["title"];
   if ($GLOBALS["fp_set_title"] != "") {
     $page_title = $GLOBALS["fp_set_title"];
   }
-  
-  $screen = new AdvisingScreen("",null,"not_advising");
+
+  if (!is_object($screen)) {
+    $screen = new AdvisingScreen("",null,"not_advising");
+  }
   $screen->page_title = $page_title;
   $screen->page_has_search = $page["router_item"]["page_settings"]["page_has_search"];
   $screen->page_banner_is_link = $page["router_item"]["page_settings"]["page_banner_is_link"];
   $screen->page_hide_report_error = $page["router_item"]["page_settings"]["page_hide_report_error"];
   $screen->page_is_popup = $page["router_item"]["page_settings"]["page_is_popup"];
-  $screen->screen_mode = $page["router_item"]["page_settings"]["screen_mode"];
-  $screen->bool_print = $page["router_item"]["page_settings"]["bool_print"];
-  
+  if (isset($page["router_item"]["page_settings"]["screen_mode"])) {    
+    $screen->screen_mode = $page["router_item"]["page_settings"]["screen_mode"];
+  }
+  if (isset($page["router_item"]["page_settings"]["bool_print"])) {
+    $screen->bool_print = $page["router_item"]["page_settings"]["bool_print"];
+  }
+
   if ($_REQUEST["scroll_top"] != "") {
     $screen->page_scroll_top = $_REQUEST["scroll_top"];    
   }
@@ -119,15 +125,18 @@ function fp_display_page($page) {
     $content_top .= "</ul>";
   }
   
-  // Any sub-tabs we need to render?
-  if ($page["router_item"]["type"] == MENU_TYPE_SUB_TAB) {
-    $sub_tab_array = fp_build_sub_tab_array($page);
-    $content_top .= fp_render_sub_tab_array($sub_tab_array);
-  }
   
-  // Should we override the page sub-tabs with what is in "fp_set_page_sub_tabs" ?
-  if (is_array($GLOBALS["fp_set_page_sub_tabs"])) {
-    $content_top .= fp_render_sub_tab_array($GLOBALS["fp_set_page_sub_tabs"]);    
+  if (!$screen->bool_print) {
+    // Any sub-tabs we need to render?
+    if ($page["router_item"]["type"] == MENU_TYPE_SUB_TAB) {
+      $sub_tab_array = fp_build_sub_tab_array($page);
+      $content_top .= fp_render_sub_tab_array($sub_tab_array);
+    }
+    
+    // Should we override the page sub-tabs with what is in "fp_set_page_sub_tabs" ?
+    if (is_array($GLOBALS["fp_set_page_sub_tabs"])) {
+      $content_top .= fp_render_sub_tab_array($GLOBALS["fp_set_page_sub_tabs"]);    
+    }
   }
 
   
@@ -147,7 +156,7 @@ function fp_display_page($page) {
 
   // content_top gets the Currently Advising box.
   if ($page["router_item"]["page_settings"]["display_currently_advising"] == TRUE) {
-    $content_top .= fp_render_currently_advising_box(false, false, false, NULL, $screen->screen_mode);
+    $content_top .= fp_render_currently_advising_box(false, $screen->bool_blank, $screen->bool_print, NULL, $screen->screen_mode);
   }    
   
   $screen->page_content = $content_top .= $page["content"];
@@ -370,7 +379,6 @@ function fp_build_tab_array($page) {
     }
     
     
-    
     $student = new Student();
     $student->student_id = $csid;
     $student->load_student_data();
@@ -381,6 +389,7 @@ function fp_build_tab_array($page) {
     $rtn .= "<table class='fp-currently-advising'>";
     
     $for_term = $whatif = $what_if_select = $hypoclass = "";
+    
     if ($GLOBALS["fp_advising"]["advising_term_id"] != "" && $screen_mode != "not_advising"
     && user_has_permission("can_advise_students"))
     {
@@ -682,11 +691,19 @@ function fp_render_sub_tab_array($tab_array) {
     $title = $tab["title"];
     $on_click = $tab["on_click"];
     $active = $tab["active"];
+    $type = $tab["type"];
     
     $extra_class = "";
     if ($active) $extra_class = "gradbutton-active";
     
-    $rtn .= fp_render_button($title, $on_click, true, "", $extra_class);
+    if ($type == "link" ) {
+      // Render as a standard link
+      $rtn .= "<a href='javascript: $on_click' class='fp-sub-tab-link $extra_class'>$title</a>";
+    }
+    else {
+      // Render as a button
+      $rtn .= fp_render_button($title, $on_click, true, "", $extra_class);
+    }
     
   }
   

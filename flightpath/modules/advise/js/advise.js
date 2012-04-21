@@ -648,7 +648,7 @@ function popupWindowNew(url, extraVars) {
 
 function popupPrintWindow(url) {
   var my_windowx2p = window.open(url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId,
-  "courseinfoxprint" + FlightPath.settings.currentStudentId,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=700,height=500");
+  "courseinfoxprint" + FlightPath.settings.currentStudentId,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=750,height=600");
 
   my_windowx2p.focus();  // make sure the popup window is on top.
 

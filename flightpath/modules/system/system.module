@@ -135,6 +135,7 @@ function system_menu() {
       "display_greeting" => TRUE,
       "display_currently_advising" => TRUE,
       "screen_mode" => "not_advising",
+      "page_has_search" => TRUE,
     ),
   );
   

@@ -11,6 +11,15 @@ if ($page_title == "")
 
 $theme_location = fp_theme_location();
 
+
+// Add extra JS files.    
+  if (is_array($page_extra_js_files) && count($page_extra_js_files) > 0) {
+   foreach ($page_extra_js_files as $js_file_name) {
+     print "<script type='text/javascript' src='$js_file_name'></script> \n";
+   }        
+  }     
+
+
 print "
 <link rel='stylesheet' type='text/css' href='$theme_location/style.css'>";
 

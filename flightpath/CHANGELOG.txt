@@ -1,6 +1,12 @@
 FlightPath Changelog
 ====================
 
+2012-04-21
+  Enabled small search box in corner.
+
+2012-04-15
+  Print view working, change terms, change tracks
+
 2012-04-13
   Added ability to change tracks & terms on Degree Plans.
 

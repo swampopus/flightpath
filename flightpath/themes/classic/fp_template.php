@@ -88,39 +88,6 @@ $theme_location = fp_theme_location();
 		}
 
 
-		function doSearch()
-		{
-			//document.getElementById("da_search_for").value = document.getElementById("search_bar_value").value;
-			//document.getElementById("da_advisee_action").value = "search";
-			//document.getElementById("da_from_search_button").value = "true";
-
-			//document.mainform.action = "studentsearch.php";
-			//document.mainform.submit();
-
-			window.location="studentsearch.php?didSearch=true&searchFor=" + document.getElementById("search_bar_value").value;
-
-			return true;
-		}
-
-		function searchKeyPress(e)
-		{
-			// If they typed an ENTER key, then call doSearch...
-			if(e){
-				e = e
-			} else {
-				e = window.event
-			}
-
-			if(e.which){
-				var keycode = e.which
-			} else {
-				var keycode = e.keyCode
-			}
-
-			if(keycode == 13) {
-				doSearch();
-			}
-		}
 
 		function showUpdate(boolShowLoad)
 		{
@@ -316,41 +283,16 @@ $theme_location = fp_theme_location();
 							<?php
 							// Insert a search bar if there is one.
 
-							if ($page_has_search == TRUE )
-							{
-								print "<div style='padding-bottom: 2px;'>
-										 <input type='text' class='smallinput' size='30' name='search' id='search_bar_value' 
-										 	value='Search by name or CWID.' 
-										 	onFocus='document.getElementById(\"search_bar_value\").focus(); document.getElementById(\"search_bar_value\").select();' onKeyPress ='searchKeyPress(event)'>
-										 <input type='button' name='submit' value='=>' class='smallinput' onClick='doSearch()'>
-										</div>
-									</td>
-									<td align='right' style='padding-left: 30px'>
-									
-								";
+							if ($page_has_search == TRUE && function_exists("student_search_menu")) {
+							  
+                print student_search_render_small_search();                                
 
 							}
-
-							if ($page_banner_is_link == true)
-							{
-								print "<table cellpadding='0' cellspacing='0'
-										style='padding: 3px;
-										 
-										border: 1px solid black;
-										background-color: white;' 
-										class='tenpt'><td>
-										 <a href='{$GLOBALS["fp_system_settings"]["self_u_r_l"]}' target='_blank' class='nounderline'>
-										 <img src='$theme_location/images/popup.gif' border='0'>
-										 Click here to launch FlightPath!</a>
-										</td></table>
-									</td>
-									<td align='right' style='padding-left: 30px'>
-									
-								";								
-							}
-
 
 							?>
+              </td>
+              <td align='right' style='padding-left: 30px'>							
+							
 							</td>
 						</tr>
 					</table>
