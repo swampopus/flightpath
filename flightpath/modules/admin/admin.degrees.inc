@@ -118,9 +118,6 @@ function admin_copy_degree_form() {
   
   
   
-  // Make sure this file is reachable for the submit handler.
-  $form["form_include"] = menu_get_module_path("admin") . "/admin.degrees.inc";
-
   // Our submit button.
   $form["submit"] = array(
     "type" => "submit",
@@ -371,9 +368,6 @@ function admin_add_degree_form() {
   );
 
 
-
-  // Make sure this file is reachable for the submit handler.
-  $form["form_include"] = menu_get_module_path("admin") . "/admin.degrees.inc";
 
   // Our submit button.
   $form["submit"] = array(

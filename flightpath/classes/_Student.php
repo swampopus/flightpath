@@ -490,26 +490,26 @@ class _Student
 
 	  // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this is a non-FlightPath table.
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name = $tsettings["table_name"];
+		//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
+		//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+		//$table_name = $tsettings["table_name"];
 
 		
 	  // Let's perform our queries.
-		$res = $this->db->db_query("SELECT * FROM $table_name 
-						          WHERE $tf->student_id = '?' ", $this->student_id);
+		$res = $this->db->db_query("SELECT * FROM students 
+						          WHERE user_id = '?' ", $this->student_id);
 		$cur = $this->db->db_fetch_array($res);
 
 		
 
-		$this->cumulative_hours = $cur[$tf->cumulative_hours];
-		$this->gpa = $cur[$tf->gpa];
-		$this->rank = $this->get_rank_description($cur[$tf->rank_code]);
-		$this->major_code = $cur[$tf->major_code];
+		$this->cumulative_hours = $cur["cumulative_hours"];
+		$this->gpa = $cur["gpa"];
+		$this->rank = $this->get_rank_description($cur["rank_code"]);
+		$this->major_code = $cur["major_code"];
 
-		$this->name = ucwords(strtolower($cur[$tf->f_name] . " " . $cur[$tf->l_name]));
+		$this->name = ucwords(strtolower($this->db->get_student_name($this->student_id)));
 
-		$catalog = $cur[$tf->catalog_year];
+		$catalog = $cur["catalog_year"];
 		
 		// If this is written in the format 2006-2007, then we just want
 		// the first part.  Luckily, this will still work even if there WASN'T

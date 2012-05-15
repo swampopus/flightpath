@@ -273,8 +273,6 @@ function admin_edit_group_form() {
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
     
   
-  // Make sure this file is reachable for the submit handler.
-  $form["form_include"] = menu_get_module_path("admin") . "/admin.groups.inc";  
   $form["redirect"] = array(
     "path" => "admin/groups/edit-group",
     "query" => "group_id=$group_id&de_catalog_year=$de_catalog_year",
@@ -976,7 +974,6 @@ function admin_process_all_definitions_form() {
   $de_catalog_year = admin_get_de_catalog_year();
 
   fp_set_title(t("Process all definitions for @year", array("@year" => $de_catalog_year)));
-  $form["form_include"] = menu_get_module_path("admin") . "/admin.groups.inc";
   
   $form["mark" . $m++] = array(
     "type" => "markup",

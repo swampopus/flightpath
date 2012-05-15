@@ -121,6 +121,40 @@ function system_perm() {
 
 
 
+/**
+ * Return an array containing the roles which have been assigned to
+ * a specific user.
+ */
+function system_get_roles_for_user($user_id) {
+      
+  $rtn = array();  
+  
+  $res = db_query("SELECT * FROM user_roles a, roles b 
+                   WHERE user_id = '?' 
+                   AND a.rid = b.rid ", $user_id);
+  while ($cur = db_fetch_array($res)) {
+    $rtn[$cur["rid"]] = $cur["name"];
+    
+    // Is this person in the users table?  If so, they will get the rid 2 (authenticated)
+    // If not, they will get the role 1 (anonymous)
+    
+    $res2 = db_query("SELECT user_name FROM users WHERE user_id = '?' ", $user_id);
+    if (db_num_rows($res2) > 0) {
+      $rtn[2] = t("authenticated user");
+    }
+    else {
+      $rtn[1] = t("anonymous user");
+    }
+    
+        
+  }
+  
+  return $rtn;
+  
+}
+
+
+
 function system_menu() {
   $items = array();
   

@@ -206,10 +206,7 @@ function admin_edit_course_form() {
   fp_set_title(t("Edit Course @course", array("@course" => "$subject_id $course_num ($de_catalog_year)")));
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
-    
-    
-  $form["form_include"] = menu_get_module_path("admin") . "/admin.courses.inc";    
-    
+       
   $form["de_catalog_year"] = array(
     "type" => "hidden",
     "value" => $de_catalog_year,

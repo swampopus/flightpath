@@ -44,11 +44,10 @@ function admin_menu() {
   );     
 
   
-  $items["admin/config/user-rolls"] = array(
-    "title" => "Manage user rolls",
-    "page_callback" => "fp_render_form",
-    "page_arguments" => array("admin_user_rolls_form"),
-    "access_arguments" => array("can_edit_user_rolls"),
+  $items["admin/config/users"] = array(
+    "title" => "Manage users",
+    "page_callback" => "admin_display_users",
+    "access_arguments" => array("manage_users"),
     "page_settings" => array(
       "page_has_search" => FALSE,
       "page_banner_is_link" => TRUE,
@@ -63,8 +62,60 @@ function admin_menu() {
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
     "tab_parent" => "admin-tools/admin",    
-  );     
+    "file" => menu_get_module_path("admin") . "/admin.users.inc",    
+  );      
   
+  $items["admin/config/user-roles"] = array(
+    "title" => "Manage user roles",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("admin_user_roles_form"),
+    "access_arguments" => array("can_edit_user_roles"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+    "file" => menu_get_module_path("admin") . "/admin.users.inc",    
+  );     
+
+  $items["admin/users/edit-user"] = array(
+    "title" => "Edit User",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("admin_edit_user_form"),
+    "access_arguments" => array("manage_users"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to Users list",
+          "path" => "admin/config/users",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),                
+      ),
+    ),   
+    "file" => menu_get_module_path("admin") . "/admin.users.inc",
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",
+  );     
+      
+  
+    
 
   $items["admin/config/permissions"] = array(
     "title" => "Manage permissions",
@@ -84,7 +135,8 @@ function admin_menu() {
       ),
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
-    "tab_parent" => "admin-tools/admin",    
+    "tab_parent" => "admin-tools/admin",
+    "file" => menu_get_module_path("admin") . "/admin.users.inc",    
   );     
   
   
@@ -430,127 +482,13 @@ function admin_menu() {
     "tab_parent" => "admin/courses",
   );     
           
+          
      
      
   return $items;
 }
 
 
-
-
-/**
- * This form allows the user to manage the rolls in the system.
- */
-function admin_user_rolls_form() {
-  $form = array();
-  
-  fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
-  fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
-  
-  
-  
-  $form["mark" . $m++] = array(
-    "type" => "markup",
-    "value" => t("Rolls are able to be assigned permissions in FlightPath, and then users are assigned
-                those rolls.  You may not remove the two rolls, 'anonymous user' and 'authenticated user'.
-                Those are assigned automatically when the user logs in or out.
-                However, you may add as many more rolls as you wish.")
-                . "<br><br><b>" . t("Rolls:") . "</b>
-                <table style='padding-left: 20px;'>
-                  <tr><td>" . t("anonymous user") . "</td><td></td></tr>
-                  <tr><td>" . t("authenticated user") . "</td><td></td></tr>",
-  );
-
-  $rolls = variable_get("rolls", array());   
-  foreach ($rolls as $key => $value) {
-    $form["mark" . $m++] = array(
-      "type" => "markup",
-      "value" => "<tr><td>$value</td><td>" . fp_get_js_prompt_link("Enter a new name to change this roll to:", $value, "document.getElementById(\"element-perform_action2\").value=\"edit~_~$key~_~\" + response; document.getElementById(\"sysform\").submit(); ", t("edit")) . " | 
-                  " . fp_get_js_confirm_link(t("Are you sure you wish to delete this roll?\\nIt will be removed from users' accounts.  This action cannot be undone.\\n\\nProceed?"), "document.getElementById(\"element-perform_action2\").value=\"del~_~$key\"; document.getElementById(\"sysform\").submit(); ", t("delete")) . "</td></tr>", 
-    );
-  }
-  
-  $form["mark" . $m++] = array(
-    "type" => "markup",
-    "value" => "</table>",
-  );
-  
-  $form["perform_action2"] = array(
-    "type" => "hidden",
-  );
-  
-  $form["new_roll"] = array(
-    "type" => "textfield",
-    "label" => t("Add a new roll:"),    
-  );
-  
-  $form["submit"] = array(
-    "type" => "submit",
-    "value" => t("Add new"),
-  );  
-  
-  return $form;
-}
-
-
-function admin_user_rolls_form_submit($form, $form_state) {
-  $values = $form_state["values"];
-  
-  if (trim($values["new_roll"]) != "") {
-    $new_roll = strtolower(trim($values["new_roll"]));
-    
-    // Clean up any trouble chars
-    $new_roll = preg_replace("/[^a-zA-Z0-9_]/", " ", $new_roll);
-        
-    // Get the old rolls, add it in, then re-save.
-    $rolls = variable_get("rolls", array());
-    
-    $i = 2; // start with this index.
-    // Find the highest index so far.
-    foreach($rolls as $key => $value) {
-      if ($key >= $i) $i = $key + 1;
-    }
-    // Okay, we have the highest key.  Let's insert and save!
-    $rolls[$i] = $new_roll;
-     
-    variable_set("rolls", $rolls);
-    fp_add_message("The new roll has been added successfully.");       
-  }
-  
-  
-  if (strstr($values["perform_action2"], "del~_~")) {
-    $temp = explode("~_~", $values["perform_action2"]);
-    $i = trim($temp[1]);
-    // Okay, let's load the roll, then remove it, then re-save.
-    $rolls = variable_get("rolls", array());
-    unset($rolls[$i]);
-    variable_set("rolls", $rolls);
-    // TODO:  Re-save all users who may have had this roll assigned!
-    // TODO: Something with permissions to remove this roll from that too.
-    
-    fp_add_message("The roll has been deleted successfully.");    
-            
-  }
-  
-  
-  if (strstr($values["perform_action2"], "edit~_~")) {
-    $temp = explode("~_~", $values["perform_action2"]);
-    $i = trim($temp[1]);
-    $new_name = strtolower(trim($temp[2]));
-    $new_name = preg_replace("/[^a-zA-Z0-9_]/", " ", $new_name);    
-    if (trim($new_name) != "") {  
-      // Okay, let's load the roll, then remove it, then re-save.
-      $rolls = variable_get("rolls", array());
-      $rolls[$i] = $new_name;
-      variable_set("rolls", $rolls);
-      fp_add_message("The roll has been edited successfully.");    
-    }
-    
-  }
-
-   
-  
-}
 
 
 
@@ -835,176 +773,25 @@ function admin_perm() {
       "title" => t("Edit advising settings"),
       "description" => t("The user may edit advising settings, like available term IDs and the current catalog year."),
     ),   
-    "can_edit_user_rolls" => array(
-      "title" => t("Edit user rolls"),
-      "description" => t("The user may add/edit/delete user rolls in the system."),
+    "can_edit_user_roles" => array(
+      "title" => t("Edit user roles"),
+      "description" => t("The user may add/edit/delete user roles in the system."),
     ),   
     "can_edit_permissions" => array(
       "title" => t("Edit permissions"),
-      "description" => t("The user may assign permissions to different rolls in the system."),
+      "description" => t("The user may assign permissions to different roles in the system."),
     ),   
+    "manage_users" => array(
+      "title" => t("Manage users"),
+      "description" => t("This is a powerful permission!  It allows the user to manage the roles
+                          of other users, as well as create/delete users."),
+    ),
     
             
   );
 } 
  
 
-/**
- * This is the permissions form, where users can set which rolls have which permissions.
- */
-function admin_permissions_form() {
-  $form = array();
-
-  fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
-  
-  
-  // Let's get all of our permissions from the permissions table.
-  $permissions = array();
-  $res = db_query("SELECT * FROM roll_permissions");
-  while ($cur = db_fetch_array($res)) {
-    $permissions[$cur["rid"]][] = $cur["perm"];
-  }
-    
-  $cb = $m = 1;
-  
-  $form["mark" . $m++] = array(
-    
-    "value" => t("Use this form to assign permissions to rolls in the system.
-                  These permissions are defined by module."),
-  );
-
-  $rolls = variable_get("rolls", array());
-  $rolls[0] = t("anonymous user");
-  $rolls[1] = t("authenticated user");
-  ksort($rolls);
-
-  $col_count = count($rolls) + 1;
-  
-  $form["mark" . $m++] = array(
-    "value" => "<table class='admin-perm-table' width='100%' cellpadding='0' cellspacing='0'>
-                <tr><th>Permission</th>",
-  );   
-  
-  foreach ($rolls as $key => $roll) {
-    $form["mark" . $m++] = array(
-      "value" => "<th>" . $roll . "</th>",
-    );   
-    
-  }  
-
-  $form["mark" . $m++] = array(
-    "value" => "</tr>",
-  );   
-
-    
-  // Go through all of the modules, then call hook_perm for them, to get their permissions.
-  $modules = modules_implement_hook("perm");
-  //fpm($modules);
-  foreach ($modules as $module) {
-    $form["mark" . $m++] = array(
-      "value" => "<tr><td colspan='$col_count' class='perm-module-name'>" . ucwords($module) . " " . t("module") . "</td></tr>",
-    );   
-    
-    $zebra = "even";
-    
-    // Let's get all the perms.
-    $perms = call_user_func($module . "_perm");    
-    foreach ($perms as $perm_name => $perm_details) {
-      $title = $perm_details["title"];
-      $desc = $perm_details["description"];
-
-      $zebra = ($zebra == "even") ? "odd" : "even";
-
-      $form["mark" . $m++] = array(
-        "value" => "<tr class='perm-cb-row perm-cb-row-$zebra'><td class='perm-details' valign='top'>
-                      <div class='perm-title'>$title</div>
-                      <div class='perm-name'>$perm_name</div>
-                      <div class='perm-desc'>$desc</div>
-                   </td>",
-      );   
-
-      foreach ($rolls as $key => $roll) {
-        
-        // Should this be checked by default (cause it was all ready in our table?)
-        $default_value = array();
-        if (is_array($permissions[$key]) && in_array($perm_name, $permissions[$key])) {
-          // Yes, it was in there!  Set up the default_value as an array that
-          // looks like array(key => key).  That is how we set a checkbox to be checked
-          // by default.
-          $default_value = array($key . "___$perm_name" => $key . "___$perm_name");          
-        }
-        
-        $form["perm_cb_" . $cb++] = array(
-          "type" => "checkboxes",
-          "options" => array("$key" . "___$perm_name" => ""),
-          "value" => $default_value,
-          "prefix" => "<td class='perm-cb'>",
-          "suffix" => "</td>",          
-        );   
-        
-      }
-     
-      
-      
-      $form["mark" . $m++] = array(
-        "value" => "</tr>",
-      );   
-            
-           
-      
-    }
-    
-  }
-  
-    
-  
-  $form["mark" . $m++] = array(
-    "value" => "</table>",
-  );   
-    
-    
-  $form["submit"] = array(
-    "type" => "submit",
-    "value" => t("Save permissions"),
-    "prefix" => "<hr>",
-  );
-    
-  return $form;
-}
- 
- 
- 
-/**
- * Submit handler for the permissions form.
- */
-function admin_permissions_form_submit($form, $form_submit) {
-  $values = $form_submit["values"];
-  
-  // We should begin by truncating our permissions table, then re-inserting
-  // everything we get from this submission.
-  db_query("TRUNCATE TABLE roll_permissions");
-  
-  // Find all the perm checkboxes.  
-  foreach($values as $key => $val) {
-    if (strstr($key, "perm_cb_")) {
-      $cb = current($val);
-      if (strstr($cb, "___")) {
-        $temp = explode("___", $cb);
-        $rid = $temp[0];
-        $perm = $temp[1];
-        
-        // Okay, save this to our table.
-        db_query("INSERT INTO roll_permissions (rid, perm)
-                  VALUES ('?', '?') ", $rid, $perm);      
-      }
-    }
-  }
-  
-  fp_add_message(t("Permissions saved successfully."));
-  
-} 
- 
- 
  
 /**
  * Meant to be fed into "fp_system_settings_form()", this function

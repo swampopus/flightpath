@@ -961,18 +961,18 @@ class _DatabaseHandler
 	function get_student_catalog_year($student_id) {
     // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this is a non-FlightPath table.
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name = $tsettings["table_name"];		
+		//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
+		//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+		//$table_name = $tsettings["table_name"];		
 		
 		
     // Let's perform our queries.
-		$res = $this->db_query("SELECT * FROM $table_name 
-						          WHERE $tf->student_id = '?' ", $student_id);
+		$res = $this->db_query("SELECT * FROM students 
+						          WHERE user_id = '?' ", $student_id);
 
 		
 		$cur = $this->db_fetch_array($res);
-		$catalog = $cur[$tf->catalog_year];
+		$catalog = $cur["catalog_year"];
 		
 		$temp = explode("-", $catalog);
 		return trim($temp[0]);
@@ -989,18 +989,18 @@ class _DatabaseHandler
 	function get_student_rank($student_id) {
     // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this is a non-FlightPath table.
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name = $tsettings["table_name"];		
+		//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
+		//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+		//$table_name = $tsettings["table_name"];		
 		
 		
     // Let's perform our queries.
-		$res = $this->db_query("SELECT * FROM $table_name 
-						          WHERE $tf->student_id = '?' ", $student_id);
+		$res = $this->db_query("SELECT * FROM students 
+						          WHERE user_id = '?' ", $student_id);
 
 		
 		$cur = $this->db_fetch_array($res);
-		$rank = $cur[$tf->rank_code];
+		$rank = $cur["rank_code"];
 				
 		return trim($rank);
 	}
@@ -1013,28 +1013,22 @@ class _DatabaseHandler
 	 * @param int $student_id
 	 * @return string
 	 */
-	function get_student_name($student_id, $bool_include_middle = TRUE) {
+	function get_student_name($student_id) {
     // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this is a non-FlightPath table.
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name = $tsettings["table_name"];		
+		//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
+		//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+		//$table_name = $tsettings["table_name"];		
 		
 		
     // Let's perform our queries.
-		$res = $this->db_query("SELECT * FROM $table_name 
-						          WHERE $tf->student_id = '?'", $student_id);
+		$res = $this->db_query("SELECT * FROM users 
+						          WHERE user_id = '?'
+						          AND is_student = 1 ", $student_id);
 
 		
 		$cur = $this->db_fetch_array($res);
-		if ($bool_include_middle) {
-		  // with middle name
-		  $name = $cur[$tf->f_name] . " " . $cur[$tf->mid_name] . " " . $cur[$tf->l_name];
-		}
-		else {
-		  // No middle name
-		  $name = $cur[$tf->f_name] . " " . $cur[$tf->l_name];
-		}
+    $name = $cur["f_name"] . " " . $cur["l_name"];
 
 		// Force into pretty capitalization.
 		// turns JOHN SMITH into John Smith	
@@ -1052,28 +1046,23 @@ class _DatabaseHandler
 	 * @param int $faculty_id
 	 * @return string
 	 */
-	function get_faculty_name($faculty_id, $bool_include_middle = TRUE) {
+	function get_faculty_name($faculty_id) {
     // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this is a non-FlightPath table.
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
-		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name = $tsettings["table_name"];		
+		//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
+		//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+		//$table_name = $tsettings["table_name"];		
 		
 		
     // Let's perform our queries.
-		$res = $this->db_query("SELECT * FROM $table_name 
-						          WHERE $tf->faculty_id = '?'", $faculty_id);
+		$res = $this->db_query("SELECT * FROM users 
+						          WHERE user_id = '?'
+						          AND is_faculty = '1' ", $faculty_id);
 
 		
 		$cur = $this->db_fetch_array($res);
-		if ($bool_include_middle) {
-		  // with middle name
-		  $name = $cur[$tf->f_name] . " " . $cur[$tf->mid_name] . " " . $cur[$tf->l_name];
-		}
-		else {
-		  // No middle name
-		  $name = $cur[$tf->f_name] . " " . $cur[$tf->l_name];
-		}
+    $name = $cur["f_name"] . " " . $cur["l_name"];
+
 
 		// Force into pretty capitalization.
 		// turns JOHN SMITH into John Smith	
@@ -1093,14 +1082,14 @@ class _DatabaseHandler
 	  
     // Let's pull the needed variables out of our settings, so we know what
   	// to query, because this is a non-FlightPath table.
-  	$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
-  	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  	$table_name = $tsettings["table_name"];		  
+  	//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
+  	//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+  	//$table_name = $tsettings["table_name"];		  
     
-  	$res = $this->db_query("SELECT * FROM $table_name WHERE $tf->faculty_id = '?' ", $user_id);
+  	$res = $this->db_query("SELECT * FROM faculty WHERE user_id = '?' ", $user_id);
   	$cur = $this->db_fetch_array($res);
   	
-  	return $cur[$tf->major_code];		  
+  	return $cur["major_code"];		  
 	  
 	}
 		
@@ -1112,17 +1101,17 @@ class _DatabaseHandler
 		
     // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this is a non-FlightPath table.
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name = $tsettings["table_name"];			
+		//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
+		//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+		//$table_name = $tsettings["table_name"];			
 		
     // Let's perform our queries.
-		$res = $this->db_query("SELECT * FROM $table_name 
-						          WHERE $tf->student_id = '?' ", $student_id);
+		$res = $this->db_query("SELECT * FROM students 
+						          WHERE user_id = '?' ", $student_id);
 		
 		
 		$cur = $this->db_fetch_array($res);
-		return trim($cur[$tf->major_code]);
+		return trim($cur["major_code"]);
 	}
 
 

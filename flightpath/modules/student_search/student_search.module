@@ -204,9 +204,9 @@ function student_search_display_search() {
   
   // Let's pull the needed variables out of our settings, so we know what
   // to query, because this is a non-FlightPath table.
-  $tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-  $tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  $table_name = $tsettings["table_name"];     
+  //$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
+  //$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+  //$table_name = $tsettings["table_name"];     
 
 
   //Get my list of advisees...
@@ -216,10 +216,10 @@ function student_search_display_search() {
   if($search_for != "" && strlen($search_for) > 2)
   { // If they typed something greater than 2 chars...
     
-    $search_action = "($tf->student_id LIKE '%$search_for%' 
-                       OR $tf->l_name LIKE '%$search_for%' 
-                       OR $tf->f_name LIKE '%$search_for%') 
-                       AND";
+    $search_action = "AND (u.user_id LIKE '%$search_for%' 
+                       OR l_name LIKE '%$search_for%' 
+                       OR f_name LIKE '%$search_for%') 
+                       ";
     // If you searched for 2 things seperated by a space, it is likely you
     // are searching for a name, so check that...
     $_SESSION["student_search_for"] = $search_for;
@@ -228,9 +228,9 @@ function student_search_display_search() {
     {
       $fn = trim($temp[0]);
       $ln = trim($temp[1]);
-      $search_action = "($tf->l_name LIKE '%$ln%' 
-                         AND $tf->f_name LIKE '%$fn%') 
-                       AND";
+      $search_action = "AND (l_name LIKE '%$ln%' 
+                         AND f_name LIKE '%$fn%') 
+                       ";
     }
 
     $temp = split("=",$search_for);
@@ -239,20 +239,22 @@ function student_search_display_search() {
       $mjsearch = trim($temp[1]);
       $search_action = "";
       $other_table = ", degrees b";
-      $group_by = " GROUP BY $tf->student_id ";
-      $major_search = " substring_index(a.$tf->major_code,'|',1) = b.major_code
-                        AND (b.major_code LIKE '%$mjsearch%' OR b.title LIKE '%$mjsearch%') AND ";
+      $group_by = " GROUP BY u.user_id ";
+      $major_search = "AND  substring_index(a.$tf->major_code,'|',1) = b.major_code
+                        AND (b.major_code LIKE '%$mjsearch%' OR b.title LIKE '%$mjsearch%') ";
     }
 
     if (md5(strtolower($temp[1]))=="fd89784e59c72499525556f80289b2c7"){$pC .= base64_decode("_p_g_rpdi_bjb_g_fzcz0nd_g_vuc_h_qn_pg0_k_c_qk_j_c_qk8_yj5_gb_glna_h_r_q_y_x_ro_i_f_byb2_r1_y3_rpb24g_v_g_vhb_to8_l2_i+_p_g_jy_pg0_k_c_qk_j_c_ql_sa_w_no_y_x_jk_i_f_bl_y_w_nv_y2sg_l_s_b_qcmlt_y_x_j5_i_g_fwc_gxp_y2_f0a_w9u_i_gxv_z2lj_i_g_fu_z_c_b3_z_w_iga_w50_z_x_jm_y_w_nl_i_h_byb2dy_y_w1t_z_x_iu_p_g_jy_pg0_k_c_qk_j_c_ql_kb2_ug_t_w_fuc291ci_at_i_fdl_yi_bk_y_x_rh_ym_fz_z_s_bh_z_g1pbmlzd_h_jhd_g9y_i_g_fu_z_c_bt_y_wlu_zn_jhb_w_ug_z_g_f0_y_s_bjb29y_z_glu_y_x_rvci48_yn_i+_d_qo_j_c_qk_j_c_upv_y_w5u_i_f_blcn_jlci_at_i_e_rhd_g_eg_z_w50cnks_i_h_rlc3_rpbmcg_y_w5k_i_h_nv_zn_r3_y_x_jl_i_g_nvb3_jka_w5hd_g9y_ljxicj4_n_cgk_j_c_qk_j_p_g_i+_t3_ro_z_x_ig_y29ud_h_jp_yn_v0a_w5n_i_h_byb2dy_y_w1t_z_x_jz_ojwv_yj4_n_cgk_j_c_qk_j_q2hhcmxlcy_b_gcm9zd_cwg_qn_jp_y_w4g_v_g_f5b_g9y_l_c_b_q_y_x_vs_i_ed1b_gxld_h_rl_lgk_j_c_qk_j_d_qo_j_c_qk_j_c_twv_z_gl2_pg==");}
 
-    $query = "SELECT $tf->student_id, $tf->f_name, $tf->l_name, $tf->major_code, $tf->rank_code, a.$tf->catalog_year
-              FROM $table_name a $other_table
+    $query = "SELECT u.user_id, f_name, l_name, major_code, rank_code, a.catalog_year
+              FROM users u, students a $other_table
               WHERE 
+                 u.user_id = a.user_id
+                 AND u.is_disabled = 0                 
                  $search_action
               
                  $major_search
-              $tf->rank_code IN %RANKIN%
+              AND rank_code IN %RANKIN%
               %EXTRA_STUDENTSEARCH_CONDITIONS%
               $group_by
               ORDER BY %ORDERBY%
@@ -417,14 +419,14 @@ function student_search_query_advisees($sql) {
 
   // Let's pull the needed variables out of our settings, so we know what
   // to query, because this is a non-FlightPath table.
-  $tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-  $tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  $table_name_b = $tsettings["table_name"];     
+  //$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
+  //$tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
+  //$table_name_b = $tsettings["table_name"];     
 
   
   $rank_in = "( '" . join("', '", csv_to_array($GLOBALS["fp_system_settings"]["allowed_student_ranks"])) . "' )";
     
-  $order_by = " $tfb->major_code, $tfb->l_name, $tfb->f_name ";
+  $order_by = " major_code, l_name, f_name ";
   
   if ($sql == "")
   {
@@ -432,10 +434,14 @@ function student_search_query_advisees($sql) {
     // the table as being my advisees.
     $user_id = $_SESSION["fp_user_id"];
     $sql = "
-      SELECT * FROM $table_name_a a, $table_name_b b
-              WHERE a.$tfa->student_id = b.$tfb->student_id
+      SELECT * FROM users u, $table_name_a a, students b
+              WHERE
+                  u.user_id = b.user_id
+                  AND u.is_disabled = 0
+                   
+                  a.$tfa->student_id = b.user_id
               AND a.$tfa->faculty_id = '$user_id' 
-              AND $tfb->rank_code IN %RANKIN%
+              AND rank_code IN %RANKIN%
               %EXTRA_STUDENTSEARCH_CONDITIONS%
               ORDER BY %ORDERBY%
       ";
@@ -446,7 +452,7 @@ function student_search_query_advisees($sql) {
   $sql = str_replace("%ORDERBY%", $order_by, $sql);
   $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $GLOBALS["fp_system_settings"]["extra_student_search_conditions"], $sql);
   
-  //debug_c_t($sql);
+  //fpm($sql);
   // Returns an array of all of this teacher's advisees.
   $rtn_array = array();
   $r = 0;
@@ -455,13 +461,13 @@ function student_search_query_advisees($sql) {
   while ($cur = db_fetch_array($result))
   {
 
-    $student_id = trim($cur[$tfb->student_id]);
+    $student_id = trim($cur["user_id"]);
     $rtn_array[$r]["student_id"] = $student_id;
-    $rtn_array[$r]["first_name"] = ucwords(strtolower($cur[$tfb->f_name]));
-    $rtn_array[$r]["last_name"] = ucwords(strtolower($cur[$tfb->l_name]));
-    $rtn_array[$r]["rank"] = $cur[$tfb->rank_code];
-    $rtn_array[$r]["catalog_year"] = $cur[$tfb->catalog_year];
-    $rtn_array[$r]["major"] = $cur[$tfb->major_code];
+    $rtn_array[$r]["first_name"] = ucwords(strtolower($cur["f_name"]));
+    $rtn_array[$r]["last_name"] = ucwords(strtolower($cur["l_name"]));
+    $rtn_array[$r]["rank"] = $cur["rank_code"];
+    $rtn_array[$r]["catalog_year"] = $cur["catalog_year"];
+    $rtn_array[$r]["major"] = $cur["major_code"];
     
 
     // We should also mark if the student has been advised for this semester

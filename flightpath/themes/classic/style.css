@@ -26,6 +26,9 @@ body
   font-weight: bold;
 }
 
+th {
+  text-align: left;
+}
 
 .admin-message
 {

@@ -34,8 +34,8 @@ function fp_render_form($callback, $form_type = "") {
   }
   
   
-  $menu_item = menu_get_item($path);
-  $page_title = $menu_item["title"];
+  
+  $page_title = $GLOBALS["fp_current_menu_router_item"]["title"];
   if ($GLOBALS["fp_set_title"] != "") $page_title = $GLOBALS["fp_set_title"];
   
   $rtn .= "<h2 class='title'>" . $page_title . "</h2>";
@@ -46,7 +46,17 @@ function fp_render_form($callback, $form_type = "") {
   }
  */
     
-  $form_include = "";
+  //fpm($GLOBALS["fp_current_menu_router_item"]);
+  $form_path = $GLOBALS["fp_current_menu_router_item"]["path"];
+    
+  // Are there any files required to get to the submit handler for this form?
+  $form_include = "";  
+  // Set the form_include to the current page's "file" requirement, if any.
+  if (is_array($GLOBALS["fp_current_menu_router_item"])) {
+    if (isset($GLOBALS["fp_current_menu_router_item"]["file"])) {
+      $form_include = $GLOBALS["fp_current_menu_router_item"]["file"];
+    }
+  }  
   if ($form["form_include"]) {
     $form_include = $form["form_include"];
   }
@@ -60,6 +70,7 @@ function fp_render_form($callback, $form_type = "") {
   
   $rtn .= "<input type='hidden' name='callback' value='$callback'>";
   $rtn .= "<input type='hidden' name='form_type' value='$form_type'>";
+  $rtn .= "<input type='hidden' name='form_path' value='$form_path'>";
   $rtn .= "<input type='hidden' name='form_include' value='$form_include'>";
   $rtn .= "<input type='hidden' name='default_redirect_path' value='$default_path'>";
   $rtn .= "<input type='hidden' name='default_redirect_query' value='$default_query'>";
