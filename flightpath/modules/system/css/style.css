@@ -77,10 +77,15 @@
   background-color: 	#EDF9FF;
 }
 
-.fp-system-modules-machine-name
+.fp-system-modules-machine-name,
+.fp-system-modules-installation-status
 {
   font-size: 0.85em;
   font-style: italic;
   padding-left: 30px;
+}
+
+.fp-system-modules-installation-status {
+  color: #666; 
 }
 

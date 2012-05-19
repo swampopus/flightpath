@@ -84,6 +84,7 @@ function menu_execute_page_request() {
   }
   
   if ($router_item = menu_get_item($path)) {
+    
     // Let's save the router item in the GLOBALS array, so we can use information from it
     // throughout FlightPath, if we need to.
     $GLOBALS["fp_current_menu_router_item"] = $router_item;

@@ -173,14 +173,6 @@ function fp_goto($path, $query = "") {
     $query .= "&current_student_id=$current_student_id";
   }
 
-  if ($query != "") {
-    // Should begin with a ?
-    // TODO:
-    // But NOT if we don't have clean URLs enabled.  If we don't, it will break, and it should
-    // begin with an &.
-    $query = "?" . $query;   
-  }  
-  
   // Close the seesion before we try to redirect.
   session_write_close();
   
@@ -189,7 +181,7 @@ function fp_goto($path, $query = "") {
   }
   
   
-  header('Location: ' . base_path() . '/' . $path . $query);
+  header('Location: ' . fp_url($path, $query));
   exit();
   
 }
@@ -206,15 +198,6 @@ function l($text, $path, $query = "", $attributes = array()) {
     $path = variable_get("front_page", "main");
   }
 
-  if ($query != "") {
-    // Should begin with a ?
-    // TODO:
-    // But NOT if we don't have clean URLs enabled.  If we don't, it will break, and it should
-    // begin with an &.
-    $query = "?" . $query;   
-  } 
-  
-  
   // Does the query contain possible replacement patterns? (look for %)
   if (strpos($query, "%") !== 0) {
     // Find modules which implement the hook_menu_handle_replacement_pattern function.
@@ -225,7 +208,7 @@ function l($text, $path, $query = "", $attributes = array()) {
   }
   
   
-  $rtn .= '<a href="' . base_path() . '/' . $path . $query . '" ';
+  $rtn .= '<a href="' . fp_url($path, $query) . '" ';
   
   foreach ($attributes as $key => $value) {
     $rtn .= $key . '="' . $value . '" ';
@@ -237,6 +220,34 @@ function l($text, $path, $query = "", $attributes = array()) {
 
   return $rtn;
 }
+
+/**
+ * This function will take a path, ex: "admin/config/module"
+ * and a query, ex: "nid=5&whatever=yes"
+ * And join them together, respecting whether or not clean URL's are enabled.
+ */
+function fp_url($path, $query, $include_base_path = TRUE) {
+  
+  // If clean URLs are enabled, we should begin with a ?, if not, use an &
+  
+  // TODO: make sure that works.
+  
+  $rtn = "";
+  if ($include_base_path) {
+    $rtn .= base_path() . "/";
+  }  
+ 
+  $rtn .= $path;
+  
+  $rtn .= "?";
+  
+  $rtn .= $query;
+ 
+  return $rtn;
+          
+}
+
+
 
 
   /**
@@ -282,121 +293,6 @@ function fp_screen_is_mobile(){
 
 ////////////////////////////////////////////////////////////////////
 
-define ('WATCHDOG_NOTICE', 101);
-define ('WATCHDOG_ALERT', 102);
-define ('WATCHDOG_ERROR', 103);
-define ('WATCHDOG_DEBUG', 103);
-/**
- * Call other modules which implement the hook_watchdog function.
- * Adapted from Drupal 6's watchdog function.
- */
-function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE, $extra_data = "") {
-  // TODO:  implement me.  have the system_module implement a hook_watchdog.
-}
-
-/**
- * Returns the faculty member's name based on the ID provided.
- */
-function fp_get_faculty_name($faculty_id) {
-  $db = get_global_database_handler();
-  $name = $db->get_faculty_name($faculty_id);
-  if (!$name) $name = "Unknown Advisor";
-  return $name;
-}
-
-
-
-
-function db_query($query) {
-  // Capture arguments to this function, to pass along to our $db object.
-  $args = func_get_args();
-  array_shift($args);  
-  
-  $db = get_global_database_handler();  
-  $res = $db->db_query($query, $args);
-
-  return $res;    
-}
-
-function db_fetch_array($result_handler) {
-  $db = get_global_database_handler();
-  return $db->db_fetch_array($result_handler);
-}
-
-function db_num_rows($result_handler) {
-  $db = get_global_database_handler();
-  return $db->db_num_rows($result_handler);
-}
-
-
-function variable_get($name, $default_value = "") {
-  $res = db_query("SELECT value FROM variables
-                         WHERE name = '?' ", $name);
-  $cur = db_fetch_array($res);
-  
-  $val = unserialize($cur["value"]);
-  if (!$val) {
-    $val = $default_value;
-  }
-  
-  if ($val == "BOOLEAN_FALSE_PLACEHOLDER") {
-    $val = FALSE;
-  }
-  
-  return $val;
-}
-
-
-function variable_set($name, $value) {
-  
-  // Boolean FALSE presents unusual problems when we try to tell if it got unserialized correctly.
-  // We will convert it to a placeholder so we can positively store it.   
-  if ($value === FALSE) {
-    $value = "BOOLEAN_FALSE_PLACEHOLDER";
-  }
-    
-  db_query("REPLACE INTO variables (name, value)
-              VALUES ('?', '?') ", $name, serialize($value));
-  
-}
-
-function fp_get_system_settings() {
-  //$db = get_global_database_handler();
-  //$settings = $db->get_flightpath_settings();
-  
-  if (isset($GLOBALS["fp_system_variables"])) {
-    return $GLOBALS["fp_system_variables"];
-  }
-  
-  // Get all of our settings from the variables table.
-  $res = db_query("SELECT * FROM variables");
-  while ($cur = db_fetch_array($res)) {
-    $name = $cur["name"];
-    $val = unserialize($cur["value"]);
-    
-    if ($val == "BOOLEAN_FALSE_PLACEHOLDER") {
-      $val = FALSE;
-    }
-    
-    $settings[$name] = $val;
-    
-  }
-  
-  
-  // Make sure some important settings have _something_ set, or else it could cause
-  // problems for some modules.
-  if ($settings["current_catalog_year"] == "") {
-    $settings["current_catalog_year"] = 2006;
-  }  
-  if ($settings["earliest_catalog_year"] == "") {
-    $settings["earliest_catalog_year"] = 2006;
-  }  
-  
-  $GLOBALS["fp_system_variables"] = $settings;
-  
-  return $settings;
-    
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -650,16 +546,27 @@ function get_module_path($module = "", $bool_include_file_system_path = FALSE) {
  * Will return TRUE or FALSE for success or failure to include
  * the module.
  *
+ * If the use_module_path is set to some value, we will not attempt to use
+ * the setting for this module's path.  Useful if we do not have the module in our
+ * modules table yet.
+ * 
  * Example use:  include_module("course_search");
  * 
  * @param string $module
  */
-function include_module($module, $bool_call_init = TRUE) {
+function include_module($module, $bool_call_init = TRUE, $use_module_path = "") {
 
   $system_path = trim($GLOBALS["fp_system_settings"]["file_system_path"]);
   
-  if (isset($GLOBALS["fp_system_settings"]["modules"][$module]["path"])) {
-    $path = $GLOBALS["fp_system_settings"]["modules"][$module]["path"] . "/$module.module";
+  $module_path = $GLOBALS["fp_system_settings"]["modules"][$module]["path"];
+  if ($use_module_path != "") {
+    $module_path = $use_module_path;
+  }
+  
+  if ($module_path != "") {
+    $path = $module_path . "/$module.module";
+    
+        
     if (file_exists($system_path . "/" . $path)) {
       require_once($system_path . "/" . $path);
     }
@@ -678,6 +585,22 @@ function include_module($module, $bool_call_init = TRUE) {
   return FALSE;  
 }
 
+
+/**
+ * Find and include the module's .install file, if it exists.
+ * Returns TRUE or FALSE if it was able to find & include the file.
+ */
+function include_module_install($module, $path) {
+  $system_path = trim($GLOBALS["fp_system_settings"]["file_system_path"]);
+    
+  $install_path = $path . "/$module.install";
+  if (file_exists($system_path . "/" . $install_path)) {
+    require_once($system_path . "/" . $install_path);
+    return TRUE;
+  }
+  
+  return FALSE;  
+}
 
 
 /**

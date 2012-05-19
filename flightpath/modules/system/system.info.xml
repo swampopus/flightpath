@@ -1,8 +1,0 @@
-<module>
-  <name>System</name>
-  <description>This module controls various settings for FlightPath, and
-                is required for FlightPath to run.  It cannot be
-                disabled.</description>
-  <version>1.1.1</version>
-  <required>true</required>
-</module>

@@ -190,6 +190,16 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   $required = $element["required"];
   $attributes = $element["attributes"];
 
+
+  if (is_array($attributes)) {
+    // Convert the attributes array into a string.
+    $new_attr = "";
+    foreach ($attributes as $key => $val) {
+      $new_attr .= " $key='$val' ";
+    }
+    $attributes = $new_attr;
+  }
+
   $popup_help_link = "";
   if ($popup_description) {
     // Cheap hack to get rid of whitespace    
@@ -271,14 +281,14 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
         $checked = "checked=checked";
       }
       $rtn .= "<div class='radio-element radio-element-$key'>
-                 <label class='label-for-radio'><input type='radio' name='$name' id='element-$name-$key' value='$key' $checked> $val</label>
+                 <label class='label-for-radio'><input type='radio' name='$name' id='element-$name-$key' value='$key' $checked $attributes> $val</label>
                </div>";
     }
     $rtn .= "</div>";
   }
 
   if ($type == "select") {
-    $rtn .= "<select name='$name' id='element-$name'>
+    $rtn .= "<select name='$name' id='element-$name' $attributes>
             <option value=''>- Please select -</option>";
     foreach ($options as $key => $val) {
       $selected = "";
@@ -295,12 +305,13 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   if ($type == "checkboxes") {
     $rtn .= "<div class='form-checkboxes form-checkboxes-$name'>";
     foreach ($options as $key => $val) {
-      $checked = "";     
+      $checked = "";
       if (is_array($value) && $value[$key] == $key) {
+        
         $checked = "checked=checked";
       }
       $rtn .= "<div class='checkbox-element checkbox-element-$key'>
-                 <label class='label-for-checkbox'><input type='checkbox' name='$name" . "[$key]' id='element-$name-$key' value='$key' $checked> $val</label>
+                 <label class='label-for-checkbox'><input type='checkbox' name='$name" . "[$key]' id='element-$name-$key' value='$key' $checked $attributes> $val</label>
                </div>";
     }
     $rtn .= "</div>";
@@ -309,9 +320,12 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
 
 
   if ($type == "submit") {
-    $rtn .= "<input type='submit' value='$value'>";
+    $rtn .= "<input type='submit' value='$value' $attributes>";
   }
-
+  
+  if ($type == "button") {
+    $rtn .= "<input type='button' value='$value' $attributes>";    
+  }
 
 
   if ($description) {

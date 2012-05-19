@@ -1,0 +1,37 @@
+<?php
+
+/**
+ * This file should contain only hooks relating to installing, enabling, disabling, and uninstalling this module.
+ *  
+*/
+
+
+/**
+ * Hook install.  Called when the module is installed on the admin modules page.
+ */
+function announcements_install() {
+  fpm("in hook install");
+}
+
+
+/**
+ * hook_enable. Called when the module is enabled.  Will automatically be called after hook_install.
+ */
+function announcements_enable() {
+  fpm("hook enable");
+}
+
+
+/**
+ * hook_disable.  Called when the module is disabled.
+ */
+function announcements_disable() {
+  fpm("hook disable"); 
+}
+
+/**
+ * hook_uninstall.  Called when module is "uninstalled"
+ */
+function announcements_uninstall() {
+  fpm("hook uninstall");
+}

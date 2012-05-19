@@ -40,6 +40,7 @@ if (!isset($skip_flightpath_functions) || $skip_flightpath_functions != TRUE) {
   require_once("$levels_deep" . "includes/misc.inc");
   require_once("$levels_deep" . "includes/forms.inc");
   require_once("$levels_deep" . "includes/menu.inc");
+  require_once("$levels_deep" . "includes/db.inc");
 }
 
 // Load the global system settings file.

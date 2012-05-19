@@ -85,6 +85,12 @@ function system_perm() {
                         the Data Entry components of FlightPath, like Courses,
                         Groups, Degrees, and advising settings."),
     ),
+
+    "administer_modules" => array(
+      "title" => t("Administer modules"),
+      "description" => t("This will allow a user to install, enable, disable, and uninstall modules."),
+    ),
+
     
     "de_can_administer_users" => array(
       "title" => t("Can administer users"),
@@ -209,6 +215,35 @@ function system_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
     "tab_parent" => "admin-tools/admin",    
   );
+  
+  $items["admin/config/modules"] = array(
+    "title" => "Edit modules",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_modules_form"),
+    "access_arguments" => array("administer_modules"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  );
+
+  $items["system/uninstall-module"] = array(
+    "page_callback" => "system_handle_uninstall_module",
+    "page_arguments" => array(2),
+    "access_arguments" => array("administer_modules"),
+    "type" => MENU_TYPE_CALLBACK,
+  );
+  
   
   
   $items["admin/config/clear-menu-cache"] = array(
@@ -1093,6 +1128,323 @@ function system_perform_submit_modules() {
 }
 
 
+
+/**
+ * This is the form which an admin may use to manage the modules
+ * in the system.
+ */
+function system_modules_form() {
+  $form = array();
+  
+  fp_add_css(fp_get_module_path("system") . "/css/style.css");
+  
+  $form["mark" . $m++] = array(
+    "value" => t("Use this form to enable or disable modules.  This scans the /modules/ and then /custom/modules/
+                  directories."),
+  );
+  
+  
+  // Begin by scanning the /modules/ directory.  Anything in there
+  // cannot be disabled.
+  $module_dirs = array();
+  $module_dirs[] = array("start" => "modules", "type" => t("Core"));
+  $module_dirs[] = array("start" => "custom/modules", "type" => t("Custom"));
+    
+  foreach ($module_dirs as $module_dir) {
+    $start_dir = $module_dir["start"];
+     
+    if ($dh = opendir($start_dir)) {
+      //$pC .= "<div class='fp-system-modules-type'>{$module_dir["type"]}</div>
+      //        <table class='fp-system-modules-table' cellpadding='0' cellspacing='0'>";
+              
+      $form["mark" . $m++] = array(
+        "value" => "<div class='fp-system-modules-type'>{$module_dir["type"]}</div>
+                    <table class='fp-system-modules-table' cellpadding='0' cellspacing='0'>",
+      );
+              
+      $pol = "even";
+      while ($file = readdir($dh)) {    
+        if ($file == "." || $file == "..") continue;
+        
+        if (is_dir($start_dir . "/" . $file)) {  
+         
+          // Okay, now look inside and see if there is a .info file.
+          if (file_exists("$start_dir/$file/$file.info")) {
+            $module = $file;
+            $info_contents = file_get_contents("$start_dir/$file/$file.info");
+              
+            //fpm($info_contents);  
+            // From the info_contents variable, split up and place into an array.
+            $info_details_array = array();
+            $lines = explode("\n", $info_contents);
+            foreach ($lines as $line) {
+              if (trim($line) == "") continue;
+              $temp = explode("=", trim($line));
+              $info_details_array[trim($temp[0])] = trim(substr($line, strlen($temp[0]) + 1)); 
+            }
+            
+            $info_details_array["path"] = "$start_dir/$file";
+            $info_details_array["module"] = $module;
+            
+            //fpm($info_details_array);            
+            // Expected keys:
+            // name, description, version, core, requires (csv), requred (true or false)
+            $checked = "";
+
+            $form["mark" . $m++] = array(
+              "value" => "<tr class='fp-system-modules-row fp-system-modules-row-$pol'>
+                            <td width='35%'>",
+            );
+                        
+            // the Checkbox.            
+            // Should it be checked?  We can check the modules table to see if it's enabled/installed or not.
+            $installation_status = "";
+            $default_value = array();
+            $res = db_query("SELECT * FROM modules WHERE name = '?' ", $module);
+            $cur = db_fetch_array($res);
+            $info_details_array["enabled"] = $cur["enabled"];
+            if ($cur["enabled"] == "1") {
+              // Yes, it is checked!
+              $default_value = array($module => $module);              
+            }
+            else if ($cur["enabled"] == "") {
+              $installation_status = t("not installed");
+            }
+            else if ($cur["enabled"] == "0") {
+              $installation_status = fp_get_js_confirm_link(t("Are you sure you wish to uninstall @module?\\nThis may remove saved data belonging to the module.", array("@module" => $module)), 
+                                                            ' window.location="' . fp_url("system/uninstall-module", "module=$module") . '"; ', t("uninstall?")); 
+            }
+            
+            
+                        
+            $attributes = array();
+            if ($info_details_array["required"]) {
+              // This is a required module; it cannot be unchecked.
+              $attributes["disabled"] = "disabled";
+            }
+            
+            $form["cb__$module"] = array(
+              "type" => "checkboxes",              
+              "options" => array($module => $info_details_array["name"]),
+              "value" => $default_value,
+              "suffix" => "<div class='fp-system-modules-machine-name'>$file</div>
+                            <div class='fp-system-modules-installation-status'>$installation_status</div>
+                            ",
+              "attributes" => $attributes,
+            ); 
+            
+            // hidden variable containing the details about this module, for later use on submit.
+            $form["module_details__$module"] = array(
+              "type" => "hidden",
+              "value" => urlencode(serialize($info_details_array)),
+            );
+
+
+            
+            // Version & descr.
+            $requires = "";
+            if ($info_details_array["requires"] != "") {
+              $requires = "<div class='fp-system-modules-requires hypo'>
+                            <b>" . t("Requires:") . "</b> {$info_details_array["requires"]}
+                           </div>";
+              
+            }
+            $form["mark" . $m++] = array(
+              "value" => "  </td>
+                            <td width='5%' >{$info_details_array["version"]}</td>
+                            <td >{$info_details_array["description"]}$requires</td>
+                          </tr>
+                          ",
+                          
+            );
+                                          
+                                                     
+            $pol = ($pol == "even") ? "odd" : "even";
+            
+          } // if file_exists (xml file)        
+        } // if is_dir      
+      } // while file=readdir
+      
+      $form["mark" . $m++] = array(
+        "value" => "</table>",
+      );
+      
+    } // if opendir($startdir)
+  }// foreach moduledirs
+  
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => t("Submit"),
+    "prefix" => "<hr>",
+  );  
+  
+  
+  return $form;
+}
+
+
+/**
+ * Submit handler for the modules form. 
+ */
+function system_modules_form_submit($form, $form_state) {
+    
+  // Go through all of the checkboxes which we have "module_details" for.  If there is NOT a corresponding
+  // checkbox, it means it wasn't checked, and should be disabled in the database.  Otherwise, it means it WAS
+  // checked, and should be enabled/installed.
+  //fpm($form_state["values"]);
+  foreach ($form_state["values"] as $key => $value) {
+    if (strstr($key, "module_details__")) {
+      if ($module_details = unserialize(urldecode($value))) {
+        
+        $module = $module_details["module"];
+        
+        // Disabling a module.
+        if ($module_details["enabled"] == "1" && !isset($form_state["values"]["cb__$module"])) {
+          // So it WAS enabled, but now the checkbox wasn't checked.  So disable it!
+          system_disable_module($module_details);
+        }
+        
+        // Enabling a module
+        if ($module_details["enabled"] != "1" && isset($form_state["values"]["cb__$module"])) {
+          system_enable_module($module_details);
+        }
+        
+      }
+    }
+  }
+
+  
+}
+
+
+
+/**
+ * Called from the menu (ie, a URL) this function will uninstall a module.
+ * 
+ */
+function system_handle_uninstall_module() {
+  $module = $_REQUEST["module"];
+
+  // First, let's get information about this module from the db.
+  $res = db_query("SELECT * FROM modules WHERE name = '?' ", $module);
+  $cur = db_fetch_array($res);
+  // Make sure it is not currently enabled.
+  if ($cur["enabled"] == "1") {
+    fp_add_message(t("Module %module not yet disabled.  Disable first, then try to uninstall.", array("%module" => $module)));
+    return;
+  }
+  
+  // Let's see if we can call hook_uninstall for this module.
+  if (include_module($module, TRUE, $cur["path"])) {
+    if (include_module_install($module, $cur["path"])) {
+      if (function_exists($module . "_uninstall")) {
+        call_user_func($module . "_uninstall");
+      }
+    }
+  }
+  
+  // Remove from the database.
+  $res = db_query("DELETE FROM modules WHERE name = '?' ", $module);
+  
+  
+  fp_add_message(t("Uninstalled %module.", array("%module" => $module)));
+  
+  fp_goto("admin/config/modules");
+}
+
+
+/**
+ * Handles the enabling (and possible installatio) of module.
+ */
+function system_enable_module($module_details) {
+
+  $module = $module_details["module"];
+  $path = $module_details["path"];
+
+  $bool_call_hook_install = FALSE;
+
+  // Do we need to attempt to call the hook_install function?
+  if ($module_details["enabled"] == "") {
+    // Wasn't in the database, so we need to install it.
+
+    // Add to our table.
+    // (delete anything all ready there first)      
+    $res = db_query("DELETE FROM modules WHERE name = '?' ", $module);
+    // Now, add back into the table.
+    $res = db_query("INSERT INTO modules (name, path, version, requires, enabled, type, schema_version, info)
+                     VALUES ('?', '?', '?', '?', '?', '?', '?', '?')
+                     ", $module, $path, $module_details["version"], $module_details["required"], "1", "module",
+                        $module_details["schema_version"], serialize($module_details));
+    
+    $bool_call_hook_install = TRUE;
+    
+    fp_add_message(t("The module %module has been installed.", array("%module" => $module)));
+         
+  }
+
+
+  // If the module has a .install file, begin by including it.
+  if (include_module_install($module, $path)) {
+      
+    // Include the original module file first.
+    include_module($module, TRUE, $path);
+
+         
+    if ($bool_call_hook_install) {
+      // call hook_install if it exists.
+      if (function_exists($module . '_install')) {
+        call_user_func($module . '_install');
+      }
+    }     
+
+    // Now, we can call hook_enable, if it exists.
+    if (function_exists($module . '_enable')) {
+      call_user_func($module . '_enable');
+    }
+       
+  }
+
+
+  // Update our table.
+  $res = db_query("UPDATE modules SET enabled = '1' WHERE name = '?' ", $module);    
+
+  fp_add_message(t("The module %module has been enabled.", array("%module" => $module)));
+
+ 
+  
+}
+
+
+/**
+ * Handles the disabling of the module in question.
+ */
+function system_disable_module($module_details) {
+
+  $module = $module_details["module"];
+  $path = $module_details["path"];
+
+  // This module cannot be disabled!
+  if ($module_details["required"] == TRUE) {
+    return;
+  }
+
+  // If the module has a "hook_disable" in it's path/module.install file, include and call it.  
+  if (include_module_install($module, $path) && function_exists($module . '_disable')) {
+    call_user_func($module . '_disable');
+  }
+  
+  // Disable it in the modules table.
+  $res = db_query("UPDATE modules
+                   SET enabled = '0'
+                   WHERE name = '?' ", $module);
+
+  fp_add_message(t("The module %module has been disabled.", array("%module" => $module)));  
+  
+}
+
+
+
+
 /**
  * Similar to the modules page on Drupal, this page will scan various
  * directories, looking for modules (denoted by their .info files)
@@ -1102,7 +1454,7 @@ function system_perform_submit_modules() {
  *
  * @param string $msg
  */
-function system_display_modules_form($msg = "") {
+function z__system_display_modules_form($msg = "") {
   $module_action_u_r_l = get_module_action_u_r_l("system");
   $pC = "";
   // for typing convenience...  

@@ -1,0 +1,57 @@
+<?php
+
+/**
+ *  This module lets administrators create announcements, when then appear can appear in a block.  
+*/
+
+function announcements_menu() {
+
+  $items = array();
+
+  $items["admin/config/announcements"] = array(
+    "title" => "Announcements",
+    "page_callback" => "announcements_display_announcements_admin_list",    
+    "access_arguments" => array("admin_announcements"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "announcements_list",
+  );     
+    
+  return $items;
+}
+
+
+/**
+ * Display a list of announcements for the administrator
+ */
+function announcements_display_announcements_admin_list() {
+  $rtn = "";
+  
+  $rtn .= "<h2 class='page-title'>Announcements</h2>";
+
+   
+  
+    
+  return $rtn;
+}
+
+
+function announcements_perm() {
+  return array(
+    "admin_announcements" => array(
+      "title" => t("Administer announcements"),
+      "description" => t("Allow the user to edit & delete announcements."),
+    ),
+  );
+}
