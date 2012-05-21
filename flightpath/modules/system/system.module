@@ -160,6 +160,40 @@ function system_get_roles_for_user($user_id) {
 }
 
 
+/**
+ * Hook block regions.
+ * 
+ * This function simply defines which block regions we will handle.  Each
+ * block section should have a unique machine name, so it is best to namespace it with the
+ * name of the module, then page or tab it appears on.
+ * 
+ * The array looks like this:
+ * return array(
+ *   "system_main" => array(
+ *     "title" => t("Main Tab"),
+ *     "regions" => array (
+ *       "left_col" => array("title" => t("Left Column")),
+ *       "right_col" => array("title" => t("Right Column")),
+ *      ),
+ *   ),
+ * );
+ *  
+ * 
+ * REMEMBER to make these machine-names, so only alpha numeric and underscores! 
+ */
+function system_block_regions() {
+  return array(
+    "system_main" => array(
+      "title" => t("Main Tab"),
+      "regions" => array (
+        "left_col" => array("title" => t("Left Column")),
+        "right_col" => array("title" => t("Right Column")),
+       ),
+    ),
+  );
+}
+
+
 
 function system_menu() {
   $items = array();
@@ -837,16 +871,18 @@ function system_display_main_page() {
   
   fp_add_css(fp_get_module_path("system") . "/css/style.css");
   
-  $announcements = system_render_announcements_block();
+  
+  $left_col_blocks = blocks_render_blocks("system_main", "left_col");
+  
   $tools = fp_render_menu_block("Tools", "tools");
   $admin_tools = fp_render_menu_block("Administrative Tools", "admin-tools");
   
   if (fp_screen_is_mobile()) {
-    $rtn .= "<tr><td colspan='2'>$announcements $tools $admin_tools</td></tr>";
+    $rtn .= "<tr><td colspan='2'>$left_col_blocks $tools $admin_tools</td></tr>";
   }
   else {
     $rtn .= "<tr><td width='50%' valign='top'  style='padding-right: 10px;'>
-              $announcements
+              $left_col_blocks
               </td><td width='50%' valign='top' style='padding-left: 10px;'>
                     $tools
                     $admin_tools
@@ -1292,6 +1328,9 @@ function system_modules_form_submit($form, $form_state) {
   // checkbox, it means it wasn't checked, and should be disabled in the database.  Otherwise, it means it WAS
   // checked, and should be enabled/installed.
   //fpm($form_state["values"]);
+  
+  $did_something = FALSE;
+  
   foreach ($form_state["values"] as $key => $value) {
     if (strstr($key, "module_details__")) {
       if ($module_details = unserialize(urldecode($value))) {
@@ -1302,15 +1341,26 @@ function system_modules_form_submit($form, $form_state) {
         if ($module_details["enabled"] == "1" && !isset($form_state["values"]["cb__$module"])) {
           // So it WAS enabled, but now the checkbox wasn't checked.  So disable it!
           system_disable_module($module_details);
+          $did_something = TRUE;
         }
         
         // Enabling a module
         if ($module_details["enabled"] != "1" && isset($form_state["values"]["cb__$module"])) {
           system_enable_module($module_details);
+          $did_something = TRUE;
         }
         
       }
     }
+  }
+
+  if ($did_something) {
+    // We should clear the cache if we did something.
+    
+    // Refetch all of the modules from the modules table.
+    fp_rebuild_modules_list();
+    // Rebuild the menu router now.
+    menu_rebuild_cache();
   }
 
   

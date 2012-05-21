@@ -1,6 +1,9 @@
 FlightPath Changelog
 ====================
 
+2012-05-21
+  Created Blocks module, and method of establishing block regions and blocks offered by a module.
+
 2012-05-19
   Working on modules page. Installing, enabling, uninstalling, etc.  Created system
   of hooks that go in a .install file, like Drupal.

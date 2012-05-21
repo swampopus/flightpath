@@ -1,0 +1,20 @@
+/**
+ *   CSS file for the announcements module.
+ */
+
+.announcement {
+  margin-bottom: 20px;
+  font-size: 0.9em;
+}
+
+.admin-announcements .announcement {
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin: 20px;
+}
+
+.announcement .announcement-posted {
+  color: #555;
+  text-align: right;
+  font-style: italic;
+}

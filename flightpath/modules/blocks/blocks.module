@@ -1,0 +1,306 @@
+<?php
+
+/**
+ * This is the blocks module, which lets the user manage the location and appearance of blocks
+ * in FlightPath.
+*/
+
+
+function blocks_perm() {
+  return array(
+    "administer_blocks" => array(
+      "title" => t("Administer blocks"),
+      "description" => t("Allow the user to administer the location of blocks."),
+    ),
+  );
+}
+
+
+
+function blocks_menu() {
+  $items = array();
+  
+
+  $items["admin/config/blocks"] = array(
+    "title" => "Manage Blocks",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("blocks_manage_blocks_form"),    
+    "access_arguments" => array("admin_blocks"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "blocks_manage",
+  );       
+  
+  
+  return $items;
+}
+
+
+/**
+ * This form lets the user manage the various blocks in the system.
+ */
+function blocks_manage_blocks_form() {
+    
+  $form = array();
+  
+  $selected_section = $_REQUEST["section"];
+  $selected_module = $_REQUEST["module"];
+  
+  // We should have sub-tabs for all the possible sections.  To accomplish this, 
+  // we need to get a list of defined sections and regions.    
+  $regions = blocks_get_sections_and_regions();
+  $tab_array = array();
+  $c = 0;
+  foreach ($regions as $module => $region_data) {
+    foreach ($region_data as $section => $data) {
+    
+      if ($selected_section == "" && $c == 0) {
+        // No selected section AND this is the first-- select it!
+        $selected_section = $section;
+        $selected_module = $module;
+      }
+      
+      $is_active = ($selected_section == $section && $selected_module == $module) ? TRUE : FALSE;  
+      
+      $tab_array[] = array(
+        "title" => $data["title"],
+        "active" => $is_active,
+        "on_click" => 'window.location="' . fp_url("admin/config/blocks", "section=$selected_section&module=$selected_module") . '";',
+      );
+      
+      $c++;
+    }
+  }
+  
+  fp_set_page_sub_tabs($tab_array);
+
+  $form["module"] = array(
+    "type" => "hidden",
+    "value" => $selected_module,
+  );
+   
+  $form["section"] = array(
+    "type" => "hidden",
+    "value" => $selected_section,
+  );
+
+  
+  // Build the available region options.
+  $region_options = array();
+  $region_options[""] = t("- Disabled -");
+  foreach ($regions[$selected_module][$selected_section]["regions"] as $region => $rtitle) {
+    $region_options[$region] = $rtitle["title"];
+  }
+
+  $weight_options = array();
+  for($t = -100; $t <= 100; $t++) {
+    $weight_options[$t] = $t;
+  }
+  
+  // Okay, now we need a list of available blocks in the system.  We will list each one along with 
+  // a pulldown list (of available regions on this section) and a weight pulldown.
+  $available_blocks = blocks_get_available_blocks();
+  $form["mark" . $m++] = array(
+    "value" => "<table class='blocks-table'>",
+  );
+  foreach($available_blocks as $module => $blocks) {
+    $form["mark" . $m++] = array(
+      "value" => "<tr>
+                    <td colspan='10'><div class='block-module-name'>$module</div></td>
+                </tr>
+                <tr>
+                  <th>" . t("Block") . "</th>
+                  <th>" . t("Region") . "</th>
+                  <th>" . t("Weight") . "</th>
+                </tr>",
+    );
+    
+    foreach ($blocks as $delta => $title) {
+        
+      $default_region = "";  
+      $default_weight = "";  
+      
+      // is this module and delta currently assigned a particular weight or region in this section?
+      $res = db_query("SELECT * FROM blocks WHERE section = '?' AND module = '?' AND delta = '?' 
+                        ", $selected_section, $module, $delta);
+      $cur = db_fetch_array($res);
+      $default_region = $cur["region"];
+      $default_weight = $cur["weight"];
+      
+      
+      $form["block_region~~{$module}~~{$delta}"] = array(        
+        "type" => "select",
+        "options" => $region_options,
+        "prefix" => "<tr>
+                      <td>$title</td>
+                      <td>",
+        "suffix" => "</td>",
+        "value" => $default_region,
+        "no_please_select" => TRUE,
+      );
+      
+      $form["block_weight~~{$module}~~{$delta}"] = array(        
+        "type" => "select",
+        "options" => $weight_options,
+        "prefix" => "<td>",
+        "suffix" => "</td>
+                        </tr>",
+        "value" => $default_weight,
+        "no_please_select" => TRUE,
+      );      
+                 
+    }    
+    
+  }
+      
+      
+  $form["mark" . $m++] = array(
+    "value" => "</table>",
+  );
+      
+
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => t("Save block positions"),
+    "prefix" => "<hr>",
+  );
+      
+      
+  return $form;
+}
+
+
+
+/**
+ * Submit handler for the manage blocks form.
+ */
+function blocks_manage_blocks_form_submit($form, $form_state) {
+    
+  $selected_module = $form_state["values"]["module"];
+  $selected_section = $form_state["values"]["section"];
+
+  // begin by deleteing what is all ready there, if anything, for this section.
+  db_query("DELETE FROM blocks WHERE section = '?' ", $selected_section);  
+      
+  foreach ($form_state["values"] as $key => $value) {
+
+    if (strstr($key, "block_region~~")) {
+      $temp = explode("~~", $key);
+      $module = $temp[1];
+      $delta = $temp[2];
+      
+      // Okay, let's see where it was placed, and update our blocks table.
+      $region = $form_state["values"]["block_region~~$module~~$delta"];
+      $weight = $form_state["values"]["block_weight~~$module~~$delta"];
+      
+      if ($region != "") {
+        db_query("INSERT INTO blocks (section, region, module, delta, weight)
+                  VALUES ('?', '?', '?', '?', '?')
+                  ", $selected_section, $region, $module, $delta, $weight);
+      }
+            
+                  
+    }
+  }
+    
+  fp_add_message(t("Blocks have been updated successfully."));
+    
+}
+
+
+
+
+/**
+ * Return an array of blocks which we can assign and display, as defined by other modules' hook_blocks
+ * function.
+ */
+function blocks_get_available_blocks() {
+  $rtn = array();
+  
+  $modules = modules_implement_hook("blocks");
+  foreach($modules as $module) {
+    $arr = call_user_func($module . "_blocks");
+    $rtn[$module] = $arr;
+  }
+
+  return $rtn;    
+  
+}
+
+
+/**
+ * Look through our modules for hook_block_region and assemble them in an array.
+ */
+function blocks_get_sections_and_regions() {
+  $rtn = array();
+  
+  $modules = modules_implement_hook("block_regions");
+  foreach($modules as $module) {
+    $arr = call_user_func($module . "_block_regions");
+    $rtn[$module] = $arr;
+  }
+
+  return $rtn;    
+  
+}
+
+
+/**
+ * This function will actually render the HTML for the blocks requested for a particular section
+ * and region.
+ */
+function blocks_render_blocks($section, $region, $title_style = "curved") {
+  
+  $rtn = "";
+  
+  $rtn .= "<div class='blocks-blocks'>";
+  $c = 0;
+  $res = db_query("SELECT * FROM blocks WHERE section = '?' AND region = '?'
+                   ORDER BY weight", $section, $region);
+  while ($cur = db_fetch_array($res)) {
+    $module = $cur["module"];
+    $delta = $cur["delta"];
+  
+    $block = call_user_func($module . "_render_block", $delta);
+
+    $extra_class = "";
+    if ($c == 0) $extra_class = " block-first";
+    
+    $rtn .= "<div class='block-$module-$delta $extra_class'>";
+        
+    if ($title_style == "curved") {
+      $rtn .= fp_render_curved_line($block["title"]);
+    }
+    else if ($title_stule == "square") {
+      $rtn .= fp_render_square_line($block["title"]);
+    }
+            
+    $rtn .= "<div class='block-body'>" . $block["body"] . "</div>";
+    
+    $rtn .= "</div>";
+    
+    $c++;
+  }
+  
+  
+  
+  $rtn .= "</div>";
+  
+  return $rtn;
+  
+}
+
+
+
+

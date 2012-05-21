@@ -33,12 +33,14 @@ function fp_render_form($callback, $form_type = "") {
     $default_query = join("&", $new_query);
   }
   
-  
-  
   $page_title = $GLOBALS["fp_current_menu_router_item"]["title"];
-  if ($GLOBALS["fp_set_title"] != "") $page_title = $GLOBALS["fp_set_title"];
+  if (isset($GLOBALS["fp_set_title"])) {
+     $page_title = $GLOBALS["fp_set_title"];
+  }
   
-  $rtn .= "<h2 class='title'>" . $page_title . "</h2>";
+  if ($page_title != "") {
+    $rtn .= "<h2 class='title'>" . $page_title . "</h2>";
+  }
     
 /*  if (is_array($form["redirect"])) {
     $redirect_path = $form["redirect"]["path"];
@@ -188,6 +190,8 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   $prefix = $element["prefix"];
   $suffix = $element["suffix"];
   $required = $element["required"];
+  $no_please_select = $element["no_please_select"];
+  
   $attributes = $element["attributes"];
 
 
@@ -288,8 +292,11 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   }
 
   if ($type == "select") {
-    $rtn .= "<select name='$name' id='element-$name' $attributes>
-            <option value=''>- Please select -</option>";
+    $rtn .= "<select name='$name' id='element-$name' $attributes>";
+    if ($no_please_select != TRUE) {
+      $rtn .= "<option value=''>- Please select -</option>";
+    }
+    
     foreach ($options as $key => $val) {
       $selected = "";
       if ($value == $key) {

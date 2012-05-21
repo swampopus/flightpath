@@ -9,7 +9,7 @@ function announcements_menu() {
   $items = array();
 
   $items["admin/config/announcements"] = array(
-    "title" => "Announcements",
+    "title" => "Edit Announcements",
     "page_callback" => "announcements_display_announcements_admin_list",    
     "access_arguments" => array("admin_announcements"),
     "page_settings" => array(
@@ -28,7 +28,67 @@ function announcements_menu() {
     "tab_family" => "announcements_list",
   );     
     
+  $items["announcements/delete"] = array(
+    "page_callback" => "announcements_handle_delete_announcement",
+    "access_arguments" => array("admin_announcements"),
+    "type" => MENU_TYPE_CALLBACK,
+  );
+    
+    
   return $items;
+}
+
+
+function announcements_handle_delete_announcement() {
+  $aid = $_REQUEST["aid"];
+  db_query("UPDATE announcements SET delete_flag = '1'
+            WHERE aid = '?' ", $aid);
+  
+  fp_add_message(t("Announcement successfully deleted."));
+  fp_goto("admin/config/announcements");
+}
+
+
+/**
+ * Returns a form which lets the user enter a new announcement.
+ */
+function announcements_new_announcement_form() {
+  $form = array();
+
+  fp_set_title("");  // We don't want a title to show on this form, since it's in the middle of a page.
+
+  $form["announcement_posted"] = array(
+    "label" => t("Enter the posted time:"),
+    "type" => "textfield",
+    "description" => t("You may enter the posted date in this format:
+                        YYYY-MM-DD HH:MM:SS with the hours in 24-hour format."),
+    "value" => date("Y-m-d H:i:s"),                        
+  );
+
+  $form["announcement"] = array(
+    "label" => t("Enter announcement:"),
+    "type" => "textarea",
+    
+  );  
+  
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => "Save",
+  );  
+  
+  return $form;
+}
+
+
+function announcements_new_announcement_form_submit($form, $form_state) {
+  $posted = strtotime($form_state["values"]["announcement_posted"]);
+  $announcement = trim($form_state["values"]["announcement"]);
+  
+  db_query("INSERT INTO announcements (announcement, posted)
+            VALUES ('?', '?') ", $announcement, $posted);
+  
+  fp_add_message(t("Announcement created successfully."));     
+  
 }
 
 
@@ -38,13 +98,48 @@ function announcements_menu() {
 function announcements_display_announcements_admin_list() {
   $rtn = "";
   
+  fp_add_css(fp_get_module_path("announcements") . "/css/announcements.css");
+  
+  
   $rtn .= "<h2 class='page-title'>Announcements</h2>";
 
-   
-  
+  $form = fp_render_form("announcements_new_announcement_form");
+
+  $rtn .= fp_render_c_fieldset($form, t("Click to enter a new announcement"), true);
+    
+  // Okay, let's show the announcements now, in order.
+  $rtn .= "<div class='admin-announcements'>";
+  $rtn .= announcements_render_announcements(TRUE);
+  $rtn .= "</div>";
     
   return $rtn;
 }
+
+
+/**
+ * Return the HTML rendering the announcements we have in the database.
+ */
+function announcements_render_announcements($bool_show_delete = FALSE) {
+  $rtn = "";
+  
+  $res = db_query("SELECT * FROM announcements WHERE delete_flag = 0
+                    ORDER BY posted DESC");
+  while ($cur = db_fetch_array($res)) {
+    $rtn .= "<div class='announcement'>
+                <div class='announcement-text'>" . $cur["announcement"] . "</div>
+                <div class='announcement-posted'>" . t("Posted") . " " . date("D, M jS Y - g:ia", $cur["posted"]) . "</div>";
+    if ($bool_show_delete) {
+      $delete_link = "";
+      $delete_link = fp_get_js_confirm_link(t("Are you sure you wish to delete this announcement?"), 'window.location="' . fp_url("announcements/delete", "aid=" . $cur["aid"]) . '"', t("Delete?"));
+      $rtn .= "<div class='announcement-delete'>$delete_link</div>";  
+    }
+    
+    $rtn .= "</div>";
+  }                    
+  
+  return $rtn;
+}
+
 
 
 function announcements_perm() {
@@ -54,4 +149,48 @@ function announcements_perm() {
       "description" => t("Allow the user to edit & delete announcements."),
     ),
   );
+}
+
+
+
+/**
+ * hook_blocks.  Returns an array of available blocks offered by this module in this format:
+ * array(
+ *  delta => "This is the title of the block.",
+ *  ),
+ * );
+ * 
+ * Delta can be just about anything machine-readable.  Alphanumeric and underscores only.
+ * Ex: 0, 1, fun_2, etc.
+ * 
+ */
+function announcements_blocks() {
+  return array(
+    "primary" => t("Primary announcements block"),
+  );
+}
+
+/**
+ * Called when it is time to render the block in question.
+ * Expected to return an array which looks like this:
+ * array(
+ *  "title" => "Some title goes here.",
+ *  "body" => "this is the primary body of the block",
+ * );
+ */
+function announcements_render_block($delta) {
+  
+  $rtn = array();
+  
+  if ($delta == "primary") {
+      
+    fp_add_css(fp_get_module_path("announcements") . "/css/announcements.css");
+    
+    $rtn["title"] = t("Announcements");       
+    $rtn["body"] = announcements_render_announcements();
+  }
+  
+  
+  return $rtn;
+  
 }

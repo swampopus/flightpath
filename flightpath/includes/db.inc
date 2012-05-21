@@ -46,9 +46,29 @@ function db_fetch_array($result_handler) {
   return $db->db_fetch_array($result_handler);
 }
 
+function db_fetch_object($result_handler) {
+  $db = get_global_database_handler();
+  return $db->db_fetch_object($result_handler);  
+}
+
 function db_num_rows($result_handler) {
   $db = get_global_database_handler();
   return $db->db_num_rows($result_handler);
+}
+
+
+/**
+ * Returns TRUE if the table specified exists or not.
+ */
+function db_table_exists($table_name) {
+  $res = db_query("SHOW TABLES LIKE '?' ", $table_name);
+  $cur = db_fetch_array($res);
+  if ($cur[0] == $table_name) {
+    return TRUE;
+  }
+  
+  return FALSE;
+  
 }
 
 
@@ -84,11 +104,35 @@ function variable_set($name, $value) {
   
 }
 
-function fp_get_system_settings() {
+
+/**
+ * Re-query the modules table and re-add to our global array.
+ */
+function fp_rebuild_modules_list($reinclude = TRUE) {
+  unset($GLOBALS["fp_system_settings"]["modules"]);
+  
+  $res = db_query("SELECT * FROM modules WHERE enabled = 1
+                      ORDER BY weight");
+  while ($cur = db_fetch_array($res)) {
+         
+    $GLOBALS["fp_system_settings"]["modules"][$cur["name"]] = $cur;
+
+    if ($reinclude) {
+      include_module($cur["name"], FALSE);
+    }
+    
+  }
+  
+  
+}
+
+
+
+function fp_get_system_settings($force_rebuild = FALSE) {
   //$db = get_global_database_handler();
   //$settings = $db->get_flightpath_settings();
   
-  if (isset($GLOBALS["fp_system_variables"])) {
+  if ($force_rebuild == FALSE && isset($GLOBALS["fp_system_variables"])) {
     return $GLOBALS["fp_system_variables"];
   }
   

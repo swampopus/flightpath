@@ -1289,6 +1289,11 @@ class _DatabaseHandler
 	function db_fetch_array($result) {
 		return mysql_fetch_array($result);
 	}
+  
+  function db_fetch_object($result) {
+    return mysql_fetch_object($result);
+  }
+  
 
 	function db_close() {
 		return mysql_close($this->dbc);
