@@ -123,10 +123,10 @@ function comments_perform_save_comment() {
   if ($comment) {
     db_query("INSERT INTO advising_comments
               (student_id, faculty_id, term_id,
-                comment, datetime, access_type)
+                comment, posted, access_type)
                 VALUES
-                ('?', '?', '?', '?', NOW(), '?')
-                ", $current_student_id, $faculty_id, $term_id, $comment, $type);
+                ('?', '?', '?', '?', '?', '?')
+                ", $current_student_id, $faculty_id, $term_id, $comment, time(), $type);
                
     fp_add_message("Comment saved successfully.");
   }
@@ -180,7 +180,7 @@ function comments_display_main() {
     if (user_has_permission("can_delete_own_comments_3_months")) {
       // See if this comment is younger than 3 months.
       $del_range = strtotime("-3 month");
-      $then = strtotime($comment["datetime"]);
+      $then = $comment["posted"];
 
       
       if ($then > $del_range) {
@@ -239,7 +239,7 @@ function comments_render_comment($comment, $delete_link = "") {
 
   $rtn .= "<div class='comment-comment comment-comment-" . $comment["access_type"] . "'>
               <div class='comment-by-line'>" .ucwords($comment["access_type"]) . " " . t("comment by") . " " . fp_get_faculty_name($comment["faculty_id"]) . "</div>
-              <div class='comment-datetime'>" . $comment["datetime"] . "</div>
+              <div class='comment-datetime'>" . format_date($comment["posted"], "pretty") . "</div>
               <div class='comment-text'>" . $comment["comment"] . "</div>
               ";
   if ($delete_link) {
@@ -274,7 +274,7 @@ function comments_get_comments($student_id, $bool_included_deleted = FALSE, $acc
                    WHERE student_id = '?'
                    $deleted_line
                    $access_type_line
-                   ORDER BY `datetime` DESC", $student_id);
+                   ORDER BY posted DESC", $student_id);
   while ($cur = db_fetch_array($res)) {
     $rtn[$cur["id"]] = $cur;
   }

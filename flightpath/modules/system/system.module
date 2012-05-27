@@ -293,12 +293,14 @@ function system_menu() {
     "type" => MENU_TYPE_CALLBACK,
   );  
     
+    /*
   $items["perform-login"] = array(
     "title" => "Perform Login",
     "page_callback" => "system_handle_login_submit",
     "access_callback" => TRUE,
     "type" => MENU_TYPE_CALLBACK,
   );
+     * */
 
   $items["logout"] = array(
     "title" => "Logout",
@@ -555,12 +557,20 @@ function system_handle_form_submit() {
   $form_type = $_POST["form_type"];
   $form_include = $_POST["form_include"];
   
+  $form_token = $_POST["form_token"];
+  // Make sure the form_token is valid!
+  if ($form_token != md5($callback . fp_token())) {
+    die(t("Sorry, but you have encountered an error.  A form submission was flagged
+          as possibly being an invalid or forged submission.  This may constitute a bug
+          in the system.  Please report this error to your Systems Administrator."));
+  }
+  
   if ($form_include != "") {
     // This is a file we need to include in order to complete the submission process.
     include_once($form_include);
   }
 
-  
+    
   // TODO: We need to make sure the user has permission to submit this form!
   // Get the original menu item from the callback.
   // We need to run something here which checks this.  It is VITAL!
@@ -571,7 +581,7 @@ function system_handle_form_submit() {
 
   $values = array();
   if (function_exists($callback)) {
-    $form = call_user_func($callback);
+    $form = fp_get_form($callback);
     foreach ($form as $name => $element) {     
       if (isset($_POST[$name])) {  
         $values[$name] = $_POST[$name];
@@ -579,18 +589,49 @@ function system_handle_form_submit() {
     }
   }  
 
+  // Does the form have any defined submit_handler's?  If not, let's assign it the
+  // default of callback_submit().    
+  $submit_handlers = $form["#submit_handlers"];
+  if (!is_array($submit_handlers)) $submit_handlers = array();
+  
+  // If the submit_handlers is empty, then add our default submit handler.  We don't
+  // want to do this if the user went out of their way to enter a different handler.
+  if (count($submit_handlers) == 0) {
+    array_push($submit_handlers, $callback . "_submit");
+  } 
+  
+  // Does the form have any defined validate_handler's?  This works exactly like the submit handler.
+  $validate_handlers = $form["#validate_handlers"];
+  if (!is_array($validate_handlers)) $validate_handlers = array();
+  
+  if (count($validate_handlers) == 0) {
+    array_push($validate_handlers, $callback . "_validate");
+  } 
+    
+    
   // Let's store our values in the SESSION in case we need them later on.
   // But only if this is NOT a system_settings form!
   if ($form_type != "system_settings") {
     $_SESSION["fp_form_submissions"][$callback]["values"] = $values;
   }
 
+  $form_state = array("values" => $values);
+
   // Let's pass this through our default form validator (mainly to check for required fields
   // which do not have values entered)
-  form_basic_validate($form, array("values" => $values));  
-  
+  form_basic_validate($form, $form_state);  
+
+  // Let's now pass it through all of our custom validators, if there are any.
+  foreach ($validate_handlers as $validate_callback) {         
+    if (function_exists($validate_callback)) {
+      call_user_func_array($validate_callback, array(&$form, &$form_state));
+    }
+  }
+
+
+
   if (!form_has_errors()) {
-    // No errors from the basic_validate, so let's continue.
+    // No errors from the validate, so let's continue.
     
     // Is this a "system settings" form, or a normal form?
     if ($form_type == "system_settings") {
@@ -604,20 +645,24 @@ function system_handle_form_submit() {
       fp_add_message("Settings saved successfully.");      
       
     }
-    else if ($form_type == "normal" || $form_type == "") {
-      // Normal form.  Let the callback_submit() function have it, if it exists.
-      if (function_exists($callback . "_submit")) {
-        call_user_func_array($callback . "_submit", array(&$form, array("values" => $values)));
+
+    // Let's go through the form's submit handlers now.
+    foreach ($submit_handlers as $submit_callback) {          
+      if (function_exists($submit_callback)) {
+        call_user_func_array($submit_callback, array(&$form, &$form_state));
       }    
     }
+
+    
+    
   }
 
   // Figure out where we are supposed to redirect the user.
   $redirect_path = $redirect_query = "";
 
-  if (is_array($form["redirect"])) { 
-    $redirect_path = $form["redirect"]["path"];
-    $redirect_query = $form["redirect"]["query"];    
+  if (is_array($form["#redirect"])) { 
+    $redirect_path = $form["#redirect"]["path"];
+    $redirect_query = $form["#redirect"]["query"];    
   }
   else {
     $redirect_path = $_POST["default_redirect_path"];
@@ -631,9 +676,21 @@ function system_handle_form_submit() {
 
 
 function system_handle_logout() {
+  
+  // Check for hook_user_logout
+  $modules = modules_implement_hook("user_logout");
+  foreach($modules as $module) {
+    call_user_func($module . '_user_logout');
+  }
+
+  // Finish up logging out. 
+  
   $_SESSION["fp_logged_in"] = FALSE;
-  session_destroy();
-  return system_display_login_page("<span class='logout-successful'>You have been logged out of FlightPath.</span>");
+  $_SESSION["fp_user_object"] = FALSE;
+  
+  fp_add_message(t("You have been logged out of FlightPath."));
+  fp_goto("<front>");
+  
 }
 
 /**
@@ -672,6 +729,7 @@ function system_perform_clear_menu_cache() {
 /**
  * Handles the submitting of login data.
  */
+/*
 function system_handle_login_submit() {
   // TODO:  Check for hooks which other modules might wish to hook into
   // Are we bypassing logins in the settings, and just giving this user
@@ -691,7 +749,7 @@ function system_handle_login_submit() {
     return;
   }  
 }
-
+*/
 
 function system_display_login_page($msg = "") {
   $rtn = "";
@@ -751,7 +809,7 @@ function system_display_login_page($msg = "") {
   
   $w1 = 300;
   if (fp_screen_is_mobile()) $w1 = "90%";
-  
+ /* 
   $login_box = "
       <table border='0' width='$w1' align='center' class='blueBorder' cellpadding='0' cellspacing='0'>
       <tr>
@@ -792,12 +850,17 @@ function system_display_login_page($msg = "") {
         </tr>
       </table>
    ";
+  */
   
+  $login_box = fp_render_curved_line("Please login below...");
+  $login_box .= fp_render_form("system_login_form");
   
+/*  
   $rtn .= "
       <form action='" . base_path() . "/perform-login' method='POST' id='mainform' onSubmit='showUpdate(true);'>  
     ";
-  
+  */
+ 
   if (fp_screen_is_mobile()) {
     // the user is viewing this on a mobile device, so make it look
     // a bit nicer.
@@ -812,7 +875,7 @@ function system_display_login_page($msg = "") {
        <td valign='top' width='40%'>
         $important_notice
        </td>
-      <td valign='middle'>
+      <td valign='top' style='padding-left: 20px;'>
         $login_box      
   
        </td>
@@ -821,14 +884,156 @@ function system_display_login_page($msg = "") {
      ";
   }
   
-  $rtn .= "
-  </form>
-  <br>$msg
-  ";  
-  
   
   return $rtn;
 }
+
+
+/**
+ * This draws the form which facilitates logins.
+ */
+function system_login_form() {
+  $form = array();
+  
+  fp_set_title("");
+  
+  $form["user"] = array(
+    "label" => t("User:"),
+    "type" => "textfield",
+    "size" => 30,
+  );
+  
+  $form["password"] = array(
+    "label" => t("Password:"),
+    "type" => "password",
+    "size" => 30,
+  );
+  
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => t("Login"),
+  );
+    
+  $form["#attributes"] = array("onSubmit" => "showUpdate(true);");    
+    
+  
+  return $form;
+}
+
+
+/**
+ * Validate function for the login form.
+ * This is where we will do all of the lookups to verify username
+ * and password.  If you want to write your own login handler (like for LDAP)
+ * this is the function you would duplicate in a custom module, then use hook_form_alter
+ * to make your function be the validator, not this one.
+ * 
+ * We will simply verify the password, then let the submit handler take over from there.
+ */
+function system_login_form_validate($form, &$form_state) {
+  $user = $form_state["values"]["user"];
+  $password = $form_state["values"]["password"];
+  
+  // If the GRANT_FULL_ACCESS is turned on, skip trying to validate
+  if ($GLOBALS["fp_system_settings"]["GRANT_FULL_ACCESS"] == TRUE) {
+    $user = "admin";
+    $form_state["passed_authentication"] = TRUE;
+    $form_state["db_row"]["user_id"] = 1;
+    $form_state["db_row"]["user_name"] = "FULL ACCESS USER";
+    return;
+  }  
+  
+  // Otherwise, check the table normally.
+  
+  // Check the user's password is valid.
+  $res = db_query("SELECT * FROM users WHERE user_name = '?' AND password = '?' AND is_disabled = '0' ", $user, md5($password));
+  if (db_num_rows($res) == 0) {
+    form_error("password", t("Sorry, but that username and password combination could not
+                            be found.  Please check your spelling and try again."));
+    return;    
+  }
+  
+  $cur = db_fetch_array($res);
+  $form_state["db_row"] = $cur;
+  
+  // If we made it here, then the user successfully authenticated.
+  $form_state["passed_authentication"] = TRUE;
+
+  // It will now proceed to the submit handler.  
+}
+
+
+/**
+ * Submit handler for login form.
+ * If we are here, it probably means we have indeed authenticated.  Just in case, we will
+ * test the form_state["passed_authentication"] value, which we expect to have been
+ * set in our validate handler.
+ * 
+ * We will now proceed to actually log the user into the system.
+ * 
+ */
+function system_login_form_submit($form, &$form_state) {
+  $user = $form_state["values"]["user"];
+  $password = $form_state["value"]["password"];
+  $passed = $form_state["passed_authentication"];
+  $db_row = $form_state["db_row"];
+  
+  if (!$passed) {
+    fp_add_message(t("Sorry, there has been an error while trying to authenticate the user."));
+    return;
+  }
+
+    
+  $_SESSION["fp_logged_in"] = TRUE;
+      
+    
+  // Set up a new $account object.
+  $account = new stdClass();
+  $account->name = $db_row["user_name"];
+  $account->id = $db_row["user_id"];
+  $account->is_faculty = $db_row["is_faculty"];
+  $account->is_student = $db_row["is_student"];
+  $account->email = $db_row["email"];
+  $account->f_name = $db_row["f_name"];
+  $account->l_name = $db_row["l_name"];
+  $account->roles = array();
+  $account->permissions = array();
+    
+  // Okay, let's look for all the modules who have implimented hook_user_login
+  $modules = modules_implement_hook("user_login");
+  foreach ($modules as $module) {
+    call_user_func($module . '_user_login', &$account);
+  }
+  
+  // Set the $account to the SESSION.
+  $_SESSION["fp_user_object"] = $account;
+  
+  fp_goto("<front>");
+  
+}
+
+
+/**
+ * Impliments hook_user_login.
+ * 
+ * The main thing I want to do here is populate the rolls and permissions
+ * arrays in the $account object. 
+ */
+function system_user_login(&$account) {
+
+   $res = db_query("SELECT * FROM user_roles a, 
+                                  role_permissions b,
+                                  roles c
+                    WHERE a.user_id = '?'
+                    AND a.rid = b.rid
+                    AND a.rid = c.rid", $account->id);
+    while($cur = db_fetch_array($res)) {
+      $account->roles[$cur["rid"]] = $cur["name"];
+      $account->permissions[$cur["pid"]] = $cur["perm"];
+    }
+      
+}
+
 
 
 /**
@@ -873,19 +1078,19 @@ function system_display_main_page() {
   
   
   $left_col_blocks = blocks_render_blocks("system_main", "left_col");
+  $right_col_blocks = blocks_render_blocks("system_main", "right_col");
   
   $tools = fp_render_menu_block("Tools", "tools");
   $admin_tools = fp_render_menu_block("Administrative Tools", "admin-tools");
   
   if (fp_screen_is_mobile()) {
-    $rtn .= "<tr><td colspan='2'>$left_col_blocks $tools $admin_tools</td></tr>";
+    $rtn .= "<tr><td colspan='2'>$left_col_blocks $right_col_blocks</td></tr>";
   }
   else {
     $rtn .= "<tr><td width='50%' valign='top'  style='padding-right: 10px;'>
               $left_col_blocks
               </td><td width='50%' valign='top' style='padding-left: 10px;'>
-                    $tools
-                    $admin_tools
+                    $right_col_blocks
               </td></tr>";
   }
   
@@ -936,66 +1141,32 @@ function system_display_main_page() {
 }
 
 
-/**
- * Get the current announcements (if any) and display them.
- */
-function system_render_announcements_block() {
-  $rtn = "";
+function system_blocks() {
+  return array(
+    "tools" => t("Tools menu"),
+    "admin_tools" => t("Admin Tools menu"),
+  );
+}
+
+
+function system_render_block($delta) {
+  $block = array();
+
+  if ($delta == "tools") {
+    $block["title"] = t("Tools");
+    $block["body"] = fp_render_menu_block("", "tools");
+  }
   
-
-  $rtn .= fp_render_curved_line("Announcements");
-
-  $settings = fp_get_system_settings();
-
-  $is_empty = true;
-  // Pull out just the announcements XML and make it into its own array.
-  if ($settings["announcements_xml"] != "")
-  {
-    if ($xml_array = fp_xml_to_array2($settings["announcements_xml"]))
-    {
-      // Expected format of the xmlArray:
-      //[dt_timecode] = "announcement text."
-      // ex: dt_111234432.  Use strtotime to convert.
-      // It begins with dt_ because in XML the start of
-      // an element must be a letter, not a number.
-
-      krsort($xml_array);  // sort by most recent.
-
-      foreach($xml_array as $datetime => $announcement)
-      {
-        $dt = str_replace("dt_", "", $datetime);
-
-        $disp_time = date("D, M jS Y  - h:ia", $dt);
-        // Re-enable HTML formatting in announcement...
-        $temp = split(" ~~ ", $announcement);
-        $visible = trim($temp[0]);
-        $announcement_text = trim($temp[1]);
-        //$announcement_text = $screen->convert_b_b_code_to_h_t_m_l($announcement_text);
-
-        if ($visible == "hide")
-        {
-          // visibility set to "hidden"
-          continue;
-        }
-
-        if ($visible == "faculty" && $_SESSION["fp_user_type"] == "student")
-        { // skip faculty-only comments if we are a student!
-          continue;
-        }
-
-        $rtn .= "<div class='announcement-text'>$announcement_text
-              <div class='announcement-posted'>
-                Posted $disp_time
-              </div>
-            </div>";
-      }
-    }
+  if ($delta == "admin_tools") {
+    $block["title"] = t("Administrative Tools");
+    $block["body"] = fp_render_menu_block("", "admin-tools");
   }
   
   
-  
-  return $rtn;
+  return $block;
 }
+
+
 
 
 
@@ -1009,15 +1180,13 @@ function system_init() {
   $user = new stdClass();
   $user->id = 0;
   $user->name = "Anonymous";
-  $user->rolls = array();
+  $user->roles = array();
+  $user->permissions = array();
       
   if ($_SESSION["fp_logged_in"] == TRUE) {
     //pretty_print($_SESSION);
-    $user->id = $_SESSION["fp_user_id"];
-    $user->name = $_SESSION["fp_user_name"];
-    $user->rolls = $_SESSION["fp_user_rolls"];    
+    $user = $_SESSION["fp_user_object"];
   }
-     
     
 }
 

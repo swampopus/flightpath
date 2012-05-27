@@ -51,7 +51,7 @@ function admin_edit_group_form_submit(&$form, $form_submit) {
                 values ('?','?') ", $group_id, $de_catalog_year);
     $values["group_id"] = $group_id;
     // Let's reset where we should redirect to after the form submits.
-    $form["redirect"] = array(
+    $form["#redirect"] = array(
       "path" => "admin/groups/edit-group",
       "query" => "group_id=$group_id&de_catalog_year=$de_catalog_year",
     );    
@@ -273,7 +273,7 @@ function admin_edit_group_form() {
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
     
   
-  $form["redirect"] = array(
+  $form["#redirect"] = array(
     "path" => "admin/groups/edit-group",
     "query" => "group_id=$group_id&de_catalog_year=$de_catalog_year",
   );

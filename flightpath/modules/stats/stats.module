@@ -863,19 +863,19 @@ function stats_display_student_advising_history()
 		<table border='0' cellpadding='2' class='tenpt' width='750'>
 		";
 
-  $res = $db->db_query("select * from advising_sessions
-							where `student_id`='$student_id'
-							and `is_draft`='0'
-							order by `datetime` desc, `term_id` desc ");
+  $res = $db->db_query("SELECT * FROM advising_sessions
+							WHERE student_id = '?'
+							AND is_draft = '0'
+							ORDER BY posted DESC, term_id DESC ", $student_id);
   while($cur = $db->db_fetch_array($res))
   {
     extract($cur, 3, "db");
-    $dt = date("n/j/y g:ia",strtotime($db_datetime));
+    $dt = format_date($db_posted);
     $fac_name = $db->get_faculty_name($db_faculty_id, false);
     $is_empty = ($db_is_empty == "0")? "" : "b";
     $is_what_if = ($db_is_whatif == "0")? "" : "wi";
     
-    $test_d_t = strtotime($db_datetime);
+    $test_d_t = $db_posted;
     if ($old_session_d_t < ($test_d_t - 5) || $old_session_d_t > ($test_d_t + 5))
     {
       $p = "20px;";

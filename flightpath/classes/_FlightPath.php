@@ -759,21 +759,22 @@ class _FlightPath
 	}
 
 
+	/**
+	 * Get the plain English title of a subject, from
+	 * subject_id.  Ex: COSC = Computer Science.
+	 *
+	 * @param unknown_type $subject_id
+	 * @return unknown
+	 */
 	function get_subject_title($subject_id)
 	{
 		// From the subject_id, get the title.
 		// Example: COSC = Computer Science.
-
-		// Let's pull the needed variables out of our settings, so we know what
-		// to query, because this is a non-FlightPath table.
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:subjects"];
-		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name = $tsettings["table_name"];
-		
-		$res = $this->db->db_query("SELECT * FROM $table_name
-							WHERE $tf->subject_id = '?' LIMIT 1 ", $subject_id);
+	
+		$res = $this->db->db_query("SELECT title FROM subjects
+							WHERE subject_id = '?' LIMIT 1 ", $subject_id);
 		$cur = $this->db->db_fetch_array($res);
-		return trim($cur[$tf->title]);
+		return trim($cur["title"]);
 
 	}
 
@@ -915,8 +916,8 @@ class _FlightPath
 			// have already been updated by this point, so we will
 			// simply convert them to XML and store in the database.			
 			$result = $db->db_query("REPLACE INTO student_settings
-									(`student_id`,`settings`,`datetime`)
-									VALUES ('?','?', NOW() )	", $student_id, serialize($this->student->array_settings));
+									(student_id, settings, posted)
+									VALUES ('?','?', '?' )	", $student_id, serialize($this->student->array_settings), time());
 			$db->add_to_log("update_student_settings", "$student_id");
 
 		}
@@ -982,12 +983,12 @@ class _FlightPath
 			// We create entries for all available terms, whether we
 			// are going to use them later or not.
 			$result = $db->db_query("INSERT INTO advising_sessions
-								(`student_id`,`faculty_id`,`term_id`,`degree_id`,
-								`major_code`,
-								`catalog_year`,`datetime`,`is_whatif`,`is_draft`)
+								(student_id, faculty_id, term_id, degree_id,
+								major_code,
+								catalog_year, posted, is_whatif, is_draft)
 								VALUES
-								('?', '?','?','?','?','?',NOW(),'?','?') 
-								", $student_id, $faculty_id,$term_id,$degree_id, $major_code, $catalog_year, $is_what_if, $is_draft);
+								('?', '?','?','?','?','?','?','?','?') 
+								", $student_id, $faculty_id,$term_id,$degree_id, $major_code, $catalog_year, time(), $is_what_if, $is_draft);
 			$advising_session_id = mysql_insert_id();
 			$advising_session_id_array[$term_id] = $advising_session_id;
 			$advising_session_id_array_count[$term_id] = 0;
@@ -1174,10 +1175,10 @@ class _FlightPath
 			$result = $db->db_query("INSERT INTO student_substitutions
 									(`student_id`,`faculty_id`,`required_course_id`,`required_entry_value`,
 									`required_group_id`,`required_semester_num`,`sub_course_id`,`sub_entry_value`,
-									`sub_term_id`,`sub_transfer_flag`,`sub_hours`,`sub_remarks`,`datetime`)
+									`sub_term_id`,`sub_transfer_flag`,`sub_hours`,`sub_remarks`,`posted`)
 									VALUES
-									('?','?','?','?','?','?','?','?','?','?','?','?',NOW())
-									", $student_id,$faculty_id,$course_id,$required_entry_value,$group_id,$semester_num,$sub_course_id,$sub_entry_value,$sub_term_id,$sub_transfer_flag,$sub_hours,$sub_remarks);
+									('?','?','?','?','?','?','?','?','?','?','?','?','?')
+									", $student_id,$faculty_id,$course_id,$required_entry_value,$group_id,$semester_num,$sub_course_id,$sub_entry_value,$sub_term_id,$sub_transfer_flag,$sub_hours,$sub_remarks, time());
 
 			$db->add_to_log("save_substitution", "$student_id,group_id:$group_id,insert_id:" . mysql_insert_id());
 
@@ -1215,10 +1216,10 @@ class _FlightPath
 			$result = $db->db_query("INSERT INTO student_unassign_group
 									(`student_id`,`faculty_id`,`course_id`,
 									`term_id`,`transfer_flag`,`group_id`,
-									`datetime`)
+									`posted`)
 									VALUES
-									('?','?','?','?','?','?',NOW())
-									", $student_id,$faculty_id,$course_id,$term_id,$transfer_flag,$group_id);
+									('?','?','?','?','?','?','?')
+									", $student_id,$faculty_id,$course_id,$term_id,$transfer_flag,$group_id,time());
 
 			$db->add_to_log("save_unassign_group", "$student_id,group_id:$group_id");
 
@@ -1253,10 +1254,10 @@ class _FlightPath
 
 			$result = $db->db_query("INSERT INTO student_unassign_transfer_eqv
 									(`student_id`,`faculty_id`,`transfer_course_id`,
-									`datetime`)
+									`posted`)
 									VALUES
-									('?','?','?',NOW())
-									", $student_id, $faculty_id, $course_id);
+									('?','?','?','?')
+									", $student_id, $faculty_id, $course_id, time());
 
 			$db->add_to_log("save_unassign_transfer", "$student_id,course_id:$course_id");
 

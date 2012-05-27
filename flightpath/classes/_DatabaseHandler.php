@@ -70,12 +70,13 @@ class _DatabaseHandler
     
     // This needs to be mysql_query, instead of "this->db_query", because
     // otherwise it might get into an infinite loop.
+    $now = time();
     $query = "INSERT INTO log (user_id,
 						user_name, user_type, action, extra_data, notes,
-						 ip, datetime, from_url) VALUES (
+						 ip, posted, from_url) VALUES (
 						'$user_id','$user_name','$user_type','$action','$extra_data',
 						'$notes',
-						'$ip', NOW() ,'$url') ";
+						'$ip', '$now' ,'$url') ";
 		$res = mysql_query($query) or die(mysql_error() . " - " . $query);
 
 
@@ -148,7 +149,7 @@ class _DatabaseHandler
 			$rtn_array["remarks"] = trim($cur["sub_remarks"]);
 			$rtn_array["required_course_id"] = $cur["required_course_id"];
 			$rtn_array["required_group_id"] = $cur["required_group_id"];
-			$rtn_array["datetime"] = $cur["datetime"];
+			$rtn_array["posted"] = $cur["posted"];
 		}
 
 		return $rtn_array;
@@ -184,8 +185,8 @@ class _DatabaseHandler
 
 		// Now, write it back to the settings table...
 		$res = $this->db_query("REPLACE INTO user_settings(user_id,
-								settings, `datetime`)
-								VALUES ('?','?',NOW() )", $user_id, serialize($user_settings_array));
+								settings, posted)
+								VALUES ('?','?', '?' )", $user_id, serialize($user_settings_array), time());
 
 		$db->add_to_log("update_user_settings", "hide_charts:{$user_settings_array["hide_charts"]}");
 
@@ -785,7 +786,7 @@ class _DatabaseHandler
 								and `degree_id`='$degree_id'
 								and `is_whatif`='$is_what_if'
 								$draft_line
-								order by `datetime` desc limit 1";
+								order by `posted` desc limit 1";
 		$result = $this->db_query($query) ;
 		//admin_debug($query);
 		if ($this->db_num_rows($result) > 0)
@@ -848,14 +849,10 @@ class _DatabaseHandler
 	{
 		// Return the name of the institution...
 		
-    $tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:transfer_institutions"];
-  	$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  	$table_name = $tsettings["table_name"];		
-		
-		$res = $this->db_query("SELECT * FROM $table_name
-								where $tf->institution_id = '?' ", $institution_id);
+		$res = $this->db_query("SELECT * FROM transfer_instituions
+								where institution_id = '?' ", $institution_id);
 		$cur = $this->db_fetch_array($res);
-		return trim($cur[$tf->name]);
+		return trim($cur['name']);
 	}
 
 

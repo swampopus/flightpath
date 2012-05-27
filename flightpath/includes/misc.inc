@@ -25,6 +25,22 @@ function fp_set_title($title) {
 }
 
 /**
+ * Returns back the site's "token", which is a simply md5 of some randomness.
+ * It is used primarily with forms, to ensure against cross-site forgeries.
+ */
+function fp_token() {
+  $site_token = variable_get("site_token", "");
+  if ($site_token == "") {
+    $site_token = md5("" . time() . rand(1,9999));
+    variable_set("site_token", $site_token);
+  }
+  
+  return $site_token;
+  
+}
+
+
+/**
  * Simple function to split a basiv CSV string, trim all elements, then return
  * the resulting array.
  */
@@ -397,7 +413,8 @@ function admin_debug($str, $var_name = "")
  * @param unknown_type $user_id
  * @return unknown
  */
-function determine_staff_user_type($user_id)
+/*
+function z__determine_staff_user_type($user_id)
 {
   
   // Check for hooks...
@@ -473,6 +490,7 @@ function determine_staff_user_type($user_id)
 
 
 }
+*/
 
 
 
@@ -739,43 +757,17 @@ function user_has_role($roll, $faculty_if = "") {
  */
 function user_has_permission($permission, $faculty_id = "") {
   global $user;  
-  // If the user has the role "administrator", then they always have
-  // permission.
-  if (in_array("administrator", $user->rolls)) return TRUE;
   
-  /*
+  // If the user is admin (id == 1) then they always have access.
+  if ($user->id == 1) return TRUE;
   
-  // We will check the database table each time, so that the user doesn't
-  // have to log out and back in before their permissions change.
   
-  $db = get_global_database_handler();
-  
-  if ($faculty_id == "") {
-    $faculty_id = $_SESSION["fp_user_id"];
-  }
-
-  // If the user is admin, always return TRUE.  Check the user type
-  $user_type = determine_staff_user_type($faculty_id);
-  if ($user_type == "full_admin") {
+  // Otherwise, simply check their permissions array.
+  if (in_array($permission, $user->permissions)) {
     return TRUE;
-  }  
+  }
+  
     
-  // Otherwise, check their permissions from the table.
-  
-  $res = $db->db_query("SELECT * FROM users WHERE faculty_id = '?' ", $faculty_id);
-  $cur = $db->db_fetch_array($res);
-  
-  $p_array = array();
-  
-  $temp = explode("," , $cur["permissions"]);
-  foreach ($temp as $t) {
-    $p_array[] = trim($t);
-  }
-  
-  if (in_array($permission, $p_array)) {
-    return TRUE;
-  }
-  */
   return FALSE;
   
 }

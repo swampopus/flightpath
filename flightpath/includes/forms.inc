@@ -5,6 +5,80 @@
 */
 
 
+/**
+ * This function gets the form array, where the callback is the same as form_id.
+ * It will also look for modules which may want to alter the form, using hook_form_alter,
+ * and go ahead and apply that.
+ * 
+ * It will also reorder the elements by weight.
+ * 
+ */
+function fp_get_form($form_id) {
+
+  $form = call_user_func($form_id);
+  
+  $modules = modules_implement_hook("form_alter");
+  foreach ($modules as $module) {
+    call_user_func_array($module . '_form_alter', array(&$form, $form_id));
+  }
+
+  // Okay, now the fun part.  Re-order the elements by weight.  Lighter weights
+  // should float to the top.  Elements w/o a weight listed are assumed to have a weight of 0.
+  // Unfortunately we cannot use uasort, as it re-orders our indexes when weights are identical.
+
+  // The first the I want to do is find out, what are the defined weights in this form, if any.
+  $defined_weights = array();
+  foreach ($form as $element) {
+    $weight = (int)$element["weight"];
+    if (!in_array($weight, $defined_weights)) {
+      $defined_weights[] = $weight;
+    }
+  } 
+  
+  // Okay, now sort our weights.
+  sort($defined_weights);
+  
+  // Okay, now go through the weights and create a new form in THAT order.
+  $new_form = array();
+  foreach ($defined_weights as $dw) {
+    foreach ($form as $key => $element) {
+      $weight = (int)$element["weight"];
+      if ($weight == $dw) {
+        $new_form[$key] = $element;
+      }      
+    }
+  }  
+
+  // Okay, we should now be good to go!
+      
+  return $new_form;
+  
+}
+
+/**
+ * This function is meant to be used by the uasort command, to help re-order 
+ * a form array based on each element's weight value.  If weight is blank, it is assumed
+ * to be 0 (zero).
+ * 
+ * Answers the question "is A LESS THAN b?"
+ *   with:  -1 == true.  0 == they are equal.  1 = no, b is less than a.
+ * 
+ */
+function form_field_sort_compare_by_weight($element_a, $element_b) {
+
+  if (!is_array($element_a) || !is_array($element_b)) {
+    return 0;
+  }
+  
+  $weight_a = $element_a["weight"]*1;
+  $weight_b = $element_b["weight"]*1;
+
+  if ($weight_a == $weight_b) return -1;
+
+  return ($weight_a < $weight_b) ? -1 : 1;
+
+}
+
 
 /**
  * Render the form array from the callback to the screen, and
@@ -17,7 +91,7 @@ function fp_render_form($callback, $form_type = "") {
   global $current_student_id, $user;
   $rtn = "";
   
-  $form = call_user_func($callback);
+  $form = fp_get_form($callback);
   
   // Figure out the current page's title and display it.
   $path = $_GET["q"];
@@ -42,12 +116,6 @@ function fp_render_form($callback, $form_type = "") {
     $rtn .= "<h2 class='title'>" . $page_title . "</h2>";
   }
     
-/*  if (is_array($form["redirect"])) {
-    $redirect_path = $form["redirect"]["path"];
-    $redirect_query = $form["redirect"]["query"];
-  }
- */
-    
   //fpm($GLOBALS["fp_current_menu_router_item"]);
   $form_path = $GLOBALS["fp_current_menu_router_item"]["path"];
     
@@ -59,8 +127,8 @@ function fp_render_form($callback, $form_type = "") {
       $form_include = $GLOBALS["fp_current_menu_router_item"]["file"];
     }
   }  
-  if ($form["form_include"]) {
-    $form_include = $form["form_include"];
+  if ($form["#form_include"]) {
+    $form_include = $form["#form_include"];
   }
     
   $extra_form_class = "";
@@ -68,9 +136,25 @@ function fp_render_form($callback, $form_type = "") {
     $extra_form_class = "fp-system-form";
   }
     
-  $rtn .= "<form action='" . base_path() . "/system-handle-form-submit' method='POST' id='sysform' class='$extra_form_class fp-form fp-form-$callback'>";
+  $form_token = md5($callback . fp_token());     
+    
+  // Set up our form's attributes.
+  $attributes = $form["#attributes"];
+  if (!is_array($attributes)) $attributes = array();
+
+  $attributes["class"] .= " $extra_form_class fp-form fp-form-$callback ";
+  // Convert the attributes array into a string.
+  $new_attr = "";
+  foreach ($attributes as $key => $val) {
+    $new_attr .= " $key='$val' ";
+  }
+  $attributes = $new_attr;
+    
+    
+  $rtn .= "<form action='" . base_path() . "/system-handle-form-submit' method='POST' id='fp-form-$callback' $attributes>";
   
   $rtn .= "<input type='hidden' name='callback' value='$callback'>";
+  $rtn .= "<input type='hidden' name='form_token' value='$form_token'>";
   $rtn .= "<input type='hidden' name='form_type' value='$form_type'>";
   $rtn .= "<input type='hidden' name='form_path' value='$form_path'>";
   $rtn .= "<input type='hidden' name='form_include' value='$form_include'>";
@@ -193,8 +277,7 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   $no_please_select = $element["no_please_select"];
   
   $attributes = $element["attributes"];
-
-
+  
   if (is_array($attributes)) {
     // Convert the attributes array into a string.
     $new_attr = "";
@@ -233,7 +316,7 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
 
   if ($use_session_submission_values_for_callback && is_array($_SESSION["fp_form_submissions"][$use_session_submission_values_for_callback]["values"])) {
     // Check the SESSION for a previous value which we should use.
-    $ignore_types = array("hidden", "markup", "submit");
+    $ignore_types = array("hidden", "markup", "submit", "password");
     if (!in_array($type, $ignore_types)) {
       $value = $_SESSION["fp_form_submissions"][$use_session_submission_values_for_callback]["values"][$name];
     }    
@@ -264,7 +347,7 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
     $rtn .= "<textarea name='$name' id='element-$name' rows='$rows' $attributes>$value</textarea>";
   }
 
-  if ($type == "textfield" || $type == "password") {
+  if ($type == "textfield" || $type == "text" || $type == "password") {
     if ($type == "textfield") $type = "text";
     $size = ($element["size"]) ? $element["size"] : "60";
     $maxlength = ($element["maxlength"]) ? $element["maxlength"] : "255";

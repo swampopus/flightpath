@@ -75,12 +75,12 @@ function announcements_new_announcement_form() {
     "type" => "submit",
     "value" => "Save",
   );  
-  
+      
   return $form;
 }
 
 
-function announcements_new_announcement_form_submit($form, $form_state) {
+function announcements_new_announcement_form_submit(&$form, &$form_state) {
   $posted = strtotime($form_state["values"]["announcement_posted"]);
   $announcement = trim($form_state["values"]["announcement"]);
   

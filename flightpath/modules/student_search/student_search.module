@@ -76,7 +76,11 @@ function student_search_menu() {
  */
 function student_search_subtab_switchboard() {
   
-  fp_goto("student-search/search");
+  $last_tab = $_SESSION["student_search_last_tab"];
+  if ($last_tab == "") $last_tab = 'search';
+  
+  
+  fp_goto("student-search/$last_tab");
   
 }
 
@@ -94,7 +98,7 @@ function student_search_render_small_search() {
   $rtn = "";
   $rtn .= "<form action='" . base_path() . "/student-search/search' method='post' id='small-search-form'
               style='padding:0; margin:0; padding-bottom: 5px;'>
-                     <input type='text' class='smallinput' size='30' name='search' id='search_bar_value'                       
+                     <input type='text' class='smallinput' size='30' name='search_for' id='search_bar_value'                       
                         placeholder = '" . t("Search by name or CWID") . "'>
                      <input type='button' name='submit' value='=>' class='smallinput'>
                      <input type='hidden' name='current_student_id' value='$current_student_id'>
@@ -144,18 +148,67 @@ function student_search_render_small_search() {
 
 
 
+/**
+ * Displays this user's advisees, if there are any assigned.
+ */
 function student_search_display_my_advisees() {
+  global $user;
   $rtn = "";
+
+  $_SESSION["student_search_last_tab"] = "my-advisees";
   
-  $rtn .= "this is my advisees";
-  
-  return $rtn;
+  $uid = mysql_real_escape_string($user->id);
+        
+  $query = "SELECT u.user_id, f_name, l_name, major_code, rank_code, a.catalog_year
+              FROM users u, students a, advisor_student c
+              WHERE 
+                 c.faculty_id = '$uid'
+                 AND c.student_id = a.user_id
+                 AND u.user_id = a.user_id
+                 AND u.is_disabled = 0                 
+              AND rank_code IN %RANKIN%
+              %EXTRA_STUDENTSEARCH_CONDITIONS%
+              ORDER BY %ORDERBY%
+              ";
+
+  $adv_array = student_search_query_advisees($query);
+  $s = (count($adv_array) == 1) ? "" : "s"; 
+  $rtn .= student_search_render_advisees($adv_array, t("My Advisees Results") . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
+
+  return $rtn;  
 }
 
 
+/**
+ * Displays students belonging to the current user's major code.
+ */
 function student_search_display_my_majors() {
+  global $user;
   $rtn = "";
-  $rtn .= "this is my majors";
+
+  $_SESSION["student_search_last_tab"] = "my-majors";
+    
+  // Figure out this user's major_code from the faculty table.
+  $faculty_user_major_code = mysql_real_escape_string(db_result(db_query("SELECT major_code FROM faculty WHERE user_id = '?' ", $user->id)));
+    
+  $query = "SELECT u.user_id, f_name, l_name, major_code, rank_code, a.catalog_year
+              FROM users u, students a
+              WHERE 
+                 substring_index(major_code, '|', 1) = '$faculty_user_major_code'
+                 AND u.user_id = a.user_id
+                 AND u.is_disabled = 0                 
+              AND rank_code IN %RANKIN%
+              %EXTRA_STUDENTSEARCH_CONDITIONS%
+              ORDER BY %ORDERBY%
+              ";
+
+  $adv_array = student_search_query_advisees($query);
+  $s = (count($adv_array) == 1) ? "" : "s"; 
+  $rtn .= student_search_render_advisees($adv_array, t("Major @major Results", array("@major" => $faculty_user_major_code)) . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
+
+
+ // $rtn .= "</table>";
+  
   return $rtn;
 }
 
@@ -163,19 +216,20 @@ function student_search_display_my_majors() {
 function student_search_display_search() {
   $rtn = "";
   
+  $_SESSION["student_search_last_tab"] = "search";
 
-  //$pC .= get_j_s_functions();
   $rtn .= "<table class='fp-semester-table'>
            <form id='mainform' name='mainform' method='post'
                 action='" . base_path() . "/student-search/search' >
            ";
 
+  
+
 
   // Get search results from POST -or- past search attempts
   // from the session.
   $search_for = trim($_REQUEST["search_for"]);
-  if ($search_for == "")
-  {
+  if ($search_for == "") {
     $search_for = trim($_SESSION["student_search_for"]);
   }
   // remove trouble characters
@@ -200,15 +254,7 @@ function student_search_display_search() {
             </td></tr>
             </table>";
 
-
-  
-  // Let's pull the needed variables out of our settings, so we know what
-  // to query, because this is a non-FlightPath table.
-  //$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-  //$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  //$table_name = $tsettings["table_name"];     
-
-
+    
   //Get my list of advisees...
   // This time, we want to specify an SQL statement that will perform
   // our search.
@@ -240,7 +286,7 @@ function student_search_display_search() {
       $search_action = "";
       $other_table = ", degrees b";
       $group_by = " GROUP BY u.user_id ";
-      $major_search = "AND  substring_index(a.$tf->major_code,'|',1) = b.major_code
+      $major_search = "AND  substring_index(a.major_code,'|',1) = b.major_code
                         AND (b.major_code LIKE '%$mjsearch%' OR b.title LIKE '%$mjsearch%') ";
     }
 
@@ -264,7 +310,7 @@ function student_search_display_search() {
   }
 
   $s = (count($adv_array) == 1) ? "" : "s"; 
-
+  
   if (count($adv_array) == 1 && $_REQUEST["did_search"] == "true")
   {
     // Since there was only 1 result,
@@ -294,7 +340,7 @@ function student_search_display_search() {
   }
 
 
-  $rtn .= student_search_render_advisees($adv_array, "Search Results &nbsp; ( " . count($adv_array) . " student$s )");
+  $rtn .= student_search_render_advisees($adv_array, t("Search Results") . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
   $rtn .= "</form>";
   $rtn .= "</table>";
 
@@ -354,7 +400,7 @@ function student_search_render_advisees($adv_array, $title) {
     $url = base_path() . "/view";
     $advising_what_if = "no";
     if ($what_if_major_code != "") {
-      $url .= "/what-if";
+      $url = base_path() . "/what-if";
       $advising_what_if = "yes";            
     }
     
@@ -411,42 +457,11 @@ function student_search_render_advisees($adv_array, $title) {
 
 
 function student_search_query_advisees($sql) {
-// Let's pull the needed variables out of our settings, so we know what
-  // to query, because this is a non-FlightPath table.
-  $tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:advisor_student"];
-  $tfa = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  $table_name_a = $tsettings["table_name"];   
-
-  // Let's pull the needed variables out of our settings, so we know what
-  // to query, because this is a non-FlightPath table.
-  //$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-  //$tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  //$table_name_b = $tsettings["table_name"];     
-
   
   $rank_in = "( '" . join("', '", csv_to_array($GLOBALS["fp_system_settings"]["allowed_student_ranks"])) . "' )";
     
   $order_by = " major_code, l_name, f_name ";
   
-  if ($sql == "")
-  {
-    // By default, just list for me whatever students are in
-    // the table as being my advisees.
-    $user_id = $_SESSION["fp_user_id"];
-    $sql = "
-      SELECT * FROM users u, $table_name_a a, students b
-              WHERE
-                  u.user_id = b.user_id
-                  AND u.is_disabled = 0
-                   
-                  a.$tfa->student_id = b.user_id
-              AND a.$tfa->faculty_id = '$user_id' 
-              AND rank_code IN %RANKIN%
-              %EXTRA_STUDENTSEARCH_CONDITIONS%
-              ORDER BY %ORDERBY%
-      ";
-  }
-
   // Replace the replacement portion with our derrived variables.
   $sql = str_replace("%RANKIN%", $rank_in, $sql);
   $sql = str_replace("%ORDERBY%", $order_by, $sql);
@@ -472,16 +487,20 @@ function student_search_query_advisees($sql) {
 
     // We should also mark if the student has been advised for this semester
     // or not.
+  
+    // Get the current default advising term id.
+    $term_id = variable_get("advising_term_id", "");
+    
+    
     $advised_image = "&nbsp;";
     $advising_session_id = "";
-    $res2 = mysql_query("SELECT * FROM advising_sessions WHERE
-              `student_id`='$student_id' AND
-              `term_id` = '{$GLOBALS["setting_advising_term_id"]}' 
-               AND `is_draft`='0' 
-              ORDER BY `datetime` DESC") or die(mysql_error());
-    if (mysql_num_rows($res2) > 0)
-    {
-      $cur = mysql_fetch_array($res2);
+    $res2 = db_query("SELECT * FROM advising_sessions WHERE
+                      student_id = '?' AND
+                      term_id = '?' 
+               AND is_draft = '0' 
+              ORDER BY posted DESC", $student_id, $term_id);
+    if (db_num_rows($res2) > 0) {
+      $cur = db_fetch_array($res2);
 
       $advised_image = "<img src='" . fp_theme_location() . "/images/small_check.gif' class='advisedImage'>";
 

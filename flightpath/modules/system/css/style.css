@@ -12,6 +12,18 @@
 }
 
 /* Login page */
+
+
+.fp-form-system_login_form {
+  padding-top: 20px;
+  padding-left: 20px;
+}
+
+.fp-form-system_login_form label {
+  display: inline-block;
+  min-width: 100px;
+}
+
 .login-welcome {
   text-align: center;
   font-size: 1.1em;    

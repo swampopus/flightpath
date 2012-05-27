@@ -50,7 +50,7 @@ function example_routine_module_populate_subjects_table() {
   
   
   // We must first truncate our mysql table.
-  $res = $db->db_query("TRUNCATE TABLE flightpath_extra_data.subjects");  
+  $res = $db->db_query("TRUNCATE TABLE flightpath.subjects");  
   
   // Okay, let's perform our query.
   $query = "SELECT stvsubj_code as subjectID, stvsubj_desc as title 
@@ -65,7 +65,7 @@ function example_routine_module_populate_subjects_table() {
     $title = mysql_real_escape_string($cur["TITLE"]);
     
     // Insert!
-    $db->db_query("INSERT INTO flightpath_extra_data.subjects
+    $db->db_query("INSERT INTO flightpath.subjects
                   (subject_id, title)
                   VALUES ('$subject_id', '$title') ");
     $c++;
@@ -87,7 +87,7 @@ function example_routine_module_populate_transfer_institutions_table() {
   global $db;  
   
   // We must first truncate our mysql table.
-  $res = $db->db_query("TRUNCATE TABLE flightpath_extra_data.transfer_institutions");  
+  $res = $db->db_query("TRUNCATE TABLE flightpath.transfer_institutions");  
   
   // Okay, let's perform our oracle query.
   // This will look in Banner and pick out some information we need
@@ -107,7 +107,7 @@ function example_routine_module_populate_transfer_institutions_table() {
     $state = mysql_real_escape_string($cur["STATE"]);
     
     // Insert!
-    $db->db_query("INSERT INTO flightpath_extra_data.transfer_institutions
+    $db->db_query("INSERT INTO flightpath.transfer_institutions
                   (institution_id, name, state)
                   VALUES ('$institution_id', '$name', '$state') ");
     $c++;

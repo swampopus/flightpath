@@ -442,7 +442,7 @@ function admin_edit_course_form_submit(&$form, $form_submit) {
     
     fp_add_message(t("Course %course successfully deleted for %year", array("%course" => $course_names, "%year" => $de_catalog_year)));
     // Redirect us to the list of courses.
-    $form["redirect"] = array(
+    $form["#redirect"] = array(
       "path" => "admin/courses",
       "query" => "de_catalog_year=$de_catalog_year",
     );
@@ -456,7 +456,7 @@ function admin_edit_course_form_submit(&$form, $form_submit) {
 
     $values["course_id"] = $course_id;
     // change the $form redirect so we get sent to the new course on save. 
-    $form["redirect"] = array(
+    $form["#redirect"] = array(
       "path" => "admin/courses/edit-course",
       "query" => "de_catalog_year=$de_catalog_year&course_id=$course_id",
     );

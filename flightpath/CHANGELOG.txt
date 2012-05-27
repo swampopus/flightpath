@@ -1,6 +1,13 @@
 FlightPath Changelog
 ====================
 
+2012-05-24
+  Removing the concept of the separate flightpath_extra_data database
+  
+  Switched datetime field type to "posted" timestamp integer in tables
+  
+  Added idea of validate_handlers to forms, like in Drupal.
+
 2012-05-21
   Created Blocks module, and method of establishing block regions and blocks offered by a module.
 

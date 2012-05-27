@@ -726,31 +726,22 @@ class _Course
     } else {
       // This is a transfer course.  Find out its eqv, if any...
       
-      // Let's pull the needed variables out of our settings, so we know what
-  		// to query, because this involves non-FlightPath tables.
-  		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:transfer_courses"];
-  		$tfa = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  		$table_name_a = $tsettings["table_name"];
-      
-  		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:transfer_institutions"];
-  		$tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  		$table_name_b = $tsettings["table_name"];
 
   		
       
       $res = $this->db->db_query("SELECT * FROM
-										$table_name_a a,
-										$table_name_b b
+										transfer_courses a,
+										transfer_institutions b
 										WHERE 
-									   a.$tfa->transfer_course_id = '?' 
-									   AND a.$tfa->institution_id = b.$tfb->institution_id ", $course_id);
+									   a.transfer_course_id = '?' 
+									   AND a.institution_id = b.institution_id ", $course_id);
       $cur = $this->db->db_fetch_array($res);
-      $this->subject_id = $cur[$tfa->subject_id];
-      $this->course_num = $cur[$tfa->course_num];      
+      $this->subject_id = $cur["subject_id"];
+      $this->course_num = $cur["course_num"];      
       $this->course_id = $course_id;
       $this->bool_transfer = true;
-      $this->institution_id = $cur[$tfa->institution_id];
-      $this->institution_name = $cur[$tfb->name];
+      $this->institution_id = $cur["institution_id"];
+      $this->institution_name = $cur["name"];
       
     }
 
@@ -1186,23 +1177,17 @@ class _Course
     }
 
     
-    // Let's pull the needed variables out of our settings, so we know what
-		// to query, because this involves non-FlightPath tables.
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:transfer_courses"];
-		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name = $tsettings["table_name"];    
     
-    
-    $res = $this->db->db_query("SELECT * FROM $table_name
-									     WHERE $tf->transfer_course_id = '?' ", $this->course_id);
+    $res = $this->db->db_query("SELECT * FROM transfer_courses
+									     WHERE transfer_course_id = '?' ", $this->course_id);
     $cur = $this->db->db_fetch_array($res);
 
-    $this->subject_id = $cur[$tf->subject_id];
-    $this->course_num = $cur[$tf->course_num];
-    $this->title = $this->fix_title($cur[$tf->title]);
-    $this->min_hours = $cur[$tf->min_hours];
-    $this->max_hours = $cur[$tf->max_hours];
-    $this->institution_id = $cur[$tf->institution_id];
+    $this->subject_id = $cur["subject_id"];
+    $this->course_num = $cur['course_num'];
+    $this->title = $this->fix_title($cur['title']);
+    $this->min_hours = $cur["min_hours"];
+    $this->max_hours = $cur["max_hours"];
+    $this->institution_id = $cur["institution_id"];
     // Try to figure out the institution name for this course...
     $this->institution_name = $this->db->get_institution_name($this->institution_id);
 
@@ -1211,47 +1196,33 @@ class _Course
       // Because transfer credit titles may differ from student
       // to student, let's look up the title in the sisdata table...
       
-      // Let's pull the needed variables out of our settings, so we know what
-  		// to query, because this involves non-FlightPath tables.
-  		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:student_transfer_courses"];
-  		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  		$table_name = $tsettings["table_name"];    
-      
-      
       $term_line = "";
       if ($this->term_id > 1) {
-        $term_line = "AND $tf->term_id = '$this->term_id' ";
+        $term_line = "AND term_id = '$this->term_id' ";
       }
       
-      $res = $this->db->db_query("SELECT * FROM $table_name
-									WHERE $tf->student_id = '?'
-									AND $tf->transfer_course_id = '?' 
+      $res = $this->db->db_query("SELECT * FROM student_transfer_courses
+									WHERE student_id = '?'
+									AND transfer_course_id = '?' 
 									$term_line ", $student_id, $this->course_id);
       $cur = $this->db->db_fetch_array($res);
-      if (trim($cur[$tf->student_specific_course_title]) != "") {
-        $this->title = trim($cur[$tf->student_specific_course_title]);
+      if (trim($cur["student_specific_course_title"]) != "") {
+        $this->title = trim($cur["student_specific_course_title"]);
       }
       // Also assign hours_awarded while we are here.
-      $this->hours_awarded = $cur[$tf->hours_awarded];
+      $this->hours_awarded = $cur["hours_awarded"];
 
 
-      // Get EQV information....
-      // Let's pull the needed variables out of our settings, so we know what
-  		// to query, because this involves non-FlightPath tables.
-  		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:transfer_eqv_per_student"];
-  		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  		$table_name = $tsettings["table_name"];    
-      
-      
-      $res2 = $this->db->db_query("SELECT * FROM $table_name
-            					WHERE $tf->student_id = '?'	
-            					AND $tf->transfer_course_id = '?' 
-            					AND $tf->valid_term_id = '?' ", $student_id, $this->course_id, $this->term_id);
+   
+      $res2 = $this->db->db_query("SELECT * FROM transfer_eqv_per_student
+            					WHERE student_id = '?'	
+            					AND transfer_course_id = '?' 
+            					AND valid_term_id = '?' ", $student_id, $this->course_id, $this->term_id);
       while($cur2 = $this->db->db_fetch_array($res2))
       {        
-        $c = new Course($cur2[$tf->local_course_id]);
+        $c = new Course($cur2["local_course_id"]);
         $this->transfer_eqv_text .= "$c->subject_id $c->course_num
-							(" . $c->get_catalog_hours() . " hrs) ";
+							(" . $c->get_catalog_hours() . " " . t("hrs") . ") ";
       }
 
     }

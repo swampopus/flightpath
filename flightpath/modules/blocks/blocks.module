@@ -54,6 +54,8 @@ function blocks_manage_blocks_form() {
     
   $form = array();
   
+  fp_add_css(fp_get_module_path("blocks") . "/css/blocks.css");
+  
   $selected_section = $_REQUEST["section"];
   $selected_module = $_REQUEST["module"];
   
@@ -117,7 +119,7 @@ function blocks_manage_blocks_form() {
   foreach($available_blocks as $module => $blocks) {
     $form["mark" . $m++] = array(
       "value" => "<tr>
-                    <td colspan='10'><div class='block-module-name'>$module</div></td>
+                    <td colspan='10' class='block-module-name'>$module</td>
                 </tr>
                 <tr>
                   <th>" . t("Block") . "</th>

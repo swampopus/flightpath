@@ -88,18 +88,18 @@ function advise_display_history() {
               WHERE student_id = '?'
               AND is_draft = '0'
               AND is_empty = '0'
-              ORDER BY `datetime` DESC, `term_id` DESC ", $student_id);
+              ORDER BY `posted` DESC, `term_id` DESC ", $student_id);
   while($cur = db_fetch_array($res)) {
     extract($cur, 3, "db");
 
-    $dt = date("n/j/y g:ia",strtotime($db_datetime));
+    $dt = date("n/j/y g:ia",$db_posted);
 
     // Is this datetime within 5 seconds of the previous datetime?
     // If so, they were likely saved together, and are part
     // of the same advising session.  Otherwise, this is a NEW
     // advising session.  The if statement below is testing is this
     // a new advising session.
-    $test_d_t = strtotime($db_datetime);
+    $test_d_t = $db_posted;
     //admin_debug($old_session_d_t . " - " . $test_d_t);
     if ($old_session_d_t < ($test_d_t - 5) || $old_session_d_t > ($test_d_t + 5))
     {
@@ -186,12 +186,11 @@ function advise_display_history() {
             AND delete_flag = '0'
             $access_line
             $cat_line
-            order by `datetime` desc ", $student_id);
+            order by `posted` desc ", $student_id);
   while ($cur = db_fetch_array($res))
   {
     extract($cur, 3, "db");
-    $dt = date("n/j/y g:ia",strtotime($db_datetime));
-
+    $dt = format_date($db_posted);
 
     if ($first_style == "first")
     {
@@ -256,7 +255,7 @@ function advise_popup_display_summary() {
     $cur = $db->db_fetch_array($res);
     extract($cur, 3, "db");
   }
-  $dt = date("F jS, Y, g:ia",strtotime($db_datetime));
+  $dt = format_date($db_posted, "pretty");
 
   $term = get_term_description($db_term_id);
   $degree_plan = new DegreePlan();

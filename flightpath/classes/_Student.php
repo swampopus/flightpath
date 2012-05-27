@@ -617,28 +617,21 @@ class _Student
 	{
 
 	  $retake_grades = csv_to_array($GLOBALS["fp_system_settings"]["retake_grades"]);
-	  // Let's pull the needed variables out of our settings, so we know what
-		// to query, because this involves non-FlightPath tables.
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:student_courses"];
-		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name = $tsettings["table_name"];
-
+	  
 		// This will create and load the list_courses_taken list.
 		// contains SQL queries to fully create the list_courses_taken.
-		$res = $this->db->db_query("SELECT *	FROM $table_name									
+		$res = $this->db->db_query("SELECT *	FROM student_courses									
                 							 WHERE 
-                								$tf->student_id = '?' ", $this->student_id);
+                								student_id = '?' ", $this->student_id);
 	
-		while($cur = $this->db->db_fetch_array($res))
-		{
+		while($cur = $this->db->db_fetch_array($res)) {
 
 			// Create a course object for this course...
 			$is_transfer = false;
-			$course_id = $this->db->get_course_id($cur[$tf->subject_id], $cur[$tf->course_num]);
+			$course_id = $this->db->get_course_id($cur["subject_id"], $cur["course_num"]);
 
-			if (!$course_id)
-			{
-				admin_debug("Course not found while trying to load student data: {$cur[$tf->subject_id]} {$cur[$tf->course_num]}");
+			if (!$course_id) {
+				fpm("Course not found while trying to load student data: {$cur["subject_id"]} {$cur["course_num"]}");
 				continue;
 			}
 
@@ -650,10 +643,10 @@ class _Student
 
 			// Now, over-write whatever we got from the descriptive data with what the course was called
 			// when the student took it.
-			$new_course->subject_id = $cur[$tf->subject_id];
-			$new_course->course_num = $cur[$tf->course_num];
-			$new_course->grade = $cur[$tf->grade];
-			$new_course->term_id = $cur[$tf->term_id];
+			$new_course->subject_id = $cur["subject_id"];
+			$new_course->course_num = $cur["course_num"];
+			$new_course->grade = $cur["grade"];
+			$new_course->term_id = $cur["term_id"];
 			
 			// Is this grade supposed to be hidden from students?
 			if (in_array($new_course->term_id, $this->array_hide_grades_terms)
@@ -662,7 +655,7 @@ class _Student
 			  $new_course->bool_hide_grade = true;
 			}			
 			
-			$new_course->hours_awarded = trim($cur[$tf->hours_awarded]);
+			$new_course->hours_awarded = trim($cur["hours_awarded"]);
 			$new_course->display_status = "completed";
 			$new_course->bool_taken = true;
 			
@@ -690,33 +683,23 @@ class _Student
 		
 		
 		// Tranfer credits?  Get those too...
-	  // Let's pull the needed variables out of our settings, so we know what
-		// to query, because this involves non-FlightPath tables.
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:student_transfer_courses"];
-		$tfa = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name_a = $tsettings["table_name"];
-			
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:transfer_courses"];
-		$tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name_b = $tsettings["table_name"];
-		
 		
 		$res = $this->db->db_query("
                   			SELECT *
-                  			FROM $table_name_a a, 
-                  			     $table_name_b b 
-                  			WHERE a.$tfa->transfer_course_id = b.$tfb->transfer_course_id
-                  			AND a.$tfa->student_id = '?' ", $this->student_id);
+                  			FROM student_transfer_courses a, 
+                  			     transfer_courses b 
+                  			WHERE a.transfer_course_id = b.transfer_course_id
+                  			AND a.student_id = '?' ", $this->student_id);
 
 		while($cur = $this->db->db_fetch_array($res))
 		{
-			$transfer_course_id = $cur[$tfa->transfer_course_id];
-			$institution_id = $cur[$tfb->institution_id];
+			$transfer_course_id = $cur['transfer_course_id'];
+			$institution_id = $cur["institution_id"];
 
 			$new_course = new Course();
 
 			// Find out if this course has an eqv.
-			if ($course_id = $this->get_transfer_course_eqv($transfer_course_id, false, $cur[$tfa->term_id]))
+			if ($course_id = $this->get_transfer_course_eqv($transfer_course_id, false, $cur['term_id']))
 			{
 				$new_course = new Course($course_id);
 				$this->array_significant_courses[$course_id] = true;
@@ -725,8 +708,8 @@ class _Student
 
 
 			$t_course = new Course();
-			$t_course->subject_id = $cur[$tfb->subject_id];
-			$t_course->course_num = $cur[$tfb->course_num];
+			$t_course->subject_id = $cur['subject_id'];
+			$t_course->course_num = $cur['course_num'];
 			$t_course->course_id = $transfer_course_id;
 			$t_course->bool_transfer = true;
 			$t_course->institution_id = $institution_id;
@@ -734,11 +717,11 @@ class _Student
 			$new_course->bool_transfer = true;
 
 			$new_course->course_transfer = $t_course;
-			$new_course->grade = $cur[$tfb->grade];
-			$t_course->grade = $cur[$tfb->grade];
+			$new_course->grade = $cur['grade'];
+			$t_course->grade = $cur['grade'];
 
-			$new_course->hours_awarded = $cur[$tfb->hours_awarded];
-			$t_course->hours_awarded = $cur[$tfb->hours_awarded];
+			$new_course->hours_awarded = $cur['hours_awarded'];
+			$t_course->hours_awarded = $cur['hours_awarded'];
 			
 			
 		  // Was this course worth 0 hours but they didn't fail it?
@@ -757,9 +740,8 @@ class _Student
 			$t_course->bool_taken = true;
 			
 
-			$new_course->term_id = $cur[$tfb->term_id];
-			if (strstr($new_course->term_id, "9999"))
-			{
+			$new_course->term_id = $cur['term_id'];
+			if (strstr($new_course->term_id, "9999")) {
 				// was an unknown semester.  Let's set it lower so
 				// it doesn't screw up my sorting.
 				$new_course->term_id = 11111;
@@ -795,31 +777,24 @@ class _Student
 		}
 
     
-	  // Let's pull the needed variables out of our settings, so we know what
-		// to query, because this involves non-FlightPath tables.
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:transfer_eqv_per_student"];
-		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name = $tsettings["table_name"];
-
-		
     $valid_term_line = "";
     if ($require_valid_term_id != "") {
       // We are requesting eqv's only from a particular valid term, so, amend
       // the query.
-      $valid_term_line = "AND $tf->valid_term_id = $require_valid_term_id ";
+      $valid_term_line = "AND valid_term_id = $require_valid_term_id ";
     }
 		
         
 		// Does the supplied transfer course ID have an eqv?
 		$res = $this->db->db_query("
-			SELECT * FROM $table_name
-			WHERE $tf->transfer_course_id = '?'
-			AND $tf->student_id = '?'
-			AND $tf->broken_id = '0'
+			SELECT * FROM transfer_eqv_per_student
+			WHERE transfer_course_id = '?'
+			AND student_id = '?'
+			AND broken_id = '0'
 			$valid_term_line 	", $transfer_course_id, $this->student_id);
 
 		if ($cur = $this->db->db_fetch_array($res)) {
-			return $cur[$tf->local_course_id];
+			return $cur['local_course_id'];
 		}
  
 		return false;

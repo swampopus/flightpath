@@ -19,6 +19,32 @@ function convert_bbcode_to_html($str) {
 
 
 /**
+ * Format a timestamp using the date command.
+ * TODO: Make the formats something which can be controlled through the settings.
+ *
+ */
+function format_date($timestamp, $format = "standard", $custom = "") {
+  
+  $f = "";  
+  if ($format == "standard") {
+    $f = "n/d/Y h:i:sa";
+  }
+  
+  if ($format == "pretty") {
+    $f = "F jS, Y, g:ia";
+  }
+  
+  
+  if ($custom != "") $f = $custom;
+  
+  
+  return date($f, $timestamp);
+  
+}
+
+
+
+/**
  * Render a "menu" block of menu items which are all rooted at the menu_root.
  * So if the menu root is tools, it might return items whose paths look like:
  *   tools/fun
@@ -32,7 +58,9 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
   $rtn = "";
   
   $is_empty = true;
-  $rtn .= fp_render_curved_line($title);
+  if ($title != "") {
+    $rtn .= fp_render_curved_line($title);
+  }
   
   $menu_items = menu_get_items_beginning_with($menu_root);
   foreach ($menu_items as $item) {
@@ -596,7 +624,7 @@ function fp_build_tab_array($page) {
       <div class='tenpt hypo' style='margin-top: 4px; padding: 2px;'>
       <table border='0' cellspacing='0' cellpadding='0'>
       <td valign='top'>
-        <img src='fp_theme_location()/images/alert_lg.gif' >  
+        <img src='" . fp_theme_location() . "/images/alert_lg.gif' >  
       </td>
       <td valign='middle' class='tenpt' style='padding-left: 8px;'>
         <b>Important Notice: </b>

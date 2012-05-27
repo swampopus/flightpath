@@ -899,7 +899,7 @@ function draw_menu_items($menu_array) {
 			$temp = $this->db->get_substitution_details($subbed_course->db_substitution_id);
 			$by = $this->db->get_faculty_name($temp["faculty_id"], false);
 			$remarks = $temp["remarks"];
-			$ondate = date("n/d/Y h:i:sa", strtotime($temp["datetime"]));
+			$ondate = format_date($temp["posted"]);
 			
 			if ($by != "")
 			{
@@ -3423,7 +3423,7 @@ function draw_menu_items($menu_array) {
 			$temp = $db->get_substitution_details($course->db_substitution_id);
 			$by = $db->get_faculty_name($temp["faculty_id"], false);
 			$remarks = $temp["remarks"];
-			$ondate = date("n/d/_y", strtotime($temp["datetime"]));
+			$ondate = format_date($temp["posted"], "", "n/d/_y");
 			
 			
 			if ($by != "")

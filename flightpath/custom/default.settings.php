@@ -132,6 +132,8 @@ $system_settings["cron_delete_logs_older_than_days"] = 400;
  These are defined in a multi-dimension array structure.
  
 */
+
+/*
 //human_resources:students
 $system_settings["extra_tables"]["human_resources:students"] = array(
   "table_name" => "flightpath_extra_data.students",
@@ -173,10 +175,10 @@ $system_settings["extra_tables"]["human_resources:advisor_student"] = array(
     "student_id" => "student_id",    
   ),
 );
+*/
 
 
-
-
+/*
 //course_resources:student_courses
 $system_settings["extra_tables"]["course_resources:student_courses"] = array(
   "table_name" => "flightpath_extra_data.student_courses",
@@ -189,8 +191,9 @@ $system_settings["extra_tables"]["course_resources:student_courses"] = array(
     "term_id" => "term_id",
   ),
 );
+*/
 
-
+/*
 // course_resources:student_transfer_courses
 $system_settings["extra_tables"]["course_resources:student_transfer_courses"] = array (
   "table_name" => "flightpath_extra_data.student_transfer_courses",
@@ -203,8 +206,8 @@ $system_settings["extra_tables"]["course_resources:student_transfer_courses"] = 
     "hours_awarded" => "hours_awarded",
   ),
 );
-
-
+*/
+/*
 // course_resources:transfer_courses
 $system_settings["extra_tables"]["course_resources:transfer_courses"] = array (
   "table_name" => "flightpath_extra_data.transfer_courses",
@@ -219,8 +222,8 @@ $system_settings["extra_tables"]["course_resources:transfer_courses"] = array (
     "max_hours" => "max_hours",
   ),
 );
-
-
+*/
+/*
 // course_resources:transfer_institutions
 $system_settings["extra_tables"]["course_resources:transfer_institutions"] = array (
   "table_name" => "flightpath_extra_data.transfer_institutions",
@@ -230,9 +233,9 @@ $system_settings["extra_tables"]["course_resources:transfer_institutions"] = arr
     "state" => "state",
   ),
 );
+*/
 
-
-
+/*
 // course_resources:transfer_eqv_per_student
 $system_settings["extra_tables"]["course_resources:transfer_eqv_per_student"] = array (
   "table_name" => "flightpath_extra_data.transfer_eqv_per_student",
@@ -244,9 +247,9 @@ $system_settings["extra_tables"]["course_resources:transfer_eqv_per_student"] = 
     "broken_id" => "broken_id",
   ),
 );
+*/
 
-
-
+/*
 // course_resources:subjects
 $system_settings["extra_tables"]["course_resources:subjects"] = array (
   "table_name" => "flightpath_extra_data.subjects",
@@ -255,7 +258,7 @@ $system_settings["extra_tables"]["course_resources:subjects"] = array (
     "title" => "title",
   ),
 );
-
+*/
 
 // course_resources:student_developmentals
 $system_settings["extra_tables"]["course_resources:student_developmentals"] = array (
