@@ -296,6 +296,12 @@ function fp_build_sub_tab_array($page) {
   $items = menu_get_items_in_tab_family($tab_family);
   
   foreach ($items as $item) {
+        
+    // Does the user have access to this subtab?
+    if (!menu_check_user_access($item)) {
+      continue;
+    }  
+    
     $title = $item["title"];
     $path = $item["path"];
     $active = FALSE;
@@ -349,9 +355,15 @@ function fp_build_tab_array($page) {
         
     
     // look for other possible tabs, based on the "tab_family" value 
-    // TODO:  also check on access_callback, permissions, etc.   
+    // Also check to make sure the user has access to the tab.   
     $items = menu_get_items_in_tab_family($tab_family);
     foreach ($items as $item) {
+      
+      // Does the user have access to this tab?
+      if (!menu_check_user_access($item)) {
+        continue;
+      }
+      
       $title = $item["title"];
       $path = $item["path"];
       $active = FALSE;
@@ -396,14 +408,14 @@ function fp_build_tab_array($page) {
    * @return string
    */
   function fp_render_currently_advising_box($bool_hide_catalog_warning = false, $bool_blank = FALSE, $bool_print = FALSE, $degree_plan = NULL, $screen_mode = "") {
-    global $current_student_id, $screen;
+    global $current_student_id, $screen, $user;
     
     $rtn  = "";
     
     $csid = $current_student_id;
     
     if (is_object($screen) && is_object($screen->degree_plan)) {
-      $degree_plan = $screen->degree_plan;
+      $degree_plan = $screen->degree_plan;      
     }
     
     
@@ -447,9 +459,8 @@ function fp_build_tab_array($page) {
     }
 
     $ca = t("Currently Advising");
-    // TODO:  should be based on roles instead of type
-    if ($_SESSION["fp_user_type"] == "student" || $_SESSION["fp_user_type"] == "viewer")
-    {
+    
+    if (!user_has_permission("can_advise_students")) {
       $ca = t("Student Details");
     }
 
@@ -903,46 +914,25 @@ function fp_render_tab_array($tab_array)
 
 
 
-function display_not_found($msg = "") {
+function display_not_found() {
   
   $page = array(
-    "title" => "Not Found",
-    "content" => "<h2>Page not found</h2>Sorry, the requested page could not be found!",
+    "title" => t("Not Found"),
+    "content" => "<h2>" . t("Page not found") . "</h2>" . t("Sorry, the requested page could not be found."),
   );
   
   fp_display_page($page);
 }
 
 
-function display_access_denied($system_name = "", $bool_die_at_end = TRUE) {
+function display_access_denied() {
+  $page = array(
+    "title" => t("Access Denied"),
+    "content" => "<h2>" . t("Access Denied") . "</h2>" . t("Sorry, but you do not have access to the requested page or function."),
+  );
   
-  // Check for hooks...
-  if (function_exists("functions_display_access_denied")) {
-    return call_user_func("functions_display_access_denied", $system_name, $bool_die_at_end);
-  }  
-
-  $pC = "";
-  
-  $pC .= "<h2>Access Denied";
-  if ($system_name) {
-    $pC .= " for $system_name";
-  }
-  $pC .= "</h2>";
-  
-  $pC .= "Sorry, but you do not have sufficent permissions in FlightPath
-          to access this page.";
-  
-  
-  $screen = new AdvisingScreen("", null, "not_advising");
-  $screen->page_content = $pC;
-  $screen->output_to_browser();
-  
-  if ($bool_die_at_end) {
-    die;
-  }
+  fp_display_page($page);  
 }
-
-
 
 
 
@@ -1027,8 +1017,14 @@ function fp_render_square_line($text) {
 }
 
 
-function fp_render_menu_item($item) {
+function fp_render_menu_item($item, $bool_check_user_access = TRUE) {
   $rtn = "";
+  
+  if ($bool_check_user_access) {
+    if (!menu_check_user_access($item)) {
+      return "";
+    }
+  }
   
   $description = $item["description"];
   $title = $item["title"];

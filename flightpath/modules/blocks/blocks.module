@@ -274,8 +274,15 @@ function blocks_render_blocks($section, $region, $title_style = "curved") {
     $module = $cur["module"];
     $delta = $cur["delta"];
   
-    $block = call_user_func($module . "_render_block", $delta);
-
+    $block = FALSE;
+    if (function_exists($module . "_render_block")) {
+      $block = call_user_func($module . "_render_block", $delta);
+    }
+    
+    if (!$block) {
+      continue;
+    }
+    
     $extra_class = "";
     if ($c == 0) $extra_class = " block-first";
     
@@ -287,7 +294,7 @@ function blocks_render_blocks($section, $region, $title_style = "curved") {
     else if ($title_stule == "square") {
       $rtn .= fp_render_square_line($block["title"]);
     }
-            
+
     $rtn .= "<div class='block-body'>" . $block["body"] . "</div>";
     
     $rtn .= "</div>";

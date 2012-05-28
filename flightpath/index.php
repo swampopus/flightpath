@@ -17,8 +17,11 @@ if (!is_int($page)) {
   // Display the page!  
   fp_display_page($page);
 }
-else {
+else {  
   if ($page == MENU_NOT_FOUND) {
     display_not_found();
+  }
+  else if ($page == MENU_ACCESS_DENIED) {
+    display_access_denied();
   }
 }

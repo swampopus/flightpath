@@ -892,6 +892,7 @@ class _FlightPath
 	function save_advising_session_from_post($faculty_id = 0, $bool_draft = true)
 	{
 	  global $user;
+    
 	  //var_dump($__p_o_s_t);
 		// This method will, only by looking at variables in the
 		// POST, save an advising session into the database.
@@ -938,6 +939,8 @@ class _FlightPath
 
 
 		}
+
+
 
 
 		// If this user cannot advise, then just return right now.
@@ -1123,14 +1126,14 @@ class _FlightPath
 		}
 
 
-// TOOD:  check permissions for substitutions before saving
+    
 		//------------------------------------------------------
 		//
 		//             Substitutions...
 		//
 		//-------------------------------------------------------
-		if (trim($_POST["savesubstitution"]) != "")
-		{
+		// check permissions for substitutions before saving
+		if (trim($_POST["savesubstitution"]) != "" && user_has_permission("can_substitute")) {
 			$temp = explode("~",trim($_POST["savesubstitution"]));
 			$course_id = $temp[0];  // required course
 			$group_id = $temp[1] * 1;

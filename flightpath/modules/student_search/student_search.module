@@ -7,7 +7,7 @@ function student_search_menu() {
   $items["student-search"] = array(
     "title" => t("Advisees"),
     "page_callback" => "student_search_subtab_switchboard",
-    "access_callback" => TRUE,
+    "access_arguments" => array("view_any_advising_session"),
     "type" => MENU_TYPE_TAB,
     "tab_family" => "system",
     "page_settings" => array(
@@ -19,7 +19,7 @@ function student_search_menu() {
   $items["student-search/my-advisees"] = array(
     "title" => t("My Advisees"),
     "page_callback" => "student_search_display_my_advisees",
-    "access_callback" => TRUE,
+    "access_arguments" => array("view_any_advising_session"),
     "type" => MENU_TYPE_SUB_TAB,
     "tab_family" => "student_search",
     "tab_parent" => "student-search",
@@ -35,7 +35,7 @@ function student_search_menu() {
   $items["student-search/my-majors"] = array(
     "title" => t("My Majors"),
     "page_callback" => "student_search_display_my_majors",
-    "access_callback" => TRUE,
+    "access_arguments" => array("view_any_advising_session"),
     "type" => MENU_TYPE_SUB_TAB,
     "tab_family" => "student_search",
     "tab_parent" => "student-search",
@@ -51,7 +51,7 @@ function student_search_menu() {
   $items["student-search/search"] = array(
     "title" => t("Search"),
     "page_callback" => "student_search_display_search",
-    "access_callback" => TRUE,
+    "access_arguments" => array("view_any_advising_session"),
     "type" => MENU_TYPE_SUB_TAB,
     "tab_family" => "student_search",
     "tab_parent" => "student-search",

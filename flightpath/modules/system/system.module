@@ -73,34 +73,17 @@ function system_page_switchboard() {
 function system_perm() {
   
   $perms = array (
-      "de_can_access_admin_console" => array(
-      "title" => "Can access the Admin Console",
-      "description" => t("This allows the user to log into the Admin Console.
-                        "),
-    ),
-
-    "de_can_administer_data_entry" => array(
-      "title" => t("Can administer Data Entry"),
-      "description" => t("This allows the user to edit, update, delete, etc, 
-                        the Data Entry components of FlightPath, like Courses,
-                        Groups, Degrees, and advising settings."),
-    ),
-
+    "access_logged_in_content" => array(
+      "title" => "Access logged-in content",
+      "description" => t("This should be given to all authenticated users.  It simply means
+                          the user is allowed to view the logged-in area of FlightPath."),
+    ),  
+    
     "administer_modules" => array(
       "title" => t("Administer modules"),
       "description" => t("This will allow a user to install, enable, disable, and uninstall modules."),
-    ),
-
+    ),    
     
-    "de_can_administer_users" => array(
-      "title" => t("Can administer users"),
-      "description" => t("This allows the user to edit other users' permissions
-                        in the User Management system, including their own
-                        permissions.  Users will only be able to modify
-                        permissions which they themselves have been
-                        granted."),
-    ),
-
     "de_can_switch_users" => array(
       "title" => t("Can switch users"),
       "description" => t("This powerful permission allows a user to switch
@@ -113,9 +96,10 @@ function system_perm() {
       "description" => t("This allows the user to edit any of the FlightPath
                         system settings."),
     ),
-    "access_admin_debug" => array(
-      "title" => t("Access admin_debug function"),
-      "description" => t("The user may view output from the admin_debug function.
+    
+    "view_fpm_debug" => array(
+      "title" => t("View debug output from the fpm() function"),
+      "description" => t("The user may view debug output from the fpm() function.
                         Useful for developers."),
     ),                      
        
@@ -220,11 +204,10 @@ function system_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
   );
 
-  // TODO: This one needs admin access!
   $items["admin-tools/clear-cache"] = array(
     "title" => "Clear all cache",
     "page_callback" => "system_perform_clear_cache",
-    "access_callback" => TRUE,
+    "access_arguments" => array("administer_modules"),
     "type" => MENU_TYPE_NORMAL_ITEM,
   );  
 
@@ -283,7 +266,7 @@ function system_menu() {
   $items["admin/config/clear-menu-cache"] = array(
     "title" => "Clear menu cache",
     "page_callback" => "system_perform_clear_menu_cache",
-    "access_callback" => TRUE,
+    "access_arguments" => array("administer_modules"),
     "type" => MENU_TYPE_NORMAL_ITEM,
   );  
   
@@ -293,15 +276,6 @@ function system_menu() {
     "type" => MENU_TYPE_CALLBACK,
   );  
     
-    /*
-  $items["perform-login"] = array(
-    "title" => "Perform Login",
-    "page_callback" => "system_handle_login_submit",
-    "access_callback" => TRUE,
-    "type" => MENU_TYPE_CALLBACK,
-  );
-     * */
-
   $items["logout"] = array(
     "title" => "Logout",
     "page_callback" => "system_handle_logout",
@@ -571,11 +545,23 @@ function system_handle_form_submit() {
   }
 
     
-  // TODO: We need to make sure the user has permission to submit this form!
-  // Get the original menu item from the callback.
-  // We need to run something here which checks this.  It is VITAL!
-
-  
+  // We need to make sure the user has permission to submit this form!
+  $form_path = $_POST["form_path"];
+  // Check the menu router table for whatever the permissions were for this
+  // path, if any.
+  if ($form_path != "") {
+    $router_item = menu_get_item($form_path) ;
+    if (!menu_check_user_access($router_item)) {
+      // The user does NOT have access to submit this form!  The fact that
+      // it has made it this far means this may be some sort of hacking attempt.
+      die(t("Sorry, but you have encountered an error.  A form submission was flagged
+          as possibly being an invalid or having insufficient permissions to submit.  
+          This may constitute a bug in the system.  
+          Please report this error to your Systems Administrator."));
+      
+    }
+  }  
+    
   // Let's get our set of allowed values, by looking at the original form,
   // and grab what's in the POST which matches the name.
 
@@ -588,6 +574,7 @@ function system_handle_form_submit() {
       }
     }
   }  
+
 
   // Does the form have any defined submit_handler's?  If not, let's assign it the
   // default of callback_submit().    
@@ -687,6 +674,8 @@ function system_handle_logout() {
   
   $_SESSION["fp_logged_in"] = FALSE;
   $_SESSION["fp_user_object"] = FALSE;
+  session_destroy();
+  session_start();
   
   fp_add_message(t("You have been logged out of FlightPath."));
   fp_goto("<front>");
@@ -943,8 +932,7 @@ function system_login_form_validate($form, &$form_state) {
     return;
   }  
   
-  // Otherwise, check the table normally.
-  
+  // Otherwise, check the table normally.  
   // Check the user's password is valid.
   $res = db_query("SELECT * FROM users WHERE user_name = '?' AND password = '?' AND is_disabled = '0' ", $user, md5($password));
   if (db_num_rows($res) == 0) {
@@ -991,8 +979,8 @@ function system_login_form_submit($form, &$form_state) {
   $account = new stdClass();
   $account->name = $db_row["user_name"];
   $account->id = $db_row["user_id"];
-  $account->is_faculty = $db_row["is_faculty"];
-  $account->is_student = $db_row["is_student"];
+  $account->is_faculty = ($db_row["is_faculty"] == "1") ? TRUE : FALSE;
+  $account->is_student = ($db_row["is_student"] == "1") ? TRUE : FALSE;
   $account->email = $db_row["email"];
   $account->f_name = $db_row["f_name"];
   $account->l_name = $db_row["l_name"];
@@ -1021,17 +1009,25 @@ function system_login_form_submit($form, &$form_state) {
  */
 function system_user_login(&$account) {
 
-   $res = db_query("SELECT * FROM user_roles a, 
-                                  role_permissions b,
-                                  roles c
-                    WHERE a.user_id = '?'
-                    AND a.rid = b.rid
-                    AND a.rid = c.rid", $account->id);
-    while($cur = db_fetch_array($res)) {
-      $account->roles[$cur["rid"]] = $cur["name"];
-      $account->permissions[$cur["pid"]] = $cur["perm"];
-    }
+ $res = db_query("SELECT * FROM user_roles a,                                
+                                roles c
+                  WHERE a.user_id = '?'
+                  AND a.rid = c.rid", $account->id);
+  while($cur = db_fetch_array($res)) {
+    $account->roles[$cur["rid"]] = $cur["name"];
+  }
       
+  // Let's make sure we get the authenticated user role as well, #2.
+  $account->roles[2] = "authenticated user";
+        
+  // Go through each role and add in the permissions for each role.
+  foreach ($account->roles as $rid => $val) {
+    $perms = fp_get_permissions_for_role($rid);
+    // Merge the arrays while KEEPING the original's key.  So don't
+    // use array_merge, use the + operator.
+    $account->permissions = $account->permissions + $perms;
+  }
+            
 }
 
 
@@ -1041,6 +1037,7 @@ function system_user_login(&$account) {
  * as well as the Tools menu, and the "special administrative tools" menu.
  */
 function system_display_main_page() {
+  global $user;
   $rtn = "";
 
   // If we are not logged in, then we need to re-direct the user to 
@@ -1071,6 +1068,7 @@ function system_display_main_page() {
           </div>
         ";    
   }
+
   
   $rtn .= "<table class='fp-semester-table'>";
   
@@ -1079,9 +1077,6 @@ function system_display_main_page() {
   
   $left_col_blocks = blocks_render_blocks("system_main", "left_col");
   $right_col_blocks = blocks_render_blocks("system_main", "right_col");
-  
-  $tools = fp_render_menu_block("Tools", "tools");
-  $admin_tools = fp_render_menu_block("Administrative Tools", "admin-tools");
   
   if (fp_screen_is_mobile()) {
     $rtn .= "<tr><td colspan='2'>$left_col_blocks $right_col_blocks</td></tr>";
@@ -1162,6 +1157,11 @@ function system_render_block($delta) {
     $block["body"] = fp_render_menu_block("", "admin-tools");
   }
   
+  // We don't want empty blocks to show up at all.
+  if ($block["body"] == "") {
+    return FALSE;
+  }
+  
   
   return $block;
 }
@@ -1178,14 +1178,17 @@ function system_init() {
   // Let's see if the $user object (for the logged-in user) has been set up.
   global $user;
   $user = new stdClass();
-  $user->id = 0;
-  $user->name = "Anonymous";
-  $user->roles = array();
-  $user->permissions = array();
       
   if ($_SESSION["fp_logged_in"] == TRUE) {
     //pretty_print($_SESSION);
     $user = $_SESSION["fp_user_object"];
+  }
+  else {
+    // User is anonymous, so set it up as such.
+    $user->id = 0;
+    $user->name = "Anonymous";
+    $user->roles = array(1 => "anonymous user");
+    $user->permissions = fp_get_permissions_for_role(1);    
   }
     
 }

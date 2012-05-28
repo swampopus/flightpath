@@ -69,7 +69,7 @@ function advise_menu() {
   $items["history"] = array(
     "title" => "History",
     "page_callback" => "advise_display_history",
-    "access_callback" => TRUE,  
+    "access_arguments" => array("access_logged_in_content"),
     "tab_family" => "system",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
@@ -82,15 +82,7 @@ function advise_menu() {
   );
 
 
-
-  
-  $items["advise/handle-advising-submit"] = array(
-    "page_callback" => "advise_handle_advising_submit",
-    "access_callback" => TRUE,
-    "type" => MENU_TYPE_CALLBACK,
-  );
-  
-  
+ 
   // My popups....
   
 
@@ -123,8 +115,7 @@ function advise_menu() {
   $items["advise/popup-change-track"] = array(
     "title" => "Change advising track",
     "page_callback" => "advise_display_popup_change_track",
-    "access_callback" => "user_has_role",
-    "access_arguments" => array("authenticated user"),
+    "access_arguments" => array("access_logged_in_content"),
     "page_settings" => array(
       "page_is_popup" => TRUE,
       "page_hide_report_error" => TRUE,
@@ -149,7 +140,7 @@ function advise_menu() {
   $items["advise/popup-substitute-selected"] = array(
     "title" => "Substitute",
     "page_callback" => "advise_display_popup_substitute_selected",
-    "access_callback" => TRUE,
+    "access_arguments" => array("can_substitute"),
     "page_settings" => array(
       "page_is_popup" => TRUE,
       "page_hide_report_error" => TRUE,
@@ -175,7 +166,7 @@ function advise_menu() {
   $items["advise/popup-toolbox/transfers"] = array(
     "title" => "Transfers",
     "page_callback" => "advise_display_popup_toolbox_transfers",
-    "access_callback" => TRUE,
+    "access_arguments" => array("can_substitute"),
     "page_settings" => array(
       "page_is_popup" => TRUE,
       "page_hide_report_error" => TRUE,
@@ -189,7 +180,7 @@ function advise_menu() {
   $items["advise/popup-toolbox/substitutions"] = array(
     "title" => "Substitutions",
     "page_callback" => "advise_display_popup_toolbox_substitutions",
-    "access_callback" => TRUE,
+    "access_arguments" => array("can_substitute"),
     "page_settings" => array(
       "page_is_popup" => TRUE,
       "page_hide_report_error" => TRUE,
@@ -203,7 +194,7 @@ function advise_menu() {
   $items["advise/popup-toolbox/moved"] = array(
     "title" => "Moved",
     "page_callback" => "advise_display_popup_toolbox_moved",
-    "access_callback" => TRUE,
+    "access_arguments" => array("can_substitute"),
     "page_settings" => array(
       "page_is_popup" => TRUE,
       "page_hide_report_error" => TRUE,
@@ -217,7 +208,7 @@ function advise_menu() {
   $items["advise/popup-toolbox/courses"] = array(
     "title" => "Courses",
     "page_callback" => "advise_display_popup_toolbox_courses",
-    "access_callback" => TRUE,
+    "access_arguments" => array("can_substitute"),
     "page_settings" => array(
       "page_is_popup" => TRUE,
       "page_hide_report_error" => TRUE,
@@ -590,12 +581,6 @@ function advise_display_popup_course_description() {
 function advise_perm() {
   $perms = array();
   
-  $perms["view_own_advising_session"] = array(
-    "title" => t("View own advising session"),
-    "description" => t("The user is allowed to view advising sessions for themselves.
-                        For example, the user is a student."),
-  );
-
   $perms["view_any_advising_session"] = array(
     "title" => t("View any advising session"),
     "description" => t("The user is allowed to view any advising sessions for any user.
@@ -619,21 +604,6 @@ function advise_perm() {
   
   
   return $perms;
-}
-
-
-
-/**
- * This function is called when we need to save an advising record to the database.
- * It should redirect the user afterwards to an appropriate page using fp_goto().
- */
-function advise_handle_advising_submit() {
-  $rtn = "";
-
-       
-  
-  $rtn .= "i done submitted";
-  return $rtn;
 }
 
 
@@ -847,6 +817,8 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   //$vars = advise_load_advising_variables_from_db($_REQUEST["current_student_id"], $user->id);
   $vars = array();
 
+  $student = null;
+
   // The current student ID is what we append to all session variables
   // dealing with the current student.  We do this so that we will
   // keep session variables unique, so that we can have more than one
@@ -868,8 +840,8 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   {
     $vars["advising_student_id"] = $_SESSION["advising_student_id$csid"];
     if ($vars["advising_student_id"] == "")
-    { // Default value...
-      //$vars["advising_student_id"] = "10035744";
+    { // Default value...      
+      $vars["advising_student_id"] = $csid;
     }
   }
 
@@ -885,29 +857,16 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   }
 
 
-
-  /*
-  // Get the degree ID.
-  $vars["advisingDegreeID"] = $_REQUEST["advisingDegreeID"];
-  if ($vars["advisingDegreeID"] == "")
-  {
-  $vars["advisingDegreeID"] = $_SESSION["advisingDegreeID"];
-  if ($vars["advisingDegreeID"] == "")
-  { // Default value...
-  $vars["advisingDegreeID"] = "586227"; // cosc
-  }
-  }
-  */
-
   // Get the major_code.
   $vars["advising_major_code"] = $_REQUEST["advising_major_code"];
   //admin_debug($vars["advising_major_code"]);
   if ($vars["advising_major_code"] == "")
-  {
+  {    
     $vars["advising_major_code"] = $_SESSION["advising_major_code$csid"];
     if ($vars["advising_major_code"] == "")
     { // Default value...
-      //$vars["advising_major_code"] = "COSC";
+      if (!$student) $student = new Student($csid);
+      $vars["advising_major_code"] = $student->major_code;
     }
   }
 
@@ -921,6 +880,8 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
     $vars["advising_track_code"] = $_SESSION["advising_track_code$csid"];
     if ($vars["advising_track_code"] == "")
     { // Default value...
+      if (!$student) $student = new Student($csid);
+      $vars["advising_track_code"] = $student->track_code;
 
     }
   }
@@ -1070,20 +1031,6 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   }
 
 
-
-// TODO:  not sure that I need this check any more.  Everything will be based on rolls instead.
-  if ($_SESSION["fp_user_type"] == "student")
-  {
-    // The student can only pull up their own information.  This
-    // check is to try and prevent a hacker student from trying
-    // to pull up someone else's information.
-    if ($_SESSION["advising_student_id"] != $_SESSION["fp_user_id"])
-    {
-      session_destroy();
-      die("You do not have access to that function.  Please log back in: <a href='main.php'>Log into FlightPath.</a>");
-    }
-  }
-
   // Are we in draft mode?
   if ($_SESSION["fp_draft_mode"] == "yes")
   {
@@ -1103,10 +1050,17 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
  * Implementation of hook_init
  */
 function advise_init() {
-  global $current_student_id;
+  global $current_student_id, $user, $screen;
   $current_student_id = $_REQUEST["current_student_id"];
 
-
+  // Since this user doesn't have permission to view any sessions,
+  // he can only view his own.
+  if (!user_has_permission("view_any_advising_session")) {
+    $current_student_id = $user->id;
+    $_REQUEST["current_student_id"] = $current_student_id;    
+    $_REQUEST["advising_load_active"] = "yes";        
+  }
+    
       
 }
 
@@ -1173,15 +1127,6 @@ function advise_init_screen() {
   }
 
 
-  // TODO:  not sure that this is being used anymore!  Check with rolls and permissions
-  // instead.
-  //if ($_SESSION["fp_user_type"] == "student") {
-  //  $bool_draft = false;
-    // never load a draft advising session if a student
-    // is logged in!
- // }
-
-
   ///////////////////////
   ///  Disable student data Caching....
   //$GLOBALS["load_from_cache"] = "no";
@@ -1221,7 +1166,7 @@ function advise_init_screen() {
   // Should we update the USER settings for anything?
   if ($GLOBALS["fp_advising"]["fp_update_user_settings_flag"] != "") {
     if (!$db->update_user_settings_from_post($user->id)) {
-      admin_debug("could not write user settings.");
+      fp_add_message(t("Unable to update user settings.  Please try again later."));
     }
   }
 

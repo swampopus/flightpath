@@ -753,3 +753,42 @@ a.form-popup-description {
   text-decoration: none;
 }
 
+/**
+ *   FPM related
+ */
+
+.fp-html-print-r-wrapper {
+  font-size: 0.9em;
+}
+
+.fp-html-print-r-multi-row {
+  background-color: #eee;
+  border: 1px solid #bbb;
+  padding: 5px;  
+}
+
+.fp-html-print-r-multi-row .fp-html-print-r-selector {
+  cursor: pointer;  
+}
+
+.fp-html-print-r-multi-row > .fp-html-print-r-var-value {
+  padding-left: 30px;
+}
+
+.fp-html-print-r-single-row {
+  border-top: 1px solid #bbb;
+}
+
+.fp-html-print-r-var-name {
+  color: #404000;
+  font-weight: bold;
+}
+
+.fp-html-print-r-var-type {
+  font-style: italic;
+}
+
+.fp-html-print-r-single-row .fp-html-print-r-var-value {
+  font-weight: bold;
+}
+

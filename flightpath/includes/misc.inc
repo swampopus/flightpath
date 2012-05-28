@@ -363,9 +363,13 @@ function get_global_database_handler() {
  */
 function fpm($str) {
   
+  if (!user_has_permission("view_fpm_debug")) {
+    return;
+  }
+  
   // Complex variable?  Change it to print_r.
   if (is_array($str) || is_object($str)) {
-    $str = "<pre>" . print_r($str, TRUE) . "</pre>";
+    $str = "<div class='fp-html-print-r-wrapper'>" . fp_html_print_r($str) . "</div>";
   }    
 
   $arr = debug_backtrace();
@@ -380,6 +384,86 @@ function fpm($str) {
 
     
 }
+
+
+/**
+ * Similar to print_r, this will return an HTML-friendly
+ * click-to-open system similar in design to Krumo.
+ */
+function fp_html_print_r($var, $name = "") {  
+  $rtn = "";
+  
+  $type = gettype($var);
+  $rnd = md5(mt_rand(0, 999999) . microtime() . $type . $name);
+  
+  if ($type == "boolean") {
+    $var = ($var == TRUE) ? "TRUE" : "FALSE";
+  }  
+  
+  $count = "";
+  if ($type == "string") {
+    $count = " - " . strlen($var) . " " . t("chars");
+  }
+  
+  if ($type == "array" || $type == "object") {
+      
+    
+    if ($type == "array") {
+      $count = " - " .  count($var) . " " . t("elements");
+    }
+    
+    if ($type == "object") {
+      $count = " - " . get_class($var);
+    }
+    
+    $rtn .= "<div class='fp-html-print-r-multi-row'>
+               <div class='fp-html-print-r-selector'
+                  onClick='\$(\"#fp-html-print-r-var-value-$rnd\").toggle(\"medium\");'
+                  >
+                  <span class='fp-html-print-r-var-name'>$name</span>
+                  <span class='fp-html-print-r-var-type'>($type$count)</span>
+                  </div>
+               <div class='fp-html-print-r-var-value' id='fp-html-print-r-var-value-$rnd' style='display: none;'>";
+    foreach ($var as $key => $value) {
+      $rtn .= fp_html_print_r($value, $key);
+    }
+    
+    $rtn .= "</div>
+             </div>";
+  }
+  else if ($type == "string" && strlen($var) > 50) {
+    // If the variable is fairly long, we want to also make it a hide-to-show type field.
+    $rtn .= "<div class='fp-html-print-r-multi-row'>
+               <div
+                  onClick='\$(\"#fp-html-print-r-var-value-$rnd\").toggle(\"medium\");'
+                  >
+                    <span class='fp-html-print-r-var-name'>$name</span>
+                    <span class='fp-html-print-r-var-type'>($type$count)</span>
+                    <span class='fp-html-print-r-var-value-abbr'>" . htmlentities(substr($var, 0, 50)) . "...</span>
+                  </div>
+               <div class='fp-html-print-r-var-value' id='fp-html-print-r-var-value-$rnd' style='display: none;'>
+               ";
+    $rtn .= htmlentities($var);
+    $rtn .= "</div></div>";    
+  }
+  else { 
+    
+    $html_val = $var;
+    if ($type != "resource") {
+      $html_val = htmlentities("" . $var);
+    }
+    
+    $rtn .= "<div class='fp-html-print-r-single-row'>                
+                <span class='fp-html-print-r-var-name'>$name</span>
+                <span class='fp-html-print-r-var-type'>($type$count)</span>
+                <span class='fp-html-print-r-var-value'>$html_val</span>
+           </div>";
+  }  
+  
+  return $rtn;
+}
+
+
 
 /**
  * Will output a debugCT statement only if the user
@@ -735,14 +819,14 @@ function fp_get_js_prompt_link($question, $default, $action_if_yes, $link_text) 
 /**
  * Does the user have the specified role?
  */
-function user_has_role($roll, $faculty_if = "") {
+function user_has_role($role) {
   global $user;
   
   // Admin always = TRUE
-  if (in_array("administrator", $user->rolls)) return TRUE;
+  if ($user->id == 1) return TRUE;
   
   // Check for other users...
-  if (in_array($roll, $user->rolls)) return TRUE;
+  if (in_array($role, $user->roles)) return TRUE;
   
   return FALSE;
   
@@ -755,8 +839,10 @@ function user_has_role($roll, $faculty_if = "") {
  *
  * @param String $permission
  */
-function user_has_permission($permission, $faculty_id = "") {
+function user_has_permission($permission) {
   global $user;  
+  
+  //fpm("checking permission $permission");
   
   // If the user is admin (id == 1) then they always have access.
   if ($user->id == 1) return TRUE;

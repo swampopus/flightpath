@@ -77,9 +77,8 @@ function admin_permissions_form() {
 
       $form["mark" . $m++] = array(
         "value" => "<tr class='perm-cb-row perm-cb-row-$zebra'><td class='perm-details' valign='top'>
-                      <div class='perm-title'>$title</div>
-                      <div class='perm-name'>$perm_name</div>
-                      <div class='perm-desc'>$desc</div>
+                      <div class='perm-title' title='$perm_name'>$title</div>                      
+                      <div class='perm-desc' title='$perm_name'>$desc</div>
                    </td>",
       );   
 

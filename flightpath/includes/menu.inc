@@ -72,7 +72,32 @@ function menu_get_module_path($module) {
 
 
 
-
+/**
+ * Looks at the router item's details (from menu_get_item)
+ * and returns TRUE or FALSE if the user can access this item. 
+ */
+function menu_check_user_access($router_item) {
+  $access = FALSE;
+  if ($router_item["access_callback"] == 1) {
+    $access = TRUE;
+  }
+  if (is_array($router_item["access_arguments"])) {
+    if ($router_item["access_callback"] == "") {
+      // If we specified access arguments, but not a callback, assume it
+      // is the function user_has_permission().
+      $router_item["access_callback"] = "user_has_permission";
+    }
+  }
+  
+  if (!$access && $router_item["access_callback"] != "") {
+    // We need to see if the user has the right permissions to use this item.  We will do this
+    // by calling the access_callback, passing it the access_arguments
+    $access = call_user_func_array($router_item["access_callback"], $router_item["access_arguments"]);
+  }    
+    
+    
+  return $access;
+}
 
 
 function menu_execute_page_request() {
@@ -98,33 +123,14 @@ function menu_execute_page_request() {
       return;
     }
        
-    // Let's figure out if the user has access to this menu item or not.
-    $access = FALSE;
-    if ($router_item["access_callback"] == 1) {
-      $access = TRUE;
-    }
-    if (is_array($router_item["access_arguments"])) {
-      if ($router_item["access_callback"] == "") {
-        // If we specified access arguments, but not a callback, assume it
-        // is the function user_has_permission().
-        $router_item["access_callback"] = "user_has_permission";
-      }
-    }
-    
-    if (!$access && $router_item["access_callback"] != "") {
-      // We need to see if the user has the right permissions to use this item.  We will do this
-      // by calling the access_callback, passing it the access_arguments
-      $access = call_user_func_array($router_item["access_callback"], $router_item["access_arguments"]);
-    }    
-    
-    if ($access) {
+    // Let's figure out if the user has access to this menu item or not.  
+    if (menu_check_user_access($router_item)) {
       if ($router_item['file'] != "") {      
         require_once($router_item['file']);
       }
       $page = array();
       $page["content"] = call_user_func_array($router_item['page_callback'], $router_item['page_arguments']);      
       $page["path"] = $path;
-      // TODO:  Check to see if the user has overridden the title using the fp_set_title() command.
       $page["title"] = $router_item["title"];
       $page["router_item"] = $router_item;
 

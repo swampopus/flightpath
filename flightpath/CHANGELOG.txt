@@ -1,6 +1,27 @@
 FlightPath Changelog
 ====================
 
+2012-05-28
+  Made sure user has access to submit a form after they've submitted.
+  
+  Refined permissions, made sure permissions were working correctly for tabs.
+  
+  Tabs don't show if you don't have permission.
+  
+  Worked on "student" view, when they can only see their own degree plan.
+  
+  Fixed bug where show/hide pie charts stopped working.
+  
+  Login form is now a proper "fp" form, so it can have
+  custom submitters/validators
+  
+  Created hook_user_login and hook_user_logout
+  
+  Made fpm() function VERY fancy, with click-to-open
+  folding, like Krumo.  Great for debugging.
+  
+  Blocks don't show up if there is no content in the body.  
+
 2012-05-24
   Removing the concept of the separate flightpath_extra_data database
   

@@ -27,6 +27,15 @@ function fp_get_faculty_name($faculty_id) {
   return $name;
 }
 
+function fp_get_permissions_for_role($rid) {
+  $rtn = array();
+  $res = db_query("SELECT * FROM role_permissions
+                   WHERE rid = '?' ", $rid);
+  while($cur = db_fetch_array($res)) {
+    $rtn[$cur["pid"]] = $cur["perm"];
+  }
+  return $rtn;
+}
 
 
 /**

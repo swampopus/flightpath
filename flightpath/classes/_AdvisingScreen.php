@@ -77,9 +77,7 @@ class _AdvisingScreen
 		$this->screen_mode = $screen_mode;
 
 		//$this->settings = $this->db->get_flightpath_settings();
-		$this->user_settings = $this->db->get_user_settings($_SESSION["fp_user_id"]);
-
-		
+	
 		$this->earliest_catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
 		
 		$this->determine_mobile_device();
@@ -1751,6 +1749,7 @@ function draw_menu_items($menu_array) {
 	 */
 	function draw_progress_boxes()
 	{
+	  global $user;
 		// Draw the boxes for student progress (where
 		// the pie charts go!)
 		$pC = "";
@@ -1774,7 +1773,9 @@ function draw_menu_items($menu_array) {
 		$pC .= "<tr><td colspan='2'>
 				";
 
-		if ($this->user_settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false && $this->page_is_mobile == false)
+    $user->settings = $this->db->get_user_settings($user->id);
+				
+		if ($user->settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false && $this->page_is_mobile == false)
 		{ // Display the pie charts unless the student's settings say to hide them.
 
 
@@ -2646,7 +2647,7 @@ function draw_menu_items($menu_array) {
 	function build_semester_list() {
 	  
     //admin_debug($this->degree_plan);
-    
+
 		$list_semesters = $this->degree_plan->list_semesters;
 		// Go through each semester and add it to the screen...
 		$list_semesters->reset_counter();
@@ -3512,8 +3513,8 @@ function draw_menu_items($menu_array) {
 				
 				";
 			}
-		} elseif ($show_advising_buttons == false && $course->has_variable_hours() == true && $course->grade == "")
-		{
+		} 
+		else if ($show_advising_buttons == false && $course->has_variable_hours() == true && $course->grade == "" && user_has_permission("can_advise_students")) {
 			// Show an "update" button, and use the course's assigned_to_group_id and
 			// assigned_to_semester_num.
 			$pC .= "
