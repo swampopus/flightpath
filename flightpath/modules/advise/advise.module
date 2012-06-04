@@ -421,7 +421,7 @@ function advise_display_popup_group_select() {
   $perform_action2 = $_REQUEST["perform_action2"]; 
   
   if (!$group = $degree_plan->find_placeholder_group($group_id, $semester_num)) {
-    admin_debug("Could not find group $group_id in semester $semester_num.");
+    fpm("Could not find group $group_id in semester $semester_num.");
   }
 
   if ($group_id == -88) { 
@@ -535,21 +535,17 @@ function advise_display_popup_course_description() {
   $data_string = trim($_GET["data_string"]);
   $course = new Course();
   if ($data_string != "")
-  {
-    //fpm($data_string);
+  {  
     $course->load_course_from_data_string($data_string);
-   
+
   }
 
-  //$page_content .= $screen->get_javascript_code();
   $rtn .= $screen->display_popup_course_description("", $course);
   // Create the tabs for the page...
   $tab_array = array();
   $tab_array[0]["title"] = "Description";
   $tab_array[0]["active"] = true;
 
-
-  //if ($_SESSION["fp_can_substitute"] == true && !$screen->bool_blank)
   if (user_has_permission("can_substitute") && !$screen->bool_blank) {
     if ($course->bool_substitution != true && $course->grade == "") { 
       // By checking grade, we are making sure this course has NOT already
@@ -833,7 +829,6 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
   $csid = $vars["current_student_id"];
 
-  //admin_debug("csid: $csid");
   // Get the student ID.
   $vars["advising_student_id"] = $_REQUEST["advising_student_id"];
   if ($vars["advising_student_id"] == "")
@@ -859,7 +854,6 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
   // Get the major_code.
   $vars["advising_major_code"] = $_REQUEST["advising_major_code"];
-  //admin_debug($vars["advising_major_code"]);
   if ($vars["advising_major_code"] == "")
   {    
     $vars["advising_major_code"] = $_SESSION["advising_major_code$csid"];
@@ -1140,7 +1134,6 @@ function advise_init_screen() {
 
   $bool_loaded = FALSE;
   if ($GLOBALS["fp_advising"]["load_from_cache"] == "yes" && $cache != "" && $fp = unserialize($cache)) {
-    //fpm("Loading student data from cache...");
     $bool_loaded = TRUE;    
     $fp->db = get_global_database_handler();
     $student = $fp->student;
@@ -1148,18 +1141,15 @@ function advise_init_screen() {
     $degree_plan = $fp->degree_plan;
     $student->db = get_global_database_handler();
     $degree_plan->db = get_global_database_handler();
-    //admin_debug("Done Unserializing... $bool_what_if");
   } 
   
   if (!$bool_loaded) {
-    //fpm("Loading student data fresh");    
     $fp = new FlightPath();
     $fp->init();    
     $student = $fp->student;
     $degree_plan = $fp->degree_plan;
     $GLOBALS["fp_advising"]["load_from_cache"] = "no";
     $bool_loaded = TRUE;    
-    //admin_debug($GLOBALS["advisingMajorCode"]);
   }
 
 
@@ -1205,7 +1195,7 @@ function advise_init_screen() {
   }
 
 
-  if ($_REQUEST["bool_blank"] == "true") {
+  if ($_REQUEST["bool_blank"] == "true" || $_REQUEST["blank_degree_id"] != "") {
     $screen->bool_blank = TRUE;
   }
 
@@ -1235,22 +1225,16 @@ function advise_init_screen() {
     
   }
 
-  //admin_debug("Serializing...");
   if ($GLOBALS["fp_advising"]["save_to_cache"] != "no" && $window_mode != "popup") {
     if ($bool_what_if == false) { 
       // NOT in whatIf mode.  Normal.
-      //admin_debug("start serialize");
 
       $_SESSION["cache_fp$csid"] = serialize($fp);
-      
-      //admin_debug(strlen($_SESSION["cache_f_p$csid"]));
-      //admin_debug("Done Serializing...normal");
-      
+            
     } 
     else {
       // We are in WhatIf mode.
       $_SESSION["cache_what_if$csid"] = serialize($fp);      
-      //admin_debug("Done Serializing...what if");
 
 
     }
@@ -1259,15 +1243,11 @@ function advise_init_screen() {
 
   $fp->load_advising_session_from_database(0,$advising_term_id,$bool_what_if,$bool_draft,0);
 
-  //admin_debug("load advising session");
 
   // Once we have loaded the advising session, we should always try to load
   // from draft from then on out.
   $GLOBALS["fp_advising"]["advising_load_active"] = "";
 
-  //admin_debug("mem:" .  round(memory_get_usage(true)/1024/1024,1) . "mb");
-
-  //print_pre($student->list_courses_taken->toString());
   
   
 }

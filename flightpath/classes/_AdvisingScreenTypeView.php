@@ -48,10 +48,10 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 		// Go through each semester and add it to the screen...
 		$list_semesters->reset_counter();
 
-		$this->add_to_screen($this->display_semester_list($list_semesters, "c", "Core Requirements", true));
-		$this->add_to_screen($this->display_semester_list($list_semesters, "m", "Major Requirements", true));
-		$this->add_to_screen($this->display_semester_list($list_semesters, "s", "Supporting Requirements", true));
-		$this->add_to_screen($this->display_semester_list($list_semesters, "e", "_electives", true));
+		$this->add_to_screen($this->display_semester_list($list_semesters, "c", t("Core Requirements"), true));
+		$this->add_to_screen($this->display_semester_list($list_semesters, "m", t("Major Requirements"), true));
+		$this->add_to_screen($this->display_semester_list($list_semesters, "s", t("Supporting Requirements"), true));
+		$this->add_to_screen($this->display_semester_list($list_semesters, "e", t("Electives"), true));
 
 		
 		$temp_d_s = new Semester(-55); // developmental requirements.

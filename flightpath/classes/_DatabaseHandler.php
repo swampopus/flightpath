@@ -321,9 +321,7 @@ class _DatabaseHandler
     // If $c (number of replacements performed) does not match the number of replacements
     // specified, warn the user.
     if (substr_count($sql_query, "?") != count($args)) {
-      // TODO:  Replace this with a call to something
-      // like fp_add_message("Blah blah blah", "warning");
-      admin_debug("<br><b>WARNING:</b> Replacement count does not match what was supplied to query: $sql_query<br><br>");
+      fpm("<br><b>WARNING:</b> Replacement count does not match what was supplied to query: $sql_query<br><br>");
     }    
     
 	  if (count($args) > 0) {
@@ -478,7 +476,6 @@ class _DatabaseHandler
 			$repeat_hours = $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["repeat_hours"];
 			$db_exclude = $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["db_exclude"];
 			$array_valid_names = $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["array_valid_names"];
-			//admin_debug("loaded from gb cache.");
 			// load this into the course object, if not null.
 
 			return;
@@ -511,10 +508,10 @@ class _DatabaseHandler
 							AND `catalog_year` <= '?'
 							ORDER BY `catalog_year` DESC LIMIT 1", $course_id, $current_catalog_year);
 				$cur = $this->db_fetch_array($res2);
-				//admin_debug("courses row: {$cur["id"]}");
+
 				if ($this->db_num_rows($res2) < 1)
 				{
-					//admin_debug("in here");
+
 					// Meaning, there were no results found that didn't have
 					// the exclude flag set.  So, as a last-ditch effort,
 					// go ahead and try to retrieve any course, even if it has
@@ -541,7 +538,6 @@ class _DatabaseHandler
 			$subject_id = trim(strtoupper($cur["subject_id"]));
 			$course_num = trim(strtoupper($cur["course_num"]));
 
-			//admin_debug("  got $subject_id $course_num ");
 
 
 			if ($min_hours < 1)
@@ -586,7 +582,6 @@ class _DatabaseHandler
 
 		if ($description == "")
 		{
-			//admin_debug("here for $course_id");
 			$description = "There is no course description available at this time.";
 		}
 
@@ -777,7 +772,6 @@ class _DatabaseHandler
 
 
 
-		//admin_debug("$student_id, $faculty_id, $term_id, $degree_id, $is_what_if, $is_draft ");
 		$query = "select * from advising_sessions
 								where
 								    `student_id`='$student_id'
@@ -788,12 +782,10 @@ class _DatabaseHandler
 								$draft_line
 								order by `posted` desc limit 1";
 		$result = $this->db_query($query) ;
-		//admin_debug($query);
 		if ($this->db_num_rows($result) > 0)
 		{
 			$cur = $this->db_fetch_array($result);
 			$advising_session_id = $cur["advising_session_id"];
-			//admin_debug(" - $advising_session_id");
 			return $advising_session_id;
 		}
 		return 0;

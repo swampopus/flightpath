@@ -151,17 +151,14 @@ class _CourseList extends ObjList
 		}
 		// Look through the array for a course with this id, termId, and
 		// transfer credit status.
-		//admin_debug("Looking for $course_id $term_id $bool_transfer ");
 		for ($t = 0; $t < $this->count; $t++)
 		{
 			$course = $this->array_list[$t];
 
 			$check_course_id = $course->course_id;
-			//admin_debug("..... looking at $check_course_id");
 			if ($bool_transfer == true && is_object($course->course_transfer))
 			{
 				$check_course_id = $course->course_transfer->course_id;
-				//admin_debug("..... ..... using transfer $check_course_id");
 			}
 
 			if ($check_course_id == $course_id && $course->term_id == $term_id && $course->bool_transfer == $bool_transfer)
@@ -329,13 +326,8 @@ class _CourseList extends ObjList
 		// into this course requirement.
 
 		// Sort the courses into most recently taken first.
-		//admin_debug("-------------------");
-		//print_pre($list_matches->to_string());
 		$list_matches->sort_most_recent_first();
 
-		//admin_debug("-------------------");
-		//print_pre($list_matches->to_string());
-		//admin_debug("-------------------");
 
 		// So, now that it's sorted, we should look through the list,
 		// checking the min grade requirements (if any).  When we find
@@ -352,10 +344,8 @@ class _CourseList extends ObjList
 			}
 			//////////////////////////////////////////
 			///  Check for min grade, etc, here.
-			//admin_debug("checking min grade ($min_grade) for " . $c->to_string());
 			if (!$c->meets_min_grade_requirement_of(null, $min_grade))
 			{
-				//admin_debug("skippin");
 				if ($bool_mark_repeats_exclude == true)
 				{
 					// Since this course does not meet the min_grade,
@@ -374,7 +364,6 @@ class _CourseList extends ObjList
 					if ($c->repeat_hours <= $c->min_hours)
 					{
 						// No repeats.
-						//admin_debug("no repeats allowed. rep hours:" . $c->repeat_hours . " - min_hours:" . $c->min_hours);
 						$this->mark_repeats_exclude($c);
 						return false;
 
@@ -446,12 +435,9 @@ class _CourseList extends ObjList
 				}
 			}
 
-			//admin_debug($course->to_string());
-			
 			// Has the course been substituted?
 			if ($test_sub = $list_substitutions->find_requirement($course,false, -1))
 			{
-				//admin_debug("found " . $test_sub->to_string());
 				// it WAS substituted, so we should NOT add it to our
 				// rtnList.
 				continue;
@@ -462,13 +448,11 @@ class _CourseList extends ObjList
 			if ($test_course = $list_courses->find_match($course))
 			{
 				// Yes, it found a match.
-				//admin_debug("Here!");
 				// I am taking out this part where I say if it is in
 				// this group then we can keep it.  I think that shouldn't
 				// be in.
 				// This course is in another group, so do nothing
 				// and skip it.
-				//admin_debug("found elsewhere in group: $test_course->grade");
 				
 				// perhaps the course is on the degreePlan in excess with a W
 				// or F?
@@ -548,7 +532,6 @@ class _CourseList extends ObjList
 
 				if ($course->db_exclude == 1)
 				{
-					//admin_debug("skipping " . $course->to_string());
 					continue;
 				}
 
@@ -599,7 +582,7 @@ class _CourseList extends ObjList
 						$temp = split("~",$course->array_valid_names[$x]);
 						$course->subject_id = $temp[0];
 						$course->course_num = $temp[1];
-						//admin_debug("use $course->subject_id $course->course_num");
+
 						$new_course_list->add($course);
 						continue;
 					}
@@ -890,17 +873,15 @@ class _CourseList extends ObjList
 				// This might not work at all, though...
 				
 				$cn = strrev($c->subject_id) . "," . (1000 - $c->course_num);
-				//admin_debug($cn);
+
 			}
 			$str = "$c->term_id ~~ $cn ~~ $t";
-			//admin_debug($str);
+
 			array_push($tarray,$str);
 		}
 
 		// Now, sort the array...
-		//print_pre(print_r($tarray));
 		rsort($tarray);
-		//print_pre(print_r($tarray));
 
 		// Now, convert the array back into a list of courses.
 		$new_list = new CourseList();
@@ -1248,8 +1229,6 @@ class _CourseList extends ObjList
 	{
 		for ($t = 0; $t < count($course_l->array_list); $t++)
 		{
-			//admin_debug($course_l->array_list[$t]->assigned_to_semester_num);
-			//admin_debug("adding " . $course_l->array_list[$t]->to_string());
 			$this->add($course_l->array_list[$t]);
 		}
 
@@ -1303,7 +1282,6 @@ class _CourseList extends ObjList
 				// substituted somewhere else!
 				if ($course->bool_substitution == false)
 				{ // not being used in another sub, so skip it.
-					//admin_debug("skipping " . $course->to_string());
 					continue;
 				}
 			}
@@ -1336,7 +1314,6 @@ class _CourseList extends ObjList
 				if ($course->requirement_type == $requirement_type)
 				{
 					$count = $count + $h_get_hours;
-					//admin_debug($course->to_string());
 					continue;
 				}
 
@@ -1588,7 +1565,6 @@ class _CourseList extends ObjList
 
 
 		$count = 0;
-		//admin_debug($requirement_type);
 		for ($t = 0; $t < $this->count; $t++)
 		{
 			$course = $this->array_list[$t];
@@ -1610,7 +1586,6 @@ class _CourseList extends ObjList
 			{
 				if ($course->is_completed() == false)
 				{
-					//admin_debug("skip" . $course->to_string());
 					if ($course->course_list_fulfilled_by->is_empty)
 					{
 
@@ -1630,13 +1605,10 @@ class _CourseList extends ObjList
 				{
 				  $h = $course->get_hours();
 					$count = $count + $h;
-					//admin_debug($course->to_string());
-					//admin_debug($h);
 				} else {
 					if ($course->requirement_type == $requirement_type)
 					{
 						$count = $count + $course->get_hours();
-						//admin_debug($course->to_string());
 						continue;
 					}
 
@@ -1671,7 +1643,7 @@ class _CourseList extends ObjList
 							}
 							
 							$count = $count + $h;
-							admin_debug($cc->to_string());
+							fpm($cc->to_string());
 						}
 					}
 				} else {
@@ -1689,7 +1661,6 @@ class _CourseList extends ObjList
   							}								
 								
 								$count = $count + $h;
-								//admin_debug($cc->to_string());
 							}
 						}
 
@@ -1914,12 +1885,10 @@ class _CourseList extends ObjList
 
 			if ($tarray[$course->course_id]*1 < 0)
 			{
-				//admin_debug("empty $course->subject_id $course->course_num ");
 				$tarray[$course->course_id] = $t;
 			}
 
 		}
-		//print_pre(print_r($tarray));
 
 		// Now, go through tarray and rebuild the newList.
 		foreach($tarray as $course_id => $i)
@@ -1935,12 +1904,3 @@ class _CourseList extends ObjList
 
 } // end class CourseList
 
-
-
-
-
-
-
-
-
-?>

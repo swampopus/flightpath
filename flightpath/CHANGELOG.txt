@@ -1,6 +1,19 @@
 FlightPath Changelog
 ====================
 
+2012-06-04
+  Removed old references to SESSION["user_type"], replaced with newer check on permissions instead
+  
+  Renamed old files to have a z__ in front of filename, in preparation to delete.
+  
+  Popup contact/report a bug is now part of the system module, not its own php file.
+  
+  Removed references to old admin_debug statement.  Also cleaned up some old comments along
+  the way.
+  
+  Added blank_degrees module and reworked various bits of code to make it work.
+  
+
 2012-05-28
   Made sure user has access to submit a form after they've submitted.
   

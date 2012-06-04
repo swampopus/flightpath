@@ -469,7 +469,7 @@ function fp_html_print_r($var, $name = "") {
  * Will output a debugCT statement only if the user
  * has access to view it. 
  */
-function admin_debug($str, $var_name = "")
+function z__admin_debug($str, $var_name = "")
 {
   if ($GLOBALS["fp_system_settings"]["disable_admin_debug"] == true)
   {
@@ -487,94 +487,6 @@ function admin_debug($str, $var_name = "")
   $GLOBALS["fp_system_settings"]["disable_debug_ct"] = $temp;  // restore its original state.
   
 }
-
-
-/**
- * This function determines the user type of a logged-in
- * NON student user.  As in, are they admin, advisors, viewers, etc.
- * 
- *
- * @param unknown_type $user_id
- * @return unknown
- */
-/*
-function z__determine_staff_user_type($user_id)
-{
-  
-  // Check for hooks...
-  if (function_exists("functions_determine_staff_user_type")) {
-    return call_user_func("functions_determine_staff_user_type", $user_id);
-  }
-  
- 
-  // If GRANT_FULL_ACCESS is turned on, then this person
-  // is full_admin.
-  if ($GLOBALS["fp_system_settings"]["GRANT_FULL_ACCESS"] == TRUE) {
-    return "full_admin";
-  }
-  
-  
-  // Attempt to figure out the user's type.
-  $db = new DatabaseHandler();
-
-  // Is the user a full admin?  Meaning they basically
-  // have the same privileges as a college_coordinator,
-  // but can also get into Data Entry.
-  $res = $db->db_query("SELECT * FROM administrators
-                       WHERE faculty_id = '?' ", $user_id);
-  if ($db->db_num_rows($res) == 1)
-  {
-    return "full_admin";
-  }
-
-  //////////////////////////////////////////////////////////////////
-  // Does the user have a type specified in the User management system?
-  $res = $db->db_query("SELECT * FROM users
-                WHERE faculty_id = '?' ", $user_id);
-  $cur = $db->db_fetch_array($res);
-  $user_type = trim($cur["user_type"]);
-
-  if ($user_type != "")
-  {
-    return $user_type;
-  }
-
-  /////////////////////////////////////////////////////////////////////
-  // The user was not specifically found in the users table,
-  // so let's try to determine what their user type might be...
-  // If your school uses the optional "employee_type" field of the
-  // human_resources:faculty_staff table to determine user type, then you
-  // must override this function in a hook and change this section.
-  
-  // Let's pull the needed variables out of our settings, so we know what
-  // to query, because this is a non-FlightPath table.
-  $tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
-  $tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  $table_name = $tsettings["table_name"];    
-  
-  $res = $db->db_query("SELECT * FROM $table_name
-                WHERE $tf->faculty_id = '?' ", $user_id);
-  $cur = $db->db_fetch_array($res);
-  $emp_type = $cur[$tf->employee_type];
-  
-  if($emp_type == 10 ||
-  $emp_type == 20 ||
-  $emp_type == 30 ||
-  $emp_type == 40 ||
-  $emp_type == 50 ||
-  $emp_type == 99)
-  {
-    $user_type = "advisor";
-  }
-  else {
-    $user_type = "none";
-  }
-
-  return $user_type;
-
-
-}
-*/
 
 
 
@@ -603,43 +515,6 @@ function get_shorter_catalog_year_range($cat_range, $abbr_first = true, $abbr_se
 }
 
 
-
-
-/**
- * This function returns the path to a particular module, if it
- * exists (returns FALSE otherwise).
- * Example:
- * $x = get_module_path("course_search");
- * will return:
- *   custom/modules/course_search
- * 
- * Notice it does NOT have leading or trailing slashes!
- *
- * If you set boolIncludeFileSystemPath = TRUE,
- * you will get back the FILE path of the module. Ex:
- *   /var/www/public_html/flightpath/custom/modules/course_search
- * 
- * 
- * @param unknown_type $module
- */
-/*
-function get_module_path($module = "", $bool_include_file_system_path = FALSE) {
-  
-  $system_path = "";
-  
-  if ($bool_include_file_system_path) {
-    $system_path = trim($GLOBALS["fp_system_settings"]["file_system_path"]) . "/";
-  }
-    
-  
-  if (isset($GLOBALS["fp_system_settings"]["modules"][$module]["path"])) {
-    return $system_path . $GLOBALS["fp_system_settings"]["modules"][$module]["path"];
-  }
-  else {
-    return FALSE;
-  }
-}
-*/
 
 /**
  * This will find and include the module in question, calling
@@ -1143,18 +1018,7 @@ function strip_non_u_t_f8($str, $html_safe = false){
 
 function fp_debug_ct($debug_val = "", $var = "")
 { // Shortcut to the other function.
-  if ($GLOBALS["fp_system_settings"]["disable_debug_ct"] == true)
-  {
-    return;
-  }
-
-  fp_debug_current_time_millis($debug_val, false, $var);
-}
-
-
-function fp_print_pre($str)
-{
-  print "<pre>" . $str . "</pre>";
+  return fp_debug_current_time_millis($debug_val, false, $var);
 }
 
 
@@ -1166,6 +1030,8 @@ function fp_debug_current_time_millis($debug_val = "", $show_current_time = true
   // long a particular function takes to run.  Just place a call
   // to this function before and after the function call.
   
+  $rtn = "";
+  
   $debug_string = $debug_val;
   if (is_array($debug_val) || is_object($debug_val)) {
     $debug_string = "<pre>" . print_r($debug_val, true) . "</pre>";
@@ -1175,33 +1041,25 @@ function fp_debug_current_time_millis($debug_val = "", $show_current_time = true
 
   $cur_time = microtime(true) * 1000;
 
-  //if ($debug_string != "")
-  //{
   $debug_string = "<span style='color:red;'>DEBUG:</span>
             <span style='color:green;'>$debug_string</span>";
-  //}
 
-  print "<div style='background-color: white;'>$debug_string
-      ";
-  if ($show_current_time == true)
-  {
-    print "<span style='color: red;'>TIME:</span>
-        <span style='color: green;'>$cur_time" . "ms</span>";
-  }
+  $rtn .= "<div style='background-color: white;'>$debug_string";
 
   if ($last_time > 1)
   {
     $diff = round($cur_time - $last_time,2);
-    print "<span style='color: blue;'> ($diff" . "ms since last check)</span>";
+    $rtn .= "<span style='color: blue;'> ($diff" . "ms since last check)</span>";
   } else {
     // Start of clock...
-    print "<span style='color: blue;'> --- </span>";
+    $rtn .= "<span style='color: blue;'> --- </span>";
   }
 
-  print "</div>";
+  $rtn .= "</div>";
   $GLOBALS["current_time_millis" . $var] = $cur_time;
   $GLOBALS["current_time_millis"] = $cur_time;
 
+  return $rtn;
 }
 
 

@@ -86,7 +86,6 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
  */
 function fp_display_page($page) {
   global $current_student_id, $screen;
-  
   $page_title = $page["title"];
   if ($GLOBALS["fp_set_title"] != "") {
     $page_title = $GLOBALS["fp_set_title"];
@@ -129,13 +128,17 @@ function fp_display_page($page) {
   
   $content_top = "";  
   
+  if ($page["router_item"]["page_settings"]["page_show_title"] == TRUE) {
+    $content_top .= "<h2 class='title'>" . $page_title . "</h2>";
+  } 
+  
   if ($page["router_item"]["page_settings"]["display_greeting"] == TRUE) {  
     $content_top .= fp_render_greeting();
   }
   
   // Are there any "menu_link"s for this?  In order words, little links at the top of the page,
   // where breadcrumbs might appear.
-  if (is_array($page["router_item"]["page_settings"]["menu_links"])) {
+  if (!$screen->bool_print && is_array($page["router_item"]["page_settings"]["menu_links"])) {
     $content_top .= "<ul class='top-menu-links'>";
     foreach ($page["router_item"]["page_settings"]["menu_links"] as $item) {
       $lclass = "";
@@ -408,7 +411,7 @@ function fp_build_tab_array($page) {
    * @return string
    */
   function fp_render_currently_advising_box($bool_hide_catalog_warning = false, $bool_blank = FALSE, $bool_print = FALSE, $degree_plan = NULL, $screen_mode = "") {
-    global $current_student_id, $screen, $user;
+    global $current_student_id, $screen, $user, $student;
     
     $rtn  = "";
     
@@ -418,11 +421,12 @@ function fp_build_tab_array($page) {
       $degree_plan = $screen->degree_plan;      
     }
     
+    if (!isset($student) || $student == null || !is_object($student)) {
+      $student = new Student();
+      $student->student_id = $csid;
+      $student->load_student_data();
+    }
     
-    $student = new Student();
-    $student->student_id = $csid;
-    $student->load_student_data();
-          
     $settings = fp_get_system_settings();
           
     

@@ -80,7 +80,7 @@ $theme_location = fp_theme_location();
 
 		function popupreportcontact()
 		{
-			err_window = window.open("./popup_report_contact.php",
+			err_window = window.open("./popup-report-contact",
 			"errwindow","toolbar=no,status=2,scrollbars=yes,resizable=yes,width=500,height=400");
 
 			err_window.focus();  // make sure the popup window is on top.

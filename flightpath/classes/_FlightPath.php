@@ -82,10 +82,7 @@ class _FlightPath
 		{
 			$major_code = $GLOBALS["fp_advising"]["what_if_major_code"];
 			$track_code = $GLOBALS["fp_advising"]["what_if_track_code"];
-			//admin_debug("trackCode: $track_code");
-			//$major_code = "ART";
 			$this->bool_what_if = true;
-			//admin_debug("here");
 
 		}
 
@@ -94,8 +91,6 @@ class _FlightPath
 			return;
 		}
 
-		//admin_debug("going through");
-		//admin_debug($major_code);
 		$db = $this->db;
 
 
@@ -150,9 +145,6 @@ class _FlightPath
 
 
 		$degree_id = $db->get_degree_id($t_major_code, $catalog_year);
-    //admin_debug($degree_id);
-		
-		//admin_debug($t_major_code);
 
 		if ($student->array_settings["track_code"] != "" && $this->bool_what_if == false
 		&& $student->array_settings["major_code"] == $major_code)
@@ -168,15 +160,15 @@ class _FlightPath
 			}
 		}
 
-		//admin_debug($degree_id);
+
 
 
 		if ($bool_load_full == true)
 		{
 			$this->student = $student;
-			//admin_debug(" .. yy");
+
 			$degree_plan = new DegreePlan($degree_id, $db, false, $student->array_significant_courses);
-			//admin_debug(" .. yy");
+
 			$degree_plan->add_semester_developmental($student->student_id);
 			$this->degree_plan = $degree_plan;
 		}
@@ -208,15 +200,15 @@ class _FlightPath
 			{
 				// Yes, we are coming from WhatIf mode, so
 				// save under WhatIf.
-				//admin_debug("Coming from What If");
+
 				$GLOBALS["advising_what_if"] = "yes";
 				$this->init(false);
-				//$GLOBALS["advising_what_if"] = "no";
+
 			} else {
 				// NOT coming from WhatIf mode.  Save as a normal draft.
 				$GLOBALS["advising_what_if"] = "no";
 				$this->init(true, true);
-				//$GLOBALS["advising_what_if"] = "yes";
+
 			}
 			$this->save_advising_session_from_post(0,true);
 		}
@@ -248,8 +240,6 @@ class _FlightPath
 			// group?  Technically it is a substitution.
 			// We will add them in now, because we do not take additions
 			// into consideration when figuring out branches.
-			//admin_debug("_____Working on group $g->title");
-			//print_pre($g->to_string());
 			if ($course_list_additions = $student->list_substitutions->find_group_additions($g))
 			{
 				$course_list_additions->reset_counter();
@@ -272,16 +262,12 @@ class _FlightPath
 					$new_course->requirement_type = $g->requirement_type;
 					// Add this course as a requirement.
 					//$new_course->load_descriptive_data();
-					//admin_debug("Found group addition for " . $g->title . ". It is " . $new_course->toString());
 					$g->list_courses->add($new_course, true);
 					// Later on, when we do assign_courses_to_list, it
 					// will automatically find this course and apply the
 					// substitution.
 				}
 			}
-			//print_pre($g->to_string());
-
-
 			// First we see if there are any bare courses at this level.  If there
 			// are, then this group has NO branches!  Otherwise, the courses must
 			// always be contained in a branch!
@@ -306,9 +292,9 @@ class _FlightPath
 				groups, we need to find out which group has the most matches, and THEN
 				we will assign them.
 				*/
-				//admin_debug("She's got branches!");
+
 				$g->reload_missing_courses();
-				//print_pre($g->to_string());
+
 				$high_count = -1;
 				$best_branch = -1;
 				$g->list_groups->reset_counter();
@@ -318,8 +304,6 @@ class _FlightPath
 					if (!$branch_one->list_courses->is_empty)
 					{
 						// This does not actually assign.  Just counts.
-						//admin_debug("..just get count..");
-						//$count = $this->assign_courses_to_list($branch_one->list_courses, $this->student, false, $g, true);
 						$count = $this->get_count_of_matches($branch_one, $this->student, $g);
 						$branch_one->count_of_matches = $count;
 
@@ -327,9 +311,9 @@ class _FlightPath
 						if ($count > $high_count)
 						{
 							$high_count = $count;
-							//admin_debug("$branch_one->group_id $high_count");
+							
 							$best_branch = $g->list_groups->object_index_of($branch_one);
-							//$best_branch = $branch_one;
+							
 						}
 					}
 
@@ -340,10 +324,7 @@ class _FlightPath
 				{
 					$winning_branch = $g->list_groups->get_element($best_branch);
 					$winning_branch->bool_winning_branch = true;
-					//admin_debug($high_count . " brid:" . $winning_branch->group_id);
-					//admin_debug(".. actually assign..");
 					$this->assign_courses_to_list($winning_branch->list_courses, $this->student, true, $g, true);
-					//print_pre($winning_branch->to_string());
 				}
 
 			}
@@ -371,7 +352,7 @@ class _FlightPath
 			$substitution = $this->student->list_substitutions->get_next();
 
 			$required_group_id = $substitution->course_requirement->assigned_to_group_id;
-			//admin_debug("found sub for group $required_group_id ");
+
 			// First check-- does this degree even have this group ID?
 			$outdated_note = "";
 			if ($required_group_id == 0)
@@ -415,8 +396,8 @@ class _FlightPath
 					$new_group->group_id = $required_group_id;
 					$new_group->load_descriptive_data();
 					$group_name = "";
-					if ($_SESSION["fp_user_type"] == "full_admin")
-					{ // only show if we are full admin.
+					if (user_has_permission("can_access_data_entry")) { 
+					  // only show if we are a data entry administrator.
 						$group_name = "<i>$new_group->group_name,</i>";
 					}
 					$outdated_note = "This substitution is for the group $new_group->title
@@ -429,7 +410,7 @@ class _FlightPath
 
 			if ($bool_sub_valid == false)
 			{
-				//admin_debug("Could not find degree sub for " . $substitution->course_requirement->toString());
+
 				// Couldn't find a match, so remove this sub!
 				$substitution->bool_outdated = true;
 				$substitution->outdated_note = $outdated_note;
@@ -467,7 +448,7 @@ class _FlightPath
 
 		$hours_required = $group->hours_required*1;
 		$hours_assigned = $group->hours_assigned;
-		//admin_debug("---------- hours_required: $hours_required, $group_id, $group->title");
+
 		if ($hours_required*1 < 1 || $hours_required == "")
 		{
 			$hours_required = 999999;
@@ -493,7 +474,7 @@ class _FlightPath
 
 
 
-			//admin_debug(".looking at CR $course_requirement->course_id $course_requirement->subject_id $course_requirement->course_num. lc: $list_requirements->count");
+
 			if ($course_requirement->bool_specified_repeat == true)
 			{
 				// Since this requirement has specified repeats, we want
@@ -502,13 +483,10 @@ class _FlightPath
 				$student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);
 			}
 
-			//print_pre($student->list_substitutions->toString());
-
-			//admin_debug("looking in group ID: $group_id");
 			// Does the student have any substitutions for this requirement?
 			if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id))
 			{
-				//admin_debug($substitution->toString());
+
 				// Since the substitution was made, I don't really care about
 				// min grades or the like.  Let's just put it in.
 
@@ -517,18 +495,15 @@ class _FlightPath
 				// correct a bug.
 				if ($substitution->bool_group_addition == true)
 				{
-					//admin_debug("Group addition for req:" . $course_requirement->toString() . " curgid: $group_id");
+
 					if ($substitution->course_requirement->assigned_to_group_id != $group_id)
 					{
-						//admin_debug("skipping $course_requirement->subject_id $course_requirement->course_num");
-
 						continue;
 					}
 
 				}
 
 
-				//admin_debug($course_requirement->toString() . " " . $course_requirement->get_hours());
 
 				if ($bool_perform_assignment == true)
 				{
@@ -540,7 +515,6 @@ class _FlightPath
 					if ($course_requirement->min_hours*1 > $course_sub->hours_awarded*1)
 					{
 						$remaining_hours = $course_requirement->min_hours - $course_sub->hours_awarded;
-						//admin_debug(" original: " . $course_requirement->toString() . " hrs: $course_requirement->min_hours, remaining hours: $remaining_hours. sub awarded: $course_sub->hours_awarded");
 
 						$new_course_string = $course_requirement->to_data_string();
 						$new_course = new Course();
@@ -583,21 +557,18 @@ class _FlightPath
 				  // If this is a ghost hour, then $h_get_hours would == 0 right now,
 				  // instead, use the the adjusted value (probably 1).
 				  $h_get_hours = $c->hours_awarded;
-				  //admin_debug("hGetHours == " . $h_get_hours);
 				}			  
 			  
 				// Can we assign any more hours to this group?  Are we
 				// out of hours, and should stop?
 				if ($hours_assigned >= $hours_required)
 				{
-					//admin_debug("out of hours, continuing. assigned: $hours_assigned. req: $hoursrequired. ");
 					continue;
 				}
 
 				// Will the hours of this course put us over the hours_required limit?
 				if ($hours_assigned + $c->hours_awarded > $hours_required)
 				{
-					//admin_debug("right here $c->subject_id $c->course_num.  Skipping $group->title");
 					continue;
 				}
 
@@ -605,7 +576,6 @@ class _FlightPath
 				// They must be applied by substitutions.
 				if ($c->bool_substitution_new_from_split == true)
 				{
-					//admin_debug("skipping " . $c->toString());
 					continue;
 				}
 
@@ -613,57 +583,44 @@ class _FlightPath
 				// Make sure the course meets min grade requirements.
 				if (!$c->meets_min_grade_requirement_of($course_requirement))
 				{
-					//admin_debug("Bad min grade " . $c->toString());
-
-					//admin_debug($course_requirement->min_grade);
-
 
 					continue;
 				}
 
-				if ($c->group_list_unassigned->is_empty == false)
-				{
-					//admin_debug("~" . $c->toString() . " unassigned " . $c->group_list_unassigned->toString() . " cur group: $group_id");
-				}
 
 				// Has the course been unassigned from this group?
 				if ($c->group_list_unassigned->find_match($group))
 				{
-					//admin_debug("unassigned! " . $c->toString() . "");
+
 					continue;
 				}
 
 				// Prereq checking would also go here.
-				//	admin_debug("Examining: " . $c->toString());
 
 				// Make sure $c is not being used in a substitution.
 				if ($c->bool_substitution == true)
 				{
-					//admin_debug("- - - don't use!  A sub!");
+
 					continue;
 				}
 
 				if ($c->bool_has_been_assigned != true)
 				{//Don't count courses which have already been placed in other groups.
-					//admin_debug("A match for $c->subject_id $c->course_num ");
 
 					// Has another version of this course already been
 					// assigned?  And if so, are repeats allowed for this
 					// course?  And if so, then how many hours of the
 					// repeat_hours have I used up?  If I cannot do any more
 					// repeats, then quit.  Otherwise, let it continue...
-					//admin_debug("rep hours: $course_requirement->subject_id $course_requirement->course_num rep hours: $course_requirement->repeat_hours ");
 
 					$course_list_repeats = $student->list_courses_taken->get_previous_assignments($c->course_id);
 
 
 					if ($course_list_repeats->get_size() > 0)
 					{
-						//admin_debug("loading inside group: $group_id");
 						// So, a copy of this course has been assigned more than once...
 						// Get the total number of hours taken up by this course.
 						$cc = $course_list_repeats->count_hours();
-						//admin_debug($cc);
 						// have we exceeded the number of available repeat_hours
 						// for this course?
 						if ($course_requirement->repeat_hours < 1)
@@ -671,11 +628,9 @@ class _FlightPath
 							$course_requirement->load_descriptive_data();
 						}
 
-						//if ($cc + $c->get_hours() > $course_requirement->repeat_hours*1)
 						if ($cc + $h_get_hours > $course_requirement->repeat_hours*1)
 						{
 							// Do not allow the repeat.
-							//admin_debug("kicking out. " . $course_requirement->toString() . " $course_requirement->repeat_hours , cc: $cc from group $group->title");
 							continue;
 						}
 
@@ -696,14 +651,12 @@ class _FlightPath
 
 					if ($bool_perform_assignment == true)
 					{
-						//$course_requirement->courseFulfilledBy = $c;
 						$course_requirement->course_list_fulfilled_by->add($c);
 						$course_requirement->grade = $c->grade;
 						$course_requirement->hours_awarded = $c->hours_awarded;
 						$course_requirement->bool_ghost_hour = $c->bool_ghost_hour;
 						
 						$c->bool_has_been_assigned = true;
-						//admin_debug(" -- -- assigning ... $course_requirement->subject_id $course_requirement->course_num with " . $c->toString() );
 						$c->requirement_type = $course_requirement->requirement_type;
 						$c->assigned_to_group_id = $group_id;
 						$group->hours_assigned = $hours_assigned;
@@ -714,22 +667,18 @@ class _FlightPath
 							// $c is what they actually took.
 							$c->bool_specified_repeat = true;
 							$c->specified_repeats = $course_requirement->specified_repeats;
-							//admin_debug($c->toString());
 							$list_requirements->dec_specified_repeats($c);
 						}
 					}
 
 
 					$count++;
-				} else {
-					//admin_debug(" .. .. .. skipping " . $c->toString());
 				}
 			}
 
 		}
 
 
-		//admin_debug($count);
 		return $count;
 	}
 
@@ -741,7 +690,7 @@ class _FlightPath
 		// and decide if they should be assigned to degree requirements
 		// which have been spelled out in each semester.  This
 		// is not where it looks into groups.
-		//admin_debug("- - - - - - - doing semesters - - - - -- ");
+		
 		$this->degree_plan->list_semesters->reset_counter();
 		while($this->degree_plan->list_semesters->has_more())
 		{
@@ -749,12 +698,10 @@ class _FlightPath
 
 			// Okay, let's look at the courses (not groups) in this
 			// semester...
-			//print "looking in semester $semester->semesterNum <br>";
 			$this->assign_courses_to_list($semester->list_courses, $this->student);
 
 		}
 
-		//admin_debug("- - - - - - - done w/ semesters - - - - -- ");
 
 	}
 
@@ -869,12 +816,11 @@ class _FlightPath
 		// then that course probably was originally removed
 		// from the group.  So, put it back in.
 
-		//admin_debug("replace $course_id in group $group_id ...");
 
 		// First, find the group.
 		if (!$group = $this->degree_plan->find_group($group_id))
 		{
-			admin_debug(" ~~ could not find group $group_id for replacemMissingCourseInGroup");
+			fpm(" ~~ could not find group $group_id for replacemMissingCourseInGroup");
 			return;
 		}
 
@@ -927,7 +873,6 @@ class _FlightPath
 		// Is there anything in "log_addition" which we should write to the log?
 		if ($_POST["log_addition"] != "")
 		{
-			//admin_debug("add" . $_POST["log_addition"]);
 			$temp = explode("~",$_POST["log_addition"]);
 			if ($temp[0] == "change_term") {
 				$db->add_to_log("change_term","$student_id," . $temp[1]);
@@ -996,7 +941,6 @@ class _FlightPath
 			$advising_session_id_array[$term_id] = $advising_session_id;
 			$advising_session_id_array_count[$term_id] = 0;
 		}
-		//admin_debug($advising_session_id);
         
     
 		$wi = "";
@@ -1019,7 +963,6 @@ class _FlightPath
 		{
 			if (!strstr($key,"advisecourse_"))
 			{ // Skip vars which don't have this as part of the name.
-				//admin_debug("skipping $key");
 				continue;
 			}
 			if ($value != "true")
@@ -1028,7 +971,6 @@ class _FlightPath
 				continue;
 			}
 
-			//admin_debug($key);
 			$temp = explode("_",$key);
 			$course_id = trim($temp[1]);
 			$semester_num = trim($temp[2]);
@@ -1045,7 +987,6 @@ class _FlightPath
 			$entry_value = "$new_course->subject_id~$new_course->course_num";
 
 
-			//admin_debug("$advised_term_id $entry_value");
 
 			// Some particular course should be updated.  Possibly this one.
 			// Updates happen because of a student changing the
@@ -1151,7 +1092,6 @@ class _FlightPath
 				$course_id = 0;
 			}
 
-			//admin_debug($sub_course_id);
 			// Figure out the entry values for the required course & sub course...
 			$required_entry_value = $sub_entry_value = "";
 			if ($course_id > 0)
@@ -1233,8 +1173,6 @@ class _FlightPath
 			$temp = explode("~",trim($_POST["restore_unassign_group"]));
 			$unassign_id = trim($temp[0]) * 1;
 
-			//admin_debug($unassign_id);
-			//die;
 
 			$result = $db->db_query("UPDATE student_unassign_group
 									SET `delete_flag`='1'
@@ -1399,8 +1337,6 @@ class _FlightPath
 			// show these advisings.
 			if ($course_list = $this->degree_plan->find_courses($course_id, $group_id, $semester_num))
 			{
-				//admin_debug("in here");
-				//admin_debug(count($course_list->arrayList));
 
 				// This course may exist in several different branches of a group, so we need
 				// to mark all the branches as having been advised to take.  Usually, this CourseList
@@ -1408,7 +1344,6 @@ class _FlightPath
 				$course_list->reset_counter();
 				if ($course = $course_list->get_next())
 				{
-					//admin_debug($course->toString());
 					// make sure the hour count has been loaded correctly.
 					if ($course->get_catalog_hours() < 1)
 					{
@@ -1423,7 +1358,6 @@ class _FlightPath
 						// This is a course which is supposed to be repeated.
 						// We need to cycle through and find an instance
 						// of this course which has not been advised yet.
-						//admin_debug("Specified to be repeated. $course->specified_repeats.");
 
 
 						$course_list->reset_counter();
@@ -1440,14 +1374,12 @@ class _FlightPath
 							//if ($course->bool_advised_to_take != true && !is_object($course->courseFulfilledBy))
 							if ($course->bool_advised_to_take != true && $course->course_list_fulfilled_by->is_empty == true)
 							{
-								//admin_debug("here for " . $course->toString());
 								// Okay, this course is supposed to be taken/advised
 								// more than once.  So, I will mark this one as
 								// advised, and then break out of the loop, since
 								// I don't want to mark all occurances as advised.
 								$course->bool_advised_to_take = true;
 								$course->assigned_to_semester_num = $semester_num;
-								//admin_debug("Putting it in $semester_num." . $course->toString(" ",true));
 								$course->assigned_to_group_id = $group_id;
 								$course->advised_hours = $var_hours;
 								$course->advised_term_id = $advised_term_id;
@@ -1468,7 +1400,6 @@ class _FlightPath
 				while($course_list->has_more())
 				{
 					$course = $course_list->get_next();
-					//admin_debug($course->toString());
 					// make sure the hour count has been loaded correctly.
 					if ($course->get_catalog_hours() < 1)
 					{
@@ -1497,7 +1428,6 @@ class _FlightPath
 					
 					$course->bool_advised_to_take = true;
 					$course->assigned_to_semester_num = $semester_num;
-					//admin_debug("NOW Putting it in $semester_num." . $course->toString(" ",true));
 					$course->assigned_to_group_id = $group_id;
 					$course->advised_hours = $var_hours;
 					$course->advised_term_id = $advised_term_id;
@@ -1508,10 +1438,9 @@ class _FlightPath
 						// to increment that branch's count_of_matches.
 						if ($branch = $this->degree_plan->find_group($course->required_on_branch_id))
 						{
-							//admin_debug($branch->toString());
 							$branch->count_of_matches++;
 						} else {
-							admin_debug("Error: Could not find branch.");
+							fpm("Error: Could not find branch.");
 						}
 
 					}
@@ -1520,9 +1449,7 @@ class _FlightPath
 					// break after we make our assignment.
 					break;
 
-					//print_pre($course->to_string());
 				}
-				//admin_debug("out of loop");
 
 			}
 
@@ -1564,18 +1491,12 @@ class _FlightPath
 				// course requirement has hours left over which must be
 				// fulfilled somehow.
 				$remaining_hours = $course_requirement->min_hours - $course_sub->hours_awarded;
-				//admin_debug($course_requirement->toString() . " remaining hours: $remaining_hours");
 				// This means that the course requirement needs to be split.
 				// So, find this course in the degree plan.
 				$required_course_id = $course_requirement->course_id;
 				$required_group_id = $course_requirement->assigned_to_group_id;
 				$required_semester_num = $course_requirement->assigned_to_semester_num;
 
-				if ($found_courses = $degree_plan->find_courses($required_course_id, $required_group_id, $required_semester_num))
-				{
-					//print_pre($found_courses->to_string());
-
-				}
 
 			}
 

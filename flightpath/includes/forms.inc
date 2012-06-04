@@ -150,8 +150,10 @@ function fp_render_form($callback, $form_type = "") {
   }
   $attributes = $new_attr;
     
+  // Did the user specify a submit method (like GET or POST)?  POST is default.
+  $submit_method = ($form["#submit_method"] == "") ? "POST" : $form["#submit_method"];
     
-  $rtn .= "<form action='" . base_path() . "/system-handle-form-submit' method='POST' id='fp-form-$callback' $attributes>";
+  $rtn .= "<form action='" . base_path() . "/system-handle-form-submit' method='$submit_method' id='fp-form-$callback' $attributes>";
   
   $rtn .= "<input type='hidden' name='callback' value='$callback'>";
   $rtn .= "<input type='hidden' name='form_token' value='$form_token'>";
@@ -179,7 +181,8 @@ function fp_render_form($callback, $form_type = "") {
   // If this is a system settings form, go ahead and display the save button.
   if ($form_type == "system_settings") {      
     $rtn .= "<div class='buttons'>";
-    $rtn .= fp_render_button("Save settings", "\$(\"#sysform\").submit()");
+    //$rtn .= fp_render_button("Save settings", "\$(\"#sysform\").submit()");
+    $rtn .= "<input type='submit' name='submit_button' value='" . t("Save settings") . "'>";
     $rtn .= "</div>";      
   }
   

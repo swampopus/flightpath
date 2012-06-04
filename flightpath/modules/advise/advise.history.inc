@@ -100,7 +100,6 @@ function advise_display_history() {
     // advising session.  The if statement below is testing is this
     // a new advising session.
     $test_d_t = $db_posted;
-    //admin_debug($old_session_d_t . " - " . $test_d_t);
     if ($old_session_d_t < ($test_d_t - 5) || $old_session_d_t > ($test_d_t + 5))
     {
       $p = "20px;";

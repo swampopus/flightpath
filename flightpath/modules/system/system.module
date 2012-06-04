@@ -283,9 +283,150 @@ function system_menu() {
     "type" => MENU_TYPE_CALLBACK,
   );
   
+         
+
+  $items["popup-report-contact"] = array(
+    "title" => "Report/Contact",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_popup_report_contact_form"),
+    "access_callback" => TRUE,
+    "page_settings" => array(
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),   
+    "type" => MENU_TYPE_CALLBACK,
+  );              
+           
+
+  $items["popup-contact-form/thank-you"] = array(
+    "title" => "Report/Contact",
+    "page_callback" => "system_popup_report_contact_thank_you",    
+    "access_callback" => TRUE,
+    "page_settings" => array(
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),   
+    "type" => MENU_TYPE_CALLBACK,
+  );                         
+                      
+           
            
   return $items;
 }
+
+
+/**
+ * This is the thank you page you see after submitting the contact form.
+ */
+function system_popup_report_contact_thank_you() {
+  $rtn = "";
+  
+  $rtn .= fp_render_curved_line(t("Contact the FlightPath Production Team"));
+  $rtn .= t("Thank you for submitting to the FlightPath Production Team.  They 
+             have received your comment and will review it shortly.") . "<br><br>";
+  $rtn .= t("You may now close this window.");
+  
+  return $rtn;
+}
+
+
+/**
+ * This is the form which lets users send an email to the FlightPath production
+ * team, 
+ */
+function system_popup_report_contact_form() {
+  $form = array();
+ 
+  fp_set_title("");
+  
+  $form["mark" . $m++] = array(
+    "value" => fp_render_curved_line(t("Contact the FlightPath Production Team")),
+  );
+  
+  if (!user_has_permission("access_logged_in_content")) {
+    $form["mark" . $m++] = array(
+      "value" => t("We're sorry, but for security reasons you may only access this form
+                    if you are logged in to FlightPath."),
+    );
+    return $form;
+  }
+  
+  $form["mark" . $m++] = array(
+    "value" => t("If you've noticed an error or have a suggestion, use this
+                  form to contact the FlightPath Production Team."),
+  );  
+  
+  $form["category"] = array(
+    "type" => "select",
+    "label" => t("Please select a category"),
+    "options" => array(
+                     t("Advising") => t("Advising"),
+                     t("Degree plan") => t("Degree plan"),
+                     t("What If?") => t("What If?"),
+                     t("Searching") => t("Searching"),
+                     t("Comments") => t("Comments"),
+                     t("Other") => t("Other"),
+                      ),
+  );
+
+  $form["comment"] = array(
+    "type" => "textarea",
+    "label" => t("Comment:"),    
+  );
+  
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => t("Send email"),    
+  );  
+  
+  $form["#redirect"] = array("path" => "popup-contact-form/thank-you");    
+  return $form;
+}
+
+
+function system_popup_report_contact_form_submit($form, $form_state) {
+  global $user;
+  
+  $category = strip_tags($form_state["values"]["category"]);
+  $comment = strip_tags($form_state["values"]["comment"]);
+  
+  $possible_student = $_SESSION["advising_student_id"];
+  
+  $user_roles = implode(", ", $user->roles);
+  
+  $datetime = date("Y-m-d H:i:s", strtotime("now"));
+
+  $headers = "From: FlightPath-noreply@noreply.com\n";
+  $subject = t("FLIGHTPATH REPORT CONTACT") . " - $onscreen ";
+  $msg = "";
+  $msg .= t("You have received a new report/contact on") . " $datetime.\n";
+  $msg .= t("Name:") . " $user->name  ID: $user->id  " . t("User roles:") . " $user_roles \n\n";
+  $msg .= t("Category:") . " $category  \n";
+  $msg .= t("Possible Student:") . " $possible_student  \n";
+  $msg .= t("Comment:") . " \n $comment \n\n";
+  $msg .= "------------------------------------------------ \n";
+
+  $themd5 = md5($username . $cwid . $problem . $usertype . $onscreen);
+
+  if ($_SESSION["da_error_report_md5"] != $themd5)
+  {  // Helps stop people from resubmitting over and over again
+    // (by hitting refresh, or by malicious intent)..
+
+    $msg = addslashes($msg);
+    $to = variable_get("contact_email_address", "");
+    mail($to,$subject,$msg,$headers);
+
+  } 
+
+  $_SESSION["da_error_report_md5"] = $themd5;
+  
+}
+
+
+
+
+
+
 
 
 /**
@@ -526,12 +667,12 @@ function system_settings_form() {
  */
 function system_handle_form_submit() {
     
-  $callback = $_POST["callback"];
+  $callback = $_REQUEST["callback"];
   
-  $form_type = $_POST["form_type"];
-  $form_include = $_POST["form_include"];
+  $form_type = $_REQUEST["form_type"];
+  $form_include = $_REQUEST["form_include"];
   
-  $form_token = $_POST["form_token"];
+  $form_token = $_REQUEST["form_token"];
   // Make sure the form_token is valid!
   if ($form_token != md5($callback . fp_token())) {
     die(t("Sorry, but you have encountered an error.  A form submission was flagged
@@ -546,7 +687,7 @@ function system_handle_form_submit() {
 
     
   // We need to make sure the user has permission to submit this form!
-  $form_path = $_POST["form_path"];
+  $form_path = $_REQUEST["form_path"];
   // Check the menu router table for whatever the permissions were for this
   // path, if any.
   if ($form_path != "") {
@@ -652,8 +793,8 @@ function system_handle_form_submit() {
     $redirect_query = $form["#redirect"]["query"];    
   }
   else {
-    $redirect_path = $_POST["default_redirect_path"];
-    $redirect_query = $_POST["default_redirect_query"];
+    $redirect_path = $_REQUEST["default_redirect_path"];
+    $redirect_query = $_REQUEST["default_redirect_query"];
   }
   
   // Okay, go back to where we were!  
@@ -715,30 +856,6 @@ function system_perform_clear_menu_cache() {
 }
 
 
-/**
- * Handles the submitting of login data.
- */
-/*
-function system_handle_login_submit() {
-  // TODO:  Check for hooks which other modules might wish to hook into
-  // Are we bypassing logins in the settings, and just giving this user
-  // full_admin access?
-  if ($GLOBALS["fp_system_settings"]["GRANT_FULL_ACCESS"] == TRUE) {
-    $_SESSION["fp_logged_in"] = TRUE;
-    $_SESSION["fp_user_id"] = 1;
-    $_SESSION["fp_user_name"] = "FULL ACCESS USER";
-    // $_SESSION["fp_user_type"] = "full_admin";
-    // $_SESSION["fp_can_advise"] = TRUE;
-    // $_SESSION["fp_can_search"] = TRUE;
-    // $_SESSION["fp_can_substitute"] = TRUE;
-    // $_SESSION["fp_cache_course_inventory"] = false;
-    // $_SESSION["fp_can_modify_comments"] = TRUE;
-    $_SESSION["fp_user_rolls"][] = "administrator";
-    fp_goto("<front>");
-    return;
-  }  
-}
-*/
 
 function system_display_login_page($msg = "") {
   $rtn = "";
@@ -1048,28 +1165,6 @@ function system_display_main_page() {
   }
 
 
-  
-  if ($_SESSION["fp_user_type"] != "none") {
-    //$rtn .= fp_render_currently_advising_box($true);
-  }
-  else {
-    // Let the user they have no privileges in the system.
-    $pC .= "        
-         <div class='hypo tenpt' style='margin: 10px; padding: 10px;'>
-           <div style='float:left; padding-right: 20px; height: 50px;'>
-          <img src='" . fp_theme_location() . "/images/alert_lg.gif'>
-           </div>
-          <b>Please Note:</b>
-          At this time, you do not have access to student records in FlightPath.
-          However, you may still access certain Tools, listed below.  If you feel
-          that you have reached this message in error, and you do require
-          access to student records, please speak with your department head or the
-          FlightPath administrator.
-          </div>
-        ";    
-  }
-
-  
   $rtn .= "<table class='fp-semester-table'>";
   
   fp_add_css(fp_get_module_path("system") . "/css/style.css");
@@ -1112,7 +1207,6 @@ function system_display_main_page() {
 
  */
 
-  //admin_debug("--");
   //////////////////////////////////////////////////////////
   // To cut down on how long it takes to load huge groups
   // like Free Electives, we will pre-load some of the course inventory here.
@@ -1125,7 +1219,6 @@ function system_display_main_page() {
       $_SESSION["fp_cached_inventory_flag_one"] = true;
     }
   }
-  //admin_debug("--");
 
 
   // send to the browser
@@ -1180,7 +1273,11 @@ function system_init() {
   $user = new stdClass();
       
   if ($_SESSION["fp_logged_in"] == TRUE) {
-    //pretty_print($_SESSION);
+    // Make sure it doesn't have the anonymous user role (rid == 1).
+    if ($_SESSION["fp_user_object"]->roles[1] == "anonymous user") {
+      unset($_SESSION["fp_user_object"]->roles[1]);
+    }
+    
     $user = $_SESSION["fp_user_object"];
   }
   else {
@@ -1789,12 +1886,13 @@ function z__system_display_modules_form($msg = "") {
 }
 
 
+
 /**
  * This function will display the settings for to the user, so
  * they may edit it.
  *
  */
-function system_display_settings_form($msg = "") {
+function z__system_display_settings_form($msg = "") {
 
   $module_action_u_r_l = get_module_action_u_r_l("system");
     
@@ -1892,11 +1990,6 @@ function system_display_settings_form($msg = "") {
 
   $pC .= system_build_element("display_my_s_q_l_errors", "boolean", "", 
                 "If TRUE, FlightPath will display MySQL error messages on screen.");  
-
-  $pC .= system_build_element("disable_debug_c_t", "boolean", "", 
-                "If TRUE, FlightPath will not display 'fpDebugCT' messages.");  
-  $pC .= system_build_element("disable_admin_debug", "boolean", "", 
-                "If TRUE, FlightPath will not display 'adminDebug' messages.");  
 
   $pC .= system_build_element("admin_transfer_passcode", "", "", 
                 "Enter a passcode (ie, password) which a Data Entry user must

@@ -246,7 +246,6 @@ function admin_edit_course_form() {
   }
 
   $course = new Course($course_id,false,null,false,$de_catalog_year, true);
-  //admin_debug($course->description);
   $course->catalog_year = $de_catalog_year;  // Since it may be 1900, force it!
   $course->load_descriptive_data(false, true, false, true, true);
 

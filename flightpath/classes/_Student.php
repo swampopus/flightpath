@@ -128,7 +128,6 @@ class _Student
 		foreach ($temp as $term_id)
 		{
 			$term_id = trim($term_id);
-			//admin_debug($term_id);
 			$res = $this->db->db_query("SELECT * FROM advising_sessions a,
 							advised_courses b
 							WHERE a.student_id='?'
@@ -196,7 +195,7 @@ class _Student
 			$new_course->bool_transfer = true;
 			$new_course->course_id = $db_transfer_course_id;
 			$new_course->db_unassign_transfer_id = $db_id;
-			//admin_debug($new_course->course_id);
+
 			$this->list_transfer_eqvs_unassigned->add($new_course);
 
 		}
@@ -300,9 +299,7 @@ class _Student
 			if (!(($db_datetime . $db_test_id) == $old_row))
 			{
 				// We are at a new test.  Add the old test to our list.
-				if ($st != null)
-				{
-					//admin_debug("adding " . $st->to_string());
+				if ($st != null) {					
 					$this->list_standardized_tests->add($st);
 
 				}
@@ -319,17 +316,13 @@ class _Student
 			$st->categories[$db_position . $c]["category_id"] = $db_category_id;
 			$st->categories[$db_position . $c]["score"] = $db_score;
 
-			//admin_debug(count($st->categories));
-
 		}
 
 		// Add the last one created.
-		if ($st != null)
-		{
+		if ($st != null) {
 			$this->list_standardized_tests->add($st);
 		}
 
-		//print_pre($this->list_standardized_tests->to_string());
 
 	}
 
@@ -468,14 +461,9 @@ class _Student
 
 
 
-			} else {
-				//admin_debug("Taken course not found. $sub_course_id $sub_term_id transfer: $sub_bool_transfer");
 			}
 
 		}
-
-		//print_pre($this->list_courses_taken->to_string());
-		//print_pre($this->list_substitutions->to_string());
 
 
 	}
@@ -549,7 +537,6 @@ class _Student
 	{
 		
 	  $t_major_code = $this->get_major_and_track_code($bool_ignore_settings);
-		//admin_debug($t_major_code);
 		$degree_id = $this->db->get_degree_id($t_major_code, $this->catalog_year);
 		if ($bool_load_full)
 		{
@@ -599,10 +586,8 @@ class _Student
 			$rtn = $this->major_code;
 		}
 
-		//admin_debug($this->array_settings["major_code"]);
 		
-		if ($bool_ignore_settings == true)
-		{
+		if ($bool_ignore_settings == true) {
 			$rtn = $this->major_code;
 		}
 
@@ -648,9 +633,10 @@ class _Student
 			$new_course->grade = $cur["grade"];
 			$new_course->term_id = $cur["term_id"];
 			
-			// Is this grade supposed to be hidden from students?
+			// Is this grade supposed to be hidden from students (and this user is probably
+			// a student)
 			if (in_array($new_course->term_id, $this->array_hide_grades_terms)
-			  && $_SESSION["fp_user_type"] == "student")
+			  && !user_has_permission("can_advise_students")) 
 			{
 			  $new_course->bool_hide_grade = true;
 			}			

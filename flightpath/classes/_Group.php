@@ -139,8 +139,6 @@ class _Group
 			return;
 		}
 
-		//var_dump($array_significant_courses);
-		//admin_debug(is_array($array_significant_courses));
 
 		$bool_significant_courses_empty = true;
 		if (is_array($array_significant_courses))
@@ -160,7 +158,6 @@ class _Group
 
 		}
 
-		//admin_debug("ii");
 		$table_name = "group_requirements";
 		if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 		
@@ -175,16 +172,13 @@ class _Group
 
 			if ($cur["course_id"]*1 > 0)
 			{
-				//admin_debug($boolSignificantCoursesEmtpy);
 				if ($bool_load_significant_only == true && $bool_significant_courses_empty == false)
 				{
 					// If this course_id is NOT in the array of significant courses
 					// (that the student took or has transfer credit or subs for)
 					// then skip it.  Never add it to the group.
-					//admin_debug($array_significant_courses[$cur["course_id"]]);
 					if ($array_significant_courses[$cur["course_id"]] != true)
 					{// course was not in there, so skip!
-						//admin_debug("skip {$cur["course_id"]} ");
 						continue;
 					}
 
@@ -197,8 +191,6 @@ class _Group
 				{ // Add in the specified repeats for this group...
 					// This will usually only go through the loop once.
 
-					//admin_debug("looking at " . $cur["course_id"]);
-					//$course_c = new Course($cur["course_id"], false, $this->db);
 					$use_id = $id . "_rep_$t";
 
 					if ($bool_reload_missing_only == true)
@@ -212,22 +204,16 @@ class _Group
 
 						if ($array_group_requirement_ids[$use_id] == true)
 						{
-							//admin_debug("skipping $use_id - $course_id");
 							continue;
 						}
 					}
 
-					//admin_debug("x1");
 					$course_c = new Course();
 					$course_c->bool_use_draft = $this->bool_use_draft;
 					$course_c->course_id = $cur["course_id"];
 					$course_c->db_group_requirement_id = $use_id;
 					$course_c->db = $this->db;
 					$course_c->catalog_year = $this->catalog_year;
-					//$course_c->load_descriptive_data();
-					//admin_debug($course_c->to_string());
-					//admin_debug("x2");
-					//admin_debug($course_c->to_string());
 					$course_c->assigned_to_group_id = $group_id;
 					$course_c->assigned_to_semester_num = $this->assigned_to_semester_num;
 
@@ -246,15 +232,11 @@ class _Group
 
 
 					$this->list_courses->add($course_c);
-					//$this->list_courses->arrayList[] = $course_c;
-					//admin_debug("adding " . $course_c->to_string());
-					//$this->list_courses->arrayList[] = $course_c;
 				}
 
 
 			}
-			//$this->list_courses->reset_counter();
-			//admin_debug("ii");
+
 			if ($cur["child_group_id"]*1 > 0)
 			{
 				// Another group is the next requirement (its a branch)
@@ -268,7 +250,9 @@ class _Group
 					if ($group_g = $this->list_groups->find_match($temp_g))
 					{
 						$group_g->reload_missing_courses();
-					} else {admin_debug("could not find sub group to reload!");}
+					} else {
+					  fpm("could not find sub group to reload!");
+					}
 				} else {
 					// This is a brand-new sub group, so create it
 					// and add it to this group.
@@ -330,7 +314,6 @@ class _Group
 					$course->bool_specified_repeat = true;
 				}
 
-				//admin_debug(" -- found it. replacei $this->group_id ");
 				$this->list_courses->add($course);
 			}
 		}
@@ -396,11 +379,9 @@ class _Group
 		while($this->list_courses->has_more())
 		{
 			$c = $this->list_courses->get_next();
-			//admin_debug("checking " . $c->to_string() . " sn:" . $c->assigned_to_semester_num );
 			if ($only_count_semester_num != -1 && $c->assigned_to_semester_num != $only_count_semester_num)
 			{
 				// Only accept courses assigned to a particular semester.
-				//admin_debug("wrong sem. skipping " . $c->to_string());
 				continue;
 			}
 
@@ -421,16 +402,10 @@ class _Group
 				if (!$bool_require_has_been_displayed)
 				{ // The course does not have to have been displayed on the page yet.
 					$count = $count + $c->course_list_fulfilled_by->count_hours("", false, false);
-					//admin_debug('here');
 				} else {
 					if ($c->course_list_fulfilled_by->get_first()->bool_has_been_displayed == true)
 					{
-						//admin_debug("here");
 						$count = $count + $c->course_list_fulfilled_by->count_hours("", false, false);
-				
-						//admin_debug($c->to_string());
-						//admin_debug($count);
-
 					}
 				}
 			} else if ($c->bool_advised_to_take && $bool_count_advised == true)
@@ -451,8 +426,6 @@ class _Group
 
 				$g = $this->list_groups->get_next();
 				$gc = $g->get_fulfilled_hours(true, $bool_count_advised, $bool_require_has_been_displayed, $only_count_semester_num, $bool_ignore_enrolled);
-				//print_pre($g->to_string());
-				//admin_debug($gc . " in sem $only_count_semester_num");
 				$count = $count + $gc;
 			}
 		}

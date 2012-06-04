@@ -417,117 +417,6 @@ function draw_menu_items($menu_array) {
 
 	}
 
-	/**
-	 * This method will display the greeting and logoff link which
-	 * appears at the top of the page.  If will also display
-	 * the urgentMsg, if one exists.  It returns back HTML.
-	 *
-	 * @return string
-	 */
-	function z__display_greeting()
-	{
-		// Displays the greeting message & log off link at the top of the page.
-		// Also displays the urgentMsg, if it exists.
-		$pC = "";
-
-		// Check to see if the GRANT_FULL_ACCESS flag is set.  If so, it
-		// represents a major security risk, and the user should be informed.
-		if ($GLOBALS["fp_system_settings"]["GRANT_FULL_ACCESS"] == TRUE) {
-		  $pC .= "<div class='fp-warn-grant-full'>
-		            <b>Warning:</b> The 'GRANT_FULL_ACCESS' flag has been
-		            set in the settings.php file.  This means that any user
-		            attempting to log in will be granted full_admin access!
-		            Only keep this set during the initial setup of FlightPath
-		            or during extreme emergencies.
-		          </div>";
-		}
-
-		
-		if ($this->bool_print)
-		{ // Don't display in Print View.
-			return "";
-		}
-
-		$name = "";
-		$dt = date("D, F jS, Y",time("today"));
-
-		if ($_SESSION["fp_user_type"] == "student")
-		{
-			$name = $this->db->get_student_name($_SESSION["fp_user_id"], false);
-		} else {
-			$name = $this->db->get_faculty_name($_SESSION["fp_user_id"], false);
-		}
-
-		$pC .= "<div class='tenpt'>
-					Welcome $name.  ";
-		if (!$this->page_is_mobile) {
-		  $pC .= "Today is $dt. &nbsp;";
-		}
-		$pC .= "<a href='main.php?performAction=performLogout'>Logout?</a>
-				</div>
-					";
-
-		if ($GLOBALS["bool_use_draft"] == true)
-		{
-			$this->admin_message .= "<div style='text-align: center;'>Now viewing in <b>Draft</b> Mode.
-				<br>Substitutions and advisings will still be saved normally.		
-				</div>";
-		}
-
-		if ($_SESSION["fp_switched_user"] == true)
-		{
-			$this->admin_message .= "<div>
-										As an admin user, you have switched profiles
-										and are now seeing FlightPath as though you were
-										<b>{$_SESSION["fp_user_name"]}</b>.  To return to your own account, log out,
-										then back in.
-									</div>";
-		}
-
-
-		if ($this->admin_message != "")
-		{
-			$pC .= "<div class='admin-message'>
-						<b>Admin Message:</b> $this->admin_message						
-					</div>";
-		}
-
-
-
-		$uM = "";
-		if ($this->settings["urgent_msg"] != "")
-		{
-
-			$uM = "<div class='tenpt hypo' style='margin: 10px; padding: 5px;'>
-					<b>Important Notice:</b> 
-					" . $this->convert_bbcode_to_html($this->settings["urgent_msg"]) . "
-					</div>";
-		}
-
-		if ($this->settings["maintenance_mode"]*1 > 0)
-		{
-			// We are in maintenance mode.  Display an appropriate
-			// message as an urgentMsg.
-			$uM = "<div class='tenpt hypo' style='margin: 10px; padding: 5px;'>
-					<b>Important Notice:</b> 
-					FlightPath is currently undergoing routine 
-					system maintenance, which should last for the next 5-10
-					minutes.  During this time you may notice slow load 
-					times or inaccurate data.  We apologize for the 
-					inconvenience, and thank you for your patience.					
-					</div>";
-		}
-
-
-		if ($uM != "")
-		{
-			$pC .= $uM;
-		}
-
-
-		return $pC;
-	}
-
 
 	/**
 	 * Constructs the HTML which will be used to display
@@ -850,7 +739,6 @@ function draw_menu_items($menu_array) {
 				";
 		$is_empty = true;
 
-		//admin_debug($this->student->list_substitutions->get_size());
 
 		$this->student->list_substitutions->reset_counter();
 		while ($this->student->list_substitutions->has_more())
@@ -977,9 +865,8 @@ function draw_menu_items($menu_array) {
 				$c->load_descriptive_data();
 			}
 			$course = $c->course_transfer;
-			//admin_debug($course->course_id);
+
 			$course->load_descriptive_transfer_data();
-			//$course->load_course($course->course_id, true);  // reload data for this course.
 
 			$l_s_i = $c->subject_id;
 			$l_c_n = $c->course_num;
@@ -993,7 +880,7 @@ function draw_menu_items($menu_array) {
 			{
 				$grade = "<span style='color: red;'>$grade</span>";
 			}
-			//$tCourseTitle = $this->fix_course_title($course->title);
+
 			$t_inst = $this->fix_institution_name($course->institution_name);
 
 			$pC .= "<div class='tenpt' style='padding-bottom: 15px;'>
@@ -1118,7 +1005,6 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "</td></tr>";
 		$pC .= $this->display_end_semester_table();
-		//$pC .= $this->get_hidden_advising_variables("");
 
 		$pC .= "</form>
 				";
@@ -1157,9 +1043,6 @@ function draw_menu_items($menu_array) {
 				Order by: &nbsp; &nbsp;";
     $pC .= l("Name", "advise/popup-toolbox/courses", "order=name", array("style" => $ns)) . "&nbsp; &nbsp;";
     $pC .= l("Date Taken", "advise/popup-toolbox/courses", "order=date", array("style" => $os));
-		//$pC .= "<a $ns href='advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=name&current_student_id=$csid'>Name</a>
-		//		&nbsp; &nbsp;";
-		//$pC .= "<a $os href='advise.php?windowMode=popup&performAction=toolbox&performAction2=courses&order=date&current_student_id=$csid'>Date Taken</a>";
 
 		$pC .= "<hr>
 				<table border='0' cellpadding='2'>
@@ -1204,11 +1087,6 @@ function draw_menu_items($menu_array) {
 			$l_title = $this->fix_course_title($c->title);
 			$l_term = $c->get_term_description(true);
 
-			//$pC .= "<div class='tenpt' style='padding-bottom: 15px;'>
-			//					<b>$l_s_i $l_c_n</b> ($c->hours_awarded hrs) - $c->grade - $l_term
-			//						";
-			//$pC .= "</div>";
-
 			$h = $c->hours_awarded;
 			if ($c->bool_ghost_hour) {
 			  $h .= "(ghost<a href='javascript:alertSubGhost()'>?</a>)";
@@ -1224,13 +1102,12 @@ function draw_menu_items($menu_array) {
 			$pC .= "<td valign='top' class='tenpt'>";
 
 			if ($c->bool_transfer) {$pC .= "T ";}
-			//$pC .= "</td>";
 
-			//$pC .= "<td valign='top' class='tenpt'>";
+
 			if ($c->bool_substitution) {$pC .= "S ";}
-			//$pC .= "</td>";
 
-			//$pC .= "<td valign='top' class='tenpt'>";
+
+
 			if ($c->bool_has_been_assigned)
 			{
 				$pC .= "A:";
@@ -1321,7 +1198,7 @@ function draw_menu_items($menu_array) {
 			$pC .= "<div class='tenpt' style='padding-bottom: 15px;'>
 							<b>$l_s_i $l_c_n</b> ($h hrs) - $c->grade - $l_term
 								";
-			//admin_debug($c->group_list_unassigned->get_size());
+
 			$c->group_list_unassigned->reset_counter();
 			while($c->group_list_unassigned->has_more())
 			{
@@ -1419,7 +1296,6 @@ function draw_menu_items($menu_array) {
 					// get the top scores in each category.
 					if ($cat_array["score"] > $top_scores[$cat_array["category_id"]] * 1)
 					{
-						//$top_scores[$cat_array["description"]] = $cat_array["score"];
 						$top_scores[$cat_array["category_id"]] = $cat_array["score"];
 					}
 				}
@@ -1486,7 +1362,7 @@ function draw_menu_items($menu_array) {
 		// called before display_screen();
 
 		$this->build_semester_list();
-		//$this->build_developmental_requirements();
+
 		$this->build_excess_credit();
 		$this->build_test_scores();
 
@@ -1755,8 +1631,6 @@ function draw_menu_items($menu_array) {
 		$pC = "";
 
 
-		//admin_debug("getting stuff --------  ");
-
 		if ($this->degree_plan->total_degree_hours < 1)
 		{
 			$this->degree_plan->calculate_progress_hours();
@@ -1778,17 +1652,7 @@ function draw_menu_items($menu_array) {
 		if ($user->settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false && $this->page_is_mobile == false)
 		{ // Display the pie charts unless the student's settings say to hide them.
 
-
-			/*			$total_major_hours = $this->degree_plan->getProgressHours("m");
-			$total_core_hours = $this->degree_plan->getProgressHours("c");
-			$total_degree_hours = $this->degree_plan->getProgressHours("");
-			//admin_debug("fulfilled major: ");
-			$fulfilled_major_hours = $this->degree_plan->getProgressHours("m", false);
-			//admin_debug("fulfilled core:  ");
-			$fulfilled_core_hours = $this->degree_plan->getProgressHours("c", false);
-			//admin_debug("fulfilled -degree:  ");
-			$fulfilled_degree_hours = $this->degree_plan->getProgressHours("", false);
-			*/
+		
 			$pC .= "
 				<div style='margin-bottom: 10px;'>
 				<table width='100%' cellspacing='0' cellpadding='0' border='0'>
@@ -2185,267 +2049,6 @@ function draw_menu_items($menu_array) {
 
 
 
-	/**
-	 * Initializes important advising variables from the REQUEST
-	 * or SESSION, accordingly.
-	 *
-	 * @param bool $bool_ignore_what_if_variables
-	 *         - If set to TRUE, variables involving What If mode
-	 *           will be ignored.
-	 * 
-	 */
-	function init_advising_variables($bool_ignore_what_if_variables = false)
-	{
-		// This function loads the various "advising variables"
-		// into the $GLOBALS array.
-
-
-		// The current student ID is what we append to all session variables
-		// dealing with the current student.  We do this so that we will
-		// keep session variables unique, so that we can have more than one
-		// window open at a time, with multiple students.
-		// Therefor, this should never go into the session.
-		// Annoyingly, we must pass carry this around on each page in the system.
-		$GLOBALS["current_student_id"] = $_REQUEST["current_student_id"];
-		if ($GLOBALS["current_student_id"] == "")
-		{
-			$GLOBALS["current_student_id"] = $_REQUEST["advising_student_id"];
-		}
-
-		$csid = $GLOBALS["current_student_id"];
-
-		//admin_debug("csid: $csid");
-		// Get the student ID.
-		$GLOBALS["advising_student_id"] = $_REQUEST["advising_student_id"];
-		if ($GLOBALS["advising_student_id"] == "")
-		{
-			$GLOBALS["advising_student_id"] = $_SESSION["advising_student_id$csid"];
-			if ($GLOBALS["advising_student_id"] == "")
-			{ // Default value...
-				//$GLOBALS["advising_student_id"] = "10035744";
-			}
-		}
-
-
-		// Should we load from the Draft advising session?  or the active?
-		$GLOBALS["advising_load_active"] = $_REQUEST["advising_load_active"];
-		if ($GLOBALS["advising_load_active"] == "")
-		{ // values will either be "yes" or "" (any other value than "yes" is
-			// considered to be negative.
-			// Default value...
-			$GLOBALS["advising_load_active"] = "";
-
-		}
-
-
-
-		/*
-		// Get the degree ID.
-		$GLOBALS["advisingDegreeID"] = $_REQUEST["advisingDegreeID"];
-		if ($GLOBALS["advisingDegreeID"] == "")
-		{
-		$GLOBALS["advisingDegreeID"] = $_SESSION["advisingDegreeID"];
-		if ($GLOBALS["advisingDegreeID"] == "")
-		{ // Default value...
-		$GLOBALS["advisingDegreeID"] = "586227"; // cosc
-		}
-		}
-		*/
-
-		// Get the major_code.
-		$GLOBALS["advising_major_code"] = $_REQUEST["advising_major_code"];
-		//admin_debug($GLOBALS["advising_major_code"]);
-		if ($GLOBALS["advising_major_code"] == "")
-		{
-			$GLOBALS["advising_major_code"] = $_SESSION["advising_major_code$csid"];
-			if ($GLOBALS["advising_major_code"] == "")
-			{ // Default value...
-				//$GLOBALS["advising_major_code"] = "COSC";
-			}
-		}
-
-
-
-
-		// Get the track_code.
-		$GLOBALS["advising_track_code"] = $_REQUEST["advising_track_code"];
-		if ($GLOBALS["advising_track_code"] == "")
-		{
-			$GLOBALS["advising_track_code"] = $_SESSION["advising_track_code$csid"];
-			if ($GLOBALS["advising_track_code"] == "")
-			{ // Default value...
-
-			}
-		}
-
-		// Update the student's settings?
-		$GLOBALS["advising_update_student_settings_flag"] = $_POST["advising_update_student_settings_flag"];
-		// Make it only come from the POST, for safety.
-		if ($GLOBALS["advising_update_student_settings_flag"] == "")
-		{
-			$GLOBALS["advising_update_student_settings_flag"] = $_SESSION["advising_update_student_settings_flag$csid"];
-			if ($GLOBALS["advising_update_student_settings_flag"] == "")
-			{ // Default value...
-
-			}
-		}
-
-
-		// Update the logged-in user's settings?
-		$GLOBALS["fp_update_user_settings_flag"] = $_POST["fp_update_user_settings_flag"];
-		// Make it only come from the POST, for safety.
-		if ($GLOBALS["fp_update_user_settings_flag"] == "")
-		{
-			$GLOBALS["fp_update_user_settings_flag"] = $_SESSION["fp_update_user_settings_flag$csid"];
-			if ($GLOBALS["fp_update_user_settings_flag"] == "")
-			{ // Default value...
-
-			}
-		}
-
-
-
-		$settings = $this->settings;
-
-
-		$GLOBALS["advising_term_id"] = $_REQUEST["advising_term_id"];  // Get it from the GET or POST.
-		if ($GLOBALS["advising_term_id"] == "")
-		{
-			// Set to the default advising term.
-			$GLOBALS["advising_term_id"] = $_SESSION["advising_term_id$csid"];
-			if ($GLOBALS["advising_term_id"] == "")
-			{
-				// default value:
-				$GLOBALS["advising_term_id"] = $settings["advising_term_id"];
-			}
-		}
-
-		// Are we currently in WhatIf mode?
-		$GLOBALS["advising_what_if"] = $_REQUEST["advising_what_if"];  // Get it from the GET or POST.
-		if ($GLOBALS["advising_what_if"] == "")
-		{
-			// Will equal "yes" if we ARE in whatIf mode.
-			$GLOBALS["advising_what_if"] = $_SESSION["advising_what_if$csid"];
-			if ($GLOBALS["advising_what_if"] == "")
-			{
-				// Default value:
-				$GLOBALS["advising_what_if"] = "no";
-			}
-		}
-
-		$GLOBALS["what_if_major_code"] = $_REQUEST["what_if_major_code"];  // Get it from the GET or POST.
-		if ($GLOBALS["what_if_major_code"] == "")
-		{
-			// Will equal "yes" if we ARE in whatIf mode.
-			$GLOBALS["what_if_major_code"] = $_SESSION["what_if_major_code$csid"];
-			if ($GLOBALS["what_if_major_code"] == "")
-			{
-				// Default value:
-				$GLOBALS["what_if_major_code"] = "";
-			}
-		}
-
-		$GLOBALS["what_if_track_code"] = $_REQUEST["what_if_track_code"];  // Get it from the GET or POST.
-		if ($GLOBALS["what_if_track_code"] == "")
-		{
-			// Will equal "yes" if we ARE in whatIf mode.
-			$GLOBALS["what_if_track_code"] = $_SESSION["what_if_track_code$csid"];
-			if ($GLOBALS["what_if_track_code"] == "")
-			{
-				// Default value:
-				$GLOBALS["what_if_track_code"] = "";
-			}
-		}
-
-
-		if ($GLOBALS["what_if_major_code"] == "none")
-		{
-			$GLOBALS["what_if_major_code"] = "";
-		}
-		if ($GLOBALS["what_if_track_code"] == "none")
-		{
-			$GLOBALS["what_if_track_code"] = "";
-		}
-		if ($GLOBALS["advising_track_code"] == "none")
-		{
-			$GLOBALS["advising_track_code"] = "";
-		}
-
-
-		// Settings... (from the database)
-		//$GLOBALS["setting_available_advising_term_ids"] = $settings["available_advising_term_ids"];
-		//$GLOBALS["setting_advising_term_id"] = $settings["advising_term_id"];
-		//$GLOBALS["setting_current_catalog_year"] = $settings["current_catalog_year"];
-		//$GLOBALS["setting_current_draft_catalog_year"] = $settings["current_draft_catalog_year"];
-
-		// Are we in Print View?
-		$GLOBALS["print_view"] = $_REQUEST["print_view"];
-
-		// Should we try to load from the cache?
-		$GLOBALS["load_from_cache"] = $_REQUEST["load_from_cache"];
-		if ($GLOBALS["load_from_cache"] == "")
-		{
-			// By default, attempt to load from cache.
-			$GLOBALS["load_from_cache"] = "yes";
-		}
-
-		// What "view" are we in?  View by Year or by Type?
-		// Not the same as printView.  printView should work regardless
-		// of our advising_view.
-		$GLOBALS["advising_view"] = $_REQUEST["advising_view"];
-		if ($GLOBALS["advising_view"] == "")
-		{
-			$GLOBALS["advising_view"] = $_SESSION["advising_view$csid"];
-		}
-
-
-		// Place values into session.
-		$_SESSION["advising_student_id$csid"] = $GLOBALS["advising_student_id"];
-		$_SESSION["advising_student_id"] = $GLOBALS["advising_student_id"]; // used ONLY in the error report popup!
-		$_SESSION["advising_major_code$csid"] = $GLOBALS["advising_major_code"];
-		$_SESSION["advising_track_code$csid"] = $GLOBALS["advising_track_code"];
-		$_SESSION["advising_term_id$csid"] = $GLOBALS["advising_term_id"];
-		$_SESSION["advising_what_if$csid"] = $GLOBALS["advising_what_if"];
-		$_SESSION["what_if_major_code$csid"] = $GLOBALS["what_if_major_code"];
-		$_SESSION["what_if_track_code$csid"] = $GLOBALS["what_if_track_code"];
-		$_SESSION["advising_view$csid"] = $GLOBALS["advising_view"];
-
-
-		if ($bool_ignore_what_if_variables == true)
-		{
-			$GLOBALS["advising_what_if"] = "";
-			$GLOBALS["what_if_major_code"] = "";
-			$GLOBALS["what_if_track_code"] = "";
-		}
-
-
-
-		if ($_SESSION["fp_user_type"] == "student")
-		{
-			// The student can only pull up their own information.  This
-			// check is to try and prevent a hacker student from trying
-			// to pull up someone else's information.
-			if ($_SESSION["advising_student_id"] != $_SESSION["fp_user_id"])
-			{
-				session_destroy();
-				die("You do not have access to that function.  Please log back in: <a href='main.php'>Log into FlightPath.</a>");
-			}
-		}
-
-		// Are we in draft mode?
-		if ($_SESSION["fp_draft_mode"] == "yes")
-		{
-			$GLOBALS["bool_use_draft"] = true;
-		} else {
-			$GLOBALS["bool_use_draft"] = false;
-		}
-
-
-
-
-	}
-
-
   /**
    * Will display the "public note" at the top of a degree.  This
    * was entred in Data Entry.
@@ -2646,8 +2249,6 @@ function draw_menu_items($menu_array) {
 	 */
 	function build_semester_list() {
 	  
-    //admin_debug($this->degree_plan);
-
 		$list_semesters = $this->degree_plan->list_semesters;
 		// Go through each semester and add it to the screen...
 		$list_semesters->reset_counter();
@@ -2705,7 +2306,7 @@ function draw_menu_items($menu_array) {
 	 * 
 	 * @return string
 	 */
-	function draw_system_tabs($active_tab_number = 0, $bool_save_draft = false, $bool_from_what_if = false, $bool_warn_change = false)
+	function z__draw_system_tabs($active_tab_number = 0, $bool_save_draft = false, $bool_from_what_if = false, $bool_warn_change = false)
 	{
 		// Returns the HTML to draw out the primary system tabs,
 		// for example, Main, View, Comments, etc.
@@ -3131,16 +2732,15 @@ function draw_menu_items($menu_array) {
 	{
 		$pC = "";
 
-		//$course = new Course();
-		
 		if ($course_id != "" && $course_id != 0) {
 		  
 			$course = new Course($course_id);
 		}
 
-		//admin_debug($course->toString());
+
+		
 		$db_group_requirement_id = $_REQUEST["db_group_requirement_id"];
-		//admin_debug("RequirmentID: $db_group_requirement_id");
+		
   
 
 		if ($course == null)
@@ -3155,20 +2755,17 @@ function draw_menu_items($menu_array) {
 
 
 		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
-		//admin_debug($advising_term_id);
+
     
 		$course->load_descriptive_data();
-		//admin_debug($course->title);
+
 		$course_hours = $course->get_hours();
-		//admin_debug("Information for course_id: $course->course_id");
+
 		if ($course->bool_transfer)
 		{
-			//admin_debug(" -- transfer courseid: " . $course->course_transfer->course_id );
+
 
 		}
-		//$course_hours = $course->hours_awarded;
-
-		//var_dump($course->array_valid_names);
 
 		// Does this course have more than one valid (non-excluded) name?
 		$other_valid_names = "";
@@ -3185,8 +2782,6 @@ function draw_menu_items($menu_array) {
 			}
 		}
 
-		//admin_debug($course->toString());
-		//print_pre($this->student->list_courses_taken->toString());
 		$course->fix_title();
 
     $initials = $GLOBALS["fp_system_settings"]["school_initials"];
@@ -3496,8 +3091,6 @@ function draw_menu_items($menu_array) {
 
 		}
 
-
-
 		if ($show_advising_buttons == true && !$this->bool_blank) {
 
 			// Insert a hidden radio button so the javascript works okay...
@@ -3514,7 +3107,7 @@ function draw_menu_items($menu_array) {
 				";
 			}
 		} 
-		else if ($show_advising_buttons == false && $course->has_variable_hours() == true && $course->grade == "" && user_has_permission("can_advise_students")) {
+		else if ($show_advising_buttons == false && $course->has_variable_hours() == true && $course->grade == "" && user_has_permission("can_advise_students") && !$this->bool_blank) {
 			// Show an "update" button, and use the course's assigned_to_group_id and
 			// assigned_to_semester_num.
 			$pC .= "
@@ -3669,7 +3262,7 @@ function draw_menu_items($menu_array) {
 		$semester->list_groups->reset_counter();
 		while($semester->list_groups->has_more())
 		{
-			//admin_debug("dddd");
+
 			$group = $semester->list_groups->get_next();
 			$pC .= "<tr><td colspan='8'>";
 			$pC .= $this->display_group($group);
@@ -3727,41 +3320,26 @@ function draw_menu_items($menu_array) {
 
 		if (!$group = $this->degree_plan->find_group($place_group->group_id))
 		{
-			admin_debug("Group not found.");
+			fpm("Group not found.");
 			return;
 		}
 
-		if ($group->title == "Core Fine Arts" )
-		{
-			//print_pre($group->to_string());
-			//admin_debug($group->get_fulfilled_hours());
-		}
-
+		
 
 
 		$title = $group->title;
 
 		$display_course_list = new CourseList();
 
-		/*
-		// Display the title of the Group...
-		$pC .= "<tr><td colspan='8' class='tenpt'>
-		&nbsp;<b>$title</b>
-		</td></tr>";
-		*/
 		// Okay, first look for courses in the first level
 		// of the group.
 		//$group->list_courses->sort_alphabetical_order();
 
 		$display_semesterNum = $place_group->assigned_to_semester_num;
-		//admin_debug("$group->title $display_semesterNum");
+		
 
 		$group->list_courses->remove_unfulfilled_and_unadvised_courses();
-		/*		if ($group->group_id == 660701)
-		{
-		//print_pre($group->to_string());
-		}
-		*/		$group->list_courses->reset_counter();
+		$group->list_courses->reset_counter();
 		while($group->list_courses->has_more())
 		{
 			$course = $group->list_courses->get_next();
@@ -3769,7 +3347,7 @@ function draw_menu_items($menu_array) {
 			// Do we have enough hours to keep going?
 			$fulfilled_hours = $display_course_list->count_hours();
 			$remaining = $place_group->hours_required - $fulfilled_hours;
-			//admin_debug("$group->title ff: $fulfilled_hours rem: $remaining c:" . $course->toString());
+
 
 			// If the course in question is part of a substitution that is not
 			// for this group, then we should skip it.
@@ -3778,48 +3356,31 @@ function draw_menu_items($menu_array) {
 				$try_c = $course->course_list_fulfilled_by->get_first();
 				if ($try_c->bool_substitution == true && $try_c->assigned_to_group_id != $group->group_id)
 				{
-					//admin_debug($try_c->toString() . " subbed not in group $group->title.");
+
 					continue;
 				}
 			}
 
 
-			//admin_debug($course->toString());
-			//if (is_object($course->courseFulfilledBy) && $course->courseFulfilledBy->bool_has_been_displayed != true && $course->bool_has_been_displayed != true)
 			if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->bool_has_been_displayed != true && $course->bool_has_been_displayed != true)
 			{
-				//$pC .= "<tr><td colspan='8'>";
-				//$title_text = "This course is a member of $group->title.";
-				//$pC .= $this->draw_course_row($course->courseFulfilledBy, $group->icon_filename, $title_text);
-				//$pC .= "</td></tr>";
-				//$c = $course->courseFulfilledBy;
 				$c = $course->course_list_fulfilled_by->get_first();
 				if ($remaining < $c->get_hours())
 				{
-					//admin_debug("here for " . $c->toString());
 					continue;
 				}
 
-				//admin_debug("here $c->course_id $group->title " . $c->toString());
+
 				$c->temp_flag = false;
 				$c->icon_filename = $group->icon_filename;
 				$c->title_text = "This course is a member of $group->title.";
-				//if (!$display_course_list->find_match($c))
-				//{ // Make sure it isn't already in the display list.
 				$display_course_list->add($c);
-				//}
-
-				//admin_debug("display " . $c->toString());
 
 
 			}
 
 			if ($course->bool_advised_to_take && $course->bool_has_been_displayed != true && $course->assigned_to_semester_num == $display_semesterNum)
 			{
-				//$pC .= "<tr><td colspan='8'>";
-				//$title_text = "The student has been advised to take this course to fulfill a $group->title requirement.";
-				//$pC .= $this->draw_course_row($course, $group->icon_filename, $title_text, true);
-				//$pC .= "</td></tr>";
 				$c = $course;
 				if ($remaining < $c->get_hours())
 				{
@@ -3829,22 +3390,11 @@ function draw_menu_items($menu_array) {
 				$c->temp_flag = true;
 				$c->icon_filename = $group->icon_filename;
 				$c->title_text = "The student has been advised to take this course to fulfill a $group->title requirement.";
-				//if (!$display_course_list->find_match($c))
-				//{ // Make sure it isn't already in the display list.
 				$display_course_list->add($c);
-				//}
-				//admin_debug($c->toString());
-
-				// Take off remaining hours!
 
 			}
 		}
 
-
-		// Alright, now we will see if this group has any branches
-		// (groups within groups).
-		//admin_debug("-_-_-_-_ Looking in Group $group->title -_-");
-		//print_pre($group->to_string());
 
 		$group->list_groups->reset_counter();
 		while($group->list_groups->has_more())
@@ -3859,41 +3409,31 @@ function draw_menu_items($menu_array) {
 				while($branch->list_courses->has_more())
 				{
 					$course = $branch->list_courses->get_next();
-					//admin_debug("Examining course " . $course->toString());
+
 					// Do we have enough hours to keep going?
 					$fulfilled_hours = $display_course_list->count_hours();
 					$remaining = $place_group->hours_required - $fulfilled_hours;
-					//admin_debug($course->bool_has_been_displayed);
-					//if (is_object($course->courseFulfilledBy) && $course->courseFulfilledBy->bool_has_been_displayed != true && $course->bool_has_been_displayed != true)
+
 					if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->bool_has_been_displayed != true && $course->bool_has_been_displayed != true)
 					{
-						//admin_debug("got in here");
-						//$pC .= "<tr><td colspan='8'>";
-						//$title_text = "This course is a member of $group->title.";
-						//$pC .= $this->draw_course_row($course->courseFulfilledBy, $group->icon_filename, $title_text);
-						//$pC .= "</td></tr>";
-
-						//$c = $course->courseFulfilledBy;
 						$c = $course->course_list_fulfilled_by->get_first();
 						if ($remaining < $c->get_hours() || $remaining < 1)
 						{
-							//admin_debug(" - Skip course because remaining hours are gone.");
 							continue;
 						}
 
 						$c->temp_flag = false;
 						$c->icon_filename = $group->icon_filename;
 						$c->title_text = "This course is a member of $group->title.";
-						//						admin_debug("-- Add fulfulled course to display list.");
+
 						if (!$display_course_list->find_match($c))
 						{ // Make sure it isn't already in the display list.
-							//admin_debug("adding course!");
+
 							$display_course_list->add($c);
 						} else if (is_object($c->course_transfer))
 						{
 							if (!$display_course_list->find_match($c->course_transfer))
 							{ // Make sure it isn't already in the display list.
-								//admin_debug("adding transfer course!");
 								$display_course_list->add($c);
 							}
 						}
@@ -3903,17 +3443,11 @@ function draw_menu_items($menu_array) {
 
 					if ($course->bool_advised_to_take && $course->bool_has_been_displayed != true && $course->assigned_to_semester_num == $display_semesterNum)
 					{
-						//admin_debug($course->toString());
-						//$pC .= "<tr><td colspan='8'>";
-						//$title_text = "The student has been advised to take this course to fulfill a $group->title requirement.";
-						//$pC .= $this->draw_course_row($course, $group->icon_filename, $title_text, true);
-						//$pC .= "</td></tr>";
-						//admin_debug($course->toString() . " - " . $course->bool_has_been_displayed);
 
 						$c = $course;
 						if ($remaining < $c->get_hours() || $remaining < 1)
 						{
-							//admin_debug(" - Skip course because remaining hours are gone.");
+
 							continue;
 						}
 
@@ -3938,14 +3472,11 @@ function draw_menu_items($menu_array) {
 
 
 
-		//$display_course_list->remove_duplicates();
-		//$display_course_list->sort_alphabetical_order();
 
 		$display_course_list->sort_advised_last_alphabetical();
 
 
 		$pC .= $this->display_group_course_list($display_course_list, $group, $display_semesterNum);
-		//if ($group->title == "Major Ensemble"){print_pre($group->toString());	}
 
 		$fulfilled_hours = $display_course_list->count_hours("", false, false, true);
 		$fulfilled_credit_hours = $display_course_list->count_credit_hours("",false,true);
@@ -3961,7 +3492,6 @@ function draw_menu_items($menu_array) {
 		// If there are any remaining hours in this group,
 		// draw a "blank" selection row.
 		$remaining = $place_group->hours_required - $test_hours;
-		//admin_debug("$place_group->title $place_group->hours_required $test_hours");
 		$place_group->hours_remaining = $remaining;
 		$place_group->hours_fulfilled = $fulfilled_hours;
 		$place_group->hours_fulfilled_for_credit = $fulfilled_credit_hours;
@@ -3991,7 +3521,6 @@ function draw_menu_items($menu_array) {
 		if ($obj_list = $group->list_courses->find_all_matches($course))
 		{
 			$course_list = CourseList::cast($obj_list);
-			//admin_debug("marking all displayed: " . $course->toString());
 			$course_list->mark_as_displayed();
 		}
 		// Now, go through all the course lists within each branch...
@@ -4033,42 +3562,14 @@ function draw_menu_items($menu_array) {
 		{
 			$course = $course_list->get_next();
 
-			//admin_debug("disp: $group->title : " . $course->toString());
-			if ($course->bool_transfer == true)
-			{
-				if (is_object($course->course_transfer))
-				{
-					//	debugCT (" - - trns: " . $course->course_transfer->toString());
-				} else {
-					//debugCT (" - - trns_noeqv: " . $course->toString());
-				}
-			}
 
 
-			//$pC .= "<tr><td colspan='8'>";
 			$pC .= $this->draw_course_row($course, $course->icon_filename, $course->title_text, $course->temp_flag);
 
 			// Doesn't matter if its a specified repeat or not.  Just
 			// mark it as having been displayed.
 			$course->bool_has_been_displayed = true;
-			/*
-			if ($course->boolSpecifiedRepeat != true)
-			{
-			// Regular, non-repeat courses.  Mark all of them
-			// as displayed, in all branches.
-			//$this->mark_course_as_displayed($group, $course);
-
-			$course->bool_has_been_displayed = true;
-			admin_debug("Marking displayed: " . $course->toString());
-			} else {
-			// This is a course which is supposed to be repeated.
-			// So, only mark this one instance as displayed.
-
-			$course->bool_has_been_displayed = true;
-
-			}
-			*/
-			//$pC .= "</td></tr>";
+			
 		}
 		return $pC;
 
@@ -4609,7 +4110,7 @@ function draw_menu_items($menu_array) {
 		$js_code = "describeCourse(\"$data_string\",\"$blank_degree_id\");";
 
 		$icon_link = "";
-		//admin_debug($course->toString() . " RT: " . $course->requirement_type);
+
 		if ($course->requirement_type == "um" || $course->requirement_type == "uc")
 		{
 			$icon_filename = "ucap.gif";
@@ -4645,11 +4146,6 @@ function draw_menu_items($menu_array) {
 
 		if ($course->bool_substitution_new_from_split != true || ($course->bool_substitution_new_from_split == true && $course->display_status != "eligible")){
 
-			if ($course->bool_substitution == true)	{
-				//admin_debug($subject_id . $course_num . " $footnote $hours");
-
-			}
-
 			if ($course_num == ""){
 				$course_num = "&nbsp;";
 			}
@@ -4676,7 +4172,7 @@ function draw_menu_items($menu_array) {
 
 		} else {
 			// These are the leftover hours from a partial substitution.
-			//admin_debug("here");
+
 			$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
      	<tr height='20' class='hand $display_status'
@@ -4910,7 +4406,7 @@ function draw_menu_items($menu_array) {
 
 		if (($hours_avail*1 > 0 && $hours_avail < $c_hours) || ($c_hours < 1))
 		{
-			//admin_debug($hours_avail);
+
 			// Use the remaining hours if we have fewer hours left in
 			// the group than the course we are subbing for.
 			$c_hours = $hours_avail;
@@ -4920,8 +4416,6 @@ function draw_menu_items($menu_array) {
 		{
 			$hours_avail = $c_hours;
 		}
-
-		//admin_debug("c hours $c_hours, hoursAvail $hours_avail");
 
 		$pC .= "<div class='tenpt'>
 					Please select a course to substitute
@@ -4990,7 +4484,7 @@ function draw_menu_items($menu_array) {
 						$t_flag = 1;
 					}
 				}
-				//admin_debug($course_id);
+
 				$m_hours = $c->hours_awarded*1;
 
 				if ($c->max_hours*1 < $m_hours)
@@ -5015,15 +4509,13 @@ function draw_menu_items($menu_array) {
 					$m_hours = $c->hours_awarded;
 				}
 
-				//admin_debug("$m_hours , $hours_avail");
-				//admin_debug("looking at " . $c->toString());
 				if ($c->bool_substitution != true && $c->bool_outdated_sub != true)
 				{
 				  $h = $c->hours_awarded;
 				  if ($c->bool_ghost_hour == TRUE) {
 				    $h .= "(ghost<a href='javascript: alertSubGhost();'>?</a>)";
 				  }
-					//admin_debug("here");
+
 					$pC .= "<tr>
 						<td valign='top' class='tenpt' width='15%'>
 							<input type='radio' name='subCourse' id='subCourse' value='$tcourse_id'
@@ -5150,7 +4642,7 @@ function draw_menu_items($menu_array) {
 
 			if (!$group = $this->degree_plan->find_group($place_group->group_id))
 			{
-				admin_debug("Group not found.");
+				fpm("Group not found.");
 				return;
 			}
 		} else {
@@ -5166,9 +4658,7 @@ function draw_menu_items($menu_array) {
 		// meaning, the student didn't have credit for it or the like.
 		// So what we need to do now is reload the group, being careful
 		// to preserve the existing courses / sub groups in the group.
-		//print_pre($group->to_string());
 		$group->reload_missing_courses();
-		//print_pre($group->to_string());
 
 		if ($group_hours_remaining == 0)
 		{
@@ -5177,15 +4667,12 @@ function draw_menu_items($menu_array) {
 			// with branches.
 			$group_fulfilled_hours = $group->get_fulfilled_hours(true, true, false, $place_group->assigned_to_semester_num);
 			$group_hours_remaining = $place_group->hours_required - $group_fulfilled_hours;
-			//admin_debug("count hours for semester $place_group->assigned_to_semester_num");
-
-			//admin_debug("req:$place_group->hours_required fulfilled:$group_fulfilled_hours");
 
 		}
 
 
 
-		//admin_debug("placegroup hrs rem: " . $place_group->get_hoursRemaining());
+
 		$display_semesterNum = $place_group->assigned_to_semester_num;
 		$pC .= "<!--MSG--><!--MSG2--><!--BOXTOP-->";
 
@@ -5194,8 +4681,6 @@ function draw_menu_items($menu_array) {
 		$bool_subject_select = false;
 		$bool_unselectableCourses = false;
 		$final_course_list = new CourseList();
-		//admin_debug("here");
-		//print_pre($group->to_string());
 
 		$group->list_courses->reset_counter();
 		if (!($group->list_courses->is_empty))
@@ -5292,16 +4777,14 @@ function draw_menu_items($menu_array) {
 				$clone_branch = new Group();
 				$clone_branch->list_courses = $branch->list_courses->get_clone(true);
 				$matches_count = $this->flightpath->get_count_of_matches($clone_branch, $new_student, null);
-				//print_pre($branch->to_string());
 				$branch->count_of_matches = $matches_count;
-				//admin_debug($matches_count);
 				if ($matches_count >= $highest_match_count)
 				{ // Has more than one match on this branch.
-					//			admin_debug($branch->group_id . " " . $branch->count_of_matches);
+
 					$highest_match_count = $matches_count;
 				}
 			}
-			//admin_debug("going with $highest_match_count");
+
 			// If highestMatchCount > 0, then get all the branches
 			// which have that same match count.
 			if ($highest_match_count > 0)
@@ -5310,10 +4793,9 @@ function draw_menu_items($menu_array) {
 				while($group->list_groups->has_more())
 				{
 					$branch = $group->list_groups->get_next();
-					//print_pre($branch->to_string());
+
 					if ($branch->count_of_matches == $highest_match_count)
 					{ // This branch has the right number of matches.  Add it.
-						//admin_debug($branch->group_id . " " . $branch->count_of_matches);
 
 						$new_course_list->add_list($branch->list_courses);
 						$all_zero = false;
@@ -5378,19 +4860,13 @@ function draw_menu_items($menu_array) {
 			// Only do this if NOT in Add a Course group...
 			// also, don't do it if we're looking at a "blank" degree.
 			$final_course_list->remove_previously_fulfilled($this->student->list_courses_taken, $group->group_id, true, $this->student->list_substitutions);
-			//print_pre($final_course_list->to_string());
+
 		}
-		//print_pre($this->student->list_substitutions->toString());
-		//print_pre($final_course_list->to_string());
 
 		$final_course_list->sort_alphabetical_order();
-		if (!$final_course_list->has_any_course_selected())
-		{
-			//admin_debug("in here");
-			if ($c = $final_course_list->find_first_selectable())
-			{
+		if (!$final_course_list->has_any_course_selected()) {
+			if ($c = $final_course_list->find_first_selectable()) {
 				$c->bool_selected = true;
-				//admin_debug($c->toString());
 			}
 		}
 
@@ -5458,7 +4934,7 @@ function draw_menu_items($menu_array) {
 					" . t("You may select <b>@hrs</b>
 						hour$s from this list.", array("@hrs" => $group_hours_remaining)) . "$unselectable_notice</div>";
 		}
-		//admin_debug($place_group->assigned_to_semester_num);
+
 		if ($bool_display_submit == true && !$this->bool_blank && $bool_no_courses != true)
 		{
 			if (user_has_permission("can_advise_students")) {
@@ -5554,7 +5030,7 @@ function draw_menu_items($menu_array) {
 		$new_array = array();
 		foreach($subject_array as $key => $subject_id)
 		{
-			//admin_debug($subject_id);
+
 			if ($title = $this->flightpath->get_subject_title($subject_id)) {
 				$new_array[] = "$title ~~ $subject_id";
 			} else {
@@ -5603,7 +5079,7 @@ function draw_menu_items($menu_array) {
 
 		if ($course_list == null)
 		{
-			//admin_debug("here");
+
 			return;
 		}
 
@@ -5618,19 +5094,14 @@ function draw_menu_items($menu_array) {
 				continue;
 			}
 
-			//admin_debug($course->bool_selected);
+
 			$pC .= "<tr><td colspan='8'>";
 
-			//if (!is_object($course->courseFulfilledBy) && !$course->bool_advised_to_take)
 			if ($course->course_list_fulfilled_by->is_empty && !$course->bool_advised_to_take)
 			{ // So, only display if it has not been fulfilled by anything.
 				$pC .= $this->draw_popup_group_select_course_row($course, $group_hours_remaining);
 				$old_course = $course;
-			} else {
-				// Do not display courses which the student has fulfilled,
-				// or courses for which the student has already been advised.
-				//$pC .= $this->draw_popup_group_select_course_row($course->courseFulfilledBy);
-			}
+			} 
 			$pC .= "</td></tr>";
 		}
 

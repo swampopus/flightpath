@@ -217,8 +217,9 @@ class _DegreePlan
       if ($cur["course_id"]*1 > 0)
       {
         // A course is the next degree requirement.
-        $cat_year = "";
-        if ($this->bool_use_draft) $cat_year = $this->catalog_year;        
+        
+        //if ($this->bool_use_draft) $cat_year = $this->catalog_year;        
+        $cat_year = $this->catalog_year;        
         
         $course_c = new Course($cur["course_id"], false, $this->db, false, $cat_year, $this->bool_use_draft);
         $course_c->assigned_to_semester_num = $semester_num;
@@ -641,13 +642,13 @@ class _DegreePlan
       if ($group = $this->find_group($group_id))
       {
 
-        //adminDebug("Right here, hon.");
+
         if (!($group->list_courses->is_empty))
         {
           if ($cL = $group->find_courses($new_course))
           {
             $rtn_course_list->add_list($cL);
-            //admin_debug(count($rtn_course_list->array_list));
+
           }
         }
         if (!($group->list_groups->is_empty))

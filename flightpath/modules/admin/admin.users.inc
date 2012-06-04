@@ -588,20 +588,12 @@ function admin_display_users() {
     $faculty_id = trim($cur["user_id"]);
     $dept_name = trim(ucwords(strtolower($cur["department"])));
 
-    // Now, we find out this person's user type...
-    //$user_type = determine_staff_user_type($faculty_id);
-
-
+    
     $ast = "";
     $reason = "";
 
 
     $fgcol = "black";
-
-    if ($user_type == "college_coordinator")
-    { // user is a substitutor
-      $fgcol = "red";
-    }
 
     $roles = "";
     $temp = system_get_roles_for_user($faculty_id);

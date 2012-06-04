@@ -499,7 +499,6 @@ class _Course
 
     if ($course_req != null) {
       $min_grade = $course_req->min_grade;
-      //admin_debug($min_grade);
     } else {
       $min_grade = $m_grade;
     }
@@ -608,12 +607,7 @@ class _Course
     // to make FP's math work out.  So, let's return back 0 hours.
     if ($this->bool_ghost_hour)
     {
-      admin_debug("here");
-      //$h = $this->hours_awarded;
-      //if ($this->bool_ghost_hour) {
-        $h = 0;
-      //}
-      
+      $h = 0;
       return $h;
     }
 
@@ -894,18 +888,17 @@ class _Course
 
     $db = $this->db;
 
-
     if ($this->catalog_year == "")
     {
-      $this->catalog_year = $GLOBALS["setting_current_catalog_year"];  // current catalog_year.
+      $this->catalog_year = variable_get("current_catalog_year", 2006);  // current catalog_year.
     }
 
-    $setting_current_catalog_year = $GLOBALS["setting_current_catalog_year"]*1;
+    $setting_current_catalog_year = variable_get("current_catalog_year", 2006) * 1;
     if ($this->bool_use_draft) {
-      $setting_current_catalog_year = $GLOBALS["setting_current_draft_catalog_year"]*1;
+      $setting_current_catalog_year = variable_get("current_catalog_draft_year", 2006) * 1;
     }
     
-    $earliest_catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
+    $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);
     
     
     if ($setting_current_catalog_year < $earliest_catalog_year)
@@ -977,7 +970,6 @@ class _Course
       $this->repeat_hours = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["repeat_hours"];
       $this->db_exclude = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["db_exclude"];
       $this->array_valid_names = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["array_valid_names"];
-      //admin_debug("loaded from gb cache.");
       return;
     }
 
@@ -999,8 +991,6 @@ class _Course
       							$exclude_line ", $this->course_id, $this->catalog_year);
       $cur = $this->db->db_fetch_array($res);
 
-      //admin_debug("here i am" . $this->course_id);
-      //var_dump($cur);
 
       if ($this->db->db_num_rows($res) < 1)
       {
