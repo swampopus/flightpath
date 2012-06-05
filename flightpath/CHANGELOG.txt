@@ -1,6 +1,11 @@
 FlightPath Changelog
 ====================
 
+2012-06-05
+  Worked with course_search module.  It has now merged with the courseinfoentry module.  Removed
+  the courseinfoentry module as a result.
+  
+
 2012-06-04
   Removed old references to SESSION["user_type"], replaced with newer check on permissions instead
   

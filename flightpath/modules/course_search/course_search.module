@@ -22,6 +22,15 @@ function course_search_menu() {
     ),
     "type" => MENU_TYPE_NORMAL_ITEM,
   );
+
+  
+  $items["course-search/get-syllabus"] = array(
+    "title" => "Course Search",
+    "page_callback" => "course_search_download_syllabus",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_CALLBACK,
+  );
+
   
   
   $items["admin/config/course-search"] = array(
@@ -120,11 +129,17 @@ function course_search_edit_course_details_form() {
   $course->catalog_year = $catalog_year;
   // Find out filename/link of current syllabus.
   $filelink = "- None currently entered -";
-  //$filename = courseinfoentry_get_current_syllabus("", "", $course_id);
-  if ($filename != "")
-  {
-    $filelink = "$filename
-          <input type='checkbox' name='del_syllabus' value='yes'> delete?";
+  $filename = "";
+  if ($syllabus_details = course_search_get_course_syllabus_details("", "", $course_id)) {
+    $filename = $syllabus_details["filename"];
+  }
+
+  $bool_delete_cb = FALSE;
+  
+  if ($filename != "") {
+    $filelink = $filename;
+    $bool_delete_cb = TRUE;
+          
   }
 
   $form["mark" . $m++] = array(
@@ -141,14 +156,18 @@ function course_search_edit_course_details_form() {
                         syllabus.  Remember to click Submit after selecting a file."),
   );
 
-  if ($filename != "")
-  {
+  if ($bool_delete_cb) {
+    $form["del_syllabus"] = array(
+      "type" => "checkboxes",
+      "options" => array("yes" => t("Delete the existing syllabus?")),
+    );
+  }
 
-    $syllabus_details = course_search_get_course_syllabus_details("", "", $course_id);
+  if ($filename != "") {   
     $s_url = $syllabus_details["url"];
     
     $form["mark" . $m++] = array(
-      "value" => t("Syllabus may be downloaded using this address: ") . "<a href='$s_url'>$s_url</a>",
+      "value" => "<p>" . t("Syllabus may be downloaded using this address: ") . "<a href='$s_url'>$s_url</a></p>",
     );
     
   }
@@ -260,8 +279,6 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
   
   $faculty_id = $user->id;
   
-  fpm($form_state);
-  
   $course_id = $form_state["values"]["course_id"];
   $subject_id = $form_state["values"]["subject_id"];
   $course_num = $form_state["values"]["course_num"];
@@ -287,25 +304,28 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
                 VALUES ('?', '?', '?', '?', '?') ", $faculty_id, $course_id, "$year$x", "$subject_id~$course_num", time());                
       }
     }
+            
+  }      
    
    
-    // Not anticipated check?
+  // Not anticipated check?
   
-    // delete first...
-    db_query("DELETE FROM course_rotation_schedule
-              WHERE course_id = '?'
-              AND term_id = 'NOTA' ", $course_id);
-  
-    if ($form_state["values"]["not_anticipated"]["yes"] == "yes") {
-      db_query("INSERT INTO course_rotation_schedule              
-              (faculty_id, course_id, term_id, entry_value, posted)
-              VALUES ('?', '?', '?', '?', '?') ", $faculty_id, $course_id, "NOTA", "$subject_id~$course_num", time());
-  
-    }
+  // delete first...
+  db_query("DELETE FROM course_rotation_schedule
+            WHERE course_id = '?'
+            AND term_id = 'NOTA' ", $course_id);
 
-    // Should we delete the current syllabus?
-    if ($form_state["values"]["del_syllabus"]["yes"] == "yes") {
-      //$filename = courseinfoentry_get_current_syllabus("", "", $course_id);
+  if ($form_state["values"]["not_anticipated"]["yes"] == "yes") {
+    db_query("INSERT INTO course_rotation_schedule              
+            (faculty_id, course_id, term_id, entry_value, posted)
+            VALUES ('?', '?', '?', '?', '?') ", $faculty_id, $course_id, "NOTA", "$subject_id~$course_num", time());
+
+  }
+
+  // Should we delete the current syllabus?
+  if ($form_state["values"]["del_syllabus"]["yes"] == "yes") {
+    if ($details = course_search_get_course_syllabus_details("", "", $course_id)) {
+      $filename = $details["filename"];
       if ($filename != "") {
         unlink("./custom/files/syllabi/$filename");
         db_query("DELETE FROM course_syllabi
@@ -313,25 +333,91 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
         
       }
     }
-  
-    // Did the user try to upload a file?
-    if (trim($_FILES["syllabus"]["tmp_name"]) != "")
+  }
+
+  // Did the user try to upload a file?
+  if (trim($_FILES["syllabus"]["tmp_name"]) != "")
+  {
+    $test = course_search_upload_attachment($course_id, $subject_id, $course_num);
+    if (!$test)
     {
-      //$test = courseinfoentry_upload_attachment($course_id, $subject_id, $course_num);
-      if (!$test)
-      {
-        // there was an error.
-      } else {
-        // success.
-      }
-    }    
-       
-            
+      fp_add_message(t("There was an error uploading attachment.  It is possible this is a write-permission
+                        issue with the server."));
+    } else {
+      // success.
+    }
   }      
    
   fp_add_message(t("This course's details have been updated successfully."));
   // TODO:  Do a "goto" back to wherever we came from
 }
+
+
+
+
+function course_search_upload_attachment($course_id, $subject_id, $course_num) {
+
+  // If any files were attached, go ahead and upload them.
+  $datetime = date ("_y-j-m_g-i-sa", time());
+
+
+  $tmp_filename = $_FILES["syllabus"]["tmp_name"];
+  if (trim($tmp_filename) != "") {
+    // Meaning, yes, a file was uploaded.
+    $suffix = $datetime;
+    // Create the new filename, based on the id's its been assigned.
+    $original_filename = $_FILES["syllabus"]["name"];
+    // replace problem characters...
+    $original_filename = str_replace("'", "", $original_filename);
+    $original_filename = str_replace('"', '', $original_filename);
+    $original_filename = str_replace(",", "", $original_filename);
+
+    $temp = split("\.", $original_filename);
+    $ext = $temp[count($temp) - 1];  // get the original extension.
+    $new_filename = $original_filename . ".$suffix.$ext";
+
+
+    // Does the directory/files/syllabi exist?
+    // If not, we will create it.
+    if (!is_dir("./custom/files/syllabi")) {
+      if (!mkdir("./custom/files/syllabi")) {
+        return FALSE;
+      }
+    }    
+
+    // Try to copy...
+    if (!copy($tmp_filename, "./custom/files/syllabi/$new_filename")) {      
+      return FALSE;
+    }
+
+    // If we are here, then there is success!  We should update the
+    // table with the new filename, which is $new_filename.
+    // delete the existing entry, if any.
+
+    // We need to unlink any existing syllabus file...
+    if ($file_details = course_search_get_course_syllabus_details($subject_id, $course_num, $course_id)) {
+      $filename = $file_details["filename"];    
+      if (!unlink("./custom/files/syllabi/$filename")) {
+        fp_add_message(t("Unable to delete existing file:") . " $filename");
+      }
+    }
+
+    db_query("DELETE FROM course_syllabi
+              WHERE course_id = '?' ", $course_id);
+
+    // Okay, now add the new entry.
+    db_query("INSERT INTO course_syllabi
+            (course_id, course_perm_id, filename, posted)
+            values ('?','?" . "_?','?', '?' )", $course_id, $subject_id, $course_num, $new_filename, time());
+
+
+
+  }
+
+  return TRUE;
+
+}
+
 
 
 
@@ -561,6 +647,85 @@ function z__course_search_display_settings($msg = "") {
 }
 
 
+
+
+/**
+ * This function will actually deliver a syllabus to the user's browser
+ * for download.
+ *
+ */
+function course_search_download_syllabus() {
+  // Get our global variables...
+  
+  $c = trim(mysql_real_escape_string($_REQUEST["c"]));
+  $id = trim(mysql_real_escape_string($_REQUEST["id"]));
+  
+  $db = get_global_database_handler();
+  
+  $temp = split("_", $c);
+  $subject_id = $temp[0];
+  $course_num = $temp[1];
+  
+  // Get the filename in question...
+  $query = "select * from course_syllabi
+            where course_perm_id = '$subject_id" . "_$course_num' ";
+  if ($id != "") {
+    $query = "select * from course_syllabi
+            where course_id = '$id' ";
+  }
+  $res = db_query($query);
+  $cur = db_fetch_array($res);
+  $filename = $cur["filename"];
+  
+  $course_id = $cur["course_id"];
+  
+  // Get the latest subject_id and course_num for this course!
+  $new_course = new Course();
+  $new_course->course_id = $course_id;  
+  $new_course->catalog_year = variable_get("current_catalog_year", 2006);
+  $new_course->load_descriptive_data(false, false, true);
+  
+  $subject_id = $new_course->subject_id;
+  $course_num = $new_course->course_num;
+  
+  if ($filename == "" || !file_exists("./custom/files/syllabi/$filename"))
+  { // Check to make sure the src file actually exists.
+    // Display a message, letting the user know it does not
+    // exist.
+    $db->add_to_log("syllabus", "fail,$c");
+    print t("Sorry, the syllabus for @course could not be found.", array("@course" => "$subject_id $course_num"));
+    return;
+  }
+  
+  $db->add_to_log("syllabus", "get,$c");
+  
+  $content_type = "application/plain";  // default, save as generic binary file.
+  $temp = split("\.", $filename);
+  $ext = $temp[count($temp) - 1];  // get the original file extension.
+  
+  // attempt to match to the correct content_type...
+  if ($ext == "pdf"){ $content_type = "application/pdf"; }
+  if ($ext == "doc") { $content_type = "application/msword"; }
+  if ($ext == "docx") { $content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"; }
+  if ($ext == "txt") { $content_type = "text/plain"; }
+  if ($ext == "pot") { $content_type = "application/mspowerpoint"; }
+  if ($ext == "ppt") { $content_type = "application/powerpoint"; }
+  if (strstr($ext,"xl")) { $content_type = "application/excel"; }
+  
+  
+  
+  
+  $fn = urlencode($subject_id . "_" . $course_num . "_SAMPLE_SYLLABUS") .".$ext";  // make it a safe filename.
+  $fn = str_replace("+"," ",$fn); // restore spaces from + symbols...
+  
+  // Give it to the browser!
+  header('Content-type: ' . $content_type . '');
+  header('Content-Disposition: attachment; filename="' . $fn . '"');
+  readfile('./custom/files/syllabi/' . $filename . '');  
+  die;    
+}
+
+
 /**
  * This function will actually deliver a syllabus to the user's browser
  * for download.
@@ -568,11 +733,6 @@ function z__course_search_display_settings($msg = "") {
  */
 function z__course_search_get_syllabus() {
   // Get our global variables...
-  $db = $GLOBALS["course_search_db"];
-  $catalog_year = $GLOBALS["course_search_catalog_year"];  
-  $mode = $GLOBALS["course_search_mode"];
-  $module_action_u_r_l = get_module_action_u_r_l("course_search");
-
   
   $c = trim(mysql_real_escape_string($_REQUEST["c"]));
   $id = trim(mysql_real_escape_string($_REQUEST["id"]));
@@ -1064,12 +1224,6 @@ function course_search_display_courses() {
 
 function course_search_get_course_rotation_schedule_not_anticipated($course_id)
 {
-
-  // Get our global variables...
-
-  $catalog_year = $GLOBALS["course_search_catalog_year"];  
-  $mode = $GLOBALS["course_search_mode"];
-  
   
 	// Returns TRUE if not is NOT ANTICIPATED.  False, if this
 	// is a normal courses which has an offering, or a blank
@@ -1079,8 +1233,7 @@ function course_search_get_course_rotation_schedule_not_anticipated($course_id)
 							WHERE course_id = '?'
 							AND term_id = 'NOTA'
 							", $course_id);
-	if (db_num_rows($res) > 0)
-	{
+	if (db_num_rows($res) > 0) {
 		return true;
 	}
 
@@ -1090,11 +1243,6 @@ function course_search_get_course_rotation_schedule_not_anticipated($course_id)
 
 function course_search_get_course_rotation_schedule($course_id, $year = "", $limit = 20, $bool_include_next_five_years = false)
 {
-  // Get our global variables...
-
-  $catalog_year = $GLOBALS["course_search_catalog_year"];  
-  $mode = $GLOBALS["course_search_mode"];
-
   
   // return an array containing the terms that this course
 	// is going to be offered, if any.
@@ -1160,20 +1308,10 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
 
 function course_search_get_course_syllabus_details($subject_id = "", $course_num = "", $course_id = -1)
 {
-
-  // Get our global variables...
-  $catalog_year = $GLOBALS["course_search_catalog_year"];  
-  $mode = $GLOBALS["course_search_mode"];
   
 	// This will return an array containing information
 	// about a course's syllabus, if it exists.
-	$rtn_array = array();
-
-	$server = "webservices";
-	if (strstr($_SERVER["SERVER_NAME"], "orion"))
-	{ // we are on production...
-		$server = "orion";
-	}
+	$rtn_array = FALSE;
 
 	// Does this course have a syllabus?
 	$query = "SELECT * FROM course_syllabi
@@ -1187,13 +1325,10 @@ function course_search_get_course_syllabus_details($subject_id = "", $course_num
 	$cur = db_fetch_array($res);
 	
 	//$url = $GLOBALS["fp_system_settings"]["selfURL"] . "/" . get_module_path("course_search") . "/syllabus.php?id=" . $cur["course_id"];
-	$url = get_module_action_u_r_l("course_search") . "&nosession=true&a=get_syllabus&id=" . $cur["course_id"];
-	
-	
-	
-	if ($cur["filename"] != "")
-	{
-		$rtn_array["url"] = $url;
+
+	if ($cur["filename"] != "") {
+	  $rtn_array = array();
+		$rtn_array["url"] = $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("course-search/get-syllabus", "id=" . $cur["course_id"], FALSE);
 		$rtn_array["filename"] = $cur["filename"];
 		$rtn_array["posted"] = $cur["posted"];
 	}
