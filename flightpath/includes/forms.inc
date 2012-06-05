@@ -326,7 +326,9 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   }
   
   
-  $rtn .= "<div id='element-wrapper-$name' class='form-element element-type-$type $element_extra_css'>";
+  if ($type != "markup") {
+    $rtn .= "<div id='element-wrapper-$name' class='form-element element-type-$type $element_extra_css'>";
+  }
 
   if ($prefix) {
     $rtn .= $prefix;
@@ -339,7 +341,7 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
 
   // First of all, what is it's "type"?
   if ($type == "markup") {
-    $rtn .= "<div class='markup'>$value</div>";
+    $rtn .= "$value";
   }
   else if ($type != "hidden") {
     $rtn .= "<label>$ast$label $popup_help_link</label>";
@@ -363,6 +365,11 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
     $rtn .= "<input type='hidden' name='$name' id='element-$name' value='$value'>";
   }
 
+  if ($type == "file") {        
+    $rtn .= "<input type='file' name='$name' id='element-$name'>";
+  }
+  
+  
   if ($type == "radios") {
     $rtn .= "<div class='form-radios form-radios-$name'>";
     foreach ($options as $key => $val) {
@@ -430,7 +437,9 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
     $rtn .= $suffix;
   }
 
-  $rtn .= "</div>";
+  if ($type != "markup") {
+    $rtn .= "</div>";
+  }
 
 
 

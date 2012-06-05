@@ -1,6 +1,0 @@
-Changelog for blank_degrees module of FlightPath
-=========================================
-
-2011-12-22
-Modified queries to use new replacement pattern system, to make them less
-vulnerable to SQL-injection attacks.

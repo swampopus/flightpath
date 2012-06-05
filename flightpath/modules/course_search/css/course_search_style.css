@@ -25,3 +25,15 @@ table.fp-course-search-avail td {
   text-align: center;
   font-size: 0.9em;
 }
+
+.rotation-form-checkboxes div,
+.rotation-form-checkboxes label
+{
+  display: inline;
+}
+
+.rotation-form-checkboxes div.element-type-checkboxes {
+  display: inline-block;
+  min-width: 90px;  
+  padding: 5px 0 5px 0;
+}

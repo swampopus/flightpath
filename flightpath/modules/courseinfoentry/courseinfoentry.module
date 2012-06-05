@@ -1,21 +1,4 @@
 <?php
-/*
-FlightPath was originally designed and programmed by the 
-University of Louisiana at Monroe. The original source is 
-copyright (C) 2011-present by the University of Louisiana at Monroe.
-
-FlightPath is considered "open source" under the 
-GNU General Public License, version 3 or any later version. 
-This covers any related files and documentation packaged with 
-FlightPath. 
-
-The license is defined in full here: http://www.gnu.org/licenses/gpl.html,
-and reproduced in the LICENSE.txt file.
-
-You may modify FlightPath's source code, but this copyright and license
-notice must not be modified, and must be included with the source code.
-------------------------------
-*/
 
 /*
 This script lets authorized users upload/remove syllabi for
@@ -24,21 +7,21 @@ certain courses, as well as set other information.
 */
 
 
-
-/**
- * Implementation of hook_init.  Gets called as soon as the module
- * is included.
- *
- */
-function courseinfoentry_init() {
-
-  $db = get_global_database_handler();
-  $GLOBALS["courseinfoentry_db"] = $db;
+function courseinfoentry_menu() {
+  $items = array();
   
+  $items["admin-tools/courseinfo"] = array(
+    "title" => "Course Syllabus & Schedule Entry",
+    "page_callback" => "courseinfoentry_display_list_courses",
+    "access_callback" => TRUE,
+    "target" => "_blank",    
+    "description" => "Use this tool to update course syllabi & rotation schedules.",
+    "icon" => fp_theme_location() . "/images/toolbox.gif",
+    "weight" => 30,
+  );
   
-  
+  return $items;
 }
-
 
 
 /**
@@ -47,7 +30,7 @@ function courseinfoentry_init() {
  * to this module, and what to include in the URL.
  *
  */
-function courseinfoentry_menu() {
+function z__courseinfoentry_menu() {
   
   $items = array();
   
@@ -59,33 +42,21 @@ function courseinfoentry_menu() {
     "location" => "admin_tools",
     "icon" => $GLOBALS["fp_system_settings"]["theme"] . "/images/toolbox.gif",
     "weight" => 100,
-    "permission" => "de_can_update_course_info",
+    "permission" => "can_update_course_info",
   );
     
   return $items;
 }
 
 
-/**
- * Implementation of hook_perm().
- * Expects to return an array of permissions recognized by
- * this module.
- * 
- * Ex:   $a = array( 
- *          "deCanDoSomething" => array ( 
- *              "title" => "Can Do Something",
- *              "description" => "Allow the user to do something." 
- *          )
- *        );
- *
- */
+
 function courseinfoentry_perm() {
   
   $perms = array (
-    "de_can_update_course_info" => array(
-      "title" => "Can update course info",
-      "description" => "This allows the user to access the Course Info Entry system
-                        and edit syllabi and rotation schedules.",
+    "can_update_course_info" => array(
+      "title" => t("Can update course info"),
+      "description" => t("This allows the user to access the Course Info Entry system
+                        and edit syllabi and rotation schedules."),
     ),
   );
 
