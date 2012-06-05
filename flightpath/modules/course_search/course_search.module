@@ -23,6 +23,28 @@ function course_search_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
   );
   
+  
+  $items["admin/config/course-search"] = array(
+    "title" => "Course Search Settings",    
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("course_search_settings_form", "system_settings"),
+    "access_arguments" => array("administer_course_search"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,      
+      "menu_icon" => fp_theme_location() . "/images/book_glass_20.jpg",
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),      
+    ),
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );  
+  
   $items["tools/course-search/courses"] = array(
     "title" => "Course Search",
     "page_callback" => "course_search_display_courses",
@@ -38,7 +60,7 @@ function course_search_menu() {
   $items["tools/course-search/edit-info-details"] = array(
     "title" => "Edit Course Info Details",
     "page_callback" => "fp_render_form",
-    "page_arguments" => array("course_search_edit_details_form"),
+    "page_arguments" => array("course_search_edit_course_details_form"),
     "access_arguments" => array("can_update_course_info_details"),
     "page_settings" => array(
       "page_has_search" => FALSE,
@@ -55,10 +77,12 @@ function course_search_menu() {
 
 
 
+
+
 /**
  * This form lets the user edit the course's syllabus or rotation schedule
  */
-function course_search_edit_details_form() {
+function course_search_edit_course_details_form() {
   $form = array();
 
   
@@ -112,7 +136,7 @@ function course_search_edit_details_form() {
   $form["syllabus"] = array(
     "type" => "file",
     "label" => t("Submit new sample course syllabus:"),
-    "prefix" => t("Current sample syllabus:") . " " . $filelink,
+    "prefix" => "<br><br>" . t("Current sample syllabus:") . " " . $filelink,
     "description" => t("Note: selecting a new file will replace any existing
                         syllabus.  Remember to click Submit after selecting a file."),
   );
@@ -171,10 +195,8 @@ function course_search_edit_details_form() {
       $res = db_query("select * from course_rotation_schedule
                 where `course_id`='?'
                 and `term_id`='$check_year$x' ", $course_id);
-      //debug_c_t("$t$x");
-      if (db_num_rows($res) > 0)
-      {
-        $cb_default_val = array("yes" => $cb_disp_name);
+      if (db_num_rows($res) > 0) {
+        $cb_default_val = array("yes" => "yes");
       }
       $pC .= "<label><input type='checkbox' name='cb_$cbname' value='yes' $che> $cb_disp_name &nbsp;&nbsp;</label>";
       
@@ -233,9 +255,84 @@ function course_search_edit_details_form() {
 }
 
 
-function course_search_edit_details_form_submit($form, $form_state) {
-  fpm($_FILES);
+function course_search_edit_course_details_form_submit($form, $form_state) {
+  global $user;
+  
+  $faculty_id = $user->id;
+  
+  fpm($form_state);
+  
+  $course_id = $form_state["values"]["course_id"];
+  $subject_id = $form_state["values"]["subject_id"];
+  $course_num = $form_state["values"]["course_num"];
+  
+  $term_array = get_term_id_suffixes();
+      
+  for ($t = 1; $t <= 6; $t++) {
+    $year = $form_state["values"]["year$t"];
+    
+    // delete the existing entries for this year & course here.
+    db_query("DELETE FROM course_rotation_schedule
+            WHERE `course_id`='?'
+            AND `term_id` LIKE '?%' ", $course_id, $year);
+            
+    /////////////////////////
+    // Now, for x = 1 to 5,
+    // if ($_request["cb_$year$x"] == "yes")
+    // then insert into table... blah blah...
+    foreach($term_array as $x) {
+      if ($form_state["values"]["cb_$year$x"]["yes"] == "yes") {
+        db_query("INSERT INTO course_rotation_schedule
+                (faculty_id, course_id, term_id, entry_value, posted)
+                VALUES ('?', '?', '?', '?', '?') ", $faculty_id, $course_id, "$year$x", "$subject_id~$course_num", time());                
+      }
+    }
+   
+   
+    // Not anticipated check?
+  
+    // delete first...
+    db_query("DELETE FROM course_rotation_schedule
+              WHERE course_id = '?'
+              AND term_id = 'NOTA' ", $course_id);
+  
+    if ($form_state["values"]["not_anticipated"]["yes"] == "yes") {
+      db_query("INSERT INTO course_rotation_schedule              
+              (faculty_id, course_id, term_id, entry_value, posted)
+              VALUES ('?', '?', '?', '?', '?') ", $faculty_id, $course_id, "NOTA", "$subject_id~$course_num", time());
+  
+    }
+
+    // Should we delete the current syllabus?
+    if ($form_state["values"]["del_syllabus"]["yes"] == "yes") {
+      //$filename = courseinfoentry_get_current_syllabus("", "", $course_id);
+      if ($filename != "") {
+        unlink("./custom/files/syllabi/$filename");
+        db_query("DELETE FROM course_syllabi
+                WHERE `course_id`='?' ", $course_id);
+        
+      }
+    }
+  
+    // Did the user try to upload a file?
+    if (trim($_FILES["syllabus"]["tmp_name"]) != "")
+    {
+      //$test = courseinfoentry_upload_attachment($course_id, $subject_id, $course_num);
+      if (!$test)
+      {
+        // there was an error.
+      } else {
+        // success.
+      }
+    }    
+       
+            
+  }      
+   
+  fp_add_message(t("This course's details have been updated successfully."));
+  // TODO:  Do a "goto" back to wherever we came from
 }
+
 
 
 /**
@@ -275,8 +372,8 @@ function z__course_search_menu() {
 
 function course_search_perm() {
   return array(
-          "can_administer_course_search" => array(
-            "title" => t("Can administer course search"),
+          "administer_course_search" => array(
+            "title" => t("Administer course search"),
             "description" => t("Users with this setting will be able
                               to modify settings for the Course Search module."),
           ),
@@ -357,6 +454,51 @@ function z__course_search_perform_submit_settings() {
   
   course_search_display_settings("<font color='green'>Settings successfully saved on " .date ("g:i:sa") . ".</font><br><br>");
   
+}
+
+
+
+
+/**
+ * The system settins form for course_search settings.
+ */
+function course_search_settings_form() {
+  $form = array();
+  
+  $form["course_search_avail_term_id_suffix_order"] = array(
+    "type" => "textfield",
+    "label" => t("Available Term ID suffix order"),
+    "value" => variable_get("course_search_avail_term_id_suffix_order", ""),
+    "description" => t("Enter the order of term ID suffixes, so that they will display
+                in the correct order in the table of available course
+                offerings.  Separate by comma.") . "
+                <br>
+                Ex: 60, 40, 41, 80, 81, mm",
+  );    
+  
+  $form["course_search_avail_term_headers"] = array(
+    "type" => "textfield",
+    "label" => t("Available Term Table Headers"),
+    "value" => variable_get("course_search_avail_term_headers", ""),
+    "description" => t("Enter the table headers for the available table, in the same
+                order as the suffix order above.") . "
+                <br>
+                Ex: Spring, May, Summer 1, Summer 2, Fall, Winter",
+  );    
+
+
+  $form["course_search_avail_term_mobile_headers"] = array(
+    "type" => "textfield",
+    "label" => t("Available Term Mobile Table Headers"),
+    "value" => variable_get("course_search_avail_term_mobile_headers", ""),
+    "description" => t("Enter the table headers for the available table, in the same
+                order as the suffix order above, as it should be displayed on
+                a mobile device (with a smaller screen).") . "
+                <br>
+                Ex: Spr, May, Sum1, Sum2, Fall, Win",
+  );    
+
+  return $form;
 }
 
 
