@@ -217,8 +217,7 @@ function course_search_edit_course_details_form() {
       if (db_num_rows($res) > 0) {
         $cb_default_val = array("yes" => "yes");
       }
-      $pC .= "<label><input type='checkbox' name='cb_$cbname' value='yes' $che> $cb_disp_name &nbsp;&nbsp;</label>";
-      
+            
       $form["cb_$cbname"] = array(
         "type" => "checkboxes",
         "options" => array("yes" => $cb_disp_name),        
@@ -372,7 +371,7 @@ function course_search_upload_attachment($course_id, $subject_id, $course_num) {
     $original_filename = str_replace('"', '', $original_filename);
     $original_filename = str_replace(",", "", $original_filename);
 
-    $temp = split("\.", $original_filename);
+    $temp = explode("\.", $original_filename);
     $ext = $temp[count($temp) - 1];  // get the original extension.
     $new_filename = $original_filename . ".$suffix.$ext";
 
@@ -589,66 +588,6 @@ function course_search_settings_form() {
 
 
 
-function z__course_search_display_settings($msg = "") {
-  $db = $GLOBALS["course_search_db"];
-  $module_action_u_r_l = get_module_action_u_r_l("course_search");
-    
-  $pC = "";
-  
-  // for typing convenience...  
-  $g = $GLOBALS["fp_system_settings"];
-  
-  $pC .= "<a class='tenpt' href='admin.php'>Back to main menu.</a><br>";
-  $pC .= "<h2>Course Search Settings</h2>$msg
-          Use this form to alter the various system settings for the
-          Course Search module.
-          <hr>
-          <form action='$module_action_u_r_l' method='POST'>
-          <input type='hidden' name='n' value='course_search'>
-          ";
-  
-  // Use functions in the system module to make building this
-  // for easier.
-  
-  $pC .= system_build_element("avail_term_id_suffix_order", "", "Available Term ID suffix order", 
-                "Enter the order of term ID suffixes, so that they will display
-                in the correct order in the table of available course
-                offerings.  Separate by comma.
-                <br>
-                Ex: 60, 40, 41, 80, 81, mm", $db->get_variable("course_search_avail_term_id_suffix_order"));
-  
-
-  $pC .= system_build_element("avail_term_headers", "", "Available Term Table Headers", 
-                "Enter the table headers for the available table, in the same
-                order as the suffix order above.
-                <br>
-                Ex: Spring, May, Summer 1, Summer 2, Fall, Winter", $db->get_variable("course_search_avail_term_headers"));
-                
-  $pC .= system_build_element("avail_term_mobile_headers", "", "Available Term Mobile Table Headers", 
-                "Enter the table headers for the available table, in the same
-                order as the suffix order above, as it should be displayed
-                on a mobile device.
-                <br>
-                Ex: Spr, May, Sum1, Sum2, Fall, Win", $db->get_variable("course_search_avail_term_mobile_headers"));
-
-                
-  $pC .= "<input type='hidden' name='a' value='performSubmitSettings'>
-          <input type='submit' value='Submit'>
-          </form>";
-  
-	$screen = new AdvisingScreen("",null,"not_advising");
-	
-	$screen->add_css(get_module_path("system") . "/css/style.css");
-	$screen->add_css(get_module_path("course_search") . "/css/style.css");
-	
-	$screen->page_content = $pC;
-	$screen->output_to_browser();	
-  
-}
-
-
-
-
 /**
  * This function will actually deliver a syllabus to the user's browser
  * for download.
@@ -723,119 +662,6 @@ function course_search_download_syllabus() {
   header('Content-Disposition: attachment; filename="' . $fn . '"');
   readfile('./custom/files/syllabi/' . $filename . '');  
   die;    
-}
-
-
-/**
- * This function will actually deliver a syllabus to the user's browser
- * for download.
- *
- */
-function z__course_search_get_syllabus() {
-  // Get our global variables...
-  
-  $c = trim(mysql_real_escape_string($_REQUEST["c"]));
-  $id = trim(mysql_real_escape_string($_REQUEST["id"]));
-  
-  $temp = split("_", $c);
-  $subject_id = $temp[0];
-  $course_num = $temp[1];
-  
-  // Get the filename in question...
-  $query = "select * from course_syllabi
-  					where course_perm_id = '$subject_id" . "_$course_num' ";
-  if ($id != "") {
-    $query = "select * from course_syllabi
-  					where course_id = '$id' ";
-  }
-  $res = $db->db_query($query);
-  $cur = $db->db_fetch_array($res);
-  $filename = $cur["filename"];
-  
-  $course_id = $cur["course_id"];
-  // Get the latest subject_id and course_num for this course!
-  $new_course = new Course();
-  $new_course->course_id = $course_id;
-  $settings = $db->get_flightpath_settings();
-  $new_course->catalog_year = $settings["current_catalog_year"];
-  $new_course->load_descriptive_data(false, false, true);
-  
-  $subject_id = $new_course->subject_id;
-  $course_num = $new_course->course_num;
-  
-  if ($filename == "" || !file_exists("./custom/files/syllabi/$filename"))
-  { // Check to make sure the src file actually exists.
-    // Display a message, letting the user know it does not
-    // exist.
-    	$db->add_to_log("syllabus", "fail,$c");
-  	course_search_display_file_not_found($subject_id, $course_num);
-  	return;
-  }
-  
-  $db->add_to_log("syllabus", "get,$c");
-  
-  $content_type = "application/plain";  // default, save as generic binary file.
-  $temp = split("\.", $filename);
-  $ext = $temp[count($temp) - 1];  // get the original file extension.
-  
-  // attempt to match to the correct content_type...
-  if ($ext == "pdf"){	$content_type = "application/pdf"; }
-  if ($ext == "doc") { $content_type = "application/msword"; }
-  if ($ext == "docx") { $content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"; }
-  if ($ext == "txt") { $content_type = "text/plain"; }
-  if ($ext == "pot") { $content_type = "application/mspowerpoint"; }
-  if ($ext == "ppt") { $content_type = "application/powerpoint"; }
-  if (strstr($ext,"xl")) { $content_type = "application/excel"; }
-  
-  
-  
-  
-  $fn = urlencode($subject_id . "_" . $course_num . "_SAMPLE_SYLLABUS") .".$ext";  // make it a safe filename.
-  $fn = str_replace("+"," ",$fn); // restore spaces from + symbols...
-  
-  // Give it to the browser!
-  header('Content-type: ' . $content_type . '');
-  header('Content-Disposition: attachment; filename="' . $fn . '"');
-  readfile('./custom/files/syllabi/' . $filename . '');  
-  
-}
-
-
-
-
-function z__course_search_display_file_not_found($subject_id, $course_num)
-{
-  // Get our global variables...
-  $db = $GLOBALS["course_search_db"];
-  $catalog_year = $GLOBALS["course_search_catalog_year"];  
-  $mode = $GLOBALS["course_search_mode"];
-  $module_action_u_r_l = get_module_action_u_r_l("course_search");
-
-
-	// Display a message to the user about the
-	// file not being found.
-	
-	$pC = "";
-	
-	$pC .= "<div style='font-size:16pt; font-weight:bold;'>File Not Found</div>
-			<br>
-			<div class='tenpt'>
-			We're sorry, but the syllabus file for $subject_id $course_num
-			could not be found on the system.  It has either
-			been deleted, moved, or renamed.
-			<br><br>
-			This error has been logged and the appropriate personnel
-			notified.
-			<br><br>
-			We appologize for the inconvienence.
-			</div>
-			";
-	
-		
-	$screen = new AdvisingScreen("",null,"not_advising");
-	$screen->page_content = $pC;
-	$screen->output_to_browser();	
-	
 }
 
 
