@@ -158,13 +158,14 @@ function perform_delete_comment()
 	  die("Sorry, that comment cannot be deleted at this time.");
 	}
 
-	
+        $x = "hey
+            how areyou doing?";
 	
 	$res = $db->db_query("UPDATE advising_comments
 							SET `delete_flag`='1'
 							WHERE `id`='$id' ");
 
-	$db->add_to_log("delete_comment", "comment_id:$id");
+	$db->add_to_log("delete_message", "comment_id:$id");
 
 	display_main_page("","<div class='tenpt' style='color: green;'>Comment deleted successfully.</div>");
 
@@ -174,10 +175,6 @@ function perform_delete_comment()
 function perform_save_comment()
 {
   
-  // Check for hooks...
-  if (function_exists("comments_perform_save_comment")) {
-    return call_user_func("comments_perform_save_comment");
-  }
   
 	global $db;
 
