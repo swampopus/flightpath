@@ -21,7 +21,7 @@ notice must not be modified, and must be included with the source code.
  
 This is a very important script.  This will manage all of the data entry
 and settings of FlightPath.  To be used only by administrators.
-*/
+*/ 
 
 session_start();
 header("Cache-control: private");

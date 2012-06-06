@@ -25,7 +25,7 @@ This is a "basic advising" screen for FlightPath.
 */
 session_start();
 header("Cache-control: private");
-
+ 
 require_once("bootstrap.inc");
 
 if ($_SESSION["fp_logged_in"] != true && $_REQUEST["blank_degree_id"] == "")

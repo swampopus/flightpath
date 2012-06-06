@@ -17,7 +17,7 @@ notice must not be modified, and must be included with the source code.
 ------------------------------
 */
 
-
+ 
 /*
 This is the Help system for FlightPath.
 I'm kind of iffy as to whether or not this is even really

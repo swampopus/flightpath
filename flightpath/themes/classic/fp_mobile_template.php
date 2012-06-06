@@ -175,7 +175,7 @@ if ($page_tabs) {
   </tr>
   ";
   
-}
+} 
 ?>
 <tr>
 <td valign='top'>

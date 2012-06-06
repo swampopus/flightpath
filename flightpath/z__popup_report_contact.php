@@ -16,7 +16,7 @@ You may modify FlightPath's source code, but this copyright and license
 notice must not be modified, and must be included with the source code.
 ------------------------------
 */
-
+ 
 
 session_start();
 header("Cache-control: private"); //This is important for IE6 (according to a site I went to)

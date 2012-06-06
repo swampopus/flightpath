@@ -22,7 +22,7 @@ notice must not be modified, and must be included with the source code.
 This lets an advisor
 search for students and advise them.
 */
-
+ 
 session_start();
 header("Cache-control: private");
 

@@ -17,7 +17,7 @@ FlightPath Changelog
   the way.
   
   Added blank_degrees module and reworked various bits of code to make it work.
-  
+   
 
 2012-05-28
   Made sure user has access to submit a form after they've submitted.

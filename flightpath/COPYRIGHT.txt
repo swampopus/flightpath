@@ -16,7 +16,7 @@ This covers any related files and documentation packaged with
 FlightPath. 
 
 The license is defined in full here: http://www.gnu.org/licenses/gpl.html,
-and reproduced in the LICENSE.txt file.
+and reproduced in the LICENSE.txt file. 
 
 This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY

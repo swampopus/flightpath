@@ -32,7 +32,7 @@
 * 
 **/
 $theme_location = fp_theme_location();
-?> 
+?>  
 <html>
 	<head>
 	
