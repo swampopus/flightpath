@@ -24,9 +24,7 @@ function admin_edit_group_form_submit(&$form, $form_submit) {
   $data_entry_comment = trim($values["data_entry_comment"]);
 
   // Save the entire post to the log.
-  //$post_x_m_l = fp_array_to_xml("post",$_POST, true);
-  //$db->add_to_log("admin_edit_group","$group_id,$group_name",$post_x_m_l);
-
+ 
   // Since we are making a change to the draft table(s), let's add a row
   // to draft instructions.
   $db->add_draft_instruction("-");

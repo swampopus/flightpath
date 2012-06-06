@@ -23,7 +23,7 @@ notice must not be modified, and must be included with the source code.
  *
  */
 /*
-function system_page_switchboard() {
+function system_page_switchboard() { 
   
   // Check permissions right here.
   if (!user_has_permission("de_can_administer_system_settings")) {

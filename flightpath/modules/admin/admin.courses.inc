@@ -22,7 +22,7 @@ function admin_display_courses() {
   else {
     $show_hidden = $_SESSION["dehidden"];
   }
-
+ 
   // Get the "upper range" (UR) and
   // lower range (LR) of the courses in question...
   $ur = trim($_GET["ur"]);

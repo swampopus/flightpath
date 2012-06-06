@@ -25,7 +25,7 @@ function z__popupChangeTrack(track_code) {
   if (x) {
     opener.changeTrack(track_code);
     window.close();
-  }
+  } 
 }
 
 function popupChangeWhatIfTrack(track_code, question) {

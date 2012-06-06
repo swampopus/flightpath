@@ -16,7 +16,7 @@ function announcements_menu() {
       "page_has_search" => FALSE,
       "page_banner_is_link" => TRUE,
       "page_hide_report_error" => TRUE,
-      "menu_links" => array(         
+      "menu_links" => array(          
         0 => array(
           "text" => "Back to main menu",
           "path" => "admin-tools/admin",

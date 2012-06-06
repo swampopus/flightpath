@@ -27,7 +27,7 @@ function advise_display_history() {
   if ($_REQUEST["adv_id_array_serialized"] != "") {
     $click_links = "";
     $advising_session_id_array = unserialize($_REQUEST["adv_id_array_serialized"]);
-
+ 
     foreach($advising_session_id_array as $term_id=>$value) {
       $aid = $advising_session_id_array[$term_id];
       if ($aid != "")

@@ -14,7 +14,7 @@ function announcements_install() {
   // Check to see if our announcements table has been created.
   if (!db_table_exists("announcements")) {
     
-    // Create our table.
+    // Create our table. 
     $query = "    
        CREATE TABLE `announcements` (
       `aid` int(10) unsigned NOT NULL AUTO_INCREMENT,

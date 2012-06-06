@@ -15,7 +15,7 @@ function blocks_perm() {
   );
 }
 
-
+ 
 
 function blocks_menu() {
   $items = array();

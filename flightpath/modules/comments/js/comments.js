@@ -8,4 +8,4 @@ function deleteComment(id) {
   if (x) {
     window.location=FlightPath.settings.basePath + "/comments/delete-comment&current_student_id=" + FlightPath.settings.currentStudentId + "&comment_id=" + id;
   }
-}
+} 

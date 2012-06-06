@@ -5,7 +5,7 @@
 * as all of the degree plan and course data within FlightPath.
 */
  
-function admin_menu() {
+function admin_menu() { 
   $items = array();
    
   $items["admin-tools/admin"] = array(

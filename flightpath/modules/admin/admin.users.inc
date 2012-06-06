@@ -22,7 +22,7 @@ function admin_permissions_form() {
     $permissions[$cur["rid"]][] = $cur["perm"];
   }
     
-  $cb = $m = 1;
+  $cb = $m = 1; 
   
   $form["mark" . $m++] = array(
     

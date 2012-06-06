@@ -23,7 +23,7 @@ function adminPopupAlertHelp(action)
     t = t + "  college_coordinator - The highest level user in the system (next to administrators). They may advise any student as well as perform substitutions.\n";
     
   }
-
+ 
   
   if (action == "public_note")
   {

@@ -32,7 +32,7 @@ function admin_display_degrees_popup_add_group() {
           </td>
         </tr>
           
-        ";
+        "; 
   }
 
 

@@ -28,7 +28,7 @@ function student_search_menu() {
       "display_greeting" => TRUE,
       "screen_mode" => "not_advising",
       "page_has_search" => TRUE,
-    ),
+    ), 
     "weight" => 10,
   );
   

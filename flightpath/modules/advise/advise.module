@@ -35,7 +35,7 @@ function advise_menu() {
 
 
   $items["what-if"] = array(
-    "title" => "What If?",
+    "title" => "What If?", 
     "page_callback" => "advise_display_view",
     "page_arguments" => array("what-if"),
     "access_callback" => TRUE,  

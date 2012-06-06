@@ -20,7 +20,7 @@ function comments_menu() {
       "display_greeting" => TRUE,
       "page_has_search" => TRUE,      
     ),        
-    "weight" => 50,        
+    "weight" => 50,         
   );
 
   $items["comments/save-comment"] = array(

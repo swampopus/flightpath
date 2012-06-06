@@ -37,7 +37,7 @@ function advise_display_popup_toolbox_moved() {
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
   
   $rtn = "";
-  
+   
   $rtn .= $screen->display_toolbox_moved();   
   
   return $rtn;
