@@ -37,7 +37,6 @@ $fp = new FlightPath();
 $fp->process_request_save_draft();
 
 
-
 $screen = new AdvisingScreen();
 $screen->init_advising_variables(true);
 $screen->screen_mode = "not_advising";
