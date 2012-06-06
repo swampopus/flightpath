@@ -20,7 +20,7 @@ CREATE TABLE `advised_courses` (
   KEY `course_id` (`course_id`),
   KEY `ev` (`entry_value`)
 );
-
+ 
 /* Table structure for table `advising_comments` */
 CREATE TABLE `advising_comments` (
   `id` int(11) NOT NULL auto_increment,

@@ -8,7 +8,7 @@
  * the permissions to "read-only" to prevent unauthorized users
  * from altering it.
  */
-
+ 
 // Set the PHP error reporting level for FlightPath.  In this case,
 // only show us errors and warnings. (Hide "notice" and "strict" messages)
 error_reporting(E_ERROR | E_WARNING);

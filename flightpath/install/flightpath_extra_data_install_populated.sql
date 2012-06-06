@@ -13,7 +13,7 @@ CREATE TABLE `advisor_student` (
 -- ----------------------------
 -- Records of advisor_student
 -- ----------------------------
-
+ 
 -- ----------------------------
 -- Table structure for faculty_staff
 -- ----------------------------

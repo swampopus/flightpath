@@ -2,7 +2,7 @@
 
 /**
  * This include fine mostly involves DB command shortcuts.
-*/
+*/ 
 
 define ('WATCHDOG_NOTICE', 101);
 define ('WATCHDOG_ALERT', 102);

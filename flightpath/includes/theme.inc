@@ -10,7 +10,7 @@
 // TODO:  Implement this functioN!
 function convert_html_to_bbcode($str) {
   return $str;
-}
+} 
 
 // TODO: implement this!
 function convert_bbcode_to_html($str) {

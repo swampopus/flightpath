@@ -12,7 +12,7 @@
  * 
  * It will also reorder the elements by weight.
  * 
- */
+ */ 
 function fp_get_form($form_id) {
 
   $form = call_user_func($form_id);

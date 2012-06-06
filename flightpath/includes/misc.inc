@@ -13,7 +13,7 @@ function filter_markup($str) {
   $allowed_tags = array('a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd', 'span', 'div', 'b', 'i', 'u');
   
   return filter_xss($str, $allowed_tags);
-  
+   
 } 
  
 /**
