@@ -20,7 +20,7 @@ function student_search_menu() {
     "title" => t("My Advisees"),
     "page_callback" => "student_search_display_my_advisees",
     "access_arguments" => array("view_any_advising_session"),
-    "type" => MENU_TYPE_SUB_TAB,
+    "type" => MENU_TYPE_SUB_TAB, 
     "tab_family" => "student_search",
     "tab_parent" => "student-search",
     "page_settings" => array (
@@ -31,6 +31,8 @@ function student_search_menu() {
     ),
     "weight" => 10,
   );
+  
+  
   
   $items["student-search/my-majors"] = array(
     "title" => t("My Majors"),
@@ -48,6 +50,7 @@ function student_search_menu() {
     "weight" => 20,
   );
   
+    
   $items["student-search/search"] = array(
     "title" => t("Search"),
     "page_callback" => "student_search_display_search",
@@ -56,10 +59,10 @@ function student_search_menu() {
     "tab_family" => "student_search",
     "tab_parent" => "student-search",
     "page_settings" => array (
-      "display_currently_advising" => TRUE,
-      "display_greeting" => TRUE,
-      "screen_mode" => "not_advising",
-      "page_has_search" => TRUE,      
+        "display_currently_advising" => TRUE,
+        "display_greeting" => TRUE,
+        "screen_mode" => "not_advising",
+        "page_has_search" => TRUE,      
     ),    
     "weight" => 30,
   );
@@ -67,6 +70,8 @@ function student_search_menu() {
   
   return $items;
 }
+
+
 
 
 /**
