@@ -7,4 +7,3 @@ class Group extends _Group
   
 }
 
-?>

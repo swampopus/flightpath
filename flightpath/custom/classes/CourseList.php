@@ -7,4 +7,3 @@ class CourseList extends _CourseList
   
 }
 
-?>

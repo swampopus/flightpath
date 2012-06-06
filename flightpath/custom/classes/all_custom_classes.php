@@ -27,4 +27,3 @@ require_once("Course.php");
 require_once("Student.php");
 require_once("DatabaseHandler.php");
 
-?>

@@ -9,4 +9,3 @@ class StandardizedTest extends _StandardizedTest
 }
 
 
-?>

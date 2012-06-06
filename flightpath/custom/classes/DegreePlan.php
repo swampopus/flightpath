@@ -8,4 +8,3 @@ class DegreePlan extends _DegreePlan
   
 }
 
-?>

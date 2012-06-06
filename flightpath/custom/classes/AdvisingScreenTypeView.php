@@ -6,6 +6,3 @@ class AdvisingScreenTypeView extends _AdvisingScreenTypeView
   
   
 }
-
-
-?>

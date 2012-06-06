@@ -5,4 +5,3 @@ class DatabaseHandler extends _DatabaseHandler
 
 }
 
-?>

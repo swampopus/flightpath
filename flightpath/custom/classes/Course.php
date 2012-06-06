@@ -7,5 +7,3 @@ class Course extends _Course
 
 
 
-
-?>

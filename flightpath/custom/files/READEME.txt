@@ -7,4 +7,4 @@ with the CHMOD command.
 Ex:  chmod 777 files
 
 Your specific operating system and webserver environment may
-call for other solutions.
+call for other solutions. 

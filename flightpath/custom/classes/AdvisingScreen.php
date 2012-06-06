@@ -5,5 +5,3 @@ class AdvisingScreen extends _AdvisingScreen
   
   
 }
-
-?>
