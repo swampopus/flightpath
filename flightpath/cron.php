@@ -6,7 +6,7 @@
 // Ex:  If it was run with:
 //   php flightpath/cron.php
 // then the levelDeep = "flightpath/"
-// test
+// test2
 $temp = trim($argv[0]);
 $levels_deep = trim(str_replace("cron.php", "", $temp));
 
