@@ -731,10 +731,10 @@ function draw_menu_items($menu_array) {
 		$pC = "";
 		// This will display the substitution management screen.
 
-		$pC .= $this->draw_curved_title("Manage Substitutions");
+		$pC .= fp_render_curved_line(t("Manage Substitutions"));
 
 		$pC .= "<div class='tenpt'>
-				The following substitutions have been made for this student:
+				" . t("The following substitutions have been made for this student:") . "
 				<br><br>
 				";
 		$is_empty = true;
@@ -765,11 +765,11 @@ function draw_menu_items($menu_array) {
 				$in_group = " in $new_group->title.";
 			}
 
-			$sub_action = "was substituted for";
+			$sub_action = t("was substituted for");
 			$sub_trans_notice = "";
 			if ($substitution->bool_group_addition == true)
 			{
-				$sub_action = "was added to";
+				$sub_action = t("was added to");
 				$cr_s_i = $cr_c_n = "";
 				$in_group = str_replace("in","",$in_group);
 			}
@@ -778,7 +778,7 @@ function draw_menu_items($menu_array) {
 			{
 				$sub_s_i = $subbed_course->course_transfer->subject_id;
 				$sub_c_n = $subbed_course->course_transfer->course_num;
-				$sub_trans_notice = "[transfer]";
+				$sub_trans_notice = "[" . t("transfer") . "]";
 			}
 
 			$by = $remarks = "";
@@ -789,13 +789,13 @@ function draw_menu_items($menu_array) {
 			
 			if ($by != "")
 			{
-				$by = " <br>&nbsp; &nbsp; Substitutor: $by. 
+				$by = " <br>&nbsp; &nbsp; " . t("Substitutor:") . " $by. 
 						<br>&nbsp; &nbsp; <i>$ondate.</i>";
 			}
 
 			if ($remarks != "")
 			{
-				$remarks = " <br>&nbsp; &nbsp; Remarks: <i>$remarks</i>.";
+				$remarks = " <br>&nbsp; &nbsp; " . t("Remarks:") . " <i>$remarks</i>.";
 			}
 
 
@@ -811,7 +811,7 @@ function draw_menu_items($menu_array) {
 						$sub_s_i $sub_c_n $sub_trans_notice ($subbed_course->substitution_hours hrs) $sub_action
 						$cr_s_i $cr_c_n$in_group $by$remarks $extra
 						<br>
-							<a href='javascript: popupRemoveSubstitution(\"$subbed_course->db_substitution_id\");'>Remove substitution?</a>
+							<a href='javascript: popupRemoveSubstitution(\"$subbed_course->db_substitution_id\");'>" . t("Remove substitution?") . "</a>
 					</div>";
 
 			$is_empty = false;
@@ -819,7 +819,7 @@ function draw_menu_items($menu_array) {
 
 		if ($is_empty == true)
 		{
-			$pC .= "<div align='center'>No substitutions have been made for this student.</div>";
+			$pC .= "<div align='center'>" . t("No substitutions have been made for this student.") . "</div>";
 		}
 
 		$pC .= "</div>";
@@ -840,10 +840,10 @@ function draw_menu_items($menu_array) {
 		$pC = "";
 		// This will display the substitution management screen.
 
-		$pC .= $this->draw_curved_title("Manage Transfer Equivalencies");
+		$pC .= fp_render_curved_line(t("Manage Transfer Equivalencies"));
 
 		$pC .= "<div class='tenpt'>
-				This student has the following transfer credits and equivalencies.
+				" . t("This student has the following transfer credits and equivalencies.") . "
 				<br><br>
 				";
 		$is_empty = true;
@@ -899,17 +899,17 @@ function draw_menu_items($menu_array) {
 				if ($rC = $this->student->list_transfer_eqvs_unassigned->find_match($course))
 				{
 					// Yes, the eqv WAS removed (or unassigned)
-					$pC .= "<div class='tenpt'>This course's $initials equivalency was removed for this student.<br>
-							<a href='javascript: popupRestoreTransferEqv(\"$rC->db_unassign_transfer_id\")'>_restore?</a></div>";
+					$pC .= "<div class='tenpt'>" . t("This course's @initials equivalency was removed for this student.", array("@initials" => $initials)) . "<br>
+							<a href='javascript: popupRestoreTransferEqv(\"$rC->db_unassign_transfer_id\")'>" . t("Restore?") . "</a></div>";
 				} else {
-					$pC .= "<div class='tenpt'>$initials equivalency not yet entered (or is not applicable).</div>";
+					$pC .= "<div class='tenpt'>" . t("@initials equivalency not yet entered (or is not applicable).", array("@initials" => $initials)) . "</div>";
 				}
 			} else {
 				// This course *DOES* have an equivalency.
 				$pC .= "<div class='tenpt'>$initials eqv: $l_s_i $l_c_n - $l_title</div>";
 
 				$pC .= "<div class='tenpt' align='right'>
-							<a href='javascript: popupUnassignTransferEqv(\"" . $course->course_id . "\");'>Remove this equivalency?</a>
+							<a href='javascript: popupUnassignTransferEqv(\"" . $course->course_id . "\");'>" . t("Remove this equivalency?") . "</a>
 							</div>";
 
 			}
@@ -921,94 +921,12 @@ function draw_menu_items($menu_array) {
 
 		if ($is_empty == true)
 		{
-			$pC .= "<div align='center'>There are no transfer equivalencies for this student.</div>";
+			$pC .= "<div align='center'>" . t("There are no transfer equivalencies for this student.") . "</div>";
 		}
 
 		$pC .= "</div>";
 
 		$this->db->add_to_log("toolbox", "transfers");
-
-		return $pC;
-	}
-
-	/**
-	 * Displays the pulldown select list for picking a new What If degree.
-	 * Returns HTML.
-	 *
-	 * @return string
-	 */
-	function z__display_what_if_selection($bool_undergrad_only = TRUE)
-	{
-		$pC = "";
-
-		if ($this->bool_print)
-		{
-			return "";
-		}
-
-		$db = new DatabaseHandler();
-
-		$pC .= "<form action='advise.php' id='mainform' method='POST'>";
-		$pC .= $this->get_javascript_code();
-		$pC .= $this->display_begin_semester_table();
-
-		$pC .= $this->draw_currently_advising_box();
-		$pC .= "<tr><td colspan='2'>";
-
-		$pC .= $this->draw_curved_title("What if I change my major to...");
-
-		$pC .= "<br>
-				Major: <select name='what_if_major_code' class='what-if-selector'>
-					<option value=''>Please select a major</option>
-					<option value=''>------------------------------</option>\n
-					";
-		$current_catalog_year = $this->settings["current_catalog_year"];
-		//$bool_use_draft = $GLOBALS["bool_use_draft"];
-		$bool_use_draft = FALSE;  // leave as false for now.  Because you can't select
-		                      // degree options, and if you click submit it really does
-		                      // save it.  Better to just use blank degrees.
-		if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, false, $bool_use_draft, $bool_undergrad_only))
-		{
-			foreach($degree_array as $major_code => $value)
-			{
-				if (trim($value["title"]) == ""){continue;}
-				$pC .= "<option value='$major_code'>{$value["title"]}</option> \n";
-			}
-		}
-
-		$csid = $GLOBALS["current_student_id"];
-		$pC .= "</select>
-				<br><br>";
-
-		$pC .= "
-				<div align='right'>
-				" . $this->draw_button("Try It Out!", "show_update(true);submit_form();") . "				
-				<!--	<input type='button' value='Try It Out!' onClick='showUpdate(true);submitForm();'>   -->
-					
-					<input type='hidden' name='loadFromCache' value='no'>
-					<input type='hidden' name='windowMode' value='screen'>
-					<input type='hidden' id='scrollTop'>
-					<input type='hidden' id='performAction' name='performAction'>
-					<input type='hidden' id='advising_what_if' name='advising_what_if' value='yes'>
-					<input type='hidden' id='currentStudentID' name='currentStudentID' value='$csid'>
-					
-				</div>
-				<br><br>
-				<div class='hypo tenpt'>
-				 <b>Important Notice:</b> What If displays degree plans
-				 from the most recent catalog year ($current_catalog_year-" . ($current_catalog_year + 1) . "), 
-				 as any major change would place the student into the 
-				 most recent catalog. 
-				</div>";
-
-
-
-		$pC .= "</td></tr>";
-		$pC .= $this->display_end_semester_table();
-
-		$pC .= "</form>
-				";
-
 
 		return $pC;
 	}
@@ -1024,7 +942,7 @@ function draw_menu_items($menu_array) {
 	{
 		$pC = "";
 
-		$pC .= $this->draw_curved_title("All Student Courses");
+		$pC .= fp_render_curved_line(t("All Student Courses"));
 
 		$csid = $_REQUEST["current_student_id"];
 		$order = $_REQUEST["order"];
@@ -1036,13 +954,12 @@ function draw_menu_items($menu_array) {
 		}
 
 		$pC .= "<div class='tenpt'>
-				This window displays all of the student's courses
-				which FlightPath is able to load.  
-					<!-- <a href='javascript: popupHelpWindow(\"help.php?i=7\");'>Confused? Click here.</a> -->
+				" . t("This window displays all of the student's courses
+				which FlightPath is able to load.") . "					
 				<br><br>
-				Order by: &nbsp; &nbsp;";
-    $pC .= l("Name", "advise/popup-toolbox/courses", "order=name", array("style" => $ns)) . "&nbsp; &nbsp;";
-    $pC .= l("Date Taken", "advise/popup-toolbox/courses", "order=date", array("style" => $os));
+				" . t("Order by:") . " &nbsp; &nbsp;";
+    $pC .= l(t("Name"), "advise/popup-toolbox/courses", "order=name", array("style" => $ns)) . "&nbsp; &nbsp;";
+    $pC .= l(t("Date Taken"), "advise/popup-toolbox/courses", "order=date", array("style" => $os));
 
 		$pC .= "<hr>
 				<table border='0' cellpadding='2'>
@@ -1089,7 +1006,7 @@ function draw_menu_items($menu_array) {
 
 			$h = $c->hours_awarded;
 			if ($c->bool_ghost_hour) {
-			  $h .= "(ghost<a href='javascript:alertSubGhost()'>?</a>)";
+			  $h .= "(" . t("ghost") . "<a href='javascript:alertSubGhost()'>?</a>)";
 			}
 			
 			$pC .= "<tr>
@@ -1134,7 +1051,7 @@ function draw_menu_items($menu_array) {
 
 		if ($is_empty == true)
 		{
-			$pC .= "<div align='center'>No courses have been moved for this student.</div>";
+			$pC .= "<div align='center'>" . t("No courses have been moved for this student.") . "</div>";
 		}
 
 		$pC .= "</table>";
@@ -1159,10 +1076,10 @@ function draw_menu_items($menu_array) {
 		$pC = "";
 
 
-		$pC .= $this->draw_curved_title("Manage Moved Courses");
+		$pC .= fp_render_curved_line(t("Manage Moved Courses"));
 
 		$pC .= "<div class='tenpt'>
-				This student has the following course movements.
+				" . t("This student has the following course movements.") . "
 				<br><br>
 				";
 		$is_empty = true;
@@ -1192,11 +1109,11 @@ function draw_menu_items($menu_array) {
 
 			$h = $c->hours_awarded;
 			if ($c->bool_ghost_hour) {
-			  $h .= " [ghost<a href='javascript:alertSubGhost();'>?</a>] ";
+			  $h .= " [" . t("ghost") . "<a href='javascript:alertSubGhost();'>?</a>] ";
 			}
 			
 			$pC .= "<div class='tenpt' style='padding-bottom: 15px;'>
-							<b>$l_s_i $l_c_n</b> ($h hrs) - $c->grade - $l_term
+							<b>$l_s_i $l_c_n</b> ($h " . t("hrs") . ") - $c->grade - $l_term
 								";
 
 			$c->group_list_unassigned->reset_counter();
@@ -1209,10 +1126,10 @@ function draw_menu_items($menu_array) {
 				{
 					$group_title = "<i>$group->title</i>";
 				} else {
-					$group_title = "the degree plan";
+					$group_title = t("the degree plan");
 				}
-				$pC .= "<div class='tenpt'>This course was removed from $group_title.<br>
-							<a href='javascript: popupRestoreUnassignFromGroup(\"$group->db_unassign_group_id\")'>restore?</a>
+				$pC .= "<div class='tenpt'>" . t("This course was removed from") . " $group_title.<br>
+							<a href='javascript: popupRestoreUnassignFromGroup(\"$group->db_unassign_group_id\")'>" . t("Restore?") . "</a>
 							</div>
 							";
 			}
@@ -1226,7 +1143,7 @@ function draw_menu_items($menu_array) {
 
 		if ($is_empty == true)
 		{
-			$pC .= "<div align='center'>No courses have been moved for this student.</div>";
+			$pC .= "<div align='center'>" . t("No courses have been moved for this student.") . "</div>";
 		}
 
 		$pC .= "</div>";
@@ -1393,12 +1310,12 @@ function draw_menu_items($menu_array) {
 		$current_term_id = $temp_course->term_id;
 
 
-		$pC .= $this->draw_curved_title("Select an Advising Term");
+		$pC .= fp_render_curved_line(t("Select an Advising Term"));
 		$pC .= "<div class='tenpt'>
-				You may advise this student for future semesters.  Please select which
+				" . t("You may advise this student for future semesters.  Please select which
 				advising term you would like to advise for from the list below.  If you
 				are unsure, simply close this window and continue to advise for the current
-				term of <b>$current_term</b>.
+				term of %current_term.", array("%current_term" => $current_term)) . "
 				</div>";
 
 		$pC .= "<ul>";
@@ -1427,111 +1344,6 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	/**
-	 * Displays the popup window which lets the user select a different track
-	 * for their major.  On screen, Tracks are referred to as "degree options."
-	 *
-	 * @return string
-	 */
-	function z__display_change_track()
-	{
-		// This displays the popup window which lets the user select a different
-		// track for their major.
-
-		$pC = "";
-
-		$this->degree_plan->load_descriptive_data();
-		$pC .= $this->draw_curved_title("Select a Degree Option");
-		$pC .= "<div class='tenpt'>
-				This major has one or more degree options, which affects which courses are required. 
-				Please select a degree option (or track) from the list below.
-				<br><br>
-				If you are unsure of what to do, simply close this window.
-				";
-
-		$pC .= "<br><br><b>" . $this->degree_plan->title . "</b> degree options:</div><!--DEFAULT-->
-				<ul>";
-
-		// Get the list of available tracks for this student.
-		if (!$tracks = $this->degree_plan->get_available_tracks())
-		{
-			$pC .= "<li>This major has no degree options.</li>";
-		}
-
-		// Is there a "default" message for all tracks, which will override
-		// any other track descriptions?
-		// We need to look through all the tracks for the
-		// characters:  "DEFAULT:"
-		// If we find this, then this is the default description
-		// which applies to all the tracks, and it should be displayed
-		// at the top.
-		$bool_default_description = false;
-		for ($t = 0; $t < count($tracks); $t++)
-		{
-			$temp = split(" ~~ ", $tracks[$t]);
-			$track_code = trim($temp[0]);
-			$track_title = trim($temp[1]);
-			$track_description = trim($temp[2]);
-
-			if (strstr($track_description, "DEFAULT:"))
-			{
-				// Yes!  We found a default message.
-				$bool_default_description = true;
-				$track_description = $this->convert_bbcode_to_html(trim(str_replace("DEFAULT:", "", $track_description)));
-				$track_description = "<div style='padding-top: 10px;' class='tenpt'>$track_description</div>";
-				$pC = str_replace("<!--DEFAULT-->",$track_description, $pC);
-				break;
-			}
-
-		}
-
-
-		for ($t = 0; $t < count($tracks); $t++)
-		{
-			$temp = split(" ~~ ", $tracks[$t]);
-			$track_code = trim($temp[0]);
-			$track_title = trim($temp[1]);
-			$track_description = "";
-
-			// If this is the current track_code, mark it as such.
-			if ($this->student->array_settings["track_code"] == $track_code
-			&& $this->student->array_settings["major_code"] == $this->degree_plan->major_code)
-			{
-				$track_title .= " <b>(current)</b>";
-			}
-
-			if ($bool_default_description == false)
-			{
-				$track_description = $this->convert_bbcode_to_html(trim($temp[2]));
-				if ($track_description != "")
-				{
-					$track_description = " - $track_description";
-				}
-			}
-
-			$temp_t_c = $track_code;
-			if ($temp_t_c == "")
-			{
-				$temp_t_c = "none";
-			}
-
-
-			$on_click = "popup_change_track(\"$temp_t_c\");";
-			if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes")
-			{
-				$on_click = "popup_change_what_if_track(\"$temp_t_c\");";
-
-			}
-
-			$pC .= "<li class='tenpt' style='padding:3px;'>
-					<a href='javascript: $on_click'>$track_title</a> $track_description</li>";
-
-		}
-
-		$pC .= "</ul>";
-
-		return $pC;
-	}
 
 	/**
 	 * This function is used to draw an individual pie chart box.
@@ -3751,7 +3563,7 @@ function draw_menu_items($menu_array) {
    			<tr>
     		<td colspan='8' class='blueTitle' align='center' valign='top'>
     				";
-		$rtn .= $this->draw_curved_title($title);
+		$rtn .= fp_render_curved_line($title);
 
 		$rtn .= "
     		</td>
@@ -3794,42 +3606,6 @@ function draw_menu_items($menu_array) {
 		return $rtn;
 
 	} // draw_year_box_top
-
-
-
-	/**
-	 * Will draw a string in a pretty curved box.  Used for displaying semester
-	 * titles.
-	 *
-	 * @param string $title
-	 * @return string
-	 */
-	function draw_curved_title($title)
-	{
-		// Will simply draw a curved title bar containing the $title
-		// as the text.
-		$img_path = fp_theme_location() . "/images";
-
-		$rtn = "
-     <table border='0' class='blueTitle' width='100%' cellpadding='0' cellspacing='0'>
-       <tr>
-        <td width='10%' align='left' valign='top'><img src='$img_path/corner_tl.gif'></td>
-        <td width='80%' align='center' rowspan='2'>
-         <span class='tenpt'><b>$title</b></span>
-        </td>
-        <td width='10%' align='right' valign='top'><img src='$img_path/corner_tr.gif'></td>
-       </tr>
-       <tr>
-        <td align='left' valign='bottom'><img src='$img_path/corner_bl.gif'></td>
-        <td align='right' valign='bottom'><img src='$img_path/corner_br.gif'></td>
-       </tr> 
-      </table>
-	";
-
-		return $rtn;
-
-	} // draw_curved_title
-
 
 
 	/**
@@ -4379,13 +4155,13 @@ function draw_menu_items($menu_array) {
 		$course = new Course($course_id);
 		$bool_sub_add = false;
 
-		$c_title = "Substitute for $course->subject_id $course->course_num";
+		$c_title = t("Substitute for") . " $course->subject_id $course->course_num";
 		if ($course_id == 0)
 		{
-			$c_title = "Substitute an additional course";
+			$c_title = t("Substitute an additional course");
 			$bool_sub_add = true;
 		}
-		$pC .= $this->draw_curved_title($c_title);
+		$pC .= fp_render_curved_line($c_title);
 
 		$extra = ".<input type='checkbox' id='cbAddition' value='true' style='display:none;'>";
 		if ($group_id > 0)
@@ -4393,15 +4169,15 @@ function draw_menu_items($menu_array) {
 			$new_group = new Group($group_id);
 			$checked = "";
 			if ($bool_sub_add == true){$checked = "checked disabled";}
-			$extra = " in the group <i>$new_group->title</i>.
-			Addition only: <input type='checkbox' id='cbAddition' value='true' $checked> 
+			$extra = " " . t("in the group %newg.", array("%newg" => $new_group->title)) . "
+			" . t("Addition only:") . " <input type='checkbox' id='cbAddition' value='true' $checked> 
 			   <a href='javascript: alertSubAddition();'>?</a>";
 		}
 
 		$c_hours = $course->max_hours*1;
 		$c_ghost_hour = "";
 		if ($course->bool_ghost_hour == TRUE) {
-		  $c_ghost_hour = "ghost<a href='javascript: alertSubGhost();'>?</a>";
+		  $c_ghost_hour = t("ghost") . "<a href='javascript: alertSubGhost();'>?</a>";
 		}
 
 		if (($hours_avail*1 > 0 && $hours_avail < $c_hours) || ($c_hours < 1))
@@ -4418,8 +4194,8 @@ function draw_menu_items($menu_array) {
 		}
 
 		$pC .= "<div class='tenpt'>
-					Please select a course to substitute
-				for <b>$course->subject_id $course->course_num ($c_hours $c_ghost_hour hrs)</b>$extra
+					" . t("Please select a course to substitute
+				for %course", array("%course" => "$course->subject_id $course->course_num ($c_hours $c_ghost_hour " . t("hrs") . ")")) . "$extra
 				</div>
 				
 				<div class='tenpt' 
@@ -4432,15 +4208,15 @@ function draw_menu_items($menu_array) {
     
 		for ($t = 0; $t <= 1; $t++)
 		{
-			if ($t == 0) {$the_title = "{$GLOBALS["fp_system_settings"]["school_initials"]} Credits"; $bool_transferTest = true;}
-			if ($t == 1) {$the_title = "Transfer Credits"; $bool_transferTest = false;}
+			if ($t == 0) {$the_title = "{$GLOBALS["fp_system_settings"]["school_initials"]} " . t("Credits"); $bool_transferTest = true;}
+			if ($t == 1) {$the_title = t("Transfer Credits"); $bool_transferTest = false;}
 
 			$pC .= "<tr><td colspan='3' valign='top' class='tenpt' style='padding-bottom: 10px;'>
 				$the_title
 				</td>
-				<td class='tenpt' valign='top' >Hrs</td>
-				<td class='tenpt' valign='top' >Grd</td>
-				<td class='tenpt' valign='top' >Term</td>
+				<td class='tenpt' valign='top' >" . t("Hrs") . "</td>
+				<td class='tenpt' valign='top' >" . t("Grd") . "</td>
+				<td class='tenpt' valign='top' >" . t("Term") . "</td>
 				</tr>";
 			
 			$is_empty = true;
@@ -4561,13 +4337,13 @@ function draw_menu_items($menu_array) {
 					if ($c->bool_outdated_sub == true)
 					{
 						$help_link = "<a href='javascript: popupHelpWindow(\"help.php?i=9\");' class='nounderline'>(?)</a>";
-						$extra .= " <span style='color:red;'>[Outdated$help_link]</span>";
+						$extra .= " <span style='color:red;'>[" . t("Outdated") . "$help_link]</span>";
 					}
 
 					// It has already been substituted!
 					$pC .= "<tr style='background-color: beige;'>
 						<td valign='top' class='tenpt' width='15%'>
-						 Sub:
+						 " . t("Sub:") . "
 						</td>
 						<td valign='top' class='tenpt' colspan='5'>
 							$subject_id 
@@ -4590,7 +4366,7 @@ function draw_menu_items($menu_array) {
 				// Meaning, there were no credits (may be the case with
 				// transfer credits)
 				$pC .= "<tr><td colspan='8' class='tenpt'>
-							- No substitutable credits available.
+							- " . t("No substitutable credits available.") . "
 						</td></tr>";
 			}
 
@@ -4600,9 +4376,9 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "</table></div>
 		<div class='tenpt' style='margin-top: 5px;'>
-			Select number of hours to use:
+			" . t("Select number of hours to use:") . "
 			<select name='subHours' id='subHours'>
-				<option value=''>None Selected</option>
+				<option value=''>" . t("None Selected") . "</option>
 			</select>
 			
 		</div>
@@ -4610,7 +4386,7 @@ function draw_menu_items($menu_array) {
 		<input type='hidden' name='subTermID' id='subTermID' value=''>
 		<input type='button' value='Save Substitution' onClick='popupSaveSubstitution(\"$course_id\",\"$group_id\",\"$semester_num\");'>
 		
-		<div class='tenpt' style='padding-top: 5px;'><b>Optional</b> - Enter remarks: 
+		<div class='tenpt' style='padding-top: 5px;'><b>" . t("Optional") . "</b> - " . t("Enter remarks:") . " 
 		<input type='text' name='subRemarks' id='subRemarks' value='' size='30' maxlength='254'>
 		
 		</div>

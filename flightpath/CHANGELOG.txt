@@ -1,6 +1,13 @@
 FlightPath Changelog
 ====================
 
+2012-06-07
+  Removed the old AdvisingScreen::draw_curved_title function, in favor of the new
+  fp_render_curved_line function.
+  
+  Got transfer credits & eqv's working correctly.
+  
+
 2012-06-05
   Worked with course_search module.  It has now merged with the courseinfoentry module.  Removed
   the courseinfoentry module as a result.

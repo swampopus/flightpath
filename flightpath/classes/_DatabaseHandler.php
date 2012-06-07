@@ -364,40 +364,27 @@ class _DatabaseHandler
 	 */
 	function db_error($msg = "")
 	{
-    $pC = "<div style='border: 5px solid black; color: black;
-    					background-color: beige; font-size: 12pt;
-    					padding: 5px; font-family: Arial;'>
-    			<div style='font-size: 14pt;'><b>FlightPath Database Error</b></div>
-    			We're sorry, but a database error has occured.  The Web Programming
-    			support staff have been notified of this error.			
-    			<br><br>
-    			Please try again
-    			in a few minutes.<br><br>
-    			";
     
-    	// If we are on production, email someone!
-    	if ($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"] != "")
-    	{
-    	  $server = $_SERVER["SERVER_NAME"];
-    		$email_msg = "A MYSQL error has occured in FlightPath.  
-    		Server: $server
-    		
-    		The error:
-    		" . mysql_error() . "
-    		
-    		Comments:
-    		$msg
-    		";
-    		mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
-    	}
-    
-    	if (isset($GLOBALS["fp_system_settings"]["display_mysql_errors"]) &&  $GLOBALS["fp_system_settings"]["display_mysql_errors"] != FALSE) {
-    	  $pC .= "<br><br>_error:<br>" . mysql_error();
-    	}
+    // If we are on production, email someone!
+    if ($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"] != "")
+    {
+      $server = $_SERVER["SERVER_NAME"];
+    	$email_msg = t("A MYSQL error has occured in FlightPath.") . "  
+    	Server: $server
     	
-    	$pC .= "</div>";
-    	print $pC;	  	  
-	  
+    	Error:
+    	" . mysql_error() . "
+    	
+    	Comments:
+    	$msg
+    	";
+    	mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
+    }
+    
+    fpm(t("A MySQL error has occured:") . " " . mysql_error() . "<br><br>" . t("The backtrace:"));
+    $arr = debug_backtrace();
+    fpm($arr);
+
 	}
 	
 	
@@ -841,7 +828,7 @@ class _DatabaseHandler
 	{
 		// Return the name of the institution...
 		
-		$res = $this->db_query("SELECT * FROM transfer_instituions
+		$res = $this->db_query("SELECT * FROM transfer_institutions
 								where institution_id = '?' ", $institution_id);
 		$cur = $this->db_fetch_array($res);
 		return trim($cur['name']);

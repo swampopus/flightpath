@@ -1,61 +1,4 @@
 <?php
-/*
-FlightPath was originally designed and programmed by the 
-University of Louisiana at Monroe. The original source is 
-copyright (C) 2011-present by the University of Louisiana at Monroe.
-
-FlightPath is considered "open source" under the 
-GNU General Public License, version 3 or any later version. 
-This covers any related files and documentation packaged with 
-FlightPath. 
-
-The license is defined in full here: http://www.gnu.org/licenses/gpl.html,
-and reproduced in the LICENSE.txt file.
-
-You may modify FlightPath's source code, but this copyright and license
-notice must not be modified, and must be included with the source code.
-------------------------------
-*/
-
-
-/**
- * Implementation of hook_page_switchboard
- *
- */
-/*
-function system_page_switchboard() { 
-  
-  // Check permissions right here.
-  if (!user_has_permission("de_can_administer_system_settings")) {
-    display_access_denied("System Module");
-  }
-  
-  $perform_action = $_REQUEST["perform_action"];
-  
-  if ($perform_action == "edit_settings") {
-    system_display_settings_form();
-  }
-  
-  if ($perform_action == "perform_submit_settings") {
-    system_perform_submit_settings();
-  }
-  
-  
-  if ($perform_action == "edit_modules") {
-    system_display_modules_form();
-  }
-  
-  if ($perform_action == "perform_submit_modules") {
-    system_perform_submit_modules();
-  }
-  
-  
-  
-}
-*/
-
-
-
 
 /**
  * Implementation of hook_perm().
@@ -561,16 +504,7 @@ function system_settings_form() {
                 a mysql error occurs.  
                 Leave blank to disable."),    
   );
-
-  $form["display_mysql_errors"] = array(
-    "type" => "select",
-    "label" => t("Display MySQL errors?"),
-    "options" => array("yes" => t("Yes"), "no" => t("No")),
-    "value" => variable_get("display_mysql_errors", array()),
-    "description" => t("If set to YES, FlightPath will display MySQL errors on screen."), 
-  );    
     
-  
   $form["admin_transfer_passcode"] = array(
     "type" => "textfield",
     "label" => t("Admin Apply Draft password:"),
@@ -1299,7 +1233,7 @@ function system_init() {
  * to this module, and what to include in the URL.
  *
  */
-function OLD__system_menu() {
+function z__system_menu() {
   
   $items = array();
   
@@ -1331,7 +1265,7 @@ $items[] = array(
  * flightpath_system table.
  *
  */
-function system_perform_submit_settings() {
+function z__system_perform_submit_settings() {
   
   $db = get_global_database_handler();
   $csv_to_array = $_SESSION["fp_system"]["csv_to_array"];
@@ -1374,7 +1308,7 @@ function system_perform_submit_settings() {
 
 
 
-function system_perform_submit_modules() {
+function z__system_perform_submit_modules() {
   $db = get_global_database_handler();
   
   $modules = array();

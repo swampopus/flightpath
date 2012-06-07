@@ -19,6 +19,7 @@ function advise_menu() {
     "type" => MENU_TYPE_TAB,
   );
 
+
   $items["view/print"] = array(
     "title" => "View",
     "page_callback" => "advise_display_view",

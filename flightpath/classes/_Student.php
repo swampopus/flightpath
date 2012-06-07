@@ -1,21 +1,5 @@
 <?php
-/*
-FlightPath was originally designed and programmed by the 
-University of Louisiana at Monroe. The original source is 
-copyright (C) 2011-present by the University of Louisiana at Monroe.
 
-FlightPath is considered "open source" under the 
-GNU General Public License, version 3 or any later version. 
-This covers any related files and documentation packaged with 
-FlightPath. 
-
-The license is defined in full here: http://www.gnu.org/licenses/gpl.html,
-and reproduced in the LICENSE.txt file.
-
-You may modify FlightPath's source code, but this copyright and license
-notice must not be modified, and must be included with the source code.
-------------------------------
-*/
 
 class _Student
 {
@@ -25,18 +9,7 @@ class _Student
 	public $list_transfer_eqvs_unassigned;
 	public $array_settings, $array_significant_courses, $array_hide_grades_terms;
 	
-	/*
-	* $student_id		The student's (database-generated) Campus Wide ID.
-	* $name				The student's name by which they'll be referred to on screen.
-	* $major_code		ACCT, CSCI, etc.
-	* $gpa				Grade point average. Ex: 3.12, 2.97, etc.
-	* $cumulative_hours	How many hours the student has earned to date.
-	* $catalog_year		What catalog are the listed as? Ex: 2007, 2008, etc.
-	* $list_courses_taken This is a list of all the courses the student has taken.
-	It is made up of Course objects.
-	*/
-
-
+	
 	function __construct($student_id = "", DatabaseHandler $db = NULL)
 	{
 		$this->student_id = $student_id;
@@ -145,16 +118,14 @@ class _Student
 		// performed for...
 		$res = $this->db->db_query("SELECT * FROM student_substitutions
 										WHERE student_id='?' ", $this->student_id);
-		while ($cur = $this->db->db_fetch_array($res))
-		{
+		while ($cur = $this->db->db_fetch_array($res)) {
 			$this->array_significant_courses[$cur["required_course_id"]] = true;
 		}
 
 
 	}
 
-	function load_significant_courses_from_list_courses_taken()
-	{
+	function load_significant_courses_from_list_courses_taken() {
 		// Build the array_significant_courses
 		// entriely from list_courses_taken.
 		$this->list_courses_taken->reset_counter();
@@ -166,8 +137,7 @@ class _Student
 	}
 	
 	
-	function load_settings()
-	{
+	function load_settings() {
 		// This will load & set up the array_settings variable for this
 		// student.
 		$res = $this->db->db_query("SELECT * FROM student_settings
