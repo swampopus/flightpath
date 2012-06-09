@@ -4,16 +4,40 @@
  * This include fine mostly involves DB command shortcuts.
 */ 
 
-define ('WATCHDOG_NOTICE', 101);
-define ('WATCHDOG_ALERT', 102);
-define ('WATCHDOG_ERROR', 103);
-define ('WATCHDOG_DEBUG', 103);
+define ('WATCHDOG_NOTICE', 5);
+define ('WATCHDOG_ALERT', 1);
+define ('WATCHDOG_ERROR', 3);
+define ('WATCHDOG_DEBUG', 7);
 /**
  * Call other modules which implement the hook_watchdog function.
  * Adapted from Drupal 6's watchdog function.
  */
 function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE, $extra_data = "") {
-  // TODO:  implement me.  have the system_module implement a hook_watchdog.
+  global $user;
+  
+  $user_id = $user->id;
+  $user_name = $user->name;
+  $is_student = (int) $user->is_student;
+  $is_faculty = (int) $user->is_faculty;
+  
+  $is_mobile = (int) fp_screen_is_mobile();
+  
+  $ip = $_SERVER["REMOTE_ADDR"];
+  $location = $_SERVER["REQUEST_URI"];
+  $referer = $_SERVER['HTTP_REFERER'];
+  
+  $ser_variables = "";
+  if (count($variables) > 0) {
+    $ser_variables = serialize($variables);
+  }
+  
+  db_query("INSERT INTO watchdog 
+            (user_id, user_name, type, message, variables, severity, extra_data, location, referer, ip, is_mobile, is_student, is_faculty, timestamp)
+            VALUES
+            ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
+            ", $user_id, $user_name, $type, $message, $ser_variables, $severity, $extra_data, $location, $referer, $ip, $is_mobule, $is_student, $is_faculty, time());
+  
+  
 }
 
 

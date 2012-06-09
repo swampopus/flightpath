@@ -956,7 +956,7 @@ function admin_display_edit_degree() {
     <font size='2'>Track description: <a href='javascript: adminPopupAlertHelp(\"edit_formatting\");'>(Help - Formatting)</a>
             <a href='javascript: adminPopupAlertHelp(\"track_description\");'>(Help - Track Descriptions)</a>
     </font><br>
-    <textarea name='track_description' cols='60' rows='3'>" . convert_html_to_bbcode($degree->track_description) . "</textarea>
+    <textarea name='track_description' cols='60' rows='3'>" . filter_markup($degree->track_description) . "</textarea>
     </blockquote>
     ";
   }

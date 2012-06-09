@@ -9,11 +9,13 @@
 
 // TODO:  Implement this functioN!
 function convert_html_to_bbcode($str) {
+  depricated_message();
   return $str;
 } 
 
 // TODO: implement this!
 function convert_bbcode_to_html($str) {
+  depricated_message();
   return $str;
 }
 
@@ -34,6 +36,9 @@ function format_date($timestamp, $format = "standard", $custom = "") {
     $f = "F jS, Y, g:ia";
   }
   
+  if ($format == "just_date") {
+    $f = "F jS, Y";
+  }
   
   if ($custom != "") $f = $custom;
   

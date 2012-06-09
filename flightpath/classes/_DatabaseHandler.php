@@ -54,6 +54,9 @@ class _DatabaseHandler
 	
 	function add_to_log($action, $extra_data = "", $notes = "")
 	{
+	  
+    depricated_message();
+    
 		// Add a row to the log table.
 		$ip = $_SERVER["REMOTE_ADDR"];
 		$url = mysql_real_escape_string($_SERVER["REQUEST_URI"]);
@@ -221,19 +224,12 @@ class _DatabaseHandler
 		// returns an array which states whether or not the student
 		// requires any developmental requirements.
 
-    // Let's pull the needed variables out of our settings, so we know what
-		// to query, because this is a non-FlightPath table.
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["course_resources:student_developmentals"];
-		$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name = $tsettings["table_name"];		
-		
-		
 		$rtn_array = array();
 		
-		$res = $this->db_query("SELECT * FROM $table_name
-							         WHERE $tf->student_id = '?' ", $student_id);
+		$res = $this->db_query("SELECT * FROM student_developmentals
+							         WHERE student_id = '?' ", $student_id);
 		while($cur = $this->db_fetch_array($res)) {
-			$rtn_array[] = $cur[$tf->requirement];
+			$rtn_array[] = $cur["requirement"];
 		}
 
 		return $rtn_array;
@@ -350,9 +346,8 @@ class _DatabaseHandler
 			return $result;
 		} else {
 			// Meaning, the query failed...
-			$err_screen = $this->db_error($sql_query);
-			$this->add_to_log("DB ERROR", mysql_real_escape_string(mysql_error()), mysql_real_escape_string($sql_query));
-			//die($err_screen);
+			// Do nothing.  Do not attempt to log anything, as that could cause an infinite loop.
+			// TODO:  Maybe email someone?
 		}
 	}
 

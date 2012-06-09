@@ -233,37 +233,27 @@ class _Student
 		// then load them here.
 
 		$st = null;
-		
-		
-    // Let's pull the needed variables out of our settings, so we know what
-		// to query, because this is a non-FlightPath table.
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["flightpath_resources:student_tests"];
-		$tfa = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name_a = $tsettings["table_name"];
-				
-		$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["flightpath_resources:tests"];
-		$tfb = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		$table_name_b = $tsettings["table_name"];
-		
+
 		$res = $this->db->db_query("		          
-		          SELECT * FROM $table_name_a a,$table_name_b b 
+		          SELECT * FROM student_tests a, standardized_tests b 
 							WHERE 
-								$tfa->student_id = '?' 
-								AND a.$tfa->test_id = b.$tfb->test_id
-								AND a.$tfa->category_id = b.$tfb->category_id
-							ORDER BY $tfa->date_taken DESC, $tfb->position ", $this->student_id);		
-		while($cur = $this->db->db_fetch_array($res))
-		{
+								  student_id = '?' 
+								AND a.test_id = b.test_id
+								AND a.category_id = b.category_id
+							ORDER BY date_taken DESC, position ", $this->student_id);		
+		while($cur = $this->db->db_fetch_array($res)) {
 			
 		  $c++;
 		  
-		  $db_position = $cur[$tfb->position];
-		  $db_datetime = $cur[$tfa->date_taken];		  
-		  $db_test_id = $cur[$tfb->test_id];
-		  $db_test_description = $cur[$tfb->test_description];
-		  $db_category_description = $cur[$tfb->category_description];
-		  $db_category_id = $cur[$tfb->category_id];
-		  $db_score = $cur[$tfa->score];
+      extract($cur, 3, "db");
+      
+		  //$db_position = $cur["position"];
+		  //$db_datetime = $cur["date_taken"];		  
+		  //$db_test_id = $cur[$tfb->test_id];
+		  //$db_test_description = $cur[$tfb->test_description];
+		  //$db_category_description = $cur[$tfb->category_description];
+		  //$db_category_id = $cur[$tfb->category_id];
+		  //$db_score = $cur[$tfa->score];
 		  
 		  
 			if (!(($db_datetime . $db_test_id) == $old_row))
@@ -276,7 +266,7 @@ class _Student
 
 				$st = new StandardizedTest();
 				$st->test_id = $db_test_id;
-				$st->date_taken = $db_datetime;
+				$st->date_taken = $db_date_taken;
 				$st->description = $db_test_description;
 				$old_row = $db_datetime . $db_test_id;
 

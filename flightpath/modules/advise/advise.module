@@ -275,7 +275,7 @@ function advise_display_popup_change_track() {
     if (strstr($track_description, "DEFAULT:")) {
       // Yes!  We found a default message.
       $bool_default_description = true;
-      $track_description = $this->convert_bbcode_to_html(trim(str_replace("DEFAULT:", "", $track_description)));
+      $track_description = filter_markup(trim(str_replace("DEFAULT:", "", $track_description)));
       $track_description = "<div style='padding-top: 10px;' class='tenpt'>$track_description</div>";
       $rtn = str_replace("<!--DEFAULT-->",$track_description, $rtn);
       break;
@@ -300,7 +300,7 @@ function advise_display_popup_change_track() {
 
     if ($bool_default_description == false)
     {
-      $track_description = convert_bbcode_to_html(trim($temp[2]));
+      $track_description = filter_markup(trim($temp[2]));
       if ($track_description != "")
       {
         $track_description = " - $track_description";

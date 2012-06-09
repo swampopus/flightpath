@@ -1,6 +1,16 @@
 FlightPath Changelog
 ====================
 
+2012-06-08
+  Student developmentals and standardized tests are now in core.
+  
+  I have officially done away with the concept of the "flightpath_extra_data"
+  additional database.
+  
+  Added in a depricated_message function, to help me track down problems after
+  I depricate a function.
+
+
 2012-06-07
   Removed the old AdvisingScreen::draw_curved_title function, in favor of the new
   fp_render_curved_line function.

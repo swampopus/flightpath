@@ -499,11 +499,11 @@ class _DegreePlan
       $is_empty = false;      
     }
     
-    $sem->notice = "According to our records, you are required to
+    $sem->notice = t("According to our records, you are required to
 		complete the course(s) listed above. 
 		For some transfer students, your record may 
 		not be complete. If you have any questions, 
-		please ask your advisor. ";
+		please ask your advisor.");
 
     if (!$is_empty)
     {
@@ -518,7 +518,7 @@ class _DegreePlan
     // semester, with the number -88, with a single group,
     // also numbered -88.
     $semester_courses_added = new Semester(-88);
-    $semester_courses_added->title = "Courses Added by Advisor";
+    $semester_courses_added->title = t("Courses Added by Advisor");
 
     // Now, we want to add the Add a Course group...
     $g = new Group();

@@ -658,6 +658,16 @@ function fpm($str) {
     
 }
 
+/**
+ * Displays a depricated message on screen.  Useful for tracking down 
+ * when depricated functions are being used.
+ */
+function depricated_message($str = "A depricated function has been called.") {
+  fpm($str);
+  fpm(debug_backtrace());
+}
+
+
 
 /**
  * Similar to print_r, this will return an HTML-friendly
@@ -734,31 +744,6 @@ function fp_html_print_r($var, $name = "") {
   }  
   
   return $rtn;
-}
-
-
-
-/**
- * Will output a debugCT statement only if the user
- * has access to view it. 
- */
-function z__admin_debug($str, $var_name = "")
-{
-  if ($GLOBALS["fp_system_settings"]["disable_admin_debug"] == true)
-  {
-    return;
-  }
-  // Will output a debugCT only if the user is a full_admin.
-  $temp = $GLOBALS["fp_system_settings"]["disable_debug_ct"];  // save this....
-  $GLOBALS["fp_system_settings"]["disable_debug_ct"] = false;
-  
-  if (user_has_permission("access_admin_debug"))
-  {
-    fp_debug_ct($str, $var_name);
-  }
-  
-  $GLOBALS["fp_system_settings"]["disable_debug_ct"] = $temp;  // restore its original state.
-  
 }
 
 
@@ -851,75 +836,6 @@ function include_module_install($module, $path) {
   
   return FALSE;  
 }
-
-
-/**
- * Will return a path which an HTML form may submit to in order to return
- * back to the module which is calling it.
- * 
- * For example, if the course_search module wants a form to submit something
- * to itself, it looks like:
- * <form action="' . get_module_action_u_r_l("course_search") . '" method="POST">
- * 
- * To create a link to itself, it would look like:
- * 
- * <a href="' . get_module_action_u_r_l("course_search") . "&year=1992&name=peacock">
- *
- * The returned URL will already have a ? starting the query string, so you may
- * begin any additional query with &.
- * 
- * This works fine with forms whose methods are POST, but not GET. You will
- * need to add a hidden variable to those forms like so:
- *    <input type='hidden' name='n' value='course_search'>
- * 
- * @param String $module
- */
-function get_module_action_u_r_l($module = "") {
-  
-  if (isset($GLOBALS["fp_system_settings"]["modules"][$module])) {
-    return "m.php?n=$module";
-  }
-  else {
-    return FALSE;
-  }  
-  
-}
-
-
-/**
- * Conveiencence function to convert a simple XML string
- * into an associative array.
- *
- * @param unknown_type $xml_data
- * @return unknown
- */
-/*
-function fp_xml_to_array2($xml_data)
-{
-  $xml_data = trim(utf8_encode($xml_data));
-  if ($xml_data == ""){return false;}
-
-  $na = array();
-  
-  try{
-    @$xml_object = new SimpleXmlElement($xml_data);
-    foreach($xml_object->children() as $element => $value)
-    {
-      $val = (string) $value;
-      $na["$element"] =  $val;
-    }
-  
-  } catch(Exception $exception) {
-     // Do nothing if this fails.  Just let us return an empty array. 
-     // TODO:  a call to fp_add_message or some such would be good here!
-     admin_debug("<b>WARNING:</b> Unable to parse XML: $xml_data");
-  }
-
-  
-  return $na;
-
-}
-*/
 
 
 
@@ -1064,52 +980,6 @@ function get_modules_permissions() {
 
 
 
-// Commenting-out since we can now use MYSQL to order by weight.
-/**
- * This will look through the modules array (which we assume
- * is from $GLOBALS[fpSystemSettings][modules]
- * and reorder based on weight.
- * 
- * It takes the $modules array by reference, so nothing
- * is returned.
- * 
- * Use:  reorder_modules_by_weight($GLOBALS["fp_system_settings"]["modules"]);
- *
- * @param unknown_type $modules
- */
-/*
-function reorder_modules_by_weight(&$modules) {
-  
-  $temp = array();
-  foreach ($modules as $module => $value) {
-    $w = $value["weight"];
-    if ($w == "") $w = "0";
-
-    // We need to front-pad $w with zeros, so it is the same length
-    // for every entry.  Otherwise it will not sort correctly.
-    $w = fp_number_pad($w, 10);      
-    
-    $temp[] = "$w~~$module";       
-       
-  }
-      
-  // Now, sort $temp...
-  sort($temp);  
-    
-  $new_array = array();
-  foreach ($temp as $t) {
-    $vals = explode("~~", $t);
-    $module = $vals[1];
-    $new_array[$module] = $modules[$module];
-  }
-  
-  // Reassign the $modules array and we're done!
-  $modules = $new_array;
-  
-}
-*/
-
-
 /**
  * Similar to get_modules_permissions, this will scan through all installed
  * modules' hook_menu() functions, and assemble an array which is sorted
@@ -1179,114 +1049,6 @@ function get_modules_menus() {
 function fp_number_pad($number, $len) {
   return str_pad((int) $number, $len, "0", STR_PAD_LEFT);
 }
-
-/**
- * arrayToXml will convert a single-deminsion associative array
- * into an XML document.  For example, if you send it the $_POST
- * array (after a submission) you will get back an XML document
- * which you can then easily insert into a database table.
- *
- * $root is the root element of the XML document.  You can make this
- * up yourself.  It won't affect anything, as far as I can tell, but
- * it is required.  If you don't know what to put, make it "xml_doc" or
- * something similar.
- * $xml_array is the array you want converted into XML.
- * $html_safe is a boolean.  If set to true, it will convert ' and "
- * characters into their HTML equivalent.  I recommend always setting this
- * to true.
- *
- * @param String $root
- * @param Array $xml_array
- * @param boolean $html_safe
- * @return String
- */
-/*
-function fp_array_to_xml ($root, $xml_array, $html_safe = false)
-{
-  $memory = xmlwriter_open_memory ();       // Allocate memory for XML writer
-
-  // if $makeHTMLSafe is true, then " ' and < will be converted to their
-  // HTML characters.  Recommended for web uses.
-
-  //xmlwriter_set_indent      ($memory, true);// Indent the XML document
-
-  // Start the XML document and create the DTD tag.
-  xmlwriter_start_document  ($memory, '1.0', 'UTF-8');
-  // xmlwriter_start_dtd       ($memory, 'html',
-  //    '-//WAPFORUM//DTD XHTML Mobile 1.0//EN',
-  //    'http://www.wapforum.org/DTD/xhtml-mobile10.dtd');
-  // xmlwriter_end_dtd         ($memory);
-
-  // Start the XML document root tag.
-  xmlwriter_start_element   ($memory, $root);
-
-  // Define attributes for the document namespace and language.
-  // xmlwriter_write_attribute ($memory, 'xmlns',
-  //    'http://www.wapforum.org/DTD/xhtml-mobile10.dtd');
-  // xmlwriter_write_attribute ($memory, 'xm:lang', 'en');
-
-  // Write each array element as the next XML tag.
-  foreach ($xml_array as $tag => $text)
-  {
-    $text = strip_non_u_t_f8("$text", $html_safe);  // strip out non-utf8 chars.
-    xmlwriter_write_element ($memory, $tag, $text);
-
-  }
-
-  // Generate the ending tag for the document root.
-  xmlwriter_end_element      ($memory);
-
-  // End the DTD for this XML document.
-  // xmlwriter_end_dtd          ($memory);
-
-  // Output the data in "$memory" to a String variable "$xml".
-  $xml = xmlwriter_output_memory ($memory, true);
-
-  return $xml;
-} // End function arrayToXml()
-*/
-
-
-/**
- * This function will strip a string ($str) of any non-utf8
- * characters.  This is necessary for the XML functions
- * also present in this file.
- *  
- * if $html_safe is set to TRUE, then it will replace " and ' with
- * their HTML codes (&quot; and &#39;), ensuring that they can
- * pass through a mysql query or be set inside a value='' field
- * without causing problems.
- *
- * @param String $str
- * @param boolean $html_safe
- * @return String
- */
-function strip_non_u_t_f8($str, $html_safe = false){
-  $good[] = 9;  #tab
-  $good[] = 10; #nl
-  $good[] = 13; #cr
-  for($a=32;$a<127;$a++){
-    $good[] = $a;
-  }
-  $len = strlen($str);
-  for($b=0;$b < $len+1; $b++){
-    if(in_array(ord($str[$b]), $good)){
-      $newstr .= $str[$b];
-    }//fi
-  }//rof
-
-  if ($html_safe == true)
-  {
-    $newstr = str_replace("'","&#39;",$newstr);
-    $newstr = str_replace('"','&quot;',$newstr);
-    $newstr = str_replace("<","&lt;",$newstr);
-
-  }
-
-  return $newstr;
-}
-
-
 
 
 function fp_debug_ct($debug_val = "", $var = "")
