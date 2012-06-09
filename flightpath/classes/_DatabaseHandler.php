@@ -985,12 +985,6 @@ class _DatabaseHandler
 	 * @return string
 	 */
 	function get_student_name($student_id) {
-    // Let's pull the needed variables out of our settings, so we know what
-		// to query, because this is a non-FlightPath table.
-		//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-		//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		//$table_name = $tsettings["table_name"];		
-		
 		
     // Let's perform our queries.
 		$res = $this->db_query("SELECT * FROM users 

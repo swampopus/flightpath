@@ -51,7 +51,79 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 function fp_get_faculty_name($faculty_id) {
   $db = get_global_database_handler();
   $name = $db->get_faculty_name($faculty_id);
-  if (!$name) $name = "Unknown Advisor";
+  if (!$name) $name = t("Unknown Advisor");
+  return $name;
+}
+
+
+/**
+ * Returns back a user object for this user_id.
+ * If the user is not found in the users table, it will return NULL.
+ * If the user_id requested is 0, the anonymous user object is returned.
+ */
+function fp_load_user($user_id) {
+  
+  $rtn = new stdClass();
+  
+  if ($user_id == 0) {
+    // Return the anonymous user.
+    $rtn->id = 0;
+    $rtn->name = t("Anonymous");
+    $rtn->roles = array(1 => "anonymous user");
+    $rtn->permissions = fp_get_permissions_for_role(1);
+    return $rtn;        
+  }
+  
+  $res = db_query("SELECT * FROM users WHERE user_id = '?' ", $user_id);
+  if (db_num_rows($res) == 0) return NULL;
+  $cur = db_fetch_object($res);
+  
+  $rtn->id = $cur->user_id;
+  $rtn->name = $cur->user_name;
+  $rtn->f_name = $cur->f_name;
+  $rtn->l_name = $cur->l_name;
+  $rtn->email = $cur->email;
+  $rtn->is_student = (bool) $cur->is_student;
+  $rtn->is_faculty = (bool) $cur->is_faculty;
+  $rtn->roles = array();
+  $rtn->permissions = array();
+    
+  // Load the user's roles and    
+  $res = db_query("SELECT * FROM user_roles a,                                
+                                roles c
+                  WHERE a.user_id = '?'
+                  AND a.rid = c.rid", $user_id);
+  while($cur = db_fetch_array($res)) {
+    $rtn->roles[$cur["rid"]] = $cur["name"];
+  }
+      
+  // Let's make sure we get the authenticated user role as well, #2.
+  $rtn->roles[2] = "authenticated user";
+        
+  // Go through each role and add in the permissions for each role.
+  foreach ($rtn->roles as $rid => $val) {
+    $perms = fp_get_permissions_for_role($rid);
+    // Merge the arrays while KEEPING the original's key.  So don't
+    // use array_merge, use the + operator.
+    $rtn->permissions = $rtn->permissions + $perms;
+  } 
+  
+  
+  return $rtn;  
+}
+
+
+
+
+
+
+function fp_get_student_name($student_id) {
+  if ($student_id == 0) {
+    return t("Anonymous");
+  }
+  $db = get_global_database_handler();
+  $name = $db->get_student_name($student_id);
+  if (!$name) $name = t("Unknown Student");
   return $name;
 }
 

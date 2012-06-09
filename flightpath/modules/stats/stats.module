@@ -1,21 +1,4 @@
 <?php
-/*
-FlightPath was originally designed and programmed by the 
-University of Louisiana at Monroe. The original source is 
-copyright (C) 2011-present by the University of Louisiana at Monroe.
-
-FlightPath is considered "open source" under the 
-GNU General Public License, version 3 or any later version. 
-This covers any related files and documentation packaged with 
-FlightPath. 
-
-The license is defined in full here: http://www.gnu.org/licenses/gpl.html,
-and reproduced in the LICENSE.txt file.
-
-You may modify FlightPath's source code, but this copyright and license
-notice must not be modified, and must be included with the source code.
-------------------------------
-*/
 
 /* 
 Display statistics about FlightPath.
@@ -23,10 +6,84 @@ Display statistics about FlightPath.
 
 
 
-function stats_init() {
-  $GLOBALS["stats_db"] = get_global_database_handler();
+
+
+
+function stats_menu() {
+  $items = array();
   
+  $items["admin-tools/stats"] = array(
+    "title" => "Usage Stats & Reports",
+    "page_callback" => "stats_display_main",
+    "access_arguments" => array("can_access_stats"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "menu_icon" => fp_theme_location() . "/images/popup.gif",
+      "target" => "_blank",      
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );
+  
+
+  $items["stats/major-counts"] = array(
+    "title" => "Major Counts",
+    "page_callback" => "stats_report_major_counts",
+    "access_arguments" => array("can_access_stats"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "bool_print" => FALSE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Main menu",
+          "path" => "admin-tools/stats",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_CALLBACK,
+  );
+  
+
+  $items["stats/selected-degree-options"] = array(
+    "title" => "Selected Degree Options",
+    "page_callback" => "stats_report_selected_degree_options",
+    "access_arguments" => array("can_access_stats"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "bool_print" => FALSE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Main menu",
+          "path" => "admin-tools/stats",
+        ),
+      ),            
+    ),    
+    "type" => MENU_TYPE_CALLBACK,
+  );
+
+
+
+  $items["stats/access"] = array(
+    "title" => "Access Stats",
+    "page_callback" => "stats_report_access_stats",
+    "access_arguments" => array("can_access_stats"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "bool_print" => FALSE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Main menu",
+          "path" => "admin-tools/stats",
+        ),
+      ),      
+    ),    
+    "type" => MENU_TYPE_CALLBACK,
+  );
+
+  
+  
+  return $items;
 }
+
 
 
 
@@ -36,7 +93,7 @@ function stats_init() {
  * to this module, and what to include in the URL.
  *
  */
-function stats_menu() {
+function z__stats_menu() {
   
   $items = array();
   
@@ -73,9 +130,9 @@ function stats_perm() {
   
   $perms = array (
     "can_access_stats" => array(
-      "title" => "Can access/view stats",
-      "description" => "This allows the user to access the stats module, letting them run
-                        reports on usage.",
+      "title" => t("Can access/view stats"),
+      "description" => t("This allows the user to access the stats module, letting them run
+                        reports on usage."),
     ),    
   );
 
@@ -470,7 +527,109 @@ function stats_display_failed_subs()
 }
 
 
-function stats_display_selected_degree_options()
+
+function stats_report_selected_degree_options() {
+  $rtn = "";
+  
+  
+  // What major have they selected?
+  $major = trim($_GET["major"]);
+
+  $rtn .= "<form action='" . fp_url("stats/selected-degree-options") . "' method='GET' >";
+  $rtn .= stats_draw_majors_with_options_pulldown($major, true);
+  $rtn .= "</form>";
+
+  $db = get_global_database_handler();
+
+  if ($major != "")
+  { 
+    $count_in_major = 0;
+    $degree_option_count = array();
+    
+    $sql = "SELECT * FROM students
+            WHERE substring_index(major_code, '|', 1) = '?'
+            AND rank_code IN %RANKIN%
+            %EXTRA_STUDENTSEARCH_CONDITIONS% ";      
+    
+
+    $rank_in = "( '" . join("', '", csv_to_array($GLOBALS["fp_system_settings"]["allowed_student_ranks"])) . "' )";    
+    $sql = str_replace("%RANKIN%", $rank_in, $sql);   
+    $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $GLOBALS["fp_system_settings"]["extra_student_search_conditions"], $sql);  
+
+    $result = db_query($sql, $major);
+    
+    while($cur = db_fetch_array($result))
+    {
+      extract($cur, 3, "db");
+      $count_in_major++;
+
+      $track = "";
+      // Does this student have a track (degree option) specified?
+      $student_settings = $db->get_student_settings($db_user_id);
+
+      if ($student_settings["major_code"] == $major)
+      {
+        $track = $student_settings["track_code"];
+      }
+
+      if ($track == "")
+      {
+        $track = t("None selected");
+      }
+
+      // Init if not already...
+      $degree_option_count[$track] = $degree_option_count[$track]*1;
+
+      $degree_option_count[$track]++;
+    }
+
+    arsort($degree_option_count);
+
+    $rtn .= "<table border='1'>
+        <tr>
+          <th>" . t("Degree Option") . "</th>
+          <th>" . t("Count") . "</th>
+          <th>" . t("Description") . "</th>
+        </tr>";
+
+    foreach($degree_option_count as $d_option => $value)
+    {
+      //$desc = get_track_title($major,$d_option);
+      // figure out the title of the track...
+      $temp = explode("-", $db_catalog_year);
+      $cy = $temp[0];
+      $degree_id = $db->get_degree_id($major . "|_" . $d_option, $cy);
+
+      $dp = new DegreePlan();
+      $dp->degree_id = $degree_id;
+      $dp->load_descriptive_data();
+      $desc = $dp->track_title;
+
+
+      $rtn .= "<tr><td valign='top'>
+              $d_option
+            </td>
+            <td valign='top'>
+              $value
+            </td>
+            <td valign='top'>
+              $desc
+            </td>
+            
+          </tr>";
+    }
+
+    $rtn .= "</table>" . t("Total number of results:") . " $count_in_major.";
+
+  }
+  
+  
+  
+  return $rtn;
+}
+
+
+function z__stats_display_selected_degree_options()
 {
   // Get our global variables...
   $db = $GLOBALS["stats_db"];
@@ -478,6 +637,7 @@ function stats_display_selected_degree_options()
   $module_action_u_r_l = get_module_action_u_r_l("stats");
 
   $pC = "";
+
 
   // What major have they selected?
   $major = trim($_GET["major"]);
@@ -598,55 +758,44 @@ function stats_display_selected_degree_options()
 
 
 
-function stats_draw_majors_pulldown($smajor = "", $display_submit = false)
+function stats_draw_majors_with_options_pulldown($smajor = "", $display_submit = false)
 {
 
-  // Get our global variables...
-  $db = $GLOBALS["stats_db"];
-  $screen = $GLOBALS["stats_screen"];
-  $module_action_u_r_l = get_module_action_u_r_l("stats");
-
+  $db = get_global_database_handler();
   $major_array = array();
 
-  $settings = $db->get_flightpath_settings();
-
-  $current_catalog_year = trim($settings["current_catalog_year"]);
+  $current_catalog_year = variable_get("current_catalog_year", "");
 
   $m_a_count = 0;
   $query = "SELECT * FROM degrees
-				WHERE `catalog_year`='$current_catalog_year'
+				WHERE  catalog_year = '?'
 				AND `exclude`='0'
 				ORDER BY `title`  ";
-  $result = $db->db_query($query);
-  if ($result)
-  {
-    while ($cur_row = $db->db_fetch_array($result))
-    {
-      $major = trim($cur_row["major_code"]);
-      if (!$db->get_degree_tracks($major, $current_catalog_year))
-      { // only get majors that also have tracks!
-        continue;
-      }
-      $description = trim($cur_row["title"]);
-      $type = trim($cur_row["degree_type"]);
-      $major_array[$m_a_count]["description"] = $description;
-      $major_array[$m_a_count]["major"] = $major;
-      $major_array[$m_a_count]["type"] = $type;
+  $result = db_query($query, $current_catalog_year);
+  while ($cur_row = $db->db_fetch_array($result)) {
+    $major = trim($cur_row["major_code"]);
+    if (!$db->get_degree_tracks($major, $current_catalog_year))
+    { // only get majors that also have tracks!
+      continue;
+    }
+    $description = trim($cur_row["title"]);
+    $type = trim($cur_row["degree_type"]);
+    $major_array[$m_a_count]["description"] = $description;
+    $major_array[$m_a_count]["major"] = $major;
+    $major_array[$m_a_count]["type"] = $type;
 
-      $m_a_count++;
+    $m_a_count++;
 
 
     }
-  }
 
-  //var_dump($major_array);
 
   $rtn .= "
 			<table border='0'>
 			
           <td valign='middle'>
           
-         <select name='major' id='major'><option value=''>Please select a major with degree options</option>
+         <select name='major' id='major'><option value=''>" . t("Please select a major with degree options") . "</option>
                       <option value=''>-----------------------------------</option>";
 
   for ($t = 0; $t < $m_a_count; $t++)
@@ -672,7 +821,7 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = false)
   $rtn .= "                </select> </td>";
   if ($display_submit == true)
   {
-    $rtn .= "<td valign='middle'><input type='submit' value='Select'></td>";
+    $rtn .= "<td valign='middle'><input type='submit' value='" . t("Select") . "'></td>";
   }
 
   $rtn .= "</table>";
@@ -684,9 +833,78 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = false)
 
 
 
+function stats_report_major_counts() {
+  $rtn = "";
 
 
-function stats_display_major_counts()
+
+  $rtn .= "<table border='1'>
+        <tr>
+          <th>" . t("Major") . "</th>
+          <th>" . t("Count") . "</th>
+          <th colspan='2'>" . t("Description") . "</th>          
+        </tr>";
+  
+
+  $result = db_query("SELECT * FROM degrees
+                          GROUP BY major_code 
+                          ORDER BY title, major_code ");
+  while ($cur = db_fetch_array($result)) {
+    $count = 0;
+    $major_code = $cur["major_code"];
+    $title = $cur["title"];
+    $degree_type = $cur["degree_type"];
+    
+    // If this is a degree option, skip it, as we do not expect
+    // the students table to record degree option choices.
+    if (strstr($major_code, "|_")) continue;
+    
+    // Find out how many students have this major.
+
+    $sql = "SELECT count(user_id) AS count FROM students
+            WHERE major_code = '$major_code'
+            AND rank_code IN %RANKIN%
+            %EXTRA_STUDENTSEARCH_CONDITIONS% ";      
+    
+    $rank_in = "( '" . join("', '", csv_to_array($GLOBALS["fp_system_settings"]["allowed_student_ranks"])) . "' )";    
+    $sql = str_replace("%RANKIN%", $rank_in, $sql);   
+    $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $GLOBALS["fp_system_settings"]["extra_student_search_conditions"], $sql);  
+    
+    $res2 = db_query($sql);
+    $cur2 = db_fetch_array($res2);
+    
+    if (is_numeric($cur2["count"])) {
+     $total += $cur2["count"];
+    }
+    $res_array[$major_code]["count"] = $cur2["count"] * 1;
+    $res_array[$major_code]["desc"] = $title;
+    $res_array[$major_code]["type"] = $degree_type;
+    
+  }
+  
+
+  foreach($res_array as $major => $value) {
+
+    $rtn .= "<tr>
+          <td valign='top' class='tenpt'>$major</td>
+          <td valign='top' class='tenpt'>{$value["count"]}</td>
+          <td valign='top' class='tenpt'>{$value["type"]}</td>
+          <td valign='top' class='tenpt'>{$value["desc"]}</td>
+        </tr>";
+  }
+
+  $rtn .= "</table>
+      " . t("Total student records:") . " $total.";
+
+  
+  
+    
+  return $rtn;
+}
+
+
+
+function z__stats_display_major_counts()
 {
   // Get our global variables...
   $db = $GLOBALS["stats_db"];
@@ -1345,7 +1563,109 @@ function stats_display_advisor_report()
 }
 
 
-function stats_display_access_stats()
+
+
+function stats_report_access_stats() {
+  $rtn = "";
+
+
+  $min = trim(addslashes($_REQUEST["min"]));
+  if ($min == "")
+  {
+    $min = "20";
+  }
+
+
+  $rtn .= "
+      <form action='" . fp_url("stats/access") . "' method='GET'>
+      " . t("Activity over the last") . " 
+      <input type='text' name='min' value='$min' size='2'>
+      ";
+
+
+
+  $rtn .= t("minutes") . ": <input type='submit' value='->'>
+      </form>
+      " . t("Unique students in time frame") . ": <!--STUDENTS-->. " . t("Unique faculty/staff in time frame") . ": <!--STAFF--> <br>";
+
+  $rtn .= "<table border='1' width='700'>";
+
+  $cwid_array = array();
+  $student_actions = $staff_actions = 0;
+
+  $interval = time() - ($min * 60);
+  
+  $res = db_query("SELECT * FROM watchdog
+              WHERE `timestamp` > '?'
+              ORDER BY `timestamp` DESC ", $interval);
+  while ($cur = db_fetch_array($res)) {
+    extract ($cur, 3, "db");
+
+    $account = fp_load_user($db_user_id);
+    
+    $bgcol = "white";
+    if ($account->is_student) {
+      $bgcol = "lightblue";
+    }
+    else if ($account->is_faculty){
+       $bgcol = "pink";
+    } 
+    
+    $minago = round((time() - $db_timestamp) / 60, 0);
+
+    $extra_data = trim(substr($db_extra_data, 0, 18));
+    if (strlen($extra_data) < strlen($db_extra_data))
+    {
+      $extra_data .= "...";
+    }
+
+    $pretty_date = format_date($db_timestamp);
+    
+    $user_type = "";
+    if ($account->is_student) {
+      $user_type .= "<div>" . t("student") . "</div>";
+    }
+    if ($account->is_faculty) {
+      $user_type .= "<div>" . t("faculty") . "</div>";      
+    }
+    
+    $rtn .= "<tr style='background-color:$bgcol'>
+          <td valign='top' class='tenpt'>$account->id</td>
+          <td valign='top' class='tenpt'>$account->f_name $account->l_name</td>          
+          <td valign='top' class='tenpt'>$user_type</td>
+          <td valign='top' class='tenpt'>$db_type</td>
+          <td valign='top' class='tenpt'>" . t($db_message, unserialize($db_variables)) . "</td>
+          <td valign='top' class='tenpt'>$minago " . t("min ago") . " &nbsp; <font size='1'>$pretty_date</font></td>
+        </tr>";
+
+    // Let's increase our counters, if this is a new CWID.
+    if (!in_array($db_user_id, $cwid_array)) {
+      $cwid_array[] = $db_user_id;
+      if ($account->is_student) {
+        $student_actions++;
+      } else if ($account->is_faculty) {
+        $staff_actions++;
+      }
+    }
+
+
+  }
+
+  // Add in our student and staff action counts
+  $rtn = str_replace("<!--STUDENTS-->",$student_actions,$rtn);
+  $rtn = str_replace("<!--STAFF-->",$staff_actions,$rtn);
+
+
+  $rtn .= "</table>";
+  
+  
+  return $rtn;  
+}
+
+
+
+
+function z__stats_display_access_stats()
 {
   // Get our global variables...
   $db = $GLOBALS["stats_db"];
@@ -1445,7 +1765,39 @@ function stats_display_access_stats()
 }
 
 
-function stats_display_main_menu()
+function stats_display_main() {
+  $rtn = "";
+  
+  
+  $rtn .= "<ul>";
+  
+  $rtn .= "<li>" . l(t("Major Counts"), "stats/major-counts") . "
+              <br>
+              " . t("Displays the number of students within each major or major/concentration.") . "
+            </li>";
+  
+  $rtn .= "<li>" . l(t("Selected Degree Options"), "stats/selected-degree-options") . "
+              <br>
+              " . t("This report will display information about which degree options students/advisors are selecting for particular majors 
+                    (ex: General Studies)") . "
+            </li>";
+  
+
+  $rtn .= "<li>" . l(t("Access Stats"), "stats/access") . "
+              <br>
+              " . t("See recent access within the system.  This can be useful to see if anyone is currently using the system.") . "
+            </li>";
+
+    
+  
+  
+  $rtn .= "</ul>";
+  
+  return $rtn;
+}
+
+
+function z__stats_display_main_menu()
 {
   // Get our global variables...
   $db = $GLOBALS["stats_db"];

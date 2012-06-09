@@ -1,6 +1,10 @@
 FlightPath Changelog
 ====================
 
+2012-06-09
+  Beginning work on the stats module.
+  
+
 2012-06-08
   Student developmentals and standardized tests are now in core.
   

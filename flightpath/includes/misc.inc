@@ -314,7 +314,7 @@ function fp_token() {
 
 
 /**
- * Simple function to split a basiv CSV string, trim all elements, then return
+ * Simple function to split a basic CSV string, trim all elements, then return
  * the resulting array.
  */
 function csv_to_array($csv_string) {
@@ -357,7 +357,7 @@ function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bo
  */
 function t($str, $vars = array()) {
     
-  if (count($vars) > 0) {
+  if (is_array($vars) && count($vars) > 0) {
     foreach ($vars as $var => $val) {
       
       // If var begins with %, it means we want to italicize the val.
@@ -496,7 +496,6 @@ function l($text, $path, $query = "", $attributes = array()) {
     }
   }
   
-  
   $rtn .= '<a href="' . fp_url($path, $query) . '" ';
   
   foreach ($attributes as $key => $value) {
@@ -515,7 +514,7 @@ function l($text, $path, $query = "", $attributes = array()) {
  * and a query, ex: "nid=5&whatever=yes"
  * And join them together, respecting whether or not clean URL's are enabled.
  */
-function fp_url($path, $query, $include_base_path = TRUE) {
+function fp_url($path, $query = "", $include_base_path = TRUE) {
   
   // If clean URLs are enabled, we should begin with a ?, if not, use an &
   
@@ -528,9 +527,10 @@ function fp_url($path, $query, $include_base_path = TRUE) {
  
   $rtn .= $path;
   
-  $rtn .= "?";
-  
-  $rtn .= $query;
+  if ($query != "") {
+    $rtn .= "?";  
+    $rtn .= $query;
+  }
  
   return $rtn;
           

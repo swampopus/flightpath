@@ -1,0 +1,4 @@
+name = Stats
+description = Look up various usage stats about FlightPath
+version = 1.2
+core = 4.x

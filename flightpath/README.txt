@@ -1,28 +1,31 @@
 FlightPath - The Electronic Student Advising System
 ===================================================
-Version 3.1.1 (alpha) 
-===================================================
 
-At the time of this writing, you may visit:
-   http://code.google.com/p/flightpath-advising/
+At the time of this writing, FlightPath may be downloaded from:
+   http://getflightpath.com
 
+Check the above address for updates and technical assistance.
 
-License and Copyright Information:
+Please read the COPYRIGHT.txt and LICENSE.txt files for
+important information as to what you may and may not do with
+FlightPath's source code.
 
-FlightPath was originally designed and programmed by the 
-University of Louisiana at Monroe. The original source is 
-copyright (C) 2011-present by the University of Louisiana at Monroe.
+----------------------
+A brief history...
+----------------------
 
-FlightPath is considered "open source" under the 
-GNU General Public License, version 3 or any later version. 
-This covers any related files and documentation packaged with 
-FlightPath. 
+FlightPath was created by the University of Louisiana at Monroe
+(http://www.ulm.edu) in 2006, and has been in continuous use
+ever since.
 
-The license is defined in full here: http://www.gnu.org/licenses/gpl.html,
-and reproduced in the LICENSE.txt file.
+The decision to release the code as open source occured in 2011.
 
-You may modify FlightPath's source code, but this copyright and license
-notice must not be modified, and must be included with the source code.
+While the project is now contributed to by a community of developers,
+the original ULM development team were as follows:
 
+Richard Peacock - Primary developer
+Joe Mansour - Mainframe/Banner coordinator
+Joann Perrer - Degree and course data coordinator
 
- 
+The "classic" theme was created by Paul Gullette, with the
+original banner graphic designed by Rob Glaze.

@@ -738,6 +738,10 @@ function system_handle_form_submit() {
 
 
 function system_handle_logout() {
+  global $user;
+  
+  $name = $user->name;
+  $uid = $user->id;
   
   // Check for hook_user_logout
   $modules = modules_implement_hook("user_logout");
@@ -751,6 +755,8 @@ function system_handle_logout() {
   $_SESSION["fp_user_object"] = FALSE;
   session_destroy();
   session_start();
+  
+  watchdog("logout", "@user has logged out", array("@user" => "$name ($uid)"));
   
   fp_add_message(t("You have been logged out of FlightPath."));
   fp_goto("<front>");
@@ -1007,6 +1013,10 @@ function system_login_form_submit($form, &$form_state) {
     
   // Set up a new $account object.
   $account = new stdClass();
+  
+  $account = fp_load_user($db_row["user_id"]);
+  
+  /*
   $account->name = $db_row["user_name"];
   $account->id = $db_row["user_id"];
   $account->is_faculty = ($db_row["is_faculty"] == "1") ? TRUE : FALSE;
@@ -1016,7 +1026,8 @@ function system_login_form_submit($form, &$form_state) {
   $account->l_name = $db_row["l_name"];
   $account->roles = array();
   $account->permissions = array();
-    
+  */
+   
   // Okay, let's look for all the modules who have implimented hook_user_login
   $modules = modules_implement_hook("user_login");
   foreach ($modules as $module) {
@@ -1025,6 +1036,8 @@ function system_login_form_submit($form, &$form_state) {
   
   // Set the $account to the SESSION.
   $_SESSION["fp_user_object"] = $account;
+  
+  watchdog("login", "@user has logged in", array("@user" => "$account->name ($account->id)"));
   
   fp_goto("<front>");
   
@@ -1037,7 +1050,7 @@ function system_login_form_submit($form, &$form_state) {
  * The main thing I want to do here is populate the rolls and permissions
  * arrays in the $account object. 
  */
-function system_user_login(&$account) {
+function z__system_user_login(&$account) {
 
  $res = db_query("SELECT * FROM user_roles a,                                
                                 roles c
@@ -1059,6 +1072,9 @@ function system_user_login(&$account) {
   }
             
 }
+
+
+
 
 
 
@@ -1197,10 +1213,7 @@ function system_init() {
   }
   else {
     // User is anonymous, so set it up as such.
-    $user->id = 0;
-    $user->name = "Anonymous";
-    $user->roles = array(1 => "anonymous user");
-    $user->permissions = fp_get_permissions_for_role(1);    
+    $user = fp_load_user(0);    
   }
     
 }
