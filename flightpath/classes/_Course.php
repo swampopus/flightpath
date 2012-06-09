@@ -228,7 +228,7 @@ class _Course
   function load_course_from_data_string($str)
   {
     
-    $temp = split(",",$str);
+    $temp = explode(",",$str);
 
     $this->course_id = 				$temp[0];
 
@@ -642,7 +642,7 @@ class _Course
     // ex:  MATH 111
     // may also ONLY specify the subject. ex:  BIOL
 
-    $temp = split(" ",$str);
+    $temp = explode(" ",$str);
     if ($this->subject_id == $temp[0] && ($this->course_num == $temp[1] || trim($temp[1]) == ""))
     {
       return true;
@@ -812,7 +812,7 @@ class _Course
 
     // Is this just a course name by itself?  If so, it should
     // all be capitalized.
-    $temp = split(" ", $str);
+    $temp = explode(" ", $str);
 
     if (count($temp) == 2
     && strlen($temp[0]) <= 4

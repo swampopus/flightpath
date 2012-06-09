@@ -15,6 +15,10 @@ define ('WATCHDOG_DEBUG', 7);
 function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE, $extra_data = "") {
   global $user;
   
+  // TODO:  Have a setting where, we do not actually log certain severity levels, like notice or debug
+  // (to save space)
+  
+  
   $user_id = $user->id;
   $user_name = $user->name;
   $is_student = (int) $user->is_student;

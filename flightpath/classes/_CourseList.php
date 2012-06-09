@@ -522,7 +522,7 @@ class _CourseList extends ObjList
 			// Go through all valid names for this course.
 			for ($x = 0; $x < count($course->array_valid_names); $x++)
 			{
-				$temp = split("~",$course->array_valid_names[$x]);
+				$temp = explode("~",$course->array_valid_names[$x]);
 				$subj = strtoupper($temp[0]);
 
 				if (in_array($subj, $rtn_array))
@@ -579,7 +579,7 @@ class _CourseList extends ObjList
 				{
 					if (strstr($course->array_valid_names[$x], $subject))
 					{
-						$temp = split("~",$course->array_valid_names[$x]);
+						$temp = explode("~",$course->array_valid_names[$x]);
 						$course->subject_id = $temp[0];
 						$course->course_num = $temp[1];
 
@@ -629,7 +629,7 @@ class _CourseList extends ObjList
 		$new_list = new CourseList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
-			$temp = split(" ~~ ",$tarray[$t]);
+			$temp = explode(" ~~ ",$tarray[$t]);
 			$i = $temp[2];
 
 			$new_list->add($this->array_list[$i]);
@@ -656,7 +656,7 @@ class _CourseList extends ObjList
 		$new_list2 = new CourseList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
-			$temp = split(" ~~ ",$tarray[$t]);
+			$temp = explode(" ~~ ",$tarray[$t]);
 			$i = $temp[2];
 
 			$new_list2->add($this->array_list[$i]);
@@ -720,7 +720,7 @@ class _CourseList extends ObjList
 		$new_list = new CourseList();
 		for($t = 0; $t < count($t3array); $t++)
 		{
-			$temp = split(" ~~ ",$t3array[$t]);
+			$temp = explode(" ~~ ",$t3array[$t]);
 			$i = $temp[2];
 
 			$new_list->add($this->array_list[$i]);
@@ -826,7 +826,7 @@ class _CourseList extends ObjList
 		$new_list = new CourseList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
-			$temp = split(" ~~ ",$tarray[$t]);
+			$temp = explode(" ~~ ",$tarray[$t]);
 			$i = $temp[1];
 
 			$new_list->add($this->array_list[$i]);
@@ -887,7 +887,7 @@ class _CourseList extends ObjList
 		$new_list = new CourseList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
-			$temp = split(" ~~ ",$tarray[$t]);
+			$temp = explode(" ~~ ",$tarray[$t]);
 			$i = $temp[2];
 
 			$new_list->add($this->array_list[$i]);
@@ -978,7 +978,7 @@ class _CourseList extends ObjList
 		$new_list = new CourseList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
-			$temp = split(" ~~ ",$tarray[$t]);
+			$temp = explode(" ~~ ",$tarray[$t]);
 			$i = $temp[2];
 			if ($bool_set_array_index == true)
 			{

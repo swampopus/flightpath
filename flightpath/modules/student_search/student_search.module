@@ -274,7 +274,7 @@ function student_search_display_search() {
     // If you searched for 2 things seperated by a space, it is likely you
     // are searching for a name, so check that...
     $_SESSION["student_search_for"] = $search_for;
-    $temp = split(" ",$search_for);
+    $temp = explode(" ",$search_for);
     if (trim($temp[1]) != "")
     {
       $fn = trim($temp[0]);
@@ -284,7 +284,7 @@ function student_search_display_search() {
                        ";
     }
 
-    $temp = split("=",$search_for);
+    $temp = explode("=",$search_for);
     if (trim(strtolower($temp[0])) == "major")
     {
       $mjsearch = trim($temp[1]);
@@ -513,7 +513,7 @@ function student_search_query_advisees($sql) {
       { // Last advising was a What If advising.
         $advised_image = "<span title='This student was last advised in What If mode.'><img src='" . fp_theme_location() . "/images/small_check.gif'><sup>wi</sup></span>";
         $db_major = $cur["major_code"];
-        $temp = split("\|_",$db_major);
+        $temp = explode("\|_",$db_major);
         $rtn_array[$r]["what_if_major_code"] = trim($temp[0]);
         $rtn_array[$r]["what_if_track_code"] = trim($temp[1]);
       }

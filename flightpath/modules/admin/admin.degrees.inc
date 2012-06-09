@@ -553,7 +553,7 @@ function admin_display_degrees() {
     }
 
     // get JUST the major code...
-    $temp = split("\|", $db_major_code);
+    $temp = explode("\|", $db_major_code);
     $just_major = trim($temp[0]);
     $just_conc = trim($temp[1]);
     $outside = "";
@@ -562,7 +562,7 @@ function admin_display_degrees() {
     if (strstr($just_conc, "_")) {
       // If the concentration has an underscore, it's actually
       // a track.  Let's get the track title...
-      $temp2 = split("_",$just_conc);
+      $temp2 = explode("_",$just_conc);
       $just_track = trim($temp2[1]);
       // Might need to add the first part BACK onto the major...
       if (trim($temp2[0]) != "")
@@ -683,8 +683,6 @@ function admin_handle_edit_degree_submit() {
   }
 
   // Save the entire post to the log.
-  //$post_x_m_l = fp_array_to_xml("post",$_POST, true);
-  //$db->add_to_log("admin_edit_degree","$degree_id,$major_code",$post_x_m_l);
 
   $errors = "";
   $semester_titles_c_s_v = "";

@@ -375,13 +375,13 @@ class _DegreePlan
 
       // Get the semester titles.
       $temp = trim($cur["semester_titles_csv"]);
-      $this->array_semester_titles = split(",",$temp);
+      $this->array_semester_titles = explode(",",$temp);
 
       if (strstr($this->major_code, "_"))
       {
         // This means that there is a track.  Get all the information
         // you can about it.
-        $temp = split("_", $this->major_code);
+        $temp = explode("_", $this->major_code);
         $this->track_code = trim($temp[1]);
         $this->major_code = trim($temp[0]);
 

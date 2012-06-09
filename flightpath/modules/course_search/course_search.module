@@ -420,40 +420,6 @@ function course_search_upload_attachment($course_id, $subject_id, $course_num) {
 
 
 
-/**
- * Implementation of hook_menu().
- * This tells other parts of FlightPath where to display links
- * to this module, and what to include in the URL.
- *
- */
-function z__course_search_menu() {
-  
-  $items = array();
-  
-  $items[] = array(
-    "title" => "Course Search",
-    "url" => get_module_action_u_r_l("course_search"),
-    "target" => "_blank",
-    "description" => "Use this tool to view course descriptions,
-                      sample syllabi, and projected course offering
-                      schedules.",
-    "location" => "tools",
-    "icon" => $GLOBALS["fp_system_settings"]["theme"] . "/images/book_glass_20.jpg",
-    "weight" => 100,
-  );
-  
-  $items[] = array(
-    "title" => "Edit Course Search Settings",
-    "url" => get_module_action_u_r_l("course_search") . "&a=display_settings",
-    "location" => "admin_console",
-    "icon" => $GLOBALS["fp_system_settings"]["theme"] . "/images/book_glass_20.jpg",
-    "weight" => 300,
-  );  
-    
-  return $items;
-}
-
-
 
 function course_search_perm() {
   return array(
@@ -472,75 +438,6 @@ function course_search_perm() {
           
   );
 }
-
-
-/**
- * This implementation of hook_page_switchboard gets called whenever
- * we want to go to a particular page in this module.  Therefor, it will
- * look at REQUEST or GET or POST variables, to decide where to go.
- *
- */
-function z__course_search_page_switchboard() {
-
-  $db = $GLOBALS["course_search_db"];
-  $settings = $db->get_flightpath_settings();  
-  $GLOBALS["course_search_catalog_year"] = $settings["current_catalog_year"];
-  
-  
-  $a = $_REQUEST["a"];
-  
-  if ($a == "get_syllabus") {
-    course_search_get_syllabus();
-    return;
-  }
-  
-  if ($a == "display_settings") {
-    if (!user_has_permission("can_administer_course_search")) {
-      display_access_denied("Course Search Settings");
-    }
-    course_search_display_settings();
-    return;
-  }
-  
-  if ($a == "perform_submit_settings") {
-    if (!user_has_permission("can_administer_course_search")) {
-      display_access_denied("Course Search Settings");
-    }
-    course_search_perform_submit_settings();
-    return;
-  }
-  
-  // Has the user selected a subject?
-  $subject_id = trim(addslashes($_REQUEST["subject_id"]));
-  if ($subject_id != "")
-  {
-  	course_search_show_courses($subject_id);
-  }
-  else {  
-    // If all else fails, go to the selection screen...
-    course_search_display_search();
-  }
-  
-}
-
-
-
-/**
- * Save the contents of the settings for to the variables
- * table.
- *
- */
-function z__course_search_perform_submit_settings() {
-  $db = $GLOBALS["course_search_db"];
-  
-  $db->set_variable("course_search_avail_term_id_suffix_order", trim($_POST["avail_term_id_suffix_order"]));
-  $db->set_variable("course_search_avail_term_headers", trim($_POST["avail_term_headers"]));
-  $db->set_variable("course_search_avail_term_mobile_headers", trim($_POST["avail_term_mobile_headers"]));
-  
-  course_search_display_settings("<font color='green'>Settings successfully saved on " .date ("g:i:sa") . ".</font><br><br>");
-  
-}
-
 
 
 
@@ -601,7 +498,7 @@ function course_search_download_syllabus() {
   
   $db = get_global_database_handler();
   
-  $temp = split("_", $c);
+  $temp = explode("_", $c);
   $subject_id = $temp[0];
   $course_num = $temp[1];
   
@@ -631,15 +528,15 @@ function course_search_download_syllabus() {
   { // Check to make sure the src file actually exists.
     // Display a message, letting the user know it does not
     // exist.
-    $db->add_to_log("syllabus", "fail,$c");
+    watchdog("syllabus", "fail,$c", array(), WATCHDOG_ERROR);
     print t("Sorry, the syllabus for @course could not be found.", array("@course" => "$subject_id $course_num"));
     return;
   }
   
-  $db->add_to_log("syllabus", "get,$c");
+  watchdog("syllabus", "get,$c", array(), WATCHDOG_DEBUG);
   
   $content_type = "application/plain";  // default, save as generic binary file.
-  $temp = split("\.", $filename);
+  $temp = explode("\.", $filename);
   $ext = $temp[count($temp) - 1];  // get the original file extension.
   
   // attempt to match to the correct content_type...
@@ -1040,9 +937,6 @@ function course_search_display_courses() {
   
       ';
 
-  //$db->add_to_log("course_search", "view,$subject_id,$catalog_year,$mode");
-
-  
   return $rtn;
 }
 
@@ -1123,7 +1017,7 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
 	// Now we want to get out JUST the terms...
 	foreach($arr as $line)
 	{
-		$temp = split("~",$line);
+		$temp = explode("~",$line);
 		$rtn_array[] = trim($temp[2]);
 	}
 
@@ -1266,7 +1160,6 @@ function course_search_display_search() {
         </div>";
     }
 
-    //$db->add_to_log("course_search", "select_subject");
     $rtn .= "</form>";
   
   }

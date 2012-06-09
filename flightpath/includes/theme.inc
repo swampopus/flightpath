@@ -587,12 +587,12 @@ function fp_build_tab_array($page) {
       // Now, go through the array and display it.
       for ($t = 0; $t < count($display_array); $t = $t + 2)
       {
-        $temp = split(" ~~ ",$display_array[$t]);
+        $temp = explode(" ~~ ",$display_array[$t]);
         $name1 = trim($temp[0]);
         $value1 = trim($temp[1]);
 
 
-        $temp = split(" ~~ ",$display_array[$t+1]);
+        $temp = explode(" ~~ ",$display_array[$t+1]);
         $name2 = trim($temp[0]);
         $value2 = trim($temp[1]);
 

@@ -561,7 +561,7 @@ function stats_display_selected_degree_options()
     {
       //$desc = get_track_title($major,$d_option);
       // figure out the title of the track...
-      $temp = split("-", $db_catalog_year);
+      $temp = explode("-", $db_catalog_year);
       $cy = $temp[0];
       $degree_id = $db->get_degree_id($major . "|_" . $d_option, $cy);
 

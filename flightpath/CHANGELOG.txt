@@ -10,6 +10,9 @@ FlightPath Changelog
   Added in a depricated_message function, to help me track down problems after
   I depricate a function.
 
+  Moved to new watchdog() table and function, instead of the old log table.
+
+  Got rid of old PHP split() function.
 
 2012-06-07
   Removed the old AdvisingScreen::draw_curved_title function, in favor of the new

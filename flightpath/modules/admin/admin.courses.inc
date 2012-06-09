@@ -404,10 +404,6 @@ function admin_edit_course_form_submit(&$form, $form_submit) {
   $description = trim($values["description"]);
   $data_entry_comment = trim($values["data_entry_comment"]);
 
-  // Save the entire post to the log.
-  //$post_x_m_l = fp_array_to_xml("post",$_POST, true);
-  //$db->add_to_log("admin_edit_course","$course_id,$course_names",$post_x_m_l);
-
   // Since we are making a change to the draft table(s), let's add a row
   // to draft instructions.
   $db->add_draft_instruction("-");

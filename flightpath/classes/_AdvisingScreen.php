@@ -600,7 +600,7 @@ function draw_menu_items($menu_array) {
 
 				$extra = ".";
 
-				$temp = split(" ~~ ", $line);
+				$temp = explode(" ~~ ", $line);
 				$o_course = trim($temp[0]);
 				$new_course = trim($temp[1]);
 				$using_hours = trim($temp[2]);
@@ -824,7 +824,7 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "</div>";
 
-		$this->db->add_to_log("toolbox", "substitutions");
+    watchdog("toolbox", "substitutions", array(), WATCHDOG_DEBUG);    
 
 		return $pC;
 	}
@@ -919,14 +919,13 @@ function draw_menu_items($menu_array) {
 			$is_empty = false;
 		}
 
-		if ($is_empty == true)
-		{
+		if ($is_empty == true) {
 			$pC .= "<div align='center'>" . t("There are no transfer equivalencies for this student.") . "</div>";
 		}
 
 		$pC .= "</div>";
 
-		$this->db->add_to_log("toolbox", "transfers");
+    watchdog("toolbox", "transfers", array(), WATCHDOG_DEBUG);
 
 		return $pC;
 	}
@@ -1058,8 +1057,8 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "</div>";
 
-		$this->db->add_to_log("toolbox", "courses,$order");
-
+    watchdog("toolbox", "courses", array(), WATCHDOG_DEBUG);		
+		
 		return $pC;
 	}
 
@@ -1148,7 +1147,7 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "</div>";
 
-		$this->db->add_to_log("toolbox", "moved");
+    watchdog("toolbox", "moved", array(), WATCHDOG_DEBUG);
 
 		return $pC;
 	}
@@ -4029,7 +4028,7 @@ function draw_menu_items($menu_array) {
 
 		foreach ($new_array as $key => $value)
 		{
-			$temp = split(" ~~ ",$value);
+			$temp = explode(" ~~ ",$value);
 			$title = trim($temp[0]);
 			$subject_id = trim($temp[1]);
 			$pC .= "<option value='$subject_id'>$title</option>";

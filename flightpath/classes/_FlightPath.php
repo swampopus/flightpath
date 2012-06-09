@@ -865,7 +865,9 @@ class _FlightPath
 			$result = $db->db_query("REPLACE INTO student_settings
 									(student_id, settings, posted)
 									VALUES ('?','?', '?' )	", $student_id, serialize($this->student->array_settings), time());
-			$db->add_to_log("update_student_settings", "$student_id");
+
+      watchdog("update_student_settings", "Settings updated for this student.");
+
 
 		}
 
@@ -874,12 +876,12 @@ class _FlightPath
 		if ($_POST["log_addition"] != "")
 		{
 			$temp = explode("~",$_POST["log_addition"]);
-			if ($temp[0] == "change_term") {
-				$db->add_to_log("change_term","$student_id," . $temp[1]);
+			if ($temp[0] == "change_term") {				
+        watchdog("change_term", "$student_id," . $temp[1]);        
 			}
 
 			if ($temp[0] == "change_track"){
-				$db->add_to_log("change_track","$student_id," . $temp[1]);
+        watchdog("change_track", "$student_id," . $temp[1]);        
 			}
 
 
@@ -947,10 +949,10 @@ class _FlightPath
 		if ($is_what_if == "1"){$wi = "_whatif";}
 
 		if ($bool_draft) {
-			$db->add_to_log("save_adv_draft$wi", "$student_id,major_code:$major_code");
+			watchdog("save_adv_draft$wi", "$student_id,major_code:$major_code");
 		} 
 		else {
-			$db->add_to_log("save_adv_active$wi", "$student_id,major_code:$major_code");
+			watchdog("save_adv_active$wi", "$student_id,major_code:$major_code");
 		}
 
 		// Go through the POST, looking for the
@@ -1123,7 +1125,7 @@ class _FlightPath
 									('?','?','?','?','?','?','?','?','?','?','?','?','?')
 									", $student_id,$faculty_id,$course_id,$required_entry_value,$group_id,$semester_num,$sub_course_id,$sub_entry_value,$sub_term_id,$sub_transfer_flag,$sub_hours,$sub_remarks, time());
 
-			$db->add_to_log("save_substitution", "$student_id,group_id:$group_id,insert_id:" . mysql_insert_id());
+			watchdog("save_substitution", "$student_id,group_id:$group_id,insert_id:" . mysql_insert_id());
 
 		}
 
@@ -1137,7 +1139,7 @@ class _FlightPath
 									SET `delete_flag`='1'
 									WHERE `id`='?'	", $sub_id);
 
-			$db->add_to_log("remove_substitution", "$student_id,sub_id:$sub_id");
+			watchdog("remove_substitution", "$student_id,sub_id:$sub_id");
 
 		}
 
@@ -1164,7 +1166,7 @@ class _FlightPath
 									('?','?','?','?','?','?','?')
 									", $student_id,$faculty_id,$course_id,$term_id,$transfer_flag,$group_id,time());
 
-			$db->add_to_log("save_unassign_group", "$student_id,group_id:$group_id");
+			watchdog("save_unassign_group", "$student_id,group_id:$group_id");
 
 		}
 
@@ -1178,7 +1180,7 @@ class _FlightPath
 									SET `delete_flag`='1'
 									WHERE `id`='?' ", $unassign_id);
 
-			$db->add_to_log("restore_unassign_group", "$student_id,unassign_id:$unassign_id");
+			watchdog("restore_unassign_group", "$student_id,unassign_id:$unassign_id");
 
 		}
 
@@ -1200,7 +1202,7 @@ class _FlightPath
 									('?','?','?','?')
 									", $student_id, $faculty_id, $course_id, time());
 
-			$db->add_to_log("save_unassign_transfer", "$student_id,course_id:$course_id");
+			watchdog("save_unassign_transfer", "$student_id,course_id:$course_id");
 
 		}
 
@@ -1213,7 +1215,7 @@ class _FlightPath
 									SET `delete_flag`='1'
 									WHERE `id`='?' ", $unassign_id);
 
-			$db->add_to_log("restore_unassign_transfer", "$student_id,unassign_id:$unassign_id");
+			watchdog("restore_unassign_transfer", "$student_id,unassign_id:$unassign_id");
 
 		}
 
@@ -1245,6 +1247,9 @@ class _FlightPath
 				}
 			}
 		}
+
+
+    watchdog("advising", "Student has been advised: @student", array("@student" => $student_id));
 
 		return $advising_session_id_array;
 

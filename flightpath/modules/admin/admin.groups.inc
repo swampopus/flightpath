@@ -630,7 +630,7 @@ function admin_get_course_id_array_from_course_array($course_array) {
     $line = trim($course_array[$t]);
     if ($line == "~~" || $line == "") continue;
     $count++;
-    $temp = split(" ~~ ", $line);
+    $temp = explode(" ~~ ", $line);
     $si = trim($temp[0]);
     $cn = trim($temp[1]);
 

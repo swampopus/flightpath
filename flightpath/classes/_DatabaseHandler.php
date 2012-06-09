@@ -191,7 +191,7 @@ class _DatabaseHandler
 								settings, posted)
 								VALUES ('?','?', '?' )", $user_id, serialize($user_settings_array), time());
 
-		$db->add_to_log("update_user_settings", "hide_charts:{$user_settings_array["hide_charts"]}");
+    watchdog("update_user_settings", "Hide charts set to: @hide", array("@hide" => $user_settings_array["hide_charts"]));
 
 		return true;
 
@@ -870,7 +870,7 @@ class _DatabaseHandler
 		if (strpos($course_num,":"))
 		{
 			//$course_num = substr($course_num,0,-2);
-			$temp = split(":", $course_num);
+			$temp = explode(":", $course_num);
 			$course_num = trim($temp[0]);
 		}
 
@@ -1132,7 +1132,7 @@ class _DatabaseHandler
 			// the track and make it seperate.
 			if (strstr($major, "_"))
 			{
-				$temp = split("_", $major);
+				$temp = explode("_", $major);
 				$major_code = trim($temp[0]);
 				$track_code = trim($temp[1]);
 				// The major_code might now have a | at the very end.  If so,

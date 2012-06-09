@@ -491,7 +491,7 @@ function admin_display_users() {
 
   if ($_SESSION["prev_user_search"] != "")
   {
-    $temp = split("%%",$_SESSION["prev_user_search"]);
+    $temp = explode("%%",$_SESSION["prev_user_search"]);
     if ($temp[0] == "search")
     {
       $search = $temp[1];
@@ -518,7 +518,7 @@ function admin_display_users() {
   {
     // Something was searched for, and the dept submit button was not pushed.
     $dept = "";
-    $temp = split(" ",$search);
+    $temp = explode(" ",$search);
     $search1 = $temp[0];
     $search2 = trim($temp[1]);
 

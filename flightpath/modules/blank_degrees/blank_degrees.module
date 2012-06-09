@@ -274,9 +274,8 @@ function z__blank_degrees_display_blank_degree($blank_degree_id, $blank_print, $
   // send to the browser
   $screen->output_to_browser();
   
-  $db->add_to_log("blank_degrees","$blank_degree_id,view:$blank_view,print:$blank_print", "" . $degree_plan->get_title() . ",$degree_plan->catalog_year");
- 
-  
+  watchdog("blank_degrees","$blank_degree_id,view:$blank_view,print:$blank_print", "" . $degree_plan->get_title() . ",$degree_plan->catalog_year", array(), WATCHDOG_DEBUG);
+   
 }
 
 

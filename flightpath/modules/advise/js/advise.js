@@ -482,7 +482,7 @@ function popupSaveSubstitution(course_id, group_id, semester_num) {
 function str_replace(f, r, s) {
     var ra = r instanceof Array, sa = s instanceof Array, l = (f = [].concat(f)).length, r = [].concat(r), i = (s = [].concat(s)).length;
     while(j = 0, i--)
-      while(s[i] = s[i].split(f[j]).join(ra ? r[j] || "" : r[0]), ++j < l);
+      while(s[i] = s[i].explode(f[j]).join(ra ? r[j] || "" : r[0]), ++j < l);
   return sa ? s : s[0];
 }
 

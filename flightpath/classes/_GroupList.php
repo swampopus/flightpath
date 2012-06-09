@@ -129,7 +129,7 @@ class _GroupList extends ObjList
 		$new_list = new GroupList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
-			$temp = split(" ~~ ",$tarray[$t]);
+			$temp = explode(" ~~ ",$tarray[$t]);
 			$i = $temp[1];
 
 			$new_list->add($this->array_list[$i]);
@@ -168,7 +168,7 @@ class _GroupList extends ObjList
 		$new_list = new GroupList();
 		for($t = 0; $t < count($tarray); $t++)
 		{
-			$temp = split(" ~~ ",$tarray[$t]);
+			$temp = explode(" ~~ ",$tarray[$t]);
 			$i = $temp[1];
 
 			$new_list->add($this->array_list[$i]);
