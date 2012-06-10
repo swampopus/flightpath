@@ -878,8 +878,7 @@ class _DatabaseHandler
 
 		
 		// Always override if the global variable is set.
-		if ($GLOBALS["bool_use_draft"] == true)
-		{
+		if ($GLOBALS["fp_advising"]["bool_use_draft"] == true) {
 			$bool_use_draft = true;
 		}
 		
@@ -1213,8 +1212,7 @@ class _DatabaseHandler
 		// In other words, all in one.
 
 		// Always override if the global variable is set.
-		if ($GLOBALS["bool_use_draft"] == true)
-		{
+		if ($GLOBALS["fp_advising"]["bool_use_draft"] == true) {
 			$bool_use_draft = true;
 		}
 		

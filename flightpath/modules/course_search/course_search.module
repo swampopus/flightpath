@@ -881,7 +881,7 @@ function course_search_display_courses() {
         $hyp1 = " - ";
         $on_click = "";
         if (fp_screen_is_mobile()) {
-          $on_click = "on_click='toggle_course_extra(this);'";
+          $on_click = "onClick='toggleCourseExtra(this);'";
           $hyp1 = "";
         }
         
@@ -894,15 +894,17 @@ function course_search_display_courses() {
                  <div class='course-search-course-extra'>
                    <div class='course-search-course-description'>$description</div>
                    <div class='course-search-course-details'>$details</div>
-                 </div>
+                 
                  ";
 
-        if (user_has_permission("can_update_course_info_details")) {
+        if (user_has_permission("can_update_course_info_details") && !fp_screen_is_mobile()) {
           $rtn .= "<div class='course-search-admin-options'>
                     " . t("Administrative options:") . " 
                     " . l(t("Edit syllabus and rotation schedule"), "tools/course-search/edit-info-details", "course_id=$n_course_id&subject_id=$n_subject_id&course_num=$n_course_num") . "                  
                 </div>";
         }         
+                 
+        $rtn .= "</div>";
                        
         $rtn .= "</div>";
       }
@@ -1144,7 +1146,7 @@ function course_search_display_search() {
       }
       else {
         $rtn .= "<a class='course-search-subject-select-line'
-                  href='$module_action_u_r_l&mode=$mode&subject_id=$subject_id'>
+                  href='" . fp_url("tools/course-search/courses", "subject_id=$subject_id") . "'>
                     <div class='course-search-dept-name'>$title ($subject_id)</div>
                   </a>";
       }

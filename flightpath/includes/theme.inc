@@ -101,6 +101,12 @@ function fp_display_page($page) {
   }
   $screen->page_title = $page_title;
   $screen->page_has_search = $page["router_item"]["page_settings"]["page_has_search"];
+  
+  // mobile screens never have the search box
+  if (fp_screen_is_mobile()) {
+    $screen->page_has_search = FALSE;
+  }
+  
   $screen->page_banner_is_link = $page["router_item"]["page_settings"]["page_banner_is_link"];
   $screen->page_hide_report_error = $page["router_item"]["page_settings"]["page_hide_report_error"];
   $screen->page_is_popup = $page["router_item"]["page_settings"]["page_is_popup"];
@@ -799,6 +805,67 @@ function fp_render_button($title, $on_click, $bool_padd = true, $style = "", $ex
   return $rtn;
 }
 
+
+function fp_render_mobile_tab_array($tab_array) {
+    
+    $rtn = "";
+    
+    $js_vars = "var mobileTabSelections = new Array(); ";
+
+    if (count($tab_array) <= 1) return "";
+    
+    
+    $rtn .= "<table border='0' width='200' cellpadding='0' cellspacing='0' class='fp-mobile-tabs'>
+             <td>
+             <b>" . t("Display") . ": </b>";
+    
+    
+    $rtn .= "<select onChange='executeSelection()' id='mobileTabsSelect'>";
+    
+    for ($t = 0; $t < count($tab_array); $t++)
+    {
+      $title = $tab_array[$t]["title"];
+      $active = $tab_array[$t]["active"];
+      $on_click = $tab_array[$t]["on_click"];
+
+      if ($title == "")
+      {
+        continue;
+      }
+      $sel = ($active == true) ? $sel = "selected":"";
+      
+      $rtn .= "<option $sel value='$t'>$title</option>";
+            
+      $js_vars .= "mobileTabSelections[$t] = '$on_click'; \n";
+      
+    }   
+    
+    $rtn .= "</select>
+              </td></table>";
+            
+    
+    $rtn .= '
+      <script type="text/javascript">
+      ' . $js_vars . '      
+      
+      function executeSelection() {
+        var sel = document.getElementById("mobileTabsSelect").value;
+        
+        var statement = mobileTabSelections[sel];
+        // Lets execute the statement...
+        eval(statement);
+        
+      }
+      
+      
+      </script>
+    ';
+    
+    return $rtn;
+}
+
+
+
 /**
  * Given a propperly formatted tab_array, this will return the HTML
  * to draw it on a page.
@@ -814,10 +881,11 @@ function fp_render_button($title, $on_click, $bool_padd = true, $style = "", $ex
 function fp_render_tab_array($tab_array)
 {
 
-  // TODO:  fix mobile tabs
-  //if ($this->page_is_mobile) {
-  //  return $this->draw_mobile_tabs($tab_array);
-  //}
+  // fix mobile tabs
+  if (fp_screen_is_mobile()) {
+    return fp_render_mobile_tab_array($tab_array);         
+  }
+    
   
   $rtn = "";
 

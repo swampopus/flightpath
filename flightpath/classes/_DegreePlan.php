@@ -53,8 +53,7 @@ class _DegreePlan
     $this->list_groups = new GroupList();
     $this->bool_use_draft = $bool_use_draft;
     // Always override if the global variable is set.
-    if ($GLOBALS["bool_use_draft"] == true)
-    {
+    if ($GLOBALS["fp_advising"]["bool_use_draft"] == true) {
       $this->bool_use_draft = true;
     }
 

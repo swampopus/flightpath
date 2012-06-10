@@ -1658,7 +1658,7 @@ function draw_menu_items($menu_array) {
 	 *
 	 * @param unknown_type $tab_array
 	 */
-	function draw_mobile_tabs($tab_array) {
+	function z__draw_mobile_tabs($tab_array) {
 	  
 	  $rtn = "";
 	  

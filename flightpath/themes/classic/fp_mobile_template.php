@@ -34,6 +34,15 @@ print "
 <script src="<?php print base_path() ?>/inc/jquery-1.7.1.min.js" type="text/javascript"></script>
 
 <script type='text/javascript'>
+<?php
+    // java settings.
+      print " var FlightPath = new Object();
+              FlightPath.settings = new Object();
+              FlightPath.settings.themeLocation = '$theme_location'; 
+              FlightPath.settings.currentStudentId = '{$_REQUEST["current_student_id"]}';
+              FlightPath.settings.basePath = '" . base_path() . "';
+            ";
+?>
 
 function defaultOnLoad()
 		{

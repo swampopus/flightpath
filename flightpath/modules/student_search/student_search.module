@@ -366,12 +366,12 @@ function student_search_render_advisees($adv_array, $title) {
   if (!fp_screen_is_mobile()) {
    $rtn .= "
       <td width='5%' valign='top'>&nbsp; </td>
-      <td width='12%' valign='top' class='tenpt'><b>CWID</b></td>
-      <td width='15%' valign='top' class='tenpt'><b>First Name</b></td>
-      <td width='20%' valign='top' class='tenpt'><b>Last Name</b></td>
-      <td width='15%' valign='top' class='tenpt'><b>Major Code</b></td>
-      <td width='10%' valign='top' class='tenpt'><b>Rank</b></td>
-      <td width='15%' valign='top' class='tenpt'><b>Catalog Year</b></td>
+      <td width='12%' valign='top' class='tenpt'><b>" . t("CWID") . "</b></td>
+      <td width='15%' valign='top' class='tenpt'><b>" . t("First Name") . "</b></td>
+      <td width='20%' valign='top' class='tenpt'><b>" . t("Last Name")  . "</b></td>
+      <td width='15%' valign='top' class='tenpt'><b>" . t("Major Code") . "</b></td>
+      <td width='10%' valign='top' class='tenpt'><b>" . t("Rank") . "</b></td>
+      <td width='15%' valign='top' class='tenpt'><b>" . t("Catalog Year") . "</b></td>
       ";
   } 
   
@@ -402,17 +402,19 @@ function student_search_render_advisees($adv_array, $title) {
     if ($screen->page_is_mobile) $on_mouse = ""; // Causes problems on mobile devices.
     
     // Build up the URL we want to go to when we click this row.
-    $url = base_path() . "/view";
+    $path = "view";
     $advising_what_if = "no";
     if ($what_if_major_code != "") {
-      $url = base_path() . "/what-if";
+      $path = "what-if";
       $advising_what_if = "yes";            
     }
     
     // Add in the query part.
-    $url .= "&advising_student_id=$student_id&current_student_id=$student_id&advising_major_code=$major&advising_what_if=$advising_what_if";
-    $url .= "&what_if_major_code=$what_if_major_code&what_if_track_code=$what_if_track_code&advising_load_active=yes&clear_session=yes";
+    $query = "";
+    $query .= "advising_student_id=$student_id&current_student_id=$student_id&advising_major_code=$major&advising_what_if=$advising_what_if";
+    $query .= "&what_if_major_code=$what_if_major_code&what_if_track_code=$what_if_track_code&advising_load_active=yes&clear_session=yes";
     
+    $url = fp_url($path, $query);
 
     // old onCLick:
     //<!-- onClick='selectStudent(\"$student_id\",\"$major\",\"$what_if_major_code\",\"$what_if_track_code\")' -->

@@ -1,6 +1,12 @@
 FlightPath Changelog
 ====================
 
+2012-06-10
+  Finished the stats module for now.  It could use some more reports, but is OK for now.
+  
+  Got mobile version back to working state.
+
+
 2012-06-09
   Beginning work on the stats module.
   

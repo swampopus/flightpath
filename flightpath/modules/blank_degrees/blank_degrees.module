@@ -100,9 +100,9 @@ function z__blank_degrees_page_switchboard() {
   // Are we in draft mode?
   if ($_SESSION["fp_draft_mode"] == "yes")
   {
-    $GLOBALS["bool_use_draft"] = true;
+    $GLOBALS["fp_advising"]["bool_use_draft"] = true;
   } else {
-    $GLOBALS["bool_use_draft"] = false;
+    $GLOBALS["fp_advising"]["bool_use_draft"] = false;
   }
   
   $blank_view = $_REQUEST["blank_view"];
@@ -133,6 +133,15 @@ function blank_degrees_display_blank_degree() {
   $blank_view = $_REQUEST["blank_view"];
   
   $rtn = "";
+  
+  // Are we in draft mode?
+  if ($_SESSION["fp_draft_mode"] == "yes") {
+    $GLOBALS["fp_advising"]["bool_use_draft"] = true;
+  } 
+  else {
+    $GLOBALS["fp_advising"]["bool_use_draft"] = false;
+  }  
+  
   
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
   
@@ -182,12 +191,12 @@ function blank_degrees_display_blank_degree() {
   $tab_array[1]["active"] = ($screen->view == "type");
   $tab_array[1]["on_click"] = "window.location=\"" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year&blank_view=type") . "\";";
       
-  $tab_array[2]["title"] = "Print";
-  $tab_array[2]["type"] = "link";    
-  $tab_array[2]["active"] = FALSE;
-//  $tab_array[2]["on_click"] = "popupPrintWindow(\"" . base_path() . "/$view/print&advising_view=$screen->view\");";
-  $tab_array[2]["on_click"] = "popupPrintWindow(\"" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year&blank_view=$blank_view&blank_print=yes") . "\");";  
-      
+  if (!fp_screen_is_mobile()) {
+    $tab_array[2]["title"] = "Print";
+    $tab_array[2]["type"] = "link";    
+    $tab_array[2]["active"] = FALSE;  
+    $tab_array[2]["on_click"] = "popupPrintWindow(\"" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year&blank_view=$blank_view&blank_print=yes") . "\");";  
+  }      
       
   fp_set_page_sub_tabs($tab_array);
   
@@ -291,6 +300,13 @@ function blank_degrees_select_degree_form() {
   
   $bool_show_continue = TRUE;
   
+  // Are we in draft mode?
+  if ($_SESSION["fp_draft_mode"] == "yes") {
+    $GLOBALS["fp_advising"]["bool_use_draft"] = true;
+  } 
+  else {
+    $GLOBALS["fp_advising"]["bool_use_draft"] = false;
+  }  
   
   if (fp_screen_is_mobile()) {
     fp_add_css(fp_get_module_path("blank_degrees") . "/css/mobile.css");    
@@ -329,7 +345,7 @@ function blank_degrees_select_degree_form() {
     $mobile_markup = "";
     $degree_options = array();
     $db = get_global_database_handler();    
-    if ($degree_array = $db->get_degrees_in_catalog_year($blank_catalog_year, true, $GLOBALS["bool_use_draft"], FALSE)) {
+    if ($degree_array = $db->get_degrees_in_catalog_year($blank_catalog_year, true, $GLOBALS["fp_advising"]["bool_use_draft"], FALSE)) {
       foreach($degree_array as $major_code => $value) {
         if (trim($value["title"]) == ""){continue;}
         $degree_id = $value["degree_id"];
@@ -347,7 +363,7 @@ function blank_degrees_select_degree_form() {
           
 
         $mobile_markup .= "<a class='degree-search-degree-row'
-                    href='$module_action_u_r_l&blank_degree_id=$degree_id&blank_catalog_year={$_REQUEST["blank_catalog_year"]}'>
+                    href='" . fp_url("blank-degrees/display", "blank_degree_id=$degree_id&blank_catalog_year={$_REQUEST["blank_catalog_year"]}") . "'>
                       <div class='degree-search-degree-title'>$title</div>
                   </a>";
         
@@ -409,7 +425,7 @@ function blank_degrees_select_degree_form_submit($form, $form_state) {
 
 
 
-function blank_degrees_display_blank_degree_selection()
+function z__blank_degrees_display_blank_degree_selection()
 {
   // Get our global variables...
   $db = $GLOBALS["blank_degrees_db"];
@@ -427,8 +443,7 @@ function blank_degrees_display_blank_degree_selection()
   
   $settings = $db->get_flightpath_settings();
   $current_catalog_year = $settings["current_catalog_year"];
-  if ($GLOBALS["bool_use_draft"] == true)
-  {
+  if ($GLOBALS["fp_advising"]["bool_use_draft"] == true) {
     $current_catalog_year = $settings["current_draft_catalog_year"];
   }
 
@@ -449,8 +464,7 @@ function blank_degrees_display_blank_degree_selection()
 			will appear in FlightPath.
 			<br><br>";
 
-  if ($GLOBALS["bool_use_draft"] == true)
-  {
+  if ($GLOBALS["fp_advising"]["bool_use_draft"] == true) {
     $pC .= "<div class='hypo tenpt'>Now viewing in <b>Draft</b> mode.</b></div>";
   }
   
@@ -495,11 +509,10 @@ function blank_degrees_display_blank_degree_selection()
 					<option value=''>--------------------------</option>\n
 					";
     }
-    if ($degree_array = $db->get_degrees_in_catalog_year($_REQUEST["blank_catalog_year"], true, $GLOBALS["bool_use_draft"], FALSE))
-    {
-      foreach($degree_array as $major_code => $value)
-      {
+    if ($degree_array = $db->get_degrees_in_catalog_year($_REQUEST["blank_catalog_year"], true, $GLOBALS["fp_advising"]["bool_use_draft"], FALSE)) {
+      foreach($degree_array as $major_code => $value) {
         if (trim($value["title"]) == ""){continue;}
+        
         $degree_id = $value["degree_id"];
         $title = $value["title"];
         if ($value["degree_class"] == "G") {
@@ -507,8 +520,7 @@ function blank_degrees_display_blank_degree_selection()
         }
         // if title is too long, shorten it.
         $maxlen = 95;
-        if (strlen($title) > $maxlen)
-        {
+        if (strlen($title) > $maxlen) {
           $title = substr($title, 0, $maxlen - 3) . "...";
         }
         if (!$screen->page_is_mobile) {

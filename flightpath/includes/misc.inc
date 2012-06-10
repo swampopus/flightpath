@@ -324,8 +324,19 @@ function csv_to_array($csv_string) {
 }
 
 
-function fp_add_message($msg, $type = "status") {
-  $_SESSION["fp_messages"][] = array("type" => $type, "msg" => $msg);
+function fp_add_message($msg, $type = "status", $bool_no_repeat = FALSE) {
+
+  $md5 = md5($type . $msg);  
+
+  if ($bool_no_repeat && is_array($_SESSION["fp_messages"])) {
+    // Make sure this message isn't already in the session.
+    foreach($_SESSION["fp_messages"] as $s) {
+      if ($s["md5"] == $md5) return;
+    }
+  }
+
+    
+  $_SESSION["fp_messages"][] = array("type" => $type, "msg" => $msg, "md5" => $md5);
 }
 
 function fp_add_css($path_to_css) {

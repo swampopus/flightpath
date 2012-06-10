@@ -4,6 +4,25 @@
 function advise_menu() {
   $items = array();
   
+  
+  $items["admin-tools/toggle-draft"] = array(
+    "title" => "Toggle Draft Mode",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("advise_toggle_draft_form"),
+    "access_arguments" => array("toggle_draft"),
+    "page_settings" => array(
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to Main",
+          "path" => "main",
+        ),
+      ),          
+    ),
+    "type" => MENU_TYPE_TAB,
+    "tab_parent" => "main",
+  );
+  
+  
   $items["view"] = array(
     "title" => "View",
     "page_callback" => "advise_display_view",
@@ -227,13 +246,51 @@ function advise_menu() {
 
 
 
+function advise_toggle_draft_form() {
+  $form = array();
+  
+  $form["mark" . $m++] = array(
+    "value" => "<p>" . t("By turning Draft Mode on, you will be able
+                  to view degree plans which are still in 'Draft' mode
+                  in both the regular View tab, as well as the Blank Degrees module,
+                  if enabled.") . "</p>",
+  );
+  
+  $form["draft"] = array(
+    "type" => "radios",
+    "label" => t("Enable Draft Mode?"),
+    "options" => array("yes" => t("Yes"), "no" => t("No")),
+    "value" => $_SESSION["fp_draft_mode"],
+  );
+  
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => t("Submit"),
+    "prefix" => "<hr>",
+  );
+  
+  $form["#redirect"] = array(
+    "path" => "main",
+    "query" => "",
+  );
+  
+  return $form;
+}
+
+
+function advise_toggle_draft_form_submit($form, $form_state) {
+  fp_add_message(t("Draft mode successfully updated."));  
+  $_SESSION["fp_draft_mode"] = $form_state["values"]["draft"];
+}
+
+
 /**
  * Lets the user change the track for this major.
  */
 function advise_display_popup_change_track() {
   global $degree_plan, $student;
   $rtn = "";
-  
+   
   advise_init_screen();
   
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
@@ -415,12 +472,21 @@ function advise_display_popup_group_select() {
   
   $settings = fp_get_system_settings();
   
+  $blank_degree_id = trim($_GET["blank_degree_id"]);
   $course_id = trim($_GET["course_id"]);
   $group_id = trim(addslashes($_GET["group_id"]));
   $group_hours_remaining = trim(addslashes($_GET["group_hours_remaining"]));
   $semester_num = trim(addslashes($_GET["semester_num"]));
   $perform_action2 = $_REQUEST["perform_action2"]; 
-  
+
+  // If this is a "blank" degree, make sure we set the degree_id correctly.
+  if($blank_degree_id != "") {    
+    $degree_plan = new DegreePlan($blank_degree_id);
+    $fp->degree_plan = $degree_plan;
+    $screen->degree_plan = $degree_plan;
+    $screen->bool_blank = TRUE;
+  }
+
   if (!$group = $degree_plan->find_placeholder_group($group_id, $semester_num)) {
     fpm("Could not find group $group_id in semester $semester_num.");
   }
@@ -598,6 +664,13 @@ function advise_perm() {
                         degree plan."),
   );
 
+
+  $perms["toggle_draft"] = array(
+    "title" => t("Toggle draft mode"),
+    "description" => t("The user toggle 'draft' mode, so they can view draft degree plans
+                        in FlightPath."),
+  );
+
   
   
   return $perms;
@@ -666,11 +739,13 @@ function advise_display_view($view = "view") {
     $tab_array[1]["active"] = ($screen->view == "type");
     $tab_array[1]["on_click"] = "changeView(\"type\");";
         
-    $tab_array[2]["title"] = "Print";
-    $tab_array[2]["type"] = "link";    
-    $tab_array[2]["active"] = FALSE;
-    $tab_array[2]["on_click"] = "popupPrintWindow(\"" . base_path() . "/$view/print&advising_view=$screen->view\");";  
-        
+    if (!fp_screen_is_mobile()) {
+      $tab_array[2]["title"] = "Print";
+      $tab_array[2]["type"] = "link";    
+      $tab_array[2]["active"] = FALSE;
+      $tab_array[2]["on_click"] = "popupPrintWindow(\"" . base_path() . "/$view/print&advising_view=$screen->view\");";  
+    }
+    
     fp_set_page_sub_tabs($tab_array);
     
     watchdog("view_by_$screen->view", "", array(), WATCHDOG_DEBUG);
@@ -728,7 +803,7 @@ function advise_display_what_if_selection($bool_undergrad_only = TRUE) {
         ";
   $settings = fp_get_system_settings();
   $current_catalog_year = $settings["current_catalog_year"];
-  //$bool_use_draft = $GLOBALS["bool_use_draft"];
+  //$bool_use_draft = $GLOBALS["fp_advising"]["bool_use_draft"];
   $bool_use_draft = FALSE;  // leave as false for now.  Because you can't select
                         // degree options, and if you click submit it really does
                         // save it.  Better to just use blank degrees.
@@ -1056,7 +1131,13 @@ function advise_init() {
     $_REQUEST["advising_load_active"] = "yes";        
   }
     
-      
+    
+  // Is draft mode enabled?
+  if ($_SESSION["fp_draft_mode"] == "yes") {
+    fp_add_message("<b>" . t("Draft mode") . "</b> " . t("is currently enabled, however, substitutions and advisings will
+                      still be saved normally."), "status", TRUE);
+  }
+          
 }
 
 
@@ -1149,6 +1230,7 @@ function advise_init_screen() {
     $fp->init();    
     $student = $fp->student;
     $degree_plan = $fp->degree_plan;
+
     $GLOBALS["fp_advising"]["load_from_cache"] = "no";
     $bool_loaded = TRUE;    
   }
