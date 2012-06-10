@@ -79,7 +79,45 @@ function stats_menu() {
     "type" => MENU_TYPE_CALLBACK,
   );
 
+
+
+  $items["stats/advisor-use"] = array(
+    "title" => "Advisor Use",
+    "page_callback" => "stats_report_advisor_use",
+    "access_arguments" => array("can_access_stats"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "bool_print" => FALSE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Main menu",
+          "path" => "admin-tools/stats",
+        ),
+      ),      
+    ),    
+    "type" => MENU_TYPE_CALLBACK,
+  );
+
   
+
+  $items["stats/flightpath-use-summary"] = array(
+    "title" => "FlightPath Use Summary",
+    "page_callback" => "stats_report_flightpath_use_summary",
+    "access_arguments" => array("can_access_stats"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "bool_print" => FALSE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Main menu",
+          "path" => "admin-tools/stats",
+        ),
+      ),      
+    ),    
+    "type" => MENU_TYPE_CALLBACK,
+  );
+
+    
   
   return $items;
 }
@@ -1164,7 +1202,143 @@ function stats_display_student_advising_history()
 }
 
 
-function stats_display_use_report()
+
+function stats_report_flightpath_use_summary() {
+  $rtn = "";    
+
+  $start_date = trim(addslashes($_REQUEST["start_date"]));
+  $end_date = trim(addslashes($_REQUEST["end_date"]));
+
+  $rtn .= stats_draw_date_range_form("stats/flightpath-use-summary", $start_date, $end_date);
+  
+  if ($start_date == "" || $end_date == "") {
+    return $rtn;
+  }  
+  $start_date .= " 00:00:00";  // make it start at midnight of the startDate.
+  $end_date .= " 23:59:59";  // make it go through to midnight of the endDate.
+  // Okay, now we get our various counts....
+
+  // Logins...
+  $u_student = stats_get_log_count("login","",true,$start_date,$end_date,true);
+  $t_student = stats_get_log_count("login","",false,$start_date,$end_date,true);
+  $u_staff = stats_get_log_count("login","",true,$start_date,$end_date,false);
+  $t_staff = stats_get_log_count("login","",false,$start_date,$end_date,false);
+  $rtn .= "<b>System Logins</b>
+      <blockquote>
+        Unique student logins: $u_student<br>
+        Total student logins: $t_student<br>
+        ------- <br>
+        Unique faculty/staff logins: $u_staff<br>
+        Total faculty/staff logins: $t_staff
+      </blockquote>
+      ";
+
+  // Advisings...
+  $regular_advisings = stats_get_log_count("save_adv_active","",false,$start_date,$end_date,false);
+  $wi_advisings = stats_get_log_count("save_adv_active_whatif","",false,$start_date,$end_date,false);
+  $total_advisings = $regular_advisings + $wi_advisings;
+  $rtn .= "<b>Advisings</b>
+      <blockquote>
+        Total student advisings: $total_advisings <br>
+        ------- <br>
+        Regular advisings: $regular_advisings<br>
+        What If advisings: $wi_advisings
+      </blockquote>
+      ";
+
+  // Comments...
+  $total = stats_get_log_count("save_comment","",false,$start_date,$end_date,false);
+  $unique = stats_get_log_count("save_comment","",true,$start_date,$end_date,false);
+  $rtn .= "<b>Comments</b>
+      <blockquote>
+        Total comments saved: $total <br>
+        ------- <br>
+        Unique faculty/staff commentors: $unique
+      </blockquote>
+      ";
+
+  // Course search...
+  $u_student = stats_get_log_count("course_search","",true,$start_date,$end_date,true);
+  $um_student = stats_get_log_count("course_search","",true,$start_date,$end_date,true,true);
+  $t_student = stats_get_log_count("course_search","",false,$start_date,$end_date,true);
+  $tm_student = stats_get_log_count("course_search","",false,$start_date,$end_date,true, true);
+  
+  $u_staff = stats_get_log_count("course_search","",true,$start_date,$end_date,false);
+  $t_staff = stats_get_log_count("course_search","",false,$start_date,$end_date,false);
+  $tm_staff = stats_get_log_count("course_search","",false,$start_date,$end_date,false, true);
+  $rtn .= "<b>Course Search</b>
+      <blockquote>
+        Unique student users: $u_student    <span class='s-mobile'>($um_student mobile)</span><br>
+        Total student uses: $t_student    <span class='s-mobile'>($tm_student mobile)</span><br>
+        ------- <br>
+        Unique faculty/staff users: $u_staff<br>
+        Total faculty/staff (and anonymous) uses: $t_staff <span class='s-mobile'>($tm_staff mobile)</span>
+      </blockquote>
+      ";
+
+  
+  // Degree search...
+  $u_student = stats_get_log_count("blank_degrees","",true,$start_date,$end_date,true);
+  $um_student = stats_get_log_count("blank_degrees","",true,$start_date,$end_date,true,true);
+  $t_student = stats_get_log_count("blank_degrees","",false,$start_date,$end_date,true);
+  $tm_student = stats_get_log_count("blank_degrees","",false,$start_date,$end_date,true, true);
+  $u_staff = stats_get_log_count("blank_degrees","",true,$start_date,$end_date,false);
+  $t_staff = stats_get_log_count("blank_degrees","",false,$start_date,$end_date,false);
+  $tm_staff = stats_get_log_count("blank_degrees","",false,$start_date,$end_date,false, true);
+  $rtn .= "<b>Degree Search (blank degrees)</b>
+      <blockquote>
+        Unique student users: $u_student    <span class='s-mobile'>($um_student mobile)</span><br>
+        Total student uses: $t_student    <span class='s-mobile'>($tm_student mobile)</span><br>
+        ------- <br>
+        Unique faculty/staff users: $u_staff<br>
+        Total faculty/staff (and anonymous) uses: $t_staff <span class='s-mobile'>($tm_staff mobile)</span>
+      </blockquote>
+      ";
+  
+  
+  // View preferences
+  $t_student_y = stats_get_log_count("view_by_year","",false,$start_date,$end_date,true);
+  $tm_student_y = stats_get_log_count("view_by_year","",false,$start_date,$end_date,true, true);
+  $u_student_y = stats_get_log_count("view_by_year","",true,$start_date,$end_date,true);
+  $um_student_y = stats_get_log_count("view_by_year","",true,$start_date,$end_date,true, true);
+  
+  $t_staff_y = stats_get_log_count("view_by_year","",false,$start_date,$end_date,false);
+
+  $t_student_t = stats_get_log_count("view_by_type","",false,$start_date,$end_date,true);
+  $tm_student_t = stats_get_log_count("view_by_type","",false,$start_date,$end_date,true, true);
+  $u_student_t = stats_get_log_count("view_by_type","",true,$start_date,$end_date,true);
+  $um_student_t = stats_get_log_count("view_by_type","",true,$start_date,$end_date,true, true);
+  
+  
+  $t_staff_t = stats_get_log_count("view_by_type","",false,$start_date,$end_date,false);
+  $rtn .= "<b>View Preferences</b>
+      <blockquote>
+        Unique student view-by-year: $u_student_y    <span class='s-mobile'>($um_student_y mobile)</span><br>
+        Total student view-by-year: $t_student_y    <span class='s-mobile'>($tm_student_y mobile)</span><br>
+        Total faculty/staff view-by-year: $t_staff_y<br>
+        ------- <br>
+        Unqiue student view-by-type: $u_student_t    <span class='s-mobile'>($um_student_t mobile)</span><br>
+        Total student view-by-type: $t_student_t    <span class='s-mobile'>($tm_student_t mobile)</span><br>
+        Total faculty/staff view-by-type: $t_staff_t<br>
+      </blockquote>
+      ";
+
+  // Substitutions
+  $t_staff = stats_get_log_count("save_substitution","",false,$start_date,$end_date,false);
+  $u_staff = stats_get_log_count("save_substitution","",true,$start_date,$end_date,false);
+  $rtn .= "<b>Substitutions</b>
+      <blockquote>
+        Unique substitutors: $u_staff<br>
+        Total substitutions: $t_staff<br>
+      </blockquote>
+      ";      
+  
+  return $rtn;
+}
+
+
+
+function z__stats_display_use_report()
 {
   // Get our global variables...
   $db = $GLOBALS["stats_db"];
@@ -1316,29 +1490,25 @@ function stats_display_use_report()
 
 }
 
+
+
 function stats_get_log_count($action = "", $action_array = "", $bool_distinct = false, $start_date, $end_date, $bool_students = true, $bool_mobile_only = false)
 {
-  // Return a count from the log where action1 or action2...
-  // Get our global variables...
-  $db = $GLOBALS["stats_db"];
-  $screen = $GLOBALS["stats_screen"];
-  $module_action_u_r_l = get_module_action_u_r_l("stats");
-
-
-  $action_line = " `action` = '$action' ";
+  
+  $action_line = " `type` = '$action' ";
   if (count($action_array) > 1)
   {
     $action_line = "";
     $action_line .= "( ";
     foreach($action_array as $action)
     {
-      $action_line .= " `action`='$action' OR";
+      $action_line .= " `type`='$action' OR";
     }
     $action_line = substr($action_line, 0, -2);
     $action_line .= ") ";
   }
 
-  $count = "count(id)";
+  $count = "count(wid)";
   if ($bool_distinct)
   {
     $count = "count(distinct `user_id`)";
@@ -1347,23 +1517,26 @@ function stats_get_log_count($action = "", $action_array = "", $bool_distinct = 
   $user_type = "";
   if ($bool_students)
   {
-    $user_type = " `user_type`='student' ";
+    $user_type = " `is_student` = '1' ";
   } else {
-    $user_type = " `user_type` != 'student' ";
+    $user_type = " `is_faculty` = '1' ";
   }
 
   if ($bool_mobile_only) {
-    $action_line .= "  AND notes LIKE 'M:%' ";
+    $action_line .= "  AND is_mobile = '1' ";
   }
   
-  $res = $db->db_query("SELECT $count AS count FROM log
+  $start_ts = strtotime($start_date);
+  $end_ts = strtotime($end_date);
+  
+  $res = db_query("SELECT $count AS count FROM watchdog
 					WHERE
-						`datetime` BETWEEN '$start_date' AND '$end_date'
+						`timestamp` > '$start_ts' AND `timestamp` < '$end_ts'
 					AND $user_type
 					AND
 						$action_line
 					");
-  $cur = $db->db_fetch_array($res);
+  $cur = db_fetch_array($res);
   return $cur["count"] * 1;
 
 
@@ -1467,7 +1640,114 @@ function stats_display_substitution_use_report()
 
 
 
-function stats_display_advisor_report()
+/**
+ * Displays the HTML for the date range form used by several reports.
+ * $path is what is the form's ACTION sending to.
+ */
+function stats_draw_date_range_form($path, $start_date = "", $end_date = "") {
+  $rtn = "";
+  
+  $rtn .= "<form action='" . fp_url($path) . "' method='GET' >
+            " . t("Enter dates in the format YYYY-MM-DD (ex: 2012-01-01)") . "
+            <br>
+            " . t("Start date:") . " <input type='text' name='start_date' value='$start_date'>
+            &nbsp; &nbsp;
+            " . t("End date:") . " <input type='text' name='end_date' value='$end_date'>
+            &nbsp; &nbsp;
+            <input type='submit' value='" . t("Submit") . "'>
+          </form> <hr>";  
+  
+  
+  return $rtn;
+}
+
+
+function stats_report_advisor_use() {
+  $rtn = "";
+
+  $start_date = trim(addslashes($_REQUEST["start_date"]));
+  $end_date = trim(addslashes($_REQUEST["end_date"]));
+
+  $rtn .= stats_draw_date_range_form("stats/advisor-use", $start_date, $end_date);
+  
+  if ($start_date == "" || $end_date == "") {
+    return $rtn;
+  }  
+  
+  $start_date .= " 00:00:00";  // make it start at midnight of the startDate.
+  $end_date .= " 23:59:59";  // make it go through to midnight of the endDate.
+
+  $start_ts = strtotime($start_date);
+  $end_ts = strtotime($end_date);
+
+  // Now, what we're doing here is we want the names of the advisors,
+  // and how many advisings they actually completed for each,
+  // as well as which college or department they belong to.  They need
+  // to be sorted by college/department.
+  $f_array = array();
+  $s_array = array();
+  
+  $result = db_query("SELECT * FROM watchdog a, faculty b
+            WHERE 
+              a.timestamp > '$start_ts' AND a.timestamp < '$end_ts'
+            AND
+              (a.type = 'save_adv_active' OR a.type = 'save_adv_active_whatif')
+            AND a.user_id = b.user_id
+            ORDER BY b.department ");
+
+  while($cur = db_fetch_array($result)) {
+    $faculty_id = trim($cur["user_id"]);
+
+    $f_array[$faculty_id] = $f_array[$faculty_id] * 1; // make it a number.
+    $f_array[$faculty_id]++;
+
+    $s_array[$faculty_id]["dept_name"] = ucwords(strtolower(trim($cur["department"])));
+    $s_array[$faculty_id]["college_name"] = ucwords(strtolower(trim($cur["college"])));
+    $s_array[$faculty_id]["name"] = ucwords(strtolower(trim($cur["f_name"]) . " " . trim($cur["l_name"])));
+
+
+
+  }
+  
+
+
+  // Sort based on who has advised the most...
+  //arsort($f_array);
+
+  $start_date = trim(addslashes($_REQUEST["start_date"]));
+  $end_date = trim(addslashes($_REQUEST["end_date"]));
+
+  // Now, output the results...
+  $rtn .= "
+      <table border='1' width='650'>
+        <tr>
+          <th>" . t("Name") . "</th>
+          <th>" . t("Dept") . "</th>
+          <th>#</th>
+      </tr>";
+  foreach($f_array as $faculty_id => $value)
+  {
+    $name = $s_array[$faculty_id]["name"];
+    $college_name = $s_array[$faculty_id]["college_name"];
+    $dept_name = $s_array[$faculty_id]["dept_name"];
+
+    $rtn .= "<tr>
+       <td valign='top'>$name</td>
+       <td valign='top'>$dept_name</td>
+       <td valign='top' align='center'>$value</td>
+      </tr>
+      
+      ";
+  }
+  $rtn .= "</table>";  
+
+  
+  
+  return $rtn;
+}
+
+
+function z__stats_display_advisor_report()
 {
   // Get our global variables...
   $db = $GLOBALS["stats_db"];
@@ -1770,6 +2050,11 @@ function stats_display_main() {
   
   
   $rtn .= "<ul>";
+
+  $rtn .= "<li>" . l(t("Access Stats"), "stats/access") . "
+              <br>
+              " . t("See recent access within the system.  This can be useful to see if anyone is currently using the system.") . "
+            </li>";
   
   $rtn .= "<li>" . l(t("Major Counts"), "stats/major-counts") . "
               <br>
@@ -1781,14 +2066,19 @@ function stats_display_main() {
               " . t("This report will display information about which degree options students/advisors are selecting for particular majors 
                     (ex: General Studies)") . "
             </li>";
-  
-
-  $rtn .= "<li>" . l(t("Access Stats"), "stats/access") . "
+ 
+  $rtn .= "<li>" . l(t("Advisor Use Report"), "stats/advisor-use") . "
               <br>
-              " . t("See recent access within the system.  This can be useful to see if anyone is currently using the system.") . "
+              " . t("How many students an advisor has advised over a specified time range.") . "
             </li>";
 
-    
+  $rtn .= "<li>" . l(t("FlightPath Use Summary"), "stats/flightpath-use-summary") . "
+              <br>
+              " . t("A detailed report on how FlightPath is being used over a specified time range.") . "
+            </li>";
+
+  
+  
   
   
   $rtn .= "</ul>";

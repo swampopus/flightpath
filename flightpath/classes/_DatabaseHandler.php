@@ -346,8 +346,10 @@ class _DatabaseHandler
 			return $result;
 		} else {
 			// Meaning, the query failed...
-			// Do nothing.  Do not attempt to log anything, as that could cause an infinite loop.
-			// TODO:  Maybe email someone?
+			// Do nothing.  Do not attempt to log anything, as that could cause an infinite loop.			
+			
+			// Display the error on screen
+			$this->db_error();
 		}
 	}
 

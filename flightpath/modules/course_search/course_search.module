@@ -911,6 +911,8 @@ function course_search_display_courses() {
   }
 
 
+  watchdog("course_search", "User viewed courses in subject: @subject", array("@subject" => $subject_id), WATCHDOG_DEBUG);
+
 
   //$pC .= $screen->get_java_script_code();
   $rtn .= '    

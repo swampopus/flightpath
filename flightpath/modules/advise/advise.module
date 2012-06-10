@@ -669,11 +669,11 @@ function advise_display_view($view = "view") {
     $tab_array[2]["title"] = "Print";
     $tab_array[2]["type"] = "link";    
     $tab_array[2]["active"] = FALSE;
-    $tab_array[2]["on_click"] = "popupPrintWindow(\"" . base_path() . "/$view/print&advising_view=$screen->view\");";
-        
+    $tab_array[2]["on_click"] = "popupPrintWindow(\"" . base_path() . "/$view/print&advising_view=$screen->view\");";  
         
     fp_set_page_sub_tabs($tab_array);
     
+    watchdog("view_by_$screen->view", "", array(), WATCHDOG_DEBUG);
                     
   }
 
@@ -1188,11 +1188,12 @@ function advise_init_screen() {
   if ($GLOBALS["fp_advising"]["advising_view"] == "type") {
     $screen = new AdvisingScreenTypeView("", $fp);
     $screen->view = "type";
-    $log_action = "view_by_type";
 
-  } else {
+  } 
+  else {
     // Default advising view.  "View by Year"
     $screen = new AdvisingScreen("", $fp);
+    $screen->view = "year";
   }
 
 
@@ -1248,7 +1249,6 @@ function advise_init_screen() {
   // Once we have loaded the advising session, we should always try to load
   // from draft from then on out.
   $GLOBALS["fp_advising"]["advising_load_active"] = "";
-
   
   
 }

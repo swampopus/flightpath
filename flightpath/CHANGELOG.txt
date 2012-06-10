@@ -4,6 +4,8 @@ FlightPath Changelog
 2012-06-09
   Beginning work on the stats module.
   
+  Changed comment form to be proper FlightPath form, with form api.
+  
 
 2012-06-08
   Student developmentals and standardized tests are now in core.
@@ -17,6 +19,7 @@ FlightPath Changelog
   Moved to new watchdog() table and function, instead of the old log table.
 
   Got rid of old PHP split() function.
+  
 
 2012-06-07
   Removed the old AdvisingScreen::draw_curved_title function, in favor of the new

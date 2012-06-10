@@ -109,10 +109,34 @@ function comments_perform_delete_comment() {
 }
 
 
+function comments_comment_form_submit($form, $form_state) {
+  global $user, $current_student_id;
+  $faculty_id = $user->id;
+  $type = $form_state["values"]["type"];
+  $term_id = $form_state["values"]["term_id"];
+  $comment = trim($form_state["values"]["comment"]);
+  
+  // Perform the save!
+  if ($comment) {
+    db_query("INSERT INTO advising_comments
+              (student_id, faculty_id, term_id,
+                comment, posted, access_type)
+                VALUES
+                ('?', '?', '?', '?', '?', '?')
+                ", $current_student_id, $faculty_id, $term_id, $comment, time(), $type);
+               
+    fp_add_message("Comment saved successfully.");
+  }
+
+  watchdog("save_comment", "Comment saved");  
+  
+}
+
+
 /**
  * Actually save the comment in the POST, then redirect us back to our main page.
  */
-function comments_perform_save_comment() {
+function z__comments_perform_save_comment() {
   global $user, $current_student_id;
   $faculty_id = $user->id;
   $type = $_POST["type"];
@@ -138,6 +162,55 @@ function comments_perform_save_comment() {
 
 
 /**
+ * This is the form to enter a new comment.
+ */
+function comments_comment_form() {
+  global $current_student_id;
+  
+  $term_id = variable_get("advising_term_id");
+    
+  fp_set_title("");  
+    
+  $form = array();
+  
+  $form["type"] = array(
+    "type" => "radios",
+    "label" => t("Visible to:"),
+    "options" => array("public" => t("Anyone (including students)"), "faculty" => t("Faculty/Staff only")),
+    "value" => "faculty",
+  );
+  
+  $form["term_id"] = array(
+    "type" => "hidden",
+    "value" => $term_id,
+  );
+  
+  $form["current_student_id"] = array(
+    "type" => "hidden",
+    "value" => $current_student_id,
+  );
+  
+  $form["comment"] = array(
+    "type" => "textarea",
+    "description" => t("Trouble with Copy/Paste?  Try keyboard shortcuts CTRL-C and CTRL-V."),
+  );
+  
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => t("Save"),
+  );   
+  
+
+  
+  return $form;
+}
+
+
+
+
+
+
+/**
  * This displays the primary Comments tab, where we see past comments and can enter a
  * new one (with the right permissions).
  */
@@ -149,22 +222,8 @@ function comments_display_main() {
   fp_add_css(fp_get_module_path("comments") . "/css/comments.css");
   
   if (user_has_permission("can_save_comments")) {
-    $term_id = $GLOBALS["fp_advising"]["advising_term_id"];
-     
-    $form = "<b>" . t("Add a new comment") . "</b>
-      <form method='POST' id='cform' action='" . base_path() . "/comments/save-comment'>
-        <div class='comments-visible-input-row'>Visible to:
-            <label><input type='radio' name='type' value='public'>" . t("Anyone (including students)") . "</label> &nbsp; &nbsp; &nbsp;
-            <label><input type='radio' name='type' value='faculty' checked>" . t("Faculty/Staff only") . "</label>
-        </div>
-        <textarea id='comments-comment-textarea' name='comment'></textarea>
-         <div class='comments-copy-paste-help'><b>" . t("Trouble with Copy/Paste?") . "</b> " . t("Use keyboard shortcuts CTRL-C and CTRL-V.") . "</div>
-        <div class='comments-comment-buttons'>
-          " . fp_render_button(t('Save'), '$("#cform").submit();') . "
-        </div>
-        <input type='hidden' name='term_id' value='$term_id'>
-        <input type='hidden' name='current_student_id' value='$current_student_id'>
-      </form>";
+         
+    $form = fp_render_form("comments_comment_form");
   
     $rtn .= fp_render_c_fieldset($form, t("Click to enter comment"), true);
   }

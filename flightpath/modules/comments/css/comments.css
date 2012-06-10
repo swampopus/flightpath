@@ -18,6 +18,11 @@
 
 } 
 
+.fp-form-comments_comment_form .form-radios-type div, 
+.fp-form-comments_comment_form .form-radios-type label {
+  font-size: 10pt;
+  display: inline;
+}
 
 .comment-comment {
   margin-bottom: 40px;

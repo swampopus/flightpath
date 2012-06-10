@@ -1642,8 +1642,7 @@ class _CourseList extends ObjList
 							  $h = 0;
 							}
 							
-							$count = $count + $h;
-							fpm($cc->to_string());
+							$count = $count + $h;							
 						}
 					}
 				} else {
