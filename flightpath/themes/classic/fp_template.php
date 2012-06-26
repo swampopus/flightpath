@@ -393,7 +393,8 @@ $theme_location = fp_theme_location();
 		<?php
 		if ($page_is_popup != true)
 		{
-			print "<div align='center' style='font-size: 8pt;'>&copy; <a href='http://www.ulm.edu'>University of Louisiana at Monroe</a>, all rights reserved</div>";
+		  // TODO:  Allow for some kind of copyright notice here?  Probably in a setting
+			//print "<div align='center' style='font-size: 8pt;'>&copy; <a href='http://www.ulm.edu'>University of Louisiana at Monroe</a>, all rights reserved</div>";
 		}
 		?>
 		

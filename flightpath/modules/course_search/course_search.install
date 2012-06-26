@@ -1,0 +1,40 @@
+<?php
+
+
+/**
+ * Implementation of hook_install
+ */
+function course_search_install() {
+  if (!db_table_exists("course_rotation_schedule")) {
+    $query = "
+        CREATE TABLE `course_rotation_schedule` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `faculty_id` int(11) NOT NULL,
+        `course_id` int(11) NOT NULL,
+        `term_id` varchar(20) NOT NULL,
+        `entry_value` varchar(20) NOT NULL,
+        `posted` int(10) unsigned NOT NULL,
+        PRIMARY KEY (`id`)
+        )";
+  
+    db_query($query);
+  }
+  
+
+  if (!db_table_exists("course_syllabi")) {
+    $query = "
+        CREATE TABLE `course_syllabi` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `course_id` int(11) NOT NULL,
+          `course_perm_id` varchar(20) NOT NULL,
+          `filename` varchar(255) NOT NULL,
+          `posted` int(10) unsigned NOT NULL,
+          PRIMARY KEY (`id`),
+          KEY `course_id` (`course_id`),
+          KEY `perm` (`course_perm_id`)
+        ) ";
+          
+    db_query($query);    
+  }
+  
+}

@@ -1,10 +1,20 @@
 <?php
 
-/*
-* The admin module for FlightPath.  Lets admins configure modules, users, etc, as well
-* as all of the degree plan and course data within FlightPath.
-*/
+/**
+ * @file
+ * The administrative configurations for FlightPath.
+ * 
+ * 
+ */
+
  
+ 
+ 
+ 
+/**
+ * Implementation of hook_menu
+ * 
+ */
 function admin_menu() { 
   $items = array();
    

@@ -383,11 +383,41 @@ function t($str, $vars = array()) {
   return $str;
 }
 
+
+/**
+ * Provides translation functionality when database is not available.
+ */
+function st($str, $vars = array()) {
+  // Not implemented yet.  For now, just replicate t().
+  if (is_array($vars) && count($vars) > 0) {
+    foreach ($vars as $var => $val) {
+      
+      // If var begins with %, it means we want to italicize the val.
+      if (strstr($var, "%")) {
+        $val = "<em>$val</em>";
+      }
+      
+      $str = str_replace($var, $val, $str);
+    }
+  }
+    
+  return $str;
+}
+
+
 /**
  * Shortcut for getting the base_path variable from the global system settings.
  */
 function base_path() {
-  return $GLOBALS["fp_system_settings"]["base_path"];
+  $p = $GLOBALS["fp_system_settings"]["base_path"];
+  
+  // the base_path setting isn't set, so just use '.', meaning, start
+  // at the currect directory by default.
+  if ($p == "") {
+    $p = ".";
+  }
+  
+  return $p;
 }
 
 

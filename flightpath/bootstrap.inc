@@ -1,21 +1,4 @@
 <?php
-/*
-FlightPath was originally designed and programmed by the 
-University of Louisiana at Monroe. The original source is 
-copyright (C) 2011-present by the University of Louisiana at Monroe.
-
-FlightPath is considered "open source" under the 
-GNU General Public License, version 3 or any later version. 
-This covers any related files and documentation packaged with 
-FlightPath. 
-
-The license is defined in full here: http://www.gnu.org/licenses/gpl.html,
-and reproduced in the LICENSE.txt file.
-
-You may modify FlightPath's source code, but this copyright and license
-notice must not be modified, and must be included with the source code.
-------------------------------
-*/
 
 /**
  * This file should be included by every public-facing page of FlightPath.
@@ -31,33 +14,37 @@ notice must not be modified, and must be included with the source code.
 if (!isset($levels_deep)) $levels_deep = "";
 
 
-// Should we load the functions file?  This variable should be
-// set prior to including this bootstrap file.
-if (!isset($skip_flightpath_functions) || $skip_flightpath_functions != TRUE) {
-  // Load the includes files, for common functions.
-  require_once("$levels_deep" . "includes/theme.inc");
-  require_once("$levels_deep" . "includes/misc.inc");
-  require_once("$levels_deep" . "includes/forms.inc");
-  require_once("$levels_deep" . "includes/menu.inc");
-  require_once("$levels_deep" . "includes/db.inc");
-}
+// Load the includes files, for common functions.
+require_once("$levels_deep" . "includes/theme.inc");
+require_once("$levels_deep" . "includes/misc.inc");
+require_once("$levels_deep" . "includes/forms.inc");
+require_once("$levels_deep" . "includes/menu.inc");
+require_once("$levels_deep" . "includes/db.inc");
 
-// Load the global system settings file.
-require_once("$levels_deep" . "custom/settings.php");
+// Should we load the settings file?  This variable should be
+// set prior to including this bootstrap file.
+if (!isset($skip_flightpath_settings) || $skip_flightpath_settings != TRUE) {
+  // Load the global system settings file.
+  require_once("$levels_deep" . "custom/settings.php");
+}
 
 
 // Load all of the classes, as well as the custom classes.
 require_once("$levels_deep" . "classes/all_classes.php");
 
 
-// Include all of the enabled modules
-foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $value) {
-  if (isset($value["enabled"]) && $value["enabled"] != "1") {
-    // Module is not enabled.  Skip it.
-    continue;
-  }
+// Should we load the settings file?  This variable should be
+// set prior to including this bootstrap file.
+if (!isset($skip_flightpath_modules) || $skip_flightpath_modules != TRUE) {
+  // Include all of the enabled modules
+  foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $value) {
+    if (isset($value["enabled"]) && $value["enabled"] != "1") {
+      // Module is not enabled.  Skip it.
+      continue;
+    }
   
-  include_module($module, TRUE);
+    include_module($module, TRUE);
+  }
 }
 
 

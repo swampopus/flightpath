@@ -135,7 +135,7 @@ $db_name = $system_settings["db_name"];
 $dbc = mysql_connect ($db_host, $db_user, $db_pass) or die('Could not connect to database: ' . mysql_error());
 mysql_select_db ($db_name);
 
-$res = mysql_query("SELECT * FROM flightpath_system_settings");
+$res = mysql_query("SELECT * FROM variables");
 while ($cur = mysql_fetch_array($res)) {
   if ($val = unserialize($cur["value"])) {
     $system_settings[$cur["name"]] = $val;

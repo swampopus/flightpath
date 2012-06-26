@@ -382,6 +382,13 @@ class _DatabaseHandler
     $arr = debug_backtrace();
     fpm($arr);
 
+    if ($GLOBALS["fp_die_mysql_errors"] == TRUE) {
+      print "\n<br>The script has stopped executing because of a MySQL error:
+                    " . mysql_error() . "<br>\n
+             Please fix the error and try again.<br>\n";
+      die;
+    }
+
 	}
 	
 	

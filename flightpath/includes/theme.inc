@@ -1020,6 +1020,11 @@ function fp_theme_location($bool_include_base_path = TRUE) {
   
   $p = $GLOBALS["fp_system_settings"]["theme"];
   
+  // The theme hasn't been set for some reason
+  if ($p == "") {
+    $p = "themes/classic";
+  }
+  
   if ($bool_include_base_path) {
     $p = base_path() . "/" . $p;    
   }

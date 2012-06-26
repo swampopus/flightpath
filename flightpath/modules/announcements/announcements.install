@@ -26,7 +26,7 @@ function announcements_install() {
       KEY `access_type` (`access_type`),
       KEY `posted` (`posted`),
       KEY `delete_flag` (`delete_flag`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=latin1       
+    )        
     ";
     
     db_query($query);

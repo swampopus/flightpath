@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * @file
+ * The primary entry point for FlightPath.
+ * 
+ * This script will determine which page the user is trying to view, 
+ * and display it for them.
+ */
+
+
 session_start();
 
 header("Cache-control: private");
