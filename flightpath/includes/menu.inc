@@ -24,7 +24,7 @@ define("MENU_NOT_FOUND", 62);
  * Go through all installed modules and rebuild the menu_router table,
  * based on each module's hook_menu function.
  */
-function menu_rebuild_cache() {
+function menu_rebuild_cache($bool_display_message = TRUE) {
 
 
   // Begin by wiping out the menu_router table
@@ -52,7 +52,9 @@ function menu_rebuild_cache() {
     }
   }  
   
-  fp_add_message(t("The menu router has been rebuilt"));
+  if ($bool_display_message) {
+    fp_add_message(t("The menu router has been rebuilt"));
+  }
     
 }
 

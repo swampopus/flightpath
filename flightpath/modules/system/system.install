@@ -16,7 +16,34 @@
  * database changes we need to make in order to have FlightPath up and running.
  */
 function system_enable() {
-  // TODO: set up modules (and variables?) db tables for initial core modules.  Then clear cache? 
+  
+  // Set up our default roles
+  db_query("INSERT INTO roles (rid, name)
+            VALUES (1, 'anonymous user'), 
+                   (2, 'authenticated user')");
+   
+  // Add in the anonymous user into the users table (uid = 0)
+  db_query("INSERT INTO users (user_id, user_name) VALUES (0, 'anonymous')");
+
+  // Set up the modules table.
+  db_query("INSERT INTO modules (path, name, version, enabled, weight, type)
+            VALUES ('modules/system', 'system', '?', 1, '-999', 'module') ", FLIGHTPATH_VERSION);
+    
+
+  // Let's perform installations on the other modules we want enabled by default.
+  $modules = array("admin", "advise", "blocks", "comments", "student_search");
+  foreach ($modules as $module) {
+    system_enable_module(array("module" => $module, "path" => "modules/$module"));
+  }
+
+  // Set up some blocks for the system module by default.
+  db_query("INSERT INTO blocks (section, region, module, delta, weight)
+            VALUES ('system_main', 'right_col', 'system', 'tools', 1),
+                   ('system_main', 'right_col', 'system', 'admin_tools', 2) ");
+                   
+
+
+   
 }
 
 
@@ -377,7 +404,7 @@ $q = "
 CREATE TABLE `modules` (
   `path` varchar(255) NOT NULL,
   `name` varchar(100) NOT NULL,
-  `version` varchar(10) NOT NULL,
+  `version` varchar(20) NOT NULL,
   `requires` text NOT NULL,
   `enabled` int(11) NOT NULL,
   `weight` int(11) NOT NULL,

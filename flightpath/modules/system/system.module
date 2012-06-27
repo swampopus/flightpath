@@ -140,6 +140,13 @@ function system_menu() {
     ),
   );
   
+  $items["install-finished"] = array(
+    "title" => "Installation Finished",
+    "page_callback" => "system_display_install_finished_page",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_CALLBACK,
+  );
+  
   $items["login"] = array(
     "title" => "Login",
     "page_callback" => "system_display_login_page",
@@ -255,6 +262,40 @@ function system_menu() {
            
            
   return $items;
+}
+
+
+
+/**
+ * This page is displayed to the user once FlightPath has been installed.
+ */
+function system_display_install_finished_page() {
+  $rtn = "";
+
+  // Rebuild one more time
+  menu_rebuild_cache(FALSE);
+
+
+  fp_show_title(TRUE);
+  
+  $rtn .= t("Your new installation of FlightPath is now complete.
+              <br><br>
+             As a security precaution, you should: 
+             <ul>
+              <li>change the permissions
+                  on custom/settings.php so that it cannot be read or written to by unauthorized
+                  users.</li>
+              <li>You should also rename or remove install.php so that web visitors cannot
+                  access it.</li>
+             </ul>
+             
+             If you need to re-install FlightPath, delete custom/settings.php, and drop all of the tables
+             in the database, then re-access install.php.") . "<br><br>";
+
+  $rtn .= l(t("Access your new FlightPath site now."), "<front>");
+  
+  
+  return $rtn;
 }
 
 
@@ -636,7 +677,7 @@ function system_handle_form_submit() {
       
     }
   }  
-    
+     
   // Let's get our set of allowed values, by looking at the original form,
   // and grab what's in the POST which matches the name.
 
@@ -670,7 +711,6 @@ function system_handle_form_submit() {
     array_push($validate_handlers, $callback . "_validate");
   } 
     
-    
   // Let's store our values in the SESSION in case we need them later on.
   // But only if this is NOT a system_settings form!
   if ($form_type != "system_settings") {
@@ -687,7 +727,8 @@ function system_handle_form_submit() {
     // Let's now pass it through all of our custom validators, if there are any.
     foreach ($validate_handlers as $validate_callback) {         
       if (function_exists($validate_callback)) {
-        call_user_func_array($validate_callback, array(&$form, &$form_state));
+        
+        call_user_func_array($validate_callback, array($form, &$form_state));        
       }
     }
   }
@@ -711,7 +752,7 @@ function system_handle_form_submit() {
     // Let's go through the form's submit handlers now.
     foreach ($submit_handlers as $submit_callback) {          
       if (function_exists($submit_callback)) {
-        call_user_func_array($submit_callback, array(&$form, &$form_state));
+        call_user_func_array($submit_callback, array($form, &$form_state));
       }    
     }
 
@@ -768,11 +809,9 @@ function system_handle_logout() {
  * on the hook_clear_cache in each module.
  */
 function system_perform_clear_cache() {
-  // Find modules which implement hook_clear_cache
-  $modules = modules_implement_hook("clear_cache");
-  foreach ($modules as $module) {
-    call_user_func($module . '_clear_cache');
-  }   
+    
+  fp_clear_cache();
+  
   fp_goto("<front>");
   
 }
@@ -967,7 +1006,7 @@ function system_login_form_validate($form, &$form_state) {
     $form_state["db_row"]["user_name"] = "FULL ACCESS USER";
     return;
   }  
-  
+
   // Otherwise, check the table normally.  
   // Check the user's password is valid.
   $res = db_query("SELECT * FROM users WHERE user_name = '?' AND password = '?' AND is_disabled = '0' ", $user, md5($password));
@@ -1094,7 +1133,6 @@ function system_display_main_page() {
   }
 
   watchdog("main", "testing");
-
 
   $rtn .= "<table class='fp-semester-table'>";
   
@@ -1459,7 +1497,7 @@ function system_handle_uninstall_module() {
 
 
 /**
- * Handles the enabling (and possible installatio) of module.
+ * Handles the enabling (and possible installation) of module.
  */
 function system_enable_module($module_details) {
 

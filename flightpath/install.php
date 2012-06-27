@@ -18,7 +18,7 @@ header("Cache-control: private");
 // Load our bootstrap (skipping over loads we don't need)
 $skip_flightpath_settings = TRUE;
 $skip_flightpath_modules = TRUE;
-require_once("bootstrap.inc");
+require("bootstrap.inc");
 
 // Load needed modules 
 require_once("modules/system/system.module"); 
@@ -71,11 +71,32 @@ function install_perform_install() {
   global $user;
   $user->id = 1;  // set to admin during install
   
-  $db_name = $_POST["db_name"];
-  $db_host = $_POST["db_host"];
-  $db_port = $_POST["db_port"];
-  $db_user = $_POST["db_user"];
-  $db_pass = $_POST["db_pass"];
+  $db_name = trim($_POST["db_name"]);
+  $db_host = trim($_POST["db_host"]);
+  $db_port = trim($_POST["db_port"]);
+  $db_user = trim($_POST["db_user"]);
+  $db_pass = trim($_POST["db_pass"]);
+  
+  $admin_pass = trim($_POST["admin_pass"]);
+  $admin_pass2 = trim($_POST["admin_pass2"]);
+  $admin_name = trim($_POST["admin_name"]);
+
+  if (strlen($admin_name) < 3) {
+    return install_display_db_form("<font color='red'>" . st("Please select another
+                                                            username for Admin (ex: admin)
+                                                            which is at least 3 characters long.") . "</font>");    
+  }  
+
+  if (strlen($admin_pass) < 5) {
+    return install_display_db_form("<font color='red'>" . st("Admin password must be at least 5 characters long.") . "</font>");    
+  }  
+  
+  if ($admin_pass != $admin_pass2) {
+    return install_display_db_form("<font color='red'>" . st("You must enter the same Admin password for both the
+                                                                'Admin Password' field and the 'Re-enter Password'
+                                                                field.") . "</font>");    
+  }  
+  
 
   // Place into settings so our installation procedures will work.
   $GLOBALS["fp_system_settings"]["db_host"] = $db_host . ':' . $db_port;
@@ -83,6 +104,10 @@ function install_perform_install() {
   $GLOBALS["fp_system_settings"]["db_pass"] = $db_pass;
   $GLOBALS["fp_system_settings"]["db_name"] = $db_name;
   
+
+  // Make sure admin information is OK.
+  
+
 
 
   // We will attempt to connect to this database.  If we have any problems, we will go back to
@@ -153,13 +178,44 @@ function install_perform_install() {
   $GLOBALS["fp_die_mysql_errors"] = TRUE;
   // call system_install() to perform our numerous DB table creations.
   system_install();
+     
+  // With db tables created, let's include our settings file so we can get some
+  // important GLOBAL variables set up.
+  include("custom/settings.php");
+  // Re-establish DatabaseHandler object connection since we just re-loaded the settings file.
+  $temp_db = new DatabaseHandler();
     
+  // Add the admin user to the newly-created users table and the "faculty" table.
+  db_query("INSERT INTO users (user_id, user_name, password, is_faculty, f_name, l_name)
+            VALUES ('1', '?', '?', '1', 'Admin', 'User') ", $admin_name, md5($admin_pass));
+
+  db_query("INSERT INTO faculty (user_id) VALUES ('1') ");
+            
   // Having made it here, we now need to call system_enable,
   // which will in turn enable all of the other modules which
   // we will need to have, as well as other database changes.
   system_enable();
   
-    
+  // Now that we have enabled all of the modules (and made other database changes)
+  // let's re-include the bootstrap file, which will re-init our GLOBAL settings,
+  // as well as load all of our new modules.
+  $skip_flightpath_settings = FALSE;
+  $skip_flightpath_modules = FALSE;
+  include("bootstrap.inc");
+  // Re-establish DatabaseHandler object connection since we just re-loaded the settings file.
+  $temp_db = new DatabaseHandler();
+  
+  /////////////////////////  
+
+  // Now, we need to clear our caches and re-build the menu router.
+  fp_clear_cache();
+  
+  // wipe out the SESSION to remove any extraneous messages.
+  session_destroy();
+  
+  // Okay, now we are done!
+  // let's re-direct to a new page.
+  fp_goto("install-finished");
 }
 
 
@@ -350,10 +406,16 @@ function install_display_db_form($msg = "") {
   $db_port = $_POST["db_port"];
   $db_user = $_POST["db_user"];
   $db_pass = $_POST["db_pass"];
+
+  $admin_pass = $_POST["admin_pass"];
+  $admin_pass2 = $_POST["admin_pass2"];
+  $admin_name = $_POST["admin_name"];
+  
+  
   
   $pC = "";
 
-  $pC .= "<h2 class='title'>" . st("Setup Database") . "</h2>$msg
+  $pC .= "<h2 class='title'>" . st("Setup Database and Admin") . "</h2>$msg
           <p>" . st("You should have already set up a database and database user
                       (with all privileges except Grant) for FlightPath.  Please
                       enter that information below.") . "</p>
@@ -362,6 +424,32 @@ function install_display_db_form($msg = "") {
           <form action='install.php?lang=$lang' method='POST'>
           <input type='hidden' name='perform_action' value='install'>
           <table border='0' cellpadding='3' style='margin-left: 20px;'>
+
+            <tr>
+              <td colspan='2'><b>" . st("FlightPath administrator information") . "</b></td>
+            </tr>
+          
+          
+            <tr>
+              <td valign='top'>" . st("Admin Username:") . "</td>
+              <td valign='top'><input type='text' name='admin_name' value='$admin_name' size='15' maxlength='50'> Ex: admin</td>
+            </tr>
+            
+            <tr>
+              <td valign='top'>" . st("Admin Password:") . "</td>
+              <td valign='top'><input type='password' name='admin_pass' value='$admin_pass' size='20'></td>
+            </tr>
+            
+            <tr>
+              <td valign='top'>" . st("Re-enter Password:") . "</td>
+              <td valign='top'><input type='password' name='admin_pass2' value='$admin_pass2' size='20'></td>
+            </tr>
+            
+                        
+            <tr>
+              <td colspan='2'><hr>
+                <b>" . st("Database information") . "</b></td>
+            </tr>
             
             <tr>
               <td valign='top'>" . st("Database Name:") . "</td>

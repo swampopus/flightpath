@@ -1,6 +1,11 @@
 FlightPath Changelog
 ====================
 
+2012-06-27
+  Completed the install script for the most part, as well as made various changes in other
+  files in the pursuit of making the install script work.
+
+
 2012-06-26
   Working on creating an install script for FlightPath; moving database creation statements
   into system.install file, under the system module.

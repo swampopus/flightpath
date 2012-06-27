@@ -47,6 +47,8 @@ if (!isset($skip_flightpath_modules) || $skip_flightpath_modules != TRUE) {
   }
 }
 
+// Constants
+define('FLIGHTPATH_VERSION', '4.x-dev');
 
 
 

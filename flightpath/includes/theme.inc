@@ -138,8 +138,12 @@ function fp_display_page($page) {
   // Build up the content //
   
   $content_top = "";  
+  $page_show_title = $page["router_item"]["page_settings"]["page_show_title"];
+  if (isset($GLOBALS["fp_set_show_title"])) {
+    $page_show_title = $GLOBALS["fp_set_show_title"];
+  }
   
-  if ($page["router_item"]["page_settings"]["page_show_title"] == TRUE) {
+  if ($page_show_title == TRUE) {
     $content_top .= "<h2 class='title'>" . $page_title . "</h2>";
   } 
   
@@ -208,6 +212,13 @@ function fp_display_page($page) {
   $screen->output_to_browser();  
 }
 
+
+/**
+ * Sets whether the title should be shown on the page or not.
+ */
+function fp_show_title($bool_show = TRUE) {
+  $GLOBALS["fp_set_show_title"] = $bool_show;
+}
 
 
 /**
