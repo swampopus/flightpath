@@ -24,7 +24,13 @@ require("bootstrap.inc");
 require_once("modules/system/system.module"); 
 
 
-// TODO:  Check here to see if FlightPath has already been installed.
+// Check here to see if FlightPath has already been installed.
+// We will do this by simply looking for the settings.php file.
+if (file_exists("custom/settings.php")) {
+  die("FlightPath has already been installed.  If you wish to re-install FlightPath,
+        DELETE the custom/settings.php file, and drop all of the tables in FlightPath's
+        database.");
+}
 
 /*
  * To begin setting up FlightPath, the user must have completed

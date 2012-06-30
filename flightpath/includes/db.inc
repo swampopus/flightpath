@@ -4,10 +4,7 @@
  * This include fine mostly involves DB command shortcuts.
 */ 
 
-define ('WATCHDOG_NOTICE', 5);
-define ('WATCHDOG_ALERT', 1);
-define ('WATCHDOG_ERROR', 3);
-define ('WATCHDOG_DEBUG', 7);
+
 /**
  * Call other modules which implement the hook_watchdog function.
  * Adapted from Drupal 6's watchdog function.

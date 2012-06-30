@@ -665,6 +665,16 @@ function modules_implement_hook($hook = "example_hook_here") {
 }
 
 
+/**
+ * Invoke all module hooks for the supplied hook.
+ */
+function invoke_hook($hook = "example_hook_here", $params = array()) {
+  $modules = modules_implement_hook($hook);
+  foreach($modules as $module) {
+    call_user_func_array($module . "_" . $hook, $params);
+  }
+}
+
 
 /**
  * This method will return a globally-set DatabaseHandler object,

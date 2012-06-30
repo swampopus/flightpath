@@ -1,5 +1,15 @@
-FlightPath Changelog
-====================
+FlightPath 4.x Changelog
+========================
+
+2012-06-30
+  Finalized COPYRIGHT.txt file, and removed old copyright notices from individual source files.
+  
+  Added token check to advising submissions, as well as hook so users can hook in when it is submitted.
+  
+  Removed old files from the repository.
+  
+  index.php checks to see that FlightPath is installed, if not, it redirects to install script
+
 
 2012-06-27
   Completed the install script for the most part, as well as made various changes in other

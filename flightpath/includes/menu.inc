@@ -5,19 +5,6 @@
  * for FlightPath
  */
 
- ////////////////////////////////////////////
- 
-
-// Define useful constants
-define("MENU_TYPE_NORMAL_ITEM", 1);
-define("MENU_TYPE_CALLBACK", 2);
-define("MENU_TYPE_TAB", 3);
-define("MENU_TYPE_SUB_TAB", 4);
-/////
-define("MENU_ACCESS_DENIED", 61);
-define("MENU_NOT_FOUND", 62);
-    
-  
  
  
 /**

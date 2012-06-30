@@ -13,6 +13,15 @@ session_start();
 
 header("Cache-control: private");
 
+
+// If the settings.php file doesn't exist, then FlightPath must not be installed,
+// and we should redirect to install.php.
+if (!file_exists("custom/settings.php")) {
+  header ("Location: install.php");
+  die;
+}
+
+
 require_once("bootstrap.inc");
 
 // For development reasons only:

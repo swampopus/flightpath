@@ -720,8 +720,11 @@ function advise_display_view($view = "view") {
 
     $screen->build_screen_elements();
 
-    $rtn .= "<form id='mainform' method='POST' action='" . base_path() . "/$view'>";
-    $rtn .= "<table class='fp-semester-table'>";
+    $form_token = md5("advise_display_view" . fp_token());
+        
+    $rtn .= "<form id='mainform' method='POST' action='" . base_path() . "/$view'>
+             <input type='hidden' name='form_token' value='$form_token'>
+             <table class='fp-semester-table'>";
     $rtn .= $screen->display_screen();
     $rtn .= "</table>";
     // Add in the required "advising variables"
@@ -854,39 +857,11 @@ function advise_display_what_if_selection($bool_undergrad_only = TRUE) {
 
 
 /**
- * Load from our advising_session_variables and return the vars array.
- */
-function z__advise_load_advising_variables_from_db($student_id, $faculty_id) {
-  $res = db_query("SELECT vars FROM advising_session_variables
-                    WHERE faculty_id = '?'
-                    AND student_id = '?'
-                    ", $faculty_id, $student_id);
-  $cur = db_fetch_array($res);
-  if (!$rtn = unserialize($cur["vars"])) {
-    $rtn = array();
-  }
-  
-  // Make sure certain variables always equal something valid...
-  if ($rtn["advising_term_id"] == "") {
-    $rtn["advising_term_id"] = "0";        
-  }  
-  
-  return $rtn;
-}
-
-
-
-
-
-/**
- * This function takes various variables from the REQUEST and stores them
- * in our advising_session_variables table for more convenient use later on.
+ * Takes various variables from the REQUEST and stores them in our advising_session_variables table for more convenient use later on.
  */
 function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) {
   global $user;
-  
-  // begin by loading what we already have in the db.
-  //$vars = advise_load_advising_variables_from_db($_REQUEST["current_student_id"], $user->id);
+    
   $vars = array();
 
   $student = null;
@@ -1244,25 +1219,46 @@ function advise_init_screen() {
   }
 
 
+  // If the form has been saved, this token is expected.  This protects
+  // against XSS attacks.
+  $form_token = md5("advise_display_view" . fp_token());
   if ($perform_action == "save_draft") {
+    if ($_REQUEST["form_token"] != $form_token) {
+      die(t("Sorry, but you have encountered an error.  A form submission was flagged
+      as possibly being an invalid or forged submission.  This may constitute a bug
+      in the system.  Please report this error to your Systems Administrator."));
+    }
     
     // Save, then reload the student.
-    $fp->save_advising_session_from_post(0,true);
+    $adv_id_array = $fp->save_advising_session_from_post(0,true);
+    
+    // Look for hook_save_advising_session()...
+    invoke_hook("save_advising_session", $adv_id_array);
+    
     $bool_draft = TRUE;  // load draft, since we just saved it (and changed something)
     //fpm("saved draft");
 
   }
-
   if ($perform_action == "save_active") {
+    if ($_REQUEST["form_token"] != $form_token) {
+      die(t("Sorry, but you have encountered an error.  A form submission was flagged
+      as possibly being an invalid or forged submission.  This may constitute a bug
+      in the system.  Please report this error to your Systems Administrator."));
+    }
+    
     // Save, then go to the history screen.
     $adv_id_array = $fp->save_advising_session_from_post(0,false);
+    
+    // Look for hook_save_advising_session()...
+    invoke_hook("save_advising_session", $adv_id_array);
+    
     // Use an fp_goto command here to go to the History screen
     // Serialize the adv_id_array so we can send it along in our fp_goto command...
     $adv_id_serialized = serialize($adv_id_array);
 
     fp_goto("history", "adv_id_array_serialized=" . urlencode($adv_id_serialized));
     return;
-            
+
   }
 
 

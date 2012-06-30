@@ -756,5 +756,3 @@ class _Student
 	}
 
 } // end class Student
-
-?>
