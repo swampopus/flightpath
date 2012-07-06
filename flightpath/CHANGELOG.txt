@@ -1,6 +1,14 @@
 FlightPath 4.x Changelog
 ========================
 
+2012-07-06
+  Enabled announcements and update_status modules on FlightPath first install,
+  and created a new sample announcement when the announcement module is installed
+  the first time.
+
+  Added check to install.php to make sure custom directory was writable, displaying
+  error if it is not.
+  
  
 2012-07-05
   Started update_status module.

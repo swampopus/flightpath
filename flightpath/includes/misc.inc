@@ -281,7 +281,11 @@ function filter_markup($str) {
   
   // TODO: get allowed tags from a setting.
   
-  $allowed_tags = array('a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd', 'span', 'div', 'b', 'i', 'u');
+  $allowed_tags = array('a', 'em', 'strong', 'cite', 
+                        'blockquote', 'code', 'ul', 'ol', 'li', 
+                        'dl', 'dt', 'dd', 'span', 'div', 
+                        'b', 'i', 'u', 'br', 'p', 'table', 'tr', 
+                        'td', 'th', 'tbody');
   
   return filter_xss($str, $allowed_tags);
    

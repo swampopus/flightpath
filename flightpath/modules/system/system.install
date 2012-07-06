@@ -31,7 +31,7 @@ function system_enable() {
     
 
   // Let's perform installations on the other modules we want enabled by default.
-  $modules = array("admin", "advise", "blocks", "comments", "student_search");
+  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "announcements");
   foreach ($modules as $module) {
     system_enable_module(array("module" => $module, "path" => "modules/$module"));
   }
@@ -39,8 +39,9 @@ function system_enable() {
   // Set up some blocks for the system module by default.
   db_query("INSERT INTO blocks (section, region, module, delta, weight)
             VALUES ('system_main', 'right_col', 'system', 'tools', 1),
-                   ('system_main', 'right_col', 'system', 'admin_tools', 2) ");
-                   
+                   ('system_main', 'right_col', 'system', 'admin_tools', 2), 
+                   ('system_main', 'left_col', 'announcements', 'primary', 0) 
+                   ");
 
 
    

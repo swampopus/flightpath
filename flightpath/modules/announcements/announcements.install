@@ -30,6 +30,13 @@ function announcements_install() {
     ";
     
     db_query($query);
+   $ann = "<b>Sample Announcement</b><br>
+           This is a sample announcement!  You may add new announcements (or delete this one)
+           from the Admin Console.";
+   // Add a default message in the announcements table.
+   db_query("INSERT INTO announcements (announcement, access_type, posted)
+             VALUES('?', '?', '?') ", $ann, "public", time());
+   
     
   }
     

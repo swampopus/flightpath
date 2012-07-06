@@ -515,11 +515,11 @@ function install_display_db_form($msg = "") {
 function install_check_requirements() {
   $rtn = array();
   
-  /*
-  $rtn[] = st("Please make sure the <em>/custom</em> directory is writable to the web server.
-               <br>Ex: chmod 777 custom");
-  */
-  
+  // Is the /custom directory writable?
+  if (!is_writable("custom")) {
+    $rtn[] = st("Please make sure the <em>/custom</em> directory is writable to the web server.
+               <br>Ex: chmod 777 custom");    
+  }
   
   if (count($rtn) == 0) return FALSE;
   return $rtn;
