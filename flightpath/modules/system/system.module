@@ -27,6 +27,13 @@ function system_perm() {
       "description" => t("This will allow a user to install, enable, disable, and uninstall modules."),
     ),    
     
+    "run_cron" => array(
+      "title" => t("Run Cron"),
+      "description" => t("The user may run hook_cron functions at will. Causes a new menu link to appear
+                          on the admin page."),
+    ),    
+    
+    
     "de_can_switch_users" => array(
       "title" => t("Can switch users"),
       "description" => t("This powerful permission allows a user to switch
@@ -158,6 +165,14 @@ function system_menu() {
     "title" => "Clear all cache",
     "page_callback" => "system_perform_clear_cache",
     "access_arguments" => array("administer_modules"),
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );  
+
+
+  $items["admin/config/run-cron"] = array(
+    "title" => "Run cron now",
+    "page_callback" => "system_perform_run_cron",
+    "access_arguments" => array("run_cron"),
     "type" => MENU_TYPE_NORMAL_ITEM,
   );  
 
@@ -814,6 +829,16 @@ function system_perform_clear_cache() {
   
   fp_goto("<front>");
   
+}
+
+
+/**
+ * Called from menu, will run hook_cron() for all modules.
+ */
+function system_perform_run_cron() {
+  invoke_hook("cron");
+  fp_add_message(t("Cron run completed successfully."));
+  fp_goto("admin-tools/admin");
 }
 
 /**

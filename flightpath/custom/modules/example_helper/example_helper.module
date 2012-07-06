@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * @file
+ * example_helper.module - Example module file
+ * 
+ * This file should be used as an example for how to create a new custom module.
+ * 
+ * Notice that we start the PHP tag, but do not close it.  This makes sure we do not
+ * have white space at the end of the file.
+ */
+
+
+

@@ -1,9 +1,0 @@
-<module>
-  <name>Example Routine Module</name>
-  <description>This module is meant for you to copy and base other
-              "routines" modules from.  Look at the code itself
-              (in the .module file) for more information.
-  </description>
-  <version>1.0</version>
-  <weight>100</weight>  
-</module> 

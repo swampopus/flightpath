@@ -1,0 +1,3 @@
+name = Update Status
+description = Keeps track of version status of modules, and informs the user if an update is available.
+core = 4.x

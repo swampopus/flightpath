@@ -1,6 +1,11 @@
 FlightPath 4.x Changelog
 ========================
 
+ 
+2012-07-05
+  Started update_status module.
+  
+
 2012-06-30
   Finalized COPYRIGHT.txt file, and removed old copyright notices from individual source files.
   

@@ -1,0 +1,94 @@
+<?php
+/**
+ * @file
+ * The update status module file.
+ * 
+ * This module is responsible for checking with getflightpath.com, to see
+ * if a new update is available for any of the installed modules or system.
+*/
+
+
+
+/**
+ * Implementation of hook_cron()
+ * 
+ * We only want to check every few days that cron runs.  Check with getflightpath.com,
+ * and, if updates are available, store that information in our variables table.
+ */
+function update_status_cron() {
+  
+  $check_if_older_than = strtotime("-3 DAY");
+  
+  // When was the last time we ran this check?
+  // (we only want to run once every few days)
+  $last_run = variable_get("update_status_last_run", 0);
+  if ($last_run > $check_if_older_than) {
+    // We have run this recently, harmlessly return
+    return;
+  } 
+     
+  // If we are here, it means we should run our check.
+  // Let's assemble our URL which should be fairly long.
+  $url = update_status_get_install_status_url();
+  $result = fp_http_request($url);
+  fpm($result);
+  // We expect the $result to look like an object, where
+  // $result->data contains the returned HTML from the url,
+  // and $result->code contains the response code.
+  $response = trim($result->data);
+  // Response must contain the text "FLIGHTPATH_SUCCESS" for us to believe it is successful.
+  if (!strstr($response, "FLIGHTPATH_SUCCESS")) {
+    watchdog("update_status", "Checking update status failed.", array(), WATCHDOG_ERROR);
+    fp_add_message(t("Checking update status failed.  Perhaps FlightPath cannot access external sites?"));
+    return;    
+  }
+  
+  // If we are here then we got back a valid response.
+  
+  // Parse result and set variables where needed.
+  $res_array = array();
+  parse_str($response, $res_array);
+  fpm($res_array);
+  // The modules which have different versions than what we have installed
+  // are in $res_array["modules"] and ["release_types"]
+  variable_set("update_status_need_updates_modules", $res_array["modules"]);
+  variable_set("update_status_need_updates_release_types", $res_array["release_types"]);
+  
+  
+  
+  // TODO:  variable_set("update_status_last_run", time());
+  
+  
+}
+
+/**
+ * Returns a URL containing install statuses for all installed modules on this site.
+ */
+function update_status_get_install_status_url() {
+  $rtn = "";
+  
+  $domain = "getflightpath.com";
+  // testing
+  $domain = "getfp.richardpeacock.com";
+  
+  
+  $rtn .= "http://$domain/check-update-status?pa=cv&st=" . urlencode(fp_token());
+  
+  $ignore_core_modules = array(
+    "admin", "advise", "announcements", "blank_degrees", "blocks", "comments", "course_search", "stats",
+    "student_search", "update_status",
+  );
+  
+  foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $details) {
+    if (in_array($module, $ignore_core_modules)) continue;
+    $rtn .= "&" . "modules[" . urlencode($module) . "]=" . urlencode($details["version"]);
+  }
+   
+     $rtn .= "&" . "modules[" . urlencode("testing_here") . "]=" . urlencode("1.2.3-beta1");
+  
+  return $rtn;
+}
+
+
+
+

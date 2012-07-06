@@ -1,0 +1,3 @@
+name = Example helper module
+description = This module's source code demonstrates several important features of module development
+core = 4.x 
