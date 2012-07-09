@@ -102,6 +102,11 @@ function fp_display_page($page) {
   $screen->page_title = $page_title;
   $screen->page_has_search = $page["router_item"]["page_settings"]["page_has_search"];
   
+  // If we don't have permission to search, then hide the little search.
+  if (!user_has_permission("view_any_advising_session")) {
+    $screen->page_has_search = FALSE;
+  }
+  
   // mobile screens never have the search box
   if (fp_screen_is_mobile()) {
     $screen->page_has_search = FALSE;

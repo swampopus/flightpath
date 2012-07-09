@@ -1,7 +1,7 @@
 ====================================
 Copyright Information for FlightPath
 ====================================
-Last updated: 6/30/2012
+Last updated: 7/09/2012
 
 All FlightPath code is Copyright 2006 - Present by the original authors.
 
@@ -24,6 +24,12 @@ released under the GNU General Public License, version 3 or any later version.
 In other words, you can only copy FlightPath's code if your project is ALSO
 open source, specifically under the GNU General Public License.  It cannot
 be proprietary or "closed source."
+
+Note that you are not required to release your code at all.  However, if you
+do release it, it must be under the GNU GPL.
+
+All FlightPath modules are also released under the GNU GPL version 3 or any 
+later version, and fall under the same restrictions and protections.
 
 The license is defined in full here: http://www.gnu.org/licenses/gpl.html,
 and reproduced in the LICENSE.txt file. 

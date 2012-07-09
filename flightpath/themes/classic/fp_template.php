@@ -204,7 +204,7 @@ $theme_location = fp_theme_location();
                                 	// *****************      *****************
                                 	if ($page_banner_is_link == true)
                                 	{
-                                		print "<a href='{$GLOBALS["fp_system_settings"]["self_u_r_l"]}' target='_blank'>";
+                                		print "<a href='{$GLOBALS["fp_system_settings"]["self_url"]}' target='_blank'>";
                                 	}
 		                            ?>
 		                            <img src='<?php print "$theme_location/images/"; ?>fp_banner_default.png' border='0'>

@@ -16,7 +16,8 @@ require_once("bootstrap.inc");
 
 $token = $_REQUEST["t"];
 if ($token != $GLOBALS["fp_system_settings"]["cron_security_token"]) {
-  //die("Sorry, cron security token does not match.");
+  die("Sorry, cron security token does not match. View this file's
+      source code for instructions on setting up your site's cron.");
 }
 
 watchdog("cron", "Cron run started", array(), WATCHDOG_NOTICE);

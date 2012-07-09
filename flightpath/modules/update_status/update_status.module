@@ -18,7 +18,6 @@
 function update_status_cron() {
   
   $check_if_older_than = strtotime("-3 DAY");
-  
   // When was the last time we ran this check?
   // (we only want to run once every few days)
   $last_run = variable_get("update_status_last_run", 0);
@@ -31,7 +30,7 @@ function update_status_cron() {
   // Let's assemble our URL which should be fairly long.
   $url = update_status_get_install_status_url();
   $result = fp_http_request($url);
-  fpm($result);
+
   // We expect the $result to look like an object, where
   // $result->data contains the returned HTML from the url,
   // and $result->code contains the response code.
@@ -48,7 +47,7 @@ function update_status_cron() {
   // Parse result and set variables where needed.
   $res_array = array();
   parse_str($response, $res_array);
-  fpm($res_array);
+  
   // The modules which have different versions than what we have installed
   // are in $res_array["modules"] and ["release_types"]
   variable_set("update_status_need_updates_modules", $res_array["modules"]);
@@ -69,10 +68,11 @@ function update_status_get_install_status_url() {
   
   $domain = "getflightpath.com";
   // testing
-  $domain = "getfp.richardpeacock.com";
+  //$domain = "getfp.richardpeacock.com";
   
   
   $rtn .= "http://$domain/check-update-status?pa=cv&st=" . urlencode(fp_token());
+  $rtn .= "&u=" . urlencode($GLOBALS["fp_system_settings"]["base_url"]);
   
   $ignore_core_modules = array(
     "admin", "advise", "announcements", "blank_degrees", "blocks", "comments", "course_search", "stats",

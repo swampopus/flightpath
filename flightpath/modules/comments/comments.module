@@ -12,7 +12,7 @@ function comments_menu() {
   $items["comments"] = array(
     "title" => "Comments",
     "page_callback" => "comments_display_main",
-    "access_arguments" => array("view_comments"),
+    "access_callback" => "comments_can_access_comments",
     "type" => MENU_TYPE_TAB,
     "tab_family" => "system",
     "page_settings" => array (
@@ -82,7 +82,22 @@ function comments_popup_display_comment() {
 }
 
 
+/**
+ * Used by the menu to determine if the comments tab should appear.
+ */
+function comments_can_access_comments() {
+  global $current_student_id, $user;
+  
+  // must be logged in first...
+  if (!user_has_permission("access_logged_in_content")) return FALSE;
 
+  // Do they have the correct permission to view comments?
+  if (!user_has_permission("view_comments")) return FALSE;
+    
+  if ($current_student_id != "") return TRUE;
+  
+  return FALSE;
+}
 
 
 /**

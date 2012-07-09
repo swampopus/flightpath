@@ -27,7 +27,7 @@ function advise_menu() {
     "title" => "View",
     "page_callback" => "advise_display_view",
     "page_arguments" => array("view"),
-    "access_callback" => TRUE,  
+    "access_callback" => "advise_can_access_view",  
     "tab_family" => "system",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
@@ -58,7 +58,7 @@ function advise_menu() {
     "title" => "What If?", 
     "page_callback" => "advise_display_view",
     "page_arguments" => array("what-if"),
-    "access_callback" => TRUE,  
+    "access_callback" => "advise_can_access_view",
     "tab_family" => "system",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
@@ -89,7 +89,7 @@ function advise_menu() {
   $items["history"] = array(
     "title" => "History",
     "page_callback" => "advise_display_history",
-    "access_arguments" => array("access_logged_in_content"),
+    "access_callback" => "advise_can_access_view",
     "tab_family" => "system",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
@@ -244,6 +244,22 @@ function advise_menu() {
   return $items;
 }
 
+
+/**
+ * Used by the menu to determine if the user can see the View tab.
+ */
+function advise_can_access_view() {
+  global $current_student_id, $user;
+  
+  // must be logged in first...
+  if (!user_has_permission("access_logged_in_content")) return FALSE;
+
+  
+  if ($current_student_id != "") return TRUE;
+  
+  return FALSE;
+  
+}
 
 
 function advise_toggle_draft_form() {

@@ -24,7 +24,7 @@ require_once("_DatabaseHandler.php");
 require_once("_Course.php");
 
 require_once("_StandardizedTest.php");
-require_once("objList.php");
+require_once("ObjList.php");
 require_once("_CourseList.php");
 require_once("_Group.php");
 require_once("_GroupList.php");

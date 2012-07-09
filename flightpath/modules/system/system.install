@@ -33,7 +33,7 @@ function system_enable() {
   // Let's perform installations on the other modules we want enabled by default.
   $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "announcements");
   foreach ($modules as $module) {
-    system_enable_module(array("module" => $module, "path" => "modules/$module"));
+    system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => FLIGHTPATH_VERSION));
   }
 
   // Set up some blocks for the system module by default.
@@ -43,6 +43,12 @@ function system_enable() {
                    ('system_main', 'left_col', 'announcements', 'primary', 0) 
                    ");
 
+
+  // Set up some basic permissions for authenticated user.
+  db_query("INSERT INTO role_permissions (rid, perm)
+            VALUES 
+              (2, 'access_logged_in_content'),
+              (2, 'view_comments') ");
 
    
 }

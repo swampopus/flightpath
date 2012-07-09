@@ -1,6 +1,10 @@
 FlightPath 4.x Changelog
 ========================
 
+2012-07-09
+  On install, insert basic permissions for the authenticated user.
+  
+
 2012-07-06
   Enabled announcements and update_status modules on FlightPath first install,
   and created a new sample announcement when the announcement module is installed
@@ -8,6 +12,13 @@ FlightPath 4.x Changelog
 
   Added check to install.php to make sure custom directory was writable, displaying
   error if it is not.
+  
+  Made it to where tabs don't show up for advisors until they select a student.
+  
+  Little search in the corner doesn't show up unless you have permission to search.
+  
+  Fixed bug where "objList" was being required instead of "ObjList".  It caused a fatal
+  error on Linux, but not on Windows, interestingly enough.  Difference in PHP versions?
   
  
 2012-07-05
