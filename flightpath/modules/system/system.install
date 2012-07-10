@@ -31,7 +31,7 @@ function system_enable() {
     
 
   // Let's perform installations on the other modules we want enabled by default.
-  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "announcements");
+  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "announcements", "user");
   foreach ($modules as $module) {
     system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => FLIGHTPATH_VERSION));
   }

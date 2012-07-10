@@ -54,102 +54,6 @@ function admin_menu() {
   );     
 
   
-  $items["admin/config/users"] = array(
-    "title" => "Manage users",
-    "page_callback" => "admin_display_users",
-    "access_arguments" => array("manage_users"),
-    "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
-      "page_hide_report_error" => TRUE,
-      "menu_links" => array(         
-        0 => array(
-          "text" => "Back to main menu",
-          "path" => "admin-tools/admin",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-      ),
-    ),    
-    "type" => MENU_TYPE_NORMAL_ITEM,
-    "tab_parent" => "admin-tools/admin",    
-    "file" => menu_get_module_path("admin") . "/admin.users.inc",    
-  );      
-  
-  $items["admin/config/user-roles"] = array(
-    "title" => "Manage user roles",
-    "page_callback" => "fp_render_form",
-    "page_arguments" => array("admin_user_roles_form"),
-    "access_arguments" => array("can_edit_user_roles"),
-    "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
-      "page_hide_report_error" => TRUE,
-      "menu_links" => array(         
-        0 => array(
-          "text" => "Back to main menu",
-          "path" => "admin-tools/admin",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-      ),
-    ),    
-    "type" => MENU_TYPE_NORMAL_ITEM,
-    "tab_parent" => "admin-tools/admin",    
-    "file" => menu_get_module_path("admin") . "/admin.users.inc",    
-  );     
-
-  $items["admin/users/edit-user"] = array(
-    "title" => "Edit User",
-    "page_callback" => "fp_render_form",
-    "page_arguments" => array("admin_edit_user_form"),
-    "access_arguments" => array("manage_users"),
-    "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
-      "page_hide_report_error" => TRUE,
-      "menu_links" => array(
-        0 => array(
-          "text" => "Back to main menu",
-          "path" => "admin-tools/admin",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-        1 => array(
-          "text" => "Back to Users list",
-          "path" => "admin/config/users",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),                
-      ),
-    ),   
-    "file" => menu_get_module_path("admin") . "/admin.users.inc",
-    "type" => MENU_TYPE_NORMAL_ITEM,
-    "tab_parent" => "admin-tools/admin",
-  );     
-      
-  
-    
-
-  $items["admin/config/permissions"] = array(
-    "title" => "Manage permissions",
-    "page_callback" => "fp_render_form",
-    "page_arguments" => array("admin_permissions_form"),
-    "access_arguments" => array("can_edit_permissions"),
-    "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
-      "page_hide_report_error" => TRUE,
-      "menu_links" => array(         
-        0 => array(
-          "text" => "Back to main menu",
-          "path" => "admin-tools/admin",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-      ),
-    ),    
-    "type" => MENU_TYPE_NORMAL_ITEM,
-    "tab_parent" => "admin-tools/admin",
-    "file" => menu_get_module_path("admin") . "/admin.users.inc",    
-  );     
-  
-  
   
   
   $items["admin/edit-advising-settings"] = array(
@@ -777,19 +681,7 @@ function admin_perm() {
       "title" => t("Edit advising settings"),
       "description" => t("The user may edit advising settings, like available term IDs and the current catalog year."),
     ),   
-    "can_edit_user_roles" => array(
-      "title" => t("Edit user roles"),
-      "description" => t("The user may add/edit/delete user roles in the system."),
-    ),   
-    "can_edit_permissions" => array(
-      "title" => t("Edit permissions"),
-      "description" => t("The user may assign permissions to different roles in the system."),
-    ),   
-    "manage_users" => array(
-      "title" => t("Manage users"),
-      "description" => t("This is a powerful permission!  It allows the user to manage the roles
-                          of other users, as well as create/delete users."),
-    ),
+
     
             
   );

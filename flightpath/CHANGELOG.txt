@@ -1,6 +1,11 @@
 FlightPath 4.x Changelog
 ========================
 
+2012-07-10
+  Moved user functions into its own module, user, and enabled on install by default.
+  Also fixed a few bugs int he user module.
+  
+
 2012-07-09
   On install, insert basic permissions for the authenticated user.
   

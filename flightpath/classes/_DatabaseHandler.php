@@ -921,14 +921,36 @@ class _DatabaseHandler
 
 	}
 
+
+  function get_student_cumulative_hours($student_id) {
+    
+    // Let's perform our queries.
+    $res = $this->db_query("SELECT * FROM students 
+                      WHERE user_id = '?' ", $student_id);
+
+    
+    $cur = $this->db_fetch_array($res);
+    return $cur["cumulative_hours"];
+    
+  }
+
+
+  function get_student_gpa($student_id) {
+    
+    // Let's perform our queries.
+    $res = $this->db_query("SELECT * FROM students 
+                      WHERE user_id = '?' ", $student_id);
+
+    
+    $cur = $this->db_fetch_array($res);
+    return $cur["gpa"];
+    
+  }
+
+
+
 	function get_student_catalog_year($student_id) {
-    // Let's pull the needed variables out of our settings, so we know what
-		// to query, because this is a non-FlightPath table.
-		//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-		//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		//$table_name = $tsettings["table_name"];		
-		
-		
+   		
     // Let's perform our queries.
 		$res = $this->db_query("SELECT * FROM students 
 						          WHERE user_id = '?' ", $student_id);

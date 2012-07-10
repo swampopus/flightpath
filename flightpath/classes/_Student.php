@@ -436,13 +436,14 @@ class _Student
 	function load_student_data()
 	{
 
-	  // Let's pull the needed variables out of our settings, so we know what
-		// to query, because this is a non-FlightPath table.
-		//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-		//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		//$table_name = $tsettings["table_name"];
-
-		
+    $this->cumulative_hours = $this->db->get_student_cumulative_hours($this->student_id);	
+		$this->gpa = $this->db->get_student_gpa($this->student_id);
+    $this->rank = $this->get_rank_description($this->db->get_student_rank($this->student_id));
+    $this->major_code = $this->db->get_student_major_from_db($this->student_id);
+		$this->catalog_year = $this->db->get_student_catalog_year($this->student_id);
+		$this->name = $this->db->get_student_name($this->student_id);
+    
+    /*
 	  // Let's perform our queries.
 		$res = $this->db->db_query("SELECT * FROM students 
 						          WHERE user_id = '?' ", $this->student_id);
@@ -464,7 +465,8 @@ class _Student
 		// a - in there ;)
 	  $temp = explode("-", $catalog);
 	  $this->catalog_year = $temp[0];
-
+    */
+   
 	}
 
 	

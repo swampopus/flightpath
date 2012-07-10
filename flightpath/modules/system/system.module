@@ -1337,7 +1337,10 @@ function system_modules_form() {
               $info_details_array[trim($temp[0])] = trim(substr($line, strlen($temp[0]) + 1)); 
             }
             
-            $info_details_array["path"] = "$start_dir/$file";
+            
+            $path = "$start_dir/$file";
+            
+            $info_details_array["path"] = $path;
             $info_details_array["module"] = $module;
             
             //fpm($info_details_array);            
@@ -1354,7 +1357,7 @@ function system_modules_form() {
             // Should it be checked?  We can check the modules table to see if it's enabled/installed or not.
             $installation_status = "";
             $default_value = array();
-            $res = db_query("SELECT * FROM modules WHERE name = '?' ", $module);
+            $res = db_query("SELECT * FROM modules WHERE path = '?' ", $path);
             $cur = db_fetch_array($res);
             $info_details_array["enabled"] = $cur["enabled"];
             if ($cur["enabled"] == "1") {
@@ -1366,7 +1369,7 @@ function system_modules_form() {
             }
             else if ($cur["enabled"] == "0") {
               $installation_status = fp_get_js_confirm_link(t("Are you sure you wish to uninstall @module?\\nThis may remove saved data belonging to the module.", array("@module" => $module)), 
-                                                            ' window.location="' . fp_url("system/uninstall-module", "module=$module") . '"; ', t("uninstall?")); 
+                                                            ' window.location="' . fp_url("system/uninstall-module", "module=$module&path=" . urlencode($path) . "") . '"; ', t("uninstall?")); 
             }
             
             
