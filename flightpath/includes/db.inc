@@ -17,6 +17,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
   
   
   $user_id = $user->id;
+  $cwid = $user->cwid;
   $user_name = $user->name;
   $is_student = (int) $user->is_student;
   $is_faculty = (int) $user->is_faculty;
@@ -33,10 +34,10 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
   }
   
   db_query("INSERT INTO watchdog 
-            (user_id, user_name, type, message, variables, severity, extra_data, location, referer, ip, is_mobile, is_student, is_faculty, timestamp)
+            (user_id, user_name, cwid, type, message, variables, severity, extra_data, location, referer, ip, is_mobile, is_student, is_faculty, timestamp)
             VALUES
-            ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
-            ", $user_id, $user_name, $type, $message, $ser_variables, $severity, $extra_data, $location, $referer, $ip, $is_mobule, $is_student, $is_faculty, time());
+            ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
+            ", $user_id, $user_name, $cwid, $type, $message, $ser_variables, $severity, $extra_data, $location, $referer, $ip, $is_mobule, $is_student, $is_faculty, time());
   
   
 }
@@ -80,6 +81,7 @@ function fp_load_user($user_id) {
   $rtn->f_name = $cur->f_name;
   $rtn->l_name = $cur->l_name;
   $rtn->email = $cur->email;
+  $rtn->cwid = $cur->cwid;
   $rtn->is_student = (bool) $cur->is_student;
   $rtn->is_faculty = (bool) $cur->is_faculty;
   $rtn->roles = array();
@@ -112,6 +114,22 @@ function fp_load_user($user_id) {
 
 
 
+
+/**
+ * Look up the user_id based on the the user_name.  Returns FALSE if it cannot find it.
+ *
+ * @param unknown_type $user_name
+ */
+function db_get_user_id($user_name) {
+  $user_id = db_result(db_query("SELECT user_id FROM users WHERE user_name = '?' ", $user_name));
+  
+  if ($user_id) {
+    return $user_id;
+  }
+  
+  return FALSE;
+  
+}
 
 
 function fp_get_student_name($student_id) {
@@ -168,6 +186,11 @@ function db_fetch_object($result_handler) {
 function db_num_rows($result_handler) {
   $db = get_global_database_handler();
   return $db->db_num_rows($result_handler);
+}
+
+function db_affected_rows() {
+  $db = get_global_database_handler();
+  return $db->db_affected_rows();  
 }
 
 

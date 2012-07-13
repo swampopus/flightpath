@@ -700,9 +700,9 @@ function system_handle_form_submit() {
   if (function_exists($callback)) {
     $form = fp_get_form($callback);
     foreach ($form as $name => $element) {     
-      if (isset($_POST[$name])) {  
+      //if (isset($_POST[$name])) {  
         $values[$name] = $_POST[$name];
-      }
+      //}
     }
   }  
 
@@ -1079,19 +1079,7 @@ function system_login_form_submit($form, &$form_state) {
   $account = new stdClass();
   
   $account = fp_load_user($db_row["user_id"]);
-  
-  /*
-  $account->name = $db_row["user_name"];
-  $account->id = $db_row["user_id"];
-  $account->is_faculty = ($db_row["is_faculty"] == "1") ? TRUE : FALSE;
-  $account->is_student = ($db_row["is_student"] == "1") ? TRUE : FALSE;
-  $account->email = $db_row["email"];
-  $account->f_name = $db_row["f_name"];
-  $account->l_name = $db_row["l_name"];
-  $account->roles = array();
-  $account->permissions = array();
-  */
-   
+   fpm($account);
   // Okay, let's look for all the modules who have implimented hook_user_login
   $modules = modules_implement_hook("user_login");
   foreach ($modules as $module) {
@@ -1101,7 +1089,7 @@ function system_login_form_submit($form, &$form_state) {
   // Set the $account to the SESSION.
   $_SESSION["fp_user_object"] = $account;
   
-  watchdog("login", "@user has logged in", array("@user" => "$account->name ($account->id)"));
+  watchdog("login", "@user has logged in. CWID: @cwid", array("@user" => "$account->name ($account->id)", "@cwid" => $account->cwid));
   
   fp_goto("<front>");
   

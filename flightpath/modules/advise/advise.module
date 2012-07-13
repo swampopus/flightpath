@@ -1117,7 +1117,7 @@ function advise_init() {
   // Since this user doesn't have permission to view any sessions,
   // he can only view his own.
   if (!user_has_permission("view_any_advising_session")) {
-    $current_student_id = $user->id;
+    $current_student_id = $user->cwid;
     $_REQUEST["current_student_id"] = $current_student_id;    
     $_REQUEST["advising_load_active"] = "yes";        
   }

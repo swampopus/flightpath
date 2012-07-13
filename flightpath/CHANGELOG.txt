@@ -1,6 +1,11 @@
 FlightPath 4.x Changelog
 ========================
 
+2012-07-13
+  Added "cwid" field to watchog, users, faculty, staff table.  Advising records need to be
+  saved off this cwid instead of the auto-increment user_id.
+  
+
 2012-07-10
   Moved user functions into its own module, user, and enabled on install by default.
   Also fixed a few bugs int he user module.

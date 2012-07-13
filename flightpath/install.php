@@ -192,10 +192,10 @@ function install_perform_install() {
   $temp_db = new DatabaseHandler();
     
   // Add the admin user to the newly-created users table and the "faculty" table.
-  db_query("INSERT INTO users (user_id, user_name, password, is_faculty, f_name, l_name)
-            VALUES ('1', '?', '?', '1', 'Admin', 'User') ", $admin_name, md5($admin_pass));
+  db_query("INSERT INTO users (user_id, user_name, cwid, password, is_faculty, f_name, l_name)
+            VALUES ('1', '?', '1', '?', '1', 'Admin', 'User') ", $admin_name, md5($admin_pass));
 
-  db_query("INSERT INTO faculty (user_id) VALUES ('1') ");
+  db_query("INSERT INTO faculty (cwid) VALUES ('1') ");
             
   // Having made it here, we now need to call system_enable,
   // which will in turn enable all of the other modules which

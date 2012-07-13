@@ -23,7 +23,7 @@ function system_enable() {
                    (2, 'authenticated user')");
    
   // Add in the anonymous user into the users table (uid = 0)
-  db_query("INSERT INTO users (user_id, user_name) VALUES (0, 'anonymous')");
+  db_query("INSERT INTO users (user_id, cwid, user_name) VALUES (0, 0, 'anonymous')");
 
   // Set up the modules table.
   db_query("INSERT INTO modules (path, name, version, enabled, weight, type)
@@ -31,7 +31,7 @@ function system_enable() {
     
 
   // Let's perform installations on the other modules we want enabled by default.
-  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "announcements", "user");
+  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "announcements");
   foreach ($modules as $module) {
     system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => FLIGHTPATH_VERSION));
   }

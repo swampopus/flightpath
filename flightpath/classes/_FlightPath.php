@@ -829,7 +829,7 @@ class _FlightPath
 		if ($faculty_id == 0) { 
 		  // if none supplied, use the one from the session of
 			// whomever is currently logged in.
-			$faculty_id = $user->id;
+			$faculty_id = $user->cwid;
 		}
 
 		$bool_found_update_match = false;
