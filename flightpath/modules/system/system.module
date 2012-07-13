@@ -74,19 +74,17 @@ function system_get_roles_for_user($user_id) {
                    AND a.rid = b.rid ", $user_id);
   while ($cur = db_fetch_array($res)) {
     $rtn[$cur["rid"]] = $cur["name"];
-    
-    // Is this person in the users table?  If so, they will get the rid 2 (authenticated)
-    // If not, they will get the role 1 (anonymous)
-    
-    $res2 = db_query("SELECT user_name FROM users WHERE user_id = '?' ", $user_id);
-    if (db_num_rows($res2) > 0) {
-      $rtn[2] = t("authenticated user");
-    }
-    else {
-      $rtn[1] = t("anonymous user");
-    }
-    
-        
+  }
+  
+  // Is this person in the users table?  If so, they will get the rid 2 (authenticated)
+  // If not, they will get the role 1 (anonymous)
+  
+  $res2 = db_query("SELECT user_id FROM users WHERE user_id = '?' AND user_id <> '0' ", $user_id);
+  if (db_num_rows($res2) > 0) {
+    $rtn[2] = t("authenticated user");
+  }
+  else {
+    $rtn[1] = t("anonymous user");
   }
   
   return $rtn;
@@ -399,7 +397,7 @@ function system_popup_report_contact_form_submit($form, $form_state) {
   $subject = t("FLIGHTPATH REPORT CONTACT") . " - $onscreen ";
   $msg = "";
   $msg .= t("You have received a new report/contact on") . " $datetime.\n";
-  $msg .= t("Name:") . " $user->name  ID: $user->id  " . t("User roles:") . " $user_roles \n\n";
+  $msg .= t("Name:") . " $user->name  ID: $user->cwid  " . t("User roles:") . " $user_roles \n\n";
   $msg .= t("Category:") . " $category  \n";
   $msg .= t("Possible Student:") . " $possible_student  \n";
   $msg .= t("Comment:") . " \n $comment \n\n";
@@ -1079,7 +1077,6 @@ function system_login_form_submit($form, &$form_state) {
   $account = new stdClass();
   
   $account = fp_load_user($db_row["user_id"]);
-   fpm($account);
   // Okay, let's look for all the modules who have implimented hook_user_login
   $modules = modules_implement_hook("user_login");
   foreach ($modules as $module) {

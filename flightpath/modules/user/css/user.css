@@ -4,7 +4,9 @@ table.user-list  {
 }
 
 /* Permissions form */
-.admin-perm-table td {
+.admin-perm-table th,
+.admin-perm-table td
+ {
   font-size: 0.85em;
 }
 

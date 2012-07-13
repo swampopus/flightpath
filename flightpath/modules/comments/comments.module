@@ -110,7 +110,7 @@ function comments_perform_delete_comment() {
   // Let's get some details about the comment to make sure this user can delete it.
   $comment = comments_get_comment($comment_id); 
   
-  if ($comment["faculty_id"] == $user->id && user_has_permission("can_delete_own_comments_3_months")) {
+  if ($comment["faculty_id"] == $user->cwid && user_has_permission("can_delete_own_comments_3_months")) {
     // TODO:  We should really ALSO check to make sure it's been less than 3 months.
     db_query("UPDATE advising_comments
                SET delete_flag = '1'
@@ -126,7 +126,7 @@ function comments_perform_delete_comment() {
 
 function comments_comment_form_submit($form, $form_state) {
   global $user, $current_student_id;
-  $faculty_id = $user->id;
+  $faculty_cwid = $user->cwid;
   $type = $form_state["values"]["type"];
   $term_id = $form_state["values"]["term_id"];
   $comment = trim($form_state["values"]["comment"]);
@@ -138,40 +138,13 @@ function comments_comment_form_submit($form, $form_state) {
                 comment, posted, access_type)
                 VALUES
                 ('?', '?', '?', '?', '?', '?')
-                ", $current_student_id, $faculty_id, $term_id, $comment, time(), $type);
+                ", $current_student_id, $faculty_cwid, $term_id, $comment, time(), $type);
                
     fp_add_message("Comment saved successfully.");
   }
 
   watchdog("save_comment", "Comment saved");  
   
-}
-
-
-/**
- * Actually save the comment in the POST, then redirect us back to our main page.
- */
-function z__comments_perform_save_comment() {
-  global $user, $current_student_id;
-  $faculty_id = $user->id;
-  $type = $_POST["type"];
-  $term_id = $_POST["term_id"];
-  $comment = trim($_POST["comment"]);
-  
-  // Perform the save!
-  if ($comment) {
-    db_query("INSERT INTO advising_comments
-              (student_id, faculty_id, term_id,
-                comment, posted, access_type)
-                VALUES
-                ('?', '?', '?', '?', '?', '?')
-                ", $current_student_id, $faculty_id, $term_id, $comment, time(), $type);
-               
-    fp_add_message("Comment saved successfully.");
-  }
-  
-  fp_goto("comments");
-    
 }
 
 

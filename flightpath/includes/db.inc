@@ -46,9 +46,9 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 /**
  * Returns the faculty member's name based on the ID provided.
  */
-function fp_get_faculty_name($faculty_id) {
+function fp_get_faculty_name($cwid) {
   $db = get_global_database_handler();
-  $name = $db->get_faculty_name($faculty_id);
+  $name = $db->get_faculty_name($cwid);
   if (!$name) $name = t("Unknown Advisor");
   return $name;
 }
@@ -132,12 +132,30 @@ function db_get_user_id($user_name) {
 }
 
 
-function fp_get_student_name($student_id) {
-  if ($student_id == 0) {
+function db_get_user_id_from_cwid($cwid, $type = "faculty") {
+  
+  $type_line = " is_faculty='1' ";
+  if ($type == "student") {
+    $type_line = " is_student='1' ";
+  }
+    
+  $user_id = db_result(db_query("SELECT user_id FROM users WHERE cwid = '?' AND $type_line ", $cwid));
+  
+  if ($user_id) {
+    return $user_id;
+  }
+  
+  return FALSE;
+  
+}
+
+
+function fp_get_student_name($cwid) {
+  if ($user_id == 0) {
     return t("Anonymous");
   }
   $db = get_global_database_handler();
-  $name = $db->get_student_name($student_id);
+  $name = $db->get_student_name($cwid);
   if (!$name) $name = t("Unknown Student");
   return $name;
 }

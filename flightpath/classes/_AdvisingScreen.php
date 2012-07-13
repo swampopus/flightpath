@@ -2024,7 +2024,7 @@ function draw_menu_items($menu_array) {
 			$temp = $db->get_substitution_details($course->db_substitution_id);
 			$by = $db->get_faculty_name($temp["faculty_id"], false);
 			$remarks = $temp["remarks"];
-			$ondate = format_date($temp["posted"], "", "n/d/_y");
+			$ondate = format_date($temp["posted"], "", "n/d/Y");
 			
 			
 			if ($by != "")

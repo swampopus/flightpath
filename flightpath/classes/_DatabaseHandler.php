@@ -203,7 +203,7 @@ class _DatabaseHandler
 	
 
 
-	function get_developmental_requirements($student_id)
+	function get_developmental_requirements($student_cwid)
 	{
 		// returns an array which states whether or not the student
 		// requires any developmental requirements.
@@ -211,7 +211,7 @@ class _DatabaseHandler
 		$rtn_array = array();
 		
 		$res = $this->db_query("SELECT * FROM student_developmentals
-							         WHERE student_id = '?' ", $student_id);
+							         WHERE student_id = '?' ", $student_cwid);
 		while($cur = $this->db_fetch_array($res)) {
 			$rtn_array[] = $cur["requirement"];
 		}
@@ -898,14 +898,14 @@ class _DatabaseHandler
 	}
 
 
-	function get_student_settings($student_id)
+	function get_student_settings($student_cwid)
 	{
 		// This returns an array (from the xml) of a student's
 		// settings in the student_settings table.  It will
 		// return FALSE if the student was not in the table.
 
 		$res = $this->db_query("SELECT * FROM student_settings
-							WHERE student_id = '?' ", $student_id) ;
+							WHERE student_id = '?' ", $student_cwid) ;
 		if ($this->db_num_rows($res) < 1)
 		{
 			return false;
@@ -922,11 +922,11 @@ class _DatabaseHandler
 	}
 
 
-  function get_student_cumulative_hours($student_id) {
+  function get_student_cumulative_hours($student_cwid) {
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT * FROM students 
-                      WHERE user_id = '?' ", $student_id);
+                      WHERE cwid = '?' ", $student_cwid);
 
     
     $cur = $this->db_fetch_array($res);
@@ -935,11 +935,11 @@ class _DatabaseHandler
   }
 
 
-  function get_student_gpa($student_id) {
+  function get_student_gpa($student_cwid) {
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT * FROM students 
-                      WHERE user_id = '?' ", $student_id);
+                      WHERE cwid = '?' ", $student_cwid);
 
     
     $cur = $this->db_fetch_array($res);
@@ -949,11 +949,11 @@ class _DatabaseHandler
 
 
 
-	function get_student_catalog_year($student_id) {
+	function get_student_catalog_year($student_cwid) {
    		
     // Let's perform our queries.
 		$res = $this->db_query("SELECT * FROM students 
-						          WHERE user_id = '?' ", $student_id);
+						          WHERE cwid = '?' ", $student_cwid);
 
 		
 		$cur = $this->db_fetch_array($res);
@@ -971,17 +971,12 @@ class _DatabaseHandler
 	 * @param unknown_type $student_id
 	 * @return unknown
 	 */
-	function get_student_rank($student_id) {
-    // Let's pull the needed variables out of our settings, so we know what
-		// to query, because this is a non-FlightPath table.
-		//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-		//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		//$table_name = $tsettings["table_name"];		
+	function get_student_rank($student_cwid) {
 		
 		
     // Let's perform our queries.
 		$res = $this->db_query("SELECT * FROM students 
-						          WHERE user_id = '?' ", $student_id);
+						          WHERE cwid = '?' ", $student_cwid);
 
 		
 		$cur = $this->db_fetch_array($res);
@@ -998,13 +993,12 @@ class _DatabaseHandler
 	 * @param int $student_id
 	 * @return string
 	 */
-	function get_student_name($student_id) {
+	function get_student_name($cwid) {
 		
     // Let's perform our queries.
 		$res = $this->db_query("SELECT * FROM users 
-						          WHERE user_id = '?'
-						          AND is_student = 1 ", $student_id);
-
+						          WHERE cwid = '?'
+						          AND is_student = 1 ", $cwid);
 		
 		$cur = $this->db_fetch_array($res);
     $name = $cur["f_name"] . " " . $cur["l_name"];
@@ -1025,7 +1019,7 @@ class _DatabaseHandler
 	 * @param int $faculty_id
 	 * @return string
 	 */
-	function get_faculty_name($faculty_id) {
+	function get_faculty_name($cwid) {
     // Let's pull the needed variables out of our settings, so we know what
 		// to query, because this is a non-FlightPath table.
 		//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
@@ -1035,8 +1029,8 @@ class _DatabaseHandler
 		
     // Let's perform our queries.
 		$res = $this->db_query("SELECT * FROM users 
-						          WHERE user_id = '?'
-						          AND is_faculty = '1' ", $faculty_id);
+						          WHERE cwid = '?'
+						          AND is_faculty = '1' ", $cwid);
 
 		
 		$cur = $this->db_fetch_array($res);
@@ -1055,9 +1049,8 @@ class _DatabaseHandler
 	 * Looks in our extra tables to find out what major code, if any, has been assigned
 	 * to this faculty member.
 	 *
-	 * @param unknown_type $faculty_id
 	 */
-	function get_faculty_major_code($user_id) {
+	function get_faculty_major_code($faculty_cwid) {
 	  
     // Let's pull the needed variables out of our settings, so we know what
   	// to query, because this is a non-FlightPath table.
@@ -1065,7 +1058,7 @@ class _DatabaseHandler
   	//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
   	//$table_name = $tsettings["table_name"];		  
     
-  	$res = $this->db_query("SELECT * FROM faculty WHERE user_id = '?' ", $user_id);
+  	$res = $this->db_query("SELECT * FROM faculty WHERE cwid = '?' ", $faculty_cwid);
   	$cur = $this->db_fetch_array($res);
   	
   	return $cur["major_code"];		  
@@ -1073,20 +1066,14 @@ class _DatabaseHandler
 	}
 		
 	
-	function get_student_major_from_db($student_id)
+	function get_student_major_from_db($student_cwid)
 	{
 		// Returns the student's major code from the DB.  Does not
 		// return the track code.
 		
-    // Let's pull the needed variables out of our settings, so we know what
-		// to query, because this is a non-FlightPath table.
-		//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:students"];
-		//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-		//$table_name = $tsettings["table_name"];			
-		
     // Let's perform our queries.
 		$res = $this->db_query("SELECT * FROM students 
-						          WHERE user_id = '?' ", $student_id);
+						          WHERE cwid = '?' ", $student_cwid);
 		
 		
 		$cur = $this->db_fetch_array($res);

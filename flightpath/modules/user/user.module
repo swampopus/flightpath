@@ -131,7 +131,7 @@ function user_perm() {
 function user_permissions_form() {
   $form = array();
 
-  fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
+  fp_add_css(fp_get_module_path("user") . "/css/user.css");
   
   
   // Let's get all of our permissions from the permissions table.
@@ -265,15 +265,17 @@ function user_permissions_form_submit($form, $form_submit) {
   // Find all the perm checkboxes.  
   foreach($values as $key => $val) {
     if (strstr($key, "perm_cb_")) {
-      $cb = current($val);
-      if (strstr($cb, "___")) {
-        $temp = explode("___", $cb);
-        $rid = $temp[0];
-        $perm = $temp[1];
-        
-        // Okay, save this to our table.
-        db_query("INSERT INTO role_permissions (rid, perm)
-                  VALUES ('?', '?') ", $rid, $perm);      
+      if (is_array($val)) {
+        $cb = current($val);
+        if (strstr($cb, "___")) {
+          $temp = explode("___", $cb);
+          $rid = $temp[0];
+          $perm = $temp[1];
+          
+          // Okay, save this to our table.
+          db_query("INSERT INTO role_permissions (rid, perm)
+                    VALUES ('?', '?') ", $rid, $perm);      
+        }
       }
     }
   }
@@ -290,7 +292,7 @@ function user_permissions_form_submit($form, $form_submit) {
 function user_user_roles_form() {
   $form = array();
   
-  fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
+  fp_add_css(fp_get_module_path("user") . "/css/user.css");
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
   
   
@@ -400,12 +402,14 @@ function user_user_roles_form_submit($form, $form_state) {
 function user_edit_user_form() {
 
   $form = array();
-  $faculty_id = $_REQUEST["user_id"];
-  $name = fp_get_faculty_name($faculty_id);
+  $faculty_cwid = $_REQUEST["faculty_cwid"];
+  $user_id = db_get_user_id_from_cwid($faculty_cwid);
   
-  fp_set_title(t("Edit User @name (@id)", array("@name" => $name, "@id" => $faculty_id)));
+  $name = fp_get_faculty_name($faculty_cwid);
+  
+  fp_set_title(t("Edit User @name (@id)", array("@name" => $name, "@id" => $faculty_cwid)));
 
-  $user_roles = system_get_roles_for_user($faculty_id);
+  $user_roles = system_get_roles_for_user($user_id);
   //fpm($user_roles);
   $default_values = array();
   foreach ($user_roles as $rid => $val) {
@@ -414,7 +418,7 @@ function user_edit_user_form() {
 
   $form["user_id"] = array(
     "type" => "hidden",
-    "value" => $faculty_id,
+    "value" => $user_id,
   );
   
   // Show a list of roles in the system which we may select from, and check the ones
@@ -465,10 +469,12 @@ function user_edit_user_form_submit($form, $form_state) {
   // Begin by deleting what's there all ready.
   db_query("DELETE FROM user_roles WHERE user_id = '?' ", $user_id);
 
-  foreach ($values["roles"] as $rid) {
-    //fpm("inserting $rid");
-    db_query("INSERT INTO user_roles (user_id, rid)
-              VALUES ('?', '?') ", $user_id, $rid);
+  if (is_array($values["roles"])) {
+    foreach ($values["roles"] as $rid) {
+     //fpm("inserting $rid");
+     db_query("INSERT INTO user_roles (user_id, rid)
+                VALUES ('?', '?') ", $user_id, $rid);
+    }
   }
 
   fp_add_message(t("User updated successfully."));
@@ -649,7 +655,7 @@ function user_display_users() {
       // Two search terms, probably a name...
       $result = db_query("SELECT * FROM users u, faculty f
           WHERE  
-          u.user_id = f.user_id AND
+          u.cwid = f.cwid AND
           (l_name LIKE '%?%'
           AND f_name LIKE '%?%')
           ORDER BY l_name, f_name ", $search2, $search1);
@@ -660,8 +666,8 @@ function user_display_users() {
       // One search term....
       $result = db_query("SELECT * FROM users u, faculty f
           WHERE 
-          u.user_id = f.user_id AND
-          (u.user_id LIKE '%?%' 
+          u.cwid = f.cwid AND
+          (u.cwid LIKE '%?%' 
           OR l_name LIKE '%?%'
           OR f_name LIKE '%?%')
           ORDER BY l_name, f_name ", $search1, $search1, $search1);
@@ -673,7 +679,7 @@ function user_display_users() {
     $search = "";
     $_SESSION["prev_user_search"] = "dept%%$dept";
     $result = db_query("SELECT * FROM users a, faculty b
-          WHERE a.user_id = b.user_id
+          WHERE a.cwid = b.cwid
           AND a.is_faculty = 1
           AND department = '?' 
           ORDER BY l_name, f_name ", $dept);
@@ -683,7 +689,7 @@ function user_display_users() {
   { // No search, so look for the range...
     $result = db_query("SELECT * FROM users u, faculty f
                         WHERE
-                        u.user_id = f.user_id AND 
+                        u.cwid = f.cwid AND 
                         l_name BETWEEN '?' AND '?'
                         ORDER BY l_name, f_name ", $ur, $lr);
     $displaying = $ur;
@@ -705,7 +711,7 @@ function user_display_users() {
 
     $l_name = trim(ucwords(strtolower($cur["l_name"])));
     $f_name = trim(ucwords(strtolower($cur["f_name"])));    
-    $faculty_id = trim($cur["user_id"]);
+    $faculty_cwid = trim($cur["cwid"]);
     $dept_name = trim(ucwords(strtolower($cur["department"])));
 
     
@@ -717,8 +723,11 @@ function user_display_users() {
 
     $roles = "";
     $temp = system_get_roles_for_user($faculty_id);
-    foreach ($temp as $t) {
-      $roles .= "<div class='list-role'>$t</div>";
+    foreach ($temp as $rid => $t) {
+      if ($rid > 2) {
+        // rid 1 and 2 are anonymous and authenticated-- no need to show them.
+        $roles .= "<div class='list-role'>$t</div>";
+      }
     }
 
 
@@ -727,12 +736,12 @@ function user_display_users() {
 
     $rtn .= "<tr>
               
-              <td valign='top' width='15%'>$faculty_id</td>
+              <td valign='top' width='15%'>$faculty_cwid</td>
           <td valign='top' width='15%'>$f_name</td>
           <td valign='top' width='15%'>$l_name</td>
           <td valign='top'>$dept_name</td>
           <td valign='top'>$roles</td>
-          <td valign='top'>" . l(t("edit"), "admin/users/edit-user", "user_id=$faculty_id&de_catalog_year=$de_catalog_year") . "</td>
+          <td valign='top'>" . l(t("edit"), "admin/users/edit-user", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "</td>
           
           
         </tr>";
