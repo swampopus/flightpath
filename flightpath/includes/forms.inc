@@ -17,6 +17,10 @@ function fp_get_form($form_id) {
 
   $form = call_user_func($form_id);
   
+  // Add in the default submit_handlers and validate_handlers, if not all ready set.
+  if (!isset($form["#submit_handlers"])) $form["#submit_handlers"] = array($form_id . "_submit");
+  if (!isset($form["#validate_handlers"])) $form["#validate_handlers"] = array($form_id . "_validate");
+  
   $modules = modules_implement_hook("form_alter");
   foreach ($modules as $module) {
     call_user_func_array($module . '_form_alter', array(&$form, $form_id));

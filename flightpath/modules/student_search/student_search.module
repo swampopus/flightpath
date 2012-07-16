@@ -107,7 +107,8 @@ function student_search_render_small_search() {
                      <input type='text' class='smallinput' size='30' name='search_for' id='search_bar_value'                       
                         placeholder = '" . t("Search by name or CWID") . "'>
                      <input type='button' name='submit' value='=>' class='smallinput'>
-                     <input type='hidden' name='current_student_id' value='$current_student_id'>
+                     <input type='hidden' name='current_student_id' value='$current_student_id'>   
+                     <input type='hidden' name='did_search' value='true'>                  
                     </form>
                     ";
  
@@ -163,13 +164,13 @@ function student_search_display_my_advisees() {
 
   $_SESSION["student_search_last_tab"] = "my-advisees";
   
-  $faculty_id = mysql_real_escape_string($user->cwid);
+  $faculty_cwid = mysql_real_escape_string($user->cwid);
         
   $query = "SELECT u.user_id, f_name, u.cwid, l_name, major_code, rank_code, a.catalog_year
               FROM users u, students a, advisor_student c
               WHERE 
-                 c.cwid = '$faculty_id'
-                 AND c.cwid = a.cwid
+                 c.faculty_id = '$faculty_cwid'
+                 AND c.student_id = a.cwid
                  AND u.cwid = a.cwid
                  AND u.is_disabled = 0                 
               AND rank_code IN %RANKIN%
@@ -195,7 +196,8 @@ function student_search_display_my_majors() {
   $_SESSION["student_search_last_tab"] = "my-majors";
     
   // Figure out this user's major_code from the faculty table.
-  $faculty_user_major_code = mysql_real_escape_string(db_result(db_query("SELECT major_code FROM faculty WHERE user_id = '?' ", $user->id)));
+  $db = get_global_database_handler();
+  $faculty_user_major_code = $db->get_faculty_major_code($user->cwid);
     
   $query = "SELECT u.user_id, f_name, l_name, u.cwid, major_code, rank_code, a.catalog_year
               FROM users u, students a
@@ -238,6 +240,19 @@ function student_search_display_search() {
   if ($search_for == "") {
     $search_for = trim($_SESSION["student_search_for"]);
   }
+  
+  $o_search_for = $search_for;
+  
+
+  // If the user entered an asterisk with their search, we will
+  // skip the extra search conditions (and show more results).
+	$bool_bypass_extra_search_conditions = FALSE;
+	if (strstr($search_for, "*")) {
+	  $bool_bypass_extra_search_conditions = TRUE;
+	  $search_for = trim(str_replace("*", "", $search_for));
+	}
+  
+    
   // remove trouble characters
   $search_for = str_replace("'","",$search_for);
   $search_for = str_replace('"','',$search_for);
@@ -252,8 +267,8 @@ function student_search_display_search() {
     border='0' cellpadding='0' cellspacing='0'>
       <tr>
       <td width='30%' align='right'><font size='2'><b>" . t("Search for advisees:") . "&nbsp;&nbsp;</b></td> 
-      <td width='30%'><input name='search_for' ID='input_search_for' TYPE='text' SIZE='$isize' value='$search_for'></font>
-              <input type='hidden' name='did_dearch' id='input_did_search' value='true'></td>
+      <td width='30%'><input name='search_for' ID='input_search_for' TYPE='text' SIZE='$isize' value='$o_search_for'></font>
+              <input type='hidden' name='did_search' id='input_did_search' value='true'></td>
       <td class='tenpt'>";
   $rtn .= fp_render_button("Search","jQuery(\"#mainform\").submit();");
   $rtn .= "</td><td width='1'>
@@ -268,19 +283,19 @@ function student_search_display_search() {
   if($search_for != "" && strlen($search_for) > 2)
   { // If they typed something greater than 2 chars...
     
-    $search_action = "AND (u.cwid LIKE '%$search_for%' 
+    $search_action = " AND (u.cwid LIKE '%$search_for%' 
                        OR l_name LIKE '%$search_for%' 
                        OR f_name LIKE '%$search_for%') 
                        ";
     // If you searched for 2 things seperated by a space, it is likely you
     // are searching for a name, so check that...
-    $_SESSION["student_search_for"] = $search_for;
+    $_SESSION["student_search_for"] = $o_search_for;
     $temp = explode(" ",$search_for);
     if (trim($temp[1]) != "")
     {
       $fn = trim($temp[0]);
       $ln = trim($temp[1]);
-      $search_action = "AND (l_name LIKE '%$ln%' 
+      $search_action = " (l_name LIKE '%$ln%' 
                          AND f_name LIKE '%$fn%') 
                        ";
     }
@@ -292,7 +307,7 @@ function student_search_display_search() {
       $search_action = "";
       $other_table = ", degrees b";
       $group_by = " GROUP BY u.cwid ";
-      $major_search = "AND  substring_index(a.major_code,'|',1) = b.major_code
+      $major_search = " substring_index(a.major_code,'|',1) = b.major_code
                         AND (b.major_code LIKE '%$mjsearch%' OR b.title LIKE '%$mjsearch%') ";
     }
 
@@ -306,8 +321,15 @@ function student_search_display_search() {
                  $search_action
               
                  $major_search
+        ";
+    if (!$bool_bypass_extra_search_conditions) {
+      $query .= "
               AND rank_code IN %RANKIN%
               %EXTRA_STUDENTSEARCH_CONDITIONS%
+              ";
+    }    
+    
+    $query .= "
               $group_by
               ORDER BY %ORDERBY%
               ";
@@ -317,35 +339,6 @@ function student_search_display_search() {
 
   $s = (count($adv_array) == 1) ? "" : "s"; 
   
-  if (count($adv_array) == 1 && $_REQUEST["did_search"] == "true")
-  {
-    // Since there was only 1 result,
-    // Go ahead and redirect to this person...
-    // But only if we just typed in the name.  If we switched here
-    // from a tab, do nothing-- display normally.
-    $student_id = $adv_array[0]["student_id"];
-    $first_name = $adv_array[0]["first_name"];
-    $last_name = $adv_array[0]["last_name"];
-    $major = $adv_array[0]["major"];
-    $what_if_major_code = $adv_array[0]["what_if_major_code"];
-    $what_if_track_code = $adv_array[0]["what_if_track_code"];
-
-    $rtn .= "<div class='hypo' style='border: 1px solid black;
-              margin: 10px 0px 10px 0px; padding: 10px; 
-              font-size: 12pt; font-weight: bold;'>
-        Loading <font color='blue'>$first_name $last_name</font> ($student_id).  
-          &nbsp; Please wait...
-        </div>";
-    $rtn .= "<script type='text/javascript'>
-        function redirOnLoad()
-        {        
-         setTimeout('selectStudent(\"$student_id\",\"$major\",\"$what_if_major_code\",\"$what_if_track_code\");',0);
-        }
-                </script>";
-    //$screen->page_on_load = " redirOnLoad(); ";
-  }
-
-
   $rtn .= student_search_render_advisees($adv_array, t("Search Results") . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
   $rtn .= "</form>";
   $rtn .= "</table>";
@@ -356,6 +349,24 @@ function student_search_display_search() {
 
 function student_search_render_advisees($adv_array, $title) {
   $rtn = "";
+  
+  
+  if (count($adv_array) == 1 && $_REQUEST["did_search"] == "true")
+  {
+    // Since there was only 1 result, we want to redirect this person directly.
+    // Draw this person's name...  
+    $student_id = $adv_array[0]["student_id"];
+    $first_name = $adv_array[0]["first_name"];
+    $last_name = $adv_array[0]["last_name"];
+    
+    $rtn .= "<div class='hypo' style='border: 1px solid black;
+              margin: 10px 0px 10px 0px; padding: 10px; 
+              font-size: 12pt; font-weight: bold;'>
+        " .t("Loading") . " <font color='blue'>$first_name $last_name</font> ($student_id).  
+          &nbsp; " . t("Please wait...") . "
+        </div>";
+    $bool_redirect_one = TRUE;
+  }
   
   
   $rtn .= fp_render_curved_line($title);
@@ -444,6 +455,27 @@ function student_search_render_advisees($adv_array, $title) {
 
 
   $rtn .= "</table>";
+  
+  
+  
+  if ($bool_redirect_one) {
+    // There was only one result, and it was a search, so we want to redirect
+    // this person.
+    // We will use the URL we created in the foreach loop above.  It will still contain exactly
+    // what we need.
+    $rtn .= "<script type='text/javascript'>
+        
+        $(document).ready(function() {
+          setTimeout('window.location=\"$url\";', 0);
+        });
+
+        </script>";
+    
+  }
+  
+  
+  
+  
   // Required to make the changeTab function work...
   $rtn .= "<form id='mainform' method='POST'>
       <input type='hidden' id='scrollTop'>

@@ -36,12 +36,13 @@ print "
 <script type='text/javascript'>
 <?php
     // java settings.
-      print " var FlightPath = new Object();
-              FlightPath.settings = new Object();
-              FlightPath.settings.themeLocation = '$theme_location'; 
-              FlightPath.settings.currentStudentId = '{$_REQUEST["current_student_id"]}';
-              FlightPath.settings.basePath = '" . base_path() . "';
-            ";
+    
+      print "var FlightPath = new Object();   \n";
+      print " FlightPath.settings = new Object();   \n";
+      
+      foreach ($GLOBALS["fp_extra_js_settings"] as $key => $val) {
+        print "FlightPath.settings.$key = '$val';  \n";
+      }
 ?>
 
 function defaultOnLoad()

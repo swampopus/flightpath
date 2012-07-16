@@ -126,7 +126,7 @@ function announcements_render_announcements($bool_show_delete = FALSE) {
                     ORDER BY posted DESC");
   while ($cur = db_fetch_array($res)) {
     $rtn .= "<div class='announcement'>
-                <div class='announcement-text'>" . filter_markup($cur["announcement"]) . "</div>
+                <div class='announcement-text'>" . filter_markup($cur["announcement"], "full") . "</div>
                 <div class='announcement-posted'>" . t("Posted") . " " . date("D, M jS Y - g:ia", $cur["posted"]) . "</div>";
     if ($bool_show_delete) {
       $delete_link = "";

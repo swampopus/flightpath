@@ -1,5 +1,33 @@
 /* JS for the admin module */
 
+
+$(document).ready(function() {
+  
+  // On startup, we want to call our function which hides all of the
+  // data entry UL's (on the main page).
+  adminHideDECats();
+  
+});
+
+/**
+ * On the main page, hides the data entry cat selection UL's, except for the selected one.
+ */
+function adminHideDECats() {
+
+  // First, find out what is selected.
+  var selected = $("#data-entry-select-cats").val();
+   
+  // Hide all the cat UL's
+  $("ul.data-entry-for-cat").hide();
+  
+  // Show the selected one.
+  $("ul.data-entry-for-cat-" + selected).show();
+  
+  
+}
+
+
+
 function adminPopupAlertHelp(action)
 {
   var t = "Instant Help:\n------------------\n\n";

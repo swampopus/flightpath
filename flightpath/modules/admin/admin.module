@@ -554,8 +554,8 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
    
 
   // First, set maintenance mode...
-  $db->set_maintenance_mode("1");
-
+  variable_set("maintenance_mode", TRUE);
+  
   // Okay, so what we gotta do is truncate the production tables,
   // then copy the draft tables in.
   $table_array = array(
@@ -602,8 +602,8 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
   $res = db_query("TRUNCATE TABLE draft_instructions");
 
 
-  // And we are done!  Set maintenance mode back to 0.
-  $db->set_maintenance_mode("0");
+  // And we are done!  Set maintenance mode back to none
+  variable_set("maintenance_mode", FALSE);
 
   // Send emails to notify programmers...
   $notify = variable_get("notify_apply_draft_changes_email_address", "");  
@@ -719,9 +719,12 @@ function admin_urgent_message_form() {
  * first sees when the click to go to the Admin page.
  */
 function admin_display_main() {
+  $de_catalog_year = admin_get_de_catalog_year();
+  
   $rtn = "";
 
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
+  fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
 
   $rtn .= "<h2>" . t("FlightPath Admin Console - Main Menu") . "</h2>";
   $rtn .= "<table class='fp-semester-table' cellpadding='5'>
@@ -764,16 +767,24 @@ function admin_display_main() {
   
   if (user_has_permission("can_access_data_entry")) {
     $rtn .= fp_render_curved_line("Data Entry");
-
-    // TODO:  Maybe have a pulldown here of years, then use javascript to hide/show relavant groups.
-    
+   
     $rtn .= "<div class='data-entry-cats'>";
+
+    // Have a pulldown here of years, then use javascript to hide/show relavant groups.
+    $rtn .= "&nbsp; &nbsp; &nbsp; " . t("Select a catalog year") . ": <select id='data-entry-select-cats' onChange='adminHideDECats();'>";
+    $selected_cat = ($de_catalog_year != "") ? $de_catalog_year : $settings["current_catalog_year"];
+    
+    for ($t = $settings["current_catalog_year"] +1; $t >= $settings["earliest_catalog_year"]; $t--) {
+      $sel = ($t == $selected_cat) ? "selected" : "";
+      $rtn .= "<option value='$t' $sel>$t-" . ($t+1) . "</option>";
+    }
+    $rtn .= "</select>";
     
     for ($t = $settings["current_catalog_year"] +1; $t >= $settings["earliest_catalog_year"]; $t--) {
       $rtn .= "<ul class='data-entry-for-cat data-entry-for-cat-$t'>";
-      $rtn .= "<li>" . l(t("Degree plans for @year", array("@year" => $t)), "admin/degrees", "de_catalog_year=$t") . "</li>";
-      $rtn .= "<li>" . l(t("Groups for @year", array("@year" => $t)), "admin/groups", "de_catalog_year=$t") . "</li>";
-      $rtn .= "<li>" . l(t("Courses for @year", array("@year" => $t)), "admin/courses", "de_catalog_year=$t") . "</li>";
+      $rtn .= "<li>" . l(t("Degree plans for @year", array("@year" => "$t-" . ($t+1))), "admin/degrees", "de_catalog_year=$t") . "</li>";
+      $rtn .= "<li>" . l(t("Groups for @year", array("@year" => "$t-" . ($t+1))), "admin/groups", "de_catalog_year=$t") . "</li>";
+      $rtn .= "<li>" . l(t("Courses for @year", array("@year" => "$t-" . ($t+1))), "admin/courses", "de_catalog_year=$t") . "</li>";
       $rtn .= "</ul>";
     }
     

@@ -1,6 +1,23 @@
 FlightPath 4.x Changelog
 ========================
 
+2012-07-15
+  The default submit and validate handlers are explicitly added to all forms now.
+  
+  On the admin page, the current catalog year being edited is controlled through
+  a pull-down menu.
+
+
+2012-07-14
+  When searching, major=MAJORCODE now displays a list of students with that major.
+  
+  Also, if you enter an asterisk (*) with your search, it will bypass the
+  extra search conditions and rank checks.
+  
+  Also, if there is only one result, it immediately redirects to the View
+  tab with that student's degree plan loaded.
+
+
 2012-07-13
   Added "cwid" field to watchog, users, faculty, staff table.  Advising records need to be
   saved off this cwid instead of the auto-increment user_id.

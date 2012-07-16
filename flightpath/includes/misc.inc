@@ -277,18 +277,30 @@ function fp_clear_cache() {
  
  
  
-function filter_markup($str) {
+/**
+ * Filter HTML, allowing only certain tags, and removing dangerous attributes.
+ * 
+ * $type can be:
+ *    - "basic" - Only certain tags allowed, no attributes. Safest. New lines = <br>
+ *    - "full" - All HTML is allowed through.
+ * 
+ */
+function filter_markup($str, $type = "basic") {
   
-  // TODO: get allowed tags from a setting.
+  if ($type == "basic") {
+    $str = nl2br($str);    
+    $allowed_tags = array('a', 'em', 'strong', 'cite', 
+                          'blockquote', 'code', 'ul', 'ol', 'li', 
+                          'dl', 'dt', 'dd', 'span', 'div', 
+                          'b', 'i', 'u', 'br', 'p', 'table', 'tr', 
+                          'td', 'th', 'tbody', );
+    
+    $str = filter_xss($str, $allowed_tags);
+  }
   
-  $allowed_tags = array('a', 'em', 'strong', 'cite', 
-                        'blockquote', 'code', 'ul', 'ol', 'li', 
-                        'dl', 'dt', 'dd', 'span', 'div', 
-                        'b', 'i', 'u', 'br', 'p', 'table', 'tr', 
-                        'td', 'th', 'tbody');
   
-  return filter_xss($str, $allowed_tags);
-   
+  return $str;
+  
 } 
  
 /**
@@ -618,8 +630,26 @@ function fp_add_css($path_to_css) {
   $GLOBALS["fp_extra_css"][] = $path_to_css;
 }
 
-function fp_add_js($path_to_js) {
-  $GLOBALS["fp_extra_js"][] = $path_to_js;
+/**
+ * Add extra javascript to the page.
+ * 
+ * - type = file... $js is expected to be the path to a javascript file.
+ * - type = setting... $js is expected to be an associative array of settings.
+ *            For example:  array("my_path" => "blah", "my_color" => "red").
+ *            They will be available in javascript in the object FlightPath like so:
+ *              FlightPath.settings.my_color;
+ */
+function fp_add_js($js, $type = "file") {
+  if ($type == "file") {  
+    $GLOBALS["fp_extra_js"][] = $js;
+  }
+  
+  if ($type == "setting") {
+    if (!is_array($GLOBALS["fp_extra_js_settings"])) $GLOBALS["fp_extra_js_settings"] = array();
+    
+    $GLOBALS["fp_extra_js_settings"] = array_merge($GLOBALS["fp_extra_js_settings"], $js);
+  }
+  
 }
 
 

@@ -1263,7 +1263,18 @@ function system_init() {
     // User is anonymous, so set it up as such.
     $user = fp_load_user(0);    
   }
-    
+  
+  // Are we in maintenance mode?  If so, display a message.
+  if (variable_get("maintenance_mode", FALSE)) {
+    fp_add_message(t("FlightPath is currently undergoing routine maintenance for the next
+                      few minutes.  During this time, some data may appear incomplete.
+                      We apologize for the inconvenience and appreciate your patience."), "status", TRUE);
+  }
+     
+  // Add in our custom JS settings.
+  fp_add_js(array("themeLocation" => fp_theme_location(), "currentStudentId" => $_REQUEST["current_student_id"], "basePath" => base_path()), "setting");   
+     
+     
 }
 
 
