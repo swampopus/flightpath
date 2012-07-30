@@ -474,6 +474,17 @@ function admin_advising_settings_form() {
   );  
 
 
+  $form["not_released_grades_terms"] = array(
+    "type" => "textfield",
+    "label" => t("NOT released grades terms"),
+    "value" => variable_get("not_released_grades_terms", ""),
+    "description" => t("Enter the term_id's, separated by commas, 
+                        which are NOT released and should NOT be visible to either advisors or students. 
+                        Coures in these terms will only show midterm grades or no grades at all. 
+                        Ex: 201240_1, 201240_S") . "<br>" . t("If left blank, grades will be visible to 
+                        students and advisors as soon as they appear in the database."),
+  );  
+
 
     
   
@@ -745,6 +756,7 @@ function admin_display_main() {
         <li>" . t("Default advisint term: %v", array("%v" => variable_get("advising_term_id", ""))) . "</li>          
         <li>" . t("Current catalog year: %v", array("%v" => variable_get("current_catalog_year", ""))) . "</li>       
         <li>" . t("Current draft catalog year: %v", array("%v" => variable_get("current_draft_catalog_year", ""))) . "</li>             
+        <li>" . t("Not released grades terms: %v", array("%v" => variable_get("not_released_grades_terms", ""))) . "</li>             
         
       </ul>";
   

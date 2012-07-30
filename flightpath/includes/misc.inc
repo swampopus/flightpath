@@ -786,8 +786,9 @@ function get_term_description($term_id, $bool_abbreviate = false) {
       
     }
 
+    // No descr could be found, so just display the term_id itself.
     if (trim($rtn) == "") {
-      $rtn = t("Unknown term");
+      $rtn = $term_id;
     }
 
     return $rtn;

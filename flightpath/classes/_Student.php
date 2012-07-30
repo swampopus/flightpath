@@ -565,6 +565,8 @@ class _Student
 
 	  $retake_grades = csv_to_array($GLOBALS["fp_system_settings"]["retake_grades"]);
 	  
+    $not_released_grades_terms = csv_to_array(variable_get("not_released_grades_terms"));
+    
 		// This will create and load the list_courses_taken list.
 		// contains SQL queries to fully create the list_courses_taken.
 		$res = $this->db->db_query("SELECT *	FROM student_courses									
@@ -581,6 +583,11 @@ class _Student
 				fpm("Course not found while trying to load student data: {$cur["subject_id"]} {$cur["course_num"]}");
 				continue;
 			}
+
+      // Are these grades (terms) not released yet?
+      if (in_array($cur["term_id"], $not_released_grades_terms)) {
+        $cur["grade"] = "";
+      }
 
 			$new_course = new Course();
 			$new_course->course_id = $course_id;

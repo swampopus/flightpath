@@ -1,6 +1,15 @@
 FlightPath 4.x Changelog
 ========================
 
+2012-07-30
+  If a term_id doesn't have a matching description, just display the term_id itself (instead
+  of the text "unknown term.")
+  
+  Added a not_released_grades_terms field to the advising settings.
+  
+  Added to the hook.api.php file, to help document hooks in FlightPath.
+  
+
 2012-07-15
   The default submit and validate handlers are explicitly added to all forms now.
   

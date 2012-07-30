@@ -79,11 +79,11 @@ function announcements_new_announcement_form() {
   return $form;
 }
 
-
-function announcements_new_announcement_form_submit(&$form, &$form_state) {
+function announcements_new_announcement_form_submit($form, &$form_state) {
+    
   $posted = strtotime($form_state["values"]["announcement_posted"]);
   $announcement = trim($form_state["values"]["announcement"]);
-  
+
   db_query("INSERT INTO announcements (announcement, posted)
             VALUES ('?', '?') ", $announcement, $posted);
   
