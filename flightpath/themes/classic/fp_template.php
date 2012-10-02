@@ -40,132 +40,31 @@ $theme_location = fp_theme_location();
 		<script src="<?php print base_path() ?>/inc/jquery-1.7.1.min.js" type="text/javascript"></script>
 		
 		<script type='text/javascript'>
-    <?php
-    // java settings.
-    
-      print "var FlightPath = new Object();   \n";
-      print " FlightPath.settings = new Object();   \n";
-      
-      foreach ($GLOBALS["fp_extra_js_settings"] as $key => $val) {
-        print "FlightPath.settings.$key = '$val';  \n";
-      }
-   
-    ?>
-    
-
-		function defaultOnLoad()
-		{
-			<?php
-
-			print $page_on_load;
-			// If the page had a scrollTo set, we should also
-			// perform that here...
-			if ($page_scroll_to != "")
-			{
-				print "location.href = \"#$page_scroll_to\"; \n";
-			}
-
-			?>
-
-		}
-
-
-		function popuphelp(topic)
-		{ // open a popup help window...
-			help_window = window.open("./help.php?topic=" + topic + "",
-			"helpwindow","toolbar=no,status=2,scrollbars=yes,resizable=yes,width=650,height=500");
-
-			help_window.focus();  // make sure the popup window is on top.
-
-
-		}
-
-		function popupreportcontact()
-		{
-			err_window = window.open("./popup-report-contact",
-			"errwindow","toolbar=no,status=2,scrollbars=yes,resizable=yes,width=500,height=400");
-
-			err_window.focus();  // make sure the popup window is on top.
-
-		}
-
-
-
-		function showUpdate(boolShowLoad)
-		{
-			var scrollTop = document.body.scrollTop;
-			var updateMsg = document.getElementById("updateMsg");
-			if (boolShowLoad == true)
-			{
-				updateMsg = document.getElementById("loadMsg");
-			}
-			var w = document.body.clientWidth;
-			//var h = document.body.clientHeight;
-			//var t = scrollTop + (h/2);
-			var t = scrollTop;
-			updateMsg.style.left = "" + ((w/2) - 120) + "px";
-			updateMsg.style.top = "" + t + "px";
-
-			updateMsg.style.position = "absolute";  // must use absolute for ie.
-			updateMsg.style.display = "";
-		}
-
-
+    <?php print $page_extra_js_settings; ?>     
+    // perform any requested actions on page load...
+		$(document).ready(function() { <?php print $page_on_load; ?> });
 		</script>
 		
 		
 		
 		<?php
-
-		// Add extra JS files.    
-      if (is_array($page_extra_js_files) && count($page_extra_js_files) > 0) {
-       foreach ($page_extra_js_files as $js_file_name) {
-         print "<script type='text/javascript' src='$js_file_name'></script> \n";
-       }        
-      } 		
-		
+		 // Add extra JS files.    
+     print $page_extra_js_files;
 		
 		 // Load this theme's CSS file(s)
 		 print "<link rel='stylesheet' type='text/css' href='$theme_location/style.css'>";
 		 
 		 // Load any extra CSS files which addon modules might have added.
-		 if (is_array($page_extra_css_files) && count($page_extra_css_files) > 0) {
-		   foreach ($page_extra_css_files as $css_file_name) {
-		     print "<link rel='stylesheet' type='text/css' href='$css_file_name'>";
-		   }
-		 }
+		 print $page_extra_css_files
 		 
 		?>
 		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
 		
-		<title><?php 
-		if ($page_title == "")
-		{ // By default, page title is this...
-			$page_title = $GLOBALS["fp_system_settings"]["school_initials"] . " FlightPath";
-		}
-		print $page_title;
-
-		?></title>
+		<title><?php print $page_title; ?></title>
 	</head>
 	
-	<?php
-	$scroll = "";
-	if (trim($page_scroll_top != ""))
-	{
-		$page_scroll_left = 0;
-		$scroll = " scrollTo($page_scroll_left, $page_scroll_top);";
-	}
-	$onclose = "";
-	if (trim($page_on_unload != ""))
-	{
-		$onclose = "on_unload='$page_on_unload'";
-	}
-
-
-	print "<body onLoad='defaultOnLoad(); $scroll' $onclose>";
-
-	?>
 	
+	<body>
 	
 	
 	<?php
@@ -328,14 +227,12 @@ $theme_location = fp_theme_location();
 							?>
 							   cellpadding="0" cellpadding="0">
 							<tr>
-								<td align="left" valign='top'>
-								<div id='updateMsg' class='updateMsg' style='display: none;'>Updating...</div>
-								<div id='loadMsg' class='updateMsg' style='display: none;'>Loading...</div>
+								<td align="left" valign='top'>								
 								<div class='page-content'>
 								<?php
                                 	// ***************** Page specific content will be in here *****************
 
-                                	print($page_content);
+                                	print $page_content;
 
 
                                 	// ***************** Page specific content was in here     *****************
@@ -384,9 +281,8 @@ $theme_location = fp_theme_location();
 		<td width='15'>&nbsp; </td>
 		<td style='font-size: 8pt;'>
 		<?php
-		if ($page_hide_report_error != TRUE)
-		{
-			print "<a class='nounderline' href='javascript: popupreportcontact()'>Contact the FlightPath production team</a>";
+		if ($page_hide_report_error != TRUE) {
+			print "<a class='nounderline' href='javascript: popupreportcontact()'>" . t("Contact the FlightPath production team") . "</a>";
 		}
 		?>
 		</td>

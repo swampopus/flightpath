@@ -1030,8 +1030,19 @@ function depricated_message($str = "A depricated function has been called.") {
  * Similar to print_r, this will return an HTML-friendly
  * click-to-open system similar in design to Krumo.
  */
-function fp_html_print_r($var, $name = "") {  
+function fp_html_print_r($var, $name = "", $cnt = 0) {  
   $rtn = "";
+
+  
+  if ($cnt > 20) {
+    // Max levels deep.  Deeper, and PHP might run
+    // out of memory or complain.
+    $rtn .= "<div class='fp-html-print-r-too-deep'>
+              " . t("Depth too great. To view deeper,
+                     rephrase your fpm() call, starting at this depth.") . "
+             </div>";
+    return $rtn;
+  }
   
   $type = gettype($var);
   $rnd = md5(mt_rand(0, 999999) . microtime() . $type . $name);
@@ -1065,7 +1076,7 @@ function fp_html_print_r($var, $name = "") {
                   </div>
                <div class='fp-html-print-r-var-value' id='fp-html-print-r-var-value-$rnd' style='display: none;'>";
     foreach ($var as $key => $value) {
-      $rtn .= fp_html_print_r($value, $key);
+      $rtn .= fp_html_print_r($value, $key, ($cnt + 1));
     }
     
     $rtn .= "</div>

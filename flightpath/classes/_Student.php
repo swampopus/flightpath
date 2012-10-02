@@ -96,7 +96,8 @@ class _Student
 
 		// Look in the database of advised courses for ANY course advised in
 		// the range of advisingTermIDs.
-		$advising_term_ids = $GLOBALS["setting_available_advising_term_ids"];
+		$advising_term_ids = variable_get("available_advising_term_ids", "0");;
+
 		$temp = explode(",",$advising_term_ids);
 		foreach ($temp as $term_id)
 		{

@@ -257,7 +257,6 @@ class _FlightPath
 			if (!$g->list_courses->is_empty)
 			{
 				// Yes, there are courses here.  So, assign them at this level.
-				//$this->assign_courses_to_list($g->list_courses, $this->student, true, $g);
 				$this->assign_courses_to_list($g->list_courses, $this->student, true, $g, true);
 				// Okay, if we have fulfilled our courses at this level.
 
@@ -415,6 +414,7 @@ class _FlightPath
 
 	}
 
+	
 
 	function assign_courses_to_list(ObjList $list_requirements, Student $student, $bool_perform_assignment = true, Group $group = null, $bool_check_significant_courses = false)
 	{
@@ -1255,8 +1255,6 @@ class _FlightPath
 		$student_id = $this->student->student_id;
 		$available_terms = variable_get("available_advising_term_ids", "0");
 
-
-
 		$advising_session_line = " `advising_session_id`='$advising_session_id' ";
 		// First, find the advising session id...
 		if ($advising_session_id < 1 && $available_terms == "")
@@ -1325,7 +1323,8 @@ class _FlightPath
 			// show these advisings.
 			if ($course_list = $this->degree_plan->find_courses($course_id, $group_id, $semester_num))
 			{
-
+        //fpm("I found course $course_id sem:$semester_num group:$group_id $var_hours");
+        //fpm($course_list);
 				// This course may exist in several different branches of a group, so we need
 				// to mark all the branches as having been advised to take.  Usually, this CourseList
 				// will probably only have 1 course object in it.  But, better safe than sorry.
@@ -1372,7 +1371,7 @@ class _FlightPath
 								$course->advised_hours = $var_hours;
 								$course->advised_term_id = $advised_term_id;
 								$course->db_advised_courses_id = $id;
-								$course_list->dec_specified_repeats($course);
+								$course_list->dec_specified_repeats($course);								
 								break;
 							}
 						}
@@ -1413,7 +1412,7 @@ class _FlightPath
 						break;
 					}
 					
-					
+					//fpm($course);
 					$course->bool_advised_to_take = true;
 					$course->assigned_to_semester_num = $semester_num;
 					$course->assigned_to_group_id = $group_id;

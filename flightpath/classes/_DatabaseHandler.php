@@ -423,8 +423,8 @@ class _DatabaseHandler
 	function load_course_descriptive_data($course = null, $course_id = 0)
 	{
 
-		$current_catalog_year = $GLOBALS["setting_current_catalog_year"]; // currentCatalogYear.
-		$catalog_year = $GLOBALS["setting_current_catalog_year"]; // currentCatalogYear.
+		$current_catalog_year = variable_get("current_catalog_year", "2006");
+		$catalog_year = $current_catalog_year; // currentCatalogYear.
 		if ($course != null)
 		{
 			$course_id = $course->course_id;
@@ -1192,7 +1192,7 @@ class _DatabaseHandler
 		
 		// If catalog_year is blank, use whatever the current catalog year is, loaded from our settings table.
 		if ($catalog_year == "") {
-		  $catalog_year = $GLOBALS["setting_current_catalog_year"];
+		  $catalog_year = variable_get("current_catalog_year", "2006");
 		}
 		
 		$degree_id = $this->get_degree_id($major_and_track_code, $catalog_year);

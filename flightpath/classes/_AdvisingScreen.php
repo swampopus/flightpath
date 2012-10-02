@@ -279,20 +279,59 @@ function draw_menu_items($menu_array) {
 		$page_scroll_top = $this->page_scroll_top;
 		$page_is_popup = $this->page_is_popup;
 		$page_title = $this->page_title;
+		
+  	if ($page_title == "") { 
+  	  // By default, page title is this...
+			$page_title = $GLOBALS["fp_system_settings"]["school_initials"] . " FlightPath";
+		}
+
+		
 		$page_hide_report_error = $this->page_hide_report_error;
-    $page_extra_css_files = $GLOBALS["fp_extra_css"];		
-		$page_extra_js_files = $GLOBALS["fp_extra_js"];
+
 		$print_option = "";
-		if ($this->bool_print == true)
-		{
+		if ($this->bool_print == true) {
 			$print_option = "print_";
 		}
 
-		if ($this->page_is_mobile == true)
-		{
+		if ($this->page_is_mobile == true) {
 		  $print_option = "mobile_";
 		}
 					
+				
+    // Add extra JS files.    
+    if (is_array($GLOBALS["fp_extra_js"]) && count($GLOBALS["fp_extra_js"]) > 0) {
+     foreach ($GLOBALS["fp_extra_js"] as $js_file_name) {
+       $page_extra_js_files .= "<script type='text/javascript' src='$js_file_name'></script> \n";
+     }        
+    } 		
+	
+	
+	  
+	  // Load any extra CSS files which addon modules might have added.
+	  if (is_array($GLOBALS["fp_extra_css"]) && count($GLOBALS["fp_extra_css"]) > 0) {
+	   foreach ($GLOBALS["fp_extra_css"] as $css_file_name) {
+	     $page_extra_css_files .= "<link rel='stylesheet' type='text/css' href='$css_file_name'>";
+	   }
+	  }		
+		
+		
+	  // Javascript settings...
+    $page_extra_js_settings .= "var FlightPath = new Object();   \n";
+    $page_extra_js_settings .= " FlightPath.settings = new Object();   \n";      
+    foreach ($GLOBALS["fp_extra_js_settings"] as $key => $val) {
+      $page_extra_js_settings .= "FlightPath.settings.$key = '$val';  \n";
+    }	 
+	 
+    // Scrolling somewhere?  Add it to the page_on_load...    
+	  if (trim($page_scroll_top != "")) {		  
+		  $page_on_load .= " scrollTo(0, $page_scroll_top);";
+	  }
+    
+	  // Add in our hidden divs which we will sometimes display...
+	  $page_content .= "<div id='updateMsg' class='updateMsg' style='display: none;'>" . t("Updating...") . "</div>
+								<div id='loadMsg' class='updateMsg' style='display: none;'>" . t("Loading...") . "</div>";
+	  
+		
 		include($GLOBALS["fp_system_settings"]["theme"] . "/fp_" . $print_option . "template.php");
 	}
 
@@ -1952,7 +1991,7 @@ function draw_menu_items($menu_array) {
 			$g->load_descriptive_data();
 
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
-						<img src='fp_theme_location()/images/icons/$g->icon_filename' width='19' height='19'>
+						<img src='" . fp_theme_location() . "/images/icons/$g->icon_filename' width='19' height='19'>
 						&nbsp;
 						" . t("This course is a member of") . " $g->title.
 					";
@@ -2226,22 +2265,21 @@ function draw_menu_items($menu_array) {
 
 		$semester->list_courses->sort_alphabetical_order();
 		$semester->list_courses->reset_counter();
-		//print_pre($semester->list_courses->toString());
+
 		while($semester->list_courses->has_more())
 		{
 			$course = $semester->list_courses->get_next();
-			//$pC .= "<tr><td colspan='8'>";
 			// Is this course being fulfilled by anything?
 
-			//if (is_object($course->courseFulfilledBy))
+
 			if (!($course->course_list_fulfilled_by->is_empty))
 			{ // this requirement is being fulfilled by something the student took...
 
-				//$pC .= $this->draw_course_row($course->courseFulfilledBy);
+
 				$pC .= $this->draw_course_row($course->course_list_fulfilled_by->get_first());
 				$course->course_list_fulfilled_by->get_first()->bool_has_been_displayed = true;
 
-				//$count_hoursCompleted += $course->courseFulfilledBy->hours_awarded;
+
 				if ($course->course_list_fulfilled_by->get_first()->display_status == "completed")
 				{ // We only want to count completed hours, no midterm or enrolled courses.
 					$h = $course->course_list_fulfilled_by->get_first()->hours_awarded;
@@ -2338,7 +2376,6 @@ function draw_menu_items($menu_array) {
 
 		// Okay, first look for courses in the first level
 		// of the group.
-		//$group->list_courses->sort_alphabetical_order();
 
 		$display_semesterNum = $place_group->assigned_to_semester_num;
 		

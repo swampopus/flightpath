@@ -481,7 +481,7 @@ function admin_advising_settings_form() {
     "description" => t("Enter the term_id's, separated by commas, 
                         which are NOT released and should NOT be visible to either advisors or students. 
                         Coures in these terms will only show midterm grades or no grades at all. 
-                        Ex: 201240_1, 201240_S") . "<br>" . t("If left blank, grades will be visible to 
+                        Ex: 201240, 201240:S1") . "<br>" . t("If left blank, grades will be visible to 
                         students and advisors as soon as they appear in the database."),
   );  
 

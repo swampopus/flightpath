@@ -456,7 +456,7 @@ class _Group
 		// Return a CourseList of all the Course objects
 		// which are in this group that match
 		$rtn_course_list = new CourseList();
-
+		
 		if ($obj_list = $this->list_courses->find_all_matches($course))
 		{
 			$obj_list->reset_counter();

@@ -4,37 +4,18 @@
 	to be used with content which is supposed to get printed out.
 */
 
-if ($page_title == "")
-{ // By default, page title is this...
-	$page_title = $GLOBALS["fp_system_settings"]["school_initials"] . " FlightPath";
-}
 
 $theme_location = fp_theme_location();
 
-
 // Add extra JS files.    
-  if (is_array($page_extra_js_files) && count($page_extra_js_files) > 0) {
-   foreach ($page_extra_js_files as $js_file_name) {
-     print "<script type='text/javascript' src='$js_file_name'></script> \n";
-   }        
-  }     
+print $page_extra_js_files;
+
+print "<link rel='stylesheet' type='text/css' href='$theme_location/style.css'>";
+
+print $page_extra_css_files; 
 
 
-print "
-<link rel='stylesheet' type='text/css' href='$theme_location/style.css'>";
-
- // Load any extra CSS files which addon modules might have added.
- if (is_array($page_extra_css_files) && count($page_extra_css_files) > 0) {
-   foreach ($page_extra_css_files as $css_file_name) {
-     print "<link rel='stylesheet' type='text/css' href='$css_file_name'>";
-   }
- }
- 
-
-
-print "
-<title>$page_title</title>
-";
+print "<title>$page_title</title> ";
 
 ?>
 <body style='background-color: white;'>

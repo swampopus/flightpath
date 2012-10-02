@@ -106,49 +106,12 @@ function student_search_render_small_search() {
               style='padding:0; margin:0; padding-bottom: 5px;'>
                      <input type='text' class='smallinput' size='30' name='search_for' id='search_bar_value'                       
                         placeholder = '" . t("Search by name or CWID") . "'>
-                     <input type='button' name='submit' value='=>' class='smallinput'>
+                     <input type='submit' name='submit' value='=>' class='smallinput'>
                      <input type='hidden' name='current_student_id' value='$current_student_id'>   
                      <input type='hidden' name='did_search' value='true'>                  
                     </form>
                     ";
  
-  $rtn .= "
-  
-  <script type='text/javascript'>
-    
-
-    function small_search_perform_search()
-    {
-      
-      window.location='studentsearch.php?didSearch=true&searchFor=' + document.getElementById('search_bar_value').value;
-
-      return true;
-    }
-
-    function searchKeyPress(e)
-    {
-      // If they typed an ENTER key, then call doSearch...
-      if(e){
-        e = e
-      } else {
-        e = window.event
-      }
-
-      if(e.which){
-        var keycode = e.which
-      } else {
-        var keycode = e.keyCode
-      }
-
-      if(keycode == 13) {
-        doSearch();
-      }
-    }    
-    
-  </script>
-  
-  ";
-
   return $rtn;
                       
 }

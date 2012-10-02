@@ -625,11 +625,11 @@ class _DegreePlan
       if ($group = $this->find_group($group_id))
       {
 
-
         if (!($group->list_courses->is_empty))
         {
           if ($cL = $group->find_courses($new_course))
           {
+
             $rtn_course_list->add_list($cL);
 
           }
