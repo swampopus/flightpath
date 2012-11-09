@@ -63,7 +63,7 @@ function hook_validate($form, &$form_state) {
 
  
 /**
- * Handle submissions frm the Form API
+ * Handle submissions from the Form API
  * 
  * Like hook_validate, this function (if it exists) is called after you submit a form,
  * and after the validation completes without errors.  This is where you should act on
@@ -78,6 +78,30 @@ function hook_submit($form, &$form_state) {
 }
 
  
+
+/**
+ * Handle needed database updates when user updates a module.
+ * 
+ * Modules can specify which schema their tables are using in their .info file.
+ * if the module, in a later version, changes the table it writes to, it should increment
+ * the schema number, whic causes the user to be notified (on the modules page) that they need
+ * to run the DB updates.
+ * 
+ * When the DB updates are run, every module implementing this function will be called
+ * (it is expected to be in a .install file, instead of the .module file, though both get
+ * included by the system first).
+ *
+ * In this function, the developer can see what schema they are coming FROM, and make table
+ * or other alterations based on that information.
+ * 
+ */
+function hook_update($old_schema, $new_schema) {
+  if ($new_schema < 4) {
+    db_query("ALTER TABLE my_example_table ...... ");
+  }
+}
+
+
  
  
  

@@ -175,6 +175,27 @@ function system_menu() {
   );  
 
   
+
+  $items["admin/db-updates"] = array(
+    "title" => "Run DB updates?",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_confirm_db_updates_form"),
+    "access_arguments" => array("administer_modules"),
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );  
+     
+  
+  $items["admin/completed-db-updates"] = array(
+    "title" => "Database updates completed",
+    "page_callback" => "system_display_completed_db_updates",    
+    "access_arguments" => array("administer_modules"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+    ),       
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );    
+  
+  
   $items["admin/config/system-settings"] = array(
     "title" => "Edit system settings",
     "page_callback" => "fp_render_form",
@@ -276,6 +297,157 @@ function system_menu() {
            
   return $items;
 }
+
+
+
+/**
+ * Display a confirmation form before we run the db updates (hook_updates)
+ *
+ * @return unknown
+ */
+function system_confirm_db_updates_form() {
+  $form = array();
+
+  $form["mark" . $m++] = array(
+    "value" => t("Are you sure you wish to run the database updates?
+                This will find modules which have been updated, and now need to
+                make database changes.") . "
+                <br><br>
+                " . t("You should back up your entire database first, just in case a problem
+                occurs!"),
+  );
+  
+
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => t("Continue"),
+    "prefix" => "<hr>",
+    "suffix" => "&nbsp; &nbsp; <a href='javascript: history.go(-1);'>" . t("Cancel") . "</a>",    
+  );
+  
+  $form["mark" . $m++] = array(
+    "value" => t("Press only once, as this make take several moments to run."),
+  );
+  
+  
+  return $form;
+}
+
+
+/**
+ * Perform the actual hook_update calls here, send the user to a completed page.
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function system_confirm_db_updates_form_submit($form, $form_state) {
+  
+  
+  // We need to find modules whose schema in their .info file
+  // is different than what's in the database.
+  
+  $module_dirs = array();
+  $module_dirs[] = array("start" => "modules", "type" => t("Core"));
+  $module_dirs[] = array("start" => "custom/modules", "type" => t("Custom"));
+    
+  foreach ($module_dirs as $module_dir) {
+    $start_dir = $module_dir["start"];
+     
+    if ($dh = opendir($start_dir)) {
+      while ($file = readdir($dh)) {    
+        if ($file == "." || $file == "..") continue;
+        
+        if (is_dir($start_dir . "/" . $file)) {  
+         
+          // Okay, now look inside and see if there is a .info file.
+          if (file_exists("$start_dir/$file/$file.info")) {
+            $module = $file;
+            $info_contents = file_get_contents("$start_dir/$file/$file.info");
+              
+            //fpm($info_contents);  
+            // From the info_contents variable, split up and place into an array.
+            $info_details_array = array();
+            $lines = explode("\n", $info_contents);
+            foreach ($lines as $line) {
+              if (trim($line) == "") continue;
+              $temp = explode("=", trim($line));
+              $info_details_array[trim($temp[0])] = trim(substr($line, strlen($temp[0]) + 1)); 
+            }
+            
+            
+            $path = "$start_dir/$file";
+            
+            $res = db_query("SELECT * FROM modules WHERE path = '?' ", $path);
+            $cur = db_fetch_array($res);
+            $info_details_array["enabled"] = $cur["enabled"];
+           
+            // Does this module need to run db updates?
+            if ($cur["enabled"] == "1" && $cur["schema"] != $info_details_array["schema"] && $info_details_array["schema"] != "") {
+              // YES, we need to run this module's hook_update function, if it exists.
+              
+              // So, let's try to do that.              
+
+              // If the module has a .install file, begin by including it.
+              if (include_module_install($module, $path)) {
+                  
+                // Include the original module file first.
+                include_module($module, TRUE, $path);
+                                   
+                // Now, we can call hook_update, if it exists.
+                if (function_exists($module . '_update')) {
+                  call_user_func_array($module . '_update', array($cur["schema"], $info_details_array["schema"]));
+                }
+                   
+              }              
+              
+              // Okay, update the modules table for this module, and set schema to correct version.
+              $res = db_query("UPDATE modules 
+                                SET `schema` = '?'
+                                WHERE path = '?' LIMIT 1 ", $info_details_array["schema"], $path);
+                                       
+              
+              fp_add_message(t("The module %module has run its DB updates.", array("%module" => $module)));              
+
+              
+              
+            }  
+  
+          }
+        }
+      }
+    }
+  }  
+  
+  
+  
+  fp_goto("admin/completed-db-updates");
+}
+
+
+
+/**
+ * Once db updates are run, display contents of this page.
+ *
+ */
+function system_display_completed_db_updates() {
+  $rtn = "";
+  
+  $rtn .= t("Database updates have been completed.  If you do not see
+              any errors displayed, it means everything was run correctly.");
+  
+  $rtn .= "<br><br>
+              <ul>";
+  
+  $rtn .= "<li>" . l(t("Return to Admin"), "admin-tools/admin") . "</li>
+          <li>" . l(t("Return to Modules page"), "admin/config/modules") . "</li>
+           
+          </ul>";
+  
+  
+  return $rtn;
+}
+
+
 
 
 
@@ -1290,7 +1462,8 @@ function system_modules_form() {
   
   $form["mark" . $m++] = array(
     "value" => t("Use this form to enable or disable modules.  This scans the /modules/ and then /custom/modules/
-                  directories."),
+                  directories.") . " 
+                  " . l(t("Run DB updates?"), "admin/db-updates") . "<br><br>",
   );
   
   
@@ -1367,6 +1540,13 @@ function system_modules_form() {
               $installation_status = fp_get_js_confirm_link(t("Are you sure you wish to uninstall @module?\\nThis may remove saved data belonging to the module.", array("@module" => $module)), 
                                                             ' window.location="' . fp_url("system/uninstall-module", "module=$module&path=" . urlencode($path) . "") . '"; ', t("uninstall?")); 
             }
+            
+            
+            // Does this module need to run db updates?
+            if ($cur["enabled"] == "1" && $cur["schema"] != $info_details_array["schema"] && $info_details_array["schema"] != "") {
+              $installation_status = "<b>" . l(t("Run db updates"), "admin/db-updates") . "</b>";
+            }
+            
             
             
                         
@@ -1538,10 +1718,10 @@ function system_enable_module($module_details) {
     // (delete anything all ready there first)      
     $res = db_query("DELETE FROM modules WHERE name = '?' ", $module);
     // Now, add back into the table.
-    $res = db_query("INSERT INTO modules (name, path, version, requires, enabled, type, schema_version, info)
+    $res = db_query("INSERT INTO modules (name, path, version, requires, enabled, type, `schema`, info)
                      VALUES ('?', '?', '?', '?', '?', '?', '?', '?')
                      ", $module, $path, $module_details["version"], $module_details["required"], "1", "module",
-                        $module_details["schema_version"], serialize($module_details));
+                        $module_details["schema"], serialize($module_details));
     
     $bool_call_hook_install = TRUE;
     

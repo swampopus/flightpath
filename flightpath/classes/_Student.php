@@ -257,7 +257,7 @@ class _Student
 		  //$db_score = $cur[$tfa->score];
 		  
 		  
-			if (!(($db_datetime . $db_test_id) == $old_row))
+			if (!(($db_date_taken . $db_test_id) == $old_row))
 			{
 				// We are at a new test.  Add the old test to our list.
 				if ($st != null) {					
@@ -269,7 +269,7 @@ class _Student
 				$st->test_id = $db_test_id;
 				$st->date_taken = $db_date_taken;
 				$st->description = $db_test_description;
-				$old_row = $db_datetime . $db_test_id;
+				$old_row = $db_date_taken . $db_test_id;
 
 			}
 

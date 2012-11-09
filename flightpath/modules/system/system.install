@@ -416,7 +416,7 @@ CREATE TABLE `modules` (
   `enabled` int(11) NOT NULL,
   `weight` int(11) NOT NULL,
   `type` varchar(20) NOT NULL,
-  `schema_version` int(11) NOT NULL,
+  `schema` int(11) NOT NULL,
   `info` text NOT NULL,
   PRIMARY KEY (`path`)
 ); ";

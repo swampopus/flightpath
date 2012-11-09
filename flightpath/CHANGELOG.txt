@@ -1,6 +1,14 @@
 FlightPath 4.x Changelog
 ========================
 
+2012-10-16
+  Fixed bug where test scores from different attempts were all showing
+  as having come from the same test.
+  
+  Implemented hook_update system, for when its time to update a module and
+  that module requires DB updates to be made.
+
+
 2012-07-30
   If a term_id doesn't have a matching description, just display the term_id itself (instead
   of the text "unknown term.")

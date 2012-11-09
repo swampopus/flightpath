@@ -67,8 +67,6 @@ function update_status_get_install_status_url() {
   $rtn = "";
   
   $domain = "getflightpath.com";
-  // testing
-  //$domain = "getfp.richardpeacock.com";
   
   
   $rtn .= "http://$domain/check-update-status?pa=cv&st=" . urlencode(fp_token());
