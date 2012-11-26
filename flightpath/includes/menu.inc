@@ -6,6 +6,24 @@
  */
 
  
+
+/**
+ * Look for modules implementing hook_menu_handle_replacement_pattern, and apply to str. 
+ *
+ * @param unknown_type $str
+ */
+function menu_convert_replacement_pattern($str) {
+  // Find modules which implement the hook_menu_handle_replacement_pattern function.
+  $modules = modules_implement_hook("menu_handle_replacement_pattern");
+  foreach($modules as $module) {
+    $str = call_user_func($module . '_menu_handle_replacement_pattern', $str);
+  }
+  
+  return $str;
+}
+
+
+
  
 /**
  * Go through all installed modules and rebuild the menu_router table,
@@ -173,10 +191,96 @@ function menu_get_items_in_tab_family($tab_family) {
 }
 
 
+
+/**
+ * Figure out which menu_router path matches the supplied path and return it.
+ *
+ */
+function menu_get_item($path) {
+  // Since the menu item may be using wildcards, we must 
+  // try to figure out exactly which defined path is the best one
+  // to take.
+  
+  // To cut down on the amount we need to query, we will use a global variable.
+  if (!isset($GLOBALS["fp_menu_items"]) || !is_array($GLOBALS["fp_menu_items"]) || count($GLOBALS["fp_menu_items"]) == 0) {
+    // The global array is not set.  Let's populate it from the database.
+    $res = db_query("SELECT path FROM menu_router");
+    while ($cur = db_fetch_array($res)) {
+      $GLOBALS["fp_menu_items"][] = $cur["path"];
+    }
+  }
+  
+  $menu_items = $GLOBALS["fp_menu_items"];
+  
+  // Okay, first things first, does the path *exactly* match anything in our GLOBALS array?
+  if (in_array($path, $menu_items)) {
+    return menu_get_menu_router_item_from_db($path);
+  }
+  
+  // If we are here, we didn't see an exact match.  That may mean we are using wildcards,
+  // and therefore we should pick only the best match.
+  // For example, if the path is "node/5/edit", we should return the
+  // menu_router item "node/%/edit", but not "node/%/%".  We will figure this out
+  // by breaking up our paths into pieces, and then comparing each piece, and scoring URLs
+  // as we do on how many levels they match on.  The URL with the higest match wins.
+  
+  $defined_score = array();
+  
+  
+  // Now, go through and find the best URL definition that matches the given URL.
+  
+  $given_pieces = explode("/", $path);
+  foreach ($menu_items as $defined_url) {
+    
+    $defined_pieces = explode("/", $defined_url);
+    
+    // First, make only look for the ones with the exact same count as us...
+    if (count($defined_pieces) != count($given_pieces)) continue;
+    
+    $defined_score[$defined_url]++;
+    
+    // Okay, now go through the pieces and compare.
+    foreach ($defined_pieces as $c => $defined_piece) {
+      
+      // If it's exactly a match, then inc its score.
+      if ($defined_piece == $given_pieces[$c]) {
+        $defined_score[$defined_url]++;
+      }    
+      
+      // If it's totally off, then kick it out!
+      if ($defined_piece != "%" && $defined_piece != $given_pieces[$c]) {      
+        unset($defined_score[$defined_url]);
+        break;
+      }
+      
+    }
+    
+  }
+  
+  arsort($defined_score);
+  
+  $best_match_path = "";
+  if (count($defined_score) > 0) {
+    $best_match_path = key($defined_score);
+  }
+  
+  // Okay, the best_match_path is the one that best fits our path.  Let's return the details
+  // for it from menu_router.
+  if ($best_match_path) {
+    return menu_get_menu_router_item_from_db($best_match_path);
+  }
+  
+  // Else, nothing was found!
+  return NULL;
+  
+  
+}
+
+
 /**
  * Return array from menu_router for this item. * 
  */
-function menu_get_item($path) {
+function menu_get_menu_router_item_from_db($path) {
   $res = db_query("SELECT * FROM menu_router WHERE path = '?' ", $path);
   $cur = db_fetch_array($res);
 
@@ -191,11 +295,36 @@ function menu_get_item($path) {
     $cur["page_arguments"] = array();
   }
 
+  // If any of the page_arguments is a number by itself, we will instead
+  // use the number of the URL args.
+  // For example, if the URL path is "node/edit/apple"
+  // and there is a page_argument for the number 2, we will replace
+  // it with "apple".  This is how the menu system can use wildcards from the url
+  // for the page arguments.
+  foreach ($cur["page_arguments"] as $c => $arg) {
+    if (is_numeric($arg)) {
+      $temp = explode("/", $_REQUEST["q"]);
+      $cur["page_arguments"][$c] = $temp[$arg];
+    }
+  }
+  
+  
   $cur["access_arguments"] = unserialize($cur["access_arguments"]);
   if (!is_array($cur["access_arguments"])) {
     $cur["access_arguments"] = array();
   }
 
+  
+  // Same situation for access_arguments as the page_arguments above.
+  foreach ($cur["access_arguments"] as $c => $arg) {
+    if (is_numeric($arg)) {
+      $temp = explode("/", $_REQUEST["q"]);
+      $cur["access_arguments"][$c] = $temp[$arg];
+    }
+  }
+  
+  
+  
   $cur["page_settings"] = unserialize($cur["page_settings"]);
   if (!is_array($cur["page_settings"])) {
     $cur["page_settings"] = array();

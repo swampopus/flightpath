@@ -120,8 +120,17 @@ function system_block_regions() {
       "regions" => array (
         "left_col" => array("title" => t("Left Column")),
         "right_col" => array("title" => t("Right Column")),
-       ),
+       ),       
     ),
+    "system_login" => array(
+      "title" => t("Login Page"),
+      "regions" => array (
+        "top" => array("title" => t("Top")),
+        "left_col" => array("title" => t("Left Column")),
+        "right_col" => array("title" => t("Right Column")),
+        "bottom" => array("title" => t("Bottom")),
+       ),       
+    ),    
   );
 }
 
@@ -798,27 +807,70 @@ function system_settings_form() {
                 Please see the FlightPath documentation on how to set up this field.") . "
                 <br>" . t("Ex:") . " 
                 <br>[Y4]60, Spring, Spring of [Y4], Spr '[Y2]
-                <br>[Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]",    
+                <br>[Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1], [Y-1]",
   );
 
            
   
-
-  $pC .= system_build_element("term_id_structure", "textarea", "Structure of termID's:", 
-                "Use this space to define termID structures, one per line.
-                Please see the FlightPath documentation on how to set up this field.
-                <br>Ex: 
-                <br>[Y4]60, Spring, Spring of [Y4], Spr '[Y2]
-                <br>[Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]
-                ");  
-
-                
-                
+  // Let's load the subjects...
+  $subjects = "";
+  $query = "SELECT DISTINCT b.subject_id, a.title FROM courses b LEFT JOIN subjects a
+              ON (a.subject_id = b.subject_id)
+              WHERE exclude = 0              
+              ORDER BY b.subject_id
+              ";
+   
+  
+  $result = db_query($query);
+  while ($cur = db_fetch_array($result))
+  {      
+    //fpm($cur);
+    $title = trim($cur["title"]);
+    $subject_id = trim($cur["subject_id"]);
+    $subjects .= $subject_id . "::" . $title . "\n";
+  }
+    
+  
+  $form["subjects"] = array(
+    "type" => "textarea",
+    "label" => t("Subjects:"),
+    "value" => $subjects,
+    "description" => t("Enter subjects known to FlightPath (for use
+                        in popups and the Course Search, for example), one per line
+                        in this format:") . "<br>SUBJ::Title<br>" . t("For example:") . "
+                        <br>&nbsp; ACCT::Accounting<br>&nbsp; BIOL::Biology<br>" . t("Notice
+                        the separator between the code and title is 2 colons (::)."),
+  );
                   
   
   
   return $form;
 }
+
+
+
+/**
+ * Primary thing I want to do here is get the subjects and place correctly
+ * in the subjects table.
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function system_settings_form_submit($form, &$form_state) {
+  
+  db_query("TRUNCATE TABLE subjects");
+     
+  $subjects = trim($form_state["values"]["subjects"]);
+  $lines = explode("\n", $subjects);
+  foreach ($lines as $line) {
+    $temp = explode("::", $line);
+    
+    db_query("INSERT INTO subjects (subject_id, title)
+              VALUES ('?', '?') ", strtoupper(trim($temp[0])), trim($temp[1]));
+    
+  }
+}
+
 
 
 
@@ -1031,7 +1083,72 @@ function system_perform_clear_menu_cache() {
 
 
 
-function system_display_login_page($msg = "") {
+/**
+ * Display the "login" page.  This is the default page displayed
+ * to the user, at /login, if they have not logged in yet.
+ *
+ * This page is meant to be displayed in conjunction with blocks, so the user can
+ * easily define their own messages and such.
+ * 
+ * @return unknown
+ */
+function system_display_login_page() {
+  $rtn = "";
+  
+  fp_add_css(fp_get_module_path("system") . "/css/style.css");  
+
+  
+  $top_blocks = blocks_render_blocks("system_login", "top");
+  $bottom_blocks = blocks_render_blocks("system_login", "bottom");
+  $left_col_blocks = blocks_render_blocks("system_login", "left_col");
+  $right_col_blocks = blocks_render_blocks("system_login", "right_col");
+  
+  
+  $rtn .= "<noscript>
+            <div style='padding: 5px; background-color: red; color: white; font-size: 12pt; font-weight: bold;'>
+            " . t("FlightPath requires JavaScript to be enabled in order to
+            function correctly.  Please enable JavaScript on your browser
+            before continuing.") . "</div>
+          </noscript>";
+  
+  
+  $w1 = 300;
+  if (fp_screen_is_mobile()) $w1 = "90%";
+  
+  $login_box = fp_render_curved_line("Please login below...");
+  $login_box .= fp_render_form("system_login_form");
+  
+ 
+  if (fp_screen_is_mobile()) {
+    // the user is viewing this on a mobile device, so make it look
+    // a bit nicer.
+    $rtn .= $top_blocks . $left_col_blocks . $right_col_blocks . $bottom_blocks;    
+  }
+  else {
+    // This is NOT mobile, this is a regular desktop browser.
+    $rtn .= "
+        $top_blocks
+      <table border='0'>
+      <tr>
+       <td valign='top' width='40%'>
+        $left_col_blocks
+       </td>
+      <td valign='top' style='padding-left: 20px;'>
+        $right_col_blocks  
+       </td>
+      </tr>
+     </table>
+     $bottom_blocks
+     ";
+  }
+  
+  
+  return $rtn;
+}
+
+
+
+function z__system_display_login_page($msg = "") {
   $rtn = "";
   
   fp_add_css(fp_get_module_path("system") . "/css/style.css");  
@@ -1384,6 +1501,7 @@ function system_blocks() {
   return array(
     "tools" => t("Tools menu"),
     "admin_tools" => t("Admin Tools menu"),
+    "login_form" => t("Login form"),
   );
 }
 
@@ -1400,6 +1518,12 @@ function system_render_block($delta) {
     $block["title"] = t("Administrative Tools");
     $block["body"] = fp_render_menu_block("", "admin-tools");
   }
+  
+  if ($delta == "login_form") {
+    $block["title"] = t("Please log in below...");
+    $block["body"] = fp_render_form("system_login_form");
+  }
+  
   
   // We don't want empty blocks to show up at all.
   if ($block["body"] == "") {
@@ -1797,7 +1921,7 @@ function system_disable_module($module_details) {
  * Construct an HTML element and return it.
  *
  */
-function system_build_element($name, $type = "", $label = "", $description = "", $default_value = "", $csv_to_array = FALSE) {
+function z__system_build_element($name, $type = "", $label = "", $description = "", $default_value = "", $csv_to_array = FALSE) {
   
   $rtn = "";
   

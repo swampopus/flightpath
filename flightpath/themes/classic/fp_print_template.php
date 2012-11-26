@@ -18,7 +18,7 @@ print $page_extra_css_files;
 print "<title>$page_title</title> ";
 
 ?>
-<body style='background-color: white;'>
+<body style='background-color: white;' class='<?php print $page_body_classes; ?>'>
 <!-- TEXT LOGO -->
 <table width='500' border='0'>
 	  <td valign='middle'>

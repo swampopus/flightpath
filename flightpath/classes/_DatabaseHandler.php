@@ -370,6 +370,8 @@ class _DatabaseHandler
       print "\n<br>The script has stopped executing because of a MySQL error:
                     " . mysql_error() . "<br>\n
              Please fix the error and try again.<br>\n";
+      print "<br><br>Program backtrace:
+              <pre>" . print_r($arr, true) . "</pre>";
       die;
     }
 

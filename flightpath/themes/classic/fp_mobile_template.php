@@ -29,7 +29,7 @@ print "<title>$page_title</title>";
 
 <?php print $page_extra_js_files; ?>
 
-<body>
+<body class='<?php print $page_body_classes; ?>'>
 <!-- LOGO -->
 <img src='<?php print $theme_location; ?>/images/fp_banner_default_226px.png' alt='FlightPath' title='FlightPath'>
 

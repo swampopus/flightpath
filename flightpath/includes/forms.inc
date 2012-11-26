@@ -13,9 +13,9 @@
  * It will also reorder the elements by weight.
  * 
  */ 
-function fp_get_form($form_id) {
+function fp_get_form($form_id, $params = array()) {
 
-  $form = call_user_func($form_id);
+  $form = call_user_func_array($form_id, $params);
   
   // Add in the default submit_handlers and validate_handlers, if not all ready set.
   if (!isset($form["#submit_handlers"])) $form["#submit_handlers"] = array($form_id . "_submit");
@@ -95,7 +95,17 @@ function fp_render_form($callback, $form_type = "") {
   global $current_student_id, $user;
   $rtn = "";
   
-  $form = fp_get_form($callback);
+  // Were there extra params after callback and form_type?  Wrap them up
+  // and send them along to fp_get_form
+  $params = array();
+  if (func_num_args() > 2) {
+    // Remove first 2 arguments, so all we have left is what the user added to it.
+    $params = func_get_args();
+    array_shift($params);
+    array_shift($params);    
+  }
+  
+  $form = fp_get_form($callback, $params);
   
   // Figure out the current page's title and display it.
   $path = $_GET["q"];
@@ -282,6 +292,7 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   $suffix = $element["suffix"];
   $required = $element["required"];
   $no_please_select = $element["no_please_select"];
+  $confirm = $element["confirm"];
   
   $attributes = $element["attributes"];
   
@@ -424,11 +435,19 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
 
 
   if ($type == "submit") {
-    $rtn .= "<input type='submit' value='$value' $attributes>";
+
+    if ($confirm != "") {
+      $confirm = htmlentities($confirm, ENT_QUOTES);
+      $confirm = str_replace("\n", "\\n", $confirm); 
+      
+      $attributes .= " onClick='return confirm(\"$confirm\");' ";
+    }
+    
+    $rtn .= "<input type='submit' name='$name' value='$value' $attributes>";
   }
   
   if ($type == "button") {
-    $rtn .= "<input type='button' value='$value' $attributes>";    
+    $rtn .= "<input type='button' name='$name' value='$value' $attributes>";    
   }
 
 

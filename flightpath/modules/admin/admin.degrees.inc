@@ -553,13 +553,13 @@ function admin_display_degrees() {
     }
 
     // get JUST the major code...
-    $temp = explode("\|", $db_major_code);
+    $temp = explode("|", $db_major_code);
     $just_major = trim($temp[0]);
     $just_conc = trim($temp[1]);
     $outside = "";
 
     //if ($just_conc != "" && strstr($just_conc, "_"))
-    if (strstr($just_conc, "_")) {
+    if (strstr($just_conc, "_")) {      
       // If the concentration has an underscore, it's actually
       // a track.  Let's get the track title...
       $temp2 = explode("_",$just_conc);
@@ -569,7 +569,7 @@ function admin_display_degrees() {
       {
         $just_major .= "|" . trim($temp2[0]);
       }
-
+      
 
       $res2 = db_query("SELECT * FROM draft_degree_tracks
                 WHERE catalog_year = '?'

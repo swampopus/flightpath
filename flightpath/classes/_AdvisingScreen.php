@@ -12,7 +12,7 @@ class _AdvisingScreen
 	// Variables for the template/theme output...
 	public $theme_location, $page_content, $page_has_search, $page_tabs, $page_on_load;
 	public $page_hide_report_error, $page_scroll_top, $page_is_popup, $page_is_mobile;
-	public $page_title, $page_extra_css_files;
+	public $page_title, $page_extra_css_files, $page_body_classes;
   
 
 
@@ -279,6 +279,7 @@ function draw_menu_items($menu_array) {
 		$page_scroll_top = $this->page_scroll_top;
 		$page_is_popup = $this->page_is_popup;
 		$page_title = $this->page_title;
+		$page_body_classes = $this->page_body_classes;
 		
   	if ($page_title == "") { 
   	  // By default, page title is this...
@@ -1200,7 +1201,7 @@ function draw_menu_items($menu_array) {
     
     $fsC = "";
     
-		// Go through and find all the test scores for the student...
+    // Go through and find all the test scores for the student...
 		$this->student->list_standardized_tests->reset_counter();
 		while($this->student->list_standardized_tests->has_more()) {
 			$st = $this->student->list_standardized_tests->get_next();
@@ -4052,7 +4053,7 @@ function draw_menu_items($menu_array) {
 			$temp = explode(" ~~ ",$value);
 			$title = trim($temp[0]);
 			$subject_id = trim($temp[1]);
-			$pC .= "<option value='$subject_id'>$title</option>";
+			$pC .= "<option value='$subject_id'>$title ($subject_id)</option>";
 		}
 
 		$pC .= "</select>

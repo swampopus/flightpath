@@ -399,7 +399,7 @@ function student_search_render_advisees($adv_array, $title) {
           <td colspan='7'>
           <table border='0' 
                   $on_mouse  
-                  onClick='window.location=\"$url\" '                 
+                  onClick='showUpdate(true); window.location=\"$url\"; '                 
                    width='100%' >
                   <tr height='20'>
                     <td width='5%' class='hand'>$advised_image</td>  

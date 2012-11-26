@@ -103,7 +103,17 @@ function hook_update($old_schema, $new_schema) {
 
 
  
- 
+/**
+ * Allows each module to perform actions when the cache is cleared.
+ * 
+ * If your custom module needs to clear its own cache, for example,
+ * then you should implement this hook and place your module-specific
+ * code inside.
+ *
+ */
+function hook_clear_cache() {
+  db_query("DELETE FROM mymodule_cache_tables WHERE 1");
+}
  
  
  

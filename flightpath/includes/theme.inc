@@ -164,11 +164,19 @@ function fp_display_page($page) {
       $lclass = "";
       if ($c == 0) $lclass='first';
       
-      $p = $item["path"];
-      $q = $item["query"];
+      $p = menu_convert_replacement_pattern($item["path"]);
+      $q = menu_convert_replacement_pattern($item["query"]);
       $t = $item["text"];
       $a = $item["attributes"];
       if (!is_array($a)) $a = array();
+      
+      // Make sure the current user has access to view this link.  Otherwise, do not even
+      // bother showing it.
+      $test_item = menu_get_item($p) ;      
+      if (!menu_check_user_access($test_item)) {
+        continue;
+      }
+      
       
       $content_top .= "<li class='$lclass'>" . l($t, $p, $q, $a) . "</li>";
       $c++;
@@ -213,6 +221,13 @@ function fp_display_page($page) {
   $screen->page_content = $content_top .= $page["content"];
   // If there are CSS files to add, add those.
     
+  
+  // Add in the body classes
+  $screen->page_body_classes .= " " . $GLOBALS["fp_add_body_classes"];  
+  
+  // Add in our URL
+  $screen->page_body_classes .= " page-" . str_replace("/", "-", $_REQUEST["q"]);
+  
   
   $screen->output_to_browser();  
 }

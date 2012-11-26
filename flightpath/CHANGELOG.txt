@@ -1,5 +1,42 @@
 FlightPath 4.x Changelog
 ========================
+2012-11-20
+  Added "loading" message when pulling up a new student.
+  
+  Corrected display bug on the admin degree entry page, when listing
+  degrees it did not show track titles correctly.
+  
+  Adjusted CSS for degrees and courses listings (for admin).
+  
+  Created ability for users to manage the "subjects" table directly
+  from admin settings screen.  Also, fixed bug in course_search where 
+  a subject wouldn't show up if it didn't have a title set in the subjects
+  table.
+  
+
+2012-11-09
+  Added new "confirm" option for submit buttons in form API.  So you can have a
+  javascript confirm popup when a submit button is pressed (to handle deletes, per se).
+  
+  Added concept of "body classes" to theme, and new function "fp_add_body_class()"
+  
+  Made it to where menu items will not be displayed if the user doesn't have access to them.
+  
+  Content module is somewhat rough, but acceptable.
+  
+  Menu router paths can now have wildcards!  As in, content/%/edit is what will be executed
+  if the user visits content/17/edit.  This works in a very similar way as Drupal's menu system.
+  
+
+2012-11-08
+  Fixed bug on Blocks admin page where you couldn't switch past the first
+  selected section.
+  
+  Started work on Content module, allowing users to create generic bits of HTML
+  content, like the "node" idea in Drupal.
+  
+  Made it so you can pass arguments to callbacks with fp_render_form.
+  
 
 2012-10-16
   Fixed bug where test scores from different attempts were all showing

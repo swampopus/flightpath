@@ -178,7 +178,9 @@ function course_search_edit_course_details_form() {
                       will be offered for the next five years."),
   );
   
-  $term_array = get_term_id_suffixes();
+  //$term_array = get_term_id_suffixes();
+  $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
+
 
   $form["mark" . $m++] = array(
     "value" => "<div class='rotation-form-checkboxes'>",
@@ -195,13 +197,7 @@ function course_search_edit_course_details_form() {
     foreach($term_array as $x) {
       
       $check_year = $t;
-      
-      //if ($x == 40 || $x == 41) {
-      //  $check_year = $check_year + 1;
-      //}
-      
-      //$cb_disp_name = $sem_array[$x] . " $t";
-      
+       
       $new_course = new Course();
       $new_course->term_id = $check_year . $x;
       $cb_disp_name = $new_course->get_term_description(TRUE);
@@ -282,7 +278,9 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
   $subject_id = $form_state["values"]["subject_id"];
   $course_num = $form_state["values"]["course_num"];
   
-  $term_array = get_term_id_suffixes();
+  //$term_array = get_term_id_suffixes();
+  $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
+
       
   for ($t = 1; $t <= 6; $t++) {
     $year = $form_state["values"]["year$t"];
@@ -449,7 +447,7 @@ function course_search_settings_form() {
   
   $form["course_search_avail_term_id_suffix_order"] = array(
     "type" => "textfield",
-    "label" => t("Available Term ID suffix order"),
+    "label" => t("Available Term ID Suffixes & Order"),
     "value" => variable_get("course_search_avail_term_id_suffix_order", ""),
     "description" => t("Enter the order of term ID suffixes, so that they will display
                 in the correct order in the table of available course
@@ -480,6 +478,7 @@ function course_search_settings_form() {
                 Ex: Spr, May, Sum1, Sum2, Fall, Win",
   );    
 
+  
   return $form;
 }
 
@@ -587,6 +586,16 @@ function course_search_display_courses() {
   $catalog_year = $current_catalog_year;  
   $subject_id = $_REQUEST["subject_id"];
 
+  
+  // Try to find out the title to this subject, if one exists
+  // in our subjects table.
+  $res = db_query("SELECT * FROM subjects
+                   WHERE subject_id ='?' ", $subject_id);
+  $cur = db_fetch_array($res);
+  $title = $cur["title"];
+  if ($title == "") $title = $subject_id;
+  
+  /*
   $query = "SELECT DISTINCT a.* from subjects a,
           courses b 
           WHERE a.subject_id = '?'
@@ -597,7 +606,8 @@ function course_search_display_courses() {
   $result = db_query($query, $subject_id, $catalog_year);
   $cur = db_fetch_array($result);
   $title = trim($cur["title"]);
-
+  */
+  
   $rtn .= t("Current catalog year:") . " <b>$catalog_year-" . ($catalog_year +1) . "</b>   
       ";
   $important_notice = "              
@@ -638,7 +648,11 @@ function course_search_display_courses() {
            <select name='only_term' onChange='document.getElementById(\"term_form\").submit();'>
              <option value=''>Any term</option>
              ";
-  $term_array = get_term_id_suffixes();
+  
+  //$term_array = get_term_id_suffixes();
+  $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
+  
+  fpm($term_array);
   for ($t = $catalog_year; $t <= $catalog_year + 4; $t++)
   {
     $rtn .= "<option value=''>---------------------</option>";
@@ -646,11 +660,6 @@ function course_search_display_courses() {
     {
       $schedule_text .= "<td class='tenpt' align='center'>";
       $the_term_id = $t . $x;
-      
-      //if ($x == 40 || $x == 41) {
-        // Fix cat year for fall and winter.
-      //  $the_term_id = ($t + 1) . $x;
-    //  }
       
       $temp_course = new Course();
       $temp_course->term_id = $the_term_id;
@@ -678,6 +687,8 @@ function course_search_display_courses() {
              The following courses are currently scheduled to be offered during " . $term_desc . ".
             </div>";
   }
+  
+  $term_structures = get_term_structures();
   
   
   $grad_notice_flag = false;
@@ -756,16 +767,14 @@ function course_search_display_courses() {
           $s_disp = "none";
         }
 
+
         // Consult our settings to find out what order our terms should be in.
-        $avail_order = variable_get("course_search_avail_term_id_suffix_order");
-        $term_array = explode(",", $avail_order);
-        foreach ($term_array as $k => $tt) {
-          $term_array[$k] = trim($tt);
-        }
-        
+        $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
+       
         // Get our table headers
         $avail_headers = variable_get("course_search_avail_term_headers");
         $avail_mobile_headers = variable_get("course_search_avail_term_mobile_headers");
+        
         
         $th = explode(",", $avail_headers);
         
@@ -788,7 +797,7 @@ function course_search_display_courses() {
           $schedule_text .= "<td>" . trim($header_text) . "</td>";
         }
         $schedule_text .= "      </tr>";
-        //$term_array = array("60","mm","81","82","40","41");
+        
         for ($t = $catalog_year; $t <= $catalog_year + 4; $t++)
         {
           $schedule_text .= "<tr>
@@ -799,10 +808,17 @@ function course_search_display_courses() {
           {
             $schedule_text .= "<td class='tenpt' align='center'>";
             $the_term_id = $t . $x;
-            if ($x == 40 || $x == 41) {
-              // Fix cat year for fall and winter.
+
+            // Does the term suffix ($x) call for the year to be
+            // subtracted by 1?  This is the case at ULM for fall.
+            // Ex:  201340  is Fall of *2012*, not 2013.
+            // We can tell this because the term structure (from admin settings)            
+            //fpm($term_structures);
+            if (strtoupper($term_structures[$x]["disp_adjust"]) == "[Y-1]") {
+              //fpm("here for $x");
               $the_term_id = ($t + 1) . $x;
             }
+            
             
             if (in_array($the_term_id, $full_schedule_array))
             {
@@ -1129,18 +1145,36 @@ function course_search_display_search() {
     }
 
     
-    $query = "SELECT DISTINCT a.* FROM subjects a, courses b
-          WHERE a.subject_id = b.subject_id 
-          AND catalog_year = '?'
-          AND exclude = 0
-          ORDER BY title, subject_id";
-          
+    // We want to make a pull-down list of all available subjects.
+    // Keep in mind with this join-- we may have courses who have
+    // a subject_id, for which we don't have that subject in the subjects
+    // table.
+   
+    
+    $query = "SELECT DISTINCT b.subject_id, a.title FROM courses b LEFT JOIN subjects a
+              ON (a.subject_id = b.subject_id)
+              WHERE exclude = 0
+              AND catalog_year = '?'
+              ";
+    
+    $subjects = array();
     $result = db_query($query, $catalog_year);
     while ($cur = db_fetch_array($result))
-    {
+    {      
+      //fpm($cur);
       $title = trim($cur["title"]);
       $subject_id = trim($cur["subject_id"]);
-
+      
+      if ($title == "") {
+        $title = $subject_id;
+      }
+      
+      $subjects[$subject_id] = $title;
+    }
+    
+    asort($subjects);
+    
+    foreach ($subjects as $subject_id => $title) {
       if (!fp_screen_is_mobile()) {
         $rtn .= "<option value='$subject_id'>$title ($subject_id)</option>";
       }

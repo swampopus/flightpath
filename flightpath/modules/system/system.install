@@ -31,7 +31,7 @@ function system_enable() {
     
 
   // Let's perform installations on the other modules we want enabled by default.
-  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "announcements");
+  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "announcements", "content");
   foreach ($modules as $module) {
     system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => FLIGHTPATH_VERSION));
   }
@@ -40,7 +40,11 @@ function system_enable() {
   db_query("INSERT INTO blocks (section, region, module, delta, weight)
             VALUES ('system_main', 'right_col', 'system', 'tools', 1),
                    ('system_main', 'right_col', 'system', 'admin_tools', 2), 
-                   ('system_main', 'left_col', 'announcements', 'primary', 0) 
+                   ('system_main', 'left_col', 'announcements', 'primary', 0), 
+                   ('system_login', 'left_col', 'blocks', 'block_1', 0), 
+                   ('system_login', 'right_col', 'system', 'login_form', 0),
+                   ('system_login', 'top', 'blocks', 'block_2', 0)
+                   
                    ");
 
 
@@ -51,6 +55,10 @@ function system_enable() {
               (2, 'view_comments') ");
 
    
+  // let's clear the menu cache, to set up the menu router with paths from
+  // the modules we just enabled.
+  menu_rebuild_cache(FALSE);
+  
 }
 
 
@@ -339,11 +347,11 @@ db_query($q);
 
 $q = "
 CREATE TABLE `faculty` (
-  `user_id` int(10) unsigned NOT NULL,
+  `cwid` int(10) unsigned NOT NULL,
   `college` varchar(100) NOT NULL,
   `department` varchar(100) NOT NULL,
   `major_code` varchar(10) NOT NULL,
-  PRIMARY KEY (`user_id`),
+  PRIMARY KEY (`cwid`),
   KEY `major_code` (`major_code`),
   KEY `dept` (`department`),
   KEY `college` (`college`)
@@ -462,7 +470,8 @@ CREATE TABLE `student_courses` (
   `hours_awarded` int(11) NOT NULL,
   `grade` varchar(5) NOT NULL,
   `term_id` varchar(10) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY  (`id`),
+  KEY `student_id` (`student_id`)
 ); ";
 db_query($q);
 
@@ -561,13 +570,13 @@ db_query($q);
 
 $q = "
 CREATE TABLE `students` (
-  `user_id` int(11) unsigned NOT NULL,
+  `cwid` int(11) unsigned NOT NULL,
   `cumulative_hours` varchar(5) NOT NULL,
   `gpa` varchar(5) NOT NULL,
   `rank_code` varchar(5) NOT NULL,
   `major_code` varchar(20) NOT NULL,
   `catalog_year` int(11) NOT NULL,
-  PRIMARY KEY (`user_id`)
+  PRIMARY KEY (`cwid`)
 ); ";
 db_query($q);
 
@@ -644,10 +653,13 @@ CREATE TABLE `users` (
   `is_student` tinyint(4) NOT NULL,
   `is_faculty` tinyint(4) NOT NULL,
   `email` varchar(255) NOT NULL,
+  `cwid` int(11) NOT NULL,
   `f_name` varchar(100) NOT NULL,
   `l_name` varchar(100) NOT NULL,
   `is_disabled` tinyint(4) NOT NULL,
-  PRIMARY KEY (`user_id`)
+ PRIMARY KEY  (`user_id`),
+ KEY `cwid` (`cwid`),
+ KEY `user_name` (`user_name`)
 ); ";
 db_query($q);
 
@@ -664,6 +676,7 @@ CREATE TABLE `watchdog` (
   `wid` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL DEFAULT '0',
   `user_name` varchar(50) NOT NULL,
+  `cwid` int(11) NOT NULL,
   `type` varchar(100) NOT NULL DEFAULT '',
   `message` text NOT NULL,
   `variables` text NOT NULL,
@@ -680,10 +693,11 @@ CREATE TABLE `watchdog` (
   KEY `type` (`type`),
   KEY `uid` (`user_id`),
   KEY `uname` (`user_name`),
-  KEY `severity` (`severity`)
+  KEY `severity` (`severity`),
+  KEY `cwid` (`cwid`)
 ); ";
   
-  db_query($q);
+  db_query($q); 
     
   
 }

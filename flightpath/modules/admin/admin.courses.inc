@@ -142,7 +142,7 @@ $rtn .= "</div>
     $spanstyle = "";
 
     if ($db_exclude == "1") {
-      $spanstyle = "background-color: #eee;";
+      $spanstyle = "background-color: #ddd;";
     }
 
     $temp_course = new Course();

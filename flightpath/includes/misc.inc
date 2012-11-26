@@ -584,6 +584,11 @@ function fp_set_title($title) {
   $GLOBALS["fp_set_title"] = $title;
 }
 
+function fp_add_body_class($class) {
+  $GLOBALS["fp_add_body_classes"] .= " " . $class;
+}
+
+
 /**
  * Returns back the site's "token", which is a simply md5 of some randomness.
  * It is used primarily with forms, to ensure against cross-site forgeries.
@@ -834,13 +839,15 @@ function l($text, $path, $query = "", $attributes = array()) {
     $path = variable_get("front_page", "main");
   }
 
+  
+  // Does the path contain possible replacement patterns? (look for %)
+  if (strpos($path, "%") !== 0) {
+    $path = menu_convert_replacement_pattern($path);    
+  }
+  
   // Does the query contain possible replacement patterns? (look for %)
   if (strpos($query, "%") !== 0) {
-    // Find modules which implement the hook_menu_handle_replacement_pattern function.
-    $modules = modules_implement_hook("menu_handle_replacement_pattern");
-    foreach($modules as $module) {
-      $query = call_user_func($module . '_menu_handle_replacement_pattern', $query);
-    }
+    $query = menu_convert_replacement_pattern($query);    
   }
   
   $rtn .= '<a href="' . fp_url($path, $query) . '" ';
@@ -1217,7 +1224,8 @@ function fp_get_js_confirm_link($question, $action_if_yes, $link_text) {
   $rtn = "";  
 
   $question = htmlentities($question, ENT_QUOTES);
-
+  $question = str_replace("\n", "\\n", $question);
+  
   $rtn .= "<a href='javascript: if(confirm(\"$question\")) { $action_if_yes;  }'>$link_text</a>";
 
       
@@ -1234,7 +1242,8 @@ function fp_get_js_prompt_link($question, $default, $action_if_yes, $link_text) 
   $rtn = "";  
 
   $question = htmlentities($question, ENT_QUOTES);
-
+  $question = str_replace("\n", "\\n", $question);
+  
   $rtn .= "<a href='javascript: var response = prompt(\"$question\", \"$default\");
                                 if (response != null) 
                                 {
@@ -1317,6 +1326,39 @@ function get_term_id_suffixes() {
 
   return $rtn;
   
+}
+
+
+/**
+ * Return an array version of the term_id_structures field from the admin settings
+ *
+ */
+function get_term_structures() {
+  $rtn = array();
+
+  $temp = $GLOBALS["fp_system_settings"]["term_id_structure"];
+  $structures = explode("\n", $temp);
+    
+  foreach ($structures as $structure) {      
+    $tokens = explode(",", $structure);
+    $term_def = trim($tokens[0]);
+    
+    // Get rid of the replacement pattern.
+    // Looks like:  [Y4]40.  We want the 40.
+    // Simply explode on "]"
+    $temp = explode("]", $term_def);
+    $rtn[trim($temp[1])] = array(
+      "term_def" => $term_def,
+      "short" => trim($tokens[1]),
+      "abbr" => trim($tokens[2]),
+      "full" => trim($tokens[3]),
+      "disp_adjust" => trim($tokens[4]),
+    );
+  
+  }
+  
+  
+  return $rtn;
 }
 
 

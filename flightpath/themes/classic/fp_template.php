@@ -33,9 +33,10 @@
 **/
 $theme_location = fp_theme_location();
 ?>  
+
 <html>
-	<head>
-	
+	<head>	
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	
 		<script src="<?php print base_path() ?>/inc/jquery-1.7.1.min.js" type="text/javascript"></script>
 		
@@ -64,7 +65,7 @@ $theme_location = fp_theme_location();
 	</head>
 	
 	
-	<body>
+	<body class='<?php print $page_body_classes; ?>'>
 	
 	
 	<?php
