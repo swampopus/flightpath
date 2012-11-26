@@ -1,0 +1,6 @@
+.content-edit-controls .form-element,
+.content-edit-controls label
+ {
+  display: inline;
+  padding-right: 10px;
+}

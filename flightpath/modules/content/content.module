@@ -1,0 +1,696 @@
+<?php
+
+/**
+ *  This module lets administrators create content, when then appear can appear in a block.  
+*/
+
+function content_menu() {
+
+  $items = array();
+
+  $items["admin/config/content"] = array(
+    "title" => "Content",
+    "page_callback" => "content_display_content_admin_list",    
+    "access_arguments" => array("admin_content"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_show_title" => TRUE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(          
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "content_list",
+  );     
+    
+
+ 
+  
+  $items["content/delete"] = array(
+    "page_callback" => "content_handle_delete_content",
+    "access_arguments" => array("admin_content"),
+    "type" => MENU_TYPE_CALLBACK,
+  );
+
+  
+
+/*  // We will create a new menu item for editing each content type
+  // currently known to the system.
+  $types = content_get_types();
+  foreach ($types as $type => $details) {
+    // content/add/TYPE
+    $items["content/add/$type"] = array(
+      "page_callback" => "fp_render_form",
+      "page_arguments" => array("content_edit_content_form", "", $type, "new"),
+      "access_arguments" => array("edit_$type" . "_content"),
+      "page_settings" => array(
+        "page_has_search" => FALSE,
+        "page_banner_is_link" => TRUE,
+        "page_hide_report_error" => TRUE,
+        "menu_links" => array(          
+          0 => array(
+            "text" => "Back to main menu",
+            "path" => "admin-tools/admin",
+            "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+          ),
+          1 => array(
+            "text" => "Back to content list",
+            "path" => "admin/config/content",
+            "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+          ),          
+        ),
+      ),
+      "type" => MENU_TYPE_TAB,
+      "tab_parent" => "admin/config/content",      
+    );
+  }
+*/
+
+
+  // content/add/TYPE
+  $items["content/add/%"] = array(
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("content_edit_content_form", "", 2, "new"),
+    "access_callback" => "content_user_access",
+    "access_arguments" => array("add_type", 2),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(          
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to content list",
+          "path" => "admin/config/content",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),          
+      ),
+    ),
+    "type" => MENU_TYPE_TAB,
+    "tab_parent" => "admin/config/content",      
+  );
+
+
+  // content/CID/edit
+  $items["content/%/edit"] = array(
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("content_edit_content_form", "", "", 1),
+    "access_callback" => "content_user_access",
+    "access_arguments" => array("edit_cid", 1),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(          
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to content list",
+          "path" => "admin/config/content",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),          
+      ),
+    ),
+    "type" => MENU_TYPE_TAB,
+    "tab_parent" => "admin/config/content",      
+  );
+  
+  
+  $items["content/%"] = array(
+    "page_callback" => "content_view_content",    
+    "page_arguments" => array(1),
+    "access_callback" => "content_user_access",
+    "access_arguments" => array("view_cid", 1),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_show_title" => TRUE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(          
+          0 => array(
+            "text" => "Edit this content",
+            "path" => "content/%CONTENT_CID%/edit",
+            "query" => "",
+          ),
+        ),      
+    ),
+    "type" => MENU_TYPE_TAB,
+    "tab_parent" => "admin/config/content",      
+  );
+  
+  
+    
+  return $items;
+}
+
+
+/**
+ * Custom user access function to determine if the user can add, edit, etc, the content
+ * 
+ *
+ * @param unknown_type $op
+ * @param unknown_type $var
+ */
+function content_user_access($op, $var) {
+  // for now, just return TRUE
+  //fpm("checking access to $op on $var");
+  return TRUE;
+}
+
+
+
+
+/**
+ * This is an implementation of hook_menu_handle_replacement_pattern.
+ * It will search for and replace replacement patterns which we are aware of it in $str.
+ */
+function content_menu_handle_replacement_pattern($str) {
+  
+  $cid = $_REQUEST["cid"];
+  if ($cid) {
+    $content = content_load($cid);
+    if (is_array($content)) {
+      if (strpos($str, "%CONTENT_CID%") !== 0) {
+        // It contains this replacement pattern!
+        $str = str_replace("%CONTENT_CID%", $cid, $str);
+      }
+      
+      if (strpos($str, "%CONTENT_TYPE%") !== 0) {
+        // It contains this replacement pattern!
+        $str = str_replace("%CONTENT_TYPE%", $content["type"], $str);
+      }
+    }
+  }
+  
+  return $str;
+}
+
+
+/**
+ * Display the content specified in the GET's cid.
+ *
+ */
+function content_view_content() {
+  
+  $rtn = "";
+  $content = content_load($_GET["cid"]);
+  $types = content_get_types();
+  $author = fp_load_user($content["user_id"]);
+  
+  if (!strstr($content["title"], "[hide]")) {
+    fp_set_title($content["title"]);
+  }  
+  fp_add_body_class("content-type-" . $content["type"]);
+  
+  $rtn .= "<div class='content-view content-view-{$content["type"]}'>";
+  
+  $rtn .= "<div class='content-submitted'>" . t("Submitted by") . " " . $author->name . " " . t("on");
+  $rtn .= " " . format_date($content["posted"]) . "</div>";
+  
+  $rtn .= "<div class='content-body'>" . $content["body"] . "</div>";
+  
+  $rtn .= "</div>"; 
+  
+  return $rtn;
+  
+}
+
+
+
+/**
+ * This form lets the user edit some piece of content
+ *
+ */
+function content_edit_content_form($type = "", $cid = "") {
+  
+  $form = array();
+  
+  fp_add_css(fp_get_module_path("content") . "/css/content.css");
+  
+  if ($type == "") {
+    $type = $_REQUEST["type"];    
+  }
+  
+  if ($cid == "") {
+    $cid = $_REQUEST["cid"];  
+  }
+  // TODO:  Maybe have permissions on content one day?
+
+  $types = content_get_types();
+
+  
+ if ($cid != "new") {
+    $content = content_load($cid);
+    fp_set_title(t("Editing") . " " . $content["title"] . "");
+    // Re-set $type, just in case the user put the wrong type in the
+    // URL
+    $type = $content["type"];
+  } 
+  else {
+    // New piece of content
+    $content = array();
+    fp_set_title(t("Add new") . " " . $types[$type]["title"]);
+  }
+    
+  
+  
+  $form["type"] = array(
+    "type" => "hidden",
+    "value" => $type,    
+  );
+  
+  $form["cid"] = array(
+    "type" => "hidden",
+    "value" => $cid,    
+  );
+
+ 
+  $form["title"] = array(
+    "type" => "textfield",
+    "label" => t("Title:"),
+    "value" => $content["title"],
+    "required" => TRUE,
+    "description" => t("To hide the title, you may start
+                     it with [hide].  For example: \"[hide] this is a sample.\""), 
+  );
+  
+
+  $form["body"] = array(
+    "type" => "textarea",
+    "label" => t("Body:"),
+    "rows" => 15,
+    "value" => $content["body"],    
+  );
+   
+  
+
+  // Are there any settings we should show?
+  if (is_array($types[$type]["settings"])) {    
+    foreach($types[$type]["settings"] as $field_name => $field_details) {      
+      $form[$field_name] = $field_details;
+      // Add in default value previously saved, if available.
+      $form[$field_name]["value"] = $content["settings"][$field_name];
+    }
+  }
+  
+  
+  
+  // Draw the controls (buttons)
+  $form["mark" . $m++] = array(
+    "value" => "<div class='content-edit-controls'>",
+  );
+  
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => t("Submit"),        
+  );
+   
+  $form["submit_delete"] = array(
+    "type" => "submit",
+    "value" => t("Delete"),    
+    "confirm" => t('Are you sure you wish to delete this?\nThis action cannot be undone.'),
+  );
+
+  $form["mark" . $m++] = array(
+    "value" => "</div>",
+  );
+
+  
+  $form["#redirect"] = array("path" => "admin/config/content"); 
+  
+  
+  return $form;
+}
+
+
+
+/**
+ * Submit handler for the edit content form.
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function content_edit_content_form_submit($form, $form_state) {
+  global $user;
+  
+  $values = $form_state["values"];
+
+  $now = time();
+  
+  $types = content_get_types();
+  $type = $values["type"];  
+  // Assemble our "settings" array, if available.
+  $settings = array();
+  if (is_array($types[$type]["settings"])) {    
+    
+    foreach($types[$type]["settings"] as $field_name => $field_details) {      
+      $settings[$field_name] = $values[$field_name];
+    }
+  }
+  
+  
+  if ($values["submit"] != "") {
+    // a submission (not a deletion) is taking place
+    
+    // if the cid == "new" then we should do an insert.  Otherwise,
+    // we should do an update.
+    if ($values["cid"] == "new") {
+      db_query("INSERT INTO content (user_id, type, title, body, settings, posted, updated)
+                VALUES ('?', '?', '?', '?', '?', '?', '?')
+                ", $user->id, $values["type"], $values["title"], $values["body"], serialize($settings), $now, $now);
+      
+    }
+    else {
+      // We are editing an existing piece of content-- just update.
+      db_query("UPDATE content
+                SET title = '?',
+                    body = '?',
+                    settings = '?',
+                    updated = '?'
+                WHERE cid = '?'
+                ", $values["title"], $values["body"], serialize($settings), $now, $values["cid"]);
+                    
+    }
+    
+    fp_add_message(t("%title has been saved successfully.", array("%title" => $values["title"])));
+    
+    
+  }
+   
+  // Should be we deleting things?
+  if ($values["submit_delete"] != "") {
+    db_query("DELETE FROM content WHERE cid = '?' ", $values["cid"]);
+    fp_add_message(t("%title has been deleted successfully.", array("%title" => $values["title"])));
+  }
+  
+  
+}
+
+
+
+
+/**
+ * Load the content from the database and return an array, by calling hook_content_load.
+ *
+ * @param unknown_type $cid
+ */
+function content_load($cid) {
+  $rtn = array();
+  $rtn["cid"] = $cid;
+  $modules = modules_implement_hook("content_load");
+  foreach ($modules as $module) {
+    // Since PHP 5.4 removes call-time pass by reference, 
+    // I cannot use call_user_func.  Instead, I will call the
+    // functions directly like so:
+    // $name($val).
+    $function = $module . "_content_load";
+    $function($rtn);
+  }
+  
+  return $rtn;
+}
+
+
+/**
+ * Implementation of content's hook_content_load
+ * 
+ * We simply wish to load from our db table.  The cid is in
+ * $content["cid"].
+ *
+ * @param unknown_type $content
+ */
+function content_content_load(&$content) {
+  
+  $res = db_query("SELECT * FROM content WHERE cid = '?' ", $content["cid"]);
+  $cur = db_fetch_array($res);
+
+  if ($cur["settings"] != "") {
+    $arr = unserialize($cur["settings"]);
+    $cur["settings"] = $arr;
+  }
+  
+  if ($cur && is_array($cur) && count($cur) > 0) {
+    $content += $cur;
+  }
+     
+}
+
+
+
+
+/**
+ * Sample hook for hook_content_load
+ * 
+ * This hook lets modules act on content as it is being loaded.  Notice
+ * the content is being passed by reference, so whatever changes you make
+ * to this array will be added in.  Nothing needs to be returned.
+ *
+ * @param unknown_type $content
+ */
+function hook_content_load(&$content) {
+  $content["new_field"] = "something something";
+}
+
+
+
+function content_handle_delete_content() {
+  $aid = $_REQUEST["aid"];
+  db_query("UPDATE content SET delete_flag = '1'
+            WHERE aid = '?' ", $aid);
+  
+  fp_add_message(t("Content successfully deleted."));
+  fp_goto("admin/config/content");
+}
+
+
+
+
+/**
+ * Display a list of content for the administrator
+ */
+function content_display_content_admin_list() {
+  $rtn = "";
+  
+  //fp_add_css(fp_get_module_path("content") . "/css/content.css");
+  
+
+  $rtn .= "<br><b>" .t("Create new content:") . "</b>
+            <ul>";
+  // Go through all available content types and provide a link.
+  $types = content_get_types();
+  // We expect types to be returned like this:
+  // ["page"]["title"] = "Basic Page";
+  // ["page"]["description"] = "This is a standard page.";
+  foreach ($types as $type => $details) {
+    $rtn .= "<li>" . l(t("Add new") . ' ' . $details["title"], "content/add/$type") . " - " . $details["description"] . "</li>";
+  }
+
+  
+  $rtn .= "</ul>
+          
+          <hr>";
+  
+  // Show a table of current content in the system.
+  $rtn .= "<b>" . t("Existing content:") . "</b><br><br>";
+  $rtn .= "<table width='100%' border='1' class='tenpt'>
+            <tr>
+              <th>" . t("Title") . "</th>
+              <th>" . t("Edit") . "</th>
+              <th>" . t("Type") . "</th>
+              <th>" . t("Author") . "</th>
+              <th>" . t("Updated") . "</th>
+            </tr>";
+  $res = db_query("SELECT * FROM content ORDER BY title");
+  while ($cur = db_fetch_array($res)) {
+    
+    $author = fp_load_user($cur["user_id"]);
+    $updated = format_date($cur["updated"]);
+    
+    $rtn .= "<tr>
+                <td valign='top'>" . l($cur["title"], "content/{$cur["cid"]}") . "</td>
+                <td valign='top'>" . l(t("edit"), "content/{$cur["cid"]}/edit") . "</td>
+                <td valign='top'>" . $cur["type"] . "</td>
+                <td valign='top'>" . $author->name . "</td>
+                <td valign='top'>" . $updated . "</td>
+             </tr>";
+  }
+  
+  $rtn .= "</table>";
+   
+  
+    
+  return $rtn;
+}
+
+
+/**
+ * Return an array with all the possible content types known to FlightPath
+ * 
+ * Modules may declare their content types using the hook_content_register_content_type hook.
+ * You should clear the cache after creating a new content type.
+ *
+ */
+function content_get_types() {
+  $rtn = array();
+  
+  $modules = modules_implement_hook("content_register_content_type");
+  foreach($modules as $module) {
+    $types = call_user_func($module . '_content_register_content_type');  
+    $rtn += $types;
+  }
+  
+  return $rtn;
+  
+}
+
+
+/**
+ * Implementation of this module's hook_content_register_content_type.
+ * 
+ * I mainly just want to register the "page" content type, for a basic
+ * web page set up.
+ *
+ */
+function content_content_register_content_type() {
+  return array(
+    "page" => array(
+      "title" => t("Page"),
+      "description" => t("This is a basic web page."),     
+    ),
+  );
+}
+
+
+
+/**
+ * Sample hook other modules implement to register a content type.
+ * 
+ * Simply return an array as illustrated below to register your
+ * module's content types.
+ * 
+ * IMPORTNAT:  The type's machine name must be a valid variable name.
+ * No spaces or strange symbols.
+ *
+ */
+function hook_content_register_content_type() {
+  $arr = array(
+    "type_1" => array(
+      "title" => t("Type One"),
+      "description" => t("This is a content type."),
+      "settings" => array(),
+    ),
+    "type_2" => array(
+      "title" => t("Type Two"),
+      "description" => t("This is another content type."),
+      "settings" => array(),
+    ),
+    
+  );
+  
+  return $arr;
+}
+
+
+
+/**
+ * Return the HTML rendering the content we have in the database.
+ */
+function content_render_content($bool_show_delete = FALSE) {
+  $rtn = "";
+  
+  $res = db_query("SELECT * FROM content WHERE delete_flag = 0
+                    ORDER BY posted DESC");
+  while ($cur = db_fetch_array($res)) {
+    $rtn .= "<div class='content'>
+                <div class='content-text'>" . filter_markup($cur["content"], "full") . "</div>
+                <div class='content-posted'>" . t("Posted") . " " . date("D, M jS Y - g:ia", $cur["posted"]) . "</div>";
+    if ($bool_show_delete) {
+      $delete_link = "";
+      $delete_link = fp_get_js_confirm_link(t("Are you sure you wish to delete this content?"), 'window.location="' . fp_url("content/delete", "aid=" . $cur["aid"]) . '"', t("Delete?"));
+      $rtn .= "<div class='content-delete'>$delete_link</div>";  
+    }
+    
+    $rtn .= "</div>";
+  }                    
+  
+  return $rtn;
+}
+
+
+/**
+ * Implementation of hook_perm
+ * 
+ * We want to create a permission for every content type.
+ *
+ */
+function content_perm() {
+  $rtn = array();  
+
+  
+  
+  $types = content_get_types();
+  foreach ($types as $type => $details) {  
+    $rtn ["edit_$type" . "_content"] = array(
+      "title" => t("Edit") . " " . $details["title"] . " " . t("content"),      
+    );
+  }
+  
+  return $rtn;
+}
+
+
+
+/**
+ * hook_blocks.  Returns an array of available blocks offered by this module in this format:
+ * array(
+ *  delta => "This is the title of the block.",
+ *  ),
+ * );
+ * 
+ * Delta can be just about anything machine-readable.  Alphanumeric and underscores only.
+ * Ex: 0, 1, fun_2, etc.
+ * 
+ */
+function content_blocks() {
+  return array(
+    "primary" => t("Primary content block"),
+  );
+}
+
+/**
+ * Called when it is time to render the block in question.
+ * Expected to return an array which looks like this:
+ * array(
+ *  "title" => "Some title goes here.",
+ *  "body" => "this is the primary body of the block",
+ * );
+ */
+function content_render_block($delta) {
+  
+  $rtn = array();
+  
+  if ($delta == "primary") {
+      
+    fp_add_css(fp_get_module_path("content") . "/css/content.css");
+    
+    $rtn["title"] = t("content");       
+    $rtn["body"] = content_render_content();
+  }
+  
+  
+  return $rtn;
+  
+}

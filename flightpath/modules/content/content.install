@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * This file should contain only hooks relating to installing, enabling, disabling, and uninstalling this module.
+ *  
+*/
+
+
+/**
+ * Hook install.  Called when the module is installed on the admin modules page.
+ */
+function content_install() {
+  
+  // Check to see if our content table has been created.
+  if (!db_table_exists("content")) {
+    
+    // Create our table. 
+    $query = "    
+       CREATE TABLE `content` (
+        `cid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+        `user_id` int(10) unsigned NOT NULL,
+        `type` varchar(255) NOT NULL,
+        `title` varchar(255) NOT NULL,
+        `body` text NOT NULL,      
+        `settings` text NOT NULL,      
+        `posted` int(10) unsigned NOT NULL,
+        `updated` int(10) unsigned NOT NULL,
+      PRIMARY KEY (`cid`),
+      KEY `posted` (`posted`),
+      KEY `updated` (`updated`),
+      KEY `user_id` (`user_id`),
+      KEY `type` (`type`)
+    )        
+    ";
+    
+    db_query($query);
+   
+    
+  }
+  
+  
+  // Let's also create some initial content (which the system.install will
+  // add into our blocks).
+  $notice_body = '<p><strong style="color: #000000; font-family: Arial; font-size: 13px; font-style: normal; font-variant: normal; letter-spacing: normal; line-height: normal; orphans: 2; text-align: justify; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-size-adjust: auto; -webkit-text-stroke-width: 0px;">Important Notice:</strong><span style="color: #000000; font-family: Arial; font-size: 13px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: 2; text-align: justify; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; display: inline ! important; float: none;"><span class="Apple-converted-space">&nbsp;</span>This degree audit system is intended to assist you in determining your progress toward a degree, but is not an official transcript. Although efforts are made to ensure the accuracy of this system, you should carefully review it and report any discrepancies to your advisor. It is your responsibility to confirm the status of major requirements by consulting a departmental advisor. It is also your responsibility to seek information on all college and major requirements in the undergraduate catalog to which you are assigned. Final confirmation of degree requirements is subject to approval by the major department and Dean.</span></p>';
+  
+  db_query("INSERT INTO content (cid, user_id, type, title, body, settings)
+            VALUES ('1', '1', 'content_block', 'Important Notice', '?', '?') ", $notice_body, 'a:1:{s:19:"mobile_display_mode";s:4:"show";}');
+
+  $top_body = '<p style="text-align: center;"><span style="color: #000000; font-family: Arial; font-size: 18px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-size-adjust: auto; -webkit-text-stroke-width: 0px; background-color: #ffffff; display: inline !important; float: none;">Welcome to<span class="Apple-converted-space">&nbsp;</span></span><span class="flightpath-name" style="color: maroon; font-weight: bold; font-style: italic; font-family: Arial; font-size: 18px; font-variant: normal; letter-spacing: normal; line-height: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-size-adjust: auto; -webkit-text-stroke-width: 0px; background-color: #ffffff;">FlightPath</span><span style="color: #000000; font-family: Arial; font-size: 18px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-size-adjust: auto; -webkit-text-stroke-width: 0px; background-color: #ffffff; display: inline !important; float: none;">, the electronic student advising system!</span></p>';
+  db_query("INSERT INTO content (cid, user_id, type, title, body, settings)
+            VALUES ('2', '1', 'content_block', '[hide] Top welcome on login page', '?', '?') ", $top_body, 'a:1:{s:19:"mobile_display_mode";s:4:"show";}');
+  
+  
+    
+}
+
