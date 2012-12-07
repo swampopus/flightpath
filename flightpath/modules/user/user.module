@@ -9,7 +9,7 @@ function user_menu() {
   
 
   $items["admin/config/users"] = array(
-    "title" => "Manage users",
+    "title" => "Users",
     "page_callback" => "user_display_users",
     "access_arguments" => array("manage_users"),
     "page_settings" => array(
@@ -26,10 +26,11 @@ function user_menu() {
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
     "tab_parent" => "admin-tools/admin",
+    "weight" => 100,
   );      
   
   $items["admin/config/user-roles"] = array(
-    "title" => "Manage user roles",
+    "title" => "User roles",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("user_user_roles_form"),
     "access_arguments" => array("can_edit_user_roles"),
@@ -47,6 +48,7 @@ function user_menu() {
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
     "tab_parent" => "admin-tools/admin",        
+    "weight" => 110,
   );     
 
   $items["admin/users/edit-user"] = array(
@@ -79,7 +81,7 @@ function user_menu() {
     
 
   $items["admin/config/permissions"] = array(
-    "title" => "Manage permissions",
+    "title" => "Permissions",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("user_permissions_form"),
     "access_arguments" => array("can_edit_permissions"),
@@ -97,6 +99,7 @@ function user_menu() {
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
     "tab_parent" => "admin-tools/admin",   
+    "weight" => 120,
   );     
   
     
@@ -313,8 +316,8 @@ function user_user_roles_form() {
     $key = $cur["rid"];
     $value = $cur["name"];
     
-    $prompt_link = fp_get_js_prompt_link("Enter a new name to change this role to:", $value, "document.getElementById(\"element-perform_action2\").value=\"edit~_~$key~_~\" + response; document.getElementById(\"sysform\").submit(); ", t("edit")) . "  |  ";
-    $confirm_link = fp_get_js_confirm_link(t("Are you sure you wish to delete this role?\\nIt will be removed from users' accounts.  This action cannot be undone.\\n\\nProceed?"), "document.getElementById(\"element-perform_action2\").value=\"del~_~$key\"; document.getElementById(\"sysform\").submit(); ", t("delete"));
+    $prompt_link = fp_get_js_prompt_link("Enter a new name to change this role to:", $value, "document.getElementById(\"element-perform_action2\").value=\"edit~_~$key~_~\" + response; document.getElementById(\"fp-form-user_user_roles_form\").submit(); ", t("edit")) . "  |  ";
+    $confirm_link = fp_get_js_confirm_link(t("Are you sure you wish to delete this role?\\nIt will be removed from users' accounts.  This action cannot be undone.\\n\\nProceed?"), "document.getElementById(\"element-perform_action2\").value=\"del~_~$key\"; document.getElementById(\"fp-form-user_user_roles_form\").submit(); ", t("delete"));
     
     if ($key == 1 || $key == 2) {
       $prompt_link = $confirm_link = "";
@@ -477,6 +480,7 @@ function user_edit_user_form_submit($form, $form_state) {
     }
   }
 
+    
   fp_add_message(t("User updated successfully."));
   
   
@@ -722,11 +726,13 @@ function user_display_users() {
     $fgcol = "black";
 
     $roles = "";
+    $roles_classes = "";
     $temp = system_get_roles_for_user($faculty_id);
     foreach ($temp as $rid => $t) {
       if ($rid > 2) {
         // rid 1 and 2 are anonymous and authenticated-- no need to show them.
         $roles .= "<div class='list-role'>$t</div>";
+        $roles_classes .= " role-" . fp_get_machine_readable($t);
       }
     }
 
@@ -734,7 +740,7 @@ function user_display_users() {
 
     //      $pC .= "<a href='edit_users.php?action=load&course_id=$course_id'> user: $f_name $mid_name $l_name </a><br>";
 
-    $rtn .= "<tr>
+    $rtn .= "<tr class='$roles_classes'>
               
               <td valign='top' width='15%'>$faculty_cwid</td>
           <td valign='top' width='15%'>$f_name</td>

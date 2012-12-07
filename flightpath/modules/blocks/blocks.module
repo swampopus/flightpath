@@ -22,7 +22,7 @@ function blocks_menu() {
   
 
   $items["admin/config/blocks"] = array(
-    "title" => "Manage Blocks",
+    "title" => "Blocks",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("blocks_manage_blocks_form"),    
     "access_arguments" => array("admin_blocks"),

@@ -249,6 +249,11 @@ function install_get_settings_file_template() {
 // only show us errors and warnings. (Hide "notice" and "strict" messages)
 error_reporting(E_ERROR | E_WARNING);
  
+// Set the PHP max time limit which any one page is allowed to take up while
+// running.  The default is 30 seconds.  Change this value (or remove it)
+// as needed.
+set_time_limit(300);  // 300 seconds = 5 minutes.
+
  
 /**
  * All system settings will be placed (at the end of this script)

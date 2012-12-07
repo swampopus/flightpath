@@ -247,8 +247,7 @@ function content_edit_content_form($type = "", $cid = "") {
   if ($cid == "") {
     $cid = $_REQUEST["cid"];  
   }
-  // TODO:  Maybe have permissions on content one day?
-
+  
   $types = content_get_types();
 
   
@@ -264,7 +263,17 @@ function content_edit_content_form($type = "", $cid = "") {
     $content = array();
     fp_set_title(t("Add new") . " " . $types[$type]["title"]);
   }
-    
+
+
+  
+  // Does the user have permission to edit this content?
+  if (!user_has_permission("edit_$type" . "_content")) {  
+    fp_add_message(t("Sorry, you do not have permission to edit that content type."));
+    fp_goto("admin/config/content");
+    return;
+  }
+  
+  
   
   
   $form["type"] = array(
@@ -295,8 +304,6 @@ function content_edit_content_form($type = "", $cid = "") {
     "value" => $content["body"],    
   );
    
-  
-
   // Are there any settings we should show?
   if (is_array($types[$type]["settings"])) {    
     foreach($types[$type]["settings"] as $field_name => $field_details) {      
@@ -313,7 +320,7 @@ function content_edit_content_form($type = "", $cid = "") {
     "value" => "<div class='content-edit-controls'>",
   );
   
-  $form["submit"] = array(
+  $form["submit_submit"] = array(
     "type" => "submit",
     "value" => t("Submit"),        
   );
@@ -329,9 +336,6 @@ function content_edit_content_form($type = "", $cid = "") {
   );
 
   
-  $form["#redirect"] = array("path" => "admin/config/content"); 
-  
-  
   return $form;
 }
 
@@ -343,7 +347,7 @@ function content_edit_content_form($type = "", $cid = "") {
  * @param unknown_type $form
  * @param unknown_type $form_state
  */
-function content_edit_content_form_submit($form, $form_state) {
+function content_edit_content_form_submit(&$form, $form_state) {
   global $user;
   
   $values = $form_state["values"];
@@ -352,6 +356,15 @@ function content_edit_content_form_submit($form, $form_state) {
   
   $types = content_get_types();
   $type = $values["type"];  
+  
+  // Does the user have permission to edit this content?
+  if (!user_has_permission("edit_$type" . "_content")) {  
+    fp_add_message(t("Sorry, you do not have permission to edit that content type."));
+    fp_goto("admin/config/content");
+    return;
+  }  
+  
+  
   // Assemble our "settings" array, if available.
   $settings = array();
   if (is_array($types[$type]["settings"])) {    
@@ -362,7 +375,7 @@ function content_edit_content_form_submit($form, $form_state) {
   }
   
   
-  if ($values["submit"] != "") {
+  if ($values["submit_submit"] != "") {
     // a submission (not a deletion) is taking place
     
     // if the cid == "new" then we should do an insert.  Otherwise,
@@ -371,6 +384,13 @@ function content_edit_content_form_submit($form, $form_state) {
       db_query("INSERT INTO content (user_id, type, title, body, settings, posted, updated)
                 VALUES ('?', '?', '?', '?', '?', '?', '?')
                 ", $user->id, $values["type"], $values["title"], $values["body"], serialize($settings), $now, $now);
+      
+      $new_id = db_insert_id();
+      
+      $form["#redirect"] = array(
+        "path" => "content/$new_id/edit",
+      );
+      
       
     }
     else {
@@ -394,6 +414,9 @@ function content_edit_content_form_submit($form, $form_state) {
   if ($values["submit_delete"] != "") {
     db_query("DELETE FROM content WHERE cid = '?' ", $values["cid"]);
     fp_add_message(t("%title has been deleted successfully.", array("%title" => $values["title"])));
+    $form["#redirect"] = array(
+      "path" => "admin/config/content",
+    );
   }
   
   
@@ -488,23 +511,41 @@ function content_display_content_admin_list() {
   
 
   $rtn .= "<br><b>" .t("Create new content:") . "</b>
-            <ul>";
+            <table border='1' width='100%' cellpadding='4'>";
   // Go through all available content types and provide a link.
   $types = content_get_types();
   // We expect types to be returned like this:
   // ["page"]["title"] = "Basic Page";
   // ["page"]["description"] = "This is a standard page.";
   foreach ($types as $type => $details) {
-    $rtn .= "<li>" . l(t("Add new") . ' ' . $details["title"], "content/add/$type") . " - " . $details["description"] . "</li>";
+    if (user_has_permission("edit_$type" . "_content")) {
+      $rtn .= "<tr>
+                <td>" . l($details["title"], "content/add/$type") . "</td>
+                <td>" . $details["description"] . "</td></tr>";
+    }
   }
 
   
-  $rtn .= "</ul>
+  
+  $rtn .= "</table>
           
           <hr>";
   
   // Show a table of current content in the system.
-  $rtn .= "<b>" . t("Existing content:") . "</b><br><br>";
+  $rtn .= "<b>" . t("Existing content:") . "</b>";
+  $filter = $_GET["filter"];
+  
+  $rtn .= "<form action='" . fp_url("admin/config/content") . "' method='GET'>
+              " . t("Display type:") . " &nbsp; <select name='filter'>
+                  <option value=''>" . t(" -- Any --") . "</option>";
+  foreach ($types as $type => $details) {
+    $sel = ($type == $filter) ? "selected" : "";
+    $rtn .= "<option value='$type' $sel>" . $details["title"] . "</option>";
+  }
+  $rtn .= "</select><input type='submit' value='-&gt;'> </form>";
+          
+  
+  
   $rtn .= "<table width='100%' border='1' class='tenpt'>
             <tr>
               <th>" . t("Title") . "</th>
@@ -513,15 +554,30 @@ function content_display_content_admin_list() {
               <th>" . t("Author") . "</th>
               <th>" . t("Updated") . "</th>
             </tr>";
-  $res = db_query("SELECT * FROM content ORDER BY title");
+  if ($filter != "") {
+    $res = db_query("SELECT * FROM content WHERE type = '?' ORDER BY title", $filter);
+  }
+  else {
+    $res = db_query("SELECT * FROM content ORDER BY title");
+  }
+  
   while ($cur = db_fetch_array($res)) {
     
     $author = fp_load_user($cur["user_id"]);
     $updated = format_date($cur["updated"]);
     
-    $rtn .= "<tr>
-                <td valign='top'>" . l($cur["title"], "content/{$cur["cid"]}") . "</td>
-                <td valign='top'>" . l(t("edit"), "content/{$cur["cid"]}/edit") . "</td>
+    //$rtn .= "<tr><td valign='top'>" . l($cur["title"], "content/{$cur["cid"]}") . "</td>";
+    $rtn .= "<tr><td valign='top'>" . $cur["title"] . "</td>";
+    
+    if (user_has_permission("edit_{$cur["type"]}" . "_content")) {
+      $rtn .= "
+                <td valign='top'>" . l(t("edit"), "content/{$cur["cid"]}/edit") . "</td>";
+    }
+    else {
+      $rtn .= "<td>&nbsp;</td>";
+    }
+    
+    $rtn .= "
                 <td valign='top'>" . $cur["type"] . "</td>
                 <td valign='top'>" . $author->name . "</td>
                 <td valign='top'>" . $updated . "</td>
@@ -640,6 +696,12 @@ function content_perm() {
   $rtn = array();  
 
   
+  $rtn["admin_content"] = array(
+    "title" => t("Administer Content"),
+    "description" => t("The user needs this permission to access the content page at all, in
+                      addition to specific permissions listed below for editing
+                      different content types."),
+  );
   
   $types = content_get_types();
   foreach ($types as $type => $details) {  

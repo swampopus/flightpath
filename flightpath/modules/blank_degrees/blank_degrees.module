@@ -191,7 +191,7 @@ function blank_degrees_select_degree_form() {
 
     $form["blank_catalog_year"] = array(
       "type" => "select",
-      "label" => t("Please begin by selecting a catlog year:"),
+      "label" => t("Please begin by selecting a catalog year:"),
       "options" => $catalog_year_options,
     );
   }

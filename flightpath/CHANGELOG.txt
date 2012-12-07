@@ -1,5 +1,39 @@
 FlightPath 4.x Changelog
 ========================
+
+2012-12-07
+  Fixed bug which caused user roles to not be editable from form.
+
+
+2012-11-30
+  Fixed a few minor bugs around FP, mostly related to display.
+  
+  Course descriptions have non-UTF8 chars stripped out by default.  This
+  might need to be something I re-think for version 5.x, so other languages can
+  use it.
+  
+  Changed Modules page to make it more clear when a core module is overrided.  What
+  was being displayed was somewhat confusing.
+  
+
+2012-11-28
+  Corrected bug where forms couldn't be submitted via js when an element (like a button)
+  was named "submit".  Simply auto-renamed elements named "submit" to "btn_submit".
+  
+  Fixed bug where $form var wasn't being passed by reference to submit handlers.
+  
+  Fixed several bugs introduced to admin degree, course, and group entry by changes
+  to the Form API.
+  
+  Made a big change to Announcements, to use the content module instead of being
+  its own module.
+  
+
+2012-11-27
+  Added roles as CSS classes to table rows in the user management area, to help
+  with themeing.
+  
+
 2012-11-20
   Added "loading" message when pulling up a new student.
   

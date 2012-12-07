@@ -23,6 +23,14 @@ function advise_menu() {
   );
   
   
+ $items["admin-tools/clear-advising-cache"] = array(
+    "title" => "Clear advising cache",    
+    "page_callback" => "advise_perform_clear_advising_cache",
+    "access_arguments" => array("toggle_draft"),
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );    
+  
+  
   $items["view"] = array(
     "title" => "View",
     "page_callback" => "advise_display_view",
@@ -470,8 +478,14 @@ function advise_user_can_view_advising_session_access_callback() {
     // The user is only allowed to view their OWN advising sessions.
     // So, make sure this advising session belongs to them!
     $advising_session_id = $_REQUEST["advising_session_id"];
-    // TODO: make sure this belongs to $user->id;
-    return TRUE;
+    // make sure this belongs to $user->cwid;
+    // First, what was the student's CWID associated with that advising_session_id?
+    $res = db_query("SELECT student_id FROM advising_sessions
+                     WHERE advising_session_id = '?' ", $advising_session_id);
+    $cur = db_fetch_array($res);
+    if ($user->cwid == $cur["student_id"]) {    
+      return TRUE;
+    }
   }
   
   return FALSE;
@@ -665,6 +679,13 @@ function advise_perm() {
     "description" => t("The user is allowed to view any advising sessions for any user.
                         For example, the user is an advisor."),
   );
+
+  $perms["view_own_advising_session"] = array(
+    "title" => t("View own advising session"),
+    "description" => t("The user is allowed to view their own advising sessions.
+                        For example, the user is a student."),
+  );
+  
 
   
   $perms["can_advise_students"] = array(
@@ -1144,9 +1165,21 @@ function advise_clear_cache() {
     }
   }
       
-  fp_add_message("Advising cache has been cleared.");
+  fp_add_message(t("Advising cache has been cleared."));
   
 }
+
+
+
+/**
+ * From menu hook.  Clear just the advising cache.
+ *
+ */
+function advise_perform_clear_advising_cache() {
+  advise_clear_cache();
+  fp_goto("<front>");
+}
+
 
 
 function advise_init_screen() {

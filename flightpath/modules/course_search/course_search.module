@@ -376,14 +376,16 @@ function course_search_upload_attachment($course_id, $subject_id, $course_num) {
 
     // Does the directory/files/syllabi exist?
     // If not, we will create it.
-    if (!is_dir("./custom/files/syllabi")) {
-      if (!mkdir("./custom/files/syllabi")) {
+    $files_path = $GLOBALS["fp_system_settings"]["file_system_path"];
+     
+    if (!is_dir("$files_path/custom/files/syllabi")) {
+      if (!mkdir("$files_path/custom/files/syllabi")) {
         return FALSE;
       }
     }    
 
     // Try to copy...
-    if (!copy($tmp_filename, "./custom/files/syllabi/$new_filename")) {      
+    if (!copy($tmp_filename, "$files_path/custom/files/syllabi/$new_filename")) {      
       return FALSE;
     }
 
@@ -394,7 +396,7 @@ function course_search_upload_attachment($course_id, $subject_id, $course_num) {
     // We need to unlink any existing syllabus file...
     if ($file_details = course_search_get_course_syllabus_details($subject_id, $course_num, $course_id)) {
       $filename = $file_details["filename"];    
-      if (!unlink("./custom/files/syllabi/$filename")) {
+      if (!unlink("$files_path/custom/files/syllabi/$filename")) {
         fp_add_message(t("Unable to delete existing file:") . " $filename");
       }
     }
@@ -523,12 +525,16 @@ function course_search_download_syllabus() {
   $subject_id = $new_course->subject_id;
   $course_num = $new_course->course_num;
   
-  if ($filename == "" || !file_exists("./custom/files/syllabi/$filename"))
+  $files_path = $GLOBALS["fp_system_settings"]["file_system_path"];
+  
+  if ($filename == "" || !file_exists("$files_path/custom/files/syllabi/$filename"))
   { // Check to make sure the src file actually exists.
     // Display a message, letting the user know it does not
     // exist.
     watchdog("syllabus", "fail,$c", array(), WATCHDOG_ERROR);
-    print t("Sorry, the syllabus for @course could not be found.", array("@course" => "$subject_id $course_num"));
+    fp_add_message(t("Sorry, the syllabus for @course could not be found.", array("@course" => "$subject_id $course_num")));
+    // Just so admins can see:
+    fpm("Admin: file path attempted: $files_path/custom/files/syllabi/$filename");
     return;
   }
   
@@ -556,7 +562,7 @@ function course_search_download_syllabus() {
   // Give it to the browser!
   header('Content-type: ' . $content_type . '');
   header('Content-Disposition: attachment; filename="' . $fn . '"');
-  readfile('./custom/files/syllabi/' . $filename . '');  
+  readfile("$files_path/custom/files/syllabi/" . $filename . "");
   die;    
 }
 
@@ -652,7 +658,7 @@ function course_search_display_courses() {
   //$term_array = get_term_id_suffixes();
   $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
   
-  fpm($term_array);
+  
   for ($t = $catalog_year; $t <= $catalog_year + 4; $t++)
   {
     $rtn .= "<option value=''>---------------------</option>";

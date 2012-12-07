@@ -1110,6 +1110,12 @@ class _Course
     if ($this->bool_ghost_min_hour) $min_hours = 0;
     if ($this->bool_ghost_hour) $max_hours = 0;
     
+    
+    // Since we may have trouble characters in the description (like smart quotes) let's
+    // do our best to try to clean it up a little.
+    $this->description = utf8_encode($this->description);
+    
+    
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["subject_id"] = $this->subject_id;
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["course_num"] = $this->course_num;
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["title"] = $this->title;

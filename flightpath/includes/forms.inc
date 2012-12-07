@@ -42,6 +42,24 @@ function fp_get_form($form_id, $params = array()) {
   // Okay, now sort our weights.
   sort($defined_weights);
   
+  
+  // Before we get to assigning weights, we need to make sure
+  // that none of our form elements have a name which might cause us trouble.
+  // Namely, no element can be named "submit" (like a button) because it will
+  // interfere with our javascript functions.
+  $form2 = array();
+  foreach ($form as $key => $element) {
+    $name = $key;
+    if ($name == "submit") {
+      $name = "btn_submit";
+    }
+    
+    $form2[$name] = $element;    
+  }
+  
+  $form = $form2;
+  
+   
   // Okay, now go through the weights and create a new form in THAT order.
   $new_form = array();
   foreach ($defined_weights as $dw) {
@@ -167,7 +185,7 @@ function fp_render_form($callback, $form_type = "") {
   // Did the user specify a submit method (like GET or POST)?  POST is default.
   $submit_method = ($form["#submit_method"] == "") ? "POST" : $form["#submit_method"];
     
-  $rtn .= "<form action='" . base_path() . "/system-handle-form-submit' method='$submit_method' id='fp-form-$callback' $attributes>";
+  $rtn .= "<form action='" . base_path() . "/system-handle-form-submit' method='$submit_method' id='fp-form-$callback' name='fp_form_name_$callback' $attributes>";
   
   $rtn .= "<input type='hidden' name='callback' value='$callback'>";
   $rtn .= "<input type='hidden' name='form_token' value='$form_token'>";
@@ -270,6 +288,9 @@ function form_has_errors() {
 
 
 
+
+
+
 /**
  * Returns the HTML to render this form element to the screen.
  * $name is the HTML machine name.  $element is an array containing all we need to render it.
@@ -306,20 +327,10 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   }
 
   $popup_help_link = "";
-  if ($popup_description) {
-    // Cheap hack to get rid of whitespace    
-    for ($t = 0; $t < 5; $t++) {
-      $popup_description = str_replace("  ", " ", $popup_description);
-    }
+  if ($popup_description) {        
     
-    $popup_description = str_replace("\n", "[NL]", $popup_description);
-    $popup_description = htmlentities($popup_description, ENT_QUOTES);
-    $popup_description = str_replace("&quot;", "\&quot;", $popup_description);
-    $popup_description = str_replace("[NL]", "\\n", $popup_description);
-    
-    
-    
-    $popup_help_link = " <a href='javascript: alert(\"" . $popup_description . "\");' class='form-popup-description'>[?]</a>";
+    //$popup_help_link = " <a href='javascript: alert(\"" . $popup_description . "\");' class='form-popup-description'>[?]</a>";
+    $popup_help_link = fp_get_js_alert_link($popup_description, "[?]", "form-popup-description");
   }
 
   $element_extra_css = "";

@@ -1,15 +1,3 @@
-/* Main tab related */
-.announcement-text {
-  margin-top: 20px;
-  font-size: 0.9em;
-}
-
-.announcement-text .announcement-posted {
-  color: gray; 
-  padding-right: 10px;
-  font-style: italic;
-  text-align: right;
-}
 
 /* Login page */
 

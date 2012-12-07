@@ -10,54 +10,11 @@
  * Hook install.  Called when the module is installed on the admin modules page.
  */
 function announcements_install() {
-  
-  // Check to see if our announcements table has been created.
-  if (!db_table_exists("announcements")) {
+  // Install a default announcement when first run.
+  $body = '<p>This is a sample announcement! You may add new announcements (or delete this one) from the Admin Console, then Content.</p>';
+  db_query("INSERT INTO content (user_id, type, title, body, settings)
+            VALUES ('1', 'content_block', 'Sample Announcement', '?', '?') ", $body, 'a:1:{s:10:"visibility";s:6:"public";}');
     
-    // Create our table. 
-    $query = "    
-       CREATE TABLE `announcements` (
-      `aid` int(10) unsigned NOT NULL AUTO_INCREMENT,
-      `announcement` text NOT NULL,
-      `access_type` varchar(20) NOT NULL,
-      `posted` int(10) unsigned NOT NULL,
-      `delete_flag` tinyint(4) NOT NULL,
-      PRIMARY KEY (`aid`),
-      KEY `access_type` (`access_type`),
-      KEY `posted` (`posted`),
-      KEY `delete_flag` (`delete_flag`)
-    )        
-    ";
-    
-    db_query($query);
-   $ann = "<b>Sample Announcement</b><br>
-           This is a sample announcement!  You may add new announcements (or delete this one)
-           from the Admin Console.";
-   // Add a default message in the announcements table.
-   db_query("INSERT INTO announcements (announcement, access_type, posted)
-             VALUES('?', '?', '?') ", $ann, "public", time());
-   
-    
-  }
     
 }
 
-
-/**
- * hook_enable. Called when the module is enabled.  Will automatically be called after hook_install.
- */
-function announcements_enable() {
-}
-
-
-/**
- * hook_disable.  Called when the module is disabled.
- */
-function announcements_disable() {
-}
-
-/**
- * hook_uninstall.  Called when module is "uninstalled"
- */
-function announcements_uninstall() {
-}

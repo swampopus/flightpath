@@ -2,153 +2,103 @@
 
 /**
  *  This module lets administrators create announcements, when then appear can appear in a block.  
+ * 
+ * This module uses the Content module to do all of its work.  All it is really for is
+ * specifying the content type, then handing its output as a block.
 */
 
-function announcements_menu() {
 
-  $items = array();
-
-  $items["admin/config/announcements"] = array(
-    "title" => "Edit Announcements",
-    "page_callback" => "announcements_display_announcements_admin_list",    
-    "access_arguments" => array("admin_announcements"),
-    "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
-      "page_hide_report_error" => TRUE,
-      "menu_links" => array(          
-        0 => array(
-          "text" => "Back to main menu",
-          "path" => "admin-tools/admin",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-      ),
+/**
+ * Implementatin of content's hook_content_register_content_type
+ *
+ * @return unknown
+ */
+function announcements_content_register_content_type() {
+  $arr = array(
+    "announcement" => array(
+      "title" => t("Announcement"),
+      "description" => t("This is a short announcement to the user, meant to be displayed like news items in a block."),
+      "settings" => array(),
     ),    
-    "type" => MENU_TYPE_TAB,
-    "tab_family" => "announcements_list",
-  );     
-    
-  $items["announcements/delete"] = array(
-    "page_callback" => "announcements_handle_delete_announcement",
-    "access_arguments" => array("admin_announcements"),
-    "type" => MENU_TYPE_CALLBACK,
   );
-    
-    
-  return $items;
-}
-
-
-function announcements_handle_delete_announcement() {
-  $aid = $_REQUEST["aid"];
-  db_query("UPDATE announcements SET delete_flag = '1'
-            WHERE aid = '?' ", $aid);
   
-  fp_add_message(t("Announcement successfully deleted."));
-  fp_goto("admin/config/announcements");
+  
+  // In the settings region, I want some extra fields which will be used
+  // when we display.
+  
+  $arr["announcement"]["settings"]["visibility"] = array(
+    "type" => "radios",
+    "label" => t("Visibility:"),
+    "options" => array("public" => t("Public (all users, incl students)"), 
+                       "faculty" => t("Only faculty/staff"), "hidden" => t("Hidden")
+                       ),
+    "required" => TRUE,                       
+  );
+  
+  
+  return $arr;
 }
 
 
 /**
- * Returns a form which lets the user enter a new announcement.
+ * Implementation of hook_perm
+ *
  */
-function announcements_new_announcement_form() {
-  $form = array();
-
-  fp_set_title("");  // We don't want a title to show on this form, since it's in the middle of a page.
-
-  $form["announcement_posted"] = array(
-    "label" => t("Enter the posted time:"),
-    "type" => "textfield",
-    "description" => t("You may enter the posted date in this format:
-                        YYYY-MM-DD HH:MM:SS with the hours in 24-hour format."),
-    "value" => date("Y-m-d H:i:s"),                        
+function announcements_perm() {
+    
+  return array(
+    "view_faculty_announcements" => array(
+      "title" => t("View faculty announcements"),
+    ),
   );
-
-  $form["announcement"] = array(
-    "label" => t("Enter announcement:"),
-    "type" => "textarea",
-    
-  );  
-  
-  $form["submit"] = array(
-    "type" => "submit",
-    "value" => "Save",
-  );  
-      
-  return $form;
-}
-
-function announcements_new_announcement_form_submit($form, &$form_state) {
-    
-  $posted = strtotime($form_state["values"]["announcement_posted"]);
-  $announcement = trim($form_state["values"]["announcement"]);
-
-  db_query("INSERT INTO announcements (announcement, posted)
-            VALUES ('?', '?') ", $announcement, $posted);
-  
-  fp_add_message(t("Announcement created successfully."));     
-  
-}
-
-
-/**
- * Display a list of announcements for the administrator
- */
-function announcements_display_announcements_admin_list() {
-  $rtn = "";
-  
-  fp_add_css(fp_get_module_path("announcements") . "/css/announcements.css");
-  
-  
-  $rtn .= "<h2 class='page-title'>Announcements</h2>";
-
-  $form = fp_render_form("announcements_new_announcement_form");
-
-  $rtn .= fp_render_c_fieldset($form, t("Click to enter a new announcement"), true);
-    
-  // Okay, let's show the announcements now, in order.
-  $rtn .= "<div class='admin-announcements'>";
-  $rtn .= announcements_render_announcements(TRUE);
-  $rtn .= "</div>";
-    
-  return $rtn;
 }
 
 
 /**
  * Return the HTML rendering the announcements we have in the database.
  */
-function announcements_render_announcements($bool_show_delete = FALSE) {
+function announcements_render_announcements() {
+  
+  global $user;
+  
   $rtn = "";
   
-  $res = db_query("SELECT * FROM announcements WHERE delete_flag = 0
-                    ORDER BY posted DESC");
+  $res = db_query("SELECT * FROM content WHERE type = 'announcement'
+                    ORDER BY updated DESC");
   while ($cur = db_fetch_array($res)) {
-    $rtn .= "<div class='announcement'>
-                <div class='announcement-text'>" . filter_markup($cur["announcement"], "full") . "</div>
-                <div class='announcement-posted'>" . t("Posted") . " " . date("D, M jS Y - g:ia", $cur["posted"]) . "</div>";
-    if ($bool_show_delete) {
-      $delete_link = "";
-      $delete_link = fp_get_js_confirm_link(t("Are you sure you wish to delete this announcement?"), 'window.location="' . fp_url("announcements/delete", "aid=" . $cur["aid"]) . '"', t("Delete?"));
-      $rtn .= "<div class='announcement-delete'>$delete_link</div>";  
+    
+    $announcement = content_load($cur["cid"]);
+    $title = $announcement["title"];
+    if (strstr($title, "[hide]")) {
+      $title = "";
     }
     
+    
+    // Visibility?
+    if ($announcement["settings"]["visibility"] == "hidden") {
+      continue;
+    }
+    
+    if ($announcement["settings"]["visibility"] == "faculty") {
+      if (!user_has_permission("view_faculty_announcements")) {
+        continue;
+      }
+    }
+    
+    
+    $rtn .= "<div class='announcement'>";
+    if ($title) {
+      $rtn .= "
+                <div class='announcement-title'>" . filter_markup($title) . "</div>
+                ";
+    }
+    $rtn .= "<div class='announcement-text'>" . filter_markup($announcement["body"], "full") . "</div>
+                <div class='announcement-posted'>" . t("Posted") . " " . date("D, M jS Y - g:ia", $announcement["posted"]) . "</div>";
+        
     $rtn .= "</div>";
   }                    
   
   return $rtn;
-}
-
-
-
-function announcements_perm() {
-  return array(
-    "admin_announcements" => array(
-      "title" => t("Administer announcements"),
-      "description" => t("Allow the user to edit & delete announcements."),
-    ),
-  );
 }
 
 

@@ -31,7 +31,7 @@ function system_enable() {
     
 
   // Let's perform installations on the other modules we want enabled by default.
-  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "announcements", "content");
+  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "content", "announcements");
   foreach ($modules as $module) {
     system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => FLIGHTPATH_VERSION));
   }
@@ -55,10 +55,6 @@ function system_enable() {
               (2, 'view_comments') ");
 
    
-  // let's clear the menu cache, to set up the menu router with paths from
-  // the modules we just enabled.
-  menu_rebuild_cache(FALSE);
-  
 }
 
 
@@ -647,7 +643,7 @@ db_query($q);
 
 $q = "
 CREATE TABLE `users` (
-  `user_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
   `user_name` varchar(50) NOT NULL,
   `password` varchar(32) NOT NULL,
   `is_student` tinyint(4) NOT NULL,

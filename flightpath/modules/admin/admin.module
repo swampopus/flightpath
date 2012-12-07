@@ -636,12 +636,17 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
  * Get the "de_catalog_year" from the REQUEST.
  * If it's not there or invalid, pull it from our system settings.
  */
-function admin_get_de_catalog_year() {
+function admin_get_de_catalog_year($bool_set_earliest_if_blank = TRUE) {
+  
   $settings = fp_get_system_settings();
   $de_catalog_year = $_REQUEST["de_catalog_year"];
-  if (!$de_catalog_year || $de_catalog_year < $settings["earliest_catalog_year"]) {
-    $de_catalog_year = $settings["earliest_catalog_year"];
+  
+  if ($bool_set_earliest_if_blank) {
+    if (!$de_catalog_year || $de_catalog_year < $settings["earliest_catalog_year"]) {
+      $de_catalog_year = $settings["earliest_catalog_year"];
+    }
   }
+  
   return $de_catalog_year;  
 }
 
@@ -730,7 +735,7 @@ function admin_urgent_message_form() {
  * first sees when the click to go to the Admin page.
  */
 function admin_display_main() {
-  $de_catalog_year = admin_get_de_catalog_year();
+  $de_catalog_year = admin_get_de_catalog_year(FALSE);
   
   $rtn = "";
 
@@ -753,7 +758,7 @@ function admin_display_main() {
              
        <ul>
         <li>" . t("Available terms for advising: %v", array("%v" => variable_get("available_advising_term_ids", ""))) . "</li>
-        <li>" . t("Default advisint term: %v", array("%v" => variable_get("advising_term_id", ""))) . "</li>          
+        <li>" . t("Default advising term: %v", array("%v" => variable_get("advising_term_id", ""))) . "</li>          
         <li>" . t("Current catalog year: %v", array("%v" => variable_get("current_catalog_year", ""))) . "</li>       
         <li>" . t("Current draft catalog year: %v", array("%v" => variable_get("current_draft_catalog_year", ""))) . "</li>             
         <li>" . t("Not released grades terms: %v", array("%v" => variable_get("not_released_grades_terms", ""))) . "</li>             

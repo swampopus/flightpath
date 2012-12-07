@@ -18,3 +18,16 @@
   text-align: right;
   font-style: italic;
 }
+
+.announcement-title {
+  margin-top: 20px;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+.announcement-text {
+  font-size: 0.9em;
+}
+
+.announcement-text p {
+  margin-top: 3px;
+}

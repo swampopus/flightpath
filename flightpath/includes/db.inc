@@ -180,6 +180,11 @@ function db_result($resource_handler) {
 }
 
 
+function db_insert_id() {
+  $db = get_global_database_handler();
+  return $db->db_insert_id();
+}
+
 function db_query($query) {
   // Capture arguments to this function, to pass along to our $db object.
   $args = func_get_args();

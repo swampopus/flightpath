@@ -253,7 +253,6 @@ function admin_edit_group_form_submit(&$form, $form_submit) {
   // even if its set to readonly.
   clear_session_form_values("admin_edit_group_form");
   
-
 }
 
 
@@ -283,7 +282,7 @@ function admin_edit_group_form() {
       "value" => " <span class='tenpt' style='background-color: yellow; margin-left: 20px;'>
           adv: group_id = $group_id.
           Used by:
-          <a href='javascript: adminPopupWindow(\"admin.php?performAction=popup_show_group_use&group_id=$group_id\");'>[degrees]</a>
+          <a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-show-group-use", "group_id=$group_id")  . "\");'>[degrees]</a>
           </span>",
     );
   }
@@ -455,13 +454,26 @@ function admin_display_groups_popup_edit_definition() {
 
   $results = admin_get_courses_from_definition($definition);
 
+  
+  // This text will be used to describe how the definition works in a javascript alert box:
+  $tdef .= t("Definitions provide a very quick way to add or remove many courses from a group.  For example, to add all CSCI courses, enter:") . "\n";
+  $tdef .= "       add CSCI.*\n";
+  $tdef .= t("The . is used to seperate the subject from the course number.  The * means \"any value.\"  You may also use it in the subject.  For example, ");
+  $tdef .= t("to add all CSCI and any course with a subject that begins with A, enter:") . "\n";
+  $tdef .= "       add CSCI.*\n       add A*.*\n";
+  $tdef .= t("Removing courses is done the same way.  For example, you can add all courses, then remove any course with a number lower than 400:") . "\n";
+  $tdef .= "       add *.*\n       rem *.1*\n       rem *.2*\n       rem *.3*\n";
+  $tdef .= "\n\n" . t("It should be stated that add statements will include courses which have been marked as \"exclude.\"  This is normal.  Those courses will not") . " ";
+  $tdef .= t("show up in group selection screens, but they will be added to a group if a student has completed that course in the past.");
+  
+  
   $rtn .= "<b>Edit Definition for $group->title ($de_catalog_year)<br><i>$group->group_name</i></b>
     <br><br><form action='" . base_path() . "/admin/groups/popup-edit-definition&de_catalog_year=$de_catalog_year&group_id=$group_id' method='POST' id='mainform'>
       <table border='0'>
       <tr>
           <td valign='top' align='right'>
           <div class='tenpt' align='left'>Working Definition:
-           <a href='javascript:popupAlertHelp(\"definition\");'>?</a></div>
+           " . fp_get_js_alert_link($tdef, "[?]") . "</div>
           <textarea name='definition' id='definition' rows='10' cols='15' >$definition</textarea>
           <br>
           <input type='button' value='Generate ->'

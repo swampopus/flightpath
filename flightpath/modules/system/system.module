@@ -32,15 +32,7 @@ function system_perm() {
       "description" => t("The user may run hook_cron functions at will. Causes a new menu link to appear
                           on the admin page."),
     ),    
-    
-    
-    "de_can_switch_users" => array(
-      "title" => t("Can switch users"),
-      "description" => t("This powerful permission allows a user to switch
-                        to any other user in the system.  Be sure to 
-                        only give to administrators."),
-    ),
-    
+        
     "de_can_administer_system_settings" => array(
       "title" => t("Can administer system settings"),
       "description" => t("This allows the user to edit any of the FlightPath
@@ -168,7 +160,7 @@ function system_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
   );
 
-  $items["admin-tools/clear-cache"] = array(
+ $items["admin-tools/clear-cache"] = array(
     "title" => "Clear all cache",
     "page_callback" => "system_perform_clear_cache",
     "access_arguments" => array("administer_modules"),
@@ -206,7 +198,7 @@ function system_menu() {
   
   
   $items["admin/config/system-settings"] = array(
-    "title" => "Edit system settings",
+    "title" => "System settings",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("system_settings_form", "system_settings"),
     "access_arguments" => array("de_can_administer_system_settings"),
@@ -214,6 +206,7 @@ function system_menu() {
       "page_has_search" => FALSE,
       "page_banner_is_link" => TRUE,
       "page_hide_report_error" => TRUE,
+      "menu_icon" => fp_theme_location() . "/images/toolbox.gif",
       "menu_links" => array(         
         0 => array(
           "text" => "Back to main menu",
@@ -227,7 +220,7 @@ function system_menu() {
   );
   
   $items["admin/config/modules"] = array(
-    "title" => "Edit modules",
+    "title" => "Modules",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("system_modules_form"),
     "access_arguments" => array("administer_modules"),
@@ -807,11 +800,10 @@ function system_settings_form() {
                 Please see the FlightPath documentation on how to set up this field.") . "
                 <br>" . t("Ex:") . " 
                 <br>[Y4]60, Spring, Spring of [Y4], Spr '[Y2]
-                <br>[Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1], [Y-1]",
+                <br>[Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]",    
   );
 
            
-  
   // Let's load the subjects...
   $subjects = "";
   $query = "SELECT DISTINCT b.subject_id, a.title FROM courses b LEFT JOIN subjects a
@@ -841,11 +833,15 @@ function system_settings_form() {
                         <br>&nbsp; ACCT::Accounting<br>&nbsp; BIOL::Biology<br>" . t("Notice
                         the separator between the code and title is 2 colons (::)."),
   );
+                                  
                   
   
+                
+                
   
   return $form;
 }
+
 
 
 
@@ -964,7 +960,7 @@ function system_handle_form_submit() {
     foreach ($validate_handlers as $validate_callback) {         
       if (function_exists($validate_callback)) {
         
-        call_user_func_array($validate_callback, array($form, &$form_state));        
+        call_user_func_array($validate_callback, array(&$form, &$form_state));        
       }
     }
   }
@@ -989,7 +985,7 @@ function system_handle_form_submit() {
     foreach ($submit_handlers as $submit_callback) {                
       if (function_exists($submit_callback)) {
         //call_user_func($submit_callback, $form, &$form_state);        
-        call_user_func_array($submit_callback, array($form, &$form_state));
+        call_user_func_array($submit_callback, array(&$form, &$form_state));
       }    
     }
 
@@ -1566,7 +1562,15 @@ function system_init() {
                       few minutes.  During this time, some data may appear incomplete.
                       We apologize for the inconvenience and appreciate your patience."), "status", TRUE);
   }
-     
+   
+  // Is there an urgent message to display?  
+  $urgent_msg = variable_get("urgent_msg", "");
+  if ($urgent_msg) {
+    fp_add_message("<b>" . t("Important Message:") . "</b> " . $urgent_msg, "status", TRUE);
+  }
+  
+  
+   
   // Add in our custom JS settings.
   fp_add_js(array("themeLocation" => fp_theme_location(), "currentStudentId" => $_REQUEST["current_student_id"], "basePath" => base_path()), "setting");
   fp_add_js(fp_get_module_path("system") . "/js/system.js");
@@ -1680,6 +1684,14 @@ function system_modules_form() {
               $attributes["disabled"] = "disabled";
             }
             
+            $bool_overriding = FALSE;
+            // Did this module already exist in $form?  In other words,
+            // is the module overriding a core module?  If so, we need to know
+            // so we can display something special.
+            if (isset($form["cb__$module"])) {
+              $bool_overriding = TRUE;
+            }
+            
             $form["cb__$module"] = array(
               "type" => "checkboxes",              
               "options" => array($module => $info_details_array["name"]),
@@ -1706,6 +1718,18 @@ function system_modules_form() {
                            </div>";
               
             }
+            
+            // if we are overriding a module, then display something special.
+            if ($bool_overriding) {
+              $form["mark" . $m++] = array(
+                "value" => "<em>" . t("Overriding core module:") . "<br>{$info_details_array["name"]}</em>
+                            <div class='fp-system-modules-machine-name'>$file</div>
+                            <div class='fp-system-modules-installation-status'>
+                            " . t("Use checkbox in Core section above to manage module") . "
+                            </div>",
+              );
+            }
+            
             $form["mark" . $m++] = array(
               "value" => "  </td>
                             <td width='5%' >{$info_details_array["version"]}</td>
@@ -1735,6 +1759,7 @@ function system_modules_form() {
     "prefix" => "<hr>",
   );  
   
+  fpm($form);
   
   return $form;
 }
@@ -1921,7 +1946,7 @@ function system_disable_module($module_details) {
  * Construct an HTML element and return it.
  *
  */
-function z__system_build_element($name, $type = "", $label = "", $description = "", $default_value = "", $csv_to_array = FALSE) {
+function system_build_element($name, $type = "", $label = "", $description = "", $default_value = "", $csv_to_array = FALSE) {
   
   $rtn = "";
   

@@ -751,10 +751,14 @@ function fp_render_greeting() {
   
   $today = date("D, F jS, Y",time("today"));
   
-  $rtn .= "<div class='flightpath-greeting-message'>
-              Welcome $user->name! Today is $today. " . l("Log out?", "logout") . "
-          </div>";
+  $dname = $user->name;
+  if ($user->f_name != "" || $user->l_name != "") {
+    $dname = trim($user->f_name . " " . $user->l_name) . " ($user->name)";
+  }
   
+  $rtn .= "<div class='flightpath-greeting-message'>
+              Welcome $dname! Today is $today. " . l("Log out?", "logout") . "
+          </div>";
   
   return $rtn;  
   

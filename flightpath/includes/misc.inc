@@ -564,8 +564,55 @@ function fp_validate_utf8($text) {
   return (preg_match('/^./us', $text) == 1);
 } 
  
+
+/**
+ * Simple function to convert a string into a machine-readable string.
+ * 
+ * Useful for making possibly unsafe text work as an array index, a CSS class, etc.
+ *
+ * @param unknown_type $str
+ * @return unknown
+ */
+function fp_get_machine_readable($str) {
+ return preg_replace('@[^a-z0-9_]+@','_',$str);  
+}
+
  
 /////////////////////////////////////////////////////////////////////
+
+
+
+/**
+ * Return an array version of the term_id_structures field from the admin settings
+ *
+ */
+function get_term_structures() {
+  $rtn = array();
+
+  $temp = $GLOBALS["fp_system_settings"]["term_id_structure"];
+  $structures = explode("\n", $temp);
+    
+  foreach ($structures as $structure) {      
+    $tokens = explode(",", $structure);
+    $term_def = trim($tokens[0]);
+    
+    // Get rid of the replacement pattern.
+    // Looks like:  [Y4]40.  We want the 40.
+    // Simply explode on "]"
+    $temp = explode("]", $term_def);
+    $rtn[trim($temp[1])] = array(
+      "term_def" => $term_def,
+      "short" => trim($tokens[1]),
+      "abbr" => trim($tokens[2]),
+      "full" => trim($tokens[3]),
+      "disp_adjust" => trim($tokens[4]),
+    );
+  
+  }
+  
+  
+  return $rtn;
+}
 
 
 /**
@@ -1223,6 +1270,8 @@ function fp_get_js_confirm_link($question, $action_if_yes, $link_text) {
   
   $rtn = "";  
 
+  $question = fp_reduce_whitespace($question);
+  
   $question = htmlentities($question, ENT_QUOTES);
   $question = str_replace("\n", "\\n", $question);
   
@@ -1233,14 +1282,19 @@ function fp_get_js_confirm_link($question, $action_if_yes, $link_text) {
 }
 
 /**
- * Creates a javascript "confirm" link, so when clicked it asks the user a question, then proceeds
- * if they select OK.  The main reason I want to do this is so I can pass the $question through
- * my t() function. (do it when you call this function)
+ * Creates a javascript "prompt" link, which will ask the user a question.
+ * 
+ * Similar to the fp_get_js_confirm_link function, but this is a prompt box
+ * which lets the user type in a response.
+ * 
+ * @see fp_get_js_confirm_link
  */
 function fp_get_js_prompt_link($question, $default, $action_if_yes, $link_text) {
   
   $rtn = "";  
 
+  $question = fp_reduce_whitespace($question);
+  
   $question = htmlentities($question, ENT_QUOTES);
   $question = str_replace("\n", "\\n", $question);
   
@@ -1253,6 +1307,48 @@ function fp_get_js_prompt_link($question, $default, $action_if_yes, $link_text) 
 
       
   return $rtn;
+}
+
+
+/**
+ * Creates a javascript "alert" link, which tells the user some message with javascript alert().
+ * 
+ * Similar to the fp_get_js_confirm_link function, but this is a simple alert message,
+ * with no user input.
+ * 
+ * @see fp_get_js_confirm_link
+ */
+function fp_get_js_alert_link($message, $link_text, $extra_css_class = "") {
+  
+  $rtn = "";  
+
+  $message = fp_reduce_whitespace($message);
+  
+  $message = str_replace("\n", "[NL]", $message);
+  $message = htmlentities($message, ENT_QUOTES);
+  $message = str_replace("&quot;", "\&quot;", $message);
+  $message = str_replace("[NL]", "\\n", $message);
+      
+  $rtn .= "<a href='javascript: alert(\"" . $message . "\");' class='fp-alert-link $extra_css_class'>[?]</a>";
+
+      
+  return $rtn;  
+  
+}
+
+
+/**
+ * Simple helper function to reduce whitespace (like double-spaces) 
+ *
+ * @param unknown_type $str
+ */
+function fp_reduce_whitespace($str) {
+  // Cheap hack to get rid of whitespace    
+  for ($t = 0; $t < 5; $t++) {
+    $str = str_replace("  ", " ", $str);
+  }  
+
+  return $str;  
 }
 
 
@@ -1326,39 +1422,6 @@ function get_term_id_suffixes() {
 
   return $rtn;
   
-}
-
-
-/**
- * Return an array version of the term_id_structures field from the admin settings
- *
- */
-function get_term_structures() {
-  $rtn = array();
-
-  $temp = $GLOBALS["fp_system_settings"]["term_id_structure"];
-  $structures = explode("\n", $temp);
-    
-  foreach ($structures as $structure) {      
-    $tokens = explode(",", $structure);
-    $term_def = trim($tokens[0]);
-    
-    // Get rid of the replacement pattern.
-    // Looks like:  [Y4]40.  We want the 40.
-    // Simply explode on "]"
-    $temp = explode("]", $term_def);
-    $rtn[trim($temp[1])] = array(
-      "term_def" => $term_def,
-      "short" => trim($tokens[1]),
-      "abbr" => trim($tokens[2]),
-      "full" => trim($tokens[3]),
-      "disp_adjust" => trim($tokens[4]),
-    );
-  
-  }
-  
-  
-  return $rtn;
 }
 
 
