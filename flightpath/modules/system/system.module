@@ -568,16 +568,16 @@ function system_popup_report_contact_form_submit($form, $form_state) {
   $datetime = date("Y-m-d H:i:s", strtotime("now"));
 
   $headers = "From: FlightPath-noreply@noreply.com\n";
-  $subject = t("FLIGHTPATH REPORT CONTACT") . " - $onscreen ";
+  $subject = t("FLIGHTPATH REPORT CONTACT") . " - $category ";
   $msg = "";
   $msg .= t("You have received a new report/contact on") . " $datetime.\n";
-  $msg .= t("Name:") . " $user->name  ID: $user->cwid  " . t("User roles:") . " $user_roles \n\n";
+  $msg .= t("Name:") . " $user->f_name $user->l_name ($user->name)  CWID: $user->cwid  \n" . t("User roles:") . " $user_roles \n\n";
   $msg .= t("Category:") . " $category  \n";
   $msg .= t("Possible Student:") . " $possible_student  \n";
   $msg .= t("Comment:") . " \n $comment \n\n";
   $msg .= "------------------------------------------------ \n";
 
-  $themd5 = md5($username . $cwid . $problem . $usertype . $onscreen);
+  $themd5 = md5($user->name . $user->cwid . $comment . $user_roles . $category);
 
   if ($_SESSION["da_error_report_md5"] != $themd5)
   {  // Helps stop people from resubmitting over and over again
@@ -585,7 +585,10 @@ function system_popup_report_contact_form_submit($form, $form_state) {
 
     $msg = addslashes($msg);
     $to = variable_get("contact_email_address", "");
-    mail($to,$subject,$msg,$headers);
+    
+    if ($to != "") {
+      mail($to,$subject,$msg,$headers);
+    }
 
   } 
 
@@ -806,7 +809,7 @@ function system_settings_form() {
            
   // Let's load the subjects...
   $subjects = "";
-  $query = "SELECT DISTINCT b.subject_id, a.title FROM courses b LEFT JOIN subjects a
+  $query = "SELECT DISTINCT b.subject_id, a.title, a.college FROM courses b LEFT JOIN subjects a
               ON (a.subject_id = b.subject_id)
               WHERE exclude = 0              
               ORDER BY b.subject_id
@@ -819,7 +822,9 @@ function system_settings_form() {
     //fpm($cur);
     $title = trim($cur["title"]);
     $subject_id = trim($cur["subject_id"]);
-    $subjects .= $subject_id . "::" . $title . "\n";
+    $college = trim($cur["college"]);
+        
+    $subjects .= $subject_id . "~" . $college . "~" . $title . "\n";
   }
     
   
@@ -829,9 +834,9 @@ function system_settings_form() {
     "value" => $subjects,
     "description" => t("Enter subjects known to FlightPath (for use
                         in popups and the Course Search, for example), one per line
-                        in this format:") . "<br>SUBJ::Title<br>" . t("For example:") . "
-                        <br>&nbsp; ACCT::Accounting<br>&nbsp; BIOL::Biology<br>" . t("Notice
-                        the separator between the code and title is 2 colons (::)."),
+                        in this format:") . "<br>SUBJ~COLLEGE~Title<br>" . t("For example:") . "
+                        <br>&nbsp; ACCT~BA~Accounting<br>&nbsp; BIOL~AS~Biology<br>" . t("Notice
+                        the separator between the code, college, and title is 1 tilde (~)."),
   );
                                   
                   
@@ -859,10 +864,10 @@ function system_settings_form_submit($form, &$form_state) {
   $subjects = trim($form_state["values"]["subjects"]);
   $lines = explode("\n", $subjects);
   foreach ($lines as $line) {
-    $temp = explode("::", $line);
+    $temp = explode("~", $line);
     
-    db_query("INSERT INTO subjects (subject_id, title)
-              VALUES ('?', '?') ", strtoupper(trim($temp[0])), trim($temp[1]));
+    db_query("INSERT INTO subjects (subject_id, college, title)
+              VALUES ('?', '?', '?') ", strtoupper(trim($temp[0])), trim($temp[1]), trim($temp[2]));
     
   }
 }
@@ -1759,8 +1764,7 @@ function system_modules_form() {
     "prefix" => "<hr>",
   );  
   
-  fpm($form);
-  
+    
   return $form;
 }
 

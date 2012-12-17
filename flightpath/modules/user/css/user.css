@@ -44,3 +44,12 @@ table.user-list  {
   font-size: 0.9em;
 }
 
+
+
+.admin-perm-table .headers th {
+  
+  padding-top: 5px;
+  border-bottom: 1px solid #ccc;
+  background-color: white;
+  color: #555;
+}

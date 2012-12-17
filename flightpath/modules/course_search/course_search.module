@@ -66,6 +66,25 @@ function course_search_menu() {
     "type" => MENU_TYPE_CALLBACK,
   );
 
+  
+  $items["tools/course-search/edit-list"] = array(
+    "title" => "Update Course Information",
+    "page_callback" => "course_search_display_edit_courses",
+    "access_arguments" => array("can_update_course_info_details"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,      
+      "menu_links" => array(
+        0 => array(
+          "text" => "Back to Course Search",
+          "path" => "tools/course-search",
+        ),
+      ),
+    ),    
+    "file" => menu_get_module_path("course_search") . "/course_search.edit.inc",
+    "type" => MENU_TYPE_CALLBACK,
+  );  
+  
+  
   $items["tools/course-search/edit-info-details"] = array(
     "title" => "Edit Course Info Details",
     "page_callback" => "fp_render_form",
@@ -74,11 +93,49 @@ function course_search_menu() {
     "page_settings" => array(
       "page_has_search" => FALSE,
       "page_banner_is_link" => TRUE,
+      "menu_links" => array(
+        0 => array(
+          "text" => "Back to Course Search",
+          "path" => "tools/course-search",
+        ),
+        1 => array(
+          "text" => "Back to Course Edit List",
+          "path" => "tools/course-search/edit-list",
+        ),
+      ),      
     ),        
+    "file" => menu_get_module_path("course_search") . "/course_search.edit.inc",
     "type" => MENU_TYPE_CALLBACK,
   );
 
+  $items["tools/course-search/view-reports"] = array(
+    "title" => "View Reports",
+    "page_callback" => "course_search_display_view_reports",
+    "access_arguments" => array("can_update_course_info_details"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,      
+      "menu_links" => array(
+        0 => array(
+          "text" => "Back to Course Search",
+          "path" => "tools/course-search",
+        ),
+        1 => array(
+          "text" => "Back to Course Edit List",
+          "path" => "tools/course-search/edit-list",
+        ),
+      ),
+    ),    
+    "file" => menu_get_module_path("course_search") . "/course_search.edit.inc",
+    "type" => MENU_TYPE_CALLBACK,
+  );  
 
+  // Simple callback to download CSV
+  $items["tools/course-search/get-offering-csv"] = array(    
+    "page_callback" => "course_search_get_offering_csv",
+    "access_arguments" => array("can_update_course_info_details"),
+    "file" => menu_get_module_path("course_search") . "/course_search.edit.inc",
+    "type" => MENU_TYPE_CALLBACK,
+  );    
 
     
   return $items;
@@ -86,336 +143,6 @@ function course_search_menu() {
 
 
 
-
-
-/**
- * This form lets the user edit the course's syllabus or rotation schedule
- */
-function course_search_edit_course_details_form() {
-  $form = array();
-
-  
-  fp_add_css(fp_get_module_path("course_search") . "/css/course_search_style.css");
-  
-  $course_id = $_REQUEST["course_id"];
-  $subject_id = $_REQUEST["subject_id"];
-  $course_num = $_REQUEST["course_num"];
-
-  $catalog_year = variable_get("current_catalog_year", 2006);
-
-  $course = new Course($course_id,false,null,false,$catalog_year);
-  $course->catalog_year = $de_catalog_year;  // Since it may be 1900, force it!
-  $course->load_descriptive_data(false, true, false, true);
-
-  fp_set_title(t("Edit Course Info for @course", array("@course" => "$subject_id $course_num")));
-
-  $form["#attributes"] = array("enctype" => "multipart/form-data");
-  
-  $form["course_id"] = array(
-    "type" => "hidden",
-    "value" => $course_id,
-  );
-
-  $form["subject_id"] = array(
-    "type" => "hidden",
-    "value" => $subject_id,
-  );
-
-  $form["course_num"] = array(
-    "type" => "hidden",
-    "value" => $course_num,
-  );
-
-  $course->catalog_year = $catalog_year;
-  // Find out filename/link of current syllabus.
-  $filelink = "- None currently entered -";
-  $filename = "";
-  if ($syllabus_details = course_search_get_course_syllabus_details("", "", $course_id)) {
-    $filename = $syllabus_details["filename"];
-  }
-
-  $bool_delete_cb = FALSE;
-  
-  if ($filename != "") {
-    $filelink = $filename;
-    $bool_delete_cb = TRUE;
-          
-  }
-
-  $form["mark" . $m++] = array(
-    "value" => "<strong>$course->title (" . $course->get_catalog_hours() . " " . t("hrs.") . ")</strong>
-                <div class='tenpt'>$course->description</div>
-                ",
-  );
-
-  $form["syllabus"] = array(
-    "type" => "file",
-    "label" => t("Submit new sample course syllabus:"),
-    "prefix" => "<br><br>" . t("Current sample syllabus:") . " " . $filelink,
-    "description" => t("Note: selecting a new file will replace any existing
-                        syllabus.  Remember to click Submit after selecting a file."),
-  );
-
-  if ($bool_delete_cb) {
-    $form["del_syllabus"] = array(
-      "type" => "checkboxes",
-      "options" => array("yes" => t("Delete the existing syllabus?")),
-    );
-  }
-
-  if ($filename != "") {   
-    $s_url = $syllabus_details["url"];
-    
-    $form["mark" . $m++] = array(
-      "value" => "<p>" . t("Syllabus may be downloaded using this address: ") . "<a href='$s_url'>$s_url</a></p>",
-    );
-    
-  }
-
-  $form["mark" . $m++] = array(
-    "value" => "<b>" . t("Course Rotation Schedule:") . "</b>
-                <br>" . t("Select semesters/terms in which this Course
-                      will be offered for the next five years."),
-  );
-  
-  //$term_array = get_term_id_suffixes();
-  $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
-
-
-  $form["mark" . $m++] = array(
-    "value" => "<div class='rotation-form-checkboxes'>",
-  );
-  
-  $y = 1;
-  for ($t = $catalog_year; $t <= $catalog_year + 5; $t++) {
-      
-    $form["year$y"] = array(
-      "type" => "hidden",
-      "value" => $t,
-    );
-    
-    foreach($term_array as $x) {
-      
-      $check_year = $t;
-       
-      $new_course = new Course();
-      $new_course->term_id = $check_year . $x;
-      $cb_disp_name = $new_course->get_term_description(TRUE);
-      
-      $cbname = $new_course->term_id;
-      
-      
-      $cb_default_val = array();
-      // See if this box should be checked...
-      $res = db_query("select * from course_rotation_schedule
-                where `course_id`='?'
-                and `term_id`='$check_year$x' ", $course_id);
-      if (db_num_rows($res) > 0) {
-        $cb_default_val = array("yes" => "yes");
-      }
-            
-      $form["cb_$cbname"] = array(
-        "type" => "checkboxes",
-        "options" => array("yes" => $cb_disp_name),        
-        "value" => $cb_default_val,
-      );
-      
-      
-    }
-
-    $form["mark" . $m++] = array(
-      "value" => "<br>",
-    );
-
-    $y++;
-  }
-
-  $form["mark" . $m++] = array(
-    "value" => "</div>",
-  );
-
-
-  // Not anticipated check.
-  $default_val = array();
-  $res = db_query("SELECT * FROM course_rotation_schedule
-            WHERE `course_id`='?'
-            AND `term_id`='NOTA' ", $course_id);
-  //debug_c_t("$t$x");
-  if (db_num_rows($res) > 0)
-  {
-    $default_val = array("yes" => "yes");
-  }
-
-  $form["not_anticipated"] = array(
-    "type" => "checkboxes",
-    "label" => t("Not Anticipated:"),
-    "options" => array("yes" => t("This course is not anticipated.")),
-    "value" => $default_val,
-    "description" => t("Checking this box means that the course is not
-                        anticipated to be offered within the time range above.
-                        This will override any selections made above."),
-  );
-
-
-
-  $form["submit"] = array(
-    "type" => "submit",
-    "value" => t("Submit"),
-    "prefix" => "<hr>",
-  );
-   
-  
-  return $form;
-}
-
-
-function course_search_edit_course_details_form_submit($form, $form_state) {
-  global $user;
-  
-  $faculty_id = $user->id;
-  
-  $course_id = $form_state["values"]["course_id"];
-  $subject_id = $form_state["values"]["subject_id"];
-  $course_num = $form_state["values"]["course_num"];
-  
-  //$term_array = get_term_id_suffixes();
-  $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
-
-      
-  for ($t = 1; $t <= 6; $t++) {
-    $year = $form_state["values"]["year$t"];
-    
-    // delete the existing entries for this year & course here.
-    db_query("DELETE FROM course_rotation_schedule
-            WHERE `course_id`='?'
-            AND `term_id` LIKE '?%' ", $course_id, $year);
-            
-    /////////////////////////
-    // Now, for x = 1 to 5,
-    // if ($_request["cb_$year$x"] == "yes")
-    // then insert into table... blah blah...
-    foreach($term_array as $x) {
-      if ($form_state["values"]["cb_$year$x"]["yes"] == "yes") {
-        db_query("INSERT INTO course_rotation_schedule
-                (faculty_id, course_id, term_id, entry_value, posted)
-                VALUES ('?', '?', '?', '?', '?') ", $faculty_id, $course_id, "$year$x", "$subject_id~$course_num", time());                
-      }
-    }
-            
-  }      
-   
-   
-  // Not anticipated check?
-  
-  // delete first...
-  db_query("DELETE FROM course_rotation_schedule
-            WHERE course_id = '?'
-            AND term_id = 'NOTA' ", $course_id);
-
-  if ($form_state["values"]["not_anticipated"]["yes"] == "yes") {
-    db_query("INSERT INTO course_rotation_schedule              
-            (faculty_id, course_id, term_id, entry_value, posted)
-            VALUES ('?', '?', '?', '?', '?') ", $faculty_id, $course_id, "NOTA", "$subject_id~$course_num", time());
-
-  }
-
-  // Should we delete the current syllabus?
-  if ($form_state["values"]["del_syllabus"]["yes"] == "yes") {
-    if ($details = course_search_get_course_syllabus_details("", "", $course_id)) {
-      $filename = $details["filename"];
-      if ($filename != "") {
-        unlink("./custom/files/syllabi/$filename");
-        db_query("DELETE FROM course_syllabi
-                WHERE `course_id`='?' ", $course_id);
-        
-      }
-    }
-  }
-
-  // Did the user try to upload a file?
-  if (trim($_FILES["syllabus"]["tmp_name"]) != "")
-  {
-    $test = course_search_upload_attachment($course_id, $subject_id, $course_num);
-    if (!$test)
-    {
-      fp_add_message(t("There was an error uploading attachment.  It is possible this is a write-permission
-                        issue with the server."));
-    } else {
-      // success.
-    }
-  }      
-   
-  fp_add_message(t("This course's details have been updated successfully."));
-  // TODO:  Do a "goto" back to wherever we came from
-}
-
-
-
-
-function course_search_upload_attachment($course_id, $subject_id, $course_num) {
-
-  // If any files were attached, go ahead and upload them.
-  $datetime = date ("_y-j-m_g-i-sa", time());
-
-
-  $tmp_filename = $_FILES["syllabus"]["tmp_name"];
-  if (trim($tmp_filename) != "") {
-    // Meaning, yes, a file was uploaded.
-    $suffix = $datetime;
-    // Create the new filename, based on the id's its been assigned.
-    $original_filename = $_FILES["syllabus"]["name"];
-    // replace problem characters...
-    $original_filename = str_replace("'", "", $original_filename);
-    $original_filename = str_replace('"', '', $original_filename);
-    $original_filename = str_replace(",", "", $original_filename);
-
-    $temp = explode("\.", $original_filename);
-    $ext = $temp[count($temp) - 1];  // get the original extension.
-    $new_filename = $original_filename . ".$suffix.$ext";
-
-
-    // Does the directory/files/syllabi exist?
-    // If not, we will create it.
-    $files_path = $GLOBALS["fp_system_settings"]["file_system_path"];
-     
-    if (!is_dir("$files_path/custom/files/syllabi")) {
-      if (!mkdir("$files_path/custom/files/syllabi")) {
-        return FALSE;
-      }
-    }    
-
-    // Try to copy...
-    if (!copy($tmp_filename, "$files_path/custom/files/syllabi/$new_filename")) {      
-      return FALSE;
-    }
-
-    // If we are here, then there is success!  We should update the
-    // table with the new filename, which is $new_filename.
-    // delete the existing entry, if any.
-
-    // We need to unlink any existing syllabus file...
-    if ($file_details = course_search_get_course_syllabus_details($subject_id, $course_num, $course_id)) {
-      $filename = $file_details["filename"];    
-      if (!unlink("$files_path/custom/files/syllabi/$filename")) {
-        fp_add_message(t("Unable to delete existing file:") . " $filename");
-      }
-    }
-
-    db_query("DELETE FROM course_syllabi
-              WHERE course_id = '?' ", $course_id);
-
-    // Okay, now add the new entry.
-    db_query("INSERT INTO course_syllabi
-            (course_id, course_perm_id, filename, posted)
-            values ('?','?" . "_?','?', '?' )", $course_id, $subject_id, $course_num, $new_filename, time());
-
-
-
-  }
-
-  return TRUE;
-
-}
 
 
 
@@ -721,8 +448,8 @@ function course_search_display_courses() {
       $description = trim($cur["description"]);
       if ($description == "")
       {
-        $description = "No description is available at this time.  Consult
-              the official course catalog for listings.";
+        $description = t("No description is available at this time.  Consult
+              the official course catalog for listings.");
       }
 
       $syllabus_text = "";     
@@ -733,7 +460,7 @@ function course_search_display_courses() {
         $syllabus_text = "<div class='course-search-sample-syllabus'>
                           <a href='{$syllabus_array["url"]}' class='nounderline'>
                  <img src='" . fp_theme_location() . "/images/document_icon.gif' border='0' height='12'> 
-                  Sample Syllabus</a>
+                  " . t("Sample Syllabus") . "</a>
                   
                 </div>
                 ";
@@ -1102,6 +829,11 @@ function course_search_display_search() {
   
   
   $rtn .= "";
+  
+  if (user_has_permission("can_update_course_info_details")) {
+    $rtn .= "<div>" . t("Administrators:") . " " . l(t("Edit course schedules and syllabi"), "tools/course-search/edit-list") . "</div>";
+  }
+    
   $rtn .= fp_render_curved_line("Course Search");
 
 

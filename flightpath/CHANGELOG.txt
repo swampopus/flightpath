@@ -1,6 +1,30 @@
 FlightPath 4.x Changelog
 ========================
 
+2012-12-17
+  Modified user.module, so role headers on permissions form appear for every module.
+  Otherwise, it was confusing when the list of permissions was very long.
+  
+  Moving FlightPath version from dev to 4.0-rc1, signifying "release candidate" status.
+
+
+2012-12-14
+  More work on Course Search, making the rotation schedule entry more closely
+  follow the established term_id structure.
+
+
+2012-12-13
+  Added jQuery UI plugin to core, as well as its CSS file.
+  
+  Expanded Course Search's edit abilities, to make it easier to
+  update large numbers of courses.
+
+
+2012-12-10
+  Fixed bug in the report bug popup, where a user couldn't submit
+  more than one report per session.
+  
+
 2012-12-07
   Fixed bug which caused user roles to not be editable from form.
 

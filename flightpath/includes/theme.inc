@@ -292,9 +292,9 @@ function fp_render_c_fieldset($content, $legend = "Click to expand/collapse", $b
   </script>";
   
   $rtn = "  
-    <fieldset class='c-fieldset-$fsstate-$id' id='fs_$id'>
+    <fieldset class='c-fieldset-$fsstate-$id c-fieldset-$fsstate c-fieldset' id='fs_$id'>
       <legend><a href='javascript: toggle_fieldset_$id();' class='nounderline'>$legend</a></legend>
-      <div id='content_$id' style='$content_style'>
+      <div id='content_$id' class='c-fieldset-content' style='$content_style'>
         $content
       </div>
     </fieldset>

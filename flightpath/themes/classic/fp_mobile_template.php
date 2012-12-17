@@ -7,7 +7,7 @@
 $theme_location = fp_theme_location();
 
 print "
-<meta name='viewport' id='view' content='width=device-width;'/>
+<meta name='viewport' id='view' content='width=350;'/>
 <meta name='format-detection' content='telephone=no'>                
 <link rel='stylesheet' type='text/css' href='$theme_location/style.css'>
 <link rel='stylesheet' type='text/css' href='$theme_location/mobile.css'>";
@@ -19,7 +19,10 @@ print "<title>$page_title</title>";
 
 ?>
 
-<script src="<?php print base_path() ?>/inc/jquery-1.7.1.min.js" type="text/javascript"></script>
+		<script src="<?php print base_path() ?>/inc/jquery-1.8.3.min.js" type="text/javascript"></script>
+		<script src="<?php print base_path() ?>/inc/jquery-ui-1.9.2.custom.min.js" type="text/javascript"></script>
+	  <link rel='stylesheet' type='text/css' href='<?php print base_path() ?>/inc/jqueryui-css/ui-lightness/jquery-ui-1.9.2.custom.min.css'>
+
 
 <script type='text/javascript'>
     <?php print $page_extra_js_settings; ?>     

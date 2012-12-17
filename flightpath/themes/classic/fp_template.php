@@ -38,7 +38,9 @@ $theme_location = fp_theme_location();
 	<head>	
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	
-		<script src="<?php print base_path() ?>/inc/jquery-1.7.1.min.js" type="text/javascript"></script>
+		<script src="<?php print base_path() ?>/inc/jquery-1.8.3.min.js" type="text/javascript"></script>
+		<script src="<?php print base_path() ?>/inc/jquery-ui-1.9.2.custom.min.js" type="text/javascript"></script>
+	  <link rel='stylesheet' type='text/css' href='<?php print base_path() ?>/inc/jqueryui-css/ui-lightness/jquery-ui-1.9.2.custom.min.css'>
 		
 		<script type='text/javascript'>
     <?php print $page_extra_js_settings; ?>     

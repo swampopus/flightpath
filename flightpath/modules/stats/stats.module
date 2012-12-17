@@ -603,7 +603,7 @@ function stats_report_selected_degree_options() {
 
       $track = "";
       // Does this student have a track (degree option) specified?
-      $student_settings = $db->get_student_settings($db_user_id);
+      $student_settings = $db->get_student_settings($db_cwid);
 
       if ($student_settings["major_code"] == $major)
       {
@@ -899,8 +899,8 @@ function stats_report_major_counts() {
     
     // Find out how many students have this major.
 
-    $sql = "SELECT count(user_id) AS count FROM students
-            WHERE major_code = '$major_code'
+    $sql = "SELECT count(cwid) AS count FROM students
+            WHERE major_code = '?'
             AND rank_code IN %RANKIN%
             %EXTRA_STUDENTSEARCH_CONDITIONS% ";      
     
@@ -908,7 +908,7 @@ function stats_report_major_counts() {
     $sql = str_replace("%RANKIN%", $rank_in, $sql);   
     $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $GLOBALS["fp_system_settings"]["extra_student_search_conditions"], $sql);  
     
-    $res2 = db_query($sql);
+    $res2 = db_query($sql, $major_code);
     $cur2 = db_fetch_array($res2);
     
     if (is_numeric($cur2["count"])) {
@@ -1650,12 +1650,18 @@ function stats_draw_date_range_form($path, $start_date = "", $end_date = "") {
   $rtn .= "<form action='" . fp_url($path) . "' method='GET' >
             " . t("Enter dates in the format YYYY-MM-DD (ex: 2012-01-01)") . "
             <br>
-            " . t("Start date:") . " <input type='text' name='start_date' value='$start_date'>
+            " . t("Start date:") . " <input type='text' name='start_date' value='$start_date' id='start_date'>
             &nbsp; &nbsp;
-            " . t("End date:") . " <input type='text' name='end_date' value='$end_date'>
+            " . t("End date:") . " <input type='text' name='end_date' value='$end_date' id='end_date'>
             &nbsp; &nbsp;
             <input type='submit' value='" . t("Submit") . "'>
-          </form> <hr>";  
+          </form> <hr>
+          <script type='text/javascript'>
+            $(function() {
+               $('#start_date').datepicker({ dateFormat: 'yy-mm-dd'});
+               $('#end_date').datepicker({ dateFormat: 'yy-mm-dd'});
+            });
+          </script>";  
   
   
   return $rtn;
@@ -1687,16 +1693,18 @@ function stats_report_advisor_use() {
   $f_array = array();
   $s_array = array();
   
-  $result = db_query("SELECT * FROM watchdog a, faculty b
+  $result = db_query("SELECT * FROM watchdog a, faculty b, users c
             WHERE 
-              a.timestamp > '$start_ts' AND a.timestamp < '$end_ts'
+              a.timestamp > '?' AND a.timestamp < '?'
             AND
               (a.type = 'save_adv_active' OR a.type = 'save_adv_active_whatif')
-            AND a.user_id = b.user_id
-            ORDER BY b.department ");
+            AND a.cwid = b.cwid
+            AND a.cwid = c.cwid
+            AND c.is_faculty = 1
+            ORDER BY b.department ", $start_ts, $end_ts);
 
   while($cur = db_fetch_array($result)) {
-    $faculty_id = trim($cur["user_id"]);
+    $faculty_id = trim($cur["cwid"]);
 
     $f_array[$faculty_id] = $f_array[$faculty_id] * 1; // make it a number.
     $f_array[$faculty_id]++;
@@ -1910,6 +1918,8 @@ function stats_report_access_stats() {
     }
     
     $rtn .= "<tr style='background-color:$bgcol'>
+          <td valign='top' class='tenpt'>$account->name</td>
+          <td valign='top' class='tenpt'>$account->cwid</td>
           <td valign='top' class='tenpt'>$account->id</td>
           <td valign='top' class='tenpt'>$account->f_name $account->l_name</td>          
           <td valign='top' class='tenpt'>$user_type</td>

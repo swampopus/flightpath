@@ -135,8 +135,7 @@ function user_permissions_form() {
   $form = array();
 
   fp_add_css(fp_get_module_path("user") . "/css/user.css");
-  
-  
+    
   // Let's get all of our permissions from the permissions table.
   $permissions = array();
   $res = db_query("SELECT * FROM role_permissions");
@@ -164,20 +163,10 @@ function user_permissions_form() {
   
   $form["mark" . $m++] = array(
     "value" => "<table class='admin-perm-table' width='100%' cellpadding='0' cellspacing='0'>
-                <tr><th style='min-width: 400px;'>Permission</th>",
+                ",
   );   
   
-  foreach ($roles as $key => $role) {
-    $form["mark" . $m++] = array(
-      "value" => "<th style='min-width: 100px;'>" . $role . "</th>",
-    );   
-    
-  }  
-
-  $form["mark" . $m++] = array(
-    "value" => "</tr>",
-  );   
-
+ 
     
   // Go through all of the modules, then call hook_perm for them, to get their permissions.
   $modules = modules_implement_hook("perm");
@@ -186,6 +175,20 @@ function user_permissions_form() {
     $form["mark" . $m++] = array(
       "value" => "<tr><td colspan='$col_count' class='perm-module-name'>" . ucwords($module) . " " . t("module") . "</td></tr>",
     );   
+    
+    // Draw the headers...
+    $form["mark" . $m++] = array(
+      "value" => "<tr class='headers'><th style='min-width: 400px;'>" . t("Permission") . "</th>",
+    );  
+    foreach ($roles as $key => $role) {
+      $form["mark" . $m++] = array(
+        "value" => "<th style='min-width: 100px;'>" . $role . "</th>",
+      );       
+    }  
+    $form["mark" . $m++] = array(
+      "value" => "</tr>",
+    );   
+    // End of headers    
     
     $zebra = "even";
     

@@ -151,7 +151,7 @@ function db_get_user_id_from_cwid($cwid, $type = "faculty") {
 
 
 function fp_get_student_name($cwid) {
-  if ($user_id == 0) {
+  if ($cwid == 0) {
     return t("Anonymous");
   }
   $db = get_global_database_handler();

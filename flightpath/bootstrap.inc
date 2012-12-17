@@ -48,7 +48,7 @@ if (!isset($skip_flightpath_modules) || $skip_flightpath_modules != TRUE) {
 }
 
 // Constants
-define('FLIGHTPATH_VERSION', '4.x-dev');
+define('FLIGHTPATH_VERSION', '4.0-rc1');
 
 define ('WATCHDOG_NOTICE', 5);
 define ('WATCHDOG_ALERT', 1);

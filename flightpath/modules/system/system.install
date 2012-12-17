@@ -82,7 +82,7 @@ function system_install() {
           `semester_num` int(11) NOT NULL,
           `group_id` int(11) NOT NULL,
           `var_hours` int(11) NOT NULL DEFAULT '0',
-          `term_id` int(11) NOT NULL,
+          `term_id` varchar(20) NOT NULL,
           PRIMARY KEY (`id`),
           KEY `advid` (`advising_session_id`),
           KEY `course_id` (`course_id`),
@@ -97,7 +97,7 @@ CREATE TABLE `advising_comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `student_id` int(11) NOT NULL,
   `faculty_id` int(11) NOT NULL,
-  `term_id` int(11) NOT NULL,
+  `term_id` varchar(20) NOT NULL,
   `comment` text NOT NULL,
   `posted` int(10) unsigned NOT NULL,
   `access_type` varchar(20) NOT NULL,
@@ -115,7 +115,7 @@ CREATE TABLE `advising_sessions` (
   `advising_session_id` int(11) NOT NULL AUTO_INCREMENT,
   `student_id` int(11) NOT NULL,
   `faculty_id` int(11) NOT NULL,
-  `term_id` int(11) NOT NULL,
+  `term_id` varchar(20) NOT NULL,
   `degree_id` int(11) NOT NULL,
   `major_code` varchar(20) NOT NULL,
   `track_code` varchar(20) NOT NULL,
@@ -465,7 +465,7 @@ CREATE TABLE `student_courses` (
   `course_num` varchar(10) NOT NULL,
   `hours_awarded` int(11) NOT NULL,
   `grade` varchar(5) NOT NULL,
-  `term_id` varchar(10) NOT NULL,
+  `term_id` varchar(20) NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `student_id` (`student_id`)
 ); ";
@@ -499,7 +499,7 @@ CREATE TABLE `student_substitutions` (
   `required_semester_num` int(11) NOT NULL,
   `sub_course_id` int(11) NOT NULL,
   `sub_entry_value` varchar(20) NOT NULL,
-  `sub_term_id` int(11) NOT NULL,
+  `sub_term_id` varchar(20) NOT NULL,
   `sub_transfer_flag` tinyint(4) NOT NULL,
   `sub_hours` tinyint(4) NOT NULL,
   `sub_remarks` text NOT NULL,
@@ -530,7 +530,7 @@ CREATE TABLE `student_transfer_courses` (
   `student_id` int(11) NOT NULL,
   `transfer_course_id` int(11) NOT NULL,
   `student_specific_course_title` varchar(255) NOT NULL,
-  `term_id` varchar(10) NOT NULL,
+  `term_id` varchar(20) NOT NULL,
   `grade` varchar(5) NOT NULL,
   `hours_awarded` int(11) NOT NULL,
   PRIMARY KEY (`student_id`)
@@ -543,7 +543,7 @@ CREATE TABLE `student_unassign_group` (
   `student_id` int(11) NOT NULL,
   `faculty_id` int(11) NOT NULL,
   `course_id` int(11) NOT NULL,
-  `term_id` int(11) NOT NULL,
+  `term_id` varchar(20) NOT NULL,
   `transfer_flag` tinyint(4) NOT NULL DEFAULT '0',
   `group_id` int(11) NOT NULL,
   `delete_flag` tinyint(4) NOT NULL DEFAULT '0',
@@ -579,6 +579,7 @@ db_query($q);
 $q = "
 CREATE TABLE `subjects` (
   `subject_id` varchar(10) NOT NULL,
+  `college` varchar(10) NOT NULL,
   `title` varchar(255) NOT NULL,
   PRIMARY KEY (`subject_id`)
 ); ";
@@ -607,7 +608,7 @@ CREATE TABLE `transfer_eqv_per_student` (
   `student_id` int(11) NOT NULL,
   `transfer_course_id` int(11) NOT NULL,
   `local_course_id` int(11) NOT NULL,
-  `valid_term_id` int(11) NOT NULL,
+  `valid_term_id` varchar(20) NOT NULL,
   `broken_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `student_id` (`student_id`)

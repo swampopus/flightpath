@@ -4,6 +4,12 @@ body
 	background-color: #ECECDB;
 }
 
+.c-fieldset-content {
+  /*  the astericks mean "only for IE" */
+  *margin-left: 10px;
+  *margin-right: 10px;
+}
+
 .full_admin_top_options
 {
 	font-size: 10pt;
@@ -15,6 +21,7 @@ body
 .flightpath-greeting-message {
   font-size: 0.8em;
 }
+
 
 .sub-tabs {
   margin-bottom: 10px;
