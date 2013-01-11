@@ -762,8 +762,8 @@ class _Course
     // convert to ucwords and fix some problems introduced by that.
     $str = trim(ucwords(strtolower($str)));
     
-    $str = str_replace("_iii", "III", $str);
-    $str = str_replace("_ii", "II", $str);
+    $str = str_replace("Iii", "III", $str);
+    $str = str_replace("Ii", "II", $str);
     $str = str_replace(" Iv"," IV",$str);
     $str = str_replace(" Vi"," VI",$str);
     $str = str_replace(" Of "," of ",$str);
@@ -776,10 +776,10 @@ class _Course
     $str = str_replace(" For "," for ",$str);
 
     // Strange words and abreviations which should be changed.
-    $str = str_replace("_afrotc","AFROTC",$str);
-    $str = str_replace("_gis","GIS",$str);
-    $str = str_replace("_dna","DNA",$str);
-    $str = str_replace("_cpr","CPR",$str);
+    $str = str_replace("Afrotc","AFROTC",$str);
+    $str = str_replace("Gis","GIS",$str);
+    $str = str_replace("Dna","DNA",$str);
+    $str = str_replace(" Cpr","CPR",$str);
     $str = str_replace(" Rn"," RN",$str);
     $str = str_replace(" Micu"," MICU",$str);
     $str = str_replace(" Sicu"," SICU",$str);
