@@ -54,6 +54,27 @@ function admin_menu() {
   );     
 
   
+  $items["admin/duplicate-year"] = array(
+    "title" => "Duplicate entire catalog year",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("admin_duplicate_year_form"),
+    "access_arguments" => array("can_edit_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",      
+  );
+  
   
   
   $items["admin/edit-advising-settings"] = array(
@@ -403,6 +424,300 @@ function admin_menu() {
 }
 
 
+/**
+ * This form will allow the user to duplicate an entire year's worth of data to a new
+ * catalog year.
+ *
+ */
+function admin_duplicate_year_form() {
+  $form = array();
+  
+  $form["mark" . $m++] = array(
+    "value" => "<p>" . t("This form will allow you to duplicate an entire year's worth of data
+                 (courses, degrees, groups) into a new year.  This is used to create a new
+                 year of data, based on the previous year, for example. <b>It will completely
+                 delete the 'destination' year data, if it already exists!</b>  Use carefully.
+                 <br><br>
+                 The new year will be placed in DRAFT, and will not be visible in FlightPath
+                 until draft changes are applied.
+                 <br><br>
+                 <u>It would be wise</u> to back up your database before proceeding.") . "</p><hr>",
+  );
+  
+  $form["source_year"] = array(
+    "type" => "textfield",
+    "label" => t("Source year:"),
+    "size" => 10,
+    "required" => TRUE,
+    "description" => t("Enter the 4-digit source year you are copying FROM.  For example,
+                        2007.  If you are copying from '2007-2008' then just enter
+                        2007."),
+  );
+  
+  $form["destination_year"] = array(
+    "type" => "textfield",
+    "label" => t("Destination year:"),
+    "size" => 10,
+    "required" => TRUE,
+    "description" => t("Enter the 4-digit source year you are copying TO.  <b><u>If this year
+                        all ready exists in the system, all data for this year will be DELETED.</u></b>
+                        If you are copying to '2009-2010' then just enter
+                        2009."),
+  );  
+  
+ $form["passcode"] = array(
+    "type" => "password",
+    "label" => t("For added security, you must enter the Apply Draft Changes password:"),
+    "required" => TRUE,
+    "description" => t("This is a password set up in FlightPath's settings, to provide an extra layer
+                        of security for this powerful action.  Draft changes will not actually be applied,
+                        this is simply used as an added layer of security."),
+        
+  );
+  
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => t("Submit"),
+    "description" => t("This action may take several minutes to complete!  Click only ONCE!"),
+    "prefix" => "<hr>",
+  );  
+  
+  
+  
+  return $form;
+}
+
+
+/**
+ * This function should perform the actual copy of data!
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function admin_duplicate_year_form_submit($form, $form_state) {
+  $values = $form_state["values"];
+  
+  // Check to make sure they entered the transfer passcode correctly.
+  $db = get_global_database_handler();    
+  
+  if ($values["passcode"] != variable_get("admin_transfer_passcode", "h24897Ewujflnb7 wy2896432hke w490ukj")) {
+
+    form_error("passcode", t("Error!  The password you entered is not correct.  Check with the FlightPath administrator
+                              (or check the admin settings pages) to learn the password."));
+    return;
+    
+  }
+
+
+  // Okay, we made it this far, let's proceed with the copy!
+  $new_year = $values["destination_year"];
+  $old_year = $values["source_year"];
+  
+  
+  /////////////////////////////////////////////////////////////////////
+  // We must first begin by deleting any entries for the new_year
+  // from our tables.  This is because we may have to run the parser
+  // more than once while debugging and such.
+  $res = db_query("DELETE FROM draft_courses WHERE `catalog_year`='$new_year' ");
+  
+  
+  $res = db_query("DELETE FROM draft_degree_tracks WHERE `catalog_year`='$new_year' ");
+  // For degrees, we first need to select all of the new_year degrees.
+  $res = db_query("SELECT * FROM draft_degrees WHERE `catalog_year`='$new_year' ");
+  while ($cur = db_fetch_array($res)) {
+  	$res2 = db_query("DELETE FROM draft_degree_requirements WHERE `degree_id`='{$cur["degree_id"]}' ");
+  }
+  
+  $res = db_query("DELETE FROM draft_degrees WHERE `catalog_year`='$new_year' ");
+  // For groups, begin by selecting all the groups in that year...
+  $res = db_query("SELECT * FROM draft_groups WHERE `catalog_year`='$new_year' ");
+  while ($cur = db_fetch_array($res))
+  {
+  	// Now, select all the requirements and see if there are any sub groups...
+  	$res2 = db_query("SELECT * FROM draft_group_requirements WHERE `group_id`='{$cur["group_id"]}' ");
+  	while ($cur2 = db_fetch_array($res2))
+  	{
+  		if ($cur2["child_group_id"] > 0)
+  		{
+  			// Delete the child group.
+  			$res3 = db_query("DELETE FROM draft_group_requirements WHERE `group_id`='{$cur2["child_group_id"]}' ");
+  		}
+  	}
+  	// Now, delete the original requirement.
+  	$res3 = db_query("DELETE FROM draft_group_requirements WHERE `group_id`='{$cur["group_id"]}' ");
+  }
+  $res = db_query("DELETE FROM draft_groups WHERE `catalog_year`='$new_year' ");
+  //////////////////////////////////////////////////////////////////////////
+  
+  //  Okay, we have deleted any possible old entries for the new year.
+  
+  /////////////////////////////////////////////////////////////////////////
+  // Our first step is to copy all of the courses from the old_year to the new_year.  
+  $res = db_query("SELECT * FROM draft_courses WHERE `catalog_year`='$old_year' ");
+  while ($cur = db_fetch_array($res))
+  {
+  	extract($cur, 3, "db");
+  
+  	$course = new Course($db_course_id, false, $db, false, $old_year);
+  	$course->subject_id = $db_subject_id;
+  	$course->course_num = $db_course_num;
+  	$course->db_exclude = $db_exclude;
+  	
+  	// Now, duplicate it for the new_year.
+  	$db->duplicate_course_for_year($course, $new_year);
+  
+  
+  }
+   
+  
+  $group_id_array = array();
+  $subgroup_id_array = array();
+  //////////////////////////////////////////////////////////////////////////
+  //  Now, let's copy over the groups.  
+  $res = db_query("SELECT * FROM draft_groups WHERE `catalog_year`='$old_year' ");
+  while ($cur = db_fetch_array($res))
+  {
+  	extract($cur, 3, "db");
+  	// First, let's request a new group ID for this new group.
+  	$new_group_id = $db->request_new_group_id();
+  	$group_id_array[$db_group_id] = $new_group_id;
+  
+  	//$db_data_entry_comment = mysql_real_escape_string($db_data_entry_comment);
+  	// Now, let's insert this top-level group back into the table
+  	// as the new_year, with the new_group_id.
+  	$query = "INSERT INTO draft_groups(`group_id`,`group_name`,
+  							`title`,`definition`,`icon_filename`,`catalog_year`,
+  							`priority`,`delete_flag`,`data_entry_comment`)
+  							VALUES ('?','?','?','?','?','?','?','?','?') ";  	
+  	$res2 = db_query($query, $new_group_id,$db_group_name,$db_title,
+  								$db_definition,$db_icon_filename,$new_year,
+  								$db_priority,$db_delete_flag,$db_data_entry_comment);
+  
+  	// Okay, now we need to go through the requirements for the group, and copy
+  	// those over to the new_year.
+  	$res3 = db_query("SELECT * FROM draft_group_requirements
+  							WHERE `group_id`='$db_group_id' ");
+  	while($cur3 = db_fetch_array($res3))
+  	{
+  		extract($cur3, 3, "db3");
+  
+  		$child_group_id = 0;
+  		// Was there a child_group (a branch)?  If so, we need to copy that
+  		// over too, with a new child_group_id.
+  		if ($db3_child_group_id > 0)
+  		{
+  			// First, create the child group...
+  			$new_sub_group_id = $db->request_new_group_id();
+  			$subgroup_id_array[$db3_child_group_id] = $new_sub_group_id;
+  			$res4 = db_query("SELECT * FROM draft_group_requirements
+  							WHERE `group_id`='$db3_child_group_id' ");
+  			while($cur4 = db_fetch_array($res4))
+  			{
+  				extract($cur4, 3, "db4");
+  				$res5 = db_query("INSERT INTO draft_group_requirements
+  										(`group_id`,`course_id`,`course_min_grade`,
+  										`course_repeats`,`data_entry_value`)
+  										VALUES ('?','?','?','?','?') ",
+  				            $new_sub_group_id,$db4_course_id,
+  										$db4_course_min_grade,$db4_course_repeats,
+  										$db4_data_entry_value);
+  			}
+  			
+  			// Now, add the replace the db3_child_group_id with this new id
+  			// so it will get added as a requirement.
+  			$child_group_id = $new_sub_group_id;
+  		}
+  
+  		// Add the row into the table...
+  		$res5 = db_query("INSERT INTO draft_group_requirements
+  								(`group_id`,`course_id`,`course_min_grade`,
+  								`course_repeats`,`data_entry_value`,`child_group_id`)
+  								VALUES ('?','?','?','?','?','?') ",
+  		            $new_group_id,$db3_course_id,
+  								$db3_course_min_grade,$db3_course_repeats,
+  								$db3_data_entry_value,$child_group_id);
+  		
+  		
+  	}
+  }
+  
+  /////////////////////////////////////////////////////////////////////
+  //  Now, on to transfering the degrees.
+  //  We will have to use the groupIDArray we constructed earlier, which
+  //  looks like $arr[old_id] = new_id.
+  // Do the tracks first, since they are easier and straight forward...
+  $res = db_query("SELECT * FROM draft_degree_tracks WHERE `catalog_year`='$old_year' ");
+  while ($cur = db_fetch_array($res))
+  {
+  	extract($cur, 3, "db");
+  	
+  	$res2 = db_query("INSERT INTO draft_degree_tracks
+  						(`catalog_year`,`major_code`,`track_code`,`track_title`,
+  						`track_short_title`,`track_description`)
+  						VALUES
+  						('?','?','?','?','?','?') ",
+  	           $new_year,$db_major_code,$db_track_code,$db_track_title,
+  						$db_track_short_title,$db_track_description);
+  	
+  }
+  // Now, let's do the degrees themselves.
+  $res = db_query("SELECT * FROM draft_degrees WHERE `catalog_year`='$old_year' ");
+  while ($cur = db_fetch_array($res))
+  {
+  	extract($cur, 3, "db");
+  	
+  	$new_degree_id = $db->request_new_degree_id();
+  	// add in the top-level degree to the table.
+  	$res2 = db_query("INSERT INTO draft_degrees
+  						(`degree_id`,`major_code`,`degree_type`,`title`,
+  						 `semester_titles_csv`,`catalog_year`,`exclude`,`degree_class`,`public_note`)
+  						 VALUES
+  						('?','?','?','?','?','?','?','?','?')
+  						", $new_degree_id,$db_major_code,$db_degree_type,$db_title,
+  						 $db_semester_titles_csv,$new_year,$db_exclude, $db_degree_class, $db_public_note);						 
+  	
+  	// now, pull out all of the degree_requirements.
+  	$res3 = db_query("SELECT * FROM draft_degree_requirements
+  							WHERE `degree_id`='$db_degree_id' ");
+  	while($cur3 = db_fetch_array($res3))
+  	{
+  		extract($cur3, 3, "db3");
+  		// If there is a required group, we must convert it to the
+  		// new groupID !
+  		$required_group_id = $db3_group_id;
+  		if ($db3_group_id > 0)
+  		{
+  			$required_group_id = $group_id_array[$db3_group_id];
+  			if ($required_group_id < 1 || $required_group_id == "")
+  			{
+  				die("could not find group new group for $old_year $db3_group_id !");
+  			}
+  		}
+  		 
+  		
+  		$res4 = db_query("INSERT INTO draft_degree_requirements
+  							(`degree_id`,`semester_num`,`group_id`,`group_requirement_type`,
+  							`group_hours_required`,`group_min_grade`,`course_id`,
+  							`course_min_grade`,`course_requirement_type`,`data_entry_value`)
+  							VALUES
+  							('?','?','?','?','?','?','?','?','?','?')
+  							", $new_degree_id,$db3_semester_num,$required_group_id,$db3_group_requirement_type,
+  							$db3_group_hours_required,$db3_group_min_grade,$db3_course_id,
+  							$db3_course_min_grade,$db3_course_requirement_type,$db3_data_entry_value);
+  		
+  		
+  	}
+  	
+  	
+  }  
+    
+     
+  fp_add_message(t("The copy operation is now completed.  You may view the new year
+                    by using the Data Entry links on the admin main menu.  Remember, you must
+                    apply draft changes before they will be visible in FlightPath."));
+  
+  
+}
 
 
 
@@ -804,6 +1119,13 @@ function admin_display_main() {
       $rtn .= "<li>" . l(t("Courses for @year", array("@year" => "$t-" . ($t+1))), "admin/courses", "de_catalog_year=$t") . "</li>";
       $rtn .= "</ul>";
     }
+        
+    if (user_has_permission("can_edit_data_entry")) {
+      $rtn .= "<b>" . t("Administrator function:") . "</b><ul>
+              <li>" . l(t("Duplicate entire year worth of data to new year"), "admin/duplicate-year") . "</li>
+                </ul>";
+    }
+    
     
     $rtn .= "</div>";
     

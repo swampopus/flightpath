@@ -704,7 +704,7 @@ function fp_build_tab_array($page) {
       <div class='tenpt hypo' style='margin-top: 4px; padding: 2px;'>
       <table border='0' cellspacing='0' cellpadding='0'>
       <td valign='top'>
-        <img src='fp_theme_location()/images/alert_lg.gif' >  
+        <img src='" . fp_theme_location() . "/images/alert_lg.gif' >  
       </td>
       <td valign='middle' class='tenpt' style='padding-left: 8px;'>
         <b>Important Notice: </b>

@@ -1348,8 +1348,16 @@ function advise_init_screen() {
 
 
     $fp->flag_outdated_substitutions();
+    
+    // We shouldn't supply the advising_term_id, so that it will load all terms available.
+    //$fp->load_advising_session_from_database(0,"",$bool_what_if,$bool_draft,0);
+      
     $fp->assign_courses_to_semesters(); // bare degree plan. not groups.
     $fp->assign_courses_to_groups();
+    
+  }
+  else {
+    
     
   }
 
@@ -1368,11 +1376,10 @@ function advise_init_screen() {
     }
   }
 
-
-  //$fp->load_advising_session_from_database(0,$advising_term_id,$bool_what_if,$bool_draft,0);
   // We shouldn't supply the advising_term_id, so that it will load all terms available.
   $fp->load_advising_session_from_database(0,"",$bool_what_if,$bool_draft,0);
 
+  
   // Once we have loaded the advising session, we should always try to load
   // from draft from then on out.
   $GLOBALS["fp_advising"]["advising_load_active"] = "";

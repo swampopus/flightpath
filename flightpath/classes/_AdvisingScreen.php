@@ -1529,7 +1529,7 @@ function draw_menu_items($menu_array) {
           			 padding: 2px; border: 1px solid maroon;'>
           			<table border='0' cellspacing='0' cellpadding='0'>
           			<td valign='top'>
-          				<img src='fp_theme_location()/images/alert_lg.gif' >	
+          				<img src='" . fp_theme_location() . "/images/alert_lg.gif' >	
           			</td>
           			<td valign='middle' class='tenpt' style='padding-left: 8px;'>
           			{$GLOBALS["fp_system_settings"]["hiding_grades_message"]}

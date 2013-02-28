@@ -661,7 +661,7 @@ class _FlightPath
 
 		}
 
-
+		
 		return $count;
 	}
 
@@ -1368,6 +1368,23 @@ class _FlightPath
 								$course->bool_advised_to_take = true;
 								$course->assigned_to_semester_num = $semester_num;
 								$course->assigned_to_group_id = $group_id;
+								
+                // Make sure we assign the hours to the group, so this
+      					// advised courses takes up a spot in the group.  Otherwise
+      					// it may be missed in later logic.
+      					if ($g = $this->degree_plan->find_group($group_id)) {
+      					  $h = $var_hours;
+      					  if ($h == 0) {
+      					    $h = $course->get_catalog_hours();
+      					    if ($h == 0) {
+      					      $h = 1;  // some problem occured. Just give it a token hour so it doesn't
+      					               // horribly break.
+      					    }
+      					  }
+      					  $g->hours_assigned += $h;      					  
+      					}
+      					
+								
 								$course->advised_hours = $var_hours;
 								$course->advised_term_id = $advised_term_id;
 								$course->db_advised_courses_id = $id;
@@ -1416,6 +1433,23 @@ class _FlightPath
 					$course->bool_advised_to_take = true;
 					$course->assigned_to_semester_num = $semester_num;
 					$course->assigned_to_group_id = $group_id;
+
+					// Make sure we assign the hours to the group, so this
+					// advised courses takes up a spot in the group.  Otherwise
+					// it may be missed in later logic.
+					if ($g = $this->degree_plan->find_group($group_id)) {
+					  $h = $var_hours;
+					  if ($h == 0) {
+					    $h = $course->get_catalog_hours();
+					    if ($h == 0) {
+					      $h = 1;  // some problem occured. Just give it a token hour so it doesn't
+					               // horribly break.
+					    }
+					  }
+					  $g->hours_assigned += $h;
+					  
+					}
+					
 					$course->advised_hours = $var_hours;
 					$course->advised_term_id = $advised_term_id;
 					$course->db_advised_courses_id = $id;

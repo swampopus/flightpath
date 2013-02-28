@@ -1,6 +1,13 @@
 FlightPath 4.x Changelog
 ========================
 
+2013-01-14
+  Changed the order in which advised courses are added to groups.  They are now
+  added FIRST instead of LAST.  This is so that an advised courses will never be "overwritten"
+  by a fulfilled course, and the fulfilled course will just go to the next group.  (There was
+  a bug).
+
+
 2012-12-17
   Modified user.module, so role headers on permissions form appear for every module.
   Otherwise, it was confusing when the list of permissions was very long.
