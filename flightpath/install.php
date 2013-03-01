@@ -337,12 +337,11 @@ $system_settings["load_course_inventory_on_login_number"] = 2000;
  
 // SecurityToken:  This is something which
 // must be the first argument passed to cron.php.  It can be any continuous
-// string of *alpha-numeric* characters.  If it is blank, then no securityToken 
-// will be required.
+// string of *alpha-numeric* characters.
 // This is a security measure to prevent unauthorized users (or web-users) from
 // running cron.php, and is REQUIRED!
 // For example, if the token is "qwss34frwquu" then to run the script you would need
-// to use:   php cron.php qwss34frwquu
+// to use:   http://url/cron.php?t=CRON_TOKEN  (use wget to access from a system cron job.)
 $system_settings["cron_security_token"] = "%CRON_SECURITY_TOKEN%";
 
 

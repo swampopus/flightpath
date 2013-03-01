@@ -615,6 +615,14 @@ function system_settings_form() {
                   
   );
   
+  $form["mark" . $m++] = array(
+    "value" => "<p><div style='font-size:0.8em;'>" . t("Your site requires a cron job in order to perform routine tasks.  This
+                        is accomplished by having your server access the following URL every so often
+                        (like once an hour):") . "<br>&nbsp; &nbsp; <i>" . $GLOBALS["fp_system_settings"]["base_url"] . "/cron.php?t=" . $GLOBALS["fp_system_settings"]["cron_security_token"] . "</i>
+                        <br>" . t("Example linux cron command:") . "&nbsp; <i>wget -O - -q -t 1 http://ABOVE_URL</i></div></p>",
+  );
+  
+  
   $form["contact_email_address"] = array(
     "type" => "textfield",
     "label" => t("Contact email address:"),

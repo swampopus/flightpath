@@ -13,6 +13,8 @@ FlightPath 4.x Changelog
   
   Modified descriptions of some form elements.
   
+  Modified system.module and install.php to better reflect how cron should be set up.
+  
   
 2013-02-28
   Fixed announcements.install so that a sample announcement is inserted by default.
