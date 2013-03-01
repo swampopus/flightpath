@@ -669,10 +669,9 @@ function system_settings_form() {
     "label" => t("Allowed student ranks (CSV):"),
     "value" => variable_get("allowed_student_ranks", ""),
     "description" => t("This is a list of which student ranks are allowed into FlightPath.
-                It should be separated by commas.  These ranks should exactly match
-                the rankCode from the human_resources:students table.
+                It should be separated by commas.
                 This also affects which students you may search for on the Advisees
-                tab. Ex: FR, SO, JR, SR"),    
+                tab. Ex: FR, SO, JR, SR"),
   );
 
   $form["extra_student_search_conditions"] = array(
@@ -680,11 +679,11 @@ function system_settings_form() {
     "label" => t("Extra student search conditions:"),
     "value" => variable_get("extra_student_search_conditions", ""),
     "description" => t("This is mysql which will get appended to end end of the WHERE clause of every query
-                    relating to search for students.  It is so you can easily add global conditions, for example,
-                    to check that the students are admitted or enrolled.  See the studentsearch.php to see
-                    its use.  If this setting is not sufficient for customizing the student search, you will
-                    need to use the hooks system to simply override the various functions there.
-                    example:  \" AND (admitted = '1' OR enrolled = '1') \""),    
+                    relating to search for students.  It is so you can easily add global conditions, 
+                    especially if you are overriding the student_search module.  For example,
+                    to check that the students are admitted or enrolled.  <b>Probably not necessary</b> if you
+                    are not overriding the student_search module.  If you are unsure what to do, leave this blank.
+                    Example:  \" AND (admitted = '1' OR enrolled = '1') \""),    
   );
     
   
@@ -695,7 +694,7 @@ function system_settings_form() {
     "description" => t("Similar to the one above it, this is a clause which will only bring up students
                     who are enrolled at the university, and taking courses.  This might be identical to the
                     one above it.  At the moment, this is only being used in the Stats module, and not
-                    for any logic in FlightPath, so you might consider it optional."),    
+                    for any logic in FlightPath, so you should consider it optional."),    
   );
 
 
@@ -713,7 +712,7 @@ function system_settings_form() {
     "label" => t("Hiding grades message:"),
     "value" => variable_get("hiding_grades_message", ""),
     "description" => t("This message will be displayed when any course on the page
-                has its boolHideGrade set to TRUE.  If you are not using
+                has its bool_hide_grade set to TRUE.  If you are not using
                 this functionality, you can leave this blank."),    
   );
 
@@ -1149,120 +1148,6 @@ function system_display_login_page() {
 
 
 
-function z__system_display_login_page($msg = "") {
-  $rtn = "";
-  
-  fp_add_css(fp_get_module_path("system") . "/css/style.css");  
-  
-  $rtn .= "
-    <div class='login-welcome'>
-    Welcome to <span class='flightpath-name'>FlightPath</span>, the electronic student
-    advising system!
-    </div>";
-
-  
-  $rtn .= "<noscript>
-            <div style='padding: 5px; background-color: red; color: white; font-size: 12pt; font-weight: bold;'>
-            FlightPath requires JavaScript to be enabled in order to
-            function correctly.  Please enable JavaScript on your browser
-            before continuing.</div>
-          </noscript>";
-  
-  $important_notice = "
-      <div class='hypo tenpt' style='padding:5px; text-align: justify;'>
-      <b>Important Notice:</b> This degree audit system is intended to assist you in determining 
-      your progress toward a degree, but is not an official transcript. 
-      Although efforts are made to ensure the accuracy of this system, you 
-      should carefully review it and report any discrepancies to your advisor. 
-      It is your responsibility to confirm the status of major requirements by 
-      consulting a departmental advisor. It is also your responsibility to seek 
-      information on all college and major requirements in the undergraduate 
-      catalog to which you are assigned. Final confirmation of degree requirements is subject to approval 
-      by the major department and Dean.
-      </div>
-  ";
-  
-  $w1 = 300;
-  if (fp_screen_is_mobile()) $w1 = "90%";
- /* 
-  $login_box = "
-      <table border='0' width='$w1' align='center' class='blueBorder' cellpadding='0' cellspacing='0'>
-      <tr>
-       <td class='blueTitle' align='center' height='20' colspan='2'>
-       <span class='tenpt' style='color: white' ><b>Please login below...</b></span>
-       </td>
-      </tr>
-      <tr>
-      <td colspan=2> &nbsp;
-      </td>
-      </tr>
-      <tr>
-          <td align=center valign=top width='35%'>
-            
-            <span style='color: #660000; '><b>USER:</b></span></td><td valign=top><input type=text name='user_id' id='cwid_box'></td>
-          </td>
-        </tr>
-        <tr>
-          <td align=center valign=top>
-            <span style='color: #660000; '><b>PASS:</b></span></td>
-          <td valign=top><input type='password' name='password'>
-          <!-- <br><span class='tenpt' ><a href='javascript: popupHelpWindow(\"help.php?i={$GLOBALS["fp_system_settings"]["login_help_page_id"]}\");' style='text-decoration:none;'>need help logging-in?</a></span> -->
-            </td>
-        </tr>
-        <tr>
-          <td align=center>
-          </td>
-          <td align=left>
-        <br>     
-        <input type='hidden' name='scrollTop' id='scrollTop'>   
-              <input style='font-size: 12pt; color: #660000;' NAME='submit_fun' type='submit' value='Login' onClick='showUpdate(true);submitForm(false);'>
-            
-            
-            <BR><br>
-            
-  
-          </td>
-        </tr>
-      </table>
-   ";
-  */
-  
-  $login_box = fp_render_curved_line("Please login below...");
-  $login_box .= fp_render_form("system_login_form");
-  
-/*  
-  $rtn .= "
-      <form action='" . base_path() . "/perform-login' method='POST' id='mainform' onSubmit='showUpdate(true);'>  
-    ";
-  */
- 
-  if (fp_screen_is_mobile()) {
-    // the user is viewing this on a mobile device, so make it look
-    // a bit nicer.
-    //$pC .= $screen->draw_c_fieldset($important_notice, "View important notice", true);
-    $rtn .= $login_box; 
-  }
-  else {
-    // This is NOT mobile, this is a regular desktop browser.
-    $rtn .= "
-      <table border='0'>
-      <tr>
-       <td valign='top' width='40%'>
-        $important_notice
-       </td>
-      <td valign='top' style='padding-left: 20px;'>
-        $login_box      
-  
-       </td>
-      </tr>
-     </table>
-     ";
-  }
-  
-  
-  return $rtn;
-}
-
 
 /**
  * This draws the form which facilitates logins.
@@ -1381,38 +1266,6 @@ function system_login_form_submit($form, &$form_state) {
   fp_goto("<front>");
   
 }
-
-
-/**
- * Impliments hook_user_login.
- * 
- * The main thing I want to do here is populate the rolls and permissions
- * arrays in the $account object. 
- */
-function z__system_user_login(&$account) {
-
- $res = db_query("SELECT * FROM user_roles a,                                
-                                roles c
-                  WHERE a.user_id = '?'
-                  AND a.rid = c.rid", $account->id);
-  while($cur = db_fetch_array($res)) {
-    $account->roles[$cur["rid"]] = $cur["name"];
-  }
-      
-  // Let's make sure we get the authenticated user role as well, #2.
-  $account->roles[2] = "authenticated user";
-        
-  // Go through each role and add in the permissions for each role.
-  foreach ($account->roles as $rid => $val) {
-    $perms = fp_get_permissions_for_role($rid);
-    // Merge the arrays while KEEPING the original's key.  So don't
-    // use array_merge, use the + operator.
-    $account->permissions = $account->permissions + $perms;
-  }
-            
-}
-
-
 
 
 

@@ -258,9 +258,10 @@ function student_search_display_search() {
     {
       $fn = trim($temp[0]);
       $ln = trim($temp[1]);
-      $search_action = " (l_name LIKE '%$ln%' 
+      $search_action = " AND (l_name LIKE '%$ln%' 
                          AND f_name LIKE '%$fn%') 
                        ";
+      
     }
 
     $temp = explode("=",$search_for);

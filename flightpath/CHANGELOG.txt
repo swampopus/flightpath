@@ -1,6 +1,23 @@
 FlightPath 4.x Changelog
 ========================
 
+2013-03-01
+  Tweaked TinyMCE module to give more options.
+  
+  Fixed bug in student_search.module where searching for both first
+  and last name caused a mysql error.
+  
+  Added TinyMCE module to core, so it is now built in to FlightPath by default.
+  
+  Updated installation to install TinyMCE by default.
+  
+  Modified descriptions of some form elements.
+  
+  
+2013-02-28
+  Fixed announcements.install so that a sample announcement is inserted by default.
+    
+
 2013-01-14
   Changed the order in which advised courses are added to groups.  They are now
   added FIRST instead of LAST.  This is so that an advised courses will never be "overwritten"
