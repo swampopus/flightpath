@@ -1,0 +1,17 @@
+<?php
+/**
+ * @file
+ * The install file for TinyMCE
+ */
+
+
+/**
+ * Implementation of hook_install
+ *
+ */
+function tinymce_install() {
+  
+  // We want to have some default settings when we install.
+  variable_set("tinymce_include_on_paths", "comments\ncontent/*");
+  
+}
