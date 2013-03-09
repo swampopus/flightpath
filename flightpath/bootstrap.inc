@@ -48,7 +48,7 @@ if (!isset($skip_flightpath_modules) || $skip_flightpath_modules != TRUE) {
 }
 
 // Constants
-define('FLIGHTPATH_VERSION', '4.0-rc3');
+define('FLIGHTPATH_VERSION', '%FP_VERSION%');  // will be replaced automatically by getflightpath.com.
 
 define ('WATCHDOG_NOTICE', 5);
 define ('WATCHDOG_ALERT', 1);

@@ -29,10 +29,12 @@ function advise_display_history() {
     $advising_session_id_array = unserialize($_REQUEST["adv_id_array_serialized"]);
  
     foreach($advising_session_id_array as $term_id=>$value) {
+      $term_id = (string) $term_id;  // Make sure term_id is a standard string
       $aid = $advising_session_id_array[$term_id];
       if ($aid != "")
-      {
+      {        
         $term_name = get_term_description($term_id);
+        
         $click_links .= "<li>
                 <a href='javascript: popupPrintWindow(\"" . base_path() . "/advise/popup-display-summary&advising_session_id=$aid\");'>
                 <img src='" . fp_theme_location() . "/images/popup.gif' border='0'>
@@ -128,7 +130,6 @@ function advise_display_history() {
 
 
     $on_click = "popupPrintWindow(\"" . base_path() . "/advise/popup-display-summary&advising_session_id=$db_advising_session_id\");";
-
 
     $term = get_term_description($db_term_id);
 

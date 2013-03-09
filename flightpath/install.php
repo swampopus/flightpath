@@ -573,7 +573,14 @@ function install_display_lang_selection() {
           Please begin by selecting an installation language.
           <ul>
             <li><a href='install.php?lang=en'>English</li>
-          </ul>";
+          </ul>
+          <br><br><br>
+          <b>Please note:</b> By proceeding with this installation, you affirm that you
+          have read, understand, and agree with the LICENSE.txt file and the COPYRIGHT.txt file
+          included with this software package.
+          Specifically, that you accept and agree with the GNU GPL license, and with the statement
+          that this software is provided to you without warranty.  If you have any questions,
+          please visit http://getflightpath.com/contact before proceeding with installation.";
     
   // Display the screen
   $page_content = $pC;  

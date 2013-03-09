@@ -1,6 +1,17 @@
 FlightPath 4.x Changelog
 ========================
 
+2013-03-08
+  Fixed bug in advising history, where the term_id displayed for a recent advising
+  popup might not have been correct.
+  
+  Modified bootstrap.inc so that it can be easily manipulated by getflightpath.com's upload
+  script.
+  
+  Added an extra mysql_real_escape_string to _Databasehandler's db_query() command, to make
+  sure that slash's (\) get escaped properly.
+
+
 2013-03-01
   Tweaked TinyMCE module to give more options.
   

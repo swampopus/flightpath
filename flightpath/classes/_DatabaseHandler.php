@@ -293,11 +293,10 @@ class _DatabaseHandler
       $args = $args[0];
     }
 
-
     // The query may contain an escaped ?, meaning "??", so I will replace that with something
     // else first, then change it back afterwards.
     $sql_query = str_replace("??", "~ESCAPED_Q_MARK~", $sql_query);
-    
+        
     // If $c (number of replacements performed) does not match the number of replacements
     // specified, warn the user.
     if (substr_count($sql_query, "?") != count($args)) {
@@ -313,7 +312,14 @@ class _DatabaseHandler
 	      if (strpos($replacement, "?") !== 0) {
 	        $replacement = str_replace("?", "~ESCAPED_Q_MARK~", $replacement);
         }
+        
+	      // Because mysql_real_escape_string will allow \' to pass through, I am going to
+        // first use mysql_real_escape_string on all slashes.
+        $replacement = str_replace("\\" , mysql_real_escape_string("\\"), $replacement);
+        
+        // Okay, perform the replacement
 	      $replacement = mysql_real_escape_string($replacement);
+	      
 	      $sql_query = preg_replace("/\?/", $replacement, $sql_query, 1);	    
 	    }
 	    

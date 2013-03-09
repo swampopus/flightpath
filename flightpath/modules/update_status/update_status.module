@@ -23,9 +23,10 @@ function update_status_cron() {
   $last_run = variable_get("update_status_last_run", 0);
   if ($last_run > $check_if_older_than) {
     // We have run this recently, harmlessly return
+    // Comment out to have this run every time (good for development)
     return;
   } 
-     
+     fpm("running update cron");
   // If we are here, it means we should run our check.
   // Let's assemble our URL which should be fairly long.
   $url = update_status_get_install_status_url();
@@ -53,9 +54,11 @@ function update_status_cron() {
   variable_set("update_status_need_updates_modules", $res_array["modules"]);
   variable_set("update_status_need_updates_release_types", $res_array["release_types"]);
   
+
   
   
-  // TODO:  variable_set("update_status_last_run", time());
+    
+  variable_set("update_status_last_run", time());
   
   
 }
