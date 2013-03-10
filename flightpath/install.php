@@ -9,8 +9,8 @@
 
 // Set the PHP error reporting level for FlightPath.  In this case,
 // only show us errors and warnings. (Hide "notice" and "strict" messages)
-error_reporting(E_ERROR | E_WARNING);
- 
+error_reporting(E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_WARNING);
+
 session_start();
 
 header("Cache-control: private");
@@ -75,6 +75,9 @@ die;
  */
 function install_perform_install() {
   global $user;
+  if (!isset($user)) {
+    $user = new stdClass();
+  }
   $user->id = 1;  // set to admin during install
   
   $db_name = trim($_POST["db_name"]);
@@ -247,7 +250,7 @@ function install_get_settings_file_template() {
  
 // Set the PHP error reporting level for FlightPath.  In this case,
 // only show us errors and warnings. (Hide "notice" and "strict" messages)
-error_reporting(E_ERROR | E_WARNING);
+error_reporting(E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_WARNING);
  
 // Set the PHP max time limit which any one page is allowed to take up while
 // running.  The default is 30 seconds.  Change this value (or remove it)
@@ -572,7 +575,7 @@ function install_display_lang_selection() {
             <h3 class='title'>Select language</h3>
           Please begin by selecting an installation language.
           <ul>
-            <li><a href='install.php?lang=en'>English</li>
+            <li><a href='install.php?lang=en'>English</a></li>
           </ul>
           <br><br><br>
           <b>Please note:</b> By proceeding with this installation, you affirm that you

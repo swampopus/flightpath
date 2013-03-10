@@ -40,6 +40,45 @@ function hook_form_alter(&$form, $form_id) {
  
  
 /**
+ * Reports status information which each module is aware of, visible on admin/config/status.
+ * 
+ * This allows modules to let the user know about requirements which are not being met, or
+ * simply to let them know that someting is working successfully.
+ * 
+ * For example, you may want to let the user know that a nightly job failed to run the night before.
+ * 
+ * @return array()
+ *  - severity: "normal", "warning", and "alert" are the choices.
+ *  - status: A short message.
+ *
+ */ 
+function hook_status() {
+  // Example from system.module, reporting on if Cron has run recently:
+  $rtn = array();
+  $rtn["severity"] = "normal";
+  // Check on the last time cron was run; make sure it's working properly.
+  $last_run = variable_get("cron_last_run", 0);
+  
+  if ($last_run < strtotime("-2 DAY")) {
+    $rtn["severity"] = "alert";
+    $rtn["status"] .= t("Cron hasn't run in over 2 days.  For your installation of FlightPath
+               to function properly, cron.php must be accessed routinely. At least once per day is recommended.");    
+  }
+  else {
+    $rtn["status"] .= t("Cron was last run on %date", array("%date" => format_date($last_run)));
+  } 
+  
+  $rtn["status"] .= "<p style='font-size: 0.8em;'>" . t("Your site's cron URL is:");
+  $rtn["status"] .= "<br>&nbsp; &nbsp; <i>" . $GLOBALS["fp_system_settings"]["base_url"] . "/cron.php?t=" . $GLOBALS["fp_system_settings"]["cron_security_token"] . "</i>
+                        <br>" . t("Example linux cron command:") . "&nbsp; <i>wget -O - -q -t 1 http://ABOVE_URL</i>";  
+  $rtn["status"] .= "</p>";
+  
+  
+  return $rtn;
+} 
+ 
+ 
+/**
  * Validates form submissions from the Form API
  * 
  * This function can be named anything you want (or can be considered optional).
@@ -61,6 +100,17 @@ function hook_validate($form, &$form_state) {
   }
 }
 
+
+/**
+ * This hook is called every time the system cron is run.
+ * 
+ * Modules should place code here which is meant to be run on a schedule.
+ */
+function hook_cron() {
+  // Example:  check for students who have dropped, and email their advisors.
+}
+
+
  
 /**
  * Handle submissions from the Form API
@@ -76,6 +126,90 @@ function hook_submit($form, &$form_state) {
   $values = $form_state["values"];
   db_query("INSERT INTO example (f_name) ('?') ", $values["name"]);
 }
+
+ 
+/**
+ * This hook will be executed the first time a module is enabled in the system.
+ * 
+ * It is expected to go in a PHP file named [module].install.  Ex:  system.install
+ * 
+ * @see hook_enable()
+ * @see hook_disable()
+ * @see hook_update($old_schema, $new_schema)
+ * @see hook_uninstall()
+ */
+function hook_install() {
+  // Perform installation functions.
+  db_query("CREATE TABLE ...... ");
+} 
+ 
+
+/**
+ * This hook will be executed when a module is enabled in the system.  It will be
+ * executed AFTER hook_install.
+ * 
+ * It is expected to go in a PHP file named [module].install.  Ex:  system.install
+ * 
+ * @see hook_install()
+ * @see hook_disable()
+ * @see hook_update($old_schema, $new_schema)
+ * @see hook_uninstall()
+ */ 
+function hook_enable() {
+  fp_add_message("Don't forget to go to settings...");
+} 
+ 
+
+/**
+ * This hook will be executed when a module is disabled in the system.
+ * 
+ * It is expected to go in a PHP file named [module].install.  Ex:  system.install
+ * 
+ * @see hook_install()
+ * @see hook_enable()
+ * @see hook_update($old_schema, $new_schema)
+ * @see hook_uninstall()
+ */ 
+function hook_disable() {
+  fp_add_message("Sorry to see you go!");  
+} 
+ 
+
+/**
+ * This hook will be executed when a module is "uninstalled" in the system.  Once 
+ * a module is disabled, an "uninstall" link will appear.
+ * 
+ * It is expected to go in a PHP file named [module].install.  Ex:  system.install
+ * 
+ * @see hook_install()
+ * @see hook_enable()
+ * @see hook_update($old_schema, $new_schema)
+ * @see hook_disable()
+ */ 
+function hook_uninstall() {
+  db_query("DROP TABLE mycustomtable ... ");  
+} 
+
+
+/**
+ * This hook will be executed when a module is "updated" in the system.  If the system
+ * sees that the schema version defined in the .info file is different than the one
+ * in the database for that module, an update link will appear.
+ * 
+ * It is expected to go in a PHP file named [module].install.  Ex:  system.install
+ * 
+ * @see hook_install()
+ * @see hook_enable()
+ * @see hook_uninstall()
+ * @see hook_disable()
+ */ 
+function hook_update($old_schema, $new_schema) {
+  if ($old_schema < 5) {
+    db_query("ALTER TABLE ...... ");
+  }  
+} 
+
+
 
  
 
@@ -115,8 +249,502 @@ function hook_clear_cache() {
   db_query("DELETE FROM mymodule_cache_tables WHERE 1");
 }
  
+
+/**
+ * Allows each module to execute code when the module is first loaded.
+ * 
+ * Typically, this means that we will execute code when the page is first loaded.
+ * Also useful for including javascript or CSS on the page, but only under certain
+ * conditions (like who the user is, or what permissions they have)
+ */
+function hook_init() {
+  // Perform actions when page is loaded...
+  if (user_has_access("some_permission")) {
+    $GLOBALS["some_variable"] = TRUE;    
+  }
+}
  
  
+/**
+ * Perform actions when the user logs in successfully.
+ * 
+ * Notice that $account is passed by reference. You may make whatever changes
+ * you wish to this object.
+ */
+function hook_user_login(&$account) {
+  if ($account->uid = 9) {
+    $account->this_is_jeff = TRUE;
+  }
+}
+ 
+
+
+
+/**
+ * This hook defines available permissions for a module.
+ * These perms are used with hook_menu() and the function user_has_permission()
+ * 
+ * They are defined in the form of an associative array.
+ * 
+ * Return array should look like this:
+ * $rtn["machine_name_of_perm"] = array(
+ *   "title" => "Human readable title for perm",
+ *   "description" => "Optional longer description of what perm allows.",
+ * ); 
+ * 
+ * @return array
+ * 
+ * @see hook_menu()
+ * @see user_has_permission()
+ * 
+ */
+function hook_perm() {
+  // An example from system.module:
+  
+  $perms = array (
+    "access_logged_in_content" => array(
+      "title" => t("Access logged-in content"),
+      "description" => t("This should be given to all authenticated users.  It simply means
+                          the user is allowed to view the logged-in area of FlightPath."),
+    ),  
+    
+    "administer_modules" => array(
+      "title" => t("Administer modules"),
+      "description" => t("This will allow a user to install, enable, disable, and uninstall modules."),
+    ),    
+    
+    "run_cron" => array(
+      "title" => t("Run Cron"),
+      "description" => t("The user may run hook_cron functions at will. Causes a new menu link to appear
+                          on the admin page."),
+    ),    
+        
+    "de_can_administer_system_settings" => array(
+      "title" => t("Can administer system settings"),
+      "description" => t("This allows the user to edit any of the FlightPath
+                        system settings."),
+    ),
+    
+    "view_fpm_debug" => array(
+      "title" => t("View debug output from the fpm() function"),
+      "description" => t("The user may view debug output from the fpm() function.
+                        Useful for developers."),
+    ),                      
+       
+  );
+
+  return $perms;
+}
+
+
+
+/**
+ * Allows modules to specify valid URLs in FlightPath, and define what function to call
+ * when the user visits that URL.
+ * 
+ * This function should return an array containing everything FP needs to correctly set up
+ * the menu item.
+ *  
+ * First, the index of the array should be the URL itself.
+ * Ex: $items["my/url"] = array(
+ *   ...
+ * );
+ * 
+ * The URL is allowed to contain wildcards (%).
+ * Ex:
+ * $items["content/%/edit"] = array(...);
+ * 
+ * The wildcard is in position "1", since the URL pieces begin with zero ("0").
+ * 
+ * Here are what the inner parts of the array mean:
+ *  - title : The title of the page or menu item.  Should not be wrapped in t() function.
+ *  - page_callback: A string which defines the function to call when this URL is accessed.
+ *  - page_arguments: An optional array of arguments to pass to the callback function.  May contain numerican references to wildcards in the URL.
+ *  - access_callback: A string which defines a function to call to determine if the user may access this URL.  
+ *    Can be set to TRUE if this URL is open to anyone.  May be omitted if you simply want to test if the user has a particular
+ *    permission, by only setting access_arguments.
+ *  - access_arguments: An array containing the arguments to pass to the access_callback function.  If the access_callback
+ *    function is omitted, it is assumed to be "user_has_permission", in which case you may simply specify
+ *    an array of permissions here. May contain numerican references to wildcards in the URL.
+ *  - type: A constant value describing the type of menu item it is.  Examples are: 
+ *    - MENU_TYPE_NORMAL_ITEM - A standard menu item.  Will output as a link if the URL conforms to certain requirements.
+ *    - MENU_TYPE_CALLBACK - A menu item which will not display itself on any blocks.
+ *    - MENU_TYPE_TAB - A menu item which will output the page it draws with a tab at the top, or part of a tab family.
+ *    - MENU_TYPE_SUB_TAB - This will output the page as a "sub tab" under the main tab.  Ex: the student search tab's subtabs, or
+ *      the View tab's Display by Year and Display By Type sub tabs.
+ *  - tab_family: If this menu item is a tab, specifying a machine name for the tab family will group all other tabs
+ *    in that family together, and draw the other tabs in that family at the top of the screen.
+ *  - tab_parent: The *path* of the parent tab for this menu item.  Will cause the parent tab's name to be displayed
+ *    as a tab at the top of the page.  Ex: "admin-tools/admin"
+ *  - weight: Optional number, for when menu items are being displayed in a block.  Smaller weights appear first.
+ *  - file: Path to a file that this menu item's callback is located in.
+ *  - page_settings: This is an optional array which allows for more detailed control over how the menu item and the page
+ *    it draws will look.  Ex:  "page_settings" => array( //....//);  See below:
+ *    - page_has_search: TRUE or FALSE, whether or not the search box will be drawn at the top of the screen.  This is the
+ *      search box which searches for students.
+ *    - page_show_title: TRUE if the page should display the title at the top of the content region.
+ *    - page_banner_is_link: TRUE or FALSE.  Does the banner at the top of the screen link back to the Main tab.  Not implemented right now.
+ *    - page_hide_report_error: TRUE or FALSE.  Should the "Contact the FlightPath Production Team" link be shown at the bottom of the screen.
+ *    - page_is_popup: TRUE or FALSE.  Whether or not the page is going to be displayed in a popup.  Will remove the banner and other
+ *      elements which might not look good in a popup window.
+ *    - display_greeting: TRUE or FALSE. Should the page have the greeting text at the top? Ex: see the Main tab.
+ *    - display_currently_advising: TRUE or FALSE. Should the page display the "Currently Advising" box at the top of the page?
+ *    - screen_mode: If set to "not_advising" while display_currently_advising is set to TRUE, it will not display the options
+ *      to change degree options or advising terms.
+ *    - bool_print: Set to TRUE if this page is meant to be printable (it is formatted to print easily).
+ *    - target: The anchor target of this menu item (if it is drawn in a block). Ex: "_blank"
+ *    - menu_icon: A string which points to an icon to display with this link, if it is being displayed in a block.
+ *    - menu_links: An array of links.  This is an array of parameters which would fit very will into the l() function.
+ *      The links will appear as simple links at the top of the page.  Will be filtered through hook_menu_handle_replacement_pattern().
+ *      Ex:  "menu_links" => array(0 => array("text"=>"link", "path"=>"admin/tools", "query"=>"name=bob"))
+ *      - 0..n
+ *        - text: The text of the link
+ *        - path: The internal path of the link. Ex: "admin-tools/admin"
+ *        - query: Optional query to add to the end of the URL. Ex: "de_catalog_year=%DE_CATALOG_YEAR%"
+ *          Will be filtered through hook_menu_handle_replacement_pattern() 
+ *  
+ * 
+ * See the examples below for demonstrations of typical menu items.
+ * 
+ * @return array 
+ * 
+ * @see hook_perm()
+ * @see hook_menu_handle_replacement_pattern()
+ * 
+ */
+function hook_menu() {
+  // Examples from various modules:
+  $items = array();
+  
+  $items["main"] = array(
+    "title" => "Main",
+    "page_callback" => "system_display_main_page",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "system",
+    "weight" => 10,
+    "page_settings" => array(
+      "display_greeting" => TRUE,
+      "display_currently_advising" => TRUE,
+      "screen_mode" => "not_advising",
+      "page_has_search" => TRUE,
+    ),
+  );
+  
+  $items["login"] = array(
+    "title" => "Login",
+    "page_callback" => "system_display_login_page",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );
+
+ $items["admin-tools/clear-cache"] = array(
+    "title" => "Clear all cache",
+    "page_callback" => "system_perform_clear_cache",
+    "access_arguments" => array("administer_modules"),
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );  
+
+
+  $items["admin/db-updates"] = array(
+    "title" => "Run DB updates?",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_confirm_db_updates_form"),
+    "access_arguments" => array("administer_modules"),
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );  
+     
+  
+  $items["admin/config/system-settings"] = array(
+    "title" => "System settings",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_settings_form", "system_settings"),
+    "access_arguments" => array("de_can_administer_system_settings"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_icon" => fp_theme_location() . "/images/toolbox.gif",
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  );
+  
+  $items["admin-tools/admin"] = array(
+     "title" => "FlightPath Admin Console",
+     "page_callback" => "admin_display_main",
+     "access_arguments" => array("can_access_admin"),
+     "tab_family" => "admin",
+     "page_settings" => array(
+       "page_has_search" => FALSE,
+       "page_banner_is_link" => TRUE,
+       "page_hide_report_error" => TRUE,
+       "target" => "_blank",        
+     ),     
+     "type" => MENU_TYPE_TAB,
+  );  
+  
+  $items["admin/config/modules"] = array(
+    "title" => "Modules",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_modules_form"),
+    "access_arguments" => array("administer_modules"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  );
+
+
+ $items["view/print"] = array(
+    "title" => "View",
+    "page_callback" => "advise_display_view",
+    "page_arguments" => array("view"),
+    "access_callback" => TRUE,  
+    "page_settings" => array (
+      "display_currently_advising" => TRUE,
+      "bool_print" => TRUE,
+      "screen_mode" => "not_advising",
+    ),    
+    "type" => MENU_TYPE_CALLBACK,
+  );
+  
+  
+  
+  $items["admin/config/clear-menu-cache"] = array(
+    "title" => "Clear menu cache",
+    "page_callback" => "system_perform_clear_menu_cache",
+    "access_arguments" => array("administer_modules"),
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );  
+  
+  $items["system-handle-form-submit"] = array(
+    "page_callback" => "system_handle_form_submit",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_CALLBACK,
+  );  
+    
+  $items["logout"] = array(
+    "title" => "Logout",
+    "page_callback" => "system_handle_logout",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_CALLBACK,
+  );
+  
+         
+
+  $items["popup-report-contact"] = array(
+    "title" => "Report/Contact",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_popup_report_contact_form"),
+    "access_callback" => TRUE,
+    "page_settings" => array(
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),   
+    "type" => MENU_TYPE_CALLBACK,
+  );              
+           
+
+  $items["popup-contact-form/thank-you"] = array(
+    "title" => "Report/Contact",
+    "page_callback" => "system_popup_report_contact_thank_you",    
+    "access_callback" => TRUE,
+    "page_settings" => array(
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),   
+    "type" => MENU_TYPE_CALLBACK,
+  );                         
+                      
+  $items["admin/degrees/add-degree"] = array(
+    "title" => "Add Degree",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("admin_add_degree_form"),
+    "access_arguments" => array("can_edit_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to Degrees list",
+          "path" => "admin/degrees",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),   
+    "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin/degrees",    
+  );     
+
+  $items["admin/config/content"] = array(
+    "title" => "Content",
+    "page_callback" => "content_display_content_admin_list",    
+    "access_arguments" => array("admin_content"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_show_title" => TRUE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(          
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "content_list",
+  );     
+         
+  $items["content/%"] = array(
+    "page_callback" => "content_view_content",    
+    "page_arguments" => array(1),
+    "access_callback" => "content_user_access",
+    "access_arguments" => array("view_cid", 1),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_show_title" => TRUE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(          
+          0 => array(
+            "text" => "Edit this content",
+            "path" => "content/%CONTENT_CID%/edit",
+            "query" => "",
+          ),
+        ),      
+    ),
+    "type" => MENU_TYPE_TAB,
+    "tab_parent" => "admin/config/content",      
+  );         
+               
+  $items["content/%/edit"] = array(
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("content_edit_content_form", "", "", 1),
+    "access_callback" => "content_user_access",
+    "access_arguments" => array("edit_cid", 1),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(          
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to content list",
+          "path" => "admin/config/content",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),          
+      ),
+    ),
+    "type" => MENU_TYPE_TAB,
+    "tab_parent" => "admin/config/content",      
+  );
+             
+  return $items;
+}
+
+
+
+
+
+/**
+ * This hook is called by the menu system.  It allows each module
+ * the change to replace string patterns in its menu items (defined in hook_menu). 
+ * 
+ * @see hook_menu()
+ */
+function hook_menu_handle_replacement_pattern($str) {
+  
+  /*
+   * This example, from admin.module, will replace the pattern %DE_CATALOG_YEAR%
+   * with the actual current catalog year in the system.
+   * 
+   * An example menu item which uses this replacement pattern would be this:
+   * $items["admin/config/urgent-message"] = array(
+   *   "title" => "Edit urgent message",
+   *   "page_callback" => "fp_render_form",
+   *   "page_arguments" => array("admin_urgent_message_form", "system_settings"),
+   *   "access_arguments" => array("can_edit_urgent_message"),
+   *   "page_settings" => array(
+   *     "page_has_search" => FALSE,
+   *     "page_banner_is_link" => TRUE,
+   *     "page_hide_report_error" => TRUE,
+   *     "menu_links" => array(         
+   *       0 => array(
+   *         "text" => "Back to main menu",
+   *         "path" => "admin-tools/admin",
+   *        "query" => "de_catalog_year=%DE_CATALOG_YEAR%",  // RIGHT HERE!
+   *       ),
+   *     ),
+   *  ),    
+   *   "type" => MENU_TYPE_NORMAL_ITEM,
+   *   "tab_parent" => "admin-tools/admin",    
+   * );     
+   * 
+   */
+  
+  if (strpos($str, "%DE_CATALOG_YEAR%") !== 0) {
+    // It contains this replacement pattern!
+    $str = str_replace("%DE_CATALOG_YEAR%", admin_get_de_catalog_year(), $str);
+  }
+  
+  return $str;
+}
+ 
+
+/**
+ * This hook allows modules to perform extra functions just after an advising
+ * session is saved by the system.
+ * 
+ * The main advising form (on the View and What If tabs) are currently _not_ defined
+ * through the system's form API.  Therefore, a simple hook_submit wouldn't be possible.
+ * 
+ * This hook was created to bridge that gap, until the advising form can be brought into
+ * the form API (possibly by 5.x)
+ * 
+ * @param $adv_id_array
+ *   Since this hook is called immediately after submitting the advising session,
+ *   this array will contain the database ID's to the rows added to the advising_sessions table.
+ * 
+ */
+function hook_save_advising_session($adv_id_array) {
+  foreach ($adv_id_array as $id) {
+    // Perform extra actions on those advising sessions.
+  }
+  // Example functions:
+  // Email student a copy of what was just advised for them to take.
+  // Maybe lift an advising flag in the mainframe system?
+} 
  
  
  

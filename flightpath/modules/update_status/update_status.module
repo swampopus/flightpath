@@ -26,7 +26,7 @@ function update_status_cron() {
     // Comment out to have this run every time (good for development)
     return;
   } 
-     fpm("running update cron");
+
   // If we are here, it means we should run our check.
   // Let's assemble our URL which should be fairly long.
   $url = update_status_get_install_status_url();
@@ -54,14 +54,64 @@ function update_status_cron() {
   variable_set("update_status_need_updates_modules", $res_array["modules"]);
   variable_set("update_status_need_updates_release_types", $res_array["release_types"]);
   
-
-  
-  
     
   variable_set("update_status_last_run", time());
   
   
 }
+
+
+/**
+ * Implementation of hook_status.
+ */
+function update_status_status() {
+  $rtn = array();
+  $status = "";
+  // Check the data we have for modules, to see if any of them could use an update.
+  $updates = variable_get("update_status_need_updates_modules", array());
+  $releases = variable_get("update_status_need_updates_release_types", array()); 
+  
+  $release_desc = array(
+    "other" => "Other",
+    "bug_features" => "Bug fixes & new features",
+    "new_features" => "New features",
+    "bug_fixes" => "Bug fixes",
+    "security" => "Security - High Priority!",
+  );
+  
+  if (count($updates)) {
+    $status .= t("The following packages have available updates:");
+    $status .= "<table border='0' cellpadding='3' width='100%' class='update-status-status-table'>
+                  <tr>
+                    <th>" . t("Package") . "</th>
+                    <th>" . t("Version") . "</th>
+                    <th>" . t("Release type") . "</th>
+                  </tr>";
+    foreach ($updates as $module => $version) {
+      $release_type = fp_get_machine_readable($releases[$module]);
+      
+      $status .= "<tr class='release-row release-row-$release_type'>
+                  <td valign='top' class='update-status-status-module'>
+                    <a href='http://getflightpath.com/project/$module' target='_blank'>$module</a></td>
+                  <td valign='top' class='update-status-status-version'>$version</td>
+                  <td valign='top' class='update-status-status-type'>{$release_desc[$releases[$module]]}</td>
+                  
+                  </tr>";
+    }
+    $status .= "</table>";  
+  }
+  else {
+    $status .= t("All modules are up to date.");
+  }
+  
+  $status .= "<p>" . t("Last check on %date.", array("%date" => format_date(variable_get("update_status_last_run")))) . "</p>";
+  
+  
+  $rtn["status"] = $status;
+  
+  return $rtn;
+}
+
 
 /**
  * Returns a URL containing install statuses for all installed modules on this site.
@@ -74,10 +124,12 @@ function update_status_get_install_status_url() {
   
   $rtn .= "http://$domain/check-update-status?pa=cv&st=" . urlencode(fp_token());
   $rtn .= "&u=" . urlencode($GLOBALS["fp_system_settings"]["base_url"]);
+  $rtn .= "&c=" . FLIGHTPATH_CORE;
   
+  // These core modules do not have version numbers, so we will skip them.
   $ignore_core_modules = array(
-    "admin", "advise", "announcements", "blank_degrees", "blocks", "comments", "course_search", "stats",
-    "student_search", "update_status",
+    "admin", "advise", "announcements", "blank_degrees", "blocks", "comments", "content", "course_search", "stats",
+    "student_search", "system", "update_status", "tinymce", "user",
   );
   
   foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $details) {
@@ -85,8 +137,12 @@ function update_status_get_install_status_url() {
     $rtn .= "&" . "modules[" . urlencode($module) . "]=" . urlencode($details["version"]);
   }
    
-     $rtn .= "&" . "modules[" . urlencode("testing_here") . "]=" . urlencode("1.2.3-beta1");
+  // Add FP version string.
+  $rtn .= "&" . "modules[" . urlencode("flightpath") . "]=" . urlencode(FLIGHTPATH_VERSION);
   
+  // Testing
+  $rtn .= "&" . "modules[" . urlencode("testing_here") . "]=" . urlencode("1.2.3-beta1");
+
   return $rtn;
 }
 

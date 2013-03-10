@@ -1,0 +1,12 @@
+/**
+ *   @file
+ * Custom CSS for the update_status module.
+ */
+
+.update-status-status-table .release-row-security {
+  background-color: pink;
+}
+
+.update-status-status-table .release-row-security .update-status-status-type {
+  font-weight: bold;
+}

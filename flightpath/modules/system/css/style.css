@@ -95,3 +95,11 @@
   color: #666; 
 }
 
+.status-table .module-status-alert {
+  background-color: pink;
+}
+
+.status-table .module-status-warning {
+  background-color: orange;
+}
+

@@ -17,7 +17,7 @@ function system_perm() {
   
   $perms = array (
     "access_logged_in_content" => array(
-      "title" => "Access logged-in content",
+      "title" => t("Access logged-in content"),
       "description" => t("This should be given to all authenticated users.  It simply means
                           the user is allowed to view the logged-in area of FlightPath."),
     ),  
@@ -43,7 +43,13 @@ function system_perm() {
       "title" => t("View debug output from the fpm() function"),
       "description" => t("The user may view debug output from the fpm() function.
                         Useful for developers."),
-    ),                      
+    ),
+    
+    "view_system_status" => array(
+      "title" => t("View system status"),
+      "description" => t("The user may view the update status and other requirements of the system."),
+    ),
+                            
        
   );
 
@@ -175,6 +181,24 @@ function system_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
   );  
 
+  $items["admin/config/status"] = array(
+    "title" => "System status",
+    "page_callback" => "system_display_status_page",
+    "access_arguments" => array("view_system_status"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),      
+    ),        
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+    "weight" => 50,
+  );  
   
 
   $items["admin/db-updates"] = array(
@@ -1068,8 +1092,85 @@ function system_perform_clear_cache() {
 function system_perform_run_cron() {
   invoke_hook("cron");
   fp_add_message(t("Cron run completed successfully."));
+  variable_set("cron_last_run", time());
   fp_goto("admin-tools/admin");
 }
+
+/**
+ * This page displayes the results of each module's hook_status.
+ * 
+ */
+function system_display_status_page() {
+  $rtn = "";
+  
+  fp_add_css(fp_get_module_path("system") . "/css/style.css");
+  
+  $status_array = invoke_hook("status");  // get everyone's hook_status.
+  
+  $rtn .= "<p>" . t("This page will show you important status messages
+                     about FlightPath.  For example, what modules (if any) have
+                     an update available.") . "</p>";
+
+  $rtn .= "<table width='100%' border='1' class='status-table' cellpadding='4'>
+            <tr class='header-row'>
+              <th width='10%' class='package-header'>" . t("Package") . "</th>
+              <th>" . t("Status") . "</th>
+            </tr>";
+  foreach ($status_array as $module => $details) {
+    $pol = ($pol == "even") ? "odd" : "even";
+    
+    if ($details["severity"] == "") $details["severity"] = "normal";
+    
+    $rtn .= "<tr class='status-row status-row-$pol'>
+              <td valign='top' class='module-name'>$module</td>
+              <td valign='top' class='module-status module-status-" . $details["severity"] . "'>
+              " . $details["status"] . "
+              </td>
+    
+           </tr>";
+  }
+                  
+  $rtn .= "</table>";
+    
+  
+  
+  return $rtn;
+}
+
+
+/**
+ * Implementation of hook_status
+ * Expected return is array(
+ *                          "severity" => "normal" or "warning" or "alert",
+ *                          "status" => "A message to display to the user.",
+ *                    );
+ */
+function system_status() {
+  $rtn = array();
+  $rtn["severity"] = "normal";
+  // Check on the last time cron was run; make sure it's working properly.
+  $last_run = variable_get("cron_last_run", 0);
+  
+  if ($last_run < strtotime("-2 DAY")) {
+    $rtn["severity"] = "alert";
+    $rtn["status"] .= t("Cron hasn't run in over 2 days.  For your installation of FlightPath
+               to function properly, cron.php must be accessed routinely. At least once per day is recommended.");    
+  }
+  else {
+    $rtn["status"] .= t("Cron was last run on %date", array("%date" => format_date($last_run)));
+  } 
+  
+  $rtn["status"] .= "<p style='font-size: 0.8em;'>" . t("Your site's cron URL is:");
+  $rtn["status"] .= "<br>&nbsp; &nbsp; <i>" . $GLOBALS["fp_system_settings"]["base_url"] . "/cron.php?t=" . $GLOBALS["fp_system_settings"]["cron_security_token"] . "</i>
+                        <br>" . t("Example linux cron command:") . "&nbsp; <i>wget -O - -q -t 1 http://ABOVE_URL</i>";  
+  $rtn["status"] .= "</p>";
+  
+  
+  return $rtn;
+  
+}
+
+
 
 /**
  * Implements hook_clear_cache
@@ -1263,7 +1364,7 @@ function system_login_form_submit($form, &$form_state) {
   // Okay, let's look for all the modules who have implimented hook_user_login
   $modules = modules_implement_hook("user_login");
   foreach ($modules as $module) {
-    call_user_func($module . '_user_login', &$account);
+     call_user_func_array($module . '_user_login', array(&$account));        
   }
   
   // Set the $account to the SESSION.
@@ -1292,8 +1393,6 @@ function system_display_main_page() {
     fp_goto("login");
     return;  
   }
-
-  watchdog("main", "testing");
 
   $rtn .= "<table class='fp-semester-table'>";
   

@@ -23,6 +23,6 @@ if ($token != $GLOBALS["fp_system_settings"]["cron_security_token"]) {
 watchdog("cron", "Cron run started", array(), WATCHDOG_NOTICE);
 invoke_hook("cron");
 watchdog("cron", "Cron run completed", array(), WATCHDOG_NOTICE);
+variable_set("cron_last_run", time());
 
-
-?>
+?> 

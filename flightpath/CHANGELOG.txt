@@ -1,6 +1,24 @@
 FlightPath 4.x Changelog
 ========================
 
+2013-03-10
+  Adding a hook_status hook, and page to view system status information.
+  
+  Modified invoke_hook() function to return possible results of invoking the hook.
+  
+  Finished update_status module, so that it effectively talks to getflightpath.com,
+  to discover which modules need updates.
+  
+
+2013-03-09
+  Fixed unclosed <a> tag in install.php.
+  
+  Modified the places where call_user_func was being called with a referenced variable;
+  changed it to a more PHP 5.4 friendly technique, so FP will be compatible with PHP 5.4.
+  
+  Updated hooks.api.php file to contain all of the hooks in FP, with explanations.
+  
+
 2013-03-08
   Fixed bug in advising history, where the term_id displayed for a recent advising
   popup might not have been correct.

@@ -722,6 +722,8 @@ function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bo
  * t("@name's blob", array("@name" => "Richard"));
  * or simply
  * t("My blob");  if you don't need replacements.
+ * 
+ * Not implimented yet.
  */
 function t($str, $vars = array()) {
     
@@ -743,6 +745,8 @@ function t($str, $vars = array()) {
 
 /**
  * Provides translation functionality when database is not available.
+ * 
+ * Not implemented yet
  */
 function st($str, $vars = array()) {
   // Not implemented yet.  For now, just replicate t().
@@ -1016,10 +1020,12 @@ function modules_implement_hook($hook = "example_hook_here") {
  * Invoke all module hooks for the supplied hook.
  */
 function invoke_hook($hook = "example_hook_here", $params = array()) {
+  $rtn = array();
   $modules = modules_implement_hook($hook);
   foreach($modules as $module) {
-    call_user_func_array($module . "_" . $hook, $params);
+    $rtn[$module] = call_user_func_array($module . "_" . $hook, $params);
   }
+  return $rtn;
 }
 
 
@@ -1568,90 +1574,5 @@ function fp_debug_current_time_millis($debug_val = "", $show_current_time = true
   $GLOBALS["current_time_millis"] = $cur_time;
 
   return $rtn;
-}
-
-
-
-
-
-
-/**
- * This function is intended for you to overwrite using the hooks system.
- * That's because every school might handle logins differently-- they might
- * use a MySQL table of SHA1'd values, they might use LDAP, etc.
- * 
- * !!! IMPORTANT !!!
- * This function should return boolean FALSE if login failed, and the user's numeric userID
- * if they succeeded!  Ex: "10035744" or FALSE
- * 
- * This function is passed exactly what the user typed into the login boxes, so be
- * sure to sanitize the input before use.
- *
- * @param string $username
- * @param string $password
- * @return mixed
- */
-function fp_verify_all_faculty_logins($username, $password) {
-  
-  // Check for hooks...
-  if (function_exists("functions_fp_verify_all_faculty_logins")) {
-    return call_user_func("functions_fp_verify_all_faculty_logins", $username, $password);
-  }  
-    
-  // Authenticate by the user_auth table by default.
-  $db = new DatabaseHandler();
-  $res = $db->db_query("SELECT * FROM user_auth
-                        WHERE user_name = '?'
-                        AND password = '?' 
-                        AND is_faculty = '1' ", $username, md5($password));
-  $cur = $db->db_fetch_array($res);
-  if ($cur["user_name"] == $username) {
-    return $cur["user_id"];
-  }
-  
-  // By default, return FALSE;
-  return FALSE;
-  
-}
-
-
-/**
- * This function is intended for you to overwrite using the hooks system.
- * That's because every school might handle logins differently-- they might
- * use a MySQL table of SHA1'd values, they might use LDAP, etc.
- * 
- * !!! IMPORTANT !!!
- * This function should return boolean FALSE if login failed, and the user's numeric ID
- * if they succeeded!  Ex: "10035744" or FALSE
- * 
- * This function is passed exactly what the user typed into the login boxes, so be
- * sure to sanitize the input before use.
- *
- * @param string $username
- * @param string $password
- * @return mixed
- */
-function fp_verify_all_student_logins($username, $password) {
-  
-  // Check for hooks...
-  if (function_exists("functions_fp_verify_all_student_logins")) {
-    return call_user_func("functions_fp_verify_all_student_logins", $username, $password);
-  }  
- 
-  
-  // Authenticate by the user_auth table by default.
-  $db = new DatabaseHandler();
-  $res = $db->db_query("SELECT * FROM user_auth
-                        WHERE user_name = '?'
-                        AND password = '?' 
-                        AND is_student = '1' ", $username, md5($password));
-  $cur = $db->db_fetch_array($res);
-  if ($cur["user_name"] == $username) {
-    return $cur["user_id"];
-  }
-  
-  // By default, return FALSE;
-  return FALSE;
-    
 }
 

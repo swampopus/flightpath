@@ -12,7 +12,7 @@
  *
  * @param unknown_type $str
  */
-function menu_convert_replacement_pattern($str) {
+function menu_convert_replacement_pattern($str) {  
   // Find modules which implement the hook_menu_handle_replacement_pattern function.
   $modules = modules_implement_hook("menu_handle_replacement_pattern");
   foreach($modules as $module) {
