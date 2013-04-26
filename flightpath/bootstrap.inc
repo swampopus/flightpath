@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @file
  * This file should be included by every public-facing page of FlightPath.
  * It will include all the classes, as well as settings and function files.
  * 
