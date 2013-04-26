@@ -10,7 +10,7 @@ FlightPath 4.x Changelog
   Changed the form which sends an email when someone clicks the "Contact link" to not
   specify the "From" address.  This was causing some email clients to flag the email
   as spam.
-  
+    
 
 ----------------
 RELEASED 4.0-rc4

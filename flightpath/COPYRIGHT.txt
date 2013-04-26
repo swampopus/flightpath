@@ -2,7 +2,7 @@
 Copyright Information for FlightPath
 ====================================
 Last updated: 7/09/2012
-
+  
 All FlightPath code is Copyright 2006 - Present by the original authors.
 
 FlightPath was originally designed and programmed by the 
