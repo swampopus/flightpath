@@ -1,6 +1,15 @@
 FlightPath 4.x Changelog
 ========================
    
+2013-04-26
+  Added programming to the example_helper module which ships with FlightPath,
+  to better demonstrate basic module development.
+  
+  Fixed bug in format_date, where it was not handling non-integer values gracefully.
+  
+  Tweaked update_status.module to state if Cron has never been run before.
+     
+   
 2013-03-14
   Modified a query in student_search module, to not give warning when attempting
   to search by major code (major=CODE hack).

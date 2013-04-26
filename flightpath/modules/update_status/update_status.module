@@ -104,7 +104,14 @@ function update_status_status() {
     $status .= t("All modules are up to date.");
   }
   
-  $status .= "<p>" . t("Last check on %date.", array("%date" => format_date(variable_get("update_status_last_run")))) . "</p>";
+  $last_run = variable_get("update_status_last_run", 0);
+  if ($last_run > 0) {  
+    $status .= "<p>" . t("Last check on %date.", array("%date" => format_date($last_run))) . "</p>";
+  }
+  else {
+    $status .= "<p><b><span style='color:red;'>*</span>
+                </b>" . t("Module status has never been checked.  Please make sure you have a correctly configured cron job.") . "</p>";
+  }
   
   
   $rtn["status"] = $status;

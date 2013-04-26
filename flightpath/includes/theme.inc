@@ -27,6 +27,10 @@ function convert_bbcode_to_html($str) {
  */
 function format_date($timestamp, $format = "standard", $custom = "") {
   
+  if (!is_numeric($timestamp)) {
+    $timestamp = 0;  // make sure it's numeric.
+  }
+  
   $f = "";  
   if ($format == "standard") {
     $f = "n/d/Y h:i:sa";
@@ -42,8 +46,8 @@ function format_date($timestamp, $format = "standard", $custom = "") {
   
   if ($custom != "") $f = $custom;
   
-  
   return date($f, $timestamp);
+  
   
 }
 

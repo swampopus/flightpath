@@ -342,6 +342,9 @@ function hook_perm() {
  * Allows modules to specify valid URLs in FlightPath, and define what function to call
  * when the user visits that URL.
  * 
+ * After making changes to your hook menu, you <b>must</b> clear the menu cache for FlightPath!
+ * Otherwise, FlightPath will not be aware of your changes.  This can be done on the /admin-tools/admin page.
+ * 
  * This function should return an array containing everything FP needs to correctly set up
  * the menu item.
  *  
