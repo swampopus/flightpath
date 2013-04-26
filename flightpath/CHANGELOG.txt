@@ -1,6 +1,6 @@
 FlightPath 4.x Changelog
 ========================
-
+   
 2013-03-14
   Modified a query in student_search module, to not give warning when attempting
   to search by major code (major=CODE hack).
