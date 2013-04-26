@@ -64,5 +64,3 @@ define("MENU_TYPE_SUB_TAB", 4);
 define("MENU_ACCESS_DENIED", 61);
 define("MENU_NOT_FOUND", 62);
 
-
-?>

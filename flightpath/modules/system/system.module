@@ -591,7 +591,7 @@ function system_popup_report_contact_form_submit($form, $form_state) {
   
   $datetime = date("Y-m-d H:i:s", strtotime("now"));
 
-  $headers = "From: FlightPath-noreply@noreply.com\n";
+  //$headers = "From: FlightPath-noreply@noreply.com\n";
   $subject = t("FLIGHTPATH REPORT CONTACT") . " - $category ";
   $msg = "";
   $msg .= t("You have received a new report/contact on") . " $datetime.\n";
@@ -611,7 +611,8 @@ function system_popup_report_contact_form_submit($form, $form_state) {
     $to = variable_get("contact_email_address", "");
     
     if ($to != "") {
-      mail($to,$subject,$msg,$headers);
+      //mail($to,$subject,$msg,$headers);
+      mail($to,$subject,$msg);
     }
 
   } 
@@ -1150,6 +1151,9 @@ function system_status() {
   $rtn["severity"] = "normal";
   // Check on the last time cron was run; make sure it's working properly.
   $last_run = variable_get("cron_last_run", 0);
+  
+  // Report on current details about FlightPath.
+  $rtn["status"] .= "<p>" . t("FlightPath version:") . " " . FLIGHTPATH_CORE . "-" . FLIGHTPATH_VERSION . "</p>";
   
   if ($last_run < strtotime("-2 DAY")) {
     $rtn["severity"] = "alert";

@@ -527,14 +527,20 @@ db_query($q);
 
 $q = "
 CREATE TABLE `student_transfer_courses` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `student_id` int(11) NOT NULL,
   `transfer_course_id` int(11) NOT NULL,
   `student_specific_course_title` varchar(255) NOT NULL,
   `term_id` varchar(20) NOT NULL,
   `grade` varchar(5) NOT NULL,
   `hours_awarded` int(11) NOT NULL,
-  PRIMARY KEY (`student_id`)
-); ";
+  PRIMARY KEY (`id`),
+  KEY `student_id` (`student_id`),
+  KEY `transfer_id` (`transfer_course_id`),
+  KEY `term_id` (`term_id`),
+  KEY `grade` (`grade`),
+  KEY `hrs` (`hours_awarded`)
+) ; ";
 db_query($q);
 
 $q = "

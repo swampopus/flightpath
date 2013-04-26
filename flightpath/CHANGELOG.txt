@@ -1,6 +1,30 @@
 FlightPath 4.x Changelog
 ========================
 
+2013-03-14
+  Modified a query in student_search module, to not give warning when attempting
+  to search by major code (major=CODE hack).
+
+
+2013-03-13
+  Changed the form which sends an email when someone clicks the "Contact link" to not
+  specify the "From" address.  This was causing some email clients to flag the email
+  as spam.
+  
+
+----------------
+RELEASED 4.0-rc4
+----------------
+
+2013-03-11
+  Fixed bug in update_status module, where it always reported FP needed updating.
+  
+  Modified system module's hook_status to report FP's version number
+  
+  Fixed bug in system.install, where student_transfer_courses table's primary key
+  wasn't set up correctly.
+
+
 2013-03-10
   Adding a hook_status hook, and page to view system status information.
   
@@ -29,7 +53,12 @@ FlightPath 4.x Changelog
   Added an extra mysql_real_escape_string to _Databasehandler's db_query() command, to make
   sure that slash's (\) get escaped properly.
 
-
+  
+------------------
+RELEASED 4.0-rc3.1
+------------------
+  
+  
 2013-03-01
   Tweaked TinyMCE module to give more options.
   

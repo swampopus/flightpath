@@ -138,11 +138,8 @@ function update_status_get_install_status_url() {
   }
    
   // Add FP version string.
-  $rtn .= "&" . "modules[" . urlencode("flightpath") . "]=" . urlencode(FLIGHTPATH_VERSION);
+  $rtn .= "&" . "modules[" . urlencode("flightpath") . "]=" . urlencode(FLIGHTPATH_CORE . '-' . FLIGHTPATH_VERSION);
   
-  // Testing
-  $rtn .= "&" . "modules[" . urlencode("testing_here") . "]=" . urlencode("1.2.3-beta1");
-
   return $rtn;
 }
 

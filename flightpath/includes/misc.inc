@@ -1,9 +1,8 @@
 <?php
-
-
 /**
+ * @file
  * This file contains misc functions for FlightPath
-*/
+ */
 
  
  
@@ -1001,7 +1000,7 @@ function fp_screen_is_mobile(){
  */
 function modules_implement_hook($hook = "example_hook_here") {
   $rtn = array();
-  
+
   foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $value) {
     if (isset($value["enabled"]) && $value["enabled"] != "1") {
       // Module is not enabled.  Skip it.
