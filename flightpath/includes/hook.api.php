@@ -256,6 +256,8 @@ function hook_clear_cache() {
  * Typically, this means that we will execute code when the page is first loaded.
  * Also useful for including javascript or CSS on the page, but only under certain
  * conditions (like who the user is, or what permissions they have)
+ * 
+ * @see hook_exit
  */
 function hook_init() {
   // Perform actions when page is loaded...
@@ -263,6 +265,18 @@ function hook_init() {
     $GLOBALS["some_variable"] = TRUE;    
   }
 }
+ 
+
+
+/**
+ * Allows each module to execute code when the FlightPath page is completely finished.
+ * 
+ * @see hook_init
+ */
+function hook_exit() {
+  // ex: Close outside db connections
+} 
+ 
  
  
 /**

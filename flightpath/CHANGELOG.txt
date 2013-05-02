@@ -5,6 +5,8 @@ FlightPath 4.x Changelog
   Fixed bug in system module which was causing "system forms" to not accept
   form values which had been modified by a form's hook_validate function.
      
+  Created new hook:  hook_exit().  Called last as FlightPath is shutting down, at the end
+  of index.php
    
 2013-04-26
   Added programming to the example_helper module which ships with FlightPath,
