@@ -23,22 +23,11 @@ class _Student
 		{
 			$this->db = get_global_database_handler();
 		}
-		// If a cwid was specified, then go ahead and load and assemble
-		// all information in the database on this student.
-		if ($student_id != "")
-		{
-		  $this->determine_terms_to_hide_grades();
-			$this->load_student();
-		}
-
-    // When we load this student, let's also check for any hooks relating
-    // to loading this student.
-    // Since this class might be used outside of FP, only do this if we know
-    // that the bootstrap.inc file has been executed.
-    if ($GLOBALS["fp_bootstrap_loaded"] == TRUE) {      
-      invoke_hook("student_load", array(&$this));
-    }
-
+		
+    // Go ahead and load and assemble
+    // all information in the database on this student.
+    $this->load_student();    
+                
 	}
 
 	
@@ -75,6 +64,7 @@ class _Student
 
 		if ($this->student_id != "")
 		{
+      $this->determine_terms_to_hide_grades();		  
 			$this->load_transfer_eqvs_unassigned();
 			$this->load_courses_taken();
 			$this->load_student_data();
@@ -84,6 +74,16 @@ class _Student
 			//$this->load_unassignments();
 			//$this->load_student_substitutions();
 		}
+    
+    
+    // When we load this student, let's also check for any hooks relating
+    // to loading this student.
+    // Since this class might be used outside of FP, only do this if we know
+    // that the bootstrap.inc file has been executed.
+    if ($GLOBALS["fp_bootstrap_loaded"] == TRUE) {      
+      invoke_hook("student_load", array(&$this));
+    }       
+    
 	}
 
 	function load_significant_courses()
