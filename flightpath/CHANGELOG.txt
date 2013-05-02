@@ -7,6 +7,12 @@ FlightPath 4.x Changelog
      
   Created new hook:  hook_exit().  Called last as FlightPath is shutting down, at the end
   of index.php
+  
+  Added GLOBALS variable so we can tell that the bootstrap has indeed finished loaded.
+  
+  Added new hook, hook_student_load(), which is called after a new student object is created.
+  This lets modules hook in and change the student object, w/o needing to override the class file.
+  
    
 2013-04-26
   Added programming to the example_helper module which ships with FlightPath,

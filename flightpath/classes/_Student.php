@@ -31,6 +31,14 @@ class _Student
 			$this->load_student();
 		}
 
+    // When we load this student, let's also check for any hooks relating
+    // to loading this student.
+    // Since this class might be used outside of FP, only do this if we know
+    // that the bootstrap.inc file has been executed.
+    if ($GLOBALS["fp_bootstrap_loaded"] == TRUE) {      
+      invoke_hook("student_load", array(&$this));
+    }
+
 	}
 
 	

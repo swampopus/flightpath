@@ -271,10 +271,15 @@ function hook_init() {
 /**
  * Allows each module to execute code when the FlightPath page is completely finished.
  * 
+ * Be aware that theming and themable functions will not work, since this hook is called
+ * after the page has been completely rendered.  If you need to output debug statements for yourself,
+ * use echo or print, and it will be at the BOTTOM of the page.
+ * 
  * @see hook_init
  */
 function hook_exit() {
   // ex: Close outside db connections
+  // ex:  print "Time for page to load:" . $ctime;
 } 
  
  
@@ -348,6 +353,21 @@ function hook_perm() {
   );
 
   return $perms;
+}
+
+
+
+/**
+ * Allows modules to hook in after a new student object is created.
+ * 
+ * This is so that modules can modify student objects (including what courses they
+ * have taken) when that student object is first created.  For example, if you need
+ * to query extra databases to get all of a student's credits.
+ */
+function hook_student_load(&$student) {
+  if ($student->gpa > 3) {
+    $student->deans_list = TRUE;
+  }
 }
 
 
