@@ -1,6 +1,11 @@
 FlightPath 4.x Changelog
 ========================
    
+2013-05-02
+  Fixed bug in system module which was causing "system forms" to not accept
+  form values which had been modified by a form's hook_validate function.
+     
+   
 2013-04-26
   Added programming to the example_helper module which ships with FlightPath,
   to better demonstrate basic module development.

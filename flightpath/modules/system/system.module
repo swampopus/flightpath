@@ -1009,7 +1009,7 @@ function system_handle_form_submit() {
     if ($form_type == "system_settings") {
       // This is system settings, so let's save all of our values to the variables table.
       // Write our values array to our variable table.
-      foreach ($values as $name => $val) {
+      foreach ($form_state["values"] as $name => $val) {
         
         variable_set($name, $val);
       }
