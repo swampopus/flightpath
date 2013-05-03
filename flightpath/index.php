@@ -43,7 +43,7 @@ else {
     display_access_denied();
   }
 }
- 
+
 // Call hook_exit as we leave the page.
 invoke_hook("exit"); 
  

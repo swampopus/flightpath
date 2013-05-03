@@ -468,9 +468,7 @@ function fp_build_tab_array($page) {
     }
     
     if (!isset($student) || $student == null || !is_object($student)) {
-      $student = new Student();
-      $student->student_id = $csid;
-      $student->load_student_data();
+      $student = new Student($csid);
     }
     
     $settings = fp_get_system_settings();

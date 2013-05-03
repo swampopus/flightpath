@@ -9,9 +9,9 @@ class _Student
 	public $list_transfer_eqvs_unassigned;
 	public $array_settings, $array_significant_courses, $array_hide_grades_terms;
 	
-	
-	function __construct($student_id = "", DatabaseHandler $db = NULL)
+  function __construct($student_id = "", DatabaseHandler $db = NULL)
 	{
+	  
 		$this->student_id = $student_id;
 		$this->array_hide_grades_terms = array();
 		$this->array_significant_courses = array();  // array of course_ids
@@ -27,7 +27,7 @@ class _Student
     // Go ahead and load and assemble
     // all information in the database on this student.
     $this->load_student();    
-                
+                 
 	}
 
 	
