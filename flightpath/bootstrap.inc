@@ -3,9 +3,8 @@
 /**
  * @file
  * This file should be included by every public-facing page of FlightPath.
- * It will include all the classes, as well as settings and function files.
+ * It will include all the classes, as well as settings and function files, and modules.
  * 
- * In the future, it will be used to pre-load modules. 
  */
 
 

@@ -49,6 +49,13 @@ function system_perm() {
       "title" => t("View system status"),
       "description" => t("The user may view the update status and other requirements of the system."),
     ),
+    
+    "execute_php" => array(
+      "title" => t("Execute PHP code"),
+      "description" => t("WARNING: This is a very VERY powerful and DANGEROUS permission.  Only give it to
+                       developers.  An 'Execute PHP' link will appear on the admin menu, which
+                       lets the user execute any arbitrary PHP code."),
+    ),
                             
        
   );
@@ -319,11 +326,63 @@ function system_menu() {
     "type" => MENU_TYPE_CALLBACK,
   );                         
                       
-           
+
+  
+  $items["admin/config/execute-php"] = array(
+    "title" => "Execute PHP",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_execute_php_form", "system_settings"),
+    "access_arguments" => array("execute_php"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,      
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  ); 
+
+   
            
   return $items;
 }
 
+
+
+function system_execute_php_form() {
+  $form = array();
+  
+  $form["mark" . $m++] = array(
+    "value" => t("Use this form to execute arbitrary PHP code.  <b>DO NOT</b>
+                   type php tags (&lt;php ?&gt;).  Be careful!  Entering bad code
+                   here can harm your site.  Only use if you know what you are doing."),    
+  );
+
+  $form["system_execute_php"] = array(
+    "type" => "textarea",
+    "label" => t("Enter PHP code here:"),
+    "value" => variable_get("system_execute_php", ""),
+    "rows" => 20,
+  );
+  
+  
+  return $form;
+}
+
+function system_execute_php_form_submit($form, $form_state) {
+  $code = trim($form_state["values"]["system_execute_php"]);
+  if ($code == "") return;
+  
+  eval($code);
+  
+}
 
 
 /**
@@ -1583,7 +1642,8 @@ function system_modules_form() {
       );
               
       $pol = "even";
-      while ($file = readdir($dh)) {    
+      $dir_files = scandir($start_dir);      
+      foreach ($dir_files as $file) {    
         if ($file == "." || $file == "..") continue;
         
         if (is_dir($start_dir . "/" . $file)) {  

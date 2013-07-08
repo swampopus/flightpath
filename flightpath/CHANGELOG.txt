@@ -1,5 +1,12 @@
 FlightPath 4.x Changelog
 ========================
+
+2013-07-08
+  Made changes to system.module, to sort modules page correctly.  Also, gave new
+  ability to execute arbitrary PHP code from the admin menu (for admins only, obviously).
+  
+  Minor change to bootstrap.inc's comments.
+
    
 2013-05-02
   Fixed bug in system module which was causing "system forms" to not accept
