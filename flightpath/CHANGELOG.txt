@@ -1,6 +1,12 @@
 FlightPath 4.x Changelog
 ========================
 
+
+----------------
+RELEASED 4.0-rc5
+----------------
+
+
 2013-07-08
   Made changes to system.module, to sort modules page correctly.  Also, gave new
   ability to execute arbitrary PHP code from the admin menu (for admins only, obviously).
