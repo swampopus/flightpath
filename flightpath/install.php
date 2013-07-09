@@ -375,7 +375,7 @@ while ($cur = mysql_fetch_array($res)) {
 }
 
 $res = mysql_query("SELECT * FROM modules WHERE enabled = 1
-                    ORDER BY weight");
+                    ORDER BY weight, name");
 while ($cur = mysql_fetch_array($res)) {
   $system_settings["modules"][$cur["name"]] = $cur;
 }

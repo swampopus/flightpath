@@ -1,6 +1,10 @@
 FlightPath 4.x Changelog
 ========================
 
+2013-07-09
+  Fixed a small bug in the settings file template (in install.php) where modules were not
+  being sorted in a logical way, causing some modules to load before others when they had the same
+  weight.
 
 ----------------
 RELEASED 4.0-rc5
