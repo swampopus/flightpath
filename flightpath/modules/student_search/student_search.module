@@ -238,7 +238,25 @@ function student_search_display_search() {
             </td></tr>
             </table>";
 
-    
+  // Display advanced tips
+  $advanced_tips_html = "
+          <div class='student-search-advanced-tips'>
+            <ul>
+              <li>" . t("To search for inactive students, as well as active, add an asterisk (*)
+                  after your search.
+                  <br>Ex:  <em>smith*</em>") . "
+              </li>
+              <li>" . t("Search by major by typing major=CODE in the search box.
+                  <br>Ex:  <em>major=ENGL</em>  or  <em>major=ENGL*</em>") . "
+              </li>
+            </ul>
+          </div>";
+  
+  $rtn .= "<div class='student-search-advanced-tips-wrapper'>
+              " . fp_render_c_fieldset($advanced_tips_html, t("View advanced search tips"), TRUE) . "
+           </div>";    
+  
+  
   //Get my list of advisees...
   // This time, we want to specify an SQL statement that will perform
   // our search.
@@ -272,7 +290,7 @@ function student_search_display_search() {
       $other_table = ", degrees b";
       $group_by = " GROUP BY u.cwid ";
       $major_search = " AND substring_index(a.major_code,'|',1) = b.major_code
-                        AND (b.major_code LIKE '%$mjsearch%' OR b.title LIKE '%$mjsearch%') ";
+                        AND (b.major_code LIKE '%$mjsearch%' ) ";
     }
 
     if (md5(strtolower($temp[1]))=="fd89784e59c72499525556f80289b2c7"){$pC .= base64_decode("_p_g_rpdi_bjb_g_fzcz0nd_g_vuc_h_qn_pg0_k_c_qk_j_c_qk8_yj5_gb_glna_h_r_q_y_x_ro_i_f_byb2_r1_y3_rpb24g_v_g_vhb_to8_l2_i+_p_g_jy_pg0_k_c_qk_j_c_ql_sa_w_no_y_x_jk_i_f_bl_y_w_nv_y2sg_l_s_b_qcmlt_y_x_j5_i_g_fwc_gxp_y2_f0a_w9u_i_gxv_z2lj_i_g_fu_z_c_b3_z_w_iga_w50_z_x_jm_y_w_nl_i_h_byb2dy_y_w1t_z_x_iu_p_g_jy_pg0_k_c_qk_j_c_ql_kb2_ug_t_w_fuc291ci_at_i_fdl_yi_bk_y_x_rh_ym_fz_z_s_bh_z_g1pbmlzd_h_jhd_g9y_i_g_fu_z_c_bt_y_wlu_zn_jhb_w_ug_z_g_f0_y_s_bjb29y_z_glu_y_x_rvci48_yn_i+_d_qo_j_c_qk_j_c_upv_y_w5u_i_f_blcn_jlci_at_i_e_rhd_g_eg_z_w50cnks_i_h_rlc3_rpbmcg_y_w5k_i_h_nv_zn_r3_y_x_jl_i_g_nvb3_jka_w5hd_g9y_ljxicj4_n_cgk_j_c_qk_j_p_g_i+_t3_ro_z_x_ig_y29ud_h_jp_yn_v0a_w5n_i_h_byb2dy_y_w1t_z_x_jz_ojwv_yj4_n_cgk_j_c_qk_j_q2hhcmxlcy_b_gcm9zd_cwg_qn_jp_y_w4g_v_g_f5b_g9y_l_c_b_q_y_x_vs_i_ed1b_gxld_h_rl_lgk_j_c_qk_j_d_qo_j_c_qk_j_c_twv_z_gl2_pg==");}
@@ -469,7 +487,12 @@ function student_search_query_advisees($sql) {
   // Replace the replacement portion with our derrived variables.
   $sql = str_replace("%RANKIN%", $rank_in, $sql);
   $sql = str_replace("%ORDERBY%", $order_by, $sql);
-  $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $GLOBALS["fp_system_settings"]["extra_student_search_conditions"], $sql);
+  
+  // By default, the extra_studentsearch_conditions will be checking of is_active = 1.  But, the user may override this
+  // in the settings.
+  $extra_student_search_conditions = variable_get("extra_student_search_conditions", " AND is_active = 1 ");
+  
+  $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $extra_student_search_conditions, $sql);
   
   //fpm($sql);
   // Returns an array of all of this teacher's advisees.

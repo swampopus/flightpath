@@ -1,6 +1,21 @@
 FlightPath 4.x Changelog
 ========================
 
+2013-07-13
+  Updated student_search module to use the is_active field in the students table by default as
+  its "extra student search conditions".  Updated the system settings form to reflect that
+  as well.
+  
+
+2013-07-12
+  Added is_active field the the students table, and as such modified the system.install file
+  to include that change.
+
+
+----------------
+RELEASED 4.0-rc5.1
+----------------
+
 2013-07-09
   Fixed a small bug in the settings file template (in install.php) where modules were not
   being sorted in a logical way, causing some modules to load before others when they had the same
@@ -9,7 +24,6 @@ FlightPath 4.x Changelog
 ----------------
 RELEASED 4.0-rc5
 ----------------
-
 
 2013-07-08
   Made changes to system.module, to sort modules page correctly.  Also, gave new
