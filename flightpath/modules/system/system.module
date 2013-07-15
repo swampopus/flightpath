@@ -1713,7 +1713,7 @@ function system_modules_form() {
               // This is a required module; it cannot be unchecked.
               $attributes["disabled"] = "disabled";
             }
-            
+            //fpm($info_details_array);
             $bool_overriding = FALSE;
             // Did this module already exist in $form?  In other words,
             // is the module overriding a core module?  If so, we need to know

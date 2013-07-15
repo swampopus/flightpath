@@ -1,6 +1,10 @@
 FlightPath 4.x Changelog
 ========================
 
+2013-07-15
+  Updated system.install to handle changes to the students table.
+
+
 2013-07-13
   Updated student_search module to use the is_active field in the students table by default as
   its "extra student search conditions".  Updated the system settings form to reflect that

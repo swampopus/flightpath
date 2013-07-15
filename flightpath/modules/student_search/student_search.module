@@ -135,6 +135,7 @@ function student_search_display_my_advisees() {
                  c.faculty_id = '$faculty_cwid'
                  AND c.student_id = a.cwid
                  AND u.cwid = a.cwid
+                 AND u.is_student = 1
                  AND u.is_disabled = 0                 
               AND rank_code IN %RANKIN%
               %EXTRA_STUDENTSEARCH_CONDITIONS%
@@ -167,6 +168,7 @@ function student_search_display_my_majors() {
               WHERE 
                  substring_index(major_code, '|', 1) = '$faculty_user_major_code'
                  AND u.cwid = a.cwid
+                 AND u.is_student = 1
                  AND u.is_disabled = 0                 
               AND rank_code IN %RANKIN%
               %EXTRA_STUDENTSEARCH_CONDITIONS%
@@ -299,6 +301,7 @@ function student_search_display_search() {
               FROM users u, students a $other_table
               WHERE 
                  u.cwid = a.cwid
+                 AND u.is_student = 1
                  AND u.is_disabled = 0                 
                  $search_action
               

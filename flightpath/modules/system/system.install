@@ -58,6 +58,24 @@ function system_enable() {
 }
 
 
+/**
+ * Implementation of hook_update
+ * 
+ * Will be run every time we run DB Updates from the admin modules page.
+ */
+function system_update($old_schema, $new_schema) {
+  
+  if ($old_schema == 0) {
+    // Updating from schema version 0...
+    db_query("ALTER TABLE students 
+              ADD COLUMN is_active TINYINT NOT NULL,
+              ADD INDEX `is_active` (is_active)" );        
+  }
+    
+  
+}
+
+
 
 /**
  * Implementation of hook_install.
@@ -578,7 +596,7 @@ CREATE TABLE `students` (
   `rank_code` varchar(5) NOT NULL,
   `major_code` varchar(20) NOT NULL,
   `catalog_year` int(11) NOT NULL,
-  `is_active` tinyint(11) NOT NULL,
+  `is_active` tinyint(4) NOT NULL,
   PRIMARY KEY (`cwid`),
   KEY `cwid` (`cwid`),
   KEY `rank_code` (`rank_code`),
