@@ -1172,17 +1172,12 @@ class _Course
     if ($student_id > 0)
     {
       // Because transfer credit titles may differ from student
-      // to student, let's look up the title in the sisdata table...
-      
-      $term_line = "";
-      if ($this->term_id > 1) {
-        $term_line = "AND term_id = '$this->term_id' ";
-      }
+      // to student, let's look up the title in the per-student transfer courses table...
       
       $res = $this->db->db_query("SELECT * FROM student_transfer_courses
 									WHERE student_id = '?'
 									AND transfer_course_id = '?' 
-									$term_line ", $student_id, $this->course_id);
+									 ", $student_id, $this->course_id);
       $cur = $this->db->db_fetch_array($res);
       if (trim($cur["student_specific_course_title"]) != "") {
         $this->title = trim($cur["student_specific_course_title"]);
@@ -1195,7 +1190,7 @@ class _Course
       $res2 = $this->db->db_query("SELECT * FROM transfer_eqv_per_student
             					WHERE student_id = '?'	
             					AND transfer_course_id = '?' 
-            					AND valid_term_id = '?' ", $student_id, $this->course_id, $this->term_id);
+            					 ", $student_id, $this->course_id);
       while($cur2 = $this->db->db_fetch_array($res2))
       {        
         $c = new Course($cur2["local_course_id"]);

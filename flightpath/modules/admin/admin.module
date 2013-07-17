@@ -34,6 +34,7 @@ function admin_menu() {
   
   $items["admin/config/urgent-message"] = array(
     "title" => "Edit urgent message",
+    "description" => "Set a message which will be displayed to all users on every page",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("admin_urgent_message_form", "system_settings"),
     "access_arguments" => array("can_edit_urgent_message"),

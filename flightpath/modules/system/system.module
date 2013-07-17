@@ -183,6 +183,7 @@ function system_menu() {
 
   $items["admin/config/run-cron"] = array(
     "title" => "Run cron now",
+    "description" => "Run the normal cron operations right away",
     "page_callback" => "system_perform_run_cron",
     "access_arguments" => array("run_cron"),
     "type" => MENU_TYPE_NORMAL_ITEM,
@@ -190,6 +191,7 @@ function system_menu() {
 
   $items["admin/config/status"] = array(
     "title" => "System status",
+    "description" => "View important notifications and updates for your installation of FlightPath",
     "page_callback" => "system_display_status_page",
     "access_arguments" => array("view_system_status"),
     "page_settings" => array(
@@ -230,6 +232,7 @@ function system_menu() {
   
   $items["admin/config/system-settings"] = array(
     "title" => "System settings",
+    "description" => "Configure settings for FlightPath",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("system_settings_form", "system_settings"),
     "access_arguments" => array("de_can_administer_system_settings"),
@@ -252,6 +255,7 @@ function system_menu() {
   
   $items["admin/config/modules"] = array(
     "title" => "Modules",
+    "description" => "Manage which modules are enabled for your site",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("system_modules_form"),
     "access_arguments" => array("administer_modules"),
@@ -282,6 +286,7 @@ function system_menu() {
   
   $items["admin/config/clear-menu-cache"] = array(
     "title" => "Clear menu cache",
+    "description" => "Clear and rebuild menus and URLs",
     "page_callback" => "system_perform_clear_menu_cache",
     "access_arguments" => array("administer_modules"),
     "type" => MENU_TYPE_NORMAL_ITEM,
@@ -330,6 +335,7 @@ function system_menu() {
   
   $items["admin/config/execute-php"] = array(
     "title" => "Execute PHP",
+    "description" => "Execute arbitrary PHP on your server. Caution: could be dangerous if not understood",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("system_execute_php_form", "system_settings"),
     "access_arguments" => array("execute_php"),

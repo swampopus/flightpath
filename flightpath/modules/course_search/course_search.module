@@ -1,8 +1,10 @@
 <?php
 
-/*
-Lets someone search for course descriptions.
-*/
+/**
+ * @file
+ * This module allows users to search for courses, descriptions, and, if supported, rotation schedules
+ * and sample syllabi.
+ */
 
 
 function course_search_menu() {
@@ -34,7 +36,8 @@ function course_search_menu() {
   
   
   $items["admin/config/course-search"] = array(
-    "title" => "Course Search Settings",    
+    "title" => "Course Search Settings",
+    "description" => "Administer the Course Search module's settings",    
     "page_callback" => "fp_render_form",
     "page_arguments" => array("course_search_settings_form", "system_settings"),
     "access_arguments" => array("administer_course_search"),

@@ -58,6 +58,7 @@ function tinymce_menu() {
   
   $items["admin/config/tinymce"] = array(
     "title" => "TinyMCE Settings",
+    "description" => "Administer settings for the TinyMCE WYSIWYG editor",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("tinymce_config_form", "system_settings"),
     "access_arguments" => array("administer_tinymce"),

@@ -663,7 +663,7 @@ class _Student
 			$new_course = new Course();
 
 			// Find out if this course has an eqv.
-			if ($course_id = $this->get_transfer_course_eqv($transfer_course_id, false, $cur['term_id']))
+			if ($course_id = $this->get_transfer_course_eqv($transfer_course_id, false))
 			{
 				$new_course = new Course($course_id);
 				$this->array_significant_courses[$course_id] = true;
@@ -740,6 +740,7 @@ class _Student
 			return false;
 		}
 
+		
     
     $valid_term_line = "";
     if ($require_valid_term_id != "") {

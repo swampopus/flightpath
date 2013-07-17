@@ -10,6 +10,7 @@ function content_menu() {
 
   $items["admin/config/content"] = array(
     "title" => "Content",
+    "description" => "Manage content in FlightPath. Ex: Announcements, Pages, etc.",
     "page_callback" => "content_display_content_admin_list",    
     "access_arguments" => array("admin_content"),
     "page_settings" => array(

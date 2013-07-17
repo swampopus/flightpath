@@ -1,6 +1,23 @@
 FlightPath 4.x Changelog
 ========================
 
+
+2013-07-17
+  Updated system.install to create a better transfer_eqv table, made term_id a varchar instead
+  of int.
+  
+  Updated _Course.php to fix some documentation issues, and removed a check for valid_term_id
+  in the load_descriptive_transfer_data function.
+  
+  Updated _Student.php so that we do not require a match on valif_term_id when looking for
+  transfer eqv's.
+  
+  Added a new report to the Stats module, to show all of a student's courses, and cleaned up
+  the source code for that module, removing old code and adding comments.
+
+  Added descriptions to most of the core's menu items which appear on the admin page.
+
+
 2013-07-15
   Updated system.install to handle changes to the students table.
 

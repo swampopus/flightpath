@@ -10,6 +10,7 @@ function user_menu() {
 
   $items["admin/config/users"] = array(
     "title" => "Users",
+    "description" => "Search and manage faculty/staff users",
     "page_callback" => "user_display_users",
     "access_arguments" => array("manage_users"),
     "page_settings" => array(
@@ -31,6 +32,7 @@ function user_menu() {
   
   $items["admin/config/user-roles"] = array(
     "title" => "User roles",
+    "description" => "Manage roles for users. Ex: advisors, viewers, etc.",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("user_user_roles_form"),
     "access_arguments" => array("can_edit_user_roles"),
@@ -82,6 +84,7 @@ function user_menu() {
 
   $items["admin/config/permissions"] = array(
     "title" => "Permissions",
+    "description" => "Manage permissions for user roles in FlightPath",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("user_permissions_form"),
     "access_arguments" => array("can_edit_permissions"),
