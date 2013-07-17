@@ -2,6 +2,13 @@ FlightPath 4.x Changelog
 ========================
 
 
+----------------
+RELEASED 4.0
+----------------
+
+  First full release of FlightPath as an open source project (though, it's been in constant
+  production use at ULM for 6 years ;)
+
 2013-07-17
   Updated system.install to create a better transfer_eqv table, made term_id a varchar instead
   of int.
