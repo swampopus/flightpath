@@ -72,3 +72,18 @@
   padding-left: 10px;
   padding-right: 10px;
 }
+
+.watchdog-field {
+  padding-top: 5px;
+}
+
+.watchdog-field label {
+  font-weight: bold;  
+}
+
+.watchdog-field label.block {
+  display: block;
+  padding-top: 15px;
+}
+
+

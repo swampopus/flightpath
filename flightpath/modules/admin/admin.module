@@ -78,6 +78,37 @@ function admin_menu() {
     "tab_parent" => "admin-tools/admin",    
   );       
 
+
+
+  $items["admin/config/watchdog/%"] = array(
+    "title" => "View Watchdog Entry",    
+    "page_callback" => "admin_display_watchdog_entry",
+    "page_arguments" => array(3),    
+    "access_arguments" => array("display_watchdog"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_show_title" => TRUE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to watchdog",
+          "path" => "admin/config/watchdog",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%&sev_filter=%SEV_FILTER%&page=%PAGE%",
+        ),
+                
+      ),
+    ),    
+    "type" => MENU_TYPE_CALLBACK,
+    "tab_parent" => "admin-tools/admin",    
+  );      
+
+
   
   $items["admin/duplicate-year"] = array(
     "title" => "Duplicate entire catalog year",
@@ -1002,6 +1033,18 @@ function admin_menu_handle_replacement_pattern($str) {
     $str = str_replace("%DE_CATALOG_YEAR%", admin_get_de_catalog_year(), $str);
   }
   
+  if (strpos($str, "%SEV_FILTER%") !== 0) {
+    // It contains this replacement pattern!
+    $str = str_replace("%SEV_FILTER%", $_GET["sev_filter"], $str);
+  }
+
+  if (strpos($str, "%PAGE%") !== 0) {
+    // It contains this replacement pattern!
+    $str = str_replace("%PAGE%", $_GET["page"], $str);
+  }
+    
+  
+  
   return $str;
 }
 
@@ -1075,6 +1118,100 @@ function admin_urgent_message_form() {
  
   
 
+  
+  
+/**
+ * Display the details of a particular watchdog entry, specified by its table id.
+ */
+function admin_display_watchdog_entry($wid) {
+  $rtn = "";
+  
+  fp_add_css(fp_get_module_path("admin") . '/css/admin.css');
+  
+  
+  $severity_array = array(
+    5 => "notice",
+    1 => "alert",
+    3 => "error",
+    7 => "debug",
+  );
+  
+  $res = db_query("SELECT * FROM watchdog WHERE wid = '?' ", $wid);
+  $cur = db_fetch_object($res);
+  
+  $msg = t($cur->message, unserialize($cur->variables));
+  
+  $severity = $severity_array[$cur->severity];
+  $when = format_date($cur->timestamp, "short");
+    
+  // Display
+  $rtn .= "
+    <br>
+    <div class='watchdog-entry'>
+      <div class='watchdog-field'>
+        <label>ID:</label>
+        $cur->wid
+      </div>
+
+      <div class='watchdog-field'>
+        <label>Type:</label>
+        $cur->type
+      </div>
+      
+
+      <div class='watchdog-field'>
+        <label>Time:</label>
+        $when ($cur->timestamp)
+      </div>
+      
+      <div class='watchdog-field'>
+        <label>Severity:</label>
+        $severity
+      </div>
+
+      <div class='watchdog-field'>
+        <label>User:</label>
+        $cur->user_name | id: $cur->user_id | cwid: $cur->cwid | is_student: $cur->is_student | is_faculty: $cur->is_faculty
+      </div>
+      
+      <div class='watchdog-field'>
+        <label>IP:</label>
+        $cur->ip
+      </div>
+                              
+      <div class='watchdog-field'>
+        <label>Location:</label>
+        $cur->location
+      </div>
+                      
+      <div class='watchdog-field'>
+        <label>Ref:</label>
+        $cur->referer
+      </div>
+
+      <hr>
+      
+      <div class='watchdog-field'>
+        <label class='block'>Message:</label>
+        $msg
+      </div>
+      
+      <div class='watchdog-field'>
+        <label class='block'>Extra:</label>
+        $cur->extra_data
+      </div>      
+                                                            
+      
+    </div>
+  ";
+  
+  
+  
+  
+  return $rtn;
+}  
+  
+  
 
 
 /**
@@ -1099,9 +1236,12 @@ function admin_display_watchdog() {
   $results_per_page = 50;
   
   
+  
   $type_line = $severity_line = $limit_start = "";
 
+  $sev_filter = $_GET["sev_filter"];
   $page = $_GET["page"];
+  
   $limit_start = 0;
   if ($page != "" && is_numeric($page)) {
     $limit_start = $results_per_page * ($page - 1);
@@ -1117,7 +1257,7 @@ function admin_display_watchdog() {
               <option value=''>-Any-</option>";
   foreach ($severity_array as $key => $value) {
     $sel = "";
-    if ($_GET["sev_filter"] == $key) $sel = "selected";
+    if ($sev_filter == $key) $sel = "selected";
      
     $rtn .= "<option value='$key' $sel>$value</option>";
   }  
@@ -1132,7 +1272,14 @@ function admin_display_watchdog() {
   }
   
   
-  $rtn .= "<table class='watchdog-table' cellspacing='0' cellpadding='4'>";
+  $rtn .= "<table class='watchdog-table' cellspacing='0' cellpadding='4'>
+              <tr>
+                <th>ID</th>
+                <th>When</th>
+                <th>Type</th>
+                <th>Msg</th>
+                <th>User</th>
+              </tr>";
   
   // Okay, let's display the recent watchdog entries.
   $query = "SELECT * FROM watchdog
@@ -1164,16 +1311,14 @@ function admin_display_watchdog() {
     $severity = $severity_array[$cur->severity];
     $when = format_date($cur->timestamp, "short");
     
-    $user = fp_load_user($cur->user_id);
-    
-    
-    
+        
     $rtn .= "
               <tr class='row-$pol row-$severity'>                
+                <td valign='top'>" . l($cur->wid, "admin/config/watchdog/$cur->wid", "sev_filter=$sev_filter&page=$page") . "</td>
                 <td valign='top'>$when</td>
                 <td valign='top'>$type</td>                
                 <td valign='top'>$msg</td>                
-                <td valign='top'>$user->name</td>                
+                <td valign='top'>$cur->user_name</td>                
               
               </tr>    
     
