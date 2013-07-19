@@ -34,3 +34,41 @@
 
 
 
+.watchdog-table {
+  font-size: 0.8em;
+  width: 100%;
+}
+
+.watchdog-table .row-odd {
+  background-color: #ddd;
+}
+
+.watchdog-table .row-alert {
+  background-color: #FFCC99;  
+}
+
+.watchdog-table .row-error {
+  background-color: #FF9999;
+}
+
+.watchdog-table .row-debug {
+  background-color: #FFFFCC;
+}
+.fp-pager {
+  margin-top: 15px;
+  text-align: center;
+}
+.fp-pager a {
+  text-decoration: none;
+  color: blue;
+}
+.fp-pager .pager-link {
+  padding-right: 7px;
+  padding-left: 7px;
+  
+}
+.fp-pager .pager-current {
+  font-weight: bold;
+  padding-left: 10px;
+  padding-right: 10px;
+}

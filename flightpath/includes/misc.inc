@@ -703,7 +703,14 @@ function fp_add_js($js, $type = "file") {
   
 }
 
-
+/**
+ * Return the filepath to the module
+ *
+ * @param unknown_type $module
+ * @param unknown_type $bool_include_file_system_path
+ * @param unknown_type $bool_include_base_path
+ * @return unknown
+ */
 function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bool_include_base_path = TRUE) {
   
   $p = menu_get_module_path($module, $bool_include_file_system_path);
@@ -714,6 +721,35 @@ function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bo
     
   return $p;
 }
+
+
+
+/**
+ * Simply returns the module's row from the modules table, if it exists.
+ *
+ * @param unknown_type $module
+ */
+function fp_get_module_details($module) {
+  
+  // Special case if we are looking up flightpath itself
+  if ($module == "flightpath") {
+    $rtn = array(
+      "info" => array("name" => t("FlightPath (Core)")),
+      "version" => FLIGHTPATH_VERSION,
+    );
+    return $rtn;
+  }
+  
+  $res = db_query("SELECT * FROM modules WHERE name = '?' ", $module);
+  $cur = db_fetch_array($res);
+  if ($test = unserialize($cur["info"])) {
+    $cur["info"] = $test;
+  }
+  
+  return $cur;
+}
+
+
 
 /**
  * Eventually, this function will be used to translate strings.  For now, just pass through.

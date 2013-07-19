@@ -1,13 +1,35 @@
 <?php
 
 /**
- * This include fine mostly involves DB command shortcuts.
-*/ 
-  
+ * @file
+ * This file contains mostly db shortcuts.
+ */
+
 
 /**
- * Call other modules which implement the hook_watchdog function.
- * Adapted from Drupal 6's watchdog function.
+ * Add a log entry to the watchdog (log) table.
+ * 
+ * This is adapted from Drupal 6's watchdog system.
+ *
+ * @param string $type
+ *    Generally, this is the name of the module, or some other short text
+ *    which can be used to categorize this log entry. Ex:  "system" or "routines".
+ * @param string $message
+ *    This is the actual log message itself.  It can be any length, and contain replacement
+ *    patterns (very similar to the t() function.) Ex: "The user @user has logged in."
+ * @param array $variables
+ *    If replacement patterns exist in the $message, this is where they are defined, similar
+ *    to the t() function. Ex:  array("@user" => $user->name) *    
+ * @param int $severity
+ *    One of several constant values, denoting the severity level.
+ *    Available values:
+ *      - WATCHDOG_DEBUG    (for development)
+ *      - WATCHDOG_NOTICE   (default)
+ *      - WATCHDOG_ALERT    (a step above "notice")
+ *      - WATCHDOG_ERROR    (highest level of severity)
+ * @param string $extra_data
+ *    Any extra bit of text you want to add on. Must be 255 characters or less.  Good for adding
+ *    extra codes and such which can be queried for later more easily.
  */
 function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE, $extra_data = "") {
   global $user;
@@ -52,6 +74,8 @@ function fp_get_faculty_name($cwid) {
   if (!$name) $name = t("Unknown Advisor");
   return $name;
 }
+
+
 
 
 /**
@@ -239,11 +263,12 @@ function variable_get($name, $default_value = "") {
   $cur = db_fetch_array($res);
   
   $val = unserialize($cur["value"]);
+  
   if (!$val) {
     $val = $default_value;
   }
   
-  if ($val == "BOOLEAN_FALSE_PLACEHOLDER") {
+  if ($val === "BOOLEAN_FALSE_PLACEHOLDER") {
     $val = FALSE;
   }
   

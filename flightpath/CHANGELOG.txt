@@ -1,6 +1,29 @@
 FlightPath 4.x Changelog
 ========================
 
+2013-07-19
+  Added new watchdog (log entry) viewer to admin module
+  
+  Added warning message that displays on admin console if cron hasn't been run in over 7 days
+  
+  Added new function fp_get_module_details to misc.inc
+  
+  Modified system.install so that core modules get the version of "core" when first installed.
+  
+  Changed maintenance mode message slightly in system.module
+  
+  Tweaked update_status module to make it more clear, and added a "check now" url and link,
+  so users can check for new modules instead of waiting for cron.
+  
+  Limited search results (student_search.module) to 300, and display message if 300 is reached.
+  
+  Fixed bug in db.inc, function variable_get().  If what you were getting was boolean TRUE, then it would
+  show as FALSE!  Kind of a nasty bug!
+  
+  Added new "short" date format to format_date function, in theme.inc
+  
+  Updated documentation in hook.api.php
+
 
 ----------------
 RELEASED 4.0

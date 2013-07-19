@@ -53,6 +53,30 @@ function admin_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
     "tab_parent" => "admin-tools/admin",    
   );     
+  
+
+  
+  $items["admin/config/watchdog"] = array(
+    "title" => "Watchdog (logs)",
+    "description" => "View log messages from throughout the system",
+    "page_callback" => "admin_display_watchdog",    
+    "access_arguments" => array("display_watchdog"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_show_title" => TRUE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  );       
 
   
   $items["admin/duplicate-year"] = array(
@@ -1013,6 +1037,10 @@ function admin_perm() {
       "title" => t("Edit advising settings"),
       "description" => t("The user may edit advising settings, like available term IDs and the current catalog year."),
     ),   
+    "display_watchdog" => array(
+      "title" => t("View watchdog (log) entries"),
+      "description" => t("The user may view the recent watchdog log entries.  This represents a security concern, so give this only to trusted users."),
+    ),   
 
     
             
@@ -1046,12 +1074,209 @@ function admin_urgent_message_form() {
 }
  
   
+
+
+
+/**
+ * Displays recent watchdog entries, from the watchdog table
+ *
+ */
+function admin_display_watchdog() {
+  
+  fp_add_css(fp_get_module_path("admin") . '/css/admin.css');
+  
+  $rtn = "";
+
+  $rtn .= "<p>View recent watchdog entries</p>";
+  
+  $severity_array = array(
+    5 => "notice",
+    1 => "alert",
+    3 => "error",
+    7 => "debug",
+  );
+  
+  $results_per_page = 50;
+  
+  
+  $type_line = $severity_line = $limit_start = "";
+
+  $page = $_GET["page"];
+  $limit_start = 0;
+  if ($page != "" && is_numeric($page)) {
+    $limit_start = $results_per_page * ($page - 1);
+  }
+
+  
+  
+  // Filters:
+  $rtn .= "<form method='GET' action='" . fp_url("admin/config/watchdog") . "'>
+            ";
+  $rtn .= "Filter by severity:
+            <select name='sev_filter'>
+              <option value=''>-Any-</option>";
+  foreach ($severity_array as $key => $value) {
+    $sel = "";
+    if ($_GET["sev_filter"] == $key) $sel = "selected";
+     
+    $rtn .= "<option value='$key' $sel>$value</option>";
+  }  
+  
+  $rtn .= "</select>";
+  $rtn .= "<input type='submit' value='-&gt;'>";
+  $rtn .= "</form>";
+  
+  
+  if ($_GET["sev_filter"] != "") {
+    $severity_line = " AND severity = '" . mysql_real_escape_string($_GET["sev_filter"]) . "' ";
+  }
+  
+  
+  $rtn .= "<table class='watchdog-table' cellspacing='0' cellpadding='4'>";
+  
+  // Okay, let's display the recent watchdog entries.
+  $query = "SELECT * FROM watchdog
+                   WHERE 1
+                   $type_line
+                   $severity_line
+                   ORDER BY wid DESC
+                   ";
+  $res = db_query($query . " LIMIT $limit_start, $results_per_page");
+  while ($cur = db_fetch_object($res)) {
+    $pol = ($pol == "even") ? "odd" : "even";
+    
+    $o_msg = t($cur->message, unserialize($cur->variables));
+    $o_type = $cur->type;
+    
+    // shorten msg if necessary
+    $msg = substr($o_msg, 0, 50);
+    if ($msg != $o_msg) {
+      $msg = trim($msg) . "...";
+    }
+    
+    $type = substr($o_type, 0, 15);
+    if ($type != $o_type) {
+      $type = trim($type) . "...";
+    }
+
+    
+    
+    $severity = $severity_array[$cur->severity];
+    $when = format_date($cur->timestamp, "short");
+    
+    $user = fp_load_user($cur->user_id);
+    
+    
+    
+    $rtn .= "
+              <tr class='row-$pol row-$severity'>                
+                <td valign='top'>$when</td>
+                <td valign='top'>$type</td>                
+                <td valign='top'>$msg</td>                
+                <td valign='top'>$user->name</td>                
+              
+              </tr>    
+    
+            ";
+    
+  }
+  
+  
+  $rtn .= "</table>";
+  
+  // Now, do the page
+  
+  // Figure out the total number of results
+  $total = db_result(db_query("SELECT count(*) as count
+                               FROM ($query) a "));
+  
+  // Now, divide by the number of results per page.
+  $pages = ceil($total / $results_per_page);
+
+  $base_query = "sev_filter=" . $_GET["sev_filter"];
+   
+  $rtn .= "<div class='fp-pager'>";
+  if ($page > 1) {
+    $rtn .= "<span class='pager-link pager-first'>" . l("&laquo; first", "admin/config/watchdog", $base_query . "&page=1") . "</span>";
+    $rtn .= "<span class='pager-link pager-prev'>" . l("&lt; prev", "admin/config/watchdog", $base_query . "&page=" . ($page - 1)) . "</span>";
+  }
+  else {
+    $rtn .= "<span class='pager-link pager-first'>&laquo; first</span>";
+    $rtn .= "<span class='pager-link pager-prev'>&lt; prev</span>";    
+  }
+   
+  // page numbers here
+  // Let's get the previous X page numbers, and next X (if possible)
+  $start_page_num = $page - 5;
+  if ($start_page_num < 1) $start_page_num = 1;
+  $end_page_num = $page + 5;
+  if ($end_page_num > $pages) $end_page_num = $pages;
+  
+  if ($start_page_num > 1) {
+    $rtn .= "<span class='pager-elip'>...</span>";
+  }
+  
+  for ($t = $start_page_num; $t <= $end_page_num; $t++) {
+    if ($page == $t) {
+      // current page
+      $rtn .= "<span class='pager-link pager-number pager-current'>$t</span>";      
+    }
+    else {
+      $rtn .= "<span class='pager-link pager-number'>" . l($t, "admin/config/watchdog", $base_query . "&page=$t") . "</span>";
+    }
+  } 
+
+  
+  if ($end_page_num < $pages) {
+    $rtn .= "<span class='pager-elip'>...</span>";
+  }
+  
+  
+   
+  if ($page < $pages) {
+    $rtn .= "<span class='pager-link pager-next'>" . l("next &gt;", "admin/config/watchdog", $base_query . "&page=" . ($page + 1)) . "</span>";
+    $rtn .= "<span class='pager-link pager-last'>" . l("last &raquo;", "admin/config/watchdog", $base_query . "&page=$pages") . "</span>";
+  }
+  else {
+    $rtn .= "<span class='pager-link pager-next'>next &gt;</span>";
+    $rtn .= "<span class='pager-link pager-last'>last &raquo;</span>";    
+  }
+  
+  $rtn .= "</div>";
+  
+  
+  
+  
+  return $rtn;
+  
+}
+
+
+
+
+
+
+
+
+
 /**
  * This is the "main" page for the admin module.  It's what the user
  * first sees when the click to go to the Admin page.
  */
 function admin_display_main() {
   $de_catalog_year = admin_get_de_catalog_year(FALSE);
+  
+  // Has the system cron been run recently?
+  $cron_last_run = variable_get("cron_last_run", 0);    
+  if ($cron_last_run < strtotime("-7 DAY")) {
+    // Warn admin that they need to have cron set up!  It's been over a week!
+    fpm(t("Your system's cron process hasn't run in over a week.  In order for FlightPath
+            to continue to function properly, a cron process much be configured.
+            You may @run_link or see the @status_link page for instructions.", 
+            array("@status_link" => l(t("System status"), "admin/config/status"),
+                  "@run_link" => l(t("run cron now"), "admin/config/run-cron"))));
+  }
+  
   
   $rtn = "";
 

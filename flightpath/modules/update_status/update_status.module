@@ -8,26 +8,48 @@
 */
 
 
+/**
+ * Implementation of hook_menu
+ *
+ */
+function update_status_menu() {
+  
+  $items = array();
+  
+  $items["update-status-check-now"] = array(
+    "page_callback" => "update_status_check_now",
+    "access_arguments" => array("run_cron"),
+    "type" => MENU_TYPE_CALLBACK,
+  );
+  
+  
+  return $items;
+  
+}
+
 
 /**
- * Implementation of hook_cron()
+ * This will force a re-check of modules for this update_status module.
  * 
- * We only want to check every few days that cron runs.  Check with getflightpath.com,
- * and, if updates are available, store that information in our variables table.
+ * Required permission is the same as Run Cron permission.
+ *
  */
-function update_status_cron() {
+function update_status_check_now() {
+  update_status_perform_check();
   
-  $check_if_older_than = strtotime("-3 DAY");
-  // When was the last time we ran this check?
-  // (we only want to run once every few days)
-  $last_run = variable_get("update_status_last_run", 0);
-  if ($last_run > $check_if_older_than) {
-    // We have run this recently, harmlessly return
-    // Comment out to have this run every time (good for development)
-    return;
-  } 
+  // Go back to the System status page...
+  fp_goto("admin/config/status");
+  
+}
 
-  // If we are here, it means we should run our check.
+
+
+/**
+ * This function actually performs the update status check with getflightpath.com
+ *
+ */
+function update_status_perform_check() {
+
   // Let's assemble our URL which should be fairly long.
   $url = update_status_get_install_status_url();
   $result = fp_http_request($url);
@@ -56,7 +78,33 @@ function update_status_cron() {
   
     
   variable_set("update_status_last_run", time());
+  fp_add_message(t("Check of update status successful."));  
   
+  
+}
+
+
+
+/**
+ * Implementation of hook_cron()
+ * 
+ * We only want to check every few days that cron runs.  Check with getflightpath.com,
+ * and, if updates are available, store that information in our variables table.
+ */
+function update_status_cron() {
+  
+  $check_if_older_than = strtotime("-3 DAY");
+  // When was the last time we ran this check?
+  // (we only want to run once every few days)
+  $last_run = variable_get("update_status_last_run", 0);
+  if ($last_run > $check_if_older_than) {
+    // We have run this recently, harmlessly return
+    // Comment out to have this run every time (good for development)
+    return;
+  } 
+
+  // If we are here, it means we should run our check.
+  update_status_perform_check();
   
 }
 
@@ -66,6 +114,9 @@ function update_status_cron() {
  */
 function update_status_status() {
   $rtn = array();
+  
+  fp_add_css(fp_get_module_path("update_status") . "/css/update_status.css");
+  
   $status = "";
   // Check the data we have for modules, to see if any of them could use an update.
   $updates = variable_get("update_status_need_updates_modules", array());
@@ -79,20 +130,33 @@ function update_status_status() {
     "security" => "Security - High Priority!",
   );
   
+  ksort($updates);
+  
   if (count($updates)) {
     $status .= t("The following packages have available updates:");
     $status .= "<table border='0' cellpadding='3' width='100%' class='update-status-status-table'>
                   <tr>
                     <th>" . t("Package") . "</th>
-                    <th>" . t("Version") . "</th>
+                    <th>" . t("Your Version") . "</th>
+                    <th>" . t("Latest Version") . "</th>
                     <th>" . t("Release type") . "</th>
                   </tr>";
     foreach ($updates as $module => $version) {
       $release_type = fp_get_machine_readable($releases[$module]);
       
+      $display_name = $module;
+      $module_details = fp_get_module_details($module);
+      if ($module_details["info"]["name"] != "") {
+        $display_name = $module_details["info"]["name"];
+      }
+      
+      $your_version = $module_details["version"];
+      
+
       $status .= "<tr class='release-row release-row-$release_type'>
                   <td valign='top' class='update-status-status-module'>
-                    <a href='http://getflightpath.com/project/$module' target='_blank'>$module</a></td>
+                    <a href='http://getflightpath.com/project/$module' target='_blank'>$display_name</a></td>
+                  <td valign='top' class='update-status-status-your-version'>$your_version</td>
                   <td valign='top' class='update-status-status-version'>$version</td>
                   <td valign='top' class='update-status-status-type'>{$release_desc[$releases[$module]]}</td>
                   
@@ -103,15 +167,22 @@ function update_status_status() {
   else {
     $status .= t("All modules are up to date.");
   }
+
+  $check_link = "";
+  if (user_has_permission("run_cron")) {
+    $check_link = l(t("Check now?"), "update-status-check-now");
+  }
+  
   
   $last_run = variable_get("update_status_last_run", 0);
   if ($last_run > 0) {  
-    $status .= "<p>" . t("Last check on %date.", array("%date" => format_date($last_run))) . "</p>";
+    $status .= "<p>" . t("Last check on %date.", array("%date" => format_date($last_run))) . "  $check_link</p>";
   }
   else {
     $status .= "<p><b><span style='color:red;'>*</span>
-                </b>" . t("Module status has never been checked.  Please make sure you have a correctly configured cron job.") . "</p>";
+                </b>" . t("Module status has never been checked.  Please make sure you have a correctly configured cron job.") . "  $check_link</p>";
   }
+  
   
   
   $rtn["status"] = $status;

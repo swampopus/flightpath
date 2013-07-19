@@ -27,13 +27,13 @@ function system_enable() {
 
   // Set up the modules table.
   db_query("INSERT INTO modules (path, name, version, enabled, weight, type)
-            VALUES ('modules/system', 'system', '?', 1, '-999', 'module') ", FLIGHTPATH_VERSION);
+            VALUES ('modules/system', 'system', 'core', 1, '-999', 'module') ");
     
 
   // Let's perform installations on the other modules we want enabled by default.
   $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "content", "announcements", "tinymce", "course_search", "blank_degrees");
   foreach ($modules as $module) {
-    system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => FLIGHTPATH_VERSION));
+    system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => "core"));
   }
 
   // Set up some blocks for the system module by default.

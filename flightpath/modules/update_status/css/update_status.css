@@ -3,6 +3,14 @@
  * Custom CSS for the update_status module.
  */
 
+.update-status-status-table {
+  font-size: 0.8em;
+} 
+ 
+.update-status-status-your-version {
+  font-style: italic;
+}
+
 .update-status-status-table .release-row-security {
   background-color: pink;
 }

@@ -23,6 +23,12 @@ function convert_bbcode_to_html($str) {
 /**
  * Format a timestamp using the date command.
  * TODO: Make the formats something which can be controlled through the settings.
+ * 
+ * Available formats:
+ *  - standard
+ *  - short
+ *  - pretty
+ *  - just_date
  *
  */
 function format_date($timestamp, $format = "standard", $custom = "") {
@@ -34,6 +40,10 @@ function format_date($timestamp, $format = "standard", $custom = "") {
   $f = "";  
   if ($format == "standard") {
     $f = "n/d/Y h:i:sa";
+  }
+  
+  if ($format == "short") {
+    $f = "n/d/Y - g:i";
   }
   
   if ($format == "pretty") {

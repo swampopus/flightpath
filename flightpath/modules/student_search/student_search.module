@@ -317,12 +317,20 @@ function student_search_display_search() {
     $query .= "
               $group_by
               ORDER BY %ORDERBY%
+              LIMIT 300
               ";
 
     $adv_array = student_search_query_advisees($query);
   }
 
   $s = (count($adv_array) == 1) ? "" : "s"; 
+
+  // Are we showing the maximum number of students?
+  if (count($adv_array) == 300) {
+    $rtn .= "<div class='student-search-max-results'><em>" . t("Showing maximum 300 results. Please narrow search criteria.") . "</em></div>";
+  }
+  
+  
   
   $rtn .= student_search_render_advisees($adv_array, t("Search Results") . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
   $rtn .= "</form>";

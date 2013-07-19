@@ -228,6 +228,12 @@ function hook_update($old_schema, $new_schema) {
  * In this function, the developer can see what schema they are coming FROM, and make table
  * or other alterations based on that information.
  * 
+ * @param $old_schema
+ *    This will be the schema value we are upgrading FROM. Ex: 0, 1, 17, etc.
+ * @param $new_schema
+ *    This is the new schema value in the module's .info file, that
+ *    we are upgrading to.  Ex: 2, 18, etc.
+ * 
  */
 function hook_update($old_schema, $new_schema) {
   if ($new_schema < 4) {
