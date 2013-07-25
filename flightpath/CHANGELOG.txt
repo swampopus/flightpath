@@ -1,6 +1,22 @@
 FlightPath 4.x Changelog
 ========================
 
+
+----------------
+RELEASED 4.1
+----------------
+
+
+2013-07-25
+  Tweaked student_search.module to display "advanced search tips" on all sub tabs.
+  
+  Changed schema of the faculty table, and updated the system.install file to make those
+  changes on update.
+  
+  Fixed a bug in user module, where roles were not showing up.  Also, added where is_faculty=1
+  to search queries, to reduce duplicate users who are both faculty and students.
+
+
 2013-07-19
   Added new watchdog (log entry) viewer to admin module
   

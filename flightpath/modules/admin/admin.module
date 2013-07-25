@@ -99,7 +99,7 @@ function admin_menu() {
         1 => array(
           "text" => "Back to watchdog",
           "path" => "admin/config/watchdog",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%&sev_filter=%SEV_FILTER%&page=%PAGE%",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%&sev_filter=%SEV_FILTER%&page=%PAGE%&type_filter=%TYPE_FILTER%",
         ),
                 
       ),
@@ -1038,6 +1038,12 @@ function admin_menu_handle_replacement_pattern($str) {
     $str = str_replace("%SEV_FILTER%", $_GET["sev_filter"], $str);
   }
 
+  if (strpos($str, "%TYPE_FILTER%") !== 0) {
+    // It contains this replacement pattern!
+    $str = str_replace("%TYPE_FILTER%", $_GET["type_filter"], $str);
+  }
+  
+  
   if (strpos($str, "%PAGE%") !== 0) {
     // It contains this replacement pattern!
     $str = str_replace("%PAGE%", $_GET["page"], $str);
@@ -1240,19 +1246,42 @@ function admin_display_watchdog() {
   $type_line = $severity_line = $limit_start = "";
 
   $sev_filter = $_GET["sev_filter"];
+  $type_filter = $_GET["type_filter"];
   $page = $_GET["page"];
   
   $limit_start = 0;
   if ($page != "" && is_numeric($page)) {
     $limit_start = $results_per_page * ($page - 1);
   }
+  else {
+    $page = 1;
+  }
 
   
   
   // Filters:
-  $rtn .= "<form method='GET' action='" . fp_url("admin/config/watchdog") . "'>
+  $rtn .= "<form method='GET' action='" . fp_url("admin/config/watchdog") . "' class='watchdog-filters'>
             ";
-  $rtn .= "Filter by severity:
+  
+  $rtn .= "Filter by:
+           <span class='type-filter'>
+            Type:
+            <select name='type_filter'>
+              <option value=''>-Any-</option>";
+  $res = db_query("SELECT distinct(type) as type FROM watchdog ORDER BY type");
+  while ($cur = db_fetch_object($res)) {
+    $sel = ($type_filter == $cur->type) ? "selected" : "";
+    $rtn .= "<option value='$cur->type' $sel>$cur->type</option>";
+  }  
+  
+  
+  $rtn .= "</select>
+            </span>";
+
+  
+  $rtn .= "
+            <span class='severity-filter'>
+            Severity:
             <select name='sev_filter'>
               <option value=''>-Any-</option>";
   foreach ($severity_array as $key => $value) {
@@ -1262,7 +1291,12 @@ function admin_display_watchdog() {
     $rtn .= "<option value='$key' $sel>$value</option>";
   }  
   
-  $rtn .= "</select>";
+  $rtn .= "</select>
+            </span>";
+  
+  
+  
+  
   $rtn .= "<input type='submit' value='-&gt;'>";
   $rtn .= "</form>";
   
@@ -1271,6 +1305,10 @@ function admin_display_watchdog() {
     $severity_line = " AND severity = '" . mysql_real_escape_string($_GET["sev_filter"]) . "' ";
   }
   
+  if ($_GET["type_filter"] != "") {
+    $type_line = " AND type = '" . mysql_real_escape_string($_GET["type_filter"]) . "' ";
+  }
+
   
   $rtn .= "<table class='watchdog-table' cellspacing='0' cellpadding='4'>
               <tr>
@@ -1296,7 +1334,7 @@ function admin_display_watchdog() {
     $o_type = $cur->type;
     
     // shorten msg if necessary
-    $msg = substr($o_msg, 0, 50);
+    $msg = substr($o_msg, 0, 120);
     if ($msg != $o_msg) {
       $msg = trim($msg) . "...";
     }
@@ -1314,7 +1352,7 @@ function admin_display_watchdog() {
         
     $rtn .= "
               <tr class='row-$pol row-$severity'>                
-                <td valign='top'>" . l($cur->wid, "admin/config/watchdog/$cur->wid", "sev_filter=$sev_filter&page=$page") . "</td>
+                <td valign='top'>" . l($cur->wid, "admin/config/watchdog/$cur->wid", "sev_filter=$sev_filter&type_filter=$type_filter&page=$page") . "</td>
                 <td valign='top'>$when</td>
                 <td valign='top'>$type</td>                
                 <td valign='top'>$msg</td>                
@@ -1332,13 +1370,14 @@ function admin_display_watchdog() {
   // Now, do the page
   
   // Figure out the total number of results
-  $total = db_result(db_query("SELECT count(*) as count
-                               FROM ($query) a "));
+  $total = db_result(db_query("SELECT count(wid) as count
+                               FROM watchdog WHERE 1 $type_line $severity_line "));
+  
   
   // Now, divide by the number of results per page.
   $pages = ceil($total / $results_per_page);
 
-  $base_query = "sev_filter=" . $_GET["sev_filter"];
+  $base_query = "sev_filter=$sev_filter&type_filter=$type_filter";
    
   $rtn .= "<div class='fp-pager'>";
   if ($page > 1) {

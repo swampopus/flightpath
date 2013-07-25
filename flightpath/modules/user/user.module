@@ -110,6 +110,7 @@ function user_menu() {
 }
 
 
+
 function user_perm() {
   
   return array(
@@ -664,10 +665,11 @@ function user_display_users() {
     {
       // Two search terms, probably a name...
       $result = db_query("SELECT * FROM users u, faculty f
-          WHERE  
-          u.cwid = f.cwid AND
-          (l_name LIKE '%?%'
-          AND f_name LIKE '%?%')
+          WHERE
+          u.is_faculty = 1  
+          AND u.cwid = f.cwid
+          AND (l_name LIKE '%?%'
+                AND f_name LIKE '%?%')
           ORDER BY l_name, f_name ", $search2, $search1);
 
     }
@@ -676,10 +678,11 @@ function user_display_users() {
       // One search term....
       $result = db_query("SELECT * FROM users u, faculty f
           WHERE 
-          u.cwid = f.cwid AND
-          (u.cwid LIKE '%?%' 
-          OR l_name LIKE '%?%'
-          OR f_name LIKE '%?%')
+          u.is_faculty = 1
+          AND u.cwid = f.cwid
+          AND (u.cwid LIKE '%?%' 
+                OR l_name LIKE '%?%'
+                OR f_name LIKE '%?%')
           ORDER BY l_name, f_name ", $search1, $search1, $search1);
     }
 
@@ -699,8 +702,9 @@ function user_display_users() {
   { // No search, so look for the range...
     $result = db_query("SELECT * FROM users u, faculty f
                         WHERE
-                        u.cwid = f.cwid AND 
-                        l_name BETWEEN '?' AND '?'
+                          u.is_faculty = 1
+                        AND u.cwid = f.cwid
+                        AND l_name BETWEEN '?' AND '?'
                         ORDER BY l_name, f_name ", $ur, $lr);
     $displaying = $ur;
   }
@@ -719,11 +723,13 @@ function user_display_users() {
     ";
   while ($cur = db_fetch_array($result)) {
 
+    $user_id = $cur["user_id"];
     $l_name = trim(ucwords(strtolower($cur["l_name"])));
     $f_name = trim(ucwords(strtolower($cur["f_name"])));    
     $faculty_cwid = trim($cur["cwid"]);
     $dept_name = trim(ucwords(strtolower($cur["department"])));
 
+    
     
     $ast = "";
     $reason = "";
@@ -732,8 +738,11 @@ function user_display_users() {
     $fgcol = "black";
 
     $roles = "";
-    $roles_classes = "";
-    $temp = system_get_roles_for_user($faculty_id);
+    $roles_classes = "no-roles";
+    $temp = system_get_roles_for_user($user_id);
+    
+    if (count($temp) > 1) $roles_classes = "";
+    
     foreach ($temp as $rid => $t) {
       if ($rid > 2) {
         // rid 1 and 2 are anonymous and authenticated-- no need to show them.

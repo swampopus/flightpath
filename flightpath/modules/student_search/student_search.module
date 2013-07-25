@@ -125,6 +125,8 @@ function student_search_display_my_advisees() {
   global $user;
   $rtn = "";
 
+  $rtn .= student_search_get_advanced_search_tips();
+  
   $_SESSION["student_search_last_tab"] = "my-advisees";
   
   $faculty_cwid = mysql_real_escape_string($user->cwid);
@@ -157,6 +159,9 @@ function student_search_display_my_majors() {
   global $user;
   $rtn = "";
 
+  
+  $rtn .= student_search_get_advanced_search_tips();
+  
   $_SESSION["student_search_last_tab"] = "my-majors";
     
   // Figure out this user's major_code from the faculty table.
@@ -180,7 +185,6 @@ function student_search_display_my_majors() {
   $rtn .= student_search_render_advisees($adv_array, t("Major @major Results", array("@major" => $faculty_user_major_code)) . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
 
 
- // $rtn .= "</table>";
   
   return $rtn;
 }
@@ -240,23 +244,8 @@ function student_search_display_search() {
             </td></tr>
             </table>";
 
-  // Display advanced tips
-  $advanced_tips_html = "
-          <div class='student-search-advanced-tips'>
-            <ul>
-              <li>" . t("To search for inactive students, as well as active, add an asterisk (*)
-                  after your search.
-                  <br>Ex:  <em>smith*</em>") . "
-              </li>
-              <li>" . t("Search by major by typing major=CODE in the search box.
-                  <br>Ex:  <em>major=ENGL</em>  or  <em>major=ENGL*</em>") . "
-              </li>
-            </ul>
-          </div>";
   
-  $rtn .= "<div class='student-search-advanced-tips-wrapper'>
-              " . fp_render_c_fieldset($advanced_tips_html, t("View advanced search tips"), TRUE) . "
-           </div>";    
+  $rtn .= student_search_get_advanced_search_tips();
   
   
   //Get my list of advisees...
@@ -336,6 +325,42 @@ function student_search_display_search() {
   $rtn .= "</form>";
   $rtn .= "</table>";
 
+  return $rtn;
+}
+
+
+/**
+ * Simply returns the HTML to display the "advanced search tips" collapsible fieldset
+ * and instructions.
+ *
+ */
+function student_search_get_advanced_search_tips() {
+  $rtn = "";
+  
+// Display advanced tips
+  $advanced_tips_html = "
+          <div class='student-search-advanced-tips'>            
+            " . t("FlightPath displays students who are currently enrolled or are newly admitted for
+            an upcoming term. Use the following tips to expand your search options:") . "
+            <ul>
+              <li>" . t("To search for inactive students, as well as active, add an asterisk (*)
+                  after your search.
+                  <br>&nbsp; &nbsp; &nbsp; 
+                        Ex:  <em>smith*</em> &nbsp; &nbsp; or &nbsp; &nbsp; <em>10035744*</em>") . "
+              </li>
+              <li>" . t("Search by major by typing major=CODE in the search box.
+                  <br>&nbsp; &nbsp; &nbsp; 
+                        Ex:  <em>major=ENGL</em>  &nbsp; &nbsp; or &nbsp; &nbsp;  <em>major=ENGL*</em>") . "
+              </li>
+            </ul>
+          </div>";
+  
+  
+  $rtn .= "<div class='student-search-advanced-tips-wrapper'>
+             <label>" . t("Can't find the student you're looking for?") . "</label>
+              " . fp_render_c_fieldset($advanced_tips_html, t("View advanced search tips"), TRUE) . "
+           </div>";      
+  
   return $rtn;
 }
 

@@ -53,3 +53,7 @@ table.user-list  {
   background-color: white;
   color: #555;
 }
+
+table.user-list tr.no-roles {
+  background-color: #eee;
+}

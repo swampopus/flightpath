@@ -802,3 +802,8 @@ a.form-popup-description {
 .student-search-advanced-tips-wrapper {
   font-size: 0.8em;
 }
+
+.student-search-advanced-tips-wrapper label {
+  display:block;
+  font-weight: bold;
+}

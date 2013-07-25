@@ -59,6 +59,18 @@ function system_enable() {
 
 
 
+function system_update($old_schema, $new_schema) {
+  if ($old_schema <= 1) {
+    // Add column to the faculty table
+    db_query("ALTER TABLE faculty 
+              ADD COLUMN department_code varchar(10) NOT NULL AFTER college, 
+              ADD INDEX (department_code)");
+  }
+  
+}
+
+
+
 /**
  * Implementation of hook_install.
  * 
@@ -345,11 +357,13 @@ $q = "
 CREATE TABLE `faculty` (
   `cwid` int(10) unsigned NOT NULL,
   `college` varchar(100) NOT NULL,
-  `department` varchar(100) NOT NULL,
+  `department_code` varchar(10) NOT NULL,
+  `department` varchar(100) NOT NULL,  
   `major_code` varchar(10) NOT NULL,
   PRIMARY KEY (`cwid`),
   KEY `major_code` (`major_code`),
   KEY `dept` (`department`),
+  KEY `department_code` (`department_code`),
   KEY `college` (`college`)
 ); ";
 db_query($q);
