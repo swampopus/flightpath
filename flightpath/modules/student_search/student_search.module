@@ -19,7 +19,7 @@ function student_search_menu() {
   $items["student-search/my-advisees"] = array(
     "title" => t("My Advisees"),
     "page_callback" => "student_search_display_my_advisees",
-    "access_arguments" => array("view_any_advising_session"),
+    "access_arguments" => array("display_my_advisees_subtab"),
     "type" => MENU_TYPE_SUB_TAB, 
     "tab_family" => "student_search",
     "tab_parent" => "student-search",
@@ -37,7 +37,7 @@ function student_search_menu() {
   $items["student-search/my-majors"] = array(
     "title" => t("My Majors"),
     "page_callback" => "student_search_display_my_majors",
-    "access_arguments" => array("view_any_advising_session"),
+    "access_arguments" => array("display_my_majors_subtab"),
     "type" => MENU_TYPE_SUB_TAB,
     "tab_family" => "student_search",
     "tab_parent" => "student-search",
@@ -50,11 +50,30 @@ function student_search_menu() {
     "weight" => 20,
   );
   
+
+  
+  $items["student-search/majors-search"] = array(
+    "title" => t("Majors"),
+    "page_callback" => "student_search_display_majors_search",
+    "access_arguments" => array("display_majors_subtab"),
+    "type" => MENU_TYPE_SUB_TAB,
+    "tab_family" => "student_search",
+    "tab_parent" => "student-search",
+    "page_settings" => array (
+      "display_currently_advising" => TRUE,
+      "display_greeting" => TRUE,
+      "screen_mode" => "not_advising",
+      "page_has_search" => TRUE,      
+    ),    
+    "weight" => 25,
+  );  
+  
+  
     
   $items["student-search/search"] = array(
     "title" => t("Search"),
     "page_callback" => "student_search_display_search",
-    "access_arguments" => array("view_any_advising_session"),
+    "access_arguments" => array("display_search_subtab"),
     "type" => MENU_TYPE_SUB_TAB,
     "tab_family" => "student_search",
     "tab_parent" => "student-search",
@@ -150,6 +169,114 @@ function student_search_display_my_advisees() {
 
   return $rtn;  
 }
+
+
+/**
+ * Implementation of hook_perm
+ *
+ * @return unknown
+ */
+function student_search_perm() {
+  return array(
+    "display_search_subtab" => array(
+      "title" => t("Display Search subtab"),
+      "description" => t("The user may view the Search subtab under the Advisees tab."),
+    ),
+    "display_my_advisees_subtab" => array(
+      "title" => t("Display My Advisees subtab"),
+      "description" => t("The user may view the My Advisees subtab under the Advisees tab."),
+    ),    
+    "display_my_majors_subtab" => array(
+      "title" => t("Display My Majors subtab"),
+      "description" => t("The user may view the My Majors subtab under the Advisees tab."),
+    ),    
+    "display_majors_subtab" => array(
+      "title" => t("Display Majors subtab"),
+      "description" => t("The user may view the Majors (search) subtab under the Advisees tab."),
+    ),        
+  );
+}
+
+
+
+/**
+ * Display the majors search sub-tab, where we can select a major and see the students
+ * assigned to it.
+ *
+ */
+function student_search_display_majors_search() {
+  global $user;
+  
+  $rtn = "";
+  
+  fp_add_css(fp_get_module_path("student_search") . "/css/student_search.css");
+  
+    
+  $_SESSION["student_search_last_tab"] = "majors-search";
+    
+  // Get the $major_code from the REQUEST, or from the user's saved settings.
+  $major_code = trim($_REQUEST["major_code"]);
+  if ($major_code == "") {
+    // Get from their settings
+    $major_code = db_get_user_setting($user->id, "major_search");
+  }
+  else {
+    // They did set something in the post. Save it to their settings.
+    db_set_user_setting($user->id, "major_search", $major_code);
+  }
+
+  
+  $rtn .= "<form method='POST' action='" . base_path() . "/student-search/majors-search'
+              class='major-search-form'>            
+            <label>" . t("Select an available major from the list below:") . "</label>
+            <select name='major_code'>
+              <option value=''>- " . t("Please Select") . " -</option>
+              ";
+  $res = db_query("SELECT * FROM degrees
+                   WHERE exclude = '0'
+                   AND major_code NOT LIKE '%|%'
+                   GROUP BY major_code
+                   ");
+  while ($cur = db_fetch_object($res)) {
+    $sel = ($major_code == $cur->major_code) ? "selected" : "";
+    
+    $rtn .= "<option value='$cur->major_code' $sel>$cur->title ($cur->major_code)</option>";
+  }
+  
+  
+  $rtn .= "
+            </select>
+            <input type='submit' value='" . t("Search") . "'>
+            </form>";        
+   
+
+   
+
+  $rtn .= student_search_get_advanced_search_tips();  
+  
+  $query = "SELECT u.user_id, f_name, l_name, u.cwid, major_code, rank_code, a.catalog_year
+              FROM users u, students a
+              WHERE 
+                 substring_index(major_code, '|', 1) = '$major_code'
+                 AND u.cwid = a.cwid
+                 AND u.is_student = 1
+                 AND u.is_disabled = 0                 
+              AND rank_code IN %RANKIN%
+              %EXTRA_STUDENTSEARCH_CONDITIONS%
+              ORDER BY %ORDERBY%
+              ";
+
+  $adv_array = student_search_query_advisees($query);
+  $s = (count($adv_array) == 1) ? "" : "s"; 
+  $rtn .= student_search_render_advisees($adv_array, t("Major @major Results", array("@major" => $major_code)) . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
+
+
+  
+  return $rtn;
+  
+  
+}
+
 
 
 /**

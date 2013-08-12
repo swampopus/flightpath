@@ -822,7 +822,7 @@ class _FlightPath
 	{
 	  global $user;
     
-	  //var_dump($__p_o_s_t);
+	  
 		// This method will, only by looking at variables in the
 		// POST, save an advising session into the database.
 		$db = get_global_database_handler();
@@ -1099,6 +1099,19 @@ class _FlightPath
 				$this->replace_missing_course_in_group($course_id, $group_id);
 			}
 
+			
+			// Make sure the sub_hours aren't larger than the sub_course_id's awarded hours.
+			// This is to stop a bug from happening where sometimes, some people are able to substitute
+			// a course for larger than the awarded hours.  I believe it is a javascript bug.      
+
+      if ($test_c = $this->student->list_courses_taken->find_specific_course($sub_course_id, $sub_term_id, (bool) $sub_transfer_flag, true)) {
+  	    // Are the hours out of whack?
+  	    if (intval($sub_hours) > intval($test_c->hours_awarded)) {
+  	      // Yes!  Set it to the value of the hours_awarded.
+  	      $sub_hours = intval($test_c->hours_awarded);
+  	    }
+      }			
+		
 
 			$result = $db->db_query("INSERT INTO student_substitutions
 									(`student_id`,`faculty_id`,`required_course_id`,`required_entry_value`,

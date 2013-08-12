@@ -209,6 +209,50 @@ function db_insert_id() {
   return $db->db_insert_id();
 }
 
+
+/**
+ * Return the array from the user_settings table.
+ *
+ * @param unknown_type $user_id
+ */
+function db_get_user_settings($user_id) {
+  $db = get_global_database_handler();
+  
+  return $db->get_user_settings($user_id);
+}
+
+/**
+ * Return a specific setting's value, based on the var_name given.
+ *
+ * @param unknown_type $user_id
+ * @param unknown_type $var_name
+ */
+function db_get_user_setting($user_id, $var_name = "", $default_value = "") {
+  $settings = db_get_user_settings($user_id);  
+  $val = $settings[$var_name];
+  if (!$val) {
+    $val = $default_value;
+  }
+  
+  return $val;
+}
+
+
+function db_set_user_setting($user_id, $var_name, $value) {
+  $settings = db_get_user_settings($user_id);
+  $settings[$var_name] = $value;
+  
+  $ser = serialize($settings);
+  
+  db_query("DELETE FROM user_settings WHERE user_id = '?' ", $user_id);
+  db_query("INSERT INTO user_settings (user_id, settings, posted)
+            VALUES ('?', '?', '?') ", $user_id, $ser, time());
+}
+
+
+
+
+
 function db_query($query) {
   // Capture arguments to this function, to pass along to our $db object.
   $args = func_get_args();

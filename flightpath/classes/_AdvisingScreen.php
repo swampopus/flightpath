@@ -981,8 +981,8 @@ function draw_menu_items($menu_array) {
 				which FlightPath is able to load.") . "					
 				<br><br>
 				" . t("Order by:") . " &nbsp; &nbsp;";
-    $pC .= l(t("Name"), "advise/popup-toolbox/courses", "order=name", array("style" => $ns)) . "&nbsp; &nbsp;";
-    $pC .= l(t("Date Taken"), "advise/popup-toolbox/courses", "order=date", array("style" => $os));
+    $pC .= l(t("Name"), "advise/popup-toolbox/courses", "order=name&current_student_id=$csid", array("style" => $ns)) . "&nbsp; &nbsp;";
+    $pC .= l(t("Date Taken"), "advise/popup-toolbox/courses", "order=date&current_student_id=$csid", array("style" => $os));
 
 		$pC .= "<hr>
 				<table border='0' cellpadding='2'>

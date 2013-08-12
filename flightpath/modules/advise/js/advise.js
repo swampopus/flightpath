@@ -330,6 +330,12 @@ function popupUpdateSubData(max_hours, term_id, transferFlag, groupHoursAvail, s
   document.getElementById("subTransferFlag").value = transferFlag;
   // if the addition checkbox is checked, use the groupHoursAvail as
   // the max.
+    
+  // Force numbers to be integers so they will be evaluated correctly.
+  max_hours = parseInt(max_hours);
+  groupHoursAvail = parseInt(groupHoursAvail);
+  subCourseHours = parseInt(subCourseHours);
+  
   if (document.getElementById("cbAddition").checked == true)
   {
     max_hours = groupHoursAvail;
@@ -338,9 +344,7 @@ function popupUpdateSubData(max_hours, term_id, transferFlag, groupHoursAvail, s
       max_hours = subCourseHours;
     }
   }
-  
-  //alert(max_hours);
-  
+        
   var sel = document.getElementById("subHours");
   
   // Replace this pulldowns elements with a range of values from

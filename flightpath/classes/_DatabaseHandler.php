@@ -84,38 +84,6 @@ class _DatabaseHandler
 	}
 
 	
-	/**
-	 * This attempts to set a variable in flightpath_settings,
-	 * creating it if it does not exist.
-	 *
-	 * @param string $name
-	 * @param string $val
-	 */
-	function set_settings_variable($name, $val) {
-  
-    $res = $this->db_query("REPLACE INTO flightpath_settings 
-		            (`variable_name`, `value`)
-								VALUES ('?', '?') ", $name, $val);		  
-	  
-	}
-	
-	
-	/**
-	 * Returns the value in the database table flightpath_settings
-	 * for this variable, if it exists.
-	 *
-	 * @param string $name
-	 */
-	function get_settings_variable($name) {
-	  
-	  $res = $this->db_query("SELECT value FROM flightpath_settings
-	                         WHERE variable_name = '?' ", $name);
-	  $cur = $this->db_fetch_array($res);
-	  
-	  return $cur["value"];
-	  
-	}
-	
 	
 	
 	function get_substitution_details($sub_id)
@@ -351,7 +319,12 @@ class _DatabaseHandler
 	 */
 	function db_error($msg = "")
 	{
+	  
+	  $arr = debug_backtrace();
     
+	  $when_ts = time();
+	  $when_english = format_date($when_ts);
+	  
     // If we are on production, email someone!
     if ($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"] != "")
     {
@@ -359,24 +332,29 @@ class _DatabaseHandler
     	$email_msg = t("A MYSQL error has occured in FlightPath.") . "  
     	Server: $server
     	
+    	Timestamp: $when_ts ($when_english)
+    	
     	Error:
     	" . mysql_error() . "
     	
     	Comments:
     	$msg
+    	
+    	Backtrace:
+    	" . print_r($arr, true) . "
     	";
     	mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
     }
     
     fpm(t("A MySQL error has occured:") . " " . mysql_error() . "<br><br>" . t("The backtrace:"));
-    $arr = debug_backtrace();
     fpm($arr);
 
     if ($GLOBALS["fp_die_mysql_errors"] == TRUE) {
       print "\n<br>The script has stopped executing because of a MySQL error:
                     " . mysql_error() . "<br>\n
              Please fix the error and try again.<br>\n";
-      print "<br><br>Program backtrace:
+      print "<br><br>Timestamp: $when_ts ($when_english)
+              <br><br>Program backtrace:
               <pre>" . print_r($arr, true) . "</pre>";
       die;
     }

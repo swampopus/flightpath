@@ -2,6 +2,28 @@ FlightPath 4.x Changelog
 ========================
 
 
+2013-08-12
+  Fixed bug in _AdvisingScreen.php, where the current student was lost when changing filters
+  in the Admin Toolbox
+  
+  Fixed bug involving addition substitutions, where the max hours avail wasn't being calculated
+  correctly.
+  
+  Added a safeguard when saving substitutions, so that you can never save for more hours than
+  the subbed course is worth.
+  
+  Modified the db_error function in _DatabaseHandler.php, so we get a timestamp as well
+  as the backtrace emailed when an error occurs.
+  
+  Added functions in db.inc for getting/setting individual user settings, which is required
+  for the changes to Student Search.
+  
+  Updated student_search module, to have a major search tab, where advisors can see all students
+  in a major.  Their selections are remembered in user settings.  Also, added new permissions
+  for fine-level of control over who can see which subtabs.
+
+
+
 ----------------
 RELEASED 4.1
 ----------------
