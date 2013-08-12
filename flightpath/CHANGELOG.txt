@@ -2,6 +2,11 @@ FlightPath 4.x Changelog
 ========================
 
 
+----------------
+RELEASED 4.2
+----------------
+
+
 2013-08-12
   Fixed bug in _AdvisingScreen.php, where the current student was lost when changing filters
   in the Admin Toolbox
