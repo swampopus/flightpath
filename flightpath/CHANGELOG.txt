@@ -2,6 +2,19 @@ FlightPath 4.x Changelog
 ========================
 
 
+2013-08-14
+  Added a settings page to student_search module, moved settings specific to its functioning
+  to there.
+  
+  Made it so that the user's permissions are re-calculated on every page load, so if the admin
+  grants or takes away permissions/roles from a user, they do not have to log out and back in before
+  changes are affected.
+  
+  Added a new form element type, "checkbox" which saves as either NULL or boolean TRUE, depending
+  on if the checkbox was checked.  Before this, you had to specify multiple "checkboxes" in an
+  array structure, and it was as conveineint for a single on/off checkbox.
+
+
 ----------------
 RELEASED 4.2
 ----------------

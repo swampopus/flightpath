@@ -4,6 +4,30 @@
 function student_search_menu() {
   $items = array();
   
+  
+  $items["admin/config/student-search-settings"] = array(
+    "title" => "Student Search settings",
+    "description" => "Configure settings for the Student Search function",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("student_search_settings_form", "system_settings"),
+    "access_arguments" => array("administer_student_search"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,      
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  );
+  
+  
   $items["student-search"] = array(
     "title" => t("Advisees"),
     "page_callback" => "student_search_subtab_switchboard",
@@ -92,6 +116,55 @@ function student_search_menu() {
 
 
 
+/**
+ * This is a system_settings form for configuring our module.
+ *
+ */
+function student_search_settings_form() {
+  $form = array();
+  
+  
+  $form["student_search_major_search_cur_year"] = array(
+    "type" => "checkbox",
+    "label" => "Major search - Only show major choices from current catalog year?",    
+    "value" => variable_get("student_search_major_search_cur_year", FALSE),
+    "description" => t("If checked, the Majors tab will only allow selections of
+                        unexcluded degrees/majors in the current catalog year.
+                        If not sure what to do, leave this CHECKED."),
+  );
+  
+  
+  
+  $form["extra_student_search_conditions"] = array(
+    "type" => "textarea",
+    "label" => t("Extra student search conditions:"),
+    "value" => variable_get("extra_student_search_conditions", " AND is_active = 1 "),
+    "description" => t("This is mysql which will get appended to end of the WHERE clause of every query
+                    relating to searching for students.  It is so you can easily add global conditions, 
+                    especially if you are overriding the student_search module.  For example,
+                    to check that the students are admitted or enrolled.  <b>Probably not necessary</b> if you
+                    are not overriding the student_search module.  If you are unsure what to do, leave this set to default.
+                    <br>Default is:  AND is_active = 1 "),    
+  );
+    
+  
+  $form["enrolled_student_search_conditions"] = array(
+    "type" => "textarea",
+    "label" => t("Enrolled student search conditions:"),
+    "value" => variable_get("enrolled_student_search_conditions", " AND is_active = 1 "),
+    "description" => t("Similar to the one above it, this is a clause which will only bring up students
+                    who are enrolled at the university, and taking courses.  This might be identical to the
+                    one above it.  At the moment, this is only being used in the Stats module, and not
+                    for any logic in FlightPath, so you should consider it optional.
+                    <br>Default is:  AND is_active = 1 "),    
+  );
+
+  
+  
+  return $form;
+}
+
+
 
 
 /**
@@ -150,6 +223,7 @@ function student_search_display_my_advisees() {
   
   $faculty_cwid = mysql_real_escape_string($user->cwid);
         
+  
   $query = "SELECT u.user_id, f_name, u.cwid, l_name, major_code, rank_code, a.catalog_year
               FROM users u, students a, advisor_student c
               WHERE 
@@ -178,6 +252,10 @@ function student_search_display_my_advisees() {
  */
 function student_search_perm() {
   return array(
+    "administer_student_search" => array(
+      "title" => t("Administer Student Search"),
+      "description" => t("Configure settings for the student search module."),
+    ),
     "display_search_subtab" => array(
       "title" => t("Display Search subtab"),
       "description" => t("The user may view the Search subtab under the Advisees tab."),
@@ -232,9 +310,22 @@ function student_search_display_majors_search() {
             <select name='major_code'>
               <option value=''>- " . t("Please Select") . " -</option>
               ";
+  
+  
+  // Do we have any extra settings for this search?
+  $current_catalog_year = mysql_real_escape_string(variable_get("current_catalog_year", 2006));
+  $cur_only = variable_get("student_search_major_search_cur_year", FALSE);
+  $extra_line = "";
+  if ($cur_only == TRUE) {
+    $extra_line = " AND catalog_year = '$current_catalog_year' ";
+  }
+  
+  
+  
   $res = db_query("SELECT * FROM degrees
                    WHERE exclude = '0'
                    AND major_code NOT LIKE '%|%'
+                   $extra_line
                    GROUP BY major_code
                    ");
   while ($cur = db_fetch_object($res)) {

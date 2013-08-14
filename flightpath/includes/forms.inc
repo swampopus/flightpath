@@ -369,7 +369,7 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   if ($type == "markup") {
     $rtn .= "$value";
   }
-  else if ($type != "hidden") {
+  else if ($type != "hidden" && $type != "checkbox") {
     $rtn .= "<label>$ast$label $popup_help_link</label>";
   }
 
@@ -427,7 +427,7 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   }
 
 
-
+  // Multiple checkboxes...
   if ($type == "checkboxes") {
     $rtn .= "<div class='form-checkboxes form-checkboxes-$name'>";
     foreach ($options as $key => $val) {
@@ -443,6 +443,22 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
     $rtn .= "</div>";
   }
 
+  // A single checkbox... The values will be with 0 (zero) or 1 (one), and boolean
+  // values are accepted/saved
+  if ($type == "checkbox") {
+    $rtn .= "<div class='form-checkbox form-checkbox-$name'>";
+
+    $checked = "";
+    if ((bool)($value) == TRUE) {      
+      $checked = "checked=checked";
+    }
+    $rtn .= "<div class='checkbox-element'>
+               <label class='label-for-checkbox'><input type='checkbox' name='$name' id='element-$name' value='1' $checked $attributes> $label</label>
+             </div>";
+
+    $rtn .= "</div>";    
+  }
+  
 
 
   if ($type == "submit") {

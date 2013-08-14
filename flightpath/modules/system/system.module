@@ -713,6 +713,15 @@ function system_settings_form() {
   );
   
   
+  $form["maintenance_mode"] = array(
+    "label" => t("Set maintenance mode?"),
+    "type" => "checkbox",
+    "value" => variable_get("maintenance_mode", FALSE),
+    "description" => t("If checked, a message will display on every page stating
+                        that the system is currently undergoing routine maintenance."),    
+  );
+  
+  
   $form["contact_email_address"] = array(
     "type" => "textfield",
     "label" => t("Contact email address:"),
@@ -770,30 +779,6 @@ function system_settings_form() {
                 It should be separated by commas.
                 This also affects which students you may search for on the Advisees
                 tab. Ex: FR, SO, JR, SR"),
-  );
-
-  $form["extra_student_search_conditions"] = array(
-    "type" => "textarea",
-    "label" => t("Extra student search conditions:"),
-    "value" => variable_get("extra_student_search_conditions", " AND is_active = 1 "),
-    "description" => t("This is mysql which will get appended to end of the WHERE clause of every query
-                    relating to searching for students.  It is so you can easily add global conditions, 
-                    especially if you are overriding the student_search module.  For example,
-                    to check that the students are admitted or enrolled.  <b>Probably not necessary</b> if you
-                    are not overriding the student_search module.  If you are unsure what to do, leave this set to default.
-                    <br>Default is:  AND is_active = 1 "),    
-  );
-    
-  
-  $form["enrolled_student_search_conditions"] = array(
-    "type" => "textarea",
-    "label" => t("Enrolled student search conditions:"),
-    "value" => variable_get("enrolled_student_search_conditions", " AND is_active = 1 "),
-    "description" => t("Similar to the one above it, this is a clause which will only bring up students
-                    who are enrolled at the university, and taking courses.  This might be identical to the
-                    one above it.  At the moment, this is only being used in the Stats module, and not
-                    for any logic in FlightPath, so you should consider it optional.
-                    <br>Default is:  AND is_active = 1 "),    
   );
 
 
@@ -1021,9 +1006,18 @@ function system_handle_form_submit() {
   if (function_exists($callback)) {
     $form = fp_get_form($callback);
     foreach ($form as $name => $element) {     
-      //if (isset($_POST[$name])) {  
-        $values[$name] = $_POST[$name];
-      //}
+
+      $values[$name] = $_POST[$name];
+      // Do we need to alter the value from the POST?
+      
+      // If this is a checkbox, and we have any value in the POST, it should
+      // be saved as boolean TRUE
+      if ($element["type"] == "checkbox") {
+        if (isset($_POST[$name]) && $_POST[$name] === "1") {
+          $values[$name] = TRUE;          
+        }        
+      }
+
     }
   }  
 
@@ -1585,6 +1579,12 @@ function system_init() {
     }
     
     $user = $_SESSION["fp_user_object"];
+    // To make sure we pick up the user's newest permissions, re-load 
+    // the user here.
+    
+    $user = fp_load_user($user->id);
+    
+    
   }
   else {
     // User is anonymous, so set it up as such.
