@@ -1,6 +1,14 @@
 FlightPath 4.x Changelog
 ========================
 
+2013-10-30
+  Fixed error in system module install, where "is_active" field not added to student
+  table.
+
+2013-10-04
+  Updated announcements module to show "Updated" date in block, instead of "Posted" date,
+  if the announcement had been updated recently.
+
 
 2013-08-14
   Added a settings page to student_search module, moved settings specific to its functioning

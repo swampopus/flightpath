@@ -93,7 +93,18 @@ function announcements_render_announcements() {
                 ";
     }
     $rtn .= "<div class='announcement-text'>" . filter_markup($announcement["body"], "full") . "</div>
-                <div class='announcement-posted'>" . t("Posted") . " " . date("D, M jS Y - g:ia", $announcement["posted"]) . "</div>";
+                <div class='announcement-posted'>";
+    
+    // If we have not updated this announcement before, then print "posted",
+    // else, print "updated" date.
+    if ($announcement["updated"] > $announcement["posted"]) {      
+      $rtn .= t("Updated") . " " . date("D, M jS Y - g:ia", $announcement["updated"]);      
+    }
+    else {
+      $rtn .= t("Posted") . " " . date("D, M jS Y - g:ia", $announcement["posted"]);
+    }
+    
+    $rtn .= "</div>";
         
     $rtn .= "</div>";
   }                    
