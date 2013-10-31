@@ -1420,12 +1420,9 @@ function user_has_role($role) {
 function user_has_permission($permission) {
   global $user;  
   
-  //fpm("checking permission $permission");
-  
   // If the user is admin (id == 1) then they always have access.
   if ($user->id == 1) return TRUE;
-  
-  
+    
   // Otherwise, simply check their permissions array.
   if (in_array($permission, $user->permissions)) {
     return TRUE;
