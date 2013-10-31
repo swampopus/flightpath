@@ -1,9 +1,16 @@
 FlightPath 4.x Changelog
 ========================
 
+----------------
+RELEASED 4.2.3
+----------------
+
+
 2013-10-31
   Modified Users core module, to be able to edit/create/delete both Faculty/Staff and Student users.  Includes
   a new user.js file to facilitate user deletion.
+  
+  Set "user" module to be enabled by default on a fresh install.
   
 
 ----------------
