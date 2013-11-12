@@ -714,7 +714,7 @@ function fp_add_js($js, $type = "file") {
 function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bool_include_base_path = TRUE) {
   
   $p = menu_get_module_path($module, $bool_include_file_system_path);
-    
+
   if ($bool_include_base_path) {
     $p = $GLOBALS["fp_system_settings"]["base_path"] . "/" . $p;
   }

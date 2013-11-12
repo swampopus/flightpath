@@ -64,10 +64,13 @@ function menu_rebuild_cache($bool_display_message = TRUE) {
 }
 
 
-function menu_get_module_path($module) {
+function menu_get_module_path($module, $bool_include_file_system_path = FALSE) {
 
-  
-
+  $system_path = "";
+  if ($bool_include_file_system_path) {
+    $system_path = $GLOBALS["fp_system_settings"]["file_system_path"] . "/";
+  }
+    
   if (isset($GLOBALS["fp_system_settings"]["modules"][$module]["path"])) {
     return $system_path . $GLOBALS["fp_system_settings"]["modules"][$module]["path"];
   }

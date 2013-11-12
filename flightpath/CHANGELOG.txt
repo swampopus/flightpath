@@ -8,6 +8,9 @@ FlightPath 4.x Changelog
   Modified _Student.class so that if the rank code isn't recognized, it will display whatever
   code the student has.
   
+  Fixed bug in menu.inc, where the file_system_path was not being added to a module's path, even
+  when requested.
+  
 
 2013-11-02
   Updated README.txt file to contain extra information about the icon sets used in FlightPath.
