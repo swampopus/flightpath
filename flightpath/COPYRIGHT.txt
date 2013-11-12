@@ -1,13 +1,13 @@
 ====================================
 Copyright Information for FlightPath
 ====================================
-Last updated: 7/09/2012
+Last updated: 11/02/2013
   
 All FlightPath code is Copyright 2006 - Present by the original authors.
 
 FlightPath was originally designed and programmed by the 
 University of Louisiana at Monroe. The original source (version 3x and below) 
-is Copyright (C) 2011-present by the University of Louisiana at Monroe.
+is Copyright (C) by the University of Louisiana at Monroe.
 http://www.ulm.edu
 
 FlightPath is considered "open source" under the 

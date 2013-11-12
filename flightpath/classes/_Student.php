@@ -451,7 +451,6 @@ class _Student
     $this->major_code = $this->db->get_student_major_from_db($this->student_id);
 		$this->catalog_year = $this->db->get_student_catalog_year($this->student_id);
 		$this->name = $this->db->get_student_name($this->student_id);
-    
     /*
 	  // Let's perform our queries.
 		$res = $this->db->db_query("SELECT * FROM students 
@@ -494,7 +493,13 @@ class _Student
       "PR"=>t("Professional"),
     );	  
     
-    return $rank_array[$rank_code];
+    $val = $rank_array[$rank_code];
+    
+    if (trim($val) == "") {
+       $val = $rank_code;
+    }
+    
+    return $val;
         
 	}
 	

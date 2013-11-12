@@ -1,6 +1,19 @@
 FlightPath 4.x Changelog
 ========================
 
+2013-11-12
+  Fixed javascript bug in admin.js file, which prevented courses and groups from being
+  deleted.  
+  
+  Modified _Student.class so that if the rank code isn't recognized, it will display whatever
+  code the student has.
+  
+
+2013-11-02
+  Updated README.txt file to contain extra information about the icon sets used in FlightPath.
+  Updated COPYRIGHT.txt file for minor clarifications.
+  
+
 ----------------
 RELEASED 4.2.3
 ----------------

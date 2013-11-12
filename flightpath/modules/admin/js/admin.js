@@ -272,7 +272,7 @@ function adminPopupSelectIcon(file) {
   // Submit our form..
   opener.showUpdate(false);
   //opener.document.getElementById("element-scroll_top").value = opener.document.body.scrollTop;
-  opener.document.getElementById("sysform").submit();
+  opener.document.getElementById("fp-form-admin_edit_group_form").submit();
   // Close the window
   window.close();
 }
@@ -284,7 +284,7 @@ function adminDeleteGroup(group_id) {
   }
   
   document.getElementById("element-perform_action2").value="delete_group";
-  document.getElementById("sysform").submit();
+  document.getElementById("fp-form-admin_edit_group_form").submit();
   
 }
 
@@ -296,7 +296,7 @@ function adminDeleteDegree(degreeID) {
   }
   
   document.getElementById("perform_action2").value="delete_degree";
-  adminSubmitForm();
+  adminSubmitDegreeForm();
   
 }
 
@@ -316,7 +316,7 @@ function adminDeleteCourse(course_id, catalog_year, warnEqv) {
   }
   
   document.getElementById("element-perform_action2").value="delete_course";
-  document.getElementById("sysform").submit();   
+  document.getElementById("fp-form-admin_edit_course_form").submit();   
   
 }
 
@@ -353,7 +353,7 @@ function adminPopupAddGroup(semester_num) {
   
   //alert(group_id + " " + hours + " " + type + " " + min_grade);
   opener.document.getElementById("perform_action2").value="addGroup_" + group_id + "_" + semester_num + "_" + hours + "_" + type + "_" + min_grade;
-  opener.adminSubmitForm();
+  opener.adminSubmitDegreeForm();
   window.close();
       
 }
@@ -368,12 +368,19 @@ function adminPopupSaveDefinition() {
   var def = encodeURI(document.getElementById("definition").value);
   opener.document.getElementById("element-set_definition").value = def;
   opener.showUpdate();
-  opener.document.getElementById("sysform").submit();
+  opener.document.getElementById("fp-form-admin_edit_group_form").submit();
   window.close();
   
 }
 
+
+// This is a depricated function, here purely to prevent certain things from breaking.
 function adminSubmitForm() {
+  adminSubmitDegreeForm();
+}
+
+function adminSubmitDegreeForm() {
+  // Note: due to complexity, the degree form is not a typical form_api form.
   document.getElementById("scroll_top").value = document.body.scrollTop;
   document.getElementById("mainform").submit();
 } 
@@ -387,7 +394,7 @@ function adminDelGroup(group_id, semester_num) {
   }
   
   document.getElementById("perform_action2").value="delGroup_" + group_id + "_" + semester_num;
-  adminSubmitForm();
+  adminSubmitDegreeForm();
   
   
 }
