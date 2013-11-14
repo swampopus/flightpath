@@ -661,7 +661,11 @@ function csv_to_array($csv_string) {
   return $temp;
 }
 
-
+/**
+ * Add a message to the top of the screen for anyone to see.
+ * @param $type - This will be added to the CSS class of the message box, so you can theme
+ *                it however you want.  Suggested types are "status" and "error".
+ */
 function fp_add_message($msg, $type = "status", $bool_no_repeat = FALSE) {
 
   $md5 = md5($type . $msg);  

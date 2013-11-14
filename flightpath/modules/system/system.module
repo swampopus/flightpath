@@ -738,19 +738,6 @@ function system_settings_form() {
     "description" => t("Enter the file location for your theme. Do not put preceeding or trailing slashes.  Ex: themes/classic"),    
   );
     
-  $form["language"] = array(
-    "type" => "textfield",
-    "label" => t("Language:"),
-    "size" => 5,
-    "maxlength" => 10,
-    "value" => variable_get("language", "en"),
-    "description" => t("Enter the default language code for this site.  For example, english is 'en'.
-                        Use the 2-letter code from the ISO 639-1 list, or the 3-letter 639-2 code if unavailable.
-                        <br>The list can be viewed here:") . " <a href='http://www.loc.gov/standards/iso639-2/php/English_list.php'>http://www.loc.gov/standards/iso639-2/php/English_list.php</a>
-                        ",
-  );
-    
-    
   $form["school_initials"] = array(
     "type" => "textfield",
     "size" => 20,
@@ -1117,7 +1104,8 @@ function system_handle_form_submit() {
   // Figure out where we are supposed to redirect the user.
   $redirect_path = $redirect_query = "";
 
-  if (is_array($form["#redirect"])) { 
+  // Only redirect to the custom #redirect if the form passed validation!
+  if (is_array($form["#redirect"]) && !form_has_errors()) { 
     $redirect_path = $form["#redirect"]["path"];
     $redirect_query = $form["#redirect"]["query"];    
   }

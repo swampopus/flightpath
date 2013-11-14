@@ -7,7 +7,9 @@ FlightPath 4.x Changelog
   for this purpose.
   
   Added code to facilitate language translations through the t() function, once the locale module
-  is fully implemented.  Established a new "Language" setting on the System Settings form.
+  is fully implemented.
+  
+  Fixed bug in form api where #redirect should be ignored if the form failed validation.
   
 
 ----------------
