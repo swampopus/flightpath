@@ -714,7 +714,7 @@ function fp_add_js($js, $type = "file") {
 function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bool_include_base_path = TRUE) {
   
   $p = menu_get_module_path($module, $bool_include_file_system_path);
-
+    
   if ($bool_include_base_path) {
     $p = $GLOBALS["fp_system_settings"]["base_path"] . "/" . $p;
   }
@@ -752,16 +752,32 @@ function fp_get_module_details($module) {
 
 
 /**
- * Eventually, this function will be used to translate strings.  For now, just pass through.
+ * Pass strings through this function to translate them into another language.
+ * 
+ * This function is based on a function with the same name from the Drupal project,
+ * like many other functions in FlightPath.
+ * 
+ * It uses the locale module, and if the locale module isn't available, it acts as a
+ * simple pass-through.
+ * 
  * Allows variable replacements.  Use like this:
  * t("@name's blob", array("@name" => "Richard"));
  * or simply
  * t("My blob");  if you don't need replacements.
  * 
- * Not implimented yet.
+ * 
  */
-function t($str, $vars = array()) {
-    
+function t($str, $vars = array(), $langcode = NULL) {
+
+  $langcode = isset($langcode) ? $langcode : $GLOBALS["fp_system_settings"]["language"];
+  if ($langcode == "") $langcode = "en";  // english by default.    
+
+  // If the locale module is enabled, then use it to perform the translation
+  if (function_exists('locale') && $langcode != "en") {
+    $str = locale($str, $langcode);
+  }
+  
+  // Are there any variables to insert?      
   if (is_array($vars) && count($vars) > 0) {
     foreach ($vars as $var => $val) {
       

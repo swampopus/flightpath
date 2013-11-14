@@ -3014,11 +3014,15 @@ function draw_menu_items($menu_array) {
 		// If there is a MID, then this is a midterm grade.
 		$dispgrade = str_replace("MID","<span class='superscript'>" . t("mid") . "</span>",$dispgrade);
 
-		if (strtoupper($grade) == "E")
+    // If the student has the "default enrolled grade" (set in the System Settings form), then we
+    // shouldn't actually show this grade
+    $default_enrolled_grade = $GLOBALS["fp_system_settings"]["default_enrolled_grade"];
+    if ($default_enrolled_grade == "") $default_enrolled_grade = "E";    
+		if (strtoupper($grade) == $default_enrolled_grade)
 		{ // Currently enrolled.  Show no grade.
 			$dispgrade = "";
 		}
-
+		
 		if ($course->bool_hide_grade)
 		{
 		  $dispgrade = "--";

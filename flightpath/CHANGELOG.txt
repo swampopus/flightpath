@@ -1,6 +1,20 @@
 FlightPath 4.x Changelog
 ========================
 
+2013-11-14
+  Fixed a bug where the grade "E" was hard-coded at one spot to mean "enrolled", instead
+  if that being a setting.  Added a new field "default_enrolled_grade" to the System Settings form
+  for this purpose.
+  
+  Added code to facilitate language translations through the t() function, once the locale module
+  is fully implemented.  Established a new "Language" setting on the System Settings form.
+  
+
+----------------
+RELEASED 4.3
+----------------
+
+
 2013-11-12
   Fixed javascript bug in admin.js file, which prevented courses and groups from being
   deleted.  

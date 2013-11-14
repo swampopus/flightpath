@@ -738,7 +738,19 @@ function system_settings_form() {
     "description" => t("Enter the file location for your theme. Do not put preceeding or trailing slashes.  Ex: themes/classic"),    
   );
     
-
+  $form["language"] = array(
+    "type" => "textfield",
+    "label" => t("Language:"),
+    "size" => 5,
+    "maxlength" => 10,
+    "value" => variable_get("language", "en"),
+    "description" => t("Enter the default language code for this site.  For example, english is 'en'.
+                        Use the 2-letter code from the ISO 639-1 list, or the 3-letter 639-2 code if unavailable.
+                        <br>The list can be viewed here:") . " <a href='http://www.loc.gov/standards/iso639-2/php/English_list.php'>http://www.loc.gov/standards/iso639-2/php/English_list.php</a>
+                        ",
+  );
+    
+    
   $form["school_initials"] = array(
     "type" => "textfield",
     "size" => 20,
@@ -836,13 +848,25 @@ function system_settings_form() {
     "description" => t("List grades, separated by comma, which means 'the student must
                 retake this course. They did not earn credit.' Ex: F,W,I"),    
   );
-         
+
+  $form["default_enrolled_grade"] = array(
+    "type" => "textfield",
+    "label" => t("Default enrolled grade:"),
+    "size" => 5,
+    "value" => variable_get("default_enrolled_grade", "E"),
+    "description" => t("This is a grade letter which, if a student's course has this grade,
+                        FlightPath will interpret it to mean that the student is currently
+                        enrolled in the course, and the course will show up in green with NO GRADE visible.
+                        <br><b>This grade must also be included below, in the Enrolled grades CSV.</b>"),
+  );
+  
   $form["enrolled_grades"] = array(
     "type" => "textfield",
     "label" => t("Enrolled grades (CSV):"),
     "value" => variable_get("enrolled_grades", ""),
     "description" => t("List grades, separated by comma, which means 'the student is
-                currently enrolled in this course.' Ex: E,AMID,BMID "),    
+                currently enrolled in this course.' Ex: E,AMID,BMID 
+                <br><b>Must also include the Default enrolled grade above.</b>"),    
   );
 
   $form["b_or_better"] = array(
