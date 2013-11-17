@@ -1,6 +1,10 @@
 FlightPath 4.x Changelog
 ========================
 
+----------------
+RELEASED 4.3.1
+----------------
+
 2013-11-14
   Fixed a bug where the grade "E" was hard-coded at one spot to mean "enrolled", instead
   if that being a setting.  Added a new field "default_enrolled_grade" to the System Settings form
@@ -15,7 +19,6 @@ FlightPath 4.x Changelog
 ----------------
 RELEASED 4.3
 ----------------
-
 
 2013-11-12
   Fixed javascript bug in admin.js file, which prevented courses and groups from being
