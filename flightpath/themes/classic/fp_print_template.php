@@ -7,6 +7,9 @@
 
 $theme_location = fp_theme_location();
 
+print '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
+
+
 // Add extra JS files.    
 print $page_extra_js_files;
 

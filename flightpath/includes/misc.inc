@@ -1105,8 +1105,11 @@ function get_global_database_handler() {
 /**
  * Uses fp_add_message, but in this case, it also adds in the filename and line number
  * which the message came from!
+ * 
+ * If bool_convert_html_strings is set to TRUE, html in plain strings will be displayed for the browser,
+ * so their html characters will be escaped, so they will appear correctly.
  */
-function fpm($str) {
+function fpm($str, $bool_convert_html_strings = FALSE) {
   
   if (!user_has_permission("view_fpm_debug")) {
     return;
@@ -1115,6 +1118,13 @@ function fpm($str) {
   // Complex variable?  Change it to print_r.
   if (is_array($str) || is_object($str)) {
     $str = "<div class='fp-html-print-r-wrapper'>" . fp_html_print_r($str) . "</div>";
+  }
+  else {
+    if ($bool_convert_html_strings) {
+      $str = htmlentities($str);
+      $str = str_replace("\n", "<br />", $str);
+      $str = str_replace("  ", "&nbsp;&nbsp;", $str);
+    }
   }    
 
   $arr = debug_backtrace();

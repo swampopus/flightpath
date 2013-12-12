@@ -333,6 +333,28 @@ function menu_get_menu_router_item_from_db($path) {
     $cur["page_settings"] = array();
   }
   
+  // If there is a title property, run it through t()
+  if ($cur["title"] != "") {
+    $cur["title"] = t($cur["title"]);
+  }
+  
+  // If there is a description, run through t()
+  if ($cur["description"] != "") {
+    $cur["description"] = t($cur["description"]);
+  }
+  
+  // If the page_settings has menu links, run their texts through t().
+  foreach ($cur["page_settings"] as $key => $val) {
+    if ($key == "menu_links" && is_array($val)) {
+      foreach ($val as $c => $mitems) {
+        if ($mitems["text"] != "") {
+          $cur["page_settings"]["menu_links"][$c]["text"] = t($mitems["text"]);
+        }
+      }
+    }
+  }
+  
+  
   return $cur;    
       
 }

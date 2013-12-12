@@ -243,27 +243,33 @@ class _Student
 
 		$st = null;
 
-		$res = $this->db->db_query("		          
-		          SELECT * FROM student_tests a, standardized_tests b 
-							WHERE 
-								  student_id = '?' 
-								AND a.test_id = b.test_id
-								AND a.category_id = b.category_id
-							ORDER BY date_taken DESC, position ", $this->student_id);		
-		while($cur = $this->db->db_fetch_array($res)) {
+		$res = db_query("		          
+		          SELECT * FROM student_tests
+		          WHERE 
+								  student_id = '?' 								
+							ORDER BY date_taken DESC ", $this->student_id);		
+		while($cur = db_fetch_array($res)) {
 			
 		  $c++;
 		  
       extract($cur, 3, "db");
       
-		  //$db_position = $cur["position"];
-		  //$db_datetime = $cur["date_taken"];		  
-		  //$db_test_id = $cur[$tfb->test_id];
-		  //$db_test_description = $cur[$tfb->test_description];
-		  //$db_category_description = $cur[$tfb->category_description];
-		  //$db_category_id = $cur[$tfb->category_id];
-		  //$db_score = $cur[$tfa->score];
-		  
+      
+      // Get the test's description, if available.
+            
+      $res2 = db_query("SELECT * FROM standardized_tests
+                        WHERE test_id = '?'
+                        AND category_id = '?'
+                        ORDER BY position", $db_test_id, $db_category_id);
+      $cur2 = db_fetch_array($res2);
+      $db_test_description = trim($cur2["test_description"]);
+      $db_category_description = trim($cur2["category_description"]);
+      
+      // Did we find anything in the table?  If not, just use the codes themselves
+      if ($db_test_description == "") $db_test_description = t("Test code:") . " " . $db_test_id;
+      if ($db_category_description == "") $db_category_description = $db_category_id;
+      
+      
 		  
 			if (!(($db_date_taken . $db_test_id) == $old_row))
 			{
@@ -333,7 +339,7 @@ class _Student
 			// particular course, it means the course has been split up!
 
 			if($taken_course = $this->list_courses_taken->find_specific_course($sub_course_id, $sub_term_id, $sub_bool_transfer, true))
-			{
+			{ 
 				
 								
 				// If this takenCourse is a transfer credit, then we want to remove
@@ -451,6 +457,7 @@ class _Student
     $this->major_code = $this->db->get_student_major_from_db($this->student_id);
 		$this->catalog_year = $this->db->get_student_catalog_year($this->student_id);
 		$this->name = $this->db->get_student_name($this->student_id);
+    
     /*
 	  // Let's perform our queries.
 		$res = $this->db->db_query("SELECT * FROM students 
@@ -493,13 +500,7 @@ class _Student
       "PR"=>t("Professional"),
     );	  
     
-    $val = $rank_array[$rank_code];
-    
-    if (trim($val) == "") {
-       $val = $rank_code;
-    }
-    
-    return $val;
+    return $rank_array[$rank_code];
         
 	}
 	

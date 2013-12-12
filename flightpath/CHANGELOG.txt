@@ -1,6 +1,36 @@
 FlightPath 4.x Changelog
 ========================
 
+2013-12-12
+  Added Content-Type meta tags to classic theme template files, specifying the charset as UTF-8, for 
+  simplicity.
+  
+  Altered menu.inc functions so that, after retrieving from the DB, menu items have their titles and
+  descriptions run through the t() function, so they can be translated at run-time.
+  
+  Altered the fpm() command in misc.inc to output strings with htmlentities(), if FALSE is passed with fpm().
+  Ex:  fpm("<b>Hey</b>", FALSE); will output the <b>, instead of actually making the string bold.
+  
+  Tweaked format_date() function to let it default to the current time, if none is specified.
+  
+  Fixed bug in form submission, where if a file field was required, it failed validation every time.
+  
+
+2013-12-11
+  Tweaked _DatabaseHandler.php.  Now, if a mysql error is reported which shows that the connection
+  to the database has been lost, execution of the script will terminate immediately (with a friendly
+  error message displayed to the user).  This is to prevent email recipients from being spammed
+  by error messages if the server crashes (or goes offline) in the middle of a script with lots
+  of queries to execute.
+  
+
+2013-12-09
+  Tweaked _Student.php, load_student_tests.  If a test code wasn't yet in the standardized_tests
+  table, the query failed (because of a join).  Now, we will show test scores for anything in the
+  student_tests table, even if there is no description in standardized_tests.  It just shows the code
+  itself in that case.
+  
+
 ----------------
 RELEASED 4.3.1
 ----------------

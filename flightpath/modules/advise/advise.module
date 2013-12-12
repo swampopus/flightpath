@@ -1266,7 +1266,6 @@ function advise_init_screen() {
     }
   }
 
-
   // If the form has been saved, this token is expected.  This protects
   // against XSS attacks.
   $form_token = md5("advise_display_view" . fp_token());

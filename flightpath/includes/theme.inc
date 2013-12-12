@@ -31,7 +31,12 @@ function convert_bbcode_to_html($str) {
  *  - just_date
  *
  */
-function format_date($timestamp, $format = "standard", $custom = "") {
+function format_date($timestamp = NULL, $format = "standard", $custom = "") {
+  
+  if ($timestamp == NULL) {
+    $timestamp = time();
+  }
+  
   
   if (!is_numeric($timestamp)) {
     $timestamp = 0;  // make sure it's numeric.
@@ -113,6 +118,7 @@ function fp_display_page($page) {
   if (!is_object($screen)) {
     $screen = new AdvisingScreen("",null,"not_advising");
   }
+  
   $screen->page_title = $page_title;
   $screen->page_has_search = $page["router_item"]["page_settings"]["page_has_search"];
   
@@ -148,8 +154,7 @@ function fp_display_page($page) {
   }
   
   // Should we override the page_tabs with what is in "fp_set_page_tabs" ?
-  if (is_array($GLOBALS["fp_set_page_tabs"])) {
-    //fpm($GLOBALS["fp_set_page_tabs"]);
+  if (is_array($GLOBALS["fp_set_page_tabs"])) {    
     $screen->page_tabs = fp_render_tab_array($GLOBALS["fp_set_page_tabs"]);    
   }
   

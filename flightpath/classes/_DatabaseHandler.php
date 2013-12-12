@@ -325,6 +325,8 @@ class _DatabaseHandler
 	  $when_ts = time();
 	  $when_english = format_date($when_ts);
 	  
+	  $mysql_err = mysql_error();
+	  
     // If we are on production, email someone!
     if ($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"] != "")
     {
@@ -335,7 +337,7 @@ class _DatabaseHandler
     	Timestamp: $when_ts ($when_english)
     	
     	Error:
-    	" . mysql_error() . "
+    	$mysql_err
     	
     	Comments:
     	$msg
@@ -346,18 +348,42 @@ class _DatabaseHandler
     	mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
     }
     
-    fpm(t("A MySQL error has occured:") . " " . mysql_error() . "<br><br>" . t("The backtrace:"));
+    fpm(t("A MySQL error has occured:") . " $mysql_err<br><br>" . t("The backtrace:"));
     fpm($arr);
 
     if ($GLOBALS["fp_die_mysql_errors"] == TRUE) {
       print "\n<br>The script has stopped executing because of a MySQL error:
-                    " . mysql_error() . "<br>\n
+                    $mysql_err<br>\n
              Please fix the error and try again.<br>\n";
       print "<br><br>Timestamp: $when_ts ($when_english)
               <br><br>Program backtrace:
               <pre>" . print_r($arr, true) . "</pre>";
       die;
     }
+    
+    // Also, check to see if the mysql_err is because of a lost connection, as in, the
+    // server went down.  In that case, we should also terminate immediately, rather
+    // than risk spamming an email recipient with error emails.
+    if (stristr($mysql_err, "Lost connection to MySQL server")
+        || stristr($mysql_err, "MySQL server has gone away")) {
+
+      print "<h2 style='font-family: Arial, sans serif;'>Database Connection Error</h2>
+              <br>
+              <div style='font-size: 1.2em; font-family: Arial, sans serif; padding-left: 30px;
+                          padding-right: 30px;'>
+              Sorry, but it appears the database is currently unavailable.  This may
+              simply be part of scheduled maintenance to the database server.  Please
+              try again in a few minutes.  If the problem persists for longer
+              than an hour, contact your technical support
+              staff.
+              
+              </div>
+              
+              ";
+      die;          
+    }
+    
+    
 
 	}
 	

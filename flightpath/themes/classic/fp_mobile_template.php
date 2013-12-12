@@ -8,7 +8,9 @@ $theme_location = fp_theme_location();
 
 print "
 <meta name='viewport' id='view' content='width=350;'/>
-<meta name='format-detection' content='telephone=no'>                
+<meta name='format-detection' content='telephone=no'>      
+<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+          
 <link rel='stylesheet' type='text/css' href='$theme_location/style.css'>
 <link rel='stylesheet' type='text/css' href='$theme_location/mobile.css'>";
 
