@@ -284,11 +284,15 @@ class _DatabaseHandler
 	      // Because mysql_real_escape_string will allow \' to pass through, I am going to
         // first use mysql_real_escape_string on all slashes.
         $replacement = str_replace("\\" , mysql_real_escape_string("\\"), $replacement);
-        
         // Okay, perform the replacement
 	      $replacement = mysql_real_escape_string($replacement);
 	      
-	      $sql_query = preg_replace("/\?/", $replacement, $sql_query, 1);	    
+	      // If we have a $ followed by a number (like $99), preg_replace will remove it.  So, let's escape the $ if so.
+	      /// if so.
+	      $replacement = addcslashes($replacement, '$');
+	      
+	      $sql_query = preg_replace("/\?/", $replacement, $sql_query, 1);	
+	         
 	    }
 	    
 	  }
@@ -296,7 +300,7 @@ class _DatabaseHandler
 	  $sql_query = str_replace("~ESCAPED_Q_MARK~", "?", $sql_query);	    
 	  
 	  //////////////////////////////////////////////
-	    	  
+	  
 		// Run the sqlQuery and return the result set.
 		$result = mysql_query($sql_query, $this->dbc);
 		if ($result)

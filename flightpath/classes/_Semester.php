@@ -48,15 +48,20 @@ class _Semester
 	function assign_title()
 	{
 		if ($this->semester_num == 0)
-		{$this->title = "Freshman Year";}
+		{$this->title = t("Freshman Year");}
 		if ($this->semester_num == 1)
-		{$this->title = "Sophomore Year";}
+		{$this->title = t("Sophomore Year");}
 		if ($this->semester_num == 2)
-		{$this->title = "Junior Year";}
+		{$this->title = t("Junior Year");}
 		if ($this->semester_num == 3)
-		{$this->title = "Senior Year";}
+		{$this->title = t("Senior Year");}
 		if ($this->semester_num == 4)
-		{$this->title = "Year 5";}
+		{$this->title = t("Year 5");}
+		
+		// Still didn't find anything?
+		if ($this->title == "") {
+		  $this->title = t("Year") . " " . ($this->semester_num + 1);
+		}
 		
 	}
 	

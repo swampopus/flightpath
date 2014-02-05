@@ -664,7 +664,11 @@ function user_edit_student_user_form() {
     "type" => "textfield",
     "value" => $cur["rank_code"],
     "size" => 5,
-    "description" => t("For example, FR, SO, JR, SR, GR for Freshman, Sophomore, Junior, Senior, and Graduate."),
+    "description" => t("For example, FR, SO, JR, SR, GR for Freshman, Sophomore, Junior, Senior, and Graduate.") . "
+                      <br><b>" . t("Important:") . "</b> " . t("You must enter a code from the Allowed Student Ranks field
+                      on the System Settings form.  For example, FR.  If you do not do this, you will not be able to search
+                      for this student in FlightPath.") . "<br>&nbsp; &nbsp; &nbsp;" . t("Current value for Allowed Student Ranks:") . " 
+                      <i>" . variable_get("allowed_student_ranks", "") . "</i>",
   );  
 
   $form["major_code"] = array(

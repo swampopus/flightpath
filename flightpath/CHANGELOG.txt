@@ -1,6 +1,25 @@
 FlightPath 4.x Changelog
 ========================
 
+
+2014-02-05
+  Tweaked _Semester.php so it's easier to override the default semester names at a code level,
+  and updated admin.module to use those semester names from _Semester.php, rather than hard-coded the way
+  I had it.
+
+
+2014-1-8
+  Fixed bug in db_query function, which caused dollar values ($10.75) to be converted to ".75", due to the dollar sign
+  not being escaped correctly.
+
+  Added extra verbage on student user edit form, to make it clear that a rank code from the Allowed Student Ranks field
+  must be entered for the student to be searchable.
+
+----------------
+RELEASED 4.3.2
+----------------
+
+
 2013-12-12
   Added Content-Type meta tags to classic theme template files, specifying the charset as UTF-8, for 
   simplicity.

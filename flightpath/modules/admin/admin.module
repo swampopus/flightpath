@@ -870,13 +870,20 @@ function admin_advising_settings_form() {
  */
 function admin_get_semester_name($semester_num) {    
   
+  $semester = new Semester($semester_num);
+  $title = $semester->title;
+  
+    
+  /**
   $ar = array(t("Freshman Year"), t("Sophomore Year"), t("Junior Year"), t("Senior Year"));
   $s = $ar[$semester_num];
   if ($s == "")
   {
     $s = t("Year") . " " . ($semester_num + 1);
   }
-  return $s;
+  */
+  
+  return $title;
 }
 
 
