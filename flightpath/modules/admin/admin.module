@@ -838,7 +838,8 @@ function admin_advising_settings_form() {
     "size" => 10,
     "label" => t("Current DRAFT catalog year"),
     "value" => variable_get("current_draft_catalog_year", ""),
-    "description" => t("While in Draft mode, this is the year which What If loads degrees from.
+    "description" => t("While in Draft mode, this is the year which Blank Degree Search loads degrees from.  What If
+                        mode will always use the Current catalog year, set above.
                         You may change this while working on a new catalog.  It will not affect any other
                         users of the system.  While not working on a new catalog, set this
                         to the same as the Current catalog year."),

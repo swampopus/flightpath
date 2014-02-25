@@ -568,6 +568,14 @@ class _Course
   function get_hours()
   {
 
+    // This course might be set to 1 hour, but be a "ghost hour",
+    // meaning the student actually earned 0 hours, but we recorded 1
+    // to make FP's math work out.  So, let's return back 0 hours.
+    if ($this->bool_ghost_hour)
+    {
+      $h = 0;
+      return $h;
+    }
     
        
     // Do they have any hours_awarded? (because they completed
@@ -584,14 +592,7 @@ class _Course
     }
     
     
-    // This course might be set to 1 hour, but be a "ghost hour",
-    // meaning the student actually earned 0 hours, but we recorded 1
-    // to make FP's math work out.  So, let's return back 0 hours.
-    if ($this->bool_ghost_hour)
-    {
-      $h = 0;
-      return $h;
-    }
+    
 
 
 
@@ -602,6 +603,49 @@ class _Course
   }
 
 
+  
+	/**
+	 * Calculate the quality points for this course's grade and hours.
+	 *
+	 * @param string $grade
+	 * @param int $hours
+	 * @return int
+	 */
+	function get_quality_points(){
+
+	  $hours = $this->get_hours();
+	  $grade = $this->grade;
+	  
+	  $pts = 0;
+	  	  
+		switch ($grade) {
+			case 'A':
+				$pts = 4 * $hours;
+				break;
+			case 'B':
+				$pts = 3 * $hours;
+				break;
+			case 'C':
+				$pts = 2 * $hours;
+				break;
+			case 'D':
+				$pts = 1 * $hours;
+				break;
+		}
+		
+		
+		//fpm($this->to_string());
+		//fpm($this->requirement_type . " " . $pts);
+		
+		return $pts;
+
+	}  
+  
+  
+  
+  
+  
+  
   /**
    * This function is used for comparing a course name to the subject_id
    * and course_num of $this.  
@@ -785,6 +829,8 @@ class _Course
     $str = str_replace(" Sicu"," SICU",$str);
     $str = str_replace(" Picu"," PICU",$str);
     $str = str_replace(" Nicu"," NICU",$str);
+    $str = str_replace("Uas ","UAS ",$str);
+    $str = str_replace(" Uas"," UAS",$str);
 
 
     // Cleanup

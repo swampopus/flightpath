@@ -184,6 +184,11 @@ function blank_degrees_select_degree_form() {
     
     $catalog_year_options = array();
     $current_catalog_year = variable_get("current_catalog_year", 2006);
+    
+    if ($GLOBALS["fp_advising"]["bool_use_draft"]) {
+      $current_catalog_year = variable_get("current_draft_catalog_year", 2006);
+    }
+    
     $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);
     for($t = $current_catalog_year; $t >= $earliest_catalog_year; $t--) {
       $catalog_year_options[$t] = "$t-" . ($t+1);

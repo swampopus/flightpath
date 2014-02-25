@@ -1539,15 +1539,149 @@ class _CourseList extends ObjList
 	 * 
 	 * @param bool $bool_use_ignore_list
 	 * @param bool $bool_ignore_enrolled
-	 * @return CourseList
+	 * @return int
 	 */
-	function count_credit_hours($requirement_type = "", $bool_use_ignore_list = false, $bool_ignore_enrolled = false)
+	function count_credit_hours($requirement_type = "", $bool_use_ignore_list = false, $bool_ignore_enrolled = false, $bool_qpts_grades_only = FALSE)
 	{
 		// Similar to count_hours, but this will only
 		// count courses which have been taken (have a grade).
 
 
 		$count = 0;
+
+		
+		// TODO: replace with setting instead
+		$qpts_grades = array(
+		 "A" => 4,
+		 "B" => 3,
+		 "C" => 2,
+		 "D" => 1,
+		);
+		
+		
+		for ($t = 0; $t < $this->count; $t++)
+		{
+			$course = $this->array_list[$t];
+
+			if ($bool_use_ignore_list == true)
+			{
+				// Do ignore some courses...
+        $temp_course_name = $course->subject_id . " " . $course->course_num;
+				// Check in our settings to see if we should ignore this course
+				// (configured in /custom/settings.php)
+				if (in_array($temp_course_name, csv_to_array($GLOBALS["fp_system_settings"]["ignore_courses_from_hour_counts"]))) {
+					continue;
+				}				
+
+			}
+			
+			
+			if ($bool_ignore_enrolled == true)
+			{
+				if ($course->is_completed() == false)
+				{
+					if ($course->course_list_fulfilled_by->is_empty)
+					{
+
+						continue;
+					} else {
+						if ($course->course_list_fulfilled_by->get_first()->is_completed() == false)
+						{
+							continue;
+						}
+					}
+				}
+			}
+
+			if ($course->grade != "")// || !($course->course_list_fulfilled_by->is_empty))
+			{			  
+			  
+			  // If we require the grade to be a qpts_grade, then check that now.
+			  if ($bool_qpts_grades_only && $qpts_grades[$course->grade] < 1) {
+			    continue;
+			  }
+			  
+			  
+				if ($requirement_type == "")
+				{
+				  $h = $course->get_hours();
+					$count = $count + $h;
+				} else {
+					if ($course->requirement_type == $requirement_type)
+					{
+						$count = $count + $course->get_hours();						
+						continue;
+					}
+
+					// For specifically "university capstone" courses...
+					if ($course->requirement_type == "uc" && $requirement_type == "c")
+					{
+						$count = $count + $course->get_hours();
+					}
+
+					if ($course->requirement_type == "um" && $requirement_type == "m")
+					{
+						$count = $count + $course->get_hours();
+					}
+
+
+				}
+			} else {
+
+				// maybe it's a substitution?
+				if ($requirement_type == "" || ($requirement_type != "" && $requirement_type == $course->requirement_type))
+				{
+					if ($course->course_list_fulfilled_by->is_empty == false)
+					{
+						$cc = $course->course_list_fulfilled_by->get_first();
+						if ($cc->bool_substitution)
+						{
+						  
+						  
+      			  // If we require the grade to be a qpts_grade, then check that now.
+      			  if ($bool_qpts_grades_only && $qpts_grades[$cc->grade] < 1) {
+      			    continue;
+      			  }
+						  
+						  
+							$h = $cc->substitution_hours;
+							
+							if ($cc->bool_ghost_hour) {
+							  $h = 0;
+							}
+							
+							$count = $count + $h;							
+						}
+					}
+				}
+				
+			}
+		}
+
+		return $count;
+
+	}
+
+	
+
+	/**
+	 * Similar to count_credit_hours, but this will only count courses
+	 * which have been taken and have a grade.  We will return back
+	 * a sum of their quality points.
+	 * 
+	 * @todo ignore list should be db-based, in the settings.
+	 *
+	 * @param string $requirement_type
+	 *         - If set, we will only look for courses matching this requirement_type.
+	 * 
+	 * @param bool $bool_use_ignore_list
+	 * @param bool $bool_ignore_enrolled
+	 * @return int
+	 */
+	function count_credit_quality_points($requirement_type = "", $bool_use_ignore_list = false, $bool_ignore_enrolled = false)
+	{
+
+		$points = 0;
 		for ($t = 0; $t < $this->count; $t++)
 		{
 			$course = $this->array_list[$t];
@@ -1571,7 +1705,6 @@ class _CourseList extends ObjList
 				{
 					if ($course->course_list_fulfilled_by->is_empty)
 					{
-
 						continue;
 					} else {
 						if ($course->course_list_fulfilled_by->get_first()->is_completed() == false)
@@ -1582,28 +1715,31 @@ class _CourseList extends ObjList
 				}
 			}
 
-			if ($course->grade != "")// || !($course->course_list_fulfilled_by->is_empty))
+			if ($course->grade != "")
 			{
 				if ($requirement_type == "")
 				{
-				  $h = $course->get_hours();
-					$count = $count + $h;
+				  $p = $course->get_quality_points();
+					$points = $points + $p;
 				} else {
 					if ($course->requirement_type == $requirement_type)
 					{
-						$count = $count + $course->get_hours();
+						$p = $course->get_quality_points();
+					  $points = $points + $p;
 						continue;
 					}
 
 					// For specifically "university capstone" courses...
 					if ($course->requirement_type == "uc" && $requirement_type == "c")
 					{
-						$count = $count + $course->get_hours();
+						$p = $course->get_quality_points();
+					  $points = $points + $p;
 					}
 
 					if ($course->requirement_type == "um" && $requirement_type == "m")
 					{
-						$count = $count + $course->get_hours();
+            $p = $course->get_quality_points();
+  					$points = $points + $p;
 					}
 
 
@@ -1611,7 +1747,9 @@ class _CourseList extends ObjList
 			} else {
 
 				// maybe it's a substitution?
-				if ($requirement_type == "")
+								
+				
+				if (($requirement_type == "") || ($requirement_type != "" && $requirement_type == $course->requirement_type))
 				{
 					if ($course->course_list_fulfilled_by->is_empty == false)
 					{
@@ -1619,44 +1757,28 @@ class _CourseList extends ObjList
 						if ($cc->bool_substitution)
 						{
 						  
-							$h = $cc->substitution_hours;
+							//$h = $cc->substitution_hours;
 							
-							if ($cc->bool_ghost_hour) {
-							  $h = 0;
-							}
+							//if ($cc->bool_ghost_hour) {
+							//  $h = 0;
+							//}
 							
-							$count = $count + $h;							
+							// What are the quality points for this course?						
+							$p = $cc->get_quality_points();
+							
+							$points = $points + $p;
 						}
 					}
-				} else {
-					if ($requirement_type == $course->requirement_type)
-					{
-						if ($course->course_list_fulfilled_by->is_empty == false)
-						{
-							$cc = $course->course_list_fulfilled_by->get_first();
-							if ($cc->bool_substitution)
-							{
-								$h = $cc->substitution_hours;
-								
-                if ($cc->bool_ghost_hour) {
-  							  $h = 0;
-  							}								
-								
-								$count = $count + $h;
-							}
-						}
-
-					}
-
 
 				}
 			}
 		}
 
-		return $count;
+		return $points;
 
-	}
-
+	}	
+	
+	
 
 	/**
 	 * Assign a groupID to every course in the list.

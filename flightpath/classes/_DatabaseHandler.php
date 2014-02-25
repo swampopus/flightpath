@@ -622,6 +622,17 @@ class _DatabaseHandler
 		$course_id = $c->course_id;
 
 
+		$min_hours = $c->min_hours;
+		$max_hours = $c->max_hours;
+		
+		if ($c->bool_ghost_min_hour) {
+		  $min_hours = 0;		  
+		}
+		
+		if ($c->bool_ghost_max_hour) {
+		  $max_hours = 0;
+		}
+		
 
 		$res = $this->db_query("DELETE FROM draft_courses WHERE
 							course_id = '?' AND catalog_year = '?' 
@@ -633,7 +644,7 @@ class _DatabaseHandler
 								title, description, min_hours, max_hours,
 								repeat_hours, exclude) values (
 								'?','?','?','?','?','?','?','?','?','?') 
-								", $course_id, $c->subject_id,$c->course_num,$catalog_year,$c->title,$c->description,$c->min_hours,$c->max_hours,$c->repeat_hours,$c->db_exclude);
+								", $course_id, $c->subject_id,$c->course_num,$catalog_year,$c->title,$c->description,$min_hours,$max_hours,$c->repeat_hours,$c->db_exclude);
 
 
 

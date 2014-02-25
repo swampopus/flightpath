@@ -586,13 +586,15 @@ function draw_menu_items($menu_array) {
 	 * and transfer credits.
 	 *
 	 */
-	function build_footnotes()
+	function build_footnotes($bool_include_box_top = TRUE)
 	{
 		// Display the footnotes & messages.
 
 		$pC = "";
 		$is_empty = true;
-		$pC .= $this->draw_semester_box_top(t("Footnotes & Messages"), true);
+		if ($bool_include_box_top) {
+		  $pC .= $this->draw_semester_box_top(t("Footnotes & Messages"), true);
+		}
 
 		$pC .= "<tr><td colspan='8' class='tenpt'>
 					";
@@ -722,7 +724,7 @@ function draw_menu_items($menu_array) {
 
 
 		// For admins only....
-		if (user_has_permission("can_substitute")) {
+		if (user_has_permission("can_substitute") && $bool_include_box_top) {
 			if ($this->bool_print != true)
 			{// Don't display in print view.
 				$pC .= "<div style='tenpt'>				
@@ -735,12 +737,17 @@ function draw_menu_items($menu_array) {
 
   	$pC .= "</td></tr>";
 
-		$pC .= $this->draw_semester_box_bottom();
-
+  	if ($bool_include_box_top) {
+		  $pC .= $this->draw_semester_box_bottom();
+  	}
+  	
 		if (!$is_empty)
 		{
 			$this->add_to_screen($pC);
 		}
+		
+		// Return so other functions can use this output, if needed.
+		return $pC;
 	}
 
 
@@ -1297,6 +1304,7 @@ function draw_menu_items($menu_array) {
 	 *           - cumulative
 	 *           - student
 	 * 
+	 * 
 	 * @return string
 	 */
 	function draw_pie_chart_box($title, $top_value, $bottom_value, $pal)
@@ -1348,6 +1356,9 @@ function draw_menu_items($menu_array) {
  								    <span style='color: blue;'>$val% " . t("Complete") . "</span><br>
  								    ( <span style='color: blue;'>$top_value</span>
  									 / <span style='color: gray;'>$bottom_value " . t("hours") . "</span> )
+ 									 ";
+	
+		$pC .= "
 								</td>
 								</table>
  							</td>
@@ -1376,6 +1387,7 @@ function draw_menu_items($menu_array) {
 		if ($this->degree_plan->total_degree_hours < 1)
 		{
 			$this->degree_plan->calculate_progress_hours();
+			$this->degree_plan->calculate_progress_quality_points();			
 		}
 
 		$total_major_hours = $this->degree_plan->total_major_hours;
@@ -1384,8 +1396,11 @@ function draw_menu_items($menu_array) {
 		$fulfilled_major_hours = $this->degree_plan->fulfilled_major_hours;
 		$fulfilled_core_hours = $this->degree_plan->fulfilled_core_hours;
 		$fulfilled_degree_hours = $this->degree_plan->fulfilled_degree_hours;
-
-
+    $major_qpts = $this->degree_plan->major_qpts;
+    $degree_qpts = $this->degree_plan->degree_qpts;
+    $core_qpts = $this->degree_plan->core_qpts;
+		
+    
 		$pC .= "<tr><td colspan='2'>
 				";
 
@@ -3014,15 +3029,11 @@ function draw_menu_items($menu_array) {
 		// If there is a MID, then this is a midterm grade.
 		$dispgrade = str_replace("MID","<span class='superscript'>" . t("mid") . "</span>",$dispgrade);
 
-    // If the student has the "default enrolled grade" (set in the System Settings form), then we
-    // shouldn't actually show this grade
-    $default_enrolled_grade = $GLOBALS["fp_system_settings"]["default_enrolled_grade"];
-    if ($default_enrolled_grade == "") $default_enrolled_grade = "E";    
-		if (strtoupper($grade) == $default_enrolled_grade)
+		if (strtoupper($grade) == "E")
 		{ // Currently enrolled.  Show no grade.
 			$dispgrade = "";
 		}
-		
+
 		if ($course->bool_hide_grade)
 		{
 		  $dispgrade = "--";

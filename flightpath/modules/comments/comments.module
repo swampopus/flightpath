@@ -115,10 +115,16 @@ function comments_perform_delete_comment() {
     db_query("UPDATE advising_comments
                SET delete_flag = '1'
                WHERE `id` = '?' ", $comment_id);
-    fp_add_message("Comment has been deleted successfully.");
+    fp_add_message(t("Comment has been deleted successfully."));
   }
   
-  fp_goto("comments");
+  
+  if ($_GET["destination"] != "") {
+    fp_goto($_GET["destination"]);
+  }
+  else {  
+    fp_goto("comments");
+  }
   
   
 }
@@ -130,7 +136,7 @@ function comments_comment_form_submit($form, $form_state) {
   $type = $form_state["values"]["type"];
   $term_id = $form_state["values"]["term_id"];
   $comment = trim($form_state["values"]["comment"]);
-  
+    
   // Perform the save!
   if ($comment) {
     db_query("INSERT INTO advising_comments
@@ -140,7 +146,7 @@ function comments_comment_form_submit($form, $form_state) {
                 ('?', '?', '?', '?', '?', '?')
                 ", $current_student_id, $faculty_cwid, $term_id, $comment, time(), $type);
                
-    fp_add_message("Comment saved successfully.");
+    fp_add_message(t("Comment saved successfully."));
   }
 
   watchdog("save_comment", "Comment saved");  
@@ -215,9 +221,9 @@ function comments_display_main() {
     $rtn .= fp_render_c_fieldset($form, t("Click to enter comment"), true);
   }
     
-  $access_type = (user_has_permission("view_faculty_comments")) ? "" : "public";
+  $access_types = (user_has_permission("view_faculty_comments")) ? array("faculty", "public") : array("public");
     
-  $comments = comments_get_comments($current_student_id, FALSE, $access_type);
+  $comments = comments_get_comments($current_student_id, FALSE, $access_types);
   //fpm($comments);
   foreach($comments as $comment) {
       
@@ -253,9 +259,9 @@ function comments_popup_display_all_comments() {
   
   fp_add_css(fp_get_module_path("comments") . "/css/comments.css");
   
-  $access_type = (user_has_permission("view_faculty_comments")) ? "" : "public";
+  $access_types = (user_has_permission("view_faculty_comments")) ? array("faculty", "public") : array("public");
   
-  $comments = comments_get_comments($current_student_id, FALSE, $access_type);
+  $comments = comments_get_comments($current_student_id, FALSE, $access_types);
 
   foreach($comments as $comment) {    
     $rtn .= comments_render_comment($comment, $delete_link);
@@ -302,7 +308,7 @@ function comments_render_comment($comment, $delete_link = "") {
 /**
  * Returns an array of comments for this student, sorted most recent first.
  */
-function comments_get_comments($student_id, $bool_included_deleted = FALSE, $access_type = "") {
+function comments_get_comments($student_id, $bool_included_deleted = FALSE, $access_types = array()) {
   $rtn = array();
   
   
@@ -312,9 +318,24 @@ function comments_get_comments($student_id, $bool_included_deleted = FALSE, $acc
   }
   
   $access_type_line = "";
-  if ($access_type == "public" || $access_type == "faculty") {
-    $access_type_line = "AND access_type = '$access_type' ";
+  
+  // Build up the "access_type_line" for the query, based on the values
+  // in the access_types array.
+  if (count($access_types) > 0) {
+    $access_type_line = "AND ( ";
+    foreach ($access_types as $access_type) {
+      $access_type_line .= " access_type = '$access_type' OR";
+    }
+    
+    // remove the last OR
+    $access_type_line = substr($access_type_line, 0, -2);
+    
+    $access_type_line .= ")";
   }
+  
+  //if ($access_type == "public" || $access_type == "faculty") {
+  //  $access_type_line = "AND access_type = '$access_type' ";
+  //}
   
   $res = db_query("SELECT * FROM advising_comments
                    WHERE student_id = '?'

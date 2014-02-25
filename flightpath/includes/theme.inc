@@ -31,12 +31,7 @@ function convert_bbcode_to_html($str) {
  *  - just_date
  *
  */
-function format_date($timestamp = NULL, $format = "standard", $custom = "") {
-  
-  if ($timestamp == NULL) {
-    $timestamp = time();
-  }
-  
+function format_date($timestamp, $format = "standard", $custom = "") {
   
   if (!is_numeric($timestamp)) {
     $timestamp = 0;  // make sure it's numeric.
@@ -118,7 +113,6 @@ function fp_display_page($page) {
   if (!is_object($screen)) {
     $screen = new AdvisingScreen("",null,"not_advising");
   }
-  
   $screen->page_title = $page_title;
   $screen->page_has_search = $page["router_item"]["page_settings"]["page_has_search"];
   
@@ -154,7 +148,8 @@ function fp_display_page($page) {
   }
   
   // Should we override the page_tabs with what is in "fp_set_page_tabs" ?
-  if (is_array($GLOBALS["fp_set_page_tabs"])) {    
+  if (is_array($GLOBALS["fp_set_page_tabs"])) {
+    //fpm($GLOBALS["fp_set_page_tabs"]);
     $screen->page_tabs = fp_render_tab_array($GLOBALS["fp_set_page_tabs"]);    
   }
   
@@ -493,7 +488,7 @@ function fp_build_tab_array($page) {
     
     $for_term = $whatif = $what_if_select = $hypoclass = "";
     
-    if ($GLOBALS["fp_advising"]["advising_term_id"] != "" && $screen_mode != "not_advising"
+    if ($GLOBALS["fp_advising"]["advising_term_id"] != "" && ($screen_mode != "not_advising" && $screen_mode != "detailed")
     && user_has_permission("can_advise_students"))
     {
       $t_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
@@ -523,7 +518,7 @@ function fp_build_tab_array($page) {
 
     $ca = t("Currently Advising");
     
-    if (!user_has_permission("can_advise_students")) {
+    if (!user_has_permission("can_advise_students") || $screen_mode == "detailed") {
       $ca = t("Student Details");
     }
 
@@ -581,6 +576,11 @@ function fp_build_tab_array($page) {
       array_push($display_array, t("Name:") . " ~~ " . $student->name);
       array_push($display_array, t("CWID:") . " ~~ " . $student->student_id);
     }
+    
+    if ($screen_mode == "detailed") {
+      $degree_title .= " ($degree_plan->major_code)";
+    }
+    
     array_push($display_array, t("Major:") . " ~~ " . $degree_title);
     // If this degree has tracks, we must display something about it here.
 
@@ -600,7 +600,7 @@ function fp_build_tab_array($page) {
               title='" . t("Click to change degree options.") . "'></a>";
       $op_text = t("Click to select:") . " $op_link";
 
-      if ($screen_mode == "not_advising")
+      if ($screen_mode == "not_advising" || $screen_mode == "detailed")
       {
         $op_text = t("None selected");
         $op_link = "";
@@ -622,7 +622,10 @@ function fp_build_tab_array($page) {
       // Did has the student already selected an option?
       if ($degree_plan->track_code != "")
       {
-        $op_text = $degree_plan->track_title . " $op_link";
+        // Display the track code in detailed mode.
+        $tc = ($screen_mode == "detailed") ? "($degree_plan->track_code)" : "";
+        
+        $op_text = $degree_plan->track_title . " $tc $op_link";
       }
 
 

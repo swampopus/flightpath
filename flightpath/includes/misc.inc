@@ -10,7 +10,7 @@
 /**
  * Send a request through the Internet and return the result as an object.
  * 
- * This is a copy of the Drupal 6 function drupal_http_request(),
+ * This is a modified copy of the Drupal 6 function drupal_http_request(),
  * taken from here: http://api.drupal.org/api/drupal/includes!common.inc/function/drupal_http_request/6
  */
 function fp_http_request($url, $headers = array(), $method = 'GET', $data = NULL, $retry = 3, $timeout = 30.0) {
@@ -244,7 +244,7 @@ function timer_start($name) {
 }
 
 /**
- * Works with the timer_read() function to return how long
+ * Works with the timer_start() function to return how long
  * it has been since the start.
  */
 function timer_read($name) {
@@ -567,7 +567,9 @@ function fp_validate_utf8($text) {
 /**
  * Simple function to convert a string into a machine-readable string.
  * 
- * Useful for making possibly unsafe text work as an array index, a CSS class, etc.
+ * Useful for making possibly unsafe text work as an array index, a CSS class, etc.  Replaces
+ * "bad" characters, or characters which might not be allowed for variables, for example,
+ * into underscores (_).
  *
  * @param unknown_type $str
  * @return unknown
@@ -582,7 +584,7 @@ function fp_get_machine_readable($str) {
 
 
 /**
- * Return an array version of the term_id_structures field from the admin settings
+ * Return an array version of the term_id_structure field from the admin settings
  *
  */
 function get_term_structures() {
@@ -615,21 +617,37 @@ function get_term_structures() {
 
 
 /**
- * If this program is called, it will override any other page tabs
+ * If this function is called, it will override any other page tabs
  * which might be getting constructed.  This lets the programmer,
  * at run-time, completely control what tabs are at the top of the page.
  */
 function fp_set_page_tabs($tab_array) {
   $GLOBALS["fp_set_page_tabs"] = $tab_array;
 }
+
+/**
+ * Allows the programmer to define subtabs at the top of the page.
+ *
+ * @param unknown_type $tab_array
+ */
 function fp_set_page_sub_tabs($tab_array) {
   $GLOBALS["fp_set_page_sub_tabs"] = $tab_array;
 }
 
+/**
+ * Allows the programmer to set the title of the page, overwriting any default title.
+ *
+ * @param unknown_type $title
+ */
 function fp_set_title($title) {
   $GLOBALS["fp_set_title"] = $title;
 }
 
+/**
+ * Add a CSS class to the body tag of the page.  Useful for themeing later on.
+ *
+ * @param unknown_type $class
+ */
 function fp_add_body_class($class) {
   $GLOBALS["fp_add_body_classes"] .= " " . $class;
 }
@@ -638,6 +656,8 @@ function fp_add_body_class($class) {
 /**
  * Returns back the site's "token", which is a simply md5 of some randomness.
  * It is used primarily with forms, to ensure against cross-site forgeries.
+ * The site's token gets saved to the variables table, for later use.  The idea
+ * is that every installation of FlightPath has a semi-unique token.
  */
 function fp_token() {
   $site_token = variable_get("site_token", "");
@@ -661,10 +681,17 @@ function csv_to_array($csv_string) {
   return $temp;
 }
 
+
 /**
- * Add a message to the top of the screen for anyone to see.
- * @param $type - This will be added to the CSS class of the message box, so you can theme
- *                it however you want.  Suggested types are "status" and "error".
+ * Add a "message" to the top of the screen.  Useful for short messages like "You have been logged out"
+ * or "Form submitted successfully."
+ *
+ * @param String $msg
+ *          This is the string message itself.
+ * @param String $type
+ *          The "type" of message.  This string is added as a CSS class to the message, for theming later.
+ * @param boolean $bool_no_repeat
+ *          Boolean.  Should the message show more than once per page view?  Set to TRUE if it should NOT.  
  */
 function fp_add_message($msg, $type = "status", $bool_no_repeat = FALSE) {
 
@@ -681,9 +708,18 @@ function fp_add_message($msg, $type = "status", $bool_no_repeat = FALSE) {
   $_SESSION["fp_messages"][] = array("type" => $type, "msg" => $msg, "md5" => $md5);
 }
 
+
+/**
+ * Add an extra CSS file to the page with this function.
+ * Ex:    fp_add_css(fp_get_module_path("admin") . '/css/admin.css');
+ *
+ * @param String $path_to_css
+ */
 function fp_add_css($path_to_css) {
   $GLOBALS["fp_extra_css"][] = $path_to_css;
 }
+
+
 
 /**
  * Add extra javascript to the page.
@@ -693,6 +729,11 @@ function fp_add_css($path_to_css) {
  *            For example:  array("my_path" => "blah", "my_color" => "red").
  *            They will be available in javascript in the object FlightPath like so:
  *              FlightPath.settings.my_color;
+ * 
+ * Ex: fp_add_js(fp_get_module_path("admin") . '/js/admin.js');
+ * 
+ * @see fp_add_css()
+ * 
  */
 function fp_add_js($js, $type = "file") {
   if ($type == "file") {  
@@ -756,32 +797,16 @@ function fp_get_module_details($module) {
 
 
 /**
- * Pass strings through this function to translate them into another language.
- * 
- * This function is based on a function with the same name from the Drupal project,
- * like many other functions in FlightPath.
- * 
- * It uses the locale module, and if the locale module isn't available, it acts as a
- * simple pass-through.
- * 
+ * Eventually, this function will be used to translate strings.  For now, just pass through.
  * Allows variable replacements.  Use like this:
  * t("@name's blob", array("@name" => "Richard"));
  * or simply
  * t("My blob");  if you don't need replacements.
  * 
- * 
+ * Not implimented yet.
  */
-function t($str, $vars = array(), $langcode = NULL) {
-
-  $langcode = isset($langcode) ? $langcode : $GLOBALS["fp_system_settings"]["language"];
-  if ($langcode == "") $langcode = "en";  // english by default.    
-
-  // If the locale module is enabled, then use it to perform the translation
-  if (function_exists('locale') && $langcode != "en") {
-    $str = locale($str, $langcode);
-  }
-  
-  // Are there any variables to insert?      
+function t($str, $vars = array()) {
+    
   if (is_array($vars) && count($vars) > 0) {
     foreach ($vars as $var => $val) {
       
@@ -911,6 +936,14 @@ function get_term_description($term_id, $bool_abbreviate = false) {
 
 /**
  * Redirect the user's browser to the specified internal path + query.
+ * 
+ * We will automatically add the current_student_id variable, if it is not present
+ * in the query.
+ * 
+ * Example uses:
+ *  - fp_goto("admin");
+ *  - fp_goto("test/1234");
+ *  - fp_goto("test/123", "selection=yes&fruit=apple");
  */
 function fp_goto($path, $query = "") {
   global $current_student_id;
@@ -1001,8 +1034,8 @@ function fp_url($path, $query = "", $include_base_path = TRUE) {
 
   /**
    * This function will attempt to determine automatically
-   * if we are on a mobile device.  If so, it will set
-   * $this->pageIsMobile = TRUE
+   * if we are on a mobile device, and should therefor use the mobile
+   * theme and layout settings.
    *
    */
 function fp_screen_is_mobile(){
@@ -1106,25 +1139,23 @@ function get_global_database_handler() {
  * Uses fp_add_message, but in this case, it also adds in the filename and line number
  * which the message came from!
  * 
- * If bool_convert_html_strings is set to TRUE, html in plain strings will be displayed for the browser,
- * so their html characters will be escaped, so they will appear correctly.
+ * Most useful for developers, tracking down issues.  It's also only visible to administrators
+ * with the "view_fpm_debug" permission. So if you need to display a message only to admins,
+ * you can use fpm() as a shortcut.
+ * 
+ * Note: If you attempt to fpm() an array
+ * or object with too many levels of nesting, it may run out of memory and your script will die.
  */
-function fpm($str, $bool_convert_html_strings = FALSE) {
+function fpm($var) {
   
   if (!user_has_permission("view_fpm_debug")) {
     return;
   }
   
   // Complex variable?  Change it to print_r.
+  $str = $var;
   if (is_array($str) || is_object($str)) {
     $str = "<div class='fp-html-print-r-wrapper'>" . fp_html_print_r($str) . "</div>";
-  }
-  else {
-    if ($bool_convert_html_strings) {
-      $str = htmlentities($str);
-      $str = str_replace("\n", "<br />", $str);
-      $str = str_replace("  ", "&nbsp;&nbsp;", $str);
-    }
   }    
 
   $arr = debug_backtrace();
@@ -1450,9 +1481,12 @@ function user_has_role($role) {
 function user_has_permission($permission) {
   global $user;  
   
+  //fpm("checking permission $permission");
+  
   // If the user is admin (id == 1) then they always have access.
   if ($user->id == 1) return TRUE;
-    
+  
+  
   // Otherwise, simply check their permissions array.
   if (in_array($permission, $user->permissions)) {
     return TRUE;
@@ -1592,12 +1626,44 @@ function fp_number_pad($number, $len) {
 }
 
 
+/**
+ * Shortcut to fp_debug_current_time_millis()
+ * 
+ * @see fp_debug_current_time_millis()
+ *
+ * @param unknown_type $debug_val
+ * @param unknown_type $var
+ * @return unknown
+ */
 function fp_debug_ct($debug_val = "", $var = "")
 { // Shortcut to the other function.
   return fp_debug_current_time_millis($debug_val, false, $var);
 }
 
 
+
+/**
+ * When called repeatedly, this function will display a message along with a milisecond count
+ * out to the side.  Very useful for developers to time function calls or queries, to see how long they
+ * are taking.
+ * 
+ * For example:
+ * fp_debug_ct("starting query");
+ * db_query(".........") // whatever
+ * fp_debug_ct("finished query");
+ * 
+ * On screen, that would display our messages, with time values, so we can see how many milliseconds
+ * it took to execute between calls of fp_debug_ct().
+ *
+ * @param String $debug_val
+ *          The message to display on screen.
+ * @param boolean $show_current_time
+ *          Should we display the current time as well?
+ * @param String $var
+ *          Optional.  Include a variable name so you can have more than one timer running
+ *          at the same time.
+ * @return unknown
+ */
 function fp_debug_current_time_millis($debug_val = "", $show_current_time = true, $var = "")
 {
   // Display the current time in milliseconds, and, if available,

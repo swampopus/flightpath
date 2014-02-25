@@ -1,6 +1,29 @@
 FlightPath 4.x Changelog
 ========================
 
+2014-02-25
+  Fixed a bug in blank_degrees.module, where future draft catalog years couldn't be selected for
+  viewing.  Also changed wording on admin.module's form, which sets the draft catalog year, to make
+  it clear that it only affects the Blank Degree Search feature, not What If.
+
+  Made various changes to some of the core code, in preparation of a new module, "audit", which
+  required extra calculations for quality points.  Also, made slight changes to the core comments
+  module, so it can accomodate more access_types (again, will be used by the upcoming "audit" module).  
+  
+
+2014-02-20
+  Fixed bug with "ghost hours" in _DatabaseHandler.php.  When a course has zero hours for
+  either min or max hours, it was changing into 1 hours when duplicated to a new catalog year.
+  
+
+2014-02-06
+  Made minor documenation changes to various functions.
+
+
+----------------
+RELEASED 4.3.3
+----------------
+
 
 2014-02-05
   Tweaked _Semester.php so it's easier to override the default semester names at a code level,

@@ -11,6 +11,8 @@ class _DegreePlan
 
   public $total_major_hours, $total_core_hours, $total_degree_hours;
   public $fulfilled_major_hours, $fulfilled_core_hours, $fulfilled_degree_hours;
+  public $major_qpts_hours, $core_qpts_hours, $degree_qpts_hours;
+  public $major_qpts, $degree_qpts, $core_qpts;
 
   public $bool_use_draft;
 
@@ -74,16 +76,34 @@ class _DegreePlan
     $this->total_major_hours = $this->get_progress_hours("m");
     $this->total_core_hours = $this->get_progress_hours("c");
     $this->total_degree_hours = $this->get_progress_hours("");
-    //adminDebug("fulfilled major: ");
+
     $this->fulfilled_major_hours = $this->get_progress_hours("m", false);
-    //adminDebug("fulfilled core:  ");
     $this->fulfilled_core_hours = $this->get_progress_hours("c", false);
-    //adminDebug("fulfilled -degree:  ");
     $this->fulfilled_degree_hours = $this->get_progress_hours("", false);
+           
+
+    $this->major_qpts_hours = $this->get_progress_hours("m", false, TRUE);
+    $this->core_qpts_hours = $this->get_progress_hours("c", false, TRUE);
+    $this->degree_qpts_hours = $this->get_progress_hours("", false, TRUE);
+    
+     
   }
 
+  /**
+   * Calculate the quality points of our completed courses, so we can use
+   * that to figure out GPA.
+   *
+   */
+  function calculate_progress_quality_points() {      
+    $this->major_qpts = $this->get_progress_quality_points("m");
+    $this->core_qpts = $this->get_progress_quality_points("c");
+    $this->degree_qpts = $this->get_progress_quality_points("");
+        
+    
+  }
+  
 
-  function get_progress_hours($requirement_type = "", $bool_required_hours_only = true)
+  function get_progress_hours($requirement_type = "", $bool_required_hours_only = TRUE, $bool_qpts_grades_only = FALSE)
   {
     // Returns the number of hours required (or fulfilled) in a degree plan
     // for courses & groups with the specified requirement_type.
@@ -92,18 +112,17 @@ class _DegreePlan
     // which got fulfilled.
 
     $hours = 0;
-
+    
     $this->list_semesters->reset_counter();
     while ($this->list_semesters->has_more())
     {
       $sem = $this->list_semesters->get_next();
-      //adminDebug("taken courses re: $requirement_type in " . $sem->semesterNum . ":: $temp");
+
       if ($bool_required_hours_only == true)
       {
-        //adminDebug("regular count hours");
         $hours += $sem->list_courses->count_hours($requirement_type, true, false);
       } else {
-        $temp = $sem->list_courses->count_credit_hours($requirement_type, true, true);
+        $temp = $sem->list_courses->count_credit_hours($requirement_type, true, true, $bool_qpts_grades_only);
         $hours += $temp;
       }
     }
@@ -118,19 +137,17 @@ class _DegreePlan
         continue;
       }
 
-      //print_pre($g->to_string());
 
       $g_hours = $g->hours_required;
       if ($bool_required_hours_only == false)
       { // only count the fulfilled hours, then.
-        $g_hours = $g->get_fulfilled_hours(true, false, true, -1, true);
-        //adminDebug("taken group re: $requirement_type in " . $g->title . ":: $g_hours");
+        $g_hours = $g->get_fulfilled_hours(true, false, true, -1, true, $bool_qpts_grades_only);
+
       }
 
       if ($requirement_type == "")
       {
         $hours += $g_hours;
-        //adminDebug("here $group->title : $g_hours rt: $requirement_type");
       } else {
         // A requirement is specified, so make sure
         // the group is of this requirement.
@@ -144,11 +161,7 @@ class _DegreePlan
         
         if ($g->requirement_type == $requirement_type)
         {
-          //if ($requirement_type == "m")
-          //{
-           // adminDebug("Hours required for " . $g->title . ": " . $g->hours_required_by_type["m"]);
-          //}
-
+          
           $hours += $g_hours;
         }
         
@@ -157,10 +170,67 @@ class _DegreePlan
       }
     }
 
-
     return $hours;
 
   }
+  
+  
+  /**
+   * Similar to get_progress_hours, this will return back the quality points a student has earned
+   * towards this degree.  It can then be used to calculate GPA.
+   *
+   * @param unknown_type $requirement_type
+   * @param unknown_type $bool_required_hours_only
+   * @return unknown
+   */
+  function get_progress_quality_points($requirement_type = "") {
+    // Returns the number of hours required (or fulfilled) in a degree plan
+    // for courses & groups with the specified requirement_type.
+    // ex:  "m", "s", etc.  leave blank for ALL required hours.
+    // if boolRequiredHours is FALSE, then we will only look for the courses
+    // which got fulfilled.
+
+    $points = 0;
+
+    $this->list_semesters->reset_counter();
+    while ($this->list_semesters->has_more())
+    {
+      $sem = $this->list_semesters->get_next();
+
+      $p = $sem->list_courses->count_credit_quality_points($requirement_type, true, true);    
+      $points = $points + $p;
+      
+    }
+
+    
+    // Also, add in groups matching this requirement type.
+    $this->list_groups->reset_counter();
+    while ($this->list_groups->has_more())
+    {
+      $g = $this->list_groups->get_next();
+      if ($g->group_id < 0)
+      { // Skip Add a course group.
+        continue;
+      }
+      
+      if ($g->requirement_type == $requirement_type || $requirement_type == "") {
+        //fpm("$requirement_type - group $g->title - $g_points");        
+        $g_points = $g->get_fulfilled_quality_points(TRUE, -1, TRUE, TRUE);
+        $points = $points + $g_points;       
+      }
+      
+    }
+    
+
+    
+    return $points;
+
+  }  
+  
+  
+  
+  
+  
 
   function load_degree_plan()
   {

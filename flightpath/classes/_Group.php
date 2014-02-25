@@ -348,7 +348,7 @@ class _Group
 	}
 
 
-	function get_fulfilled_hours($bool_check_subgroups = true, $bool_count_advised = true, $bool_require_has_been_displayed = false, $only_count_semester_num = -1, $bool_ignore_enrolled = false)
+	function get_fulfilled_hours($bool_check_subgroups = true, $bool_count_advised = true, $bool_require_has_been_displayed = false, $only_count_semester_num = -1, $bool_ignore_enrolled = false, $bool_qpts_grades_only = FALSE)
 	{
 		// Returns how many hours have been used by the
 		// course fulfillments for this group...
@@ -356,6 +356,15 @@ class _Group
 		// if onlyCountSemesterNum != -1, then we will only count courses
 		// who have their "assigned_to_semester_num" = $only_count_semester_num.
 
+		// TODO:  Replace with setting instead
+    $qpts_grades = array(
+			 "A" => 4,
+			 "B" => 3,
+			 "C" => 2,
+			 "D" => 1,
+			);		
+		
+		
 		//print_pre($this->to_string());
 		$this->list_courses->reset_counter();
 		while($this->list_courses->has_more())
@@ -383,11 +392,13 @@ class _Group
 
 				if (!$bool_require_has_been_displayed)
 				{ // The course does not have to have been displayed on the page yet.
-					$count = $count + $c->course_list_fulfilled_by->count_hours("", false, false);
+					//$count = $count + $c->course_list_fulfilled_by->count_hours("", false, false);
+					$count = $count + $c->course_list_fulfilled_by->count_credit_hours("", false, false, $bool_qpts_grades_only);
 				} else {
 					if ($c->course_list_fulfilled_by->get_first()->bool_has_been_displayed == true)
 					{
-						$count = $count + $c->course_list_fulfilled_by->count_hours("", false, false);
+						//$count = $count + $c->course_list_fulfilled_by->count_hours("", false, false);
+						$count = $count + $c->course_list_fulfilled_by->count_credit_hours("", false, false, $bool_qpts_grades_only);
 					}
 				}
 			} else if ($c->bool_advised_to_take && $bool_count_advised == true)
@@ -407,7 +418,7 @@ class _Group
 			{
 
 				$g = $this->list_groups->get_next();
-				$gc = $g->get_fulfilled_hours(true, $bool_count_advised, $bool_require_has_been_displayed, $only_count_semester_num, $bool_ignore_enrolled);
+				$gc = $g->get_fulfilled_hours(true, $bool_count_advised, $bool_require_has_been_displayed, $only_count_semester_num, $bool_ignore_enrolled, $bool_qpts_grades_only);
 				$count = $count + $gc;
 			}
 		}
@@ -416,6 +427,75 @@ class _Group
 
 	}
 
+	
+
+	/**
+	 * Returns the quality points earned for all of the courses in this group
+	 *
+	 */
+	function get_fulfilled_quality_points($bool_check_subgroups = true, $only_count_semester_num = -1, $bool_ignore_enrolled = false, $bool_require_has_been_displayed = false)
+	{
+		$points = 0;
+		// if onlyCountSemesterNum != -1, then we will only count courses
+		// who have their "assigned_to_semester_num" = $only_count_semester_num.
+
+		$this->list_courses->reset_counter();
+		while($this->list_courses->has_more())
+		{
+			$c = $this->list_courses->get_next();
+			if ($only_count_semester_num != -1 && $c->assigned_to_semester_num != $only_count_semester_num)
+			{
+				// Only accept courses assigned to a particular semester.
+				continue;
+			}
+
+			
+			if (is_object($c->course_list_fulfilled_by) && !($c->course_list_fulfilled_by->is_empty))
+			{
+				if ($bool_ignore_enrolled == true)
+				{
+					// Only allow it if it has been completed.
+					if ($c->course_list_fulfilled_by->get_first()->is_completed() == false)
+					{
+						continue;
+					}
+				}
+
+				$p = 0;
+				
+				// Are we requiring that the course has been displayed?
+        if (!$bool_require_has_been_displayed || ($bool_require_has_been_displayed && $c->course_list_fulfilled_by->get_first()->bool_has_been_displayed == TRUE))
+				{
+					$p = $c->course_list_fulfilled_by->count_credit_quality_points("", TRUE, TRUE);
+				}				
+  		  
+  		  $points = $points + $p;
+  				    					
+			}
+			
+		}
+
+		if ($bool_check_subgroups == TRUE)
+		{
+			// If there are any subgroups for this group, then run
+			// this function for each group as well.
+			$this->list_groups->reset_counter();
+			while($this->list_groups->has_more())
+			{
+
+				$g = $this->list_groups->get_next();
+				$gp = $g->get_fulfilled_quality_points(TRUE, $only_count_semester_num, $bool_ignore_enrolled);
+				$points = $points + $gp;
+			}
+		}
+		
+
+		return $points;
+
+	}	
+	
+	
+	
 
 	function equals(Group $group)
 	{

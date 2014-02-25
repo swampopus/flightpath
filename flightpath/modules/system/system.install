@@ -31,7 +31,7 @@ function system_enable() {
     
 
   // Let's perform installations on the other modules we want enabled by default.
-  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "content", "announcements", "tinymce", "course_search", "blank_degrees", "user");
+  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "content", "announcements", "tinymce", "course_search", "blank_degrees");
   foreach ($modules as $module) {
     system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => "core"));
   }
@@ -66,6 +66,14 @@ function system_update($old_schema, $new_schema) {
               ADD COLUMN department_code varchar(10) NOT NULL AFTER college, 
               ADD INDEX (department_code)");
   }
+  
+  
+  if ($old_schema < 3) {
+    // Add an index to the advising_comments table for access_type
+    db_query("ALTER TABLE advising_comments
+              ADD INDEX (access_type) ");  
+  }
+  
   
 }
 
@@ -116,7 +124,8 @@ CREATE TABLE `advising_comments` (
   `delete_flag` tinyint(4) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `student_id` (`student_id`),
-  KEY `delete_flag` (`delete_flag`)
+  KEY `delete_flag` (`delete_flag`), 
+  KEY `access_type` (`access_type`)
 );
   ";
 
@@ -592,12 +601,7 @@ CREATE TABLE `students` (
   `rank_code` varchar(5) NOT NULL,
   `major_code` varchar(20) NOT NULL,
   `catalog_year` int(11) NOT NULL,
-  `is_active` tinyint(11) NOT NULL,
-  PRIMARY KEY (`cwid`),
-  KEY `cwid` (`cwid`),
-  KEY `rank_code` (`rank_code`),
-  KEY `major_code` (`major_code`),
-  KEY `is_active` (`is_active`)
+  PRIMARY KEY (`cwid`)
 ); ";
 db_query($q);
 
