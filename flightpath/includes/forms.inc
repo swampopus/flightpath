@@ -251,21 +251,7 @@ function form_basic_validate($form, $form_submitted) {
     if (is_array($element) && $element["required"]) {
       // Okay, this is a required field.  So, check that it has a non-blank value
       // in form_submitted.
-      
-      $submitted_value = $form_submitted["values"][$name]; 
-      
-      // If this field is a file field, check to see if a file was uploaded (in the $_FILES) array
-      if ($form[$name]["type"] == "file") {
-        if (isset($_FILES[$name])) {
-          if (isset($_FILES[$name]["name"])) {
-            // A file WAS uploaded for this filed!  Assign its filename to the
-            // submitted_value, so we know something was indeed submitted.
-            $submitted_value = $_FILES[$name]["name"];
-          }
-        }
-      }
-      
-      if ( $submitted_value == "") {
+      if ($form_submitted["values"][$name] == "") {
         // It's blank!  ERROR!
         $label = $element["label"];
         if ($label == "") $label = $name;
@@ -327,6 +313,9 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   $suffix = $element["suffix"];
   $required = $element["required"];
   $no_please_select = $element["no_please_select"];
+  if (isset($element["hide_please_select"])) {
+    $no_please_select = $element["hide_please_select"];
+  }
   $confirm = $element["confirm"];
   
   $attributes = $element["attributes"];

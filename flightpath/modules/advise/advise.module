@@ -609,6 +609,11 @@ function advise_display_popup_substitute_selected() {
   advise_init_screen();
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
   
+  $sub_decimals_allowed = variable_get("sub_hours_decimals_allowed", 2);
+  // Add our allowed substitution decimals as a js setting for later use.
+  fp_add_js(array("subDecimalsAllowed" => $sub_decimals_allowed), "setting");
+  
+  
   $course_id = trim($_GET["course_id"]);
   $group_id = trim(addslashes($_GET["group_id"]));
   $semester_num = trim(addslashes($_GET["semester_num"]));
@@ -1258,13 +1263,13 @@ function advise_init_screen() {
     $bool_loaded = TRUE;    
   }
 
-
   // Should we update the USER settings for anything?
   if ($GLOBALS["fp_advising"]["fp_update_user_settings_flag"] != "") {
     if (!$db->update_user_settings_from_post($user->id)) {
       fp_add_message(t("Unable to update user settings.  Please try again later."));
     }
   }
+
 
   // If the form has been saved, this token is expected.  This protects
   // against XSS attacks.

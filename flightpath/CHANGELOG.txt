@@ -1,6 +1,32 @@
 FlightPath 4.x Changelog
 ========================
 
+2014-03-10
+  Changed hour fields in FlightPath to allow for decimal values.  The rule is that hours
+  may not be larger than 9999 hours, and have no more than 4 decimal places.  For example,
+  2.25 hours is acceptable.  2.33334 would be truncated to 2.3333.
+  
+  Added alias to form_api system for "no_please_select" to much more descriptive "hide_please_select",
+  for select fields.
+  
+  Added ability to control whether or not course titles are auto-capitalized based on a capitalization
+  scheme.
+
+
+2014-02-27
+  Added ability to specify College Code for each degree, through new settings page "School Data," with
+  new permission.
+  
+  Moved "subjects" setting under the new settings page as well, for simplicity.
+  
+  Cache gets automatically cleared when we run DB updates.
+
+
+----------------
+RELEASED 4.3.4
+----------------
+
+
 2014-02-25
   Fixed a bug in blank_degrees.module, where future draft catalog years couldn't be selected for
   viewing.  Also changed wording on admin.module's form, which sets the draft catalog year, to make

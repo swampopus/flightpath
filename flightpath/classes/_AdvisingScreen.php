@@ -2232,21 +2232,6 @@ function draw_menu_items($menu_array) {
 	 */
 	function fix_course_title($str)
 	{
-		/*		$str = str_replace("&", " & ", $str);
-
-		$str = ucwords(strtolower(trim($str)));
-		$str = str_replace("Ii","II",$str);
-		$str = str_replace("IIi","III",$str);
-		$str = str_replace("Iv","IV",$str);
-		$str = str_replace("Vi","VI",$str);
-
-
-		if ($str == "")
-		{
-		$str = "Title not available";
-		}
-		*/
-
 
 		$new_course = new Course();
 		$str = $new_course->fix_title($str);
@@ -2992,14 +2977,14 @@ function draw_menu_items($menu_array) {
 			}
 		}
 
-		$hours = $course->hours_awarded;
+		$hours = $course->hours_awarded * 1;
 
-		if ($hours*1 < 1)
-		{
+		if ($hours <= 0) {
+		  // Some kind of error-- default to catalog hours
 			$hours = $course->get_catalog_hours();
 		}
 
-		$hours = $hours * 1;
+		$hours = $hours * 1;  // force numeric, trim extra zeros.
 
 		$var_hour_icon = "&nbsp;";
 		
@@ -3622,10 +3607,18 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "</table></div>
 		<div class='tenpt' style='margin-top: 5px;'>
-			" . t("Select number of hours to use:") . "
-			<select name='subHours' id='subHours'>
+			" . t("Select number of hrs to use:") . "
+			<select name='subHours' id='subHours' onChange='popupOnChangeSubHours()'>
 				<option value=''>" . t("None Selected") . "</option>
 			</select>
+			";
+		
+		// If we have entered manual hours (like for decimals), they go here:
+		// The subManual span will *display* them, the hidden field keeps them so they can be transmitted.		
+		$pC .= "
+			<span id='subManual' style='font-style:italic; display:none;'></span>			  
+			<input type='hidden' id='subManualHours' value=''>
+
 			
 		</div>
 		<input type='hidden' name='subTransferFlag' id='subTransferFlag' value=''>

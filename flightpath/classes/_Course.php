@@ -138,54 +138,54 @@ class _Course
   {
     $rtn = "";
 
-    $rtn .= $this->course_id . ",";
-    $rtn .= $this->assigned_to_semester_num . ",";
-    $rtn .= $this->assigned_to_group_id . ",";
-    $rtn .= intval($this->bool_advised_to_take) . ",";
-    $rtn .= $this->specified_repeats . ",";
-    $rtn .= intval($this->bool_specified_repeat) . ",";
-    $rtn .= $this->grade . ",";
-    $rtn .= $this->hours_awarded . ",";
-    $rtn .= $this->term_id . ",";
-    $rtn .= $this->advised_hours . ",";
+    $rtn .= $this->course_id . "~";
+    $rtn .= $this->assigned_to_semester_num . "~";
+    $rtn .= $this->assigned_to_group_id . "~";
+    $rtn .= intval($this->bool_advised_to_take) . "~";
+    $rtn .= $this->specified_repeats . "~";
+    $rtn .= intval($this->bool_specified_repeat) . "~";
+    $rtn .= $this->grade . "~";
+    $rtn .= $this->hours_awarded . "~";
+    $rtn .= $this->term_id . "~";
+    $rtn .= $this->advised_hours . "~";
 
-    $rtn .= intval($this->bool_transfer) . ",";
+    $rtn .= intval($this->bool_transfer) . "~";
 
     // If this is a transfer, then we will put in various information
     // about the original transfer course...
     if ($this->bool_transfer == true)
     {
-      $rtn .= $this->course_transfer->course_id . ",";
+      $rtn .= $this->course_transfer->course_id . "~";
     } else {
       // Just enter blank.
-      $rtn .= ",";
+      $rtn .= "~";
     }
 
-    $rtn .= intval($this->bool_added_course) . ",";
-    $rtn .= $this->db_advised_courses_id . ",";
-    $rtn .= $this->random_id . ",";
+    $rtn .= intval($this->bool_added_course) . "~";
+    $rtn .= $this->db_advised_courses_id . "~";
+    $rtn .= $this->random_id . "~";
 
-    $rtn .= intval($this->bool_substitution) . ",";
+    $rtn .= intval($this->bool_substitution) . "~";
     // If this is a substitution, what is the original requirement?
     if ($this->bool_substitution == true)
     {
-      $rtn .= $this->course_substitution->course_id . ",";
+      $rtn .= $this->course_substitution->course_id . "~";
     } else {
       // Just enter blank.
-      $rtn .= ",";
+      $rtn .= "~";
     }
 
-    $rtn .= $this->db_substitution_id . ",";
-    $rtn .= $this->min_hours . ",";
-    $rtn .= $this->max_hours . ",";
+    $rtn .= $this->db_substitution_id . "~";
+    $rtn .= $this->min_hours . "~";
+    $rtn .= $this->max_hours . "~";
 
-    $rtn .= intval($this->bool_substitution_new_from_split) . ",";
-    $rtn .= intval($this->bool_substitution_split) . ",";
-    $rtn .= intval($this->bool_has_been_assigned) . ",";
+    $rtn .= intval($this->bool_substitution_new_from_split) . "~";
+    $rtn .= intval($this->bool_substitution_split) . "~";
+    $rtn .= intval($this->bool_has_been_assigned) . "~";
 
-    $rtn .= $this->display_status . ",";
+    $rtn .= $this->display_status . "~";
     
-    $rtn .= intval($this->bool_ghost_hour) . ",";
+    $rtn .= intval($this->bool_ghost_hour) . "~";
 
 
 
@@ -210,7 +210,7 @@ class _Course
   function load_course_from_data_string($str)
   {
     
-    $temp = explode(",",$str);
+    $temp = explode("~",$str);
 
     $this->course_id = 				$temp[0];
 
@@ -222,9 +222,9 @@ class _Course
     $this->specified_repeats   	= 	$temp[4];
     $this->bool_specified_repeat 	= 	(bool) $temp[5];
     $this->grade   				= 	$temp[6];
-    $this->hours_awarded			= 	$temp[7];
+    $this->hours_awarded			= 	$temp[7] * 1;  // *1 to force numeric, and trim extra zeros.
     $this->term_id				= 	$temp[8];
-    $this->advised_hours			=	$temp[9];
+    $this->advised_hours			=	$temp[9] * 1;
 
     $this->bool_transfer 		= 	(bool) $temp[10];
 
@@ -250,8 +250,8 @@ class _Course
     }
 
     $this->db_substitution_id		= 	$temp[17];
-    $this->min_hours				= 	$temp[18];
-    $this->max_hours				= 	$temp[19];
+    $this->min_hours				= 	$temp[18] * 1;
+    $this->max_hours				= 	$temp[19] * 1;
 
     $this->bool_substitution_new_from_split	= 	(bool) $temp[20];
     $this->bool_substitution_split	= 	(bool) $temp[21];
@@ -786,6 +786,17 @@ class _Course
     }
 
         
+    // Should we do this at all?  We will look at the "autocapitalize_course_titles" setting.
+    $auto = $GLOBALS["fp_system_settings"]["autocapitalize_course_titles"];
+    if ($auto == "no") {
+      // Nope!  Just return.
+      $this->title = $str;
+      return $str;
+    }
+    
+    // Otherwise, we may continue with the capitalization scheme:
+    
+    
     $str = str_replace("/", " / ", $str);
     $str = str_replace("/", " / ", $str);
     $str = str_replace("-", " - ", $str);
@@ -1066,8 +1077,8 @@ class _Course
       $this->course_num = trim(strtoupper($cur["course_num"]));
 
 
-      $this->min_hours = $cur["min_hours"];
-      $this->max_hours = $cur["max_hours"];
+      $this->min_hours = $cur["min_hours"] * 1;  //*1 will trim extra zeros from end of decimals
+      $this->max_hours = $cur["max_hours"] * 1;
 
       // Reset the ghosthours to default.
       $this->bool_ghost_hour = $this->bool_ghost_min_hour = FALSE;
@@ -1082,8 +1093,8 @@ class _Course
       }
       
       
-      $this->repeat_hours = $cur["repeat_hours"];
-      if ($this->repeat_hours*1 < 1)
+      $this->repeat_hours = $cur["repeat_hours"] * 1;
+      if ($this->repeat_hours < 1)
       {
         $this->repeat_hours = $this->max_hours;
       }
@@ -1209,8 +1220,8 @@ class _Course
     $this->subject_id = $cur["subject_id"];
     $this->course_num = $cur['course_num'];
     $this->title = $this->fix_title($cur['title']);
-    $this->min_hours = $cur["min_hours"];
-    $this->max_hours = $cur["max_hours"];
+    $this->min_hours = $cur["min_hours"] * 1;
+    $this->max_hours = $cur["max_hours"] * 1;
     $this->institution_id = $cur["institution_id"];
     // Try to figure out the institution name for this course...
     $this->institution_name = $this->db->get_institution_name($this->institution_id);
@@ -1229,7 +1240,7 @@ class _Course
         $this->title = trim($cur["student_specific_course_title"]);
       }
       // Also assign hours_awarded while we are here.
-      $this->hours_awarded = $cur["hours_awarded"];
+      $this->hours_awarded = $cur["hours_awarded"] * 1;
 
 
    

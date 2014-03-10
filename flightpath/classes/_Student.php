@@ -321,7 +321,7 @@ class _Student
 			$sub_course_id = $cur["sub_course_id"];
 			$sub_term_id = $cur["sub_term_id"];
 			$sub_bool_transfer = (bool) $cur["sub_transfer_flag"];
-			$sub_hours = $cur["sub_hours"];
+			$sub_hours = $cur["sub_hours"] * 1;
 			$sub_remarks = trim($cur["sub_remarks"]);
 			$faculty_id = $cur["faculty_id"];
 
@@ -352,13 +352,15 @@ class _Student
 				}
 
 				if ($sub_hours == 0)
-				{ // If none specified, assume its the full amount.
+				{ // If none specified, assume its the full amount.				  
 					$sub_hours = $taken_course->hours_awarded;
 				}
 
 
 				if (($taken_course->hours_awarded > $sub_hours))
 				{
+
+				  
 					// Okay, now this means that the course which we are
 					// using in the substitution-- the course which the student
 					// has actually taken-- is being split up in the substitution.
@@ -390,8 +392,7 @@ class _Student
 						$taken_course->course_transfer->hours_awarded = $sub_hours;
 					}
 
-
-					
+										
 					// Add the newCourse back into the student's list_courses_taken.
 					$this->list_courses_taken->add($new_course);
 
@@ -438,8 +439,7 @@ class _Student
 
 			}
 
-		}
-
+		}		
 
 	}
 
@@ -625,7 +625,7 @@ class _Student
 			  $new_course->bool_hide_grade = true;
 			}			
 			
-			$new_course->hours_awarded = trim($cur["hours_awarded"]);
+			$new_course->hours_awarded = $cur["hours_awarded"] * 1;
 			$new_course->display_status = "completed";
 			$new_course->bool_taken = true;
 			
@@ -690,8 +690,8 @@ class _Student
 			$new_course->grade = $cur['grade'];
 			$t_course->grade = $cur['grade'];
 
-			$new_course->hours_awarded = $cur['hours_awarded'];
-			$t_course->hours_awarded = $cur['hours_awarded'];
+			$new_course->hours_awarded = $cur['hours_awarded'] * 1;
+			$t_course->hours_awarded = $cur['hours_awarded'] * 1;
 			
 			
 		  // Was this course worth 0 hours but they didn't fail it?

@@ -39,6 +39,13 @@ function system_perm() {
                         system settings."),
     ),
     
+    "de_can_administer_school_data" => array(
+      "title" => t("Can administer school data"),
+      "description" => t("This allows the user to edit the school data settings for FlightPath.
+                          For example, describing college and subject codes."),
+    ),
+    
+    
     "view_fpm_debug" => array(
       "title" => t("View debug output from the fpm() function"),
       "description" => t("The user may view debug output from the fpm() function.
@@ -252,6 +259,32 @@ function system_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
     "tab_parent" => "admin-tools/admin",    
   );
+  
+  
+  $items["admin/config/school-data"] = array(
+    "title" => "Configure school data",
+    "description" => "Configure school-specific data and settings",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_school_data_form"),
+    "access_arguments" => array("de_can_administer_school_data"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_icon" => fp_theme_location() . "/images/toolbox.gif",
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  );  
+  
+  
   
   $items["admin/config/modules"] = array(
     "title" => "Modules",
@@ -509,7 +542,8 @@ function system_confirm_db_updates_form_submit($form, $form_state) {
     }
   }  
   
-  
+  // Clear our cache
+  fp_clear_cache();
   
   fp_goto("admin/completed-db-updates");
 }
@@ -689,6 +723,244 @@ function system_popup_report_contact_form_submit($form, $form_state) {
 
 
 
+/**
+ * This form is for the school-data, like subject code descriptions, colleges, etc.
+ *
+ */
+function system_school_data_form() {
+  $form = array();
+  
+  
+  
+  $form["ignore_courses_from_hour_counts"] = array(
+    "type" => "textfield",
+    "label" => t("Ignore courses from hour counts (CSV):"),
+    "value" => variable_get("ignore_courses_from_hour_counts", ""),
+    "description" => t("List courses, separated by comma, 
+                which should be ignored in hours counts.  This helps
+                remedial courses from being applied to hour counts.
+                Ex: MATH 093, ENGL 090, UNIV 1001"),    
+  );
+
+
+
+  $form["term_id_structure"] = array(
+    "type" => "textarea",
+    "label" => t("Structure of term ID's:"),
+    "value" => variable_get("term_id_structure", ""),
+    "description" => t("Use this space to define termID structures, one per line.
+                Please see the FlightPath documentation on how to set up this field.") . "
+                <br>" . t("Ex:") . " 
+                <br>[Y4]60, Spring, Spring of [Y4], Spr '[Y2]
+                <br>[Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]",    
+  );
+
+             
+  
+  
+  
+  // Let's load the subjects...
+  $subjects = "";
+  $query = "SELECT DISTINCT b.subject_id, a.title, a.college FROM courses b LEFT JOIN subjects a
+              ON (a.subject_id = b.subject_id)
+              WHERE exclude = 0              
+              ORDER BY b.subject_id
+              ";
+   
+  
+  $result = db_query($query);
+  while ($cur = db_fetch_array($result))
+  {      
+    //fpm($cur);
+    $title = trim($cur["title"]);
+    $subject_id = trim($cur["subject_id"]);
+    $college = trim($cur["college"]);
+        
+    $subjects .= $subject_id . " ~ " . $college . " ~ " . $title . "\n";
+  }
+    
+  
+  $form["subjects"] = array(
+    "type" => "textarea",
+    "label" => t("Subjects:"),
+    "value" => $subjects,
+    "rows" => 15,
+    "description" => t("Enter subjects known to FlightPath (for use
+                        in popups and the Course Search, for example), one per line
+                        in this format:") . "<br>SUBJ ~ COLLEGE ~ Title<br>" . t("For example:") . "
+                        <br>&nbsp; ACCT ~ BA ~ Accounting<br>&nbsp; BIOL ~ AS ~ Biology<br>" . t("Notice
+                        the separator between the code, college, and title is 1 tilde (~). Whatespace is ignored."),
+  );  
+  
+  
+  // Load the colleges...
+  $colleges = "";
+  $res = db_query("SELECT * FROM colleges ORDER BY college_code");
+  while ($cur = db_fetch_array($res)) {
+    $colleges .= $cur["college_code"] . " ~ " . $cur["title"] . "\n";
+  }
+  
+  $form["colleges"] = array(
+    "type" => "textarea",
+    "label" => t("Colleges:"),
+    "value" => $colleges,
+    "description" => t("Enter colleges known to FlightPath, one per line, in this format:
+                       ") . "<br>COLLEGE_CODE ~ Title<br>" . t("For example:") . "
+                       <br>&nbsp; AE ~ College of Arts, Science, and Education
+                       <br>&nbsp; PY ~ College of Pharmacy<br>" . t("Notice
+                        the separator between the code and title is 1 tilde (~). Whitespace is ignored."),
+  );
+  
+  
+
+  
+  // Load the degree_college data....
+  $degree_college = "";
+  
+  $res = db_query("SELECT DISTINCT(major_code) FROM draft_degrees ORDER BY major_code");
+  while ($cur = db_fetch_array($res)) {
+    $major_code = $cur["major_code"];
+    
+    // Is there an assigned college already?
+    $res2 = db_query("SELECT college_code FROM degree_college WHERE major_code = '?' ", $major_code); 
+    $cur2 = db_fetch_array($res2);
+    $college_code = $cur2["college_code"];
+    
+    $degree_college .= $major_code . " ~ " . $college_code . "\n";
+     
+  }
+  
+
+  $form["degree_college"] = array(
+    "type" => "textarea",
+    "label" => t("Degree Colleges:"),
+    "value" => $degree_college,
+    "rows" => 15,
+    "description" => t("Enter the degree's college, one per line, in this format:
+                       ") . "<br>MAJOR_CODE ~ COLLEGE_CODE<br>" . t("For example:") . "
+                       <br>&nbsp; ACCT ~ AE
+                       <br>&nbsp; BUSN ~ SB<br>" . t("Notice
+                        the separator between the codes is 1 tilde (~). Whitespace is ignored."),
+  );
+  
+  
+  
+  // How many decimal places allowed in substitutions?
+  
+  $form["sub_hours_decimals_allowed"] = array(
+    "type" => "select",
+    "label" => t("Substitution hours decimal places allowed:"),
+    "options" => array(1 => t("1 (ex: 1.1 hrs)"), 2 => t("2 (ex: 1.15 hrs)"), 3 => t("3 (ex: 1.155 hrs)"), 4 => t("4 (ex: 1.1556 hrs)")),
+    "value" => variable_get("sub_hours_decimals_allowed", 2),
+    "no_please_select" => TRUE,
+    "description" => t("For hours with decimals (like 2.25 hours), how many numbers
+                      after the decimal place will be allowed?  Affects users performing
+                      substitutions.  For example, if you select \"2\" here, then
+                      a value of 1.2555 will be rejected, and the user will be asked to re-enter.
+                      1.25, would be accepted, since it has 2 decimal places.
+                      <br>If you are unsure what to select, set to 2."),
+  );
+  
+  
+  // Auto-correct course titles?
+  $form["autocapitalize_course_titles"] = array(
+    "type" => "select",
+    "label" => t("Auto-capitalize course titles?"),
+    "options" => array("yes" => "Yes", "no" => "No"),
+    "hide_please_select" => TRUE,
+    "value" => variable_get("autocapitalize_course_titles", "yes"),
+    "description" => t("If set to yes, course titles in FlightPath will be run through a capitalization
+                        filter, so that 'INTRO TO ACCOUNTING' becomes 'Intro to Accounting'.
+                        Generally, this makes the course names more attractive, but it can
+                        incorrectly capitalize acronyms and initials.  Disable if you would like
+                        complete control over capitalization.
+                        <br>If unsure, set to Yes."),
+  );
+  
+  
+  
+  $form["submit_btn"] = array(
+    "type" => "submit",
+    "value" => t("Submit"),
+  );
+  
+  
+  
+  
+  
+  
+  
+  return $form;
+}
+
+
+
+/**
+ * Submit handler for the school_data_form.
+ * 
+ * We want to save our submitted data, basically.
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function system_school_data_form_submit($form, $form_state) {
+
+  
+  // Use variable_set for some values...
+  variable_set("ignore_courses_from_hour_counts", $form_state["values"]["ignore_courses_from_hour_counts"]);  
+  
+  variable_set("term_id_structure", $form_state["values"]["term_id_structure"]);  
+  
+  variable_set("sub_hours_decimals_allowed", $form_state["values"]["sub_hours_decimals_allowed"]);
+  
+  variable_set("autocapitalize_course_titles", $form_state["values"]["autocapitalize_course_titles"]);
+  
+  
+  // Subjects...
+  db_query("TRUNCATE TABLE subjects");
+     
+  $subjects = trim($form_state["values"]["subjects"]);
+  $lines = explode("\n", $subjects);
+  foreach ($lines as $line) {
+    $temp = explode("~", $line);
+    
+    db_query("INSERT INTO subjects (subject_id, college, title)
+              VALUES ('?', '?', '?') ", strtoupper(trim($temp[0])), strtoupper(trim($temp[1])), trim($temp[2]));
+    
+  }  
+  
+
+  // Colleges...
+  db_query("TRUNCATE TABLE colleges");
+     
+  $contents = trim($form_state["values"]["colleges"]);
+  $lines = explode("\n", $contents);
+  foreach ($lines as $line) {
+    $temp = explode("~", $line);
+    
+    db_query("INSERT INTO colleges (college_code, title)
+              VALUES ('?', '?') ", strtoupper(trim($temp[0])), trim($temp[1]));
+    
+  }  
+  
+
+  // Degree College...
+  db_query("TRUNCATE TABLE degree_college");
+     
+  $contents = trim($form_state["values"]["degree_college"]);
+  $lines = explode("\n", $contents);
+  foreach ($lines as $line) {
+    $temp = explode("~", $line);
+    
+    db_query("INSERT INTO degree_college (major_code, college_code)
+              VALUES ('?', '?') ", strtoupper(trim($temp[0])), strtoupper(trim($temp[1])));
+    
+  }  
+  
+  
+  
+  
+}
 
 
 
@@ -738,6 +1010,7 @@ function system_settings_form() {
     "description" => t("Enter the file location for your theme. Do not put preceeding or trailing slashes.  Ex: themes/classic"),    
   );
     
+
   $form["school_initials"] = array(
     "type" => "textfield",
     "size" => 20,
@@ -835,25 +1108,13 @@ function system_settings_form() {
     "description" => t("List grades, separated by comma, which means 'the student must
                 retake this course. They did not earn credit.' Ex: F,W,I"),    
   );
-
-  $form["default_enrolled_grade"] = array(
-    "type" => "textfield",
-    "label" => t("Default enrolled grade:"),
-    "size" => 5,
-    "value" => variable_get("default_enrolled_grade", "E"),
-    "description" => t("This is a grade letter which, if a student's course has this grade,
-                        FlightPath will interpret it to mean that the student is currently
-                        enrolled in the course, and the course will show up in green with NO GRADE visible.
-                        <br><b>This grade must also be included below, in the Enrolled grades CSV.</b>"),
-  );
-  
+         
   $form["enrolled_grades"] = array(
     "type" => "textfield",
     "label" => t("Enrolled grades (CSV):"),
     "value" => variable_get("enrolled_grades", ""),
     "description" => t("List grades, separated by comma, which means 'the student is
-                currently enrolled in this course.' Ex: E,AMID,BMID 
-                <br><b>Must also include the Default enrolled grade above.</b>"),    
+                currently enrolled in this course.' Ex: E,AMID,BMID "),    
   );
 
   $form["b_or_better"] = array(
@@ -877,61 +1138,8 @@ function system_settings_form() {
     "description" => t("List grades, separated by comma, which are either a D or better."),    
   );
 
-  $form["ignore_courses_from_hour_counts"] = array(
-    "type" => "textfield",
-    "label" => t("Ignore courses from hour counts (CSV):"),
-    "value" => variable_get("ignore_courses_from_hour_counts", ""),
-    "description" => t("List courses, separated by comma, 
-                which should be ignored in hours counts.  This helps
-                remedial courses from being applied to hour counts.
-                Ex: MATH 093, ENGL 090, UNIV 1001"),    
-  );
 
 
-
-  $form["term_id_structure"] = array(
-    "type" => "textarea",
-    "label" => t("Structure of term ID's:"),
-    "value" => variable_get("term_id_structure", ""),
-    "description" => t("Use this space to define termID structures, one per line.
-                Please see the FlightPath documentation on how to set up this field.") . "
-                <br>" . t("Ex:") . " 
-                <br>[Y4]60, Spring, Spring of [Y4], Spr '[Y2]
-                <br>[Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]",    
-  );
-
-           
-  // Let's load the subjects...
-  $subjects = "";
-  $query = "SELECT DISTINCT b.subject_id, a.title, a.college FROM courses b LEFT JOIN subjects a
-              ON (a.subject_id = b.subject_id)
-              WHERE exclude = 0              
-              ORDER BY b.subject_id
-              ";
-   
-  
-  $result = db_query($query);
-  while ($cur = db_fetch_array($result))
-  {      
-    //fpm($cur);
-    $title = trim($cur["title"]);
-    $subject_id = trim($cur["subject_id"]);
-    $college = trim($cur["college"]);
-        
-    $subjects .= $subject_id . "~" . $college . "~" . $title . "\n";
-  }
-    
-  
-  $form["subjects"] = array(
-    "type" => "textarea",
-    "label" => t("Subjects:"),
-    "value" => $subjects,
-    "description" => t("Enter subjects known to FlightPath (for use
-                        in popups and the Course Search, for example), one per line
-                        in this format:") . "<br>SUBJ~COLLEGE~Title<br>" . t("For example:") . "
-                        <br>&nbsp; ACCT~BA~Accounting<br>&nbsp; BIOL~AS~Biology<br>" . t("Notice
-                        the separator between the code, college, and title is 1 tilde (~)."),
-  );
                                   
                   
   
@@ -945,25 +1153,15 @@ function system_settings_form() {
 
 
 /**
- * Primary thing I want to do here is get the subjects and place correctly
- * in the subjects table.
- *
+ *  Extra submit handler for the system_settings_form
+ * 
  * @param unknown_type $form
  * @param unknown_type $form_state
  */
 function system_settings_form_submit($form, &$form_state) {
-  
-  db_query("TRUNCATE TABLE subjects");
-     
-  $subjects = trim($form_state["values"]["subjects"]);
-  $lines = explode("\n", $subjects);
-  foreach ($lines as $line) {
-    $temp = explode("~", $line);
-    
-    db_query("INSERT INTO subjects (subject_id, college, title)
-              VALUES ('?', '?', '?') ", strtoupper(trim($temp[0])), trim($temp[1]), trim($temp[2]));
-    
-  }
+
+  // Empty, for the time being.
+   
 }
 
 
@@ -1104,8 +1302,7 @@ function system_handle_form_submit() {
   // Figure out where we are supposed to redirect the user.
   $redirect_path = $redirect_query = "";
 
-  // Only redirect to the custom #redirect if the form passed validation!
-  if (is_array($form["#redirect"]) && !form_has_errors()) { 
+  if (is_array($form["#redirect"])) { 
     $redirect_path = $form["#redirect"]["path"];
     $redirect_query = $form["#redirect"]["query"];    
   }
@@ -1721,6 +1918,11 @@ function system_modules_form() {
             // Does this module need to run db updates?
             if ($cur["enabled"] == "1" && $cur["schema"] != $info_details_array["schema"] && $info_details_array["schema"] != "") {
               $installation_status = "<b>" . l(t("Run db updates"), "admin/db-updates") . "</b>";
+              
+              // Let's also make sure to enable a message at the top of the screen, letting the user
+              // know that there are needed updates.
+              fp_add_message("<b>" . t("Note:") . "</b> " . t("There are modules which have been updated.  Please back up your database,
+                                then run the DB Updates function below as soon as possible."), "error", TRUE); 
             }
             
             

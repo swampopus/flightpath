@@ -331,10 +331,10 @@ function popupUpdateSubData(max_hours, term_id, transferFlag, groupHoursAvail, s
   // if the addition checkbox is checked, use the groupHoursAvail as
   // the max.
     
-  // Force numbers to be integers so they will be evaluated correctly.
-  max_hours = parseInt(max_hours);
-  groupHoursAvail = parseInt(groupHoursAvail);
-  subCourseHours = parseInt(subCourseHours);
+  // Force numbers to be floats (numeric) so they will be evaluated correctly.
+  max_hours = parseFloat(max_hours);
+  groupHoursAvail = parseFloat(groupHoursAvail);
+  subCourseHours = parseFloat(subCourseHours);
   
   if (document.getElementById("cbAddition").checked == true)
   {
@@ -345,6 +345,14 @@ function popupUpdateSubData(max_hours, term_id, transferFlag, groupHoursAvail, s
     }
   }
         
+  // Add some values to the global FlightPath object, for use later...
+  FlightPath.globals = new Object();
+  FlightPath.globals.maxHours = max_hours;
+  FlightPath.globals.groupHoursAvail = groupHoursAvail;
+  FlightPath.globals.subCourseHours = subCourseHours;
+    
+  
+  
   var sel = document.getElementById("subHours");
   
   // Replace this pulldowns elements with a range of values from
@@ -362,7 +370,105 @@ function popupUpdateSubData(max_hours, term_id, transferFlag, groupHoursAvail, s
     c++;
   }
   
+  // Add in the option for manual, decimal hours
+  sel.options[c] = new Option(" Enter manual >", "manual");
+  c++;
   
+  
+}
+
+/* The user has changed the sub hours on the substitution popup */
+function popupOnChangeSubHours() {
+  // Get our selected hours selection, and look for "manual" to see if
+  // we should prompt the user to select a new manual hours.
+  var selectedVal = $("#subHours").val();
+  if (selectedVal == "manual") {
+    // Send the user to the manual hour entry...
+    popupPromptSubManualHours()
+  }
+  else {
+    // Hide the span showing the change link and value.
+    $("#subManual").hide();
+  }
+  
+}
+
+
+/* Ask the user what hours they want, check for errors at the same time if possible */
+function popupPromptSubManualHours() {
+  // Existing manual sub hours?
+  var manualHours = $("#subManualHours").val();
+  if (manualHours == "" || manualHours == null) {
+    manualHours = "1";
+  }
+  
+  // We will look at the global values we set earlier.
+  var maxHours = FlightPath.globals.maxHours;
+  
+  var subDecimalsAllowed = FlightPath.settings.subDecimalsAllowed;
+  
+  var newManualHours = $.trim(prompt("Please enter the hours to substitute manually, between 0 and " + maxHours + " hours.\n\nYou may enter decimal values. Ex: 2.5.\nNote: No more than " + subDecimalsAllowed + " decimal places are allowed.", manualHours));
+  
+  // Did they cancel?
+  if (newManualHours == null || newManualHours == "") {
+    $("#subHours").val(0); // set back to first index (max);
+    $("#subManual").hide();
+    return;
+  }
+  
+  // Is the value non-numeric?
+  if (!isNumeric(newManualHours)) {
+    $("#subHours").val(0); // set back to first index (max);
+    $("#subManual").hide();
+    alert("You entered a non-numeric value.  Please make sure you only enter numeric values.\nEx: 3, 2, 1.25");
+    return;
+  }
+  
+  newManualHours = newManualHours * 1;
+  
+  // Make sure the value falls within 0 to maxHours.
+  // We will look at the global values we set earlier.
+  var maxHours = FlightPath.globals.maxHours;
+  if (newManualHours <= 0 || newManualHours > maxHours) {
+    $("#subHours").val(0); // set back to first index (max);
+    $("#subManual").hide();    
+    alert("Sorry, but the value you entered, " + newManualHours + ", isn't valid.\n\nMake sure you enter a number between 0 and " + maxHours + " for this substutution.");
+    return;
+  }
+  
+  // Make sure, if there are decimal places, there aren't too many entered.  If so, reject it.
+  if (decimalPlaces(newManualHours) > subDecimalsAllowed) {
+    alert("Sorry, but you entered " + newManualHours + ", which has too many decimal places (only " + subDecimalsAllowed + " are allowed).\n\nPlease re-enter your substitution hours using the correct number of decimal places.");
+    $("#subHours").val(0); // set back to first index (max);
+    $("#subManual").hide();    
+    return;
+  }
+  
+  
+  
+  // It's good!  Let's store this number in our hidden variable, and display it in our span.
+  $("#subManual").html("&nbsp;" + newManualHours + " - <a href='javascript:popupPromptSubManualHours()'>edit</a>");
+  $("#subManual").show();
+  $("#subManualHours").val(newManualHours);
+  
+  
+}
+
+// test if value is numeric or not.
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+// From the Internet.  Get number of digits after decimal.
+function decimalPlaces(num) {
+  var match = (''+num).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
+  if (!match) { return 0; }
+  return Math.max(
+       0,
+       // Number of digits right of decimal point.
+       (match[1] ? match[1].length : 0)
+       // Adjust for scientific notation.
+       - (match[2] ? +match[2] : 0));
 }
 
 
@@ -439,6 +545,12 @@ function toggleSelectionAndSave(uniqueID, display_status, warningMsg) {
 
 function popupSaveSubstitution(course_id, group_id, semester_num) {
   var subHours = document.getElementById("subHours").value;
+  
+  // If the subHours are "manual", then we will use the manual value instead.
+  if (subHours == "manual") {
+    subHours = $("#subManualHours").val();
+  }
+  
   var subCourseID = 0;
   var subAddition = "";
   if (document.getElementById("cbAddition").checked == true)
@@ -469,7 +581,7 @@ function popupSaveSubstitution(course_id, group_id, semester_num) {
 
   //alert(subRemarks)
 
-  if (subHours < 1 || subCourseID == 0)
+  if (subHours <= 0 || subCourseID == 0)
   {
     alert("Please select a course to substitute.");
     return;

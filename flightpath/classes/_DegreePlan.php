@@ -306,14 +306,14 @@ class _DegreePlan
         {
           // Was already there (probably in another semester),
           // so, just increment the required hours.
-          $new_group->hours_required = $new_group->hours_required + $cur["group_hours_required"];
-          $new_group->hours_required_by_type[$cur["group_requirement_type"]] += $cur["group_hours_required"];
+          $new_group->hours_required = $new_group->hours_required + ($cur["group_hours_required"] * 1);
+          $new_group->hours_required_by_type[$cur["group_requirement_type"]] += ($cur["group_hours_required"] * 1);
           $title = $new_group->title;
           $icon_filename = $new_group->icon_filename;
         } else {
           // Was not already there; insert it.
           $group_n = new Group($cur["group_id"], $this->db, $semester_num, $this->student_array_significant_courses, $this->bool_use_draft);
-          $group_n->hours_required = $cur["group_hours_required"];
+          $group_n->hours_required = $cur["group_hours_required"] * 1;
           $group_n->hours_required_by_type[$cur["group_requirement_type"]] += $group_n->hours_required;
           if (trim($cur["group_min_grade"]) != "")
           {
@@ -339,7 +339,7 @@ class _DegreePlan
         $group_g->assigned_to_semester_num = $semester_num;
         $group_g->title = "$title";
         $group_g->icon_filename = $icon_filename;
-        $group_g->hours_required = $cur["group_hours_required"];
+        $group_g->hours_required = $cur["group_hours_required"] * 1;
         $group_g->bool_placeholder = true;
         $obj_semester->list_groups->add($group_g);
 

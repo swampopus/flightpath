@@ -75,6 +75,57 @@ function system_update($old_schema, $new_schema) {
   }
   
   
+  if ($old_schema < 4) {
+    // Add college-related tables
+    db_query("CREATE TABLE `colleges` (
+                `college_code` varchar(10) NOT NULL,
+                `title` varchar(255) NOT NULL,
+                PRIMARY KEY (`college_code`)
+                ) ");
+    
+    db_query("CREATE TABLE `degree_college` (
+                `major_code` varchar(20) NOT NULL,
+                `college_code` varchar(10) NOT NULL,
+                PRIMARY KEY (`major_code`),
+                KEY `college_code` (`college_code`)
+              ) ");    
+    
+    fp_add_message(t("Added college-related tables to database."));
+  }
+  
+  if ($old_schema < 5) {
+    // Update hour fields to be decimal type.
+    db_query("ALTER TABLE `advised_courses` MODIFY `var_hours` DECIMAL(8,4) NOT NULL");
+    db_query("ALTER TABLE `student_courses` MODIFY `hours_awarded` DECIMAL(8,4) NOT NULL");
+    db_query("ALTER TABLE `student_substitutions` MODIFY `sub_hours` DECIMAL(8,4) NOT NULL");
+    
+    db_query("ALTER TABLE `courses` MODIFY `min_hours` DECIMAL(8,4) NOT NULL");
+    db_query("ALTER TABLE `courses` MODIFY `max_hours` DECIMAL(8,4) NOT NULL");
+    db_query("ALTER TABLE `courses` MODIFY `repeat_hours` DECIMAL(8,4) NOT NULL");
+    db_query("ALTER TABLE `draft_courses` MODIFY `min_hours` DECIMAL(8,4) NOT NULL");
+    db_query("ALTER TABLE `draft_courses` MODIFY `max_hours` DECIMAL(8,4) NOT NULL");
+    db_query("ALTER TABLE `draft_courses` MODIFY `repeat_hours` DECIMAL(8,4) NOT NULL");    
+    
+    db_query("ALTER TABLE `degree_requirements` MODIFY `group_hours_required` DECIMAL(8,4) NOT NULL");    
+    db_query("ALTER TABLE `draft_degree_requirements` MODIFY `group_hours_required` DECIMAL(8,4) NOT NULL");    
+    
+    db_query("ALTER TABLE `student_transfer_courses` MODIFY `hours_awarded` DECIMAL(8,4) NOT NULL");    
+    db_query("ALTER TABLE `transfer_courses` MODIFY `min_hours` DECIMAL(8,4) NOT NULL");    
+    db_query("ALTER TABLE `transfer_courses` MODIFY `max_hours` DECIMAL(8,4) NOT NULL");    
+
+    
+    // Also, expand the varchar fields for students table...
+    db_query("ALTER TABLE `students` MODIFY `cumulative_hours` varchar(10) NOT NULL");    
+    db_query("ALTER TABLE `students` MODIFY `gpa` varchar(10) NOT NULL");    
+    
+    
+    fp_add_message(t("Updated database fields to allow for decimal hours."));
+  }
+  
+  
+  
+  
+  
 }
 
 
@@ -101,7 +152,7 @@ function system_install() {
           `entry_value` varchar(20) NOT NULL,
           `semester_num` int(11) NOT NULL,
           `group_id` int(11) NOT NULL,
-          `var_hours` int(11) NOT NULL DEFAULT '0',
+          `var_hours` decimal(8,4) NOT NULL DEFAULT '0',
           `term_id` varchar(20) NOT NULL,
           PRIMARY KEY (`id`),
           KEY `advid` (`advising_session_id`),
@@ -182,9 +233,9 @@ CREATE TABLE `courses` (
   `catalog_year` int(11) NOT NULL DEFAULT '2006',
   `title` text NOT NULL,
   `description` text NOT NULL,
-  `min_hours` int(11) NOT NULL,
-  `max_hours` int(11) NOT NULL,
-  `repeat_hours` int(11) NOT NULL,
+  `min_hours` decimal(8,4) NOT NULL,
+  `max_hours` decimal(8,4) NOT NULL,
+  `repeat_hours` decimal(8,4) NOT NULL,
   `exclude` tinyint(4) NOT NULL DEFAULT '0',
   `data_entry_comment` text NOT NULL,
   `delete_flag` tinyint(4) NOT NULL DEFAULT '0',
@@ -196,6 +247,21 @@ CREATE TABLE `courses` (
 ); ";
 db_query($q);
 
+
+db_query("CREATE TABLE `colleges` (
+            `college_code` varchar(10) NOT NULL,
+            `title` varchar(255) NOT NULL,
+            PRIMARY KEY (`college_code`)
+            ) ");
+
+db_query("CREATE TABLE `degree_college` (
+            `major_code` varchar(20) NOT NULL,
+            `college_code` varchar(10) NOT NULL,
+            PRIMARY KEY (`major_code`),
+            KEY `college_code` (`college_code`)
+          ) "); 
+
+
 $q = "
 CREATE TABLE `degree_requirements` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -203,7 +269,7 @@ CREATE TABLE `degree_requirements` (
   `semester_num` int(11) NOT NULL,
   `group_id` int(11) NOT NULL,
   `group_requirement_type` varchar(10) NOT NULL,
-  `group_hours_required` int(11) NOT NULL,
+  `group_hours_required` decimal(8,4) NOT NULL,
   `group_min_grade` varchar(10) NOT NULL,
   `course_id` int(11) NOT NULL,
   `course_min_grade` varchar(10) NOT NULL,
@@ -255,9 +321,9 @@ CREATE TABLE `draft_courses` (
   `catalog_year` int(11) NOT NULL DEFAULT '2006',
   `title` text NOT NULL,
   `description` text NOT NULL,
-  `min_hours` int(11) NOT NULL,
-  `max_hours` int(11) NOT NULL,
-  `repeat_hours` int(11) NOT NULL,
+  `min_hours` decimal(8,4) NOT NULL,
+  `max_hours` decimal(8,4) NOT NULL,
+  `repeat_hours` decimal(8,4) NOT NULL,
   `exclude` tinyint(4) NOT NULL DEFAULT '0',
   `data_entry_comment` text NOT NULL,
   `delete_flag` tinyint(4) NOT NULL DEFAULT '0',
@@ -276,7 +342,7 @@ CREATE TABLE `draft_degree_requirements` (
   `semester_num` int(11) NOT NULL,
   `group_id` int(11) NOT NULL,
   `group_requirement_type` varchar(10) NOT NULL,
-  `group_hours_required` int(11) NOT NULL,
+  `group_hours_required` decimal(8,4) NOT NULL,
   `group_min_grade` varchar(10) NOT NULL,
   `course_id` int(11) NOT NULL,
   `course_min_grade` varchar(10) NOT NULL,
@@ -315,7 +381,7 @@ CREATE TABLE `draft_degrees` (
   `catalog_year` int(11) NOT NULL DEFAULT '2006',
   `exclude` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `degree_id` (`degree_id`)
+  KEY `degree_id` (`degree_id`)  
 );";
 db_query($q);
 
@@ -486,7 +552,7 @@ CREATE TABLE `student_courses` (
   `student_id` int(11) NOT NULL,
   `subject_id` varchar(10) NOT NULL,
   `course_num` varchar(10) NOT NULL,
-  `hours_awarded` int(11) NOT NULL,
+  `hours_awarded` decimal(8,4) NOT NULL,
   `grade` varchar(5) NOT NULL,
   `term_id` varchar(20) NOT NULL,
   PRIMARY KEY  (`id`),
@@ -524,7 +590,7 @@ CREATE TABLE `student_substitutions` (
   `sub_entry_value` varchar(20) NOT NULL,
   `sub_term_id` varchar(20) NOT NULL,
   `sub_transfer_flag` tinyint(4) NOT NULL,
-  `sub_hours` tinyint(4) NOT NULL,
+  `sub_hours` decimal(8,4) NOT NULL,
   `sub_remarks` text NOT NULL,
   `posted` int(10) unsigned NOT NULL,
   `delete_flag` tinyint(4) NOT NULL,
@@ -556,7 +622,7 @@ CREATE TABLE `student_transfer_courses` (
   `student_specific_course_title` varchar(255) NOT NULL,
   `term_id` varchar(20) NOT NULL,
   `grade` varchar(5) NOT NULL,
-  `hours_awarded` int(11) NOT NULL,
+  `hours_awarded` decimal(8,4) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `student_id` (`student_id`),
   KEY `transfer_id` (`transfer_course_id`),
@@ -596,8 +662,8 @@ db_query($q);
 $q = "
 CREATE TABLE `students` (
   `cwid` int(11) unsigned NOT NULL,
-  `cumulative_hours` varchar(5) NOT NULL,
-  `gpa` varchar(5) NOT NULL,
+  `cumulative_hours` varchar(10) NOT NULL,
+  `gpa` varchar(10) NOT NULL,
   `rank_code` varchar(5) NOT NULL,
   `major_code` varchar(20) NOT NULL,
   `catalog_year` int(11) NOT NULL,
@@ -622,8 +688,8 @@ CREATE TABLE `transfer_courses` (
   `course_num` varchar(10) NOT NULL,
   `title` varchar(100) NOT NULL,
   `description` text NOT NULL,
-  `min_hours` int(11) NOT NULL,
-  `max_hours` int(11) NOT NULL,
+  `min_hours` decimal(8,4) NOT NULL,
+  `max_hours` decimal(8,4) NOT NULL,
   PRIMARY KEY (`transfer_course_id`),
   KEY `ic` (`institution_id`),
   KEY `si` (`subject_id`),

@@ -1068,7 +1068,7 @@ class _FlightPath
 			$sub_course_id = $temp[3];
 			$sub_term_id = $temp[4];
 			$sub_transfer_flag = $temp[5];
-			$sub_hours = $temp[6];
+			$sub_hours = $temp[6] * 1;
 			$sub_addition = $temp[7];
 			$sub_remarks = urldecode($temp[8]);
 
@@ -1106,9 +1106,9 @@ class _FlightPath
 
       if ($test_c = $this->student->list_courses_taken->find_specific_course($sub_course_id, $sub_term_id, (bool) $sub_transfer_flag, true)) {
   	    // Are the hours out of whack?
-  	    if (intval($sub_hours) > intval($test_c->hours_awarded)) {
+  	    if (floatval($sub_hours) > floatval($test_c->hours_awarded)) {
   	      // Yes!  Set it to the value of the hours_awarded.
-  	      $sub_hours = intval($test_c->hours_awarded);
+  	      $sub_hours = floatval($test_c->hours_awarded);
   	    }
       }			
 		
