@@ -1,6 +1,10 @@
 FlightPath 4.x Changelog
 ========================
 
+----------------
+RELEASED 4.4
+----------------
+
 2014-03-10
   Changed hour fields in FlightPath to allow for decimal values.  The rule is that hours
   may not be larger than 9999 hours, and have no more than 4 decimal places.  For example,
@@ -11,6 +15,8 @@ FlightPath 4.x Changelog
   
   Added ability to control whether or not course titles are auto-capitalized based on a capitalization
   scheme.
+
+  Fixed a bug in last release (4.3.4) where the students table no longer had the is_active column.
 
 
 2014-02-27

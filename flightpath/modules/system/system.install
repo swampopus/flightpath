@@ -25,13 +25,24 @@ function system_enable() {
   // Add in the anonymous user into the users table (uid = 0)
   db_query("INSERT INTO users (user_id, cwid, user_name) VALUES (0, 0, 'anonymous')");
 
-  // Set up the modules table.
-  db_query("INSERT INTO modules (path, name, version, enabled, weight, type)
-            VALUES ('modules/system', 'system', 'core', 1, '-999', 'module') ");
+  // Let's figure out what the current schema value is for this system module...
+  $info_contents = file_get_contents("modules/system/system.info");    
+  // From the info_contents variable, split up and place into an array.
+  $info_details_array = array();
+  $lines = explode("\n", $info_contents);
+  foreach ($lines as $line) {
+    if (trim($line) == "") continue;
+    $temp = explode("=", trim($line));
+    $info_details_array[trim($temp[0])] = trim(substr($line, strlen($temp[0]) + 1)); 
+  }  
+
+  // Set up the modules table-- add the system module first.    
+  db_query("INSERT INTO modules (path, name, version, enabled, weight, type, `schema`)
+            VALUES ('modules/system', 'system', 'core', 1, '-999', 'module', '?') ", $info_details_array["schema"]);
     
 
   // Let's perform installations on the other modules we want enabled by default.
-  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "content", "announcements", "tinymce", "course_search", "blank_degrees");
+  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "content", "announcements", "tinymce", "course_search", "blank_degrees", "user");
   foreach ($modules as $module) {
     system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => "core"));
   }
@@ -662,12 +673,16 @@ db_query($q);
 $q = "
 CREATE TABLE `students` (
   `cwid` int(11) unsigned NOT NULL,
-  `cumulative_hours` varchar(10) NOT NULL,
-  `gpa` varchar(10) NOT NULL,
+  `cumulative_hours` varchar(5) NOT NULL,
+  `gpa` varchar(5) NOT NULL,
   `rank_code` varchar(5) NOT NULL,
   `major_code` varchar(20) NOT NULL,
   `catalog_year` int(11) NOT NULL,
-  PRIMARY KEY (`cwid`)
+  `is_active` tinyint(11) NOT NULL,
+  PRIMARY KEY (`cwid`),
+  KEY `rank_code` (`rank_code`),
+  KEY `major_code` (`major_code`),
+  KEY `is_active` (`is_active`)
 ); ";
 db_query($q);
 

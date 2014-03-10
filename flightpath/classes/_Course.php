@@ -993,14 +993,14 @@ class _Course
       // Reset the ghosthours to default.
       $this->bool_ghost_hour = $this->bool_ghost_min_hour = FALSE;
 
-      if ($this->min_hours < 1) {
+      if ($this->min_hours <= 0) {
         $this->min_hours = 1;        
         $this->bool_ghost_min_hour = TRUE;
       }
       
       $this->max_hours = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["max_hours"];
       
-      if ($this->max_hours < 1) {
+      if ($this->max_hours <= 0) {
         $this->max_hours = 1;
         $this->bool_ghost_hour = TRUE;
       }
@@ -1083,18 +1083,18 @@ class _Course
       // Reset the ghosthours to default.
       $this->bool_ghost_hour = $this->bool_ghost_min_hour = FALSE;
       
-      if ($this->min_hours < 1) {
+      if ($this->min_hours <= 0) {
         $this->min_hours = 1;
         $this->bool_ghost_min_hour = TRUE;
       }
-      if ($this->max_hours < 1) {
+      if ($this->max_hours <= 0) {
         $this->max_hours = 1;
         $this->bool_ghost_hour = TRUE;
       }
       
       
       $this->repeat_hours = $cur["repeat_hours"] * 1;
-      if ($this->repeat_hours < 1)
+      if ($this->repeat_hours <= 0)
       {
         $this->repeat_hours = $this->max_hours;
       }
