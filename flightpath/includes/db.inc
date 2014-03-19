@@ -300,18 +300,46 @@ function db_table_exists($table_name) {
 }
 
 
-
+/**
+ * Get a variable from the database.  We will first look in our GLOBALS array,
+ * to see that it hasn't already been retrieved this page load.
+ *
+ * @param unknown_type $name
+ * @param unknown_type $default_value
+ * @return unknown
+ */
 function variable_get($name, $default_value = "") {
-  $res = db_query("SELECT value FROM variables
-                         WHERE name = '?' ", $name);
-  $cur = db_fetch_array($res);
   
-  $val = unserialize($cur["value"]);
+  $val = null;
+  
+  // First, check in our GLOBALS array, like a cache...
+  if (isset($GLOBALS["fp_system_settings"][$name])) {
+    $val = $GLOBALS["fp_system_settings"][$name];
+  }
+  else {    
+    // Not found-- look in the database for it.
+    $res = db_query("SELECT value FROM variables
+                           WHERE name = '?' ", $name);
+    $cur = db_fetch_array($res);    
+    $val = unserialize($cur["value"]);
+    
+    if ($val === "BOOLEAN_FALSE_PLACEHOLDER") {
+      $val = FALSE;
+    }
+    
+    // Save back to our cache...
+    $GLOBALS["fp_system_settings"][$name] = $val;
+  }
+
   
   if (!$val) {
     $val = $default_value;
   }
-  
+
+  // We must have this down here again, just in case what got stored in the GLOBALS
+  // array was this placeholder.  This can happen, because the settings file doesn't do
+  // this check when assembling this variable on page load.  It's something that needs
+  // to be fixed.
   if ($val === "BOOLEAN_FALSE_PLACEHOLDER") {
     $val = FALSE;
   }
@@ -320,7 +348,20 @@ function variable_get($name, $default_value = "") {
 }
 
 
+/**
+ * Set a variable value, so we can retrieve it later on.
+ * 
+ * This will write to our variables database table, as well as store in a cache
+ * array for quick look-up later.
+ *
+ * @param unknown_type $name
+ * @param unknown_type $value
+ */
 function variable_set($name, $value) {
+
+  // Save back to our "cache" GLOBALS array:
+  $GLOBALS["fp_system_settings"][$name] = $value;
+  
   
   // Boolean FALSE presents unusual problems when we try to tell if it got unserialized correctly.
   // We will convert it to a placeholder so we can positively store it.   
@@ -330,6 +371,7 @@ function variable_set($name, $value) {
     
   db_query("REPLACE INTO variables (name, value)
               VALUES ('?', '?') ", $name, serialize($value));
+ 
   
 }
 
@@ -358,11 +400,9 @@ function fp_rebuild_modules_list($reinclude = TRUE) {
 
 
 function fp_get_system_settings($force_rebuild = FALSE) {
-  //$db = get_global_database_handler();
-  //$settings = $db->get_flightpath_settings();
   
-  if ($force_rebuild == FALSE && isset($GLOBALS["fp_system_variables"])) {
-    return $GLOBALS["fp_system_variables"];
+  if ($force_rebuild == FALSE && isset($GLOBALS["fp_system_settings"])) {
+    return $GLOBALS["fp_system_settings"];
   }
   
   // Get all of our settings from the variables table.
@@ -376,6 +416,7 @@ function fp_get_system_settings($force_rebuild = FALSE) {
     }
     
     $settings[$name] = $val;
+    $GLOBALS["fp_system_settings"][$name] = $val;
     
   }
   

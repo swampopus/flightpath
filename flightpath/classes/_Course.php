@@ -421,6 +421,8 @@ class _Course
   /**
    * Returns TRUE if the student has completed the course 
    * (and did not make a failing grade on it).
+   * 
+   * 
    *
    * @return bool
    */  
@@ -617,25 +619,31 @@ class _Course
 	  $grade = $this->grade;
 	  
 	  $pts = 0;
-	  	  
-		switch ($grade) {
-			case 'A':
-				$pts = 4 * $hours;
-				break;
-			case 'B':
-				$pts = 3 * $hours;
-				break;
-			case 'C':
-				$pts = 2 * $hours;
-				break;
-			case 'D':
-				$pts = 1 * $hours;
-				break;
-		}
-		
-		
-		//fpm($this->to_string());
-		//fpm($this->requirement_type . " " . $pts);
+		$qpts_grades = array();
+	  
+	  // Let's find out what our quality point grades & values are...
+	  if (isset($GLOBALS["qpts_grades"])) {
+	    // have we already cached this?
+	    $qpts_grades = $GLOBALS["qpts_grades"];
+	  }	
+	  else {
+	    $tlines = explode("\n", variable_get("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0"));
+      foreach ($tlines as $tline) {
+        $temp = explode("~", trim($tline));      
+        if (trim($temp[0]) != "") {
+          $qpts_grades[trim($temp[0])] = trim($temp[1]);
+        }
+      }
+    
+      $GLOBALS["qpts_grades"] = $qpts_grades;  // save to cache
+	  }
+    
+	  // Okay, find out what the points are by multiplying value * hours...
+    
+    if (isset($qpts_grades[$grade])) {
+	   $pts = $qpts_grades[$grade] * $hours;
+    }
+	  
 		
 		return $pts;
 
@@ -1243,6 +1251,9 @@ class _Course
       $this->hours_awarded = $cur["hours_awarded"] * 1;
 
 
+      $already = array();  // to prevent duplicates from showing up, keep up with
+                           // eqv's we've already recorded.
+      
    
       $res2 = $this->db->db_query("SELECT * FROM transfer_eqv_per_student
             					WHERE student_id = '?'	
@@ -1250,9 +1261,13 @@ class _Course
             					 ", $student_id, $this->course_id);
       while($cur2 = $this->db->db_fetch_array($res2))
       {        
-        $c = new Course($cur2["local_course_id"]);
-        $this->transfer_eqv_text .= "$c->subject_id $c->course_num
-							(" . $c->get_catalog_hours() . " " . t("hrs") . ") ";
+
+        if (!in_array($cur2["local_course_id"], $already)) {
+          $c = new Course($cur2["local_course_id"]);
+          $this->transfer_eqv_text .= "$c->subject_id $c->course_num
+  							(" . $c->get_catalog_hours() . " " . t("hrs") . ") ";
+          $already[] = $cur2["local_course_id"];
+        }
       }
 
     }

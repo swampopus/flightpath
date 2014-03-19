@@ -1,6 +1,54 @@
 FlightPath 4.x Changelog
 ========================
 
+
+----------------
+RELEASED 4.4.1
+----------------
+
+
+2014-03-19
+  Added the ability for FlightPath to calculate cumulative hours and GPA on the fly, instead of
+  relying on what is in the database.
+
+  Added new settings to the School data settings form, for configuring what quality points each grade
+  is worth, as well as enabling the on-the-fly calculations for hours and gpa.
+  
+  Moved more settings from the System Settings form to the School Data form.
+  
+  Made variable_get and variable_set more efficient by taking advantage of a global variable for caching.
+  
+  Tweaked advise.js, to reducee the hour options for subs if they are already decimals (just use
+  manual for that)
+  
+  Added a new function, fp_truncate_decimals(), which lets gives you back a float with a truncated
+  number of decimals, instead of rounded (as number_format does).
+   
+  Added the ability for modules to require that FlightPath core be a certain version.  In the
+  .info file, use "requires core version = 4.5", for example.  If the user is not running that version
+  for FlightPath core or higher, they will not be able to enable the module from the modules page, and
+  a warning will be displayed next to the module's listing.
+  
+  Tweaked wording on user form for students, to make it clear that the cumulative hours and gpa
+  might be getting replaced if you have that set.
+  
+
+2014-03-13
+  Fixed display bug where, for some transfer courses, an eqv might show up more than once
+  in the popup window.
+
+
+2014-03-12
+  Tweaked math that splits substitutions.  If a split happens for certain decimals, the
+  result isn't expected.  For example, 2.001 - 2 should equal "0.001"  Instead, we get
+  "0.000099999999".  This is due to binary math.  So, I added a round() statement, which rounds
+  to the 5th decimal point, which should be sufficient, since the database only allows for 4 decimal
+  points anyway.
+  
+  Also tweaked javascript in advise.js to not show substitution hour selections if we're dealing with
+  a course with decimals to begin with-- only give them "Max (Default)" or "Manual" selections.
+
+
 ----------------
 RELEASED 4.4
 ----------------

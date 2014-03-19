@@ -1627,6 +1627,42 @@ function fp_number_pad($number, $len) {
 
 
 /**
+ * This simple function will take a number and truncate the number of decimals
+ * to the requested places.  This can be used in place of number_format(), which *rounds*
+ * numbers.
+ * 
+ * For example, number_format(1.99999, 2) gives you 2.00.
+ * But THIS function gives:
+ *   fp_truncate_decimals(1.999999, 2) = 1.99
+ * 
+ *
+ * @param unknown_type $places
+ */
+function fp_truncate_decimals($num, $places = 2) {
+    
+  // does $num contain a .?  If not, add it on.
+  if (!strstr("" . $num, ".")) {
+    $num .= ".0";
+  }
+  
+  // Break it by .
+  $temp = explode (".", "" . $num);
+  
+  // Get just the decimals and trim 'em
+  $decimals = trim(substr($temp[1], 0, $places));
+  if (strlen($decimals) < $places) {
+    // Padd with zeros on the right!
+    $decimals = str_pad($decimals, $places, "0", STR_PAD_RIGHT);
+  }
+  
+  $new_num = $temp[0] . "." . $decimals; 
+  
+  return $new_num;
+}
+
+
+
+/**
  * Shortcut to fp_debug_current_time_millis()
  * 
  * @see fp_debug_current_time_millis()

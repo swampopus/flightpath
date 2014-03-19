@@ -73,6 +73,16 @@ class _Student
 			$this->load_significant_courses();
 			//$this->load_unassignments();
 			//$this->load_student_substitutions();
+			
+			// If we are supposed to set cumulative hours and gpa, perform that
+			// operation now.
+      if (variable_get("calculate_cumulative_hours_and_gpa", FALSE)) {			
+			 $arr = $this->calculate_cumulative_hours_and_gpa();
+			 $this->cumulative_hours = $arr["cumulative_total_hours"];		
+			 $this->gpa = $arr["cumulative_gpa"];		
+      }
+			
+			
 		}
     
     
@@ -365,7 +375,11 @@ class _Student
 					// using in the substitution-- the course which the student
 					// has actually taken-- is being split up in the substitution.
 					// We are only using a portion of its hours.
-					$remaining_hours = $taken_course->hours_awarded - $sub_hours;
+					// We MUST round, because if there is a decimal place, we might run into
+					// trouble.  Because, for example, 2.001 - 2 actually gets .00009999999 instead of .001.
+					// The most decimals we can have is 4, so let's round to 5 decimal places.  That should
+					// take care of us.
+					$remaining_hours = round(($taken_course->hours_awarded - $sub_hours), 5);
 					
 					// Create a clone of the course with the leftover hours, and add
 					// it back into the list_courses_taken.
@@ -457,33 +471,46 @@ class _Student
     $this->major_code = $this->db->get_student_major_from_db($this->student_id);
 		$this->catalog_year = $this->db->get_student_catalog_year($this->student_id);
 		$this->name = $this->db->get_student_name($this->student_id);
-    
-    /*
-	  // Let's perform our queries.
-		$res = $this->db->db_query("SELECT * FROM students 
-						          WHERE user_id = '?' ", $this->student_id);
-		$cur = $this->db->db_fetch_array($res);
 
-		
-
-		$this->cumulative_hours = $cur["cumulative_hours"];
-		$this->gpa = $cur["gpa"];
-		$this->rank = $this->get_rank_description($cur["rank_code"]);
-		$this->major_code = $cur["major_code"];
-
-		$this->name = ucwords(strtolower($this->db->get_student_name($this->student_id)));
-
-		$catalog = $cur["catalog_year"];
-		
-		// If this is written in the format 2006-2007, then we just want
-		// the first part.  Luckily, this will still work even if there WASN'T
-		// a - in there ;)
-	  $temp = explode("-", $catalog);
-	  $this->catalog_year = $temp[0];
-    */
    
 	}
 
+	/**
+	 * This function will look at the courses which the student has taken, to calculate
+	 * the cumulative hours and gpa, rather than just load them from the db table.
+	 * 
+	 * It will then return the values in an assoc array for later use.  For example, you
+	 * may want to set $this->cumulative_hours and $this->gpa to them.
+	 *
+	 */
+	function calculate_cumulative_hours_and_gpa() {
+	  
+		$cumulative_hours = 0;
+		$cumulative_points = 0;
+		
+		$cumulative_total_hours = $this->list_courses_taken->count_credit_hours("", FALSE, TRUE, FALSE);
+		$cumulative_quality_hours = $this->list_courses_taken->count_credit_hours("", FALSE, TRUE, TRUE);
+		$cumulative_quality_points = $this->list_courses_taken->count_credit_quality_points("", FALSE, TRUE);
+		
+		$cgpa = FALSE;
+		if ($cumulative_quality_hours > 0) {
+		  $cgpa = fp_truncate_decimals($cumulative_quality_points / $cumulative_quality_hours, 3);
+		} 
+		
+		fpm("This student: <b>$cumulative_total_hours total hours</b>, 
+		            $cumulative_quality_hours qual hours, $cumulative_quality_points cpoints. <b>gpa: $cgpa</b>");
+		
+	  	
+		return array(
+		  "cumulative_total_hours" => $cumulative_total_hours,
+		  "cumulative_quality_hours" => $cumulative_quality_hours,
+		  "cumulative_quality_points" => $cumulative_quality_points,
+		  "cumulative_gpa" => $cgpa,
+		);
+		
+	}
+	
+	
 	
 	/**
 	 * Given a rank_code like FR, SO, etc., get the english

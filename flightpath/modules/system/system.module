@@ -265,7 +265,7 @@ function system_menu() {
     "title" => "Configure school data",
     "description" => "Configure school-specific data and settings",
     "page_callback" => "fp_render_form",
-    "page_arguments" => array("system_school_data_form"),
+    "page_arguments" => array("system_school_data_form", "system_settings"),
     "access_arguments" => array("de_can_administer_school_data"),
     "page_settings" => array(
       "page_has_search" => FALSE,
@@ -878,13 +878,68 @@ function system_school_data_form() {
   );
   
   
-  
-  $form["submit_btn"] = array(
-    "type" => "submit",
-    "value" => t("Submit"),
+
+  $form["retake_grades"] = array(
+    "type" => "textfield",
+    "label" => t("Retake grades (CSV):"),
+    "value" => variable_get("retake_grades", ""),
+    "description" => t("List grades, separated by comma, which means 'the student must
+                retake this course. They did not earn credit.' Ex: F,W,I"),    
+  );
+         
+  $form["enrolled_grades"] = array(
+    "type" => "textfield",
+    "label" => t("Enrolled grades (CSV):"),
+    "value" => variable_get("enrolled_grades", ""),
+    "description" => t("List grades, separated by comma, which means 'the student is
+                currently enrolled in this course.' Ex: E,AMID,BMID "),    
+  );
+
+  $form["b_or_better"] = array(
+    "type" => "textfield",
+    "label" => t("B or better grades (CSV):"),
+    "value" => variable_get("b_or_better", ""),
+    "description" => t("List grades, separated by comma, which are either a B or better."),    
+  );
+
+  $form["c_or_better"] = array(
+    "type" => "textfield",
+    "label" => t("C or better grades (CSV):"),
+    "value" => variable_get("c_or_better", ""),
+    "description" => t("List grades, separated by comma, which are either a C or better."),    
+  );
+
+  $form["d_or_better"] = array(
+    "type" => "textfield",
+    "label" => t("D or better grades (CSV):"),
+    "value" => variable_get("d_or_better", ""),
+    "description" => t("List grades, separated by comma, which are either a D or better."),    
+  );
+
+
+  $form["calculate_cumulative_hours_and_gpa"] = array(
+    "label" => t("Calculate student cumulative hours and GPA?"),
+    "type" => "checkbox",
+    "value" => variable_get("calculate_cumulative_hours_and_gpa", FALSE),
+    "description" => t("If checked, student cumulative hours and GPA will not be read from the
+                          'students' database table, but will instead be calculated on the fly
+                          each time a student is loaded.  If unsure what to do, check this box."),    
   );
   
-  
+  $form["quality_points_grades"] = array(
+    "label" => t("Quality points and grades:"),
+    "type" => "textarea",
+    "value" => variable_get("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0"),
+    "description" => t("Enter a grade, and how many quality points it is worth, separated by
+                        tilde (~), one per line.  You must include every grade which should count
+                        for (or against) a GPA calculation, even if it is worth zero points.  For example,
+                        if an 'F' should cause a GPA to lower (which normally it would), it should be
+                        listed here.  If a 'W' grade should simply be ignored, then DO NOT list it here.
+                        Any grade you do not list here will be IGNORED in all GPA calculations.") . "
+                        <br>
+                        Ex:<blockquote style='margin-top:0; font-family: Courier New, monospace;'>                        
+                        A ~ 4<br>B ~ 3<br>C ~ 2<br>D ~ 1<br>F ~ 0<br>I ~ 0</blockquote>",
+  );
   
   
   
@@ -896,25 +951,17 @@ function system_school_data_form() {
 
 
 /**
- * Submit handler for the school_data_form.
+ * Validate handler for the school_data_form.
  * 
- * We want to save our submitted data, basically.
+ * Most of our data can be saved as simple system_settings, but for the others,
+ * we want to save them to special tables, then remove them from the form_state so
+ * they don't get saved to the variables table, taking up a lot of space.
  *
  * @param unknown_type $form
  * @param unknown_type $form_state
  */
-function system_school_data_form_submit($form, $form_state) {
+function system_school_data_form_validate($form, &$form_state) {
 
-  
-  // Use variable_set for some values...
-  variable_set("ignore_courses_from_hour_counts", $form_state["values"]["ignore_courses_from_hour_counts"]);  
-  
-  variable_set("term_id_structure", $form_state["values"]["term_id_structure"]);  
-  
-  variable_set("sub_hours_decimals_allowed", $form_state["values"]["sub_hours_decimals_allowed"]);
-  
-  variable_set("autocapitalize_course_titles", $form_state["values"]["autocapitalize_course_titles"]);
-  
   
   // Subjects...
   db_query("TRUNCATE TABLE subjects");
@@ -927,9 +974,12 @@ function system_school_data_form_submit($form, $form_state) {
     db_query("INSERT INTO subjects (subject_id, college, title)
               VALUES ('?', '?', '?') ", strtoupper(trim($temp[0])), strtoupper(trim($temp[1])), trim($temp[2]));
     
-  }  
+  }
+  // Remove the data from our form_state, so it isn't saved twice
+  unset($form_state["values"]["subjects"]);
   
 
+  
   // Colleges...
   db_query("TRUNCATE TABLE colleges");
      
@@ -942,6 +992,9 @@ function system_school_data_form_submit($form, $form_state) {
               VALUES ('?', '?') ", strtoupper(trim($temp[0])), trim($temp[1]));
     
   }  
+  // Remove the data from our form_state, so it isn't saved twice
+  unset($form_state["values"]["colleges"]);
+
   
 
   // Degree College...
@@ -956,6 +1009,8 @@ function system_school_data_form_submit($form, $form_state) {
               VALUES ('?', '?') ", strtoupper(trim($temp[0])), strtoupper(trim($temp[1])));
     
   }  
+  // Remove the data from our form_state, so it isn't saved twice
+  unset($form_state["values"]["degree_college"]);
   
   
   
@@ -1101,45 +1156,7 @@ function system_settings_form() {
   );
     
 
-  $form["retake_grades"] = array(
-    "type" => "textfield",
-    "label" => t("Retake grades (CSV):"),
-    "value" => variable_get("retake_grades", ""),
-    "description" => t("List grades, separated by comma, which means 'the student must
-                retake this course. They did not earn credit.' Ex: F,W,I"),    
-  );
-         
-  $form["enrolled_grades"] = array(
-    "type" => "textfield",
-    "label" => t("Enrolled grades (CSV):"),
-    "value" => variable_get("enrolled_grades", ""),
-    "description" => t("List grades, separated by comma, which means 'the student is
-                currently enrolled in this course.' Ex: E,AMID,BMID "),    
-  );
-
-  $form["b_or_better"] = array(
-    "type" => "textfield",
-    "label" => t("B or better grades (CSV):"),
-    "value" => variable_get("b_or_better", ""),
-    "description" => t("List grades, separated by comma, which are either a B or better."),    
-  );
-
-  $form["c_or_better"] = array(
-    "type" => "textfield",
-    "label" => t("C or better grades (CSV):"),
-    "value" => variable_get("c_or_better", ""),
-    "description" => t("List grades, separated by comma, which are either a C or better."),    
-  );
-
-  $form["d_or_better"] = array(
-    "type" => "textfield",
-    "label" => t("D or better grades (CSV):"),
-    "value" => variable_get("d_or_better", ""),
-    "description" => t("List grades, separated by comma, which are either a D or better."),    
-  );
-
-
-
+  
                                   
                   
   
@@ -1942,6 +1959,26 @@ function system_modules_form() {
               $bool_overriding = TRUE;
             }
             
+            $requires = "";
+
+            // If this module requires a higher core version of FlightPath than what we
+            // are running, disable and explain to the user.
+            if (FLIGHTPATH_VERSION != '%FP_VERSION%' && $info_details_array["requires core version"]) {
+              // Test to see if the current version is >= to the required core version.
+              if (version_compare(FLIGHTPATH_VERSION, $info_details_array["requires core version"], "<")) {
+                // No, it's LESS than the required version!  We shouldn't be able to use this module!
+                $attributes["disabled"] = "disabled";
+                $requires .= "<div style='color: red;'>" . t("This module requires
+                                          that you run FlightPath version %fpv or higher.  
+                                          You are instead running version %fpov.  Please update
+                                          your core copy of FlightPath before attempting to install this
+                                          module.", array('%fpv' => $info_details_array["requires core version"],
+                                                          '%fpov' => FLIGHTPATH_VERSION)) . "</div>";
+              }
+            }
+                       
+                       
+            
             $form["cb__$module"] = array(
               "type" => "checkboxes",              
               "options" => array($module => $info_details_array["name"]),
@@ -1960,10 +1997,9 @@ function system_modules_form() {
 
 
             
-            // Version & descr.
-            $requires = "";
+            // Version & descr.            
             if ($info_details_array["requires"] != "") {
-              $requires = "<div class='fp-system-modules-requires hypo'>
+              $requires .= "<div class='fp-system-modules-requires hypo'>
                             <b>" . t("Requires:") . "</b> {$info_details_array["requires"]}
                            </div>";
               

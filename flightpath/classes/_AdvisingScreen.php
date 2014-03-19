@@ -3207,6 +3207,10 @@ function draw_menu_items($menu_array) {
 
 	/**
 	 * Calculate the quality points for a grade and hours.
+	 * 
+	 * This function is very similar to the one in the Course class.
+	 * It is only slightly different here.  Possibly, the two functions should be
+	 * merged.
 	 *
 	 * @param string $grade
 	 * @param int $hours
@@ -3214,22 +3218,35 @@ function draw_menu_items($menu_array) {
 	 */
 	function get_quality_points($grade, $hours){
 
-		switch ($grade) {
-			case 'A':
-				$pts = 4 * $hours;
-				break;
-			case 'B':
-				$pts = 3 * $hours;
-				break;
-			case 'C':
-				$pts = 2 * $hours;
-				break;
-			case 'D':
-				$pts = 1 * $hours;
-				break;
-		}
+    $pts = 0;
+		$qpts_grades = array();
+	  
+	  // Let's find out what our quality point grades & values are...
+	  if (isset($GLOBALS["qpts_grades"])) {
+	    // have we already cached this?
+	    $qpts_grades = $GLOBALS["qpts_grades"];
+	  }	
+	  else {
+	    $tlines = explode("\n", variable_get("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0"));
+      foreach ($tlines as $tline) {
+        $temp = explode("~", trim($tline));      
+        if (trim($temp[0]) != "") {
+          $qpts_grades[trim($temp[0])] = trim($temp[1]);
+        }
+      }
+    
+      $GLOBALS["qpts_grades"] = $qpts_grades;  // save to cache
+	  }
+    
+	  // Okay, find out what the points are by multiplying value * hours...
+    
+    if (isset($qpts_grades[$grade])) {
+	   $pts = $qpts_grades[$grade] * $hours;
+    }
+	  
+		
 		return $pts;
-
+	  
 	}
 
 

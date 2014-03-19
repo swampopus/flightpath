@@ -636,7 +636,7 @@ function fp_build_tab_array($page) {
     }
     array_push($display_array, t("Catalog Year:") . " ~~ " . $cat_year);
     if (!$bool_blank) {
-      array_push($display_array, t("Cumulative:") . " ~~ " . $student->cumulative_hours . " " . t("hrs") . ". &nbsp;" . $student->gpa . " " . t("GPA"));
+      array_push($display_array, t("Cumulative:") . " ~~ " . $student->cumulative_hours . " " . t("hrs") . ". &nbsp;" . fp_truncate_decimals($student->gpa, 1) . " " . t("GPA"));
     }
 
     if ($student->student_id > 1 || $bool_blank == true)

@@ -1549,15 +1549,20 @@ class _CourseList extends ObjList
 
 		$count = 0;
 
+		// Let's find out what our quality point grades & values are...
+		$qpts_grades = array();
+    $tlines = explode("\n", variable_get("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0"));
+    foreach ($tlines as $tline) {
+      $temp = explode("~", trim($tline));      
+      if (trim($temp[0]) != "") {
+        $qpts_grades[trim($temp[0])] = trim($temp[1]);
+      }
+    }
+    
+    
 		
-		// TODO: replace with setting instead
-		$qpts_grades = array(
-		 "A" => 4,
-		 "B" => 3,
-		 "C" => 2,
-		 "D" => 1,
-		);
-		
+		$enrolled_grades = csv_to_array($GLOBALS["fp_system_settings"]["enrolled_grades"]);
+		$retake_grades = csv_to_array($GLOBALS["fp_system_settings"]["retake_grades"]);
 		
 		for ($t = 0; $t < $this->count; $t++)
 		{
@@ -1575,14 +1580,21 @@ class _CourseList extends ObjList
 
 			}
 			
+
 			
 			if ($bool_ignore_enrolled == true)
 			{
+			  
+        if (in_array($course->grade, $enrolled_grades)) {
+          continue;
+        }
+			  
+			  /*
 				if ($course->is_completed() == false)
 				{
+  
 					if ($course->course_list_fulfilled_by->is_empty)
 					{
-
 						continue;
 					} else {
 						if ($course->course_list_fulfilled_by->get_first()->is_completed() == false)
@@ -1591,13 +1603,26 @@ class _CourseList extends ObjList
 						}
 					}
 				}
+				*/
 			}
 
+			// Only allowing grades which we have quality points for?
+			if ($bool_qpts_grades_only) {
+			  if (!isset($qpts_grades[$course->grade])) {
+			    continue;
+			  }
+			}
+			else {
+			  // Is this grade a "retake" grade?  If so, skip it.
+			  if (in_array($course->grade, $retake_grades)) continue;
+			}
+			
+			
 			if ($course->grade != "")// || !($course->course_list_fulfilled_by->is_empty))
 			{			  
 			  
 			  // If we require the grade to be a qpts_grade, then check that now.
-			  if ($bool_qpts_grades_only && $qpts_grades[$course->grade] < 1) {
+			  if ($bool_qpts_grades_only && !isset($qpts_grades[$course->grade])) {
 			    continue;
 			  }
 			  
@@ -1639,7 +1664,7 @@ class _CourseList extends ObjList
 						  
 						  
       			  // If we require the grade to be a qpts_grade, then check that now.
-      			  if ($bool_qpts_grades_only && $qpts_grades[$cc->grade] < 1) {
+      			  if ($bool_qpts_grades_only && !isset($qpts_grades[$cc->grade])) {
       			    continue;
       			  }
 						  

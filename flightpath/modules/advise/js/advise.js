@@ -363,12 +363,21 @@ function popupUpdateSubData(max_hours, term_id, transferFlag, groupHoursAvail, s
 
   sel.options[0] = new Option(" Max (default) ", max_hours, true, true);
   var c = 1;
-  // Now, add in the others.
+  
+  // Now, add in the others, but ONLY if we aren't dealing with any decimal values!
+  // But, show the max_hours regardless...
   for (var t = max_hours; t > 0; t--)
   {
+    
     sel.options[c] = new Option(" " + t + " ", t, false, false);
     c++;
+
+    if (decimalPlaces(t) > 0) {
+      break;
+    }
+    
   }
+
   
   // Add in the option for manual, decimal hours
   sel.options[c] = new Option(" Enter manual >", "manual");
