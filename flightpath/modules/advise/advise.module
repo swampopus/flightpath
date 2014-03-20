@@ -1393,3 +1393,44 @@ function advise_init_screen() {
 
 
 
+
+
+/** 
+ * This is a hook which developers may use to add custom blocks (or perform other operations)
+ * onto the advising View or What If screen.
+ * 
+ * This is called AFTER the AdvisingScreen class has called it's build_screen_elements()
+ * function, which draws the various semester blocks, footnotes, etc, onto the screen.
+ * 
+ * This gives other modules a chance to alter the screen, or to add a custom block to the 
+ * bottom of the screen.  Note that the $screen element is sent by reference.  Any changes
+ * you make to it will be instant; there is no need to return anything.
+ * 
+ * To see how these blocks are best set up, look at AdvisingScreen->build_excess_credit(), or
+ * AdvisingScreen->displaySemester() for inspiration.
+ *
+ * @param AdvisingScreen &$screen
+ */
+function hook_advise_build_screen_elements(&$screen) {
+
+  $html = "";
+  $html .= $screen->draw_semester_box_top("Sample", TRUE); // pass TRUE to hide the "headers" 
+  $html .= "<tr><td colspan='8'>";  // required after the top!
+              
+  ////////////////
+  // The content...
+  $html .= "<b>Hello World!</b>";
+  
+  ///////////////////
+  
+  // All done, time to tidy up...
+  $html .= "</td></tr>";  // required before the bottom!
+  $html .= $screen->draw_semester_box_bottom();
+
+   
+  
+  // Add to the screen as a "semester block".
+  $screen->add_to_screen($html);
+  
+}
+

@@ -1277,6 +1277,10 @@ function draw_menu_items($menu_array) {
 			$this->build_added_courses();
 		}
 
+		// invoke a hook, to give custom modules the chance to perform actions 
+		// (or add blocks) to the advise screen after we have run this function.
+		invoke_hook("advise_build_screen_elements", array(&$this));
+		
 	}
 
 

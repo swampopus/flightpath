@@ -377,9 +377,9 @@ class _Student
 					// We are only using a portion of its hours.
 					// We MUST round, because if there is a decimal place, we might run into
 					// trouble.  Because, for example, 2.001 - 2 actually gets .00009999999 instead of .001.
-					// The most decimals we can have is 4, so let's round to 5 decimal places.  That should
-					// take care of us.
-					$remaining_hours = round(($taken_course->hours_awarded - $sub_hours), 5);
+					// The most decimals we can have is 4, so let's round to 6 decimal places, just to give
+					// us some breathing room.  That should take care of us without losing too much precision.
+					$remaining_hours = round(($taken_course->hours_awarded - $sub_hours), 6);
 					
 					// Create a clone of the course with the leftover hours, and add
 					// it back into the list_courses_taken.

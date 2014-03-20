@@ -432,7 +432,7 @@ class _FlightPath
 		$hours_required = $group->hours_required*1;
 		$hours_assigned = $group->hours_assigned;
 
-		if ($hours_required*1 < 1 || $hours_required == "")
+		if ($hours_required*1 <= 0 || $hours_required == "")
 		{
 			$hours_required = 999999;
 		}
@@ -497,7 +497,12 @@ class _FlightPath
 					$course_sub = $substitution->course_list_substitutions->get_first();
 					if ($course_requirement->min_hours*1 > $course_sub->hours_awarded*1)
 					{
-						$remaining_hours = $course_requirement->min_hours - $course_sub->hours_awarded;
+					  
+					  // Because float math can create some very strange results, we must
+					  // perform some rounding.  We will round to 6 decimal places, which should
+					  // provide us the accuracy w/o losing precision (since we can only represent a max
+					  // of 4 decimals in the database anyway.
+						$remaining_hours = round($course_requirement->min_hours - $course_sub->hours_awarded, 6);
 
 						$new_course_string = $course_requirement->to_data_string();
 						$new_course = new Course();
@@ -508,7 +513,12 @@ class _FlightPath
 						$new_course->requirement_type = $course_requirement->requirement_type;
 
 						$course_requirement->bool_substitution_split = true;
-						$course_requirement->bool_substitution_new_from_split = false;
+						
+						// I am commenting this out-- if we split up a sub multiple times, then we shouldn't
+						// set the old course requirement to say it WASN'T from a split.  This was causing a bug
+						// where the pie charts got weird if you did more than 1 split.  Was counting total
+						// hours as more, in CourseList->count_hours().
+						//$course_requirement->bool_substitution_new_from_split = false;
 
 						// Now, add this into the list, right after the course_requirement.
 						$current_i = $list_requirements->i;
@@ -606,7 +616,7 @@ class _FlightPath
 						$cc = $course_list_repeats->count_hours();
 						// have we exceeded the number of available repeat_hours
 						// for this course?
-						if ($course_requirement->repeat_hours < 1)
+						if ($course_requirement->repeat_hours <= 0)
 						{
 							$course_requirement->load_descriptive_data();
 						}

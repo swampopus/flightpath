@@ -1237,7 +1237,6 @@ class _CourseList extends ObjList
 		// A requirement type of "uc" is the same as "c"
 		// (university capstone is a core requirement)
 
-
 		$count = 0;
 		for ($t = 0; $t < $this->count; $t++)
 		{
@@ -1255,7 +1254,7 @@ class _CourseList extends ObjList
 				
 			}
 			
-			if ($course->bool_substitution_new_from_split == true)
+			if ($course->bool_substitution_new_from_split == true)			
 			{
 				// Do not count the possible fragments that are created
 				// from a new substitution split.  This is causing problems
@@ -1264,12 +1263,14 @@ class _CourseList extends ObjList
 				// BUT-- only skip if this new fragment isn't also being
 				// substituted somewhere else!
 				if ($course->bool_substitution == false)
-				{ // not being used in another sub, so skip it.
+				{ // not being used in another sub, so skip it.				  
 					continue;
 				}
 			}
 
 			$h_get_hours = $course->get_hours();
+			
+			
 			if ($bool_correct_ghost_hour) {
   			// If this course has a ghosthour, then use the
   			// hours_awarded (probably 1).  However, if it was substituted,
@@ -1567,7 +1568,7 @@ class _CourseList extends ObjList
 		for ($t = 0; $t < $this->count; $t++)
 		{
 			$course = $this->array_list[$t];
-
+			
 			if ($bool_use_ignore_list == true)
 			{
 				// Do ignore some courses...
@@ -1608,7 +1609,7 @@ class _CourseList extends ObjList
 
 			// Only allowing grades which we have quality points for?
 			if ($bool_qpts_grades_only) {
-			  if (!isset($qpts_grades[$course->grade])) {
+			  if ($course->grade != "" && !isset($qpts_grades[$course->grade])) {
 			    continue;
 			  }
 			}
@@ -1616,8 +1617,7 @@ class _CourseList extends ObjList
 			  // Is this grade a "retake" grade?  If so, skip it.
 			  if (in_array($course->grade, $retake_grades)) continue;
 			}
-			
-			
+
 			if ($course->grade != "")// || !($course->course_list_fulfilled_by->is_empty))
 			{			  
 			  
@@ -1632,6 +1632,7 @@ class _CourseList extends ObjList
 				  $h = $course->get_hours();
 					$count = $count + $h;
 				} else {
+				  
 					if ($course->requirement_type == $requirement_type)
 					{
 						$count = $count + $course->get_hours();						
@@ -1662,14 +1663,14 @@ class _CourseList extends ObjList
 						if ($cc->bool_substitution)
 						{
 						  
-						  
       			  // If we require the grade to be a qpts_grade, then check that now.
-      			  if ($bool_qpts_grades_only && !isset($qpts_grades[$cc->grade])) {
+      			  if ($bool_qpts_grades_only && !isset($qpts_grades[$cc->grade])) {      			    
       			    continue;
       			  }
 						  
 						  
 							$h = $cc->substitution_hours;
+														
 							
 							if ($cc->bool_ghost_hour) {
 							  $h = 0;
@@ -1683,6 +1684,7 @@ class _CourseList extends ObjList
 			}
 		}
 
+    		
 		return $count;
 
 	}

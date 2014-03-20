@@ -2,6 +2,24 @@ FlightPath 4.x Changelog
 ========================
 
 
+2014-03-20
+  Added rounding logic to FlightPath class, when applying subs, to compensate for weird floating point
+  arithmetic errors.  Adjusted it and Student class to round to 6 places, instead of 5.
+
+  Added ability to filter by role in the User management module.  Also did some minor display tweaking
+  to make things fit better.
+  
+  Fixed a minor bug in User module, where the list of students would select a major code if a search
+  were performed.  Due to re-use of a variable name.
+
+  Fixed a bug in CourseList and FlightPath classes where GPA and hours wasn't being calculated correctly, 
+  especially for subs split more than once.
+  
+  Added a new hook to AdvisingScreen class, after build_screen_elements(), so other modules
+  can hook in and add to the screen once that function is called.  See advise.module's listing
+  for hook_advise_build_screen_elements() for description and example of use.
+  
+  
 ----------------
 RELEASED 4.4.1
 ----------------

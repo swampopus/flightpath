@@ -57,3 +57,10 @@ table.user-list  {
 table.user-list tr.no-roles {
   background-color: #eee;
 }
+
+form.filters {
+  margin: 0;
+  padding: 0;
+  margin-top: 5px;
+  font-size: 0.8em;
+}

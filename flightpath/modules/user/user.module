@@ -1341,9 +1341,9 @@ function user_display_student_users() {
 
   $rtn .= "</div>";
   $rtn .= "                             
-                        <form action='" . base_path() . "/admin/users/students' method='GET' style='margin:0px; padding:0px;'>
+                        <form class='filters' action='" . base_path() . "/admin/users/students' method='GET' >
                         <input type='hidden' name='performAction' value='editUsers'>
-                         " . t("Search:") . " <input type='text' class='smallinput' name='search' value='{$_GET["search"]}' length='20'>
+                         " . t("Search:") . " <input type='text' class='smallinput' name='search' value='{$_GET["search"]}' size='15'>
                         <input type='submit' name='searchsubmit' class='smallinput' value=' -> '>
                        
                         &nbsp; &nbsp; " . t("or") . " &nbsp; &nbsp;
@@ -1513,7 +1513,7 @@ function user_display_student_users() {
     $l_name = trim(ucwords(strtolower($cur["l_name"])));
     $f_name = trim(ucwords(strtolower($cur["f_name"])));    
     $student_cwid = trim($cur["cwid"]);
-    $major_code = trim($cur["major_code"]);
+    $disp_major_code = trim($cur["major_code"]);
     $is_active = ($cur["is_active"] == "1") ? "Y" : "N";
     
     
@@ -1532,7 +1532,7 @@ function user_display_student_users() {
               <td valign='top' width='15%'>$student_cwid</td>
           <td valign='top' width='15%'>$f_name</td>
           <td valign='top' width='15%'>$l_name</td>
-          <td valign='top'>$major_code</td>
+          <td valign='top'>$disp_major_code</td>
           <td valign='top'>$is_active</td>
           <td valign='top'>" . l(t("edit"), "admin/users/edit-student-user", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "</td>
           
@@ -1639,18 +1639,48 @@ function user_display_users() {
 
   $rtn .= "</div>";
   $rtn .= "                             
-                        <form action='" . base_path() . "/admin/users/faculty' method='GET' style='margin:0px; padding:0px;'>
+                        <form class='filters' action='" . base_path() . "/admin/users/faculty' method='GET' >
                         <input type='hidden' name='performAction' value='editUsers'>
-                         " . t("Search:") . " <input type='text' class='smallinput' name='search' value='{$_GET["search"]}' length='20'>
+                         " . t("Search:") . " <input type='text' class='smallinput' name='search' value='{$_GET["search"]}' size='15'>
                         <input type='submit' name='searchsubmit' class='smallinput' value=' -> '>
                        
-                        &nbsp; &nbsp; " . t("or") . " &nbsp; &nbsp;
+                        &nbsp;&nbsp;" . t("or") . "&nbsp;&nbsp;
                        <select name='department' class='smallinput'>
-                        <option value=''>" . t("Select a department...") . "</option>
+                        <option value=''>" . t("Select a department:") . "</option>
                         <option value=''>--------------------------</option>
                     <!--DEPTSEARCH-->
                        </select>
                        <input type='submit' name='deptsubmit' class='smallinput' value=' -> '>
+                       
+                       &nbsp;&nbsp;" . t("or") . "&nbsp;&nbsp;
+                       <select name='role' class='smallinput'>
+                       <option value=''>" . t("Select a role:") . "</option>
+                       <option value=''>--------------------------</option>
+                       ";
+  // Show list of roles
+  $res = db_query("SELECT * FROM roles ORDER BY rid");
+  while ($cur = db_fetch_array($res)) {    
+    $key = $cur["rid"];
+    $value = $cur["name"];
+    $dispval = $value;
+    
+    // Skip anonymous and authenticated
+    if ($key == 1 || $key == 2) continue;
+    
+    if (strlen($dispval) > 25) {
+      $dispval = trim(substr($dispval, 0, 22)) . "...";
+    }
+    
+    $sel = "";
+    if ($key == $_GET["role"]*1) {
+      $sel = "selected";
+    }
+    
+    $rtn .= "<option value='$key' $sel>$dispval</option>";
+  }
+  $rtn .= "</select>
+                       
+                       <input type='submit' name='rolesubmit' class='smallinput' value=' -> '>
                        
                        </form>
                        </div>
@@ -1688,6 +1718,7 @@ function user_display_users() {
 
   $search = trim($_GET["search"]);
   $dept = trim($_GET["department"]);
+  $role = trim($_GET["role"]);
 
   if ($search != "" || $dept != "")
   {
@@ -1707,6 +1738,10 @@ function user_display_users() {
       $_GET["deptsubmit"] = "1";
       $dept = $temp[1];
     }
+    if ($temp[0] == "role") {
+      $_GET["rolesubmit"] = "1";
+      $role = $temp[1];
+    }
   }
 
 
@@ -1720,9 +1755,9 @@ function user_display_users() {
   //$table_name = $tsettings["table_name"];  
   
   
-  if ($search != "" && !($_GET["deptsubmit"]))
+  if ($search != "" && !($_GET["deptsubmit"]) && !($_GET["rolesubmit"]))
   {
-    // Something was searched for, and the dept submit button was not pushed.
+    // Something was searched for, and the dept submit button was not pushed, nor role submit
     $dept = "";
     $temp = explode(" ",$search);
     $search1 = $temp[0];
@@ -1768,6 +1803,20 @@ function user_display_users() {
           ORDER BY l_name, f_name ", $dept);
     $displaying = $dept;
   }
+  else if ($role != "" && $_GET["rolesubmit"]) {
+    // User select a role.  Look for it...
+    $search = "";
+    $_SESSION["prev_user_search"] = "role%%$role";
+    
+    $result = db_query("SELECT * FROM users a, faculty b, user_roles c
+          WHERE a.cwid = b.cwid
+          AND a.is_faculty = 1
+          AND a.user_id = c.user_id
+          AND c.rid = '?'
+          ORDER BY l_name, f_name ", $role);
+    
+    $displaying = user_get_role_name($role);
+  }    
   else
   { // No search, so look for the range...
     $result = db_query("SELECT * FROM users u, faculty f
@@ -1853,7 +1902,14 @@ function user_display_users() {
     {
       $sel = "selected";
     }
-    $bC .= "<option value='$dd' $sel>{$dept_array[$t]}</option> \n";
+    
+    $dispval = $dd;
+    if (strlen($dispval) > 40) {
+      $dispval = trim(substr($dispval, 0, 37)) . "...";
+    }
+    
+    
+    $bC .= "<option value='$dd' $sel>$dispval</option> \n";
   }
   $rtn = str_replace("<!--DEPTSEARCH-->",$bC,$rtn);
 
@@ -1861,4 +1917,15 @@ function user_display_users() {
   
   return $rtn;
   
+}
+
+
+/**
+ * Simple function to return the human-readable name for a role, by rid.
+ *
+ * @param unknown_type $rid
+ */
+function user_get_role_name($rid) {
+  $name = db_result(db_query("SELECT name FROM roles WHERE rid = '?' ", $rid));
+  return $name;
 }
