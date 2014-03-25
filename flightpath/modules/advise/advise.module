@@ -617,9 +617,13 @@ function advise_display_popup_substitute_selected() {
   $course_id = trim($_GET["course_id"]);
   $group_id = trim(addslashes($_GET["group_id"]));
   $semester_num = trim(addslashes($_GET["semester_num"]));
-  $group_hours_remaining = trim(addslashes($_GET["group_hours_remaining"]));
+  $hours_avail = trim(addslashes($_GET["group_hours_remaining"]));
   
-  $rtn .= $screen->display_popup_substitute($course_id, $group_id, $semester_num, $group_hours_remaining);  
+  if ($_GET["hours_avail"] * 1 > 0) {
+    $hours_avail = $_GET["hours_avail"] * 1;
+  }
+  
+  $rtn .= $screen->display_popup_substitute($course_id, $group_id, $semester_num, $hours_avail);  
    
   
   return $rtn;
@@ -638,11 +642,16 @@ function advise_display_popup_course_description() {
   $course = new Course();
   if ($data_string != "")
   {  
-    $course->load_course_from_data_string($data_string);
-
+    $course->load_course_from_data_string($data_string);  
   }
+  
+  // Save the max hours from the data string here.  This is to fix a bug where we didn't keep track
+  // of a course's remainder from a split substitution.  Due to pass-by-reference, it gets reset
+  // in the display_popup_course_description function.
+  $datastring_max_hours = $course->max_hours;
 
   $rtn .= $screen->display_popup_course_description("", $course);
+  
   // Create the tabs for the page...
   $tab_array = array();
   $tab_array[0]["title"] = "Description";
@@ -652,15 +661,11 @@ function advise_display_popup_course_description() {
     if ($course->bool_substitution != true && $course->grade == "") { 
       // By checking grade, we are making sure this course has NOT already
       // been taken by the student.  In other words, verify that this course
-      // is an unfulfilled requirement on the degree plan ONLY.
-      $extra_vars = "hours_avail=$course->max_hours";
+      // is an unfulfilled requirement on the degree plan ONLY.      
+      $extra_vars = "hours_avail=$datastring_max_hours";
       $tab_array[1]["title"] = "Substitute";
       $tab_array[1]["on_click"] = "popupSubstituteSelected(\"$course->course_id\",\"$course->assigned_to_group_id\",\"$course->assigned_to_semester_num\",\"$extra_vars\");";
       
-      // I WAS WRONG!!!!!
-      // I don't see any reason to make this a javascript function.  I'm going to make it a simple URL link.
-      // window.location = "' . $script_filename . '?windowMode=popup&performAction=substituteSelected&course_id=" + course_id + "&group_id=" + group_id + "&semester_num=" + semester_num + "&current_student_id=" + csid + "&" + extraVars;
-      //$tab_array[1]["on_click"] = "window.location = \"" . base_path() . "/advise/popup-substitute-selected&window_mode=popup&course_id=$course->course_id&group_id=$course->assigned_to_group_id&semester_num=$course->assigned_to_semester_num&current_student_id=$current_student_id&hours_avail=$course->max_hours\"";      
     }
   }
 
@@ -1353,11 +1358,20 @@ function advise_init_screen() {
 
     $fp->flag_outdated_substitutions();
     
-    // We shouldn't supply the advising_term_id, so that it will load all terms available.
-    //$fp->load_advising_session_from_database(0,"",$bool_what_if,$bool_draft,0);
-      
     $fp->assign_courses_to_semesters(); // bare degree plan. not groups.
     $fp->assign_courses_to_groups();
+    
+    ////////////
+     /*
+    // Good place to output a serialization, in case we need it for testing.
+    $student->name = "Test Student2";
+    $student->student_id = "123457";
+    $temp = serialize($screen);
+    file_put_contents(fp_get_files_path() . "/test.txt", $temp);
+    /////////////*/
+    
+    
+    
     
   }
   else {

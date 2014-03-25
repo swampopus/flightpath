@@ -76,7 +76,7 @@ class _DegreePlan
     $this->total_major_hours = $this->get_progress_hours("m");
     $this->total_core_hours = $this->get_progress_hours("c");
     $this->total_degree_hours = $this->get_progress_hours("");
-
+    
     $this->fulfilled_major_hours = $this->get_progress_hours("m", false);
     $this->fulfilled_core_hours = $this->get_progress_hours("c", false);
     $this->fulfilled_degree_hours = $this->get_progress_hours("", false);
@@ -110,7 +110,19 @@ class _DegreePlan
     // ex:  "m", "s", etc.  leave blank for ALL required hours.
     // if boolRequiredHours is FALSE, then we will only look for the courses
     // which got fulfilled.
-
+    
+   
+    /* 
+    if ($requirement_type == "c" && $bool_qpts_grades_only == TRUE && $bool_required_hours_only == FALSE) {
+      $GLOBALS["show_me"] = TRUE;
+    }
+    else {
+      $GLOBALS["show_me"] = FALSE;
+    }
+    
+    if ($GLOBALS["show_me"]) fpm("starting ....");
+    */
+    
     $hours = 0;
     
     $this->list_semesters->reset_counter();
@@ -123,10 +135,14 @@ class _DegreePlan
         $hours += $sem->list_courses->count_hours($requirement_type, true, false);
       } else {
         $temp = $sem->list_courses->count_credit_hours($requirement_type, true, true, $bool_qpts_grades_only);
+                
         $hours += $temp;
       }
     }
 
+    
+ 
+    
     // Also, add in groups matching this requirement type.
     $this->list_groups->reset_counter();
     while ($this->list_groups->has_more())
@@ -140,9 +156,9 @@ class _DegreePlan
 
       $g_hours = $g->hours_required;
       if ($bool_required_hours_only == false)
-      { // only count the fulfilled hours, then.
-        $g_hours = $g->get_fulfilled_hours(true, false, true, -1, true, $bool_qpts_grades_only);
-
+      { // only count the fulfilled hours, then.        
+        $g_hours = $g->get_fulfilled_hours(true, false, true, -1, true, $bool_qpts_grades_only, $requirement_type);        
+            
       }
 
       if ($requirement_type == "")
@@ -160,16 +176,16 @@ class _DegreePlan
         }
         
         if ($g->requirement_type == $requirement_type)
-        {
-          
+        {            
           $hours += $g_hours;
         }
         
+      
         
         
       }
     }
-
+    
     return $hours;
 
   }
@@ -213,11 +229,9 @@ class _DegreePlan
         continue;
       }
       
-      if ($g->requirement_type == $requirement_type || $requirement_type == "") {
-        //fpm("$requirement_type - group $g->title - $g_points");        
-        $g_points = $g->get_fulfilled_quality_points(TRUE, -1, TRUE, TRUE);
-        $points = $points + $g_points;       
-      }
+      $g_points = $g->get_fulfilled_quality_points(TRUE, -1, TRUE, TRUE, $requirement_type);
+      $points = $points + $g_points;       
+
       
     }
     
@@ -312,14 +326,13 @@ class _DegreePlan
           $icon_filename = $new_group->icon_filename;
         } else {
           // Was not already there; insert it.
-          $group_n = new Group($cur["group_id"], $this->db, $semester_num, $this->student_array_significant_courses, $this->bool_use_draft);
+          $group_n = new Group($cur["group_id"], $this->db, $semester_num, $this->student_array_significant_courses, $this->bool_use_draft, $cur["group_requirement_type"]);
           $group_n->hours_required = $cur["group_hours_required"] * 1;
           $group_n->hours_required_by_type[$cur["group_requirement_type"]] += $group_n->hours_required;
           if (trim($cur["group_min_grade"]) != "")
           {
             $group_n->assign_min_grade(trim(strtoupper($cur["group_min_grade"])));
           }
-          $group_n->requirement_type = $cur["group_requirement_type"];
           $title = $group_n->title;
           $icon_filename = $group_n->icon_filename;
           $this->list_groups->add($group_n);

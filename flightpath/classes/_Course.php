@@ -186,8 +186,8 @@ class _Course
     $rtn .= $this->display_status . "~";
     
     $rtn .= intval($this->bool_ghost_hour) . "~";
-
-
+    
+    
 
 
     return $rtn;
@@ -260,8 +260,6 @@ class _Course
     $this->display_status	= 	$temp[23];
 
     $this->bool_ghost_hour	= 	(bool) $temp[24];
-    
-
 
   }
 

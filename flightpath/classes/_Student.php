@@ -696,9 +696,9 @@ class _Student
 			$new_course = new Course();
 
 			// Find out if this course has an eqv.
-			if ($course_id = $this->get_transfer_course_eqv($transfer_course_id, false))
+			if ($course_id = $this->get_transfer_course_eqv($transfer_course_id, FALSE, "", $cur["hours_awarded"]))
 			{
-				$new_course = new Course($course_id);
+				$new_course = new Course($course_id);				
 				$this->array_significant_courses[$course_id] = true;
 			}
 
@@ -759,7 +759,7 @@ class _Student
 	 * Find a transfer eqv for this student, for this course in question.
 	 *
 	 */
-	function get_transfer_course_eqv($transfer_course_id, $bool_ignore_unassigned = false, $require_valid_term_id = "")
+	function get_transfer_course_eqv($transfer_course_id, $bool_ignore_unassigned = false, $require_valid_term_id = "", $require_hours = -1)
 	{
 		
 	  // First, make sure that this transfer course hasn't
@@ -792,7 +792,24 @@ class _Student
 			$valid_term_line 	", $transfer_course_id, $this->student_id);
 
 		if ($cur = $this->db->db_fetch_array($res)) {
-			return $cur['local_course_id'];
+			$local_course_id = $cur['local_course_id'];
+			
+			// If we require that the local course have the same number of hours
+			// as the transfer, then check that now.
+			if ($require_hours != -1) {
+			  $temp_course = new Course($local_course_id);
+			  if ($temp_course->max_hours != $require_hours) {
+			    return FALSE;
+			  }
+			  else {
+			    return $local_course_id;
+			  }
+			}	
+			else {
+			  return $local_course_id;
+			}		
+			
+			
 		}
  
 		return false;

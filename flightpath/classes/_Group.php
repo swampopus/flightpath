@@ -39,7 +39,7 @@ class _Group
 	**/
 
 
-	function __construct($group_id = "", DatabaseHandler $db = NULL, $semester_num = -1, $array_significant_courses = false, $bool_use_draft = false)
+	function __construct($group_id = "", DatabaseHandler $db = NULL, $semester_num = -1, $array_significant_courses = false, $bool_use_draft = false, $requirement_type = "")
 	{
 		$this->group_id = $group_id;
 		$this->assigned_to_semester_num = $semester_num;
@@ -49,6 +49,7 @@ class _Group
 		$this->list_groups = new GroupList();
 		$this->bool_use_draft = $bool_use_draft;
 		$this->hours_required_by_type = array();
+		$this->requirement_type = $requirement_type;
 		// Always override if the global variable is set.
 		if ($GLOBALS["fp_advising"]["bool_use_draft"] == true) {
 			$this->bool_use_draft = true;
@@ -198,6 +199,7 @@ class _Group
 					$course_c->catalog_year = $this->catalog_year;
 					$course_c->assigned_to_group_id = $group_id;
 					$course_c->assigned_to_semester_num = $this->assigned_to_semester_num;
+					
 
 					$course_c->specified_repeats = $cur["course_repeats"];
 					if ($cur["course_repeats"] > 0)
@@ -229,9 +231,10 @@ class _Group
 					$temp_g = new Group();
 					$temp_g->bool_use_draft = $this->bool_use_draft;
 					$temp_g->group_id = $cur["child_group_id"];
+					$temp_g->requirement_type = $this->requirement_type;
 					if ($group_g = $this->list_groups->find_match($temp_g))
 					{
-						$group_g->reload_missing_courses();
+						$group_g->reload_missing_courses();						
 					} else {
 					  fpm("could not find sub group to reload!");
 					}
@@ -239,6 +242,7 @@ class _Group
 					// This is a brand-new sub group, so create it
 					// and add it to this group.
 					$group_g = new Group($cur["child_group_id"],null,$this->assigned_to_semester_num, $array_significant_courses, $this->bool_use_draft);
+					$group_g->requirement_type = $this->requirement_type;
 					$this->list_groups->add($group_g);
 				}
 			}
@@ -348,21 +352,15 @@ class _Group
 	}
 
 
-	function get_fulfilled_hours($bool_check_subgroups = true, $bool_count_advised = true, $bool_require_has_been_displayed = false, $only_count_semester_num = -1, $bool_ignore_enrolled = false, $bool_qpts_grades_only = FALSE)
+	function get_fulfilled_hours($bool_check_subgroups = true, $bool_count_advised = true, $bool_require_has_been_displayed = false, $only_count_semester_num = -1, $bool_ignore_enrolled = false, $bool_qpts_grades_only = FALSE, $requirement_type = "")
 	{
 		// Returns how many hours have been used by the
 		// course fulfillments for this group...
 		$count = 0;
 		// if onlyCountSemesterNum != -1, then we will only count courses
-		// who have their "assigned_to_semester_num" = $only_count_semester_num.
-
-		// TODO:  Replace with setting instead
-    $qpts_grades = array(
-			 "A" => 4,
-			 "B" => 3,
-			 "C" => 2,
-			 "D" => 1,
-			);		
+		// who have their "assigned_to_semester_num" = $only_count_semester_num.		
+		
+		
 		
 		
 		//print_pre($this->to_string());
@@ -391,14 +389,15 @@ class _Group
 
 
 				if (!$bool_require_has_been_displayed)
-				{ // The course does not have to have been displayed on the page yet.
-					//$count = $count + $c->course_list_fulfilled_by->count_hours("", false, false);
-					$count = $count + $c->course_list_fulfilled_by->count_credit_hours("", false, false, $bool_qpts_grades_only);
+				{ // The course does not have to have been displayed on the page yet.					
+					$count = $count + $c->course_list_fulfilled_by->count_credit_hours($requirement_type, false, false, $bool_qpts_grades_only);
 				} else {
 					if ($c->course_list_fulfilled_by->get_first()->bool_has_been_displayed == true)
 					{
-						//$count = $count + $c->course_list_fulfilled_by->count_hours("", false, false);
-						$count = $count + $c->course_list_fulfilled_by->count_credit_hours("", false, false, $bool_qpts_grades_only);
+						
+						$h = $c->course_list_fulfilled_by->count_credit_hours($requirement_type, false, false, $bool_qpts_grades_only);
+						$count = $count + $h;
+						
 					}
 				}
 			} else if ($c->bool_advised_to_take && $bool_count_advised == true)
@@ -418,11 +417,18 @@ class _Group
 			{
 
 				$g = $this->list_groups->get_next();
-				$gc = $g->get_fulfilled_hours(true, $bool_count_advised, $bool_require_has_been_displayed, $only_count_semester_num, $bool_ignore_enrolled, $bool_qpts_grades_only);
+				$gc = $g->get_fulfilled_hours(true, $bool_count_advised, $bool_require_has_been_displayed, $only_count_semester_num, $bool_ignore_enrolled, $bool_qpts_grades_only, $requirement_type);
 				$count = $count + $gc;
 			}
 		}
 
+		
+		//if ($this->group_id == 533404) {
+		  //fpm($this);
+		  //fpm("returning $count for group $this->group_id, $this->title");
+		//}
+		
+		
 		return $count;
 
 	}
@@ -433,7 +439,7 @@ class _Group
 	 * Returns the quality points earned for all of the courses in this group
 	 *
 	 */
-	function get_fulfilled_quality_points($bool_check_subgroups = true, $only_count_semester_num = -1, $bool_ignore_enrolled = false, $bool_require_has_been_displayed = false)
+	function get_fulfilled_quality_points($bool_check_subgroups = true, $only_count_semester_num = -1, $bool_ignore_enrolled = false, $bool_require_has_been_displayed = false, $requirement_type = "")
 	{
 		$points = 0;
 		// if onlyCountSemesterNum != -1, then we will only count courses
@@ -466,7 +472,7 @@ class _Group
 				// Are we requiring that the course has been displayed?
         if (!$bool_require_has_been_displayed || ($bool_require_has_been_displayed && $c->course_list_fulfilled_by->get_first()->bool_has_been_displayed == TRUE))
 				{
-					$p = $c->course_list_fulfilled_by->count_credit_quality_points("", TRUE, TRUE);
+					$p = $c->course_list_fulfilled_by->count_credit_quality_points($requirement_type, TRUE, TRUE);
 				}				
   		  
   		  $points = $points + $p;
@@ -484,7 +490,7 @@ class _Group
 			{
 
 				$g = $this->list_groups->get_next();
-				$gp = $g->get_fulfilled_quality_points(TRUE, $only_count_semester_num, $bool_ignore_enrolled);
+				$gp = $g->get_fulfilled_quality_points(TRUE, $only_count_semester_num, $bool_ignore_enrolled, $bool_require_has_been_displayed, $requirement_type);
 				$points = $points + $gp;
 			}
 		}

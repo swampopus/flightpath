@@ -171,7 +171,7 @@ $theme_location = fp_theme_location();
 						
 							<!-- ********** The tabs td ************-->
 							<td>
-								<table width="100%" cellpadding="0" cellspacing="0" align="left"">
+								<table width="100%" cellpadding="0" cellspacing="0" align="left">
 									<tr>
 										<td align="left">
 
@@ -230,7 +230,12 @@ $theme_location = fp_theme_location();
 							?>
 							   cellpadding="0" cellpadding="0">
 							<tr>
-								<td align="left" valign='top'>								
+								<td align="left" valign='top' 
+								<?php
+								  // Stupid hack to make IE display correctly on certain pages.
+								if (!$page_is_popup) print " width='800' ";
+								?>
+								>			
 								<div class='page-content'>
 								<?php
                                 	// ***************** Page specific content will be in here *****************

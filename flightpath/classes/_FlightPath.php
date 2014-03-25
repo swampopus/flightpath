@@ -650,7 +650,12 @@ class _FlightPath
 						$course_requirement->bool_ghost_hour = $c->bool_ghost_hour;
 						
 						$c->bool_has_been_assigned = true;
-						$c->requirement_type = $course_requirement->requirement_type;
+						//$c->requirement_type = $course_requirement->requirement_type;
+						if ($c->requirement_type == "") {
+						  // No requirement type given?  Perhaps we are part of a group.  If so, use that.
+						  //$c->requirement_type = $group->requirement_type;		
+						  //$course_requirement->requirement_type = $group->requirement_type;				  
+						}
 						$c->assigned_to_group_id = $group_id;
 						$group->hours_assigned = $hours_assigned;
 						// Should check for:
@@ -1534,7 +1539,7 @@ class _FlightPath
 				// fully satisfied by this substitution!  The original
 				// course requirement has hours left over which must be
 				// fulfilled somehow.
-				$remaining_hours = $course_requirement->min_hours - $course_sub->hours_awarded;
+				$remaining_hours = round($course_requirement->min_hours - $course_sub->hours_awarded, 6);
 				// This means that the course requirement needs to be split.
 				// So, find this course in the degree plan.
 				$required_course_id = $course_requirement->course_id;

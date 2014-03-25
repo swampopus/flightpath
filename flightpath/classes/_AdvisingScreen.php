@@ -451,7 +451,7 @@ function draw_menu_items($menu_array) {
 	{
 		$pC = "";
 		$is_empty = true;
-		$pC .= $this->draw_semester_box_top("Transfer Credit", true);
+		$pC .= $this->draw_semester_box_top("Transfer Credit", FALSE);
 		// Basically, go through all the courses the student has taken,
 		// And only show the transfers.  This is similar to Excess credit.
 
@@ -1408,6 +1408,10 @@ function draw_menu_items($menu_array) {
 		$pC .= "<tr><td colspan='2'>
 				";
 
+		if (!$this->db) {
+		  $this->db = get_global_database_handler();
+		}
+		
     $user->settings = $this->db->get_user_settings($user->id);
 				
 		if ($user->settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false && $this->page_is_mobile == false)
@@ -1538,6 +1542,10 @@ function draw_menu_items($menu_array) {
 		$pC = "";
 
 
+		if (!$this->db) {
+		  $this->db = get_global_database_handler();
+		}
+		
 
 		if ($this->bool_hiding_grades && !$this->bool_print && $GLOBALS["fp_system_settings"]["hiding_grades_message"] != "")
 		{
@@ -1796,12 +1804,14 @@ function draw_menu_items($menu_array) {
 	{
 		$pC = "";
 
-		if ($course_id != "" && $course_id != 0) {
-		  
+		if ($course_id != "" && $course_id != 0) {		  
 			$course = new Course($course_id);
 		}
 
-
+		// Keep up with original max hours, in case this is from a substitution split.
+		$datastring_max_hours = $course->max_hours;
+		$datastring_bool_new_from_split = $course->bool_substitution_new_from_split;
+		
 		
 		$db_group_requirement_id = $_REQUEST["db_group_requirement_id"];
 		
@@ -1911,7 +1921,18 @@ function draw_menu_items($menu_array) {
 		if ($course->bool_substitution_new_from_split || $course->bool_substitution_split)
 		{
 			$pC .= "<div class='tenpt' style='margin-bottom:5px;'>
-						<i>" . t("This course's hours were split in a substitution.") . "</i> 
+						<i>" . t("This course's hours were split in a substitution.");
+			
+			if ($datastring_bool_new_from_split) {
+			  $pC .= "<br>" . t("Remaining hours after split:") . " " . $datastring_max_hours . " hrs.";
+			}
+			/*
+			else {
+			  $pC .= "<br>" . t("Original course hours:") . " " . $course->max_hours . " hrs.";
+			}
+			*/
+			
+			$pC .= "</i>
 						<a href='javascript: alertSplitSub();'>?</a>
 					</div>";
 		}
@@ -2420,7 +2441,8 @@ function draw_menu_items($menu_array) {
 
 				$c->temp_flag = false;
 				$c->icon_filename = $group->icon_filename;
-				$c->title_text = "This course is a member of $group->title.";
+				$c->title_text = "This course is a member of $group->title." . "($place_group->requirement_type)";
+				$c->requirement_type = $place_group->requirement_type;
 				$display_course_list->add($c);
 
 
@@ -2471,8 +2493,9 @@ function draw_menu_items($menu_array) {
 
 						$c->temp_flag = false;
 						$c->icon_filename = $group->icon_filename;
-						$c->title_text = "This course is a member of $group->title.";
-
+						$c->title_text = "This course is a member of $group->title." . "($place_group->requirement_type)";
+            $c->requirement_type = $place_group->requirement_type;
+						
 						if (!$display_course_list->find_match($c))
 						{ // Make sure it isn't already in the display list.
 
@@ -2884,6 +2907,7 @@ function draw_menu_items($menu_array) {
       $advising_term_id = 0;
     }
 
+        
 		$course->assign_display_status();
 		// If the course has already been advised in a different semester,
 		// we should set the advising_term_id to that and disable unchecking.
@@ -2901,7 +2925,7 @@ function draw_menu_items($menu_array) {
 
 
 		$subject_id = $course->subject_id;
-		$course_num = $course->course_num;
+		$course_num = $course->course_num; 
 
 
 		$o_subject_id = $subject_id;
@@ -3161,23 +3185,22 @@ function draw_menu_items($menu_array) {
 				$course_num = "&nbsp;";
 			}
 
-
-
+ 
 			$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
      	<tr height='20' class='$hand_class $display_status'
       		$on_mouse_over title='$title_text'>
-      		<td width='$w1_1' align='left'>$op$hid</td>
-      		<td width='$w1_2' align='left' onClick='$js_code'>$icon_link</td>
-      		<td width='$w1_3' align='left' onClick='$js_code'>&nbsp;$ast</td>
-      		<td align='left' width='$w2' class='tenpt underline' onClick='$js_code'>
+      		<td style='width:$w1_1; white-space:nowrap;' align='left'>$op$hid</td>
+      		<td style='width:$w1_2; white-space:nowrap;' align='left' onClick='$js_code'>$icon_link</td>
+      		<td style='width:$w1_3; white-space:nowrap;' align='left' onClick='$js_code'>&nbsp;$ast</td>
+      		<td align='left' style='width:$w2; white-space:nowrap;' class='tenpt underline' onClick='$js_code'>
        				$subject_id</td>
-       		<td class='tenpt underline' width='$w3' align='left' 
+       		<td class='tenpt underline' style='width:$w3; white-space:nowrap;' align='left' 
        			onClick='$js_code'>
         			$course_num$footnote</td>
-	       <td class='tenpt underline' width='$w4' onClick='$js_code'>$hours$var_hour_icon</td>
-       	   <td class='tenpt underline' width='$w5' onClick='$js_code'>$dispgrade&nbsp;</td>
-       	   <td class='tenpt underline' width='$w6' onClick='$js_code'>$pts&nbsp;</td>
+	       <td class='tenpt underline' style='width:$w4; max-width:36px; white-space:nowrap;' onClick='$js_code'>$hours$var_hour_icon</td>
+       	   <td class='tenpt underline'  style='width:$w5; max-width:35px; white-space:nowrap;' onClick='$js_code'>$dispgrade&nbsp;</td>
+       	   <td class='tenpt underline' style='width:$w6; max-width:31px; white-space:nowrap;' onClick='$js_code'>$pts&nbsp;</td>
      	</tr>
      	</table>";
 
@@ -3425,22 +3448,22 @@ function draw_menu_items($menu_array) {
 			" . t("Addition only:") . " <input type='checkbox' id='cbAddition' value='true' $checked> 
 			   <a href='javascript: alertSubAddition();'>?</a>";
 		}
-
+ 
 		$c_hours = $course->max_hours*1;
 		$c_ghost_hour = "";
 		if ($course->bool_ghost_hour == TRUE) {
 		  $c_ghost_hour = t("ghost") . "<a href='javascript: alertSubGhost();'>?</a>";
 		}
 
-		if (($hours_avail*1 > 0 && $hours_avail < $c_hours) || ($c_hours < 1))
+		if (($hours_avail*1 > 0 && $hours_avail < $c_hours) || ($c_hours <= 0))
 		{
 
 			// Use the remaining hours if we have fewer hours left in
 			// the group than the course we are subbing for.
 			$c_hours = $hours_avail;
-		}
+		} 
 
-		if ($hours_avail == "" || $hours_avail*1 < 1)
+		if ($hours_avail == "" || $hours_avail*1 <= 0)
 		{
 			$hours_avail = $c_hours;
 		}

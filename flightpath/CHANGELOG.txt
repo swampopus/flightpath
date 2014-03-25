@@ -2,6 +2,44 @@ FlightPath 4.x Changelog
 ========================
 
 
+2014-03-25
+  Fixed a bug in CourseList, Group, and DegreePlan, in finding courses of a particular
+  requirement type within groups.
+  
+  Altered Student, so that in order for a transfer eqv to be valid and used (loaded), it must
+  be the same number of hours as the local course's max hours.  If it is not, the automatic
+  eqv will not be applied.  This is to prevent problems where courses are set to be eqv, even
+  though they are not, and it messes up the hour counts.
+  
+  Fixed minor bug in AdvisingScreen where db object wasn't initialized correctly in certain situaions,
+  also changed draw_course_row() to use CSS styles to set column widths in the table, so they
+  can have overflow properties set.  This keeps things nice and even, even if the col gets stretched.
+  
+  Altered AdvisingScreen's display_group function to assign the placeholder group's requirement_type
+  to the courses displayed, at display-time.
+  
+  Fixed a small display bug in the classic theme's fp_template.php, which was causing certain
+  screens to not show up nicely for Internet Explorer (it looked fine in Chrome and Firefox).
+  
+  Added new function to misc.inc: fp_get_files_path().  Returns the system path to the files
+  directory.
+  
+  
+
+2014-03-21
+  Fixed bug in _AdvisingScreen.php and advise.module, where the split remainder of a substitution
+  wasn't correctly being detected when performing an additional sub, making it's "max hours" be the
+  original course's max hours, and not the remainder.
+  
+  Added some verbiage to the popup when you are looking at the remainder of a split, to say how much
+  of the remainder is left.
+
+  
+----------------
+RELEASED 4.4.2
+----------------
+
+
 2014-03-20
   Added rounding logic to FlightPath class, when applying subs, to compensate for weird floating point
   arithmetic errors.  Adjusted it and Student class to round to 6 places, instead of 5.

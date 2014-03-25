@@ -1618,44 +1618,34 @@ class _CourseList extends ObjList
 			  if (in_array($course->grade, $retake_grades)) continue;
 			}
 
+			
+			// Correct the course's requirement type, if needed.
+      $cr_type = $course->requirement_type;
+		  if ($cr_type == "uc") $cr_type = "c";
+		  if ($cr_type == "um") $cr_type = "m";
+		  if ($cr_type == "us") $cr_type = "s";
+		  if ($cr_type == "ue") $cr_type = "e";			  
+			
+			
 			if ($course->grade != "")// || !($course->course_list_fulfilled_by->is_empty))
 			{			  
-			  
+			  			  
 			  // If we require the grade to be a qpts_grade, then check that now.
 			  if ($bool_qpts_grades_only && !isset($qpts_grades[$course->grade])) {
 			    continue;
 			  }
 			  
-			  
-				if ($requirement_type == "")
+			  // Do our requirement types match?
+				if ($requirement_type == "" || ($requirement_type != "" && $requirement_type == $cr_type))
 				{
 				  $h = $course->get_hours();
 					$count = $count + $h;
-				} else {
-				  
-					if ($course->requirement_type == $requirement_type)
-					{
-						$count = $count + $course->get_hours();						
-						continue;
-					}
-
-					// For specifically "university capstone" courses...
-					if ($course->requirement_type == "uc" && $requirement_type == "c")
-					{
-						$count = $count + $course->get_hours();
-					}
-
-					if ($course->requirement_type == "um" && $requirement_type == "m")
-					{
-						$count = $count + $course->get_hours();
-					}
-
-
-				}
+				} 
+				
 			} else {
 
 				// maybe it's a substitution?
-				if ($requirement_type == "" || ($requirement_type != "" && $requirement_type == $course->requirement_type))
+				if ($requirement_type == "" || ($requirement_type != "" && $requirement_type == $cr_type))
 				{
 					if ($course->course_list_fulfilled_by->is_empty == false)
 					{
@@ -1684,6 +1674,7 @@ class _CourseList extends ObjList
 			}
 		}
 
+		
     		
 		return $count;
 
@@ -1713,6 +1704,14 @@ class _CourseList extends ObjList
 		{
 			$course = $this->array_list[$t];
 
+      // Correct the course's requirement type, if needed.
+      $cr_type = $course->requirement_type;
+		  if ($cr_type == "uc") $cr_type = "c";
+		  if ($cr_type == "um") $cr_type = "m";
+		  if ($cr_type == "us") $cr_type = "s";
+		  if ($cr_type == "ue") $cr_type = "e";				
+			
+			
 			if ($bool_use_ignore_list == true)
 			{
 				// Do ignore some courses...
@@ -1749,26 +1748,12 @@ class _CourseList extends ObjList
 				  $p = $course->get_quality_points();
 					$points = $points + $p;
 				} else {
-					if ($course->requirement_type == $requirement_type)
+					if ($cr_type == $requirement_type)
 					{
 						$p = $course->get_quality_points();
 					  $points = $points + $p;
 						continue;
 					}
-
-					// For specifically "university capstone" courses...
-					if ($course->requirement_type == "uc" && $requirement_type == "c")
-					{
-						$p = $course->get_quality_points();
-					  $points = $points + $p;
-					}
-
-					if ($course->requirement_type == "um" && $requirement_type == "m")
-					{
-            $p = $course->get_quality_points();
-  					$points = $points + $p;
-					}
-
 
 				}
 			} else {
@@ -1776,7 +1761,7 @@ class _CourseList extends ObjList
 				// maybe it's a substitution?
 								
 				
-				if (($requirement_type == "") || ($requirement_type != "" && $requirement_type == $course->requirement_type))
+				if (($requirement_type == "") || ($requirement_type != "" && $requirement_type == $cr_type))
 				{
 					if ($course->course_list_fulfilled_by->is_empty == false)
 					{

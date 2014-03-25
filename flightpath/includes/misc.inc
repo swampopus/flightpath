@@ -770,6 +770,16 @@ function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bo
 
 
 /**
+ * Convenience function to return the /files system path.  Does NOT end with a trailing slash.
+ *
+ */
+function fp_get_files_path() {
+  return $GLOBALS["fp_system_settings"]["file_system_path"] . "/custom/files";
+}
+
+
+
+/**
  * Simply returns the module's row from the modules table, if it exists.
  *
  * @param unknown_type $module
