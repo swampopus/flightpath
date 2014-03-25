@@ -812,7 +812,7 @@ function draw_menu_items($menu_array) {
 				$sub_trans_notice = "[" . t("transfer") . "]";
 			}
 
-			$by = $remarks = "";
+			$extra = $by = $remarks = "";
 			$temp = $this->db->get_substitution_details($subbed_course->db_substitution_id);
 			$by = $this->db->get_faculty_name($temp["faculty_id"], false);
 			$remarks = $temp["remarks"];
@@ -829,11 +829,15 @@ function draw_menu_items($menu_array) {
 				$remarks = " <br>&nbsp; &nbsp; " . t("Remarks:") . " <i>$remarks</i>.";
 			}
 
-
-			$extra = "";
+      // If the sub'd course had ghost hours, make a note of that.
+      if ($subbed_course->bool_ghost_hour) {
+        $subbed_course->substitution_hours = "0 (1 ghost) ";
+      }			
+			
+			
 			if ($substitution->bool_outdated)
 			{
-				$extra = " <span style='color:red'>[OUTDATED: ";
+				$extra .= " <span style='color:red'>[OUTDATED: ";
 				$extra .= $substitution->outdated_note;
 				$extra .= "]</span>";
 			}
@@ -2221,7 +2225,15 @@ function draw_menu_items($menu_array) {
 	 * @return string
 	 */
 	function fix_institution_name($str)
-	{
+	{	 
+	   
+	  // Should we do this at all?  We will look at the "autocapitalize_institution_names" setting.
+    $auto = $GLOBALS["fp_system_settings"]["autocapitalize_institution_names"];
+    if ($auto == "no") {
+      // Nope!  Just return.      
+      return $str;
+    }
+	  
 		$str = str_replace("-", " - ", $str);
 		$str = ucwords(strtolower($str));
 		$str = str_replace(" Of ", " of ", $str);
@@ -3472,7 +3484,21 @@ function draw_menu_items($menu_array) {
 					" . t("Please select a course to substitute
 				for %course", array("%course" => "$course->subject_id $course->course_num ($c_hours $c_ghost_hour " . t("hrs") . ")")) . "$extra
 				</div>
+				";
+		
 				
+		// If this course has ghost hours, and if we've set that you can only sub ghost hours
+		// for other ghost hours, then display a message here explaining that.
+		$bool_ghost_for_ghost = (variable_get("restrict_ghost_subs_to_ghost_hours", "yes") == "yes" && $course->bool_ghost_hour);
+		
+		if ($bool_ghost_for_ghost) {
+		  $pC .= "<div class='tenpt'>" . t("<b>Note:</b> As per a setting in FlightPath, the only courses which
+		            may be substituted must be worth zero hours (1 ghost hour).") . "</div>";
+		}
+				
+		
+		
+		$pC .= "
 				<div class='tenpt' 
 					style='height: 175px; overflow: auto; border:1px inset black; padding: 5px;'>
 					<table border='0' cellpadding='0' cellspacing='0' width='100%'>
@@ -3506,11 +3532,32 @@ function draw_menu_items($menu_array) {
 				}
 
 				
-				if (!$c->meets_min_grade_requirement_of(null, "D"))
+				if (!$c->meets_min_grade_requirement_of(null, variable_get("minimum_substitutable_grade", "D")))
 				{// Make sure the grade is OK.
 					continue;
 				}
 
+				$bool_disable_selection = $disabled_msg = FALSE;
+				
+				// Should we skip this course, because of a ghost_for_ghost requirement?
+				if ($bool_ghost_for_ghost && !$c->bool_ghost_hour) {
+				  continue;
+				}
+				// If we are supposed to restrict ghost for ghost, but the course does NOT
+				// have a ghost hour, and this $c course does, then disable it
+				if (variable_get("restrict_ghost_subs_to_ghost_hours", "yes") == "yes"
+				    && $course->bool_ghost_hour != TRUE
+				    && $c->bool_ghost_hour == TRUE) {
+				      
+				  $bool_disable_selection = TRUE;
+				  $disabled_msg = t("Substitution of this courses has been disabled.  
+				                     As per a setting in FlightPath, courses worth zero hours (1 ghost hour)
+				                     may only be substituted for course requirements also worth zero hours.");
+				     
+				}
+				
+				
+				
 				$t_flag = 0;
 				if ($c->bool_transfer == true)
 				{
@@ -3570,7 +3617,17 @@ function draw_menu_items($menu_array) {
 					$pC .= "<tr>
 						<td valign='top' class='tenpt' width='15%'>
 							<input type='radio' name='subCourse' id='subCourse' value='$tcourse_id'
-							 onClick='popupUpdateSubData(\"$m_hours\",\"$c->term_id\",\"$t_flag\",\"$hours_avail\",\"$c->hours_awarded\");'>
+							 onClick='popupUpdateSubData(\"$m_hours\",\"$c->term_id\",\"$t_flag\",\"$hours_avail\",\"$c->hours_awarded\");'
+							 ";
+					if ($bool_disable_selection) $pC .= "disabled=disabled";
+					
+					$pC .= "	 >";
+					
+					if ($disabled_msg) {
+					  $pC .= fp_get_js_alert_link(fp_reduce_whitespace(str_replace("\n", " ", $disabled_msg)), "?");
+					}
+					
+					$pC .= "
 						</td>
 						<td valign='top' class='tenpt underline' width='13%'>
 							$subject_id
@@ -3611,7 +3668,7 @@ function draw_menu_items($menu_array) {
 					}
 					if ($c->bool_outdated_sub == true)
 					{
-						$help_link = "<a href='javascript: popupHelpWindow(\"help.php?i=9\");' class='nounderline'>(?)</a>";
+						$help_link = fp_get_js_alert_link(t("This substitution is outdated. It was made for a course or group which does not currently appear on the student's degree plan.  You may remove this sub using the Administrator's Toolbox, at the bottom of the View tab."), "?");
 						$extra .= " <span style='color:red;'>[" . t("Outdated") . "$help_link]</span>";
 					}
 

@@ -1,8 +1,32 @@
 FlightPath 4.x Changelog
 ========================
 
+----------------
+RELEASED 4.4.3
+----------------
+
 
 2014-03-25
+  Fixed minor bug with Course, where a course's catalog hours showed extra zeros after
+  the decimal.
+  
+  Removed explanation text for 'quick term reference' on admin page, it was hard-coded
+  using old values, and was confusing.  Added extra explanation text to clarify.
+  
+  Added a setting for not auto-capitalizing institution names of transfer credits.
+  Added a setting for minimum substitutable grade (instead of hard-coding "D")
+  
+  Added a setting & code for controlling whether zero-hour courses can be subbed
+  for non-zero hour courses.  By default, this is set to not allow that; you can only
+  sub zero-hour courses for other zero-hour courses.  Internally, those courses have 1
+  "ghost" hour, due to limitations in the mathematics of FlightPath, true 0-hour courses
+  can't be allowed.
+  
+  Corrected hard-coded URL for a reference to a help page which doesn't exist, for outdated
+  subs.
+
+
+2014-03-24
   Fixed a bug in CourseList, Group, and DegreePlan, in finding courses of a particular
   requirement type within groups.
   

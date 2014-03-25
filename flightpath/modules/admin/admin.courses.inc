@@ -148,6 +148,10 @@ $rtn .= "</div>
     $temp_course = new Course();
     $db_title = $temp_course->fix_title($db_title);
 
+    $db_min_hours = $db_min_hours*1;
+    $db_max_hours = $db_max_hours*1;
+    $db_repeat_hours = $db_repeat_hours*1;
+    
     $hrs = $db_min_hours;
     if (trim($db_min_hours) != trim($db_max_hours)) {
       $hrs .= " - $db_max_hours";

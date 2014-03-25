@@ -877,6 +877,43 @@ function system_school_data_form() {
                         <br>If unsure, set to Yes."),
   );
   
+
+  // Auto-correct institution names?
+  $form["autocapitalize_institution_names"] = array(
+    "type" => "select",
+    "label" => t("Auto-capitalize institution names?"),
+    "options" => array("yes" => "Yes", "no" => "No"),
+    "hide_please_select" => TRUE,
+    "value" => variable_get("autocapitalize_institution_names", "yes"),
+    "description" => t("If set to yes, transfer institution names in 
+                        FlightPath will be run through a capitalization
+                        filter, so that 'UNIVERSITY OF LOUISIANA AT MONROE' 
+                        becomes 'University of Louisiana at Monroe'.
+                        Like the course title setting above, this is to make
+                        inconsistent or unattractive capitalization prettier.  
+                        Disable if you would like
+                        complete control over capitalization.
+                        <br>If unsure, set to Yes."),
+  );
+
+  
+  // Only allow ghost subs for fellow ghost hours?
+  $form["restrict_ghost_subs_to_ghost_hours"] = array(
+    "type" => "select",
+    "label" => t("Restrict ghost substitutions to courses with zero hours only?"),
+    "options" => array("yes" => "Yes", "no" => "No"),
+    "hide_please_select" => TRUE,
+    "value" => variable_get("restrict_ghost_subs_to_ghost_hours", "yes"),
+    "description" => t("If set to yes, courses with \"ghost\" hours may only be
+                        substituted for other courses with \"ghost\" hours.  What this
+                        means is that if a course is worth zero hours, it may only be
+                        subbed for a requirement worth zero hours, and it will not appear
+                        as an option for substitutions of courses worth more than zero hours.
+                        This will not affect old subs; only new ones.
+                        <br>If unsure, set to Yes."),
+  );
+
+  
   
 
   $form["retake_grades"] = array(
@@ -916,6 +953,17 @@ function system_school_data_form() {
     "description" => t("List grades, separated by comma, which are either a D or better."),    
   );
 
+  $form["minimum_substitutable_grade"] = array(
+    "type" => "textfield",
+    "size" => 3,
+    "label" => t("Minimum substitutable grade:"),
+    "value" => variable_get("minimum_substitutable_grade", "D"),
+    "description" => t("Enter a grade which is the minimum grade a student must have earned
+                      for the course to be allowed in a substitution.  This will affect
+                      new substitutions, not old ones.  If unsure, enter D."),    
+  );
+  
+  
 
   $form["calculate_cumulative_hours_and_gpa"] = array(
     "label" => t("Calculate student cumulative hours and GPA?"),

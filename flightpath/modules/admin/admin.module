@@ -786,9 +786,10 @@ function admin_advising_settings_form() {
   
   $settings = fp_get_system_settings();
   
+  /*
   $mark = "";
   // TODO: This needs to become genericized!  If it can't be, it should just be taken out.
-  
+    
   $sems = array(40,41, 60,81,82);
   for($t = $settings["current_catalog_year"]; $t <= $settings["current_catalog_year"] + 2; $t++) {
     $mark .= "<div style='padding-left: 15px;'>";
@@ -806,12 +807,16 @@ function admin_advising_settings_form() {
     "type" => "markup",
     "value" => t("Term ID Quick Reference:") . $mark,
   );
+  */
   
   $form["available_advising_term_ids"] = array(
     "type" => "textfield",
-    "label" => t("Available advising term ids"),
+    "label" => t("Available advising term id's"),
     "value" => variable_get("available_advising_term_ids", ""),
-    "description" => t("Separate by commas. Ex: 200940, 200941, 200960. Make sure to enter
+    "description" => t("These are the terms for which advisors may advise a student to take
+                        a course.  They should follow the structure established on the
+                        school data settings page.
+                        Separate term id's by commas. Ex: 200940, 200941, 200960. Make sure to enter
                         in the order that they should appear in FlightPath."),
   );  
 

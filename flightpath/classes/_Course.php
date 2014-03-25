@@ -334,12 +334,12 @@ class _Course
     
     if (!$this->has_variable_hours())
     {
-      return $this->min_hours;
+      return $this->min_hours*1;
     } else {
       // Meaning this does course have variable hours.
 
-      $min_h = $this->min_hours;
-      $max_h = $this->max_hours;
+      $min_h = $this->min_hours*1;
+      $max_h = $this->max_hours*1;
       
       
       // Convert back from ghosthours.
