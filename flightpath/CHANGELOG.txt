@@ -1,6 +1,13 @@
 FlightPath 4.x Changelog
 ========================
 
+
+2014-03-27
+  Fixed a small typo, and fixed a bug in _FlightPath.php.  Made it so that courses
+  worth zero hours may be repeated infinitely.  The bug, otherwise, was to not allow
+  repeated attempts, which doesn't make sense, given the math.
+
+
 ----------------
 RELEASED 4.4.3
 ----------------

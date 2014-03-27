@@ -3550,7 +3550,7 @@ function draw_menu_items($menu_array) {
 				    && $c->bool_ghost_hour == TRUE) {
 				      
 				  $bool_disable_selection = TRUE;
-				  $disabled_msg = t("Substitution of this courses has been disabled.  
+				  $disabled_msg = t("Substitution of this course has been disabled.  
 				                     As per a setting in FlightPath, courses worth zero hours (1 ghost hour)
 				                     may only be substituted for course requirements also worth zero hours.");
 				     

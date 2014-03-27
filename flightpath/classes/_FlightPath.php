@@ -540,6 +540,7 @@ class _FlightPath
 				continue;
 			}
 
+			
 
 			// Has the student taken this course requirement?
 			if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, true))
@@ -551,7 +552,7 @@ class _FlightPath
 				  // instead, use the the adjusted value (probably 1).
 				  $h_get_hours = $c->hours_awarded;
 				}			  
-			  
+			  								
 				// Can we assign any more hours to this group?  Are we
 				// out of hours, and should stop?
 				if ($hours_assigned >= $hours_required)
@@ -575,8 +576,7 @@ class _FlightPath
 
 				// Make sure the course meets min grade requirements.
 				if (!$c->meets_min_grade_requirement_of($course_requirement))
-				{
-
+				{		  
 					continue;
 				}
 
@@ -584,7 +584,6 @@ class _FlightPath
 				// Has the course been unassigned from this group?
 				if ($c->group_list_unassigned->find_match($group))
 				{
-
 					continue;
 				}
 
@@ -593,7 +592,6 @@ class _FlightPath
 				// Make sure $c is not being used in a substitution.
 				if ($c->bool_substitution == true)
 				{
-
 					continue;
 				}
 
@@ -621,9 +619,11 @@ class _FlightPath
 							$course_requirement->load_descriptive_data();
 						}
 
-						if ($cc + $h_get_hours > $course_requirement->repeat_hours*1)
+						if (($course_requirement->bool_ghost_hour != TRUE || $c->bool_ghost_hour != TRUE)
+						    && $cc + $h_get_hours > $course_requirement->repeat_hours*1)
 						{
-							// Do not allow the repeat.
+							// Do not allow the repeat, unless we are talking about courses worth zero hours.
+							// meaning, they have a ghost hour.  In which case, allow it.
 							continue;
 						}
 
