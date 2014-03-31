@@ -1518,7 +1518,11 @@ function admin_display_main() {
   $rtn .= "</table><br>"; // close table
 
 
-  $settings = fp_get_system_settings();
+  //$settings = fp_get_system_settings();
+  
+  $current_catalog_year = variable_get("current_catalog_year", 2006);
+  $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);
+  
   
   if (user_has_permission("can_access_data_entry")) {
     $rtn .= fp_render_curved_line("Data Entry");
@@ -1527,15 +1531,15 @@ function admin_display_main() {
 
     // Have a pulldown here of years, then use javascript to hide/show relavant groups.
     $rtn .= "&nbsp; &nbsp; &nbsp; " . t("Select a catalog year") . ": <select id='data-entry-select-cats' onChange='adminHideDECats();'>";
-    $selected_cat = ($de_catalog_year != "") ? $de_catalog_year : $settings["current_catalog_year"];
+    $selected_cat = ($de_catalog_year != "") ? $de_catalog_year : $current_catalog_year;
     
-    for ($t = $settings["current_catalog_year"] +1; $t >= $settings["earliest_catalog_year"]; $t--) {
+    for ($t = $current_catalog_year +1; $t >= $earliest_catalog_year; $t--) {
       $sel = ($t == $selected_cat) ? "selected" : "";
       $rtn .= "<option value='$t' $sel>$t-" . ($t+1) . "</option>";
     }
     $rtn .= "</select>";
     
-    for ($t = $settings["current_catalog_year"] +1; $t >= $settings["earliest_catalog_year"]; $t--) {
+    for ($t = $current_catalog_year +1; $t >= $earliest_catalog_year; $t--) {
       $rtn .= "<ul class='data-entry-for-cat data-entry-for-cat-$t'>";
       $rtn .= "<li>" . l(t("Degree plans for @year", array("@year" => "$t-" . ($t+1))), "admin/degrees", "de_catalog_year=$t") . "</li>";
       $rtn .= "<li>" . l(t("Groups for @year", array("@year" => "$t-" . ($t+1))), "admin/groups", "de_catalog_year=$t") . "</li>";

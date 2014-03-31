@@ -2,6 +2,17 @@ FlightPath 4.x Changelog
 ========================
 
 
+----------------
+RELEASED 4.4.4
+----------------
+
+
+2014-03-31
+  Added changes to admin.module and system.install, so that certain system values are setup
+  by default.  This was causing a bug, if they weren't set, which on some systems created
+  a run-away loop.
+  
+
 2014-03-27
   Fixed a small typo, and fixed a bug in _FlightPath.php.  Made it so that courses
   worth zero hours may be repeated infinitely.  The bug, otherwise, was to not allow

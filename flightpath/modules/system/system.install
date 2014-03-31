@@ -65,7 +65,12 @@ function system_enable() {
               (2, 'access_logged_in_content'),
               (2, 'view_comments') ");
 
-   
+  
+  // Add some default variable values, to make things a little easier on first-run.
+  variable_set("earliest_catalog_year", date("Y"));
+  variable_set("current_catalog_year", date("Y"));
+  variable_set("current_draft_catalog_year", date("Y"));
+  
 }
 
 
