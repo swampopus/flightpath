@@ -371,13 +371,13 @@ class _Course
   {
     if ($this->advised_hours > -1)
     {
-      return $this->advised_hours;
+      return $this->advised_hours * 1;
     } else {
       // No, the user has not selected any hours yet.  So,
       // just display the min_hours.
       
       // Correct for ghost hours, if any.
-      $min_h = $this->min_hours;
+      $min_h = $this->min_hours * 1;
       if ($this->bool_ghost_min_hour) {
         $min_h = 0;
       }
@@ -582,13 +582,13 @@ class _Course
     // the course)
     if ($this->hours_awarded > 0)
     {
-      $h = $this->hours_awarded;
+      $h = $this->hours_awarded * 1;
       return $h;
     }
 
     
     if ($this->has_variable_hours() && $this->advised_hours > -1) {
-      return $this->advised_hours;
+      return $this->advised_hours * 1;
     }
     
     
@@ -598,7 +598,7 @@ class _Course
 
     // No selected hours, but it's a variable hour course.
     // So, return the min_hours for this course.
-    return $this->min_hours;
+    return $this->min_hours * 1;
 
   }
 
@@ -925,7 +925,7 @@ class _Course
    */
   function load_descriptive_data($bool_load_from_global_cache = true, $bool_ignore_catalog_year_in_cache = true, $bool_limit_current_catalog_year = true, $bool_force_catalog_year = false, $bool_ignore_exclude = false)
   {
-
+    
     if ($this->db == null)
     {
       $this->db = get_global_database_handler();
@@ -1207,6 +1207,7 @@ class _Course
    */
   function load_descriptive_transfer_data($student_id = 0)
   {
+
     // This method should be called to load transfer course data
     // into THIS object.  It assumes that $this->course_id is a transfer
     // course's ID, which can be looked up in flightpath.transfer_courses.

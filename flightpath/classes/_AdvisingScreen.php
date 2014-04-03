@@ -2155,8 +2155,8 @@ function draw_menu_items($menu_array) {
 					";
 			
 			// Correct for ghost hours, if they are there.
-			$min_h = $course->min_hours;
-			$max_h = $course->max_hours;
+			$min_h = $course->min_hours*1;
+			$max_h = $course->max_hours*1;
 			if ($course->bool_ghost_min_hour) $min_h = 0;
 			if ($course->bool_ghost_hour) $max_h = 0;
 			
@@ -2173,7 +2173,7 @@ function draw_menu_items($menu_array) {
 
 			if ($course->advised_hours > -1)
 			{
-				$var_hours_default = $course->advised_hours;
+				$var_hours_default = $course->advised_hours *1;
 			} else {
 				$var_hours_default = $min_h;
 			}
@@ -2915,7 +2915,8 @@ function draw_menu_items($menu_array) {
 		
 		// The current term we are advising for.
 		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
-    if (!$advising_term_id) {
+		
+    if (!$advising_term_id) {      
       $advising_term_id = 0;
     }
 
@@ -3076,10 +3077,19 @@ function draw_menu_items($menu_array) {
 		$semester_num = $course->assigned_to_semester_num;
 		$group_id = $course->assigned_to_group_id;
 		$random_id = $course->random_id;
-		$advised_hours = $course->advised_hours;
+		$advised_hours = $course->advised_hours*1;
 
-		$unique_id = $course_id . "_" . $semester_num . "_" . rand(1,9999);
-		$hid_name = "advisecourse_$course_id" . "_$semester_num" . "_$group_id" . "_$advised_hours" . "_$random_id" . "_$advising_term_id" . "_random" . rand(1,9999);
+		$unique_id = $course_id . "_" . $semester_num . "_" . mt_rand(1,9999);
+		$hid_name = "advisecourse_$course_id" . "_$semester_num" . "_$group_id" . "_$advised_hours" . "_$random_id" . "_$advising_term_id" . "_random" . mt_rand(1,9999);
+		
+		// Due to an interesting bug, the hid_name cannot contain periods.  So, if a course
+		// has decimal hours, we need to replace the decimal with a placeholder.
+		if (strstr($hid_name, ".")) {
+		  $hid_name = str_replace(".", "DOTPLACEHOLDER", $hid_name);
+		}
+		
+		
+		
 		$hid_value = "";
 		$opchecked = "";
 		if ($course->bool_advised_to_take == true)

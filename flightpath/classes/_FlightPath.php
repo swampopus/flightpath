@@ -971,11 +971,18 @@ class _FlightPath
 				continue;
 			}
 
-			$temp = explode("_",$key);
+      // The key might contain a DOTPLACEHOLDER instead of a period.  If so, let's
+      // add the period back in.  This was to correct a bug where courses with dots couldn't
+      // be advised.
+      if (strstr($key, "DOTPLACEHOLDER")) {
+        $key = str_replace("DOTPLACEHOLDER", ".", $key);
+      }
+
+      $temp = explode("_",$key);
 			$course_id = trim($temp[1]);
 			$semester_num = trim($temp[2]);
 			$group_id = trim($temp[3]);
-			$var_hours = trim($temp[4]);
+			$var_hours = trim($temp[4]) * 1;
 			$random_id = trim($temp[5]);
 			$advised_term_id = trim($temp[6]);			
 			$db_group_requirement_id = trim($temp[7]);

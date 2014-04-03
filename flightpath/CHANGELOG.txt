@@ -3,6 +3,21 @@ FlightPath 4.x Changelog
 
 
 ----------------
+RELEASED 4.4.4.1
+----------------
+
+
+2014-04-03
+  Fixed a bug where courses with decimal hours were gettng un-advised upon save.  This is due
+  to decimal points not being allowed in hidden variable names in HTML.  So, they now get
+  replaced before saving with placeholder text, then turned back into decimals after
+  submission.
+  
+  Tweaked a few places where hours are displayed to *1, so excess zeroes after the decimal are
+  trimmed off.
+
+
+----------------
 RELEASED 4.4.4
 ----------------
 
