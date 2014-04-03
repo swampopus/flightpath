@@ -181,7 +181,7 @@ function toggleSelection(uniqueID, display_status, warningMsg) {
   var img = $("#cb_" + uniqueID);
   // This is the hidden variable for this course, to
   // determine if it has been selected or not.
-  var course = $("#advisecourse_" + uniqueID);
+  var course = $("#advcr_" + uniqueID);
 
   if (course.val() == "true") {
     // Meaning, this course is currently selected.
@@ -506,17 +506,21 @@ function saveSubstitution(course_id, group_id, semester_num, subCourseID, subTer
  */
 function assignSelectedCourseToGroup(course_id, semester_num, group_id, var_hours, advising_term_id, db_group_requirement_id)
 {
-  //alert("The user selected course " + course_id + " for group " + group_id + " in sem " + semester_num + "for var hours " + varHours + " termid:" + advising_term_id + " grid:" + db_group_requirement_id);
-  //return;
   
+  //alert("The user selected course " + course_id + " for group " + group_id + " in sem " + semester_num + "for var hours " + varHours + " termid:" + advising_term_id + " grid:" + db_group_requirement_id );
+  //return;
+    
   var_hours = var_hours * 1;
   var hiddenElements = document.getElementById("hidden_elements");
   var e = document.createElement("input");
-  e.setAttribute("name","advisecourse_" + course_id + "_" + semester_num + "_" + group_id + "_" + var_hours + "_random34534534534" + "_" + advising_term_id + "_" + db_group_requirement_id);
+  e.setAttribute("name","advcr_" + course_id + "_" + semester_num + "_" + group_id + "_" + var_hours + "_r7" + "_" + advising_term_id + "_" + db_group_requirement_id);
+  
+  // note, the "r7" above is taking the place of a "random number."  Since it's the only one being submitted, it doesn't
+  // really need to be random.
+  
   e.setAttribute("type","hidden");
   e.setAttribute("value","true");
   hiddenElements.appendChild(e);      
-  
   submitForm(true);
   
 }

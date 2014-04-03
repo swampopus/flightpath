@@ -3080,12 +3080,12 @@ function draw_menu_items($menu_array) {
 		$advised_hours = $course->advised_hours*1;
 
 		$unique_id = $course_id . "_" . $semester_num . "_" . mt_rand(1,9999);
-		$hid_name = "advisecourse_$course_id" . "_$semester_num" . "_$group_id" . "_$advised_hours" . "_$random_id" . "_$advising_term_id" . "_random" . mt_rand(1,9999);
+		$hid_name = "advcr_$course_id" . "_$semester_num" . "_$group_id" . "_$advised_hours" . "_$random_id" . "_$advising_term_id" . "_r" . mt_rand(1,9999);
 		
 		// Due to an interesting bug, the hid_name cannot contain periods.  So, if a course
 		// has decimal hours, we need to replace the decimal with a placeholder.
 		if (strstr($hid_name, ".")) {
-		  $hid_name = str_replace(".", "DOTPLACEHOLDER", $hid_name);
+		  $hid_name = str_replace(".", "DoT", $hid_name);
 		}
 		
 		
@@ -3151,7 +3151,7 @@ function draw_menu_items($menu_array) {
 					onclick='{$op_on_click_function}(\"$unique_id\",\"$display_status\",\"$extra_js_vars\");'
 					>";
 		$hid = "<input type='hidden' name='$hid_name'
-						id='advisecourse_$unique_id' value='$hid_value'>";
+						id='advcr_$unique_id' value='$hid_value'>";
 
 		// Okay, we can't actually serialize a course, as it takes too much space.
 		// It was slowing down the page load significantly!  So, I am going

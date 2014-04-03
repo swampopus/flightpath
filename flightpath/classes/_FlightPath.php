@@ -958,11 +958,13 @@ class _FlightPath
 		// There should be one of these for every course that was
 		// on the page.  It looks like this:
 		// advisecourse_course_id_semesterNum_group_id_varHours_randomID
-		//fpm($_POST);
 		foreach($_POST as $key => $value)
 		{
-			if (!strstr($key,"advisecourse_"))
+			
+			if (!strstr($key,"advisecourse_") && !(strstr($key, "advcr_")))
 			{ // Skip vars which don't have this as part of the name.
+				// We accept either advisecourse_ or advcr_ for short.  advisecourse_ is the old way.
+				// I changed to use advcr_ to save space, because some browsers will not allow long input names.
 				continue;
 			}
 			if ($value != "true")
@@ -971,11 +973,11 @@ class _FlightPath
 				continue;
 			}
 
-      // The key might contain a DOTPLACEHOLDER instead of a period.  If so, let's
+      // The key might contain a DoT (dot placeholder) instead of a period.  If so, let's
       // add the period back in.  This was to correct a bug where courses with dots couldn't
       // be advised.
-      if (strstr($key, "DOTPLACEHOLDER")) {
-        $key = str_replace("DOTPLACEHOLDER", ".", $key);
+      if (strstr($key, "DoT")) {
+        $key = str_replace("DoT", ".", $key);
       }
 
       $temp = explode("_",$key);

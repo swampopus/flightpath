@@ -2,6 +2,11 @@ FlightPath 4.x Changelog
 ========================
 
 
+2014-04-03
+  Some servers/browsers do not allow very long names for html input elements, which FlightPath sometimes uses.
+  So, measures were taken in this version to reduce the length of hidden element names.  This shouldn't
+  affect the functionality of FlightPath.  Changes were made to _FlightPath, _AdvisingScreen, and advise.js.
+
 ----------------
 RELEASED 4.4.4.1
 ----------------
