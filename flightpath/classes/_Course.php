@@ -89,7 +89,7 @@ class _Course
     $this->specified_repeats = 0;
     $this->bool_exclude_repeat = false;
     $this->bool_specified_repeat = false;
-    $this->random_id = rand(1,9999);
+    $this->random_id = mt_rand(1,9999);
     $this->display_status = "eligible";
     $this->course_list_fulfilled_by = new CourseList();
     $this->group_list_unassigned = new ObjList();

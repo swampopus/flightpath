@@ -1204,6 +1204,33 @@ function system_settings_form() {
   );
     
 
+  $options = array(
+              "90" => "90 days",
+              "180" => "180 days",
+              "365" => "1 year (365 days)",
+              "548" => "1.5 years (548 days)",
+              "730" => "2 years (730 days)",
+              "912" => "2.5 years (912 days)",
+              "never" => t("Never - Do not trim log table"),
+              );
+              
+              
+  
+  $form["max_watchdog_age"] = array(
+    "type" => "select",
+    "label" => t("Max watchdog (log) entry age:"),
+    "hide_please_select" => TRUE,
+    "options" => $options,
+    "value" => variable_get("max_watchdog_age", "548"),
+    "description" => t("Keep entries in the watchdog log tables until they are this old.
+                        Entries older than this will be deleted at every cron run.
+                        For example, if you only want to keep log entries for 1 year, then
+                        set this to 1 year.
+                        <b>Warning:</b> the Stats module uses data in this table to create
+                        statistics and reports about use of FlightPath.  Once data is removed from the
+                        watchdog table, it cannot be retrieved again.
+                        <br>If you are unsure what to put here, select '1.5 years'."),
+  );
   
                                   
                   
@@ -1229,6 +1256,34 @@ function system_settings_form_submit($form, &$form_state) {
    
 }
 
+
+
+/**
+ * Implementation of hook_cron
+ * 
+ * We will perform operations necessary for keep FlightPath's tables in shape.
+ *
+ */
+function system_cron() {
+  
+  // Should we "trim" the watchdog table of old entries?
+  $max_age_days = variable_get("max_watchdog_age", "548");
+  if ($max_age_days != "never" && ($max_age_days*1) > 0) {
+    
+    // Okay, let's trim the table.
+    $max_timestamp = strtotime("$max_age_days DAYS AGO");
+    
+    db_query("DELETE FROM watchdog WHERE `timestamp` < '?' ", $max_timestamp);
+    $rows = db_affected_rows();
+    if ($rows > 0) {
+      watchdog("system", t("@rows old rows (older than @max days) trimmed from watchdog table on system cron run.", array("@rows" => $rows, "@max" => $max_age_days)));
+    }
+    
+  }
+  
+  
+  
+}
 
 
 
@@ -1517,8 +1572,32 @@ function system_status() {
 function system_clear_cache() {
   
   menu_rebuild_cache();
-  
+
+  system_rebuild_css_js_query_string();
 }
+
+
+/**
+ * This function will recreate the dummy query string we add to the end of css and js files.
+ *
+ */
+function system_rebuild_css_js_query_string() {
+  
+  // A dummy query string gets added to the URLs for css and javascript files,
+  // to give us control over browser caching.  When this value changes (cause we
+  // cleared the cache, updated a module, etc) it tells the browser to get a new
+  // copy of our css and js files.  
+  
+  // This idea, like many other ideas in FlightPath, was borrowed from Drupal.
+  
+  // The timestamp is converted to base 36 in order to make it more compact.
+  // This gives us a random-looking string of 6 numbers and letters.
+  variable_set('css_js_query_string', base_convert(time(), 10, 36));
+
+   
+}
+
+
 
 /**
  * Clears only the menu cache
@@ -2134,12 +2213,13 @@ function system_modules_form_submit($form, $form_state) {
   }
 
   if ($did_something) {
-    // We should clear the cache if we did something.
     
     // Refetch all of the modules from the modules table.
     fp_rebuild_modules_list();
-    // Rebuild the menu router now.
-    menu_rebuild_cache();
+    
+    // We should clear the cache if we did something.
+    fp_clear_cache();
+    
   }
 
   

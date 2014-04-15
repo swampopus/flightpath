@@ -2,10 +2,36 @@ FlightPath 4.x Changelog
 ========================
 
 
+----------------
+RELEASED 4.4.5
+----------------
+
+
+2014-04-15
+  Added a system to create a dummy query string which gets added when we include css or js files,
+  and gets reset to a new random value when we clear the cache or install a new module.  This prevents
+  the browser from caching pages even though we've made changes and clear the cache.  Got the idea
+  (like so much else) from Drupal.  system module, AdvisingScreen class, and the default theme files were
+  affected.
+
+
+2014-04-04  
+  Added a new setting to the system settings form, to control how long we keep watchdog entries.
+  In system_cron, we will delete any watchdog entry older than the selected time.  Default is
+  1.5 years.
+
+  Changed the "random_id" generated for every Course object to use mt_rand() instead of rand(),
+  as it is slightly faster in certain situations.
+  
+  Tweaked the wording in the default settings.php which is generated on first installation.
+  
+
 2014-04-03
-  Some servers/browsers do not allow very long names for html input elements, which FlightPath sometimes uses.
-  So, measures were taken in this version to reduce the length of hidden element names.  This shouldn't
-  affect the functionality of FlightPath.  Changes were made to _FlightPath, _AdvisingScreen, and advise.js.
+  Some servers/browsers do not allow very long names for html input elements, which FlightPath 
+  sometimes uses. So, measures were taken in this update to reduce the length of hidden 
+  element names.  This shouldn't affect the functionality of FlightPath for most users.  
+  Changes were made to _FlightPath, _AdvisingScreen, and advise.js.
+  
 
 ----------------
 RELEASED 4.4.4.1

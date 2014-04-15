@@ -8,11 +8,9 @@ $theme_location = fp_theme_location();
 
 print "
 <meta name='viewport' id='view' content='width=350;'/>
-<meta name='format-detection' content='telephone=no'>      
-<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
-          
-<link rel='stylesheet' type='text/css' href='$theme_location/style.css'>
-<link rel='stylesheet' type='text/css' href='$theme_location/mobile.css'>";
+<meta name='format-detection' content='telephone=no'>                
+<link rel='stylesheet' type='text/css' href='$theme_location/style.css?$page_css_js_query_string' />
+<link rel='stylesheet' type='text/css' href='$theme_location/mobile.css?$page_css_js_query_string' />";
 
 // Load any extra CSS files which addon modules might have added.
 print $page_extra_css_files;

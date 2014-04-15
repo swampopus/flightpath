@@ -271,7 +271,8 @@ $system_settings = array();
 ////////////////////////////////////
 // If this variable is set to TRUE, then anyone who attempts to log in
 // will have full, admin access.
-// Only set this to TRUE when you are first installing FlightPath.
+// Only set this to TRUE if you have run into trouble, and cannot log into
+// FlightPath normally!
 // Otherwise, leave it set to FALSE!
 $system_settings["GRANT_FULL_ACCESS"] = FALSE;
 ////////////////////////////////////

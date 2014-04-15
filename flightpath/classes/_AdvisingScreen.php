@@ -298,11 +298,17 @@ function draw_menu_items($menu_array) {
 		  $print_option = "mobile_";
 		}
 					
+		// A dummy query-string is added to filenames, to gain control over
+    // browser-caching. The string changes on every update or full cache
+    // flush, forcing browsers to load a new copy of the files, as the
+    // URL changed.
+    $page_css_js_query_string = variable_get('css_js_query_string', '0');
+		
 				
     // Add extra JS files.    
     if (is_array($GLOBALS["fp_extra_js"]) && count($GLOBALS["fp_extra_js"]) > 0) {
      foreach ($GLOBALS["fp_extra_js"] as $js_file_name) {
-       $page_extra_js_files .= "<script type='text/javascript' src='$js_file_name'></script> \n";
+       $page_extra_js_files .= "<script type='text/javascript' src='$js_file_name?$page_css_js_query_string'></script> \n";
      }        
     } 		
 	
@@ -311,7 +317,7 @@ function draw_menu_items($menu_array) {
 	  // Load any extra CSS files which addon modules might have added.
 	  if (is_array($GLOBALS["fp_extra_css"]) && count($GLOBALS["fp_extra_css"]) > 0) {
 	   foreach ($GLOBALS["fp_extra_css"] as $css_file_name) {
-	     $page_extra_css_files .= "<link rel='stylesheet' type='text/css' href='$css_file_name'>";
+	     $page_extra_css_files .= "<link rel='stylesheet' type='text/css' href='$css_file_name?$page_css_js_query_string' /> \n";
 	   }
 	  }		
 		
