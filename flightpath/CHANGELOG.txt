@@ -3,6 +3,19 @@ FlightPath 4.x Changelog
 
 
 ----------------
+RELEASED 4.4.6
+----------------
+
+
+2014-04-28
+  Fixed a bug in misc.inc, with the function fp_http_request().
+  
+  Added new code in index.php and install.php, to ensure during install that Clean URLs are
+  possible (which requires url rewriting).  This prevents users from getting confused
+  after the fact if they receive errors post installation relating to clean urls.
+  
+
+----------------
 RELEASED 4.4.5
 ----------------
 

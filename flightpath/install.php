@@ -529,6 +529,41 @@ function install_check_requirements() {
                <br>Ex: chmod 777 custom");    
   }
   
+  // Are clean-url's enabled?
+  // We will do this by trying to retrieve a test URL, built into index.php.
+  // If we can get a success message back from "http://example.com/flightpath/test-clean-urls/check", then
+  // we are good to go.
+  
+  // First, figure out the base URL.
+  $protocol = strpos(strtolower($_SERVER['SERVER_PROTOCOL']),'https') === FALSE ? 'http' : 'https';
+  $host = $_SERVER['HTTP_HOST'];
+  $script = $_SERVER['SCRIPT_NAME'];
+  $base_url = $protocol . "://" . $host . $script;
+  $base_url = str_replace("/install.php", "", $base_url);
+  
+  // Try to get our test URL's success message...
+  $res = fp_http_request($base_url . '/test-clean-urls/check');  
+  if ($res->code != 200) {
+    // Could not be loaded on the server!
+    
+    //$rtn[] = "<pre>" . print_r($res, TRUE) . "</pre>";
+    $rtn[] = st("Clean URLs are not working correctly.  
+                  <br><br>FlightPath requires that your webserver
+                  is configured to allow URL rewriting, called Clean URLs in FlightPath.  This may be as
+                  simple as setting 'AllowOverride All' on the FlightPath directory in your Apache config.
+                  Also, make sure the .htaccess file is present and unchanged.
+                  <br><br>
+                  For more information, please see: ") . " 
+                    <a href='http://getflightpath.com/node/5'>http://getflightpath.com/node/5</a>.                    
+                  <br><br>" . st("
+                  If you are sure you have set everything up correctly, this error may also result
+                  if your server is not configured to access URLs using the PHP fsockopen() command.
+                  Ensure this command is not blocked in your PHP setup. ");
+    
+  }
+  
+  
+  
   if (count($rtn) == 0) return FALSE;
   return $rtn;
 }

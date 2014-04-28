@@ -14,6 +14,13 @@ session_start();
 header("Cache-control: private");
 
 
+// If the user is requesting a "clean URLs" check, display a simple success message.
+if ($_REQUEST["q"] == "test-clean-urls/check") {
+  print "CLEAN URLS CHECK SUCCESSFUL";
+  die;
+}
+
+
 // If the settings.php file doesn't exist, then FlightPath must not be installed,
 // and we should redirect to install.php.
 if (!file_exists("custom/settings.php")) {

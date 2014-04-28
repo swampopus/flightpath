@@ -217,7 +217,7 @@ function fp_http_request($url, $headers = array(), $method = 'GET', $data = NULL
         $result->error = 'request timed out';
       }
       elseif ($retry) {
-        $result = drupal_http_request($result->headers['Location'], $headers, $method, $data, --$retry, $timeout);
+        $result = fp_http_request($result->headers['Location'], $headers, $method, $data, --$retry, $timeout);
         $result->redirect_code = $result->code;
       }
       $result->redirect_url = $location;
