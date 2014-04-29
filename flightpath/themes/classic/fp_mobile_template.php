@@ -10,10 +10,14 @@ print "
 <meta name='viewport' id='view' content='width=350;'/>
 <meta name='format-detection' content='telephone=no'>                
 <link rel='stylesheet' type='text/css' href='$theme_location/style.css?$page_css_js_query_string' />
+<link rel='stylesheet' type='text/css' href='$theme_location/layout.css?$page_css_js_query_string' />
 <link rel='stylesheet' type='text/css' href='$theme_location/mobile.css?$page_css_js_query_string' />";
 
 // Load any extra CSS files which addon modules might have added.
 print $page_extra_css_files;
+
+// Load our custom.css last, so we can override whatever needs to be overwritten
+print "<link rel='stylesheet' type='text/css' href='$theme_location/custom.css?$page_css_js_query_string' />";
 
 print "<title>$page_title</title>";
 

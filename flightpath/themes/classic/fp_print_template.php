@@ -11,8 +11,12 @@ $theme_location = fp_theme_location();
 print $page_extra_js_files;
 
 print "<link rel='stylesheet' type='text/css' href='$theme_location/style.css?$page_css_js_query_string' /> \n";
+print "<link rel='stylesheet' type='text/css' href='$theme_location/layout.css?$page_css_js_query_string' /> \n";
 
 print $page_extra_css_files; 
+
+// Load our custom.css last, so we can override whatever needs to be overwritten
+print "<link rel='stylesheet' type='text/css' href='$theme_location/custom.css?$page_css_js_query_string' />";
 
 
 print "<title>$page_title</title> ";

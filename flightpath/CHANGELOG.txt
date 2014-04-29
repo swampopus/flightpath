@@ -1,6 +1,18 @@
 FlightPath 4.x Changelog
 ========================
 
+2014-04-29
+  Altered the "classic" theme which comes with FlightPath so that it relies more heavily on
+  CSS, which can be tweaked much more easily than by manipulating the theme PHP files.
+  
+  Introduced the idea of themes having .info files, like modules.  At the moment they are
+  not used, but one day they will likely be used with an admin settings page to let a user
+  select & configure a theme through point and click.
+  
+  Created a "basic" theme which ships with FlightPath, and lacks most of the graphical elements
+  in the classic theme.  This is meant to be a starter theme to help schools customize from
+  a mostly-blank canvas.
+
 
 ----------------
 RELEASED 4.4.6
