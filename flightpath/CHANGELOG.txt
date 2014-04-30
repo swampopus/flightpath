@@ -21,6 +21,9 @@ FlightPath 4.x Changelog
   require an outside connection to draw the pie charts.  It does require that the PHP GD libraries
   are installed, however.  
 
+  Improved the "Majors" pulldown search on the student_search module, to include concentrations
+  in the list.  Also re-ordered how the majors are displayed (alphabetical by title).
+  
 
 2014-04-29
   Altered the "classic" theme which comes with FlightPath so that it relies more heavily on

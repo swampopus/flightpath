@@ -751,7 +751,9 @@ function system_school_data_form() {
     "label" => t("Structure of term ID's:"),
     "value" => variable_get("term_id_structure", ""),
     "description" => t("Use this space to define termID structures, one per line.
-                Please see the FlightPath documentation on how to set up this field.") . "
+                Please see the 
+                <b><a href='http://getflightpath.com/node/1085' target='_blank'>FlightPath documentation</a></b> 
+                on how to set up this field.") . "
                 <br>" . t("Ex:") . " 
                 <br>[Y4]60, Spring, Spring of [Y4], Spr '[Y2]
                 <br>[Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]",    
@@ -1013,8 +1015,13 @@ function system_school_data_form() {
                          e ~ Electives<br>
                          m ~ Major Requirements<br>
                          s ~ Supporting Requirements<br>
-                         x ~ Additional Requirements
-                         </div>",
+                         x ~ Additional Requirements                         
+                         </div>
+                         
+                         Please see the 
+                <b><a href='http://getflightpath.com/node/1085' target='_blank'>FlightPath documentation</a></b> 
+                for more information on how to set up this field.
+                         ",
                          
   );
 

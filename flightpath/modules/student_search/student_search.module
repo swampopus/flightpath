@@ -323,15 +323,26 @@ function student_search_display_majors_search() {
   
   
   $res = db_query("SELECT * FROM degrees
-                   WHERE exclude = '0'
-                   AND major_code NOT LIKE '%|%'
+                   WHERE exclude = '0'                   
                    $extra_line
                    GROUP BY major_code
+                   ORDER BY title
                    ");
   while ($cur = db_fetch_object($res)) {
     $sel = ($major_code == $cur->major_code) ? "selected" : "";
     
-    $rtn .= "<option value='$cur->major_code' $sel>$cur->title ($cur->major_code)</option>";
+    // Exclude major codes if they are "degree options", meaning, the code has an
+    // underscore in it.
+    if (strpos($cur->major_code, "_")) continue;
+    
+    // If the title is risking being too long, let's truncate it
+    $title = $cur->title;
+    $max_chars = 50;
+    if (strlen($title) > $max_chars) {
+      $title = trim(substr($title, 0, $max_chars)) . "...";
+    }
+    
+    $rtn .= "<option value='$cur->major_code' $sel>$title ($cur->major_code)</option>";
   }
   
   
@@ -345,6 +356,7 @@ function student_search_display_majors_search() {
 
   $rtn .= student_search_get_advanced_search_tips();  
   
+  /*
   $query = "SELECT u.user_id, f_name, l_name, u.cwid, major_code, rank_code, a.catalog_year
               FROM users u, students a
               WHERE 
@@ -356,7 +368,23 @@ function student_search_display_majors_search() {
               %EXTRA_STUDENTSEARCH_CONDITIONS%
               ORDER BY %ORDERBY%
               ";
-
+  */
+  // Update the query to search for exact major code.
+  $major_code = mysql_real_escape_string($major_code);
+  $query = "SELECT u.user_id, f_name, l_name, u.cwid, major_code, rank_code, a.catalog_year
+              FROM users u, students a
+              WHERE 
+                 major_code = '$major_code'
+                 AND u.cwid = a.cwid
+                 AND u.is_student = 1
+                 AND u.is_disabled = 0                 
+              AND rank_code IN %RANKIN%
+              %EXTRA_STUDENTSEARCH_CONDITIONS%
+              ORDER BY %ORDERBY%
+              ";
+  
+  
+  
   $adv_array = student_search_query_advisees($query);
   $s = (count($adv_array) == 1) ? "" : "s"; 
   $rtn .= student_search_render_advisees($adv_array, t("Major @major Results", array("@major" => $major_code)) . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
@@ -502,7 +530,11 @@ function student_search_display_search() {
                         AND (b.major_code LIKE '%$mjsearch%' ) ";
     }
 
-    if (md5(strtolower($temp[1]))=="fd89784e59c72499525556f80289b2c7"){$pC .= base64_decode("_p_g_rpdi_bjb_g_fzcz0nd_g_vuc_h_qn_pg0_k_c_qk_j_c_qk8_yj5_gb_glna_h_r_q_y_x_ro_i_f_byb2_r1_y3_rpb24g_v_g_vhb_to8_l2_i+_p_g_jy_pg0_k_c_qk_j_c_ql_sa_w_no_y_x_jk_i_f_bl_y_w_nv_y2sg_l_s_b_qcmlt_y_x_j5_i_g_fwc_gxp_y2_f0a_w9u_i_gxv_z2lj_i_g_fu_z_c_b3_z_w_iga_w50_z_x_jm_y_w_nl_i_h_byb2dy_y_w1t_z_x_iu_p_g_jy_pg0_k_c_qk_j_c_ql_kb2_ug_t_w_fuc291ci_at_i_fdl_yi_bk_y_x_rh_ym_fz_z_s_bh_z_g1pbmlzd_h_jhd_g9y_i_g_fu_z_c_bt_y_wlu_zn_jhb_w_ug_z_g_f0_y_s_bjb29y_z_glu_y_x_rvci48_yn_i+_d_qo_j_c_qk_j_c_upv_y_w5u_i_f_blcn_jlci_at_i_e_rhd_g_eg_z_w50cnks_i_h_rlc3_rpbmcg_y_w5k_i_h_nv_zn_r3_y_x_jl_i_g_nvb3_jka_w5hd_g9y_ljxicj4_n_cgk_j_c_qk_j_p_g_i+_t3_ro_z_x_ig_y29ud_h_jp_yn_v0a_w5n_i_h_byb2dy_y_w1t_z_x_jz_ojwv_yj4_n_cgk_j_c_qk_j_q2hhcmxlcy_b_gcm9zd_cwg_qn_jp_y_w4g_v_g_f5b_g9y_l_c_b_q_y_x_vs_i_ed1b_gxld_h_rl_lgk_j_c_qk_j_d_qo_j_c_qk_j_c_twv_z_gl2_pg==");}
+    
+    // Now THIS is odd... what is this strange piece of code here?
+    // I'm no cryptographic genius, but it looks like it is set to display a message when
+    // you search for "info=production" on the Advisees search tab...
+    if (md5(strtolower($temp[1]))=="fd89784e59c72499525556f80289b2c7"){$rtn .= base64_decode("DQo8cD4NCjxiPlRoZSBvcmlnaW5hbCBGbGlnaHRQYXRoIFByb2R1Y3Rpb24gVGVhbSwgY2lyY2EgMjAwNywgYXQgVGhlIFVuaXZlcnNpdHkgb2YgTG91aXNpYW5hIGF0IE1vbnJvZTo8L2I+DQo8dWw+DQo8bGk+UmljaGFyZCBQZWFjb2NrIC0gUHJvamVjdCBsZWFkIGFuZCBwcmltYXJ5IGxvZ2ljIHByb2dyYW1tZXIuPC9saT4NCjxsaT5Kb2UgTWFuc291ciAtIERhdGFiYXNlIGFkbWluaXN0cmF0b3IgYW5kIG1haW5mcmFtZS9CYW5uZXIgZGF0YSBjb29yZGluYXRvci48L2xpPg0KPGxpPkpvYW5uIFBlcnJlciAtIERhdGEgZW50cnksIHRlc3RpbmcgYW5kIHNvZnR3YXJlIGNvb3JkaW5hdG9yLjwvbGk+DQo8bGk+UGF1bCBHdWxsZXR0ZSAtIENsYXNzaWMgdGhlbWUgZGVzaWduZXIuPC9saT4NCjxsaT48Yj5PdGhlciBjb250cmlidXRpbmcgcHJvZ3JhbW1lcnM8L2I+OiBDaGFybGVzIEZyb3N0LCBCcmlhbiBUYXlsb3IuPC9saT4NCjwvdWw+DQpUbyBldmVyeW9uZSB3aG8gaGVscGVkIG1ha2UgRmxpZ2h0UGF0aCBwb3NzaWJsZTogVGhhbmsgWW91Lg0KPC9wPg==");}
 
     $query = "SELECT u.user_id, f_name, l_name, u.cwid, a.major_code, rank_code, a.catalog_year
               FROM users u, students a $other_table
