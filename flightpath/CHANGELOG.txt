@@ -1,6 +1,27 @@
 FlightPath 4.x Changelog
 ========================
 
+
+2014-04-30
+  Added the ability to specify what the "requirement types" are in the system, instead of
+  the static "c", "m", "s", and "e".  This is now controlled through the School data settings
+  form.
+  
+  Fixed a bug in misc.inc, fp_get_js_alert_link() where the $link_text value was being ignored.
+  
+  Any requirement type specified with a "u" in front (ex: um, uc, ug, etc) will be considered
+  a "University Capstone" course.
+  
+  Added the ability to specify which requirement types are to be displayed as pie charts,
+  on the School data settings form.
+  
+  To get ahead of Google Charts API shutting down in one year, I've incorporated the GPLv3
+  project, pChart, into FlightPath.  A segment of it now resides in the /inc/pchart directory,
+  and this is how the pie charts are to be drawn from now on.  This way, too, FlightPath doesn't
+  require an outside connection to draw the pie charts.  It does require that the PHP GD libraries
+  are installed, however.  
+
+
 2014-04-29
   Altered the "classic" theme which comes with FlightPath so that it relies more heavily on
   CSS, which can be tweaked much more easily than by manipulating the theme PHP files.

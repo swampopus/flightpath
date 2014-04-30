@@ -617,6 +617,49 @@ function get_term_structures() {
 
 
 /**
+ * Returns back an array of all the available requirement types (by code) that
+ * have been defined.
+ *
+ */
+function fp_get_requirement_types() {
+  $rtn = array();
+  
+  $temp = explode("\n", variable_get("requirement_types", "g ~ General Requirements\nc ~ Core Requirements\ne ~ Electives\nm ~ Major Requirements\ns ~ Supporting Requirements\nx ~ Additional Requirements"));
+  foreach ($temp as $line) {
+    $line = trim($line);
+    if ($line == "") continue;
+    
+    $temp = explode("~", $line);
+    $code = trim(strtolower($temp[0]));
+    $desc = trim($temp[1]);
+
+    $rtn[$code] = $desc;   
+    
+  }
+  
+  // Make sure that code 'x' is set.
+  if (!isset($rtn["x"])) {
+    $rtn["x"] = t("Additional Requirements");
+  }
+  
+  // Make sure code 'e' for Electives is set.
+  if (!isset($rtn["e"])) {
+    $rtn["e"] = t("Electives");
+  }
+  
+  // Make sure code 'm' is set, for Major Requirements, our default type.
+  if (!isset($rtn["m"])) {
+    $rtn["m"] = t("Major Requirements");
+  }
+  
+  
+  
+  return $rtn;
+  
+}
+
+
+/**
  * If this function is called, it will override any other page tabs
  * which might be getting constructed.  This lets the programmer,
  * at run-time, completely control what tabs are at the top of the page.
@@ -1430,10 +1473,14 @@ function fp_get_js_prompt_link($question, $default, $action_if_yes, $link_text) 
  * 
  * @see fp_get_js_confirm_link
  */
-function fp_get_js_alert_link($message, $link_text, $extra_css_class = "") {
+function fp_get_js_alert_link($message, $link_text = "", $extra_css_class = "") {
   
   $rtn = "";  
 
+  if ($link_text == "") {
+    $link_text = "[?]";
+  }
+  
   $message = fp_reduce_whitespace($message);
   
   $message = str_replace("\n", "[NL]", $message);
@@ -1441,7 +1488,7 @@ function fp_get_js_alert_link($message, $link_text, $extra_css_class = "") {
   $message = str_replace("&quot;", "\&quot;", $message);
   $message = str_replace("[NL]", "\\n", $message);
       
-  $rtn .= "<a href='javascript: alert(\"" . $message . "\");' class='fp-alert-link $extra_css_class'>[?]</a>";
+  $rtn .= "<a href='javascript: alert(\"" . $message . "\");' class='fp-alert-link $extra_css_class'>$link_text</a>";
 
       
   return $rtn;  

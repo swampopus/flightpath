@@ -1311,49 +1311,61 @@ function draw_menu_items($menu_array) {
 	 *         - Do not let this equal zero.  If it does, the calculation
 	 *           for the pie chart will never be evaluated.
 	 * @param string $pal
-	 *         - Which palette to use for the pie chart.
+	 *         - Which palette to use for the pie chart.  If set, fore_col will be ignored in the argument list.
 	 *         - Acceptable values:
 	 *           - core
 	 *           - major
 	 *           - cumulative
 	 *           - student
+	 * @param string $back_col
+	 *         - If $pal is left blank, the value here will be used for the "back" or "unfinished" color.
+	 * @param string $fore_col
+	 *         - If $pal is left blank, the value here will be used for the "foreground" or "progress" color.
 	 * 
 	 * 
 	 * @return string
 	 */
-	function draw_pie_chart_box($title, $top_value, $bottom_value, $pal)
+	function draw_pie_chart_box($title, $top_value, $bottom_value, $pal = "", $back_col = "", $fore_col = "")
 	{
-		$pC = "";
+		$rtn = "";
 
 				
-		if ($bottom_value > 0)
-		{
+		if ($bottom_value > 0) {
 			$val = round(($top_value / $bottom_value)*100);
 		}
 		if ($val > 100) { $val = 99; }
     
 		$leftval = 100 - $val;
 		
-		$back_col = "660000";
-		$fore_col = "FFCC33";
+		if ($back_col == "") $back_col = "660000";
+		if ($fore_col == "") $fore_col = "FFCC33";
 		
-    if ($pal == "major")
-    {
+    if ($pal == "major") {
     	$fore_col = "93D18B";
     }
     
-    if ($pal == "cumulative")
-    {
+    if ($pal == "cumulative") {
     	$fore_col = "5B63A5";
     }
+    
+    // Remove # from colors, if needed.
+    $fore_col = str_replace("#", "", $fore_col);
+    $back_col = str_replace("#", "", $back_col);
+    
     
     $vval = $val;
     if ($vval < 1) $vval = 1;
     
-		// Create a graph using google's chart API		
-		$google_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
+		// Create a graph using our built-in pchart api:		
+		// First, establish a token to we know the script is being called from US:
+		if (!isset($_SESSION["fp_pie_chart_token"])) {
+		  $_SESSION["fp_pie_chart_token"] = md5(fp_token());
+		}
+		//old Google API url: $pie_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
+		$pie_chart_url = $GLOBALS["fp_system_settings"]["base_path"] . "/inc/pchart/fp_pie_chart.php?progress=$vval&unfinished=$leftval&unfinished_col=$back_col&progress_col=$fore_col&token=" . $_SESSION["fp_pie_chart_token"];
 		
-		$pC .= "<table border='0' width='100%'  height='100' class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
+		
+		$rtn .= "<table border='0' width='100%'  height='100' class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
  						<tr>
   							<td class='blueTitle' align='center' height='20'>
     				" . fp_render_square_line($title) . "
@@ -1362,9 +1374,8 @@ function draw_menu_items($menu_array) {
  						<tr>
  							<td>
  								<table border='0'>
- 								<td>
- 									<!-- <img src='jgraph/display_graph.php?pal=$pal&value=$val'> -->
- 									<img src='$google_chart_url'>
+ 								<td> 									
+ 									<img src='$pie_chart_url'>
  								</td>
  								<td class='elevenpt'>
  								    <span style='color: blue;'>$val% " . t("Complete") . "</span><br>
@@ -1372,7 +1383,7 @@ function draw_menu_items($menu_array) {
  									 / <span style='color: gray;'>$bottom_value " . t("hours") . "</span> )
  									 ";
 	
-		$pC .= "
+		$rtn .= "
 								</td>
 								</table>
  							</td>
@@ -1380,9 +1391,11 @@ function draw_menu_items($menu_array) {
  					</table>
 				";
 
-		return $pC;
+		return $rtn;
 	}
 
+	
+	
 
 	/**
 	 * This function calls drawPieChart to construct the student's 3
@@ -1395,7 +1408,7 @@ function draw_menu_items($menu_array) {
 	  global $user;
 		// Draw the boxes for student progress (where
 		// the pie charts go!)
-		$pC = "";
+		$rtn = "";
 
 
 		if ($this->degree_plan->total_degree_hours < 1)
@@ -1404,6 +1417,162 @@ function draw_menu_items($menu_array) {
 			$this->degree_plan->calculate_progress_quality_points();			
 		}
 
+		// Create a holding array for later use.
+		$pie_chart_html_array = array();
+		
+		// Get the requested piecharts from our config...
+		$temp = variable_get("pie_chart_config", "g ~ General Requirements\nc ~ Core Requirements\ndegree ~ Degree Progress");
+		$lines = explode("\n", $temp);
+		foreach ($lines as $line) {
+		  if (trim($line) == "") continue;
+		  
+		  $temp = explode("~", $line);
+		  $requirement_type = trim($temp[0]);
+		  $label = trim($temp[1]);		  
+		  $unfinished_col = trim($temp[2]);
+		  $progress_col = trim($temp[3]);
+		  
+		  if ($unfinished_col == "") $unfinished_col = "660000";
+		  if ($progress_col == "") $progress_col = "FFCC33";
+		  // TODO:  get 2 colors as well.
+		  
+		  // Okay, let's see if this degreeplan even has any data on this requirement type.
+		  $total_hours = $this->degree_plan->gpa_calculations[$requirement_type]["total_hours"]*1;
+		  $fulfilled_hours = $this->degree_plan->gpa_calculations[$requirement_type]["fulfilled_hours"]*1;
+		  $qpts = $this->degree_plan->gpa_calculations[$requirement_type]["qpts"]*1;
+		  
+		  if ($total_hours < 1) continue;  // no hours for this requirement type!
+		  
+		  // If we are here, then there is indeed enough data to create a piechart!
+		  // Generate the pie chart and add to our array, for later display.
+		  $html = $this->draw_pie_chart_box($label,$fulfilled_hours, $total_hours, "", $unfinished_col, $progress_col);
+		  $hide_pie_html = "$label: $fulfilled_hours / $total_hours";
+		  $pie_chart_html_array[] = array(
+		    "pie" => $html,
+		    "hide_pie" => $hide_pie_html,
+		   );
+		  
+		}
+		
+		
+		
+		$rtn .= "<tr><td colspan='2'>
+				";
+
+		if (!$this->db) {
+		  $this->db = get_global_database_handler();
+		}
+		
+    $user->settings = $this->db->get_user_settings($user->id);
+
+	  if (count($pie_chart_html_array) > 0) {
+	    $td_width = round(100 / count($pie_chart_html_array));
+	  }
+    
+    
+		if ($user->settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false && $this->page_is_mobile == false)
+		{ // Display the pie charts unless the student's settings say to hide them.
+
+		  
+		
+			$rtn .= "
+				<div style='margin-bottom: 10px;'>
+				<table class='pie-chart-table' width='100%' cellspacing='0' cellpadding='0' border='0'>
+				<tr>
+				";
+			
+			$c = 0;
+			foreach ($pie_chart_html_array as $val) {
+			  $html = $val["pie"];
+			  $style = ($c == count($pie_chart_html_array) - 1) ? "" : "padding-right:5px;";
+			  $rtn .= "<td width='$td_width%' style='$style'>
+					         " . $html . "
+				         </td>";
+        $c++;
+			}
+			
+				
+				
+			$rtn .= "</table>";
+
+			$rtn .= "				
+				<div style='font-size: 8pt; text-align:right;'>
+					<a href='javascript:hideShowCharts(\"hide\");'>" . t("hide charts") . "</a>
+				</div>";
+
+			$rtn .= "</div>";
+			
+		} 
+		else {
+			// Hide the charts!  Show a "show" link....
+			$rtn .= "
+ 			<table border='0' width='100%'  class='pie-chart-table-hide-charts 
+ 			                                elevenpt blueBorder' cellpadding='0' cellspacing='0' >
+ 			<tr>
+  				<td colspan='10' class='blueTitle' align='center' height='20'>
+    			" . fp_render_square_line(t("Progress")) . "
+  				</td>
+ 			</tr>
+ 			<tr>";
+
+			$c = 0;
+			foreach ($pie_chart_html_array as $val) {
+			  $html = $val["hide_pie"];			  
+			  $rtn .= "<td width='$td_width%' align='center'>
+					         " . $html . "
+				         </td>";
+        $c++;
+			}
+ 				
+ 			$rtn .= "
+ 			  </tr>
+
+			 </table>";
+
+			if ($this->bool_print != true && $this->bool_blank != true && $this->page_is_mobile != true)
+			{
+
+				$rtn .= "<div style='font-size: 8pt; text-align:right;'>
+					<a href='javascript:hideShowCharts(\"show\");'>" . t("show charts") . "</a>
+				</div>
+					";
+			} else {
+				$rtn .= "<div> &nbsp; </div>";
+			}
+		}
+		$rtn .= "
+				</td></tr>";
+
+
+
+		return $rtn;
+	}
+
+	
+	
+	
+
+	/**
+	 * This function calls drawPieChart to construct the student's 3
+	 * progress pie charts.
+	 *
+	 * @return string
+	 */
+	function z__old__draw_progress_boxes()
+	{
+	  global $user;
+		// Draw the boxes for student progress (where
+		// the pie charts go!)
+		$rtn = "";
+
+
+		if ($this->degree_plan->total_degree_hours < 1)
+		{
+			$this->degree_plan->calculate_progress_hours();
+			$this->degree_plan->calculate_progress_quality_points();			
+		}
+
+		
 		$total_major_hours = $this->degree_plan->total_major_hours;
 		$total_core_hours = $this->degree_plan->total_core_hours;
 		$total_degree_hours = $this->degree_plan->total_degree_hours;
@@ -1415,7 +1584,7 @@ function draw_menu_items($menu_array) {
     $core_qpts = $this->degree_plan->core_qpts;
 		
     
-		$pC .= "<tr><td colspan='2'>
+		$rtn .= "<tr><td colspan='2'>
 				";
 
 		if (!$this->db) {
@@ -1428,7 +1597,7 @@ function draw_menu_items($menu_array) {
 		{ // Display the pie charts unless the student's settings say to hide them.
 
 		
-			$pC .= "
+			$rtn .= "
 				<div style='margin-bottom: 10px;'>
 				<table width='100%' cellspacing='0' cellpadding='0' border='0'>
 				<td width='33%' style='padding-right:5px;'>
@@ -1448,17 +1617,17 @@ function draw_menu_items($menu_array) {
 				</table>
 				";
 
-			$pC .= "
+			$rtn .= "
 				
 				<div style='font-size: 8pt; text-align:right;'>
 					<a href='javascript:hideShowCharts(\"hide\");'>" . t("hide charts") . "</a>
 				</div>";
 
-			$pC .= "
+			$rtn .= "
 				</div>";
 		} else {
 			// Hide the charts!  Show a "show" link....
-			$pC .= "
+			$rtn .= "
  			<table border='0' width='100%'  class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
  			<tr>
   				<td colspan='4' class='blueTitle' align='center' height='20'>
@@ -1484,20 +1653,20 @@ function draw_menu_items($menu_array) {
 			if ($this->bool_print != true && $this->bool_blank != true && $this->page_is_mobile != true)
 			{
 
-				$pC .= "<div style='font-size: 8pt; text-align:right;'>
+				$rtn .= "<div style='font-size: 8pt; text-align:right;'>
 					<a href='javascript:hideShowCharts(\"show\");'>" . t("show charts") . "</a>
 				</div>
 					";
 			} else {
-				$pC .= "<div> &nbsp; </div>";
+				$rtn .= "<div> &nbsp; </div>";
 			}
 		}
-		$pC .= "
+		$rtn .= "
 				</td></tr>";
 
 
 
-		return $pC;
+		return $rtn;
 	}
 
 
@@ -3174,8 +3343,8 @@ function draw_menu_items($menu_array) {
 
 		$icon_link = "";
 
-		if ($course->requirement_type == "um" || $course->requirement_type == "uc")
-		{
+		// If the course has a 'u' in it, it is a 'University Capstone' course.
+		if (strstr($course->requirement_type, "u")) {
 			$icon_filename = "ucap.gif";
 			$title_text = t("This course is a University Capstone.");
 		}

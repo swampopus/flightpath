@@ -1301,16 +1301,12 @@ class _CourseList extends ObjList
 					continue;
 				}
 
-				// For specifically "university capstone" courses...
-				if ($course->requirement_type == "uc" && $requirement_type == "c")
+				// For specifically "university capstone" courses (which have a 'u' in front)...
+				if ($course->requirement_type == "u" . $requirement_type)
 				{
 					$count = $count + $h_get_hours;
 				}
 
-				if ($course->requirement_type == "um" && $requirement_type == "m")
-				{
-					$count = $count + $h_get_hours;
-				}
 
 
 			}
@@ -1619,12 +1615,9 @@ class _CourseList extends ObjList
 			}
 
 			
-			// Correct the course's requirement type, if needed.
+			// Correct the course's requirement type, if needed (remove the "u")
       $cr_type = $course->requirement_type;
-		  if ($cr_type == "uc") $cr_type = "c";
-		  if ($cr_type == "um") $cr_type = "m";
-		  if ($cr_type == "us") $cr_type = "s";
-		  if ($cr_type == "ue") $cr_type = "e";			  
+		  $cr_type = str_replace("u", "", $cr_type);
 			
 			
 			if ($course->grade != "")// || !($course->course_list_fulfilled_by->is_empty))
@@ -1704,12 +1697,9 @@ class _CourseList extends ObjList
 		{
 			$course = $this->array_list[$t];
 
-      // Correct the course's requirement type, if needed.
+			// Correct the course's requirement type, if needed (remove the "u")
       $cr_type = $course->requirement_type;
-		  if ($cr_type == "uc") $cr_type = "c";
-		  if ($cr_type == "um") $cr_type = "m";
-		  if ($cr_type == "us") $cr_type = "s";
-		  if ($cr_type == "ue") $cr_type = "e";				
+		  $cr_type = str_replace("u", "", $cr_type);
 			
 			
 			if ($bool_use_ignore_list == true)

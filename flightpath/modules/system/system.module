@@ -739,6 +739,8 @@ function system_school_data_form() {
     "description" => t("List courses, separated by comma, 
                 which should be ignored in hours counts.  This helps
                 remedial courses from being applied to hour counts.
+                <br><b>These courses will automatically be assigned the requirement type code 'x'.</b>
+                <br>
                 Ex: MATH 093, ENGL 090, UNIV 1001"),    
   );
 
@@ -989,6 +991,62 @@ function system_school_data_form() {
                         A ~ 4<br>B ~ 3<br>C ~ 2<br>D ~ 1<br>F ~ 0<br>I ~ 0</blockquote>",
   );
   
+  
+  $form["requirement_types"] = array(
+    "label" => t("Requirement types and codes:"),
+    "type" => "textarea",
+    "value" => variable_get("requirement_types", "g ~ General Requirements\nc ~ Core Requirements\ne ~ Electives\nm ~ Major Requirements\ns ~ Supporting Requirements\nx ~ Additional Requirements"),
+    "description" => t("Enter requirement type codes and descriptions, separated by a tilde (~), one
+                        per line.  <b>You may not use the code 'u'</b> as that is reserved in FlightPath.
+                        <b>You should define what 'x' means</b>, but be aware that the code 'x' will always
+                        designate a course whose hours should be ignored from GPA calculations.
+                        <b>You should define what 'm' means</b>, as this is the default code applied
+                        to a requirement if one is not entered.  <b>You should define what
+                        'e' means</b>, as this is also the code given to courses whose types we cannot
+                        figure out, perhaps because of a typo or intentionally.  Ex:  Electives.
+                        This list also defines the order in which they will appear on screen in
+                        Type View.  By convention, codes should be lower case single-letters.") . "
+                        <br>Ex:
+                        <div style='padding-left: 20px; font-family: Courier New, monospace'>
+                         g ~ General Requirements<br>
+                         c ~ Core Requirements<br>
+                         e ~ Electives<br>
+                         m ~ Major Requirements<br>
+                         s ~ Supporting Requirements<br>
+                         x ~ Additional Requirements
+                         </div>",
+                         
+  );
+
+  // Check to make sure the gd extension is loaded, since that will be required to display
+  // the pie charts...
+  if (!extension_loaded('gd') && !extension_loaded('gd2')) {
+    $form["mark" . $m++] = array(
+      "value" => "<p class='hypo'><b>" . t("Note: it appears your web server does not have the 'GD' library
+                                enabled for PHP.  This is required to make the pie charts show up
+                                correctly.  Contact your server administrator about enabling the 'GD'
+                                library.") . "</b></p>",
+    );
+  }
+  
+  
+  $form["pie_chart_config"] = array(
+    "label" => t("Pie chart configuration:"),
+    "type" => "textarea",
+    "value" => variable_get("pie_chart_config", "g ~ General Requirements\nc ~ Core Requirements\ndegree ~ Degree Progress"),
+    "description" => t("Enter configuration data for the pie charts which graph a student's progress
+                        through their degree.  Enter the requirement type code, pie chart label, and optional
+                        colors separated by tilde (~).  Requirement types not found for a student will be skipped 
+                        and the chart will not be drawn. <b>Enter 'degree' for total progress.</b>") . "
+                        <br>Ex:  CODE ~ LABEL ~ [optional: UNFINISHED COLOR ~ PROGRESS COLOR ]
+                        <div style='padding-left: 20px; font-family: Courier New, monospace'>
+                          g ~ General Requirements ~ 660000 ~ 93D18B<br>
+                          c ~ Core Requirements ~ 660000 ~ FFCC33<br>
+                          degree ~ Degree Progress ~ 660000 ~ 5B63A5
+                        </div>",
+                         
+  );
+
   
   
   

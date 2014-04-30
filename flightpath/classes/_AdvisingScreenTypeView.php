@@ -31,10 +31,17 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 		// Go through each semester and add it to the screen...
 		$list_semesters->reset_counter();
 
-		$this->add_to_screen($this->display_semester_list($list_semesters, "c", t("Core Requirements"), true));
-		$this->add_to_screen($this->display_semester_list($list_semesters, "m", t("Major Requirements"), true));
-		$this->add_to_screen($this->display_semester_list($list_semesters, "s", t("Supporting Requirements"), true));
-		$this->add_to_screen($this->display_semester_list($list_semesters, "e", t("Electives"), true));
+		
+		// We want to go through our requirement types, and create a box for each one, if available.
+		$types = fp_get_requirement_types();
+		foreach ($types as $code => $desc) {
+		  $this->add_to_screen($this->display_semester_list($list_semesters, $code, $desc, TRUE));  
+		}
+		
+		//$this->add_to_screen($this->display_semester_list($list_semesters, "c", t("Core Requirements"), true));
+		//$this->add_to_screen($this->display_semester_list($list_semesters, "m", t("Major Requirements"), true));
+		//$this->add_to_screen($this->display_semester_list($list_semesters, "s", t("Supporting Requirements"), true));
+		//$this->add_to_screen($this->display_semester_list($list_semesters, "e", t("Electives"), true));
 
 		
 		$temp_d_s = new Semester(-55); // developmental requirements.
@@ -65,25 +72,24 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 			return true;
 		}
 		
-		if ($test_type == "uc" && $req_type == "c")
-		{  // university captone core.
+		// Does it match if there's a u in front?
+		if ($test_type == ("u" . $req_type))
+		{  // university captone type.
 			return true;
 		}
 
-		if ($test_type == "um" && $req_type == "m")
-		{  // university captone major
-			return true;
-		}
-		
-		
-		if ($req_type == "e")
+  	if ($req_type == "e")
 		{
-			// type "elective."  test must not be c, s, or m.
-			if ($test_type != "c" && $test_type != "s" && $test_type != "m"
-				&& $test_type != "uc" && $test_type != "um" && $test_type != "dev")
-			{
-				return true;
+			// type "elective."  We will make sure the test_type isn't in
+			// one of our defined types already.
+			$types = fp_get_requirement_types();
+			if (!isset($types[$test_type])) {
+			  // Yes-- the user is using a code NOT defined, so let's just call it
+			  // an "elective" type.
+			  return TRUE;
 			}
+			
+			
 		}
 		
 		return false;
@@ -93,8 +99,8 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 	/**
 	 * Display contents of a semester list as a single semester,
 	 * only displaying courses matching the requirement_type.
-	 * If the requirement_type is "e", then we will look for anything
-	 * not containing an m, s, uc, um, or c as a requirement_type.
+	 * If the requirement_type is "e", then we will also look for anything
+	 * not containing a defined requirement_type.
 	 *
 	 * @param SemesterList $list_semesters
 	 * @param string $requirement_type

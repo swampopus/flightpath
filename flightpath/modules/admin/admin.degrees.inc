@@ -48,11 +48,13 @@ function admin_display_degrees_popup_add_group() {
               <option value='A'>A</option>
               
             </select>
-      Type: <select name='type' id='type'>
-          <option value='m'>m - Major</option>
-          <option value='c'>c - Core</option>
-          <option value='s'>s - Supporting</option>
-          <option value='e'>e - Elective</option>
+      Type: <select name='type' id='type'>";
+  // Get our list of requirement types from our settings.
+  $types = fp_get_requirement_types();
+  foreach ($types as $code => $desc) {
+    $rtn .= "<option value='$code'>$code - $desc</option>";
+  }
+  $rtn .= "
           </select>
         &nbsp; &nbsp;
         " . fp_render_button("Add group &raquo;", "adminPopupAddGroup(\"$semester_num\");") . "
@@ -141,7 +143,7 @@ function admin_copy_degree_form_submit($form, $form_submit) {
 
   $de_catalog_year = $values["de_catalog_year"];  
   
-
+    
   $source_major_code = trim(strtoupper($values["source_major_code"]));
   $destination_major_code = trim(strtoupper($values["destination_major_code"]));
   $include_tracks = $values["include_tracks"]["yes"];
@@ -617,6 +619,10 @@ function admin_handle_edit_degree_submit() {
   $de_catalog_year = $_REQUEST["de_catalog_year"];
   $db = get_global_database_handler();
 
+  // What courses should have their type overwritten as "x"?
+  $ignore_courses = csv_to_array(variable_get("ignore_courses_from_hour_counts", ""));
+
+  
   // This will UPDATE a degree in the system with the courses
   // and groups that the user selected.
   $perform_action2 = trim($_POST["perform_action2"]);
@@ -722,6 +728,13 @@ function admin_handle_edit_degree_submit() {
         $requirement_type = "m";
       }
 
+      // If this course is in our ignore list, override it's type
+      // to be 'x'
+      if (in_array("$subject_id $course_num", $ignore_courses)) {
+        $requirement_type = "x";
+      }
+      
+      
       $min_grade = strtoupper($tokens[3]);
 
       if (strstr($requirement_type, "(")) {
@@ -923,27 +936,29 @@ function admin_display_edit_degree() {
   $rtn .= "
       <table>
        <tr>
-        <td valign='top' class='tenpt' width='15%'>Degree Type:</td>
+        <td valign='top' class='tenpt' width='15%'>" . t("Degree Type:") . "</td>
         <td valign='top' class='tenpt' width='15%'><input type='text' name='degree_type' value='$degree->degree_type' size='5' maxlength='20'></td>
 
-        <td valign='top' class='tenpt' width='15%'>Degree Class:</td>
+        <td valign='top' class='tenpt' width='15%'>" . t("Degree Class:") . "</td>
         <td valign='top' class='tenpt'><input type='text' name='degree_class' value='$degree->degree_class' size='2' maxlength='1'>
-        <a href='javascript: adminPopupAlertHelp(\"degree_class\");'>?</a></td>
+        <a href='javascript: adminPopupAlertHelp(\"degree_class\");'>?</a>
+        
+        </td>
        </tr>
         
        </tr>
        <tr>
-        <td valign='top' class='tenpt'>Degree Title:</td>
+        <td valign='top' class='tenpt'>" . t("Degree Title:") . "</td>
         <td valign='top' class='tenpt' colspan='3'><input type='text' name='title' value='$degree->title' size='80' maxlength='100'></td>
        </tr>
        <tr>
-        <td valign='top' class='tenpt'>Exclude:</td>
+        <td valign='top' class='tenpt'>" . t("Exclude:") . "</td>
         <td valign='top' class='tenpt' colspan='3'><input type='text' name='exclude' value='$degree->db_exclude' size='2' maxlength='1'>
         <a href='javascript: adminPopupAlertHelp(\"degree_exclude\");'>?</a></td>
        </tr>
        
        
-       
+        
       </table> ";
 
   if (strstr($major_code, "_"))
@@ -951,7 +966,7 @@ function admin_display_edit_degree() {
     $rtn .= "<b>Edit track information:</b>
       <blockquote style='margin-top: 0px; margin-bottom: 0px;'>
     <font size='2'>Track title: <input type='text' name='track_title' value='$degree->track_title' size='60' maxlength='100'></font><br>
-    <font size='2'>Track description: <a href='javascript: adminPopupAlertHelp(\"edit_formatting\");'>(Help - Formatting)</a>
+    <font size='2'>Track description: " . fp_get_js_alert_link(t("You may enter simple HTML in this field, like <b>bold</b> or <i>italics</i>."), t("(Help - Formatting)")) . "
             <a href='javascript: adminPopupAlertHelp(\"track_description\");'>(Help - Track Descriptions)</a>
     </font><br>
     <textarea name='track_description' cols='60' rows='3'>" . filter_markup($degree->track_description) . "</textarea>
@@ -1097,7 +1112,7 @@ function admin_display_edit_degree() {
       <div class='elevenpt'><b>More Options:</b><br>
       Enter a public note for this degree: 
        <a href='javascript: adminPopupAlertHelp(\"public_note\");'>(Help - Public Note)</a>
-       <a href='javascript: adminPopupAlertHelp(\"edit_formatting\");'>(Help - Formatting)</a>
+       " . fp_get_js_alert_link(t("You may enter simple HTML in this field, like <b>bold</b> or <i>italics</i>."), t("(Help - Formatting)")) . "
       <br>
       <textarea name='public_note' rows='4' cols='80'>$degree->public_note</textarea>
       
