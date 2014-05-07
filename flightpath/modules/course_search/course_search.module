@@ -151,6 +151,7 @@ function course_search_menu() {
 
 
 
+
 function course_search_perm() {
   return array(
           "administer_course_search" => array(
@@ -598,8 +599,8 @@ function course_search_display_courses() {
       }
 
 
-      $min_hours = trim($cur["min_hours"]);
-      $max_hours = trim($cur["max_hours"]);
+      $min_hours = trim($cur["min_hours"]*1);
+      $max_hours = trim($cur["max_hours"]*1);
       if ($min_hours == $max_hours)
       {
         $hours = $min_hours;
@@ -608,9 +609,9 @@ function course_search_display_courses() {
       }
 
       $repeat = "";
-      if (trim($cur["repeat_hours"]) > $min_hours)
+      if (trim($cur["repeat_hours"]*1) > $min_hours)
       {
-        $repeat = "<div class='course-search-repeat'>" . t("May be repeated for up to @repeat hours of credit.", array("@repeat" => $cur["repeat_hours"])) . "</div>";
+        $repeat = "<div class='course-search-repeat'>" . t("May be repeated for up to @repeat hours of credit.", array("@repeat" => $cur["repeat_hours"]*1)) . "</div>";
       }
       
       

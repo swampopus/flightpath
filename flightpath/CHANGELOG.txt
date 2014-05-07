@@ -1,7 +1,15 @@
 FlightPath 4.x Changelog
 ========================
 
+
+----------------
+RELEASED 4.5
+----------------
+
+
 2014-05-07
+  Fixed display bug in course_search.module where hours had trailing zeros.
+
   Added ability to change the course repeat policy for FlightPath, as explained here:
   http://getflightpath.com/node/1115
 
