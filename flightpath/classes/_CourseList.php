@@ -312,6 +312,9 @@ class _CourseList extends ObjList
 		$list_matches->sort_most_recent_first();
 
 
+		$withdrew_grades = csv_to_array(variable_get("withdrew_grades", "W"));
+		
+		
 		// So, now that it's sorted, we should look through the list,
 		// checking the min grade requirements (if any).  When we find
 		// a good one, we will select it.
@@ -338,7 +341,7 @@ class _CourseList extends ObjList
 					// (ULM policy on repeats).
 					// We don't do this consideration if they simply
 					// withdrew from a course...
-					if ($c->grade == "W") { continue; }
+					if (in_array($c->grade, $withdrew_grades)) { continue; }
 
           if ($c->min_hours < 1 || $c->min_hours == "") {
 					  $c->load_descriptive_data();  // make sure we get hour data for this course.
@@ -1221,9 +1224,6 @@ class _CourseList extends ObjList
 	/**
 	 * Returns hour many hours are in $this CourseList.
 	 *
-	 * @todo The ignore list should be database-based.  Should just get it
-	 *       from the settings.
-	 * 
 	 * @param string $requirement_type
 	 *         - If specified, we will only count courses which match this
 	 *           requirement_type.
@@ -1251,6 +1251,10 @@ class _CourseList extends ObjList
 				if (in_array($temp_course_name, csv_to_array($GLOBALS["fp_system_settings"]["ignore_courses_from_hour_counts"]))) {
 					continue;
 				}
+				
+				// Also, if the course's requirement_type is "x" it means we should ignore it.
+				if ($course->requirement_type == 'x') continue;
+				
 				
 			}
 			
@@ -1529,8 +1533,6 @@ class _CourseList extends ObjList
 	 * Similar to count_hours, but this will only count courses
 	 * which have been taken and have a grade.
 	 * 
-	 * @todo ignore list should be db-based, in the settings.
-	 *
 	 * @param string $requirement_type
 	 *         - If set, we will only look for courses matching this requirement_type.
 	 * 
@@ -1575,6 +1577,9 @@ class _CourseList extends ObjList
 					continue;
 				}				
 
+				// Also, if the course's requirement_type is "x" it means we should ignore it.
+				if ($course->requirement_type == 'x') continue;
+				
 			}
 			
 
@@ -1680,8 +1685,6 @@ class _CourseList extends ObjList
 	 * which have been taken and have a grade.  We will return back
 	 * a sum of their quality points.
 	 * 
-	 * @todo ignore list should be db-based, in the settings.
-	 *
 	 * @param string $requirement_type
 	 *         - If set, we will only look for courses matching this requirement_type.
 	 * 
@@ -1712,6 +1715,9 @@ class _CourseList extends ObjList
 					continue;
 				}				
 
+				// Also, if the course's requirement_type is "x" it means we should ignore it.
+				if ($course->requirement_type == 'x') continue;				
+				
 			}
 
 

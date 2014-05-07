@@ -1,6 +1,21 @@
 FlightPath 4.x Changelog
 ========================
 
+2014-05-07
+  Added ability to change the course repeat policy for FlightPath, as explained here:
+  http://getflightpath.com/node/1115
+
+  Removed hard-coded value for withdrew grade (W) and added a new setting to the School data form,
+  where you can specify which grade(s) are considered "withdrew".
+  
+  Modified toolbox screen in _AdvisingScreen, also had hard-coded grades for which should show up
+  in red.  Changed to be the "retake" grades.
+
+
+2014-05-02
+  Fixed bug where courses and groups (with requirement type 'x') weren't being ignored from
+  hour counts specifically.
+  
 
 2014-04-30
   Added the ability to specify what the "requirement types" are in the system, instead of

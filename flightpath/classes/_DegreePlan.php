@@ -14,6 +14,11 @@ class _DegreePlan
   public $major_qpts_hours, $core_qpts_hours, $degree_qpts_hours;
   public $major_qpts, $degree_qpts, $core_qpts;
 
+  // TODO:  Convert the total_major_hours, qpts, etc, to a single array that
+  // we can key based on our requirement types codes.
+  public $gpa_calculations;
+  
+  
   public $bool_use_draft;
 
   /**
@@ -73,6 +78,25 @@ class _DegreePlan
 
   function calculate_progress_hours()
   {
+    
+    // Let's go through our requirement types by code, and collect calcuations on them
+    // in the gpa_calculations array.
+    $types = fp_get_requirement_types();
+    // Add a pseudo-code in for "degree", which the functions will convert into a blank.
+    $types["degree"] = "Degree (total)";
+    foreach ($types as $code => $desc) {
+      // Make sure to skip appropriate codes we don't care about.
+      if ($code == 'x') continue;      
+      
+      
+      $this->gpa_calculations[$code]["total_hours"] = $this->get_progress_hours($code);
+      $this->gpa_calculations[$code]["fulfilled_hours"] = $this->get_progress_hours($code, FALSE);
+      $this->gpa_calculations[$code]["qpts_hours"] = $this->get_progress_hours($code, FALSE, TRUE);      
+    }
+    
+    
+    
+    /*
     $this->total_major_hours = $this->get_progress_hours("m");
     $this->total_core_hours = $this->get_progress_hours("c");
     $this->total_degree_hours = $this->get_progress_hours("");
@@ -85,7 +109,7 @@ class _DegreePlan
     $this->major_qpts_hours = $this->get_progress_hours("m", false, TRUE);
     $this->core_qpts_hours = $this->get_progress_hours("c", false, TRUE);
     $this->degree_qpts_hours = $this->get_progress_hours("", false, TRUE);
-    
+    */
      
   }
 
@@ -95,10 +119,25 @@ class _DegreePlan
    *
    */
   function calculate_progress_quality_points() {      
+    
+    // Let's go through our requirement types by code, and collect calcuations on them
+    // in the gpa_calculations array.
+    $types = fp_get_requirement_types();
+    // Add a pseudo-code in for "degree", which the functions will convert into a blank.
+    $types["degree"] = "Degree (total)";
+    foreach ($types as $code => $desc) {
+      // Make sure to skip appropriate codes we don't care about.
+      if ($code == 'x') continue;
+      
+      $this->gpa_calculations[$code]["qpts"] = $this->get_progress_quality_points($code);
+    }
+        
+    
+    /*
     $this->major_qpts = $this->get_progress_quality_points("m");
     $this->core_qpts = $this->get_progress_quality_points("c");
     $this->degree_qpts = $this->get_progress_quality_points("");
-        
+    */  
     
   }
   
@@ -111,17 +150,9 @@ class _DegreePlan
     // if boolRequiredHours is FALSE, then we will only look for the courses
     // which got fulfilled.
     
-   
-    /* 
-    if ($requirement_type == "c" && $bool_qpts_grades_only == TRUE && $bool_required_hours_only == FALSE) {
-      $GLOBALS["show_me"] = TRUE;
-    }
-    else {
-      $GLOBALS["show_me"] = FALSE;
-    }
+   if ($requirement_type == "degree") $requirement_type = "";
+
     
-    if ($GLOBALS["show_me"]) fpm("starting ....");
-    */
     
     $hours = 0;
     
@@ -153,6 +184,10 @@ class _DegreePlan
         continue;
       }
 
+      // Make sure the group doesn't have a type of 'x' assigned to it, which means we should
+      // skip it.
+      if ($g->requirement_type == 'x') continue;
+      
 
       $g_hours = $g->hours_required;
       if ($bool_required_hours_only == false)
@@ -206,6 +241,8 @@ class _DegreePlan
     // if boolRequiredHours is FALSE, then we will only look for the courses
     // which got fulfilled.
 
+    if ($requirement_type == "degree") $requirement_type = "";
+    
     $points = 0;
 
     $this->list_semesters->reset_counter();
@@ -228,6 +265,10 @@ class _DegreePlan
       { // Skip Add a course group.
         continue;
       }
+      
+      // Make sure the group doesn't have a type of 'x' assigned to it, which means we should
+      // skip it.
+      if ($g->requirement_type == 'x') continue;
       
       $g_points = $g->get_fulfilled_quality_points(TRUE, -1, TRUE, TRUE, $requirement_type);
       $points = $points + $g_points;       

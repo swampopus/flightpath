@@ -426,6 +426,13 @@ class _FlightPath
 			$group->group_id = 0;
 		}
 
+
+    // Get the course repeat policy.
+    $course_repeat_policy = variable_get("course_repeat_policy", "most_recent_exclude_previous");
+    // Set the $bool_mark_repeats_exclude variable based on the course_repeat_policy.
+    $bool_mark_repeats_exclude = ($course_repeat_policy == "most_recent_exclude_previous");
+
+
 		$group_id = $group->group_id;
 		// If the group_id == 0, we may be talking about the bare degree plan.
 
@@ -543,8 +550,8 @@ class _FlightPath
 			
 
 			// Has the student taken this course requirement?
-			if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, true))
-			{
+			if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude))
+			{ 
 
         $h_get_hours = $c->get_hours();
 				if ($c->bool_ghost_hour) {

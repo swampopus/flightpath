@@ -15,7 +15,7 @@ header("Cache-control: private");
 
 
 // If the user is requesting a "clean URLs" check, display a simple success message.
-if ($_REQUEST["q"] == "test-clean-urls/check") {
+if (isset($_REQUEST["q"]) && $_REQUEST["q"] == "test-clean-urls/check") {
   print "CLEAN URLS CHECK SUCCESSFUL";
   die;
 }

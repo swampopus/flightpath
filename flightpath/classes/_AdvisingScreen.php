@@ -889,6 +889,9 @@ function draw_menu_items($menu_array) {
 				";
 		$is_empty = true;
 
+		$retake_grades = csv_to_array(variable_get("retake_grades", "F,W"));
+		
+		
 		$this->student->list_courses_taken->sort_alphabetical_order(false, true);
 		$this->student->list_courses_taken->reset_counter();
 		while($this->student->list_courses_taken->has_more())
@@ -917,8 +920,7 @@ function draw_menu_items($menu_array) {
 			$t_c_n = $course->course_num;
 			$t_term = $c->get_term_description(true);
 			$grade = $c->grade;
-			if ($grade == "W" || $grade == "F" || $grade == "NC" || $grade == "I")
-			{
+			if (in_array($grade, $retake_grades)) {
 				$grade = "<span style='color: red;'>$grade</span>";
 			}
 
@@ -1421,7 +1423,7 @@ function draw_menu_items($menu_array) {
 		$pie_chart_html_array = array();
 		
 		// Get the requested piecharts from our config...
-		$temp = variable_get("pie_chart_config", "g ~ General Requirements\nc ~ Core Requirements\ndegree ~ Degree Progress");
+		$temp = variable_get("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress");
 		$lines = explode("\n", $temp);
 		foreach ($lines as $line) {
 		  if (trim($line) == "") continue;

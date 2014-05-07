@@ -731,6 +731,22 @@ function system_school_data_form() {
   $form = array();
   
   
+  $form["course_repeat_policy"] = array(
+    "type" => "select",
+    "label" => t("Course repeat policy:"),
+    "options" => array("most_recent_exclude_previous" => t("most recent, exclude previous attempts"),
+                       "most_recent_do_not_exclude" => t("most recent, do not exclude previous attempts - \"beta\" feature")),
+    "value" => variable_get("course_repeat_policy", "most_recent_exclude_previous"),
+    "hide_please_select" => TRUE,
+    "description" => t("This setting affects the course repeat policy for FlightPath for normal courses.
+                        <br><b>If you are unsure what to select</b>, choose 'most recent, exclude previous attempts'.
+                        <br>Please see the 
+                <b><a href='http://getflightpath.com/node/1085' target='_blank'>FlightPath documentation</a></b> 
+                on how to set up this field."),
+                                              
+                        
+  );
+  
   
   $form["ignore_courses_from_hour_counts"] = array(
     "type" => "textfield",
@@ -928,6 +944,15 @@ function system_school_data_form() {
                 retake this course. They did not earn credit.' Ex: F,W,I"),    
   );
          
+  $form["withdrew_grades"] = array(
+    "type" => "textfield",
+    "label" => t("Withdrew grades (CSV):"),
+    "value" => variable_get("withdrew_grades", "W"),
+    "description" => t("List grades, separated by comma, which means 'the student withdrew
+                from this course. They did not earn credit.' Ex: W,WD,WF.  If not sure
+                what to enter here, just enter 'W'."),    
+  );  
+  
   $form["enrolled_grades"] = array(
     "type" => "textfield",
     "label" => t("Enrolled grades (CSV):"),
@@ -1040,15 +1065,15 @@ function system_school_data_form() {
   $form["pie_chart_config"] = array(
     "label" => t("Pie chart configuration:"),
     "type" => "textarea",
-    "value" => variable_get("pie_chart_config", "g ~ General Requirements\nc ~ Core Requirements\ndegree ~ Degree Progress"),
+    "value" => variable_get("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress"),
     "description" => t("Enter configuration data for the pie charts which graph a student's progress
                         through their degree.  Enter the requirement type code, pie chart label, and optional
                         colors separated by tilde (~).  Requirement types not found for a student will be skipped 
                         and the chart will not be drawn. <b>Enter 'degree' for total progress.</b>") . "
                         <br>Ex:  CODE ~ LABEL ~ [optional: UNFINISHED COLOR ~ PROGRESS COLOR ]
-                        <div style='padding-left: 20px; font-family: Courier New, monospace'>
-                          g ~ General Requirements ~ 660000 ~ 93D18B<br>
+                        <div style='padding-left: 20px; font-family: Courier New, monospace'>                          
                           c ~ Core Requirements ~ 660000 ~ FFCC33<br>
+                          m ~ Major Requirements ~ 660000 ~ 93D18B<br>
                           degree ~ Degree Progress ~ 660000 ~ 5B63A5
                         </div>",
                          
