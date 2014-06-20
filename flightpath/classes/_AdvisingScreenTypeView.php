@@ -35,7 +35,10 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 		// We want to go through our requirement types, and create a box for each one, if available.
 		$types = fp_get_requirement_types();
 		foreach ($types as $code => $desc) {
-		  $this->add_to_screen($this->display_semester_list($list_semesters, $code, $desc, TRUE));  
+		  $temp = $this->display_semester_list($list_semesters, $code, $desc, TRUE);
+		  if ($temp) {
+		    $this->add_to_screen($temp);
+		  }
 		}
 		
 		//$this->add_to_screen($this->display_semester_list($list_semesters, "c", t("Core Requirements"), true));
@@ -116,6 +119,8 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 		$pC = "";
 		$pC .= $this->draw_semester_box_top($title);
 
+		$is_empty = TRUE;
+		
 		$count_hours_completed = 0;
 		$list_semesters->reset_counter();
 		while($list_semesters->has_more())
@@ -142,6 +147,8 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 					continue;
 				}
 		
+				$is_empty = FALSE;
+				
 				// Is this course being fulfilled by anything?
 				//if (is_object($course->courseFulfilledBy))
 				if (!($course->course_list_fulfilled_by->is_empty))
@@ -163,8 +170,7 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 				} else {
 					// This requirement is not being fulfilled...
 					$pC .= $this->draw_course_row($course);
-				}
-				//$pC .= "</td></tr>";
+				}				
 				$sem_is_empty = false;
 			}
 
@@ -185,6 +191,7 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 				$count_hours_completed += $group->hours_fulfilled_for_credit;
 				$pC .= "</td></tr>";
 				$sem_is_empty = false;
+				$is_empty = FALSE;
 			}
 
 			if ($sem_is_empty == false)
@@ -195,6 +202,12 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 				$pC = str_replace("<!--SEMTITLE$sem_rnd-->",$semester->title,$pC);
 			}
 			
+		}
+		
+		
+		if ($is_empty == TRUE) {
+		  // There was nothing in this box.  Do not return anything.
+		  return FALSE;
 		}
 		
 		

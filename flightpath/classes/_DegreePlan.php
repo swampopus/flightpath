@@ -589,7 +589,7 @@ class _DegreePlan
     // developmentals are required.
     // -55 is the developmental semester.
     $sem = new Semester(-55);
-    $sem->title = "Developmental Requirements";
+    $sem->title = variable_get("developmentals_title", t("Developmental Requirements"));
     $is_empty = true;
 
     $temp_array = $this->db->get_developmental_requirements($student_id);
@@ -606,11 +606,7 @@ class _DegreePlan
       $is_empty = false;      
     }
     
-    $sem->notice = t("According to our records, you are required to
-		complete the course(s) listed above. 
-		For some transfer students, your record may 
-		not be complete. If you have any questions, 
-		please ask your advisor.");
+    $sem->notice = variable_get("developmentals_notice", t("According to our records, you are required to complete the course(s) listed above. For some transfer students, your record may not be complete. If you have any questions, please ask your advisor."));
 
     if (!$is_empty)
     {

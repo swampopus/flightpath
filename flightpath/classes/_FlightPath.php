@@ -462,9 +462,7 @@ class _FlightPath
 				}
 			}
 
-
-
-
+	
 			if ($course_requirement->bool_specified_repeat == true)
 			{
 				// Since this requirement has specified repeats, we want
@@ -546,8 +544,6 @@ class _FlightPath
 				$count++;
 				continue;
 			}
-
-			
 
 			// Has the student taken this course requirement?
 			if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude))
@@ -704,7 +700,7 @@ class _FlightPath
 			// Okay, let's look at the courses (not groups) in this
 			// semester...
 			$this->assign_courses_to_list($semester->list_courses, $this->student);
-
+			
 		}
 
 
@@ -854,6 +850,19 @@ class _FlightPath
 			$faculty_id = $user->cwid;
 		}
 
+		
+		// It's possible the user has simply pressed "refresh" after submitting the form.  If so,
+		// there is no reason to re-submit everything, creating duplicate data in some situations.
+		$post_md5 = md5(serialize($_POST));
+		if ($_SESSION["fp_previous_advising_post_md5"] == $post_md5) {		  
+		  return array();
+		}
+		// We may proceed, but save the POST md5 for next time.
+		$_SESSION["fp_previous_advising_post_md5"] = $post_md5;
+		
+		
+		
+		
 		$bool_found_update_match = false;
 		$student_id = $this->student->student_id;
 		$degree_id = $this->degree_plan->degree_id;

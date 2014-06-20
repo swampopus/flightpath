@@ -1080,7 +1080,26 @@ function system_school_data_form() {
   );
 
   
+  $form["developmentals_title"] = array(
+    "label" => t("Developmentals semester block title:"),
+    "type" => "textfield",
+    "value" => variable_get("developmentals_title", t("Developmental Requirements")),
+    "description" => t("This is the title of the Developmental Requirements semester block,
+                        which appears on a student's degree plan, near the bottom, when they
+                        have remedial courses they are required to take.  If you are
+                        unsure what to enter, use 'Developmental Requirements'."),
+  );
   
+  $form["developmentals_notice"] = array(
+    "label" => t("Developmentals notice text:"),
+    "type" => "textarea",
+    "value" => variable_get("developmentals_notice", t("According to our records, you are required to complete the course(s) listed above. For some transfer students, your record may not be complete. If you have any questions, please ask your advisor.")),
+    "description" => t("The text you enter here will be displayed below the Developmentals semester
+                        block, explaining to the student what these courses are.  For example:
+                        'According to our records, you are required to complete the course(s) listed
+                        above.'"),
+  );
+
   
   
   return $form;

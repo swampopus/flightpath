@@ -1246,9 +1246,12 @@ class _Course
       if (trim($cur["student_specific_course_title"]) != "") {
         $this->title = trim($cur["student_specific_course_title"]);
       }
-      // Also assign hours_awarded while we are here.
+      // Also assign hours_awarded and other values while we are here
       $this->hours_awarded = $cur["hours_awarded"] * 1;
-
+      $this->grade = $cur["grade"];
+      $this->term_id = $cur["term_id"];
+      
+      
 
       $already = array();  // to prevent duplicates from showing up, keep up with
                            // eqv's we've already recorded.

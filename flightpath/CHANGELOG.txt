@@ -1,6 +1,32 @@
 FlightPath 4.x Changelog
 ========================
 
+----------------
+RELEASED 4.5.1
+----------------
+
+
+2014-06-20
+  Added new variable to AdvisingScreen - bool_force_pie_charts.  If set to true, the pie charts
+  will appear no matter what else is set.
+  
+
+2014-06-10
+  Added new footnote section to AdvisingScreen - showing transfer eqvs which have been removed.
+
+  Also made changes to how the POST is saved for an advising session- it now checks to make sure
+  it is not a duplicate post (from the user hitting Refresh). 
+
+
+2014-06-09
+  Created new settings in the School data form, so users can change the title and notice
+  for the Developmentals semester block.
+
+
+2014-05-13
+  Modified AdvisingScreenTypeView.  If there are no courses in a particular requirement type, the
+  box is not displayed.
+
 
 ----------------
 RELEASED 4.5

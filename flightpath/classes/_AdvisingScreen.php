@@ -6,7 +6,7 @@ class _AdvisingScreen
 	public $width_array, $popup_width_array, $script_filename, $is_on_left, $box_array;
 	public $degree_plan, $student, $bool_popup, $footnote_array, $flightpath;
 	public $screen_mode, $db, $bool_print, $view, $settings, $user_settings;
-	public $bool_blank, $bool_hiding_grades;
+	public $bool_blank, $bool_hiding_grades, $bool_force_pie_charts;
 	public $admin_message, $earliest_catalog_year;
 
 	// Variables for the template/theme output...
@@ -649,7 +649,7 @@ function draw_menu_items($menu_array) {
 					$new_group = new Group();
 					$new_group->group_id = $in_group;
 					$new_group->load_descriptive_data();
-					$extra = "<div style='padding-left:45px;'><i>" . t("in") . " $new_group->title.</i></div>";
+					$extra = "<div style='padding-left: 45px;'><i>" . t("in") . " $new_group->title.</i></div>";
 					if ($new_course == $o_course || $o_course == "")
 					{
 						$o_course = t("was added");
@@ -668,10 +668,51 @@ function draw_menu_items($menu_array) {
 			$pC .= "</div>";
 		}
 
+		
+		//////////////////////////////
+		/// Unassigned transfer eqv's
+		$this->student->list_transfer_eqvs_unassigned->load_descriptive_transfer_data();
+		$this->student->list_transfer_eqvs_unassigned->sort_alphabetical_order();
+		$this->student->list_transfer_eqvs_unassigned->reset_counter();
+		$ut_is_empty = TRUE;
+		$pC .= "<!--TRANS_UN_COURSES-->";
+		while ($this->student->list_transfer_eqvs_unassigned->has_more()) {
+      
+		  $c = $this->student->list_transfer_eqvs_unassigned->get_next();
+
+    	$l_si = $c->subject_id;
+			$l_cn = $c->course_num;
+			$l_term = $c->get_term_description(true);
+
+			$pC .= "<div class='tenpt' style='padding-left: 10px; padding-bottom: 5px;
+			                                 margin-left: 1.5em; text-indent: -1.5em;'>
+							$l_si $l_cn (" . $c->get_hours() . " " . t("hrs") . ") from <em>$c->institution_name</em>.
+								";
+			
+  		
+  		$pC .= "</div>";
+  		
+  		$ut_is_empty = false;
+			$is_empty = false;
+		}
+		
+		
+    if ($ut_is_empty == false)
+		{
+			$mtitle = "<div style='padding-bottom: 10px;'>
+						<div style='padding-bottom: 5px;'>
+						<b>" . t("Transfer Equivalency Removed Courses") . "</b><br>
+				" . t("These courses have had their default transfer equivalencies removed.
+				        ") . "</div>";
+			$pC = str_replace("<!--TRANS_UN_COURSES-->",$mtitle,$pC);
+			$pC .= "</div>";
+		}		
+		
+		
 
 		////////////////////////////////////
 		////  Moved Courses...
-		$m_is_empty = true;
+		$m_is_empty = TRUE;
 		$pC .= "<!--MOVEDCOURSES-->";
 		$this->student->list_courses_taken->sort_alphabetical_order();
 		$this->student->list_courses_taken->reset_counter();
@@ -689,7 +730,8 @@ function draw_menu_items($menu_array) {
 			$l_c_n = $c->course_num;
 			$l_term = $c->get_term_description(true);
 
-			$pC .= "<div class='tenpt' style='padding-left: 10px; padding-bottom: 5px;'>
+			$pC .= "<div class='tenpt' style='padding-left: 10px; padding-bottom: 5px;
+			                                   margin-left: 1.5em; text-indent: -1.5em;'>
 							$l_s_i $l_c_n ($c->hours_awarded " . t("hrs") . ") - $c->grade - $l_term
 								";
 			
@@ -721,7 +763,7 @@ function draw_menu_items($menu_array) {
 			$mtitle = "<div style='padding-bottom: 10px;'>
 						<div style='padding-bottom: 5px;'>
 						<b>" . t("Moved Courses") . "</b><br>
-				" . t("Some courses have been moved out of their 
+				" . t("These courses have been moved out of their 
 				original positions on your degree plan.") . "</div>";
 			$pC = str_replace("<!--MOVEDCOURSES-->",$mtitle,$pC);
 			$pC .= "</div>";
@@ -1472,8 +1514,8 @@ function draw_menu_items($menu_array) {
 	  }
     
     
-		if ($user->settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false && $this->page_is_mobile == false)
-		{ // Display the pie charts unless the student's settings say to hide them.
+		if ($this->bool_force_pie_charts || ($user->settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false && $this->page_is_mobile == false))
+		{ // Display the pie charts
 
 		  
 		
@@ -1497,11 +1539,12 @@ function draw_menu_items($menu_array) {
 				
 			$rtn .= "</table>";
 
-			$rtn .= "				
-				<div style='font-size: 8pt; text-align:right;'>
-					<a href='javascript:hideShowCharts(\"hide\");'>" . t("hide charts") . "</a>
-				</div>";
-
+			if (!$this->bool_force_pie_charts) {
+  			$rtn .= "				
+  				<div style='font-size: 8pt; text-align:right;'>
+  					<a href='javascript:hideShowCharts(\"hide\");'>" . t("hide charts") . "</a>
+  				</div>";
+			}
 			$rtn .= "</div>";
 			
 		} 

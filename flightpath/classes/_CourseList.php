@@ -182,6 +182,22 @@ class _CourseList extends ObjList
 	}
 
 
+	/**
+	 * Call the $course->load_descriptive_transfer_data() on 
+	 * every course in the list.  Meant for transfer courses.
+	 *
+	 */
+	function load_descriptive_transfer_data($student_id = 0)
+	{
+		
+		for ($t = 0; $t < $this->count; $t++)
+		{
+			$course = $this->array_list[$t];
+			$course->load_descriptive_transfer_data($student_id);
+		}
+	}	
+	
+	
   /**
    * Using the parent's function of find_all_matches, this
    * will return a CourseList of all courses which match
@@ -282,15 +298,13 @@ class _CourseList extends ObjList
 		// We should, too, check for minimum grades here
 		// as well.
 
-
 		if (!$list_matches =  parent::find_all_matches($course_c))
 		{
 			return false;
 		}
 
-
+		
 		$list_matches = CourseList::cast($list_matches);
-
 
 		// Don't just return if it's only got a size of 1,
 		// so that it forces it to do the min grade checking.

@@ -700,6 +700,7 @@ class _Student
 			{
 				$new_course = new Course($course_id);				
 				$this->array_significant_courses[$course_id] = true;
+				
 			}
 
 
@@ -798,7 +799,7 @@ class _Student
 			// as the transfer, then check that now.
 			if ($require_hours != -1) {
 			  $temp_course = new Course($local_course_id);
-			  if ($temp_course->max_hours != $require_hours) {
+			  if (($temp_course->max_hours*1) != ($require_hours*1)) {
 			    return FALSE;
 			  }
 			  else {
