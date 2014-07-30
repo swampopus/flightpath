@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * The installation file for the Batch module
+ */
+
+
+
+/**
+ * Implementation of hook_install.
+ * 
+ * We want to create our database table.
+ *
+ */
+function batch_install() {
+  db_query("DROP TABLE IF EXISTS `batch_queue` ");
+  
+  
+  db_query("    
+            CREATE TABLE `batch_queue` (
+              `batch_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+              `token` varchar(64) NOT NULL COMMENT 'A string token generated against the current user’s session id and the batch id, used to ensure that only the user who submitted the batch can effectively access it.',
+              `created` int(11) unsigned NOT NULL COMMENT 'A Unix timestamp indicating when this batch was submitted for processing. Stale batches are purged at cron time.',
+              `batch_data` longblob COMMENT 'A serialized array containing the processing data for the batch.',
+              PRIMARY KEY (`batch_id`),
+              KEY `token` (`token`)
+            )  
+  
+  ");
+}

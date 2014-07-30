@@ -682,8 +682,14 @@ function fp_set_page_sub_tabs($tab_array) {
  *
  * @param unknown_type $title
  */
-function fp_set_title($title) {
+function fp_set_title($title) {  
   $GLOBALS["fp_set_title"] = $title;
+  if ($title == "") {
+    fp_show_title(FALSE);  // No title to show!
+  }
+  else {
+    fp_show_title(TRUE);  // If we are calling this function, we clearly want to display the title.
+  }
 }
 
 /**

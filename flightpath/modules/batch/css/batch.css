@@ -1,0 +1,37 @@
+/**
+ * @file
+ * CSS file for batch module
+**/
+
+
+.batch-progress-bar-wrapper {
+  width: 100%;
+  border: 1px solid #ccc;
+}
+
+.batch-progress-bar {
+  background-color: #0099ff;
+  height: 50px;
+  line-height: 50px;
+  width: 1px;
+  text-align: right;
+
+}
+
+.batch-progress-bar span.percent {
+  padding-right: 5px;
+  color: white;
+  font-size: 1.1em;
+  font-weight: bold;
+  
+}
+
+
+#batch-progress-message {
+  background: url('throbber.gif') top left no-repeat;
+  padding-left: 20px;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 40px;
+  min-height: 20px;
+}

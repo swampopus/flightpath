@@ -63,6 +63,8 @@ function format_date($timestamp, $format = "standard", $custom = "") {
 
 
 
+
+
 /**
  * Render a "menu" block of menu items which are all rooted at the menu_root.
  * So if the menu root is tools, it might return items whose paths look like:
@@ -533,7 +535,7 @@ function fp_build_tab_array($page) {
       <tr>
           <td colspan='4' class='blueTitle' align='center' height='20'>
           " . fp_render_square_line("$ca$whatif$for_term") . "
-          </td>
+          </td>                    
       </tr>
       ";
 
@@ -636,7 +638,7 @@ function fp_build_tab_array($page) {
     }
     array_push($display_array, t("Catalog Year:") . " ~~ " . $cat_year);
     if (!$bool_blank) {
-      array_push($display_array, t("Cumulative:") . " ~~ " . $student->cumulative_hours . " " . t("hrs") . ". &nbsp;" . fp_truncate_decimals($student->gpa, 1) . " " . t("GPA"));
+      array_push($display_array, t("Cumulative:") . " ~~ " . $student->cumulative_hours . " " . t("hrs") . ". &nbsp;" . fp_truncate_decimals($student->gpa, 3) . " " . t("GPA"));
     }
 
     if ($student->student_id > 1 || $bool_blank == true)
@@ -692,6 +694,7 @@ function fp_build_tab_array($page) {
       $bool_hide_catalog_warning = true;
     }
 
+    
     $rtn .= "</table>";
 
     if ($bool_catalog_warning == true && !$bool_hide_catalog_warning)
@@ -704,12 +707,12 @@ function fp_build_tab_array($page) {
         <img src='" . fp_theme_location() . "/images/alert_lg.gif' >  
       </td>
       <td valign='middle' class='tenpt' style='padding-left: 8px;'>
-        <b>Important Notice: </b>
-        FlightPath cannot display degree plans from 
-        catalogs earlier than " . $settings["earliest_catalog_year"] . "-" . ($settings["earliest_catalog_year"] + 1) . ".  
-        The above student's catalog year is $cat_year, which means 
+        <b>" . t("Important Notice:") . " </b>
+        " . t("FlightPath cannot display degree plans from 
+        catalogs earlier than @earliest.
+        The above student's catalog year is @current, which means 
         that the degree plan below may not accurately 
-        display this student's degree requirements.
+        display this student's degree requirements.", array("@earliest" => $settings["earliest_catalog_year"] . "-" . ($settings["earliest_catalog_year"] + 1), "@current" => $cat_year)) . "
       </td>
       </table>
       </div>

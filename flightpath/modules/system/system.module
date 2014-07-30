@@ -1540,6 +1540,20 @@ function system_handle_form_submit() {
     $redirect_query = $_REQUEST["default_redirect_query"];
   }
   
+  
+  // If there is a Batch process we need to do, do it here instead of the fp_goto.
+  if (isset($_SESSION["fp_batch_id"]) && function_exists("batch_menu")) {
+    $batch_id = $_SESSION["fp_batch_id"];
+    unset($_SESSION["fp_batch_id"]);
+    batch_start_batch_from_form_submit($batch_id, $redirect_path, $redirect_query);
+    return;
+  }
+  else if (isset($_SESSION["fp_batch_id"]) && !function_exists("batch_menu")) {
+    // We requested a batch action, but the batch module is not installed.
+    fp_add_message(t("A batch process was attempted, but it appears that the Batch module is not enabled.  Please contact your FlightPath administrator."), "error");
+    unset($_SESSION["fp_batch_id"]);
+  }
+  
   // Okay, go back to where we were!  
   fp_goto($redirect_path, $redirect_query);
    

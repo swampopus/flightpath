@@ -1,0 +1,3 @@
+name = Batch
+description = Provides access for developers to batch processing functionality.
+core = 4.x

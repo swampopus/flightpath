@@ -29,47 +29,11 @@ function stats_menu() {
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
   );
+
   
-
-  $items["stats/major-counts"] = array(
-    "title" => "Major Counts",
-    "page_callback" => "stats_report_major_counts",
-    "access_arguments" => array("can_access_stats"),
-    "page_settings" => array(
-      "page_show_title" => TRUE,
-      "bool_print" => FALSE,
-      "menu_links" => array(         
-        0 => array(
-          "text" => "Main menu",
-          "path" => "admin-tools/stats",
-        ),
-      ),
-    ),    
-    "type" => MENU_TYPE_CALLBACK,
-  );
-  
-
-  $items["stats/selected-degree-options"] = array(
-    "title" => "Selected Degree Options",
-    "page_callback" => "stats_report_selected_degree_options",
-    "access_arguments" => array("can_access_stats"),
-    "page_settings" => array(
-      "page_show_title" => TRUE,
-      "bool_print" => FALSE,
-      "menu_links" => array(         
-        0 => array(
-          "text" => "Main menu",
-          "path" => "admin-tools/stats",
-        ),
-      ),            
-    ),    
-    "type" => MENU_TYPE_CALLBACK,
-  );
-
-
-
-  $items["stats/access"] = array(
+  $items["stats/reports/access"] = array(
     "title" => "Access Stats",
+    "description" => "See recent access within the system.  This can be useful to see if anyone is currently using the system.",
     "page_callback" => "stats_report_access_stats",
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(
@@ -82,13 +46,59 @@ function stats_menu() {
         ),
       ),      
     ),    
-    "type" => MENU_TYPE_CALLBACK,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "weight" => 100,
+  );
+  
+
+  $items["stats/reports/major-counts"] = array(
+    "title" => "Major Counts",
+    "description" => "Displays the number of students within each major or major/concentration.",
+    "page_callback" => "stats_report_major_counts",
+    "access_arguments" => array("can_access_stats"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "bool_print" => FALSE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Main menu",
+          "path" => "admin-tools/stats",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "weight" => 150,
+  );
+  
+
+  $items["stats/reports/selected-degree-options"] = array(
+    "title" => "Selected Degree Options",
+    "description" => "This report will display information about which degree options students/advisors are selecting for particular majors 
+                    (ex: General Studies)",
+    "page_callback" => "stats_report_selected_degree_options",
+    "access_arguments" => array("can_access_stats"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "bool_print" => FALSE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Main menu",
+          "path" => "admin-tools/stats",
+        ),
+      ),            
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "weight" => 200,
   );
 
 
 
-  $items["stats/advisor-use"] = array(
+
+
+
+  $items["stats/reports/advisor-use"] = array(
     "title" => "Advisor Use",
+    "description" => "How many students an advisor has advised over a specified time range.",
     "page_callback" => "stats_report_advisor_use",
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(
@@ -101,13 +111,15 @@ function stats_menu() {
         ),
       ),      
     ),    
-    "type" => MENU_TYPE_CALLBACK,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "weight" => 250,
   );
 
   
 
-  $items["stats/student-course-list"] = array(
+  $items["stats/reports/student-course-list"] = array(
     "title" => "Student Course List",
+    "description" => "List courses a student has taken, which FlightPath is aware of.",
     "page_callback" => "stats_report_student_course_list",
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(
@@ -120,14 +132,16 @@ function stats_menu() {
         ),
       ),      
     ),    
-    "type" => MENU_TYPE_CALLBACK,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "weight" => 300,
   );  
   
   
   
 
-  $items["stats/flightpath-use-summary"] = array(
+  $items["stats/reports/flightpath-use-summary"] = array(
     "title" => "FlightPath Use Summary",
+    "description" => "A detailed report on how FlightPath is being used over a specified time range.",
     "page_callback" => "stats_report_flightpath_use_summary",
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(
@@ -140,13 +154,176 @@ function stats_menu() {
         ),
       ),      
     ),    
-    "type" => MENU_TYPE_CALLBACK,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "weight" => 350,
   );
 
-    
+
+  $items["stats/reports/major-students-progress"] = array(
+    "title" => "Major Students Progresss - CSV Export (Beta)",
+    "description" => "A CSV report showing students in a major, and their progress percentages in that major.  Currently in 'Beta' status.",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("stats_report_major_students_progress_form"),
+    "access_arguments" => array("can_access_stats"),
+    "page_settings" => array(
+      "bool_print" => FALSE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Main menu",
+          "path" => "admin-tools/stats",
+        ),
+      ),      
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "weight" => 400,
+    "file" => menu_get_module_path("stats") . "/stats.major-students-progress.inc",
+  );
+
+  
+  // Lets the user download a CSV file stored in the batch_queue table, with a batch_id.
+  $items["stats/download-csv-from-batch/%"] = array(
+    "page_callback" => "stats_download_csv_from_batch",
+    "page_arguments" => array(2),
+    "access_arguments" => array("can_access_stats"),
+    "type" => MENU_CALLBACK,
+  );
+  
+  
+  
+  
   
   return $items;
 }
+
+
+
+/**
+ * Lets the user download a CSV file from a completed batch.
+ * 
+ * There are no permissions on this, except the can_access_stats permission.
+ *
+ * @param unknown_type $batch_id
+ */
+function stats_download_csv_from_batch($batch_id) {
+  
+  $filename = fp_get_machine_readable(strtolower($_REQUEST["filename"]));
+  
+  $batch = batch_get($batch_id);
+
+  // Give it to the browser...  
+  header('Content-type: text/csv');
+  header('Content-Disposition: attachment; filename="' . $filename . '.csv"');
+  print $batch["csv"];
+
+  die;    
+  
+}
+
+
+
+/**
+ * Lets me run a test...
+ *
+ */
+function stats_test() {
+
+  $cwid = "17690589";
+  $major_code = "AGRB";
+  $catalog_year = 2011;
+  
+  
+  
+  $db = get_global_database_handler();
+  
+  // For later, let's get our requirement types from the pie chart config...
+  $requirement_types = array();
+	// Get the requested piecharts from our config...
+	$temp = variable_get("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress");
+	$lines = explode("\n", $temp);
+	foreach ($lines as $line) {
+	  if (trim($line) == "") continue;	  
+	  $temp = explode("~", $line);
+	  $requirement_type = trim($temp[0]);
+	  $label = trim($temp[1]);		
+	  $requirement_types[$requirement_type] = $label;  
+	  
+	}    
+  
+  
+	
+	//advise_init_advising_variables();
+  
+  
+  // Load them up fully and calculate their percentages      
+  $student = new Student($cwid, $db);
+
+  
+  $degree_id = $db->get_degree_id($major_code, $catalog_year);
+  if ($degree_id) {
+    ///////////////////
+    // Fully build up a FlightPath screen in memory, as if the student
+    // were looking at this on a web page....
+    
+    //$degree_plan = new DegreePlan($degree_id);                
+    
+    $degree_plan = new DegreePlan($degree_id, $db, false, $student->array_significant_courses);
+    
+    $student->load_student_substitutions();
+    $student->load_unassignments();
+    
+    $student->list_courses_taken->sort_alphabetical_order();
+    $student->list_courses_taken->sort_most_recent_first();        
+    
+    $fp = new FlightPath($student, $degree_plan);
+  
+    $screen = new AdvisingScreen("", $fp);
+    $screen->view = "year";        
+
+    $fp->flag_outdated_substitutions();    
+    
+    $fp->assign_courses_to_semesters(); // bare degree plan. not groups.
+    $fp->assign_courses_to_groups();
+  
+    
+    $screen->build_screen_elements();    
+    ////////////////
+    
+    // Okay, perform the percentage calculations...
+    $degree_plan->calculate_progress_hours();
+    $degree_plan->calculate_progress_quality_points();
+    
+  	foreach ($requirement_types as $requirement_type => $label) {
+  	  
+  	  // Okay, let's see if this degreeplan even has any data on this requirement type.
+  	  $total_hours = $degree_plan->gpa_calculations[$requirement_type]["total_hours"]*1;
+  	  $fulfilled_hours = $degree_plan->gpa_calculations[$requirement_type]["fulfilled_hours"]*1;
+  	  $qpts_hours = $degree_plan->gpa_calculations[$requirement_type]["qpts_hours"]*1;
+  	  $qpts = $degree_plan->gpa_calculations[$requirement_type]["qpts"]*1;
+      
+  	  $gpa = $percent = 0;
+  	  
+  	  if ($qpts_hours > 0) {
+  	    $gpa = fp_truncate_decimals($qpts / $qpts_hours, 3);
+  	  }
+  	  if ($total_hours > 0) {
+  	    $percent = round(($fulfilled_hours / $total_hours) * 100);
+  	  }
+  	  
+  	  
+      $batch["csv"] .= "$fulfilled_hours, $total_hours, $percent, $gpa, ";
+        
+  	}		
+  
+  }
+  
+    fpm($degree_plan->gpa_calculations["degree"]);
+  
+  
+}
+
+
+
+
 
 
 
@@ -180,6 +357,57 @@ function stats_perm() {
 
 
 
+
+/**
+ * Return the HTML for a pulldown containing the catalog years available for selection.
+ *
+ * @param unknown_type $selected
+ * @param unknown_type $display_submit
+ */
+function stats_draw_catalog_year_pulldown($selected = "", $display_submit = FALSE) {
+  
+  $rtn = "";
+
+  
+  $rtn .= "
+			<table border='0'>
+			
+          <td valign='middle'>
+          
+          <select name='catalog_year' id='catalog_year'><option value=''>
+                " . t("Please select a catalog year") . "</option>
+          <option value=''>-----------------------------------</option>";
+  
+  
+  $current_catalog_year = variable_get("current_catalog_year", "");
+
+  if ($selected == "") $selected = $current_catalog_year;
+  
+  $res = db_query("SELECT DISTINCT (catalog_year) FROM degrees
+                   WHERE exclude = '0'
+                   ORDER BY catalog_year DESC");
+  while ($cur = db_fetch_array($res)) {
+    $sel = ($cur["catalog_year"] == $selected) ? "selected=selected" : "";
+    $rtn .= "<option value='{$cur["catalog_year"]}' $sel>{$cur["catalog_year"]}-" . ($cur["catalog_year"] + 1) . "</option>";
+  }
+  
+  $rtn .= "                </select> </td>";
+  if ($display_submit == true)
+  {
+    $rtn .= "<td valign='middle'><input type='submit' value='" . t("Select") . "'></td>";
+  }
+
+  $rtn .= "</table>";
+  
+  return $rtn;
+  
+}
+
+
+
+
+
+
 /**
  * This report will show which degree options are being selected for degrees which offer options.
  *
@@ -192,8 +420,8 @@ function stats_report_selected_degree_options() {
   // What major have they selected?
   $major = trim($_GET["major"]);
 
-  $rtn .= "<form action='" . fp_url("stats/selected-degree-options") . "' method='GET' >";
-  $rtn .= stats_draw_majors_with_options_pulldown($major, true);
+  $rtn .= "<form action='" . fp_url("stats/reports/selected-degree-options") . "' method='GET' >";
+  $rtn .= stats_draw_majors_pulldown($major, TRUE, TRUE, t("Please select a major with degree options"));
   $rtn .= "</form>";
 
   $db = get_global_database_handler();
@@ -287,6 +515,124 @@ function stats_report_selected_degree_options() {
 
 
 
+
+/**
+ * Display a major selection pulldown, used by other reports.
+ * 
+ * If bool_only_majors_with_tracks == TRUE, then we will only display the majors which
+ * have tracks associated with them.
+ * 
+ * If bool_exclude_tracks == TRUE, then we will skip over any major_code with a "_" in it,
+ * meaning, this code describes a track and not the base major.
+ * 
+ * If bool_only_current_catalog_year == TRUE, then only degrees from the current catalog year
+ * will be displayed.
+ *
+ */
+function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool_only_majors_with_tracks = FALSE, $label = "Please select a major", $bool_exclude_tracks = FALSE, $bool_only_current_catalog_year = TRUE, $bool_return_options_array = FALSE)
+{
+
+  $db = get_global_database_handler();
+  $major_array = array();
+
+  $options_array = array();
+  
+  
+  $current_catalog_year = variable_get("current_catalog_year", "");
+
+  $m_a_count = 0;  
+  if ($bool_only_current_catalog_year) {
+    $query = "SELECT * FROM degrees
+  				WHERE  catalog_year = '?'
+  				AND `exclude`='0'
+  				ORDER BY `title`  ";
+    $result = db_query($query, $current_catalog_year);
+  }
+  else { // current catalog year not important.
+    $query = "SELECT * FROM degrees
+  				WHERE  `exclude`='0'
+  				GROUP BY major_code
+  				ORDER BY `title`  ";
+    $result = db_query($query);    
+  }
+  while ($cur_row = $db->db_fetch_array($result)) {
+    $major = trim($cur_row["major_code"]);
+    
+    if ($bool_exclude_tracks && strpos($major, "_")) {
+      continue;
+    }
+    
+    if ($bool_only_majors_with_tracks && !$db->get_degree_tracks($major, $current_catalog_year))
+    { // only get majors that also have tracks!
+      continue;
+    }
+    
+    $description = trim($cur_row["title"]);
+    $type = trim($cur_row["degree_type"]);
+    $major_array[$m_a_count]["description"] = $description;
+    $major_array[$m_a_count]["major"] = $major;
+    $major_array[$m_a_count]["type"] = $type;
+
+    $m_a_count++;
+
+
+    }
+
+
+  $rtn .= "
+			<table border='0'>
+			
+          <td valign='middle'>
+          
+         <select name='major' id='major'>
+         <option value=''>" . $label . "</option>
+                      <option value=''>-----------------------------------</option>";
+
+  for ($t = 0; $t < $m_a_count; $t++)
+  {
+    $sel = "";
+    if ($major_array[$t]["major"] == $smajor && $smajor != "")
+    {
+      $sel = "selected";
+    }
+    $hyph = "-";
+    if ($major_array[$t]["type"] == "" || $major_array[$t]["type"] == "NA")
+    {
+      $hyph = "";
+      $major_array[$t]["type"] = "";
+    }
+
+    $rtn .= "<option value='" . $major_array[$t]["major"] . "' $sel>(" . $major_array[$t]["major"] . ")
+					" . $major_array[$t]["description"] . " $hyph " . $major_array[$t]["type"] . "
+					</option>";
+    
+    $options_array[$major_array[$t]["major"]] = "(" . $major_array[$t]["major"] . ") " . $major_array[$t]["description"] . " $hyph " . $major_array[$t]["type"];
+    
+    
+  }
+
+
+  $rtn .= "                </select> </td>";
+  if ($display_submit == true)
+  {
+    $rtn .= "<td valign='middle'><input type='submit' value='" . t("Select") . "'></td>";
+  }
+
+  $rtn .= "</table>";
+
+  if ($bool_return_options_array) return $options_array;
+  
+  
+  
+  return $rtn;
+
+}
+
+
+
+
+
+
 /**
  * Draws a simple form for entering a student's CWID, used by other reports.
  *
@@ -308,87 +654,6 @@ function stats_draw_student_cwid_form($path, $student_cwid = "") {
   
   
   return $rtn;
-}
-
-
-
-/**
- * Display a major selection pulldown, used by other reports.
- *
- * @param unknown_type $smajor
- * @param unknown_type $display_submit
- * @return unknown
- */
-function stats_draw_majors_with_options_pulldown($smajor = "", $display_submit = false)
-{
-
-  $db = get_global_database_handler();
-  $major_array = array();
-
-  $current_catalog_year = variable_get("current_catalog_year", "");
-
-  $m_a_count = 0;
-  $query = "SELECT * FROM degrees
-				WHERE  catalog_year = '?'
-				AND `exclude`='0'
-				ORDER BY `title`  ";
-  $result = db_query($query, $current_catalog_year);
-  while ($cur_row = $db->db_fetch_array($result)) {
-    $major = trim($cur_row["major_code"]);
-    if (!$db->get_degree_tracks($major, $current_catalog_year))
-    { // only get majors that also have tracks!
-      continue;
-    }
-    $description = trim($cur_row["title"]);
-    $type = trim($cur_row["degree_type"]);
-    $major_array[$m_a_count]["description"] = $description;
-    $major_array[$m_a_count]["major"] = $major;
-    $major_array[$m_a_count]["type"] = $type;
-
-    $m_a_count++;
-
-
-    }
-
-
-  $rtn .= "
-			<table border='0'>
-			
-          <td valign='middle'>
-          
-         <select name='major' id='major'><option value=''>" . t("Please select a major with degree options") . "</option>
-                      <option value=''>-----------------------------------</option>";
-
-  for ($t = 0; $t < $m_a_count; $t++)
-  {
-    $sel = "";
-    if ($major_array[$t]["major"] == $smajor && $smajor != "")
-    {
-      $sel = "selected";
-    }
-    $hyph = "-";
-    if ($major_array[$t]["type"] == "" || $major_array[$t]["type"] == "NA")
-    {
-      $hyph = "";
-      $major_array[$t]["type"] = "";
-    }
-
-    $rtn .= "<option value='" . $major_array[$t]["major"] . "' $sel>
-					" . $major_array[$t]["description"] . " $hyph " . $major_array[$t]["type"] . "
-					</option>";
-  }
-
-
-  $rtn .= "                </select> </td>";
-  if ($display_submit == true)
-  {
-    $rtn .= "<td valign='middle'><input type='submit' value='" . t("Select") . "'></td>";
-  }
-
-  $rtn .= "</table>";
-
-  return $rtn;
-
 }
 
 
@@ -483,7 +748,7 @@ function stats_report_flightpath_use_summary() {
   $start_date = trim(addslashes($_REQUEST["start_date"]));
   $end_date = trim(addslashes($_REQUEST["end_date"]));
 
-  $rtn .= stats_draw_date_range_form("stats/flightpath-use-summary", $start_date, $end_date);
+  $rtn .= stats_draw_date_range_form("stats/reports/flightpath-use-summary", $start_date, $end_date);
   
   if ($start_date == "" || $end_date == "") {
     return $rtn;
@@ -720,7 +985,7 @@ function stats_report_advisor_use() {
   $start_date = trim(addslashes($_REQUEST["start_date"]));
   $end_date = trim(addslashes($_REQUEST["end_date"]));
 
-  $rtn .= stats_draw_date_range_form("stats/advisor-use", $start_date, $end_date);
+  $rtn .= stats_draw_date_range_form("stats/reports/advisor-use", $start_date, $end_date);
   
   if ($start_date == "" || $end_date == "") {
     return $rtn;
@@ -820,7 +1085,7 @@ function stats_report_access_stats() {
 
 
   $rtn .= "
-      <form action='" . fp_url("stats/access") . "' method='GET'>
+      <form action='" . fp_url("stats/reports/access") . "' method='GET'>
       " . t("Activity over the last") . " 
       <input type='text' name='min' value='$min' size='2'>
       ";
@@ -919,7 +1184,7 @@ function stats_report_student_course_list() {
 
   $student_cwid = trim(addslashes($_REQUEST["student_cwid"]));
 
-  $rtn .= stats_draw_student_cwid_form("stats/student-course-list", $student_cwid);
+  $rtn .= stats_draw_student_cwid_form("stats/reports/student-course-list", $student_cwid);
   
   if ($student_cwid == "") {
     return $rtn;
@@ -1048,6 +1313,15 @@ function stats_report_student_course_list() {
 
 /**
  * Main menu screen for this module.
+ * 
+ * We will simply display the "menu block" for "stats/reports".  That is,
+ * any path that begins with stats/reports will show up here.
+ * 
+ * You can create a report in your custom module, and as long as the url begins 
+ * with stats/reports, and the menu item is of type "MENU_TYPE_NORMAL_ITEM"
+ * it will appear on this page.  Set the weight to be > 1000 to appear below this list,
+ * set weight < 100 to appear above.
+
  *
  * @return unknown
  */
@@ -1055,6 +1329,14 @@ function stats_display_main() {
   $rtn = "";
   
   
+  
+  $rtn .= "<div class='stats-main-menu' style='font-size:1.2em;'>";
+  $rtn .= fp_render_menu_block("", "stats/reports");
+  $rtn .= "</div>";
+  
+  
+  
+  /*
   $rtn .= "<ul>";
 
   $rtn .= "<li>" . l(t("Access Stats"), "stats/access") . "
@@ -1094,6 +1376,7 @@ function stats_display_main() {
   
   
   $rtn .= "</ul>";
+  */
   
   return $rtn;
 }

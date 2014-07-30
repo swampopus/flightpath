@@ -1,6 +1,29 @@
 FlightPath 4.x Changelog
 ========================
 
+
+----------------
+RELEASED 4.6
+----------------
+
+
+2014-07-30
+  Added a new Batch API for processing large amounts of data without a timeout.  Modified system.install and system.module to work with the new Batch module.
+  
+  Minor changes and corrections in other files.
+
+  Added a new Student Progress Report to the Stats module, which takes advantage of the new Batch API, due to it taking such
+  a long time to run.
+  
+
+2014-06-23
+  Modified the Stats module, so that its main menu page simply displays any menu item that begins
+  with the path "stats/reports".  This allows users to create new reports in custom modules, and the
+  links will still appear on that page.  Ex:  stats/reports/my-custom-report.  Just make sure that
+  the "type" => MENU_TYPE_NORMAL_ITEM and the url begins with "stats/reports".  And remember to clear
+  cache after creating any new menu items.
+  
+  
 ----------------
 RELEASED 4.5.1
 ----------------
