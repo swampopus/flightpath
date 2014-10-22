@@ -95,8 +95,13 @@ function batch_ajax_callback($batch_id) {
   
   $operation_args = $batch["operation"][1];
   // Add our $batch to the beginning of the $args array.
-  array_unshift($operation_args, &$batch);
-  call_user_func_array($operation_callback, $operation_args);       
+  //array_unshift($operation_args, $batch);
+  $params = array(0 => &$batch);
+  foreach ($operation_args as $val) {
+    $params[] = $val;
+  }
+  
+  call_user_func_array($operation_callback, $params);       
 
   
   
@@ -159,10 +164,17 @@ function batch_finished_page($batch_id) {
   $finished_args = $batch["finished_callback"][1];
   if (!is_array($finished_args)) $finished_args = array();
 
+  $params = array();
+
   // If we are NOT going to fp_goto, then add the $batch as the first argument.
   if ($finished_callback != "fp_goto") {
     // Add our $batch to the beginning of the $args array.
-    array_unshift($finished_args, &$batch);    
+    //array_unshift($finished_args, $batch);
+    $params = array (0 => &$batch);    
+  }
+  
+  foreach ($finished_args as $val) {
+    $params[] = $val;
   }
   
   if (isset($batch["success_message"])) {
@@ -170,7 +182,7 @@ function batch_finished_page($batch_id) {
   }
   
   // Okay, let's call our function:
-  return call_user_func_array($finished_callback, $finished_args);       
+  return call_user_func_array($finished_callback, $params);       
   
   
   

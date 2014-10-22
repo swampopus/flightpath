@@ -167,9 +167,13 @@ function advise_display_history() {
   $has_admin_category = false;
   $access_line = "";
   
-  if (!user_has_permission("view_faculty_comments")) { 
-    $access_line = "and `access_type`='public' ";    
-  }
+  //if (!user_has_permission("view_faculty_comments")) { 
+  //  $access_line = "and `access_type`='public' ";    
+  //}
+  
+  $access_types = (user_has_permission("view_faculty_comments")) ? array("faculty", "public") : array("public");
+
+  
   
   $rtn .= "<tr><td colspan='3' class='tenpt'>
         <!--STARTCOM$cat_type--><div style='padding-top: 10px;'>
@@ -180,14 +184,21 @@ function advise_display_history() {
         </div><!--ENDCOM$cat_type-->
         </td></tr>";
 
+// Use the function comments_get_comments instead of a direct query.
 
+  $res = comments_get_comments($student_id, FALSE, $access_types);
+
+/*  
+  
   $res = db_query("SELECT * FROM advising_comments
             WHERE student_id = '?' 
             AND delete_flag = '0'
             $access_line
             $cat_line
             order by `posted` desc ", $student_id);
-  while ($cur = db_fetch_array($res))
+            */
+  //while ($cur = db_fetch_array($res))
+  foreach ($res as $cur)
   {
     extract($cur, 3, "db");
     $dt = format_date($db_posted);

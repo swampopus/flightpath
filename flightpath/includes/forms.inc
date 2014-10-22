@@ -145,7 +145,8 @@ function fp_render_form($callback, $form_type = "") {
   }
   
   if ($page_title != "") {
-    $rtn .= "<h2 class='title'>" . $page_title . "</h2>";
+    //$rtn .= "<h2 class='title'>" . $page_title . "</h2>";
+    fp_show_title(TRUE);
   }
     
   //fpm($GLOBALS["fp_current_menu_router_item"]);

@@ -3,6 +3,21 @@ FlightPath 4.x Changelog
 
 
 ----------------
+RELEASED 4.6.1
+----------------
+
+
+2014-10-22
+  Bug fix for PHP 5.4 and above, removed call-time pass by reference code in the batch.module file.
+
+
+2014-09-22
+  Added bug fix to forms.inc, where sometimes a form's title would appear twice on the page.
+  
+  Updated advise.history.inc to use functions in the comments module to display comments.
+
+
+----------------
 RELEASED 4.6
 ----------------
 
