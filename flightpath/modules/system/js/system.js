@@ -2,7 +2,11 @@
 		
 		function popupreportcontact()
 		{
-			err_window = window.open("./popup-report-contact",
+		  
+		  // To make compatible with non-clean URLs, use the "unclean" url...
+		  var url = FlightPath.settings.basePath + "/index.php?q=popup-report-contact";
+		  
+			err_window = window.open(url,
 			"errwindow","toolbar=no,status=2,scrollbars=yes,resizable=yes,width=500,height=400");
 
 			err_window.focus();  // make sure the popup window is on top.

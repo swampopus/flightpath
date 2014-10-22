@@ -104,6 +104,41 @@ function system_get_roles_for_user($user_id) {
 }
 
 
+
+/**
+ * This function will attempt to confirm that "clean URLs" is functioning, and
+ * allowed on this server.
+ * 
+ * Returns TRUE or FALSE
+ */
+function system_check_clean_urls() {
+  
+    // Are clean-url's enabled?
+  // We will do this by trying to retrieve a test URL, built into index.php.
+  // If we can get a success message back from "http://example.com/flightpath/test-clean-urls/check", then
+  // we are good to go.
+  
+  // First, figure out the base URL.
+  $protocol = strpos(strtolower($_SERVER['SERVER_PROTOCOL']),'https') === FALSE ? 'http' : 'https';
+  $host = $_SERVER['HTTP_HOST'];
+  $script = $_SERVER['SCRIPT_NAME'];
+  $base_url = $protocol . "://" . $host . $script;
+  $base_url = str_replace("/install.php", "", $base_url);
+  
+  // Try to get our test URL's success message...
+  $res = fp_http_request($base_url . '/test-clean-urls/check');  
+  if ($res->code != 200) {
+    // Nope, there was an error or some other problem!
+    return FALSE;    
+  }
+  
+  // If we made it here, it must have worked.
+  return TRUE;
+  
+}
+
+
+
 /**
  * Hook block regions.
  * 

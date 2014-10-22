@@ -1070,17 +1070,30 @@ function fp_url($path, $query = "", $include_base_path = TRUE) {
   
   // If clean URLs are enabled, we should begin with a ?, if not, use an &
   
-  // TODO: make sure that works.
-  
   $rtn = "";
   if ($include_base_path) {
     $rtn .= base_path() . "/";
   }  
  
+ 
+  $bool_clean_urls = variable_get("clean_urls", FALSE);
+  if (!$bool_clean_urls) {
+    // Clean URLs are NOT enabled!  Let's make sure the URL contains "index.php?q="
+    $rtn .= "index.php?q=";    
+  }
+ 
+ 
   $rtn .= $path;
   
   if ($query != "") {
-    $rtn .= "?";  
+    // Is there a ? already in the $rtn?  If not, add a ?.  If so, use a &.
+    if (!strstr($rtn, "?")) {  
+      $rtn .= "?";  
+    }
+    else {
+      $rtn .= "&";
+    }
+    
     $rtn .= $query;
   }
  

@@ -769,7 +769,9 @@ function advise_display_view($view = "view") {
 
     $form_token = md5("advise_display_view" . fp_token());
         
-    $rtn .= "<form id='mainform' method='POST' action='" . base_path() . "/$view'>
+    $vurl = fp_url($view);    
+        
+    $rtn .= "<form id='mainform' method='POST' action='$vurl'>
              <input type='hidden' name='form_token' value='$form_token'>
              <table class='fp-semester-table'>";
     $rtn .= $screen->display_screen();
@@ -843,7 +845,9 @@ function advise_display_what_if_selection($bool_undergrad_only = TRUE) {
 
   $db = get_global_database_handler();
 
-  $rtn .= "<form action='" . base_path() . "/what-if' id='mainform' method='POST'>";
+  $url = fp_url("what-if");
+  
+  $rtn .= "<form action='" . $url . "' id='mainform' method='POST'>";
   $rtn .= fp_render_curved_line("What if I change my major to...");
 
   $rtn .= "<br>

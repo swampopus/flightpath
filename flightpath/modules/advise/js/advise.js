@@ -209,13 +209,21 @@ function dummyToggleSelection(x,y,z) {
 
 
 function describeCourse(dataString, blankDegreeID) {
-  var url = FlightPath.settings.basePath + "/advise/popup-course-description";
+  //var url = FlightPath.settings.basePath + "/advise/popup-course-description";  
+  
+  // To make compatible with non-clean URL sites, we will use the "unclean" URL...
+  var url = FlightPath.settings.basePath + "/index.php?q=advise/popup-course-description";
+    
   popupWindowNew(url,"data_string=" + dataString + "&blank_degree_id=" + blankDegreeID);
 }
 
 
 function selectCourseFromGroup(group_id, semester_num, groupHoursRemaining, blankDegreeID) {
-  var url = FlightPath.settings.basePath + "/advise/popup-group-select";  
+  //var url = FlightPath.settings.basePath + "/advise/popup-group-select";
+  
+  // To make compatible with non-clean URL sites, we will use the "unclean" URL...
+  var url = FlightPath.settings.basePath + "/index.php?q=advise/popup-group-select";
+    
   popupWindowNew(url,"group_id=" + group_id + "&semester_num=" + semester_num + "&group_hours_remaining=" + groupHoursRemaining + "&blank_degree_id=" + blankDegreeID);
 }
 
@@ -255,7 +263,8 @@ function popupDescribeSelected(group_id, semester_num, optionalCourseID, selecte
     }
   }
 
-  window.location = FlightPath.settings.basePath + "/advise/popup-group-select" + "&window_mode=popup&perform_action2=describe_course&course_id=" + course_id + "&group_id=" + group_id + "&semester_num=" + semester_num + "&selected_subject=" + selectedSubject + "&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
+  // To make compatible with non-clean URLs, we need to always supply the "unclean" URL version.
+  window.location = FlightPath.settings.basePath + "/index.php?q=advise/popup-group-select" + "&window_mode=popup&perform_action2=describe_course&course_id=" + course_id + "&group_id=" + group_id + "&semester_num=" + semester_num + "&selected_subject=" + selectedSubject + "&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
 
 }
 
@@ -267,7 +276,9 @@ function popupBackToGroupSelect(course_id, group_id, semester_num, extraVars) {
   // am reading a description of a course, then I click
   // the select tab to go back.  The course_id is the ID
   // of the course whose description I was just reading.
-  window.location = FlightPath.settings.basePath + "/advise/popup-group-select" + "&window_mode=popup&course_id=" + course_id + "&group_id=" + group_id + "&semester_num=" + semester_num + "&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
+  
+  // To make compatible with non-clean URLs, we need to always supply the "unclean" URL version.  
+  window.location = FlightPath.settings.basePath + "/index.php?q=advise/popup-group-select" + "&window_mode=popup&course_id=" + course_id + "&group_id=" + group_id + "&semester_num=" + semester_num + "&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
 }
 
 
@@ -291,7 +302,8 @@ function popupSubstituteSelected(course_id, group_id, semester_num, extraVars)
     }
   }
 
-  window.location = FlightPath.settings.basePath + "/advise/popup-substitute-selected" + "&window_mode=popup&course_id=" + course_id + "&group_id=" + group_id + "&semester_num=" + semester_num + "&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
+  // To make compatible with non-clean URLs, we need to always supply the "unclean" URL version.
+  window.location = FlightPath.settings.basePath + "/index.php?q=advise/popup-substitute-selected" + "&window_mode=popup&course_id=" + course_id + "&group_id=" + group_id + "&semester_num=" + semester_num + "&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
 }
 
 

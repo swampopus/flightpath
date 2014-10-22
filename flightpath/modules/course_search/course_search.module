@@ -323,6 +323,7 @@ function course_search_display_courses() {
   $catalog_year = $current_catalog_year;  
   $subject_id = $_REQUEST["subject_id"];
 
+  $clean_urls = variable_get("clean_urls", FALSE);
   
   // Try to find out the title to this subject, if one exists
   // in our subjects table.
@@ -377,10 +378,17 @@ function course_search_display_courses() {
       ";
   // Draw the term selector.
   $only_term = $_REQUEST["only_term"];
-  $rtn .= "<form id='term_form' action='" . fp_url("/tools/course-search/courses", "") . "' method='GET'>           
+  $rtn .= "<form id='term_form' action='" . fp_url("tools/course-search/courses") . "' method='GET'>           
            <input type='hidden' name='mode' value='$subject_id'>
            <input type='hidden' name='subject_id' value='$subject_id'>
-           
+           ";
+  
+  if (!$clean_urls) {
+      // Hack for if clean URLs isn't enabled
+      $rtn .= "<input type='hidden' name='q' value='tools/course-search/courses'>";
+  }
+             
+  $rtn .= "           
            View courses offered:
            <select name='only_term' onChange='document.getElementById(\"term_form\").submit();'>
              <option value=''>Any term</option>
@@ -846,12 +854,14 @@ function course_search_display_search() {
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;
 
+  $clean_urls = variable_get("clean_urls", FALSE); // are clean URLs enabled?
+
   if ($catalog_year == "")
   {
     
     $rtn .= "Please select an available catalog year from the
       list below.<br><br>
-      <form action='" . $GLOBALS["fp_system_settings"]["base_path"] . "/tools/course-search' method='GET' name='mainform' id='myform'>
+      <form action='" . fp_url("tools/course-search") . "' method='GET' name='mainform' id='myform'>
       <table align='center'>
       <td width='150' valign='bottom'>
         <select name='catalog_year'>";
@@ -865,8 +875,14 @@ function course_search_display_search() {
       <td valign='bottom'>
         <input type='submit' value='Select ->'>
       </td>
-      </table>
-      </form>";
+      </table>";
+
+    if (!$clean_urls) {
+      // Hack for if clean URLs isn't enabled
+      $rtn .= "<input type='hidden' name='q' value='tools/course-search'>";
+    }
+      
+    $rtn .= "      </form>";
 
   } 
   else {
@@ -877,7 +893,12 @@ function course_search_display_search() {
         <br><br>
       Please select an available subject from the list below.<br>       
       <br>
-      <form action='" . $GLOBALS["fp_system_settings"]["base_path"] . "/tools/course-search/courses' method='GET' name='mainform' id='myform'>";
+      <form action='" . fp_url("tools/course-search/courses") . "' method='GET' name='mainform' id='myform'>";
+    
+    if (!$clean_urls) {
+      // Hack for if clean URLs isn't enabled
+      $rtn .= "<input type='hidden' name='q' value='tools/course-search/courses'>";
+    }
     
     if (!fp_screen_is_mobile()) {
       $rtn .= "

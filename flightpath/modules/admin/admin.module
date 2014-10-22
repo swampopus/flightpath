@@ -1311,6 +1311,9 @@ function admin_display_watchdog() {
   
   
   $rtn .= "<input type='submit' value='-&gt;'>";
+  // Hack if clean URLs are not enabled:
+  $rtn .= "<input type='hidden' name='q' value='admin/config/watchdog'>";
+  
   $rtn .= "</form>";
   
   

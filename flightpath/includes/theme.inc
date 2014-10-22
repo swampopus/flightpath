@@ -370,8 +370,11 @@ function fp_build_sub_tab_array($page) {
     if ($on_click == "") {
       // Just a simple link to the path
       // Add the current_student_id to the query!
-      $query = "&current_student_id=$current_student_id";
-      $on_click = "window.location=\"" . base_path() . "/" . $path . $query . "\"";
+      $query = "current_student_id=$current_student_id";
+      
+      $turl = fp_url($path, $query, TRUE);
+      
+      $on_click = "window.location=\"" . $turl . "\"";
     }
           
     if ($path == $active_tab_path) {
@@ -432,9 +435,11 @@ function fp_build_tab_array($page) {
       if ($on_click == "") {
         // Just a simple link to the path
         // Include the current_student_id!
-        $query = "&current_student_id=$current_student_id";
+        $query = "current_student_id=$current_student_id";
         
-        $on_click = "window.location=\"" . base_path() . "/" . $path . $query . "\"";
+        $turl = fp_url($path, $query, TRUE);
+        
+        $on_click = "window.location=\"" . $turl . "\"";
       }
             
       if ($path == $active_tab_path) {
@@ -497,8 +502,9 @@ function fp_build_tab_array($page) {
       $for_term = " " . t("for") . " " . get_term_description($t_term_id);
 
       // If this is an advisor or above
+      $furl = fp_url("advise/popup-change-term");
       $for_term .= "<span style='font-size: 8pt; font-weight:normal;'>
-             - <a href='javascript: popupWindow2(\"" . base_path() . "/advise/popup-change-term\",\"advising_term_id=$t_term_id\");' style='color:blue; background-color: white; border: 1px solid black; padding-left: 3px; padding-right: 3px;'>" . t("change") . "<img src='" . fp_theme_location() . "/images/calendar1.jpg' height='13' border='0' style='vertical-align: bottom;'></a>
+             - <a href='javascript: popupWindow2(\"" . $furl . "\",\"advising_term_id=$t_term_id\");' style='color:blue; background-color: white; border: 1px solid black; padding-left: 3px; padding-right: 3px;'>" . t("change") . "<img src='" . fp_theme_location() . "/images/calendar1.jpg' height='13' border='0' style='vertical-align: bottom;'></a>
             </span>";
 
 
@@ -1168,7 +1174,8 @@ function fp_render_menu_item($item, $bool_check_user_access = TRUE) {
   
   $description = $item["description"];
   $title = $item["title"];
-  $url = $GLOBALS["fp_system_settings"]["base_path"] . "/" . $item["path"];
+  //$url = $GLOBALS["fp_system_settings"]["base_path"] . "/" . $item["path"];
+  $url = fp_url($item["path"], "", TRUE);
   $target = $item["page_settings"]["target"];
   $menu_icon = $item["page_settings"]["menu_icon"];
   if ($menu_icon != "") {

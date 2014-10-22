@@ -35,8 +35,10 @@ function advise_display_history() {
       {        
         $term_name = get_term_description($term_id);
         
+        $turl = fp_url("advise/popup-display-summary", "advising_session_id=$aid");
+        
         $click_links .= "<li>
-                <a href='javascript: popupPrintWindow(\"" . base_path() . "/advise/popup-display-summary&advising_session_id=$aid\");'>
+                <a href='javascript: popupPrintWindow(\"" . $turl . "\");'>
                 <img src='" . fp_theme_location() . "/images/popup.gif' border='0'>
                 $term_name</a>";
 
@@ -44,7 +46,6 @@ function advise_display_history() {
     }
 
 
-    // onClick='popup_print_window(\"advise.php?window_mode=summary&advising_session_id=ADVID\");'
     $rtn .= "
         <tr>
           <td colspan='2' width='100%'>
@@ -128,8 +129,9 @@ function advise_display_history() {
       $first_style = "";
     }
 
+    $turl = fp_url("advise/popup-display-summary", "advising_session_id=$db_advising_session_id");
 
-    $on_click = "popupPrintWindow(\"" . base_path() . "/advise/popup-display-summary&advising_session_id=$db_advising_session_id\");";
+    $on_click = "popupPrintWindow(\"" . $turl . "\");";
 
     $term = get_term_description($db_term_id);
 
@@ -174,12 +176,13 @@ function advise_display_history() {
   $access_types = (user_has_permission("view_faculty_comments")) ? array("faculty", "public") : array("public");
 
   
+  $turl = fp_url("comments/popup-display-all-comments");
   
   $rtn .= "<tr><td colspan='3' class='tenpt'>
         <!--STARTCOM$cat_type--><div style='padding-top: 10px;'>
           <b>" . t("Advising Comments") . "</b>
           &nbsp; 
-        <a href='javascript: popupPrintWindow(\"" . base_path() . "/comments/popup-display-all-comments\");'  
+        <a href='javascript: popupPrintWindow(\"" . $turl . "\");'  
           class='nounderline'><img src='" . fp_theme_location() . "/images/popup.gif' border='0'>view/print all</a>
         </div><!--ENDCOM$cat_type-->
         </td></tr>";
@@ -210,9 +213,9 @@ function advise_display_history() {
     }
 
 
+    $turl = fp_url("comments/popup-display-comment", "id=$db_id");
 
-
-    $on_click = "popupPrintWindow(\"" . base_path() . "/comments/popup-display-comment&id=$db_id\");";
+    $on_click = "popupPrintWindow(\"" . $turl . "\");";
     $rtn .= "<tr $on_mouse_over style='cursor:pointer; $first_style $extra_style'
           onClick='$on_click'>
           <td valign='top' width='165' class='tenpt'

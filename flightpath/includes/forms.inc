@@ -186,7 +186,7 @@ function fp_render_form($callback, $form_type = "") {
   // Did the user specify a submit method (like GET or POST)?  POST is default.
   $submit_method = ($form["#submit_method"] == "") ? "POST" : $form["#submit_method"];
     
-  $rtn .= "<form action='" . base_path() . "/system-handle-form-submit' method='$submit_method' id='fp-form-$callback' name='fp_form_name_$callback' $attributes>";
+  $rtn .= "<form action='" . fp_url("system-handle-form-submit", "", TRUE) .  "' method='$submit_method' id='fp-form-$callback' name='fp_form_name_$callback' $attributes>";
   
   $rtn .= "<input type='hidden' name='callback' value='$callback'>";
   $rtn .= "<input type='hidden' name='form_token' value='$form_token'>";
@@ -195,8 +195,7 @@ function fp_render_form($callback, $form_type = "") {
   $rtn .= "<input type='hidden' name='form_include' value='$form_include'>";
   $rtn .= "<input type='hidden' name='default_redirect_path' value='$default_path'>";
   $rtn .= "<input type='hidden' name='default_redirect_query' value='$default_query'>";
-  //$rtn .= "<input type='hidden' name='redirect_query' value='$redirect_query'>";
-  $rtn .= "<input type='hidden' name='current_student_id' value='$current_student_id'>";
+    $rtn .= "<input type='hidden' name='current_student_id' value='$current_student_id'>";
   
   $use_callback = "";
   if (form_has_errors()) {

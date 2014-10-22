@@ -194,7 +194,10 @@ function student_search_render_small_search() {
   global $current_student_id;
   
   $rtn = "";
-  $rtn .= "<form action='" . base_path() . "/student-search/search' method='post' id='small-search-form'
+  
+  $url = fp_url("student-search/search");
+  
+  $rtn .= "<form action='" . $url . "' method='post' id='small-search-form'
               style='padding:0; margin:0; padding-bottom: 5px;'>
                      <input type='text' class='smallinput' size='30' name='search_for' id='search_bar_value'                       
                         placeholder = '" . t("Search by name or CWID") . "'>
@@ -303,8 +306,9 @@ function student_search_display_majors_search() {
     db_set_user_setting($user->id, "major_search", $major_code);
   }
 
+  $url = fp_url("student-search/majors-search");
   
-  $rtn .= "<form method='POST' action='" . base_path() . "/student-search/majors-search'
+  $rtn .= "<form method='POST' action='" . $url . "'
               class='major-search-form'>            
             <label>" . t("Select an available major from the list below:") . "</label>
             <select name='major_code'>
@@ -441,9 +445,11 @@ function student_search_display_search() {
   
   $_SESSION["student_search_last_tab"] = "search";
 
+  $url = fp_url("student-search/search");
+
   $rtn .= "<table class='fp-semester-table'>
            <form id='mainform' name='mainform' method='post'
-                action='" . base_path() . "/student-search/search' >
+                action='" . $url . "' >
            ";
 
   

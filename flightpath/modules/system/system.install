@@ -71,6 +71,11 @@ function system_enable() {
   variable_set("current_catalog_year", date("Y"));
   variable_set("current_draft_catalog_year", date("Y"));
   
+  
+  // Do we have "clean URLs" enabled?
+  $test = system_check_clean_urls();
+  variable_set("clean_urls", $test);
+  
 }
 
 
