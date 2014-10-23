@@ -124,10 +124,10 @@ function system_check_clean_urls() {
   $script = $_SERVER['SCRIPT_NAME'];
   $base_url = $protocol . "://" . $host . $script;
   $base_url = str_replace("/install.php", "", $base_url);  
+  $base_url = str_replace("/index.php", "", $base_url);  
   // Try to get our test URL's success message...
   $res = fp_http_request($base_url . '/test-clean-urls/check');
-
-  if ($res->code >= 400) {
+  if ($res->code != 200) {
     // Nope, there was an error or some other problem!
     return FALSE;    
   }
