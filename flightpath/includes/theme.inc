@@ -603,7 +603,7 @@ function fp_build_tab_array($page) {
       $extra_vars .= "&advising_what_if=yes";
       }*/
       
-      $op_link = "<a href='javascript: popupWindow2(\"" . base_path() . "/advise/popup-change-track\",\"$extra_vars\");'><img
+      $op_link = "<a href='javascript: popupWindow2(\"" . fp_url("advise/popup-change-track") . "\",\"$extra_vars\");'><img
               src='" . fp_theme_location() . "/images/popup.gif' border='0' 
               title='" . t("Click to change degree options.") . "'></a>";
       $op_text = t("Click to select:") . " $op_link";

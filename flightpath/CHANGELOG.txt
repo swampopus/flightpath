@@ -2,6 +2,11 @@ FlightPath 4.x Changelog
 ========================
 
 
+2014-10-23
+  Made it to where Clean URLs is optional; not required.  This allows FlightPath to work more easily
+  on non-Apache servers, or for users who do not wish to configure their server to AllowOverrides.
+  
+
 ----------------
 RELEASED 4.6.1
 ----------------

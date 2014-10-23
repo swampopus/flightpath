@@ -1338,11 +1338,17 @@ function user_display_student_users() {
     $sel_both = "selected";
   }
   
+  $clean_urls = variable_get("clean_urls", FALSE);
 
   $rtn .= "</div>";
   $rtn .= "                             
-                        <form class='filters' action='" . base_path() . "/admin/users/students' method='GET' >
-                        <input type='hidden' name='performAction' value='editUsers'>
+                        <form class='filters' action='" . fp_url("admin/users/students") . "' method='GET' >
+                        <input type='hidden' name='performAction' value='editUsers'>";
+  if (!$clean_urls) {
+    // Hack to support non-clean URL sites
+    $rtn .= "<input type='hidden' name='q' value='admin/users/students'>";
+  }                        
+  $rtn .= "
                          " . t("Search:") . " <input type='text' class='smallinput' name='search' value='{$_GET["search"]}' size='15'>
                         <input type='submit' name='searchsubmit' class='smallinput' value=' -> '>
                        
@@ -1636,10 +1642,17 @@ function user_display_users() {
     $rtn .= l($disp, "admin/users/faculty", "de_catalog_year=$de_catalog_year&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link")) . " &nbsp; ";
   }
 
+  $clean_urls = variable_get("clean_urls", FALSE);
 
   $rtn .= "</div>";
   $rtn .= "                             
-                        <form class='filters' action='" . base_path() . "/admin/users/faculty' method='GET' >
+                        <form class='filters' action='" . fp_url("admin/users/faculty") . "' method='GET' >";
+  if (!$clean_urls) {
+    // Hack to support non-clean URL sites
+    $rtn .= "<input type='hidden' name='q' value='admin/users/faculty'>";
+  }                        
+                        
+  $rtn .= "                        
                         <input type='hidden' name='performAction' value='editUsers'>
                          " . t("Search:") . " <input type='text' class='smallinput' name='search' value='{$_GET["search"]}' size='15'>
                         <input type='submit' name='searchsubmit' class='smallinput' value=' -> '>

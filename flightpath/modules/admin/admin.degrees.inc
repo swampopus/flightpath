@@ -925,7 +925,9 @@ function admin_display_edit_degree() {
           </span>";
   }
 
-  $rtn .= "<form id='mainform' action='" . base_path() . "/admin/degrees/handle-edit-degree-submit' method='POST'>
+  $url = fp_url("admin/degrees/handle-edit-degree-submit");
+
+  $rtn .= "<form id='mainform' action='" . $url . "' method='POST'>
             <input type='hidden' name='perform_action2' id='perform_action2'>
             <input type='hidden' name='de_catalog_year' value='$de_catalog_year'>
             <input type='hidden' name='scroll_top' id='scroll_top' value=''>
@@ -1040,9 +1042,12 @@ function admin_display_edit_degree() {
             <input type='hidden' name='group_" . $group->group_id . "_" . rand(1,999999) . "' value='$group->group_id" . "_$semester->semester_num" . "_$group->hours_required" . "_$group->requirement_type" . "_$group->min_grade'>
             </td>"; 
     }
+    
+    $url = fp_url("admin/degrees/popup-add-group", "semester_num=$semester->semester_num&de_catalog_year=$de_catalog_year");
+    
     $rtn .= "</table>
         <div style='margin-top: 10px; margin-left: 20px;'>
-          <a href='javascript: adminPopupWindow(\"" . base_path() . "/admin/degrees/popup-add-group&semester_num=$semester->semester_num&de_catalog_year=$de_catalog_year\");'>Add an elective group</a>
+          <a href='javascript: adminPopupWindow(\"" . $url . "\");'>Add an elective group</a>
         </div>
     </td>";
 
@@ -1091,9 +1096,12 @@ function admin_display_edit_degree() {
             <td valign='top' class='tenpt'>grd</td>
             <td valign='top' class='tenpt'>type</td>
             </tr>";
+
+    $url = fp_url("admin/degrees/popup-add-group", "semester_num=$sem&de_catalog_year=$de_catalog_year");
+            
     $rtn .= "</table>
         <div style='margin-top: 10px; margin-left: 20px;'>
-          <a href='javascript: adminPopupWindow(\"" . base_path() . "/admin/degrees/popup-add-group&semester_num=$sem&de_catalog_year=$de_catalog_year\");'>Add an elective group</a>
+          <a href='javascript: adminPopupWindow(\"" . $url . "\");'>Add an elective group</a>
     </td>";
 
 

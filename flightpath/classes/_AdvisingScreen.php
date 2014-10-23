@@ -775,8 +775,9 @@ function draw_menu_items($menu_array) {
 		if (user_has_permission("can_substitute") && $bool_include_box_top) {
 			if ($this->bool_print != true)
 			{// Don't display in print view.
+			  $purl = fp_url("advise/popup-toolbox/transfers"); 
 				$pC .= "<div style='tenpt'>				
-					<a href='javascript: popupWindow2(\"" . base_path() . "/advise/popup-toolbox/transfers\",\"\");'><img src='" . fp_theme_location() . "/images/toolbox.gif' border='0'>" . t("Administrator's Toolbox") . "</a>
+					<a href='javascript: popupWindow2(\"" . $purl . "\",\"\");'><img src='" . fp_theme_location() . "/images/toolbox.gif' border='0'>" . t("Administrator's Toolbox") . "</a>
 				</div>";
 				$is_empty = false;
 			}
@@ -4327,7 +4328,7 @@ function draw_menu_items($menu_array) {
 				$blank_degree_id = $this->degree_plan->degree_id;
 			}
 			$back_link = "<span class='tenpt'>
-						<a href='" . base_path() . "/advise/popup-group-select&window_mode=popup&group_id=$group->group_id&semester_num=$display_semesterNum&group_hours_remaining=$group_hours_remaining&current_student_id=$csid&blank_degree_id=$blank_degree_id' 
+						<a href='" . fp_url("advise/popup-group-select", "window_mode=popup&group_id=$group->group_id&semester_num=$display_semesterNum&group_hours_remaining=$group_hours_remaining&current_student_id=$csid&blank_degree_id=$blank_degree_id") . "' 
 						class='nounderline'>" . t("Click here to return to subject selection.") . "</a></span>";
 			$pC = str_replace("<!--MSG2-->",$back_link,$pC);
 		}
@@ -4358,10 +4359,18 @@ function draw_menu_items($menu_array) {
 		{
 			$blank_degree_id = $this->degree_plan->degree_id;
 		}
+    
+    $clean_urls = variable_get("clean_urls", FALSE);
+    
 		$pC .= "<tr><td colspan='8' class='tenpt'>";
-		$pC .= "<form action='" . base_path() . "/advise/popup-group-select' method='GET' style='margin:0px; padding:0px;' id='theform'>
+		$pC .= "<form action='" . fp_url("advise/popup-group-select") . "' method='GET' style='margin:0px; padding:0px;' id='theform'>
 					<input type='hidden' name='window_mode' value='popup'>
-					<input type='hidden' name='group_id' value='$group_id'>
+					<input type='hidden' name='group_id' value='$group_id'>";
+    if (!$clean_urls) {
+      // Hack so that non-clean URLs sites still work
+      $pC .= "<input type='hidden' name='q' value='advise/popup-group-select'>";
+    }
+    $pC .= "					
 					<input type='hidden' name='semester_num' value='$semester_num'>
 					<input type='hidden' name='group_hours_remaining' value='$group_hours_remaining'>
 					<input type='hidden' name='current_student_id' value='$csid'>

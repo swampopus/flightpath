@@ -795,7 +795,7 @@ function advise_display_view($view = "view") {
       $tab_array[2]["title"] = "Print";
       $tab_array[2]["type"] = "link";    
       $tab_array[2]["active"] = FALSE;
-      $tab_array[2]["on_click"] = "popupPrintWindow(\"" . base_path() . "/$view/print&advising_view=$screen->view\");";  
+      $tab_array[2]["on_click"] = "popupPrintWindow(\"" . fp_url("$view/print", "advising_view=$screen->view") . "\");";  
     }
     
     fp_set_page_sub_tabs($tab_array);

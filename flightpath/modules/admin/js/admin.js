@@ -320,12 +320,14 @@ function adminDeleteCourse(course_id, catalog_year, warnEqv) {
   
 }
 
+/* old code
 function adminProcessDefinitions(catalog_year) {
  var x = confirm("Are you sure you wish to process all group definitions for the year " + catalog_year + "?\n\nAll groups with definitions will be cleared, and their definitions re-run.\n\nNOTICE: This may take more than a minute to complete.\n\nClick OK to proceed.");
  if (x) {
    window.location = "admin.php?performAction=perform_process_group_definitions&de_catalog_year=" + catalog_year;
  }
 }
+*/
 
 function adminPopupAddGroup(semester_num) {
 
@@ -399,9 +401,11 @@ function adminDelGroup(group_id, semester_num) {
   
 }
 
+/* old code
 function adminConfirmClearJDHistory() {
  var x = confirm("Are you sure you wish to clear the advising and comment history for John Doe (student 99999999)?");
  if (x) {
    window.location = "admin.php?performAction=perform_clear_john_doe";
  }
 }
+*/

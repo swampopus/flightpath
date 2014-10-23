@@ -123,11 +123,11 @@ function system_check_clean_urls() {
   $host = $_SERVER['HTTP_HOST'];
   $script = $_SERVER['SCRIPT_NAME'];
   $base_url = $protocol . "://" . $host . $script;
-  $base_url = str_replace("/install.php", "", $base_url);
-  
+  $base_url = str_replace("/install.php", "", $base_url);  
   // Try to get our test URL's success message...
-  $res = fp_http_request($base_url . '/test-clean-urls/check');  
-  if ($res->code != 200) {
+  $res = fp_http_request($base_url . '/test-clean-urls/check');
+
+  if ($res->code >= 400) {
     // Nope, there was an error or some other problem!
     return FALSE;    
   }
@@ -1249,6 +1249,34 @@ function system_settings_form() {
                         Contact FlightPath Production Team popup."),
     
   );
+
+  
+  // Can we support clean_urls?
+  $bool_support_clean = system_check_clean_urls();
+  $form["support_clean_urls"] = array(
+    "type" => "hidden",
+    "value" => ($bool_support_clean) ? "yes" : "no",
+  );
+  
+  if ($bool_support_clean) {
+    // Give the option to change ONLY if we can support clean URLs
+    $form["clean_urls"] = array(
+      "type" => "checkbox",
+      "label" => t("Enable 'Clean URLs?'"),
+      "value" => variable_get("clean_urls", FALSE),
+      "description" => t("Your server supports 'clean URLs', which eliminates 'index.php?q=' from your URLs, making them
+                          more readable.  It is recommended you leave this feature enabled.  For more information, see: http://getflightpath.com/node/5."), 
+    );
+  }
+  else {
+    // Server does not support clean URLs.
+    $form["support_clean_markup"] = array(
+      "value" => "<p><b>Clean URLs:</b> This server <u>does not support</u> clean URLs.  If you are using an Apache-compatible server,
+                  make sure that your .htaccess file is properly configured.  For more information, see: http://getflightpath.com/node/5.</p>",
+                  
+    );
+  }
+  
     
   $form["theme"] = array(
     "type" => "textfield",
@@ -1395,9 +1423,11 @@ function system_settings_form() {
  * @param unknown_type $form_state
  */
 function system_settings_form_submit($form, &$form_state) {
+    
+  
+  // Left empty for now.
+  
 
-  // Empty, for the time being.
-   
 }
 
 

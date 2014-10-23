@@ -363,7 +363,7 @@ function admin_edit_group_form() {
                 <img src='" . fp_theme_location() . "/images/icons/$group->icon_filename' width='19'>
                 $group->icon_filename
                 &nbsp; &nbsp;
-                <a href='javascript: adminPopupWindow(\"" . base_path() . "/admin/groups/popup-select-icon&group_id=$group_id\");'>[select another]</a>
+                <a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-select-icon", "group_id=$group_id") . "\");'>[select another]</a>
                 ",
   );
 
@@ -373,7 +373,7 @@ function admin_edit_group_form() {
     "label" => t("Definition:"),
     "value" => "<label>" . t("Definition:") . "</label><i>" . nl2br($group->definition) . "</i>",
     "prefix" => "<div style='overflow: auto; max-height: 150px;' class='admin-groups-show-definition'>",
-    "suffix" => "</div><a href='javascript: adminPopupWindow(\"" . base_path() . "/admin/groups/popup-edit-definition&de_catalog_year=$de_catalog_year&group_id=$group_id\");'
+    "suffix" => "</div><a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-edit-definition", "de_catalog_year=$de_catalog_year&group_id=$group_id") . "\");'
                             >[" . t("edit definition") . "]</a>",
   );
  
@@ -467,8 +467,9 @@ function admin_display_groups_popup_edit_definition() {
   $tdef .= t("show up in group selection screens, but they will be added to a group if a student has completed that course in the past.");
   
   
+  
   $rtn .= "<b>Edit Definition for $group->title ($de_catalog_year)<br><i>$group->group_name</i></b>
-    <br><br><form action='" . base_path() . "/admin/groups/popup-edit-definition&de_catalog_year=$de_catalog_year&group_id=$group_id' method='POST' id='mainform'>
+    <br><br><form action='" . fp_url("admin/groups/popup-edit-definition", "de_catalog_year=$de_catalog_year&group_id=$group_id") . "' method='POST' id='mainform'>
       <table border='0'>
       <tr>
           <td valign='top' align='right'>
@@ -962,7 +963,7 @@ function admin_display_groups() {
             <img src='" . fp_theme_location() . "/images/icons/$db_icon_filename' width='19'>
           </td>
           <td valign='top' class='tenpt'>
-            $use_count <a href='javascript: adminPopupWindow(\"" . base_path() . "/admin/groups/popup-show-group-use&group_id=$db_group_id\");'><img src='" . fp_theme_location() . "/images/popup.gif' border='0'></a>
+            $use_count <a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-show-group-use", "group_id=$db_group_id") . "\");'><img src='" . fp_theme_location() . "/images/popup.gif' border='0'></a>
           </td>
 
           
@@ -1110,7 +1111,7 @@ function admin_process_all_definitions_form_submit($form, $form_submit) {
   }
   
     
-  fp_add_message(t("Group definitions have be re-run for @year", array("@year" => $de_catalog_year)));
+  fp_add_message(t("Group definitions have been re-run for @year", array("@year" => $de_catalog_year)));
 }
 
 

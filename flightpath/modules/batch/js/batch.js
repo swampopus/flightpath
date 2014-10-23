@@ -21,8 +21,9 @@ function batchContinueBatch() {
   var batchId = FlightPath.settings.batch_id;
   var basePath = FlightPath.settings.basePath;
   
+  // use "unclean" URLs so that it's compatible with non-Clean URL sites.
   // Contact via Ajax...
-  $.get(basePath + "/batch-ajax-callback/" + batchId, function(data) {
+  $.get(basePath + "/index.php?q=batch-ajax-callback/" + batchId, function(data) {
 
     // Handle data. 
     if (data.error != null) {
@@ -54,8 +55,8 @@ function batchContinueBatch() {
     
     // If we are finished, then we can proceed to our finished handler.
     if (data.finished == "finished") {
-      // Redirect to our finished page...
-      window.location = basePath + "/batch-finished/" + batchId;
+      // Redirect to our finished page...  (use unclean URL path for compatibility)
+      window.location = basePath + "/index.php?q=batch-finished/" + batchId;
       return;
     }
     
