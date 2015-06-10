@@ -1,6 +1,11 @@
 FlightPath 4.x Changelog
 ========================
 
+----------------
+RELEASED 4.7.1
+----------------
+
+
 2016-06-10
   Changed all CWIDs from int type to varchar(30) in the database, to accomodate schools with alpha-numeric cwids.  Also, added or modified indexes
   on table fields, hopefully to help with query speed.  Removed hard-coded requirements for CWIDs to be numeric.
