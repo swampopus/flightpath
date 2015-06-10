@@ -427,6 +427,9 @@ class _FlightPath
 		}
 
 
+		$bool_disallow_graduate_credits = (variable_get("disallow_graduate_credits", "yes") == "yes") ? TRUE : FALSE;
+		$graduate_level_codes_array = csv_to_array(variable_get("graduate_level_codes", "GR"));		
+				
     // Get the course repeat policy.
     $course_repeat_policy = variable_get("course_repeat_policy", "most_recent_exclude_previous");
     // Set the $bool_mark_repeats_exclude variable based on the course_repeat_policy.
@@ -493,7 +496,7 @@ class _FlightPath
 
 
 
-				if ($bool_perform_assignment == true)
+				if ($bool_perform_assignment == TRUE)
 				{
 					// If the course_requirement's min_hours are greater than
 					// the substitution's hours, then we have to split the
@@ -598,6 +601,14 @@ class _FlightPath
 					continue;
 				}
 
+				// If this is a graduate level course, and we are not allowing grad credits, then skip!
+				if ($c->level_code != "" && in_array($c->level_code, $graduate_level_codes_array)) {
+				  if ($bool_disallow_graduate_credits) {				    
+				    continue;
+				  }
+				}
+				
+				
 				if ($c->bool_has_been_assigned != true)
 				{//Don't count courses which have already been placed in other groups.
 

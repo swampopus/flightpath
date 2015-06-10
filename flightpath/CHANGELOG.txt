@@ -1,6 +1,16 @@
 FlightPath 4.x Changelog
 ========================
 
+2016-06-10
+  Changed all CWIDs from int type to varchar(30) in the database, to accomodate schools with alpha-numeric cwids.  Also, added or modified indexes
+  on table fields, hopefully to help with query speed.  Removed hard-coded requirements for CWIDs to be numeric.
+  
+
+2015-03-12
+  Various changes include:  beta feature of "sort best grade first".  Fixed bug in clean URLs. Added support for the concept of "level code".
+  Added ability to exclude graduate credits (based on level code).  Added support to display graduate credits in their own box.
+
+
 ----------------
 RELEASED 4.7
 ----------------

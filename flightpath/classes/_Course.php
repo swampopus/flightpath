@@ -21,7 +21,7 @@ class _Course
   public $array_valid_names;
 
   // Student record related:
-  public $bool_taken, $term_id, $section_number, $grade, $hours_awarded, $quality_points;
+  public $bool_taken, $term_id, $section_number, $grade, $hours_awarded, $quality_points, $level_code;
   public $bool_transfer, $institution_id, $institution_name, $course_transfer;
   public $transfer_eqv_text, $transfer_footnote, $bool_outdated_sub;
   public $bool_substitution, $course_substitution, $substitution_hours, $sub_remarks, $sub_faculty_id;
@@ -1471,7 +1471,7 @@ class _Course
     "bool_substitution_split", "substitution_footnote", "bool_substitution_new_from_split",
 
     "min_grade", "specified_repeats", "bool_specified_repeat", "required_on_branch_id",
-    "assigned_to_group_id", "assigned_to_semester_num",
+    "assigned_to_group_id", "assigned_to_semester_num", "level_code",
 
     "advised_hours", "bool_selected", "bool_advised_to_take", "bool_use_draft",
     "course_fulfilled_by", "course_list_fulfilled_by",
@@ -1489,7 +1489,7 @@ class _Course
       if (isset($this->$var))  // This checks to see if we are using
       {						// the variable or not.
         $rtn[] = $var;
-      }
+      } 
     }
 
     return $rtn;

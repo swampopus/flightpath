@@ -393,16 +393,73 @@ class _CourseList extends ObjList
 
 	}
 
+	
+	
+	
+	
 	/**
-	 * @todo implement this function.
+	 * Sorts best-grade-first, as defined by the setting "grade_order", which is a CSV of
+	 * grades, best-first.  Ex:  A, B, C, D, F
 	 *
 	 */
-	function sort_best_grade_first()
-	{
-		// This will look very similar to sort_most_recent_first
-		// when I get a chance to fool with it.
+	function sort_best_grade_first() {
+
+	  
+	  $temp = csv_to_array(variable_get("grade_order", "A,B,C,D,F"));	  
+	  // We will use array_flip to get back an assoc array where the grades are the keys and the indexes are the values.
+	  $temp = array_flip($temp);
+	  // Go through the grades and convert the integers to strings, padd with zeros so that everything is at least 3 digits.
+	  $grades = array();
+	  foreach ($temp as $grade => $val) {
+	    $grades[$grade] = str_pad((string)$val, 3, "0", STR_PAD_LEFT);
+	  }
+	  
+	  // We now have our grades array just how we want it.  Best grade has lowest value.  Worst grade has highest value.
+	  	  
+	  $unknown_grade_value = "999";  // sort to the very end, in other words.	  
+	  	  
+	  // We are going to go through our courses and, based on the grade, assign them a value.
+	  $tarray = array();
+	  for ($t = 0; $t < $this->count; $t++) {
+	    // $t is the index for the array_list, keep in mind.
+	    
+			$c = $this->array_list[$t];
+			
+			$grade_value = $grades[$c->grade];
+			if ($grade_value == "") {
+			  // Couldn't find this grade in our array, so give it the unknown value.
+			  $grade_value = $unknown_grade_value;
+			}
+			
+			// Add to a string in array so we can sort easily using a normal sort operation.
+			$tarray[] = "$grade_value ~~ $t";
+			
+		}
+	  
+		// Sort best-grade-first:
+		sort($tarray);		
+		
+		// Okay, now go back through tarray and re-construct a new CourseList
+    $new_list = new CourseList();
+		for($t = 0; $t < count($tarray); $t++)
+		{
+			$temp = explode(" ~~ ",$tarray[$t]);
+			$i = $temp[1];
+			$new_list->add($this->array_list[$i]);
+		}
+
+		// Okay, now $new_list should contain the correct values.
+		// We will transfer over the reference.
+		$this->array_list = $new_list->array_list;			  
+
+		
+		// And we are done!
+	  
 	}
 
+	
+	
+	
 	
 	/**
 	 * Remove courses from THIS list which appear in listCourses under

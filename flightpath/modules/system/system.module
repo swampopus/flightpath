@@ -113,7 +113,9 @@ function system_get_roles_for_user($user_id) {
  */
 function system_check_clean_urls() {
   
-    // Are clean-url's enabled?
+  // Are clean-url's enabled?
+  
+  
   // We will do this by trying to retrieve a test URL, built into index.php.
   // If we can get a success message back from "http://example.com/flightpath/test-clean-urls/check", then
   // we are good to go.
@@ -127,8 +129,16 @@ function system_check_clean_urls() {
   $base_url = str_replace("/index.php", "", $base_url);  
   // Try to get our test URL's success message...
   $res = fp_http_request($base_url . '/test-clean-urls/check');
+  
   if ($res->code != 200) {
-    // Nope, there was an error or some other problem!
+    // There was an error or some other problem!
+    
+    // But wait-- did we get redirected?
+    if (isset($res->redirect_code) && $res->redirect_code == 200) {
+      return TRUE;  // it's OK after all!
+    }
+
+    
     return FALSE;    
   }
   
@@ -969,6 +979,27 @@ function system_school_data_form() {
   );
 
   
+  $form["initial_student_course_sort_policy"] = array(
+    "type" => "select",
+    "label" => t("Initial student course sort policy:"),
+    "options" => array("alpha" => "Alphabetical sort [default]", "grade" => "Best grade first (beta)"),
+    "hide_please_select" => TRUE,
+    "value" => variable_get("initial_student_course_sort_policy", "alpha"),
+    "description" => t("Student courses are sorted more than once as they are evaluated by FlightPath.
+                        By default, they are sorted alphabetically first.  If you change this to best-grade-first, 
+                        courses will be initally sorted according to the grade they earned, in the order defined in 'Grade order CSV' below.
+                        Any student grades not defined below will be considered the lowest possible grade."),
+  );
+  
+  $form["grade_order"] = array(
+    "type" => "textfield",
+    "label" => t("Grade order (CSV):"),
+    "value" => variable_get("grade_order", ""),
+    "description" => t("List all possible grades, separated by comma, from highest to lowest.  This is only needed if you
+                      selected 'Best grade first' sort policy above.
+                      <br>Ex: A, AMID, B, BMID, C, CMID, CR, D, DMID, F, FMID, W, I"),
+  );
+  
   
 
   $form["retake_grades"] = array(
@@ -1135,6 +1166,66 @@ function system_school_data_form() {
                         above.'"),
   );
 
+  
+
+  $form["graduate_level_codes"] = array(
+    "type" => "textfield",
+    "label" => t("Graduate course level codes (CSV):"),
+    "value" => variable_get("graduate_level_codes", "GR"),
+    "description" => t("List level codes, separated by comma, which should be considered graduate credit.  If you do not need
+                        to distinguish between graduate and undergraduate credit, leave this field blank.<br>If unsure, set to GR."),    
+  );
+  
+  
+  
+  $form["disallow_graduate_credits"] = array(
+    "type" => "select",
+    "label" => t("Disallow automatic use of graduate credits?"),
+    "options" => array("yes" => "Yes", "no" => "No"),
+    "hide_please_select" => TRUE,
+    "value" => variable_get("disallow_graduate_credits", "yes"),
+    "description" => t("If set to yes, FlightPath will not automatically use graduate credits (based on the level code the student's credit
+                        is given in the database) to populate elective groups or on the degree plan.  They may still be substituted using the
+                        substitution system however.  In order for this setting to work, the 'Graduate course level codes' field must be set above.
+                        <br>If unsure, set to Yes."),
+  );
+  
+
+  $form["display_graduate_credits_block"] = array(
+    "type" => "select",
+    "label" => t("Display graduate credits in their own semester block?"),
+    "options" => array("yes" => "Yes", "no" => "No"),
+    "hide_please_select" => TRUE,
+    "value" => variable_get("display_graduate_credits_block", "yes"),
+    "description" => t("If set to yes, FlightPath will display graduate credits in their own block, and NOT in Excess credits.  The graduate block details
+                        are set below.
+                        <br>If unsure, set to Yes."),
+  );
+  
+  
+  $form["graduate_credits_block_title"] = array(
+    "label" => t("Graduate Credits block title:"),
+    "type" => "textfield",
+    "value" => variable_get("graduate_credits_block_title", t("Graduate Credits")),
+    "description" => t("This is the title of the Graduate Credits semester block (setting above),
+                        which appears on a student's degree plan, near the bottom, when they
+                        have graduate credits in their history (based on the credit's level code).  If you are
+                        unsure what to enter, use 'Graduate Credits'."),
+  );
+  
+
+  $form["graduate_credits_block_notice"] = array(
+    "label" => t("Graduate Credits block notice text:"),
+    "type" => "textarea",
+    "value" => variable_get("graduate_credits_block_notice", t("These courses may not be used for undergraduate credit.")),
+    "description" => t("The text you enter here will be displayed below the Gradute Credits semester
+                        block, explaining to the student what these courses are.  For example:
+                        'These courses may not be used for undergraduate credit.'"),
+  );
+  
+  
+  
+  
   
   
   return $form;

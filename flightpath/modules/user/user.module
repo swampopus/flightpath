@@ -751,13 +751,15 @@ function user_edit_student_user_form_validate($form, $form_state) {
   if ($values["student_cwid"] == "new") {
     $new_cwid = trim($values["new_student_cwid"]);
     $new_user_name = trim($values["new_user_name"]);
-    
+
+    /*  // CWIDS are no longer required to be numeric.
     // Check that cwid is numeric.
     if (!is_numeric($new_cwid)) {
       form_error("new_student_cwid", t("The cwid you entered is not numeric.  CWIDs must contain only numbers.  
                                     Please select a different cwid."));
       return;
     }
+    */
 
     // Check that username is at least 4 characters
     if (strlen($new_user_name) < 4) {
@@ -1107,13 +1109,15 @@ function user_edit_user_form_validate($form, $form_state) {
     $new_cwid = trim($values["new_faculty_cwid"]);
     $new_user_name = trim($values["new_user_name"]);
     
+    /*   // CWIDs are no longer required to be numeric.
     // Check that cwid is numeric.
     if (!is_numeric($new_cwid)) {
       form_error("new_faculty_cwid", t("The cwid you entered is not numeric.  CWIDs must contain only numbers.  
                                     Please select a different cwid."));
       return;
     }
-
+    */
+    
     // Check that username is at least 4 characters
     if (strlen($new_user_name) < 4) {
       form_error("new_user_name", t("The username you entered is too short.  It must be at least 4 characters.

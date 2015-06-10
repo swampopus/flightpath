@@ -144,6 +144,19 @@ function system_update($old_schema, $new_schema) {
   }
   
   
+  if ($old_schema < 6) {
+    // Add level_code field to relavant tables.
+    db_query("alter table `student_courses` add column `level_code` VARCHAR(10) NOT NULL");
+    db_query("alter table `student_transfer_courses` add column `level_code` VARCHAR(10) NOT NULL");
+    
+    // Also add indexes for these fields.
+    db_query("alter table `student_courses` add index `level_code` (level_code)");
+    db_query("alter table `student_transfer_courses` add index `level_code` (level_code)");
+    
+    
+    fp_add_message(t("Updated database fields to allow for level codes per course."));
+  }
+  
   
   
   
@@ -187,8 +200,8 @@ function system_install() {
   
 CREATE TABLE `advising_comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `student_id` int(11) NOT NULL,
-  `faculty_id` int(11) NOT NULL,
+  `student_id` varchar(30) NOT NULL,
+  `faculty_id` varchar(30) NOT NULL,
   `term_id` varchar(20) NOT NULL,
   `comment` text NOT NULL,
   `posted` int(10) unsigned NOT NULL,
@@ -206,8 +219,8 @@ CREATE TABLE `advising_comments` (
 $q = "
 CREATE TABLE `advising_sessions` (
   `advising_session_id` int(11) NOT NULL AUTO_INCREMENT,
-  `student_id` int(11) NOT NULL,
-  `faculty_id` int(11) NOT NULL,
+  `student_id` varchar(30) NOT NULL,
+  `faculty_id` varchar(30) NOT NULL,
   `term_id` varchar(20) NOT NULL,
   `degree_id` int(11) NOT NULL,
   `major_code` varchar(20) NOT NULL,
@@ -226,8 +239,8 @@ db_query($q);
 $q = "
 
 CREATE TABLE `advisor_student` (
-  `faculty_id` int(10) unsigned NOT NULL,
-  `student_id` int(10) unsigned NOT NULL,
+  `faculty_id` varchar(30) NOT NULL,
+  `student_id` varchar(30) NOT NULL,
   PRIMARY KEY (`faculty_id`,`student_id`)
 ); ";
 
@@ -451,7 +464,7 @@ db_query($q);
 
 $q = "
 CREATE TABLE `faculty` (
-  `cwid` int(10) unsigned NOT NULL,
+  `cwid` varchar(30) NOT NULL,
   `college` varchar(100) NOT NULL,
   `department_code` varchar(10) NOT NULL,
   `department` varchar(100) NOT NULL,  
@@ -570,28 +583,31 @@ db_query($q);
 $q = "
 CREATE TABLE `student_courses` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `student_id` int(11) NOT NULL,
+  `student_id` varchar(30) NOT NULL,
   `subject_id` varchar(10) NOT NULL,
   `course_num` varchar(10) NOT NULL,
   `hours_awarded` decimal(8,4) NOT NULL,
   `grade` varchar(5) NOT NULL,
   `term_id` varchar(20) NOT NULL,
+  `level_code` varchar(10) NOT NULL,
   PRIMARY KEY  (`id`),
-  KEY `student_id` (`student_id`)
+  KEY `student_id` (`student_id`),
+  KEY `level_code` (`level_code`)
 ); ";
 db_query($q);
 
 $q = "
 CREATE TABLE `student_developmentals` (
-  `student_id` int(11) NOT NULL,
+  `student_id` varchar(30) NOT NULL,
   `requirement` varchar(15) NOT NULL,
-  PRIMARY KEY (`student_id`,`requirement`)
+  PRIMARY KEY (`student_id`),
+  KEY (`requirement`)
 ); ";
 db_query($q);
 
 $q = "
 CREATE TABLE `student_settings` (
-  `student_id` int(11) NOT NULL,
+  `student_id` varchar(30) NOT NULL,
   `settings` text NOT NULL,
   `posted` int(10) unsigned NOT NULL,
   PRIMARY KEY (`student_id`)
@@ -601,8 +617,8 @@ db_query($q);
 $q = "
 CREATE TABLE `student_substitutions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `student_id` int(11) NOT NULL,
-  `faculty_id` int(11) NOT NULL,
+  `student_id` varchar(30) NOT NULL,
+  `faculty_id` varchar(30) NOT NULL,
   `required_course_id` int(11) NOT NULL,
   `required_entry_value` varchar(20) NOT NULL,
   `required_group_id` int(11) NOT NULL,
@@ -625,7 +641,7 @@ db_query($q);
 $q = "
 CREATE TABLE `student_tests` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `student_id` int(11) NOT NULL,
+  `student_id` varchar(30) NOT NULL,
   `test_id` varchar(20) NOT NULL,
   `category_id` varchar(20) NOT NULL,
   `score` varchar(10) NOT NULL,
@@ -638,17 +654,19 @@ db_query($q);
 $q = "
 CREATE TABLE `student_transfer_courses` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `student_id` int(11) NOT NULL,
+  `student_id` varchar(30) NOT NULL,
   `transfer_course_id` int(11) NOT NULL,
   `student_specific_course_title` varchar(255) NOT NULL,
   `term_id` varchar(20) NOT NULL,
   `grade` varchar(5) NOT NULL,
   `hours_awarded` decimal(8,4) NOT NULL,
+  `level_code` VARCHAR(10) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `student_id` (`student_id`),
   KEY `transfer_id` (`transfer_course_id`),
   KEY `term_id` (`term_id`),
   KEY `grade` (`grade`),
+  KEY `level_code` (`level_code`),
   KEY `hrs` (`hours_awarded`)
 ) ; ";
 db_query($q);
@@ -656,33 +674,40 @@ db_query($q);
 $q = "
 CREATE TABLE `student_unassign_group` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `student_id` int(11) NOT NULL,
-  `faculty_id` int(11) NOT NULL,
+  `student_id` varchar(30) NOT NULL,
+  `faculty_id` varchar(30) NOT NULL,
   `course_id` int(11) NOT NULL,
   `term_id` varchar(20) NOT NULL,
   `transfer_flag` tinyint(4) NOT NULL DEFAULT '0',
   `group_id` int(11) NOT NULL,
   `delete_flag` tinyint(4) NOT NULL DEFAULT '0',
   `posted` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY (`student_id`),
+  KEY (`faculty_id`),
+  KEY (`delete_flag`)
 ); ";
 db_query($q);
 
 $q = "
 CREATE TABLE `student_unassign_transfer_eqv` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `student_id` int(11) NOT NULL,
-  `faculty_id` int(11) NOT NULL,
+  `student_id` varchar(30) NOT NULL,
+  `faculty_id` varchar(30) NOT NULL,
   `transfer_course_id` int(11) NOT NULL,
   `delete_flag` tinyint(4) NOT NULL DEFAULT '0',
   `posted` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY (`student_id`),
+  KEY (`faculty_id`),
+  KEY (`transfer_course_id`),
+  KEY (`delete_flag`)  
 ); ";
 db_query($q);
 
 $q = "
 CREATE TABLE `students` (
-  `cwid` int(11) unsigned NOT NULL,
+  `cwid` varchar(30) NOT NULL,
   `cumulative_hours` varchar(5) NOT NULL,
   `gpa` varchar(5) NOT NULL,
   `rank_code` varchar(5) NOT NULL,
@@ -725,7 +750,7 @@ db_query($q);
 $q = "
 CREATE TABLE `transfer_eqv_per_student` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `student_id` int(11) NOT NULL,
+  `student_id` varchar(30) NOT NULL,
   `transfer_course_id` int(11) NOT NULL,
   `local_course_id` int(11) NOT NULL,
   `valid_term_id` varchar(20) NOT NULL,
@@ -752,7 +777,8 @@ $q = "
 CREATE TABLE `user_roles` (
   `user_id` int(11) NOT NULL,
   `rid` int(11) NOT NULL,
-  PRIMARY KEY (`user_id`,`rid`)
+  PRIMARY KEY (`user_id`),
+  KEY (`rid`)
 ); ";
 db_query($q);
 
@@ -773,13 +799,16 @@ CREATE TABLE `users` (
   `is_student` tinyint(4) NOT NULL,
   `is_faculty` tinyint(4) NOT NULL,
   `email` varchar(255) NOT NULL,
-  `cwid` int(11) NOT NULL,
+  `cwid` varchar(30) NOT NULL,
   `f_name` varchar(100) NOT NULL,
   `l_name` varchar(100) NOT NULL,
   `is_disabled` tinyint(4) NOT NULL,
  PRIMARY KEY  (`user_id`),
  KEY `cwid` (`cwid`),
- KEY `user_name` (`user_name`)
+ KEY `user_name` (`user_name`),
+ KEY (`is_disabled`),
+ KEY (`is_faculty`),
+ KEY (`is_student`)
 ); ";
 db_query($q);
 
@@ -796,7 +825,7 @@ CREATE TABLE `watchdog` (
   `wid` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL DEFAULT '0',
   `user_name` varchar(50) NOT NULL,
-  `cwid` int(11) NOT NULL,
+  `cwid` varchar(30) NOT NULL,
   `type` varchar(100) NOT NULL DEFAULT '',
   `message` text NOT NULL,
   `variables` text NOT NULL,

@@ -180,6 +180,30 @@ function stats_menu() {
   );
 
   
+
+  $items["stats/reports/course-use-summary"] = array(
+    "title" => "Course Use Summary",
+    "description" => "A report of everywhere a particular course is used in FlightPath (groups or degrees).",
+    "page_callback" => "stats_report_course_use_summary",    
+    "access_arguments" => array("can_access_stats"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "bool_print" => FALSE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Main menu",
+          "path" => "admin-tools/stats",
+        ),
+      ),      
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "weight" => 450,
+  );
+  
+  
+  
+  
+  
   // Lets the user download a CSV file stored in the batch_queue table, with a batch_id.
   $items["stats/download-csv-from-batch/%"] = array(
     "page_callback" => "stats_download_csv_from_batch",
@@ -398,6 +422,126 @@ function stats_draw_catalog_year_pulldown($selected = "", $display_submit = FALS
   }
 
   $rtn .= "</table>";
+  
+  return $rtn;
+  
+}
+
+
+
+/**
+ * This report will display everywhere a particular course is used in FlightPath (groups and degrees)
+ *
+ */
+function stats_report_course_use_summary() {
+  $rtn = "";
+  
+  $draft = "";
+  $use_draft = FALSE;
+  
+  $subject_id = trim($_GET["subject_id"]);
+  $course_num = trim($_GET["course_num"]);
+  $draft_check = $_GET["draft"];
+  if ($draft_check == "checked") {
+    $draft = "draft_";
+    $use_draft = TRUE;
+  }
+  
+  $rtn .= "<form action='" . fp_url("stats/reports/course-use-summary") . "' method='GET' >";
+  $rtn .= "Please enter a course's subject ID and course number to search:<br>
+            <input type='text' name='subject_id' placeholder='subject ID' size='10' value='$subject_id'> &nbsp;
+            <input type='text' name='course_num' placeholder='course num' size='10' value='$course_num'> &nbsp;
+            <input type='checkbox' name='draft' value='checked' $draft_check>Check draft tables? &nbsp;
+            <input type='submit' value='Search'>
+            <br><b>Note:</b> This may take up to a minute to run, please be patient.";
+            
+  $rtn .= "</form>";
+  
+  if ($subject_id && $course_num) {
+    $rtn .= "<hr>";
+    // First, look up this course's ID.
+    $db = get_global_database_handler();
+    $course_id = $db->get_course_id($subject_id, $course_num);
+    
+    if ($course_id) {
+      $rtn .= "<h2>Course $subject_id $course_num (id is $course_id)</h2>";
+      
+      // Groups
+      $rtn .= "<div><b>Groups:</b></div>
+                <table border='1'>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Title</th>
+                    <th>Year</th>
+                    
+                  </tr>";
+      $res = db_query("SELECT * FROM {$draft}group_requirements WHERE course_id = ?
+                        order by `id`", $course_id);
+      while ($cur = db_fetch_array($res)) {
+        $group_id = $cur["group_id"];
+        $group = new Group($group_id, $db, -1, false, $use_draft);
+        if (!$group->title) {
+          // This is possibly a child group.  Look for its parent.
+          $res2 = db_query("SELECT * FROM {$draft}group_requirements WHERE child_group_id = ?", $group_id);
+          $cur2 = db_fetch_array($res2);
+          if ($cur2["group_id"] != "") {
+            $group_id = $cur2["group_id"];
+            $group = new Group($group_id, $db, -1, false, $use_draft);
+          }
+        }
+        $rtn .= "<tr>
+                    <td>$group_id</td>
+                    <td>$group->group_name</td>
+                    <td>$group->title</td>
+                    <td>$group->catalog_year</td>
+                  </tr>";
+      }
+      $rtn .= "</table>";
+      
+      // Now, look for degrees...
+      
+      $rtn .= "<br><br><br>
+                <b>Degrees:</b>
+               <table border='1'>
+               <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>MAJR</th>
+                <th>Track</th>
+                <th>Sem</th>
+                <th>Year</th>
+               </tr>";
+      
+      $res = db_query("SELECT * FROM {$draft}degree_requirements WHERE course_id = ? ORDER BY `id`", $course_id);
+      while ($cur = db_fetch_array($res)) {
+        $degree_id = $cur["degree_id"];
+        $degree = new DegreePlan($degree_id, $db, TRUE, FALSE, $use_draft);
+        
+        $rtn .= "<tr>
+                    <td>$degree_id</td>
+                    <td>$degree->title</td>
+                    <td>$degree->major_code</td>
+                    <td>$degree->track_code</td>
+                    <td>" . $cur["semester_num"] . "</td>
+                    <td>$degree->catalog_year</td>
+                  </tr>";
+      }
+      
+      
+      
+      $rtn .= '</table>';
+      
+    } // if course_id
+    else {
+      $rtn .= "<div>Course could not be found.  Check spelling.";
+    }
+    
+  }
+  
+  
+  
+  
   
   return $rtn;
   

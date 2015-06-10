@@ -1,6 +1,6 @@
 FlightPath - The Electronic Student Advising System
 ===================================================
-  
+
 FlightPath may be downloaded from:
    
    http://getflightpath.com

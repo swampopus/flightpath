@@ -24,7 +24,7 @@ class _AdvisingScreen
 	 *   - This is the script which forms with POST to.  Ex: "advise.php"
 	 * 
 	 * @param FlightPath $flightpath   
-	 *   - FlightPath object.
+	 *   - FlightPath object.                                               
 	 *
 	 * @param string $screen_mode
 	 *   - A string describing what "mode" we are in.  
@@ -515,6 +515,64 @@ function draw_menu_items($menu_array) {
 
 
 
+	/**
+	 * Constructs the HTML which will be used to display
+	 * the student's graduate credits (if any exist)
+	 *
+	 */
+	function build_graduate_credit()
+	{
+	  $pC = "";
+		$is_empty = true;
+		$pC .= $this->draw_semester_box_top(variable_get("graduate_credits_block_title", t("Graduate Credits")), FALSE);
+		// Basically, go through all the courses the student has taken,
+		// And only show the graduate credits.  Similar to build_transfer_credits
+
+		$graduate_level_codes_array = csv_to_array(variable_get("graduate_level_codes", "GR"));
+
+
+		$this->student->list_courses_taken->sort_alphabetical_order(false, true);
+		$this->student->list_courses_taken->reset_counter();
+		while($this->student->list_courses_taken->has_more())
+		{
+			$course = $this->student->list_courses_taken->get_next();
+
+			// Skip non graduate credits.
+			if (!in_array($course->level_code, $graduate_level_codes_array))
+			{
+				continue;
+			}
+
+			$pC .= $this->draw_course_row($course,"","",false,false,false,true);
+			$is_empty = FALSE;
+
+		}
+
+    $notice = trim(variable_get("graduate_credits_block_notice", t("These courses may not be used for undergraduate credit.")));
+		
+    // Do we have a notice to display?
+		if ($notice != "")
+		{
+			$pC .= "<tr><td colspan='8'>
+					<div class='hypo tenpt' style='margin-top: 15px; padding: 5px;'>
+						<b>" . t("Important Notice:") . "</b> $notice
+					</div>
+					</td></tr>";
+		}
+		
+		
+		$pC .= $this->draw_semester_box_bottom();
+
+		if (!$is_empty)
+		{
+			$this->add_to_screen($pC);
+		}
+
+	}
+
+	
+	
+	
 
 	/**
 	 * Constructs the HTML to show which courses have been added
@@ -547,13 +605,18 @@ function draw_menu_items($menu_array) {
 		$pC .= $this->draw_semester_box_top(t("Excess Credits"));
 		$is_empty = true;
 
+		// Should we exclude graduate credits from this list?
+		$bool_grad_credit_block = (variable_get("display_graduate_credit_block", "yes") == "yes") ? TRUE : FALSE;
+		$graduate_level_codes_array = csv_to_array(variable_get("graduate_level_codes", "GR"));
+			
 		// Basically, go through all the courses the student has taken,
 		// selecting out the ones that are not fulfilling any
 		// requirements.
+		
 		$this->student->list_courses_taken->sort_alphabetical_order();
 		$this->student->list_courses_taken->reset_counter();
 		while($this->student->list_courses_taken->has_more())
-		{
+		{		  
 			$course = $this->student->list_courses_taken->get_next();
 
 			if ($course->bool_has_been_displayed == true)
@@ -573,6 +636,13 @@ function draw_menu_items($menu_array) {
 				continue;
 			}
       
+			
+			// Exclude graduate credits?
+			if ($bool_grad_credit_block && $course->level_code != "" && in_array($course->level_code, $graduate_level_codes_array)) {			  			  
+			  continue;
+			}
+			
+			
 			$pC .= $this->draw_course_row($course,"","",false,false);
 			$is_empty = false;
 		}
@@ -1326,6 +1396,14 @@ function draw_menu_items($menu_array) {
 
 		$this->build_transfer_credit();
 
+		// Should we add the graduate credit block?
+		
+		if (variable_get("display_graduate_credit_block", "yes") == "yes") {
+		  $this->build_graduate_credit();
+		}
+		
+		
+		
 		if (!$this->bool_blank)
 		{ // Don't show if this is a blank degree plan.
 			$this->build_footnotes();

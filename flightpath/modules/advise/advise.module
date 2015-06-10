@@ -1355,7 +1355,23 @@ function advise_init_screen() {
     $student->load_student_substitutions();
     $student->load_unassignments();
     
-    $student->list_courses_taken->sort_alphabetical_order();
+    
+    
+    // Should we sort alphabetical order, or should we sort best grade first?  This is a setting the admin
+    // can configure on the Configure School Data settings screen (admin/config/school-data)
+    $sort_policy = variable_get("initial_student_course_sort_policy", "alpha"); // will either be "alpha" or "grade"
+    if ($sort_policy == "grade") {
+      $student->list_courses_taken->sort_best_grade_first();  
+    }
+    else {
+      // It's alpha!
+      $student->list_courses_taken->sort_alphabetical_order();  
+    }
+    
+    
+    
+    
+    
     $student->list_courses_taken->sort_most_recent_first();
     //  print_pre($student->list_courses_taken->toString());
 

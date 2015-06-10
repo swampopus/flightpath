@@ -184,7 +184,7 @@ class _Student
 			$new_course->bool_transfer = true;
 			$new_course->course_id = $db_transfer_course_id;
 			$new_course->db_unassign_transfer_id = $db_id;
-
+		
 			$this->list_transfer_eqvs_unassigned->add($new_course);
 
 		}
@@ -643,6 +643,7 @@ class _Student
 			$new_course->course_num = $cur["course_num"];
 			$new_course->grade = $cur["grade"];
 			$new_course->term_id = $cur["term_id"];
+			$new_course->level_code = $cur["level_code"];
 			
 			// Is this grade supposed to be hidden from students (and this user is probably
 			// a student)
@@ -708,6 +709,7 @@ class _Student
 			$t_course = new Course();
 			$t_course->subject_id = $cur['subject_id'];
 			$t_course->course_num = $cur['course_num'];
+			$t_course->level_code = $cur['level_code'];
 			$t_course->course_id = $transfer_course_id;
 			$t_course->bool_transfer = true;
 			$t_course->institution_id = $institution_id;
@@ -721,6 +723,7 @@ class _Student
 			$new_course->hours_awarded = $cur['hours_awarded'] * 1;
 			$t_course->hours_awarded = $cur['hours_awarded'] * 1;
 			
+			$new_course->level_code = $t_course->level_code;
 			
 		  // Was this course worth 0 hours but they didn't fail it?
 			// If so, we need to set it to actually be 1 hour, and
