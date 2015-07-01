@@ -400,12 +400,17 @@ class _CourseList extends ObjList
 	/**
 	 * Sorts best-grade-first, as defined by the setting "grade_order", which is a CSV of
 	 * grades, best-first.  Ex:  A, B, C, D, F
+	 * 
+	 * If the student object is set to a student, we will use that's student's best grade for a course, rather
+	 * than the actual course's grade.  Generally, this can be left as set to null.   This is only for when we are
+	 * trying to organize a list of courses into the grade order, based on what a student has taken.  For example, if we want
+	 * to order a Group's list of courses based on what the student has taken and the grades they made.
 	 *
 	 */
-	function sort_best_grade_first() {
+	function sort_best_grade_first(Student $student = NULL) {
 
 	  
-	  $temp = csv_to_array(variable_get("grade_order", "A,B,C,D,F"));	  
+	  $temp = csv_to_array(variable_get("grade_order", "AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I"));	  
 	  // We will use array_flip to get back an assoc array where the grades are the keys and the indexes are the values.
 	  $temp = array_flip($temp);
 	  // Go through the grades and convert the integers to strings, padd with zeros so that everything is at least 3 digits.
@@ -425,7 +430,14 @@ class _CourseList extends ObjList
 	    
 			$c = $this->array_list[$t];
 			
-			$grade_value = $grades[$c->grade];
+			$use_grade = $c->grade;
+			
+			if ($student != null) {
+			  $use_grade = $student->get_best_grade_for_course($c);
+			  if (!$use_grade) $use_grade = "";
+			}
+			
+			$grade_value = $grades[$use_grade];
 			if ($grade_value == "") {
 			  // Couldn't find this grade in our array, so give it the unknown value.
 			  $grade_value = $unknown_grade_value;

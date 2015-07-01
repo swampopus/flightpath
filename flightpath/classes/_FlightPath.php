@@ -426,7 +426,9 @@ class _FlightPath
 			$group->group_id = 0;
 		}
 
-
+    $sort_policy = variable_get("initial_student_course_sort_policy", "alpha"); // will either be "alpha" or "grade"
+		
+		
 		$bool_disallow_graduate_credits = (variable_get("disallow_graduate_credits", "yes") == "yes") ? TRUE : FALSE;
 		$graduate_level_codes_array = csv_to_array(variable_get("graduate_level_codes", "GR"));		
 				
@@ -447,9 +449,18 @@ class _FlightPath
 			$hours_required = 999999;
 		}
 
-		//print_pre($list_requirements->to_string());
+		
 		$list_requirements->sort_smallest_hours_first();
+		// sort the requirement list by the best grades that the student has made?  Similar to the substitutions?
+		if ($sort_policy == "grade") {
+		  $list_requirements->sort_best_grade_first($student);
+		}
+		else if ($sort_policy == "alpha") {
+		  $list_requirements->sort_alphabetical_order();
+		}
+		
 		$list_requirements->sort_substitutions_first($student->list_substitutions, $group_id);
+				
 		$list_requirements->reset_counter();
 		while($list_requirements->has_more())
 		{

@@ -758,6 +758,28 @@ class _Student
 
 
 
+	/**
+	 * This function will find the best grade the student made on a particular course, and return it.
+	 * 
+	 * It will return FALSE if the student never took the course.
+	 *
+	 * @param unknown_type $course
+	 */
+	function get_best_grade_for_course(Course $course) {
+	  $c = $this->list_courses_taken->find_most_recent_match($course);
+	  
+	  if ($c) return $c->grade;
+	  
+	  
+	  // else
+	  return FALSE;
+	  
+	}
+	
+	
+	
+	
+	
 	
 	/**
 	 * Find a transfer eqv for this student, for this course in question.

@@ -1,12 +1,26 @@
 FlightPath 4.x Changelog
 ========================
 
+
+
+
+
+2015-07-01
+  Made various changes for a new beta feature, so that students grades can be assigned to groups by best grade first.  Files affected
+  were _CourseList.php, _Student.php, _FlightPath.php, advise.module, system.module.
+
+  Adjusted the .install files which come with FlightPath core modules, to always provide a default value for fields.  This is because
+  in MySQL strict mode, the installation fails if default values are not provided.
+  
+  Corrected a course_search.install, where it was recording a faculty_id as an int still, instead of varchar(30).
+  
+
 ----------------
 RELEASED 4.7.1
 ----------------
 
 
-2016-06-10
+2015-06-10
   Changed all CWIDs from int type to varchar(30) in the database, to accomodate schools with alpha-numeric cwids.  Also, added or modified indexes
   on table fields, hopefully to help with query speed.  Removed hard-coded requirements for CWIDs to be numeric.
   

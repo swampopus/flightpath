@@ -426,7 +426,7 @@ function install_display_db_form($msg = "") {
   $admin_pass2 = $_POST["admin_pass2"];
   $admin_name = $_POST["admin_name"];
   
-  
+  if ($db_port == "") $db_port = "3306";
   
   $pC = "";
 

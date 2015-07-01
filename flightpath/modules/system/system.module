@@ -997,7 +997,7 @@ function system_school_data_form() {
     "value" => variable_get("grade_order", ""),
     "description" => t("List all possible grades, separated by comma, from highest to lowest.  This is only needed if you
                       selected 'Best grade first' sort policy above.
-                      <br>Ex: A, AMID, B, BMID, C, CMID, CR, D, DMID, F, FMID, W, I"),
+                      <br>Ex: AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I"),
   );
   
   
