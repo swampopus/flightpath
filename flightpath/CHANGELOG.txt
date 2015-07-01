@@ -2,7 +2,20 @@ FlightPath 4.x Changelog
 ========================
 
 
+----------------
+RELEASED 4.7.2.1
+----------------
 
+
+
+2015-07-01
+  Made more changes so that MySQL in strict mode would work normally-- specifically, removed the NOT NULL requirement from
+  text fields on install.
+
+
+----------------
+RELEASED 4.7.2
+----------------
 
 
 2015-07-01

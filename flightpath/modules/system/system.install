@@ -203,7 +203,7 @@ CREATE TABLE `advising_comments` (
   `student_id` varchar(30) NOT NULL DEFAULT '0',
   `faculty_id` varchar(30) NOT NULL DEFAULT '0',
   `term_id` varchar(20) NOT NULL DEFAULT '',
-  `comment` text NOT NULL,
+  `comment` text,
   `posted` int(10) unsigned NOT NULL DEFAULT '0',
   `access_type` varchar(20) NOT NULL DEFAULT '',
   `delete_flag` tinyint(4) NOT NULL DEFAULT '0',
@@ -265,13 +265,13 @@ CREATE TABLE `courses` (
   `subject_id` varchar(10) NOT NULL DEFAULT '',
   `course_num` varchar(10) NOT NULL DEFAULT '',
   `catalog_year` int(11) NOT NULL DEFAULT '0',
-  `title` text NOT NULL,
-  `description` text NOT NULL,
+  `title` text,
+  `description` text,
   `min_hours` decimal(8,4) NOT NULL DEFAULT '0.0000',
   `max_hours` decimal(8,4) NOT NULL DEFAULT '0.0000',
   `repeat_hours` decimal(8,4) NOT NULL DEFAULT '0.0000',
   `exclude` tinyint(4) NOT NULL DEFAULT '0',
-  `data_entry_comment` text NOT NULL,
+  `data_entry_comment` text,
   `delete_flag` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `course_id` (`course_id`),
@@ -324,7 +324,7 @@ CREATE TABLE `degree_tracks` (
   `track_code` varchar(10) NOT NULL DEFAULT '',
   `track_title` varchar(100) NOT NULL DEFAULT '',
   `track_short_title` varchar(50) NOT NULL DEFAULT '',
-  `track_description` text NOT NULL,
+  `track_description` text,
   PRIMARY KEY (`track_id`)
 );  ";
 db_query($q);
@@ -337,8 +337,8 @@ CREATE TABLE `degrees` (
   `degree_type` varchar(20) NOT NULL DEFAULT '',
   `degree_class` varchar(5) NOT NULL DEFAULT '',
   `title` varchar(200) NOT NULL DEFAULT '',
-  `public_note` text NOT NULL,
-  `semester_titles_csv` text NOT NULL,
+  `public_note` text,
+  `semester_titles_csv` text,
   `catalog_year` int(11) NOT NULL DEFAULT '2006',
   `exclude` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -353,13 +353,13 @@ CREATE TABLE `draft_courses` (
   `subject_id` varchar(10) NOT NULL DEFAULT '',
   `course_num` varchar(10) NOT NULL DEFAULT '',
   `catalog_year` int(11) NOT NULL DEFAULT '2006',
-  `title` text NOT NULL,
-  `description` text NOT NULL,
+  `title` text,
+  `description` text,
   `min_hours` decimal(8,4) NOT NULL DEFAULT '0.0000',
   `max_hours` decimal(8,4) NOT NULL DEFAULT '0.0000',
   `repeat_hours` decimal(8,4) NOT NULL DEFAULT '0.0000',
   `exclude` tinyint(4) NOT NULL DEFAULT '0',
-  `data_entry_comment` text NOT NULL,
+  `data_entry_comment` text,
   `delete_flag` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `course_id` (`course_id`),
@@ -397,7 +397,7 @@ CREATE TABLE `draft_degree_tracks` (
   `track_code` varchar(10) NOT NULL DEFAULT '',
   `track_title` varchar(100) NOT NULL DEFAULT '',
   `track_short_title` varchar(50) NOT NULL DEFAULT '',
-  `track_description` text NOT NULL,
+  `track_description` text,
   PRIMARY KEY (`track_id`)
 ); ";
 db_query($q);
@@ -410,8 +410,8 @@ CREATE TABLE `draft_degrees` (
   `degree_type` varchar(20) NOT NULL DEFAULT '',
   `degree_class` varchar(5) NOT NULL DEFAULT '',
   `title` varchar(200) NOT NULL DEFAULT '',
-  `public_note` text NOT NULL,
-  `semester_titles_csv` text NOT NULL,
+  `public_note` text,
+  `semester_titles_csv` text,
   `catalog_year` int(11) NOT NULL DEFAULT '2006',
   `exclude` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -440,12 +440,12 @@ CREATE TABLE `draft_groups` (
   `group_id` int(11) NOT NULL DEFAULT '0',
   `group_name` varchar(200) NOT NULL DEFAULT '',
   `title` varchar(255) NOT NULL DEFAULT '',
-  `definition` text NOT NULL,
-  `icon_filename` text NOT NULL,
+  `definition` text,
+  `icon_filename` text,
   `catalog_year` int(11) NOT NULL DEFAULT '2006',
   `priority` int(11) NOT NULL DEFAULT '50',
   `delete_flag` tinyint(4) NOT NULL DEFAULT '0',
-  `data_entry_comment` text NOT NULL,
+  `data_entry_comment` text,
   PRIMARY KEY (`id`),
   KEY `group_id` (`group_id`),
   KEY `group_name` (`group_name`),
@@ -457,7 +457,7 @@ db_query($q);
 $q = "
 CREATE TABLE `draft_instructions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `instruction` text NOT NULL,
+  `instruction` text,
   PRIMARY KEY (`id`)
 );";
 db_query($q);
@@ -498,12 +498,12 @@ CREATE TABLE `groups` (
   `group_id` int(11) NOT NULL DEFAULT '0',
   `group_name` varchar(200) NOT NULL DEFAULT '',
   `title` varchar(255) NOT NULL DEFAULT '',
-  `definition` text NOT NULL,
-  `icon_filename` text NOT NULL,
+  `definition` text,
+  `icon_filename` text,
   `catalog_year` int(11) NOT NULL DEFAULT '2006',
   `priority` int(11) NOT NULL DEFAULT '50',
   `delete_flag` tinyint(4) NOT NULL DEFAULT '0',
-  `data_entry_comment` text NOT NULL,
+  `data_entry_comment` text,
   PRIMARY KEY (`id`),
   KEY `group_id` (`group_id`),
   KEY `group_name` (`group_name`),
@@ -516,17 +516,17 @@ $q = "
 CREATE TABLE `menu_router` (
   `path` varchar(255) NOT NULL,
   `access_callback` varchar(255) NOT NULL DEFAULT '',
-  `access_arguments` text NOT NULL,
+  `access_arguments` text,
   `page_callback` varchar(255) NOT NULL DEFAULT '',
-  `page_arguments` text NOT NULL,
+  `page_arguments` text,
   `title` varchar(255) NOT NULL DEFAULT '',
-  `description` text NOT NULL,
+  `description` text,
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `tab_family` varchar(255) NOT NULL DEFAULT '',
   `tab_parent` varchar(255) NOT NULL DEFAULT '',
   `weight` int(11) NOT NULL DEFAULT '0',
   `icon` varchar(255) NOT NULL DEFAULT '',
-  `page_settings` text NOT NULL,
+  `page_settings` text,
   `file` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`path`),
   KEY `type` (`type`),
@@ -539,12 +539,12 @@ CREATE TABLE `modules` (
   `path` varchar(255) NOT NULL,
   `name` varchar(100) NOT NULL DEFAULT '',
   `version` varchar(20) NOT NULL DEFAULT '',
-  `requires` text NOT NULL,
+  `requires` text,
   `enabled` int(11) NOT NULL DEFAULT '0',
   `weight` int(11) NOT NULL DEFAULT '0',
   `type` varchar(20) NOT NULL DEFAULT '',
   `schema` int(11) NOT NULL DEFAULT '0',
-  `info` text NOT NULL,
+  `info` text,
   PRIMARY KEY (`path`)
 ); ";
 db_query($q);
@@ -608,7 +608,7 @@ db_query($q);
 $q = "
 CREATE TABLE `student_settings` (
   `student_id` varchar(30) NOT NULL,
-  `settings` text NOT NULL,
+  `settings` text,
   `posted` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`student_id`)
 ); ";
@@ -628,7 +628,7 @@ CREATE TABLE `student_substitutions` (
   `sub_term_id` varchar(20) NOT NULL DEFAULT '',
   `sub_transfer_flag` tinyint(4) NOT NULL DEFAULT '0',
   `sub_hours` decimal(8,4) NOT NULL DEFAULT '0.0000',
-  `sub_remarks` text NOT NULL,
+  `sub_remarks` text,
   `posted` int(10) unsigned NOT NULL DEFAULT '0',
   `delete_flag` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -737,7 +737,7 @@ CREATE TABLE `transfer_courses` (
   `subject_id` varchar(10) NOT NULL DEFAULT '',
   `course_num` varchar(10) NOT NULL DEFAULT '',
   `title` varchar(100) NOT NULL DEFAULT '',
-  `description` text NOT NULL,
+  `description` text,
   `min_hours` decimal(8,4) NOT NULL DEFAULT '0.0000',
   `max_hours` decimal(8,4) NOT NULL DEFAULT '0.0000',
   PRIMARY KEY (`transfer_course_id`),
@@ -785,7 +785,7 @@ db_query($q);
 $q = "
 CREATE TABLE `user_settings` (
   `user_id` int(11) NOT NULL,
-  `settings` text NOT NULL,
+  `settings` text,
   `posted` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`user_id`)
 ); ";
@@ -815,7 +815,7 @@ db_query($q);
 $q = "
 CREATE TABLE `variables` (
   `name` varchar(255) NOT NULL,
-  `value` text NOT NULL,
+  `value` text,
   PRIMARY KEY (`name`)
 ); ";
 db_query($q);
@@ -827,12 +827,12 @@ CREATE TABLE `watchdog` (
   `user_name` varchar(50) NOT NULL DEFAULT '',
   `cwid` varchar(30) NOT NULL DEFAULT '',
   `type` varchar(100) NOT NULL DEFAULT '',
-  `message` text NOT NULL,
-  `variables` text NOT NULL,
+  `message` text,
+  `variables` text,
   `severity` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `extra_data` varchar(255) NOT NULL DEFAULT '',
-  `location` text NOT NULL,
-  `referer` text NOT NULL,
+  `location` text,
+  `referer` text,
   `ip` varchar(64) NOT NULL DEFAULT '',
   `is_mobile` tinyint(4) NOT NULL DEFAULT '0',
   `is_student` tinyint(4) NOT NULL DEFAULT '0',

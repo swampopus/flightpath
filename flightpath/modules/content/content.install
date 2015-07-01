@@ -21,7 +21,7 @@ function content_install() {
         `user_id` int(10) unsigned NOT NULL DEFAULT '0',
         `type` varchar(255) NOT NULL DEFAULT '',
         `title` varchar(255) NOT NULL DEFAULT '',
-        `body` text NOT NULL,      
+        `body` text,      
         `settings` text NOT NULL,      
         `posted` int(10) unsigned NOT NULL DEFAULT '0',
         `updated` int(10) unsigned NOT NULL DEFAULT '0',
