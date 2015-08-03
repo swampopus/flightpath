@@ -826,7 +826,7 @@ function system_school_data_form() {
   
   // Let's load the subjects...
   $subjects = "";
-  $query = "SELECT DISTINCT b.subject_id, a.title, a.college FROM courses b LEFT JOIN subjects a
+  $query = "SELECT DISTINCT b.subject_id, a.title, a.college FROM draft_courses b LEFT JOIN subjects a
               ON (a.subject_id = b.subject_id)
               WHERE exclude = 0              
               ORDER BY b.subject_id
@@ -854,7 +854,11 @@ function system_school_data_form() {
                         in popups and the Course Search, for example), one per line
                         in this format:") . "<br>SUBJ ~ COLLEGE ~ Title<br>" . t("For example:") . "
                         <br>&nbsp; ACCT ~ BA ~ Accounting<br>&nbsp; BIOL ~ AS ~ Biology<br>" . t("Notice
-                        the separator between the code, college, and title is 1 tilde (~). Whatespace is ignored."),
+                        the separator between the code, college, and title is 1 tilde (~). Whatespace is ignored.
+                        <br><b>Important:</b> This field cannot be set up until you have your courses
+                        fully entered.  Once that occurs, the course
+                        subjects will automatically appear in this box, where you can then assign the college code
+                        and subject title."),
   );  
   
   
@@ -905,7 +909,11 @@ function system_school_data_form() {
                        ") . "<br>MAJOR_CODE ~ COLLEGE_CODE<br>" . t("For example:") . "
                        <br>&nbsp; ACCT ~ AE
                        <br>&nbsp; BUSN ~ SB<br>" . t("Notice
-                        the separator between the codes is 1 tilde (~). Whitespace is ignored."),
+                        the separator between the codes is 1 tilde (~). Whitespace is ignored.
+                        <br><b>Important:</b> This field cannot be set up until you have your degrees
+                        entered.  Once that occurs, the degree major codes
+                        will automatically appear in this box, where you can then assign the college code.
+                        "),
   );
   
   

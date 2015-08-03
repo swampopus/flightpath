@@ -336,12 +336,12 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
     $popup_help_link = fp_get_js_alert_link($popup_description, "[?]", "form-popup-description");
   }
 
-  $element_extra_css = "";
+  $element_error_css = "";
   if (is_array($_SESSION["fp_form_errors"])) {
     foreach ($_SESSION["fp_form_errors"] as $err) {
       if ($err["name"] == $name) {
         // There is an error on this element!  Add an extra CSS element.
-        $element_extra_css .= "form-element-error";
+        $element_error_css .= "form-element-error";
       }
     }
   }
@@ -356,12 +356,19 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   
   
   if ($type != "markup") {
-    $rtn .= "<div id='element-wrapper-$name' class='form-element element-type-$type $element_extra_css'>";
+    $rtn .= "<div id='element-wrapper-$name' class='form-element element-type-$type'>";
   }
 
   if ($prefix) {
     $rtn .= $prefix;
   }
+
+
+  if ($type != "markup") {
+    $rtn .= "<div id='element-inner-wrapper-$name' class='form-element element-type-$type $element_error_css'>";
+  }
+
+
 
   $ast = "";
   if ($required) {
@@ -485,13 +492,18 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
     $rtn .= "<div class='form-element-description'>$description</div>";
   }
 
+  if ($type != "markup") {
+    $rtn .= "</div>";  // close the inner wrapper
+  }
+
+
 
   if ($suffix) {
     $rtn .= $suffix;
   }
 
   if ($type != "markup") {
-    $rtn .= "</div>";
+    $rtn .= "</div>";  // close the over-all wrapper
   }
 
 

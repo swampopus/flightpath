@@ -1,11 +1,24 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-08-03
+  Changed how form_render_element works, to add an inner wrapper which gets the error class, inside of the 
+  prefix and suffix, if they exist.
+  
+  Changed user module to allow users to enter student's courses.
+
+
+2015-07-02
+  Added explanation text to the Config School Data form, to better explain how the Subjects box works, as well as the Degree Colleges box.
+  
+  Also made a change so that the Subjects box pulls from draft_courses table, and not the courses table.
+
+  Set default db port on installation.
+  
 
 ----------------
 RELEASED 4.7.2.1
 ----------------
-
 
 
 2015-07-01
