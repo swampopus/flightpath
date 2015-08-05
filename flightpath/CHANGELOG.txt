@@ -1,6 +1,11 @@
 FlightPath 4.x Changelog
 ========================
 
+----------------
+RELEASED 4.8
+----------------
+
+
 2015-08-05
   Changed user module to allow entering of faculty advisees (to populate the advisor_student table)
   
