@@ -1,6 +1,10 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-08-05
+  Changed user module to allow entering of faculty advisees (to populate the advisor_student table)
+  
+
 2015-08-03
   Changed how form_render_element works, to add an inner wrapper which gets the error class, inside of the 
   prefix and suffix, if they exist.

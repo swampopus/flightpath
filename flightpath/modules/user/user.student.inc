@@ -25,7 +25,7 @@ function user_student_edit_student_courses_form() {
   $tab_array[0]["active"] = FALSE;
   $tab_array[0]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-student-user", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";
       
-  $tab_array[1]["title"] = t("Edit Student Courses (beta)");
+  $tab_array[1]["title"] = t("Edit Student Courses");
   $tab_array[1]["active"] = TRUE;
   $tab_array[1]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-student-user/courses", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";
       
@@ -306,7 +306,7 @@ function user_edit_student_user_form() {
   $tab_array[0]["active"] = TRUE;
   $tab_array[0]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-student-user", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";
       
-  $tab_array[1]["title"] = t("Edit Student Courses (beta)");
+  $tab_array[1]["title"] = t("Edit Student Courses");
   $tab_array[1]["active"] = FALSE;
   $tab_array[1]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-student-user/courses", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";
       

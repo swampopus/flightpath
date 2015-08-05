@@ -113,7 +113,35 @@ function user_menu() {
     ),   
     "type" => MENU_TYPE_NORMAL_ITEM,
     "tab_parent" => "admin-tools/admin",
-  );     
+  );   
+  
+  $items["admin/users/edit-user/advisees"] = array(
+    "title" => "Edit Faculty/Staff User Advisees",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("user_edit_user_advisees_form"),
+    "access_arguments" => array("manage_users"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to Users list",
+          "path" => "admin/users/faculty",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),                
+      ),
+    ),   
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",
+  );    
+  
+    
       
   $items["admin/users/edit-student-user"] = array(
     "title" => "Edit Student",
@@ -522,6 +550,174 @@ function user_user_roles_form_submit($form, $form_state) {
 }
 
 
+/**
+ * This form lets us populate the advisor_student table
+ */
+function user_edit_user_advisees_form() {
+
+  $form = array();
+  
+  $faculty_cwid = $_REQUEST["faculty_cwid"];
+  $user_id = db_get_user_id_from_cwid($faculty_cwid);
+
+  // Figure out what the page's sub-tabs should be, and set them.
+  $tab_array = array();
+  $tab_array[0]["title"] = t("Edit Faculty/Staff User");
+  $tab_array[0]["active"] = FALSE;
+  $tab_array[0]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "\"";
+      
+  $tab_array[1]["title"] = t("Edit Faculty Advisees");
+  $tab_array[1]["active"] = TRUE;
+  $tab_array[1]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user/advisees", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "\"";
+      
+  fp_set_page_sub_tabs($tab_array);  
+
+
+  
+  if ($faculty_cwid != "new") {  
+    $name = fp_get_faculty_name($faculty_cwid);  
+    fp_set_title(t("Edit Faculty/Staff Advisees of @name (@id)", array("@name" => $name, "@id" => $faculty_cwid)));
+  }
+  else {
+    // A new student!  We can't create a new student until a CWID is assigned.
+    fp_set_title(t("Create New Faculty/Staff User"));
+    $form["mark_sorry"] = array(
+      "type" => "markup",
+      "value" => "<p>" . t("Sorry, but you cannot add advisees to this faculty member until the faculty member
+                      has been fully created (and given a CWID).  Use the Edit Faculty/Staff User button above
+                      to return to that screen.") . "</p>",
+    );
+    return $form;
+  }
+  
+
+
+  $form["user_id"] = array(
+    "type" => "hidden",
+    "value" => $user_id,
+  );
+  
+  $form["perform_action2"] = array(
+    "type" => "hidden",
+    "value" => "",
+  );
+  
+  $form["faculty_cwid"] = array(
+    "type" => "hidden",
+    "value" => $faculty_cwid,
+  );    
+
+
+  // We are good to go... display the box for entering CWIDS
+  $form["markup_explain"] = array(
+    "value" => "<p>" . t("
+                If this faculty user is an advisor, you may enter their advisees' CWIDs in the box below, one
+                per line.  This will be used to populate the advisor_student table.
+                <br><br>
+                <i>Anything after a # sign will be ignored.  It is for your benefit only, it will NOT be saved.</i>
+                <br><br>
+                <b>Important:</b> If you have any routines which modify or edit the advisor_student table,
+                this data will be overwritten.") . "</p>",
+        
+  );  
+
+  $contents = "";
+  $db = get_global_database_handler();
+  // begin by reading what's already there.
+  $res = db_query("SELECT * FROM advisor_student WHERE faculty_id = '?' ", $faculty_cwid);
+  while ($cur = db_fetch_array($res)) {
+    $contents .= trim($cur["student_id"]);
+    // If this student exists, get their name and other info as well, to help with display.
+    $name = $db->get_student_name($cur["student_id"]);
+    $major = $db->get_student_major_from_db($cur["student_id"]);
+    if ($name || $major) {
+      $contents .= "   #  $name - $major ";
+    }
+    $contents .= "\n";
+  }
+  $contents = trim($contents);  
+  
+  $form["students"] = array(
+    "type" => "textarea",
+    "label" => t("Advisee Student CWIDs:"),
+    "value" => $contents,
+    "rows" => 20,
+    "cols" => 50,
+    "description" => t("Enter advisee student CWIDs for this faculty user, one per line."),
+  );
+  
+  $form["warn_me"] = array(
+    "type" => "checkbox",
+    "label" => t("Warn me if I enter a student CWID which doesn't exist in the students/users table yet (good for catching typos)"),    
+    "value" => "yes",
+  );
+  
+  $form["submit_btn"] = array(
+    "type" => "submit",
+    "value" => "Submit",
+  );  
+  
+  
+  
+  return $form;    
+  
+} // edit_user_advisees_form
+
+
+/**
+ * Check to see if we entered a CWID which doesn't exist in students table.
+ */
+function user_edit_user_advisees_form_validate($form, $form_state) {
+      
+  if ($form_state["values"]["warn_me"] === TRUE) {
+    $students = trim($form_state["values"]["students"]);
+    $lines = explode("\n", $students);
+    foreach($lines as $line) {
+      $temp = explode("#", $line);
+      $line = trim($temp[0]);
+      if ($line == "") continue;
+      
+      // $line should now contain the CWID
+      
+      // Otherwise, check that it exists.
+      $uid = db_get_user_id_from_cwid($line, "student");
+      if ($uid < 2 || !$uid) {
+        form_error("students", t("The CWID %cwid could not be found in the users table as a student.  Your data has NOT been saved.", array("%cwid" => $line)));
+      }
+      
+    }
+  }
+    
+}
+
+
+/**
+ * Save to the advisor_student table
+ */
+function user_edit_user_advisees_form_submit($form, $form_state) {
+
+  // Begin by clearing the table for this advisor.
+  $faculty_cwid = trim($form_state["values"]["faculty_cwid"]);
+  db_query("DELETE FROM advisor_student WHERE faculty_id = '?' ", $faculty_cwid);
+      
+  $students = trim($form_state["values"]["students"]);
+  $lines = explode("\n", $students);
+  foreach($lines as $line) {
+    $temp = explode("#", $line);
+    $line = trim($temp[0]);
+    if ($line == "") continue;
+    // Okay, $line should now contain the CWID.
+    // Insert into db.  (use REPLACE to prevent an error if data was entered twice)
+    db_query("REPLACE INTO advisor_student (faculty_id, student_id)
+              VALUES ('?', '?') ", $faculty_cwid, $line);        
+    
+  }
+
+  fp_add_message(t("The advisees have been updated for this faculty member."));
+    
+}
+
+
 
 
 
@@ -541,6 +737,26 @@ function user_edit_user_form() {
   
   fp_set_title(t("Edit Faculty/Staff User @name (@id)", array("@name" => $name, "@id" => $faculty_cwid)));
 
+  
+  // Figure out what the page's sub-tabs should be, and set them.
+  $tab_array = array();
+  $tab_array[0]["title"] = t("Edit Faculty/Staff User");
+  $tab_array[0]["active"] = TRUE;
+  $tab_array[0]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "\"";
+      
+  $tab_array[1]["title"] = t("Edit Faculty Advisees");
+  $tab_array[1]["active"] = FALSE;
+  $tab_array[1]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user/advisees", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "\"";
+      
+  fp_set_page_sub_tabs($tab_array);  
+  
+  
+  
+  
+  
+  
+  
+  
   $user_roles = system_get_roles_for_user($user_id);
   //fpm($user_roles);
   $default_values = array();
