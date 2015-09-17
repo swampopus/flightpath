@@ -1314,7 +1314,7 @@ class _CourseList extends ObjList
 	 * @param bool $bool_use_ignore_list
 	 * @return int
 	 */
-	function count_hours($requirement_type = "", $bool_use_ignore_list = false, $bool_correct_ghost_hour = true, $bool_force_zero_hours_to_one_hour = false)
+	function count_hours($requirement_type = "", $bool_use_ignore_list = false, $bool_correct_ghost_hour = true, $bool_force_zero_hours_to_one_hour = false, $bool_exclude_all_transfer_credits = FALSE)
 	{
 		// Returns how many hours are being represented in this courseList.
 		// A requirement type of "uc" is the same as "c"
@@ -1374,6 +1374,15 @@ class _CourseList extends ObjList
 			    $h_get_hours = 1;
 			  }
 			}
+			
+			
+			// Are we excluding transfer credits?
+			if ($bool_exclude_all_transfer_credits && $course->bool_transfer) {			  
+			  continue;
+			}			
+			
+			
+			
 			
 			
 			if ($requirement_type == "")
@@ -1623,7 +1632,7 @@ class _CourseList extends ObjList
 	 * @param bool $bool_ignore_enrolled
 	 * @return int
 	 */
-	function count_credit_hours($requirement_type = "", $bool_use_ignore_list = false, $bool_ignore_enrolled = false, $bool_qpts_grades_only = FALSE)
+	function count_credit_hours($requirement_type = "", $bool_use_ignore_list = false, $bool_ignore_enrolled = false, $bool_qpts_grades_only = FALSE, $bool_exclude_all_transfer_credits = FALSE)
 	{
 		// Similar to count_hours, but this will only
 		// count courses which have been taken (have a grade).
@@ -1710,6 +1719,14 @@ class _CourseList extends ObjList
 			
 			if ($course->grade != "")// || !($course->course_list_fulfilled_by->is_empty))
 			{			  
+
+			  			  
+			  // Make sure we aren't trying to exclude any transfer credits.
+			  if ($bool_exclude_all_transfer_credits && $course->bool_transfer) {			   
+			    //if ($course->subject_id == "ENGL" && $course->course_num == "2238" && $course->bool_transfer) fpm($course);
+			   continue;			   			    			    
+			  }			  
+			  
 			  			  
 			  // If we require the grade to be a qpts_grade, then check that now.
 			  if ($bool_qpts_grades_only && !isset($qpts_grades[$course->grade])) {
@@ -1739,7 +1756,15 @@ class _CourseList extends ObjList
       			    continue;
       			  }
 						  
-						  
+
+      			  // Make sure we aren't trying to exclude any transfer credits.
+      			  if ($bool_exclude_all_transfer_credits && $cc->bool_transfer) {			
+      			    //fpm($requirement_type);
+      			    //fpm($cc);   
+      			    continue;			   			    			    
+      			  }							  
+      			  
+      			  
 							$h = $cc->substitution_hours;
 														
 							
@@ -1775,7 +1800,7 @@ class _CourseList extends ObjList
 	 * @param bool $bool_ignore_enrolled
 	 * @return int
 	 */
-	function count_credit_quality_points($requirement_type = "", $bool_use_ignore_list = false, $bool_ignore_enrolled = false)
+	function count_credit_quality_points($requirement_type = "", $bool_use_ignore_list = false, $bool_ignore_enrolled = false, $bool_exclude_all_transfer_credits = FALSE)
 	{
 
 		$points = 0;
@@ -1822,6 +1847,16 @@ class _CourseList extends ObjList
 
 			if ($course->grade != "")
 			{
+
+			  // Make sure we aren't trying to exclude any transfer credits.
+			  if ($bool_exclude_all_transfer_credits) {
+			    if ($course->bool_transfer) {
+			     //fpm($course);
+			     continue;
+			    }			    			    
+			  }
+			  
+			  
 				if ($requirement_type == "")
 				{
 				  $p = $course->get_quality_points();
@@ -1847,6 +1882,18 @@ class _CourseList extends ObjList
 						$cc = $course->course_list_fulfilled_by->get_first();
 						if ($cc->bool_substitution)
 						{
+						  
+						  
+      			  // Make sure we aren't trying to exclude any transfer credits.
+      			  if ($bool_exclude_all_transfer_credits) {
+      			    if ($cc->bool_transfer) {
+      			     //fpm($course);
+      			     continue;
+      			    }			    
+      			    
+      			  }
+
+						  
 						  
 							//$h = $cc->substitution_hours;
 							

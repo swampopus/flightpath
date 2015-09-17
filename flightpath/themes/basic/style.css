@@ -23,6 +23,10 @@
   font-size: 0.8em;
 }
 
+.page-content {
+  background-color: white;
+}
+
 
 .sub-tabs {
   margin-bottom: 10px;

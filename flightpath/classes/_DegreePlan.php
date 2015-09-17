@@ -92,24 +92,18 @@ class _DegreePlan
       $this->gpa_calculations[$code]["total_hours"] = $this->get_progress_hours($code);
       $this->gpa_calculations[$code]["fulfilled_hours"] = $this->get_progress_hours($code, FALSE);
       $this->gpa_calculations[$code]["qpts_hours"] = $this->get_progress_hours($code, FALSE, TRUE);      
+      
+      
+      // Get ONLY local hours, too....
+      $this->gpa_calculations[$code . "_local"]["total_hours"] = $this->get_progress_hours($code, TRUE, FALSE, TRUE);
+      $this->gpa_calculations[$code . "_local"]["fulfilled_hours"] = $this->get_progress_hours($code, FALSE, FALSE, TRUE);
+      $this->gpa_calculations[$code . "_local"]["qpts_hours"] = $this->get_progress_hours($code, FALSE, TRUE, TRUE);     
+      
+      
     }
     
     
     
-    /*
-    $this->total_major_hours = $this->get_progress_hours("m");
-    $this->total_core_hours = $this->get_progress_hours("c");
-    $this->total_degree_hours = $this->get_progress_hours("");
-    
-    $this->fulfilled_major_hours = $this->get_progress_hours("m", false);
-    $this->fulfilled_core_hours = $this->get_progress_hours("c", false);
-    $this->fulfilled_degree_hours = $this->get_progress_hours("", false);
-           
-
-    $this->major_qpts_hours = $this->get_progress_hours("m", false, TRUE);
-    $this->core_qpts_hours = $this->get_progress_hours("c", false, TRUE);
-    $this->degree_qpts_hours = $this->get_progress_hours("", false, TRUE);
-    */
      
   }
 
@@ -130,6 +124,9 @@ class _DegreePlan
       if ($code == 'x') continue;
       
       $this->gpa_calculations[$code]["qpts"] = $this->get_progress_quality_points($code);
+      
+      // Get only local courses, too...
+      $this->gpa_calculations[$code . "_local"]["qpts"] = $this->get_progress_quality_points($code, TRUE);
     }
         
     
@@ -142,7 +139,7 @@ class _DegreePlan
   }
   
 
-  function get_progress_hours($requirement_type = "", $bool_required_hours_only = TRUE, $bool_qpts_grades_only = FALSE)
+  function get_progress_hours($requirement_type = "", $bool_required_hours_only = TRUE, $bool_qpts_grades_only = FALSE, $bool_exclude_all_transfer_credits = FALSE)
   {
     // Returns the number of hours required (or fulfilled) in a degree plan
     // for courses & groups with the specified requirement_type.
@@ -163,9 +160,9 @@ class _DegreePlan
 
       if ($bool_required_hours_only == true)
       {
-        $hours += $sem->list_courses->count_hours($requirement_type, true, false);
+        $hours += $sem->list_courses->count_hours($requirement_type, true, false, FALSE, $bool_exclude_all_transfer_credits);
       } else {
-        $temp = $sem->list_courses->count_credit_hours($requirement_type, true, true, $bool_qpts_grades_only);
+        $temp = $sem->list_courses->count_credit_hours($requirement_type, true, true, $bool_qpts_grades_only, $bool_exclude_all_transfer_credits);
                 
         $hours += $temp;
       }
@@ -192,7 +189,7 @@ class _DegreePlan
       $g_hours = $g->hours_required;
       if ($bool_required_hours_only == false)
       { // only count the fulfilled hours, then.        
-        $g_hours = $g->get_fulfilled_hours(true, false, true, -1, true, $bool_qpts_grades_only, $requirement_type);        
+        $g_hours = $g->get_fulfilled_hours(true, false, true, -1, true, $bool_qpts_grades_only, $requirement_type, $bool_exclude_all_transfer_credits);        
             
       }
 
@@ -234,7 +231,7 @@ class _DegreePlan
    * @param unknown_type $bool_required_hours_only
    * @return unknown
    */
-  function get_progress_quality_points($requirement_type = "") {
+  function get_progress_quality_points($requirement_type = "", $bool_exclude_all_transfer_credits = FALSE) {
     // Returns the number of hours required (or fulfilled) in a degree plan
     // for courses & groups with the specified requirement_type.
     // ex:  "m", "s", etc.  leave blank for ALL required hours.
@@ -250,7 +247,7 @@ class _DegreePlan
     {
       $sem = $this->list_semesters->get_next();
 
-      $p = $sem->list_courses->count_credit_quality_points($requirement_type, true, true);    
+      $p = $sem->list_courses->count_credit_quality_points($requirement_type, true, true, $bool_exclude_all_transfer_credits);
       $points = $points + $p;
       
     }
@@ -270,7 +267,7 @@ class _DegreePlan
       // skip it.
       if ($g->requirement_type == 'x') continue;
       
-      $g_points = $g->get_fulfilled_quality_points(TRUE, -1, TRUE, TRUE, $requirement_type);
+      $g_points = $g->get_fulfilled_quality_points(TRUE, -1, TRUE, TRUE, $requirement_type, $bool_exclude_all_transfer_credits);
       $points = $points + $g_points;       
 
       

@@ -1,6 +1,19 @@
 FlightPath 4.x Changelog
 ========================
 
+
+2015-09-17
+  Added small changes to DegreePlan, CourseList, and Group, to support features in the new Audit module. Specifically, the ability
+  to exclude transfer credits from points calculations, if desired.
+  
+
+2015-09-10
+  Minor tweaks to style.css files in basic and classic (included) themes, to set page-content to white background for
+  improved readibility on pages like the permissions page, where it might stretch past the page.
+
+  Added option for viewing semi-permanent URLs for the blank degrees, to make them more accessible, and also
+  to auto-set the catalog year to whatever the current one is set to.
+
 ----------------
 RELEASED 4.8
 ----------------

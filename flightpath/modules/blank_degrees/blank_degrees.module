@@ -79,6 +79,39 @@ function blank_degrees_display_blank_degree() {
   $blank_print = $_REQUEST["blank_print"];
   $blank_view = $_REQUEST["blank_view"];
   
+  // If we used the word "current" for catalog_year, then find out what the current is.
+  if (strtolower($blank_catalog_year) == "current") {
+    $blank_catalog_year = variable_get("current_catalog_year", 2006);    
+  }
+
+  // If the blank_degree_id begins with "major_code_" then figure out the degree based on major_code.
+  if (strstr($blank_degree_id, "major_code_")) {
+    $blank_major_code = str_replace("major_code_", "", $blank_degree_id);
+    // Okay, figure out the degree id based on the major code and catalog year.
+    $db = get_global_database_handler();
+    $blank_degree_id = $db->get_degree_id($blank_major_code, $blank_catalog_year);
+    if (!$blank_degree_id) {
+      // Couldn't be found!
+      $rtn = "<br>Checking for major code: $blank_major_code, year: $blank_catalog_year
+              <br><br>
+              Sorry, but that major code/track combination and catalog year could not be found.  Please check your URL and try again.";
+      return $rtn;
+    }
+  }
+  else {
+    // Find out the major_code for this blank_degree_id...
+    $blank_degree = new DegreePlan($blank_degree_id, NULL, TRUE);
+    $blank_major_code = $blank_degree->major_code;
+    // If there is a track, tack it on.
+    if ($blank_degree->track_code != "") {
+      if (!strstr($blank_major_code, "|")) $blank_major_code .= "|";
+      $blank_major_code .= "_" . $blank_degree->track_code;
+    }
+    
+    
+  }
+      
+  
   $rtn = "";
   
   // Are we in draft mode?
@@ -124,7 +157,25 @@ function blank_degrees_display_blank_degree() {
   
   $rtn .= "<table class='fp-semester-table'>";
   $rtn .= $screen->display_screen();
-  $rtn .= "</table>";
+  $rtn .= "</table><br><br>";
+  
+
+  if (user_has_permission("blank_degrees_view_url_options") && !$screen->bool_print) {
+    // If the user has permissions, show them the extra URL options.  (but don't bother in print mode)
+    $rtn .= fp_render_c_fieldset("
+              <div style='font-size: 0.85em;'>
+                " . t("This degree may be linked to directly using the following URLs:") . "
+                <ul>
+                  <li>Internal ID for $blank_catalog_year: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year", FALSE) . "'>Link</a></li>
+                  <li>Major-code $blank_major_code for $blank_catalog_year: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=major_code_$blank_major_code&blank_catalog_year=$blank_catalog_year", FALSE) . "'>Link</a></li>
+                  <li>Major-code $blank_major_code always <b>current</b> catalog: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=major_code_$blank_major_code&blank_catalog_year=current", FALSE) . "'>Link</a></li>
+                </ul>
+              </div>
+             ", t("View URL Options"), TRUE);
+  }
+  
+  
+  
   // Add in the required "advising variables"
   //$rtn .= $screen->get_hidden_advising_variables("save_draft");
       
@@ -155,6 +206,13 @@ function blank_degrees_display_blank_degree() {
 }
 
 
+function blank_degrees_perm() {
+  return array("blank_degrees_view_url_options" => array(
+                  "title" => t("View URL options"),
+                  "description" => t("View URL options at the bottom of blank degrees"), 
+  ));
+}
+
 
 
 /**
@@ -179,6 +237,12 @@ function blank_degrees_select_degree_form() {
     
   
   $blank_catalog_year = $_REQUEST["blank_catalog_year"];
+  
+  // If we used the word "current" for catalog_year, then find out what the current is.
+  if (strtolower($blank_catalog_year) == "current") {
+    $blank_catalog_year = variable_get("current_catalog_year", 2006);    
+  }
+  
   if ($blank_catalog_year == "") {
     // The user must first select the desired catalog year.
     
@@ -287,6 +351,7 @@ function blank_degrees_select_degree_form_submit($form, $form_state) {
   }
   else if ($form_state["values"]["blank_degree_id"] != "" && $form_state["values"]["blank_catalog_year"] != ""){
     // Send them to the blank degree page
+    
     fp_goto("blank-degrees/display", "blank_degree_id=" . $form_state["values"]["blank_degree_id"] . "&blank_catalog_year=" . $form_state["values"]["blank_catalog_year"]);  
     return;
   }

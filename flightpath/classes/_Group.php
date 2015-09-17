@@ -352,7 +352,7 @@ class _Group
 	}
 
 
-	function get_fulfilled_hours($bool_check_subgroups = true, $bool_count_advised = true, $bool_require_has_been_displayed = false, $only_count_semester_num = -1, $bool_ignore_enrolled = false, $bool_qpts_grades_only = FALSE, $requirement_type = "")
+	function get_fulfilled_hours($bool_check_subgroups = true, $bool_count_advised = true, $bool_require_has_been_displayed = false, $only_count_semester_num = -1, $bool_ignore_enrolled = false, $bool_qpts_grades_only = FALSE, $requirement_type = "", $bool_exclude_all_transfer_credits = FALSE)
 	{
 		// Returns how many hours have been used by the
 		// course fulfillments for this group...
@@ -390,12 +390,12 @@ class _Group
 
 				if (!$bool_require_has_been_displayed)
 				{ // The course does not have to have been displayed on the page yet.					
-					$count = $count + $c->course_list_fulfilled_by->count_credit_hours($requirement_type, false, false, $bool_qpts_grades_only);
+					$count = $count + $c->course_list_fulfilled_by->count_credit_hours($requirement_type, false, false, $bool_qpts_grades_only, $bool_exclude_all_transfer_credits);
 				} else {
 					if ($c->course_list_fulfilled_by->get_first()->bool_has_been_displayed == true)
 					{
 						
-						$h = $c->course_list_fulfilled_by->count_credit_hours($requirement_type, false, false, $bool_qpts_grades_only);
+						$h = $c->course_list_fulfilled_by->count_credit_hours($requirement_type, false, false, $bool_qpts_grades_only, $bool_exclude_all_transfer_credits);
 						$count = $count + $h;
 						
 					}
@@ -417,7 +417,7 @@ class _Group
 			{
 
 				$g = $this->list_groups->get_next();
-				$gc = $g->get_fulfilled_hours(true, $bool_count_advised, $bool_require_has_been_displayed, $only_count_semester_num, $bool_ignore_enrolled, $bool_qpts_grades_only, $requirement_type);
+				$gc = $g->get_fulfilled_hours(true, $bool_count_advised, $bool_require_has_been_displayed, $only_count_semester_num, $bool_ignore_enrolled, $bool_qpts_grades_only, $requirement_type, $bool_exclude_all_transfer_credits);
 				$count = $count + $gc;
 			}
 		}
@@ -439,7 +439,7 @@ class _Group
 	 * Returns the quality points earned for all of the courses in this group
 	 *
 	 */
-	function get_fulfilled_quality_points($bool_check_subgroups = true, $only_count_semester_num = -1, $bool_ignore_enrolled = false, $bool_require_has_been_displayed = false, $requirement_type = "")
+	function get_fulfilled_quality_points($bool_check_subgroups = true, $only_count_semester_num = -1, $bool_ignore_enrolled = false, $bool_require_has_been_displayed = false, $requirement_type = "", $bool_exclude_all_transfer_credits = FALSE)
 	{
 		$points = 0;
 		// if onlyCountSemesterNum != -1, then we will only count courses
@@ -472,7 +472,7 @@ class _Group
 				// Are we requiring that the course has been displayed?
         if (!$bool_require_has_been_displayed || ($bool_require_has_been_displayed && $c->course_list_fulfilled_by->get_first()->bool_has_been_displayed == TRUE))
 				{
-					$p = $c->course_list_fulfilled_by->count_credit_quality_points($requirement_type, TRUE, TRUE);
+					$p = $c->course_list_fulfilled_by->count_credit_quality_points($requirement_type, TRUE, TRUE, $bool_exclude_all_transfer_credits);
 				}				
   		  
   		  $points = $points + $p;
@@ -490,7 +490,7 @@ class _Group
 			{
 
 				$g = $this->list_groups->get_next();
-				$gp = $g->get_fulfilled_quality_points(TRUE, $only_count_semester_num, $bool_ignore_enrolled, $bool_require_has_been_displayed, $requirement_type);
+				$gp = $g->get_fulfilled_quality_points(TRUE, $only_count_semester_num, $bool_ignore_enrolled, $bool_require_has_been_displayed, $requirement_type, $bool_exclude_all_transfer_credits);
 				$points = $points + $gp;
 			}
 		}
