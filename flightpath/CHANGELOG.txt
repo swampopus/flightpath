@@ -1,6 +1,16 @@
 FlightPath 4.x Changelog
 ========================
 
+
+
+
+
+-------  Beginning of 4.10-dev Branch ----------
+  As part of coding for Morningside, I am creating this branch which will hopefully become integrated
+  into the main 4.x branch, possibly as version 4.10 of FlightPath.
+
+
+
 ----------------
 RELEASED 4.8.2
 ----------------
