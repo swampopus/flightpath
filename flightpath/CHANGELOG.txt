@@ -3,7 +3,15 @@ FlightPath 4.x Changelog
 
 
 
+2015-10-24
+  Modifying _DegreesPlan.php, as well as degree tables - Degree Class is now called Degree Level (undergrad or graduate).  Degree Class is now the classification
+  as in "Major", "Minor", "Concentration", etc, or whatever the user wants to set it up as.  
+  Adding a new field, "allow_dynamic".  It means the degree is eligible to be combined with another degree.
 
+  Edits to admin.degrees.inc to cope with these new fields.  Also small changes to the help text in admin.js.
+  
+  
+  
 
 -------  Beginning of 4.10-dev Branch ----------
   As part of coding for Morningside, I am creating this branch which will hopefully become integrated

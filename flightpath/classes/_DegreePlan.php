@@ -3,10 +3,10 @@
 
 class _DegreePlan
 {
-  public $major_code, $title, $degree_type, $degree_class, $short_description, $long_description;
+  public $major_code, $title, $degree_type, $degree_level, $degree_class, $short_description, $long_description;
   public $list_semesters, $list_degree_plans, $list_groups, $db, $degree_id, $catalog_year;
   public $track_code, $track_title, $track_description, $student_array_significant_courses;
-  public $bool_has_tracks, $array_semester_titles, $db_exclude;
+  public $bool_has_tracks, $array_semester_titles, $db_exclude, $db_allow_dynamic;
   public $public_note;
 
   public $total_major_hours, $total_core_hours, $total_degree_hours;
@@ -14,8 +14,6 @@ class _DegreePlan
   public $major_qpts_hours, $core_qpts_hours, $degree_qpts_hours;
   public $major_qpts, $degree_qpts, $core_qpts;
 
-  // TODO:  Convert the total_major_hours, qpts, etc, to a single array that
-  // we can key based on our requirement types codes.
   public $gpa_calculations;
   
   
@@ -306,7 +304,8 @@ class _DegreePlan
     {
       $this->title = $cur["title"];
       $this->major_code = $cur["major_code"];
-      $this->degree_class = strtoupper(trim($cur["degree_class"]));
+      $this->degree_level = strtoupper(trim($cur["degree_level"]));
+      $this->degree_class = $cur["degree_class"];
 
       $semester_num = $cur["semester_num"];
       if ($semester_num != $old_semester)
@@ -476,6 +475,7 @@ class _DegreePlan
       $this->catalog_year = $cur["catalog_year"];
       $this->degree_type = trim($cur["degree_type"]);
       $this->db_exclude = trim($cur["exclude"]);
+      $this->db_allow_dynamic = trim($cur["allow_dynamic"]);
 
       // Get the semester titles.
       $temp = trim($cur["semester_titles_csv"]);

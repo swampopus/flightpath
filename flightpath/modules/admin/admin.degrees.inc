@@ -878,18 +878,22 @@ function admin_handle_edit_degree_submit() {
   // and exclude value, etc....
   $degree_title = trim($_POST["title"]);
   $degree_type = trim($_POST["degree_type"]);
-  $degree_class = strtoupper(trim($_POST["degree_class"]));
+  $degree_class = trim($_POST["degree_class"]);
+  $degree_level = strtoupper(trim($_POST["degree_level"]));
   $exclude = trim($_POST["exclude"]);
+  $allow_dynamic = trim($_POST["allow_dynamic"]);
   $public_note = trim($_POST["public_note"]);
   $res = db_query("UPDATE draft_degrees
               SET `semester_titles_csv`='?',
               `title`='?',
               `degree_type`='?',
               `degree_class`='?',
+              `degree_level`='?',
               `exclude`='?',
+              `allow_dynamic`='?',
               `public_note`='?'
               WHERE `degree_id`='?' ",
-              $semester_titles_csv, $degree_title, $degree_type, $degree_class, $exclude, $public_note, $degree_id);
+              $semester_titles_csv, $degree_title, $degree_type, $degree_class, $degree_level, $exclude, $allow_dynamic, $public_note, $degree_id);
 
   ////  Was there a track title/description?  If so, UPDATE that in the tracks
   // table...
@@ -981,27 +985,57 @@ function admin_display_edit_degree() {
 
   $rtn .= "<div style='font-size: 16pt; font-weight:bold; padding-top: 20px;'>$degree->degree_type $degree->title<br>$major_code ($de_catalog_year)</div>";
   $rtn .= "
-      <table>
+      <table border='0'>
        <tr>
         <td valign='top' class='tenpt' width='15%'>" . t("Degree Type:") . "</td>
-        <td valign='top' class='tenpt' width='15%'><input type='text' name='degree_type' value='$degree->degree_type' size='5' maxlength='20'></td>
-
-        <td valign='top' class='tenpt' width='15%'>" . t("Degree Class:") . "</td>
-        <td valign='top' class='tenpt'><input type='text' name='degree_class' value='$degree->degree_class' size='2' maxlength='1'>
-        <a href='javascript: adminPopupAlertHelp(\"degree_class\");'>?</a>
-        
+        <td valign='top' class='tenpt' width=''>
+              <input type='text' name='degree_type' value='$degree->degree_type' size='5' maxlength='20'>
         </td>
-       </tr>
+
+        <td valign='top' class='tenpt' width=''>
+              " . t("Degree Classification.:") . "
+        </td>
+        <td valign='top' class='tenpt' width=''>  
+              <input type='text' name='degree_class' value='$degree->degree_class' size='10' maxlength='40'>
+              <a href='javascript: adminPopupAlertHelp(\"degree_class\");'>?</a>
+        </td>
+
+        <td valign='top' class='tenpt' >" . t("Degree Level:") . "
+              <input type='text' name='degree_level' value='$degree->degree_level' size='2' maxlength='1'>
+              <a href='javascript: adminPopupAlertHelp(\"degree_level\");'>?</a>
+        </td>
+                
         
        </tr>
+        
+             
+       
+       
+       
        <tr>
         <td valign='top' class='tenpt'>" . t("Degree Title:") . "</td>
-        <td valign='top' class='tenpt' colspan='3'><input type='text' name='title' value='$degree->title' size='80' maxlength='100'></td>
+        <td valign='top' class='tenpt' colspan='4'><input type='text' name='title' value='$degree->title' size='80' maxlength='100'></td>
        </tr>
+       
+       
+             
+       
+       
        <tr>
         <td valign='top' class='tenpt'>" . t("Exclude:") . "</td>
-        <td valign='top' class='tenpt' colspan='3'><input type='text' name='exclude' value='$degree->db_exclude' size='2' maxlength='1'>
-        <a href='javascript: adminPopupAlertHelp(\"degree_exclude\");'>?</a></td>
+        <td valign='top' class='tenpt'>
+              <input type='text' name='exclude' value='$degree->db_exclude' size='2' maxlength='1'>
+              <a href='javascript: adminPopupAlertHelp(\"degree_exclude\");'>?</a>
+        </td>
+        <td valign='top' class='tenpt' >
+              " . t("Allow Dynamic:") . "
+              &nbsp;
+              <input type='text' name='allow_dynamic' value='$degree->db_allow_dynamic' size='2' maxlength='1'>
+              <a href='javascript: adminPopupAlertHelp(\"degree_allow_dynamic\");'>?</a>
+        </td>       
+        
+        <td></td>
+        
        </tr>
        
        

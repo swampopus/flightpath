@@ -67,12 +67,19 @@ function adminPopupAlertHelp(action)
     t = t + "If you are not sure what to enter, either leave it blank or enter a 0 (zero).";
   }
   
-  if (action == "degree_class")
+  if (action == "degree_level")
   {
-    t = t + "Enter the degree classification code in this box.  If left blank, it is assumed to be an \"Undergraduate\" degree.\n";
+    t = t + "Enter the degree level code in this box.  If left blank, it is assumed to be an \"Undergraduate\" degree.\n";
     t = t + "Enter \"G\" for a degree which should only be accessible to Graduate students in What If mode.\n\n";
     t = t + "NOTE: NOT CURRENTLY SUPPORTED IN THIS VERSION OF FLIGHTPATH";
   }
+
+  if (action == "degree_allow_dynamic")
+  {
+    t = t + "If this value is set to 1 (the number one), then this degree plan is able to be combined with other degrees which are also set to Allow Dynamic.\n\n";
+    t = t + "If you are unsure what to enter, either leave blank or enter a 0 (the number zero).";
+  }
+  
   
   
   if (action == "track_description")
