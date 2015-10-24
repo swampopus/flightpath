@@ -1,6 +1,29 @@
 FlightPath 4.x Changelog
 ========================
 
+----------------
+RELEASED 4.8.2
+----------------
+
+
+2015-10-14
+  Added some logic to detect if, when editing a degree, the user enters a group twice with differing min grade
+  or requirement types.  It will display a warning if so, as that can create a bug later on with calculations.
+  
+  Fixed a problem where a popup help dialog wasn't showing when adding a group to a degree.
+  
+
+2015-09-25
+  Fixed small bugs relating to the audit module, and the exclusion of transfer credits from calculations.
+
+  Added code to _FlightPath.php, so that when a coure requirement is fulfilled by a transfer requirement,
+  it sets the requirement's bool_transfer to TRUE.
+
+
+----------------
+RELEASED 4.8.1
+----------------
+
 
 2015-09-17
   Added small changes to DegreePlan, CourseList, and Group, to support features in the new Audit module. Specifically, the ability

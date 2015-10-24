@@ -1373,14 +1373,23 @@ class _CourseList extends ObjList
 			  if ($h_get_hours == 0) {			    
 			    $h_get_hours = 1;
 			  }
-			}
+			}              
 			
 			
-			// Are we excluding transfer credits?
-			if ($bool_exclude_all_transfer_credits && $course->bool_transfer) {			  
-			  continue;
-			}			
-			
+		  // Make sure we aren't trying to exclude any transfer credits.
+		  if ($bool_exclude_all_transfer_credits) {			   
+		    if ($course->bool_transfer) {
+		      continue;
+		    }
+		    // Is this a requirement which has been fulfilled by a course?  And if so, is THAT course a transfer?
+				if ($course->course_list_fulfilled_by->is_empty == false) {
+					$cc = $course->course_list_fulfilled_by->get_first();
+					if ($cc->bool_transfer) {
+					  continue;
+					}
+				}               
+ 		  }			  	                    
+			                                              
 			
 			
 			
@@ -1722,10 +1731,21 @@ class _CourseList extends ObjList
 
 			  			  
 			  // Make sure we aren't trying to exclude any transfer credits.
-			  if ($bool_exclude_all_transfer_credits && $course->bool_transfer) {			   
-			    //if ($course->subject_id == "ENGL" && $course->course_num == "2238" && $course->bool_transfer) fpm($course);
-			   continue;			   			    			    
+			  if ($bool_exclude_all_transfer_credits) {			   
+			    if ($course->bool_transfer) {
+			      continue;
+			    }
+			    // Is this a requirement which has been fulfilled by a course?  And if so, is THAT course a transfer?
+					if ($course->course_list_fulfilled_by->is_empty == false) {
+						$cc = $course->course_list_fulfilled_by->get_first();
+						if ($cc->bool_transfer) {
+						  continue;
+						}
+					}
 			  }			  
+			  
+			  
+			  
 			  
 			  			  
 			  // If we require the grade to be a qpts_grade, then check that now.
@@ -1849,13 +1869,19 @@ class _CourseList extends ObjList
 			{
 
 			  // Make sure we aren't trying to exclude any transfer credits.
-			  if ($bool_exclude_all_transfer_credits) {
+			  if ($bool_exclude_all_transfer_credits) {			   
 			    if ($course->bool_transfer) {
-			     //fpm($course);
-			     continue;
-			    }			    			    
-			  }
-			  
+			      continue;
+			    }
+			    // Is this a requirement which has been fulfilled by a course?  And if so, is THAT course a transfer?
+					if ($course->course_list_fulfilled_by->is_empty == false) {
+						$cc = $course->course_list_fulfilled_by->get_first();
+						if ($cc->bool_transfer) {
+						  continue;
+						}
+					}
+			  }			  
+			  			  
 			  
 				if ($requirement_type == "")
 				{

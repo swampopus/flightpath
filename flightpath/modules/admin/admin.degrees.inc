@@ -33,12 +33,12 @@ function admin_display_degrees_popup_add_group() {
         </tr>
           
         "; 
-  }
+  }                                                         
 
 
   $rtn .= "</table></div>
       " . t("Next, select properties for this group:") . "
-      <a href='javascript: popupAlertHelp(\"group_properties\");'>?</a>
+      <a href='javascript: adminPopupAlertHelp(\"group_properties\");'>?</a>
       <div class='tenpt' style='padding-top: 5px;'>
       Hrs: <input type='text' name='hours' id='hours' size='2'>
       Min Grade: <select name='min_grade' id='min_grade'>
@@ -759,13 +759,13 @@ function admin_handle_edit_degree_submit() {
         //debug_c_t($query);
       } else {
         // The course_id could not be found!
-        $errors .= "<br><font color='red'><b>Course Not Found!</b>
+        $errors .= "<br><span style='color:red;'><b>Course Not Found!</b>
               In Block " . ($semester_num+1) . ", you specified the course
               <b>$subject_id $course_num</b> as a requirement, but this course
               could not be found.
               It was removed from that block.
               Are you sure you typed it correctly?  Please go to this
-              semester, check your spelling, and add the course again.</font>";
+              semester, check your spelling, and add the course again.</span>";
 
       }
 
@@ -799,6 +799,25 @@ function admin_handle_edit_degree_submit() {
       }
     }
 
+    $adding_group = new Group($group_id);
+    
+    // If this group is already saved in this degree elsewhere, and it has a different type or min_grade,
+    // then we must display a warning message to the user.
+    $res = db_query("SELECT * FROM draft_degree_requirements
+                     WHERE degree_id = '?'
+                     AND group_id = '?'
+                     AND (group_min_grade <> '?' OR group_requirement_type <> '?')", $degree_id, $group_id, $min_grade, $type);
+    while ($cur = db_fetch_array($res)) {
+      $errors .= "<br><span style='color:red;'><b>Group type or min grade mismatch!</b>
+                  In Block " . ($semester_num + 1) . ", you specified the group <em>" . $adding_group->title . "</em> ($adding_group->group_name) with a min grade of \"<em>$min_grade</em>\"
+                  and a requirement type of \"<em>$type</em>\".  However, the group was previously specified in this degree plan in Block " . ($cur["semester_num"] + 1) . "
+                  with a different requirement type and/or min grade requirement.  FlightPath will not perform calculations correctly for courses assigned to this group.
+                  You should either set the duplicate occurances of the group to the same type/min grade, or create a new group to handle these alternate requirements.</span>";
+    }
+    
+    
+    
+    
     // We now have enough information to insert this group.
     //debugCT("group: $group_id $semester_num $hours $type");
     $query = "INSERT INTO draft_degree_requirements
@@ -820,6 +839,27 @@ function admin_handle_edit_degree_submit() {
     $hours = trim($temp[3]);
     $type = $temp[4];
     $min_grade = trim($temp[5]);
+    
+    
+    $adding_group = new Group($group_id);
+    
+    // If this group is already saved in this degree elsewhere, and it has a different type or min_grade,
+    // then we must display a warning message to the user.
+    $res = db_query("SELECT * FROM draft_degree_requirements
+                     WHERE degree_id = '?'
+                     AND group_id = '?'
+                     AND (group_min_grade <> '?' OR group_requirement_type <> '?')", $degree_id, $group_id, $min_grade, $type);
+    while ($cur = db_fetch_array($res)) {
+      $errors .= "<br><span style='color:red;'><b>Group type or min grade mismatch!</b>
+                  In Block " . ($semester_num + 1) . ", you specified the group <em>" . $adding_group->title . "</em> ($adding_group->group_name) with a min grade of \"<em>$min_grade</em>\"
+                  and a requirement type of \"<em>$type</em>\".  However, the group was previously specified in this degree plan in Block " . ($cur["semester_num"] + 1) . "
+                  with a different requirement type and/or min grade requirement.  FlightPath will not perform calculations correctly for courses assigned to this group.
+                  You should either set the duplicate occurances of the group to the same type/min grade, or create a new group to handle these alternate requirements.</span>";
+    }
+    
+    
+    
+    
     $query = "INSERT INTO draft_degree_requirements
                     (`degree_id`,`semester_num`,`group_id`,
                     `group_requirement_type`,`group_hours_required`,`group_min_grade`)
@@ -880,15 +920,20 @@ function admin_handle_edit_degree_submit() {
 
   //$msg = "<font color='green' size='4'>Degree updated successfully at " . get_current_time() . ".</font>";
   fp_add_message("Degree updated succesfully.");
+  $button_msg = urlencode("Degree updated successfully at " . date("H:i:s"));
   $bool_scroll = $bool_button_msg = true;
   if ($errors != "")
   {
-    fp_add_message("ERROR(s): $errors");
+    fp_add_message("ERRORS/WARNINGS: $errors");
     $bool_scroll = $bool_button_msg = false;
+
+    $button_msg = urlencode("The degree plan was saved, but an error or warning has occured.  Please see error message at the top of the page.");
+    $_REQUEST["scroll_top"] = 0;
+    
   }
 
 
-  fp_goto("admin/degrees/edit-degree", "de_catalog_year=$de_catalog_year&major_code=$major_code&scroll_top=" . $_REQUEST["scroll_top"] . "&button_msg=" . urlencode("Degree updated successfully at " . date("H:i:s")));
+  fp_goto("admin/degrees/edit-degree", "de_catalog_year=$de_catalog_year&major_code=$major_code&scroll_top=" . $_REQUEST["scroll_top"] . "&button_msg=" . $button_msg);
   return;    
     
 }

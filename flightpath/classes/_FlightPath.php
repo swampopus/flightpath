@@ -26,8 +26,8 @@ class _FlightPath
 
 		if ($bool_perform_full_init == true)
 		{
-			$this->init(true);
-		}
+			$this->init(true); 
+		}                                                      
 
 		$this->course_list_advised_courses = new CourseList();
 
@@ -667,13 +667,13 @@ class _FlightPath
 					
 					$hours_assigned = $hours_assigned + $h_get_hours;
 
-					if ($bool_perform_assignment == true)
+					if ($bool_perform_assignment == TRUE)
 					{
 						$course_requirement->course_list_fulfilled_by->add($c);
 						$course_requirement->grade = $c->grade;
 						$course_requirement->hours_awarded = $c->hours_awarded;
 						$course_requirement->bool_ghost_hour = $c->bool_ghost_hour;
-						
+
 						$c->bool_has_been_assigned = true;
 						//$c->requirement_type = $course_requirement->requirement_type;
 						if ($c->requirement_type == "") {

@@ -158,15 +158,15 @@ class _DegreePlan
     {
       $sem = $this->list_semesters->get_next();
 
-      if ($bool_required_hours_only == true)
+      if ($bool_required_hours_only == TRUE)
       {
-        $hours += $sem->list_courses->count_hours($requirement_type, true, false, FALSE, $bool_exclude_all_transfer_credits);
+        $hours += $sem->list_courses->count_hours($requirement_type, true, false, FALSE);  // do not exclude transfer credits, since this is for required hours only.
       } else {
         $temp = $sem->list_courses->count_credit_hours($requirement_type, true, true, $bool_qpts_grades_only, $bool_exclude_all_transfer_credits);
                 
         $hours += $temp;
       }
-    }
+    }                       
 
     
  
@@ -176,7 +176,7 @@ class _DegreePlan
     while ($this->list_groups->has_more())
     {
       $g = $this->list_groups->get_next();
-      if ($g->group_id < 0)
+      if ($g->group_id < 0)                           
       { // Skip Add a course group.
         continue;
       }
