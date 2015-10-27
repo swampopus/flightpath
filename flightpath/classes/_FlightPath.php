@@ -50,12 +50,13 @@ class _FlightPath
 			advise_init_advising_variables();
 		}
 
-		$major_code = $GLOBALS["fp_advising"]["advising_major_code"];
+		$major_code_csv = $GLOBALS["fp_advising"]["advising_major_code"];
 		$track_code = $GLOBALS["fp_advising"]["advising_track_code"];
 		$student_id = $GLOBALS["fp_advising"]["advising_student_id"];
 		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
 		$available_terms = $GLOBALS["fp_advising"]["available_advising_term_ids"];
 
+    // Keep in mind-- at this point, major_coe might be a CSV of major codes.
 
 
 		$this->bool_what_if = false;
@@ -63,7 +64,7 @@ class _FlightPath
 		// Are we in WhatIf mode?
 		if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes")
 		{
-			$major_code = $GLOBALS["fp_advising"]["what_if_major_code"];
+			$major_code_csv = $GLOBALS["fp_advising"]["what_if_major_code"];
 			$track_code = $GLOBALS["fp_advising"]["what_if_track_code"];
 			$this->bool_what_if = true;
 
@@ -107,58 +108,156 @@ class _FlightPath
 		if ($GLOBALS["fp_advising"]["advising_update_student_settings_flag"] != "")
 		{
 			$student->array_settings["track_code"] = $track_code;
-			$student->array_settings["major_code"] = $major_code;
+			$student->array_settings["major_code"] = $major_code_csv;
 		}
 
-		$t_major_code = $major_code;
+		
+    ///////////////////////////////
+    //  TODO:  Okay folks.  So this is basically where we will be interating through all
+    //  of the student's major_codes (if they have more than one), and squishing them together,
+    //  to create a single DegreePlan object, made out of all the options.
+    //  We need like a loop here.
+    $degree_plans = array();
+		$temparr = explode(",", $major_code_csv);
+    foreach ($temparr as $major_code) {		
+		
+  		$t_major_code = $major_code;
+  
+        
+  		if ($track_code != "")
+  		{
+  			// Does the major_code already have a | in it?
+  			if (!strstr($t_major_code, "|"))
+  			{
+  				$t_major_code .= "|_" . $track_code;
+  			} else {
+  				// it DOES have a | in it already, so just add the
+  				// trackCode using _.  This is most likely because
+  				// we are dealing with a track AND a concentration.
+  				$t_major_code .= "_" . $track_code;
+  			}
+  		}
+  
+  
+  
+  		$degree_id = $db->get_degree_id($t_major_code, $catalog_year);
+      
+  
+  
+  		if ($student->array_settings["track_code"] != "" && $this->bool_what_if == false
+  		&& $student->array_settings["major_code"] == $major_code)
+  		{
+  			// The student has a selected track in their settings,
+  			// so use that (but only if it is for their current major-- settings
+  			// could be old!)
+  
+  			$t_major_code = $student->get_major_and_track_code();
+  			$temp_degree_id = $db->get_degree_id($t_major_code, $student->catalog_year);
+  			if ($temp_degree_id) {
+  			  $degree_id = $temp_degree_id;
+  			}
+  		}
+  
+  
+  
+  		if ($bool_load_full == true)
+  		{
+  			$this->student = $student;
+  
+  			$degree_plan = new DegreePlan($degree_id, $db, false, $student->array_significant_courses);
+  
+  			$degree_plan->add_semester_developmental($student->student_id);
+  			//$this->degree_plan = $degree_plan;
+  			$degree_plans[] = $degree_plan;
+  		}
 
-		if ($track_code != "")
-		{
-			// Does the major_code already have a | in it?
-			if (!strstr($t_major_code, "|"))
-			{
-				$t_major_code .= "|_" . $track_code;
-			} else {
-				// it DOES have a | in it already, so just add the
-				// trackCode using _.  This is most likely because
-				// we are dealing with a track AND a concentration.
-				$t_major_code .= "_" . $track_code;
-			}
-		}
 
+    } // foreach temparr as major_code.  The foreach loop through all our major codes.
 
-		$degree_id = $db->get_degree_id($t_major_code, $catalog_year);
-
-		if ($student->array_settings["track_code"] != "" && $this->bool_what_if == false
-		&& $student->array_settings["major_code"] == $major_code)
-		{
-			// The student has a selected track in their settings,
-			// so use that (but only if it is for their current major-- settings
-			// could be old!)
-
-			$t_major_code = $student->get_major_and_track_code();
-			$temp_degree_id = $db->get_degree_id($t_major_code, $student->catalog_year);
-			if ($temp_degree_id) {
-			  $degree_id = $temp_degree_id;
-			}
-		}
+    // DEV:  Remove once we have everything working...
+    $this->degree_plan = new DegreePlan();  // just a blank degree as a placeholder for now.
+    
+    
+    // Okay, coming out of this, we have an array of degree_plans  (maybe).  If it's just one, then set it to that one.
+    if (count($degree_plans) == 1) {
+      $this->degree_plan = $degree_plan;
+    }
+    else if (count($degree_plans) > 1) {
+      // Okay folks, here's the magic.  We need to combine the degree plans in this array
+      // into 1 generated degree plan.
+    
+      $combined_degree_plan = $this->combine_degree_plans($degree_plans);
+      
+      $this->degree_plan = $combined_degree_plan;
+      
+    } // else if count(degree_plans) > 1
 
 
 
-
-		if ($bool_load_full == true)
-		{
-			$this->student = $student;
-
-			$degree_plan = new DegreePlan($degree_id, $db, false, $student->array_significant_courses);
-
-			$degree_plan->add_semester_developmental($student->student_id);
-			$this->degree_plan = $degree_plan;
-		}
+	}  // end of function fp_init
 
 
 
-	}
+  /**
+   * This function is responsible for combining multiple degree plans into a single unified degree plan,
+   * then returning it.
+   */
+  function combine_degree_plans($degree_plans) {
+    
+    fpm($degree_plans);
+    
+    $new_degree_plan = new DegreePlan();
+    fpm($new_degree_plan);
+    
+    // Loop through the degree plans one at a time...
+    foreach ($degree_plans as $degree_plan) {
+      
+      // Okay, now copy whatever we need to into the new_degree_plan.
+      
+      // First, go through its list of semesters, and copy out all the courses and groups      
+      $degree_plan->list_semesters->reset_counter();
+      while ($degree_plan->list_semesters->has_more()) {
+        $sem = $degree_plan->list_semesters->get_next();
+        
+        // Okay, the semester contains a CourseList called list_courses, and a GroupList caled list_groups.
+        $new_list_courses = $sem->list_courses->get_clone();
+        
+        // Now, let's add them to the new_degree_plan's semester...
+        // if the new degree plan already has this semester, get that instead.
+        $the_semester = $new_degree_plan->get_semester($sem->semester_num);
+        if (!$the_semester) {
+          $the_semester = new Semester($sem->semester_num);
+          $new_degree_plan->list_semesters->add($the_semester);
+        }
+        
+        // Okay, now add the courses to the_semester
+        // TODO:  Here's probably where we'd check with a hook first.
+        // TODO:  We also want to say which degree these courses came from.
+        
+        $the_semester->list_courses->add_list($new_list_courses);
+        
+        
+        ////////////////////////////
+        
+        // Getting the list of groups is going to be a little more interesting.
+        // TODO:  Get the groups.        
+                
+        
+      } // while, listing semesters in degree plan.
+      
+      
+    } // foreach degree_plans
+    
+    
+    fpm($new_degree_plan);
+    
+    return $new_degree_plan;
+    
+  } // combine_degree_plans
+
+
+
+
 
 
 	/**

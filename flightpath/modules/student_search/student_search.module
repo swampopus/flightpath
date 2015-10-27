@@ -664,12 +664,21 @@ function student_search_render_advisees($adv_array, $title) {
   $rtn .= "
     </tr>"; 
 
+  $db = get_global_database_handler();  
+    
   for ($t = 0; $t < count($adv_array); $t++)
   {
     $student_id = $adv_array[$t]["student_id"];
     $first_name = $adv_array[$t]["first_name"];
     $last_name = $adv_array[$t]["last_name"];
-    $major = $adv_array[$t]["major"];
+    //$major = $adv_array[$t]["major"];
+    
+    // Are there more majors for this user?
+    $major = "";
+    // Get a CSV of this student's majors
+    $major = $db->get_student_majors_from_db($student_id, TRUE);
+        
+    
     $advising_what_if = $adv_array[$t]["advising_what_if"];
     $what_if_major_code = $adv_array[$t]["what_if_major_code"];
     $what_if_track_code = $adv_array[$t]["what_if_track_code"];

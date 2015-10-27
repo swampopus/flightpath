@@ -540,6 +540,23 @@ class _DegreePlan
 
 
   /**
+   * Look through our list of semesters for the one with this semester_num, and return it, or return FALSE
+   */
+  function get_semester($semester_num) {
+    $this->list_semesters->reset_counter();
+    while ($this->list_semesters->has_more()) {
+      $sem = $this->list_semesters->get_next();
+      if ($sem->semester_num == $semester_num) {
+        return $sem;
+      }
+    }
+    
+    return FALSE;
+  }
+
+
+
+  /**
    * Returns a simple array with values seperated by " ~~ "
    * in this order: track_code ~~ track_title ~~ trackDesc
    *

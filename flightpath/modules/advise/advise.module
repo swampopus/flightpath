@@ -954,7 +954,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   }
 
 
-  // Get the major_code.
+  // Get the major_code(s).
   $vars["advising_major_code"] = $_REQUEST["advising_major_code"];
   if ($vars["advising_major_code"] == "")
   {    
@@ -962,7 +962,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
     if ($vars["advising_major_code"] == "")
     { // Default value...
       if (!$student) $student = new Student($csid);
-      $vars["advising_major_code"] = $student->major_code;
+      $vars["advising_major_code"] = $student->major_code_csv;
     }
   }
 

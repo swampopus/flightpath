@@ -611,6 +611,17 @@ CREATE TABLE `student_courses` (
 ); ";
 db_query($q);
 
+
+
+$q = "
+CREATE TABLE `student_degrees` (
+  `student_id` varchar(30) NOT NULL DEFAULT '',
+  `major_code` varchar(20) NOT NULL DEFAULT '',
+  PRIMARY KEY (`student_id`,`major_code`)
+);  ";
+db_query($q);
+
+
 $q = "
 CREATE TABLE `student_developmentals` (
   `student_id` varchar(30) NOT NULL,

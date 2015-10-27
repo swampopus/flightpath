@@ -1,6 +1,13 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-10-26
+  Adding "student_degrees" table, so we can keep up with more than one major_code per student.  Still going to call them major_codes, to maintain
+  backwards compatibility.
+  
+  Added get_student_majors_from_db function to look at the student_degrees table to get a list of major codes.
+  In this effort, modified _DatabaseHandler.php and _Student.php.  Also advise.module.  Also _FlightPath.php
+  Added new function to _DegreePlan to let me more easily find semesters by number.
 
 
 2015-10-24

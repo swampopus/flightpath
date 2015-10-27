@@ -1095,6 +1095,7 @@ class _DatabaseHandler
 	
 	function get_student_major_from_db($student_cwid)
 	{
+	  depricated_message("db->get_student_major_from_db() is deprecated. use get_student_major*s* instead.");
 		// Returns the student's major code from the DB.  Does not
 		// return the track code.
 		
@@ -1106,6 +1107,29 @@ class _DatabaseHandler
 		$cur = $this->db_fetch_array($res);
 		return trim($cur["major_code"]);
 	}
+
+
+  /**
+   * Returns an array (or CSV string) of major_codes from the student_degrees table for this student.
+   */
+  function get_student_majors_from_db($student_cwid, $bool_return_as_csv = FALSE) {
+    // Looks in the student_degrees table and returns an array of major codes.
+    $rtn = array();
+    
+    $res = $this->db_query("SELECT * FROM student_degrees
+                            WHERE student_id = '?' ", $student_cwid);
+    while ($cur = $this->db_fetch_array($res)) {
+      $rtn[] = $cur["major_code"];
+    }
+    
+    if ($bool_return_as_csv) {
+      // Instead return a CSV string of these codes.      
+      $rtn = join(",", $rtn);
+    }
+    
+    return $rtn;
+    
+  }
 
 
 	function get_flightpath_settings()
