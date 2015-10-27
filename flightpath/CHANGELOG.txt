@@ -1,6 +1,11 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-10-27
+  Added get_clone() function to _GroupList, in continuing to work on combining degree plans.  Also added add_list function, both similar to
+  functions in the CourseList object.
+
+
 2015-10-26
   Adding "student_degrees" table, so we can keep up with more than one major_code per student.  Still going to call them major_codes, to maintain
   backwards compatibility.

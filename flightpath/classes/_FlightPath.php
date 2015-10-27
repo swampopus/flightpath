@@ -186,7 +186,7 @@ class _FlightPath
       // Okay folks, here's the magic.  We need to combine the degree plans in this array
       // into 1 generated degree plan.
     
-      $combined_degree_plan = $this->combine_degree_plans($degree_plans);
+      $combined_degree_plan = $this->combine_degree_plans($degree_plans, $student_id);
       
       $this->degree_plan = $combined_degree_plan;
       
@@ -202,7 +202,7 @@ class _FlightPath
    * This function is responsible for combining multiple degree plans into a single unified degree plan,
    * then returning it.
    */
-  function combine_degree_plans($degree_plans) {
+  function combine_degree_plans($degree_plans, $student_id) {
     
     fpm($degree_plans);
     
@@ -219,12 +219,20 @@ class _FlightPath
       while ($degree_plan->list_semesters->has_more()) {
         $sem = $degree_plan->list_semesters->get_next();
         
+        // If the semester is the Added by Advisor (-88), or the developmental block (-55) then skip for now.
+        if ($sem->semester_num == -88 || $sem->semester_num == -55) {
+          // This is the special one that is "added by advisor".  Skip it.  But remember to add it later to the finished product.
+          // Or, it's the developmentals block.  Add that later too.
+          continue;
+        }
+        
         // Okay, the semester contains a CourseList called list_courses, and a GroupList caled list_groups.
         $new_list_courses = $sem->list_courses->get_clone();
         
         // Now, let's add them to the new_degree_plan's semester...
         // if the new degree plan already has this semester, get that instead.
         $the_semester = $new_degree_plan->get_semester($sem->semester_num);
+        
         if (!$the_semester) {
           $the_semester = new Semester($sem->semester_num);
           $new_degree_plan->list_semesters->add($the_semester);
@@ -239,14 +247,37 @@ class _FlightPath
         
         ////////////////////////////
         
-        // Getting the list of groups is going to be a little more interesting.
-        // TODO:  Get the groups.        
+        // Getting the list of groups is going to be similar to getting our list of courses.
+        // Go through the list of groups for this semester.
+        $new_list_groups = $sem->list_groups->get_clone();        
+        
+        // Okay, now we can add to our semester
+        // TODO:  Check hooks here?
+        
+        $the_semester->list_groups->add_list($new_list_groups); 
+        // Also add this group list to the degree plan's list_groups.
+        $new_degree_plan->list_groups->add_list($new_list_groups);
+        
+         
                 
         
       } // while, listing semesters in degree plan.
       
       
     } // foreach degree_plans
+
+    //////////////////////////////    
+    
+    // Okay, now to put the finishing touches on the $new_degree_plan
+
+    // Add in the "Developmental Req's" if required for this student.
+    $new_degree_plan->add_semester_developmental($student_id);     
+        
+    // Add in the "Courses added by advisor"
+    $new_degree_plan->add_semester_courses_added(); 
+    
+    // TODO:  Do we need to add in the developmentals?
+    
     
     
     fpm($new_degree_plan);

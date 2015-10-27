@@ -41,6 +41,52 @@ class _GroupList extends ObjList
 		
 	}
 	
+  
+  
+
+  /**
+   * Adds the supplied GroupList to the bottom of $this's list.
+   *
+   */
+  function add_list(GroupList $glist)
+  {
+    for ($t = 0; $t < count($glist->array_list); $t++)
+    {
+      $this->add($glist->array_list[$t]);
+    }
+
+  }  
+  
+  
+  
+  /**
+   * Return a GroupList which is a clone of this list.
+   */
+  function get_clone($bool_return_new_groups = FALSE)
+  {
+    $rtn_list = new GroupList();
+    
+    for ($t = 0; $t < $this->count; $t++)
+    {
+      $group = $this->array_list[$t];
+      
+      if ($bool_return_new_groups == TRUE)
+      {
+        $new_group = new Group();
+        $new_group->group_id = $group->group_id;
+        $rtn_list->add($new_group);
+      } else {
+        $rtn_list->add($group);
+      } 
+      
+    } 
+    
+    return $rtn_list;
+      
+  }  
+  
+  
+  
 	
 	function get_advised_courses_list()
 	{
