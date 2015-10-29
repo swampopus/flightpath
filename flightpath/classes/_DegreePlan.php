@@ -3,8 +3,14 @@
 
 class _DegreePlan
 {
+  
+  const DEGREE_ID_FOR_COMBINED_DEGREE = -1001;
+  const SEMESTER_NUM_FOR_COURSES_ADDED = -88;
+  const SEMESTER_NUM_FOR_DEVELOPMENTALS = -55;
+  
+  
   public $major_code, $title, $degree_type, $degree_level, $degree_class, $short_description, $long_description;
-  public $list_semesters, $list_degree_plans, $list_groups, $db, $degree_id, $catalog_year;
+  public $list_semesters, $list_groups, $db, $degree_id, $catalog_year, $is_combined_dynamic_degree_plan, $combined_degree_ids_array;
   public $track_code, $track_title, $track_description, $student_array_significant_courses;
   public $bool_has_tracks, $array_semester_titles, $db_exclude, $db_allow_dynamic;
   public $public_note;
@@ -602,7 +608,7 @@ class _DegreePlan
     // a semester.  Will check the studentID to see if any
     // developmentals are required.
     // -55 is the developmental semester.
-    $sem = new Semester(-55);
+    $sem = new Semester(DegreePlan::SEMESTER_NUM_FOR_DEVELOPMENTALS);
     $sem->title = variable_get("developmentals_title", t("Developmental Requirements"));
     $is_empty = true;
 
@@ -634,18 +640,18 @@ class _DegreePlan
     // The "Add a Course" box on screen is really just a
     // semester, with the number -88, with a single group,
     // also numbered -88.
-    $semester_courses_added = new Semester(-88);
+    $semester_courses_added = new Semester(DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED);
     $semester_courses_added->title = t("Courses Added by Advisor");
 
     // Now, we want to add the Add a Course group...
     $g = new Group();
-    $g->group_id = -88;
+    $g->group_id = DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED;
     // Since it would take a long time during page load, we will
     // leave this empty of courses for now.  It doesn't matter anyway,
     // as we will not be checking this group for course membership
     // anyway.  We only need to load it in the popup.
     $g->hours_required = 99999;  // Nearly infinite selections may be made.
-    $g->assigned_to_semester_num = -88;
+    $g->assigned_to_semester_num = DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED;
 
     $semester_courses_added->list_groups->add($g);
 

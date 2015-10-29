@@ -251,7 +251,7 @@ function install_get_settings_file_template() {
  
 // Set the PHP error reporting level for FlightPath.  In this case,
 // only show us errors and warnings. (Hide "notice" and "strict" messages)
-error_reporting(E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_WARNING);
+error_reporting(E_ALL ^ E_NOTICE ^ E_STRICT);
  
 // Set the PHP max time limit which any one page is allowed to take up while
 // running.  The default is 30 seconds.  Change this value (or remove it)

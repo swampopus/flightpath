@@ -477,7 +477,7 @@ function fp_build_tab_array($page) {
     global $current_student_id, $screen, $user, $student;
     
     $rtn  = "";
-    
+        
     $csid = $current_student_id;
     
     if (is_object($screen) && is_object($screen->degree_plan)) {
@@ -569,27 +569,56 @@ function fp_build_tab_array($page) {
       }
     }
 
-    $db = get_global_database_handler();
-
-    if ($degree_plan != NULL) {
-      $degree_title = $degree_plan->get_title2();
-    }
-    if ($degree_title == "") {
-      // Attempt to load the degree from the student's information.     
-      $degree_plan = $db->get_degree_plan($student->major_code, $student->catalog_year, true);
-      $degree_title = $degree_plan->get_title2();
-    }
 
     if (!$bool_blank) {
       array_push($display_array, t("Name:") . " ~~ " . $student->name);
       array_push($display_array, t("CWID:") . " ~~ " . $student->student_id);
     }
+
+
+    $db = get_global_database_handler();
+
+
+    ///////////////////////////
+
+    // We are trying to figure out what to display for the Major.  If there is only one degree plan
+    // to worry about, then we will display it.
+    if ($degree_plan == null || !$degree_plan->is_combined_dynamic_degree_plan) {
+      // This is an ordinary degree plan.
+      if ($degree_plan != NULL) {
+        $degree_title = $degree_plan->get_title2();      
+      }
+      if ($degree_title == "") {
+        // Attempt to load the degree from the student's information.     
+        $degree_plan = $db->get_degree_plan($student->major_code, $student->catalog_year, true);
+        $degree_title = $degree_plan->get_title2();
+      }
+   
+      if ($screen_mode == "detailed") {
+        $degree_title .= " ($degree_plan->major_code)";
+      }
+      
+      array_push($display_array, t("Major:") . " ~~ " . $degree_title);
     
-    if ($screen_mode == "detailed") {
-      $degree_title .= " ($degree_plan->major_code)";
+    }
+    else {
+      // This degree plan is made from combining several other degrees.  let's trot them out and display them as well.
+      foreach ($degree_plan->combined_degree_ids_array as $t_degree_id) {
+        $t_degree_plan = new DegreePlan($t_degree_id);
+        $t_degree_plan->load_descriptive_data();
+        
+        // Add it to our box...
+        // TODO:  If more than one major/minor, etc, combine them?
+        array_push($display_array, t("Major:") . " ~~ " . $t_degree_plan->title);
+        
+      }
     }
     
-    array_push($display_array, t("Major:") . " ~~ " . $degree_title);
+    
+    
+    
+    
+    // TODO:  handle tracks later...
     // If this degree has tracks, we must display something about it here.
 
     if ($degree_plan->bool_has_tracks)

@@ -1,6 +1,13 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-10-29
+  Changed the error_reporting default in install.php, during a new install.
+  
+  Modified theme.inc to tell us what degrees are being applied.
+  
+  
+
 2015-10-27
   Added get_clone() function to _GroupList, in continuing to work on combining degree plans.  Also added add_list function, both similar to
   functions in the CourseList object.

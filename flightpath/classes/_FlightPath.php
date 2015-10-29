@@ -204,13 +204,15 @@ class _FlightPath
    */
   function combine_degree_plans($degree_plans, $student_id) {
     
-    fpm($degree_plans);
+    //fpm($degree_plans);
     
     $new_degree_plan = new DegreePlan();
-    fpm($new_degree_plan);
+    //fpm($new_degree_plan);
     
     // Loop through the degree plans one at a time...
     foreach ($degree_plans as $degree_plan) {
+      
+      $new_degree_plan->combined_degree_ids_array[] = $degree_plan->degree_id;
       
       // Okay, now copy whatever we need to into the new_degree_plan.
       
@@ -276,11 +278,13 @@ class _FlightPath
     // Add in the "Courses added by advisor"
     $new_degree_plan->add_semester_courses_added(); 
     
-    // TODO:  Do we need to add in the developmentals?
+    if (count($degree_plans) > 1) {
+      $new_degree_plan->is_combined_dynamic_degree_plan = TRUE;
+      $new_degree_plan->degree_id = DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE;  // use constant to make it easier later on.
+    }
     
     
-    
-    fpm($new_degree_plan);
+    //fpm($new_degree_plan);
     
     return $new_degree_plan;
     
