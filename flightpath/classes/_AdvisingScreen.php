@@ -1557,7 +1557,7 @@ function draw_menu_items($menu_array) {
 		  
 		  if ($unfinished_col == "") $unfinished_col = "660000";
 		  if ($progress_col == "") $progress_col = "FFCC33";
-		  // TODO:  get 2 colors as well.
+
 		  
 		  // Okay, let's see if this degreeplan even has any data on this requirement type.
 		  $total_hours = $this->degree_plan->gpa_calculations[$requirement_type]["total_hours"]*1;
@@ -2598,6 +2598,8 @@ function draw_menu_items($menu_array) {
 
 		$count_hoursCompleted = 0;
 
+    $last_req_by_degree_id = -1;
+
 		// First, display the list of bare courses.
 
 		$semester->list_courses->sort_alphabetical_order();
@@ -2606,8 +2608,24 @@ function draw_menu_items($menu_array) {
 		while($semester->list_courses->has_more())
 		{
 			$course = $semester->list_courses->get_next();
+      
+      // TODO:  Display what degree this course is required by
+      // TODO:  Decide if we should display the degree this course is coming from or not.
+      // Only display what degree we are required by if we have only displayed it once so far...
+      if (intval($course->req_by_degree_id) > 0 && $course->req_by_degree_id != $last_req_by_degree_id) {
+        
+        $t_degree_plan = new DegreePlan($course->req_by_degree_id);
+        $t_degree_plan->load_descriptive_data();
+        $pC .= "<tr><td colspan='8'>
+                  <div class='tenpt required-by-degree'>Required by $t_degree_plan->title</div>
+                </td></tr>";
+        
+        // Remember what the last degree we displayed was.        
+        $last_req_by_degree_id = $course->req_by_degree_id;                
+      }      
+      
+      
 			// Is this course being fulfilled by anything?
-
 
 			if (!($course->course_list_fulfilled_by->is_empty))
 			{ // this requirement is being fulfilled by something the student took...
@@ -2644,6 +2662,24 @@ function draw_menu_items($menu_array) {
 		{
 
 			$group = $semester->list_groups->get_next();
+      
+      // Display what degree this group is required by
+      // TODO:  Decide if we should display the degree this group is coming from or not.
+      // Only display what degree we are required by if we have only displayed it once so far...
+      if (intval($group->req_by_degree_id) > 0 && $group->req_by_degree_id != $last_req_by_degree_id) {
+        
+        $t_degree_plan = new DegreePlan($group->req_by_degree_id);
+        $t_degree_plan->load_descriptive_data();
+        $pC .= "<tr><td colspan='8'>
+                  <div class='tenpt required-by-degree'>Required by $t_degree_plan->title</div>
+                </td></tr>";
+        
+        // Remember what the last degree we displayed was.        
+        $last_req_by_degree_id = $group->req_by_degree_id;                
+      }            
+      
+      
+      
 			$pC .= "<tr><td colspan='8'>";
 			$pC .= $this->display_group($group);
 			$count_hoursCompleted += $group->hours_fulfilled_for_credit;

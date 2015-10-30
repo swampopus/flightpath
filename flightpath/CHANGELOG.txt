@@ -1,6 +1,11 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-10-30
+  Working on AdvisingScreen object, to display what degrees each requirement comes from.  Added new property to Course and Group objects, to track what
+  degree id they were originally required by.
+  
+
 2015-10-29
   Changed the error_reporting default in install.php, during a new install.
   

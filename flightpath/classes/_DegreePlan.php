@@ -341,6 +341,9 @@ class _DegreePlan
         }
         $course_c->requirement_type = trim($cur["course_requirement_type"]);
 
+        // Set which degree_id this course is a requirement of (for multiple degrees)
+        $course_c->req_by_degree_id = $this->degree_id;
+
         //adminDebug($course_c->to_string() . $course_c->getCatalogHours());
         
         $obj_semester->list_courses->add($course_c);
@@ -365,13 +368,18 @@ class _DegreePlan
           // so, just increment the required hours.
           $new_group->hours_required = $new_group->hours_required + ($cur["group_hours_required"] * 1);
           $new_group->hours_required_by_type[$cur["group_requirement_type"]] += ($cur["group_hours_required"] * 1);
+          //Set which degree_id this is required by.
+          $new_group->req_by_degree_id = $this->degree_id;
+          
           $title = $new_group->title;
           $icon_filename = $new_group->icon_filename;
-        } else {
+        } 
+        else {
           // Was not already there; insert it.
           $group_n = new Group($cur["group_id"], $this->db, $semester_num, $this->student_array_significant_courses, $this->bool_use_draft, $cur["group_requirement_type"]);
           $group_n->hours_required = $cur["group_hours_required"] * 1;
           $group_n->hours_required_by_type[$cur["group_requirement_type"]] += $group_n->hours_required;
+          $group_n->req_by_degree_id = $this->degree_id;
           if (trim($cur["group_min_grade"]) != "")
           {
             $group_n->assign_min_grade(trim(strtoupper($cur["group_min_grade"])));
@@ -386,6 +394,7 @@ class _DegreePlan
         $group_g = new Group();
         $group_g->bool_use_draft = $this->bool_use_draft;
         $group_g->group_id = $cur["group_id"];
+        $group_g->req_by_degree_id = $this->degree_id;
         $group_g->load_descriptive_data();
         $group_g->requirement_type = $cur["group_requirement_type"];
         if (trim($cur["group_min_grade"]) != "")
@@ -466,8 +475,12 @@ class _DegreePlan
 
   function load_descriptive_data()
   {
+    
     $table_name = "degrees";
     if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
+
+    // TODO:  Pull from GLOBALS cache if available, just like courses.
+    // Ex:  $GLOBALS["degree_cache_$table_name"][$degree_id] = DegreePlan Object
 
     $res = $this->db->db_query("SELECT * FROM $table_name
 								               WHERE degree_id = '?' ", $this->degree_id);

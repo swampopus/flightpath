@@ -4,7 +4,7 @@ class _Group
 {
 	public $title, $icon_filename, $group_id, $requirement_type, $min_grade, $group_name;
 	public $hours_required, $hours_remaining, $hours_fulfilled, $hours_fulfilled_for_credit;
-	public $hours_required_by_type;
+	public $hours_required_by_type, $req_by_degree_id;
 	public $assigned_to_semester_num, $bool_placeholder, $data_entry_comment;
 	public $list_courses, $list_groups, $db, $count_of_matches, $bool_winning_branch;
 	public $catalog_year;

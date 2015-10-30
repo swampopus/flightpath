@@ -27,9 +27,9 @@ class _Course
   public $bool_substitution, $course_substitution, $substitution_hours, $sub_remarks, $sub_faculty_id;
   public $bool_substitution_split, $substitution_footnote, $bool_substitution_new_from_split;
 
-  // Major or Group Requirement related:
+  // Major/Degree or Group Requirement related:
   public $min_grade, $specified_repeats, $bool_specified_repeat, $required_on_branch_id;
-  public $assigned_to_group_id, $assigned_to_semester_num, $bool_exclude_repeat;
+  public $assigned_to_group_id, $assigned_to_semester_num, $bool_exclude_repeat, $req_by_degree_id;
 
   // advising & in-system logic related:
   public $advised_hours, $bool_selected, $bool_advised_to_take;
@@ -1471,7 +1471,7 @@ class _Course
     "bool_substitution_split", "substitution_footnote", "bool_substitution_new_from_split",
 
     "min_grade", "specified_repeats", "bool_specified_repeat", "required_on_branch_id",
-    "assigned_to_group_id", "assigned_to_semester_num", "level_code",
+    "assigned_to_group_id", "assigned_to_semester_num", "level_code", "req_by_degree_id",
 
     "advised_hours", "bool_selected", "bool_advised_to_take", "bool_use_draft",
     "course_fulfilled_by", "course_list_fulfilled_by",
