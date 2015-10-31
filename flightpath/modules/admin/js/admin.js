@@ -74,6 +74,17 @@ function adminPopupAlertHelp(action)
     t = t + "NOTE: NOT CURRENTLY SUPPORTED IN THIS VERSION OF FLIGHTPATH";
   }
 
+  if (action == "degree_class")
+  {
+    t = t + "Select which classification this degree plan is listed under.  The number beside the title is the 'level' of the degree classification.";
+    t = t + "\n\n 1 - Degrees which a student may graduate in. Ex: Majors.";
+    t = t + "\n 2 - Degree plans which are secondary to top level degree plans. Ex: Minors.";
+    t = t + "\n 3 - Degree plans which are only selectable as add-ons to an existing degree plan. Ex: Concentrations.";
+    t = t + "\n\nYou may edit these classifications in the Configure School Data form, from the Admin Console.";
+  }
+
+
+
   if (action == "degree_allow_dynamic")
   {
     t = t + "If this value is set to 1 (the number one), then this degree plan is able to be combined with other degrees which are also set to Allow Dynamic.\n\n";

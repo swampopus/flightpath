@@ -1,6 +1,11 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-10-31
+  Added settings to School Data form in system.module, so we can set up "classifications" of majors.  Edited the admin.degrees.inc file to use these new options,
+  added function to misc.inc to get all the options as an array for ease of use.
+  
+
 2015-10-30
   Working on AdvisingScreen object, to display what degrees each requirement comes from.  Added new property to Course and Group objects, to track what
   degree id they were originally required by.

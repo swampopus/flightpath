@@ -1232,7 +1232,53 @@ function system_school_data_form() {
   );
   
   
-  
+  $form["degree_classifications_level_1"] = array(
+    "label" => t("Degree Classifications - Level 1:"),
+    "type" => "textarea",
+    "rows" => 3,
+    "value" => variable_get("degree_classifications_level_1", "MAJOR ~ Major"),
+    "description" => t("Enter the 'level 1' (ie, top level) degree classifications, one per line, in the following format:
+                          <br>&nbsp; &nbsp; MACHINE_NAME ~ Title
+                          <br> Example:  MAJOR ~ Major
+                          <br>These are degrees which might be combined with 
+                               another degree, as in a double-major, or selected on their own for graduation.
+                               For example, a degree in Computer Science, by itself would be
+                               classified as a 'Major' by most universities.  If you are unsure what to enter,
+                               use:  MAJOR ~ Major"),                        
+  );
+
+  $form["degree_classifications_level_2"] = array(
+    "label" => t("Degree Classifications - Level 2:"),
+    "type" => "textarea",
+    "rows" => 3,
+    "value" => variable_get("degree_classifications_level_2", "MINOR ~ Minor"),
+    "description" => t("Enter the 'level 2' degree classifications, one per line, in the following format:
+                          <br>&nbsp; &nbsp; MACHINE_NAME ~ Title
+                          <br> Example:  MINOR ~ Minor
+                          <br>These are degrees which might be combined with another degree
+                              but are not selected by themselves for graduation.  Most universities
+                              would consider this type to be a 'Minor'.  For example, a student
+                              might Major in Computer Science, with a Minor in Math.  In this instance,
+                              Math would be classified by this level. If you are unsuare what to enter, use:
+                              MINOR ~ Minor"),                        
+  );
+    
+  $form["degree_classifications_level_3"] = array(
+    "label" => t("Degree Classifications - Level 3 (Add-on degrees, attached to other degrees):"),
+    "type" => "textarea",
+    "rows" => 3,
+    "value" => variable_get("degree_classifications_level_3", "CONC ~ Concentration"),
+    "description" => t("Enter the 'level 3' degree classifications, one per line, in the following format:
+                          <br>&nbsp; &nbsp; MACHINE_NAME ~ Title
+                          <br> Example:  CONC ~ Concentration
+                          <br>These are degree plans which are only ever 'attached' to other degree plans as an add-on option
+                          to the student.
+                          For example, Computer Science might have an Option or Track or Concentration in 'Business'.
+                          The Business concentration would ONLY be selectable if the student were already majoring in Computer Science,
+                          therefor it would fall into this classification.
+                          If unsure what to enter here, use: CONC ~ Concentration"),                        
+  );
+      
   
   
   

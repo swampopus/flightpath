@@ -993,10 +993,22 @@ function admin_display_edit_degree() {
         </td>
 
         <td valign='top' class='tenpt' width=''>
-              " . t("Degree Classification.:") . "
-        </td>
-        <td valign='top' class='tenpt' width=''>  
-              <input type='text' name='degree_class' value='$degree->degree_class' size='10' maxlength='40'>
+              " . t("Degree Classification.:") . "          
+              <select name='degree_class'> ";
+              //<input type='text' name='degree_class' value='$degree->degree_class' size='10' maxlength='40'>
+    // Display degree_class pulldown.
+    $degree_classes = fp_get_degree_classifications();
+    foreach ($degree_classes["levels"] as $level => $details) {
+      foreach ($degree_classes["levels"][$level] as $machine_name => $title) {
+        $sel = "";
+        if ($machine_name == $degree->degree_class) $sel = "selected";
+                
+        $rtn .= "<option value='$machine_name' $sel>$level - $title</option>";
+      }
+    }          
+              
+    $rtn .= "</select>              
+              
               <a href='javascript: adminPopupAlertHelp(\"degree_class\");'>?</a>
         </td>
 
@@ -1004,7 +1016,8 @@ function admin_display_edit_degree() {
               <input type='text' name='degree_level' value='$degree->degree_level' size='2' maxlength='1'>
               <a href='javascript: adminPopupAlertHelp(\"degree_level\");'>?</a>
         </td>
-                
+        
+        <td></td>
         
        </tr>
         
