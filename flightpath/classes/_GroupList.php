@@ -62,7 +62,7 @@ class _GroupList extends ObjList
   /**
    * Return a GroupList which is a clone of this list.
    */
-  function get_clone($bool_return_new_groups = FALSE)
+  function get_clone($bool_return_new_groups = FALSE, $bool_load_groups = TRUE)
   {
     $rtn_list = new GroupList();
     
@@ -70,12 +70,24 @@ class _GroupList extends ObjList
     {
       $group = $this->array_list[$t];
       
+            
       if ($bool_return_new_groups == TRUE)
       {
         $new_group = new Group();
         $new_group->group_id = $group->group_id;
+        
+        if ($bool_load_groups) {
+          $new_group->load_group();  // Make sure the group has all its courses loaded in.
+        }
+                
         $rtn_list->add($new_group);
-      } else {
+      } 
+      else {
+        
+        if ($bool_load_groups) {
+          $group->load_group();  // Make sure the group has all its courses loaded in.
+        }        
+        
         $rtn_list->add($group);
       } 
       

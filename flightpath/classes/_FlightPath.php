@@ -175,7 +175,7 @@ class _FlightPath
     } // foreach temparr as major_code.  The foreach loop through all our major codes.
 
     // DEV:  Remove once we have everything working...
-    $this->degree_plan = new DegreePlan();  // just a blank degree as a placeholder for now.
+    // $this->degree_plan = new DegreePlan();  // just a blank degree as a placeholder for now.
     
     
     // Okay, coming out of this, we have an array of degree_plans  (maybe).  If it's just one, then set it to that one.
@@ -204,7 +204,7 @@ class _FlightPath
    */
   function combine_degree_plans($degree_plans, $student_id) {
     
-    //fpm($degree_plans);
+    //DEV: // return $degree_plans[0];
     
     $new_degree_plan = new DegreePlan();
     //fpm($new_degree_plan);
@@ -251,7 +251,7 @@ class _FlightPath
         
         // Getting the list of groups is going to be similar to getting our list of courses.
         // Go through the list of groups for this semester.
-        $new_list_groups = $sem->list_groups->get_clone();        
+        $new_list_groups = $sem->list_groups->get_clone();
         
         // Okay, now we can add to our semester
         // TODO:  Check hooks here?
@@ -803,6 +803,10 @@ class _FlightPath
 
 					if ($bool_perform_assignment == TRUE)
 					{
+					  // Which degree is this coming from?  
+					  $req_by_degree_id = $course_requirement->req_by_degree_id;
+					  $c->assigned_to_degree_ids_array[$req_by_degree_id] = $req_by_degree_id;					              
+            // Go ahead and state that the requirement was fulfilled.
 						$course_requirement->course_list_fulfilled_by->add($c);
 						$course_requirement->grade = $c->grade;
 						$course_requirement->hours_awarded = $c->hours_awarded;

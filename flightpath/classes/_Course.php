@@ -30,6 +30,9 @@ class _Course
   // Major/Degree or Group Requirement related:
   public $min_grade, $specified_repeats, $bool_specified_repeat, $required_on_branch_id;
   public $assigned_to_group_id, $assigned_to_semester_num, $bool_exclude_repeat, $req_by_degree_id;
+  public $assigned_to_degree_ids_array;
+
+  // TODO:  will need to be "assigned_to_group_ids_array" eventually...
 
   // advising & in-system logic related:
   public $advised_hours, $bool_selected, $bool_advised_to_take;
@@ -94,6 +97,8 @@ class _Course
     $this->course_list_fulfilled_by = new CourseList();
     $this->group_list_unassigned = new ObjList();
     $this->bool_use_draft = $bool_use_draft;
+
+    $this->assigned_to_degree_ids_array = array();
 
     // Always override if the global variable is set.
     if ($GLOBALS["fp_advising"]["bool_use_draft"] == true) {
@@ -187,7 +192,7 @@ class _Course
     
     $rtn .= intval($this->bool_ghost_hour) . "~";
     
-    
+    $rtn .= join(",", $this->assigned_to_degree_ids_array) . "~";
 
 
     return $rtn;
@@ -260,6 +265,11 @@ class _Course
     $this->display_status	= 	$temp[23];
 
     $this->bool_ghost_hour	= 	(bool) $temp[24];
+
+  if (trim($temp[25]) != "") {
+    $this->assigned_to_degree_ids_array = explode(",", $temp[25]);
+  }
+
 
   }
 
@@ -1472,6 +1482,7 @@ class _Course
 
     "min_grade", "specified_repeats", "bool_specified_repeat", "required_on_branch_id",
     "assigned_to_group_id", "assigned_to_semester_num", "level_code", "req_by_degree_id",
+    "assigned_to_degree_ids_array",
 
     "advised_hours", "bool_selected", "bool_advised_to_take", "bool_use_draft",
     "course_fulfilled_by", "course_list_fulfilled_by",

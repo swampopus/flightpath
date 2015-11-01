@@ -2312,6 +2312,9 @@ function draw_menu_items($menu_array) {
 		}
 
 
+    ////////////////////////////
+    //  When was this student enrolled in this course?
+
 		if ($course->term_id != "" && $course->term_id != "11111" && $course->display_status != "eligible" && $course->display_status != "disabled")
 		{
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
@@ -2326,6 +2329,26 @@ function draw_menu_items($menu_array) {
 					</div>";
 
 		}
+    
+    
+    ////////////////////////////////
+    // TODO:  Conditions on which this will even appear?  Like only if the student has more than one degree selected?
+    // What degrees is this course fulfilling?    
+    if (count($course->assigned_to_degree_ids_array) > 0) {
+      $pC .= "<div class='tenpt course-description-assigned-to-degrees'>
+                " . t("This course is fulfilling a requirement for: ");
+      foreach ($course->assigned_to_degree_ids_array as $degree_id) {
+        $t_degree_plan = new DegreePlan($degree_id);        
+        $pC .= "<span>" . $t_degree_plan->get_title2() . "</span>";
+      }
+      $pC .= "</div>";              
+      
+    }
+    
+    ////////////////
+    // Is this course assigned to a group?
+    // TODO: This will eventually need to be a list of groups, I think, if the course can
+    // double-dip into other degrees' groups.
 
 		if ($course->assigned_to_group_id*1 > 0 && $course->grade != "" && $course->bool_transfer != true && $course->bool_substitution != true)
 		{
@@ -3546,18 +3569,20 @@ function draw_menu_items($menu_array) {
 			$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
      	<tr height='20' class='$hand_class $display_status'
-      		$on_mouse_over title='$title_text'>
+      		$on_mouse_over title='$title_text' >
       		<td style='width:$w1_1; white-space:nowrap;' align='left'>$op$hid</td>
-      		<td style='width:$w1_2; white-space:nowrap;' align='left' onClick='$js_code'>$icon_link</td>
-      		<td style='width:$w1_3; white-space:nowrap;' align='left' onClick='$js_code'>&nbsp;$ast</td>
-      		<td align='left' style='width:$w2; white-space:nowrap;' class='tenpt underline' onClick='$js_code'>
+        
+      		<td style='width:$w1_2; white-space:nowrap;' align='left'  onClick='$js_code'>$icon_link</td>
+      		<td style='width:$w1_3; white-space:nowrap;' align='left'  onClick='$js_code'>&nbsp;$ast</td>
+      		<td align='left' style='width:$w2; white-space:nowrap;' class='tenpt underline'  onClick='$js_code'>
        				$subject_id</td>
        		<td class='tenpt underline' style='width:$w3; white-space:nowrap;' align='left' 
-       			onClick='$js_code'>
-        			$course_num$footnote</td>
-	       <td class='tenpt underline' style='width:$w4; max-width:36px; white-space:nowrap;' onClick='$js_code'>$hours$var_hour_icon</td>
-       	   <td class='tenpt underline'  style='width:$w5; max-width:35px; white-space:nowrap;' onClick='$js_code'>$dispgrade&nbsp;</td>
+       			         onClick='$js_code'>
+        			       $course_num$footnote</td>
+	         <td class='tenpt underline' style='width:$w4; max-width:36px; white-space:nowrap;'  onClick='$js_code'>$hours$var_hour_icon</td>
+       	   <td class='tenpt underline'  style='width:$w5; max-width:35px; white-space:nowrap;'  onClick='$js_code'>$dispgrade&nbsp;</td>
        	   <td class='tenpt underline' style='width:$w6; max-width:31px; white-space:nowrap;' onClick='$js_code'>$pts&nbsp;</td>
+       	
      	</tr>
      	</table>";
 

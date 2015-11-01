@@ -563,7 +563,6 @@ function fp_validate_utf8($text) {
   return (preg_match('/^./us', $text) == 1);
 } 
  
-
 /**
  * Simple function to convert a string into a machine-readable string.
  * 
