@@ -498,9 +498,6 @@ class _Student
 		  $cgpa = fp_truncate_decimals($cumulative_quality_points / $cumulative_quality_hours, 3);
 		} 
 		
-		fpm("This student: <b>$cumulative_total_hours total hours</b>, 
-		            $cumulative_quality_hours qual hours, $cumulative_quality_points cpoints. <b>gpa: $cgpa</b>");
-		
 	  	
 		return array(
 		  "cumulative_total_hours" => $cumulative_total_hours,

@@ -350,6 +350,12 @@ table.blueBorder
  text-decoration:none;
 }
 
+.course-assigned-more-than-one-degree td /* the course has been assigned to multiple degrees */
+{
+  background-color: #FFFF99;
+  text-decoration: none;
+}
+
 .eligible /* elegible courses (student may take) */
 {
  color: black;

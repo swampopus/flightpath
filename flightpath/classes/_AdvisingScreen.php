@@ -2337,11 +2337,13 @@ function draw_menu_items($menu_array) {
     if (count($course->assigned_to_degree_ids_array) > 0) {
       $pC .= "<div class='tenpt course-description-assigned-to-degrees'>
                 " . t("This course is fulfilling a requirement for: ");
+      $html = "";
       foreach ($course->assigned_to_degree_ids_array as $degree_id) {
         $t_degree_plan = new DegreePlan($degree_id);        
-        $pC .= "<span>" . $t_degree_plan->get_title2() . "</span>";
+        $html .= "<span>" . $t_degree_plan->get_title2() . "</span>, ";
       }
-      $pC .= "</div>";              
+      $html = rtrim($html, ", ");
+      $pC .= "$html</div>";              
       
     }
     
@@ -3278,6 +3280,7 @@ function draw_menu_items($menu_array) {
       $advising_term_id = 0;
     }
 
+    $extra_classes = "";
         
 		$course->assign_display_status();
 		// If the course has already been advised in a different semester,
@@ -3287,6 +3290,12 @@ function draw_menu_items($menu_array) {
 			$course->display_status = "disabled";
 			$advising_term_id = $course->advised_term_id;
 		}
+
+
+    // Has the course been assigned to more than one degree?
+    if (count($course->assigned_to_degree_ids_array) > 1) {
+      $extra_classes .= " course-assigned-more-than-one-degree course-assigned-" . count($course->assigned_to_degree_ids_array) . "-degrees";
+    }
 
 
 		if ($course->subject_id == "")
@@ -3568,7 +3577,7 @@ function draw_menu_items($menu_array) {
  
 			$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
-     	<tr height='20' class='$hand_class $display_status'
+     	<tr height='20' class='$hand_class $display_status $extra_classes'
       		$on_mouse_over title='$title_text' >
       		<td style='width:$w1_1; white-space:nowrap;' align='left'>$op$hid</td>
         

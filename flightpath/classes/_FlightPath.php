@@ -599,6 +599,7 @@ class _FlightPath
 		while($list_requirements->has_more())
 		{
 			$course_requirement = $list_requirements->get_next();
+      $req_by_degree_id = $course_requirement->req_by_degree_id;  // what degree is requiring this course?
 
 			if ($bool_check_significant_courses == true)
 			{
@@ -754,9 +755,14 @@ class _FlightPath
 				}
 				
 				
-				if ($c->bool_has_been_assigned != true)
+				//if ($c->bool_has_been_assigned != true)  // boom.  
+				// We want to see if this course has already been assigned to THIS degree...
+				if (!in_array($req_by_degree_id, $c->assigned_to_degree_ids_array))
 				{//Don't count courses which have already been placed in other groups.
 
+				  // TODO:  Check hooks to see if this course is allowed to be assigned to the degree in question.
+				  				
+				
 					// Has another version of this course already been
 					// assigned?  And if so, are repeats allowed for this
 					// course?  And if so, then how many hours of the
@@ -812,13 +818,14 @@ class _FlightPath
 						$course_requirement->hours_awarded = $c->hours_awarded;
 						$course_requirement->bool_ghost_hour = $c->bool_ghost_hour;
 
-						$c->bool_has_been_assigned = true;
+						// No longer using... using the assigned_to_degree_ids_array instead. // $c->bool_has_been_assigned = true;
 						//$c->requirement_type = $course_requirement->requirement_type;
 						if ($c->requirement_type == "") {
 						  // No requirement type given?  Perhaps we are part of a group.  If so, use that.
 						  //$c->requirement_type = $group->requirement_type;		
 						  //$course_requirement->requirement_type = $group->requirement_type;				  
 						}
+            // TODO:  This will need to be an array eventually...
 						$c->assigned_to_group_id = $group_id;
 						$group->hours_assigned = $hours_assigned;
 						// Should check for:
