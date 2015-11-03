@@ -1,6 +1,12 @@
 FlightPath 4.x Changelog
 ========================
 
+
+
+2015-11-02
+  Removed errant fpm() statement accidentally left in _Student.
+
+
 ----------------
 RELEASED 4.8.2
 ----------------
