@@ -30,7 +30,7 @@ class _Course
   // Major/Degree or Group Requirement related:
   public $min_grade, $specified_repeats, $bool_specified_repeat, $required_on_branch_id;
   public $assigned_to_group_id, $assigned_to_semester_num, $bool_exclude_repeat, $req_by_degree_id;
-  public $assigned_to_degree_ids_array;
+  public $assigned_to_degree_ids_array, $assigned_to_group_ids_array;
 
   // TODO:  will need to be "assigned_to_group_ids_array" eventually...
 
@@ -87,6 +87,7 @@ class _Course
     $this->catalog_year = $catalog_year;
     $this->assigned_to_semester_num = -1;
     $this->assigned_to_group_id = 0;
+    $this->assigned_to_group_ids_array = array();
     $this->bool_advised_to_take = false;
     $this->bool_added_course = false;
     $this->specified_repeats = 0;
@@ -145,7 +146,7 @@ class _Course
 
     $rtn .= $this->course_id . "~";
     $rtn .= $this->assigned_to_semester_num . "~";
-    $rtn .= $this->assigned_to_group_id . "~";
+    $rtn .= join(",", $this->assigned_to_group_ids_array) . "~";
     $rtn .= intval($this->bool_advised_to_take) . "~";
     $rtn .= $this->specified_repeats . "~";
     $rtn .= intval($this->bool_specified_repeat) . "~";
@@ -222,7 +223,7 @@ class _Course
     $this->load_course($this->course_id);
 
     $this->assigned_to_semester_num = 	$temp[1];
-    $this->assigned_to_group_id 	= 	$temp[2];
+    $this->assigned_to_group_ids_array 	= 	explode(",", $temp[2]);
     $this->bool_advised_to_take 	= 		(bool) $temp[3];
     $this->specified_repeats   	= 	$temp[4];
     $this->bool_specified_repeat 	= 	(bool) $temp[5];
@@ -1444,6 +1445,20 @@ class _Course
   }
 
 
+  /**
+   * Return the first element in our assigned_to_group_ids_array, or FALSE
+   */
+  function get_first_assigned_to_group_id() {
+    if (count($this->assigned_to_group_ids_array) < 1) return FALSE;
+    
+    
+    
+    // Otherwise, get it.
+    return reset($this->assigned_to_group_ids_array);  // returns the first element.    
+    
+  }
+
+
 
   /**
    * This is the magic method __sleep().  PHP will call this method any time
@@ -1482,7 +1497,7 @@ class _Course
 
     "min_grade", "specified_repeats", "bool_specified_repeat", "required_on_branch_id",
     "assigned_to_group_id", "assigned_to_semester_num", "level_code", "req_by_degree_id",
-    "assigned_to_degree_ids_array",
+    "assigned_to_degree_ids_array", "assigned_to_group_ids_array",
 
     "advised_hours", "bool_selected", "bool_advised_to_take", "bool_use_draft",
     "course_fulfilled_by", "course_list_fulfilled_by",

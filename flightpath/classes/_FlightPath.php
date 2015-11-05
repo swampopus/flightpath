@@ -467,7 +467,8 @@ class _FlightPath
 		{
 			$substitution = $this->student->list_substitutions->get_next();
 
-			$required_group_id = $substitution->course_requirement->assigned_to_group_id;
+			//$required_group_id = $substitution->course_requirement->assigned_to_group_id;
+			$required_group_id = $substitution->course_requirement->get_first_assigned_to_group_id(); // we assume there's only one group to get
 
 			// First check-- does this degree even have this group ID?
 			$outdated_note = "";
@@ -601,6 +602,12 @@ class _FlightPath
 			$course_requirement = $list_requirements->get_next();
       $req_by_degree_id = $course_requirement->req_by_degree_id;  // what degree is requiring this course?
 
+      // If we're dealing with a group, use it's required by degree id.
+      if ($group->group_id > 0 && $group->req_by_degree_id > 0) {        
+        $req_by_degree_id = $group->req_by_degree_id;
+      }
+      
+      
 			if ($bool_check_significant_courses == true)
 			{
 				// Only look for the course_requirement if it is in the student's
@@ -633,7 +640,8 @@ class _FlightPath
 				if ($substitution->bool_group_addition == true)
 				{
 
-					if ($substitution->course_requirement->assigned_to_group_id != $group_id)
+					//if ($substitution->course_requirement->assigned_to_group_id != $group_id)
+          if ($substitution->course_requirement->get_first_assigned_to_group_id() != $group_id)
 					{
 						continue;
 					}
@@ -810,7 +818,7 @@ class _FlightPath
 					if ($bool_perform_assignment == TRUE)
 					{
 					  // Which degree is this coming from?  
-					  $req_by_degree_id = $course_requirement->req_by_degree_id;
+					  //$req_by_degree_id = $course_requirement->req_by_degree_id;
 					  $c->assigned_to_degree_ids_array[$req_by_degree_id] = $req_by_degree_id;					              
             // Go ahead and state that the requirement was fulfilled.
 						$course_requirement->course_list_fulfilled_by->add($c);
@@ -825,9 +833,12 @@ class _FlightPath
 						  //$c->requirement_type = $group->requirement_type;		
 						  //$course_requirement->requirement_type = $group->requirement_type;				  
 						}
+            
             // TODO:  This will need to be an array eventually...
-						$c->assigned_to_group_id = $group_id;
+						//$c->assigned_to_group_id = $group_id;
+						$c->assigned_to_group_ids_array[$group_id] = $group_id;
 						$group->hours_assigned = $hours_assigned;
+						
 						// Should check for:
 						// Can it be assigned, based on the number of allowed course repeats?
 						if ($course_requirement->bool_specified_repeat == true)
@@ -1587,7 +1598,8 @@ class _FlightPath
 								// I don't want to mark all occurances as advised.
 								$course->bool_advised_to_take = true;
 								$course->assigned_to_semester_num = $semester_num;
-								$course->assigned_to_group_id = $group_id;
+								//$course->assigned_to_group_id = $group_id;
+								$course->assigned_to_group_ids_array[$group_id] = $group_id;
 								
                 // Make sure we assign the hours to the group, so this
       					// advised courses takes up a spot in the group.  Otherwise
@@ -1652,7 +1664,8 @@ class _FlightPath
 					//fpm($course);
 					$course->bool_advised_to_take = true;
 					$course->assigned_to_semester_num = $semester_num;
-					$course->assigned_to_group_id = $group_id;
+					//$course->assigned_to_group_id = $group_id;
+					$course->assigned_to_group_ids_array[$group_id] = $group_id;
 
 					// Make sure we assign the hours to the group, so this
 					// advised courses takes up a spot in the group.  Otherwise
@@ -1735,7 +1748,8 @@ class _FlightPath
 				// This means that the course requirement needs to be split.
 				// So, find this course in the degree plan.
 				$required_course_id = $course_requirement->course_id;
-				$required_group_id = $course_requirement->assigned_to_group_id;
+				//$required_group_id = $course_requirement->assigned_to_group_id;
+				$required_group_id = $course_requirement->get_first_assigned_to_group_id();  // we assume a course requirement is only assigned to 1 group.
 				$required_semester_num = $course_requirement->assigned_to_semester_num;
 
 
@@ -1758,7 +1772,8 @@ class _FlightPath
 		$course = new Course($course_id, false, $this->db);
 		$course->bool_advised_to_take = true;
 		$course->assigned_to_semester_num = -88;
-		$course->assigned_to_group_id = -88;
+		//$course->assigned_to_group_id = -88;
+		$course->assigned_to_group_ids_array[-88] = -88;
 		$course->advised_hours = $var_hours;
 		$course->db_advised_courses_id = $db_advised_courses_id;
 		$course->advised_term_id = $advised_term_id;

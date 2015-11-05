@@ -906,10 +906,12 @@ function draw_menu_items($menu_array) {
 			$cr_hrs = $course_requirement->get_hours();
 
 			$in_group = ".";
-			if ($subbed_course->assigned_to_group_id > 0)
+			//if ($subbed_course->assigned_to_group_id > 0)
+			if ($subbed_course->get_first_assigned_to_group_id() > 0)
 			{
 				$new_group = new Group();
-				$new_group->group_id = $subbed_course->assigned_to_group_id;
+				//$new_group->group_id = $subbed_course->assigned_to_group_id;
+				$new_group->group_id = $subbed_course->get_first_assigned_to_group_id();
 				$new_group->load_descriptive_data();
 
 				$in_group = " in $new_group->title.";
@@ -1183,6 +1185,8 @@ function draw_menu_items($menu_array) {
 			if ($c->bool_has_been_assigned)
 			{
 				$pC .= "A:";
+				//////////////////////////////
+				// TODO:  List all the groups/degrees this course has been assigned to!
 				if ($c->assigned_to_group_id == 0)
 				{
 					$pC .= "degree plan";
@@ -2352,11 +2356,14 @@ function draw_menu_items($menu_array) {
     // TODO: This will eventually need to be a list of groups, I think, if the course can
     // double-dip into other degrees' groups.
 
-		if ($course->assigned_to_group_id*1 > 0 && $course->grade != "" && $course->bool_transfer != true && $course->bool_substitution != true)
+		if (intval($course->get_first_assigned_to_group_id()) > 0 && $course->grade != "" && $course->bool_transfer != true && $course->bool_substitution != true)
 		{
 			//$g = new Group($course->assigned_to_group_id);
 			$g = new Group();
-			$g->group_id = $course->assigned_to_group_id;
+      // TODO:  Not sure yet what to do about this. Might only be 1 value, actually, since courses are assigned
+      // one at a time to the groups....  
+			//$g->group_id = $course->assigned_to_group_id;
+			$g->group_id = $course->get_first_assigned_to_group_id();
 			$g->load_descriptive_data();
 
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
@@ -2388,8 +2395,10 @@ function draw_menu_items($menu_array) {
 		}
 
 
-		// Substitutors get extra information:
-		if (user_has_permission("can_substitute") && $course->assigned_to_group_id > 0) {
+    fpm($course);
+
+  	// Substitutors get extra information:
+		if (user_has_permission("can_substitute") && $course->get_first_assigned_to_group_id()) {
 			
 			
 			$pC .= "<div class='tenpt' style='margin-top: 20px;'>
@@ -2404,19 +2413,22 @@ function draw_menu_items($menu_array) {
 					";
 
 			// Course is assigned to a group.
-			if ($course->assigned_to_group_id > 0) {
-  			$group = new Group();
-  			$group->group_id = $course->assigned_to_group_id;
-  			$group->load_descriptive_data();
-  			
-  			$pC .= "
-  					" . t("Course is assigned to group:") . "<br>
-  					&nbsp; " . t("Group ID:") . " $group->group_id<br>
-  					&nbsp; " . t("Title:") . " $group->title<br>";
-				$pC .= "&nbsp; <i>" . t("Internal name:") . " $group->group_name</i><br>";
-  			
-  			$pC .= "&nbsp; " . t("Catalog year:") . " $group->catalog_year
-  			";
+			// TODO:  will come back to this, since it might be assigned to multiple groups.
+			if ($course->get_first_assigned_to_group_id()) {
+  			foreach ($course->assigned_to_group_ids_array as $group_id) {  
+    			$group = new Group();
+    			$group->group_id = $group_id;
+    			$group->load_descriptive_data();
+    			
+    			$pC .= "<div>
+    					" . t("Course is assigned to group:") . "<br>
+    					&nbsp; " . t("Group ID:") . " $group->group_id<br>
+    					&nbsp; " . t("Title:") . " $group->title<br>";
+  				$pC .= "&nbsp; <i>" . t("Internal name:") . " $group->group_name</i><br>";
+    			
+    			$pC .= "&nbsp; " . t("Catalog year:") . " $group->catalog_year
+    			         </div>";
+        }
 			}
 			$pC .= "
 					</div>
@@ -2526,6 +2538,7 @@ function draw_menu_items($menu_array) {
 			$pC .= "
 					<input type='hidden' name='varHours' id='varHours' value='$var_hours_default'>";
 
+      //TODO: Same situation about the group_id.  I guess need to find out exactly which group it was assigned to?
 
       $pC .= fp_render_button(t("Update"), "popupUpdateSelectedCourse(\"$course->course_id\",\"$course->assigned_to_group_id\",\"$course->assigned_to_semester_num\",\"$course->random_id\",\"$advising_term_id\");");
 
@@ -4130,7 +4143,8 @@ function draw_menu_items($menu_array) {
 		$pC = "";
 
 		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
-
+    $req_by_degree_id = $place_group->req_by_degree_id;
+    
 		if ($place_group->group_id != -88)
 		{
 			// This is NOT the Add a Course group.
@@ -4429,6 +4443,24 @@ function draw_menu_items($menu_array) {
 					" . t("You may select <b>@hrs</b>
 						hour$s from this list.", array("@hrs" => $group_hours_remaining)) . "$unselectable_notice</div>";
 		}
+
+
+   ////////////////////////////////
+    // TODO:  Conditions on which this will even appear?  Like only if the student has more than one degree selected?
+    // What degrees is this group req by?    
+    
+    $pC .= "<div class='tenpt group-select-req-by-degree'>
+              " . t("This group is required by: ");
+    $html = "";
+    $t_degree_plan = new DegreePlan($req_by_degree_id);        
+    $html .= "<span>" . $t_degree_plan->get_title2() . "</span>";
+   
+    $pC .= "$html</div>";              
+    
+    
+
+
+    /////////////////////////////
 
 		if ($bool_display_submit == true && !$this->bool_blank && $bool_no_courses != true)
 		{

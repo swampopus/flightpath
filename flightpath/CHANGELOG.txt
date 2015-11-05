@@ -1,6 +1,11 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-11-04
+  Working on allowing courses to be "double dipped", assigned to multiple GROUPS, so long as the groups belong
+  to different degrees.
+  
+
 2015-11-02
   Removed errant fpm() statement left in accidentally in _Student.php
 
