@@ -476,7 +476,7 @@ function draw_menu_items($menu_array) {
 			}
 
 			$bool_add_footnote = false;
-			if ($course->bool_has_been_displayed == true)
+			if ($course->get_has_been_displayed($course->req_by_degree_id) == true)
 			{ // Show the footnote if this has already been displayed
 				// elsewhere on the page.
 				$bool_add_footnote = true;
@@ -619,7 +619,7 @@ function draw_menu_items($menu_array) {
 		{		  
 			$course = $this->student->list_courses_taken->get_next();
 
-			if ($course->bool_has_been_displayed == true)
+			if ($course->get_has_been_displayed($course->req_by_degree_id) == TRUE)
 			{ // Skip ones which have been assigned to groups or semesters.
 				continue;
 			}
@@ -2394,9 +2394,7 @@ function draw_menu_items($menu_array) {
 
 		}
 
-
-    fpm($course);
-
+    
   	// Substitutors get extra information:
 		if (user_has_permission("can_substitute") && $course->get_first_assigned_to_group_id()) {
 			
@@ -2670,7 +2668,7 @@ function draw_menu_items($menu_array) {
 
 
 				$pC .= $this->draw_course_row($course->course_list_fulfilled_by->get_first());
-				$course->course_list_fulfilled_by->get_first()->bool_has_been_displayed = true;
+				$course->course_list_fulfilled_by->get_first()->set_has_been_displayed($course->req_by_degree_id);
 
 
 				if ($course->course_list_fulfilled_by->get_first()->display_status == "completed")
@@ -2789,7 +2787,8 @@ function draw_menu_items($menu_array) {
 		// of the group.
 
 		$display_semesterNum = $place_group->assigned_to_semester_num;
-		
+
+    $req_by_degree_id = $group->req_by_degree_id;		
 
 		$group->list_courses->remove_unfulfilled_and_unadvised_courses();
 		$group->list_courses->reset_counter();
@@ -2813,9 +2812,10 @@ function draw_menu_items($menu_array) {
 					continue;
 				}
 			}
-
-
-			if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->bool_has_been_displayed != true && $course->bool_has_been_displayed != true)
+      
+    
+			if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->get_has_been_displayed($req_by_degree_id) != TRUE && $course->get_has_been_displayed($req_by_degree_id) != TRUE)
+			//if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->bool_has_been_displayed != true && $course->bool_has_been_displayed != true)
 			{
 				$c = $course->course_list_fulfilled_by->get_first();
 				if ($remaining < $c->get_hours())
@@ -2833,7 +2833,7 @@ function draw_menu_items($menu_array) {
 
 			}
 
-			if ($course->bool_advised_to_take && $course->bool_has_been_displayed != true && $course->assigned_to_semester_num == $display_semesterNum)
+			if ($course->bool_advised_to_take && $course->get_has_been_displayed($req_by_degree_id) != true && $course->assigned_to_semester_num == $display_semesterNum)
 			{
 				$c = $course;
 				if ($remaining < $c->get_hours())
@@ -2868,7 +2868,7 @@ function draw_menu_items($menu_array) {
 					$fulfilled_hours = $display_course_list->count_hours();
 					$remaining = $place_group->hours_required - $fulfilled_hours;
 
-					if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->bool_has_been_displayed != true && $course->bool_has_been_displayed != true)
+					if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->get_has_been_displayed($req_by_degree_id) != true && $course->get_has_been_displayed($req_by_degree_id) != true)
 					{
 						$c = $course->course_list_fulfilled_by->get_first();
 						if ($remaining < $c->get_hours() || $remaining < 1)
@@ -2896,7 +2896,7 @@ function draw_menu_items($menu_array) {
 
 					}
 
-					if ($course->bool_advised_to_take && $course->bool_has_been_displayed != true && $course->assigned_to_semester_num == $display_semesterNum)
+					if ($course->bool_advised_to_take && $course->get_has_been_displayed($req_by_degree_id) != true && $course->assigned_to_semester_num == $display_semesterNum)
 					{
 
 						$c = $course;
@@ -3023,7 +3023,7 @@ function draw_menu_items($menu_array) {
 
 			// Doesn't matter if its a specified repeat or not.  Just
 			// mark it as having been displayed.
-			$course->bool_has_been_displayed = true;
+			$course->set_has_been_displayed($group->req_by_degree_id);
 			
 		}
 		return $pC;
@@ -3351,7 +3351,7 @@ function draw_menu_items($menu_array) {
 
 				$footnote .= "<span class='superscript'>T";
 				$fcount = count($this->footnote_array["transfer"]) + 1;
-				if ($course->bool_has_been_displayed == true)
+				if ($course->get_has_been_displayed($course->req_by_degree_id) == true)
 				{ // If we've already displayed this course once, and are
 					// now showing it again (like in the Transfer Credit list)
 					// we do not want to increment the footnote counter.
@@ -3385,7 +3385,7 @@ function draw_menu_items($menu_array) {
 				$footnote = "";
 				$footnote .= "<span class='superscript'>S";
 				$fcount = count($this->footnote_array["substitution"]) + 1;
-				if ($course->bool_has_been_displayed == true)
+				if ($course->get_has_been_displayed($course->req_by_degree_id) == true)
 				{ // If we've already displayed this course once, and are
 					// now showing it again (like in the Transfer Credit list)
 					// we do not want to increment the footnote counter.
@@ -3456,11 +3456,12 @@ function draw_menu_items($menu_array) {
 		$course_id = $course->course_id;
 		$semester_num = $course->assigned_to_semester_num;
 		$group_id = $course->assigned_to_group_id;
+    $hid_group_id = str_replace("_", "U", $group_id); // replace _ with placeholder U so it doesn't mess up submission.
 		$random_id = $course->random_id;
 		$advised_hours = $course->advised_hours*1;
 
 		$unique_id = $course_id . "_" . $semester_num . "_" . mt_rand(1,9999);
-		$hid_name = "advcr_$course_id" . "_$semester_num" . "_$group_id" . "_$advised_hours" . "_$random_id" . "_$advising_term_id" . "_r" . mt_rand(1,9999);
+		$hid_name = "advcr_$course_id" . "_$semester_num" . "_$hid_group_id" . "_$advised_hours" . "_$random_id" . "_$advising_term_id" . "_r" . mt_rand(1,9999);
 		
 		// Due to an interesting bug, the hid_name cannot contain periods.  So, if a course
 		// has decimal hours, we need to replace the decimal with a placeholder.

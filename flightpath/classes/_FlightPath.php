@@ -390,7 +390,8 @@ class _FlightPath
 			// always be contained in a branch!
 			if (!$g->list_courses->is_empty)
 			{
-				// Yes, there are courses here.  So, assign them at this level.
+	
+    		// Yes, there are courses here.  So, assign them at this level.
 				$this->assign_courses_to_list($g->list_courses, $this->student, true, $g, true);
 				// Okay, if we have fulfilled our courses at this level.
 
@@ -560,6 +561,13 @@ class _FlightPath
 			$group = new Group();
 			$group->group_id = 0;
 		}
+
+//TODO: dev
+/*      if ($group->get_db_group_id() == 2951197) {
+          fpm("starting fun electives, req by degree: $group->req_by_degree_id");
+        $dev_flag = "yes";
+        }
+*/
 
     $sort_policy = variable_get("initial_student_course_sort_policy", "alpha"); // will either be "alpha" or "grade"
 		
@@ -817,9 +825,10 @@ class _FlightPath
 
 					if ($bool_perform_assignment == TRUE)
 					{
+					  
 					  // Which degree is this coming from?  
 					  //$req_by_degree_id = $course_requirement->req_by_degree_id;
-					  $c->assigned_to_degree_ids_array[$req_by_degree_id] = $req_by_degree_id;					              
+					  $c->assigned_to_degree_ids_array[$req_by_degree_id] = $req_by_degree_id;            	              
             // Go ahead and state that the requirement was fulfilled.
 						$course_requirement->course_list_fulfilled_by->add($c);
 						$course_requirement->grade = $c->grade;
@@ -834,9 +843,10 @@ class _FlightPath
 						  //$course_requirement->requirement_type = $group->requirement_type;				  
 						}
             
-            // TODO:  This will need to be an array eventually...
+            // Check what groups it has been assigned to already.
 						//$c->assigned_to_group_id = $group_id;
-						$c->assigned_to_group_ids_array[$group_id] = $group_id;
+						$c->assigned_to_group_ids_array[$group_id . "_" . $req_by_degree_id] = $group_id;
+            
 						$group->hours_assigned = $hours_assigned;
 						
 						// Should check for:
@@ -1177,7 +1187,7 @@ class _FlightPath
       $temp = explode("_",$key);
 			$course_id = trim($temp[1]);
 			$semester_num = trim($temp[2]);
-			$group_id = trim($temp[3]);
+			$group_id = str_replace("U", "_", trim($temp[3]));  // replace U with _, which was required for the submission to work (couldn't use the _ in group_id.)
 			$var_hours = trim($temp[4]) * 1;
 			$random_id = trim($temp[5]);
 			$advised_term_id = trim($temp[6]);			

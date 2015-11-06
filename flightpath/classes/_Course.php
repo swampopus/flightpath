@@ -32,7 +32,7 @@ class _Course
   public $assigned_to_group_id, $assigned_to_semester_num, $bool_exclude_repeat, $req_by_degree_id;
   public $assigned_to_degree_ids_array, $assigned_to_group_ids_array;
 
-  // TODO:  will need to be "assigned_to_group_ids_array" eventually...
+  // TODO:  deprecated: the assigned_to_group_id variable?
 
   // advising & in-system logic related:
   public $advised_hours, $bool_selected, $bool_advised_to_take;
@@ -44,10 +44,10 @@ class _Course
 
   // Display related:
   public $display_status, $icon_filename, $description, $title;
-  public $title_text, $temp_flag, $bool_has_been_displayed;
+  public $title_text, $temp_flag, $bool_has_been_displayed, $bool_has_been_displayed_by_degree_array;
   public $bool_unselectable;
   public $bool_hide_grade, $bool_ghost_hour, $bool_ghost_min_hour;
-
+// TODO:  Deprecated, the bool_has_been_displayed.  Insteads need to be by degree.
   
 
 
@@ -98,6 +98,7 @@ class _Course
     $this->course_list_fulfilled_by = new CourseList();
     $this->group_list_unassigned = new ObjList();
     $this->bool_use_draft = $bool_use_draft;
+    $this->bool_has_been_displayed_by_degree_array = array();
 
     $this->assigned_to_degree_ids_array = array();
 
@@ -120,6 +121,27 @@ class _Course
     {
       $this->load_course($course_id, $is_transfer);
     }
+  }
+
+  /**
+   * Returns TRUE or FALSE if this course has been displayed.  Specify a degree_id to be more specific.
+   */
+  function get_has_been_displayed($degree_id = 0) {
+    if ($degree_id > 0) {
+      return $this->bool_has_been_displayed_by_degree_array[$degree_id];
+    }
+    else {
+      // has the course been displayed by ANY degree?
+      if (count($this->bool_has_been_displayed_by_degree_array) > 0) {
+        return TRUE;
+      }
+    }
+    
+    return FALSE;
+  }
+
+  function set_has_been_displayed($degree_id = 0, $val = TRUE) {
+    $this->bool_has_been_displayed_by_degree_array[$degree_id] = $val;
   }
 
 
@@ -1503,7 +1525,7 @@ class _Course
     "course_fulfilled_by", "course_list_fulfilled_by",
     "bool_has_been_assigned", "bool_added_course", "group_list_unassigned",
 
-    "display_status", "bool_has_been_displayed", "bool_hide_grade", "bool_ghost_hour",
+    "display_status", "bool_has_been_displayed", "bool_has_been_displayed_by_degree_array", "bool_hide_grade", "bool_ghost_hour",
     "bool_ghost_min_hour",
     );
 

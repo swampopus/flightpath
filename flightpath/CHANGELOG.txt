@@ -1,6 +1,21 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-11-05
+  Working on having identical groups in combined degrees.  My solution is that each group's group_id is actually
+  always a combination of the db_group_id + _ + degree_id.
+  Ex:  5555_1234
+  This means I have to take extra precautions when dealing with the group_id variable from a group.  I created
+  a function in the group object called get_db_group_id() to make this easier.  Also changed certain DB tables to let group_id
+  be a varchar(50), since we would be saving the '_' along with it.
+  
+  Had to adjust how advising variables were submitted, replacing the group_id's _ with U as a placeholder until it could
+  be saved, lest it mess up the submission.  
+  
+  I also changed the course object's bool_has_been_displayed to instead be an array of WHICH degrees it has been
+  displayed in.  I created convenience functions for interacting with it: get_has_been_displayed($degree_id) and set...($degree_id).
+
+
 2015-11-04
   Working on allowing courses to be "double dipped", assigned to multiple GROUPS, so long as the groups belong
   to different degrees.

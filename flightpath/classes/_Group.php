@@ -113,15 +113,28 @@ class _Group
 		return ($this->hours_required - $this->get_fulfilled_hours(true, true, false, $semester_num));
 	}
 
+ 
+  /**
+   * We expect the group_id to be our db_group_id + _ + degree_id, to ensure
+   * that groups are unique to a degree.  Let's return just the database group_id portion (the number
+   * which we can look up in the db groups table with.)
+   */
+  function get_db_group_id() {
+    // We expect our group_id to actually be the db_group_id + _ + degree_id.
+    $temp = explode("_", $this->group_id);
+    $db_group_id = trim($temp[0]);
+    
+    return $db_group_id;    
+  }
+
+
 	function load_group($bool_load_significant_only = true, $array_significant_courses = false, $bool_reload_missing_only = false)
 	{
-		$group_id = $this->group_id;
 		$this->load_descriptive_data();
 		if ($this->db_delete_flag == 1)
 		{
 			return;
 		}
-
 
 		$bool_significant_courses_empty = true;
 		if (is_array($array_significant_courses))
@@ -145,7 +158,7 @@ class _Group
 		if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 		
 		$res = $this->db->db_query("SELECT * FROM $table_name
-							WHERE group_id = '?'	", $this->group_id);
+							WHERE group_id = '?'	", $this->get_db_group_id());
 		while ($cur = $this->db->db_fetch_array($res))
 		{
 
@@ -197,7 +210,7 @@ class _Group
 					$course_c->db_group_requirement_id = $use_id;
 					$course_c->db = $this->db;
 					$course_c->catalog_year = $this->catalog_year;
-					$course_c->assigned_to_group_id = $group_id;
+					$course_c->assigned_to_group_id = $this->group_id;
 					$course_c->assigned_to_semester_num = $this->assigned_to_semester_num;
 					
 
@@ -230,7 +243,7 @@ class _Group
 					// and reload it's missing courses.
 					$temp_g = new Group();
 					$temp_g->bool_use_draft = $this->bool_use_draft;
-					$temp_g->group_id = $cur["child_group_id"];
+					$temp_g->group_id = $cur["child_group_id"] . '_' . $this->req_by_degree_id;
 					$temp_g->requirement_type = $this->requirement_type;
 					if ($group_g = $this->list_groups->find_match($temp_g))
 					{
@@ -241,7 +254,7 @@ class _Group
 				} else {
 					// This is a brand-new sub group, so create it
 					// and add it to this group.
-					$group_g = new Group($cur["child_group_id"],null,$this->assigned_to_semester_num, $array_significant_courses, $this->bool_use_draft);
+					$group_g = new Group($cur["child_group_id"] . "_" . $this->req_by_degree_id,null,$this->assigned_to_semester_num, $array_significant_courses, $this->bool_use_draft);
 					$group_g->requirement_type = $this->requirement_type;
 					$this->list_groups->add($group_g);
 				}
@@ -277,7 +290,7 @@ class _Group
 		// Look for all instances of this course in the group's base list...
 		$res = $this->db->db_query("SELECT * FROM $table_name
 									WHERE `group_id`='?'
-									AND `course_id`='?' ", $this->group_id, $course_id);
+									AND `course_id`='?' ", $this->get_db_group_id(), $course_id);
 		while ($cur = $this->db->db_fetch_array($res))
 		{
 			$id = $cur["id"];
@@ -331,7 +344,7 @@ class _Group
 		if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 		// Load information about the group's title, icon, etc.
 		$res = $this->db->db_query("SELECT * FROM $table_name
-							WHERE group_id = '?' ", $this->group_id);
+							WHERE group_id = '?' ", $this->get_db_group_id());
 		$cur = $this->db->db_fetch_array($res);
 		$this->title = trim($cur["title"]);
 		$this->icon_filename = trim($cur["icon_filename"]);
@@ -503,9 +516,18 @@ class _Group
 	
 	
 
-	function equals(Group $group)
+	function equals(Group $group, $bool_ignore_degree_id = FALSE)
 	{
-		if ($this->group_id == $group->group_id)
+	  
+    $our_group_id = $this->group_id;
+    $test_group_id = $group->group_id;
+    
+    if ($bool_ignore_degree_id) {
+      $our_group_id = $this->get_db_group_id();
+      $test_group_id = $group->get_db_group_id();      
+    }
+    
+		if ($our_group_id == $test_group_id)
 		{
 			return true;
 		}

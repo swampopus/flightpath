@@ -156,7 +156,7 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 					//$pC .= $this->draw_course_row($course->courseFulfilledBy);
 					$pC .= $this->draw_course_row($course->course_list_fulfilled_by->get_first());
 					//$count_hours_completed += $course->courseFulfilledBy->hours_awarded;
-					$course->course_list_fulfilled_by->get_first()->bool_has_been_displayed = true;
+					$course->course_list_fulfilled_by->get_first()->set_has_been_displayed($course->req_by_degree_id);
 					
 					if ($course->course_list_fulfilled_by->get_first()->display_status == "completed")
 					{ // We only want to count completed hours, no midterm or enrolled courses.

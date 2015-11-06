@@ -519,12 +519,19 @@ function saveSubstitution(course_id, group_id, semester_num, subCourseID, subTer
 function assignSelectedCourseToGroup(course_id, semester_num, group_id, var_hours, advising_term_id, db_group_requirement_id)
 {
   
-  //alert("The user selected course " + course_id + " for group " + group_id + " in sem " + semester_num + "for var hours " + varHours + " termid:" + advising_term_id + " grid:" + db_group_requirement_id );
+  //alert("The user selected course " + course_id + " for group " + group_id + " in sem " + semester_num + "for var hours " + var_hours + " termid:" + advising_term_id + " grid:" + db_group_requirement_id );
   //return;
     
   var_hours = var_hours * 1;
   var hiddenElements = document.getElementById("hidden_elements");
-  var e = document.createElement("input");
+  var e = document.createElement("input");  
+  // IMPORTANT!!!!!  //
+  /////////////////////
+  // We MUST use _'s here to separate values, due to the way this is being submitted (as a name of a variable)
+  // However, we know that group_id probably contains a "_", separating the db_group_id from the degree_id.  So, let's 
+  // replace _ with something else that is valid, just for this submission.
+  group_id = str_replace("_", "U", group_id);  // replace _ with "U" for "underscore".  We will change it back in _FlightPath.php.
+  
   e.setAttribute("name","advcr_" + course_id + "_" + semester_num + "_" + group_id + "_" + var_hours + "_r7" + "_" + advising_term_id + "_" + db_group_requirement_id);
   
   // note, the "r7" above is taking the place of a "random number."  Since it's the only one being submitted, it doesn't
@@ -620,6 +627,9 @@ function popupSaveSubstitution(course_id, group_id, semester_num) {
 //+ Jonas Raoni Soares Silva  
 //@ http://jsfromhell.com
 // Found this function on the Internet.  It acts like php str_replace function:
+// f = find  ex:  "bob"
+// r = replace  ex:  "sally"
+// s = string  ex:  "bob is a girl name"
 function str_replace(f, r, s) {
     var ra = r instanceof Array, sa = s instanceof Array, l = (f = [].concat(f)).length, r = [].concat(r), i = (s = [].concat(s)).length;
     while(j = 0, i--)

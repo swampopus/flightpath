@@ -362,7 +362,8 @@ class _DegreePlan
         // First, see if this group alread exists.  If it does,
         // simply add the number of hours required to it.  If not,
         // create it fresh.
-        if ($new_group = $this->find_group($cur["group_id"]))
+        //if ($new_group = $this->find_group($cur["group_id"]))
+        if ($new_group = $this->find_group($cur["group_id"] . '_' . $this->degree_id))   // group_id's will always have db_group_id _ degree_id from now on...
         {
           // Was already there (probably in another semester),
           // so, just increment the required hours.
@@ -376,7 +377,7 @@ class _DegreePlan
         } 
         else {
           // Was not already there; insert it.
-          $group_n = new Group($cur["group_id"], $this->db, $semester_num, $this->student_array_significant_courses, $this->bool_use_draft, $cur["group_requirement_type"]);
+          $group_n = new Group($cur["group_id"] . '_' . $this->degree_id, $this->db, $semester_num, $this->student_array_significant_courses, $this->bool_use_draft, $cur["group_requirement_type"]);
           $group_n->hours_required = $cur["group_hours_required"] * 1;
           $group_n->hours_required_by_type[$cur["group_requirement_type"]] += $group_n->hours_required;
           $group_n->req_by_degree_id = $this->degree_id;
@@ -393,7 +394,7 @@ class _DegreePlan
         // Add a placeholder to the Semester....
         $group_g = new Group();
         $group_g->bool_use_draft = $this->bool_use_draft;
-        $group_g->group_id = $cur["group_id"];
+        $group_g->group_id = $cur["group_id"] . '_' . $this->degree_id;
         $group_g->req_by_degree_id = $this->degree_id;
         $group_g->load_descriptive_data();
         $group_g->requirement_type = $cur["group_requirement_type"];
