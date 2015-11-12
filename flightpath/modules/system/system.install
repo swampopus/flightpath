@@ -648,6 +648,7 @@ CREATE TABLE `student_substitutions` (
   `required_course_id` int(11) NOT NULL DEFAULT '0',
   `required_entry_value` varchar(20) NOT NULL DEFAULT '',
   `required_group_id` varchar(50) NOT NULL DEFAULT '',
+  `required_degree_id` int(11) unsigned NOT NULL DEFAULT '0',
   `required_semester_num` int(11) NOT NULL DEFAULT '0',
   `sub_course_id` int(11) NOT NULL DEFAULT '0',
   `sub_entry_value` varchar(20) NOT NULL DEFAULT '',

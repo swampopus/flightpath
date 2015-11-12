@@ -11,7 +11,7 @@ class _Course
 
   // Database & misc related:
   public $random_id, $db_advised_courses_id;
-  public $bool_placeholder, $db, $db_substitution_id, $db_unassign_transfer_id;
+  public $bool_placeholder, $db, $db_substitution_id_array, $db_unassign_transfer_id;
   public $db_exclude, $data_entry_comment, $array_index, $data_entry_value;
   public $db_group_requirement_id;  // the id from the group_requirements table where this was specified.
 
@@ -26,6 +26,8 @@ class _Course
   public $transfer_eqv_text, $transfer_footnote, $bool_outdated_sub;
   public $bool_substitution, $course_substitution, $substitution_hours, $sub_remarks, $sub_faculty_id;
   public $bool_substitution_split, $substitution_footnote, $bool_substitution_new_from_split;
+  public $course_substitution_by_degree_array;
+  public $bool_substitution_by_degree_array;
 
   // Major/Degree or Group Requirement related:
   public $min_grade, $specified_repeats, $bool_specified_repeat, $required_on_branch_id;
@@ -99,6 +101,10 @@ class _Course
     $this->group_list_unassigned = new ObjList();
     $this->bool_use_draft = $bool_use_draft;
     $this->bool_has_been_displayed_by_degree_array = array();
+    $this->bool_substitution_by_degree_array = array();
+    $this->db_substitution_id_array = array();
+    $this->course_substitution_by_degree_array = array();
+
 
     $this->assigned_to_degree_ids_array = array();
 
@@ -123,10 +129,88 @@ class _Course
     }
   }
 
+
+
+  function set_course_substitution($degree_id = 0, Course $course) {
+    // If degree_id is zero, then use the course's currently req_by_degree_id.    
+    if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
+    
+    $this->course_substitution_by_degree_array[$degree_id] = $course;
+    
+  }
+
+  /**
+   * Similar to the functions regarding display-- get the course substitution based on supplied degree_id.
+   * Set degree_id to -1 to just get the first one, if available.
+   */
+  function get_course_substitution($degree_id = 0) {
+    // If degree_id is zero, then use the course's currently req_by_degree_id.    
+    if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
+
+    if ($degree_id > 0) {
+      return $this->course_substitution_by_degree_array[$degree_id];
+    }
+    else {
+      $x = reset($this->course_substitution_by_degree_array);
+      if ($x) return $x;
+    }
+    
+    // Else, return boolean FALSE
+    return FALSE;
+    
+    
+  }
+
+
+
+
+  /**
+   * Similar to the functions regarding display, these will say if this course has been used in a substitution
+   * for a particular degree.
+   */
+  function get_bool_substitution($degree_id = 0) {
+
+    // If degree_id is zero, then use the course's currently req_by_degree_id.    
+    if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
+    
+    if ($degree_id > 0) {
+      return $this->bool_substitution_by_degree_array[$degree_id];
+    }
+    else {
+      // has the course been displayed by ANY degree?
+      if (count($this->bool_substitution_by_degree_array) > 0) {
+        return TRUE;
+      }
+    }
+    
+    return FALSE;
+    
+  }
+
+
+
+  function set_bool_substitution($degree_id = 0, $val = TRUE) {
+
+    // If degree_id is zero, then use the course's currently req_by_degree_id.    
+    if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
+    
+    $this->bool_substitution_by_degree_array[$degree_id] = $val;
+    
+  }
+
+
+
+
+
   /**
    * Returns TRUE or FALSE if this course has been displayed.  Specify a degree_id to be more specific.
+   * Use -1 to mean "ANY" degree?
    */
   function get_has_been_displayed($degree_id = 0) {
+    
+    // If degree_id is zero, then use the course's currently req_by_degree_id.    
+    if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
+    
     if ($degree_id > 0) {
       return $this->bool_has_been_displayed_by_degree_array[$degree_id];
     }
@@ -140,7 +224,17 @@ class _Course
     return FALSE;
   }
 
+  
+  
+  /**
+   * Counterpart to get_has_been_displayed.
+   * @see get_has_been_displayed()
+   */
   function set_has_been_displayed($degree_id = 0, $val = TRUE) {
+
+    // If degree_id is zero, then use the course's currently req_by_degree_id.
+    if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
+    
     $this->bool_has_been_displayed_by_degree_array[$degree_id] = $val;
   }
 
@@ -173,9 +267,9 @@ class _Course
     $rtn .= $this->specified_repeats . "~";
     $rtn .= intval($this->bool_specified_repeat) . "~";
     $rtn .= $this->grade . "~";
-    $rtn .= $this->hours_awarded . "~";
+    $rtn .= $this->hours_awarded * 1 . "~";
     $rtn .= $this->term_id . "~";
-    $rtn .= $this->advised_hours . "~";
+    $rtn .= $this->advised_hours * 1 . "~";
 
     $rtn .= intval($this->bool_transfer) . "~";
 
@@ -193,19 +287,31 @@ class _Course
     $rtn .= $this->db_advised_courses_id . "~";
     $rtn .= $this->random_id . "~";
 
-    $rtn .= intval($this->bool_substitution) . "~";
+    $rtn .= fp_join_assoc($this->bool_substitution_by_degree_array) . "~";
     // If this is a substitution, what is the original requirement?
-    if ($this->bool_substitution == true)
+    if ($this->get_bool_substitution(-1))
     {
-      $rtn .= $this->course_substitution->course_id . "~";
-    } else {
+      // Create a simple assoc array for our course substitutions, where all we need to keep track of
+      // is their course_id, not the entire course object.
+      $arr = array();
+      foreach ($this->course_substitution_by_degree_array as $key => $c) {
+        $arr[$key] = $c->course_id;
+      }      
+      
+      //$rtn .= $this->course_substitution->course_id . "," . $this->req_by_degree_id . "~";
+      $rtn .= fp_join_assoc($arr) . "~";
+      
+    } 
+    else {
       // Just enter blank.
       $rtn .= "~";
     }
+    ///////////////////
 
-    $rtn .= $this->db_substitution_id . "~";
-    $rtn .= $this->min_hours . "~";
-    $rtn .= $this->max_hours . "~";
+
+    $rtn .= fp_join_assoc($this->db_substitution_id_array) . "~";
+    $rtn .= $this->min_hours * 1 . "~";
+    $rtn .= $this->max_hours *1 . "~";
 
     $rtn .= intval($this->bool_substitution_new_from_split) . "~";
     $rtn .= intval($this->bool_substitution_split) . "~";
@@ -215,8 +321,10 @@ class _Course
     
     $rtn .= intval($this->bool_ghost_hour) . "~";
     
-    $rtn .= join(",", $this->assigned_to_degree_ids_array) . "~";
+    $rtn .= fp_join_assoc($this->assigned_to_degree_ids_array) . "~";
 
+    $rtn .= $this->req_by_degree_id . "~";
+    
 
     return $rtn;
   }
@@ -268,16 +376,31 @@ class _Course
     $this->db_advised_courses_id	= 	$temp[13];
     $this->random_id				= 	$temp[14];
 
-    $this->bool_substitution		= 	(bool) $temp[15];
+    $this->bool_substitution_by_degree_array		= 	fp_explode_assoc($temp[15]);
 
     // Was this a substitution course?
-    if ($this->bool_substitution == true)
+    if (trim($temp[16]) != "")
     {
-      $t_course = new Course($temp[16]); // original course requirement.
+      $arr = fp_explode_assoc($temp[16]);
+      
+      foreach ($arr as $did => $cid) {
+        $t_course = new Course($cid); // original course requirement.
+        $t_course->req_by_degree_id = $did;  
+        
+        $this->set_course_substitution($did, $t_course);        
+      }
+      
+      /*
+      $temp2 = explode(",", $temp[16]);  // contains course_id,req_by_degree_id.  Need to split the values up.
+      $t_course = new Course($temp2[0]); // original course requirement.
+      $t_course->req_by_degree_id = $temp2[1];  
+      
       $this->course_substitution = $t_course;
+       */
     }
 
-    $this->db_substitution_id		= 	$temp[17];
+    $this->db_substitution_id_array		= 	fp_explode_assoc($temp[17]);
+    
     $this->min_hours				= 	$temp[18] * 1;
     $this->max_hours				= 	$temp[19] * 1;
 
@@ -289,10 +412,11 @@ class _Course
 
     $this->bool_ghost_hour	= 	(bool) $temp[24];
 
-  if (trim($temp[25]) != "") {
-    $this->assigned_to_degree_ids_array = explode(",", $temp[25]);
-  }
+    $this->assigned_to_degree_ids_array = fp_explode_assoc($temp[25]);
 
+    $this->req_by_degree_id = intval($temp[26]);
+
+    
 
   }
 
@@ -1505,7 +1629,7 @@ class _Course
 
     $arr = array(
     "db_advised_courses_id",
-    "db_substitution_id", "db_unassign_transfer_id",
+    "db_substitution_id_array", "db_unassign_transfer_id",
     "db_exclude", "array_index", "db_group_requirement_id", "array_valid_names",
     "data_entry_value",
 
@@ -1516,6 +1640,7 @@ class _Course
     "bool_transfer", "institution_id", "institution_name", "course_transfer", "transfer_footnote",
     "bool_substitution", "course_substitution", "substitution_hours",
     "bool_substitution_split", "substitution_footnote", "bool_substitution_new_from_split",
+    "course_substitution_by_degree_array",
 
     "min_grade", "specified_repeats", "bool_specified_repeat", "required_on_branch_id",
     "assigned_to_group_id", "assigned_to_semester_num", "level_code", "req_by_degree_id",
@@ -1525,7 +1650,8 @@ class _Course
     "course_fulfilled_by", "course_list_fulfilled_by",
     "bool_has_been_assigned", "bool_added_course", "group_list_unassigned",
 
-    "display_status", "bool_has_been_displayed", "bool_has_been_displayed_by_degree_array", "bool_hide_grade", "bool_ghost_hour",
+    "display_status", "bool_has_been_displayed", "bool_has_been_displayed_by_degree_array", "bool_substitution_by_degree_array",
+    "bool_hide_grade", "bool_ghost_hour",
     "bool_ghost_min_hour",
     );
 

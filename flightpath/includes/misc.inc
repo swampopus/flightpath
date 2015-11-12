@@ -844,6 +844,55 @@ function fp_add_js($js, $type = "file") {
   
 }
 
+
+/**
+ * This function will create a string from a 1 dimensional assoc array.
+ * Ex:   arr = array("pet" => "dog", "name" => "Rex")
+ *      will return:    pet-dog,name-Rex    under the default settings.
+ * 
+ * Use the fp_explode_assoc function to piece it back together.
+ * @see fp_explode_assoc
+ */
+function fp_join_assoc($arr, $glue = ",", $assign_sep = "-") {
+  $rtn = "";
+  
+  foreach ($arr as $key => $val) {
+    $rtn .= $key . $assign_sep . $val . $glue;
+  }
+  
+  // Should be an extra glue character at the end we need to trim off.
+  $rtn = rtrim($rtn, $glue);
+  
+  return $rtn;
+}
+
+/**
+ * Takes a string (created by fp_join_assoc()) and re-creates the 1 dimensional assoc array.
+ *
+ * @see fp_join_assoc()
+ */
+function fp_explode_assoc($string, $delim = ",", $assign_sep = "-") {
+  $rtn = array();
+  
+  $temp = explode($delim, $string);
+  foreach($temp as $line) {
+    $line = trim($line);
+    if ($line == "") continue;
+    
+    $temp2 = explode($assign_sep, $line);
+    if (is_numeric($temp2[1])) {
+      $temp2[1] = $temp2[1] * 1;  // if its numeric anyway, make it have a numeric type.      
+    }
+    
+    $rtn[$temp2[0]] = $temp2[1];
+    
+  }
+  
+  return $rtn;
+}
+
+
+
 /**
  * Return the filepath to the module
  *

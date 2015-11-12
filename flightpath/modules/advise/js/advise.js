@@ -282,7 +282,7 @@ function popupBackToGroupSelect(course_id, group_id, semester_num, extraVars) {
 }
 
 
-function popupSubstituteSelected(course_id, group_id, semester_num, extraVars)
+function popupSubstituteSelected(course_id, group_id, semester_num, req_by_degree_id, extraVars)
 {
 
   if (course_id < 1)
@@ -303,7 +303,7 @@ function popupSubstituteSelected(course_id, group_id, semester_num, extraVars)
   }
 
   // To make compatible with non-clean URLs, we need to always supply the "unclean" URL version.
-  window.location = FlightPath.settings.basePath + "/index.php?q=advise/popup-substitute-selected" + "&window_mode=popup&course_id=" + course_id + "&group_id=" + group_id + "&semester_num=" + semester_num + "&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
+  window.location = FlightPath.settings.basePath + "/index.php?q=advise/popup-substitute-selected" + "&window_mode=popup&course_id=" + course_id + "&group_id=" + group_id + "&req_by_degree_id=" + req_by_degree_id + "&semester_num=" + semester_num + "&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
 }
 
 
@@ -363,7 +363,6 @@ function popupUpdateSubData(max_hours, term_id, transferFlag, groupHoursAvail, s
   FlightPath.globals.groupHoursAvail = groupHoursAvail;
   FlightPath.globals.subCourseHours = subCourseHours;
     
-  
   
   var sel = document.getElementById("subHours");
   
@@ -494,21 +493,21 @@ function decimalPlaces(num) {
 
 
 /* Saves a substitution from the popup */
-function saveSubstitution(course_id, group_id, semester_num, subCourseID, subTermID, subTransferFlag, subHours, subAddition, subRemarks) {
+function saveSubstitution(course_id, group_id, req_by_degree_id, semester_num, subCourseID, subTermID, subTransferFlag, subHours, subAddition, subRemarks) {
   //alert("The user to sub course " + course_id + " for group " + group_id + " in sem " + semester_num + "for course " + subCourseID + " hours: " + subHours + " addition: " + subAddition + "remarks: " + subRemarks);
-    
+
   var hiddenElements = document.getElementById("hidden_elements");
   var e = document.createElement("input");
   e.setAttribute("name","savesubstitution");
   e.setAttribute("type","hidden");
-  e.setAttribute("value","" + course_id + "~" + group_id + "~" + semester_num + "~" + subCourseID + "~" + subTermID + "~" + subTransferFlag + "~" + subHours + "~" + subAddition + "~" + subRemarks + "");
+  e.setAttribute("value","" + course_id + "~" + group_id + "~" + req_by_degree_id + "~" + semester_num + "~" + subCourseID + "~" + subTermID + "~" + subTransferFlag + "~" + subHours + "~" + subAddition + "~" + subRemarks + "");
   hiddenElements.appendChild(e);      
   
   // rebuild the cache.
   document.getElementById("load_from_cache").value="no";
   
   submitForm(true);
-  
+
 }
 
 
@@ -575,7 +574,7 @@ function toggleSelectionAndSave(uniqueID, display_status, warningMsg) {
 
 
 
-function popupSaveSubstitution(course_id, group_id, semester_num) {
+function popupSaveSubstitution(course_id, group_id, semester_num, req_by_degree_id) {
   var subHours = document.getElementById("subHours").value;
   
   // If the subHours are "manual", then we will use the manual value instead.
@@ -607,7 +606,7 @@ function popupSaveSubstitution(course_id, group_id, semester_num) {
   var subTermID = document.getElementById("subTermID").value;   
   var subTransferFlag = document.getElementById("subTransferFlag").value;   
   var subRemarks = document.getElementById("subRemarks").value;   
-
+  
   // make sure the remarks do not have a ~ in them.
   subRemarks = str_replace("~", "_", subRemarks);
 
@@ -619,7 +618,7 @@ function popupSaveSubstitution(course_id, group_id, semester_num) {
     return;
   }
   
-  opener.saveSubstitution(course_id, group_id, semester_num, subCourseID, subTermID, subTransferFlag, subHours, subAddition, subRemarks);
+  opener.saveSubstitution(course_id, group_id, req_by_degree_id, semester_num, subCourseID, subTermID, subTransferFlag, subHours, subAddition, subRemarks);
   window.close();
 }
 
@@ -638,22 +637,6 @@ function str_replace(f, r, s) {
 }
 
 
-function saveSubstitution(course_id, group_id, semester_num, subCourseID, subTermID, subTransferFlag, subHours, subAddition, subRemarks) {
-  //alert("The user to sub course " + course_id + " for group " + group_id + " in sem " + semester_num + "for course " + subCourseID + " hours: " + subHours + " addition: " + subAddition + "remarks: " + subRemarks);
-    
-  var hiddenElements = document.getElementById("hidden_elements");
-  var e = document.createElement("input");
-  e.setAttribute("name","savesubstitution");
-  e.setAttribute("type","hidden");
-  e.setAttribute("value","" + course_id + "~" + group_id + "~" + semester_num + "~" + subCourseID + "~" + subTermID + "~" + subTransferFlag + "~" + subHours + "~" + subAddition + "~" + subRemarks + "");
-  hiddenElements.appendChild(e);      
-  
-  // rebuild the cache.
-  document.getElementById("load_from_cache").value="no";
-  
-  submitForm(true);
-  
-}
 
 function updateSelectedCourse(course_id, group_id, semester_num, varHours, random_id, advising_term_id) {
   //alert("The user selected course " + course_id + " for group " + group_id + " in sem " + semester_num + "for var hours " + varHours + "id: " + random_id + " term:" + advising_term_id);

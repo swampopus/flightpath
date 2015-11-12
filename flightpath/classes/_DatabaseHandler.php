@@ -105,6 +105,8 @@ class _DatabaseHandler
 			$rtn_array["required_course_id"] = $cur["required_course_id"];
 			$rtn_array["required_group_id"] = $cur["required_group_id"];
 			$rtn_array["posted"] = $cur["posted"];
+      $rtn_array["required_degree_id"] = $cur["required_degree_id"];
+      $rtn_array["db_record"] = $cur;
 		}
 
 		return $rtn_array;

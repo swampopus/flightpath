@@ -1,6 +1,23 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-11-11
+  Continued working on degree-specific subs, had to create an array of substitutions, by degree.  Basically, I will need to do this for anything involving
+  substitutions I believe.
+  
+
+2015-11-10
+  Still working on substitutions, trying to save them *per degree*.  Made numerous changes to AdvisingScreen, Course, and FlightPath to try to get
+  this to work.  Still not perfect, but getting there.
+  
+  Created new functions in misc.inc, fp_explode_assoc() and fp_join_assoc(), just for _Course's to_data_string functionality.  I needed
+  a way to convert an assoc array into a string in as few chars as possible, and let it be transmited through a URL.
+   
+
+2015-11-09
+  Working on substitutions accross multiple degrees.
+  
+
 2015-11-05
   Working on having identical groups in combined degrees.  My solution is that each group's group_id is actually
   always a combination of the db_group_id + _ + degree_id.

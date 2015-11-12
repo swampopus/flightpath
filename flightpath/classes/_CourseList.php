@@ -2001,17 +2001,36 @@ class _CourseList extends ObjList
 	 * @param bool $bool_s
 	 *         - What to set each course's bool_substitution value to.
 	 */
-	function set_bool_substitution($bool_s = true)
+	function set_bool_substitution($degree_id = 0, $bool_s = true)
 	{
 		// Set the bool_substitution for all items
 		// in this list.
 		for ($t = 0; $t < $this->count; $t++)
 		{
 			$course = $this->array_list[$t];
-			$course->bool_substitution = $bool_s;
+			$course->set_bool_substitution($degree_id, $bool_s);
 		}
 
 	}
+
+
+  /**
+   * Set all the courses in this list to have the same "req_by_degree_id" value.
+   */
+  function set_req_by_degree_id($degree_id = 0)
+  {
+    // Set the bool_substitution for all items
+    // in this list.
+    for ($t = 0; $t < $this->count; $t++)
+    {
+      $course = $this->array_list[$t];
+      $course->req_by_degree_id = $degree_id;
+    }
+
+  }
+
+
+
 
 	/**
 	 * Sets each course's $course_substitution value to the supplied
@@ -2020,12 +2039,13 @@ class _CourseList extends ObjList
 	 * @param Course $course_s
 	 * @param string $sub_remarks
 	 */
-	function set_course_substitution(Course $course_s, $sub_remarks = "")
+	function set_course_substitution(Course $course_s, $sub_remarks = "", $degree_id = 0)
 	{
 		for ($t = 0; $t < $this->count; $t++)
 		{
 			$course = $this->array_list[$t];
-			$course->course_substitution = $course_s;
+			$course->set_course_substitution($degree_id, $course_s);
+      $course->req_by_degree_id = $course_s->req_by_degree_id;  // match it up to the degree its being subbed for
 			$course->sub_remarks = $sub_remarks;
 		}
 

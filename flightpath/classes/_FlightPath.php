@@ -533,7 +533,8 @@ class _FlightPath
 				$substitution->bool_outdated = true;
 				$substitution->outdated_note = $outdated_note;
 				$substitution->course_list_substitutions->get_first()->bool_outdated_sub = true;
-				$substitution->course_list_substitutions->get_first()->bool_substitution = false;
+				//$substitution->course_list_substitutions->get_first()->bool_substitution = false;
+				$substitution->course_list_substitutions->get_first()->set_bool_substitution(0, FALSE);
 				if ($substitution->course_list_substitutions->get_first()->temp_old_course_id > 0)
 				{ // Restore the course_id *if* it was set to 0 on purpose. (happens
 					// when there is a sub of a transfer to kill the transfer eqv.  This will
@@ -681,6 +682,7 @@ class _FlightPath
 						$new_course->bool_substitution_split = true;
 						$new_course->bool_substitution_new_from_split = true;
 						$new_course->requirement_type = $course_requirement->requirement_type;
+            $new_course->req_by_degree_id = $req_by_degree_id;
 
 						$course_requirement->bool_substitution_split = true;
 						
@@ -700,10 +702,13 @@ class _FlightPath
 
 					$substitution->course_list_substitutions->assign_group_id($group_id);
 					$substitution->course_list_substitutions->set_has_been_assigned(true);
-					$substitution->course_list_substitutions->set_bool_substitution(true);
-					$substitution->course_list_substitutions->set_course_substitution($course_requirement, $substitution->remarks);
+					$substitution->course_list_substitutions->set_bool_substitution($req_by_degree_id, TRUE);
+          //fpm($course_requirement->req_by_degree_id);
+          
+					$substitution->course_list_substitutions->set_course_substitution($course_requirement, $substitution->remarks, $req_by_degree_id);
+					
 					$substitution->bool_has_been_applied = true;
-
+          
 
 				}
 				$count++;
@@ -757,9 +762,8 @@ class _FlightPath
 
 				// Prereq checking would also go here.
 
-				// Make sure $c is not being used in a substitution.
-				if ($c->bool_substitution == true)
-				{
+				// Make sure $c is not being used in a substitution (for this degree)
+				if ($c->get_bool_substitution($req_by_degree_id) == TRUE) {
 					continue;
 				}
 
@@ -1290,15 +1294,16 @@ class _FlightPath
 		if (trim($_POST["savesubstitution"]) != "" && user_has_permission("can_substitute")) {
 			$temp = explode("~",trim($_POST["savesubstitution"]));
 			$course_id = $temp[0];  // required course
-			$group_id = $temp[1] * 1;
-			$semester_num = $temp[2] * 1;
+			$group_id = trim($temp[1]);
+      $req_by_degree_id = $temp[2];
+			$semester_num = $temp[3] * 1;
 
-			$sub_course_id = $temp[3];
-			$sub_term_id = $temp[4];
-			$sub_transfer_flag = $temp[5];
-			$sub_hours = $temp[6] * 1;
-			$sub_addition = $temp[7];
-			$sub_remarks = urldecode($temp[8]);
+			$sub_course_id = $temp[4];
+			$sub_term_id = $temp[5];
+			$sub_transfer_flag = $temp[6];
+			$sub_hours = $temp[7] * 1;
+			$sub_addition = $temp[8];
+			$sub_remarks = urldecode($temp[9]);
 
 			if ($sub_addition == "true")
 			{
@@ -1343,11 +1348,11 @@ class _FlightPath
 
 			$result = $db->db_query("INSERT INTO student_substitutions
 									(`student_id`,`faculty_id`,`required_course_id`,`required_entry_value`,
-									`required_group_id`,`required_semester_num`,`sub_course_id`,`sub_entry_value`,
+									`required_group_id`,`required_degree_id`,`required_semester_num`,`sub_course_id`,`sub_entry_value`,
 									`sub_term_id`,`sub_transfer_flag`,`sub_hours`,`sub_remarks`,`posted`)
 									VALUES
-									('?','?','?','?','?','?','?','?','?','?','?','?','?')
-									", $student_id,$faculty_id,$course_id,$required_entry_value,$group_id,$semester_num,$sub_course_id,$sub_entry_value,$sub_term_id,$sub_transfer_flag,$sub_hours,$sub_remarks, time());
+									('?','?','?','?','?','?','?','?','?','?','?','?','?','?')
+									", $student_id,$faculty_id,$course_id,$required_entry_value,$group_id,$req_by_degree_id,$semester_num,$sub_course_id,$sub_entry_value,$sub_term_id,$sub_transfer_flag,$sub_hours,$sub_remarks, time());
 
 			watchdog("save_substitution", "$student_id,group_id:$group_id,insert_id:" . mysql_insert_id());
 

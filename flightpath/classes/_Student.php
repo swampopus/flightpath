@@ -334,7 +334,8 @@ class _Student
 			$sub_hours = $cur["sub_hours"] * 1;
 			$sub_remarks = trim($cur["sub_remarks"]);
 			$faculty_id = $cur["faculty_id"];
-
+      $req_by_degree_id = $cur["required_degree_id"];
+      
 			if (strstr($sub_term_id, "9999"))
 			{
 				// was an unknown semester.  Let's set it lower so
@@ -347,7 +348,7 @@ class _Student
 			// courseSubstitution within the list of courses which the student
 			// has taken.  If the subHours is less than the hours_awarded for the
 			// particular course, it means the course has been split up!
-
+      // TODO:  Only look for a particular degree id?
 			if($taken_course = $this->list_courses_taken->find_specific_course($sub_course_id, $sub_term_id, $sub_bool_transfer, true))
 			{ 
 				
@@ -358,6 +359,7 @@ class _Student
 				if ($sub_bool_transfer == true)
 				{
 					$taken_course->temp_old_course_id = $taken_course->course_id;
+					$taken_course->course_id = 0;
 					$taken_course->course_id = 0;
 				}
 
@@ -414,13 +416,14 @@ class _Student
 
 
 				$taken_course->substitution_hours = $sub_hours;
-				$taken_course->bool_substitution = true;
+				//$taken_course->bool_substitution = true;  // using array of degrees now, based on requirement...
+				$taken_course->set_bool_substitution($req_by_degree_id, TRUE);
 				$taken_course->display_status = "completed";
-				$taken_course->db_substitution_id = $sub_id;
+				$taken_course->db_substitution_id_array[$req_by_degree_id] = $sub_id;
 
 
 				$substitution = new Substitution();
-
+ 
 				if ($cur["required_course_id"] > 0)
 				{
 					$course_requirement = new Course($cur["required_course_id"]);
@@ -436,6 +439,7 @@ class _Student
 
 				$course_requirement->assigned_to_group_id = $cur["required_group_id"];
 				$course_requirement->assigned_to_semester_num = $cur["required_semester_num"];
+        $course_requirement->req_by_degree_id = $req_by_degree_id;
 				$taken_course->assigned_to_group_id = $cur["required_group_id"];
 				$taken_course->assigned_to_semester_num = $cur["required_semester_num"];
 
@@ -447,6 +451,7 @@ class _Student
 
 				$substitution->remarks = $sub_remarks;
 				$substitution->faculty_id = $faculty_id;
+        $substitution->db_substitution_id = $sub_id;
 				$this->list_substitutions->add($substitution);
 
 

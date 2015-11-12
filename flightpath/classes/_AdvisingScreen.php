@@ -631,6 +631,7 @@ function draw_menu_items($menu_array) {
 			}
 
 			// Skip substitutions
+			// TODO:  Only skip if we have substituted for every degree the student is enrolled in.
 			if ($course->bool_substitution == true)
 			{
 				continue;
@@ -895,6 +896,8 @@ function draw_menu_items($menu_array) {
 		{
 			$substitution = $this->student->list_substitutions->get_next();
 
+      $db_substitution_id = $substitution->db_substitution_id;
+
 			$course_requirement = $substitution->course_requirement;
 			$subbed_course = $substitution->course_list_substitutions->get_first();
 
@@ -934,7 +937,7 @@ function draw_menu_items($menu_array) {
 			}
 
 			$extra = $by = $remarks = "";
-			$temp = $this->db->get_substitution_details($subbed_course->db_substitution_id);
+			$temp = $this->db->get_substitution_details($db_substitution_id);
 			$by = $this->db->get_faculty_name($temp["faculty_id"], false);
 			$remarks = $temp["remarks"];
 			$ondate = format_date($temp["posted"]);
@@ -967,7 +970,7 @@ function draw_menu_items($menu_array) {
 						$sub_s_i $sub_c_n $sub_trans_notice ($subbed_course->substitution_hours hrs) $sub_action
 						$cr_s_i $cr_c_n$in_group $by$remarks $extra
 						<br>
-							<a href='javascript: popupRemoveSubstitution(\"$subbed_course->db_substitution_id\");'>" . t("Remove substitution?") . "</a>
+							<a href='javascript: popupRemoveSubstitution(\"$db_substitution_id\");'>" . t("Remove substitution?") . "</a>
 					</div>";
 
 			$is_empty = false;
@@ -1178,7 +1181,8 @@ function draw_menu_items($menu_array) {
 			if ($c->bool_transfer) {$pC .= "T ";}
 
 
-			if ($c->bool_substitution) {$pC .= "S ";}
+			//if ($c->bool_substitution) {$pC .= "S ";}
+			if ($c->get_bool_substitution()) {$pC .= "S ";}
 
 
 
@@ -2122,7 +2126,7 @@ function draw_menu_items($menu_array) {
 		
 		$db_group_requirement_id = $_REQUEST["db_group_requirement_id"];
 		
-  
+  //fpm($course);
 
 		if ($course == null)
 		{
@@ -2256,7 +2260,8 @@ function draw_menu_items($menu_array) {
 				"; 
 		}
 
-		if ($course->bool_transfer == true && $course->course_id < 1 && $course->bool_substitution == false)
+		// The -1 for get_bool_substitution means, is it being used in ANY substitution?
+		if ($course->bool_transfer == true && $course->course_id < 1 && $course->get_bool_substitution(-1) == FALSE)
 		{ // No local eqv!
 
 			$pC .= "<div class='tenpt' style='margin-top: 10px;'><b>Note:</b> ";
@@ -2285,7 +2290,8 @@ function draw_menu_items($menu_array) {
 
 			$pC .= $t_msg;
 
-		} elseif ($course->bool_transfer == true && $course->course_id > 0 && $course->bool_substitution == false)
+		} 
+		elseif ($course->bool_transfer == true && $course->course_id > 0 && $course->get_bool_substitution(-1) == FALSE)
 		{ // Has a local eqv!
 
 			$t_s_i = $course->course_transfer->subject_id;
@@ -2352,11 +2358,8 @@ function draw_menu_items($menu_array) {
     }
     
     ////////////////
-    // Is this course assigned to a group?
-    // TODO: This will eventually need to be a list of groups, I think, if the course can
-    // double-dip into other degrees' groups.
-
-		if (intval($course->get_first_assigned_to_group_id()) > 0 && $course->grade != "" && $course->bool_transfer != true && $course->bool_substitution != true)
+    // Is this course assigned to a group?    
+		if (intval($course->get_first_assigned_to_group_id()) > 0 && $course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE)
 		{
 			//$g = new Group($course->assigned_to_group_id);
 			$g = new Group();
@@ -2380,7 +2383,7 @@ function draw_menu_items($menu_array) {
 				$pC .= "</div>";
 			}
 
-		} else if ($course->grade != "" && $course->bool_transfer != true && $course->bool_substitution != true && $course->bool_has_been_assigned == true) {
+		} else if ($course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE && $course->bool_has_been_assigned == true) {
 			// Course is not assigned to a group; it's on the bare degree plan.  group_id = 0.
 			// If user is an admin...
 			if (user_has_permission("can_substitute"))
@@ -2411,7 +2414,7 @@ function draw_menu_items($menu_array) {
 					";
 
 			// Course is assigned to a group.
-			// TODO:  will come back to this, since it might be assigned to multiple groups.
+			// might be assigned to multiple groups, so show them in a loop
 			if ($course->get_first_assigned_to_group_id()) {
   			foreach ($course->assigned_to_group_ids_array as $group_id) {  
     			$group = new Group();
@@ -2434,47 +2437,56 @@ function draw_menu_items($menu_array) {
 					</div>";								
 		}
 
-
-		if ($course->bool_substitution == true)
+    // Has the course been substituted into *this* degree plan?
+		if ($course->get_bool_substitution() == TRUE)
 		{
+		  // TODO:  Get this working!  The req_by_degree_id situation.
 			// Find out who did it and if they left any remarks.
-			$db = $this->db;
-			$temp = $db->get_substitution_details($course->db_substitution_id);
-			$by = $db->get_faculty_name($temp["faculty_id"], false);
-			$remarks = $temp["remarks"];
-			$ondate = format_date($temp["posted"], "", "n/d/Y");
+			fpm($course->course_substitution_by_degree_array);
+		  $db = $this->db;
+			fpm($course->db_substitution_id_array);
+			$sub_id = $course->db_substitution_id_array[$course->get_course_substitution()->req_by_degree_id];
+			
+			  $temp = $db->get_substitution_details($sub_id);
+        
+        $required_degree_id = $temp["required_degree_id"];
+        $req_degree_plan = new DegreePlan($required_degree_id);
+                
+			  $by = $db->get_faculty_name($temp["faculty_id"], false);
+			  $remarks = $temp["remarks"];
+			  $ondate = format_date($temp["posted"], "", "n/d/Y");
 			
 			
-			if ($by != "")
-			{
-				$by = " by $by, on $ondate.";
-			}
+			  if ($by != "") {
+			    $by = " by $by, on $ondate.";
+			  }
 
-			if ($remarks != "")
-			{
-				$remarks = " " . t("Substitution remarks:") . " <i>$remarks</i>.";
-			}
+			  if ($remarks != "")
+			  {
+				  $remarks = " " . t("Substitution remarks:") . " <i>$remarks</i>.";
+			  }
 
-			$forthecourse = t("for the original course
-						requirement of") . " <b>" . $course->course_substitution->subject_id . " 
-						" . $course->course_substitution->course_num . "</b>";
-			if ($temp["required_course_id"]*1 == 0)
-			{
-				$forthecourse = "";
-			}
+			  $forthecourse = t("for the original course
+						requirement of") . " <b>" . $course->get_course_substitution()->subject_id . " 
+						" . $course->get_course_substitution()->course_num . "</b>";
+			  if ($temp["required_course_id"]*1 == 0)
+			  {
+				  $forthecourse = "";
+			  }
 
-			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
-						<b>" . t("Note:") . "</b> " . t("This course was substituted into the 
-						degree plan") . " $forthecourse
+			  $pC .= "<div class='tenpt' style='margin-top: 10px;'>
+						<b>" . t("Note:") . "</b> " . t("This course was substituted into the %title 
+						degree plan", array("%title" => $req_degree_plan->get_title2())) . " $forthecourse
 						$by$remarks";
 
 			
-			if (user_has_permission("can_substitute")) {
-				$pC .= "<div align='left' class='tenpt' style='padding-left: 10px;'>
-					<b>" . t("Special administrative function:") . "</b>
-					<a href='javascript: popupRemoveSubstitution(\"$course->db_substitution_id\");'>" . t("Remove substitution?") . "</a>
-					</div>";
-			}
+			  if (user_has_permission("can_substitute")) {
+				  $pC .= "<div align='left' class='tenpt' style='padding-left: 10px;'>
+					  <b>" . t("Special administrative function:") . "</b>
+					  <a href='javascript: popupRemoveSubstitution(\"$sub_id\");'>" . t("Remove substitution?") . "</a>
+					 </div>";
+			  }
+			
 
 		}
 
@@ -2645,7 +2657,7 @@ function draw_menu_items($menu_array) {
 		{
 			$course = $semester->list_courses->get_next();
       
-      // TODO:  Display what degree this course is required by
+      // Display what degree this course is required by
       // TODO:  Decide if we should display the degree this course is coming from or not.
       // Only display what degree we are required by if we have only displayed it once so far...
       if (intval($course->req_by_degree_id) > 0 && $course->req_by_degree_id != $last_req_by_degree_id) {
@@ -2666,15 +2678,17 @@ function draw_menu_items($menu_array) {
 			if (!($course->course_list_fulfilled_by->is_empty))
 			{ // this requirement is being fulfilled by something the student took...
 
+        $c = $course->course_list_fulfilled_by->get_first();
+        
+        $c->req_by_degree_id = $last_req_by_degree_id;  // make sure we assign it to the current degree_id.
+				$pC .= $this->draw_course_row($c);
+				$c->set_has_been_displayed($course->req_by_degree_id);
 
-				$pC .= $this->draw_course_row($course->course_list_fulfilled_by->get_first());
-				$course->course_list_fulfilled_by->get_first()->set_has_been_displayed($course->req_by_degree_id);
 
-
-				if ($course->course_list_fulfilled_by->get_first()->display_status == "completed")
+				if ($c->display_status == "completed")
 				{ // We only want to count completed hours, no midterm or enrolled courses.
-					$h = $course->course_list_fulfilled_by->get_first()->hours_awarded;
-					if ($course->course_list_fulfilled_by->get_first()->bool_ghost_hour == TRUE) {
+					$h = $c->hours_awarded;
+					if ($c->bool_ghost_hour == TRUE) {
 					  $h = 0;
 					}
 					$count_hoursCompleted += $h;
@@ -2717,6 +2731,8 @@ function draw_menu_items($menu_array) {
       
       
 			$pC .= "<tr><td colspan='8'>";
+      // TODO:   Do we need to set the req_by_degree_id to groups as well, like I did above to courses?
+      
 			$pC .= $this->display_group($group);
 			$count_hoursCompleted += $group->hours_fulfilled_for_credit;
 			$pC .= "</td></tr>";
@@ -2806,7 +2822,7 @@ function draw_menu_items($menu_array) {
 			if (!($course->course_list_fulfilled_by->is_empty))
 			{
 				$try_c = $course->course_list_fulfilled_by->get_first();
-				if ($try_c->bool_substitution == true && $try_c->assigned_to_group_id != $group->group_id)
+				if ($try_c->get_bool_substitution($req_by_degree_id) == TRUE && $try_c->assigned_to_group_id != $group->group_id)
 				{
 
 					continue;
@@ -3351,7 +3367,7 @@ function draw_menu_items($menu_array) {
 
 				$footnote .= "<span class='superscript'>T";
 				$fcount = count($this->footnote_array["transfer"]) + 1;
-				if ($course->get_has_been_displayed($course->req_by_degree_id) == true)
+				if ($course->get_has_been_displayed() == true)
 				{ // If we've already displayed this course once, and are
 					// now showing it again (like in the Transfer Credit list)
 					// we do not want to increment the footnote counter.
@@ -3364,22 +3380,22 @@ function draw_menu_items($menu_array) {
 		}
 
 
-		if ($course->bool_substitution == true )
+		if ($course->get_bool_substitution() == TRUE )
 		{
 
-			if ($course->course_substitution->subject_id == "")
+			if ($course->get_course_substitution()->subject_id == "")
 			{ // Reload subject_id, course_num, etc, for the substitution course,
 				// which is actually the original requirement.
-				if (is_object($course->course_substitution))
+				if (is_object($course->get_course_substitution()))
 				{
-					$course->course_substitution->load_descriptive_data();
+					$course->get_course_substitution()->load_descriptive_data();
 				} 
 				
 			}
 
-			$o_subject_id = $course->course_substitution->subject_id;
-			$o_course_num = $course->course_substitution->course_num;
-
+			$o_subject_id = $course->get_course_substitution()->subject_id;
+			$o_course_num = $course->get_course_substitution()->course_num;
+      fpm($course->req_by_degree_id);
 			if ($bool_add_footnote == true)
 			{
 				$footnote = "";
@@ -3827,13 +3843,18 @@ function draw_menu_items($menu_array) {
 	 * 
 	 * @return string
 	 */
-	function display_popup_substitute($course_id = 0, $group_id, $semester_num, $hours_avail = "")
+	function display_popup_substitute($course_id = 0, $group_id, $semester_num, $hours_avail = "", $req_by_degree_id = 0)
 	{
 		// This lets the user make a substitution for a course.
 		$pC = "";
 
 		$course = new Course($course_id);
 		$bool_sub_add = false;
+
+    $req_degree_plan = new DegreePlan($req_by_degree_id); 
+    if ($req_by_degree_id > 0) {
+      $req_degree_plan->load_descriptive_data();
+    }
 
 		$c_title = t("Substitute for") . " $course->subject_id $course->course_num";
 		if ($course_id == 0)
@@ -3843,6 +3864,11 @@ function draw_menu_items($menu_array) {
 		}
 		$pC .= fp_render_curved_line($c_title);
 
+		if ($req_by_degree_id > 0) {
+		  $pC .= "<div class='tenpt sub-req-by-degree-title-line'>" . t("This substitution will only affect the <b>%title</b> degree requirements.", array("%title" => $req_degree_plan->get_title2())) . "
+		          </div>";
+		}
+		
 		$extra = ".<input type='checkbox' id='cbAddition' value='true' style='display:none;'>";
 		if ($group_id > 0)
 		{
@@ -4000,7 +4026,7 @@ function draw_menu_items($menu_array) {
 					$m_hours = $c->hours_awarded;
 				}
 
-				if ($c->bool_substitution != true && $c->bool_outdated_sub != true)
+				if ($c->get_bool_substitution($req_by_degree_id) != TRUE && $c->bool_outdated_sub != true)
 				{
 				  $h = $c->hours_awarded;
 				  if ($c->bool_ghost_hour == TRUE) {
@@ -4047,10 +4073,10 @@ function draw_menu_items($menu_array) {
 
 
 
-					if (is_object($c->course_substitution) && $c->course_substitution->subject_id == "")
+					if (is_object($c->get_course_substitution()) && $c->get_course_substitution()->subject_id == "")
 					{ // Load subject_id and course_num of the original
 						// requirement.
-						$c->course_substitution->load_descriptive_data();
+						$c->get_course_substitution()->load_descriptive_data();
 					}
 
 					$extra = "";
@@ -4074,8 +4100,8 @@ function draw_menu_items($menu_array) {
 							$subject_id 
 						
 							$course_num ($c->substitution_hours)
-							 -> " . $c->course_substitution->subject_id . "
-							 " . $c->course_substitution->course_num . "$extra
+							 -> " . $c->get_course_substitution()->subject_id . "
+							 " . $c->get_course_substitution()->course_num . "$extra
 						</td>
 
 						
@@ -4116,8 +4142,8 @@ function draw_menu_items($menu_array) {
 			
 		</div>
 		<input type='hidden' name='subTransferFlag' id='subTransferFlag' value=''>
-		<input type='hidden' name='subTermID' id='subTermID' value=''>
-		<input type='button' value='Save Substitution' onClick='popupSaveSubstitution(\"$course_id\",\"$group_id\",\"$semester_num\");'>
+		<input type='hidden' name='subTermID' id='subTermID' value=''>		
+		<input type='button' value='Save Substitution' onClick='popupSaveSubstitution(\"$course_id\",\"$group_id\",\"$semester_num\",\"$req_by_degree_id\");'>
 		
 		<div class='tenpt' style='padding-top: 5px;'><b>" . t("Optional") . "</b> - " . t("Enter remarks:") . " 
 		<input type='text' name='subRemarks' id='subRemarks' value='' size='30' maxlength='254'>
