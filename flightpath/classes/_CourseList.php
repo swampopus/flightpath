@@ -485,8 +485,9 @@ class _CourseList extends ObjList
 	 * @param int $group_id
 	 * @param bool $bool_keep_repeatable_courses
 	 * @param SubstitutionList $list_substitutions
+   * @param $degree_id  The degree id to look for.  If it's -1, then ignore it. If it's 0, use the course's req_by_degree_id.
 	 */
-	function remove_previously_fulfilled(CourseList $list_courses, $group_id, $bool_keep_repeatable_courses = true, $list_substitutions)
+	function remove_previously_fulfilled(CourseList $list_courses, $group_id, $bool_keep_repeatable_courses = true, $list_substitutions, $degree_id = 0)
 	{
 
 		$rtn_list = new CourseList();
@@ -509,10 +510,19 @@ class _CourseList extends ObjList
 			{
 				// it WAS substituted, so we should NOT add it to our
 				// rtnList.
-				continue;
+				
+				// We should only skip it if the test_sub's degree_id matches the one supplied...
+				if ($degree_id >= 0) {
+				  if ($test_sub->assigned_to_degree_id == $degree_id) {
+				    continue;
+          }  
+        }
+        else if ($degree_id < 0) {
+          // degree_id is -1, so we don't care what degree it was assigned to.
+				  continue;
+        }
 			}
-			
-			
+						
 			// Okay, now check if $course is anywhere in $list_courses
 			if ($test_course = $list_courses->find_match($course))
 			{
@@ -1954,7 +1964,8 @@ class _CourseList extends ObjList
 		for ($t = 0; $t < $this->count; $t++)
 		{
 			$course = $this->array_list[$t];
-			$course->assigned_to_group_id = $group_id;
+			//$course->assigned_to_group_id = $group_id;
+			$course->assigned_to_group_ids_array[$group_id] = $group_id;
 		}
 	}
 

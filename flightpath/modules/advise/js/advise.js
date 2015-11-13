@@ -218,13 +218,13 @@ function describeCourse(dataString, blankDegreeID) {
 }
 
 
-function selectCourseFromGroup(group_id, semester_num, groupHoursRemaining, blankDegreeID) {
+function selectCourseFromGroup(group_id, semester_num, groupHoursRemaining, blankDegreeID, req_by_degree_id) {
   //var url = FlightPath.settings.basePath + "/advise/popup-group-select";
   
   // To make compatible with non-clean URL sites, we will use the "unclean" URL...
   var url = FlightPath.settings.basePath + "/index.php?q=advise/popup-group-select";
     
-  popupWindowNew(url,"group_id=" + group_id + "&semester_num=" + semester_num + "&group_hours_remaining=" + groupHoursRemaining + "&blank_degree_id=" + blankDegreeID);
+  popupWindowNew(url,"group_id=" + group_id + "&semester_num=" + semester_num + "&group_hours_remaining=" + groupHoursRemaining + "&blank_degree_id=" + blankDegreeID + "&req_by_degree_id=" + req_by_degree_id);
 }
 
 /**

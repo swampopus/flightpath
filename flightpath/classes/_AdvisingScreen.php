@@ -910,7 +910,7 @@ function draw_menu_items($menu_array) {
 
 			$in_group = ".";
 			//if ($subbed_course->assigned_to_group_id > 0)
-			if ($subbed_course->get_first_assigned_to_group_id() > 0)
+			if ($subbed_course->get_first_assigned_to_group_id() != "")
 			{
 				$new_group = new Group();
 				//$new_group->group_id = $subbed_course->assigned_to_group_id;
@@ -1186,17 +1186,20 @@ function draw_menu_items($menu_array) {
 
 
 
-			if ($c->bool_has_been_assigned)
+			if ($c->bool_has_been_assigned)			
 			{
 				$pC .= "A:";
 				//////////////////////////////
 				// TODO:  List all the groups/degrees this course has been assigned to!
-				if ($c->assigned_to_group_id == 0)
+				//if ($c->assigned_to_group_id == 0)
+				if ($c->get_first_assigned_to_group_id() == "")
 				{
 					$pC .= "degree plan";
-				} else {
+				} 
+				else {
 					$temp_group = new Group();
-					$temp_group->group_id = $c->assigned_to_group_id;
+					//$temp_group->group_id = $c->assigned_to_group_id;
+					$temp_group->group_id = $c->get_first_assigned_to_group_id();
 					$temp_group->load_descriptive_data();
 					$pC .= $temp_group->title;
 				}
@@ -2359,7 +2362,7 @@ function draw_menu_items($menu_array) {
     
     ////////////////
     // Is this course assigned to a group?    
-		if (intval($course->get_first_assigned_to_group_id()) > 0 && $course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE)
+		if ($course->get_first_assigned_to_group_id() != "" && $course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE)
 		{
 			//$g = new Group($course->assigned_to_group_id);
 			$g = new Group();
@@ -2550,7 +2553,7 @@ function draw_menu_items($menu_array) {
 
       //TODO: Same situation about the group_id.  I guess need to find out exactly which group it was assigned to?
 
-      $pC .= fp_render_button(t("Update"), "popupUpdateSelectedCourse(\"$course->course_id\",\"$course->assigned_to_group_id\",\"$course->assigned_to_semester_num\",\"$course->random_id\",\"$advising_term_id\");");
+      $pC .= fp_render_button(t("Update"), "popupUpdateSelectedCourse(\"$course->course_id\",\"$course->get_first_assigned_to_group_id()\",\"$course->assigned_to_semester_num\",\"$course->random_id\",\"$advising_term_id\");");
 
 		}
 
@@ -2806,7 +2809,10 @@ function draw_menu_items($menu_array) {
 
     $req_by_degree_id = $group->req_by_degree_id;		
 
+    // What we are trying to do is end up with a list of courses we want to display on the screen (for example,
+    // that the student took or were substituted in)
 		$group->list_courses->remove_unfulfilled_and_unadvised_courses();
+    //fpm($group->list_courses);
 		$group->list_courses->reset_counter();
 		while($group->list_courses->has_more())
 		{
@@ -2822,9 +2828,8 @@ function draw_menu_items($menu_array) {
 			if (!($course->course_list_fulfilled_by->is_empty))
 			{
 				$try_c = $course->course_list_fulfilled_by->get_first();
-				if ($try_c->get_bool_substitution($req_by_degree_id) == TRUE && $try_c->assigned_to_group_id != $group->group_id)
+				if ($try_c->get_bool_substitution($req_by_degree_id) == TRUE && $try_c->get_bool_assigned_to_group_id($group->group_id) != TRUE)
 				{
-
 					continue;
 				}
 			}
@@ -3087,7 +3092,9 @@ function draw_menu_items($menu_array) {
 			$blank_degree_id = $this->degree_plan->degree_id;
 		}
 
-		$js_code = "selectCourseFromGroup(\"$group->group_id\", \"$group->assigned_to_semester_num\", \"$remaining_hours\", \"$blank_degree_id\");";
+    $req_by_degree_id = $group->req_by_degree_id;
+
+		$js_code = "selectCourseFromGroup(\"$group->group_id\", \"$group->assigned_to_semester_num\", \"$remaining_hours\", \"$blank_degree_id\",\"$req_by_degree_id\");";
 
 		$row_msg = "<i>Click <font color='red'>&gt;&gt;</font> to select $remaining_hours hour$s.</i>";
 		$hand_class = "hand";
@@ -3395,7 +3402,7 @@ function draw_menu_items($menu_array) {
 
 			$o_subject_id = $course->get_course_substitution()->subject_id;
 			$o_course_num = $course->get_course_substitution()->course_num;
-      fpm($course->req_by_degree_id);
+      
 			if ($bool_add_footnote == true)
 			{
 				$footnote = "";
@@ -3409,7 +3416,7 @@ function draw_menu_items($menu_array) {
 				}
 				$course->substitution_footnote = $fcount;
 				$footnote .= "$fcount</span>";
-				$this->footnote_array["substitution"][$fcount] = "$o_subject_id $o_course_num ~~ $subject_id $course_num ~~ $course->substitution_hours ~~ $course->assigned_to_group_id";
+				$this->footnote_array["substitution"][$fcount] = "$o_subject_id $o_course_num ~~ $subject_id $course_num ~~ $course->substitution_hours ~~ " . $course->get_first_assigned_to_group_id() . "";
 				
 			}
 		}
@@ -3471,7 +3478,8 @@ function draw_menu_items($menu_array) {
 
 		$course_id = $course->course_id;
 		$semester_num = $course->assigned_to_semester_num;
-		$group_id = $course->assigned_to_group_id;
+		//$group_id = $course->assigned_to_group_id;
+		$group_id = $course->get_first_assigned_to_group_id();
     $hid_group_id = str_replace("_", "U", $group_id); // replace _ with placeholder U so it doesn't mess up submission.
 		$random_id = $course->random_id;
 		$advised_hours = $course->advised_hours*1;
@@ -3740,10 +3748,12 @@ function draw_menu_items($menu_array) {
 		}
 
 		$course_id = $course->course_id;
-		$group_id = $course->assigned_to_group_id;
+		//$group_id = $course->assigned_to_group_id;
+		$group_id = $course->get_first_assigned_to_group_id();
 		$semester_num = $course->assigned_to_semester_num;
+    $req_by_degree_id = $course->req_by_degree_id;
 
-		$var_hour_icon = "&nbsp;";
+    $var_hour_icon = "&nbsp;";
 		if ($course->has_variable_hours() == true)
 		{
 			$var_hour_icon = "<img src='" . fp_theme_location() . "/images/var_hour.gif'
@@ -3761,7 +3771,8 @@ function draw_menu_items($menu_array) {
 		$hid = "<input type='hidden' name='$course_id" . "_subject'
 						id='$course_id" . "_subject' value='$subject_id'>
 					<input type='hidden' name='$course_id" . "_db_group_requirement_id'
-						id='$course_id" . "_db_group_requirement_id' value='$db_group_requirement_id'>";
+						id='$course_id" . "_db_group_requirement_id' value='$db_group_requirement_id'>
+						<input_type='hidden' name='$course_id" . "_req_by_degree_id' id='$course_id" . "_req_by_degree_id' value='$req_by_degree_id'>";
 
 		$blank_degree_id = "";
 		if ($this->bool_blank)
@@ -3770,7 +3781,7 @@ function draw_menu_items($menu_array) {
 		}
 
 		//$serializedCourse = urlencode(serialize($course));
-		$js_code = "popupDescribeSelected(\"$group_id\",\"$semester_num\",\"$course_id\",\"$subject_id\",\"group_hours_remaining=$group_hours_remaining&db_group_requirement_id=$db_group_requirement_id&blank_degree_id=$blank_degree_id\");";
+		$js_code = "popupDescribeSelected(\"$group_id\",\"$semester_num\",\"$course_id\",\"$subject_id\",\"req_by_degree_id=$req_by_degree_id&group_hours_remaining=$group_hours_remaining&db_group_requirement_id=$db_group_requirement_id&blank_degree_id=$blank_degree_id\");";
 
 		$on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
       				onmouseout=\"style.backgroundColor='white'\" ";
@@ -3853,6 +3864,7 @@ function draw_menu_items($menu_array) {
 
     $req_degree_plan = new DegreePlan($req_by_degree_id); 
     if ($req_by_degree_id > 0) {
+      $course->req_by_degree_id = $req_by_degree_id;
       $req_degree_plan->load_descriptive_data();
     }
 
@@ -4069,7 +4081,8 @@ function draw_menu_items($menu_array) {
 						
 					</tr>
 					";
-				} else {
+				} 
+				else {
 
 
 
@@ -4080,9 +4093,11 @@ function draw_menu_items($menu_array) {
 					}
 
 					$extra = "";
-					if ($c->assigned_to_group_id > 0)
+					//if ($c->assigned_to_group_id > 0)
+					if ($c->get_bool_assigned_to_group_id(-1))
 					{
-						$new_group = new Group($c->assigned_to_group_id);
+					  // TODO:  based on degree?
+						$new_group = new Group($c->get_first_assigned_to_group_id());
 						$extra = " in $new_group->title";
 					}
 					if ($c->bool_outdated_sub == true)
@@ -4181,7 +4196,8 @@ function draw_menu_items($menu_array) {
 				fpm("Group not found.");
 				return;
 			}
-		} else {
+		} 
+		else {
 			// This is the Add a Course group.
 			$group = $place_group;
 		}
@@ -4205,8 +4221,6 @@ function draw_menu_items($menu_array) {
 			$group_hours_remaining = $place_group->hours_required - $group_fulfilled_hours;
 
 		}
-
-
 
 
 		$display_semesterNum = $place_group->assigned_to_semester_num;
@@ -4243,6 +4257,7 @@ function draw_menu_items($menu_array) {
 					$selected_subject = trim(addslashes($_GET["selected_subject"]));
 					if ($selected_subject == "")
 					{
+					  //TODO:  Probably goin to have some trouble here with multi degrees.
 						// Prompt them to select a subject first.
 						$pC .= $this->draw_popup_group_subject_select($subject_array, $group->group_id, $display_semesterNum, $group_hours_remaining);
 						$new_course_list = new CourseList(); // empty it
@@ -4379,7 +4394,7 @@ function draw_menu_items($menu_array) {
 		}
 
 
-		//print_pre($final_course_list->to_string());
+		//fpm($final_course_list->to_string());
 		// Remove courses which have been marked as "exclude" in the database.
 		$final_course_list->remove_excluded();
 
@@ -4395,7 +4410,7 @@ function draw_menu_items($menu_array) {
 		{
 			// Only do this if NOT in Add a Course group...
 			// also, don't do it if we're looking at a "blank" degree.
-			$final_course_list->remove_previously_fulfilled($this->student->list_courses_taken, $group->group_id, true, $this->student->list_substitutions);
+			$final_course_list->remove_previously_fulfilled($this->student->list_courses_taken, $group->group_id, true, $this->student->list_substitutions, $req_by_degree_id);
 
 		}
 
@@ -4413,7 +4428,10 @@ function draw_menu_items($menu_array) {
 			$bool_unselectableCourses = true;
 		}
 
-
+    // Make sure all the courses in our final list have the same req_by_degree_id.
+    $final_course_list->set_req_by_degree_id($req_by_degree_id);
+    
+    
 		$pC .= $this->display_popup_group_select_course_list($final_course_list, $group_hours_remaining);
 
 		// If there were no courses in the finalCourseList, display a message.

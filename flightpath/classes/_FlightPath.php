@@ -471,6 +471,7 @@ class _FlightPath
 			//$required_group_id = $substitution->course_requirement->assigned_to_group_id;
 			$required_group_id = $substitution->course_requirement->get_first_assigned_to_group_id(); // we assume there's only one group to get
 
+			fpm($required_group_id);
 			// First check-- does this degree even have this group ID?
 			$outdated_note = "";
 			if ($required_group_id == 0)
@@ -563,12 +564,6 @@ class _FlightPath
 			$group->group_id = 0;
 		}
 
-//TODO: dev
-/*      if ($group->get_db_group_id() == 2951197) {
-          fpm("starting fun electives, req by degree: $group->req_by_degree_id");
-        $dev_flag = "yes";
-        }
-*/
 
     $sort_policy = variable_get("initial_student_course_sort_policy", "alpha"); // will either be "alpha" or "grade"
 		
@@ -635,11 +630,11 @@ class _FlightPath
 				// also have specified repeats.
 				$student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);
 			}
-
+fpm($group_id);
 			// Does the student have any substitutions for this requirement?
 			if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id))
 			{
-
+fpm($substitution);
 				// Since the substitution was made, I don't really care about
 				// min grades or the like.  Let's just put it in.
 

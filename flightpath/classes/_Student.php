@@ -437,10 +437,13 @@ class _Student
 					$substitution->bool_group_addition = true;
 				}
 
-				$course_requirement->assigned_to_group_id = $cur["required_group_id"];
+				//$course_requirement->assigned_to_group_id = $cur["required_group_id"];
+				$course_requirement->assigned_to_group_ids_array[$cur["required_group_id"]] = $cur["required_group_id"];
+				
 				$course_requirement->assigned_to_semester_num = $cur["required_semester_num"];
         $course_requirement->req_by_degree_id = $req_by_degree_id;
-				$taken_course->assigned_to_group_id = $cur["required_group_id"];
+				//$taken_course->assigned_to_group_id = $cur["required_group_id"];
+				$taken_course->assigned_to_group_ids_array[$cur["required_group_id"]] = $cur["required_group_id"];
 				$taken_course->assigned_to_semester_num = $cur["required_semester_num"];
 
 				$substitution->course_requirement = $course_requirement;
@@ -452,6 +455,7 @@ class _Student
 				$substitution->remarks = $sub_remarks;
 				$substitution->faculty_id = $faculty_id;
         $substitution->db_substitution_id = $sub_id;
+        $substitution->assigned_to_degree_id = $req_by_degree_id;
 				$this->list_substitutions->add($substitution);
 
 

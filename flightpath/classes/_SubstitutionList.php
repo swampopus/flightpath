@@ -28,7 +28,7 @@ class _SubstitutionList extends ObjList
 				}
 			} else {
 				// ONLY check if it's in the supplied group_id...
-				if ($cr->course_id == $course_requirement->course_id && $cr->assigned_to_group_id == $group_id)
+				if ($cr->course_id == $course_requirement->course_id && $cr->get_bool_assigned_to_group_id($group_id))
 				{
 					return $substitution;
 				}
@@ -50,7 +50,7 @@ class _SubstitutionList extends ObjList
 			if ($substitution->bool_group_addition == true)
 			{
 				$c = $substitution->course_requirement;
-				if ($c->assigned_to_group_id == $group_id)
+				if ($c->get_bool_assigned_to_group_id($group_id))
 				{
 					$cc = $substitution->course_list_substitutions->get_first();
 					//adminDebug("~~ $cc->course_id");

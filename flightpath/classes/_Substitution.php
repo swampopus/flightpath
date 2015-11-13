@@ -14,7 +14,9 @@ class _Substitution
 	public $remarks; // like a comment for the substitution.
 
 	public $outdated_note; // will contain information about WHY this was outdated.
+  public $assigned_to_degree_id = 0;
 	
+		
 	function __construct()
 	{
 
@@ -23,6 +25,7 @@ class _Substitution
 		$this->bool_group_addition = false;
 		$this->bool_outdated = false;
 	}
+
 
 	function to_string()
 	{

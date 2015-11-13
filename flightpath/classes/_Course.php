@@ -262,7 +262,7 @@ class _Course
 
     $rtn .= $this->course_id . "~";
     $rtn .= $this->assigned_to_semester_num . "~";
-    $rtn .= join(",", $this->assigned_to_group_ids_array) . "~";
+    $rtn .= fp_join_assoc($this->assigned_to_group_ids_array) . "~";
     $rtn .= intval($this->bool_advised_to_take) . "~";
     $rtn .= $this->specified_repeats . "~";
     $rtn .= intval($this->bool_specified_repeat) . "~";
@@ -353,7 +353,7 @@ class _Course
     $this->load_course($this->course_id);
 
     $this->assigned_to_semester_num = 	$temp[1];
-    $this->assigned_to_group_ids_array 	= 	explode(",", $temp[2]);
+    $this->assigned_to_group_ids_array 	= 	fp_explode_assoc($temp[2]);
     $this->bool_advised_to_take 	= 		(bool) $temp[3];
     $this->specified_repeats   	= 	$temp[4];
     $this->bool_specified_repeat 	= 	(bool) $temp[5];
@@ -1592,9 +1592,33 @@ class _Course
 
 
   /**
+   * Return TRUE or FALSE if this this course was ever assigned to the supplied group_id. 
+   * if $group_id == -1, then return TRUE if it was assigned to ANY group.
+   */
+  function get_bool_assigned_to_group_id($group_id) {
+    
+    if ($group_id == -1) {
+      // check to see if it was assigned to any group at all.
+      if (count($this->assigned_to_group_ids_array) < 1) {
+        return FALSE;
+      }
+      else {
+        return TRUE;
+      }
+    }
+    
+    foreach ($this->assigned_to_group_ids_array as $k => $v) {
+      if ($group_id == $v) return TRUE;
+    }
+    return FALSE;
+  }
+
+
+  /**
    * Return the first element in our assigned_to_group_ids_array, or FALSE
    */
   function get_first_assigned_to_group_id() {
+      
     if (count($this->assigned_to_group_ids_array) < 1) return FALSE;
     
     

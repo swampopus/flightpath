@@ -507,7 +507,10 @@ function advise_display_popup_group_select() {
   $group_id = trim(addslashes($_GET["group_id"]));
   $group_hours_remaining = trim(addslashes($_GET["group_hours_remaining"]));
   $semester_num = trim(addslashes($_GET["semester_num"]));
+  $req_by_degree_id = trim(addslashes($_REQUEST["req_by_degree_id"]));
   $perform_action2 = $_REQUEST["perform_action2"]; 
+
+
 
   // If this is a "blank" degree, make sure we set the degree_id correctly.
   if($blank_degree_id != "") {    
@@ -538,7 +541,9 @@ function advise_display_popup_group_select() {
 
     $course = new Course();
     $course->course_id = $course_id;
+    $course->req_by_degree_id = $req_by_degree_id;
 
+    // TODO:  Right here, do we need to limit by degree id?  Probably...
     $temp_course_list = $group->find_courses($course);
     if (!$temp_course_list) {
       $temp_course_list = $degree_plan->find_courses($course_id, $group_id, $semester_num);
@@ -561,14 +566,14 @@ function advise_display_popup_group_select() {
     // Create the tabs for the page...
     $tab_array = array();
     $tab_array[0]["title"] = "Description";
-    $tab_array[0]["on_click"] = "popupDescribeSelected(\"$group_id\",\"$semester_num\",\"0\",\"\",\"group_hours_remaining=$group_hours_remaining&blank_degree_id=$blank_degree_id\");";
+    $tab_array[0]["on_click"] = "popupDescribeSelected(\"$group_id\",\"$semester_num\",\"0\",\"\",\"req_by_degree_id=$req_by_degree_id&group_hours_remaining=$group_hours_remaining&blank_degree_id=$blank_degree_id\");";
     $tab_array[1]["title"] = "Select";
     $tab_array[1]["active"] = true;
 
     // If we are allowed to substitute....
     if (user_has_permission("can_substitute") && $group_id != -88 && !$screen->bool_blank) {
       $tab_array[2]["title"] = "Substitute";
-      $tab_array[2]["on_click"] = "popupSubstituteSelected(\"0\",\"$group_id\",\"$semester_num\",\"group_hours_remaining=$group_hours_remaining\");";
+      $tab_array[2]["on_click"] = "popupSubstituteSelected(\"0\",\"$group_id\",\"$semester_num\",\"$req_by_degree_id\",\"group_hours_remaining=$group_hours_remaining\");";
     }
 
   }
@@ -582,12 +587,12 @@ function advise_display_popup_group_select() {
     $tab_array[1]["title"] = "Select";
     $subject = trim($_GET["selected_subject"]);
 
-    $tab_array[1]["on_click"] = "popupBackToGroupSelect(\"$course_id\",\"$group_id\",\"$semester_num\",\"selected_subject=$subject&group_hours_remaining=$group_hours_remaining&blank_degree_id=$blank_degree_id\");";
+    $tab_array[1]["on_click"] = "popupBackToGroupSelect(\"$course_id\",\"$group_id\",\"$semester_num\",\"req_by_degree_id=$req_by_degree_id&selected_subject=$subject&group_hours_remaining=$group_hours_remaining&blank_degree_id=$blank_degree_id\");";
 
     // If we are allowed to substitute....
     if (user_has_permission("can_substitute") && $group_id != -88 && !$screen->bool_blank) {
       $tab_array[2]["title"] = "Substitute";
-      $tab_array[2]["on_click"] = "popupSubstituteSelected(\"$course_id\",\"$group_id\",\"$semester_num\",\"group_hours_remaining=$group_hours_remaining\");";
+      $tab_array[2]["on_click"] = "popupSubstituteSelected(\"$course_id\",\"$group_id\",\"$semester_num\",\"$req_by_degree_id\",\"group_hours_remaining=$group_hours_remaining\");";
     }
    
 
