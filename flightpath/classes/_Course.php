@@ -24,10 +24,16 @@ class _Course
   public $bool_taken, $term_id, $section_number, $grade, $hours_awarded, $quality_points, $level_code;
   public $bool_transfer, $institution_id, $institution_name, $course_transfer;
   public $transfer_eqv_text, $transfer_footnote, $bool_outdated_sub;
-  public $bool_substitution, $course_substitution, $substitution_hours, $sub_remarks, $sub_faculty_id;
+  public $substitution_hours, $sub_remarks, $sub_faculty_id;
   public $bool_substitution_split, $substitution_footnote, $bool_substitution_new_from_split;
+  
+  public $details_by_degree_array;  // meant to hold all details about a substitution, or anything else, keyed by degree id.
+  
+  // These are deprecated now?
   public $course_substitution_by_degree_array;
   public $bool_substitution_by_degree_array;
+  public $bool_substitution, $course_substitution; 
+  ///
 
   // Major/Degree or Group Requirement related:
   public $min_grade, $specified_repeats, $bool_specified_repeat, $required_on_branch_id;
@@ -100,16 +106,22 @@ class _Course
     $this->course_list_fulfilled_by = new CourseList();
     $this->group_list_unassigned = new ObjList();
     $this->bool_use_draft = $bool_use_draft;
+    
     $this->bool_has_been_displayed_by_degree_array = array();
+    
     $this->bool_substitution_by_degree_array = array();
+    
     $this->db_substitution_id_array = array();
     $this->course_substitution_by_degree_array = array();
+    
+    $this->details_by_degree_array = array();
+    $this->details_by_degree_array[-1] = array();  // to keep notices from showing up.    
 
 
     $this->assigned_to_degree_ids_array = array();
 
     // Always override if the global variable is set.
-    if ($GLOBALS["fp_advising"]["bool_use_draft"] == true) {
+    if (@$GLOBALS["fp_advising"]["bool_use_draft"] == true) {
       $this->bool_use_draft = true;
     }
 
@@ -148,10 +160,12 @@ class _Course
     if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
 
     if ($degree_id > 0) {
-      return $this->course_substitution_by_degree_array[$degree_id];
+      //return $this->course_substitution_by_degree_array[$degree_id];
+      return $this->get_details_by_degree($degree_id, "course_substitution");
     }
     else {
-      $x = reset($this->course_substitution_by_degree_array);
+      //$x = reset($this->course_substitution_by_degree_array);
+      $x = reset($this->details_by_degree_array[$degree_id]["course_substitution"]);
       if ($x) return $x;
     }
     
@@ -174,11 +188,13 @@ class _Course
     if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
     
     if ($degree_id > 0) {
-      return $this->bool_substitution_by_degree_array[$degree_id];
+      //return $this->bool_substitution_by_degree_array[$degree_id];
+      return $this->get_details_by_degree($degree_id, "bool_substitution");
     }
     else {
       // has the course been displayed by ANY degree?
-      if (count($this->bool_substitution_by_degree_array) > 0) {
+      
+      if (isset($this->details_by_degree_array[$degree_id]["bool_substitution"]) && count($this->details_by_degree_array[$degree_id]["bool_substitution"]) > 0) {
         return TRUE;
       }
     }
@@ -194,7 +210,8 @@ class _Course
     // If degree_id is zero, then use the course's currently req_by_degree_id.    
     if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
     
-    $this->bool_substitution_by_degree_array[$degree_id] = $val;
+    //$this->bool_substitution_by_degree_array[$degree_id] = $val;
+    $this->set_details_by_degree($degree_id, "bool_substitution", $val);
     
   }
 
@@ -212,11 +229,12 @@ class _Course
     if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
     
     if ($degree_id > 0) {
-      return $this->bool_has_been_displayed_by_degree_array[$degree_id];
+      //return $this->bool_has_been_displayed_by_degree_array[$degree_id];
+      return $this->get_details_by_degree($degree_id, "bool_has_been_displayed");
     }
     else {
       // has the course been displayed by ANY degree?
-      if (count($this->bool_has_been_displayed_by_degree_array) > 0) {
+      if (@count($this->details_by_degree_array[$degree_id]["bool_has_been_displayed"]) > 0) {
         return TRUE;
       }
     }
@@ -235,7 +253,24 @@ class _Course
     // If degree_id is zero, then use the course's currently req_by_degree_id.
     if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
     
-    $this->bool_has_been_displayed_by_degree_array[$degree_id] = $val;
+    //$this->bool_has_been_displayed_by_degree_array[$degree_id] = $val;
+    $this->set_details_by_degree($degree_id, "bool_has_been_displayed", $val);
+  }
+
+
+  
+  /**
+   * Convenience function to set a value into our details_by_degree_array.
+   */
+  function set_details_by_degree($degree_id, $key, $val) {
+    $this->details_by_degree_array[$degree_id][$key] = $val;
+  }
+
+  /**
+   * @see set_details_by_degree()
+   */
+  function get_details_by_degree($degree_id, $key) {
+    return @$this->details_by_degree_array[$degree_id][$key];
   }
 
 
@@ -1145,7 +1180,7 @@ class _Course
     // First-- is this course in our GLOBALS cache for courses?
     // If it is, then load from that.
     if ($bool_load_from_global_cache == true && $this->course_id != 0 &&
-    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["subject_id"] != "")
+        @$GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["subject_id"] != "")
     {
       $this->subject_id = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["subject_id"];
       $this->course_num = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["course_num"];
@@ -1672,7 +1707,7 @@ class _Course
 
     "advised_hours", "bool_selected", "bool_advised_to_take", "bool_use_draft",
     "course_fulfilled_by", "course_list_fulfilled_by",
-    "bool_has_been_assigned", "bool_added_course", "group_list_unassigned",
+    "bool_has_been_assigned", "bool_added_course", "group_list_unassigned", "details_by_degree_array",
 
     "display_status", "bool_has_been_displayed", "bool_has_been_displayed_by_degree_array", "bool_substitution_by_degree_array",
     "bool_hide_grade", "bool_ghost_hour",

@@ -257,7 +257,7 @@ class _DatabaseHandler
 	  // replacement patterns.
 	  $args = func_get_args();
 	  array_shift($args);
-    if (is_array($args[0])) {
+    if (isset($args[0]) && is_array($args[0])) {
       // If the first argument was an array, it means we passed an array of values instead
       // of passing them directly.  So use them directly as our args.
       $args = $args[0];
@@ -898,7 +898,7 @@ class _DatabaseHandler
 
 		
 		// Always override if the global variable is set.
-		if ($GLOBALS["fp_advising"]["bool_use_draft"] == true) {
+		if (@$GLOBALS["fp_advising"]["bool_use_draft"] == true) {
 			$bool_use_draft = true;
 		}
 		

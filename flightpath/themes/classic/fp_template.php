@@ -62,7 +62,7 @@ if ($page_is_popup) {
 		 print "<link rel='stylesheet' type='text/css' href='$theme_location/layout.css?$page_css_js_query_string' /> \n";
 		 
 		 // Load any extra CSS files which addon modules might have added.
-		 print $page_extra_css_files;
+		 print @$page_extra_css_files;
 		 
      // Load the custom.css file for this theme...
      print "<link rel='stylesheet' type='text/css' href='$theme_location/custom.css?$page_css_js_query_string' /> \n";
@@ -91,11 +91,11 @@ if ($page_is_popup) {
             
             // ***************** Header Content   *****************
             // *****************      *****************
-            if ($page_banner_is_link == TRUE) {
+            if (isset($page_banner_is_link) && $page_banner_is_link == TRUE) {
               print "<a href='{$GLOBALS["fp_system_settings"]["self_url"]}' target='_blank'>";
             }
             ?><img src='<?php print "$theme_location/images/"; ?>fp_banner_default.png' border='0'><?php
-            if ($page_banner_is_link == TRUE) {
+            if (isset($page_banner_is_link) && $page_banner_is_link == TRUE) {
               print "</a>";
             }    
             

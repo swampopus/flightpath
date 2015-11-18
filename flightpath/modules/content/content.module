@@ -180,7 +180,7 @@ function content_user_access($op, $var) {
  */
 function content_menu_handle_replacement_pattern($str) {
   
-  $cid = $_REQUEST["cid"];
+  $cid = @$_REQUEST["cid"];
   if ($cid) {
     $content = content_load($cid);
     if (is_array($content)) {

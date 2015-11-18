@@ -1,6 +1,15 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-11-17
+  Still working on subs (split subs now).  Changed FP error_reporting to allow notices to appear, for the sake of catching typos and missed variabls
+  as I develop.  As a result, numerous changes were made in numerous files.
+  
+
+2015-11-16
+  Worked on getting subs within groups to work across different degrees.
+
+
 2015-11-11
   Continued working on degree-specific subs, had to create an array of substitutions, by degree.  Basically, I will need to do this for anything involving
   substitutions I believe.

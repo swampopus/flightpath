@@ -61,7 +61,7 @@ function blank_degrees_menu_handle_replacement_pattern($str) {
   
   if (strpos($str, "%BLANK_CATALOG_YEAR%") !== 0) {
     // It contains this replacement pattern!
-    $str = str_replace("%BLANK_CATALOG_YEAR%", $_REQUEST["blank_catalog_year"], $str);
+    $str = str_replace("%BLANK_CATALOG_YEAR%", @$_REQUEST["blank_catalog_year"], $str);
   }
   
   return $str;

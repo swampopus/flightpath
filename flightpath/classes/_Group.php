@@ -172,8 +172,8 @@ class _Group
 				{
 					// If this course_id is NOT in the array of significant courses
 					// (that the student took or has transfer credit or subs for)
-					// then skip it.  Never add it to the group.
-					if ($array_significant_courses[$cur["course_id"]] != true)
+					// then skip it.  Never add it to the group.					
+					if (isset($array_significant_courses[$cur["course_id"]]) && $array_significant_courses[$cur["course_id"]] != true)
 					{// course was not in there, so skip!
 						continue;
 					}
@@ -335,7 +335,7 @@ class _Group
 	function load_descriptive_data()
 	{
 
-		if ($db == NULL)
+		if ($this->db == NULL)
 		{
 			$this->db = get_global_database_handler();
 		}

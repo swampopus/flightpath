@@ -281,6 +281,9 @@ function draw_menu_items($menu_array) {
 		$page_title = $this->page_title;
 		$page_body_classes = $this->page_body_classes;
 		
+    $page_extra_js_files = "";
+    $page_extra_js_settings = "";
+    
   	if ($page_title == "") { 
   	  // By default, page title is this...
 			$page_title = $GLOBALS["fp_system_settings"]["school_initials"] . " FlightPath";
@@ -315,7 +318,7 @@ function draw_menu_items($menu_array) {
 	
 	  
 	  // Load any extra CSS files which addon modules might have added.
-	  if (is_array($GLOBALS["fp_extra_css"]) && count($GLOBALS["fp_extra_css"]) > 0) {
+	  if (isset($GLOBALS["fp_extra_css"]) && is_array($GLOBALS["fp_extra_css"]) && count($GLOBALS["fp_extra_css"]) > 0) {
 	   foreach ($GLOBALS["fp_extra_css"] as $css_file_name) {
 	     $page_extra_css_files .= "<link rel='stylesheet' type='text/css' href='$css_file_name?$page_css_js_query_string' /> \n";
 	   }
@@ -489,7 +492,7 @@ function draw_menu_items($menu_array) {
 
 
 
-		if ($GLOBALS["advising_course_has_asterisk"] == true)
+		if (@$GLOBALS["advising_course_has_asterisk"] == true)
 		{
 			$pC .= "<tr>
 				<td colspan='10'>
@@ -684,7 +687,7 @@ function draw_menu_items($menu_array) {
 		for ($xx = 0; $xx <= 1; $xx++)
 		{
 			$fn_type = $fn_type_array[$xx];
-			if (count($this->footnote_array[$fn_type]) < 1)
+			if (isset($this->footnote_array[$fn_type]) && @count($this->footnote_array[$fn_type]) < 1)
 			{
 				continue;
 			}
@@ -692,7 +695,7 @@ function draw_menu_items($menu_array) {
 			$pC .= "<div style='padding-bottom: 10px;'>
 						<b>{$fn_name[$fn_type]}</b>";
 			$is_empty = false;
-			for ($t = 1; $t <= count($this->footnote_array[$fn_type]); $t++)
+			for ($t = 1; $t <= @count($this->footnote_array[$fn_type]); $t++)
 			{
 				$line = $this->footnote_array[$fn_type][$t];
 
@@ -712,14 +715,24 @@ function draw_menu_items($menu_array) {
 					$using_hours = "($using_hours hrs)";
 				}
 				$in_group = trim($temp[3]);
-
+        $sub_id = trim($temp[4]);
+				
+				
 				$fbetween = $fn_between[$fn_type];
+
+        $sub_details = $this->db->get_substitution_details($sub_id);
+        //fpm($sub_details);
+        $remarks = trim($sub_details["remarks"]);
+        $sub_faculty_id = $sub_details["faculty_id"];
+        $sub_degree_plan = new DegreePlan($sub_details["required_degree_id"]);
+
 
 				if ($in_group > 0 && $fn_type=="substitution")
 				{
 					$new_group = new Group();
 					$new_group->group_id = $in_group;
 					$new_group->load_descriptive_data();
+					
 					$extra = "<div style='padding-left: 45px;'><i>" . t("in") . " $new_group->title.</i></div>";
 					if ($new_course == $o_course || $o_course == "")
 					{
@@ -727,13 +740,16 @@ function draw_menu_items($menu_array) {
 						$fbetween = "";
 						$extra = str_replace("<i>" . t("in"), "<i>" . t("to"), $extra);
 					}
+          
+                   
+          
 				}
 
-
-
+        // TODO:  Clean this up, as far as the remarks and such.  Make it look similar (new function?) as popup text for a substitution.
+        
 				$pC .= "<div class='tenpt'>&nbsp; &nbsp;
 					<sup>{$fn_char[$fn_type]}$t</sup>
-					$new_course $using_hours $fbetween $o_course$extra</div>";
+					$new_course $using_hours $fbetween $o_course$extra ($remarks) for degree " . $sub_degree_plan->get_title2() . "</div>";
 
 			}
 			$pC .= "</div>";
@@ -1563,8 +1579,8 @@ function draw_menu_items($menu_array) {
 		  $temp = explode("~", $line);
 		  $requirement_type = trim($temp[0]);
 		  $label = trim($temp[1]);		  
-		  $unfinished_col = trim($temp[2]);
-		  $progress_col = trim($temp[3]);
+		  $unfinished_col = @trim($temp[2]);
+		  $progress_col = @trim($temp[3]);
 		  
 		  if ($unfinished_col == "") $unfinished_col = "660000";
 		  if ($progress_col == "") $progress_col = "FFCC33";
@@ -1603,6 +1619,7 @@ function draw_menu_items($menu_array) {
 	    $td_width = round(100 / count($pie_chart_html_array));
 	  }
     
+    if (!isset($user->settings["hide_charts"])) $user->settings["hide_charts"] = "";
     
 		if ($this->bool_force_pie_charts || ($user->settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false && $this->page_is_mobile == false))
 		{ // Display the pie charts
@@ -2443,52 +2460,52 @@ function draw_menu_items($menu_array) {
     // Has the course been substituted into *this* degree plan?
 		if ($course->get_bool_substitution() == TRUE)
 		{
-		  // TODO:  Get this working!  The req_by_degree_id situation.
+		  
 			// Find out who did it and if they left any remarks.
-			fpm($course->course_substitution_by_degree_array);
+			//fpm($course->course_substitution_by_degree_array);
 		  $db = $this->db;
-			fpm($course->db_substitution_id_array);
+			//fpm($course->db_substitution_id_array);
 			$sub_id = $course->db_substitution_id_array[$course->get_course_substitution()->req_by_degree_id];
 			
-			  $temp = $db->get_substitution_details($sub_id);
-        
-        $required_degree_id = $temp["required_degree_id"];
-        $req_degree_plan = new DegreePlan($required_degree_id);
-                
-			  $by = $db->get_faculty_name($temp["faculty_id"], false);
-			  $remarks = $temp["remarks"];
-			  $ondate = format_date($temp["posted"], "", "n/d/Y");
-			
-			
-			  if ($by != "") {
-			    $by = " by $by, on $ondate.";
-			  }
+		  $temp = $db->get_substitution_details($sub_id);
+      
+      $required_degree_id = $temp["required_degree_id"];
+      $req_degree_plan = new DegreePlan($required_degree_id);
+              
+		  $by = $db->get_faculty_name($temp["faculty_id"], false);
+		  $remarks = $temp["remarks"];
+		  $ondate = format_date($temp["posted"], "", "n/d/Y");
+		
+		
+		  if ($by != "") {
+		    $by = " by $by, on $ondate.";
+		  }
 
-			  if ($remarks != "")
-			  {
-				  $remarks = " " . t("Substitution remarks:") . " <i>$remarks</i>.";
-			  }
+		  if ($remarks != "")
+		  {
+			  $remarks = " " . t("Substitution remarks:") . " <i>$remarks</i>.";
+		  }
 
-			  $forthecourse = t("for the original course
-						requirement of") . " <b>" . $course->get_course_substitution()->subject_id . " 
-						" . $course->get_course_substitution()->course_num . "</b>";
-			  if ($temp["required_course_id"]*1 == 0)
-			  {
-				  $forthecourse = "";
-			  }
+		  $forthecourse = t("for the original course
+					requirement of") . " <b>" . $course->get_course_substitution()->subject_id . " 
+					" . $course->get_course_substitution()->course_num . "</b>";
+		  if ($temp["required_course_id"]*1 == 0)
+		  {
+			  $forthecourse = "";
+		  }
 
-			  $pC .= "<div class='tenpt' style='margin-top: 10px;'>
-						<b>" . t("Note:") . "</b> " . t("This course was substituted into the %title 
-						degree plan", array("%title" => $req_degree_plan->get_title2())) . " $forthecourse
-						$by$remarks";
+		  $pC .= "<div class='tenpt' style='margin-top: 10px;'>
+					<b>" . t("Note:") . "</b> " . t("This course was substituted into the %title 
+					degree plan", array("%title" => $req_degree_plan->get_title2())) . " $forthecourse
+					$by$remarks";
 
-			
-			  if (user_has_permission("can_substitute")) {
-				  $pC .= "<div align='left' class='tenpt' style='padding-left: 10px;'>
-					  <b>" . t("Special administrative function:") . "</b>
-					  <a href='javascript: popupRemoveSubstitution(\"$sub_id\");'>" . t("Remove substitution?") . "</a>
-					 </div>";
-			  }
+		
+		  if (user_has_permission("can_substitute")) {
+			  $pC .= "<div align='left' class='tenpt' style='padding-left: 10px;'>
+				  <b>" . t("Special administrative function:") . "</b>
+				  <a href='javascript: popupRemoveSubstitution(\"$sub_id\");'>" . t("Remove substitution?") . "</a>
+				 </div>";
+		  }
 			
 
 		}
@@ -2731,11 +2748,11 @@ function draw_menu_items($menu_array) {
         $last_req_by_degree_id = $group->req_by_degree_id;                
       }            
       
-      
+      //fpm($group->req_by_degree_id);
       
 			$pC .= "<tr><td colspan='8'>";
-      // TODO:   Do we need to set the req_by_degree_id to groups as well, like I did above to courses?
-      
+            
+                  
 			$pC .= $this->display_group($group);
 			$count_hoursCompleted += $group->hours_fulfilled_for_credit;
 			$pC .= "</td></tr>";
@@ -2951,6 +2968,10 @@ function draw_menu_items($menu_array) {
 
 		$display_course_list->sort_advised_last_alphabetical();
 
+    // Make sure we're all on the same page, for what degree_id we're being displayed under.
+    $display_course_list->set_req_by_degree_id($req_by_degree_id);
+
+    //fpm($display_course_list);
 
 		$pC .= $this->display_group_course_list($display_course_list, $group, $display_semesterNum);
 
@@ -3033,12 +3054,12 @@ function draw_menu_items($menu_array) {
    */
 	function display_group_course_list($course_list, $group, $semester_num)
 	{
+	  $pC = "";
+    
 		$course_list->reset_counter();
 		while($course_list->has_more())
 		{
 			$course = $course_list->get_next();
-
-
 
 			$pC .= $this->draw_course_row($course, $course->icon_filename, $course->title_text, $course->temp_flag);
 
@@ -3083,6 +3104,9 @@ function draw_menu_items($menu_array) {
 		{
 			$s = "";
 		}
+    
+    $title_text = "";
+    
 		$select_icon = "<img src='$img_path/select.gif' border='0'>";
 		$icon_link = "<img src='$img_path/icons/$group->icon_filename' width='19' height='19' border='0' alt='$title_text' title='$title_text'>";
 
@@ -3235,7 +3259,7 @@ function draw_menu_items($menu_array) {
     		</td>
    			</tr>
    					";
-		if (!$hide_headers)
+		if (!$hideheaders)
 		{
 			$rtn .= "
    			<tr height='20'>
@@ -3312,6 +3336,8 @@ function draw_menu_items($menu_array) {
 		// The current term we are advising for.
 		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
 		
+    $pts = "";
+    
     if (!$advising_term_id) {      
       $advising_term_id = 0;
     }
@@ -3416,7 +3442,9 @@ function draw_menu_items($menu_array) {
 				}
 				$course->substitution_footnote = $fcount;
 				$footnote .= "$fcount</span>";
-				$this->footnote_array["substitution"][$fcount] = "$o_subject_id $o_course_num ~~ $subject_id $course_num ~~ $course->substitution_hours ~~ " . $course->get_first_assigned_to_group_id() . "";
+        
+        $sub_id = $course->db_substitution_id_array[$course->req_by_degree_id];
+				$this->footnote_array["substitution"][$fcount] = "$o_subject_id $o_course_num ~~ $subject_id $course_num ~~ $course->substitution_hours ~~ " . $course->get_first_assigned_to_group_id() . " ~~ $sub_id";
 				
 			}
 		}
@@ -3471,7 +3499,7 @@ function draw_menu_items($menu_array) {
 		
 		$display_status =  $course->display_status;
 
-		if ($display_status == "completed")
+    if ($display_status == "completed")
 		{
 			$pts = $this->get_quality_points($grade, $hours);
 		}
@@ -4705,6 +4733,8 @@ function draw_menu_items($menu_array) {
 	function get_hidden_advising_variables($perform_action = "")
 	{
 		$rtn = "";
+
+    if (!isset($GLOBALS["print_view"])) $GLOBALS["print_view"] = "";
 
 		$rtn .= "<span id='hidden_elements'>
 		

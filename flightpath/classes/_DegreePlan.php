@@ -204,6 +204,8 @@ class _DegreePlan
         // A requirement is specified, so make sure
         // the group is of this requirement.
 
+        if (!isset($g->hours_required_by_type[$requirement_type])) $g->hours_required_by_type[$requirement_type] = 0;
+        
         if ($bool_required_hours_only == true)
         {  // make sure it's of the right type.
           $g_hours = $g->hours_required_by_type[$requirement_type]*1;
@@ -379,6 +381,8 @@ class _DegreePlan
           // Was not already there; insert it.
           $group_n = new Group($cur["group_id"] . '_' . $this->degree_id, $this->db, $semester_num, $this->student_array_significant_courses, $this->bool_use_draft, $cur["group_requirement_type"]);
           $group_n->hours_required = $cur["group_hours_required"] * 1;
+          
+          if (!isset($group_n->hours_required_by_type[$cur["group_requirement_type"]])) $group_n->hours_required_by_type[$cur["group_requirement_type"]] = 0;
           $group_n->hours_required_by_type[$cur["group_requirement_type"]] += $group_n->hours_required;
           $group_n->req_by_degree_id = $this->degree_id;
           if (trim($cur["group_min_grade"]) != "")

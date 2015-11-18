@@ -54,7 +54,7 @@ class _FlightPath
 		$track_code = $GLOBALS["fp_advising"]["advising_track_code"];
 		$student_id = $GLOBALS["fp_advising"]["advising_student_id"];
 		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
-		$available_terms = $GLOBALS["fp_advising"]["available_advising_term_ids"];
+		@$available_terms = $GLOBALS["fp_advising"]["available_advising_term_ids"];
 
     // Keep in mind-- at this point, major_coe might be a CSV of major codes.
 
@@ -144,8 +144,8 @@ class _FlightPath
       
   
   
-  		if ($student->array_settings["track_code"] != "" && $this->bool_what_if == false
-  		&& $student->array_settings["major_code"] == $major_code)
+  		if (@$student->array_settings["track_code"] != "" && $this->bool_what_if == false
+  		&& @$student->array_settings["major_code"] == $major_code)
   		{
   			// The student has a selected track in their settings,
   			// so use that (but only if it is for their current major-- settings
@@ -471,7 +471,7 @@ class _FlightPath
 			//$required_group_id = $substitution->course_requirement->assigned_to_group_id;
 			$required_group_id = $substitution->course_requirement->get_first_assigned_to_group_id(); // we assume there's only one group to get
 
-			fpm($required_group_id);
+			//fpm($required_group_id);
 			// First check-- does this degree even have this group ID?
 			$outdated_note = "";
 			if ($required_group_id == 0)
@@ -616,7 +616,7 @@ class _FlightPath
 			{
 				// Only look for the course_requirement if it is in the student's
 				// array_significant_courses array.
-				if ($student->array_significant_courses[$course_requirement->course_id] != true)
+				if (isset($student->array_significant_courses[$course_requirement->course_id]) && $student->array_significant_courses[$course_requirement->course_id] != true)
 				{// course was not in there, so skip!
 					continue;
 				}
@@ -630,11 +630,12 @@ class _FlightPath
 				// also have specified repeats.
 				$student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);
 			}
-fpm($group_id);
+//fpm($group_id);
 			// Does the student have any substitutions for this requirement?
 			if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id))
 			{
-fpm($substitution);
+//fpm($substitution);
+//fpm($group_id);
 				// Since the substitution was made, I don't really care about
 				// min grades or the like.  Let's just put it in.
 
@@ -661,9 +662,9 @@ fpm($substitution);
 					// coureRequirement into 2 pieces, and add the second piece just
 					// after this one in the list.
 					$course_sub = $substitution->course_list_substitutions->get_first();
+          //fpm($course_sub);
 					if ($course_requirement->min_hours*1 > $course_sub->hours_awarded*1)
-					{
-					  
+					{					  
 					  // Because float math can create some very strange results, we must
 					  // perform some rounding.  We will round to 6 decimal places, which should
 					  // provide us the accuracy w/o losing precision (since we can only represent a max
@@ -692,21 +693,21 @@ fpm($substitution);
 						$list_requirements->insert_after_index($current_i, $new_course);
 
 					}
-
+//fpm($substitution->course_list_substitutions);
 					$course_requirement->course_list_fulfilled_by = $substitution->course_list_substitutions;
 
 					$substitution->course_list_substitutions->assign_group_id($group_id);
 					$substitution->course_list_substitutions->set_has_been_assigned(true);
 					$substitution->course_list_substitutions->set_bool_substitution($req_by_degree_id, TRUE);
           //fpm($course_requirement->req_by_degree_id);
-          
+          //fpm($req_by_degree_id);
 					$substitution->course_list_substitutions->set_course_substitution($course_requirement, $substitution->remarks, $req_by_degree_id);
 					
 					$substitution->bool_has_been_applied = true;
           
 
 				}
-				$count++;
+				$count++;        
 				continue;
 			}
 

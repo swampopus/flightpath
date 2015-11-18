@@ -389,9 +389,12 @@ class _Student
 					$new_course = new Course();
 					$new_course->load_course_from_data_string($new_course_string);
 
-					$new_course->bool_substitution_split = true;
-					$new_course->bool_substitution_new_from_split = true;
-
+					//$new_course->bool_substitution_split = true;
+					//$new_course->bool_substitution_new_from_split = true;
+          $new_course->set_details_by_degree($req_by_degree_id, "bool_substitution_split", TRUE);
+          $new_course->set_details_by_degree($req_by_degree_id, "bool_substitution_new_from_split", TRUE);
+					
+					
           $new_course->subject_id = $taken_course->subject_id;
           $new_course->course_num = $taken_course->course_num;
 					
@@ -401,7 +404,9 @@ class _Student
 						$new_course->course_transfer->hours_awarded = $remaining_hours;
 					}
 
-					$taken_course->bool_substitution_split = true;
+					//$taken_course->bool_substitution_split = true;
+					$taken_course->set_details_by_degree($req_by_degree_id, "bool_substitution_split", TRUE);
+          
 					$taken_course->hours_awarded = $sub_hours;
 					if (is_object($taken_course->course_transfer))
 					{
@@ -414,13 +419,13 @@ class _Student
 
 				}
 
-
-				$taken_course->substitution_hours = $sub_hours;
-				//$taken_course->bool_substitution = true;  // using array of degrees now, based on requirement...
+        // Place in details_by_degree_array...        
+				//$taken_course->substitution_hours = $sub_hours;
+        $taken_course->set_details_by_degree($req_by_degree_id, "substitution_hours", TRUE);
+				        
 				$taken_course->set_bool_substitution($req_by_degree_id, TRUE);
 				$taken_course->display_status = "completed";
 				$taken_course->db_substitution_id_array[$req_by_degree_id] = $sub_id;
-
 
 				$substitution = new Substitution();
  
@@ -457,7 +462,6 @@ class _Student
         $substitution->db_substitution_id = $sub_id;
         $substitution->assigned_to_degree_id = $req_by_degree_id;
 				$this->list_substitutions->add($substitution);
-
 
 
 			}

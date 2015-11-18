@@ -59,7 +59,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
             (user_id, user_name, cwid, type, message, variables, severity, extra_data, location, referer, ip, is_mobile, is_student, is_faculty, timestamp)
             VALUES
             ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
-            ", $user_id, $user_name, $cwid, $type, $message, $ser_variables, $severity, $extra_data, $location, $referer, $ip, $is_mobule, $is_student, $is_faculty, time());
+            ", $user_id, $user_name, $cwid, $type, $message, $ser_variables, $severity, $extra_data, $location, $referer, $ip, $is_mobile, $is_student, $is_faculty, time());
   
   
 }

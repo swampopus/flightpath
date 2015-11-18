@@ -978,24 +978,26 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
 
   // Get the track_code.
-  $vars["advising_track_code"] = $_REQUEST["advising_track_code"];
+  
+  @$vars["advising_track_code"] = $_REQUEST["advising_track_code"];
   if ($vars["advising_track_code"] == "")
   {
-    $vars["advising_track_code"] = $_SESSION["advising_track_code$csid"];
+    @$vars["advising_track_code"] = $_SESSION["advising_track_code$csid"];
     if ($vars["advising_track_code"] == "")
     { // Default value...
       if (!$student) $student = new Student($csid);
-      $vars["advising_track_code"] = $student->track_code;
-
+      //$vars["advising_track_code"] = $student->track_code;
+      // NOTE:  Student doesn't have a track_code property...  This code would have never worked.
     }
   }
+  
 
   // Update the student's settings?
-  $vars["advising_update_student_settings_flag"] = $_REQUEST["advising_update_student_settings_flag"];
+  @$vars["advising_update_student_settings_flag"] = $_REQUEST["advising_update_student_settings_flag"];
   // Make it only come from the POST, for safety.
   if ($vars["advising_update_student_settings_flag"] == "")
   {
-    $vars["advising_update_student_settings_flag"] = $_SESSION["advising_update_student_settings_flag$csid"];
+    @$vars["advising_update_student_settings_flag"] = $_SESSION["advising_update_student_settings_flag$csid"];
     if ($vars["advising_update_student_settings_flag"] == "")
     { // Default value...
 
@@ -1004,11 +1006,11 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
 
   // Update the logged-in user's settings?
-  $vars["fp_update_user_settings_flag"] = $_REQUEST["fp_update_user_settings_flag"];
+  @$vars["fp_update_user_settings_flag"] = $_REQUEST["fp_update_user_settings_flag"];
   // Make it only come from the POST, for safety.
   if ($vars["fp_update_user_settings_flag"] == "")
   {
-    $vars["fp_update_user_settings_flag"] = $_SESSION["fp_update_user_settings_flag$csid"];
+    @$vars["fp_update_user_settings_flag"] = $_SESSION["fp_update_user_settings_flag$csid"];
     if ($vars["fp_update_user_settings_flag"] == "")
     { // Default value...
 
@@ -1020,11 +1022,11 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   $settings = fp_get_system_settings();
 
 
-  $vars["advising_term_id"] = $_REQUEST["advising_term_id"];  // Get it from the GET or POST.
+  @$vars["advising_term_id"] = $_REQUEST["advising_term_id"];  // Get it from the GET or POST.
   if ($vars["advising_term_id"] == "")
   {
     // Set to the default advising term.
-    $vars["advising_term_id"] = $_SESSION["advising_term_id$csid"];
+    @$vars["advising_term_id"] = $_SESSION["advising_term_id$csid"];
     if ($vars["advising_term_id"] == "")
     {
       // default value:
@@ -1037,11 +1039,11 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   }
 
   // Are we currently in WhatIf mode?
-  $vars["advising_what_if"] = $_REQUEST["advising_what_if"];  // Get it from the GET or POST.
+  @$vars["advising_what_if"] = $_REQUEST["advising_what_if"];  // Get it from the GET or POST.
   if ($vars["advising_what_if"] == "")
   {
     // Will equal "yes" if we ARE in whatIf mode.
-    $vars["advising_what_if"] = $_SESSION["advising_what_if$csid"];
+    @$vars["advising_what_if"] = $_SESSION["advising_what_if$csid"];
     if ($vars["advising_what_if"] == "")
     {
       // Default value:
@@ -1049,11 +1051,11 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
     }
   }
 
-  $vars["what_if_major_code"] = $_REQUEST["what_if_major_code"];  // Get it from the GET or POST.
+  @$vars["what_if_major_code"] = $_REQUEST["what_if_major_code"];  // Get it from the GET or POST.
   if ($vars["what_if_major_code"] == "")
   {
     // Will equal "yes" if we ARE in whatIf mode.
-    $vars["what_if_major_code"] = $_SESSION["what_if_major_code$csid"];
+    @$vars["what_if_major_code"] = $_SESSION["what_if_major_code$csid"];
     if ($vars["what_if_major_code"] == "")
     {
       // Default value:
@@ -1061,11 +1063,11 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
     }
   }
 
-  $vars["what_if_track_code"] = $_REQUEST["what_if_track_code"];  // Get it from the GET or POST.
+  @$vars["what_if_track_code"] = $_REQUEST["what_if_track_code"];  // Get it from the GET or POST.
   if ($vars["what_if_track_code"] == "")
   {
     // Will equal "yes" if we ARE in whatIf mode.
-    $vars["what_if_track_code"] = $_SESSION["what_if_track_code$csid"];
+    @$vars["what_if_track_code"] = $_SESSION["what_if_track_code$csid"];
     if ($vars["what_if_track_code"] == "")
     {
       // Default value:
@@ -1095,10 +1097,10 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   $vars["setting_current_draft_catalog_year"] = $settings["current_draft_catalog_year"];
 
   // Are we in Print View?
-  $vars["print_view"] = $_REQUEST["print_view"];
+  @$vars["print_view"] = $_REQUEST["print_view"];
 
   // Should we try to load from the cache?
-  $vars["load_from_cache"] = $_REQUEST["load_from_cache"];
+  @$vars["load_from_cache"] = $_REQUEST["load_from_cache"];
   if ($vars["load_from_cache"] == "")
   {
     // By default, attempt to load from cache.
@@ -1108,10 +1110,10 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   // What "view" are we in?  View by Year or by Type?
   // Not the same as printView.  printView should work regardless
   // of our advising_view.
-  $vars["advising_view"] = $_REQUEST["advising_view"];
+  @$vars["advising_view"] = $_REQUEST["advising_view"];
   if ($vars["advising_view"] == "")
   {
-    $vars["advising_view"] = $_SESSION["advising_view$csid"];
+    @$vars["advising_view"] = $_SESSION["advising_view$csid"];
   }
 
 
@@ -1165,6 +1167,7 @@ function advise_init() {
     $_REQUEST["advising_load_active"] = "yes";        
   }
     
+  if (!isset($_SESSION["fp_draft_mode"])) $_SESSION["fp_draft_mode"] = "";  
     
   // Is draft mode enabled?
   if ($_SESSION["fp_draft_mode"] == "yes") {
@@ -1214,7 +1217,7 @@ function advise_init_screen() {
   advise_init_advising_variables();    
     
     
-  $perform_action = trim(addslashes($_REQUEST["perform_action"]));
+  @$perform_action = trim(addslashes($_REQUEST["perform_action"]));
 
   if ($_REQUEST["clear_session"] == "yes") {
     //advise_save_advising_variables_to_db();
@@ -1344,12 +1347,12 @@ function advise_init_screen() {
   }
 
 
-  if ($_REQUEST["bool_blank"] == "true" || $_REQUEST["blank_degree_id"] != "") {
+  if (@$_REQUEST["bool_blank"] == "true" || @$_REQUEST["blank_degree_id"] != "") {
     $screen->bool_blank = TRUE;
   }
 
   
-  if ($bool_what_if == true && $GLOBALS["fp_advising"]["what_if_major_code"] == "")  {
+  if ($bool_what_if == true && @$GLOBALS["fp_advising"]["what_if_major_code"] == "")  {
     // In other words, we are on the WhatIf tab, but we have not
     // selected a major.  So, just exit out.  We will give the user
     // a display_screen later.
@@ -1357,7 +1360,7 @@ function advise_init_screen() {
   }
 
 
-  if ($GLOBALS["fp_advising"]["load_from_cache"] != "yes") { 
+  if (@$GLOBALS["fp_advising"]["load_from_cache"] != "yes") { 
     // do not load from cache....
     $student->load_student();
     $student->load_student_substitutions();
@@ -1408,7 +1411,7 @@ function advise_init_screen() {
     
   }
 
-  if ($GLOBALS["fp_advising"]["save_to_cache"] != "no" && $window_mode != "popup") {
+  if (@$GLOBALS["fp_advising"]["save_to_cache"] != "no" && $window_mode != "popup") {
     if ($bool_what_if == false) { 
       // NOT in whatIf mode.  Normal.
 

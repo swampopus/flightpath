@@ -108,7 +108,7 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
 function fp_display_page($page) {
   global $current_student_id, $screen;
   $page_title = $page["title"];
-  if ($GLOBALS["fp_set_title"] != "") {
+  if (@$GLOBALS["fp_set_title"] != "") {
     $page_title = $GLOBALS["fp_set_title"];
   }
 
@@ -128,9 +128,9 @@ function fp_display_page($page) {
     $screen->page_has_search = FALSE;
   }
   
-  $screen->page_banner_is_link = $page["router_item"]["page_settings"]["page_banner_is_link"];
-  $screen->page_hide_report_error = $page["router_item"]["page_settings"]["page_hide_report_error"];
-  $screen->page_is_popup = $page["router_item"]["page_settings"]["page_is_popup"];
+  $screen->page_banner_is_link = @$page["router_item"]["page_settings"]["page_banner_is_link"];
+  $screen->page_hide_report_error = @$page["router_item"]["page_settings"]["page_hide_report_error"];
+  $screen->page_is_popup = @$page["router_item"]["page_settings"]["page_is_popup"];
   if (isset($page["router_item"]["page_settings"]["screen_mode"])) {    
     $screen->screen_mode = $page["router_item"]["page_settings"]["screen_mode"];
   }
@@ -138,7 +138,7 @@ function fp_display_page($page) {
     $screen->bool_print = $page["router_item"]["page_settings"]["bool_print"];
   }
 
-  if ($_REQUEST["scroll_top"] != "") {
+  if (@$_REQUEST["scroll_top"] != "") {
     $screen->page_scroll_top = $_REQUEST["scroll_top"];    
   }
   
@@ -150,7 +150,7 @@ function fp_display_page($page) {
   }
   
   // Should we override the page_tabs with what is in "fp_set_page_tabs" ?
-  if (is_array($GLOBALS["fp_set_page_tabs"])) {
+  if (isset($GLOBALS["fp_set_page_tabs"]) && is_array($GLOBALS["fp_set_page_tabs"])) {
     //fpm($GLOBALS["fp_set_page_tabs"]);
     $screen->page_tabs = fp_render_tab_array($GLOBALS["fp_set_page_tabs"]);    
   }
@@ -159,7 +159,7 @@ function fp_display_page($page) {
   // Build up the content //
   
   $content_top = "";  
-  $page_show_title = $page["router_item"]["page_settings"]["page_show_title"];
+  $page_show_title = @$page["router_item"]["page_settings"]["page_show_title"];
   if (isset($GLOBALS["fp_set_show_title"])) {
     $page_show_title = $GLOBALS["fp_set_show_title"];
   }
@@ -174,7 +174,7 @@ function fp_display_page($page) {
   
   // Are there any "menu_link"s for this?  In order words, little links at the top of the page,
   // where breadcrumbs might appear.
-  if (!$screen->bool_print && is_array($page["router_item"]["page_settings"]["menu_links"])) {
+  if (!$screen->bool_print && @is_array($page["router_item"]["page_settings"]["menu_links"])) {
     $content_top .= "<ul class='top-menu-links'>";
     foreach ($page["router_item"]["page_settings"]["menu_links"] as $item) {
       $lclass = "";
@@ -218,7 +218,7 @@ function fp_display_page($page) {
   
   
   // If there are "messages" waiting, then let's add them to the top of content.
-  if (count($_SESSION["fp_messages"]) > 0) {
+  if (@count($_SESSION["fp_messages"]) > 0) {
     $content_top .= "<div class='fp-messages'>";
     foreach ($_SESSION["fp_messages"] as $key => $tmsg) {
       $type = $tmsg["type"];
@@ -239,7 +239,7 @@ function fp_display_page($page) {
     
   
   // Add in the body classes
-  $screen->page_body_classes .= " " . $GLOBALS["fp_add_body_classes"];  
+  $screen->page_body_classes .= " " . @$GLOBALS["fp_add_body_classes"];  
   
   // Add in our URL
   $screen->page_body_classes .= " page-" . str_replace("/", "-", $_REQUEST["q"]);
@@ -431,7 +431,7 @@ function fp_build_tab_array($page) {
       $title = $item["title"];
       $path = $item["path"];
       $active = FALSE;
-      $on_click = $page["page_settings"]["tab_on_click"];
+      $on_click = @$page["page_settings"]["tab_on_click"];
       if ($on_click == "") {
         // Just a simple link to the path
         // Include the current_student_id!
@@ -477,6 +477,9 @@ function fp_build_tab_array($page) {
     global $current_student_id, $screen, $user, $student;
     
     $rtn  = "";
+        
+    $bool_catalog_warning = FALSE;
+    $bool_future_catalog_warning = FALSE;    
         
     $csid = $current_student_id;
     
@@ -686,9 +689,9 @@ function fp_build_tab_array($page) {
         $value1 = trim($temp[1]);
 
 
-        $temp = explode(" ~~ ",$display_array[$t+1]);
-        $name2 = trim($temp[0]);
-        $value2 = trim($temp[1]);
+        $temp = @explode(" ~~ ",$display_array[$t+1]);
+        $name2 = @trim($temp[0]);
+        $value2 = @trim($temp[1]);
 
 
         if (fp_screen_is_mobile()) {
@@ -835,10 +838,10 @@ function fp_render_sub_tab_array($tab_array) {
   $rtn .= "<div class='sub-tabs'>";
 
   foreach ($tab_array as $tab) {
-    $title = $tab["title"];
-    $on_click = $tab["on_click"];
-    $active = $tab["active"];
-    $type = $tab["type"];
+    $title = @$tab["title"];
+    $on_click = @$tab["on_click"];
+    $active = @$tab["active"];
+    $type = @$tab["type"];
     
     $extra_class = "";
     if ($active) $extra_class = "gradbutton-active";
@@ -1169,6 +1172,7 @@ function fp_render_curved_line($text) {
  * @return string
  */
 function fp_render_square_line($text) {
+  $rtn = "";
   
   $rtn .= "
         <table border='0' width='100%' cellpadding='0' cellspacing='0'>

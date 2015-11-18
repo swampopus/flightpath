@@ -1023,7 +1023,7 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
 function admin_get_de_catalog_year($bool_set_earliest_if_blank = TRUE) {
   
   $settings = fp_get_system_settings();
-  $de_catalog_year = $_REQUEST["de_catalog_year"];
+  $de_catalog_year = @$_REQUEST["de_catalog_year"];
   
   if ($bool_set_earliest_if_blank) {
     if (!$de_catalog_year || $de_catalog_year < $settings["earliest_catalog_year"]) {
@@ -1048,18 +1048,18 @@ function admin_menu_handle_replacement_pattern($str) {
   
   if (strpos($str, "%SEV_FILTER%") !== 0) {
     // It contains this replacement pattern!
-    $str = str_replace("%SEV_FILTER%", $_GET["sev_filter"], $str);
+    $str = str_replace("%SEV_FILTER%", @$_GET["sev_filter"], $str);
   }
 
   if (strpos($str, "%TYPE_FILTER%") !== 0) {
     // It contains this replacement pattern!
-    $str = str_replace("%TYPE_FILTER%", $_GET["type_filter"], $str);
+    $str = str_replace("%TYPE_FILTER%", @$_GET["type_filter"], $str);
   }
   
   
   if (strpos($str, "%PAGE%") !== 0) {
     // It contains this replacement pattern!
-    $str = str_replace("%PAGE%", $_GET["page"], $str);
+    $str = str_replace("%PAGE%", @$_GET["page"], $str);
   }
     
   

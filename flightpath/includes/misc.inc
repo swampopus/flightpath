@@ -837,7 +837,7 @@ function fp_add_js($js, $type = "file") {
   }
   
   if ($type == "setting") {
-    if (!is_array($GLOBALS["fp_extra_js_settings"])) $GLOBALS["fp_extra_js_settings"] = array();
+    if (!isset($GLOBALS["fp_extra_js_settings"])) $GLOBALS["fp_extra_js_settings"] = array();
     
     $GLOBALS["fp_extra_js_settings"] = array_merge($GLOBALS["fp_extra_js_settings"], $js);
   }
@@ -1047,7 +1047,7 @@ function get_term_description($term_id, $bool_abbreviate = false) {
     // [Y4]60, Spring, Spring of [Y4], Spr '[Y2]
     // [Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]
     
-    $temp = $GLOBALS["fp_system_settings"]["term_id_structure"];
+    $temp = @$GLOBALS["fp_system_settings"]["term_id_structure"];
     $structures = explode("\n", $temp);
     
     foreach ($structures as $structure) {      
@@ -1061,9 +1061,9 @@ function get_term_description($term_id, $bool_abbreviate = false) {
       
       // Now, break up the structure to make it easier to work with.
       $tokens = explode(",", $structure);
-      $term_def = trim($tokens[0]);
-      $full_description = trim($tokens[2]);
-      $abbr_description = trim($tokens[3]);
+      $term_def = @trim($tokens[0]);
+      $full_description = @trim($tokens[2]);
+      $abbr_description = @trim($tokens[3]);
       
       // Does our term_id match the termDef?
       if ($term_def == $term_id) {
@@ -1224,6 +1224,8 @@ function fp_screen_is_mobile(){
     "(iris|3g_t|windows ce|opera mobi|windows ce; smartphone;|windows ce; iemobile)",
     "(smartphone|iemobile)",
     );
+  
+  $is_mobile = FALSE;
   
   foreach ($look_for as $test_agent) {   
     if (preg_match('/' . $test_agent . '/i',$user_agent)) {

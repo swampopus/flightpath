@@ -2257,6 +2257,8 @@ function system_init() {
   // Let's see if the $user object (for the logged-in user) has been set up.
   global $user;
   $user = new stdClass();
+  
+  if (!isset($_SESSION["fp_user_object"]->roles[1])) $_SESSION["fp_user_object"]->roles[1] = ""; 
       
   if ($_SESSION["fp_logged_in"] == TRUE) {
     // Make sure it doesn't have the anonymous user role (rid == 1).
