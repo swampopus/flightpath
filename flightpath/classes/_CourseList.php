@@ -149,7 +149,7 @@ class _CourseList extends ObjList
 
 				if ($bool_exclude_substitutions == true)
 				{
-					if ($course->bool_substitution == true)
+					if ($course->get_bool_substitution() == TRUE)
 					{
 						continue;
 					}
@@ -1351,7 +1351,7 @@ class _CourseList extends ObjList
 				
 			}
 			
-			if ($course->bool_substitution_new_from_split == true)			
+			if ($course->get_bool_substitution_new_from_split() == TRUE)			
 			{
 				// Do not count the possible fragments that are created
 				// from a new substitution split.  This is causing problems
@@ -1359,7 +1359,7 @@ class _CourseList extends ObjList
 				
 				// BUT-- only skip if this new fragment isn't also being
 				// substituted somewhere else!
-				if ($course->bool_substitution == false)
+				if ($course->get_bool_substitution() == FALSE)
 				{ // not being used in another sub, so skip it.				  
 					continue;
 				}
@@ -1778,7 +1778,7 @@ class _CourseList extends ObjList
 					if ($course->course_list_fulfilled_by->is_empty == false)
 					{
 						$cc = $course->course_list_fulfilled_by->get_first();
-						if ($cc->bool_substitution)
+						if ($cc->get_bool_substitution())
 						{
 						  
       			  // If we require the grade to be a qpts_grade, then check that now.
@@ -1795,7 +1795,7 @@ class _CourseList extends ObjList
       			  }							  
       			  
       			  
-							$h = $cc->substitution_hours;
+							$h = $cc->get_substitution_hours();
 														
 							
 							if ($cc->bool_ghost_hour) {
@@ -1916,7 +1916,7 @@ class _CourseList extends ObjList
 					if ($course->course_list_fulfilled_by->is_empty == false)
 					{
 						$cc = $course->course_list_fulfilled_by->get_first();
-						if ($cc->bool_substitution)
+						if ($cc->get_bool_substitution())
 						{
 						  
 						  

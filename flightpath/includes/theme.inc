@@ -116,7 +116,7 @@ function fp_display_page($page) {
     $screen = new AdvisingScreen("",null,"not_advising");
   }
   $screen->page_title = $page_title;
-  $screen->page_has_search = $page["router_item"]["page_settings"]["page_has_search"];
+  $screen->page_has_search = @$page["router_item"]["page_settings"]["page_has_search"];
   
   // If we don't have permission to search, then hide the little search.
   if (!user_has_permission("view_any_advising_session")) {
@@ -168,7 +168,7 @@ function fp_display_page($page) {
     $content_top .= "<h2 class='title'>" . $page_title . "</h2>";
   } 
   
-  if ($page["router_item"]["page_settings"]["display_greeting"] == TRUE) {  
+  if (@$page["router_item"]["page_settings"]["display_greeting"] == TRUE) {  
     $content_top .= fp_render_greeting();
   }
   
@@ -209,7 +209,7 @@ function fp_display_page($page) {
     }
     
     // Should we override the page sub-tabs with what is in "fp_set_page_sub_tabs" ?
-    if (is_array($GLOBALS["fp_set_page_sub_tabs"])) {
+    if (isset($GLOBALS["fp_set_page_sub_tabs"]) && is_array($GLOBALS["fp_set_page_sub_tabs"])) {
       $content_top .= fp_render_sub_tab_array($GLOBALS["fp_set_page_sub_tabs"]);    
     }
   }
@@ -230,7 +230,7 @@ function fp_display_page($page) {
   }
 
   // content_top gets the Currently Advising box.
-  if ($page["router_item"]["page_settings"]["display_currently_advising"] == TRUE) {
+  if (@$page["router_item"]["page_settings"]["display_currently_advising"] == TRUE) {
     $content_top .= fp_render_currently_advising_box(false, $screen->bool_blank, $screen->bool_print, NULL, $screen->screen_mode);
   }    
   
@@ -242,7 +242,7 @@ function fp_display_page($page) {
   $screen->page_body_classes .= " " . @$GLOBALS["fp_add_body_classes"];  
   
   // Add in our URL
-  $screen->page_body_classes .= " page-" . str_replace("/", "-", $_REQUEST["q"]);
+  $screen->page_body_classes .= " page-" . str_replace("/", "-", @$_REQUEST["q"]);
   
   
   $screen->output_to_browser();  
@@ -366,7 +366,7 @@ function fp_build_sub_tab_array($page) {
     $title = $item["title"];
     $path = $item["path"];
     $active = FALSE;
-    $on_click = $page["page_settings"]["tab_on_click"];
+    $on_click = @$page["page_settings"]["tab_on_click"];
     if ($on_click == "") {
       // Just a simple link to the path
       // Add the current_student_id to the query!
@@ -498,7 +498,7 @@ function fp_build_tab_array($page) {
     
     $for_term = $whatif = $what_if_select = $hypoclass = "";
     
-    if ($GLOBALS["fp_advising"]["advising_term_id"] != "" && ($screen_mode != "not_advising" && $screen_mode != "detailed")
+    if (@$GLOBALS["fp_advising"]["advising_term_id"] != "" && ($screen_mode != "not_advising" && $screen_mode != "detailed")
     && user_has_permission("can_advise_students"))
     {
       $t_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
@@ -514,7 +514,7 @@ function fp_build_tab_array($page) {
     }
 
     // TODO:  bool_blank? bool_print?
-    if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes" && !$bool_blank)
+    if (@$GLOBALS["fp_advising"]["advising_what_if"] == "yes" && !$bool_blank)
     {
       $whatif = " (" . t("in \"What If\" mode") . ") ";
       $hypoclass = "hypo";
@@ -583,7 +583,8 @@ function fp_build_tab_array($page) {
 
 
     ///////////////////////////
-
+    $degree_title = "";
+    
     // We are trying to figure out what to display for the Major.  If there is only one degree plan
     // to worry about, then we will display it.
     if ($degree_plan == null || !$degree_plan->is_combined_dynamic_degree_plan) {
@@ -994,9 +995,9 @@ function fp_render_tab_array($tab_array)
 
   for ($t = 0; $t < count($tab_array); $t++)
   {
-    $title = $tab_array[$t]["title"];
-    $active = $tab_array[$t]["active"];
-    $on_click = $tab_array[$t]["on_click"];
+    $title = @$tab_array[$t]["title"];
+    $active = @$tab_array[$t]["active"];
+    $on_click = @$tab_array[$t]["on_click"];
 
     if ($title == "")
     {
@@ -1209,8 +1210,9 @@ function fp_render_menu_item($item, $bool_check_user_access = TRUE) {
   $title = $item["title"];
   //$url = $GLOBALS["fp_system_settings"]["base_path"] . "/" . $item["path"];
   $url = fp_url($item["path"], "", TRUE);
-  $target = $item["page_settings"]["target"];
-  $menu_icon = $item["page_settings"]["menu_icon"];
+  $target = @$item["page_settings"]["target"];
+  $menu_icon = @$item["page_settings"]["menu_icon"];
+  $extra_class = "";
   if ($menu_icon != "") {
     $icon_img = "<img src='$menu_icon' border='0'>";    
   } 
@@ -1219,7 +1221,7 @@ function fp_render_menu_item($item, $bool_check_user_access = TRUE) {
   } 
   
   if (!$description) $extra_class = "fp-menu-item-tight";
-  
+   
   $rtn .= "<div class='fp-menu-item $extra_class'>
             <div class='fp-menu-item-link-line'>
               <a href='$url' target='$target'>$icon_img $title</a>

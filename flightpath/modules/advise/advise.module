@@ -619,13 +619,13 @@ function advise_display_popup_substitute_selected() {
   fp_add_js(array("subDecimalsAllowed" => $sub_decimals_allowed), "setting");
   
   
-  $course_id = trim($_GET["course_id"]);
-  $group_id = trim(addslashes($_GET["group_id"]));
-  $semester_num = trim(addslashes($_GET["semester_num"]));
-  $req_by_degree_id = trim(addslashes($_GET["req_by_degree_id"]));
-  $hours_avail = trim(addslashes($_GET["group_hours_remaining"]));
+  $course_id = trim(@$_GET["course_id"]);
+  $group_id = trim(addslashes(@$_GET["group_id"]));
+  $semester_num = trim(addslashes(@$_GET["semester_num"]));
+  $req_by_degree_id = trim(addslashes(@$_GET["req_by_degree_id"]));
+  $hours_avail = trim(addslashes(@$_GET["group_hours_remaining"]));
   
-  if ($_GET["hours_avail"] * 1 > 0) {
+  if (@$_GET["hours_avail"] * 1 > 0) {
     $hours_avail = $_GET["hours_avail"] * 1;
   }
   
@@ -666,7 +666,7 @@ function advise_display_popup_course_description() {
   $tab_array[0]["active"] = true;
 
   if (user_has_permission("can_substitute") && !$screen->bool_blank) {
-    if ($course->bool_substitution != true && $course->grade == "") { 
+    if ($course->get_bool_substitution() != TRUE && $course->grade == "") { 
       // By checking grade, we are making sure this course has NOT already
       // been taken by the student.  In other words, verify that this course
       // is an unfulfilled requirement on the degree plan ONLY.      
@@ -940,10 +940,10 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   $csid = $vars["current_student_id"];
 
   // Get the student ID.
-  $vars["advising_student_id"] = $_REQUEST["advising_student_id"];
+  $vars["advising_student_id"] = @$_REQUEST["advising_student_id"];
   if ($vars["advising_student_id"] == "")
   {
-    $vars["advising_student_id"] = $_SESSION["advising_student_id$csid"];
+    $vars["advising_student_id"] = @$_SESSION["advising_student_id$csid"];
     if ($vars["advising_student_id"] == "")
     { // Default value...      
       $vars["advising_student_id"] = $csid;
@@ -952,7 +952,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
 
   // Should we load from the Draft advising session?  or the active?
-  $vars["advising_load_active"] = $_REQUEST["advising_load_active"];
+  $vars["advising_load_active"] = @$_REQUEST["advising_load_active"];
   if ($vars["advising_load_active"] == "")
   { // values will either be "yes" or "" (any other value than "yes" is
     // considered to be negative.
@@ -963,10 +963,10 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
 
   // Get the major_code(s).
-  $vars["advising_major_code"] = $_REQUEST["advising_major_code"];
+  $vars["advising_major_code"] = @$_REQUEST["advising_major_code"];
   if ($vars["advising_major_code"] == "")
   {    
-    $vars["advising_major_code"] = $_SESSION["advising_major_code$csid"];
+    $vars["advising_major_code"] = @$_SESSION["advising_major_code$csid"];
     if ($vars["advising_major_code"] == "")
     { // Default value...
       if (!$student) $student = new Student($csid);
@@ -979,10 +979,10 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
   // Get the track_code.
   
-  @$vars["advising_track_code"] = $_REQUEST["advising_track_code"];
+  $vars["advising_track_code"] = @$_REQUEST["advising_track_code"];
   if ($vars["advising_track_code"] == "")
   {
-    @$vars["advising_track_code"] = $_SESSION["advising_track_code$csid"];
+    $vars["advising_track_code"] = @$_SESSION["advising_track_code$csid"];
     if ($vars["advising_track_code"] == "")
     { // Default value...
       if (!$student) $student = new Student($csid);
@@ -993,11 +993,11 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   
 
   // Update the student's settings?
-  @$vars["advising_update_student_settings_flag"] = $_REQUEST["advising_update_student_settings_flag"];
+  $vars["advising_update_student_settings_flag"] = @$_REQUEST["advising_update_student_settings_flag"];
   // Make it only come from the POST, for safety.
   if ($vars["advising_update_student_settings_flag"] == "")
   {
-    @$vars["advising_update_student_settings_flag"] = $_SESSION["advising_update_student_settings_flag$csid"];
+    $vars["advising_update_student_settings_flag"] = @$_SESSION["advising_update_student_settings_flag$csid"];
     if ($vars["advising_update_student_settings_flag"] == "")
     { // Default value...
 
@@ -1006,11 +1006,11 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
 
   // Update the logged-in user's settings?
-  @$vars["fp_update_user_settings_flag"] = $_REQUEST["fp_update_user_settings_flag"];
+  $vars["fp_update_user_settings_flag"] = @$_REQUEST["fp_update_user_settings_flag"];
   // Make it only come from the POST, for safety.
   if ($vars["fp_update_user_settings_flag"] == "")
   {
-    @$vars["fp_update_user_settings_flag"] = $_SESSION["fp_update_user_settings_flag$csid"];
+    $vars["fp_update_user_settings_flag"] = @$_SESSION["fp_update_user_settings_flag$csid"];
     if ($vars["fp_update_user_settings_flag"] == "")
     { // Default value...
 
@@ -1157,7 +1157,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
  */
 function advise_init() {
   global $current_student_id, $user, $screen;
-  $current_student_id = $_REQUEST["current_student_id"];
+  $current_student_id = @$_REQUEST["current_student_id"];
 
   // Since this user doesn't have permission to view any sessions,
   // he can only view his own.
@@ -1217,9 +1217,9 @@ function advise_init_screen() {
   advise_init_advising_variables();    
     
     
-  @$perform_action = trim(addslashes($_REQUEST["perform_action"]));
+  $perform_action = trim(addslashes(@$_REQUEST["perform_action"]));
 
-  if ($_REQUEST["clear_session"] == "yes") {
+  if (@$_REQUEST["clear_session"] == "yes") {
     //advise_save_advising_variables_to_db();
     // reload our advising vars into the GLOBALS array for easy use later.
     //$GLOBALS["fp_advising"] = advise_load_advising_variables_from_db($current_student_id, $user->id);
@@ -1233,7 +1233,7 @@ function advise_init_screen() {
   
   $csid = $current_student_id;
 
-  $cache = $_SESSION["cache_fp$csid"];
+  $cache = @$_SESSION["cache_fp$csid"];
 
   if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
     $major_code = $GLOBALS["fp_advising"]["what_if_major_code"];

@@ -1,6 +1,12 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-11-18
+  Worked more on splitting subs across degrees; still not finished.  Implemented new system for keeping all attributes associated with a specific degree
+  together under one array (for course).  Continued making changes so as not to trigger notice messages.  Caught several potential problems before they started
+  that way.
+  
+
 2015-11-17
   Still working on subs (split subs now).  Changed FP error_reporting to allow notices to appear, for the sake of catching typos and missed variabls
   as I develop.  As a result, numerous changes were made in numerous files.

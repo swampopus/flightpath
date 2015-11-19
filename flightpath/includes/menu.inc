@@ -111,7 +111,7 @@ function menu_check_user_access($router_item) {
 
 
 function menu_execute_page_request() {
-  $path = $_GET["q"];
+  $path = @$_GET["q"];
 
   //If the path is blank, figure out what the "font page" is, and use that path.
   if ($path == "") {

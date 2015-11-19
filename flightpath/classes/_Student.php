@@ -388,7 +388,7 @@ class _Student
 					$new_course_string = $taken_course->to_data_string();
 					$new_course = new Course();
 					$new_course->load_course_from_data_string($new_course_string);
-
+          
 					//$new_course->bool_substitution_split = true;
 					//$new_course->bool_substitution_new_from_split = true;
           $new_course->set_details_by_degree($req_by_degree_id, "bool_substitution_split", TRUE);
@@ -412,8 +412,7 @@ class _Student
 					{
 						$taken_course->course_transfer->hours_awarded = $sub_hours;
 					}
-
-										
+          										
 					// Add the newCourse back into the student's list_courses_taken.
 					$this->list_courses_taken->add($new_course);
 
@@ -421,7 +420,7 @@ class _Student
 
         // Place in details_by_degree_array...        
 				//$taken_course->substitution_hours = $sub_hours;
-        $taken_course->set_details_by_degree($req_by_degree_id, "substitution_hours", TRUE);
+        $taken_course->set_details_by_degree($req_by_degree_id, "substitution_hours", $sub_hours);
 				        
 				$taken_course->set_bool_substitution($req_by_degree_id, TRUE);
 				$taken_course->display_status = "completed";

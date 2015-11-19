@@ -2295,7 +2295,7 @@ function system_init() {
   
    
   // Add in our custom JS settings.
-  fp_add_js(array("themeLocation" => fp_theme_location(), "currentStudentId" => $_REQUEST["current_student_id"], "basePath" => base_path()), "setting");
+  fp_add_js(array("themeLocation" => fp_theme_location(), "currentStudentId" => @$_REQUEST["current_student_id"], "basePath" => base_path()), "setting");
   fp_add_js(fp_get_module_path("system") . "/js/system.js");
      
 }

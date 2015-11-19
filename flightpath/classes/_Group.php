@@ -405,7 +405,7 @@ class _Group
 				{ // The course does not have to have been displayed on the page yet.					
 					$count = $count + $c->course_list_fulfilled_by->count_credit_hours($requirement_type, false, false, $bool_qpts_grades_only, $bool_exclude_all_transfer_credits);
 				} else {
-					if ($c->course_list_fulfilled_by->get_first()->bool_has_been_displayed == true)
+					if ($c->course_list_fulfilled_by->get_first()->get_has_been_displayed() == true)
 					{
 						
 						$h = $c->course_list_fulfilled_by->count_credit_hours($requirement_type, false, false, $bool_qpts_grades_only, $bool_exclude_all_transfer_credits);
@@ -483,7 +483,7 @@ class _Group
 				$p = 0;
 				
 				// Are we requiring that the course has been displayed?
-        if (!$bool_require_has_been_displayed || ($bool_require_has_been_displayed && $c->course_list_fulfilled_by->get_first()->bool_has_been_displayed == TRUE))
+        if (!$bool_require_has_been_displayed || ($bool_require_has_been_displayed && $c->course_list_fulfilled_by->get_first()->get_has_been_displayed() == TRUE))
 				{
 					$p = $c->course_list_fulfilled_by->count_credit_quality_points($requirement_type, TRUE, TRUE, $bool_exclude_all_transfer_credits);
 				}				

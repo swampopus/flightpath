@@ -46,9 +46,12 @@ class _AdvisingScreen
 		$this->page_extra_css_files = array();
 
 		$this->flightpath = $flightpath;
-		$this->degree_plan = $flightpath->degree_plan;
-		$this->student = $flightpath->student;
-
+    if ($flightpath != null) {
+		  $this->degree_plan = $flightpath->degree_plan;
+		  $this->student = $flightpath->student;
+    }
+    
+    
 		$this->db = get_global_database_handler();
 
 		if ($screen_mode == "popup")
@@ -283,6 +286,7 @@ function draw_menu_items($menu_array) {
 		
     $page_extra_js_files = "";
     $page_extra_js_settings = "";
+    $page_extra_css_files = "";
     
   	if ($page_title == "") { 
   	  // By default, page title is this...
@@ -635,7 +639,7 @@ function draw_menu_items($menu_array) {
 
 			// Skip substitutions
 			// TODO:  Only skip if we have substituted for every degree the student is enrolled in.
-			if ($course->bool_substitution == true)
+			if ($course->get_bool_substitution(-1) == TRUE)
 			{
 				continue;
 			}
@@ -2141,10 +2145,10 @@ function draw_menu_items($menu_array) {
 
 		// Keep up with original max hours, in case this is from a substitution split.
 		$datastring_max_hours = $course->max_hours;
-		$datastring_bool_new_from_split = $course->bool_substitution_new_from_split;
+		$datastring_bool_new_from_split = $course->get_bool_substitution_new_from_split();
 		
 		
-		$db_group_requirement_id = $_REQUEST["db_group_requirement_id"];
+		$db_group_requirement_id = @$_REQUEST["db_group_requirement_id"];
 		
   //fpm($course);
 
@@ -2249,7 +2253,7 @@ function draw_menu_items($menu_array) {
 			$pC .= "
 					<b>$course->title ($use_hours " . t("hrs") . ")</b>";
 		}
-		if ($course->bool_substitution_new_from_split || $course->bool_substitution_split)
+		if ($course->get_bool_substitution_new_from_split() || $course->get_bool_substitution_split())
 		{
 			$pC .= "<div class='tenpt' style='margin-bottom:5px;'>
 						<i>" . t("This course's hours were split in a substitution.");
@@ -2464,7 +2468,7 @@ function draw_menu_items($menu_array) {
 			// Find out who did it and if they left any remarks.
 			//fpm($course->course_substitution_by_degree_array);
 		  $db = $this->db;
-			//fpm($course->db_substitution_id_array);
+			
 			$sub_id = $course->db_substitution_id_array[$course->get_course_substitution()->req_by_degree_id];
 			
 		  $temp = $db->get_substitution_details($sub_id);
@@ -3431,6 +3435,7 @@ function draw_menu_items($menu_array) {
       
 			if ($bool_add_footnote == true)
 			{
+			  if (!isset($this->footnote_array["substitution"])) $this->footnote_array["substitution"] = array();
 				$footnote = "";
 				$footnote .= "<span class='superscript'>S";
 				$fcount = count($this->footnote_array["substitution"]) + 1;
@@ -3444,7 +3449,7 @@ function draw_menu_items($menu_array) {
 				$footnote .= "$fcount</span>";
         
         $sub_id = $course->db_substitution_id_array[$course->req_by_degree_id];
-				$this->footnote_array["substitution"][$fcount] = "$o_subject_id $o_course_num ~~ $subject_id $course_num ~~ $course->substitution_hours ~~ " . $course->get_first_assigned_to_group_id() . " ~~ $sub_id";
+				$this->footnote_array["substitution"][$fcount] = "$o_subject_id $o_course_num ~~ $subject_id $course_num ~~ " . $course->get_substitution_hours() . " ~~ " . $course->get_first_assigned_to_group_id() . " ~~ $sub_id";
 				
 			}
 		}
@@ -3634,7 +3639,7 @@ function draw_menu_items($menu_array) {
 		$pC .= "<tr><td colspan='8'>";
 
 
-		if ($course->bool_substitution_new_from_split != true || ($course->bool_substitution_new_from_split == true && $course->display_status != "eligible")){
+		if ($course->get_bool_substitution_new_from_split() != TRUE || ($course->get_bool_substitution_new_from_split() == TRUE && $course->display_status != "eligible")){
 
 			if ($course_num == ""){
 				$course_num = "&nbsp;";
@@ -4066,7 +4071,7 @@ function draw_menu_items($menu_array) {
 					$m_hours = $c->hours_awarded;
 				}
 
-				if ($c->get_bool_substitution($req_by_degree_id) != TRUE && $c->bool_outdated_sub != true)
+				if ($c->get_bool_substitution($req_by_degree_id) != TRUE && $c->get_bool_outdated_sub($req_by_degree_id) != TRUE)
 				{
 				  $h = $c->hours_awarded;
 				  if ($c->bool_ghost_hour == TRUE) {
@@ -4128,7 +4133,7 @@ function draw_menu_items($menu_array) {
 						$new_group = new Group($c->get_first_assigned_to_group_id());
 						$extra = " in $new_group->title";
 					}
-					if ($c->bool_outdated_sub == true)
+					if ($c->get_bool_outdated_sub())
 					{
 						$help_link = fp_get_js_alert_link(t("This substitution is outdated. It was made for a course or group which does not currently appear on the student's degree plan.  You may remove this sub using the Administrator's Toolbox, at the bottom of the View tab."), "?");
 						$extra .= " <span style='color:red;'>[" . t("Outdated") . "$help_link]</span>";
@@ -4142,7 +4147,7 @@ function draw_menu_items($menu_array) {
 						<td valign='top' class='tenpt' colspan='5'>
 							$subject_id 
 						
-							$course_num ($c->substitution_hours)
+							$course_num (" . $c->get_substitution_hours() . ")
 							 -> " . $c->get_course_substitution()->subject_id . "
 							 " . $c->get_course_substitution()->course_num . "$extra
 						</td>

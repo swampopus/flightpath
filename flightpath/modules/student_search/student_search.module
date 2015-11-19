@@ -457,9 +457,9 @@ function student_search_display_search() {
 
   // Get search results from POST -or- past search attempts
   // from the session.
-  $search_for = trim($_REQUEST["search_for"]);
+  $search_for = trim(@$_REQUEST["search_for"]);
   if ($search_for == "") {
-    $search_for = trim($_SESSION["student_search_for"]);
+    $search_for = trim(@$_SESSION["student_search_for"]);
   }
   
   $o_search_for = $search_for;
@@ -480,7 +480,8 @@ function student_search_display_search() {
   $search_for = mysql_real_escape_string($search_for);
 
   $isize = "25";
-  if ($screen->page_is_mobile) $isize = "10";
+  // $screen variable is never initialized.  Old code?
+  //if ($screen->page_is_mobile) $isize = "10";
   
   $rtn .= "<tr><td valign='top'>
   
@@ -515,20 +516,24 @@ function student_search_display_search() {
     // are searching for a name, so check that...
     $_SESSION["student_search_for"] = $o_search_for;
     $temp = explode(" ",$search_for);
-    if (trim($temp[1]) != "")
+    if (trim(@$temp[1]) != "")
     {
-      $fn = trim($temp[0]);
-      $ln = trim($temp[1]);
+      $fn = trim(@$temp[0]);
+      $ln = trim(@$temp[1]);
       $search_action = " AND (l_name LIKE '%$ln%' 
                          AND f_name LIKE '%$fn%') 
                        ";
       
     }
 
+    $other_table = "";
+    $major_search = "";
+    $group_by = "";
+    
     $temp = explode("=",$search_for);
     if (trim(strtolower($temp[0])) == "major")
     {      
-      $mjsearch = trim($temp[1]);
+      $mjsearch = trim(@$temp[1]);
       $search_action = "";
       $other_table = ", degrees b";
       $group_by = " GROUP BY u.cwid ";
@@ -540,7 +545,7 @@ function student_search_display_search() {
     // Now THIS is odd... what is this strange piece of code here?
     // I'm no cryptographic genius, but it looks like it is set to display a message when
     // you search for "info=production" on the Advisees search tab...
-    if (md5(strtolower($temp[1]))=="fd89784e59c72499525556f80289b2c7"){$rtn .= base64_decode("DQo8cD4NCjxiPlRoZSBvcmlnaW5hbCBGbGlnaHRQYXRoIFByb2R1Y3Rpb24gVGVhbSwgY2lyY2EgMjAwNywgYXQgVGhlIFVuaXZlcnNpdHkgb2YgTG91aXNpYW5hIGF0IE1vbnJvZTo8L2I+DQo8dWw+DQo8bGk+UmljaGFyZCBQZWFjb2NrIC0gUHJvamVjdCBsZWFkIGFuZCBwcmltYXJ5IGxvZ2ljIHByb2dyYW1tZXIuPC9saT4NCjxsaT5Kb2UgTWFuc291ciAtIERhdGFiYXNlIGFkbWluaXN0cmF0b3IgYW5kIG1haW5mcmFtZS9CYW5uZXIgZGF0YSBjb29yZGluYXRvci48L2xpPg0KPGxpPkpvYW5uIFBlcnJlciAtIERhdGEgZW50cnksIHRlc3RpbmcgYW5kIHNvZnR3YXJlIGNvb3JkaW5hdG9yLjwvbGk+DQo8bGk+UGF1bCBHdWxsZXR0ZSAtIENsYXNzaWMgdGhlbWUgZGVzaWduZXIuPC9saT4NCjxsaT48Yj5PdGhlciBjb250cmlidXRpbmcgcHJvZ3JhbW1lcnM8L2I+OiBDaGFybGVzIEZyb3N0LCBCcmlhbiBUYXlsb3IuPC9saT4NCjwvdWw+DQpUbyBldmVyeW9uZSB3aG8gaGVscGVkIG1ha2UgRmxpZ2h0UGF0aCBwb3NzaWJsZTogVGhhbmsgWW91Lg0KPC9wPg==");}
+    if (md5(strtolower(@$temp[1]))=="fd89784e59c72499525556f80289b2c7"){$rtn .= base64_decode("DQo8cD4NCjxiPlRoZSBvcmlnaW5hbCBGbGlnaHRQYXRoIFByb2R1Y3Rpb24gVGVhbSwgY2lyY2EgMjAwNywgYXQgVGhlIFVuaXZlcnNpdHkgb2YgTG91aXNpYW5hIGF0IE1vbnJvZTo8L2I+DQo8dWw+DQo8bGk+UmljaGFyZCBQZWFjb2NrIC0gUHJvamVjdCBsZWFkIGFuZCBwcmltYXJ5IGxvZ2ljIHByb2dyYW1tZXIuPC9saT4NCjxsaT5Kb2UgTWFuc291ciAtIERhdGFiYXNlIGFkbWluaXN0cmF0b3IgYW5kIG1haW5mcmFtZS9CYW5uZXIgZGF0YSBjb29yZGluYXRvci48L2xpPg0KPGxpPkpvYW5uIFBlcnJlciAtIERhdGEgZW50cnksIHRlc3RpbmcgYW5kIHNvZnR3YXJlIGNvb3JkaW5hdG9yLjwvbGk+DQo8bGk+UGF1bCBHdWxsZXR0ZSAtIENsYXNzaWMgdGhlbWUgZGVzaWduZXIuPC9saT4NCjxsaT48Yj5PdGhlciBjb250cmlidXRpbmcgcHJvZ3JhbW1lcnM8L2I+OiBDaGFybGVzIEZyb3N0LCBCcmlhbiBUYXlsb3IuPC9saT4NCjwvdWw+DQpUbyBldmVyeW9uZSB3aG8gaGVscGVkIG1ha2UgRmxpZ2h0UGF0aCBwb3NzaWJsZTogVGhhbmsgWW91Lg0KPC9wPg==");}
 
     $query = "SELECT u.user_id, f_name, l_name, u.cwid, a.major_code, rank_code, a.catalog_year
               FROM users u, students a $other_table
@@ -624,8 +629,9 @@ function student_search_get_advanced_search_tips() {
 function student_search_render_advisees($adv_array, $title) {
   $rtn = "";
   
+  $bool_redirect_one = FALSE;
   
-  if (count($adv_array) == 1 && $_REQUEST["did_search"] == "true")
+  if (count($adv_array) == 1 && @$_REQUEST["did_search"] == "true")
   {
     // Since there was only 1 result, we want to redirect this person directly.
     // Draw this person's name...  
@@ -679,22 +685,26 @@ function student_search_render_advisees($adv_array, $title) {
     $major = $db->get_student_majors_from_db($student_id, TRUE);
         
     
-    $advising_what_if = $adv_array[$t]["advising_what_if"];
-    $what_if_major_code = $adv_array[$t]["what_if_major_code"];
-    $what_if_track_code = $adv_array[$t]["what_if_track_code"];
-    $degree_id = $adv_array[$t]["degree_id"];
-    $rank = $adv_array[$t]["rank"];
-    $catalog_year = $adv_array[$t]["catalog_year"];
-    if ($screen->page_is_mobile) {
-      $catalog_year = get_shorter_catalog_year_range($catalog_year, false, true);
-    }
+    $advising_what_if = @$adv_array[$t]["advising_what_if"];
+    $what_if_major_code = @$adv_array[$t]["what_if_major_code"];
+    $what_if_track_code = @$adv_array[$t]["what_if_track_code"];
+    $degree_id = @$adv_array[$t]["degree_id"];
+    $rank = @$adv_array[$t]["rank"];
+    $catalog_year = @$adv_array[$t]["catalog_year"];
+    
+    // There is no $screen variable-- old code?
+    //if ($screen->page_is_mobile) {
+    //  $catalog_year = get_shorter_catalog_year_range($catalog_year, false, true);
+    //}
+    
     $advising_session_id = $adv_array[$t]["advising_session_id"];
     $advised_image = $adv_array[$t]["advised_image"];
 
     $on_mouse = "onmouseover=\"style.backgroundColor='#FFFF99'\"
                onmouseout=\"style.backgroundColor='white'\"
                 ";
-    if ($screen->page_is_mobile) $on_mouse = ""; // Causes problems on mobile devices.
+    // No screen var defined. Old code?
+    //if ($screen->page_is_mobile) $on_mouse = ""; // Causes problems on mobile devices.
     
     // Build up the URL we want to go to when we click this row.
     $path = "view";

@@ -634,7 +634,7 @@ class _FlightPath
 			// Does the student have any substitutions for this requirement?
 			if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id))
 			{
-//fpm($substitution);
+fpm($substitution);
 //fpm($group_id);
 				// Since the substitution was made, I don't really care about
 				// min grades or the like.  Let's just put it in.
@@ -675,12 +675,12 @@ class _FlightPath
 						$new_course = new Course();
 						$new_course->load_course_from_data_string($new_course_string);
 						$new_course->min_hours = $new_course->max_hours = $remaining_hours;
-						$new_course->bool_substitution_split = true;
-						$new_course->bool_substitution_new_from_split = true;
+						$new_course->set_bool_substitution_split($req_by_degree_id, TRUE);
+						$new_course->set_bool_substitution_new_from_split($req_by_degree_id, TRUE);
 						$new_course->requirement_type = $course_requirement->requirement_type;
             $new_course->req_by_degree_id = $req_by_degree_id;
 
-						$course_requirement->bool_substitution_split = true;
+						$course_requirement->set_bool_substitution_split($req_by_degree_id, TRUE);
 						
 						// I am commenting this out-- if we split up a sub multiple times, then we shouldn't
 						// set the old course requirement to say it WASN'T from a split.  This was causing a bug
@@ -737,7 +737,7 @@ class _FlightPath
 
 				// Do not apply substitutionSplit courses to anything automatically.
 				// They must be applied by substitutions.
-				if ($c->bool_substitution_new_from_split == true)
+				if ($c->get_bool_substitution_new_from_split($req_by_degree_id) == TRUE)
 				{
 					continue;
 				}
@@ -1028,7 +1028,8 @@ class _FlightPath
 	{
 	  global $user;
     
-	  
+	  $catalog_year = 0;
+    
 		// This method will, only by looking at variables in the
 		// POST, save an advising session into the database.
 		$db = get_global_database_handler();
@@ -1247,7 +1248,7 @@ class _FlightPath
 		}
 
 		// Did we have to perform an update-- but no course was found?
-		if (trim($_POST["updatecourse"]) != "" && $bool_found_update_match == false)
+		if (trim(@$_POST["updatecourse"]) != "" && $bool_found_update_match == false)
 		{
 			// This means that the course was probably on the bare
 			// degree program, and not already checked for advising.  So,
@@ -1287,7 +1288,7 @@ class _FlightPath
 		//
 		//-------------------------------------------------------
 		// check permissions for substitutions before saving
-		if (trim($_POST["savesubstitution"]) != "" && user_has_permission("can_substitute")) {
+		if (trim(@$_POST["savesubstitution"]) != "" && user_has_permission("can_substitute")) {
 			$temp = explode("~",trim($_POST["savesubstitution"]));
 			$course_id = $temp[0];  // required course
 			$group_id = trim($temp[1]);
@@ -1355,7 +1356,7 @@ class _FlightPath
 		}
 
 
-		if (trim($_POST["removesubstitution"]) != "")
+		if (trim(@$_POST["removesubstitution"]) != "")
 		{
 			$temp = explode("~",trim($_POST["removesubstitution"]));
 			$sub_id = trim($temp[0]) * 1;
@@ -1375,7 +1376,7 @@ class _FlightPath
 		//             Group Unassignments
 		//
 		//-------------------------------------------------------
-		if (trim($_POST["unassign_group"]) != "")
+		if (trim(@$_POST["unassign_group"]) != "")
 		{
 			$temp = explode("~",trim($_POST["unassign_group"]));
 			$course_id = $temp[0];
@@ -1395,7 +1396,7 @@ class _FlightPath
 
 		}
 
-		if (trim($_POST["restore_unassign_group"]) != "")
+		if (trim(@$_POST["restore_unassign_group"]) != "")
 		{
 			$temp = explode("~",trim($_POST["restore_unassign_group"]));
 			$unassign_id = trim($temp[0]) * 1;
@@ -1415,7 +1416,7 @@ class _FlightPath
 		//             Transfer EQV Unassignments
 		//
 		//-------------------------------------------------------
-		if (trim($_POST["unassign_transfer_eqv"]) != "")
+		if (trim(@$_POST["unassign_transfer_eqv"]) != "")
 		{
 			$temp = explode("~",trim($_POST["unassign_transfer_eqv"]));
 			$course_id = $temp[0];
@@ -1431,7 +1432,7 @@ class _FlightPath
 
 		}
 
-		if (trim($_POST["restore_transfer_eqv"]) != "")
+		if (trim(@$_POST["restore_transfer_eqv"]) != "")
 		{
 			$temp = explode("~",trim($_POST["restore_transfer_eqv"]));
 			$unassign_id = trim($temp[0]) * 1;
