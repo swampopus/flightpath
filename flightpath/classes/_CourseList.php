@@ -121,10 +121,14 @@ class _CourseList extends ObjList
 	 *         NULL.  If using this, then $course_id, $term_id, and $bool_transfer
 	 *         will be ignored.
 	 * 
+   * @param Int $sub_req_by_degree_id
+   *      - Optional.  If set, we will only exclude substituted courses if they were substitutions made for this degree_id.  Leave 0 if not sure
+   *        what to use. 
+   * 
 	 * 
 	 * @return Course
 	 */
-	function find_specific_course($course_id = 0, $term_id = 0, $bool_transfer = false, $bool_exclude_substitutions = true, Course $use_course = null)
+	function find_specific_course($course_id = 0, $term_id = 0, $bool_transfer = false, $bool_exclude_substitutions = true, Course $use_course = null, $sub_req_by_degree_id = 0)
 	{
 		if ($use_course != null && is_object($use_course))
 		{
@@ -149,7 +153,7 @@ class _CourseList extends ObjList
 
 				if ($bool_exclude_substitutions == true)
 				{
-					if ($course->get_bool_substitution() == TRUE)
+					if ($course->get_bool_substitution($sub_req_by_degree_id) == TRUE)
 					{
 						continue;
 					}
@@ -206,7 +210,7 @@ class _CourseList extends ObjList
    * @param Course $course_c
    * @return CourseList
    */
-	function find_all_matches(Course $course_c)
+	function find_all_matches(stdClass $course_c)
 	{
 		if (!$list_matches =  parent::find_all_matches($course_c))
 		{
@@ -887,7 +891,7 @@ class _CourseList extends ObjList
 		for ($t = 0; $t < $this->count; $t++)
 		{
 			$c = $this->array_list[$t];
-			$hours = $c->hours_awarded*1;
+			$hours = $c->get_hours_awarded();
 			if ($hours < 1)
 			{
 				$hours = $c->min_hours*1;
@@ -1002,9 +1006,12 @@ class _CourseList extends ObjList
 	 * @param unknown_type $bool_set_array_index
 	 *         - If set to true, it will set the $course->array_index value
 	 *           to the index value in $this's array_list array.
+   * @param new_split_subs_higher_priority_in_degree_id
+   *         - If the course is a split substitution for the supplied degree_id, then  give it a higher "priority" so it will
+   *           sort above courses with identical names.
 	 * 
 	 */
-	function sort_alphabetical_order($bool_reverse_order = false, $bool_only_transfers = false, $bool_set_array_index = false)
+	function sort_alphabetical_order($bool_reverse_order = false, $bool_only_transfers = false, $bool_set_array_index = false, $subs_higher_prority_in_degree_id = 0)
 	{
 		// Sort the list into alphabetical order, based
 		// on the subject_id and course_num.
@@ -1020,6 +1027,23 @@ class _CourseList extends ObjList
 			}
 
 
+      $priority = 5;  // default sort priority for courses with identical names.
+      if ($subs_higher_prority_in_degree_id > 0) {
+        if (@$c->details_by_degree_array[$subs_higher_prority_in_degree_id]["bool_substitution_new_from_split"] == TRUE
+            || @$c->details_by_degree_array[$subs_higher_prority_in_degree_id]["bool_substitution_split"] == TRUE
+            || @$c->details_by_degree_array[$subs_higher_prority_in_degree_id]["bool_substitution"] == TRUE) {
+          //fpm("here for $c->subject_id $c->course_num");
+          $priority = 3;  // lower priority so it sorts higher in the list.
+        }
+      }
+      
+
+      // Make $t at least 5 characters long, padded with zeroes on the left, so sorting works correctly.  We are using it to
+      // find out our index later, but it is throwing off the sorting when courses have the same name.  For example,
+      // if a course is from a split sub.
+      $tpad = str_pad("$t",5,"0",STR_PAD_LEFT);
+
+
 			if ($bool_only_transfers == true)
 			{
 				// Rarer.  We only want to sort the transfer credits.  If the course doesn not
@@ -1027,17 +1051,17 @@ class _CourseList extends ObjList
 				// the transfer credit's SI and CN.
 				if (is_object($c->course_transfer))
 				{
-					$str = $c->course_transfer->subject_id . " ~~ " . $c->course_transfer->course_num ." ~~ $t";
+					$str = $c->course_transfer->subject_id . " ~~ " . $c->course_transfer->course_num ." ~~ $priority ~~ $tpad";
 				} else {
 					// There was no transfer!
-					$str = "$c->subject_id ~~ $c->course_num ~~ $t";
+					$str = "$c->subject_id ~~ $c->course_num ~~ $priority ~~ $tpad";
 				}
 			} else {
 
 				// This is the one which will be run most often.  Just sort the list
 				// in alphabetical order.
 
-				$str = "$c->subject_id ~~ $c->course_num ~~ $t";
+				$str = "$c->subject_id ~~ $c->course_num ~~ $priority ~~ $tpad";
 			}
 			array_push($tarray,$str);
 		}
@@ -1058,7 +1082,8 @@ class _CourseList extends ObjList
 		for($t = 0; $t < count($tarray); $t++)
 		{
 			$temp = explode(" ~~ ",$tarray[$t]);
-			$i = $temp[2];
+			$i = intval($temp[3] * 1);
+      
 			if ($bool_set_array_index == true)
 			{
 				$this->array_list[$i]->array_index = $i;
@@ -1373,7 +1398,7 @@ class _CourseList extends ObjList
   			// hours_awarded (probably 1).  However, if it was substituted,
   			// then we actually want the 0 hour.  Confusing, isn't it?
   			if ($course->bool_ghost_hour) {
-  			  $h_get_hours = $course->hours_awarded;
+  			  $h_get_hours = $course->get_hours_awarded();
   			}
 			}
 			

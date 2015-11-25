@@ -1,6 +1,6 @@
 <?php
 
-class _Group
+class _Group extends stdClass
 {
 	public $title, $icon_filename, $group_id, $requirement_type, $min_grade, $group_name;
 	public $hours_required, $hours_remaining, $hours_fulfilled, $hours_fulfilled_for_credit;

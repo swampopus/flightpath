@@ -1,7 +1,7 @@
 <?php
 
 
-class _StandardizedTest
+class _StandardizedTest extends stdClass
 {
 	public $categories, $description, $test_id, $date_taken;
 

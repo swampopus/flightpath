@@ -1,6 +1,16 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-11-24
+  Made numerous changes to get split substitutions working (on the bare degree plan).  They tentatively seem to be working, separated between
+  degrees.  Still have a little ways to go, including split subs inside of groups, and making them show in Excess credit correctly.
+  
+
+2015-11-20
+  Continued working on split subs.  It has been slow, I've had to move various variables into the details_by_degree array, to separate them
+  out by what degree they were assigned to.
+  
+
 2015-11-18
   Worked more on splitting subs across degrees; still not finished.  Implemented new system for keeping all attributes associated with a specific degree
   together under one array (for course).  Continued making changes so as not to trigger notice messages.  Caught several potential problems before they started

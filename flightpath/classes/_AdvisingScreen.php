@@ -1,7 +1,7 @@
 <?php
 
 
-class _AdvisingScreen
+class _AdvisingScreen extends stdClass
 {
 	public $width_array, $popup_width_array, $script_filename, $is_on_left, $box_array;
 	public $degree_plan, $student, $bool_popup, $footnote_array, $flightpath;
@@ -750,10 +750,11 @@ function draw_menu_items($menu_array) {
 				}
 
         // TODO:  Clean this up, as far as the remarks and such.  Make it look similar (new function?) as popup text for a substitution.
+        if ($remarks) $remarks = " ($remarks) ";
         
 				$pC .= "<div class='tenpt'>&nbsp; &nbsp;
 					<sup>{$fn_char[$fn_type]}$t</sup>
-					$new_course $using_hours $fbetween $o_course$extra ($remarks) for degree " . $sub_degree_plan->get_title2() . "</div>";
+					$new_course $using_hours $fbetween $o_course$extra$remarks for degree " . $sub_degree_plan->get_title2() . "</div>";
 
 			}
 			$pC .= "</div>";
@@ -823,7 +824,7 @@ function draw_menu_items($menu_array) {
 
 			$pC .= "<div class='tenpt' style='padding-left: 10px; padding-bottom: 5px;
 			                                   margin-left: 1.5em; text-indent: -1.5em;'>
-							$l_s_i $l_c_n ($c->hours_awarded " . t("hrs") . ") - $c->grade - $l_term
+							$l_s_i $l_c_n ($c->" . get_hours_awarded() . " " . t("hrs") . ") - $c->grade - $l_term
 								";
 			
 			$c->group_list_unassigned->reset_counter();
@@ -1065,7 +1066,7 @@ function draw_menu_items($menu_array) {
 			$t_inst = $this->fix_institution_name($course->institution_name);
 
 			$pC .= "<div class='tenpt' style='padding-bottom: 15px;'>
-							<b>$t_s_i $t_c_n</b> ($c->hours_awarded hrs) - $grade - $t_term - $t_inst
+							<b>$t_s_i $t_c_n</b> (" . $c->get_hours_awarded() . " hrs) - $grade - $t_term - $t_inst
 								";
 			if ($c->bool_substitution_split == true)
 			{
@@ -1184,7 +1185,7 @@ function draw_menu_items($menu_array) {
 			$l_title = $this->fix_course_title($c->title);
 			$l_term = $c->get_term_description(true);
 
-			$h = $c->hours_awarded;
+			$h = $c->get_hours_awarded();
 			if ($c->bool_ghost_hour) {
 			  $h .= "(" . t("ghost") . "<a href='javascript:alertSubGhost()'>?</a>)";
 			}
@@ -1293,7 +1294,7 @@ function draw_menu_items($menu_array) {
 			$l_title = $this->fix_course_title($c->title);
 			$l_term = $c->get_term_description(true);
 
-			$h = $c->hours_awarded;
+			$h = $c->get_hours_awarded();
 			if ($c->bool_ghost_hour) {
 			  $h .= " [" . t("ghost") . "<a href='javascript:alertSubGhost();'>?</a>] ";
 			}
@@ -2711,7 +2712,7 @@ function draw_menu_items($menu_array) {
 
 				if ($c->display_status == "completed")
 				{ // We only want to count completed hours, no midterm or enrolled courses.
-					$h = $c->hours_awarded;
+					$h = $c->get_hours_awarded();
 					if ($c->bool_ghost_hour == TRUE) {
 					  $h = 0;
 					}
@@ -3419,7 +3420,7 @@ function draw_menu_items($menu_array) {
 
 		if ($course->get_bool_substitution() == TRUE )
 		{
-
+//fpm($course);
 			if ($course->get_course_substitution()->subject_id == "")
 			{ // Reload subject_id, course_num, etc, for the substitution course,
 				// which is actually the original requirement.
@@ -3454,7 +3455,7 @@ function draw_menu_items($menu_array) {
 			}
 		}
 
-		$hours = $course->hours_awarded * 1;
+		$hours = $course->get_hours_awarded();
 
 		if ($hours <= 0) {
 		  // Some kind of error-- default to catalog hours
@@ -3969,7 +3970,7 @@ function draw_menu_items($menu_array) {
 					
 					";
     
-		$this->student->list_courses_taken->sort_alphabetical_order(false, true);
+		$this->student->list_courses_taken->sort_alphabetical_order(false, true, FALSE, $req_by_degree_id);
     
 		for ($t = 0; $t <= 1; $t++)
 		{
@@ -3983,6 +3984,9 @@ function draw_menu_items($menu_array) {
 				<td class='tenpt' valign='top' >" . t("Grd") . "</td>
 				<td class='tenpt' valign='top' >" . t("Term") . "</td>
 				</tr>";
+			
+			$already_seen = array(); // keep track of the courses we've already seen.
+			$used_hours_subs = array(); // extra help keeping up with how many hours we've used for particular courses in split up subs.
 			
 			$is_empty = true;
 			$this->student->list_courses_taken->reset_counter();
@@ -4047,8 +4051,10 @@ function draw_menu_items($menu_array) {
 					}
 				}
 
-				$m_hours = $c->hours_awarded*1;
 
+				$m_hours = $c->get_hours_awarded($req_by_degree_id);
+
+        
 				if ($c->max_hours*1 < $m_hours)
 				{
 					$m_hours = $c->max_hours*1;
@@ -4066,22 +4072,68 @@ function draw_menu_items($menu_array) {
 					$m_hours = $c_hours;
 				}
 
-				if ($m_hours > $c->hours_awarded)
+				if ($m_hours > $c->get_hours_awarded($req_by_degree_id))
 				{
-					$m_hours = $c->hours_awarded;
+					$m_hours = $c->get_hours_awarded($req_by_degree_id);
 				}
 
+        // If we have already displayed this EXACT course, then we shouldn't display it again.  This is to
+        // fix a multi-degree bug, where we see the same course however many times it was split for a DIFFERENT degree.
+        // If it's never been split for THIS degree, it should just show up as 1 course.
+        $ukey = md5($c->course_id . $c->catalog_year . $c->term_id . $m_hours . $tcourse_id . intval(@$c->db_substitution_id_array[$req_by_degree_id]));
+        if (isset($already_seen[$ukey])) {
+          //fpm($c);
+          //fpm($m_hours);  
+          continue;
+        }        
+        // Else, add it.
+        $already_seen[$ukey] = TRUE;
+        
+        // We should also keep up with how many hours have been used by this sub...
+        
+        // Is this course NOT a substitution for this degree, and NOT an outdated sub? 
+        // In other words, are we safe to just display this course as an option for selection?
 				if ($c->get_bool_substitution($req_by_degree_id) != TRUE && $c->get_bool_outdated_sub($req_by_degree_id) != TRUE)
 				{
-				  $h = $c->hours_awarded;
+				            
+          
+          if ($course_num == "201") {
+            //fpm("here");  
+            //fpm($req_by_degree_id);
+            //fpm($c);          
+          }
+          
+          
+                              
+				  $h = $c->get_hours_awarded($req_by_degree_id);
 				  if ($c->bool_ghost_hour == TRUE) {
 				    $h .= "(ghost<a href='javascript: alertSubGhost();'>?</a>)";
 				  }
 
+          // If this course was split up, we need to use our 
+          // helper array to see what the OTHER, already-used pieces add up to.
+          if ($c->get_bool_substitution_split($req_by_degree_id)) {
+            //fpm("here for new thang");
+            $ukey = md5($c->course_id . $c->catalog_year . $c->term_id . $tcourse_id);
+            if (isset($used_hours_subs[$ukey])) {
+              $used_hours = $used_hours_subs[$ukey];
+              // Get the remaining hours by subtracting the ORIGINAL hours for this course against
+              // the used hours.
+              $remaining_hours = $c->get_hours_awarded(0) - $used_hours;  // (0) gets the original hours awarded.
+              if ($remaining_hours > 0) {
+                $h = $remaining_hours;
+              } 
+            }
+            
+          }          
+
+
+
+
 					$pC .= "<tr>
 						<td valign='top' class='tenpt' width='15%'>
 							<input type='radio' name='subCourse' id='subCourse' value='$tcourse_id'
-							 onClick='popupUpdateSubData(\"$m_hours\",\"$c->term_id\",\"$t_flag\",\"$hours_avail\",\"$c->hours_awarded\");'
+							 onClick='popupUpdateSubData(\"$m_hours\",\"$c->term_id\",\"$t_flag\",\"$hours_avail\",\"" . $c->get_hours_awarded($req_by_degree_id) . "\");'
 							 ";
 					if ($bool_disable_selection) $pC .= "disabled=disabled";
 					
@@ -4117,23 +4169,25 @@ function draw_menu_items($menu_array) {
 				} 
 				else {
 
+          // Does this course have a substitution for THIS degree?
+          if (!is_object($c->get_course_substitution($req_by_degree_id))) {
+            continue;
+          }
 
-
-					if (is_object($c->get_course_substitution()) && $c->get_course_substitution()->subject_id == "")
+					if (is_object($c->get_course_substitution($req_by_degree_id)) && $c->get_course_substitution($req_by_degree_id)->subject_id == "")
 					{ // Load subject_id and course_num of the original
 						// requirement.
-						$c->get_course_substitution()->load_descriptive_data();
+						$c->get_course_substitution($req_by_degree_id)->load_descriptive_data();
 					}
-
 					$extra = "";
 					//if ($c->assigned_to_group_id > 0)
 					if ($c->get_bool_assigned_to_group_id(-1))
-					{
-					  // TODO:  based on degree?
+					{					  
+					  // TODO:  based on degree (hint: probably so...?
 						$new_group = new Group($c->get_first_assigned_to_group_id());
 						$extra = " in $new_group->title";
 					}
-					if ($c->get_bool_outdated_sub())
+					if ($c->get_bool_outdated_sub($req_by_degree_id))
 					{
 						$help_link = fp_get_js_alert_link(t("This substitution is outdated. It was made for a course or group which does not currently appear on the student's degree plan.  You may remove this sub using the Administrator's Toolbox, at the bottom of the View tab."), "?");
 						$extra .= " <span style='color:red;'>[" . t("Outdated") . "$help_link]</span>";
@@ -4147,15 +4201,21 @@ function draw_menu_items($menu_array) {
 						<td valign='top' class='tenpt' colspan='5'>
 							$subject_id 
 						
-							$course_num (" . $c->get_substitution_hours() . ")
-							 -> " . $c->get_course_substitution()->subject_id . "
-							 " . $c->get_course_substitution()->course_num . "$extra
+							$course_num (" . $c->get_substitution_hours($req_by_degree_id) . ")
+							 -> " . $c->get_course_substitution($req_by_degree_id)->subject_id . "
+							 " . $c->get_course_substitution($req_by_degree_id)->course_num . "$extra
 						</td>
 
 						
 					</tr>
 					";
 
+          // Keep track of how many hours THIS course has been subbed, if it was split.
+          $ukey = md5($c->course_id . $c->catalog_year . $c->term_id . $tcourse_id);
+          //fpm($c->get_substitution_hours($req_by_degree_id));
+          if (!isset($used_hours_subs[$ukey])) $used_hours_subs[$ukey] = 0;
+          $used_hours_subs[$ukey] += $c->get_substitution_hours($req_by_degree_id);
+          
 				}
 
 			}

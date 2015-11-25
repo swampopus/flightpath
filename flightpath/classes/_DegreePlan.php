@@ -1,7 +1,7 @@
 <?php
 
 
-class _DegreePlan
+class _DegreePlan extends stdClass
 {
   
   const DEGREE_ID_FOR_COMBINED_DEGREE = -1001;

@@ -1,7 +1,7 @@
 <?php
 
 
-class _DatabaseHandler
+class _DatabaseHandler extends stdClass
 {
 	//
 	public $dbc;

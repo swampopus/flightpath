@@ -1,6 +1,6 @@
 <?php
 
-class _FlightPath
+class _FlightPath extends stdClass
 {
 	public $student, $degree_plan, $db, $bool_what_if;
 	public $course_list_advised_courses;
@@ -634,7 +634,7 @@ class _FlightPath
 			// Does the student have any substitutions for this requirement?
 			if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id))
 			{
-fpm($substitution);
+//fpm($substitution);
 //fpm($group_id);
 				// Since the substitution was made, I don't really care about
 				// min grades or the like.  Let's just put it in.
@@ -663,14 +663,15 @@ fpm($substitution);
 					// after this one in the list.
 					$course_sub = $substitution->course_list_substitutions->get_first();
           //fpm($course_sub);
-					if ($course_requirement->min_hours*1 > $course_sub->hours_awarded*1)
-					{					  
+					if ($course_requirement->min_hours*1 > $course_sub->get_hours_awarded($req_by_degree_id))
+					{
+					  //fpm("here I am");					  
 					  // Because float math can create some very strange results, we must
 					  // perform some rounding.  We will round to 6 decimal places, which should
 					  // provide us the accuracy w/o losing precision (since we can only represent a max
 					  // of 4 decimals in the database anyway.
-						$remaining_hours = round($course_requirement->min_hours - $course_sub->hours_awarded, 6);
-
+						$remaining_hours = round($course_requirement->min_hours - $course_sub->get_hours_awarded($req_by_degree_id), 6);
+      //fpm($remaining_hours);
 						$new_course_string = $course_requirement->to_data_string();
 						$new_course = new Course();
 						$new_course->load_course_from_data_string($new_course_string);
@@ -679,7 +680,8 @@ fpm($substitution);
 						$new_course->set_bool_substitution_new_from_split($req_by_degree_id, TRUE);
 						$new_course->requirement_type = $course_requirement->requirement_type;
             $new_course->req_by_degree_id = $req_by_degree_id;
-
+            $new_course->assigned_to_degree_ids_array[$req_by_degree_id] = $req_by_degree_id; 
+            
 						$course_requirement->set_bool_substitution_split($req_by_degree_id, TRUE);
 						
 						// I am commenting this out-- if we split up a sub multiple times, then we shouldn't
@@ -719,7 +721,7 @@ fpm($substitution);
 				if ($c->bool_ghost_hour) {
 				  // If this is a ghost hour, then $h_get_hours would == 0 right now,
 				  // instead, use the the adjusted value (probably 1).
-				  $h_get_hours = $c->hours_awarded;
+				  $h_get_hours = $c->get_hours_awarded($req_by_degree_id);
 				}			  
 			  								
 				// Can we assign any more hours to this group?  Are we
@@ -730,7 +732,7 @@ fpm($substitution);
 				}
 
 				// Will the hours of this course put us over the hours_required limit?
-				if ($hours_assigned + $c->hours_awarded > $hours_required)
+				if ($hours_assigned + $c->get_hours_awarded($req_by_degree_id) > $hours_required)
 				{
 					continue;
 				}
@@ -832,7 +834,7 @@ fpm($substitution);
             // Go ahead and state that the requirement was fulfilled.
 						$course_requirement->course_list_fulfilled_by->add($c);
 						$course_requirement->grade = $c->grade;
-						$course_requirement->hours_awarded = $c->hours_awarded;
+						$course_requirement->set_hours_awarded($req_by_degree_id, $c->get_hours_awarded($req_by_degree_id));
 						$course_requirement->bool_ghost_hour = $c->bool_ghost_hour;
 
 						// No longer using... using the assigned_to_degree_ids_array instead. // $c->bool_has_been_assigned = true;
@@ -1336,9 +1338,9 @@ fpm($substitution);
 
       if ($test_c = $this->student->list_courses_taken->find_specific_course($sub_course_id, $sub_term_id, (bool) $sub_transfer_flag, true)) {
   	    // Are the hours out of whack?
-  	    if (floatval($sub_hours) > floatval($test_c->hours_awarded)) {
+  	    if (floatval($sub_hours) > floatval($test_c->get_hours_awarded($req_by_degree_id))) {
   	      // Yes!  Set it to the value of the hours_awarded.
-  	      $sub_hours = floatval($test_c->hours_awarded);
+  	      $sub_hours = floatval($test_c->get_hours_awarded($req_by_degree_id));
   	    }
       }			
 		
@@ -1748,15 +1750,17 @@ fpm($substitution);
 			$course_requirement = $substitution->course_requirement;
 			$course_sub = $substitution->course_list_substitutions->get_first();
 
+      // TODO: This could be an important part right here
+
 			// Check to see if the courseSub's hours_awarded are less than the
 			// course_requirement's min hours...
-			if ($course_requirement->min_hours > $course_sub->hours_awarded)
+			if ($course_requirement->min_hours > $course_sub->get_hours_awarded())
 			{
 				// Meaning the original course requirement is not being
 				// fully satisfied by this substitution!  The original
 				// course requirement has hours left over which must be
 				// fulfilled somehow.
-				$remaining_hours = round($course_requirement->min_hours - $course_sub->hours_awarded, 6);
+				$remaining_hours = round($course_requirement->min_hours - $course_sub->get_hours_awarded(), 6);
 				// This means that the course requirement needs to be split.
 				// So, find this course in the degree plan.
 				$required_course_id = $course_requirement->course_id;

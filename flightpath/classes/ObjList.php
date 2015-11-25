@@ -144,7 +144,7 @@ class ObjList
 	}
 
 
-	function find_all_matches($obj_c)
+	function find_all_matches(stdClass $obj_c)
 	{
 		// This will find all the matches of objC in the
 		// array, and return an ObjList of matches.

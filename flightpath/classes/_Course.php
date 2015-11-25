@@ -5,7 +5,7 @@
 Class definition for the Course object.
 */
 
-class _Course
+class _Course extends stdClass
 {
   // Some public variables and what they are used for.
 
@@ -21,7 +21,7 @@ class _Course
   public $array_valid_names;
 
   // Student record related:
-  public $bool_taken, $term_id, $section_number, $grade, $hours_awarded, $quality_points, $level_code;
+  public $bool_taken, $term_id, $section_number,$quality_points, $grade, $level_code;
   public $bool_transfer, $institution_id, $institution_name, $course_transfer;
   public $transfer_eqv_text, $transfer_footnote;
   
@@ -35,7 +35,7 @@ class _Course
   //public $bool_substitution, $course_substitution;
   //public $substitution_hours, $sub_remarks, $sub_faculty_id, $bool_outdated_sub;
   //public $bool_substitution_split, $substitution_footnote, $bool_substitution_new_from_split;
-  //public $assigned_to_group_id;
+  //public $assigned_to_group_id, $hours_awarded;
   //public $bool_has_been_displayed, $bool_has_been_displayed_by_degree_array;
    
   ///////////
@@ -98,7 +98,7 @@ class _Course
     $this->temp_old_course_id = 0;  // Used in case we delete the course_id, we can get it back (good with substitutions of transfers that are outdated).
     $this->catalog_year = $catalog_year;
     $this->assigned_to_semester_num = -1;
-    $this->assigned_to_group_id = 0;
+    //$this->assigned_to_group_id = 0;  // deprecated
     $this->assigned_to_group_ids_array = array();
     $this->bool_advised_to_take = false;
     $this->bool_added_course = false;
@@ -110,6 +110,8 @@ class _Course
     $this->course_list_fulfilled_by = new CourseList();
     $this->group_list_unassigned = new ObjList();
     $this->bool_use_draft = $bool_use_draft;
+    
+    $this->req_by_degree_id = 0;
     
     //$this->bool_has_been_displayed_by_degree_array = array();
     
@@ -269,9 +271,11 @@ class _Course
     if ($degree_id > 0) {      
       return $this->get_details_by_degree($degree_id, "substitution_hours");
     }
-    else {      
-      $x = reset($this->details_by_degree_array[$degree_id]["substitution_hours"]);
-      if ($x) return $x;
+    else {
+      if (isset($this->details_by_degree_array[$degree_id]["substitution_hours"])) {      
+        $x = reset($this->details_by_degree_array[$degree_id]["substitution_hours"]);
+        if ($x) return $x;
+      }
     }
     
     // Else, return boolean FALSE
@@ -281,6 +285,14 @@ class _Course
   }
 
 
+
+  function set_hours_awarded($degree_id = 0, $val) {
+    // If degree_id is zero, then use the course's currently req_by_degree_id.    
+    if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
+        
+    $this->set_details_by_degree($degree_id, "hours_awarded", $val*1);  // *1 to force integer and to trim extra zeroes.
+    
+  }
 
 
 
@@ -292,6 +304,7 @@ class _Course
     $this->set_details_by_degree($degree_id, "course_substitution", $course);
     
   }
+
 
   /**
    * Similar to the functions regarding display-- get the course substitution based on supplied degree_id.
@@ -307,8 +320,10 @@ class _Course
     }
     else {
       //$x = reset($this->course_substitution_by_degree_array);
-      $x = reset($this->details_by_degree_array[$degree_id]["course_substitution"]);
-      if ($x) return $x;
+      if (isset($this->details_by_degree_array[$degree_id]["course_substitution"])) {
+        $x = reset($this->details_by_degree_array[$degree_id]["course_substitution"]);
+        if ($x) return $x;
+      }
     }
     
     // Else, return boolean FALSE
@@ -316,6 +331,57 @@ class _Course
     
     
   }
+
+
+  /**
+   * If the boolean is set, it means if the supplied degree_id isn't set, then use the first found value.
+   */
+  function get_hours_awarded($degree_id = 0, $bool_use_first_found_if_not_found_by_degree = TRUE) {
+    // If degree_id is zero, then use the course's currently req_by_degree_id.    
+    if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
+
+    if ($degree_id > 0) {
+      //return $this->course_substitution_by_degree_array[$degree_id];
+      if (isset($this->details_by_degree_array[$degree_id]["hours_awarded"])) {
+        $x = $this->get_details_by_degree($degree_id, "hours_awarded") * 1;  // *1 forces numeric and trimes extra zeroes.
+      }
+      else if ($bool_use_first_found_if_not_found_by_degree) {
+        // It wasn't set, so get the first value that WAS set.
+        $x = $this->get_first_value_from_any_degree("hours_awarded");
+      }
+      
+      if ($x) return $x;                  
+                  
+    }
+    else {
+      
+      // We just want the first value of ANY degree returned.
+      $x = $this->get_first_value_from_any_degree("hours_awarded");      
+      if ($x) return $x;
+      
+    }
+    
+    // Else, return zero
+    return 0;
+    
+    
+  }
+
+  
+  /**
+   * Goes through the details_by_degree array and returns the first 
+   * valid value for the supplied key, any degree., or return NULL if not found.
+   */
+  function get_first_value_from_any_degree($key) {
+    
+    foreach ($this->details_by_degree_array as $d => $v) {
+      if (isset($v[$key])) return $v[$key];
+    }
+    
+    // Found nothing, return null
+    return NULL;
+  }
+
 
 
 
@@ -454,7 +520,7 @@ class _Course
     $rtn .= $this->specified_repeats . "~";
     $rtn .= intval($this->bool_specified_repeat) . "~";
     $rtn .= $this->grade . "~";
-    $rtn .= $this->hours_awarded * 1 . "~";
+    $rtn .= $this->get_hours_awarded() * 1 . "~";
     $rtn .= $this->term_id . "~";
     $rtn .= $this->advised_hours * 1 . "~";
 
@@ -580,7 +646,7 @@ class _Course
     $this->specified_repeats   	= 	$temp[4];
     $this->bool_specified_repeat 	= 	(bool) $temp[5];
     $this->grade   				= 	$temp[6];
-    $this->hours_awarded			= 	$temp[7] * 1;  // *1 to force numeric, and trim extra zeros.
+    $this->set_hours_awarded(0,$temp[7] * 1);  // *1 to force numeric, and trim extra zeros.
     $this->term_id				= 	$temp[8];
     $this->advised_hours			=	$temp[9] * 1;
 
@@ -964,9 +1030,9 @@ class _Course
        
     // Do they have any hours_awarded? (because they completed
     // the course)
-    if ($this->hours_awarded > 0)
+    if ($this->get_hours_awarded() > 0)
     {
-      $h = $this->hours_awarded * 1;
+      $h = $this->get_hours_awarded();
       return $h;
     }
 
@@ -1526,9 +1592,9 @@ class _Course
 
         $this->subject_id = $this->course_transfer->subject_id;
         $this->course_num = $this->course_transfer->course_num;
-        if ($this->course_transfer->hours_awarded > 0)
+        if ($this->course_transfer->get_hours_awarded() > 0)
         {
-          $this->hours_awarded = $this->course_transfer->hours_awarded;
+          $this->set_hours_awarded(0, $this->course_transfer->get_hours_awarded());
         }
       }
 
@@ -1631,7 +1697,7 @@ class _Course
         $this->title = trim($cur["student_specific_course_title"]);
       }
       // Also assign hours_awarded and other values while we are here
-      $this->hours_awarded = $cur["hours_awarded"] * 1;
+      $this->set_hours_awarded(0, $cur["hours_awarded"] * 1);
       $this->grade = $cur["grade"];
       $this->term_id = $cur["term_id"];
       
@@ -1775,7 +1841,7 @@ class _Course
 
     if ($bool_show_random) {$x = "rnd:$this->random_id -";}
 
-    $rtn = $pad . "$this->course_id $x- $this->subject_id $this->course_num ($this->hours_awarded) $this->grade $this->term_id";
+    $rtn = $pad . "$this->course_id $x- $this->subject_id $this->course_num (" . $this->get_hours_awarded() . ") $this->grade $this->term_id";
 
     if ($this->course_list_fulfilled_by->is_empty != true) {
       // In other words, if this is a requirement, and it is
@@ -1824,20 +1890,26 @@ class _Course
    */
   function get_bool_assigned_to_group_id($group_id) {
     
-    if ($group_id == -1) {
-      // check to see if it was assigned to any group at all.
-      if (count($this->assigned_to_group_ids_array) < 1) {
-        return FALSE;
-      }
-      else {
-        return TRUE;
+    $bool_yes_specific_group = FALSE;
+    $bool_yes_any_group = FALSE;
+    
+    foreach ($this->assigned_to_group_ids_array as $k => $v) {
+      if (intval($v) > 0) {
+        $bool_yes_any_group = TRUE;  
+      } 
+      if ($group_id == $v) {
+        $bool_yes_specific_group = TRUE;        
       }
     }
     
-    foreach ($this->assigned_to_group_ids_array as $k => $v) {
-      if ($group_id == $v) return TRUE;
+    
+    if ($group_id == -1) {
+      return $bool_yes_any_group;
     }
-    return FALSE;
+    
+    // Else...
+    return $bool_yes_specific_group;
+    
   }
 
 
@@ -1879,7 +1951,7 @@ class _Course
     // of the variables which are supposed to be serialized.
 
     $arr = array(
-    "db_advised_courses_id",
+    "db_advised_courses_id", "random_id",
     "db_substitution_id_array", "db_unassign_transfer_id",
     "db_exclude", "array_index", "db_group_requirement_id", "array_valid_names",
     "data_entry_value",
@@ -1887,7 +1959,7 @@ class _Course
     "subject_id", "course_num", "course_id", "requirement_type", "catalog_year",
     "min_hours", "max_hours", "repeat_hours", "bool_outdated_sub",
 
-    "bool_taken", "term_id", "section_number", "grade", "hours_awarded", "quality_points",
+    "bool_taken", "term_id", "section_number", "grade", "quality_points",
     "bool_transfer", "institution_id", "institution_name", "course_transfer", "transfer_footnote",    
     "substitution_footnote",    
 

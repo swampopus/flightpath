@@ -1,7 +1,7 @@
 <?php
 
 
-class _Student
+class _Student extends stdClass
 {
 	public $student_id, $name, $major_code_array, $major_code_csv, $gpa, $cumulative_hours, $catalog_year;
 	public $list_courses_taken, $list_courses_advised, $list_courses_added, $db, $rank;
@@ -348,10 +348,12 @@ class _Student
 			// courseSubstitution within the list of courses which the student
 			// has taken.  If the subHours is less than the hours_awarded for the
 			// particular course, it means the course has been split up!
+      
       // TODO:  Only look for a particular degree id?
-			if($taken_course = $this->list_courses_taken->find_specific_course($sub_course_id, $sub_term_id, $sub_bool_transfer, true))
+			if($taken_course = $this->list_courses_taken->find_specific_course($sub_course_id, $sub_term_id, $sub_bool_transfer, true, null, $req_by_degree_id))
 			{ 
 				
+        fpm($taken_course);
 								
 				// If this takenCourse is a transfer credit, then we want to remove
 				// any automatic eqv it may have set.
@@ -365,11 +367,11 @@ class _Student
 
 				if ($sub_hours == 0)
 				{ // If none specified, assume its the full amount.				  
-					$sub_hours = $taken_course->hours_awarded;
+					$sub_hours = $taken_course->get_hours_awarded($req_by_degree_id);
 				}
 
 
-				if (($taken_course->hours_awarded > $sub_hours))
+				if (($taken_course->get_hours_awarded($req_by_degree_id) > $sub_hours))
 				{
 
 				  
@@ -381,13 +383,14 @@ class _Student
 					// trouble.  Because, for example, 2.001 - 2 actually gets .00009999999 instead of .001.
 					// The most decimals we can have is 4, so let's round to 6 decimal places, just to give
 					// us some breathing room.  That should take care of us without losing too much precision.
-					$remaining_hours = round(($taken_course->hours_awarded - $sub_hours), 6);
+					$remaining_hours = round(($taken_course->get_hours_awarded($req_by_degree_id) - $sub_hours), 6);
 					
 					// Create a clone of the course with the leftover hours, and add
 					// it back into the list_courses_taken.
 					$new_course_string = $taken_course->to_data_string();
 					$new_course = new Course();
 					$new_course->load_course_from_data_string($new_course_string);
+          $new_course->random_id = mt_rand(1,9999);
           
 					//$new_course->bool_substitution_split = true;
 					//$new_course->bool_substitution_new_from_split = true;
@@ -398,19 +401,20 @@ class _Student
           $new_course->subject_id = $taken_course->subject_id;
           $new_course->course_num = $taken_course->course_num;
 					
-					$new_course->hours_awarded = $remaining_hours;
+					$new_course->set_hours_awarded($req_by_degree_id, $remaining_hours);
 					if (is_object($new_course->course_transfer))
 					{
-						$new_course->course_transfer->hours_awarded = $remaining_hours;
+						$new_course->course_transfer->set_hours_awarded($req_by_degree_id, $remaining_hours);
 					}
 
 					//$taken_course->bool_substitution_split = true;
 					$taken_course->set_details_by_degree($req_by_degree_id, "bool_substitution_split", TRUE);
           
-					$taken_course->hours_awarded = $sub_hours;
+          $taken_course->set_hours_awarded($req_by_degree_id, $sub_hours);
+          
 					if (is_object($taken_course->course_transfer))
 					{
-						$taken_course->course_transfer->hours_awarded = $sub_hours;
+						$taken_course->course_transfer->set_hours_awarded($req_by_degree_id, $sub_hours);
 					}
           										
 					// Add the newCourse back into the student's list_courses_taken.
@@ -663,7 +667,7 @@ class _Student
 			  $new_course->bool_hide_grade = true;
 			}			
 			
-			$new_course->hours_awarded = $cur["hours_awarded"] * 1;
+			$new_course->set_hours_awarded(0, $cur["hours_awarded"] * 1);
 			$new_course->display_status = "completed";
 			$new_course->bool_taken = true;
 			
@@ -671,9 +675,9 @@ class _Student
 			// If so, we need to set it to actually be 1 hour, and
 			// indicate this is a "ghost hour."
 			if (!in_array($new_course->grade, $retake_grades) 
-			     && $new_course->hours_awarded == 0) 			
+			     && $new_course->get_hours_awarded() == 0) 			
 			{
-			  $new_course->hours_awarded = 1;
+			  $new_course->set_hours_awarded(0, 1);
 			  $new_course->bool_ghost_hour = TRUE;
 			}			
 			
@@ -730,8 +734,8 @@ class _Student
 			$new_course->grade = $cur['grade'];
 			$t_course->grade = $cur['grade'];
 
-			$new_course->hours_awarded = $cur['hours_awarded'] * 1;
-			$t_course->hours_awarded = $cur['hours_awarded'] * 1;
+			$new_course->set_hours_awarded(0, $cur['hours_awarded'] * 1);
+			$t_course->set_hours_awarded(0, $cur['hours_awarded'] * 1);
 			
 			$new_course->level_code = $t_course->level_code;
 			
@@ -739,11 +743,11 @@ class _Student
 			// If so, we need to set it to actually be 1 hour, and
 			// indicate this is a "ghost hour."
 			if (!in_array($new_course->grade, $retake_grades) 
-			     && $new_course->hours_awarded == 0) 			
+			     && $new_course->get_hours_awarded() == 0) 			
 			{
-			  $new_course->hours_awarded = 1;
+			  $new_course->set_hours_awarded(0, 1);
 			  $new_course->bool_ghost_hour = TRUE;
-			  $t_course->hours_awarded = 1;
+			  $t_course->set_hours_awarded(0, 1);
 			  $t_course->bool_ghost_hour = TRUE;
 			}						
 			

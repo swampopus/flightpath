@@ -9,7 +9,7 @@
  * and groups to be taken Freshman year.
  *
  */
-class _Semester
+class _Semester extends stdClass
 {
 	public $title, $semester_num, $notice;
 	public $list_courses, $list_groups;
