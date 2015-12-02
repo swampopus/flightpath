@@ -304,6 +304,7 @@ class _DatabaseHandler extends stdClass
 	  //////////////////////////////////////////////
 	  
 		// Run the sqlQuery and return the result set.
+		if (!is_resource($this->dbc)) fpm(debug_backtrace());
 		$result = mysql_query($sql_query, $this->dbc);
 		if ($result)
 		{
@@ -334,7 +335,7 @@ class _DatabaseHandler extends stdClass
 	  $mysql_err = mysql_error();
 	  
     // If we are on production, email someone!
-    if ($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"] != "")
+    if (@$GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"] != "")
     {
       $server = $_SERVER["SERVER_NAME"];
     	$email_msg = t("A MYSQL error has occured in FlightPath.") . "  
@@ -353,11 +354,11 @@ class _DatabaseHandler extends stdClass
     	";
     	mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
     }
-    
+        
     fpm(t("A MySQL error has occured:") . " $mysql_err<br><br>" . t("The backtrace:"));
     fpm($arr);
 
-    if ($GLOBALS["fp_die_mysql_errors"] == TRUE) {
+    if (@$GLOBALS["fp_die_mysql_errors"] == TRUE) {
       print "\n<br>The script has stopped executing because of a MySQL error:
                     $mysql_err<br>\n
              Please fix the error and try again.<br>\n";

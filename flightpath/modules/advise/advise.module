@@ -502,13 +502,13 @@ function advise_display_popup_group_select() {
   
   $settings = fp_get_system_settings();
   
-  $blank_degree_id = trim($_GET["blank_degree_id"]);
-  $course_id = trim($_GET["course_id"]);
-  $group_id = trim(addslashes($_GET["group_id"]));
-  $group_hours_remaining = trim(addslashes($_GET["group_hours_remaining"]));
-  $semester_num = trim(addslashes($_GET["semester_num"]));
-  $req_by_degree_id = trim(addslashes($_REQUEST["req_by_degree_id"]));
-  $perform_action2 = $_REQUEST["perform_action2"]; 
+  $blank_degree_id = trim(@$_GET["blank_degree_id"]);
+  $course_id = trim(@$_GET["course_id"]);
+  $group_id = trim(addslashes(@$_GET["group_id"]));
+  $group_hours_remaining = trim(addslashes(@$_GET["group_hours_remaining"]));
+  $semester_num = trim(addslashes(@$_GET["semester_num"]));
+  $req_by_degree_id = trim(addslashes(@$_REQUEST["req_by_degree_id"]));
+  $perform_action2 = @$_REQUEST["perform_action2"]; 
 
 
 

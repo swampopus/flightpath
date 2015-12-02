@@ -824,7 +824,7 @@ function draw_menu_items($menu_array) {
 
 			$pC .= "<div class='tenpt' style='padding-left: 10px; padding-bottom: 5px;
 			                                   margin-left: 1.5em; text-indent: -1.5em;'>
-							$l_s_i $l_c_n ($c->" . get_hours_awarded() . " " . t("hrs") . ") - $c->grade - $l_term
+							$l_s_i $l_c_n (" . $c->get_hours_awarded() . " " . t("hrs") . ") - $c->grade - $l_term
 								";
 			
 			$c->group_list_unassigned->reset_counter();
@@ -921,6 +921,8 @@ function draw_menu_items($menu_array) {
 
 			$course_requirement = $substitution->course_requirement;
 			$subbed_course = $substitution->course_list_substitutions->get_first();
+      
+      $assigned_to_degree_id = $substitution->assigned_to_degree_id;
 
 			$sub_s_i = $subbed_course->subject_id;
 			$sub_c_n = $subbed_course->course_num;
@@ -987,8 +989,10 @@ function draw_menu_items($menu_array) {
 				$extra .= "]</span>";
 			}
 
+      $substitution_hours = $subbed_course->get_substitution_hours($assigned_to_degree_id);
+
 			$pC .= "<div class='tenpt' style='margin-bottom: 20px;'>
-						$sub_s_i $sub_c_n $sub_trans_notice ($subbed_course->substitution_hours hrs) $sub_action
+						$sub_s_i $sub_c_n $sub_trans_notice ($substitution_hours hrs) $sub_action
 						$cr_s_i $cr_c_n$in_group $by$remarks $extra
 						<br>
 							<a href='javascript: popupRemoveSubstitution(\"$db_substitution_id\");'>" . t("Remove substitution?") . "</a>
@@ -2163,6 +2167,8 @@ function draw_menu_items($menu_array) {
 			return $pC;
 		}
 
+    $req_by_degree_id = $course->req_by_degree_id;
+
 
 		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
 
@@ -2381,11 +2387,12 @@ function draw_menu_items($menu_array) {
       $pC .= "$html</div>";              
       
     }
-    
+    fpm($course);
     ////////////////
     // Is this course assigned to a group?    
 		if ($course->get_first_assigned_to_group_id() != "" && $course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE)
 		{
+		  fpm("here");
 			//$g = new Group($course->assigned_to_group_id);
 			$g = new Group();
       // TODO:  Not sure yet what to do about this. Might only be 1 value, actually, since courses are assigned
@@ -2404,19 +2411,20 @@ function draw_menu_items($menu_array) {
 				$tflag = intval($course->bool_transfer);
 				$pC .= "<div align='left' class='tenpt'>
 					<b>" . t("Special administrative function:") . "</b>
-						<a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"$g->group_id\");'>" . t("Remove from this group?") . "</a></div>";
+						<a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"$g->group_id\",\"$req_by_degree_id\");'>" . t("Remove from this group?") . "</a></div>";
 				$pC .= "</div>";
 			}
-
-		} else if ($course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE && $course->bool_has_been_assigned == true) {
+		} 
+		else if ($course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE && $course->get_has_been_assigned_to_degree_id()) {
 			// Course is not assigned to a group; it's on the bare degree plan.  group_id = 0.
 			// If user is an admin...
+			
 			if (user_has_permission("can_substitute"))
 			{
 				$tflag = intval($course->bool_transfer);
 				$pC .= "<div align='left' class='tenpt'>
 					<b>" . t("Special administrative function:") . "</b>
-						<a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"0\");'>" . t("Remove from the degree plan?") . "</a></div>";
+						<a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"0\",\"$req_by_degree_id\");'>" . t("Remove from the degree plan?") . "</a></div>";
 				$pC .= "</div>";
 			}
 
@@ -2817,9 +2825,6 @@ function draw_menu_items($menu_array) {
 			return;
 		}
 
-		
-
-
 		$title = $group->title;
 
 		$display_course_list = new CourseList();
@@ -2830,6 +2835,9 @@ function draw_menu_items($menu_array) {
 		$display_semesterNum = $place_group->assigned_to_semester_num;
 
     $req_by_degree_id = $group->req_by_degree_id;		
+    
+    // Make sure all courses and subgroups have the same req_by_degree_id set.
+    $group->set_req_by_degree_id($group->req_by_degree_id);
 
     // What we are trying to do is end up with a list of courses we want to display on the screen (for example,
     // that the student took or were substituted in)
@@ -2841,8 +2849,10 @@ function draw_menu_items($menu_array) {
 			$course = $group->list_courses->get_next();
 
 			// Do we have enough hours to keep going?
-			$fulfilled_hours = $display_course_list->count_hours();
+			$fulfilled_hours = $display_course_list->count_hours("", FALSE, TRUE, FALSE, FALSE, $req_by_degree_id);
 			$remaining = $place_group->hours_required - $fulfilled_hours;
+
+      fpm("fulfilled: $fulfilled_hours, remaining: $remaining");
 
 
 			// If the course in question is part of a substitution that is not
@@ -2851,7 +2861,7 @@ function draw_menu_items($menu_array) {
 			{
 				$try_c = $course->course_list_fulfilled_by->get_first();
 				if ($try_c->get_bool_substitution($req_by_degree_id) == TRUE && $try_c->get_bool_assigned_to_group_id($group->group_id) != TRUE)
-				{
+				{				  
 					continue;
 				}
 			}
@@ -2861,11 +2871,21 @@ function draw_menu_items($menu_array) {
 			//if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->bool_has_been_displayed != true && $course->bool_has_been_displayed != true)
 			{
 				$c = $course->course_list_fulfilled_by->get_first();
-				if ($remaining < $c->get_hours())
+        $ch = $c->get_hours($req_by_degree_id);
+        
+        // Because PHP has dumb floating point arithmatic, we are going to round our values to 8 places,
+        // otherwise I was getting weird results like 0.34 < 0.34 == true.  I chose 8 places to make sure it wouldn't
+        // actually cause the values to round and mess up the math.
+        $remaining = round($remaining, 8);
+        $ch = round($ch, 8);
+        
+        // Is whats remaining actually LESS than the course hours?  If so, we need to skip it.        
+				if ($remaining < $ch)
 				{
+				  //fpm("skipping $c->subject_id $c->course_num because remaining $remaining is less than course hours: $cgh");          
 					continue;
 				}
-
+        
 
 				$c->temp_flag = false;
 				$c->icon_filename = $group->icon_filename;
@@ -2879,7 +2899,7 @@ function draw_menu_items($menu_array) {
 			if ($course->bool_advised_to_take && $course->get_has_been_displayed($req_by_degree_id) != true && $course->assigned_to_semester_num == $display_semesterNum)
 			{
 				$c = $course;
-				if ($remaining < $c->get_hours())
+				if ($remaining < $c->get_hours($req_by_degree_id))
 				{
 					continue;
 				}
@@ -2908,7 +2928,7 @@ function draw_menu_items($menu_array) {
 					$course = $branch->list_courses->get_next();
 
 					// Do we have enough hours to keep going?
-					$fulfilled_hours = $display_course_list->count_hours();
+					$fulfilled_hours = $display_course_list->count_hours("", FALSE, TRUE, FALSE, FALSE, $req_by_degree_id);
 					$remaining = $place_group->hours_required - $fulfilled_hours;
 
 					if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->get_has_been_displayed($req_by_degree_id) != true && $course->get_has_been_displayed($req_by_degree_id) != true)
@@ -2943,7 +2963,7 @@ function draw_menu_items($menu_array) {
 					{
 
 						$c = $course;
-						if ($remaining < $c->get_hours() || $remaining < 1)
+						if ($remaining < $c->get_hours($req_by_degree_id) || $remaining < 1)
 						{
 
 							continue;
@@ -3762,6 +3782,11 @@ function draw_menu_items($menu_array) {
 		$w5 = $this->popup_width_array[6];
 		$w6 = $this->popup_width_array[7];
 
+    $title_text = "";
+    $icon_link = "";
+    $pts = "";   
+
+
 		if ($course->subject_id == "")
 		{
 			// Lacking course's display data, so reload it from the DB.
@@ -4280,6 +4305,8 @@ function draw_menu_items($menu_array) {
 		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
     $req_by_degree_id = $place_group->req_by_degree_id;
     
+    $bool_no_courses = FALSE;
+    
 		if ($place_group->group_id != -88)
 		{
 			// This is NOT the Add a Course group.
@@ -4288,11 +4315,12 @@ function draw_menu_items($menu_array) {
 			{
 				fpm("Group not found.");
 				return;
-			}
+			}      
 		} 
 		else {
 			// This is the Add a Course group.
 			$group = $place_group;
+      
 		}
 
 		$group_id = $group->group_id;
@@ -4303,7 +4331,9 @@ function draw_menu_items($menu_array) {
 		// meaning, the student didn't have credit for it or the like.
 		// So what we need to do now is reload the group, being careful
 		// to preserve the existing courses / sub groups in the group.
+
 		$group->reload_missing_courses();
+
 
 		if ($group_hours_remaining == 0)
 		{
@@ -4501,9 +4531,12 @@ function draw_menu_items($menu_array) {
 		// We also should not see it in other instances of Core Math.
 		if ($group->group_id != -88 && $this->bool_blank != TRUE)
 		{
+		  fpm($final_course_list);      
 			// Only do this if NOT in Add a Course group...
 			// also, don't do it if we're looking at a "blank" degree.
 			$final_course_list->remove_previously_fulfilled($this->student->list_courses_taken, $group->group_id, true, $this->student->list_substitutions, $req_by_degree_id);
+      //fpm($final_course_list);
+
 
 		}
 
@@ -4560,6 +4593,8 @@ function draw_menu_items($menu_array) {
 		$s = "s";
 		//print_pre($place_group->to_string());
 
+		$unselectable_notice = "";
+		
 		if ($group_hours_remaining == 1){$s = "";}
 		if ($bool_unselectableCourses == true) {
 			$unselectable_notice = " <div class='tenpt'><i>(" . t("Courses worth more than %hrs hour$s

@@ -1296,7 +1296,10 @@ function invoke_hook($hook = "example_hook_here", $params = array()) {
  */
 function get_global_database_handler() {
   
-  if (!isset($GLOBALS["fp_global_database_handler"]) || !is_object($GLOBALS["fp_global_database_handler"])) {
+  $db = @$GLOBALS["fp_global_database_handler"];
+  
+  if (!is_object($db) || !is_resource($db->dbc)) {
+    // Something isn't right, or it wasn't set correctly.  Create a new connection.
     $GLOBALS["fp_global_database_handler"] = new DatabaseHandler();
   }
   

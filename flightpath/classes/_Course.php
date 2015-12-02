@@ -35,7 +35,7 @@ class _Course extends stdClass
   //public $bool_substitution, $course_substitution;
   //public $substitution_hours, $sub_remarks, $sub_faculty_id, $bool_outdated_sub;
   //public $bool_substitution_split, $substitution_footnote, $bool_substitution_new_from_split;
-  //public $assigned_to_group_id, $hours_awarded;
+  //public $assigned_to_group_id, $hours_awarded, $bool_has_been_assigned;
   //public $bool_has_been_displayed, $bool_has_been_displayed_by_degree_array;
    
   ///////////
@@ -49,7 +49,7 @@ class _Course extends stdClass
   // advising & in-system logic related:
   public $advised_hours, $bool_selected, $bool_advised_to_take;
   public $course_list_fulfilled_by;
-  public $bool_has_been_assigned, $bool_added_course, $group_list_unassigned;
+  public $bool_added_course, $group_list_unassigned;
   public $advised_term_id, $temp_old_course_id;
   public $bool_use_draft;
 
@@ -573,8 +573,12 @@ class _Course extends stdClass
     $rtn .= fp_join_assoc($this->get_degree_details_data_string("bool_substitution_new_from_split")) . "~";
     //$rtn .= intval($this->get_bool_substitution_split()) . "~";
     $rtn .= fp_join_assoc($this->get_degree_details_data_string("bool_substitution_split")) . "~";
-    $rtn .= intval($this->bool_has_been_assigned) . "~";
-
+    
+    // no longer used
+    //$rtn .= intval($this->bool_has_been_assigned) . "~";
+    $rtn .= "0~";  // temporary just to keep place.  Should probably just be removed.
+    
+    
     $rtn .= $this->display_status . "~";
     
     $rtn .= intval($this->bool_ghost_hour) . "~";
@@ -699,8 +703,10 @@ class _Course extends stdClass
     //$this->bool_substitution_split	= 	(bool) $temp[21];
     $this->set_degree_details_from_data_array(fp_explode_assoc($temp[15]), "bool_substitution_split");
     
-    $this->bool_has_been_assigned	= 	(bool) $temp[22];
-
+    // No longer used.  Using assigned_to_degree_ids instead.
+    //$this->bool_has_been_assigned	= 	(bool) $temp[22];
+    $throw_away = $temp[22];  // throw-away value.  Can probably just remove entirely.
+        
     $this->display_status	= 	$temp[23];
 
     $this->bool_ghost_hour	= 	(bool) $temp[24];
@@ -1015,8 +1021,10 @@ class _Course extends stdClass
    *
    * @return int
    */
-  function get_hours()
+  function get_hours($degree_id = 0)
   {
+
+    if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
 
     // This course might be set to 1 hour, but be a "ghost hour",
     // meaning the student actually earned 0 hours, but we recorded 1
@@ -1030,9 +1038,9 @@ class _Course extends stdClass
        
     // Do they have any hours_awarded? (because they completed
     // the course)
-    if ($this->get_hours_awarded() > 0)
+    if ($this->get_hours_awarded($degree_id) > 0)
     {
-      $h = $this->get_hours_awarded();
+      $h = $this->get_hours_awarded($degree_id);
       return $h;
     }
 
@@ -1041,10 +1049,6 @@ class _Course extends stdClass
       return $this->advised_hours * 1;
     }
     
-    
-    
-
-
 
     // No selected hours, but it's a variable hour course.
     // So, return the min_hours for this course.
@@ -1149,7 +1153,7 @@ class _Course extends stdClass
    */
   function equals(Course $course_c = null)
   {
-    if ($this->course_id == $course_c->course_id)
+    if ($course_c != null && $this->course_id == $course_c->course_id)
     {
       return true;
     }
@@ -1920,11 +1924,27 @@ class _Course extends stdClass
       
     if (count($this->assigned_to_group_ids_array) < 1) return FALSE;
     
-    
-    
     // Otherwise, get it.
-    return reset($this->assigned_to_group_ids_array);  // returns the first element.    
+    $x = reset($this->assigned_to_group_ids_array);  // returns the first element.
+    if ($x == 0) {  // not a valid group_id number
+      return FALSE;
+    }    
+
+    // Otherwise, return x   
+    return $x;     
     
+  }
+
+
+  function get_has_been_assigned_to_degree_id($degree_id = 0) {
+    
+    if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
+    
+    if (in_array($degree_id, $this->assigned_to_degree_ids_array)) {
+      return TRUE;
+    }    
+    
+    return FALSE;
   }
 
 
@@ -1969,7 +1989,7 @@ class _Course extends stdClass
 
     "advised_hours", "bool_selected", "bool_advised_to_take", "bool_use_draft",
     "course_list_fulfilled_by",
-    "bool_has_been_assigned", "bool_added_course", "group_list_unassigned", 
+    "bool_added_course", "group_list_unassigned", 
     
     "details_by_degree_array",
 

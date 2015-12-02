@@ -57,9 +57,8 @@ class _Group extends stdClass
 
 		
 		$this->db = $db;
-		if ($db == NULL)
-		{
-			$this->db = get_global_database_handler();
+		if ($db == NULL || !is_object($db) || !is_resource($db->dbc)) {		  
+			$this->db = get_global_database_handler();			
 		}
 
 
@@ -157,9 +156,9 @@ class _Group extends stdClass
 		$table_name = "group_requirements";
 		if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 		
-		$res = $this->db->db_query("SELECT * FROM $table_name
+		$res = db_query("SELECT * FROM $table_name
 							WHERE group_id = '?'	", $this->get_db_group_id());
-		while ($cur = $this->db->db_fetch_array($res))
+		while ($cur = db_fetch_array($res))
 		{
 
 			$id = $cur["id"];
@@ -281,23 +280,20 @@ class _Group extends stdClass
 	{
 		// replace course_id in this group, if it is missing.
 
-		$this->db = new DatabaseHandler();
-
-
 		$table_name = "group_requirements";
 		if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 
 		// Look for all instances of this course in the group's base list...
-		$res = $this->db->db_query("SELECT * FROM $table_name
+		$res = db_query("SELECT * FROM $table_name
 									WHERE `group_id`='?'
 									AND `course_id`='?' ", $this->get_db_group_id(), $course_id);
-		while ($cur = $this->db->db_fetch_array($res))
+		while ($cur = db_fetch_array($res))
 		{
 			$id = $cur["id"];
 
 			for ($t = 0; $t <= $cur["course_repeats"]; $t++)
 			{
-				$course = new Course($course_id,false,$db, false, "", $this->bool_use_draft);
+				$course = new Course($course_id,false,$this->db, false, "", $this->bool_use_draft);
 				$use_id = $id . "_rep_$t";
 				// Make sure the group does not already have this requirementID...
 				if ($this->list_courses->contains_group_requirement_id($use_id))
@@ -331,21 +327,35 @@ class _Group extends stdClass
 
 	}
 
+  /**
+   * Set all the courses and branches in this group to the specified degree_id.
+   */
+  function set_req_by_degree_id($degree_id = 0) {
+    $this->req_by_degree_id = $degree_id;
+    $this->list_courses->reset_counter();
+    $this->list_courses->set_req_by_degree_id($degree_id);
+    
+    // go through sub-groups and do the same...
+    $this->list_groups->reset_counter();
+    while($this->list_groups->has_more())
+    {
+      $g = $this->list_groups->get_next();
+      $g->set_req_by_degree_id($degree_id);
+    }
+    
+  }
+
+
 
 	function load_descriptive_data()
 	{
 
-		if ($this->db == NULL)
-		{
-			$this->db = get_global_database_handler();
-		}
-
 		$table_name = "groups";
 		if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 		// Load information about the group's title, icon, etc.
-		$res = $this->db->db_query("SELECT * FROM $table_name
+		$res = db_query("SELECT * FROM $table_name
 							WHERE group_id = '?' ", $this->get_db_group_id());
-		$cur = $this->db->db_fetch_array($res);
+		$cur = db_fetch_array($res);
 		$this->title = trim($cur["title"]);
 		$this->icon_filename = trim($cur["icon_filename"]);
 		$this->group_name = trim($cur["group_name"]);

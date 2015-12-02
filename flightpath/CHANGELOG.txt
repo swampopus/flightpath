@@ -1,6 +1,9 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-11-30
+  Working on split additions within groups.
+
 2015-11-24
   Made numerous changes to get split substitutions working (on the bare degree plan).  They tentatively seem to be working, separated between
   degrees.  Still have a little ways to go, including split subs inside of groups, and making them show in Excess credit correctly.

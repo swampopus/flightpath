@@ -353,7 +353,7 @@ class _Student extends stdClass
 			if($taken_course = $this->list_courses_taken->find_specific_course($sub_course_id, $sub_term_id, $sub_bool_transfer, true, null, $req_by_degree_id))
 			{ 
 				
-        fpm($taken_course);
+        //fpm($taken_course);
 								
 				// If this takenCourse is a transfer credit, then we want to remove
 				// any automatic eqv it may have set.
@@ -438,8 +438,10 @@ class _Student extends stdClass
 					
 					$this->array_significant_courses[$course_requirement->course_id] = true;
 
-				} else {
+				} else 
+				{
 					// This is a group addition!
+										
 					$course_requirement = new Course($sub_course_id, $sub_bool_transfer);
 					$this->array_significant_courses[$sub_course_id] = true;					
 					$substitution->bool_group_addition = true;

@@ -125,24 +125,24 @@ function unassignTransferEqv(course_id) {
 }
 
 
-function popupUnassignFromGroup(course_id, term_id, transferFlag, group_id) {
+function popupUnassignFromGroup(course_id, term_id, transferFlag, group_id, degree_id) {
   var x = confirm("Are you sure you wish to remove this course?");
   if (x)
   {
-    opener.unassignFromGroup(course_id, term_id, transferFlag, group_id);
+    opener.unassignFromGroup(course_id, term_id, transferFlag, group_id, degree_id);
     window.close();
   }
 }
 
  
 
-function unassignFromGroup(course_id, term_id, transferFlag, group_id) {
+function unassignFromGroup(course_id, term_id, transferFlag, group_id, degree_id) {
 
   var hiddenElements = document.getElementById("hidden_elements");
   var e = document.createElement("input");
   e.setAttribute("name","unassign_group");
   e.setAttribute("type","hidden");
-  e.setAttribute("value","" + course_id + "~" + term_id + "~" + transferFlag + "~" + group_id + "");
+  e.setAttribute("value","" + course_id + "~" + term_id + "~" + transferFlag + "~" + group_id + "" + degree_id + "");
   hiddenElements.appendChild(e);      
   
   // rebuild the cache.

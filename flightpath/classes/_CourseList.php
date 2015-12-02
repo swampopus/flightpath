@@ -510,11 +510,10 @@ class _CourseList extends ObjList
 			}
 
 			// Has the course been substituted?
-			if ($test_sub = $list_substitutions->find_requirement($course,false, -1))
+			if ($test_sub = $list_substitutions->find_requirement($course, false, -1))
 			{
 				// it WAS substituted, so we should NOT add it to our
-				// rtnList.
-				
+				// rtnList.				
 				// We should only skip it if the test_sub's degree_id matches the one supplied...
 				if ($degree_id >= 0) {
 				  if ($test_sub->assigned_to_degree_id == $degree_id) {
@@ -1349,7 +1348,7 @@ class _CourseList extends ObjList
 	 * @param bool $bool_use_ignore_list
 	 * @return int
 	 */
-	function count_hours($requirement_type = "", $bool_use_ignore_list = false, $bool_correct_ghost_hour = true, $bool_force_zero_hours_to_one_hour = false, $bool_exclude_all_transfer_credits = FALSE)
+	function count_hours($requirement_type = "", $bool_use_ignore_list = false, $bool_correct_ghost_hour = true, $bool_force_zero_hours_to_one_hour = false, $bool_exclude_all_transfer_credits = FALSE, $degree_id = 0)
 	{
 		// Returns how many hours are being represented in this courseList.
 		// A requirement type of "uc" is the same as "c"
@@ -1376,7 +1375,7 @@ class _CourseList extends ObjList
 				
 			}
 			
-			if ($course->get_bool_substitution_new_from_split() == TRUE)			
+			if ($course->get_bool_substitution_new_from_split($degree_id) == TRUE)			
 			{
 				// Do not count the possible fragments that are created
 				// from a new substitution split.  This is causing problems
@@ -1384,13 +1383,13 @@ class _CourseList extends ObjList
 				
 				// BUT-- only skip if this new fragment isn't also being
 				// substituted somewhere else!
-				if ($course->get_bool_substitution() == FALSE)
+				if ($course->get_bool_substitution($degree_id) == FALSE)
 				{ // not being used in another sub, so skip it.				  
 					continue;
 				}
 			}
 
-			$h_get_hours = $course->get_hours();
+			$h_get_hours = $course->get_hours($degree_id);
 			
 			
 			if ($bool_correct_ghost_hour) {
@@ -1398,7 +1397,7 @@ class _CourseList extends ObjList
   			// hours_awarded (probably 1).  However, if it was substituted,
   			// then we actually want the 0 hour.  Confusing, isn't it?
   			if ($course->bool_ghost_hour) {
-  			  $h_get_hours = $course->get_hours_awarded();
+  			  $h_get_hours = $course->get_hours_awarded($degree_id);
   			}
 			}
 			

@@ -707,6 +707,7 @@ CREATE TABLE `student_unassign_group` (
   `term_id` varchar(20) NOT NULL DEFAULT '',
   `transfer_flag` tinyint(4) NOT NULL DEFAULT '0',
   `group_id` varchar(50) NOT NULL DEFAULT '',
+  `degree_id` int(11) NOT NULL DEFAULT '0',
   `delete_flag` tinyint(4) NOT NULL DEFAULT '0',
   `posted` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),

@@ -358,7 +358,7 @@ class _FlightPath extends stdClass
 			// We will add them in now, because we do not take additions
 			// into consideration when figuring out branches.
 			if ($course_list_additions = $student->list_substitutions->find_group_additions($g))
-			{
+			{			  
 				$course_list_additions->reset_counter();
 				while($course_list_additions->has_more())
 				{
@@ -384,7 +384,7 @@ class _FlightPath extends stdClass
 					// will automatically find this course and apply the
 					// substitution.
 				}
-			}
+			}      
 			// First we see if there are any bare courses at this level.  If there
 			// are, then this group has NO branches!  Otherwise, the courses must
 			// always be contained in a branch!
@@ -588,7 +588,6 @@ class _FlightPath extends stdClass
 			$hours_required = 999999;
 		}
 
-		
 		$list_requirements->sort_smallest_hours_first();
 		// sort the requirement list by the best grades that the student has made?  Similar to the substitutions?
 		if ($sort_policy == "grade") {
@@ -597,9 +596,9 @@ class _FlightPath extends stdClass
 		else if ($sort_policy == "alpha") {
 		  $list_requirements->sort_alphabetical_order();
 		}
-		
+
 		$list_requirements->sort_substitutions_first($student->list_substitutions, $group_id);
-				
+
 		$list_requirements->reset_counter();
 		while($list_requirements->has_more())
 		{
@@ -644,7 +643,8 @@ class _FlightPath extends stdClass
 				// correct a bug.
 				if ($substitution->bool_group_addition == true)
 				{
-
+          //fpm("I am a group addition in degree $req_by_degree_id");
+          //fpm($substitution);
 					//if ($substitution->course_requirement->assigned_to_group_id != $group_id)
           if ($substitution->course_requirement->get_first_assigned_to_group_id() != $group_id)
 					{
@@ -665,13 +665,13 @@ class _FlightPath extends stdClass
           //fpm($course_sub);
 					if ($course_requirement->min_hours*1 > $course_sub->get_hours_awarded($req_by_degree_id))
 					{
-					  //fpm("here I am");					  
+					  					  
 					  // Because float math can create some very strange results, we must
 					  // perform some rounding.  We will round to 6 decimal places, which should
 					  // provide us the accuracy w/o losing precision (since we can only represent a max
 					  // of 4 decimals in the database anyway.
 						$remaining_hours = round($course_requirement->min_hours - $course_sub->get_hours_awarded($req_by_degree_id), 6);
-      //fpm($remaining_hours);
+      
 						$new_course_string = $course_requirement->to_data_string();
 						$new_course = new Course();
 						$new_course->load_course_from_data_string($new_course_string);
@@ -690,12 +690,21 @@ class _FlightPath extends stdClass
 						// hours as more, in CourseList->count_hours().
 						//$course_requirement->bool_substitution_new_from_split = false;
 
-						// Now, add this into the list, right after the course_requirement.
-						$current_i = $list_requirements->i;
-						$list_requirements->insert_after_index($current_i, $new_course);
+						
+    //if ($group_id == "2951197_2645063") {
+    //  fpm($list_requirements);
+    //}
+						
+  					// Only do this if we are NOT in a group!  This is to correct a bug where split additions to groups wound up
+  					// being displayed like available selections in the group.  It was like, weird man.  
+						if ($group_id == 0) {
+						  // Now, add this into the list, right after the course_requirement.
+						  $current_i = $list_requirements->i;
+						  $list_requirements->insert_after_index($current_i, $new_course);
+            }
 
 					}
-//fpm($substitution->course_list_substitutions);
+
 					$course_requirement->course_list_fulfilled_by = $substitution->course_list_substitutions;
 
 					$substitution->course_list_substitutions->assign_group_id($group_id);
@@ -847,7 +856,9 @@ class _FlightPath extends stdClass
             
             // Check what groups it has been assigned to already.
 						//$c->assigned_to_group_id = $group_id;
-						$c->assigned_to_group_ids_array[$group_id . "_" . $req_by_degree_id] = $group_id;
+						if ($group_id > 0) {
+						  $c->assigned_to_group_ids_array[$group_id . "_" . $req_by_degree_id] = $group_id;
+            }
             
 						$group->hours_assigned = $hours_assigned;
 						
@@ -868,8 +879,7 @@ class _FlightPath extends stdClass
 			}
 
 		}
-
-		
+  
 		return $count;
 	}
 
@@ -1385,16 +1395,17 @@ class _FlightPath extends stdClass
 			$term_id = $temp[1];
 			$transfer_flag = $temp[2];
 			$group_id = $temp[3];
+			$degree_id = $temp[3];
 
 			$result = $db->db_query("INSERT INTO student_unassign_group
 									(`student_id`,`faculty_id`,`course_id`,
-									`term_id`,`transfer_flag`,`group_id`,
+									`term_id`,`transfer_flag`,`group_id`,`degree_id`,
 									`posted`)
 									VALUES
-									('?','?','?','?','?','?','?')
-									", $student_id,$faculty_id,$course_id,$term_id,$transfer_flag,$group_id,time());
+									('?','?','?','?','?','?','?','?')
+									", $student_id,$faculty_id,$course_id,$term_id,$transfer_flag,$group_id,$degree_id,time());
 
-			watchdog("save_unassign_group", "$student_id,group_id:$group_id");
+			watchdog("save_unassign_group", "$student_id,group_id:$group_id,degree_id:$degree_id");
 
 		}
 
@@ -1612,7 +1623,7 @@ class _FlightPath extends stdClass
 								// I don't want to mark all occurances as advised.
 								$course->bool_advised_to_take = true;
 								$course->assigned_to_semester_num = $semester_num;
-								//$course->assigned_to_group_id = $group_id;
+								//$course->assigned_to_group_id = $group_id;								
 								$course->assigned_to_group_ids_array[$group_id] = $group_id;
 								
                 // Make sure we assign the hours to the group, so this
