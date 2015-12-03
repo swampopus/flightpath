@@ -219,11 +219,11 @@ class _Student extends stdClass
 	{
 		// Load courses which have been unassigned from groups
 		// or the bare degree plan.
-		$res = $this->db->db_query("SELECT * FROM student_unassign_group
-							WHERE 
-								student_id='?' 
-								AND delete_flag='0' ", $this->student_id);
-		while($cur = $this->db->db_fetch_array($res))
+		$res = db_query("SELECT * FROM student_unassign_group
+							       WHERE 
+								      student_id='?' 
+								      AND delete_flag='0' ", $this->student_id);
+		while($cur = db_fetch_array($res))
 		{
 			extract ($cur, 3, "db");
 
@@ -233,7 +233,7 @@ class _Student extends stdClass
 				$new_group = new Group();
 				$new_group->group_id = $db_group_id;
 				$new_group->db_unassign_group_id = $db_id;
-
+        $new_group->req_by_degree_id = $db_degree_id;
 
 				$taken_course->group_list_unassigned->add($new_group);
 			}

@@ -192,6 +192,13 @@ class _FlightPath extends stdClass
       
     } // else if count(degree_plans) > 1
 
+    // Add degree_plan to a simple cache to make our lives easier later on.
+    $_SESSION["fp_simple_degree_plan_cache_for_student"] = array(
+      "cwid" => $student_id,
+      "degree_id" => $this->degree_plan->degree_id,
+      "combined_degree_ids_array" => $this->degree_plan->combined_degree_ids_array,      
+      "is_combined_dynamic_degree_plan" => $this->degree_plan->is_combined_dynamic_degree_plan,      
+    );
 
 
 	}  // end of function fp_init
@@ -760,9 +767,9 @@ class _FlightPath extends stdClass
 					continue;
 				}
 
-
+//fpm($c->group_list_unassigned);
 				// Has the course been unassigned from this group?
-				if ($c->group_list_unassigned->find_match($group))
+				if ($c->group_list_unassigned->find_match_with_degree_id($group, $req_by_degree_id))
 				{
 					continue;
 				}
@@ -976,7 +983,7 @@ class _FlightPath extends stdClass
 	{
 		// Load courses from the inventory into the inventory cache...
 		// Attempt to load the course inventory cache...
-		if ($course_inventory = unserialize($_SESSION["fp_cache_course_inventory"]))
+		if ($course_inventory = unserialize(@$_SESSION["fp_cache_course_inventory"]))
 		{
 			$GLOBALS["fp_course_inventory"] = $course_inventory;
 		}
@@ -1395,9 +1402,9 @@ class _FlightPath extends stdClass
 			$term_id = $temp[1];
 			$transfer_flag = $temp[2];
 			$group_id = $temp[3];
-			$degree_id = $temp[3];
+			$degree_id = $temp[4];
 
-			$result = $db->db_query("INSERT INTO student_unassign_group
+			$result = db_query("INSERT INTO student_unassign_group
 									(`student_id`,`faculty_id`,`course_id`,
 									`term_id`,`transfer_flag`,`group_id`,`degree_id`,
 									`posted`)

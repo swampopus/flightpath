@@ -1,6 +1,13 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-12-3
+  Unassignments appear to be working for bare degree plan and in groups.  Working on making student's multiple degrees
+  show up nicer in the Currently Advising box.
+
+2015-12-2
+  Worked on unassignments per degree, both on bare degree plan and in groups.
+
 2015-11-30
   Working on split additions within groups.
 

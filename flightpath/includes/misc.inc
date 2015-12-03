@@ -629,6 +629,38 @@ function fp_get_degree_classifications() {
 }
 
 
+/**
+ * Returns back an assoc array for the supplied code.  Looks like:
+ * $arr["level_num"] = number
+ * $arr["title"] = the title
+ * 
+ * 
+ */
+function fp_get_degree_classification_details($degree_class = "MAJOR", $bool_return_class_code_as_title_if_not_found = TRUE) {
+  $rtn = array();
+  
+  if ($bool_return_class_code_as_title_if_not_found) {
+    // Use the degree_class as title for default, if we can't find it otherwise.
+    $rtn["level_num"] = 0;
+    $rtn["title"] = $degree_class;
+    $rtn["degree_class"] = $degree_class;
+  }
+  
+  $degree_classifications = fp_get_degree_classifications();
+  foreach ($degree_classifications["levels"] as $num => $details) {
+    if (isset($details[$degree_class])) {
+      $rtn["level_num"] = $num;
+      $rtn["title"] = $details[$degree_class];
+      $rtn["degree_class"] = $degree_class;   
+      break;   
+    }
+  }
+  
+  
+  return $rtn;
+}
+
+
 
 /**
  * Return an array version of the term_id_structure field from the admin settings

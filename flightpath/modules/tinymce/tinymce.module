@@ -121,7 +121,7 @@ function tinymce_perm() {
 function tinymce_form_alter(&$form, $form_id) {
   
   // if tinymce is active, add instrcutions under the textareas.
-  if ($GLOBALS["tinymce_active"]) {
+  if (@$GLOBALS["tinymce_active"]) {
     
     fp_add_css(fp_get_module_path("tinymce") . "/css/tinymce.css");
     

@@ -456,6 +456,8 @@ class _DatabaseHandler extends stdClass
 		$cache_catalog_year = 0;
 
 		$array_valid_names = array();
+		
+		/*  NOTE:  This was never running it seems, so commenting it out.
 		// First-- is this course in our GLOBALS cache for courses?
 		// If it is, then load from that.
 		if ($bool_load_from_global_cache == true &&
@@ -474,7 +476,7 @@ class _DatabaseHandler extends stdClass
 
 			return;
 		}
-
+    */
 
 		if ($course_id != 0)
 		{
@@ -532,18 +534,14 @@ class _DatabaseHandler extends stdClass
 			$subject_id = trim(strtoupper($cur["subject_id"]));
 			$course_num = trim(strtoupper($cur["course_num"]));
 
-
-
-			if ($min_hours < 1)
+			$min_hours = $cur["min_hours"];
+			$max_hours = $cur["max_hours"];
+			$repeat_hours = $cur["repeat_hours"];
+			if ($repeat_hours*1 < 1)
 			{
-				$min_hours = $cur["min_hours"];
-				$max_hours = $cur["max_hours"];
-				$repeat_hours = $cur["repeat_hours"];
-				if ($repeat_hours*1 < 1)
-				{
-					$repeat_hours = $max_hours;
-				}
+				$repeat_hours = $max_hours;
 			}
+
 
 			$db_exclude = $cur["exclude"];
 			$data_entry_comment = $cur["data_entry_comment"];

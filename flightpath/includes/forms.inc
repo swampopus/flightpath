@@ -33,6 +33,7 @@ function fp_get_form($form_id, $params = array()) {
   // The first the I want to do is find out, what are the defined weights in this form, if any.
   $defined_weights = array();
   foreach ($form as $element) {
+    if (!isset($element["weight"])) $element["weight"] = 0;
     $weight = (int)$element["weight"];
     if (!in_array($weight, $defined_weights)) {
       $defined_weights[] = $weight;
@@ -64,6 +65,7 @@ function fp_get_form($form_id, $params = array()) {
   $new_form = array();
   foreach ($defined_weights as $dw) {
     foreach ($form as $key => $element) {
+      if (!isset($element["weight"])) $element["weight"] = 0;
       $weight = (int)$element["weight"];
       if ($weight == $dw) {
         $new_form[$key] = $element;
@@ -128,6 +130,7 @@ function fp_render_form($callback, $form_type = "") {
   // Figure out the current page's title and display it.
   $path = $_GET["q"];
   $default_path = $path;
+  $default_query = "";
   // Figure out the "default_query" from $_GET
   $new_query = array();
   foreach ($_GET as $key => $val) {
@@ -160,7 +163,7 @@ function fp_render_form($callback, $form_type = "") {
       $form_include = $GLOBALS["fp_current_menu_router_item"]["file"];
     }
   }  
-  if ($form["#form_include"]) {
+  if (@$form["#form_include"]) {
     $form_include = $form["#form_include"];
   }
     
@@ -172,9 +175,10 @@ function fp_render_form($callback, $form_type = "") {
   $form_token = md5($callback . fp_token());     
     
   // Set up our form's attributes.
-  $attributes = $form["#attributes"];
+  $attributes = @$form["#attributes"];
   if (!is_array($attributes)) $attributes = array();
 
+  if (!isset($attributes["class"])) $attributes["class"] = "";
   $attributes["class"] .= " $extra_form_class fp-form fp-form-$callback ";
   // Convert the attributes array into a string.
   $new_attr = "";
@@ -184,7 +188,7 @@ function fp_render_form($callback, $form_type = "") {
   $attributes = $new_attr;
     
   // Did the user specify a submit method (like GET or POST)?  POST is default.
-  $submit_method = ($form["#submit_method"] == "") ? "POST" : $form["#submit_method"];
+  $submit_method = (@$form["#submit_method"] == "") ? "POST" : $form["#submit_method"];
     
   $rtn .= "<form action='" . fp_url("system-handle-form-submit", "", TRUE) .  "' method='$submit_method' id='fp-form-$callback' name='fp_form_name_$callback' $attributes>";
   
@@ -279,7 +283,7 @@ function form_error($element_name, $message) {
  * (We will just look in the SESSION to find out).
  */
 function form_has_errors() {
-  if (count($_SESSION["fp_form_errors"]) > 0) {
+  if (count(@$_SESSION["fp_form_errors"]) > 0) {
     return TRUE;
   }
   
@@ -301,24 +305,24 @@ function form_has_errors() {
 function fp_render_form_element($name, $element, $use_session_submission_values_for_callback = "") {
   $rtn = "";
 
-  $type = $element["type"]; 
+  $type = @$element["type"]; 
   if ($type == "") $type = "markup";
   
-  $value = $element["value"];
-  $label = $element["label"];
-  $options = $element["options"];
-  $description = $element["description"];
-  $popup_description = $element["popup_description"];
-  $prefix = $element["prefix"];
-  $suffix = $element["suffix"];
-  $required = $element["required"];
-  $no_please_select = $element["no_please_select"];
+  $value = @$element["value"];
+  $label = @$element["label"];
+  $options = @$element["options"];
+  $description = @$element["description"];
+  $popup_description = @$element["popup_description"];
+  $prefix = @$element["prefix"];
+  $suffix = @$element["suffix"];
+  $required = @$element["required"];
+  $no_please_select = @$element["no_please_select"];
   if (isset($element["hide_please_select"])) {
-    $no_please_select = $element["hide_please_select"];
+    $no_please_select = @$element["hide_please_select"];
   }
-  $confirm = $element["confirm"];
+  $confirm = @$element["confirm"];
   
-  $attributes = $element["attributes"];
+  $attributes = @$element["attributes"];
   
   if (is_array($attributes)) {
     // Convert the attributes array into a string.
@@ -337,7 +341,7 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   }
 
   $element_error_css = "";
-  if (is_array($_SESSION["fp_form_errors"])) {
+  if (isset($_SESSION["fp_form_errors"]) && is_array($_SESSION["fp_form_errors"])) {
     foreach ($_SESSION["fp_form_errors"] as $err) {
       if ($err["name"] == $name) {
         // There is an error on this element!  Add an extra CSS element.
@@ -384,14 +388,14 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
   }
 
   if ($type == "textarea") {
-    $rows = ($element["rows"]) ? $element["rows"] : "5";
+    $rows = (isset($element["rows"])) ? $element["rows"] : "5";
     $rtn .= "<textarea name='$name' id='element-$name' rows='$rows' $attributes>$value</textarea>";
   }
 
   if ($type == "textfield" || $type == "text" || $type == "password") {
     if ($type == "textfield") $type = "text";
-    $size = ($element["size"]) ? $element["size"] : "60";
-    $maxlength = ($element["maxlength"]) ? $element["maxlength"] : "255";
+    $size = (isset($element["size"])) ? $element["size"] : "60";
+    $maxlength = (isset($element["maxlength"])) ? $element["maxlength"] : "255";
     $value = htmlentities($value, ENT_QUOTES);    
     $rtn .= "<input type='$type' name='$name' id='element-$name' size='$size' maxlength='$maxlength' value='$value' $attributes>";
   }

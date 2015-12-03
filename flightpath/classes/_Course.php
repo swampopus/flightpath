@@ -108,7 +108,7 @@ class _Course extends stdClass
     $this->random_id = mt_rand(1,9999);
     $this->display_status = "eligible";
     $this->course_list_fulfilled_by = new CourseList();
-    $this->group_list_unassigned = new ObjList();
+    $this->group_list_unassigned = new GroupList();
     $this->bool_use_draft = $bool_use_draft;
     
     $this->req_by_degree_id = 0;

@@ -57,6 +57,21 @@ class _GroupList extends ObjList
 
   }  
   
+  /**
+   * Return back the matching group object, if it's degree_id matches.  Otherwise, FALSE
+   */
+  function find_match_with_degree_id($group, $degree_id) {
+    for ($t = 0; $t < $this->count; $t++)
+    {
+      $g = $this->array_list[$t];
+      if ($g->group_id == $group->group_id && $g->req_by_degree_id == $degree_id) {
+        return $g;
+      }
+    }
+        
+    return FALSE;
+  }
+  
   
   
   /**

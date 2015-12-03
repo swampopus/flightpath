@@ -1162,8 +1162,10 @@ function advise_init() {
   // Since this user doesn't have permission to view any sessions,
   // he can only view his own.
   if (!user_has_permission("view_any_advising_session")) {
-    $current_student_id = $user->cwid;
-    $_REQUEST["current_student_id"] = $current_student_id;    
+    if (isset($user->cwid)) {  
+      $current_student_id = $user->cwid;
+      $_REQUEST["current_student_id"] = $current_student_id;
+    }    
     $_REQUEST["advising_load_active"] = "yes";        
   }
     
@@ -1235,20 +1237,20 @@ function advise_init_screen() {
 
   $cache = @$_SESSION["cache_fp$csid"];
 
-  if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
-    $major_code = $GLOBALS["fp_advising"]["what_if_major_code"];
-    $track_code = $GLOBALS["fp_advising"]["what_if_track_code"];
+  if (@$GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
+    $major_code = @$GLOBALS["fp_advising"]["what_if_major_code"];
+    $track_code = @$GLOBALS["fp_advising"]["what_if_track_code"];
     $bool_what_if = true;
-    $cache = $_SESSION["cache_what_if$csid"];
+    $cache = @$_SESSION["cache_what_if$csid"];
   }
 
   $bool_draft = true;
   
   //fpm($GLOBALS["fp_advising"]);
-  if ($GLOBALS["fp_advising"]["advising_load_active"] == "yes") { 
+  if (@$GLOBALS["fp_advising"]["advising_load_active"] == "yes") { 
     // If we are loading from Active, then rebuild the cache as well.
     $bool_draft = false;
-    $GLOBALS["fp_advising"]["load_from_cache"] = "no";
+    @$GLOBALS["fp_advising"]["load_from_cache"] = "no";
   }
 
 

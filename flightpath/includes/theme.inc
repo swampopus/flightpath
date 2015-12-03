@@ -490,6 +490,37 @@ function fp_build_tab_array($page) {
     if (!isset($student) || $student == null || !is_object($student)) {
       $student = new Student($csid);
     }
+
+    if ($degree_plan == null) {
+      // Degree plan is still null.  This probably means we are NOT on an advising screen, so, let's
+      // use a FlightPath object to init our degree plan, which might actually be a combination of degrees.
+      
+      // First, we can cheat by seeing if we have anything cached for this student the last time their degree plan
+      // was loaded.  Using this,
+      // its much faster & memory-friendly than trying to re-init a whole new FlightPath object and DegreePlan object(s).
+      $bool_got_from_simple_cache = FALSE;
+      if (isset($_SESSION["fp_simple_degree_plan_cache_for_student"])) {
+        if ($_SESSION["fp_simple_degree_plan_cache_for_student"]["cwid"] == $csid) {
+          // Yes, it's for this student.  Load her up.
+          $degree_plan = new DegreePlan();
+          $degree_plan->degree_id = $_SESSION["fp_simple_degree_plan_cache_for_student"]["degree_id"];
+          $degree_plan->combined_degree_ids_array = $_SESSION["fp_simple_degree_plan_cache_for_student"]["combined_degree_ids_array"];
+          $degree_plan->is_combined_dynamic_degree_plan = $_SESSION["fp_simple_degree_plan_cache_for_student"]["is_combined_dynamic_degree_plan"];
+          
+          
+          $bool_got_from_simple_cache = TRUE;
+        }
+      }
+      
+      if (!$bool_got_from_simple_cache) {
+        // didn't get it from the simple cache, so load it all fresh.
+        $fp = new FlightPath($student);
+        $fp->init(TRUE);
+        $degree_plan = $fp->degree_plan;
+      }
+    }
+
+
     
     $settings = fp_get_system_settings();
           
@@ -585,37 +616,44 @@ function fp_build_tab_array($page) {
     ///////////////////////////
     $degree_title = "";
     
-    // We are trying to figure out what to display for the Major.  If there is only one degree plan
+    // We are trying to figure out what to display for the Degree field.  If there is only ONE degree plan
     // to worry about, then we will display it.
-    if ($degree_plan == null || !$degree_plan->is_combined_dynamic_degree_plan) {
+    if ($degree_plan == null || $degree_plan->is_combined_dynamic_degree_plan != TRUE) {
       // This is an ordinary degree plan.
+      
+      $degree_title = "";
       if ($degree_plan != NULL) {
-        $degree_title = $degree_plan->get_title2();      
+        $degree_title = $degree_plan->get_title2(TRUE);      
       }
+      /*
+       * I don't think this is relavent anymore.
       if ($degree_title == "") {
         // Attempt to load the degree from the student's information.     
         $degree_plan = $db->get_degree_plan($student->major_code, $student->catalog_year, true);
         $degree_title = $degree_plan->get_title2();
       }
-   
+       * 
+       */
       if ($screen_mode == "detailed") {
         $degree_title .= " ($degree_plan->major_code)";
       }
       
-      array_push($display_array, t("Major:") . " ~~ " . $degree_title);
+      array_push($display_array, t("Degree:") . " ~~ " . $degree_title);
     
     }
     else {
       // This degree plan is made from combining several other degrees.  let's trot them out and display them as well.
+      $t_degree_plan_titles = "";
       foreach ($degree_plan->combined_degree_ids_array as $t_degree_id) {
         $t_degree_plan = new DegreePlan($t_degree_id);
         $t_degree_plan->load_descriptive_data();
         
         // Add it to our box...
-        // TODO:  If more than one major/minor, etc, combine them?
-        array_push($display_array, t("Major:") . " ~~ " . $t_degree_plan->title);
+        // If more than one major/minor, etc, combine them?
+        $t_degree_plan_titles .= "<div class='multi-degree-title'>" . $t_degree_plan->get_title2(TRUE) . "</div>";
         
       }
+      array_push($display_array, t("Degrees:") . " ~~ " . $t_degree_plan_titles);
     }
     
     
@@ -625,7 +663,7 @@ function fp_build_tab_array($page) {
     // TODO:  handle tracks later...
     // If this degree has tracks, we must display something about it here.
 
-    if ($degree_plan->bool_has_tracks)
+    if ($degree_plan != null && $degree_plan->bool_has_tracks)
     {
       $extra_vars = "";
 

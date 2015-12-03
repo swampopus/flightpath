@@ -460,7 +460,7 @@ function blocks_render_blocks($section, $region, $title_style = "curved") {
     
     $rtn .= "<div class='block-$module-$delta $extra_class'>";
         
-    if ($block["title"] != "") {
+    if (@$block["title"] != "") {
       if ($title_style == "curved") {
         $rtn .= fp_render_curved_line($block["title"]);
       }

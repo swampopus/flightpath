@@ -294,7 +294,7 @@ class _CourseList extends ObjList
 	 * 
 	 * @return Course
 	 */
-	function find_most_recent_match(Course $course_c, $min_grade = "D", $bool_mark_repeats_exclude = false)
+	function find_most_recent_match(Course $course_c, $min_grade = "D", $bool_mark_repeats_exclude = false, $degree_id = 0)
 	{
 		// Get a list of all matches to courseC, and
 		// then order them by the most recently taken course
@@ -381,12 +381,10 @@ class _CourseList extends ObjList
 				}
 			}
 
-			// Has the course already been assigned?
-			if ($c->bool_has_been_assigned)
-			{ // Skip over it.  Now, this is an important part here, because actually, we should
-				// only skip it (and look at the next one) if this course is allowed to be
-				// repeated.  If it cannot be repeated, or if the student has taken the
-				// maximum allowed hours, then we should return false right here.
+			// Has the course already been assigned [to this degree]?
+			//if ($c->bool_has_been_assigned)
+			if ($c->get_has_been_assigned_to_degree_id($degree_id)) {
+			  // Yes, it's been assigned, so we can just skip it.
 				continue;
 			}
 
@@ -1272,12 +1270,12 @@ class _CourseList extends ObjList
 
 	/**
 	 * Returns a CourseList of all the courses matching course_id
-	 * that has bool_has_been_assigned == TRUE.
+	 * that has bool_has_been_assigned == TRUE for the requested degree
 	 *
 	 * @param int $course_id
 	 * @return CourseList
 	 */
-	function get_previous_assignments($course_id)
+	function get_previous_assignments($course_id, $degree_id = 0)
 	{
 		// Return a courseList of all the times a course matching
 		// course_id has the bool_has_been_assigned set to TRUE.
@@ -1287,7 +1285,7 @@ class _CourseList extends ObjList
 		for ($t = 0; $t < $this->count; $t++)
 		{
 			$course = $this->array_list[$t];
-			if ($course->course_id == $course_id && $course->bool_has_been_assigned == true)
+			if ($course->course_id == $course_id && $course->get_has_been_assigned_to_degree_id($degree_id) == true)
 			{
 				$rtn_list->add($course);
 			}

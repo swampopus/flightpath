@@ -142,7 +142,7 @@ function unassignFromGroup(course_id, term_id, transferFlag, group_id, degree_id
   var e = document.createElement("input");
   e.setAttribute("name","unassign_group");
   e.setAttribute("type","hidden");
-  e.setAttribute("value","" + course_id + "~" + term_id + "~" + transferFlag + "~" + group_id + "" + degree_id + "");
+  e.setAttribute("value","" + course_id + "~" + term_id + "~" + transferFlag + "~" + group_id + "~" + degree_id + "");
   hiddenElements.appendChild(e);      
   
   // rebuild the cache.

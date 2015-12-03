@@ -812,9 +812,11 @@ function draw_menu_items($menu_array) {
 		{
 			$c = $this->student->list_courses_taken->get_next();
 			// Skip courses which haven't had anything moved.
-			if ($c->group_list_unassigned->is_empty == true)
-			{	continue;	}
-
+			if ($c->group_list_unassigned->is_empty == true) {
+			  continue;	
+			}
+						
+			
 			if ($c->course_id > 0)
 			{	$c->load_descriptive_data();	}
 
@@ -822,29 +824,38 @@ function draw_menu_items($menu_array) {
 			$l_c_n = $c->course_num;
 			$l_term = $c->get_term_description(true);
 
-			$pC .= "<div class='tenpt' style='padding-left: 10px; padding-bottom: 5px;
-			                                   margin-left: 1.5em; text-indent: -1.5em;'>
-							$l_s_i $l_c_n (" . $c->get_hours_awarded() . " " . t("hrs") . ") - $c->grade - $l_term
-								";
-			
+		
 			$c->group_list_unassigned->reset_counter();
-			while($c->group_list_unassigned->has_more())
-			{
+			while($c->group_list_unassigned->has_more()) {
+			  
+		    $pC .= "<div class='tenpt' style='padding-left: 10px; padding-bottom: 5px;
+                                       margin-left: 1.5em; text-indent: -1.5em;'>
+                      $l_s_i $l_c_n (" . $c->get_hours_awarded() . " " . t("hrs") . ") - $c->grade - $l_term
+                    ";
+			  
 				$group = $c->group_list_unassigned->get_next();
 				$group->load_descriptive_data();
 				$group_title = "";
+        $degree_title = "";
+        if ($group->req_by_degree_id != 0) {
+          $tdeg = new DegreePlan($group->req_by_degree_id);
+          $degree_title = " (" . $tdeg->get_title2() . ")";
+        }
 				if ($group->group_id > 0)
 				{
 					$group_title = "<i>$group->title</i>";
 				} else {
 					$group_title = t("the degree plan");
 				}
-				$pC .= t("was removed from") . " $group_title.";
+				$pC .= t("was removed from") . " $group_title$degree_title.";
+        
+        $pC .= "</div>";        
+        
 			}
 
 
 
-			$pC .= "</div>";
+
 
 			$m_is_empty = false;
 			$is_empty = false;
@@ -1319,7 +1330,15 @@ function draw_menu_items($menu_array) {
 				} else {
 					$group_title = t("the degree plan");
 				}
-				$pC .= "<div class='tenpt'>" . t("This course was removed from") . " $group_title.<br>
+        
+        $degree_title = "";
+        if ($group->req_by_degree_id != 0) {
+          $tdeg = new DegreePlan($group->req_by_degree_id);
+          $degree_title = " (" . $tdeg->get_title2() . ")";
+        }        
+        
+        
+				$pC .= "<div class='tenpt'>" . t("This course was removed from") . " $group_title$degree_title.<br>
 							<a href='javascript: popupRestoreUnassignFromGroup(\"$group->db_unassign_group_id\")'>" . t("Restore?") . "</a>
 							</div>
 							";

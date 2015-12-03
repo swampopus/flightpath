@@ -2189,7 +2189,7 @@ function system_display_main_page() {
   //////////////////////////////////////////////////////////
   // To cut down on how long it takes to load huge groups
   // like Free Electives, we will pre-load some of the course inventory here.
-  if ($_SESSION["fp_cached_inventory_flag_one"] != true)
+  if (@$_SESSION["fp_cached_inventory_flag_one"] != true)
   {
     $load_number = $GLOBALS["fp_system_settings"]["load_course_inventory_on_login_number"];
     if ($load_number > 1) {
@@ -2260,7 +2260,7 @@ function system_init() {
   
   if (!isset($_SESSION["fp_user_object"]->roles[1])) $_SESSION["fp_user_object"]->roles[1] = ""; 
       
-  if ($_SESSION["fp_logged_in"] == TRUE) {
+  if (@$_SESSION["fp_logged_in"] == TRUE) {
     // Make sure it doesn't have the anonymous user role (rid == 1).
     if ($_SESSION["fp_user_object"]->roles[1] == "anonymous user") {
       unset($_SESSION["fp_user_object"]->roles[1]);

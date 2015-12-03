@@ -447,7 +447,8 @@ class _DegreePlan extends stdClass
   }
 
 
-  function get_title2()
+
+  function get_title2($bool_include_classification = FALSE)
   {
     // This will simply return the degree's title.  If it does not
     // exist, it will try to find another degree with the same major_code.
@@ -456,25 +457,35 @@ class _DegreePlan extends stdClass
 
     $this->load_descriptive_data();
 
-    if ($this->title != "")
-    {
-      return $this->title;
+    $dtitle = "";
+
+    if ($this->title != "") {
+      $dtitle = $this->title;
+    }
+    else {
+
+
+      // Still no title?  Try to load ANY degree title with this degree's
+      // major_code.
+      $table_name = "degrees";
+      if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
+  
+      $res = $this->db->db_query("SELECT * FROM $table_name
+              								WHERE major_code = '?' 
+              								ORDER BY catalog_year DESC LIMIT 1", $this->major_code);
+      $cur = $this->db->db_fetch_array($res);
+      $this->title = $cur["title"];
+
+      $dtitle = $this->title;
     }
 
+    if ($bool_include_classification && $this->degree_class != "") {
+      $details = fp_get_degree_classification_details($this->degree_class);
+      
+      $dtitle .= " (" . $details["title"] . ")";
+    }
 
-    // Still no title?  Try to load ANY degree title with this degree's
-    // major_code.
-    $table_name = "degrees";
-    if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
-
-    $res = $this->db->db_query("SELECT * FROM $table_name
-            								WHERE major_code = '?' 
-            								ORDER BY catalog_year DESC LIMIT 1", $this->major_code);
-    $cur = $this->db->db_fetch_array($res);
-    $this->title = $cur["title"];
-
-    return $this->title;
-
+    return $dtitle;
   }
 
 

@@ -24,7 +24,7 @@ function advise_display_history() {
 
  
   // If coming here from a save, display info here.
-  if ($_REQUEST["adv_id_array_serialized"] != "") {
+  if (@$_REQUEST["adv_id_array_serialized"] != "") {
     $click_links = "";
     $advising_session_id_array = unserialize($_REQUEST["adv_id_array_serialized"]);
  
@@ -179,12 +179,12 @@ function advise_display_history() {
   $turl = fp_url("comments/popup-display-all-comments");
   
   $rtn .= "<tr><td colspan='3' class='tenpt'>
-        <!--STARTCOM$cat_type--><div style='padding-top: 10px;'>
+        <!--STARTCOM--><div style='padding-top: 10px;'>
           <b>" . t("Advising Comments") . "</b>
           &nbsp; 
         <a href='javascript: popupPrintWindow(\"" . $turl . "\");'  
           class='nounderline'><img src='" . fp_theme_location() . "/images/popup.gif' border='0'>view/print all</a>
-        </div><!--ENDCOM$cat_type-->
+        </div><!--ENDCOM-->
         </td></tr>";
 
 // Use the function comments_get_comments instead of a direct query.
@@ -235,7 +235,7 @@ function advise_display_history() {
     
     $rtn .= "<tr><td colspan='4' class='tenpt'>
             <div style='padding-left: 20px;'>
-              " . t("No @cat_type comment history available.", array("@cat_type" => $cat_type)) . "</div></td></tr>";
+              " . t("No comment history available.") . "</div></td></tr>";
   }
 
   $rtn .= "</table>";
