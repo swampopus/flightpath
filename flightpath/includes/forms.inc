@@ -252,7 +252,7 @@ function clear_session_form_values($callback) {
 function form_basic_validate($form, $form_submitted) {
   
   foreach ($form as $name => $element) {
-    if (is_array($element) && $element["required"]) {
+    if (is_array($element) && @$element["required"]) {
       // Okay, this is a required field.  So, check that it has a non-blank value
       // in form_submitted.
       if ($form_submitted["values"][$name] == "") {

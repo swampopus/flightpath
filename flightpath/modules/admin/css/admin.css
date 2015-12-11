@@ -90,3 +90,26 @@
   padding-left: 15px;
 }
 
+/*
+ * The degrees page (where we list all the degrees)
+ */
+
+.degrees-table .degree-title {
+  
+}
+
+.degrees-table .class-level-3 .degree-title {
+  padding-left: 20px;
+}
+
+.degrees-table .degree-major-code {
+  font-size: 0.8em;
+}
+
+.degrees-filter {
+  margin: 10px;
+  padding: 10px;
+  font-size: 0.8em;
+  background: #eee;
+  border: 1px solid #ccc;
+}

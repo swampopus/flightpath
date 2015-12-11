@@ -15,22 +15,22 @@ function admin_display_courses() {
   
   $cc = 1;
 
-  $show_hidden = trim($_GET["show_hidden"]);
+  $show_hidden = trim(@$_GET["show_hidden"]);
   if ($show_hidden != "") {
     $_SESSION["dehidden"] = $show_hidden;
   } 
   else {
-    $show_hidden = $_SESSION["dehidden"];
+    $show_hidden = @$_SESSION["dehidden"];
   }
  
   // Get the "upper range" (UR) and
   // lower range (LR) of the courses in question...
-  $ur = trim($_GET["ur"]);
-  $lr = trim($_GET["lr"]);
+  $ur = trim(@$_GET["ur"]);
+  $lr = trim(@$_GET["lr"]);
   if ($ur == "") { 
     // meaning, no range was set.  Use A - AZZZZZ, so, all of the A's.
-    $ur = $_SESSION["dec_ur"];
-    $lr = $_SESSION["dec_lr"];
+    $ur = @$_SESSION["dec_ur"];
+    $lr = @$_SESSION["dec_lr"];
     if ($ur == "") { 
       // if still blank, assign it..
       $ur = "A";
@@ -202,10 +202,12 @@ function admin_edit_course_form() {
   $form = array();
   
   $de_catalog_year = admin_get_de_catalog_year();
-  $course_id = $_REQUEST["course_id"];
-  $subject_id = $_REQUEST["subject_id"];
+  $course_id = @$_REQUEST["course_id"];
+  $subject_id = @$_REQUEST["subject_id"];
   $subject_id = str_replace("_A_","&",$subject_id);  
-  $course_num = $_REQUEST["course_num"];
+  $course_num = @$_REQUEST["course_num"];
+  
+  $m = 0;
   
   fp_set_title(t("Edit Course @course", array("@course" => "$subject_id $course_num ($de_catalog_year)")));
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
@@ -239,7 +241,7 @@ function admin_edit_course_form() {
   // Begin the form...
 
   // TODO:  implement this!
-  if ($_SESSION["de_advanced_mode"] == true)
+  if (@$_SESSION["de_advanced_mode"] == true)
   {
     $pC .= " <span class='tenpt' style='background-color: yellow; margin-left: 20px;'>
           adv: course_id = $course_id. Used by:

@@ -307,7 +307,7 @@ function menu_get_menu_router_item_from_db($path) {
   foreach ($cur["page_arguments"] as $c => $arg) {
     if (is_numeric($arg)) {
       $temp = explode("/", $_REQUEST["q"]);
-      $cur["page_arguments"][$c] = $temp[$arg];
+      $cur["page_arguments"][$c] = @$temp[$arg];
     }
   }
   
@@ -322,7 +322,7 @@ function menu_get_menu_router_item_from_db($path) {
   foreach ($cur["access_arguments"] as $c => $arg) {
     if (is_numeric($arg)) {
       $temp = explode("/", $_REQUEST["q"]);
-      $cur["access_arguments"][$c] = $temp[$arg];
+      $cur["access_arguments"][$c] = @$temp[$arg];
     }
   }
   

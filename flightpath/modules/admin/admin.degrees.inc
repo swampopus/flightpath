@@ -312,6 +312,7 @@ function admin_add_degree_form() {
   fp_set_title(t("Add Degree for") . " " . $de_catalog_year);
   
   $form = array();
+  $m = 0;
   
   $form["markup" . $m++] = array(
     "type" => "markup",
@@ -526,15 +527,44 @@ function admin_display_degrees() {
   $rtn .= l("Copy a degree plan", "admin/degrees/copy-degree", "de_catalog_year=$de_catalog_year");
   $rtn .= "</div>";
   
+  $filter_class = @$_REQUEST["filter_class"];
   
-  $rtn .= "<div class='list-degree-row-excluded'>
-        " . t("Majors or Tracks marked as \"exclude\" are shaded.  You may pull up students with these
-        majors in FlightPath, but they will not be options in the What If mode.") . "
-      </div>
-      <br>
-      <div class='tenpt' align='center'>
-        " . t("Use CTRL-F to find degrees more quickly.") . "
-      </div>";
+  
+  $rtn .= "<div class='degrees-filter'>
+              <form id='filter-form' action='" . fp_url("admin/degrees") . "' method='GET'>
+              <input type='hidden' name='de_catalog_year' value='$de_catalog_year'>
+                            
+              <b>Filter list by...</b>
+              <br>Class: &nbsp; 
+           
+              <select name='filter_class' onChange='showUpdate(true);$(\"#filter-form\").submit();'> 
+              <option value=''>- Show all -</option>";
+
+  // Display degree_class pulldown.
+  $degree_classes = fp_get_degree_classifications();
+  foreach ($degree_classes["levels"] as $level => $details) {
+    foreach ($degree_classes["levels"][$level] as $machine_name => $title) {
+      $sel = "";
+      if ($machine_name == $filter_class) $sel = "selected";
+              
+      $rtn .= "<option value='$machine_name' $sel>$level - $title</option>";
+    }
+  }          
+                                      
+  $rtn .= " </select>            
+            </form>
+               
+           </div>";
+  
+  
+  
+  $rtn .= "<table class='degrees-table' border='0' width='100%' cellpadding='5' cellspacing='0'>
+            <tr>
+              <th width='8%'>Type</th>
+              <th width='15%'>Class</th>
+              <th width='60%'>Title</th>
+              <th>Code</th>
+            </tr>";
   
 
   $res = db_query("SELECT * FROM draft_degrees
@@ -545,6 +575,10 @@ function admin_display_degrees() {
     $db_exclude = 0;
     extract($cur, 3, "db");
 
+    // We filtered for a particular class, and we didn't find it, so skip.
+    if ($filter_class != "" && $db_degree_class != $filter_class) continue;
+
+
     if ($db_degree_type == "NA" && strstr($db_major, "|")) {
       $db_degree_type = " -- ";
     }
@@ -553,11 +587,12 @@ function admin_display_degrees() {
     if ($db_exclude == "1") {
       $extra_class = "list-degree-row-excluded";
     }
+    $degree_title = $db_title;
 
     // get JUST the major code...
     $temp = explode("|", $db_major_code);
-    $just_major = trim($temp[0]);
-    $just_conc = trim($temp[1]);
+    $just_major = trim(@$temp[0]);
+    $just_conc = trim(@$temp[1]);
     $outside = "";
 
     //if ($just_conc != "" && strstr($just_conc, "_"))
@@ -581,7 +616,7 @@ function admin_display_degrees() {
         $cur2 = db_fetch_array($res2);
 
         $db_title = trim($cur2["track_title"]);
-        $outside = "----&gt;";
+        $outside = "$degree_title &raquo; ";
         if (strstr($just_major, "|")) { 
           // both a conc AND a track. Denote it special.
           $outside = ">>" . $outside;
@@ -596,7 +631,9 @@ function admin_display_degrees() {
     }
 
 
+    $url = fp_url("admin/degrees/edit-degree", "de_catalog_year=$de_catalog_year&major_code=$db_major_code", array("class" => "degree-$db_degree_class"));
 
+    /*        
     $rtn .= "<div class='admin-degrees-list-degree'>
              <a name='degree_$db_degree_id'></a>";
     $rtn .= "<div class='list-degree-row $extra_class'>
@@ -605,9 +642,31 @@ function admin_display_degrees() {
             </div>
             </div>";
 
+    */      
+                
+                
+    $class_details = fp_get_degree_classification_details($db_degree_class);
+    $disp_class = $class_details["title"];            
+                
+    $rtn .= "<tr
+                  onmouseover=\"style.backgroundColor='#FFFF99'\"
+                  onmouseout=\"style.backgroundColor='white'\"
+                  style='cursor:pointer;'
+                  onClick='window.location=\"$url\"'
+                  class='$extra_class class-$db_degree_class class-level-" . $class_details["level_num"] . " '
+             >
+              <td valign='top' class='degree-type'>$db_degree_type</td>
+              <td valign='top' class='degreee-class'>$disp_class</td>
+              <td valign='top' class='degree-title'>$outside$db_title</td>
+              <td valign='top' class='degree-major-code'>$db_major_code</td>    
+            </tr>";        
 
 
   }    
+  
+  $rtn .= "</table>";
+  
+  
   
   return $rtn;
     
@@ -691,13 +750,13 @@ function admin_handle_edit_degree_submit() {
   // Save the entire post to the log.
 
   $errors = "";
-  $semester_titles_c_s_v = "";
+  $semester_titles_csv = "";
   $highest_semester_num = 0;   // What is the largest semester_num in the system?
   // Okay, now get the various courses...
   for ($semester_num = 0; $semester_num < 50; $semester_num++)
   {
     // Assuming no more than 50 semesters.
-    $courses = trim($_POST["courses_$semester_num"]);
+    $courses = trim(@$_POST["courses_$semester_num"]);
     if ($courses == "") {
       continue;
     }
@@ -721,7 +780,7 @@ function admin_handle_edit_degree_submit() {
       $tokens = explode(" ", $line);
       $subject_id = $tokens[0];
       $course_num = $tokens[1];
-      $requirement_type = strtolower($tokens[2]);
+      $requirement_type = strtolower(@$tokens[2]);
 
       if ($requirement_type == "") { 
         // major type by default.
@@ -735,7 +794,7 @@ function admin_handle_edit_degree_submit() {
       }
       
       
-      $min_grade = strtoupper($tokens[3]);
+      $min_grade = strtoupper(@$tokens[3]);
 
       if (strstr($requirement_type, "(")) {
         // This means there was no requirement_type specified, so it's "m",
@@ -868,10 +927,9 @@ function admin_handle_edit_degree_submit() {
 
   }
 
-
   // Make the semesterTitlesCSV...
   for ($semester_num = 0; $semester_num <= $highest_semester_num; $semester_num++) {
-    $semester_titles_csv .= trim($_POST["semester_title_$semester_num"]) . ",";
+    $semester_titles_csv .= trim(@$_POST["semester_title_$semester_num"]) . ",";
   }
 
   // Before we UPDATE, also grab the degree title, degree_type,
@@ -953,11 +1011,13 @@ function admin_display_edit_degree() {
   
   $major_code = $_REQUEST["major_code"];
 
+  $s_count = 0;
+  
   // Add in our CSS and JS
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
 
-  $button_msg = trim(addslashes($_REQUEST["button_msg"]));  
+  $button_msg = trim(addslashes(@$_REQUEST["button_msg"]));  
   
   $db = get_global_database_handler();
 
@@ -1238,7 +1298,7 @@ function admin_display_edit_degree() {
   //$pC .= get_j_s();
 
 
-  if ($_REQUEST["serialize"] != "")
+  if (@$_REQUEST["serialize"] != "")
   {
     print "<br><textarea rows=20 cols=80>" . serialize($degree) . "</textarea>";
   }  

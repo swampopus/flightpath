@@ -51,7 +51,10 @@ class _FlightPath extends stdClass
 		}
 
 		$major_code_csv = $GLOBALS["fp_advising"]["advising_major_code"];
-		$track_code = $GLOBALS["fp_advising"]["advising_track_code"];
+		//$track_code = $GLOBALS["fp_advising"]["advising_track_code"];
+		
+		$track_degree_ids = $GLOBALS["fp_advising"]["advising_track_degree_ids"];
+		
 		$student_id = $GLOBALS["fp_advising"]["advising_student_id"];
 		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
 		@$available_terms = $GLOBALS["fp_advising"]["available_advising_term_ids"];
@@ -65,7 +68,9 @@ class _FlightPath extends stdClass
 		if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes")
 		{
 			$major_code_csv = $GLOBALS["fp_advising"]["what_if_major_code"];
-			$track_code = $GLOBALS["fp_advising"]["what_if_track_code"];
+			
+			$track_degree_ids = $GLOBALS["fp_advising"]["what_if_track_degree_ids"];
+			
 			$this->bool_what_if = true;
 
 		}
@@ -107,7 +112,8 @@ class _FlightPath extends stdClass
 
 		if ($GLOBALS["fp_advising"]["advising_update_student_settings_flag"] != "")
 		{
-			$student->array_settings["track_code"] = $track_code;
+			//$student->array_settings["track_code"] = $track_code;
+			$student->array_settings["track_degree_ids"] = $track_degree_ids;
 			$student->array_settings["major_code"] = $major_code_csv;
 		}
 
@@ -123,7 +129,7 @@ class _FlightPath extends stdClass
 		
   		$t_major_code = $major_code;
   
-        
+      /*  
   		if ($track_code != "")
   		{
   			// Does the major_code already have a | in it?
@@ -137,6 +143,8 @@ class _FlightPath extends stdClass
   				$t_major_code .= "_" . $track_code;
   			}
   		}
+      */
+      // TODO:  If we are dealing with a track, then just get the degree_id directly
   
   
   
@@ -1093,7 +1101,7 @@ class _FlightPath extends stdClass
 
 		}
 
-
+        
 		// Is there anything in "log_addition" which we should write to the log?
 		if ($_POST["log_addition"] != "")
 		{

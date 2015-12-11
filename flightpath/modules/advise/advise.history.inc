@@ -14,6 +14,7 @@ function advise_display_history() {
   $student_id = $current_student_id;
   $db = get_global_database_handler();
   
+  $extra_style = $ast = "";
   $rtn = "";
   
   fp_add_css(fp_get_module_path("advise") . "/css/advise.css");

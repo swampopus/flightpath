@@ -172,6 +172,8 @@ function fp_display_page($page) {
     $content_top .= fp_render_greeting();
   }
   
+  $c = 0;
+  
   // Are there any "menu_link"s for this?  In order words, little links at the top of the page,
   // where breadcrumbs might appear.
   if (!$screen->bool_print && @is_array($page["router_item"]["page_settings"]["menu_links"])) {
@@ -182,8 +184,8 @@ function fp_display_page($page) {
       
       $p = menu_convert_replacement_pattern($item["path"]);
       $q = menu_convert_replacement_pattern($item["query"]);
-      $t = $item["text"];
-      $a = $item["attributes"];
+      $t = @$item["text"];
+      $a = @$item["attributes"];
       if (!is_array($a)) $a = array();
       
       // Make sure the current user has access to view this link.  Otherwise, do not even
@@ -649,8 +651,13 @@ function fp_build_tab_array($page) {
         $t_degree_plan->load_descriptive_data();
         
         // Add it to our box...
-        // If more than one major/minor, etc, combine them?
-        $t_degree_plan_titles .= "<div class='multi-degree-title'>" . $t_degree_plan->get_title2(TRUE) . "</div>";
+        // If more than one major/minor, etc, combine them
+        $t_title = $t_degree_plan->get_title2(TRUE);
+        // If this is actually a track, let's get the track's title instead.
+        if ($x = $t_degree_plan->get_track_title(TRUE)) {
+          $t_title = $x;
+        }
+        $t_degree_plan_titles .= "<div class='multi-degree-title'>" . $t_title . "</div>";
         
       }
       array_push($display_array, t("Degrees:") . " ~~ " . $t_degree_plan_titles);

@@ -445,6 +445,7 @@ function draw_menu_items($menu_array) {
 		$_SESSION["advising_student_id"] = "";
 		$_SESSION["advising_major_code$csid"] = "";
 		$_SESSION["advising_track_code$csid"] = "";
+		$_SESSION["advising_track_degree_ids$csid"] = "";
 		$_SESSION["advising_term_id$csid"] = "";
 		$_SESSION["advising_what_if$csid"] = "";
 		$_SESSION["what_if_major_code$csid"] = "";
@@ -2406,12 +2407,12 @@ function draw_menu_items($menu_array) {
       $pC .= "$html</div>";              
       
     }
-    fpm($course);
+    
     ////////////////
     // Is this course assigned to a group?    
 		if ($course->get_first_assigned_to_group_id() != "" && $course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE)
 		{
-		  fpm("here");
+		
 			//$g = new Group($course->assigned_to_group_id);
 			$g = new Group();
       // TODO:  Not sure yet what to do about this. Might only be 1 value, actually, since courses are assigned
@@ -2717,7 +2718,7 @@ function draw_menu_items($menu_array) {
         $t_degree_plan = new DegreePlan($course->req_by_degree_id);
         $t_degree_plan->load_descriptive_data();
         $pC .= "<tr><td colspan='8'>
-                  <div class='tenpt required-by-degree'>Required by $t_degree_plan->title</div>
+                  <div class='tenpt required-by-degree'>Required by " . $t_degree_plan->get_title2(TRUE, TRUE) . "</div>
                 </td></tr>";
         
         // Remember what the last degree we displayed was.        
@@ -2871,7 +2872,7 @@ function draw_menu_items($menu_array) {
 			$fulfilled_hours = $display_course_list->count_hours("", FALSE, TRUE, FALSE, FALSE, $req_by_degree_id);
 			$remaining = $place_group->hours_required - $fulfilled_hours;
 
-      fpm("fulfilled: $fulfilled_hours, remaining: $remaining");
+      //fpm("fulfilled: $fulfilled_hours, remaining: $remaining");
 
 
 			// If the course in question is part of a substitution that is not
@@ -3402,6 +3403,8 @@ function draw_menu_items($menu_array) {
     if (count($course->assigned_to_degree_ids_array) > 1) {
       $extra_classes .= " course-assigned-more-than-one-degree course-assigned-" . count($course->assigned_to_degree_ids_array) . "-degrees";
     }
+
+    // TODO:  If the course has NOT been assigned, but is appearing in more than one degree, give it an extra CSS class
 
 
 		if ($course->subject_id == "")
@@ -4868,17 +4871,25 @@ function draw_menu_items($menu_array) {
 			<input type='hidden' name='advising_student_id' id='advising_student_id' value='{$GLOBALS["fp_advising"]["advising_student_id"]}'>
 			<input type='hidden' name='advising_term_id' id='advising_term_id' value='{$GLOBALS["fp_advising"]["advising_term_id"]}'>
 			<input type='hidden' name='advising_major_code' id='advising_major_code' value='{$GLOBALS["fp_advising"]["advising_major_code"]}'>
-			<input type='hidden' name='advising_track_code' id='advising_track_code' value='{$GLOBALS["fp_advising"]["advising_track_code"]}'>
+			
+      
+      <input type='hidden' name='advising_track_degree_ids' id='advising_track_degree_ids' value='{$GLOBALS["fp_advising"]["advising_track_degree_ids"]}'>
+      
 			<input type='hidden' name='advising_update_student_settings_flag' id='advising_update_student_settings_flag' value=''>
 			<input type='hidden' name='advising_what_if' id='advising_what_if' value='{$GLOBALS["fp_advising"]["advising_what_if"]}'>
 			<input type='hidden' name='what_if_major_code' id='what_if_major_code' value='{$GLOBALS["fp_advising"]["what_if_major_code"]}'>
-			<input type='hidden' name='what_if_track_code' id='what_if_track_code' value='{$GLOBALS["fp_advising"]["what_if_track_code"]}'>
+			
+      
+			<input type='hidden' name='what_if_track_degree_ids' id='what_if_track_degree_ids' value='{$GLOBALS["fp_advising"]["what_if_track_degree_ids"]}'>
+
 			<input type='hidden' name='advising_view' id='advising_view' value='{$GLOBALS["fp_advising"]["advising_view"]}'>
 
 			<input type='hidden' name='current_student_id' id='current_student_id' value='{$GLOBALS["fp_advising"]["current_student_id"]}'>
 			<input type='hidden' name='log_addition' id='log_addition' value=''>
 			
 			<input type='hidden' name='fp_update_user_settings_flag' id='fp_update_user_settings_flag' value=''>
+			
+			<input type='hidden' name='fp_update_student_degrees_flag' id='fp_update_student_degrees_flag' value=''>
 			
 			</span>
 			";

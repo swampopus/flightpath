@@ -51,6 +51,38 @@ function changeTrack(track_code) {
   submitForm(true);
 }
 
+
+
+/**
+ * This function is meant to replace the changeTrack and popupChangeWhatIfTrack functions.
+ * It needs to handle multiple track additions, not just one at a time.
+ */
+function popupChangeTrackSelections() {
+  // We will look through the page for any checkboxes (or radio buttons) that have been checked.
+  var track_degree_ids = "";
+  $("input:checked").each(function() {
+    track_degree_ids += ($(this).val()) + ",";
+  });
+  
+  // Okay, we now have the track_degree_id's, separated by comma, that the user wishes to apply to
+  // their degree plan.  We will now set our "opener" variables, submitForm, and close this popup window.
+  opener.document.getElementById("advising_track_degree_ids").value = track_degree_ids;
+  opener.document.getElementById("advising_update_student_settings_flag").value = "true";
+  opener.document.getElementById("log_addition").value = "change_track~" + track_degree_ids;
+  
+  // rebuild the cache.
+  opener.document.getElementById("load_from_cache").value="no";
+
+  opener.submitForm(true);
+  window.close();
+    
+    
+} // popupChangeTrackSelections
+
+
+
+
+
 function hideShowCharts(status) {
   document.getElementById("hide_charts").value = status;    
   document.getElementById("fp_update_user_settings_flag").value = "true";

@@ -1655,12 +1655,12 @@ function system_handle_form_submit() {
     $form = fp_get_form($callback);
     foreach ($form as $name => $element) {     
 
-      $values[$name] = $_POST[$name];
+      $values[$name] = @$_POST[$name];
       // Do we need to alter the value from the POST?
       
       // If this is a checkbox, and we have any value in the POST, it should
       // be saved as boolean TRUE
-      if ($element["type"] == "checkbox") {
+      if (isset($element["type"]) && $element["type"] == "checkbox") {
         if (isset($_POST[$name]) && $_POST[$name] === "1") {
           $values[$name] = TRUE;          
         }        
@@ -1741,7 +1741,7 @@ function system_handle_form_submit() {
   // Figure out where we are supposed to redirect the user.
   $redirect_path = $redirect_query = "";
 
-  if (is_array($form["#redirect"])) { 
+  if (isset($form["#redirect"]) && is_array($form["#redirect"])) { 
     $redirect_path = $form["#redirect"]["path"];
     $redirect_query = $form["#redirect"]["query"];    
   }

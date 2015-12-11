@@ -847,8 +847,8 @@ function student_search_query_advisees($sql) {
         $advised_image = "<span title='This student was last advised in What If mode.'><img src='" . fp_theme_location() . "/images/small_check.gif'><sup>wi</sup></span>";
         $db_major = $cur["major_code"];
         $temp = explode("\|_",$db_major);
-        $rtn_array[$r]["what_if_major_code"] = trim($temp[0]);
-        $rtn_array[$r]["what_if_track_code"] = trim($temp[1]);
+        $rtn_array[$r]["what_if_major_code"] = @trim($temp[0]);
+        $rtn_array[$r]["what_if_track_code"] = @trim($temp[1]);
       }
     }
 

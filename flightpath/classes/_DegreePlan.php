@@ -447,8 +447,26 @@ class _DegreePlan extends stdClass
   }
 
 
+  function get_track_title($bool_include_classification = FALSE) {
+    $this->load_descriptive_data();
+    
+    $ttitle = trim($this->track_title);
+    if ($ttitle == "") return FALSE;  // there is no track?
+            
+    if ($bool_include_classification) {
+      
+      $details = fp_get_degree_classification_details($this->degree_class);
+      
+      $ttitle .= " (" . $details["title"] . ")";
+    }
 
-  function get_title2($bool_include_classification = FALSE)
+    return $ttitle;
+
+            
+  }
+
+
+  function get_title2($bool_include_classification = FALSE, $bool_include_track_title = FALSE)
   {
     // This will simply return the degree's title.  If it does not
     // exist, it will try to find another degree with the same major_code.
@@ -479,11 +497,19 @@ class _DegreePlan extends stdClass
       $dtitle = $this->title;
     }
 
+
+    if ($bool_include_track_title && $this->track_title != "") {
+      $dtitle .= " &raquo; $this->track_title";
+    }
+    
     if ($bool_include_classification && $this->degree_class != "") {
       $details = fp_get_degree_classification_details($this->degree_class);
       
       $dtitle .= " (" . $details["title"] . ")";
     }
+
+
+
 
     return $dtitle;
   }
@@ -593,7 +619,7 @@ class _DegreePlan extends stdClass
 
   /**
    * Returns a simple array with values seperated by " ~~ "
-   * in this order: track_code ~~ track_title ~~ trackDesc
+   * in this order: track_code ~~ track_title ~~ trackDesc ~~ track's degree id
    *
    * @return array
    */
@@ -606,18 +632,22 @@ class _DegreePlan extends stdClass
     $table_name = "degree_tracks";
     if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 
-    $res = $this->db->db_query("SELECT * FROM $table_name
+    $res = db_query("SELECT * FROM $table_name
               								WHERE major_code = '?'
               								AND catalog_year = '?' 
               								ORDER BY track_title ", $this->major_code, $this->catalog_year);
-    while($cur = $this->db->db_fetch_array($res))
+    while($cur = db_fetch_array($res))
     {
 
       $track_code = $cur["track_code"];
       $track_title = $cur["track_title"];
       $track_description = $cur["track_description"];
       //adminDebug($track_code);
-      $rtn_array[] = "$track_code ~~ $track_title ~~ $track_description";
+      
+      // Let's also get the degree_id for this particular track.
+      $track_degree_id = $this->db->get_degree_id($this->major_code . "|_" . $track_code, $this->catalog_year, $this->bool_use_draft);
+      
+      $rtn_array[] = "$track_code ~~ $track_title ~~ $track_description ~~ $track_degree_id";
     }
 
     if (count($rtn_array))
