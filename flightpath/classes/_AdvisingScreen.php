@@ -4889,7 +4889,7 @@ function draw_menu_items($menu_array) {
 			
 			<input type='hidden' name='fp_update_user_settings_flag' id='fp_update_user_settings_flag' value=''>
 			
-			<input type='hidden' name='fp_update_student_degrees_flag' id='fp_update_student_degrees_flag' value=''>
+			<input type='hidden' name='advising_update_student_degrees_flag' id='advising_update_student_degrees_flag' value=''>
 			
 			</span>
 			";

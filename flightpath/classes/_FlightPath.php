@@ -118,6 +118,11 @@ class _FlightPath extends stdClass
 		}
 
 		
+
+    // Let's add the track_degree_ids to the major_code_csv...
+    $major_code_csv .= "," . $track_degree_ids;    
+    
+    
     ///////////////////////////////
     //  TODO:  Okay folks.  So this is basically where we will be interating through all
     //  of the student's major_codes (if they have more than one), and squishing them together,
@@ -128,6 +133,8 @@ class _FlightPath extends stdClass
     foreach ($temparr as $major_code) {		
 		
   		$t_major_code = $major_code;
+  
+      if (trim($major_code) == "") continue;
   
       /*  
   		if ($track_code != "")
@@ -144,14 +151,17 @@ class _FlightPath extends stdClass
   			}
   		}
       */
-      // TODO:  If we are dealing with a track, then just get the degree_id directly
-  
-  
-  
-  		$degree_id = $db->get_degree_id($t_major_code, $catalog_year);
+      // If we are dealing with a track, then just get the degree_id directly, else, figure out the
+      // degree_id from the t_major_code.
       
-  
-  
+      if (is_numeric($t_major_code)) {
+        $degree_id = $t_major_code;
+      }
+      else {
+  		  $degree_id = $db->get_degree_id($t_major_code, $catalog_year);
+      }
+      
+      /*  // NO LONGER NEEDED?
   		if (@$student->array_settings["track_code"] != "" && $this->bool_what_if == false
   		&& @$student->array_settings["major_code"] == $major_code)
   		{
@@ -165,7 +175,7 @@ class _FlightPath extends stdClass
   			  $degree_id = $temp_degree_id;
   			}
   		}
-  
+      */
   
   
   		if ($bool_load_full == true)
@@ -176,16 +186,13 @@ class _FlightPath extends stdClass
   
   			$degree_plan->add_semester_developmental($student->student_id);
   			//$this->degree_plan = $degree_plan;
-  			$degree_plans[] = $degree_plan;
+  			$degree_plans[$degree_plan->degree_id] = $degree_plan;
   		}
 
 
     } // foreach temparr as major_code.  The foreach loop through all our major codes.
 
-    // DEV:  Remove once we have everything working...
-    // $this->degree_plan = new DegreePlan();  // just a blank degree as a placeholder for now.
-    
-    
+        
     // Okay, coming out of this, we have an array of degree_plans  (maybe).  If it's just one, then set it to that one.
     if (count($degree_plans) == 1) {
       $this->degree_plan = $degree_plan;
@@ -1097,9 +1104,41 @@ class _FlightPath extends stdClass
 									VALUES ('?','?', '?' )	", $student_id, serialize($this->student->array_settings), time());
 
       watchdog("update_student_settings", "Settings updated for this student.");
-
+  
 
 		}
+
+    //var_dump($_POST);
+    //    die;
+    // We have changed tracks, so we are to edit the student degrees table.
+    if ($_POST["advising_update_student_degrees_flag"] == "true") {
+      // TODO:  Check if this is for whatif mode or not.
+      $is_whatif = 0;
+      // TODO:  Begin by deleting all the "editable" rows for this student
+      //        in student_degrees.
+      db_query("DELETE FROM student_degrees 
+                WHERE student_id = '?'
+                AND is_whatif = '?'
+                AND is_editable = '1' ", $student_id, $is_whatif);
+      // Now, go through our list of degree tracks ids we're adding back in, and add to the table.
+      $temp = explode(",", $_POST["advising_track_degree_ids"]);
+              
+      foreach ($temp as $tdegree_id) {
+        if (trim($tdegree_id) == "") continue;
+        if (!is_numeric($tdegree_id)) continue;
+        
+        $tdegree_plan = new DegreePlan($tdegree_id, NULL, TRUE);
+        $tmajor_code = $tdegree_plan->major_code . "|_" . $tdegree_plan->track_code;
+                        
+        db_query("INSERT INTO student_degrees
+                  (student_id, major_code, is_whatif, is_editable)
+                  VALUES ('?', '?', '?', '1')", $student_id, $tmajor_code, $is_whatif);
+        
+      }      
+       
+    } // editing degrees?
+
+
 
         
 		// Is there anything in "log_addition" which we should write to the log?

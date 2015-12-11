@@ -67,7 +67,7 @@ function popupChangeTrackSelections() {
   // Okay, we now have the track_degree_id's, separated by comma, that the user wishes to apply to
   // their degree plan.  We will now set our "opener" variables, submitForm, and close this popup window.
   opener.document.getElementById("advising_track_degree_ids").value = track_degree_ids;
-  opener.document.getElementById("advising_update_student_settings_flag").value = "true";
+  opener.document.getElementById("advising_update_student_degrees_flag").value = "true";
   opener.document.getElementById("log_addition").value = "change_track~" + track_degree_ids;
   
   // rebuild the cache.

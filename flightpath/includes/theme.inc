@@ -616,8 +616,9 @@ function fp_build_tab_array($page) {
 
 
     ///////////////////////////
-    $degree_title = "";
-    
+    $degree_title_div = "";
+    $s = "";  // plural degrees?
+    $bool_show_track_selection_link = FALSE;
     // We are trying to figure out what to display for the Degree field.  If there is only ONE degree plan
     // to worry about, then we will display it.
     if ($degree_plan == null || $degree_plan->is_combined_dynamic_degree_plan != TRUE) {
@@ -639,6 +640,10 @@ function fp_build_tab_array($page) {
       if ($screen_mode == "detailed") {
         $degree_title .= " ($degree_plan->major_code)";
       }
+
+      if ($degree_plan->get_available_tracks()) {
+        $bool_show_track_selection_link = TRUE;
+      }
       
       array_push($display_array, t("Degree:") . " ~~ " . $degree_title);
     
@@ -649,6 +654,11 @@ function fp_build_tab_array($page) {
       foreach ($degree_plan->combined_degree_ids_array as $t_degree_id) {
         $t_degree_plan = new DegreePlan($t_degree_id);
         $t_degree_plan->load_descriptive_data();
+
+        if ($t_degree_plan->get_available_tracks()) {
+          $bool_show_track_selection_link = TRUE;
+        }
+
         
         // Add it to our box...
         // If more than one major/minor, etc, combine them
@@ -658,28 +668,51 @@ function fp_build_tab_array($page) {
           $t_title = $x;
         }
         $t_degree_plan_titles .= "<div class='multi-degree-title'>" . $t_title . "</div>";
-        
+        $s = "s";
       }
-      array_push($display_array, t("Degrees:") . " ~~ " . $t_degree_plan_titles);
+      $degree_title_div = $t_degree_plan_titles;
+      
     }
+
+    // Now, do we want to add an option to select a track to the degree_title_div?
+    if ($bool_show_track_selection_link) {
+      // We want to add a link to the popup to let the user select other degree tracks.
+      $op_link = "<a href='javascript: popupWindow2(\"" . fp_url("advise/popup-change-track") . "\",\"\");'
+                    style='background: url(" . fp_theme_location() . "/images/popup.gif) no-repeat top left;
+                            padding-left: 20px; text-decoration: none; font-size: 0.8em;'
+                    >Change degree options</a>";
+      
+      if ($screen_mode == "not_advising" || $screen_mode == "detailed") {
+        $op_link = "";
+      }
+
+      if (!user_has_permission("can_advise_students")) {
+        
+        if ($GLOBALS["fp_advising"]["advising_what_if"] != "yes")
+        {
+          // In other words, we do not have permission to advise,
+          // and we are not in whatIf, so take out the link.
+          $op_link = "";
+        }
+      }
+     
+      if ($op_link) {
+        $degree_title_div .= "<div class='degree-op-link' style='text-align: right;'>$op_link</div>";
+      }            
+    }          
+
+    // Add our "degrees" section....
+    array_push($display_array, t("Degree$s:") . " ~~ " . $degree_title_div);     
+        
     
     
     
-    
-    
-    // TODO:  handle tracks later...
+    /*  THIS LINK IS NOW PART OF THE DEGREES SECTION
     // If this degree has tracks, we must display something about it here.
 
     if ($degree_plan != null && $degree_plan->bool_has_tracks)
     {
       $extra_vars = "";
-
-      /*if ($GLOBALS["advising_what_if"] == "yes")
-      {
-      $extra_vars .= "what_if_major_code={$GLOBALS["what_if_major_code"]}";
-      $extra_vars .= "&what_if_track_code={$GLOBALS["what_if_track_code"]}";
-      $extra_vars .= "&advising_what_if=yes";
-      }*/
       
       $op_link = "<a href='javascript: popupWindow2(\"" . fp_url("advise/popup-change-track") . "\",\"$extra_vars\");'><img
               src='" . fp_theme_location() . "/images/popup.gif' border='0' 
@@ -704,7 +737,6 @@ function fp_build_tab_array($page) {
         }
       }
 
-
       // Did has the student already selected an option?
       if ($degree_plan->track_code != "")
       {
@@ -717,10 +749,17 @@ function fp_build_tab_array($page) {
 
       array_push($display_array, t("Option:") . " ~~ " . $op_text);
     }
+
+     * 
+     */
+     
+     
     if (!$bool_blank) {
       array_push($display_array, t("Rank:") . " ~~ " . $student->rank);
     }
+    
     array_push($display_array, t("Catalog Year:") . " ~~ " . $cat_year);
+    
     if (!$bool_blank) {
       array_push($display_array, t("Cumulative:") . " ~~ " . $student->cumulative_hours . " " . t("hrs") . ". &nbsp;" . fp_truncate_decimals($student->gpa, 3) . " " . t("GPA"));
     }
