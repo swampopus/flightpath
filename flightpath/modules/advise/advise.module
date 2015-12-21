@@ -425,6 +425,7 @@ function advise_display_popup_change_track() {
   
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
    
+  $top_level_majors_csv = "";
     
   $degree_plan_array = array();
   if ($degree_plan->is_combined_dynamic_degree_plan == FALSE) {
@@ -453,7 +454,7 @@ function advise_display_popup_change_track() {
       <br><br>
       " . t("If you are unsure of what to do, simply close this window.");
 
-  // TODO:  Loop through available degrees here
+  // Loop through available degrees here
   foreach ($degree_plan_array as $t_degree_plan) {
   
     $t_degree_plan->load_descriptive_data();
@@ -471,6 +472,8 @@ function advise_display_popup_change_track() {
         <ul>";
 
     $major_code = $t_degree_plan->major_code;
+
+    $top_level_majors_csv .= $major_code . ",";
 
     // Get the list of available tracks for this student.
     if (!$tracks = $t_degree_plan->get_available_tracks())
@@ -536,8 +539,14 @@ function advise_display_popup_change_track() {
   
       $link = fp_get_js_confirm_link(t("Are you sure you wish to change degree options?"), "opener.changeTrack(\"$temp_tc\"); window.close(); ", $track_title);
       
+      
+      
+      // We actually don't need to do anything special for what_if, I think.  When
+      // we save, it should automatically detect it and set the appropriate values.
+      $is_whatif = 0;
       if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
-        $link = "<a href='javascript: popupChangeWhatIfTrack(\"$temp_tc\", \"" . t("Are you sure you wish to change degree options?") . "\");'>$track_title</a>";      
+        //$link = "<a href='javascript: popupChangeWhatIfTrack(\"$temp_tc\", \"" . t("Are you sure you wish to change degree options?") . "\");'>$track_title</a>";
+        $is_whatif = 1;              
       }
   
       //$rtn .= "<li class='tenpt' style='padding:3px;'>
@@ -568,8 +577,11 @@ function advise_display_popup_change_track() {
   } // foreach degree_plan_array
 
   $rtn .= "<input type='button' value='" . t("Apply Selections") . "'
-              onClick='if(confirm(\"Are you sure you wish to apply these selections to the degree plan?\")) { popupChangeTrackSelections();  }'>";
+              onClick='if(confirm(\"Are you sure you wish to apply these selections to the degree plan?\")) { popupChangeTrackSelections($is_whatif);  }'>";
 
+  // Keep track of what our top-level majors were.
+  $top_level_majors_csv = rtrim($top_level_majors_csv, ","); // remove trailing comma if exists
+  $rtn .= "<input type='hidden' name='top_level_majors_csv' id='top_level_majors_csv' value='$top_level_majors_csv'>";
   
   return $rtn;
 }
@@ -989,9 +1001,9 @@ function advise_display_view($view = "view") {
   //  print_pre($student->list_courses_taken->toString());
   // Should we re-cache the course inventory?  If there have been any changes
   // to it, then we will see that in a GLOBALS variable...
-  if ($GLOBALS["cache_course_inventory"] == true)
+  if (@$GLOBALS["cache_course_inventory"] == true)
   {
-    $_SESSION["fp_cache_course_inventory"] = serialize($GLOBALS["fp_course_inventory"]);
+    $_SESSION["fp_cache_course_inventory"] = serialize(@$GLOBALS["fp_course_inventory"]);
   }
    
   return $rtn;
@@ -1065,7 +1077,9 @@ function advise_display_what_if_selection($bool_undergrad_only = TRUE) {
           <input type='hidden' id='perform_action' name='perform_action'>
           <input type='hidden' id='advising_what_if' name='advising_what_if' value='yes'>
           <input type='hidden' id='current_student_id' name='current_student_id' value='$current_student_id'>
-  
+          
+          <input type='hidden' id='from_what_if_selection_form' name='from_what_if_selection_form' value='yes'>
+          
         ";
 
   $rtn .= "</form>
@@ -1125,19 +1139,41 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
   }
 
-
-  // Get the major_code(s).
-  $vars["advising_major_code"] = @$_REQUEST["advising_major_code"];
-  if ($vars["advising_major_code"] == "")
-  {    
-    $vars["advising_major_code"] = @$_SESSION["advising_major_code$csid"];
-    if ($vars["advising_major_code"] == "")
-    { // Default value...
-      if (!$student) $student = new Student($csid);
-      $vars["advising_major_code"] = $student->major_code_csv;
+  // Are we currently in WhatIf mode?
+  @$vars["advising_what_if"] = $_REQUEST["advising_what_if"];  // Get it from the GET or POST.
+  if ($vars["advising_what_if"] == "")
+  {
+    // Will equal "yes" if we ARE in whatIf mode.
+    @$vars["advising_what_if"] = $_SESSION["advising_what_if$csid"];
+    if ($vars["advising_what_if"] == "")
+    {
+      // Default value:
+      $vars["advising_what_if"] = "no";
     }
   }
 
+  // Go ahead and set our GLOBALS variable for advising_what_if.  It's needed when we load
+  // the $student variable.
+  $GLOBALS["fp_advising"]["advising_what_if"] = $vars["advising_what_if"];
+  
+
+
+  // Get the major_code(s).
+  $vars["advising_major_code"] = @$_REQUEST["advising_major_code"];
+  
+  if ($vars["advising_major_code"] == "")
+  {
+      
+    $vars["advising_major_code"] = @$_SESSION["advising_major_code$csid"];
+    if ($vars["advising_major_code"] == "")
+    { // Default value...
+      
+      if (!$student) $student = new Student($csid);             
+      $vars["advising_major_code"] = $student->major_code_csv;
+ 
+      $_REQUEST["advising_major_code"] = $student->major_code_csv;
+    }
+  }
 
 
 
@@ -1158,13 +1194,15 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
   $vars["advising_track_degree_ids"] = @$_REQUEST["advising_track_degree_ids"];
   if ($vars["advising_track_degree_ids"] == "")
-  {
+  {    
     $vars["advising_track_degree_ids"] = @$_SESSION["advising_track_degree_ids$csid"];
+    //fpm($_SESSION["advising_track_degree_ids$csid"]);   
     if ($vars["advising_track_degree_ids"] == "")
-    { // Default value...
+    { // Default value...    
       if (!$student) $student = new Student($csid);
-      //$vars["advising_track_code"] = $student->track_code;
-      // NOTE:  Student doesn't have a track_code property...  This code would have never worked.
+      // Re-load the major codes, as the tracks might have changed.
+      $student->load_student_data();      
+      $vars["advising_major_code"] = $student->major_code_csv;      
     }
   }
   
@@ -1217,18 +1255,6 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
     }
   }
 
-  // Are we currently in WhatIf mode?
-  @$vars["advising_what_if"] = $_REQUEST["advising_what_if"];  // Get it from the GET or POST.
-  if ($vars["advising_what_if"] == "")
-  {
-    // Will equal "yes" if we ARE in whatIf mode.
-    @$vars["advising_what_if"] = $_SESSION["advising_what_if$csid"];
-    if ($vars["advising_what_if"] == "")
-    {
-      // Default value:
-      $vars["advising_what_if"] = "no";
-    }
-  }
 
   @$vars["what_if_major_code"] = $_REQUEST["what_if_major_code"];  // Get it from the GET or POST.
   if ($vars["what_if_major_code"] == "")
@@ -1241,6 +1267,8 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
       $vars["what_if_major_code"] = "";
     }
   }
+
+
 
   /*
   @$vars["what_if_track_code"] = $_REQUEST["what_if_track_code"];  // Get it from the GET or POST.
@@ -1256,6 +1284,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   }
   */
 
+  
   @$vars["what_if_track_degree_ids"] = $_REQUEST["what_if_track_degree_ids"];  // Get it from the GET or POST.
   if ($vars["what_if_track_degree_ids"] == "")
   {
@@ -1267,7 +1296,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
       $vars["what_if_track_degree_ids"] = "";
     }
   }
-
+  
 
 
 
@@ -1485,8 +1514,7 @@ function advise_init_screen() {
     $fp = new FlightPath();
     $fp->init();    
     $student = $fp->student;
-    $degree_plan = $fp->degree_plan;
-    fpm($degree_plan);
+    $degree_plan = $fp->degree_plan;    
     $GLOBALS["fp_advising"]["load_from_cache"] = "no";
     $bool_loaded = TRUE;    
   }

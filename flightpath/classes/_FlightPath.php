@@ -112,17 +112,25 @@ class _FlightPath extends stdClass
 
 		if ($GLOBALS["fp_advising"]["advising_update_student_settings_flag"] != "")
 		{
+      
+      // TODO: This is used in What If mode.  We need to make sure that these track_degree_ids
+      // actually do match to the selected majors.  If not, then we should remove them.  This
+      // is to make sure that when we switch What If settings, these get cleared. 
+		  
+      $wi = "";
+      if ($this->bool_what_if) {
+        $wi = "what_if_";
+      }
 			//$student->array_settings["track_code"] = $track_code;
-			$student->array_settings["track_degree_ids"] = $track_degree_ids;
-			$student->array_settings["major_code"] = $major_code_csv;
+			$student->array_settings[$wi . "track_degree_ids"] = $track_degree_ids;
+			$student->array_settings[$wi . "major_code_csv"] = $major_code_csv;
 		}
 
 		
 
     // Let's add the track_degree_ids to the major_code_csv...
     $major_code_csv .= "," . $track_degree_ids;    
-    
-    
+        
     ///////////////////////////////
     //  TODO:  Okay folks.  So this is basically where we will be interating through all
     //  of the student's major_codes (if they have more than one), and squishing them together,
@@ -207,14 +215,18 @@ class _FlightPath extends stdClass
       
     } // else if count(degree_plans) > 1
 
-    // Add degree_plan to a simple cache to make our lives easier later on.
-    $_SESSION["fp_simple_degree_plan_cache_for_student"] = array(
-      "cwid" => $student_id,
-      "degree_id" => $this->degree_plan->degree_id,
-      "combined_degree_ids_array" => $this->degree_plan->combined_degree_ids_array,      
-      "is_combined_dynamic_degree_plan" => $this->degree_plan->is_combined_dynamic_degree_plan,      
-    );
+    $wi = "";
+    if ($this->bool_what_if) $wi = "_what_if";
 
+    if (isset($this->degree_plan) && $this->degree_plan != null) {
+      // Add degree_plan to a simple cache to make our lives easier later on.
+      $_SESSION["fp_simple_degree_plan_cache_for_student" . $wi] = array(
+        "cwid" => $student_id,
+        "degree_id" => $this->degree_plan->degree_id,
+        "combined_degree_ids_array" => $this->degree_plan->combined_degree_ids_array,      
+        "is_combined_dynamic_degree_plan" => $this->degree_plan->is_combined_dynamic_degree_plan,      
+      );
+    }
 
 	}  // end of function fp_init
 
@@ -236,6 +248,10 @@ class _FlightPath extends stdClass
       
       $new_degree_plan->combined_degree_ids_array[] = $degree_plan->degree_id;
       
+      if ($degree_plan->catalog_year == "" || $degree_plan->catalog_year == 0) {
+        $degree_plan->load_descriptive_data();
+      }
+      $new_degree_plan->catalog_year = $degree_plan->catalog_year;
       // Okay, now copy whatever we need to into the new_degree_plan.
       
       // First, go through its list of semesters, and copy out all the courses and groups      
@@ -1077,22 +1093,20 @@ class _FlightPath extends stdClass
 		// It's possible the user has simply pressed "refresh" after submitting the form.  If so,
 		// there is no reason to re-submit everything, creating duplicate data in some situations.
 		$post_md5 = md5(serialize($_POST));
-		if ($_SESSION["fp_previous_advising_post_md5"] == $post_md5) {		  
+		if (@$_SESSION["fp_previous_advising_post_md5"] == $post_md5) {		  
 		  return array();
 		}
 		// We may proceed, but save the POST md5 for next time.
-		$_SESSION["fp_previous_advising_post_md5"] = $post_md5;
-		
-		
+		$_SESSION["fp_previous_advising_post_md5"] = $post_md5; 
 		
 		
 		$bool_found_update_match = false;
 		$student_id = $this->student->student_id;
 		$degree_id = $this->degree_plan->degree_id;
-		$major_code = $this->degree_plan->major_code;
+		$major_code_csv = $this->degree_plan->get_major_code_csv();
+    $catalog_year = $this->degree_plan->catalog_year;
 		$available_terms = variable_get("available_advising_term_ids", "0");
-    
-    
+        
 		// Do we need to update the student's settings?
 		if (trim($_POST["advising_update_student_settings_flag"]) != "")
 		{
@@ -1112,10 +1126,13 @@ class _FlightPath extends stdClass
     //    die;
     // We have changed tracks, so we are to edit the student degrees table.
     if ($_POST["advising_update_student_degrees_flag"] == "true") {
-      // TODO:  Check if this is for whatif mode or not.
+      // Check if this is for whatif mode or not.
       $is_whatif = 0;
-      // TODO:  Begin by deleting all the "editable" rows for this student
-      //        in student_degrees.
+      if ($_POST["advising_what_if"] == "yes") {
+        $is_whatif = 1;
+      }
+      // Begin by deleting all the "editable" rows for this student
+      // in student_degrees.
       db_query("DELETE FROM student_degrees 
                 WHERE student_id = '?'
                 AND is_whatif = '?'
@@ -1135,6 +1152,18 @@ class _FlightPath extends stdClass
                   VALUES ('?', '?', '?', '1')", $student_id, $tmajor_code, $is_whatif);
         
       }      
+       
+      // Reset the SESSION variables and re-init, so we get the correct
+      // major codes and track codes for this student.      
+      $_SESSION["advising_track_degree_ids$student_id"] = "";
+      $_SESSION["advising_major_code$student_id"] = "";
+      $_REQUEST["advising_major_code"] = "";
+      $_REQUEST["advising_track_degree_ids"] = "";
+      
+      $this->student->load_student_data();
+      //fpm("calling init...");
+      $this->init(TRUE);
+      //fpm("done with init");       
        
     } // editing degrees?
 
@@ -1203,11 +1232,11 @@ class _FlightPath extends stdClass
 			// are going to use them later or not.
 			$result = $db->db_query("INSERT INTO advising_sessions
 								(student_id, faculty_id, term_id, degree_id,
-								major_code,
+								major_code_csv,
 								catalog_year, posted, is_whatif, is_draft)
 								VALUES
 								('?', '?','?','?','?','?','?','?','?') 
-								", $student_id, $faculty_id,$term_id,$degree_id, $major_code, $catalog_year, time(), $is_what_if, $is_draft);
+								", $student_id, $faculty_id,$term_id,$degree_id, $major_code_csv, $catalog_year, time(), $is_what_if, $is_draft);
 			$advising_session_id = mysql_insert_id();
 			$advising_session_id_array[$term_id] = $advising_session_id;
 			$advising_session_id_array_count[$term_id] = 0;
@@ -1218,10 +1247,10 @@ class _FlightPath extends stdClass
 		if ($is_what_if == "1"){$wi = "_whatif";}
 
 		if ($bool_draft) {
-			watchdog("save_adv_draft$wi", "$student_id,major_code:$major_code");
+			watchdog("save_adv_draft$wi", "$student_id,major_code_csv:$major_code_csv");
 		} 
 		else {
-			watchdog("save_adv_active$wi", "$student_id,major_code:$major_code");
+			watchdog("save_adv_active$wi", "$student_id,major_code_csv:$major_code_csv");
 		}
 
 		// Go through the POST, looking for the
@@ -1271,7 +1300,7 @@ class _FlightPath extends stdClass
 			// Some particular course should be updated.  Possibly this one.
 			// Updates happen because of a student changing the
 			// variable hours, for example.
-			if (trim($_POST["updatecourse"]) != "")
+			if (trim(@$_POST["updatecourse"]) != "")
 			{
 				$temp2 = explode("~",trim($_POST["updatecourse"]));
 

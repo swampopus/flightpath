@@ -451,6 +451,8 @@ function blocks_render_blocks($section, $region, $title_style = "curved") {
       $block = call_user_func($module . "_render_block", $delta);
     }
     
+        
+        
     if (!$block) {
       continue;
     }

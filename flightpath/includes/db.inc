@@ -37,12 +37,19 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
   // TODO:  Have a setting where, we do not actually log certain severity levels, like notice or debug
   // (to save space)
   
-  
-  $user_id = $user->id;
-  $cwid = $user->cwid;
-  $user_name = $user->name;
-  $is_student = (int) $user->is_student;
-  $is_faculty = (int) $user->is_faculty;
+  $user_id = 0;
+  $cwid = 0;
+  $user_name = "";
+  $is_student = 0;
+  $is_faculty = 0;
+      
+  if (is_object($user)) {
+    $user_id = @$user->id;
+    $cwid = @$user->cwid;
+    $user_name = @$user->name;
+    $is_student = (int) @$user->is_student;
+    $is_faculty = (int) @$user->is_faculty;
+  }
   
   $is_mobile = (int) fp_screen_is_mobile();
   
@@ -97,9 +104,9 @@ function fp_load_user($user_id) {
   }
   
   $res = db_query("SELECT * FROM users WHERE user_id = '?' ", $user_id);
+  
   if (db_num_rows($res) == 0) return NULL;
   $cur = db_fetch_object($res);
-  
   $rtn->id = $cur->user_id;
   $rtn->name = $cur->user_name;
   $rtn->f_name = $cur->f_name;
@@ -119,13 +126,14 @@ function fp_load_user($user_id) {
   while($cur = db_fetch_array($res)) {
     $rtn->roles[$cur["rid"]] = $cur["name"];
   }
-      
-  // Let's make sure we get the authenticated user role as well, #2.
-  $rtn->roles[2] = "authenticated user";
+  
         
+  // Let's make sure we get the authenticated user role as well, #2.
+  $rtn->roles[2] = "authenticated user";        
   // Go through each role and add in the permissions for each role.
   foreach ($rtn->roles as $rid => $val) {
     $perms = fp_get_permissions_for_role($rid);
+    
     // Merge the arrays while KEEPING the original's key.  So don't
     // use array_merge, use the + operator.
     $rtn->permissions = $rtn->permissions + $perms;
@@ -289,7 +297,7 @@ function db_affected_rows() {
  * Returns TRUE if the table specified exists or not.
  */
 function db_table_exists($table_name) {
-  $res = db_query("SHOW TABLES LIKE '?' ", $table_name);
+  $res = db_query("SHOW TABLES LIKE ? ", $table_name);
   $cur = db_fetch_array($res);
   if ($cur[0] == $table_name) {
     return TRUE;

@@ -44,16 +44,16 @@ function menu_rebuild_cache($bool_display_message = TRUE) {
     // to the menu_router array.
     foreach ($items as $path => $item) {
       if (is_numeric($path)) continue; // problem, so skip.
-
+      
       // Update our menu_router table.
       // Now, insert the new one.
       db_query("INSERT INTO menu_router
                   (path, access_callback, access_arguments, page_callback, page_arguments, title, description, type, weight, icon, page_settings, tab_family, tab_parent, file)
                   VALUES
-                  ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
-                  ", $path, $item["access_callback"], serialize($item["access_arguments"]), $item["page_callback"],
-                     serialize($item['page_arguments']), $item['title'], $item['description'], $item['type'], $item['weight'], $item['icon'],
-                     serialize($item['page_settings']), $item['tab_family'], $item['tab_parent'], $item['file']);
+                  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  ", $path, @$item["access_callback"], @serialize($item["access_arguments"]), @$item["page_callback"],
+                     @serialize($item['page_arguments']), @$item['title'], @$item['description'], @$item['type'], @$item['weight'], @$item['icon'],
+                     @serialize($item['page_settings']), @$item['tab_family'], @$item['tab_parent'], @$item['file']);
     }
   }  
   
@@ -162,8 +162,8 @@ function menu_execute_page_request() {
 function menu_get_items_beginning_with($menu_root) {
   $rtn = array();
   
-  $res = db_query("SELECT path FROM menu_router WHERE path LIKE '?%' 
-                    ORDER BY weight, title", $menu_root);
+  $res = db_query("SELECT path FROM menu_router WHERE path LIKE ? 
+                    ORDER BY weight, title", $menu_root . "%");
   while ($cur = db_fetch_array($res)) {
     $path = $cur["path"];
     $item = menu_get_item($path);
@@ -180,7 +180,7 @@ function menu_get_items_beginning_with($menu_root) {
 function menu_get_items_in_tab_family($tab_family) {
   $rtn = array();
   
-  $res = db_query("SELECT path FROM menu_router WHERE tab_family = '?'
+  $res = db_query("SELECT path FROM menu_router WHERE tab_family = ?
                    ORDER BY weight, title", $tab_family);
   while ($cur = db_fetch_array($res)) {
     $path = $cur["path"];
@@ -203,6 +203,8 @@ function menu_get_item($path) {
   // Since the menu item may be using wildcards, we must 
   // try to figure out exactly which defined path is the best one
   // to take.
+  
+  $menu_items = array();
   
   // To cut down on the amount we need to query, we will use a global variable.
   if (!isset($GLOBALS["fp_menu_items"]) || !is_array($GLOBALS["fp_menu_items"]) || count($GLOBALS["fp_menu_items"]) == 0) {

@@ -4,20 +4,66 @@
 class _DatabaseHandler extends stdClass
 {
 	//
-	public $dbc;
+	public $dbc;   // OLD.  DEPRECATED
+	public $pdo;
 
 	function __construct()
 	{
-	  	  
+	 
 	  $db_host = $GLOBALS["fp_system_settings"]["db_host"];
 	  $db_user = $GLOBALS["fp_system_settings"]["db_user"];
 	  $db_pass = $GLOBALS["fp_system_settings"]["db_pass"];
 	  $db_name = $GLOBALS["fp_system_settings"]["db_name"];
-	  
-    $this->dbc = mysql_connect ($db_host, $db_user, $db_pass) or die('Could not connect to database: ' . mysql_error());
-		mysql_select_db ($db_name);
 
+    // The port is part of the host.  Separate them out.
+    $db_port = "3306";
+    $temp = explode(":", $db_host);
+    
+    $db_host = trim($temp[0]);
+    $db_host_ip = trim($temp[0]);  // set as same as db_host for now.
+    
+    if (isset($temp[1])) $db_port = $temp[1];
+    
+    
+    //$this->dbc = mysql_connect ($db_host, $db_user, $db_pass) or die('Could not connect to database: ' . mysql_error());
+		//mysql_select_db ($db_name);
+
+		// Connection by IP address is fastest, so let's always try to do that.
+		// It can be time-consuming to convert our hostname to IP address.  Cache it in our SESSION
+		if (isset($_SESSION["fp_db_host_ip"])) {
+		  $db_host_ip = $_SESSION["fp_db_host_ip"];
+    }
+    else {
+ 		  // Convert our db_host into an IP address, then save to simple SESSION cache.
+		  $db_host_ip = gethostbyname($db_host);
+      $_SESSION["fp_db_host_ip"] = $db_host_ip;
+    }
+
+
+
+		// Connect using PDO
+		$this->pdo = new PDO("mysql:host=$db_host_ip;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass);
+		// Set our error handling...  (using "silent" so I can catch errors in try/catch and display them, email, etc, if wanted.)
+		$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      
 	}
+
+
+  /**
+   * This is a PHP "magic" function.  Called during a serialize command.
+   * Basically, we aren't trying to save any local variables.
+   * In fact, we will get a fatal exception if we try to serialize our PDO connection.
+   */
+  function __sleep() {
+    return array();  
+  }
+
+  /**
+   * This function is called when this objectis unserialized.  We want to reconnect to the database, so we'll call our constructor. 
+   */
+  function __wakeup() {
+    $this->__construct();
+  }
 
 
 
@@ -242,6 +288,153 @@ class _DatabaseHandler extends stdClass
 	}
 	
 
+	
+  /**
+   * This function is used to perform a database query. It uses PDO execute, which will
+   * take automatically replace ? with variables you supply as the arguments to this function,
+   * or as an array to this function.  Either will work.
+   * Do this by using ?, or naming the variable like :name or :age.
+   * 
+   * For example:
+   * $result = $db->db_query("SELECT * FROM table WHERE name = ? and age = ? ", $name, $temp_age);
+   * or
+   * $result = $db->db_query("SELECT * FROM table WHERE name = ? AND age = ? ", array($name, $temp_age));
+   * or
+   * $result = $db->db_query("SELECT * FROM table WHERE name = :name ", array(":name" => $name));
+   *
+   * @param unknown_type $sql_query
+   * @return unknown
+   */
+  function db_query($sql_query) {
+    
+    // If there were any arguments to this function, then we must first apply
+    // replacement patterns.
+    $args = func_get_args();
+    array_shift($args);
+    if (isset($args[0]) && is_array($args[0])) {
+      // If the first argument was an array, it means we passed an array of values instead
+      // of passing them directly.  So use them directly as our args.
+      $args = $args[0];
+    }
+
+    // We need to make sure that arguments are passed without being contained in single quotes ('?').  Should be just ?
+    $sql_query = str_replace("'?'", "?", $sql_query);
+
+    // If $c (number of replacements performed) does not match the number of replacements
+    // specified, warn the user.
+    if (substr_count($sql_query, "?") != count($args)) {
+      fpm("<br><b>WARNING:</b> Replacement count does not match what was supplied to query: $sql_query<br><br>");
+    }    
+    
+    //////////////////////////////////////////////
+    
+    // Run the sqlQuery and return the result set.
+    if (!isset($this->pdo) || $this->pdo == NULL) fpm(debug_backtrace());
+    
+    
+    try {
+      
+      $result = $this->pdo->prepare($sql_query);
+      $result->execute($args);      
+      return $result;
+    } 
+    catch (Exception $ex) {
+      // Some error happened!
+      $this->db_error($ex);
+    }
+    
+    /*
+    $result = mysql_query($sql_query, $this->dbc);
+    if ($result)
+    {
+      return $result;
+    } else {
+      // Meaning, the query failed...
+      // Do nothing.  Do not attempt to log anything, as that could cause an infinite loop.     
+      
+      // Display the error on screen
+      $this->db_error();
+    }
+     **/
+    
+  } // db_query	
+	
+
+  /**
+   * Draw out the error onto the screen.
+   *
+   */
+  function db_error(Exception $ex)
+  {
+        
+    $arr = $ex->getTrace();
+    
+    $when_ts = time();
+    $when_english = format_date($when_ts);
+    
+    $message = $ex->getMessage();
+    
+    // If we are on production, email someone!
+    if (@$GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"] != "")
+    {
+      $server = $_SERVER["SERVER_NAME"];
+      $email_msg = t("A MYSQL error has occured in FlightPath.") . "  
+      Server: $server
+      
+      Timestamp: $when_ts ($when_english)
+      
+      Error:
+      $message
+      
+      Backtrace:
+      " . print_r($arr, true) . "
+      ";
+      mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
+    }
+        
+    fpm(t("A MySQL error has occured:") . " $message<br><br>" . t("The backtrace:"));
+    fpm($arr);
+
+    if (@$GLOBALS["fp_die_mysql_errors"] == TRUE) {
+      print "\n<br>The script has stopped executing because of a MySQL error:
+                    $message<br>\n
+             Please fix the error and try again.<br>\n";
+      print "<br><br>Timestamp: $when_ts ($when_english)
+              <br><br>Program backtrace:
+              <pre>" . print_r($arr, true) . "</pre>";
+      die;
+    }
+    
+    // Also, check to see if the mysql_err is because of a lost connection, as in, the
+    // server went down.  In that case, we should also terminate immediately, rather
+    // than risk spamming an email recipient with error emails.
+    if (stristr($message, "Lost connection to MySQL server")
+        || stristr($message, "MySQL server has gone away")) {
+
+      print "<h2 style='font-family: Arial, sans serif;'>Database Connection Error</h2>
+              <br>
+              <div style='font-size: 1.2em; font-family: Arial, sans serif; padding-left: 30px;
+                          padding-right: 30px;'>
+              Sorry, but it appears the database is currently unavailable.  This may
+              simply be part of scheduled maintenance to the database server.  Please
+              try again in a few minutes.  If the problem persists for longer
+              than an hour, contact your technical support
+              staff.
+              
+              </div>
+              
+              ";
+      die;          
+    }
+    
+    
+
+  }	// db_error
+	
+	
+	
+	
+	
   /**
    * This function is used to perform a database query.  It can take simple replacement patterns,
    * by using ?.  If you actually need to have a ? in the query, you can escape it with ??.
@@ -251,7 +444,7 @@ class _DatabaseHandler extends stdClass
    * @param unknown_type $sql_query
    * @return unknown
    */
-	function db_query($sql_query) {
+	function z__db_query($sql_query) {
 	  
 	  // If there were any arguments to this function, then we must first apply
 	  // replacement patterns.
@@ -324,7 +517,7 @@ class _DatabaseHandler extends stdClass
 	 *
 	 * @param unknown_type $sql
 	 */
-	function db_error($msg = "")
+	function z__db_error($msg = "")
 	{
 	  
 	  $arr = debug_backtrace();
@@ -1112,13 +1305,27 @@ class _DatabaseHandler extends stdClass
 
   /**
    * Returns an array (or CSV string) of major_codes from the student_degrees table for this student.
+   *   
+   * 
    */
   function get_student_majors_from_db($student_cwid, $bool_return_as_csv = FALSE) {
     // Looks in the student_degrees table and returns an array of major codes.
     $rtn = array();
     
+    /*
+    if ($is_whatif == -1) {
+      $is_whatif = 0;
+      if (@$GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
+        $is_whatif = 1;
+      }
+    }
+     * 
+     */
+    
+    
     $res = $this->db_query("SELECT * FROM student_degrees
-                            WHERE student_id = '?' ", $student_cwid);
+                            WHERE student_id = '?' 
+                            ", $student_cwid);
     while ($cur = $this->db_fetch_array($res)) {
       $rtn[] = $cur["major_code"];
     }
@@ -1291,30 +1498,68 @@ class _DatabaseHandler extends stdClass
 	}
 
 
-	function db_num_rows($result)	{
+
+
+  function db_fetch_array($result) {
+    return $result->fetch(PDO::FETCH_ASSOC);
+  }
+
+  function db_fetch_object($result) {
+    return $result->fetch(PDO::FETCH_OBJ);
+  }
+
+  function db_num_rows($result) {
+    return $result->rowCount();
+  }
+
+  function db_affected_rows($result) {
+     return db_num_rows($result);
+  }
+
+  function db_insert_id() {
+    return $this->pdo->lastInsertId();
+  }
+
+  function db_close() {
+    return $this->pdo = NULL;  // this is all you need to do to close a PDO connection.
+  }
+
+
+///////////////////////////////////////////////////
+///////////////////////////////////////////////////
+///////////////////////////////////////////////////
+
+	function z__db_num_rows($result)	{
 		return mysql_num_rows($result);
 	}
 
-	function db_affected_rows() {
+	function z__db_affected_rows() {
 	   return mysql_affected_rows();
 	}
 	
-	function db_insert_id() {
+	function z__db_insert_id() {
 		return mysql_insert_id();
 	}
 
-	function db_fetch_array($result) {
+	function z__db_fetch_array($result) {
 		return mysql_fetch_array($result);
 	}
   
-  function db_fetch_object($result) {
+  
+  function z__db_fetch_object($result) {
     return mysql_fetch_object($result);
   }
   
 
-	function db_close() {
+	function z__db_close() {
 		return mysql_close($this->dbc);
 	}
 
+	
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	
+	
 
 }

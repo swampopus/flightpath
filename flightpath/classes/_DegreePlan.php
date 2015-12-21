@@ -446,6 +446,27 @@ class _DegreePlan extends stdClass
 
   }
 
+  /**
+   * Returns back a CSV of all the major codes that this degree comprises
+   */
+  function get_major_code_csv() {
+    if (!$this->is_combined_dynamic_degree_plan) return $this->major_code;  // just a basic single non-combined degree.
+    
+    // Otherwise, we should assume this is a combined dynamic degree.
+    $rtn = "";
+    
+    foreach ($this->combined_degree_ids_array as $degree_id) {
+      $t_degree_plan = new DegreePlan($degree_id);
+      $rtn .= $t_degree_plan->major_code . ",";
+    }
+    
+    $rtn = rtrim($rtn, ","); // remove last comma, if its there.
+    
+    return $rtn;
+    
+  }
+
+
 
   function get_track_title($bool_include_classification = FALSE) {
     $this->load_descriptive_data();
@@ -499,7 +520,7 @@ class _DegreePlan extends stdClass
 
 
     if ($bool_include_track_title && $this->track_title != "") {
-      $dtitle .= " &raquo; $this->track_title";
+      $dtitle .= "<span class='level-3-raquo'>&raquo;</span>$this->track_title";
     }
     
     if ($bool_include_classification && $this->degree_class != "") {
@@ -650,7 +671,7 @@ class _DegreePlan extends stdClass
       $rtn_array[] = "$track_code ~~ $track_title ~~ $track_description ~~ $track_degree_id";
     }
 
-    if (count($rtn_array))
+    if (count($rtn_array) > 1)  // we're going to have at least 1 because of the "none" option.  Let's skip that one.
     {
       return $rtn_array;
     } else {

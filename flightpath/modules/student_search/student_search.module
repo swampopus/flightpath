@@ -677,12 +677,8 @@ function student_search_render_advisees($adv_array, $title) {
     $student_id = $adv_array[$t]["student_id"];
     $first_name = $adv_array[$t]["first_name"];
     $last_name = $adv_array[$t]["last_name"];
-    //$major = $adv_array[$t]["major"];
+    $major = $adv_array[$t]["major"];
     
-    // Are there more majors for this user?
-    $major = "";
-    // Get a CSV of this student's majors
-    $major = $db->get_student_majors_from_db($student_id, TRUE);
         
     
     $advising_what_if = @$adv_array[$t]["advising_what_if"];
@@ -699,6 +695,8 @@ function student_search_render_advisees($adv_array, $title) {
     
     $advising_session_id = $adv_array[$t]["advising_session_id"];
     $advised_image = $adv_array[$t]["advised_image"];
+
+    fpm($adv_array);
 
     $on_mouse = "onmouseover=\"style.backgroundColor='#FFFF99'\"
                onmouseout=\"style.backgroundColor='white'\"
@@ -790,6 +788,8 @@ function student_search_render_advisees($adv_array, $title) {
 
 
 function student_search_query_advisees($sql) {
+      
+  $db = get_global_database_handler();  
   
   $rank_in = "( '" . join("', '", csv_to_array($GLOBALS["fp_system_settings"]["allowed_student_ranks"])) . "' )";
     
@@ -820,7 +820,14 @@ function student_search_query_advisees($sql) {
     $rtn_array[$r]["last_name"] = ucwords(strtolower($cur["l_name"]));
     $rtn_array[$r]["rank"] = $cur["rank_code"];
     $rtn_array[$r]["catalog_year"] = $cur["catalog_year"];
-    $rtn_array[$r]["major"] = $cur["major_code"];
+    //$rtn_array[$r]["major"] = $cur["major_code"];
+    // Need to get the major_code_csv for this student.
+    // Are there more majors for this user?
+    $major = "";
+    // Get a CSV of this student's majors
+    $major = $db->get_student_majors_from_db($student_id, TRUE);
+    $rtn_array[$r]["major"] = $major;
+    
     
 
     // We should also mark if the student has been advised for this semester
@@ -845,10 +852,13 @@ function student_search_query_advisees($sql) {
       if ($cur["is_whatif"] == "1")
       { // Last advising was a What If advising.
         $advised_image = "<span title='This student was last advised in What If mode.'><img src='" . fp_theme_location() . "/images/small_check.gif'><sup>wi</sup></span>";
-        $db_major = $cur["major_code"];
-        $temp = explode("\|_",$db_major);
-        $rtn_array[$r]["what_if_major_code"] = @trim($temp[0]);
-        $rtn_array[$r]["what_if_track_code"] = @trim($temp[1]);
+        $db_major_code_csv = $cur["major_code_csv"];
+        //$temp = explode("\|_",$db_major);
+        //$rtn_array[$r]["what_if_major_code"] = @trim($temp[0]);        
+        //$rtn_array[$r]["what_if_track_code"] = @trim($temp[1]);
+        $rtn_array[$r]["what_if_major_code"] = $db_major_code_csv;
+        $rtn_array[$r]["last_advised_what_if"] = TRUE;
+        
       }
     }
 

@@ -267,29 +267,64 @@ function advise_popup_display_summary() {
   $res = db_query("SELECT * FROM advising_sessions
                      WHERE advising_session_id = '?' ", $advising_session_id);
   if (db_num_rows($res) > 0) {
-    $cur = $db->db_fetch_array($res);
+    $cur = db_fetch_array($res);
     extract($cur, 3, "db");
   }
   $dt = format_date($db_posted, "pretty");
 
   $term = get_term_description($db_term_id);
+  
+  $degree_title_line = "";
+  $ds = "";
   $degree_plan = new DegreePlan();
-  $degree_plan->degree_id = $db_degree_id;
-  $degree_plan->load_descriptive_data();
-  $degree_title = $degree_plan->get_title(true);
+  if ($db_degree_id != _DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE) {
+    $degree_plan->degree_id = $db_degree_id;
+    $degree_plan->load_descriptive_data();
+    $degree_title_line = $degree_plan->get_title(true);    
+  }
+  else {
+    // This is a set of combined degrees.  We need to load all of the
+    // degrees in the major_code_csv to get their titles.
+    $temp = explode(",", $db_major_code_csv);
+    $ds = "s";
+    foreach ($temp as $major_code) {
+      if ($major_code == "") continue;      
+      $dp = $db->get_degree_plan($major_code, $db_catalog_year);
+      if ($dp != null) {
+        $degree_title_line .= $dp->get_title2(TRUE, TRUE) . ", ";
+      }      
+    }
+    $degree_title_line = rtrim($degree_title_line, ", ");
+  }
 
   $student = new Student($db_student_id, $db);
 
   $what_if_message = "";
-  if ($db_is_whatif == "1") {
-    $official_degree_plan = $student->get_degree_plan(false, true);
-    $official_degree_plan->load_descriptive_data();
-    $official_degree_title = $official_degree_plan->get_title(true);
-
+  if ($db_is_whatif == 1) {
+      
+    $official_degree_title = "";
+    $odsverb = " is";
+    $c = 0;
+    $majors = $db->get_student_majors_from_db($student->student_id);
+    foreach ($majors as $major_code) {      
+      if ($major_code == "") continue;
+            
+      $dp = $db->get_degree_plan($major_code, $db_catalog_year);
+      if ($dp != null) {
+        $c++;
+        $official_degree_title .= $dp->get_title2(TRUE, TRUE) . ", ";
+      }      
+    }
+    if ($c > 1) $odsverb = "s are";
+    
+    $official_degree_title = rtrim($official_degree_title, ", ");    
+      
     $what_if_message = "<b>" . t("Note:") . "</b>
               " . t("This advising was saved using <b>What If</b> mode
-              for the %degree_title major.  According to @initials records,
-              the student's official major is %official.", array("%degree_title" => $degree_title, "@initials" => $GLOBALS["fp_system_settings"]["school_initials"], "%official" => $official_degree_title));
+              for the degree$ds %degree_title.  According to @initials records,
+              the student's official degree$odsverb %official.", array("%degree_title" => $degree_title_line, 
+                                                            "@initials" => $GLOBALS["fp_system_settings"]["school_initials"], 
+                                                            "%official" => $official_degree_title));
   }
 
   $page_is_mobile = fp_screen_is_mobile();
@@ -362,9 +397,9 @@ function advise_popup_display_summary() {
         <td valign='top' colspan='4'>
         ";
 
-  if ($degree_title != "")
+  if ($degree_title_line != "")
   {
-    $rtn .= t("Major:") . " $degree_title";
+    $rtn .= t("Degree$ds:") . " $degree_title_line";
   }
 
   $rtn .= "

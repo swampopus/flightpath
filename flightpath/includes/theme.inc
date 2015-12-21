@@ -84,6 +84,7 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
   }
   
   $menu_items = menu_get_items_beginning_with($menu_root);
+  
   foreach ($menu_items as $item) {
     if ($item["type"] != MENU_TYPE_CALLBACK) {
       $rtn .= fp_render_menu_item($item);
@@ -497,10 +498,13 @@ function fp_build_tab_array($page) {
       // Degree plan is still null.  This probably means we are NOT on an advising screen, so, let's
       // use a FlightPath object to init our degree plan, which might actually be a combination of degrees.
       
+                  
       // First, we can cheat by seeing if we have anything cached for this student the last time their degree plan
       // was loaded.  Using this,
       // its much faster & memory-friendly than trying to re-init a whole new FlightPath object and DegreePlan object(s).
       $bool_got_from_simple_cache = FALSE;
+      // TODO:  Check for _what_if if we are in what if mode?
+      
       if (isset($_SESSION["fp_simple_degree_plan_cache_for_student"])) {
         if ($_SESSION["fp_simple_degree_plan_cache_for_student"]["cwid"] == $csid) {
           // Yes, it's for this student.  Load her up.
@@ -508,8 +512,8 @@ function fp_build_tab_array($page) {
           $degree_plan->degree_id = $_SESSION["fp_simple_degree_plan_cache_for_student"]["degree_id"];
           $degree_plan->combined_degree_ids_array = $_SESSION["fp_simple_degree_plan_cache_for_student"]["combined_degree_ids_array"];
           $degree_plan->is_combined_dynamic_degree_plan = $_SESSION["fp_simple_degree_plan_cache_for_student"]["is_combined_dynamic_degree_plan"];
-          
-          
+                   
+                              
           $bool_got_from_simple_cache = TRUE;
         }
       }
@@ -555,7 +559,7 @@ function fp_build_tab_array($page) {
       $student->catalog_year = $settings["current_catalog_year"];
       if ($bool_print != true) {
         $what_if_select = "<div class='tenpt'><b>
-          " . l(t("Change What If Settings"), "what-if", "advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&current_student_id=$current_student_id") . "
+          " . l(t("Change What If Settings"), "what-if", "advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&what_if_track_degree_ids=none&current_student_id=$current_student_id") . "
           </b></div>";
       }
     }
@@ -641,11 +645,13 @@ function fp_build_tab_array($page) {
         $degree_title .= " ($degree_plan->major_code)";
       }
 
-      if ($degree_plan->get_available_tracks()) {
+      if ($degree_plan != null && $degree_plan->get_available_tracks()) {        
         $bool_show_track_selection_link = TRUE;
       }
       
-      array_push($display_array, t("Degree:") . " ~~ " . $degree_title);
+      $degree_title_div = "<div class='degree-title'>$degree_title</div>";
+      
+      //array_push($display_array, t("Degree:") . " ~~ " . $degree_title);
     
     }
     else {
@@ -661,13 +667,21 @@ function fp_build_tab_array($page) {
 
         
         // Add it to our box...
-        // If more than one major/minor, etc, combine them
+        // If more than one major/minor, etc, combine them into one div
         $t_title = $t_degree_plan->get_title2(TRUE);
+        $t_class = $t_degree_plan->degree_class;
+        $t_class_details = fp_get_degree_classification_details($t_class);
         // If this is actually a track, let's get the track's title instead.
         if ($x = $t_degree_plan->get_track_title(TRUE)) {
           $t_title = $x;
         }
-        $t_degree_plan_titles .= "<div class='multi-degree-title'>" . $t_title . "</div>";
+        
+        if ($t_class_details["level_num"] == 3) {
+          $t_title = "<span class='level-3-raquo'>&raquo;</span>" . $t_title;
+        }
+        
+        $t_degree_plan_titles .= "<div class='multi-degree-title multi-degree-class-" . $t_class . "
+                                      multi-degree-class-level-" . $t_class_details["level_num"] . "'>" . $t_title . "</div>";
         $s = "s";
       }
       $degree_title_div = $t_degree_plan_titles;

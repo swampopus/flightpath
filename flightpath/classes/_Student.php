@@ -543,7 +543,7 @@ class _Student extends stdClass
       "PR"=>t("Professional"),
     );	  
     
-    return $rank_array[$rank_code];
+    return @$rank_array[$rank_code];
         
 	}
 	
@@ -555,7 +555,8 @@ class _Student extends stdClass
 	 */
 	function get_degree_plan($bool_load_full = true, $bool_ignore_settings = false)
 	{
-		
+		depricated_message();
+    
 	  $t_major_code = $this->get_major_and_track_code($bool_ignore_settings);
 		$degree_id = $this->db->get_degree_id($t_major_code, $this->catalog_year);
 		if ($bool_load_full)
@@ -569,7 +570,7 @@ class _Student extends stdClass
 
 		return $degree_plan;
 	}
-
+  
 
 	/**
 	 * Enter description here...
@@ -585,6 +586,11 @@ class _Student extends stdClass
 		$rtn = "";
 		$major_code = "";
 
+    if (@$this->array_settings["major_code_csv"] != "") {
+      $rtn = $this->array_settings["major_code_csv"];
+    }
+    
+    /*
 		if ($this->array_settings["major_code"] != "")
 		{ // If they have settings saved, use those...
 			if ($this->array_settings["track_code"] != "")
@@ -605,7 +611,7 @@ class _Student extends stdClass
 		} else {
 			$rtn = $this->major_code;
 		}
-
+    */
 		
 		if ($bool_ignore_settings == true) {
 			$rtn = $this->major_code;

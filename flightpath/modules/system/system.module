@@ -2094,7 +2094,7 @@ function system_login_form_validate($form, &$form_state) {
  */
 function system_login_form_submit($form, &$form_state) {
   $user = $form_state["values"]["user"];
-  $password = $form_state["value"]["password"];
+  $password = $form_state["values"]["password"];
   $passed = $form_state["passed_authentication"];
   $db_row = $form_state["db_row"];
   
@@ -2220,9 +2220,11 @@ function system_blocks() {
 function system_render_block($delta) {
   $block = array();
 
-  if ($delta == "tools") {
+
+  if ($delta == "tools") {    
     $block["title"] = t("Tools");
     $block["body"] = fp_render_menu_block("", "tools");
+    
   }
   
   if ($delta == "admin_tools") {

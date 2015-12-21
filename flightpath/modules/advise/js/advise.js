@@ -56,18 +56,38 @@ function changeTrack(track_code) {
 /**
  * This function is meant to replace the changeTrack and popupChangeWhatIfTrack functions.
  * It needs to handle multiple track additions, not just one at a time.
+ * 
+ * is_whatif is either 1 or 0
+ * 
  */
-function popupChangeTrackSelections() {
+function popupChangeTrackSelections(is_whatif) {
   // We will look through the page for any checkboxes (or radio buttons) that have been checked.
-  var track_degree_ids = "";
+  var track_degree_ids = ",";  // give it *something* initially, so it isn't an empty string and might get overlooked.
   $("input:checked").each(function() {
     track_degree_ids += ($(this).val()) + ",";
   });
   
   // Okay, we now have the track_degree_id's, separated by comma, that the user wishes to apply to
   // their degree plan.  We will now set our "opener" variables, submitForm, and close this popup window.
-  opener.document.getElementById("advising_track_degree_ids").value = track_degree_ids;
-  opener.document.getElementById("advising_update_student_degrees_flag").value = "true";
+    
+  if (is_whatif == 0) {
+    // NOT what if mode.
+    opener.document.getElementById("advising_update_student_degrees_flag").value = "true";
+    opener.document.getElementById("advising_track_degree_ids").value = track_degree_ids;    
+  }
+  else {
+    // Yes, this IS what-if mode.
+    opener.document.getElementById("advising_update_student_settings_flag").value = "true";
+    opener.document.getElementById("what_if_track_degree_ids").value = track_degree_ids;
+    
+    // Set the what_if_major_code to be only our top-level major codes, so we can change the tracks.  This is
+    // to fix a bug where if you load an advising session directly what was what-if, the major codes include the tracks,
+    // and you can't unselect tracks then.
+    //alert($("#top_level_majors_csv").val());
+    //return false;
+    opener.document.getElementById("what_if_major_code").value = $("#top_level_majors_csv").val();
+  }
+  
   opener.document.getElementById("log_addition").value = "change_track~" + track_degree_ids;
   
   // rebuild the cache.
