@@ -13,6 +13,11 @@
   *margin-right: 10px;
 }
 
+.c-fieldset {
+  margin-bottom: 10px;
+}
+
+
 .full_admin_top_options
 {
 	font-size: 10pt;

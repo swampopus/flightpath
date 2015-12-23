@@ -298,14 +298,14 @@ function fp_render_c_fieldset($content, $legend = "Click to expand/collapse", $b
       // Already open.  Let's close it.
       fieldset_state_$id = 0;      
       \$(content).slideUp('medium');
-      fs.className = 'c-fieldset-closed-$id';
+      fs.className = 'c-fieldset-closed-$id c-fieldset-closed c-fieldset';
     }
     else {
       // Was closed.  let's open it.
       fieldset_state_$id = 1;
       
       \$(content).slideDown('medium');
-      fs.className = 'c-fieldset-open-$id';      
+      fs.className = 'c-fieldset-open-$id c-fieldset-open c-fieldset';      
     }  
   }  
   </script>";

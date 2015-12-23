@@ -1354,7 +1354,7 @@ class _DatabaseHandler extends stdClass
 
 	}
 
-	function get_degrees_in_catalog_year($catalog_year, $bool_include_tracks = false, $bool_use_draft = false, $bool_undergrad_only = TRUE)
+	function get_degrees_in_catalog_year($catalog_year, $bool_include_tracks = false, $bool_use_draft = false, $bool_undergrad_only = TRUE, $only_level_nums = array(1,2))
 	{
 		// Returns an array of all the degrees from a particular year
 		// which are entered into FlightPath.
@@ -1362,13 +1362,31 @@ class _DatabaseHandler extends stdClass
 	  $table_name = "degrees";
 		if ($bool_use_draft){$table_name = "draft_$table_name";}		
 		
-		if ($bool_undergrad_only) $undergrad_line = "AND degree_class != 'G' ";
+		// TODO:  change this to be whatever the graduate code actually is.
+		if ($bool_undergrad_only) $undergrad_line = "AND degree_level != 'G' ";
 		
+		$degree_class_line = "";
+    if (count($only_level_nums) > 0) {
+      $classes = fp_get_degree_classifications();
+      foreach ($only_level_nums as $num) {
+        foreach ($classes["levels"][$num] as $machine_name => $val) {
+          $degree_class_line .= " degree_class = '" . addslashes($machine_name) . "' OR";
+        }
+      }
+      // Remove training "OR" from degree_class_line
+      $degree_class_line = substr($degree_class_line, 0, strlen($degree_class_line) - 2);
+    }
+    
+    if ($degree_class_line != "") {
+      $degree_class_line = "AND ($degree_class_line)";
+    }
+    				
 		$rtn_array = array();
 		$res = $this->db_query("SELECT * FROM $table_name
-								WHERE catalog_year = '?' 
+								WHERE catalog_year = ? 
 								AND exclude = '0'
 								$undergrad_line
+								$degree_class_line
 								ORDER BY title, major_code ", $catalog_year);
 		if ($this->db_num_rows($res) < 1)
 		{
@@ -1382,6 +1400,7 @@ class _DatabaseHandler extends stdClass
 			$title = trim($cur["title"]);
 			$track_code = "";
 			$major_code = $major;
+                  
 			// The major may have a track specified.  If so, take out
 			// the track and make it seperate.
 			if (strstr($major, "_"))
@@ -1501,22 +1520,29 @@ class _DatabaseHandler extends stdClass
 
 
   function db_fetch_array($result) {
+    if (!is_object($result)) return FALSE;
+    
     return $result->fetch(PDO::FETCH_ASSOC);
   }
 
   function db_fetch_object($result) {
+    if (!is_object($result)) return FALSE;
+    
     return $result->fetch(PDO::FETCH_OBJ);
   }
 
   function db_num_rows($result) {
+    if (!is_object($result)) return FALSE;
+    
     return $result->rowCount();
   }
 
   function db_affected_rows($result) {
-     return db_num_rows($result);
+    
+    return db_num_rows($result);
   }
 
-  function db_insert_id() {
+  function db_insert_id() {    
     return $this->pdo->lastInsertId();
   }
 

@@ -1,6 +1,11 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-12-23
+  Working on multi-degree selection for What-If settings screen.  Added new form element type- cfieldset, for collapsible fieldsets.
+  Modified style.css slightly to go with it.
+  
+
 2015-12-21
   Working on adding PDO support, replacing the outdated mysql() functions.
 

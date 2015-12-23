@@ -3,13 +3,21 @@
  * This CSS file pertains to the look of content itself in FlightPath.
  */
 
-
+.level-3-raquo {
+  padding: 0 5px 0 5px;
+}
 
 .c-fieldset-content {
   /*  the astericks mean "only for IE" */
   *margin-left: 10px;
   *margin-right: 10px;
 }
+
+.c-fieldset {
+  margin-bottom: 10px;
+}
+
+
 
 .full_admin_top_options
 {

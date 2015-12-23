@@ -940,7 +940,8 @@ function advise_display_view($view = "view") {
     // We are in WhatIf, but we have not selected a major, so give
     // the user a selection screen.
     $screen->screen_mode = "not_advising";
-    $rtn .= advise_display_what_if_selection();
+    //$rtn .= advise_display_what_if_selection();
+    $rtn .= fp_render_form("advise_what_if_selection_form");
   } 
   else {
     // This is a normal advising screen.  Either View or WhatIf.
@@ -1011,6 +1012,133 @@ function advise_display_view($view = "view") {
 
 
 
+function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
+  global $screen, $current_student_id;
+    
+  if ($screen->bool_print) {
+    return array();
+  }  
+    
+  $form = array();
+  $m = 0;
+  
+  fp_set_title("");  // Remove the default form's title
+  
+  $db = get_global_database_handler();
+
+    
+  $form["mark" . $m++] = array(
+   "value" => fp_render_curved_line("What if I change my degree to...") . "<br>",
+  );
+  
+
+  $settings = fp_get_system_settings();
+  $current_catalog_year = $settings["current_catalog_year"];
+  //$bool_use_draft = $GLOBALS["fp_advising"]["bool_use_draft"];
+  $bool_use_draft = FALSE;  // leave as false for now.  Because you can't select
+                        // degree options, and if you click submit it really does
+                        // save it.  Better to just use blank degrees.
+
+  $c = 100;
+  
+  /////////////////////
+  // Select a major....
+  $options = array();  
+  if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, false, $bool_use_draft, $bool_undergrad_only, array(1))) {
+    foreach($degree_array as $major_code => $value) {
+      if (trim($value["title"]) == ""){continue;}      
+      $options[$major_code] = $value["title"];
+    }
+  }
+  
+  // Place in a fieldset...
+  $e1["select_level_1_degrees"] = array(
+    "type" => "checkboxes",
+    "label" => "",
+    "options" => $options,
+  );
+
+  $form["cfieldset_level_1"] = array(
+    "type" => "cfieldset",
+    "label" => "Select Major &raquo;",
+    "elements" => array($e1),
+    "start_closed" => FALSE,    
+  );
+  
+  
+  
+  /////////////////////////
+  // Select a minor....
+  $options = array();
+  if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, false, $bool_use_draft, $bool_undergrad_only, array(2))) {
+    foreach($degree_array as $major_code => $value) {
+      if (trim($value["title"]) == ""){continue;}
+      $options[$major_code] = $value["title"];
+    }
+  }
+
+  $e2["select_level_2_degrees"] = array(
+    "type" => "checkboxes",
+    "label" => "",
+    "options" => $options,
+  );
+
+  $form["cfieldset_level_2"] = array(
+    "type" => "cfieldset",
+    "label" => "Select Minor &raquo;",
+    "elements" => array($e2),    
+  );
+
+
+
+
+  $form["submit_btn"] = array(
+    "value" => "<div align='right'>
+      " . fp_render_button("Try It Out!", "showUpdate(true);$(\"#fp-form-advise_what_if_selection_form\").submit(); ") . "
+                </div>",  
+  );
+
+
+
+/*
+  $rtn .= "<br><br>
+      <div align='right'>
+      " . fp_render_button("Try It Out!", "showUpdate(true);submitForm();") . "       
+   
+      </div>
+      <br><br>
+      <div class='hypo tenpt'>
+       <b>Important Notice:</b> What If displays degree plans
+       from the most recent catalog year ($current_catalog_year-" . ($current_catalog_year + 1) . "), 
+       as any major change would place the student into the 
+       most recent catalog. 
+      </div>";
+
+
+  // Include only certain variables, so we don't overwrite our selection of what_if_major_code.
+  $rtn .= "
+          <input type='hidden' name='load_from_cache' value='no'>
+          <input type='hidden' name='window_mode' value='screen'>
+          <input type='hidden' id='scroll_top'>
+          <input type='hidden' id='perform_action' name='perform_action'>
+          <input type='hidden' id='advising_what_if' name='advising_what_if' value='yes'>
+          <input type='hidden' id='current_student_id' name='current_student_id' value='$current_student_id'>
+          
+          <input type='hidden' id='from_what_if_selection_form' name='from_what_if_selection_form' value='yes'>
+          
+        ";
+
+  $rtn .= "</form>
+      ";  
+  */
+  
+  
+  
+  return $form;
+}
+
+
+
 
 /**
  * Displays the pulldown select list for picking a new What If degree.
@@ -1034,6 +1162,7 @@ function advise_display_what_if_selection($bool_undergrad_only = TRUE) {
   $rtn .= "<form action='" . $url . "' id='mainform' method='POST'>";
   $rtn .= fp_render_curved_line("What if I change my major to...");
 
+  
   $rtn .= "<br>
       Major: <select name='what_if_major_code' class='what-if-selector'>
         <option value=''>Please select a major</option>
@@ -1045,7 +1174,7 @@ function advise_display_what_if_selection($bool_undergrad_only = TRUE) {
   $bool_use_draft = FALSE;  // leave as false for now.  Because you can't select
                         // degree options, and if you click submit it really does
                         // save it.  Better to just use blank degrees.
-  if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, false, $bool_use_draft, $bool_undergrad_only)) {
+  if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, false, $bool_use_draft, $bool_undergrad_only, array(1))) {
     foreach($degree_array as $major_code => $value) {
       if (trim($value["title"]) == ""){continue;}
       $rtn .= "<option value='$major_code'>{$value["title"]}</option> \n";
@@ -1055,7 +1184,39 @@ function advise_display_what_if_selection($bool_undergrad_only = TRUE) {
   $rtn .= "</select>
       <br><br>";
 
-  $rtn .= "
+  $c = 100;
+  
+  /////////////////////
+  // Select a major....
+  $content = "";  
+  if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, false, $bool_use_draft, $bool_undergrad_only, array(1))) {
+    foreach($degree_array as $major_code => $value) {
+      if (trim($value["title"]) == ""){continue;}
+      $content .= "<label style='display:block;'><input type='checkbox' name='cb_$c' value='$major_code'>{$value["title"]} </label> \n";
+      $c++;
+    }
+  }
+
+  $rtn .= fp_render_c_fieldset($content, "Select a Major &raquo;", FALSE);
+
+  /////////////////////////
+  // Select a minor....
+  $content = "";
+  if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, false, $bool_use_draft, $bool_undergrad_only, array(2))) {
+    foreach($degree_array as $major_code => $value) {
+      if (trim($value["title"]) == ""){continue;}
+      $content .= "<label style='display:block;'><input type='checkbox' name='cb_$c' value='$major_code'>{$value["title"]} </label> \n";
+      $c++;
+    }
+  }
+
+  $rtn .= "<br><br>" .fp_render_c_fieldset($content, "Select a Minor &raquo;", FALSE);
+
+
+
+
+
+  $rtn .= "<br><br>
       <div align='right'>
       " . fp_render_button("Try It Out!", "showUpdate(true);submitForm();") . "       
    
