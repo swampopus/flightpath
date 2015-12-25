@@ -14,8 +14,8 @@
  
 require_once("bootstrap.inc");
 
-$GLOBALS["fp_die_mysql_errors"] = TRUE;
-menu_rebuild_cache();
+//$GLOBALS["fp_die_mysql_errors"] = TRUE;
+//menu_rebuild_cache();
 
 $token = @$_REQUEST["t"];
 if ($token != @$GLOBALS["fp_system_settings"]["cron_security_token"]) {

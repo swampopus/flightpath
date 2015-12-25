@@ -315,6 +315,11 @@ class _DatabaseHandler extends stdClass
       // If the first argument was an array, it means we passed an array of values instead
       // of passing them directly.  So use them directly as our args.
       $args = $args[0];
+      
+      // If we were supplied an array, then we need to see if the NEW args[0] is an array...  If it is, grab the first element AGAIN.
+      if (isset($args[0]) && is_array($args[0])) {
+        $args = $args[0];
+      }
     }
 
     // We need to make sure that arguments are passed without being contained in single quotes ('?').  Should be just ?
@@ -1308,7 +1313,7 @@ class _DatabaseHandler extends stdClass
    *   
    * 
    */
-  function get_student_majors_from_db($student_cwid, $bool_return_as_csv = FALSE) {
+  function get_student_majors_from_db($student_cwid, $bool_return_as_csv = FALSE, $bool_return_as_full_record = FALSE) {
     // Looks in the student_degrees table and returns an array of major codes.
     $rtn = array();
     
@@ -1327,7 +1332,12 @@ class _DatabaseHandler extends stdClass
                             WHERE student_id = '?' 
                             ", $student_cwid);
     while ($cur = $this->db_fetch_array($res)) {
-      $rtn[] = $cur["major_code"];
+      if ($bool_return_as_full_record) {
+        $rtn[] = $cur;
+      }
+      else {  
+        $rtn[] = $cur["major_code"];
+      }
     }
     
     if ($bool_return_as_csv) {
@@ -1473,7 +1483,7 @@ class _DatabaseHandler extends stdClass
 		  $catalog_year = variable_get("current_catalog_year", "2006");
 		}
 		
-		$degree_id = $this->get_degree_id($major_and_track_code, $catalog_year);
+		$degree_id = $this->get_degree_id(trim($major_and_track_code), $catalog_year);
 		$dp = new DegreePlan($degree_id,null,$bool_minimal);
 		if ($dp->major_code == "")
 		{
@@ -1506,7 +1516,7 @@ class _DatabaseHandler extends stdClass
 		$res7 = $this->db_query("SELECT * FROM $table_name
 							WHERE major_code = '?'
 							AND catalog_year = '?'
-							 LIMIT 1 ", $major_and_track_code, $catalog_year) ;
+							 LIMIT 1 ", trim($major_and_track_code), $catalog_year) ;
 		if ($this->db_num_rows($res7) > 0)
 		{
 			$cur7 = $this->db_fetch_array($res7);

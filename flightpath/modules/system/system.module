@@ -1607,7 +1607,7 @@ function system_cron() {
 
 
 /**
- * Intercepts form submissions from System Settings Forms.
+ * Intercepts form submissions from forms built with the form API.
  */
 function system_handle_form_submit() {
     
@@ -1655,8 +1655,25 @@ function system_handle_form_submit() {
     $form = fp_get_form($callback);
     foreach ($form as $name => $element) {     
 
-      $values[$name] = @$_POST[$name];
+      // Save to our $values array, but we don't care about markup.
+      if (@$element["type"] != "" && @$element["type"] != "markup") {
+        $values[$name] = @$_POST[$name];
+      }
       // Do we need to alter the value from the POST?
+      
+      // If this element is a cfieldset, it may contain other elements.  We should get
+      // those values too.
+      if (isset($element["elements"])) {
+        foreach ($element["elements"] as $k => $v) {
+          foreach ($element["elements"][$k] as $cname => $celement) {
+            // Save to our $values array, but we don't care about markup.
+            if (@$celement["type"] != "" && @$celement["type"] != "markup") {
+              $values[$cname] = @$_POST[$cname];
+            }
+          }
+        }
+      }
+      
       
       // If this is a checkbox, and we have any value in the POST, it should
       // be saved as boolean TRUE
@@ -1694,7 +1711,7 @@ function system_handle_form_submit() {
     $_SESSION["fp_form_submissions"][$callback]["values"] = $values;
   }
 
-  $form_state = array("values" => $values);
+  $form_state = array("values" => $values, "POST" => $_POST);
 
   // Let's pass this through our default form validator (mainly to check for required fields
   // which do not have values entered)

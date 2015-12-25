@@ -208,7 +208,7 @@ function fp_get_permissions_for_role($rid) {
  */
 function db_result($resource_handler) {
   $cur = db_fetch_array($resource_handler);
-  return $cur[0];
+  return @$cur[0];
 }
 
 

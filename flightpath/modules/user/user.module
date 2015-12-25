@@ -1111,8 +1111,12 @@ function user_edit_user_form_submit($form, $form_state) {
  */
 function user_display_student_users() {
   global $db, $screen;
-  $de_catalog_year = $GLOBALS["de_catalog_year"];
+  $de_catalog_year = @$GLOBALS["de_catalog_year"];
 
+  if ($db == NULL) {
+    $db = get_global_database_handler();
+  }
+    
   $cc = 1;
 
   $rtn = "";
@@ -1125,11 +1129,10 @@ function user_display_student_users() {
   
   // Let's pull the needed variables out of our settings, so we know what
   // to query, because this is a non-FlightPath table.
-  //$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
-  //$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  //$table_name = $tsettings["table_name"];    
   
-  $res = db_query("SELECT DISTINCT major_code FROM students ORDER BY major_code ");
+  
+    
+  $res = db_query("SELECT DISTINCT major_code FROM student_degrees ORDER BY major_code ");
   while ($cur = db_fetch_array($res)) {
     if (trim($cur["major_code"]) == "")
     {// skip if blank
@@ -1139,7 +1142,7 @@ function user_display_student_users() {
     $major_code_array[$d] = trim(ucwords($cur["major_code"]));
     $d++;
   }
-
+  
 
   $rtn .= "<h2 class='title' style='margin-bottom:0;'>" . t("Edit Student Users") . "</h2>";
 
@@ -1178,9 +1181,9 @@ function user_display_student_users() {
   }
 
   // Figure out what type of students to display-- active, inactive, or both
-  $set_disp = $_REQUEST["set_disp"];
+  $set_disp = @$_REQUEST["set_disp"];
   if ($set_disp == "") {
-    $set_disp = $_SESSION["user_set_disp"];
+    $set_disp = @$_SESSION["user_set_disp"];
     if ($set_disp == "") {
       $set_disp = "only_active";
     }
@@ -1211,9 +1214,10 @@ function user_display_student_users() {
   if (!$clean_urls) {
     // Hack to support non-clean URL sites
     $rtn .= "<input type='hidden' name='q' value='admin/users/students'>";
-  }                        
+  }               
+  $get_search = @$_GET["search"];         
   $rtn .= "
-                         " . t("Search:") . " <input type='text' class='smallinput' name='search' value='{$_GET["search"]}' size='15'>
+                         " . t("Search:") . " <input type='text' class='smallinput' name='search' value='$get_search' size='15'>
                         <input type='submit' name='searchsubmit' class='smallinput' value=' -> '>
                        
                         &nbsp; &nbsp; " . t("or") . " &nbsp; &nbsp;
@@ -1243,8 +1247,8 @@ function user_display_student_users() {
 
 
 
-  $ur = trim($_GET["ur"]);
-  $lr = trim($_GET["lr"]);
+  $ur = trim(@$_GET["ur"]);
+  $lr = trim(@$_GET["lr"]);
 
   if ($ur != "" || $lr != "")
   {
@@ -1254,8 +1258,8 @@ function user_display_student_users() {
 
   if ($ur == "")
   { // meaning, no range was set.  Use A - C
-    $ur = $_SESSION["ur"];
-    $lr = $_SESSION["lr"];
+    $ur = @$_SESSION["ur"];
+    $lr = @$_SESSION["lr"];
     if ($ur == "")
     { // if still blank, assign it..
       $ur = "A";
@@ -1266,8 +1270,8 @@ function user_display_student_users() {
   $_SESSION["ur"] = $ur;
   $_SESSION["lr"] = $lr;
 
-  $search = trim($_GET["search"]);
-  $major_code = trim($_GET["major_code"]);
+  $search = trim(@$_GET["search"]);
+  $major_code = trim(@$_GET["major_code"]);
 
   if ($search != "" || $major_code != "")
   {
@@ -1275,7 +1279,7 @@ function user_display_student_users() {
   }
 
 
-  if ($_SESSION["prev_user_search"] != "")
+  if (@$_SESSION["prev_user_search"] != "")
   {
     $temp = explode("%%",$_SESSION["prev_user_search"]);
     if ($temp[0] == "search")
@@ -1345,10 +1349,11 @@ function user_display_student_users() {
     // User select a major_code.  Look for it...
     $search = "";
     $_SESSION["prev_user_search"] = "major_code%%$major_code";
-    $result = db_query("SELECT * FROM users a, students b
+    $result = db_query("SELECT * FROM users a, students b, student_degrees c
           WHERE a.cwid = b.cwid
+          AND a.cwid = c.student_id
           AND a.is_student = 1
-          AND major_code = '?' 
+          AND c.major_code = '?' 
           $in_active_query_line
           ORDER BY l_name, f_name ", $major_code);
     $displaying = $major_code;
@@ -1371,7 +1376,7 @@ function user_display_student_users() {
           <th>CWID</th>
           <th>Name</th>
           <th></th>
-          <th>Major code</th>
+          <th>Major code(s)</th>
           <th>Active?</th>
           <th>&nbsp;</th>
         </tr>
@@ -1383,7 +1388,10 @@ function user_display_student_users() {
     $l_name = trim(ucwords(strtolower($cur["l_name"])));
     $f_name = trim(ucwords(strtolower($cur["f_name"])));    
     $student_cwid = trim($cur["cwid"]);
-    $disp_major_code = trim($cur["major_code"]);
+    
+    //$disp_major_code = trim($cur["major_code"]);
+    $disp_major_code = $db->get_student_majors_from_db($student_cwid, TRUE);
+    
     $is_active = ($cur["is_active"] == "1") ? "Y" : "N";
     
     
@@ -1441,7 +1449,7 @@ function user_display_student_users() {
 */
 function user_display_users() {
   global $db, $screen;
-  $de_catalog_year = $GLOBALS["de_catalog_year"];
+  $de_catalog_year = @$GLOBALS["de_catalog_year"];
 
   $cc = 1;
 
@@ -1515,10 +1523,12 @@ function user_display_users() {
     // Hack to support non-clean URL sites
     $rtn .= "<input type='hidden' name='q' value='admin/users/faculty'>";
   }                        
+  
+  $get_search = @$_GET["search"];
                         
   $rtn .= "                        
                         <input type='hidden' name='performAction' value='editUsers'>
-                         " . t("Search:") . " <input type='text' class='smallinput' name='search' value='{$_GET["search"]}' size='15'>
+                         " . t("Search:") . " <input type='text' class='smallinput' name='search' value='$get_search' size='15'>
                         <input type='submit' name='searchsubmit' class='smallinput' value=' -> '>
                        
                         &nbsp;&nbsp;" . t("or") . "&nbsp;&nbsp;
@@ -1549,7 +1559,7 @@ function user_display_users() {
     }
     
     $sel = "";
-    if ($key == $_GET["role"]*1) {
+    if ($key == intval(@$_GET["role"])) {
       $sel = "selected";
     }
     
@@ -1570,8 +1580,8 @@ function user_display_users() {
 
 
 
-  $ur = trim($_GET["ur"]);
-  $lr = trim($_GET["lr"]);
+  $ur = trim(@$_GET["ur"]);
+  $lr = trim(@$_GET["lr"]);
 
   if ($ur != "" || $lr != "")
   {
@@ -1581,8 +1591,8 @@ function user_display_users() {
 
   if ($ur == "")
   { // meaning, no range was set.  Use A - C
-    $ur = $_SESSION["ur"];
-    $lr = $_SESSION["lr"];
+    $ur = @$_SESSION["ur"];
+    $lr = @$_SESSION["lr"];
     if ($ur == "")
     { // if still blank, assign it..
       $ur = "A";
@@ -1593,9 +1603,9 @@ function user_display_users() {
   $_SESSION["ur"] = $ur;
   $_SESSION["lr"] = $lr;
 
-  $search = trim($_GET["search"]);
-  $dept = trim($_GET["department"]);
-  $role = trim($_GET["role"]);
+  $search = trim(@$_GET["search"]);
+  $dept = trim(@$_GET["department"]);
+  $role = trim(@$_GET["role"]);
 
   if ($search != "" || $dept != "")
   {
@@ -1603,7 +1613,7 @@ function user_display_users() {
   }
 
 
-  if ($_SESSION["prev_user_search"] != "")
+  if (@$_SESSION["prev_user_search"] != "")
   {
     $temp = explode("%%",$_SESSION["prev_user_search"]);
     if ($temp[0] == "search")
@@ -1612,11 +1622,11 @@ function user_display_users() {
     }
     if ($temp[0] == "dept")
     {
-      $_GET["deptsubmit"] = "1";
+      @$_GET["deptsubmit"] = "1";
       $dept = $temp[1];
     }
     if ($temp[0] == "role") {
-      $_GET["rolesubmit"] = "1";
+      @$_GET["rolesubmit"] = "1";
       $role = $temp[1];
     }
   }

@@ -295,10 +295,12 @@ function user_edit_student_user_form() {
   fp_add_js(fp_get_module_path("user") . "/js/user.js");
 
   $form = array();
-  $student_cwid = $_REQUEST["student_cwid"];  // now getting it from argument
+  $m = 0;
+  $student_cwid = @$_REQUEST["student_cwid"];  // now getting it from argument
+  $de_catalog_year = @$_REQUEST["de_catalog_year"];
   $user_id = db_get_user_id_from_cwid($student_cwid, "student");
 
-
+  $db = get_global_database_handler();
 
   // Figure out what the page's sub-tabs should be, and set them.
   $tab_array = array();
@@ -497,12 +499,33 @@ function user_edit_student_user_form() {
                       <i>" . variable_get("allowed_student_ranks", "") . "</i>",
   );  
 
-  $form["major_code"] = array(
-    "label" => t("Major code:"),
-    "type" => "textfield",
-    "value" => $cur["major_code"],
-    "size" => 10,
+  
+  $major_code_array = $db->get_student_majors_from_db($student_cwid, FALSE, TRUE);
+  
+  $temp = "";
+  foreach ($major_code_array as $details) {
+    if ((string)$details["is_editable"] == "1") {
+      $temp .= "* ";
+    }
+    
+    $temp .= $details["major_code"] . "\n";
+  }      
+  
+  $form["major_codes"] = array(
+    "label" => t("Major code(s):"),
+    "type" => "textarea",
+    "value" => $temp,
+    "cols" => 40,
+    "rows" => 5,
+    "description" => t("Enter the student's major codes, one per line.
+                          <br>Ex:
+                          <br>&nbsp; &nbsp; ACCT
+                          <br>&nbsp; &nbsp; MATH
+                        <br>Advanced: If any of the level 3 (add-on) major codes can be 'editable' by the advisor or another
+                        privileged user during normal advising, add an asterisk
+                        at the beginning.  For example: <b>*</b> ACCT|_COSC.  If you are unsure what this means, do not enter an asterisk."),
   );  
+    
     
   $form["catalog_year"] = array(
     "label" => t("Catalog year:"),
@@ -641,6 +664,7 @@ function user_edit_student_user_form_submit($form, $form_state) {
     return;
   }
   
+  $bool_is_new = FALSE;
   
   if ($student_cwid != "new") {
     // NOT a new student!  Insert values normally.
@@ -668,35 +692,67 @@ function user_edit_student_user_form_submit($form, $form_state) {
    db_query("UPDATE students
              SET cumulative_hours = '?',
                  gpa = '?',
-                 rank_code = '?',
-                 major_code = '?',
+                 rank_code = '?',                 
                  catalog_year = '?',
                  is_active = '?'                 
              WHERE cwid = '?'", $values["cumulative_hours"], $values["gpa"], $values["rank_code"],
-                                $values["major_code"], $values["catalog_year"], 
+                                $values["catalog_year"], 
                                 $values["is_active"], $student_cwid);             
+
+    fp_add_message(t("User updated successfully."));
 
   }
   else {
     // This is a NEW user!  We need to perform inserts.  Thanks to our validate handler,
     // we know all of the values we have are valid.
+    
+    $bool_is_new = TRUE;
+    
     db_query("INSERT INTO users (user_name, password, is_student, email, cwid, f_name, l_name, is_disabled)
               VALUES ('?', '?', '1', '?', '?', '?', '?', '?')
               ", $values["new_user_name"], md5($values["new_password"]), $values["email"], $values["new_student_cwid"],
                  $values["f_name"], $values["l_name"], $values["is_disabled"]);
-    db_query("INSERT INTO students (cwid, cumulative_hours, gpa, rank_code, major_code, catalog_year, is_active)
-              VALUES ('?', '?', '?', '?', '?', '?', '?')
+    db_query("INSERT INTO students (cwid, cumulative_hours, gpa, rank_code, catalog_year, is_active)
+              VALUES ('?', '?', '?', '?', '?', '?')
              ", $values["new_student_cwid"], $values["cumulative_hours"], $values["gpa"], $values["rank_code"],
-                $values["major_code"], $values["catalog_year"], $values["is_active"]);
+                $values["catalog_year"], $values["is_active"]);
                                   
     fp_add_message(t("User created successfully."));
-    fp_goto("admin/users/edit-student-user", "student_cwid=" . $values["new_student_cwid"]);
+    
+    $student_cwid = $values["new_student_cwid"];
+        
   }
   
   
-      
-  fp_add_message(t("User updated successfully."));
+  // Now, regardless if this was a new student or not, we need to update the student_degrees table.
+  // First, delete what's there for this CWID.
+  db_query("DELETE FROM student_degrees WHERE student_id = ?", $student_cwid);
+  // Now, insert.
+  $temp = explode("\n", $values["major_codes"]);
+  foreach ($temp as $mc) {
+    $mc = trim($mc);
+    if ($mc == "") continue;
+    
+    $is_editable = "0";
+    if (strstr($mc, "*")) {
+      $is_editable = "1";
+      $mc = trim(str_replace("*", "", $mc));  // remove the asterisk.
+    }
+    
+    // Now, insert into the table.
+    db_query("INSERT INTO student_degrees (student_id, major_code, is_editable)
+              VALUES (?, ?, ?) ", array($student_cwid, $mc, $is_editable));    
+    
+  }
   
+  
+  
+  if ($bool_is_new) {
+    // If new, we need to go to the regular edit form for this newly created student.
+    fp_goto("admin/users/edit-student-user", "student_cwid=" . $values["new_student_cwid"]);
+  }
+  
+  // If not new, it just reloads the form normally.
   
 }
 

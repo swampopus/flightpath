@@ -1,6 +1,17 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-12-25
+  Worked on edit student page; specifically how major codes are entered.  They are now no longer saved to the 
+  "students" table, but instead need to be saved to the "student_degrees" table.
+  
+  Removed the major_code field from the "students" table during install.
+  
+
+2015-12-24
+  Continued working on cfieldset as a new form element, and what if selection form workflow.
+  
+
 2015-12-23
   Working on multi-degree selection for What-If settings screen.  Added new form element type- cfieldset, for collapsible fieldsets.
   Modified style.css slightly to go with it.

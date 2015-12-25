@@ -1055,7 +1055,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   $e1["select_level_1_degrees"] = array(
     "type" => "checkboxes",
     "label" => "",
-    "options" => $options,
+    "options" => $options,    
   );
 
   $form["cfieldset_level_1"] = array(
@@ -1132,11 +1132,74 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
       ";  
   */
   
-  
+  $form["current_student_id"] = array(
+    "type" => "hidden",
+    "value" => $current_student_id,
+  );
   
   return $form;
 }
 
+
+/**
+ * Validate handler for the what_if selection form.  This is where we might, for example, make sure
+ * that if a non-dynamic degree was selected, that they can't proceed.
+ */
+function advise_what_if_selection_form_validate($form, &$form_state) {
+
+  // Make sure they selected at least 1 level 1 degree.
+  $temp = FALSE;
+  foreach (array(1) as $num) {
+    if (is_array($form_state["values"]["select_level_{$num}_degrees"])) {
+      foreach ($form_state["values"]["select_level_{$num}_degrees"] as $k => $v) {
+        if ((string)$k === (string)$v && $k != "") {
+          $temp = TRUE;
+        }
+      }
+    }
+  }  
+  
+  if (!$temp) {
+    form_error("select_level_1_degrees", t("Sorry, you must select at least one top-level degree to proceed.  Please try again."));
+    return;
+  }
+  
+  
+  // TODO:  If a non-dynamic degree was selected, along with anything else, the user may not proceed.
+  //fpm($form_state);
+  
+  
+}
+
+
+/**
+ * Submit handler for the what if selection form.
+ * Since at this point we have passed validation, let's just assemble the URL we need to now
+ * redirect to.
+ */
+function advise_what_if_selection_form_submit($form, $form_state) {
+  $current_student_id = $form_state["values"]["current_student_id"];
+  
+  // Get the major codes CSV
+  $what_if_major_code = "";
+  foreach (array(1, 2) as $num) {
+    if (is_array($form_state["values"]["select_level_{$num}_degrees"])) {
+      foreach ($form_state["values"]["select_level_{$num}_degrees"] as $k => $v) {
+        if ((string)$k === (string)$v && $k != "") {
+          $what_if_major_code .= $k . ",";
+        }
+      }
+    }
+  }
+      
+  // Remove training comma
+  $what_if_major_code = rtrim($what_if_major_code, ",");    
+  
+  // Okay, let's redirect the user to their proper destination
+  $query = "advising_what_if=yes&load_from_cache=no&window_mode=screen&current_student_id=$current_student_id&what_if_major_code=$what_if_major_code";
+  fp_goto("what-if", $query);  
+  
+}
 
 
 
