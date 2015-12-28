@@ -206,9 +206,13 @@ function fp_get_permissions_for_role($rid) {
 /**
  * Returns back the first result from a resource_handler.
  */
-function db_result($resource_handler) {
-  $cur = db_fetch_array($resource_handler);
-  return @$cur[0];
+function db_result($res) {
+
+  if (is_object($res)) {
+    return $res->fetchColumn();  // fetches the first value returned.
+  }  
+  
+  return NULL;
 }
 
 
@@ -237,7 +241,7 @@ function db_get_user_settings($user_id) {
  */
 function db_get_user_setting($user_id, $var_name = "", $default_value = "") {
   $settings = db_get_user_settings($user_id);  
-  $val = $settings[$var_name];
+  $val = @$settings[$var_name];
   if (!$val) {
     $val = $default_value;
   }

@@ -1270,24 +1270,33 @@ class _DatabaseHandler extends stdClass
 		return trim($name);
 	}	
 	
-		
+	
+  
+  
+  
+  	
 	/**
 	 * Looks in our extra tables to find out what major code, if any, has been assigned
 	 * to this faculty member.
 	 *
 	 */
+  function get_faculty_major_code_csv($faculty_cwid) {
+            
+    // Let's pull the needed variables out of our settings, so we know what
+    // to query, because this is a non-FlightPath table.
+    
+    $res = $this->db_query("SELECT * FROM faculty WHERE cwid = '?' ", $faculty_cwid);
+    $cur = $this->db_fetch_array($res);
+    
+    return @$cur["major_code_csv"];      
+    
+  }
+	
+  // Deprecated, use the "_csv" version of this function instead. 	 
 	function get_faculty_major_code($faculty_cwid) {
 	  
-    // Let's pull the needed variables out of our settings, so we know what
-  	// to query, because this is a non-FlightPath table.
-  	//$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
-  	//$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  	//$table_name = $tsettings["table_name"];		  
-    
-  	$res = $this->db_query("SELECT * FROM faculty WHERE cwid = '?' ", $faculty_cwid);
-  	$cur = $this->db_fetch_array($res);
-  	
-  	return $cur["major_code"];		  
+    depricated_message("db->get_faculty_major_code() is deprecated. Use get_faculty_major_code_csv() instead.");
+    return $this->get_faculty_major_code_csv($faculty_cwid);    
 	  
 	}
 		
@@ -1393,8 +1402,8 @@ class _DatabaseHandler extends stdClass
     				
 		$rtn_array = array();
 		$res = $this->db_query("SELECT * FROM $table_name
-								WHERE catalog_year = ? 
-								AND exclude = '0'
+								WHERE exclude = '0'
+								AND catalog_year = ?								
 								$undergrad_line
 								$degree_class_line
 								ORDER BY title, major_code ", $catalog_year);

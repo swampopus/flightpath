@@ -468,7 +468,7 @@ function fp_render_form_element($name, $element, $use_session_submission_values_
     $rtn .= "<div class='form-checkboxes form-checkboxes-$name'>";
     foreach ($options as $key => $val) {
       $checked = "";
-      if (is_array($value) && $value[$key] == $key) {
+      if (is_array($value) && isset($value[$key]) && $value[$key] == $key) {
         
         $checked = "checked=checked";
       }

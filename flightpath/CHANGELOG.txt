@@ -1,6 +1,15 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-12-28
+  Working on Display by Type, to make it more in line with Display by Year.
+  
+  Worked on search module, to get multiple majors right.
+  Modified faculty table, to handle major code csv
+  Modified user.module for the same faculty purpose.
+  Fixed bug in new db_result() function, it was not working as expected.
+  
+
 2015-12-25
   Worked on edit student page; specifically how major codes are entered.  They are now no longer saved to the 
   "students" table, but instead need to be saved to the "student_degrees" table.

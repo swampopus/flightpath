@@ -228,16 +228,19 @@ function student_search_display_my_advisees() {
         
   
   $query = "SELECT u.user_id, f_name, u.cwid, l_name, major_code, rank_code, a.catalog_year
-              FROM users u, students a, advisor_student c
+              FROM users u, students a, advisor_student c, student_degrees d
               WHERE 
                  c.faculty_id = '$faculty_cwid'
                  AND c.student_id = a.cwid
+                 AND c.student_id = d.student_id
                  AND u.cwid = a.cwid
                  AND u.is_student = 1
                  AND u.is_disabled = 0                 
               AND rank_code IN %RANKIN%
               %EXTRA_STUDENTSEARCH_CONDITIONS%
+              GROUP BY u.cwid
               ORDER BY %ORDERBY%
+              
               ";
 
   $adv_array = student_search_query_advisees($query);
@@ -296,7 +299,7 @@ function student_search_display_majors_search() {
   $_SESSION["student_search_last_tab"] = "majors-search";
     
   // Get the $major_code from the REQUEST, or from the user's saved settings.
-  $major_code = trim($_REQUEST["major_code"]);
+  $major_code = trim(@$_REQUEST["major_code"]);
   if ($major_code == "") {
     // Get from their settings
     $major_code = db_get_user_setting($user->id, "major_search");
@@ -311,7 +314,7 @@ function student_search_display_majors_search() {
   $rtn .= "<form method='POST' action='" . $url . "'
               class='major-search-form'>            
             <label>" . t("Select an available major from the list below:") . "</label>
-            <select name='major_code'>
+            <br><select name='major_code'>
               <option value=''>- " . t("Please Select") . " -</option>
               ";
   
@@ -334,6 +337,9 @@ function student_search_display_majors_search() {
                    ");
   while ($cur = db_fetch_object($res)) {
     $sel = ($major_code == $cur->major_code) ? "selected" : "";
+  
+    $degree_class_details = fp_get_degree_classification_details($cur->degree_class);
+  
     
     // Exclude major codes if they are "degree options", meaning, the code has an
     // underscore in it.
@@ -346,7 +352,7 @@ function student_search_display_majors_search() {
       $title = trim(substr($title, 0, $max_chars)) . "...";
     }
     
-    $rtn .= "<option value='$cur->major_code' $sel>$title ($cur->major_code)</option>";
+    $rtn .= "<option value='$cur->major_code' $sel>$cur->major_code : $title ({$degree_class_details["title"]})</option>";
   }
   
   
@@ -414,27 +420,38 @@ function student_search_display_my_majors() {
   $rtn .= student_search_get_advanced_search_tips();
   
   $_SESSION["student_search_last_tab"] = "my-majors";
+  
+  $adv_array = array();
     
   // Figure out this user's major_code from the faculty table.
   $db = get_global_database_handler();
-  $faculty_user_major_code = $db->get_faculty_major_code($user->cwid);
+  $faculty_user_major_code_csv = $db->get_faculty_major_code_csv($user->cwid);
+  
+  $temp = explode(",", $faculty_user_major_code_csv);
+  foreach ($temp as $major_code) {
+    $major_code = trim($major_code);
+    if ($major_code == "") continue;
     
-  $query = "SELECT u.user_id, f_name, l_name, u.cwid, major_code, rank_code, a.catalog_year
-              FROM users u, students a, student_degrees b
-              WHERE 
-                 substring_index(major_code, '|', 1) = '$faculty_user_major_code'
-                 AND u.cwid = a.cwid
-                 AND u.cwid = b.student_id
-                 AND u.is_student = 1
-                 AND u.is_disabled = 0                 
-              AND rank_code IN %RANKIN%
-              %EXTRA_STUDENTSEARCH_CONDITIONS%
-              ORDER BY %ORDERBY%
-              ";
-
-  $adv_array = student_search_query_advisees($query);
-  $s = (count($adv_array) == 1) ? "" : "s"; 
-  $rtn .= student_search_render_advisees($adv_array, t("Major @major Results", array("@major" => $faculty_user_major_code)) . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
+    $query = "SELECT u.user_id, f_name, l_name, u.cwid, major_code, rank_code, a.catalog_year
+                FROM users u, students a, student_degrees b
+                WHERE 
+                   substring_index(major_code, '|', 1) = '$major_code'
+                   AND u.cwid = a.cwid
+                   AND u.cwid = b.student_id
+                   AND u.is_student = 1
+                   AND u.is_disabled = 0                 
+                AND rank_code IN %RANKIN%
+                %EXTRA_STUDENTSEARCH_CONDITIONS%
+                GROUP BY u.cwid
+                ORDER BY %ORDERBY%
+                ";
+  
+    $adv_array = student_search_query_advisees($query);
+    
+    $s = (count($adv_array) == 1) ? "" : "s"; 
+    $rtn .= student_search_render_advisees($adv_array, t("Major @major Results", array("@major" => $major_code)) . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
+        
+  }
 
 
   
@@ -698,7 +715,7 @@ function student_search_render_advisees($adv_array, $title) {
     $advising_session_id = $adv_array[$t]["advising_session_id"];
     $advised_image = $adv_array[$t]["advised_image"];
 
-    fpm($adv_array);
+    //fpm($adv_array);
 
     $on_mouse = "onmouseover=\"style.backgroundColor='#FFFF99'\"
                onmouseout=\"style.backgroundColor='white'\"
