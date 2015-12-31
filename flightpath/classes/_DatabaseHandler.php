@@ -340,7 +340,8 @@ class _DatabaseHandler extends stdClass
     try {
       
       $result = $this->pdo->prepare($sql_query);
-      $result->execute($args);      
+      $result->execute($args);   
+      $_SESSION["fp_last_insert_id"] = $this->pdo->lastInsertId();  // capture last insert id, in case we ask for it later.   
       return $result;
     } 
     catch (Exception $ex) {
@@ -379,6 +380,15 @@ class _DatabaseHandler extends stdClass
     
     $message = $ex->getMessage();
     
+    $file = $arr[2]["file"];
+    if (strlen($file) > 50) {
+      $file = "..." . substr($file, strlen($file) - 50);
+    }
+    
+    
+    $file_and_line = "Line " . $arr[2]["line"] . ": " . $file;
+    
+    
     // If we are on production, email someone!
     if (@$GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"] != "")
     {
@@ -390,6 +400,8 @@ class _DatabaseHandler extends stdClass
       
       Error:
       $message
+      Location:
+      $file_and_line
       
       Backtrace:
       " . print_r($arr, true) . "
@@ -397,12 +409,13 @@ class _DatabaseHandler extends stdClass
       mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
     }
         
-    fpm(t("A MySQL error has occured:") . " $message<br><br>" . t("The backtrace:"));
+    fpm(t("A MySQL error has occured:") . " $message<br><br>Location: $file_and_line<br><br>" . t("The backtrace:"));
     fpm($arr);
 
     if (@$GLOBALS["fp_die_mysql_errors"] == TRUE) {
       print "\n<br>The script has stopped executing because of a MySQL error:
-                    $message<br>\n
+                    $message<br>
+                    Location: $file_and_line<br>\n
              Please fix the error and try again.<br>\n";
       print "<br><br>Timestamp: $when_ts ($when_english)
               <br><br>Program backtrace:
@@ -1561,8 +1574,10 @@ class _DatabaseHandler extends stdClass
     return db_num_rows($result);
   }
 
-  function db_insert_id() {    
-    return $this->pdo->lastInsertId();
+  function db_insert_id() {
+    //fpm($this->pdo->lastInsertId());    
+    //return $this->pdo->lastInsertId();
+    return $_SESSION["fp_last_insert_id"];
   }
 
   function db_close() {

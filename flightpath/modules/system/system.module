@@ -774,7 +774,7 @@ function system_popup_report_contact_form_submit($form, $form_state) {
  */
 function system_school_data_form() {
   $form = array();
-  
+  $m = 0;
   
   $form["course_repeat_policy"] = array(
     "type" => "select",
@@ -1362,6 +1362,7 @@ function system_school_data_form_validate($form, &$form_state) {
  */
 function system_settings_form() {
   $form = array();
+  $m = 0;
   
   $form["mark" . $m++] = array(
     "value" => t("Use this form to alter the various system settings in FlightPath.
@@ -2327,6 +2328,7 @@ function system_init() {
  */
 function system_modules_form() {
   $form = array();
+  $m = 0;
   
   fp_add_css(fp_get_module_path("system") . "/css/style.css");
   
@@ -2369,7 +2371,11 @@ function system_modules_form() {
               
             //fpm($info_contents);  
             // From the info_contents variable, split up and place into an array.
-            $info_details_array = array();
+            $info_details_array = array("path" => "", "module" => "", 
+                                        "schema" => "", "core" => "", "description" => "", 
+                                        "requires" => "", "version" => "",
+                                        "required" => "", );
+            
             $lines = explode("\n", $info_contents);
             foreach ($lines as $line) {
               if (trim($line) == "") continue;

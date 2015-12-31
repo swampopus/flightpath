@@ -519,6 +519,7 @@ function student_search_display_search() {
   
   $rtn .= student_search_get_advanced_search_tips();
   
+  $adv_array = array();
   
   //Get my list of advisees...
   // This time, we want to specify an SQL statement that will perform

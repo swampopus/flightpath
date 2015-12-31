@@ -439,9 +439,9 @@ function stats_report_course_use_summary() {
   $draft = "";
   $use_draft = FALSE;
   
-  $subject_id = trim($_GET["subject_id"]);
-  $course_num = trim($_GET["course_num"]);
-  $draft_check = $_GET["draft"];
+  $subject_id = trim(@$_GET["subject_id"]);
+  $course_num = trim(@$_GET["course_num"]);
+  $draft_check = @$_GET["draft"];
   if ($draft_check == "checked") {
     $draft = "draft_";
     $use_draft = TRUE;
@@ -562,7 +562,7 @@ function stats_report_selected_degree_options() {
   
   
   // What major have they selected?
-  $major = trim($_GET["major"]);
+  $major = trim(@$_GET["major"]);
 
   $rtn .= "<form action='" . fp_url("stats/reports/selected-degree-options") . "' method='GET' >";
   $rtn .= stats_draw_majors_pulldown($major, TRUE, TRUE, t("Please select a major with degree options"));
@@ -575,15 +575,17 @@ function stats_report_selected_degree_options() {
     $count_in_major = 0;
     $degree_option_count = array();
     
-    $sql = "SELECT * FROM students
+    $sql = "SELECT * FROM students a, student_degrees b
             WHERE substring_index(major_code, '|', 1) = '?'
             AND rank_code IN %RANKIN%
-            %EXTRA_STUDENTSEARCH_CONDITIONS% ";      
+            AND a.cwid = b.student_id
+            %EXTRA_STUDENTSEARCH_CONDITIONS% 
+            GROUP BY a.cwid";      
     
 
     $rank_in = "( '" . join("', '", csv_to_array($GLOBALS["fp_system_settings"]["allowed_student_ranks"])) . "' )";    
     $sql = str_replace("%RANKIN%", $rank_in, $sql);   
-    $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $GLOBALS["fp_system_settings"]["extra_student_search_conditions"], $sql);  
+    $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", @$GLOBALS["fp_system_settings"]["extra_student_search_conditions"], $sql);  
 
     $result = db_query($sql, $major);
     
@@ -594,25 +596,49 @@ function stats_report_selected_degree_options() {
 
       $track = "";
       // Does this student have a track (degree option) specified?
-      $student_settings = $db->get_student_settings($db_cwid);
+      //$student_settings = $db->get_student_settings($db_cwid);
+      
+      $student_major_codes = $db->get_student_majors_from_db($db_cwid);
+      // Look through all the major codes for this student, and see if any
+      // have a |_ in them.  If they do, that means they are a track.
+      foreach ($student_major_codes as $mc) {
+        if (strstr($mc, $major . "|_")) {
+          $track = $mc;  // Yes, so this is a track for this major.
+          
+          // Init if not already...
+          if (!isset($degree_option_count[$track])) {
+            $degree_option_count[$track] = 0;
+          }
+    
+          $degree_option_count[$track]++;
+                    
+        }
+      } 
+      
 
-      if ($student_settings["major_code"] == $major)
-      {
-        $track = $student_settings["track_code"];
-      }
 
+      // No track found.  Add that one, too.
       if ($track == "")
       {
         $track = t("None selected");
+        // Init if not already...
+        if (!isset($degree_option_count[$track])) {
+          $degree_option_count[$track] = 0;
+        }
+        
+        $degree_option_count[$track]++;
+              
       }
 
-      // Init if not already...
-      $degree_option_count[$track] = $degree_option_count[$track]*1;
 
-      $degree_option_count[$track]++;
-    }
+                
+      
+
+    } // while db_fetch_array
 
     arsort($degree_option_count);
+
+    
 
     $rtn .= "<table border='1'>
         <tr>
@@ -627,12 +653,12 @@ function stats_report_selected_degree_options() {
       // figure out the title of the track...
       $temp = explode("-", $db_catalog_year);
       $cy = $temp[0];
-      $degree_id = $db->get_degree_id($major . "|_" . $d_option, $cy);
+      $degree_id = $db->get_degree_id($d_option, $cy);
 
       $dp = new DegreePlan();
       $dp->degree_id = $degree_id;
       $dp->load_descriptive_data();
-      $desc = $dp->track_title;
+      $desc = $dp->get_title2(TRUE, TRUE);
 
 
       $rtn .= "<tr><td valign='top'>
@@ -648,7 +674,7 @@ function stats_report_selected_degree_options() {
           </tr>";
     }
 
-    $rtn .= "</table>" . t("Total number of results:") . " $count_in_major.";
+    $rtn .= "</table>" . t("Total number of students:") . " $count_in_major.";
 
   }
   
@@ -675,7 +701,8 @@ function stats_report_selected_degree_options() {
  */
 function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool_only_majors_with_tracks = FALSE, $label = "Please select a major", $bool_exclude_tracks = FALSE, $bool_only_current_catalog_year = TRUE, $bool_return_options_array = FALSE)
 {
-
+  
+  $rtn = "";
   $db = get_global_database_handler();
   $major_array = array();
 
@@ -819,7 +846,8 @@ function stats_report_major_counts() {
           <th colspan='2'>" . t("Description") . "</th>          
         </tr>";
   
-
+  $total = 0;
+  
   $result = db_query("SELECT * FROM degrees
                           GROUP BY major_code 
                           ORDER BY title, major_code ");
@@ -835,14 +863,15 @@ function stats_report_major_counts() {
     
     // Find out how many students have this major.
 
-    $sql = "SELECT count(cwid) AS count FROM students
-            WHERE major_code = '?'
+    $sql = "SELECT count(cwid) AS count FROM students a, student_degrees b
+            WHERE b.major_code = ?
+            AND a.cwid = b.student_id
             AND rank_code IN %RANKIN%
             %EXTRA_STUDENTSEARCH_CONDITIONS% ";      
     
-    $rank_in = "( '" . join("', '", csv_to_array($GLOBALS["fp_system_settings"]["allowed_student_ranks"])) . "' )";    
+    $rank_in = "( '" . join("', '", csv_to_array(@$GLOBALS["fp_system_settings"]["allowed_student_ranks"])) . "' )";    
     $sql = str_replace("%RANKIN%", $rank_in, $sql);   
-    $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $GLOBALS["fp_system_settings"]["extra_student_search_conditions"], $sql);  
+    $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", @$GLOBALS["fp_system_settings"]["extra_student_search_conditions"], $sql);  
     
     $res2 = db_query($sql, $major_code);
     $cur2 = db_fetch_array($res2);
@@ -889,8 +918,8 @@ function stats_report_major_counts() {
 function stats_report_flightpath_use_summary() {
   $rtn = "";    
 
-  $start_date = trim(addslashes($_REQUEST["start_date"]));
-  $end_date = trim(addslashes($_REQUEST["end_date"]));
+  $start_date = trim(addslashes(@$_REQUEST["start_date"]));
+  $end_date = trim(addslashes(@$_REQUEST["end_date"]));
 
   $rtn .= stats_draw_date_range_form("stats/reports/flightpath-use-summary", $start_date, $end_date);
   
@@ -1126,8 +1155,8 @@ function stats_draw_date_range_form($path, $start_date = "", $end_date = "") {
 function stats_report_advisor_use() {
   $rtn = "";
 
-  $start_date = trim(addslashes($_REQUEST["start_date"]));
-  $end_date = trim(addslashes($_REQUEST["end_date"]));
+  $start_date = trim(addslashes(@$_REQUEST["start_date"]));
+  $end_date = trim(addslashes(@$_REQUEST["end_date"]));
 
   $rtn .= stats_draw_date_range_form("stats/reports/advisor-use", $start_date, $end_date);
   
@@ -1161,7 +1190,9 @@ function stats_report_advisor_use() {
   while($cur = db_fetch_array($result)) {
     $faculty_id = trim($cur["cwid"]);
 
-    $f_array[$faculty_id] = $f_array[$faculty_id] * 1; // make it a number.
+    if (!isset($f_array[$faculty_id])) $f_array[$faculty_id] = 0;
+    
+    $f_array[$faculty_id] = intval($f_array[$faculty_id]); // make it a number.
     $f_array[$faculty_id]++;
 
     $s_array[$faculty_id]["dept_name"] = ucwords(strtolower(trim($cur["department"])));
@@ -1221,7 +1252,7 @@ function stats_report_access_stats() {
   $rtn = "";
 
 
-  $min = trim(addslashes($_REQUEST["min"]));
+  $min = trim(addslashes(@$_REQUEST["min"]));
   if ($min == "")
   {
     $min = "20";
@@ -1240,7 +1271,17 @@ function stats_report_access_stats() {
       </form>
       " . t("Unique students in time frame") . ": <!--STUDENTS-->. " . t("Unique faculty/staff in time frame") . ": <!--STAFF--> <br>";
 
-  $rtn .= "<table border='1' width='700'>";
+  $rtn .= "<table border='1' width='700'>
+            <tr>
+              <th>" . t("User") . "</th>
+              <th>" . t("UID") . "</th>
+              <th>" . t("CWID") . "</th>
+              <th>" . t("Name") . "</th>
+              <th>" . t("Type") . "</th>
+              <th>" . t("Action") . "</th>
+              <th>" . t("Extra") . "</th>
+              <th>" . t("Time") . "</th>
+            </tr>";
 
   $cwid_array = array();
   $student_actions = $staff_actions = 0;
@@ -1326,8 +1367,8 @@ function stats_report_student_course_list() {
   
   $rtn = "";
 
-  $student_cwid = trim(addslashes($_REQUEST["student_cwid"]));
-
+  $student_cwid = trim(addslashes(@$_REQUEST["student_cwid"]));
+  $student_pidm = 0;
   $rtn .= stats_draw_student_cwid_form("stats/reports/student-course-list", $student_cwid);
   
   if ($student_cwid == "") {
@@ -1356,7 +1397,7 @@ function stats_report_student_course_list() {
   
       <h2>$student_name ($student_cwid)
       ";
-  if ($student_pidm) {
+  if ($student_pidm > 0) {
     $rtn .= "<br>PIDM: $student_pidm";
   }
   $rtn .= "</h2>  
@@ -1388,7 +1429,7 @@ function stats_report_student_course_list() {
     $subjectID = $course->subject_id;
     $courseNum = $course->course_num;
     $grade = $course->grade;
-    $hours = $course->hours_awarded;
+    $hours = $course->get_hours_awarded();
     if (is_object($course->course_transfer)) {
       $subjectID = $course->course_transfer->subject_id;
       $courseNum = $course->course_transfer->course_num;

@@ -217,7 +217,7 @@ function db_result($res) {
 
 
 function db_insert_id() {
-  $db = get_global_database_handler();
+  $db = get_global_database_handler();  
   return $db->db_insert_id();
 }
 

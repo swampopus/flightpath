@@ -183,8 +183,8 @@ function fp_display_page($page) {
       $lclass = "";
       if ($c == 0) $lclass='first';
       
-      $p = menu_convert_replacement_pattern($item["path"]);
-      $q = menu_convert_replacement_pattern($item["query"]);
+      $p = menu_convert_replacement_pattern(@$item["path"]);
+      $q = menu_convert_replacement_pattern(@$item["query"]);
       $t = @$item["text"];
       $a = @$item["attributes"];
       if (!is_array($a)) $a = array();

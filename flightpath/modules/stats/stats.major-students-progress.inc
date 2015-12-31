@@ -23,12 +23,12 @@
 function stats_report_major_students_progress_form() {
   $form = array();
   
-  $last_major = $_SESSION["stats_report_major_students_progress"]["last_major"];
+  $last_major = @$_SESSION["stats_report_major_students_progress"]["last_major"];
   
   $form["major"] = array(
     "label" => t("Please select a major"),
     "type" => "select",
-    "options" => stats_draw_majors_pulldown($major, FALSE, FALSE, t("Please select a major"), TRUE, FALSE, TRUE),
+    "options" => stats_draw_majors_pulldown($last_major, FALSE, FALSE, t("Please select a major"), TRUE, FALSE, TRUE),
     "value" => $last_major,  
   );  
   
@@ -39,8 +39,10 @@ function stats_report_major_students_progress_form() {
   
   
   // If we have previously generated a CSV within the last hour, display it here.
-  $last_timestamp = $_SESSION["stats_report_major_students_progress"]["last_timestamp"];
-  $last_batch_id = $_SESSION["stats_report_major_students_progress"]["last_batch_id"];
+  $last_timestamp = @$_SESSION["stats_report_major_students_progress"]["last_timestamp"];
+  $last_batch_id = @$_SESSION["stats_report_major_students_progress"]["last_batch_id"];
+
+  $html = $m = "";
 
   if (time() < $last_timestamp + (60 * 60)) {
     
@@ -132,7 +134,7 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
     $batch["results"]["finished"] = FALSE;    
 
     
-    $batch["csv"] .= "CWID, LAST, FIRST, CATALOG, MAJOR, RANK, ";
+    $batch["csv"] = "CWID, LAST, FIRST, CATALOG, MAJOR, RANK, ";
     
   	// Get the requested piecharts from our config...
   	$temp = variable_get("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress");
@@ -152,17 +154,21 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
 
   	
   	// We need the "total" number of students in the selected major.    
-    $res = db_query("SELECT COUNT(*) as count FROM students a, users b
+    $res = db_query("SELECT COUNT(*) as count FROM students a, users b, student_degrees c
                      WHERE major_code = '?'
                      AND is_active = '1'
                      AND is_student = '1'
-                     AND a.cwid = b.cwid                     
-                     ORDER BY l_name, f_name ", $major);  	
+                     AND a.cwid = b.cwid
+                     AND a.cwid = c.student_id                     
+                     GROUP BY a.cwid
+                     ORDER BY l_name, f_name 
+                     
+                     
+                     ", $major);  	
     $cur = db_fetch_array($res);
     
     $batch["results"]["total"] = $cur["count"];
-  	 
-    
+  	
   }
   ////////////////////////////////////////////////////////////////////////
   
@@ -177,12 +183,15 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
    
 
   // Find active students with this major
-  $res = db_query("SELECT * FROM students a, users b
+  $res = db_query("SELECT * FROM students a, users b, student_degrees c
                    WHERE major_code = '?'
                    AND is_active = '1'
                    AND is_student = '1'
                    AND a.cwid = b.cwid                   
+                   AND a.cwid = c.student_id
+                   GROUP BY a.cwid
                    ORDER BY l_name, f_name
+                   
                    LIMIT $current, $limit", $major);
   while ($cur = db_fetch_array($res)) {
     $l_name = $cur["l_name"];
@@ -197,6 +206,8 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
     $catalog_year = $cur["catalog_year"];
     $rank = $cur["rank_code"];
 
+
+/*
     // Query for track code for this student, if exists.   
     $track_code = "";      
     $res2 = db_query("SELECT * FROM student_settings
@@ -216,7 +227,9 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
       if (!strstr($major_code, "|")) $major_code .= "|";
       $major_code .= "_" . $track_code;
     }
-    
+
+ * 
+ */    
     
     $batch["csv"] .= "$cwid, $l_name, $f_name, $catalog_year, $major_code, $rank, ";
       

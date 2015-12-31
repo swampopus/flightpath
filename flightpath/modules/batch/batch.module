@@ -334,7 +334,7 @@ function batch_set($batch) {
  */
 function batch_get($batch_id) {
   $res = db_query("SELECT * FROM batch_queue 
-                   WHERE batch_id = '?' ", $batch_id);
+                   WHERE batch_id = ? ", $batch_id);
   $cur = db_fetch_array($res);
   
   if ($batch = unserialize($cur["batch_data"])) {
@@ -359,8 +359,13 @@ function batch_get($batch_id) {
 function batch_get_token() {
   global $user;
   
+  $uid = 0;
+  if (isset($user->user_id)) {
+    $uid = $user->user_id;  
+  }
+  
   // Return back md5 of user_id + session_id.
-  return md5($user->user_id . session_id());
+  return md5($uid . session_id());
   
 }
 
@@ -394,6 +399,8 @@ function batch_start_batch_from_form_submit($batch_id, $redirect_path = "", $red
   
   
   $batch = batch_get($batch_id);
+    
+  
   if ($batch["token"] == $current_user_token) {  
     // Yes, we can proceed!
     

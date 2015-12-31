@@ -242,6 +242,8 @@ function menu_get_item($path) {
     // First, make only look for the ones with the exact same count as us...
     if (count($defined_pieces) != count($given_pieces)) continue;
     
+    if (!isset($defined_score[$defined_url])) $defined_score[$defined_url] = 0;
+    
     $defined_score[$defined_url]++;
     
     // Okay, now go through the pieces and compare.

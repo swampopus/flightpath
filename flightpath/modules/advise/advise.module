@@ -449,10 +449,12 @@ function advise_display_popup_change_track() {
   
   $rtn .= fp_render_curved_line(t("Select a Degree Option"));
   $rtn .= "<div class='tenpt'>
-      " . t("The student's degree has one or more degree options, which affects which courses are required. 
-      Please select a degree option (or track) from the list below.") . "
-      <br><br>
-      " . t("If you are unsure of what to do, simply close this window.");
+            " . t("The student's degree has one or more degree options, which affects which courses are required. 
+              Please select a degree option (or track) from the list below.") . "
+              <br><br>
+            " . t("If you are unsure of what to do, simply close this window.") . "
+          </div>
+      ";
 
   // Loop through available degrees here
   foreach ($degree_plan_array as $t_degree_plan) {
@@ -468,8 +470,9 @@ function advise_display_popup_change_track() {
     
     // Let's look to see what "tracks" this degree has.
   
-    $rtn .= "<br><br><b>" . $t_degree_plan->title . "</b> " . t("degree options:") . "</div><!--DEFAULT-->
-        <ul>";
+    $rtn .= "<br><div class='tenpt'><b>" . $t_degree_plan->title . "</b> " . t("degree options:") . "</div><!--DEFAULT-->
+                <div style='padding-left: 20px; padding-top: 10px; padding-bottom: 20px;'>
+        ";
 
     $major_code = $t_degree_plan->major_code;
 
@@ -478,7 +481,7 @@ function advise_display_popup_change_track() {
     // Get the list of available tracks for this student.
     if (!$tracks = $t_degree_plan->get_available_tracks())
     {
-      $rtn .= "<li>" . t("This degree has no degree options.") . "</li>";
+      $rtn .= "<div>&nbsp; &nbsp; &bull; " . t("This degree has no degree options.") . "</div>";
     }
 
     // Is there a "default" message for all tracks, which will override
@@ -492,9 +495,9 @@ function advise_display_popup_change_track() {
     for ($t = 0; $t < count($tracks); $t++)
     {
       $temp = explode(" ~~ ", $tracks[$t]);
-      $track_code = trim($temp[0]);
-      $track_title = trim($temp[1]);
-      $track_description = trim($temp[2]);
+      $track_code = trim(@$temp[0]);
+      $track_title = trim(@$temp[1]);
+      $track_description = trim(@$temp[2]);
   
       if (strstr($track_description, "DEFAULT:")) {
         // Yes!  We found a default message.
@@ -513,8 +516,8 @@ function advise_display_popup_change_track() {
     for ($t = 0; $t < count($tracks); $t++)
     {
       $temp = explode(" ~~ ", $tracks[$t]);
-      $track_code = trim($temp[0]);
-      $track_title = trim($temp[1]);
+      $track_code = trim(@$temp[0]);
+      $track_title = trim(@$temp[1]);
       $track_degree_id = intval(trim(@$temp[3]));
       $track_description = "";
   
@@ -528,7 +531,7 @@ function advise_display_popup_change_track() {
   
   
       if ($bool_default_description == false) {
-        $track_description = filter_markup(trim($temp[2]));
+        $track_description = filter_markup(trim(@$temp[2]));
       }
   
       $temp_tc = $track_code;
@@ -572,7 +575,7 @@ function advise_display_popup_change_track() {
   
     } // for (count(tracks))
   
-    $rtn .= "</ul>";    
+    $rtn .= "</div>";    
 
   } // foreach degree_plan_array
 

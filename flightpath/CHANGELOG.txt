@@ -1,6 +1,17 @@
 FlightPath 4.x Changelog
 ========================
 
+2015-12-30
+  Worked on stats module and general housekeeping for adding recognition that students and faculty can have
+  multiple major codes.
+  
+  Improved DatabaseHandler's db error function to give line number and file of problem when it occurs.
+  
+  Fixed bug in db_last_insert_id function, was always returning zero.
+  
+  Worked on bugs relating to batch module.
+
+
 2015-12-28
   Working on Display by Type, to make it more in line with Display by Year.
   

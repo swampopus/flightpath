@@ -3379,7 +3379,7 @@ function draw_menu_items($menu_array) {
 		$img_path = fp_theme_location() . "/images";
 		
 		// The current term we are advising for.
-		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
+		$advising_term_id = @$GLOBALS["fp_advising"]["advising_term_id"];
 		
     $pts = "";
     

@@ -1126,17 +1126,12 @@ class _FlightPath extends stdClass
     //    die;
     // We have changed tracks, so we are to edit the student degrees table.
     if ($_POST["advising_update_student_degrees_flag"] == "true") {
-      // Check if this is for whatif mode or not.
-      $is_whatif = 0;
-      if ($_POST["advising_what_if"] == "yes") {
-        $is_whatif = 1;
-      }
+
       // Begin by deleting all the "editable" rows for this student
       // in student_degrees.
       db_query("DELETE FROM student_degrees 
-                WHERE student_id = '?'
-                AND is_whatif = '?'
-                AND is_editable = '1' ", $student_id, $is_whatif);
+                WHERE student_id = '?'                
+                AND is_editable = '1' ", $student_id);
       // Now, go through our list of degree tracks ids we're adding back in, and add to the table.
       $temp = explode(",", $_POST["advising_track_degree_ids"]);
               
@@ -1148,8 +1143,8 @@ class _FlightPath extends stdClass
         $tmajor_code = $tdegree_plan->major_code . "|_" . $tdegree_plan->track_code;
                         
         db_query("INSERT INTO student_degrees
-                  (student_id, major_code, is_whatif, is_editable)
-                  VALUES ('?', '?', '?', '1')", $student_id, $tmajor_code, $is_whatif);
+                  (student_id, major_code, is_editable)
+                  VALUES ('?', '?', '1')", $student_id, $tmajor_code);
         
       }      
        
