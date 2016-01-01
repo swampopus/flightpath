@@ -2463,6 +2463,24 @@ function system_modules_form() {
                                                           '%fpov' => FLIGHTPATH_VERSION)) . "</div>";
               }
             }
+            
+            
+            // Let's see if this module is for the wrong core entirely.
+            if ($info_details_array["core"]) {
+                
+              // Test to see if we are not the correct core version.
+              if (strtolower(FLIGHTPATH_CORE) != strtolower($info_details_array["core"])) {
+                // Nope, the wrong core version!
+                $attributes["disabled"] = "disabled";
+                $requires .= "<div style='color: red;'>" . t("This module requires
+                                          that you run FlightPath core version %fpv.  
+                                          You are instead running version %fpov.  Please either download
+                                          the correct version of this module for your FlightPath core version,
+                                          or update FlightPath to the required core version.", array('%fpv' => $info_details_array["core"],
+                                                          '%fpov' => FLIGHTPATH_CORE)) . "</div>";
+              }
+            }
+                        
                        
                        
             
