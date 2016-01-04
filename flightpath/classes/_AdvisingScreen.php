@@ -2168,6 +2168,17 @@ function draw_menu_items($menu_array) {
 			$course = new Course($course_id);
 		}
 
+
+    // Set up our "render array" for later rendering, using the render API.
+    $render = array();
+    $render["#id"] = "AdvisingScreen_display_popup_course_description";
+    $render["#course"] = array(
+      "type" => "do_not_render",
+      "value" => $course,
+    );
+
+
+
 		// Keep up with original max hours, in case this is from a substitution split.
 		$datastring_max_hours = $course->max_hours;
 		$datastring_bool_new_from_split = $course->get_bool_substitution_new_from_split();
@@ -2238,8 +2249,9 @@ function draw_menu_items($menu_array) {
 						
 			// make transfer course titles all caps.
 			$course->course_transfer->title = strtoupper($course->course_transfer->title);
-
-			$pC .= "<div style='margin-top: 13px;' class='tenpt'>
+      
+      $html = "";
+			$html .= "<div style='margin-top: 13px;' class='tenpt'>
 				<b>" . t("Transfer Credit Information:") . "</b><br>
 				<div style='margin-left: 20px;' class='tenpt'>
 					" . t("Course:") . " " . $course->course_transfer->subject_id . " " . $course->course_transfer->course_num . " 
@@ -2255,60 +2267,89 @@ function draw_menu_items($menu_array) {
 				$bool_transferEqv = false;
 			}
 
-			$pC .= "$initials Eqv: $transfer_eqv_text<br>
+			$html .= "$initials Eqv: $transfer_eqv_text<br>
 				</div>
 					</div>";
+
+      $render["transfer_credit_info"] = array(
+        "value" => $html,        
+      );
 
 		}
 
 
+    /*
 		$pC .= "
 		   	<div style='margin-top: 13px;'>
 				<div class='tenpt'>";
+    */    
+        
 		if ($course->course_id != 0)
 		{
+		  $html = "";
 		  $use_hours = $course_hours;
 			if ($course->bool_transfer)
 			{
-				$pC .= "<b>$initials " . t("Equivalent Course Information:") . "</b><br>
+				$html .= "<b>$initials " . t("Equivalent Course Information:") . "</b><br>
 						<b>$course->subject_id $course->course_num</b> - ";
 				$new_course = new Course();
 				$new_course->course_id = $course->course_id;
 				$new_course->load_descriptive_data();
 				$use_hours = $new_course->get_catalog_hours();
 			}
-			$pC .= "
+			$html .= "
 					<b>$course->title ($use_hours " . t("hrs") . ")</b>";
+          
+          
+      $render["course_title_line"] = array(
+        "value" => $html,
+        "attributes" => array("style" => "margin-top: 13px;", "class" => "tenpt"),
+      );
+          
 		}
+        
+    
+    
 		if ($course->get_bool_substitution_new_from_split() || $course->get_bool_substitution_split())
 		{
-			$pC .= "<div class='tenpt' style='margin-bottom:5px;'>
-						<i>" . t("This course's hours were split in a substitution.");
+		  $html = "";
+			$html .= "<div class='tenpt' style='margin-bottom:5px;'>
+						        <i>" . t("This course's hours were split in a substitution.");
 			
 			if ($datastring_bool_new_from_split) {
-			  $pC .= "<br>" . t("Remaining hours after split:") . " " . $datastring_max_hours . " hrs.";
+			  $html .= "<br>" . t("Remaining hours after split:") . " " . $datastring_max_hours . " hrs.";
 			}
-			/*
-			else {
-			  $pC .= "<br>" . t("Original course hours:") . " " . $course->max_hours . " hrs.";
-			}
-			*/
 			
-			$pC .= "</i>
-						<a href='javascript: alertSplitSub();'>?</a>
-					</div>";
+			
+			$html .= "</i>
+						        <a href='javascript: alertSplitSub();'>?</a>
+					     </div>";
+					
+			$render["substitution_split"] = array(
+			 "value" => $html,
+			);		
+					
 		}
 
-		$pC .= "</div>";
+		//$pC .= "</div>";
 
 		if ($course->course_id != 0)
 		{
+		  /*
 			$pC .= "
 			<div class='tenpt'>
 					$course->description
 				</div>
 			</div>
-				"; 
+				";
+        
+       */
+        
+      $render["course_description"] = array(
+        "value" => $course->description,
+        "attributes" => array("class" => "tenpt"),
+      );  
+         
 		}
 
 		// The -1 for get_bool_substitution means, is it being used in ANY substitution?
@@ -2606,6 +2647,13 @@ function draw_menu_items($menu_array) {
       $pC .= fp_render_button(t("Update"), "popupUpdateSelectedCourse(\"$course->course_id\",\"$course->get_first_assigned_to_group_id()\",\"$course->assigned_to_semester_num\",\"$course->random_id\",\"$advising_term_id\");");
 
 		}
+
+
+    $pC .= "<hr>";    
+    $pC .= fp_render_content($render);
+    $pC .= "<hr>";
+
+
 
 
 		return $pC;

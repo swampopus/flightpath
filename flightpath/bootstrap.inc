@@ -17,7 +17,7 @@ if (!isset($levels_deep)) $levels_deep = "";
 // Load the includes files, for common functions.
 require_once("$levels_deep" . "includes/theme.inc");
 require_once("$levels_deep" . "includes/misc.inc");
-require_once("$levels_deep" . "includes/forms.inc");
+require_once("$levels_deep" . "includes/render.inc");
 require_once("$levels_deep" . "includes/menu.inc");
 require_once("$levels_deep" . "includes/db.inc");
 

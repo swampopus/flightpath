@@ -816,7 +816,7 @@ function advise_display_popup_substitute_selected() {
 function advise_display_popup_course_description() {
   global $current_student_id, $screen;
   $rtn = "";
-
+  
   advise_init_screen();
   
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
@@ -841,15 +841,15 @@ function advise_display_popup_course_description() {
   $tab_array = array();
   $tab_array[0]["title"] = "Description";
   $tab_array[0]["active"] = true;
-
   if (user_has_permission("can_substitute") && !$screen->bool_blank) {
-    if ($course->get_bool_substitution() != TRUE && $course->grade == "") { 
+    if ($course->get_bool_substitution() != TRUE && $course->grade == "") {
+      
       // By checking grade, we are making sure this course has NOT already
       // been taken by the student.  In other words, verify that this course
       // is an unfulfilled requirement on the degree plan ONLY.      
       $extra_vars = "hours_avail=$datastring_max_hours";
       $tab_array[1]["title"] = "Substitute";
-      $tab_array[1]["on_click"] = "popupSubstituteSelected(\"$course->course_id\",\"$course->assigned_to_group_id\",\"$course->assigned_to_semester_num\",\"$req_by_degree_id\",\"$extra_vars\");";
+      $tab_array[1]["on_click"] = "popupSubstituteSelected(\"$course->course_id\",\"" . $course->get_first_assigned_to_group_id() . "\",\"$course->assigned_to_semester_num\",\"$req_by_degree_id\",\"$extra_vars\");";
       
     }
   }
