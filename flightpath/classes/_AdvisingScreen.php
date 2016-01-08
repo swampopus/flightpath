@@ -2342,8 +2342,8 @@ function draw_menu_items($menu_array) {
 				</div>
 			</div>
 				";
-        
-       */
+        */
+      
         
       $render["course_description"] = array(
         "value" => $course->description,
@@ -2974,7 +2974,7 @@ function draw_menu_items($menu_array) {
 
 				$c->temp_flag = true;
 				$c->icon_filename = $group->icon_filename;
-				$c->title_text = "The student has been advised to take this course to fulfill a $group->title requirement.";
+				$c->title_text = t("The student has been advised to take this course to fulfill a @gt requirement.", array("@gt" => $group->title));
 				$display_course_list->add($c);
 
 			}
@@ -3085,9 +3085,21 @@ function draw_menu_items($menu_array) {
 		$place_group->hours_remaining = $remaining;
 		$place_group->hours_fulfilled = $fulfilled_hours;
 		$place_group->hours_fulfilled_for_credit = $fulfilled_credit_hours;
+		
 		if ($remaining > 0)
 		{
-			$pC .= "<tr><td colspan='8' class='tenpt'>";
+		  
+      $rowclass = "";
+      // If we have met the min hours (if the group even HAS min hours) then add a class to $rowclass,
+      // so we can hide it or whatever with CSS.
+      if ($group->has_min_hours_allowed()) {
+        if ($test_hours > $group->min_hours_allowed) {
+          $rowclass .= "group-select-min-hours-fulfilled";
+        }
+      }
+      
+      
+			$pC .= "<tr class='$rowclass'><td colspan='8' class='tenpt'>";
 			$pC .= $this->draw_group_select_row($place_group, $remaining);
 			$pC .= "</td></tr>";
 		}
@@ -3211,9 +3223,16 @@ function draw_menu_items($menu_array) {
 
     $req_by_degree_id = $group->req_by_degree_id;
 
+    $disp_remaining_hours = $remaining_hours;
+    // If the group has min_hours, then the disp_remaining_hours gets that too.
+    if ($group->has_min_hours_allowed()) {
+      $disp_remaining_hours = $group->min_hours_allowed . "-" . $remaining_hours;
+    }
+
+
 		$js_code = "selectCourseFromGroup(\"$group->group_id\", \"$group->assigned_to_semester_num\", \"$remaining_hours\", \"$blank_degree_id\",\"$req_by_degree_id\");";
 
-		$row_msg = "<i>Click <font color='red'>&gt;&gt;</font> to select $remaining_hours hour$s.</i>";
+		$row_msg = "<i>Click <font color='red'>&gt;&gt;</font> to select $disp_remaining_hours hour$s.</i>";
 		$hand_class = "hand";
 
 		if ($this->bool_print)
@@ -3222,7 +3241,7 @@ function draw_menu_items($menu_array) {
 			$on_mouse_over = "";
 			$js_code = "";
 			$hand_class = "";
-			$row_msg = "<i>Select $remaining_hours hour$s from $group->title.</i>";
+			$row_msg = "<i>Select $disp_remaining_hours hour$s from $group->title.</i>";
 		}
 
 
@@ -4680,11 +4699,17 @@ function draw_menu_items($menu_array) {
 			}
 		}
 
-		if ($group_hours_remaining < 100 && $bool_no_courses != true)	{ 
+		if ($group_hours_remaining < 100 && $bool_no_courses != true)	{
+		  $disp_group_hours_remaining = $group_hours_remaining;
+      // If we have min_hours, display that information.
+      if ($group->has_min_hours_allowed()) {
+        $disp_group_hours_remaining = $group->min_hours_allowed . "-" . $group_hours_remaining;
+      }
+       
 		  // Don't show for huge groups (like add-a-course)
 			$pC .= "<div class='elevenpt' style='margin-top:5px;'>
 					" . t("You may select <b>@hrs</b>
-						hour$s from this list.", array("@hrs" => $group_hours_remaining)) . "$unselectable_notice</div>";
+						hour$s from this list.", array("@hrs" => $disp_group_hours_remaining)) . "$unselectable_notice</div>";
 		}
 
 

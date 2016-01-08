@@ -899,6 +899,7 @@ function admin_get_semester_name($semester_num) {
  */
 function admin_apply_draft_changes_form() {
   $form = array();
+  $m = 0;
   
   $form["mark" . $m++] = array(
     "type" => "markup",

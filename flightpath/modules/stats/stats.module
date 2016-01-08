@@ -115,11 +115,11 @@ function stats_menu() {
     "weight" => 250,
   );
 
-  
+  $system_name = variable_get("system_name", "FlightPath");
 
   $items["stats/reports/student-course-list"] = array(
     "title" => "Student Course List",
-    "description" => "List courses a student has taken, which FlightPath is aware of.",
+    "description" => "List courses a student has taken, which $system_name is aware of.",
     "page_callback" => "stats_report_student_course_list",
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(
@@ -140,8 +140,8 @@ function stats_menu() {
   
 
   $items["stats/reports/flightpath-use-summary"] = array(
-    "title" => "FlightPath Use Summary",
-    "description" => "A detailed report on how FlightPath is being used over a specified time range.",
+    "title" => "$system_name Use Summary",
+    "description" => "A detailed report on how $system_name is being used over a specified time range.",
     "page_callback" => "stats_report_flightpath_use_summary",
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(
@@ -183,7 +183,7 @@ function stats_menu() {
 
   $items["stats/reports/course-use-summary"] = array(
     "title" => "Course Use Summary",
-    "description" => "A report of everywhere a particular course is used in FlightPath (groups or degrees).",
+    "description" => "A report of everywhere a particular course is used in $system_name (groups or degrees).",
     "page_callback" => "stats_report_course_use_summary",    
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(

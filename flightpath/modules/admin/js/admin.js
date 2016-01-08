@@ -244,7 +244,8 @@ function adminPopupAlertHelp(action)
 
   if (action == "group_properties")
   {
-    t = t + "The Hrs means how many hours are required to fulfill this group in this semester or year?  For example, 6.  Must contain a whole number larger than 0.\n\n";
+    t = t + "The Hrs means how many hours are required to fulfill this group in this semester or year?  For example, 6.  Must contain a whole number larger than 0. ";
+    t = t + "You may also specify 'min' acceptible hours for the group, ex: 3-6 means from 3 (min) to 6 hours.\n\n";    
     t = t + "The Min Grade is the default minimum grade any course taken from this group must have in order to fulfill the group. ";
     t = t + "This is different from the minimum grade set per-course within the group entry screen.  This minimum grade value will always override ";
     t = t + "any other minimum grade setting within the group.  Leave blank for no min grade (meaning that any passing grade is acceptable.)\n\n";
@@ -366,11 +367,16 @@ function adminPopupAddGroup(semester_num) {
   var type = document.getElementById("type").value;
   var min_grade = document.getElementById("min_grade").value;
   
+  // make sure hours doesn't contain a _, as that will cause all sorts of problems.
+  hours = str_replace("_", "-", hours);
+  
+  
   if (hours < 1 || group_id < 1) {
     alert("Please select a group and number of hours!");
     return;
   }
   
+  opener.showUpdate(false);
   //alert(group_id + " " + hours + " " + type + " " + min_grade);
   opener.document.getElementById("perform_action2").value="addGroup_" + group_id + "_" + semester_num + "_" + hours + "_" + type + "_" + min_grade;
   opener.adminSubmitDegreeForm();

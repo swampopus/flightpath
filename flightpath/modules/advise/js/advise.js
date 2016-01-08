@@ -675,18 +675,7 @@ function popupSaveSubstitution(course_id, group_id, semester_num, req_by_degree_
 }
 
 
-//+ Jonas Raoni Soares Silva  
-//@ http://jsfromhell.com
-// Found this function on the Internet.  It acts like php str_replace function:
-// f = find  ex:  "bob"
-// r = replace  ex:  "sally"
-// s = string  ex:  "bob is a girl name"
-function str_replace(f, r, s) {
-    var ra = r instanceof Array, sa = s instanceof Array, l = (f = [].concat(f)).length, r = [].concat(r), i = (s = [].concat(s)).length;
-    while(j = 0, i--)
-      while(s[i] = s[i].split(f[j]).join(ra ? r[j] || "" : r[0]), ++j < l);
-  return sa ? s : s[0];
-}
+
 
 
 

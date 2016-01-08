@@ -39,8 +39,6 @@ class _DatabaseHandler extends stdClass
       $_SESSION["fp_db_host_ip"] = $db_host_ip;
     }
 
-
-
 		// Connect using PDO
 		$this->pdo = new PDO("mysql:host=$db_host_ip;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass);
 		// Set our error handling...  (using "silent" so I can catch errors in try/catch and display them, email, etc, if wanted.)
@@ -340,7 +338,8 @@ class _DatabaseHandler extends stdClass
     try {
       
       $result = $this->pdo->prepare($sql_query);
-      $result->execute($args);   
+      $result->execute($args);
+      
       $_SESSION["fp_last_insert_id"] = $this->pdo->lastInsertId();  // capture last insert id, in case we ask for it later.   
       return $result;
     } 
@@ -372,6 +371,7 @@ class _DatabaseHandler extends stdClass
    */
   function db_error(Exception $ex)
   {
+    global $user;
         
     $arr = $ex->getTrace();
     
@@ -442,6 +442,11 @@ class _DatabaseHandler extends stdClass
               </div>
               
               ";
+
+      
+      // DEV:  Comment out when not needed.
+      print "<pre>" . print_r($arr, TRUE) . "</pre>";
+      
       die;          
     }
     

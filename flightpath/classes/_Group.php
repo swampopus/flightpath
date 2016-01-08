@@ -3,7 +3,7 @@
 class _Group extends stdClass
 {
 	public $title, $icon_filename, $group_id, $requirement_type, $min_grade, $group_name;
-	public $hours_required, $hours_remaining, $hours_fulfilled, $hours_fulfilled_for_credit;
+	public $hours_required, $min_hours_allowed, $hours_remaining, $hours_fulfilled, $hours_fulfilled_for_credit;
 	public $hours_required_by_type, $req_by_degree_id;
 	public $assigned_to_semester_num, $bool_placeholder, $data_entry_comment;
 	public $list_courses, $list_groups, $db, $count_of_matches, $bool_winning_branch;
@@ -45,6 +45,7 @@ class _Group extends stdClass
 		$this->assigned_to_semester_num = $semester_num;
 		$this->count_of_matches = 0;
 		$this->hours_assigned = 0;
+    $this->min_hours_allowed = 0;
 		$this->list_courses = new CourseList();
 		$this->list_groups = new GroupList();
 		$this->bool_use_draft = $bool_use_draft;
@@ -105,12 +106,35 @@ class _Group extends stdClass
 
 	}
 
+
+  
+  function has_min_hours_allowed() {
+    
+    return ($this->min_hours_allowed > 0 && $this->min_hours_allowed != $this->hours_required);
+    
+  }
+
+
 	function get_hours_remaining($semester_num = -1)
 	{
-		// returns hor many hours are left for this group.
+		// returns how many hours are left for this group.
 
 		return ($this->hours_required - $this->get_fulfilled_hours(true, true, false, $semester_num));
 	}
+
+  /**
+   * Return TRUE or FALSE if we've fulfilled the min hour allowed value, if it's set.
+   */
+  function get_is_min_hours_allowed_fulfilled($semester_num = -1) {
+    if ($this->min_hours_allowed < 1) return TRUE;
+    
+    $v = $this->get_fulfilled_hours(true, true, false, $semester_num);
+    
+    if ($v >= $this->min_hours_allowed) return TRUE;
+    
+    return FALSE;
+    
+  }
 
  
   /**

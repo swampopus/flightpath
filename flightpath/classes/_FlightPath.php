@@ -1232,7 +1232,7 @@ class _FlightPath extends stdClass
 								VALUES
 								('?', '?','?','?','?','?','?','?','?') 
 								", $student_id, $faculty_id,$term_id,$degree_id, $major_code_csv, $catalog_year, time(), $is_what_if, $is_draft);
-			$advising_session_id = mysql_insert_id();
+			$advising_session_id = db_insert_id();
 			$advising_session_id_array[$term_id] = $advising_session_id;
 			$advising_session_id_array_count[$term_id] = 0;
 		}

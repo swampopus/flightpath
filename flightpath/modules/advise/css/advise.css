@@ -1,0 +1,12 @@
+/**
+ *   @file
+ * CSS file for the advise module.  Added to pages having to do with advising.
+ */
+
+/**
+ *   A group select row for a group with min hours,
+ * where the min hours have been completed.  So, make it not show up.
+ */
+.group-select-min-hours-fulfilled {
+  display: none;
+}

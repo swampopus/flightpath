@@ -23,7 +23,7 @@ function blocks_menu() {
 
   $items["admin/config/blocks"] = array(
     "title" => "Blocks",
-    "description" => "Configure blocks of content and where they show up in FlightPath",
+    "description" => "Configure blocks of content and where they show up in " . variable_get("system_name", "FlightPath"),
     "page_callback" => "fp_render_form",
     "page_arguments" => array("blocks_manage_blocks_form"),    
     "access_arguments" => array("admin_blocks"),

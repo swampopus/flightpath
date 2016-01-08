@@ -1,9 +1,18 @@
 FlightPath 5.x Changelog
 ========================
 
-2015-01-04
+2016-01-07
+  Workng on var hour groups, ie, "min_hours_allowed".  Also, added in mechanism for changing the name of FlightPath to something else, if desired.
+  
+
+2016-01-05
+  Beginning work on optional min hours for groups.
+  
+
+2016-01-04
   Creating new render api system, for rendering arrays similar to form arrays.  This lets other modules hook in to make changes.
   Changed forms.inc to render.inc
+
 
 2015-12-31
   Initial commit of 5.x branch, from 4.10-dev branch. Enough has changed to warrent naming this a new core version.

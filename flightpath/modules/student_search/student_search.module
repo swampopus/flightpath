@@ -621,8 +621,8 @@ function student_search_get_advanced_search_tips() {
 // Display advanced tips
   $advanced_tips_html = "
           <div class='student-search-advanced-tips'>            
-            " . t("FlightPath displays students who are currently enrolled or are newly admitted for
-            an upcoming term. Use the following tips to expand your search options:") . "
+            " . t("@FlightPath displays students who are currently enrolled or are newly admitted for
+            an upcoming term. Use the following tips to expand your search options:", array("@FlightPath" => variable_get("system_name", "FlightPath"))) . "
             <ul>
               <li>" . t("To search for inactive students, as well as active, add an asterisk (*)
                   after your search.

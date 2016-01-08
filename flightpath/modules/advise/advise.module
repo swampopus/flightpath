@@ -930,7 +930,9 @@ function advise_display_view($view = "view") {
   // Initialize everything we need to initialize for this advising session.
   advise_init_screen();      
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");  
-
+  // Add advise.css to the screen
+  fp_add_css(fp_get_module_path("advise") . "/css/advise.css");
+  
   // If we are on a print screen, we need to go out of our
   // way to set the screen mode, so we don't display certain things
   // when we go to draw the screen.
@@ -1637,6 +1639,9 @@ function advise_init() {
     fp_add_message("<b>" . t("Draft mode") . "</b> " . t("is currently enabled, however, substitutions and advisings will
                       still be saved normally."), "status", TRUE);
   }
+ 
+  
+  
           
 }
 

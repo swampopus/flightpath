@@ -243,7 +243,7 @@ function system_menu() {
 
   $items["admin/config/status"] = array(
     "title" => "System status",
-    "description" => "View important notifications and updates for your installation of FlightPath",
+    "description" => "View important notifications and updates for your installation of " . variable_get("system_name", "FlightPath"),
     "page_callback" => "system_display_status_page",
     "access_arguments" => array("view_system_status"),
     "page_settings" => array(
@@ -660,9 +660,9 @@ function system_display_install_finished_page() {
 function system_popup_report_contact_thank_you() {
   $rtn = "";
   
-  $rtn .= fp_render_curved_line(t("Contact the FlightPath Production Team"));
-  $rtn .= t("Thank you for submitting to the FlightPath Production Team.  They 
-             have received your comment and will review it shortly.") . "<br><br>";
+  $rtn .= fp_render_curved_line(t("Contact the @FlightPath Production Team", array("@FlightPath" => variable_get("system_name", "FlightPath"))));
+  $rtn .= t("Thank you for submitting to the @FlightPath Production Team.  They 
+             have received your comment and will review it shortly.", array("@FlightPath" => variable_get("system_name", "FlightPath"))) . "<br><br>";
   $rtn .= t("You may now close this window.");
   
   return $rtn;
@@ -679,20 +679,20 @@ function system_popup_report_contact_form() {
   fp_set_title("");
   
   $form["mark" . $m++] = array(
-    "value" => fp_render_curved_line(t("Contact the FlightPath Production Team")),
+    "value" => fp_render_curved_line(t("Contact the @FlightPath Production Team", array("@FlightPath" => variable_get("system_name", "FlightPath")))),
   );
   
   if (!user_has_permission("access_logged_in_content")) {
     $form["mark" . $m++] = array(
       "value" => t("We're sorry, but for security reasons you may only access this form
-                    if you are logged in to FlightPath."),
+                    if you are logged in to @FlightPath.", array("@FlightPath" => variable_get("system_name", "FlightPath"))),
     );
     return $form;
   }
   
   $form["mark" . $m++] = array(
     "value" => t("If you've noticed an error or have a suggestion, use this
-                  form to contact the FlightPath Production Team."),
+                  form to contact the @FlightPath Production Team.", array("@FlightPath" => variable_get("system_name", "FlightPath"))),
   );  
   
   $form["category"] = array(
@@ -1396,6 +1396,19 @@ function system_settings_form() {
     
   );
 
+  $form["system_name"] = array(
+    "type" => "textfield",
+    "label" => t("System Name:"),
+    "value" => variable_get("system_name", "FlightPath"),
+    "description" => t("This is the name of this software system.  Ex:  FlightPath.  This setting allows you to re-name this
+                        system for you school.  You will also need to create new themes, and edit where the name FlightPath
+                        is hard-coded in the template files.  This will only change the name FlightPath in user-facing pages, 
+                        it will still appear in admin sections.  After changing this value, clear your cache, as several
+                        menu items will need to be updated."),
+    
+  );
+
+
   
   // Can we support clean_urls?
   $bool_support_clean = system_check_clean_urls();
@@ -1809,7 +1822,7 @@ function system_handle_logout() {
   
   watchdog("logout", "@user has logged out", array("@user" => "$name ($uid)"));
   
-  fp_add_message(t("You have been logged out of FlightPath."));
+  fp_add_message(t("You have been logged out of @FlightPath.", array("@FlightPath" => variable_get("system_name", "FlightPath"))));
   fp_goto("<front>");
   
 }
@@ -1983,9 +1996,9 @@ function system_display_login_page() {
   
   $rtn .= "<noscript>
             <div style='padding: 5px; background-color: red; color: white; font-size: 12pt; font-weight: bold;'>
-            " . t("FlightPath requires JavaScript to be enabled in order to
+            " . t("@FlightPath requires JavaScript to be enabled in order to
             function correctly.  Please enable JavaScript on your browser
-            before continuing.") . "</div>
+            before continuing.", array("@FlightPath" => variable_get("system_name", "FlightPath"))) . "</div>
           </noscript>";
   
   
@@ -2301,9 +2314,9 @@ function system_init() {
   
   // Are we in maintenance mode?  If so, display a message.
   if (variable_get("maintenance_mode", FALSE)) {
-    fp_add_message(t("FlightPath is currently undergoing routine maintenance.  
+    fp_add_message(t("@FlightPath is currently undergoing routine maintenance.  
                       During this time, some data may appear incomplete.
-                      We apologize for the inconvenience and appreciate your patience."), "status", TRUE);
+                      We apologize for the inconvenience and appreciate your patience.", array("@FlightPath" => variable_get("system_name", "FlightPath"))), "status", TRUE);
   }
    
   // Is there an urgent message to display?  

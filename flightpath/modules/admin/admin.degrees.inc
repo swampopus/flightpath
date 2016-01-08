@@ -813,8 +813,8 @@ function admin_handle_edit_degree_submit() {
       {
         $query = "INSERT INTO draft_degree_requirements
                     (degree_id, semester_num, course_id, course_min_grade, course_requirement_type, data_entry_value)
-                    values ('?','?','?','?','?','?~?') ";
-        $res = db_query($query, $degree_id, $semester_num, $course_id, $min_grade, $requirement_type, $subject_id, $course_num);
+                    values (?,?,?,?,?,?) ";
+        $res = db_query($query, $degree_id, $semester_num, $course_id, $min_grade, $requirement_type, "$subject_id~$course_num");
         //debug_c_t($query);
       } else {
         // The course_id could not be found!
@@ -840,9 +840,22 @@ function admin_handle_edit_degree_submit() {
     }
     // Only look at the groups...
     $temp = explode("_", $value);
+    
+        
     $group_id = $temp[0];
+    
     $semester_num = $temp[1];
+    
     $hours = $temp[2];
+    $min_hours = $hours;
+    
+    if (strstr($hours, "-")) {
+      // Hours has a min hour value specified.  let's grab it.
+      $tt = explode("-", $hours);
+      $min_hours = $tt[0];
+      $hours = $tt[1];
+    }    
+    
     $type = $temp[3];
     $min_grade = trim($temp[4]);
 
@@ -852,7 +865,7 @@ function admin_handle_edit_degree_submit() {
 
 
     // Do not add if we are supposed to be deleting this group!
-    if (is_object($del_group)) {
+    if (isset($del_group) && is_object($del_group)) {
       if ($del_group->group_id == $group_id && $del_group->assigned_to_semester_num == $semester_num) {
         continue;
       }
@@ -880,11 +893,10 @@ function admin_handle_edit_degree_submit() {
     // We now have enough information to insert this group.
     //debugCT("group: $group_id $semester_num $hours $type");
     $query = "INSERT INTO draft_degree_requirements
-                    (`degree_id`,`semester_num`,`group_id`,
-                    `group_requirement_type`,`group_hours_required`,`group_min_grade`)
-                    values ('?','?','?',
-                    '?','?','?') ";
-    $res = db_query($query, $degree_id, $semester_num, $group_id, $type, $hours, $min_grade);
+                    (degree_id, semester_num, group_id,
+                    group_requirement_type, group_hours_required, group_min_hours_allowed, group_min_grade)
+                    values (?,?,?,?,?,?,?) ";
+    $res = db_query($query, $degree_id, $semester_num, $group_id, $type, $hours, $min_hours, $min_grade);
 
 
   }
@@ -896,8 +908,18 @@ function admin_handle_edit_degree_submit() {
     $group_id = $temp[1];
     $semester_num = $temp[2];
     $hours = trim($temp[3]);
+    $min_hours = $hours;
+    if (strstr($hours, "-")) {
+      // Hours has a min hour value specified.  let's grab it.
+      $tt = explode("-", $hours);
+      $min_hours = $tt[0];
+      $hours = $tt[1];
+    }    
+    
+    
     $type = $temp[4];
     $min_grade = trim($temp[5]);
+    
     
     
     $adding_group = new Group($group_id);
@@ -920,15 +942,18 @@ function admin_handle_edit_degree_submit() {
     
     
     $query = "INSERT INTO draft_degree_requirements
-                    (`degree_id`,`semester_num`,`group_id`,
-                    `group_requirement_type`,`group_hours_required`,`group_min_grade`)
-                    VALUES ('?','?','?','?','?','?') ";
-    $res = db_query($query, $degree_id, $semester_num, $group_id, $type, $hours, $min_grade);
+                    (degree_id,semester_num,group_id,
+                    group_requirement_type,group_hours_required,group_min_hours_allowed,group_min_grade)
+                    VALUES (?,?,?,?,?,?,?) ";
+    $res = db_query($query, $degree_id, $semester_num, $group_id, $type, $hours, $min_hours, $min_grade);
 
   }
 
   // Make the semesterTitlesCSV...
   for ($semester_num = 0; $semester_num <= $highest_semester_num; $semester_num++) {
+      
+    if ($semester_num > 99) break;  // some problem.  Give up.  Don't try to go past 99 semesters!
+    
     $semester_titles_csv .= trim(@$_POST["semester_title_$semester_num"]) . ",";
   }
 
@@ -942,16 +967,16 @@ function admin_handle_edit_degree_submit() {
   $allow_dynamic = trim($_POST["allow_dynamic"]);
   $public_note = trim($_POST["public_note"]);
   $res = db_query("UPDATE draft_degrees
-              SET `semester_titles_csv`='?',
-              `title`='?',
-              `degree_type`='?',
-              `degree_class`='?',
-              `degree_level`='?',
-              `exclude`='?',
-              `allow_dynamic`='?',
-              `public_note`='?'
-              WHERE `degree_id`='?' ",
-              $semester_titles_csv, $degree_title, $degree_type, $degree_class, $degree_level, $exclude, $allow_dynamic, $public_note, $degree_id);
+              SET semester_titles_csv = ?,
+                  title = ?,
+                  degree_type = ?,
+                  degree_class = ?,
+                  degree_level = ?,
+                  exclude = ?,
+                  allow_dynamic = ?,
+                  public_note = ?
+              WHERE degree_id = ? ",
+                $semester_titles_csv, $degree_title, $degree_type, $degree_class, $degree_level, $exclude, $allow_dynamic, $public_note, $degree_id);
 
   ////  Was there a track title/description?  If so, UPDATE that in the tracks
   // table...
@@ -1182,16 +1207,24 @@ function admin_display_edit_degree() {
     while($semester->list_groups->has_more()) {
       $group = $semester->list_groups->get_next();
       $group->load_descriptive_data();
+      
+      $ghours = $group->hours_required;
+      // If min hours are specified, set to MIN-MAX.
+      if ($group->has_min_hours_allowed()) {
+        $ghours = $group->min_hours_allowed . "-" . $ghours;
+      }
+      
+      
       $rtn .= "<tr><td valign='middle'>
       
-            <a href='javascript: adminDelGroup(\"$group->group_id\",\"$semester->semester_num\");'><img src='" . fp_theme_location() . "/images/delete.png' border='0'></a>
+            <a href='javascript: adminDelGroup(\"" . $group->get_db_group_id() . "\",\"$semester->semester_num\");'><img src='" . fp_theme_location() . "/images/delete.png' border='0'></a>
                   
             <td valign='top' class='tenpt'>
             $group->title<br><i>$group->group_name</i></td>
-            <td valign='top' class='tenpt'>$group->hours_required</td>
+            <td valign='top' class='tenpt'>$ghours</td>
             <td valign='top' class='tenpt'>$group->min_grade</td>
             <td valign='top' class='tenpt'>$group->requirement_type
-            <input type='hidden' name='group_" . $group->group_id . "_" . rand(1,999999) . "' value='$group->group_id" . "_$semester->semester_num" . "_$group->hours_required" . "_$group->requirement_type" . "_$group->min_grade'>
+            <input type='hidden' name='group_" . $group->get_db_group_id() . "_" . rand(1,999999) . "' value='" . $group->get_db_group_id() . "" . "_$semester->semester_num" . "_$ghours" . "_$group->requirement_type" . "_$group->min_grade'>
             </td>"; 
     }
     

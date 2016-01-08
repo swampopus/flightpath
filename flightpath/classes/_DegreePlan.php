@@ -369,6 +369,11 @@ class _DegreePlan extends stdClass
         {
           // Was already there (probably in another semester),
           // so, just increment the required hours.
+          
+          if (!isset($new_group->hours_required_by_type[$cur["group_requirement_type"]])) {
+            $new_group->hours_required_by_type[$cur["group_requirement_type"]] = 0;
+          }
+          
           $new_group->hours_required = $new_group->hours_required + ($cur["group_hours_required"] * 1);
           $new_group->hours_required_by_type[$cur["group_requirement_type"]] += ($cur["group_hours_required"] * 1);
           //Set which degree_id this is required by.
@@ -409,7 +414,8 @@ class _DegreePlan extends stdClass
         $group_g->assigned_to_semester_num = $semester_num;
         $group_g->title = "$title";
         $group_g->icon_filename = $icon_filename;
-        $group_g->hours_required = $cur["group_hours_required"] * 1;
+        $group_g->hours_required = intval($cur["group_hours_required"]);
+        $group_g->min_hours_allowed = intval($cur["group_min_hours_allowed"]);
         $group_g->bool_placeholder = true;
         $obj_semester->list_groups->add($group_g);
 
