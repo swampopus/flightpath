@@ -1,6 +1,10 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-01-11
+  Changed course popup description to use new content render API system.
+  
+
 2016-01-07
   Workng on var hour groups, ie, "min_hours_allowed".  Also, added in mechanism for changing the name of FlightPath to something else, if desired.
   

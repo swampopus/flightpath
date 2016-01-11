@@ -2355,8 +2355,9 @@ function draw_menu_items($menu_array) {
 		// The -1 for get_bool_substitution means, is it being used in ANY substitution?
 		if ($course->bool_transfer == true && $course->course_id < 1 && $course->get_bool_substitution(-1) == FALSE)
 		{ // No local eqv!
-
-			$pC .= "<div class='tenpt' style='margin-top: 10px;'><b>Note:</b> ";
+      
+      $html = "";
+			$html .= "<div class='tenpt' style='margin-top: 10px;'><b>Note:</b> ";
 			/*
 			$pC .= "
 			<b>Note:</b> This course is a transfer credit which
@@ -2364,7 +2365,8 @@ function draw_menu_items($menu_array) {
 
 			$pC .= $this->fix_institution_name($course->course_transfer->institution_name) . "</i>.";
 			*/
-			$pC = str_replace("<!--EQV1-->"," (" . t("Transfer Credit") . ")",$pC);
+			$pC = str_replace("<!--EQV1-->"," (" . t("Transfer Credit") . ")",$pC);  // place the words "transfer credit" in the curved title line at the top.
+			
 			if (!$bool_transferEqv)
 			{
 				$t_msg = t("This course does not have an assigned @initials equivalency, or the equivalency
@@ -2380,12 +2382,18 @@ function draw_menu_items($menu_array) {
 					</div>"; 				
 			}
 
-			$pC .= $t_msg;
+			$html .= $t_msg;
+      
+      $render["course_transfer_no_eqv"] = array(
+        "value" => $html,
+      );
+      
 
 		} 
 		elseif ($course->bool_transfer == true && $course->course_id > 0 && $course->get_bool_substitution(-1) == FALSE)
 		{ // Has a local eqv!
-
+      $html = "";
+		
 			$t_s_i = $course->course_transfer->subject_id;
 			$t_c_n = $course->course_transfer->course_num;
 			/*			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
@@ -2403,28 +2411,37 @@ function draw_menu_items($menu_array) {
 			// Admin function only.
 			if (user_has_permission("can_substitute"))
 			{
-				$pC .= "<div align='left' class='tenpt'>
+				$html .= "<div align='left' class='tenpt'>
 					<b>" . t("Special administrative function:") . "</b>
 						<a href='javascript: popupUnassignTransferEqv(\"" . $course->course_transfer->course_id . "\");'>" . t("Remove this equivalency?") . "</a></div>";
-				$pC .= "</div>";
+				
+				//$html .= "</div>";  // not sure what this went to.  Commenting out.  
 			}
 
 
-			$pC .= "</div>";
+			//$pC .= "</div>";   // not sure what this went to... commenting out.
+      
+      $render["course_transfer_local_eqv"] = array(
+        "value" => $html,
+      );
+      
+      
 		}
 
 
     ////////////////////////////
     //  When was this student enrolled in this course?
 
+    $html = "";
 		if ($course->term_id != "" && $course->term_id != "11111" && $course->display_status != "eligible" && $course->display_status != "disabled")
 		{
-			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
+			$html .= "<div class='tenpt' style='margin-top: 10px;'>
 						" . t("The student enrolled in this course in") . " " . $course->get_term_description() . ".
 					</div>";
+          
 		} else if ($course->term_id == "11111")
 		{
-			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
+			$html .= "<div class='tenpt' style='margin-top: 10px;'>
 						" . t("The exact date that the student enrolled in this course
 						cannot be retrieved at this time.  Please check the
 						student's official transcript for more details.") . "
@@ -2432,20 +2449,40 @@ function draw_menu_items($menu_array) {
 
 		}
     
+    $render["when_enrolled"] = array(
+      "value" => $html,
+    );
+    
+    ///////////////////////////////////
+    
     
     ////////////////////////////////
     // TODO:  Conditions on which this will even appear?  Like only if the student has more than one degree selected?
     // What degrees is this course fulfilling?    
     if (count($course->assigned_to_degree_ids_array) > 0) {
-      $pC .= "<div class='tenpt course-description-assigned-to-degrees'>
-                " . t("This course is fulfilling a requirement for: ");
       $html = "";
+      
+      $html .= "<div class='tenpt course-description-assigned-to-degrees'>
+                " . t("This course is fulfilling a requirement for: ");
+      $c = "";
+      $d = "";
       foreach ($course->assigned_to_degree_ids_array as $degree_id) {
+        $d .= $degree_id . ",";
         $t_degree_plan = new DegreePlan($degree_id);        
-        $html .= "<span>" . $t_degree_plan->get_title2() . "</span>, ";
+        $c .= "<span>" . $t_degree_plan->get_title2() . "</span>, ";
       }
-      $html = rtrim($html, ", ");
-      $pC .= "$html</div>";              
+      $c = rtrim($c, ", ");
+      $html .= "$c</div>";              
+      
+      $render["fulfilling_reqs_for_degrees"] = array(
+        "value" => $html,
+      );
+      // Also keep track of what degree ids we are fulfilling reqs for, in case we need it later.
+      $render["#fulfilling_reqs_for_degree_ids"] = array(
+        "type" => "do_not_render",
+        "value" => $d,
+      );
+      
       
     }
     
@@ -2454,6 +2491,8 @@ function draw_menu_items($menu_array) {
 		if ($course->get_first_assigned_to_group_id() != "" && $course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE)
 		{
 		
+      $html = "";
+    
 			//$g = new Group($course->assigned_to_group_id);
 			$g = new Group();
       // TODO:  Not sure yet what to do about this. Might only be 1 value, actually, since courses are assigned
@@ -2462,7 +2501,7 @@ function draw_menu_items($menu_array) {
 			$g->group_id = $course->get_first_assigned_to_group_id();
 			$g->load_descriptive_data();
 
-			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
+			$html .= "<div class='tenpt' style='margin-top: 10px;'>
 						<img src='" . fp_theme_location() . "/images/icons/$g->icon_filename' width='19' height='19'>
 						&nbsp;
 						" . t("This course is a member of") . " $g->title.
@@ -2470,24 +2509,34 @@ function draw_menu_items($menu_array) {
 			// If user is an admin...
 			if (user_has_permission("can_substitute")) {
 				$tflag = intval($course->bool_transfer);
-				$pC .= "<div align='left' class='tenpt'>
+				$html .= "<div align='left' class='tenpt'>
 					<b>" . t("Special administrative function:") . "</b>
 						<a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"$g->group_id\",\"$req_by_degree_id\");'>" . t("Remove from this group?") . "</a></div>";
-				$pC .= "</div>";
+				$html .= "</div>";
 			}
+      
+      $render["course_assigned_to_group"] = array(
+        "value" => $html,
+      );
+      
 		} 
 		else if ($course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE && $course->get_has_been_assigned_to_degree_id()) {
 			// Course is not assigned to a group; it's on the bare degree plan.  group_id = 0.
 			// If user is an admin...
 			
+			$html = "";
 			if (user_has_permission("can_substitute"))
 			{
 				$tflag = intval($course->bool_transfer);
-				$pC .= "<div align='left' class='tenpt'>
+				$html .= "<div align='left' class='tenpt'>
 					<b>" . t("Special administrative function:") . "</b>
 						<a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"0\",\"$req_by_degree_id\");'>" . t("Remove from the degree plan?") . "</a></div>";
-				$pC .= "</div>";
+				$html .= "</div>";
 			}
+
+      $render["course_not_assigned_to_group"] = array(
+        "value" => $html,
+      );
 
 		}
 
@@ -2495,8 +2544,9 @@ function draw_menu_items($menu_array) {
   	// Substitutors get extra information:
 		if (user_has_permission("can_substitute") && $course->get_first_assigned_to_group_id()) {
 			
+      $html = "";
 			
-			$pC .= "<div class='tenpt' style='margin-top: 20px;'>
+			$html .= "<div class='tenpt' style='margin-top: 20px;'>
 					<b>" . t("Special administrative information:") . "</b>
 					
 				<span id='viewinfolink'
@@ -2515,26 +2565,35 @@ function draw_menu_items($menu_array) {
     			$group->group_id = $group_id;
     			$group->load_descriptive_data();
     			
-    			$pC .= "<div>
+    			$html .= "<div>
     					" . t("Course is assigned to group:") . "<br>
     					&nbsp; " . t("Group ID:") . " $group->group_id<br>
     					&nbsp; " . t("Title:") . " $group->title<br>";
-  				$pC .= "&nbsp; <i>" . t("Internal name:") . " $group->group_name</i><br>";
+  				$html .= "&nbsp; <i>" . t("Internal name:") . " $group->group_name</i><br>";
     			
-    			$pC .= "&nbsp; " . t("Catalog year:") . " $group->catalog_year
+    			$html .= "&nbsp; " . t("Catalog year:") . " $group->catalog_year
     			         </div>";
         }
 			}
-			$pC .= "
+			$html .= "
 					</div>
 					
-					</div>";								
+					</div>";
+          
+      $render["substitutor_extra"] = array(
+        "value" => $html,
+      );
+          								
 		}
 
+		
+    
     // Has the course been substituted into *this* degree plan?
 		if ($course->get_bool_substitution() == TRUE)
 		{
-		  
+		
+      $html = "";
+      
 			// Find out who did it and if they left any remarks.
 			//fpm($course->course_substitution_by_degree_array);
 		  $db = $this->db;
@@ -2568,29 +2627,37 @@ function draw_menu_items($menu_array) {
 			  $forthecourse = "";
 		  }
 
-		  $pC .= "<div class='tenpt' style='margin-top: 10px;'>
+		  $html .= "<div class='tenpt' style='margin-top: 10px;'>
 					<b>" . t("Note:") . "</b> " . t("This course was substituted into the %title 
 					degree plan", array("%title" => $req_degree_plan->get_title2())) . " $forthecourse
 					$by$remarks";
 
 		
 		  if (user_has_permission("can_substitute")) {
-			  $pC .= "<div align='left' class='tenpt' style='padding-left: 10px;'>
+			  $html .= "<div align='left' class='tenpt' style='padding-left: 10px;'>
 				  <b>" . t("Special administrative function:") . "</b>
 				  <a href='javascript: popupRemoveSubstitution(\"$sub_id\");'>" . t("Remove substitution?") . "</a>
 				 </div>";
 		  }
 			
+      $render["course_sub_this_degree_plan"] = array(
+        "value" => $html,
+      );
 
 		}
 
-		// Only show if the course has not been taken...
+
+
+		// Variable hours? Only show if the course has not been taken...
+		$var_hours_default = "";
 		if ($course->has_variable_hours() && $course->grade == "")
 		{
-			$pC .= "<div class='tenpt' style='margin-top: 10px;'>
+		  $html = "";
+      
+			$html .= "<div class='tenpt' style='margin-top: 10px;'>
 					" . t("This course has variable hours. Please select 
 					how many hours this course will be worth:") . "<br>
-					<center>
+					<div style='text-align: center;'>
 					<select name='selHours' id='selHours' onChange='popupSetVarHours();'>
 					";
 			
@@ -2604,11 +2671,11 @@ function draw_menu_items($menu_array) {
 			{
 				$sel = "";
 				if ($t == $course->advised_hours){ $sel = "SELECTED"; }
-				$pC .= "<option value='$t' $sel>$t</option>";
+				$html .= "<option value='$t' $sel>$t</option>";
 			}
-			$pC .= "</select> " . t("hours.") . "<br>
+			$html .= "</select> " . t("hours.") . "<br>
 					
-					</center>
+					</div>
 					</div>";
 
 			if ($course->advised_hours > -1)
@@ -2618,18 +2685,25 @@ function draw_menu_items($menu_array) {
 				$var_hours_default = $min_h;
 			}
 
+      $render["course_var_hour_select"] = array(
+        "value" => $html,
+      );
+
 		}
 
+
+    // Some hidden vars and other details
+    $html = "";
 		if ($show_advising_buttons == true && !$this->bool_blank) {
 
 			// Insert a hidden radio button so the javascript works okay...
-			$pC .= "<input type='radio' name='course' value='$course->course_id' checked='checked'
+			$html .= "<input type='radio' name='course' value='$course->course_id' checked='checked'
 					style='display: none;'>
 					<input type='hidden' name='varHours' id='varHours' value='$var_hours_default'>";
 
 			if (user_has_permission("can_advise_students"))
 			{
-				$pC .= "<div style='margin-top: 20px;'>
+				$html .= "<div style='margin-top: 20px;'>
 				" . fp_render_button(t("Select Course"), "popupAssignSelectedCourseToGroup(\"$group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"$db_group_requirement_id\");", true, "style='font-size: 10pt;'") . "
 				</div>
 				
@@ -2639,23 +2713,23 @@ function draw_menu_items($menu_array) {
 		else if ($show_advising_buttons == false && $course->has_variable_hours() == true && $course->grade == "" && user_has_permission("can_advise_students") && !$this->bool_blank) {
 			// Show an "update" button, and use the course's assigned_to_group_id and
 			// assigned_to_semester_num.
-			$pC .= "
+			$html .= "
 					<input type='hidden' name='varHours' id='varHours' value='$var_hours_default'>";
 
-      //TODO: Same situation about the group_id.  I guess need to find out exactly which group it was assigned to?
+      // Same situation about the group_id.  I guess need to find out exactly which group it was assigned to?
 
-      $pC .= fp_render_button(t("Update"), "popupUpdateSelectedCourse(\"$course->course_id\",\"$course->get_first_assigned_to_group_id()\",\"$course->assigned_to_semester_num\",\"$course->random_id\",\"$advising_term_id\");");
+      $html .= fp_render_button(t("Update"), "popupUpdateSelectedCourse(\"$course->course_id\",\"" . $course->get_first_assigned_to_group_id() . "\",\"$course->assigned_to_semester_num\",\"$course->random_id\",\"$advising_term_id\");");
 
 		}
 
+    $render["hidden_vars_and_buttons"] = array(
+      "value" => $html,
+    );
 
-    $pC .= "<hr>";    
+
+
+    // Okay, render our render array and return.    
     $pC .= fp_render_content($render);
-    $pC .= "<hr>";
-
-
-
-
 		return $pC;
 	}
 
