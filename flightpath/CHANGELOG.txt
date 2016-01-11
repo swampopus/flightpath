@@ -7,6 +7,8 @@ FlightPath 5.x Changelog
   Added "override_degree_hours" field to degrees and draft_degrees tables, and db_override_degree_hours in the _DegreeClass object,
   for future use.
   
+  Made small tweaks to fix bugs so installation works correctly.
+  
 
 2016-01-07
   Workng on var hour groups, ie, "min_hours_allowed".  Also, added in mechanism for changing the name of FlightPath to something else, if desired.

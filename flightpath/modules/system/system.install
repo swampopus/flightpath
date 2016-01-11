@@ -486,9 +486,9 @@ CREATE TABLE `faculty` (
   `college` varchar(100)   DEFAULT '',
   `department_code` varchar(10)   DEFAULT '',
   `department` varchar(100)   DEFAULT '',  
-  `major_code` varchar(10)   DEFAULT '',
+  `major_code_csv` varchar(255)   DEFAULT '',
   PRIMARY KEY (`cwid`),
-  KEY `major_code` (`major_code`),
+  KEY `major_code_csv` (`major_code_csv`),
   KEY `dept` (`department`),
   KEY `department_code` (`department_code`),
   KEY `college` (`college`)
@@ -620,9 +620,8 @@ $q = "
 CREATE TABLE `student_degrees` (
   `student_id` varchar(30)   DEFAULT '',
   `major_code` varchar(20)   DEFAULT '',
-  `is_whatif` tinyint(4)   DEFAULT '0',
   `is_editable` tinyint(4)   DEFAULT '0',
-  PRIMARY KEY (`student_id`,`major_code`,`is_whatif`)
+  PRIMARY KEY (`student_id`,`major_code`)
 );  ";
 db_query($q);
 
@@ -748,7 +747,6 @@ CREATE TABLE `students` (
   `is_active` tinyint(11)   DEFAULT '0',
   PRIMARY KEY (`cwid`),
   KEY `rank_code` (`rank_code`),
-  KEY `major_code` (`major_code`),
   KEY `is_active` (`is_active`)
 ); ";
 db_query($q);
