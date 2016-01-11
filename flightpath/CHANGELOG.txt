@@ -4,6 +4,9 @@ FlightPath 5.x Changelog
 2016-01-11
   Changed course popup description to use new content render API system.
   
+  Added "override_degree_hours" field to degrees and draft_degrees tables, and db_override_degree_hours in the _DegreeClass object,
+  for future use.
+  
 
 2016-01-07
   Workng on var hour groups, ie, "min_hours_allowed".  Also, added in mechanism for changing the name of FlightPath to something else, if desired.
@@ -15,6 +18,7 @@ FlightPath 5.x Changelog
 
 2016-01-04
   Creating new render api system, for rendering arrays similar to form arrays.  This lets other modules hook in to make changes.
+  
   Changed forms.inc to render.inc
 
 

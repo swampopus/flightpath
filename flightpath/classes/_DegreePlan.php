@@ -12,7 +12,7 @@ class _DegreePlan extends stdClass
   public $major_code, $title, $degree_type, $degree_level, $degree_class, $short_description, $long_description;
   public $list_semesters, $list_groups, $db, $degree_id, $catalog_year, $is_combined_dynamic_degree_plan, $combined_degree_ids_array;
   public $track_code, $track_title, $track_description, $student_array_significant_courses;
-  public $bool_has_tracks, $array_semester_titles, $db_exclude, $db_allow_dynamic;
+  public $bool_has_tracks, $array_semester_titles, $db_exclude, $db_allow_dynamic, $db_override_degree_hours;
   public $public_note;
 
   public $total_major_hours, $total_core_hours, $total_degree_hours;
@@ -314,6 +314,7 @@ class _DegreePlan extends stdClass
       $this->major_code = $cur["major_code"];
       $this->degree_level = strtoupper(trim($cur["degree_level"]));
       $this->degree_class = $cur["degree_class"];
+      $this->db_override_degree_hours = $cur["override_degree_hours"];
 
       $semester_num = $cur["semester_num"];
       if ($semester_num != $old_semester)

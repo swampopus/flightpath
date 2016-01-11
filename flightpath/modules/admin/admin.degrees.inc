@@ -251,12 +251,12 @@ function admin_copy_degree_form_submit($form, $form_submit) {
     $res = db_query("INSERT INTO draft_degrees
                         (degree_id, major_code, degree_type, degree_class, title,
                          public_note, semester_titles_csv,
-                         catalog_year, exclude)
+                         catalog_year, exclude, allow_dynamic, override_degree_hours)
                          VALUES   
-                        ('?', '?', '?', '?', '?', '?', '?', '?', '?') ",
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?) ",
                          $dest_degree_id, $dest_code, $src_degree_type, $src_degree_class, $src_title,
                          $src_public_note, $src_semester_titles_csv,
-                         $de_catalog_year, $src_exclude);
+                         $de_catalog_year, $src_exclude, $src_allow_dynamic, $src_override_degree_hours);
     
     // Now, go through the source's degree requirements and copy those over.
     $res = db_query("SELECT * FROM draft_degree_requirements
@@ -965,6 +965,7 @@ function admin_handle_edit_degree_submit() {
   $degree_level = strtoupper(trim($_POST["degree_level"]));
   $exclude = trim($_POST["exclude"]);
   $allow_dynamic = trim($_POST["allow_dynamic"]);
+  $override_degree_hours = trim($_POST["override_degree_hours"]);
   $public_note = trim($_POST["public_note"]);
   $res = db_query("UPDATE draft_degrees
               SET semester_titles_csv = ?,
@@ -974,9 +975,10 @@ function admin_handle_edit_degree_submit() {
                   degree_level = ?,
                   exclude = ?,
                   allow_dynamic = ?,
+                  override_degree_hours = ?,
                   public_note = ?
               WHERE degree_id = ? ",
-                $semester_titles_csv, $degree_title, $degree_type, $degree_class, $degree_level, $exclude, $allow_dynamic, $public_note, $degree_id);
+                $semester_titles_csv, $degree_title, $degree_type, $degree_class, $degree_level, $exclude, $allow_dynamic, $override_degree_hours, $public_note, $degree_id);
 
   ////  Was there a track title/description?  If so, UPDATE that in the tracks
   // table...
@@ -1132,7 +1134,13 @@ function admin_display_edit_degree() {
               <a href='javascript: adminPopupAlertHelp(\"degree_allow_dynamic\");'>?</a>
         </td>       
         
-        <td></td>
+        <td valign='top' class='tenpt' >
+              " . t("Override Degree Hours:") . "
+              &nbsp;
+              <input type='text' name='override_degree_hours' value='$degree->db_override_degree_hours' size='3' maxlength='10'>
+              <a href='javascript: adminPopupAlertHelp(\"degree_override_degree_hours\");'>?</a>
+        </td>       
+
         
        </tr>
        

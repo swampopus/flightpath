@@ -90,6 +90,13 @@ function adminPopupAlertHelp(action)
     t = t + "If this value is set to 1 (the number one), then this degree plan is able to be combined with other degrees which are also set to Allow Dynamic.\n\n";
     t = t + "If you are unsure what to enter, either leave blank or enter a 0 (the number zero).";
   }
+
+
+  if (action == "degree_override_degree_hours")
+  {
+    t = t + "You may specify a number of degree hours here (ex: 125).  FlightPath will use this value, instead of calculating the number of hours ";
+    t = t + "required for this degree.  If you are unsure what to put here, leave it blank, or enter zero, for FlightPath to calculate hours normally.";
+  }
   
   
   
