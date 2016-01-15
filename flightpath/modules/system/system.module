@@ -442,6 +442,7 @@ function system_menu() {
 
 function system_execute_php_form() {
   $form = array();
+  $m = 0;
   
   $form["mark" . $m++] = array(
     "value" => t("Use this form to execute arbitrary PHP code.  <b>DO NOT</b>

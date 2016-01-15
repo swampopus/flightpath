@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-01-14
+  Converted the advising history tab to use the content render api, so other modules can add content to that page.
+  Also made it so that past advising histories appear in a collapsible fieldset, to save space.
+  
+
 2016-01-11
   Changed course popup description to use new content render API system.
   

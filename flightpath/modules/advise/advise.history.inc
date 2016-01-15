@@ -80,9 +80,13 @@ function advise_display_history() {
   /////////  Advising History
   ///////////////////////////////////////////////////
   $rtn .= fp_render_curved_line(t("Advising History"));
-  $rtn .= "<table border='0' cellspacing='0'>";
+  $render_left = array();  // creating a new render array.
+  $render_left["#id"] = "advise_history_left_column";
+  
+  //$rtn .= "<table border='0' cellspacing='0'>";
   $old_session_d_t = 0;
   $a_count = 0;
+  $c = 0;
   $is_empty = true;
   $first_style = "color: maroon; font-weight:bold;";
   $on_mouse_over = "onmouseover=\"style.backgroundColor='#FFFF99'\"
@@ -97,6 +101,7 @@ function advise_display_history() {
     extract($cur, 3, "db");
 
     $dt = date("n/j/y g:ia",$db_posted);
+    $html = "";
 
     // Is this datetime within 5 seconds of the previous datetime?
     // If so, they were likely saved together, and are part
@@ -116,11 +121,18 @@ function advise_display_history() {
       $advised_by = "<div style='padding-top: $p'>
               <b>" . t("Advised by") . " " . fp_get_faculty_name($db_faculty_id, false) . "</b>
             </div>";
-
+      /*
       $rtn .= "<tr><td colspan='2' class='tenpt'>
               $advised_by
             </td>
           </tr>";
+      */
+      
+      $html .= "<div class='tenpt'>$advised_by</div>";      
+      
+      
+            
+          
       $a_count++;
 
     }
@@ -136,6 +148,7 @@ function advise_display_history() {
 
     $term = get_term_description($db_term_id);
 
+    /*
     $rtn .= "<tr $on_mouse_over style='cursor: pointer; $first_style'
           onClick='$on_click'>
           <td valign='top' class='tenpt'
@@ -147,14 +160,56 @@ function advise_display_history() {
             $dt
           </td>
         </tr>";
+    */
+    
+    
+    $html .= "<div $on_mouse_over style='cursor: pointer; $first_style' onClick='$on_click'>
+                <div class='tenpt' style='display: inline-block; padding-left:20px; width:165px;'>$term</div>
+                <div class='tenpt' style='display: inline-block;'>$dt</div>
+              </div>";
 
-
+    // If this is more than X number, let's hide the rest in a collapsible fieldset.
+    if ($c < 5) {
+      $render_left["advising_history_$c"] = array(
+        "value" => $html,
+        "weight" => $c,
+      );
+    }
+    else {
+      // Let's place in a collapsible fieldset!
+      if (!isset($render_left["advising_history_fs"])) {
+        $render_left["advising_history_fs"] = array(
+          "type" => "cfieldset",
+          "label" => t("View complete advising history"),
+          "start_closed" => TRUE,
+          "elements" => array(),
+          "weight" => $c,          
+        );
+      }
+      $render_left["advising_history_fs"]["elements"][] = array("advising_history_$c" => array(
+        "value" => $html,
+      ));
+        
+      
+    }
+        
+        
+    $c++;
   }
-  $rtn .= "</table>";
+  //$rtn .= "</table>";
 
   if ($is_empty == true) {
-    $rtn .= "<div class='tenpt'>No advising history available.</div>";
+    //$rtn .= "<div class='tenpt'>No advising history available.</div>";
+    
+    $render_left["markup_no_adv_history"] = array(
+      "value" => t("No advising history available."),
+    );
   }
+
+  // Okay, we can render the left-hand side now.
+  $rtn .= fp_render_content($render_left);
+
+
 
 
   //----------------------------------------------------------------------------------------
@@ -162,8 +217,14 @@ function advise_display_history() {
   //----------------------------------------------------------------------------------------
   $rtn .= "</td><td width='50%' valign='top'>";
   $rtn .= fp_render_curved_line(t("Comment History"));
-  $rtn .= "<table border='0' cellspacing='0'>";
-
+  //$rtn .= "<table border='0' cellspacing='0'>";
+  
+  // Prepare a render array for the right-hand side.
+  $render_right = array();
+  $render_right["#id"] = "advise_history_right_column";
+  
+  $html = "";
+  
   $old_term_id = "";
   $first_style = "first";
   $is_empty = true;
@@ -179,6 +240,7 @@ function advise_display_history() {
   
   $turl = fp_url("comments/popup-display-all-comments");
   
+  /*
   $rtn .= "<tr><td colspan='3' class='tenpt'>
         <!--STARTCOM--><div style='padding-top: 10px;'>
           <b>" . t("Advising Comments") . "</b>
@@ -187,6 +249,18 @@ function advise_display_history() {
           class='nounderline'><img src='" . fp_theme_location() . "/images/popup.gif' border='0'>view/print all</a>
         </div><!--ENDCOM-->
         </td></tr>";
+
+   */
+   
+  $html .= "<div colspan='3' class='tenpt'>
+        <!--STARTCOM--><div style='padding-top: 10px;'>
+          <b>" . t("Advising Comments") . "</b>
+          &nbsp; 
+        <a href='javascript: popupPrintWindow(\"" . $turl . "\");'  
+          class='nounderline'><img src='" . fp_theme_location() . "/images/popup.gif' border='0'>view/print all</a>
+        </div><!--ENDCOM-->
+        </div>";
+
 
 // Use the function comments_get_comments instead of a direct query.
 
@@ -217,6 +291,7 @@ function advise_display_history() {
     $turl = fp_url("comments/popup-display-comment", "id=$db_id");
 
     $on_click = "popupPrintWindow(\"" . $turl . "\");";
+    /*
     $rtn .= "<tr $on_mouse_over style='cursor:pointer; $first_style $extra_style'
           onClick='$on_click'>
           <td valign='top' width='165' class='tenpt'
@@ -228,19 +303,47 @@ function advise_display_history() {
           </td>
         </tr>";
 
+     * 
+     */
+    $html .=  "<div $on_mouse_over style='cursor:pointer; $first_style $extra_style'
+          onClick='$on_click'>
+          <div class='tenpt' style='padding-left: 20px; width:165px; display:inline-block;'>
+            " . fp_get_faculty_name($db_faculty_id, false) . "
+          </div>
+          <div class='tenpt' style='display: inline-block;'>
+              $dt$ast
+          </div>
+        </div>";
+      
     $is_empty = false;
     $first_style = "";
   }
 
   if ($is_empty == true) {
-    
+    /*
     $rtn .= "<tr><td colspan='4' class='tenpt'>
             <div style='padding-left: 20px;'>
               " . t("No comment history available.") . "</div></td></tr>";
+    */
+    
+    $render_right["markup_no_comment_history"] = array(
+      "value" => t("No comment history available."),
+    );                  
+              
   }
 
-  $rtn .= "</table>";
+  $render_right["comment_history"] = array(
+    "value" => $html,
+    "weight" => 0,
+  );
+  
+  //$rtn .= "</table>";
 
+  // Render our render array now...
+  $rtn .= fp_render_content($render_right);
+  
+  
+  
 
   $rtn .= "</td></tr>";
 
