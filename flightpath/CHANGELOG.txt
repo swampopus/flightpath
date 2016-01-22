@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-01-19
+  Changed default password scheme to use new D7 inspired PHPass technique, instead of basic md5's.  Added new password.inc file, virtually identical to the
+  one which ships with D7.
+  
+
 2016-01-14
   Converted the advising history tab to use the content render api, so other modules can add content to that page.
   Also made it so that past advising histories appear in a collapsible fieldset, to save space.

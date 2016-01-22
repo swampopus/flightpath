@@ -82,6 +82,7 @@ function advise_display_history() {
   $rtn .= fp_render_curved_line(t("Advising History"));
   $render_left = array();  // creating a new render array.
   $render_left["#id"] = "advise_history_left_column";
+  $render_left["#student_id"] = $student_id;
   
   //$rtn .= "<table border='0' cellspacing='0'>";
   $old_session_d_t = 0;
@@ -222,6 +223,7 @@ function advise_display_history() {
   // Prepare a render array for the right-hand side.
   $render_right = array();
   $render_right["#id"] = "advise_history_right_column";
+  $render_right["#student_id"] = $student_id;
   
   $html = "";
   

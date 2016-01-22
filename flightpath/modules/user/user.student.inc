@@ -670,7 +670,7 @@ function user_edit_student_user_form_submit($form, $form_state) {
     // NOT a new student!  Insert values normally.
     // First-- was there a password given?  If so, insert that separate.
     if (trim($values["new_password"]) != "") {
-      $new_pass = md5(trim($values["new_password"]));
+      $new_pass = user_hash_password(trim($values["new_password"]));
       db_query("UPDATE users 
                 SET password = '?' 
                 WHERE cwid = '?' 
@@ -710,7 +710,7 @@ function user_edit_student_user_form_submit($form, $form_state) {
     
     db_query("INSERT INTO users (user_name, password, is_student, email, cwid, f_name, l_name, is_disabled)
               VALUES ('?', '?', '1', '?', '?', '?', '?', '?')
-              ", $values["new_user_name"], md5($values["new_password"]), $values["email"], $values["new_student_cwid"],
+              ", $values["new_user_name"], user_hash_password($values["new_password"]), $values["email"], $values["new_student_cwid"],
                  $values["f_name"], $values["l_name"], $values["is_disabled"]);
     db_query("INSERT INTO students (cwid, cumulative_hours, gpa, rank_code, catalog_year, is_active)
               VALUES ('?', '?', '?', '?', '?', '?')

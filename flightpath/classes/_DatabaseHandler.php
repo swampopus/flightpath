@@ -80,7 +80,7 @@ class _DatabaseHandler extends stdClass
 	}
 
 	
-	function add_to_log($action, $extra_data = "", $notes = "")
+	function z__add_to_log($action, $extra_data = "", $notes = "")
 	{
 	  
     depricated_message();
@@ -236,7 +236,7 @@ class _DatabaseHandler extends stdClass
 
 
 
-	function get_table_transfer_data_string($table_name, $table_structure, $where_clause = "")
+	function z__get_table_transfer_data_string($table_name, $table_structure, $where_clause = "")
 	{
 		// This function will return a string of all the data
 		// in a particular table, formatted with delimeters.

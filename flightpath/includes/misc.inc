@@ -262,6 +262,34 @@ function timer_read($name) {
   }
 }
 
+
+/**
+ * Returns a random string of length len.
+ */
+function fp_get_random_string($len = 7, $alpha = TRUE, $numeric = TRUE, $symbols = FALSE) {
+  
+  $base = "";
+  if ($alpha) {
+    $base .= "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  }
+  if ($numeric) {
+    $base .= "12345678901234567890";
+  }
+  if ($symbols) {
+    $base .= "!@#$%^&*()_+!@#$%^&*()-=";
+  }
+  
+  $str = "";
+  for ($t = 0; $t < $len; $t++) {
+    $base = str_shuffle($base);
+    $str .= $base[0];
+  }
+  
+  return $str;
+  
+}
+
+
  
 /**
  * Call all modules which implement hook_clear_cache

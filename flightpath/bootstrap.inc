@@ -20,6 +20,7 @@ require_once("$levels_deep" . "includes/misc.inc");
 require_once("$levels_deep" . "includes/render.inc");
 require_once("$levels_deep" . "includes/menu.inc");
 require_once("$levels_deep" . "includes/db.inc");
+require_once("$levels_deep" . "includes/password.inc");
 
 // Should we load the settings file?  This variable should be
 // set prior to including this bootstrap file.

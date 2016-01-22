@@ -2097,16 +2097,33 @@ function system_login_form_validate($form, &$form_state) {
   }  
 
   // Otherwise, check the table normally.  
-  // Check the user's password is valid.
+ 
+  /*
+  
   $res = db_query("SELECT * FROM users WHERE user_name = '?' AND password = '?' AND is_disabled = '0' ", $user, md5($password));
   if (db_num_rows($res) == 0) {
     form_error("password", t("Sorry, but that username and password combination could not
                             be found.  Please check your spelling and try again."));
     return;    
   }
+  */
   
+  $res = db_query("SELECT * FROM users WHERE user_name = ? AND is_disabled = '0' ", $user); 
+   
   $cur = db_fetch_array($res);
+  
+  // Check the user's password is valid.
+  $stored_hash = @$cur["password"];
+  if (!user_check_password($password, $stored_hash)) {
+    form_error("password", t("Sorry, but that username and password combination could not
+                            be found.  Please check your spelling and try again."));
+    return;    
+  }  
+  
+  // otherwise, we know it must be correct.  Continue.
+  
   $form_state["db_row"] = $cur;
+
   
   // If we made it here, then the user successfully authenticated.
   $form_state["passed_authentication"] = TRUE;

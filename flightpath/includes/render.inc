@@ -467,7 +467,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     }
   }
 
-  if ($use_session_submission_values_for_callback && is_array($_SESSION["fp_form_submissions"][$use_session_submission_values_for_callback]["values"])) {
+  if ($use_session_submission_values_for_callback && is_array(@$_SESSION["fp_form_submissions"][$use_session_submission_values_for_callback]["values"])) {
     // Check the SESSION for a previous value which we should use.
     $ignore_types = array("hidden", "markup", "submit", "password");
     if (!in_array($type, $ignore_types)) {
