@@ -1719,13 +1719,20 @@ function system_handle_form_submit() {
   if (count($validate_handlers) == 0) {
     array_push($validate_handlers, $callback . "_validate");
   } 
-    
+  
+  /*
+   * 
+   * For security, let's NOT store in the session, since these values might stick around
+   * in a file on the server.
+   * 
+   *   
   // Let's store our values in the SESSION in case we need them later on.
   // But only if this is NOT a system_settings form!
   if ($form_type != "system_settings") {
     $_SESSION["fp_form_submissions"][$callback]["values"] = $values;
   }
-
+  */
+    
   $form_state = array("values" => $values, "POST" => $_POST);
 
   // Let's pass this through our default form validator (mainly to check for required fields
