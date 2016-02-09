@@ -2,7 +2,7 @@ FlightPath 5.x Changelog
 ========================
 
 2016-02-09
-  Fixed MySQL bug when editing groups
+  Fixed MySQL bug when editing groups.  Fixed bug where group_min_hours_required should be group_min_hours_allowed in the database.
 
 2016-02-01
   Removed section from system.module where submissions were being temporarily stored in the session.  It wasn't being used anyway,
