@@ -224,8 +224,8 @@ function admin_edit_group_form_submit(&$form, $form_submit) {
         $query = "INSERT INTO draft_group_requirements
                     (group_id, course_id,
                     course_min_grade, course_repeats, data_entry_value)
-                    values ('?','?','?','?','?~?') ";
-        $res = db_query($query, $group_id, $course_id, $min_grade, $course_repeats, $subject_id, $course_num);
+                    values (?,?,?,?,?) ";
+        $res = db_query($query, $group_id, $course_id, $min_grade, $course_repeats, "$subject_id~$course_num");
         
       } 
       else {
@@ -262,6 +262,7 @@ function admin_edit_group_form_submit(&$form, $form_submit) {
  */
 function admin_edit_group_form() {
   $form = array();
+  $m = 0;
   
   $de_catalog_year = admin_get_de_catalog_year();
   $group_id = $_REQUEST["group_id"];
@@ -817,7 +818,7 @@ function admin_get_group_courses(Group $group) {
     }
 
     //$rtn .= "\n";
-    if ($courses[$course_line] == "")
+    if (!isset($courses[$course_line]))
     {
       $courses[$course_line] = 0;
     }

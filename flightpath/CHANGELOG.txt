@@ -1,6 +1,9 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-02-09
+  Fixed MySQL bug when editing groups
+
 2016-02-01
   Removed section from system.module where submissions were being temporarily stored in the session.  It wasn't being used anyway,
   and it presented a possible security issue on improperly secured servers.
