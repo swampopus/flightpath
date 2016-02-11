@@ -278,6 +278,18 @@ class _FlightPath extends stdClass
           $new_degree_plan->list_semesters->add($the_semester);
         }
         
+        
+        // Should we rename the_semester's title (because the semester we are grabbing is overriding?)
+        // TODO: Maybe do this based on some priority or hooks, etc.
+        //$degree_plan->load_descriptive_data();   // Doesn't appear to be necessary at this stage.     
+        $stitle = trim(@$degree_plan->array_semester_titles[$sem->semester_num]);
+        if ($stitle != "") {          
+           // Meaning we should overwrite the semester title, because this degree isn't using the default title
+           $the_semester->title = $stitle;
+           $the_semester->bool_using_default_title = FALSE;
+        }        
+        
+        
         // Okay, now add the courses to the_semester
         // TODO:  Here's probably where we'd check with a hook first.
         // TODO:  We also want to say which degree these courses came from.

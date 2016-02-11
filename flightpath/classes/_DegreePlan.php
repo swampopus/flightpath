@@ -322,8 +322,10 @@ class _DegreePlan extends stdClass
         // This is a new semester object we are dealing with.
         $old_semester = $semester_num;
         $obj_semester = new Semester($semester_num);
-        $obj_semester->title = trim($this->array_semester_titles[$semester_num]);
-        if ($obj_semester->title == "") { $obj_semester->assign_title(); }
+        $obj_semester->title = trim(@$this->array_semester_titles[$semester_num]);
+        if ($obj_semester->title == "") {
+           $obj_semester->assign_title();
+        }
         $this->list_semesters->add($obj_semester);
       }
 

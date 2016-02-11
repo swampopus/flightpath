@@ -1,8 +1,15 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-02-11
+  Made it to where combined degrees will overwrite semester block titles if they are set to.
+  
+
 2016-02-09
   Fixed MySQL bug when editing groups.  Fixed bug where group_min_hours_required should be group_min_hours_allowed in the database.
+  Fixed bug in degree list filter when not using clean URLs.
+  Fixed missing argument bug in db.inc for db_affected_rows().
+  
 
 2016-02-01
   Removed section from system.module where submissions were being temporarily stored in the session.  It wasn't being used anyway,

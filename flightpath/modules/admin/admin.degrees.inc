@@ -533,7 +533,14 @@ function admin_display_degrees() {
   $rtn .= "<div class='degrees-filter'>
               <form id='filter-form' action='" . fp_url("admin/degrees") . "' method='GET'>
               <input type='hidden' name='de_catalog_year' value='$de_catalog_year'>
-                            
+          ";
+          
+  if (!variable_get("clean_urls", FALSE)) {
+    // Clean URLs is not enabled, so add in the q=admin/degrees, to make this form work.
+    $rtn .= "<input type='hidden' name='q' value='admin/degrees'>";
+  }
+          
+  $rtn .= "
               <b>Filter list by...</b>
               <br>Class: &nbsp; 
            

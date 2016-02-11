@@ -291,9 +291,9 @@ function db_num_rows($result_handler) {
   return $db->db_num_rows($result_handler);
 }
 
-function db_affected_rows() {
+function db_affected_rows($result_handler) {
   $db = get_global_database_handler();
-  return $db->db_affected_rows();  
+  return $db->db_affected_rows($result_handler);  
 }
 
 

@@ -11,7 +11,7 @@
  */
 class _Semester extends stdClass
 {
-	public $title, $semester_num, $notice;
+	public $title, $semester_num, $notice, $bool_using_default_title;
 	public $list_courses, $list_groups;
 	/*
 	* $title		Freshman, Sophomore, Summer II, etc.
@@ -28,6 +28,8 @@ class _Semester extends stdClass
 	{
 		$this->semester_num = $semester_num;
 		
+    $this->bool_using_default_title = FALSE;
+    
 		//$this->list_courses = new ObjList();
 		$this->list_courses = new CourseList();
 		$this->list_groups = new GroupList();
@@ -63,6 +65,8 @@ class _Semester extends stdClass
 		  $this->title = t("Year") . " " . ($this->semester_num + 1);
 		}
 		
+    $this->bool_using_default_title = TRUE;
+    
 	}
 	
 	
