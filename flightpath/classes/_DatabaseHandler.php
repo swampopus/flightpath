@@ -1358,7 +1358,7 @@ class _DatabaseHandler extends stdClass
     $res = $this->db_query("SELECT * FROM student_degrees a, degrees b
                             WHERE student_id = '?' 
                             AND a.major_code = b.major_code
-                            ORDER BY b.advising_weight, b.title
+                            ORDER BY b.advising_weight, b.major_code
                             ", $student_cwid);
     while ($cur = $this->db_fetch_array($res)) {
       if ($bool_return_as_full_record) {
