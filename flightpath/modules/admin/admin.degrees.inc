@@ -347,7 +347,8 @@ function admin_add_degree_form() {
                       If adding a new concentration to an existing major, you still put this in as a 
                       NEW major code. Do not have any spaces in this box. The concentration code 
                       is optional. If the major does not have a concentration, 
-                      then simply enter the major code by itself."),
+                      then simply enter the major code by itself.  The combined major code and optional track
+                      code can only be 18 characters maximum."),
     "required" => TRUE,
   );
 
@@ -367,7 +368,8 @@ function admin_add_degree_form() {
     "type" => "textfield",
     "size" => 15,
     "label" => t("Track code:"),
-    "description" => t("Leave blank if you selected None above."),
+    "description" => t("Leave blank if you selected None above.  This code must not contain spaces, 
+                        and combined with the major code it must not exceed 18 characters."),
   );
 
 
@@ -382,6 +384,37 @@ function admin_add_degree_form() {
   
   return $form;
    
+}
+
+
+/**
+ * Validate handler for add_degree_form
+ */
+function admin_add_degree_form_validate($form, $form_submit) {
+  $values = $form_submit["values"];
+  
+  // Make sure neither major code nor track code contains any spaces.
+  $major_code = trim(strtoupper($values["major_code"]));
+  $track_code = trim(strtoupper($values["track_code"]));
+  
+  if (strstr($major_code, " ")) {
+    form_error("major_code", t("The major code may not contain spaces.  Please enter a new one containing only letters and numbers."));
+    return;
+  }
+  if (strstr($track_code, " ")) {
+    form_error("track_code", t("The track code may not contain spaces.  Please enter a new one containing only letters and numbers."));
+    return;
+  }      
+
+    // Make sure the major + |_ + track_code doesn't exceed 20 characters.
+  if (strlen("$major_code|_$track_code") > 20) {
+    form_error("major_code", t("The major and track code combined may not exceed 18 characters.  Please shorten one or the other."));
+    return;
+  }
+            
+
+          
+  
 }
 
 
@@ -972,6 +1005,7 @@ function admin_handle_edit_degree_submit() {
   $degree_level = strtoupper(trim($_POST["degree_level"]));
   $exclude = trim($_POST["exclude"]);
   $allow_dynamic = trim($_POST["allow_dynamic"]);
+  $advising_weight = intval($_POST["advising_weight"]);
   $override_degree_hours = trim($_POST["override_degree_hours"]);
   $public_note = trim($_POST["public_note"]);
   $res = db_query("UPDATE draft_degrees
@@ -982,10 +1016,11 @@ function admin_handle_edit_degree_submit() {
                   degree_level = ?,
                   exclude = ?,
                   allow_dynamic = ?,
+                  advising_weight = ?,
                   override_degree_hours = ?,
                   public_note = ?
               WHERE degree_id = ? ",
-                $semester_titles_csv, $degree_title, $degree_type, $degree_class, $degree_level, $exclude, $allow_dynamic, $override_degree_hours, $public_note, $degree_id);
+                $semester_titles_csv, $degree_title, $degree_type, $degree_class, $degree_level, $exclude, $allow_dynamic, $advising_weight, $override_degree_hours, $public_note, $degree_id);
 
   ////  Was there a track title/description?  If so, UPDATE that in the tracks
   // table...
@@ -1082,12 +1117,14 @@ function admin_display_edit_degree() {
       <table border='0'>
        <tr>
         <td valign='top' class='tenpt' width='15%'>" . t("Degree Type:") . "</td>
-        <td valign='top' class='tenpt' width=''>
+        <td valign='top' class='tenpt' >
               <input type='text' name='degree_type' value='$degree->degree_type' size='5' maxlength='20'>
+              <a href='javascript: adminPopupAlertHelp(\"degree_type\");'>?</a>
+              
         </td>
 
         <td valign='top' class='tenpt' width=''>
-              " . t("Degree Classification.:") . "          
+              " . t("Classification:") . "          
               <select name='degree_class'> ";
               //<input type='text' name='degree_class' value='$degree->degree_class' size='10' maxlength='40'>
     // Display degree_class pulldown.
@@ -1106,12 +1143,22 @@ function admin_display_edit_degree() {
               <a href='javascript: adminPopupAlertHelp(\"degree_class\");'>?</a>
         </td>
 
-        <td valign='top' class='tenpt' >" . t("Degree Level:") . "
+        <td valign='top' class='tenpt' >" . t("Level:") . "
               <input type='text' name='degree_level' value='$degree->degree_level' size='2' maxlength='1'>
               <a href='javascript: adminPopupAlertHelp(\"degree_level\");'>?</a>
+              
+          &nbsp; &nbsp;
+          
+          " . t("Advising Weight:") . "
+              <input type='text' name='advising_weight' value='$degree->db_advising_weight' size='2' maxlength='5'>
+              <a href='javascript: adminPopupAlertHelp(\"advising_weight\");'>?</a>
+                        
+                        
+              
         </td>
         
-        <td></td>
+        <td valign='top'>        
+        </td>
         
        </tr>
         
@@ -1120,7 +1167,7 @@ function admin_display_edit_degree() {
        
        
        <tr>
-        <td valign='top' class='tenpt'>" . t("Degree Title:") . "</td>
+        <td valign='top' class='tenpt'>" . t("Title:") . "</td>
         <td valign='top' class='tenpt' colspan='4'><input type='text' name='title' value='$degree->title' size='80' maxlength='100'></td>
        </tr>
        
@@ -1148,6 +1195,8 @@ function admin_display_edit_degree() {
               <a href='javascript: adminPopupAlertHelp(\"degree_override_degree_hours\");'>?</a>
         </td>       
 
+        <td>
+        </td>
         
        </tr>
        

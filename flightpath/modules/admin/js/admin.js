@@ -30,13 +30,33 @@ function adminHideDECats() {
 
 function adminPopupAlertHelp(action)
 {
-  var t = "Instant Help:\n------------------\n\n";
+  var t = "Instant Help:\n-------------------------\n\n";
 
   if (action == "edit_announcements")
   {
     t = t + "Use this to edit the announcements found on the Main tab in FlightPath.";
     
   }
+  
+  if (action == "degree_type")
+  {
+    t = t + "For example: BS, BA, Ph.D, etc.";
+    
+  }
+  
+  if (action == "advising_weight")
+  {
+    t = t + "If this degree is ever combined with another degree, this value, the advising weight, determines ";
+    t = t + "the order in which the degrees will be displayed on the View tab and in What If mode.\n\n";
+    t = t + "The default is zero (0).  To place this degree above normal degrees, set it to a negative value (ex: -1, -10, etc.)."
+    t = t + "Set it higher to place it below normal degrees.  (Ex: 10, 20, 30, etc).\n\n";
+    t = t + "To prevent confusion, it's recommended that a degree's tracks have the same advising weight as the main degree.\n\n";
+    t = t + "If you are unsure what to enter, leave it set to 0 (zero).";
+    
+  }
+  
+  
+  
   if (action == "edit_urgent")
   {
     t = t + "An Urgent Message is one which is displayed at the top of every page in FlightPath, for every user.  Good examples are to warn that the system is about to be taken down.";
@@ -260,7 +280,10 @@ function adminPopupAlertHelp(action)
     
   }
   
+  t = t + "\n\n-------------------------\n\n";
+  
   var x = alert(t);
+  
 }
 
 

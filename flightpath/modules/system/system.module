@@ -1666,6 +1666,8 @@ function system_handle_form_submit() {
   // and grab what's in the POST which matches the name.
 
   $values = array();
+  $safe_values = array(); // will be the same as $values, but anything of type password will not be included.
+  
   if (function_exists($callback)) {
     $form = fp_get_form($callback);
     foreach ($form as $name => $element) {     
@@ -1673,6 +1675,12 @@ function system_handle_form_submit() {
       // Save to our $values array, but we don't care about markup.
       if (@$element["type"] != "" && @$element["type"] != "markup") {
         $values[$name] = @$_POST[$name];
+        
+        // Save to save_values, too, if this is not a password field.
+        if (@$element["type"] != "password") {
+          $safe_values[$name] = @$_POST[$name];
+        }
+                
       }
       // Do we need to alter the value from the POST?
       
@@ -1684,6 +1692,13 @@ function system_handle_form_submit() {
             // Save to our $values array, but we don't care about markup.
             if (@$celement["type"] != "" && @$celement["type"] != "markup") {
               $values[$cname] = @$_POST[$cname];
+              
+              // Save to save_values, too, if this is not a password field.
+              if (@$celement["type"] != "password") {
+                $safe_values[$cname] = @$_POST[$cname];
+              }
+              
+              
             }
           }
         }
@@ -1720,18 +1735,16 @@ function system_handle_form_submit() {
     array_push($validate_handlers, $callback . "_validate");
   } 
   
-  /*
-   * 
-   * For security, let's NOT store in the session, since these values might stick around
-   * in a file on the server.
-   * 
-   *   
   // Let's store our values in the SESSION in case we need them later on.
   // But only if this is NOT a system_settings form!
   if ($form_type != "system_settings") {
-    $_SESSION["fp_form_submissions"][$callback]["values"] = $values;
+    
+    // Do not store any "password" field, for security, so it isn't stored
+    // in the server's session file in plain text.
+    // For this reason we will use the $safe_values array we created earlier.    
+    
+    $_SESSION["fp_form_submissions"][$callback]["values"] = $safe_values;
   }
-  */
     
   $form_state = array("values" => $values, "POST" => $_POST);
 

@@ -1,6 +1,20 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-02-13
+  Fixed bug in install script so that track major codes can have up to 20 characters.
+  
+  Modified the add degree form, to check to make sure tracks and major codes don't contain spaces,
+  as well as fall below the 20 character limit.
+  
+  Fixed but which was intruduced by removing submissions form sessions.  As a result, forms which didn't
+  validate didn't retain values.  Instead made it so only password fields were hidden from the session.
+  
+  Added concept of an "advising weight" to degrees, and on the degree edit form.  This lets the admin set
+  the order in which degrees are presented to a student.  Lower weights appear first.  Added new popup help
+  topics to the degree edit page to help explain.
+    
+
 2016-02-11
   Made it to where combined degrees will overwrite semester block titles if they are set to.
   

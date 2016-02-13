@@ -138,6 +138,7 @@ class _FlightPath extends stdClass
     //  We need like a loop here.
     $degree_plans = array();
 		$temparr = explode(",", $major_code_csv);
+    
     foreach ($temparr as $major_code) {		
 		
   		$t_major_code = $major_code;

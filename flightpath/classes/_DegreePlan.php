@@ -12,7 +12,7 @@ class _DegreePlan extends stdClass
   public $major_code, $title, $degree_type, $degree_level, $degree_class, $short_description, $long_description;
   public $list_semesters, $list_groups, $db, $degree_id, $catalog_year, $is_combined_dynamic_degree_plan, $combined_degree_ids_array;
   public $track_code, $track_title, $track_description, $student_array_significant_courses;
-  public $bool_has_tracks, $array_semester_titles, $db_exclude, $db_allow_dynamic, $db_override_degree_hours;
+  public $bool_has_tracks, $array_semester_titles, $db_exclude, $db_allow_dynamic, $db_override_degree_hours, $db_advising_weight;
   public $public_note;
 
   public $total_major_hours, $total_core_hours, $total_degree_hours;
@@ -52,6 +52,7 @@ class _DegreePlan extends stdClass
       $this->bool_use_draft = true;
     }
 
+    $this->db_advising_weight = 0;
 
     $this->db = $db;
     if ($db == NULL)
@@ -315,6 +316,7 @@ class _DegreePlan extends stdClass
       $this->degree_level = strtoupper(trim($cur["degree_level"]));
       $this->degree_class = $cur["degree_class"];
       $this->db_override_degree_hours = $cur["override_degree_hours"];
+      $this->db_advising_weight = intval($cur["advising_weight"]);
 
       $semester_num = $cur["semester_num"];
       if ($semester_num != $old_semester)
@@ -567,6 +569,7 @@ class _DegreePlan extends stdClass
       $this->degree_type = trim($cur["degree_type"]);
       $this->db_exclude = trim($cur["exclude"]);
       $this->db_allow_dynamic = trim($cur["allow_dynamic"]);
+      $this->db_advising_weight = intval($cur["advising_weight"]);
 
       // Get the semester titles.
       $temp = trim($cur["semester_titles_csv"]);
