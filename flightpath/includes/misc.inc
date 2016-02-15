@@ -1358,7 +1358,7 @@ function get_global_database_handler() {
   
   $db = @$GLOBALS["fp_global_database_handler"];
   
-  if (!is_object($db) || !is_resource($db->dbc)) {
+  if (!is_object($db) || !is_object($db->pdo)) {
     // Something isn't right, or it wasn't set correctly.  Create a new connection.
     $GLOBALS["fp_global_database_handler"] = new DatabaseHandler();
   }
@@ -1952,7 +1952,7 @@ function fp_debug_current_time_millis($debug_val = "", $show_current_time = true
     $debug_string = "<pre>" . print_r($debug_val, true) . "</pre>";
   }
 
-  $last_time = $GLOBALS["current_time_millis" . $var] * 1;
+  $last_time = @($GLOBALS["current_time_millis" . $var]) * 1;  //*1 forces numeric
 
   $cur_time = microtime(true) * 1000;
 
