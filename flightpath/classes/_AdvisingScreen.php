@@ -1445,6 +1445,7 @@ function draw_menu_items($menu_array) {
 		// elements for the advising screen.  It should be
 		// called before display_screen();
 
+		
 		$this->build_semester_list();
 
 		$this->build_excess_credit();
@@ -1589,13 +1590,29 @@ function draw_menu_items($menu_array) {
 		// the pie charts go!)
 		$rtn = "";
 
-
-		if ($this->degree_plan->total_degree_hours < 1)
+    // have we already calculated this degree's data?
+		if (@$this->degree_plan->gpa_calculations["degree"]["total_hours"] < 1)
 		{
-			$this->degree_plan->calculate_progress_hours();
-			$this->degree_plan->calculate_progress_quality_points();			
+		    
+		  // Only bother to get the types calculations needed for the piecharts
+      // Get the requested piecharts from our config...
+      $types = array();
+      $temp = variable_get("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress");
+      $lines = explode("\n", $temp);
+      foreach ($lines as $line) {
+        if (trim($line) == "") continue;      
+        $temp = explode("~", $line);
+        $requirement_type = trim($temp[0]);
+        $types[$requirement_type] = trim($temp[1]);
+      }
+      
+		  
+			$this->degree_plan->calculate_progress_hours(FALSE, $types);
+        
+			$this->degree_plan->calculate_progress_quality_points(FALSE, $types);
+			  			
 		}
-
+  
 		// Create a holding array for later use.
 		$pie_chart_html_array = array();
 		
@@ -1633,7 +1650,7 @@ function draw_menu_items($menu_array) {
 		  
 		}
 		
-		
+		 
 		
 		$rtn .= "<tr><td colspan='2'>
 				";
@@ -1906,7 +1923,6 @@ function draw_menu_items($menu_array) {
 		  $this->db = get_global_database_handler();
 		}
 		
-
 		if ($this->bool_hiding_grades && !$this->bool_print && $GLOBALS["fp_system_settings"]["hiding_grades_message"] != "")
 		{
 		  // Display the message about us hiding grades.
@@ -1930,8 +1946,6 @@ function draw_menu_items($menu_array) {
 		
 		//$pC .= $this->draw_currently_advising_box();
 		$pC .= $this->draw_progress_boxes();
-		
-    
 		
 		$pC .= $this->draw_public_note();
 
@@ -1966,7 +1980,6 @@ function draw_menu_items($menu_array) {
 		{ // close up any loose ends.
 			$pC .= "</tr>";
 		}
-
 
 		if (user_has_permission("can_advise_students"))
 		{
@@ -2822,9 +2835,13 @@ function draw_menu_items($menu_array) {
 		$count_hoursCompleted = 0;
 
     $last_req_by_degree_id = -1;
+    
+    // Create a temporary caching system for degree titles, so we don't have to keep looking them back up.
+    if (!isset($GLOBALS["fp_temp_degree_titles"])) {
+      $GLOBALS["fp_temp_degree_titles"] = array();
+    }
 
 		// First, display the list of bare courses.
-
 		$semester->list_courses->sort_alphabetical_order();
 		$semester->list_courses->reset_counter();
 
@@ -2837,10 +2854,17 @@ function draw_menu_items($menu_array) {
       // Only display what degree we are required by if we have only displayed it once so far...
       if (intval($course->req_by_degree_id) > 0 && $course->req_by_degree_id != $last_req_by_degree_id) {
         
-        $t_degree_plan = new DegreePlan($course->req_by_degree_id);
-        $t_degree_plan->load_descriptive_data();
+        // Get the degree title...        
+        $dtitle = @$GLOBALS["fp_temp_degree_titles"][$course->req_by_degree_id];
+        if ($dtitle == "") {
+          $t_degree_plan = new DegreePlan($course->req_by_degree_id);
+          $t_degree_plan->load_descriptive_data();        
+          $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
+          $GLOBALS["fp_temp_degree_titles"][$course->req_by_degree_id] = $dtitle . " "; //save for next time.
+        }
+        
         $pC .= "<tr><td colspan='8'>
-                  <div class='tenpt required-by-degree'>Required by " . $t_degree_plan->get_title2(TRUE, TRUE) . "</div>
+                  <div class='tenpt required-by-degree'>Required by " . $dtitle . "</div>
                 </td></tr>";
         
         // Remember what the last degree we displayed was.        
@@ -2892,11 +2916,18 @@ function draw_menu_items($menu_array) {
       // TODO:  Decide if we should display the degree this group is coming from or not.
       // Only display what degree we are required by if we have only displayed it once so far...
       if (intval($group->req_by_degree_id) > 0 && $group->req_by_degree_id != $last_req_by_degree_id) {
+
+        // Get the degree title...        
+        $dtitle = @$GLOBALS["fp_temp_degree_titles"][$group->req_by_degree_id];
+        if ($dtitle == "") {
+          $t_degree_plan = new DegreePlan($group->req_by_degree_id);
+          $t_degree_plan->load_descriptive_data();        
+          $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
+          $GLOBALS["fp_temp_degree_titles"][$group->req_by_degree_id] = $dtitle; //save for next time.
+        }
         
-        $t_degree_plan = new DegreePlan($group->req_by_degree_id);
-        $t_degree_plan->load_descriptive_data();
         $pC .= "<tr><td colspan='8'>
-                  <div class='tenpt required-by-degree'>Required by $t_degree_plan->title</div>
+                  <div class='tenpt required-by-degree'>Required by $dtitle</div>
                 </td></tr>";
         
         // Remember what the last degree we displayed was.        
@@ -2934,7 +2965,8 @@ function draw_menu_items($menu_array) {
 					</div>
 					</td></tr>";
 		}
-
+			
+		
 		$pC .= $this->draw_semester_box_bottom();
 
 		return $pC;
@@ -4540,7 +4572,7 @@ function draw_menu_items($menu_array) {
 				{
 					// First, check to see if the user has already
 					// selected a subject.
-					$selected_subject = trim(addslashes($_GET["selected_subject"]));
+					$selected_subject = trim(addslashes(@$_GET["selected_subject"]));
 					if ($selected_subject == "")
 					{
 					  //TODO:  Probably goin to have some trouble here with multi degrees.
@@ -4671,7 +4703,6 @@ function draw_menu_items($menu_array) {
 
 
 			$new_course_list->remove_duplicates();
-
 			$new_course_list->assign_group_id($group->group_id);
 			$new_course_list->assign_semester_num($display_semesterNum);
 
@@ -4679,11 +4710,10 @@ function draw_menu_items($menu_array) {
 			
 		}
 
-
-		//fpm($final_course_list->to_string());
+		
 		// Remove courses which have been marked as "exclude" in the database.
 		$final_course_list->remove_excluded();
-
+    $final_course_list->assign_group_id($group->group_id);  // make sure everyone is in THIS group.
 		//print_pre($final_course_list->to_string());
 
 		// Here's a fun one:  We need to remove courses for which the student
@@ -4692,9 +4722,9 @@ function draw_menu_items($menu_array) {
 		// Core Math, then we should not see it as a choice for advising
 		// in Free Electives (or any other group except Add a Course).
 		// We also should not see it in other instances of Core Math.
-		if ($group->group_id != -88 && $this->bool_blank != TRUE)
+		if ($group->group_id != DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED && $this->bool_blank != TRUE)
 		{
-		  fpm($final_course_list);      
+		  //fpm($final_course_list);      
 			// Only do this if NOT in Add a Course group...
 			// also, don't do it if we're looking at a "blank" degree.
 			$final_course_list->remove_previously_fulfilled($this->student->list_courses_taken, $group->group_id, true, $this->student->list_substitutions, $req_by_degree_id);
@@ -4882,6 +4912,8 @@ function draw_menu_items($menu_array) {
 			$blank_degree_id = $this->degree_plan->degree_id;
 		}
     
+    $pC = "";
+    
     $clean_urls = variable_get("clean_urls", FALSE);
     
 		$pC .= "<tr><td colspan='8' class='tenpt'>";
@@ -4975,7 +5007,7 @@ function draw_menu_items($menu_array) {
 			$pC .= "<tr><td colspan='8'>";
 
 			if ($course->course_list_fulfilled_by->is_empty && !$course->bool_advised_to_take)
-			{ // So, only display if it has not been fulfilled by anything.
+			{ // So, only display if it has not been fulfilled by anything.			
 				$pC .= $this->draw_popup_group_select_course_row($course, $group_hours_remaining);
 				$old_course = $course;
 			} 

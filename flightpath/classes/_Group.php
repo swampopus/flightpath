@@ -221,7 +221,7 @@ class _Group extends stdClass
 						// list_courses object for a db_group_requirement_id of $id.
 						// Only proceed if $id was NOT found.
 
-						if ($array_group_requirement_ids[$use_id] == true)
+						if (@$array_group_requirement_ids[$use_id] == true)
 						{
 							continue;
 						}

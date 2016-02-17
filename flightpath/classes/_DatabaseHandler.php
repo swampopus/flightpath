@@ -10,10 +10,12 @@ class _DatabaseHandler extends stdClass
 	function __construct()
 	{
 	 
-	  $db_host = $GLOBALS["fp_system_settings"]["db_host"];
-	  $db_user = $GLOBALS["fp_system_settings"]["db_user"];
-	  $db_pass = $GLOBALS["fp_system_settings"]["db_pass"];
-	  $db_name = $GLOBALS["fp_system_settings"]["db_name"];
+	  $db_host = @$GLOBALS["fp_system_settings"]["db_host"];
+	  $db_user = @$GLOBALS["fp_system_settings"]["db_user"];
+	  $db_pass = @$GLOBALS["fp_system_settings"]["db_pass"];
+	  $db_name = @$GLOBALS["fp_system_settings"]["db_name"];
+
+    if ($db_host == "") return;  // some problem, do not proceed with the attempt to construct.
 
     // The port is part of the host.  Separate them out.
     $db_port = "3306";

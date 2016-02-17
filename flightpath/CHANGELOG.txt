@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-02-17
+  Fixed bug where group id was not being maintained for certain groups in popup window.
+  Made various changes in an attempt to help speed up page loads.
+
+
 2016-02-15
   Fixed bug in misc.inc which was causing a new database connection *every time* a connection was requested (instead of re-using the
   global one).

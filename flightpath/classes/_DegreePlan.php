@@ -81,29 +81,45 @@ class _DegreePlan extends stdClass
   }
 
 
-  function calculate_progress_hours()
+  /**
+   * Calculate and store progress hour information.  Stores in the $this->gpa_calculations array.
+   * 
+   * 
+   * @param $bool_get_local_only_hours - If set to TRUE, then "local" courses (non-transfer) will be separated into their own indexes.
+   * @param $types - the type codes we care about.  If left as an emtpy array, it will get all the types defined + "degree" for degree total.
+   *                 The array structure should be "code" => "code".  Ex:  array('a' => 'a')
+   * 
+   */
+  function calculate_progress_hours($bool_get_local_only_hours = FALSE, $types = array())
   {
     
     // Let's go through our requirement types by code, and collect calcuations on them
     // in the gpa_calculations array.
-    $types = fp_get_requirement_types();
+    if (count($types) == 0) {
+      // Wasn't set, so use ALL of the known requirement types.
+      $types = fp_get_requirement_types();
+    }
+
     // Add a pseudo-code in for "degree", which the functions will convert into a blank.
     $types["degree"] = "Degree (total)";
+
+    
     foreach ($types as $code => $desc) {
-      // Make sure to skip appropriate codes we don't care about.
+      // Make sure to skip appropriate codes we don't care about.      
+      
       if ($code == 'x') continue;      
       
-      
-      $this->gpa_calculations[$code]["total_hours"] = $this->get_progress_hours($code);
-      $this->gpa_calculations[$code]["fulfilled_hours"] = $this->get_progress_hours($code, FALSE);
+      $this->gpa_calculations[$code]["total_hours"] = $this->get_progress_hours($code);      
+      $this->gpa_calculations[$code]["fulfilled_hours"] = $this->get_progress_hours($code, FALSE);      
       $this->gpa_calculations[$code]["qpts_hours"] = $this->get_progress_hours($code, FALSE, TRUE);      
       
       
-      // Get ONLY local hours, too....
-      $this->gpa_calculations[$code . "_local"]["total_hours"] = $this->get_progress_hours($code, TRUE, FALSE, TRUE);
-      $this->gpa_calculations[$code . "_local"]["fulfilled_hours"] = $this->get_progress_hours($code, FALSE, FALSE, TRUE);
-      $this->gpa_calculations[$code . "_local"]["qpts_hours"] = $this->get_progress_hours($code, FALSE, TRUE, TRUE);     
-      
+      if ($bool_get_local_only_hours) {
+        // Get ONLY local hours, too....
+        $this->gpa_calculations[$code . "_local"]["total_hours"] = $this->get_progress_hours($code, TRUE, FALSE, TRUE);
+        $this->gpa_calculations[$code . "_local"]["fulfilled_hours"] = $this->get_progress_hours($code, FALSE, FALSE, TRUE);
+        $this->gpa_calculations[$code . "_local"]["qpts_hours"] = $this->get_progress_hours($code, FALSE, TRUE, TRUE);     
+      }
       
     }
     
@@ -117,29 +133,29 @@ class _DegreePlan extends stdClass
    * that to figure out GPA.
    *
    */
-  function calculate_progress_quality_points() {      
+  function calculate_progress_quality_points($bool_get_local_only_hours = FALSE, $types = array()) {      
     
     // Let's go through our requirement types by code, and collect calcuations on them
     // in the gpa_calculations array.
-    $types = fp_get_requirement_types();
+    if (count($types) == 0) {
+      $types = fp_get_requirement_types();
+    }
+    
     // Add a pseudo-code in for "degree", which the functions will convert into a blank.
     $types["degree"] = "Degree (total)";
+    
     foreach ($types as $code => $desc) {
       // Make sure to skip appropriate codes we don't care about.
       if ($code == 'x') continue;
       
       $this->gpa_calculations[$code]["qpts"] = $this->get_progress_quality_points($code);
       
-      // Get only local courses, too...
-      $this->gpa_calculations[$code . "_local"]["qpts"] = $this->get_progress_quality_points($code, TRUE);
+      if ($bool_get_local_only_hours) {
+        // Get only local courses, too...
+        $this->gpa_calculations[$code . "_local"]["qpts"] = $this->get_progress_quality_points($code, TRUE);
+      }
     }
         
-    
-    /*
-    $this->major_qpts = $this->get_progress_quality_points("m");
-    $this->core_qpts = $this->get_progress_quality_points("c");
-    $this->degree_qpts = $this->get_progress_quality_points("");
-    */  
     
   }
   

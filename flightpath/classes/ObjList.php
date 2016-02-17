@@ -202,7 +202,7 @@ class ObjList
 
 	function get_next()
 	{
-		$s = $this->array_list[$this->i];
+		$s = @$this->array_list[$this->i];
 		$this->i++;
 		return $s;
 	}

@@ -135,10 +135,6 @@ class _Course extends stdClass
     if ($db == NULL)
     {
       $this->db = get_global_database_handler();;
-      if (!is_object($this->db))
-      {
-        $this->db = new DatabaseHandler();
-      }
     }
 
     if ($course_id != "")
@@ -1742,7 +1738,7 @@ class _Course extends stdClass
 
     if ($this->db == null)
     {
-      $this->db = new DatabaseHandler();
+      $this->db = get_global_database_handler();
     }
 
     if (strstr($this->term_id, "1111"))

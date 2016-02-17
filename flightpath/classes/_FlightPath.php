@@ -41,7 +41,7 @@ class _FlightPath extends stdClass
 		// based on what is available in the global variables.
 		// Takes the place of what was going on at the beginning
 		// of advise.php.
-
+				
 		if ($bool_init_advising_variables == true)
 		{
 			//$temp_screen = new AdvisingScreen();
@@ -132,7 +132,7 @@ class _FlightPath extends stdClass
     $major_code_csv .= "," . $track_degree_ids;    
         
     ///////////////////////////////
-    //  TODO:  Okay folks.  So this is basically where we will be interating through all
+    //  TODO:  Okay folks.  So this is basically where we will be iterating through all
     //  of the student's major_codes (if they have more than one), and squishing them together,
     //  to create a single DegreePlan object, made out of all the options.
     //  We need like a loop here.
@@ -336,6 +336,7 @@ class _FlightPath extends stdClass
     
     
     //fpm($new_degree_plan);
+        
     
     return $new_degree_plan;
     
@@ -388,7 +389,7 @@ class _FlightPath extends stdClass
 	{
 		// This method will look at the student's courses
 		// and decide which groups they should be fit into.
-
+				
 		// We will be going through the degree plan's master list
 		// of groups to decide this.
 		$student = $this->student;
@@ -499,6 +500,7 @@ class _FlightPath extends stdClass
 
 
 		}
+    
 
 	}
 
@@ -1093,6 +1095,8 @@ class _FlightPath extends stdClass
     
 	  $catalog_year = 0;
     
+    
+    
 		// This method will, only by looking at variables in the
 		// POST, save an advising session into the database.
 		$db = get_global_database_handler();
@@ -1592,7 +1596,8 @@ class _FlightPath extends stdClass
 		// This method will load an advising session for a particular
 		// student, and modify the degree plan object to reflect
 		// the advisings.
-    $db = new DatabaseHandler();
+						
+    $db = get_global_database_handler();
 		$is_what_if = "0";
 		$is_draft = "0";
 		if ($bool_what_if == true){$is_what_if = "1";}
@@ -1831,7 +1836,8 @@ class _FlightPath extends stdClass
 
 		//$this->degree_plan->sortGroupsFulfilledFirst();
 		//print_pre($this->degree_plan->list_groups->toString());
-
+		
+		
 	} // function loadAdvisingSessionFromDatabase
 
 

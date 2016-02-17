@@ -9,6 +9,19 @@
  */
 
 
+/**
+ * This function makes sure we auto-load our classes, if we need to.
+ * Largely used when loading objects our of our SESSION cache.
+ */
+function __autoload($class) {
+  // Load all of the classes, as well as the custom classes.
+  require_once("classes/all_classes.php");
+  
+}
+
+
+ 
+ 
 session_start();
 
 header("Cache-control: private");
@@ -27,7 +40,6 @@ if (!file_exists("custom/settings.php")) {
   header ("Location: install.php");
   die;
 }
-
 
 require_once("bootstrap.inc");
 
