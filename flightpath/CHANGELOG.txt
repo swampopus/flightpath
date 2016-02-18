@@ -1,8 +1,19 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-02-18
+  Fixed stray mysql_insert_id() command in _FlightPath.php.  Changed to db_insert_id().
+  
+  Made it to where if you skipped semesters on the degrees page, it will still show the blank
+  boxes, at least before where you skipped.
+  
+  Fixed issue so that public notes (on degrees) show up correctly, no matter how many degrees
+  are being combined.  
+
+
 2016-02-17
   Fixed bug where group id was not being maintained for certain groups in popup window.
+  
   Made various changes in an attempt to help speed up page loads.
 
 

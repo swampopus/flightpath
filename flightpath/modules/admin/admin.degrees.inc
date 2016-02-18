@@ -35,6 +35,8 @@ function admin_display_degrees_popup_add_group() {
         "; 
   }                                                         
 
+  $min_grades = csv_to_array(variable_get("group_min_grades", "A,B,C,D"));
+
 
   $rtn .= "</table></div>
       " . t("Next, select properties for this group:") . "
@@ -43,10 +45,12 @@ function admin_display_degrees_popup_add_group() {
       Hrs: <input type='text' name='hours' id='hours' size='2'>
       Min Grade: <select name='min_grade' id='min_grade'>
               <option value=''>--</option>
-              <option value='C'>C</option>
-              <option value='B'>B</option>
-              <option value='A'>A</option>
-              
+              ";
+  foreach ($min_grades as $g) {
+    $rtn .= "<option value='$g'>$g</option>";
+  }
+  
+  $rtn .= "              
             </select>
       Type: <select name='type' id='type'>";
   // Get our list of requirement types from our settings.
@@ -1125,7 +1129,7 @@ function admin_display_edit_degree() {
 
         <td valign='top' class='tenpt' width=''>
               " . t("Classification:") . "          
-              <select name='degree_class'> ";
+              <select name='degree_class' style='max-width: 120px;'> ";
               //<input type='text' name='degree_class' value='$degree->degree_class' size='10' maxlength='40'>
     // Display degree_class pulldown.
     $degree_classes = fp_get_degree_classifications();
@@ -1144,13 +1148,13 @@ function admin_display_edit_degree() {
         </td>
 
         <td valign='top' class='tenpt' >" . t("Level:") . "
-              <input type='text' name='degree_level' value='$degree->degree_level' size='2' maxlength='1'>
+              <input type='text' name='degree_level' value='$degree->degree_level' size='1' maxlength='1'>
               <a href='javascript: adminPopupAlertHelp(\"degree_level\");'>?</a>
               
           &nbsp; &nbsp;
           
           " . t("Advising Weight:") . "
-              <input type='text' name='advising_weight' value='$degree->db_advising_weight' size='2' maxlength='5'>
+              <input type='text' name='advising_weight' value='$degree->db_advising_weight' size='1' maxlength='5'>
               <a href='javascript: adminPopupAlertHelp(\"advising_weight\");'>?</a>
                         
                         
@@ -1216,14 +1220,23 @@ function admin_display_edit_degree() {
     </blockquote>
     ";
   }
-  $rtn .= "<div class='tenpt' align='center'>(Scroll to the bottom of the page for more options)</div>";
+  $rtn .= "<div class='tenpt' align='center'>(Scroll to the bottom of the page for more options)</div>
+            <!--PREVIOUS_SEMESTERS-->";
 
+  $first_semester_num = -999;
+            
   $degree->list_semesters->reset_counter();
   while ($degree->list_semesters->has_more()) {
     $semester = $degree->list_semesters->get_next();
     if ($semester->semester_num < 0) {
       continue;
     }
+    
+    // Record what is the first semester num we have...
+    if ($first_semester_num == -999) {
+      $first_semester_num = $semester->semester_num;
+    } 
+    
     $sem_default_title = admin_get_semester_name($semester->semester_num);
     if ($semester->title == $sem_default_title) {
       $semester->title = "";
@@ -1311,57 +1324,96 @@ function admin_display_edit_degree() {
     $s_count = $semester->semester_num+1;
   }
 
-  // Always add an additional 4 semesters to the bottom.
-  for ($t = 0; $t < 4; $t++) {
-    $sem = $t + $s_count;
-    if ($sem > 99) {
-      // Max number of semesters.  More or less arbitrarily set number.
-      $rtn .= "<br>" . t("Maximum number of semesters created.") . "<br>";
-      break;
+  
+  
+  // Always add an additional 4 semesters to the bottom.  Also, add in any missing semesters to the top of the degree as well.
+  $deltas = array("top", "bottom");
+  foreach ($deltas as $delta) {
+    $html = "";    
+    
+    // Set for if delta == bottom.    
+    $start_at = $s_count;  // s_count was the last semester we created above.
+    $less_than = 4;
+    
+    if ($delta == "top") {
+      // We are creating semesters for the top of the page, if needed.
+      if ($first_semester_num == -999) {
+        continue; // None were put at the top!  We can skip it.
+      }
+      else {
+        $start_at = 0;
+        $less_than = $first_semester_num;
+      }
+      
     }
-
-    $rtn .= "<div class='elevenpt' style='padding-bottom: 30px;'>
-          <b>Block number: " . ($sem+1) . "</b>
-          &nbsp; &nbsp; &nbsp; &nbsp;
-          Default title: " . admin_get_semester_name($sem) . "
-          &nbsp; &nbsp;
-          Override: <input type='text' name='semester_title_$sem' value='' size='20'>
-          <a href='javascript: adminPopupAlertHelp(\"semester_title\");'>?</a>
-          
-          <table border='1' width='100%'>
-          ";
-
-    $rtn .= "<tr><td valign='top'>
-          <textarea name='courses_$sem' rows='10' cols='20'>";
-    $rtn .= "</textarea></td>";
-
-    // the groups...
-    $rtn .= "<td valign='top' class='tenpt' width='100%'>
-          <table width='100%' border='0' cellspacing='5'>
-          <tr>
-            <td valign='top' class='tenpt' width='1'>&nbsp;</td>
-            <td valign='top' class='tenpt'>Group</td>
-            <td valign='top' class='tenpt'>hrs</td>
-            <td valign='top' class='tenpt'>grd</td>
-            <td valign='top' class='tenpt'>type</td>
-            </tr>";
-
-    $url = fp_url("admin/degrees/popup-add-group", "semester_num=$sem&de_catalog_year=$de_catalog_year");
+    
+    
+    for ($t = 0; $t < $less_than; $t++) {
+      $sem = $t + $start_at;
+      if ($sem > 99) {
+        // Max number of semesters.  More or less arbitrarily set number.
+        $html .= "<br>" . t("Maximum number of semesters created.") . "<br>";
+        break;
+      }
+  
+      $html .= "<div class='elevenpt' style='padding-bottom: 30px;'>
+            <b>Block number: " . ($sem+1) . "</b>
+            &nbsp; &nbsp; &nbsp; &nbsp;
+            Default title: " . admin_get_semester_name($sem) . "
+            &nbsp; &nbsp;
+            Override: <input type='text' name='semester_title_$sem' value='' size='20'>
+            <a href='javascript: adminPopupAlertHelp(\"semester_title\");'>?</a>
             
-    $rtn .= "</table>
-        <div style='margin-top: 10px; margin-left: 20px;'>
-          <a href='javascript: adminPopupWindow(\"" . $url . "\");'>Add an elective group</a>
-    </td>";
-
-
-    $rtn .= "</table><br>
+            <table border='1' width='100%'>
+            ";
+  
+      $html .= "<tr><td valign='top'>
+            <textarea name='courses_$sem' rows='10' cols='20'>";
+      $html .= "</textarea></td>";
+  
+      // the groups...
+      $html .= "<td valign='top' class='tenpt' width='100%'>
+            <table width='100%' border='0' cellspacing='5'>
+            <tr>
+              <td valign='top' class='tenpt' width='1'>&nbsp;</td>
+              <td valign='top' class='tenpt'>Group</td>
+              <td valign='top' class='tenpt'>hrs</td>
+              <td valign='top' class='tenpt'>grd</td>
+              <td valign='top' class='tenpt'>type</td>
+              </tr>";
+  
+      $url = fp_url("admin/degrees/popup-add-group", "semester_num=$sem&de_catalog_year=$de_catalog_year");
+              
+      $html .= "</table>
+          <div style='margin-top: 10px; margin-left: 20px;'>
+            <a href='javascript: adminPopupWindow(\"" . $url . "\");'>Add an elective group</a>
+      </td>";
+  
+  
+      $html .= "</table><br>
+      
+      " . fp_render_button(t("Save for @year", array("@year" => $de_catalog_year)), "adminSubmitForm();") . "
+          <span class='admin-button-msg'>$button_msg</span>
+      
+      </div>";
+  
+    } // creating a blank semester block
     
-    " . fp_render_button(t("Save for @year", array("@year" => $de_catalog_year)), "adminSubmitForm();") . "
-        <span class='admin-button-msg'>$button_msg</span>
     
-    </div>";
+    // Add $html to wherever it needs to go.
+    if ($delta == "bottom") {
+      $rtn .= $html;
+    }
+    else if ($delta == "top") {
+      // Place the HTML at the top of the page by replacing our html comment.
+      $rtn = str_replace("<!--PREVIOUS_SEMESTERS-->", $html, $rtn);
+    } 
+    
+    
+  } //foreach delta
 
-  }
+
+
   $rtn .= "<div class='elevenpt'>If you need more semester boxes, simply save this page, and additional blank
       boxes will appear below.</div>
       

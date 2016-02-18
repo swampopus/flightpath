@@ -13,7 +13,7 @@ class _DegreePlan extends stdClass
   public $list_semesters, $list_groups, $db, $degree_id, $catalog_year, $is_combined_dynamic_degree_plan, $combined_degree_ids_array;
   public $track_code, $track_title, $track_description, $student_array_significant_courses;
   public $bool_has_tracks, $array_semester_titles, $db_exclude, $db_allow_dynamic, $db_override_degree_hours, $db_advising_weight;
-  public $public_note;
+  public $public_notes_array;
 
   public $total_major_hours, $total_core_hours, $total_degree_hours;
   public $fulfilled_major_hours, $fulfilled_core_hours, $fulfilled_degree_hours;
@@ -51,6 +51,8 @@ class _DegreePlan extends stdClass
     if (@$GLOBALS["fp_advising"]["bool_use_draft"] == true) {
       $this->bool_use_draft = true;
     }
+
+    $this->public_notes_array = array();
 
     $this->db_advising_weight = 0;
 
@@ -580,7 +582,7 @@ class _DegreePlan extends stdClass
       $cur = $this->db->db_fetch_array($res);
       $this->major_code = $cur["major_code"];
       $this->title = $cur["title"];
-      $this->public_note = $cur["public_note"];
+      $this->public_notes_array[$this->degree_id] = $cur["public_note"];
       $this->catalog_year = $cur["catalog_year"];
       $this->degree_type = trim($cur["degree_type"]);
       $this->db_exclude = trim($cur["exclude"]);

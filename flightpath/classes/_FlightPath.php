@@ -248,6 +248,7 @@ class _FlightPath extends stdClass
     foreach ($degree_plans as $degree_plan) {
       
       $new_degree_plan->combined_degree_ids_array[] = $degree_plan->degree_id;
+      $new_degree_plan->public_notes_array[$degree_plan->degree_id] = $degree_plan->public_notes_array[$degree_plan->degree_id];
       
       if ($degree_plan->catalog_year == "" || $degree_plan->catalog_year == 0) {
         $degree_plan->load_descriptive_data();
@@ -1458,9 +1459,9 @@ class _FlightPath extends stdClass
 									('?','?','?','?','?','?','?','?','?','?','?','?','?','?')
 									", $student_id,$faculty_id,$course_id,$required_entry_value,$group_id,$req_by_degree_id,$semester_num,$sub_course_id,$sub_entry_value,$sub_term_id,$sub_transfer_flag,$sub_hours,$sub_remarks, time());
 
-			watchdog("save_substitution", "$student_id,group_id:$group_id,insert_id:" . mysql_insert_id());
+			watchdog("save_substitution", "$student_id,group_id:$group_id,insert_id:" . db_insert_id());
 
-		}
+		} 
 
 
 		if (trim(@$_POST["removesubstitution"]) != "")

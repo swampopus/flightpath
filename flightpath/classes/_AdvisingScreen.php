@@ -1881,23 +1881,32 @@ function draw_menu_items($menu_array) {
 		// This will display a "public note" to the user about
 		// this degree.  The public note was entered in Data Entry.
 
-		if ($this->degree_plan->public_note == "")
+		if (count($this->degree_plan->public_notes_array) == 0)
 		{
 			return "";
 		}
+		
+    $pC = "";        
 
-		$public_note = filter_markup($this->degree_plan->public_note);
+    foreach ($this->degree_plan->public_notes_array as $degree_id => $note) {
+        
+      if (trim($note) != "") {
+      
+        $pC .= "<tr><td colspan='8'>
+            <div class='tenpt' 
+              style='border: 5px double #C1A599;
+                  padding: 5px;
+                  margin: 10px;'>
+            <b>" . t("Important Message:") . "</b> $note
+            </div>
+            </td></tr>";
+      }
+        
+    }
+		
 
-		$pC = "";
+		
 
-		$pC .= "<tr><td colspan='8'>
-					<div class='tenpt' 
-						style='border: 5px double #C1A599;
-								padding: 5px;
-								margin: 10px;'>
-					<b>" . t("Important Message:") . "</b> $public_note
-					</div>
-					</td></tr>";
 
 
 		return $pC;

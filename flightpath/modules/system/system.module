@@ -1067,6 +1067,14 @@ function system_school_data_form() {
                       new substitutions, not old ones.  If unsure, enter D."),    
   );
   
+  $form["group_min_grades"] = array(
+    "type" => "textfield",
+    "label" => t("Group requirement min grades (CSV):"),
+    "value" => variable_get("group_min_grades", "D,C,B,A"),
+    "description" => t("List grades, separated by comma, which should appear in the min grade pulldown when setting a group requirement
+                        in a degree (this also sets the order in which they will appear).  If unsure what to enter, use: D,C,B,A"),    
+  );
+
   
 
   $form["calculate_cumulative_hours_and_gpa"] = array(
