@@ -79,6 +79,8 @@ function admin_copy_degree_form() {
   
   $form = array();
 
+  $m = 0;
+
   $form["mark" . $m++] = array(
     "type" => "markup",
     "value" => t("Use this form to duplicate a degree plan in this catalog year.
@@ -154,9 +156,9 @@ function admin_copy_degree_form_submit($form, $form_submit) {
   
   // First thing's first.  Make sure the sourceMajorCode exists.
   $res = db_query("SELECT * FROM draft_degrees 
-                    WHERE (major_code = '?'
-                    OR major_code LIKE '?|%')
-                    AND catalog_year='?' ", $source_major_code, $source_major_code, $de_catalog_year) ;
+                    WHERE (major_code = ?
+                    OR major_code LIKE ?)
+                    AND catalog_year = ? ", $source_major_code, "$source_major_code|%", $de_catalog_year) ;
   if (db_num_rows($res) == 0) {
     // Meaning, it could not be found.
     
@@ -168,9 +170,9 @@ function admin_copy_degree_form_submit($form, $form_submit) {
   // delete everything involving the destination major.
   // First, get the degree_id's in a select...
   $res = db_query("SELECT * FROM draft_degrees 
-                    WHERE (major_code = '?'
-                    OR major_code LIKE '?|%')
-                    AND catalog_year='?' ", $destination_major_code, $destination_major_code, $de_catalog_year) ;
+                    WHERE (major_code = ?
+                    OR major_code LIKE ?)
+                    AND catalog_year = ? ", $destination_major_code, "$destination_major_code|%", $de_catalog_year) ;
   if (db_num_rows($res) > 0) {
     while ($cur = db_fetch_array($res)) {
       $degree_id = $cur["degree_id"];
@@ -201,8 +203,8 @@ function admin_copy_degree_form_submit($form, $form_submit) {
   // Now, any tracks or concentrations?
   if ($include_tracks == "yes") {
     $res = db_query("SELECT * FROM draft_degrees 
-                      WHERE major_code LIKE '?|%'
-                      AND catalog_year='?' ", $source_major_code, $de_catalog_year) ;
+                      WHERE major_code LIKE '?'
+                      AND catalog_year='?' ", "$source_major_code|%", $de_catalog_year) ;
     while ($cur = db_fetch_array($res)) {
       $source_array[] = $cur;
     }
@@ -210,8 +212,8 @@ function admin_copy_degree_form_submit($form, $form_submit) {
     // While we're here, let's go ahead and make a copy of the tracks.
     $res = db_query("SELECT * FROM draft_degree_tracks
                         WHERE (major_code = '?'
-                        OR major_code LIKE '?|%' )
-                        AND catalog_year='?' ", $source_major_code, $source_major_code, $de_catalog_year) ;
+                        OR major_code LIKE '?' )
+                        AND catalog_year='?' ", $source_major_code, "$source_major_code|%", $de_catalog_year) ;
     while($cur = db_fetch_array($res)) {
       extract($cur, 3, "db");
       $dest_code = $destination_major_code;
@@ -257,7 +259,7 @@ function admin_copy_degree_form_submit($form, $form_submit) {
                          public_note, semester_titles_csv,
                          catalog_year, exclude, allow_dynamic, override_degree_hours)
                          VALUES   
-                        (?, ?, ?, ?, ?, ?, ?, ?, ?) ",
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
                          $dest_degree_id, $dest_code, $src_degree_type, $src_degree_class, $src_title,
                          $src_public_note, $src_semester_titles_csv,
                          $de_catalog_year, $src_exclude, $src_allow_dynamic, $src_override_degree_hours);
@@ -277,11 +279,7 @@ function admin_copy_degree_form_submit($form, $form_submit) {
                            course_requirement_type,
                            data_entry_value)
                            VALUES
-                          ('?', '?', '?', '?', '?',
-                           '?', '?',
-                           '?',
-                           '?',
-                           '?') ",
+                          (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
                             $dest_degree_id, $db_semester_num, $db_group_id,
                            $db_group_requirement_type,
                            $db_group_hours_required,
@@ -1423,7 +1421,7 @@ function admin_display_edit_degree() {
        <a href='javascript: adminPopupAlertHelp(\"public_note\");'>(Help - Public Note)</a>
        " . fp_get_js_alert_link(t("You may enter simple HTML in this field, like <b>bold</b> or <i>italics</i>."), t("(Help - Formatting)")) . "
       <br>
-      <textarea name='public_note' rows='4' cols='80'>$degree->public_note</textarea>
+      <textarea name='public_note' rows='4' cols='80'>" . $degree->public_notes_array[$degree->degree_id] . "</textarea>
       
       
       </div>

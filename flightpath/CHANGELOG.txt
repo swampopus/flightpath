@@ -1,6 +1,13 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-02-19
+  Fixed bug in Copy Degree form submission, related to switch to PDO support.
+  
+  Fixed bug where min hours for a group weren't making it obtain the correct CSS class.
+  
+  
+
 2016-02-18
   Fixed stray mysql_insert_id() command in _FlightPath.php.  Changed to db_insert_id().
   

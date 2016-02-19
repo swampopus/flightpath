@@ -2913,6 +2913,7 @@ function draw_menu_items($menu_array) {
 		}
 
 
+    /////////////////////////////////////
 		// Now, draw all the groups.
 		$semester->list_groups->sort_alphabetical_order();
 		$semester->list_groups->reset_counter();
@@ -3207,8 +3208,8 @@ function draw_menu_items($menu_array) {
       $rowclass = "";
       // If we have met the min hours (if the group even HAS min hours) then add a class to $rowclass,
       // so we can hide it or whatever with CSS.
-      if ($group->has_min_hours_allowed()) {
-        if ($test_hours > $group->min_hours_allowed) {
+      if ($group->has_min_hours_allowed()) {        
+        if ($test_hours >= $group->min_hours_allowed) {
           $rowclass .= "group-select-min-hours-fulfilled";
         }
       }
