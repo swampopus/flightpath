@@ -347,9 +347,10 @@ class _CourseList extends ObjList
 				continue;
 			}
 			//////////////////////////////////////////
-			///  Check for min grade, etc, here.
+			///  Check for min grade, etc, here.			
 			if (!$c->meets_min_grade_requirement_of(null, $min_grade))
 			{
+			  //if ($min_grade == "C-") fpm("[did not meet min grade requirement of $min_grade :: $c->subject_id $c->course_num $c->grade");
 				if ($bool_mark_repeats_exclude == true)
 				{
 					// Since this course does not meet the min_grade,

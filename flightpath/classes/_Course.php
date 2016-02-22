@@ -950,7 +950,23 @@ class _Course extends stdClass
       return true;
     }
 
+    // Okay, let's check those min grade requirements...
+    $grade_order = csv_to_array(strtoupper(variable_get("grade_order", "AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I")));    
+  
+    // Make it so the indexes are the grades, their numeric values are values.    
+    $grade_order = array_flip($grade_order);
+      
+    // Get the "weight" of the min_grade_requirement, and $this->grade
+    $req_weight = intval(@$grade_order[$min_grade]);
+    $this_weight = intval(@$grade_order[$this->grade]);  
 
+
+    
+    
+    if ($this_weight <= $req_weight) return TRUE;  // yay, we have the min grade!
+
+ 
+/*
     if ($min_grade == "A" && $this->grade == "A")
     {
       return true;
@@ -970,6 +986,7 @@ class _Course extends stdClass
     {
       return true;
     }
+*/
 
 
 

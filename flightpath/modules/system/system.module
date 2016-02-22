@@ -1004,8 +1004,9 @@ function system_school_data_form() {
     "type" => "textfield",
     "label" => t("Grade order (CSV):"),
     "value" => variable_get("grade_order", ""),
-    "description" => t("List all possible grades, separated by comma, from highest to lowest.  This is only needed if you
-                      selected 'Best grade first' sort policy above.
+    "description" => t("List all possible grades, separated by comma, from highest to lowest.  This is 
+                      used if you select 'Best Grade first' order above, but also is used in determining
+                      if a course fulfills a minimum grade requirement.                      
                       <br>Ex: AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I"),
   );
   
@@ -1036,6 +1037,7 @@ function system_school_data_form() {
                 currently enrolled in this course.' Ex: E,AMID,BMID "),    
   );
 
+  /*
   $form["b_or_better"] = array(
     "type" => "textfield",
     "label" => t("B or better grades (CSV):"),
@@ -1056,7 +1058,9 @@ function system_school_data_form() {
     "value" => variable_get("d_or_better", ""),
     "description" => t("List grades, separated by comma, which are either a D or better."),    
   );
-
+   * 
+   */
+    
   $form["minimum_substitutable_grade"] = array(
     "type" => "textfield",
     "size" => 3,

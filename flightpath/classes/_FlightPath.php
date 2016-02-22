@@ -617,6 +617,9 @@ class _FlightPath extends stdClass
 			$group = new Group();
 			$group->group_id = 0;
 		}
+    else if ($group->min_grade != "") {
+      $group->assign_min_grade($group->min_grade);  // If this is a group with a min grade value, let's make sure we assign all the courses in it to this min grade.
+    }
 
 
     $sort_policy = variable_get("initial_student_course_sort_policy", "alpha"); // will either be "alpha" or "grade"
@@ -649,7 +652,7 @@ class _FlightPath extends stdClass
 		}
 		else if ($sort_policy == "alpha") {
 		  $list_requirements->sort_alphabetical_order();
-		}
+    }
 
 		$list_requirements->sort_substitutions_first($student->list_substitutions, $group_id);
 

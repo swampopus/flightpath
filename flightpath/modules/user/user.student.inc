@@ -13,11 +13,12 @@ function user_student_edit_student_courses_form() {
     
   fp_add_js(fp_get_module_path("user") . "/js/user.js");
 
+  $m = 0;
   $form = array();
   $student_cwid = $_REQUEST["student_cwid"];  // now getting it from argument
   $user_id = db_get_user_id_from_cwid($student_cwid, "student");
 
-
+  $de_catalog_year = @$_REQUEST["de_catalog_year"];
 
   // Figure out what the page's sub-tabs should be, and set them.
   $tab_array = array();

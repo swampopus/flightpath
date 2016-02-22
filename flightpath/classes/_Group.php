@@ -103,7 +103,6 @@ class _Group extends stdClass
 		$this->list_courses->assign_min_grade($min_grade);
 		$this->list_groups->assign_min_grade($min_grade);
 
-
 	}
 
 
