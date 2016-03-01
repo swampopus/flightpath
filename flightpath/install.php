@@ -194,9 +194,12 @@ function install_perform_install() {
   // Re-establish DatabaseHandler object connection since we just re-loaded the settings file.
   $temp_db = new DatabaseHandler();
     
+  // Get our hash of the admin password  
+  $new_pass = user_hash_password($admin_pass);  
+    
   // Add the admin user to the newly-created users table and the "faculty" table.
   db_query("INSERT INTO users (user_id, user_name, cwid, password, is_faculty, f_name, l_name)
-            VALUES ('1', '?', '1', '?', '1', 'Admin', 'User') ", $admin_name, md5($admin_pass));
+            VALUES ('1', '?', '1', '?', '1', 'Admin', 'User') ", $admin_name, $new_pass);
 
   db_query("INSERT INTO faculty (cwid) VALUES ('1') ");
             

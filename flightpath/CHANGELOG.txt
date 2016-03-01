@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+
+2016-02-29
+  Fixed bug where on install, the admin password wasn't set correctly.
+
+
 2016-02-23
   Fixed issue with Course Search where faculty_id wasn't being saved as CWID, and where
   only first 20 rotation schedules were being returned instead of most recent 20.
