@@ -762,7 +762,7 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
 	$res = db_query("SELECT * FROM course_rotation_schedule
 							WHERE `course_id`='?'
 							$year_line
-							ORDER BY term_id
+							ORDER BY term_id DESC
 							LIMIT $limit", $course_id);
 	while($cur = db_fetch_array($res))
 	{

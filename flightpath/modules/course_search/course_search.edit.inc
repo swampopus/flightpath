@@ -207,7 +207,7 @@ function course_search_edit_course_details_form() {
 function course_search_edit_course_details_form_submit($form, $form_state) {
   global $user;
   
-  $faculty_id = $user->id;
+  $faculty_id = $user->cwid;
   
   $course_id = $form_state["values"]["course_id"];
   $subject_id = $form_state["values"]["subject_id"];
