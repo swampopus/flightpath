@@ -24,7 +24,7 @@ class _AdvisingScreen
 	 *   - This is the script which forms with POST to.  Ex: "advise.php"
 	 * 
 	 * @param FlightPath $flightpath   
-	 *   - FlightPath object.                                               
+	 *   - FlightPath object.                                                                                               
 	 *
 	 * @param string $screen_mode
 	 *   - A string describing what "mode" we are in.  
@@ -38,13 +38,13 @@ class _AdvisingScreen
 		$this->width_array = Array("10%", "8%","8%", "17%", "26%", "10%", "10%", "9%");
 		$this->popup_width_array = Array("17%", "1%", "1%", "15%", "26%", "15%", "15%", "10%");
 		
-		$this->script_filename = $script_filename;
+		$this->script_filename = $script_filename;                 
 		$this->is_on_left = true;
-		$this->box_array = array();
+		$this->box_array = array();  
 		$this->footnote_array = array();
 		
 		$this->page_extra_css_files = array();
-
+ 
 		$this->flightpath = $flightpath;
 		$this->degree_plan = $flightpath->degree_plan;
 		$this->student = $flightpath->student;
@@ -1444,11 +1444,13 @@ function draw_menu_items($menu_array) {
 	 *         - If $pal is left blank, the value here will be used for the "back" or "unfinished" color.
 	 * @param string $fore_col
 	 *         - If $pal is left blank, the value here will be used for the "foreground" or "progress" color.
+	 * @param string $extra
+	 *         - This is any HTML you wish to add after the hours.  Leave blank if unsure.
 	 * 
 	 * 
 	 * @return string
 	 */
-	function draw_pie_chart_box($title, $top_value, $bottom_value, $pal = "", $back_col = "", $fore_col = "")
+	function draw_pie_chart_box($title, $top_value, $bottom_value, $pal = "", $back_col = "", $fore_col = "", $extra = "")
 	{
 		$rtn = "";
 
@@ -1504,8 +1506,10 @@ function draw_menu_items($menu_array) {
  								    <span style='color: blue;'>$val% " . t("Complete") . "</span><br>
  								    ( <span style='color: blue;'>$top_value</span>
  									 / <span style='color: gray;'>$bottom_value " . t("hours") . "</span> )
- 									 ";
+ 									 $extra";
 	
+		
+		
 		$rtn .= "
 								</td>
 								</table>
@@ -1566,15 +1570,34 @@ function draw_menu_items($menu_array) {
 		  
 		  if ($total_hours < 1) continue;  // no hours for this requirement type!
 		  
+		  // Setting to display GPA
+		  $gpa = $extra_gpa = "";
+		  if (variable_get("pie_chart_gpa", "no") == "yes") {  
+  	    if ($this->degree_plan->gpa_calculations[$requirement_type]["qpts_hours"] > 0) {
+          $gpa = fp_truncate_decimals($this->degree_plan->gpa_calculations[$requirement_type]["qpts"] / $this->degree_plan->gpa_calculations[$requirement_type]["qpts_hours"], 3);
+        }
+        if ($gpa) {
+          $extra_gpa = "<div class='view-extra-gpa tenpt' style='text-align: right; color: gray;'>GPA: $gpa</div>";
+        }
+		  }
+
+		  
 		  // If we are here, then there is indeed enough data to create a piechart!
 		  // Generate the pie chart and add to our array, for later display.
-		  $html = $this->draw_pie_chart_box($label,$fulfilled_hours, $total_hours, "", $unfinished_col, $progress_col);
+		  $html = $this->draw_pie_chart_box($label,$fulfilled_hours, $total_hours, "", $unfinished_col, $progress_col, $extra_gpa);
 		  $hide_pie_html = "$label: $fulfilled_hours / $total_hours";
+		  
+		  
+		  // Will only display if we've set it above.
+		  if ($gpa) {
+		    $hide_pie_html .= " ($gpa)";
+		  }
+		  
 		  $pie_chart_html_array[] = array(
 		    "pie" => $html,
 		    "hide_pie" => $hide_pie_html,
-		   );
-		  
+		   );                                    
+		                       
 		}
 		
 		

@@ -14,8 +14,8 @@
  *
  */
 function system_perm() {
-  
-  $perms = array (
+    
+  $perms = array (  
     "access_logged_in_content" => array(
       "title" => t("Access logged-in content"),
       "description" => t("This should be given to all authenticated users.  It simply means
@@ -30,22 +30,22 @@ function system_perm() {
     "run_cron" => array(
       "title" => t("Run Cron"),
       "description" => t("The user may run hook_cron functions at will. Causes a new menu link to appear
-                          on the admin page."),
-    ),    
-        
+                          on the admin page."),               
+    ),             
+          
     "de_can_administer_system_settings" => array(
       "title" => t("Can administer system settings"),
       "description" => t("This allows the user to edit any of the FlightPath
                         system settings."),
     ),
-    
+
     "de_can_administer_school_data" => array(
       "title" => t("Can administer school data"),
       "description" => t("This allows the user to edit the school data settings for FlightPath.
                           For example, describing college and subject codes."),
     ),
-    
-    
+                             
+                                        
     "view_fpm_debug" => array(
       "title" => t("View debug output from the fpm() function"),
       "description" => t("The user may view debug output from the fpm() function.
@@ -1153,6 +1153,16 @@ function system_school_data_form() {
                          
   );
 
+  $form["pie_chart_gpa"] = array(
+    "label" => t("Should pie charts show GPAs?"),
+    "type" => "select",
+    "options" => array("no" => "No", "yes" => "Yes"),
+    "value" => variable_get("pie_chart_gpa", "no"),
+    "hide_please_select" => TRUE,
+    "description" => t("If set to 'Yes', the GPA will be displayed below each pie chart on the View and What If screens.
+                        If unsure what to select, choose 'no'."),
+  );
+  
   
   $form["developmentals_title"] = array(
     "label" => t("Developmentals semester block title:"),

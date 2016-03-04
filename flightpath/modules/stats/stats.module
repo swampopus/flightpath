@@ -35,7 +35,7 @@ function stats_menu() {
     "title" => "Access Stats",
     "description" => "See recent access within the system.  This can be useful to see if anyone is currently using the system.",
     "page_callback" => "stats_report_access_stats",
-    "access_arguments" => array("can_access_stats"),
+    "access_arguments" => array("stats_reports_access"),
     "page_settings" => array(
       "page_show_title" => TRUE,
       "bool_print" => FALSE,
@@ -55,7 +55,7 @@ function stats_menu() {
     "title" => "Major Counts",
     "description" => "Displays the number of students within each major or major/concentration.",
     "page_callback" => "stats_report_major_counts",
-    "access_arguments" => array("can_access_stats"),
+    "access_arguments" => array("stats_reports_major_counts"),
     "page_settings" => array(
       "page_show_title" => TRUE,
       "bool_print" => FALSE,
@@ -76,7 +76,7 @@ function stats_menu() {
     "description" => "This report will display information about which degree options students/advisors are selecting for particular majors 
                     (ex: General Studies)",
     "page_callback" => "stats_report_selected_degree_options",
-    "access_arguments" => array("can_access_stats"),
+    "access_arguments" => array("stats_reports_selected_degree_options"),
     "page_settings" => array(
       "page_show_title" => TRUE,
       "bool_print" => FALSE,
@@ -100,7 +100,7 @@ function stats_menu() {
     "title" => "Advisor Use",
     "description" => "How many students an advisor has advised over a specified time range.",
     "page_callback" => "stats_report_advisor_use",
-    "access_arguments" => array("can_access_stats"),
+    "access_arguments" => array("stats_reports_advisor_use"),
     "page_settings" => array(
       "page_show_title" => TRUE,
       "bool_print" => FALSE,
@@ -121,7 +121,7 @@ function stats_menu() {
     "title" => "Student Course List",
     "description" => "List courses a student has taken, which FlightPath is aware of.",
     "page_callback" => "stats_report_student_course_list",
-    "access_arguments" => array("can_access_stats"),
+    "access_arguments" => array("stats_reports_student_course_list"),
     "page_settings" => array(
       "page_show_title" => TRUE,
       "bool_print" => FALSE,
@@ -143,7 +143,7 @@ function stats_menu() {
     "title" => "FlightPath Use Summary",
     "description" => "A detailed report on how FlightPath is being used over a specified time range.",
     "page_callback" => "stats_report_flightpath_use_summary",
-    "access_arguments" => array("can_access_stats"),
+    "access_arguments" => array("stats_reports_flightpath_use_summary"),
     "page_settings" => array(
       "page_show_title" => TRUE,
       "bool_print" => FALSE,
@@ -160,11 +160,11 @@ function stats_menu() {
 
 
   $items["stats/reports/major-students-progress"] = array(
-    "title" => "Major Students Progresss - CSV Export (Beta)",
+    "title" => "Major Students Progress - CSV Export (Beta)",
     "description" => "A CSV report showing students in a major, and their progress percentages in that major.  Currently in 'Beta' status.",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("stats_report_major_students_progress_form"),
-    "access_arguments" => array("can_access_stats"),
+    "access_arguments" => array("stats_reports_major_students_progress"),
     "page_settings" => array(
       "bool_print" => FALSE,
       "menu_links" => array(         
@@ -185,7 +185,7 @@ function stats_menu() {
     "title" => "Course Use Summary",
     "description" => "A report of everywhere a particular course is used in FlightPath (groups or degrees).",
     "page_callback" => "stats_report_course_use_summary",    
-    "access_arguments" => array("can_access_stats"),
+    "access_arguments" => array("stats_reports_course_use_summary"),
     "page_settings" => array(
       "page_show_title" => TRUE,
       "bool_print" => FALSE,
@@ -200,6 +200,25 @@ function stats_menu() {
     "weight" => 450,
   );
   
+
+  $items["stats/reports/user-roles"] = array(
+    "title" => "User Roles Report",
+    "description" => "A report that shows what roles each user has been assigned.",
+    "page_callback" => "stats_report_user_roles",    
+    "access_arguments" => array("stats_reports_user_roles"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "bool_print" => FALSE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Main menu",
+          "path" => "admin-tools/stats",
+        ),
+      ),      
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "weight" => 460,
+  );
   
   
   
@@ -370,10 +389,39 @@ function stats_perm() {
   $perms = array (
     "can_access_stats" => array(
       "title" => t("Can access/view stats"),
-      "description" => t("This allows the user to access the stats module, letting them run
-                        reports on usage."),
-    ),    
+      "description" => t("This allows the user to access the stats & reports page.  They will still need additional
+                          permissions to view individual reports."),
+    ),
+    "stats_reports_access" => array(
+      "title" => t("Access the 'Access Stats' report"),
+    ),
+    "stats_reports_major_counts" => array(
+      "title" => t("Access the 'Major Counts' report"),
+    ),
+    "stats_reports_selected_degree_options" => array(
+      "title" => t("Access the 'Selected Degree Options' report"),
+    ),
+    "stats_reports_advisor_use" => array(
+      "title" => t("Access the 'Advisor Use' report"),
+    ),
+    "stats_reports_student_course_list" => array(
+      "title" => t("Access the 'Student Course List' report"),
+    ),
+    "stats_reports_flightpath_use_summary" => array(
+      "title" => t("Access the 'FlightPath Use Summary' report"),
+    ),
+    "stats_reports_major_students_progress" => array(
+      "title" => t("Access the 'Major Students Progress' report"),
+    ),
+    "stats_reports_course_use_summary" => array(
+      "title" => t("Access the 'Course Use Summary' report"),
+    ),
+    "stats_reports_user_roles" => array(
+      "title" => t("Access the 'User Roles' report"),
+    ),
+
   );
+
 
   return $perms;
   
@@ -1208,6 +1256,135 @@ function stats_report_advisor_use() {
   
   return $rtn;
 }
+
+
+
+/**
+ * This is a simple report which shows the user roles assigned to each user.
+ * It will also allow downloads as a CSV.
+ *
+ */
+function stats_report_user_roles() {
+
+  $rtn = "";
+  
+  $csv = "";
+  
+  $results = array();
+  $roles = array();
+  
+  $res = db_query("SELECT * FROM users a, user_roles b, roles c
+                   WHERE a.user_id = b.user_id
+                   AND b.rid = c.rid
+                   ORDER BY l_name, f_name");
+  
+  while ($cur = db_fetch_array($res)) {
+       
+    $results[$cur["cwid"]]["db"] = $cur;
+    $results[$cur["cwid"]]["roles"][$cur["name"]] = TRUE;
+    
+    // Figure out what department they belong to, if any.
+    $dept = "";
+    $res2 = db_query("SELECT * FROM faculty WHERE cwid = '?' ", $cur["cwid"]);
+    $cur2 = db_fetch_array($res2);
+    $dept = $cur2["department"];
+    
+    $results[$cur["cwid"]]["db"]["dept"] = $dept;
+    
+    
+    
+    $roles[$cur["name"]] = $cur["name"];
+    
+  }  
+  
+
+  $rtn .= "<br><div style='width: 700px; height: 600px; overflow: auto; border:1px solid #ccc;'>
+              <table border='1'>
+                <tr>
+                  <th>CWID</th>
+                  <th>FN</th>
+                  <th>LN</th>
+                  <th>UN</th>
+                  <th>DEPT</th>
+                  ";
+  
+  $csv .= "CWID,FN,LN,UN,DEPT,";
+  
+  // Roles...
+  foreach ($roles as $role) {
+    
+    
+    $rtn .= "<th>$role</th>";
+    $csv .= '"' . $role . '",';
+    
+  }
+  $rtn .= "</tr>";
+  $csv .= "\n";
+  
+  
+  
+  
+  
+  // Okay, go through our results and display them
+  foreach ($results as $cwid => $details) {
+    if (count($details["roles"]) < 1) continue;  // not interested, honey. No roles assigned
+
+    $rtn .= "<tr>";
+    
+    $rtn .= "<td>$cwid</td>
+             <td>{$details["db"]["f_name"]}</td>
+             <td>{$details["db"]["l_name"]}</td>
+             <td>{$details["db"]["user_name"]}</td>
+             <td>{$details["db"]["dept"]}</td>
+    ";
+    
+    $csv .= "\"$cwid\",\"{$details["db"]["f_name"]}\",\"{$details["db"]["l_name"]}\",\"{$details["db"]["user_name"]}\",\"{$details["db"]["dept"]}\",";
+    
+    // Roles...
+    foreach ($roles as $role) {
+      
+      $val = "";
+      if ($details["roles"][$role]) {
+        $val = "X";
+      }
+      
+      $rtn .= "<td>$val</td>";
+      
+      $csv .= $val . ",";
+    }
+    
+    
+    $rtn .= "
+            </tr>";    
+    $csv .= "\n";
+    
+  }
+  
+  
+  $rtn .= "</table>
+          </div>";
+  
+  
+  $rtn .= l("Download as CSV", "stats/reports/user-roles", "csv=yes");
+  
+  if ($_REQUEST["csv"] == "yes") {
+    // Deliver as CSV file instead.
+    $filename = "user_roles_report";
+    // Give it to the browser...  
+    header('Content-type: text/csv');
+    header('Content-Disposition: attachment; filename="' . $filename . '.csv"');
+    print $csv;        
+    die;
+  }
+  
+  
+  return $rtn; 
+  
+}
+
+
+
+
 
 
 

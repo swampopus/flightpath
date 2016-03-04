@@ -1,7 +1,21 @@
 FlightPath 4.x Changelog
 ========================
 
+2016-03-04
+  Made it so that GPA calculatins can be displayed under pie charts (with setting).
+  
 
+2016-02-23
+  Fixed bug in Course Search where faculty_id wasn't being saved, and only first 20 schedules were being queried.
+
+
+2016-01-07
+  Added new report to stats module, showing what roles users have been assigned.
+  
+
+2016-01-05
+  Modified the Stats module so that each report has its own permission.
+  
 
 2015-11-02
   Removed errant fpm() statement accidentally left in _Student.
