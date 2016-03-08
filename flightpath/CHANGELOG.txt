@@ -1,6 +1,10 @@
 FlightPath 4.x Changelog
 ========================
 
+2016-03-07
+  Fixed bug where course data was not being loaded from draft catalog year correctly.
+  
+
 2016-03-04
   Made it so that GPA calculatins can be displayed under pie charts (with setting).
   

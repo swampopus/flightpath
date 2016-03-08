@@ -940,7 +940,7 @@ class _Course
 
     $setting_current_catalog_year = variable_get("current_catalog_year", 2006) * 1;
     if ($this->bool_use_draft) {
-      $setting_current_catalog_year = variable_get("current_catalog_draft_year", 2006) * 1;
+      $setting_current_catalog_year = variable_get("current_draft_catalog_year", 2006) * 1;      
     }
     
     $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);
@@ -1055,7 +1055,7 @@ class _Course
         $cur = $db->db_fetch_array($res2);
 
         if ($db->db_num_rows($res2) < 1)
-        {
+        {          
           // Meaning, there were no results found that didn't have
           // the exclude flag set.
           // So, try to retrieve any course, even if it has
