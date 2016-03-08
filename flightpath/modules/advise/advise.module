@@ -254,19 +254,54 @@ function advise_menu() {
 
 
 /**
- * Used by the menu to determine if the user can see the View tab.
+ * Used by the menu to determine if the user can see the View tab for the current student.
  */
-function advise_can_access_view() {
+function advise_can_access_view($student_id = "") {
   global $current_student_id, $user;
+  
+  if ($student_id == "") $student_id = $current_student_id;
   
   // must be logged in first...
   if (!user_has_permission("access_logged_in_content")) return FALSE;
 
+  if ($student_id == "") return FALSE;
   
-  if ($current_student_id != "") return TRUE;
+  if ($user->id == 1) return TRUE; // the admin user.
   
+  // Can the user view ANY advising session?
+  if (user_has_permission("view_any_advising_session")) return TRUE;
+  
+  // can the user only see their own advisees, and is this student one of their advisees?
+  if (user_has_permission("view_advisee_advising_session")) {
+    // Is the student_id in their list of advisees?
+    $advisees = advise_get_advisees();
+    if (in_array($student_id, $advisees)) return TRUE;    
+  }
+  
+  // Is this user viewing THEIR OWN advising session?
+  if (user_has_permission("view_own_advising_session")) {
+    if ($student_id == $user->cwid && $student_id != "") return TRUE;
+  }
+  
+  
+  // All else fails, return FALSE  
   return FALSE;
   
+}
+
+function advise_get_advisees($faculty_id = "") {
+  global $user;
+  if ($faculty_id == "") $faculty_id = $user->cwid;
+  
+  $rtn = array();
+  
+  $res = db_query("SELECT * FROM advisor_student WHERE faculty_id = ?", $faculty_id);
+  foreach ($res as $cur) {
+    $rtn[] = $cur["student_id"];
+  }
+  
+  
+  return $rtn;
 }
 
 
@@ -875,6 +910,13 @@ function advise_perm() {
     "description" => t("The user is allowed to view any advising sessions for any user.
                         For example, the user is an advisor."),
   );
+
+  $perms["view_advisee_advising_session"] = array(
+    "title" => t("View advisee advising sessions only"),
+    "description" => t("The user is only allowed to view their assigned advisee's advising sessions.
+                        For example, the user is an advisor."),
+  );
+
 
   $perms["view_own_advising_session"] = array(
     "title" => t("View own advising session"),

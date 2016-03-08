@@ -490,6 +490,9 @@ function draw_menu_items($menu_array) {
 				$bool_add_footnote = true;
 			}
 
+			// Tell the course what group we are coming from. (in this case: none)
+      $course->disp_for_group_id = "";
+      			
 			$pC .= $this->draw_course_row($course,"","",false,false,$bool_add_footnote,true);
 			$is_empty = false;
 
@@ -551,6 +554,9 @@ function draw_menu_items($menu_array) {
 				continue;
 			}
 
+      // Tell the course_row what group we are coming from. (in this case: none)
+      $course->disp_for_group_id = "";
+			
 			$pC .= $this->draw_course_row($course,"","",false,false,false,true);
 			$is_empty = FALSE;
 
@@ -651,7 +657,9 @@ function draw_menu_items($menu_array) {
 			  continue;
 			}
 			
-			
+      // Tell the course_row what group we are coming from. (in this case: none)
+      $course->disp_for_group_id = "";
+						
 			$pC .= $this->draw_course_row($course,"","",false,false);
 			$is_empty = false;
 		}
@@ -2190,7 +2198,6 @@ function draw_menu_items($menu_array) {
 			$course = new Course($course_id);
 		}
 
-
     // Set up our "render array" for later rendering, using the render API.
     $render = array();
     $render["#id"] = "AdvisingScreen_display_popup_course_description";
@@ -2198,7 +2205,6 @@ function draw_menu_items($menu_array) {
       "type" => "do_not_render",
       "value" => $course,
     );
-
 
 
 		// Keep up with original max hours, in case this is from a substitution split.
@@ -2510,17 +2516,17 @@ function draw_menu_items($menu_array) {
     
     ////////////////
     // Is this course assigned to a group?    
-		if ($course->get_first_assigned_to_group_id() != "" && $course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE)
+		//if ($course->get_first_assigned_to_group_id() != "" && $course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE)
+		if ($course->disp_for_group_id != "" && $course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE)
 		{
-		
+		  		  
       $html = "";
     
 			//$g = new Group($course->assigned_to_group_id);
 			$g = new Group();
-      // TODO:  Not sure yet what to do about this. Might only be 1 value, actually, since courses are assigned
-      // one at a time to the groups....  
 			//$g->group_id = $course->assigned_to_group_id;
-			$g->group_id = $course->get_first_assigned_to_group_id();
+			//$g->group_id = $course->get_first_assigned_to_group_id();
+			$g->group_id = $course->disp_for_group_id;
 			$g->load_descriptive_data();
 
 			$html .= "<div class='tenpt' style='margin-top: 10px;'>
@@ -2577,6 +2583,7 @@ function draw_menu_items($menu_array) {
 				> - " . t("Click to show") . " -</span>					
 					
 					<div style='padding-left: 20px; display:none;' id='admin_info'>
+					Groups this course has been assigned to:
 					";
 
 			// Course is assigned to a group.
@@ -2889,7 +2896,11 @@ function draw_menu_items($menu_array) {
         $c = $course->course_list_fulfilled_by->get_first();
         
         $c->req_by_degree_id = $last_req_by_degree_id;  // make sure we assign it to the current degree_id.
-				$pC .= $this->draw_course_row($c);
+
+        // Tell the course what group we are coming from. (in this case: none)
+        $c->disp_for_group_id = "";
+        
+        $pC .= $this->draw_course_row($c);
 				$c->set_has_been_displayed($course->req_by_degree_id);
 
 
@@ -2904,6 +2915,10 @@ function draw_menu_items($menu_array) {
 
 			} else {
 				// This requirement is not being fulfilled...
+        
+        // Tell the course what group we are coming from. (in this case: none)
+        $course->disp_for_group_id = "";
+								
 				$pC .= $this->draw_course_row($course);
 
 			}
@@ -3073,7 +3088,7 @@ function draw_menu_items($menu_array) {
 
 				$c->temp_flag = false;
 				$c->icon_filename = $group->icon_filename;
-				$c->title_text = "This course is a member of $group->title." . "($place_group->requirement_type)";
+				$c->title_text = "This course is a member of $group->title." . " ($place_group->requirement_type)";
 				$c->requirement_type = $place_group->requirement_type;
 				$display_course_list->add($c);
 
@@ -3282,6 +3297,9 @@ function draw_menu_items($menu_array) {
 		{
 			$course = $course_list->get_next();
 
+			// Tell the course what group we are coming from, so it displays correctly
+      $course->disp_for_group_id = $group->group_id;
+					
 			$pC .= $this->draw_course_row($course, $course->icon_filename, $course->title_text, $course->temp_flag);
 
 			// Doesn't matter if its a specified repeat or not.  Just
@@ -3349,6 +3367,11 @@ function draw_menu_items($menu_array) {
 		$js_code = "selectCourseFromGroup(\"$group->group_id\", \"$group->assigned_to_semester_num\", \"$remaining_hours\", \"$blank_degree_id\",\"$req_by_degree_id\");";
 
 		$row_msg = "<i>Click <font color='red'>&gt;&gt;</font> to select $disp_remaining_hours hour$s.</i>";
+    if ($remaining_hours > 200) {
+      // Don't bother showing the remaining hours number.
+      $row_msg = "<i>Click <font color='red'>&gt;&gt;</font> to select additional courses.</i>";
+    }
+    
 		$hand_class = "hand";
 
 		if ($this->bool_print)
@@ -3358,6 +3381,11 @@ function draw_menu_items($menu_array) {
 			$js_code = "";
 			$hand_class = "";
 			$row_msg = "<i>Select $disp_remaining_hours hour$s from $group->title.</i>";
+      if ($remaining_hours > 200) {
+        // Don't bother showing the remaining hours number.
+        $row_msg = "<i>Select additional courses from $group->title.</i>";
+      }
+      
 		}
 
 
@@ -4813,7 +4841,7 @@ function draw_menu_items($menu_array) {
 			}
 		}
 
-		if ($group_hours_remaining < 100 && $bool_no_courses != true)	{
+		if ($group_hours_remaining < 200 && $bool_no_courses != true)	{
 		  $disp_group_hours_remaining = $group_hours_remaining;
       // If we have min_hours, display that information.
       if ($group->has_min_hours_allowed()) {
@@ -4830,15 +4858,19 @@ function draw_menu_items($menu_array) {
    ////////////////////////////////
     // TODO:  Conditions on which this will even appear?  Like only if the student has more than one degree selected?
     // What degrees is this group req by?    
-    
-    $pC .= "<div class='tenpt group-select-req-by-degree'>
-              " . t("This group is required by: ");
-    $html = "";
-    $t_degree_plan = new DegreePlan($req_by_degree_id);        
-    $html .= "<span>" . $t_degree_plan->get_title2() . "</span>";
-   
-    $pC .= "$html</div>";              
-    
+
+    $t_degree_plan = new DegreePlan($req_by_degree_id);
+    $t = $t_degree_plan->get_title2();
+    if ($t) {        
+        
+      $pC .= "<div class='tenpt group-select-req-by-degree'>
+                " . t("This group is required by ");
+      $html = "";
+      $html .= "<span class='group-req-by-degree-title'>" . $t . "</span>";
+        
+      $pC .= "$html</div>";
+                    
+    } 
     
 
 

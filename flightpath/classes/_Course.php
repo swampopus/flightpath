@@ -56,7 +56,7 @@ class _Course extends stdClass
 
   // Display related:
   public $display_status, $icon_filename, $description, $title;
-  public $title_text, $temp_flag;
+  public $title_text, $temp_flag, $disp_for_group_id;
   public $bool_unselectable;
   public $bool_hide_grade, $bool_ghost_hour, $bool_ghost_min_hour;
 
@@ -110,7 +110,7 @@ class _Course extends stdClass
     $this->course_list_fulfilled_by = new CourseList();
     $this->group_list_unassigned = new GroupList();
     $this->bool_use_draft = $bool_use_draft;
-    
+    $this->disp_for_group_id = "";
     $this->req_by_degree_id = 0;
     
     //$this->bool_has_been_displayed_by_degree_array = array();
@@ -582,6 +582,7 @@ class _Course extends stdClass
     $rtn .= fp_join_assoc($this->assigned_to_degree_ids_array) . "~";
 
     $rtn .= $this->req_by_degree_id . "~";
+    $rtn .= $this->disp_for_group_id . "~";
     
 
     return $rtn;
@@ -711,6 +712,7 @@ class _Course extends stdClass
 
     $this->req_by_degree_id = intval($temp[26]);
 
+    $this->disp_for_group_id = trim($temp[27]);
     
 
   }
@@ -1407,7 +1409,7 @@ class _Course extends stdClass
 
     $setting_current_catalog_year = variable_get("current_catalog_year", 2006) * 1;
     if ($this->bool_use_draft) {
-      $setting_current_catalog_year = variable_get("current_catalog_draft_year", 2006) * 1;
+      $setting_current_catalog_year = variable_get("current_draft_catalog_year", 2006) * 1;
     }
     
     $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);
@@ -2006,7 +2008,7 @@ class _Course extends stdClass
     
     "details_by_degree_array",
 
-    "display_status",
+    "display_status", "disp_for_group_id",
     "bool_hide_grade", "bool_ghost_hour",
     "bool_ghost_min_hour",
     );

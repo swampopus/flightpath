@@ -432,6 +432,14 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   $popup_description = @$element["popup_description"];
   $prefix = @$element["prefix"];
   $suffix = @$element["suffix"];
+  $multiple = @$element["multiple"];
+  if ($multiple == TRUE) {
+    $multiple = "multiple=multiple";
+  }
+  else {
+    $multiple = "";
+  }
+  
   $required = @$element["required"];
   $no_please_select = @$element["no_please_select"];
   if (isset($element["hide_please_select"])) {
@@ -530,8 +538,12 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     $rtn .= "<input type='hidden' name='$name' id='element-$name' value='$value'>";
   }
 
-  if ($type == "file") {        
-    $rtn .= "<input type='file' name='$name' id='element-$name'>";
+  if ($type == "file") {
+    $tname = $name;
+    if ($multiple != "") {
+      $tname .= "[]";   // if we allow uploading multiple files, we MUST put a [] behind it, or HTML will not upload correctly.  Weird but true.
+    }
+    $rtn .= "<input type='file' name='$tname' id='element-$name' $multiple $attributes>";
   }
   
   

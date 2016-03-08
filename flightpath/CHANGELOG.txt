@@ -1,6 +1,25 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-03-08
+  Added new permission checks to advise.module, and new permission-- limiting ability of user to only view their 
+  specified advisee's advising sessions.  Needed to make that change for something to do with the student_files module.
+   
+
+2016-03-07
+  Fixed bug where current draft catalog year wasn't being read correctly in _Course->load_descriptive_data()
+  
+  Fixed oversight where files input element didn't render attributes array, also added multiple=TRUE for files, too.
+  
+
+2016-03-02
+  Made it to where if a group is worth more than 200 hours, its hour counts do not show in the group select row,
+  or in the popup.
+  
+  
+2016-03-01
+  Fixed bug where courses were not reflecting the correct group they were assigned, in a multi-degree scenario.
+  
 
 2016-02-29
   Fixed bug where on install, the admin password wasn't set correctly.
