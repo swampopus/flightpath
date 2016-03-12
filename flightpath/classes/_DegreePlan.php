@@ -20,6 +20,8 @@ class _DegreePlan extends stdClass
   public $major_qpts_hours, $core_qpts_hours, $degree_qpts_hours;
   public $major_qpts, $degree_qpts, $core_qpts;
 
+  public $min_tracks, $max_tracks, $default_tracks;
+
   public $gpa_calculations;
   
   
@@ -55,6 +57,8 @@ class _DegreePlan extends stdClass
     $this->public_notes_array = array();
 
     $this->db_advising_weight = 0;
+    $this->min_tracks = $this->max_tracks = 0;
+    $this->default_tracks = "";
 
     $this->db = $db;
     if ($db == NULL)
@@ -335,6 +339,9 @@ class _DegreePlan extends stdClass
       $this->degree_class = $cur["degree_class"];
       $this->db_override_degree_hours = $cur["override_degree_hours"];
       $this->db_advising_weight = intval($cur["advising_weight"]);
+      $this->min_tracks = intval($cur["min_tracks"]);
+      $this->max_tracks = intval($cur["max_tracks"]);
+      $this->default_tracks = trim($cur["default_tracks"]);
 
       $semester_num = $cur["semester_num"];
       if ($semester_num != $old_semester)

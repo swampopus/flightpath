@@ -55,6 +55,32 @@ function adminPopupAlertHelp(action)
     
   }
   
+
+  if (action == "min_tracks")
+  {
+    t = t + "This is the minimum number of tracks THIS degree must select.  For example, if the degree ";
+    t = t + "requires at least one track, enter a 1 (one) in this box.\n\n";
+    t = t + "The default is zero (0), which means that no track is required for this degree.  The user is not required to select any at all.\n\n"
+    t = t + "If you are unsure what to enter, leave it set to 0 (zero).";    
+  }
+
+
+  if (action == "max_tracks")
+  {
+    t = t + "This is the maximum number of tracks THIS degree may select.  For example, if the degree ";
+    t = t + "requires the student to have NO MORE than 1 track selected, you would enter 1 (one) in this box.\n\n";
+    t = t + "The default is zero (0), which means that there is no maximum; the user may select as many of this degree's tracks as they wish.\n\n"
+    t = t + "If you are unsure what to enter, leave it set to 0 (zero).";
+  }
+
+
+  if (action == "default_tracks")
+  {
+    t = t + "If THIS degree has one or more 'default' tracks associated with it (ex: for What If mode), enter the FULL major codes here, separated by comma.\n\n";
+    t = t + "For example: ART|_SCULP, ART|_PAINT\n\n";
+    t = t + "If you are unsure what to enter, leave it blank.";
+  }
+
   
   
   if (action == "edit_urgent")

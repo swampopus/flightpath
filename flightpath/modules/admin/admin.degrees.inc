@@ -1010,6 +1010,10 @@ function admin_handle_edit_degree_submit() {
   $advising_weight = intval($_POST["advising_weight"]);
   $override_degree_hours = trim($_POST["override_degree_hours"]);
   $public_note = trim($_POST["public_note"]);
+  $min_tracks = intval($_POST["min_tracks"]);
+  $max_tracks = intval($_POST["max_tracks"]);
+  $default_tracks = trim($_POST["default_tracks"]);
+  
   $res = db_query("UPDATE draft_degrees
               SET semester_titles_csv = ?,
                   title = ?,
@@ -1020,9 +1024,13 @@ function admin_handle_edit_degree_submit() {
                   allow_dynamic = ?,
                   advising_weight = ?,
                   override_degree_hours = ?,
+                  min_tracks = ?,
+                  max_tracks = ?,
+                  default_tracks = ?,
                   public_note = ?
               WHERE degree_id = ? ",
-                $semester_titles_csv, $degree_title, $degree_type, $degree_class, $degree_level, $exclude, $allow_dynamic, $advising_weight, $override_degree_hours, $public_note, $degree_id);
+                $semester_titles_csv, $degree_title, $degree_type, $degree_class, $degree_level, $exclude, $allow_dynamic, $advising_weight, $override_degree_hours, 
+                $min_tracks, $max_tracks, $default_tracks, $public_note, $degree_id);
 
   ////  Was there a track title/description?  If so, UPDATE that in the tracks
   // table...
@@ -1218,7 +1226,7 @@ function admin_display_edit_degree() {
     </blockquote>
     ";
   }
-  $rtn .= "<div class='tenpt' align='center'>(Scroll to the bottom of the page for more options)</div>
+  $rtn .= "<div class='tenpt' align='center'>(Scroll to the bottom of the page for advanced options)</div>
             <!--PREVIOUS_SEMESTERS-->";
 
   $first_semester_num = -999;
@@ -1416,19 +1424,46 @@ function admin_display_edit_degree() {
       boxes will appear below.</div>
       
       <br><br>
-      <div class='elevenpt'><b>More Options:</b><br>
+      ";
+  $html = "";
+  $html .= "
+      <div class='elevenpt'>
       Enter a public note for this degree: 
        <a href='javascript: adminPopupAlertHelp(\"public_note\");'>(Help - Public Note)</a>
        " . fp_get_js_alert_link(t("You may enter simple HTML in this field, like <b>bold</b> or <i>italics</i>."), t("(Help - Formatting)")) . "
       <br>
       <textarea name='public_note' rows='4' cols='80'>" . $degree->public_notes_array[$degree->degree_id] . "</textarea>
       
+      <br><br>
+      If this degree has tracks, you may enter rules for track selection below:
+      <br>
+      Min:
+        <input type='text' name='min_tracks' size='2' value='$degree->min_tracks'>
+        <a href='javascript: adminPopupAlertHelp(\"min_tracks\");'>?</a>
+      
+      &nbsp;&nbsp;  
+      
+      Max:
+        <input type='text' name='max_tracks' size='2' value='$degree->max_tracks'>
+        <a href='javascript: adminPopupAlertHelp(\"max_tracks\");'>?</a>
+      
+      &nbsp;&nbsp;
+      
+      Default tracks: (CSV)
+        <input type='text' name='default_tracks' size='15' value='$degree->default_tracks' maxlength='255'>
+        <a href='javascript: adminPopupAlertHelp(\"default_tracks\");'>?</a>
+      
+      
       
       </div>
       
       
       
-      "; 
+      ";  
+
+
+
+  $rtn .= fp_render_c_fieldset($html, t("View advanced options"), TRUE);
 
 
 
