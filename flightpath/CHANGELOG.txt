@@ -1,6 +1,6 @@
 FlightPath 5.x Changelog
 ========================
-
+ 
 2016-03-08
   Added new permission checks to advise.module, and new permission-- limiting ability of user to only view their 
   specified advisee's advising sessions.  Needed to make that change for something to do with the student_files module.
