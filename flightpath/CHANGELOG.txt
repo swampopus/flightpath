@@ -1,5 +1,10 @@
 FlightPath 5.x Changelog
 ========================
+
+2016-03-14
+  Added concept of min/max track selections to degrees.  Now, the user will be stopped if they select a number of tracks
+  outside of the allowed range.
+  
  
 2016-03-08
   Added new permission checks to advise.module, and new permission-- limiting ability of user to only view their 

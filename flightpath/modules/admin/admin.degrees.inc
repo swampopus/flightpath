@@ -1226,7 +1226,7 @@ function admin_display_edit_degree() {
     </blockquote>
     ";
   }
-  $rtn .= "<div class='tenpt' align='center'>(Scroll to the bottom of the page for advanced options)</div>
+  $rtn .= "<div class='tenpt' align='center'>(<a href='#bot'>Scroll to the bottom</a> of the page for advanced options)</div>
             <!--PREVIOUS_SEMESTERS-->";
 
   $first_semester_num = -999;
@@ -1423,6 +1423,7 @@ function admin_display_edit_degree() {
   $rtn .= "<div class='elevenpt'>If you need more semester boxes, simply save this page, and additional blank
       boxes will appear below.</div>
       
+      <a name='bot'></a>
       <br><br>
       ";
   $html = "";

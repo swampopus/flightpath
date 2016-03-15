@@ -61,6 +61,62 @@ function changeTrack(track_code) {
  * 
  */
 function popupChangeTrackSelections(is_whatif) {
+  
+  /////////// Validation.  
+  // We need to look through our degrees and make sure that
+  // the user has selected between the correct range of min and max tracks.
+   
+  for (var key in FlightPath.settings) {
+    
+    var val = FlightPath.settings[key];
+    
+    var min_tracks = 0;
+    var max_tracks = 0;
+    
+    if (key.indexOf("degree_min_max_tracks") > -1) {
+      // Get the degree_id from the key...
+      var degree_id = str_replace("degree_min_max_tracks_", "", key);
+      var degree_name = FlightPath.settings["degree_name_" + degree_id];
+      // Get the min and max tracks.
+      var temp = val.split("~");
+      min_tracks = temp[0];
+      max_tracks = temp[1];
+      
+      //alert("For degree " + degree_id + ", min max is " + min_tracks + " - " + max_tracks);
+            
+      // if the min and max are both 1 or 0, skip, since that is handled in the HTML.
+      if (min_tracks == max_tracks && min_tracks == 1) continue;
+      if (min_tracks == max_tracks && min_tracks == 0) continue;
+
+      // Count how many are picked for THIS degree...           
+      var c = 0;
+      // Make sure the number selected for this degree does not exceed max_tracks.  If it does, fail.
+      $("input[degree_id=" + degree_id + "]:checked").each(function() {
+        c++;
+      })        
+        
+      //alert("I picked " + c + " for " + degree_id);
+      
+      // Is c > the max_tracks? or < than min_tracks?  If max_tracks is 0 that means "infinite"
+      if ((c > max_tracks && max_tracks != 0) || c < min_tracks) {
+        var msg = "Sorry, but you are only allowed to select between " + min_tracks + " and " + max_tracks + " options for this degree (" + degree_name + ").\n\nPlease try again.";
+        
+        if (max_tracks == 0) {
+          msg = "Sorry, but you must select at least " + min_tracks + " option(s) for this degree (" + degree_name + ").\n\nPlease try again.";
+        }
+        
+        alert(msg);
+        return;
+      }
+
+
+            
+      
+    } // if key contains degree_min_max_tracks
+    
+  } // for var in settings
+  
+  
   // We will look through the page for any checkboxes (or radio buttons) that have been checked.
   var track_degree_ids = ",";  // give it *something* initially, so it isn't an empty string and might get overlooked.
   $("input:checked").each(function() {

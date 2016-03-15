@@ -496,16 +496,45 @@ function advise_display_popup_change_track() {
   
     $t_degree_plan->load_descriptive_data();
   
-  
     // Skip any degree plan that isn't level 1 or level 2.  In other words,
     // if this is already a track, then skip it.
     $details = fp_get_degree_classification_details($t_degree_plan->degree_class);
     //fpm($details);  
     if ($details["level_num"] == 3) continue;
     
+    
+    $min_tracks = $t_degree_plan->min_tracks;
+    $max_tracks = $t_degree_plan->max_tracks;
+    $degree_id = $t_degree_plan->degree_id;     
+    
+    // Add this information to our javascript settings...
+    $js = array(      
+      "degree_min_max_tracks_" . $degree_id  => $min_tracks . "~" . $max_tracks,      
+      "degree_name_" . $degree_id => $t_degree_plan->get_title2(),      
+    );
+    
+    fp_add_js($js, "setting");
+    
+    $min_max_options = "Please select between $min_tracks and $max_tracks degree options.";
+    if ($min_tracks == $max_tracks && $max_tracks == 1) {
+      $min_max_options = "Please select 1 degree option.";
+    }
+
+    if ($min_tracks > 0 && $max_tracks == 0) {
+      // Meaning, there is no maximum.  It's infinite.
+      $min_max_options = "Please select at least $min_tracks option(s) for this degree.";
+    }
+
+    if ($min_tracks == $max_tracks && $max_tracks == 0) {
+      $min_max_options = "Optional: You are not required to select any additional degree options.";
+    }
+    
+    
     // Let's look to see what "tracks" this degree has.
   
-    $rtn .= "<br><div class='tenpt'><b>" . $t_degree_plan->title . "</b> " . t("degree options:") . "</div><!--DEFAULT-->
+    $rtn .= "<br><div class='tenpt'><b>" . $t_degree_plan->title . "</b> " . t("degree options:") . "</div>
+              <div class='advise-track-min-max-options advise-track-min-$min_tracks advise-track-max-$max_tracks'>$min_max_options</div>
+                <!--DEFAULT-->
                 <div style='padding-left: 20px; padding-top: 10px; padding-bottom: 20px;'>
         ";
 
@@ -593,11 +622,20 @@ function advise_display_popup_change_track() {
       
       $track_degree_plan = new DegreePlan($track_degree_id, NULL, TRUE);  // load minimally
       
+      $input_type = "checkbox";
+      $input_name = "track_degree_id_$track_degree_id";
+      
+      // We are extected to select EXACTLY 1 track...
+      if ($min_tracks == $max_tracks && $max_tracks == 1) {
+        $input_type = "radio";
+        $input_name = "track_degree_id_" . $degree_id;   // needs to be the same for all options. 
+      }
+      
       
       if ($track_degree_plan->db_allow_dynamic == 1) {
         $rtn .= "<div class='track-option'>
                     <label>
-                      <input type='checkbox' name='track_degree_id_$track_degree_id' value='$track_degree_id' $selected> 
+                      <input type='$input_type' name='$input_name' degree_id='$degree_id' value='$track_degree_id' $selected> 
                       <span class='track-title'>" . $track_degree_plan->get_title2(TRUE, TRUE) . "
                       </span>
                     </label>
