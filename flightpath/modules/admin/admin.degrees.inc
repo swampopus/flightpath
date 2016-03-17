@@ -745,6 +745,26 @@ function admin_handle_edit_degree_submit() {
   $db->add_draft_instruction("-");
 
 
+
+  // Let's assemble the track selection config values into one string.  We need to loop through all of the POST
+  // values, looking for each type of track.
+  $db_track_selection_config = "";
+  $degree_classes = fp_get_degree_classifications();
+  foreach ($degree_classes["levels"] as $level => $details) {
+    if (intval($level) != 3) continue;  // we only care about level 3...
+    foreach ($degree_classes["levels"][$level] as $machine_name => $title) {
+      // Got the machine name, now let's see if we have any values for
+      // the track selections...
+      $min_tracks = @intval($_POST["tsc_{$machine_name}_min_tracks"]);
+      $max_tracks = @intval($_POST["tsc_{$machine_name}_max_tracks"]);
+      $default_tracks = @trim($_POST["tsc_{$machine_name}_default_tracks"]);
+      
+      $db_track_selection_config .= $machine_name . "~" . $min_tracks . "~" . $max_tracks . "~" . $default_tracks . "\n";   
+    }
+  }
+
+
+
   $degree_id = "";
   // First things first, if this degree already exists in this
   // catalog year, then we need to delete it first.
@@ -1024,13 +1044,11 @@ function admin_handle_edit_degree_submit() {
                   allow_dynamic = ?,
                   advising_weight = ?,
                   override_degree_hours = ?,
-                  min_tracks = ?,
-                  max_tracks = ?,
-                  default_tracks = ?,
+                  track_selection_config = ?,
                   public_note = ?
               WHERE degree_id = ? ",
                 $semester_titles_csv, $degree_title, $degree_type, $degree_class, $degree_level, $exclude, $allow_dynamic, $advising_weight, $override_degree_hours, 
-                $min_tracks, $max_tracks, $default_tracks, $public_note, $degree_id);
+                $db_track_selection_config, $public_note, $degree_id);
 
   ////  Was there a track title/description?  If so, UPDATE that in the tracks
   // table...
@@ -1436,8 +1454,64 @@ function admin_display_edit_degree() {
       <textarea name='public_note' rows='4' cols='80'>" . $degree->public_notes_array[$degree->degree_id] . "</textarea>
       
       <br><br>
-      If this degree has tracks, you may enter rules for track selection below:
-      <br>
+      If this degree has tracks, you may enter rules for track selection below, for each type of level 3 degree (tracks) you might have.
+      <b>You may skip classifications which do not pertain to this degree.</b>
+      <br><br>
+
+      <table border='0' width='100%'>
+      <tr>
+        <th>Class:</th>
+        <th>Min: <a href='javascript: adminPopupAlertHelp(\"min_tracks\");'>?</a></th>
+        <th>Max: <a href='javascript: adminPopupAlertHelp(\"max_tracks\");'>?</a></th>
+        <th>Default tracks (CSV): <a href='javascript: adminPopupAlertHelp(\"default_tracks\");'>?</a></th> 
+      </tr>
+      ";
+      
+      $degree_classes = fp_get_degree_classifications();
+      foreach ($degree_classes["levels"] as $level => $details) {
+          
+        if (intval($level) != 3) continue;  // we only care about level 3...
+        
+        foreach ($degree_classes["levels"][$level] as $machine_name => $title) {
+              
+          $min_tracks = @intval($degree->track_selection_config_array[$machine_name]["min_tracks"]);  
+          $max_tracks = @intval($degree->track_selection_config_array[$machine_name]["max_tracks"]);  
+          $default_tracks = @trim($degree->track_selection_config_array[$machine_name]["default_tracks"]);  
+          
+          $html .= "<tr class='admin-degrees-edit-track-selection-config track-selection-config-$machine_name'>
+                      <td valign='top'>
+                        
+                        <span class='track-selection-config-title'>$title</span>:
+                       </td>
+                       <td valign='top'>
+                          
+                          <input type='text' name='tsc_{$machine_name}_min_tracks' size='2' value='$min_tracks'>
+                          
+                        
+                        </td>
+                        <td valign='top'>
+                        
+                        
+                          <input type='text' name='tsc_{$machine_name}_max_tracks' size='2' value='$max_tracks'>
+                          
+                        
+                        </td>
+                        <td valign='top'>
+                        
+                        
+                          <input type='text' name='tsc_{$machine_name}_default_tracks' size='25' value='$default_tracks' maxlength='255'>
+                          
+                    </td>    
+                    </tr>";
+        }
+      }
+      
+      
+    $html .= "</table>
+              </div>";      
+      
+      /*
+      
       Min:
         <input type='text' name='min_tracks' size='2' value='$degree->min_tracks'>
         <a href='javascript: adminPopupAlertHelp(\"min_tracks\");'>?</a>
@@ -1460,7 +1534,7 @@ function admin_display_edit_degree() {
       
       
       
-      ";  
+      ";  */
 
 
 

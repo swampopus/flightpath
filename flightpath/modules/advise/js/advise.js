@@ -74,9 +74,15 @@ function popupChangeTrackSelections(is_whatif) {
     var max_tracks = 0;
     
     if (key.indexOf("degree_min_max_tracks") > -1) {
-      // Get the degree_id from the key...
-      var degree_id = str_replace("degree_min_max_tracks_", "", key);
+      // Get the degree_id and track machine name from the key...
+      var temp = str_replace("degree_min_max_tracks_", "", key).split("_split_");
+      
+      
+      var degree_id = temp[0];
+      var machine_name = temp[1];
       var degree_name = FlightPath.settings["degree_name_" + degree_id];
+      var class_title = FlightPath.settings["class_title_" + machine_name];
+      
       // Get the min and max tracks.
       var temp = val.split("~");
       min_tracks = temp[0];
@@ -91,7 +97,7 @@ function popupChangeTrackSelections(is_whatif) {
       // Count how many are picked for THIS degree...           
       var c = 0;
       // Make sure the number selected for this degree does not exceed max_tracks.  If it does, fail.
-      $("input[degree_id=" + degree_id + "]:checked").each(function() {
+      $("input[degree_id_class=" + degree_id + "_class_" + machine_name + "]:checked").each(function() {
         c++;
       })        
         
@@ -99,10 +105,10 @@ function popupChangeTrackSelections(is_whatif) {
       
       // Is c > the max_tracks? or < than min_tracks?  If max_tracks is 0 that means "infinite"
       if ((c > max_tracks && max_tracks != 0) || c < min_tracks) {
-        var msg = "Sorry, but you are only allowed to select between " + min_tracks + " and " + max_tracks + " options for this degree (" + degree_name + ").\n\nPlease try again.";
+        var msg = "Sorry, but you are only allowed to select between " + min_tracks + " and " + max_tracks + " " + class_title + " options for this degree (" + degree_name + ").\n\nPlease try again.";
         
         if (max_tracks == 0) {
-          msg = "Sorry, but you must select at least " + min_tracks + " option(s) for this degree (" + degree_name + ").\n\nPlease try again.";
+          msg = "Sorry, but you must select at least " + min_tracks + " " + class_title + " option(s) for this degree (" + degree_name + ").\n\nPlease try again.";
         }
         
         alert(msg);

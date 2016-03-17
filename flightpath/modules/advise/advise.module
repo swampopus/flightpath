@@ -503,152 +503,180 @@ function advise_display_popup_change_track() {
     if ($details["level_num"] == 3) continue;
     
     
-    $min_tracks = $t_degree_plan->min_tracks;
-    $max_tracks = $t_degree_plan->max_tracks;
-    $degree_id = $t_degree_plan->degree_id;     
-    
-    // Add this information to our javascript settings...
-    $js = array(      
-      "degree_min_max_tracks_" . $degree_id  => $min_tracks . "~" . $max_tracks,      
-      "degree_name_" . $degree_id => $t_degree_plan->get_title2(),      
-    );
-    
-    fp_add_js($js, "setting");
-    
-    $min_max_options = "Please select between $min_tracks and $max_tracks degree options.";
-    if ($min_tracks == $max_tracks && $max_tracks == 1) {
-      $min_max_options = "Please select 1 degree option.";
-    }
-
-    if ($min_tracks > 0 && $max_tracks == 0) {
-      // Meaning, there is no maximum.  It's infinite.
-      $min_max_options = "Please select at least $min_tracks option(s) for this degree.";
-    }
-
-    if ($min_tracks == $max_tracks && $max_tracks == 0) {
-      $min_max_options = "Optional: You are not required to select any additional degree options.";
-    }
-    
-    
-    // Let's look to see what "tracks" this degree has.
-  
-    $rtn .= "<br><div class='tenpt'><b>" . $t_degree_plan->title . "</b> " . t("degree options:") . "</div>
-              <div class='advise-track-min-max-options advise-track-min-$min_tracks advise-track-max-$max_tracks'>$min_max_options</div>
-                <!--DEFAULT-->
-                <div style='padding-left: 20px; padding-top: 10px; padding-bottom: 20px;'>
-        ";
-
-    $major_code = $t_degree_plan->major_code;
-
-    $top_level_majors_csv .= $major_code . ",";
-
-    // Get the list of available tracks for this student.
-    if (!$tracks = $t_degree_plan->get_available_tracks())
-    {
-      $rtn .= "<div>&nbsp; &nbsp; &bull; " . t("This degree has no degree options.") . "</div>";
-    }
-
-    // Is there a "default" message for all tracks, which will override
-    // any other track descriptions?
-    // We need to look through all the tracks for the
-    // characters:  "DEFAULT:"
-    // If we find this, then this is the default description
-    // which applies to all the tracks, and it should be displayed
-    // at the top.
-    $bool_default_description = false;
-    for ($t = 0; $t < count($tracks); $t++)
-    {
-      $temp = explode(" ~~ ", $tracks[$t]);
-      $track_code = trim(@$temp[0]);
-      $track_title = trim(@$temp[1]);
-      $track_description = trim(@$temp[2]);
-  
-      if (strstr($track_description, "DEFAULT:")) {
-        // Yes!  We found a default message.
-        $bool_default_description = true;
-        $track_description = filter_markup(trim(str_replace("DEFAULT:", "", $track_description)));
-        $track_description = "<div style='padding-top: 10px;' class='tenpt'>$track_description</div>";
-        $rtn = str_replace("<!--DEFAULT-->",$track_description, $rtn);
-        break;
-      }
-  
-    }
-  
-    ///////////////////
-    // Okay, go through the tracks, 
-  
-    for ($t = 0; $t < count($tracks); $t++)
-    {
-      $temp = explode(" ~~ ", $tracks[$t]);
-      $track_code = trim(@$temp[0]);
-      $track_title = trim(@$temp[1]);
-      $track_degree_id = intval(trim(@$temp[3]));
-      $track_description = "";
-  
-      $selected = "";
-  
-      // If this track has been selected already, mark it as such
-      if (isset($degree_plan_array[$track_degree_id])) {
-        // Meaning yes, this was already selected for this student.
-        $selected = "checked=checked";
-      }
-  
-  
-      if ($bool_default_description == false) {
-        $track_description = filter_markup(trim(@$temp[2]));
-      }
-  
-      $temp_tc = $track_code;
-      if ($temp_tc == "") {
-        $temp_tc = "none";
-      }
-  
-  
-      $link = fp_get_js_confirm_link(t("Are you sure you wish to change degree options?"), "opener.changeTrack(\"$temp_tc\"); window.close(); ", $track_title);
+    // Go through each time of classification in this degree's track_selection_config_array.    
+    //foreach ($t_degree_plan->track_selection_config_array as $machine_name => $tdetails) {
+    $degree_classes = fp_get_degree_classifications();
+    foreach ($degree_classes["levels"][3] as $machine_name => $class_title) {
+        
+      $min_max_options = "";            
+      // Check to see what we have in this degree's track_selection_config_array        
+      $min_tracks = @intval($t_degree_plan->track_selection_config_array[$machine_name]["min_tracks"]);
+      $max_tracks = @intval($t_degree_plan->track_selection_config_array[$machine_name]["max_tracks"]);
+      $default_tracks = @trim($t_degree_plan->track_selection_config_array[$machine_name]["default_tracks"]);
+      
+      $degree_id = $t_degree_plan->degree_id;
       
       
       
-      // We actually don't need to do anything special for what_if, I think.  When
-      // we save, it should automatically detect it and set the appropriate values.
-      $is_whatif = 0;
-      if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
-        //$link = "<a href='javascript: popupChangeWhatIfTrack(\"$temp_tc\", \"" . t("Are you sure you wish to change degree options?") . "\");'>$track_title</a>";
-        $is_whatif = 1;              
-      }
-  
-      //$rtn .= "<li class='tenpt' style='padding:3px;'>
-      //    $link $track_description</li>";
-  
+      // Add this information to our javascript settings...
+      $js = array(      
+        "degree_min_max_tracks_" . $degree_id . "_split_" . $machine_name => $min_tracks . "~" . $max_tracks,
+        "degree_name_" . $degree_id => $t_degree_plan->get_title2(),
+        "class_title_" . $machine_name => $class_title,
+      );
+        
+      fp_add_js($js, "setting");
       
-      $track_degree_plan = new DegreePlan($track_degree_id, NULL, TRUE);  // load minimally
-      
-      $input_type = "checkbox";
-      $input_name = "track_degree_id_$track_degree_id";
-      
-      // We are extected to select EXACTLY 1 track...
+      $min_max_options = "<div>Please select between $min_tracks and $max_tracks $class_title options.</div>";
       if ($min_tracks == $max_tracks && $max_tracks == 1) {
-        $input_type = "radio";
-        $input_name = "track_degree_id_" . $degree_id;   // needs to be the same for all options. 
-      }
-      
-      
-      if ($track_degree_plan->db_allow_dynamic == 1) {
-        $rtn .= "<div class='track-option'>
-                    <label>
-                      <input type='$input_type' name='$input_name' degree_id='$degree_id' value='$track_degree_id' $selected> 
-                      <span class='track-title'>" . $track_degree_plan->get_title2(TRUE, TRUE) . "
-                      </span>
-                    </label>
-                    <div class='track-description'>
-                      $track_description
-                    </div>
-                  </div>";
+        $min_max_options = "<div>Please select 1 $class_title option.</div>";
       }
   
+      if ($min_tracks > 0 && $max_tracks == 0) {
+        // Meaning, there is no maximum.  It's infinite.
+        $min_max_options = "<div>Please select at least $min_tracks $class_title option(s) for this degree.</div>";
+      }
   
-    } // for (count(tracks))
+      if ($min_tracks == $max_tracks && $max_tracks == 0) {
+        $min_max_options = "<div>Optional: You are not required to select any additional $class_title options.</div>";
+      }
+          
+    
+    
+      // Let's look to see what "tracks" this degree has.
+    
+      $rtn .= "<br><div class='tenpt'><b>" . $t_degree_plan->title . "</b> " . t("$class_title options:") . "</div>
+                <div class='advise-track-min-max-options advise-track-min-$min_tracks advise-track-max-$max_tracks'>$min_max_options</div>
+                  <!--DEFAULT_$machine_name-->
+                  <div style='padding-left: 20px; padding-top: 10px; padding-bottom: 20px;'>
+          ";
+   
+      $major_code = $t_degree_plan->major_code;
   
-    $rtn .= "</div>";    
+      $top_level_majors_csv .= $major_code . ",";
+  
+      // Get the list of available tracks for this student.
+      if (!$tracks = $t_degree_plan->get_available_tracks())
+      {
+        $rtn .= "<div>&nbsp; &nbsp; &bull; " . t("This degree has no degree options.") . "</div>";
+      }
+  
+      // Is there a "default" message for all tracks, which will override
+      // any other track descriptions?
+      // We need to look through all the tracks for the
+      // characters:  "DEFAULT:"
+      // If we find this, then this is the default description
+      // which applies to all the tracks, and it should be displayed
+      // at the top.
+      $bool_default_description = false;
+      for ($t = 0; $t < count($tracks); $t++)
+      {
+        $temp = explode(" ~~ ", $tracks[$t]);
+        $track_code = trim(@$temp[0]);
+        $track_title = trim(@$temp[1]);
+        $track_description = trim(@$temp[2]);
+        
+        // if this track is NOT of the same classification as the current machine_code, we skip it.        
+        $track_machine_name = trim(@$temp[4]);
+        if ($track_machine_name != $machine_name) continue; // not the right degree_class
+    
+        if (strstr($track_description, "DEFAULT:")) {
+          // Yes!  We found a default message.
+          $bool_default_description = true;
+          $track_description = filter_markup(trim(str_replace("DEFAULT:", "", $track_description)));
+          $track_description = "<div style='padding-top: 10px;' class='tenpt'>$track_description</div>";
+          $rtn = str_replace("<!--DEFAULT_$machine_name-->",$track_description, $rtn);
+          break;
+        }
+    
+      }
+    
+      ///////////////////
+      // Okay, go through the tracks, 
+    
+      for ($t = 0; $t < count($tracks); $t++)
+      {
+        $temp = explode(" ~~ ", $tracks[$t]);
+        $track_code = trim(@$temp[0]);
+        $track_title = trim(@$temp[1]);
+        $track_degree_id = intval(trim(@$temp[3]));
+        $track_description = "";
+        
+        // if this track is NOT of the same classification as the current machine_code, we skip it.
+        $track_machine_name = trim(@$temp[4]);
+        if ($track_machine_name != $machine_name) continue; // not the right degree_class
+    
+        
+        
+    
+    
+        $selected = "";
+    
+        // If this track has been selected already, mark it as such
+        if (isset($degree_plan_array[$track_degree_id])) {
+          // Meaning yes, this was already selected for this student.
+          $selected = "checked=checked";
+        }
+    
+    
+        if ($bool_default_description == false) {
+          $track_description = filter_markup(trim(@$temp[2]));
+        }
+    
+        $temp_tc = $track_code;
+        if ($temp_tc == "") {
+          $temp_tc = "none";
+        }
+    
+    
+        $link = fp_get_js_confirm_link(t("Are you sure you wish to change degree options?"), "opener.changeTrack(\"$temp_tc\"); window.close(); ", $track_title);
+        
+        
+        
+        // We actually don't need to do anything special for what_if, I think.  When
+        // we save, it should automatically detect it and set the appropriate values.
+        $is_whatif = 0;
+        if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
+          //$link = "<a href='javascript: popupChangeWhatIfTrack(\"$temp_tc\", \"" . t("Are you sure you wish to change degree options?") . "\");'>$track_title</a>";
+          $is_whatif = 1;              
+        }
+    
+        //$rtn .= "<li class='tenpt' style='padding:3px;'>
+        //    $link $track_description</li>";
+    
+        
+        $track_degree_plan = new DegreePlan($track_degree_id, NULL, TRUE);  // load minimally
+        
+        $input_type = "checkbox";
+        $input_name = "track_degree_id_$track_degree_id";
+        
+        // We are extected to select EXACTLY 1 track...
+        if ($min_tracks == $max_tracks && $max_tracks == 1) {
+          $input_type = "radio";
+          $input_name = "track_degree_id_" . $degree_id;   // needs to be the same for all options. 
+        }
+        
+        
+        if ($track_degree_plan->db_allow_dynamic == 1) {
+          $rtn .= "<div class='track-option'>
+                      <label>
+                        <input type='$input_type' name='$input_name' degree_id_class='{$degree_id}_class_{$machine_name}' value='$track_degree_id' $selected> 
+                        <span class='track-title'>" . $track_degree_plan->get_title2(TRUE, TRUE) . "
+                        </span>
+                      </label>
+                      <div class='track-description'>
+                        $track_description
+                      </div>
+                    </div>";
+        }
+    
+    
+      } // for (count(tracks))
+    
+      $rtn .= "</div>";    
+  
+
+    }
 
   } // foreach degree_plan_array
 

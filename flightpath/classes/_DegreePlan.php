@@ -20,7 +20,7 @@ class _DegreePlan extends stdClass
   public $major_qpts_hours, $core_qpts_hours, $degree_qpts_hours;
   public $major_qpts, $degree_qpts, $core_qpts;
 
-  public $min_tracks, $max_tracks, $default_tracks;
+  public $db_track_selection_config, $track_selection_config_array;
 
   public $gpa_calculations;
   
@@ -57,8 +57,7 @@ class _DegreePlan extends stdClass
     $this->public_notes_array = array();
 
     $this->db_advising_weight = 0;
-    $this->min_tracks = $this->max_tracks = 0;
-    $this->default_tracks = "";
+    $this->track_selection_config_array = array();
 
     $this->db = $db;
     if ($db == NULL)
@@ -339,9 +338,9 @@ class _DegreePlan extends stdClass
       $this->degree_class = $cur["degree_class"];
       $this->db_override_degree_hours = $cur["override_degree_hours"];
       $this->db_advising_weight = intval($cur["advising_weight"]);
-      $this->min_tracks = intval($cur["min_tracks"]);
-      $this->max_tracks = intval($cur["max_tracks"]);
-      $this->default_tracks = trim($cur["default_tracks"]);
+
+      $this->db_track_selection_config = trim($cur["track_selection_config"]);
+      $this->parse_track_selection_config();  // load into the track_selection_config_array as needed.
 
       $semester_num = $cur["semester_num"];
       if ($semester_num != $old_semester)
@@ -462,6 +461,52 @@ class _DegreePlan extends stdClass
     $this->list_groups->sort_priority();
 
   }
+
+
+
+  /**
+   * This function will parse through the db_track_selection_config string and
+   * populate the track_selection_config_array.
+   * 
+   * We assume the string looks like this:
+   * 
+   * CLASS ~ MIN ~ MAX ~ DEFAULT_CSV
+   * 
+   * ex:
+   * CONCENTRATION ~ 0 ~ 1 ~
+   * EMPHASIS ~ 1 ~ 1 ~ ART|_SCULT, ART|_PAINT
+   * 
+   * 
+   * 
+   */
+  function parse_track_selection_config() {
+    $lines = explode("\n", $this->db_track_selection_config);
+    foreach ($lines as $line) {
+      $line = trim($line);
+      if ($line == "") continue;  // blank line, skip it.
+      if (substr($line, 0, 1) == "#") continue; // this is a comment, skip it.
+      
+      $temp = explode("~", $line);
+      $machine_name = @trim($temp[0]);
+      $min = @intval($temp[1]);
+      $max = @intval($temp[2]);
+      $default_csv = @trim($temp[3]);
+      
+      $this->track_selection_config_array[$machine_name] = array(
+        "machine_name" => $machine_name,
+        "min_tracks" => $min,
+        "max_tracks" => $max,
+        "default_tracks" => $default_csv,
+      );
+      
+      
+      
+    }      
+        
+      
+    
+  } // parse... config
+
 
 
   function get_title($bool_include_track = false)
@@ -688,7 +733,9 @@ class _DegreePlan extends stdClass
     $rtn_array[] = "  ~~ None ~~ Select this option to display
 						the base degree plan (may not be available for all majors).";
     $table_name = "degree_tracks";
+    $table_name2 = "degrees";
     if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
+    if ($this->bool_use_draft) {$table_name2 = "draft_$table_name";}
 
     $res = db_query("SELECT * FROM $table_name
               								WHERE major_code = '?'
@@ -705,7 +752,12 @@ class _DegreePlan extends stdClass
       // Let's also get the degree_id for this particular track.
       $track_degree_id = $this->db->get_degree_id($this->major_code . "|_" . $track_code, $this->catalog_year, $this->bool_use_draft);
       
-      $rtn_array[] = "$track_code ~~ $track_title ~~ $track_description ~~ $track_degree_id";
+      // Also find out what is the degree_class for this degree_id.
+      $degree_class = @trim(db_result(db_query("SELECT degree_class FROM $table_name2
+                        WHERE degree_id = ?", $track_degree_id))); 
+      
+      
+      $rtn_array[] = "$track_code ~~ $track_title ~~ $track_description ~~ $track_degree_id ~~ $degree_class";
     }
 
     if (count($rtn_array) > 1)  // we're going to have at least 1 because of the "none" option.  Let's skip that one.
