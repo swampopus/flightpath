@@ -1,6 +1,10 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-03-17
+  Added check on copy degree form to prevent accidental overwriting of existing degrees.
+  
+
 2016-03-14
   Added concept of min/max track selections to degrees.  Now, the user will be stopped if they select a number of tracks
   outside of the allowed range.

@@ -14,3 +14,58 @@
 .c-fieldset {
   margin-top: 10px;
 }
+
+
+/**
+ *   The track selection popup....
+ */
+
+.advise-select-track-min-max {
+  font-size: 10pt;
+}
+
+
+.advise-track-options-region {
+  padding-left: 5px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.advise-select-degree-title {
+  font-size: 12pt;
+  font-weight: bold;
+}
+
+.advise-select-class-title {
+  font-style: italic;
+}
+
+
+.track-option {
+  padding-bottom: 15px;
+}
+
+.track-option .track-title {
+  font-size: 0.95em;
+}
+
+.track-option .track-description {
+  font-size: 0.85em;
+  padding-left: 35px;
+}
+
+.advise-select-track-default-track .track-title {
+  font-weight: bold;
+}
+
+.advise-select-track-default-track .track-title .track-default-track {
+  padding-left: 20px;
+  color: #ccc;
+  font-style: italic;
+  font-weight: normal;
+}
+
+
+
+
+

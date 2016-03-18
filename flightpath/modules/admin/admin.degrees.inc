@@ -83,10 +83,7 @@ function admin_copy_degree_form() {
 
   $form["mark" . $m++] = array(
     "type" => "markup",
-    "value" => t("Use this form to duplicate a degree plan in this catalog year.
-                  <b>IMPORTANT:</b> If you specify a destination major code which
-                  already exists, <b>all of its tracks and concentrations</b> will be
-                  deleted for @year!", array("@year" => $de_catalog_year)),
+    "value" => t("Use this form to duplicate a degree plan in this catalog year."),
   );
 
 
@@ -98,7 +95,7 @@ function admin_copy_degree_form() {
 
   $form["source_major_code"] = array(
     "type" => "textfield",
-    "size" => 15,
+    "size" => 35,
     "label" => t("Enter the SOURCE major code you wish to copy:"),
     "required" => TRUE,
     "description" => t("Ex: ART or GBUS. Do not enter any track or concentration codes here."),
@@ -106,22 +103,31 @@ function admin_copy_degree_form() {
 
   $form["include_tracks"] = array(
     "type" => "checkboxes",
-    "label" => t("Include tracks and concentrations?"),
-    "options" => array("yes" => "Include tracks and concentrations."),
-    "description" => t("Check this box if you wish to also copy any tracks and concentrations 
+    "label" => t("Include tracks?"),
+    "options" => array("yes" => "Include tracks."),
+    "description" => t("Check this box if you wish to also copy any tracks 
                         this major code may have associated with it. If you do not check this box, 
                         only the base degree will be copied. If the major does not have 
-                        tracks and concentrations, leave this unchecked."),
+                        tracks, leave this unchecked."),
   );
 
   $form["destination_major_code"] = array(
     "type" => "textfield",
-    "size" => 15,    
+    "size" => 35,    
     "label" => t("Enter the DESTINATION major code you wish to create/overwrite:"),
     "required" => TRUE,
-    "description" => t("Ex: CHEM or XYZ. Do not enter any track or concentration codes here.  If the destination
-                        major already exists, it and <b>all of its tracks and concentrations</b> will be
-                        deleted for this catalog year!"),
+    "description" => t("Ex: CHEM or XYZ. Do not enter any track or concentration codes here."),
+  );
+  
+  
+  $form["allow_overwrite"] = array(
+    "type" => "radios",
+    "label" => t("Overwrite if major code already exists?"),
+    "options" => array(
+                  "no" => t("No, DO NOT delete and overwrite any existing major codes & associated tracks.  Instead, return here with a warning message."),
+                  "yes" => t("Yes, if my destination major already exists, overwrite <b>and delete all associated tracks</b> for this year.  (Use caution with this option!)"),
+                ),
+    "value" => "no",
   );
   
   
@@ -136,6 +142,37 @@ function admin_copy_degree_form() {
   
   
   return $form;
+}
+
+
+/**
+ * Validate handler.
+ * Make sure our allow_overwrite setting is working.  Check for existing major code.
+ */
+function admin_copy_degree_form_validate($form, $form_state) {
+      
+  $values = $form_state["values"];  
+  
+  if ($values["allow_overwrite"] == "no") {
+    // Check to see if destination major code already exists.
+    $de_catalog_year = $values["de_catalog_year"];
+    $destination_major_code = trim(strtoupper($values["destination_major_code"]));
+    
+    // First thing's first.  Make sure the sourceMajorCode exists.
+    $res = db_query("SELECT * FROM draft_degrees 
+                      WHERE major_code = ?                      
+                      AND catalog_year = ? ", $destination_major_code, $de_catalog_year) ;
+    if (db_num_rows($res) != 0) {
+      // Meaning, it WAS be found.
+      form_error("destination_major_code", t("The destination major, %dest, was found for %year.  Since you selected not to overwrite
+                        existing majors, your submission was not processed.  Please try again.", array("%dest" => $destination_major_code, "%year" => $de_catalog_year)));
+      return;
+    }
+        
+    
+        
+  }    
+  
 }
 
 

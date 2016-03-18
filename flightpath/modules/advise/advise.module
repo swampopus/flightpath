@@ -459,6 +459,7 @@ function advise_display_popup_change_track() {
   advise_init_screen();
   
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
+  fp_add_css(fp_get_module_path("advise") . "/css/advise.css");
    
   $top_level_majors_csv = "";
     
@@ -507,12 +508,17 @@ function advise_display_popup_change_track() {
     //foreach ($t_degree_plan->track_selection_config_array as $machine_name => $tdetails) {
     $degree_classes = fp_get_degree_classifications();
     foreach ($degree_classes["levels"][3] as $machine_name => $class_title) {
+          
+      $class_is_empty = TRUE;
+      $html = "";  
         
       $min_max_options = "";            
       // Check to see what we have in this degree's track_selection_config_array        
       $min_tracks = @intval($t_degree_plan->track_selection_config_array[$machine_name]["min_tracks"]);
       $max_tracks = @intval($t_degree_plan->track_selection_config_array[$machine_name]["max_tracks"]);
       $default_tracks = @trim($t_degree_plan->track_selection_config_array[$machine_name]["default_tracks"]);
+      $default_tracks_array = csv_to_array($default_tracks);
+      
       
       $degree_id = $t_degree_plan->degree_id;
       
@@ -527,28 +533,28 @@ function advise_display_popup_change_track() {
         
       fp_add_js($js, "setting");
       
-      $min_max_options = "<div>Please select between $min_tracks and $max_tracks $class_title options.</div>";
+      $min_max_options = "<div class='advise-select-track-min-max advise-select-track-between'>Please select between $min_tracks and $max_tracks $class_title options.</div>";
       if ($min_tracks == $max_tracks && $max_tracks == 1) {
-        $min_max_options = "<div>Please select 1 $class_title option.</div>";
+        $min_max_options = "<div class='advise-select-track-min-max advise-select-track-exactly-one'>Please select 1 $class_title option.</div>";
       }
   
       if ($min_tracks > 0 && $max_tracks == 0) {
         // Meaning, there is no maximum.  It's infinite.
-        $min_max_options = "<div>Please select at least $min_tracks $class_title option(s) for this degree.</div>";
+        $min_max_options = "<div class='advise-select-track-min-max advise-select-track-at-least-one'>Please select at least $min_tracks $class_title option(s) for this degree.</div>";
       }
   
       if ($min_tracks == $max_tracks && $max_tracks == 0) {
-        $min_max_options = "<div>Optional: You are not required to select any additional $class_title options.</div>";
+        $min_max_options = "<div class='advise-select-track-min-max advise-select-track-optional'>Optional: You are not required to select any additional $class_title options.</div>";
       }
           
     
     
       // Let's look to see what "tracks" this degree has.
     
-      $rtn .= "<br><div class='tenpt'><b>" . $t_degree_plan->title . "</b> " . t("$class_title options:") . "</div>
+      $html .= "<br><div class='tenpt'><span class='advise-select-degree-title'>" . $t_degree_plan->title . "</span> <span class='advise-select-class-title'>$class_title</span> options:</div>
                 <div class='advise-track-min-max-options advise-track-min-$min_tracks advise-track-max-$max_tracks'>$min_max_options</div>
                   <!--DEFAULT_$machine_name-->
-                  <div style='padding-left: 20px; padding-top: 10px; padding-bottom: 20px;'>
+                  <div class='advise-track-options-region'>
           ";
    
       $major_code = $t_degree_plan->major_code;
@@ -558,7 +564,7 @@ function advise_display_popup_change_track() {
       // Get the list of available tracks for this student.
       if (!$tracks = $t_degree_plan->get_available_tracks())
       {
-        $rtn .= "<div>&nbsp; &nbsp; &bull; " . t("This degree has no degree options.") . "</div>";
+        $html .= "<div class='advise-select-track-none'>&nbsp; &nbsp; &bull; " . t("This degree has no degree options.") . "</div>";        
       }
   
       // Is there a "default" message for all tracks, which will override
@@ -584,8 +590,8 @@ function advise_display_popup_change_track() {
           // Yes!  We found a default message.
           $bool_default_description = true;
           $track_description = filter_markup(trim(str_replace("DEFAULT:", "", $track_description)));
-          $track_description = "<div style='padding-top: 10px;' class='tenpt'>$track_description</div>";
-          $rtn = str_replace("<!--DEFAULT_$machine_name-->",$track_description, $rtn);
+          $track_description = "<div style='padding-top: 10px;' class='tenpt advise-select-track-description'>$track_description</div>";
+          $html = str_replace("<!--DEFAULT_$machine_name-->",$track_description, $rtn);
           break;
         }
     
@@ -658,22 +664,43 @@ function advise_display_popup_change_track() {
         
         
         if ($track_degree_plan->db_allow_dynamic == 1) {
-          $rtn .= "<div class='track-option'>
+          
+          $extra_class = "";
+          $is_default = FALSE;
+          if (in_array($t_degree_plan->major_code . "|_" . $track_code, $default_tracks_array)) {
+            $extra_class = "advise-select-track-default-track";
+            $is_default = TRUE;
+          }
+          
+          $html .= "<div class='track-option $extra_class'>
                       <label>
                         <input type='$input_type' name='$input_name' degree_id_class='{$degree_id}_class_{$machine_name}' value='$track_degree_id' $selected> 
                         <span class='track-title'>" . $track_degree_plan->get_title2(TRUE, TRUE) . "
+                        ";
+          if ($is_default) {
+            $html .= "<span class='track-default-track'>" . t("(Default)") . "</span>";
+          }
+          $html .= "                        
                         </span>
                       </label>
                       <div class='track-description'>
                         $track_description
                       </div>
                     </div>";
+                    
+          $class_is_empty = FALSE;                    
+                    
         }
     
     
       } // for (count(tracks))
     
-      $rtn .= "</div>";    
+      $html .= "</div>";    
+  
+  
+      if (!$class_is_empty) {
+        $rtn .= $html;
+      }
   
 
     }
