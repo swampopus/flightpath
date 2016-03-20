@@ -1,6 +1,10 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-03-20
+  Fixed bug where permissions were not acting correctly in certain circumstances for viewing past advising sessions.
+
+
 2016-03-17
   Added check on copy degree form to prevent accidental overwriting of existing degrees.
   

@@ -261,6 +261,7 @@ function advise_can_access_view($student_id = "") {
   
   if ($student_id == "") $student_id = $current_student_id;
   
+  
   // must be logged in first...
   if (!user_has_permission("access_logged_in_content")) return FALSE;
 
@@ -778,19 +779,28 @@ function advise_user_can_view_advising_session_access_callback() {
   if (user_has_permission("view_any_advising_session")) {
     return TRUE;
   }
+  
     
-  if (user_has_permission("view_own_advising_session")) {
-    // The user is only allowed to view their OWN advising sessions.
-    // So, make sure this advising session belongs to them!
+  if (user_has_permission("view_own_advising_session") || user_has_permission("view_advisee_advising_session")) {
+        
     $advising_session_id = $_REQUEST["advising_session_id"];
-    // make sure this belongs to $user->cwid;
+    
     // First, what was the student's CWID associated with that advising_session_id?
     $res = db_query("SELECT student_id FROM advising_sessions
                      WHERE advising_session_id = '?' ", $advising_session_id);
     $cur = db_fetch_array($res);
-    if ($user->cwid == $cur["student_id"]) {    
+    
+    if (user_has_permission("view_own_advising_session") && $user->cwid == $cur["student_id"]) {    
       return TRUE;
     }
+    
+    if (user_has_permission("view_advisee_advising_session")) {
+      $faculty_advisees = advise_get_advisees();
+      if (in_array($cur["student_id"], $faculty_advisees)) {
+        return TRUE;
+      }
+    }
+    
   }
   
   return FALSE;
@@ -1005,9 +1015,9 @@ function advise_perm() {
   );
 
   $perms["view_advisee_advising_session"] = array(
-    "title" => t("View advisee advising sessions only"),
-    "description" => t("The user is only allowed to view their assigned advisee's advising sessions.
-                        For example, the user is an advisor."),
+    "title" => t("View advisee advising sessions"),
+    "description" => t("The user is allowed to view their assigned advisee's advising sessions.
+                        For example, the user is a limited advisor with advisees assigned."),
   );
 
 
@@ -1764,15 +1774,16 @@ function advise_init() {
   $current_student_id = @$_REQUEST["current_student_id"];
 
   // Since this user doesn't have permission to view any sessions,
-  // he can only view his own.
+  // he can only view his own (but first make sure they are indeed a student)
   if (!user_has_permission("view_any_advising_session")) {
-    if (isset($user->cwid)) {  
+    if (isset($user->cwid) && $user->is_student == TRUE) {  
       $current_student_id = $user->cwid;
       $_REQUEST["current_student_id"] = $current_student_id;
     }    
     $_REQUEST["advising_load_active"] = "yes";        
   }
-    
+   
+      
   if (!isset($_SESSION["fp_draft_mode"])) $_SESSION["fp_draft_mode"] = "";  
     
   // Is draft mode enabled?

@@ -31,7 +31,7 @@ function student_search_menu() {
   $items["student-search"] = array(
     "title" => t("Advisees"),
     "page_callback" => "student_search_subtab_switchboard",
-    "access_arguments" => array("view_any_advising_session"),
+    "access_callback" => "search_user_can_search_for_some_advisees",    
     "type" => MENU_TYPE_TAB,
     "tab_family" => "system",
     "page_settings" => array(
@@ -224,7 +224,8 @@ function student_search_display_my_advisees() {
   
   $_SESSION["student_search_last_tab"] = "my-advisees";
   
-  $faculty_cwid = mysql_real_escape_string($user->cwid);
+  //$faculty_cwid = mysql_real_escape_string($user->cwid);
+  $faculty_cwid = $user->cwid;
         
   
   $query = "SELECT u.user_id, f_name, u.cwid, l_name, major_code, rank_code, a.catalog_year
@@ -249,6 +250,21 @@ function student_search_display_my_advisees() {
 
   return $rtn;  
 }
+
+
+/**
+ * Basically, can the user see the "Advisees" tab at all?
+ * The answer is TRUE if they have any of the permissions that let them do so.
+ */
+function search_user_can_search_for_some_advisees() {
+  if (user_has_permission("display_search_subtab")) return TRUE;
+  if (user_has_permission("display_my_advisees_subtab")) return TRUE;
+  if (user_has_permission("display_my_majors_subtab")) return TRUE;
+  if (user_has_permission("display_majors_subtab")) return TRUE;
+  
+  return FALSE;
+}
+
 
 
 /**
@@ -471,7 +487,6 @@ function student_search_display_search() {
                 action='" . $url . "' >
            ";
 
-  
 
 
   // Get search results from POST -or- past search attempts
@@ -482,22 +497,21 @@ function student_search_display_search() {
   }
   
   $o_search_for = $search_for;
-  
 
   // If the user entered an asterisk with their search, we will
   // skip the extra search conditions (and show more results).
-	$bool_bypass_extra_search_conditions = FALSE;
-	if (strstr($search_for, "*")) {
-	  $bool_bypass_extra_search_conditions = TRUE;
-	  $search_for = trim(str_replace("*", "", $search_for));
-	}
+  $bool_bypass_extra_search_conditions = FALSE;
+  if (strstr($search_for, "*")) {
+    $bool_bypass_extra_search_conditions = TRUE;
+    $search_for = trim(str_replace("*", "", $search_for));
+  }
   
     
   // remove trouble characters
   $search_for = str_replace("'","",$search_for);
   $search_for = str_replace('"','',$search_for);
-  $search_for = mysql_real_escape_string($search_for);
-
+  
+      
   $isize = "25";
   // $screen variable is never initialized.  Old code?
   //if ($screen->page_is_mobile) $isize = "10";
@@ -699,8 +713,6 @@ function student_search_render_advisees($adv_array, $title) {
     $last_name = $adv_array[$t]["last_name"];
     $major = $adv_array[$t]["major"];
     
-        
-    
     $advising_what_if = @$adv_array[$t]["advising_what_if"];
     $what_if_major_code = @$adv_array[$t]["what_if_major_code"];
     $what_if_track_code = @$adv_array[$t]["what_if_track_code"];
@@ -825,16 +837,28 @@ function student_search_query_advisees($sql) {
   
   $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $extra_student_search_conditions, $sql);
   
-  //fpm($sql);
+  
   // Returns an array of all of this teacher's advisees.
   $rtn_array = array();
   $r = 0;
+
+  $faculty_advisees = advise_get_advisees();
   
   $result = db_query($sql);
   while ($cur = db_fetch_array($result))
   {
 
     $student_id = trim($cur["cwid"]);
+    
+    // If this user does NOT have the "view any advising session" and DOES have the "view advisee advising sessions only",
+    // then see if this student is in their advisees list before continuing.
+    if (!user_has_permission("view_any_advising_session") && user_has_permission("view_advisee_advising_session")) {
+      if (!in_array($student_id, $faculty_advisees)) {
+        // Nope, this student is NOT one of their advisees!  Skip it.
+        continue;
+      }
+    }        
+    
     $rtn_array[$r]["student_id"] = $student_id;
     $rtn_array[$r]["first_name"] = ucwords(strtolower($cur["f_name"]));
     $rtn_array[$r]["last_name"] = ucwords(strtolower($cur["l_name"]));
