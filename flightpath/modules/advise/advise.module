@@ -483,7 +483,8 @@ function advise_display_popup_change_track() {
     }    
   }
   
-  
+  $student_majors_array = fp_get_student_majors($student->student_id, FALSE, TRUE);
+      
   $rtn .= fp_render_curved_line(t("Select a Degree Option"));
   $rtn .= "<div class='tenpt'>
             " . t("The student's degree has one or more degree options, which affects which courses are required. 
@@ -614,10 +615,7 @@ function advise_display_popup_change_track() {
         if ($track_machine_name != $machine_name) continue; // not the right degree_class
     
         
-        
-    
-    
-        $selected = "";
+        $selected = $disabled = "";
     
         // If this track has been selected already, mark it as such
         if (isset($degree_plan_array[$track_degree_id])) {
@@ -625,6 +623,16 @@ function advise_display_popup_change_track() {
           $selected = "checked=checked";
         }
     
+        // Is this track marked as NOT is_editable?
+        $is_editable = 1;
+        if (isset($student_majors_array[$t_degree_plan->major_code . "|_" . $track_code])) {
+          $is_editable = intval(@$student_majors_array[$t_degree_plan->major_code . "|_" . $track_code]["is_editable"]);
+        }    
+    
+        if ($is_editable != 1) {
+          $disabled = "disabled=disabled";
+        }
+                
     
         if ($bool_default_description == false) {
           $track_description = filter_markup(trim(@$temp[2]));
@@ -673,17 +681,27 @@ function advise_display_popup_change_track() {
             $is_default = TRUE;
           }
           
-          $html .= "<div class='track-option $extra_class'>
+          $html .= "<div class='track-option $extra_class'>";
+          $html .= "          
                       <label>
-                        <input type='$input_type' name='$input_name' degree_id_class='{$degree_id}_class_{$machine_name}' value='$track_degree_id' $selected> 
+                        <input type='$input_type' name='$input_name' degree_id_class='{$degree_id}_class_{$machine_name}'
+                                is_editable='$is_editable' 
+                                value='$track_degree_id' $selected $disabled> 
                         <span class='track-title'>" . $track_degree_plan->get_title2(TRUE, TRUE) . "
                         ";
+          
           if ($is_default) {
             $html .= "<span class='track-default-track'>" . t("(Default)") . "</span>";
-          }
+          }          
           $html .= "                        
                         </span>
-                      </label>
+                      </label>";
+          if (!$is_editable) {
+            $html .= "<div class='track-not-editable'>" . t("You are not allowed to modify this option.") . "</div>";
+          }
+
+          $html .= "
+                      
                       <div class='track-description'>
                         $track_description
                       </div>

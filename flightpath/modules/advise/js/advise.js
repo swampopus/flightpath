@@ -125,7 +125,7 @@ function popupChangeTrackSelections(is_whatif) {
   
   // We will look through the page for any checkboxes (or radio buttons) that have been checked.
   var track_degree_ids = ",";  // give it *something* initially, so it isn't an empty string and might get overlooked.
-  $("input:checked").each(function() {
+  $("input[is_editable=1]:checked").each(function() {
     track_degree_ids += ($(this).val()) + ",";
   });
   
