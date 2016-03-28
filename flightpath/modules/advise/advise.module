@@ -483,7 +483,15 @@ function advise_display_popup_change_track() {
     }    
   }
   
-  $student_majors_array = fp_get_student_majors($student->student_id, FALSE, TRUE);
+  // From What If mode...  
+  if (@$GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
+    $student_majors_array = @csv_to_array($_SESSION["what_if_major_code" . $student->student_id]);
+  }
+  else {
+    // Not in what if mode-- get the data from the normal student_majors table.
+    $student_majors_array = fp_get_student_majors($student->student_id, FALSE, TRUE);    
+  }
+  
       
   $rtn .= fp_render_curved_line(t("Select a Degree Option"));
   $rtn .= "<div class='tenpt'>
@@ -1193,6 +1201,12 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
     return array();
   }  
     
+  
+  fp_add_js(fp_get_module_path("advise") . "/js/advise.what-if-selection.js");
+  fp_add_css(fp_get_module_path("advise") . "/css/advise.css");    
+    
+    
+    
   $form = array();
   $m = 0;
   
@@ -1200,6 +1214,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   
   $db = get_global_database_handler();
 
+  $major_codes = array();
     
   $form["mark" . $m++] = array(
    "value" => fp_render_curved_line("What if I change my degree to...") . "<br>",
@@ -1218,10 +1233,11 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   /////////////////////
   // Select a major....
   $options = array();  
-  if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, false, $bool_use_draft, $bool_undergrad_only, array(1))) {
+  if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, FALSE, $bool_use_draft, $bool_undergrad_only, array(1))) {
     foreach($degree_array as $major_code => $value) {
       if (trim($value["title"]) == ""){continue;}      
       $options[$major_code] = $value["title"];
+      $major_codes[$major_code] = $major_code;
     }
   }
   
@@ -1244,10 +1260,11 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   /////////////////////////
   // Select a minor....
   $options = array();
-  if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, false, $bool_use_draft, $bool_undergrad_only, array(2))) {
+  if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, FALSE, $bool_use_draft, $bool_undergrad_only, array(2))) {    
     foreach($degree_array as $major_code => $value) {
       if (trim($value["title"]) == ""){continue;}
       $options[$major_code] = $value["title"];
+      $major_codes[$major_code] = $major_code;
     }
   }
 
@@ -1262,6 +1279,106 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
     "label" => "Select Minor &raquo;",
     "elements" => array($e2),    
   );
+
+
+
+  /////////////////////
+  // All the tracks...
+  
+    
+  foreach ($major_codes as $major_code => $temp) {
+    // Let's see if this major has any tracks...
+    if ($tracks = $db->get_degree_tracks($major_code, $current_catalog_year)) {
+            
+      // Let's load the original degree plan.
+      $degree_plan = $db->get_degree_plan($major_code, $current_catalog_year);
+      
+      // Yes, there are indeed tracks for THIS major.  Let's load them up...
+      // First, organize them by degree_class...
+      $tracks_by_class = array();
+      foreach ($tracks as $track) {
+        $t_degree_plan = $db->get_degree_plan($major_code . "|_" . $track, $current_catalog_year);
+        $degree_class = $t_degree_plan->degree_class;                
+        $tracks_by_class[$degree_class][] = $t_degree_plan;        
+      }
+      
+      // Now, create the form element...      
+      foreach ($tracks_by_class as $degree_class => $c) {
+        $options = array();
+
+        $temp = fp_get_degree_classification_details($degree_class);
+        $class_title = $temp["title"];
+
+        
+        // Are there any special requirements or defaults for this degree_class selection?
+        $tsca = $degree_plan->track_selection_config_array;
+        $default_tracks_array = @csv_to_array($tsca[$degree_class]["default_tracks"]);
+        
+        $min_tracks = @intval($tsca[$degree_class]["min_tracks"]);
+        $max_tracks = @intval($tsca[$degree_class]["max_tracks"]);
+        $element_type = "checkboxes";
+        $element_value = array();
+
+        // If we require exactly 1 selection, then make this a radio button, and pre-select either the first element
+        // or the first default track.
+        if ($min_tracks == 1 && $max_tracks == 1) {
+          $element_type = "radios";
+          $element_value = $default_tracks_array[0];
+        }
+
+        // Actually build up the options...        
+        foreach ($tracks_by_class[$degree_class] as $t_degree_plan) {
+          //$degree_id = $t_degree_plan->degree_id;  
+          
+          $tmajor_code = trim($t_degree_plan->major_code);
+          
+          $options[$tmajor_code] = $t_degree_plan->get_title2(FALSE, TRUE);
+          // Is this a "default" major code?
+          if (in_array(trim($tmajor_code), $default_tracks_array)) {
+            $element_value[$tmajor_code] = $tmajor_code;  // make it be selected
+          }                  
+        }
+        
+        $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-between'>Please select between $min_tracks and $max_tracks $class_title options.</div>";
+        if ($min_tracks == $max_tracks && $max_tracks == 1) {
+          $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-exactly-one'>Please select 1 $class_title option.</div>";
+        }
+    
+        if ($min_tracks > 0 && $max_tracks == 0) {
+          // Meaning, there is no maximum.  It's infinite.
+          $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-at-least-one'>Please select at least $min_tracks $class_title option(s) for this degree.</div>";
+        }
+    
+        if ($min_tracks == $max_tracks && $max_tracks == 0) {
+          $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-optional'>Optional: You are not required to select any additional $class_title options.</div>";
+        }        
+        
+        
+        
+        
+        $form["L3__sel__{$degree_class}__for__{$major_code}__xx"] = array(  //ends with xx so we can be sure when the major code ends.
+          "type" => $element_type,
+          "label" => "Select $class_title for " . $degree_plan->get_title2(),
+          "options" => $options,
+          "description" => "$min_max_options",  
+          "value" => $element_value,          
+        );   
+        
+        // Save min and max options for quick look-up later.
+        $form["L3__ops__{$degree_class}__for__{$major_code}__xx"] = array(
+          "type" => "hidden",
+          "value" => "$min_tracks~$max_tracks",
+        );
+                     
+        
+      }
+      
+      
+      
+      
+    } // if tracks
+  } // foreach major codes
+
 
 
 
@@ -1343,6 +1460,89 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
   //fpm($form_state);
   
   
+  /////////////////////////
+  // Make sure they selected approprite number of required tracks, if any.
+  
+  // Begin by going through each track which was selected, and keep track of how many we selected.
+  $selected_for = array();
+    
+  foreach ($form_state["values"] as $key => $val) {
+    if (strstr($key, "L3__sel__")) {
+            
+      // L3_sel_{$degree_class}_for_{$major_code}_xx      
+      $temp = explode("__", $key);
+      $degree_class = $temp[2];
+      $major_code = $temp[4];
+      
+      if (!isset($selected_for[$major_code . "__" . $degree_class])) {
+        $selected_for[$major_code . "__" . $degree_class] = 0;
+      }        
+        
+      
+      if (is_array($val)) {
+        foreach ($val as $k => $v) {
+          // Did the user select an item?  Val's key and value will be identical if so.
+          if ($k == $v && $k != "") {
+            // YES.  It was selected!
+            $selected_for[$major_code . "__" . $degree_class]++;          
+          }
+        }
+      }
+    }
+  }
+  
+   
+  
+  // Okay, now that we know how many were selected, let's make sure that the number falls within
+  // our min/max range for those tracks.
+  //foreach ($selected_for as $key => $count) {
+  foreach ($form_state["values"] as $key => $val) {
+    if (!strstr($key, "L3__sel__")) { continue; }
+
+    $temp = explode("__", $key);
+    $degree_class = $temp[2];
+    $major_code = $temp[4];
+    
+    
+    $count = @intval($selected_for[$major_code . "__" . $degree_class]);
+    
+        
+    
+    //First, make sure it's top-level degree was even selected.  If it wasn't, skip it, it doesn't matter.
+    $temp = explode("|_", $major_code);
+    
+    $top_level_code = trim($temp[0]);
+    if (@$form_state["values"]["select_level_1_degrees"][$top_level_code] != $top_level_code) {
+      if (@$form_state["values"]["select_level_2_degrees"][$top_level_code] != $top_level_code) {
+        continue;
+      }
+    }
+        
+    
+    // Okay, check to see if the count falls within the range for this degree & class.
+    $temp = explode("~", $form_state["values"]["L3__ops__{$degree_class}__for__{$major_code}__xx"]);
+    $min_tracks = @intval($temp[0]);
+    $max_tracks = @intval($temp[1]);
+    
+        
+    if ($count > $max_tracks && $max_tracks != 0) {
+      // We picked too many!
+      form_error("L3__sel__{$degree_class}__for__{$major_code}__xx", t("Sorry, you did not select the correct number of options for this degree."));
+      return;
+    }
+    
+    if ($count < $min_tracks && $min_tracks > 0) {
+      // We picked too few!
+      form_error("L3__sel__{$degree_class}__for__{$major_code}__xx", t("Sorry, you did not select the correct number of options for this degree."));
+      return;
+    }
+    
+    
+    
+    
+  }
+  
+  
 }
 
 
@@ -1365,6 +1565,34 @@ function advise_what_if_selection_form_submit($form, $form_state) {
       }
     }
   }
+  
+  //fpm($form_state["values"]);
+  // Add in the tracks, too, if selected.
+  foreach ($form_state["values"] as $key => $val) {
+    if (strstr($key, "L3__sel__")) {
+      if (is_array($val) && count($val) > 0) {
+        // Did the user select this item?  Val's key and value will be identical if so.
+        foreach ($val as $k => $v) {          
+          if ($k == $v && $k != "") {
+            // YES.  It was selected!
+            
+            //First, make sure it's top-level degree was even selected.  If it wasn't, skip it, it doesn't matter.
+            $temp = explode("|_", $k);
+            $top_level_code = trim($temp[0]);
+            if (@$form_state["select_level_1_degrees"][$top_level_code] != $top_level_code) {
+              if (@$form_state["select_level_2_degrees"][$top_level_code] != $top_level_code) {
+               // continue;
+              }
+            }
+            
+            $what_if_major_code .= $k . ",";
+          }
+        }
+      }
+    }
+  }
+  
+  //fpm($what_if_major_code);
       
   // Remove training comma
   $what_if_major_code = rtrim($what_if_major_code, ",");    
