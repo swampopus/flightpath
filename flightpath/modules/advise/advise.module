@@ -1789,7 +1789,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   
   if ($vars["advising_major_code"] == "")
   {
-      
+  
     $vars["advising_major_code"] = @$_SESSION["advising_major_code$csid"];
     if ($vars["advising_major_code"] == "")
     { // Default value...
@@ -1831,9 +1831,6 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
       $vars["advising_major_code"] = $student->major_code_csv;      
     }
   }
-  
-  
-  
   
   // Update the student's settings?
   $vars["advising_update_student_settings_flag"] = @$_REQUEST["advising_update_student_settings_flag"];
@@ -1911,6 +1908,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   */
 
   
+    
   @$vars["what_if_track_degree_ids"] = $_REQUEST["what_if_track_degree_ids"];  // Get it from the GET or POST.
   if ($vars["what_if_track_degree_ids"] == "")
   {
@@ -2004,6 +2002,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   } else {
     $vars["bool_use_draft"] = false;
   }
+
 
 
   $GLOBALS["fp_advising"] = $vars;

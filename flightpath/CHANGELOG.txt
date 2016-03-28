@@ -1,6 +1,16 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-03-28
+  Implemented hook for fp_get_student_majors().
+  
+  Added extra CSS classes to degrees in the currently advising box, making it easier to hide them through CSS. 
+
+  Improved the fp_get_machine_readable() function, altered how form elements are rendered in render.inc so that
+  elements with weird characters get safely handled.
+  
+
+
 2016-03-27
   Worked on What If selections screen, to work with new degree track selection configurations.
   

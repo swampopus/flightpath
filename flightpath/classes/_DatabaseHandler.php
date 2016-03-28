@@ -1234,6 +1234,9 @@ class _DatabaseHandler extends stdClass
   }
   
   
+  
+  
+  
   /**
    * Returns the student's first and last name, put together.
    * Ex: John Smith or John W Smith.
@@ -1344,7 +1347,7 @@ class _DatabaseHandler extends stdClass
    *   
    * 
    */
-  function get_student_majors_from_db($student_cwid, $bool_return_as_csv = FALSE, $bool_return_as_full_record = FALSE) {
+  function get_student_majors_from_db($student_cwid, $bool_return_as_full_record = FALSE) {
     // Looks in the student_degrees table and returns an array of major codes.
     $rtn = array();
     
@@ -1357,29 +1360,25 @@ class _DatabaseHandler extends stdClass
     }
      * 
      */
-    
+        
+    $catalog_year = $this->get_student_catalog_year($student_cwid);
     
     $res = $this->db_query("SELECT * FROM student_degrees a, degrees b
-                            WHERE student_id = '?' 
+                            WHERE student_id = ? 
                             AND a.major_code = b.major_code
+                            AND b.catalog_year = ?
                             ORDER BY b.advising_weight, b.major_code
-                            ", $student_cwid);
+                            ", $student_cwid, $catalog_year);
     while ($cur = $this->db_fetch_array($res)) {
       if ($bool_return_as_full_record) {
         $rtn[$cur["major_code"]] = $cur;
       }
       else {  
-        $rtn[] = $cur["major_code"];
+        $rtn[$cur["major_code"]] = $cur["major_code"];
       }
     }
     
-    if ($bool_return_as_csv) {
-      // Instead return a CSV string of these codes.      
-      $rtn = join(",", $rtn);
-    }
-    
     return $rtn;
-    
   }
 
 

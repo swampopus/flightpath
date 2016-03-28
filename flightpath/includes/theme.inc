@@ -680,8 +680,16 @@ function fp_build_tab_array($page) {
           $t_title = "<span class='level-3-raquo'>&raquo;</span>" . $t_title;
         }
         
+        $machine_major_code = fp_get_machine_readable($t_degree_plan->major_code);
+        if ($t_degree_plan->track_code != "") {
+          $machine_major_code .=  "-" . fp_get_machine_readable($t_degree_plan->track_code);
+        }
+        
+        
         $t_degree_plan_titles .= "<div class='multi-degree-title multi-degree-class-" . $t_class . "
-                                      multi-degree-class-level-" . $t_class_details["level_num"] . "'>" . $t_title . "</div>";
+                                      multi-degree-class-level-" . $t_class_details["level_num"] . "
+                                      multi-degree-code-$machine_major_code '> 
+                                      " . $t_title . "</div>";
         $s = "s";
       }
       $degree_title_div = $t_degree_plan_titles;
@@ -691,7 +699,7 @@ function fp_build_tab_array($page) {
     // Now, do we want to add an option to select a track to the degree_title_div?
     if ($bool_show_track_selection_link) {
       // Are we in what_if mode?
-      $advising_what_if = $GLOBALS["fp_advising"]["advising_what_if"];
+      $advising_what_if = @$GLOBALS["fp_advising"]["advising_what_if"];
       // We want to add a link to the popup to let the user select other degree tracks.
       $op_link = "<a href='javascript: popupWindow2(\"" . fp_url("advise/popup-change-track", "advising_what_if=$advising_what_if") . "\",\"\");'
                     style='background: url(" . fp_theme_location() . "/images/popup.gif) no-repeat top left;

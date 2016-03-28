@@ -420,6 +420,12 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   $type = @$element["type"]; 
   if ($type == "") $type = "markup";
   
+  // Make sure the "css name" is friendly.
+  $cssname = fp_get_machine_readable($name);
+  
+  
+  
+  
   if ($type == "do_not_render") return;  // not supposed to render this element.
   
   // TODO: Does the name start with a # character?  If so, do not attempt to render.
@@ -485,7 +491,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   
   
   if ($type != "markup") {
-    $rtn .= "<div id='element-wrapper-$name' class='form-element element-type-$type'>";
+    $rtn .= "<div id='element-wrapper-$cssname' class='form-element element-type-$type'>";
   }
 
   if ($prefix) {
@@ -494,7 +500,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
 
 
   if ($type != "markup") {
-    $rtn .= "<div id='element-inner-wrapper-$name' class='form-element element-type-$type $element_error_css'>";
+    $rtn .= "<div id='element-inner-wrapper-$cssname' class='form-element element-type-$type $element_error_css'>";
   }
 
 
@@ -522,7 +528,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
 
   if ($type == "textarea") {
     $rows = (isset($element["rows"])) ? $element["rows"] : "5";
-    $rtn .= "<textarea name='$name' id='element-$name' rows='$rows' $attributes>$value</textarea>";
+    $rtn .= "<textarea name='$name' id='element-$cssname' rows='$rows' $attributes>$value</textarea>";
   }
 
   if ($type == "textfield" || $type == "text" || $type == "password") {
@@ -530,12 +536,12 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     $size = (isset($element["size"])) ? $element["size"] : "60";
     $maxlength = (isset($element["maxlength"])) ? $element["maxlength"] : "255";
     $value = htmlentities($value, ENT_QUOTES);    
-    $rtn .= "<input type='$type' name='$name' id='element-$name' size='$size' maxlength='$maxlength' value='$value' $attributes>";
+    $rtn .= "<input type='$type' name='$name' id='element-$cssname' size='$size' maxlength='$maxlength' value='$value' $attributes>";
   }
   
   if ($type == "hidden") {
     $value = htmlentities($value, ENT_QUOTES);    
-    $rtn .= "<input type='hidden' name='$name' id='element-$name' value='$value'>";
+    $rtn .= "<input type='hidden' name='$name' id='element-$cssname' value='$value'>";
   }
 
   if ($type == "file") {
@@ -543,26 +549,27 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     if ($multiple != "") {
       $tname .= "[]";   // if we allow uploading multiple files, we MUST put a [] behind it, or HTML will not upload correctly.  Weird but true.
     }
-    $rtn .= "<input type='file' name='$tname' id='element-$name' $multiple $attributes>";
+    $rtn .= "<input type='file' name='$tname' id='element-$cssname' $multiple $attributes>";
   }
   
   
   if ($type == "radios") {
-    $rtn .= "<div class='form-radios form-radios-$name'>";
+    $rtn .= "<div class='form-radios form-radios-$cssname'>";
     foreach ($options as $key => $val) {
       $checked = "";
       if ($value == $key) {
         $checked = "checked=checked";
       }
-      $rtn .= "<div class='radio-element radio-element-$key'>
-                 <label class='label-for-radio'><input type='radio' name='$name' id='element-$name-$key' value='$key' $checked $attributes> $val</label>
+      $csskey = fp_get_machine_readable($key);
+      $rtn .= "<div class='radio-element radio-element-$csskey'>
+                 <label class='label-for-radio'><input type='radio' name='$name' id='element-$cssname-$csskey' value='$key' $checked $attributes> $val</label>
                </div>";
     }
     $rtn .= "</div>";
   }
 
   if ($type == "select") {
-    $rtn .= "<select name='$name' id='element-$name' $attributes>";
+    $rtn .= "<select name='$name' id='element-$cssname' $attributes>";
     if ($no_please_select != TRUE) {
       $rtn .= "<option value=''>- Please select -</option>";
     }
@@ -580,15 +587,16 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
 
   // Multiple checkboxes...
   if ($type == "checkboxes") {
-    $rtn .= "<div class='form-checkboxes form-checkboxes-$name'>";
+    $rtn .= "<div class='form-checkboxes form-checkboxes-$cssname'>";
     foreach ($options as $key => $val) {
       $checked = "";
       if (is_array($value) && isset($value[$key]) && $value[$key] == $key) {
         
         $checked = "checked=checked";
       }
-      $rtn .= "<div class='checkbox-element checkbox-element-$key'>
-                 <label class='label-for-checkbox'><input type='checkbox' name='$name" . "[$key]' id='element-$name-$key' value='$key' $checked $attributes> $val</label>
+      $csskey = fp_get_machine_readable($key);
+      $rtn .= "<div class='checkbox-element checkbox-element-$csskey'>
+                 <label class='label-for-checkbox'><input type='checkbox' name='$name" . "[$key]' id='element-$cssname-$csskey' value='$key' $checked $attributes> $val</label>
                </div>";
     }
     $rtn .= "</div>";
@@ -597,14 +605,14 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   // A single checkbox... The values will be with 0 (zero) or 1 (one), and boolean
   // values are accepted/saved
   if ($type == "checkbox") {
-    $rtn .= "<div class='form-checkbox form-checkbox-$name'>";
+    $rtn .= "<div class='form-checkbox form-checkbox-$cssname'>";
 
     $checked = "";
     if ((bool)($value) == TRUE) {      
       $checked = "checked=checked";
     }
     $rtn .= "<div class='checkbox-element'>
-               <label class='label-for-checkbox'><input type='checkbox' name='$name' id='element-$name' value='1' $checked $attributes> $label</label>
+               <label class='label-for-checkbox'><input type='checkbox' name='$name' id='element-$cssname' value='1' $checked $attributes> $label</label>
              </div>";
 
     $rtn .= "</div>";    

@@ -486,8 +486,8 @@ class _Student extends stdClass
     $this->cumulative_hours = $this->db->get_student_cumulative_hours($this->student_id);	
 		$this->gpa = $this->db->get_student_gpa($this->student_id);
     $this->rank = $this->get_rank_description($this->db->get_student_rank($this->student_id));
-    $this->major_code_array = $this->db->get_student_majors_from_db($this->student_id);
-    $this->major_code_csv = $this->db->get_student_majors_from_db($this->student_id, TRUE);
+    $this->major_code_array = fp_get_student_majors($this->student_id, FALSE);
+    $this->major_code_csv = fp_get_student_majors($this->student_id, TRUE);
 		$this->catalog_year = $this->db->get_student_catalog_year($this->student_id);
 		$this->name = $this->db->get_student_name($this->student_id);
 

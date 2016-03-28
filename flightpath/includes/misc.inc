@@ -602,7 +602,7 @@ function fp_validate_utf8($text) {
  * @return unknown
  */
 function fp_get_machine_readable($str) {
- return preg_replace('@[^a-z0-9_]+@','_',$str);  
+ return preg_replace('@[^a-zA-Z0-9_]+@','_',$str);  
 }
 
  

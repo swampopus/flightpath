@@ -72,6 +72,23 @@ function system_perm() {
 }
 
 
+/**
+ * Implements hook_fp_get_student_majors.
+ * 
+ * In our case, we will use our database method and get directly from our student_degrees table.
+ */
+function system_fp_get_student_majors($student_cwid, $bool_return_as_full_record = FALSE) {
+    
+  $db = get_global_database_handler();
+  $rtn = $db->get_student_majors_from_db($student_cwid, $bool_return_as_full_record);
+  
+  return $rtn;
+  
+}
+
+
+
+
 
 /**
  * Return an array containing the roles which have been assigned to

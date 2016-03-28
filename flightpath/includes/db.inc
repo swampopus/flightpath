@@ -184,18 +184,51 @@ function db_get_user_id_from_cwid($cwid, $type = "faculty") {
 
 /**
   Return back the codes or records for a student's degrees, based on what is in the
-  student_degrees table, as well as what we get from hooks.
+  student_degrees table (thanks to system.module), as well as what we get from hooks.
 */
 function fp_get_student_majors($student_cwid, $bool_return_as_csv = FALSE, $bool_return_as_full_record = FALSE) {
     
-  $db = get_global_database_handler();
-
-  $rtn = $db->get_student_majors_from_db($student_cwid, $bool_return_as_csv, $bool_return_as_full_record);
-
+  $params = array($student_cwid, $bool_return_as_full_record);  
+      
+  // Execute hook for this too.
+  $arr = invoke_hook("fp_get_student_majors", $params);
+  
     
-  // TODO:  execute hook for this too.
+  // Results will appear in an array, with each module as the index.
+  // Ex:
+  //   system
+  //      MAJOR1 => MAJOR1
+  //      MAJOR2 => MAJOR2
+  //   custom_module
+  //      MAJOR1 => MAJOR1
+  //      XYZ => XYZ
   
   
+  $new_arr = array();
+  $csv = "";
+  // Go through our modules, combine the identical ones, then prepare as a possible CSV.
+  foreach ($arr as $module => $results) {
+    foreach ($results as $k => $v) {
+      $new_arr[$k] = $v;
+    }
+  }
+  
+  $rtn = $new_arr;
+
+  
+  // Returning as a CSV?
+  
+  if ($bool_return_as_csv) {
+    foreach ($new_arr as $k => $v) {
+      $csv .= $k . ",";      
+    }
+    $csv = rtrim($csv, ",");  
+    $rtn = $csv;
+  }
+  
+  
+
+        
   return $rtn;
   
 }

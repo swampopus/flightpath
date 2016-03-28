@@ -52,7 +52,7 @@ class _FlightPath extends stdClass
 
     $major_code_csv = $GLOBALS["fp_advising"]["advising_major_code"];
     //$track_code = $GLOBALS["fp_advising"]["advising_track_code"];
-    
+
     $track_degree_ids = $GLOBALS["fp_advising"]["advising_track_degree_ids"];
     
     $student_id = $GLOBALS["fp_advising"]["advising_student_id"];

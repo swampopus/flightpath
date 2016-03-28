@@ -77,6 +77,31 @@ function hook_status() {
   return $rtn;
 } 
  
+
+
+
+/**
+ * Returns a full listing of the student's majors.
+ * 
+ * @see fp_get_student_majors()
+ */
+function hook_fp_get_student_majors($student_cwid, $bool_return_as_full_record = FALSE) {
+  
+  // Example code from system.module:
+  $db = get_global_database_handler();
+  $rtn = $db->get_student_majors_from_db($student_cwid, $bool_return_as_full_record);
+  
+  return $rtn;  
+  
+    
+  
+}
+
+
+
+
+
+
  
 /**
  * Validates form submissions from the Form API
