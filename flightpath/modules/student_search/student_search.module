@@ -755,7 +755,13 @@ function student_search_render_advisees($adv_array, $title) {
     $temp = csv_to_array($major);
     foreach ($temp as $code) {
       $csscode = fp_get_machine_readable($code);
-      $disp_major .= "<div class='ss-major-code ss-major-code-$csscode'>$code</div>";
+      // Was this a track code or not?  Meaning, did it contain |_
+      $is_track = "no";
+      if (strstr($code, "|_")) {
+        $is_track = "yes";
+      }
+      
+      $disp_major .= "<div class='ss-major-code ss-major-code-$csscode ss-major-code-is-track-$is_track'>$code</div>";
     }
     
     

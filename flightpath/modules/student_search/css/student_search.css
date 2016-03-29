@@ -20,3 +20,7 @@
 .student_search_advisee_results td {
   vertical-align: top;
 }
+
+.student_search_advisee_results .ss-major-code-is-track-yes {
+  display: none;
+}
