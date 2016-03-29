@@ -1579,9 +1579,9 @@ function advise_what_if_selection_form_submit($form, $form_state) {
             //First, make sure it's top-level degree was even selected.  If it wasn't, skip it, it doesn't matter.
             $temp = explode("|_", $k);
             $top_level_code = trim($temp[0]);
-            if (@$form_state["select_level_1_degrees"][$top_level_code] != $top_level_code) {
-              if (@$form_state["select_level_2_degrees"][$top_level_code] != $top_level_code) {
-               // continue;
+            if (@$form_state["values"]["select_level_1_degrees"][$top_level_code] != $top_level_code) {
+              if (@$form_state["values"]["select_level_2_degrees"][$top_level_code] != $top_level_code) {
+                continue;
               }
             }
             

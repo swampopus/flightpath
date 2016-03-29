@@ -329,9 +329,13 @@ class _DatabaseHandler extends stdClass
 
     // If $c (number of replacements performed) does not match the number of replacements
     // specified, warn the user.
+    /*
+     * Don't do this anymore, as it might throw off queries that don't use ?'s, but instead use :var  as the replacements.
+     * 
     if (substr_count($sql_query, "?") != count($args)) {
       fpm("<br><b>WARNING:</b> Replacement count does not match what was supplied to query: $sql_query<br><br>");
-    }    
+    } 
+     */    
     
     //////////////////////////////////////////////
     

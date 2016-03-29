@@ -224,14 +224,13 @@ function student_search_display_my_advisees() {
   
   $_SESSION["student_search_last_tab"] = "my-advisees";
   
-  //$faculty_cwid = mysql_real_escape_string($user->cwid);
   $faculty_cwid = $user->cwid;
         
   
   $query = "SELECT u.user_id, f_name, u.cwid, l_name, major_code, rank_code, a.catalog_year
               FROM users u, students a, advisor_student c, student_degrees d
               WHERE 
-                 c.faculty_id = '$faculty_cwid'
+                 c.faculty_id = :faculty_cwid
                  AND c.student_id = a.cwid
                  AND c.student_id = d.student_id
                  AND u.cwid = a.cwid
@@ -244,7 +243,7 @@ function student_search_display_my_advisees() {
               
               ";
 
-  $adv_array = student_search_query_advisees($query);
+  $adv_array = student_search_query_advisees($query, array(":faculty_cwid" => $faculty_cwid));
   $s = (count($adv_array) == 1) ? "" : "s"; 
   $rtn .= student_search_render_advisees($adv_array, t("My Advisees Results") . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
 
@@ -309,8 +308,6 @@ function student_search_display_majors_search() {
   
   $rtn = "";
   
-  fp_add_css(fp_get_module_path("student_search") . "/css/student_search.css");
-  
     
   $_SESSION["student_search_last_tab"] = "majors-search";
     
@@ -336,11 +333,14 @@ function student_search_display_majors_search() {
   
   
   // Do we have any extra settings for this search?
-  $current_catalog_year = mysql_real_escape_string(variable_get("current_catalog_year", 2006));
+  $current_catalog_year = variable_get("current_catalog_year", 2006);
   $cur_only = variable_get("student_search_major_search_cur_year", FALSE);
   $extra_line = "";
+  
+  $params = array();
   if ($cur_only == TRUE) {
-    $extra_line = " AND catalog_year = '$current_catalog_year' ";
+    $extra_line = " AND catalog_year = :cur_cat_year ";
+    $params[":cur_cat_year"] = $current_catalog_year;
   }
   
   
@@ -350,7 +350,7 @@ function student_search_display_majors_search() {
                    $extra_line
                    GROUP BY major_code
                    ORDER BY title
-                   ");
+                   ", $params);
   while ($cur = db_fetch_object($res)) {
     $sel = ($major_code == $cur->major_code) ? "selected" : "";
   
@@ -382,25 +382,11 @@ function student_search_display_majors_search() {
 
   $rtn .= student_search_get_advanced_search_tips();  
   
-  /*
-  $query = "SELECT u.user_id, f_name, l_name, u.cwid, major_code, rank_code, a.catalog_year
-              FROM users u, students a
-              WHERE 
-                 substring_index(major_code, '|', 1) = '$major_code'
-                 AND u.cwid = a.cwid
-                 AND u.is_student = 1
-                 AND u.is_disabled = 0                 
-              AND rank_code IN %RANKIN%
-              %EXTRA_STUDENTSEARCH_CONDITIONS%
-              ORDER BY %ORDERBY%
-              ";
-  */
-  // Update the query to search for exact major code.
-  $major_code = mysql_real_escape_string($major_code);
+  // Update the query to search for exact major code.  
   $query = "SELECT u.user_id, f_name, l_name, u.cwid, major_code, rank_code, a.catalog_year
               FROM users u, students a, student_degrees b
               WHERE 
-                 major_code = '$major_code'
+                 major_code = :major_code
                  AND u.cwid = a.cwid
                  AND u.cwid = b.student_id
                  AND u.is_student = 1
@@ -412,7 +398,7 @@ function student_search_display_majors_search() {
   
   
   
-  $adv_array = student_search_query_advisees($query);
+  $adv_array = student_search_query_advisees($query, array(":major_code" => $major_code));
   $s = (count($adv_array) == 1) ? "" : "s"; 
   $rtn .= student_search_render_advisees($adv_array, t("Major @major Results", array("@major" => $major_code)) . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
 
@@ -451,7 +437,7 @@ function student_search_display_my_majors() {
     $query = "SELECT u.user_id, f_name, l_name, u.cwid, major_code, rank_code, a.catalog_year
                 FROM users u, students a, student_degrees b
                 WHERE 
-                   substring_index(major_code, '|', 1) = '$major_code'
+                   substring_index(major_code, '|', 1) = :major_code
                    AND u.cwid = a.cwid
                    AND u.cwid = b.student_id
                    AND u.is_student = 1
@@ -462,7 +448,7 @@ function student_search_display_my_majors() {
                 ORDER BY %ORDERBY%
                 ";
   
-    $adv_array = student_search_query_advisees($query);
+    $adv_array = student_search_query_advisees($query, array(":major_code" => $major_code));
     
     $s = (count($adv_array) == 1) ? "" : "s"; 
     $rtn .= student_search_render_advisees($adv_array, t("Major @major Results", array("@major" => $major_code)) . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
@@ -539,13 +525,17 @@ function student_search_display_search() {
   // This time, we want to specify an SQL statement that will perform
   // our search.
 
+  $params = array();
+  
   if($search_for != "" && strlen($search_for) > 2)
   { // If they typed something greater than 2 chars...
     
-    $search_action = " AND (u.cwid LIKE '%$search_for%' 
-                       OR l_name LIKE '%$search_for%' 
-                       OR f_name LIKE '%$search_for%') 
+    $search_action = " AND (u.cwid LIKE :like_search_for 
+                       OR l_name LIKE :like_search_for 
+                       OR f_name LIKE :like_search_for ) 
                        ";
+    $params[":like_search_for"] = "%$search_for%";
+    
     // If you searched for 2 things seperated by a space, it is likely you
     // are searching for a name, so check that...
     $_SESSION["student_search_for"] = $o_search_for;
@@ -554,9 +544,11 @@ function student_search_display_search() {
     {
       $fn = trim(@$temp[0]);
       $ln = trim(@$temp[1]);
-      $search_action = " AND (l_name LIKE '%$ln%' 
-                         AND f_name LIKE '%$fn%') 
+      $search_action = " AND (l_name LIKE :like_ln 
+                         AND f_name LIKE :like_fn ) 
                        ";
+      $params[":like_ln"] = "%$ln%";
+      $params[":like_fn"] = "%$fn%";      
       
     }
 
@@ -571,7 +563,10 @@ function student_search_display_search() {
       $search_action = "";
       $other_table = ", degrees b";      
       $major_search = " AND substring_index(c.major_code,'|',1) = b.major_code
-                        AND (b.major_code LIKE '%$mjsearch%' ) ";
+                        AND (b.major_code LIKE :like_mjsearch ) ";
+                        
+      $params[":like_mjsearch"] = "%$mjsearch%";
+      
     }
 
     
@@ -604,7 +599,7 @@ function student_search_display_search() {
               LIMIT 300
               ";
 
-    $adv_array = student_search_query_advisees($query);
+    $adv_array = student_search_query_advisees($query, $params);
   }
 
   $s = (count($adv_array) == 1) ? "" : "s"; 
@@ -662,6 +657,8 @@ function student_search_get_advanced_search_tips() {
 
 function student_search_render_advisees($adv_array, $title) {
   $rtn = "";
+  
+  fp_add_css(fp_get_module_path("student_search") . "/css/student_search.css");
   
   $bool_redirect_one = FALSE;
   
@@ -754,23 +751,33 @@ function student_search_render_advisees($adv_array, $title) {
     // old onCLick:
     //<!-- onClick='selectStudent(\"$student_id\",\"$major\",\"$what_if_major_code\",\"$what_if_track_code\")' -->
     
+    $disp_major = "";
+    $temp = csv_to_array($major);
+    foreach ($temp as $code) {
+      $csscode = fp_get_machine_readable($code);
+      $disp_major .= "<div class='ss-major-code ss-major-code-$csscode'>$code</div>";
+    }
+    
+    
+    
     $rtn .= "
       <tr height='19'>
           <td colspan='7'>
           <table border='0' 
-                  $on_mouse  
-                  onClick='showUpdate(true); window.location=\"$url\"; '                 
-                   width='100%' >
+            $on_mouse  
+            onClick='showUpdate(true); window.location=\"$url\"; '                 
+             width='100%' 
+             class='student_search_advisee_results'>
                   <tr height='20'>
-                    <td width='5%' class='hand'>$advised_image</td>  
-                <td width='12%' class='hand'><font size='2'>$student_id</font></td>
-                  <td width='15%' class='hand'><font size='2'>$first_name </font></td>
-                <td width='20%' class='hand'><font size='2'>$last_name </font></td>    
-              <td width='15%' class='hand'><font size='2'>$major</td>
-                <td width='10%' class='hand'><font size='2'>$rank</td>
-                <td width='15%' class='hand'><font size='2'>$catalog_year</td>
+                    <td width='5%' class='ss-advised-image'>$advised_image</td>  
+                    <td width='12%' class='ss-student-id'>$student_id</td>
+                    <td width='15%' class='ss-student-fn'>$first_name</td>
+                    <td width='20%' class='ss-student-ln'>$last_name</td>    
+                    <td width='15%' class='ss-student-major'>$disp_major</td>
+                    <td width='10%' class='ss-student-rank'>$rank</td>
+                    <td width='15%' class='ss-student-catalog-year'>$catalog_year</td>
                  </tr>
-                  </table>   
+              </table>   
             </td> 
          </tr>
          ";
@@ -818,8 +825,14 @@ function student_search_render_advisees($adv_array, $title) {
 }
 
 
-
-function student_search_query_advisees($sql) {
+/**
+ * Accepts the SQL, plus an array of parameters compatible with our PDO set up.
+ * ex:
+ *   $params[":name"] = "Bob"
+ *   and   $sql = " SELECT * where name = :name";
+ * 
+ */
+function student_search_query_advisees($sql, $params = array()) {
       
   $db = get_global_database_handler();  
   
@@ -844,7 +857,7 @@ function student_search_query_advisees($sql) {
 
   $faculty_advisees = advise_get_advisees();
   
-  $result = db_query($sql);
+  $result = db_query($sql, $params);
   while ($cur = db_fetch_array($result))
   {
 

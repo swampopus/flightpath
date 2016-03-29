@@ -1,6 +1,13 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-03-29
+  Fixed bug in what if selection screen.
+  
+  Cleaned up student search module a little, added extra CSS so that major codes more stylable.
+  Also made student_search module PDO compliant, not relying on older mysql_real_escape_string function calls anymore.
+
+
 2016-03-28
   Implemented hook for fp_get_student_majors().
   
