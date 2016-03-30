@@ -727,9 +727,16 @@ function student_search_render_advisees($adv_array, $title) {
 
     //fpm($adv_array);
 
+    /*
     $on_mouse = "onmouseover=\"style.backgroundColor='#FFFF99'\"
                onmouseout=\"style.backgroundColor='white'\"
                 ";
+     */
+      
+    $on_mouse = "
+            onmouseover='$(this).addClass(\"selection_highlight\");'
+            onmouseout='$(this).removeClass(\"selection_highlight\");'
+    ";      
     // No screen var defined. Old code?
     //if ($screen->page_is_mobile) $on_mouse = ""; // Causes problems on mobile devices.
     

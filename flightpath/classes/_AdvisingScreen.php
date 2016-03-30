@@ -735,7 +735,7 @@ function draw_menu_items($menu_array) {
 
         $sub_details = $this->db->get_substitution_details($sub_id);
         //fpm($sub_details);
-        $remarks = trim($sub_details["remarks"]);
+        $remarks = @trim($sub_details["remarks"]);
         $sub_faculty_id = $sub_details["faculty_id"];
         $sub_degree_plan = new DegreePlan($sub_details["required_degree_id"]);
 
@@ -2461,13 +2461,13 @@ function draw_menu_items($menu_array) {
     //  When was this student enrolled in this course?
 
     $html = "";
-		if ($course->term_id != "" && $course->term_id != "11111" && $course->display_status != "eligible" && $course->display_status != "disabled")
+		if ($course->term_id != "" && $course->term_id != Course::COURSE_UNKNOWN_TERM_ID && $course->display_status != "eligible" && $course->display_status != "disabled")
 		{
 			$html .= "<div class='tenpt' style='margin-top: 10px;'>
 						" . t("The student enrolled in this course in") . " " . $course->get_term_description() . ".
 					</div>";
           
-		} else if ($course->term_id == "11111")
+		} else if ($course->term_id == Course::COURSE_UNKNOWN_TERM_ID)
 		{
 			$html .= "<div class='tenpt' style='margin-top: 10px;'>
 						" . t("The exact date that the student enrolled in this course
@@ -3324,8 +3324,15 @@ function draw_menu_items($menu_array) {
 	{
 		$pC = "";
 		$img_path = fp_theme_location() . "/images";
+    /*
 		$on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
       				onmouseout=\"style.backgroundColor='white'\" ";
+     */
+     
+    $on_mouse_over = "
+            onmouseover='$(this).addClass(\"selection_highlight\");'
+            onmouseout='$(this).removeClass(\"selection_highlight\");'
+    ";      
 
 		if ($this->page_is_mobile) $on_mouse_over = "";  // Causes problems for some mobile devices.
 		
@@ -3344,7 +3351,13 @@ function draw_menu_items($menu_array) {
 			$s = "";
 		}
     
-    $title_text = "";
+    $title_text = $extra_classes = "";
+        
+
+    // Add the name of the group to the extra-classes
+    $extra_classes .= " gr-" . fp_get_machine_readable($group->group_name);
+    
+    
     
 		$select_icon = "<img src='$img_path/select.gif' border='0'>";
 		$icon_link = "<img src='$img_path/icons/$group->icon_filename' width='19' height='19' border='0' alt='$title_text' title='$title_text'>";
@@ -3399,7 +3412,7 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
-     	<tr height='20' class='$hand_class'
+     	<tr height='20' class='$hand_class $extra_classes'
       		$on_mouse_over title='$group->title'>
       		<td width='$w1_1' align='left'>&nbsp;</td>
       		<td width='$w1_2' align='left' onClick='$js_code'>$icon_link</td>
@@ -3609,6 +3622,8 @@ function draw_menu_items($menu_array) {
 			$advising_term_id = $course->advised_term_id;
 		}
 
+    // Add the name of the course to the extra-classes
+    $extra_classes .= " cr-" . fp_get_machine_readable($course->subject_id . " " . $course->course_num);
 
     // Has the course been assigned to more than one degree?
     if (count($course->assigned_to_degree_ids_array) > 1) {
@@ -3870,9 +3885,17 @@ function draw_menu_items($menu_array) {
 			$icon_link = "<img src='" . fp_theme_location() . "/images/icons/$icon_filename' width='19' height='19' border='0' alt='$title_text' title='$title_text'>";
 		}
 
+    /*
 		$on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
       				onmouseout=\"style.backgroundColor='white'\" ";
 
+     */
+    
+    $on_mouse_over = "
+            onmouseover='$(this).addClass(\"selection_highlight\");'
+            onmouseout='$(this).removeClass(\"selection_highlight\");'
+    ";
+      
 		if (fp_screen_is_mobile()) $on_mouse_over = "";  // Causes problems for some mobile devices.
 		
 		$hand_class = "hand";
@@ -4075,13 +4098,27 @@ function draw_menu_items($menu_array) {
 		//$serializedCourse = urlencode(serialize($course));
 		$js_code = "popupDescribeSelected(\"$group_id\",\"$semester_num\",\"$course_id\",\"$subject_id\",\"req_by_degree_id=$req_by_degree_id&group_hours_remaining=$group_hours_remaining&db_group_requirement_id=$db_group_requirement_id&blank_degree_id=$blank_degree_id\");";
 
+    /*
 		$on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
       				onmouseout=\"style.backgroundColor='white'\" ";
-		
+		*/
+    
+    $on_mouse_over = "
+            onmouseover='$(this).addClass(\"selection_highlight\");'
+            onmouseout='$(this).removeClass(\"selection_highlight\");'
+    ";
+    
+    
 		if ($this->page_is_mobile) $on_mouse_over = "";  // Causes problems for some mobile devices.
 		
 		$hand_class = "hand";
-		$extra_style = "";
+		$extra_style = $extra_classes = "";
+
+
+    // Add the name of the course to the extra-classes
+    $extra_classes .= " cr-" . fp_get_machine_readable($course->subject_id . " " . $course->course_num);
+    
+
 
 		if ($course->bool_unselectable == true)
 		{
@@ -4096,7 +4133,7 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
-     	<tr height='20' class='$hand_class $display_status'
+     	<tr height='20' class='$hand_class $display_status $extra_classes'
       		$on_mouse_over title='$title_text'>
       		<td width='$w1_1' align='left'>$op$hid</td>
       		<td width='$w1_2' align='left' onClick='$js_code'>$icon_link</td>
@@ -4257,7 +4294,7 @@ function draw_menu_items($menu_array) {
 					continue;
 				}
 
-				
+				//fpm($c);
 				if (!$c->meets_min_grade_requirement_of(null, variable_get("minimum_substitutable_grade", "D")))
 				{// Make sure the grade is OK.
 					continue;

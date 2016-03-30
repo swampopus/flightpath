@@ -340,7 +340,7 @@ class _Student extends stdClass
 			{
 				// was an unknown semester.  Let's set it lower so
 				// it doesn't screw up my sorting.
-				$sub_term_id = 11111;
+				$sub_term_id = Course::COURSE_UNKNOWN_TERM_ID;
 			}
 
 
@@ -767,7 +767,7 @@ class _Student extends stdClass
 			if (strstr($new_course->term_id, "9999")) {
 				// was an unknown semester.  Let's set it lower so
 				// it doesn't screw up my sorting.
-				$new_course->term_id = 11111;
+				$new_course->term_id = Course::COURSE_UNKNOWN_TERM_ID;
 			}
       $t_course->term_id = $new_course->term_id;
 			$new_course->display_status = "completed";

@@ -9,6 +9,10 @@ class _Course extends stdClass
 {
   // Some public variables and what they are used for.
 
+  
+  const COURSE_UNKNOWN_TERM_ID = 11111;
+  
+  
   // Database & misc related:
   public $random_id, $db_advised_courses_id;
   public $bool_placeholder, $db, $db_substitution_id_array, $db_unassign_transfer_id;
@@ -61,8 +65,6 @@ class _Course extends stdClass
   public $bool_hide_grade, $bool_ghost_hour, $bool_ghost_min_hour;
 
   
-
-
 /**
  * The constructor for a Course object.
  *
@@ -1218,7 +1220,8 @@ class _Course extends stdClass
 
     if ($is_transfer == false) {      
       $this->load_descriptive_data();
-    } else {
+    } 
+    else {
       // This is a transfer course.  Find out its eqv, if any...
       
 

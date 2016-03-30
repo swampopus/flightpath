@@ -17,6 +17,11 @@
   margin-bottom: 10px;
 }
 
+.selection_highlight {
+  background-color: #FFFF99;
+}
+
+
 
 .full_admin_top_options
 {
