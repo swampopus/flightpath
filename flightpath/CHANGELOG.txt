@@ -1,6 +1,14 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-03-31
+  Added option to CourseList function sort_alphabetical_order, to include the degree's advising weight of the degree the course requires first, to make
+  it also get sorted by degree.
+  
+  Changed the way semester blocks are drawn in AdvisingScreen, to group degrees together by advising weight, then name, alphabetically.
+  Made similar changes to AdvisingScreenTypeView.  Also added more CSS classes to elements, making it easier to target.
+
+
 2016-03-30
   Added extra class names when drawing courses and group selection rows.  Also, created new CSS class called "selection_highlight" that gets
   added and removed over certain items.  Updated theme css files to accomodate.

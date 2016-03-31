@@ -1009,7 +1009,7 @@ class _CourseList extends ObjList
    *           sort above courses with identical names.
 	 * 
 	 */
-	function sort_alphabetical_order($bool_reverse_order = false, $bool_only_transfers = false, $bool_set_array_index = false, $subs_higher_prority_in_degree_id = 0)
+	function sort_alphabetical_order($bool_reverse_order = false, $bool_only_transfers = false, $bool_set_array_index = false, $subs_higher_prority_in_degree_id = 0, $bool_include_degree_sort = FALSE)
 	{
 		// Sort the list into alphabetical order, based
 		// on the subject_id and course_num.
@@ -1041,6 +1041,30 @@ class _CourseList extends ObjList
       // if a course is from a split sub.
       $tpad = str_pad("$t",5,"0",STR_PAD_LEFT);
 
+      $degree_title = "n";  // Default.
+      $degree_advising_weight = "0000";
+      
+      if ($bool_include_degree_sort) {
+        // Find the actual degree title for this course.
+        if (intval($c->req_by_degree_id) > 0) {        
+          // Get the degree title...         
+          $dtitle = @$GLOBALS["fp_temp_degree_titles"][$c->req_by_degree_id];
+          $dweight = intval(@$GLOBALS["fp_temp_degree_advising_weights"][$c->req_by_degree_id]);
+          
+          if ($dtitle == "" || $dweight == "" || $dweight == 0) {
+            $t_degree_plan = new DegreePlan($c->req_by_degree_id);
+            $t_degree_plan->load_descriptive_data();        
+            $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
+            $dweight = $t_degree_plan->db_advising_weight;
+            $GLOBALS["fp_temp_degree_titles"][$c->req_by_degree_id] = $dtitle . " "; //save for next time.
+            $GLOBALS["fp_temp_degree_advising_weights"][$c->req_by_degree_id] = $dweight . " "; //save for next time.
+          }
+          
+          $degree_title = fp_get_machine_readable($dtitle);  // make it machine readable.  No funny characters.
+          $degree_advising_weight = str_pad($dweight, 4, "0", STR_PAD_LEFT);
+        } 
+      }
+
 
 			if ($bool_only_transfers == true)
 			{
@@ -1049,17 +1073,17 @@ class _CourseList extends ObjList
 				// the transfer credit's SI and CN.
 				if (is_object($c->course_transfer))
 				{
-					$str = $c->course_transfer->subject_id . " ~~ " . $c->course_transfer->course_num ." ~~ $priority ~~ $tpad";
+					$str = $degree_advising_weight . " ~~ " . $degree_title . " ~~ " . $c->course_transfer->subject_id . " ~~ " . $c->course_transfer->course_num ." ~~ $priority ~~ $tpad";
 				} else {
 					// There was no transfer!
-					$str = "$c->subject_id ~~ $c->course_num ~~ $priority ~~ $tpad";
+					$str = "$degree_advising_weight ~~ $degree_title ~~ $c->subject_id ~~ $c->course_num ~~ $priority ~~ $tpad";
 				}
 			} else {
 
 				// This is the one which will be run most often.  Just sort the list
 				// in alphabetical order.
 
-				$str = "$c->subject_id ~~ $c->course_num ~~ $priority ~~ $tpad";
+				$str = "$degree_advising_weight ~~ $degree_title ~~ $c->subject_id ~~ $c->course_num ~~ $priority ~~ $tpad";
 			}
 			array_push($tarray,$str);
 		}
@@ -1080,7 +1104,7 @@ class _CourseList extends ObjList
 		for($t = 0; $t < count($tarray); $t++)
 		{
 			$temp = explode(" ~~ ",$tarray[$t]);
-			$i = intval($temp[3] * 1);
+			$i = intval($temp[5]);
       
 			if ($bool_set_array_index == true)
 			{

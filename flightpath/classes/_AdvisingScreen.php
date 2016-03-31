@@ -2841,7 +2841,7 @@ function draw_menu_items($menu_array) {
 	 * 
 	 * @return string
 	 */
-	function display_semester(Semester $semester, $bool_display_hour_count = false)
+	function z__display_semester(Semester $semester, $bool_display_hour_count = false)
 	{
 		// Display the contents of a semester object
 		// on the screen (in HTML)
@@ -2858,7 +2858,7 @@ function draw_menu_items($menu_array) {
     }
 
 		// First, display the list of bare courses.
-		$semester->list_courses->sort_alphabetical_order();
+		$semester->list_courses->sort_alphabetical_order(FALSE, FALSE, FALSE, 0, TRUE);  // sort, including the degree title we're sorting for.
 		$semester->list_courses->reset_counter();
 
 		while($semester->list_courses->has_more())
@@ -2996,6 +2996,216 @@ function draw_menu_items($menu_array) {
 
 		return $pC;
 	}
+
+
+
+  /**
+   * Given a Semester object, this will generate the HTML to draw it out
+   * to the screen.
+   *
+   * @param Semester $semester
+   * @param bool $bool_display_hour_count
+   *       - If set to TRUE, it will display a small "hour count" message
+   *         at the bottom of each semester, showing how many hours are in
+   *         the semester.  Good for debugging purposes.
+   * 
+   * @return string
+   */
+  function display_semester(Semester $semester, $bool_display_hour_count = false)
+  {
+    // Display the contents of a semester object
+    // on the screen (in HTML)
+    $pC = "";
+    $pC .= $this->draw_semester_box_top($semester->title);
+
+    $count_hoursCompleted = 0;
+
+    $last_req_by_degree_id = -1;
+    
+    $html = array();
+    
+    
+    // Create a temporary caching system for degree titles, so we don't have to keep looking them back up.
+    if (!isset($GLOBALS["fp_temp_degree_titles"])) {
+      $GLOBALS["fp_temp_degree_titles"] = array();
+    }
+
+    // First, display the list of bare courses.
+    $semester->list_courses->sort_alphabetical_order();  // sort, including the degree title we're sorting for.
+    $semester->list_courses->reset_counter();
+
+    while($semester->list_courses->has_more())
+    {
+      $course = $semester->list_courses->get_next();
+      
+      if (!isset($html[$course->req_by_degree_id])) {
+        $html[$course->req_by_degree_id] = "";
+      }
+           
+      // Is this course being fulfilled by anything?
+
+      if (!($course->course_list_fulfilled_by->is_empty))
+      { // this requirement is being fulfilled by something the student took...
+
+        $c = $course->course_list_fulfilled_by->get_first();
+        
+        $c->req_by_degree_id = $last_req_by_degree_id;  // make sure we assign it to the current degree_id.
+
+        // Tell the course what group we are coming from. (in this case: none)
+        $c->disp_for_group_id = "";
+        
+        $html[$course->req_by_degree_id]  .= $this->draw_course_row($c);
+        $c->set_has_been_displayed($course->req_by_degree_id);
+
+
+        if ($c->display_status == "completed")
+        { // We only want to count completed hours, no midterm or enrolled courses.
+          $h = $c->get_hours_awarded();
+          if ($c->bool_ghost_hour == TRUE) {
+            $h = 0;
+          }
+          $count_hoursCompleted += $h;
+        }
+
+      } else {
+        // This requirement is not being fulfilled...
+        
+        // Tell the course what group we are coming from. (in this case: none)
+        $course->disp_for_group_id = "";
+                
+        $html[$course->req_by_degree_id]  .= $this->draw_course_row($course);
+
+      }
+
+      //$pC .= "</td></tr>";
+
+    }
+
+
+    /////////////////////////////////////
+    // Now, draw all the groups.
+    $semester->list_groups->sort_alphabetical_order();
+    $semester->list_groups->reset_counter();
+    while($semester->list_groups->has_more())
+    {
+
+      $group = $semester->list_groups->get_next();
+      
+      if (!isset($html[$group->req_by_degree_id])) {
+        $html[$group->req_by_degree_id] = "";
+      }
+      
+      $html[$group->req_by_degree_id] .= "<tr><td colspan='8'>";
+            
+                  
+      $html[$group->req_by_degree_id] .= $this->display_group($group);
+      $count_hoursCompleted += $group->hours_fulfilled_for_credit;
+      $html[$group->req_by_degree_id] .= "</td></tr>";
+    } //while groups.
+
+    
+    //fpm($html);
+
+    // Sort by degree's advising weight
+    $new_html = array();
+    foreach($html as $req_by_degree_id => $content) {
+      
+      $dtitle = @$GLOBALS["fp_temp_degree_titles"][$req_by_degree_id];
+      $dweight = intval(@$GLOBALS["fp_temp_degree_advising_weights"][$req_by_degree_id]);
+      
+      if ($dtitle == "") {
+        $t_degree_plan = new DegreePlan($req_by_degree_id);
+        $t_degree_plan->load_descriptive_data();        
+        $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
+        $dweight = $t_degree_plan->db_advising_weight;
+        $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle . " "; //save for next time.
+        $GLOBALS["fp_temp_degree_advising_weights"][$req_by_degree_id] = $dweight . " "; //save for next time.
+      }
+      
+      $degree_title = fp_get_machine_readable($dtitle);  // make it machine readable.  No funny characters.
+      $degree_advising_weight = str_pad($dweight, 4, "0", STR_PAD_LEFT);
+      
+      
+      $new_html[$degree_advising_weight . "__" . $degree_title][$req_by_degree_id] = $content;
+      
+    }
+    
+    // Sort by the first index, the advising weight.   
+    //fpm($new_html); 
+    ksort($new_html);
+    //fpm($new_html);
+    
+    
+    
+    //////////////////////////
+    // Okay, now let's go through our HTML array and add to the screen....
+    foreach ($new_html as $w => $html) {
+      foreach($html as $req_by_degree_id => $content) {
+        
+        // Get the degree title...        
+        $dtitle = @$GLOBALS["fp_temp_degree_titles"][$req_by_degree_id];
+        if ($dtitle == "") {
+          $t_degree_plan = new DegreePlan($req_by_degree_id);
+          $t_degree_plan->load_descriptive_data();        
+          $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
+          $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle; //save for next time.
+        }
+  
+        $css_dtitle = fp_get_machine_readable($dtitle);
+  
+        // TODO:  Possibly don't display this if we only have one degree chosen?      
+        $pC .= "<tr><td colspan='8'>
+                  <div class='tenpt required-by-degree required-by-degree-$css_dtitle'>Required by $dtitle</div>
+                </td></tr>";      
+        
+        
+        $pC .= $content;
+      }
+    }
+     
+       
+    
+    
+    
+    
+    // Add hour count to the bottom...
+    if ($bool_display_hour_count == true && $count_hoursCompleted > 0)
+    {
+      $pC .= "<tr><td colspan='8'>
+        <div class='tenpt advise-completed-hours' style='text-align:right; margin-top: 10px;'>
+        <span class='completed-hours-label'>Completed hours:</span> <span class='count-hours-completed'>$count_hoursCompleted</span>
+        </div>
+        ";
+      $pC .= "</td></tr>";
+    }
+
+
+    // Does the semester have a notice?
+    if ($semester->notice != "")
+    {
+      $pC .= "<tr><td colspan='8'>
+          <div class='hypo tenpt advise-semester-notice' style='margin-top: 15px; padding: 5px;'>
+            <b>Important Notice:</b> $semester->notice
+          </div>
+          </td></tr>";
+    }
+      
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    $pC .= $this->draw_semester_box_bottom();
+
+    return $pC;
+  }
+
+
+
 
 
 	/**

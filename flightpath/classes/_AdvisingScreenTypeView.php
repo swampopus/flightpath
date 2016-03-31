@@ -111,7 +111,7 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 	 * @param bool $bool_display_hour_count
 	 * @return string
 	 */
-	function display_semester_list($list_semesters, $requirement_type, $title, $bool_display_hour_count = false)
+	function z__display_semester_list($list_semesters, $requirement_type, $title, $bool_display_hour_count = false)
 	{
 
 		// Display the contents of a semester object
@@ -270,5 +270,240 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 
 	}
 
-}
+
+
+
+
+
+  /**
+   * Display contents of a semester list as a single semester,
+   * only displaying courses matching the requirement_type.
+   * If the requirement_type is "e", then we will also look for anything
+   * not containing a defined requirement_type.
+   *
+   * @param SemesterList $list_semesters
+   * @param string $requirement_type
+   * @param string $title
+   * @param bool $bool_display_hour_count
+   * @return string
+   */
+  function display_semester_list($list_semesters, $requirement_type, $title, $bool_display_hour_count = false)
+  {
+
+    // Display the contents of a semester object
+    // on the screen (in HTML)
+    $pC = "";
+    $pC .= $this->draw_semester_box_top($title);
+
+    $is_empty = TRUE;
+    
+    $count_hours_completed = 0;
+    $list_semesters->reset_counter();
+    while($list_semesters->has_more())
+    {
+      $semester = $list_semesters->get_next();
+      if ($semester->semester_num == -88)
+      { // These are the "added by advisor" courses.  Skip them.
+        continue;
+      }
+
+      $last_req_by_degree_id = -1;
+            
+      // First, display the list of bare courses.
+      $semester->list_courses->sort_alphabetical_order();
+      $semester->list_courses->reset_counter();
+      $sem_is_empty = true;
+      $html = array();
+      $sem_rnd = rand(0,9999);
+      $pC .= "<tr><td colspan='4' class='tenpt'>
+          <span class='advise-type-view-sem-title'><!--SEMTITLE$sem_rnd--></span></td></tr>";
+      while($semester->list_courses->has_more())
+      {
+        $course = $semester->list_courses->get_next();
+        // Make sure the requirement type matches!
+        if (!$this->match_requirement_type($course->requirement_type, $requirement_type))
+        {
+          continue;
+        }
+    
+        $is_empty = FALSE;
+      
+        if (!isset($html[$course->req_by_degree_id])) {
+          $html[$course->req_by_degree_id] = "";
+        }
+        
+        // Is this course being fulfilled by anything?
+        //if (is_object($course->courseFulfilledBy))
+        if (!($course->course_list_fulfilled_by->is_empty))
+        { // this requirement is being fulfilled by something the student took...
+          //$pC .= $this->draw_course_row($course->courseFulfilledBy);
+          $html[$course->req_by_degree_id] .= $this->draw_course_row($course->course_list_fulfilled_by->get_first());
+          //$count_hours_completed += $course->courseFulfilledBy->hours_awarded;
+          $course->course_list_fulfilled_by->get_first()->set_has_been_displayed($course->req_by_degree_id);
+          
+          if ($course->course_list_fulfilled_by->get_first()->display_status == "completed")
+          { // We only want to count completed hours, no midterm or enrolled courses.
+            //$count_hours_completed += $course->course_list_fulfilled_by->get_first()->hours_awarded;
+            $h = $course->course_list_fulfilled_by->get_first()->get_hours_awarded();
+            if ($course->course_list_fulfilled_by->get_first()->bool_ghost_hour == TRUE) {
+             $h = 0;
+            }
+            $count_hours_completed += $h;           
+          }
+        } else {
+          // This requirement is not being fulfilled...
+          $html[$course->req_by_degree_id] .= $this->draw_course_row($course);
+        }
+        
+        
+        
+                
+        $sem_is_empty = false;
+      } //while list_courses
+
+      // Now, draw all the groups.
+      $semester->list_groups->sort_alphabetical_order();
+      $semester->list_groups->reset_counter();
+      while($semester->list_groups->has_more())
+      {
+        
+        $group = $semester->list_groups->get_next();
+        if (!$this->match_requirement_type($group->requirement_type, $requirement_type))
+        {
+          continue;
+        }
+
+        if (!isset($html[$group->req_by_degree_id])) {
+          $html[$group->req_by_degree_id] = "";
+        }
+
+
+
+
+        $html[$group->req_by_degree_id] .= "<tr><td colspan='8'>";
+        $html[$group->req_by_degree_id] .= $this->display_group($group);
+        $count_hours_completed += $group->hours_fulfilled_for_credit;
+        $html[$group->req_by_degree_id] .= "</td></tr>";
+        $sem_is_empty = false;
+        $is_empty = FALSE;
+      } // while list_groups
+
+      if ($sem_is_empty == false)
+      {
+        // There WAS something in this semester, put in the title.
+        
+        //debugCT("replacing $sem_rnd with $semester->title");
+        $pC = str_replace("<!--SEMTITLE$sem_rnd-->",$semester->title,$pC);
+      }
+
+      // Okay, let's plan to put it all on the screen for this semester....      
+
+      // Sort by degree's advising weight
+      $new_html = array();
+      foreach($html as $req_by_degree_id => $content) {
+        
+        $dtitle = @$GLOBALS["fp_temp_degree_titles"][$req_by_degree_id];
+        $dweight = intval(@$GLOBALS["fp_temp_degree_advising_weights"][$req_by_degree_id]);
+        
+        if ($dtitle == "") {
+          $t_degree_plan = new DegreePlan($req_by_degree_id);
+          $t_degree_plan->load_descriptive_data();        
+          $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
+          $dweight = $t_degree_plan->db_advising_weight;
+          $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle . " "; //save for next time.
+          $GLOBALS["fp_temp_degree_advising_weights"][$req_by_degree_id] = $dweight . " "; //save for next time.
+        }
+        
+        $degree_title = fp_get_machine_readable($dtitle);  // make it machine readable.  No funny characters.
+        $degree_advising_weight = str_pad($dweight, 4, "0", STR_PAD_LEFT);
+        
+        
+        $new_html[$degree_advising_weight . "__" . $degree_title][$req_by_degree_id] = $content;
+        
+      }
+      
+      // Sort by the first index, the advising weight.   
+      //fpm($new_html); 
+      ksort($new_html);
+      //fpm($new_html);
+      
+      
+      
+      //////////////////////////
+      // Okay, now let's go through our HTML array and add to the screen....
+      foreach ($new_html as $w => $html) {
+        foreach($html as $req_by_degree_id => $content) {
+          
+          // Get the degree title...        
+          $dtitle = @$GLOBALS["fp_temp_degree_titles"][$req_by_degree_id];
+          if ($dtitle == "") {
+            $t_degree_plan = new DegreePlan($req_by_degree_id);
+            $t_degree_plan->load_descriptive_data();        
+            $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
+            $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle; //save for next time.
+          }
+    
+          $css_dtitle = fp_get_machine_readable($dtitle);
+    
+          // TODO:  Possibly don't display this if we only have one degree chosen?      
+          $pC .= "<tr><td colspan='8'>
+                    <div class='tenpt required-by-degree required-by-degree-$css_dtitle'>Required by $dtitle</div>
+                  </td></tr>";      
+          
+          
+          $pC .= $content;
+        }
+      }    
+        
+      
+      
+      
+    } // while list_semester
+    
+    
+    if ($is_empty == TRUE) {
+      // There was nothing in this box.  Do not return anything.
+      return FALSE;
+    }
+    
+    
+    
+    // Add hour count to the bottom...
+    if ($bool_display_hour_count == true && $count_hours_completed > 0)
+    {
+      $pC .= "<tr><td colspan='8'>
+        <div class='tenpt advise-completed-hours' style='text-align:right; margin-top: 10px;'>
+        <span class='completed-hours-label'>Completed hours:</span> <span class='count-hours-completed'>$count_hours_completed</span>
+        </div>
+        ";
+      $pC .= "</td></tr>";
+    }
+
+    $pC .= $this->draw_semester_box_bottom();
+
+    return $pC;
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+} //class
 
