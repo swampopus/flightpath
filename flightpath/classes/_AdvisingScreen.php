@@ -3652,7 +3652,11 @@ function draw_menu_items($menu_array) {
 
 	  $w = 340;
 	  if ($this->page_is_mobile) $w = "100%";
-		return $this->draw_box_top($title, $hideheaders, $w);
+    
+    $extra_classes = " fp-semester-box-top fp-semester-box-top-" . fp_get_machine_readable(strtolower($title));
+    
+    
+		return $this->draw_box_top($title, $hideheaders, $w, $extra_classes);
 	}
 
 	/**
@@ -3690,7 +3694,7 @@ function draw_menu_items($menu_array) {
 	 * 
 	 * @return string
 	 */
-	function draw_box_top($title, $hideheaders=false, $table_width = 300){ 
+	function draw_box_top($title, $hideheaders=false, $table_width = 300, $extra_classes = ""){ 
 	  // returns the beginnings of the year tables...
 
 		// Get width values from width_array (supplied by calling function,
@@ -3727,8 +3731,11 @@ function draw_menu_items($menu_array) {
 		}
 
 
+    $extra_classes .= " fp-box-top-" . fp_get_machine_readable(strtolower($title));
+
+
 		$rtn = "
-		   <table border='0' width='$table_width' cellpadding='0' cellspacing='0' class='fp-box-top'>
+		   <table border='0' width='$table_width' cellpadding='0' cellspacing='0' class='fp-box-top $extra_classes'>
    			<tr>
     		<td colspan='8' class='blueTitle' align='center' valign='top'>
     				";
