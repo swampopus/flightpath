@@ -501,7 +501,7 @@ function user_edit_student_user_form() {
   );  
 
   
-  $major_code_array = $db->get_student_majors_from_db($student_cwid, FALSE, TRUE);
+  $major_code_array = $db->get_student_majors_from_db($student_cwid, TRUE);
   
   $temp = "";
   foreach ($major_code_array as $details) {

@@ -248,7 +248,11 @@ class _FlightPath extends stdClass
     foreach ($degree_plans as $degree_plan) {
       
       $new_degree_plan->combined_degree_ids_array[] = $degree_plan->degree_id;
-      $new_degree_plan->public_notes_array[$degree_plan->degree_id] = $degree_plan->public_notes_array[$degree_plan->degree_id];
+      
+      // Is there a public note to copy over?
+      if (isset($degree_plan->public_notes_array[$degree_plan->degree_id])) {
+        $new_degree_plan->public_notes_array[$degree_plan->degree_id] = $degree_plan->public_notes_array[$degree_plan->degree_id];
+      }
       
       if ($degree_plan->catalog_year == "" || $degree_plan->catalog_year == 0) {
         $degree_plan->load_descriptive_data();

@@ -1,6 +1,10 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-04-01
+  Fixed a bug in user.student.inc where major codes were not being read correctly from student_degrees table.
+  
+
 2016-03-31
   Added option to CourseList function sort_alphabetical_order, to include the degree's advising weight of the degree the course requires first, to make
   it also get sorted by degree.

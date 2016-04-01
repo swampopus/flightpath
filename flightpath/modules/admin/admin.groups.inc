@@ -196,10 +196,10 @@ function admin_edit_group_form_submit(&$form, $form_submit) {
       // Did NOT contain an ampersand (&), so this goes in the
       // regular course requirements.
       $tokens = explode(" ", $line);
-      $subject_id = trim($tokens[0]);
-      $course_num = trim($tokens[1]);
-      $min_grade = trim($tokens[2]);
-      $course_repeats = trim($tokens[3]);
+      $subject_id = @trim($tokens[0]);
+      $course_num = @trim($tokens[1]);
+      $min_grade = @trim($tokens[2]);
+      $course_repeats = @trim($tokens[3]);
 
       if (strstr($min_grade, "[")) {
         // This is actually a specified repeat, not a min grade.
@@ -436,8 +436,9 @@ function admin_edit_group_form() {
 
 
 function admin_display_groups_popup_edit_definition() {
-  $rtn = "";
+  $rtn = $tdef = "";
 
+  
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
 
@@ -620,7 +621,7 @@ function admin_get_courses_from_definition($definition, $catalog_year = "") {
     $si = trim($temp[0]);
     $cn = trim($temp[1]);
 
-    $rtn["text"] .= "$si $cn\n";
+    @$rtn["text"] .= "$si $cn\n";
 
 
   }

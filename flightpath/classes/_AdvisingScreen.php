@@ -3899,18 +3899,18 @@ function draw_menu_items($menu_array) {
 		if ($course->get_bool_substitution() == TRUE )
 		{
 //fpm($course);
-			if ($course->get_course_substitution()->subject_id == "")
-			{ // Reload subject_id, course_num, etc, for the substitution course,
-				// which is actually the original requirement.
-				if (is_object($course->get_course_substitution()))
-				{
+      if (is_object($course->get_course_substitution()))
+      {
+			  if ($course->get_course_substitution()->subject_id == "")
+			  { // Reload subject_id, course_num, etc, for the substitution course,
+				  // which is actually the original requirement.
 					$course->get_course_substitution()->load_descriptive_data();
-				} 
-				
+			  }
+        
+        $o_subject_id = $course->get_course_substitution()->subject_id;
+        $o_course_num = $course->get_course_substitution()->course_num;        				
 			}
 
-			$o_subject_id = $course->get_course_substitution()->subject_id;
-			$o_course_num = $course->get_course_substitution()->course_num;
       
 			if ($bool_add_footnote == true)
 			{
