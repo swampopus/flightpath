@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-04-04
+  Fixed bug in what if selection screen for tracks.  Added new javascript function to create CSS-friendly strings.
+  
+  Added ability in System Settings to show group titles on View and What If screens, not just in print mode.
+  
+
 2016-04-01
   Fixed a bug in user.student.inc where major codes were not being read correctly from student_degrees table.
   

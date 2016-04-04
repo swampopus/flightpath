@@ -1323,19 +1323,19 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
         // or the first default track.
         if ($min_tracks == 1 && $max_tracks == 1) {
           $element_type = "radios";
-          $element_value = $default_tracks_array[0];
+          $element_value = array($default_tracks_array[0] => $default_tracks_array[0]);
         }
 
         // Actually build up the options...        
         foreach ($tracks_by_class[$degree_class] as $t_degree_plan) {
           //$degree_id = $t_degree_plan->degree_id;  
           
-          $tmajor_code = trim($t_degree_plan->major_code);
+          $tmajor_code = "" . trim($t_degree_plan->major_code);
           
           $options[$tmajor_code] = $t_degree_plan->get_title2(FALSE, TRUE);
           // Is this a "default" major code?
-          if (in_array(trim($tmajor_code), $default_tracks_array)) {
-            $element_value[$tmajor_code] = $tmajor_code;  // make it be selected
+          if (in_array(trim($tmajor_code), $default_tracks_array)) {                       
+            $element_value[$tmajor_code] = $tmajor_code;  // make it be selected            
           }                  
         }
         
@@ -1439,8 +1439,8 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
 function advise_what_if_selection_form_validate($form, &$form_state) {
 
   // Make sure they selected at least 1 level 1 degree.
-  $temp = FALSE;
-  foreach (array(1) as $num) {
+  $temp = FALSE;  
+  foreach (array(1,2) as $num) {    
     if (is_array($form_state["values"]["select_level_{$num}_degrees"])) {
       foreach ($form_state["values"]["select_level_{$num}_degrees"] as $k => $v) {
         if ((string)$k === (string)$v && $k != "") {
@@ -1479,7 +1479,7 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
       }        
         
       
-      if (is_array($val)) {
+      if (is_array($val)) { // In other words, this was a group of checkboxes.        
         foreach ($val as $k => $v) {
           // Did the user select an item?  Val's key and value will be identical if so.
           if ($k == $v && $k != "") {
@@ -1487,11 +1487,15 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
             $selected_for[$major_code . "__" . $degree_class]++;          
           }
         }
+      } // if is_array (val)
+      else if (is_string($val) && trim($val) != ""){
+        // Not an array-- was a radio list?  So, this was a selection.
+        $selected_for[$major_code . "__" . $degree_class]++;        
       }
+      
     }
   }
   
-   
   
   // Okay, now that we know how many were selected, let's make sure that the number falls within
   // our min/max range for those tracks.
@@ -1588,7 +1592,25 @@ function advise_what_if_selection_form_submit($form, $form_state) {
             $what_if_major_code .= $k . ",";
           }
         }
+      } // if is_array val (cause it was a checkbox)
+      else if (is_string($val) && trim($val) != "") {
+        // This was from radio buttons.
+        
+        //First, make sure it's top-level degree was even selected.  If it wasn't, skip it, it doesn't matter.
+        $temp = explode("|_", $val);
+        $top_level_code = trim($temp[0]);
+        if (@$form_state["values"]["select_level_1_degrees"][$top_level_code] != $top_level_code) {
+          if (@$form_state["values"]["select_level_2_degrees"][$top_level_code] != $top_level_code) {
+            continue;
+          }
+        }
+        
+        $what_if_major_code .= $k . ",";        
+        
+        
       }
+      
+      
     }
   }
   

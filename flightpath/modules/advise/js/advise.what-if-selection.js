@@ -46,9 +46,13 @@ function adviseWhatIf_UpdateBasedOnSelectionOf(element) {
   
   if ($(element).is(":checked")) {
     var is_checked = true;
+    
   }
    
   var major_code = $(element).val();
+  
+  var css_major_code = fp_get_machine_readable(major_code);
+  
   
   // We want all the wrappers that END with our major_code.
   // The exact format will look like   
@@ -56,11 +60,11 @@ function adviseWhatIf_UpdateBasedOnSelectionOf(element) {
   // jquery to see if element ENDS with string.... $("[id$=ENDING_STRING]")
   if (is_checked) {
     // Make visible...
-    $("[id$=__for__" + major_code + "__xx]").show();
-  }
-  else {
+    $("[id$=__for__" + css_major_code + "__xx]").show();
     
-    $("[id$=__for__" + major_code + "__xx]").hide();
+  }
+  else {    
+    $("[id$=__for__" + css_major_code + "__xx]").hide();
   }
   
   

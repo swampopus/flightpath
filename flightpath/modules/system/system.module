@@ -1593,7 +1593,16 @@ function system_settings_form() {
                         <br>If you are unsure what to put here, select '1.5 years'."),
   );
   
-                                  
+  $form["show_group_titles_on_view"] = array(
+    "type" => "select",
+    "label" => t("Show group titles on View and What If screens?"),
+    "hide_please_select" => TRUE,
+    "options" => array("no" => t("No"), "yes" => t("Yes")),
+    "value" => variable_get("show_group_titles_on_view", "no"),
+    "description" => t("If set to Yes, then group titles will be displayed in the View
+                        and What if screens, similar to how they are displayed when printing.
+                        If unsure what to select, select 'No'."), 
+  );                                
                   
   
                 

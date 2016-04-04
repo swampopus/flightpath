@@ -15,6 +15,17 @@
     }
 
 
+    /**
+     * Similar to the php function flightpath, this will remove any non alphanumeric characters
+     * and replace with a _ (underscore)
+     * @param {Object} str
+     */
+    function fp_get_machine_readable(str) {
+      return str.replace(/[\W_]+/g,"_");
+    }    
+
+
+
 		
 		function popupreportcontact()
 		{

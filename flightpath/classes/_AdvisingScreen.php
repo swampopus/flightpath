@@ -3597,7 +3597,7 @@ function draw_menu_items($menu_array) {
     
 		$hand_class = "hand";
 
-		if ($this->bool_print)
+		if ($this->bool_print || variable_get("show_group_titles_on_view", "no") == "yes")
 		{
 			// In print view, disable all popups and mouseovers.
 			$on_mouse_over = "";
