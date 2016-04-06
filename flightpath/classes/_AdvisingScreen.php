@@ -599,7 +599,7 @@ function draw_menu_items($menu_array) {
 		$pC = "";
 
 
-		$semester = new Semester(-88);
+		$semester = new Semester(DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED);
 		if ($new_semester = $this->degree_plan->list_semesters->find_match($semester))
 		{
 			$this->add_to_screen($this->display_semester($new_semester));
@@ -2078,7 +2078,7 @@ function draw_menu_items($menu_array) {
 		{
 			$semester = $list_semesters->get_next();
 			$semester->reset_list_counters();
-			if ($semester->semester_num == -88)
+			if ($semester->semester_num == DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED)
 			{ // These are the "added by advisor" courses.  Skip them.
 				continue;
 			}
@@ -3599,20 +3599,24 @@ function draw_menu_items($menu_array) {
 
 		if ($this->bool_print || variable_get("show_group_titles_on_view", "no") == "yes")
 		{
-			// In print view, disable all popups and mouseovers.
-			$on_mouse_over = "";
-			$js_code = "";
-			$hand_class = "";
-			$row_msg = "<i>Select $disp_remaining_hours hour$s from $group->title.</i>";
+		  
+      $row_msg = "<i>Select $disp_remaining_hours hour$s from $group->title.</i>";
       if ($remaining_hours > 200) {
         // Don't bother showing the remaining hours number.
         $row_msg = "<i>Select additional courses from $group->title.</i>";
+      }
+
+      if ($this->bool_print) {            
+  			// In print view, disable all popups and mouseovers.
+  			$on_mouse_over = "";
+  			$js_code = "";
+  			$hand_class = "";
       }
       
 		}
 
 
-		if ($group->group_id == -88)
+		if ($group->group_id == DegreePlan::GROUP_ID_FOR_COURSES_ADDED)
 		{ // This is the Add a Course group.
 			$row_msg = "<i>Click to add an additional course.</i>";
 			$select_icon = "<span style='font-size: 16pt; color:blue;'>+</span>";
@@ -4068,12 +4072,24 @@ function draw_menu_items($menu_array) {
 			// we are in print view).
 			$op_on_click_function = "dummyToggleSelection";
 		}
-
-		$op = "<img src='$img_path/cb_" . $display_status . "$opchecked.gif'
-					border='0'
-					id='cb_$unique_id'
-					onclick='{$op_on_click_function}(\"$unique_id\",\"$display_status\",\"$extra_js_vars\");'
-					>";
+		
+		$extra_css = "";
+    if ($opchecked == "-check") {
+      $extra_css .= " advise-checkbox-$display_status-checked";
+    }
+		
+		$op = "<span class='advise-checkbox advise-checkbox-$display_status $extra_css'
+		             id='cb_span_$unique_id'
+		             onClick='{$op_on_click_function}(\"$unique_id\",\"$display_status\",\"$extra_js_vars\");'></span>";
+/*
+ * 
+          <img src='$img_path/cb_" . $display_status . "$opchecked.gif'
+          border='0'
+          id='cb_$unique_id'
+          onclick='{$op_on_click_function}(\"$unique_id\",\"$display_status\",\"$extra_js_vars\");'
+          >*/
+          
+                           
 		$hid = "<input type='hidden' name='$hid_name'
 						id='advcr_$unique_id' value='$hid_value'>";
 
@@ -4794,7 +4810,7 @@ function draw_menu_items($menu_array) {
     
     $bool_no_courses = FALSE;
     
-		if ($place_group->group_id != -88)
+		if ($place_group->group_id != DegreePlan::GROUP_ID_FOR_COURSES_ADDED)
 		{
 			// This is NOT the Add a Course group.
 
@@ -5145,7 +5161,7 @@ function draw_menu_items($menu_array) {
 		}
 
 		// Substitutors get extra information:
-		if (user_has_permission("can_substitute") && $group->group_id != -88)
+		if (user_has_permission("can_substitute") && $group->group_id != DegreePlan::GROUP_ID_FOR_COURSES_ADDED)
 		{
 			$pC .= "<div class='tenpt' style='margin-top: 20px;'>
 					<b>" . t("Special administrative information:") . "</b>

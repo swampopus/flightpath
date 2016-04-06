@@ -6,6 +6,7 @@ class _DegreePlan extends stdClass
   
   const DEGREE_ID_FOR_COMBINED_DEGREE = -1001;
   const SEMESTER_NUM_FOR_COURSES_ADDED = -88;
+  const GROUP_ID_FOR_COURSES_ADDED = -88;
   const SEMESTER_NUM_FOR_DEVELOPMENTALS = -55;
   
   
@@ -814,7 +815,7 @@ class _DegreePlan extends stdClass
 
     // Now, we want to add the Add a Course group...
     $g = new Group();
-    $g->group_id = DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED;
+    $g->group_id = DegreePlan::GROUP_ID_FOR_COURSES_ADDED;
     // Since it would take a long time during page load, we will
     // leave this empty of courses for now.  It doesn't matter anyway,
     // as we will not be checking this group for course membership

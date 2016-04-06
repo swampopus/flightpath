@@ -290,6 +290,41 @@ function toggleDisabledCompleted(x,y,type) {
 function toggleSelection(uniqueID, display_status, warningMsg) {
   // We expect this to be the graphic of the checkbox.
   
+  //var imgPath = FlightPath.settings.themeLocation + "/images";
+  
+  var cb_span = $("#cb_span_" + uniqueID);
+  // This is the hidden variable for this course, to
+  // determine if it has been selected or not.
+  var course = $("#advcr_" + uniqueID);
+
+  if (course.val() == "true") {
+    // Meaning, this course is currently selected.
+    // So, unselect it.
+    course.val("");
+    //img.attr("src", imgPath + "/cb_" + display_status + ".gif");
+    $(cb_span).removeClass("advise-checkbox-" + display_status + "-checked");
+  } else {
+    // Meaning, this is unselected, so lets select it.
+    if (warningMsg != "") {
+      var x = confirm(warningMsg);
+      if (!x) {
+        return;
+      }
+    }
+    // Select it!
+    
+    course.val("true");
+    //img.attr("src", imgPath + "/cb_" + display_status + "-check.gif");
+    $(cb_span).addClass("advise-checkbox-" + display_status + "-checked");
+    
+  }
+}
+
+
+
+function z__toggleSelection(uniqueID, display_status, warningMsg) {
+  // We expect this to be the graphic of the checkbox.
+  
   var imgPath = FlightPath.settings.themeLocation + "/images";
   
   var img = $("#cb_" + uniqueID);

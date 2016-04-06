@@ -14,6 +14,7 @@
 function course_search_edit_course_details_form() {
   $form = array();
 
+  $m = 0;
   
   fp_add_css(fp_get_module_path("course_search") . "/css/course_search_style.css");
   
@@ -24,7 +25,7 @@ function course_search_edit_course_details_form() {
   $catalog_year = variable_get("current_catalog_year", 2006);
 
   $course = new Course($course_id,false,null,false,$catalog_year);
-  $course->catalog_year = $de_catalog_year;  // Since it may be 1900, force it!
+  
   $course->load_descriptive_data(false, true, false, true);
 
   fp_set_title(t("Edit Course Info for @course", array("@course" => "$subject_id $course_num")));
@@ -101,7 +102,6 @@ function course_search_edit_course_details_form() {
   //$term_array = get_term_id_suffixes();
   $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
 
-
   $form["mark" . $m++] = array(
     "value" => "<div class='rotation-form-checkboxes'>",
   );
@@ -127,7 +127,7 @@ function course_search_edit_course_details_form() {
       // subtracted by 1?  This is the case at ULM for fall.
       // Ex:  201340  is Fall of *2012*, not 2013.
       // We can tell this because the term structure (from admin settings)      
-      if (strtoupper($term_structures[$x]["disp_adjust"]) == "[Y-1]") {        
+      if (@strtoupper($term_structures[$x]["disp_adjust"]) == "[Y-1]") {        
         $term_id = ($check_year + 1) . $x;
       }
       
@@ -222,8 +222,8 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
     
     // delete the existing entries for this year & course here.
     db_query("DELETE FROM course_rotation_schedule
-            WHERE `course_id`='?'
-            AND `term_id` LIKE '?%' ", $course_id, $year);
+            WHERE `course_id`= ?
+            AND `term_id` LIKE ? ", $course_id, "$year%");
             
     /////////////////////////
     // Now, for x = 1 to 5,
@@ -233,7 +233,7 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
       if ($form_state["values"]["cb_$year$x"]["yes"] == "yes") {
         db_query("INSERT INTO course_rotation_schedule
                 (faculty_id, course_id, term_id, entry_value, posted)
-                VALUES ('?', '?', '?', '?', '?') ", $faculty_id, $course_id, "$year$x", "$subject_id~$course_num", time());                
+                VALUES (?, ?, ?, ?, ?) ", $faculty_id, $course_id, "$year$x", "$subject_id~$course_num", time());                
       }
     }
             
@@ -244,13 +244,13 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
   
   // delete first...
   db_query("DELETE FROM course_rotation_schedule
-            WHERE course_id = '?'
+            WHERE course_id = ?
             AND term_id = 'NOTA' ", $course_id);
 
   if ($form_state["values"]["not_anticipated"]["yes"] == "yes") {
     db_query("INSERT INTO course_rotation_schedule              
             (faculty_id, course_id, term_id, entry_value, posted)
-            VALUES ('?', '?', '?', '?', '?') ", $faculty_id, $course_id, "NOTA", "$subject_id~$course_num", time());
+            VALUES (?, ?, ?, ?, ?) ", $faculty_id, $course_id, "NOTA", "$subject_id~$course_num", time());
 
   }
 
@@ -261,7 +261,7 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
       if ($filename != "") {
         unlink("./custom/files/syllabi/$filename");
         db_query("DELETE FROM course_syllabi
-                WHERE `course_id`='?' ", $course_id);
+                WHERE `course_id`= ? ", $course_id);
         
       }
     }

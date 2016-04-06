@@ -312,7 +312,7 @@ function course_search_display_courses() {
   }      
   
   
-  $rtn .= "";
+  $mode = "";
       
   $rtn .= fp_render_curved_line(t("Course Search"));
 
@@ -377,7 +377,7 @@ function course_search_display_courses() {
       </div>
       ";
   // Draw the term selector.
-  $only_term = $_REQUEST["only_term"];
+  $only_term = @$_REQUEST["only_term"];
   $rtn .= "<form id='term_form' action='" . fp_url("tools/course-search/courses") . "' method='GET'>           
            <input type='hidden' name='mode' value='$subject_id'>
            <input type='hidden' name='subject_id' value='$subject_id'>
@@ -397,6 +397,7 @@ function course_search_display_courses() {
   //$term_array = get_term_id_suffixes();
   $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
   
+  $schedule_text = "";
   
   for ($t = $catalog_year; $t <= $catalog_year + 4; $t++)
   {
@@ -624,7 +625,11 @@ function course_search_display_courses() {
       
       
       // Draw it on screen...
-      if ($bool_hide != true) {     
+      if ($bool_hide != true) {
+        /*   
+         * 
+         * TODO:  This section should really only be if the course is designated as a graduate course or not, not based on course_num.
+         *   
         if ($grad_notice_flag == false && $course_num > 4999)
         {
           $grad_notice_flag = true;
@@ -636,6 +641,7 @@ function course_search_display_courses() {
                 " . t("The following courses are for Graduate Students only.") . "
                 </div>";
         }
+         * */
   
         $details = $schedule_text . $syllabus_text;
 
@@ -733,6 +739,7 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
 	// is going to be offered, if any.
 	$rtn_array = array();
 	$arr = array();
+	$year_line = "";
 	if ($year != "")
 	{ // if a year is entered, we will get the next few years, and the previous
 	  // one for good measure.
@@ -760,7 +767,7 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
 
 
 	$res = db_query("SELECT * FROM course_rotation_schedule
-							WHERE `course_id`='?'
+							WHERE `course_id`= ?
 							$year_line
 							ORDER BY term_id DESC
 							LIMIT $limit", $course_id);

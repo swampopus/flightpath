@@ -888,27 +888,27 @@ class _DatabaseHandler extends stdClass
     
     $res = $this->db_query("UPDATE degree_requirements
                 set `course_id`='?'
-                where `data_entry_value`='?~?' ", $new_course_id, $subject_id, $course_num) ;
+                where `data_entry_value`= ? ", $new_course_id, "$subject_id~$course_num") ;
 
     $res = $this->db_query("UPDATE group_requirements
                 SET `course_id`='?'
-                WHERE `data_entry_value`='?~?' ", $new_course_id, $subject_id, $course_num) ;
+                WHERE `data_entry_value`= ? ", $new_course_id, "$subject_id~$course_num") ;
 
 
 
     // Also update substitutions....
     $res = $this->db_query("UPDATE student_substitutions
                 SET `sub_course_id`='?'
-                WHERE `sub_entry_value`='?~?' ", $new_course_id, $subject_id, $course_num) ;
+                WHERE `sub_entry_value`= ? ", $new_course_id, "$subject_id~$course_num") ;
 
     $res = $this->db_query("UPDATE student_substitutions
                 SET `required_course_id`='?'
-                WHERE `required_entry_value`='?~?' ", $new_course_id, $subject_id, $course_num) ;
+                WHERE `required_entry_value`= ? ", $new_course_id, "$subject_id~$course_num") ;
 
     // Also the advising histories....
     $res = $this->db_query("UPDATE advised_courses
                 SET `course_id`='?'
-                WHERE `entry_value`='?~?' ", $new_course_id, $subject_id, $course_num) ;
+                WHERE `entry_value`= ? ", $new_course_id, "$subject_id~$course_num") ;
     
     
     

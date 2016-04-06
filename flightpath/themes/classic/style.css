@@ -22,6 +22,63 @@
 }
 
 
+/* 
+ * checkboxes.... 
+ * 
+ * */
+span.advise-checkbox {
+  width:14px;
+  height:14px;
+  display:inline-block;
+  background: url('images/cb_eligible.gif') no-repeat top left;
+}
+
+span.advise-checkbox-eligible {
+  background: url('images/cb_eligible.gif') no-repeat top left;
+}
+
+span.advise-checkbox-eligible-checked {
+  background: url('images/cb_eligible-check.gif') no-repeat top left;
+}
+
+span.advise-checkbox-completed {
+  background: url('images/cb_completed.gif') no-repeat top left;
+}
+
+span.advise-checkbox-completed-checked {
+  background: url('images/cb_completed-check.gif') no-repeat top left;
+}
+
+span.advise-checkbox-disabled {
+  background: url('images/cb_disabled.gif') no-repeat top left;
+}
+
+span.advise-checkbox-disabled-checked {
+  background: url('images/cb_disabled-check.gif') no-repeat top left;
+}
+
+span.advise-checkbox-enrolled {
+  background: url('images/cb_enrolled.gif') no-repeat top left;
+}
+
+span.advise-checkbox-enrolled-checked {
+  background: url('images/cb_enrolled-check.gif') no-repeat top left;
+}
+
+span.advise-checkbox-retake {
+  background: url('images/cb_retake.gif') no-repeat top left;
+}
+
+span.advise-checkbox-retake-checked {
+  background: url('images/cb_retake-check.gif') no-repeat top left;
+}
+
+
+
+
+
+
+/**************/
 
 .full_admin_top_options
 {

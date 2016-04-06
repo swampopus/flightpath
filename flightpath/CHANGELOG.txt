@@ -1,6 +1,20 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-04-06
+  Fixed isses with db queries which specified '?~?' or similar syntax, which is incompatible with the new PDO system.
+  
+  Changed checkboxes to use spans with classes for graphics, so we can easily overwrite as needed.
+  
+
+2016-04-05
+  Replaced some hard-coded values with constants.
+  
+  Fixed bug with group titles in view and what if.
+
+  Fixed mysql bug in course_search.module, fixed various issues which were causing "notices".
+  
+
 2016-04-04
   Fixed bug in what if selection screen for tracks.  Added new javascript function to create CSS-friendly strings.
   

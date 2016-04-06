@@ -710,10 +710,10 @@ function get_term_structures() {
     $temp = explode("]", $term_def);
     $rtn[trim($temp[1])] = array(
       "term_def" => $term_def,
-      "short" => trim($tokens[1]),
-      "abbr" => trim($tokens[2]),
-      "full" => trim($tokens[3]),
-      "disp_adjust" => trim($tokens[4]),
+      "short" => trim(@$tokens[1]),
+      "abbr" => trim(@$tokens[2]),
+      "full" => trim(@$tokens[3]),
+      "disp_adjust" => trim(@$tokens[4]),
     );
   
   }

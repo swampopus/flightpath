@@ -266,7 +266,7 @@ class _FlightPath extends stdClass
         $sem = $degree_plan->list_semesters->get_next();
         
         // If the semester is the Added by Advisor (-88), or the developmental block (-55) then skip for now.
-        if ($sem->semester_num == -88 || $sem->semester_num == -55) {
+        if ($sem->semester_num == DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED || $sem->semester_num == DegreePlan::SEMESTER_NUM_FOR_DEVELOPMENTALS) {
           // This is the special one that is "added by advisor".  Skip it.  But remember to add it later to the finished product.
           // Or, it's the developmentals block.  Add that later too.
           continue;
@@ -404,7 +404,7 @@ class _FlightPath extends stdClass
     {
       $g = $this->degree_plan->list_groups->get_next();
 
-      if ($g->group_id == -88)
+      if ($g->group_id == DegreePlan::GROUP_ID_FOR_COURSES_ADDED)
       {
         // Add a course group.  Skip.
         continue;
@@ -1672,7 +1672,7 @@ class _FlightPath extends stdClass
       $temp_course->advised_hours = $var_hours;
       $this->course_list_advised_courses->add($temp_course);
 
-      if ($semester_num == -88)
+      if ($semester_num == DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED)
       {
         // This was a courses added by the advisor.
         $this->assign_course_to_courses_added_list($course_id, $var_hours, $id, $advised_term_id);
@@ -1903,14 +1903,14 @@ class _FlightPath extends stdClass
 
     $course = new Course($course_id, false, $this->db);
     $course->bool_advised_to_take = true;
-    $course->assigned_to_semester_num = -88;
+    $course->assigned_to_semester_num = DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED;
     //$course->assigned_to_group_id = -88;
-    $course->assigned_to_group_ids_array[-88] = -88;
+    $course->assigned_to_group_ids_array[DegreePlan::GROUP_ID_FOR_COURSES_ADDED] = DegreePlan::GROUP_ID_FOR_COURSES_ADDED;
     $course->advised_hours = $var_hours;
     $course->db_advised_courses_id = $db_advised_courses_id;
     $course->advised_term_id = $advised_term_id;
 
-    if ($group = $this->degree_plan->find_group(-88))
+    if ($group = $this->degree_plan->find_group(DegreePlan::GROUP_ID_FOR_COURSES_ADDED))
     {
       $group->list_courses->add($course);
     }
