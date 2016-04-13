@@ -1379,7 +1379,7 @@ function get_global_database_handler() {
  * Note: If you attempt to fpm() an array
  * or object with too many levels of nesting, it may run out of memory and your script will die.
  */
-function fpm($var) {
+function fpm($var, $max_levels = 20) {
   
   if (!user_has_permission("view_fpm_debug")) {
     return;
@@ -1388,7 +1388,7 @@ function fpm($var) {
   // Complex variable?  Change it to print_r.
   $str = $var;
   if (is_array($str) || is_object($str)) {
-    $str = "<div class='fp-html-print-r-wrapper'>" . fp_html_print_r($str) . "</div>";
+    $str = "<div class='fp-html-print-r-wrapper'>" . fp_html_print_r($str, "", 0, $max_levels) . "</div>";
   }    
 
   $arr = debug_backtrace();
@@ -1419,11 +1419,11 @@ function depricated_message($str = "A depricated function has been called.") {
  * Similar to print_r, this will return an HTML-friendly
  * click-to-open system similar in design to Krumo.
  */
-function fp_html_print_r($var, $name = "", $cnt = 0) {  
+function fp_html_print_r($var, $name = "", $cnt = 0, $max_levels = 20) {  
   $rtn = "";
 
   
-  if ($cnt > 20) {
+  if ($cnt > $max_levels) {
     // Max levels deep.  Deeper, and PHP might run
     // out of memory or complain.
     $rtn .= "<div class='fp-html-print-r-too-deep'>
@@ -1465,7 +1465,7 @@ function fp_html_print_r($var, $name = "", $cnt = 0) {
                   </div>
                <div class='fp-html-print-r-var-value' id='fp-html-print-r-var-value-$rnd' style='display: none;'>";
     foreach ($var as $key => $value) {
-      $rtn .= fp_html_print_r($value, $key, ($cnt + 1));
+      $rtn .= fp_html_print_r($value, $key, ($cnt + 1), $max_levels);
     }
     
     $rtn .= "</div>

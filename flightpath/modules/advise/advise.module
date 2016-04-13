@@ -985,6 +985,7 @@ function advise_display_popup_course_description() {
   advise_init_screen();
   
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
+  fp_add_css(fp_get_module_path("advise") . "/css/advise.css");
   
   $data_string = trim($_GET["data_string"]);
   $course = new Course();

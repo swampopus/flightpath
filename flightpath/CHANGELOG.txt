@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-04-09
+  To prepare for dealing with prereqs, I changed the way the draw_course_row function is written in AdvisingScreen,
+  to allow hooks to change elements of it.
+  
+
 2016-04-06
   Fixed isses with db queries which specified '?~?' or similar syntax, which is incompatible with the new PDO system.
   

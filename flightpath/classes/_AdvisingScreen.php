@@ -3811,6 +3811,11 @@ function draw_menu_items($menu_array) {
 	function draw_course_row(Course $course, $icon_filename = "", $title_text = "", $js_toggle_and_save = false, $bool_display_check = true, $bool_add_footnote = true, $bool_add_asterisk_to_transfers = false)
 	{ 
 		// Display a course itself...
+		
+		$theme = array();
+    $theme["screen"] = $this;
+    $theme["student"] = $this->student;
+		
 		$pC = "";
 		$w1_1 = $this->width_array[0];
 		$w1_2 = $this->width_array[1];
@@ -3862,7 +3867,6 @@ function draw_menu_items($menu_array) {
 
 		$subject_id = $course->subject_id;
 		$course_num = $course->course_num; 
-
 
 		$o_subject_id = $subject_id;
 		$o_course_num = $course_num;
@@ -4078,9 +4082,23 @@ function draw_menu_items($menu_array) {
       $extra_css .= " advise-checkbox-$display_status-checked";
     }
 		
+    /*
 		$op = "<span class='advise-checkbox advise-checkbox-$display_status $extra_css'
 		             id='cb_span_$unique_id'
 		             onClick='{$op_on_click_function}(\"$unique_id\",\"$display_status\",\"$extra_js_vars\");'></span>";
+    */
+                 
+    $theme["checkbox"] = array(
+      "display_status" => $display_status,
+      "extra_css" => $extra_css,
+      "unique_id" => $unique_id,
+      "onclick" => array(
+        "function" => $op_on_click_function,
+        "arguments" => array($unique_id, $display_status, $extra_js_vars),
+      ),
+      "hidden_field" => "<input type='hidden' name='$hid_name' id='advcr_$unique_id' value='$hid_value'>",
+    );                 
+                 
 /*
  * 
           <img src='$img_path/cb_" . $display_status . "$opchecked.gif'
@@ -4090,8 +4108,8 @@ function draw_menu_items($menu_array) {
           >*/
           
                            
-		$hid = "<input type='hidden' name='$hid_name'
-						id='advcr_$unique_id' value='$hid_value'>";
+		//$hid = "<input type='hidden' name='$hid_name'
+		//				id='advcr_$unique_id' value='$hid_value'>";
 
 		// Okay, we can't actually serialize a course, as it takes too much space.
 		// It was slowing down the page load significantly!  So, I am going
@@ -4106,16 +4124,43 @@ function draw_menu_items($menu_array) {
 
 		$js_code = "describeCourse(\"$data_string\",\"$blank_degree_id\");";
 
-		$icon_link = "";
+    $theme["course"]["js_code"] = $js_code;
+
+    // Assemble theme array elements for the course itself.
+    $theme["course"] = array(
+      "course" => $course,
+      "js_code" => $js_code,
+      "subject_id" => $subject_id,
+      "course_num" => $course_num,
+      "display_status" => $display_status,
+      "extra_classes" => $extra_classes,
+      "footnote" => $footnote,
+      "hours" => $hours,
+      "var_hour_icon" => $var_hour_icon,
+      "dispgrade" => $dispgrade,
+      "grade" => $grade,
+      "pts" => $pts,
+      "title" => $title_text,
+    );
+
+
+
+
 
 		// If the course has a 'u' in it, it is a 'University Capstone' course.
 		if (strstr($course->requirement_type, "u")) {
 			$icon_filename = "ucap.gif";
-			$title_text = t("This course is a University Capstone.");
+			$title_text = t("This course is a University Capstone.");     
 		}
 
 		if ($icon_filename != "") {
-			$icon_link = "<img src='" . fp_theme_location() . "/images/icons/$icon_filename' width='19' height='19' border='0' alt='$title_text' title='$title_text'>";
+			//$icon_link = "<img src='" . fp_theme_location() . "/images/icons/$icon_filename' width='19' height='19' border='0' alt='$title_text' title='$title_text'>";
+			
+			$theme["icon"] = array();
+      $theme["icon"]["filename"] = $icon_filename;
+      $theme["icon"]["location"] = fp_theme_location() . "/images/icons";
+      $theme["icon"]["title"] = $title_text;
+      
 		}
 
     /*
@@ -4134,20 +4179,54 @@ function draw_menu_items($menu_array) {
 		$hand_class = "hand";
 
 		if ($bool_display_check == false) {
-			$op = $hid = "";
+			//$op = $hid = "";
+			
+      unset($theme["checkbox"]);
 		}
 
 
 		if ($this->bool_print) {
 			// In print view, disable all popups and mouseovers.
 			$on_mouse_over = "";
-			$js_code = "";
+			//$js_code = "";
+      $theme["course"]["js_code"] = "";
 			$hand_class = "";
 		}
 
 
-		$pC .= "<tr><td colspan='8'>";
 
+    // Invoke a hook on our theme array, so other modules have a chance to change it up.   
+    invoke_hook("theme_advise_course_row", array(&$theme));
+
+    /////////////////////////////////
+    // Actually draw out our $theme array now....
+    
+    // The checkbox & hidden element....
+    $op = $hid = "";
+    if (isset($theme["checkbox"]) && count($theme["checkbox"]) > 0) {
+      
+      $onclick = "";
+      $onclick = $theme["checkbox"]["onclick"]["function"] . "(\"" . join("\",\"", $theme["checkbox"]["onclick"]["arguments"]) . "\")";
+      
+      $op = "<span class='advise-checkbox advise-checkbox-{$theme["checkbox"]["display_status"]} {$theme["checkbox"]["extra_css"]}'
+                 id='cb_span_{$theme["checkbox"]["unique_id"]}'
+                 onClick='$onclick;'></span>";
+      $hid = $theme["checkbox"]["hidden_field"];                       
+    }
+    
+    // The icon....
+    $icon_html = "";
+    if (isset($theme["icon"]) && count($theme["icon"]) > 0) {
+      $icon_html = "<img class='advising-course-row-icon'
+                      src='{$theme["icon"]["location"]}/{$theme["icon"]["filename"]}' width='19' height='19' border='0' alt='{$theme["icon"]["title"]}' title='{$theme["icon"]["title"]}'>";      
+    }
+    
+
+    ////////////////////////////////////
+
+    // Draw the actual course row...
+
+    $pC .= "<tr><td colspan='8'>";
 
 		if ($course->get_bool_substitution_new_from_split() != TRUE || ($course->get_bool_substitution_new_from_split() == TRUE && $course->display_status != "eligible")){
 
@@ -4155,42 +4234,44 @@ function draw_menu_items($menu_array) {
 				$course_num = "&nbsp;";
 			}
 
+      $js_code = $theme["course"]["js_code"];
  
 			$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
-     	<tr height='20' class='$hand_class $display_status $extra_classes'
-      		$on_mouse_over title='$title_text' >
+     	<tr height='20' class='$hand_class {$theme["course"]["display_status"]} {$theme["course"]["extra_classes"]}'
+      		$on_mouse_over title='{$theme["course"]["title"]}' >
       		<td style='width:$w1_1; white-space:nowrap;' align='left'>$op$hid</td>
         
-      		<td style='width:$w1_2; white-space:nowrap;' align='left'  onClick='$js_code'>$icon_link</td>
+      		<td style='width:$w1_2; white-space:nowrap;' align='left'  onClick='$js_code'>$icon_html</td>
       		<td style='width:$w1_3; white-space:nowrap;' align='left'  onClick='$js_code'>&nbsp;$ast</td>
       		<td align='left' style='width:$w2; white-space:nowrap;' class='tenpt underline'  onClick='$js_code'>
-       				$subject_id</td>
+       				{$theme["course"]["subject_id"]}</td>
        		<td class='tenpt underline' style='width:$w3; white-space:nowrap;' align='left' 
        			         onClick='$js_code'>
-        			       $course_num$footnote</td>
-	         <td class='tenpt underline' style='width:$w4; max-width:36px; white-space:nowrap;'  onClick='$js_code'>$hours$var_hour_icon</td>
-       	   <td class='tenpt underline'  style='width:$w5; max-width:35px; white-space:nowrap;'  onClick='$js_code'>$dispgrade&nbsp;</td>
-       	   <td class='tenpt underline' style='width:$w6; max-width:31px; white-space:nowrap;' onClick='$js_code'>$pts&nbsp;</td>
+        			       {$theme["course"]["course_num"]}{$theme["course"]["footnote"]}</td>
+	         <td class='tenpt underline' style='width:$w4; max-width:36px; white-space:nowrap;'  onClick='$js_code'>{$theme["course"]["hours"]}{$theme["course"]["var_hour_icon"]}</td>
+       	   <td class='tenpt underline'  style='width:$w5; max-width:35px; white-space:nowrap;'  onClick='$js_code'>{$theme["course"]["dispgrade"]}&nbsp;</td>
+       	   <td class='tenpt underline' style='width:$w6; max-width:31px; white-space:nowrap;' onClick='$js_code'>{$theme["course"]["pts"]}&nbsp;</td>
        	
      	</tr>
      	</table>";
 
-		} else {
+		} 
+		else {
 			// These are the leftover hours from a partial substitution.
 
 			$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
-     	<tr height='20' class='hand $display_status'
-      		$on_mouse_over title='$title_text'>
+     	<tr height='20' class='hand {$theme["course"]["display_status"]}'
+      		$on_mouse_over title='{$theme["course"]["title"]}'>
       		<td width='$w1_1' align='left'>$op$hid</td>
-      		<td width='$w1_2' align='left' onClick='$js_code'>$icon_link</td>
+      		<td width='$w1_2' align='left' onClick='$js_code'>$icon_html</td>
       		<td width='$w1_3' align='left' onClick='$js_code'>&nbsp;</td>
       		<td align='left' class='tenpt underline' onClick='$js_code'
       			colspan='4'>
-       				&nbsp; &nbsp; $subject_id &nbsp;
-        			$course_num$footnote
-	       			&nbsp; ($hours " . t("hrs left") . ")
+       				&nbsp; &nbsp; {$theme["course"]["subject_id"]} &nbsp;
+        			{$theme["course"]["course_num"]}{$theme["course"]["footnote"]}
+	       			&nbsp; ({$theme["course"]["hours"]} " . t("hrs left") . ")
        	   	</td>
      	</tr>
      	</table>";		
