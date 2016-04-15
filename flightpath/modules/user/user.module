@@ -1398,8 +1398,8 @@ function user_display_student_users() {
     $student_cwid = trim($cur["cwid"]);
     
     //$disp_major_code = trim($cur["major_code"]);
-    $disp_major_code = $db->get_student_majors_from_db($student_cwid, TRUE);
-    
+    $disp_major_code = join(", ", $db->get_student_majors_from_db($student_cwid, FALSE));
+        
     $is_active = ($cur["is_active"] == "1") ? "Y" : "N";
     
     

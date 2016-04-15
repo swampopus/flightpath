@@ -294,7 +294,7 @@ class _CourseList extends ObjList
 	 * 
 	 * @return Course
 	 */
-	function find_most_recent_match(Course $course_c, $min_grade = "D", $bool_mark_repeats_exclude = false, $degree_id = 0)
+	function find_most_recent_match(Course $course_c, $min_grade = "D", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE)
 	{
 		// Get a list of all matches to courseC, and
 		// then order them by the most recently taken course
@@ -384,7 +384,7 @@ class _CourseList extends ObjList
 
 			// Has the course already been assigned [to this degree]?
 			//if ($c->bool_has_been_assigned)
-			if ($c->get_has_been_assigned_to_degree_id($degree_id)) {
+			if ($bool_skip_already_assigned && $c->get_has_been_assigned_to_degree_id($degree_id)) {
 			  // Yes, it's been assigned, so we can just skip it.
 				continue;
 			}
@@ -1337,10 +1337,10 @@ class _CourseList extends ObjList
 	 *
 	 * @return Course
 	 */
-	function find_best_match(Course $course_c, $min_grade = "D", $bool_mark_repeats_exclude = false)
+	function find_best_match(Course $course_c, $min_grade = "D", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE)
 	{
 
-		return $this->find_most_recent_match($course_c, $min_grade, $bool_mark_repeats_exclude);
+		return $this->find_most_recent_match($course_c, $min_grade, $bool_mark_repeats_exclude, $degree_id, $bool_skip_already_assigned);
 
 	}
 

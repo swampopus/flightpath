@@ -288,13 +288,15 @@ function admin_edit_course_form() {
                               Ex: ACCT 110, MATH 110A exclude
                               
                               IMPORTANT: Course names are updated for ALL YEARS of a course."),
+    "weight" => 10,
   );  
   
   $form["title"] = array(
     "type" => "textfield",
-    "label" => t("Title:"),
+    "label" => t("Title:"), 
     "value" => $course->title,
     "popup_description" => t("The title of the course displayed in FlightPath."),
+    "weight" => 20,
   );  
   
   $form["min_hours"] = array(
@@ -308,6 +310,7 @@ function admin_edit_course_form() {
                               
                               For example, if you have a course
                               worth 1-6 hours, enter 1 for min, and 6 for max."),
+    "weight" => 30,
   );  
    
 
@@ -322,6 +325,7 @@ function admin_edit_course_form() {
                               
                               For example, if you have a course
                               worth 1-6 hours, enter 1 for min, and 6 for max."),
+    "weight" => 40,
   );  
 
   $form["repeat_hours"] = array(
@@ -337,6 +341,7 @@ function admin_edit_course_form() {
                               be the same number as the min and max, or simply blank.
                               
                               If you are unsure what to enter, leave it blank."),
+    "weight" => 50,
   );  
    
     
@@ -345,7 +350,8 @@ function admin_edit_course_form() {
     "label" => t("Description"),
     "value" => $course->description,
     "rows" => 4,
-    "cols" => 80,    
+    "cols" => 80,
+    "weight" => 60,    
   );  
      
   $form["all_years"] = array(
@@ -355,6 +361,7 @@ function admin_edit_course_form() {
     "popup_description" => t("Check this box and press Submit to update title, description, and hour information
                               for all available years of this course.  Note that course name is automatically
                               updated for all years, regardless if you check this box or not."),
+    "weight" => 70,
   );   
      
   
@@ -364,6 +371,7 @@ function admin_edit_course_form() {
     "rows" => 3,
     "cols" => 80,
     "value" => $course->data_entry_comment,
+    "weight" => 80,
   );
    
      
@@ -372,6 +380,7 @@ function admin_edit_course_form() {
     "type" => "submit",
     "value" => t("Save for @year", array("@year" => $de_catalog_year)),
     "prefix" => "<hr>",
+    "weight" => 90,
   );
   
   $form["mark" . $m++] = array(
@@ -379,7 +388,8 @@ function admin_edit_course_form() {
     "value" => "<div align='right'>
                       " . t("Delete this course?") . " <input type='button' value='X'
                       onClick='adminDeleteCourse(\"$course_id\",\"$de_catalog_year\",\"$warn_eqv\");'>
-                    </div>", 
+                    </div>",
+    "weight" => 100, 
   );
   
   
