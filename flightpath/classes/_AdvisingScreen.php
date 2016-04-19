@@ -2753,6 +2753,7 @@ function draw_menu_items($menu_array) {
 
     $render["hidden_vars_and_buttons"] = array(
       "value" => $html,
+      "weight" => 1000,
     );
 
 
@@ -4088,7 +4089,7 @@ function draw_menu_items($menu_array) {
 		             onClick='{$op_on_click_function}(\"$unique_id\",\"$display_status\",\"$extra_js_vars\");'></span>";
     */
                  
-    $theme["checkbox"] = array(
+    $theme["op"] = array(
       "display_status" => $display_status,
       "extra_css" => $extra_css,
       "unique_id" => $unique_id,
@@ -4181,7 +4182,7 @@ function draw_menu_items($menu_array) {
 		if ($bool_display_check == false) {
 			//$op = $hid = "";
 			
-      unset($theme["checkbox"]);
+      unset($theme["op"]);
 		}
 
 
@@ -4203,15 +4204,15 @@ function draw_menu_items($menu_array) {
     
     // The checkbox & hidden element....
     $op = $hid = "";
-    if (isset($theme["checkbox"]) && count($theme["checkbox"]) > 0) {
+    if (isset($theme["op"]) && count($theme["op"]) > 0) {
       
       $onclick = "";
-      $onclick = $theme["checkbox"]["onclick"]["function"] . "(\"" . join("\",\"", $theme["checkbox"]["onclick"]["arguments"]) . "\")";
+      $onclick = $theme["op"]["onclick"]["function"] . "(\"" . join("\",\"", $theme["op"]["onclick"]["arguments"]) . "\")";
       
-      $op = "<span class='advise-checkbox advise-checkbox-{$theme["checkbox"]["display_status"]} {$theme["checkbox"]["extra_css"]}'
-                 id='cb_span_{$theme["checkbox"]["unique_id"]}'
+      $op = "<span class='advise-checkbox advise-checkbox-{$theme["op"]["display_status"]} {$theme["op"]["extra_css"]}'
+                 id='cb_span_{$theme["op"]["unique_id"]}'
                  onClick='$onclick;'></span>";
-      $hid = $theme["checkbox"]["hidden_field"];                       
+      $hid = $theme["op"]["hidden_field"];                       
     }
     
     // The icon....
@@ -4353,9 +4354,17 @@ function draw_menu_items($menu_array) {
 		$w6 = $this->popup_width_array[7];
 
     $title_text = "";
-    $icon_link = "";
+    $icon_html = "";
     $pts = "";   
 
+
+    $theme["icon"] = array();
+
+    $theme = array();
+    $theme["screen"] = $this;
+    $theme["student"] = $this->student;
+    $theme["from_group_select"] = TRUE;
+        
 
 		if ($course->subject_id == "")
 		{
@@ -4363,8 +4372,7 @@ function draw_menu_items($menu_array) {
 			$course->load_course($course->course_id);
 		}
 
-
-		$subject_id = $course->subject_id;
+    $subject_id = $course->subject_id;
 		$course_num = $course->course_num;
 		$hours = $course->get_catalog_hours();
 		$display_status = $course->display_status;
@@ -4396,12 +4404,6 @@ function draw_menu_items($menu_array) {
 		{
 			$checked = " checked='checked' ";
 		}
-		$op = "<input type='radio' name='course' value='$course_id' $checked>";
-		$hid = "<input type='hidden' name='$course_id" . "_subject'
-						id='$course_id" . "_subject' value='$subject_id'>
-					<input type='hidden' name='$course_id" . "_db_group_requirement_id'
-						id='$course_id" . "_db_group_requirement_id' value='$db_group_requirement_id'>
-						<input_type='hidden' name='$course_id" . "_req_by_degree_id' id='$course_id" . "_req_by_degree_id' value='$req_by_degree_id'>";
 
 		$blank_degree_id = "";
 		if ($this->bool_blank)
@@ -4422,42 +4424,123 @@ function draw_menu_items($menu_array) {
             onmouseout='$(this).removeClass(\"selection_highlight\");'
     ";
     
-    
 		if ($this->page_is_mobile) $on_mouse_over = "";  // Causes problems for some mobile devices.
 		
 		$hand_class = "hand";
-		$extra_style = $extra_classes = "";
+		$extra_style = $extra_classes = $extra_css = "";
 
 
     // Add the name of the course to the extra-classes
     $extra_classes .= " cr-" . fp_get_machine_readable($course->subject_id . " " . $course->course_num);
+
+
+
+   // Assemble theme array elements for the course itself.
+    $theme["course"] = array(
+      "course" => $course,
+      "js_code" => $js_code,
+      "subject_id" => $subject_id,
+      "course_num" => $course_num,
+      "display_status" => $display_status,
+      "extra_classes" => $extra_classes,      
+      "hours" => $hours,
+      "var_hour_icon" => $var_hour_icon,      
+      "grade" => $grade,
+      "pts" => $pts,
+      "title" => $title_text,
+    );   
+
+
     
+    $op_on_click_function = "adviseSelectCourseFromGroupPopup";
+
+    $theme["op"] = array(
+      "display_status" => $display_status,
+      "extra_css" => $extra_css,
+      "onclick" => array(
+        "function" => $op_on_click_function,
+        "arguments" => array(""),
+      ),
+      "checked" => $checked,
+      "hidden_field" => "<input type='hidden' name='$course_id" . "_subject'
+                            id='$course_id" . "_subject' value='$subject_id'>
+                          <input type='hidden' name='$course_id" . "_db_group_requirement_id'
+                              id='$course_id" . "_db_group_requirement_id' value='$db_group_requirement_id'>
+                          <input_type='hidden' name='$course_id" . "_req_by_degree_id' id='$course_id" . "_req_by_degree_id' value='$req_by_degree_id'>",
+    );
 
 
-		if ($course->bool_unselectable == true)
-		{
-			// Cannot be selected, so remove that ability!
-			$hand_class = "";
-			$on_mouse_over = "";
-			$js_code = "";
-			$op = "";
-			$extra_style = "style='font-style: italic; color:gray;'";
-		}
+    $theme["course"]["js_code"] = $js_code;
 
 
+
+    // Invoke a hook on our theme array, so other modules have a chance to change it up.   
+    invoke_hook("theme_advise_course_row", array(&$theme));
+
+    /////////////////////////////////
+    // Actually draw out our $theme array now....
+    
+    // The checkbox & hidden element....
+    $op = $hid = "";
+    if (isset($theme["op"]) && count($theme["op"]) > 0) {
+      
+      $onclick = "";
+      $onclick = $theme["op"]["onclick"]["function"] . "(\"" . join("\",\"", $theme["op"]["onclick"]["arguments"]) . "\")";
+      
+      $checked = $theme["op"]["checked"];
+      $hid = $theme["op"]["hidden_field"];
+      $op = "<input type='radio' name='course' value='$course_id' $checked onClick='return $onclick;' $extra_css>";
+                            
+    }
+
+    // The icon....
+    $icon_html = "";
+    if (isset($theme["icon"]) && count($theme["icon"]) > 0) {
+      
+      $icon_html = "<img class='advising-course-row-icon'
+                      src='{$theme["icon"]["location"]}/{$theme["icon"]["filename"]}' width='14' height='14' border='0' alt='{$theme["icon"]["title"]}' title='{$theme["icon"]["title"]}'>";      
+    }
+
+
+
+
+    if ($course->bool_unselectable == true)
+    {
+      // Cannot be selected, so remove that ability!
+      $hand_class = "";
+      $on_mouse_over = "";
+      $js_code = "";
+      $op = $op_on_click_function = "";
+      $extra_style = "style='font-style: italic; color:gray;'";
+    }
+
+
+
+
+  
+
+    //////////////////////////////////////
+    //////////////////////////////////////
+    
+    // Actually draw the row's HTML
+    
+    //////////////////////////////////////
+    
+    $js_code = $theme["course"]["js_code"];
+    
 		$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
-     	<tr height='20' class='$hand_class $display_status $extra_classes'
-      		$on_mouse_over title='$title_text'>
-      		<td width='$w1_1' align='left'>$op$hid</td>
-      		<td width='$w1_2' align='left' onClick='$js_code'>$icon_link</td>
+     	<tr height='20' class='$hand_class {$theme["course"]["display_status"]} {$theme["course"]["extra_classes"]}'
+      		$on_mouse_over title='{$theme["course"]["title"]}'>
+      		<td width='$w1_1' align='left'>$op$hid<span onClick='$js_code'>$icon_html</span></td>
+      		<td width='$w1_2' align='left' onClick='$js_code'> </td>
       		<td width='$w1_3' align='left' onClick='$js_code'>&nbsp;</td>
       		<td align='left' width='$w2' class='tenpt underline' 
       				onClick='$js_code' $extra_style>
-       				$subject_id</td>
+       				{$theme["course"]["subject_id"]}</td>
        		<td class='tenpt underline' $extra_style width='$w3' align='left' 
        			onClick='$js_code'>
-        			$course_num</td>
+        			{$theme["course"]["course_num"]}</td>
         	";
 		if ($repeats > 0)
 		{
@@ -4470,9 +4553,9 @@ function draw_menu_items($menu_array) {
 		} else {
 
 			$pC .= "
-	       <td class='tenpt underline' width='$w4' onClick='$js_code' $extra_style>$hours&nbsp;$var_hour_icon</td>
-       	   <td class='tenpt underline' width='$w5' onClick='$js_code'>$grade&nbsp;</td>
-       	   <td class='tenpt underline' width='$w6' onClick='$js_code'>$pts&nbsp;</td>
+	       <td class='tenpt underline' width='$w4' onClick='$js_code' $extra_style>{$theme["course"]["hours"]} {$theme["course"]["var_hour_icon"]}</td>
+       	   <td class='tenpt underline' width='$w5' onClick='$js_code'>{$theme["course"]["grade"]}&nbsp;</td>
+       	   <td class='tenpt underline' width='$w6' onClick='$js_code'>{$theme["course"]["pts"]}&nbsp;</td>
        	   ";
 		}
 

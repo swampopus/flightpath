@@ -726,10 +726,18 @@ function admin_display_degrees() {
                 
     $class_details = fp_get_degree_classification_details($db_degree_class);
     $disp_class = $class_details["title"];            
+
+    $on_mouse_over = "
+            onmouseover='$(this).addClass(\"selection_highlight\");'
+            onmouseout='$(this).removeClass(\"selection_highlight\");'
+    ";      
+
+
                 
     $rtn .= "<tr
-                  onmouseover=\"style.backgroundColor='#FFFF99'\"
-                  onmouseout=\"style.backgroundColor='white'\"
+                  
+                  $on_mouse_over
+                  
                   style='cursor:pointer;'
                   onClick='window.location=\"$url\"'
                   class='$extra_class class-$db_degree_class class-level-" . $class_details["level_num"] . " '

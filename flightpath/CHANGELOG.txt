@@ -1,8 +1,15 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-04-19
+  Made various changes in AdvisingScreen, and added a new hook, so that course rows could be further themed by
+  modules, before they are drawn on screen.  This is partially so that the prereqs module will more easily work.
+  
+  Added better CSS to admin.degrees.inc.
+
 2016-04-14
   Added extra functionality to CourseList.
+  
 
 2016-04-09
   To prepare for dealing with prereqs, I changed the way the draw_course_row function is written in AdvisingScreen,

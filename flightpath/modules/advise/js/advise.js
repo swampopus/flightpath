@@ -357,6 +357,23 @@ function dummyToggleSelection(x,y,z) {
 }
 
 
+
+/*
+ * We are selecting a course to advise from a popup list of courses.  Normally, return
+ * TRUE if there's no str.  If there is, it means it's a question we should ask.
+ */
+function adviseSelectCourseFromGroupPopup(str_confirm) {
+  if (!str_confirm || str_confirm == "") {
+    return true;
+  }
+  
+  // else...
+  return confirm(str_confirm); 
+  
+}
+
+
+
 function describeCourse(dataString, blankDegreeID) {
   //var url = FlightPath.settings.basePath + "/advise/popup-course-description";  
   
