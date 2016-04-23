@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-04-22
+  Added ability to "view/print all" advising histories, just like the comments.
+  
+  Added track descriptions to what if selection screen
+
+
 2016-04-19
   Made various changes in AdvisingScreen, and added a new hook, so that course rows could be further themed by
   modules, before they are drawn on screen.  This is partially so that the prereqs module will more easily work.

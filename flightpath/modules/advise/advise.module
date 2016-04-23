@@ -1336,6 +1336,11 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
           $tmajor_code = "" . trim($t_degree_plan->major_code);
           
           $options[$tmajor_code] = $t_degree_plan->get_title2(FALSE, TRUE);
+          if (trim($t_degree_plan->track_description) != "") {
+            $options[$tmajor_code] .= "<div class='what-if-selection-track-desc what-if-selection-track-desc-for-" . fp_get_machine_readable($tmajor_code) . "'
+                                                >" . $t_degree_plan->track_description . "</div>";
+          }
+          
           // Is this a "default" major code?
           if (in_array(trim($tmajor_code), $default_tracks_array)) {                       
             $element_value[$tmajor_code] = $tmajor_code;  // make it be selected            

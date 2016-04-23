@@ -73,7 +73,8 @@ function advise_display_history() {
 
 
 
-  $rtn .= "<tr><td width='50%' valign='top'  style='padding-right: 10px;'>";
+  $rtn .= "<tr><td width='50%' valign='top'  style='padding-right: 10px;'>
+          ";
 
   ///////////////////////////////////////////////////
   //////////////////////////////////////////////////
@@ -90,8 +91,15 @@ function advise_display_history() {
   $c = 0;
   $is_empty = true;
   $first_style = "color: maroon; font-weight:bold;";
-  $on_mouse_over = "onmouseover=\"style.backgroundColor='#FFFF99'\"
-           onmouseout=\"style.backgroundColor='white'\" ";
+  $advising_session_id_array = array();
+  
+  $on_mouse_over = "
+            onmouseover='$(this).addClass(\"selection_highlight\");'
+            onmouseout='$(this).removeClass(\"selection_highlight\");'
+    ";      
+  
+  $html = "";
+  
 
   $res = db_query("SELECT * FROM advising_sessions
               WHERE student_id = '?'
@@ -144,6 +152,8 @@ function advise_display_history() {
     }
 
     $turl = fp_url("advise/popup-display-summary", "advising_session_id=$db_advising_session_id");
+
+    $advising_session_id_array[] = $db_advising_session_id;
 
     $on_click = "popupPrintWindow(\"" . $turl . "\");";
 
@@ -204,6 +214,17 @@ function advise_display_history() {
     
     $render_left["markup_no_adv_history"] = array(
       "value" => t("No advising history available."),
+    );
+  }
+  else {
+    
+    $print_all_url = fp_url("advise/popup-display-summary", "advising_session_id=" . join(",", $advising_session_id_array));
+    
+    $render_left["markup_print_all"] = array(
+      "value" => "<a href='javascript: popupPrintWindow(\"" . $print_all_url . "\");'  
+          class='nounderline tenpt'><img src='" . fp_theme_location() . "/images/popup.gif' border='0'>view/print all</a>
+          ",
+      "weight" => -1,
     );
   }
 
@@ -366,224 +387,244 @@ function advise_popup_display_summary() {
 
   $db = get_global_database_handler();
   
-  $advising_session_id = trim($_REQUEST["advising_session_id"]);
-
-
-  $res = db_query("SELECT * FROM advising_sessions
+  $advising_session_id = rtrim(trim($_REQUEST["advising_session_id"]), ",");
+  $bool_multiple = FALSE;
+  
+  // If we have commas in our advising_session_id, it means we had more than one that were passed to us!  We want to show
+  // them all. 
+  
+  if (!strstr($advising_session_id, ",")) {
+    $res = db_query("SELECT * FROM advising_sessions
                      WHERE advising_session_id = '?' ", $advising_session_id);
-  if (db_num_rows($res) > 0) {
-    $cur = db_fetch_array($res);
-    extract($cur, 3, "db");
-  }
-  $dt = format_date($db_posted, "pretty");
-
-  $term = get_term_description($db_term_id);
-  
-  $degree_title_line = "";
-  $ds = "";
-  $degree_plan = new DegreePlan();
-  if ($db_degree_id != _DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE) {
-    $degree_plan->degree_id = $db_degree_id;
-    $degree_plan->load_descriptive_data();
-    $degree_title_line = $degree_plan->get_title(true);    
   }
   else {
-    // This is a set of combined degrees.  We need to load all of the
-    // degrees in the major_code_csv to get their titles.
-    $temp = explode(",", $db_major_code_csv);
-    $ds = "s";
-    foreach ($temp as $major_code) {
-      if ($major_code == "") continue;      
-      $dp = $db->get_degree_plan($major_code, $db_catalog_year);
-      if ($dp != null) {
-        $degree_title_line .= $dp->get_title2(TRUE, TRUE) . ", ";
-      }      
-    }
-    $degree_title_line = rtrim($degree_title_line, ", ");
-  }
-
-  $student = new Student($db_student_id, $db);
-
-  $what_if_message = "";
-  if ($db_is_whatif == 1) {
-      
-    $official_degree_title = "";
-    $odsverb = " is";
-    $c = 0;
-    $majors = $db->get_student_majors_from_db($student->student_id);
-    foreach ($majors as $major_code) {      
-      if ($major_code == "") continue;
-            
-      $dp = $db->get_degree_plan($major_code, $db_catalog_year);
-      if ($dp != null) {
-        $c++;
-        $official_degree_title .= $dp->get_title2(TRUE, TRUE) . ", ";
-      }      
-    }
-    if ($c > 1) $odsverb = "s are";
-    
-    $official_degree_title = rtrim($official_degree_title, ", ");    
-      
-    $what_if_message = "<b>" . t("Note:") . "</b>
-              " . t("This advising was saved using <b>What If</b> mode
-              for the degree$ds %degree_title.  According to @initials records,
-              the student's official degree$odsverb %official.", array("%degree_title" => $degree_title_line, 
-                                                            "@initials" => $GLOBALS["fp_system_settings"]["school_initials"], 
-                                                            "%official" => $official_degree_title));
-  }
-
-  $page_is_mobile = fp_screen_is_mobile();
-
-  $w = ($page_is_mobile) ? "100%" : "500";
-  
-  $rtn .= "<table width='$w'><td valign='top'>";
-  
-  if ($page_is_mobile) {
-
-  }
-  else {
-  
-    $rtn .= "
-      <table class='tenpt' border='0' width='100%' cellpadding='3' cellspacing='0' style='border-width: 2px; border-style: solid; border-color: black;'>
-       <tr height='7'>
-        <td> </td>
-       </tr>
-       <tr>
-        <td valign='top' width='15%'>" . t("Student:") . "</td>
-        <td valign='top' width='40%'>" . $db->get_student_name($db_student_id, false) . " ($db_student_id)</td>
-        <td valign='top' rowspan='3'>
-          <table width='100%' cellpadding='0' cellspacing='0'>
-        <tr height='20'>
-         <td width='100%' valign='bottom'><hr noshade size='1' width='100%' color='black' style='margin: 0px;'></td>
-        </tr>
-        <tr height='20'>
-         <td width='100%' valign='top' align='right'><span style='font-size: 8pt;'>" . t("Student signature") . "</span></td>
-        </tr>
-
-        <tr height='20'>
-         <td width='100%' valign='bottom'><hr noshade size='1' width='100%' color='black' style='margin: 0px;'></td>
-        </tr>
-        <tr>
-         <td width='100%' valign='bottom' align='right'><span style='font-size: 8pt;'>" . t("Advisor signature") . "</span></td>
-        </tr>
-       <tr height='7'>
-        <td> </td>
-       </tr>
-  
+    $bool_multiple = TRUE;
+    $session_array = csv_to_array($advising_session_id);
         
-        </table> ";
+    $where = "";
+    foreach ($session_array as $sid) {
+      $where .= " advising_session_id = ? OR";
+    }
+    $where = rtrim($where, "OR");
+     
+    $res = db_query("SELECT * FROM advising_sessions
+                     WHERE $where ", $session_array);
+        
   }
+  while ($cur = db_fetch_array($res)) {
+    extract($cur, 3, "db");
   
-  $rtn .= "
-        </td>
-       </tr>
-       <tr>
-        <td valign='top' width='10%'>" . t("Advisor:") . "</td>
-        <td valign='top'>" . fp_get_faculty_name($db_faculty_id, false) . "</td>
-
-       </tr>
-       <tr>
-        <td valign='top'>" . t("Term:") . "</td>
-        <td valign='top'>$term</td>
-
-       </tr>
-       ";
-  if (!$page_is_mobile) {
-    $rtn .= "
-       <tr>
-        <td valign='top' colspan='2'>
-        " . t("Alternate Term:") . " _____________________
-        </td>
-       </tr>";
-  }
-       
-  $rtn .= "   
-       <tr>
-        <td valign='top' colspan='4'>
-        ";
-
-  if ($degree_title_line != "")
-  {
-    $rtn .= t("Degree$ds:") . " $degree_title_line";
-  }
-
-  $rtn .= "
-       </tr>
-       </table>
-       <div class='tenpt'><i>" . t("Submitted on") . " $dt.</i></div>
-       <div class='tenpt'>$what_if_message</div>
-       <br>
-    ";
-
-  $rtn .= fp_render_curved_line(t("Advised Courses"));
-
-  $fp = new FlightPath($student,$degree_plan, $db);
-
-  $fp->load_advising_session_from_database("","",false,false,$advising_session_id);
-
-  $rtn .= "<table border='0' cellpadding='3'>
-      <tr>
-        <td class='tenpt' valign='top' width='25%'>
-          <b>" . t("Course") . "</b>
-        </td>
-        <td class='tenpt' valign='top' width='70%'>
-          <b>" . t("Title") . "</b>
-        </td>
-        <td class='tenpt' valign='top'>
-          <b>" . t("Hours") . "</b>
-        </td>
-      </tr>";
-
-
-
-  // Get a courseList of all the courses which are set as advised to take.
-  $advised_courses_list = $fp->course_list_advised_courses;
-  $advised_courses_list->load_course_descriptive_data();
-  $advised_courses_list->sort_alphabetical_order();
-  $advised_courses_list->reset_counter();
-  while ($advised_courses_list->has_more()) {
-    $course = $advised_courses_list->get_next();
-    // set the catalogYear from the term_id.
-    $course->term_id = $db_term_id;
-    $course->set_catalog_year_from_term_id();
-    $course->load_descriptive_data(false);
-
-    $rtn .= "<tr>
-          <td class='tenpt' valign='top'>
-          $course->subject_id $course->course_num
-          </td>
-          <td class='tenpt' valign='top'>
-          $course->title
-          </td>
-          <td class='tenpt' valign='top' align='center'>
-          " . $course->get_hours() . " 
-          </td>
+    $dt = format_date($db_posted, "pretty");
+  
+    $term = get_term_description($db_term_id);
+    
+    $degree_title_line = "";
+    $ds = "";
+    $degree_plan = new DegreePlan();
+    if ($db_degree_id != _DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE) {
+      $degree_plan->degree_id = $db_degree_id;
+      $degree_plan->load_descriptive_data();
+      $degree_title_line = $degree_plan->get_title(true);    
+    }
+    else {
+      // This is a set of combined degrees.  We need to load all of the
+      // degrees in the major_code_csv to get their titles.
+      $temp = explode(",", $db_major_code_csv);
+      $ds = "s";
+      foreach ($temp as $major_code) {
+        if ($major_code == "") continue;      
+        $dp = $db->get_degree_plan($major_code, $db_catalog_year);
+        if ($dp != null) {
+          $degree_title_line .= $dp->get_title2(TRUE, TRUE) . ", ";
+        }      
+      }
+      $degree_title_line = rtrim($degree_title_line, ", ");
+    }
+  
+    $student = new Student($db_student_id, $db);
+  
+    $what_if_message = "";
+    if ($db_is_whatif == 1) {
+        
+      $official_degree_title = "";
+      $odsverb = " is";
+      $c = 0;
+      $majors = $db->get_student_majors_from_db($student->student_id);
+      foreach ($majors as $major_code) {      
+        if ($major_code == "") continue;
+              
+        $dp = $db->get_degree_plan($major_code, $db_catalog_year);
+        if ($dp != null) {
+          $c++;
+          $official_degree_title .= $dp->get_title2(TRUE, TRUE) . ", ";
+        }      
+      }
+      if ($c > 1) $odsverb = "s are";
+      
+      $official_degree_title = rtrim($official_degree_title, ", ");    
+        
+      $what_if_message = "<b>" . t("Note:") . "</b>
+                " . t("This advising was saved using <b>What If</b> mode
+                for the degree$ds %degree_title.  According to @initials records,
+                the student's official degree$odsverb %official.", array("%degree_title" => $degree_title_line, 
+                                                              "@initials" => $GLOBALS["fp_system_settings"]["school_initials"], 
+                                                              "%official" => $official_degree_title));
+    }
+  
+    $page_is_mobile = fp_screen_is_mobile();
+  
+    $w = ($page_is_mobile) ? "100%" : "500";
+    
+    $rtn .= "<table width='$w'><td valign='top'>";
+    
+    if ($page_is_mobile) {
+  
+    }
+    else {
+    
+      $rtn .= "
+        <table class='tenpt' border='0' width='100%' cellpadding='3' cellspacing='0' style='border-width: 2px; border-style: solid; border-color: black;'>
+         <tr height='7'>
+          <td> </td>
+         </tr>
+         <tr>
+          <td valign='top' width='15%'>" . t("Student:") . "</td>
+          <td valign='top' width='40%'>" . $db->get_student_name($db_student_id, false) . " ($db_student_id)</td>
+          <td valign='top' rowspan='3'>
+            <table width='100%' cellpadding='0' cellspacing='0'>
+          <tr height='20'>
+           <td width='100%' valign='bottom'><hr noshade size='1' width='100%' color='black' style='margin: 0px;'></td>
+          </tr>
+          <tr height='20'>
+           <td width='100%' valign='top' align='right'><span style='font-size: 8pt;'>" . t("Student signature") . "</span></td>
+          </tr>
+  
+          <tr height='20'>
+           <td width='100%' valign='bottom'><hr noshade size='1' width='100%' color='black' style='margin: 0px;'></td>
+          </tr>
+          <tr>
+           <td width='100%' valign='bottom' align='right'><span style='font-size: 8pt;'>" . t("Advisor signature") . "</span></td>
+          </tr>
+         <tr height='7'>
+          <td> </td>
+         </tr>
+    
           
-        </tr>
+          </table> ";
+    }
+    
+    $rtn .= "
+          </td>
+         </tr>
+         <tr>
+          <td valign='top' width='10%'>" . t("Advisor:") . "</td>
+          <td valign='top'>" . fp_get_faculty_name($db_faculty_id, false) . "</td>
+  
+         </tr>
+         <tr>
+          <td valign='top'>" . t("Term:") . "</td>
+          <td valign='top'>$term</td>
+  
+         </tr>
+         ";
+    if (!$page_is_mobile) {
+      $rtn .= "
+         <tr>
+          <td valign='top' colspan='2'>
+          " . t("Alternate Term:") . " _____________________
+          </td>
+         </tr>";
+    }
+         
+    $rtn .= "   
+         <tr>
+          <td valign='top' colspan='4'>
+          ";
+  
+    if ($degree_title_line != "")
+    {
+      $rtn .= t("Degree$ds:") . " $degree_title_line";
+    }
+  
+    $rtn .= "
+         </tr>
+         </table>
+         <div class='tenpt'><i>" . t("Submitted on") . " $dt.</i></div>
+         <div class='tenpt'>$what_if_message</div>
+         <br>
       ";
-  }
-
-  $rtn .= "</table>
-      <div align='right' class='tenpt' style='padding-top: 10px; padding-right: 15px;'>
-        <b>" . t("Total advised hours:") . " &nbsp; " . $advised_courses_list->count_hours() . "</b>
-      </div>
-      ";
-
-
-  if (!$page_is_mobile) {
-    $rtn .= "<br>";
-    $rtn .= fp_render_curved_line(t("Alternate Courses"));
-    $rtn .= "<div class='tenpt'>
-        " . t("You may use this space to write in alternate courses 
-        the student should enroll in, in the event that an 
-        advised course is full or unavailable.") . "
-        <br><br>
-        ___________________________________________________________________ <br><br>
-        ___________________________________________________________________
-        </div>  ";
-  }
-
-  $rtn .= "</table>";
+  
+    $rtn .= fp_render_curved_line(t("Advised Courses"));
+  
+    $fp = new FlightPath($student,$degree_plan, $db);
+  
+    $fp->load_advising_session_from_database("","",false,false,$advising_session_id);
+  
+    $rtn .= "<table border='0' cellpadding='3'>
+        <tr>
+          <td class='tenpt' valign='top' width='25%'>
+            <b>" . t("Course") . "</b>
+          </td>
+          <td class='tenpt' valign='top' width='70%'>
+            <b>" . t("Title") . "</b>
+          </td>
+          <td class='tenpt' valign='top'>
+            <b>" . t("Hours") . "</b>
+          </td>
+        </tr>";
+  
+  
+  
+    // Get a courseList of all the courses which are set as advised to take.
+    $advised_courses_list = $fp->course_list_advised_courses;
+    $advised_courses_list->load_course_descriptive_data();
+    $advised_courses_list->sort_alphabetical_order();
+    $advised_courses_list->reset_counter();
+    while ($advised_courses_list->has_more()) {
+      $course = $advised_courses_list->get_next();
+      // set the catalogYear from the term_id.
+      $course->term_id = $db_term_id;
+      $course->set_catalog_year_from_term_id();
+      $course->load_descriptive_data(false);
+  
+      $rtn .= "<tr>
+            <td class='tenpt' valign='top'>
+            $course->subject_id $course->course_num
+            </td>
+            <td class='tenpt' valign='top'>
+            $course->title
+            </td>
+            <td class='tenpt' valign='top' align='center'>
+            " . $course->get_hours() . " 
+            </td>
+            
+          </tr>
+        ";
+    }
+  
+    $rtn .= "</table>
+        <div align='right' class='tenpt' style='padding-top: 10px; padding-right: 15px;'>
+          <b>" . t("Total advised hours:") . " &nbsp; " . $advised_courses_list->count_hours() . "</b>
+        </div>
+        ";
+  
+  
+    if (!$page_is_mobile) {
+      $rtn .= "<br>";
+      $rtn .= fp_render_curved_line(t("Alternate Courses"));
+      $rtn .= "<div class='tenpt'>
+          " . t("You may use this space to write in alternate courses 
+          the student should enroll in, in the event that an 
+          advised course is full or unavailable.") . "
+          <br><br>
+          ___________________________________________________________________ <br><br>
+          ___________________________________________________________________
+          </div>  ";
+    }
+  
+    $rtn .= "</table>";
+    
+  } // while, for the query itself!    
 
   fp_set_title($db->get_student_name($db_student_id, FALSE) . " ($db_student_id) $term " . t("Advising Summary"));
 
