@@ -126,8 +126,8 @@ function tinymce_form_alter(&$form, $form_id) {
     fp_add_css(fp_get_module_path("tinymce") . "/css/tinymce.css");
     
     foreach($form as $key=>$val) {
-      if ($form[$key]["type"] == "textarea") {
-        $form[$key]["description"] .= "<div class='tinymce-extra-instructions'>
+      if (@$form[$key]["type"] == "textarea") {        
+        @$form[$key]["description"] .= "<div class='tinymce-extra-instructions'>
                                         " . t("Trouble with Copy/Paste? Try keyboard
                                               shortcuts CTRL-C and CTRL-V. To single-space, press CTRL-ENTER.") . "</div>";
       }

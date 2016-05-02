@@ -1465,6 +1465,7 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
   
   
   // TODO:  If a non-dynamic degree was selected, along with anything else, the user may not proceed.
+  //fpm($form);
   //fpm($form_state);
   
   
@@ -1588,6 +1589,7 @@ function advise_what_if_selection_form_submit($form, $form_state) {
           if ($k == $v && $k != "") {
             // YES.  It was selected!
             
+                        
             //First, make sure it's top-level degree was even selected.  If it wasn't, skip it, it doesn't matter.
             $temp = explode("|_", $k);
             $top_level_code = trim($temp[0]);
@@ -1603,7 +1605,7 @@ function advise_what_if_selection_form_submit($form, $form_state) {
       } // if is_array val (cause it was a checkbox)
       else if (is_string($val) && trim($val) != "") {
         // This was from radio buttons.
-        
+                        
         //First, make sure it's top-level degree was even selected.  If it wasn't, skip it, it doesn't matter.
         $temp = explode("|_", $val);
         $top_level_code = trim($temp[0]);
@@ -1613,7 +1615,7 @@ function advise_what_if_selection_form_submit($form, $form_state) {
           }
         }
         
-        $what_if_major_code .= $k . ",";        
+        $what_if_major_code .= $val . ",";        
         
         
       }
