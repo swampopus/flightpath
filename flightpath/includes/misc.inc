@@ -805,7 +805,7 @@ function fp_set_title($title) {
  * @param unknown_type $class
  */
 function fp_add_body_class($class) {
-  $GLOBALS["fp_add_body_classes"] .= " " . $class;
+  @$GLOBALS["fp_add_body_classes"] .= " " . $class;
 }
 
 

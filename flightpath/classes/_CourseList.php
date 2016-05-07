@@ -294,7 +294,7 @@ class _CourseList extends ObjList
 	 * 
 	 * @return Course
 	 */
-	function find_most_recent_match(Course $course_c, $min_grade = "D", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE)
+	function find_most_recent_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE)
 	{
 		// Get a list of all matches to courseC, and
 		// then order them by the most recently taken course
@@ -350,7 +350,7 @@ class _CourseList extends ObjList
 			///  Check for min grade, etc, here.			
 			if (!$c->meets_min_grade_requirement_of(null, $min_grade))
 			{
-			  //if ($min_grade == "C-") fpm("[did not meet min grade requirement of $min_grade :: $c->subject_id $c->course_num $c->grade");
+			  //if ($min_grade == "B-") fpm("[did not meet min grade requirement of $min_grade :: $c->subject_id $c->course_num $c->grade");
 				if ($bool_mark_repeats_exclude == true)
 				{
 					// Since this course does not meet the min_grade,
@@ -377,10 +377,18 @@ class _CourseList extends ObjList
 						continue;
 					}
 
-				} else {
+				} // if bool_mark_repeats_exclude == true 
+				else {
+				  // We did NOT meet the min_grade requirement!
+				  //if ($min_grade == "B-") fpm("[did not meet min grade requirement of $min_grade :: $c->subject_id $c->course_num $c->grade");
+				  $c = FALSE;
 					continue;
 				}
-			}
+			} // course did NOT meet the min_grade requirement
+      else {
+        // The course DID meet the min grade requirement.
+        //fpm("[DID meet min grade req of $min_grade :: $c->subject_id $c->course_num $c->grade");
+      }
 
 			// Has the course already been assigned [to this degree]?
 			//if ($c->bool_has_been_assigned)
@@ -391,8 +399,8 @@ class _CourseList extends ObjList
 
 			return $c;
 		}
-
-		return false;
+  
+		return FALSE;
 
 	}
 
@@ -1337,7 +1345,7 @@ class _CourseList extends ObjList
 	 *
 	 * @return Course
 	 */
-	function find_best_match(Course $course_c, $min_grade = "D", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE)
+	function find_best_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE)
 	{
 
 		return $this->find_most_recent_match($course_c, $min_grade, $bool_mark_repeats_exclude, $degree_id, $bool_skip_already_assigned);

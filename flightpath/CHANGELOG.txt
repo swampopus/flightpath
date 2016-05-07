@@ -1,6 +1,14 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-05-06
+  Fixed bug in _CourseList.php, where min_grade wasn't being accurately taken into account when searching for find_best_match() courses.
+  
+  Added CSS class to the body tag to state what the student's rank is.
+  
+  Made it so any rendered button gets its title as its class, for extra CSS styling.
+  
+
 2016-04-22
   Added ability to "view/print all" advising histories, just like the comments.
   

@@ -1104,7 +1104,13 @@ function advise_display_view($view = "view") {
   
   // Initialize everything we need to initialize for this advising session.
   advise_init_screen();      
-    
+  
+  // Add some body classes to the page for this student.
+  $student = $screen->student;
+  if (is_object($student)) {
+    fp_add_body_class("student-rank-$student->db_rank  student-catalog-year-$student->catalog_year");
+  }  
+  
   
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");  
   // Add advise.css to the screen

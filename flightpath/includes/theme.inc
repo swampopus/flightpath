@@ -118,6 +118,19 @@ function fp_display_page($page) {
   }
   $screen->page_title = $page_title;
   $screen->page_has_search = @$page["router_item"]["page_settings"]["page_has_search"];
+
+  // Add some body classes to the page for this student.
+  $student = $screen->student;
+  if (!is_object($student)) {
+    $student = new Student(); 
+    $student->student_id = $current_student_id;
+    $student->load_student_data();
+  }
+  if (is_object($student)) {
+    fp_add_body_class("student-rank-$student->db_rank  student-catalog-year-$student->catalog_year");
+  }  
+
+
   
   // If we don't have permission to search, then hide the little search.
   if (!user_has_permission("display_search_subtab")) {
@@ -989,6 +1002,9 @@ function fp_render_button($title, $on_click, $bool_padd = true, $style = "", $ex
   // style='some:thing;'
   // with SINGLE apostrophes!  not quotes.
 
+  // we want to add on a variable-name-friendly version of the title to extra_class.
+  $extra_class .= " fp-render-button-" . fp_get_machine_readable(strtolower($title));
+  
   $on_mouse = "onmouseover='this.className=\"gradbutton gradbutton_hover hand $extra_class\";'
         onmouseout='this.className=\"gradbutton hand $extra_class\";'
         onmousedown='this.className=\"gradbutton gradbutton_down hand $extra_class\";'
