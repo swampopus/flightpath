@@ -73,6 +73,24 @@ class _GroupList extends ObjList
   }
   
   
+  /**
+   * Return an array of course_id's for all the groups in this list.
+   * will look like:  $rtn[group_id][course_id] = TRUE
+   */
+  function get_group_course_id_array() {
+    $rtn = array();
+    
+    for ($t = 0; $t < $this->count; $t++)
+    {
+      $g = $this->array_list[$t];
+      $rtn[$g->group_id] = $g->get_course_id_array();
+    }
+        
+    return $rtn;
+      
+  }
+  
+  
   
   /**
    * Return a GroupList which is a clone of this list.

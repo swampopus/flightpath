@@ -249,6 +249,8 @@ class _FlightPath extends stdClass
       
       $new_degree_plan->combined_degree_ids_array[] = $degree_plan->degree_id;
       
+      $new_degree_plan->add_to_required_course_id_array($degree_plan->required_course_id_array);
+      
       // Is there a public note to copy over?
       if (isset($degree_plan->public_notes_array[$degree_plan->degree_id])) {
         $new_degree_plan->public_notes_array[$degree_plan->degree_id] = $degree_plan->public_notes_array[$degree_plan->degree_id];
@@ -340,7 +342,7 @@ class _FlightPath extends stdClass
     }
     
     
-    //fpm($new_degree_plan);
+    //fpm($new_degree_plan->required_course_id_array);
         
     
     return $new_degree_plan;

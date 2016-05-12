@@ -1,6 +1,16 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-05-11
+  Added to AdvisingScreen so we add extra classes when a course appears in more than one degree.
+    
+
+2016-05-10
+  Created an array in DegreePlan to keep track of every course that degree can possibly use.
+  
+  Added to $theme when drawing course rows, so we can move the degree_plan around as well.
+
+
 2016-05-06
   Fixed bug in _CourseList.php, where min_grade wasn't being accurately taken into account when searching for find_best_match() courses.
   

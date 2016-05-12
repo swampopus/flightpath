@@ -23,6 +23,9 @@ class _DegreePlan extends stdClass
 
   public $db_track_selection_config, $track_selection_config_array;
 
+  public $required_course_id_array;  // We will keep track of every course which this degree lists as a requirement, even in groups.
+                                    // looks like: required_course_id_array[$course_id][$degree_id][$group_id] = TRUE;
+
   public $gpa_calculations;
   
   
@@ -54,6 +57,8 @@ class _DegreePlan extends stdClass
     if (@$GLOBALS["fp_advising"]["bool_use_draft"] == true) {
       $this->bool_use_draft = true;
     }
+
+    $this->required_course_id_array = array();
 
     $this->public_notes_array = array();
 
@@ -379,9 +384,15 @@ class _DegreePlan extends stdClass
         //adminDebug($course_c->to_string() . $course_c->getCatalogHours());
         
         $obj_semester->list_courses->add($course_c);
+        
+        // array is sectioned like:  course_id | degree_id | group_id.    Group id = 0 means "on the bare degree plan"
+        $this->required_course_id_array[$course_c->course_id][$this->degree_id][0] = TRUE;        
+        
+      } // if course_id > 0
 
-      }
-
+      
+      
+      
       if ($cur["group_id"]*1 > 0)
       {
         // A group is the next degree requirement.
@@ -450,19 +461,42 @@ class _DegreePlan extends stdClass
         $obj_semester->list_groups->add($group_g);
 
 
-      }
+      }// if group_id > 0
 
-
-
-
-    }
+    } // while db results
 
 
 
     $this->list_groups->sort_priority();
 
+    $group_course_id_array = $this->list_groups->get_group_course_id_array();
+    // Add to our required_course_id_array.
+    foreach($group_course_id_array as $group_id => $details) {
+      foreach ($group_course_id_array[$group_id] as $course_id => $val) {
+        $this->required_course_id_array[$course_id][$this->degree_id][$group_id] = $val;
+      }
+    }
+
   }
 
+
+  /**
+   * Add another degree's required_course_id_array onto this one's.
+   */
+  function add_to_required_course_id_array($req_course_id_array) {
+    
+    foreach ($req_course_id_array as $course_id => $details) {
+      foreach ($req_course_id_array[$course_id] as $degree_id => $details2) {
+        foreach ($req_course_id_array[$course_id][$degree_id] as $group_id => $val) {
+            
+          $this->required_course_id_array[$course_id][$degree_id][$group_id] = $val;
+          
+        }
+      }
+    }
+    
+    
+  } // add_to_required_course_id_array
 
 
   /**

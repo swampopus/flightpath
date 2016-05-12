@@ -3816,6 +3816,7 @@ function draw_menu_items($menu_array) {
 		$theme = array();
     $theme["screen"] = $this;
     $theme["student"] = $this->student;
+    $theme["degree_plan"] = $this->degree_plan;
 		
 		$pC = "";
 		$w1_1 = $this->width_array[0];
@@ -3857,11 +3858,20 @@ function draw_menu_items($menu_array) {
       $extra_classes .= " course-assigned-more-than-one-degree course-assigned-" . count($course->assigned_to_degree_ids_array) . "-degrees";
     }
 
-    // TODO:  If the course has NOT been assigned, but is appearing in more than one degree, give it an extra CSS class
+    // If the course has NOT been assigned, but is appearing in more than one degree, give it an extra CSS class
+    // Check to see if the course is in our required_courses_id_array for more than one degree.
+    if ($course->display_status == "eligible") {
+      if (isset($this->degree_plan->required_course_id_array[$course->course_id])) {
+        if (count($this->degree_plan->required_course_id_array[$course->course_id]) > 1) {
+          // Add a new classname for this course...          
+          $extra_classes .= " course-appears-in-mult-degrees course-appears-in-" . count($this->degree_plan->required_course_id_array[$course->course_id]) . "-degrees";
+        }
+      }    
+    }
 
 
 		if ($course->subject_id == "")
-		{
+		{ 
 			$course->load_descriptive_data();
 		}
 
@@ -4363,6 +4373,7 @@ function draw_menu_items($menu_array) {
     $theme = array();
     $theme["screen"] = $this;
     $theme["student"] = $this->student;
+    $theme["degree_plan"] = $this->degree_plan;
     $theme["from_group_select"] = TRUE;
         
 
@@ -4432,6 +4443,15 @@ function draw_menu_items($menu_array) {
 
     // Add the name of the course to the extra-classes
     $extra_classes .= " cr-" . fp_get_machine_readable($course->subject_id . " " . $course->course_num);
+
+    // Check to see if the course is in our required_courses_id_array for more than one degree.
+    if (isset($this->degree_plan->required_course_id_array[$course->course_id])) {
+      if (count($this->degree_plan->required_course_id_array[$course->course_id]) > 1) {
+        // Add a new classname for this course...
+        $extra_classes .= " course-appears-in-mult-degrees course-appears-in-" . count($this->degree_plan->required_course_id_array[$course->course_id]) . "-degrees";
+      }
+    }    
+
 
 
 

@@ -106,6 +106,33 @@ class _Group extends stdClass
 	}
 
 
+  /**
+   * Returns an array of course_id's in this group, as well as any sub-group (branches).
+   * // Key = course_id, val = TRUE.
+   */
+  function get_course_id_array() {
+    
+    $rtn = array();
+    
+    $this->list_courses->reset_counter();
+    while($this->list_courses->has_more()) {
+      $c = $this->list_courses->get_next();
+      
+      $rtn[$c->course_id] = TRUE;  
+    }
+
+    // Also get any sub-group's courses...
+    $this->list_groups->reset_counter();
+    while($this->list_groups->has_more()) {
+      $g = $this->list_groups->get_next();
+      $rtn = array_merge($rtn, $g->get_course_id_array());
+    }
+
+    return $rtn;
+    
+  } // get_course_id_array.
+
+
   
   function has_min_hours_allowed() {
     
