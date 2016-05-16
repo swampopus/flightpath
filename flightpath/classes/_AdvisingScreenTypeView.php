@@ -99,182 +99,8 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 		
 	}
 	
-	/**
-	 * Display contents of a semester list as a single semester,
-	 * only displaying courses matching the requirement_type.
-	 * If the requirement_type is "e", then we will also look for anything
-	 * not containing a defined requirement_type.
-	 *
-	 * @param SemesterList $list_semesters
-	 * @param string $requirement_type
-	 * @param string $title
-	 * @param bool $bool_display_hour_count
-	 * @return string
-	 */
-	function z__display_semester_list($list_semesters, $requirement_type, $title, $bool_display_hour_count = false)
-	{
-
-		// Display the contents of a semester object
-		// on the screen (in HTML)
-		$pC = "";
-		$pC .= $this->draw_semester_box_top($title);
-
-		$is_empty = TRUE;
-
-		$count_hours_completed = 0;
-		$list_semesters->reset_counter();
-		while($list_semesters->has_more())
-		{
-			$semester = $list_semesters->get_next();
-			if ($semester->semester_num == -88)
-			{ // These are the "added by advisor" courses.  Skip them.
-				continue;
-			}
-
-      $last_req_by_degree_id = -1;
-			      
-			// First, display the list of bare courses.
-			$semester->list_courses->sort_alphabetical_order();
-			$semester->list_courses->reset_counter();
-			$sem_is_empty = true;
-			$sem_rnd = rand(0,9999);
-			$pC .= "<tr><td colspan='4' class='tenpt'>
-					<b><!--SEMTITLE$sem_rnd--></b></td></tr>";
-			while($semester->list_courses->has_more())
-			{
-				$course = $semester->list_courses->get_next();
-				// Make sure the requirement type matches!
-				if (!$this->match_requirement_type($course->requirement_type, $requirement_type))
-				{
-					continue;
-				}
-		
-				$is_empty = FALSE;
-			
-      
-        // Display what degree this course is required by
-        // TODO:  Decide if we should display the degree this course is coming from or not.
-        // Only display what degree we are required by if we have only displayed it once so far...
-        if (intval($course->req_by_degree_id) > 0 && $course->req_by_degree_id != $last_req_by_degree_id) {
-          
-          $t_degree_plan = new DegreePlan($course->req_by_degree_id);
-          $t_degree_plan->load_descriptive_data();
-          $pC .= "<tr><td colspan='8'>
-                    <div class='tenpt required-by-degree'>Required by " . $t_degree_plan->get_title2(TRUE, TRUE) . "</div>
-                  </td></tr>";
-          
-          // Remember what the last degree we displayed was.        
-          $last_req_by_degree_id = $course->req_by_degree_id;                
-        }            
-      
-      	
-				// Is this course being fulfilled by anything?
-				//if (is_object($course->courseFulfilledBy))
-				if (!($course->course_list_fulfilled_by->is_empty))
-				{ // this requirement is being fulfilled by something the student took...
-					//$pC .= $this->draw_course_row($course->courseFulfilledBy);
-					$pC .= $this->draw_course_row($course->course_list_fulfilled_by->get_first());
-					//$count_hours_completed += $course->courseFulfilledBy->hours_awarded;
-					$course->course_list_fulfilled_by->get_first()->set_has_been_displayed($course->req_by_degree_id);
-					
-					if ($course->course_list_fulfilled_by->get_first()->display_status == "completed")
-					{ // We only want to count completed hours, no midterm or enrolled courses.
-						//$count_hours_completed += $course->course_list_fulfilled_by->get_first()->hours_awarded;
-            $h = $course->course_list_fulfilled_by->get_first()->get_hours_awarded();
-					  if ($course->course_list_fulfilled_by->get_first()->bool_ghost_hour == TRUE) {
-					   $h = 0;
-					  }
-					  $count_hours_completed += $h;						
-					}
-				} else {
-					// This requirement is not being fulfilled...
-					$pC .= $this->draw_course_row($course);
-				}
-        
-        
-        
-        				
-				$sem_is_empty = false;
-			}
-
-			// Now, draw all the groups.
-			$semester->list_groups->sort_alphabetical_order();
-			$semester->list_groups->reset_counter();
-			while($semester->list_groups->has_more())
-			{
-				//debug_c_t("dddd");
-				$group = $semester->list_groups->get_next();
-				if (!$this->match_requirement_type($group->requirement_type, $requirement_type))
-				{
-					continue;
-				}
-
-
-        // Display what degree this group is required by
-        // TODO:  Decide if we should display the degree this group is coming from or not.
-        // Only display what degree we are required by if we have only displayed it once so far...
-        if (intval($group->req_by_degree_id) > 0 && $group->req_by_degree_id != $last_req_by_degree_id) {
-          
-          $t_degree_plan = new DegreePlan($group->req_by_degree_id);
-          $t_degree_plan->load_descriptive_data();
-          $pC .= "<tr><td colspan='8'>
-                    <div class='tenpt required-by-degree'>Required by $t_degree_plan->title</div>
-                  </td></tr>";
-          
-          // Remember what the last degree we displayed was.        
-          $last_req_by_degree_id = $group->req_by_degree_id;                
-        }            
-
-
-
-
-				$pC .= "<tr><td colspan='8'>";
-				$pC .= $this->display_group($group);
-				$count_hours_completed += $group->hours_fulfilled_for_credit;
-				$pC .= "</td></tr>";
-				$sem_is_empty = false;
-				$is_empty = FALSE;
-			}
-
-			if ($sem_is_empty == false)
-			{
-				// There WAS something in this semester, put in the title.
-				
-				//debugCT("replacing $sem_rnd with $semester->title");
-				$pC = str_replace("<!--SEMTITLE$sem_rnd-->",$semester->title,$pC);
-			}
-			
-		}
-		
-		
-		if ($is_empty == TRUE) {
-		  // There was nothing in this box.  Do not return anything.
-		  return FALSE;
-		}
-		
-		
-		// Add hour count to the bottom...
-		if ($bool_display_hour_count == true && $count_hours_completed > 0)
-		{
-			$pC .= "<tr><td colspan='8'>
-				<div class='tenpt' style='text-align:right; margin-top: 10px;'>
-				Completed hours: $count_hours_completed
-				</div>
-				";
-			$pC .= "</td></tr>";
-		}
-
-		$pC .= $this->draw_semester_box_bottom();
-
-		return $pC;
-
-	}
-
-
-
-
-
-
+  
+  
   /**
    * Display contents of a semester list as a single semester,
    * only displaying courses matching the requirement_type.
@@ -407,7 +233,7 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
         
         if ($dtitle == "") {
           $t_degree_plan = new DegreePlan($req_by_degree_id);
-          $t_degree_plan->load_descriptive_data();        
+          //$t_degree_plan->load_descriptive_data();        
           $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
           $dweight = $t_degree_plan->db_advising_weight;
           $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle . " "; //save for next time.
@@ -438,12 +264,13 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
           $dtitle = @$GLOBALS["fp_temp_degree_titles"][$req_by_degree_id];
           if ($dtitle == "") {
             $t_degree_plan = new DegreePlan($req_by_degree_id);
-            $t_degree_plan->load_descriptive_data();        
+            //$t_degree_plan->load_descriptive_data();        
             $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
             $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle; //save for next time.
           }
     
           $css_dtitle = fp_get_machine_readable($dtitle);
+          
     
           // TODO:  Possibly don't display this if we only have one degree chosen?      
           $pC .= "<tr><td colspan='8'>

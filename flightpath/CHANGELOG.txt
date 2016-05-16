@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-05-16
+  Added a new hook to let other modules decide if a course should be assigned to a particular degree or not.
+  
+  Removed some redundant database queries to help reduce queries per page load.
+
+
 2016-05-11
   Added to AdvisingScreen so we add extra classes when a course appears in more than one degree.
     

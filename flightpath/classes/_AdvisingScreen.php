@@ -2874,8 +2874,8 @@ function draw_menu_items($menu_array) {
         // Get the degree title...        
         $dtitle = @$GLOBALS["fp_temp_degree_titles"][$course->req_by_degree_id];
         if ($dtitle == "") {
-          $t_degree_plan = new DegreePlan($course->req_by_degree_id);
-          $t_degree_plan->load_descriptive_data();        
+          $t_degree_plan = new DegreePlan($course->req_by_degree_id);   
+          //$t_degree_plan->load_descriptive_data();    
           $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
           $GLOBALS["fp_temp_degree_titles"][$course->req_by_degree_id] = $dtitle . " "; //save for next time.
         }
@@ -2947,7 +2947,7 @@ function draw_menu_items($menu_array) {
         $dtitle = @$GLOBALS["fp_temp_degree_titles"][$group->req_by_degree_id];
         if ($dtitle == "") {
           $t_degree_plan = new DegreePlan($group->req_by_degree_id);
-          $t_degree_plan->load_descriptive_data();        
+          //$t_degree_plan->load_descriptive_data();      
           $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
           $GLOBALS["fp_temp_degree_titles"][$group->req_by_degree_id] = $dtitle; //save for next time.
         }
@@ -3116,7 +3116,7 @@ function draw_menu_items($menu_array) {
       
       if ($dtitle == "") {
         $t_degree_plan = new DegreePlan($req_by_degree_id);
-        $t_degree_plan->load_descriptive_data();        
+        //$t_degree_plan->load_descriptive_data();            
         $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
         $dweight = $t_degree_plan->db_advising_weight;
         $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle . " "; //save for next time.
@@ -3147,7 +3147,7 @@ function draw_menu_items($menu_array) {
         $dtitle = @$GLOBALS["fp_temp_degree_titles"][$req_by_degree_id];
         if ($dtitle == "") {
           $t_degree_plan = new DegreePlan($req_by_degree_id);
-          $t_degree_plan->load_descriptive_data();        
+          //$t_degree_plan->load_descriptive_data();
           $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
           $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle; //save for next time.
         }

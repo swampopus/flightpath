@@ -29,7 +29,7 @@ class _DegreePlan extends stdClass
   public $gpa_calculations;
   
   
-  public $bool_use_draft;
+  public $bool_use_draft, $bool_loaded_descriptive_data;
 
   /**
 	* $major_code		ACCT, CSCI, etc.
@@ -610,8 +610,10 @@ class _DegreePlan extends stdClass
     // This is to fix the problem with students with catalog years outside
     // of FlightPath's database, but with major codes that have titles.
 
-    $this->load_descriptive_data();
-
+    if (!$this->bool_loaded_descriptive_data) {
+      $this->load_descriptive_data();
+    }
+    
     $dtitle = "";
 
     if ($this->title != "") {
@@ -646,14 +648,14 @@ class _DegreePlan extends stdClass
     }
 
 
-
-
     return $dtitle;
   }
 
 
   function load_descriptive_data()
   {
+    
+    $this->bool_loaded_descriptive_data = TRUE;
     
     $table_name = "degrees";
     if ($this->bool_use_draft) {$table_name = "draft_$table_name";}

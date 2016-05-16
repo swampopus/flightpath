@@ -850,7 +850,17 @@ class _FlightPath extends stdClass
         if (!in_array($req_by_degree_id, $c->assigned_to_degree_ids_array))
         {//Don't count courses which have already been placed in other groups.
 
-          // TODO:  Check hooks to see if this course is allowed to be assigned to the degree in question.
+          // Check hooks to see if this course is allowed to be assigned to the degree in question.
+          $bool_can_proceed = TRUE;
+          $result = invoke_hook("flightpath_can_assign_course_to_degree_id", array($req_by_degree_id, $c));
+          foreach ($result as $m => $val) {
+            // If *any* module said FALSE, then we must skip this couse and not assign it to this degree.
+            $bool_can_proceed = $val;
+          }
+           
+          if (!$bool_can_proceed) {
+            continue;  // don't assign!
+          } 
                   
         
           // Has another version of this course already been

@@ -38,6 +38,24 @@ function hook_form_alter(&$form, $form_id) {
   }
 }
  
+
+/**
+ * Is the course allowed to be assigned to the specified degree?  Returns TRUE or FALSE
+ * 
+ * @return boolean
+ */
+function hook_flightpath_can_assign_course_to_degree_id($degree_id, $course) {
+    
+  // See previously assigned degrees: $course->assigned_to_degree_ids_array  
+    
+  
+  return TRUE;
+  
+} // ...can_assign_course_to_degree_id
+
+
+
+
  
 /**
  * Reports status information which each module is aware of, visible on admin/config/status.
