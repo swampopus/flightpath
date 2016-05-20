@@ -1310,10 +1310,47 @@ function system_school_data_form() {
   );
       
   
+  $form["exclude_majors_from_appears_in_counts"] = array(
+    "label" => t("Exclude major codes from \"appears in\" counts (CSV):"),
+    "type" => "textfield",
+    "maxlength" => 1000,
+    "value" => variable_get("exclude_majors_from_appears_in_counts", ""),
+    "description" => t('When a course appears in more than one degree, it is given an extra CSS class
+                        denoting that.  This fields lets you enter major codes for degrees, separated by commas,
+                        for any degrees you do not wish to be counted toward the "appears in" counts.
+                        <br>&nbsp; &nbsp; Ex:  UGELEC, ACCTB
+                        <br>If you are unsure what to enter, leave this field blank.'),
+  );
+  
   
   
   return $form;
 }
+
+
+/**
+ * Uses the "exclude_majors...." setting, but converts them into an array of degree_ids.
+ */
+function system_get_exclude_degree_ids_from_appears_in_counts() {
+  
+  // Have we already cached this for this page load?  
+  if (isset($GLOBALS["exclude_degree_ids_from_appears_in_counts"])) {
+    return $GLOBALS["exclude_degree_ids_from_appears_in_counts"];
+  }  
+    
+  $db = get_global_database_handler();
+  $rtn = array();
+  $majors = csv_to_array(variable_get("exclude_majors_from_appears_in_counts", ""));
+  
+  foreach ($majors as $major_code) {
+    $rtn = array_merge($rtn, $db->get_degree_ids($major_code));
+  }  
+  
+  
+  $GLOBALS["exclude_degree_ids_from_appears_in_counts"] = $rtn;  // cache for next time.
+  return $rtn;
+  
+} //system_get_exclude_degree_ids_from_appears_in_counts
 
 
 

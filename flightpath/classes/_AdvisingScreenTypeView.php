@@ -18,8 +18,8 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 
   /**
    * In __advising_screen, this method simply displays the degree plan's
-   * semesters to the screen.  But here, we need to go through the 4
-   * type categories: Core, Major, Supporting, and Electives,
+   * semesters to the screen.  But here, we need to go through the 
+   * type categories: ex: Core, Major, Supporting, and Electives,
    * and only display courses and groups from each semester fitting
    * that type.
    *
@@ -41,11 +41,6 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 		  }
 		}
 		
-		//$this->add_to_screen($this->display_semester_list($list_semesters, "c", t("Core Requirements"), true));
-		//$this->add_to_screen($this->display_semester_list($list_semesters, "m", t("Major Requirements"), true));
-		//$this->add_to_screen($this->display_semester_list($list_semesters, "s", t("Supporting Requirements"), true));
-		//$this->add_to_screen($this->display_semester_list($list_semesters, "e", t("Electives"), true));
-
 		
 		$temp_d_s = new Semester(-55); // developmental requirements.
 		if ($dev_sem = $list_semesters->find_match($temp_d_s))
@@ -83,12 +78,17 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 
   	if ($req_type == "e")
 		{
-			// type "elective."  We will make sure the test_type isn't in
+		  // type "elective."  We will make sure the test_type isn't in
 			// one of our defined types already.
+			
+			// Also, make sure it doesn't begin with a 'u'.  Ex:  um, for University Capstone + m.  That would be undefined as well.
+			$no_u_test_type = ltrim($test_type, 'u');
+      
 			$types = fp_get_requirement_types();
-			if (!isset($types[$test_type])) {
+			if (!isset($types[$test_type]) && !isset($types[$no_u_test_type])) {
 			  // Yes-- the user is using a code NOT defined, so let's just call it
 			  // an "elective" type.
+			  
 			  return TRUE;
 			}
 			

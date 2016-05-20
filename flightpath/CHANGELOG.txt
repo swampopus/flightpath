@@ -1,6 +1,17 @@
 FlightPath 5.x Changelog
 ========================
 
+
+2016-05-20
+  Added setting to School Data form (system.module) for excluding degrees from "appears in" counts.
+  
+  Added method to DatabaseHandler-- get_degree_ids().
+  
+
+2016-05-19
+  Adding "appears-in" counts for group select rows as well.
+
+
 2016-05-16
   Added a new hook to let other modules decide if a course should be assigned to a particular degree or not.
   

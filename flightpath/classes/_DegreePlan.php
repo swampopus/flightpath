@@ -92,6 +92,66 @@ class _DegreePlan extends stdClass
   }
 
 
+  
+  /**
+   * Given a group_id, find out if this group contains a course which appears in other degrees.  Return the max number.
+   */
+  function get_max_course_appears_in_degrees_count($test_group_id) {
+    
+    // array is sectioned like:  course_id | degree_id | group_id.    Group id = 0 means "on the bare degree plan"
+    // ex:  $this->required_course_id_array[$course_c->course_id][$this->degree_id][0] = TRUE;      
+    
+    $exclude_degree_ids = system_get_exclude_degree_ids_from_appears_in_counts();
+    
+    $courses = array();
+    
+    foreach ($this->required_course_id_array as $course_id => $temp1) {
+      foreach ($this->required_course_id_array[$course_id] as $degree_id => $temp2) {
+        
+        // Is this an excluded degree?  If so, skip it.
+        if (in_array($degree_id, $exclude_degree_ids)) continue;
+        
+        foreach ($this->required_course_id_array[$course_id][$degree_id] as $group_id => $val) {
+          
+          // Is this the group we are looking for?
+          if ($group_id != $test_group_id) continue;
+          
+          // Otherwise, yes, we are in the right group.  Let's keep track of what courses we have in this group:                    
+          $courses[$course_id] = TRUE;
+          
+        }
+      }
+    }
+    
+    $course_count = array();
+
+    // Okay, now what we want to do is find out, how many different degrees do these courses appear in?
+    foreach ($this->required_course_id_array as $course_id => $temp1) {
+      
+      if (!isset($courses[$course_id])) continue; // wasn't in our list, so skip.
+      $course_count[$course_id] = 0;
+      
+      foreach ($this->required_course_id_array[$course_id] as $degree_id => $temp2) {
+        
+        $course_count[$course_id]++;
+                
+      }
+    }
+    
+    
+        
+    // Okay, coming out of this, we can sort the courses_degrees array, and return the highest number.
+    rsort($course_count);        
+    
+    //fpm($course_count);
+    
+    return @$course_count[0];  // first element should be the highest value.
+    
+  } //get_max_course_appears_in_degrees_count
+
+
+
+
   /**
    * Calculate and store progress hour information.  Stores in the $this->gpa_calculations array.
    * 
@@ -332,6 +392,10 @@ class _DegreePlan extends stdClass
       $table_name2 = "draft_$table_name2";
     }
 
+    // Degrees we should exclude from the "appears in" counts.  Used later...
+    $exclude_degree_ids = system_get_exclude_degree_ids_from_appears_in_counts();
+
+
     $res = $this->db->db_query("SELECT * FROM $table_name1 a, $table_name2 b
             							WHERE a.degree_id = '?'
             							AND a.degree_id = b.degree_id 
@@ -385,8 +449,10 @@ class _DegreePlan extends stdClass
         
         $obj_semester->list_courses->add($course_c);
         
-        // array is sectioned like:  course_id | degree_id | group_id.    Group id = 0 means "on the bare degree plan"
-        $this->required_course_id_array[$course_c->course_id][$this->degree_id][0] = TRUE;        
+        if (!in_array($this->degree_id, $exclude_degree_ids)) {
+          // array is sectioned like:  course_id | degree_id | group_id.    Group id = 0 means "on the bare degree plan"
+          $this->required_course_id_array[$course_c->course_id][$this->degree_id][0] = TRUE;
+        }        
         
       } // if course_id > 0
 
@@ -469,15 +535,18 @@ class _DegreePlan extends stdClass
 
     $this->list_groups->sort_priority();
 
-    $group_course_id_array = $this->list_groups->get_group_course_id_array();
-    // Add to our required_course_id_array.
-    foreach($group_course_id_array as $group_id => $details) {
-      foreach ($group_course_id_array[$group_id] as $course_id => $val) {
-        $this->required_course_id_array[$course_id][$this->degree_id][$group_id] = $val;
+    if (!in_array($this->degree_id, $exclude_degree_ids)) {
+      $group_course_id_array = $this->list_groups->get_group_course_id_array();
+      // Add to our required_course_id_array.
+      foreach($group_course_id_array as $group_id => $details) {
+        foreach ($group_course_id_array[$group_id] as $course_id => $val) {
+          $this->required_course_id_array[$course_id][$this->degree_id][$group_id] = $val;
+        }
       }
     }
 
-  }
+
+  } // load_degree_plan
 
 
   /**

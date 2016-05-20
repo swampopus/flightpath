@@ -2206,11 +2206,6 @@ function draw_menu_items($menu_array) {
       "value" => $course,
     );
 
-
-		// Keep up with original max hours, in case this is from a substitution split.
-		$datastring_max_hours = $course->max_hours;
-		$datastring_bool_new_from_split = $course->get_bool_substitution_new_from_split();
-		
 		
 		$db_group_requirement_id = @$_REQUEST["db_group_requirement_id"];
 		
@@ -2220,11 +2215,21 @@ function draw_menu_items($menu_array) {
 		{
 			// No course available!
 			$pC .= fp_render_curved_line(t("Description"));
-			$pC .= "<div class='tenpt'>" . t("No course was selected.  Please
-					click the Select tab at the top of the screen.") . "
-					</div>";
+          
+      $render["no_course_selected"] = array(
+        "value" => t("No course was selected.  Please
+          click the Select tab at the top of the screen."),
+        "attributes" => array("style" => "margin-top: 13px;", "class" => "tenpt"),
+      );          
+      
+      $pC .= fp_render_content($render);          
 			return $pC;
 		}
+
+    // Keep up with original max hours, in case this is from a substitution split.
+    $datastring_max_hours = $course->max_hours;
+    $datastring_bool_new_from_split = $course->get_bool_substitution_new_from_split();
+
 
     $req_by_degree_id = $course->req_by_degree_id;
 
@@ -3624,6 +3629,16 @@ function draw_menu_items($menu_array) {
 			$icon_link = "";
 		}
 
+    
+    // Let's find out if this group contains courses which can be used in more than one degree.
+    $res = intval($this->degree_plan->get_max_course_appears_in_degrees_count($group->group_id));
+    
+    if ($res > 1) {
+      $extra_classes .= " contains-course-which-appears-in-mult-degrees contains-course-which-appears-in-$res-degrees";
+    }
+     
+
+
 
 		$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
@@ -3863,7 +3878,7 @@ function draw_menu_items($menu_array) {
     if ($course->display_status == "eligible") {
       if (isset($this->degree_plan->required_course_id_array[$course->course_id])) {
         if (count($this->degree_plan->required_course_id_array[$course->course_id]) > 1) {
-          // Add a new classname for this course...          
+          // Add a new classname for this course...
           $extra_classes .= " course-appears-in-mult-degrees course-appears-in-" . count($this->degree_plan->required_course_id_array[$course->course_id]) . "-degrees";
         }
       }    
