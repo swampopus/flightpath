@@ -3,13 +3,14 @@
 
 class _StandardizedTest extends stdClass
 {
-	public $categories, $description, $test_id, $date_taken;
+	public $categories, $description, $test_id, $date_taken, $bool_date_unavailable;
 
 
 
 	function __construct()
 	{
-		$categories = Array();
+		$this->categories = array();
+    $this->bool_date_unavailable = FALSE;
 	}
 
 

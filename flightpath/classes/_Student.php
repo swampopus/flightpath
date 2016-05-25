@@ -253,6 +253,9 @@ class _Student extends stdClass
 
 		$st = null;
 
+    $c = 0;
+    $old_row = "";
+
 		$res = db_query("		          
 		          SELECT * FROM student_tests
 		          WHERE 
@@ -264,6 +267,7 @@ class _Student extends stdClass
 		  
       extract($cur, 3, "db");
       
+      if (!isset($db_position)) $db_position = 0;
       
       // Get the test's description, if available.
             
@@ -278,9 +282,7 @@ class _Student extends stdClass
       // Did we find anything in the table?  If not, just use the codes themselves
       if ($db_test_description == "") $db_test_description = t("Test code:") . " " . $db_test_id;
       if ($db_category_description == "") $db_category_description = $db_category_id;
-      
-      
-		  
+            		  
 			if (!(($db_date_taken . $db_test_id) == $old_row))
 			{
 				// We are at a new test.  Add the old test to our list.
@@ -292,6 +294,12 @@ class _Student extends stdClass
 				$st = new StandardizedTest();
 				$st->test_id = $db_test_id;
 				$st->date_taken = $db_date_taken;
+        
+        // Is the date unavailable?
+        if ($st->date_taken == "" || $st->date_taken == NULL || strstr($st->date_taken, "0000")) {
+          $st->bool_date_unavailable = TRUE;
+        }
+        
 				$st->description = $db_test_description;
 				$old_row = $db_date_taken . $db_test_id;
 

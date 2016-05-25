@@ -554,12 +554,12 @@ function admin_get_courses_from_definition($definition, $catalog_year = "") {
     // Let's get each of the parts... the instruction, and the course data.
     $tokens = explode(" ", $line);
     $instruction = strtolower(trim($tokens[0]));
-    $course_data = trim($tokens[1]);
+    @$course_data = trim($tokens[1]);
 
     // We know that the course data can also be broken up, by the .
     $c_tokens = explode(".", $course_data);
     $subject_data = trim(strtoupper($c_tokens[0]));
-    $course_numData = trim(strtoupper($c_tokens[1]));
+    @$course_numData = trim(strtoupper($c_tokens[1]));
 
     // Okay, so now, for this line, we have an instruction,
     // and some course data (possibly wild cards) to act on.
@@ -610,6 +610,7 @@ function admin_get_courses_from_definition($definition, $catalog_year = "") {
   //var_dump($group_array2);
 
   $rtn = array();
+  $rtn["text"] = "";
   $count = 1;
   // Now that we have the groupArray, we will turn it into a string...
   for ($t = 0; $t < count($group_array2); $t++)
@@ -987,6 +988,7 @@ function admin_process_all_definitions_form() {
   $de_catalog_year = admin_get_de_catalog_year();
 
   fp_set_title(t("Process all definitions for @year", array("@year" => $de_catalog_year)));
+  $m = 0;
   
   $form["mark" . $m++] = array(
     "type" => "markup",
@@ -1024,6 +1026,26 @@ function admin_process_all_definitions_form_submit($form, $form_submit) {
   $db = get_global_database_handler();
   $de_catalog_year = $values["de_catalog_year"];
 
+  
+  // Okay, set up the batch....
+  $batch = array(
+    "operation" => array("admin_process_all_definitions_perform_batch_operation", array($de_catalog_year)),
+    "title" => t("Process all group definitions for %year", array("%year" => $de_catalog_year)),
+    "file" => menu_get_module_path("admin") . "/admin.groups.inc",
+    "progress_message" => "Processing group @current of @total",
+    "display_percent" => TRUE,
+  );
+ 
+ 
+  // Set the batch...
+  batch_set($batch);  
+  
+  
+  /*
+  
+  
+  
+  
   // This function will go through every group for this year and
   // re-run it's definition, saving the result.
 
@@ -1065,8 +1087,8 @@ function admin_process_all_definitions_form_submit($form, $form_submit) {
         $tokens = explode(" ", $line);
         $subject_id = trim($tokens[0]);
         $course_num = trim($tokens[1]);
-        $min_grade = trim($tokens[2]);
-        $course_repeats = trim($tokens[3]);
+        @$min_grade = trim($tokens[2]);
+        @$course_repeats = trim($tokens[3]);
 
         if (strstr($min_grade, "[")) {
           // This is actually a specified repeat, not a min grade.
@@ -1113,7 +1135,155 @@ function admin_process_all_definitions_form_submit($form, $form_submit) {
   
     
   fp_add_message(t("Group definitions have been re-run for @year", array("@year" => $de_catalog_year)));
+   */ 
 }
+
+
+
+/**
+ * This actually is the batch operation for processing all of our group definitions.
+ */
+function admin_process_all_definitions_perform_batch_operation(&$batch, $de_catalog_year) {
+  
+  
+  ////////////////////////////  FIRST TIME ///////////////////////////////
+  // If this is our first time through, let's init our values.
+  if (!isset($batch["results"]["total"])) {
+    // Our first time through.  Let's start up.    
+    $batch["results"]["current"] = 0;
+    $batch["results"]["finished"] = FALSE;    
+
+    // We need a count of how manhy groups in this year have definitions to process.
+    $res = db_query("SELECT count(*) as `count` FROM draft_groups
+                       WHERE definition != '' 
+                       AND catalog_year = '?' 
+                       AND delete_flag = 0 ", $de_catalog_year);
+    $cur = db_fetch_array($res);
+        
+    $batch["results"]["total"] = $cur["count"];
+    
+  }
+  ////////////////////////////////////////////////////////////////////////  
+  
+  
+  // Okay, we can now begin the actual batch process.
+  $current = $batch["results"]["current"];
+  $total = $batch["results"]["total"];
+
+  $limit = 1;  // how many definitions to process per run of THIS function
+  $c = 0;  // count of records.
+  
+  $db = get_global_database_handler();  
+  
+  // First, find every group which has a definition set.
+  $res = db_query("SELECT * FROM draft_groups
+                       WHERE definition != '' 
+                       AND catalog_year = '?' 
+                       AND delete_flag = 0 
+                       limit $current, $limit", $de_catalog_year);
+  while($cur = db_fetch_array($res)) {
+          
+    if ($c >= $limit) {
+      break;
+    }
+      
+    
+    $def = $cur["definition"];
+    $group_id = $cur["group_id"];
+    $group_name = $cur["group_name"];
+    $temp = admin_get_courses_from_definition($def);
+    $courses = trim($temp["text"]);
+    $ccount = 0;
+
+    fp_add_message(t("Working on %name", array("%name" => $group_name)));
+
+    // Remove all the existing group requirements for this group first.
+    $res2 = db_query("DELETE FROM draft_group_requirements
+                        WHERE group_id = ? ", $group_id);
+
+
+    $lines = explode("\n", $courses);
+    for ($t = 0; $t < count($lines); $t++) {
+      $line = trim($lines[$t]);
+      if ($line == "") { continue; }
+      // Get rid of extra whitespace.
+      $line = str_replace("  ", " ", $line);
+      $line = str_replace("  ", " ", $line);
+      $line = str_replace("  ", " ", $line);
+
+      // Does this line contain at least one & symbol?  If it does,
+      // then this is a subgroup (branch).  If not, then we can insert
+      // the course as-is.
+      if (!strstr($line, "&")) {
+        // Did NOT contain an ampersand (&), so this goes in the
+        // regular course requirements.
+        $tokens = explode(" ", $line);
+        $subject_id = trim($tokens[0]);
+        $course_num = trim($tokens[1]);
+        @$min_grade = trim($tokens[2]);
+        @$course_repeats = trim($tokens[3]);
+
+        if (strstr($min_grade, "[")) {
+          // This is actually a specified repeat, not a min grade.
+          $course_repeats = $min_grade;
+          $min_grade = "";
+        }
+
+        $min_grade = str_replace("(","",$min_grade);
+        $min_grade = strtoupper(str_replace(")","",$min_grade));
+
+        $course_repeats = str_replace("[","",$course_repeats);
+        $course_repeats = str_replace("]","",$course_repeats);
+        $course_repeats--;
+        if ($course_repeats < 0) { $course_repeats = 0; }
+
+        // If the subject_id had a _A_ in it, convert this back
+        // to an ampersand.
+        $subject_id = str_replace("_A_", "&", $subject_id);
+
+        // We don't care about catalog year anymore...
+        if ($course_id = $db->get_course_id($subject_id, $course_num, "", true)) {
+          $query = "INSERT INTO draft_group_requirements
+                    (`group_id`,`course_id`,
+                    `course_min_grade`,`course_repeats`,`data_entry_value`)
+                    values (?, ?, ?, ?, ?) ";
+          $res2 = db_query($query, $group_id, $course_id, $min_grade, $course_repeats, "$subject_id~$course_num");
+          $ccount++;        
+        } 
+        else {
+          // The course_id could not be found!
+
+          fp_add_message(t("Course not found! You specified %course as a requirement in %gname,
+                            but this course could not be found in the catalog.  It was removed from
+                            the list of requirements.  Are you sure you typed it correctly? Please
+                            check your spelling, and add the course again.", array("%course" => "$subject_id $course_num", "%gname" => $group_name)), "error");
+
+        }
+      }
+    }
+
+    fp_add_message(t("%name definition processed. %count courses added.", array("%name" => $group_name, "%count" => $ccount)) . "<br><br>");    
+
+    
+
+    $c++;
+    
+  } // while cur = db_fetch_array($res)
+  
+
+  // Update our $batch results variables
+  $batch["results"]["current"] = $current + $c;
+  
+
+  if ($batch["results"]["current"] >= $total) {
+    // We are finished!
+    $batch["results"]["finished"] = TRUE;
+    fp_add_message("<br><br><br>" . t("Group definitions have been processed for %year", array("%year" => $de_catalog_year)));
+  }  
+    
+  
+} // admin_process....batch_operation
+
 
 
 

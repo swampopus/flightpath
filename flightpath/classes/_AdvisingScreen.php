@@ -1401,16 +1401,25 @@ function draw_menu_items($menu_array) {
 		$this->student->list_standardized_tests->reset_counter();
 		while($this->student->list_standardized_tests->has_more()) {
 			$st = $this->student->list_standardized_tests->get_next();
-      
-			$dt = strtotime($st->date_taken);
-			$ddate = format_date($dt, "just_date");
 
-			$fsC .= "<div>
-						<b>$st->description</b> - $ddate
+      $extra_date_css = "";
+      
+      if (!$st->bool_date_unavailable) {
+  			$dt = strtotime($st->date_taken);
+  			$ddate = format_date($dt, "just_date");
+      }
+      else {
+        // The date was not available!
+        $ddate = t("N/A");
+        $extra_date_css = " test-date-unavailable";
+      }
+      
+			$fsC .= "<div class='test-section'>
+						<b class='test-description'>$st->description</b> - <span class='test-date $extra_date_css'>$ddate</span>
 						<ul>";
 			foreach($st->categories as $position => $cat_array)
 			{
-				$fsC .= "<li>{$cat_array["description"]} - {$cat_array["score"]}</li>";
+				$fsC .= "<li><span class='test-cat-desc'>{$cat_array["description"]}</span> - <span class='test-cat-score'>{$cat_array["score"]}</span></li>";
 
 			}
 			$fsC .= "</ul>

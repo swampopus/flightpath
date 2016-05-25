@@ -194,6 +194,12 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
                    
                    LIMIT $current, $limit", $major);
   while ($cur = db_fetch_array($res)) {
+    
+    if ($c >= $limit) {
+      break;
+    }
+    
+    
     $l_name = $cur["l_name"];
     $f_name = $cur["f_name"];
     
@@ -296,12 +302,10 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
         
     $batch["csv"] .= "\n";
     
-    $c++;
-    if ($c > $limit) {
-      break;
-    }
     
-  }  
+    $c++;
+    
+  } // while $cur = db_fetch_array  
   
   
   // Update our $batch results variables
