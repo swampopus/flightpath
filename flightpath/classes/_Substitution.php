@@ -5,6 +5,8 @@ class _Substitution extends stdClass
 	public $course_requirement; // The original degree requirement.
 	public $course_list_substitutions; // The course(s) which are
 	public $db_substitution_id;   // the specific database id this object refers to.
+	public $db_required_group_id;
+  public $db_required_degree_id;
 	//filling in for that requirement.
 	public $bool_has_been_applied;
 	public $bool_group_addition;

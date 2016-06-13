@@ -773,6 +773,7 @@ class _FlightPath extends stdClass
           $substitution->course_list_substitutions->assign_group_id($group_id);
           $substitution->course_list_substitutions->set_has_been_assigned(true);
           $substitution->course_list_substitutions->set_bool_substitution($req_by_degree_id, TRUE);
+          $course_requirement->db_substitution_id_array[] = $substitution->db_substitution_id;
           //fpm($course_requirement->req_by_degree_id);
           //fpm($req_by_degree_id);
           $substitution->course_list_substitutions->set_course_substitution($course_requirement, $substitution->remarks, $req_by_degree_id);

@@ -1954,6 +1954,17 @@ class _Course extends stdClass
   }
 
 
+  /**
+   * Similar to get_first_sassigned_to_group_id, except this time we want to the first group_id
+   * that "belongs" to a certain degree.
+   * 
+   */
+  function get_first_assigned_to_group_id_from_degree_id($degree_id = 0) {
+  }
+
+
+
+
   function get_has_been_assigned_to_degree_id($degree_id = 0) {
     
     if ($degree_id == 0) $degree_id = $this->req_by_degree_id;

@@ -260,7 +260,7 @@ class _Student extends stdClass
 		          SELECT * FROM student_tests
 		          WHERE 
 								  student_id = '?' 								
-							ORDER BY date_taken DESC ", $this->student_id);		
+							ORDER BY date_taken DESC, test_id, category_id ", $this->student_id);		
 		while($cur = db_fetch_array($res)) {
 			
 		  $c++;
@@ -343,7 +343,9 @@ class _Student extends stdClass
 			$sub_remarks = trim($cur["sub_remarks"]);
 			$faculty_id = $cur["faculty_id"];
       $req_by_degree_id = $cur["required_degree_id"];
-      
+      $db_required_degree_id = $req_by_degree_id;
+      $db_required_group_id = $cur["required_group_id"];
+            
 			if (strstr($sub_term_id, "9999"))
 			{
 				// was an unknown semester.  Let's set it lower so
@@ -474,6 +476,9 @@ class _Student extends stdClass
 				$substitution->faculty_id = $faculty_id;
         $substitution->db_substitution_id = $sub_id;
         $substitution->assigned_to_degree_id = $req_by_degree_id;
+        $substitution->db_required_degree_id = $req_by_degree_id;
+        $substitution->db_required_group_id = $db_required_group_id;
+        
 				$this->list_substitutions->add($substitution);
 
 

@@ -734,16 +734,18 @@ function draw_menu_items($menu_array) {
 				$fbetween = $fn_between[$fn_type];
 
         $sub_details = $this->db->get_substitution_details($sub_id);
-        //fpm($sub_details);
+        
         $remarks = @trim($sub_details["remarks"]);
         $sub_faculty_id = $sub_details["faculty_id"];
         $sub_degree_plan = new DegreePlan($sub_details["required_degree_id"]);
+        $sub_required_group_id = $sub_details["required_group_id"];
 
 
-				if ($in_group > 0 && $fn_type=="substitution")
+				//if ($in_group > 0 && $fn_type=="substitution")
+				if ($sub_required_group_id != "" && $fn_type=="substitution")
 				{
 					$new_group = new Group();
-					$new_group->group_id = $in_group;
+					$new_group->group_id = $sub_required_group_id;
 					$new_group->load_descriptive_data();
 					
 					$extra = "<div style='padding-left: 45px;'><i>" . t("in") . " $new_group->title.</i></div>";
@@ -933,6 +935,7 @@ function draw_menu_items($menu_array) {
 
 
 		$this->student->list_substitutions->reset_counter();
+    fpm($this->student->list_substitutions);
 		while ($this->student->list_substitutions->has_more())
 		{
 			$substitution = $this->student->list_substitutions->get_next();
@@ -953,11 +956,13 @@ function draw_menu_items($menu_array) {
 
 			$in_group = ".";
 			//if ($subbed_course->assigned_to_group_id > 0)
-			if ($subbed_course->get_first_assigned_to_group_id() != "")
+			//if ($subbed_course->get_first_assigned_to_group_id() != "")
+			if ($substitution->db_required_group_id != "")
 			{
 				$new_group = new Group();
 				//$new_group->group_id = $subbed_course->assigned_to_group_id;
-				$new_group->group_id = $subbed_course->get_first_assigned_to_group_id();
+				//$new_group->group_id = $subbed_course->get_first_assigned_to_group_id();
+				$new_group->group_id = $substitution->db_required_group_id;
 				$new_group->load_descriptive_data();
 
 				$in_group = " in $new_group->title.";
@@ -3949,16 +3954,18 @@ function draw_menu_items($menu_array) {
 		if ($course->get_bool_substitution() == TRUE )
 		{
 //fpm($course);
-      if (is_object($course->get_course_substitution()))
+      $temp_sub_course = $course->get_course_substitution();
+      if (is_object($temp_sub_course))
       {
-			  if ($course->get_course_substitution()->subject_id == "")
+        //fpm($temp_sub_course);
+			  if ($temp_sub_course->subject_id == "")
 			  { // Reload subject_id, course_num, etc, for the substitution course,
 				  // which is actually the original requirement.
-					$course->get_course_substitution()->load_descriptive_data();
+					$temp_sub_course->load_descriptive_data();
 			  }
         
-        $o_subject_id = $course->get_course_substitution()->subject_id;
-        $o_course_num = $course->get_course_substitution()->course_num;        				
+        $o_subject_id = $temp_sub_course->subject_id;
+        $o_course_num = $temp_sub_course->course_num;        				
 			}
 
       
@@ -3975,9 +3982,8 @@ function draw_menu_items($menu_array) {
 					$fcount = $course->substitution_footnote;
 				}
 				$course->substitution_footnote = $fcount;
-				$footnote .= "$fcount</span>";
-        
-        $sub_id = $course->db_substitution_id_array[$course->req_by_degree_id];
+				$footnote .= "$fcount</span>";        
+        $sub_id = $course->db_substitution_id_array[$course->req_by_degree_id];        
 				$this->footnote_array["substitution"][$fcount] = "$o_subject_id $o_course_num ~~ $subject_id $course_num ~~ " . $course->get_substitution_hours() . " ~~ " . $course->get_first_assigned_to_group_id() . " ~~ $sub_id";
 				
 			}
