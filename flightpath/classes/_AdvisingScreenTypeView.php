@@ -37,15 +37,15 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 		foreach ($types as $code => $desc) {
 		  $temp = $this->display_semester_list($list_semesters, $code, $desc, TRUE);
 		  if ($temp) {
-		    $this->add_to_screen($temp);
+		    $this->add_to_screen($temp, "SEMESTER_TYPE_" . $code);
 		  }
 		}
 		
 		
-		$temp_d_s = new Semester(-55); // developmental requirements.
+		$temp_d_s = new Semester(DegreePlan::SEMESTER_NUM_FOR_DEVELOPMENTALS); // developmental requirements.
 		if ($dev_sem = $list_semesters->find_match($temp_d_s))
 		{
-			$this->add_to_screen($this->display_semester($dev_sem));
+			$this->add_to_screen($this->display_semester($dev_sem), "SEMESTER_" . DegreePlan::SEMESTER_NUM_FOR_DEVELOPMENTALS);
 		}
 						
 		
@@ -162,16 +162,18 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
         //if (is_object($course->courseFulfilledBy))
         if (!($course->course_list_fulfilled_by->is_empty))
         { // this requirement is being fulfilled by something the student took...
-          //$pC .= $this->draw_course_row($course->courseFulfilledBy);
-          $html[$course->req_by_degree_id] .= $this->draw_course_row($course->course_list_fulfilled_by->get_first());
-          //$count_hours_completed += $course->courseFulfilledBy->hours_awarded;
-          $course->course_list_fulfilled_by->get_first()->set_has_been_displayed($course->req_by_degree_id);
+                     
+          $c = $course->course_list_fulfilled_by->get_first();
+          $c->req_by_degree_id = $course->req_by_degree_id;   // make sure we assign it to the current degree_id.
           
-          if ($course->course_list_fulfilled_by->get_first()->display_status == "completed")
-          { // We only want to count completed hours, no midterm or enrolled courses.
-            //$count_hours_completed += $course->course_list_fulfilled_by->get_first()->hours_awarded;
-            $h = $course->course_list_fulfilled_by->get_first()->get_hours_awarded();
-            if ($course->course_list_fulfilled_by->get_first()->bool_ghost_hour == TRUE) {
+          $html[$course->req_by_degree_id] .= $this->draw_course_row($c);
+          
+          $c->set_has_been_displayed($course->req_by_degree_id);
+          
+          if ($c->display_status == "completed")
+          { // We only want to count completed hours, no midterm or enrolled courses.            
+            $h = $c->get_hours_awarded();
+            if ($c->bool_ghost_hour == TRUE) {
              $h = 0;
             }
             $count_hours_completed += $h;           

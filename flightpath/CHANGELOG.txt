@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-06-17
+  Fixed bugs with substitution footnotes, in AdvisingScreenTypeView.  Substitutions were not being accurately displayed for footnotes.
+
+  Added extra indexes to the box_array in AdvisingScreen, so it makes it easier to overwrite certain screen elements for other modules. 
+  
+
 2016-06-13
   Made alterations to fix a bug where the group a course was substituted into was not being reported correctly.
   

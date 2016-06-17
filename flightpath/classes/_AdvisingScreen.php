@@ -519,7 +519,7 @@ function draw_menu_items($menu_array) {
 
 		if (!$is_empty)
 		{
-			$this->add_to_screen($pC);
+			$this->add_to_screen($pC, "TRANSFER_CREDIT");
 		}
 
 	}
@@ -579,7 +579,7 @@ function draw_menu_items($menu_array) {
 
 		if (!$is_empty)
 		{
-			$this->add_to_screen($pC);
+			$this->add_to_screen($pC, "GRADUATE_CREDIT");
 		}
 
 	}
@@ -602,7 +602,7 @@ function draw_menu_items($menu_array) {
 		$semester = new Semester(DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED);
 		if ($new_semester = $this->degree_plan->list_semesters->find_match($semester))
 		{
-			$this->add_to_screen($this->display_semester($new_semester));
+			$this->add_to_screen($this->display_semester($new_semester), "ADDED_COURSES");
 		}
 	}
 
@@ -669,7 +669,7 @@ function draw_menu_items($menu_array) {
 
 		if (!$is_empty)
 		{
-			$this->add_to_screen($pC);
+			$this->add_to_screen($pC, "EXCESS_CREDIT");
 		}
 	}
 
@@ -765,7 +765,7 @@ function draw_menu_items($menu_array) {
         
 				$pC .= "<div class='tenpt'>&nbsp; &nbsp;
 					<sup>{$fn_char[$fn_type]}$t</sup>
-					$new_course $using_hours $fbetween $o_course$extra$remarks for degree " . $sub_degree_plan->get_title2() . "</div>";
+					$new_course $using_hours $fbetween $o_course$extra$remarks <span class='footnote-for-degree'>(Degree " . $sub_degree_plan->get_title2() . ")</span></div>";
 
 			}
 			$pC .= "</div>";
@@ -906,7 +906,7 @@ function draw_menu_items($menu_array) {
   	
 		if (!$is_empty)
 		{
-			$this->add_to_screen($pC);
+			$this->add_to_screen($pC, "FOOTNOTES");
 		}
 		
 		// Return so other functions can use this output, if needed.
@@ -935,7 +935,7 @@ function draw_menu_items($menu_array) {
 
 
 		$this->student->list_substitutions->reset_counter();
-    fpm($this->student->list_substitutions);
+    
 		while ($this->student->list_substitutions->has_more())
 		{
 			$substitution = $this->student->list_substitutions->get_next();
@@ -1439,7 +1439,7 @@ function draw_menu_items($menu_array) {
 
 		$pC .= $this->draw_semester_box_bottom();
 
-		$this->add_to_screen($pC);
+		$this->add_to_screen($pC, "TEST_SCORES");
 	}
 
 
@@ -1450,9 +1450,14 @@ function draw_menu_items($menu_array) {
  *
  * @param string $content_box
  */
-	function add_to_screen($content_box)
-	{
-		$this->box_array[] = $content_box;
+	function add_to_screen($content_box, $index = "")	{
+	  if ($index == "") {
+		  $this->box_array[] = $content_box;
+    }
+    else {
+      $this->box_array[$index] = $content_box;
+    }
+    
 	}
 
 
@@ -1979,9 +1984,9 @@ function draw_menu_items($menu_array) {
 		$pC .= $this->draw_progress_boxes();
 		
 		$pC .= $this->draw_public_note();
-
-		for ($t = 0; $t < count($this->box_array); $t++)
-		{
+    
+    $t = 0;
+		foreach ($this->box_array as $index => $box_array_contents) {
 
 			$align = "right";
 			if ($this->is_on_left)
@@ -1989,9 +1994,9 @@ function draw_menu_items($menu_array) {
 				$pC .= "<tr>";
 				$align= "left";
 			}
-			
-			$pC .= "<td valign='top' align='$align' class='fp-boxes'>";
-			$pC .= $this->box_array[$t];
+			$css_index = fp_get_machine_readable($index);
+			$pC .= "<td valign='top' align='$align' class='fp-boxes fp-boxes-$css_index'>";
+			$pC .= $box_array_contents;
 			$pC .= "</td>";
 			
 			if (fp_screen_is_mobile()) {
@@ -2098,7 +2103,7 @@ function draw_menu_items($menu_array) {
 			}
 
 
-			$this->add_to_screen($this->display_semester($semester, true));
+			$this->add_to_screen($this->display_semester($semester, true), "SEMESTER_" . $semester->semester_num);
 
 		}
 
@@ -3904,7 +3909,6 @@ function draw_menu_items($menu_array) {
 			$course->load_descriptive_data();
 		}
 
-
 		$subject_id = $course->subject_id;
 		$course_num = $course->course_num; 
 
@@ -3953,11 +3957,11 @@ function draw_menu_items($menu_array) {
 
 		if ($course->get_bool_substitution() == TRUE )
 		{
-//fpm($course);
+
       $temp_sub_course = $course->get_course_substitution();
       if (is_object($temp_sub_course))
       {
-        //fpm($temp_sub_course);
+        //fpm($temp_sub_course);        
 			  if ($temp_sub_course->subject_id == "")
 			  { // Reload subject_id, course_num, etc, for the substitution course,
 				  // which is actually the original requirement.

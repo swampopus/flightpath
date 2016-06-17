@@ -669,7 +669,7 @@ class _FlightPath extends stdClass
       $req_by_degree_id = $course_requirement->req_by_degree_id;  // what degree is requiring this course?
 
       // If we're dealing with a group, use it's required by degree id.
-      if ($group->group_id > 0 && $group->req_by_degree_id > 0) {        
+      if ($group->group_id != "" && $group->req_by_degree_id > 0) {        
         $req_by_degree_id = $group->req_by_degree_id;
       }
       
@@ -716,8 +716,6 @@ class _FlightPath extends stdClass
 
         }
 
-
-
         if ($bool_perform_assignment == TRUE)
         {
           // If the course_requirement's min_hours are greater than
@@ -744,7 +742,7 @@ class _FlightPath extends stdClass
             $new_course->requirement_type = $course_requirement->requirement_type;
             $new_course->req_by_degree_id = $req_by_degree_id;
             $new_course->assigned_to_degree_ids_array[$req_by_degree_id] = $req_by_degree_id; 
-            
+
             $course_requirement->set_bool_substitution_split($req_by_degree_id, TRUE);
             
             // I am commenting this out-- if we split up a sub multiple times, then we shouldn't
