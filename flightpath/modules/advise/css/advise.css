@@ -83,6 +83,23 @@
   padding-bottom: 10px;
 }
 
+/* Footnotes */
+.advise-footnote {
+  padding-left: 20px;
+  padding-botton: 4px;
+  /* create "outdent" effect... */
+  text-indent: -18px;
+  margin-left: 18px;  
+}
+
+
+/* Subs popup */
+.advise-substitute-popup-transfer-course-title td {
+  font-size: 0.9em;
+  padding-left: 80px;
+  font-style: italic;
+  color: #777;
+}
 
 
 

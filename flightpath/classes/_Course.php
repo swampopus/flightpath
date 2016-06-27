@@ -1677,7 +1677,7 @@ class _Course extends stdClass
    *          just use the first bit of data we find.
    * 
    */
-  function load_descriptive_transfer_data($student_id = 0)
+  function load_descriptive_transfer_data($student_id = "")
   {
 
     // This method should be called to load transfer course data
@@ -1705,11 +1705,10 @@ class _Course extends stdClass
     // Try to figure out the institution name for this course...
     $this->institution_name = $this->db->get_institution_name($this->institution_id);
 
-    if ($student_id > 0)
+    if ($student_id != "")
     {
       // Because transfer credit titles may differ from student
       // to student, let's look up the title in the per-student transfer courses table...
-      
       $res = $this->db->db_query("SELECT * FROM student_transfer_courses
 									WHERE student_id = '?'
 									AND transfer_course_id = '?' 

@@ -55,6 +55,26 @@ function hook_flightpath_can_assign_course_to_degree_id($degree_id, $course) {
 
 
 
+/**
+ * This hook allows other modules to interact with the AdvisingScreen object
+ * adter the build_screen_elements method is called.
+ * 
+ * Of particular interest could be $advising_screen->box_array[].  This is an array of HTML
+ * for the semester blocks which appear on the screen.
+ */
+function hook_advise_build_screen_elements(&$advising_screen) {
+  
+}
+
+
+/**
+ * This hook allows another module to alter the way a course row is drawn onto the advising screen.
+ */
+function hook_theme_advise_course_row(&$theme) {
+}
+
+
+
 
  
 /**
@@ -759,6 +779,13 @@ function hook_menu() {
   return $items;
 }
 
+
+/**
+ * This function allowes the user to theme footnotes before they are draw onto the screen.
+ * 
+ */
+function hook_theme_advise_footnote(&$theme) {
+}
 
 
 

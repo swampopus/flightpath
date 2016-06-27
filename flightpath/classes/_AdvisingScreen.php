@@ -522,7 +522,7 @@ function draw_menu_items($menu_array) {
 			$this->add_to_screen($pC, "TRANSFER_CREDIT");
 		}
 
-	}
+	} // function build_transfer_credit
 
 
 
@@ -763,9 +763,52 @@ function draw_menu_items($menu_array) {
         // TODO:  Clean this up, as far as the remarks and such.  Make it look similar (new function?) as popup text for a substitution.
         if ($remarks) $remarks = " ($remarks) ";
         
-				$pC .= "<div class='tenpt'>&nbsp; &nbsp;
-					<sup>{$fn_char[$fn_type]}$t</sup>
-					$new_course $using_hours $fbetween $o_course$extra$remarks <span class='footnote-for-degree'>(Degree " . $sub_degree_plan->get_title2() . ")</span></div>";
+        // Build a "theme" array, so we can pass it to other modules in a hook.
+        $theme = array();
+        $theme["footnote"] = array(          
+          "fn_char" => $fn_char,
+          "fn_type" => $fn_type,
+          "fn_num" => $t,
+          "css_class" => "",
+          "new_course" => $new_course,
+          "using_hours" => $using_hours,
+          "fbetween" => $fbetween,
+          "o_course" => $o_course,
+          "extra" => $extra,
+          "remarks" => $remarks,
+          "for_degree" => $sub_degree_plan->get_title2(),
+          "overwrite_with_html" => "",
+        );
+        
+        
+        // Invoke a hook on our theme array, so other modules have a chance to change it up.   
+        invoke_hook("theme_advise_footnote", array(&$theme));
+        
+        $sup = $theme["footnote"]["fn_char"][$theme["footnote"]["fn_type"]] . $theme["footnote"]["fn_num"];
+        
+        // Actually gather the output for the footnote:
+        $html = "";
+        
+        if ($theme["footnote"]["overwrite_with_html"] != "") {
+          $html = $theme["footnote"]["overwrite_with_html"];
+        }
+        else {
+        
+  				$html = "<div class='tenpt advise-footnote {$theme["footnote"]["css_class"]}'>
+  					<sup>$sup</sup>
+  					<span class='advise-footnote-body'>
+  					   {$theme["footnote"]["new_course"]} 
+  					   {$theme["footnote"]["using_hours"]} 
+  					   {$theme["footnote"]["fbetween"]} 
+  					   {$theme["footnote"]["o_course"]}{$theme["footnote"]["extra"]}{$theme["footnote"]["remarks"]} 
+  					   <span class='footnote-for-degree'>(Degree {$theme["footnote"]["for_degree"]})</span>
+  					</span>
+  					</div>";
+        }
+        
+        
+        $pC .= $html;
+
 
 			}
 			$pC .= "</div>";
@@ -3955,8 +3998,13 @@ function draw_menu_items($menu_array) {
 		}
 
 
+    $hours = $course->get_hours_awarded();
+
+
 		if ($course->get_bool_substitution() == TRUE )
 		{
+
+      $hours = $course->get_substitution_hours();
 
       $temp_sub_course = $course->get_course_substitution();
       if (is_object($temp_sub_course))
@@ -3991,9 +4039,9 @@ function draw_menu_items($menu_array) {
 				$this->footnote_array["substitution"][$fcount] = "$o_subject_id $o_course_num ~~ $subject_id $course_num ~~ " . $course->get_substitution_hours() . " ~~ " . $course->get_first_assigned_to_group_id() . " ~~ $sub_id";
 				
 			}
-		}
+		} // if course->get_bool_substitution() == true
 
-		$hours = $course->get_hours_awarded();
+		
 
 		if ($hours <= 0) {
 		  // Some kind of error-- default to catalog hours
@@ -4639,6 +4687,10 @@ function draw_menu_items($menu_array) {
 		// This lets the user make a substitution for a course.
 		$pC = "";
 
+		// Bring in advise's css...
+		fp_add_css(fp_get_module_path("advise") . "/css/advise.css");
+		
+		
 		$course = new Course($course_id);
 		$bool_sub_add = false;
 
@@ -4800,13 +4852,19 @@ function draw_menu_items($menu_array) {
 
 				$m_hours = $c->get_hours_awarded($req_by_degree_id);
 
-        
+        /*
+         * 
+         * We don't want to do this. What it's saying is if the max_hours (from the course database)
+         * is LESS than the awarded hours, use the lower hours.  Instead, we want to always use
+         * what the student was AWARDED.
+         * 
 				if ($c->max_hours*1 < $m_hours)
 				{
 					$m_hours = $c->max_hours*1;
 
 				}
-
+        */
+				
 				if (($hours_avail*1 > 0 && $hours_avail < $m_hours) || ($m_hours < 1))
 				{
 					$m_hours = $hours_avail;
@@ -4964,7 +5022,21 @@ function draw_menu_items($menu_array) {
           
 				}
 
-			}
+				// If this was a transfer course, have an extra line under the course, stating it's title.
+				if ($bool_transferTest == FALSE) {  // Means this IS INDEED a transfer courses.
+				  
+				  $c->course_transfer->load_descriptive_transfer_data($this->student->student_id);
+				  $pC .= "<tr class='advise-substitute-popup-transfer-course-title'>
+				            <td colspan='8'>
+				              {$c->course_transfer->title} ({$c->course_transfer->institution_name})
+				            </td>
+				          </tr>";
+				  
+        }
+				
+        
+        
+			} // while list_courses_taken
 
 			if ($is_empty == true)
 			{

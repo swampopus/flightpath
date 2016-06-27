@@ -465,6 +465,7 @@ class _Student extends stdClass
 				//$taken_course->assigned_to_group_id = $cur["required_group_id"];
 				$taken_course->assigned_to_group_ids_array[$cur["required_group_id"]] = $cur["required_group_id"];
 				$taken_course->assigned_to_semester_num = $cur["required_semester_num"];
+        $taken_course->req_by_degree_id = $req_by_degree_id;
 
 				$substitution->course_requirement = $course_requirement;
 
@@ -486,7 +487,10 @@ class _Student extends stdClass
 
 		}		
 
-	}
+		
+		    
+    
+	} //load_student_substitutions
 
 
 	/**
@@ -715,7 +719,7 @@ class _Student extends stdClass
 			return;
 		}
 		
-		
+		////////////////////////////////////////////////////////////
 		// Tranfer credits?  Get those too...
 		
 		$res = $this->db->db_query("

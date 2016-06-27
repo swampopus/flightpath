@@ -508,11 +508,12 @@ function popupUpdateSubData(max_hours, term_id, transferFlag, groupHoursAvail, s
   document.getElementById("subTransferFlag").value = transferFlag;
   // if the addition checkbox is checked, use the groupHoursAvail as
   // the max.
-    
+  
   // Force numbers to be floats (numeric) so they will be evaluated correctly.
   max_hours = parseFloat(max_hours);
   groupHoursAvail = parseFloat(groupHoursAvail);
   subCourseHours = parseFloat(subCourseHours);
+    
   
   if (document.getElementById("cbAddition").checked == true)
   {

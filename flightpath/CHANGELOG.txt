@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-06-26
+  Fixed bug in substitution reporting, where it wasn't correctly finding the split sub hours for transfer credits.
+  
+  Added new hook to core; to be able to alter footnotes.
+
+
 2016-06-17
   Fixed bugs with substitution footnotes, in AdvisingScreenTypeView.  Substitutions were not being accurately displayed for footnotes.
 
