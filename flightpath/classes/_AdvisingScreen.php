@@ -3477,11 +3477,14 @@ function draw_menu_items($menu_array) {
 
 		$pC .= $this->display_group_course_list($display_course_list, $group, $display_semesterNum);
 
-		$fulfilled_hours = $display_course_list->count_hours("", false, false, true);
+		$fulfilled_hours = $display_course_list->count_hours("", false, false, TRUE, false, $req_by_degree_id);
+    
 		$fulfilled_credit_hours = $display_course_list->count_credit_hours("",false,true);
 		
+    
 
 		$test_hours = $fulfilled_hours;
+    
 		// if the fulfilledCreditHours is > than the fulfilledHours,
 		// then assign the fulfilledCreditHours to the testHours.
 		if ($fulfilled_credit_hours > $fulfilled_hours)
@@ -3495,6 +3498,9 @@ function draw_menu_items($menu_array) {
 		$place_group->hours_fulfilled = $fulfilled_hours;
 		$place_group->hours_fulfilled_for_credit = $fulfilled_credit_hours;
 		
+    
+    
+    
 		if ($remaining > 0)
 		{
 		  

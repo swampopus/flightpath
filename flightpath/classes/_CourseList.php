@@ -1421,8 +1421,7 @@ class _CourseList extends ObjList
 			}
 
 			$h_get_hours = $course->get_hours($degree_id);
-			
-			
+						
 			if ($bool_correct_ghost_hour) {
   			// If this course has a ghosthour, then use the
   			// hours_awarded (probably 1).  However, if it was substituted,

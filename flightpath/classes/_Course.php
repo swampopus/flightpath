@@ -1052,6 +1052,11 @@ class _Course extends stdClass
       return $h;
     }
     
+    // Was this course used in a substitution?  If so, use the substitution hours.
+    if ($this->get_substitution_hours($degree_id) > 0) {
+      return $this->get_substitution_hours($degree_id);
+    }
+    
        
     // Do they have any hours_awarded? (because they completed
     // the course)
