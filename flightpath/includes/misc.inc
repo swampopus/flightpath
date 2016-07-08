@@ -1012,7 +1012,8 @@ function fp_get_module_details($module) {
 
 
 /**
- * Eventually, this function will be used to translate strings.  For now, just pass through.
+ * This function will facilitate translations by using hook_translate()
+ * 
  * Allows variable replacements.  Use like this:
  * t("@name's blob", array("@name" => "Richard"));
  * or simply
@@ -1021,6 +1022,12 @@ function fp_get_module_details($module) {
  * Not implimented yet.
  */
 function t($str, $vars = array()) {
+
+  // Note: at the moment, this isn't being used, but should one day be set.  
+  @$langcode = isset($langcode) ? $langcode : $GLOBALS["fp_system_settings"]["language"]; 
+  
+  // First, change $str if any other modules implement hook_translate().
+  invoke_hook("translate", array(&$str, $langcode));  // str is passed by ref, so no return needed.
     
   if (is_array($vars) && count($vars) > 0) {
     foreach ($vars as $var => $val) {
@@ -1033,7 +1040,7 @@ function t($str, $vars = array()) {
       $str = str_replace($var, $val, $str);
     }
   }
-    
+
   return $str;
 }
 
@@ -1318,6 +1325,15 @@ function fp_screen_is_mobile(){
  * Do not include the preceeding "_" on the hook name!
  */
 function modules_implement_hook($hook = "example_hook_here") {
+  static $hook_cache;  // we want to keep up with which modules implement which hooks.    
+    
+  if (!isset($hook_cache)) $hook_cache = array();  
+    
+  // Have we already cached this list previously?
+  if (isset($hook_cache[$hook])) return $hook_cache[$hook];  
+    
+  // We have not already cached this, so let's look for it fresh...  
+    
   $rtn = array();
 
   foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $value) {
@@ -1329,6 +1345,8 @@ function modules_implement_hook($hook = "example_hook_here") {
       $rtn[] = $module;
     }
   }
+  
+  $hook_cache[$hook] = $rtn;
   
   return $rtn;  
 }

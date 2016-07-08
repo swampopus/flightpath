@@ -788,6 +788,24 @@ function hook_theme_advise_footnote(&$theme) {
 }
 
 
+/**
+ * This function is called by the t() function, and gives modules a chance to intercept
+ * a string and change it.  Meant primarily for translating to another language, but also
+ * good for simple replacements.  Used by the Locale module.
+ * 
+ * NOTE:  Since str is passed by reference, we don't need to return it.
+ */
+function hook_translate(&$str, $langcode = NULL) {
+  // Ex:
+  $str = str_replace("something", "something_else", $str);
+  
+  
+  // Since str is passed by reference, we don't need to return it.
+  
+}
+
+
+
 
 
 /**
