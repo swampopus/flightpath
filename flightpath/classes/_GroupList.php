@@ -79,13 +79,16 @@ class _GroupList extends ObjList
    */
   function get_group_course_id_array() {
     $rtn = array();
+    $this->reset_counter();
     
     for ($t = 0; $t < $this->count; $t++)
     {
       $g = $this->array_list[$t];
+      
       $rtn[$g->group_id] = $g->get_course_id_array();
     }
-        
+
+       
     return $rtn;
       
   }

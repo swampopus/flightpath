@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-07-08
+  Made tweaks to advising screen to make CSS re-themeing easier, and to make adding "extra html" easier to the group
+  list popups as well as other areas.
+  
+
 2016-06-29
   Fixed bug in Substitution system for split transfer subs, where hours were not being reported correctly.
 

@@ -534,10 +534,10 @@ class _DegreePlan extends stdClass
 
 
     $this->list_groups->sort_priority();
-
+    
     if (!in_array($this->degree_id, $exclude_degree_ids)) {
       $group_course_id_array = $this->list_groups->get_group_course_id_array();
-      // Add to our required_course_id_array.
+      // Add to our required_course_id_array.      
       foreach($group_course_id_array as $group_id => $details) {
         foreach ($group_course_id_array[$group_id] as $course_id => $val) {
           $this->required_course_id_array[$course_id][$this->degree_id][$group_id] = $val;
@@ -559,7 +559,6 @@ class _DegreePlan extends stdClass
         foreach ($req_course_id_array[$course_id][$degree_id] as $group_id => $val) {
             
           $this->required_course_id_array[$course_id][$degree_id][$group_id] = $val;
-          
         }
       }
     }

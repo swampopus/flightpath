@@ -3710,12 +3710,12 @@ function draw_menu_items($menu_array) {
 
 		$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
-     	<tr height='20' class='$hand_class $extra_classes'
+     	<tr height='20' class='$hand_class $extra_classes group-select-row'
       		$on_mouse_over title='$group->title'>
-      		<td width='$w1_1' align='left'>&nbsp;</td>
-      		<td width='$w1_2' align='left' onClick='$js_code'>$icon_link</td>
-      		<td width='$w1_3' align='left' onClick='$js_code'>$select_icon</td>
-      		<td align='left' colspan='5' class='tenpt underline' onClick='$js_code'>
+      		<td width='$w1_1' class='group-w1_1' align='left'>&nbsp;</td>
+      		<td width='$w1_2' class='group-w1_2' align='left' onClick='$js_code'>$icon_link</td>
+      		<td width='$w1_3' class='group-w1_3' align='left' onClick='$js_code'>$select_icon</td>
+      		<td align='left' colspan='5' class='tenpt underline group-row-msg' onClick='$js_code'>
       		$row_msg
        				
      	</tr>
@@ -3838,30 +3838,30 @@ function draw_menu_items($menu_array) {
 			$rtn .= "
    			<tr height='20'>
 
-    			<td width='$w1_1' align='left'>
+    			<td width='$w1_1' class='w1_1' align='left'>
      			&nbsp;
     			</td>
 
-    			<td width='$w1_2' align='left'>
+    			<td width='$w1_2' class='w1_2' align='left'>
      			&nbsp;
     			</td>
 
-    			<td width='$w1_3' align='left'>
+    			<td width='$w1_3' class='w1_3' align='left'>
      			&nbsp;
     			</td>
     
-        		<td align='left' width='$w2'>
+        		<td align='left' width='$w2' class='w2' >
      				<font size='2'><b>$headers[0]</b></font>
 	    		</td>
 
-    			<td width='$w3' align='left'>&nbsp;</td>
-    			<td width='$w4'>
+    			<td width='$w3' class='w3' align='left'>&nbsp;</td>
+    			<td width='$w4' class='w4'>
      				<font size='2'><b>$headers[1]</b></font>
     			</td>
-    			<td width='$w5'>
+    			<td width='$w5' class='w5'>
      				<font size='2'><b>$headers[2]</b></font>
     			</td>
-    			<td width='$w6'>
+    			<td width='$w6' class='w6'>
      				<font size='2'><b>$headers[3]</b></font>
     			</td>
    			</tr>
@@ -3945,6 +3945,8 @@ function draw_menu_items($menu_array) {
     // Check to see if the course is in our required_courses_id_array for more than one degree.
     if ($course->display_status == "eligible") {
       if (isset($this->degree_plan->required_course_id_array[$course->course_id])) {
+          
+          
         if (count($this->degree_plan->required_course_id_array[$course->course_id]) > 1) {
           // Add a new classname for this course...
           $extra_classes .= " course-appears-in-mult-degrees course-appears-in-" . count($this->degree_plan->required_course_id_array[$course->course_id]) . "-degrees";
@@ -4336,21 +4338,21 @@ function draw_menu_items($menu_array) {
       $js_code = $theme["course"]["js_code"];
  
 			$pC .= "
-   		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
+   		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left' class='draw-course-row'>
      	<tr height='20' class='$hand_class {$theme["course"]["display_status"]} {$theme["course"]["extra_classes"]}'
       		$on_mouse_over title='{$theme["course"]["title"]}' >
-      		<td style='width:$w1_1; white-space:nowrap;' align='left'>$op$hid</td>
+      		<td style='width:$w1_1; white-space:nowrap;' class='w1_1' align='left'>$op$hid</td>
         
-      		<td style='width:$w1_2; white-space:nowrap;' align='left'  onClick='$js_code'>$icon_html</td>
-      		<td style='width:$w1_3; white-space:nowrap;' align='left'  onClick='$js_code'>&nbsp;$ast</td>
-      		<td align='left' style='width:$w2; white-space:nowrap;' class='tenpt underline'  onClick='$js_code'>
+      		<td style='width:$w1_2; white-space:nowrap;' align='left'   class='w1_2' onClick='$js_code'>$icon_html</td>
+      		<td style='width:$w1_3; white-space:nowrap;' align='left'   class='w1_3' onClick='$js_code'>&nbsp;$ast</td>
+      		<td align='left' style='width:$w2; white-space:nowrap;' class='tenpt underline  w2 '  onClick='$js_code'>
        				{$theme["course"]["subject_id"]}</td>
-       		<td class='tenpt underline' style='width:$w3; white-space:nowrap;' align='left' 
+       		<td class='tenpt underline w3' style='width:$w3; white-space:nowrap;' align='left' 
        			         onClick='$js_code'>
         			       {$theme["course"]["course_num"]}{$theme["course"]["footnote"]}</td>
-	         <td class='tenpt underline' style='width:$w4; max-width:36px; white-space:nowrap;'  onClick='$js_code'>{$theme["course"]["hours"]}{$theme["course"]["var_hour_icon"]}</td>
-       	   <td class='tenpt underline'  style='width:$w5; max-width:35px; white-space:nowrap;'  onClick='$js_code'>{$theme["course"]["dispgrade"]}&nbsp;</td>
-       	   <td class='tenpt underline' style='width:$w6; max-width:31px; white-space:nowrap;' onClick='$js_code'>{$theme["course"]["pts"]}&nbsp;</td>
+	         <td class='tenpt underline w4' style='width:$w4; max-width:36px; white-space:nowrap;'  onClick='$js_code'>{$theme["course"]["hours"]}{$theme["course"]["var_hour_icon"]}</td>
+       	   <td class='tenpt underline w5'  style='width:$w5; max-width:35px; white-space:nowrap;'  onClick='$js_code'>{$theme["course"]["dispgrade"]}&nbsp;</td>
+       	   <td class='tenpt underline w6' style='width:$w6; max-width:31px; white-space:nowrap;' onClick='$js_code'>{$theme["course"]["pts"]}&nbsp;</td>
        	
      	</tr>
      	</table>";
@@ -4360,13 +4362,13 @@ function draw_menu_items($menu_array) {
 			// These are the leftover hours from a partial substitution.
 
 			$pC .= "
-   		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
+   		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left' class='draw-course-row-leftover-hours'>
      	<tr height='20' class='hand {$theme["course"]["display_status"]}'
       		$on_mouse_over title='{$theme["course"]["title"]}'>
-      		<td width='$w1_1' align='left'>$op$hid</td>
-      		<td width='$w1_2' align='left' onClick='$js_code'>$icon_html</td>
-      		<td width='$w1_3' align='left' onClick='$js_code'>&nbsp;</td>
-      		<td align='left' class='tenpt underline' onClick='$js_code'
+      		<td width='$w1_1'  class='w1_1' align='left'>$op$hid</td>
+      		<td width='$w1_2'  class='w1_2' align='left' onClick='$js_code'>$icon_html</td>
+      		<td width='$w1_3'  class='w1_3' align='left' onClick='$js_code'>&nbsp;</td>
+      		<td align='left' class='tenpt underline course-part-sub-hrs-left' onClick='$js_code'
       			colspan='4'>
        				&nbsp; &nbsp; {$theme["course"]["subject_id"]} &nbsp;
         			{$theme["course"]["course_num"]}{$theme["course"]["footnote"]}
@@ -4526,7 +4528,7 @@ function draw_menu_items($menu_array) {
 		if ($this->page_is_mobile) $on_mouse_over = "";  // Causes problems for some mobile devices.
 		
 		$hand_class = "hand";
-		$extra_style = $extra_classes = $extra_css = "";
+		$extra_style = $extra_classes = $extra_css = $extra_html = "";
 
 
     // Add the name of the course to the extra-classes
@@ -4537,6 +4539,7 @@ function draw_menu_items($menu_array) {
       if (count($this->degree_plan->required_course_id_array[$course->course_id]) > 1) {
         // Add a new classname for this course...
         $extra_classes .= " course-appears-in-mult-degrees course-appears-in-" . count($this->degree_plan->required_course_id_array[$course->course_id]) . "-degrees";
+                        
       }
     }    
 
@@ -4546,6 +4549,7 @@ function draw_menu_items($menu_array) {
    // Assemble theme array elements for the course itself.
     $theme["course"] = array(
       "course" => $course,
+      "course_id" => $course->course_id,
       "js_code" => $js_code,
       "subject_id" => $subject_id,
       "course_num" => $course_num,
@@ -4556,6 +4560,7 @@ function draw_menu_items($menu_array) {
       "grade" => $grade,
       "pts" => $pts,
       "title" => $title_text,
+      "extra_html" => $extra_html,      
     );   
 
 
@@ -4637,33 +4642,43 @@ function draw_menu_items($menu_array) {
     $js_code = $theme["course"]["js_code"];
     
 		$pC .= "
-   		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
+   		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left' class='group-course-row'>
      	<tr height='20' class='$hand_class {$theme["course"]["display_status"]} {$theme["course"]["extra_classes"]}'
       		$on_mouse_over title='{$theme["course"]["title"]}'>
-      		<td width='$w1_1' align='left'>$op$hid<span onClick='$js_code'>$icon_html</span></td>
-      		<td width='$w1_2' align='left' onClick='$js_code'> </td>
-      		<td width='$w1_3' align='left' onClick='$js_code'>&nbsp;</td>
-      		<td align='left' width='$w2' class='tenpt underline' 
+      		<td width='$w1_1' class='group-w1_1' align='left'>$op$hid<span onClick='$js_code'>$icon_html</span></td>
+      		<td width='$w1_2' class='group-w1_2' align='left' onClick='$js_code'> </td>
+      		<td width='$w1_3' class='group-w1_3' align='left' onClick='$js_code'>&nbsp;</td>
+      		<td align='left' width='$w2' class='tenpt underline group-w2' 
       				onClick='$js_code' $extra_style>
        				{$theme["course"]["subject_id"]}</td>
-       		<td class='tenpt underline' $extra_style width='$w3' align='left' 
+       		<td class='tenpt underline group-w3' $extra_style width='$w3' align='left' 
        			onClick='$js_code'>
         			{$theme["course"]["course_num"]}</td>
         	";
 		if ($repeats > 0)
 		{
 			$pC .= "
-				<td class='tenpt underline' style='color: gray;' 
+				<td class='tenpt underline group-may-repeat' style='color: gray;' 
 					onClick='$js_code' colspan='3'>
 				<i>" . t("May take up to") . " <span style='color: blue;'>" . ($repeats + 1) . "</span> " . t("times.") . "</i>
 				</td>
 			";
-		} else {
+		} 
+    else if ($theme["course"]["extra_html"] != "") {
+      $pC .= "
+        <td class='tenpt underline' class='group-w4' width='$w4' onClick='$js_code' $extra_style>{$theme["course"]["hours"]} {$theme["course"]["var_hour_icon"]}</td>
+        <td class='tenpt underline group-course-extra-html' 
+          onClick='$js_code' colspan='10'>
+          {$theme["course"]["extra_html"]}
+        </td>
+      ";      
+    }
+		else {
 
 			$pC .= "
-	       <td class='tenpt underline' width='$w4' onClick='$js_code' $extra_style>{$theme["course"]["hours"]} {$theme["course"]["var_hour_icon"]}</td>
-       	   <td class='tenpt underline' width='$w5' onClick='$js_code'>{$theme["course"]["grade"]}&nbsp;</td>
-       	   <td class='tenpt underline' width='$w6' onClick='$js_code'>{$theme["course"]["pts"]}&nbsp;</td>
+	       <td class='tenpt underline' class='group-w4' width='$w4' onClick='$js_code' $extra_style>{$theme["course"]["hours"]} {$theme["course"]["var_hour_icon"]}</td>
+       	   <td class='tenpt underline' class='group-w5' width='$w5' onClick='$js_code'>{$theme["course"]["grade"]}&nbsp;</td>
+       	   <td class='tenpt underline' class='group-w6' width='$w6' onClick='$js_code'>{$theme["course"]["pts"]}&nbsp;</td>
        	   ";
 		}
 
