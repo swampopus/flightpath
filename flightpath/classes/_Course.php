@@ -635,8 +635,7 @@ class _Course extends stdClass
    * @param string $str
    */
   function load_course_from_data_string($str)
-  {
-    
+  {    
     $temp = explode("~",$str);
 
     $this->course_id = 				$temp[0];
@@ -697,10 +696,10 @@ class _Course extends stdClass
     $this->max_hours				= 	$temp[19] * 1;
 
     //$this->bool_substitution_new_from_split	= 	(bool) $temp[20];
-    $this->set_degree_details_from_data_array(fp_explode_assoc($temp[15]), "bool_substitution_new_from_split");    
+    $this->set_degree_details_from_data_array(fp_explode_assoc($temp[20]), "bool_substitution_new_from_split");    
     
     //$this->bool_substitution_split	= 	(bool) $temp[21];
-    $this->set_degree_details_from_data_array(fp_explode_assoc($temp[15]), "bool_substitution_split");
+    $this->set_degree_details_from_data_array(fp_explode_assoc($temp[21]), "bool_substitution_split");
     
     // No longer used.  Using assigned_to_degree_ids instead.
     //$this->bool_has_been_assigned	= 	(bool) $temp[22];

@@ -723,10 +723,9 @@ class _FlightPath extends stdClass
           // coureRequirement into 2 pieces, and add the second piece just
           // after this one in the list.
           $course_sub = $substitution->course_list_substitutions->get_first();
-          //fpm($course_sub);
           if ($course_requirement->min_hours*1 > $course_sub->get_hours_awarded($req_by_degree_id))
           {
-                        
+                   
             // Because float math can create some very strange results, we must
             // perform some rounding.  We will round to 6 decimal places, which should
             // provide us the accuracy w/o losing precision (since we can only represent a max

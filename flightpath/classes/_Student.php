@@ -358,13 +358,11 @@ class _Student extends stdClass
 			// courseSubstitution within the list of courses which the student
 			// has taken.  If the subHours is less than the hours_awarded for the
 			// particular course, it means the course has been split up!
-      
-      // TODO:  Only look for a particular degree id?
+            
 			if($taken_course = $this->list_courses_taken->find_specific_course($sub_course_id, $sub_term_id, $sub_bool_transfer, true, null, $req_by_degree_id))
 			{ 
 				
-        //fpm($taken_course);
-								
+        								
 				// If this takenCourse is a transfer credit, then we want to remove
 				// any automatic eqv it may have set.
 				// We can do this easily by setting its course_id to 0.
@@ -383,7 +381,6 @@ class _Student extends stdClass
 
 				if (($taken_course->get_hours_awarded($req_by_degree_id) > $sub_hours))
 				{
-
 				  
 					// Okay, now this means that the course which we are
 					// using in the substitution-- the course which the student
@@ -402,8 +399,7 @@ class _Student extends stdClass
 					$new_course->load_course_from_data_string($new_course_string);
           $new_course->random_id = mt_rand(1,9999);
           
-					//$new_course->bool_substitution_split = true;
-					//$new_course->bool_substitution_new_from_split = true;
+          
           $new_course->set_details_by_degree($req_by_degree_id, "bool_substitution_split", TRUE);
           $new_course->set_details_by_degree($req_by_degree_id, "bool_substitution_new_from_split", TRUE);
 					
@@ -481,7 +477,6 @@ class _Student extends stdClass
         $substitution->db_required_group_id = $db_required_group_id;
         
 				$this->list_substitutions->add($substitution);
-
 
 			}
 

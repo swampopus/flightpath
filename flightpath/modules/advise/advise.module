@@ -853,7 +853,7 @@ function advise_display_popup_group_select() {
   $req_by_degree_id = trim(addslashes(@$_REQUEST["req_by_degree_id"]));
   $perform_action2 = @$_REQUEST["perform_action2"]; 
 
-
+  
   // If this is a "blank" degree, make sure we set the degree_id correctly.
   if($blank_degree_id != "") {    
     $degree_plan = new DegreePlan($blank_degree_id);
@@ -905,7 +905,7 @@ function advise_display_popup_group_select() {
 
   if ($perform_action2 == "" || $perform_action2 == "select") {
     if ($group) {
-      $rtn .= $screen->display_popup_group_select($group, $group_hours_remaining);
+      $rtn .= $screen->display_popup_group_select($group, $group_hours_remaining, $req_by_degree_id);
     }
     // Create the tabs for the page...
     $tab_array = array();

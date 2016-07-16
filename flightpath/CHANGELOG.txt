@@ -1,6 +1,18 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-07-16
+  Fixed bug where sometimes subs in groups were not showing hours correctly, especially for transfer credits. Was
+  fixed by ensuring the "req_by_degree_id" value was always passed along.
+  
+  Fixed bug in subs where "split sub hours" were being incorrectly reported.  This was because the course's data string
+  was not being assembled correctly.
+
+  Fixed issue where min/max hours for a group were not being displayed correctly.
+
+  Added new theme hook, so modules can theme group select rows, to have custom messages.
+
+
 2016-07-08
   Made tweaks to advising screen to make CSS re-themeing easier, and to make adding "extra html" easier to the group
   list popups as well as other areas.

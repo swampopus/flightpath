@@ -74,6 +74,12 @@ function hook_theme_advise_course_row(&$theme) {
 }
 
 
+/**
+ * Similar to hook_theme_advise_course_row.
+ * This lets the user theme the "select X hours..." row for a group.
+ */
+function theme_advise_group_select_row(&$theme) {
+}
 
 
  

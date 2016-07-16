@@ -978,7 +978,7 @@ function draw_menu_items($menu_array) {
 
 
 		$this->student->list_substitutions->reset_counter();
-    
+    fpm($this->student->list_substitutions);
 		while ($this->student->list_substitutions->has_more())
 		{
 			$substitution = $this->student->list_substitutions->get_next();
@@ -2290,6 +2290,8 @@ function draw_menu_items($menu_array) {
 
     // Keep up with original max hours, in case this is from a substitution split.
     $datastring_max_hours = $course->max_hours;
+        
+    
     $datastring_bool_new_from_split = $course->get_bool_substitution_new_from_split();
 
 
@@ -2405,17 +2407,18 @@ function draw_menu_items($menu_array) {
         
     
     
-		if ($course->get_bool_substitution_new_from_split() || $course->get_bool_substitution_split())
+		if ($course->get_bool_substitution_new_from_split($req_by_degree_id) || $course->get_bool_substitution_split($req_by_degree_id))
 		{
 		  $html = "";
 			$html .= "<div class='tenpt' style='margin-bottom:5px;'>
 						        <i>" . t("This course's hours were split in a substitution.");
 			
-			if ($datastring_bool_new_from_split) {
-			  $html .= "<br>" . t("Remaining hours after split:") . " " . $datastring_max_hours . " hrs.";
-			}
+      
+      if ($course->get_bool_substitution_new_from_split()) {
+        $html .= "<br>" . t("Remaining hours after split:") . "  $datastring_max_hours hrs.";
+      }
 			
-			
+						
 			$html .= "</i>
 						        <a href='javascript: alertSplitSub();'>?</a>
 					     </div>";
@@ -3656,8 +3659,8 @@ function draw_menu_items($menu_array) {
 
     $disp_remaining_hours = $remaining_hours;
     // If the group has min_hours, then the disp_remaining_hours gets that too.
-    if ($group->has_min_hours_allowed()) {
-      $disp_remaining_hours = $group->min_hours_allowed . "-" . $remaining_hours;
+    if ($group->has_min_hours_allowed()) {     
+      $disp_remaining_hours = ($group->min_hours_allowed - $group->hours_fulfilled) . "-" . $remaining_hours;
     }
 
 
@@ -3705,18 +3708,35 @@ function draw_menu_items($menu_array) {
       $extra_classes .= " contains-course-which-appears-in-mult-degrees contains-course-which-appears-in-$res-degrees";
     }
      
-
-
+    
+    // Just like the other times we check to theme a course row, let's give the option to theme this as well.
+    $theme = array();
+    $theme["screen"] = $this;
+    $theme["degree_plan"] = $this->degree_plan;
+    $theme["student"] = $this->student;
+    $theme["group"]["group"] = $group;
+    $theme["group"]["extra_classes"] = $extra_classes;
+    $theme["group"]["icon_link"] = $icon_link;
+    $theme["group"]["select_icon"] = $select_icon;
+    $theme["group"]["js_code"] = $js_code;
+    $theme["group"]["row_msg"] = $row_msg;
+    $theme["group"]["title"] = $group->title;
+    $theme["group"]["remaining_hours"] = $remaining_hours;
+    
+         
+    // Invoke a hook on our theme array, so other modules have a chance to change it up.   
+    invoke_hook("theme_advise_group_select_row", array(&$theme));     
+     
 
 		$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
-     	<tr height='20' class='$hand_class $extra_classes group-select-row'
-      		$on_mouse_over title='$group->title'>
+     	<tr height='20' class='$hand_class {$theme["group"]["extra_classes"]} group-select-row'
+      		$on_mouse_over title='{$theme["group"]["title"]}'>
       		<td width='$w1_1' class='group-w1_1' align='left'>&nbsp;</td>
-      		<td width='$w1_2' class='group-w1_2' align='left' onClick='$js_code'>$icon_link</td>
-      		<td width='$w1_3' class='group-w1_3' align='left' onClick='$js_code'>$select_icon</td>
-      		<td align='left' colspan='5' class='tenpt underline group-row-msg' onClick='$js_code'>
-      		$row_msg
+      		<td width='$w1_2' class='group-w1_2' align='left' onClick='{$theme["group"]["js_code"]}'>{$theme["group"]["icon_link"]}</td>
+      		<td width='$w1_3' class='group-w1_3' align='left' onClick='{$theme["group"]["js_code"]}'>{$theme["group"]["select_icon"]}</td>
+      		<td align='left' colspan='5' class='tenpt underline group-row-msg' onClick='{$theme["group"]["js_code"]}'>
+      		{$theme["group"]["row_msg"]}
        				
      	</tr>
      	</table>";		
@@ -4710,8 +4730,8 @@ function draw_menu_items($menu_array) {
 
 		// Bring in advise's css...
 		fp_add_css(fp_get_module_path("advise") . "/css/advise.css");
-		
-		
+				
+    
 		$course = new Course($course_id);
 		$bool_sub_add = false;
 
@@ -5112,13 +5132,16 @@ function draw_menu_items($menu_array) {
 	 * @param int $group_hours_remaining
 	 * @return string
 	 */
-	function display_popup_group_select(Group $place_group, $group_hours_remaining = 0)
+	function display_popup_group_select(Group $place_group, $group_hours_remaining = 0, $req_by_degree_id = 0)
 	{
 		$pC = "";
 
 		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
-    $req_by_degree_id = $place_group->req_by_degree_id;
+    if ($req_by_degree_id == 0) {
+      $req_by_degree_id = $place_group->req_by_degree_id;
+    }
     
+        
     $bool_no_courses = FALSE;
     
 		if ($place_group->group_id != DegreePlan::GROUP_ID_FOR_COURSES_ADDED)
@@ -5193,10 +5216,9 @@ function draw_menu_items($menu_array) {
 					// selected a subject.
 					$selected_subject = trim(addslashes(@$_GET["selected_subject"]));
 					if ($selected_subject == "")
-					{
-					  //TODO:  Probably goin to have some trouble here with multi degrees.
+					{					  
 						// Prompt them to select a subject first.
-						$pC .= $this->draw_popup_group_subject_select($subject_array, $group->group_id, $display_semesterNum, $group_hours_remaining);
+						$pC .= $this->draw_popup_group_subject_select($subject_array, $group->group_id, $display_semesterNum, $group_hours_remaining, $req_by_degree_id);
 						$new_course_list = new CourseList(); // empty it
 						$bool_display_submit = false;
 						$bool_subject_select = true;
@@ -5526,7 +5548,7 @@ function draw_menu_items($menu_array) {
 	 * @param int $group_hours_remaining
 	 * @return string
 	 */
-	function draw_popup_group_subject_select($subject_array, $group_id, $semester_num, $group_hours_remaining = 0)
+	function draw_popup_group_subject_select($subject_array, $group_id, $semester_num, $group_hours_remaining = 0, $req_by_degree_id = 0)
 	{
 		$csid = $GLOBALS["current_student_id"];
 		$blank_degree_id = "";
@@ -5552,6 +5574,7 @@ function draw_menu_items($menu_array) {
 					<input type='hidden' name='group_hours_remaining' value='$group_hours_remaining'>
 					<input type='hidden' name='current_student_id' value='$csid'>
 					<input type='hidden' name='blank_degree_id' value='$blank_degree_id'>
+					<input type='hidden' name='req_by_degree_id' value='$req_by_degree_id'>
 		
 					" . t("Please begin by selecting a subject from the list below.") . "
 					<br><br>

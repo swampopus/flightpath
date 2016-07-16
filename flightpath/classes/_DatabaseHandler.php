@@ -150,6 +150,7 @@ class _DatabaseHandler extends stdClass
       $cur = $this->db_fetch_array($res);
       $rtn_array["faculty_id"] = $cur["faculty_id"];
       $rtn_array["remarks"] = trim($cur["sub_remarks"]);
+      $rtn_array["sub_hours"] = $cur["sub_hours"];
       $rtn_array["required_course_id"] = $cur["required_course_id"];
       $rtn_array["required_group_id"] = $cur["required_group_id"];
       $rtn_array["posted"] = $cur["posted"];
