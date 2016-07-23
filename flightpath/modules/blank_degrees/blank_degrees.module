@@ -76,8 +76,8 @@ function blank_degrees_display_blank_degree() {
   
   $blank_degree_id = $_REQUEST["blank_degree_id"];
   $blank_catalog_year = $_REQUEST["blank_catalog_year"];
-  $blank_print = $_REQUEST["blank_print"];
-  $blank_view = $_REQUEST["blank_view"];
+  @$blank_print = $_REQUEST["blank_print"];
+  @$blank_view = $_REQUEST["blank_view"];
   
   // If we used the word "current" for catalog_year, then find out what the current is.
   if (strtolower($blank_catalog_year) == "current") {
@@ -220,6 +220,7 @@ function blank_degrees_perm() {
  */
 function blank_degrees_select_degree_form() {
   $form = array();
+  $m = 0;
   
   $bool_show_continue = TRUE;
   
@@ -236,7 +237,7 @@ function blank_degrees_select_degree_form() {
   }      
     
   
-  $blank_catalog_year = $_REQUEST["blank_catalog_year"];
+  @$blank_catalog_year = $_REQUEST["blank_catalog_year"];
   
   // If we used the word "current" for catalog_year, then find out what the current is.
   if (strtolower($blank_catalog_year) == "current") {

@@ -1406,6 +1406,8 @@ class _DatabaseHandler extends stdClass
     // Returns an array of all the degrees from a particular year
     // which are entered into FlightPath.
     
+    $undergrad_line = $degree_class_line = "";
+    
     $table_name = "degrees";
     if ($bool_use_draft){$table_name = "draft_$table_name";}    
     

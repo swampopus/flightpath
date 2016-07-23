@@ -313,6 +313,13 @@ function course_search_display_courses() {
   
   
   $mode = "";
+  
+  
+  // We are going to be setting up a render array for this screen, so other modules can alter it later.
+  $render = array();
+  $render["#id"] = "course_search_display_courses";
+  
+  
       
   $rtn .= fp_render_curved_line(t("Course Search"));
 
@@ -322,6 +329,18 @@ function course_search_display_courses() {
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;  
   $subject_id = $_REQUEST["subject_id"];
+
+  $render["#catalog_year"] = array(
+    "type" => "do_not_render",
+    "value" => $catalog_year,    
+  );
+
+  $render["#subject_id"] = array(
+    "type" => "do_not_render",
+    "value" => $subject_id,
+  );
+
+
 
   $clean_urls = variable_get("clean_urls", FALSE);
   
@@ -333,21 +352,15 @@ function course_search_display_courses() {
   $title = $cur["title"];
   if ($title == "") $title = $subject_id;
   
-  /*
-  $query = "SELECT DISTINCT a.* from subjects a,
-          courses b 
-          WHERE a.subject_id = '?'
-          AND a.subject_id = b.subject_id 
-          AND catalog_year = '?'
-          AND exclude = 0
-          ORDER BY title ";
-  $result = db_query($query, $subject_id, $catalog_year);
-  $cur = db_fetch_array($result);
-  $title = trim($cur["title"]);
-  */
   
-  $rtn .= t("Current catalog year:") . " <b>$catalog_year-" . ($catalog_year +1) . "</b>   
-      ";
+  //$rtn .= t("Current catalog year:") . " <b>$catalog_year-" . ($catalog_year +1) . "</b>   
+  //    ";
+  
+      
+  $render["current_cat_year"] = array(
+    "value" => t("Current catalog year:") . " <b>$catalog_year-" . ($catalog_year +1) . "</b>", 
+  );
+      
   $important_notice = "              
       <div class='tenpt hypo' style='padding: 5px;'>
       <b>Important Notice:</b> <ul style='margin-top: 5px;'>
@@ -365,30 +378,43 @@ function course_search_display_courses() {
     //$pC .= $screen->draw_c_fieldset($important_notice, "View important notice", true);   
   }
   else {
-    $rtn .= $important_notice;
+    //$rtn .= $important_notice;
+    $render["important_notice"] = array(
+      "value" => $important_notice, 
+    );
   }
-  
+
+  /*  
   $rtn .= "      
-      <div>
+     <!-- <div>  -->
       
       <div style='margin: 10px 0 20px 10px; border-bottom: 2px solid black;'>
       <span style='font-size: 14pt; font-weight:bold;'>$title</span>
       " . l("[change]", "tools/course-search", "", array("class" => "nounderline")) . "      
       </div>
       ";
+    */  
+  $render["subject_change"] = array(
+    "value" => "<div style='margin: 10px 0 20px 10px; border-bottom: 2px solid black;'>
+                    <span style='font-size: 14pt; font-weight:bold;'>$title</span>
+                    " . l("[change]", "tools/course-search", "", array("class" => "nounderline")) . "      
+                </div>",
+  );
+    
   // Draw the term selector.
+  $html = "";
   $only_term = @$_REQUEST["only_term"];
-  $rtn .= "<form id='term_form' action='" . fp_url("tools/course-search/courses") . "' method='GET'>           
+  $html .= "<form id='term_form' action='" . fp_url("tools/course-search/courses") . "' method='GET'>           
            <input type='hidden' name='mode' value='$subject_id'>
            <input type='hidden' name='subject_id' value='$subject_id'>
            ";
   
   if (!$clean_urls) {
       // Hack for if clean URLs isn't enabled
-      $rtn .= "<input type='hidden' name='q' value='tools/course-search/courses'>";
+      $html .= "<input type='hidden' name='q' value='tools/course-search/courses'>";
   }
              
-  $rtn .= "           
+  $html .= "           
            View courses offered:
            <select name='only_term' onChange='document.getElementById(\"term_form\").submit();'>
              <option value=''>Any term</option>
@@ -401,7 +427,7 @@ function course_search_display_courses() {
   
   for ($t = $catalog_year; $t <= $catalog_year + 4; $t++)
   {
-    $rtn .= "<option value=''>---------------------</option>";
+    $html .= "<option value=''>---------------------</option>";
     foreach($term_array as $x)
     {
       $schedule_text .= "<td class='tenpt' align='center'>";
@@ -416,22 +442,39 @@ function course_search_display_courses() {
         $sel = " selected";
       }
       
-      $rtn .= "<option value='$the_term_id' $sel>$term_desc</option> \n";     
+      $html .= "<option value='$the_term_id' $sel>$term_desc</option> \n";     
     }   
     
   } 
-  $rtn .= "
+  $html .= "
            </select>
          </form>";
+  
+  
+  $render["term_selector_form"] = array(
+    "value" => $html,
+  );
+  
+  
   
   if ($only_term != "") {
     $temp_course = new Course();
     $temp_course->term_id = $only_term;
     $term_desc = $temp_course->get_term_description(false);
 
+    /*
     $rtn .= "<div style='font-weight: bold; padding-bottom: 20px;'>
              The following courses are currently scheduled to be offered during " . $term_desc . ".
             </div>";
+    */
+            
+    $render["term_selected_only_term"] = array(
+      "value" => "<div style='font-weight: bold; padding-bottom: 20px;'>
+                 " . t("The following courses are currently scheduled to be offered during") . $term_desc . "
+                </div>",
+     
+    );            
+            
   }
   
   $term_structures = get_term_structures();
@@ -652,28 +695,47 @@ function course_search_display_courses() {
           $hyp1 = "";
         }
         
-        $rtn .= "<div class='course-search-course-block'>
+        $html = "";
+        
+        // Note, the HTML comments are so other modules, that wish to manipulate this block, have something easy to find/replace
+        
+        $html .= "<div class='course-search-course-block'>
+                 <!-- TITLE_ROW -->
                  <div class='course-search-course-title-row' 
                       $on_click>
+                       <!-- COURSE-NAME -->
                        <span class='course-search-course-name'>$n_subject_id $n_course_num</span>
-                        $hyp1 
-                        <span class='course-search-course-title'>$title</span> - $hours " . t("hrs.") . "$repeat </div>
+                        $hyp1
+                        <!-- COURSE-TITLE --> 
+                        <span class='course-search-course-title'>$title</span> - $hours " . t("hrs.") . "$repeat 
+                 </div>
+                 <!-- COURSE-EXTRA -->
                  <div class='course-search-course-extra'>
+                   <!-- DESC -->
                    <div class='course-search-course-description'>$description</div>
+                   <!-- DETAILS -->
                    <div class='course-search-course-details'>$details</div>
                  
                  ";
 
+        
         if (user_has_permission("can_update_course_info_details") && !fp_screen_is_mobile()) {
-          $rtn .= "<div class='course-search-admin-options'>
+          $html .= "<!-- ADMIN-OPTIONS -->
+                    <div class='course-search-admin-options'>
                     " . t("Administrative options:") . " 
                     " . l(t("Edit syllabus and rotation schedule"), "tools/course-search/edit-info-details", "course_id=$n_course_id&subject_id=$n_subject_id&course_num=$n_course_num") . "                  
                 </div>";
         }         
                  
-        $rtn .= "</div>";
+        $html .= "</div>"; // div course-search-course-extra
                        
-        $rtn .= "</div>";
+        $html .= "</div>"; // div course-search-course-block
+        
+        $render["course_search_course_block__$n_course_id"] = array(
+          "value" => $html,
+        );
+                
+        
       }
   
     }
@@ -684,7 +746,7 @@ function course_search_display_courses() {
 
 
   //$pC .= $screen->get_java_script_code();
-  $rtn .= '    
+  $html = '    
     <script type="text/javascript">
     function toggleHideDiv(rndDivID)
     {
@@ -707,6 +769,13 @@ function course_search_display_courses() {
     </script>
   
       ';
+
+  
+  $render["extra_javascript"] = array(
+    "value" => $html,
+  );
+
+  $rtn .= fp_render_content($render);
 
   return $rtn;
 }
@@ -839,6 +908,7 @@ function course_search_get_course_syllabus_details($subject_id = "", $course_num
 function course_search_display_search() {
     
   $rtn = "";
+  $mode = "";
    
   fp_add_css(fp_get_module_path("course_search") . "/css/course_search_style.css");
   

@@ -5526,7 +5526,7 @@ function draw_menu_items($menu_array) {
 			}
 			$back_link = "<span class='tenpt'>
 						<a href='" . fp_url("advise/popup-group-select", "window_mode=popup&group_id=$group->group_id&semester_num=$display_semesterNum&group_hours_remaining=$group_hours_remaining&current_student_id=$csid&blank_degree_id=$blank_degree_id") . "' 
-						class='nounderline'>" . t("Click here to return to subject selection.") . "</a></span>";
+						class='nounderline'>&laquo; " . t("return to subject selection") . "</a></span>";
 			$pC = str_replace("<!--MSG2-->",$back_link,$pC);
 		}
 

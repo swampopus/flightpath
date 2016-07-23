@@ -973,6 +973,10 @@ function advise_display_popup_substitute_selected() {
     $hours_avail = $_GET["hours_avail"] * 1;
   }
   
+  
+  
+  $rtn .= "<div class='tenpt'><a href='javascript:history.go(-1);' class='nounderline'>&laquo; " . t("return to course selection") . "</a></div>";  
+    
   $rtn .= $screen->display_popup_substitute($course_id, $group_id, $semester_num, $hours_avail, $req_by_degree_id);
    
   
