@@ -695,6 +695,7 @@ function system_popup_report_contact_form() {
   $form = array();
  
   fp_set_title("");
+  $m = 0;
   
   $form["mark" . $m++] = array(
     "value" => fp_render_curved_line(t("Contact the @FlightPath Production Team", array("@FlightPath" => variable_get("system_name", "FlightPath")))),
@@ -1642,6 +1643,39 @@ function system_settings_form() {
   );                                
                   
   
+  $form["popup_admin_win_options"] = array(
+    "type" => "textfield",
+    "size" => 80,
+    "label" => t("Javascript Popup Admin Window Options:"),
+    "value" => variable_get("popup_admin_win_options", "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=600,height=400"),
+    "description" => t("This is the popup javascript options for the 'Admin' popup window.  This popup is used for
+                           assigning groups in degree edit, editing definitions, and the popup contact window.
+                         <br><b>DO NOT ENTER ANY SPACES OR QUOTES!  Entering invalid syntax could break your Javascript.</b>
+                         <br>If unsure what to enter, use: <em>toolbar=no,status=2,scrollbars=yes,resizable=yes,width=600,height=400</em>"),    
+  );
+    
+  $form["popup_advise_win_options"] = array(
+    "type" => "textfield",
+    "size" => 80,
+    "label" => t("Javascript Popup Advise Window Options:"),
+    "value" => variable_get("popup_advise_win_options", "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375"),
+    "description" => t("This is the popup javascript options for the 'Advising' popup window.  This popup is used for
+                           course descriptions, group selections, substitutions, etc.
+                         <br><b>DO NOT ENTER ANY SPACES OR QUOTES!  Entering invalid syntax could break your Javascript.</b>
+                         <br>If unsure what to enter, use: <em>toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375</em>"),    
+  );
+  
+  $form["popup_print_win_options"] = array(
+    "type" => "textfield",
+    "size" => 80,
+    "label" => t("Javascript Popup Print Window Options:"),
+    "value" => variable_get("popup_print_win_options", "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=750,height=600"),
+    "description" => t("This is the popup javascript options for the 'Print' popup window.  This popup is used for
+                           printable views of degree plans.
+                         <br><b>DO NOT ENTER ANY SPACES OR QUOTES!  Entering invalid syntax could break your Javascript.</b>
+                         <br>If unsure what to enter, use: <em>toolbar=no,status=2,scrollbars=yes,resizable=yes,width=750,height=600</em>"),    
+  );
+    
                 
                 
   
@@ -2441,7 +2475,18 @@ function system_init() {
   
    
   // Add in our custom JS settings.
-  fp_add_js(array("themeLocation" => fp_theme_location(), "currentStudentId" => @$_REQUEST["current_student_id"], "basePath" => base_path()), "setting");
+  $settings = array(
+      "themeLocation" => fp_theme_location(), 
+      "currentStudentId" => @$_REQUEST["current_student_id"], 
+      "basePath" => base_path(),
+      // Add in the popup window options....      
+      "popupAdminWinOptions" => variable_get("popup_admin_win_options", "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=600,height=400"),  // used by admin groups, edit definitions, degrees, and popup contact form.    
+      "popupAdviseWinOptions" => variable_get("popup_advise_win_options", "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375"),  // the work-horse of most of the advising popups. course desc, subs, etc.
+      "popupPrintWinOptions" => variable_get("popup_print_win_options", "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=750,height=600"),  // any printable screen is displayed in this.
+          
+  );
+   
+  fp_add_js($settings, "setting");
   fp_add_js(fp_get_module_path("system") . "/js/system.js");
      
 }

@@ -929,28 +929,44 @@ function setVar(id, newValue) {
 ////////////////////////////////////////
 
 function popupWindowNew(url, extraVars) {
+  
+  // Figure out the window's options from our settings, if they exist.
+  var win_options = FlightPath.settings.popupAdviseWinOptions;
+  if (!win_options) {
+    win_options = "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375"; 
+  }
+  
   var my_windowx = window.open(url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars,
-  "courseinfox" + FlightPath.settings.currentStudentId,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375");
+  "courseinfox" + FlightPath.settings.currentStudentId, win_options);
 
   my_windowx.focus();  // make sure the popup window is on top.
   
 }
 
 function popupPrintWindow(url) {
+  
+  // Figure out the window's options from our settings, if they exist.
+  var win_options = FlightPath.settings.popupPrintWinOptions;
+  if (!win_options) {
+    win_options = "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=750,height=600"; 
+  }
+    
   var my_windowx2p = window.open(url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId,
-  "courseinfoxprint" + FlightPath.settings.currentStudentId,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=750,height=600");
+  "courseinfoxprint" + FlightPath.settings.currentStudentId,win_options);
 
   my_windowx2p.focus();  // make sure the popup window is on top.
 
 }
 
 
+
+
+
+
+
 function popupHelpWindow(url) {
-  var my_windowxhelp2p = window.open(url + "&current_student_id=" + FlightPath.settings.currentStudentId,
-  "courseinfoxhelp" + FlightPath.settings.currentStudentId,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=700,height=500");
-
-  my_windowxhelp2p.focus();  // make sure the popup window is on top.
-
+  // I don't think this function is used anymore.  Re-route to the popupPrintWindow instead.
+  popupPrintWindow(url);
 }
 
 
@@ -964,11 +980,10 @@ function popupHelpWindow(url) {
 // 
 // }
 
-function popupWindow2(url, extraVars) {
-  var my_windowx2 = window.open(url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars,
-  "courseinfox2" + FlightPath.settings.currentStudentId,"toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375");
 
-  my_windowx2.focus();  // make sure the popup window is on top.
+function popupWindow2(url, extraVars) {
+  // I don't think this is used, re-route to popupWindowNew just in case.
+  popupWindowNew(url, extraVars);
 
 }
 

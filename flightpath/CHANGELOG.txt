@@ -2,6 +2,11 @@ FlightPath 5.x Changelog
 ========================
 
 
+2016-07-26
+  Added ability to change popup window sizes in the System Settings form.  Popup window options are
+  now stored in the FlightPath.settings javascript object.
+  
+
 2016-07-23
   Switched (much of) the course search module to use render arrays, so other modules can make changes.
   

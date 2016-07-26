@@ -934,7 +934,7 @@ function draw_menu_items($menu_array) {
 			{// Don't display in print view.
 			  $purl = fp_url("advise/popup-toolbox/transfers"); 
 				$pC .= "<div style='tenpt'>				
-					<a href='javascript: popupWindow2(\"" . $purl . "\",\"\");'><img src='" . fp_theme_location() . "/images/toolbox.gif' border='0'>" . t("Administrator's Toolbox") . "</a>
+					<a href='javascript: popupWindowNew(\"" . $purl . "\",\"\");'><img src='" . fp_theme_location() . "/images/toolbox.gif' border='0'>" . t("Administrator's Toolbox") . "</a>
 				</div>";
 				$is_empty = false;
 			}

@@ -315,21 +315,31 @@ function adminPopupAlertHelp(action)
 
 function adminPopupWindow(url)
 {
+  
+  // Figure out the window's options from our settings, if they exist.
+  var win_options = FlightPath.settings.popupAdminWinOptions;
+  if (!win_options) {
+    win_options = "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=600,height=400"; 
+  }
+  
   var my_windowxvvv = window.open(url,
-      "courseinfoxvvv","toolbar=no,status=2,scrollbars=yes,resizable=yes,width=600,height=400");
+      "admininfoxvvv",win_options);
 
   my_windowxvvv.focus();  // make sure the popup window is on top.
       
 }
 
+/*
 function adminPopupWindow2(url)
-{
+{  
   my_windowx2vvv = window.open(url,
       "courseinfox2vvv","toolbar=no,status=2,scrollbars=yes,resizable=yes,width=500,height=300");
 
   my_windowx2vvv.focus();  // make sure the popup window is on top.
       
 }
+*/
+
 
 function adminViewAnnouncementPreview(count) {
   // Display the announcement in question in a popup window so

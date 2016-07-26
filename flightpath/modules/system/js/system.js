@@ -30,11 +30,18 @@
 		function popupreportcontact()
 		{
 		  
+		  // Figure out the window's options from our settings, if they exist.
+		  var win_options = FlightPath.settings.popupAdminWinOptions;
+		  if (!win_options) {
+		    win_options = "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=600,height=400"; 
+		  }
+		  
+		  
 		  // To make compatible with non-clean URLs, use the "unclean" url...
 		  var url = FlightPath.settings.basePath + "/index.php?q=popup-report-contact";
 		  
 			err_window = window.open(url,
-			"errwindow","toolbar=no,status=2,scrollbars=yes,resizable=yes,width=500,height=400");
+			   "errwindow", win_options);
 
 			err_window.focus();  // make sure the popup window is on top.
 
