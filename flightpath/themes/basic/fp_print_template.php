@@ -22,6 +22,9 @@ print "<link rel='stylesheet' type='text/css' href='$theme_location/custom.css?$
 print "<title>$page_title</title> ";
 
 ?>
+    <script src="<?php print base_path() ?>/inc/jquery-1.8.3.min.js" type="text/javascript"></script>
+    <script src="<?php print base_path() ?>/inc/jquery-ui-1.9.2.custom.min.js" type="text/javascript"></script>
+
 <body style='background-color: white;' class='<?php print $page_body_classes; ?>'>
 <!-- TEXT LOGO -->
 <table width='500' border='0'>

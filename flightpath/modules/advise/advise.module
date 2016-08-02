@@ -510,7 +510,7 @@ function advise_display_popup_change_track() {
     // Skip any degree plan that isn't level 1 or level 2.  In other words,
     // if this is already a track, then skip it.
     $details = fp_get_degree_classification_details($t_degree_plan->degree_class);
-    //fpm($details);  
+      
     if ($details["level_num"] == 3) continue;
     
     
@@ -1475,8 +1475,8 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
   
   
   // TODO:  If a non-dynamic degree was selected, along with anything else, the user may not proceed.
-  //fpm($form);
-  //fpm($form_state);
+  
+  
   
   
   /////////////////////////
@@ -1589,7 +1589,7 @@ function advise_what_if_selection_form_submit($form, $form_state) {
     }
   }
   
-  //fpm($form_state["values"]);
+  
   // Add in the tracks, too, if selected.
   foreach ($form_state["values"] as $key => $val) {
     if (strstr($key, "L3__sel__")) {
@@ -1634,7 +1634,7 @@ function advise_what_if_selection_form_submit($form, $form_state) {
     }
   }
   
-  //fpm($what_if_major_code);
+  
       
   // Remove training comma
   $what_if_major_code = rtrim($what_if_major_code, ",");    
@@ -1864,7 +1864,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   if ($vars["advising_track_degree_ids"] == "")
   {    
     $vars["advising_track_degree_ids"] = @$_SESSION["advising_track_degree_ids$csid"];
-    //fpm($_SESSION["advising_track_degree_ids$csid"]);   
+       
     if ($vars["advising_track_degree_ids"] == "")
     { // Default value...    
       if (!$student) $student = new Student($csid);
@@ -2153,7 +2153,7 @@ function advise_init_screen() {
 
   $bool_draft = true;
   
-  //fpm($GLOBALS["fp_advising"]);
+  
   if (@$GLOBALS["fp_advising"]["advising_load_active"] == "yes") { 
     // If we are loading from Active, then rebuild the cache as well.
     $bool_draft = false;
@@ -2219,7 +2219,7 @@ function advise_init_screen() {
     invoke_hook("save_advising_session", $adv_id_array);
     
     $bool_draft = TRUE;  // load draft, since we just saved it (and changed something)
-    //fpm("saved draft");
+    
 
   }
   if ($perform_action == "save_active") {

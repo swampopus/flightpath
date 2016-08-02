@@ -54,6 +54,7 @@ function blocks_menu() {
 function blocks_manage_blocks_form() {
     
   $form = array();
+  $m = 0;
   
   fp_add_css(fp_get_module_path("blocks") . "/css/blocks.css");
   

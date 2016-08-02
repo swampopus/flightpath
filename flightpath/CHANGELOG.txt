@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-08-01
+  Added jQuery includes in the print template files, in case they are needed for debugging.
+  
+  Fixed bug in History view, where "view/print all" wasn't correctly loading advising sessions
+  in sequence.
+  
 
 2016-07-26
   Added ability to change popup window sizes in the System Settings form.  Popup window options are

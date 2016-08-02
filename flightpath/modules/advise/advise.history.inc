@@ -398,6 +398,7 @@ function advise_popup_display_summary() {
                      WHERE advising_session_id = '?' ", $advising_session_id);
   }
   else {
+    
     $bool_multiple = TRUE;
     $session_array = csv_to_array($advising_session_id);
         
@@ -406,9 +407,9 @@ function advise_popup_display_summary() {
       $where .= " advising_session_id = ? OR";
     }
     $where = rtrim($where, "OR");
-     
     $res = db_query("SELECT * FROM advising_sessions
-                     WHERE $where ", $session_array);
+                     WHERE $where 
+                     ORDER BY `posted` DESC ", $session_array);
         
   }
   while ($cur = db_fetch_array($res)) {
@@ -557,8 +558,8 @@ function advise_popup_display_summary() {
     $rtn .= fp_render_curved_line(t("Advised Courses"));
   
     $fp = new FlightPath($student,$degree_plan, $db);
-  
-    $fp->load_advising_session_from_database("","",false,false,$advising_session_id);
+      
+    $fp->load_advising_session_from_database("","",false,false,$db_advising_session_id);
   
     $rtn .= "<table border='0' cellpadding='3'>
         <tr>

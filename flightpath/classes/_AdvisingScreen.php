@@ -978,7 +978,7 @@ function draw_menu_items($menu_array) {
 
 
 		$this->student->list_substitutions->reset_counter();
-    fpm($this->student->list_substitutions);
+    
 		while ($this->student->list_substitutions->has_more())
 		{
 			$substitution = $this->student->list_substitutions->get_next();
@@ -2271,7 +2271,7 @@ function draw_menu_items($menu_array) {
 		
 		$db_group_requirement_id = @$_REQUEST["db_group_requirement_id"];
 		
-  //fpm($course);
+  
 
 		if ($course == null)
 		{
@@ -2694,7 +2694,7 @@ function draw_menu_items($menu_array) {
       $html = "";
       
 			// Find out who did it and if they left any remarks.
-			//fpm($course->course_substitution_by_degree_array);
+			
 		  $db = $this->db;
 			
 			$sub_id = $course->db_substitution_id_array[$course->get_course_substitution()->req_by_degree_id];
@@ -3030,7 +3030,7 @@ function draw_menu_items($menu_array) {
         $last_req_by_degree_id = $group->req_by_degree_id;                
       }            
       
-      //fpm($group->req_by_degree_id);
+      
       
 			$pC .= "<tr><td colspan='8'>";
             
@@ -3175,7 +3175,7 @@ function draw_menu_items($menu_array) {
     } //while groups.
 
     
-    //fpm($html);
+    
 
     // Sort by degree's advising weight
     $new_html = array();
@@ -3202,9 +3202,9 @@ function draw_menu_items($menu_array) {
     }
     
     // Sort by the first index, the advising weight.   
-    //fpm($new_html); 
+     
     ksort($new_html);
-    //fpm($new_html);
+    
     
     
     
@@ -3322,7 +3322,7 @@ function draw_menu_items($menu_array) {
     // What we are trying to do is end up with a list of courses we want to display on the screen (for example,
     // that the student took or were substituted in)
 		$group->list_courses->remove_unfulfilled_and_unadvised_courses();
-    //fpm($group->list_courses);
+    
 		$group->list_courses->reset_counter();
 		while($group->list_courses->has_more())
 		{
@@ -3332,7 +3332,7 @@ function draw_menu_items($menu_array) {
 			$fulfilled_hours = $display_course_list->count_hours("", FALSE, TRUE, FALSE, FALSE, $req_by_degree_id);
 			$remaining = $place_group->hours_required - $fulfilled_hours;
 
-      //fpm("fulfilled: $fulfilled_hours, remaining: $remaining");
+      
 
 
 			// If the course in question is part of a substitution that is not
@@ -3362,7 +3362,7 @@ function draw_menu_items($menu_array) {
         // Is whats remaining actually LESS than the course hours?  If so, we need to skip it.        
 				if ($remaining < $ch)
 				{
-				  //fpm("skipping $c->subject_id $c->course_num because remaining $remaining is less than course hours: $cgh");          
+				            
 					continue;
 				}
         
@@ -3476,7 +3476,7 @@ function draw_menu_items($menu_array) {
     // Make sure we're all on the same page, for what degree_id we're being displayed under.
     $display_course_list->set_req_by_degree_id($req_by_degree_id);
 
-    //fpm($display_course_list);
+    
 
 		$pC .= $this->display_group_course_list($display_course_list, $group, $display_semesterNum);
 
@@ -4037,7 +4037,7 @@ function draw_menu_items($menu_array) {
       $temp_sub_course = $course->get_course_substitution();
       if (is_object($temp_sub_course))
       {
-        //fpm($temp_sub_course);        
+                
 			  if ($temp_sub_course->subject_id == "")
 			  { // Reload subject_id, course_num, etc, for the substitution course,
 				  // which is actually the original requirement.
@@ -4838,7 +4838,7 @@ function draw_menu_items($menu_array) {
 					continue;
 				}
 
-				//fpm($c);
+				
 				if (!$c->meets_min_grade_requirement_of(null, variable_get("minimum_substitutable_grade", "D")))
 				{// Make sure the grade is OK.
 					continue;
@@ -4927,8 +4927,8 @@ function draw_menu_items($menu_array) {
         // If it's never been split for THIS degree, it should just show up as 1 course.
         $ukey = md5($c->course_id . $c->catalog_year . $c->term_id . $m_hours . $tcourse_id . intval(@$c->db_substitution_id_array[$req_by_degree_id]));
         if (isset($already_seen[$ukey])) {
-          //fpm($c);
-          //fpm($m_hours);  
+          
+            
           continue;
         }        
         // Else, add it.
@@ -4941,14 +4941,6 @@ function draw_menu_items($menu_array) {
 				if ($c->get_bool_substitution($req_by_degree_id) != TRUE && $c->get_bool_outdated_sub($req_by_degree_id) != TRUE)
 				{
 				            
-          
-          if ($course_num == "201") {
-            //fpm("here");  
-            //fpm($req_by_degree_id);
-            //fpm($c);          
-          }
-          
-          
                               
 				  $h = $c->get_hours_awarded($req_by_degree_id);
 				  if ($c->bool_ghost_hour == TRUE) {
@@ -4958,7 +4950,7 @@ function draw_menu_items($menu_array) {
           // If this course was split up, we need to use our 
           // helper array to see what the OTHER, already-used pieces add up to.
           if ($c->get_bool_substitution_split($req_by_degree_id)) {
-            //fpm("here for new thang");
+            
             $ukey = md5($c->course_id . $c->catalog_year . $c->term_id . $tcourse_id);
             if (isset($used_hours_subs[$ukey])) {
               $used_hours = $used_hours_subs[$ukey];
@@ -5057,7 +5049,7 @@ function draw_menu_items($menu_array) {
 
           // Keep track of how many hours THIS course has been subbed, if it was split.
           $ukey = md5($c->course_id . $c->catalog_year . $c->term_id . $tcourse_id);
-          //fpm($c->get_substitution_hours($req_by_degree_id));
+          
           if (!isset($used_hours_subs[$ukey])) $used_hours_subs[$ukey] = 0;
           $used_hours_subs[$ukey] += $c->get_substitution_hours($req_by_degree_id);
           
@@ -5365,11 +5357,11 @@ function draw_menu_items($menu_array) {
 		// We also should not see it in other instances of Core Math.
 		if ($group->group_id != DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED && $this->bool_blank != TRUE)
 		{
-		  //fpm($final_course_list);      
+		        
 			// Only do this if NOT in Add a Course group...
 			// also, don't do it if we're looking at a "blank" degree.
 			$final_course_list->remove_previously_fulfilled($this->student->list_courses_taken, $group->group_id, true, $this->student->list_substitutions, $req_by_degree_id);
-      //fpm($final_course_list);
+      
 
 
 		}

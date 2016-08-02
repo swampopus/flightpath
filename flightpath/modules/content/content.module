@@ -238,15 +238,16 @@ function content_view_content() {
 function content_edit_content_form($type = "", $cid = "") {
   
   $form = array();
+  $m = 0;
   
   fp_add_css(fp_get_module_path("content") . "/css/content.css");
   
   if ($type == "") {
-    $type = $_REQUEST["type"];    
+    @$type = $_REQUEST["type"];    
   }
   
   if ($cid == "") {
-    $cid = $_REQUEST["cid"];  
+    @$cid = $_REQUEST["cid"];  
   }
   
   $types = content_get_types();
@@ -534,7 +535,7 @@ function content_display_content_admin_list() {
   
   // Show a table of current content in the system.
   $rtn .= "<b>" . t("Existing content:") . "</b>";
-  $filter = $_GET["filter"];
+  @$filter = $_GET["filter"];
   
   $rtn .= "<form action='" . fp_url("admin/config/content") . "' method='GET'>
               " . t("Display type:") . " &nbsp; <select name='filter'>

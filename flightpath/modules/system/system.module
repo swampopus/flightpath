@@ -551,7 +551,7 @@ function system_confirm_db_updates_form_submit($form, $form_state) {
             $module = $file;
             $info_contents = file_get_contents("$start_dir/$file/$file.info");
               
-            //fpm($info_contents);  
+              
             // From the info_contents variable, split up and place into an array.
             $info_details_array = array();
             $lines = explode("\n", $info_contents);
@@ -855,7 +855,7 @@ function system_school_data_form() {
   $result = db_query($query);
   while ($cur = db_fetch_array($result))
   {      
-    //fpm($cur);
+    
     $title = trim($cur["title"]);
     $subject_id = trim($cur["subject_id"]);
     $college = trim($cur["college"]);
@@ -2540,7 +2540,7 @@ function system_modules_form() {
             $module = $file;
             $info_contents = file_get_contents("$start_dir/$file/$file.info");
               
-            //fpm($info_contents);  
+              
             // From the info_contents variable, split up and place into an array.
             $info_details_array = array("path" => "", "module" => "", 
                                         "schema" => "", "core" => "", "description" => "", 
@@ -2560,7 +2560,7 @@ function system_modules_form() {
             $info_details_array["path"] = $path;
             $info_details_array["module"] = $module;
             
-            //fpm($info_details_array);            
+                        
             // Expected keys:
             // name, description, version, core, requires (csv), requred (true or false)
             $checked = "";
@@ -2734,7 +2734,7 @@ function system_modules_form_submit($form, $form_state) {
   // Go through all of the checkboxes which we have "module_details" for.  If there is NOT a corresponding
   // checkbox, it means it wasn't checked, and should be disabled in the database.  Otherwise, it means it WAS
   // checked, and should be enabled/installed.
-  //fpm($form_state["values"]);
+  
   
   $did_something = FALSE;
   
