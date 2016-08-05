@@ -1681,7 +1681,7 @@ class _Course extends stdClass
    *          just use the first bit of data we find.
    * 
    */
-  function load_descriptive_transfer_data($student_id = "")
+  function load_descriptive_transfer_data($student_id = "", $term_id = NULL)
   {
 
     // This method should be called to load transfer course data
@@ -1714,8 +1714,8 @@ class _Course extends stdClass
       // Because transfer credit titles may differ from student
       // to student, let's look up the title in the per-student transfer courses table...
       $res = $this->db->db_query("SELECT * FROM student_transfer_courses
-									WHERE student_id = '?'
-									AND transfer_course_id = '?' 
+									WHERE student_id = ?
+									AND transfer_course_id = ? 
 									 ", $student_id, $this->course_id);
       $cur = $this->db->db_fetch_array($res);
       if (trim($cur["student_specific_course_title"]) != "") {
@@ -1726,6 +1726,31 @@ class _Course extends stdClass
       $this->grade = $cur["grade"];
       $this->term_id = $cur["term_id"];
       
+      ///////////////////
+      // If a term_id was specified, then let's try to see if we can get more specific information for this course.
+      if ($term_id != NULL) {
+        $res = $this->db->db_query("SELECT * FROM student_transfer_courses
+                    WHERE student_id = ?
+                    AND transfer_course_id = ?
+                    AND term_id = ? 
+                     ", $student_id, $this->course_id, $term_id);
+        if ($res) {                     
+          $cur = $this->db->db_fetch_array($res);
+          if ($cur) {
+            if (trim($cur["student_specific_course_title"]) != "") {
+              $this->title = trim($cur["student_specific_course_title"]);
+            }
+            // Also assign hours_awarded and other values while we are here
+            if ($cur["grade"] != "" || $cur["hours_awarded"] != "") {
+              $this->set_hours_awarded(0, $cur["hours_awarded"] * 1);
+              $this->grade = $cur["grade"];
+            }
+            $this->term_id = $cur["term_id"];
+          }      
+        }
+      } // if term_id != NULL
+      
+      
       
 
       $already = array();  // to prevent duplicates from showing up, keep up with
@@ -1733,8 +1758,8 @@ class _Course extends stdClass
       
    
       $res2 = $this->db->db_query("SELECT * FROM transfer_eqv_per_student
-            					WHERE student_id = '?'	
-            					AND transfer_course_id = '?' 
+            					WHERE student_id = ?	
+            					AND transfer_course_id = ? 
             					 ", $student_id, $this->course_id);
       while($cur2 = $this->db->db_fetch_array($res2))
       {        

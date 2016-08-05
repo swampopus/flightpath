@@ -308,23 +308,25 @@ class _DatabaseHandler extends stdClass
    * @param unknown_type $sql_query
    * @return unknown
    */
-  function db_query($sql_query) {
-    
+  function db_query($sql_query, $args = array()) {
+
     // If there were any arguments to this function, then we must first apply
     // replacement patterns.
     $args = func_get_args();
+  
     array_shift($args);
     if (isset($args[0]) && is_array($args[0])) {
       // If the first argument was an array, it means we passed an array of values instead
       // of passing them directly.  So use them directly as our args.
-      $args = $args[0];
-      
+      $args = $args[0];      
+
       // If we were supplied an array, then we need to see if the NEW args[0] is an array...  If it is, grab the first element AGAIN.
       if (isset($args[0]) && is_array($args[0])) {
         $args = $args[0];
       }
     }
 
+    
     // We need to make sure that arguments are passed without being contained in single quotes ('?').  Should be just ?
     $sql_query = str_replace("'?'", "?", $sql_query);
 

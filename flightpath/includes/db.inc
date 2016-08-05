@@ -321,7 +321,9 @@ function db_set_user_setting($user_id, $var_name, $value) {
 
 function db_query($query) {
   // Capture arguments to this function, to pass along to our $db object.
-  $args = func_get_args();
+
+    $args = func_get_args();
+      
   array_shift($args);  
   
   $db = get_global_database_handler();  
@@ -380,7 +382,7 @@ function variable_get($name, $default_value = "") {
   
   // First, check in our GLOBALS array, like a cache...
   if (isset($GLOBALS["fp_system_settings"][$name])) {
-    $val = $GLOBALS["fp_system_settings"][$name];
+    $val = $GLOBALS["fp_system_settings"][$name];        
   }
   else {    
     // Not found-- look in the database for it.
@@ -388,13 +390,10 @@ function variable_get($name, $default_value = "") {
                            WHERE name = '?' ", $name);
     $cur = db_fetch_array($res);    
     $val = unserialize($cur["value"]);
-    
-    if ($val === "BOOLEAN_FALSE_PLACEHOLDER") {
-      $val = FALSE;
-    }
-    
+
     // Save back to our cache...
     $GLOBALS["fp_system_settings"][$name] = $val;
+    
   }
 
   
@@ -409,7 +408,11 @@ function variable_get($name, $default_value = "") {
   if ($val === "BOOLEAN_FALSE_PLACEHOLDER") {
     $val = FALSE;
   }
-  
+
+  if ($val === "NULL_PLACEHOLDER") {
+    $val = NULL;
+  }  
+    
   return $val;
 }
 
@@ -434,6 +437,11 @@ function variable_set($name, $value) {
   if ($value === FALSE) {
     $value = "BOOLEAN_FALSE_PLACEHOLDER";
   }
+  // Same for NULL value
+  if ($value === NULL) {
+    $value = "NULL_PLACEHOLDER";
+  }
+
     
   db_query("REPLACE INTO variables (name, value)
               VALUES ('?', '?') ", $name, serialize($value));

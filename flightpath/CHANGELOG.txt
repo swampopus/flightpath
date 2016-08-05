@@ -1,6 +1,16 @@
 FlightPath 5.x Changelog
 ========================
 
+
+2016-08-04
+  Fixed queries in admin (for viewing watchdog logs) to use better PDO system.
+  
+  Made variable_get/set respect NULL values, to ensure more effience caching and fewer db calls. 
+  
+  Fixed issue where identical transfer courses with different specific titles for the same student were not being retreived
+  correctly.
+    
+
 2016-08-01
   Added jQuery includes in the print template files, in case they are needed for debugging.
   

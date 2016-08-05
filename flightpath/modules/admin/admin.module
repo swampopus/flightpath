@@ -1259,9 +1259,9 @@ function admin_display_watchdog() {
   
   $type_line = $severity_line = $limit_start = "";
 
-  $sev_filter = $_GET["sev_filter"];
-  $type_filter = $_GET["type_filter"];
-  $page = $_GET["page"];
+  @$sev_filter = $_GET["sev_filter"];
+  @$type_filter = $_GET["type_filter"];
+  @$page = $_GET["page"];
   
   $limit_start = 0;
   if ($page != "" && is_numeric($page)) {
@@ -1317,15 +1317,22 @@ function admin_display_watchdog() {
   
   $rtn .= "</form>";
   
-  
-  if ($_GET["sev_filter"] != "") {
-    $severity_line = " AND severity = '" . mysql_real_escape_string($_GET["sev_filter"]) . "' ";
-  }
-  
-  if ($_GET["type_filter"] != "") {
-    $type_line = " AND type = '" . mysql_real_escape_string($_GET["type_filter"]) . "' ";
-  }
+  $params = array();
 
+  if (@$_GET["type_filter"] != "") {
+    //$type_line = " AND type = '" . mysql_real_escape_string($_GET["type_filter"]) . "' ";
+    $type_line = " AND `type` = :type ";
+    $params[":type"] = $_GET["type_filter"];
+  }
+    
+  if (@$_GET["sev_filter"] != "") {
+    //$severity_line = " AND severity = '" . mysql_real_escape_string($_GET["sev_filter"]) . "' ";
+    $severity_line = " AND severity = :sev ";
+    $params[":sev"] = $_GET["sev_filter"]; 
+  }
+  
+
+  $pol = "even";
   
   $rtn .= "<table class='watchdog-table' cellspacing='0' cellpadding='4'>
               <tr>
@@ -1335,7 +1342,6 @@ function admin_display_watchdog() {
                 <th>Msg</th>
                 <th>User</th>
               </tr>";
-  
   // Okay, let's display the recent watchdog entries.
   $query = "SELECT * FROM watchdog
                    WHERE 1
@@ -1343,7 +1349,7 @@ function admin_display_watchdog() {
                    $severity_line
                    ORDER BY wid DESC
                    ";
-  $res = db_query($query . " LIMIT $limit_start, $results_per_page");
+  $res = db_query($query . " LIMIT $limit_start, $results_per_page", $params);
   while ($cur = db_fetch_object($res)) {
     $pol = ($pol == "even") ? "odd" : "even";
     
@@ -1388,7 +1394,7 @@ function admin_display_watchdog() {
   
   // Figure out the total number of results
   $total = db_result(db_query("SELECT count(wid) as count
-                               FROM watchdog WHERE 1 $type_line $severity_line "));
+                               FROM watchdog WHERE 1 $type_line $severity_line", $params));
   
   
   // Now, divide by the number of results per page.

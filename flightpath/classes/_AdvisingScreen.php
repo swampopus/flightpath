@@ -2337,7 +2337,7 @@ function draw_menu_items($menu_array) {
 			// This is a transfer course.  Begin by displaying the transfer credit's
 			// information.
 			
-			$course->course_transfer->load_descriptive_transfer_data($this->student->student_id);
+			$course->course_transfer->load_descriptive_transfer_data($this->student->student_id, $course->term_id);
 			$hrs = $course->course_transfer->get_hours()*1;
 			if ($hrs == 0)
 			{
@@ -5058,7 +5058,7 @@ function draw_menu_items($menu_array) {
 				// If this was a transfer course, have an extra line under the course, stating it's title.
 				if ($bool_transferTest == FALSE) {  // Means this IS INDEED a transfer courses.
 				  
-				  $c->course_transfer->load_descriptive_transfer_data($this->student->student_id);
+				  $c->course_transfer->load_descriptive_transfer_data($this->student->student_id, $c->term_id);
 				  $pC .= "<tr class='advise-substitute-popup-transfer-course-title'>
 				            <td colspan='8'>
 				              {$c->course_transfer->title} ({$c->course_transfer->institution_name})
