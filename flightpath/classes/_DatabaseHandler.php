@@ -1533,15 +1533,13 @@ class _DatabaseHandler extends stdClass
     return $dp;
   }
 
-  function get_degree_id($major_and_track_code, $catalog_year, $bool_use_draft = false)
+  function get_degree_id($major_and_track_code, $catalog_year, $bool_use_draft = FALSE)
   {
     // This function expects the major_code and track_code (if it exists)
     // to be joined using |_.  Example:
     // GSBA|_123  or  KIND|EXCP_231.
     // In other words, all in one.
-
-    $bool_use_draft = FALSE;
-    
+        
     // Always override if the global variable is set.
     if (@$GLOBALS["fp_advising"]["bool_use_draft"] == true) {
       $bool_use_draft = true;
@@ -1556,9 +1554,10 @@ class _DatabaseHandler extends stdClass
 
     $table_name = "degrees";
     if ($bool_use_draft){$table_name = "draft_$table_name";}
+            
     $res7 = $this->db_query("SELECT * FROM $table_name
-              WHERE major_code = '?'
-              AND catalog_year = '?'
+              WHERE major_code = ?
+              AND catalog_year = ?
                LIMIT 1 ", trim($major_and_track_code), $catalog_year) ;
     if ($this->db_num_rows($res7) > 0)
     {

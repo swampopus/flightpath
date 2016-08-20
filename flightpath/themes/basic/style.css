@@ -82,6 +82,17 @@ span.advise-checkbox-retake-checked {
 /**************/
 
 
+/* What If selection screen */
+#element-inner-wrapper-select_level_1_degrees,
+#element-inner-wrapper-select_level_2_degrees
+{
+  max-height: 300px;
+  overflow-y: scroll;
+}
+
+
+
+
 
 .full_admin_top_options
 {

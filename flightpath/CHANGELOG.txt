@@ -1,6 +1,18 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-08-20
+  Added setting for default 'allow dynamic' value.
+  
+  Fixed bug where draft mode wasn't being selected correctly when fetching degree_id.
+  
+  Added more CSS class names to elements on degree edit page.
+  
+  Adjusted CSS in packaged themes' style.css files for what if selection screen.
+  
+  Fixed What If selection so it pays attention to whether or not the degree was allowed
+  to be combined with any other degree.
+  
 
 2016-08-04
   Fixed queries in admin (for viewing watchdog logs) to use better PDO system.

@@ -472,6 +472,8 @@ function admin_add_degree_form_submit($form, $form_submit) {
   $new_major = $values["new_major"];
   $new_track = $values["new_track"];
 
+  $allow_dynamic = variable_get("admin_degrees_default_allow_dynamic", "0");
+
   //////////////////////////////////////////////
 
   if ($new_track == "new" && $track_code == "") {   
@@ -502,8 +504,8 @@ function admin_add_degree_form_submit($form, $form_submit) {
   // First, deal with the major/concentration.
   // Firstly, check to see if it already exists...
   $res = db_query("SELECT * FROM draft_degrees
-          WHERE catalog_year = '?'
-          AND major_code = '?' ", $de_catalog_year, $major_code);
+          WHERE catalog_year = ?
+          AND major_code = ? ", $de_catalog_year, $major_code);
   if (db_num_rows($res) > 0 && $new_major == "new") { 
     // Meaning, it already exists, yet we are trying to add it as a new
     // major.  This is an error!
@@ -524,8 +526,8 @@ function admin_add_degree_form_submit($form, $form_submit) {
     $db2 = new DatabaseHandler();
     $degree_id = $db2->request_new_degree_id();
     $db2->db_query("INSERT INTO draft_degrees
-            (degree_id, major_code, catalog_year)
-            values ('?', '?', '?') ", $degree_id, $major_code, $de_catalog_year);
+            (degree_id, major_code, catalog_year, allow_dynamic, title)
+            values (?, ?, ?, ?, ?) ", $degree_id, $major_code, $de_catalog_year, $allow_dynamic, $major_code);
   }
 
 
@@ -534,9 +536,9 @@ function admin_add_degree_form_submit($form, $form_submit) {
     // Now, let's see about adding ourself a track...
     // First, check to see if it exists...
     $res = db_query("SELECT * FROM draft_degree_tracks
-          WHERE catalog_year = '?'
-          AND major_code = '?' 
-          AND track_code = '?' ", $de_catalog_year, $major_code, $track_code);  
+          WHERE catalog_year = ?
+          AND major_code = ? 
+          AND track_code = ? ", $de_catalog_year, $major_code, $track_code);  
 
     if (db_num_rows($res) > 0) {
       // Meaning, it already existed, so we can't create it.      
@@ -564,8 +566,8 @@ function admin_add_degree_form_submit($form, $form_submit) {
 
       $degree_id = $db2->request_new_degree_id();
       $db2->db_query("INSERT INTO draft_degrees
-            (degree_id, major_code, catalog_year)
-            values ('?', '?', '?') ", $degree_id, $new_major_code, $de_catalog_year);
+            (degree_id, major_code, catalog_year, allow_dynamic, title)
+            values (?, ?, ?, ?, ?) ", $degree_id, $new_major_code, $de_catalog_year, $allow_dynamic, $new_major_code);
 
     }
 
@@ -1171,8 +1173,8 @@ function admin_display_edit_degree() {
 
 
   if (user_has_permission("can_view_advanced")) {
-    $rtn .= " <span class='tenpt' style='background-color: yellow; margin-left: 20px;'>
-          advanced: degreeID = $degree_id.
+    $rtn .= " <span class='tenpt deg-advanced-msg' style='background-color: yellow; margin-left: 20px;'>
+          advanced: degreeID = $degree_id. catalog year: $de_catalog_year
           </span>";
   }
 
@@ -1187,10 +1189,10 @@ function admin_display_edit_degree() {
 
   $rtn .= "<div style='font-size: 16pt; font-weight:bold; padding-top: 20px;'>$degree->degree_type $degree->title<br>$major_code ($de_catalog_year)</div>";
   $rtn .= "
-      <table border='0'>
+      <table border='0' class='degree-edit-top-part'>
        <tr>
-        <td valign='top' class='tenpt' width='15%'>" . t("Degree Type:") . "</td>
-        <td valign='top' class='tenpt' >
+        <td valign='top' class='tenpt td-d-type-lable' width='15%'>" . t("Degree Type:") . "</td>
+        <td valign='top' class='tenpt td-d-type' >
               <input type='text' name='degree_type' value='$degree->degree_type' size='5' maxlength='20'>
               <a href='javascript: adminPopupAlertHelp(\"degree_type\");'>?</a>
               
@@ -1216,14 +1218,14 @@ function admin_display_edit_degree() {
               <a href='javascript: adminPopupAlertHelp(\"degree_class\");'>?</a>
         </td>
 
-        <td valign='top' class='tenpt' >" . t("Level:") . "
-              <input type='text' name='degree_level' value='$degree->degree_level' size='1' maxlength='1'>
+        <td valign='top' class='tenpt td-lev-weight' >" . t("Level:") . "
+              <input type='text' id='edit-degree-level' name='degree_level' value='$degree->degree_level' size='1' maxlength='1'>
               <a href='javascript: adminPopupAlertHelp(\"degree_level\");'>?</a>
               
           &nbsp; &nbsp;
           
           " . t("Advising Weight:") . "
-              <input type='text' name='advising_weight' value='$degree->db_advising_weight' size='1' maxlength='5'>
+              <input type='text' id='edit-advising-weight' name='advising_weight' value='$degree->db_advising_weight' size='1' maxlength='5'>
               <a href='javascript: adminPopupAlertHelp(\"advising_weight\");'>?</a>
                         
                         
@@ -1240,8 +1242,8 @@ function admin_display_edit_degree() {
        
        
        <tr>
-        <td valign='top' class='tenpt'>" . t("Title:") . "</td>
-        <td valign='top' class='tenpt' colspan='4'><input type='text' name='title' value='$degree->title' size='80' maxlength='100'></td>
+        <td valign='top' class='tenpt td-title-lab'>" . t("Title:") . "</td>
+        <td valign='top' class='tenpt td-title-field' colspan='4'><input type='text' name='title' value='$degree->title' size='80' maxlength='100'></td>
        </tr>
        
        
@@ -1249,19 +1251,19 @@ function admin_display_edit_degree() {
        
        
        <tr>
-        <td valign='top' class='tenpt'>" . t("Exclude:") . "</td>
-        <td valign='top' class='tenpt'>
+        <td valign='top' class='tenpt td-ex-lab'>" . t("Exclude:") . "</td>
+        <td valign='top' class='tenpt td-ex'
               <input type='text' name='exclude' value='$degree->db_exclude' size='2' maxlength='1'>
               <a href='javascript: adminPopupAlertHelp(\"degree_exclude\");'>?</a>
         </td>
-        <td valign='top' class='tenpt' >
+        <td valign='top' class='tenpt td-al-dy' >
               " . t("Allow Dynamic:") . "
               &nbsp;
               <input type='text' name='allow_dynamic' value='$degree->db_allow_dynamic' size='2' maxlength='1'>
               <a href='javascript: adminPopupAlertHelp(\"degree_allow_dynamic\");'>?</a>
         </td>       
         
-        <td valign='top' class='tenpt' >
+        <td valign='top' class='tenpt td-o-dh' >
               " . t("Override Degree Hours:") . "
               &nbsp;
               <input type='text' name='override_degree_hours' value='$degree->db_override_degree_hours' size='3' maxlength='10'>
@@ -1496,7 +1498,7 @@ function admin_display_edit_degree() {
        <a href='javascript: adminPopupAlertHelp(\"public_note\");'>(Help - Public Note)</a>
        " . fp_get_js_alert_link(t("You may enter simple HTML in this field, like <b>bold</b> or <i>italics</i>."), t("(Help - Formatting)")) . "
       <br>
-      <textarea name='public_note' rows='4' cols='80'>" . $degree->public_notes_array[$degree->degree_id] . "</textarea>
+      <textarea name='public_note' rows='4' cols='80'>" . @$degree->public_notes_array[$degree->degree_id] . "</textarea>
       
       <br><br>
       If this degree has tracks, you may enter rules for track selection below, for each type of level 3 degree (tracks) you might have.

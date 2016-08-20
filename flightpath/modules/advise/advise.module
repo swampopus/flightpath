@@ -30,7 +30,7 @@ function advise_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
   );    
   
-  
+   
   $items["view"] = array(
     "title" => "View",
     "page_callback" => "advise_display_view",
@@ -1456,13 +1456,17 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
  */
 function advise_what_if_selection_form_validate($form, &$form_state) {
 
+  $current_catalog_year = variable_get("current_catalog_year", "2006");
+
   // Make sure they selected at least 1 level 1 degree.
+  $selected_degrees = array();
   $temp = FALSE;  
   foreach (array(1,2) as $num) {    
     if (is_array($form_state["values"]["select_level_{$num}_degrees"])) {
       foreach ($form_state["values"]["select_level_{$num}_degrees"] as $k => $v) {
         if ((string)$k === (string)$v && $k != "") {
           $temp = TRUE;
+          $selected_degrees[$k] = $v;
         }
       }
     }
@@ -1473,14 +1477,25 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
     return;
   }
   
+  $db = get_global_database_handler();
   
-  // TODO:  If a non-dynamic degree was selected, along with anything else, the user may not proceed.
-  
-  
-  
+  // If a non-dynamic degree was selected, along with anything else, the user may not proceed.
+  if (count($selected_degrees) > 1) {
+    foreach ($selected_degrees as $major_code) {
+      $temp = $db->get_degree_plan($major_code, $current_catalog_year, TRUE);
+      if (is_object($temp) && intval($temp->db_allow_dynamic) != 1) {
+        $temp->load_descriptive_data();
+        // meaning, we have selected more than one degree, and at least THIS degree does NOT allow for dynamic recombination.  So, reject it!
+        form_error("select_level_1_degrees", t("Sorry, but the degree you selected, %deg, does not allow you to combine it with any other degree.
+                                                It must be selected by itself.  Please alter your selection and try again.", array("%deg"=> $temp->get_title2())));
+        return;
+      }  
+    }
+  }
+ 
   
   /////////////////////////
-  // Make sure they selected approprite number of required tracks, if any.
+  // Make sure they selected appropriate number of required tracks, if any.
   
   // Begin by going through each track which was selected, and keep track of how many we selected.
   $selected_for = array();
@@ -1566,7 +1581,12 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
   }
   
   
-}
+  
+    
+    
+  
+  
+} //what_if_selection_form_validate
 
 
 /**

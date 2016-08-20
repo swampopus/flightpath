@@ -1676,7 +1676,16 @@ function system_settings_form() {
                          <br>If unsure what to enter, use: <em>toolbar=no,status=2,scrollbars=yes,resizable=yes,width=750,height=600</em>"),    
   );
     
-                
+
+  $form["admin_degrees_default_allow_dynamic"] = array(
+    "type" => "textfield",
+    "size" => 5,
+    "label" => t("Default 'Allow Dynamic' value for new degrees:"),
+    "value" => variable_get("admin_degrees_default_allow_dynamic", "0"),
+    "description" => t("When creating a new degree, this is the default value to set for 'Allow Dynamic'.  If set to 1 (the number one), it means
+                        the degree is allowed to be dynamic, meaning it can be combined with other 'dynamic' degrees.  If it is set to 0 (zero), it
+                        means the degree is not allowed to be combined with anything else.  If you are unsure what to enter here, type 0 (zero)."),
+  );                
                 
   
   return $form;
