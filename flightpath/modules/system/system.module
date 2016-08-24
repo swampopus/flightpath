@@ -481,8 +481,8 @@ function system_execute_php_form() {
 function system_execute_php_form_submit($form, $form_state) {
   $code = trim($form_state["values"]["system_execute_php"]);
   if ($code == "") return;
-  
-  eval($code);
+
+    eval($code);
   
 }
 

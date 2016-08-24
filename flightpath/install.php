@@ -121,19 +121,17 @@ function install_perform_install() {
 
   // We will attempt to connect to this database.  If we have any problems, we will go back to
   // the form and inform the user.
-  if (!@mysql_connect ($db_host . ':' . $db_port, $db_user, $db_pass)) {
-    return install_display_db_form("<font color='red'>" . st("Could not connect.  Please check that you have
+  try {
+  	$pdo = new PDO("mysql:host=$db_host;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass);
+  } 
+  catch (Exception $e) {
+  	// Connection failed!
+  	return install_display_db_form("<font color='red'>" . st("Could not connect.  Please check that you have
                                     created the database already, and given the user all of the permissions
                                     (except Grant).  Then, make sure you typed the username and
-                                    password correctly.") . "</font>");
+                                    password correctly, as well as the database name itself") . "</font>");
+  	 
   }
-  if (!@mysql_select_db ($db_name)) {
-    return install_display_db_form("<font color='red'>" . st("Could not connect to the database name you specified.  
-                                    Please check that you have
-                                    created the database already, and given the user all of the permissions
-                                    (except Grant).  Possibly check that the database name is correct.") . "</font>");    
-  }
-  
   
   ///////////////////////////////
   // If we have made it here, then we have been provided valid database credentials.  
@@ -306,7 +304,8 @@ $system_settings["base_path"] = "%BASE_PATH%";
 ////////////////////////////////////
 // *** Database-related settings ***
 ////////////////////////////////////
-$system_settings["db_host"] = "%DB_HOST%:%DB_PORT%"; // domain/ip address of the mysql host. ex: localhost or mysite.com:32145
+$system_settings["db_host"] = "%DB_HOST%:%DB_PORT%"; // domain/ip address of the mysql host. ex: localhost or mysite.com:32145		
+$system_settings["db_port"] = "%DB_PORT%"; 
 $system_settings["db_user"] = "%DB_USER%"; 
 $system_settings["db_pass"] = "%DB_PASS%"; 
 $system_settings["db_name"] = "%DB_NAME%"; // Name of the actual database where
@@ -366,26 +365,35 @@ $system_settings["cron_security_token"] = "%CRON_SECURITY_TOKEN%";
 // table into the $system_settings variable.  These are extra settings
 // which were set via the web using the system module.
 $db_host = $system_settings["db_host"];
+$db_port = $system_settings["db_port"];
 $db_user = $system_settings["db_user"];
 $db_pass = $system_settings["db_pass"];
 $db_name = $system_settings["db_name"];
-$dbc = mysql_connect ($db_host, $db_user, $db_pass) or die("Could not connect to database: " . mysql_error());
-mysql_select_db ($db_name);
 
-$res = mysql_query("SELECT * FROM variables");
-while ($cur = mysql_fetch_array($res)) {
-  if ($val = unserialize($cur["value"])) {
+$pdo = new PDO("mysql:host=$db_host;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass);  		
+if (!$pdo) die("Could not connect to database.");
+
+$res = $pdo->prepare("SELECT * FROM variables");
+$res->execute();
+
+  		
+while ($cur = $res->fetch(PDO::FETCH_ASSOC)) {
+  if (@$val = unserialize($cur["value"])) {
     $system_settings[$cur["name"]] = $val;
   }
 }
 
-$res = mysql_query("SELECT * FROM modules WHERE enabled = 1
-                    ORDER BY weight, name");
-while ($cur = mysql_fetch_array($res)) {
+  		
+$res = $pdo->prepare("SELECT * FROM modules WHERE enabled = 1
+  					  ORDER BY weight, name");
+$res->execute();
+  		
+while ($cur = $res->fetch(PDO::FETCH_ASSOC)) {
   $system_settings["modules"][$cur["name"]] = $cur;
 }
 
-mysql_close($dbc);
+// Close our pdo connection.
+$pdo = NULL;
 
 // We want to make sure the "system" module is enabled, so we will hard-code
 // its values.

@@ -345,6 +345,9 @@ CREATE TABLE `degrees` (
   `allow_dynamic` int(11)   DEFAULT '0',
   `advising_weight` int(11)   DEFAULT '0',  
   `override_degree_hours` varchar(20)   DEFAULT '',
+  `min_tracks` int(11) DEFAULT '0',
+  `max_tracks` int(11) DEFAULT '0',
+  `default_tracks` varchar(255) DEFAULT '',  
   `track_selection_config` text,  
   PRIMARY KEY (`id`),
   KEY `degree_id` (`degree_id`),
@@ -430,6 +433,9 @@ CREATE TABLE `draft_degrees` (
   `allow_dynamic` int(11)   DEFAULT '0',
   `advising_weight` int(11)   DEFAULT '0',
   `override_degree_hours` varchar(20)   DEFAULT '',
+  `min_tracks` int(11) DEFAULT '0',
+  `max_tracks` int(11) DEFAULT '0',
+  `default_tracks` varchar(255) DEFAULT '',  
   `track_selection_config` text,  
   PRIMARY KEY (`id`),
   KEY `degree_id` (`degree_id`),
@@ -627,6 +633,7 @@ CREATE TABLE `student_degrees` (
   `student_id` varchar(30)   DEFAULT '',
   `major_code` varchar(20)   DEFAULT '',
   `is_editable` tinyint(4)   DEFAULT '0',
+  `delete_flag` tinyint(4)   DEFAULT '0',
   PRIMARY KEY (`student_id`,`major_code`)
 );  ";
 db_query($q);

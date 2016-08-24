@@ -1,6 +1,9 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-08-23
+  Removed mysql_* functions from installation and settings files, to make PDO compatible and PHP 7 compatible.
+
 2016-08-20
   Added setting for default 'allow dynamic' value.
   
