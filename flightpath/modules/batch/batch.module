@@ -23,7 +23,7 @@ function batch_menu() {
     "page_callback" => "fp_render_form",
     "page_arguments" => array("batch_test_form"),
     "access_arguments" => array("batch_run_test"),
-    "type" => MENU_CALLBACK,
+    "type" => MENU_TYPE_CALLBACK,
     "file" => menu_get_module_path("batch") . "/batch.test.inc",
   );
   
@@ -32,7 +32,7 @@ function batch_menu() {
     "page_callback" => "batch_processing_page",
     "page_arguments" => array(1),
     "access_callback" => TRUE,
-    "type" => MENU_CALLBACK,
+    "type" => MENU_TYPE_CALLBACK,
   );
 
   
@@ -40,7 +40,7 @@ function batch_menu() {
     "page_callback" => "batch_finished_page",
     "page_arguments" => array(1),
     "access_callback" => TRUE,
-    "type" => MENU_CALLBACK,
+    "type" => MENU_TYPE_CALLBACK,
   );
   
   
@@ -48,7 +48,7 @@ function batch_menu() {
     "page_callback" => "batch_ajax_callback",
     "page_arguments" => array(1),
     "access_callback" => TRUE,
-    "type" => MENU_CALLBACK,  
+    "type" => MENU_TYPE_CALLBACK,  
   );
   
   

@@ -1,8 +1,18 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-08-24
+  Changed system.install so that datetime field is given a real date (1970-01-01 00:00:01), not all zeros, by default.  This was
+  necessary because on some MySQL configurations, zero dates are not allowed.
+  
+  Fixed bug in stats and batch modules, where they were not using constant names correctly (this is to make compatible with MySQL 5.7+)
+  
+  Made note in db errors that contain the text sql_mode= to see a documentation page regarding how to correct that.
+  
+
 2016-08-23
   Removed mysql_* functions from installation and settings files, to make PDO compatible and PHP 7 compatible.
+
 
 2016-08-20
   Added setting for default 'allow dynamic' value.

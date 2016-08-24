@@ -2841,7 +2841,7 @@ function system_enable_module($module_details) {
     $res = db_query("INSERT INTO modules (name, path, version, requires, enabled, type, `schema`, info)
                      VALUES ('?', '?', '?', '?', '?', '?', '?', '?')
                      ", $module, $path, $module_details["version"], $module_details["required"], "1", "module",
-                        $module_details["schema"], serialize($module_details));
+                        @intval($module_details["schema"]), serialize($module_details));
     
     $bool_call_hook_install = TRUE;
     

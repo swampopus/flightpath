@@ -209,7 +209,7 @@ function stats_menu() {
     "page_callback" => "stats_download_csv_from_batch",
     "page_arguments" => array(2),
     "access_arguments" => array("can_access_stats"),
-    "type" => MENU_CALLBACK,
+    "type" => MENU_TYPE_CALLBACK,
   );
   
   
