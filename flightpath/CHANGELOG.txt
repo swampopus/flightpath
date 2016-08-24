@@ -9,6 +9,8 @@ FlightPath 5.x Changelog
   
   Made note in db errors that contain the text sql_mode= to see a documentation page regarding how to correct that.
   
+  Adjusted install.php, settings.php, and _DatabaseHandler so that the db_port is its own value now.
+  
 
 2016-08-23
   Removed mysql_* functions from installation and settings files, to make PDO compatible and PHP 7 compatible.

@@ -304,7 +304,7 @@ $system_settings["base_path"] = "%BASE_PATH%";
 ////////////////////////////////////
 // *** Database-related settings ***
 ////////////////////////////////////
-$system_settings["db_host"] = "%DB_HOST%:%DB_PORT%"; // domain/ip address of the mysql host. ex: localhost or mysite.com:32145		
+$system_settings["db_host"] = "%DB_HOST%"; // domain/ip address of the mysql host. ex: localhost or example.com
 $system_settings["db_port"] = "%DB_PORT%"; 
 $system_settings["db_user"] = "%DB_USER%"; 
 $system_settings["db_pass"] = "%DB_PASS%"; 

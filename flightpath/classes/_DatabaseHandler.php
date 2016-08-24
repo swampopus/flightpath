@@ -11,22 +11,17 @@ class _DatabaseHandler extends stdClass
   {
    
     $db_host = @$GLOBALS["fp_system_settings"]["db_host"];
+    $db_port = @$GLOBALS["fp_system_settings"]["db_port"];
     $db_user = @$GLOBALS["fp_system_settings"]["db_user"];
     $db_pass = @$GLOBALS["fp_system_settings"]["db_pass"];
     $db_name = @$GLOBALS["fp_system_settings"]["db_name"];
 
     if ($db_host == "") return;  // some problem, do not proceed with the attempt to construct.
 
-    // The port is part of the host.  Separate them out.
-    $db_port = "3306";
-    $temp = explode(":", $db_host);
-    
-    $db_host = trim($temp[0]);
-    $db_host_ip = trim($temp[0]);  // set as same as db_host for now.
-    
-    if (isset($temp[1])) $db_port = $temp[1];
+    $db_host_ip = $db_host;  // set as same as db_host for now.
     
     
+        
     //$this->dbc = mysql_connect ($db_host, $db_user, $db_pass) or die('Could not connect to database: ' . mysql_error());
     //mysql_select_db ($db_name);
 
