@@ -38,7 +38,8 @@ function adminPopupAlertHelp(action)
     
   }
   
-  if (action == "degree_type")
+  
+  if (action == "degree_type")  
   {
     t = t + "For example: BS, BA, Ph.D, etc.";
     

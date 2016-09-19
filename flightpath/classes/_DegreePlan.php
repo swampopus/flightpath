@@ -26,7 +26,7 @@ class _DegreePlan extends stdClass
   public $required_course_id_array;  // We will keep track of every course which this degree lists as a requirement, even in groups.
                                     // looks like: required_course_id_array[$course_id][$degree_id][$group_id] = TRUE;
 
-  public $gpa_calculations;
+  public $gpa_calculations, $bool_calculated_progess_hours;
   
   
   public $bool_use_draft, $bool_loaded_descriptive_data;
@@ -172,32 +172,53 @@ class _DegreePlan extends stdClass
     }
 
     // Add a pseudo-code in for "degree", which the functions will convert into a blank.
-    $types["degree"] = "Degree (total)";
+    $types["degree"] = t("Degree (total)");
 
+    // We want to do this for all possible degrees.
+    $all_degree_ids = array();
     
-    foreach ($types as $code => $desc) {
-      // Make sure to skip appropriate codes we don't care about.      
+    $all_degree_ids[0] = 0;  // Add in the default "0" degree, meaning, don't look for a specific degree_id.
+    
+    if ($this->degree_id != DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE) {
       
-      if ($code == 'x') continue;      
-      
-      $this->gpa_calculations[$code]["total_hours"] = $this->get_progress_hours($code);      
-      $this->gpa_calculations[$code]["fulfilled_hours"] = $this->get_progress_hours($code, FALSE);      
-      $this->gpa_calculations[$code]["qpts_hours"] = $this->get_progress_hours($code, FALSE, TRUE);      
-      
-      
-      if ($bool_get_local_only_hours) {
-        // Get ONLY local hours, too....
-        $this->gpa_calculations[$code . "_local"]["total_hours"] = $this->get_progress_hours($code, TRUE, FALSE, TRUE);
-        $this->gpa_calculations[$code . "_local"]["fulfilled_hours"] = $this->get_progress_hours($code, FALSE, FALSE, TRUE);
-        $this->gpa_calculations[$code . "_local"]["qpts_hours"] = $this->get_progress_hours($code, FALSE, TRUE, TRUE);     
-      }
-      
+      // Not a combined degree, just use the current degree_id.
+      // $all_degree_ids[] = $this->degree_id;  // comment out... not needed?
     }
+    else {
+        
+      // Add in all the degrees we are combined with.      
+      $all_degree_ids = array_merge($all_degree_ids, $this->combined_degree_ids_array);
+    }
+        
+        
+    foreach ($all_degree_ids as $degree_id) {        
+        
+      foreach ($types as $code => $desc) {
+        // Make sure to skip appropriate codes we don't care about.      
+        
+        if ($code == 'x') continue;      
+        
+        $this->gpa_calculations[$degree_id][$code]["total_hours"] = $this->get_progress_hours($code, TRUE, FALSE, FALSE, $degree_id);      
+        $this->gpa_calculations[$degree_id][$code]["fulfilled_hours"] = $this->get_progress_hours($code, FALSE, FALSE, FALSE, $degree_id);      
+        $this->gpa_calculations[$degree_id][$code]["qpts_hours"] = $this->get_progress_hours($code, FALSE, TRUE, FALSE, $degree_id);      
+        
+        
+        if ($bool_get_local_only_hours) {
+          // Get ONLY local hours, too....
+          $this->gpa_calculations[$degree_id][$code . "_local"]["total_hours"] = $this->get_progress_hours($code, TRUE, FALSE, TRUE, $degree_id);
+          $this->gpa_calculations[$degree_id][$code . "_local"]["fulfilled_hours"] = $this->get_progress_hours($code, FALSE, FALSE, TRUE, $degree_id);
+          $this->gpa_calculations[$degree_id][$code . "_local"]["qpts_hours"] = $this->get_progress_hours($code, FALSE, TRUE, TRUE, $degree_id);     
+        }
+        
+      } // foreach types as code
     
+    } //foreach all_degree_ids
     
-    
+  
+    // Note that we have run this function for this degree.
+    $this->bool_calculated_progess_hours = TRUE;
      
-  }
+  }// calculate progress hours
 
   /**
    * Calculate the quality points of our completed courses, so we can use
@@ -215,29 +236,51 @@ class _DegreePlan extends stdClass
     // Add a pseudo-code in for "degree", which the functions will convert into a blank.
     $types["degree"] = "Degree (total)";
     
-    foreach ($types as $code => $desc) {
-      // Make sure to skip appropriate codes we don't care about.
-      if ($code == 'x') continue;
-      
-      $this->gpa_calculations[$code]["qpts"] = $this->get_progress_quality_points($code);
-      
-      if ($bool_get_local_only_hours) {
-        // Get only local courses, too...
-        $this->gpa_calculations[$code . "_local"]["qpts"] = $this->get_progress_quality_points($code, TRUE);
-      }
-    }
-        
+    // We want to do this for all possible degrees.
+    $all_degree_ids = array();
+    $all_degree_ids[0] = 0;  // Add in the default "0" degree, meaning, don't look for a specific degree_id.
     
-  }
+    if ($this->degree_id != DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE) {
+      // Not a combined degree, just use the current degree_id.
+      // $all_degree_ids[] = $this->degree_id;   // Not needed?
+    }
+    else {
+      $all_degree_ids = array_merge($all_degree_ids, $this->combined_degree_ids_array);
+    }    
+    
+    foreach ($all_degree_ids as $degree_id) {
+      foreach ($types as $code => $desc) {
+        // Make sure to skip appropriate codes we don't care about.
+        if ($code == 'x') continue;
+        
+        $this->gpa_calculations[$degree_id][$code]["qpts"] = $this->get_progress_quality_points($code, FALSE, $degree_id);
+        
+        if ($bool_get_local_only_hours) {
+          // Get only local courses, too...
+          $this->gpa_calculations[$degree_id][$code . "_local"]["qpts"] = $this->get_progress_quality_points($code, TRUE, $degree_id);
+        }
+      } //foreach types as code
+      
+    } //foreach all_degree_ids
+            
+                
+    
+  } // calculate progess quality points
   
 
-  function get_progress_hours($requirement_type = "", $bool_required_hours_only = TRUE, $bool_qpts_grades_only = FALSE, $bool_exclude_all_transfer_credits = FALSE)
+  /**
+   * Returns the number of hours required (or fulfilled) in a degree plan
+   * for courses & groups with the specified requirement_type.
+   * ex:  "m", "s", etc.  leave blank for ALL required hours.
+   * if boolRequiredHours is FALSE, then we will only look for the courses
+   * which got fulfilled.
+   * 
+   * 
+   *  
+   */
+  function get_progress_hours($requirement_type = "", $bool_required_hours_only = TRUE, $bool_qpts_grades_only = FALSE, $bool_exclude_all_transfer_credits = FALSE, $req_by_degree_id = 0)
   {
-    // Returns the number of hours required (or fulfilled) in a degree plan
-    // for courses & groups with the specified requirement_type.
-    // ex:  "m", "s", etc.  leave blank for ALL required hours.
-    // if boolRequiredHours is FALSE, then we will only look for the courses
-    // which got fulfilled.
+    
     
    if ($requirement_type == "degree") $requirement_type = "";
 
@@ -252,9 +295,11 @@ class _DegreePlan extends stdClass
 
       if ($bool_required_hours_only == TRUE)
       {
-        $hours += $sem->list_courses->count_hours($requirement_type, true, false, FALSE);  // do not exclude transfer credits, since this is for required hours only.
+                
+        $hours += $sem->list_courses->count_hours($requirement_type, TRUE, FALSE, FALSE, FALSE, $req_by_degree_id);  // do not exclude transfer credits, since this is for required hours only.
+        
       } else {
-        $temp = $sem->list_courses->count_credit_hours($requirement_type, true, true, $bool_qpts_grades_only, $bool_exclude_all_transfer_credits);
+        $temp = $sem->list_courses->count_credit_hours($requirement_type, TRUE, TRUE, $bool_qpts_grades_only, $bool_exclude_all_transfer_credits, $req_by_degree_id);
                 
         $hours += $temp;
       }
@@ -277,6 +322,9 @@ class _DegreePlan extends stdClass
       // skip it.
       if ($g->requirement_type == 'x') continue;
       
+      // If req_by_degree_id is set, make sure this group is assigned to that degree.
+      if ($req_by_degree_id != 0 && $g->req_by_degree_id != $req_by_degree_id) continue;
+
 
       $g_hours = $g->hours_required;
       if ($bool_required_hours_only == false)
@@ -325,7 +373,7 @@ class _DegreePlan extends stdClass
    * @param unknown_type $bool_required_hours_only
    * @return unknown
    */
-  function get_progress_quality_points($requirement_type = "", $bool_exclude_all_transfer_credits = FALSE) {
+  function get_progress_quality_points($requirement_type = "", $bool_exclude_all_transfer_credits = FALSE, $req_by_degree_id = 0) {
     // Returns the number of hours required (or fulfilled) in a degree plan
     // for courses & groups with the specified requirement_type.
     // ex:  "m", "s", etc.  leave blank for ALL required hours.
@@ -341,7 +389,7 @@ class _DegreePlan extends stdClass
     {
       $sem = $this->list_semesters->get_next();
 
-      $p = $sem->list_courses->count_credit_quality_points($requirement_type, true, true, $bool_exclude_all_transfer_credits);
+      $p = $sem->list_courses->count_credit_quality_points($requirement_type, true, true, $bool_exclude_all_transfer_credits, $req_by_degree_id);
       $points = $points + $p;
       
     }
@@ -356,10 +404,14 @@ class _DegreePlan extends stdClass
       { // Skip Add a course group.
         continue;
       }
-      
+            
       // Make sure the group doesn't have a type of 'x' assigned to it, which means we should
       // skip it.
       if ($g->requirement_type == 'x') continue;
+      
+      // if req_by_degree_id is set, make sure the group belongs to that degree id!
+      if ($req_by_degree_id != 0 && $g->req_by_degree_id != $req_by_degree_id) continue;      
+      
       
       $g_points = $g->get_fulfilled_quality_points(TRUE, -1, TRUE, TRUE, $requirement_type, $bool_exclude_all_transfer_credits);
       $points = $points + $g_points;       
@@ -738,6 +790,10 @@ class _DegreePlan extends stdClass
     {
       $cur = $this->db->db_fetch_array($res);
       $this->major_code = $cur["major_code"];
+      $this->degree_level = strtoupper(trim($cur["degree_level"]));
+      $this->degree_class = $cur["degree_class"];
+      $this->db_override_degree_hours = $cur["override_degree_hours"];
+      
       $this->title = $cur["title"];
       $this->public_notes_array[$this->degree_id] = $cur["public_note"];
       $this->catalog_year = $cur["catalog_year"];

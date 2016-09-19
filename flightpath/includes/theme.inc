@@ -548,10 +548,12 @@ function fp_build_tab_array($page) {
     
     $for_term = $whatif = $what_if_select = $hypoclass = "";
     
-    if (@$GLOBALS["fp_advising"]["advising_term_id"] != "" && ($screen_mode != "not_advising" && $screen_mode != "detailed")
+    $advising_term_id = @$GLOBALS["fp_advising"]["advising_term_id"];
+    
+    if ($advising_term_id != "" && ($screen_mode != "not_advising" && $screen_mode != "detailed")
     && user_has_permission("can_advise_students"))
-    {
-      $t_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
+    {      
+      $t_term_id = $advising_term_id;
       $for_term = " " . t("for") . " " . get_term_description($t_term_id);
 
       // If this is an advisor or above

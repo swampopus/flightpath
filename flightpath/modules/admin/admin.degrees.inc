@@ -1145,6 +1145,171 @@ function admin_handle_edit_degree_submit() {
 }
 
 
+
+/**
+ * Meant to replace the old-fashioned display_edit_degree function...
+ */
+function admin_edit_degree_form($major_code, $de_catalog_year) {
+  $form = array();
+    
+  fp_set_title(t("Edit Degree") . " $major_code - $de_catalog_year");
+
+
+  // Add in our CSS and JS
+  fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
+  fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
+
+  $button_msg = trim(addslashes(@$_REQUEST["button_msg"]));  
+  
+  $db = get_global_database_handler();
+
+  $degree_id = intval($db->get_degree_id($major_code, $de_catalog_year, true));
+  // The intval says, if it's false, make it = 0.  otherwise keep the number
+  // that is returned.
+  $degree = new DegreePlan($degree_id, null, false, false, true);
+  $degree->load_descriptive_data();
+
+
+  if (user_has_permission("can_view_advanced")) {
+    $form["markup_adv"] = array(
+      "value" => "<span class='tenpt deg-advanced-msg' style='background-color: yellow; margin-left: 20px;'>
+          advanced: degreeID = $degree_id. catalog year: $de_catalog_year
+          </span>",
+    ); 
+  }
+
+  $form["major_code"] = array(
+    "type" => "hidden",
+    "value" => $major_code,
+  );
+  
+  $form["de_catalog_year"] = array(
+    "type" => "hidden",
+    "value" => $de_catalog_year,
+  );
+  
+  $form["markup_degree_header"] = array(
+    "value" => "<h3>$degree->degree_type $degree->title<br>$major_code ($de_catalog_year)</h3>",
+  );
+  
+  //////////////////////////////////////////////////////  
+  // Top part of degree entry....
+  $form["degree_type"] = array(
+    "type" => "textfield",
+    "label" => "Degree Type:",
+    "size" => 3,
+    "value" => $degree->degree_type,
+    "popup_description" => t("For example: BS, BA, Ph.D, etc."),    
+  );
+  
+  // Display degree_class pulldown.
+  $options = array();
+  $degree_classes = fp_get_degree_classifications();
+  foreach ($degree_classes["levels"] as $level => $details) {
+    foreach ($degree_classes["levels"][$level] as $machine_name => $title) {
+      //$rtn .= "<option value='$machine_name' $sel>$level - $title</option>";
+      $options[$machine_name] = "$level - $title";
+    }
+  }          
+  
+  $form["degree_class"] = array(
+    "type" => "select",
+    "label" => "Classification:",
+    "options" => $options,
+    "value" => $degree->degree_class,
+    "hide_please_select" => TRUE,
+    "popup_description" => t("Select which classification this degree plan is listed under.  The number beside the title is the 'level' of the degree classification.
+                            
+                            1 - Degrees which a student may graduate in. Ex: Majors.
+                            2 - Degree plans which are secondary to top level degree plans. Ex: Minors.
+                            3 - Degree plans which are only selectable as add-ons to an existing degree plan. Ex: Concentrations.
+                            
+                            You may edit these classifications in the Configure School Data form, from the Admin Console."), 
+    
+  );
+  
+  
+  $form["degree_level"] = array(
+    "type" => "textfield",
+    "label" => "Degree Level:",
+    "size" => 1,
+    "value" => $degree->degree_level,
+    "popup_description" => t("Enter the degree level code in this box.  If left blank, it is assumed to be an \"Undergraduate\" degree.
+                              
+                              Enter \"G\" for a degree which should only be accessible to Graduate students in What If mode.
+                              
+                              NOTE: NOT CURRENTLY SUPPORTED IN THIS VERSION OF FLIGHTPATH"),    
+  );
+    
+  
+  $form["advising_weight"] = array(
+    "type" => "textfield",
+    "label" => "Advising Weight:",
+    "size" => 1,
+    "value" => $degree->db_advising_weight,
+    "popup_description" => t("If this degree is ever combined with another degree, this value, the advising weight, determines
+                              the order in which the degrees will be displayed on the View tab and in What If mode.
+                              
+                              The default is zero (0).  To place this degree above normal degrees, set it to a negative value (ex: -1, -10, etc.).
+                              
+                              Set it higher to place it below normal degrees.  (Ex: 10, 20, 30, etc).
+                              
+                              To prevent confusion, it's recommended that a degree's tracks have the same advising weight as the main degree.
+                              
+                              If you are unsure what to enter, leave it set to 0 (zero)."),    
+  );
+  
+  
+  $form["title"] = array(
+    "type" => "textfield",
+    "label" => "Title:",
+    "size" => 80,
+    "maxlength" => 100,
+    "value" => $degree->title,
+    "popup_description" => t("This is the full title of the degree.  Ex: Computer Science, Accounting, etc."),    
+  );
+
+  $form["exclude"] = array(
+    "type" => "textfield",
+    "label" => "Exclude:",
+    "size" => 1,
+    "value" => intval($degree->db_exclude),
+    "popup_description" => t("If the Exclude value is set to 1 (the number one), then this degree will show up in gray on the list of degrees.  It will also not be selectable in What If mode in FlightPath.
+                              
+                              If you are not sure what to enter, either leave it blank or enter a 0 (zero)."),    
+  );
+  
+  $form["allow_dynamic"] = array(
+    "type" => "textfield",
+    "label" => "Allow Dynamic:",
+    "size" => 1,
+    "value" => intval($degree->db_allow_dynamic),
+    "popup_description" => t("If this value is set to 1 (the number one), then this degree plan is able to be combined with other degrees which are also set to Allow Dynamic.
+                              
+                              If you are unsure what to enter, either leave blank or enter a 0 (the number zero)."),    
+  );
+    
+    
+  $form["override_degree_hours"] = array(
+    "type" => "textfield",
+    "label" => "Override Degree Hours:",
+    "size" => 1,
+    "value" => $degree->db_override_degree_hours,
+    "popup_description" => t("You may specify a number of degree hours here (ex: 125).  FlightPath will use this value, instead of calculating the number of hours
+                              required for this degree.  If you are unsure what to put here, leave it blank, or enter zero, for FlightPath to calculate hours normally."),    
+  );
+      
+        
+  
+  
+  
+  
+  return $form;
+} // admin_edit_degree_form
+
+
+
+
 /**
  * This screen displays the form which allows the user to actually
  * edit a degree.
@@ -1252,7 +1417,7 @@ function admin_display_edit_degree() {
        
        <tr>
         <td valign='top' class='tenpt td-ex-lab'>" . t("Exclude:") . "</td>
-        <td valign='top' class='tenpt td-ex'
+        <td valign='top' class='tenpt td-ex'>
               <input type='text' name='exclude' value='$degree->db_exclude' size='2' maxlength='1'>
               <a href='javascript: adminPopupAlertHelp(\"degree_exclude\");'>?</a>
         </td>

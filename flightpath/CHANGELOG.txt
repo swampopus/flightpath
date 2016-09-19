@@ -1,6 +1,13 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-09-10
+  Made various changes so that pie charts are rendered using a hook-able theme function, similar to Course Row, Footnot, etc.
+  This allows outside modules to modify the pie charts.
+  
+  Also, the pie charts by default now list out progress for every degree the student is enrolled in.  
+  
+
 2016-08-24
   Changed system.install so that datetime field is given a real date (1970-01-01 00:00:01), not all zeros, by default.  This was
   necessary because on some MySQL configurations, zero dates are not allowed.

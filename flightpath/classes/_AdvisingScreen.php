@@ -1579,6 +1579,7 @@ function draw_menu_items($menu_array) {
 	{
 		$rtn = "";
 
+    $val = 0;
 				
 		if ($bottom_value > 0) {
 			$val = round(($top_value / $bottom_value)*100);
@@ -1660,8 +1661,17 @@ function draw_menu_items($menu_array) {
 		// the pie charts go!)
 		$rtn = "";
 
+    if (!$this->db) {
+      $this->db = get_global_database_handler();
+    }
+    
+    $user->settings = $this->db->get_user_settings($user->id);
+
+    $bool_charts_are_hidden = FALSE;
+
+
     // have we already calculated this degree's data?
-		if (@$this->degree_plan->gpa_calculations["degree"]["total_hours"] < 1)
+		if (@$this->degree_plan->bool_calculated_progess_hours != TRUE)
 		{
 		    
 		  // Only bother to get the types calculations needed for the piecharts
@@ -1683,133 +1693,227 @@ function draw_menu_items($menu_array) {
 			  			
 		}
   
-		// Create a holding array for later use.
-		$pie_chart_html_array = array();
-		
-		// Get the requested piecharts from our config...
-		$temp = variable_get("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress");
-		$lines = explode("\n", $temp);
-		foreach ($lines as $line) {
-		  if (trim($line) == "") continue;
-		  
-		  $temp = explode("~", $line);
-		  $requirement_type = trim($temp[0]);
-		  $label = trim($temp[1]);		  
-		  $unfinished_col = @trim($temp[2]);
-		  $progress_col = @trim($temp[3]);
-		  
-		  if ($unfinished_col == "") $unfinished_col = "660000";
-		  if ($progress_col == "") $progress_col = "FFCC33";
-
-		  
-		  // Okay, let's see if this degreeplan even has any data on this requirement type.
-		  $total_hours = $this->degree_plan->gpa_calculations[$requirement_type]["total_hours"]*1;
-		  $fulfilled_hours = $this->degree_plan->gpa_calculations[$requirement_type]["fulfilled_hours"]*1;
-		  $qpts = $this->degree_plan->gpa_calculations[$requirement_type]["qpts"]*1;
-		  
-		  if ($total_hours < 1) continue;  // no hours for this requirement type!
-		  
-		  // If we are here, then there is indeed enough data to create a piechart!
-		  // Generate the pie chart and add to our array, for later display.
-		  $html = $this->draw_pie_chart_box($label,$fulfilled_hours, $total_hours, "", $unfinished_col, $progress_col);
-		  $hide_pie_html = "$label: $fulfilled_hours / $total_hours";
-		  $pie_chart_html_array[] = array(
-		    "pie" => $html,
-		    "hide_pie" => $hide_pie_html,
-		   );
-		  
-		}
-		
-		 
-		
-		$rtn .= "<tr><td colspan='2'>
-				";
-
-		if (!$this->db) {
-		  $this->db = get_global_database_handler();
-		}
-		
-    $user->settings = $this->db->get_user_settings($user->id);
-
-	  if (count($pie_chart_html_array) > 0) {
-	    $td_width = round(100 / count($pie_chart_html_array));
-	  }
+		// Create a "theme" array for later use.		
+		$pie_chart_theme_array = array();
+    $pie_chart_theme_array["screen"] = $this;
+    $pie_chart_theme_array["student"] = $this->student;
+    $pie_chart_theme_array["degree_plan"] = $this->degree_plan;
     
-    if (!isset($user->settings["hide_charts"])) $user->settings["hide_charts"] = "";
-    
-		if ($this->bool_force_pie_charts || ($user->settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false && $this->page_is_mobile == false))
-		{ // Display the pie charts
 
-		  
+    // Get the requested piecharts from our config...
+    $temp = variable_get("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress");
+    $config_lines = explode("\n", $temp);
 		
-			$rtn .= "
-				<div style='margin-bottom: 10px;'>
-				<table class='pie-chart-table' width='100%' cellspacing='0' cellpadding='0' border='0'>
-				<tr>
-				";
-			
-			$c = 0;
-			foreach ($pie_chart_html_array as $val) {
-			  $html = $val["pie"];
-			  $style = ($c == count($pie_chart_html_array) - 1) ? "" : "padding-right:5px;";
-			  $rtn .= "<td width='$td_width%' style='$style'>
-					         " . $html . "
-				         </td>";
-        $c++;
-			}
-			
-				
-				
-			$rtn .= "</table>";
+		// Go through each of the degrees we have piecharts for
+    foreach ($this->degree_plan->gpa_calculations as $degree_id => $val) {
+      
+            
+      $dp = new DegreePlan();
+      $dp->degree_id = $degree_id;   
+      if ($degree_id > 0) {
+        $dp->load_descriptive_data();
+        $d_title = $dp->get_title2(FALSE, TRUE);
+        $d_code = fp_get_machine_readable($dp->major_code);
+      }
+      else {
+        // Degree_id == 0, so this is the "overall" degree.
+        $d_title = t("Overall Progress");
+        $d_code = "PIE_OVERALL_PROGRESS";
+      }
+      
+      // Add to our theme array.
+      $pie_chart_theme_array["degree_rows"][$degree_id] = array(
+        "degree_id" => $degree_id,
+        "row_label" => $d_title,
+        "row_classes" => "",
+        "degree_plan" => $dp,
+        "degree_major_code_machine" => $d_code,                             
+        "bool_display" => TRUE,
+      );
+          
+          
+  		foreach ($config_lines as $line) {
+  		  if (trim($line) == "") continue;
+  		  
+  		  $temp = explode("~", $line);
+  		  $requirement_type = trim($temp[0]);
+  		  $label = trim($temp[1]);		  
+  		  $unfinished_col = @trim($temp[2]);
+  		  $progress_col = @trim($temp[3]);
+  		  
+  		  if ($unfinished_col == "") $unfinished_col = "660000";
+  		  if ($progress_col == "") $progress_col = "FFCC33";
+  
+  		  
+  		  // Okay, let's see if this degreeplan even has any data on this requirement type.
+  		  $total_hours = $this->degree_plan->gpa_calculations[$degree_id][$requirement_type]["total_hours"]*1;
+  		  $fulfilled_hours = $this->degree_plan->gpa_calculations[$degree_id][$requirement_type]["fulfilled_hours"]*1;
+  		  $qpts = $this->degree_plan->gpa_calculations[$degree_id][$requirement_type]["qpts"]*1;
+  		  
+  		  if ($total_hours < 1) continue;  // no hours for this requirement type!
+  		  
+  		  // If we are here, then there is indeed enough data to create a piechart!
+  		  // Generate the pie chart and add to our array, for later display.
+  		  $html = $this->draw_pie_chart_box($label,$fulfilled_hours, $total_hours, "", $unfinished_col, $progress_col);
+  		  $hide_pie_html = "$label: $fulfilled_hours / $total_hours";
+        
+  		  $pie_chart_html_array[] = array(
+  		    "pie" => $html,
+  		    "hide_pie" => $hide_pie_html,
+  		   );
 
-			if (!$this->bool_force_pie_charts) {
-  			$rtn .= "				
-  				<div style='font-size: 8pt; text-align:right;'>
-  					<a href='javascript:hideShowCharts(\"hide\");'>" . t("hide charts") . "</a>
-  				</div>";
-			}
-			$rtn .= "</div>";
-			
-		} 
-		else {
-			// Hide the charts!  Show a "show" link....
-			$rtn .= "
- 			<table border='0' width='100%'  class='pie-chart-table-hide-charts 
- 			                                elevenpt blueBorder' cellpadding='0' cellspacing='0' >
- 			<tr>
-  				<td colspan='10' class='blueTitle' align='center' height='20'>
-    			" . fp_render_square_line(t("Progress")) . "
-  				</td>
- 			</tr>
- 			<tr>";
+        // Add to our theme array
+        $pie_chart_theme_array["degree_rows"][$degree_id]["data"][$requirement_type] = array(
+          "full_html" => $html,
+          "hide_pie_html" => $hide_pie_html,
+          "requirement_type" => $requirement_type,
+          "label" => $label,
+          "unfinished_col" => $unfinished_col,
+          "progress_col" => $progress_col,
+          "total_hours" => $total_hours,
+          "fulfilled_hours" => $fulfilled_hours,
+          "qpts" => $qpts,
+          "bool_display" => TRUE,
+          "pie_classes" => '',
+        );        
 
-			$c = 0;
-			foreach ($pie_chart_html_array as $val) {
-			  $html = $val["hide_pie"];			  
-			  $rtn .= "<td width='$td_width%' align='center'>
-					         " . $html . "
-				         </td>";
-        $c++;
-			}
- 				
- 			$rtn .= "
- 			  </tr>
 
-			 </table>";
+  		  
+  		} // foreach $line  (for piechart by type)
+  		
+		} //foreach $degree_id
+				 
+		
+		//////////////////
+		// Send the pie_chart_theme_array to a hook for possible extra processing.
+		invoke_hook("theme_pie_charts", array(&$pie_chart_theme_array));
+		//////////////////
 
-			if ($this->bool_print != true && $this->bool_blank != true && $this->page_is_mobile != true)
-			{
+								 		 
+		// Now, cycle through all of the 'rows' of degrees we need to draw. 
+		foreach ($pie_chart_theme_array["degree_rows"] as $degree_id => $details) {
+  		
+      if ($details["bool_display"] === FALSE) continue;   // hide the entire row  
+		  
+		               
+  		$rtn .= "<tr class='pie-degree-row pie-degree-row-$degree_id {$details['row_classes']}'><td colspan='2'>
+  				      <div class='pie-row-label'>{$details["row_label"]}</div>";
+  
+      
+  
+  	  if (count($pie_chart_html_array) > 0) {
+  	    $td_width = round(100 / count($pie_chart_html_array));
+  	  }
+      
+      if (!isset($user->settings["hide_charts"])) $user->settings["hide_charts"] = "";
+      
+  		if ($this->bool_force_pie_charts || ($user->settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false && $this->page_is_mobile == false))
+  		{ // Display the pie charts
+    		
+    		$bool_charts_are_hidden = FALSE;
+    		
+  			$rtn .= "
+          				<div style='margin-bottom: 10px;' class='pies-wrapper'>
+            				<table class='pie-chart-table' width='100%' cellspacing='0' cellpadding='0' border='0'>
+              				<tr>
+          				";
+  			
+  			$c = 0;
+  			foreach ($pie_chart_theme_array['degree_rows'][$degree_id]["data"] as $requirement_type => $val) {
+  			  $html = $val["full_html"];
+          if ($val["bool_display"] === FALSE) continue; // this particular chart shouldn't be shown.
+          
+  			  $style = ($c == count($pie_chart_html_array) - 1) ? "" : "padding-right:5px;";
+  			  $rtn .= "<td width='$td_width%' style='$style' class='td_full_pie td_full_pie_$requirement_type {$val["pie_classes"]}'>
+  					         " . $html . "
+  				         </td>";
+          $c++;
+  			}
+  			
+  				
+  				
+  			$rtn .= "  </table>";
+  
+  			$rtn .= "</div>"; // class pies-wrapper
+  			
+  		} 
+  		else {  		  
+  			// Hide the charts!
+  			$bool_charts_are_hidden = TRUE;
+        
+  			$rtn .= "
+   			<table border='0' width='100%'  class='pie-chart-table-hide-charts 
+   			                                elevenpt blueBorder' cellpadding='0' cellspacing='0' >
+   			<tr class='pie-hidden-charts-label-row'>
+    				<td colspan='10' class='blueTitle' align='center' height='20'>
+      			" . fp_render_square_line(t("Progress")) . "
+    				</td>
+   			</tr>
+   			<tr class='pie-hidden-charts-row'>";
+  
+  			$c = 0;
+  			foreach ($pie_chart_theme_array['degree_rows'][$degree_id]["data"] as $requirement_type => $val) {
+          $html = $val["hide_pie_html"];
+          if ($val["bool_display"] === FALSE) continue; // this particular chart shouldn't be shown.
+          
+  			  $rtn .= "<td width='$td_width%' align='center' class='td_hidden_pie td_hidden_pie_$requirement_type {$val["pie_classes"]} '>
+  					         " . $html . "
+  				         </td>";
+          $c++;
+  			}
+   				
+   			$rtn .= "
+   			  </tr>
+  
+  			 </table>";
+  			 
+         
+  
+        
+        
+  		}
 
-				$rtn .= "<div style='font-size: 8pt; text-align:right;'>
-					<a href='javascript:hideShowCharts(\"show\");'>" . t("show charts") . "</a>
-				</div>
-					";
-			} else {
-				$rtn .= "<div> &nbsp; </div>";
-			}
-		}
-		$rtn .= "
-				</td></tr>";
+
+
+  		$rtn .= "</td></tr>";
+  
+
+    } // foreach degree_rows
+
+
+
+    ///////////////////////////////////
+    // Show the show/hide link
+    $rtn .= "<tr class='pie-show-hide-links'><td colspan='2'>";
+    
+    if ($bool_charts_are_hidden) {
+      // Charts are hidden, so show the "Show" link.
+      if ($this->bool_print != true && $this->bool_blank != true && $this->page_is_mobile != true)
+      {
+  
+        $rtn .= "<div style='font-size: 8pt; text-align:right;' class='pie-show-charts-link'>
+                     <a href='javascript:hideShowCharts(\"show\");'>" . t("show charts") . "</a>
+                  </div>
+          ";
+      } else {
+        $rtn .= "<div> &nbsp; </div>";
+      }
+            
+    }
+    else {
+      // Charts are visible, so display the "Hide" link
+      if (!$this->bool_force_pie_charts) {
+        $rtn .= "       
+          <div style='font-size: 8pt; text-align:right;' class='pie-hide-charts-link'>
+            <a href='javascript:hideShowCharts(\"hide\");'>" . t("hide charts") . "</a>
+          </div>";
+      }
+            
+    }
+
+    $rtn .= "</td></tr>";
+    
+
 
 
 
@@ -2298,7 +2402,7 @@ function draw_menu_items($menu_array) {
     $req_by_degree_id = $course->req_by_degree_id;
 
 
-		$advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
+		$advising_term_id = @$GLOBALS["fp_advising"]["advising_term_id"];
 
     
 		$course->load_descriptive_data();

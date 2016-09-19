@@ -1086,9 +1086,9 @@ class _Course extends stdClass
 	 * @param int $hours
 	 * @return int
 	 */
-	function get_quality_points(){
+	function get_quality_points($degree_id = 0){
 
-	  $hours = $this->get_hours();
+	  $hours = $this->get_hours($degree_id = 0);
 	  $grade = $this->grade;
 	  
 	  $pts = 0;

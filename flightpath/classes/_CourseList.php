@@ -1884,7 +1884,7 @@ class _CourseList extends ObjList
 	 * @param bool $bool_ignore_enrolled
 	 * @return int
 	 */
-	function count_credit_quality_points($requirement_type = "", $bool_use_ignore_list = false, $bool_ignore_enrolled = false, $bool_exclude_all_transfer_credits = FALSE)
+	function count_credit_quality_points($requirement_type = "", $bool_use_ignore_list = false, $bool_ignore_enrolled = false, $bool_exclude_all_transfer_credits = FALSE, $degree_id = 0)
 	{
 
 		$points = 0;
@@ -1949,12 +1949,12 @@ class _CourseList extends ObjList
 			  
 				if ($requirement_type == "")
 				{
-				  $p = $course->get_quality_points();
+				  $p = $course->get_quality_points($degree_id);
 					$points = $points + $p;
 				} else {
 					if ($cr_type == $requirement_type)
 					{
-						$p = $course->get_quality_points();
+						$p = $course->get_quality_points($degree_id);
 					  $points = $points + $p;
 						continue;
 					}
@@ -1970,7 +1970,7 @@ class _CourseList extends ObjList
 					if ($course->course_list_fulfilled_by->is_empty == false)
 					{
 						$cc = $course->course_list_fulfilled_by->get_first();
-						if ($cc->get_bool_substitution())
+						if ($cc->get_bool_substitution($degree_id))
 						{
 						  
 						  
@@ -1992,7 +1992,7 @@ class _CourseList extends ObjList
 							//}
 							
 							// What are the quality points for this course?						
-							$p = $cc->get_quality_points();
+							$p = $cc->get_quality_points($degree_id);
 							
 							$points = $points + $p;
 						}

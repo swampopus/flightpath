@@ -225,7 +225,39 @@ function admin_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
     "tab_parent" => "admin/degrees",
   );   
-   
+
+  
+  $items["admin/degrees/edit-degree2/%/%"] = array(
+    "title" => "Edit Degree",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("admin_edit_degree_form", "normal", 3, 4),
+    "access_arguments" => array("can_edit_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to Degrees list",
+          "path" => "admin/degrees",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),   
+    "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin/degrees",    
+  );     
+  
+  
+  
+  
+     
   $items["admin/degrees/handle-edit-degree-submit"] = array(    
     "page_callback" => "admin_handle_edit_degree_submit",
     "access_arguments" => array("can_edit_data_entry"),
