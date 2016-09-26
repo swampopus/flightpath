@@ -9,7 +9,7 @@ function admin_display_degrees_popup_add_group() {
    fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
   
   $rtn = "";
-
+   
   $rtn .= "<b>" . t("Add an elective group to semester: @semester_num in @de_catalog_year", array("@semester_num" => $semester_num, "@de_catalog_year" => $de_catalog_year)) . "</b><br>
         <span class='tenpt'>" . t("Use keyboard shortcut CTRL-F to find groups quickly.") . "</span>
         <br><br>
