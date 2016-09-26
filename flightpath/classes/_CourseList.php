@@ -1390,6 +1390,13 @@ class _CourseList extends ObjList
 		{
 			$course = $this->array_list[$t];
 
+      // Does this course belong to the same degree we are interested in?  If not, skip it.
+      if ($degree_id > 0) {
+        if ($course->req_by_degree_id != $degree_id && $course->get_has_been_assigned_to_degree_id($degree_id) != TRUE) continue;
+      }
+      
+
+
 			if ($bool_use_ignore_list == true)
 			{
 				// Do ignore some courses...
@@ -1461,7 +1468,8 @@ class _CourseList extends ObjList
 			if ($requirement_type == "")
 			{
 				$count = $count + $h_get_hours;
-			} else {
+			} 
+			else {
 				// Requirement Type not blank, so only count these hours
 				// if it has the set requirement type.
 				if ($course->requirement_type == $requirement_type)
@@ -1705,7 +1713,7 @@ class _CourseList extends ObjList
 	 * @param bool $bool_ignore_enrolled
 	 * @return int
 	 */
-	function count_credit_hours($requirement_type = "", $bool_use_ignore_list = false, $bool_ignore_enrolled = false, $bool_qpts_grades_only = FALSE, $bool_exclude_all_transfer_credits = FALSE)
+	function count_credit_hours($requirement_type = "", $bool_use_ignore_list = false, $bool_ignore_enrolled = false, $bool_qpts_grades_only = FALSE, $bool_exclude_all_transfer_credits = FALSE, $degree_id = 0)
 	{
 		// Similar to count_hours, but this will only
 		// count courses which have been taken (have a grade).
@@ -1732,6 +1740,12 @@ class _CourseList extends ObjList
 		{
 			$course = $this->array_list[$t];
 			
+      // Does this course belong to the same degree we are interested in?  If not, skip it.
+      if ($degree_id > 0) {
+        if ($course->req_by_degree_id != $degree_id && $course->get_has_been_assigned_to_degree_id($degree_id) != TRUE) continue;
+      }
+      
+      
 			if ($bool_use_ignore_list == true)
 			{
 				// Do ignore some courses...
@@ -1824,7 +1838,8 @@ class _CourseList extends ObjList
 					$count = $count + $h;
 				} 
 				
-			} else {
+			} 
+			else {
 
 				// maybe it's a substitution?
 				if ($requirement_type == "" || ($requirement_type != "" && $requirement_type == $cr_type))
@@ -1891,6 +1906,12 @@ class _CourseList extends ObjList
 		for ($t = 0; $t < $this->count; $t++)
 		{
 			$course = $this->array_list[$t];
+
+      // Does this course belong to the same degree we are interested in?  If not, skip it.
+      if ($degree_id > 0) {
+        if ($course->req_by_degree_id != $degree_id && $course->get_has_been_assigned_to_degree_id($degree_id) != TRUE) continue;
+      }
+
 
 			// Correct the course's requirement type, if needed (remove the "u")
       $cr_type = $course->requirement_type;
@@ -1960,7 +1981,8 @@ class _CourseList extends ObjList
 					}
 
 				}
-			} else {
+			} 
+			else {
 
 				// maybe it's a substitution?
 								

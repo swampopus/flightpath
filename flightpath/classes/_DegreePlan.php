@@ -214,6 +214,7 @@ class _DegreePlan extends stdClass
     
     } //foreach all_degree_ids
     
+    fpm($this->gpa_calculations);
   
     // Note that we have run this function for this degree.
     $this->bool_calculated_progess_hours = TRUE;
@@ -282,9 +283,9 @@ class _DegreePlan extends stdClass
   {
     
     
-   if ($requirement_type == "degree") $requirement_type = "";
+    if ($requirement_type == "degree") $requirement_type = "";
 
-    
+        
     
     $hours = 0;
     
@@ -305,8 +306,6 @@ class _DegreePlan extends stdClass
       }
     }                       
 
-    
- 
     
     // Also, add in groups matching this requirement type.
     $this->list_groups->reset_counter();
@@ -336,7 +335,8 @@ class _DegreePlan extends stdClass
       if ($requirement_type == "")
       {
         $hours += $g_hours;
-      } else {
+      } 
+      else {
         // A requirement is specified, so make sure
         // the group is of this requirement.
 
@@ -548,13 +548,14 @@ class _DegreePlan extends stdClass
           
           if (!isset($group_n->hours_required_by_type[$cur["group_requirement_type"]])) $group_n->hours_required_by_type[$cur["group_requirement_type"]] = 0;
           $group_n->hours_required_by_type[$cur["group_requirement_type"]] += $group_n->hours_required;
-          $group_n->req_by_degree_id = $this->degree_id;
+          $group_n->set_req_by_degree_id($this->degree_id);
           if (trim($cur["group_min_grade"]) != "")
           {
             $group_n->assign_min_grade(trim(strtoupper($cur["group_min_grade"])));
           }
           $title = $group_n->title;
           $icon_filename = $group_n->icon_filename;
+          
           $this->list_groups->add($group_n);
         }
 
@@ -563,7 +564,7 @@ class _DegreePlan extends stdClass
         $group_g = new Group();
         $group_g->bool_use_draft = $this->bool_use_draft;
         $group_g->group_id = $cur["group_id"] . '_' . $this->degree_id;
-        $group_g->req_by_degree_id = $this->degree_id;
+        $group_g->set_req_by_degree_id($this->degree_id);
         $group_g->load_descriptive_data();
         $group_g->requirement_type = $cur["group_requirement_type"];
         if (trim($cur["group_min_grade"]) != "")

@@ -41,6 +41,21 @@ class _GroupList extends ObjList
 		
 	}
 	
+   /**
+   * Set all the courses and branches in this group to the specified degree_id.
+   */
+  function set_req_by_degree_id($degree_id = 0) {
+      
+    // Loop through all the groups in this list...
+    $this->reset_counter();
+    while ($this->has_more()) {
+      $g = $this->get_next();
+      // Set req_by_degree_id on this group...
+      $g->set_req_by_degree_id($degree_id);
+    }  
+    
+  }
+  
   
   
 

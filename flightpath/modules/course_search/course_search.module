@@ -478,8 +478,7 @@ function course_search_display_courses() {
   }
   
   $term_structures = get_term_structures();
-  
-  
+    
   $grad_notice_flag = false;
   $temp_course = new Course();
   // removed course_num < 500 and
@@ -524,6 +523,7 @@ function course_search_display_courses() {
 
       // Look for all 5 years.
       $long_schedule_array = course_search_get_course_rotation_schedule($n_course_id, $catalog_year, 100, true);
+      
       // Only grab next 2 years.
       $schedule_array = course_search_get_course_rotation_schedule($n_course_id, $catalog_year);  
       
@@ -599,18 +599,24 @@ function course_search_display_courses() {
             $the_term_id = $t . $x;
 
             // Does the term suffix ($x) call for the year to be
-            // subtracted by 1?  This is the case at ULM for fall.
+            // subtracted by 1, or modified at all?  This is the case at ULM for fall.
             // Ex:  201340  is Fall of *2012*, not 2013.
             // We can tell this because the term structure (from admin settings)            
             //fpm($term_structures);
-            if (strtoupper($term_structures[$x]["disp_adjust"]) == "[Y-1]") {
-              //fpm("here for $x");
+            if (strtoupper($term_structures[$x]["disp_adjust"]) == "[Y-1]" || strtoupper($term_structures[$x]["disp_adjust"]) == "[Y4-1]") {
+              // It is subtracted by one.  So the year for "XYZ of 2016" is actually recorded as 2017xyz                
               $the_term_id = ($t + 1) . $x;
+            }            
+            if (strtoupper($term_structures[$x]["disp_adjust"]) == "[Y+1]" || strtoupper($term_structures[$x]["disp_adjust"]) == "[Y4+1]") {
+              // It is added by one.  So the year for "XYZ of 2016" is actually recorded as 2015xyz                              
+              $the_term_id = ($t - 1) . $x;
             }
             
             
+            
+            
             if (in_array($the_term_id, $full_schedule_array))
-            {
+            {              
               $schedule_text .= "<img src='" . fp_theme_location() . "/images/small_check.gif'>";             
             }
             else {

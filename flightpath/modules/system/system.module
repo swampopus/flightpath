@@ -482,7 +482,19 @@ function system_execute_php_form_submit($form, $form_state) {
   $code = trim($form_state["values"]["system_execute_php"]);
   if ($code == "") return;
 
-    eval($code);
+  try {
+    $res = @eval($code);
+    
+    // Check for errors less than PHP 7.
+    if ($res === FALSE &&($error = error_get_last())) {
+      fp_add_message("Error: " . $error["message"] . ". See line: " . $error["line"], "error");
+    }
+    
+  }
+  catch (ParseError $e) {    
+    // Catches PHP 7+ ParseError exceptions...
+    fp_add_message("Exception detected: " . $e->getMessage() . ". See line: " . $e->getLine(), "error");
+  }
   
 }
 
@@ -833,13 +845,14 @@ function system_school_data_form() {
     "description" => t("Use this space to define termID structures, one per line.
                 Please see the 
                 <b><a href='http://getflightpath.com/node/1085' target='_blank'>FlightPath documentation</a></b> 
-                on how to set up this field.") . "
+                on how to set up this field.") . "                
+                <br>&nbsp; &nbsp; &nbsp; " . t("Like so: Structure, Short Desc, Long Desc, Abbr Desc, Year Adjustment") . "
                 <br>" . t("Ex:") . " 
-                <br>[Y4]60, Spring, Spring of [Y4], Spr '[Y2]
-                <br>[Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]",    
+                <br>&nbsp; &nbsp; &nbsp; [Y4]60, Spring, Spring of [Y4], Spr '[Y2], [Y]
+                <br>&nbsp; &nbsp; &nbsp; [Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1], [Y-1]",
   );
 
-             
+              
   
   
   
