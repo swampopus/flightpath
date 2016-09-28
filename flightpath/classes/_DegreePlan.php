@@ -214,7 +214,7 @@ class _DegreePlan extends stdClass
     
     } //foreach all_degree_ids
     
-    fpm($this->gpa_calculations);
+    //fpm($this->gpa_calculations);
   
     // Note that we have run this function for this degree.
     $this->bool_calculated_progess_hours = TRUE;

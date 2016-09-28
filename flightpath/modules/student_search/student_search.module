@@ -544,11 +544,25 @@ function student_search_display_search() {
     {
       $fn = trim(@$temp[0]);
       $ln = trim(@$temp[1]);
+      // If there was a comma, then these should be reversed,
+      // as they probably entered last, first.
+      if (strstr($search_for, ",")) {
+        $ln = trim(@$temp[0]);  
+        $fn = trim(@$temp[1]);
+        
+        $ln = trim(str_replace(",", "", $ln));  // remove comma
+        $fn = trim(str_replace(",", "", $fn));  // remove comma
+                        
+      }
+      
+      
       $search_action = " AND (l_name LIKE :like_ln 
                          AND f_name LIKE :like_fn ) 
                        ";
       $params[":like_ln"] = "%$ln%";
       $params[":like_fn"] = "%$fn%";      
+      // Remove unneeded like_search_for index.
+      unset($params[":like_search_for"]);
       
     }
 
