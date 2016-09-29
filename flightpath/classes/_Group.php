@@ -67,6 +67,7 @@ class _Group extends stdClass
 		{
 			$this->bool_placeholder = false;
 			$this->load_group(true, $array_significant_courses);
+      $this->set_requirement_type($this->requirement_type);
 		}
 
 	}
@@ -352,6 +353,7 @@ class _Group extends stdClass
 				}
 
 				$course->assigned_to_group_id = $this->group_id;
+        $course->requirement_type = $this->requirement_type;
 				$course->db_group_requirement_id = $use_id;
 				$course->specified_repeats = $cur["course_repeats"];
 				if ($cur["course_repeats"] > 0)
@@ -395,6 +397,23 @@ class _Group extends stdClass
     
   }
 
+
+  /**
+   * Sets the requirement type for the group and all its courses (including sub-groups)
+   */
+  function set_requirement_type($requirement_type = "") {
+    $this->requirement_type = $requirement_type;
+    $this->list_courses->reset_counter();
+    $this->list_courses->set_requirement_type($requirement_type);
+    
+    // go through sub-groups and do the same...
+    $this->list_groups->reset_counter();
+    while($this->list_groups->has_more())
+    {
+      $g = $this->list_groups->get_next();
+      $g->set_requirement_type($requirement_type);
+    }    
+  }
 
 
 	function load_descriptive_data()

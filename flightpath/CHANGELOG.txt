@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-09-29
+  Fixed a bug with pie charts where it was not taking a group's min_hours into account.  Also, told it to ignore
+  the "hours_required_by_type" in pie chart calculations, since a group can only be assigned to one requirement type
+  at a time.
+  
+
 2016-09-28
   Fixed bug where searching for lastname, firstname broke the search. 
   

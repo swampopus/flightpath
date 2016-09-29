@@ -130,7 +130,10 @@ class _GroupList extends ObjList
         if ($bool_load_groups) {
           $new_group->load_group();  // Make sure the group has all its courses loaded in.
         }
-                
+        
+        $new_group->set_requirement_type($group->requirement_type);
+        $new_group->set_req_by_degree_id($group->req_by_degree_id);                
+        
         $rtn_list->add($new_group);
       } 
       else {
@@ -139,6 +142,9 @@ class _GroupList extends ObjList
           $group->load_group();  // Make sure the group has all its courses loaded in.
         }        
         
+        $group->set_requirement_type($group->requirement_type);
+        $group->set_req_by_degree_id($group->req_by_degree_id);
+                       
         $rtn_list->add($group);
       } 
       

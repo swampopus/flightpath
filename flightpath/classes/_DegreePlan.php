@@ -214,8 +214,7 @@ class _DegreePlan extends stdClass
     
     } //foreach all_degree_ids
     
-    //fpm($this->gpa_calculations);
-  
+      
     // Note that we have run this function for this degree.
     $this->bool_calculated_progess_hours = TRUE;
      
@@ -326,10 +325,16 @@ class _DegreePlan extends stdClass
 
 
       $g_hours = $g->hours_required;
+      
+      // use the min hours if it is set.
+      if ($g->min_hours_allowed > 0) {
+        $g_hours = $g->min_hours_allowed;
+      }
+      
       if ($bool_required_hours_only == false)
       { // only count the fulfilled hours, then.        
         $g_hours = $g->get_fulfilled_hours(true, false, true, -1, true, $bool_qpts_grades_only, $requirement_type, $bool_exclude_all_transfer_credits);        
-            
+
       }
 
       if ($requirement_type == "")
@@ -344,9 +349,21 @@ class _DegreePlan extends stdClass
         
         if ($bool_required_hours_only == true)
         {  // make sure it's of the right type.
-          $g_hours = $g->hours_required_by_type[$requirement_type]*1;
-          $hours += $g_hours;
-          continue;
+          //$g_hours = $g->hours_required_by_type[$requirement_type]*1;
+
+          // it should just be any hours_required, instead of by type, since a group can only have 1 type.
+          if ($g->requirement_type == $requirement_type) {
+            $g_hours = $g->hours_required;
+            
+            // use the min hours if it is set.
+            if ($g->min_hours_allowed > 0) {
+              $g_hours = $g->min_hours_allowed;
+            }            
+              
+            $hours += $g_hours;
+            continue;
+          }
+          
         }
         
         if ($g->requirement_type == $requirement_type)
@@ -432,6 +449,8 @@ class _DegreePlan extends stdClass
 
   function load_degree_plan()
   {
+    
+        
     // Load this degree plan from the database and fully
     // assemble it.
     $degree_id = $this->degree_id;
@@ -460,6 +479,9 @@ class _DegreePlan extends stdClass
       $this->degree_class = $cur["degree_class"];
       $this->db_override_degree_hours = $cur["override_degree_hours"];
       $this->db_advising_weight = intval($cur["advising_weight"]);
+
+
+
 
       $this->db_track_selection_config = trim($cur["track_selection_config"]);
       $this->parse_track_selection_config();  // load into the track_selection_config_array as needed.
@@ -516,6 +538,8 @@ class _DegreePlan extends stdClass
         // A group is the next degree requirement.
         //$group_g = new Group($cur["group_id"], $this->db, $semester_num);
 
+        
+        
         $title = "";
         $icon_filename = "";
         // Add the real Group (with all the courses, branches, etc)
@@ -545,7 +569,7 @@ class _DegreePlan extends stdClass
           // Was not already there; insert it.
           $group_n = new Group($cur["group_id"] . '_' . $this->degree_id, $this->db, $semester_num, $this->student_array_significant_courses, $this->bool_use_draft, $cur["group_requirement_type"]);
           $group_n->hours_required = $cur["group_hours_required"] * 1;
-          
+
           if (!isset($group_n->hours_required_by_type[$cur["group_requirement_type"]])) $group_n->hours_required_by_type[$cur["group_requirement_type"]] = 0;
           $group_n->hours_required_by_type[$cur["group_requirement_type"]] += $group_n->hours_required;
           $group_n->set_req_by_degree_id($this->degree_id);
@@ -566,7 +590,7 @@ class _DegreePlan extends stdClass
         $group_g->group_id = $cur["group_id"] . '_' . $this->degree_id;
         $group_g->set_req_by_degree_id($this->degree_id);
         $group_g->load_descriptive_data();
-        $group_g->requirement_type = $cur["group_requirement_type"];
+        $group_g->set_requirement_type($cur["group_requirement_type"]);
         if (trim($cur["group_min_grade"]) != "")
         {
           $group_g->assign_min_grade(trim(strtoupper($cur["group_min_grade"])));
@@ -585,7 +609,6 @@ class _DegreePlan extends stdClass
     } // while db results
 
 
-
     $this->list_groups->sort_priority();
     
     if (!in_array($this->degree_id, $exclude_degree_ids)) {
@@ -598,7 +621,7 @@ class _DegreePlan extends stdClass
       }
     }
 
-
+      
   } // load_degree_plan
 
 

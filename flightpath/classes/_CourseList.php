@@ -2117,6 +2117,23 @@ class _CourseList extends ObjList
   }
 
 
+  /**
+   * Set all the courses in this list to have the same "requirement_type" value.
+   */
+  function set_requirement_type($requirement_type = "")
+  {
+    // Set the bool_substitution for all items
+    // in this list.
+    for ($t = 0; $t < $this->count; $t++)
+    {
+      $course = $this->array_list[$t];
+      $course->requirement_type = $requirement_type;
+    }
+
+  }
+
+
+
 
 
 	/**
