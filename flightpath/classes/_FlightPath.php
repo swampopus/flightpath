@@ -646,10 +646,16 @@ class _FlightPath extends stdClass
     $hours_required = $group->hours_required*1;
     $hours_assigned = $group->hours_assigned;
 
-    if ($hours_required*1 <= 0 || $hours_required == "")
+    // If the group has min_hours, then we should use THAT as the hours_required (based on setting...)
+    if ($group->has_min_hours_allowed() && variable_get("group_full_at_min_hours", "yes") == "yes") {
+      $hours_required = $group->min_hours_allowed;
+    }
+
+    if ($hours_required <= 0 || $hours_required == "")
     {
       $hours_required = 999999;
     }
+
 
     $list_requirements->sort_smallest_hours_first();
     // sort the requirement list by the best grades that the student has made?  Similar to the substitutions?
