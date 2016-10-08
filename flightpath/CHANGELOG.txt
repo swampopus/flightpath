@@ -4,6 +4,8 @@ FlightPath 5.x Changelog
 2016-10-08
   Added default setting to stop filling courses into a group once the min hours are met.
   
+  Display of min hours correctly calculated in group select with min hours after advising.
+  
 
 2016-09-29
   Fixed a bug with pie charts where it was not taking a group's min_hours into account.  Also, told it to ignore

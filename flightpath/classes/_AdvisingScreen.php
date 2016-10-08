@@ -5544,7 +5544,11 @@ function draw_menu_items($menu_array) {
 		  $disp_group_hours_remaining = $group_hours_remaining;
       // If we have min_hours, display that information.
       if ($group->has_min_hours_allowed()) {
-        $disp_group_hours_remaining = $group->min_hours_allowed . "-" . $group_hours_remaining;
+        
+        $g_fulfilled_hours = $group->hours_required - $group_hours_remaining;  // How many have we actually used?
+        
+        $d_min_hours = $group->min_hours_allowed - $g_fulfilled_hours;  // min hours must be reduced by the number already assigned
+        $disp_group_hours_remaining = $d_min_hours . "-" . $group_hours_remaining;
       }
        
 		  // Don't show for huge groups (like add-a-course)
