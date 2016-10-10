@@ -1339,13 +1339,14 @@ function system_school_data_form() {
   
 
   $form["group_full_at_min_hours"] = array(
-    "label" => t("Groups should be considered 'full' when min hours are met?"),
+    "label" => t("Groups should be considered 'full' when min hours are met or exceeded?"),
     "type" => "select",
     "options" => array("yes" => "Yes", "no" => "No"),
     "value" => variable_get("group_full_at_min_hours", "yes"),
     "hide_please_select" => TRUE,
-    "description" => t("If a group has been added to a degree plan with min hours, should FlightPath consider the group
-                        'full', and stop assigning courses to it, even if the max hours have not been fulfilled?  This
+    "description" => t("If a group has been added to a degree plan with 'min hours', should FlightPath consider the group
+                        'full', and stop assigning courses to it, once the assigned courses meets or goes over the min hours value, 
+                        even if the max hours have not been fulfilled?  This
                         only affects groups which have been added to a degree plan with min hours set.  Ex: 3-6 hours.
                         If you are unsure what to enter, select 'Yes'"),
   );  

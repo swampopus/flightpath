@@ -646,9 +646,11 @@ class _FlightPath extends stdClass
     $hours_required = $group->hours_required*1;
     $hours_assigned = $group->hours_assigned;
 
-    // If the group has min_hours, then we should use THAT as the hours_required (based on setting...)
+    $meet_min_hours = 999999;   // effectively infinite by default, to make logic easier later on.
+
+    // If the group has min_hours, then we should allow the user to get at least the min hours before we stop trying to fill.
     if ($group->has_min_hours_allowed() && variable_get("group_full_at_min_hours", "yes") == "yes") {
-      $hours_required = $group->min_hours_allowed;
+      $meet_min_hours = $group->min_hours_allowed;
     }
 
     if ($hours_required <= 0 || $hours_required == "")
@@ -802,7 +804,7 @@ class _FlightPath extends stdClass
                         
         // Can we assign any more hours to this group?  Are we
         // out of hours, and should stop?
-        if ($hours_assigned >= $hours_required)
+        if ($hours_assigned >= $hours_required || $hours_assigned >= $meet_min_hours)
         {
           continue;
         }
