@@ -3436,8 +3436,6 @@ function draw_menu_items($menu_array) {
 			$fulfilled_hours = $display_course_list->count_hours("", FALSE, TRUE, FALSE, FALSE, $req_by_degree_id);
 			$remaining = $place_group->hours_required - $fulfilled_hours;
 
-      
-
 
 			// If the course in question is part of a substitution that is not
 			// for this group, then we should skip it.
@@ -3514,6 +3512,8 @@ function draw_menu_items($menu_array) {
 					// Do we have enough hours to keep going?
 					$fulfilled_hours = $display_course_list->count_hours("", FALSE, TRUE, FALSE, FALSE, $req_by_degree_id);
 					$remaining = $place_group->hours_required - $fulfilled_hours;
+
+
 
 					if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->get_has_been_displayed($req_by_degree_id) != true && $course->get_has_been_displayed($req_by_degree_id) != true)
 					{

@@ -700,12 +700,13 @@ class _FlightPath extends stdClass
         // also have specified repeats.
         $student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);
       }
-//fpm($group_id);
+      //fpm($group_id);
       // Does the student have any substitutions for this requirement?
       if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id))
       {
-//fpm($substitution);
-//fpm($group_id);
+        //fpm($substitution);
+        //fpm($group_id);
+        
         // Since the substitution was made, I don't really care about
         // min grades or the like.  Let's just put it in.
 
@@ -783,13 +784,20 @@ class _FlightPath extends stdClass
           //fpm($req_by_degree_id);
           $substitution->course_list_substitutions->set_course_substitution($course_requirement, $substitution->remarks, $req_by_degree_id);
           
-          $substitution->bool_has_been_applied = true;
+          $substitution->bool_has_been_applied = TRUE;
+          
+          if ($group_id > 0) {
+            // This is NEW CODE.  We are going to add the course_sub's hours in as being assigned to this list, if this is for a group.
+            // I am surprised this wasn't already here.  This fixes a bug with groups that allow min hours.  
+            $hours_assigned += $course_sub->get_hours_awarded($req_by_degree_id);
+          } 
+                      
           
 
         }
         $count++;        
         continue;
-      }
+      } // if student has any substitutions for this requirement
 
       // Has the student taken this course requirement?
       if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude))
@@ -801,6 +809,10 @@ class _FlightPath extends stdClass
           // instead, use the the adjusted value (probably 1).
           $h_get_hours = $c->get_hours_awarded($req_by_degree_id);
         }       
+
+ 
+
+
                         
         // Can we assign any more hours to this group?  Are we
         // out of hours, and should stop?
@@ -809,9 +821,12 @@ class _FlightPath extends stdClass
           continue;
         }
 
+        $c_hours_awarded = $c->get_hours_awarded($req_by_degree_id);
+
         // Will the hours of this course put us over the hours_required limit?
-        if ($hours_assigned + $c->get_hours_awarded($req_by_degree_id) > $hours_required)
+        if ($hours_assigned + $c_hours_awarded > $hours_required || $hours_assigned + $c_hours_awarded > $meet_min_hours )
         {
+
           continue;
         }
 
@@ -869,6 +884,7 @@ class _FlightPath extends stdClass
           } 
                   
         
+        
           // Has another version of this course already been
           // assigned?  And if so, are repeats allowed for this
           // course?  And if so, then how many hours of the
@@ -915,6 +931,7 @@ class _FlightPath extends stdClass
 
           if ($bool_perform_assignment == TRUE)
           {
+            
             
             // Which degree is this coming from?  
             //$req_by_degree_id = $course_requirement->req_by_degree_id;
