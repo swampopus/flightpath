@@ -1,8 +1,13 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-10-19
+  Fixed bug where a course over the min hours of a group was being skipped over.
+  
+
 2016-10-16
   Fixed a bug where groups with min hours weren't correctly being limited by substitutions.
+
 
 2016-10-10
   Corrected logic on the min hours in groups code.

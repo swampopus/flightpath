@@ -459,6 +459,7 @@ class _FlightPath extends stdClass
       }
 
 
+
       if (!$g->list_groups->is_empty)
       {
         /*
@@ -648,6 +649,9 @@ class _FlightPath extends stdClass
 
     $meet_min_hours = 999999;   // effectively infinite by default, to make logic easier later on.
 
+    
+    
+    
     // If the group has min_hours, then we should allow the user to get at least the min hours before we stop trying to fill.
     if ($group->has_min_hours_allowed() && variable_get("group_full_at_min_hours", "yes") == "yes") {
       $meet_min_hours = $group->min_hours_allowed;
@@ -688,6 +692,8 @@ class _FlightPath extends stdClass
         // array_significant_courses array.
         if (isset($student->array_significant_courses[$course_requirement->course_id]) && $student->array_significant_courses[$course_requirement->course_id] != true)
         {// course was not in there, so skip!
+
+                
           continue;
         }
       }
@@ -799,6 +805,7 @@ class _FlightPath extends stdClass
         continue;
       } // if student has any substitutions for this requirement
 
+      
       // Has the student taken this course requirement?
       if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude))
       { 
@@ -818,15 +825,15 @@ class _FlightPath extends stdClass
         // out of hours, and should stop?
         if ($hours_assigned >= $hours_required || $hours_assigned >= $meet_min_hours)
         {
+          
           continue;
         }
 
         $c_hours_awarded = $c->get_hours_awarded($req_by_degree_id);
 
-        // Will the hours of this course put us over the hours_required limit?
-        if ($hours_assigned + $c_hours_awarded > $hours_required || $hours_assigned + $c_hours_awarded > $meet_min_hours )
+        // Will the hours of this course put us over the hours_required limit?  NOTE:  We don't care if it puts us over the min_hours, in fact, we want that.
+        if ($hours_assigned + $c_hours_awarded > $hours_required )
         {
-
           continue;
         }
 
