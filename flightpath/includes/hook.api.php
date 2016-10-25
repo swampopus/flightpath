@@ -54,6 +54,25 @@ function hook_flightpath_can_assign_course_to_degree_id($degree_id, $course) {
 } // ...can_assign_course_to_degree_id
 
 
+/**
+ * Is the course allowed to be assigned to the specified group?  Returns TRUE or FALSE.  
+ * $group should be a fully formed Group object.
+ * 
+ * This is useful if you have a rule like "No course worth 3 hours is allowed in XYZ group" or something similar.
+ * 
+ * @return boolean
+ */
+function hook_flightpath_can_assign_course_to_group($group, $course) {
+
+  //...  Special logic here to see if this course is allowed in this group.
+  
+  return TRUE;
+  
+}
+
+
+
+
 
 /**
  * This hook allows other modules to interact with the AdvisingScreen object

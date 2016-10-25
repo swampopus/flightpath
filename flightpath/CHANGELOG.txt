@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+
+2016-10-24
+  Added new hook: hook_flightpath_can_assign_course_to_group().  It lets custom modules decide whether or not
+  to allow a course into a particular group at all.
+  
+
 2016-10-19
   Fixed bug where a course over the min hours of a group was being skipped over.
   

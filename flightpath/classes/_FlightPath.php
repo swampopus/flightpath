@@ -872,8 +872,24 @@ class _FlightPath extends stdClass
           }
         }
         
-        
-        //if ($c->bool_has_been_assigned != true)  // boom.  
+
+
+          // Check hooks to see if this course is allowed to be assigned to the GROUP in question.
+          if ($group_id != 0) {
+            $bool_can_proceed = TRUE;
+            
+            $result = invoke_hook("flightpath_can_assign_course_to_group", array($group, $c));
+            foreach ($result as $m => $val) {
+              // If *any* module said FALSE, then we must skip this couse and not assign it to this degree.
+              if ($val === FALSE) $bool_can_proceed = $val;
+            }
+            
+            if (!$bool_can_proceed) {
+              continue;  // don't assign!
+            }                  
+            
+          } // if group_id != 0
+  
         // We want to see if this course has already been assigned to THIS degree...
         if (!in_array($req_by_degree_id, $c->assigned_to_degree_ids_array))
         {//Don't count courses which have already been placed in other groups.
@@ -883,7 +899,7 @@ class _FlightPath extends stdClass
           $result = invoke_hook("flightpath_can_assign_course_to_degree_id", array($req_by_degree_id, $c));
           foreach ($result as $m => $val) {
             // If *any* module said FALSE, then we must skip this couse and not assign it to this degree.
-            $bool_can_proceed = $val;
+            if ($val === FALSE) $bool_can_proceed = $val;
           }
            
           if (!$bool_can_proceed) {
