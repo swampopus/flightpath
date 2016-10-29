@@ -31,7 +31,7 @@ function admin_edit_group_form_submit(&$form, $form_submit) {
 
 
   // Are we trying to delete this group?
-  if ($_POST["perform_action2"] == "delete_group") {
+  if ($_POST["perform_action2"] == "delete_group" && user_has_permission("can_delete_data_entry")) {
     $res = db_query("UPDATE draft_groups
                 SET delete_flag = '1'
                 WHERE group_id = '?' 
@@ -420,15 +420,17 @@ function admin_edit_group_form() {
     "prefix" => "<hr>",
   );
   
-  $form["mark" . $m++] = array(
-    "type" => "markup",
-    "value" => "<div align='right'>
-                      " . t("Delete this group?") . " <input type='button' value='X'
-                      onClick='adminDeleteGroup(\"$group_id\");'>
-                    </div>", 
-  );
+  // Only show delete option based on permission  
+  if (user_has_permission("can_delete_data_entry")) {  
+    $form["mark" . $m++] = array(
+      "type" => "markup",
+      "value" => "<div align='right' class='groups-delete-group-wrapper'>
+                        " . t("Delete this group?") . " <input type='button' value='X'
+                        onClick='adminDeleteGroup(\"$group_id\");'>
+                      </div>", 
+    );
  
- 
+  }
   
   return $form;
 }

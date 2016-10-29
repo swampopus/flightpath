@@ -324,7 +324,7 @@ function system_menu() {
   
   
   $items["admin/config/school-data"] = array(
-    "title" => "Configure school data",
+    "title" => "Configure school settings",
     "description" => "Configure school-specific data and settings",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("system_school_data_form", "system_settings"),
@@ -1351,6 +1351,23 @@ function system_school_data_form() {
                         If you are unsure what to enter, select 'Yes'"),
   );  
   
+
+  $form["remove_advised_when_course_taken"] = array(
+    "label" => t("Remove an advised course when a student enrolls in it (or completes it), for the same term?"),
+    "type" => "select",
+    "options" => array("yes" => "Yes", "no" => "No"),
+    "value" => variable_get("remove_advised_when_course_taken", "no"),
+    "hide_please_select" => TRUE,
+    "description" => t("If a student has been advised into a course, and then enrolls in that course before the next
+                        advising term begins, should the advised course (and checkbox) be removed?  This would also affect
+                        courses the student completes within that term.  The default is 'No', meaning advising checkboxes in View
+                        will continue to show, even if the student has enrolled or completes the course that term.  The checkboxes
+                        will disappear when the advising term is no longer available for advising.
+                        Select 'Yes' if you wish to have FlightPath hide advising checkboxes on the View screen when a student
+                        is enrolled or completes a course within the same advising term.  If you are unsure what to enter, select 'No'."),
+  );  
+
+
   
   
   return $form;

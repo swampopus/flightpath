@@ -383,14 +383,21 @@ function admin_edit_course_form() {
     "weight" => 90,
   );
   
-  $form["mark" . $m++] = array(
-    "type" => "markup",
-    "value" => "<div align='right'>
-                      " . t("Delete this course?") . " <input type='button' value='X'
-                      onClick='adminDeleteCourse(\"$course_id\",\"$de_catalog_year\",\"$warn_eqv\");'>
-                    </div>",
-    "weight" => 100, 
-  );
+  
+  // Only show delete option based on permission  
+  if (user_has_permission("can_delete_data_entry")) {
+  
+    $form["mark" . $m++] = array(
+      "type" => "markup",
+      "value" => "<div align='right' class='courses-delete-course-wrapper'>
+                        " . t("Delete this course?") . " <input type='button' value='X'
+                        onClick='adminDeleteCourse(\"$course_id\",\"$de_catalog_year\",\"$warn_eqv\");'>
+                      </div>",
+      "weight" => 100, 
+    );
+    
+  }
+  
   
   
   return $form;
@@ -444,7 +451,7 @@ function admin_edit_course_form_submit(&$form, $form_submit) {
   }
 
 
-  if ($values["perform_action2"] == "delete_course") {
+  if ($values["perform_action2"] == "delete_course" && user_has_permission("can_delete_data_entry")) {
     // That's it.  All we wanted to do was delete the course.
     $query = "DELETE FROM draft_courses
           WHERE course_id = '-12345'

@@ -824,7 +824,7 @@ function admin_handle_edit_degree_submit() {
                   WHERE degree_id = '?' ", $degree_id);
 
     // Are we trying to DELETE this degree?  If so, keep deleting!
-    if ($perform_action2 == "delete_degree") {
+    if ($perform_action2 == "delete_degree" && user_has_permission("can_delete_data_entry")) {
       $res = db_query("DELETE FROM draft_degrees
                   WHERE  degree_id = '?' ", $degree_id);
 
@@ -1757,13 +1757,17 @@ function admin_display_edit_degree() {
 
   $rtn .= "</form>";
 
-  $rtn .= "        <div align='right'>
-          Delete this degree? <input type='button' value='X'
-                  onClick='adminDeleteDegree(\"$degree_id\");'>
-        </div>      
-        ";
+  // Only show delete option based on permission  
+  if (user_has_permission("can_delete_data_entry")) {
+  
+    $rtn .= "        <div align='right' class='degrees-delete-degree-wrapper'>
+            Delete this degree? <input type='button' value='X'
+                    onClick='adminDeleteDegree(\"$degree_id\");'>
+          </div>      
+          ";
 
-
+  }
+  
   //$pC .= get_j_s();
 
 

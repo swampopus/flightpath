@@ -494,9 +494,8 @@ function course_search_display_courses() {
       $n_course_num = trim($cur["course_num"]);
       $n_course_id = $cur["course_id"];
       $bool_hide = FALSE;
-
-      $title = ucwords(strtolower(trim($cur["title"])));
-      // Fix formatting problems introduced by the ucwords command...
+      
+      $title = trim($cur["title"]);
 
       $title = $temp_course->fix_title($title);
 

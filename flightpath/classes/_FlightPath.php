@@ -1837,6 +1837,22 @@ class _FlightPath extends stdClass
             continue;
           }
 
+          // If we have the setting which says we should skip if it's already been completed/enrolled for this term,
+          // then we should do that.
+          if (variable_get("remove_advised_when_course_taken", "no") == "yes") {
+            // First, see if this advised course has been attempted already.
+            
+            if ($taken_course = $this->student->list_courses_taken->find_specific_course($course->course_id, $advised_term_id)) {
+              
+              // Yep, found it!  So, skip this one.
+              continue;
+            }
+            
+            
+            
+          }
+          
+
           // Has this course already been fulfilled by something?
           // If so, we cannot attempt to say it's been advised!
           if (!$course->course_list_fulfilled_by->is_empty)

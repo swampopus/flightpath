@@ -343,8 +343,8 @@ function user_permissions_form() {
     // Let's get all the perms.
     $perms = call_user_func($module . "_perm");    
     foreach ($perms as $perm_name => $perm_details) {
-      $title = $perm_details["title"];
-      $desc = $perm_details["description"];
+      $title = @$perm_details["title"];
+      $desc = @$perm_details["description"];
 
       $zebra = ($zebra == "even") ? "odd" : "even";
 
@@ -359,7 +359,7 @@ function user_permissions_form() {
         
         // Should this be checked by default (cause it was all ready in our table?)
         $default_value = array();
-        if (is_array($permissions[$key]) && in_array($perm_name, $permissions[$key])) {
+        if (@is_array($permissions[$key]) && in_array($perm_name, $permissions[$key])) {
           // Yes, it was in there!  Set up the default_value as an array that
           // looks like array(key => key).  That is how we set a checkbox to be checked
           // by default.

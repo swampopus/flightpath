@@ -1120,6 +1120,10 @@ function admin_perm() {
       "title" => t("Edit Data Entry"),
       "description" => t("This is a powerful permission! The user can edit degree plans, groups, and courses."),
     ),
+    "can_delete_data_entry" => array(
+      "title" => t("Delete Data Entry items"),
+      "description" => t("This is a VERY powerful permission!  The user can delete degree plans, groups, and courses."),
+    ),
     "can_view_advanced" => array(
       "title" => t("View advanced"),
       "description" => t("The user may see advanced information on-screen, for example, internal ID numbers for degrees and courses."),

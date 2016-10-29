@@ -1266,19 +1266,17 @@ class _Course extends stdClass
     {
       $str = $this->title;
     }
-
         
     // Should we do this at all?  We will look at the "autocapitalize_course_titles" setting.
     $auto = $GLOBALS["fp_system_settings"]["autocapitalize_course_titles"];
-    if ($auto == "no") {
+    if ($auto == "no") {                    
       // Nope!  Just return.
       $this->title = $str;
       return $str;
     }
     
     // Otherwise, we may continue with the capitalization scheme:
-    
-    
+   
     $str = str_replace("/", " / ", $str);
     $str = str_replace("/", " / ", $str);
     $str = str_replace("-", " - ", $str);
