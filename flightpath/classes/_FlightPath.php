@@ -1742,7 +1742,7 @@ class _FlightPath extends stdClass
       if ($course_list = $this->degree_plan->find_courses($course_id, $group_id, $semester_num))
       {
         //fpm("I found course $course_id sem:$semester_num group:$group_id $var_hours");
-        //fpm($course_list);
+        
         // This course may exist in several different branches of a group, so we need
         // to mark all the branches as having been advised to take.  Usually, this CourseList
         // will probably only have 1 course object in it.  But, better safe than sorry.
@@ -1813,7 +1813,8 @@ class _FlightPath extends stdClass
             }
             continue;  // Go to the next advised course.
           }
-        }
+
+        } // if $course = $course_list->get_next();
 
         //////////////////////////////
         // We're here, because it was not a repeatable course.
@@ -1840,16 +1841,11 @@ class _FlightPath extends stdClass
           // If we have the setting which says we should skip if it's already been completed/enrolled for this term,
           // then we should do that.
           if (variable_get("remove_advised_when_course_taken", "no") == "yes") {
-            // First, see if this advised course has been attempted already.
-            
-            if ($taken_course = $this->student->list_courses_taken->find_specific_course($course->course_id, $advised_term_id)) {
-              
-              // Yep, found it!  So, skip this one.
+            // First, see if this advised course has been attempted already.            
+            if ($taken_course = $this->student->list_courses_taken->find_specific_course($course->course_id, $advised_term_id)) {              
+              // Yep, found it!  So, skip this one.              
               continue;
             }
-            
-            
-            
           }
           
 
@@ -1860,8 +1856,28 @@ class _FlightPath extends stdClass
             // meaning, this course HAS been fulfilled.
             // So, let's move this advising to the "added by advisor"
             // spot.
-            $this->assign_course_to_courses_added_list($course_id, $var_hours, $id, $advised_term_id);
+            
+            /*  This is the original bit of code here.  It is causing a problem when there are courses which are supposed to be
+             * repeated.  Example: MUSC courses which are advised one term at a time.
+             * 
+             * 
+            $this->assign_course_to_courses_added_list($course_id, $var_hours, $id, $advised_term_id);            
             break;
+             * 
+             * Strategy:  Find out how many courses are in this course_list by looking at the size of the list.  If it's > 1, then just continue.  If it == 1, then
+             * do the original logic.
+             * 
+            */
+            
+            if ($course_list->get_size() > 1) {
+              continue;
+            }
+            else {
+              $this->assign_course_to_courses_added_list($course_id, $var_hours, $id, $advised_term_id);            
+              break;              
+            }
+            
+            
           }
           
           //fpm($course);

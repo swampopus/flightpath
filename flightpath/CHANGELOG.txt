@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-11-01
+  Fixed bug where identical courses which had all been advised were not correctly
+  being counted as advised/fulfilled when only one was fulfilled, and before the advising term
+  was advanced.
+  
+
 2016-10-28
   Added a setting to Configure School settings, to hide advising checkmarks if the student has enrolled
   in the course they were advised for (also works for completed as well).
