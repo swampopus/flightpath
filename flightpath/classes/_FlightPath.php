@@ -51,6 +51,7 @@ class _FlightPath extends stdClass
     }
 
     $major_code_csv = $GLOBALS["fp_advising"]["advising_major_code"];
+    
     //$track_code = $GLOBALS["fp_advising"]["advising_track_code"];
 
     $track_degree_ids = $GLOBALS["fp_advising"]["advising_track_degree_ids"];
@@ -215,7 +216,13 @@ class _FlightPath extends stdClass
       $this->degree_plan = $combined_degree_plan;
       
     } // else if count(degree_plans) > 1
-
+    else if (count($degree_plans < 1)) {
+      // Meaning, we couldn't find any degree plans for this student!  Let's just load some blank objects.
+      $this->degree_plan = new DegreePlan();
+      $this->student = $student;      
+    }
+    
+    
     $wi = "";
     if ($this->bool_what_if) $wi = "_what_if";
 

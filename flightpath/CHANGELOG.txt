@@ -1,6 +1,15 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-11-09
+  Fixed minor PHP warning which pie charts were not enabled.
+  
+
+2016-11-05
+  Made varius modifications to accomodate a student with no assigned major code, or, a major code which could
+  not be found in the designated catalog year.
+
+
 2016-11-01
   Fixed bug where identical courses which had all been advised were not correctly
   being counted as advised/fulfilled when only one was fulfilled, and before the advising term

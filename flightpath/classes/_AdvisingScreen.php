@@ -1800,8 +1800,8 @@ function draw_menu_items($menu_array) {
   				      <div class='pie-row-label'>{$details["row_label"]}</div>";
   
       
-  
-  	  if (count($pie_chart_html_array) > 0) {
+      $td_width = "";
+  	  if (@count($pie_chart_html_array) > 0) {
   	    $td_width = round(100 / count($pie_chart_html_array));
   	  }
       
@@ -1819,17 +1819,18 @@ function draw_menu_items($menu_array) {
           				";
   			
   			$c = 0;
-  			foreach ($pie_chart_theme_array['degree_rows'][$degree_id]["data"] as $requirement_type => $val) {
-  			  $html = $val["full_html"];
-          if ($val["bool_display"] === FALSE) continue; // this particular chart shouldn't be shown.
-          
-  			  $style = ($c == count($pie_chart_html_array) - 1) ? "" : "padding-right:5px;";
-  			  $rtn .= "<td width='$td_width%' style='$style' class='td_full_pie td_full_pie_$requirement_type {$val["pie_classes"]}'>
-  					         " . $html . "
-  				         </td>";
-          $c++;
-  			}
-  			
+        if (@isset($pie_chart_theme_array['degree_rows'][$degree_id]["data"])) {
+    			foreach ($pie_chart_theme_array['degree_rows'][$degree_id]["data"] as $requirement_type => $val) {
+    			  $html = $val["full_html"];
+            if (@$val["bool_display"] === FALSE) continue; // this particular chart shouldn't be shown.
+            
+    			  $style = @($c == count($pie_chart_html_array) - 1) ? "" : "padding-right:5px;";
+    			  $rtn .= "<td width='$td_width%' style='$style' class='td_full_pie td_full_pie_$requirement_type " . @$val["pie_classes"] . "'>
+    					         " . $html . "
+    				         </td>";
+            $c++;
+    			}
+        }
   				
   				
   			$rtn .= "  </table>";

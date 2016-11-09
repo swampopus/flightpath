@@ -501,8 +501,8 @@ function user_edit_student_user_form() {
   );  
 
   
-  $major_code_array = $db->get_student_majors_from_db($student_cwid, TRUE);
-  
+  $major_code_array = $db->get_student_majors_from_db($student_cwid, TRUE, FALSE);
+
   $temp = "";
   foreach ($major_code_array as $details) {
     if ((string)$details["is_editable"] == "1") {

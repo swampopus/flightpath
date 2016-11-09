@@ -1213,8 +1213,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   if ($screen->bool_print) {
     return array();
   }  
-    
-  
+      
   fp_add_js(fp_get_module_path("advise") . "/js/advise.what-if-selection.js");
   fp_add_css(fp_get_module_path("advise") . "/css/advise.css");    
     
@@ -1234,9 +1233,17 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   );
   
 
-  $settings = fp_get_system_settings();
-  $current_catalog_year = $settings["current_catalog_year"];
-  //$bool_use_draft = $GLOBALS["fp_advising"]["bool_use_draft"];
+  //$settings = fp_get_system_settings();
+  $current_catalog_year = variable_get("current_catalog_year", 0);
+
+  // TODO:  Use the student's catalog year, based on a setting instead?
+
+  $form["catalog_year"] = array(
+    "type" => "hidden",
+    "value" => $current_catalog_year,
+  );
+
+
   $bool_use_draft = FALSE;  // leave as false for now.  Because you can't select
                         // degree options, and if you click submit it really does
                         // save it.  Better to just use blank degrees.
@@ -1446,6 +1453,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
     "value" => $current_student_id,
   );
   
+ 
   return $form;
 }
 
@@ -1671,9 +1679,11 @@ function advise_what_if_selection_form_submit($form, $form_state) {
  * Displays the pulldown select list for picking a new What If degree.
  * Returns HTML.
  *
+ * This function is no longer used...
+ * 
  * @return string
  */
-function advise_display_what_if_selection($bool_undergrad_only = TRUE) {
+function z___advise_display_what_if_selection($bool_undergrad_only = TRUE) {
   global $screen, $current_student_id;
     
   $rtn = "";
@@ -1695,8 +1705,8 @@ function advise_display_what_if_selection($bool_undergrad_only = TRUE) {
         <option value=''>Please select a major</option>
         <option value=''>------------------------------</option>\n
         ";
-  $settings = fp_get_system_settings();
-  $current_catalog_year = $settings["current_catalog_year"];
+  //$settings = fp_get_system_settings();
+  $current_catalog_year = variable_get("current_catalog_year", 0);  // get the current catalog year, 0 if not set (which is an error condition)
   //$bool_use_draft = $GLOBALS["fp_advising"]["bool_use_draft"];
   $bool_use_draft = FALSE;  // leave as false for now.  Because you can't select
                         // degree options, and if you click submit it really does
@@ -1738,8 +1748,6 @@ function advise_display_what_if_selection($bool_undergrad_only = TRUE) {
   }
 
   $rtn .= "<br><br>" .fp_render_c_fieldset($content, "Select a Minor &raquo;", FALSE);
-
-
 
 
 
@@ -2202,10 +2210,11 @@ function advise_init_screen() {
     $degree_plan = $fp->degree_plan;
     $student->db = get_global_database_handler();
     $degree_plan->db = get_global_database_handler();
+    
   }
    
     
-  if (!$bool_loaded) {    
+  if (!$bool_loaded) {       
     $fp = new FlightPath();
     $fp->init();    
     $student = $fp->student;

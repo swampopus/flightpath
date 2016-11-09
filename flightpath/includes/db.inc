@@ -193,7 +193,6 @@ function fp_get_student_majors($student_cwid, $bool_return_as_csv = FALSE, $bool
   // Execute hook for this too.
   $arr = invoke_hook("fp_get_student_majors", $params);
   
-    
   // Results will appear in an array, with each module as the index.
   // Ex:
   //   system
