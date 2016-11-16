@@ -1,6 +1,15 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-11-16
+  Added ability for a "locked" directive in the student_degrees table.  It lets you lock an entire
+  degree classification from editing at a time.
+
+
+2016-11-14
+  Added minor CSS to "Change degree options" link.
+
+
 2016-11-09
   Fixed minor PHP warning which pie charts were not enabled.
   

@@ -631,7 +631,7 @@ db_query($q);
 $q = "
 CREATE TABLE `student_degrees` (
   `student_id` varchar(30)   DEFAULT '',
-  `major_code` varchar(20)   DEFAULT '',
+  `major_code` varchar(100)   DEFAULT '',
   `is_editable` tinyint(4)   DEFAULT '0',
   `delete_flag` tinyint(4)   DEFAULT '0',
   PRIMARY KEY (`student_id`,`major_code`)

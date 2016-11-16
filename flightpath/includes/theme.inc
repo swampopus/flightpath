@@ -716,7 +716,7 @@ function fp_build_tab_array($page) {
       // Are we in what_if mode?
       $advising_what_if = @$GLOBALS["fp_advising"]["advising_what_if"];
       // We want to add a link to the popup to let the user select other degree tracks.
-      $op_link = "<a href='javascript: popupWindow2(\"" . fp_url("advise/popup-change-track", "advising_what_if=$advising_what_if") . "\",\"\");'
+      $op_link = "<a class='degree-op-link-change-degree-options' href='javascript: popupWindow2(\"" . fp_url("advise/popup-change-track", "advising_what_if=$advising_what_if") . "\",\"\");'
                     style='background: url(" . fp_theme_location() . "/images/popup.gif) no-repeat top left;
                             padding-left: 20px; text-decoration: none; font-size: 0.8em;'
                     >Change degree options</a>";

@@ -76,6 +76,20 @@
   padding-top: 10px;
 }
 
+.degree-class-is-locked {
+  color: #888;
+}
+.track-class-is-locked-msg {
+  font-size: 0.85em;
+  padding: 5px;
+  border: 1px solid orange;
+  background-color: lemonchiffon;
+  color: #333;
+  margin-left: 10px;
+  margin-right:10px;
+  
+}
+
 /* what if selection screen */
 .what-if-selection-track-desc {
   font-size: 11pt;

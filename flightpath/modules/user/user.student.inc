@@ -501,7 +501,7 @@ function user_edit_student_user_form() {
   );  
 
   
-  $major_code_array = $db->get_student_majors_from_db($student_cwid, TRUE, FALSE);
+  $major_code_array = $db->get_student_majors_from_db($student_cwid, TRUE, FALSE, FALSE);
 
   $temp = "";
   foreach ($major_code_array as $details) {
@@ -513,7 +513,7 @@ function user_edit_student_user_form() {
   }      
   
   $form["major_codes"] = array(
-    "label" => t("Major code(s):"),
+    "label" => t("Major code(s) and Directives:"),
     "type" => "textarea",
     "value" => $temp,
     "cols" => 40,
@@ -524,7 +524,24 @@ function user_edit_student_user_form() {
                           <br>&nbsp; &nbsp; MATH
                         <br>Advanced: If any of the level 3 (add-on) major codes can be 'editable' by the advisor or another
                         privileged user during normal advising, add an asterisk
-                        at the beginning.  For example: <b>*</b> ACCT|_COSC.  If you are unsure what this means, do not enter an asterisk."),
+                        at the beginning.  For example: <b>*</b> ACCT|_COSC.  If you are unsure what this means, do not enter an asterisk.
+                        <br>
+                        <br>Available directives (advanced):
+                        <ul>
+                          <li>LOCKED ~ level_3_class_code
+                          <ul>
+                            <li>
+                              This will tell FlightPath not to allow a user to make any changes (except in What If mode) to this student's degrees for the specified
+                              level 3 classification.  For example, to prevent additions or removals from Concentrations (CONC) for this student, you would enter:
+                              <br> &nbsp; &nbsp; &nbsp; LOCKED ~ CONC
+                              <br>(notice the single tilde ~ character between the LOCKED keyword and the code for the degree class).                              
+                            </li> 
+                          </ul>
+                          </li>
+                        </ul>  
+                            
+                            
+                            "),
   );  
     
     

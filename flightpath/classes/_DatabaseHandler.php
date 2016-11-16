@@ -1357,7 +1357,7 @@ class _DatabaseHandler extends stdClass
    *   
    * 
    */
-  function get_student_majors_from_db($student_cwid, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE) {
+  function get_student_majors_from_db($student_cwid, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE, $bool_skip_directives = TRUE) {
     // Looks in the student_degrees table and returns an array of major codes.
     $rtn = array();
     
@@ -1389,6 +1389,10 @@ class _DatabaseHandler extends stdClass
                               ", $student_cwid);      
     }
     while ($cur = $this->db_fetch_array($res)) {
+      
+      if ($bool_skip_directives && strstr($cur["major_code"], "~")) continue;
+      
+      
       if ($bool_return_as_full_record) {
         $rtn[$cur["major_code"]] = $cur;
       }

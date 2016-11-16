@@ -483,16 +483,31 @@ function advise_display_popup_change_track() {
     }    
   }
   
+  $locked_array = array();  // keep track of any degree classes which are "locked".
+    
   // From What If mode...  
   if (@$GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
     $student_majors_array = @csv_to_array($_SESSION["what_if_major_code" . $student->student_id]);
   }
   else {
     // Not in what if mode-- get the data from the normal student_majors table.
-    $student_majors_array = fp_get_student_majors($student->student_id, FALSE, TRUE);    
-  }
+    $student_majors_array = fp_get_student_majors($student->student_id, FALSE, TRUE);
+    
+    // Also see if any degree classes should be "locked" for this student.
+    $db = get_global_database_handler();
+    $temp = $db->get_student_majors_from_db($student->student_id, FALSE, FALSE, FALSE);
+    foreach ($temp as $line) {
+      $t = explode("~", $line);
+      if (trim(strtoupper($t[0])) == "LOCKED") {
+        $locked_array[] = trim($t[1]);
+      }
+    }
+        
+  } //else
   
-      
+  
+  
+     
   $rtn .= fp_render_curved_line(t("Select a Degree Option"));
   $rtn .= "<div class='tenpt'>
             " . t("The student's degree has one or more degree options, which affects which courses are required. 
@@ -518,8 +533,15 @@ function advise_display_popup_change_track() {
     //foreach ($t_degree_plan->track_selection_config_array as $machine_name => $tdetails) {
     $degree_classes = fp_get_degree_classifications();
     foreach ($degree_classes["levels"][3] as $machine_name => $class_title) {
-          
+            
+      $extra_css_class = "";    
       $class_is_empty = TRUE;
+      $is_locked = FALSE;
+      if (in_array($machine_name, $locked_array)) {
+        $is_locked = TRUE;
+        $extra_css_class = "degree-class-is-locked";
+      }
+      
       $html = "";  
         
       $min_max_options = "";            
@@ -561,7 +583,9 @@ function advise_display_popup_change_track() {
     
       // Let's look to see what "tracks" this degree has.
     
-      $html .= "<br><div class='tenpt'><span class='advise-select-degree-title'>" . $t_degree_plan->title . "</span> <span class='advise-select-class-title'>$class_title</span> options:</div>
+      $html .= "<br>
+                <div class='advise-track-selection-tracks $extra_css_class'>
+                <div class='tenpt'><span class='advise-select-degree-title'>" . $t_degree_plan->title . "</span> <span class='advise-select-class-title'>$class_title</span> options:</div>
                 <div class='advise-track-min-max-options advise-track-min-$min_tracks advise-track-max-$max_tracks'>$min_max_options</div>
                   <!--DEFAULT_$machine_name-->
                   <div class='advise-track-options-region'>
@@ -637,7 +661,7 @@ function advise_display_popup_change_track() {
           $is_editable = intval(@$student_majors_array[$t_degree_plan->major_code . "|_" . $track_code]["is_editable"]);
         }    
     
-        if ($is_editable != 1) {
+        if ($is_editable != 1 || $is_locked == TRUE) {
           $disabled = "disabled=disabled";
         }
                 
@@ -714,16 +738,25 @@ function advise_display_popup_change_track() {
                         $track_description
                       </div>
                     </div>";
-                    
+          
+                                        
           $class_is_empty = FALSE;                    
                     
         }
     
     
       } // for (count(tracks))
-    
+
+      if ($is_locked) {
+        $html .= "<div class='track-class-is-locked-msg'>" . t("Selections from this degree classification are locked.  You may use What If mode to explore
+                                                                other options, or ask your advisor about changing these options officially.") . "</div>";
+      }
+      
+          
       $html .= "</div>";    
-  
+      
+      
+      $html .= "</div>"; // advise-track-selection-tracks  
   
       if (!$class_is_empty) {
         $rtn .= $html;
