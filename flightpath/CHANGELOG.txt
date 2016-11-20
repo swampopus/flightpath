@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-11-20
+  Converted FlightPath and module licenses' to GNU AGPL Version 3.0.  Generally, it is compatible
+  with the previous GPLv3 license, with one addition as it pertains to servers.
+  See more here: http://getflightpath.com/gnu-agpl 
+   
+
 2016-11-16
   Added ability for a "locked" directive in the student_degrees table.  It lets you lock an entire
   degree classification from editing at a time.
