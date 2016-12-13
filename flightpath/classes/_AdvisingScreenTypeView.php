@@ -264,19 +264,22 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
           
           // Get the degree title...        
           $dtitle = @$GLOBALS["fp_temp_degree_titles"][$req_by_degree_id];
-          if ($dtitle == "") {
+          $css_dtitle = @$GLOBALS["fp_temp_degree_css_titles"][$req_by_degree_id];
+          if ($dtitle == "" || $css_dtitle == "") {
             $t_degree_plan = new DegreePlan($req_by_degree_id);
             //$t_degree_plan->load_descriptive_data();        
             $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
+            $css_dtitle = $t_degree_plan->get_title2(TRUE, TRUE, FALSE);
             $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle; //save for next time.
+            $GLOBALS["fp_temp_degree_css_titles"][$req_by_degree_id] = $css_dtitle; //save for next time.
           }
     
-          $css_dtitle = fp_get_machine_readable($dtitle);
+          $css_dtitle = fp_get_machine_readable($css_dtitle);
           
     
           // TODO:  Possibly don't display this if we only have one degree chosen?      
           $pC .= "<tr><td colspan='8'>
-                    <div class='tenpt required-by-degree required-by-degree-$css_dtitle'>Required by $dtitle</div>
+                    <div class='tenpt required-by-degree required-by-degree-$css_dtitle'><span class='req-by-label'>Required by </span>$dtitle</div>
                   </td></tr>";      
           
           

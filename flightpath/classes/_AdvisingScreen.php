@@ -3056,8 +3056,8 @@ function draw_menu_items($menu_array) {
         }
         
         $pC .= "<tr><td colspan='8'>
-                  <div class='tenpt required-by-degree'>Required by " . $dtitle . "</div>
-                </td></tr>";
+                  <div class='tenpt required-by-degree'><span class='req-by-label'>Required by </span>" . $dtitle . "</div>
+                </td></tr>"; 
         
         // Remember what the last degree we displayed was.        
         $last_req_by_degree_id = $course->req_by_degree_id;                

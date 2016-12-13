@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2016-12-13
+  Fixed bug where zero-hour courses were not allowing repeats correctly.
+  
+  Added more CSS classes and options to displaying degree titles.
+  
+
 2016-11-20
   Converted FlightPath and module licenses' to GNU AGPL Version 3.0.  Generally, it is compatible
   with the previous GPLv3 license, with one addition as it pertains to servers.

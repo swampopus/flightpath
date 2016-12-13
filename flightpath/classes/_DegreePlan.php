@@ -747,7 +747,7 @@ class _DegreePlan extends stdClass
   }
 
 
-  function get_title2($bool_include_classification = FALSE, $bool_include_track_title = FALSE)
+  function get_title2($bool_include_classification = FALSE, $bool_include_track_title = FALSE, $bool_include_html = TRUE)
   {
     // This will simply return the degree's title.  If it does not
     // exist, it will try to find another degree with the same major_code.
@@ -782,13 +782,20 @@ class _DegreePlan extends stdClass
 
 
     if ($bool_include_track_title && $this->track_title != "") {
-      $dtitle .= "<span class='level-3-raquo'>&raquo;</span>$this->track_title";
+      if ($bool_include_html) {  
+        $dtitle .= "<span class='level-3-raquo'>&raquo;</span>";
+      }
+      $dtitle .= $this->track_title;
     }
     
     if ($bool_include_classification && $this->degree_class != "") {
       $details = fp_get_degree_classification_details($this->degree_class);
-      
-      $dtitle .= " (" . $details["title"] . ")";
+      if ($bool_include_html) {
+        $dtitle .= " <span class='deg-class-title'>(" . $details["title"] . ")</span>";
+      }
+      else {
+        $dtitle .= " (" . $details["title"] . ")";
+      }
     }
 
 
