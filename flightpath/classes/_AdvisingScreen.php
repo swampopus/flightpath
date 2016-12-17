@@ -5804,6 +5804,7 @@ function draw_menu_items($menu_array) {
 			<input type='hidden' name='advising_update_student_settings_flag' id='advising_update_student_settings_flag' value=''>
 			<input type='hidden' name='advising_what_if' id='advising_what_if' value='{$GLOBALS["fp_advising"]["advising_what_if"]}'>
 			<input type='hidden' name='what_if_major_code' id='what_if_major_code' value='{$GLOBALS["fp_advising"]["what_if_major_code"]}'>
+			<input type='hidden' name='what_if_catalog_year' id='what_if_catalog_year' value='{$GLOBALS["fp_advising"]["what_if_catalog_year"]}'>
 			
       
 			<input type='hidden' name='what_if_track_degree_ids' id='what_if_track_degree_ids' value='{$GLOBALS["fp_advising"]["what_if_track_degree_ids"]}'>

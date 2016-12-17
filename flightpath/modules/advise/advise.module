@@ -1267,15 +1267,43 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   
 
   //$settings = fp_get_system_settings();
-  $current_catalog_year = variable_get("current_catalog_year", 0);
+  $catalog_year = variable_get("current_catalog_year", 0);
+  $current_catalog_year = $catalog_year;  // keep track of what the current catalog year is.
+  $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);
 
-  // TODO:  Use the student's catalog year, based on a setting instead?
-
-  $form["catalog_year"] = array(
-    "type" => "hidden",
-    "value" => $current_catalog_year,
+  // Use the student's catalog year, based on a setting instead?
+  if (variable_get("what_if_catalog_year", "current") == "student") {
+    $db = get_global_database_handler();
+    $catalog_year = $db->get_student_catalog_year($current_student_id);
+  }
+  
+  $form["mark_cat_year"] = array(
+    "value" => "<div class='mark-select-from-cat-year'>" . t("Please select from the %cat catalog year:", array("%cat" => $catalog_year . "-" . ($catalog_year+1))) . "</div>",
   );
 
+
+    
+  // We cannot go beyond the current catalog year, so if the catalog_year is now > than current, we must stop
+  // the user.
+  if ($catalog_year > $current_catalog_year || $catalog_year < $earliest_catalog_year) {
+    $form["mark_cat_year_past_current"] = array(
+      "value" => "<p class='cat-year-past-current'>" . t("Sorry, but the catalog year %cat is not available yet within
+                                                            FlightPath.  Please speak with your adviser about how to proceed
+                                                            with advising.", array("%cat" => $catalog_year . "-" . ($catalog_year+1))) . "</p>",
+    );
+    
+    return $form;
+    
+    
+  }  
+    
+    
+    
+    
+  $form["catalog_year"] = array(
+    "type" => "hidden",
+    "value" => $catalog_year,
+  );
 
   $bool_use_draft = FALSE;  // leave as false for now.  Because you can't select
                         // degree options, and if you click submit it really does
@@ -1286,7 +1314,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   /////////////////////
   // Select a major....
   $options = array();  
-  if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, FALSE, $bool_use_draft, $bool_undergrad_only, array(1))) {
+  if ($degree_array = $db->get_degrees_in_catalog_year($catalog_year, FALSE, $bool_use_draft, $bool_undergrad_only, array(1))) {
     foreach($degree_array as $major_code => $value) {
       if (trim($value["title"]) == ""){continue;}      
       $options[$major_code] = $value["title"];
@@ -1313,7 +1341,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   /////////////////////////
   // Select a minor....
   $options = array();
-  if ($degree_array = $db->get_degrees_in_catalog_year($current_catalog_year, FALSE, $bool_use_draft, $bool_undergrad_only, array(2))) {    
+  if ($degree_array = $db->get_degrees_in_catalog_year($catalog_year, FALSE, $bool_use_draft, $bool_undergrad_only, array(2))) {    
     foreach($degree_array as $major_code => $value) {
       if (trim($value["title"]) == ""){continue;}
       $options[$major_code] = $value["title"];
@@ -1341,16 +1369,16 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
     
   foreach ($major_codes as $major_code => $temp) {
     // Let's see if this major has any tracks...
-    if ($tracks = $db->get_degree_tracks($major_code, $current_catalog_year)) {
+    if ($tracks = $db->get_degree_tracks($major_code, $catalog_year)) {
             
       // Let's load the original degree plan.
-      $degree_plan = $db->get_degree_plan($major_code, $current_catalog_year);
+      $degree_plan = $db->get_degree_plan($major_code, $catalog_year);
       
       // Yes, there are indeed tracks for THIS major.  Let's load them up...
       // First, organize them by degree_class...
       $tracks_by_class = array();
       foreach ($tracks as $track) {
-        $t_degree_plan = $db->get_degree_plan($major_code . "|_" . $track, $current_catalog_year);
+        $t_degree_plan = $db->get_degree_plan($major_code . "|_" . $track, $catalog_year);
         $degree_class = $t_degree_plan->degree_class;                
         $tracks_by_class[$degree_class][] = $t_degree_plan;        
       }
@@ -1496,9 +1524,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
  * that if a non-dynamic degree was selected, that they can't proceed.
  */
 function advise_what_if_selection_form_validate($form, &$form_state) {
-
-  $current_catalog_year = variable_get("current_catalog_year", "2006");
-
+  $catalog_year = $form_state['values']['catalog_year'];
   // Make sure they selected at least 1 level 1 degree.
   $selected_degrees = array();
   $temp = FALSE;  
@@ -1523,7 +1549,7 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
   // If a non-dynamic degree was selected, along with anything else, the user may not proceed.
   if (count($selected_degrees) > 1) {
     foreach ($selected_degrees as $major_code) {
-      $temp = $db->get_degree_plan($major_code, $current_catalog_year, TRUE);
+      $temp = $db->get_degree_plan($major_code, $catalog_year, TRUE);
       if (is_object($temp) && intval($temp->db_allow_dynamic) != 1) {
         $temp->load_descriptive_data();
         // meaning, we have selected more than one degree, and at least THIS degree does NOT allow for dynamic recombination.  So, reject it!
@@ -1637,6 +1663,7 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
  */
 function advise_what_if_selection_form_submit($form, $form_state) {
   $current_student_id = $form_state["values"]["current_student_id"];
+  $catalog_year = $form_state["values"]["catalog_year"];
   
   // Get the major codes CSV
   $what_if_major_code = "";
@@ -1696,12 +1723,12 @@ function advise_what_if_selection_form_submit($form, $form_state) {
   }
   
   
-      
+       
   // Remove training comma
   $what_if_major_code = rtrim($what_if_major_code, ",");    
   
   // Okay, let's redirect the user to their proper destination
-  $query = "advising_what_if=yes&load_from_cache=no&window_mode=screen&current_student_id=$current_student_id&what_if_major_code=$what_if_major_code";
+  $query = "advising_what_if=yes&load_from_cache=no&window_mode=screen&current_student_id=$current_student_id&what_if_major_code=$what_if_major_code&what_if_catalog_year=$catalog_year";
   fp_goto("what-if", $query);  
   
 }
@@ -1995,6 +2022,21 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   }
 
 
+  @$vars["what_if_catalog_year"] = $_REQUEST["what_if_catalog_year"];  // Get it from the GET or POST.
+  if ($vars["what_if_catalog_year"] == "")
+  {
+    
+    @$vars["what_if_catalog_year"] = $_SESSION["what_if_catalog_year$csid"];
+    if ($vars["what_if_catalog_year"] == "")
+    {
+      // Default value:
+      $vars["what_if_catalog_year"] = "";
+    }
+  }
+
+
+
+
 
   /*
   @$vars["what_if_track_code"] = $_REQUEST["what_if_track_code"];  // Get it from the GET or POST.
@@ -2086,6 +2128,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   $_SESSION["advising_term_id$csid"] = $vars["advising_term_id"];
   $_SESSION["advising_what_if$csid"] = $vars["advising_what_if"];
   $_SESSION["what_if_major_code$csid"] = $vars["what_if_major_code"];
+  $_SESSION["what_if_catalog_year$csid"] = $vars["what_if_catalog_year"];
   $_SESSION["what_if_track_degree_ids$csid"] = $vars["what_if_track_degree_ids"];
   $_SESSION["advising_view$csid"] = $vars["advising_view"];
 
@@ -2094,6 +2137,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   {
     $vars["advising_what_if"] = "";
     $vars["what_if_major_code"] = "";
+    $vars["what_if_catalog_year"] = "";
     $vars["what_if_track_degree_ids"] = "";
   }
 

@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+
+2016-12-16
+  Added a new feature to let What If save & load with any catalog year.  Built into the system
+  are the options "Current" and "Student".
+  
+  
 2016-12-13
   Fixed bug where zero-hour courses were not allowing repeats correctly.
   

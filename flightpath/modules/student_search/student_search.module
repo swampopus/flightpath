@@ -719,6 +719,7 @@ function student_search_render_advisees($adv_array, $title) {
     
   for ($t = 0; $t < count($adv_array); $t++)
   {
+    
     $student_id = $adv_array[$t]["student_id"];
     $first_name = $adv_array[$t]["first_name"];
     $last_name = $adv_array[$t]["last_name"];
@@ -727,6 +728,7 @@ function student_search_render_advisees($adv_array, $title) {
     $advising_what_if = @$adv_array[$t]["advising_what_if"];
     $what_if_major_code = @$adv_array[$t]["what_if_major_code"];
     $what_if_track_code = @$adv_array[$t]["what_if_track_code"];
+    $what_if_catalog_year = @$adv_array[$t]["what_if_catalog_year"];
     $degree_id = @$adv_array[$t]["degree_id"];
     $rank = @$adv_array[$t]["rank"];
     $catalog_year = @$adv_array[$t]["catalog_year"];
@@ -765,7 +767,7 @@ function student_search_render_advisees($adv_array, $title) {
     // Add in the query part.
     $query = "";
     $query .= "advising_student_id=$student_id&current_student_id=$student_id&advising_major_code=$major&advising_what_if=$advising_what_if";
-    $query .= "&what_if_major_code=$what_if_major_code&what_if_track_code=$what_if_track_code&advising_load_active=yes&clear_session=yes";
+    $query .= "&what_if_major_code=$what_if_major_code&what_if_track_code=$what_if_track_code&what_if_catalog_year=$what_if_catalog_year&advising_load_active=yes&clear_session=yes";
     
     $url = fp_url($path, $query);
 
@@ -938,10 +940,9 @@ function student_search_query_advisees($sql, $params = array()) {
       { // Last advising was a What If advising.
         $advised_image = "<span title='This student was last advised in What If mode.'><img src='" . fp_theme_location() . "/images/small_check.gif'><sup>wi</sup></span>";
         $db_major_code_csv = $cur["major_code_csv"];
-        //$temp = explode("\|_",$db_major);
-        //$rtn_array[$r]["what_if_major_code"] = @trim($temp[0]);        
-        //$rtn_array[$r]["what_if_track_code"] = @trim($temp[1]);
         $rtn_array[$r]["what_if_major_code"] = $db_major_code_csv;
+        // Capture the catalog year that was saved with what_if
+        $rtn_array[$r]["what_if_catalog_year"] = $cur["catalog_year"];
         $rtn_array[$r]["last_advised_what_if"] = TRUE;
         
       }

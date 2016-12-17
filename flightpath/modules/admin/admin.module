@@ -520,6 +520,7 @@ function admin_menu() {
 function admin_duplicate_year_form() {
   $form = array();
   
+  $m = 0;
   $form["mark" . $m++] = array(
     "value" => "<p>" . t("This form will allow you to duplicate an entire year's worth of data
                  (courses, degrees, groups) into a new year.  This is used to create a new

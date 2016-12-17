@@ -100,7 +100,14 @@ class _FlightPath extends stdClass
     $catalog_year = $student->catalog_year;
     if ($this->bool_what_if)
     {
-      $catalog_year = $settings["current_catalog_year"];
+      // We need to look at a "what_if_catalog_year" value.
+      $catalog_year = $GLOBALS["fp_advising"]["what_if_catalog_year"];
+      
+      if ($catalog_year == "" || $catalog_year == 0) {
+        // Some problem, default to current cat year.
+        $catalog_year = $settings["current_catalog_year"];  
+      }
+      
     }
 
     // make sure their catalog year is not past the system's current

@@ -824,6 +824,22 @@ function system_school_data_form() {
   );
   
   
+  $form["what_if_catalog_year"] = array(
+    "type" => "select",
+    "label" => t("What If mode default catalog year:"),
+    "options" => array("current" => t("Current catalog year only"),
+                       "student" => t("Student catalog year only [beta]"),
+                      ),
+    "value" => variable_get("what_if_catalog_year", "current"),
+    "hide_please_select" => TRUE,
+    "description" => t("What should be the default catalog year that What If pulls degrees from?  For some schools,
+                        changing majors means moving to the current catalog year.  However, at other schools, students
+                        may remain in their current catalog year when they change majors.  If you are unsure what
+                        to select, choose 'Current catalog year only.'"),
+  );
+  
+  
+  
   $form["ignore_courses_from_hour_counts"] = array(
     "type" => "textfield",
     "label" => t("Ignore courses from hour counts (CSV):"),

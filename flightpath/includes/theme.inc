@@ -570,8 +570,17 @@ function fp_build_tab_array($page) {
     {
       $whatif = " (" . t("in \"What If\" mode") . ") ";
       $hypoclass = "hypo";
-      // latest cat year because its what if.
-      $student->catalog_year = $settings["current_catalog_year"];
+      
+      // Set the cat year to whatever our What If cat year was, current if we can't find it.
+      $what_if_catalog_year = @$GLOBALS["fp_advising"]["what_if_catalog_year"];
+      if ($what_if_catalog_year != 0 && $what_if_catalog_year != "") {
+        $student->catalog_year = $what_if_catalog_year;
+      }
+      else {
+        $student->catalog_year = $settings["current_catalog_year"];
+      }
+      
+      
       if ($bool_print != true) {
         $what_if_select = "<div class='tenpt'><b>
           " . l(t("Change What If Settings"), "what-if", "advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&what_if_track_degree_ids=none&current_student_id=$current_student_id") . "

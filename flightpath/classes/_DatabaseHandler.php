@@ -856,11 +856,11 @@ class _DatabaseHandler extends stdClass
     $min_hours = $c->min_hours;
     $max_hours = $c->max_hours;
     
-    if ($c->bool_ghost_min_hour) {
+    if (@$c->bool_ghost_min_hour) {
       $min_hours = 0;     
     }
     
-    if ($c->bool_ghost_max_hour) {
+    if (@$c->bool_ghost_max_hour) {
       $max_hours = 0;
     }
     
