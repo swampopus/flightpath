@@ -1668,6 +1668,7 @@ class _FlightPath extends stdClass
 
   function load_advising_session_from_database($faculty_id = 0, $term_id = "", $bool_what_if = false, $bool_draft = true, $advising_session_id = 0)
   {
+    global $user;
     // This method will load an advising session for a particular
     // student, and modify the degree plan object to reflect
     // the advisings.
@@ -1682,6 +1683,25 @@ class _FlightPath extends stdClass
     $student_id = $this->student->student_id;
     $available_terms = variable_get("available_advising_term_ids", "0");
 
+    
+    // If we are pulling up an active student record, then let's
+    // delete any draft sessions for this faculty user and student, so as not to cause
+    // a bug later on when changing tabs.  We don't care if $faculty_id is set or not, just
+    // the current user's CWID.
+    if ($bool_draft == FALSE && $user->cwid != 0) {
+      $res = db_query("DELETE FROM advising_sessions
+                        WHERE student_id = ?
+                        AND faculty_id = ?
+                        AND is_draft = 1
+                         ", $student_id, $user->cwid);
+    }
+        
+    
+    
+    
+    
+    
+    
     $advising_session_line = " `advising_session_id`='$advising_session_id' ";
     // First, find the advising session id...
     if ($advising_session_id < 1 && $available_terms == "")
