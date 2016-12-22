@@ -2227,13 +2227,6 @@ function advise_init_screen() {
   
 
   $faculty_id = $user->cwid;
-  // Before we try to load for THIS faculty_id, let's check a few things first.  If we
-  // set it to 0 (zero) it will load the most recent advising record, regardless of if it is
-  // for this user or not.  If we are loading this student from the Advisees tab, we should
-  // set faculty_id = 0.  But, if we are loading it just between tab changes, we should try to
-  // look for THIS faculty member only.
-
-
   
   // Insert our advising vars into the GLOBALS array for easy use later.
   advise_init_advising_variables();    
@@ -2271,7 +2264,6 @@ function advise_init_screen() {
     // If we are loading from Active, then rebuild the cache as well.
     $bool_draft = false;
     @$GLOBALS["fp_advising"]["load_from_cache"] = "no";
-    $faculty_id = 0;  // We don't care who saved last, just get whatever it was.
   }
 
 
@@ -2456,7 +2448,7 @@ function advise_init_screen() {
 
 
   // We shouldn't supply the advising_term_id, so that it will load all terms available.
-  $fp->load_advising_session_from_database($faculty_id,"",$bool_what_if,$bool_draft,0);
+  $fp->load_advising_session_from_database(0,"",$bool_what_if,$bool_draft,0);
 
   
   // Once we have loaded the advising session, we should always try to load

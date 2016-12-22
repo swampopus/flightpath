@@ -981,14 +981,64 @@ class _DatabaseHandler extends stdClass
   }
 
 
-  function get_advising_session_id($faculty_id = 0, $student_id = "", $term_id = "", $degree_id = "", $bool_what_if = false, $bool_draft = true, $bool_load_any_if_faculty_id_not_found = TRUE)
+
+  /**
+   * Given an advising_session_id, create a duplicate of it as a new session_id (and return the new session_id).
+   * 
+   * All the values can be left blank to mean "keep what is in there".  If they have values supplied in the arguments to this function,
+   * then the new values will be used.
+   */
+  function duplicate_advising_session($advising_session_id, $faculty_id = "", $student_id = "", $term_id = "", $degree_id = "", $is_whatif = "", $is_draft = "") {
+    $now = time();     
+      
+    // First, get the details of this particular advising session....
+    $res = db_query("SELECT * FROM advising_sessions WHERE advising_session_id = ?", $advising_session_id);
+    $cur = db_fetch_array($res);  
+    
+    // Get our values....
+    $db_student_id = ($student_id == "") ? $cur["student_id"] : $student_id;  
+    $db_faculty_id = ($faculty_id == "") ? $cur["faculty_id"] : $faculty_id;  
+    $db_term_id = ($term_id == "") ? $cur["term_id"] : $term_id;  
+    $db_degree_id = ($degree_id == "") ? $cur["degree_id"] : $degree_id;  
+    $db_major_code_csv = $cur["major_code_csv"];  
+    $db_catalog_year = $cur["catalog_year"];  
+    $db_posted = $now;  
+    $db_is_whatif = ($is_whatif == "") ? $cur["is_whatif"] : $is_whatif;
+    $db_is_draft = ($is_draft == "") ? $cur["is_draft"] : $is_draft;
+    $db_is_empty = $cur["is_empty"];
+    
+    // Okay, let's INSERT this record, and capture the new advising_session_id...
+    $res = db_query("INSERT INTO advising_sessions
+              (student_id, faculty_id, term_id, degree_id, major_code_csv, catalog_year, posted, is_whatif, is_draft, is_empty)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              ", $db_student_id, $db_faculty_id, $db_term_id, $db_degree_id, $db_major_code_csv, $db_catalog_year, $db_posted, $db_is_whatif, $db_is_draft, $db_is_empty);
+    
+    $new_asid = db_insert_id();
+    
+    // Okay, now pull out the advised_courses, and insert again under the new_asid...
+    $res = db_query("SELECT * FROM advised_courses WHERE advising_session_id = ?", $advising_session_id);
+    while ($cur = db_fetch_array($res)) {
+          
+      db_query("INSERT INTO advised_courses (advising_session_id, course_id, entry_value, semester_num, group_id, var_hours, term_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?)", $new_asid, $cur["course_id"], $cur["entry_value"], $cur["semester_num"], $cur["group_id"], $cur["var_hours"], $cur["term_id"]);    
+      
+    }
+    
+    // Finished!
+    return $new_asid;
+      
+    
+  }
+
+
+  function get_advising_session_id($faculty_id = "", $student_id = "", $term_id = "", $degree_id = "", $bool_what_if = false, $bool_draft = true, $bool_load_any_if_faculty_id_not_found = TRUE)
   {
     $is_what_if = "0";
     $is_draft = "0";
     $draft_line = " and `is_draft`='$is_draft' ";
     $faculty_line = " and `faculty_id`='$faculty_id' ";
 
-    if ($faculty_id == 0)
+    if ($faculty_id == 0 || $faculty_id == "")
     { // If no faculty is specified, just get the first one to come up.
       $faculty_line = "";
     }
@@ -1021,7 +1071,9 @@ class _DatabaseHandler extends stdClass
       $advising_session_id = $cur["advising_session_id"];
       return $advising_session_id;
     }
-    else if ($bool_load_any_if_faculty_id_not_found) {
+    
+    
+    if (intval($advising_session_id) < 1 && $bool_load_any_if_faculty_id_not_found) {
       // Meaning, we couldn't find a record for the supplied faculty_id.  Let's just load the first one, regardless
       // of faculty_id.      
       $query = "select * from advising_sessions

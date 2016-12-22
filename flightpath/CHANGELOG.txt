@@ -12,6 +12,15 @@ FlightPath 5.x Changelog
   To guarantee draft advising sessions aren't loaded inappropriately, when a faculty user loads
   a student's advising session, the draft versions are deleted.  This is to correct a bug.
   
+  Fixed display bug of student's catalog year, in what if, when it is set to the Student mode in
+  the settings.
+  
+  Fixed SQL bug in system.install, user_roles table didn't have primary key set up correctly.
+  
+  More work on advising sessions-- now saves a draft duplicate any time a new student is loaded.  This
+  is to fix a bug which can occur when more than one advisor is working on a student in the same
+  time period.
+  
 
 2016-12-16
   Added a new feature to let What If save & load with any catalog year.  Built into the system

@@ -577,7 +577,11 @@ function fp_build_tab_array($page) {
         $student->catalog_year = $what_if_catalog_year;
       }
       else {
-        $student->catalog_year = $settings["current_catalog_year"];
+        
+        // Only change to current if that is how our settings are set...
+        if (variable_get("what_if_catalog_year", "current") == "current") {
+          $student->catalog_year = $settings["current_catalog_year"];
+        }
       }
       
       

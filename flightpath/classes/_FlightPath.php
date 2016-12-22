@@ -1709,6 +1709,11 @@ class _FlightPath extends stdClass
       $advising_session_id = $this->db->get_advising_session_id($faculty_id, $student_id, $term_id, $degree_id, $bool_what_if, $bool_draft, TRUE);
       $advising_session_line = " `advising_session_id`='$advising_session_id' ";
 
+      // Create a duplicate of this session as a draft...
+      if ($bool_draft == FALSE) {
+        $db->duplicate_advising_session($advising_session_id, $faculty_id, "", "", "", "", 1);
+      }
+      
 
     } else if ($advising_session_id < 1 && $available_terms != "")
     {
@@ -1723,6 +1728,13 @@ class _FlightPath extends stdClass
         if ($asid != 0)
         {
           $advising_session_line .= " advising_session_id='$asid' || ";
+          
+          // Create a duplicate of this session as a draft...
+          if ($bool_draft == FALSE) {
+            $db->duplicate_advising_session($asid, $faculty_id, "", "", "", "", 1);
+          }
+          
+          
         }
       }
       // Take off the last 3 chars...
