@@ -721,9 +721,8 @@ class _FlightPath extends stdClass
       }
       //fpm($group_id);
       // Does the student have any substitutions for this requirement?
-      if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id))
+      if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id, $req_by_degree_id))
       {
-        //fpm($substitution);
         //fpm($group_id);
         
         // Since the substitution was made, I don't really care about

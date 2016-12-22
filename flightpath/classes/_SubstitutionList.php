@@ -3,7 +3,7 @@
 class _SubstitutionList extends ObjList
 {
 
-	function find_requirement($course_requirement, $bool_exclude_has_been_applied = false, $group_id = 0)
+	function find_requirement($course_requirement, $bool_exclude_has_been_applied = false, $group_id = 0, $degree_id = 0)
 	{
 		// Look through the array for a substitution which has this
 		// course requirement.
@@ -17,6 +17,13 @@ class _SubstitutionList extends ObjList
 				// Skip substitutions which we have already applied.
 				continue;
 			}
+
+      
+      if ($degree_id != 0 && $substitution->db_required_degree_id != $degree_id) {
+        // Skip substitutions which are for a different degree_id than the one supplied.
+        continue;
+      }
+
 
 			$cr = $substitution->course_requirement;
 			//adminDebug($cr->course_id . " " . $course_requirement->course_id);

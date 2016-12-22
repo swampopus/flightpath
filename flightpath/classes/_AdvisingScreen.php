@@ -1140,7 +1140,7 @@ function draw_menu_items($menu_array) {
 			$pC .= "<div class='tenpt' style='padding-bottom: 15px;'>
 							<b>$t_s_i $t_c_n</b> (" . $c->get_hours_awarded() . " hrs) - $grade - $t_term - $t_inst
 								";
-			if ($c->bool_substitution_split == true)
+			if (isset($c->bool_substitution) && $c->bool_substitution_split == true)
 			{
 				$pC .= "<div class='tenpt'><b> +/- </b> This course's hours were split in a substitution.</div>";
 			}
@@ -4168,7 +4168,7 @@ function draw_menu_items($menu_array) {
 				}
 				$course->substitution_footnote = $fcount;
 				$footnote .= "$fcount</span>";        
-        $sub_id = $course->db_substitution_id_array[$course->req_by_degree_id];        
+        @$sub_id = $course->db_substitution_id_array[$course->req_by_degree_id];        
 				$this->footnote_array["substitution"][$fcount] = "$o_subject_id $o_course_num ~~ $subject_id $course_num ~~ " . $course->get_substitution_hours() . " ~~ " . $course->get_first_assigned_to_group_id() . " ~~ $sub_id";
 				
 			}
