@@ -1686,7 +1686,7 @@ class _FlightPath extends stdClass
     // First, find the advising session id...
     if ($advising_session_id < 1 && $available_terms == "")
     {
-      $advising_session_id = $this->db->get_advising_session_id($faculty_id,$student_id,$term_id,$degree_id,$bool_what_if,$bool_draft);
+      $advising_session_id = $this->db->get_advising_session_id($faculty_id, $student_id, $term_id, $degree_id, $bool_what_if, $bool_draft, TRUE);
       $advising_session_line = " `advising_session_id`='$advising_session_id' ";
 
 
@@ -1699,7 +1699,7 @@ class _FlightPath extends stdClass
       {
         $t_id = trim($temp[$t]);
 
-        $asid = $this->db->get_advising_session_id($faculty_id,$student_id,$t_id,$degree_id,$bool_what_if,$bool_draft);
+        $asid = $this->db->get_advising_session_id($faculty_id, $student_id, $t_id,$degree_id, $bool_what_if, $bool_draft, TRUE);
         if ($asid != 0)
         {
           $advising_session_line .= " advising_session_id='$asid' || ";

@@ -981,7 +981,7 @@ class _DatabaseHandler extends stdClass
   }
 
 
-  function get_advising_session_id($faculty_id = 0, $student_id = "", $term_id = "", $degree_id = "", $bool_what_if = false, $bool_draft = true)
+  function get_advising_session_id($faculty_id = 0, $student_id = "", $term_id = "", $degree_id = "", $bool_what_if = false, $bool_draft = true, $bool_load_any_if_faculty_id_not_found = TRUE)
   {
     $is_what_if = "0";
     $is_draft = "0";
@@ -1007,20 +1007,44 @@ class _DatabaseHandler extends stdClass
 
     $query = "select * from advising_sessions
                 where
-                    `student_id`='$student_id'
+                    student_id = ?
                 $faculty_line
-                and `term_id`='$term_id'
-                and `degree_id`='$degree_id'
-                and `is_whatif`='$is_what_if'
+                and term_id = ?
+                and degree_id = ?
+                and is_whatif = ?
                 $draft_line
                 order by `posted` desc limit 1";
-    $result = $this->db_query($query) ;
+    $result = $this->db_query($query, array($student_id, $term_id, $degree_id, $is_what_if)) ;
     if ($this->db_num_rows($result) > 0)
     {
       $cur = $this->db_fetch_array($result);
       $advising_session_id = $cur["advising_session_id"];
       return $advising_session_id;
     }
+    else if ($bool_load_any_if_faculty_id_not_found) {
+      // Meaning, we couldn't find a record for the supplied faculty_id.  Let's just load the first one, regardless
+      // of faculty_id.      
+      $query = "select * from advising_sessions
+                  where
+                      student_id = ?
+                  $faculty_line
+                  and term_id = ?
+                  and degree_id = ?
+                  and is_whatif = ?
+                  $draft_line
+                  order by `posted` desc limit 1";
+      $result = $this->db_query($query, array($student_id, $term_id, $degree_id, $is_what_if)) ;
+      if ($this->db_num_rows($result) > 0) {
+        $cur = $this->db_fetch_array($result);
+        $advising_session_id = $cur["advising_session_id"];
+        return $advising_session_id;        
+      }
+            
+    }
+    
+    
+    
+    
     return 0;
 
   }
@@ -1058,7 +1082,7 @@ class _DatabaseHandler extends stdClass
       $id = mt_rand(1,9999999);
       // Check for collisions...
       $res4 = $this->db_query("SELECT * FROM draft_degrees
-              WHERE `degree_id`='$id' limit 1");
+              WHERE `degree_id`='?' limit 1", $id);
       if ($this->db_num_rows($res4) == 0)
       { // Was not in the table already, so use it!
         return $id;

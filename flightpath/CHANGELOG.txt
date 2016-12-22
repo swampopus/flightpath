@@ -6,6 +6,9 @@ FlightPath 5.x Changelog
   degrees, and the substituted courses was ALSO the same.  FlightPath was applying the sub
   to the first instance of the course requirement, and not necessarily the one the user selected.
   
+  Worked on an issue where when two users are working on the same student, they should only pull up
+  draft changes that THEY made, not that the other user made.
+  
 
 2016-12-16
   Added a new feature to let What If save & load with any catalog year.  Built into the system
