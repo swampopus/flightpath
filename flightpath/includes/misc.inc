@@ -298,7 +298,6 @@ function fp_clear_cache() {
   // Find modules which implement hook_clear_cache
   $modules = modules_implement_hook("clear_cache");
   foreach ($modules as $module) {
-    fpm($modules);
     call_user_func($module . '_clear_cache');
   }  
 } 
