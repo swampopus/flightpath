@@ -853,7 +853,7 @@ function fp_add_message($msg, $type = "status", $bool_no_repeat = FALSE) {
 
   $md5 = md5($type . $msg);  
 
-  if ($bool_no_repeat && is_array($_SESSION["fp_messages"])) {
+  if ($bool_no_repeat && isset($_SESSION["fp_messages"]) && is_array($_SESSION["fp_messages"])) {
     // Make sure this message isn't already in the session.
     foreach($_SESSION["fp_messages"] as $s) {
       if ($s["md5"] == $md5) return;
@@ -1181,8 +1181,7 @@ function fp_goto($path, $query = "") {
   if ($path == "<front>") {
     $path = variable_get("front_page", "main");
   }
-  
-  
+    
   header('Location: ' . fp_url($path, $query));
   exit();
   

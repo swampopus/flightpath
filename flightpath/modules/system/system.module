@@ -2015,15 +2015,32 @@ function system_handle_logout() {
 
   // Finish up logging out. 
   
-  $_SESSION["fp_logged_in"] = FALSE;
-  $_SESSION["fp_user_object"] = FALSE;
-  session_destroy();
-  session_start();
-  
   watchdog("logout", "@user has logged out", array("@user" => "$name ($uid)"));
   
-  fp_add_message(t("You have been logged out of @FlightPath.", array("@FlightPath" => variable_get("system_name", "FlightPath"))));
-  fp_goto("<front>");
+  // In an effort to mimimize a bug in Safari, we will
+  // overwrite the SESSION variables, then perform a few other operations,
+  // to make sure they are well and truly destroyed.
+  foreach ($_SESSION as $key => $val) {
+    $_SESSION[$key] = "x";
+  }
+  foreach ($_SESSION as $key => $val) {
+    $_SESSION[$key] = FALSE;
+  }    
+  $_SESSION = array();
+  if (isset($_COOKIE[session_name()]))  // remove cookie by setting it to expire, if it's there.
+  {
+     $cookie_expires  = time() - date('Z') - 3600;
+     setcookie(session_name(), '', $cookie_expires, '/');
+  }  
+  
+  // I know this is repetitive, but I want to make ABSOLUTELY SURE
+  // I am removing the session by removing it, creating a new one, then killing that one too.
+  session_destroy();
+  session_start();
+  session_destroy();
+      
+  
+  fp_goto("<front>", "logout=true");
   
 }
 
@@ -2253,6 +2270,13 @@ function system_login_form() {
   
   fp_set_title("");
   
+  
+  // If we are coming from having just logged out, display a message.
+  if (isset($_REQUEST["logout"]) && $_REQUEST["logout"] == "true") {
+    fp_add_message(t("You have been logged out of @FlightPath.", array("@FlightPath" => variable_get("system_name", "FlightPath"))), "status", TRUE);
+  }
+  
+  
   $form["user"] = array(
     "label" => t("User:"),
     "type" => "textfield",
@@ -2394,7 +2418,9 @@ function system_display_main_page() {
   // If we are not logged in, then we need to re-direct the user to 
   // the login page!
   if ($_SESSION["fp_logged_in"] != TRUE) {
-    fp_goto("login");
+    $query = "";
+    if (isset($_REQUEST["logout"])) $query = "logout=" . $_REQUEST["logout"];
+    fp_goto("login", $query);
     return;  
   }
 
