@@ -2036,9 +2036,10 @@ function system_handle_logout() {
   // I know this is repetitive, but I want to make ABSOLUTELY SURE
   // I am removing the session by removing it, creating a new one, then killing that one too.
   session_destroy();
+  session_commit();
   session_start();
   session_destroy();
-      
+  session_commit();    
   
   fp_goto("<front>", "logout=true");
   
