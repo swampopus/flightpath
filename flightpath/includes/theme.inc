@@ -864,7 +864,7 @@ function fp_build_tab_array($page) {
     } else {
       // No student has been selected yet!
       $rtn .= "<tr height='60'>
-        <td align='center'> No advisee selected. </td>
+        <td align='center' class='no-advisee-selected'> " . t("No advisee selected.") . " </td>
       </tr>";
       $bool_hide_catalog_warning = true;
     }
@@ -897,6 +897,24 @@ function fp_build_tab_array($page) {
 
     if ($bool_future_catalog_warning == true && !$bool_hide_catalog_warning)
     {
+      
+      
+      $msg = t("This student's catalog year is @cat_year, 
+        and specific curriculum requirements are not yet 
+        available for this year.  
+        To advise this student according to @new_cat
+        requirements, select the student's major using What If.", array("@cat_year" => $cat_year, "@new_cat" => "{$settings["current_catalog_year"]}-" . ($settings["current_catalog_year"] + 1)));
+      
+      // If the what_if catalog year is in "student" mode, we can't tell them to use What If, cause it won't work.
+      if (variable_get("what_if_catalog_year", "current") == "student") {
+        $msg = t("This student's catalog year is @cat_year, 
+          and specific curriculum requirements are not yet 
+          available for this year.", array("@cat_year" => $cat_year));
+        
+      }
+      
+      
+      
       $rtn .= "
       
       <div class='tenpt hypo' style='margin-top: 4px; padding: 2px;'>
@@ -905,12 +923,8 @@ function fp_build_tab_array($page) {
         <img src='" . fp_theme_location() . "/images/alert_lg.gif' >  
       </td>
       <td valign='middle' class='tenpt' style='padding-left: 8px;'>
-        <b>Important Notice: </b>
-        This student's catalog year is $cat_year, 
-        and specific curriculum requirements are not yet 
-        available for this year.  
-        To advise this student according to {$settings["current_catalog_year"]}-" . ($settings["current_catalog_year"] + 1) . "
-        requirements, select the student's major using What If.
+        <b>" . t("Important Notice:") . " </b>
+        $msg
       </td>
       </table>
       </div>

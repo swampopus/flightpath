@@ -2135,6 +2135,12 @@ function system_status() {
  */
 function system_clear_cache() {
   
+  unset($_SESSION["fp_form_submissions"]);
+  unset($_SESSION["fp_db_host"]);
+  unset($_SESSION["fp_draft_mode"]);
+  unset($_SESSION["fp_simple_degree_plan_cache_for_student"]);
+  
+  
   menu_rebuild_cache();
 
   system_rebuild_css_js_query_string();
@@ -2892,7 +2898,7 @@ function system_enable_module($module_details) {
   $bool_call_hook_install = FALSE;
 
   // Do we need to attempt to call the hook_install function?
-  if ($module_details["enabled"] == "") {
+  if (@$module_details["enabled"] == "") {
     // Wasn't in the database, so we need to install it.
 
     // Add to our table.
@@ -2901,7 +2907,7 @@ function system_enable_module($module_details) {
     // Now, add back into the table.
     $res = db_query("INSERT INTO modules (name, path, version, requires, enabled, type, `schema`, info)
                      VALUES ('?', '?', '?', '?', '?', '?', '?', '?')
-                     ", $module, $path, $module_details["version"], $module_details["required"], "1", "module",
+                     ", $module, $path, @$module_details["version"], @$module_details["required"], "1", "module",
                         @intval($module_details["schema"]), serialize($module_details));
     
     $bool_call_hook_install = TRUE;

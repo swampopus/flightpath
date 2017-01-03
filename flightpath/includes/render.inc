@@ -14,6 +14,15 @@ function fp_render_content($render_array = array()) {
 
   $rtn = "";
 
+  if (!isset($render_array["#id"])) {
+    // An #id wasn't set, which is required, so we're going to 
+    // create one based on the function that called this function.
+    $x = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+    $render_array['#id'] = trim(@$x[1]['class'] . "_" . @$x[1]['function']);
+    // If nothing was discovered, just ditch it...
+    if ($render_array['#id'] == "_") unset($render_array["#id"]);
+  }
+
   // First, check to see if this render array has an "#id" field defined.  This is required.
   $render_id = fp_get_machine_readable(trim(@$render_array["#id"]));
   if ($render_id == "") {
@@ -428,7 +437,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   
   if ($type == "do_not_render") return;  // not supposed to render this element.
   
-  // TODO: Does the name start with a # character?  If so, do not attempt to render.
+  // Does the name start with a # character?  If so, do not attempt to render.
   if (substr($name, 0, 1) == "#") return;  
     
   $value = @$element["value"];
@@ -452,11 +461,21 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     $no_please_select = @$element["hide_please_select"];
   }
   $confirm = @$element["confirm"];
+
+  // Let's also add our cssname as a class to the element, so that even markup will get it...
+  if ($type == "markup") {  
+    if (!isset($element["attributes"]) || is_array($element["attributes"])) {        
+      @$element["attributes"]["class"] .= " markup-element form-element markup-element-$cssname";
+    }
+  }
+  
+
   
   $attributes = @$element["attributes"];
   
   if (is_array($attributes)) {
     // Convert the attributes array into a string.
+    
     $new_attr = "";
     foreach ($attributes as $key => $val) {
       $new_attr .= " $key='$val' ";
@@ -516,6 +535,11 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
       $rtn .= "<div $attributes>";
     }
     
+    // If a label is set, go ahead and display, even though its markup...
+    if ($label != "") {
+      $rtn .= "<label>$ast$label $popup_help_link</label>";
+    } 
+     
     $rtn .= "$value";
     
     if (is_string($attributes) && $attributes != "") {

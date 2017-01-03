@@ -1038,6 +1038,8 @@ class _DatabaseHandler extends stdClass
     $draft_line = " and `is_draft`='$is_draft' ";
     $faculty_line = " and `faculty_id`='$faculty_id' ";
 
+    $advising_session_id = 0;  // init
+
     if ($faculty_id == 0 || $faculty_id == "")
     { // If no faculty is specified, just get the first one to come up.
       $faculty_line = "";

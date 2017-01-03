@@ -1,6 +1,23 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-01-03
+  Added additional unsetting of SESSION vars when cache is cleared, to erase any potential problems.
+  
+
+2017-01-02
+  Altered the way the renderapi handles markup, so it always gets a CSS class we can
+  use later.  Also, added weights to the AdvisingScreen's display_popup_course_descroption.
+  
+  Made minor CSS tweaks in other places too.
+  
+  Minor display bug in user module, list of majors for student
+  
+
+2016-12-28
+  Minor changes to System to suppress PHP warnings in one area.
+
+
 2016-12-22
   Fixed a bug with substitutions, where the required courses was the same in two different
   degrees, and the substituted courses was ALSO the same.  FlightPath was applying the sub

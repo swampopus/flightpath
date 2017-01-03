@@ -2368,6 +2368,7 @@ function draw_menu_items($menu_array) {
     // Set up our "render array" for later rendering, using the render API.
     $render = array();
     $render["#id"] = "AdvisingScreen_display_popup_course_description";
+    
     $render["#course"] = array(
       "type" => "do_not_render",
       "value" => $course,
@@ -2505,7 +2506,8 @@ function draw_menu_items($menu_array) {
           
       $render["course_title_line"] = array(
         "value" => $html,
-        "attributes" => array("style" => "margin-top: 13px;", "class" => "tenpt"),
+        "attributes" => array("style" => "margin-top: 13px; margin-bottom: 0;", "class" => "tenpt"),
+        "weight" => 10,
       );
           
 		}
@@ -2529,7 +2531,8 @@ function draw_menu_items($menu_array) {
 					     </div>";
 					
 			$render["substitution_split"] = array(
-			 "value" => $html,
+			   "value" => $html,
+			   "weight" => 20,
 			);		
 					
 		}
@@ -2551,6 +2554,7 @@ function draw_menu_items($menu_array) {
       $render["course_description"] = array(
         "value" => $course->description,
         "attributes" => array("class" => "tenpt"),
+        "weight" => 30,
       );  
          
 		}
@@ -2589,6 +2593,7 @@ function draw_menu_items($menu_array) {
       
       $render["course_transfer_no_eqv"] = array(
         "value" => $html,
+        "weight" => 40,
       );
       
 
@@ -2626,6 +2631,7 @@ function draw_menu_items($menu_array) {
       
       $render["course_transfer_local_eqv"] = array(
         "value" => $html,
+        "weight" => 50,
       );
       
       
@@ -2654,6 +2660,7 @@ function draw_menu_items($menu_array) {
     
     $render["when_enrolled"] = array(
       "value" => $html,
+      "weight" => 50,
     );
     
     ///////////////////////////////////
@@ -2679,11 +2686,12 @@ function draw_menu_items($menu_array) {
       
       $render["fulfilling_reqs_for_degrees"] = array(
         "value" => $html,
+        "weight" => 60,
       );
       // Also keep track of what degree ids we are fulfilling reqs for, in case we need it later.
       $render["#fulfilling_reqs_for_degree_ids"] = array(
         "type" => "do_not_render",
-        "value" => $d,
+        "value" => $d,        
       );
       
       
@@ -2720,6 +2728,7 @@ function draw_menu_items($menu_array) {
       
       $render["course_assigned_to_group"] = array(
         "value" => $html,
+        "weight" => 70,
       );
       
 		} 
@@ -2739,6 +2748,7 @@ function draw_menu_items($menu_array) {
 
       $render["course_not_assigned_to_group"] = array(
         "value" => $html,
+        "weight" => 80,
       );
 
 		}
@@ -2749,8 +2759,7 @@ function draw_menu_items($menu_array) {
 			
       $html = "";
 			
-			$html .= "<div class='tenpt' style='margin-top: 20px;'>
-					<b>" . t("Special administrative information:") . "</b>
+			$html .= "
 					
 				<span id='viewinfolink'
 				onClick='document.getElementById(\"admin_info\").style.display=\"\"; this.style.display=\"none\"; '
@@ -2780,12 +2789,15 @@ function draw_menu_items($menu_array) {
         }
 			}
 			$html .= "
-					</div>
+					
 					
 					</div>";
           
       $render["substitutor_extra"] = array(
+        "label" => ("Special administrative information:"),
         "value" => $html,
+        "weight" => 90,
+        "attributes" => array("class" => "tenpt"),
       );
           								
 		}
@@ -2846,6 +2858,7 @@ function draw_menu_items($menu_array) {
 			
       $render["course_sub_this_degree_plan"] = array(
         "value" => $html,
+        "weight" => 100,
       );
 
 		}
@@ -2858,7 +2871,7 @@ function draw_menu_items($menu_array) {
 		{
 		  $html = "";
       
-			$html .= "<div class='tenpt' style='margin-top: 10px;'>
+			$html .= "<div class='tenpt'>
 					" . t("This course has variable hours. Please select 
 					how many hours this course will be worth:") . "<br>
 					<div style='text-align: center;'>
@@ -2891,6 +2904,7 @@ function draw_menu_items($menu_array) {
 
       $render["course_var_hour_select"] = array(
         "value" => $html,
+        "weight" => 110,
       );
 
 		}
@@ -2907,11 +2921,7 @@ function draw_menu_items($menu_array) {
 
 			if (user_has_permission("can_advise_students"))
 			{
-				$html .= "<div style='margin-top: 20px;'>
-				" . fp_render_button(t("Select Course"), "popupAssignSelectedCourseToGroup(\"$group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"$db_group_requirement_id\");", true, "style='font-size: 10pt;'") . "
-				</div>
-				
-				";
+				$html .= fp_render_button(t("Select Course"), "popupAssignSelectedCourseToGroup(\"$group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"$db_group_requirement_id\");", true, "style='font-size: 10pt;'");
 			}
 		} 
 		else if ($show_advising_buttons == false && $course->has_variable_hours() == true && $course->grade == "" && user_has_permission("can_advise_students") && !$this->bool_blank) {

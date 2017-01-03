@@ -73,7 +73,7 @@
 
 .popup-description-section {
   font-size: 10pt;
-  padding-top: 10px;
+  /* padding-top: 10px; */
 }
 
 .degree-class-is-locked {
@@ -83,7 +83,7 @@
   font-size: 0.85em;
   padding: 5px;
   border: 1px solid orange;
-  background-color: lemonchiffon;
+  background-color: #FFFACD; /* lemonchiffon */
   color: #333;
   margin-left: 10px;
   margin-right:10px;
@@ -100,7 +100,7 @@
 /* Footnotes */
 .advise-footnote {
   padding-left: 20px;
-  padding-botton: 4px;
+  padding-bottom: 4px;
   /* create "outdent" effect... */
   text-indent: -18px;
   margin-left: 18px;  

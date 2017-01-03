@@ -808,7 +808,6 @@ function course_search_get_course_rotation_schedule_not_anticipated($course_id)
 
 function course_search_get_course_rotation_schedule($course_id, $year = "", $limit = 20, $bool_include_next_five_years = false)
 {
-  
   // return an array containing the terms that this course
 	// is going to be offered, if any.
 	$rtn_array = array();

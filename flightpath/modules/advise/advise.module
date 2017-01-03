@@ -2199,7 +2199,14 @@ function advise_clear_cache() {
   foreach ($_SESSION as $key => $value) {
     if (strstr($key, "cache_")) {
       $_SESSION[$key] = FALSE;
+      unset($_SESSION[$key]);  // do this just to make sure our server-side session file gets overwritten
     }
+    
+    if (strstr($key, "advising_") || strstr($key, "what_if_")) {
+      $_SESSION[$key] = FALSE;  
+      unset($_SESSION[$key]);
+    }
+    
   }
       
   fp_add_message(t("Advising cache has been cleared."));

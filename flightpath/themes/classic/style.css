@@ -802,7 +802,7 @@ ul.top-menu-links li.first {
 /*
  * Forms...
  */
-.fp-form label {
+label {
   display: block;
   font-weight: bold;  
 }
