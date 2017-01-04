@@ -2025,13 +2025,14 @@ function system_handle_logout() {
   }
   foreach ($_SESSION as $key => $val) {
     $_SESSION[$key] = FALSE;
-  }    
+  }      
   $_SESSION = array();
   if (isset($_COOKIE[session_name()]))  // remove cookie by setting it to expire, if it's there.
   {
      $cookie_expires  = time() - date('Z') - 3600;
      setcookie(session_name(), '', $cookie_expires, '/');
   }  
+  session_commit();  // write our session to the server's files...
   
   // I know this is repetitive, but I want to make ABSOLUTELY SURE
   // I am removing the session by removing it, creating a new one, then killing that one too.
@@ -2421,6 +2422,18 @@ function system_display_main_page() {
   if ($_SESSION["fp_logged_in"] != TRUE) {
     $query = "";
     if (isset($_REQUEST["logout"])) $query = "logout=" . $_REQUEST["logout"];
+    // Since we are not logged in, and are headed to the login page, also clear out any advising variables we might have.
+    foreach ($_REQUEST as $key => $val) {
+      unset($_REQUEST[$key]);
+      unset($_GET[$key]);
+      unset($_POST[$key]);
+    }
+    
+    global $current_student_id;
+    $current_student_id = "";  // clear this so the fp_goto doesn't try to add it.
+    
+    session_destroy();
+    session_commit();
     fp_goto("login", $query);
     return;  
   }

@@ -1,6 +1,13 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-01-04
+  Handful of extra changes to logout function, again, for Safari browser bug. 
+  
+  Added more HTML comments to the course_search_display_courses render api call, to give
+  more spots for custom modules to dig in and change/add content.
+  
+
 2017-01-03
   Added additional unsetting of SESSION vars when cache is cleared, to erase any potential problems.
   

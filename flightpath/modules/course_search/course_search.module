@@ -318,8 +318,6 @@ function course_search_display_courses() {
   // We are going to be setting up a render array for this screen, so other modules can alter it later.
   $render = array();
   $render["#id"] = "course_search_display_courses";
-  
-  
       
   $rtn .= fp_render_curved_line(t("Course Search"));
 
@@ -705,22 +703,26 @@ function course_search_display_courses() {
         // Note, the HTML comments are so other modules, that wish to manipulate this block, have something easy to find/replace
         
         $html .= "<div class='course-search-course-block'>
-                 <!-- TITLE_ROW -->
+                 <!-- TITLE-ROW -->
                  <div class='course-search-course-title-row' 
-                      $on_click>
+                      $on_click>                       
                        <!-- COURSE-NAME -->
                        <span class='course-search-course-name'>$n_subject_id $n_course_num</span>
                         $hyp1
+                        <!-- END-COURSE-NAME ->
                         <!-- COURSE-TITLE --> 
-                        <span class='course-search-course-title'>$title</span> - $hours " . t("hrs.") . "$repeat 
+                        <span class='course-search-course-title'>$title</span> - $hours " . t("hrs.") . "$repeat
+                        <!-- END-COURSE-TITLE --> 
                  </div>
+                 <!-- END-TITLE-ROW -->
                  <!-- COURSE-EXTRA -->
                  <div class='course-search-course-extra'>
                    <!-- DESC -->
                    <div class='course-search-course-description'>$description</div>
+                   <!-- END-DESC -->
                    <!-- DETAILS -->
                    <div class='course-search-course-details'>$details</div>
-                 
+                   <!-- END-DETAILS -->
                  ";
 
         
@@ -729,10 +731,12 @@ function course_search_display_courses() {
                     <div class='course-search-admin-options'>
                     " . t("Administrative options:") . " 
                     " . l(t("Edit syllabus and rotation schedule"), "tools/course-search/edit-info-details", "course_id=$n_course_id&subject_id=$n_subject_id&course_num=$n_course_num") . "                  
-                </div>";
+                    </div>
+                    <!-- END-ADMIN-OPTIONS -->";
         }         
                  
-        $html .= "</div>"; // div course-search-course-extra
+        $html .= "</div>
+                  <!-- END-COURSE-EXTRA -->"; // div course-search-course-extra
                        
         $html .= "</div>"; // div course-search-course-block
         

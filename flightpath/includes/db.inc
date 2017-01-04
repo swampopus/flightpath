@@ -53,9 +53,9 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
   
   $is_mobile = (int) fp_screen_is_mobile();
   
-  $ip = $_SERVER["REMOTE_ADDR"];
-  $location = $_SERVER["REQUEST_URI"];
-  $referer = $_SERVER['HTTP_REFERER'];
+  $ip = @$_SERVER["REMOTE_ADDR"];
+  $location = @$_SERVER["REQUEST_URI"];
+  $referer = @$_SERVER['HTTP_REFERER'];
   
   $ser_variables = "";
   if (count($variables) > 0) {
