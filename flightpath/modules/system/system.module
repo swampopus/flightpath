@@ -2032,8 +2032,7 @@ function system_handle_logout() {
      $cookie_expires  = time() - date('Z') - 3600;
      setcookie(session_name(), '', $cookie_expires, '/');
   }  
-  session_commit();  // write our session to the server's files...
-  
+    
   // I know this is repetitive, but I want to make ABSOLUTELY SURE
   // I am removing the session by removing it, creating a new one, then killing that one too.
   session_destroy();
