@@ -276,11 +276,13 @@ function advise_can_access_view($student_id = "") {
   if (user_has_permission("view_advisee_advising_session")) {
     // Is the student_id in their list of advisees?
     $advisees = advise_get_advisees();
+  
     if (in_array($student_id, $advisees)) return TRUE;    
   }
   
   // Is this user viewing THEIR OWN advising session?
   if (user_has_permission("view_own_advising_session")) {
+  
     if ($student_id == $user->cwid && $student_id != "") return TRUE;
   }
   
@@ -2164,15 +2166,27 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 function advise_init() {
   global $current_student_id, $user, $screen;
   $current_student_id = @$_REQUEST["current_student_id"];
-
-  // Since this user doesn't have permission to view any sessions,
-  // he can only view his own (but first make sure they are indeed a student)
-  if (!user_has_permission("view_any_advising_session")) {
-    if (isset($user->cwid) && $user->is_student == TRUE) {  
-      $current_student_id = $user->cwid;
-      $_REQUEST["current_student_id"] = $current_student_id;
-    }    
-    $_REQUEST["advising_load_active"] = "yes";        
+    
+  // Since this user doesn't have permission to view this student's sessions,
+  // he can only view his own.  This is to stop hackers from experimenting with the URL
+  // to see other users' data.
+  if (!advise_can_access_view($current_student_id)) {    
+        
+    // Reset our global vars....
+    $current_student_id = $user->cwid;
+    $_REQUEST["current_student_id"] = $current_student_id;
+    $_POST["current_student_id"] = $current_student_id;
+    $_GET["current_student_id"] = $current_student_id;
+    $_SESSION["current_student_id"] = $current_student_id;
+    $_REQUEST["advising_student_id"] = $current_student_id;
+    $_POST["advising_student_id"] = $current_student_id;
+    $_GET["advising_student_id"] = $current_student_id;
+    $_SESSION["advising_student_id"] = $current_student_id;
+    
+    $GLOBALS["fp_advising"]["advising_student_id"] = $current_student_id;
+    
+      
+    $_REQUEST["advising_load_active"] = "yes"; 
   }
    
       

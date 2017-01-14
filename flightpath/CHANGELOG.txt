@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
  
+2017-01-14
+  Made more changes, to ensure that users cannot access another student's data by manipulating
+  URL variables. 
+ 
+ 
 2017-01-04
   Handful of extra changes to logout function, again, for Safari browser bug. 
   

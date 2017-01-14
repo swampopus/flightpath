@@ -740,7 +740,7 @@ function fp_build_tab_array($page) {
 
       if (!user_has_permission("can_advise_students")) {
         
-        if ($GLOBALS["fp_advising"]["advising_what_if"] != "yes")
+        if (@$GLOBALS["fp_advising"]["advising_what_if"] != "yes")
         {
           // In other words, we do not have permission to advise,
           // and we are not in whatIf, so take out the link.
