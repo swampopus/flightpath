@@ -292,14 +292,16 @@ function admin_copy_degree_form_submit($form, $form_submit) {
 
     // Create the entry in the degrees table.
     $res = db_query("INSERT INTO draft_degrees
-                        (degree_id, major_code, degree_type, degree_class, title,
+                        (degree_id, major_code, degree_type, degree_level, degree_class, title,
                          public_note, semester_titles_csv,
-                         catalog_year, exclude, allow_dynamic, override_degree_hours)
+                         catalog_year, exclude, allow_dynamic, advising_weight, override_degree_hours,
+                         min_tracks, max_tracks, default_tracks, track_selection_config)
                          VALUES   
-                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
-                         $dest_degree_id, $dest_code, $src_degree_type, $src_degree_class, $src_title,
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
+                         $dest_degree_id, $dest_code, $src_degree_type, $src_degree_level, $src_degree_class, $src_title,
                          $src_public_note, $src_semester_titles_csv,
-                         $de_catalog_year, $src_exclude, $src_allow_dynamic, $src_override_degree_hours);
+                         $de_catalog_year, $src_exclude, $src_allow_dynamic, $src_advising_weight, $src_override_degree_hours,
+                         $src_min_tracks, $src_max_tracks, $src_default_tracks, $src_track_selection_config);
     
     // Now, go through the source's degree requirements and copy those over.
     $res = db_query("SELECT * FROM draft_degree_requirements

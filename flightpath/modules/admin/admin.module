@@ -758,12 +758,14 @@ function admin_duplicate_year_form_submit($form, $form_state) {
   	$new_degree_id = $db->request_new_degree_id();
   	// add in the top-level degree to the table.
   	$res2 = db_query("INSERT INTO draft_degrees
-  						(`degree_id`,`major_code`,`degree_type`,`title`,
-  						 `semester_titles_csv`,`catalog_year`,`exclude`,`degree_class`,`public_note`)
+  						(degree_id, major_code, degree_type, degree_level, degree_class, title,
+  						 semester_titles_csv, catalog_year, exclude, public_note,
+  						 allow_dynamic, advising_weight, override_degree_hours, min_tracks, max_tracks, default_tracks, track_selection_config)
   						 VALUES
-  						('?','?','?','?','?','?','?','?','?')
-  						", $new_degree_id,$db_major_code,$db_degree_type,$db_title,
-  						 $db_semester_titles_csv,$new_year,$db_exclude, $db_degree_class, $db_public_note);						 
+  						(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  						", $new_degree_id,$db_major_code,$db_degree_type, $db_degree_level, $db_degree_class, $db_title,
+  						 $db_semester_titles_csv, $new_year, $db_exclude, $db_public_note,
+               $db_allow_dynamic, $db_advising_weight, $db_override_degree_hours, $db_min_tracks, $db_max_tracks, $db_default_tracks, $db_track_selection_config);						 
   	
   	// now, pull out all of the degree_requirements.
   	$res3 = db_query("SELECT * FROM draft_degree_requirements
