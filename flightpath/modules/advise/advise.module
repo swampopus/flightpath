@@ -265,7 +265,7 @@ function advise_can_access_view($student_id = "") {
   // must be logged in first...
   if (!user_has_permission("access_logged_in_content")) return FALSE;
 
-  if ($student_id == "") return FALSE;
+  if ($student_id == "" || $student_id == 0) return FALSE;
   
   if ($user->id == 1) return TRUE; // the admin user.
   
@@ -283,7 +283,7 @@ function advise_can_access_view($student_id = "") {
   // Is this user viewing THEIR OWN advising session?
   if (user_has_permission("view_own_advising_session")) {
   
-    if ($student_id == $user->cwid && $student_id != "") return TRUE;
+    if ($student_id == $user->cwid && ($student_id != "" && $student_id != 0)) return TRUE;
   }
   
   
@@ -2170,10 +2170,13 @@ function advise_init() {
   // Since this user doesn't have permission to view this student's sessions,
   // he can only view his own.  This is to stop hackers from experimenting with the URL
   // to see other users' data.
-  if (!advise_can_access_view($current_student_id)) {    
+  if (!advise_can_access_view($current_student_id)) {
         
     // Reset our global vars....
-    $current_student_id = $user->cwid;
+    $current_student_id = 0;
+    if (isset($user->cwid) && $user->is_student) {
+      $current_student_id = $user->cwid;
+    }
     $_REQUEST["current_student_id"] = $current_student_id;
     $_POST["current_student_id"] = $current_student_id;
     $_GET["current_student_id"] = $current_student_id;
@@ -2294,7 +2297,7 @@ function advise_init_screen() {
 
 
   // Attempt to load the course inventory cache...
-  if ($course_inventory = unserialize($_SESSION["fp_cache_course_inventory"])) {  
+  if ($course_inventory = unserialize(@$_SESSION["fp_cache_course_inventory"])) {  
     $GLOBALS["fp_course_inventory"] = $course_inventory;    
   }
   

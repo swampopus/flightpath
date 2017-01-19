@@ -2921,7 +2921,7 @@ function draw_menu_items($menu_array) {
 
 			if (user_has_permission("can_advise_students"))
 			{
-				$html .= fp_render_button(t("Select Course"), "popupAssignSelectedCourseToGroup(\"$group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"$db_group_requirement_id\");", true, "style='font-size: 10pt;'");
+				$html .= fp_render_button(t("Select Course"), "popupAssignSelectedCourseToGroup(\"$group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"$db_group_requirement_id\",\"$req_by_degree_id\");", true, "style='font-size: 10pt;'");
 			}
 		} 
 		else if ($show_advising_buttons == false && $course->has_variable_hours() == true && $course->grade == "" && user_has_permission("can_advise_students") && !$this->bool_blank) {
@@ -2932,7 +2932,7 @@ function draw_menu_items($menu_array) {
 
       // Same situation about the group_id.  I guess need to find out exactly which group it was assigned to?
 
-      $html .= fp_render_button(t("Update"), "popupUpdateSelectedCourse(\"$course->course_id\",\"" . $course->get_first_assigned_to_group_id() . "\",\"$course->assigned_to_semester_num\",\"$course->random_id\",\"$advising_term_id\");");
+      $html .= fp_render_button(t("Update"), "popupUpdateSelectedCourse(\"$course->course_id\",\"" . $course->get_first_assigned_to_group_id() . "\",\"$course->assigned_to_semester_num\",\"$course->random_id\",\"$advising_term_id\",\"$req_by_degree_id\");");
 
 		}
 
@@ -4101,6 +4101,8 @@ function draw_menu_items($menu_array) {
 		$o_subject_id = $subject_id;
 		$o_course_num = $course_num;
 
+		$degree_id = $course->req_by_degree_id;
+		
 		$footnote = "";
 		$ast = "";
 		// Is this actually a transfer course?  If so, display its
@@ -4247,8 +4249,8 @@ function draw_menu_items($menu_array) {
 		$random_id = $course->random_id;
 		$advised_hours = $course->advised_hours*1;
 
-		$unique_id = $course_id . "_" . $semester_num . "_" . mt_rand(1,9999);
-		$hid_name = "advcr_$course_id" . "_$semester_num" . "_$hid_group_id" . "_$advised_hours" . "_$random_id" . "_$advising_term_id" . "_r" . mt_rand(1,9999);
+		$unique_id = $course_id . "_" . $semester_num . "_" . mt_rand(1,99999);
+		$hid_name = "advcr_$course_id" . "_$semester_num" . "_$hid_group_id" . "_$advised_hours" . "_$random_id" . "_$advising_term_id" . "_$degree_id" . "_r" . mt_rand(1,99);
 		
 		// Due to an interesting bug, the hid_name cannot contain periods.  So, if a course
 		// has decimal hours, we need to replace the decimal with a placeholder.

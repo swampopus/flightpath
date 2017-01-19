@@ -492,6 +492,8 @@ function popupAssignSelectedCourseToGroup(semester_num, group_id, advising_term_
         db_group_requirement_id = document.getElementById("" + course_id + "_db_group_requirement_id").value;
       }
       
+           
+      
       opener.assignSelectedCourseToGroup(course_id, semester_num, group_id, var_hours, advising_term_id, db_group_requirement_id);
 
       window.close();
@@ -698,7 +700,8 @@ function assignSelectedCourseToGroup(course_id, semester_num, group_id, var_hour
   // replace _ with something else that is valid, just for this submission.
   group_id = str_replace("_", "U", group_id);  // replace _ with "U" for "underscore".  We will change it back in _FlightPath.php.
   
-  e.setAttribute("name","advcr_" + course_id + "_" + semester_num + "_" + group_id + "_" + var_hours + "_r7" + "_" + advising_term_id + "_" + db_group_requirement_id);
+  // The "group" tells FlightPath to figure out the degree_id from the group_id var.
+  e.setAttribute("name","advcr_" + course_id + "_" + semester_num + "_" + group_id + "_" + var_hours + "_r7" + "_" + advising_term_id + "_" + "group");
   
   // note, the "r7" above is taking the place of a "random number."  Since it's the only one being submitted, it doesn't
   // really need to be random.
@@ -794,14 +797,14 @@ function popupSaveSubstitution(course_id, group_id, semester_num, req_by_degree_
 
 
 
-function updateSelectedCourse(course_id, group_id, semester_num, varHours, random_id, advising_term_id) {
+function updateSelectedCourse(course_id, group_id, semester_num, varHours, random_id, advising_term_id, degree_id) {
   //alert("The user selected course " + course_id + " for group " + group_id + " in sem " + semester_num + "for var hours " + varHours + "id: " + random_id + " term:" + advising_term_id);
       
   var hiddenElements = document.getElementById("hidden_elements");
   var e = document.createElement("input");
   e.setAttribute("name","updatecourse");
   e.setAttribute("type","hidden");
-  e.setAttribute("value","" + course_id + "~" + group_id + "~" + semester_num + "~" + varHours + "~" + random_id + "~" + advising_term_id);
+  e.setAttribute("value","" + course_id + "~" + group_id + "~" + semester_num + "~" + varHours + "~" + random_id + "~" + advising_term_id + "~" + degree_id);
   hiddenElements.appendChild(e);      
   
   submitForm(true);
@@ -891,9 +894,9 @@ function popupSetVarHours() {
 }
 
 
-function popupUpdateSelectedCourse(course_id, group_id, semester_num, random_id, advising_term_id) {
+function popupUpdateSelectedCourse(course_id, group_id, semester_num, random_id, advising_term_id, degree_id) {
   var varHours = document.getElementById("varHours").value;
-  opener.updateSelectedCourse(course_id, group_id, semester_num, varHours, random_id, advising_term_id);
+  opener.updateSelectedCourse(course_id, group_id, semester_num, varHours, random_id, advising_term_id, degree_id);
   window.close();
 
 }

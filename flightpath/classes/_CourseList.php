@@ -2236,6 +2236,38 @@ class _CourseList extends ObjList
 	}
 
 
+
+  /**
+   * Removes all courses which are not assigned to this degree_id.
+   */
+  function remove_courses_not_in_degree($degree_id) {
+      
+    $new_list = new CourseList();  
+    for ($t = 0; $t < $this->count; $t++)
+    {
+      $course = $this->array_list[$t];
+      if ($course == null)
+      {
+        continue;
+      }
+      
+      if ($course->req_by_degree_id != $degree_id) {
+        continue;
+      }
+      
+      // Otherwise, let's add it to the new_list.
+      $new_list->add($course);
+    }
+
+    // Switch over the reference.
+    $this->array_list = $new_list->array_list;
+    $this->reset_counter();      
+        
+  }
+  
+  
+
+
 	/**
 	 * Removes null's and duplicate courses from the list.
 	 *

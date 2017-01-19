@@ -1112,16 +1112,21 @@ class _DegreePlan extends stdClass
 
 
 
-  function find_courses($course_id, $group_id = 0, $semester_num)
+  /**
+   * If degree_id != 0, then we will remove any course from the finished list that is NOT in the degree plan.
+   *   0 means "give me all of matches back"
+   */
+  function find_courses($course_id, $group_id = 0, $semester_num, $degree_id = 0)
   {
     // This will locate a course within the degree plan, and return
     // back either that course object, or FALSE.
     $new_course = new Course($course_id);
     $new_semester = new Semester($semester_num);
     $rtn_course_list = new CourseList();
+    
     // Okay, if the course is within a group, then
     // we can first use the find_group method.
-    if ($group_id != 0)
+    if ($group_id != "" && $group_id != 0)
     {
       if ($group = $this->find_group($group_id))
       {
@@ -1166,7 +1171,14 @@ class _DegreePlan extends stdClass
 
         if ($cL = $semester->list_courses->find_all_matches($new_course))
         {
-          $rtn_course_list->add_list($cL);
+            
+          if ($degree_id != 0) {
+            // Trim $cL of any courses NOT in our supplied degree_id.
+            $cL->remove_courses_not_in_degree($degree_id);
+            if ($cL->get_size() == 0) return FALSE;  // we removed them all!
+          }
+          
+          $rtn_course_list->add_list($cL); 
           return $rtn_course_list;
         }
       }
@@ -1188,7 +1200,7 @@ class _DegreePlan extends stdClass
       }
     }
 
-    return false;
+    return FALSE;
 
 
   }

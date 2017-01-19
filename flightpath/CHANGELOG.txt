@@ -1,5 +1,14 @@
 FlightPath 5.x Changelog
 ========================
+
+2017-01-18
+  Fixed bug where advised identical courses in same semester, but in different degrees, FlightPath got confused about which
+  course to check.
+  
+  Fixed bug where after clearing advising cache, an adviser showed invalid tabs.
+  
+  Fixed bug with variable hour courses not being selected after changing hour selector.
+   
  
 2017-01-14
   Made more changes, to ensure that users cannot access another student's data by manipulating

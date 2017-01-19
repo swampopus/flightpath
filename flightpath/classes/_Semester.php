@@ -12,7 +12,7 @@
 class _Semester extends stdClass
 {
 	public $title, $semester_num, $notice, $bool_using_default_title;
-	public $list_courses, $list_groups;
+	public $list_courses, $list_groups, $req_by_degree_id;
 	/*
 	* $title		Freshman, Sophomore, Summer II, etc.
 	* $rankNum		Numeric "rank" or order of the semester object. 1,2,3, etc.
@@ -27,7 +27,7 @@ class _Semester extends stdClass
 	function __construct($semester_num = "")
 	{
 		$this->semester_num = $semester_num;
-		
+		    
     $this->bool_using_default_title = FALSE;
     
 		//$this->list_courses = new ObjList();
@@ -39,9 +39,10 @@ class _Semester extends stdClass
 	
 	function equals(Semester $semester)
 	{
+	  
 		if ($this->semester_num == $semester->semester_num)
 		{
-			return true;
+			  return true;
 		}
 		
 		return false;			

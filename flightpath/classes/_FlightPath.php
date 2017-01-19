@@ -1374,7 +1374,13 @@ class _FlightPath extends stdClass
       $var_hours = trim($temp[4]) * 1;
       $random_id = trim($temp[5]);
       $advised_term_id = trim($temp[6]);      
-      $db_group_requirement_id = trim($temp[7]);
+      //$db_group_requirement_id = trim($temp[7]);
+      $degree_id = trim($temp[7]);
+      if ($degree_id == "group") {
+        // Get degree_id from the group_id.
+        $tt = explode("_", $group_id);
+        $degree_id = $tt[1];
+      }
 
       $advising_session_id = $advising_session_id_array[$advised_term_id];
 
@@ -1397,12 +1403,17 @@ class _FlightPath extends stdClass
         $tvar_hours = $temp2[3];
         $trandom_id = $temp2[4];
         $tadvised_term_id = $temp2[5];
+        $tdegree_id = $temp2[6];
 
         // Do we have a match?
         if ($course_id == $tcourse_id && $random_id == $trandom_id)
         {
           // We have a match, so update with the new information.
           $var_hours = $tvar_hours;
+          $degree_id = $tdegree_id;
+          $new_course = new Course($tcourse_id);
+          $new_course->load_descriptive_data();
+          $entry_value = "$new_course->subject_id~$new_course->course_num";
           $bool_found_update_match = true;
         }
 
@@ -1420,10 +1431,10 @@ class _FlightPath extends stdClass
       $result = $db->db_query("INSERT INTO advised_courses
                   (`advising_session_id`,`course_id`,
                   `entry_value`,`semester_num`,
-                    `group_id`,`var_hours`,`term_id`)
+                    `group_id`,`var_hours`,`term_id`, `degree_id`)
                   VALUES
-                  ('?','?','?','?','?','?','?')
-                  ", $advising_session_id,$course_id,$entry_value,$semester_num,$group_id,$var_hours,$advised_term_id);
+                  ('?','?','?','?','?','?','?','?')
+                  ", $advising_session_id, $course_id, $entry_value, $semester_num, $group_id, $var_hours, $advised_term_id, $degree_id);
 
       $advising_session_id_array_count[$advised_term_id]++;
 
@@ -1442,15 +1453,20 @@ class _FlightPath extends stdClass
       $semester_num = $temp2[2] * 1;
       $var_hours = $temp2[3];
       $advised_term_id = $temp2[5];
+      $degree_id = $temp2[6];
 
+      $new_course = new Course($course_id);
+      $new_course->load_descriptive_data();
+      $entry_value = "$new_course->subject_id~$new_course->course_num";
+      
       $advising_session_id = $advising_session_id_array[$advised_term_id];
 
       $result = $db->db_query("INSERT INTO advised_courses
-                  (`advising_session_id`,`course_id`,`semester_num`,
-                    `group_id`,`var_hours`,`term_id`)
+                  (`advising_session_id`,`course_id`,`entry_value`,`semester_num`,
+                    `group_id`,`var_hours`,`term_id`,`degree_id`)
                   VALUES
-                  ('?','?','?','?','?','?')
-                  ", $advising_session_id,$course_id,$semester_num,$group_id,$var_hours,$advised_term_id);
+                  ('?','?','?','?','?','?','?','?')
+                  ", $advising_session_id,$course_id,$entry_value,$semester_num,$group_id,$var_hours,$advised_term_id,$degree_id);
 
       $advising_session_id_array_count[$advised_term_id]++;
 
@@ -1760,6 +1776,7 @@ class _FlightPath extends stdClass
       $course_id = trim($cur["course_id"]);
       $semester_num = trim($cur["semester_num"]);
       $group_id = trim($cur["group_id"]);
+      $degree_id = $cur["degree_id"];
       $var_hours = trim($cur["var_hours"]);
       $advised_term_id = trim($cur["term_id"]);
       $id = trim($cur["id"]);
@@ -1780,9 +1797,9 @@ class _FlightPath extends stdClass
 
       // Now, we need to modify the degree_plan object to
       // show these advisings.
-      if ($course_list = $this->degree_plan->find_courses($course_id, $group_id, $semester_num))
+      if ($course_list = $this->degree_plan->find_courses($course_id, $group_id, $semester_num, $degree_id))
       {
-        //fpm("I found course $course_id sem:$semester_num group:$group_id $var_hours");
+        //fpm("I found course $course_id sem:$semester_num group:$group_id $var_hours $degree_id");
         
         // This course may exist in several different branches of a group, so we need
         // to mark all the branches as having been advised to take.  Usually, this CourseList
@@ -1864,6 +1881,7 @@ class _FlightPath extends stdClass
         $course_list->reset_counter();
         while($course_list->has_more())
         {
+          
           $course = $course_list->get_next();
           // make sure the hour count has been loaded correctly.
           if ($course->get_catalog_hours() < 1)

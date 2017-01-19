@@ -179,20 +179,25 @@ function system_install() {
   // simplicity.
     
   $q = "
-        CREATE TABLE `advised_courses` (
-          `id` int(11)   AUTO_INCREMENT,
-          `advising_session_id` int(11)   DEFAULT '0',
-          `course_id` int(11)   DEFAULT '0',
-          `entry_value` varchar(20)   DEFAULT '',
-          `semester_num` int(11)   DEFAULT '0',
-          `group_id` varchar(50)   DEFAULT '',
-          `var_hours` decimal(8,4)   DEFAULT '0.0000',
-          `term_id` varchar(20)   DEFAULT '',
-          PRIMARY KEY (`id`),
-          KEY `advid` (`advising_session_id`),
-          KEY `course_id` (`course_id`),
-          KEY `ev` (`entry_value`)
-        );   ";
+CREATE TABLE `advised_courses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `advising_session_id` int(11) DEFAULT '0',
+  `course_id` int(11) DEFAULT '0',
+  `entry_value` varchar(20) DEFAULT '',
+  `semester_num` int(11) DEFAULT '0',
+  `group_id` varchar(50) DEFAULT '',
+  `var_hours` decimal(8,4) DEFAULT '0.0000',
+  `term_id` varchar(20) DEFAULT '',
+  `degree_id` int(11) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `advid` (`advising_session_id`),
+  KEY `course_id` (`course_id`),
+  KEY `ev` (`entry_value`),
+  KEY `degree_id` (`degree_id`),
+  KEY `term_id` (`term_id`),
+  KEY `semester_num` (`semester_num`)
+);   ";
+
   
   db_query($q);
 
