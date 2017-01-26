@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-01-26
+  Fixed bug where duplicating an entire year of courses was skipping over the max hours, if they were
+  set to zero.
+  
+
 2017-01-19
   Fixed bug in duplicate degrees, where some of the new fields were not being included.
   

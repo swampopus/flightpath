@@ -651,7 +651,10 @@ function admin_duplicate_year_form_submit($form, $form_state) {
   	$course->subject_id = $db_subject_id;
   	$course->course_num = $db_course_num;
   	$course->db_exclude = $db_exclude;
-  	
+    $course->min_hours = $db_min_hours;
+    $course->max_hours = $db_max_hours;
+    $course->repeat_hours = $db_repeat_hours;
+      	
   	// Now, duplicate it for the new_year.
   	$db->duplicate_course_for_year($course, $new_year);
   
