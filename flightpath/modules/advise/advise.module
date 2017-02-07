@@ -2470,9 +2470,9 @@ function advise_init_screen() {
     }
   }
 
-
+   
   // We shouldn't supply the advising_term_id, so that it will load all terms available.
-  $fp->load_advising_session_from_database(0,"",$bool_what_if,$bool_draft,0);
+  $fp->load_advising_session_from_database($faculty_id,"",$bool_what_if,$bool_draft,0);
 
   
   // Once we have loaded the advising session, we should always try to load

@@ -1031,7 +1031,7 @@ class _DatabaseHandler extends stdClass
   }
 
 
-  function get_advising_session_id($faculty_id = "", $student_id = "", $term_id = "", $degree_id = "", $bool_what_if = false, $bool_draft = true, $bool_load_any_if_faculty_id_not_found = TRUE)
+  function get_advising_session_id($faculty_id = "", $student_id = "", $term_id = "", $degree_id = "", $bool_what_if = false, $bool_draft = true, $bool_load_any_active_if_faculty_id_not_found = TRUE)
   {
     $is_what_if = "0";
     $is_draft = "0";
@@ -1075,17 +1075,16 @@ class _DatabaseHandler extends stdClass
     }
     
     
-    if (intval($advising_session_id) < 1 && $bool_load_any_if_faculty_id_not_found) {
-      // Meaning, we couldn't find a record for the supplied faculty_id.  Let's just load the first one, regardless
-      // of faculty_id.      
+    if (intval($advising_session_id) < 1 && $bool_load_any_active_if_faculty_id_not_found) {
+      // Meaning, we couldn't find a record for the supplied faculty_id.  Let's just load the most recent active one, regardless
+      // of faculty_id.  Meaning, we need to make sure that is_draft = 0      
       $query = "select * from advising_sessions
                   where
-                      student_id = ?
-                  $faculty_line
+                      student_id = ?                  
                   and term_id = ?
                   and degree_id = ?
-                  and is_whatif = ?
-                  $draft_line
+                  and is_whatif = ?                  
+                  and is_draft = 0
                   order by `posted` desc limit 1";
       $result = $this->db_query($query, array($student_id, $term_id, $degree_id, $is_what_if)) ;
       if ($this->db_num_rows($result) > 0) {

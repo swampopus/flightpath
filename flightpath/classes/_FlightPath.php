@@ -1688,7 +1688,7 @@ class _FlightPath extends stdClass
     // This method will load an advising session for a particular
     // student, and modify the degree plan object to reflect
     // the advisings.
-            
+  
     $db = get_global_database_handler();
     $is_what_if = "0";
     $is_draft = "0";
