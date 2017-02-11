@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-02-11
+  Fixed another bug relating to the logic of pulling up a student when two advisors are
+  working on the student at the same time.
+
+
 2017-02-07
   Fixed advising session bug where advisors working at the same time on the same student might see
   each other's draft work.
