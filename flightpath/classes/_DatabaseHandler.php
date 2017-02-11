@@ -1019,8 +1019,8 @@ class _DatabaseHandler extends stdClass
     $res = db_query("SELECT * FROM advised_courses WHERE advising_session_id = ?", $advising_session_id);
     while ($cur = db_fetch_array($res)) {
           
-      db_query("INSERT INTO advised_courses (advising_session_id, course_id, entry_value, semester_num, group_id, var_hours, term_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?)", $new_asid, $cur["course_id"], $cur["entry_value"], $cur["semester_num"], $cur["group_id"], $cur["var_hours"], $cur["term_id"]);    
+      db_query("INSERT INTO advised_courses (advising_session_id, course_id, entry_value, semester_num, group_id, var_hours, term_id, degree_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $new_asid, $cur["course_id"], $cur["entry_value"], $cur["semester_num"], $cur["group_id"], $cur["var_hours"], $cur["term_id"], $cur["degree_id"]);    
       
     }
     

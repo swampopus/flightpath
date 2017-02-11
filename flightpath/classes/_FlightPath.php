@@ -1291,14 +1291,15 @@ class _FlightPath extends stdClass
     $is_draft = intval($bool_draft);
     $is_what_if = intval($this->bool_what_if);
 
-    // Since we only want one draft copy per term/per student,
+    // Since we only want one draft copy per term/per student and faculty,
     // let's delete
     // any draft copies already in existence, if we are saving a draft.
     $result = $db->db_query("DELETE FROM advising_sessions
-                  WHERE `student_id`='?'
-                  AND `is_draft`='1'
-                  AND `degree_id`='?'
-                  AND `is_whatif`='?' ", $student_id, $degree_id, $is_what_if);
+                  WHERE student_id = ?
+                  AND is_draft = 1
+                  AND faculty_id = ?
+                  AND degree_id = ?
+                  AND is_whatif = ? ", $student_id, $faculty_id, $degree_id, $is_what_if);
 
 
     // The first thing we need to do is go through the availableTerms,
@@ -1682,7 +1683,8 @@ class _FlightPath extends stdClass
   }
 
 
-  function load_advising_session_from_database($faculty_id = 0, $term_id = "", $bool_what_if = false, $bool_draft = true, $advising_session_id = 0)
+
+  function load_advising_session_from_database($faculty_id = 0, $term_id = "", $bool_what_if = false, $bool_draft = true, $advising_session_id = 0, $duplicate_for_faculty_id = 0)
   {
     global $user;
     // This method will load an advising session for a particular
@@ -1692,6 +1694,8 @@ class _FlightPath extends stdClass
     $db = get_global_database_handler();
     $is_what_if = "0";
     $is_draft = "0";
+    
+    
     if ($bool_what_if == true){$is_what_if = "1";}
     if ($bool_draft == true){$is_draft = "1";}
 
@@ -1727,7 +1731,7 @@ class _FlightPath extends stdClass
 
       // Create a duplicate of this session as a draft...
       if ($bool_draft == FALSE) {
-        $db->duplicate_advising_session($advising_session_id, $faculty_id, "", "", "", "", 1);
+        $db->duplicate_advising_session($advising_session_id, $duplicate_for_faculty_id, "", "", "", "", 1);
       }
       
 
@@ -1744,10 +1748,10 @@ class _FlightPath extends stdClass
         if ($asid != 0)
         {
           $advising_session_line .= " advising_session_id='$asid' || ";
-          
+          fpm("loading asid $asid.  duplicate for fac $duplicate_for_faculty_id");
           // Create a duplicate of this session as a draft...
           if ($bool_draft == FALSE) {
-            $db->duplicate_advising_session($asid, $faculty_id, "", "", "", "", 1);
+            $db->duplicate_advising_session($asid, $duplicate_for_faculty_id, "", "", "", "", 1);
           }
           
           
