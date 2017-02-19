@@ -2476,7 +2476,7 @@ function advise_init_screen() {
   // loading fresh, not from draft, then load *any* faculty that saved last. 
   $use_faculty_id = $faculty_id;
   if (!$bool_draft) $use_faculty_id = 0;
-  fpm('bool_draft:' . intval($bool_draft) . " use fac: $use_faculty_id, fac: $faculty_id");
+  
   
   // We shouldn't supply the advising_term_id, so that it will load all terms available.
   $fp->load_advising_session_from_database($use_faculty_id,"",$bool_what_if,$bool_draft,0,$faculty_id);

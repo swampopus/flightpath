@@ -313,15 +313,17 @@ function admin_copy_degree_form_submit($form, $form_submit) {
                           (degree_id, semester_num, group_id,
                            group_requirement_type,
                            group_hours_required,
+                           group_min_hours_allowed,
                            group_min_grade, course_id,
                            course_min_grade,
                            course_requirement_type,
                            data_entry_value)
                            VALUES
-                          (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
+                          (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
                             $dest_degree_id, $db_semester_num, $db_group_id,
                            $db_group_requirement_type,
                            $db_group_hours_required,
+                           $db_group_min_hours_allowed,
                            $db_group_min_grade, $db_course_id,
                            $db_course_min_grade,
                            $db_course_requirement_type,

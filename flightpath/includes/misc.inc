@@ -1092,6 +1092,10 @@ function get_term_description($term_id, $bool_abbreviate = false) {
     // Ex:  "Fall of 2002."
     $rtn = "";
 
+    // See if any modules would like to act on the term_id before we proceed.
+    invoke_hook("alter_term_id_prior_to_description", array(&$term_id, &$bool_abbreviate));
+
+
     if (strstr($term_id, "1111"))
     {
       return "(data unavailable at this time)";

@@ -1748,7 +1748,7 @@ class _FlightPath extends stdClass
         if ($asid != 0)
         {
           $advising_session_line .= " advising_session_id='$asid' || ";
-          fpm("loading asid $asid.  duplicate for fac $duplicate_for_faculty_id");
+          
           // Create a duplicate of this session as a draft...
           if ($bool_draft == FALSE) {
             $db->duplicate_advising_session($asid, $duplicate_for_faculty_id, "", "", "", "", 1);

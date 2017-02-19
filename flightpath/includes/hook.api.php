@@ -39,6 +39,26 @@ function hook_form_alter(&$form, $form_id) {
 }
  
 
+
+
+/**
+ * This hook is called right before retrieving the plain English description
+ * for a term_id.  It allows modules to change the term_id.
+ * 
+ * Notice that term_id and $bool_abbreviate are passed by reference! 
+ */
+function hook_alter_term_id_prior_to_description(&$term_id, &$bool_abbreviate) {
+  if ($term_id == "201740") {
+    // change term_id to something else.
+    $term_id = "555570";
+  }
+}
+
+
+
+
+
+
 /**
  * Is the course allowed to be assigned to the specified degree?  Returns TRUE or FALSE
  * 

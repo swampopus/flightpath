@@ -790,14 +790,14 @@ function admin_duplicate_year_form_submit($form, $form_state) {
   		 
   		
   		$res4 = db_query("INSERT INTO draft_degree_requirements
-  							(`degree_id`,`semester_num`,`group_id`,`group_requirement_type`,
-  							`group_hours_required`,`group_min_grade`,`course_id`,
-  							`course_min_grade`,`course_requirement_type`,`data_entry_value`)
+  							(degree_id, semester_num, group_id, group_requirement_type,
+  							group_hours_required, group_min_hours_allowed, group_min_grade, course_id,
+  							course_min_grade, course_requirement_type, data_entry_value)
   							VALUES
-  							('?','?','?','?','?','?','?','?','?','?')
-  							", $new_degree_id,$db3_semester_num,$required_group_id,$db3_group_requirement_type,
-  							$db3_group_hours_required,$db3_group_min_grade,$db3_course_id,
-  							$db3_course_min_grade,$db3_course_requirement_type,$db3_data_entry_value);
+  							(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  							", $new_degree_id, $db3_semester_num, $required_group_id, $db3_group_requirement_type,
+  							$db3_group_hours_required, $db3_group_min_hours_allowed, $db3_group_min_grade, $db3_course_id,
+  							$db3_course_min_grade, $db3_course_requirement_type, $db3_data_entry_value);
   		
   		
   	}
