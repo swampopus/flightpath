@@ -652,7 +652,7 @@ class _FlightPath extends stdClass
     // Get the course repeat policy.
     $course_repeat_policy = variable_get("course_repeat_policy", "most_recent_exclude_previous");
     // Set the $bool_mark_repeats_exclude variable based on the course_repeat_policy.
-    $bool_mark_repeats_exclude = ($course_repeat_policy == "most_recent_exclude_previous");
+    $bool_mark_repeats_exclude = ($course_repeat_policy == "most_recent_exclude_previous" || $course_repeat_policy == "best_grade_exclude_others");
 
     $group_id = $group->group_id;
     // If the group_id == 0, we may be talking about the bare degree plan.

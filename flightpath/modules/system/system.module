@@ -811,10 +811,11 @@ function system_school_data_form() {
     "type" => "select",
     "label" => t("Course repeat policy:"),
     "options" => array("most_recent_exclude_previous" => t("most recent, exclude previous attempts"),
-                       "most_recent_do_not_exclude" => t("most recent, do not exclude previous attempts - \"beta\" feature")),
+                       "most_recent_do_not_exclude" => t("most recent, do not exclude previous attempts - \"beta\" feature"),
+                       "best_grade_exclude_others" => t("best grade, exclude other attempts - \"beta\" feature")),
     "value" => variable_get("course_repeat_policy", "most_recent_exclude_previous"),
     "hide_please_select" => TRUE,
-    "description" => t("This setting affects the course repeat policy for FlightPath for normal courses.
+    "description" => t("This setting affects the course repeat policy for FlightPath for normal courses (courses which are not allowed to be repeated normally).
                         <br><b>If you are unsure what to select</b>, choose 'most recent, exclude previous attempts'.
                         <br>Please see the 
                 <b><a href='http://getflightpath.com/node/1085' target='_blank'>FlightPath documentation</a></b> 

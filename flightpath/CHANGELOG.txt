@@ -1,6 +1,10 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-03-05
+  Added new course sort policy (to be considered in 'beta' for the time being,
+  which allows to select highest grade, exclude other attempts.
+
 
 2017-02-19
   Fixed bug in duplicating degrees re: groups with var hours.

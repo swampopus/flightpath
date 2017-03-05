@@ -406,6 +406,127 @@ class _CourseList extends ObjList
 
 	
 	
+  
+  
+  
+  /**
+   * Find a list of matches to Course courseC, which fulfill 
+   * the min_grade requirement, ordered by most best grade first.
+   *
+   * Returns FALSE if no matches were found, else it will 
+   * return the matched Course object.
+   * 
+   * @param Course $course_c
+   * @param string $min_grade
+   * @param bool $bool_mark_repeats_exclude
+   * 
+   * @return Course
+   */
+  function find_best_grade_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE)
+  {
+
+    if (!$list_matches =  parent::find_all_matches($course_c))
+    {
+      return false;
+    }
+
+    
+    $list_matches = CourseList::cast($list_matches);
+
+    if ($list_matches->is_empty)
+    {
+      return false;
+    }
+
+    // If we are here, then we have more than one match.
+    // Meaning, we have more than one class which might fit
+    // into this course requirement.
+
+    // Sort the courses into best grade first.
+    $list_matches->sort_best_grade_first();
+
+
+    $withdrew_grades = csv_to_array(variable_get("withdrew_grades", "W"));
+    
+    
+    // So, now that it's sorted, we should look through the list,
+    // checking the min grade requirements (if any).  When we find
+    // a good one, we will select it.
+
+    $list_matches->reset_counter();
+    while($list_matches->has_more())
+    {
+      $c = $list_matches->get_next();
+      
+      if ($c->bool_exclude_repeat == true)
+      {
+        continue;
+      }
+      //////////////////////////////////////////
+      ///  Check for min grade, etc, here.      
+      if (!$c->meets_min_grade_requirement_of(null, $min_grade))
+      {
+                
+        if ($bool_mark_repeats_exclude == true)
+        {
+          // Since this course does not meet the min_grade,
+          // check to see if it may be repeated.  If it can't,
+          // then we must mark ALL previous attempts at this
+          // course as being excluded from further consideration.
+          // (ULM policy on repeats).
+          // We don't do this consideration if they simply
+          // withdrew from a course...
+          if (in_array($c->grade, $withdrew_grades)) { continue; }
+
+          if ($c->min_hours < 1 || $c->min_hours == "") {
+            $c->load_descriptive_data();  // make sure we get hour data for this course.
+          }         
+          
+          if ($c->repeat_hours <= $c->min_hours)
+          {
+            // No repeats.
+            $this->mark_repeats_exclude($c);
+            return false;
+
+          } else {
+            // Repeats allowed, so just continue.
+            continue;
+          }
+
+        } // if bool_mark_repeats_exclude == true 
+        else {
+          // We did NOT meet the min_grade requirement!
+          $c = FALSE;
+          continue;
+        }
+      } // course did NOT meet the min_grade requirement
+      else {
+        // The course DID meet the min grade requirement.
+        //fpm("[DID meet min grade req of $min_grade :: $c->subject_id $c->course_num $c->grade");
+      }
+
+      // Has the course already been assigned [to this degree]?
+      if ($bool_skip_already_assigned && $c->get_has_been_assigned_to_degree_id($degree_id)) {
+        // Yes, it's been assigned, so we can just skip it.
+        continue;
+      }
+
+      return $c;
+    }
+  
+    return FALSE;
+
+  } // find_best_grade_match
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
 	
 	
 	/**
@@ -448,7 +569,7 @@ class _CourseList extends ObjList
 			  if (!$use_grade) $use_grade = "";
 			}
 			
-			$grade_value = $grades[$use_grade];
+			@$grade_value = $grades[$use_grade];
 			if ($grade_value == "") {
 			  // Couldn't find this grade in our array, so give it the unknown value.
 			  $grade_value = $unknown_grade_value;
@@ -1347,9 +1468,22 @@ class _CourseList extends ObjList
 	 */
 	function find_best_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE)
 	{
+    $rtn = FALSE;
+    
+    // We will look at the course_repeat_policy to determine which type of search to do on this list.
+    $course_repeat_policy = variable_get("course_repeat_policy", "most_recent_exclude_previous");
+    
+    if ($course_repeat_policy == "best_grade_exclude_others") {
+      // Search for best grade, exclude other attempts.
+      $rtn = $this->find_best_grade_match($course_c, $min_grade, TRUE, $degree_id, $bool_skip_already_assigned);
+    }
+    else {
+      // Search for most recent first, possibly mark previous as excluded.
+      
+		  $rtn = $this->find_most_recent_match($course_c, $min_grade, $bool_mark_repeats_exclude, $degree_id, $bool_skip_already_assigned);
+    }
 
-		return $this->find_most_recent_match($course_c, $min_grade, $bool_mark_repeats_exclude, $degree_id, $bool_skip_already_assigned);
-
+    return $rtn;
 	}
 
 
