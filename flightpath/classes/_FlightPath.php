@@ -653,7 +653,7 @@ class _FlightPath extends stdClass
     $course_repeat_policy = variable_get("course_repeat_policy", "most_recent_exclude_previous");
     // Set the $bool_mark_repeats_exclude variable based on the course_repeat_policy.
     $bool_mark_repeats_exclude = ($course_repeat_policy == "most_recent_exclude_previous" || $course_repeat_policy == "best_grade_exclude_others");
-
+    
     $group_id = $group->group_id;
     // If the group_id == 0, we may be talking about the bare degree plan.
 
@@ -821,6 +821,14 @@ class _FlightPath extends stdClass
       // Has the student taken this course requirement?
       if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude, $req_by_degree_id))
       { 
+
+        $temp = false;
+        $c->load_descriptive_data();
+        if ($c->name_equals("HIST 201")) {
+          //fpm("here, $req_by_degree_id, " . $bool_mark_repeats_exclude);
+          //fpm($c);
+          $temp = true;
+        }
 
         $h_get_hours = $c->get_hours();
         if ($c->bool_ghost_hour) {

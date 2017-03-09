@@ -226,8 +226,9 @@ class _Student extends stdClass
 		while($cur = db_fetch_array($res))
 		{
 			extract ($cur, 3, "db");
+      
 
-			if ($taken_course = $this->list_courses_taken->find_specific_course($db_course_id, $db_term_id, (bool) $db_transfer_flag, true))
+			if ($taken_course = $this->list_courses_taken->find_specific_course($db_course_id, $db_term_id, (bool) $db_transfer_flag, TRUE, NULL, $db_degree_id))
 			{
 				// Add the group_id to this courses' list of unassigned groups.
 				$new_group = new Group();
@@ -801,7 +802,8 @@ class _Student extends stdClass
 	 * @param unknown_type $course
 	 */
 	function get_best_grade_for_course(Course $course) {
-	  $c = $this->list_courses_taken->find_most_recent_match($course);
+	  //$c = $this->list_courses_taken->find_most_recent_match($course);
+	  $c = $this->list_courses_taken->find_best_grade_match($course);
 	  
 	  if ($c) return $c->grade;
 	  

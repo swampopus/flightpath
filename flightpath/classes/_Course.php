@@ -46,7 +46,7 @@ class _Course extends stdClass
 
   // Major/Degree or Group Requirement related:
   public $min_grade, $specified_repeats, $bool_specified_repeat, $required_on_branch_id;
-  public $assigned_to_semester_num, $bool_exclude_repeat, $req_by_degree_id;
+  public $assigned_to_semester_num, $req_by_degree_id;
   public $assigned_to_degree_ids_array, $assigned_to_group_ids_array;
 
 
@@ -105,7 +105,6 @@ class _Course extends stdClass
     $this->bool_advised_to_take = false;
     $this->bool_added_course = false;
     $this->specified_repeats = 0;
-    $this->bool_exclude_repeat = false;
     $this->bool_specified_repeat = false;
     
     // Give this course instance a "random" numeric id, meaning, it doesn't really mean anything.
@@ -481,6 +480,42 @@ class _Course extends stdClass
     //$this->bool_has_been_displayed_by_degree_array[$degree_id] = $val;
     $this->set_details_by_degree($degree_id, "bool_has_been_displayed", $val);
   }
+
+
+
+  function set_bool_exclude_repeat($degree_id = 0, $val = TRUE) {
+    // If degree_id is zero, then use the course's currently req_by_degree_id.
+    if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
+    
+    //$this->bool_has_been_displayed_by_degree_array[$degree_id] = $val;
+    $this->set_details_by_degree($degree_id, "bool_exclude_repeat", $val);    
+  }
+
+
+  /**
+   * Returns TRUE or FALSE if this course has been marked as exclude_repeat.  Specify a degree_id to be more specific.
+   * Use -1 to mean "ANY" degree?
+   */
+  function get_bool_exclude_repeat($degree_id = 0) {
+    
+    // If degree_id is zero, then use the course's currently req_by_degree_id.    
+    if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
+    
+    if ($degree_id > 0) {
+      //return $this->bool_has_been_displayed_by_degree_array[$degree_id];
+      return $this->get_details_by_degree($degree_id, "bool_exclude_repeat");
+    }
+    else {
+      // has the course been displayed by ANY degree?
+      if ($this->get_count_details_by_degree("bool_exclude_repeat") > 0) {
+        return TRUE;
+      }
+    }
+    
+    return FALSE;
+  }
+
+
 
 
   
@@ -1923,9 +1958,6 @@ class _Course extends stdClass
       $rtn .= " - substitution.";
     }
 
-    if ($this->bool_exclude_repeat) {
-      $rtn .= " - excluded repeat.";
-    }
 
     if ($this->db_exclude > 0) {
       $rtn .= " - db_exclude = $this->db_exclude";

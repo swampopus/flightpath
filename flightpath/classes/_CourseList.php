@@ -259,7 +259,7 @@ class _CourseList extends ObjList
 	 * @param Course $course
 	 * @return bool
 	 */
-	function mark_repeats_exclude(Course $course)
+	function mark_repeats_exclude(Course $course, $degree_id = 0, Course $except_for_course = NULL)
 	{
 		// Set the bool_exclude_repeat flag to TRUE for all
 		// occurances of $course in THIS list.
@@ -274,7 +274,15 @@ class _CourseList extends ObjList
 		while($list_matches->has_more())
 		{
 			$c = $list_matches->get_next();
-			$c->bool_exclude_repeat = true;
+      
+      if ($except_for_course != NULL) {
+        if ($c == $except_for_course) {
+          // Skip it.
+          continue;
+        }
+      }
+      
+			$c->set_bool_exclude_repeat($degree_id, TRUE);
 		}
 
 		return true;
@@ -307,23 +315,15 @@ class _CourseList extends ObjList
 			return false;
 		}
 
-		
 		$list_matches = CourseList::cast($list_matches);
 
-		// Don't just return if it's only got a size of 1,
-		// so that it forces it to do the min grade checking.
-		/*		if ($list_matches->getSize() == 1)
-		{
-		return $list_matches->get_next();
-		}
-		*/
 		if ($list_matches->is_empty)
 		{
 			return false;
 		}
 
-		// If we are here, then we have more than one match.
-		// Meaning, we have more than one class which might fit
+		// If we are here, then we have at least one match.
+		// Meaning, we have at least one class which might fit
 		// into this course requirement.
 
 		// Sort the courses into most recently taken first.
@@ -342,10 +342,11 @@ class _CourseList extends ObjList
 		{
 			$c = $list_matches->get_next();
 			
-			if ($c->bool_exclude_repeat == true)
+			if ($c->get_bool_exclude_repeat($degree_id, TRUE))
 			{
 				continue;
 			}
+      
 			//////////////////////////////////////////
 			///  Check for min grade, etc, here.			
 			if (!$c->meets_min_grade_requirement_of(null, $min_grade))
@@ -357,7 +358,7 @@ class _CourseList extends ObjList
 					// check to see if it may be repeated.  If it can't,
 					// then we must mark ALL previous attempts at this
 					// course as being excluded from further consideration.
-					// (ULM policy on repeats).
+					// 
 					// We don't do this consideration if they simply
 					// withdrew from a course...
 					if (in_array($c->grade, $withdrew_grades)) { continue; }
@@ -368,8 +369,8 @@ class _CourseList extends ObjList
 					
 					if ($c->repeat_hours <= $c->min_hours)
 					{
-						// No repeats.
-						$this->mark_repeats_exclude($c);
+						// No repeats.						
+						$this->mark_repeats_exclude($c, $degree_id);
 						return false;
 
 					} else {
@@ -387,6 +388,15 @@ class _CourseList extends ObjList
 			} // course did NOT meet the min_grade requirement
       else {
         // The course DID meet the min grade requirement.
+        // Are we supposed to exclude repeats?
+        if ($bool_mark_repeats_exclude) {
+          // Make sure the course isn't allowed to be repeated...
+          if ($c->repeat_hours <= $c->min_hours) {
+            // No repeats allowed.
+            $this->mark_repeats_exclude($c, $degree_id, $c);
+          }        
+        }
+        
         //fpm("[DID meet min grade req of $min_grade :: $c->subject_id $c->course_num $c->grade");
       }
 
@@ -458,7 +468,7 @@ class _CourseList extends ObjList
     {
       $c = $list_matches->get_next();
       
-      if ($c->bool_exclude_repeat == true)
+      if ($c->get_bool_exclude_repeat($degree_id) == TRUE)
       {
         continue;
       }
@@ -485,7 +495,7 @@ class _CourseList extends ObjList
           if ($c->repeat_hours <= $c->min_hours)
           {
             // No repeats.
-            $this->mark_repeats_exclude($c);
+            $this->mark_repeats_exclude($c, $degree_id);
             return false;
 
           } else {
@@ -502,6 +512,18 @@ class _CourseList extends ObjList
       } // course did NOT meet the min_grade requirement
       else {
         // The course DID meet the min grade requirement.
+        
+        // Are we supposed to exclude repeats?
+        if ($bool_mark_repeats_exclude) {
+          // Make sure the course isn't allowed to be repeated...
+          if ($c->repeat_hours <= $c->min_hours) {
+            // No repeats allowed.
+            $this->mark_repeats_exclude($c, $degree_id, $c);
+          }        
+        }        
+        
+        
+        
         //fpm("[DID meet min grade req of $min_grade :: $c->subject_id $c->course_num $c->grade");
       }
 
@@ -1469,6 +1491,8 @@ class _CourseList extends ObjList
 	function find_best_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE)
 	{
     $rtn = FALSE;
+    
+
     
     // We will look at the course_repeat_policy to determine which type of search to do on this list.
     $course_repeat_policy = variable_get("course_repeat_policy", "most_recent_exclude_previous");

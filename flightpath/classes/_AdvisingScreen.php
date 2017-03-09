@@ -1351,7 +1351,7 @@ function draw_menu_items($menu_array) {
 
 			// Skip courses which haven't had anything moved.
 			if ($c->group_list_unassigned->is_empty == true)
-			{
+			{			  
 				continue;
 			}
 
@@ -2698,9 +2698,8 @@ function draw_menu_items($menu_array) {
     }
     
     ////////////////
-    // Is this course assigned to a group?    
-		//if ($course->get_first_assigned_to_group_id() != "" && $course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE)
-		if ($course->disp_for_group_id != "" && $course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE)
+    // Is this course assigned to a group?
+		if ($course->disp_for_group_id != "" && $course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution($course->req_by_degree_id) != TRUE)
 		{
 		  		  
       $html = "";
@@ -2732,7 +2731,7 @@ function draw_menu_items($menu_array) {
       );
       
 		} 
-		else if ($course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution(-1) != TRUE && $course->get_has_been_assigned_to_degree_id()) {
+		else if ($course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution($course->req_by_degree_id) != TRUE && $course->get_has_been_assigned_to_degree_id()) {
 			// Course is not assigned to a group; it's on the bare degree plan.  group_id = 0.
 			// If user is an admin...
 			

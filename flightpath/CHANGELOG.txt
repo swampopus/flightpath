@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2014-03-09
+  Fixed bug where course repeats were not being excluded correctly.
+  
+  Fixed bug where a course could not be removed from a group if it was being used as a sub in a different degree's group.
+  
+
 2017-03-05
   Added new course sort policy (to be considered in 'beta' for the time being,
   which allows to select highest grade, exclude other attempts.
