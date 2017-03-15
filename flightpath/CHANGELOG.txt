@@ -1,14 +1,17 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-03-15
+  Fixed another bug where courses worth zero hours were not showing up in lists correctly.
+  
+
 2017-03-14
   Fixed bug where course->load_descriptive_data() actually reset bool_ghost_hour booleans
   for courses.  This meant that courses worth MORE than zero hours in the database would show up as worth
   1 hour, even if they earned zero hours.  Added a simple argument to disable that behavior, FALSE by default.
   
   The same bug was causing ghost hour courses to show as worth "1 hour" in popups.
-  
-  
+    
 
 2017-03-09
   Fixed bug where course repeats were not being excluded correctly.

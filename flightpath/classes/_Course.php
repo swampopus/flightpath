@@ -832,7 +832,13 @@ class _Course extends stdClass
     
     if (!$this->has_variable_hours())
     {
-      return $this->min_hours*1;
+      // Normal course, no var hours.
+      $h = $this->min_hours * 1;
+      // check for ghost hours.
+      if ($this->bool_ghost_min_hour) {
+        $h = 0;
+      }
+      return $h;
     } else {
       // Meaning this does course have variable hours.
 

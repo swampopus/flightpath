@@ -4607,7 +4607,6 @@ function draw_menu_items($menu_array) {
 			// Lacking course's display data, so reload it from the DB.
 			$course->load_course($course->course_id);
 		}
-
     $subject_id = $course->subject_id;
 		$course_num = $course->course_num;
 		$hours = $course->get_catalog_hours();
