@@ -1,7 +1,16 @@
 FlightPath 5.x Changelog
 ========================
 
-2014-03-09
+2017-03-14
+  Fixed bug where course->load_descriptive_data() actually reset bool_ghost_hour booleans
+  for courses.  This meant that courses worth MORE than zero hours in the database would show up as worth
+  1 hour, even if they earned zero hours.  Added a simple argument to disable that behavior, FALSE by default.
+  
+  The same bug was causing ghost hour courses to show as worth "1 hour" in popups.
+  
+  
+
+2017-03-09
   Fixed bug where course repeats were not being excluded correctly.
   
   Fixed bug where a course could not be removed from a group if it was being used as a sub in a different degree's group.

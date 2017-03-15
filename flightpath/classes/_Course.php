@@ -355,7 +355,6 @@ class _Course extends stdClass
         // It wasn't set, so get the first value that WAS set.
         $x = $this->get_first_value_from_any_degree("hours_awarded");
       }
-      
       if ($x) return $x;                  
                   
     }
@@ -1441,7 +1440,7 @@ class _Course extends stdClass
    *          database.
    * 
    */
-  function load_descriptive_data($bool_load_from_global_cache = true, $bool_ignore_catalog_year_in_cache = true, $bool_limit_current_catalog_year = true, $bool_force_catalog_year = false, $bool_ignore_exclude = false)
+  function load_descriptive_data($bool_load_from_global_cache = true, $bool_ignore_catalog_year_in_cache = true, $bool_limit_current_catalog_year = true, $bool_force_catalog_year = false, $bool_ignore_exclude = false, $bool_reset_ghost_hours = TRUE)
   {
     
     if ($this->db == null)
@@ -1514,19 +1513,25 @@ class _Course extends stdClass
       $this->description = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["description"];
       $this->min_hours = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["min_hours"];
       
-      // Reset the ghosthours to default.
-      $this->bool_ghost_hour = $this->bool_ghost_min_hour = FALSE;
-
+      if ($bool_reset_ghost_hours) {
+        // Reset the ghosthours to default.
+        $this->bool_ghost_hour = $this->bool_ghost_min_hour = FALSE;
+      }
+      
       if ($this->min_hours <= 0) {
-        $this->min_hours = 1;        
-        $this->bool_ghost_min_hour = TRUE;
+        $this->min_hours = 1;
+        if ($bool_reset_ghost_hours) {        
+          $this->bool_ghost_min_hour = TRUE;
+        }
       }
       
       $this->max_hours = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["max_hours"];
       
       if ($this->max_hours <= 0) {
         $this->max_hours = 1;
-        $this->bool_ghost_hour = TRUE;
+        if ($bool_reset_ghost_hours) {
+          $this->bool_ghost_hour = TRUE;
+        }
       }
       
       
@@ -1604,16 +1609,22 @@ class _Course extends stdClass
       $this->min_hours = $cur["min_hours"] * 1;  //*1 will trim extra zeros from end of decimals
       $this->max_hours = $cur["max_hours"] * 1;
 
-      // Reset the ghosthours to default.
-      $this->bool_ghost_hour = $this->bool_ghost_min_hour = FALSE;
+      if ($bool_reset_ghost_hours) {
+        // Reset the ghosthours to default.
+        $this->bool_ghost_hour = $this->bool_ghost_min_hour = FALSE;
+      }
       
       if ($this->min_hours <= 0) {
         $this->min_hours = 1;
-        $this->bool_ghost_min_hour = TRUE;
+        if ($bool_reset_ghost_hours) {
+          $this->bool_ghost_min_hour = TRUE;
+        }
       }
       if ($this->max_hours <= 0) {
         $this->max_hours = 1;
-        $this->bool_ghost_hour = TRUE;
+        if ($bool_reset_ghost_hours) {
+          $this->bool_ghost_hour = TRUE;
+        }
       }
       
       
@@ -1684,12 +1695,15 @@ class _Course extends stdClass
     // Now, to reduce the number of database calls in the future, save this
     // to our GLOBALS cache...
 
+    
     // We do need to go back and correct the ghost hours, setting them
     // back to 0 hrs, or else this will be a problem.
     $min_hours = $this->min_hours;
     $max_hours = $this->max_hours;
-    if ($this->bool_ghost_min_hour) $min_hours = 0;
-    if ($this->bool_ghost_hour) $max_hours = 0;
+    if ($bool_reset_ghost_hours) {    
+      if ($this->bool_ghost_min_hour) $min_hours = 0;
+      if ($this->bool_ghost_hour) $max_hours = 0;
+    }
     
     
     // Since we may have trouble characters in the description (like smart quotes) let's

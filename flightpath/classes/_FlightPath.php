@@ -822,13 +822,15 @@ class _FlightPath extends stdClass
       if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude, $req_by_degree_id))
       { 
 
+        /*
         $temp = false;
-        $c->load_descriptive_data();
-        if ($c->name_equals("HIST 201")) {
+        $c->load_descriptive_data(false, false, false,false, false, false);
+        if ($c->name_equals("COMM 101")) {
           //fpm("here, $req_by_degree_id, " . $bool_mark_repeats_exclude);
-          //fpm($c);
+          fpm($c);
           $temp = true;
         }
+         */ 
 
         $h_get_hours = $c->get_hours();
         if ($c->bool_ghost_hour) {

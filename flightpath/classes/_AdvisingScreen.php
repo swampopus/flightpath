@@ -2405,9 +2405,8 @@ function draw_menu_items($menu_array) {
 
 
 		$advising_term_id = @$GLOBALS["fp_advising"]["advising_term_id"];
-
     
-		$course->load_descriptive_data();
+		$course->load_descriptive_data(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE);
 
 		$course_hours = $course->get_hours();
 
