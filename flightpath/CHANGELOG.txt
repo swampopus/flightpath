@@ -1,6 +1,17 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-03-27
+  Fixed a bug where substitutions and moved courses were not showing up correctly
+  immediately after changing a degree option (like adding or removing a track).  This
+  was due to the FlightPath object not using the same reference to the student object
+  after a non-cache load.
+  
+  Fixed an issue where hooks could not always be invoked from hook_init.  This was
+  because hook_init was being called as soon as the module was loaded.  Instead, the logic
+  was changed so that all modules are loaded first, THEN hook_init is called.
+
+
 2017-03-15
   Fixed another bug where courses worth zero hours were not showing up in lists correctly.
   

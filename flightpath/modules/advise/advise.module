@@ -534,6 +534,7 @@ function advise_display_popup_change_track() {
     // Go through each time of classification in this degree's track_selection_config_array.    
     //foreach ($t_degree_plan->track_selection_config_array as $machine_name => $tdetails) {
     $degree_classes = fp_get_degree_classifications();
+    
     foreach ($degree_classes["levels"][3] as $machine_name => $class_title) {
             
       $extra_css_class = "";    
@@ -620,6 +621,7 @@ function advise_display_popup_change_track() {
         
         // if this track is NOT of the same classification as the current machine_code, we skip it.        
         $track_machine_name = trim(@$temp[4]);
+                        
         if ($track_machine_name != $machine_name) continue; // not the right degree_class
     
         if (strstr($track_description, "DEFAULT:")) {
@@ -2408,30 +2410,13 @@ function advise_init_screen() {
     $student->load_student_substitutions();
     $student->load_unassignments();
     
+    // Make sure we assign the freshly-loaded student, and re-establish all of our connections.
+    $fp->student = $student;     
+    $screen->flightpath = $fp;
+    $screen->student = $fp->student;
     
-    /*
-    // Should we sort alphabetical order, or should we sort best grade first?  This is a setting the admin
-    // can configure on the Configure School Data settings screen (admin/config/school-data)
-    $sort_policy = variable_get("initial_student_course_sort_policy", "alpha"); // will either be "alpha" or "grade"
-    if ($sort_policy == "grade") {
-      $student->list_courses_taken->sort_best_grade_first();  
-    }
-    else {
-      // It's alpha!
-      $student->list_courses_taken->sort_alphabetical_order();  
-    }
-    
-    
-    // DEV
-    $student->list_courses_taken->sort_best_grade_first();  
-    */
-    
-    //   DEV, REMOVE: $student->list_courses_taken->sort_most_recent_first();
-    //  print_pre($student->list_courses_taken->toString());
-
-
+       
     $fp->flag_outdated_substitutions();
-    
     $fp->assign_courses_to_semesters(); // bare degree plan. not groups.
     $fp->assign_courses_to_groups();
     

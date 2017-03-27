@@ -697,16 +697,22 @@ class _FlightPath extends stdClass
       if ($group->group_id != "" && $group->req_by_degree_id > 0) {        
         $req_by_degree_id = $group->req_by_degree_id;
       }
-      
-      
+       
+       /*
+        if ($course_requirement->name_equals("HIST 225")) {
+          fpm("here, $req_by_degree_id, $group_id");
+          fpm($student->list_substitutions);          
+
+        }
+        */       
+     
       if ($bool_check_significant_courses == true)
       {
         // Only look for the course_requirement if it is in the student's
         // array_significant_courses array.
         if (isset($student->array_significant_courses[$course_requirement->course_id]) && $student->array_significant_courses[$course_requirement->course_id] != true)
         {// course was not in there, so skip!
-
-                
+               
           continue;
         }
       }
@@ -720,10 +726,10 @@ class _FlightPath extends stdClass
         $student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);
       }
       //fpm($group_id);
+      
       // Does the student have any substitutions for this requirement?
       if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id, $req_by_degree_id))
       {
-        //fpm($group_id);
         
         // Since the substitution was made, I don't really care about
         // min grades or the like.  Let's just put it in.
@@ -822,15 +828,8 @@ class _FlightPath extends stdClass
       if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude, $req_by_degree_id))
       { 
 
-        /*
-        $temp = false;
-        $c->load_descriptive_data(false, false, false,false, false, false);
-        if ($c->name_equals("COMM 101")) {
-          //fpm("here, $req_by_degree_id, " . $bool_mark_repeats_exclude);
-          fpm($c);
-          $temp = true;
-        }
-         */ 
+ 
+ 
 
         $h_get_hours = $c->get_hours();
         if ($c->bool_ghost_hour) {

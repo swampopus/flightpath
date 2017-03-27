@@ -2580,6 +2580,7 @@ function system_init() {
     fp_add_message(t("@FlightPath is currently undergoing routine maintenance.  
                       During this time, some data may appear incomplete.
                       We apologize for the inconvenience and appreciate your patience.", array("@FlightPath" => variable_get("system_name", "FlightPath"))), "status", TRUE);
+    
   }
    
   // Is there an urgent message to display?  

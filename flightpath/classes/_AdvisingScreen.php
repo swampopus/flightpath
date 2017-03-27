@@ -776,7 +776,7 @@ function draw_menu_items($menu_array) {
           "o_course" => $o_course,
           "extra" => $extra,
           "remarks" => $remarks,
-          "for_degree" => $sub_degree_plan->get_title2(),
+          "for_degree" => $sub_degree_plan->get_title2(FALSE, TRUE),
           "overwrite_with_html" => "",
         );
         
@@ -893,7 +893,7 @@ function draw_menu_items($menu_array) {
         $degree_title = "";
         if ($group->req_by_degree_id != 0) {
           $tdeg = new DegreePlan($group->req_by_degree_id);
-          $degree_title = " (" . $tdeg->get_title2() . ")";
+          $degree_title = " (" . $tdeg->get_title2(FALSE, TRUE) . ")";
         }
 				if ($group->group_id > 0)
 				{
@@ -1391,7 +1391,7 @@ function draw_menu_items($menu_array) {
         $degree_title = "";
         if ($group->req_by_degree_id != 0) {
           $tdeg = new DegreePlan($group->req_by_degree_id);
-          $degree_title = " (" . $tdeg->get_title2() . ")";
+          $degree_title = " (" . $tdeg->get_title2(FALSE, TRUE) . ")";
         }        
         
         

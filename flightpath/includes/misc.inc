@@ -1328,12 +1328,12 @@ function fp_screen_is_mobile(){
  * Do not include the preceeding "_" on the hook name!
  */
 function modules_implement_hook($hook = "example_hook_here") {
-  static $hook_cache;  // we want to keep up with which modules implement which hooks.    
-    
-  if (!isset($hook_cache)) $hook_cache = array();  
-    
+  
+  // Going to use a global array to keep track of what hooks exist.  
+  if (!isset($GLOBALS['hook_cache'])) $GLOBALS['hook_cache'] = array();  
+  
   // Have we already cached this list previously?
-  if (isset($hook_cache[$hook])) return $hook_cache[$hook];  
+  if (isset($GLOBALS['hook_cache'][$hook])) return $GLOBALS['hook_cache'][$hook];  
     
   // We have not already cached this, so let's look for it fresh...  
     
@@ -1349,7 +1349,7 @@ function modules_implement_hook($hook = "example_hook_here") {
     }
   }
   
-  $hook_cache[$hook] = $rtn;
+  $GLOBALS['hook_cache'][$hook] = $rtn;
   
   return $rtn;  
 }

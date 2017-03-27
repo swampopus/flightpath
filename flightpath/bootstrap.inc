@@ -42,11 +42,16 @@ if (!isset($skip_flightpath_modules) || $skip_flightpath_modules != TRUE) {
     if (isset($value["enabled"]) && $value["enabled"] != "1") {
       // Module is not enabled.  Skip it.
       continue;
-    }
-  
-    include_module($module, TRUE);
+    }  
+    include_module($module, FALSE);  // simply include the module, do not call hook_init yet.
   }
 }
+
+// Now, invoke all modules which implement hook_init.
+invoke_hook('init');
+
+
+
 
 // Constants
 define('FLIGHTPATH_VERSION', '%FP_VERSION%');  // will be replaced automatically by getflightpath.com.
