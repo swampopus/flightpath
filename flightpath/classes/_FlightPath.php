@@ -55,7 +55,7 @@ class _FlightPath extends stdClass
     //$track_code = $GLOBALS["fp_advising"]["advising_track_code"];
 
     $track_degree_ids = $GLOBALS["fp_advising"]["advising_track_degree_ids"];
-    
+            
     $student_id = $GLOBALS["fp_advising"]["advising_student_id"];
     $advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
     @$available_terms = $GLOBALS["fp_advising"]["available_advising_term_ids"];
@@ -140,7 +140,7 @@ class _FlightPath extends stdClass
     $major_code_csv .= "," . $track_degree_ids;    
         
     ///////////////////////////////
-    //  TODO:  Okay folks.  So this is basically where we will be iterating through all
+    //  Okay folks.  So this is basically where we will be iterating through all
     //  of the student's major_codes (if they have more than one), and squishing them together,
     //  to create a single DegreePlan object, made out of all the options.
     //  We need like a loop here.
@@ -152,7 +152,7 @@ class _FlightPath extends stdClass
       $t_major_code = $major_code;
   
       if (trim($major_code) == "") continue;
-  
+      //fpm($major_code);
       /*  
       if ($track_code != "")
       {
@@ -1178,7 +1178,9 @@ class _FlightPath extends stdClass
     global $user;
     
     $catalog_year = 0;
-    
+
+
+    $bool_fp_goto_at_end = FALSE;    
     
     
     // This method will, only by looking at variables in the
@@ -1227,7 +1229,6 @@ class _FlightPath extends stdClass
     //    die;
     // We have changed tracks, so we are to edit the student degrees table.
     if ($_POST["advising_update_student_degrees_flag"] == "true") {
-
       // Begin by deleting all the "editable" rows for this student
       // in student_degrees.
       db_query("DELETE FROM student_degrees 
@@ -1257,10 +1258,17 @@ class _FlightPath extends stdClass
       $_REQUEST["advising_track_degree_ids"] = "";
       
       $this->student->load_student_data();
+      
+      // force re-build of cache
+      //$_REQUEST["load_from_cache"] = "no"; 
+      //$_SESSION["cache_fp$student_id"] = "";
+      //$_SESSION["cache_what_if$student_id"] = "";
+      $GLOBALS["fp_advising"]["load_from_cache"] = "no";
+      
       //fpm("calling init...");
       $this->init(TRUE);
       //fpm("done with init");       
-       
+      $bool_fp_goto_at_end = TRUE; 
     } // editing degrees?
 
 
@@ -1685,6 +1693,16 @@ class _FlightPath extends stdClass
 
 
     watchdog("advising", "Student has been advised: @student", array("@student" => $student_id));
+
+    // Instead of executing the page, we will issue a redirect using fp_goto.
+    // This makes it so if the user hits "refresh", it will not re-submit a POST request.
+    if ($bool_fp_goto_at_end) {
+          
+      // Goto the same page we are already on.  This mimics Drupal's Form API behavior.  
+      $q = $_REQUEST['q'];       
+      fp_goto($q, "advising_major_code=&load_from_cache=no&advising_student_id=$student_id");
+      
+    }
 
     return $advising_session_id_array;
 

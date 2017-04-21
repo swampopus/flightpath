@@ -5,7 +5,26 @@
  */
 
  
+
+/**
+ * Returns the component of the page's path.
+ * 
+ * When viewing a page at the path "admin/structure/types", for example, arg(0) returns "admin", arg(1) returns "structure", and arg(2) returns "types".
+ * 
+ */ 
+function arg($index) {
+  
+  $q = $_REQUEST["q"];
+  $temp = explode("/", $q);
+
+  $rtn = @trim($temp[$index]);
+  
+  return $rtn;
+  
+} 
  
+ 
+  
  
 /**
  * Send a request through the Internet and return the result as an object.

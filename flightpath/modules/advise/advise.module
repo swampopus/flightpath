@@ -1925,12 +1925,13 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   {
   
     $vars["advising_major_code"] = @$_SESSION["advising_major_code$csid"];
+  
     if ($vars["advising_major_code"] == "")
     { // Default value...
       
       if (!$student) $student = new Student($csid);             
       $vars["advising_major_code"] = $student->major_code_csv;
- 
+  
       $_REQUEST["advising_major_code"] = $student->major_code_csv;
     }
   }
@@ -2395,17 +2396,28 @@ function advise_init_screen() {
     $screen->bool_blank = TRUE;
   }
 
+
   
   if ($bool_what_if == true && @$GLOBALS["fp_advising"]["what_if_major_code"] == "")  {
     // In other words, we are on the WhatIf tab, but we have not
     // selected a major.  So, just exit out.  We will give the user
     // a display_screen later.
     return;
-  }
+  } 
 
 
   if (@$GLOBALS["fp_advising"]["load_from_cache"] != "yes") { 
     // do not load from cache....  load the student fresh....
+    //fpm("no cache");
+ 
+    /*
+    $fp = new FlightPath();
+    $fp->init();    
+    $student = $fp->student;
+    $degree_plan = $fp->degree_plan;    
+    $GLOBALS["fp_advising"]["load_from_cache"] = "no";    
+    */
+    
     $student->load_student();
     $student->load_student_substitutions();
     $student->load_unassignments();
@@ -2437,6 +2449,9 @@ function advise_init_screen() {
     
     
   }
+
+
+
 
   if (@$GLOBALS["fp_advising"]["save_to_cache"] != "no" && $window_mode != "popup") {
     if ($bool_what_if == false) { 

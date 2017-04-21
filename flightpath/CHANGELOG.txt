@@ -1,6 +1,13 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-04-21
+  Added a new behavior to when FlightPath saves advising session from POST.  Instead of
+  simply continuing execution, it can now reload the page via fp_goto().  This prevents
+  certain bugs from appearing if the user hits "Refresh" on the browser, causing the
+  POST to submit again.  
+
+
 2017-03-27
   Fixed a bug where substitutions and moved courses were not showing up correctly
   immediately after changing a degree option (like adding or removing a track).  This
