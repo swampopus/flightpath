@@ -388,7 +388,7 @@ function variable_get($name, $default_value = "") {
     $res = db_query("SELECT value FROM variables
                            WHERE name = '?' ", $name);
     $cur = db_fetch_array($res);    
-    $val = unserialize($cur["value"]);
+    @$val = unserialize($cur["value"]);
 
     // Save back to our cache...
     $GLOBALS["fp_system_settings"][$name] = $val;
