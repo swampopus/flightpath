@@ -1161,6 +1161,7 @@ function admin_perm() {
 function admin_urgent_message_form() {
   $form = array();
 
+  $m = 0;
   
   $form["mark" . $m++] = array(
     "type" => "markup",

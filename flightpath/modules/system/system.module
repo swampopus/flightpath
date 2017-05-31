@@ -2076,6 +2076,8 @@ function system_perform_run_cron() {
 function system_display_status_page() {
   $rtn = "";
   
+  $pol = "";
+  
   fp_add_css(fp_get_module_path("system") . "/css/style.css");
   
   $status_array = invoke_hook("status");  // get everyone's hook_status.
@@ -2092,7 +2094,7 @@ function system_display_status_page() {
   foreach ($status_array as $module => $details) {
     $pol = ($pol == "even") ? "odd" : "even";
     
-    if ($details["severity"] == "") $details["severity"] = "normal";
+    if (@$details["severity"] == "") $details["severity"] = "normal";
     
     $rtn .= "<tr class='status-row status-row-$pol'>
               <td valign='top' class='module-name'>$module</td>
@@ -2121,6 +2123,7 @@ function system_display_status_page() {
 function system_status() {
   $rtn = array();
   $rtn["severity"] = "normal";
+  $rtn["status"] = "";
   // Check on the last time cron was run; make sure it's working properly.
   $last_run = variable_get("cron_last_run", 0);
   
