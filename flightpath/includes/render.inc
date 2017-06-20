@@ -487,7 +487,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   if ($popup_description) {        
     
     //$popup_help_link = " <a href='javascript: alert(\"" . $popup_description . "\");' class='form-popup-description'>[?]</a>";
-    $popup_help_link = fp_get_js_alert_link($popup_description, "[?]", "form-popup-description");
+    $popup_help_link = fp_get_js_alert_link($popup_description, "<span class='pop-q-mark'>?</span>", "form-popup-description");
   }
 
   $element_error_css = "";
@@ -537,7 +537,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     
     // If a label is set, go ahead and display, even though its markup...
     if ($label != "") {
-      $rtn .= "<label>$ast$label $popup_help_link</label>";
+      $rtn .= "<label>$ast$label$popup_help_link</label>";
     } 
      
     $rtn .= "$value";
@@ -547,7 +547,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     }
   }
   else if ($type != "hidden" && $type != "checkbox") {
-    $rtn .= "<label>$ast$label $popup_help_link</label>";
+    $rtn .= "<label>$ast$label$popup_help_link</label>";
   }
 
   if ($type == "textarea") {

@@ -1725,7 +1725,10 @@ function fp_reduce_whitespace($str) {
   // Cheap hack to get rid of whitespace    
   for ($t = 0; $t < 5; $t++) {
     $str = str_replace("  ", " ", $str);
+    $str = str_replace("\n ", "\n", $str);
   }  
+
+
 
   return $str;  
 }

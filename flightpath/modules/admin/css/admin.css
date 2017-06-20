@@ -113,3 +113,76 @@
   background: #eee;
   border: 1px solid #ccc;
 }
+
+
+
+/*
+ * 
+ * *********************************************************
+ * *********************************************************
+ * 
+ * The edit degree form page
+ */
+___edit_degree_form{}  /* placeholder for editor */
+
+#fp-form-admin_edit_degree_form {
+  font-size: 0.85em;  
+}
+
+#fp-form-admin_edit_degree_form .form-element label {
+  font-weight: normal;
+  float: left;
+  
+}
+
+#fp-form-admin_edit_degree_form .form-element {
+  margin-bottom: 10px;
+}
+
+#fp-form-admin_edit_degree_form .form-popup-description {
+  padding-left: 0;
+  padding-right: 3px;
+}
+
+#fp-form-admin_edit_degree_form #element-wrapper-degree_type,
+#fp-form-admin_edit_degree_form #element-wrapper-degree_class,
+#fp-form-admin_edit_degree_form #element-wrapper-degree_level,
+#fp-form-admin_edit_degree_form #element-inner-wrapper-exclude,
+#fp-form-admin_edit_degree_form #element-wrapper-allow_dynamic,
+#fp-form-admin_edit_degree_form #element-wrapper-override_degree_hours,
+#ignoreme .ignoreme 
+{
+  float: left;
+  padding-right: 20px;
+}
+
+
+#fp-form-admin_edit_degree_form #element-wrapper-title,
+#ignore .ignore #ignoreme
+{
+  clear: both;
+}
+
+
+
+
+
+#fp-form-admin_edit_degree_form #element-wrapper-degree_class select {
+  max-width: 140px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -656,7 +656,8 @@ function draw_menu_items($menu_array) {
 			if ($bool_grad_credit_block && $course->level_code != "" && in_array($course->level_code, $graduate_level_codes_array)) {			  			  
 			  continue;
 			}
-			
+			      
+      
       // Tell the course_row what group we are coming from. (in this case: none)
       $course->disp_for_group_id = "";
 						

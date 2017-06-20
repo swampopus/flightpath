@@ -408,7 +408,11 @@ class _Student extends stdClass
           $new_course->subject_id = $taken_course->subject_id;
           $new_course->course_num = $taken_course->course_num;
 					
-					$new_course->set_hours_awarded($req_by_degree_id, $remaining_hours);
+					$new_course->set_hours_awarded($req_by_degree_id, $remaining_hours);					
+					$new_course->req_by_degree_id = $req_by_degree_id;
+          
+					
+					
 					if (is_object($new_course->course_transfer))
 					{
 						$new_course->course_transfer->set_hours_awarded($req_by_degree_id, $remaining_hours);

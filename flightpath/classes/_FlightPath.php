@@ -2072,7 +2072,7 @@ class _FlightPath extends stdClass
     }
 
 
-  }
+  } // split_requirements_by_substitution
 
 
 

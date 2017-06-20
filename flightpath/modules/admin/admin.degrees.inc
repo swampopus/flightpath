@@ -1235,7 +1235,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
   
   $form["degree_level"] = array(
     "type" => "textfield",
-    "label" => "Degree Level:",
+    "label" => "Level:",
     "size" => 1,
     "value" => $degree->degree_level,
     "popup_description" => t("Enter the degree level code in this box.  If left blank, it is assumed to be an \"Undergraduate\" degree.
@@ -1302,8 +1302,91 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     "popup_description" => t("You may specify a number of degree hours here (ex: 125).  FlightPath will use this value, instead of calculating the number of hours
                               required for this degree.  If you are unsure what to put here, leave it blank, or enter zero, for FlightPath to calculate hours normally."),    
   );
+  
+  
       
         
+  ///////////////////////////////////////
+  ///////////////////////////////////////
+  // Degree Blocks //
+  //////////////////////////////////////
+  ///////////////////////////////////////
+   
+  $form['blocks_top_markup'] = array(
+    'value' => "<div style='clear: both;'></div>
+                <hr>
+                <h2>Semester Blocks</h2>",
+  );
+   
+  $first_semester_num = -999;
+            
+  $degree->list_semesters->reset_counter();
+  while ($degree->list_semesters->has_more()) {
+    $semester = $degree->list_semesters->get_next();
+    if ($semester->semester_num < 0) {
+      continue;
+    }
+    
+    // Record what is the first semester num we have...
+    if ($first_semester_num == -999) {
+      $first_semester_num = $semester->semester_num;
+    } 
+    
+    $sem_default_title = admin_get_semester_name($semester->semester_num);
+    if ($semester->title == $sem_default_title) {
+      $semester->title = "";
+    }
+
+    $form['semester_title_' . $semester->semester_num] = array(
+      'type' => 'textfield',
+      'prefix' => "<div style='padding-bottom: 3px;'><b>Block number: " . ($semester->semester_num + 1) . "</b> &nbsp; &nbsp; &nbsp; Default Title: <em>$sem_default_title</em></div>",
+      'label' => 'Override Title:',
+      'value' => $semester->title,
+      'size' => 20,
+      'popup_description' =>  t("You may override the default title for a block.  For example, if instead of Freshman Year you want it to read Pre-Pharmacy Year 1 in FlightPath,
+                                 then you would enter that in this box and hit save.  
+                                 
+                                 To change a title back to the default, just leave it blank."),
+      
+    );
+
+
+    // Show the courses for this semester...
+    $contents = "";
+    $semester->list_courses->sort_alphabetical_order();
+    $semester->list_courses->reset_counter();
+    while($semester->list_courses->has_more()) {
+      $course = $semester->list_courses->get_next();
+      $course->load_descriptive_data();
+      $contents .= "$course->subject_id $course->course_num $course->requirement_type";
+      if ($course->min_grade != "D" && $course->min_grade != "") {
+        $contents .= " ($course->min_grade)";
+      }
+      $contents .= "\n";
+    }
+    
+    
+    $form['courses_' . $semester->semester_num] = array(
+      'type' => 'textarea',
+      'label' => 'Courses: ',
+      'value' => $contents,
+      'rows' => 10,
+      'cols' => 20,
+      'popup_description' => t("Enter course requirements in this format: \n   SUBJECT COURSENUM type (MINGRADE)\n\n
+                              type - lowercase character denoting the requirement type of the course.  Make sure you have a space between it and the course number.  If no type is specified, it is understood to be a major requirement.\n
+                              min grade - Place the min grade (if there is one) in parenthesis after the type.  Make sure there is a space between the min grade and the type (or course number, if there is no type specified).\n   Example:  ACCT 110 s (C)\n\n
+                              Repeats require no special characters or symbols.  Simply enter the course again."),
+      
+    );
+    
+    
+    
+  
+  } // while degree->list_semesters
+     
+     
+     
+     
   
   
   
