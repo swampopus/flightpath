@@ -69,6 +69,78 @@ function admin_display_degrees_popup_add_group() {
 }
 
 
+
+
+
+function admin_display_degrees_popup_add_group2() {
+  $semester_num = trim($_GET["semester_num"]);
+  $de_catalog_year = admin_get_de_catalog_year();
+  
+   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
+  
+  $rtn = "";
+   
+  $rtn .= "<b>" . t("VERSION 2 - Add an elective group to semester: @semester_num in @de_catalog_year", array("@semester_num" => $semester_num, "@de_catalog_year" => $de_catalog_year)) . "</b><br>
+        <span class='tenpt'>" . t("Use keyboard shortcut CTRL-F to find groups quickly.") . "</span>
+        <br><br>
+        First, select a group (from $de_catalog_year):
+        <div class='tenpt' 
+          style='height:200px; overflow-y: scroll; border: 1px solid black;
+          margin:5px;'>
+        <table border='0' cellspacing='5'>";
+
+  $res = db_query("SELECT * FROM draft_groups
+              WHERE catalog_year = '?'
+              AND delete_flag = '0'
+              ORDER BY title ", $de_catalog_year);
+  while($cur = db_fetch_array($res)) {
+    extract($cur, 3, "db");
+    $rtn .= "<tr><td valign='middle'>
+                <input type='radio' name='rgroups' value='$db_group_id'></td>
+          <td valign='top' class='tenpt'>
+          $db_title<br><i>$db_group_name</i>
+          </td>
+        </tr>
+          
+        "; 
+  }                                                         
+
+  $min_grades = csv_to_array(variable_get("group_min_grades", "A,B,C,D"));
+
+
+  $rtn .= "</table></div>
+      " . t("Next, select properties for this group:") . "
+      <a href='javascript: adminPopupAlertHelp(\"group_properties\");'>?</a>
+      <div class='tenpt' style='padding-top: 5px;'>
+      Hrs: <input type='text' name='hours' id='hours' size='2'>
+      Min Grade: <select name='min_grade' id='min_grade'>
+              <option value=''>--</option>
+              ";
+  foreach ($min_grades as $g) {
+    $rtn .= "<option value='$g'>$g</option>";
+  }
+  
+  $rtn .= "              
+            </select>
+      Type: <select name='type' id='type'>";
+  // Get our list of requirement types from our settings.
+  $types = fp_get_requirement_types();
+  foreach ($types as $code => $desc) {
+    $rtn .= "<option value='$code'>$code - $desc</option>";
+  }
+  $rtn .= "
+          </select> 
+        &nbsp; &nbsp;
+        " . fp_render_button("Add group &raquo;", "adminPopupAddGroup2(\"$semester_num\");") . "
+      </div>";
+
+
+  return $rtn;
+}
+
+
+
+
 /**
  * This form lets the user copy a degree and all of it's tracks & concentrations.
  */
@@ -1177,7 +1249,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
   if (user_has_permission("can_view_advanced")) {
     $form["markup_adv"] = array(
       "value" => "<span class='tenpt deg-advanced-msg' style='background-color: yellow; margin-left: 20px;'>
-          advanced: degreeID = $degree_id. catalog year: $de_catalog_year
+          Advanced: degree_id = $degree_id. catalog_year: $de_catalog_year
           </span>",
     ); 
   }
@@ -1191,6 +1263,18 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     "type" => "hidden",
     "value" => $de_catalog_year,
   );
+  
+  $form["scroll_top"] = array(
+    "type" => "hidden",
+    "value" => '',
+  );
+
+  $form["perform_action2"] = array(
+    "type" => "hidden",
+    "value" => '',
+  );
+  
+      
   
   $form["markup_degree_header"] = array(
     "value" => "<h3>$degree->degree_type $degree->title<br>$major_code ($de_catalog_year)</h3>",
@@ -1368,6 +1452,9 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     
     $form['courses_' . $semester->semester_num] = array(
       'type' => 'textarea',
+      'prefix' => "<div class='edit-degree-semester-block'>
+                   <table border='1' width='100%' class='edit-degree-semester-block-table'>
+                   <td valign='top' width='30%'>",      
       'label' => 'Courses: ',
       'value' => $contents,
       'rows' => 10,
@@ -1376,14 +1463,139 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
                               type - lowercase character denoting the requirement type of the course.  Make sure you have a space between it and the course number.  If no type is specified, it is understood to be a major requirement.\n
                               min grade - Place the min grade (if there is one) in parenthesis after the type.  Make sure there is a space between the min grade and the type (or course number, if there is no type specified).\n   Example:  ACCT 110 s (C)\n\n
                               Repeats require no special characters or symbols.  Simply enter the course again."),
+
+      'suffix' => "</td>",
+                  
       
     );
     
     
     
+    // Show the groups (and option for adding groups) for this semester...
+    $contents = "";
+    $contents .= "
+          <table width='100%' border='0' cellspacing='5' class='edit-degree-semester-groups-table'>
+          <tr>
+            <th valign='top' class='tenpt' width='1'>&nbsp;</td>
+            <th valign='top' class='tenpt'>" . t("Group") . "</td>
+            <th valign='top' class='tenpt' width='5'>" . t("Hrs") . "</td>
+            <th valign='top' class='tenpt' width='5'>" . t("Grd") . "</td>
+            <th valign='top' class='tenpt' width='5'>" . t("Type") . "</td>
+          </tr>    
+    ";
+    $semester->list_groups->sort_alphabetical_order();
+    $semester->list_groups->reset_counter();
+    while($semester->list_groups->has_more()) {
+      $group = $semester->list_groups->get_next();
+      $group->load_descriptive_data();
+      
+      $ghours = $group->hours_required;
+      // If min hours are specified, set to MIN-MAX.
+      if ($group->has_min_hours_allowed()) {
+        $ghours = $group->min_hours_allowed . "-" . $ghours;
+      }
+
+      $contents .= "<tr>
+                      <td valign='middle'>      
+                        <a href='javascript: adminDelGroup(\"" . $group->get_db_group_id() . "\",\"$semester->semester_num\");'><img src='" . fp_theme_location() . "/images/delete.png' border='0'></a>
+                      </td>
+                      <td valign='top' class='tenpt'>
+                        $group->title<br><i>$group->group_name</i>
+                      </td>
+                      <td valign='top' class='tenpt'>$ghours</td>
+                      <td valign='top' class='tenpt'>$group->min_grade</td>
+                      <td valign='top' class='tenpt'>$group->requirement_type                        
+                      </td>
+                    </tr>";
+
+      // Let's also add a hidden form element here, for the existing group.
+      // <input type='hidden' name='group_" . $group->get_db_group_id() . "_" . rand(1,999999) . "' value='" . $group->get_db_group_id() . "" . "_$semester->semester_num" . "_$ghours" . "_$group->requirement_type" . "_$group->min_grade'>
+      $form['group_' . $group->get_db_group_id() . '_' . rand(1,99999)] = array(
+        'type' => 'hidden',
+        'value' => $group->get_db_group_id() . "_{$semester->semester_num}_{$ghours}_{$group->requirement_type}_{$group->min_grade}", 
+      );
+
+
+    } // while semester->list_groups    
+    
+    $url = fp_url("admin/degrees/popup-add-group2", "semester_num=$semester->semester_num&de_catalog_year=$de_catalog_year");
+    
+    $contents .= "</table>
+        <div style='margin-top: 10px; margin-left: 20px; font-size:0.8em;'>
+          <a href='javascript: adminPopupWindow(\"$url\");'>Add an elective group</a>
+        </div>";
+    
+    
+    // Display our contents in a markup element for this semester
+    $form["semester_groups_" . $semester->semester_num . "_markup"] = array(
+      'prefix' => "<td valign='top'>",
+      'label' => "Groups:",
+      'value' => $contents,
+      'suffix' => "</table>
+                   </div> <!-- semester block -->
+                   " . fp_render_button(t("Save Draft for @year", array("@year" => $de_catalog_year)), "adminSubmitDegreeForm2();"),
+    ); 
+
+
+
+
+    
+    /*
+    // Get the groups...
+    $rtn .= "<td valign='top' class='tenpt' width='100%'>
+          <table width='100%' border='0' cellspacing='5'>
+          <tr>
+            <td valign='top' class='tenpt' width='1'>&nbsp;</td>
+            <td valign='top' class='tenpt'>Group</td>
+            <td valign='top' class='tenpt' width='5'>hrs</td>
+            <td valign='top' class='tenpt' width='5'>grd</td>
+            <td valign='top' class='tenpt' width='5'>type</td>
+            </tr>";
+    $semester->list_groups->sort_alphabetical_order();
+    $semester->list_groups->reset_counter();
+    while($semester->list_groups->has_more()) {
+      $group = $semester->list_groups->get_next();
+      $group->load_descriptive_data();
+      
+      $ghours = $group->hours_required;
+      // If min hours are specified, set to MIN-MAX.
+      if ($group->has_min_hours_allowed()) {
+        $ghours = $group->min_hours_allowed . "-" . $ghours;
+      }
+      
+      
+      $rtn .= "<tr><td valign='middle'>
+      
+            <a href='javascript: adminDelGroup(\"" . $group->get_db_group_id() . "\",\"$semester->semester_num\");'><img src='" . fp_theme_location() . "/images/delete.png' border='0'></a>
+                  
+            <td valign='top' class='tenpt'>
+            $group->title<br><i>$group->group_name</i></td>
+            <td valign='top' class='tenpt'>$ghours</td>
+            <td valign='top' class='tenpt'>$group->min_grade</td>
+            <td valign='top' class='tenpt'>$group->requirement_type
+            <input type='hidden' name='group_" . $group->get_db_group_id() . "_" . rand(1,999999) . "' value='" . $group->get_db_group_id() . "" . "_$semester->semester_num" . "_$ghours" . "_$group->requirement_type" . "_$group->min_grade'>
+            </td>"; 
+    }
+    
+    $url = fp_url("admin/degrees/popup-add-group", "semester_num=$semester->semester_num&de_catalog_year=$de_catalog_year");
+    
+    $rtn .= "</table>
+        <div style='margin-top: 10px; margin-left: 20px;'>
+          <a href='javascript: adminPopupWindow(\"" . $url . "\");'>Add an elective group</a>
+        </div>
+    </td>";  
+  */
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   } // while degree->list_semesters
-     
      
      
      
@@ -1393,6 +1605,28 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
   
   return $form;
 } // admin_edit_degree_form
+
+
+
+function admin_edit_degree_form_submit($form, $form_state) {
+  fpm($form_state);
+  
+  // Set the scroll_top position, if it is set.
+  $scroll_top = $form_state['values']['scroll_top'];  
+  if (@$scroll_top != "" && intval($scroll_top) > 0) {
+    $_SESSION['scroll_top'] = $scroll_top;
+  }
+  
+  // Perform actual saves to database
+  // TODO: that!
+  
+  
+  
+}
+
+
+
+
 
 
 

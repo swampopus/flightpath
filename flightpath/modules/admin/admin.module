@@ -279,6 +279,21 @@ function admin_menu() {
     "type" => MENU_TYPE_CALLBACK,
   );     
 
+  $items["admin/degrees/popup-add-group2"] = array(
+    "title" => "Add Group",
+    "page_callback" => "admin_display_degrees_popup_add_group2",
+    "access_arguments" => array("can_edit_data_entry"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),   
+    "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
+    "type" => MENU_TYPE_CALLBACK,
+  );     
+  
+  
+  
   
   $items["admin/degrees/add-degree"] = array(
     "title" => "Add Degree",

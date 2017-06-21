@@ -452,6 +452,50 @@ function adminPopupAddGroup(semester_num) {
 }
 
 
+
+
+function adminPopupAddGroup2(semester_num) {
+
+  var group_id = 0;
+  
+  var cbs = document.getElementsByName("rgroups");
+  for (var t = 0; t < cbs.length; t++)
+  {
+    var cb = cbs[t];
+    if (cb.checked == true) {
+      // In other words, this group
+      // was selected.
+      group_id = cb.value;
+    }
+  }
+  
+  var hours = document.getElementById("hours").value;
+  var type = document.getElementById("type").value;
+  var min_grade = document.getElementById("min_grade").value;
+  
+  // make sure hours doesn't contain a _, as that will cause all sorts of problems.
+  hours = str_replace("_", "-", hours);
+  
+  
+  if (hours < 1 || group_id < 1) {
+    alert("Please select a group and number of hours!");
+    return;
+  }
+  
+  opener.showUpdate(false);
+  //alert(group_id + " " + hours + " " + type + " " + min_grade);
+  opener.document.getElementById("element-perform_action2").value="addGroup_" + group_id + "_" + semester_num + "_" + hours + "_" + type + "_" + min_grade;
+  
+  opener.adminSubmitDegreeForm2();
+  
+  
+  window.close();
+      
+}//popupaddgroup2
+
+
+
+
 function adminPopupSaveDefinition() {
   var x = confirm("Are you sure you wish to save this definition?  Doing this will overwrite whatever may already be in the Required Courses box.\n\nClick OK to proceed.");
   if (!x) {
@@ -477,6 +521,13 @@ function adminSubmitDegreeForm() {
   document.getElementById("scroll_top").value = document.body.scrollTop;
   document.getElementById("mainform").submit();
 } 
+
+function adminSubmitDegreeForm2() {
+  // Note: due to complexity, the degree form is not a typical form_api form.
+  document.getElementById("element-scroll_top").value = document.body.scrollTop;
+  document.getElementById("fp-form-admin_edit_degree_form").submit();
+} 
+
 
 
 function adminDelGroup(group_id, semester_num) {

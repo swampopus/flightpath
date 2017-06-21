@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+
+2017-06-21
+  Made it to where if the SESSION var "scroll_top" is set, the value will be respected.  This allows
+  FAPI forms to set the scroll top (like the degree edit form)
+
+
 2017-06-19
   Tweaked the reduce_whitespace function to make it slightly smarter.
   

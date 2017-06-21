@@ -156,6 +156,13 @@ function fp_display_page($page) {
     $screen->page_scroll_top = $_REQUEST["scroll_top"];    
   }
   
+  // If there is a SESSION var for scroll_top, use that instead, then wipe it.
+  if (@$_SESSION['scroll_top'] != "") {
+    $screen->page_scroll_top = $_SESSION["scroll_top"];
+    $_SESSION['scroll_top'] = "";
+    unset($_SESSION['scroll_top']);
+  }
+  
   // Was this page a tab?  And if so, are there any other tabs we need to display? //
   if ($page["router_item"]["type"] == MENU_TYPE_TAB || $page["router_item"]["tab_parent"] != "") {
     // We know we should have at least 1 tab for this page.
