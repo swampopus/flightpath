@@ -1284,7 +1284,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
   // Top part of degree entry....
   $form["degree_type"] = array(
     "type" => "textfield",
-    "label" => "Degree Type:",
+    "label" => t("Degree Type:"),
     "size" => 3,
     "value" => $degree->degree_type,
     "popup_description" => t("For example: BS, BA, Ph.D, etc."),    
@@ -1302,7 +1302,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
   
   $form["degree_class"] = array(
     "type" => "select",
-    "label" => "Classification:",
+    "label" => t("Classification:"),
     "options" => $options,
     "value" => $degree->degree_class,
     "hide_please_select" => TRUE,
@@ -1319,7 +1319,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
   
   $form["degree_level"] = array(
     "type" => "textfield",
-    "label" => "Level:",
+    "label" => t("Level:"),
     "size" => 1,
     "value" => $degree->degree_level,
     "popup_description" => t("Enter the degree level code in this box.  If left blank, it is assumed to be an \"Undergraduate\" degree.
@@ -1332,7 +1332,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
   
   $form["advising_weight"] = array(
     "type" => "textfield",
-    "label" => "Advising Weight:",
+    "label" => t("Advising Weight:"),
     "size" => 1,
     "value" => $degree->db_advising_weight,
     "popup_description" => t("If this degree is ever combined with another degree, this value, the advising weight, determines
@@ -1350,7 +1350,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
   
   $form["title"] = array(
     "type" => "textfield",
-    "label" => "Title:",
+    "label" => t("Title:"),
     "size" => 80,
     "maxlength" => 100,
     "value" => $degree->title,
@@ -1359,7 +1359,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
 
   $form["exclude"] = array(
     "type" => "textfield",
-    "label" => "Exclude:",
+    "label" => t("Exclude:"),
     "size" => 1,
     "value" => intval($degree->db_exclude),
     "popup_description" => t("If the Exclude value is set to 1 (the number one), then this degree will show up in gray on the list of degrees.  It will also not be selectable in What If mode in FlightPath.
@@ -1369,7 +1369,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
   
   $form["allow_dynamic"] = array(
     "type" => "textfield",
-    "label" => "Allow Dynamic:",
+    "label" => t("Allow Dynamic:"),
     "size" => 1,
     "value" => intval($degree->db_allow_dynamic),
     "popup_description" => t("If this value is set to 1 (the number one), then this degree plan is able to be combined with other degrees which are also set to Allow Dynamic.
@@ -1380,12 +1380,51 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     
   $form["override_degree_hours"] = array(
     "type" => "textfield",
-    "label" => "Override Degree Hours:",
+    "label" => t("Override Degree Hours:"),
     "size" => 1,
     "value" => $degree->db_override_degree_hours,
     "popup_description" => t("You may specify a number of degree hours here (ex: 125).  FlightPath will use this value, instead of calculating the number of hours
                               required for this degree.  If you are unsure what to put here, leave it blank, or enter zero, for FlightPath to calculate hours normally."),    
   );
+
+  $form['below_degree_details_markup'] = array(
+    'value' => "<div style='clear: both;'></div>",
+  );
+
+  
+  
+  // Is this a "track"?
+  if (strstr($major_code, "_"))
+  {
+     
+    $form['track_info_markup'] = array(
+      'value' => "<h3>" . t("Track Information") . "</h3>",
+    );
+            
+    $form['track_title'] = array(
+      'type' => 'textfield',
+      'label' => t("Track Title:") . "&nbsp;",
+      'size' => 60,
+      'maxlength' => 100,
+      'value' => $degree->track_title,
+    );
+    
+    $form['track_description'] = array(
+      'type' => 'textarea',
+      'label' => t("Track Description:"),
+      'rows' => 3,
+      'cols' => 60,
+      'value' => filter_markup($degree->track_description),
+      'description' => t("You may enter simple HTML in this field. Ex: &lt;b&gt;bold&lt;/b&gt; or &lt;i&gt;italics&lt;/i&gt;"),
+      'popup_description' => t("This is where you can enter a short description of this track (also called a Degree Option) which will display for the user in a pop-up when they select to change degree options.
+                                \nTo enter a default message, which will display at the top of the selection window, begin the description with:\n      DEFAULT: \nIt must be in all caps, and you must have the colon (:) after it.
+                                By doing this in ANY of the track descriptions for a major, FP will ignore all other track descriptions and ONLY display the default.
+                                \n\nExample of usage:  DEFAULT: You may select any of these degree options."),
+    );
+      
+  }  
+  
+  
   
   
       
@@ -1398,8 +1437,11 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
    
   $form['blocks_top_markup'] = array(
     'value' => "<div style='clear: both;'></div>
-                <hr>
-                <h2>Semester Blocks</h2>",
+                <hr>                
+                <h2>Semester Blocks</h2>
+                <a class='add-new-sem-block' style='float: right;' href='javascript:adminAddNewSemesterBlock();'>
+                  Add new Semester Block
+                </a>",
   );
    
   $first_semester_num = -999;

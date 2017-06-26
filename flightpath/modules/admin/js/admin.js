@@ -28,6 +28,37 @@ function adminHideDECats() {
 
 
 
+function adminAddNewSemesterBlock() {
+  var x = prompt("Please enter the number of the new Semester Block below.\n\nThis must be a positive number, which has not already been used:");
+  x = x * 1;
+  if (x == null) {
+    // They pressed cancel, just return.
+    return false;
+  }
+  
+  if (!x) {
+    return false;
+  }
+  
+  if (x < 1 || x == NaN) {
+    alert("Sorry!\n\nYou must enter a non-zero, positive number in the box.  Please try again.");
+    return false;
+  }
+  
+  // TODO:  Did we enter the number of an existing block?
+  // TODO:  Check the FlightPath.settings var for existing blocks we may have.
+  
+  
+  // If we made it here, it means we can proceed with creating the new semester.
+  // TODO:  Update perform_action2 to include that we want to create a new semester.
+  // TODO:  Submit the form.
+  
+  
+}
+
+
+
+
 function adminPopupAlertHelp(action)
 {
   var t = "Instant Help:\n-------------------------\n\n";
