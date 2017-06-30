@@ -1,6 +1,17 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-06-30
+  Large overhaul to the degree edit screen.  In addition to being 100% FAPI now, you can add new
+  semester blocks on demand, rather than having to save and refresh the page for more.  You can
+  also delete a semester block.  Also, when a new degree is created, the first four semester blocks
+  are created by default.  
+  
+
+2017-06-27
+  Fixed bug where form parameters not being stored as hidden variables in the form were causing
+  the $form_state['values'] to be incomplete.  Specifically on the degree edit form.
+
 
 2017-06-21
   Made it to where if the SESSION var "scroll_top" is set, the value will be respected.  This allows

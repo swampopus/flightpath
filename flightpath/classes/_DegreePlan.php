@@ -479,7 +479,7 @@ class _DegreePlan extends stdClass
       $this->degree_class = $cur["degree_class"];
       $this->db_override_degree_hours = $cur["override_degree_hours"];
       $this->db_advising_weight = intval($cur["advising_weight"]);
-
+      $data_entry_value = trim($cur['data_entry_value']);
 
 
 

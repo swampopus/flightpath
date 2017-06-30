@@ -251,6 +251,9 @@ function fp_render_form($callback, $form_type = "") {
   
   $form = fp_get_form($callback, $params);
   
+  // Base64 enc the params, so we can easily handle if there are quotation marks, line breaks, etc.
+  $form_params = base64_encode(serialize($params));
+  
   // Figure out the current page's title and display it.
   $path = $_GET["q"];
   $default_path = $path;
@@ -320,6 +323,7 @@ function fp_render_form($callback, $form_type = "") {
   $rtn .= "<input type='hidden' name='form_token' value='$form_token'>";
   $rtn .= "<input type='hidden' name='form_type' value='$form_type'>";
   $rtn .= "<input type='hidden' name='form_path' value='$form_path'>";
+  $rtn .= "<input type='hidden' name='form_params' value='$form_params'>";
   $rtn .= "<input type='hidden' name='form_include' value='$form_include'>";
   $rtn .= "<input type='hidden' name='default_redirect_path' value='$default_path'>";
   $rtn .= "<input type='hidden' name='default_redirect_query' value='$default_query'>";

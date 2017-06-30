@@ -171,8 +171,20 @@ ___edit_degree_form{}  /* placeholder for editor */
   max-width: 140px;
 }
 
+#fp-form-admin_edit_degree_form .admin-degrees-edit-track-rules-table td {
+  font-size: 0.9em;
+}
 
+#fp-form-admin_edit_degree_form .admin-degrees-edit-track-rules-table .form-element label {
+  display: block;
+  float: none !important;
+  clear: both;
+  font-weight: bold;
+}
 
+#fp-form-admin_edit_degree_form fieldset {
+  margin-top: 40px;
+}
 
 
 

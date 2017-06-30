@@ -27,9 +27,23 @@ function adminHideDECats() {
 }
 
 
+function adminDeleteSemesterBlock(semester_num) {
+  var x = confirm("Are you sure you wish to delete block " + (semester_num + 1) + "?  This action cannot be undone.");
+  if (!x) return false;
+  
+  // If we are here, we can proceed with delete.
+  document.getElementById("element-perform_action2").value="editSemester_del_" + (semester_num);
+  
+  // Submit the form.
+  adminSubmitDegreeForm2();
+  
+   
+}
+
+
 
 function adminAddNewSemesterBlock() {
-  var x = prompt("Please enter the number of the new Semester Block below.\n\nThis must be a positive number, which has not already been used:");
+  var x = prompt("Please enter the number of the new Semester Block below.\n\nThis must be a positive number, which has not already been used\n\nMust be between 1 and 99:");
   x = x * 1;
   if (x == null) {
     // They pressed cancel, just return.
@@ -41,17 +55,32 @@ function adminAddNewSemesterBlock() {
   }
   
   if (x < 1 || x == NaN) {
-    alert("Sorry!\n\nYou must enter a non-zero, positive number in the box.  Please try again.");
+    alert("Sorry!\n\nYou must enter a non-zero, positive number in the box, between 1 and 99.  Please try again.");
     return false;
   }
   
-  // TODO:  Did we enter the number of an existing block?
-  // TODO:  Check the FlightPath.settings var for existing blocks we may have.
+  if (x > 99) {
+    alert("Sorry!\n\nYou must enter a non-zero, positive number in the box, between 1 and 99.  Please try again.");
+    return false;
+  }
+  
+  // Did we enter the number of an existing block?
+  // Check the FlightPath.settings var for existing blocks we may have.
+  if (FlightPath.settings["semester_" + (x - 1)] == (x-1)) {
+    alert("Sorry!\n\nThe semester block number you entered is already in use.\n\nPlease try again.");
+    return false;    
+  }
   
   
   // If we made it here, it means we can proceed with creating the new semester.
-  // TODO:  Update perform_action2 to include that we want to create a new semester.
-  // TODO:  Submit the form.
+   
+  
+  // Update perform_action2 to include that we want to create a new semester.
+  document.getElementById("element-perform_action2").value="editSemester_new_" + (x - 1);
+  
+  // Submit the form.
+  adminSubmitDegreeForm2();
+  
   
   
 }
@@ -412,8 +441,8 @@ function adminDeleteDegree(degreeID) {
     return;
   }
   
-  document.getElementById("perform_action2").value="delete_degree";
-  adminSubmitDegreeForm();
+  document.getElementById("element-perform_action2").value="delete_degree";
+  adminSubmitDegreeForm2();
   
 }
 
@@ -513,7 +542,6 @@ function adminPopupAddGroup2(semester_num) {
     return;
   }
   
-  opener.showUpdate(false);
   //alert(group_id + " " + hours + " " + type + " " + min_grade);
   opener.document.getElementById("element-perform_action2").value="addGroup_" + group_id + "_" + semester_num + "_" + hours + "_" + type + "_" + min_grade;
   
@@ -554,8 +582,9 @@ function adminSubmitDegreeForm() {
 } 
 
 function adminSubmitDegreeForm2() {
-  // Note: due to complexity, the degree form is not a typical form_api form.
-  document.getElementById("element-scroll_top").value = document.body.scrollTop;
+  
+  showUpdate(false);
+  //document.getElementById("element-scroll_top").value = document.body.scrollTop;
   document.getElementById("fp-form-admin_edit_degree_form").submit();
 } 
 
@@ -568,8 +597,9 @@ function adminDelGroup(group_id, semester_num) {
     return;
   }
   
-  document.getElementById("perform_action2").value="delGroup_" + group_id + "_" + semester_num;
-  adminSubmitDegreeForm();
+  
+  document.getElementById("element-perform_action2").value="delGroup_" + group_id + "_" + semester_num;
+  adminSubmitDegreeForm2();
   
   
 }

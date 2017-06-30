@@ -1849,7 +1849,14 @@ function system_handle_form_submit() {
   $safe_values = array(); // will be the same as $values, but anything of type password will not be included.
   
   if (function_exists($callback)) {
-    $form = fp_get_form($callback);
+
+    // Get any params for the callback, or, an empty array.    
+    $form_params = @unserialize(base64_decode($_REQUEST['form_params']));
+    if (!$form_params) {
+      $form_params = array();
+    }
+    // Actually get the form now.    
+    $form = fp_get_form($callback, $form_params);
     foreach ($form as $name => $element) {     
 
       // Save to our $values array, but we don't care about markup.
