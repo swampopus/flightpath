@@ -30,6 +30,9 @@ class _DegreePlan extends stdClass
   
   
   public $bool_use_draft, $bool_loaded_descriptive_data;
+  
+  public $extra_data_array;  // This is an array meant for any generic "extra data" we want to include, from custom modules.
+  
 
   /**
 	* $major_code		ACCT, CSCI, etc.
@@ -61,6 +64,7 @@ class _DegreePlan extends stdClass
     $this->required_course_id_array = array();
 
     $this->public_notes_array = array();
+    $this->extra_data_array = array();
 
     $this->db_advising_weight = 0;
     $this->track_selection_config_array = array();
@@ -621,6 +625,19 @@ class _DegreePlan extends stdClass
       }
     }
 
+      
+      
+      
+      
+    // When we load this degree plan, let's also check for any hooks.
+    // Since this class might be used outside of FP, only do this if we know
+    // that the bootstrap.inc file has been executed.
+    if ($GLOBALS["fp_bootstrap_loaded"] == TRUE) {      
+      invoke_hook("degree_plan_load", array(&$this));
+    }         
+      
+      
+      
       
   } // load_degree_plan
 

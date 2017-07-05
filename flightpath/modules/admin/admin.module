@@ -600,7 +600,7 @@ function admin_duplicate_year_form() {
  * @param unknown_type $form
  * @param unknown_type $form_state
  */
-function admin_duplicate_year_form_submit($form, $form_state) {
+function admin_duplicate_year_form_submit($form, &$form_state) {
   $values = $form_state["values"];
   
   // Check to make sure they entered the transfer passcode correctly.
@@ -776,6 +776,15 @@ function admin_duplicate_year_form_submit($form, $form_state) {
   	extract($cur, 3, "db");
   	
   	$new_degree_id = $db->request_new_degree_id();
+    
+    // Store what degrees we are working on, for other modules.
+    $form_state['degrees'][] = array(
+      'src' => $db_degree_id,
+      'dest' => $new_degree_id,
+      'dest_major_code' => $db_major_code,
+      'dest_catalog_year' => $new_year,
+    );
+    
   	// add in the top-level degree to the table.
   	$res2 = db_query("INSERT INTO draft_degrees
   						(degree_id, major_code, degree_type, degree_level, degree_class, title,

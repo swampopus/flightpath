@@ -499,6 +499,23 @@ function hook_student_load(&$student) {
 
 
 /**
+ * Allows modules to hook in after a degree plan object is created & loaded.
+ * 
+ * Specifically, this is called at the end of the DegreePlan::load_degree_plan() method is called.
+ * 
+ * Similar concept to hook_student_load
+ * 
+ * @see hook_student_load()
+ */
+function hook_degree_plan_load(&$degree) {
+  if ($degree->major_code == 'XYZ') {
+    $degree->is_xyz = TRUE;
+  }
+}
+
+
+
+/**
  * Allows modules to specify valid URLs in FlightPath, and define what function to call
  * when the user visits that URL.
  * 

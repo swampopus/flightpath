@@ -1438,16 +1438,6 @@ class _DatabaseHandler extends stdClass
     // Looks in the student_degrees table and returns an array of major codes.
     $rtn = array();
     
-    /*
-    if ($is_whatif == -1) {
-      $is_whatif = 0;
-      if (@$GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
-        $is_whatif = 1;
-      }
-    }
-     * 
-     */
-        
     $catalog_year = $this->get_student_catalog_year($student_cwid);
     
     if ($perform_join_with_degrees) {

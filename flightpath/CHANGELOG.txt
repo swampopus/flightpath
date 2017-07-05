@@ -1,6 +1,14 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-07-05
+  Modified the admin_copy_degree_submit function to store degree id's in the form_state, for
+  other modules to use.  Same for the admin_duplicate_year_form
+
+2017-07-02
+  Added new hook for when a new degree plan is loaded:  hook_degree_plan_load(&$degree)
+  
+
 2017-06-30
   Large overhaul to the degree edit screen.  In addition to being 100% FAPI now, you can add new
   semester blocks on demand, rather than having to save and refresh the page for more.  You can
