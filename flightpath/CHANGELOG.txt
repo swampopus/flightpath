@@ -1,6 +1,10 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-07-18
+  Added extra CSS classes to course rows which were created from split substitutions.
+
+
 2017-07-05
   Modified the admin_copy_degree_submit function to store degree id's in the form_state, for
   other modules to use.  Same for the admin_duplicate_year_form

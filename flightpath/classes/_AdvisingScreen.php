@@ -4075,6 +4075,16 @@ function draw_menu_items($menu_array) {
       $extra_classes .= " course-assigned-more-than-one-degree course-assigned-" . count($course->assigned_to_degree_ids_array) . "-degrees";
     }
 
+    // If this is a course fragment, created as a remainder of a split substitution, add extra class.
+    if (@$course->details_by_degree_array[$course->req_by_degree_id]["bool_substitution_new_from_split"]) {
+      $extra_classes .= " course-sub-new-from-split";
+    }
+    if (@$course->details_by_degree_array[$course->req_by_degree_id]["bool_substitution_split"]) {
+      $extra_classes .= " course-sub-split";
+    }
+
+
+
     // If the course has NOT been assigned, but is appearing in more than one degree, give it an extra CSS class
     // Check to see if the course is in our required_courses_id_array for more than one degree.
     if ($course->display_status == "eligible") {
