@@ -1,5 +1,9 @@
 FlightPath 5.x Changelog
 ========================
+
+2017-07-25
+  Made all major_code fields in the database be varchar(100), just to cover any weird ones which may be above 20 chars (the old limit).
+  
  
 2017-07-18
   Added extra CSS classes to course rows which were created from split substitutions.

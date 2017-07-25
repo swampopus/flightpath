@@ -105,7 +105,7 @@ function system_update($old_schema, $new_schema) {
                 ) ");
     
     db_query("CREATE TABLE `degree_college` (
-                `major_code` varchar(20)  ,
+                `major_code` varchar(100)  ,
                 `college_code` varchar(10)  ,
                 PRIMARY KEY (`major_code`),
                 KEY `college_code` (`college_code`)
@@ -293,7 +293,7 @@ db_query("CREATE TABLE `colleges` (
             ) ");
 
 db_query("CREATE TABLE `degree_college` (
-            `major_code` varchar(20)   DEFAULT '',
+            `major_code` varchar(100)   DEFAULT '',
             `college_code` varchar(10)   DEFAULT '',
             PRIMARY KEY (`major_code`),
             KEY `college_code` (`college_code`)
@@ -325,7 +325,7 @@ $q = "
 CREATE TABLE `degree_tracks` (
   `track_id` int(11)   AUTO_INCREMENT,
   `catalog_year` int(11)   DEFAULT '2006',
-  `major_code` varchar(20)   DEFAULT '',
+  `major_code` varchar(100)   DEFAULT '',
   `track_code` varchar(20)   DEFAULT '',
   `track_title` varchar(100)   DEFAULT '',
   `track_short_title` varchar(50)   DEFAULT '',
@@ -338,7 +338,7 @@ $q = "
 CREATE TABLE `degrees` (
   `id` int(11)   AUTO_INCREMENT,
   `degree_id` int(11)   DEFAULT '0',
-  `major_code` varchar(20)   DEFAULT '',
+  `major_code` varchar(100)   DEFAULT '',
   `degree_type` varchar(20)   DEFAULT '',
   `degree_level` varchar(5)   DEFAULT '',
   `degree_class` varchar(40)   DEFAULT '',
@@ -413,7 +413,7 @@ $q = "
 CREATE TABLE `draft_degree_tracks` (
   `track_id` int(11)   AUTO_INCREMENT,
   `catalog_year` int(11)   DEFAULT '2006',
-  `major_code` varchar(20)   DEFAULT '',
+  `major_code` varchar(100)   DEFAULT '',
   `track_code` varchar(20)   DEFAULT '',
   `track_title` varchar(100)   DEFAULT '',
   `track_short_title` varchar(50)   DEFAULT '',
@@ -426,7 +426,7 @@ $q = "
 CREATE TABLE `draft_degrees` (
   `id` int(11)   AUTO_INCREMENT,
   `degree_id` int(11)   DEFAULT '0',
-  `major_code` varchar(20)   DEFAULT '',
+  `major_code` varchar(100)   DEFAULT '',
   `degree_type` varchar(20)   DEFAULT '',
   `degree_level` varchar(5)   DEFAULT '',
   `degree_class` varchar(40)   DEFAULT '',
