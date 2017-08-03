@@ -393,6 +393,7 @@ function user_edit_student_user_form() {
       "description" => t("Enter an ID for this student.  It may be the same
                           as a faculty member, but may not be the same as any existing
                           student.  You will not be able to edit this value, once saved."),
+      "weight" => 10,
     );
     
     $form["new_user_name"] = array(
@@ -404,6 +405,7 @@ function user_edit_student_user_form() {
                           use to log in.  It must be unique to all users (cannot have both
                           a faculty and a student with the same username).  You will not
                           be able to edit this value, once saved."),
+      "weight" => 10,
     );
         
     
@@ -434,24 +436,28 @@ function user_edit_student_user_form() {
     "description" => t("If you enter any value here, it will change the
                         user's password in FlightPath.  If you are using the LDAP module,
                         the LDAP password will be unaffected."),    
+    "weight" => 20,                        
   );
 
   $form["email"] = array(
     "label" => t("Email:"),
     "type" => "textfield",
     "value" => $cur["email"],
+    "weight" => 30,    
   );  
 
   $form["f_name"] = array(
     "label" => t("First name:"),
     "type" => "textfield",
     "value" => $cur["f_name"],
+    "weight" => 40,
   );  
 
   $form["l_name"] = array(
     "label" => t("Last name:"),
     "type" => "textfield",
     "value" => $cur["l_name"],
+    "weight" => 50,
   );  
 
   $form["is_disabled"] = array(
@@ -462,6 +468,7 @@ function user_edit_student_user_form() {
     "description" => t("Enter only 1 or 0 (number one for 'yes', or number zero for 'no').  This setting means the user will
                         be ignored by FlightPath, and they will not be able to log in or be searched for.
                         It is safer to disable a user, than delete them."),
+    "weight" => 60,
   );  
   
   
@@ -475,6 +482,7 @@ function user_edit_student_user_form() {
                         calculate this, rather than read from the database, whatever you enter here
                         will be ignored, and instead this value will be calculated on the fly when
                         the student is loaded."),
+    "weight" => 70,
   );  
     
   $form["gpa"] = array(
@@ -485,7 +493,8 @@ function user_edit_student_user_form() {
     "description" => t("What is the student's GPA?  NOTE: If FlightPath is set to
                         calculate this, rather than read from the database, whatever you enter here
                         will be ignored, and instead this value will be calculated on the fly when
-                        the student is loaded."),    
+                        the student is loaded."),
+    "weight" => 80,                            
   );  
     
   $form["rank_code"] = array(
@@ -498,6 +507,7 @@ function user_edit_student_user_form() {
                       on the System Settings form.  For example, FR.  If you do not do this, you will not be able to search
                       for this student in FlightPath.") . "<br>&nbsp; &nbsp; &nbsp;" . t("Current value for Allowed Student Ranks:") . " 
                       <i>" . variable_get("allowed_student_ranks", "") . "</i>",
+    "weight" => 90,
   );  
 
   
@@ -542,6 +552,7 @@ function user_edit_student_user_form() {
                             
                             
                             "),
+    "weight" => 100,
   );  
     
     
@@ -552,6 +563,7 @@ function user_edit_student_user_form() {
     "size" => 10,
     "description" => t("Only the leading year is used.  For example, for the
                         catalog year 2008-2009, you would just enter 2008."),
+    "weight" => 110,
   );  
 
   $form["is_active"] = array(
@@ -562,6 +574,7 @@ function user_edit_student_user_form() {
     "description" => t("Enter only 1 or 0 (number one for 'yes', or number zero for 'no').  This setting means the student
                       will not appear in searches automatically, unless the advisor specifies to search
                       for inactive students."),
+    "weight" => 120,
   );  
         
       
@@ -571,6 +584,7 @@ function user_edit_student_user_form() {
     "type" => "submit",  
     "value" => "Submit",    
     "prefix" => "<hr>",
+    "weight" => 500,
   );
   
   
@@ -581,7 +595,8 @@ function user_edit_student_user_form() {
       "value" => "<div align='right'>
                         " . t("Delete this student?") . " <input type='button' value='X'
                         onClick='userDeleteStudent();'>
-                      </div>", 
+                      </div>",
+      "weight" => 510, 
     );  
   }
   
