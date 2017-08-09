@@ -916,7 +916,7 @@ class _FlightPath extends stdClass
           $bool_can_proceed = TRUE;
           $result = invoke_hook("flightpath_can_assign_course_to_degree_id", array($req_by_degree_id, $c));
           foreach ($result as $m => $val) {
-            // If *any* module said FALSE, then we must skip this couse and not assign it to this degree.
+            // If *any* module said FALSE, then we must skip this course and not assign it to this degree.
             if ($val === FALSE) $bool_can_proceed = $val;
           }
            

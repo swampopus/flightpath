@@ -73,6 +73,31 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 
 
 /**
+ * Returns the major code for a given degree_id 
+ */
+function fp_get_degree_major_code($degree_id) {
+  // We will cache in a GLOBALS variable, to save lookup time.
+  if (isset($GLOBALS['fp_temp_degree_major_codes'][$degree_id])) {
+    return $GLOBALS['fp_temp_degree_major_codes'][$degree_id];
+  }
+  
+  $res = db_query("SELECT * FROM degrees WHERE degree_id = ?", $degree_id);
+  $cur = db_fetch_array($res);
+  $major_code = trim($cur['major_code']);
+  
+  if ($major_code) {
+    $GLOBALS['fp_temp_degree_major_codes'][$degree_id] = $major_code;
+  }
+  
+  return $major_code;
+  
+}
+
+
+
+
+
+/**
  * Returns the faculty member's name based on the ID provided.
  */
 function fp_get_faculty_name($cwid) {

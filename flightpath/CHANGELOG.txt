@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-08-09
+  Added a new option to Configure School Settings -- "prevent_course_assignment_to_both_degree_and_track".  If set to "Yes", then
+  a course cannot be assigned to both a Level-1 degree and one of its direct tracks.  Ex:  ENGL and ENGL|_track1.  It is set to "yes" by
+  default.
+  
+
 2017-07-25
   Made all major_code fields in the database be varchar(100), just to cover any weird ones which may be above 20 chars (the old limit).
   

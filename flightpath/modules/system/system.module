@@ -72,6 +72,67 @@ function system_perm() {
 }
 
 
+
+/**
+ * Implements hook flightpath_can_assign_course_to_degree_id
+ * 
+ */
+function system_flightpath_can_assign_course_to_degree_id($degree_id, Course $course) {
+  
+  // If this course has already been assigned to another degree, should we allow it to be assigned to THIS degree?
+  
+  $this_major_code = fp_get_degree_major_code($degree_id);
+  $temp = explode("|", $this_major_code);
+  $this_first_part = trim($temp[0]);  // get just the first part. Ex, ENGL|_something => ENGL
+  
+  // If the configuration is such that a course cannot be assigned to a degree's tracks, then no.
+  // Example:  if a course has been assigned to ENGL, then it can't also get assigned to ENGL|_track1
+    
+  if (variable_get("prevent_course_assignment_to_both_degree_and_track", "yes") == 'yes') {
+    // Begin by checking to see what degrees the course has already been assigned to (if any)
+    if (count($course->assigned_to_degree_ids_array)) {
+          
+      foreach ($course->assigned_to_degree_ids_array as $d_id) {
+        $m_code = fp_get_degree_major_code($d_id);
+        
+        if ($m_code) {
+          $temp = explode("|", $this_major_code);
+          $m_code_first_part = trim($temp[0]);  // get just the first part. Ex, ENGL|_something => ENGL
+          
+          // At this point, we have a major code for a degree which this course has already been assigned.
+          // Ex:  ENGL or ENGL|minor
+          // If this degree is a track, the variable $this_major_code should equal ENGL|_whatever or, ENGL|minor_whatever.
+          // If that condition is true, then we must return FALSE. 
+          
+          // We will look for the presence of an underscore and a pipe symbol first, and see if this_first_part == m_code_first_part
+          if (strstr($this_major_code, "_") && strstr($this_major_code, "|") && $this_first_part == $m_code_first_part) {
+            // Now, if this_major_code CONTAINS m_code, then that means our condition
+            // is true.
+            if (strstr($this_major_code, $m_code)) {
+              return FALSE;  // meaning, no, we cannot assign this course!
+            }
+          }        
+                  
+        }
+        
+        
+      }    
+      
+    } //if count(assigned to degree ids array)
+    
+  } // if variable_get ...
+  
+  
+  // Default, return TRUE
+  return TRUE;  
+  
+} // hook_flightpath_can_assign_course_to_degree_id
+
+
+
+
+
+
 /**
  * Implements hook_fp_get_student_majors.
  * 
@@ -1383,6 +1444,19 @@ function system_school_data_form() {
                         Select 'Yes' if you wish to have FlightPath hide advising checkboxes on the View screen when a student
                         is enrolled or completes a course within the same advising term.  If you are unsure what to enter, select 'No'."),
   );  
+
+
+  $form["prevent_course_assignment_to_both_degree_and_track"] = array(
+    "label" => t("Prevent a course assignment to both a degree and its track(s)?"),
+    "type" => "select",
+    "options" => array("yes" => "Yes", "no" => "No"),
+    "value" => variable_get("prevent_course_assignment_to_both_degree_and_track", "yes"),
+    "hide_please_select" => TRUE,
+    "description" => t("If set to 'Yes' (default), then FlightPath will not allow the same course to be assigned to both a Level-1 degree
+                       and its tracks.  For example, if a student completes ENGL 101, and it can be assigned to the major COMPSCI, then
+                       it cannot also be assigned to the track COMPSCI|_OPT1.  If you are unsure what to select, leave this set to 'Yes'."),
+  );  
+
 
 
   
