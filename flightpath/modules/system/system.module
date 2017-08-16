@@ -1457,6 +1457,18 @@ function system_school_data_form() {
                        it cannot also be assigned to the track COMPSCI|_OPT1.  If you are unsure what to select, leave this set to 'Yes'."),
   );  
 
+  
+  $form["warning_on_view_if_degree_not_found"] = array(
+    "label" => t("Display a warning on View screens if a degree cannot be found?"),
+    "type" => "select",
+    "options" => array("yes" => "Yes", "no" => "No"),
+    "value" => variable_get("warning_on_view_if_degree_not_found", "yes"),
+    "hide_please_select" => TRUE,
+    "description" => t("If set to 'Yes' (default), FlightPath will warn both the advisor and the student if a degree cannot be found
+                        for a catalog year.  For example, if the student is supposed to take ADVENGL|_TRACK1, but this is not found
+                        in the database.  If set to 'No', FlightPath will silently skip over the degree, and display no warning.  If you
+                        are unsure what to select, leave this set to 'Yes'."),
+  );  
 
 
   

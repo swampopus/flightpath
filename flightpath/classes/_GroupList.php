@@ -194,6 +194,56 @@ class _GroupList extends ObjList
 		
 	}
 	
+  
+  
+  function sort_degree_advising_weight() {
+    
+    $tarray = array();
+    
+    for ($t = 0; $t < count($this->array_list); $t++)
+    {
+      $g = $this->array_list[$t];
+      // Get the degree_id for this group
+      $degree_id = $g->req_by_degree_id;
+      
+      $major_code = fp_get_degree_major_code($degree_id);
+      $advising_weight = fp_get_degree_advising_weight($degree_id);
+      if (!$advising_weight) $advising_weight = 0;
+      
+      // Make the number a string, uniformly long    
+      $advising_weight = str_pad($advising_weight, 4, "0", STR_PAD_LEFT);
+      
+      
+      //$new_html[$degree_advising_weight . "__" . $degree_title][$req_by_degree_id] = $content;
+      $tarray[] = $advising_weight . "___" . $major_code . " ~~ " . $t;
+    }
+    
+    // Now, sort the array to get everything in the correct order.   
+     
+    sort($tarray);
+    
+    
+    // Now, convert the array back into a list of groups.
+    $new_list = new GroupList();
+    for($t = 0; $t < count($tarray); $t++)
+    {
+      $temp = explode(" ~~ ",$tarray[$t]);
+      $i = $temp[1];
+
+      $new_list->add($this->array_list[$i]);
+    }
+
+    // Okay, now $new_list should contain the correct values.
+    // We will transfer over the reference.
+    $this->array_list = $new_list->array_list;
+
+    
+        
+  } // sort_degree_advising_weight
+  
+  
+  
+  
 	function sort_priority()
 	{
 		/*

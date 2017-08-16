@@ -694,6 +694,7 @@ function fp_build_tab_array($page) {
       $t_degree_plan_titles = "";
       foreach ($degree_plan->combined_degree_ids_array as $t_degree_id) {
         $t_degree_plan = new DegreePlan($t_degree_id);
+        
         $t_degree_plan->load_descriptive_data();
 
         if ($t_degree_plan->get_available_tracks()) {

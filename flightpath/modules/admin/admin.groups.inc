@@ -372,7 +372,7 @@ function admin_edit_group_form() {
   $form["definition"] = array(
     "type" => "markup",
     "label" => t("Definition:"),
-    "value" => "<label>" . t("Definition:") . "</label><i>" . nl2br($group->definition) . "</i>",
+    "value" => "<i>" . nl2br($group->definition) . "</i>",
     "prefix" => "<div style='overflow: auto; max-height: 150px;' class='admin-groups-show-definition'>",
     "suffix" => "</div><a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-edit-definition", "de_catalog_year=$de_catalog_year&group_id=$group_id") . "\");'
                             >[" . t("edit definition") . "]</a>",

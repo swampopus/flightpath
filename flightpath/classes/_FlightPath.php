@@ -178,6 +178,17 @@ class _FlightPath extends stdClass
         $degree_id = $db->get_degree_id($t_major_code, $catalog_year);
       }
       
+      
+      // If we couldn't find the degree_id, then we should just skip it.
+      if (!$degree_id || $degree_id == 0) {
+        if (variable_get("warning_on_view_if_degree_not_found", "yes") == 'yes') {
+          fp_add_message(t("Could not find degree %maj in catalog year %cat.  FlightPath will
+                            skip loading this degree for now.  If this message continues to appear,
+                            contact your advisor.", array("%maj" => $t_major_code, "%cat" => $catalog_year . "-" . ($catalog_year + 1))), "error", TRUE);
+        }
+        continue;
+      }
+      
       /*  // NO LONGER NEEDED?
       if (@$student->array_settings["track_code"] != "" && $this->bool_what_if == false
       && @$student->array_settings["major_code"] == $major_code)
@@ -415,6 +426,9 @@ class _FlightPath extends stdClass
     // of groups to decide this.
     $student = $this->student;
     $this->degree_plan->list_groups->sort_priority();
+    // Now, sort by the advising weight of the degree itself.
+    $this->degree_plan->list_groups->sort_degree_advising_weight();
+    
     $this->degree_plan->list_groups->reset_counter();
     while($this->degree_plan->list_groups->has_more())
     {
@@ -892,21 +906,22 @@ class _FlightPath extends stdClass
         
 
 
-          // Check hooks to see if this course is allowed to be assigned to the GROUP in question.
-          if ($group_id != 0) {
-            $bool_can_proceed = TRUE;
-            
-            $result = invoke_hook("flightpath_can_assign_course_to_group", array($group, $c));
-            foreach ($result as $m => $val) {
-              // If *any* module said FALSE, then we must skip this couse and not assign it to this degree.
-              if ($val === FALSE) $bool_can_proceed = $val;
-            }
-            
-            if (!$bool_can_proceed) {
-              continue;  // don't assign!
-            }                  
-            
-          } // if group_id != 0
+        // Check hooks to see if this course is allowed to be assigned to the GROUP in question.
+        if ($group_id != 0) {
+          $bool_can_proceed = TRUE;
+
+          
+          $result = invoke_hook("flightpath_can_assign_course_to_group", array($group, $c));
+          foreach ($result as $m => $val) {
+            // If *any* module said FALSE, then we must skip this couse and not assign it to this degree.
+            if ($val === FALSE) $bool_can_proceed = $val;
+          }
+          
+          if (!$bool_can_proceed) {
+            continue;  // don't assign!
+          }                  
+          
+        } // if group_id != 0
   
         // We want to see if this course has already been assigned to THIS degree...
         if (!in_array($req_by_degree_id, $c->assigned_to_degree_ids_array))
@@ -920,9 +935,10 @@ class _FlightPath extends stdClass
             if ($val === FALSE) $bool_can_proceed = $val;
           }
            
-          if (!$bool_can_proceed) {
+          if (!$bool_can_proceed) {         
             continue;  // don't assign!
           } 
+        
                   
         
         

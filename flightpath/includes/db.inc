@@ -75,7 +75,12 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 /**
  * Returns the major code for a given degree_id 
  */
-function fp_get_degree_major_code($degree_id) {
+function fp_get_degree_major_code($degree_id, $bool_reset_cache = FALSE) {
+  
+  if ($bool_reset_cache) {
+    unset($GLOBALS['fp_temp_degree_major_codes']);
+  }    
+  
   // We will cache in a GLOBALS variable, to save lookup time.
   if (isset($GLOBALS['fp_temp_degree_major_codes'][$degree_id])) {
     return $GLOBALS['fp_temp_degree_major_codes'][$degree_id];
@@ -92,6 +97,30 @@ function fp_get_degree_major_code($degree_id) {
   return $major_code;
   
 }
+
+function fp_get_degree_advising_weight($degree_id, $bool_reset_cache = FALSE) {
+    
+  if ($bool_reset_cache) {
+    unset($GLOBALS['fp_temp_degree_advising_weights']);
+  }    
+    
+  // We will cache in a GLOBALS variable, to save lookup time.  
+  if (isset($GLOBALS['fp_temp_degree_advising_weights'][$degree_id])) {
+    return $GLOBALS['fp_temp_degree_advising_weights'][$degree_id];
+  }
+  
+  $res = db_query("SELECT * FROM degrees WHERE degree_id = ?", $degree_id);
+  $cur = db_fetch_array($res);
+  $advising_weight = intval(trim($cur['advising_weight']));
+  
+  if ($advising_weight) {
+    $GLOBALS['fp_temp_degree_advising_weights'][$degree_id] = $advising_weight;
+  }
+  
+  return $advising_weight;
+  
+}
+
 
 
 

@@ -1,6 +1,14 @@
 FlightPath 5.x Changelog
 ========================
 
+20147-08-16
+  Fixed a bug where the "prevent_course_assignment..." setting wasn't working for groups.  It involved fixing another bug I discovered,
+  where advising_weight of a degree wasn't being applied when it came to group assignments.
+  
+  Added a new setting to School Settings screen, where you can decide to show a warning or not on the View screens, if a student's major
+  cannot be found.
+  
+
 2017-08-09
   Added a new option to Configure School Settings -- "prevent_course_assignment_to_both_degree_and_track".  If set to "Yes", then
   a course cannot be assigned to both a Level-1 degree and one of its direct tracks.  Ex:  ENGL and ENGL|_track1.  It is set to "yes" by
