@@ -1,7 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
-20147-08-16
+2017-08-22
+  Fixed PDO mysql error in student search when searching by major.
+  
+
+2017-08-16
   Fixed a bug where the "prevent_course_assignment..." setting wasn't working for groups.  It involved fixing another bug I discovered,
   where advising_weight of a degree wasn't being applied when it came to group assignments.
   

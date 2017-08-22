@@ -580,6 +580,7 @@ function student_search_display_search() {
                         AND (b.major_code LIKE :like_mjsearch ) ";
                         
       $params[":like_mjsearch"] = "%$mjsearch%";
+      unset($params[':like_search_for']);
       
     }
 
