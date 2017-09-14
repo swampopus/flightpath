@@ -72,6 +72,53 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 }
 
 
+
+
+
+
+/**
+ * Figure out the maximum number of times this course can be repeated for credit, based on what is stored
+ * in the course catalog.
+ * 
+ * We will do this by directly querying the database, for speed reasons.
+ * 
+ */
+function fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalog_year, $bool_draft = TRUE) {
+  $table_name = "courses";
+  if ($bool_draft) {
+    $table_name = "draft_courses";
+  }    
+  
+  $res = db_query("SELECT * FROM $table_name WHERE subject_id = ? AND course_num = ? AND catalog_year = ?", $subject_id, $course_num, $catalog_year);
+  $cur = db_fetch_array($res);
+  
+  $min_hours = $cur['min_hours'];
+  $max_hours = $cur['max_hours'];
+  $repeat_hours = $cur['repeat_hours'];
+  
+  if ($repeat_hours <= $min_hours) {
+    // Meaning, this course cannot be repeated for anything.  So, just return 1, meaning, it can be taken only once.
+    return 1;
+  }
+  
+  // Okay, so what we want to do is figure out, if this is a 3 hour course, and it can be repeated for 9 hours, that means it
+  // can be taken (repeats) 3 times.
+  
+  // We will use the min_hours for this calculation.  If zero, then change it to 1.
+  if ($min_hours < 1) $min_hours = 1;
+  
+  // Use intval so we don't have decimals.  Whole attempts only.
+  $repeats = intval($repeat_hours / $min_hours);   
+  
+  return $repeats;  
+  
+} // fp_get_max_catalog_repeats_for_course
+
+
+
+
+
+
 /**
  * Returns the major code for a given degree_id 
  */

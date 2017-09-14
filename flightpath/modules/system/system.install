@@ -469,24 +469,31 @@ CREATE TABLE `draft_group_requirements` (
 ); ";
 db_query($q);
 
+
+
 $q = "
+
 CREATE TABLE `draft_groups` (
-  `id` int(11)   AUTO_INCREMENT,
-  `group_id` int(11)   DEFAULT '0',
-  `group_name` varchar(200)   DEFAULT '',
-  `title` varchar(255)   DEFAULT '',
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) DEFAULT '0',
+  `group_name` varchar(200) DEFAULT '',
+  `title` varchar(255) DEFAULT '',
   `definition` text,
   `icon_filename` text,
-  `catalog_year` int(11)   DEFAULT '2006',
-  `priority` int(11)   DEFAULT '50',
-  `delete_flag` tinyint(4)   DEFAULT '0',
+  `catalog_year` int(11) DEFAULT '2006',
+  `priority` int(11) DEFAULT '50',
+  `delete_flag` tinyint(4) DEFAULT '0',
   `data_entry_comment` text,
+  `catalog_repeat` tinyint(4) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `group_id` (`group_id`),
   KEY `group_name` (`group_name`),
   KEY `catalog_year` (`catalog_year`),
-  KEY `title` (`title`)
-); ";
+  KEY `title` (`title`),
+  KEY `delete_flag` (`delete_flag`),
+  KEY `catalog_repeat` (`catalog_repeat`),
+  KEY `priority` (`priority`)
+);    ";
 db_query($q);
 
 $q = "
@@ -529,21 +536,25 @@ db_query($q);
 
 $q = "
 CREATE TABLE `groups` (
-  `id` int(11)   AUTO_INCREMENT,
-  `group_id` int(11)   DEFAULT '0',
-  `group_name` varchar(200)   DEFAULT '',
-  `title` varchar(255)   DEFAULT '',
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) DEFAULT '0',
+  `group_name` varchar(200) DEFAULT '',
+  `title` varchar(255) DEFAULT '',
   `definition` text,
   `icon_filename` text,
-  `catalog_year` int(11)   DEFAULT '2006',
-  `priority` int(11)   DEFAULT '50',
-  `delete_flag` tinyint(4)   DEFAULT '0',
+  `catalog_year` int(11) DEFAULT '2006',
+  `priority` int(11) DEFAULT '50',
+  `delete_flag` tinyint(4) DEFAULT '0',
   `data_entry_comment` text,
+  `catalog_repeat` tinyint(4) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `group_id` (`group_id`),
   KEY `group_name` (`group_name`),
   KEY `catalog_year` (`catalog_year`),
-  KEY `title` (`title`)
+  KEY `title` (`title`),
+  KEY `delete_flag` (`delete_flag`),
+  KEY `catalog_repeat` (`catalog_repeat`),
+  KEY `priority` (`priority`)
 ); ";
 db_query($q);
 

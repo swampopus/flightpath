@@ -640,7 +640,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
       $checked = "checked=checked";
     }
     $rtn .= "<div class='checkbox-element'>
-               <label class='label-for-checkbox'><input type='checkbox' name='$name' id='element-$cssname' value='1' $checked $attributes> $label</label>
+               <label class='label-for-checkbox'><input type='checkbox' name='$name' id='element-$cssname' value='1' $checked $attributes> $label$popup_help_link</label>
              </div>";
 
     $rtn .= "</div>";    

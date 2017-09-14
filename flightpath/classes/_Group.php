@@ -11,7 +11,7 @@ class _Group extends stdClass
 	public $priority;
 	//////////////////
 	///  From the database...
-	public $db_unassign_group_id, $db_delete_flag;
+	public $db_unassign_group_id, $db_delete_flag, $db_catalog_repeat;
 
 	///////////////
 	///  Used with in-system logic....
@@ -432,6 +432,7 @@ class _Group extends stdClass
 		$this->priority = trim($cur["priority"]);
 		$this->definition = trim($cur["definition"]);
 		$this->db_delete_flag = trim($cur["delete_flag"]);
+		$this->db_catalog_repeat = trim($cur["catalog_repeat"]);
 		$this->catalog_year = trim($cur["catalog_year"]);
 
 

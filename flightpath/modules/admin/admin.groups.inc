@@ -22,6 +22,7 @@ function admin_edit_group_form_submit(&$form, $form_submit) {
   $priority = trim($values["priority"]);
   $icon_filename = trim($values["icon_filename"]);
   $data_entry_comment = trim($values["data_entry_comment"]);
+  $catalog_repeat = intval(trim($values["catalog_repeat"]));
 
   // Save the entire post to the log.
  
@@ -60,10 +61,11 @@ function admin_edit_group_form_submit(&$form, $form_submit) {
               title = '?',
               priority = '?',
               icon_filename = '?',
+              catalog_repeat = '?',
               data_entry_comment = '?'
               WHERE
                 group_id = '?' ", 
-              $group_name, $title, $priority, $icon_filename, $data_entry_comment, $group_id);
+              $group_name, $title, $priority, $icon_filename, $catalog_repeat, $data_entry_comment, $group_id);
 
   // We need to delete all the existing course & subgroup requirements from this group.
   // That entails first seeing what subgroups were required and deleting them,
@@ -110,6 +112,13 @@ function admin_edit_group_form_submit(&$form, $form_submit) {
                 group_id = '?' ", $group_id);    
   }
 
+
+
+  // If catalog_repeat == 1, then we need to perform that operation on the $courses text.
+  if ($catalog_repeat == 1) {
+    $courses = admin_process_catalog_repeats_for_group_courses_text($courses, $de_catalog_year);
+  }
+
   // Okay, now we look at the actual "courses" box and assemble the group
   // in the database.
   $lines = explode("\n", $courses);
@@ -145,8 +154,8 @@ function admin_edit_group_form_submit(&$form, $form_submit) {
         $tokens = explode(" ", trim($c_tokes[$cT]));
         $subject_id = trim($tokens[0]);
         $course_num = trim($tokens[1]);
-        $min_grade = trim($tokens[2]);
-        $course_repeats = trim($tokens[3]);
+        $min_grade = @trim($tokens[2]);
+        $course_repeats = @trim($tokens[3]);
 
         if (strstr($min_grade, "[")) {
           // This is actually a specified repeat, not a min grade.
@@ -169,6 +178,7 @@ function admin_edit_group_form_submit(&$form, $form_submit) {
         // Commenting out, because we do not care about catalog_year
         // when specifying courses...
         if ($course_id = $db->get_course_id($subject_id, $course_num, "", true)) {
+                    
           $query = "INSERT INTO draft_group_requirements
                     (group_id, course_id,
                     course_min_grade, course_repeats, data_entry_value)
@@ -257,6 +267,162 @@ function admin_edit_group_form_submit(&$form, $form_submit) {
 
 
 
+
+
+
+/**
+ * This function will accept the $courses text (textarea) from a group, which spells out
+ * all of the courses, and then assign specified repeats based on what is set for that course
+ * in the course catalog.
+ */
+function admin_process_catalog_repeats_for_group_courses_text($courses, $catalog_year) {
+  $rtn = "";
+  
+  // Okay, now we look at the actual "courses" box and assemble the group
+  // in the database.
+  $lines = explode("\n", $courses);
+  for ($t = 0; $t < count($lines); $t++) {
+    $line = trim($lines[$t]);
+    if ($line == "") { continue; }
+    // Get rid of extra whitespace.
+    $line = str_replace("  ", " ", $line);
+    $line = str_replace("  ", " ", $line);
+    $line = str_replace("  ", " ", $line);
+
+    $new_line = "";
+
+    // Does this line contain at least one & symbol?  If it does,
+    // then this is a subgroup (branch), and we need to look at all the courses
+    // on that branch.
+    if (strstr($line, "&")) {
+      
+      // If this branch contains an ampersand, I don't think I should attempt to process it at all.
+      $new_line = $line;
+      
+      /*
+      $c_tokes = explode("&",$line);
+      for ($cT = 0; $cT < count($c_tokes); $cT++)
+      {
+        $tokens = explode(" ", trim($c_tokes[$cT]));
+        $subject_id = trim($tokens[0]);
+        $course_num = trim($tokens[1]);
+        $min_grade = @trim($tokens[2]);
+        $course_repeats = @trim($tokens[3]);
+
+        if (strstr($min_grade, "[")) {
+          // This is actually a specified repeat, not a min grade.
+          $course_repeats = $min_grade;
+          $min_grade = "";
+        }
+
+        $min_grade = str_replace("(","",$min_grade);
+        $min_grade = str_replace(")","",$min_grade);
+
+        $course_repeats = str_replace("[","",$course_repeats);
+        $course_repeats = str_replace("]","",$course_repeats);
+        $course_repeats--;
+        if ($course_repeats < 0) { $course_repeats = 0; }
+
+        // If the subject_id had a _A_ in it, convert this back
+        // to an ampersand.
+        $subject_id = str_replace("_A_", "&", $subject_id);
+
+        // Okay, we now have a subject_id and course_number.  Let's find out how many times
+        // it can be repeated for credit.
+        $max_cat_repeats = fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalog_year, TRUE);
+
+        // Okay, now, let's rebuild this line.        
+        $subject_id = str_replace("&", "_A_", $subject_id);
+        
+        $new_line .= "$subject_id $course_num";
+        // Was there a min grade?
+        if ($min_grade != "") {
+          $new_line .= " ($min_grade)";
+        }
+        // Specified repeats?
+        if ($max_cat_repeats > 0) {
+          $new_line .= " [$max_cat_repeats]";
+        }
+        
+        // Put ampersand back at the end?
+        if ($cT < count($c_tokes) - 1) {
+          $new_line .= " & ";
+        }
+        else {
+          // This is the last part.  No need to add an ampersand, but
+          // leave blank, as we will add a \n to the very end later.
+        }
+
+        
+
+      } // for $cT
+
+      */
+    } 
+    else {
+      // Did NOT contain an ampersand (&), so this goes in the
+      // regular course requirements.
+      $tokens = explode(" ", $line);
+      $subject_id = @trim($tokens[0]);
+      $course_num = @trim($tokens[1]);
+      $min_grade = @trim($tokens[2]);
+      $course_repeats = @trim($tokens[3]);
+
+      if (strstr($min_grade, "[")) {
+        // This is actually a specified repeat, not a min grade.
+        $course_repeats = $min_grade;
+        $min_grade = "";
+      }
+
+      $min_grade = str_replace("(","",$min_grade);
+      $min_grade = strtoupper(str_replace(")","",$min_grade));
+
+      $course_repeats = str_replace("[","",$course_repeats);
+      $course_repeats = str_replace("]","",$course_repeats);
+      $course_repeats--;
+      if ($course_repeats < 0) { $course_repeats = 0; }
+
+      // If the subject_id had a _A_ in it, convert this back
+      // to an ampersand.
+      $subject_id = str_replace("_A_", "&", $subject_id);
+
+      // Okay, we now have a subject_id and course_number.  Let's find out how many times
+      // it can be repeated for credit.
+      $max_cat_repeats = fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalog_year, TRUE);
+
+      // Okay, now, let's rebuild this line.        
+      $subject_id = str_replace("&", "_A_", $subject_id);
+      
+      $new_line .= "$subject_id $course_num";
+      // Was there a min grade?
+      if ($min_grade != "") {
+        $new_line .= " ($min_grade)";
+      }
+      // Specified repeats?
+      if ($max_cat_repeats > 0) {
+        $new_line .= " [$max_cat_repeats]";
+      }
+
+           
+
+
+    } // else (does not contain &)
+
+    // Add to our $rtn
+    $rtn .= $new_line . "\n";
+    
+  } // for lines...
+        
+    
+    
+  return $rtn;
+} // admin_process_catalog_repeats_for_group_courses_text
+
+
+
+
+
+
 /**
  * This function lets the user edit a group.
  */
@@ -285,6 +451,7 @@ function admin_edit_group_form() {
           Used by:
           <a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-show-group-use", "group_id=$group_id")  . "\");'>[degrees]</a>
           </span>",
+      "weight" => 0,
     );
   }
 
@@ -328,6 +495,7 @@ function admin_edit_group_form() {
     "maxlength" => 100,
     "popup_description" => t("This is what FlightPath uses to refer to this group in screens and popups.
                         Ex: Free Electives, Art Electives, Core Humanities, etc."),
+    "weight" => 10,
   );
 
   $form["group_name"] = array(
@@ -340,6 +508,7 @@ function admin_edit_group_form() {
                         major_electives_sr and major_electives_jr.  The field may be considered
                         optional, but it is highly recommended you enter something here for your
                         own clarity later on.  It is OK to have the same group title and name."),
+    "weight" => 20,
   );
 
 
@@ -353,6 +522,7 @@ function admin_edit_group_form() {
                         order in which courses are assigned to groups in FlightPath.
                         Higher numbers fill in FIRST!  So a group with a priority of 100 would fill in before
                         a group with a priority of 30."),
+    "weight" => 30,
   );
 
 
@@ -366,6 +536,7 @@ function admin_edit_group_form() {
                 &nbsp; &nbsp;
                 <a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-select-icon", "group_id=$group_id") . "\");'>[select another]</a>
                 ",
+    "weight" => 40,
   );
 
     
@@ -376,12 +547,14 @@ function admin_edit_group_form() {
     "prefix" => "<div style='overflow: auto; max-height: 150px;' class='admin-groups-show-definition'>",
     "suffix" => "</div><a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-edit-definition", "de_catalog_year=$de_catalog_year&group_id=$group_id") . "\");'
                             >[" . t("edit definition") . "]</a>",
+    "weight" => 50,
   );
  
 
   $form["mark" . $m++] = array(
     "type" => "markup",
     "value" => "<hr>",
+    "weight" => 60,
   );
 
   
@@ -392,6 +565,7 @@ function admin_edit_group_form() {
     "rows" => 17,
     "cols" => 80,
     "value" => $courses,
+    "weight" => 70,
   );
   // if a definition was specified, we need to disable the courses textarea.
   if (trim($group->definition)) {
@@ -403,7 +577,21 @@ function admin_edit_group_form() {
                                  
   }
   
-
+  $form["catalog_repeat"] = array(
+    "type" => "checkbox",
+    "label" => t("Set Catalog Repeats"),
+    "value" => $group->db_catalog_repeat,
+    "popup_description" => t("If checked, this group will automatically assign specified repeats to courses
+                        which are determined to be repeatable for this catalog year.  
+                        
+                        For example, if you enter
+                        ART 101, and in the course catalog that course may be taken two times, then
+                        when you save this group the line will be changed to ART 101 [2].
+                        
+                        This will work with definitions, but will not work in groups with branches.
+                        If you are unsure what to select, leave this box unchecked."),
+    "weight" => 80,
+  );
 
   $form["data_entry_comment"] = array(
     "type" => "textarea",
@@ -411,6 +599,7 @@ function admin_edit_group_form() {
     "rows" => 3,
     "cols" => 80,
     "value" => $group->data_entry_comment,
+    "weight" => 90,
   );
  
   
@@ -418,6 +607,7 @@ function admin_edit_group_form() {
     "type" => "submit",
     "value" => "Submit",
     "prefix" => "<hr>",
+    "weight" => 100,
   );
   
   // Only show delete option based on permission  
@@ -427,7 +617,8 @@ function admin_edit_group_form() {
       "value" => "<div align='right' class='groups-delete-group-wrapper'>
                         " . t("Delete this group?") . " <input type='button' value='X'
                         onClick='adminDeleteGroup(\"$group_id\");'>
-                      </div>", 
+                      </div>",
+      "weight" => 200,
     );
  
   }
@@ -795,7 +986,7 @@ function admin_get_group_courses(Group $group) {
   
   
   // Returns a plain text list of the courses in a group's requirements
-  // for use in the editSpecificGroup page.
+  // for use in the edit_group_form.
   $rtn = "";
 
   // courses not in branches...
@@ -911,7 +1102,7 @@ function admin_display_groups() {
         Options:
         <ul style='margin-top: 5px;'>          
           <li>" . l(t("Add a new group to this year"), "admin/groups/edit-group", "de_catalog_year=$de_catalog_year&group_id=new") . "</li>
-          <li>" . l(t("Process all group definitions for this year"), "admin/groups/process-all-definitions", "de_catalog_year=$de_catalog_year") . "</li>
+          <li>" . l(t("Process all group definitions & catalog repeats for this year"), "admin/groups/process-all-definitions", "de_catalog_year=$de_catalog_year") . "</li>
           </li>
         </ul>
           <div align='center'>" . t("Hint: use CTRL-F to search groups quickly") . "</div>
@@ -989,13 +1180,13 @@ function admin_process_all_definitions_form() {
   $form = array();
   $de_catalog_year = admin_get_de_catalog_year();
 
-  fp_set_title(t("Process all definitions for @year", array("@year" => $de_catalog_year)));
+  fp_set_title(t("Process all group definitions and settings for @year", array("@year" => $de_catalog_year)));
   $m = 0;
   
   $form["mark" . $m++] = array(
     "type" => "markup",
-    "value" => t("This will cause all of the groups with definitions to be cleared, and their
-                  definitions re-run.  This process can take several minutes, depending
+    "value" => t("This will cause all of the groups with definitions and other settngs (ex: catalog repeats) to be cleared, and their
+                  course requirements re-processed.  This function can take several minutes, depending
                   on how many groups with definitions you have."), 
   );  
       
@@ -1007,8 +1198,8 @@ function admin_process_all_definitions_form() {
 
   $form["submit"] = array(
     "type" => "submit",
-    "value" => t("Process definitions"),
-    "description" => t("Can take several minutes to run! Only click ONCE!"),
+    "value" => t("Process groups"),
+    "description" => t("Can take several minutes to run. Only click once!"),
   );
      
 
@@ -1155,9 +1346,10 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
     $batch["results"]["current"] = 0;
     $batch["results"]["finished"] = FALSE;    
 
-    // We need a count of how manhy groups in this year have definitions to process.
+    // TODO:  Change to count how many groups with definitions OR "catalog_repeat" set.
+    // We need a count of how many groups in this year have definitions to process.
     $res = db_query("SELECT count(*) as `count` FROM draft_groups
-                       WHERE definition != '' 
+                       WHERE (definition != '' OR catalog_repeat = 1) 
                        AND catalog_year = '?' 
                        AND delete_flag = 0 ", $de_catalog_year);
     $cur = db_fetch_array($res);
@@ -1177,9 +1369,10 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
   
   $db = get_global_database_handler();  
   
+  // TODO:  Change to count how many groups with definitions OR "catalog_repeat" set.
   // First, find every group which has a definition set.
   $res = db_query("SELECT * FROM draft_groups
-                       WHERE definition != '' 
+                       WHERE (definition != '' OR catalog_repeat = 1) 
                        AND catalog_year = '?' 
                        AND delete_flag = 0 
                        limit $current, $limit", $de_catalog_year);
@@ -1190,11 +1383,27 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
     }
       
     
-    $def = $cur["definition"];
+    $def = trim($cur["definition"]);
     $group_id = $cur["group_id"];
     $group_name = $cur["group_name"];
-    $temp = admin_get_courses_from_definition($def);
-    $courses = trim($temp["text"]);
+    $catalog_repeat = intval($cur['catalog_repeat']);
+
+    // Only do definitions if there IS a definition.
+    if ($def != "") {
+      $temp = admin_get_courses_from_definition($def);
+      $courses = trim($temp["text"]);
+    }
+    else {
+      // If there are no definitions, assemble a $courses string. admin_get_group_courses(Group $group)
+      $g = new Group($group_id);
+      $courses = admin_get_group_courses($g);      
+    }
+
+    // If the catalog_repeat flag is set, process that.
+    if ($catalog_repeat == 1) {
+      $courses = admin_process_catalog_repeats_for_group_courses_text($courses, $de_catalog_year);
+    }
+
     $ccount = 0;
 
     fp_add_message(t("Working on %name", array("%name" => $group_name)));

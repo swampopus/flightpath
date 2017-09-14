@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-19-14
+  Added concept of "set catalog repeats" to groups, which will automatically set all repeatable courses to repeat.
+  
+  Fixed popup_description bug for "checkbox" form element type.
+
+
 2017-08-22
   Fixed PDO mysql error in student search when searching by major.
   
