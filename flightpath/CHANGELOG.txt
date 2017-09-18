@@ -1,7 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
-2017-19-14
+
+2017-09-18
+  Fixed bug where "process all definitions" wasn't loading groups with branches correctly.
+
+
+2017-09-14
   Added concept of "set catalog repeats" to groups, which will automatically set all repeatable courses to repeat.
   
   Fixed popup_description bug for "checkbox" form element type.

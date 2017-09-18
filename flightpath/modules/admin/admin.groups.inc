@@ -1223,7 +1223,7 @@ function admin_process_all_definitions_form_submit($form, $form_submit) {
   // Okay, set up the batch....
   $batch = array(
     "operation" => array("admin_process_all_definitions_perform_batch_operation", array($de_catalog_year)),
-    "title" => t("Process all group definitions for %year", array("%year" => $de_catalog_year)),
+    "title" => t("Process all group definitions & settings for %year", array("%year" => $de_catalog_year)),
     "file" => menu_get_module_path("admin") . "/admin.groups.inc",
     "progress_message" => "Processing group @current of @total",
     "display_percent" => TRUE,
@@ -1346,7 +1346,7 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
     $batch["results"]["current"] = 0;
     $batch["results"]["finished"] = FALSE;    
 
-    // TODO:  Change to count how many groups with definitions OR "catalog_repeat" set.
+    // Change to count how many groups with definitions OR "catalog_repeat" set.
     // We need a count of how many groups in this year have definitions to process.
     $res = db_query("SELECT count(*) as `count` FROM draft_groups
                        WHERE (definition != '' OR catalog_repeat = 1) 
@@ -1369,7 +1369,7 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
   
   $db = get_global_database_handler();  
   
-  // TODO:  Change to count how many groups with definitions OR "catalog_repeat" set.
+  // Change to count how many groups with definitions OR "catalog_repeat" set.
   // First, find every group which has a definition set.
   $res = db_query("SELECT * FROM draft_groups
                        WHERE (definition != '' OR catalog_repeat = 1) 
@@ -1395,8 +1395,10 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
     }
     else {
       // If there are no definitions, assemble a $courses string. admin_get_group_courses(Group $group)
-      $g = new Group($group_id);
-      $courses = admin_get_group_courses($g);      
+      
+      $g = new Group($group_id, null, -1, false, true);  // make sure we are loading from draft.
+      $courses = admin_get_group_courses($g);
+            
     }
 
     // If the catalog_repeat flag is set, process that.
@@ -1408,9 +1410,25 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
 
     fp_add_message(t("Working on %name", array("%name" => $group_name)));
 
-    // Remove all the existing group requirements for this group first.
+
+
+
+    // We need to delete all the existing course & subgroup requirements from this group.
+    // That entails first seeing what subgroups were required and deleting them,
+    // then deleting the parent group's requirements.
+    // First, find and delete the branches (child groups):
+    $res2 = db_query("SELECT * FROM draft_group_requirements
+                WHERE group_id = ?
+                AND child_group_id != '0' ", $group_id);
+    while ($cur2 = db_fetch_array($res2)) {
+      $cg_id = $cur2["child_group_id"];
+      $res22 = db_query("DELETE FROM draft_group_requirements
+                  WHERE group_id = ? ", $cg_id);
+    }
+    // Now delete the course requirements...
     $res2 = db_query("DELETE FROM draft_group_requirements
-                        WHERE group_id = ? ", $group_id);
+                  WHERE group_id = ? ", $group_id);
+
 
 
     $lines = explode("\n", $courses);
@@ -1470,10 +1488,78 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
                             check your spelling, and add the course again.", array("%course" => "$subject_id $course_num", "%gname" => $group_name)), "error");
 
         }
-      }
-    }
+      } // if line does not contain &
+      else {
+        // ELSE, this was a branch!  Insert it as well.
 
-    fp_add_message(t("%name definition processed. %count courses added.", array("%name" => $group_name, "%count" => $ccount)) . "<br><br>");    
+        // This line DOES have an ampersand (&), so this is a sub group
+        // within this group.
+        // First, we need to request a new branchID for this new group.
+        if (!$branch_id = $db->request_new_group_id()) {
+          die ("Error.  Could not create new group (branch) ID.");
+        } 
+        else {
+          // Add this branch to the list of requirements for this group.
+          $query = "INSERT INTO draft_group_requirements
+                      (group_id, child_group_id)
+                      values ('?','?') ";
+          $res2 = db_query($query, $group_id, $branch_id);
+  
+        }
+        $c_tokes = explode("&",$line);
+        for ($cT = 0; $cT < count($c_tokes); $cT++)
+        {
+          $tokens = explode(" ", trim($c_tokes[$cT]));
+          $subject_id = trim($tokens[0]);
+          $course_num = trim($tokens[1]);
+          $min_grade = @trim($tokens[2]);
+          $course_repeats = @trim($tokens[3]);
+  
+          if (strstr($min_grade, "[")) {
+            // This is actually a specified repeat, not a min grade.
+            $course_repeats = $min_grade;
+            $min_grade = "";
+          }
+  
+          $min_grade = str_replace("(","",$min_grade);
+          $min_grade = str_replace(")","",$min_grade);
+  
+          $course_repeats = str_replace("[","",$course_repeats);
+          $course_repeats = str_replace("]","",$course_repeats);
+          $course_repeats--;
+          if ($course_repeats < 0) { $course_repeats = 0; }
+  
+          // If the subject_id had a _A_ in it, convert this back
+          // to an ampersand.
+          $subject_id = str_replace("_A_", "&", $subject_id);
+  
+          // Commenting out, because we do not care about catalog_year
+          // when specifying courses...
+          if ($course_id = $db->get_course_id($subject_id, $course_num, "", true)) {
+                      
+            $query = "INSERT INTO draft_group_requirements
+                      (group_id, course_id,
+                      course_min_grade, course_repeats, data_entry_value)
+                      values ('?','?','?','?', ?) ";
+            $res2 = db_query($query, $branch_id, $course_id, $min_grade, $course_repeats, "$subject_id~$course_num");
+          } 
+          else {
+            // The course_id could not be found!
+            
+            fp_add_message(t("Course not found! You specified %course as a requirement in %gname,
+                            but this course could not be found in the catalog.  It was removed from
+                            the list of requirements.  Are you sure you typed it correctly? Please
+                            check your spelling, and add the course again.", array("%course" => "$subject_id $course_num", "%gname" => $group_name)), "error");
+              
+          }
+  
+        } // for $cT
+      } // else it does contain &      
+      
+      
+    } // for t < count lines
+
+    fp_add_message(t("%name processed. %count courses added.", array("%name" => $group_name, "%count" => $ccount)) . "<br><br>");    
 
     
 
