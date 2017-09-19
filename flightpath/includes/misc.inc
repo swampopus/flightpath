@@ -1358,6 +1358,12 @@ function modules_implement_hook($hook = "example_hook_here") {
     
   $rtn = array();
 
+  // If we are in the install script, the GLOBALS array won't be set up, since there is no
+  // settings file yet.  If that's the case, create a blank array so we don't have an issue.
+  if (!isset($GLOBALS['fp_system_settings'])) $GLOBALS['fp_system_settings'] = array();
+  if (!isset($GLOBALS['fp_system_settings']['modules'])) $GLOBALS['fp_system_settings']['modules'] = array();
+   
+
   foreach ($GLOBALS["fp_system_settings"]["modules"] as $module => $value) {
     if (isset($value["enabled"]) && $value["enabled"] != "1") {
       // Module is not enabled.  Skip it.
