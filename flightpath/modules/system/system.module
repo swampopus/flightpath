@@ -568,6 +568,8 @@ function system_execute_php_form_submit($form, $form_state) {
 function system_confirm_db_updates_form() {
   $form = array();
 
+  $m = 0;
+  
   $form["mark" . $m++] = array(
     "value" => t("Are you sure you wish to run the database updates?
                 This will find modules which have been updated, and now need to
@@ -642,7 +644,7 @@ function system_confirm_db_updates_form_submit($form, $form_state) {
             $info_details_array["enabled"] = $cur["enabled"];
            
             // Does this module need to run db updates?
-            if ($cur["enabled"] == "1" && $cur["schema"] != $info_details_array["schema"] && $info_details_array["schema"] != "") {
+            if (@$cur["enabled"] == "1" && @$cur["schema"] != @$info_details_array["schema"] && @$info_details_array["schema"] != "") {
               // YES, we need to run this module's hook_update function, if it exists.
               
               // So, let's try to do that.              

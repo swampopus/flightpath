@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+
+2017-09-23
+  Fixed PHP notices on update function
+  
+
 2017-09-19
   Fixing PHP warnings on install.
   
