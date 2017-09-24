@@ -164,7 +164,7 @@ function fp_display_page($page) {
   }
   
   // Was this page a tab?  And if so, are there any other tabs we need to display? //
-  if ($page["router_item"]["type"] == MENU_TYPE_TAB || $page["router_item"]["tab_parent"] != "") {
+  if (@$page["router_item"]["type"] == MENU_TYPE_TAB || @$page["router_item"]["tab_parent"] != "") {
     // We know we should have at least 1 tab for this page.
     $tab_array = fp_build_tab_array($page);        
     $screen->page_tabs = fp_render_tab_array($tab_array);    
@@ -226,7 +226,7 @@ function fp_display_page($page) {
   
   if (!$screen->bool_print) {
     // Any sub-tabs we need to render?
-    if ($page["router_item"]["type"] == MENU_TYPE_SUB_TAB) {
+    if (@$page["router_item"]["type"] == MENU_TYPE_SUB_TAB) {
       $sub_tab_array = fp_build_sub_tab_array($page);
       $content_top .= fp_render_sub_tab_array($sub_tab_array);
     }

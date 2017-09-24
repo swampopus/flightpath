@@ -1,6 +1,10 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-09-24
+  Fixed notices on Not Found page.  Re-ordered weight system and added new markup elements to degree edit form (to make it easier
+  for other modules, ie, Conditional Requirements, to form_alter).
+  
 
 2017-09-23
   Fixed PHP notices on update function

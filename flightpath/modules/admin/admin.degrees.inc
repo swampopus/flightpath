@@ -1469,13 +1469,11 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
         
   ///////////////////////////////////////
   ///////////////////////////////////////
-  // Degree Blocks //
+  // Semester Blocks //
   //////////////////////////////////////
   ///////////////////////////////////////
   $groups_counter = 0;  // used to create unique variables for groups 
   $js_existing_semesters = array();
-  
-  $base_weight = 3000;
    
   $form['blocks_top_markup'] = array(
     'value' => "<div style='clear: both;'></div>
@@ -1486,6 +1484,8 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
                 ",
     "weight" => 2010,
   );
+  
+  $base_weight = 30000;
    
   $first_semester_num = -999;
             
@@ -1508,6 +1508,12 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
       $semester->title = "";
     }
 
+    $form["semester_{$semester->semester_num}_very_top_markup"] = array(
+      "value" => "",
+      "weight" => $base_weight + ($semester->semester_num * 100) + 10,
+    );
+    
+    
     $form['semester_title_' . $semester->semester_num] = array(
       'type' => 'textfield',
       'prefix' => "<div style='padding-bottom: 3px; margin-top:20px;'><b>Block number: " . ($semester->semester_num + 1) . "</b> 
@@ -1521,7 +1527,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
                                  then you would enter that in this box and hit save.  
                                  
                                  To change a title back to the default, just leave it blank."),
-      "weight" => $base_weight + ($semester->semester_num * 10) + 1,      
+      "weight" => $base_weight + ($semester->semester_num * 100) + 20,      
     );
 
 
@@ -1539,12 +1545,17 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
       $contents .= "\n";
     }
     
+
+    $form["semester_{$semester->semester_num}_top_table_markup"] = array(
+      "value" => "<div class='edit-degree-semester-block'>
+                   <table border='1' width='100%' class='edit-degree-semester-block-table'>",
+      "weight" => $base_weight + ($semester->semester_num * 100) + 30,
+    );
     
+        
     $form['courses_' . $semester->semester_num] = array(
       'type' => 'textarea',
-      'prefix' => "<div class='edit-degree-semester-block'>
-                   <table border='1' width='100%' class='edit-degree-semester-block-table'>
-                   <td valign='top' width='30%'>",      
+      'prefix' => "<td valign='top' width='30%'>",      
       'label' => 'Courses: ',
       'value' => $contents,
       'rows' => 10,
@@ -1556,7 +1567,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
 
       'suffix' => "</td>",
                   
-      "weight" => $base_weight + ($semester->semester_num * 10) + 5,      
+      "weight" => $base_weight + ($semester->semester_num * 100) + 40,      
     );
     
     
@@ -1621,13 +1632,29 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
       'prefix' => "<td valign='top'>",
       'label' => t("Groups:"),
       'value' => $contents,
-      'suffix' => "</table>
-                   </div> <!-- semester block -->
-                   " . fp_render_button(t("Save Draft for @year", array("@year" => $de_catalog_year)), "adminSubmitDegreeForm2();"),
-      "weight" => $base_weight + ($semester->semester_num * 10) + 7,
+      "weight" => $base_weight + ($semester->semester_num * 100) + 50,
     ); 
 
  
+ 
+    $form["semester_{$semester->semester_num}_table_bottom_markup"] = array(
+      "value" => "</table>
+                   </div> <!-- semester block -->",
+      "weight" => $base_weight + ($semester->semester_num * 100) + 60,
+    );
+
+    $form["semester_{$semester->semester_num}_below_table_markup"] = array(
+      "value" => "",
+      "weight" => $base_weight + ($semester->semester_num * 100) + 70,
+    );
+
+ 
+    $form["semester_{$semester->semester_num}_save_draft_markup"] = array(
+      "value" => fp_render_button(t("Save Draft for @year", array("@year" => $de_catalog_year)), "adminSubmitDegreeForm2();"),
+      "weight" => $base_weight + ($semester->semester_num * 100) + 80,
+    );
+ 
+  
   
   } // while degree->list_semesters
      
@@ -1661,7 +1688,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
                               Use this to pass messages to all students and advisors who pull up this degree plan.
                               \n\nIt will begin with the text 'Important Message': automatically."),
     
-    "weight" => 5010,    
+    "weight" => 50010,    
   );
 
   
@@ -1670,7 +1697,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     'type' => 'markup',
     'value' => t('If this degre has tracks, you may enter rules for track selection below, for each
                   type of level 3 degree (tracks). <b>You may skip classifications which do not pertain to this degree.</b>'),
-    "weight" => 5020,
+    "weight" => 50020,
   );
   $c = 10;
   $degree_classes = fp_get_degree_classifications();
@@ -1704,7 +1731,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
         'popup_description' => t("This is the minimum number of tracks THIS degree must select.  For example, if the degree requires at least one track, enter a 1 (one) in this box.\n\n
                                   The default is zero (0), which means that no track is required for this degree.  The user is not required to select any at all.\n\n
                                   If you are unsure what to enter, leave it set to 0 (zero)."),
-        "weight" => 6000 + $c + 1,    
+        "weight" => 60000 + $c + 1,    
       );
       
       
@@ -1718,7 +1745,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
         'popup_description' => t("This is the maximum number of tracks THIS degree may select.  For example, if the degree requires the student to have NO MORE than 1 track selected, you would enter 1 (one) in this box.\n\n
                                   The default is zero (0), which means that there is no maximum; the user may select as many of this degree's tracks as they wish.\n\n
                                   If you are unsure what to enter, leave it set to 0 (zero)."),
-        "weight" => 6000 + $c + 5,
+        "weight" => 60000 + $c + 5,
       );
       
       $elements["tsc_{$machine_name}_default_tracks"] = array(
@@ -1733,7 +1760,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
         'popup_description' => t("If THIS degree has one or more 'default' tracks associated with it (ex: for What If mode), enter the FULL major codes here, separated by comma.\n\n
                                   For example: ART|_SCULP, ART|_PAINT\n\n
                                   If you are unsure what to enter, leave it blank."),
-        "weight" => 6000 + $c + 7,
+        "weight" => 60000 + $c + 7,
       );
                   
       
@@ -1749,7 +1776,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     'label' => t('View advanced options'),
     'elements' => array($elements),
     'start_closed' => $bool_start_closed,
-    "weight" => 5100,
+    "weight" => 50100,
   );
   
   
@@ -1762,7 +1789,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
                     onClick='adminDeleteDegree(\"$degree_id\");'>
           </div>      
           ", 
-      "weight" => 9000,
+      "weight" => 90000,
     );
   
     
