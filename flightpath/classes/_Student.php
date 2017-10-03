@@ -806,14 +806,25 @@ class _Student extends stdClass
 	 * @param unknown_type $course
 	 */
 	function get_best_grade_for_course(Course $course) {
-	  //$c = $this->list_courses_taken->find_most_recent_match($course);
+	    
+	  $rtn = FALSE;
+    
+    // To help speed things up, let's see if we have cached this course already.
+    if (isset($GLOBALS['fp_temp_cache_' . $this->student_id]['best_grade_for_course'][$course->course_id])) {
+      return $GLOBALS['fp_temp_cache_' . $this->student_id]['best_grade_for_course'][$course->course_id];
+    }
+        
 	  $c = $this->list_courses_taken->find_best_grade_match($course);
 	  
-	  if ($c) return $c->grade;
-	  
-	  
-	  // else
-	  return FALSE;
+	  if ($c) {
+	    $rtn = $c->grade;
+    }
+    	  
+    // Set into our cache
+    $GLOBALS['fp_temp_cache_' . $this->student_id]['best_grade_for_course'][$course->course_id] = $rtn;    
+    
+	  	  
+	  return $rtn;
 	  
 	}
 	

@@ -129,9 +129,7 @@ function fp_display_page($page) {
   if (is_object($student)) {
     fp_add_body_class("student-rank-$student->db_rank  student-catalog-year-$student->catalog_year");
   }  
-
-
-  
+ 
   // If we don't have permission to search, then hide the little search.
   if (!user_has_permission("display_search_subtab")) {
     $screen->page_has_search = FALSE;
@@ -176,7 +174,7 @@ function fp_display_page($page) {
     $screen->page_tabs = fp_render_tab_array($GLOBALS["fp_set_page_tabs"]);    
   }
   
-      
+  
   // Build up the content //
   
   $content_top = "";  
@@ -237,9 +235,7 @@ function fp_display_page($page) {
     }
   }
 
-  
-  
-  
+      
   // If there are "messages" waiting, then let's add them to the top of content.
   if (@count($_SESSION["fp_messages"]) > 0) {
     $content_top .= "<div class='fp-messages'>";
@@ -266,6 +262,7 @@ function fp_display_page($page) {
   
   // Add in our URL
   $screen->page_body_classes .= " page-" . str_replace("/", "-", @$_REQUEST["q"]);
+  
   
   
   $screen->output_to_browser();  
@@ -500,7 +497,7 @@ function fp_build_tab_array($page) {
     global $current_student_id, $screen, $user, $student;
     
     $rtn  = "";
-        
+
     $bool_catalog_warning = FALSE;
     $bool_future_catalog_warning = FALSE;    
         
@@ -546,7 +543,7 @@ function fp_build_tab_array($page) {
       }
     }
 
-
+    
     
     $settings = fp_get_system_settings();
           
@@ -693,7 +690,8 @@ function fp_build_tab_array($page) {
       // This degree plan is made from combining several other degrees.  let's trot them out and display them as well.
       $t_degree_plan_titles = "";
       foreach ($degree_plan->combined_degree_ids_array as $t_degree_id) {
-        $t_degree_plan = new DegreePlan($t_degree_id);
+        $t_degree_plan = new DegreePlan();
+        $t_degree_plan->degree_id = $t_degree_id;
         
         $t_degree_plan->load_descriptive_data();
 
@@ -767,51 +765,6 @@ function fp_build_tab_array($page) {
     
     
     
-    /*  THIS LINK IS NOW PART OF THE DEGREES SECTION
-    // If this degree has tracks, we must display something about it here.
-
-    if ($degree_plan != null && $degree_plan->bool_has_tracks)
-    {
-      $extra_vars = "";
-      
-      $op_link = "<a href='javascript: popupWindow2(\"" . fp_url("advise/popup-change-track") . "\",\"$extra_vars\");'><img
-              src='" . fp_theme_location() . "/images/popup.gif' border='0' 
-              title='" . t("Click to change degree options.") . "'></a>";
-      $op_text = t("Click to select:") . " $op_link";
-
-      if ($screen_mode == "not_advising" || $screen_mode == "detailed")
-      {
-        $op_text = t("None selected");
-        $op_link = "";
-      }
-
-      if (!user_has_permission("can_advise_students")) {
-        
-        if ($GLOBALS["fp_advising"]["advising_what_if"] != "yes")
-        {
-          // In other words, we do not have permission to advise,
-          // and we are not in whatIf, so take out the link.
-          $op_link = "";
-          $op_text = t("None selected");
-
-        }
-      }
-
-      // Did has the student already selected an option?
-      if ($degree_plan->track_code != "")
-      {
-        // Display the track code in detailed mode.
-        $tc = ($screen_mode == "detailed") ? "($degree_plan->track_code)" : "";
-        
-        $op_text = $degree_plan->track_title . " $tc $op_link";
-      }
-
-
-      array_push($display_array, t("Option:") . " ~~ " . $op_text);
-    }
-
-     * 
-     */
      
      
     if (!$bool_blank) {
@@ -1276,7 +1229,7 @@ function display_access_denied() {
  */
 function fp_theme_location($bool_include_base_path = TRUE) {
   
-  $p = $GLOBALS["fp_system_settings"]["theme"];
+  $p = @$GLOBALS["fp_system_settings"]["theme"];
   
   // The theme hasn't been set for some reason
   if ($p == "") {

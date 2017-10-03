@@ -738,7 +738,10 @@ function draw_menu_items($menu_array) {
         
         $remarks = @trim($sub_details["remarks"]);
         $sub_faculty_id = $sub_details["faculty_id"];
-        $sub_degree_plan = new DegreePlan($sub_details["required_degree_id"]);
+        
+        $sub_degree_plan = new DegreePlan();
+        $sub_degree_plan->degree_id = $sub_details["required_degree_id"];
+        
         $sub_required_group_id = $sub_details["required_group_id"];
 
 
@@ -893,7 +896,8 @@ function draw_menu_items($menu_array) {
 				$group_title = "";
         $degree_title = "";
         if ($group->req_by_degree_id != 0) {
-          $tdeg = new DegreePlan($group->req_by_degree_id);
+          $tdeg = new DegreePlan();
+          $tdeg->degree_id = $group->req_by_degree_id;
           $degree_title = " (" . $tdeg->get_title2(FALSE, TRUE) . ")";
         }
 				if ($group->group_id > 0)
@@ -1391,7 +1395,8 @@ function draw_menu_items($menu_array) {
         
         $degree_title = "";
         if ($group->req_by_degree_id != 0) {
-          $tdeg = new DegreePlan($group->req_by_degree_id);
+          $tdeg = new DegreePlan();
+          $tdeg->degree_id = $group->req_by_degree_id;
           $degree_title = " (" . $tdeg->get_title2(FALSE, TRUE) . ")";
         }        
         
@@ -1516,28 +1521,25 @@ function draw_menu_items($menu_array) {
 		// elements for the advising screen.  It should be
 		// called before display_screen();
 
-		
 		$this->build_semester_list();
-
+		              
 		$this->build_excess_credit();
 		$this->build_test_scores();
 
 		$this->build_transfer_credit();
-
+    
 		// Should we add the graduate credit block?
 		
 		if (variable_get("display_graduate_credit_block", "yes") == "yes") {
 		  $this->build_graduate_credit();
 		}
-		
-		
-		
+ 		
 		if (!$this->bool_blank)
 		{ // Don't show if this is a blank degree plan.
 			$this->build_footnotes();
 			$this->build_added_courses();
 		}
-
+           
 		// invoke a hook, to give custom modules the chance to perform actions 
 		// (or add blocks) to the advise screen after we have run this function.
 		invoke_hook("advise_build_screen_elements", array(&$this));
@@ -2238,7 +2240,8 @@ function draw_menu_items($menu_array) {
 	 */
 	function build_semester_list() {
 	  
-		$list_semesters = $this->degree_plan->list_semesters;
+    
+    $list_semesters = $this->degree_plan->list_semesters;
 		// Go through each semester and add it to the screen...
 		$list_semesters->reset_counter();
 
@@ -2250,11 +2253,12 @@ function draw_menu_items($menu_array) {
 			{ // These are the "added by advisor" courses.  Skip them.
 				continue;
 			}
-
+ 
 
 			$this->add_to_screen($this->display_semester($semester, true), "SEMESTER_" . $semester->semester_num);
 
 		}
+        
 
 	}
 
@@ -2678,7 +2682,8 @@ function draw_menu_items($menu_array) {
       $d = "";
       foreach ($course->assigned_to_degree_ids_array as $degree_id) {
         $d .= $degree_id . ",";
-        $t_degree_plan = new DegreePlan($degree_id);        
+        $t_degree_plan = new DegreePlan();
+        $t_degree_plan->degree_id = $degree_id;        
         $c .= "<span>" . $t_degree_plan->get_title2() . "</span>, ";
       }
       $c = rtrim($c, ", ");
@@ -2818,7 +2823,8 @@ function draw_menu_items($menu_array) {
 		  $temp = $db->get_substitution_details($sub_id);
       
       $required_degree_id = $temp["required_degree_id"];
-      $req_degree_plan = new DegreePlan($required_degree_id);
+      $req_degree_plan = new DegreePlan();
+      $req_degree_plan->degree_id = $required_degree_id;
               
 		  $by = $db->get_faculty_name($temp["faculty_id"], false);
 		  $remarks = $temp["remarks"];
@@ -3014,175 +3020,6 @@ function draw_menu_items($menu_array) {
 	}
 
 
-	/**
-	 * Given a Semester object, this will generate the HTML to draw it out
-	 * to the screen.
-	 *
-	 * @param Semester $semester
-	 * @param bool $bool_display_hour_count
-	 *       - If set to TRUE, it will display a small "hour count" message
-	 *         at the bottom of each semester, showing how many hours are in
-	 *         the semester.  Good for debugging purposes.
-	 * 
-	 * @return string
-	 */
-	function z__display_semester(Semester $semester, $bool_display_hour_count = false)
-	{
-		// Display the contents of a semester object
-		// on the screen (in HTML)
-		$pC = "";
-		$pC .= $this->draw_semester_box_top($semester->title);
-
-		$count_hoursCompleted = 0;
-
-    $last_req_by_degree_id = -1;
-    
-    // Create a temporary caching system for degree titles, so we don't have to keep looking them back up.
-    if (!isset($GLOBALS["fp_temp_degree_titles"])) {
-      $GLOBALS["fp_temp_degree_titles"] = array();
-    }
-
-		// First, display the list of bare courses.
-		$semester->list_courses->sort_alphabetical_order(FALSE, FALSE, FALSE, 0, TRUE);  // sort, including the degree title we're sorting for.
-		$semester->list_courses->reset_counter();
-
-		while($semester->list_courses->has_more())
-		{
-			$course = $semester->list_courses->get_next();
-      
-      // Display what degree this course is required by
-      // TODO:  Decide if we should display the degree this course is coming from or not.
-      // Only display what degree we are required by if we have only displayed it once so far...
-      if (intval($course->req_by_degree_id) > 0 && $course->req_by_degree_id != $last_req_by_degree_id) {
-        
-        // Get the degree title...        
-        $dtitle = @$GLOBALS["fp_temp_degree_titles"][$course->req_by_degree_id];
-        if ($dtitle == "") {
-          $t_degree_plan = new DegreePlan($course->req_by_degree_id);   
-          //$t_degree_plan->load_descriptive_data();    
-          $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
-          $GLOBALS["fp_temp_degree_titles"][$course->req_by_degree_id] = $dtitle . " "; //save for next time.
-        }
-        
-        $pC .= "<tr><td colspan='8'>
-                  <div class='tenpt required-by-degree'><span class='req-by-label'>Required by </span>" . $dtitle . "</div>
-                </td></tr>"; 
-        
-        // Remember what the last degree we displayed was.        
-        $last_req_by_degree_id = $course->req_by_degree_id;                
-      }      
-      
-      
-			// Is this course being fulfilled by anything?
-
-			if (!($course->course_list_fulfilled_by->is_empty))
-			{ // this requirement is being fulfilled by something the student took...
-
-        $c = $course->course_list_fulfilled_by->get_first();
-        
-        $c->req_by_degree_id = $last_req_by_degree_id;  // make sure we assign it to the current degree_id.
-
-        // Tell the course what group we are coming from. (in this case: none)
-        $c->disp_for_group_id = "";
-        
-        $pC .= $this->draw_course_row($c);
-				$c->set_has_been_displayed($course->req_by_degree_id);
-
-
-				if ($c->display_status == "completed")
-				{ // We only want to count completed hours, no midterm or enrolled courses.
-					$h = $c->get_hours_awarded();
-					if ($c->bool_ghost_hour == TRUE) {
-					  $h = 0;
-					}
-					$count_hoursCompleted += $h;
-				}
-
-			} else {
-				// This requirement is not being fulfilled...
-        
-        // Tell the course what group we are coming from. (in this case: none)
-        $course->disp_for_group_id = "";
-								
-				$pC .= $this->draw_course_row($course);
-
-			}
-
-			//$pC .= "</td></tr>";
-
-		}
-
-
-    /////////////////////////////////////
-		// Now, draw all the groups.
-		$semester->list_groups->sort_alphabetical_order();
-		$semester->list_groups->reset_counter();
-		while($semester->list_groups->has_more())
-		{
-
-			$group = $semester->list_groups->get_next();
-      
-      // Display what degree this group is required by
-      // TODO:  Decide if we should display the degree this group is coming from or not.
-      // Only display what degree we are required by if we have only displayed it once so far...
-      if (intval($group->req_by_degree_id) > 0 && $group->req_by_degree_id != $last_req_by_degree_id) {
-
-        // Get the degree title...        
-        $dtitle = @$GLOBALS["fp_temp_degree_titles"][$group->req_by_degree_id];
-        if ($dtitle == "") {
-          $t_degree_plan = new DegreePlan($group->req_by_degree_id);
-          //$t_degree_plan->load_descriptive_data();      
-          $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
-          $GLOBALS["fp_temp_degree_titles"][$group->req_by_degree_id] = $dtitle; //save for next time.
-        }
-        
-        $pC .= "<tr><td colspan='8'>
-                  <div class='tenpt required-by-degree'>Required by $dtitle</div>
-                </td></tr>";
-        
-        // Remember what the last degree we displayed was.        
-        $last_req_by_degree_id = $group->req_by_degree_id;                
-      }            
-      
-      
-      
-			$pC .= "<tr><td colspan='8'>";
-            
-                  
-			$pC .= $this->display_group($group);
-			$count_hoursCompleted += $group->hours_fulfilled_for_credit;
-			$pC .= "</td></tr>";
-		}
-
-		// Add hour count to the bottom...
-		if ($bool_display_hour_count == true && $count_hoursCompleted > 0)
-		{
-			$pC .= "<tr><td colspan='8'>
-				<div class='tenpt' style='text-align:right; margin-top: 10px;'>
-				Completed hours: $count_hoursCompleted
-				</div>
-				";
-			$pC .= "</td></tr>";
-		}
-
-
-		// Does the semester have a notice?
-		if ($semester->notice != "")
-		{
-			$pC .= "<tr><td colspan='8'>
-					<div class='hypo tenpt' style='margin-top: 15px; padding: 5px;'>
-						<b>Important Notice:</b> $semester->notice
-					</div>
-					</td></tr>";
-		}
-			
-		
-		$pC .= $this->draw_semester_box_bottom();
-
-		return $pC;
-	}
-
-
 
   /**
    * Given a Semester object, this will generate the HTML to draw it out
@@ -3299,7 +3136,8 @@ function draw_menu_items($menu_array) {
       $dweight = intval(@$GLOBALS["fp_temp_degree_advising_weights"][$req_by_degree_id]);
       
       if ($dtitle == "") {
-        $t_degree_plan = new DegreePlan($req_by_degree_id);
+        $t_degree_plan = new DegreePlan();
+        $t_degree_plan->degree_id = $req_by_degree_id;
         //$t_degree_plan->load_descriptive_data();            
         $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
         $dweight = $t_degree_plan->db_advising_weight;
@@ -3330,7 +3168,8 @@ function draw_menu_items($menu_array) {
         // Get the degree title...        
         $dtitle = @$GLOBALS["fp_temp_degree_titles"][$req_by_degree_id];
         if ($dtitle == "") {
-          $t_degree_plan = new DegreePlan($req_by_degree_id);
+          $t_degree_plan = new DegreePlan();
+          $t_degree_plan->degree_id = $req_by_degree_id;
           //$t_degree_plan->load_descriptive_data();
           $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
           $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle; //save for next time.
@@ -4316,6 +4155,7 @@ function draw_menu_items($menu_array) {
 			$op_on_click_function = "dummyToggleSelection";
 		}
 
+
 		if (!user_has_permission("can_advise_students"))
 		{
 			// This user does not have the abilty to advise,
@@ -4323,7 +4163,7 @@ function draw_menu_items($menu_array) {
 			// we are in print view).
 			$op_on_click_function = "dummyToggleSelection";
 		}
-		
+	
 		$extra_css = "";
     if ($opchecked == "-check") {
       $extra_css .= " advise-checkbox-$display_status-checked";
@@ -4860,7 +4700,8 @@ function draw_menu_items($menu_array) {
 		$course = new Course($course_id);
 		$bool_sub_add = false;
 
-    $req_degree_plan = new DegreePlan($req_by_degree_id); 
+    $req_degree_plan = new DegreePlan();
+    $req_degree_plan->degree_id = $req_by_degree_id; 
     if ($req_by_degree_id > 0) {
       $course->req_by_degree_id = $req_by_degree_id;
       $req_degree_plan->load_descriptive_data();
@@ -5583,7 +5424,8 @@ function draw_menu_items($menu_array) {
     // TODO:  Conditions on which this will even appear?  Like only if the student has more than one degree selected?
     // What degrees is this group req by?    
 
-    $t_degree_plan = new DegreePlan($req_by_degree_id);
+    $t_degree_plan = new DegreePlan();
+    $t_degree_plan->degree_id = $req_by_degree_id;
     $t = $t_degree_plan->get_title2();
     if ($t) {        
         

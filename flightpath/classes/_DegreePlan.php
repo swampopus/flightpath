@@ -75,16 +75,17 @@ class _DegreePlan extends stdClass
       $this->db = get_global_database_handler();
     }
 
+
     $this->student_array_significant_courses = $array_significant_courses;
 
     if ($degree_id != "")
     {
-
+    
       $this->degree_id = $degree_id;
-      $this->load_descriptive_data();
+      $this->load_descriptive_data();      
       if (!$bool_load_minimal)
-      {
-        $this->load_degree_plan();
+      {            
+        $this->load_degree_plan();                 
       }
       // Add the "Add a Course" semester to the semester list.
       $this->add_semester_courses_added();
@@ -92,8 +93,7 @@ class _DegreePlan extends stdClass
     }
 
 
-
-  }
+  } // __construct
 
 
   

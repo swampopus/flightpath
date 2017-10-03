@@ -1,6 +1,13 @@
 FlightPath 5.x Changelog
 ========================
 
+
+2017-10-03
+  Added extra caching & other techniques to speed up load times.  In some situations, load time has been decreased by 300%.
+  
+  Added new function, fpmct(), which is short for fpm(fp_debug_ct($val));
+
+
 2017-09-24
   Fixed notices on Not Found page.  Re-ordered weight system and added new markup elements to degree edit form (to make it easier
   for other modules, ie, Conditional Requirements, to form_alter).

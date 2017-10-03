@@ -750,6 +750,11 @@ function get_term_structures() {
 function fp_get_requirement_types() {
   $rtn = array();
   
+  if (isset($GLOBALS['fp_temp_cache']['fp_get_requirement_types'])) {
+    return $GLOBALS['fp_temp_cache']['fp_get_requirement_types'];
+  }
+  
+  
   $temp = explode("\n", variable_get("requirement_types", "g ~ General Requirements\nc ~ Core Requirements\ne ~ Electives\nm ~ Major Requirements\ns ~ Supporting Requirements\nx ~ Additional Requirements"));
   foreach ($temp as $line) {
     $line = trim($line);
@@ -778,11 +783,36 @@ function fp_get_requirement_types() {
     $rtn["m"] = t("Major Requirements");
   }
   
-  
+  $GLOBALS['fp_temp_cache']['fp_get_requirement_types'] = $rtn;
   
   return $rtn;
   
 }
+
+
+/**
+ * This function provides a pass-thru to $d = new DegreePlan(args).
+ * However, it allows for quick caching look-up, so it should be used when possible instead of $x = new DegreePlan.
+ */
+function fp_load_degree($degree_id = "", DatabaseHandler $db = NULL, $bool_load_minimal = false, $array_significant_courses = false, $bool_use_draft = false) {
+  
+  // Create a "cache key" based on the arguments, so we can look this degree up faster later.
+  $cache_key = $degree_id . intval($bool_load_minimal) . md5(json_encode($array_significant_courses)) . intval($bool_use_draft);
+  if (isset($GLOBALS['fp_temp_cache']['fp_load_degree'][$cache_key])) {
+    $degree = $GLOBALS['fp_temp_cache']['fp_load_degree'][$cache_key];    
+    return $degree;
+  }
+    
+  $degree = new DegreePlan($degree_id, $db, $bool_load_minimal, $array_significant_courses, $bool_use_draft);
+  
+  // Save to our cache
+  $GLOBALS['fp_temp_cache']['fp_load_degree'][$cache_key] = $degree;
+  
+  return $degree;
+  
+}
+
+
 
 
 /**
@@ -1439,11 +1469,18 @@ function fpm($var, $max_levels = 20) {
 
   $arr = debug_backtrace();
   //pretty_print($arr);
-  $file = $arr[0]["file"];
+  
+  $t = 0;
+  
+  if (@$arr[1]['function'] == 'fpmct') {
+    $t = 1;
+  }
+  
+  $file = $arr[$t]["file"];
   if (strlen($file) > 70) {
     $file = "..." . substr($file, strlen($file) - 70);
   }
-  $str .= "<div class='fp-message-backtrace'>line {$arr[0]["line"]}: $file</div>";
+  $str .= "<div class='fp-message-backtrace'>line {$arr[$t]["line"]}: $file</div>";
     
   fp_add_message("&bull; " . $str);
 
@@ -1458,6 +1495,16 @@ function depricated_message($str = "A depricated function has been called.") {
   fpm($str);
   fpm(debug_backtrace());
 }
+
+
+/**
+ * Convenience function, will use fp_debug_ct() to display
+ * a message, and the number of miliseconds since its last call.
+ */
+function fpmct($val, $var = "") {
+  fpm(fp_debug_ct($val, $var));
+}
+
 
 
 
@@ -2013,7 +2060,7 @@ function fp_debug_current_time_millis($debug_val = "", $show_current_time = true
   if ($last_time > 1)
   {
     $diff = round($cur_time - $last_time,2);
-    $rtn .= "<span style='color: blue;'> ($diff" . "ms since last check)</span>";
+    $rtn .= "<span style='color: blue;'> ($diff" . t("ms since last call") . "</span>";
   } else {
     // Start of clock...
     $rtn .= "<span style='color: blue;'> --- </span>";

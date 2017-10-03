@@ -169,6 +169,80 @@ function fp_get_degree_advising_weight($degree_id, $bool_reset_cache = FALSE) {
 }
 
 
+/**
+ * Quick method to look up title for a degree.
+ */
+function fp_get_degree_title($degree_id, $bool_include_classification = FALSE, $bool_include_track_title = FALSE, $bool_include_html = TRUE, $bool_use_draft = FALSE) {
+
+  // TODO:  Check cache.
+  $dtitle = "";
+  $track_title = "";  
+  
+  
+  // Still no title?  Try to load ANY degree title with this degree's
+  // major_code.
+  $table_name = "degrees";
+  if ($bool_use_draft) {$table_name = "draft_$table_name";}
+
+  $res = $this->db->db_query("SELECT * FROM $table_name
+                          WHERE major_code = '?' 
+                          ORDER BY catalog_year DESC LIMIT 1", $this->major_code);
+  $cur = $this->db->db_fetch_array($res);
+  $dtitle = $cur["title"];
+  $major_code = $cur['major_code'];
+
+  if ($bool_include_track_title) {
+    
+    // Get track title
+    if (strstr($major_code, "_"))
+    {
+      // This means that there is a track.  Get all the information
+      // you can about it.
+      $temp = explode("_", $this->major_code);
+      $track_code = trim($temp[1]);
+      $major_code = trim($temp[0]);
+  
+      // The major_code might now have a | at the very end.  If so,
+      // get rid of it.
+      if (substr($major_code, strlen($major_code)-1, 1) == "|")
+      {
+        $major_code = str_replace("|","",$major_code);
+      }
+      // Now, look up information on the track.
+      $table_name = "degree_tracks";
+      if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
+  
+      $res = $this->db->db_query("SELECT * FROM $table_name
+                              WHERE major_code = '?'
+                              AND track_code = '?'
+                              AND catalog_year = '?' ", $this->major_code, $this->track_code, $this->catalog_year);
+      $cur = $this->db->db_fetch_array($res);
+  
+      $this->track_title = $cur["track_title"];    
+    }
+
+    if ($bool_include_html) {  
+      $dtitle .= "<span class='level-3-raquo'>&raquo;</span>";
+    }
+    $dtitle .= $track_title;
+  }
+  
+  if ($bool_include_classification && $this->degree_class != "") {
+    $details = fp_get_degree_classification_details($this->degree_class);
+    if ($bool_include_html) {
+      $dtitle .= " <span class='deg-class-title'>(" . $details["title"] . ")</span>";
+    }
+    else {
+      $dtitle .= " (" . $details["title"] . ")";
+    }
+  }
+
+
+  return $dtitle;  
+  
+  
+}
+
 
 
 

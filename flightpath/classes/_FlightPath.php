@@ -35,7 +35,7 @@ class _FlightPath extends stdClass
 
 
   function init($bool_init_advising_variables = false, $bool_ignore_what_if_advising_variables = false, $bool_load_full = true) {
-      
+    
     global $current_student_id, $user;
     // This will initialize this flightPath object
     // based on what is available in the global variables.
@@ -146,7 +146,7 @@ class _FlightPath extends stdClass
     //  We need like a loop here.
     $degree_plans = array();
     $temparr = explode(",", $major_code_csv);
-    
+      
     foreach ($temparr as $major_code) {   
     
       $t_major_code = $major_code;
@@ -209,9 +209,7 @@ class _FlightPath extends stdClass
       if ($bool_load_full == true)
       {
         $this->student = $student;
-  
-        $degree_plan = new DegreePlan($degree_id, $db, false, $student->array_significant_courses);
-  
+        $degree_plan = fp_load_degree($degree_id, $db, FALSE, $student->array_significant_courses);
         $degree_plan->add_semester_developmental($student->student_id);
         //$this->degree_plan = $degree_plan;
         $degree_plans[$degree_plan->degree_id] = $degree_plan;
@@ -230,7 +228,7 @@ class _FlightPath extends stdClass
       // into 1 generated degree plan.
     
       $combined_degree_plan = $this->combine_degree_plans($degree_plans, $student_id);
-      
+    
       $this->degree_plan = $combined_degree_plan;
       
     } // else if count(degree_plans) > 1
@@ -253,6 +251,9 @@ class _FlightPath extends stdClass
         "is_combined_dynamic_degree_plan" => $this->degree_plan->is_combined_dynamic_degree_plan,      
       );
     }
+
+
+
 
   }  // end of function fp_init
 
@@ -331,10 +332,9 @@ class _FlightPath extends stdClass
         
         
         ////////////////////////////
-        
         // Getting the list of groups is going to be similar to getting our list of courses.
         // Go through the list of groups for this semester.
-        $new_list_groups = $sem->list_groups->get_clone();
+        $new_list_groups = $sem->list_groups->get_clone(FALSE, FALSE);
         
         // Okay, now we can add to our semester
         // TODO:  Check hooks here?
@@ -342,9 +342,6 @@ class _FlightPath extends stdClass
         $the_semester->list_groups->add_list($new_list_groups); 
         // Also add this group list to the degree plan's list_groups.
         $new_degree_plan->list_groups->add_list($new_list_groups);
-        
-         
-                
         
       } // while, listing semesters in degree plan.
       
@@ -417,8 +414,8 @@ class _FlightPath extends stdClass
   }
 
 
-  function assign_courses_to_groups()
-  {
+  function assign_courses_to_groups() {
+    //fpm(fp_debug_ct("start assignt to groups", "assign_groups"));
     // This method will look at the student's courses
     // and decide which groups they should be fit into.
         
@@ -426,8 +423,9 @@ class _FlightPath extends stdClass
     // of groups to decide this.
     $student = $this->student;
     $this->degree_plan->list_groups->sort_priority();
-    // Now, sort by the advising weight of the degree itself.
+    // Now, sort by the advising weight of the degree itself.    
     $this->degree_plan->list_groups->sort_degree_advising_weight();
+    
     
     $this->degree_plan->list_groups->reset_counter();
     while($this->degree_plan->list_groups->has_more())
@@ -471,15 +469,18 @@ class _FlightPath extends stdClass
           // will automatically find this course and apply the
           // substitution.
         }
-      }      
+      }
+
+
+      
       // First we see if there are any bare courses at this level.  If there
       // are, then this group has NO branches!  Otherwise, the courses must
       // always be contained in a branch!
       if (!$g->list_courses->is_empty)
       {
   
-        // Yes, there are courses here.  So, assign them at this level.
-        $this->assign_courses_to_list($g->list_courses, $this->student, true, $g, true);
+        // Yes, there are courses here.  So, assign them at this level.        
+        $this->assign_courses_to_list($g->list_courses, $this->student, true, $g, true);        
         // Okay, if we have fulfilled our courses at this level.
 
         // then we can continue on to the next "top level" group.
@@ -535,9 +536,9 @@ class _FlightPath extends stdClass
       }
 
 
-    }
+    } // while 
     
-
+    //fpm(fp_debug_ct("finish assign to groups", "assign_groups"));
   }
 
 
@@ -692,11 +693,11 @@ class _FlightPath extends stdClass
 
     $list_requirements->sort_smallest_hours_first();
     // sort the requirement list by the best grades that the student has made?  Similar to the substitutions?
-    if ($sort_policy == "grade") {
-      $list_requirements->sort_best_grade_first($student);
+    if ($sort_policy == "grade") {        
+      $list_requirements->sort_best_grade_first($student);            
     }
-    else if ($sort_policy == "alpha") {
-      $list_requirements->sort_alphabetical_order();
+    else if ($sort_policy == "alpha") {      
+      $list_requirements->sort_alphabetical_order();      
     }
 
     $list_requirements->sort_substitutions_first($student->list_substitutions, $group_id);
@@ -737,7 +738,7 @@ class _FlightPath extends stdClass
         // Since this requirement has specified repeats, we want
         // to make all of the student's taken courses (for this course)
         // also have specified repeats.
-        $student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);
+        $student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);        
       }
       //fpm($group_id);
       
@@ -840,11 +841,8 @@ class _FlightPath extends stdClass
       
       // Has the student taken this course requirement?
       if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude, $req_by_degree_id))
-      { 
-
- 
- 
-
+      {
+         
         $h_get_hours = $c->get_hours();
         if ($c->bool_ghost_hour) {
           // If this is a ghost hour, then $h_get_hours would == 0 right now,
@@ -1257,7 +1255,7 @@ class _FlightPath extends stdClass
         if (trim($tdegree_id) == "") continue;
         if (!is_numeric($tdegree_id)) continue;
         
-        $tdegree_plan = new DegreePlan($tdegree_id, NULL, TRUE);
+        $tdegree_plan = fp_load_degree($tdegree_id, NULL, TRUE);
         $tmajor_code = $tdegree_plan->major_code . "|_" . $tdegree_plan->track_code;
                         
         db_query("INSERT INTO student_degrees

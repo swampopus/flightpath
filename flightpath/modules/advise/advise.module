@@ -474,7 +474,7 @@ function advise_display_popup_change_track() {
   else {
     // It IS a combined degree plan, so we need to get all the plans out of there.
     foreach ($degree_plan->combined_degree_ids_array as $t_degree_id) {
-      $t_degree_plan = new DegreePlan($t_degree_id);
+      $t_degree_plan = fp_load_degree($t_degree_id);
       $t_degree_plan->load_descriptive_data();
 
       if ($t_degree_plan->get_available_tracks()) {
@@ -696,7 +696,7 @@ function advise_display_popup_change_track() {
         //    $link $track_description</li>";
     
         
-        $track_degree_plan = new DegreePlan($track_degree_id, NULL, TRUE);  // load minimally
+        $track_degree_plan = fp_load_degree($track_degree_id, NULL, TRUE);  // load minimally
         
         $input_type = "checkbox";
         $input_name = "track_degree_id_$track_degree_id";
@@ -893,7 +893,7 @@ function advise_display_popup_group_select() {
   
   // If this is a "blank" degree, make sure we set the degree_id correctly.
   if($blank_degree_id != "") {    
-    $degree_plan = new DegreePlan($blank_degree_id);
+    $degree_plan = new fp_load_degree($blank_degree_id);
     $fp->degree_plan = $degree_plan;
     $screen->degree_plan = $degree_plan;
     $screen->bool_blank = TRUE;
@@ -1133,7 +1133,7 @@ function advise_perm() {
 function advise_display_view($view = "view") {
   global $user, $fp, $degree_plan, $screen;
   $rtn = "";
-        
+ 
   if ($view == "what-if") {
     $GLOBALS["fp_advising"]["advising_what_if"] = "yes";  
     $_REQUEST["advising_what_if"] = "yes";
@@ -1144,6 +1144,7 @@ function advise_display_view($view = "view") {
   }
   
   // Initialize everything we need to initialize for this advising session.
+  
   advise_init_screen();      
   
   // Add some body classes to the page for this student.
@@ -1175,10 +1176,9 @@ function advise_display_view($view = "view") {
   else {
     // This is a normal advising screen.  Either View or WhatIf.
 
-    //$page_content .= $screen->display_view_options();
-      
+    //$page_content .= $screen->display_view_options();    
     $screen->build_screen_elements();
-     
+           
     $form_token = md5("advise_display_view" . fp_token());
         
     $vurl = fp_url($view);    
@@ -1187,7 +1187,7 @@ function advise_display_view($view = "view") {
              <input type='hidden' name='form_token' value='$form_token'>
              <table class='fp-semester-table'>";
     $rtn .= $screen->display_screen();
-      
+
     $rtn .= "</table>";
     // Add in the required "advising variables"
     $rtn .= $screen->get_hidden_advising_variables("save_draft");
@@ -1203,6 +1203,7 @@ function advise_display_view($view = "view") {
     $tab_array[1]["title"] = "Display by Type";
     $tab_array[1]["active"] = ($screen->view == "type");
     $tab_array[1]["on_click"] = "changeView(\"type\");";
+        
         
     if (!fp_screen_is_mobile()) {
       $tab_array[2]["title"] = "Print";
@@ -1237,8 +1238,7 @@ function advise_display_view($view = "view") {
   {    
     $_SESSION["fp_cache_course_inventory"] = serialize(@$GLOBALS["fp_course_inventory"]);    
   }
-   
-   
+     
   return $rtn;
 }
 
@@ -2252,7 +2252,6 @@ function advise_init_screen() {
   
   $db = get_global_database_handler();
   
-
   $faculty_id = $user->cwid;
   
   // Insert our advising vars into the GLOBALS array for easy use later.
@@ -2300,14 +2299,16 @@ function advise_init_screen() {
 
 
   // Attempt to load the course inventory cache...
+  
   if ($course_inventory = unserialize(@$_SESSION["fp_cache_course_inventory"])) {  
     $GLOBALS["fp_course_inventory"] = $course_inventory;    
   }
   
   
-
+  
   $bool_loaded = FALSE;
-  if ($GLOBALS["fp_advising"]["load_from_cache"] == "yes" && $cache != "" && $fp = unserialize($cache)) {    
+  if ($GLOBALS["fp_advising"]["load_from_cache"] == "yes" && $cache != "" && $fp = unserialize($cache)) {
+        
     $bool_loaded = TRUE;    
     $fp->db = get_global_database_handler();
     $student = $fp->student;
@@ -2318,16 +2319,19 @@ function advise_init_screen() {
     
   }
    
+  
     
   if (!$bool_loaded) {       
-    $fp = new FlightPath();
-    $fp->init();    
+    $fp = new FlightPath();    
+    $fp->init();        
     $student = $fp->student;
     $degree_plan = $fp->degree_plan;    
     $GLOBALS["fp_advising"]["load_from_cache"] = "no";
     $bool_loaded = TRUE;    
   }
 
+  
+  
   // Should we update the USER settings for anything?
   if ($GLOBALS["fp_advising"]["fp_update_user_settings_flag"] != "") {
     if (!$db->update_user_settings_from_post($user->id)) {
@@ -2355,8 +2359,8 @@ function advise_init_screen() {
     $bool_draft = TRUE;  // load draft, since we just saved it (and changed something)
     
 
-  }
-  if ($perform_action == "save_active") {
+  } 
+  else if ($perform_action == "save_active") {
     if ($_REQUEST["form_token"] != $form_token) {
       die(t("Sorry, but you have encountered an error.  A form submission was flagged
       as possibly being an invalid or forged submission.  This may constitute a bug
@@ -2426,12 +2430,11 @@ function advise_init_screen() {
     $fp->student = $student;     
     $screen->flightpath = $fp;
     $screen->student = $fp->student;
-    
-       
+          
     $fp->flag_outdated_substitutions();
     $fp->assign_courses_to_semesters(); // bare degree plan. not groups.
     $fp->assign_courses_to_groups();
-    
+        
     ////////////
      /*
     // Good place to output a serialization, in case we need it for testing.
@@ -2469,7 +2472,6 @@ function advise_init_screen() {
 
     }
   }
-
    
 
   // If we are loading from draft, then load the faculty_id which saved draft last.  If we are
@@ -2485,7 +2487,7 @@ function advise_init_screen() {
   // Once we have loaded the advising session, we should always try to load
   // from draft from then on out.
   $GLOBALS["fp_advising"]["advising_load_active"] = "";
-  
+
   
 }
  

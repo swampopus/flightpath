@@ -435,15 +435,32 @@ class _CourseList extends ObjList
   function find_best_grade_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE)
   {
 
-    if (!$list_matches =  parent::find_all_matches($course_c))
-    {
-      return false;
+    // Do we already have a list of matches for this course?
+    if (isset($GLOBALS['fp_temp_cache']['CourseList_find_best_grade_match_list_matches'][$course_c->course_id])) {
+      $list_matches = $GLOBALS['fp_temp_cache']['CourseList_find_best_grade_match_list_matches'][$course_c->course_id];
     }
+    else {
 
-    
-    $list_matches = CourseList::cast($list_matches);
 
-    if ($list_matches->is_empty)
+      if (!$list_matches =  parent::find_all_matches($course_c))
+      {
+        $GLOBALS['fp_temp_cache']['CourseList_find_best_grade_match_list_matches'][$course_c->course_id] = FALSE;
+        return false;
+      }
+  
+      
+      $list_matches = CourseList::cast($list_matches);
+      
+      // Sort the courses into best grade first.
+      $list_matches->sort_best_grade_first();
+      
+      // Add to our cache
+      $GLOBALS['fp_temp_cache']['CourseList_find_best_grade_match_list_matches'][$course_c->course_id] = $list_matches;
+      
+    }
+  
+
+    if (!$list_matches || $list_matches->is_empty)
     {
       return false;
     }
@@ -451,9 +468,6 @@ class _CourseList extends ObjList
     // If we are here, then we have more than one match.
     // Meaning, we have more than one class which might fit
     // into this course requirement.
-
-    // Sort the courses into best grade first.
-    $list_matches->sort_best_grade_first();
 
 
     $withdrew_grades = csv_to_array(variable_get("withdrew_grades", "W"));
@@ -472,6 +486,15 @@ class _CourseList extends ObjList
       {
         continue;
       }
+      
+      
+      // Has the course already been assigned [to this degree]?
+      if ($bool_skip_already_assigned && $c->get_has_been_assigned_to_degree_id($degree_id)) {
+        // Yes, it's been assigned, so we can just skip it.
+        continue;
+      }
+      
+      
       //////////////////////////////////////////
       ///  Check for min grade, etc, here.      
       if (!$c->meets_min_grade_requirement_of(null, $min_grade))
@@ -522,19 +545,12 @@ class _CourseList extends ObjList
           }        
         }        
         
-        
-        
         //fpm("[DID meet min grade req of $min_grade :: $c->subject_id $c->course_num $c->grade");
       }
 
-      // Has the course already been assigned [to this degree]?
-      if ($bool_skip_already_assigned && $c->get_has_been_assigned_to_degree_id($degree_id)) {
-        // Yes, it's been assigned, so we can just skip it.
-        continue;
-      }
 
       return $c;
-    }
+    } // while
   
     return FALSE;
 
@@ -586,8 +602,8 @@ class _CourseList extends ObjList
 			
 			$use_grade = $c->grade;
 			
-			if ($student != null) {
-			  $use_grade = $student->get_best_grade_for_course($c);
+			if ($student != null) {			  
+			  $use_grade = $student->get_best_grade_for_course($c);        
 			  if (!$use_grade) $use_grade = "";
 			}
 			
@@ -1517,9 +1533,11 @@ class _CourseList extends ObjList
 	 *
 	 * @param CourseList $course_l
 	 */
-	function add_list(CourseList $course_l)
-	{
-		for ($t = 0; $t < count($course_l->array_list); $t++)
+	function add_list(CourseList $course_l)	{
+      	  
+    $c = count($course_l->array_list);
+    
+		for ($t = 0; $t < $c; $t++)
 		{
 			$this->add($course_l->array_list[$t]);
 		}
@@ -1722,7 +1740,7 @@ class _CourseList extends ObjList
 	 * 
 	 * @return CourseList
 	 */
-	function get_clone($bool_return_new_courses = false)
+	function get_clone($bool_return_new_courses = FALSE)
 	{
 		// This will return a clone of this list.
 		// If boolReturnNewCourses is true, then it will
@@ -1734,7 +1752,7 @@ class _CourseList extends ObjList
 		{
 			$course = $this->array_list[$t];
 			
-			if ($bool_return_new_courses == true)
+			if ($bool_return_new_courses)
 			{
 				$new_course = new Course();
 				$new_course->course_id = $course->course_id;

@@ -27,6 +27,8 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 	function build_semester_list()
 	{
 
+    
+
 		$list_semesters = $this->degree_plan->list_semesters;
 		// Go through each semester and add it to the screen...
 		$list_semesters->reset_counter();
@@ -47,7 +49,7 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 		{
 			$this->add_to_screen($this->display_semester($dev_sem), "SEMESTER_" . DegreePlan::SEMESTER_NUM_FOR_DEVELOPMENTALS);
 		}
-						
+		    			
 		
 	}
 
@@ -85,6 +87,7 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
 			$no_u_test_type = ltrim($test_type, 'u');
       
 			$types = fp_get_requirement_types();
+			
 			if (!isset($types[$test_type]) && !isset($types[$no_u_test_type])) {
 			  // Yes-- the user is using a code NOT defined, so let's just call it
 			  // an "elective" type.
@@ -189,6 +192,7 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
         $sem_is_empty = false;
       } //while list_courses
 
+
       // Now, draw all the groups.
       $semester->list_groups->sort_alphabetical_order();
       $semester->list_groups->reset_counter();
@@ -196,6 +200,7 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
       {
         
         $group = $semester->list_groups->get_next();
+     
         if (!$this->match_requirement_type($group->requirement_type, $requirement_type))
         {
           continue;
@@ -214,8 +219,11 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
         $html[$group->req_by_degree_id] .= "</td></tr>";
         $sem_is_empty = false;
         $is_empty = FALSE;
-      } // while list_groups
 
+      } // while list_groups
+      
+
+      
       if ($sem_is_empty == false)
       {
         // There WAS something in this semester, put in the title.
@@ -234,8 +242,8 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
         $dweight = intval(@$GLOBALS["fp_temp_degree_advising_weights"][$req_by_degree_id]);
         
         if ($dtitle == "") {
-          $t_degree_plan = new DegreePlan($req_by_degree_id);
-          //$t_degree_plan->load_descriptive_data();        
+          $t_degree_plan = new DegreePlan();
+          $t_degree_plan->degree_id = $req_by_degree_id;                  
           $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
           $dweight = $t_degree_plan->db_advising_weight;
           $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle . " "; //save for next time.
@@ -266,8 +274,8 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
           $dtitle = @$GLOBALS["fp_temp_degree_titles"][$req_by_degree_id];
           $css_dtitle = @$GLOBALS["fp_temp_degree_css_titles"][$req_by_degree_id];
           if ($dtitle == "" || $css_dtitle == "") {
-            $t_degree_plan = new DegreePlan($req_by_degree_id);
-            //$t_degree_plan->load_descriptive_data();        
+            $t_degree_plan = new DegreePlan();
+            $t_degree_plan->degree_id = $req_by_degree_id;                
             $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
             $css_dtitle = $t_degree_plan->get_title2(TRUE, TRUE, FALSE);
             $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle; //save for next time.
