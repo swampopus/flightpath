@@ -1875,8 +1875,8 @@ function system_cron() {
     // Okay, let's trim the table.
     $max_timestamp = strtotime("$max_age_days DAYS AGO");
     
-    db_query("DELETE FROM watchdog WHERE `timestamp` < '?' ", $max_timestamp);
-    $rows = db_affected_rows();
+    $result = db_query("DELETE FROM watchdog WHERE `timestamp` < ? ", $max_timestamp);
+    $rows = db_affected_rows($result);
     if ($rows > 0) {
       watchdog("system", t("@rows old rows (older than @max days) trimmed from watchdog table on system cron run.", array("@rows" => $rows, "@max" => $max_age_days)));
     }
