@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-10-15
+  Fixed bug when duplicating entire catalog year (typo in variable name for catalog_repeat).
+  
+  Fixed bug where it 'Back to degrees' link was linking to the wrong year.
+
+
 2017-10-11
   Fixed mysql error in system.module.
 

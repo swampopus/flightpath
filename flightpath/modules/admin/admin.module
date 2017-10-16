@@ -700,7 +700,7 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   							VALUES ('?','?','?','?','?','?','?','?','?','?') ";  	
   	$res2 = db_query($query, $new_group_id,$db_group_name,$db_title,
   								$db_definition,$db_icon_filename,$new_year,
-  								$db_priority,$db_delete_flag,$db_data_entry_comment,$catalog_repeat);
+  								$db_priority,$db_delete_flag,$db_data_entry_comment,$db_catalog_repeat);
   
   	// Okay, now we need to go through the requirements for the group, and copy
   	// those over to the new_year.

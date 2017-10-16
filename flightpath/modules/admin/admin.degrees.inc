@@ -808,7 +808,7 @@ function admin_display_degrees() {
     }
 
 
-    $url = fp_url("admin/degrees/edit-degree/$db_major_code/$de_catalog_year", "", array("class" => "degree-$db_degree_class"));
+    $url = fp_url("admin/degrees/edit-degree/$db_major_code/$de_catalog_year", "de_catalog_year=$de_catalog_year", array("class" => "degree-$db_degree_class"));
 
     /*        
     $rtn .= "<div class='admin-degrees-list-degree'>
