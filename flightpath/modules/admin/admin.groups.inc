@@ -4,9 +4,44 @@
 
 
 
+/**
+ * Validate handler for edit group form.
+ */
+function admin_edit_group_form_validate(&$form, &$form_state) {
+  $values = $form_state["values"];
+  $group_name = trim($values["group_name"]);
+  $group_id = $values["group_id"];
+  $de_catalog_year = $values["de_catalog_year"];
+  
+  
+  // We want to make sure the group_name is in a machine-name format,
+  // and we need to make sure it is unique for this catalog year!
+  $group_name = fp_get_machine_readable(strtolower($group_name));
+  
+  $form_state['values']['group_name'] = $group_name;
+  
+    
+  // Check that group_name is unique (but exclude the current group_id from the check)
+  $mycount = db_query("SELECT count(*) as mycount FROM draft_groups 
+                       WHERE group_name = ?
+                       AND group_id != ?
+                       AND catalog_year = ?", $group_name, $group_id, $de_catalog_year)->fetchColumn();
+  
+  if ($mycount > 0) {    
+    form_error("group_name", t("The 'Internal group machine name' %gn is already in use in FlightPath by another group
+                                in the catalog year %cy.  
+                                Please change to a different name, and submit again. <b>Your work has NOT been saved.</b>
+                                ", array("%gn" => $group_name, "%cy" => $de_catalog_year)));
+    return;
+  }
+  
+  
+}
 
-function admin_edit_group_form_submit(&$form, $form_submit) {
-  $values = $form_submit["values"];
+
+
+function admin_edit_group_form_submit(&$form, $form_state) {
+  $values = $form_state["values"];
   $de_catalog_year = $values["de_catalog_year"];
 
   $db = get_global_database_handler();  
@@ -493,6 +528,7 @@ function admin_edit_group_form() {
     "label" => t("Group title:"),
     "value" => $group->title,
     "maxlength" => 100,
+    "required" => TRUE,
     "popup_description" => t("This is what FlightPath uses to refer to this group in screens and popups.
                         Ex: Free Electives, Art Electives, Core Humanities, etc."),
     "weight" => 10,
@@ -500,14 +536,16 @@ function admin_edit_group_form() {
 
   $form["group_name"] = array(
     "type" => "textfield",
-    "label" => t("Internal group name:"),
+    "label" => t("Internal group machine name:"),
     "value" => $group->group_name,
     "maxlength" => 100,
-    "popup_description" => t("The \"group's name\" is internal to FlightPath, and is never seen by the average user.
+    "required" => TRUE,
+    "popup_description" => t("The group's \"internal machine name\" is internal to FlightPath, and is never seen by the average user.
                         You may use this to distinguish between groups with the same title. Ex:
-                        major_electives_sr and major_electives_jr.  The field may be considered
-                        optional, but it is highly recommended you enter something here for your
-                        own clarity later on.  It is OK to have the same group title and name."),
+                        major_electives_sr and major_electives_jr.  The field must be unique within each catalog year, and
+                        consist of only letters, numbers, and underscores.  FlightPath will make
+                        sure it is unique when you save, and give you a chance to change it if it
+                        is not."),
     "weight" => 20,
   );
 

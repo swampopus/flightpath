@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-10-18
+  Made groups' internal machine name a required field, and forced them to be unique, in preparation of
+  functionality for the Conditional Requirements module, as well as any other module which needs to
+  identify groups by human-readable names.
+
+
 2017-10-15
   Fixed bug when duplicating entire catalog year (typo in variable name for catalog_repeat).
   
