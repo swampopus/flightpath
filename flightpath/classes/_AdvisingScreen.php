@@ -5333,12 +5333,19 @@ function draw_menu_items($menu_array) {
 		}
 
 		$final_course_list->sort_alphabetical_order();
+    /*
+     *   We no longer wish to have a course selected by default.  Instead, it will be up to the user
+     *   to select a course.  
+     * 
+     *   TODO:  Perhaps make this a setting?
+     * 
 		if (!$final_course_list->has_any_course_selected()) {
 			if ($c = $final_course_list->find_first_selectable()) {
 				$c->bool_selected = true;
 			}
 		}
-
+    */
+     
 		// flag any courses with more hours than are available for this group.
 		if ($final_course_list->assign_unselectable_courses_with_hours_greater_than($group_hours_remaining))
 		{
