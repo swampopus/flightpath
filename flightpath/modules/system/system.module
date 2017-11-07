@@ -85,6 +85,8 @@ function system_flightpath_can_assign_course_to_degree_id($degree_id, Course $co
   $temp = explode("|", $this_major_code);
   $this_first_part = trim($temp[0]);  // get just the first part. Ex, ENGL|_something => ENGL
   
+  //fpm('here in system fp_can_assign.....');
+  
   // If the configuration is such that a course cannot be assigned to a degree's tracks, then no.
   // Example:  if a course has been assigned to ENGL, then it can't also get assigned to ENGL|_track1
     
@@ -109,6 +111,7 @@ function system_flightpath_can_assign_course_to_degree_id($degree_id, Course $co
             // Now, if this_major_code CONTAINS m_code, then that means our condition
             // is true.
             if (strstr($this_major_code, $m_code)) {
+              
               return FALSE;  // meaning, no, we cannot assign this course!
             }
           }        

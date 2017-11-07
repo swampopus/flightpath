@@ -2684,7 +2684,7 @@ function draw_menu_items($menu_array) {
         $d .= $degree_id . ",";
         $t_degree_plan = new DegreePlan();
         $t_degree_plan->degree_id = $degree_id;        
-        $c .= "<span>" . $t_degree_plan->get_title2() . "</span>, ";
+        $c .= "<span>" . $t_degree_plan->get_title2(FALSE, TRUE) . "</span>, ";
       }
       $c = rtrim($c, ", ");
       $html .= "$c</div>";              
@@ -2734,6 +2734,12 @@ function draw_menu_items($menu_array) {
         "value" => $html,
         "weight" => 70,
       );
+
+      $render["#group"] = array(
+        "type" => "do_not_render",
+        "value" => $g,
+      );
+
       
 		} 
 		else if ($course->grade != "" && $course->bool_transfer != true && $course->get_bool_substitution($course->req_by_degree_id) != TRUE && $course->get_has_been_assigned_to_degree_id()) {
@@ -5129,7 +5135,6 @@ function draw_menu_items($menu_array) {
 
 		$group->reload_missing_courses();
 
-
 		if ($group_hours_remaining == 0)
 		{
 			// Attempt to figure out the remaining hours (NOT WORKING IN ALL CASES!)
@@ -5197,6 +5202,7 @@ function draw_menu_items($menu_array) {
 			$final_course_list->add_list($new_course_list);
 		}
 
+
 		if (!($group->list_groups->is_empty))
 		{
 			// Basically, this means that this group
@@ -5209,6 +5215,7 @@ function draw_menu_items($menu_array) {
 			// or subgroups with the most # of matches.
 			$new_course_list = new CourseList();
 			$all_zero= true;
+
 
 			// Okay, this is a little squirely.  What I need to do
 			// first is get a course list of all the courses which
@@ -5309,12 +5316,15 @@ function draw_menu_items($menu_array) {
 			
 		}
 
-		
+    
 		// Remove courses which have been marked as "exclude" in the database.
 		$final_course_list->remove_excluded();
+     
     $final_course_list->assign_group_id($group->group_id);  // make sure everyone is in THIS group.
 		//print_pre($final_course_list->to_string());
 
+
+		
 		// Here's a fun one:  We need to remove courses for which the student
 		// already has credit that *don't* have repeating hours.
 		// For example, if a student took MATH 113, and it fills in to
@@ -5433,7 +5443,7 @@ function draw_menu_items($menu_array) {
 
     $t_degree_plan = new DegreePlan();
     $t_degree_plan->degree_id = $req_by_degree_id;
-    $t = $t_degree_plan->get_title2();
+    $t = $t_degree_plan->get_title2(FALSE, TRUE);
     if ($t) {        
         
       $pC .= "<div class='tenpt group-select-req-by-degree'>

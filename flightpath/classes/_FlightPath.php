@@ -152,22 +152,7 @@ class _FlightPath extends stdClass
       $t_major_code = $major_code;
   
       if (trim($major_code) == "") continue;
-      //fpm($major_code);
-      /*  
-      if ($track_code != "")
-      {
-        // Does the major_code already have a | in it?
-        if (!strstr($t_major_code, "|"))
-        {
-          $t_major_code .= "|_" . $track_code;
-        } else {
-          // it DOES have a | in it already, so just add the
-          // trackCode using _.  This is most likely because
-          // we are dealing with a track AND a concentration.
-          $t_major_code .= "_" . $track_code;
-        }
-      }
-      */
+
       // If we are dealing with a track, then just get the degree_id directly, else, figure out the
       // degree_id from the t_major_code.
       
@@ -268,7 +253,7 @@ class _FlightPath extends stdClass
     //DEV: // return $degree_plans[0];
     
     $new_degree_plan = new DegreePlan();
-    //fpm($new_degree_plan);
+
     
     // Loop through the degree plans one at a time...
     foreach ($degree_plans as $degree_plan) {
@@ -364,7 +349,7 @@ class _FlightPath extends stdClass
     }
     
     
-    //fpm($new_degree_plan->required_course_id_array);
+
         
     
     return $new_degree_plan;
@@ -415,7 +400,7 @@ class _FlightPath extends stdClass
 
 
   function assign_courses_to_groups() {
-    //fpm(fp_debug_ct("start assignt to groups", "assign_groups"));
+      
     // This method will look at the student's courses
     // and decide which groups they should be fit into.
         
@@ -471,14 +456,12 @@ class _FlightPath extends stdClass
         }
       }
 
-
-      
       // First we see if there are any bare courses at this level.  If there
       // are, then this group has NO branches!  Otherwise, the courses must
       // always be contained in a branch!
       if (!$g->list_courses->is_empty)
       {
-  
+        
         // Yes, there are courses here.  So, assign them at this level.        
         $this->assign_courses_to_list($g->list_courses, $this->student, true, $g, true);        
         // Okay, if we have fulfilled our courses at this level.
@@ -538,7 +521,7 @@ class _FlightPath extends stdClass
 
     } // while 
     
-    //fpm(fp_debug_ct("finish assign to groups", "assign_groups"));
+    
   }
 
 
@@ -561,7 +544,7 @@ class _FlightPath extends stdClass
       //$required_group_id = $substitution->course_requirement->assigned_to_group_id;
       $required_group_id = $substitution->course_requirement->get_first_assigned_to_group_id(); // we assume there's only one group to get
 
-      //fpm($required_group_id);
+
       // First check-- does this degree even have this group ID?
       $outdated_note = "";
       if ($required_group_id == 0)
@@ -713,13 +696,6 @@ class _FlightPath extends stdClass
         $req_by_degree_id = $group->req_by_degree_id;
       }
        
-       /*
-        if ($course_requirement->name_equals("HIST 225")) {
-          fpm("here, $req_by_degree_id, $group_id");
-          fpm($student->list_substitutions);          
-
-        }
-        */       
      
       if ($bool_check_significant_courses == true)
       {
@@ -740,7 +716,7 @@ class _FlightPath extends stdClass
         // also have specified repeats.
         $student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);        
       }
-      //fpm($group_id);
+
       
       // Does the student have any substitutions for this requirement?
       if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id, $req_by_degree_id))
@@ -754,9 +730,6 @@ class _FlightPath extends stdClass
         // correct a bug.
         if ($substitution->bool_group_addition == true)
         {
-          //fpm("I am a group addition in degree $req_by_degree_id");
-          //fpm($substitution);
-          //if ($substitution->course_requirement->assigned_to_group_id != $group_id)
           if ($substitution->course_requirement->get_first_assigned_to_group_id() != $group_id)
           {
             continue;
@@ -799,9 +772,6 @@ class _FlightPath extends stdClass
             //$course_requirement->bool_substitution_new_from_split = false;
 
             
-    //if ($group_id == "2951197_2645063") {
-    //  fpm($list_requirements);
-    //}
             
             // Only do this if we are NOT in a group!  This is to correct a bug where split additions to groups wound up
             // being displayed like available selections in the group.  It was like, weird man.  
@@ -819,8 +789,6 @@ class _FlightPath extends stdClass
           $substitution->course_list_substitutions->set_has_been_assigned(true);
           $substitution->course_list_substitutions->set_bool_substitution($req_by_degree_id, TRUE);
           $course_requirement->db_substitution_id_array[] = $substitution->db_substitution_id;
-          //fpm($course_requirement->req_by_degree_id);
-          //fpm($req_by_degree_id);
           $substitution->course_list_substitutions->set_course_substitution($course_requirement, $substitution->remarks, $req_by_degree_id);
           
           $substitution->bool_has_been_applied = TRUE;
@@ -881,7 +849,7 @@ class _FlightPath extends stdClass
           continue;
         }
 
-//fpm($c->group_list_unassigned);
+
         // Has the course been unassigned from this group?
         if ($c->group_list_unassigned->find_match_with_degree_id($group, $req_by_degree_id))
         {
@@ -920,7 +888,7 @@ class _FlightPath extends stdClass
           }                  
           
         } // if group_id != 0
-  
+
         // We want to see if this course has already been assigned to THIS degree...
         if (!in_array($req_by_degree_id, $c->assigned_to_degree_ids_array))
         {//Don't count courses which have already been placed in other groups.
@@ -1279,9 +1247,7 @@ class _FlightPath extends stdClass
       //$_SESSION["cache_what_if$student_id"] = "";
       $GLOBALS["fp_advising"]["load_from_cache"] = "no";
       
-      //fpm("calling init...");
-      $this->init(TRUE);
-      //fpm("done with init");       
+      $this->init(TRUE);   
       $bool_fp_goto_at_end = TRUE; 
     } // editing degrees?
 
@@ -1814,7 +1780,6 @@ class _FlightPath extends stdClass
                 WHERE 
                  $advising_session_line
                 ORDER BY `id` ";
-    //fpm($query);
     $result = $db->db_query($query);
     while($cur = $db->db_fetch_array($result))
     {
@@ -1825,7 +1790,6 @@ class _FlightPath extends stdClass
       $var_hours = trim($cur["var_hours"]);
       $advised_term_id = trim($cur["term_id"]);
       $id = trim($cur["id"]);
-      //fpm("course $course_id sem:$semester_num group:$group_id $var_hours");
 
       // Add this course to the generic list of advised courses.  Useful
       // if we are using this to pull up an advising summary.
@@ -1844,7 +1808,6 @@ class _FlightPath extends stdClass
       // show these advisings.
       if ($course_list = $this->degree_plan->find_courses($course_id, $group_id, $semester_num, $degree_id))
       {
-        //fpm("I found course $course_id sem:$semester_num group:$group_id $var_hours $degree_id");
         
         // This course may exist in several different branches of a group, so we need
         // to mark all the branches as having been advised to take.  Usually, this CourseList
@@ -1984,7 +1947,7 @@ class _FlightPath extends stdClass
             
           }
           
-          //fpm($course);
+
           $course->bool_advised_to_take = true;
           $course->assigned_to_semester_num = $semester_num;
           //$course->assigned_to_group_id = $group_id;

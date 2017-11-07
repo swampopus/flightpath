@@ -1,6 +1,15 @@
 FlightPath 5.x Changelog
 ========================
 
+
+2017-11-07
+  Fixed an issue related to how a GroupList creates a clone().
+  
+  Added #group field to render array for course info popup.
+  
+  Added get_course_id array to CourseList object.
+
+
 2017-10-30
   Removed functionality of having a course always get selected by default in a popup group listing.
   

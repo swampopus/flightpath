@@ -140,6 +140,9 @@ class _GroupList extends ObjList
         
         if ($bool_load_groups) {
           $group->load_group();  // Make sure the group has all its courses loaded in.
+        }
+        else {
+          $group->reload_missing_courses();
         }        
         
         $group->set_requirement_type($group->requirement_type);

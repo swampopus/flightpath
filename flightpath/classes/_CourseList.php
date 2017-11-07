@@ -740,6 +740,25 @@ class _CourseList extends ObjList
 	}
 
 
+  /**
+   * Return an array of all the course_id's in this course_list.
+   */
+  function get_course_id_array() {
+    
+    $rtn = array();
+    
+    for ($t = 0; $t < $this->count; $t++)
+    {
+      $course = $this->array_list[$t];
+            
+      $rtn[$course->course_id] = TRUE;  
+    }
+
+    return $rtn;
+
+  }
+  
+
 	/**
 	 * Returns an array containing the unique subject_id's of
 	 * the courses in this list.  Its assumed to be ordered

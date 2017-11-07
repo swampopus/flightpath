@@ -20,7 +20,7 @@ function tinymce_init() {
     
     if ($ipath == "") continue;
     
-    if ($ipath == $_REQUEST["q"]) {
+    if ($ipath == @$_REQUEST["q"]) {
       $bool_activate = TRUE;
       break;
     }
@@ -28,7 +28,7 @@ function tinymce_init() {
     // Contains a wildcard!  So, is the ipath partially in the request?
     if (strstr($ipath, "*")) {
       $ipath = str_replace("*", "", $ipath);
-      if (substr($_REQUEST["q"], 0, strlen($ipath)) == $ipath) {
+      if (substr(@$_REQUEST["q"], 0, strlen($ipath)) == $ipath) {
         $bool_activate = TRUE;
         break;
       }

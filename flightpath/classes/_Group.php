@@ -323,7 +323,7 @@ class _Group extends stdClass
 		// cache (because the cached group only contains
 		// courses which the student has taken).
 
-		$this->load_group(false, "", true);
+		$this->load_group(FALSE, FALSE, TRUE);
 
 	}
 
@@ -527,6 +527,10 @@ class _Group extends stdClass
 	}
 
 	
+  
+  
+  
+  
 
 	/**
 	 * Returns the quality points earned for all of the courses in this group
