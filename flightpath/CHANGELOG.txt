@@ -9,6 +9,8 @@ FlightPath 5.x Changelog
   
   Added get_course_id array to CourseList object.
 
+  Added extra option for Group::get_course_id()
+
 
 2017-10-30
   Removed functionality of having a course always get selected by default in a popup group listing.

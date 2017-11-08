@@ -111,7 +111,7 @@ class _Group extends stdClass
    * Returns an array of course_id's in this group, as well as any sub-group (branches).
    * // Key = course_id, val = TRUE.
    */
-  function get_course_id_array() {
+  function get_course_id_array($bool_exclude_assigned_courses = FALSE) {
     
     $rtn = array();
     
@@ -119,7 +119,24 @@ class _Group extends stdClass
     while($this->list_courses->has_more()) {
       $c = $this->list_courses->get_next();
       
-      $rtn[$c->course_id] = TRUE;  
+      if (!$bool_exclude_assigned_courses) {
+        $rtn[$c->course_id] = TRUE;  
+      }
+      else {
+        // Look to see if this course has already been assigned or not. If it has, then we
+        // should skip it. If it has NOT, then it's OK to add.
+        
+        if ($c->course_list_fulfilled_by->is_empty == TRUE) {
+          $rtn[$c->course_id] = TRUE;
+        }
+        else {
+          //$c->load_descriptive_data();
+          //fpm("Not doing $c->subject_id $c->course_num");
+        }
+      }
+      
+      
+      
     }
 
     // Also get any sub-group's courses...

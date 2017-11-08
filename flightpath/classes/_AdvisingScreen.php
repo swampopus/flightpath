@@ -4234,6 +4234,7 @@ function draw_menu_items($menu_array) {
       "grade" => $grade,
       "pts" => $pts,
       "title" => $title_text,
+      "group_id" => $group_id,
     );
 
 
