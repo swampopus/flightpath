@@ -788,8 +788,8 @@ class _DegreePlan extends stdClass
       $table_name = "degrees";
       if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
   
-      $res = $this->db->db_query("SELECT * FROM $table_name
-              								WHERE major_code = '?' 
+      $res = $this->db->db_query("SELECT title FROM $table_name
+              								WHERE major_code = ? 
               								ORDER BY catalog_year DESC LIMIT 1", $this->major_code);
       $cur = $this->db->db_fetch_array($res);
       $this->title = $cur["title"];
@@ -824,15 +824,41 @@ class _DegreePlan extends stdClass
   {
     
     $this->bool_loaded_descriptive_data = TRUE;
+   
+    
+    // If we already have this in our cache, then look there... 
+    $cache_name = 'degreeplan_cache';
+    if ($this->bool_use_draft) {
+      $cache_name = 'degreeplan_cache_draft';
+    }
+    if (isset($GLOBALS[$cache_name][$this->degree_id])) {
+      $this->array_semester_titles = $GLOBALS[$cache_name][$this->degree_id]['array_semester_titles'];
+      $this->bool_has_tracks = $GLOBALS[$cache_name][$this->degree_id]['bool_has_tracks'];
+      $this->catalog_year = $GLOBALS[$cache_name][$this->degree_id]['catalog_year'];
+      $this->db_advising_weight = $GLOBALS[$cache_name][$this->degree_id]['db_advising_weight'];
+      $this->db_allow_dynamic = $GLOBALS[$cache_name][$this->degree_id]['db_allow_dynamic'];
+      $this->db_exclude = $GLOBALS[$cache_name][$this->degree_id]['db_exclude'];
+      $this->db_override_degree_hours = $GLOBALS[$cache_name][$this->degree_id]['db_override_degree_hours'];
+      $this->degree_class = $GLOBALS[$cache_name][$this->degree_id]['degree_class'];
+      $this->degree_level = $GLOBALS[$cache_name][$this->degree_id]['degree_level'];
+      $this->degree_type = $GLOBALS[$cache_name][$this->degree_id]['degree_type'];
+      $this->major_code = $GLOBALS[$cache_name][$this->degree_id]['major_code'];
+      $this->public_notes_array = $GLOBALS[$cache_name][$this->degree_id]['public_notes_array'];
+      $this->title = $GLOBALS[$cache_name][$this->degree_id]['title'];
+      $this->track_code = $GLOBALS[$cache_name][$this->degree_id]['track_code'];
+      $this->track_description = $GLOBALS[$cache_name][$this->degree_id]['track_description'];
+      $this->track_title = $GLOBALS[$cache_name][$this->degree_id]['track_title'];
+      return;
+    }    
+    
+    
     
     $table_name = "degrees";
     if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 
-    // TODO:  Pull from GLOBALS cache if available, just like courses.
-    // Ex:  $GLOBALS["degree_cache_$table_name"][$degree_id] = DegreePlan Object
-
+   
     $res = $this->db->db_query("SELECT * FROM $table_name
-								               WHERE degree_id = '?' ", $this->degree_id);
+								               WHERE degree_id = ? ", $this->degree_id);
 
     if ($this->db->db_num_rows($res) > 0)
     {
@@ -872,11 +898,20 @@ class _DegreePlan extends stdClass
         $table_name = "degree_tracks";
         if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 
-        $res = $this->db->db_query("SELECT * FROM $table_name
-                								WHERE major_code = '?'
-                								AND track_code = '?'
-                								AND catalog_year = '?' ", $this->major_code, $this->track_code, $this->catalog_year);
-        $cur = $this->db->db_fetch_array($res);
+
+        static $degree_track_cache = array();
+        $cur = null;
+        if (isset($degree_track_cache[$table_name][$this->major_code][$this->track_code][$this->catalog_year])) {
+          $cur = $degree_track_cache[$table_name][$this->major_code][$this->track_code][$this->catalog_year];
+        } 
+        else {
+              $res = $this->db->db_query("SELECT track_title, track_description FROM $table_name
+                                      WHERE major_code = ?
+                                      AND track_code = ?
+                                      AND catalog_year = ? ", $this->major_code, $this->track_code, $this->catalog_year);
+              $cur = $this->db->db_fetch_array($res);
+              $degree_track_cache[$table_name][$this->major_code][$this->track_code][$this->catalog_year] = $cur;
+        }
 
         $this->track_title = $cur["track_title"];
         $this->track_description = $cur["track_description"];
@@ -890,6 +925,30 @@ class _DegreePlan extends stdClass
       }
 
     }
+
+    
+    // Add to our GLOBALS cache for this degree's descriptive data.
+    $GLOBALS[$cache_name][$this->degree_id] = array(
+      'array_semester_titles' => $this->array_semester_titles,
+      'bool_has_tracks' => $this->bool_has_tracks,
+      'catalog_year' => $this->catalog_year,
+      'db_advising_weight' => $this->db_advising_weight,
+      'db_allow_dynamic' => $this->db_allow_dynamic,
+      'db_exclude' => $this->db_exclude,
+      'db_override_degree_hours' => $this->db_override_degree_hours,
+      'degree_class' => $this->degree_class,
+      'degree_level' => $this->degree_level,
+      'degree_type' => $this->degree_type,
+      'major_code' => $this->major_code,
+      'public_notes_array' => $this->public_notes_array,
+      'title' => $this->title,
+      'track_code' => $this->track_code,
+      'track_description' => $this->track_description,
+      'track_title' => $this->track_title
+    );    
+
+
+
 
   }
 
@@ -946,7 +1005,7 @@ class _DegreePlan extends stdClass
     if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
     if ($this->bool_use_draft) {$table_name2 = "draft_$table_name";}
 
-    $res = db_query("SELECT * FROM $table_name
+    $res = db_query("SELECT track_code, track_title, track_description FROM $table_name
               								WHERE major_code = '?'
               								AND catalog_year = '?' 
               								ORDER BY track_title ", $this->major_code, $this->catalog_year);

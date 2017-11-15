@@ -1,6 +1,20 @@
 FlightPath 5.x Changelog
 ========================
 
+2017-11-15
+  Introduced concept of "infinite repeats" in groups, for courses with an excessive
+  amount of repeats allowed.  This greaty helps speed up FlightPath's group logic when
+  loading a student.
+  
+  Added various function caches, and re-wrote some queries, in an effort to speed
+  load time for FlightPath (special thanks to Logan Buth)
+  
+
+2017-11-09
+  Added extra filtering to the filter_markup() function, which would repair
+  any mismatched or faulty HTML tags.  This can happen when people paste incomplete HTML
+  from Word or an email into a Comment.
+  
 
 2017-11-07
   Fixed an issue related to how a GroupList creates a clone().

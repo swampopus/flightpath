@@ -133,7 +133,7 @@ function fp_get_degree_major_code($degree_id, $bool_reset_cache = FALSE) {
     return $GLOBALS['fp_temp_degree_major_codes'][$degree_id];
   }
   
-  $res = db_query("SELECT * FROM degrees WHERE degree_id = ?", $degree_id);
+  $res = db_query("SELECT major_code FROM degrees WHERE degree_id = ?", $degree_id);
   $cur = db_fetch_array($res);
   $major_code = trim($cur['major_code']);
   
@@ -156,7 +156,7 @@ function fp_get_degree_advising_weight($degree_id, $bool_reset_cache = FALSE) {
     return $GLOBALS['fp_temp_degree_advising_weights'][$degree_id];
   }
   
-  $res = db_query("SELECT * FROM degrees WHERE degree_id = ?", $degree_id);
+  $res = db_query("SELECT advising_weight FROM degrees WHERE degree_id = ?", $degree_id);
   $cur = db_fetch_array($res);
   $advising_weight = intval(trim($cur['advising_weight']));
   
@@ -184,7 +184,7 @@ function fp_get_degree_title($degree_id, $bool_include_classification = FALSE, $
   $table_name = "degrees";
   if ($bool_use_draft) {$table_name = "draft_$table_name";}
 
-  $res = $this->db->db_query("SELECT * FROM $table_name
+  $res = $this->db->db_query("SELECT title, major_code FROM $table_name
                           WHERE major_code = '?' 
                           ORDER BY catalog_year DESC LIMIT 1", $this->major_code);
   $cur = $this->db->db_fetch_array($res);
@@ -212,7 +212,7 @@ function fp_get_degree_title($degree_id, $bool_include_classification = FALSE, $
       $table_name = "degree_tracks";
       if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
   
-      $res = $this->db->db_query("SELECT * FROM $table_name
+      $res = $this->db->db_query("SELECT track_title FROM $table_name
                               WHERE major_code = '?'
                               AND track_code = '?'
                               AND catalog_year = '?' ", $this->major_code, $this->track_code, $this->catalog_year);
@@ -422,7 +422,7 @@ function fp_get_student_name($cwid) {
 
 function fp_get_permissions_for_role($rid) {
   $rtn = array();
-  $res = db_query("SELECT * FROM role_permissions
+  $res = db_query("SELECT pid, perm FROM role_permissions
                    WHERE rid = '?' ", $rid);
   while($cur = db_fetch_array($res)) {
     $rtn[$cur["pid"]] = $cur["perm"];

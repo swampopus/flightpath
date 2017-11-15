@@ -333,6 +333,12 @@ function fp_clear_cache() {
  */
 function filter_markup($str, $type = "basic") {
   
+  // Use the DOM functions to repair any mismatched HTML.
+  $doc = new DOMDocument();
+  @$doc->loadHTML($str);
+  $str = $doc->saveHTML();  
+  
+  
   if ($type == "basic") {
     $str = nl2br($str);    
     $allowed_tags = array('a', 'em', 'strong', 'cite', 
@@ -797,9 +803,11 @@ function fp_get_requirement_types() {
 function fp_load_degree($degree_id = "", DatabaseHandler $db = NULL, $bool_load_minimal = false, $array_significant_courses = false, $bool_use_draft = false) {
   
   // Create a "cache key" based on the arguments, so we can look this degree up faster later.
-  $cache_key = $degree_id . intval($bool_load_minimal) . md5(json_encode($array_significant_courses)) . intval($bool_use_draft);
+  $cache_key = md5(serialize(func_get_args()));
+  //fpm("degree_id: $degree_id . cache key:" . $cache_key . "+++++++++++++");
   if (isset($GLOBALS['fp_temp_cache']['fp_load_degree'][$cache_key])) {
     $degree = $GLOBALS['fp_temp_cache']['fp_load_degree'][$cache_key];    
+    //fpm(" ...  returning cache");
     return $degree;
   }
     

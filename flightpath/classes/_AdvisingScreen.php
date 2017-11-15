@@ -4647,7 +4647,7 @@ function draw_menu_items($menu_array) {
        			onClick='$js_code'>
         			{$theme["course"]["course_num"]}</td>
         	";
-		if ($repeats > 0)
+		if ($repeats > 0 && $repeats < 20)
 		{
 			$pC .= "
 				<td class='tenpt underline group-may-repeat' style='color: gray;' 
@@ -4655,7 +4655,14 @@ function draw_menu_items($menu_array) {
 				<i>" . t("May take up to") . " <span style='color: blue;'>" . ($repeats + 1) . "</span> " . t("times.") . "</i>
 				</td>
 			";
-		} 
+		}
+    else if ($repeats > 0 && $repeats >= 20) {      $pC .= "
+        <td class='tenpt underline group-may-repeat' style='color: gray;' 
+          onClick='$js_code' colspan='3'>
+        <i>" . t("May be repeated for credit.") . "</i>
+        </td>
+      ";      
+    } 
     else if ($theme["course"]["extra_html"] != "") {
       $pC .= "
         <td class='tenpt underline' class='group-w4' width='$w4' onClick='$js_code' $extra_style>{$theme["course"]["hours"]} {$theme["course"]["var_hour_icon"]}</td>
@@ -5336,10 +5343,8 @@ function draw_menu_items($menu_array) {
 		{
 		        
 			// Only do this if NOT in Add a Course group...
-			// also, don't do it if we're looking at a "blank" degree.
+			// also, don't do it if we're looking at a "blank" degree.			
 			$final_course_list->remove_previously_fulfilled($this->student->list_courses_taken, $group->group_id, true, $this->student->list_substitutions, $req_by_degree_id);
-      
-
 
 		}
 
@@ -5620,7 +5625,7 @@ function draw_menu_items($menu_array) {
 		}
 
 		$old_course = null;
-
+    
 		$course_list->reset_counter();
 		while($course_list->has_more())
 		{
@@ -5632,9 +5637,12 @@ function draw_menu_items($menu_array) {
 
 
 			$pC .= "<tr><td colspan='8'>";
-
-			if ($course->course_list_fulfilled_by->is_empty && !$course->bool_advised_to_take)
-			{ // So, only display if it has not been fulfilled by anything.			
+      
+			// Only display this course for advising IF it hasn't been fulfilled, or if it has infinite repeats, and only if it isn't already
+			// advised to be taken.
+			if (($course->course_list_fulfilled_by->is_empty || $course->specified_repeats == Group::GROUP_COURSE_INFINITE_REPEATS) && !$course->bool_advised_to_take ){
+			  // So, only display if it has not been fulfilled by anything.			
+			  
 				$pC .= $this->draw_popup_group_select_course_row($course, $group_hours_remaining);
 				$old_course = $course;
 			} 

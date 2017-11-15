@@ -514,6 +514,28 @@ function hook_degree_plan_load(&$degree) {
 }
 
 
+/**
+ * Allows modules to execute code when the admin user has chose to "apply draft changes".
+ */
+function hook_apply_draft_changes() {
+  
+  $table_name = "my_module_table";
+  $draft_table_name = "draft_$table_name";
+  
+  // First, truncate existing...
+  $query = "truncate table $table_name";
+  $res = db_query($query);
+  
+  // Now, copy in draft changes...
+  $query = "INSERT INTO $table_name
+          SELECT * FROM $draft_table_name ";
+  $res = db_query($query);
+  
+    
+}
+
+
+
 
 /**
  * Allows modules to specify valid URLs in FlightPath, and define what function to call

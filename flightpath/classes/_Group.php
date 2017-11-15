@@ -2,6 +2,10 @@
 
 class _Group extends stdClass
 {
+  
+  const GROUP_COURSE_INFINITE_REPEATS = 9999;
+  
+  
 	public $title, $icon_filename, $group_id, $requirement_type, $min_grade, $group_name;
 	public $hours_required, $min_hours_allowed, $hours_remaining, $hours_fulfilled, $hours_fulfilled_for_credit;
 	public $hours_required_by_type, $req_by_degree_id;
@@ -250,56 +254,107 @@ class _Group extends stdClass
 
 
 				// A course is the next requirement.
-				for ($t = 0; $t <= $cur["course_repeats"]; $t++)
-				{ // Add in the specified repeats for this group...
-					// This will usually only go through the loop once.
-
-					$use_id = $id . "_rep_$t";
-
-					if ($bool_reload_missing_only == true)
-					{
-						// Only load this course if it is missing from the group.
-						// Read the reload_missing_courses() method for an explanation
-						// of why we should want to do this.
-						// Basically, check all the courses in the current
-						// list_courses object for a db_group_requirement_id of $id.
-						// Only proceed if $id was NOT found.
-
-						if (@$array_group_requirement_ids[$use_id] == true)
-						{
-							continue;
-						}
-					}
-
-					$course_c = new Course();
-					$course_c->bool_use_draft = $this->bool_use_draft;
-					$course_c->course_id = $cur["course_id"];
-					$course_c->db_group_requirement_id = $use_id;
-					$course_c->db = $this->db;
-					$course_c->catalog_year = $this->catalog_year;
-					$course_c->assigned_to_group_id = $this->group_id;
-					$course_c->assigned_to_semester_num = $this->assigned_to_semester_num;
-					
-
-					$course_c->specified_repeats = $cur["course_repeats"];
-					if ($cur["course_repeats"] > 0)
-					{
-						$course_c->bool_specified_repeat = true;
-					}
-
-					$course_c->min_grade = trim(strtoupper($cur["course_min_grade"]));
-					if ($course_c->min_grade == "")
-					{ // By default, all courses have a
-						// min grade requirement of D.
-						$course_c->min_grade = "D";
-					}
-
-
-					$this->list_courses->add($course_c);
+				
+				// Is this more than 20 repeats?  If so, we consider it "infinite"
+				if ($cur['course_repeats'] <= 20) {
+  				for ($t = 0; $t <= $cur["course_repeats"]; $t++)
+  				{ // Add in the specified repeats for this group...
+  					// This will usually only go through the loop once.
+  
+  					$use_id = $id . "_rep_$t";
+  
+  					if ($bool_reload_missing_only == true)
+  					{
+  						// Only load this course if it is missing from the group.
+  						// Read the reload_missing_courses() method for an explanation
+  						// of why we should want to do this.
+  						// Basically, check all the courses in the current
+  						// list_courses object for a db_group_requirement_id of $id.
+  						// Only proceed if $id was NOT found.
+  
+  						if (@$array_group_requirement_ids[$use_id] == true)
+  						{
+  							continue;
+  						}
+  					}
+  
+  					$course_c = new Course();
+  					$course_c->bool_use_draft = $this->bool_use_draft;
+  					$course_c->course_id = $cur["course_id"];
+  					$course_c->db_group_requirement_id = $use_id;
+  					$course_c->db = $this->db;
+  					$course_c->catalog_year = $this->catalog_year;
+  					$course_c->assigned_to_group_id = $this->group_id;
+  					$course_c->assigned_to_semester_num = $this->assigned_to_semester_num;
+  					
+  
+  					$course_c->specified_repeats = $cur["course_repeats"];
+  					if ($cur["course_repeats"] > 0)
+  					{
+  						$course_c->bool_specified_repeat = true;
+  					}
+  
+  					$course_c->min_grade = trim(strtoupper($cur["course_min_grade"]));
+  					if ($course_c->min_grade == "")
+  					{ // By default, all courses have a
+  						// min grade requirement of D.
+  						$course_c->min_grade = "D";
+  					}
+  
+  
+  					$this->list_courses->add($course_c);
+  				} // for t <= cur['course_repeats']
 				}
+        else {
+          // We are dealing with a course with "infinite" repeats.
+          $use_id = $id . "_rep_999";
+
+          if ($bool_reload_missing_only == true)
+          {
+            // Only load this course if it is missing from the group.
+            // Read the reload_missing_courses() method for an explanation
+            // of why we should want to do this.
+            // Basically, check all the courses in the current
+            // list_courses object for a db_group_requirement_id of $id.
+            // Only proceed if $id was NOT found.
+            if (@$array_group_requirement_ids[$use_id] == true)
+            {
+              continue;
+            }
+          }
+
+          $course_c = new Course();
+          $course_c->bool_use_draft = $this->bool_use_draft;
+          $course_c->course_id = $cur["course_id"];
+          $course_c->db_group_requirement_id = $use_id;
+          $course_c->db = $this->db;
+          $course_c->catalog_year = $this->catalog_year;
+          $course_c->assigned_to_group_id = $this->group_id;
+          $course_c->assigned_to_semester_num = $this->assigned_to_semester_num;
+          
+
+          $course_c->specified_repeats = Group::GROUP_COURSE_INFINITE_REPEATS;
+          $course_c->bool_specified_repeat = true;
+          
+          $course_c->min_grade = trim(strtoupper($cur["course_min_grade"]));
+          if ($course_c->min_grade == "")
+          { // By default, all courses have a
+            // min grade requirement of D.
+            $course_c->min_grade = "D";
+          }
 
 
-			}
+          $this->list_courses->add($course_c);
+                    
+        }
+
+
+
+			} // if cur['course_id']
+			
+			
+			
+			
 
 			if ($cur["child_group_id"]*1 > 0)
 			{
@@ -352,9 +407,9 @@ class _Group extends stdClass
 		if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 
 		// Look for all instances of this course in the group's base list...
-		$res = db_query("SELECT * FROM $table_name
-									WHERE `group_id`='?'
-									AND `course_id`='?' ", $this->get_db_group_id(), $course_id);
+		$res = db_query("SELECT `id`, course_repeats FROM $table_name
+									WHERE group_id = ?
+									AND course_id = ? ", $this->get_db_group_id(), $course_id);
 		while ($cur = db_fetch_array($res))
 		{
 			$id = $cur["id"];
@@ -435,13 +490,24 @@ class _Group extends stdClass
 
 	function load_descriptive_data()
 	{
+	  
+    $cur = null;
+    static $group_descriptive_data_cache = array();
+    if (isset($group_descriptive_data_cache[$this->get_db_group_id()])) {
+      $cur = $group_descriptive_data_cache[$this->get_db_group_id()];
+    } 
+    else {
+      $table_name = "groups";
+      if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
+      // Load information about the group's title, icon, etc.
+      $res = db_query("SELECT * 
+                       FROM $table_name
+                       WHERE group_id = ? ", $this->get_db_group_id());
+      $cur = db_fetch_array($res);
+      $group_descriptive_data_cache[$this->get_db_group_id()] = $cur;
+    }    
+       
 
-		$table_name = "groups";
-		if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
-		// Load information about the group's title, icon, etc.
-		$res = db_query("SELECT * FROM $table_name
-							WHERE group_id = '?' ", $this->get_db_group_id());
-		$cur = db_fetch_array($res);
 		$this->title = trim($cur["title"]);
 		$this->icon_filename = trim($cur["icon_filename"]);
 		$this->group_name = trim($cur["group_name"]);

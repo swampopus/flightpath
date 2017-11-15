@@ -122,9 +122,9 @@ class _Student extends stdClass
 			$term_id = trim($term_id);
 			$res = $this->db->db_query("SELECT * FROM advising_sessions a,
 							advised_courses b
-							WHERE a.student_id='?'
+							WHERE a.student_id = ?
 							AND a.advising_session_id = b.advising_session_id
-							AND a.term_id = '?' 
+							AND a.term_id = ? 
 							AND a.is_draft = '0' ", $this->student_id, $term_id);
 			while ($cur = $this->db->db_fetch_array($res))
 			{
@@ -136,7 +136,7 @@ class _Student extends stdClass
 		// Now, look for any course which a substitution might have been
 		// performed for...
 		$res = $this->db->db_query("SELECT * FROM student_substitutions
-										WHERE student_id='?' ", $this->student_id);
+										WHERE student_id = ? ", $this->student_id);
 		while ($cur = $this->db->db_fetch_array($res)) {
 			$this->array_significant_courses[$cur["required_course_id"]] = true;
 		}
@@ -159,9 +159,9 @@ class _Student extends stdClass
 	function load_settings() {
 		// This will load & set up the array_settings variable for this
 		// student.
-		$res = $this->db->db_query("SELECT * FROM student_settings
+		$res = $this->db->db_query("SELECT settings FROM student_settings
 									WHERE 
-									student_id='?' ", $this->student_id);
+									student_id = ? ", $this->student_id);
 		$cur = $this->db->db_fetch_array($res);
 
 		if ($arr = unserialize($cur["settings"])) {
@@ -172,9 +172,9 @@ class _Student extends stdClass
 
 	function load_transfer_eqvs_unassigned()
 	{
-		$res = $this->db->db_query("SELECT * FROM student_unassign_transfer_eqv
+		$res = $this->db->db_query("SELECT `id`, transfer_course_id FROM student_unassign_transfer_eqv
 									WHERE
-									student_id='?' 
+									student_id = ? 
 									AND delete_flag='0'
 									ORDER BY id ", $this->student_id);
 		while($cur = $this->db->db_fetch_array($res))
@@ -257,11 +257,9 @@ class _Student extends stdClass
     $c = 0;
     $old_row = "";
 
-		$res = db_query("		          
-		          SELECT * FROM student_tests
-		          WHERE 
-								  student_id = '?' 								
-							ORDER BY date_taken DESC, test_id, category_id ", $this->student_id);		
+		$res = db_query("SELECT * FROM student_tests
+		                 WHERE student_id = ? 								
+							       ORDER BY date_taken DESC, test_id, category_id ", $this->student_id);		
 		while($cur = db_fetch_array($res)) {
 			
 		  $c++;
@@ -500,6 +498,30 @@ class _Student extends stdClass
 	function load_student_data()
 	{
 
+    $cur = null;
+    if (isset($GLOBALS['load_student_data'][$this->student_id])) {
+      $cur = $GLOBALS['load_student_data'][$this->student_id];
+    } 
+    else {
+      $res = $this->db->db_query("SELECT cumulative_hours, gpa, rank_code, catalog_year FROM students WHERE cwid='?'",$this->student_id);
+      $cur = $this->db->db_fetch_array($res);
+      $GLOBALS['load_student_data'][$this->student_id] = $cur;
+    }
+    $this->cumulative_hours = $cur['cumulative_hours'];
+    $this->gpa = $cur['gpa'];
+    $this->db_rank = $cur['rank_code'];
+    $this->catalog_year = $cur['catalog_year'];
+    $this->rank = $this->get_rank_description($this->db_rank);
+    $this->major_code_array = fp_get_student_majors($this->student_id, FALSE);
+    $this->major_code_csv = '';
+    foreach ($this->major_code_array as $k => $v) {
+      $this->major_code_csv .= $k . ',';
+    }
+    $this->major_code_csv = rtrim($this->major_code_csv,',');
+    $this->name = $this->db->get_student_name($this->student_id);
+
+
+    /*
     $this->cumulative_hours = $this->db->get_student_cumulative_hours($this->student_id);	
 		$this->gpa = $this->db->get_student_gpa($this->student_id);
     $this->db_rank = $this->db->get_student_rank($this->student_id);
@@ -508,7 +530,7 @@ class _Student extends stdClass
     $this->major_code_csv = fp_get_student_majors($this->student_id, TRUE);
 		$this->catalog_year = $this->db->get_student_catalog_year($this->student_id);
 		$this->name = $this->db->get_student_name($this->student_id);
-
+    */
    
 	}
 
@@ -863,11 +885,11 @@ class _Student extends stdClass
         
 		// Does the supplied transfer course ID have an eqv?
 		$res = $this->db->db_query("
-			SELECT * FROM transfer_eqv_per_student
-			WHERE transfer_course_id = '?'
-			AND student_id = '?'
-			AND broken_id = '0'
-			$valid_term_line 	", $transfer_course_id, $this->student_id);
+                  			SELECT local_course_id FROM transfer_eqv_per_student
+                  			WHERE transfer_course_id = ?
+                  			AND student_id = ?
+                  			AND broken_id = 0
+                  			$valid_term_line 	", $transfer_course_id, $this->student_id);
 
 		if ($cur = $this->db->db_fetch_array($res)) {
 			$local_course_id = $cur['local_course_id'];

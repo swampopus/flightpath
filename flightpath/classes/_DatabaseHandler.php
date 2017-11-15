@@ -1112,7 +1112,7 @@ class _DatabaseHandler extends stdClass
       $catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
     }
 
-    $res7 = $this->db_query("SELECT * FROM groups
+    $res7 = $this->db_query("SELECT group_id FROM groups
               WHERE `group_name`='?'
               AND `catalog_year`='?'
                LIMIT 1 ", $group_name, $catalog_year) ;
@@ -1219,9 +1219,9 @@ class _DatabaseHandler extends stdClass
     $table_name = "courses";
     if ($bool_use_draft){$table_name = "draft_$table_name";}
     
-    $res7 = $this->db_query("SELECT * FROM $table_name
-              WHERE subject_id = '?'
-              AND course_num = '?'
+    $res7 = $this->db_query("SELECT course_id FROM $table_name
+              WHERE subject_id = ?
+              AND course_num = ?
               $catalog_line
                ORDER BY catalog_year DESC LIMIT 1 ", $subject_id, $course_num) ;
     if ($this->db_num_rows($res7) > 0)
@@ -1229,7 +1229,7 @@ class _DatabaseHandler extends stdClass
       $cur7 = $this->db_fetch_array($res7);
       return $cur7["course_id"];
     }
-    return false;
+    return FALSE;
   }
 
 
@@ -1239,7 +1239,7 @@ class _DatabaseHandler extends stdClass
     // settings in the student_settings table.  It will
     // return FALSE if the student was not in the table.
 
-    $res = $this->db_query("SELECT * FROM student_settings
+    $res = $this->db_query("SELECT settings FROM student_settings
               WHERE student_id = '?' ", $student_cwid) ;
     if ($this->db_num_rows($res) < 1)
     {
@@ -1260,7 +1260,7 @@ class _DatabaseHandler extends stdClass
   function get_student_cumulative_hours($student_cwid) {
     
     // Let's perform our queries.
-    $res = $this->db_query("SELECT * FROM students 
+    $res = $this->db_query("SELECT cumulative_hours FROM students 
                       WHERE cwid = '?' ", $student_cwid);
 
     
@@ -1273,7 +1273,7 @@ class _DatabaseHandler extends stdClass
   function get_student_gpa($student_cwid) {
     
     // Let's perform our queries.
-    $res = $this->db_query("SELECT * FROM students 
+    $res = $this->db_query("SELECT gpa FROM students 
                       WHERE cwid = '?' ", $student_cwid);
 
     
@@ -1287,7 +1287,7 @@ class _DatabaseHandler extends stdClass
   function get_student_catalog_year($student_cwid) {
       
     // Let's perform our queries.
-    $res = $this->db_query("SELECT * FROM students 
+    $res = $this->db_query("SELECT catalog_year FROM students 
                       WHERE cwid = '?' ", $student_cwid);
 
     
@@ -1310,7 +1310,7 @@ class _DatabaseHandler extends stdClass
     
     
     // Let's perform our queries.
-    $res = $this->db_query("SELECT * FROM students 
+    $res = $this->db_query("SELECT rank_code FROM students 
                       WHERE cwid = '?' ", $student_cwid);
 
     
@@ -1334,7 +1334,7 @@ class _DatabaseHandler extends stdClass
   function get_student_name($cwid) {
     
     // Let's perform our queries.
-    $res = $this->db_query("SELECT * FROM users 
+    $res = $this->db_query("SELECT f_name, l_name FROM users 
                       WHERE cwid = '?'
                       AND is_student = 1 ", $cwid);
     
@@ -1366,7 +1366,7 @@ class _DatabaseHandler extends stdClass
     
     
     // Let's perform our queries.
-    $res = $this->db_query("SELECT * FROM users 
+    $res = $this->db_query("SELECT f_name, l_name FROM users 
                       WHERE cwid = '?'
                       AND is_faculty = '1' ", $cwid);
 
@@ -1397,7 +1397,7 @@ class _DatabaseHandler extends stdClass
     // Let's pull the needed variables out of our settings, so we know what
     // to query, because this is a non-FlightPath table.
     
-    $res = $this->db_query("SELECT * FROM faculty WHERE cwid = '?' ", $faculty_cwid);
+    $res = $this->db_query("SELECT major_code_csv FROM faculty WHERE cwid = '?' ", $faculty_cwid);
     $cur = $this->db_fetch_array($res);
     
     return @$cur["major_code_csv"];      
@@ -1438,9 +1438,18 @@ class _DatabaseHandler extends stdClass
     // Looks in the student_degrees table and returns an array of major codes.
     $rtn = array();
     
-    $catalog_year = $this->get_student_catalog_year($student_cwid);
+       
+    static $student_majors_cache = array();
+    $student_majors_cache_key = md5(serialize(func_get_args())) . $student_cwid;
+    if (isset($student_majors_cache[$student_majors_cache_key])) {
+      return $student_majors_cache[$student_majors_cache_key];
+    }    
+    
     
     if ($perform_join_with_degrees) {
+        
+      $catalog_year = $this->get_student_catalog_year($student_cwid);
+      
       $res = $this->db_query("SELECT * FROM student_degrees a, degrees b
                               WHERE student_id = ? 
                               AND a.major_code = b.major_code
@@ -1467,6 +1476,8 @@ class _DatabaseHandler extends stdClass
         $rtn[$cur["major_code"]] = $cur["major_code"];
       }
     }
+    
+    $student_majors_cache[$student_majors_cache_key] = $rtn;
     
     return $rtn;
   }
@@ -1516,7 +1527,7 @@ class _DatabaseHandler extends stdClass
     }
             
     $rtn_array = array();
-    $res = $this->db_query("SELECT * FROM $table_name
+    $res = $this->db_query("SELECT degree_id, major_code, title, degree_class FROM $table_name
                 WHERE exclude = '0'
                 AND catalog_year = ?                
                 $undergrad_line
@@ -1580,11 +1591,18 @@ class _DatabaseHandler extends stdClass
     // has.  Must match the major_code in degree_tracks table.
     // Returns FALSE if there are none.
     $rtn_array = array();
+    
+    static $degree_tracks_data_cache = array();
+    if (isset($degree_tracks_data_cache[$catalog_year][$major_code])) {
+      return $degree_tracks_data_cache[$catalog_year][$major_code];
+    }    
+    
     $res = $this->db_query("SELECT * FROM degree_tracks
                 WHERE major_code = '?'
                 AND catalog_year = '?' ", $major_code, $catalog_year);
     if ($this->db_num_rows($res) < 1)
     {
+      $degree_tracks_data_cache[$catalog_year][$major_code] = false;
       return false;
     }
 
@@ -1594,6 +1612,7 @@ class _DatabaseHandler extends stdClass
       $rtn_array[] = $db_track_code;
     }
 
+    $degree_tracks_data_cache[$catalog_year][$major_code] = $rtn_array;
     return $rtn_array;
 
   }
@@ -1638,7 +1657,7 @@ class _DatabaseHandler extends stdClass
     $table_name = "degrees";
     if ($bool_use_draft){$table_name = "draft_$table_name";}
             
-    $res7 = $this->db_query("SELECT * FROM $table_name
+    $res7 = $this->db_query("SELECT degree_id FROM $table_name
               WHERE major_code = ?
               AND catalog_year = ?
                LIMIT 1 ", trim($major_and_track_code), $catalog_year) ;
@@ -1667,7 +1686,7 @@ class _DatabaseHandler extends stdClass
     $table_name = "degrees";
     if ($bool_use_draft){$table_name = "draft_$table_name";}
     
-    $res7 = $this->db_query("SELECT * FROM $table_name
+    $res7 = $this->db_query("SELECT degree_id FROM $table_name
                             WHERE major_code = ?              
                             ", trim($major_code)) ;
     

@@ -1236,7 +1236,7 @@ function advise_display_view($view = "view") {
   // to it, then we will see that in a GLOBALS variable...
   if (@$GLOBALS["cache_course_inventory"] == true)
   {    
-    $_SESSION["fp_cache_course_inventory"] = serialize(@$GLOBALS["fp_course_inventory"]);    
+    $_SESSION["fp_cache_course_inventory"] = serialize(@$GLOBALS["fp_course_inventory"]);
   }
      
   return $rtn;

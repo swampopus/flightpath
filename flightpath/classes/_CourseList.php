@@ -2358,8 +2358,7 @@ class _CourseList extends ObjList
 	 *
 	 * @param Course $course
 	 */
-	function dec_specified_repeats(Course $course)
-	{
+	function dec_specified_repeats(Course $course, $bool_ignore_infinite_repeats = TRUE) {
 		// Go through the list, and decrement the specified_repeats
 		// value for all instances of $course.
 		for ($t = 0; $t < $this->count; $t++)
@@ -2367,6 +2366,9 @@ class _CourseList extends ObjList
 			$course2 = $this->array_list[$t];
 			if ($course2->course_id == $course->course_id)
 			{
+			    
+			  if ($bool_ignore_infinite_repeats && $course2->specified_repeats == Group::GROUP_COURSE_INFINITE_REPEATS) continue;
+        
 				$course2->specified_repeats--;
 			}
 		}
@@ -2430,6 +2432,47 @@ class _CourseList extends ObjList
 
 	}
 
+
+
+  /**
+   * Remove occurances of the course in the course list.
+   * 
+   * If a limit is higher than zero, we will STOP after that limit has been reached.
+   */
+  function remove_course_with_course_id($course_id, $limit = 0) {
+    
+    // If the limit is 0, set it to an int's max, which is around 2 billion (32bit) or 9 quintillion (64 bit).
+    // Either way, it's effectively infinite for FlightPath in this purpose.
+    
+    if ($limit == 0) $limit = PHP_INT_MAX;
+    
+    $new_list = new CourseList();
+    $c = 0;  
+    for ($t = 0; $t < $this->count; $t++)
+    {
+      $course = $this->array_list[$t];
+      if ($course == null)
+      {
+        continue;
+      }
+      
+      if ($c < $limit && $course->course_id == $course_id) {
+        // We found the course.  Since we do not want it to be part of the list,
+        // we will skip adding it to the new_list.
+        $c++;
+        continue;
+      }
+      
+      
+      // Otherwise, let's add it to the new_list.
+      $new_list->add($course);
+    }
+
+    // Switch over the reference.
+    $this->array_list = $new_list->array_list;
+    $this->reset_counter();      
+    
+  }
 
 
   /**

@@ -1223,7 +1223,7 @@ function admin_process_all_definitions_form() {
   
   $form["mark" . $m++] = array(
     "type" => "markup",
-    "value" => t("This will cause all of the groups with definitions and other settngs (ex: catalog repeats) to be cleared, and their
+    "value" => t("This will cause all of the groups with definitions and other settings (ex: catalog repeats) to be cleared, and their
                   course requirements re-processed.  This function can take several minutes, depending
                   on how many groups with definitions you have."), 
   );  

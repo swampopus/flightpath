@@ -1027,6 +1027,7 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
     "groups",
   );
 
+
   foreach($table_array as $table_name) {
     $draft_table_name = "draft_$table_name";
     // First, truncate existing...
@@ -1037,6 +1038,7 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
             SELECT * FROM $draft_table_name ";
     $res = db_query($query);
   }
+
 
   $db2 = new DatabaseHandler();
   // Now, we need to go through the draft_instructions table,
@@ -1056,10 +1058,17 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
     if (trim($temp[0]) == "update_course_requirement_from_name") {
       $db2->update_course_requirement_from_name(trim($temp[1]), trim($temp[2]), trim($temp[3]));
     }
+    
+    // TODO:  Maybe invoke another hook here, to let other modules act on the instruction?
+    
   }
 
   // Once this is done, truncate the draft_instructions table.
   $res = db_query("TRUNCATE TABLE draft_instructions");
+
+
+  // Invoke a hook to allow other modules to apply_draft_changes as well
+  invoke_hook("apply_draft_changes");
 
 
   // And we are done!  Set maintenance mode back to none

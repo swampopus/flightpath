@@ -253,7 +253,6 @@ class _FlightPath extends stdClass
     //DEV: // return $degree_plans[0];
     
     $new_degree_plan = new DegreePlan();
-
     
     // Loop through the degree plans one at a time...
     foreach ($degree_plans as $degree_plan) {
@@ -299,7 +298,6 @@ class _FlightPath extends stdClass
         
         
         // Should we rename the_semester's title (because the semester we are grabbing is overriding?)
-        // TODO: Maybe do this based on some priority or hooks, etc.
         //$degree_plan->load_descriptive_data();   // Doesn't appear to be necessary at this stage.     
         $stitle = trim(@$degree_plan->array_semester_titles[$sem->semester_num]);
         if ($stitle != "") {          
@@ -309,20 +307,16 @@ class _FlightPath extends stdClass
         }        
         
         
-        // Okay, now add the courses to the_semester
-        // TODO:  Here's probably where we'd check with a hook first.
-        // TODO:  We also want to say which degree these courses came from.
-        
+        // Okay, now add the courses to the_semester     
         $the_semester->list_courses->add_list($new_list_courses);
         
         
         ////////////////////////////
         // Getting the list of groups is going to be similar to getting our list of courses.
-        // Go through the list of groups for this semester.
-        $new_list_groups = $sem->list_groups->get_clone(FALSE, FALSE);
-        
+        // Go through the list of groups for this semester.        
+        $new_list_groups = $sem->list_groups->get_clone(FALSE, FALSE, FALSE);
+                
         // Okay, now we can add to our semester
-        // TODO:  Check hooks here?
         
         $the_semester->list_groups->add_list($new_list_groups); 
         // Also add this group list to the degree plan's list_groups.
@@ -348,9 +342,12 @@ class _FlightPath extends stdClass
       $new_degree_plan->degree_id = DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE;  // use constant to make it easier later on.
     }
     
-    
-
-        
+    // Make sure all of our groups have reloaded any missing courses.
+    $new_degree_plan->list_semesters->reset_counter();
+    while ($new_degree_plan->list_semesters->has_more()) {
+      $sem = $new_degree_plan->list_semesters->get_next();
+      $sem->list_groups->reload_missing_courses();
+    }    
     
     return $new_degree_plan;
     
@@ -401,6 +398,7 @@ class _FlightPath extends stdClass
 
   function assign_courses_to_groups() {
       
+                  
     // This method will look at the student's courses
     // and decide which groups they should be fit into.
         
@@ -520,8 +518,7 @@ class _FlightPath extends stdClass
 
 
     } // while 
-    
-    
+        
   }
 
 
@@ -955,6 +952,17 @@ class _FlightPath extends stdClass
           if ($bool_perform_assignment == TRUE)
           {
             
+            // If this course has an "infinite" number of specified repeats, then
+            // let's actually clone the course and insert it as a new requirement, to replace
+            // the one we're about to use. 
+            if ($course_requirement->specified_repeats == Group::GROUP_COURSE_INFINITE_REPEATS) {
+              $temp_ds = $course_requirement->to_data_string();
+              $new_course = new Course();
+              $new_course->load_course_from_data_string($temp_ds);
+              // TODO:  Do we need to add this new course right after the current requirement?
+              $list_requirements->add($new_course);
+            }
+            
             
             // Which degree is this coming from?  
             //$req_by_degree_id = $course_requirement->req_by_degree_id;
@@ -1093,6 +1101,8 @@ class _FlightPath extends stdClass
 
   function cache_course_inventory($limit_start = 0, $limit_size = 4000)
   {
+      
+    
     // Load courses from the inventory into the inventory cache...
     // Attempt to load the course inventory cache...
     if ($course_inventory = unserialize(@$_SESSION["fp_cache_course_inventory"]))

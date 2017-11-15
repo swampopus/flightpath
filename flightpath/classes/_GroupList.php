@@ -109,11 +109,23 @@ class _GroupList extends ObjList
   }
   
   
+  /**
+   * Calls the function "reload_missing_courses" on all groups in this list.
+   */
+  function reload_missing_courses() {
+    for ($t = 0; $t < $this->count; $t++)
+    {
+      $group = $this->array_list[$t];
+      $group->reload_missing_courses();
+    }    
+  }
+  
+  
   
   /**
    * Return a GroupList which is a clone of this list.
    */
-  function get_clone($bool_return_new_groups = FALSE, $bool_load_groups = TRUE)
+  function get_clone($bool_return_new_groups = FALSE, $bool_load_groups = TRUE, $bool_reload_missing_courses = FALSE)
   {
     $rtn_list = new GroupList();
     
@@ -141,9 +153,11 @@ class _GroupList extends ObjList
         if ($bool_load_groups) {
           $group->load_group();  // Make sure the group has all its courses loaded in.
         }
-        else {
+        
+        if ($bool_reload_missing_courses) {          
           $group->reload_missing_courses();
-        }        
+        }
+                
         
         $group->set_requirement_type($group->requirement_type);
         $group->set_req_by_degree_id($group->req_by_degree_id);
