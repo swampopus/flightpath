@@ -255,8 +255,9 @@ class _Group extends stdClass
 
 				// A course is the next requirement.
 				
-				// Is this more than 20 repeats?  If so, we consider it "infinite"
-				if ($cur['course_repeats'] <= 20) {
+				// Is this more than XX repeats?  If so, we consider it "infinite"
+				if ($cur['course_repeats'] <= 50) {
+				  // Less than XX repeats, so treat it like a normal course.
   				for ($t = 0; $t <= $cur["course_repeats"]; $t++)
   				{ // Add in the specified repeats for this group...
   					// This will usually only go through the loop once.
