@@ -359,30 +359,44 @@ class _Group extends stdClass
 
 			if ($cur["child_group_id"]*1 > 0)
 			{
+			  
+        $temp_add_as_new_group = FALSE;
+			  
 				// Another group is the next requirement (its a branch)
 				if ($bool_reload_missing_only == true)
-				{ // Since we are reloading courses, this subgroup is already
+				{ // Since we are reloading courses, this subgroup is (probably) already
 					// part of this group, so do not re-create it, just find it
 					// and reload it's missing courses.
 					$temp_g = new Group();
 					$temp_g->bool_use_draft = $this->bool_use_draft;
 					$temp_g->group_id = $cur["child_group_id"] . '_' . $this->req_by_degree_id;
 					$temp_g->requirement_type = $this->requirement_type;
-					if ($group_g = $this->list_groups->find_match($temp_g))
-					{
+					if ($group_g = $this->list_groups->find_match($temp_g)) {
 						$group_g->reload_missing_courses();						
-					} else {
-					  fpm("could not find sub group to reload!");
+					} 
+					else {
+					  // We didn't find the child group, possibly because this is the first time we are loading it.  If that is
+					  // the case, then we should just add it fresh.   
+				    $temp_add_as_new_group = TRUE;
 					}
-				} else {
-					// This is a brand-new sub group, so create it
-					// and add it to this group.
-					$group_g = new Group($cur["child_group_id"] . "_" . $this->req_by_degree_id,null,$this->assigned_to_semester_num, $array_significant_courses, $this->bool_use_draft);
-					$group_g->requirement_type = $this->requirement_type;
-					$this->list_groups->add($group_g);
-				}
-			}
-		}
+				} 
+				else {
+          $temp_add_as_new_group = TRUE;
+        }
+        
+        
+        if ($temp_add_as_new_group) {        
+  				// Add this as a brand-new sub group, so create it
+  				// and add it to this group.
+  				$group_g = new Group($cur["child_group_id"] . "_" . $this->req_by_degree_id,null,$this->assigned_to_semester_num, $array_significant_courses, $this->bool_use_draft);
+  				$group_g->requirement_type = $this->requirement_type;
+  				$this->list_groups->add($group_g);
+        }
+        
+        
+			} // if child_group_id > 0
+			
+		} // while cur = db_fetch_array(res)
 
 	}
 

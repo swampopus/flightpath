@@ -1819,13 +1819,13 @@ class _CourseList extends ObjList
 			}
 			
 			// Several ways to tell if a course is here by credit...
-			if (!$course->course_list_fulfilled_by->is_empty)
-			{
+			if (!$course->course_list_fulfilled_by->is_empty) {
 				$rtn_list->add($add_course);
-			} else if ($course->grade != "") {
+			} 
+			else if ($course->grade != "") {
 				$rtn_list->add($add_course);
-			} else if ($course->bool_substitution == true)
-			{
+			} 
+			else if ($course->get_bool_substitution() == true) {
 				$rtn_list->add($add_course);
 			}			
 		}
