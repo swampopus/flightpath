@@ -796,6 +796,18 @@ class _FlightPath extends stdClass
             $hours_assigned += $course_sub->get_hours_awarded($req_by_degree_id);
           } 
                       
+                      
+          // Check to see if this course requirement has "infinite repeats".  If it does, then we want to
+          // clone it and add it back into our list of requirements.
+          if ($course_requirement->specified_repeats == Group::GROUP_COURSE_INFINITE_REPEATS) {
+            $temp_ds = $course_requirement->to_data_string();
+            $new_course = new Course();
+            $new_course->load_course_from_data_string($temp_ds);
+            $new_course->min_grade = $course_requirement->min_grade;
+            
+            // TODO:  Do we need to add this new course right after the current requirement?
+            $list_requirements->add($new_course);
+          }          
           
 
         }
@@ -959,6 +971,8 @@ class _FlightPath extends stdClass
               $temp_ds = $course_requirement->to_data_string();
               $new_course = new Course();
               $new_course->load_course_from_data_string($temp_ds);
+              $new_course->min_grade = $course_requirement->min_grade;
+              
               // TODO:  Do we need to add this new course right after the current requirement?
               $list_requirements->add($new_course);
             }
