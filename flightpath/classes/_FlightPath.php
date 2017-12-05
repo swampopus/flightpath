@@ -480,10 +480,21 @@ class _FlightPath extends stdClass
         we will assign them.
         */
 
+               
+        
+        
         $g->reload_missing_courses();
 
         $high_count = -1;
         $best_branch = -1;
+        
+        // Sort our list of groups by student's grades, if applicable.        
+        $sort_policy = variable_get("initial_student_course_sort_policy", "alpha"); // will either be "alpha" or "grade"
+        if ($sort_policy == "grade") {
+          $g->list_groups->sort_best_grade_first_by_student_grades($student);
+        }
+        
+        
         $g->list_groups->reset_counter();
         while($g->list_groups->has_more())
         {
@@ -510,8 +521,8 @@ class _FlightPath extends stdClass
         if ($best_branch != -1)
         {
           $winning_branch = $g->list_groups->get_element($best_branch);
-          $winning_branch->bool_winning_branch = true;
-          $this->assign_courses_to_list($winning_branch->list_courses, $this->student, true, $g, true);
+          $winning_branch->bool_winning_branch = TRUE;
+          $this->assign_courses_to_list($winning_branch->list_courses, $this->student, TRUE, $g, TRUE);
         }
 
       }
@@ -524,7 +535,7 @@ class _FlightPath extends stdClass
 
   function get_count_of_matches($branch, $student, $group)
   {
-    return $this->assign_courses_to_list($branch->list_courses, $student, false, $group, true);
+    return $this->assign_courses_to_list($branch->list_courses, $student, FALSE, $group, TRUE);
   }
 
   function flag_outdated_substitutions()

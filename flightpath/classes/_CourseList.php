@@ -580,7 +580,7 @@ class _CourseList extends ObjList
 	function sort_best_grade_first(Student $student = NULL) {
 
 	  
-	  $temp = csv_to_array(variable_get("grade_order", "AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I"));	  
+    $temp = csv_to_array(variable_get("grade_order", "AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I"));	  
 	  // We will use array_flip to get back an assoc array where the grades are the keys and the indexes are the values.
 	  $temp = array_flip($temp);
 	  // Go through the grades and convert the integers to strings, padd with zeros so that everything is at least 3 digits.
@@ -592,7 +592,9 @@ class _CourseList extends ObjList
 	  // We now have our grades array just how we want it.  Best grade has lowest value.  Worst grade has highest value.
 	  	  
 	  $unknown_grade_value = "999";  // sort to the very end, in other words.	  
-	  	  
+	  $student_grade_score = 0;
+    
+    	  
 	  // We are going to go through our courses and, based on the grade, assign them a value.
 	  $tarray = array();
 	  for ($t = 0; $t < $this->count; $t++) {
@@ -613,6 +615,7 @@ class _CourseList extends ObjList
 			  $grade_value = $unknown_grade_value;
 			}
 			
+      $student_grade_score += intval($grade_value);
 			// Add to a string in array so we can sort easily using a normal sort operation.
 			$tarray[] = "$grade_value ~~ $t";
 			
@@ -636,6 +639,11 @@ class _CourseList extends ObjList
 
 		
 		// And we are done!
+	  if ($student != NULL) {
+	    // Return the "student grade score" for this list of courses.
+	    return $student_grade_score;
+    }
+	  
 	  
 	}
 

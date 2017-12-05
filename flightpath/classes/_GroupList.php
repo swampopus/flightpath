@@ -308,6 +308,83 @@ class _GroupList extends ObjList
 		
 	}
 	
+  
+  
+  
+  /**
+   * Sorts best-grade-first, as defined by the setting "grade_order", which is a CSV of
+   * grades, best-first.  Ex:  A, B, C, D, F
+   * 
+   * We will use the student's best grade for a course, rather
+   * than the actual course's grade.  Generally, this can be left as set to null.   This is only for when we are
+   * trying to organize a list of courses into the grade order, based on what a student has taken.  For example, if we want
+   * to order a Group's list of courses based on what the student has taken and the grades they made.
+   * 
+   * We will do this for each group in this group list, and the group list with the best grades overall will be sorted
+   * to the top, the group with the worst grades will sort to the bottom.
+   *
+   */
+  function sort_best_grade_first_by_student_grades(Student $student) {
+
+    
+    $temp = csv_to_array(variable_get("grade_order", "AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I"));    
+    // We will use array_flip to get back an assoc array where the grades are the keys and the indexes are the values.
+    $temp = array_flip($temp);
+    // Go through the grades and convert the integers to strings, padd with zeros so that everything is at least 3 digits.
+    $grades = array();
+    foreach ($temp as $grade => $val) {
+      $grades[$grade] = str_pad((string)$val, 3, "0", STR_PAD_LEFT);
+    }
+    
+    // We now have our grades array just how we want it.  Best grade has lowest value.  Worst grade has highest value.
+        
+    $unknown_grade_value = "999";  // sort to the very end, in other words.   
+
+    
+    $tarray = array();
+    for ($t = 0; $t < $this->count; $t++) {
+      $g = $this->array_list[$t];
+      
+      $student_grade_score = $g->list_courses->sort_best_grade_first($student);
+      // Now, we want to record their "grade score", which we will use for sorting.
+      
+      // Make sure all the values are uniformly 6 digits long 
+      $student_grade_score = str_pad((string)$student_grade_score, 6, "0", STR_PAD_LEFT);
+      
+      $tarray[] = "$student_grade_score ~~ $t";
+            
+    }
+    
+    // Sort by those grade scores
+    sort($tarray);    
+    
+    // Okay, now go back through tarray and re-construct a new GroupList
+    $new_list = new GroupList();
+    for($t = 0; $t < count($tarray); $t++)
+    {
+      $temp = explode(" ~~ ",$tarray[$t]);
+      $i = $temp[1];
+      $new_list->add($this->array_list[$i]);
+    }
+
+    // Okay, now $new_list should contain the correct values.
+    // We will transfer over the reference.
+    $this->array_list = $new_list->array_list;        
+    
+    // And we are done!
+    
+  } // function
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 	function sort_alphabetical_order($bool_reverse_order = false)
 	{
 
