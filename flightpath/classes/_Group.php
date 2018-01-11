@@ -4,6 +4,7 @@ class _Group extends stdClass
 {
   
   const GROUP_COURSE_INFINITE_REPEATS = 9999;
+  const GROUP_COURSE_INFINITE_REPEATS_THRESHOLD = 50;
   
   
 	public $title, $icon_filename, $group_id, $requirement_type, $min_grade, $group_name;
@@ -256,7 +257,7 @@ class _Group extends stdClass
 				// A course is the next requirement.
 				
 				// Is this more than XX repeats?  If so, we consider it "infinite"
-				if ($cur['course_repeats'] <= 50) {
+				if ($cur['course_repeats'] <= Group::GROUP_COURSE_INFINITE_REPEATS_THRESHOLD) {
 				  // Less than XX repeats, so treat it like a normal course.
   				for ($t = 0; $t <= $cur["course_repeats"]; $t++)
   				{ // Add in the specified repeats for this group...
@@ -398,7 +399,20 @@ class _Group extends stdClass
 			
 		} // while cur = db_fetch_array(res)
 
-	}
+		
+		
+		
+    // When we load this group, let's also check for any hooks.
+    // Since this class might be used outside of FP, only do this if we know
+    // that the bootstrap.inc file has been executed.
+    if ($GLOBALS["fp_bootstrap_loaded"] == TRUE) {      
+      invoke_hook("group_load", array(&$this));
+    }         
+				
+		
+    
+		
+	} // load_group
 
 
 	function reload_missing_courses()

@@ -514,6 +514,40 @@ function hook_degree_plan_load(&$degree) {
 }
 
 
+
+
+/**
+ * Allows modules to act after a group object has been loaded.
+ * 
+ * Specifically, this is called at the end of Group::load_group()
+ * 
+ * @see hook_degree_plan_load()
+ */
+function hook_group_load(&$group) {
+  if ($group->group_name == "YXZ") {
+    $group->is_xyz = TRUE;
+  }
+}
+
+
+
+/**
+ * Allows modules to act after a course object has been loaded.
+ * 
+ * Specifically, this is called at the end of Course::load_course()
+ * 
+ * @see hook_degree_plan_load()
+ */
+function hook_course_load(&$course) {
+  if ($course->subject_id == "YXZ") {
+    $course->is_xyz = TRUE;
+  }
+}
+
+
+
+
+
 /**
  * Allows modules to execute code when the admin user has chose to "apply draft changes".
  */

@@ -108,7 +108,8 @@ function install_perform_install() {
   
 
   // Place into settings so our installation procedures will work.
-  $GLOBALS["fp_system_settings"]["db_host"] = $db_host . ':' . $db_port;
+  $GLOBALS["fp_system_settings"]["db_host"] = $db_host;
+  $GLOBALS["fp_system_settings"]["db_port"] = $db_port;
   $GLOBALS["fp_system_settings"]["db_user"] = $db_user;
   $GLOBALS["fp_system_settings"]["db_pass"] = $db_pass;
   $GLOBALS["fp_system_settings"]["db_name"] = $db_name;
@@ -126,10 +127,11 @@ function install_perform_install() {
   } 
   catch (Exception $e) {
   	// Connection failed!
-  	return install_display_db_form("<font color='red'>" . st("Could not connect.  Please check that you have
+  	return install_display_db_form("<div style='color:red;'>" . st("Could not connect.  Please check that you have
                                     created the database already, and given the user all of the permissions
                                     (except Grant).  Then, make sure you typed the username and
-                                    password correctly, as well as the database name itself") . "</font>");
+                                    password correctly, as well as the database name itself.  
+                                    <br><br>Full exception message: " . $e->getMessage()) . "</div>");
   	 
   }
   

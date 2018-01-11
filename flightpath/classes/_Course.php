@@ -1297,7 +1297,21 @@ class _Course extends stdClass
     }
 
     $this->assign_display_status();
-  }
+    
+    
+        
+    
+    // When we load this course, let's also check for any hooks.
+    // Since this class might be used outside of FP, only do this if we know
+    // that the bootstrap.inc file has been executed.
+    if ($GLOBALS["fp_bootstrap_loaded"] == TRUE) {      
+      invoke_hook("course_load", array(&$this));
+    }         
+    
+    
+    
+    
+  } // load_course
 
 
   /**

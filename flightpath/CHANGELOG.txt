@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-01-11
+  Fixed a bug which was preventing a clean installation.
+  
+  Added a new hook for when degree plans load, as well as when groups load.
+
+
 2017-12-5
   To fix an issue where groups with branches were not respecting the grade sort order, I added
   a new method to _GroupList: sort_best_grade_first_by_student_grades().  This helps sort branches
