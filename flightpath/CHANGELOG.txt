@@ -1,6 +1,12 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-01-18
+  In order to make conditional_requirememnts module work more smoothly, added
+  a global $student command to FlightPath::init() method.  This way when degree plans are loaded,
+  and hook for hook_degree_load() is called, $student is available as a global variable.
+
+
 2018-01-11
   Fixed a bug which was preventing a clean installation.
   

@@ -36,7 +36,7 @@ class _FlightPath extends stdClass
 
   function init($bool_init_advising_variables = false, $bool_ignore_what_if_advising_variables = false, $bool_load_full = true) {
     
-    global $current_student_id, $user;
+    global $current_student_id, $user, $student;
     // This will initialize this flightPath object
     // based on what is available in the global variables.
     // Takes the place of what was going on at the beginning

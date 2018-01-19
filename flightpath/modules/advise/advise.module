@@ -2167,7 +2167,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
  * Implementation of hook_init
  */
 function advise_init() {
-  global $current_student_id, $user, $screen;
+  global $current_student_id, $user, $screen, $student;
   $current_student_id = @$_REQUEST["current_student_id"];
     
   // Since this user doesn't have permission to view this student's sessions,
@@ -2412,7 +2412,7 @@ function advise_init_screen() {
 
   if (@$GLOBALS["fp_advising"]["load_from_cache"] != "yes") { 
     // do not load from cache....  load the student fresh....
-    //fpm("no cache");
+    
  
     /*
     $fp = new FlightPath();
