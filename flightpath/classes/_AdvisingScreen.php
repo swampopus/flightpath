@@ -2413,7 +2413,7 @@ function draw_menu_items($menu_array) {
     
 		$course->load_descriptive_data(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE);
 
-		$course_hours = $course->get_hours();
+		$course_hours = $course->get_catalog_hours();
 
 		if ($course->bool_transfer)
 		{
@@ -2482,7 +2482,7 @@ function draw_menu_items($menu_array) {
         "value" => $html,        
       );
 
-		}
+		} // if course->bool_transfer
 
 
     /*
@@ -2495,6 +2495,7 @@ function draw_menu_items($menu_array) {
 		{
 		  $html = "";
 		  $use_hours = $course_hours;
+      
 			if ($course->bool_transfer)
 			{
 				$html .= "<b>$initials " . t("Equivalent Course Information:") . "</b><br>
@@ -2513,6 +2514,28 @@ function draw_menu_items($menu_array) {
         "attributes" => array("style" => "margin-top: 13px; margin-bottom: 0;", "class" => "tenpt"),
         "weight" => 10,
       );
+      
+      
+      // If the course can be repeated for credit, show that information next.
+      if ($course->repeat_hours > $course->min_hours)
+      {        
+        $html = t("May be repeated for up to @repeat hours of credit.", array("@repeat" => $course->repeat_hours));
+       
+        // if it is essentially infinite, then we just say it can be repeated for credit, period.
+        if ($course->repeat_hours > 20) {
+          $html = t("May be repeated for credit.");
+        }
+
+        $render["course_repeat_line"] = array(
+          "value" => $html,
+          "attributes" => array("class" => "tenpt course-search-repeat"),
+          "weight" => 15,
+        );
+        
+      }
+                  
+      
+      
           
 		}
         
@@ -3264,6 +3287,7 @@ function draw_menu_items($menu_array) {
 			return;
 		}
 
+		
 		$title = $group->title;
 
 		$display_course_list = new CourseList();
@@ -4458,6 +4482,9 @@ function draw_menu_items($menu_array) {
     $theme["student"] = $this->student;
     $theme["degree_plan"] = $this->degree_plan;
     $theme["from_group_select"] = TRUE;
+
+    //Setting in Configure School Settings:
+    $show_repeat_information = (variable_get("group_list_course_show_repeat_information", "yes") == "yes");
         
 
 		if ($course->subject_id == "")
@@ -4472,7 +4499,7 @@ function draw_menu_items($menu_array) {
 		$db_group_requirement_id = $course->db_group_requirement_id;
 		$grade = $course->grade;
 		$repeats = $course->specified_repeats;
-		if ($repeats > 0)
+		if ($repeats > 0 && $show_repeat_information)
 		{
 			$w3 = "15%";
 		}
@@ -4647,7 +4674,7 @@ function draw_menu_items($menu_array) {
        			onClick='$js_code'>
         			{$theme["course"]["course_num"]}</td>
         	";
-		if ($repeats > 0 && $repeats < 20)
+		if ($repeats > 0 && $repeats < 20 && $show_repeat_information)
 		{
 			$pC .= "
 				<td class='tenpt underline group-may-repeat' style='color: gray;' 
@@ -4656,7 +4683,8 @@ function draw_menu_items($menu_array) {
 				</td>
 			";
 		}
-    else if ($repeats > 0 && $repeats >= 20) {      $pC .= "
+    else if ($repeats > 0 && $repeats >= 20 && $show_repeat_information) {
+      $pC .= "
         <td class='tenpt underline group-may-repeat' style='color: gray;' 
           onClick='$js_code' colspan='3'>
         <i>" . t("May be repeated for credit.") . "</i>
@@ -5428,6 +5456,11 @@ function draw_menu_items($menu_array) {
 		if ($group_hours_remaining < 200 && $bool_no_courses != true)	{
 		  $disp_group_hours_remaining = $group_hours_remaining;
       // If we have min_hours, display that information.
+      if ($place_group->has_min_hours_allowed()) {
+        // Make sure the "real" group has the same min hours set.
+        $group->min_hours_allowed = $place_group->min_hours_allowed;
+      }
+      
       if ($group->has_min_hours_allowed()) {
         
         $g_fulfilled_hours = $group->hours_required - $group_hours_remaining;  // How many have we actually used?

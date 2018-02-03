@@ -1,6 +1,25 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-02-02
+  Fixed bug in Blank Degrees module, where it would never load correctly.  Also added a hook for prereqs module (if installed) so it will not display
+  errors relating to prereqs. (Thanks to Kim from Morningside).
+  
+  Fixed incorrect display of variable hours in Course Information popup (AdvisingScreen).
+  
+  Added setting to Configure School Setitngs, to hide the "May take up to..." text in a group list popup, instead showing
+  the default course information of hrs.
+  
+  Added repeat hours display to course information popup.
+  
+  Added limit (so as not to show courses which can be repeated 999 times) to Course Search.
+
+
+2018-01-31
+  Fixed a bug in system.install where student_developmentals table did not have primary key
+  configured correctly.
+  
+
 2018-01-18
   In order to make conditional_requirememnts module work more smoothly, added
   a global $student command to FlightPath::init() method.  This way when degree plans are loaded,

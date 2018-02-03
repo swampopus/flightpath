@@ -893,7 +893,7 @@ function advise_display_popup_group_select() {
   
   // If this is a "blank" degree, make sure we set the degree_id correctly.
   if($blank_degree_id != "") {    
-    $degree_plan = new fp_load_degree($blank_degree_id);
+    $degree_plan = fp_load_degree($blank_degree_id);
     $fp->degree_plan = $degree_plan;
     $screen->degree_plan = $degree_plan;
     $screen->bool_blank = TRUE;
@@ -986,6 +986,9 @@ function advise_display_popup_group_select() {
 
   return $rtn;
 }
+
+
+
 
 
 function advise_display_popup_substitute_selected() {

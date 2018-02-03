@@ -659,7 +659,7 @@ $q = "
 CREATE TABLE `student_developmentals` (
   `student_id` varchar(30)  ,
   `requirement` varchar(15)   DEFAULT '',
-  PRIMARY KEY (`student_id`),
+  PRIMARY KEY (`student_id`,`requirement`),
   KEY (`requirement`)
 ); ";
 db_query($q);

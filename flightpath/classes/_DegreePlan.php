@@ -572,8 +572,8 @@ class _DegreePlan extends stdClass
         else {
           // Was not already there; insert it.
           $group_n = new Group($cur["group_id"] . '_' . $this->degree_id, $this->db, $semester_num, $this->student_array_significant_courses, $this->bool_use_draft, $cur["group_requirement_type"]);
-          $group_n->hours_required = $cur["group_hours_required"] * 1;
-
+          $group_n->hours_required = $cur["group_hours_required"] * 1;          
+          
           if (!isset($group_n->hours_required_by_type[$cur["group_requirement_type"]])) $group_n->hours_required_by_type[$cur["group_requirement_type"]] = 0;
           $group_n->hours_required_by_type[$cur["group_requirement_type"]] += $group_n->hours_required;
           $group_n->set_req_by_degree_id($this->degree_id);

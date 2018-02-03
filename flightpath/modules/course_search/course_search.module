@@ -667,6 +667,9 @@ function course_search_display_courses() {
       if (trim($cur["repeat_hours"]*1) > $min_hours)
       {
         $repeat = "<div class='course-search-repeat'>" . t("May be repeated for up to @repeat hours of credit.", array("@repeat" => $cur["repeat_hours"]*1)) . "</div>";
+        if (trim($cur["repeat_hours"]*1) > 20) {
+          $repeat = "<div class='course-search-repeat'>" . t("May be repeated for credit.") . "</div>";
+        }
       }
       
       
