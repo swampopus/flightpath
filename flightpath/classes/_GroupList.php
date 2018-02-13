@@ -213,7 +213,68 @@ class _GroupList extends ObjList
 	
   
   
+  
+  /**
+   * Sort this list of groups by the advising weights of the degrees they belong to.
+   * 
+   * This solution (which allows for negative numbers) was provided by user oantby (Logan Bluth) from Morningside.
+   * The original function is z__sort_degree_advising_weight()
+   */
   function sort_degree_advising_weight() {
+  
+    $tarray = array();
+    $per_major_code = array();
+    
+    for ($t = 0; $t < count($this->array_list); $t++)
+    {
+      $g = $this->array_list[$t];
+      
+      // Get the degree_id for this group
+      $degree_id = $g->req_by_degree_id;
+      
+      $major_code = fp_get_degree_major_code($degree_id);
+      $advising_weight = fp_get_degree_advising_weight($degree_id);
+      if (!$advising_weight) $advising_weight = 0;
+      
+      $tarray[$major_code] = $advising_weight;
+      $per_major_code[$advising_weight][$major_code][] = &$this->array_list[$t];//use a reference so we don't need extra memory/cpu overhead.
+    }
+    
+    // Now, sort the array to get everything in the correct order
+    // Use asort to preserve keys (major codes)
+    asort($tarray,SORT_NUMERIC);
+    
+        
+    // Now, convert the array back into a list of groups.
+    $new_list = new GroupList();
+    foreach ($tarray as $major_code => $weight) {
+
+      // As a secondary measure, we also wanted to sort equal weighted majors alphabetically by major_code.
+      ksort($per_major_code[$weight]);    
+      
+      foreach ($per_major_code[$weight][$major_code] as &$group) {
+        $new_list->add($group);
+      }
+    }
+    
+    // Okay, now $new_list should contain the correct values.
+    // We will transfer over the reference.
+    $this->array_list = $new_list->array_list;
+  
+    
+        
+  } // sort_degree_advising_weight
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  function z__sort_degree_advising_weight() {
     
     $tarray = array();
     
@@ -261,7 +322,55 @@ class _GroupList extends ObjList
   
   
   
-	function sort_priority()
+  
+  /**
+   * Sort this list of groups by their priority number.  Higher priorities appear at the top of the list.
+   * 
+   * This will allow negative numbers (thanks to user oantby (Logan Bluth) from Morningside.
+   * The original function is z__sort_priority(), which is left in the code in case it is needed.
+   */
+  function sort_priority() {
+    /*
+      Sort this list of groups by their priority number.
+      Higher priorities should appear at the
+      top of the list.
+    */
+    $tarray = array();
+    
+    
+    for ($t = 0; $t < count($this->array_list); $t++)
+    {
+      $g = $this->array_list[$t];
+      $g->load_descriptive_data();
+      $pri = "" . ($g->priority*1) . "";
+      $str = "$pri ~~ $t";
+  
+      array_push($tarray,$str);
+    }
+    
+    // We use SORT_NUMERIC so that negative numbers may be used.
+    rsort($tarray,SORT_NUMERIC);
+    
+    
+    // Now, convert the array back into a list of groups.
+    $new_list = new GroupList();
+    for($t = 0; $t < count($tarray); $t++)
+    {
+      $temp = explode(" ~~ ",$tarray[$t]);
+      $i = $temp[1];
+  
+      $new_list->add($this->array_list[$i]);
+    }
+  
+    // Okay, now $new_list should contain the correct values.
+    // We will transfer over the reference.
+    $this->array_list = $new_list->array_list;
+    
+  
+  } 
+  
+  
+	function z__sort_priority()
 	{
 		/*
 			Sort this list of groups by their priority number.

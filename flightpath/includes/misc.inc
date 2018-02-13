@@ -929,7 +929,14 @@ function fp_add_message($msg, $type = "status", $bool_no_repeat = FALSE) {
  * @param String $path_to_css
  */
 function fp_add_css($path_to_css) {
-  $GLOBALS["fp_extra_css"][] = $path_to_css;
+  
+  // Init if needed
+  if (!isset($GLOBALS['fp_extra_css'])) $GLOBALS['fp_extra_css'] = array();  
+  
+  
+  if (!in_array($path_to_css, $GLOBALS['fp_extra_css'])) {
+    $GLOBALS["fp_extra_css"][] = $path_to_css;
+  }
 }
 
 
@@ -949,8 +956,15 @@ function fp_add_css($path_to_css) {
  * 
  */
 function fp_add_js($js, $type = "file") {
-  if ($type == "file") {  
-    $GLOBALS["fp_extra_js"][] = $js;
+  
+  // Init if needed
+  if (!isset($GLOBALS['fp_extra_js'])) $GLOBALS['fp_extra_js'] = array();  
+    
+    
+  if ($type == "file") {
+    if (!in_array($js, $GLOBALS['fp_extra_js'])) {
+      $GLOBALS["fp_extra_js"][] = $js;
+    }
   }
   
   if ($type == "setting") {

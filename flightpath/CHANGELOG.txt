@@ -1,6 +1,14 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-02-13
+  Implemented changes to group sorting functions (thanks to Logan Bluth) to let advising weights be sorted into
+  negative numbers for groups.
+  
+  Fixed bug in fp_add_js and _add_css (dumb mistake on my part) which allowed the same scripts to be added
+  multiple times, instead of just once.  Thanks to Logan Bluth for pointing that out.
+
+
 2018-02-02
   Fixed bug in Blank Degrees module, where it would never load correctly.  Also added a hook for prereqs module (if installed) so it will not display
   errors relating to prereqs. (Thanks to Kim from Morningside).

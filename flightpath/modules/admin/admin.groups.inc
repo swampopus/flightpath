@@ -25,6 +25,7 @@ function admin_edit_group_form_validate(&$form, &$form_state) {
   $mycount = db_query("SELECT count(*) as mycount FROM draft_groups 
                        WHERE group_name = ?
                        AND group_id != ?
+                       AND delete_flag = '0'
                        AND catalog_year = ?", $group_name, $group_id, $de_catalog_year)->fetchColumn();
   
   if ($mycount > 0) {    
