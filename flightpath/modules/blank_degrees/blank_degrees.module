@@ -1,0 +1,376 @@
+<?php
+
+/**
+ * Implementation of hook_menu 
+ */
+function blank_degrees_menu() {
+  
+  $items = array();
+  
+  $items["tools/blank-degrees"] = array(
+    "title" => "Blank Degree Search",
+    "description" => "Browse through available degree plans as they appear in " . variable_get("system_name", "FlightPath"),
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("blank_degrees_select_degree_form"),
+    "access_callback" => TRUE,
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "target" => "_blank",
+      "menu_icon" => fp_theme_location() . "/images/popup.gif",
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "weight" => 10,
+  );
+  
+  $items["blank-degrees/display"] = array(
+    "title" => "Blank Degrees - Display",
+    "page_callback" => "blank_degrees_display_blank_degree",
+    "access_callback" => TRUE,
+    "page_settings" => array(
+      "display_currently_advising" => TRUE,
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "page_show_title" => TRUE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Change degree",
+          "path" => "tools/blank-degrees",
+          "query" => "blank_catalog_year=%BLANK_CATALOG_YEAR%",
+        ),
+      ),      
+    ),    
+    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );
+    
+  
+  return $items;
+  
+}
+
+
+
+/**
+ * This is an implementation of hook_menu_handle_replacement_pattern.
+ * It will search for and replace replacement patterns which we are aware of it in $str.
+ */
+function blank_degrees_menu_handle_replacement_pattern($str) {
+  
+  if (strpos($str, "%BLANK_CATALOG_YEAR%") !== 0) {
+    // It contains this replacement pattern!
+    $str = str_replace("%BLANK_CATALOG_YEAR%", @$_REQUEST["blank_catalog_year"], $str);
+  }
+  
+  return $str;
+}
+
+
+
+
+/**
+ * Implements hook_prereqs_get_prereq_warnings_for_course
+ * 
+ * For a blank degree, we don't want to worry about any warnings.
+ */
+function blank_degrees_prereqs_get_prereq_warnings_for_course(&$rtn, $course, $student) {
+  
+  if (isset($_REQUEST['blank_degree_id'])) {
+    // We are on a blank degree, so remove any prereq warnings.
+    $rtn = array();
+  }
+}
+
+
+
+function blank_degrees_display_blank_degree() {
+  global $screen, $student, $fp;
+  
+  $blank_degree_id = $_REQUEST["blank_degree_id"];
+  $blank_catalog_year = $_REQUEST["blank_catalog_year"];
+  @$blank_print = $_REQUEST["blank_print"];
+  @$blank_view = $_REQUEST["blank_view"];
+  
+  // If we used the word "current" for catalog_year, then find out what the current is.
+  if (strtolower($blank_catalog_year) == "current") {
+    $blank_catalog_year = variable_get("current_catalog_year", 2006);    
+  }
+
+  // If the blank_degree_id begins with "major_code_" then figure out the degree based on major_code.
+  if (strstr($blank_degree_id, "major_code_")) {
+    $blank_major_code = str_replace("major_code_", "", $blank_degree_id);
+    // Okay, figure out the degree id based on the major code and catalog year.
+    $db = get_global_database_handler();
+    $blank_degree_id = $db->get_degree_id($blank_major_code, $blank_catalog_year);
+    if (!$blank_degree_id) {
+      // Couldn't be found!
+      $rtn = "<br>Checking for major code: $blank_major_code, year: $blank_catalog_year
+              <br><br>
+              Sorry, but that major code/track combination and catalog year could not be found.  Please check your URL and try again.";
+      return $rtn;
+    }
+  }
+  else {
+    // Find out the major_code for this blank_degree_id...
+    $blank_degree = new DegreePlan($blank_degree_id, NULL, TRUE);
+    $blank_major_code = $blank_degree->major_code;
+    // If there is a track, tack it on.
+    if ($blank_degree->track_code != "") {
+      if (!strstr($blank_major_code, "|")) $blank_major_code .= "|";
+      $blank_major_code .= "_" . $blank_degree->track_code;
+    }
+    
+    
+  }
+      
+  
+  $rtn = "";
+  
+  // Are we in draft mode?
+  if ($_SESSION["fp_draft_mode"] == "yes") {
+    $GLOBALS["fp_advising"]["bool_use_draft"] = true;
+  } 
+  else {
+    $GLOBALS["fp_advising"]["bool_use_draft"] = false;
+  }  
+  
+  
+  fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
+  
+  $student = new Student();
+  $student->load_student();
+  $student->student_id = "000000000";
+  $student->name = "Blank Degree";  
+  $degree_plan = new DegreePlan($blank_degree_id);  
+  $degree_plan->load_descriptive_data();
+  $student->catalog_year = $degree_plan->catalog_year;
+  $fp = new FlightPath($student, $degree_plan);
+  $screen = new AdvisingScreen("", $fp, "not_advising");
+  if ($blank_view == "type")
+  {
+    $screen = new AdvisingScreenTypeView("", $fp, "not_advising");
+    $screen->view = "type";
+  }
+  
+  $screen->bool_blank = true;
+  
+  if ($blank_print == "yes")
+  {
+    $screen->bool_print = true;
+  }    
+
+  $screen->build_screen_elements();
+
+  $title = $degree_plan->title;
+  if ($degree_plan->track_title != "") {
+    $title .= " - " . $degree_plan->track_title;
+  }
+  fp_set_title($title);
+  
+  $rtn .= "<table class='fp-semester-table'>";
+  $rtn .= $screen->display_screen();
+  $rtn .= "</table><br><br>";
+  
+
+  if (user_has_permission("blank_degrees_view_url_options") && !$screen->bool_print) {
+    // If the user has permissions, show them the extra URL options.  (but don't bother in print mode)
+    $rtn .= fp_render_c_fieldset("
+              <div style='font-size: 0.85em;'>
+                " . t("This degree may be linked to directly using the following URLs:") . "
+                <ul>
+                  <li>Internal ID for $blank_catalog_year: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year", FALSE) . "'>Link</a></li>
+                  <li>Major-code $blank_major_code for $blank_catalog_year: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=major_code_$blank_major_code&blank_catalog_year=$blank_catalog_year", FALSE) . "'>Link</a></li>
+                  <li>Major-code $blank_major_code always <b>current</b> catalog: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=major_code_$blank_major_code&blank_catalog_year=current", FALSE) . "'>Link</a></li>
+                </ul>
+              </div>
+             ", t("View URL Options"), TRUE);
+  }
+  
+  
+  
+  // Add in the required "advising variables"
+  //$rtn .= $screen->get_hidden_advising_variables("save_draft");
+      
+  // Figure out what the page's sub-tabs should be, and set them.
+  $tab_array = array();
+  $tab_array[0]["title"] = "Display by Year";
+  $tab_array[0]["active"] = ($screen->view != "type");
+  $tab_array[0]["on_click"] = "window.location=\"" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year&blank_view=year") . "\";";
+      
+  $tab_array[1]["title"] = "Display by Type";
+  $tab_array[1]["active"] = ($screen->view == "type");
+  $tab_array[1]["on_click"] = "window.location=\"" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year&blank_view=type") . "\";";
+      
+  if (!fp_screen_is_mobile()) {
+    $tab_array[2]["title"] = "Print";
+    $tab_array[2]["type"] = "link";    
+    $tab_array[2]["active"] = FALSE;  
+    $tab_array[2]["on_click"] = "popupPrintWindow(\"" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year&blank_view=$blank_view&blank_print=yes") . "\");";  
+  }      
+      
+  fp_set_page_sub_tabs($tab_array);
+  
+  watchdog("blank_degrees", "User viewed blank degree: @year,@degree,@title", array("@year" => $blank_catalog_year, "@degree" => $blank_degree_id, "@title" => $title), WATCHDOG_DEBUG);
+  
+  
+  return $rtn;
+  
+}
+
+
+function blank_degrees_perm() {
+  return array("blank_degrees_view_url_options" => array(
+                  "title" => t("View URL options"),
+                  "description" => t("View URL options at the bottom of blank degrees"), 
+  ));
+}
+
+
+
+/**
+ * This form lets the user select which degree they wish to view.
+ */
+function blank_degrees_select_degree_form() {
+  $form = array();
+  $m = 0;
+  
+  $bool_show_continue = TRUE;
+  
+  // Are we in draft mode?
+  if ($_SESSION["fp_draft_mode"] == "yes") {
+    $GLOBALS["fp_advising"]["bool_use_draft"] = true;
+  } 
+  else {
+    $GLOBALS["fp_advising"]["bool_use_draft"] = false;
+  }  
+  
+  if (fp_screen_is_mobile()) {
+    fp_add_css(fp_get_module_path("blank_degrees") . "/css/mobile.css");    
+  }      
+    
+  
+  @$blank_catalog_year = $_REQUEST["blank_catalog_year"];
+  
+  // If we used the word "current" for catalog_year, then find out what the current is.
+  if (strtolower($blank_catalog_year) == "current") {
+    $blank_catalog_year = variable_get("current_catalog_year", 2006);    
+  }
+  
+  if ($blank_catalog_year == "") {
+    // The user must first select the desired catalog year.
+    
+    $catalog_year_options = array();
+    $current_catalog_year = variable_get("current_catalog_year", 2006);
+    
+    if ($GLOBALS["fp_advising"]["bool_use_draft"]) {
+      $current_catalog_year = variable_get("current_draft_catalog_year", 2006);
+    }
+    
+    $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);
+    for($t = $current_catalog_year; $t >= $earliest_catalog_year; $t--) {
+      $catalog_year_options[$t] = "$t-" . ($t+1);
+    }    
+
+    $form["blank_catalog_year"] = array(
+      "type" => "select",
+      "label" => t("Please begin by selecting a catalog year:"),
+      "options" => $catalog_year_options,
+    );
+  }
+  else {
+    // Catalog year WAS specified.  So, ask the user to select a degree now.
+    $form["blank_catalog_year"] = array(
+      "type" => "hidden",
+      "value" => $blank_catalog_year,
+    );
+
+    $form["mark" . $m++] = array(
+      "value" => t("Searching degrees in %year.", array("%year" => $blank_catalog_year . "-" . ($blank_catalog_year+1))) . "
+                   " . l(t("Change?"), "tools/blank-degrees"),
+    );    
+    
+    $mobile_markup = "";
+    $degree_options = array();
+    $db = get_global_database_handler();    
+    if ($degree_array = $db->get_degrees_in_catalog_year($blank_catalog_year, true, $GLOBALS["fp_advising"]["bool_use_draft"], FALSE)) {
+      foreach($degree_array as $major_code => $value) {
+        if (trim($value["title"]) == ""){continue;}
+        $degree_id = $value["degree_id"];
+        $title = $value["title"];
+        if ($value["degree_class"] == "G") {
+          $title = "(" . t("Graduate") . ") " . $title;          
+        }
+        // if title is too long, shorten it.
+        $maxlen = 95;
+        if (strlen($title) > $maxlen) {
+          $title = substr($title, 0, $maxlen - 3) . "...";
+        }
+          
+        $degree_options[$degree_id] = $title;
+          
+
+        $mobile_markup .= "<a class='degree-search-degree-row'
+                    href='" . fp_url("blank-degrees/display", "blank_degree_id=$degree_id&blank_catalog_year={$_REQUEST["blank_catalog_year"]}") . "'>
+                      <div class='degree-search-degree-title'>$title</div>
+                  </a>";
+        
+        
+      }
+    }
+
+    if (fp_screen_is_mobile()) {
+      $form["mark" . $m++] = array(
+        "value" => $mobile_markup,
+      );
+      $bool_show_continue = FALSE;
+    }
+    else {
+      // NOT mobile
+      $form["blank_degree_id"] = array(
+        "label" => t("Please select a degree"),
+        "type" => "select",
+        "options" => $degree_options,
+      );
+    
+    }
+    
+  }
+  
+  
+  if ($bool_show_continue) {
+    $form["submit"] = array(
+      "type" => "submit",
+      "prefix" => "<hr>",
+      "value" => t("Continue") . " -&gt;",
+    );
+  }
+  
+  
+  return $form;
+}
+
+
+/**
+ * Submit handler for degree selection
+ */
+function blank_degrees_select_degree_form_submit($form, $form_state) {
+  
+  // If all the user did was select catalog year, we need to redirect
+  // back to the form with blank_catalog_year set.
+  if ($form_state["values"]["blank_degree_id"] == "" && $form_state["values"]["blank_catalog_year"] != "") {
+    // Go to degree selection.
+    fp_goto("tools/blank-degrees", "blank_catalog_year=" . $form_state["values"]["blank_catalog_year"]);
+    return;
+  }
+  else if ($form_state["values"]["blank_degree_id"] != "" && $form_state["values"]["blank_catalog_year"] != ""){
+    // Send them to the blank degree page
+    
+    fp_goto("blank-degrees/display", "blank_degree_id=" . $form_state["values"]["blank_degree_id"] . "&blank_catalog_year=" . $form_state["values"]["blank_catalog_year"]);  
+    return;
+  }
+  
+}
+
+
