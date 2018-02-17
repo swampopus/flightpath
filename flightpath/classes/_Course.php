@@ -662,6 +662,36 @@ class _Course extends stdClass
   }
 
 
+  /**
+   * This function uses load_course_from_data_string, but it removes any elements which might interfere with
+   * the course object then being used as a requirement.  This is used specifically by the FlightPath object,
+   * when creating a clone of a repeatable course.
+   */
+  function load_course_from_data_string_for_requirement_clone($str) {
+      
+    // Begin by loading THIS course from the supplied data string.  
+    $this->load_course_from_data_string($str);
+    
+    
+    // Now, let's overwrite the values we don't need, since this is to be used as
+    // a course requirement.
+    
+    $this->random_id = $GLOBALS['fp_courses_random_ids']++;
+    
+    $this->set_hours_awarded(0, 0);
+    $this->grade = "";
+    $this->advised_hours = 0;
+    $this->bool_added_course = FALSE;
+    $this->db_advised_courses_id = 0;
+    $this->details_by_degree_array = array();
+    $this->assigned_to_degree_ids_array = array();
+    $this->db_substitution_id_array = array();
+    $this->display_status = "";
+    $this->disp_for_group_id = "";
+    
+    
+  } 
+
 
   /**
    * This will take a data string, as created by

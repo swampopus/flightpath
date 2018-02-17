@@ -302,7 +302,7 @@ class _CourseList extends ObjList
 	 * 
 	 * @return Course
 	 */
-	function find_most_recent_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE)
+	function find_most_recent_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE, $bool_skip_subs = FALSE)
 	{
 		// Get a list of all matches to courseC, and
 		// then order them by the most recently taken course
@@ -346,6 +346,12 @@ class _CourseList extends ObjList
 			{
 				continue;
 			}
+      
+      
+     if ($bool_skip_subs && $c->get_bool_substitution($degree_id) == TRUE) {
+        // It is already being used in a substitution for this degree id, so we skip it.
+        continue;
+      }      
       
 			//////////////////////////////////////////
 			///  Check for min grade, etc, here.			
@@ -432,36 +438,23 @@ class _CourseList extends ObjList
    * 
    * @return Course
    */
-  function find_best_grade_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE)
+  function find_best_grade_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE, $bool_skip_subs = FALSE)
   {
-
-    // Do we already have a list of matches for this course?
-    if (isset($GLOBALS['fp_temp_cache']['CourseList_find_best_grade_match_list_matches'][$course_c->course_id])) {
-      $list_matches = $GLOBALS['fp_temp_cache']['CourseList_find_best_grade_match_list_matches'][$course_c->course_id];
+    
+        
+    $list_matches = parent::find_all_matches($course_c);
+    if (!$list_matches) {
+      return false;
     }
-    else {
-
-
-      if (!$list_matches =  parent::find_all_matches($course_c))
-      {
-        $GLOBALS['fp_temp_cache']['CourseList_find_best_grade_match_list_matches'][$course_c->course_id] = FALSE;
-        return false;
-      }
-  
-      
-      $list_matches = CourseList::cast($list_matches);
-      
-      // Sort the courses into best grade first.
-      $list_matches->sort_best_grade_first();
-      
-      // Add to our cache
-      $GLOBALS['fp_temp_cache']['CourseList_find_best_grade_match_list_matches'][$course_c->course_id] = $list_matches;
-      
-    }
-  
+    
+    $list_matches = CourseList::cast($list_matches);
+    
+    // Sort the courses into best grade first.
+    $list_matches->sort_best_grade_first();
+    
 
     if (!$list_matches || $list_matches->is_empty)
-    {
+    {                      
       return false;
     }
 
@@ -494,6 +487,10 @@ class _CourseList extends ObjList
         continue;
       }
       
+      if ($bool_skip_subs && $c->get_bool_substitution($degree_id) == TRUE) {
+        // It is already being used in a substitution for this degree id, so we skip it.
+        continue;
+      }
       
       //////////////////////////////////////////
       ///  Check for min grade, etc, here.      
@@ -519,6 +516,7 @@ class _CourseList extends ObjList
           {
             // No repeats.
             $this->mark_repeats_exclude($c, $degree_id);
+
             return false;
 
           } else {
@@ -551,7 +549,7 @@ class _CourseList extends ObjList
 
       return $c;
     } // while
-  
+            
     return FALSE;
 
   } // find_best_grade_match
@@ -1531,7 +1529,7 @@ class _CourseList extends ObjList
 	 *
 	 * @return Course
 	 */
-	function find_best_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE)
+	function find_best_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE, $bool_skip_subs = FALSE)
 	{
     $rtn = FALSE;
     
@@ -1542,12 +1540,12 @@ class _CourseList extends ObjList
     
     if ($course_repeat_policy == "best_grade_exclude_others") {
       // Search for best grade, exclude other attempts.
-      $rtn = $this->find_best_grade_match($course_c, $min_grade, TRUE, $degree_id, $bool_skip_already_assigned);
+      $rtn = $this->find_best_grade_match($course_c, $min_grade, TRUE, $degree_id, $bool_skip_already_assigned, $bool_skip_subs);
     }
     else {
       // Search for most recent first, possibly mark previous as excluded.
       
-		  $rtn = $this->find_most_recent_match($course_c, $min_grade, $bool_mark_repeats_exclude, $degree_id, $bool_skip_already_assigned);
+		  $rtn = $this->find_most_recent_match($course_c, $min_grade, $bool_mark_repeats_exclude, $degree_id, $bool_skip_already_assigned, $bool_skip_subs);
     }
 
     return $rtn;

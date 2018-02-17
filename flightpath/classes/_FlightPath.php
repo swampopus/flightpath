@@ -637,6 +637,7 @@ class _FlightPath extends stdClass
 
   function assign_courses_to_list(ObjList $list_requirements, Student $student, $bool_perform_assignment = true, Group $group = null, $bool_check_significant_courses = false)
   {
+
     $count = 0;
 
     if ($group == null)
@@ -650,6 +651,8 @@ class _FlightPath extends stdClass
 
 
     $sort_policy = variable_get("initial_student_course_sort_policy", "alpha"); // will either be "alpha" or "grade"
+    
+    
     
     
     $bool_disallow_graduate_credits = (variable_get("disallow_graduate_credits", "yes") == "yes") ? TRUE : FALSE;
@@ -668,8 +671,6 @@ class _FlightPath extends stdClass
 
     $meet_min_hours = 999999;   // effectively infinite by default, to make logic easier later on.
 
-    
-    
     
     // If the group has min_hours, then we should allow the user to get at least the min hours before we stop trying to fill.
     if ($group->has_min_hours_allowed() && variable_get("group_full_at_min_hours", "yes") == "yes") {
@@ -696,6 +697,7 @@ class _FlightPath extends stdClass
     $list_requirements->reset_counter();
     while($list_requirements->has_more())
     {
+
       $course_requirement = $list_requirements->get_next();
       $req_by_degree_id = $course_requirement->req_by_degree_id;  // what degree is requiring this course?
 
@@ -705,13 +707,13 @@ class _FlightPath extends stdClass
       }
        
      
+    
       if ($bool_check_significant_courses == true)
       {
         // Only look for the course_requirement if it is in the student's
         // array_significant_courses array.
         if (isset($student->array_significant_courses[$course_requirement->course_id]) && $student->array_significant_courses[$course_requirement->course_id] != true)
         {// course was not in there, so skip!
-               
           continue;
         }
       }
@@ -722,38 +724,48 @@ class _FlightPath extends stdClass
         // Since this requirement has specified repeats, we want
         // to make all of the student's taken courses (for this course)
         // also have specified repeats.
-        $student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);        
+        $student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);   
       }
 
       
       // Does the student have any substitutions for this requirement?
       if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id, $req_by_degree_id))
-      {
-        
+      {       
         // Since the substitution was made, I don't really care about
         // min grades or the like.  Let's just put it in.
 
-        // Make sure this isn't a group addition and we are *currently*
-        // NOT looking at the group it is being added to.  This is to
-        // correct a bug.
-        if ($substitution->bool_group_addition == true)
-        {
-          if ($substitution->course_requirement->get_first_assigned_to_group_id() != $group_id)
-          {
-            continue;
-          }
-
-        }
-
         if ($bool_perform_assignment == TRUE)
-        {
+        {        
+          // Check to see if this course requirement has "infinite repeats".  If it does, then we want to
+          // clone it and add it back into our list of requirements.
+          if ($course_requirement->specified_repeats == Group::GROUP_COURSE_INFINITE_REPEATS) {
+            $temp_ds = $course_requirement->to_data_string();
+            $new_course = new Course();
+            $new_course->load_course_from_data_string_for_requirement_clone($temp_ds);
+            $new_course->min_grade = $course_requirement->min_grade;
+            $list_requirements->add($new_course);
+          }      
+          
+          
+          // Make sure this isn't a group addition and we are *currently*
+          // NOT looking at the group it is being added to.  This is to
+          // correct a bug.
+          if ($substitution->bool_group_addition == true)
+          {
+            if ($substitution->course_requirement->get_first_assigned_to_group_id() != $group_id)
+            {              
+              continue;
+            }
+  
+          }
+          
           // If the course_requirement's min_hours are greater than
           // the substitution's hours, then we have to split the
           // coureRequirement into 2 pieces, and add the second piece just
           // after this one in the list.
           $course_sub = $substitution->course_list_substitutions->get_first();
           if ($course_requirement->min_hours*1 > $course_sub->get_hours_awarded($req_by_degree_id))
-          {
+          { 
                    
             // Because float math can create some very strange results, we must
             // perform some rounding.  We will round to 6 decimal places, which should
@@ -781,6 +793,8 @@ class _FlightPath extends stdClass
 
             
             
+            
+            
             // Only do this if we are NOT in a group!  This is to correct a bug where split additions to groups wound up
             // being displayed like available selections in the group.  It was like, weird man.  
             if ($group_id == 0) {
@@ -789,7 +803,7 @@ class _FlightPath extends stdClass
               $list_requirements->insert_after_index($current_i, $new_course);
             }
 
-          }
+          } // if min_hours > sub's awarded hours
 
           $course_requirement->course_list_fulfilled_by = $substitution->course_list_substitutions;
 
@@ -807,30 +821,14 @@ class _FlightPath extends stdClass
             $hours_assigned += $course_sub->get_hours_awarded($req_by_degree_id);
           } 
                       
-                      
-          // Check to see if this course requirement has "infinite repeats".  If it does, then we want to
-          // clone it and add it back into our list of requirements.
-          if ($course_requirement->specified_repeats == Group::GROUP_COURSE_INFINITE_REPEATS) {
-            $temp_ds = $course_requirement->to_data_string();
-            $new_course = new Course();
-            $new_course->load_course_from_data_string($temp_ds);
-            $new_course->min_grade = $course_requirement->min_grade;
-            
-            // TODO:  Do we need to add this new course right after the current requirement?
-            $list_requirements->add($new_course);
-          }          
-          
-
         }
-        $count++;        
+        $count++;
         continue;
       } // if student has any substitutions for this requirement
 
-      
       // Has the student taken this course requirement?
-      if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude, $req_by_degree_id))
+      if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude, $req_by_degree_id, TRUE, TRUE))
       {
-         
         $h_get_hours = $c->get_hours();
         if ($c->bool_ghost_hour) {
           // If this is a ghost hour, then $h_get_hours would == 0 right now,
@@ -842,8 +840,7 @@ class _FlightPath extends stdClass
         // Can we assign any more hours to this group?  Are we
         // out of hours, and should stop?
         if ($hours_assigned >= $hours_required || $hours_assigned >= $meet_min_hours)
-        {
-          
+        { 
           continue;
         }
 
@@ -865,7 +862,7 @@ class _FlightPath extends stdClass
 
         // Make sure the course meets min grade requirements.
         if (!$c->meets_min_grade_requirement_of($course_requirement))
-        {     
+        {    
           continue;
         }
 
@@ -876,7 +873,6 @@ class _FlightPath extends stdClass
           continue;
         }
 
-        // Prereq checking would also go here.
 
         // Make sure $c is not being used in a substitution (for this degree)
         if ($c->get_bool_substitution($req_by_degree_id) == TRUE) {
@@ -885,7 +881,7 @@ class _FlightPath extends stdClass
 
         // If this is a graduate level course, and we are not allowing grad credits, then skip!
         if ($c->level_code != "" && in_array($c->level_code, $graduate_level_codes_array)) {
-          if ($bool_disallow_graduate_credits) {            
+          if ($bool_disallow_graduate_credits) {                        
             continue;
           }
         }
@@ -921,12 +917,9 @@ class _FlightPath extends stdClass
             if ($val === FALSE) $bool_can_proceed = $val;
           }
            
-          if (!$bool_can_proceed) {         
+          if (!$bool_can_proceed) {
             continue;  // don't assign!
           } 
-        
-                  
-        
         
           // Has another version of this course already been
           // assigned?  And if so, are repeats allowed for this
@@ -972,22 +965,22 @@ class _FlightPath extends stdClass
           
           $hours_assigned = $hours_assigned + $h_get_hours;
 
+
+
           if ($bool_perform_assignment == TRUE)
           {
-            
+
             // If this course has an "infinite" number of specified repeats, then
             // let's actually clone the course and insert it as a new requirement, to replace
             // the one we're about to use. 
             if ($course_requirement->specified_repeats == Group::GROUP_COURSE_INFINITE_REPEATS) {
               $temp_ds = $course_requirement->to_data_string();
               $new_course = new Course();
-              $new_course->load_course_from_data_string($temp_ds);
+              $new_course->load_course_from_data_string_for_requirement_clone($temp_ds);
               $new_course->min_grade = $course_requirement->min_grade;
               
-              // TODO:  Do we need to add this new course right after the current requirement?
               $list_requirements->add($new_course);
             }
-            
             
             // Which degree is this coming from?  
             //$req_by_degree_id = $course_requirement->req_by_degree_id;

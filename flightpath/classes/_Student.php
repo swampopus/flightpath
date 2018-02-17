@@ -360,8 +360,7 @@ class _Student extends stdClass
             
 			if($taken_course = $this->list_courses_taken->find_specific_course($sub_course_id, $sub_term_id, $sub_bool_transfer, true, null, $req_by_degree_id))
 			{ 
-				
-        								
+				        								
 				// If this takenCourse is a transfer credit, then we want to remove
 				// any automatic eqv it may have set.
 				// We can do this easily by setting its course_id to 0.

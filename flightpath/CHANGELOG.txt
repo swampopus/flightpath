@@ -1,6 +1,15 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-02-17
+  Fixed bug where repeated courses (with inifinite repeats) were not filling into a group properly if one attempt was
+  being subbed into another group.
+
+
+2018-02-15
+  Fixed bug in user module, which made it difficult to search by name of user. (Error in query syntax)
+  
+
 2018-02-13
   Implemented changes to group sorting functions (thanks to Logan Bluth) to let advising weights be sorted into
   negative numbers for groups.

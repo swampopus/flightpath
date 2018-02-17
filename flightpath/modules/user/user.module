@@ -1333,9 +1333,9 @@ function user_display_student_users() {
           u.is_student = 1  
           AND u.cwid = s.cwid
           $in_active_query_line
-          AND (l_name LIKE '%?%'
-                AND f_name LIKE '%?%')
-          ORDER BY l_name, f_name ", $search2, $search1);
+          AND (l_name LIKE ?
+                AND f_name LIKE ?)
+          ORDER BY l_name, f_name ", "%$search2%", "%$search1%");
 
     }
     else {
@@ -1346,10 +1346,10 @@ function user_display_student_users() {
           u.is_student = 1
           AND u.cwid = s.cwid
           $in_active_query_line
-          AND (u.cwid LIKE '%?%' 
-                OR l_name LIKE '%?%'
-                OR f_name LIKE '%?%')
-          ORDER BY l_name, f_name ", $search1, $search1, $search1);
+          AND (u.cwid LIKE ? 
+                OR l_name LIKE ?
+                OR f_name LIKE ?)
+          ORDER BY l_name, f_name ", "%$search1%", "%$search1%", "%$search1%");
     }
 
   }
@@ -1668,9 +1668,9 @@ function user_display_users() {
           WHERE
           u.is_faculty = 1  
           AND u.cwid = f.cwid
-          AND (l_name LIKE '%?%'
-                AND f_name LIKE '%?%')
-          ORDER BY l_name, f_name ", $search2, $search1);
+          AND (l_name LIKE ?
+                AND f_name LIKE ?)
+          ORDER BY l_name, f_name ", "%$search2%", "%$search1%");
 
     }
     else {
@@ -1680,11 +1680,13 @@ function user_display_users() {
           WHERE 
           u.is_faculty = 1
           AND u.cwid = f.cwid
-          AND (u.cwid LIKE '%?%' 
-                OR l_name LIKE '%?%'
-                OR f_name LIKE '%?%')
-          ORDER BY l_name, f_name ", $search1, $search1, $search1);
+          AND (u.cwid LIKE ? 
+                OR l_name LIKE ?
+                OR f_name LIKE ?)
+          ORDER BY l_name, f_name ", "%$search1%", "%$search1%", "%$search1%");
+      
     }
+    
 
   }
   else if ($dept != "" && $_GET["deptsubmit"]) {
