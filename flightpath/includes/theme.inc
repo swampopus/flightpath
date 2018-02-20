@@ -497,7 +497,6 @@ function fp_build_tab_array($page) {
     global $current_student_id, $screen, $user, $student;
     
     $rtn  = "";
-
     $bool_catalog_warning = FALSE;
     $bool_future_catalog_warning = FALSE;    
         
@@ -660,25 +659,39 @@ function fp_build_tab_array($page) {
     if ($degree_plan == null || $degree_plan->is_combined_dynamic_degree_plan != TRUE) {
       // This is an ordinary degree plan.
       
+      $use_degree_plan = $degree_plan;
+      
       $degree_title = "";
       if ($degree_plan != NULL) {
-        $degree_title = $degree_plan->get_title2(TRUE);      
+        $degree_title = $degree_plan->get_title2(TRUE);
       }
-      /*
-       * I don't think this is relavent anymore.
-      if ($degree_title == "") {
-        // Attempt to load the degree from the student's information.     
-        $degree_plan = $db->get_degree_plan($student->major_code, $student->catalog_year, true);
-        $degree_title = $degree_plan->get_title2();
-      }
-       * 
+
+      /**
+       * This degree is in fact a track.
        */
+      if (strstr($degree_plan->major_code, "_")) {
+        $degree_title = $degree_plan->get_title2(TRUE, TRUE);
+        
+        if ($degree_plan->db_allow_dyanmic == 0) {
+          // This degree is NON-dynamic.  Meaning, if we change tracks, we should do it from the perspective
+          // of the original major code, and how FP 4.x did things.
+          $temp = explode("_", $degree_plan->major_code);
+          $m = trim($temp[0]);
+          // Remove trailing | if its there.
+          $m = rtrim($m, "|");
+          
+          $use_degree_plan = $db->get_degree_plan($m, $degree_plan->catalog_year, TRUE);  // the original degree plan!          
+        }
+      }
+      
+      
       if ($screen_mode == "detailed") {
         $degree_title .= " ($degree_plan->major_code)";
       }
 
-      if ($degree_plan != null && $degree_plan->get_available_tracks()) {        
+      if ($use_degree_plan != null && $use_degree_plan->get_available_tracks()) {        
         $bool_show_track_selection_link = TRUE;
+        
       }
       
       $degree_title_div = "<div class='degree-title'>$degree_title</div>";

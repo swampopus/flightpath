@@ -455,6 +455,144 @@ function z__old__advise_display_popup_change_track() {
 
 
 
+
+
+/**
+ * This is the "change track" popup we will display if the degree cannot be combined with anything else (non-dynamic).
+ * 
+ * We will basically treat it similarly to how FlightPath 4x did things.
+ */
+function advise_display_popup_change_track_non_dynamic_degree() {
+  global $degree_plan, $student;
+  $rtn = "";
+   
+  
+  
+  // Find out what track the user is already on.
+  
+  // From What If mode...  
+  if (@$GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
+    $student_majors_array = @csv_to_array($_SESSION["what_if_major_code" . $student->student_id]);
+  }
+  else {
+    // Not in what if mode-- get the data from the normal student_majors table.
+    $student_majors_array = fp_get_student_majors($student->student_id, FALSE, TRUE);
+  } //else  
+    
+
+  $degree_plan->load_descriptive_data();
+  
+  $major_code = $degree_plan->major_code;
+  
+  $rtn .= fp_render_curved_line(t("Select a Degree Option"));
+  $rtn .= "<div class='tenpt'>
+            " . t("The student's degree has one or more degree options, which affects which courses are required. 
+              Please select a degree option (or track) from the list below.") . "
+              <br><br>
+            " . t("If you are unsure of what to do, simply close this window.") . "
+          </div>
+      ";
+
+  $rtn .= "<br><br><b>" . $degree_plan->title . "</b> " . t("degree options:") . "</div><!--DEFAULT-->
+      <ul>";
+
+  // Get the list of available tracks for this degree.
+  if (!$tracks = $degree_plan->get_available_tracks())
+  {
+    $rtn .= "<li>" . t("This major has no degree options.") . "</li>";
+  }
+
+  // Is there a "default" message for all tracks, which will override
+  // any other track descriptions?
+  // We need to look through all the tracks for the
+  // characters:  "DEFAULT:"
+  // If we find this, then this is the default description
+  // which applies to all the tracks, and it should be displayed
+  // at the top.
+  $bool_default_description = false;
+  for ($t = 0; $t < count($tracks); $t++)
+  {
+    $temp = explode(" ~~ ", $tracks[$t]);
+    $track_code = trim($temp[0]);
+    $track_title = trim($temp[1]);
+    $track_description = trim($temp[2]);
+
+    if (strstr($track_description, "DEFAULT:")) {
+      // Yes!  We found a default message.
+      $bool_default_description = true;
+      $track_description = filter_markup(trim(str_replace("DEFAULT:", "", $track_description)));
+      $track_description = "<div style='padding-top: 10px;' class='tenpt'>$track_description</div>";
+      $rtn = str_replace("<!--DEFAULT-->",$track_description, $rtn);
+      break;
+    }
+
+  }
+
+
+  for ($t = 0; $t < count($tracks); $t++)
+  {
+    $temp = explode(" ~~ ", $tracks[$t]);
+    $track_code = trim($temp[0]);
+    $track_title = trim($temp[1]);
+    $track_description = "";
+
+    $temp_tc = $track_code;
+    if ($temp_tc == "")
+    {
+      $temp_tc = "none";
+    }
+
+    
+    $major_and_track_code = $major_code;
+    
+    if ($temp_tc != "none") {
+      if (!strstr($major_code, "|")) {
+        $major_and_track_code .= "|";
+      }
+      $major_and_track_code .= "_" . $temp_tc;
+    }
+    
+    
+    
+    // If this is the current track_code, mark it as such.
+    if (in_array($major_and_track_code, $student_majors_array)) {
+      $track_title .= " <b>(" . t("current") . ")</b>";
+    }
+
+    
+    if ($bool_default_description == false)
+    {
+      $track_description = filter_markup(trim($temp[2]));
+      if ($track_description != "")
+      {
+        $track_description = " - $track_description";
+      }
+    }
+
+
+    $link = fp_get_js_confirm_link(t("Are you sure you wish to change degree options?"), "opener.changeTrack(\"$major_and_track_code\"); window.close(); ", $track_title);
+    
+    if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
+      $link = "<a href='javascript: popupChangeWhatIfTrackNonDynamicDegree(\"$major_and_track_code\", \"" . t("Are you sure you wish to change degree options?") . "\");'>$track_title</a>";      
+    }
+
+    $rtn .= "<li class='tenpt' style='padding:3px;'>
+        $link $track_description</li>";
+
+  }
+
+  $rtn .= "</ul>";    
+
+
+  
+  return $rtn;
+} // popup_change_track_non_dynamic_degree
+
+
+
+
+
+
 function advise_display_popup_change_track() {
   global $degree_plan, $student;
   $rtn = "";
@@ -463,13 +601,23 @@ function advise_display_popup_change_track() {
   
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
   fp_add_css(fp_get_module_path("advise") . "/css/advise.css");
-   
+
+  
+  if ($degree_plan->db_allow_dynamic == 0) {
+    // Since this is NOT a degree plan which can be combined with others, we
+    // want to display this popup like in FlightPath 4.x.
+    return advise_display_popup_change_track_non_dynamic_degree();
+    
+  }
+  
+  
   $top_level_majors_csv = "";
     
   $degree_plan_array = array();
   if ($degree_plan->is_combined_dynamic_degree_plan == FALSE) {
     // NOT a combined degree plan.  Just use the 1 degree plan we gots.
     $degree_plan_array[$degree_plan->degree_id] = $degree_plan;
+    
   }
   else {
     // It IS a combined degree plan, so we need to get all the plans out of there.
@@ -484,6 +632,8 @@ function advise_display_popup_change_track() {
       
     }    
   }
+  
+  
   
   $locked_array = array();  // keep track of any degree classes which are "locked".
     
@@ -531,7 +681,7 @@ function advise_display_popup_change_track() {
     if ($details["level_num"] == 3) continue;
     
     
-    // Go through each time of classification in this degree's track_selection_config_array.    
+    // Go through each type of classification in this degree's track_selection_config_array.    
     //foreach ($t_degree_plan->track_selection_config_array as $machine_name => $tdetails) {
     $degree_classes = fp_get_degree_classifications();
     
@@ -687,14 +837,11 @@ function advise_display_popup_change_track() {
         // We actually don't need to do anything special for what_if, I think.  When
         // we save, it should automatically detect it and set the appropriate values.
         $is_whatif = 0;
-        if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
-          //$link = "<a href='javascript: popupChangeWhatIfTrack(\"$temp_tc\", \"" . t("Are you sure you wish to change degree options?") . "\");'>$track_title</a>";
+        if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes") {          
           $is_whatif = 1;              
         }
     
-        //$rtn .= "<li class='tenpt' style='padding:3px;'>
-        //    $link $track_description</li>";
-    
+            
         
         $track_degree_plan = fp_load_degree($track_degree_id, NULL, TRUE);  // load minimally
         
@@ -779,7 +926,7 @@ function advise_display_popup_change_track() {
   $rtn .= "<input type='hidden' name='top_level_majors_csv' id='top_level_majors_csv' value='$top_level_majors_csv'>";
   
   return $rtn;
-}
+} // display_popup_change_track
 
 
 
@@ -1278,6 +1425,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   $current_catalog_year = $catalog_year;  // keep track of what the current catalog year is.
   $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);
 
+  
   // Use the student's catalog year, based on a setting instead?
   if (variable_get("what_if_catalog_year", "current") == "student") {
     $db = get_global_database_handler();
@@ -1320,9 +1468,11 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   
   /////////////////////
   // Select a major....
+    
+  
   $options = array();  
   if ($degree_array = $db->get_degrees_in_catalog_year($catalog_year, FALSE, $bool_use_draft, $bool_undergrad_only, array(1))) {
-    foreach($degree_array as $major_code => $value) {
+    foreach($degree_array as $major_code => $value) {      
       if (trim($value["title"]) == ""){continue;}      
       $options[$major_code] = $value["title"];
       $major_codes[$major_code] = $major_code;
@@ -1342,8 +1492,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
     "elements" => array($e1),
     "start_closed" => FALSE,    
   );
-  
-  
+    
   
   /////////////////////////
   // Select a minor....
@@ -1356,18 +1505,20 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
     }
   }
 
-  $e2["select_level_2_degrees"] = array(
-    "type" => "checkboxes",
-    "label" => "",
-    "options" => $options,
-  );
-
-  $form["cfieldset_level_2"] = array(
-    "type" => "cfieldset",
-    "label" => "Select Minor &raquo;",
-    "elements" => array($e2),    
-  );
-
+  
+  if (count($options) > 0) {
+    $e2["select_level_2_degrees"] = array(
+      "type" => "checkboxes",
+      "label" => "",
+      "options" => $options,
+    );
+  
+    $form["cfieldset_level_2"] = array(
+      "type" => "cfieldset",
+      "label" => "Select Minor &raquo;",
+      "elements" => array($e2),    
+    );
+  }
 
 
   /////////////////////
@@ -1379,13 +1530,13 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
     if ($tracks = $db->get_degree_tracks($major_code, $catalog_year)) {
             
       // Let's load the original degree plan.
-      $degree_plan = $db->get_degree_plan($major_code, $catalog_year);
+      $degree_plan = $db->get_degree_plan($major_code, $catalog_year, TRUE);
       
       // Yes, there are indeed tracks for THIS major.  Let's load them up...
       // First, organize them by degree_class...
       $tracks_by_class = array();
       foreach ($tracks as $track) {
-        $t_degree_plan = $db->get_degree_plan($major_code . "|_" . $track, $catalog_year);
+        $t_degree_plan = $db->get_degree_plan($major_code . "|_" . $track, $catalog_year, TRUE);
         $degree_class = $t_degree_plan->degree_class;                
         $tracks_by_class[$degree_class][] = $t_degree_plan;        
       }

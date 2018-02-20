@@ -1,6 +1,16 @@
 FlightPath 5.x Changelog
 ========================
 
+UNDATED - ADD DATE WHEN FINISHED
+  Fixed issues when dealing with non-dynamic degrees.  For example, track selection.
+  
+
+2018-02-19
+  Hide degree type fieldsets on What If screen if no such degrees exist for the catalog year.  Ex: minors.
+
+  Added code to make What If selection screen load faster.
+  
+
 2018-02-17
   Fixed bug where repeated courses (with inifinite repeats) were not filling into a group properly if one attempt was
   being subbed into another group.

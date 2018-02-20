@@ -28,17 +28,20 @@ function z__popupChangeTrack(track_code) {
   } 
 }
 
-function popupChangeWhatIfTrack(track_code, question) {
+
+function popupChangeWhatIfTrackNonDynamicDegree(major_and_track_code, question) {
   var x = confirm(question);
   if (x) {
-    opener.document.getElementById("what_if_track_code").value = track_code;
+    opener.document.getElementById("what_if_major_code").value = major_and_track_code;
     opener.document.getElementById("load_from_cache").value = "no";
-    opener.document.getElementById("log_addition").value = "change_track~" + track_code;
+    opener.document.getElementById("log_addition").value = "change_track~" + major_and_track_code;
     
     opener.submitForm(true);
     window.close();
   }
 }
+
+
 
 function changeTrack(track_code) {
   document.getElementById("advising_track_code").value = track_code;
