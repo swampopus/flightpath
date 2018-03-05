@@ -1,63 +1,21 @@
 FlightPath 5.x Changelog
 ========================
 
-UNDATED - ADD DATE WHEN FINISHED
-  Fixed issues when dealing with non-dynamic degrees.  For example, track selection.
+2018-03-05
+  Added a new hook, hook_courselist_find_match_allow_course.  This allows modules too hook in just before a "match" is found by _CourseList's match methods,
+  to determine if it should really keep the course or skip it.  This was introduced to counter a bug.  Special thanks to Logan Buth for the concept.
   
+  Added extra code to _Course::name_equals, to call load_descriptive_data if subject_id is not populated.    
 
-2018-02-19
-  Hide degree type fieldsets on What If screen if no such degrees exist for the catalog year.  Ex: minors.
 
-  Added code to make What If selection screen load faster.
+2018-02-27
+  Fixed bug where selecting a track for a degree which already had a | in it would have failed.
   
-
-2018-02-17
-  Fixed bug where repeated courses (with inifinite repeats) were not filling into a group properly if one attempt was
-  being subbed into another group.
-
-
-2018-02-15
-  Fixed bug in user module, which made it difficult to search by name of user. (Error in query syntax)
+  Fixed bug for non-dynamic degrees and degree option (track) selection.  It now uses the first "editable"
+  degree found for a student, if the primary non-editable degree is non-dynamic.
   
-
-2018-02-13
-  Implemented changes to group sorting functions (thanks to Logan Bluth) to let advising weights be sorted into
-  negative numbers for groups.
+  Added function get_degree_allow_dynamic() to _DatabaseHandler.php.
   
-  Fixed bug in fp_add_js and _add_css (dumb mistake on my part) which allowed the same scripts to be added
-  multiple times, instead of just once.  Thanks to Logan Bluth for pointing that out.
-
-
-2018-02-02
-  Fixed bug in Blank Degrees module, where it would never load correctly.  Also added a hook for prereqs module (if installed) so it will not display
-  errors relating to prereqs. (Thanks to Kim from Morningside).
-  
-  Fixed incorrect display of variable hours in Course Information popup (AdvisingScreen).
-  
-  Added setting to Configure School Setitngs, to hide the "May take up to..." text in a group list popup, instead showing
-  the default course information of hrs.
-  
-  Added repeat hours display to course information popup.
-  
-  Added limit (so as not to show courses which can be repeated 999 times) to Course Search.
-
-
-2018-01-31
-  Fixed a bug in system.install where student_developmentals table did not have primary key
-  configured correctly.
-  
-
-2018-01-18
-  In order to make conditional_requirememnts module work more smoothly, added
-  a global $student command to FlightPath::init() method.  This way when degree plans are loaded,
-  and hook for hook_degree_load() is called, $student is available as a global variable.
-
-
-2018-01-11
-  Fixed a bug which was preventing a clean installation.
-  
-  Added a new hook for when degree plans load, as well as when groups load.
-
 
 2017-12-5
   To fix an issue where groups with branches were not respecting the grade sort order, I added

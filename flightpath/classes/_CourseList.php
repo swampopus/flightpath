@@ -302,7 +302,7 @@ class _CourseList extends ObjList
 	 * 
 	 * @return Course
 	 */
-	function find_most_recent_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE, $bool_skip_subs = FALSE)
+	function find_most_recent_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned_to_degree = TRUE, $bool_skip_subs = FALSE)
 	{
 		// Get a list of all matches to courseC, and
 		// then order them by the most recently taken course
@@ -408,13 +408,30 @@ class _CourseList extends ObjList
 
 			// Has the course already been assigned [to this degree]?
 			//if ($c->bool_has_been_assigned)
-			if ($bool_skip_already_assigned && $c->get_has_been_assigned_to_degree_id($degree_id)) {
+			if ($bool_skip_already_assigned_to_degree && $c->get_has_been_assigned_to_degree_id($degree_id)) {
 			  // Yes, it's been assigned, so we can just skip it.
 				continue;
 			}
 
+
+      // At this point, we are going to invoke a hook, to give add-on modules
+      // one last chance to "skip" the course or not.
+      $bool_can_proceed = TRUE;
+      $result = invoke_hook("courselist_find_match_allow_course", array($c, $course_c, $list_matches, $degree_id));
+      foreach ($result as $m => $val) {
+        // If *any* module said FALSE, then we must skip this course and not assign it to this degree.
+        if ($val === FALSE) $bool_can_proceed = $val;
+      }            
+      
+      if (!$bool_can_proceed) {
+        continue;
+      }
+
+
+
 			return $c;
 		}
+
   
 		return FALSE;
 
@@ -438,7 +455,7 @@ class _CourseList extends ObjList
    * 
    * @return Course
    */
-  function find_best_grade_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE, $bool_skip_subs = FALSE)
+  function find_best_grade_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned_to_degree = TRUE, $bool_skip_subs = FALSE)
   {
     
         
@@ -482,7 +499,7 @@ class _CourseList extends ObjList
       
       
       // Has the course already been assigned [to this degree]?
-      if ($bool_skip_already_assigned && $c->get_has_been_assigned_to_degree_id($degree_id)) {
+      if ($bool_skip_already_assigned_to_degree && $c->get_has_been_assigned_to_degree_id($degree_id)) {
         // Yes, it's been assigned, so we can just skip it.
         continue;
       }
@@ -546,6 +563,19 @@ class _CourseList extends ObjList
         //fpm("[DID meet min grade req of $min_grade :: $c->subject_id $c->course_num $c->grade");
       }
 
+
+      // At this point, we are going to invoke a hook, to give add-on modules
+      // one last chance to "skip" the course or not.
+      $bool_can_proceed = TRUE;
+      $result = invoke_hook("courselist_find_match_allow_course", array($c, $course_c, $list_matches, $degree_id));
+      foreach ($result as $m => $val) {
+        // If *any* module said FALSE, then we must skip this course and not assign it to this degree.
+        if ($val === FALSE) $bool_can_proceed = $val;
+      }            
+      
+      if (!$bool_can_proceed) {
+        continue;
+      }
 
       return $c;
     } // while
@@ -1529,7 +1559,7 @@ class _CourseList extends ObjList
 	 *
 	 * @return Course
 	 */
-	function find_best_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned = TRUE, $bool_skip_subs = FALSE)
+	function find_best_match(Course $course_c, $min_grade = "", $bool_mark_repeats_exclude = false, $degree_id = 0, $bool_skip_already_assigned_to_degree = TRUE, $bool_skip_subs = FALSE)
 	{
     $rtn = FALSE;
     
@@ -1540,12 +1570,12 @@ class _CourseList extends ObjList
     
     if ($course_repeat_policy == "best_grade_exclude_others") {
       // Search for best grade, exclude other attempts.
-      $rtn = $this->find_best_grade_match($course_c, $min_grade, TRUE, $degree_id, $bool_skip_already_assigned, $bool_skip_subs);
+      $rtn = $this->find_best_grade_match($course_c, $min_grade, TRUE, $degree_id, $bool_skip_already_assigned_to_degree, $bool_skip_subs);
     }
     else {
       // Search for most recent first, possibly mark previous as excluded.
       
-		  $rtn = $this->find_most_recent_match($course_c, $min_grade, $bool_mark_repeats_exclude, $degree_id, $bool_skip_already_assigned, $bool_skip_subs);
+		  $rtn = $this->find_most_recent_match($course_c, $min_grade, $bool_mark_repeats_exclude, $degree_id, $bool_skip_already_assigned_to_degree, $bool_skip_subs);
     }
 
     return $rtn;

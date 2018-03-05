@@ -42,6 +42,26 @@ function hook_form_alter(&$form, $form_id) {
 
 
 /**
+ * This hook his called just before returning a Course object from CourseList::find_best_grade_match or find_most_recent_match.
+ * 
+ * Returns TRUE or FALSE if the $candidate_course is allowed to match for the $needle_course.
+ * 
+ * Note:  it should ALWAYS return TRUE as the default case.
+ * 
+ */
+function hook_courselist_find_match_allow_course(Course $candidate_course, Course $needle_course, CourseList $haystack_list_matches, $degree_id = 0) {
+  
+  if ($degree_id == 12345 && $candidate_course->name_equals('ART 101')) {
+    return FALSE;
+  }
+  
+  return TRUE;  
+}
+
+
+
+
+/**
  * This hook is called right before retrieving the plain English description
  * for a term_id.  It allows modules to change the term_id.
  * 

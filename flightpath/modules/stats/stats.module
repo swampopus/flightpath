@@ -1382,8 +1382,7 @@ function stats_report_student_course_list() {
   $student_name = fp_get_student_name($student_cwid);
   $student = new Student($student_cwid);
     
-  //var_dump($student->listCoursesTaken->arrayList);
-
+  
   $rtn .= "
   
   <style>
@@ -1423,18 +1422,21 @@ function stats_report_student_course_list() {
   $transfer_hours = 0;
   
   
+  
   while($student->list_courses_taken->has_more()) {
     $course = $student->list_courses_taken->get_next();
-    
+         
     $subjectID = $course->subject_id;
     $courseNum = $course->course_num;
     $grade = $course->grade;
     $hours = $course->get_hours_awarded();
+    
+    
     if (is_object($course->course_transfer)) {
       $subjectID = $course->course_transfer->subject_id;
       $courseNum = $course->course_transfer->course_num;
       $grade = $course->course_transfer->grade;
-      $hours = $course->course_transfer->hours_awarded;
+      $hours = $course->course_transfer->get_hours_awarded();
       
       $transfer_hours += $hours;
       

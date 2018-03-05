@@ -465,7 +465,8 @@ function z__old__advise_display_popup_change_track() {
 function advise_display_popup_change_track_non_dynamic_degree() {
   global $degree_plan, $student;
   $rtn = "";
-   
+      
+  $db = get_global_database_handler();
   
   
   // Find out what track the user is already on.
@@ -476,13 +477,34 @@ function advise_display_popup_change_track_non_dynamic_degree() {
   }
   else {
     // Not in what if mode-- get the data from the normal student_majors table.
-    $student_majors_array = fp_get_student_majors($student->student_id, FALSE, TRUE);
+    $student_majors_array = fp_get_student_majors($student->student_id, FALSE, FALSE);
   } //else  
+    
+  
     
 
   $degree_plan->load_descriptive_data();
   
   $major_code = $degree_plan->major_code;
+  $catalog_year = $degree_plan->catalog_year;
+  $bare_degree_plan = $degree_plan;
+  // Are we already on a track?  If so, find out what the original degree was.
+  if (strstr($major_code, "_")) {
+    
+    $temp = explode("_", $major_code);
+    $m = trim($temp[0]);
+    // Remove trailing | if its there.
+    $m = rtrim($m, "|");          
+    $bare_degree_plan = $db->get_degree_plan($m, $catalog_year);  // the original degree plan (bare, no tracks)
+    $major_code = $m;
+  }
+    
+  $just_major_code = $major_code;
+  $temp = explode("_" , $just_major_code);
+  $just_major_code = $temp[0];
+  $just_major_code = rtrim($just_major_code, "|");
+  
+  
   
   $rtn .= fp_render_curved_line(t("Select a Degree Option"));
   $rtn .= "<div class='tenpt'>
@@ -493,11 +515,11 @@ function advise_display_popup_change_track_non_dynamic_degree() {
           </div>
       ";
 
-  $rtn .= "<br><br><b>" . $degree_plan->title . "</b> " . t("degree options:") . "</div><!--DEFAULT-->
+  $rtn .= "<br><br><b>" . $bare_degree_plan->title . "</b> " . t("degree options:") . "</div><!--DEFAULT-->
       <ul>";
 
   // Get the list of available tracks for this degree.
-  if (!$tracks = $degree_plan->get_available_tracks())
+  if (!$tracks = $bare_degree_plan->get_available_tracks())
   {
     $rtn .= "<li>" . t("This major has no degree options.") . "</li>";
   }
@@ -543,10 +565,10 @@ function advise_display_popup_change_track_non_dynamic_degree() {
     }
 
     
-    $major_and_track_code = $major_code;
+    $major_and_track_code = $just_major_code;
     
     if ($temp_tc != "none") {
-      if (!strstr($major_code, "|")) {
+      if (!strstr($major_and_track_code, "|")) {
         $major_and_track_code .= "|";
       }
       $major_and_track_code .= "_" . $temp_tc;
@@ -569,8 +591,15 @@ function advise_display_popup_change_track_non_dynamic_degree() {
       }
     }
 
+ 
+    // We need the track's degree id.
+    $trid = $db->get_degree_id($major_and_track_code, $catalog_year);    
+    
+        
+    if ($trid == $bare_degree_plan->degree_id) $trid = "";  // don't use anything for the "none" option (the "orignal" degree plan)
 
-    $link = fp_get_js_confirm_link(t("Are you sure you wish to change degree options?"), "opener.changeTrack(\"$major_and_track_code\"); window.close(); ", $track_title);
+    
+    $link = fp_get_js_confirm_link(t("Are you sure you wish to change degree options?"), "opener.changeTrackNonDynamicDegree(\"$trid\"); window.close(); ", $track_title);
     
     if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
       $link = "<a href='javascript: popupChangeWhatIfTrackNonDynamicDegree(\"$major_and_track_code\", \"" . t("Are you sure you wish to change degree options?") . "\");'>$track_title</a>";      
@@ -604,6 +633,7 @@ function advise_display_popup_change_track() {
 
   
   if ($degree_plan->db_allow_dynamic == 0) {
+    
     // Since this is NOT a degree plan which can be combined with others, we
     // want to display this popup like in FlightPath 4.x.
     return advise_display_popup_change_track_non_dynamic_degree();
@@ -2321,7 +2351,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
  * Implementation of hook_init
  */
 function advise_init() {
-  global $current_student_id, $user, $screen, $student;
+  global $current_student_id, $user, $screen, $student, $degree_plan;
   $current_student_id = @$_REQUEST["current_student_id"];
     
   // Since this user doesn't have permission to view this student's sessions,
@@ -2642,6 +2672,7 @@ function advise_init_screen() {
   // from draft from then on out.
   $GLOBALS["fp_advising"]["advising_load_active"] = "";
 
+  
   
 }
  

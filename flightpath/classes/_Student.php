@@ -674,7 +674,7 @@ class _Student extends stdClass
 		// contains SQL queries to fully create the list_courses_taken.
 		$res = $this->db->db_query("SELECT *	FROM student_courses									
                 							 WHERE 
-                								student_id = '?' ", $this->student_id);
+                								student_id = ? ", $this->student_id);
 	
 		while($cur = $this->db->db_fetch_array($res)) {
 

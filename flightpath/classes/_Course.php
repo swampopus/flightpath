@@ -1228,13 +1228,19 @@ class _Course extends stdClass
     // ex:  MATH 111
     // may also ONLY specify the subject. ex:  BIOL
 
+    // If our $subject_id is not populated, then call load_descriptive_data()
+    if ($this->subject_id == "") {
+      $this->load_descriptive_data();
+    }
+    
+    
     $temp = explode(" ",$str);
     if ($this->subject_id == $temp[0] && ($this->course_num == $temp[1] || trim($temp[1]) == ""))
     {
-      return true;
+      return TRUE;
     }
 
-    return false;
+    return FALSE;
 
   }
 

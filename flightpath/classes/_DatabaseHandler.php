@@ -1431,19 +1431,21 @@ class _DatabaseHandler extends stdClass
 
   /**
    * Returns an array (or CSV string) of major_codes from the student_degrees table for this student.
+   * 
+   * If bool_check_for_allow_dynaic is TRUE, it means that, if the student has more than one degree returned, we will make sure that they all
+   * have allow_dynamic = TRUE.  If they do not, we will use the first is_editable degree we find ONLY.  We do this because that means the student
+   * had a situation like we see in FlightPath 4x, where only one degree may be selected at a time, and the is_editiable degree is the track/option they
+   * selected.
    *   
    * 
    */
-  function get_student_majors_from_db($student_cwid, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE, $bool_skip_directives = TRUE) {
+  function get_student_majors_from_db($student_cwid, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE, $bool_skip_directives = TRUE, $bool_check_for_allow_dynamic = TRUE) {
     // Looks in the student_degrees table and returns an array of major codes.
     $rtn = array();
     
-       
-    static $student_majors_cache = array();
-    $student_majors_cache_key = md5(serialize(func_get_args())) . $student_cwid;
-    if (isset($student_majors_cache[$student_majors_cache_key])) {
-      return $student_majors_cache[$student_majors_cache_key];
-    }    
+    // Keep track of degrees which have is_editable set to 1.
+    $is_editable_true = array();
+    $is_editable_false = array();
     
     
     if ($perform_join_with_degrees) {
@@ -1468,16 +1470,53 @@ class _DatabaseHandler extends stdClass
       
       if ($bool_skip_directives && strstr($cur["major_code"], "~")) continue;
       
-      
       if ($bool_return_as_full_record) {
         $rtn[$cur["major_code"]] = $cur;
       }
       else {  
         $rtn[$cur["major_code"]] = $cur["major_code"];
       }
+      
+      if ($bool_check_for_allow_dynamic && !isset($cur['allow_dynamic'])) {
+        $cur['allow_dynamic'] = $this->get_degree_allow_dynamic($cur['degree_id']);
+      }
+      
+      
+      if ($cur['is_editable'] == 1) {
+        $is_editable_true[] = $cur;
+      }
+      else {
+        $is_editable_false[] = $cur;
+      }
+      
     }
+
+    if ($bool_check_for_allow_dynamic && count($rtn) > 1) {
+      
+      // This means that we have more than one degree selected, and we have been asked to make sure that if any of the degrees have allow_dynamic = 0, then we will
+      // only select the is_editable degree.
+      
+      foreach ($is_editable_false as $major) {
+        if ($major['allow_dynamic'] == 0) {
+          // Meaning, allow dynamic is NOT allowed.  So, if we have ANYTHING in is_editable_true, then use THAT, else, use THIS.
+          if (count($is_editable_true) > 0) {
+            // Only get out 1 major.
+            $x = $is_editable_true[0];
+            $new_rtn[$x['major_code']] = $rtn[$x['major_code']];
+            $rtn = $new_rtn;  
+          }
+          else {            
+            $x = $major;
+            $new_rtn[$x['major_code']] = $rtn[$x['major_code']];
+            $rtn = $new_rtn;              
+          }
+        }
+      }
+      
+    } // if bool_check_for_allow_dynamic
+       
     
-    $student_majors_cache[$student_majors_cache_key] = $rtn;
+        
     
     return $rtn;
   }
@@ -1635,6 +1674,35 @@ class _DatabaseHandler extends stdClass
     return $dp;
   }
 
+  
+  /**
+   * Returns the value of a degree's allow_dynamic field in the database.
+   * 
+   * Returns boolean FALSE if it cannot find the degree.
+   *
+   * @param unknown_type $degree_id
+   * @param unknown_type $bool_use_draft
+   */
+  function get_degree_allow_dynamic($degree_id, $bool_use_draft = FALSE) {
+
+    $table_name = "degrees";
+    if ($bool_use_draft){$table_name = "draft_$table_name";}
+    
+    $res7 = $this->db_query("SELECT allow_dynamic FROM $table_name
+              WHERE degree_id = ?              
+               ", $degree_id) ;
+    if ($this->db_num_rows($res7) > 0)
+    {
+      $cur7 = $this->db_fetch_array($res7);
+      return $cur7["allow_dynamic"];
+    }
+    return false;
+    
+    
+    
+  }
+  
+  
   function get_degree_id($major_and_track_code, $catalog_year, $bool_use_draft = FALSE)
   {
     // This function expects the major_code and track_code (if it exists)

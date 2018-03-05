@@ -62,7 +62,6 @@ class _FlightPath extends stdClass
 
     // Keep in mind-- at this point, major_coe might be a CSV of major codes.
 
-
     $this->bool_what_if = false;
 
     // Are we in WhatIf mode?
@@ -826,16 +825,18 @@ class _FlightPath extends stdClass
         continue;
       } // if student has any substitutions for this requirement
 
+      
+      
       // Has the student taken this course requirement?
       if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude, $req_by_degree_id, TRUE, TRUE))
       {
+        
         $h_get_hours = $c->get_hours();
         if ($c->bool_ghost_hour) {
           // If this is a ghost hour, then $h_get_hours would == 0 right now,
           // instead, use the the adjusted value (probably 1).
           $h_get_hours = $c->get_hours_awarded($req_by_degree_id);
         }       
-
                          
         // Can we assign any more hours to this group?  Are we
         // out of hours, and should stop?
@@ -889,13 +890,13 @@ class _FlightPath extends stdClass
 
 
         // Check hooks to see if this course is allowed to be assigned to the GROUP in question.
-        if ($group_id != 0) {
+        if ($group_id != "" && $group_id != 0) {
           $bool_can_proceed = TRUE;
 
           
           $result = invoke_hook("flightpath_can_assign_course_to_group", array($group, $c));
           foreach ($result as $m => $val) {
-            // If *any* module said FALSE, then we must skip this couse and not assign it to this degree.
+            // If *any* module said FALSE, then we must skip this course and not assign it to this degree.
             if ($val === FALSE) $bool_can_proceed = $val;
           }
           
@@ -903,8 +904,8 @@ class _FlightPath extends stdClass
             continue;  // don't assign!
           }                  
           
-        } // if group_id != 0
-
+        } // if group_id != ""
+        
         // We want to see if this course has already been assigned to THIS degree...
         if (!in_array($req_by_degree_id, $c->assigned_to_degree_ids_array))
         {//Don't count courses which have already been placed in other groups.
@@ -980,6 +981,7 @@ class _FlightPath extends stdClass
               $new_course->min_grade = $course_requirement->min_grade;
               
               $list_requirements->add($new_course);
+              
             }
             
             // Which degree is this coming from?  
@@ -1252,8 +1254,17 @@ class _FlightPath extends stdClass
         if (!is_numeric($tdegree_id)) continue;
         
         $tdegree_plan = fp_load_degree($tdegree_id, NULL, TRUE);
-        $tmajor_code = $tdegree_plan->major_code . "|_" . $tdegree_plan->track_code;
-                        
+        
+        $tmajor_code = $tdegree_plan->major_code;
+        
+        /*  // shouldn't need this anymore, as the major_code will contain both the major and track in one.
+        $tmajor_code = $tdegree_plan->major_code;
+        if (!strstr($tmajor_code, "|")) {
+          $tmajor_code .= "|";
+        }        
+        $tmajor_code .= "_" . $tdegree_plan->track_code;
+        */
+               
         db_query("INSERT INTO student_degrees
                   (student_id, major_code, is_editable)
                   VALUES ('?', '?', '1')", $student_id, $tmajor_code);

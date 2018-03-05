@@ -880,20 +880,21 @@ class _DegreePlan extends stdClass
       $temp = trim($cur["semester_titles_csv"]);
       $this->array_semester_titles = explode(",",$temp);
 
+      $just_major_code = $this->major_code;
+      
       if (strstr($this->major_code, "_"))
       {
         // This means that there is a track.  Get all the information
         // you can about it.
         $temp = explode("_", $this->major_code);
         $this->track_code = trim($temp[1]);
-        $this->major_code = trim($temp[0]);
+        
+        $just_major_code = trim($temp[0]);  // Don't change major_code value-- causes a bug in FP5
 
         // The major_code might now have a | at the very end.  If so,
         // get rid of it.
-        if (substr($this->major_code, strlen($this->major_code)-1, 1) == "|")
-        {
-          $this->major_code = str_replace("|","",$this->major_code);
-        }
+        $just_major_code = rtrim($just_major_code, "|");
+        
         // Now, look up information on the track.
         $table_name = "degree_tracks";
         if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
@@ -908,9 +909,9 @@ class _DegreePlan extends stdClass
               $res = $this->db->db_query("SELECT track_title, track_description FROM $table_name
                                       WHERE major_code = ?
                                       AND track_code = ?
-                                      AND catalog_year = ? ", $this->major_code, $this->track_code, $this->catalog_year);
+                                      AND catalog_year = ? ", $just_major_code, $this->track_code, $this->catalog_year);
               $cur = $this->db->db_fetch_array($res);
-              $degree_track_cache[$table_name][$this->major_code][$this->track_code][$this->catalog_year] = $cur;
+              $degree_track_cache[$table_name][$just_major_code][$this->track_code][$this->catalog_year] = $cur;
         }
 
         $this->track_title = $cur["track_title"];
@@ -919,7 +920,7 @@ class _DegreePlan extends stdClass
       }
 
       // Does this major have any tracks at all?  If so, set a bool.
-      if ($this->db->get_degree_tracks($this->major_code, $this->catalog_year))
+      if ($this->db->get_degree_tracks($just_major_code, $this->catalog_year))
       {
         $this->bool_has_tracks = true;
       }

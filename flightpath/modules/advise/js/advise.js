@@ -43,10 +43,16 @@ function popupChangeWhatIfTrackNonDynamicDegree(major_and_track_code, question) 
 
 
 
-function changeTrack(track_code) {
-  document.getElementById("advising_track_code").value = track_code;
-  document.getElementById("advising_update_student_settings_flag").value = "true";
-  document.getElementById("log_addition").value = "change_track~" + track_code;
+/**
+ * As a non-dynamic degree, we will add the track as an "editable" option, and we will know
+ * to use THAT option when loading.
+ **/
+function changeTrackNonDynamicDegree(track_degree_ids) {
+  
+  document.getElementById("advising_update_student_degrees_flag").value = "true";
+  document.getElementById("advising_track_degree_ids").value = track_degree_ids;    
+
+  document.getElementById("log_addition").value = "change_track~" + track_degree_ids;
   //alert(document.getElementById("logAddition").value);
   // rebuild the cache.
   document.getElementById("load_from_cache").value="no";
