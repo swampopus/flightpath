@@ -1477,7 +1477,7 @@ class _DatabaseHandler extends stdClass
         $rtn[$cur["major_code"]] = $cur["major_code"];
       }
       
-      if ($bool_check_for_allow_dynamic && !isset($cur['allow_dynamic'])) {
+      if ($bool_check_for_allow_dynamic && !isset($cur['allow_dynamic']) && isset($cur['degree_id'])) {
         $cur['allow_dynamic'] = $this->get_degree_allow_dynamic($cur['degree_id']);
       }
       
@@ -1497,7 +1497,7 @@ class _DatabaseHandler extends stdClass
       // only select the is_editable degree.
       
       foreach ($is_editable_false as $major) {
-        if ($major['allow_dynamic'] == 0) {
+        if (isset($major['allow_dynamic']) && $major['allow_dynamic'] == 0) {
           // Meaning, allow dynamic is NOT allowed.  So, if we have ANYTHING in is_editable_true, then use THAT, else, use THIS.
           if (count($is_editable_true) > 0) {
             // Only get out 1 major.

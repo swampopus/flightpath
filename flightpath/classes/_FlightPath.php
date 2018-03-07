@@ -853,9 +853,9 @@ class _FlightPath extends stdClass
           continue;
         }
 
-        // Do not apply substitutionSplit courses to anything automatically.
+        // Do not apply substitution new_from_split courses to anything automatically.  (from any degree!)
         // They must be applied by substitutions.
-        if ($c->get_bool_substitution_new_from_split($req_by_degree_id) == TRUE)
+        if ($c->get_bool_substitution_new_from_split() == TRUE)
         {
           continue;
         }

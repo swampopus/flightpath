@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-03-07
+  Fixed bug where new_from_split courses were allowed to fill into other degrees, instead of going straight to 'excess credits', which is the
+  expected behavior.
+
+
 2018-03-05
   Added a new hook, hook_courselist_find_match_allow_course.  This allows modules too hook in just before a "match" is found by _CourseList's match methods,
   to determine if it should really keep the course or skip it.  This was introduced to counter a bug.  Special thanks to Logan Buth for the concept.
