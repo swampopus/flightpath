@@ -212,6 +212,7 @@ class _FlightPath extends stdClass
       // into 1 generated degree plan.
     
       $combined_degree_plan = $this->combine_degree_plans($degree_plans, $student_id);
+      $combined_degree_plan->db_allow_dynamic = 1;  // since they are combined, we must be allowing dynamic.
     
       $this->degree_plan = $combined_degree_plan;
       
@@ -828,7 +829,7 @@ class _FlightPath extends stdClass
       
       
       // Has the student taken this course requirement?
-      if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude, $req_by_degree_id, TRUE, TRUE))
+      if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude, $req_by_degree_id, TRUE, TRUE, $group_id))
       {
         
         $h_get_hours = $c->get_hours();

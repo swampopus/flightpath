@@ -1103,6 +1103,26 @@ class _DatabaseHandler extends stdClass
   }
 
 
+  /**
+   * Returns the group_id for the given group name, or FALSE
+   */
+  function get_group_name($group_id) {
+    $temp = explode("_", $group_id);
+    $group_id = trim(@$temp[0]);
+    
+    $res7 = $this->db_query("SELECT group_name FROM groups
+              WHERE group_id = ?              
+               LIMIT 1 ", $group_id) ;
+    if ($this->db_num_rows($res7) > 0)
+    {
+      $cur7 = $this->db_fetch_array($res7);
+      return $cur7["group_name"];
+    }
+    return false;
+    
+    
+  }
+
 
   function get_group_id($group_name, $catalog_year)
   {
@@ -1113,8 +1133,8 @@ class _DatabaseHandler extends stdClass
     }
 
     $res7 = $this->db_query("SELECT group_id FROM groups
-              WHERE `group_name`='?'
-              AND `catalog_year`='?'
+              WHERE group_name = ?
+              AND catalog_year = ?
                LIMIT 1 ", $group_name, $catalog_year) ;
     if ($this->db_num_rows($res7) > 0)
     {

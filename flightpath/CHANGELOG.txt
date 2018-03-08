@@ -4,6 +4,13 @@ FlightPath 5.x Changelog
 2018-03-07
   Fixed bug where new_from_split courses were allowed to fill into other degrees, instead of going straight to 'excess credits', which is the
   expected behavior.
+  
+  Added $group_id to find_xyz_match functions in _CourseList.  This is not used by core code, but is passed along to hooks, so that modules
+  can better decide to allow the course or not.
+  
+  Added get_group_name function to _DatabaseHandler for quick lookups of a group's name by its id.
+  
+  Fixed a bug where "combined" degree plans didn't retain their "db_allow_dynamic = 1" member variable.  Thanks to Logan Buth.
 
 
 2018-03-05

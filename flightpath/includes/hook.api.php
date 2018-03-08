@@ -46,12 +46,16 @@ function hook_form_alter(&$form, $form_id) {
  * 
  * Returns TRUE or FALSE if the $candidate_course is allowed to match for the $needle_course.
  * 
+ * @param $degree_id    This is the degree the course is trying to be matched within, if applicable.
+ * @param $group_id     This is the group the course is trying to be matched within, if applicable.
+ * 
+ * 
  * Note:  it should ALWAYS return TRUE as the default case.
  * 
  */
-function hook_courselist_find_match_allow_course(Course $candidate_course, Course $needle_course, CourseList $haystack_list_matches, $degree_id = 0) {
+function hook_courselist_find_match_allow_course(Course $candidate_course, Course $needle_course, CourseList $haystack_list_matches, $degree_id = 0, $group_id = 0) {
   
-  if ($degree_id == 12345 && $candidate_course->name_equals('ART 101')) {
+  if ($degree_id == 12345 && $candidate_course->name_equals('ART 101') && $group_id != 0) {
     return FALSE;
   }
   
