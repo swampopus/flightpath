@@ -6,6 +6,8 @@ FlightPath 5.x Changelog
   Changed back behavior in advise.module's what if selection form screen, to load full degrees.  This is to correct a bug I introduced while trying
   to speed up execution.
   
+  Made small change to filter_markup() function to help prevent an excess of newlines at the end of a string.  Special thanks to Logan Buth.
+  
 
 2018-03-07
   Fixed bug where new_from_split courses were allowed to fill into other degrees, instead of going straight to 'excess credits', which is the

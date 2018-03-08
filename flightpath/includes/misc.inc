@@ -339,8 +339,7 @@ function filter_markup($str, $type = "basic") {
   $str = $doc->saveHTML();  
   
   
-  if ($type == "basic") {
-    $str = nl2br($str);    
+  if ($type == "basic") { 
     $allowed_tags = array('a', 'em', 'strong', 'cite', 
                           'blockquote', 'code', 'ul', 'ol', 'li', 
                           'dl', 'dt', 'dd', 'span', 'div', 
@@ -348,6 +347,9 @@ function filter_markup($str, $type = "basic") {
                           'td', 'th', 'tbody', );
     
     $str = filter_xss($str, $allowed_tags);
+    $str = trim($str);
+    $str = nl2br($str);
+    
   }
   
   
