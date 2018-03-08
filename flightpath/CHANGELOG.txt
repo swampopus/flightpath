@@ -8,6 +8,9 @@ FlightPath 5.x Changelog
   
   Made small change to filter_markup() function to help prevent an excess of newlines at the end of a string.  Special thanks to Logan Buth.
   
+  Added a static cache to DatabaseHandler's get_group_id and _name functions, along with checks to see if they were deleted or not, to help
+  with efficiency and to reduce errors.  Special thanks to Kim Sangwin and Logan Buth for pointing it out.
+  
 
 2018-03-07
   Fixed bug where new_from_split courses were allowed to fill into other degrees, instead of going straight to 'excess credits', which is the

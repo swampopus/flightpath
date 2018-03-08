@@ -64,8 +64,10 @@ class _DatabaseHandler extends stdClass
 
 
 
-  function get_help_page($i)
+  function z__get_help_page($i)
   {
+    depricated_message();
+    
     $rtn_array = array();
 
 
@@ -1110,36 +1112,64 @@ class _DatabaseHandler extends stdClass
     $temp = explode("_", $group_id);
     $group_id = trim(@$temp[0]);
     
+
+    // If it's already in our static cache, just return that.
+    static $group_name_cache = array();
+    if (isset($group_name_cache[$group_id])) {
+      return $group_name_cache[$group_id];
+    }    
+    
+    
+    
+    
+    
     $res7 = $this->db_query("SELECT group_name FROM groups
-              WHERE group_id = ?              
+              WHERE group_id = ?
+              AND delete_flag = 0
                LIMIT 1 ", $group_id) ;
     if ($this->db_num_rows($res7) > 0)
     {
       $cur7 = $this->db_fetch_array($res7);
-      return $cur7["group_name"];
+      
+      // Save to our cache before returning.
+      $group_name_cache[$group_id] = $cur7['group_name'];
+      return $cur7['group_name'];
     }
-    return false;
+    return FALSE;
     
     
   }
 
 
-  function get_group_id($group_name, $catalog_year)
-  {
+
+  function get_group_id($group_name, $catalog_year) {
 
     if ($catalog_year < $GLOBALS["fp_system_settings"]["earliest_catalog_year"])
     {
       $catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
     }
 
+
+    // If it's already in our static cache, just return that.
+    static $group_id_cache = array();
+    if (isset($group_id_cache[$group_name][$catalog_year])) {
+      return $group_id_cache[$group_name][$catalog_year];
+    }    
+
+    
+
     $res7 = $this->db_query("SELECT group_id FROM groups
               WHERE group_name = ?
               AND catalog_year = ?
+              AND delete_flag = 0
                LIMIT 1 ", $group_name, $catalog_year) ;
     if ($this->db_num_rows($res7) > 0)
     {
       $cur7 = $this->db_fetch_array($res7);
-      return $cur7["group_id"];
+      
+      // Save to our cache
+      $group_id_cache[$group_name][$catalog_year] = $cur7['group_id'];
+      return $cur7['group_id'];
     }
     return false;
   }
