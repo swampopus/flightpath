@@ -672,7 +672,7 @@ function fp_build_tab_array($page) {
       if (strstr($degree_plan->major_code, "_")) {
         $degree_title = $degree_plan->get_title2(TRUE, TRUE);
         
-        if ($degree_plan->db_allow_dyanmic == 0) {
+        if ($degree_plan->db_allow_dynamic == 0) {
           // This degree is NON-dynamic.  Meaning, if we change tracks, we should do it from the perspective
           // of the original major code, and how FP 4.x did things.
           $temp = explode("_", $degree_plan->major_code);

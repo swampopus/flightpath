@@ -11,6 +11,8 @@ FlightPath 5.x Changelog
   Added get_group_name function to _DatabaseHandler for quick lookups of a group's name by its id.
   
   Fixed a bug where "combined" degree plans didn't retain their "db_allow_dynamic = 1" member variable.  Thanks to Logan Buth.
+  
+  Fixed typo for db_allow_dynamic in theme.inc.  Thanks to Kim Sangwin
 
 
 2018-03-05
