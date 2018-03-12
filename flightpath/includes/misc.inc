@@ -342,8 +342,8 @@ function filter_markup($str, $type = "basic") {
   if ($type == "basic") {
     
     // To reduce extra newlines, remove any newline which is at the END of an existing <br> tag.
-    $str = str_ireplace("<br>\n", "<br \>", $str);
-    $str = str_ireplace("<br \>\n", "<br \>", $str);
+    $str = str_ireplace("<br>\n", "<br />", $str);
+    $str = str_ireplace("<br />\n", "<br />", $str);
      
     $allowed_tags = array('a', 'em', 'strong', 'cite', 
                           'blockquote', 'code', 'ul', 'ol', 'li', 
