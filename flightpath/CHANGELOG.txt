@@ -4,6 +4,8 @@ FlightPath 5.x Changelog
 2018-03-11
   Fixed bug where track descriptions (when editing a degree) were having filter_markup applied twice, causing new lines to keep appearing.
 
+  Fixed a non-clean URL issue in comments.js, where deletion was not possible unless clean URLs was enabled.
+  
 
 2018-03-09
   Updated hook_fp_get_student_majors to have the same (newly added) arguments as the DatabaseHandler function.  Similarly updated system.module's implentation
