@@ -1449,9 +1449,9 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     $form['track_description'] = array(
       'type' => 'textarea',
       'label' => t("Track Description:"),
-      'rows' => 3,
+      'rows' => 4,
       'cols' => 60,
-      'value' => filter_markup($degree->track_description),
+      'value' => $degree->track_description,
       'description' => t("You may enter simple HTML in this field. Ex: &lt;b&gt;bold&lt;/b&gt; or &lt;i&gt;italics&lt;/i&gt;"),
       'popup_description' => t("This is where you can enter a short description of this track (also called a Degree Option) which will display for the user in a pop-up when they select to change degree options.
                                 \nTo enter a default message, which will display at the top of the selection window, begin the description with:\n      DEFAULT: \nIt must be in all caps, and you must have the colon (:) after it.
@@ -2421,9 +2421,9 @@ function admin_display_edit_degree() {
     <font size='2'>Track description: " . fp_get_js_alert_link(t("You may enter simple HTML in this field, like <b>bold</b> or <i>italics</i>."), t("(Help - Formatting)")) . "
             <a href='javascript: adminPopupAlertHelp(\"track_description\");'>(Help - Track Descriptions)</a>
     </font><br>
-    <textarea name='track_description' cols='60' rows='3'>" . filter_markup($degree->track_description) . "</textarea>
+    <textarea name='track_description' cols='60' rows='3'>" . $degree->track_description . "</textarea>
     </blockquote>
-    ";
+    "; 
   }
   $rtn .= "<div class='tenpt' align='center'>(<a href='#bot'>Scroll to the bottom</a> of the page for advanced options)</div>
             <!--PREVIOUS_SEMESTERS-->";

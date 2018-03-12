@@ -204,11 +204,11 @@ function hook_status() {
  * 
  * @see fp_get_student_majors()
  */
-function hook_fp_get_student_majors($student_cwid, $bool_return_as_full_record = FALSE) {
+function hook_fp_get_student_majors($student_cwid, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE, $bool_skip_directives = TRUE, $bool_check_for_allow_dynamic = TRUE) {
   
   // Example code from system.module:
   $db = get_global_database_handler();
-  $rtn = $db->get_student_majors_from_db($student_cwid, $bool_return_as_full_record);
+  $rtn = $db->get_student_majors_from_db($student_cwid, $bool_return_as_full_record, $perform_join_with_degrees, $bool_skip_directives, $bool_check_for_allow_dynamic);
   
   return $rtn;  
   

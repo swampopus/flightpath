@@ -1,16 +1,15 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-03-11
+  Fixed bug where track descriptions (when editing a degree) were having filter_markup applied twice, causing new lines to keep appearing.
 
-2018-03-08
-  Changed back behavior in advise.module's what if selection form screen, to load full degrees.  This is to correct a bug I introduced while trying
-  to speed up execution.
-  
-  Made small change to filter_markup() function to help prevent an excess of newlines at the end of a string.  Special thanks to Logan Buth.
-  
-  Added a static cache to DatabaseHandler's get_group_id and _name functions, along with checks to see if they were deleted or not, to help
-  with efficiency and to reduce errors.  Special thanks to Kim Sangwin and Logan Buth for pointing it out.
-  
+
+2018-03-09
+  Updated hook_fp_get_student_majors to have the same (newly added) arguments as the DatabaseHandler function.  Similarly updated system.module's implentation
+  of the hook.  Also updated student_search.module, to take advantage of this addition, to tell it not to join with the degrees table, as the student's listed
+  degree might not be present in that catalog year in the degrees table.  This was to fix a bug.
+
 
 2018-03-07
   Fixed bug where new_from_split courses were allowed to fill into other degrees, instead of going straight to 'excess credits', which is the

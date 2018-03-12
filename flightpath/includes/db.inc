@@ -361,9 +361,9 @@ function db_get_user_id_from_cwid($cwid, $type = "faculty") {
   Return back the codes or records for a student's degrees, based on what is in the
   student_degrees table (thanks to system.module), as well as what we get from hooks.
 */
-function fp_get_student_majors($student_cwid, $bool_return_as_csv = FALSE, $bool_return_as_full_record = FALSE) {
+function fp_get_student_majors($student_cwid, $bool_return_as_csv = FALSE, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE, $bool_skip_directives = TRUE, $bool_check_for_allow_dynamic = TRUE) {
     
-  $params = array($student_cwid, $bool_return_as_full_record);  
+  $params = array($student_cwid, $bool_return_as_full_record, $perform_join_with_degrees, $bool_skip_directives, $bool_check_for_allow_dynamic);  
       
   // Execute hook for this too.
   $arr = invoke_hook("fp_get_student_majors", $params);

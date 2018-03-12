@@ -913,7 +913,8 @@ function student_search_query_advisees($sql, $params = array()) {
     // Are there more majors for this user?
     $major = "";
     // Get a CSV of this student's majors
-    $major = fp_get_student_majors($student_id, TRUE);
+    $major = fp_get_student_majors($student_id, TRUE, FALSE, FALSE);
+    
     $rtn_array[$r]["major"] = $major;
     
     
