@@ -1,11 +1,22 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-03-17
+  Fixed subtle bug where substitutions are sometimes displayed more than once in a group.  Special thanks to Logan Buth.
+  
+
+2018-03-15
+  Fixed bug with pie charts code (from older version of pchart) that was incompatible with PHP7.
+  
+
 2018-03-14
   Fixed bug where min grade requirements was being ignored for a newly-created course, when the original course was
   partially filled by a substitution.  Thanks to Logan Buth.
   
-
+  Added new load_degree_plan_ancillary() method to _DegreePlan.  This lets us load just the 'ancillary' data for a degree-- title, advising weight, track
+  configs, etc., without having to load the entire degree.  At the moment, it is used primarily on the What If selection form.
+  
+    
 2018-03-11
   Fixed bug where track descriptions (when editing a degree) were having filter_markup applied twice, causing new lines to keep appearing.
 

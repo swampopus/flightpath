@@ -1560,13 +1560,15 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
     if ($tracks = $db->get_degree_tracks($major_code, $catalog_year)) {
             
       // Let's load the original degree plan.
-      $degree_plan = $db->get_degree_plan($major_code, $catalog_year);
+      $degree_plan = $db->get_degree_plan($major_code, $catalog_year, TRUE);
+      $degree_plan->load_degree_plan_ancillary();
       
       // Yes, there are indeed tracks for THIS major.  Let's load them up...
       // First, organize them by degree_class...
       $tracks_by_class = array();
       foreach ($tracks as $track) {
-        $t_degree_plan = $db->get_degree_plan($major_code . "|_" . $track, $catalog_year);
+        $t_degree_plan = $db->get_degree_plan($major_code . "|_" . $track, $catalog_year, TRUE);
+        $t_degree_plan->load_degree_plan_ancillary();
         $degree_class = $t_degree_plan->degree_class;                
         $tracks_by_class[$degree_class][] = $t_degree_plan;        
       } 

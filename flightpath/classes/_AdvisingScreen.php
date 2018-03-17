@@ -3342,8 +3342,7 @@ function draw_menu_items($menu_array) {
         
         // Is whats remaining actually LESS than the course hours?  If so, we need to skip it.        
 				if ($remaining < $ch)
-				{
-				            
+				{				            
 					continue;
 				}
         
@@ -3352,9 +3351,15 @@ function draw_menu_items($menu_array) {
 				$c->icon_filename = $group->icon_filename;
 				$c->title_text = "This course is a member of $group->title." . " ($place_group->requirement_type)";
 				$c->requirement_type = $place_group->requirement_type;
-				$display_course_list->add($c);
 
-
+        
+        // Make sure it isn't already in the display list.
+        // object_index_of means it has to actually be a reference to the supplied object.
+        // This is to fix a subtle bug, described in issue #2291, where a substitution can be listed twice for a group.
+        if ($display_course_list->object_index_of($c) == -1) {
+          $display_course_list->add($c);
+        }
+        
 			}
 
 			if ($course->bool_advised_to_take && $course->get_has_been_displayed($req_by_degree_id) != true && $course->assigned_to_semester_num == $display_semesterNum)
@@ -3369,6 +3374,7 @@ function draw_menu_items($menu_array) {
 				$c->icon_filename = $group->icon_filename;
 				$c->title_text = t("The student has been advised to take this course to fulfill a @gt requirement.", array("@gt" => $group->title));
 				$display_course_list->add($c);
+        
 
 			}
 		}
@@ -3409,7 +3415,6 @@ function draw_menu_items($menu_array) {
 						
 						if (!$display_course_list->find_match($c))
 						{ // Make sure it isn't already in the display list.
-
 							$display_course_list->add($c);
 						} else if (is_object($c->course_transfer))
 						{
@@ -3451,11 +3456,7 @@ function draw_menu_items($menu_array) {
 
 
 
-
-
-
 		$display_course_list->sort_advised_last_alphabetical();
-
     // Make sure we're all on the same page, for what degree_id we're being displayed under.
     $display_course_list->set_req_by_degree_id($req_by_degree_id);
 

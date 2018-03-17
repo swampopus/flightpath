@@ -426,7 +426,7 @@ class _FlightPath extends stdClass
       // We will add them in now, because we do not take additions
       // into consideration when figuring out branches.
       if ($course_list_additions = $student->list_substitutions->find_group_additions($g))
-      {       
+      {
         $course_list_additions->reset_counter();
         while($course_list_additions->has_more())
         {

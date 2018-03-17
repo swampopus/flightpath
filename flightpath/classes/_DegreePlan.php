@@ -51,8 +51,7 @@ class _DegreePlan extends stdClass
 	**/
 
 
-  function __construct($degree_id = "", DatabaseHandler $db = NULL, $bool_load_minimal = false, $array_significant_courses = false, $bool_use_draft = false)
-  {
+  function __construct($degree_id = "", DatabaseHandler $db = NULL, $bool_load_minimal = FALSE, $array_significant_courses = FALSE, $bool_use_draft = FALSE) {
     $this->list_semesters = new ObjList();
     $this->list_groups = new GroupList();
     $this->bool_use_draft = $bool_use_draft;
@@ -448,11 +447,49 @@ class _DegreePlan extends stdClass
   
   
   
-  
-  
+  /**
+   * Loads the "ancillary" information about our degree plan, including advising weight, track selection config, etc.
+   *
+   */
+  function load_degree_plan_ancillary() {
+    $degree_id = $this->degree_id;
 
-  function load_degree_plan()
-  {
+    $old_semester = "";
+    $table_name1 = "degrees";
+    $table_name2 = "degree_requirements";
+    if ($this->bool_use_draft) {
+      $table_name1 = "draft_$table_name1";
+      $table_name2 = "draft_$table_name2";
+    }
+    
+    
+    // We want to get some of the data for this degree.
+    $res = db_query("SELECT * FROM $table_name1 WHERE degree_id = ?", $this->degree_id);
+    if ($res) {
+      $cur = db_fetch_array($res);
+  
+      $this->title = @$cur["title"];
+      $this->major_code = @$cur["major_code"];
+      $this->degree_level = @strtoupper(trim($cur["degree_level"]));
+      $this->degree_class = @$cur["degree_class"];
+      $this->db_override_degree_hours = @$cur["override_degree_hours"];
+      $this->db_advising_weight = @intval($cur["advising_weight"]);
+      $data_entry_value = @trim($cur['data_entry_value']);
+  
+      $this->db_track_selection_config = @trim($cur["track_selection_config"]);
+      $this->parse_track_selection_config();  // load into the track_selection_config_array as needed.
+    }
+    
+  }  // load_degree_plan_ancillary
+  
+  
+  
+  
+  /**
+   * Load our complete degree plan, including all courses and groups.
+   *
+   */
+  function load_degree_plan() {
     
         
     // Load this degree plan from the database and fully
@@ -484,8 +521,6 @@ class _DegreePlan extends stdClass
       $this->db_override_degree_hours = $cur["override_degree_hours"];
       $this->db_advising_weight = intval($cur["advising_weight"]);
       $data_entry_value = trim($cur['data_entry_value']);
-
-
 
       $this->db_track_selection_config = trim($cur["track_selection_config"]);
       $this->parse_track_selection_config();  // load into the track_selection_config_array as needed.

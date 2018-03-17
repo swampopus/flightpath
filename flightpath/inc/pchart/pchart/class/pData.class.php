@@ -55,7 +55,7 @@
  /* pData class definition */
  class pData
   {
-   var $Data;
+   var $Data = array();
 
    var $Palette = array("0"=>array("R"=>188,"G"=>224,"B"=>46,"Alpha"=>100),
                         "1"=>array("R"=>224,"G"=>100,"B"=>46,"Alpha"=>100),
@@ -69,7 +69,7 @@
    /* Class creator */
    function pData()
     {
-     $this->Data = "";
+     $this->Data = array();
      $this->Data["XAxisDisplay"]	= AXIS_FORMAT_DEFAULT;
      $this->Data["XAxisFormat"]		= NULL;
      $this->Data["XAxisName"]		= NULL;
