@@ -1587,7 +1587,7 @@ function draw_menu_items($menu_array) {
 		if ($bottom_value > 0) {
 			$val = round(($top_value / $bottom_value)*100);
 		}
-		if ($val > 100) { $val = 99; }
+		if ($val > 100) { $val = 100; }
     
 		$leftval = 100 - $val;
 		
