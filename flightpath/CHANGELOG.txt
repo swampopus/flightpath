@@ -10,6 +10,11 @@ FlightPath 5.x Changelog
   for a course, instead of the parent's find_match() function.  This allows for hooks to be used, as well as the
   school's sorting/matching policy to be used.  Special thanks to Logan Buth. 
   
+  Added new methods & updated existing in CourseList: sort_largest_hours_first(), and made modifications to find_best_grade_match()
+  and sort_best_grade_first().  This was to correct a subtle bug which appeared if a student took a non-repeatable course twice,
+  and received the same grade both times, but had different hours.  For example, if a student earned 0 hours on one attempt,
+  and 4 hours on the next.  Special thanks to Logan Buth.
+  
 
 2018-03-17
   Fixed subtle bug where substitutions are sometimes displayed more than once in a group.  Special thanks to Logan Buth.

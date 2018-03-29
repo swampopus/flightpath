@@ -457,6 +457,9 @@ class _CourseList extends ObjList
     
     $list_matches = CourseList::cast($list_matches);
     
+    //sort the courses into largest hours first, so equal grades will be sorted by hours
+    $list_matches->sort_largest_hours_first();
+    
     // Sort the courses into best grade first.
     $list_matches->sort_best_grade_first();
     
@@ -572,14 +575,11 @@ class _CourseList extends ObjList
             
     return FALSE;
 
-  } // find_best_grade_match
-
-  
-  
-  
-  
-  
-  
+  } // find_best_grade_match   
+   
+   
+   
+   
   
   
   
@@ -595,7 +595,83 @@ class _CourseList extends ObjList
 	 * to order a Group's list of courses based on what the student has taken and the grades they made.
 	 *
 	 */
-	function sort_best_grade_first(Student $student = NULL) {
+  function sort_best_grade_first(Student $student = NULL) {
+
+    
+    $temp = csv_to_array(variable_get("grade_order", "AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I"));    
+    // We will use array_flip to get back an assoc array where the grades are the keys and the indexes are the values.
+    $temp = array_flip($temp);
+    // Go through the grades and convert the integers to strings, padd with zeros so that everything is at least 3 digits.
+    $grades = array();
+    foreach ($temp as $grade => $val) {
+      $grades[$grade] = str_pad((string)$val, 3, "0", STR_PAD_LEFT);
+    }
+    
+    // We now have our grades array just how we want it.  Best grade has lowest value.  Worst grade has highest value.
+        
+    $unknown_grade_value = 999;  // sort to the very end, in other words.   
+    $student_grade_score = 0;
+    
+        
+    // We are going to go through our courses and, based on the grade, assign them a value.
+    $tarray = array();
+    for ($t = 0; $t < $this->count; $t++) {
+      // $t is the index for the array_list, keep in mind.
+      
+      $c = $this->array_list[$t];
+      
+      $use_grade = $c->grade;
+      
+      if ($student != null) {       
+        $use_grade = $student->get_best_grade_for_course($c);        
+        if (!$use_grade) $use_grade = "";
+      }
+      
+      @$grade_value = $grades[$use_grade];
+      if ($grade_value == "") {
+        // Couldn't find this grade in our array, so give it the unknown value.
+        $grade_value = $unknown_grade_value;
+      }
+      
+      $student_grade_score += intval($grade_value);
+      // Add to a string in array so we can sort easily using a normal sort operation.
+      $tarray[$grade_value][] = $c;
+      
+    }
+    
+    // Sort best-grade-first:
+    ksort($tarray,SORT_NUMERIC);    
+    
+    // Okay, now go back through tarray and re-construct a new CourseList
+    $new_list = new CourseList();
+    foreach ($tarray as $per_grade_courses) {
+      foreach ($per_grade_courses as $course) {
+        $new_list->add($course);
+      }
+    }
+    
+    // Okay, now $new_list should contain the correct values.
+    // We will transfer over the reference.
+    $this->array_list = $new_list->array_list;        
+
+    
+    // And we are done!
+    if ($student != NULL) {
+      // Return the "student grade score" for this list of courses.
+      return $student_grade_score;
+    }
+    
+    
+  }	 
+	 
+	 
+	  
+	 
+	 
+  /**
+   * This is the original sort_best_grade_first method, replaced by the new one (modified by Logan Buth) on 3-29-2018)
+   */	 
+	function z____sort_best_grade_first(Student $student = NULL) {
 
 	  
     $temp = csv_to_array(variable_get("grade_order", "AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I"));	  
@@ -624,7 +700,7 @@ class _CourseList extends ObjList
 			
 			if ($student != null) {			  
 			  $use_grade = $student->get_best_grade_for_course($c);        
-			  if (!$use_grade) $use_grade = "";
+			  if (!$use_grade) $use_grade = ""; 
 			}
 			
 			@$grade_value = $grades[$use_grade];
@@ -1133,7 +1209,37 @@ class _CourseList extends ObjList
 		$this->array_list = $new_list->array_list;
 
 
-	}
+	}  // sort_smallest_hours_first
+	
+	
+  /*
+   * Sort the courses of this list by number of hours descending.
+   * Order of courses with the same number of hours is preserved.
+   */
+  function sort_largest_hours_first() {
+    $sort_list = array();
+    
+    // go through the courses, creating an array keyed by hours.
+    for ($t = 0; $t < count($this->array_list); $t++) {
+      $hrs = $this->array_list[$t]->get_hours();
+      if ($this->array_list[$t]->bool_ghost_hour) $hrs = 0;
+      
+      $sort_list[$hrs][] = $this->array_list[$t];
+    }
+    
+    //sort the array in order of hours descending
+    krsort($sort_list,SORT_NUMERIC);
+    
+    //clear the internal array, then refill it with the now sorted courses.
+    $this->array_list = array();
+    foreach ($sort_list as $courses) {
+      foreach ($courses as $course) {
+        $this->array_list[] = $course;
+      }
+    }
+    $this->reset_counter();
+  }	
+	
 
 
 	/**
