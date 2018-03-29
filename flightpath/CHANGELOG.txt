@@ -6,6 +6,10 @@ FlightPath 5.x Changelog
   
   Fixed a bug in get_term_structure() where the abbreviation and long description were switched.
 
+  Modified the CourseList::remove_previously_fulfilled() function, where it uses find_best_match() to find a match
+  for a course, instead of the parent's find_match() function.  This allows for hooks to be used, as well as the
+  school's sorting/matching policy to be used.  Special thanks to Logan Buth. 
+  
 
 2018-03-17
   Fixed subtle bug where substitutions are sometimes displayed more than once in a group.  Special thanks to Logan Buth.

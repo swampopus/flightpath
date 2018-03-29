@@ -719,7 +719,10 @@ class _CourseList extends ObjList
 			}
 						
 			// Okay, now check if $course is anywhere in $list_courses
-			if ($test_course = $list_courses->find_match($course))
+			//if ($test_course = $list_courses->find_match($course))
+			// Instead of using simply find_match(), which does not allow for any hook interventions, switch to using find_best_match.
+			// Thanks for Logan Buth for this.
+			if ($test_course = $list_courses->find_best_match($course, '', FALSE, $degree_id, TRUE, FALSE, $group_id))
 			{
 				// Yes, it found a match.
 				// I am taking out this part where I say if it is in
