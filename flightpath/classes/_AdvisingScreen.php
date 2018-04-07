@@ -721,15 +721,15 @@ function draw_menu_items($menu_array) {
 				$extra = ".";
 
 				$temp = explode(" ~~ ", $line);
-				$o_course = trim($temp[0]);
-				$new_course = trim($temp[1]);
-				$using_hours = trim($temp[2]);
+				$o_course = trim(@$temp[0]);
+				$new_course = trim(@$temp[1]);
+				$using_hours = trim(@$temp[2]);
 				if ($using_hours != "")
 				{
 					$using_hours = "($using_hours hrs)";
 				}
-				$in_group = trim($temp[3]);
-        $sub_id = trim($temp[4]);
+				$in_group = trim(@$temp[3]);
+        $sub_id = trim(@$temp[4]);
 				
 				
 				$fbetween = $fn_between[$fn_type];
@@ -737,12 +737,12 @@ function draw_menu_items($menu_array) {
         $sub_details = $this->db->get_substitution_details($sub_id);
         
         $remarks = @trim($sub_details["remarks"]);
-        $sub_faculty_id = $sub_details["faculty_id"];
+        $sub_faculty_id = @$sub_details["faculty_id"];
         
         $sub_degree_plan = new DegreePlan();
-        $sub_degree_plan->degree_id = $sub_details["required_degree_id"];
+        $sub_degree_plan->degree_id = @$sub_details["required_degree_id"];
         
-        $sub_required_group_id = $sub_details["required_group_id"];
+        $sub_required_group_id = @$sub_details["required_group_id"];
 
 
 				//if ($in_group > 0 && $fn_type=="substitution")
@@ -4008,7 +4008,7 @@ function draw_menu_items($menu_array) {
 				$footnote = "";
 
 				$footnote .= "<span class='superscript'>T";
-				$fcount = count($this->footnote_array["transfer"]) + 1;
+				$fcount = count(@$this->footnote_array["transfer"]) + 1;
 				if ($course->get_has_been_displayed() == true)
 				{ // If we've already displayed this course once, and are
 					// now showing it again (like in the Transfer Credit list)

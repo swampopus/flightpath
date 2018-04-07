@@ -1,6 +1,10 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-04-07
+  Fixed some small display issues in AdvisingScreen, to keep PHP notices from appearing.
+
+
 2018-03-29
   Made a bug fix to where a pie chart would display 99 if its value was above 100.  Instead, this was changed to 100.
   
