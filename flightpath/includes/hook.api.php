@@ -130,6 +130,25 @@ function hook_advise_build_screen_elements(&$advising_screen) {
 }
 
 
+
+/**
+ * This hook allows another module to alter the way a "degree header" row is drawn onto the advising screen.
+ * 
+ * These are the rows which appear above a new degree, and say "Required by degree_title", etc.  This hook
+ * allows modules to alter its content.
+ * 
+ * To see how it is used, 
+ * @see _AdvisingScreen::display_semester()
+ * @see _AdvisingScreenTypeView::display_semester_list()
+ * 
+ * 
+ */
+function hook_theme_advise_degree_header_row(&$theme) {
+}
+
+
+
+
 /**
  * This hook allows another module to alter the way a course row is drawn onto the advising screen.
  */

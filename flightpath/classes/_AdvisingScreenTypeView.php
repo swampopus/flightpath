@@ -285,11 +285,22 @@ class _AdvisingScreenTypeView extends _AdvisingScreen
           $css_dtitle = fp_get_machine_readable($css_dtitle);
           
     
+    
+          $theme = array(
+            'classes' => array('tenpt', 'required-by-degree', "required-by-degree-$css_dtitle"),
+            'css_dtitle' => $css_dtitle,
+            'degree_id' => $req_by_degree_id,
+            'html' => "<span class='req-by-label'>" . t("Required by") . "</span> <span class='req-by-degree-title'>$dtitle</span>",
+            'view_by' => 'type',
+          );
+  
+          invoke_hook("theme_advise_degree_header_row", array(&$theme));        
+            
+    
           // TODO:  Possibly don't display this if we only have one degree chosen?      
           $pC .= "<tr><td colspan='8'>
-                    <div class='tenpt required-by-degree required-by-degree-$css_dtitle'><span class='req-by-label'>Required by </span>$dtitle</div>
+                    <div class='" . implode(' ',$theme['classes']) ."'>{$theme['html']}</div>
                   </td></tr>";      
-          
           
           $pC .= $content;
         }

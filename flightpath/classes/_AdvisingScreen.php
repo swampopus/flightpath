@@ -3206,12 +3206,23 @@ function draw_menu_items($menu_array) {
   
         $css_dtitle = fp_get_machine_readable($dtitle);
   
+        $theme = array(
+          'classes' => array('tenpt', 'required-by-degree', "required-by-degree-$css_dtitle"),
+          'css_dtitle' => $css_dtitle,
+          'degree_id' => $req_by_degree_id,
+          'html' => "<span class='req-by-label'>" . t("Required by") . "</span> <span class='req-by-degree-title'>$dtitle</span>",
+          'view_by' => 'year',
+        );
+
+        invoke_hook("theme_advise_degree_header_row", array(&$theme));        
+          
+  
         // TODO:  Possibly don't display this if we only have one degree chosen?      
         $pC .= "<tr><td colspan='8'>
-                  <div class='tenpt required-by-degree required-by-degree-$css_dtitle'>Required by $dtitle</div>
+                  <div class='" . implode(' ',$theme['classes']) ."'>{$theme['html']}</div>
                 </td></tr>";      
         
-        
+         
         $pC .= $content;
       }
     }
