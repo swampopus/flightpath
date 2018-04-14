@@ -750,6 +750,9 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   	}
   }
   
+  // Store what groups we are working on, for other modules.
+  $form_state['groups'] = $group_id_array;
+  
   /////////////////////////////////////////////////////////////////////
   //  Now, on to transfering the degrees.
   //  We will have to use the groupIDArray we constructed earlier, which

@@ -7,6 +7,8 @@ FlightPath 5.x Changelog
   new changes from comment #42 (special thanks to Logan Buth).  This was to deal with a subtle bug involving a
   repeated course, where one of the attempts was substituted, the other not.
 
+  Re: ticket #2311, added array of group id's to the form_state, when a year of degree data is being duplicated.
+  
 
 2018-04-11
   Fixed an issue with "clean URLs" when site is hosted on a bare domain.
