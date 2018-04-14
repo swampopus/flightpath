@@ -5297,7 +5297,7 @@ function draw_menu_items($menu_array) {
 				// recalculate count_of_matches here.
 				$clone_branch = new Group();
 				$clone_branch->list_courses = $branch->list_courses->get_clone(true);
-				$matches_count = $this->flightpath->get_count_of_matches($clone_branch, $new_student, null);
+				$matches_count = $this->flightpath->get_count_of_matches($clone_branch, $new_student, $group);
 				$branch->count_of_matches = $matches_count;
 				if ($matches_count >= $highest_match_count)
 				{ // Has more than one match on this branch.
