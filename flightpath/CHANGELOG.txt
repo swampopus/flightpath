@@ -10,7 +10,10 @@ FlightPath 5.x Changelog
   Re: ticket #2311, added array of group id's to the form_state, when a year of degree data is being duplicated.
   
   Re: ticket #2312, fixed a bug where sometimes a group popup doesn't show the same branch as what the View screen
-  does.  Spexial thanks to Logan Buth for discovering this issue and proposing the fix.
+  does.  Special thanks to Logan Buth for discovering this issue and proposing the fix.
+  
+  Re: ticket #2294, fixed a bug where var hour courses were being advised for zero hours.  To fix this, had to add
+  a new bit of javascript to advise.js, as well as a new hidden variable per course in _AdvisingScreen's draw_popup_group_course_row()
   
 
 2018-04-11

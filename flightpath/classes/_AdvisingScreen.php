@@ -4484,6 +4484,10 @@ function draw_menu_items($menu_array) {
     $icon_html = "";
     $pts = "";   
 
+if ($course->name_equals('MUAL 265')) {
+  fpm($course);
+}
+
 
     $theme["icon"] = array();
 
@@ -4520,12 +4524,20 @@ function draw_menu_items($menu_array) {
 		$semester_num = $course->assigned_to_semester_num;
     $req_by_degree_id = $course->req_by_degree_id;
 
+    $min_var_hours = "";
     $var_hour_icon = "&nbsp;";
 		if ($course->has_variable_hours() == true)
-		{
+		{       
 			$var_hour_icon = "<img src='" . fp_theme_location() . "/images/var_hour.gif'
 								title='" . t("This course has variable hours.") . "'
 								alt='" . t("This course has variable hours.") . "'>";
+                
+      $min_var_hours = $course->min_hours;
+      
+      // Does the var hours actually start at zero?
+      if ($course->bool_ghost_min_hour) {
+        $min_var_hours = 0;
+      }
 		}
 
 
@@ -4608,7 +4620,9 @@ function draw_menu_items($menu_array) {
                             id='$course_id" . "_subject' value='$subject_id'>
                           <input type='hidden' name='$course_id" . "_db_group_requirement_id'
                               id='$course_id" . "_db_group_requirement_id' value='$db_group_requirement_id'>
-                          <input_type='hidden' name='$course_id" . "_req_by_degree_id' id='$course_id" . "_req_by_degree_id' value='$req_by_degree_id'>",
+                          <input type='hidden' name='$course_id" . "_req_by_degree_id' id='$course_id" . "_req_by_degree_id' value='$req_by_degree_id'>
+                          <input type='hidden' name='$course_id" . "_min_var_hours' id='$course_id" . "_min_var_hours' value='$min_var_hours'>
+                          ",
     );
 
 
@@ -4625,13 +4639,12 @@ function draw_menu_items($menu_array) {
     // The checkbox & hidden element....
     $op = $hid = "";
     if (isset($theme["op"]) && count($theme["op"]) > 0) {
-      
       $onclick = "";
       $onclick = $theme["op"]["onclick"]["function"] . "(\"" . join("\",\"", $theme["op"]["onclick"]["arguments"]) . "\")";
       
       $checked = $theme["op"]["checked"];
       $hid = $theme["op"]["hidden_field"];
-      $op = "<input type='radio' name='course' value='$course_id' $checked onClick='return $onclick;' $extra_css>";
+      $op = "<input type='radio' name='course' class='cb-course' id='cb-course-$course_id' value='$course_id' $checked onClick='return $onclick;' $extra_css>";
                             
     }
 
@@ -5659,7 +5672,7 @@ function draw_menu_items($menu_array) {
 	{
 		// Accepts a CourseList object and draws it out to the screen.  Meant to
 		// be called by display_popup_group_select().
-		$pC = "";
+		$rtn = "";
 
 		if ($course_list == null)
 		{
@@ -5679,21 +5692,21 @@ function draw_menu_items($menu_array) {
 			}
 
 
-			$pC .= "<tr><td colspan='8'>";
+			$rtn .= "<tr><td colspan='8'>";
       
 			// Only display this course for advising IF it hasn't been fulfilled, or if it has infinite repeats, and only if it isn't already
 			// advised to be taken.
 			if (($course->course_list_fulfilled_by->is_empty || $course->specified_repeats == Group::GROUP_COURSE_INFINITE_REPEATS) && !$course->bool_advised_to_take ){
 			  // So, only display if it has not been fulfilled by anything.			
 			  
-				$pC .= $this->draw_popup_group_select_course_row($course, $group_hours_remaining);
+				$rtn .= $this->draw_popup_group_select_course_row($course, $group_hours_remaining);
 				$old_course = $course;
 			} 
-			$pC .= "</td></tr>";
+			$rtn .= "</td></tr>";
 		}
 
 
-		return $pC;
+		return $rtn;
 	}
 
 

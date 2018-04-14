@@ -1,6 +1,60 @@
 /* Javascript for the Advise module */
 
 
+/**
+ * Run this code on the page, after everything has finished loading.  
+ */
+$(document).ready(function() {
+
+  // Update the varHours field for the selected course row in the group_select_popup screen.
+  if ($('body').hasClass('page-advise-popup-group-select')) {
+    
+    // Run once on startup, in case we are returning to a screen with already selected options
+    popupUpdateVarHoursBasedOnSelectedRadio();
+    
+    // we need to
+    // attach a behavior the radio buttons for each course row, to call a function when they are
+    // selected.  This function will update the varHours field, if that course has var hours.
+    
+    $(".page-advise-popup-group-select input.cb-course").change(function() {
+      
+      // Update the varHours field for the selected course row in the group_select_popup screen.
+      popupUpdateVarHoursBasedOnSelectedRadio();
+       
+    });
+    
+    
+  }
+  
+  
+});
+
+
+
+function popupUpdateVarHoursBasedOnSelectedRadio() {
+  
+  // Get all the radios on the page, to find out which (if any) is currently selected.
+  // Then, set the varHours variable to THAT course's min_var_hours.
+  
+  var course_id = $(".page-advise-popup-group-select input.cb-course:checked").val();
+  
+  if (course_id != undefined && course_id > 0) {
+    // Yes, a course_id was found.  Let's see if it has any min_var_hours selected.
+    
+    // Var hours?
+    var min_var_hours = $("#" + course_id + "_min_var_hours").val();
+    if (min_var_hours != undefined && min_var_hours != "") {
+      console.log(min_var_hours);
+      $("#varHours").val(min_var_hours);
+    }
+    
+  }
+  
+  
+}
+
+
+
 
 function changeTerm(term_id) {
   document.getElementById("advising_term_id").value = term_id;
@@ -487,7 +541,8 @@ function popupSubstituteSelected(course_id, group_id, semester_num, req_by_degre
  */
 function popupAssignSelectedCourseToGroup(semester_num, group_id, advising_term_id, db_group_requirement_id) {
 
-  var var_hours = document.getElementById("varHours").value;
+  //var var_hours = document.getElementById("varHours").value;
+  var var_hours = $("#varHours").val();
 
   var c = document.getElementsByName("course");
   for (var t = 0; t < c.length; t++)
