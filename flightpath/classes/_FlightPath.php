@@ -426,7 +426,7 @@ class _FlightPath extends stdClass
       // We will add them in now, because we do not take additions
       // into consideration when figuring out branches.
       if ($course_list_additions = $student->list_substitutions->find_group_additions($g))
-      {
+      {       
         $course_list_additions->reset_counter();
         while($course_list_additions->has_more())
         {
@@ -780,7 +780,6 @@ class _FlightPath extends stdClass
             $new_course->set_bool_substitution_split($req_by_degree_id, TRUE);
             $new_course->set_bool_substitution_new_from_split($req_by_degree_id, TRUE);
             $new_course->requirement_type = $course_requirement->requirement_type;
-            $new_course->min_grade = $course_requirement->min_grade;
             $new_course->req_by_degree_id = $req_by_degree_id;
             $new_course->assigned_to_degree_ids_array[$req_by_degree_id] = $req_by_degree_id; 
 
@@ -792,8 +791,7 @@ class _FlightPath extends stdClass
             // hours as more, in CourseList->count_hours().
             //$course_requirement->bool_substitution_new_from_split = false;
 
-            
-            
+                        
             
             
             // Only do this if we are NOT in a group!  This is to correct a bug where split additions to groups wound up
@@ -806,6 +804,7 @@ class _FlightPath extends stdClass
 
           } // if min_hours > sub's awarded hours
 
+          
           $course_requirement->course_list_fulfilled_by = $substitution->course_list_substitutions;
 
           $substitution->course_list_substitutions->assign_group_id($group_id);
@@ -816,12 +815,12 @@ class _FlightPath extends stdClass
           
           $substitution->bool_has_been_applied = TRUE;
           
-          if ($group_id > 0) {
-            // This is NEW CODE.  We are going to add the course_sub's hours in as being assigned to this list, if this is for a group.
+          if ($group_id != "" && intval($group_id) > 0) {
+            // We are going to add the course_sub's hours in as being assigned to this list, if this is for a group.
             // I am surprised this wasn't already here.  This fixes a bug with groups that allow min hours.  
             $hours_assigned += $course_sub->get_hours_awarded($req_by_degree_id);
           } 
-                      
+
         }
         $count++;
         continue;
@@ -878,7 +877,7 @@ class _FlightPath extends stdClass
 
 
         // Make sure $c is not being used in a substitution (for this degree)
-        if ($c->get_bool_substitution($req_by_degree_id) == TRUE) {
+        if ($c->get_bool_substitution($req_by_degree_id) == TRUE) {          
           continue;
         }
 

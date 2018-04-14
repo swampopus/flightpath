@@ -566,6 +566,11 @@ function content_display_content_admin_list() {
   while ($cur = db_fetch_array($res)) {
     
     $author = fp_load_user($cur["user_id"]);
+    $author_name = "";
+    if ($author && isset($author->name)) {
+      $author_name = $author->name;
+    }
+    
     $updated = format_date($cur["updated"]);
     
     //$rtn .= "<tr><td valign='top'>" . l($cur["title"], "content/{$cur["cid"]}") . "</td>";
@@ -581,7 +586,7 @@ function content_display_content_admin_list() {
     
     $rtn .= "
                 <td valign='top'>" . $cur["type"] . "</td>
-                <td valign='top'>" . $author->name . "</td>
+                <td valign='top'>" . $author_name . "</td>
                 <td valign='top'>" . $updated . "</td>
              </tr>";
   }

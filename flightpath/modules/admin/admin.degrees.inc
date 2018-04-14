@@ -756,7 +756,7 @@ function admin_display_degrees() {
     if ($filter_class != "" && $db_degree_class != $filter_class) continue;
 
 
-    if ($db_degree_type == "NA" && strstr($db_major, "|")) {
+    if ($db_degree_type == "NA" && strstr($db_major_code, "|")) {
       $db_degree_type = " -- ";
     }
 

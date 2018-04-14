@@ -1250,7 +1250,16 @@ function fp_theme_location($bool_include_base_path = TRUE) {
   }
   
   if ($bool_include_base_path) {
-    $p = base_path() . "/" . $p;    
+    $bp = base_path();
+    
+    // The following code is to fix a bug where we might end up with // as our location, if our base_path is simply "/", meaning,
+    // the site is located on a bare domain.
+    if ($bp != "/") {
+      $p = base_path() . "/" . $p;
+    }
+    else {
+      $p = "/" . $p;
+    }    
   }
   
   return $p;

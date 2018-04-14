@@ -279,7 +279,7 @@ class _Course extends stdClass
     }
     else {
       if (isset($this->details_by_degree_array[$degree_id]["substitution_hours"])) {      
-        $x = reset($this->details_by_degree_array[$degree_id]["substitution_hours"]);
+        $x = $this->details_by_degree_array[$degree_id]["substitution_hours"];
         if ($x) return $x;
       }
     }

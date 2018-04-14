@@ -123,16 +123,16 @@ function install_perform_install() {
   // We will attempt to connect to this database.  If we have any problems, we will go back to
   // the form and inform the user.
   try {
-  	$pdo = new PDO("mysql:host=$db_host;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass);
+    $pdo = new PDO("mysql:host=$db_host;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass);
   } 
   catch (Exception $e) {
-  	// Connection failed!
-  	return install_display_db_form("<div style='color:red;'>" . st("Could not connect.  Please check that you have
+    // Connection failed!
+    return install_display_db_form("<div style='color:red;'>" . st("Could not connect.  Please check that you have
                                     created the database already, and given the user all of the permissions
                                     (except Grant).  Then, make sure you typed the username and
                                     password correctly, as well as the database name itself.  
                                     <br><br>Full exception message: " . $e->getMessage()) . "</div>");
-  	 
+     
   }
   
   ///////////////////////////////
@@ -299,7 +299,8 @@ $system_settings["base_url"] = "%BASE_URL%";
 // your domain name.
 // It MUST begin with a preceeding slash.
 // Ex: If your site is example.com/dev/flightpath, then you should
-// enter  "/dev/flightpath" 
+// enter  "/dev/flightpath".  If you are hosting on a bare domain name (https://abc.example.com/)
+// then simply enter "/"
 $system_settings["base_path"] = "%BASE_PATH%";
 
 
@@ -372,24 +373,24 @@ $db_user = $system_settings["db_user"];
 $db_pass = $system_settings["db_pass"];
 $db_name = $system_settings["db_name"];
 
-$pdo = new PDO("mysql:host=$db_host;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass);  		
+$pdo = new PDO("mysql:host=$db_host;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass);     
 if (!$pdo) die("Could not connect to database.");
 
 $res = $pdo->prepare("SELECT * FROM variables");
 $res->execute();
 
-  		
+      
 while ($cur = $res->fetch(PDO::FETCH_ASSOC)) {
   if (@$val = unserialize($cur["value"])) {
     $system_settings[$cur["name"]] = $val;
   }
 }
 
-  		
+      
 $res = $pdo->prepare("SELECT * FROM modules WHERE enabled = 1
-  					  ORDER BY weight, name");
+              ORDER BY weight, name");
 $res->execute();
-  		
+      
 while ($cur = $res->fetch(PDO::FETCH_ASSOC)) {
   $system_settings["modules"][$cur["name"]] = $cur;
 }

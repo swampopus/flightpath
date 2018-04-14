@@ -1044,7 +1044,7 @@ function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bo
   $p = menu_get_module_path($module, $bool_include_file_system_path);
     
   if ($bool_include_base_path) {
-    $p = $GLOBALS["fp_system_settings"]["base_path"] . "/" . $p;
+    $p = base_path() . "/" . $p;
   }
     
   return $p;
@@ -1156,6 +1156,12 @@ function base_path() {
   // at the currect directory by default.
   if ($p == "") {
     $p = ".";
+  }
+  
+  // if our base_path is simply "/" (meaning, we are hosted on a bare domain), then we should
+  // actually return nothing, so as not to cause errors with other systems.
+  if ($p == "/") {
+    $p = "";
   }
   
   return $p;
@@ -1319,6 +1325,11 @@ function fp_url($path, $query = "", $include_base_path = TRUE) {
     $rtn .= base_path() . "/";
   }  
  
+ 
+  // Make sure that $rtn isn't now "//".  This can happen if our
+  // site is hosted on a bare domain.  Ex:  http://fp.example.com
+  // And we have set the base_path to simply "/"
+  if ($rtn == "//") $rtn = "/";
  
   $bool_clean_urls = variable_get("clean_urls", FALSE);
   if (!$bool_clean_urls) {

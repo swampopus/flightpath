@@ -1616,7 +1616,7 @@ function draw_menu_items($menu_array) {
 		  $_SESSION["fp_pie_chart_token"] = md5(fp_token());
 		}
 		//old Google API url: $pie_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
-		$pie_chart_url = $GLOBALS["fp_system_settings"]["base_path"] . "/inc/pchart/fp_pie_chart.php?progress=$vval&unfinished=$leftval&unfinished_col=$back_col&progress_col=$fore_col&token=" . $_SESSION["fp_pie_chart_token"];
+		$pie_chart_url = base_path() . "/inc/pchart/fp_pie_chart.php?progress=$vval&unfinished=$leftval&unfinished_col=$back_col&progress_col=$fore_col&token=" . $_SESSION["fp_pie_chart_token"];
 		
 		
 		$rtn .= "<table border='0' width='100%'  height='100' class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
@@ -3071,8 +3071,7 @@ function draw_menu_items($menu_array) {
 
     $count_hoursCompleted = 0;
 
-    $last_req_by_degree_id = -1;
-    
+        
     $html = array();
     
     
@@ -3100,7 +3099,7 @@ function draw_menu_items($menu_array) {
 
         $c = $course->course_list_fulfilled_by->get_first();
         
-        $c->req_by_degree_id = $last_req_by_degree_id;  // make sure we assign it to the current degree_id.
+        $c->req_by_degree_id = $course->req_by_degree_id;  // make sure we assign it to the current degree_id.
 
         // Tell the course what group we are coming from. (in this case: none)
         $c->disp_for_group_id = "";
@@ -4042,6 +4041,8 @@ function draw_menu_items($menu_array) {
       $hours = $course->get_substitution_hours();
 
       $temp_sub_course = $course->get_course_substitution();
+      
+      //fpm($temp_sub_course);
       if (is_object($temp_sub_course))
       {
                 
@@ -4070,7 +4071,9 @@ function draw_menu_items($menu_array) {
 				}
 				$course->substitution_footnote = $fcount;
 				$footnote .= "$fcount</span>";        
-        @$sub_id = $course->db_substitution_id_array[$course->req_by_degree_id];        
+				$r = $course->req_by_degree_id;
+				
+        @$sub_id = $course->db_substitution_id_array[$r];        
 				$this->footnote_array["substitution"][$fcount] = "$o_subject_id $o_course_num ~~ $subject_id $course_num ~~ " . $course->get_substitution_hours() . " ~~ " . $course->get_first_assigned_to_group_id() . " ~~ $sub_id";
 				
 			}

@@ -256,7 +256,7 @@ function comments_display_main() {
 function comments_popup_display_all_comments() {
   global $current_student_id;  
   $rtn = "";
-  
+  $delete_link = "";
   fp_add_css(fp_get_module_path("comments") . "/css/comments.css");
   
   $access_types = (user_has_permission("view_faculty_comments")) ? array("faculty", "public") : array("public");

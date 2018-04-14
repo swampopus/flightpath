@@ -1,6 +1,16 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-04-11
+  Fixed an issue with "clean URLs" when site is hosted on a bare domain.
+  
+  Updated install.php to have more instructions in the settings.php file for bare domain hosting.
+  
+  Fixed small issues causing PHP Notice's to show up.
+  
+  Fixed bug where substitutions were not displaying correctly in Display by Year view.
+  
+
 2018-04-07
   Fixed some small display issues in AdvisingScreen, to keep PHP notices from appearing.
   

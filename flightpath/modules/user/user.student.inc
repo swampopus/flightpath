@@ -421,7 +421,7 @@ function user_edit_student_user_form() {
     $cur = db_fetch_array($res);
   }
 
-  $user_name = $cur["user_name"];
+  $user_name = @$cur["user_name"];
   if ($user_name != "") {
     $form["mark" . $m++] = array(
       "value" => "<p><b>Username:</b> $user_name</p>",
@@ -442,28 +442,28 @@ function user_edit_student_user_form() {
   $form["email"] = array(
     "label" => t("Email:"),
     "type" => "textfield",
-    "value" => $cur["email"],
+    "value" => @$cur["email"],
     "weight" => 30,    
   );  
 
   $form["f_name"] = array(
     "label" => t("First name:"),
     "type" => "textfield",
-    "value" => $cur["f_name"],
+    "value" => @$cur["f_name"],
     "weight" => 40,
   );  
 
   $form["l_name"] = array(
     "label" => t("Last name:"),
     "type" => "textfield",
-    "value" => $cur["l_name"],
+    "value" => @$cur["l_name"],
     "weight" => 50,
   );  
 
   $form["is_disabled"] = array(
     "label" => t("Is disabled:"),
     "type" => "textfield",
-    "value" => $cur["is_disabled"],
+    "value" => @$cur["is_disabled"],
     "size" => 5,
     "description" => t("Enter only 1 or 0 (number one for 'yes', or number zero for 'no').  This setting means the user will
                         be ignored by FlightPath, and they will not be able to log in or be searched for.
@@ -476,7 +476,7 @@ function user_edit_student_user_form() {
   $form["cumulative_hours"] = array(
     "label" => t("Cumulative hours:"),
     "type" => "textfield",
-    "value" => $cur["cumulative_hours"],
+    "value" => @$cur["cumulative_hours"],
     "size" => 5,
     "description" => t("How many hours has the student earned?  NOTE: If FlightPath is set to
                         calculate this, rather than read from the database, whatever you enter here
@@ -488,7 +488,7 @@ function user_edit_student_user_form() {
   $form["gpa"] = array(
     "label" => t("GPA:"),
     "type" => "textfield",
-    "value" => $cur["gpa"],
+    "value" => @$cur["gpa"],
     "size" => 5,
     "description" => t("What is the student's GPA?  NOTE: If FlightPath is set to
                         calculate this, rather than read from the database, whatever you enter here
@@ -500,7 +500,7 @@ function user_edit_student_user_form() {
   $form["rank_code"] = array(
     "label" => t("Rank or Classification:"),
     "type" => "textfield",
-    "value" => $cur["rank_code"],
+    "value" => @$cur["rank_code"],
     "size" => 5,
     "description" => t("For example, FR, SO, JR, SR, GR for Freshman, Sophomore, Junior, Senior, and Graduate.") . "
                       <br><b>" . t("Important:") . "</b> " . t("You must enter a code from the Allowed Student Ranks field
@@ -559,7 +559,7 @@ function user_edit_student_user_form() {
   $form["catalog_year"] = array(
     "label" => t("Catalog year:"),
     "type" => "textfield",
-    "value" => $cur["catalog_year"],
+    "value" => @$cur["catalog_year"],
     "size" => 10,
     "description" => t("Only the leading year is used.  For example, for the
                         catalog year 2008-2009, you would just enter 2008."),
@@ -569,7 +569,7 @@ function user_edit_student_user_form() {
   $form["is_active"] = array(
     "label" => t("Is active:"),
     "type" => "textfield",
-    "value" => $cur["is_active"],
+    "value" => @$cur["is_active"],
     "size" => 5,
     "description" => t("Enter only 1 or 0 (number one for 'yes', or number zero for 'no').  This setting means the student
                       will not appear in searches automatically, unless the advisor specifies to search
