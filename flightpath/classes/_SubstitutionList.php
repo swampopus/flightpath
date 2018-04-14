@@ -3,14 +3,19 @@
 class _SubstitutionList extends ObjList
 {
 
-	function find_requirement($course_requirement, $bool_exclude_has_been_applied = false, $group_id = 0, $degree_id = 0)
-	{
+
+	function find_requirement($course_requirement, $bool_exclude_has_been_applied = false, $group_id = 0, $degree_id = 0, $exclude_ids = array()) {
+	  
 		// Look through the array for a substitution which has this
 		// course requirement.
 		// If group_id == -1, no particular group is required.
 		for ($t = 0; $t < count($this->array_list); $t++)
 		{
 			$substitution = $this->array_list[$t];
+
+      // Skip if this substitution id is in our list to exclude.
+      if (in_array($substitution->db_substitution_id,$exclude_ids)) continue;
+      
 
 			if ($bool_exclude_has_been_applied == true && $substitution->bool_has_been_applied == true)
 			{

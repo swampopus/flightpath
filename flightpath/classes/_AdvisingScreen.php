@@ -3285,7 +3285,7 @@ function draw_menu_items($menu_array) {
 		// Display a group, either filled in with courses,
 		// and/or with a "blank row" for the user to
 		// click on.
-		$pC = "";
+		$rtn = "";
 
 		// Now, if you will recall, all of the groups and their courses, etc,
 		// are in the degree_plan's list_groups.  The $place_group object here
@@ -3363,12 +3363,7 @@ function draw_menu_items($menu_array) {
 				$c->requirement_type = $place_group->requirement_type;
 
         
-        // Make sure it isn't already in the display list.
-        // object_index_of means it has to actually be a reference to the supplied object.
-        // This is to fix a subtle bug, described in issue #2291, where a substitution can be listed twice for a group.
-        if ($display_course_list->object_index_of($c) == -1) {
-          $display_course_list->add($c);
-        }
+
         
 			}
 
@@ -3472,7 +3467,7 @@ function draw_menu_items($menu_array) {
 
     
 
-		$pC .= $this->display_group_course_list($display_course_list, $group, $display_semesterNum);
+		$rtn .= $this->display_group_course_list($display_course_list, $group, $display_semesterNum);
 
 		$fulfilled_hours = $display_course_list->count_hours("", false, false, TRUE, false, $req_by_degree_id);
     
@@ -3511,13 +3506,13 @@ function draw_menu_items($menu_array) {
       }
       
       
-			$pC .= "<tr class='$rowclass'><td colspan='8' class='tenpt'>";
-			$pC .= $this->draw_group_select_row($place_group, $remaining);
-			$pC .= "</td></tr>";
+			$rtn .= "<tr class='$rowclass'><td colspan='8' class='tenpt'>";
+			$rtn .= $this->draw_group_select_row($place_group, $remaining);
+			$rtn .= "</td></tr>";
 		}
 
 
-		return $pC;
+		return $rtn;
 	}
 
 

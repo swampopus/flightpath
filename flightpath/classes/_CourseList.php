@@ -1122,18 +1122,26 @@ class _CourseList extends ObjList
 
 		// Since I need the indexes, I will have to go through the array
 		// myself...
-		for ($t = 0; $t < $this->count; $t++)
-		{
-			$c = $this->array_list[$t];
-			// So-- does this course have a substitution somewhere in
-			// the list (for the supplied groupID) ?
-			if ($substitution = $list_substitutions->find_requirement($c, true, $group_id))
-			{
-				// yes, there is a sub for this group (or bare degree plan)
-				$top_array[] = $t;
-			}
+		
+    // array to keep track of all the substitutions that have been used for this list (Logan's change ticket 2291)
+    $used_substitution_ids = array();
+    
+    for ($t = 0; $t < $this->count; $t++) {
+      $c = $this->array_list[$t];
+      // So-- does this course have a substitution somewhere in
+      // the list (for the supplied groupID) ?
+      // supply the list of used ids, so they are not reused in this list. (Logan's change ticket 2291)
+      if ($substitution = $list_substitutions->find_requirement($c, true, $group_id,0,$used_substitution_ids))
+      {
+        // yes, there is a sub for this group (or bare degree plan)
+        
+        //mark the substitution so it doesn't get used again (Logan's change ticket 2291)
+        $used_substitution_ids[] = $substitution->db_substitution_id;
 
-		}
+        $top_array[] = $t;
+      }
+
+    }
 
 		// Okay, we now have, in the topArray, a list of indexes which should
 		// appear at the top.
