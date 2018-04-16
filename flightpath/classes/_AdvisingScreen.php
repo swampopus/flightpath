@@ -3361,7 +3361,7 @@ function draw_menu_items($menu_array) {
 				$c->icon_filename = $group->icon_filename;
 				$c->title_text = "This course is a member of $group->title." . " ($place_group->requirement_type)";
 				$c->requirement_type = $place_group->requirement_type;
-
+        $display_course_list->add($c);
         
 
         
