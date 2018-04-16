@@ -780,6 +780,7 @@ class _FlightPath extends stdClass
             $new_course->set_bool_substitution_split($req_by_degree_id, TRUE);
             $new_course->set_bool_substitution_new_from_split($req_by_degree_id, TRUE);
             $new_course->requirement_type = $course_requirement->requirement_type;
+            $new_course->min_grade = $course_requirement->min_grade;
             $new_course->req_by_degree_id = $req_by_degree_id;
             $new_course->assigned_to_degree_ids_array[$req_by_degree_id] = $req_by_degree_id; 
 

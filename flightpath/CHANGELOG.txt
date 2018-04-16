@@ -5,6 +5,7 @@ FlightPath 5.x Changelog
   Fixed bug in AdvisingScreen introduced by a previous commit, where I left off a line of code after rolling
   back changes.
 
+  Restored a line of code I accidentally deleted in a previous commit, in _FlightPath.php.
 
 2018-04-14   
   Rolled back a modification made to AdvisingScreen, as described in ticket 2291, comment #36, and implemented
