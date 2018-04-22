@@ -1,11 +1,22 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-04-22
+  Fixed issue #2316 (special thanks to Logan Buth) in which outdated subs aren't always detected in cases
+  of combined degrees.
+  
+
+2018-04-21
+  Fixed small bug where sometimes "courses added by advisor" result in a mysql error while advising, due to
+  the "degree_id" being blank and not "0".
+
+ 
 2018-04-16
   Fixed bug in AdvisingScreen introduced by a previous commit, where I left off a line of code after rolling
   back changes.
   
   Restored a line of code I accidentally deleted in a previous commit, in _FlightPath.php.
+
 
 2018-04-14   
   Rolled back a modification made to AdvisingScreen, as described in ticket 2291, comment #36, and implemented

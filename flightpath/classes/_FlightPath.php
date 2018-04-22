@@ -549,14 +549,38 @@ class _FlightPath extends stdClass
     {
       $substitution = $this->student->list_substitutions->get_next();
 
+      ////////////////////////////
+      // Ticket #2316, from Logan Buth, this is to better detect outdated subs for combined degrees.
+      $bool_sub_valid = true;
+      $outdated_note = "";
+      
+      if ($this->degree_plan->degree_id == DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE &&
+          !in_array($substitution->db_required_degree_id, $this->degree_plan->combined_degree_ids_array)) {
+          //combined degree plan, degree id not in it.
+          
+          $bool_sub_valid = false;
+          $outdated_note = t("This substitutions is for the degree %did
+                            which is no longer in the student's degrees.", array("%did" => $substitution->db_required_degree_id));
+      } 
+      else if ($this->degree_plan->degree_id != DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE &&
+                 $this->degree_plan->degree_id != $substitution->db_required_degree_id) {
+          
+          $bool_sub_valid = false;
+          $outdated_note = t("This substitutions is for the degree %did
+                            which is no longer the student's degree", array("%did" => $substitution->db_required_degree_id));
+      }
+      //////////////
+      
+
+
+
+
       //$required_group_id = $substitution->course_requirement->assigned_to_group_id;
       $required_group_id = $substitution->course_requirement->get_first_assigned_to_group_id(); // we assume there's only one group to get
 
 
       // First check-- does this degree even have this group ID?
-      $outdated_note = "";
-      if ($required_group_id == 0)
-      {
+      if ($bool_sub_valid && $required_group_id == 0) {
         // bare degree plan.
         // Does the bare degree plan list the course_requirement
         // anywhere?
@@ -573,22 +597,22 @@ class _FlightPath extends stdClass
             $bool_sub_valid = false;
             $scr = $substitution->course_requirement;
             $scr->load_descriptive_data();
-            $outdated_note = "This substitution is for the course $scr->subject_id
-                      $scr->course_num (id: $scr->course_id) on the 
+            $outdated_note = t("This substitution is for the course %info on the 
                       bare degree plan, but the student's current degree does
-                      not specify this course.";
+                      not specify this course.", array("%info" => "$scr->subject_id $scr->course_num (id: $scr->course_id)"));
           }
         }
 
 
-      } else {
-        // requiredGroupID != 0.  So, does this
+      } 
+      else {
+        // required_group_id != 0.  So, does this
         // degree plan have a group with this id?
         $bool_sub_valid = false;
-        if ($g = $this->degree_plan->find_group($required_group_id))
-        {
+        if ($g = $this->degree_plan->find_group($required_group_id)) {
           $bool_sub_valid = true;
-        } else {
+        } 
+        else {
           // Could not find the group in question.  Add an "outdated_note"
           // to the sub...
           $bool_sub_valid = false;
@@ -600,16 +624,14 @@ class _FlightPath extends stdClass
             // only show if we are a data entry administrator.
             $group_name = "<i>$new_group->group_name,</i>";
           }
-          $outdated_note = "This substitution is for the group $new_group->title
-                  (id: $new_group->group_id, $group_name $new_group->catalog_year),
+          $outdated_note = t("This substitution is for the group %info,
                   but the student's current degree does not call for this 
-                  specific group.";
+                  specific group.", array("%info" => "$new_group->title (id: $new_group->group_id, $group_name $new_group->catalog_year)"));
         }
       }
 
 
-      if ($bool_sub_valid == false)
-      {
+      if ($bool_sub_valid == false) {
 
         // Couldn't find a match, so remove this sub!
         $substitution->bool_outdated = true;
@@ -1465,6 +1487,11 @@ class _FlightPath extends stdClass
         $this->replace_missing_course_in_group($course_id, $group_id);
       }
 
+
+      // Make sure degree_id is a valid number for the database.
+      if (!is_numeric($degree_id) || $degree_id == "" || intval($degree_id) < 0) {
+        $degree_id = 0;
+      }
 
       // Okay, write it to the table...
       $result = $db->db_query("INSERT INTO advised_courses
