@@ -1576,6 +1576,66 @@ function system_school_data_form_validate($form, &$form_state) {
 }
 
 
+/**
+ * Returns back an array (suitable for FAPI) of the available themes in the system.
+ */
+function system_get_available_themes() {
+  $rtn = array();
+  
+  // First, search for themes in our core folder.  Themes must have a .info file which matches
+  // their folder name, just like modules.
+  $theme_dirs = array();
+  $theme_dirs[] = array("start" => "themes", "type" => t("Core"));
+  $theme_dirs[] = array("start" => "custom/themes", "type" => t("Custom"));
+    
+  foreach ($theme_dirs as $theme_dir) {
+    $start_dir = $theme_dir["start"];
+    $type_dir = $theme_dir['type'];
+     
+    if ($dh = opendir($start_dir)) {
+            
+      $dir_files = scandir($start_dir);      
+      foreach ($dir_files as $file) {    
+        if ($file == "." || $file == "..") continue;
+        
+        if (is_dir($start_dir . "/" . $file)) {  
+         
+          // Okay, now look inside and see if there is a .info file.
+          if (file_exists("$start_dir/$file/$file.info")) {
+            $theme = $file;
+            $info_contents = file_get_contents("$start_dir/$file/$file.info");
+              
+            // From the info_contents variable, split up and place into an array.
+            $info_details_array = array("path" => "", "module" => "", 
+                                        "schema" => "", "core" => "", "description" => "", 
+                                        "requires" => "", "version" => "",
+                                        "required" => "", );
+            
+            $lines = explode("\n", $info_contents);
+            foreach ($lines as $line) {
+              if (trim($line) == "") continue;
+              $temp = explode("=", trim($line));
+              $info_details_array[trim($temp[0])] = trim(substr($line, strlen($temp[0]) + 1)); 
+            }
+                        
+            $path = "$start_dir/$file";
+            
+            $rtn[$path] = $info_details_array['name'] . "<div style='font-size: 0.8em; font-style: italic; padding-left: 40px;'>{$info_details_array['description']}
+                                                          <br>(Type: $type_dir  &nbsp; &nbsp; Location: $path)</div>";            
+            
+          } // if file_exists
+        } //if is_dir
+      } //foreach dir_files as $file
+    } // if we can opendir
+  } // foreach theme_dirs as theme_dir
+  
+  
+  
+  
+  return $rtn;
+}
+
+
 
 
 /**
@@ -1659,10 +1719,11 @@ function system_settings_form() {
   
     
   $form["theme"] = array(
-    "type" => "textfield",
-    "label" => t("Theme location:"),
+    "type" => "radios",
+    "label" => t("Theme:"),
+    "options" => system_get_available_themes(),
     "value" => variable_get("theme", "themes/classic"),
-    "description" => t("Enter the file location for your theme. Do not put preceeding or trailing slashes.  Ex: themes/classic"),    
+    "description" => t("Select the theme you wish to use.  Ex:  Classic (themes/classic)"),
   );
     
 
