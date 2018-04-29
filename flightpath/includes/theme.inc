@@ -555,16 +555,26 @@ function fp_build_tab_array($page) {
     
     if ($advising_term_id != "" && ($screen_mode != "not_advising" && $screen_mode != "detailed")
     && user_has_permission("can_advise_students"))
-    {      
+    {
+      // If this is someone who is allowed to change terms. (advisor or above)
+            
       $t_term_id = $advising_term_id;
-      $for_term = " " . t("for") . " " . get_term_description($t_term_id);
+      $for_term = " " . t("for") . " ";
+      $termdesc = get_term_description($t_term_id);
 
-      // If this is an advisor or above
+      
       $furl = fp_url("advise/popup-change-term");
+      
+      // Let's make the change-term link a little more intuitive.
+      $for_term .= "<span class='currently-advising-box-change-term'><a href='javascript: popupWindow2(\"" . $furl . "\",\"advising_term_id=$t_term_id\");'>$termdesc</a></span>";
+      
+      
+      
+      /*
       $for_term .= "<span style='font-size: 8pt; font-weight:normal;'>
              - <a href='javascript: popupWindow2(\"" . $furl . "\",\"advising_term_id=$t_term_id\");' style='color:blue; background-color: white; border: 1px solid black; padding-left: 3px; padding-right: 3px;'>" . t("change") . "<img src='" . fp_theme_location() . "/images/calendar1.jpg' height='13' border='0' style='vertical-align: bottom;'></a>
             </span>";
-
+      */
 
     }
 

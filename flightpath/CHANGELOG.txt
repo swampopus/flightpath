@@ -1,8 +1,13 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-04-29
+  Made "change term" link in the currently advising box nicer, with more CSS selectors available.
+  
+
 2018-04-26
   Small change in system.module, to make theme selection easier (radio buttons instead of having to type in location)
+
 
 2018-04-22
   Fixed issue #2316 (special thanks to Logan Buth) in which outdated subs aren't always detected in cases

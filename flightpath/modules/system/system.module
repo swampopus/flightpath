@@ -2405,12 +2405,12 @@ function system_display_login_page() {
     // This is NOT mobile, this is a regular desktop browser.
     $rtn .= "
         $top_blocks
-      <table border='0'>
+      <table border='0' class='login-content-table'>
       <tr>
-       <td valign='top' width='40%'>
+       <td valign='top' width='40%' class='left-side-content'>
         $left_col_blocks
        </td>
-      <td valign='top' style='padding-left: 20px;'>
+      <td valign='top' style='padding-left: 20px;' class='right-side-content'>
         $right_col_blocks  
        </td>
       </tr>
