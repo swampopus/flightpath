@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-05-05
+  Made the function Course::load_course_from_data_string_for_requirement_clone() set the course's display_status to "ellible"
+  to match the behavior of the default constructor.  Re: issue #2317, thanks to Logan Buth.
+
+
 2018-04-29
   Made "change term" link in the currently advising box nicer, with more CSS selectors available.
   

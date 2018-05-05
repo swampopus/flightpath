@@ -686,7 +686,7 @@ class _Course extends stdClass
     $this->details_by_degree_array = array();
     $this->assigned_to_degree_ids_array = array();
     $this->db_substitution_id_array = array();
-    $this->display_status = "";
+    $this->display_status = "eligible";  // match the default constructor so we don't cause issues.    
     $this->disp_for_group_id = "";
     
     
