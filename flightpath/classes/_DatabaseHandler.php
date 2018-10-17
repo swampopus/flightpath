@@ -29,10 +29,12 @@ class _DatabaseHandler extends stdClass
     // It can be time-consuming to convert our hostname to IP address.  Cache it in our SESSION
     if (isset($_SESSION["fp_db_host_ip"])) {
       $db_host_ip = $_SESSION["fp_db_host_ip"];
+      if (!$db_host_ip) $db_host_ip = $db_host;
     }
     else {
       // Convert our db_host into an IP address, then save to simple SESSION cache.
-      $db_host_ip = gethostbyname($db_host);
+      $db_host_ip = trim(gethostbyname($db_host));
+      if (!$db_host_ip) $db_host_ip = $db_host;
       $_SESSION["fp_db_host_ip"] = $db_host_ip;
     }
 

@@ -36,10 +36,13 @@ function menu_rebuild_cache($bool_display_message = TRUE) {
   db_query("TRUNCATE TABLE menu_router ");
   
   $modules = modules_implement_hook("menu");
-  
+    
   foreach ($modules as $module) {
     $items = call_user_func($module . "_menu");
     
+    // Invoke hook_menu_alter() to see if we need to alter these items or not.
+    invoke_hook('menu_alter', array(&$items));
+      
     // Okay, now go through the $items array, and write the needed information
     // to the menu_router array.
     foreach ($items as $path => $item) {
@@ -147,7 +150,7 @@ function menu_execute_page_request() {
       return $page;    
            
     }
-    else {
+    else {      
       return MENU_ACCESS_DENIED;
     }
   }
@@ -330,7 +333,8 @@ function menu_get_menu_router_item_from_db($path) {
     }
   }
   
-  
+  //fpm($_REQUEST);
+  //fpm($cur);
   
   $cur["page_settings"] = unserialize($cur["page_settings"]);
   if (!is_array($cur["page_settings"])) {

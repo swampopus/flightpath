@@ -107,6 +107,7 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
  * its original menu item (router_item) definition.
  */
 function fp_display_page($page) {
+
   global $current_student_id, $screen;
   $page_title = $page["title"];
   if (@$GLOBALS["fp_set_title"] != "") {
@@ -1237,11 +1238,12 @@ function display_not_found() {
 
 
 function display_access_denied() {
+  
   $page = array(
     "title" => t("Access Denied"),
     "content" => "<h2>" . t("Access Denied") . "</h2>" . t("Sorry, but you do not have access to the requested page or function."),
-  );
-  
+  );  
+    
   fp_display_page($page);  
 }
 
@@ -1286,6 +1288,8 @@ function fp_theme_location($bool_include_base_path = TRUE) {
 function fp_render_curved_line($text) {
   // Will simply draw a curved title bar containing the $title
   // as the text.
+
+  /*
   $img_path = fp_theme_location();
   
 
@@ -1304,6 +1308,15 @@ function fp_render_curved_line($text) {
      </tr> 
     </table>
 ";
+*/
+ 
+
+  $rtn = "
+    <div class='blueTitle' style='text-align: center; border-radius: 5px; padding: 1px;'>
+      <span class='tenpt'><b>$text</b></span>
+    </div>
+  ";
+
 
   return $rtn;
 

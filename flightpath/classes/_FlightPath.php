@@ -505,7 +505,6 @@ class _FlightPath extends stdClass
             $count = $this->get_count_of_matches($branch_one, $this->student, $g);
             $branch_one->count_of_matches = $count;
 
-
             if ($count > $high_count)
             {
               $high_count = $count;
@@ -521,7 +520,7 @@ class _FlightPath extends stdClass
         if ($best_branch != -1)
         {
           $winning_branch = $g->list_groups->get_element($best_branch);
-          $winning_branch->bool_winning_branch = TRUE;
+          $winning_branch->bool_winning_branch = TRUE;          
           $this->assign_courses_to_list($winning_branch->list_courses, $this->student, TRUE, $g, TRUE);
         }
 
@@ -716,6 +715,12 @@ class _FlightPath extends stdClass
 
     $list_requirements->sort_substitutions_first($student->list_substitutions, $group_id);
 
+
+    if ($bool_perform_assignment == FALSE && $group_id == "3268747_1006254") {
+      $list_requirements->load_course_descriptive_data();  
+    }
+
+
     $list_requirements->reset_counter();
     while($list_requirements->has_more())
     {
@@ -729,7 +734,6 @@ class _FlightPath extends stdClass
       }
        
      
-    
       if ($bool_check_significant_courses == true)
       {
         // Only look for the course_requirement if it is in the student's
@@ -749,6 +753,7 @@ class _FlightPath extends stdClass
         $student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);   
       }
 
+ 
       
       // Does the student have any substitutions for this requirement?
       if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id, $req_by_degree_id))
@@ -854,6 +859,7 @@ class _FlightPath extends stdClass
       // Has the student taken this course requirement?
       if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude, $req_by_degree_id, TRUE, TRUE, $group_id))
       {
+      
         
         $h_get_hours = $c->get_hours();
         if ($c->bool_ghost_hour) {
@@ -929,6 +935,7 @@ class _FlightPath extends stdClass
           }                  
           
         } // if group_id != ""
+
         
         // We want to see if this course has already been assigned to THIS degree...
         if (!in_array($req_by_degree_id, $c->assigned_to_degree_ids_array))
@@ -945,6 +952,8 @@ class _FlightPath extends stdClass
           if (!$bool_can_proceed) {
             continue;  // don't assign!
           } 
+
+
         
           // Has another version of this course already been
           // assigned?  And if so, are repeats allowed for this

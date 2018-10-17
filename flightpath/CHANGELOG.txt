@@ -1,6 +1,17 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-10-17
+  Added new hook: hook_menu_alter(), for editing menu items.
+
+2018-10-09
+  Fixed a theming issue which sometimes would occur in Chrome, on the Majors search page (of the student_search module).
+  
+
+2018-05-10
+  Fixed display bug in user.module, found a mis-matched </div> tag.
+  
+
 2018-05-05
   Made the function Course::load_course_from_data_string_for_requirement_clone() set the course's display_status to "ellible"
   to match the behavior of the default constructor.  Re: issue #2317, thanks to Logan Buth.

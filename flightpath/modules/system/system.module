@@ -2716,6 +2716,7 @@ function system_init() {
   global $user;
   $user = new stdClass();
   
+    
   if (!isset($_SESSION["fp_user_object"]->roles[1])) $_SESSION["fp_user_object"]->roles[1] = ""; 
       
   if (@$_SESSION["fp_logged_in"] == TRUE) {

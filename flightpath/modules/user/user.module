@@ -1245,7 +1245,7 @@ function user_display_student_users() {
                        <input type='submit' name='show_inactive_submit' class='smallinput' value=' -> '>                                              
                        
                        </form>
-                       </div>
+                       
                        <br>
                       ";
 
@@ -1578,7 +1578,7 @@ function user_display_users() {
                        <input type='submit' name='rolesubmit' class='smallinput' value=' -> '>
                        
                        </form>
-                       </div>
+                       
                        <br>
                       ";
 

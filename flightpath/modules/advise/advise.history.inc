@@ -19,8 +19,7 @@ function advise_display_history() {
   
   fp_add_css(fp_get_module_path("advise") . "/css/advise.css");
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
-  
-  
+    
   $rtn .= "<table class='fp-semester-table'>";
 
  

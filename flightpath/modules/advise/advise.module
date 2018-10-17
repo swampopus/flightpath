@@ -515,7 +515,7 @@ function advise_display_popup_change_track_non_dynamic_degree() {
           </div>
       ";
 
-  $rtn .= "<br><br><b>" . $bare_degree_plan->title . "</b> " . t("degree options:") . "</div><!--DEFAULT-->
+  $rtn .= "<br><br><b>" . $bare_degree_plan->title . "</b> " . t("degree options:") . "<!--DEFAULT-->
       <ul>";
 
   // Get the list of available tracks for this degree.

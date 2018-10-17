@@ -684,6 +684,7 @@ function admin_add_degree_form_submit($form, $form_submit) {
  * This function lists all of our degrees on the screen, for a given year
  */
 function admin_display_degrees() {
+   
   $de_catalog_year = admin_get_de_catalog_year();
   $rtn = "";    
     
@@ -807,21 +808,13 @@ function admin_display_degrees() {
       $outside = "&gt;&gt;";
     }
 
+        
+    //$base_path = $GLOBALS['system_settings']['base_path'];
+    //$url = $base_path . "/index.php?q=admin/degrees/edit-degree/$db_major_code/$de_catalog_year&de_catalog_year=$de_catalog_year";
 
     $url = fp_url("admin/degrees/edit-degree/$db_major_code/$de_catalog_year", "de_catalog_year=$de_catalog_year", array("class" => "degree-$db_degree_class"));
-
-    /*        
-    $rtn .= "<div class='admin-degrees-list-degree'>
-             <a name='degree_$db_degree_id'></a>";
-    $rtn .= "<div class='list-degree-row $extra_class'>
-            $outside
-            " . l("$db_degree_type $db_title $db_major_code", "admin/degrees/edit-degree", "de_catalog_year=$de_catalog_year&major_code=$db_major_code", array("class" => "degree-$db_degree_class")) . "
-            </div>
-            </div>";
-
-    */      
-                
-                
+    
+            
     $class_details = fp_get_degree_classification_details($db_degree_class);
     $disp_class = $class_details["title"];            
 

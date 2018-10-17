@@ -324,7 +324,8 @@ function student_search_display_majors_search() {
 
   $url = fp_url("student-search/majors-search");
   
-  $rtn .= "<form method='POST' action='" . $url . "'
+  $rtn .= "
+            <form method='POST' action='" . $url . "'
               class='major-search-form'>            
             <label>" . t("Select an available major from the list below:") . "</label>
             <br><select name='major_code'>
@@ -401,6 +402,7 @@ function student_search_display_majors_search() {
   $adv_array = student_search_query_advisees($query, array(":major_code" => $major_code));
   $s = (count($adv_array) == 1) ? "" : "s"; 
   $rtn .= student_search_render_advisees($adv_array, t("Major @major Results", array("@major" => $major_code)) . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
+
 
 
   
@@ -490,6 +492,11 @@ function student_search_display_search() {
   if (strstr($search_for, "*")) {
     $bool_bypass_extra_search_conditions = TRUE;
     $search_for = trim(str_replace("*", "", $search_for));
+  }
+
+  // If the user entered an =, then remove all spaces from the query.
+  if (strstr($search_for, "=")) {
+    $search_for = trim(str_replace(" ", "", $search_for));
   }
   
     
@@ -688,7 +695,7 @@ function student_search_render_advisees($adv_array, $title) {
     $rtn .= "<div class='hypo' style='border: 1px solid black;
               margin: 10px 0px 10px 0px; padding: 10px; 
               font-size: 12pt; font-weight: bold;'>
-        " .t("Loading") . " <font color='blue'>$first_name $last_name</font> ($student_id).  
+        " .t("Loading") . " <span style='color:blue;'>$first_name $last_name</span> ($student_id).  
           &nbsp; " . t("Please wait...") . "
         </div>";
     $bool_redirect_one = TRUE;
@@ -697,12 +704,15 @@ function student_search_render_advisees($adv_array, $title) {
   
   $rtn .= fp_render_curved_line($title);
   
+  
   $rtn .= "<table width='100%' align='left'
-            border='0' cellpadding='0' cellspacing='0'>";
-
+            border='0' cellpadding='0' cellspacing='0'>
+            ";
+  
   // Do not show headers at all if mobile
   if (!fp_screen_is_mobile()) {
    $rtn .= "
+     <tr>
       <td width='5%' valign='top'>&nbsp; </td>
       <td width='12%' valign='top' class='tenpt'><b>" . t("CWID") . "</b></td>
       <td width='15%' valign='top' class='tenpt'><b>" . t("First Name") . "</b></td>
@@ -710,11 +720,11 @@ function student_search_render_advisees($adv_array, $title) {
       <td width='15%' valign='top' class='tenpt'><b>" . t("Major Code") . "</b></td>
       <td width='10%' valign='top' class='tenpt'><b>" . t("Rank") . "</b></td>
       <td width='15%' valign='top' class='tenpt'><b>" . t("Catalog Year") . "</b></td>
-      ";
+     </tr> ";
   } 
   
   $rtn .= "
-    </tr>"; 
+    "; 
 
   $db = get_global_database_handler();  
     
@@ -811,13 +821,14 @@ function student_search_render_advisees($adv_array, $title) {
             </td> 
          </tr>
          ";
-  }
+  
+  }  // for t advisee array
 
 
-  $rtn .= "</table>";
+ $rtn .= "</table>";
   
-  
-  
+ 
+ 
   if ($bool_redirect_one) {
     // There was only one result, and it was a search, so we want to redirect
     // this person.
@@ -850,7 +861,13 @@ function student_search_render_advisees($adv_array, $title) {
       <input type='hidden' id='clearSession' name='clearSession'>
       </form>";
 
-    
+
+ ////  IMPORTANT///////////
+ $rtn .= "&nbsp;";     // Not sure why, but adding this to the end fixes a display bug in Chrome, so I'm going to leave it here.
+ ///////////////////
+  
+  
+  
   return $rtn;
 }
 

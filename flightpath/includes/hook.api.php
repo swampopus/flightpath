@@ -985,6 +985,24 @@ function hook_translate(&$str, $langcode = NULL) {
 }
 
 
+/**
+ * This hook lets us make alterations to menu items before saving them to the database.
+ * 
+ * It is only called when the menu cache is cleared and being rebuilt.
+ * 
+ * Notice that $items is passed by reference, so you must make changes to the
+ * $items array if you want those changes saved, as seen in the xample below.
+ * 
+ */
+function schools_menu_alter(&$items) {
+  foreach ($items as $path => $item) {    
+    if ($path == 'admin/config/some-path') { 
+      $items[$path]['access_callback'] = 'new_function_name';
+    }
+  }
+}
+
+
 
 
 

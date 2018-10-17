@@ -5313,7 +5313,7 @@ if ($course->name_equals('MUAL 265')) {
 				$matches_count = $this->flightpath->get_count_of_matches($clone_branch, $new_student, $group);
 				$branch->count_of_matches = $matches_count;
 				if ($matches_count >= $highest_match_count)
-				{ // Has more than one match on this branch.
+				{ // Has more than one match on this branch. 
 
 					$highest_match_count = $matches_count;
 				}
@@ -5323,6 +5323,7 @@ if ($course->name_equals('MUAL 265')) {
 			// which have that same match count.
 			if ($highest_match_count > 0)
 			{
+			  
 				$group->list_groups->reset_counter();
 				while($group->list_groups->has_more())
 				{
@@ -5345,7 +5346,7 @@ if ($course->name_equals('MUAL 265')) {
 				// so we should add all the branches to the
 				// newCourseList.
 
-				$group->list_groups->reset_counter();
+								$group->list_groups->reset_counter();
 				while($group->list_groups->has_more())
 				{
 					$branch = $group->list_groups->get_next();
