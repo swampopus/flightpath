@@ -1,8 +1,21 @@
 FlightPath 5.x Changelog
 ========================
 
+2018-11-13
+  Added extra data to $form_state, when duplicating an entire year's worth of data.
+  
+  Added fix for issue #2455, thanks to Logan Buth.  This deals with repeatable courses still appearing
+  in groups, even though a setting was set saying they should be advised once enrolled. 
+
+  Also fixed issue with maintaining keys in array for _Group::get_course_id_array function.  Issue #2456,
+  credit Logan Buth.
+
+  Issue #2470, Logan Buth.  Fixed typo causing degree_id to always be set to zero in _Course::get_quality_points.
+  
+
 2018-10-17
   Added new hook: hook_menu_alter(), for editing menu items.
+
 
 2018-10-09
   Fixed a theming issue which sometimes would occur in Chrome, on the Majors search page (of the student_search module).

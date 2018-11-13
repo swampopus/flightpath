@@ -40,6 +40,21 @@ function hook_form_alter(&$form, $form_id) {
  
 
 
+/**
+ * Similar to hook_form_alter, this function lets other modules alter
+ * content which is being rendered through the "render" system.
+ * 
+ * You may make changes to the render array.
+ */
+function hook_content_alter(&$render, $render_id) {
+  if ($render_id == 'some_id') {
+    $render_array['extra'] = array(
+      'value' => 'Add this extra content.',
+    );
+  }
+}
+
+
 
 /**
  * This hook his called just before returning a Course object from CourseList::find_best_grade_match or find_most_recent_match.

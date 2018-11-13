@@ -446,6 +446,8 @@ function user_permissions_form_submit($form, $form_submit) {
 function user_user_roles_form() {
   $form = array();
   
+  $m = 0;
+  
   fp_add_css(fp_get_module_path("user") . "/css/user.css");
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
   
@@ -852,7 +854,7 @@ function user_edit_user_form() {
     $cur = db_fetch_array($res);
   }
 
-  $user_name = $cur["user_name"];
+  @$user_name = $cur["user_name"];
   if ($user_name != "") {
     $form["mark" . $m++] = array(
       "value" => "<p><b>Username:</b> $user_name</p>",
@@ -872,25 +874,25 @@ function user_edit_user_form() {
   $form["email"] = array(
     "label" => t("Email:"),
     "type" => "textfield",
-    "value" => $cur["email"],
+    "value" => @$cur["email"],
   );  
 
   $form["f_name"] = array(
     "label" => t("First name:"),
     "type" => "textfield",
-    "value" => $cur["f_name"],
+    "value" => @$cur["f_name"],
   );  
 
   $form["l_name"] = array(
     "label" => t("Last name:"),
     "type" => "textfield",
-    "value" => $cur["l_name"],
+    "value" => @$cur["l_name"],
   );  
 
   $form["is_disabled"] = array(
     "label" => t("Is disabled:"),
     "type" => "textfield",
-    "value" => $cur["is_disabled"],
+    "value" => @$cur["is_disabled"],
     "size" => 5,
     "description" => t("Enter only 1 or 0 (number one for 'yes', or number zero for 'no').  This setting means the user will
                         be ignored by FlightPath, and they will not be able to log in or be searched for.
@@ -902,21 +904,21 @@ function user_edit_user_form() {
   $form["college"] = array(
     "label" => t("College:"),
     "type" => "textfield",
-    "value" => $cur["college"],
+    "value" => @$cur["college"],
     "size" => 5,
   );  
     
   $form["department"] = array(
     "label" => t("Department:"),
     "type" => "textfield",
-    "value" => $cur["department"],
+    "value" => @$cur["department"],
     "size" => 30,
   );  
     
   $form["major_code_csv"] = array(
     "label" => t("Major code CSV:"),
     "type" => "textfield",
-    "value" => $cur["major_code_csv"],
+    "value" => @$cur["major_code_csv"],
     "size" => 60,
     "maxlength" => 255,
     "description" => t("Enter the major codes which this faculty member is over, separated by commas.  Ex: ACCT,MATH

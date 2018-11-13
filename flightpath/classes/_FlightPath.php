@@ -1919,6 +1919,24 @@ class _FlightPath extends stdClass
                 $course->load_descriptive_data();
               }
 
+
+              ////////////////////
+              // Logan's change: https://bytetask.com/node/2455
+              
+              // If we have the setting which says we should skip if it's already been completed/enrolled for this term,
+              // then we should do that.
+              if (variable_get("remove_advised_when_course_taken", "no") == "yes") {
+                // First, see if this advised course has been attempted already.
+                if ($this->student->list_courses_taken->find_specific_course($course->course_id, $advised_term_id)) {
+                  // Yep, found it!  So, skip this one.
+                  continue;
+                }
+              }
+              
+              //////////////////////////
+
+
+
               //if ($course->bool_advised_to_take != true && !is_object($course->courseFulfilledBy))
               if ($course->bool_advised_to_take != true && $course->course_list_fulfilled_by->is_empty == true)
               {

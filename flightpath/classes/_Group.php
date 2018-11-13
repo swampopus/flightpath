@@ -148,7 +148,11 @@ class _Group extends stdClass
     $this->list_groups->reset_counter();
     while($this->list_groups->has_more()) {
       $g = $this->list_groups->get_next();
-      $rtn = array_merge($rtn, $g->get_course_id_array());
+      
+      // $rtn = array_merge($rtn, $g->get_course_id_array());      
+      // Fix by Logan Buth: https://bytetask.com/node/2456
+      $rtn = $rtn + $g->get_course_id_array();
+      
     }
 
     return $rtn;

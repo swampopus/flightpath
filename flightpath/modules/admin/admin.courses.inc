@@ -9,6 +9,16 @@
 function admin_display_courses() {
   $rtn = "";
 
+
+  // TODO: Do this using $render array, so it can be altered
+  // by hook_content_alter
+  
+  $render = array();
+  $render['#id'] = 'admin_display_courses';
+  
+
+
+
   $de_catalog_year = admin_get_de_catalog_year();
 
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
@@ -42,9 +52,16 @@ function admin_display_courses() {
   $_SESSION["dec_lr"] = $lr;
 
 
-  fp_set_title(t("Courses for @year", array("@year" => $de_catalog_year)));
+  //fp_set_title(t("Courses for @year", array("@year" => $de_catalog_year)));
 
-  $rtn .= "<h2 class='title'>" . t("Courses for @year", array("@year" => $de_catalog_year)) . "</h2>";
+  $render['title_top'] = array(
+    'value' => "<h2 class='title'>" . t("Courses for @year", array("@year" => $de_catalog_year)) . "</h2>",
+  );
+  
+  
+
+
+  $html = "";
 
   $letter_ranges = array(
     "A" => array("A", "AZZZZ"),
@@ -68,13 +85,13 @@ function admin_display_courses() {
   );
 
 
-  $rtn .= "<div class='admin-courses-select-letter-bar'>
+  $html .= "<div class='admin-courses-select-letter-bar'>
           ";
   foreach($letter_ranges as $disp => $vals) {
-    $rtn .= l($disp, "admin/courses", "de_catalog_year=$de_catalog_year&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link")) . " &nbsp; ";
+    $html .= l($disp, "admin/courses", "de_catalog_year=$de_catalog_year&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link")) . " &nbsp; ";
   }
 
-$rtn .= "</div>                       
+  $html .= "</div>                       
         <div class='tenpt'>             
         <div style='padding: 5px;'>          
         " . l(t("Add a course for @year", array("@year" => $de_catalog_year)), "admin/courses/edit-course", "course_id=new&de_catalog_year=$de_catalog_year") . "
@@ -88,22 +105,32 @@ $rtn .= "</div>
 
   $exclude_line = "and exclude != 1";
   if ($show_hidden == "yes") {
-    $rtn .= "<div class='tenpt'><b>" . t("Showing excluded courses.") . " ";
-    $rtn .= l(t("Hide?"), "admin/courses", "de_catalog_year=$de_catalog_year&show_hidden=no");
-    $rtn .= "</b></div>";
+    $html .= "<div class='tenpt'><b>" . t("Showing excluded courses.") . " ";
+    $html .= l(t("Hide?"), "admin/courses", "de_catalog_year=$de_catalog_year&show_hidden=no");
+    $html .= "</b></div>";
     $exclude_line = "";
 
   }  
   else {
-    $rtn .= "<div class='tenpt'><b>" . t("Hiding excluded courses.") . " ";
-    $rtn .= l(t("Show?"), "admin/courses", "de_catalog_year=$de_catalog_year&show_hidden=yes");
-    $rtn .= "</b></div>";   
+    $html .= "<div class='tenpt'><b>" . t("Hiding excluded courses.") . " ";
+    $html .= l(t("Show?"), "admin/courses", "de_catalog_year=$de_catalog_year&show_hidden=yes");
+    $html .= "</b></div>";   
   }
 
-  $rtn .= "<hr><br>
-          <table border='0' cellpadding='3' cellspacing='0'>";
+  $html .= "<hr><br>";
+  
+  
 
-
+  $render['upper_links'] = array(
+    'value' => $html,
+  );
+  
+    
+  
+  $render['courses_table_top'] = array(
+    'value' => "<table border='0' cellpadding='3' cellspacing='0' class='disp-courses-table'>",
+  );  
+  
 
   $q = "SELECT * FROM draft_courses
                         WHERE 
@@ -168,7 +195,7 @@ $rtn .= "</div>
     $display_subject_id = $db_subject_id;
     $db_subject_id = str_replace("&","_A_",$db_subject_id);
 
-
+/*
     $rtn .= "<tr style='$spanstyle'>
           <td valign='top' width='90%'><a name='course_$db_course_id'></a>";
     $rtn .= "<div style='$spanstyle padding:3px;'>";
@@ -184,10 +211,52 @@ $rtn .= "</div>
           $val_names
           </td>
         </tr>";
+*/
+
+    $render['course_row_' . $db_course_id] = array(
+      'value' => "
+                    <tr style='$spanstyle'>
+                      <td valign='top' width='90%'>
+                          <a name='course_$db_course_id'></a>
+                          <div style='$spanstyle padding:3px;'>
+    
+           " . l("$display_subject_id $db_course_num - $db_title", "admin/courses/edit-course", "course_id=$db_course_id&subject_id=$db_subject_id&course_num=$db_course_num&de_catalog_year=$de_catalog_year") . " - $hrs$rep_hours</div>
+
+                  </td>
+                  <td valign='top' width='5%'>
+                      $ex_names
+                  </td>
+                  
+                  <td valign='top' width='5%'>
+                        $val_names
+                  </td>
+                </tr>",     
+
+           'data' => array(
+                    'course_id' => $db_course_id,
+                    'catalog_year' => $de_catalog_year,
+                    'db_row' => $cur,
+                    'subject_id' => $db_subject_id,
+                    'course_num' => $db_course_num,
+                  ),                
+                
+    );
+  
+
+
+
 
   } // while
 
-  $rtn .= "</table>";
+  
+  $render['courses_table_bottom'] = array(
+    'value' => "</table>",
+  );
+  
+  
+  
+  
+  $rtn .= fp_render_content($render);
 
   
   return $rtn;

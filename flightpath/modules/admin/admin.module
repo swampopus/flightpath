@@ -619,6 +619,8 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   $new_year = $values["destination_year"];
   $old_year = $values["source_year"];
   
+  $form_state['duplication']['src_catalog_year'] = $old_year;
+  $form_state['duplication']['dest_catalog_year'] = $new_year;
   
   /////////////////////////////////////////////////////////////////////
   // We must first begin by deleting any entries for the new_year
@@ -675,6 +677,8 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   	// Now, duplicate it for the new_year.
   	$db->duplicate_course_for_year($course, $new_year);
   
+    // Store what courses we are working on, for other modules.
+    $form_state['courses'][] = $db_course_id;  
   
   }
    
@@ -783,6 +787,7 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
     // Store what degrees we are working on, for other modules.
     $form_state['degrees'][] = array(
       'src' => $db_degree_id,
+      'src_catalog_year' => $old_year,
       'dest' => $new_degree_id,
       'dest_major_code' => $db_major_code,
       'dest_catalog_year' => $new_year,

@@ -364,6 +364,7 @@ function admin_copy_degree_form_submit($form, &$form_state) {
     // Let's save our src_degree_id and dest_degree_id in $form_state, for other possible modules to use.
     $form_state['degrees'][] = array(
       'src' => $src_degree_id,
+      'src_catalog_year' => $de_catalog_year,
       'dest' => $dest_degree_id,
       'dest_major_code' => $dest_code,
       'dest_catalog_year' => $de_catalog_year,
@@ -684,34 +685,56 @@ function admin_add_degree_form_submit($form, $form_submit) {
  * This function lists all of our degrees on the screen, for a given year
  */
 function admin_display_degrees() {
+  
+  // Do this using $render array, so it can be altered
+  // by hook_content_alter
+  
+  $render = array();
+  $render['#id'] = 'admin_display_degrees';
+  
    
   $de_catalog_year = admin_get_de_catalog_year();
   $rtn = "";    
     
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
 
-  $rtn .= "<h2 class='title'>" . t("Degrees for @year", array("@year" => $de_catalog_year)) . "</h2>";  
-
+  
+  //$rtn .= "<h2 class='title'>" . t("Degrees for @year", array("@year" => $de_catalog_year)) . "</h2>";  
+  
+  $render['title_top'] = array(
+    'value' => "<h2 class='title'>" . t("Degrees for @year", array("@year" => $de_catalog_year)) . "</h2>",
+  );
+  
+  /*
   $rtn .= "<div class='admin-degrees-upper-links'>";  
   $rtn .= l("Add new degree plan (major, degree plan, or track)", "admin/degrees/add-degree", "de_catalog_year=$de_catalog_year");
   $rtn .= " &nbsp; &nbsp; | &nbsp; &nbsp; ";
   $rtn .= l("Copy a degree plan", "admin/degrees/copy-degree", "de_catalog_year=$de_catalog_year");
   $rtn .= "</div>";
+  */
+
+  $render['upper_links'] = array(
+    'value' => "<div class='admin-degrees-upper-links'>  
+                " .  l("Add new degree plan (major, degree plan, or track)", "admin/degrees/add-degree", "de_catalog_year=$de_catalog_year") . "
+                &nbsp; &nbsp; | &nbsp; &nbsp;
+                " . l("Copy a degree plan", "admin/degrees/copy-degree", "de_catalog_year=$de_catalog_year") . "</div>",
+  );
+
   
   $filter_class = @$_REQUEST["filter_class"];
   
-  
-  $rtn .= "<div class='degrees-filter'>
+  $html = "";
+  $html .= "<div class='degrees-filter'>
               <form id='filter-form' action='" . fp_url("admin/degrees") . "' method='GET'>
               <input type='hidden' name='de_catalog_year' value='$de_catalog_year'>
           ";
           
   if (!variable_get("clean_urls", FALSE)) {
     // Clean URLs is not enabled, so add in the q=admin/degrees, to make this form work.
-    $rtn .= "<input type='hidden' name='q' value='admin/degrees'>";
+    $html .= "<input type='hidden' name='q' value='admin/degrees'>";
   }
           
-  $rtn .= "
+  $html .= "
               <b>Filter list by...</b>
               <br>Class: &nbsp; 
            
@@ -725,17 +748,21 @@ function admin_display_degrees() {
       $sel = "";
       if ($machine_name == $filter_class) $sel = "selected";
               
-      $rtn .= "<option value='$machine_name' $sel>$level - $title</option>";
+      $html .= "<option value='$machine_name' $sel>$level - $title</option>";
     }
   }          
                                       
-  $rtn .= " </select>            
+  $html .= " </select>            
             </form>
                
            </div>";
   
   
+  $render['degrees_filter'] = array(
+    'value' => $html,    
+  );
   
+  /*
   $rtn .= "<table class='degrees-table' border='0' width='100%' cellpadding='5' cellspacing='0'>
             <tr>
               <th width='8%'>Type</th>
@@ -743,6 +770,17 @@ function admin_display_degrees() {
               <th width='60%'>Title</th>
               <th>Code</th>
             </tr>";
+  */
+  
+  $render['degrees_table_top'] = array(
+    'value' => "<table class='degrees-table' border='0' width='100%' cellpadding='5' cellspacing='0'>
+                  <tr>
+                    <th width='8%'>Type</th>
+                    <th width='15%'>Class</th>
+                    <th width='60%'>Title</th>
+                    <th>Code</th>
+                  </tr>",
+  );
   
 
   $res = db_query("SELECT * FROM draft_degrees
@@ -821,10 +859,12 @@ function admin_display_degrees() {
     $on_mouse_over = "
             onmouseover='$(this).addClass(\"selection_highlight\");'
             onmouseout='$(this).removeClass(\"selection_highlight\");'
-    ";      
+          ";      
 
 
-                
+    
+
+         /*       
     $rtn .= "<tr
                   
                   $on_mouse_over
@@ -838,12 +878,51 @@ function admin_display_degrees() {
               <td valign='top' class='degree-title'>$outside$db_title</td>
               <td valign='top' class='degree-major-code'>$db_major_code</td>    
             </tr>";        
+      */
+
+    $render['degree_row_' . $db_degree_id] = array(
+      'value' => "<tr
+                  
+                  $on_mouse_over
+                  
+                  style='cursor:pointer;'
+                  onClick='window.location=\"$url\"'
+                  class='$extra_class class-$db_degree_class class-level-" . $class_details["level_num"] . " '
+             >
+              <td valign='top' class='degree-type'>$db_degree_type</td>
+              <td valign='top' class='degreee-class'>$disp_class</td>
+              <td valign='top' class='degree-title'>$outside$db_title</td>
+              <td valign='top' class='degree-major-code'>$db_major_code</td>    
+            </tr>
+                ",
+                
+        'data' => array(
+                    'degree_id' => $db_degree_id,
+                    'major_code' => $db_major_code,
+                    'title' => $db_title,
+                    'catalog_year' => $db_catalog_year,
+                    'degree_type' => $db_degree_type,
+                    'degree_class' => $db_degree_class,
+                    'db_row' => $cur,
+                  ),                
+                
+    );
 
 
   }    
+ 
+ 
   
-  $rtn .= "</table>";
+  //$rtn .= "</table>";
+ 
+  $render['degrees_table_bottom'] = array(
+    'value' => "</table>",
+  );
   
+  
+  
+  
+  $rtn .= fp_render_content($render);
   
   
   return $rtn;

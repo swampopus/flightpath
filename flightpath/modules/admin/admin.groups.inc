@@ -1127,6 +1127,14 @@ function admin_get_group_courses(Group $group) {
 function admin_display_groups() {
   $rtn = "";
   
+  // Do this using $render array, so it can be altered
+  // by hook_content_alter
+  
+  $render = array();
+  $render['#id'] = 'admin_display_groups';
+  
+  
+  
   $de_catalog_year = admin_get_de_catalog_year();
   
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
@@ -1134,8 +1142,27 @@ function admin_display_groups() {
   
   $db2 = new DatabaseHandler();
 
-  fp_set_title(t("Edit Groups for") . " $de_catalog_year");
+  //fp_set_title(t("Edit Groups for") . " $de_catalog_year");
 
+  
+  $render['title_top'] = array(
+    'value' => "<h2 class='title'>" . t("Edit Groups for @de_catalog_year", array("@de_catalog_year" => $de_catalog_year)) . "</h2>",
+  );
+  
+  
+  $render['upper_links'] = array(
+    'value' => "        Options:
+                  <ul style='margin-top: 5px;'>          
+                    <li>" . l(t("Add a new group to this year"), "admin/groups/edit-group", "de_catalog_year=$de_catalog_year&group_id=new") . "</li>
+                    <li>" . l(t("Process all group definitions & catalog repeats for this year"), "admin/groups/process-all-definitions", "de_catalog_year=$de_catalog_year") . "</li>
+                    </li>
+                  </ul>
+                    <div align='center'>" . t("Hint: use CTRL-F to search groups quickly") . "</div>
+                ",
+  );
+    
+  
+  /*
   $rtn .= "
       <h2 class='title'>" . t("Edit Groups for @de_catalog_year", array("@de_catalog_year" => $de_catalog_year)) . "</h2>
         Options:
@@ -1154,6 +1181,20 @@ function admin_display_groups() {
           <th align='center'>" . t("Used") . "</th>
         </tr>
       ";
+  */
+
+  $render['groups_table_top'] = array(
+    'value' => "<table border='0' cellpadding='2' width='100%' class='admin-groups-list'>
+                <tr>
+                  <th>" . t("Title") . "</th>
+                  <th>" . t("Internal Name") . "</th>
+                  <th align='center'>Pri</th>
+                  <th align='center'>i</th>
+                  <th align='center'>" . t("Used") . "</th>
+                </tr>",
+  );
+  
+
 
   $on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
               onmouseout=\"style.backgroundColor='white'\" ";
@@ -1184,6 +1225,7 @@ function admin_display_groups() {
       $db_title = "[" . t("NO TITLE SPECIFIED") . "]";
     }
 
+/*
     $rtn .= "<tr $on_mouse_over>
           <td valign='top' class='tenpt'><a name='group_$db_group_id'></a>
             " . l($db_title, "admin/groups/edit-group", "group_id=$db_group_id&de_catalog_year=$de_catalog_year") . "
@@ -1202,12 +1244,54 @@ function admin_display_groups() {
           </td>
 
           
-        </tr>"; 
+        </tr>";
+ */
+ 
+ 
+    $render['group_row_' . $db_group_id] = array(
+      'value' => "<tr $on_mouse_over>
+                    <td valign='top' class='tenpt'><a name='group_$db_group_id'></a>
+                      " . l($db_title, "admin/groups/edit-group", "group_id=$db_group_id&de_catalog_year=$de_catalog_year") . "
+                    </td>
+                    <td valign='top' class='tenpt'>
+                      <i>$db_group_name</i>$def_flag
+                    </td>
+                    <td valign='top' class='tenpt'>
+                      $db_priority
+                    </td>
+                    <td valign='top' class='tenpt'>
+                      <img src='" . fp_theme_location() . "/images/icons/$db_icon_filename' width='19'>
+                    </td>
+                    <td valign='top' class='tenpt'>
+                      $use_count <a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-show-group-use", "group_id=$db_group_id") . "\");'><img src='" . fp_theme_location() . "/images/popup.gif' border='0'></a>
+                    </td>
+          
+                    
+                  </tr>
+                ",
+                
+        'data' => array(
+                    'group_id' => $db_group_id,
+                    'db_row' => $cur,
+                    'use_count' => $use_count,
+                    'def_flag' => $def_flag,
+                  ),                
+                
+    );
+  
+ 
+ 
+   
   }
 
-  $rtn .= "</table>";
+  $render['groups_table_bottom'] = array(
+    'value' => "</table>",
+  );
   
   
+  
+  
+  $rtn .= fp_render_content($render);
   
   
   return $rtn;
