@@ -1204,19 +1204,18 @@ function admin_perm() {
 function admin_urgent_message_form() {
   $form = array();
 
-  $m = 0;
-  
-  $form["mark" . $m++] = array(
+  $form["mark_top"] = array(
     "type" => "markup",
-    "value" => "<p>" . t("Any message you enter here will be displayed at the top of every page in the system. 
-                  This is used to alert users that the system is about to be taken offline, or any other urgently-needed information.") . "</p>
-                  <p>" . t("To delete this message, simple delete all the text in the box and save.") . "</p>",
+    "value" => "<p>" . t("Any message you enter here will be displayed at the top of every page <b>for all users</b> in the system. 
+                  This is used to alert users that the system is about to be taken offline, or any other urgently-needed information.") . "</p>",
+                  
   );
   
   $form["urgent_msg"] = array(
     "type" => "textarea",
-    "label" => "Urgent message:",
+    "label" => "Global Urgent Message:",
     "value" => variable_get("urgent_msg", ""),
+    'description' => t("To delete this message, simple delete all the text in this box and save."),
   );
   
   return $form;

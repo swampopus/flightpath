@@ -1,5 +1,14 @@
 FlightPath 5.x Changelog
 ========================
+2018-12-15
+  Modified core's display of the Urgent Message screen, to better allow other modules
+  to make modifications.
+
+
+2018-11-26
+  Fixed bug where groups split over more than one semester block were not having courses assigned
+  to them correctly.  Partially due to them not having req_by_degree_id set.
+
 
 2018-11-13
   Added extra data to $form_state, when duplicating an entire year's worth of data.

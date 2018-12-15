@@ -3306,7 +3306,6 @@ function draw_menu_items($menu_array) {
 		// of the group.
 
 		$display_semesterNum = $place_group->assigned_to_semester_num;
-
     $req_by_degree_id = $group->req_by_degree_id;		
     
     // Make sure all courses and subgroups have the same req_by_degree_id set.
@@ -3319,12 +3318,11 @@ function draw_menu_items($menu_array) {
 		$group->list_courses->reset_counter();
 		while($group->list_courses->has_more())
 		{
-			$course = $group->list_courses->get_next();
-
+			$course = $group->list_courses->get_next();			
+			
 			// Do we have enough hours to keep going?
 			$fulfilled_hours = $display_course_list->count_hours("", FALSE, TRUE, FALSE, FALSE, $req_by_degree_id);
 			$remaining = $place_group->hours_required - $fulfilled_hours;
-
 
 			// If the course in question is part of a substitution that is not
 			// for this group, then we should skip it.
@@ -3344,6 +3342,8 @@ function draw_menu_items($menu_array) {
 				$c = $course->course_list_fulfilled_by->get_first();
         $ch = $c->get_hours($req_by_degree_id);
         
+        
+        
         // Because PHP has dumb floating point arithmatic, we are going to round our values to 8 places,
         // otherwise I was getting weird results like 0.34 < 0.34 == true.  I chose 8 places to make sure it wouldn't
         // actually cause the values to round and mess up the math.
@@ -3361,8 +3361,8 @@ function draw_menu_items($menu_array) {
 				$c->icon_filename = $group->icon_filename;
 				$c->title_text = "This course is a member of $group->title." . " ($place_group->requirement_type)";
 				$c->requirement_type = $place_group->requirement_type;
+				$c->req_by_degree_id = $req_by_degree_id;
         $display_course_list->add($c);
-        
 
         
 			}
@@ -3377,6 +3377,7 @@ function draw_menu_items($menu_array) {
 
 				$c->temp_flag = true;
 				$c->icon_filename = $group->icon_filename;
+				$c->req_by_degree_id = $req_by_degree_id;
 				$c->title_text = t("The student has been advised to take this course to fulfill a @gt requirement.", array("@gt" => $group->title));
 				$display_course_list->add($c);
         
@@ -3417,6 +3418,7 @@ function draw_menu_items($menu_array) {
 						$c->icon_filename = $group->icon_filename;
 						$c->title_text = "This course is a member of $group->title." . "($place_group->requirement_type)";
             $c->requirement_type = $place_group->requirement_type;
+						$c->req_by_degree_id = $req_by_degree_id;
 						
 						if (!$display_course_list->find_match($c))
 						{ // Make sure it isn't already in the display list.
@@ -3444,6 +3446,7 @@ function draw_menu_items($menu_array) {
 
 						$c->temp_flag = true;
 						$c->icon_filename = $group->icon_filename;
+						$c->req_by_degree_id = $req_by_degree_id;
 						$c->title_text = "The student has been advised to take this course to fulfill a $group->title requirement.";
 						if (!$display_course_list->find_match($c))
 						{
@@ -3494,12 +3497,11 @@ function draw_menu_items($menu_array) {
     
     
 		if ($remaining > 0)
-		{
-		  
+		{		  
       $rowclass = "";
       // If we have met the min hours (if the group even HAS min hours) then add a class to $rowclass,
       // so we can hide it or whatever with CSS.
-      if ($group->has_min_hours_allowed()) {        
+      if ($group->has_min_hours_allowed()) {              
         if ($test_hours >= $group->min_hours_allowed) {
           $rowclass .= "group-select-min-hours-fulfilled";
         }
