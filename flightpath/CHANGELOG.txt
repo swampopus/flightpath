@@ -1,5 +1,11 @@
 FlightPath 5.x Changelog
 ========================
+
+2018-12-18
+  Added new hook: hook_alter_currently_advising_box.  This allows modules to modify or add to the "currently
+  advising" box, which appears at the top of the screen when a student is selected for advising.
+
+
 2018-12-15
   Modified core's display of the Urgent Message screen, to better allow other modules
   to make modifications.

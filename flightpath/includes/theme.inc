@@ -801,6 +801,13 @@ function fp_build_tab_array($page) {
       array_push($display_array, t("Cumulative:") . " ~~ " . $student->cumulative_hours . " " . t("hrs") . ". &nbsp;" . fp_truncate_decimals($student->gpa, 3) . " " . t("GPA"));
     }
 
+
+    // Invoke a hook, letting other modules act on the "display array".
+    invoke_hook('alter_currently_advising_box', array(&$display_array));
+
+
+
+
     if ($student->student_id > 1 || $bool_blank == true)
     { // Make sure we have selected a student! (or are viewing a blank plan)
       // Now, go through the array and display it.
@@ -1395,7 +1402,12 @@ function fp_render_menu_item($item, $bool_check_user_access = TRUE) {
 }
 
 
-
+/**
+ * Alias of pretty_print($var)
+ */
+function ppm($var) {
+  pretty_print($var);
+}
 
 function pretty_print($var) {
   print "<pre>" . print_r($var, true) . "</pre>";

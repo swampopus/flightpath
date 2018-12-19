@@ -41,6 +41,31 @@ function hook_form_alter(&$form, $form_id) {
 
 
 /**
+ * This will let us re-arrange or add new elements to the Currently Advising box,
+ * which appears at the top of the screen once a student has been selected (or for
+ * a student when they log in).
+ * 
+ * Values are stored as Strings for each element, in the format:
+ *     label ~~ value
+ * For example:
+ *     [0] Name: ~~ John Doe
+ *     [1] Degree: ~~ Accounting
+ * 
+ * NOTE: Because of when this hook is invoked, the fpm() function will not work
+ * correctly to debug variables.  Use ppm($var) instead.
+ */
+function mside_alter_currently_advising_box(&$display_array) {
+
+  // Add to the end...  
+  $display_array[] = 'Extra: ~~ Values';
+  
+}
+
+
+
+
+
+/**
  * Similar to hook_form_alter, this function lets other modules alter
  * content which is being rendered through the "render" system.
  * 
@@ -1009,7 +1034,7 @@ function hook_translate(&$str, $langcode = NULL) {
  * $items array if you want those changes saved, as seen in the xample below.
  * 
  */
-function schools_menu_alter(&$items) {
+function hook_menu_alter(&$items) {
   foreach ($items as $path => $item) {    
     if ($path == 'admin/config/some-path') { 
       $items[$path]['access_callback'] = 'new_function_name';
