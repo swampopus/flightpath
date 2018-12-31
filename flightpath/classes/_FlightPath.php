@@ -716,11 +716,6 @@ class _FlightPath extends stdClass
     $list_requirements->sort_substitutions_first($student->list_substitutions, $group_id);
 
 
-    if ($bool_perform_assignment == FALSE && $group_id == "3268747_1006254") {
-      $list_requirements->load_course_descriptive_data();  
-    }
-
-
     $list_requirements->reset_counter();
     while($list_requirements->has_more())
     {
@@ -1498,7 +1493,7 @@ class _FlightPath extends stdClass
 
 
       // Make sure degree_id is a valid number for the database.
-      if (!is_numeric($degree_id) || $degree_id == "" || intval($degree_id) < 0) {
+      if (!is_numeric($degree_id) || intval($degree_id) < 0) {
         $degree_id = 0;
       }
 

@@ -54,7 +54,7 @@ function hook_form_alter(&$form, $form_id) {
  * NOTE: Because of when this hook is invoked, the fpm() function will not work
  * correctly to debug variables.  Use ppm($var) instead.
  */
-function mside_alter_currently_advising_box(&$display_array) {
+function hook_alter_currently_advising_box(&$display_array) {
 
   // Add to the end...  
   $display_array[] = 'Extra: ~~ Values';

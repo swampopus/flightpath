@@ -7,7 +7,7 @@
  * This script will determine which page the user is trying to view, 
  * and display it for them.
  */
-ini_set('memory_limit',             '1024M');  // For unknown reasons, I have to manually set this now, at least on my Windows machine
+
 
 /**
  * This function makes sure we auto-load our classes, if we need to.
