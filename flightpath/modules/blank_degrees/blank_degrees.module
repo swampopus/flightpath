@@ -77,7 +77,7 @@ function blank_degrees_menu_handle_replacement_pattern($str) {
  */
 function blank_degrees_prereqs_get_prereq_warnings_for_course(&$rtn, $course, $student) {
   
-  if (isset($_REQUEST['blank_degree_id'])) {
+  if (isset($_REQUEST['blank_degree_id']) && $_REQUEST['blank_degree_id'] != '') {
     // We are on a blank degree, so remove any prereq warnings.
     $rtn = array();
   }

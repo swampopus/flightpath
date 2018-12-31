@@ -1069,8 +1069,15 @@ function advise_display_popup_group_select() {
 
   
   // If this is a "blank" degree, make sure we set the degree_id correctly.
-  if($blank_degree_id != "") {    
-    $degree_plan = fp_load_degree($blank_degree_id);
+  if($blank_degree_id != "") {
+    // If req_by_degree_id isn't blank or zero, then use it instead.
+    if ($req_by_degree_id != '' && intval($req_by_degree_id) != 0) {
+      $degree_plan = fp_load_degree($req_by_degree_id);
+    }
+    else {
+      // Default behavior    
+      $degree_plan = fp_load_degree($blank_degree_id);
+    }
     $fp->degree_plan = $degree_plan;
     $screen->degree_plan = $degree_plan;
     $screen->bool_blank = TRUE;
