@@ -604,9 +604,9 @@ class _FlightPath extends stdClass
 
 
       } 
-      else {
-        // required_group_id != 0.  So, does this
-        // degree plan have a group with this id?
+      else if ($bool_sub_valid && $required_group_id != 0) {
+        // required_group_id != 0, meaning, NOT the bare degree plan.
+        // So, does this degree plan have a group with this id (required_group_id)?
         $bool_sub_valid = false;
         if ($g = $this->degree_plan->find_group($required_group_id)) {
           $bool_sub_valid = true;
