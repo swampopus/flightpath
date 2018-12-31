@@ -10,6 +10,8 @@ FlightPath 5.x Changelog
   a simple "else" to an "else if" to make sure some logic doesn't get executed more
   than necessary.  (Thanks to Logan Buth #2316)
   
+  Various QOL issues and fixes.  Thanks to Logan Buth #2488.
+  
 
 2018-12-18
   Added new hook: hook_alter_currently_advising_box.  This allows modules to modify or add to the "currently

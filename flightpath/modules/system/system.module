@@ -1606,7 +1606,7 @@ function system_get_available_themes() {
             $info_contents = file_get_contents("$start_dir/$file/$file.info");
               
             // From the info_contents variable, split up and place into an array.
-            $info_details_array = array("path" => "", "module" => "", 
+            $info_details_array = array("name" => t("Name Not Set.  Configure theme's .info file."), "path" => "", "module" => "", 
                                         "schema" => "", "core" => "", "description" => "", 
                                         "requires" => "", "version" => "",
                                         "required" => "", );

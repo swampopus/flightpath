@@ -1296,28 +1296,6 @@ function fp_render_curved_line($text) {
   // Will simply draw a curved title bar containing the $title
   // as the text.
 
-  /*
-  $img_path = fp_theme_location();
-  
-
-  $rtn = "
-   <table border='0' class='blueTitle' width='100%' cellpadding='0' cellspacing='0'>
-     <tr>
-      <td width='10%' align='left' valign='top'><img src='$img_path/images/corner_tl.gif'></td>
-      <td width='80%' align='center' rowspan='2'>
-       <span class='tenpt'><b>$text</b></span>
-      </td>
-      <td width='10%' align='right' valign='top'><img src='$img_path/images/corner_tr.gif'></td>
-     </tr>
-     <tr>
-      <td align='left' valign='bottom'><img src='$img_path/images/corner_bl.gif'></td>
-      <td align='right' valign='bottom'><img src='$img_path/images/corner_br.gif'></td>
-     </tr> 
-    </table>
-";
-*/
- 
-
   $rtn = "
     <div class='blueTitle' style='text-align: center; border-radius: 5px; padding: 1px;'>
       <span class='tenpt'><b>$text</b></span>

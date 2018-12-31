@@ -10,9 +10,8 @@ function admin_display_courses() {
   $rtn = "";
 
 
-  // TODO: Do this using $render array, so it can be altered
+  // Do this using $render array, so it can be altered
   // by hook_content_alter
-  
   $render = array();
   $render['#id'] = 'admin_display_courses';
   
@@ -194,24 +193,6 @@ function admin_display_courses() {
     // remove special chars from subject_id...
     $display_subject_id = $db_subject_id;
     $db_subject_id = str_replace("&","_A_",$db_subject_id);
-
-/*
-    $rtn .= "<tr style='$spanstyle'>
-          <td valign='top' width='90%'><a name='course_$db_course_id'></a>";
-    $rtn .= "<div style='$spanstyle padding:3px;'>";
-    //<a href='admin.php?performAction=editSpecificCourse&course_id=$db_course_id&subject_id=$db_subject_id&course_num=$db_course_num&de_catalog_year=$de_catalog_year'>$display_subject_id $db_course_num - $db_title</a> - $hrs$rep_hours</div>";
-    $rtn .= l("$display_subject_id $db_course_num - $db_title", "admin/courses/edit-course", "course_id=$db_course_id&subject_id=$db_subject_id&course_num=$db_course_num&de_catalog_year=$de_catalog_year") . " - $hrs$rep_hours</div>";
-
-    $rtn .= "</td>
-          <td valign='top' width='5%'>
-          $ex_names
-          </td>
-          
-          <td valign='top' width='5%'>
-          $val_names
-          </td>
-        </tr>";
-*/
 
     $render['course_row_' . $db_course_id] = array(
       'value' => "
