@@ -3472,7 +3472,14 @@ function draw_menu_items($menu_array) {
 
 		$rtn .= $this->display_group_course_list($display_course_list, $group, $display_semesterNum);
 
-		$fulfilled_hours = $display_course_list->count_hours("", false, false, TRUE, false, $req_by_degree_id);
+		
+		// original: $fulfilled_hours = $display_course_list->count_hours("", false, false, TRUE, false, $req_by_degree_id);
+    // Changing to new line, to match other argument list for previous occurances of 'fulfilled_hours'. This makes it so that
+    // a zero-hour course does not "use up" a 1 hour spot in the course hour counts.
+    // TODO:  This might cause a group of *only* zero hour courses to never count as being filled.
+    // TODO:  Maybe this difference between the original and this line should be a setting?  Or per-group?    
+    $fulfilled_hours = $display_course_list->count_hours("", FALSE, TRUE, FALSE, FALSE, $req_by_degree_id);
+    
     
 		$fulfilled_credit_hours = $display_course_list->count_credit_hours("",false,true);
 		
