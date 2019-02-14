@@ -808,7 +808,7 @@ function fp_build_tab_array($page) {
 
 
 
-    if ($student->student_id > 1 || $bool_blank == true)
+    if ($student->student_id != "" || $bool_blank == true)
     { // Make sure we have selected a student! (or are viewing a blank plan)
       // Now, go through the array and display it.
       for ($t = 0; $t < count($display_array); $t = $t + 2)

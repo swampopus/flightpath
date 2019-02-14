@@ -769,9 +769,9 @@ db_query($q);
 $q = "
 CREATE TABLE `students` (
   `cwid` varchar(30)  ,
-  `cumulative_hours` varchar(5)   DEFAULT '',
-  `gpa` varchar(5)   DEFAULT '',
-  `rank_code` varchar(5)   DEFAULT '',  
+  `cumulative_hours` varchar(20)   DEFAULT '',
+  `gpa` varchar(20)   DEFAULT '',
+  `rank_code` varchar(20)   DEFAULT '',  
   `catalog_year` int(11)   DEFAULT '2006',
   `is_active` tinyint(11)   DEFAULT '0',
   PRIMARY KEY (`cwid`),

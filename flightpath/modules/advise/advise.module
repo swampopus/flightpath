@@ -265,7 +265,7 @@ function advise_can_access_view($student_id = "") {
   // must be logged in first...
   if (!user_has_permission("access_logged_in_content")) return FALSE;
 
-  if ($student_id == "" || $student_id == 0) return FALSE;
+  if ($student_id == "" || $student_id === 0) return FALSE;
   
   if ($user->id == 1) return TRUE; // the admin user.
   
@@ -283,7 +283,7 @@ function advise_can_access_view($student_id = "") {
   // Is this user viewing THEIR OWN advising session?
   if (user_has_permission("view_own_advising_session")) {
   
-    if ($student_id == $user->cwid && ($student_id != "" && $student_id != 0)) return TRUE;
+    if ($student_id == $user->cwid && ($student_id != "" && $student_id !== 0)) return TRUE;
   }
   
   

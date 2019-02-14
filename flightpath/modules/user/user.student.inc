@@ -744,11 +744,11 @@ function user_edit_student_user_form_submit($form, $form_state) {
     db_query("INSERT INTO users (user_name, password, is_student, email, cwid, f_name, l_name, is_disabled)
               VALUES ('?', '?', '1', '?', '?', '?', '?', '?')
               ", $values["new_user_name"], user_hash_password($values["new_password"]), $values["email"], $values["new_student_cwid"],
-                 $values["f_name"], $values["l_name"], $values["is_disabled"]);
+                 $values["f_name"], $values["l_name"], intval($values["is_disabled"]));
     db_query("INSERT INTO students (cwid, cumulative_hours, gpa, rank_code, catalog_year, is_active)
               VALUES ('?', '?', '?', '?', '?', '?')
              ", $values["new_student_cwid"], $values["cumulative_hours"], $values["gpa"], $values["rank_code"],
-                $values["catalog_year"], $values["is_active"]);
+                $values["catalog_year"], intval($values["is_active"]));
                                   
     fp_add_message(t("User created successfully."));
     

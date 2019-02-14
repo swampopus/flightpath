@@ -1,6 +1,19 @@
 FlightPath 5.x Changelog
 ========================
 
+2019-02-13
+  Enforced integer constraint when adding a new student user (for is_disabled and is_active).
+  
+  Fixed bug in advise.module which was preventing alphabetic CWIDs from working.
+  
+
+2019-02-09
+  Changed cumulative_hours in students table (as well as a couple other fields) to be
+  varchar(20) instead of varchar(5).  This is because at only 5 characters, students
+  with 123.45 hours were violating the constraint on the table, and causing routines
+  to die.
+
+
 2018-12-31
   Made small changes to advise.module and blank_degrees.module, so that if a blank degree plan
   is loaded with prereqs, they are not blocked.  Also, to make it easier for custom modules
