@@ -71,6 +71,12 @@ function stats_menu() {
   );
   
 
+  
+  /**
+   * 
+   * Removing due to lack of use, and incompatibility with FP5
+   * 
+   * 
   $items["stats/reports/selected-degree-options"] = array(
     "title" => "Selected Degree Options",
     "description" => "This report will display information about which degree options students/advisors are selecting for particular majors 
@@ -90,7 +96,7 @@ function stats_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
     "weight" => 200,
   );
-
+  */
 
 
 
@@ -160,7 +166,7 @@ function stats_menu() {
 
 
   $items["stats/reports/major-students-progress"] = array(
-    "title" => "Major Students Progresss - CSV Export (Beta)",
+    "title" => "Major Students Progresss - CSV Export",
     "description" => "A CSV report showing students in a major, and their progress percentages in that major.  Currently in 'Beta' status.",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("stats_report_major_students_progress_form"),
@@ -557,7 +563,7 @@ function stats_report_course_use_summary() {
  *
  * @return unknown
  */
-function stats_report_selected_degree_options() {
+function z__stats_report_selected_degree_options() {
   $rtn = "";
   
   

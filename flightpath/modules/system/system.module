@@ -1281,6 +1281,19 @@ function system_school_data_form() {
   );
 
   
+  $form["pie_chart_gpa"] = array(
+    "label" => t("Should pie charts show GPAs?"),
+    "type" => "select",
+    "options" => array("no" => "No", "yes" => "Yes"),
+    "value" => variable_get("pie_chart_gpa", "no"),
+    "hide_please_select" => TRUE,
+    "description" => t("If set to 'Yes', the GPA will be displayed below each pie chart on the View and What If screens.
+                        If unsure what to select, choose 'no'."),
+  );
+  
+  
+  
+  
   $form["developmentals_title"] = array(
     "label" => t("Developmentals semester block title:"),
     "type" => "textfield",

@@ -155,14 +155,13 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
   	
   	// We need the "total" number of students in the selected major.    
     $res = db_query("SELECT COUNT(*) as count FROM students a, users b, student_degrees c
-                     WHERE major_code = '?'
+                     WHERE major_code = ?
                      AND is_active = '1'
                      AND is_student = '1'
                      AND a.cwid = b.cwid
                      AND a.cwid = c.student_id                     
-                     GROUP BY a.cwid
-                     ORDER BY l_name, f_name 
                      
+                     ORDER BY l_name, f_name 
                      
                      ", $major);  	
     $cur = db_fetch_array($res);
@@ -184,12 +183,12 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
 
   // Find active students with this major
   $res = db_query("SELECT * FROM students a, users b, student_degrees c
-                   WHERE major_code = '?'
+                   WHERE major_code = ?
                    AND is_active = '1'
                    AND is_student = '1'
                    AND a.cwid = b.cwid                   
                    AND a.cwid = c.student_id
-                   GROUP BY a.cwid
+                   
                    ORDER BY l_name, f_name
                    
                    LIMIT $current, $limit", $major);
@@ -269,16 +268,22 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
       ////////////////
       
       // Okay, perform the percentage calculations...
-      $degree_plan->calculate_progress_hours();
-		  $degree_plan->calculate_progress_quality_points();
+      $degree_plan->calculate_progress_hours(FALSE, $requirement_types);
+		  $degree_plan->calculate_progress_quality_points(FALSE, $requirement_types);
       
+		  $use_degree_id = $degree_id;
+		  if (!isset($degree_plan->gpa_calculations[$use_degree_id])) {
+		    $use_degree_id = 0;
+		  }
+		  
+		  
   		foreach ($requirement_types as $requirement_type => $label) {
   		  
   		  // Okay, let's see if this degreeplan even has any data on this requirement type.
-  		  $total_hours = $degree_plan->gpa_calculations[$requirement_type]["total_hours"]*1;
-  		  $fulfilled_hours = $degree_plan->gpa_calculations[$requirement_type]["fulfilled_hours"]*1;
-  		  $qpts_hours = $degree_plan->gpa_calculations[$requirement_type]["qpts_hours"]*1;
-  		  $qpts = $degree_plan->gpa_calculations[$requirement_type]["qpts"]*1;
+  		  $total_hours = $degree_plan->gpa_calculations[$use_degree_id][$requirement_type]["total_hours"]*1;
+  		  $fulfilled_hours = $degree_plan->gpa_calculations[$use_degree_id][$requirement_type]["fulfilled_hours"]*1;
+  		  $qpts_hours = $degree_plan->gpa_calculations[$use_degree_id][$requirement_type]["qpts_hours"]*1;
+  		  $qpts = $degree_plan->gpa_calculations[$use_degree_id][$requirement_type]["qpts"]*1;
         
   		  $gpa = $percent = 0;
   		  

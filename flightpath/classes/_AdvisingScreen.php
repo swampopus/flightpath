@@ -1578,7 +1578,7 @@ function draw_menu_items($menu_array) {
 	 * 
 	 * @return string
 	 */
-	function draw_pie_chart_box($title, $top_value, $bottom_value, $pal = "", $back_col = "", $fore_col = "")
+	function draw_pie_chart_box($title, $top_value, $bottom_value, $pal = "", $back_col = "", $fore_col = "", $extra = "")
 	{
 		$rtn = "";
 
@@ -1635,7 +1635,7 @@ function draw_menu_items($menu_array) {
  								    <span style='color: blue;'>$val% " . t("Complete") . "</span><br>
  								    ( <span style='color: blue;'>$top_value</span>
  									 / <span style='color: gray;'>$bottom_value " . t("hours") . "</span> )
- 									 ";
+ 									 $extra";
 	
 		$rtn .= "
 								</td>
@@ -1672,6 +1672,7 @@ function draw_menu_items($menu_array) {
 
     $bool_charts_are_hidden = FALSE;
 
+ 
 
     // have we already calculated this degree's data?
 		if (@$this->degree_plan->bool_calculated_progess_hours != TRUE)
@@ -1755,11 +1756,27 @@ function draw_menu_items($menu_array) {
   		  
   		  if ($total_hours < 1) continue;  // no hours for this requirement type!
   		  
+  		  // Setting to display GPA
+  		  $gpa = $extra_gpa = "";
+  		  if (variable_get("pie_chart_gpa", "no") == "yes") {    		    
+    	    if ($this->degree_plan->gpa_calculations[$degree_id][$requirement_type]["qpts_hours"] > 0) {
+            $gpa = fp_truncate_decimals($qpts / $this->degree_plan->gpa_calculations[$degree_id][$requirement_type]["qpts_hours"], 3);
+          }
+          if ($gpa) {
+            $extra_gpa = "<div class='view-extra-gpa tenpt' style='text-align: right; color: gray;'>GPA: $gpa</div>";
+          }
+  		  }  		  
+  		  
   		  // If we are here, then there is indeed enough data to create a piechart!
   		  // Generate the pie chart and add to our array, for later display.
-  		  $html = $this->draw_pie_chart_box($label,$fulfilled_hours, $total_hours, "", $unfinished_col, $progress_col);
+  		  $html = $this->draw_pie_chart_box($label,$fulfilled_hours, $total_hours, "", $unfinished_col, $progress_col, $extra_gpa);
   		  $hide_pie_html = "$label: $fulfilled_hours / $total_hours";
         
+  		  // Will only display if we've set it above.
+  		  if ($gpa) {
+  		    $hide_pie_html .= " ($gpa)";
+  		  }  		  
+  		  
   		  $pie_chart_html_array[] = array(
   		    "pie" => $html,
   		    "hide_pie" => $hide_pie_html,
