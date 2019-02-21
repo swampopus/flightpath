@@ -2369,7 +2369,7 @@ function advise_init() {
   if (!advise_can_access_view($current_student_id)) {
         
     // Reset our global vars....
-    $current_student_id = 0;
+    $current_student_id = "";
     if (isset($user->cwid) && $user->is_student) {
       $current_student_id = $user->cwid;
     }

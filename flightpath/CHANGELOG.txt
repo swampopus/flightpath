@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2019-02-20
+  Fixed bug in advise.module, which was forcing a blank or empty current_student_id to be 0 (zero), which
+  was causing problems in the logic.
+
+  
 2019-02-14
   Added new setting to calculate & show GPA for each pie chart on a student's degree plan.
 
