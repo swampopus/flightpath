@@ -3,6 +3,8 @@ FlightPath 5.x Changelog
 
 2019-02-21
   Initial commit to new flightpath-5.x branch.  (instead of 5.x-dev)
+  
+  Continuing to test git config.
     
 
 2019-02-20
