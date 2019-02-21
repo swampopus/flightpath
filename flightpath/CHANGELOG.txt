@@ -3,7 +3,9 @@ FlightPath 5.x Changelog
 
 2019-02-21
   Initial commit to new flightpath-5.x branch.  (instead of 5.x-dev)
-    
+  
+  Still working on github to get new branch right.
+  
 
 2019-02-20
   Fixed bug in advise.module, which was forcing a blank or empty current_student_id to be 0 (zero), which
