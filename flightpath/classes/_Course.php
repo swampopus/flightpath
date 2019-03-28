@@ -96,7 +96,7 @@ class _Course extends stdClass
     }
 
     $array_valid_names = array();  // will hold all "valid" names for this course (non excluded names).
-    $this->course_id = $course_id*1;  // Force it to be numeric.
+    $this->course_id = intval($course_id);  // Force it to be numeric.
     $this->temp_old_course_id = 0;  // Used in case we delete the course_id, we can get it back (good with substitutions of transfers that are outdated).
     $this->catalog_year = $catalog_year;
     $this->assigned_to_semester_num = -1;
@@ -176,7 +176,7 @@ class _Course extends stdClass
     else {
       // Any degree?
       
-      if ($this->get_count_details_by_degree("bool_substitution_split") > 0) {
+      if ($this->get_count_details_by_degree("bool_substitution_split", TRUE) > 0) {
         return TRUE;
       }
     }
@@ -195,6 +195,8 @@ class _Course extends stdClass
     $this->set_details_by_degree($degree_id, "bool_outdated_sub", $val);
   }
 
+  
+  
 
   function get_bool_outdated_sub($degree_id = 0) {
 
@@ -208,7 +210,7 @@ class _Course extends stdClass
     else {
       // how about for ANY degree?
       
-      if ($this->get_count_details_by_degree("bool_outdated_sub") > 0) {
+      if ($this->get_count_details_by_degree("bool_outdated_sub", TRUE) > 0) {
         return TRUE;
       }
     }
@@ -243,7 +245,7 @@ class _Course extends stdClass
     else {
       // how about for ANY degree?
       
-      if ($this->get_count_details_by_degree("bool_substitution_new_from_split") > 0) {
+      if ($this->get_count_details_by_degree("bool_substitution_new_from_split", TRUE) > 0) {
         return TRUE;
       }
     }
@@ -405,8 +407,8 @@ class _Course extends stdClass
       return $this->get_details_by_degree($degree_id, "bool_substitution");
     }
     else {
-      // has the course been displayed by ANY degree?      
-      if ($this->get_count_details_by_degree("bool_substitution") > 0) {        
+      // has the course been substituted by ANY degree?      
+      if ($this->get_count_details_by_degree("bool_substitution", TRUE) > 0) {        
         return TRUE;
       }
     }
@@ -418,10 +420,18 @@ class _Course extends stdClass
   /**
    * Return back a count from ANY degree for this property name.
    */
-  function get_count_details_by_degree($property_name) {
+  function get_count_details_by_degree($property_name, $check_for_specific_value = NULL) {
     $c = 0;
     foreach ($this->details_by_degree_array as $degree_id => $temp) {
-      if (isset($temp[$property_name])) $c++;
+      if (isset($temp[$property_name])) {
+          
+        if ($check_for_specific_value !== NULL) {
+          // We want to SKIP if this property does not have this specific value
+          if ($temp[$property_name] !== $check_for_specific_value) continue;
+        }  
+        
+        $c++;
+      }
     }
     return $c;
   }
@@ -457,7 +467,7 @@ class _Course extends stdClass
     }
     else {
       // has the course been displayed by ANY degree?
-      if ($this->get_count_details_by_degree("bool_has_been_displayed") > 0) {
+      if ($this->get_count_details_by_degree("bool_has_been_displayed", TRUE) > 0) {
         return TRUE;
       }
     }
@@ -506,7 +516,7 @@ class _Course extends stdClass
     }
     else {
       // has the course been displayed by ANY degree?
-      if ($this->get_count_details_by_degree("bool_exclude_repeat") > 0) {
+      if ($this->get_count_details_by_degree("bool_exclude_repeat", TRUE) > 0) {
         return TRUE;
       }
     }
@@ -703,7 +713,7 @@ class _Course extends stdClass
    * To use:  
    *  - $newCourse = new Course();
    *  - $newCourse->load_course_from_data_string($data);
-   *          
+   *           
    *
    * @param string $str
    */

@@ -1561,108 +1561,109 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   /////////////////////
   // All the tracks...
   
+  if (variable_get("show_level_3_on_what_if_selection", "yes") == 'yes') {
     
-  foreach ($major_codes as $major_code => $temp) {
-    // Let's see if this major has any tracks...
-    if ($tracks = $db->get_degree_tracks($major_code, $catalog_year)) {
+    foreach ($major_codes as $major_code => $temp) {
+      // Let's see if this major has any tracks...
+      if ($tracks = $db->get_degree_tracks($major_code, $catalog_year)) {
+              
+        // Let's load the original degree plan.
+        $degree_plan = $db->get_degree_plan($major_code, $catalog_year, TRUE);
+        $degree_plan->load_degree_plan_ancillary();
+        
+        // Yes, there are indeed tracks for THIS major.  Let's load them up...
+        // First, organize them by degree_class...
+        $tracks_by_class = array();
+        foreach ($tracks as $track) {
+          $t_degree_plan = $db->get_degree_plan($major_code . "|_" . $track, $catalog_year, TRUE);
+          $t_degree_plan->load_degree_plan_ancillary();
+          $degree_class = $t_degree_plan->degree_class;                
+          $tracks_by_class[$degree_class][] = $t_degree_plan;        
+        } 
+        
+        // Now, create the form element...      
+        foreach ($tracks_by_class as $degree_class => $c) {
+          $options = array();
+  
+          $temp = fp_get_degree_classification_details($degree_class);
+          $class_title = $temp["title"];
+  
+          
+          // Are there any special requirements or defaults for this degree_class selection?
+          $tsca = $degree_plan->track_selection_config_array;
+          $default_tracks_array = @csv_to_array($tsca[$degree_class]["default_tracks"]);
+          
+          $min_tracks = @intval($tsca[$degree_class]["min_tracks"]);
+          $max_tracks = @intval($tsca[$degree_class]["max_tracks"]);
+          $element_type = "checkboxes";
+          $element_value = array();
+  
+          // If we require exactly 1 selection, then make this a radio button, and pre-select either the first element
+          // or the first default track.
+          if ($min_tracks == 1 && $max_tracks == 1) {
+            $element_type = "radios";
+            $element_value = array($default_tracks_array[0] => $default_tracks_array[0]);
+          }
+  
+          // Actually build up the options...        
+          foreach ($tracks_by_class[$degree_class] as $t_degree_plan) {
+            //$degree_id = $t_degree_plan->degree_id;  
             
-      // Let's load the original degree plan.
-      $degree_plan = $db->get_degree_plan($major_code, $catalog_year, TRUE);
-      $degree_plan->load_degree_plan_ancillary();
-      
-      // Yes, there are indeed tracks for THIS major.  Let's load them up...
-      // First, organize them by degree_class...
-      $tracks_by_class = array();
-      foreach ($tracks as $track) {
-        $t_degree_plan = $db->get_degree_plan($major_code . "|_" . $track, $catalog_year, TRUE);
-        $t_degree_plan->load_degree_plan_ancillary();
-        $degree_class = $t_degree_plan->degree_class;                
-        $tracks_by_class[$degree_class][] = $t_degree_plan;        
-      } 
-      
-      // Now, create the form element...      
-      foreach ($tracks_by_class as $degree_class => $c) {
-        $options = array();
-
-        $temp = fp_get_degree_classification_details($degree_class);
-        $class_title = $temp["title"];
-
-        
-        // Are there any special requirements or defaults for this degree_class selection?
-        $tsca = $degree_plan->track_selection_config_array;
-        $default_tracks_array = @csv_to_array($tsca[$degree_class]["default_tracks"]);
-        
-        $min_tracks = @intval($tsca[$degree_class]["min_tracks"]);
-        $max_tracks = @intval($tsca[$degree_class]["max_tracks"]);
-        $element_type = "checkboxes";
-        $element_value = array();
-
-        // If we require exactly 1 selection, then make this a radio button, and pre-select either the first element
-        // or the first default track.
-        if ($min_tracks == 1 && $max_tracks == 1) {
-          $element_type = "radios";
-          $element_value = array($default_tracks_array[0] => $default_tracks_array[0]);
-        }
-
-        // Actually build up the options...        
-        foreach ($tracks_by_class[$degree_class] as $t_degree_plan) {
-          //$degree_id = $t_degree_plan->degree_id;  
-          
-          $tmajor_code = "" . trim($t_degree_plan->major_code);
-          
-          $options[$tmajor_code] = $t_degree_plan->get_title2(FALSE, TRUE);
-          if (trim($t_degree_plan->track_description) != "") {
-            $options[$tmajor_code] .= "<div class='what-if-selection-track-desc what-if-selection-track-desc-for-" . fp_get_machine_readable($tmajor_code) . "'
-                                                >" . $t_degree_plan->track_description . "</div>";
+            $tmajor_code = "" . trim($t_degree_plan->major_code);
+            
+            $options[$tmajor_code] = $t_degree_plan->get_title2(FALSE, TRUE);
+            if (trim($t_degree_plan->track_description) != "") {
+              $options[$tmajor_code] .= "<div class='what-if-selection-track-desc what-if-selection-track-desc-for-" . fp_get_machine_readable($tmajor_code) . "'
+                                                  >" . $t_degree_plan->track_description . "</div>";
+            }
+            
+            // Is this a "default" major code?
+            if (in_array(trim($tmajor_code), $default_tracks_array)) {                       
+              $element_value[$tmajor_code] = $tmajor_code;  // make it be selected            
+            }                  
           }
           
-          // Is this a "default" major code?
-          if (in_array(trim($tmajor_code), $default_tracks_array)) {                       
-            $element_value[$tmajor_code] = $tmajor_code;  // make it be selected            
-          }                  
+          $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-between'>Please select between $min_tracks and $max_tracks $class_title options.</div>";
+          if ($min_tracks == $max_tracks && $max_tracks == 1) {
+            $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-exactly-one'>Please select 1 $class_title option.</div>";
+          }
+      
+          if ($min_tracks > 0 && $max_tracks == 0) {
+            // Meaning, there is no maximum.  It's infinite.
+            $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-at-least-one'>Please select at least $min_tracks $class_title option(s) for this degree.</div>";
+          }
+      
+          if ($min_tracks == $max_tracks && $max_tracks == 0) {
+            $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-optional'>Optional: You are not required to select any additional $class_title options.</div>";
+          }        
+          
+          
+          
+          
+          $form["L3__sel__{$degree_class}__for__{$major_code}__xx"] = array(  //ends with xx so we can be sure when the major code ends.
+            "type" => $element_type,
+            "label" => "Select $class_title for " . $degree_plan->get_title2(),
+            "options" => $options,
+            "description" => "$min_max_options",  
+            "value" => $element_value,          
+          );   
+          
+          // Save min and max options for quick look-up later.
+          $form["L3__ops__{$degree_class}__for__{$major_code}__xx"] = array(
+            "type" => "hidden",
+            "value" => "$min_tracks~$max_tracks",
+          );
+                       
+          
         }
         
-        $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-between'>Please select between $min_tracks and $max_tracks $class_title options.</div>";
-        if ($min_tracks == $max_tracks && $max_tracks == 1) {
-          $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-exactly-one'>Please select 1 $class_title option.</div>";
-        }
-    
-        if ($min_tracks > 0 && $max_tracks == 0) {
-          // Meaning, there is no maximum.  It's infinite.
-          $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-at-least-one'>Please select at least $min_tracks $class_title option(s) for this degree.</div>";
-        }
-    
-        if ($min_tracks == $max_tracks && $max_tracks == 0) {
-          $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-optional'>Optional: You are not required to select any additional $class_title options.</div>";
-        }        
         
         
         
-        
-        $form["L3__sel__{$degree_class}__for__{$major_code}__xx"] = array(  //ends with xx so we can be sure when the major code ends.
-          "type" => $element_type,
-          "label" => "Select $class_title for " . $degree_plan->get_title2(),
-          "options" => $options,
-          "description" => "$min_max_options",  
-          "value" => $element_value,          
-        );   
-        
-        // Save min and max options for quick look-up later.
-        $form["L3__ops__{$degree_class}__for__{$major_code}__xx"] = array(
-          "type" => "hidden",
-          "value" => "$min_tracks~$max_tracks",
-        );
-                     
-        
-      }
-      
-      
-      
-      
-    } // if tracks
-  } // foreach major codes
+      } // if tracks
+    } // foreach major codes
 
-
+  } // if level-3 selection...
 
 
 

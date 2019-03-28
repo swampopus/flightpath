@@ -342,7 +342,7 @@ function course_search_upload_attachment($course_id, $subject_id, $course_num) {
     // Okay, now add the new entry.
     db_query("INSERT INTO course_syllabi
             (course_id, course_perm_id, filename, posted)
-            values ('?','?" . "_?','?', '?' )", $course_id, $subject_id, $course_num, $new_filename, time());
+            values (?, ?, ?, ? )", $course_id, $subject_id . '_' . $course_num, $new_filename, time());
 
 
 

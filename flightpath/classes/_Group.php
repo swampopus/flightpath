@@ -534,7 +534,7 @@ class _Group extends stdClass
       if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
       // Load information about the group's title, icon, etc.
       $res = db_query("SELECT * 
-                       FROM $table_name
+                       FROM `$table_name`
                        WHERE group_id = ? ", $this->get_db_group_id());
       $cur = db_fetch_array($res);
       $group_descriptive_data_cache[$this->get_db_group_id()] = $cur;

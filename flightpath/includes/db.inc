@@ -172,7 +172,7 @@ function fp_get_degree_advising_weight($degree_id, $bool_reset_cache = FALSE) {
 /**
  * Quick method to look up title for a degree.
  */
-function fp_get_degree_title($degree_id, $bool_include_classification = FALSE, $bool_include_track_title = FALSE, $bool_include_html = TRUE, $bool_use_draft = FALSE) {
+function fp_get_degree_title($degree_id, $bool_include_track_title = FALSE, $bool_include_html = TRUE, $bool_use_draft = FALSE, $bool_include_major_code = FALSE) {
 
   // TODO:  Check cache.
   $dtitle = "";
@@ -184,12 +184,14 @@ function fp_get_degree_title($degree_id, $bool_include_classification = FALSE, $
   $table_name = "degrees";
   if ($bool_use_draft) {$table_name = "draft_$table_name";}
 
-  $res = $this->db->db_query("SELECT title, major_code FROM $table_name
-                          WHERE major_code = '?' 
-                          ORDER BY catalog_year DESC LIMIT 1", $this->major_code);
-  $cur = $this->db->db_fetch_array($res);
+  $res = db_query("SELECT title, major_code FROM $table_name
+                          WHERE degree_id = ? 
+                          ORDER BY catalog_year DESC LIMIT 1", $degree_id);
+  $cur = db_fetch_array($res);
   $dtitle = $cur["title"];
   $major_code = $cur['major_code'];
+  $o_major_code = $cur['major_code'];
+  $catalog_year = $cur['catalog_year'];
 
   if ($bool_include_track_title) {
     
@@ -198,7 +200,7 @@ function fp_get_degree_title($degree_id, $bool_include_classification = FALSE, $
     {
       // This means that there is a track.  Get all the information
       // you can about it.
-      $temp = explode("_", $this->major_code);
+      $temp = explode("_", $major_code);
       $track_code = trim($temp[1]);
       $major_code = trim($temp[0]);
   
@@ -210,33 +212,31 @@ function fp_get_degree_title($degree_id, $bool_include_classification = FALSE, $
       }
       // Now, look up information on the track.
       $table_name = "degree_tracks";
-      if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
+      if ($bool_use_draft) {$table_name = "draft_$table_name";}
   
-      $res = $this->db->db_query("SELECT track_title FROM $table_name
+      $res = db_query("SELECT track_title FROM $table_name
                               WHERE major_code = '?'
                               AND track_code = '?'
-                              AND catalog_year = '?' ", $this->major_code, $this->track_code, $this->catalog_year);
-      $cur = $this->db->db_fetch_array($res);
+                              AND catalog_year = '?' ", $major_code, $track_code, $catalog_year);
+      $cur = db_fetch_array($res);
   
-      $this->track_title = $cur["track_title"];    
+      $track_title = $cur["track_title"];    
     }
 
-    if ($bool_include_html) {  
-      $dtitle .= "<span class='level-3-raquo'>&raquo;</span>";
+    if ($track_title != "") {
+      if ($bool_include_html) {  
+        $dtitle .= "<span class='level-3-raquo'>&raquo;</span>";
+      }
+      $dtitle .= $track_title;
     }
-    $dtitle .= $track_title;
+    
+    
   }
   
-  if ($bool_include_classification && $this->degree_class != "") {
-    $details = fp_get_degree_classification_details($this->degree_class);
-    if ($bool_include_html) {
-      $dtitle .= " <span class='deg-class-title'>(" . $details["title"] . ")</span>";
-    }
-    else {
-      $dtitle .= " (" . $details["title"] . ")";
-    }
-  }
 
+  if ($bool_include_major_code) {
+    $dtitle .= " [$major_code]";
+  }
 
   return $dtitle;  
   

@@ -1,6 +1,44 @@
 FlightPath 5.x Changelog
 ========================
 
+
+2019-03-20
+  Added new system setting, letting you disable logins for all but admin.  Very helpful for
+  maintenance tasks.
+  
+
+2019-03-19
+  Fixed bug in _FlightPath, causing errors.
+  
+  Changed way I was forcing something to be numeric, to silence a warning in PHP 7.2
+  
+  Fixed code which causes a bug in MySQL 8+
+    
+
+2019-03-15
+  Added a new option to System Settings: enable or disable display level-3 selection on what if selection screen.  If disabled,
+  this has more of a feel for FlightPath 4, and might help schools which do not allow dynamic degrees, or who have so many level 3
+  options that it causes confusion.
+  
+  Fixed a left-over $this in db.inc, which caused problems in specific situations.
+  
+
+2019-03-13
+  Fixed another SQL bug in the course_search module.
+
+  Fixed bug where outdated subs were being hidden.  Had to do with the way the _Course.php file was checking for if a course
+  was substituted or not.
+  
+  Fixed several bugs in db.inc's fp_get_degree_title() function, which was causing it not to work at all.
+  
+  Modified the Administrator's Toolbox message so that outdated subs correctly state what degree they were from
+  which is now outdated.
+  
+
+2019-03-07
+  Removed mysql_* functions from course_search module.
+  
+
 2019-02-21
   Initial commit to new flightpath-5.x branch.  (instead of 5.x-dev)
   

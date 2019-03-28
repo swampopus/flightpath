@@ -408,7 +408,7 @@ function form_error($element_name, $message) {
  * (We will just look in the SESSION to find out).
  */
 function form_has_errors() {
-  if (count(@$_SESSION["fp_form_errors"]) > 0) {
+  if (@count($_SESSION["fp_form_errors"]) > 0) {
     return TRUE;
   }
   

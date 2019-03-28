@@ -306,6 +306,15 @@ function system_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
   );
 
+  $items["disable-login"] = array(
+    "title" => "Login Disabled",
+    "page_callback" => "system_display_disable_login_page",
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );
+  
+  
+  
  $items["admin-tools/clear-cache"] = array(
     "title" => "Clear all cache",
     "page_callback" => "system_perform_clear_cache",
@@ -517,6 +526,21 @@ function system_menu() {
    
            
   return $items;
+}
+
+
+function system_display_disable_login_page() {
+  $rtn = "";
+  
+  $rtn .= "<h2>Logins Currently Disabled</h2>
+          We're sorry, but logins are disabled at this time due to maintenance on FlightPath.
+          <br><br>Please try again later.
+          <br><br>
+          " . l("Return to login page", "<front>") . "";
+  
+  
+  
+  return $rtn;
 }
 
 
@@ -1680,6 +1704,21 @@ function system_settings_form() {
                         that the system is currently undergoing routine maintenance."),    
   );
   
+  $form["disable_login_except_admin"] = array(
+    "type" => "select",
+    "label" => t("Disable all new logins (except admin user)?"),
+    "hide_please_select" => TRUE,
+    "options" => array("no" => t("No"), "yes" => t("Yes")),
+    "value" => variable_get('disable_login_except_admin', 'no'),
+    "description" => t("If set to Yes, then when normal users attempt to log in, they will be
+                        sent back to the login page, with a message displayed explaning that
+                        logins are disabled.  Admin will still be able to log in.  This 
+                        is useful when trying to perform maintenance on FlightPath.  If unsure
+                        what to select, select 'No'."), 
+  );                                
+
+
+  
   
   $form["contact_email_address"] = array(
     "type" => "textfield",
@@ -1868,7 +1907,21 @@ function system_settings_form() {
                         and What if screens, similar to how they are displayed when printing.
                         If unsure what to select, select 'No'."), 
   );                                
-                  
+
+  
+  $form["show_level_3_on_what_if_selection"] = array(
+    "type" => "select",
+    "label" => t("Show level-3 degree options on What If selection screen?"),
+    "hide_please_select" => TRUE,
+    "options" => array("no" => t("No"), "yes" => t("Yes")),
+    "value" => variable_get("show_level_3_on_what_if_selection", "yes"),
+    "description" => t("If set to Yes, then level 3 Track/Options will appear on the What If
+                        selection screen, if a degree is selected with available options.
+                        Setting to 'no' gives behavior more like FlightPath 4.
+                        If unsure what to select, select 'No'."), 
+  );                                
+  
+                    
   
   $form["popup_admin_win_options"] = array(
     "type" => "textfield",
@@ -2491,6 +2544,13 @@ function system_login_form() {
  */
 function system_login_form_validate($form, &$form_state) {
   $user = $form_state["values"]["user"];
+  
+  if ($user != 'admin' && variable_get('disable_login_except_admin', 'no') == 'yes') {
+    fp_goto("disable-login");
+    return;
+  }
+  
+  
   $password = $form_state["values"]["password"];
   
   // If the GRANT_FULL_ACCESS is turned on, skip trying to validate

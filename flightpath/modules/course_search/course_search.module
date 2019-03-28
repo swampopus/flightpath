@@ -225,8 +225,8 @@ function course_search_settings_form() {
 function course_search_download_syllabus() {
   // Get our global variables...
   
-  $c = trim(mysql_real_escape_string($_REQUEST["c"]));
-  $id = trim(mysql_real_escape_string($_REQUEST["id"]));
+  $c = trim($_REQUEST["c"]);
+  $id = trim($_REQUEST["id"]);
   
   $db = get_global_database_handler();
   
@@ -236,12 +236,15 @@ function course_search_download_syllabus() {
   
   // Get the filename in question...
   $query = "select * from course_syllabi
-            where course_perm_id = '$subject_id" . "_$course_num' ";
+            where course_perm_id = '?' ";
+  $params = array($subject_id . "_" . $course_num);            
   if ($id != "") {
     $query = "select * from course_syllabi
-            where course_id = '$id' ";
+            where course_id = '?' ";
+    $params = array($id);            
   }
-  $res = db_query($query);
+  
+  $res = db_query($query, $params);
   $cur = db_fetch_array($res);
   $filename = $cur["filename"];
   

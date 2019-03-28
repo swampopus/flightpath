@@ -111,8 +111,7 @@ class _FlightPath extends stdClass
 
     // make sure their catalog year is not past the system's current
     // year setting.
-    if ($catalog_year > $settings["current_catalog_year"]
-    && $settings["current_catalog_year"] > $settings["earliest_catalog_year"])
+    if ($catalog_year > $settings["current_catalog_year"] && $settings["current_catalog_year"] > $settings["earliest_catalog_year"])
     { // Make sure degree plan is blank if it is!
       $catalog_year = 99999;
     }
@@ -217,7 +216,7 @@ class _FlightPath extends stdClass
       $this->degree_plan = $combined_degree_plan;
       
     } // else if count(degree_plans) > 1
-    else if (count($degree_plans < 1)) {
+    else if (count($degree_plans) < 1) {
       // Meaning, we couldn't find any degree plans for this student!  Let's just load some blank objects.
       $this->degree_plan = new DegreePlan();
       $this->student = $student;      
@@ -558,15 +557,18 @@ class _FlightPath extends stdClass
           //combined degree plan, degree id not in it.
           
           $bool_sub_valid = false;
-          $outdated_note = t("This substitutions is for the degree %did
-                            which is no longer in the student's degrees.", array("%did" => $substitution->db_required_degree_id));
+          $sub_degree_title = fp_get_degree_title($substitution->db_required_degree_id, TRUE, TRUE, FALSE, TRUE);
+          
+          $outdated_note = t("This substitution is for the degree %did
+                            which is no longer in the student's degrees.", array("%did" => $sub_degree_title));
       } 
       else if ($this->degree_plan->degree_id != DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE &&
                  $this->degree_plan->degree_id != $substitution->db_required_degree_id) {
           
           $bool_sub_valid = false;
-          $outdated_note = t("This substitutions is for the degree %did
-                            which is no longer the student's degree", array("%did" => $substitution->db_required_degree_id));
+          $sub_degree_title = fp_get_degree_title($substitution->db_required_degree_id, TRUE, TRUE, FALSE, TRUE);
+          $outdated_note = t("This substitution is for the degree %did
+                            which is no longer the student's degree", array("%did" => $sub_degree_title));
       }
       //////////////
       
@@ -636,6 +638,7 @@ class _FlightPath extends stdClass
         $substitution->bool_outdated = true;
         $substitution->outdated_note = $outdated_note;
         $substitution->course_list_substitutions->get_first()->bool_outdated_sub = true;
+        $substitution->course_list_substitutions->get_first()->set_bool_outdated_sub(0, TRUE);
         //$substitution->course_list_substitutions->get_first()->bool_substitution = false;
         $substitution->course_list_substitutions->get_first()->set_bool_substitution(0, FALSE);
         if ($substitution->course_list_substitutions->get_first()->temp_old_course_id > 0)

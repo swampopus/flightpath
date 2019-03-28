@@ -645,10 +645,12 @@ function draw_menu_items($menu_array) {
 			}
 
 			// Skip substitutions
-			// TODO:  Only skip if we have substituted for every degree the student is enrolled in.
+			// Only skip if we have substituted for every degree the student is enrolled in.
 			if ($course->get_bool_substitution(-1) == TRUE)
 			{
-				continue;
+			  fpm($course->get_bool_substitution(-1));
+			  fpm($course);
+  		  continue;
 			}
       
 			

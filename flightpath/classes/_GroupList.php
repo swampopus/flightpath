@@ -202,7 +202,8 @@ class _GroupList extends ObjList
 	function assign_min_grade($min_grade)
 	{
 		// Assign a min grade to every group in this grouplist.
-		for ($t = 0; $t < count($this->array_list); $t++)
+		$count = count($this->array_list);
+		for ($t = 0; $t < $count; $t++)
 		{
 			$group = $this->array_list[$t];
 			$group->assign_min_grade($min_grade);
@@ -342,7 +343,7 @@ class _GroupList extends ObjList
     {
       $g = $this->array_list[$t];
       $g->load_descriptive_data();
-      $pri = "" . ($g->priority*1) . "";
+      $pri = "" . intval($g->priority) . "";
       $str = "$pri ~~ $t";
   
       array_push($tarray,$str);
