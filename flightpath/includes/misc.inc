@@ -323,6 +323,26 @@ function fp_clear_cache() {
  
  
  
+ 
+ 
+ 
+ 
+/**
+Remove any possiblilty of a malicious attacker trying to inject
+nonsense.
+From:  https://paragonie.com/blog/2015/06/preventing-xss-vulnerabilities-in-php-everything-you-need-know
+*/
+function fp_no_html_xss($string) {
+  return htmlentities($string, ENT_QUOTES, 'UTF-8');
+  //return htmlentities($string, ENT_QUOTES | ENT_HTML5, 'UTF-8');  // ENT_HTML5 requires PGP 5.4+
+} 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 /**
  * Filter HTML, allowing only certain tags, and removing dangerous attributes.
  * 

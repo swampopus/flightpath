@@ -20,11 +20,19 @@ function __autoload($class) {
 }
 
 
+// Make sure our cookies are the most secure possible:
+ini_set('session.cookie_httponly', 'On');
+ini_set('session.cookie_secure', 'On');
+
  
  
 session_start();
 
-header("Cache-control: private");
+// Set headers for maximum security
+header("Cache-control: no-cache, no-store, must-revalidate");  // HTTP 1.1
+header("Pragma: no-cache");  // HTTP 1.0
+header("X-XSS-Protection: 1");
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");  // Date in the past, to ensure it expires when we close browser.
 
 
 // If the user is requesting a "clean URLs" check, display a simple success message.

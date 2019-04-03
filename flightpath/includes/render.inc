@@ -255,12 +255,19 @@ function fp_render_form($callback, $form_type = "") {
   $form_params = base64_encode(serialize($params));
   
   // Figure out the current page's title and display it.
-  $path = $_GET["q"];
+  $path = fp_no_html_xss($_GET["q"]);    // Sanitize _GET valuses.
+  
   $default_path = $path;
   $default_query = "";
   // Figure out the "default_query" from $_GET
   $new_query = array();
   foreach ($_GET as $key => $val) {
+        
+    // Sanitize since it is coming from _GET.  
+    $key = fp_no_html_xss($key);
+    $val = fp_no_html_xss($val);
+      
+    
     if ($key != "q") {
       $new_query[] = "$key=$val"; 
     }
