@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2019-04-30
+  Fixed bug in _DegreePlan.php which caused tracks to not load correctly while viewing in draft mode (Thanks
+  to Logan Buth from Morningside College).
+
+
 2019-04-03
   Mitigated some possible XSS weaknesses in index.php (by using more secure headers and cookies), and in 
   render.inc.  When creating forms, the current path was not being santized sufficiently, which has now been

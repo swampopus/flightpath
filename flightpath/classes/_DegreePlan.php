@@ -1039,7 +1039,7 @@ class _DegreePlan extends stdClass
     $table_name = "degree_tracks";
     $table_name2 = "degrees";
     if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
-    if ($this->bool_use_draft) {$table_name2 = "draft_$table_name";}
+    if ($this->bool_use_draft) {$table_name2 = "draft_$table_name2";}
 
     $res = db_query("SELECT track_code, track_title, track_description FROM $table_name
               								WHERE major_code = '?'
