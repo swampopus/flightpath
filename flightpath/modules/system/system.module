@@ -1629,7 +1629,7 @@ function system_get_available_themes() {
     $start_dir = $theme_dir["start"];
     $type_dir = $theme_dir['type'];
      
-    if ($dh = opendir($start_dir)) {
+    if ($dh = @opendir($start_dir)) {
             
       $dir_files = scandir($start_dir);      
       foreach ($dir_files as $file) {    
