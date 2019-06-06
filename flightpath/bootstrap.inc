@@ -34,6 +34,14 @@ if (!isset($skip_flightpath_settings) || $skip_flightpath_settings != TRUE) {
 require_once("$levels_deep" . "classes/all_classes.php");
 
 
+// Define our custom error handler, so we can intercept PHP warnings and notices,
+// and decide if we want to display them, log them to file, etc.
+set_error_handler('_fp_error_handler');  // located in includes/misc.inc
+
+
+
+
+
 // Should we load the settings file?  This variable should be
 // set prior to including this bootstrap file.
 if (!isset($skip_flightpath_modules) || $skip_flightpath_modules != TRUE) {

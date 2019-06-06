@@ -1,0 +1,3 @@
+name = SMTP Mail Protocol
+description = Send emails using SMTP instead of sendmail and PHP mail() command.
+core = 5.x

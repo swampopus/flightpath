@@ -424,7 +424,7 @@ class _DatabaseHandler extends stdClass
       Backtrace:
       " . print_r($arr, true) . "
       ";
-      mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
+      fp_mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
     }
         
     fpm(t("A MySQL error has occured:") . " $message<br><br>Location: $file_and_line<br><br>" . t("The backtrace:"));
@@ -586,7 +586,7 @@ class _DatabaseHandler extends stdClass
       Backtrace:
       " . print_r($arr, true) . "
       ";
-      mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
+      fp_mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
     }
         
     fpm(t("A MySQL error has occured:") . " $mysql_err<br><br>" . t("The backtrace:"));

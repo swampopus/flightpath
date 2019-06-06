@@ -6,6 +6,99 @@
 
  
 
+ 
+ 
+/**
+ * This is our custom error handler, which will intercept PHP warnings, notices, etc, and let us
+ * display them, log them, etc.
+ * 
+ * See https://www.php.net/manual/en/function.set-error-handler.php
+ */ 
+function _fp_error_handler($error_level, $message, $filename, $line, $context = array()) {
+  global $user;
+  
+  $err_name = _fp_map_php_error_code($error_level); 
+  
+  if (stristr($err_name, 'notice')) return FALSE; // don't care about Notices. 
+  
+  // fpm() only displays for privileged users
+  fpm( $err_name . " - $message - $filename $line");
+  
+  if (@$user->id !== '1' && @$user->id !== 1) {
+    // We are NOT the admin user.
+    
+    // TODO: Should we email someone, as with mysql errors?
+    
+    
+  }
+  
+} // _fp_error_handler
+ 
+ 
+
+/**
+* Map an error code into an Error word
+*
+* @param int $code Error code to map
+* @return array Array of error word, and log location.
+*/
+function _fp_map_php_error_code($code) {
+    $error = '';
+    switch ($code) {
+        case E_PARSE:
+        case E_ERROR:
+        case E_CORE_ERROR:
+        case E_COMPILE_ERROR:
+        case E_USER_ERROR:
+            $error = 'Fatal Error';            
+            break;
+        case E_WARNING:
+        case E_USER_WARNING:
+        case E_COMPILE_WARNING:
+        case E_RECOVERABLE_ERROR:
+            $error = 'Warning';            
+            break;
+        case E_NOTICE:
+        case E_USER_NOTICE:
+            $error = 'Notice';            
+            break;
+        case E_STRICT:
+            $error = 'Strict';            
+            break;
+        case E_DEPRECATED:
+        case E_USER_DEPRECATED:
+            $error = 'Deprecated';
+            
+            break;
+        default :
+            break;
+    }
+    return $error;
+}
+
+ 
+
+/**
+ * Send an email.  Drop-in replacement for PHP's mail() command,
+ * but can use SMTP protocol if enabled.
+ */
+function fp_mail($to,$subject,$msg) {
+  
+  if (function_exists('smtp_mail')) {
+    smtp_mail($to, $subject, $msg);
+    return;
+  }
+  else {
+    mail($to, $subject, $msg);
+  }
+  
+  
+  
+} // fp_mail
+
+ 
+ 
+ 
 /**
  * Returns the component of the page's path.
  * 
