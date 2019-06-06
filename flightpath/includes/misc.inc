@@ -17,6 +17,8 @@
 function _fp_error_handler($error_level, $message, $filename, $line, $context = array()) {
   global $user;
   
+  if (0 === error_reporting()) { return false;} // suppressed with @-operator
+  
   $err_name = _fp_map_php_error_code($error_level); 
   
   if (stristr($err_name, 'notice')) return FALSE; // don't care about Notices. 
