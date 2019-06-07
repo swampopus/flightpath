@@ -43,6 +43,7 @@ class _DatabaseHandler extends stdClass
       $this->pdo = new PDO("mysql:host=$db_host_ip;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass);
       // Set our error handling...  (using "silent" so I can catch errors in try/catch and display them, email, etc, if wanted.)
       $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+           
     }
     
   }
@@ -345,11 +346,9 @@ class _DatabaseHandler extends stdClass
     if (!isset($this->pdo) || $this->pdo == NULL) fpm(debug_backtrace());
     
     
-    try {
-      
+    try {      
       $result = $this->pdo->prepare($sql_query);
       $result->execute($args);
-      
       $_SESSION["fp_last_insert_id"] = $this->pdo->lastInsertId();  // capture last insert id, in case we ask for it later.   
       return $result;
     } 

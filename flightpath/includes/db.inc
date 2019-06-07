@@ -616,9 +616,11 @@ function variable_set($name, $value) {
     $value = "NULL_PLACEHOLDER";
   }
 
-    
-  db_query("REPLACE INTO variables (name, value)
-              VALUES ('?', '?') ", $name, serialize($value));
+
+  db_query("DELETE FROM variables WHERE name = ?", $name);
+
+  db_query("INSERT INTO variables (name, value)
+              VALUES (?, ?) ", $name, serialize($value));
  
   
 }

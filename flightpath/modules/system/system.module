@@ -2097,7 +2097,7 @@ function system_handle_form_submit() {
       
     }
   }  
-     
+  
   // Let's get our set of allowed values, by looking at the original form,
   // and grab what's in the POST which matches the name.
 
@@ -2105,7 +2105,7 @@ function system_handle_form_submit() {
   $safe_values = array(); // will be the same as $values, but anything of type password will not be included.
   
   if (function_exists($callback)) {
-
+   
     // Get any params for the callback, or, an empty array.    
     $form_params = @unserialize(base64_decode($_REQUEST['form_params']));
     if (!$form_params) {
@@ -2188,13 +2188,13 @@ function system_handle_form_submit() {
     
     $_SESSION["fp_form_submissions"][$callback]["values"] = $safe_values;
   }
-    
+
   $form_state = array("values" => $values, "POST" => $_POST);
 
   // Let's pass this through our default form validator (mainly to check for required fields
   // which do not have values entered)
   form_basic_validate($form, $form_state);  
-
+ 
   if (!form_has_errors()) {
     // Let's now pass it through all of our custom validators, if there are any.
     foreach ($validate_handlers as $validate_callback) {         
@@ -2213,7 +2213,6 @@ function system_handle_form_submit() {
       // This is system settings, so let's save all of our values to the variables table.
       // Write our values array to our variable table.
       foreach ($form_state["values"] as $name => $val) {
-        
         variable_set($name, $val);
       }
            
@@ -2224,7 +2223,7 @@ function system_handle_form_submit() {
     // Let's go through the form's submit handlers now.
     foreach ($submit_handlers as $submit_callback) {                
       if (function_exists($submit_callback)) {
-        //call_user_func($submit_callback, $form, &$form_state);        
+        //call_user_func($submit_callback, $form, &$form_state);
         call_user_func_array($submit_callback, array(&$form, &$form_state));
       }    
     }
@@ -2232,7 +2231,7 @@ function system_handle_form_submit() {
     
     
   }
-
+   
   // Figure out where we are supposed to redirect the user.
   $redirect_path = $redirect_query = "";
 
@@ -2244,7 +2243,6 @@ function system_handle_form_submit() {
     $redirect_path = $_REQUEST["default_redirect_path"];
     $redirect_query = $_REQUEST["default_redirect_query"];
   }
-  
   
   // If there is a Batch process we need to do, do it here instead of the fp_goto.
   if (isset($_SESSION["fp_batch_id"]) && function_exists("batch_menu")) {
@@ -2664,9 +2662,10 @@ function system_login_form_submit($form, &$form_state) {
   $account = new stdClass();
   
   $account = fp_load_user($db_row["user_id"]);
+  
   // Okay, let's look for all the modules who have implimented hook_user_login
   $modules = modules_implement_hook("user_login");
-  foreach ($modules as $module) {
+  foreach ($modules as $module) {    
      call_user_func_array($module . '_user_login', array(&$account));        
   }
   

@@ -18,7 +18,7 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
   global $user;
   
   if (0 === error_reporting()) { return false;} // suppressed with @-operator
-  
+   
   $err_name = _fp_map_php_error_code($error_level); 
   
   if (stristr($err_name, 'notice')) return FALSE; // don't care about Notices. 
@@ -1172,10 +1172,12 @@ function fp_explode_assoc($string, $delim = ",", $assign_sep = "-") {
 function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bool_include_base_path = TRUE) {
   
   $p = menu_get_module_path($module, $bool_include_file_system_path);
+  
+  // Redundant, causes bug.
     
-  if ($bool_include_base_path) {
-    $p = base_path() . "/" . $p;
-  }
+  //if ($bool_include_base_path) {
+    //$p = base_path() . "/" . $p;
+  //}
     
   return $p;
 }
