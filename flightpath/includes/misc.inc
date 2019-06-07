@@ -24,13 +24,28 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
   if (stristr($err_name, 'notice')) return FALSE; // don't care about Notices. 
   
   // fpm() only displays for privileged users
-  fpm( $err_name . " - $message - $filename $line");
+  fpm($err_name . ": $message<br>... ($line) $filename");
   
   if (@$user->id !== '1' && @$user->id !== 1) {
     // We are NOT the admin user.
     
-    // TODO: Should we email someone, as with mysql errors?
-    
+    // Should we email someone, as with mysql errors?
+    $tomail = trim(variable_get("notify_php_error_email_address", ""));
+    if ($tomail != "") {
+      
+      $hostname = php_uname('n');
+      
+      $msg = "";
+      $msg .= "SERVER:   $hostname \n";
+      $msg .= "DATE:     " . format_date() . "\n";
+      $msg .= "SEVERITY: $err_name \n";
+      $msg .= "--------------------------\n\n";
+      $msg .= "$err_name: $message \n\n";
+      $msg .= "... ($line) $filename";
+      
+      fp_mail($tomail, "PHP Error in FlightPath", $msg);
+      
+    }
     
   }
   

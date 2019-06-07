@@ -31,11 +31,16 @@ function convert_bbcode_to_html($str) {
  *  - just_date
  *
  */
-function format_date($timestamp, $format = "standard", $custom = "") {
+function format_date($timestamp = 0, $format = "standard", $custom = "") {
   
   if (!is_numeric($timestamp)) {
     $timestamp = 0;  // make sure it's numeric.
   }
+  
+  if ($timestamp == 0) {
+    $timestamp = strtotime("now");
+  }
+  
   
   $f = "";  
   if ($format == "standard") {
@@ -1358,7 +1363,7 @@ function fp_render_menu_item($item, $bool_check_user_access = TRUE) {
   $menu_icon = @$item["page_settings"]["menu_icon"];
   $extra_class = "";
   if ($menu_icon != "") {
-    $icon_img = "<img src='$menu_icon' border='0'>";    
+    $icon_img = "<img src='$menu_icon' border='0' class='fpmn-icon'>";    
   } 
   else { 
     $icon_img = "<span class='fp-menu-item-no-icon'></span>";
@@ -1368,7 +1373,7 @@ function fp_render_menu_item($item, $bool_check_user_access = TRUE) {
    
   $rtn .= "<div class='fp-menu-item $extra_class'>
             <div class='fp-menu-item-link-line'>
-              <a href='$url' target='$target'>$icon_img $title</a>
+              <a href='$url' target='$target'>$icon_img$title</a>
             </div>
             ";
   if ($description) {

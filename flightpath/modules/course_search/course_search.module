@@ -20,7 +20,7 @@ function course_search_menu() {
       "page_banner_is_link" => TRUE,
       "page_hide_report_error" => TRUE,
       "target" => "_blank",
-      "menu_icon" => fp_theme_location() . "/images/book_glass_20.jpg",
+      "menu_icon" => fp_get_module_path('course_search') . "/icons/book_go.png",
     ),
     "type" => MENU_TYPE_NORMAL_ITEM,
   ); 
@@ -45,7 +45,7 @@ function course_search_menu() {
       "page_has_search" => FALSE,
       "page_banner_is_link" => TRUE,
       "page_hide_report_error" => TRUE,      
-      "menu_icon" => fp_theme_location() . "/images/book_glass_20.jpg",
+      "menu_icon" => fp_get_module_path('course_search') . "/icons/book_go.png",
       "menu_links" => array(         
         0 => array(
           "text" => "Back to main menu",

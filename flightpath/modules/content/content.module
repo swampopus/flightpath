@@ -15,6 +15,7 @@ function content_menu() {
     "access_arguments" => array("admin_content"),
     "page_settings" => array(
       "page_has_search" => FALSE,
+      "menu_icon" => fp_get_module_path('content') . "/icons/application_edit.png",      
       "page_show_title" => TRUE,
       "page_banner_is_link" => TRUE,
       "page_hide_report_error" => TRUE,

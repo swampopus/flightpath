@@ -1,6 +1,23 @@
 FlightPath 5.x Changelog
 ========================
 
+2019-06-06
+  Created a new core module: SMTP, as well as a helper function, fp_mail().  Now if you have the SMTP module
+  enabled and configured, all mail is automatically routed through your SMTP server, instead of whatever
+  the default setting is for PHP's mail() command.
+  
+  Added PHPMailer to the /inc/ directory (for the SMTP module).
+  
+  Moved some settings from the System Settings form and into the School settings form.
+  
+  Created a custom PHP error handler, so that we can display (and log if necessary, email, etc) PHP 
+  warnings and errors.
+
+  Added /icons/ folders and silk icons for admin/config menu entires for the core modules.
+  
+  Adjusted CSS in default themes to make new icons look nicer.
+
+
 2019-04-30
   Fixed bug in _DegreePlan.php which caused tracks to not load correctly while viewing in draft mode (Thanks
   to Logan Buth from Morningside College).

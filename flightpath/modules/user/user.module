@@ -15,7 +15,9 @@ function user_menu() {
     "access_arguments" => array("manage_users"),        
     "type" => MENU_TYPE_NORMAL_ITEM,
     "tab_parent" => "admin-tools/admin",
-    "weight" => 100,
+    "page_settings" => array(
+      "menu_icon" => fp_get_module_path('user') . "/icons/group.png",            
+    ),    
   );      
 
   
@@ -62,7 +64,6 @@ function user_menu() {
     "type" => MENU_TYPE_SUB_TAB, 
     "tab_family" => "users",    
     "tab_parent" => "admin-tools/admin",
-    "weight" => 100,
   );    
 
   
@@ -73,6 +74,7 @@ function user_menu() {
     "page_arguments" => array("user_user_roles_form"),
     "access_arguments" => array("can_edit_user_roles"),
     "page_settings" => array(
+      "menu_icon" => fp_get_module_path('user') . "/icons/medal_gold_1.png",    
       "page_has_search" => FALSE,
       "page_banner_is_link" => TRUE,
       "page_hide_report_error" => TRUE,
@@ -86,7 +88,6 @@ function user_menu() {
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
     "tab_parent" => "admin-tools/admin",        
-    "weight" => 110,
   );     
 
   $items["admin/users/edit-user"] = array(
@@ -213,6 +214,7 @@ function user_menu() {
     "page_arguments" => array("user_permissions_form"),
     "access_arguments" => array("can_edit_permissions"),
     "page_settings" => array(
+      "menu_icon" => fp_get_module_path('user') . "/icons/key.png",    
       "page_has_search" => FALSE,
       "page_banner_is_link" => TRUE,
       "page_hide_report_error" => TRUE,
@@ -226,7 +228,6 @@ function user_menu() {
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
     "tab_parent" => "admin-tools/admin",   
-    "weight" => 120,
   );     
   
     

@@ -23,6 +23,13 @@
 }
 
 
+img.fpmn-icon {
+  position: relative;
+  top: 4px;
+  margin-right: 8px;
+}
+
+
 /* 
  * checkboxes.... 
  * 

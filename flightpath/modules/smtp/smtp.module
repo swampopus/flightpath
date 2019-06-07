@@ -23,6 +23,7 @@ function smtp_menu() {
     "access_arguments" => array("de_can_administer_smtp"),
     "page_settings" => array(
       "page_has_search" => FALSE,
+      "menu_icon" => fp_get_module_path('smtp') . "/icons/email.png",      
       "menu_links" => array(         
         0 => array(
           "text" => "Back to main menu",

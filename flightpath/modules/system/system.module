@@ -323,35 +323,6 @@ function system_menu() {
   );  
 
 
-  $items["admin/config/run-cron"] = array(
-    "title" => "Run cron now",
-    "description" => "Run the normal cron operations right away",
-    "page_callback" => "system_perform_run_cron",
-    "access_arguments" => array("run_cron"),
-    "type" => MENU_TYPE_NORMAL_ITEM,
-  );  
-
-  $items["admin/config/status"] = array(
-    "title" => "System status",
-    "description" => "View important notifications and updates for your installation of " . variable_get("system_name", "FlightPath"),
-    "page_callback" => "system_display_status_page",
-    "access_arguments" => array("view_system_status"),
-    "page_settings" => array(
-      "page_show_title" => TRUE,
-      "menu_links" => array(         
-        0 => array(
-          "text" => "Back to main menu",
-          "path" => "admin-tools/admin",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-      ),      
-    ),        
-    "type" => MENU_TYPE_NORMAL_ITEM,
-    "tab_parent" => "admin-tools/admin",    
-    "weight" => 50,
-  );  
-  
-
   $items["admin/db-updates"] = array(
     "title" => "Run DB updates?",
     "page_callback" => "fp_render_form",
@@ -370,78 +341,8 @@ function system_menu() {
     ),       
     "type" => MENU_TYPE_NORMAL_ITEM,
   );    
-  
-  
-  $items["admin/config/system-settings"] = array(
-    "title" => "System settings",
-    "description" => "Configure settings for FlightPath",
-    "page_callback" => "fp_render_form",
-    "page_arguments" => array("system_settings_form", "system_settings"),
-    "access_arguments" => array("de_can_administer_system_settings"),
-    "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
-      "page_hide_report_error" => TRUE,
-      "menu_icon" => fp_theme_location() . "/images/toolbox.gif",
-      "menu_links" => array(         
-        0 => array(
-          "text" => "Back to main menu",
-          "path" => "admin-tools/admin",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-      ),
-    ),    
-    "type" => MENU_TYPE_NORMAL_ITEM,
-    "tab_parent" => "admin-tools/admin",    
-  );
-  
-  
-  $items["admin/config/school-data"] = array(
-    "title" => "Configure school settings",
-    "description" => "Configure school-specific data and settings",
-    "page_callback" => "fp_render_form",
-    "page_arguments" => array("system_school_data_form", "system_settings"),
-    "access_arguments" => array("de_can_administer_school_data"),
-    "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
-      "page_hide_report_error" => TRUE,
-      "menu_icon" => fp_theme_location() . "/images/toolbox.gif",
-      "menu_links" => array(         
-        0 => array(
-          "text" => "Back to main menu",
-          "path" => "admin-tools/admin",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-      ),
-    ),    
-    "type" => MENU_TYPE_NORMAL_ITEM,
-    "tab_parent" => "admin-tools/admin",    
-  );  
-  
-  
-  
-  $items["admin/config/modules"] = array(
-    "title" => "Modules",
-    "description" => "Manage which modules are enabled for your site",
-    "page_callback" => "fp_render_form",
-    "page_arguments" => array("system_modules_form"),
-    "access_arguments" => array("administer_modules"),
-    "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
-      "page_hide_report_error" => TRUE,
-      "menu_links" => array(         
-        0 => array(
-          "text" => "Back to main menu",
-          "path" => "admin-tools/admin",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-      ),
-    ),    
-    "type" => MENU_TYPE_NORMAL_ITEM,
-    "tab_parent" => "admin-tools/admin",    
-  );
+
+
 
   $items["system/uninstall-module"] = array(
     "page_callback" => "system_handle_uninstall_module",
@@ -450,16 +351,7 @@ function system_menu() {
     "type" => MENU_TYPE_CALLBACK,
   );
   
-  
-  
-  $items["admin/config/clear-menu-cache"] = array(
-    "title" => "Clear menu cache",
-    "description" => "Clear and rebuild menus and URLs",
-    "page_callback" => "system_perform_clear_menu_cache",
-    "access_arguments" => array("administer_modules"),
-    "type" => MENU_TYPE_NORMAL_ITEM,
-  );  
-  
+
   $items["system-handle-form-submit"] = array(
     "page_callback" => "system_handle_form_submit",
     "access_callback" => TRUE,
@@ -498,6 +390,132 @@ function system_menu() {
     ),   
     "type" => MENU_TYPE_CALLBACK,
   );                         
+  
+  
+
+  //////////////// Config (admin console main menu) /////////////
+
+  $items["admin/config/run-cron"] = array(
+    "title" => "Run cron now",
+    "description" => "Run the normal cron operations right away",
+    "page_callback" => "system_perform_run_cron",
+    "access_arguments" => array("run_cron"),
+    "page_settings" => array(      
+      "menu_icon" => fp_get_module_path('system') . "/icons/bullet_go.png",
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );  
+
+  
+  $items["admin/config/status"] = array(
+    "title" => "System status",
+    "description" => "View important notifications and updates for your installation of " . variable_get("system_name", "FlightPath"),
+    "page_callback" => "system_display_status_page",
+    "access_arguments" => array("view_system_status"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "menu_icon" => fp_get_module_path('system') . "/icons/application_view_list.png",
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),      
+    ),        
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+    "weight" => 50,
+  );  
+  
+
+  
+  
+  $items["admin/config/system-settings"] = array(
+    "title" => "System settings",
+    "description" => "Configure settings for FlightPath",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_settings_form", "system_settings"),
+    "access_arguments" => array("de_can_administer_system_settings"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_icon" => fp_get_module_path('system') . "/icons/cog.png",
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  );
+  
+  
+  $items["admin/config/school-data"] = array(
+    "title" => "Configure school settings",
+    "description" => "Configure school-specific data and settings",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_school_data_form", "system_settings"),
+    "access_arguments" => array("de_can_administer_school_data"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_icon" => fp_get_module_path('system') . "/icons/cog_edit.png",
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  );  
+  
+  
+  
+  $items["admin/config/modules"] = array(
+    "title" => "Modules",
+    "description" => "Manage which modules are enabled for your site",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_modules_form"),
+    "access_arguments" => array("administer_modules"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_icon" => fp_get_module_path('system') . "/icons/bricks.png",      
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Back to main menu",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  );
+
+  
+  
+  $items["admin/config/clear-menu-cache"] = array(
+    "title" => "Clear menu cache",
+    "description" => "Clear and rebuild menus and URLs",
+    "page_callback" => "system_perform_clear_menu_cache",
+    "access_arguments" => array("administer_modules"),
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "page_settings" => array(
+      "menu_icon" => fp_get_module_path('system') . "/icons/arrow_refresh.png",      
+    ),    
+  );  
+  
                       
 
   
@@ -509,6 +527,7 @@ function system_menu() {
     "access_arguments" => array("execute_php"),
     "page_settings" => array(
       "page_has_search" => FALSE,
+      "menu_icon" => fp_get_module_path('system') . "/icons/page_white_php.png",      
       "page_banner_is_link" => TRUE,
       "page_hide_report_error" => TRUE,      
       "menu_links" => array(         
@@ -896,6 +915,107 @@ function system_popup_report_contact_form_submit($form, $form_state) {
 function system_school_data_form() {
   $form = array();
   $m = 0;
+  
+  
+  $form["contact_email_address"] = array(
+    "type" => "textfield",
+    "label" => t("Contact email address:"),
+    "value" => variable_get("contact_email_address", ""),
+    "description" => t("Enter the email address to mail when a user accesses the
+                        Contact FlightPath Production Team popup."),
+    
+  );
+  
+
+  $form["school_initials"] = array(
+    "type" => "textfield",
+    "size" => 20,
+    "label" => t("School initials:"),
+    "value" => variable_get("school_initials", "DEMO"),
+    "description" => t("Ex: ULM or BPCC"),    
+  );
+                  
+
+  $form["earliest_catalog_year"] = array(
+    "type" => "textfield",
+    "size" => 20,
+    "label" => t("Earliest catalog year:"),
+    "value" => variable_get("earliest_catalog_year", "2006"),
+    "description" => t("This is the earliest possible catalog year FlightPath may look 
+                up.  Typically, this is the earliest year for which you have 
+                data (ie, when FlightPath went online.
+                If FlightPath cannot figure out a catalog year to use,
+                it will default to this one. Ex: 2006"),    
+  );
+  
+
+  $form["graduate_level_course_num"] = array(
+    "type" => "textfield",
+    "size" => 20,
+    "label" => t("Graduate level course num:"),
+    "value" => variable_get("graduate_level_course_num", "5000"),
+    "description" => t("This is the course num which means 'graduate level', meaning
+                anything above it is considered a graduate level course. Ex: 5000"),    
+  );
+  
+
+  $form["allowed_student_ranks"] = array(
+    "type" => "textfield",
+    "label" => t("Allowed student ranks (CSV):"),
+    "value" => variable_get("allowed_student_ranks", ""),
+    "description" => t("This is a list of which student ranks are allowed into FlightPath.
+                It should be separated by commas.
+                This also affects which students you may search for on the Advisees
+                tab. Ex: FR, SO, JR, SR"),
+  );
+
+
+  $form["not_allowed_student_message"] = array(
+    "type" => "textarea",
+    "label" => t("Not allowed student message:"),
+    "value" => variable_get("not_allowed_student_message", ""),
+    "description" => t("When a student is NOT allowed into FlightPath because of their
+                rank, this message will be displayed."),    
+  );
+    
+
+  $form["hiding_grades_message"] = array(
+    "type" => "textarea",
+    "label" => t("Hiding grades message:"),
+    "value" => variable_get("hiding_grades_message", ""),
+    "description" => t("This message will be displayed when any course on the page
+                has its bool_hide_grade set to TRUE.  If you are not using
+                this functionality, you can leave this blank."),    
+  );
+  
+  
+  $form["show_group_titles_on_view"] = array(
+    "type" => "select",
+    "label" => t("Show group titles on View and What If screens?"),
+    "hide_please_select" => TRUE,
+    "options" => array("no" => t("No"), "yes" => t("Yes")),
+    "value" => variable_get("show_group_titles_on_view", "no"),
+    "description" => t("If set to Yes, then group titles will be displayed in the View
+                        and What if screens, similar to how they are displayed when printing.
+                        If unsure what to select, select 'No'."), 
+  );                                
+
+  
+  $form["show_level_3_on_what_if_selection"] = array(
+    "type" => "select",
+    "label" => t("Show level-3 degree options on What If selection screen?"),
+    "hide_please_select" => TRUE,
+    "options" => array("no" => t("No"), "yes" => t("Yes")),
+    "value" => variable_get("show_level_3_on_what_if_selection", "yes"),
+    "description" => t("If set to Yes, then level 3 Track/Options will appear on the What If
+                        selection screen, if a degree is selected with available options.
+                        Setting to 'no' gives behavior more like FlightPath 4.
+                        If unsure what to select, select 'No'."), 
+  );                                
+  
+       
+  
+  
   
   $form["course_repeat_policy"] = array(
     "type" => "select",
@@ -1629,7 +1749,7 @@ function system_get_available_themes() {
     $start_dir = $theme_dir["start"];
     $type_dir = $theme_dir['type'];
      
-    if ($dh = opendir($start_dir)) {
+    if ($dh = @opendir($start_dir)) {
             
       $dir_files = scandir($start_dir);      
       foreach ($dir_files as $file) {    
@@ -1720,14 +1840,6 @@ function system_settings_form() {
 
   
   
-  $form["contact_email_address"] = array(
-    "type" => "textfield",
-    "label" => t("Contact email address:"),
-    "value" => variable_get("contact_email_address", ""),
-    "description" => t("Enter the email address to mail when a user accesses the
-                        Contact FlightPath Production Team popup."),
-    
-  );
 
   $form["system_name"] = array(
     "type" => "textfield",
@@ -1779,67 +1891,6 @@ function system_settings_form() {
   );
     
 
-  $form["school_initials"] = array(
-    "type" => "textfield",
-    "size" => 20,
-    "label" => t("School initials:"),
-    "value" => variable_get("school_initials", "DEMO"),
-    "description" => t("Ex: ULM or BPCC"),    
-  );
-                  
-
-  $form["earliest_catalog_year"] = array(
-    "type" => "textfield",
-    "size" => 20,
-    "label" => t("Earliest catalog year:"),
-    "value" => variable_get("earliest_catalog_year", "2006"),
-    "description" => t("This is the earliest possible catalog year FlightPath may look 
-                up.  Typically, this is the earliest year for which you have 
-                data (ie, when FlightPath went online.
-                If FlightPath cannot figure out a catalog year to use,
-                it will default to this one. Ex: 2006"),    
-  );
-  
-
-  $form["graduate_level_course_num"] = array(
-    "type" => "textfield",
-    "size" => 20,
-    "label" => t("Graduate level course num:"),
-    "value" => variable_get("graduate_level_course_num", "5000"),
-    "description" => t("This is the course num which means 'graduate level', meaning
-                anything above it is considered a graduate level course. Ex: 5000"),    
-  );
-  
-
-  $form["allowed_student_ranks"] = array(
-    "type" => "textfield",
-    "label" => t("Allowed student ranks (CSV):"),
-    "value" => variable_get("allowed_student_ranks", ""),
-    "description" => t("This is a list of which student ranks are allowed into FlightPath.
-                It should be separated by commas.
-                This also affects which students you may search for on the Advisees
-                tab. Ex: FR, SO, JR, SR"),
-  );
-
-
-  $form["not_allowed_student_message"] = array(
-    "type" => "textarea",
-    "label" => t("Not allowed student message:"),
-    "value" => variable_get("not_allowed_student_message", ""),
-    "description" => t("When a student is NOT allowed into FlightPath because of their
-                rank, this message will be displayed."),    
-  );
-    
-
-  $form["hiding_grades_message"] = array(
-    "type" => "textarea",
-    "label" => t("Hiding grades message:"),
-    "value" => variable_get("hiding_grades_message", ""),
-    "description" => t("This message will be displayed when any course on the page
-                has its bool_hide_grade set to TRUE.  If you are not using
-                this functionality, you can leave this blank."),    
-  );
-
 
   $form["notify_apply_draft_changes_email_address"] = array(
     "type" => "textfield",
@@ -1858,6 +1909,18 @@ function system_settings_form() {
                 a mysql error occurs.  
                 Leave blank to disable."),    
   );
+
+
+  $form["notify_php_error_email_address"] = array(
+    "type" => "textfield",
+    "label" => t("Notify PHP error email address:"),
+    "value" => variable_get("notify_php_error_email_address", ""),
+    "description" => t("Enter 1 or more email addresses (separated by comma) to notify when
+                a PHP warning or error occurs.  Leave blank to disable.  Recommendation: disable
+                on development, but enable on production."),
+  );
+
+
     
   $form["admin_transfer_passcode"] = array(
     "type" => "textfield",
@@ -1896,32 +1959,7 @@ function system_settings_form() {
                         watchdog table, it cannot be retrieved again.
                         <br>If you are unsure what to put here, select '1.5 years'."),
   );
-  
-  $form["show_group_titles_on_view"] = array(
-    "type" => "select",
-    "label" => t("Show group titles on View and What If screens?"),
-    "hide_please_select" => TRUE,
-    "options" => array("no" => t("No"), "yes" => t("Yes")),
-    "value" => variable_get("show_group_titles_on_view", "no"),
-    "description" => t("If set to Yes, then group titles will be displayed in the View
-                        and What if screens, similar to how they are displayed when printing.
-                        If unsure what to select, select 'No'."), 
-  );                                
-
-  
-  $form["show_level_3_on_what_if_selection"] = array(
-    "type" => "select",
-    "label" => t("Show level-3 degree options on What If selection screen?"),
-    "hide_please_select" => TRUE,
-    "options" => array("no" => t("No"), "yes" => t("Yes")),
-    "value" => variable_get("show_level_3_on_what_if_selection", "yes"),
-    "description" => t("If set to Yes, then level 3 Track/Options will appear on the What If
-                        selection screen, if a degree is selected with available options.
-                        Setting to 'no' gives behavior more like FlightPath 4.
-                        If unsure what to select, select 'No'."), 
-  );                                
-  
-                    
+               
   
   $form["popup_admin_win_options"] = array(
     "type" => "textfield",
