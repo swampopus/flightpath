@@ -40,11 +40,14 @@ class _DatabaseHandler extends stdClass
 
     // Connect using PDO
     if (!$this->pdo) {
-      $this->pdo = new PDO("mysql:host=$db_host_ip;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass);
+      $this->pdo = new PDO("mysql:host=$db_host_ip;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass,
+        array(
+                PDO::ATTR_EMULATE_PREPARES => true,
+                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,                        
+        ));
       // Set our error handling...  (using "silent" so I can catch errors in try/catch and display them, email, etc, if wanted.)
       $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, TRUE);
-      $this->pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, TRUE);
+
            
     }
     
