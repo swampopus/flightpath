@@ -42,6 +42,7 @@ class _DatabaseHandler extends stdClass
     if (!$this->pdo) {
       $this->pdo = new PDO("mysql:host=$db_host_ip;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass,
         array(
+          PDO::MYSQL_ATTR_LOCAL_INFILE => true,
         ));
       // Set our error handling...  (using "silent" so I can catch errors in try/catch and display them, email, etc, if wanted.)
       $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
