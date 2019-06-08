@@ -1363,6 +1363,10 @@ function fp_render_menu_item($item, $bool_check_user_access = TRUE) {
   $menu_icon = @$item["page_settings"]["menu_icon"];
   $extra_class = "";
   if ($menu_icon != "") {
+    if (!strstr($menu_icon, 'http')) {
+      global $base_url;  
+      $menu_icon = $base_url . "/" . $menu_icon;
+    }    
     $icon_img = "<img src='$menu_icon' border='0' class='fpmn-icon'>";    
   } 
   else { 
