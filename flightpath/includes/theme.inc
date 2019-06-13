@@ -1364,7 +1364,8 @@ function fp_render_menu_item($item, $bool_check_user_access = TRUE) {
   $extra_class = "";
   if ($menu_icon != "") {
     if (!strstr($menu_icon, 'http')) {
-      global $base_url;  
+      $base_url = $GLOBALS['fp_system_settings']['base_url'];  
+      if ($base_url == "/") $base_url = "";  // so that we don't have // as a path, because of the next line.
       $menu_icon = $base_url . "/" . $menu_icon;
     }    
     $icon_img = "<img src='$menu_icon' border='0' class='fpmn-icon'>";    
