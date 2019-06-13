@@ -628,19 +628,19 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   // We must first begin by deleting any entries for the new_year
   // from our tables.  This is because we may have to run the parser
   // more than once while debugging and such.
-  $res = db_query("DELETE FROM draft_courses WHERE `catalog_year`='$new_year' ");
+  $res = db_query("DELETE FROM draft_courses WHERE `catalog_year`= ? ", $new_year);
   
   
-  $res = db_query("DELETE FROM draft_degree_tracks WHERE `catalog_year`='$new_year' ");
+  $res = db_query("DELETE FROM draft_degree_tracks WHERE `catalog_year` = ? ", $new_year);
   // For degrees, we first need to select all of the new_year degrees.
-  $res = db_query("SELECT * FROM draft_degrees WHERE `catalog_year`='$new_year' ");
+  $res = db_query("SELECT * FROM draft_degrees WHERE `catalog_year` = ? ", $new_year);
   while ($cur = db_fetch_array($res)) {
   	$res2 = db_query("DELETE FROM draft_degree_requirements WHERE `degree_id`='{$cur["degree_id"]}' ");
   }
   
-  $res = db_query("DELETE FROM draft_degrees WHERE `catalog_year`='$new_year' ");
+  $res = db_query("DELETE FROM draft_degrees WHERE `catalog_year`=? ", $new_year);
   // For groups, begin by selecting all the groups in that year...
-  $res = db_query("SELECT * FROM draft_groups WHERE `catalog_year`='$new_year' ");
+  $res = db_query("SELECT * FROM draft_groups WHERE `catalog_year`=? ", $new_year);
   while ($cur = db_fetch_array($res))
   {
   	// Now, select all the requirements and see if there are any sub groups...
@@ -656,14 +656,14 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   	// Now, delete the original requirement.
   	$res3 = db_query("DELETE FROM draft_group_requirements WHERE `group_id`='{$cur["group_id"]}' ");
   }
-  $res = db_query("DELETE FROM draft_groups WHERE `catalog_year`='$new_year' ");
+  $res = db_query("DELETE FROM draft_groups WHERE `catalog_year`=? ", $new_year);
   //////////////////////////////////////////////////////////////////////////
   
   //  Okay, we have deleted any possible old entries for the new year.
   
   /////////////////////////////////////////////////////////////////////////
   // Our first step is to copy all of the courses from the old_year to the new_year.  
-  $res = db_query("SELECT * FROM draft_courses WHERE `catalog_year`='$old_year' ");
+  $res = db_query("SELECT * FROM draft_courses WHERE `catalog_year`=? ", $old_year);
   while ($cur = db_fetch_array($res))
   {
   	extract($cur, 3, "db");
@@ -689,7 +689,7 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   $subgroup_id_array = array();
   //////////////////////////////////////////////////////////////////////////
   //  Now, let's copy over the groups.  
-  $res = db_query("SELECT * FROM draft_groups WHERE `catalog_year`='$old_year' ");
+  $res = db_query("SELECT * FROM draft_groups WHERE `catalog_year`=? ", $old_year);
   while ($cur = db_fetch_array($res))
   {
   	extract($cur, 3, "db");
@@ -1041,11 +1041,11 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
   foreach($table_array as $table_name) {
     $draft_table_name = "draft_$table_name";
     // First, truncate existing...
-    $query = "truncate table $table_name";
+    $query = "truncate table `$table_name`";
     $res = db_query($query);
     // Now, copy in draft changes...
-    $query = "INSERT INTO $table_name
-            SELECT * FROM $draft_table_name ";
+    $query = "INSERT INTO `$table_name`
+            SELECT * FROM `$draft_table_name` ";
     $res = db_query($query);
   }
 

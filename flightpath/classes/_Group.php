@@ -233,13 +233,13 @@ class _Group extends stdClass
 		$table_name = "group_requirements";
 		if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 		
-		$res = db_query("SELECT * FROM $table_name
+		$res = db_query("SELECT * FROM `$table_name`
 							WHERE group_id = '?'	", $this->get_db_group_id());
 		while ($cur = db_fetch_array($res))
 		{
 
 			$id = $cur["id"];
-			$course_id = $cur["course_id"]*1;
+			$course_id = $cur["course_id"]*1; 
 
 
 			if ($cur["course_id"]*1 > 0)
@@ -440,7 +440,7 @@ class _Group extends stdClass
 		if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 
 		// Look for all instances of this course in the group's base list...
-		$res = db_query("SELECT `id`, course_repeats FROM $table_name
+		$res = db_query("SELECT `id`, course_repeats FROM `$table_name`
 									WHERE group_id = ?
 									AND course_id = ? ", $this->get_db_group_id(), $course_id);
 		while ($cur = db_fetch_array($res))
