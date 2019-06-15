@@ -1,6 +1,10 @@
 FlightPath 4.x Changelog
 ========================
 
+2019-06-14
+  Backported a security fix, first reported by m.althibyani@gmail.com in the 5.x branch.  This fix helps mitigate a PHP Local File Include vulnerability.
+  
+
 2016-03-07
   Fixed bug where course data was not being loaded from draft catalog year correctly.
   

@@ -1590,6 +1590,40 @@ function system_handle_form_submit() {
   
   if ($form_include != "") {
     // This is a file we need to include in order to complete the submission process.
+    // We will also make sure that we only allow certain file extensions to be included.
+    $allowed_ext = array(
+      "php",
+      "inc",
+      "class",
+      "module",
+    );
+    
+    $temp = explode(".", $form_include);
+    $test_ext = trim($temp[count($temp) - 1]);
+
+    if (!in_array($test_ext, $allowed_ext)) {
+      fp_add_message(t("Include file type (%ext) not allowed in form submission.", array("%ext" => $test_ext)), "error");
+      fp_goto("<front>");
+      return;
+    }
+    
+    // We need to make sure, before we include this file, that it is something only available from within the main FlightPath directory.
+    $absolute_path = realpath($form_include);
+    $absolute_path = str_replace("\\", "/", $absolute_path);
+    
+    // In order for us to proceed, the $absolute_path must BEGIN with our base FlightPath installation directory.  
+    $file_system_path = $GLOBALS['fp_system_settings']['file_system_path'];     
+    
+        
+    if (substr($absolute_path, 0, strlen($file_system_path)) != $file_system_path) {
+      fp_add_message(t("Include file in form submission is outside of the FlightPath installation directory.
+                          <br>FlightPath directory path: %fsp
+                          <br>Include file path: %ap", array("%fsp" => $file_system_path, "%ap" => $absolute_path)), "error");
+      fp_goto("<front>");
+      return;
+    }
+
+	
     include_once($form_include);
   }
 
