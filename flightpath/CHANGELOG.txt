@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2019-06-14
+  Patched a security bug whereby a user could theoretically try to view a system file, using a PHP Local File Include vulnerability.
+  Special thanks to m.althibyani@gmail.com for finding and reporting!
+
+
 2019-06-06
   Created a new core module: SMTP, as well as a helper function, fp_mail().  Now if you have the SMTP module
   enabled and configured, all mail is automatically routed through your SMTP server, instead of whatever
