@@ -3,7 +3,20 @@ table.user-list  {
   font-size: 0.85em;
 }
 
+
 /* Permissions form */
+
+/* Permissions page */
+table.admin-perm-table {
+  background-color: white;
+}
+
+.admin-perm-table .perm-desc {
+  padding-left: 10px;
+  font-style: italic;
+  font-size: 0.85em;
+}
+
 .admin-perm-table th,
 .admin-perm-table td
  {

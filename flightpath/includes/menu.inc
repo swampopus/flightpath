@@ -73,7 +73,7 @@ function menu_get_module_path($module, $bool_include_file_system_path = FALSE) {
   if ($bool_include_file_system_path) {
     $system_path = $GLOBALS["fp_system_settings"]["file_system_path"] . "/";
   }
-    
+  
   if (isset($GLOBALS["fp_system_settings"]["modules"][$module]["path"])) {
     return $system_path . $GLOBALS["fp_system_settings"]["modules"][$module]["path"];
   }

@@ -1173,11 +1173,9 @@ function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bo
   
   $p = menu_get_module_path($module, $bool_include_file_system_path);
   
-  // Redundant, causes bug.
-    
-  //if ($bool_include_base_path) {
-    //$p = base_path() . "/" . $p;
-  //}
+  if ($bool_include_file_system_path == FALSE && $bool_include_base_path == TRUE) {
+    $p = base_path() . "/" . $p;
+  }
     
   return $p;
 }
@@ -1325,8 +1323,8 @@ function get_term_description($term_id, $bool_abbreviate = false) {
     $year4m1 = $year4 - 1;
     
     // left-pad these with 0's if needed.
-    $year2p1 = fp_number_pad($year2 + 1, 2);
-    $year2m1 = fp_number_pad($year2 - 1, 2);
+    $year2p1 = @fp_number_pad($year2 + 1, 2);
+    $year2m1 = @fp_number_pad($year2 - 1, 2);
         
     // Let's look at the term_idStructure setting and attempt to match
     // what we have been supplied.
