@@ -814,6 +814,9 @@ class _DegreePlan extends stdClass
 
     if ($this->title != "") {
       $dtitle = $this->title;
+      if ($bool_include_html) {
+        $dtitle = "<span class='deg-title'>$this->title</span>";
+      }      
     }
     else {
 
