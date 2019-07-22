@@ -1,6 +1,10 @@
 FlightPath 5.x Changelog
 ========================
 
+2019-07-22
+  Adding extra HTML and CSS when displaying degree titles on screen.
+  
+
 2019-06-14
   Patched a security bug whereby a user could theoretically try to view a system file, using a PHP Local File Include vulnerability.
   Special thanks to m.althibyani@gmail.com for finding and reporting!

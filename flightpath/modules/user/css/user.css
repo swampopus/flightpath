@@ -4,11 +4,9 @@ table.user-list  {
 }
 
 
-/* Permissions form */
-
 /* Permissions page */
 table.admin-perm-table {
-  background-color: white;
+  background-color: white !important;
 }
 
 .admin-perm-table .perm-desc {
@@ -17,7 +15,13 @@ table.admin-perm-table {
   font-size: 0.85em;
 }
 
-.admin-perm-table th,
+.admin-perm-table th {
+  text-align: center;
+  vertical-align: top;
+  font-size: 0.8em;  
+  border-left: 1px solid #ccc;
+}
+
 .admin-perm-table td
  {
   font-size: 0.85em;

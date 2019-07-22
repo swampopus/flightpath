@@ -829,15 +829,23 @@ class _DegreePlan extends stdClass
       $cur = $this->db->db_fetch_array($res);
       $this->title = $cur["title"];
 
-      $dtitle = $this->title;
+      if ($bool_include_html) {
+        $dtitle = "<span class='deg-title'>$this->title</span>";
+      }
+      else {
+        $dtitle = $this->title;
+      }
     }
 
 
     if ($bool_include_track_title && $this->track_title != "") {
       if ($bool_include_html) {  
         $dtitle .= "<span class='level-3-raquo'>&raquo;</span>";
+        $dtitle .= "<span class='deg-track-title'>$this->track_title</span>";
       }
-      $dtitle .= $this->track_title;
+      else {        
+        $dtitle .= $this->track_title;
+      }
     }
     
     if ($bool_include_classification && $this->degree_class != "") {
