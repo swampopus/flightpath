@@ -3222,7 +3222,7 @@ function draw_menu_items($menu_array) {
           $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle; //save for next time.
         }
   
-        $css_dtitle = fp_get_machine_readable($dtitle);
+        $css_dtitle = fp_get_machine_readable($t_degree_plan->get_title2(TRUE, TRUE, FALSE));
   
         $theme = array(
           'classes' => array('tenpt', 'required-by-degree', 
