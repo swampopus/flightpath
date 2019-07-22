@@ -3225,7 +3225,7 @@ function draw_menu_items($menu_array) {
         $css_dtitle = fp_get_machine_readable($dtitle);
   
         $theme = array(
-          'classes' => array('tenpt', 'required-by-degree', "required-by-degree-$css_dtitle", "required-by-degree-type-" . fp_get_machine_readable($t_degree_plan->degree_type)),
+          'classes' => array('tenpt', 'required-by-degree', "required-by-degree-$css_dtitle", "required-by-degree-type-" . fp_get_machine_readable($t_degree_plan->degree_type), "required-by-degree-level-" . fp_get_machine_readable($t_degree_plan->degree_level)),
           'css_dtitle' => $css_dtitle,
           'degree_id' => $req_by_degree_id,
           'html' => "<span class='req-by-label'>" . t("Required by") . "</span> <span class='req-by-degree-title'>$dtitle</span>",
