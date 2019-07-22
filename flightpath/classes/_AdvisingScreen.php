@@ -3097,6 +3097,9 @@ function draw_menu_items($menu_array) {
     // Create a temporary caching system for degree titles, so we don't have to keep looking them back up.
     if (!isset($GLOBALS["fp_temp_degree_titles"])) {
       $GLOBALS["fp_temp_degree_titles"] = array();
+      $GLOBALS["fp_temp_degree_types"] = array();
+      $GLOBALS["fp_temp_degree_classes"] = array();
+      $GLOBALS["fp_temp_degree_levels"] = array();
     }
 
     // First, display the list of bare courses.
@@ -3188,7 +3191,13 @@ function draw_menu_items($menu_array) {
         //$t_degree_plan->load_descriptive_data();            
         $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
         $dweight = $t_degree_plan->db_advising_weight;
+        $dtype = $t_degree_plan->degree_type;
+        $dclass = $t_degree_plan->degree_class;
+        $dlevel = $t_degree_plan->degree_level;
         $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle . " "; //save for next time.
+        $GLOBALS["fp_temp_degree_types"][$req_by_degree_id] = $dtype; //save for next time.
+        $GLOBALS["fp_temp_degree_classes"][$req_by_degree_id] = $dclass; //save for next time.
+        $GLOBALS["fp_temp_degree_levels"][$req_by_degree_id] = $dlevel; //save for next time.
         $GLOBALS["fp_temp_degree_advising_weights"][$req_by_degree_id] = $dweight . " "; //save for next time.
       }
       
@@ -3214,22 +3223,35 @@ function draw_menu_items($menu_array) {
         
         // Get the degree title...        
         $dtitle = @$GLOBALS["fp_temp_degree_titles"][$req_by_degree_id];
+        $dtype = @$GLOBALS["fp_temp_degree_types"][$req_by_degree_id];
+        $dclass = @$GLOBALS["fp_temp_degree_classes"][$req_by_degree_id];
+        $dlevel = @$GLOBALS["fp_temp_degree_levels"][$req_by_degree_id];
         if ($dtitle == "") {
           $t_degree_plan = new DegreePlan();
           $t_degree_plan->degree_id = $req_by_degree_id;
           //$t_degree_plan->load_descriptive_data();
           $dtitle = $t_degree_plan->get_title2(TRUE, TRUE);
+          
+          $dtype = $t_degree_plan->degree_type;
+          $dclass = $t_degree_plan->degree_class;
+          $dlevel = $t_degree_plan->degree_level;          
+          
           $GLOBALS["fp_temp_degree_titles"][$req_by_degree_id] = $dtitle; //save for next time.
+          $GLOBALS["fp_temp_degree_types"][$req_by_degree_id] = $dtype; //save for next time.
+          $GLOBALS["fp_temp_degree_classes"][$req_by_degree_id] = $dclass; //save for next time.
+          $GLOBALS["fp_temp_degree_levels"][$req_by_degree_id] = $dlevel; //save for next time.
+                    
         }
   
-        $css_dtitle = fp_get_machine_readable($t_degree_plan->get_title2(TRUE, TRUE, FALSE));
-  
+        $css_dtitle = fp_get_machine_readable($dtitle);
+        
+          
         $theme = array(
           'classes' => array('tenpt', 'required-by-degree', 
                               "required-by-degree-$css_dtitle", 
-                              "required-by-degree-type-" . fp_get_machine_readable($t_degree_plan->degree_type), 
-                              "required-by-degree-class-" . fp_get_machine_readable($t_degree_plan->degree_class), 
-                              "required-by-degree-level-" . fp_get_machine_readable($t_degree_plan->degree_level)),
+                              "required-by-degree-type-" . fp_get_machine_readable($dtype), 
+                              "required-by-degree-class-" . fp_get_machine_readable($dclass), 
+                              "required-by-degree-level-" . fp_get_machine_readable($dlevel)),
           'css_dtitle' => $css_dtitle,
           'degree_id' => $req_by_degree_id,
           'html' => "<span class='req-by-label'>" . t("Required by") . "</span> <span class='req-by-degree-title'>$dtitle</span>",
