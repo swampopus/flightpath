@@ -1418,7 +1418,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
   
   
   $form["degree_level"] = array(
-    "type" => "textfield",
+    "type" => "select",
     "label" => t("Level:"),
     "size" => 1,
     "options" => array('UG' => 'UG - Under Grad', 'GR' => 'GR - Grad'),
