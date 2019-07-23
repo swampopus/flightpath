@@ -1423,6 +1423,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     "size" => 1,
     "options" => array('UG' => 'UG - Under Grad', 'GR' => 'GR - Grad'),
     "value" => $degree->degree_level,
+    "hide_please_select" => TRUE,
     "popup_description" => t("Select the degree level code in this box.  By default, it is assumed to be an \"Undergraduate\" (UG) degree.
                               
                               Select \"GR\" for a degree which should only be accessible to Graduate students in What If mode.                              
