@@ -1875,15 +1875,17 @@ function draw_menu_items($menu_array) {
    			<tr class='pie-hidden-charts-row'>";
   
   			$c = 0;
-  			foreach ($pie_chart_theme_array['degree_rows'][$degree_id]["data"] as $requirement_type => $val) {
-          $html = $val["hide_pie_html"];
-          if ($val["bool_display"] === FALSE) continue; // this particular chart shouldn't be shown.
-          
-  			  $rtn .= "<td width='$td_width%' align='center' class='td_hidden_pie td_hidden_pie_$requirement_type {$val["pie_classes"]} '>
-  					         " . $html . "
-  				         </td>";
-          $c++;
-  			}
+        if (isset($pie_chart_theme_array['degree_rows'][$degree_id]["data"])) {
+    			foreach ($pie_chart_theme_array['degree_rows'][$degree_id]["data"] as $requirement_type => $val) {
+            $html = $val["hide_pie_html"];
+            if ($val["bool_display"] === FALSE) continue; // this particular chart shouldn't be shown.
+            
+    			  $rtn .= "<td width='$td_width%' align='center' class='td_hidden_pie td_hidden_pie_$requirement_type {$val["pie_classes"]} '>
+    					         " . $html . "
+    				         </td>";
+            $c++;
+    			}
+        }
    				
    			$rtn .= "
    			  </tr>
