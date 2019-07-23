@@ -1601,11 +1601,11 @@ class _DatabaseHandler extends stdClass
     $table_name = "degrees";
     if ($bool_use_draft){$table_name = "draft_$table_name";}    
     
-    // TODO:  change this to be whatever the graduate code actually is.
-    if ($bool_undergrad_only) $undergrad_line = "AND degree_level != 'G' ";
+    // change this to be whatever the graduate code actually is.
+    if ($bool_undergrad_only) $undergrad_line = "AND degree_level != 'GR' ";
     
     $degree_class_line = "";
-    if (count($only_level_nums) > 0) {
+    if (count($only_level_nums) > 0) { 
       $classes = fp_get_degree_classifications();
       foreach ($only_level_nums as $num) {
         foreach ($classes["levels"][$num] as $machine_name => $val) {

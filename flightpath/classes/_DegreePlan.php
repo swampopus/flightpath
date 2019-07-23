@@ -91,6 +91,11 @@ class _DegreePlan extends stdClass
 
     }
 
+     
+    if ($this->degree_level == "") {
+      $this->degree_level = "UG";  // undergrad by default
+    }
+
 
   } // __construct
 
@@ -471,6 +476,11 @@ class _DegreePlan extends stdClass
       $this->title = @$cur["title"];
       $this->major_code = @$cur["major_code"];
       $this->degree_level = @strtoupper(trim($cur["degree_level"]));
+      
+      if ($this->degree_level == "") {
+        $this->degree_level = "UG";  // undergrad by default
+      }      
+      
       $this->degree_class = @$cur["degree_class"];
       $this->db_override_degree_hours = @$cur["override_degree_hours"];
       $this->db_advising_weight = @intval($cur["advising_weight"]);
@@ -517,6 +527,9 @@ class _DegreePlan extends stdClass
       $this->title = $cur["title"];
       $this->major_code = $cur["major_code"];
       $this->degree_level = strtoupper(trim($cur["degree_level"]));
+      if ($this->degree_level == "") {
+        $this->degree_level = "UG";  // undergrad by default
+      }      
       $this->degree_class = $cur["degree_class"];
       $this->db_override_degree_hours = $cur["override_degree_hours"];
       $this->db_advising_weight = intval($cur["advising_weight"]);
@@ -887,6 +900,11 @@ class _DegreePlan extends stdClass
       $this->db_override_degree_hours = $GLOBALS[$cache_name][$this->degree_id]['db_override_degree_hours'];
       $this->degree_class = $GLOBALS[$cache_name][$this->degree_id]['degree_class'];
       $this->degree_level = $GLOBALS[$cache_name][$this->degree_id]['degree_level'];
+      
+      if ($this->degree_level == "") {
+        $this->degree_level = "UG";  // undergrad by default
+      }      
+      
       $this->degree_type = $GLOBALS[$cache_name][$this->degree_id]['degree_type'];
       $this->major_code = $GLOBALS[$cache_name][$this->degree_id]['major_code'];
       $this->public_notes_array = $GLOBALS[$cache_name][$this->degree_id]['public_notes_array'];
@@ -911,6 +929,11 @@ class _DegreePlan extends stdClass
       $cur = $this->db->db_fetch_array($res);
       $this->major_code = $cur["major_code"];
       $this->degree_level = strtoupper(trim($cur["degree_level"]));
+
+      if ($this->degree_level == "") {
+        $this->degree_level = "UG";  // undergrad by default
+      }      
+      
       $this->degree_class = $cur["degree_class"];
       $this->db_override_degree_hours = $cur["override_degree_hours"];
       

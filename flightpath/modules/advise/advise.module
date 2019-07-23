@@ -1358,7 +1358,19 @@ function advise_display_view($view = "view") {
     // the user a selection screen.
     $screen->screen_mode = "not_advising";
     //$rtn .= advise_display_what_if_selection();
-    $rtn .= fp_render_form("advise_what_if_selection_form");
+    
+    // TODO:  If graduate degree selection is allowed for graduate students, then change bool_undergrad_only to FALSE.
+    // (if the student is a grad student!)  
+    $bool_undergrad_only = TRUE;
+    
+    if ($student->db_rank == 'GR') { // TODO: make it a settings list of graduate ranks
+      // TODO: check setting to see if we should allow graduate students to see what if (?)  Maybe?
+      $bool_undergrad_only = FALSE; 
+    }
+    
+    $rtn .= fp_render_form("advise_what_if_selection_form", "", $bool_undergrad_only);
+    
+    
   } 
   else {
     // This is a normal advising screen.  Either View or WhatIf.
@@ -1488,7 +1500,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
     
     
   }  
-    
+  
     
     
     

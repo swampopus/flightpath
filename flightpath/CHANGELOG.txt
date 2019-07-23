@@ -1,6 +1,10 @@
 FlightPath 5.x Changelog
 ========================
 
+2019-07-23
+  Adding better support for Graduate degrees & students.
+  
+
 2019-07-22
   Adding extra HTML and CSS when displaying degree titles on screen.
   

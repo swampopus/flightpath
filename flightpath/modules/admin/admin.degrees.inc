@@ -1421,12 +1421,12 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     "type" => "textfield",
     "label" => t("Level:"),
     "size" => 1,
+    "options" => array('UG' => 'UG - Under Grad', 'GR' => 'GR - Grad'),
     "value" => $degree->degree_level,
-    "popup_description" => t("Enter the degree level code in this box.  If left blank, it is assumed to be an \"Undergraduate\" degree.
+    "popup_description" => t("Select the degree level code in this box.  By default, it is assumed to be an \"Undergraduate\" (UG) degree.
                               
-                              Enter \"G\" for a degree which should only be accessible to Graduate students in What If mode.
-                              
-                              NOTE: NOT CURRENTLY SUPPORTED IN THIS VERSION OF FLIGHTPATH"),
+                              Select \"GR\" for a degree which should only be accessible to Graduate students in What If mode.                              
+                              "),
     "weight" => 1040,    
   );
     
