@@ -742,7 +742,7 @@ function advise_display_popup_change_track() {
       // Add this information to our javascript settings...
       $js = array(      
         "degree_min_max_tracks_" . $degree_id . "_split_" . $machine_name => $min_tracks . "~" . $max_tracks,
-        "degree_name_" . $degree_id => $t_degree_plan->get_title2(),
+        "degree_name_" . $degree_id => $t_degree_plan->get_title2(FALSE, FALSE, FALSE),
         "class_title_" . $machine_name => $class_title,
       );
         

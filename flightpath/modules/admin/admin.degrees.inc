@@ -784,10 +784,11 @@ function admin_display_degrees() {
   
 
   $res = db_query("SELECT * FROM draft_degrees
-              WHERE catalog_year = '?'
+              WHERE catalog_year = ?
              ORDER BY degree_type, major_code, title ", $de_catalog_year);
 
   while($cur = db_fetch_array($res)) {
+
     $db_exclude = 0;
     extract($cur, 3, "db");
 
