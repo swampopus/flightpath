@@ -1945,6 +1945,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
     $degree = new DegreePlan($degree_id, null, false, false, true);
     $degree->load_descriptive_data();
 
+
     // Delete from degree_requirements WHERE this degree_id exists.
     $res = db_query("DELETE FROM draft_degree_requirements
                   WHERE degree_id = '?' ", $degree_id);
@@ -1957,10 +1958,16 @@ function admin_edit_degree_form_submit($form, $form_state) {
 
       // Also need to get rid of the track, if there is one for this
       // degree.
+      
+      $temp = explode("_", $degree->major_code);  // get only the "major" part from the full major_code (might look like ACCT|FINA_TRACK1
+      $just_major_part = trim($temp[0]);
+      $just_major_part = rtrim($just_major_part, "|"); // if there is now a trailing |, get rid of it.  Ex:  ACCT|
+            
       $res = db_query("DELETE FROM draft_degree_tracks
-                  WHERE major_code = '$degree->major_code' 
-                  AND track_code = '$degree->track_code'
-                  AND catalog_year = '?' LIMIT 1", $de_catalog_year);
+                  WHERE major_code = ? 
+                  AND track_code = ?
+                  AND catalog_year = ? LIMIT 1", $just_major_part, $degree->track_code, $de_catalog_year);
+
 
       // Okay, we have deleted everything.  We need to go back to
       // just the list of degrees.
