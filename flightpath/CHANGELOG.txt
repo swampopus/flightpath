@@ -4,6 +4,8 @@ FlightPath 5.x Changelog
 2019-08-08
   But when adding new user; user isn't searchable.  Adding default lastname (username) if not entered.
   
+  Fixed blocks module's administer_blocks permission.  Had typo preventing it from working.
+  
 
 2019-08-07
   Fixed bug where when deleting a degree with a track, it wasn't being removed from the draft_degree_tracks table.
