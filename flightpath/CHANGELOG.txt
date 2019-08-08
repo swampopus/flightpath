@@ -1,8 +1,13 @@
 FlightPath 5.x Changelog
 ========================
 
+2019-08-08
+  But when adding new user; user isn't searchable.  Adding default lastname (username) if not entered.
+  
+
 2019-08-07
   Fixed bug where when deleting a degree with a track, it wasn't being removed from the draft_degree_tracks table.
+
 
 2019-07-23
   Adding better support for Graduate degrees & students.
