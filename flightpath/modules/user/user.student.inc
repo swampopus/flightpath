@@ -741,6 +741,10 @@ function user_edit_student_user_form_submit($form, $form_state) {
     
     $bool_is_new = TRUE;
     
+    if (trim($values["l_name"]) == "") {
+      $values["l_name"] = $values["new_user_name"];  // force a last name if none supplied
+    }
+    
     db_query("INSERT INTO users (user_name, password, is_student, email, cwid, f_name, l_name, is_disabled)
               VALUES ('?', '?', '1', '?', '?', '?', '?', '?')
               ", $values["new_user_name"], user_hash_password($values["new_password"]), $values["email"], $values["new_student_cwid"],
