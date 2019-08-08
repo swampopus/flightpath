@@ -48,7 +48,7 @@ function format_date($timestamp = 0, $format = "standard", $custom = "") {
   }
   
   if ($format == "short") {
-    $f = "n/d/Y - g:i";
+    $f = "n/d/Y - g:ia";
   }
   
   if ($format == "pretty") {

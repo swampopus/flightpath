@@ -6,6 +6,8 @@ FlightPath 5.x Changelog
   
   Fixed blocks module's administer_blocks permission.  Had typo preventing it from working.
   
+  Updated format_date() function, so that the "short" format has am/pm at the end.
+  
 
 2019-08-07
   Fixed bug where when deleting a degree with a track, it wasn't being removed from the draft_degree_tracks table.
