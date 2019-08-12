@@ -2259,11 +2259,13 @@ function system_handle_form_submit() {
     foreach ($submit_handlers as $submit_callback) {                
       if (function_exists($submit_callback)) {
         //call_user_func($submit_callback, $form, &$form_state);
+        
         call_user_func_array($submit_callback, array(&$form, &$form_state));
+        
       }    
     }
 
-    
+
     
   }
    
@@ -2700,10 +2702,11 @@ function system_login_form_submit($form, &$form_state) {
   
   // Okay, let's look for all the modules who have implimented hook_user_login
   $modules = modules_implement_hook("user_login");
-  foreach ($modules as $module) {    
-     call_user_func_array($module . '_user_login', array(&$account));        
+  if (is_array($modules) && count($modules) > 0) {
+    foreach ($modules as $module) {          
+       call_user_func_array($module . '_user_login', array(&$account));        
+    }
   }
-  
   // Set the $account to the SESSION.
   $_SESSION["fp_user_object"] = $account;
   
