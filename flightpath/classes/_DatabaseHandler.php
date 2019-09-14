@@ -1692,12 +1692,12 @@ class _DatabaseHandler extends stdClass
     }    
     
     $res = $this->db_query("SELECT * FROM degree_tracks
-                WHERE major_code = '?'
-                AND catalog_year = '?' ", $major_code, $catalog_year);
+                WHERE major_code = ?
+                AND catalog_year = ? ", $major_code, $catalog_year);
     if ($this->db_num_rows($res) < 1)
     {
       $degree_tracks_data_cache[$catalog_year][$major_code] = false;
-      return false;
+      return FALSE;
     }
 
     while($cur = $this->db_fetch_array($res))

@@ -5,6 +5,9 @@ FlightPath 5.x Changelog
   Made it so legacy support for 4x style "concentrations" is DISABLED by default.  This is to help clear up confusion.  New
   language on the Add Degree form uses the new level-1, -2, and -3 terminology for consistency.
   
+  Fixed a bug where previously-deleted tracks were showing as a blank degree_class to select from on the What If selection
+  screen.  Make it simply where if the degree_class is blank, then skip over it.
+  
 
 2019-09-09
   Minor tweak to stop a warning from appearing.
