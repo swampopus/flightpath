@@ -440,9 +440,15 @@ function admin_add_degree_form() {
   $form["markup" . $m++] = array(
     "type" => "markup",
     "value" => t("You may use this screen to add a new degree,
-                  by entering a new major, concentration, or track (degree option)"),
+                  by entering a new degree code (Level 1 or 2) or <em>track</em> (Level-3 degree) code.
+                  <br><br><em>Note: For simplicity, FlightPath refers to Level-1 and -2 degree codes as \"major codes\" and Level-3 degree codes as \"track codes\".</e>"),
   );
   
+  $bool_legacy_concentrations = variable_get("enable_legacy_concentrations", FALSE);
+  $legacy_text = "";
+  if ($bool_legacy_concentrations) {
+    $legacy_text = " [and concentration] ";
+  }
 
   $form["de_catalog_year"] = array(
     "type" => "hidden",
@@ -451,34 +457,42 @@ function admin_add_degree_form() {
 
   $form["new_major"] = array(
     "type" => "radios",
-    "label" => t("Please select: are you entering a new major code [and concentration] 
-                  or an existing major code [and concentration] (so you can add a new track)?"),
+    "label" => t("Are you entering a new major code $legacy_text,<br> 
+                  or an existing major code $legacy_text (so you can add a new track)?"),
     "options" => array(
-      "new" => t("Entering a <b>new</b> major code [and concentration]"),
-      "existing" => t("Entering an <b>existing</b> major code [and concentration] (only adding a new track)"),
+      "new" => t("Entering a <b>new</b> major code"),
+      "existing" => t("Entering an <b>existing</b> major code (only adding a new Level-3 track)"),
     ),
     "required" => TRUE,
   );
 
   
-  $form["major_code"] = array(
-    "type" => "textfield",
-    "size" => 15,
-    "label" => t("Major|Conc code:"),
-    "description" => t("To enter a concentration code, use MAJOR|CONC. 
+  
+  $desc = "Enter the Level-1 or -2 Major Code here.  
+           Do not enter any Level 3 codes (ex: Tracks or Concentrations).
+           <br>For example, enter ACCT or ENGL.  <i><b>But not ENGL|_TRKA, etc</b></i>";
+  if ($bool_legacy_concentrations) {
+    $desc = "To enter a concentration code, use MAJOR|CONC. 
                       The | character is call the pipe, and it should under the backspace key. 
                       If adding a new concentration to an existing major, you still put this in as a 
                       NEW major code. Do not have any spaces in this box. The concentration code 
                       is optional. If the major does not have a concentration, 
                       then simply enter the major code by itself.  The combined major code and optional track
-                      code can only be 18 characters maximum."),
+                      code can only be 18 characters maximum.";
+  }
+  
+  $form["major_code"] = array(
+    "type" => "textfield",
+    "size" => 15,
+    "label" => t("Level-1 or -2 Major Code:"),
+    "description" => t($desc),
     "required" => TRUE,
   );
 
 
   $form["new_track"] = array(
     "type" => "radios",
-    "label" => t("Please select: are you entering a new track code?"),
+    "label" => t("Are you entering a new Level-3 track code?"),
     "options" => array(
       "new" => t("Entering a <b>new</b> track code"),
       "none" => t("None - Not adding a track.  Leave blank"),
@@ -490,7 +504,7 @@ function admin_add_degree_form() {
   $form["track_code"] = array(
     "type" => "textfield",
     "size" => 15,
-    "label" => t("Track code:"),
+    "label" => t("Level-3 Track code:"),
     "description" => t("Leave blank if you selected None above.  This code must not contain spaces, 
                         and combined with the major code it must not exceed 18 characters."),
   );
@@ -571,9 +585,20 @@ function admin_add_degree_form_submit($form, $form_submit) {
   if (strstr($track_code, "_") || strstr($major_code, "_")) {
         
     form_error("major_code", t("You are not allowed to enter underscores (_) in either the track code
-                    or major code.  FlightPath will add that for you.  Please re-enter
-                    your new degree without using an underscore.")); 
+                    or major code, as this character has a special meaning in FlightPath (it is used in Level-3 degree code prefixes).
+                    Please re-enter your new degree code without using an underscore.")); 
 
+  }
+
+  // make sure no pipes in major or track (if legacy not enabled)
+  if (!variable_get("enable_legacy_concentrations", FALSE)) {
+    if (strstr($track_code, "|") || strstr($major_code, "|")) {
+          
+    form_error("major_code", t("You are not allowed to enter pipes (|) in either the track code
+                    or major code, as this character has a special meaning in FlightPath (it is used in Level-3 degree code prefixes).
+                    Please re-enter your new degree code without using a pipe character.")); 
+  
+    }
   }
 
   // Return since we have errors all ready.
@@ -1507,13 +1532,13 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
   {
      
     $form['track_info_markup'] = array(
-      'value' => "<h3>" . t("Track Information") . "</h3>",
+      'value' => "<h3>" . t("Track (Level-3) Information") . "</h3>",
     "weight" => 1120,
     );
             
     $form['track_title'] = array(
       'type' => 'textfield',
-      'label' => t("Track Title:") . "&nbsp;",
+      'label' => t("Track (Level-3) Title:") . "&nbsp;",
       'size' => 60,
       'maxlength' => 100,
       'value' => $degree->track_title,
@@ -1522,12 +1547,12 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     
     $form['track_description'] = array(
       'type' => 'textarea',
-      'label' => t("Track Description:"),
+      'label' => t("Track (Level-3) Description:"),
       'rows' => 4,
       'cols' => 60,
       'value' => $degree->track_description,
       'description' => t("You may enter simple HTML in this field. Ex: &lt;b&gt;bold&lt;/b&gt; or &lt;i&gt;italics&lt;/i&gt;"),
-      'popup_description' => t("This is where you can enter a short description of this track (also called a Degree Option) which will display for the user in a pop-up when they select to change degree options.
+      'popup_description' => t("This is where you can enter a short description of this Level-3 degree track (also called a Degree Option) which will display for the user in a pop-up when they select to change degree options.
                                 \nTo enter a default message, which will display at the top of the selection window, begin the description with:\n      DEFAULT: \nIt must be in all caps, and you must have the colon (:) after it.
                                 By doing this in ANY of the track descriptions for a major, FP will ignore all other track descriptions and ONLY display the default.
                                 \n\nExample of usage:  DEFAULT: You may select any of these degree options."),
@@ -2313,12 +2338,36 @@ function admin_edit_degree_form_submit($form, $form_state) {
     $track_description = trim($values["track_description"]);
     $track_title = trim($values["track_title"]);
     
+    // Make sure the track exists in our draft_degree_tracks table...
+    $track_id = db_result(db_query("SELECT track_id FROM draft_degree_tracks
+                     WHERE major_code = ?
+                     AND track_code = ?
+                     AND catalog_year = ?", $major, $track, $de_catalog_year));
+    
+    if (!$track_id) {
+      // Didn't already exist. Let's insert.
+      db_query("INSERT INTO draft_degree_tracks (major_code, track_code, catalog_year)
+                VALUES (?, ?, ?)", $major, $track, $de_catalog_year);
+      $track_id = db_insert_id();
+    }
+    
+    
+    /*
     $res = db_query("UPDATE draft_degree_tracks
                 SET `track_description`='?',
                 `track_title`='?'
                 WHERE `track_code`='?'
                 AND `major_code`='?' 
                 AND `catalog_year`='?' ", $track_description, $track_title, $track, $major, $de_catalog_year);
+     */
+
+     
+    $res = db_query("UPDATE draft_degree_tracks
+                      SET track_description = ?,
+                          track_title = ?
+                      WHERE track_id = ? ", $track_description, $track_title, $track_id);
+          
+          
   }
 
 

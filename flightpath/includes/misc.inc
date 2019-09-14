@@ -1315,8 +1315,8 @@ function get_term_description($term_id, $bool_abbreviate = false) {
       return "(data unavailable at this time)";
     }
 
-    $year4 = trim(substr($term_id, 0, 4));
-    $year2 = trim(substr($term_id, 2, 2));
+    $year4 = intval(trim(substr($term_id, 0, 4)));
+    $year2 = intval(trim(substr($term_id, 2, 2)));
     $ss = trim(substr($term_id, 4, strlen($term_id) - 4));
     
     $year4p1 = $year4 + 1;

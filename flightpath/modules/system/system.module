@@ -2005,6 +2005,22 @@ function system_settings_form() {
                         means the degree is not allowed to be combined with anything else.  If you are unsure what to enter here, type 0 (zero)."),
   );                
                 
+        
+        
+  $form["enable_legacy_concentrations"] = array(
+    "label" => t("Enable legacy concentrations?"),
+    "type" => "checkbox",
+    "value" => variable_get("enable_legacy_concentrations", FALSE),
+    "description" => t("If checked, FlightPath will instruct users creating new degrees (and in other places) to
+                        enter concentrations with a | (pipe) symbol.  This is how concentrations were handled in FlightPath 4x and
+                        before-- as entirely separate degrees.  However, this can cause confusion if Dynamic Degrees
+                        and/or Level-3 degrees are being utilized, as a concentration is a similar concept as a level-3 track, and some schools
+                        may even name it as such.  If you are unsure what to do, leave this unchecked."),    
+  );
+                
+        
+        
+        
                   
   return $form;
 }

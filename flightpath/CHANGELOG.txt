@@ -1,6 +1,19 @@
 FlightPath 5.x Changelog
 ========================
 
+2019-09-13
+  Made it so legacy support for 4x style "concentrations" is DISABLED by default.  This is to help clear up confusion.  New
+  language on the Add Degree form uses the new level-1, -2, and -3 terminology for consistency.
+  
+
+2019-09-09
+  Minor tweak to stop a warning from appearing.
+
+
+2019-08-12
+  Minor tweak in theme.inc, to fix menu icon bug which can happen sometimes.
+  
+
 2019-08-08
   But when adding new user; user isn't searchable.  Adding default lastname (username) if not entered.
   
