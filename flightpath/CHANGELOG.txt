@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2019-10-04
+  Fixed display bug in _FlightPath.php, where if a student's catalog year was past the current_catalog_year, it was set to 99999.  This caused
+  a message to display onscreen which read "Could not find degreee... in catalog year 99999-100000..."
+  
+
 2019-09-13
   Made it so legacy support for 4x style "concentrations" is DISABLED by default.  This is to help clear up confusion.  New
   language on the Add Degree form uses the new level-1, -2, and -3 terminology for consistency.

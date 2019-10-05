@@ -165,9 +165,12 @@ class _FlightPath extends stdClass
       // If we couldn't find the degree_id, then we should just skip it.
       if (!$degree_id || $degree_id == 0) {
         if (variable_get("warning_on_view_if_degree_not_found", "yes") == 'yes') {
+          
           fp_add_message(t("Could not find degree %maj in catalog year %cat.  FlightPath will
                             skip loading this degree for now.  If this message continues to appear,
-                            contact your advisor.", array("%maj" => $t_major_code, "%cat" => $catalog_year . "-" . ($catalog_year + 1))), "error", TRUE);
+                            contact your advisor.", array("%maj" => $t_major_code, "%cat" => $student->catalog_year . "-" . ($student->catalog_year + 1))), "error", TRUE);
+          
+          
         }
         continue;
       }
