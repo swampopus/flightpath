@@ -1,6 +1,10 @@
 FlightPath 5.x Changelog
 ========================
 
+2019-12-17
+  Fixed search by role on Users page. It was only recognizing the first selection, and not if you changed the role more than once.
+  
+
 2019-10-04
   Fixed display bug in _FlightPath.php, where if a student's catalog year was past the current_catalog_year, it was set to 99999.  This caused
   a message to display onscreen which read "Could not find degreee... in catalog year 99999-100000..."

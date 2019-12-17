@@ -1642,9 +1642,10 @@ function user_display_users() {
       @$_GET["deptsubmit"] = "1";
       $dept = $temp[1];
     }
-    if ($temp[0] == "role") {
+    if ($temp[0] == "role" && ($role == "" || intval($role) == 0)) {      
       @$_GET["rolesubmit"] = "1";
       $role = $temp[1];
+      
     }
   }
 
