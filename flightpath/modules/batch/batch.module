@@ -264,7 +264,7 @@ function batch_processing_page($batch_id) {
 function batch_cron() {
 
   $older_than = strtotime("6 HOURS AGO");
-  db_query("DELETE FROM batch_queue WHERE created < '?' ", $older_than);
+  db_query("DELETE FROM batch_queue WHERE created < ? ", $older_than);
   
 }
 

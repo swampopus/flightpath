@@ -166,8 +166,8 @@ function stats_menu() {
 
 
   $items["stats/reports/major-students-progress"] = array(
-    "title" => "Major Students Progresss - CSV Export",
-    "description" => "A CSV report showing students in a major, and their progress percentages in that major.  Currently in 'Beta' status.",
+    "title" => "Major Students Progresss",
+    "description" => "Students in a major, and their progress percentages in that major.",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("stats_report_major_students_progress_form"),
     "access_arguments" => array("can_access_stats"),
