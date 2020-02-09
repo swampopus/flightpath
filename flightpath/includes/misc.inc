@@ -101,6 +101,8 @@ function _fp_map_php_error_code($code) {
  */
 function fp_mail($to,$subject,$msg) {
   
+  // TODO: In the future, check to see if there are any other modules which invoke a hook to intercept mail.
+  
   if (function_exists('smtp_mail')) {
     smtp_mail($to, $subject, $msg);
     return;

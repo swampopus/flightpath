@@ -126,10 +126,11 @@ function smtp_mail($to, $subject, $msg) {
   $mail->Subject = $subject;
   $mail->Body = $msg;
   
-  
-  //Recipients
+   
   $mail->setFrom('noreply@flightpathlabs.com', 'NoReply - FlightPath Labs');
   
+  
+  //Recipients
   $temp = explode(',', $to);
   foreach ($temp as $line) {
     $line = trim($line);
