@@ -2200,9 +2200,14 @@ function draw_menu_items($menu_array) {
           $pC .= "<td>&nbsp;</td>";
         }
 			  
+        $render = array();
+        $render['html'] = fp_render_button(t("Submit"),"submitSaveActive();");
+        invoke_hook("content_alter", array(&$render, 'advise_submit_button'));
+         
+        
 				$pC .= "<td align='center'>
-						<div class='tenpt' style='margin-top:35px; margin-bottom:10px; padding: 10px; width: 200px;'>
-						" . fp_render_button(t("Submit"),"submitSaveActive();") . "					
+						<div class='tenpt advise_submit_button_wrapper' style='margin-top:35px; margin-bottom:10px; padding: 10px;'>
+						" . $render['html'] . "					
 						</div>
 						</td></tr>
 						";		
@@ -4069,7 +4074,7 @@ function draw_menu_items($menu_array) {
 				$footnote = "";
 
 				$footnote .= "<span class='superscript'>T";
-				$fcount = count(@$this->footnote_array["transfer"]) + 1;
+				$fcount = @count($this->footnote_array["transfer"]) + 1;
 				if ($course->get_has_been_displayed() == true)
 				{ // If we've already displayed this course once, and are
 					// now showing it again (like in the Transfer Credit list)

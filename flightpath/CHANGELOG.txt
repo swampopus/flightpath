@@ -1,6 +1,22 @@
 FlightPath 5.x Changelog
 ========================
 
+2019-02-15
+  Adding ability to return plain txt instead of HTML in the advise_popup_display_summary function, so we can more easily email advising
+  summaries to students.
+  
+  Added new settings to smtp module so we can more easily set the From address and name.
+  
+
+2019-02-11
+  Minor change to remove "warning" on Count().
+  
+  Made it so that the "submit" button on the main advise form goes through hook_content_alter.  This is so the new email_events module can add
+  a checkbox.
+  
+  Added a new hook, hook_save_advising_session_from_post, while lets other modules act after an advising session has been saved.
+  
+
 2019-12-17
   Fixed search by role on Users page. It was only recognizing the first selection, and not if you changed the role more than once.
   

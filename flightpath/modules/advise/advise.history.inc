@@ -380,13 +380,23 @@ function advise_display_history() {
 
 /**
  * Displays the printable advising summary.
+ * 
+ * If the advising_session_id is null, it gets that value from the REQUEST.  Otherwise, we expect it to be a csv of the
+ * sessions we are interested in.
+ * 
+ * If bool_html is set to FALSE, then we will return results in plain text, suitable for email.
+ * 
  */
-function advise_popup_display_summary() {
+function advise_popup_display_summary($advising_session_id = NULL, $bool_html = TRUE) {
   $rtn = "";
-
+  $txt = "";
+  
   $db = get_global_database_handler();
   
-  $advising_session_id = rtrim(trim($_REQUEST["advising_session_id"]), ",");
+  if ($advising_session_id == NULL) {
+    $advising_session_id = rtrim(trim($_REQUEST["advising_session_id"]), ",");
+  }
+  
   $bool_multiple = FALSE;
   
   // If we have commas in our advising_session_id, it means we had more than one that were passed to us!  We want to show
@@ -394,7 +404,7 @@ function advise_popup_display_summary() {
   
   if (!strstr($advising_session_id, ",")) {
     $res = db_query("SELECT * FROM advising_sessions
-                     WHERE advising_session_id = '?' ", $advising_session_id);
+                     WHERE advising_session_id = ? ", $advising_session_id);
   }
   else {
     
@@ -511,7 +521,11 @@ function advise_popup_display_summary() {
     
           
           </table> ";
-    }
+      
+      $txt .= "\n-----  Advising Summary for $term -----\n";    
+      $txt .= "Student: " . $db->get_student_name($db_student_id, false) . " ($db_student_id) \n";    
+          
+    } // else 
     
     $rtn .= "
           </td>
@@ -527,6 +541,10 @@ function advise_popup_display_summary() {
   
          </tr>
          ";
+    
+    $txt .= "Advisor: " . fp_get_faculty_name($db_faculty_id, false) . "\n";
+    $txt .= "Term: " . $term . "\n";
+    
     if (!$page_is_mobile) {
       $rtn .= "
          <tr>
@@ -544,6 +562,9 @@ function advise_popup_display_summary() {
     if ($degree_title_line != "")
     {
       $rtn .= t("Degree$ds:") . " $degree_title_line";
+      
+      $txt .= "Degree$ds: " . $degree_title_line . "\n";
+      
     }
   
     $rtn .= "
@@ -554,7 +575,14 @@ function advise_popup_display_summary() {
          <br>
       ";
   
+    $txt .= "Submitted on $dt \n";
+    if ($what_if_message) {
+      $txt .= "  " . fp_reduce_whitespace(strip_tags($what_if_message)) . "\n";
+    }
+    
     $rtn .= fp_render_curved_line(t("Advised Courses"));
+  
+    $txt .= "\nAdvised Courses:\n";
   
     $fp = new FlightPath($student,$degree_plan, $db);
       
@@ -600,6 +628,8 @@ function advise_popup_display_summary() {
             
           </tr>
         ";
+        
+        $txt .= "  $course->subject_id $course->course_num - $course->title - " . $course->get_hours() . "hrs \n"; 
     }
   
     $rtn .= "</table>
@@ -608,6 +638,8 @@ function advise_popup_display_summary() {
         </div>
         ";
   
+    $txt .= "Total advised hours: " . $advised_courses_list->count_hours() . "\n";
+    $txt .= "\n\n";
   
     if (!$page_is_mobile) {
       $rtn .= "<br>";
@@ -626,9 +658,12 @@ function advise_popup_display_summary() {
     
   } // while, for the query itself!    
 
-  fp_set_title($db->get_student_name($db_student_id, FALSE) . " ($db_student_id) $term " . t("Advising Summary"));
-
+  // Are we NOT returning html?
+  if (!$bool_html) {
+    return $txt;
+  }
   
+  fp_set_title($db->get_student_name($db_student_id, FALSE) . " ($db_student_id) $term " . t("Advising Summary"));
   return $rtn;
 }
 

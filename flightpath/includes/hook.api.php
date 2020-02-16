@@ -81,6 +81,10 @@ function hook_content_alter(&$render, $render_id) {
 
 
 
+
+
+
+
 /**
  * This hook his called just before returning a Course object from CourseList::find_best_grade_match or find_most_recent_match.
  * 
@@ -1101,15 +1105,20 @@ function hook_menu_handle_replacement_pattern($str) {
  * This hook was created to bridge that gap, until the advising form can be brought into
  * the form API (possibly by 5.x)
  * 
+ * Advising session values should still be in _REQUEST or _POST.
+ * 
+ * 
  * @param $adv_id_array
  *   Since this hook is called immediately after submitting the advising session,
  *   this array will contain the database ID's to the rows added to the advising_sessions table.
  * 
  */
-function hook_save_advising_session($adv_id_array) {
+function hook_save_advising_session_from_post ($student_id, $is_draft, $adv_id_array) {
+    
   foreach ($adv_id_array as $id) {
     // Perform extra actions on those advising sessions.
   }
+  
   // Example functions:
   // Email student a copy of what was just advised for them to take.
   // Maybe lift an advising flag in the mainframe system?

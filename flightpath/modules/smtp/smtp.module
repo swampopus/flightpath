@@ -86,6 +86,22 @@ function smtp_settings_form() {
                         Make sure you take the necessary precautions to ensure the security of your database.'),
   );
         
+
+  $form['smtp_from_email_address'] = array(
+    'type' => 'textfield',
+    'label' => t('From Email Address'),
+    'value' => variable_get('smtp_from_email_address', 'noreply@yourdomain.com'),
+    'description' => 'What is the default "from" address on emails we send?',    
+  );
+
+  $form['smtp_from_email_name'] = array(
+    'type' => 'textfield',
+    'label' => t('From Email Address'),
+    'value' => variable_get('smtp_from_email_name', 'NoReply - FlightPath'),
+    'description' => 'What is the default "from" name on emails we send?',    
+  );
+  
+  
   
   
   return $form;
@@ -125,9 +141,8 @@ function smtp_mail($to, $subject, $msg) {
   // Content
   $mail->Subject = $subject;
   $mail->Body = $msg;
-  
-   
-  $mail->setFrom('noreply@flightpathlabs.com', 'NoReply - FlightPath Labs');
+     
+  $mail->setFrom(variable_get('smtp_from_email_address', 'noreply@yourdomain.com'), variable_get('smtp_from_email_name', 'NoReply - FlightPath'));
   
   
   //Recipients
