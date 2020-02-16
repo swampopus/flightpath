@@ -41,6 +41,27 @@ function hook_form_alter(&$form, $form_id) {
 
 
 /**
+ * Used by the stats module, this will ask other modules to return an array
+ * of paths suitable for the fp_render_menu_block() function.  In other words,
+ * the paths should be the **beginning** of the paths of your custom reports or other links
+ * which you wish to show up on the stats screen.
+ * 
+ * To see this in action, examine the stats.module file, function stats_display_main() 
+ * @see stats_display_main
+ */
+function fpl_reports_stats_additional_menublocks() {
+  
+  return array(
+    'Custom Reports' => 'stats/custom-reports',      
+    'Fancy Reports' => 'stats/fancy-reports',
+  );
+  
+}
+
+
+
+
+/**
  * This will let us re-arrange or add new elements to the Currently Advising box,
  * which appears at the top of the screen once a student has been selected (or for
  * a student when they log in).

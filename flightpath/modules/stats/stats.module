@@ -165,25 +165,6 @@ function stats_menu() {
   );
 
 
-  $items["stats/reports/major-students-progress"] = array(
-    "title" => "Major Students Progresss",
-    "description" => "Students in a major, and their progress percentages in that major.",
-    "page_callback" => "fp_render_form",
-    "page_arguments" => array("stats_report_major_students_progress_form"),
-    "access_arguments" => array("can_access_stats"),
-    "page_settings" => array(
-      "bool_print" => FALSE,
-      "menu_links" => array(         
-        0 => array(
-          "text" => "Main menu",
-          "path" => "admin-tools/stats",
-        ),
-      ),      
-    ),    
-    "type" => MENU_TYPE_NORMAL_ITEM,
-    "weight" => 400,
-    "file" => menu_get_module_path("stats") . "/stats.major-students-progress.inc",
-  );
 
   
 
@@ -1524,52 +1505,26 @@ function stats_display_main() {
   
   
   $rtn .= "<div class='stats-main-menu' style='font-size:1.2em;'>";
-  $rtn .= fp_render_menu_block("", "stats/reports");
+  $rtn .= fp_render_menu_block("System Reports", "stats/reports");
   $rtn .= "</div>";
   
+  // If we have other reports which have been exposed using the hook_stats_additional_menublocks function,
+  // display them here.
   
-  
-  /*
-  $rtn .= "<ul>";
-
-  $rtn .= "<li>" . l(t("Access Stats"), "stats/access") . "
-              <br>
-              " . t("See recent access within the system.  This can be useful to see if anyone is currently using the system.") . "
-            </li>";
-  
-  $rtn .= "<li>" . l(t("Major Counts"), "stats/major-counts") . "
-              <br>
-              " . t("Displays the number of students within each major or major/concentration.") . "
-            </li>";
-  
-  $rtn .= "<li>" . l(t("Selected Degree Options"), "stats/selected-degree-options") . "
-              <br>
-              " . t("This report will display information about which degree options students/advisors are selecting for particular majors 
-                    (ex: General Studies)") . "
-            </li>";
- 
-  $rtn .= "<li>" . l(t("Advisor Use Report"), "stats/advisor-use") . "
-              <br>
-              " . t("How many students an advisor has advised over a specified time range.") . "
-            </li>";
-
-  $rtn .= "<li>" . l(t("Student Course List"), "stats/student-course-list") . "
-              <br>
-              " . t("List courses a student has taken, which FlightPath is aware of.") . "
-            </li>";
-  
-  
-  $rtn .= "<li>" . l(t("FlightPath Use Summary"), "stats/flightpath-use-summary") . "
-              <br>
-              " . t("A detailed report on how FlightPath is being used over a specified time range.") . "
-            </li>";
-
+  $reports = invoke_hook('stats_additional_menublocks');
+  if ($reports) {
+    foreach ($reports as $module_name => $temp) {
+      $rtn .= "<div class='stats-main-menu stats-additional-menublocks' style='font-size:1.2em;'>";
+      foreach($reports[$module_name] as $title => $menu_block_path) {
+        $rtn .= fp_render_menu_block($title, $menu_block_path);        
+      }
+      $rtn .= "</div>";
+    }
+  }
   
   
   
   
-  $rtn .= "</ul>";
-  */
-  
+    
   return $rtn;
 }

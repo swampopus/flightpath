@@ -6,6 +6,9 @@ FlightPath 5.x Changelog
   summaries to students.
   
   Added new settings to smtp module so we can more easily set the From address and name.
+
+  Migrating the major-students-progress report into fpl_reports module.  Made changes to stats module, and added new hook, so that other
+  modules can more easily add reports and links to the stats page.
   
 
 2019-02-11
