@@ -4,6 +4,8 @@ FlightPath 5.x Changelog
 2020-02-17
   Modified user_has_permission() and user_has_role() function to allow us to specify an account other than the current logged in user.
   
+  Adding extra CSS to advising summary popup, so we can theme it better.
+  
 
 2020-02-15
   Adding ability to return plain txt instead of HTML in the advise_popup_display_summary function, so we can more easily email advising

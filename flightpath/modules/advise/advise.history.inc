@@ -493,7 +493,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     else {
     
       $rtn .= "
-        <table class='tenpt' border='0' width='100%' cellpadding='3' cellspacing='0' style='border-width: 2px; border-style: solid; border-color: black;'>
+        <table class='tenpt summary-transaction-details' border='0' width='100%' cellpadding='3' cellspacing='0' style='border-width: 2px; border-style: solid; border-color: black;'>
          <tr height='7'>
           <td> </td>
          </tr>
@@ -503,17 +503,17 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
           <td valign='top' rowspan='3'>
             <table width='100%' cellpadding='0' cellspacing='0'>
           <tr height='20'>
-           <td width='100%' valign='bottom'><hr noshade size='1' width='100%' color='black' style='margin: 0px;'></td>
+           <td width='100%' id='student-signature-line' valign='bottom'><hr noshade size='1' width='100%' color='black' style='margin: 0px;'></td>
           </tr>
           <tr height='20'>
-           <td width='100%' valign='top' align='right'><span style='font-size: 8pt;'>" . t("Student signature") . "</span></td>
+           <td width='100%' id='student-signature-caption' valign='top' align='right'><span style='font-size: 8pt;'>" . t("Student signature") . "</span></td>
           </tr>
   
           <tr height='20'>
-           <td width='100%' valign='bottom'><hr noshade size='1' width='100%' color='black' style='margin: 0px;'></td>
+           <td width='100%'  id='advisor-signature-line' valign='bottom'><hr noshade size='1' width='100%' color='black' style='margin: 0px;'></td>
           </tr>
           <tr>
-           <td width='100%' valign='bottom' align='right'><span style='font-size: 8pt;'>" . t("Advisor signature") . "</span></td>
+           <td width='100%'  id='advisor-signature-caption'valign='bottom' align='right'><span style='font-size: 8pt;'>" . t("Advisor signature") . "</span></td>
           </tr>
          <tr height='7'>
           <td> </td>
@@ -548,7 +548,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     if (!$page_is_mobile) {
       $rtn .= "
          <tr>
-          <td valign='top' colspan='2'>
+          <td valign='top' colspan='2'  id='summary-alternate-term'>
           " . t("Alternate Term:") . " _____________________
           </td>
          </tr>";
@@ -588,15 +588,15 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
       
     $fp->load_advising_session_from_database("","",false,false,$db_advising_session_id);
   
-    $rtn .= "<table border='0' cellpadding='3'>
+    $rtn .= "<table border='0' cellpadding='3' class='summary-advised-courses'>
         <tr>
-          <td class='tenpt' valign='top' width='25%'>
+          <td class='tenpt course-si-cn' valign='top' width='25%'>
             <b>" . t("Course") . "</b>
           </td>
-          <td class='tenpt' valign='top' width='70%'>
+          <td class='tenpt course-title' valign='top' width='70%'>
             <b>" . t("Title") . "</b>
           </td>
-          <td class='tenpt' valign='top'>
+          <td class='tenpt course-hours' valign='top'>
             <b>" . t("Hours") . "</b>
           </td>
         </tr>";
@@ -616,13 +616,13 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
       $course->load_descriptive_data(false);
   
       $rtn .= "<tr>
-            <td class='tenpt' valign='top'>
+            <td class='tenpt course-si-cn' valign='top'>
             $course->subject_id $course->course_num
             </td>
-            <td class='tenpt' valign='top'>
+            <td class='tenpt course-title' valign='top'>
             $course->title
             </td>
-            <td class='tenpt' valign='top' align='center'>
+            <td class='tenpt course-hours' valign='top' align='center'>
             " . $course->get_hours() . " 
             </td>
             
@@ -633,7 +633,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     }
   
     $rtn .= "</table>
-        <div align='right' class='tenpt' style='padding-top: 10px; padding-right: 15px;'>
+        <div align='right' class='tenpt total-advised-hours' style='padding-top: 10px; padding-right: 15px;'>
           <b>" . t("Total advised hours:") . " &nbsp; " . $advised_courses_list->count_hours() . "</b>
         </div>
         ";
@@ -643,8 +643,9 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
   
     if (!$page_is_mobile) {
       $rtn .= "<br>";
+      $rtn .= "<div class='summary-alternate-courses'>";
       $rtn .= fp_render_curved_line(t("Alternate Courses"));
-      $rtn .= "<div class='tenpt'>
+      $rtn .= "<div class='tenpt alt-courses-desc-and-lines'>
           " . t("You may use this space to write in alternate courses 
           the student should enroll in, in the event that an 
           advised course is full or unavailable.") . "
@@ -652,6 +653,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
           ___________________________________________________________________ <br><br>
           ___________________________________________________________________
           </div>  ";
+      $rtn .= "</div>";
     }
   
     $rtn .= "</table>";
