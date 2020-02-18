@@ -1,7 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
-2019-02-15
+2020-02-17
+  Modified user_has_permission() and user_has_role() function to allow us to specify an account other than the current logged in user.
+  
+
+2020-02-15
   Adding ability to return plain txt instead of HTML in the advise_popup_display_summary function, so we can more easily email advising
   summaries to students.
   
@@ -11,7 +15,7 @@ FlightPath 5.x Changelog
   modules can more easily add reports and links to the stats page.
   
 
-2019-02-11
+2020-02-11
   Minor change to remove "warning" on Count().
   
   Made it so that the "submit" button on the main advise form goes through hook_content_alter.  This is so the new email_events module can add

@@ -757,13 +757,7 @@ function user_edit_user_form() {
       
   fp_set_page_sub_tabs($tab_array);  
   
-  
-  
-  
-  
-  
-  
-  
+    
   $user_roles = system_get_roles_for_user($user_id);
   //fpm($user_roles);
   $default_values = array();

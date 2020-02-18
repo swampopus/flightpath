@@ -1963,14 +1963,16 @@ function fp_reduce_whitespace($str) {
 /**
  * Does the user have the specified role?
  */
-function user_has_role($role) {
+function user_has_role($role, $account = NULL) {
   global $user;
   
+  if ($account == NULL) $account = $user;
+  
   // Admin always = TRUE
-  if ($user->id == 1) return TRUE;
+  if ($account->id == 1) return TRUE;
   
   // Check for other users...
-  if (in_array($role, $user->roles)) return TRUE;
+  if (in_array($role, $account->roles)) return TRUE;
   
   return FALSE;
   
@@ -1983,17 +1985,17 @@ function user_has_role($role) {
  *
  * @param String $permission
  */
-function user_has_permission($permission) {
+function user_has_permission($permission, $account = NULL) {
   global $user;  
   
+  if ($account == NULL) $account = $user;
   //fpm("checking permission $permission");
   
   // If the user is admin (id == 1) then they always have access.
-  if ($user->id == 1) return TRUE;
-  
+  if ($account->id == 1) return TRUE;
   
   // Otherwise, simply check their permissions array.
-  if (in_array($permission, $user->permissions)) {
+  if (in_array($permission, $account->permissions)) {
     return TRUE;
   }
   
