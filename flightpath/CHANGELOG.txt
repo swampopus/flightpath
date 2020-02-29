@@ -12,6 +12,9 @@ FlightPath 5.x Changelog
   
   Modified logic in _CourseList, where non-numeric course_num values would sometimes result in a warning
   when being sorted.
+  
+  Added the removal of periods (.) from "default_redirect_path" from form submissions, to help mitigate
+  attempts at path traversal attacks.
 
 
 2020-02-25

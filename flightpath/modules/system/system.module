@@ -1013,10 +1013,8 @@ function system_school_data_form() {
                         If unsure what to select, select 'No'."), 
   );                                
   
-       
   
-  
-  
+   
   $form["course_repeat_policy"] = array(
     "type" => "select",
     "label" => t("Course repeat policy:"),
@@ -2295,6 +2293,10 @@ function system_handle_form_submit() {
   else {
     $redirect_path = $_REQUEST["default_redirect_path"];
     $redirect_query = $_REQUEST["default_redirect_query"];
+    
+    // To help prevent directory traversal attacks, the redirect_path cannot contain periods (.)
+    $redirect_path = str_replace(".", "", $redirect_path);
+    
   }
   
   // If there is a Batch process we need to do, do it here instead of the fp_goto.

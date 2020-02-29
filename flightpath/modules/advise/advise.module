@@ -1363,7 +1363,7 @@ function advise_display_view($view = "view") {
     // (if the student is a grad student!)  
     $bool_undergrad_only = TRUE;
     
-    if ($student->db_rank == 'GR') { // TODO: make it a settings list of graduate ranks
+    if ($student->db_rank == 'GR') { // TODO: make it a settings list of graduate ranks?
       // TODO: check setting to see if we should allow graduate students to see what if (?)  Maybe?
       $bool_undergrad_only = FALSE; 
     }
