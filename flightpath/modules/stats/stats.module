@@ -1055,7 +1055,7 @@ function stats_get_log_count($action = "", $action_array = "", $bool_distinct = 
 {
   
   $action_line = " `type` = '$action' ";
-  if (count($action_array) > 1)
+  if (is_array($action_array) && count($action_array) > 1)
   {
     $action_line = "";
     $action_line .= "( ";

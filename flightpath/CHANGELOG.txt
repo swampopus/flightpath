@@ -9,6 +9,9 @@ FlightPath 5.x Changelog
   Added header option to default .htaccess to make cookies more secure & "nosniff" was turned on.
 
   Various other modifications.
+  
+  Modified logic in _CourseList, where non-numeric course_num values would sometimes result in a warning
+  when being sorted.
 
 
 2020-02-25

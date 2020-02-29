@@ -1282,7 +1282,11 @@ class _CourseList extends ObjList
 				// MATH will be sorted above ZOOL, when taken at the same time.
 				// This might not work at all, though...
 				
-				$cn = strrev($c->subject_id) . "," . (1000 - $c->course_num);
+				// TODO:  The 1000 - course_num bit doesn't work (throws a warning) if the course_num
+				// is non-numeric.  Ex:  301A.  Let's instead use the same strrev() function on course_num, but we put it in quotes
+				// to guarantee it gets evaluated as a string.
+				//$cn = strrev($c->subject_id) . "," . (1000 - $c->course_num);
+				$cn = strrev($c->subject_id) . "," . strrev("$c->course_num");
 
 			}
 			$str = "$c->term_id ~~ $cn ~~ $t";
