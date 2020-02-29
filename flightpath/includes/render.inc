@@ -332,8 +332,8 @@ function fp_render_form($callback, $form_type = "") {
   $rtn .= "<input type='hidden' name='form_path' value='$form_path'>";
   $rtn .= "<input type='hidden' name='form_params' value='$form_params'>";
   $rtn .= "<input type='hidden' name='form_include' value='$form_include'>";
-  $rtn .= "<input type='hidden' name='default_redirect_path' value='$default_path'>";
-  $rtn .= "<input type='hidden' name='default_redirect_query' value='$default_query'>";
+  $rtn .= "<input type='hidden' name='d_r_p' value='$default_path'>";   // default_redirect_path
+  $rtn .= "<input type='hidden' name='d_r_q' value='$default_query'>";  // default_redirect_query
     $rtn .= "<input type='hidden' name='current_student_id' value='$current_student_id'>";
   
   $use_callback = "";
