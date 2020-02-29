@@ -2295,9 +2295,12 @@ function system_handle_form_submit() {
     $redirect_query = @$_REQUEST["default_redirect_query"];
 
     
-    // To help prevent directory traversal attacks, the redirect_path cannot contain periods (.) and semi-colons
+    // To help prevent directory traversal attacks, the redirect_path cannot contain periods (.) and semi-colons, and other trouble characters
     $redirect_path = str_replace(".", "", $redirect_path);
     $redirect_path = str_replace(";", "", $redirect_path);
+    $redirect_path = str_replace("'", "", $redirect_path);
+    $redirect_path = str_replace('"', "", $redirect_path);
+    $redirect_path = str_replace(' ', "", $redirect_path);
         
     
   }

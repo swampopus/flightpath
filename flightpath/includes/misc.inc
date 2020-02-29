@@ -1001,6 +1001,21 @@ function fp_set_title($title) {
  * @param unknown_type $class
  */
 function fp_add_body_class($class) {
+  
+  // Let's sanitize the "class" to make sure it doesn't contain any trouble characters.
+  $class = str_replace("'", '', $class);
+  $class = str_replace('"', '', $class);
+  $class = str_replace('(', '', $class);
+  $class = str_replace(')', '', $class);
+  $class = str_replace(';', '', $class);
+  $class = str_replace('.', '', $class);
+  $class = str_replace('<', '', $class);
+  $class = str_replace('>', '', $class);
+  $class = str_replace('/', '', $class);
+  $class = str_replace('\\', '', $class);
+  $class = str_replace('#', '', $class);
+  $class = str_replace('&', '', $class);
+  
   @$GLOBALS["fp_add_body_classes"] .= " " . $class;
 }
 
