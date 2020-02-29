@@ -266,9 +266,22 @@ function fp_display_page($page) {
   // Add in the body classes
   $screen->page_body_classes .= " " . @$GLOBALS["fp_add_body_classes"];  
   
-  // Add in our URL
-  $screen->page_body_classes .= " page-" . str_replace("/", "-", @$_REQUEST["q"]);
+  // Add in our URL  (after we sanitize it appropriately)
+  $class = @$_REQUEST['q'];
+  $class = str_replace("'", '', $class);
+  $class = str_replace('"', '', $class);
+  $class = str_replace('(', '', $class);
+  $class = str_replace(')', '', $class);
+  $class = str_replace(';', '', $class);
+  $class = str_replace('.', '', $class);
+  $class = str_replace('<', '', $class);
+  $class = str_replace('>', '', $class);
+  $class = str_replace('/', '', $class);
+  $class = str_replace('\\', '', $class);
+  $class = str_replace('#', '', $class);
+  $class = str_replace('&', '', $class);  
   
+  $screen->page_body_classes .= " page-" . str_replace("/", "-", $class);
   
   
   $screen->output_to_browser();  
