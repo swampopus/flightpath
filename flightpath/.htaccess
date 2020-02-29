@@ -66,6 +66,16 @@ DirectoryIndex index.php
   
 </IfModule>
 
+# Add headers to all responses.
+<IfModule mod_headers.c>  
+  # Make cookies a bit more secure
+  Header edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure;SameSite=strict
+  
+  # Disable content sniffing, since it's an attack vector.
+  Header always set X-Content-Type-Options nosniff  
+</IfModule>
+
+
 # Various rewrite rules.
 <IfModule mod_rewrite.c>
   RewriteEngine on

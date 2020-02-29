@@ -1454,6 +1454,7 @@ class _Course extends stdClass
     // there and make it all uppercase, except for the word Formerly.
     if (strstr(strtolower($str), strtolower("formerly "))) 
     {
+
       $formline = preg_replace("/.*\((formerly .*)\).*/i", "$1", $str);
       $str = str_replace($formline, strtoupper($formline), $str);
       $str = str_replace("FORMERLY ", "Formerly ", $str);

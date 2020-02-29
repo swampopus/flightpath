@@ -2917,11 +2917,16 @@ function system_init() {
   }
   
   
+  // Since current_student_id is coming from the REQUEST, sanitize it.
+  $current_student_id = @$_REQUEST['current_student_id'];
+  $current_student_id = str_replace("'", "", $current_student_id);  // remove single quotes
+  $current_student_id = str_replace('"', "", $current_student_id);  // remove back quotes
+  $current_student_id = str_replace(';', "", $current_student_id);  // remove semicolons
    
   // Add in our custom JS settings.
   $settings = array(
       "themeLocation" => fp_theme_location(), 
-      "currentStudentId" => @$_REQUEST["current_student_id"], 
+      "currentStudentId" => $current_student_id, 
       "basePath" => base_path(),
       // Add in the popup window options....      
       "popupAdminWinOptions" => variable_get("popup_admin_win_options", "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=600,height=400"),  // used by admin groups, edit definitions, degrees, and popup contact form.    

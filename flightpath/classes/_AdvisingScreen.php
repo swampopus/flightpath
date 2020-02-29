@@ -370,67 +370,6 @@ function draw_menu_items($menu_array) {
 	
 	
 	
-	/**
-	 * Converts a string containing BBCode to the equivalent HTML.
-	 *
-	 * @param string $str
-	 * @return string
-	 */
-	function z__convert_bbcode_to_html($str)
-	{
-		// This will accept a string with BBcode tags in it,
-		// and convert them to HTML tags.
-		$str = str_replace("[b]","<b>",$str);
-		$str = str_replace("[/b]","</b>",$str);
-
-		$str = str_replace("[i]","<i>",$str);
-		$str = str_replace("[/i]","</i>",$str);
-
-		$str = str_replace("[u]","<u>",$str);
-		$str = str_replace("[/u]","</u>",$str);
-
-		$str = str_replace("[center]","<center>",$str);
-		$str = str_replace("[/center]","</center>",$str);
-
-		$str = str_replace("[ul]","<ul>",$str);
-		$str = str_replace("[/ul]","</ul>",$str);
-
-		$str = str_replace("[li]","<li>",$str);
-		$str = str_replace("[/li]","</li>",$str);
-
-
-		$str = str_replace("[br]","<br>",$str);
-
-		// convert more than 1 space into 2 hard spaces...
-		$str = str_replace("  ","&nbsp;&nbsp;",$str);
-
-
-		// Check for colored text
-		$str = preg_replace("(\[color=(.+?)\](.+?)\[\/color\])is","<span style='color:$1;'>$2</span>",$str);
-
-		// valid URL characters...
-		$url_search_string = " a-zA-Z0-9\:\/\-\?\&\.\=\_\~\#\'";
-		// Check for a link...
-		$str = preg_replace("(\[url\=([$url_search_string]*)\](.+?)\[/url\])", "<a href='$1' target='_blank' class='nounderline'>$2</a>", $str);
-		// check for a link that does NOT load in a new window (URL2)
-		$str = preg_replace("(\[url2\=([$url_search_string]*)\](.+?)\[/url2\])", "<a href='$1'>$2</a>", $str);
-		// check for a link to a popup....
-		$str = preg_replace("(\[popup\=([$url_search_string]*)\](.+?)\[/popup\])", "<a href='javascript: popupHelpWindow(\"$1\");' class='nounderline'>$2</a>", $str);
-		// Images...  (looks like: [img]http://www.image.jpg[/img]
-		//$str = preg_replace("(\[img\]([$url_search_string]*)\](.+?)\[/img\])", "<img src='$1' border='0'>", $str);
-
-		// Images
-		// [img]pathtoimage[/img]
-		$str = preg_replace("/\[img\](.+?)\[\/img\]/", "<img src='$1' border='0'>", $str);
-
-		// [img=widthxheight]image source[/img]
-		$str = preg_replace("/\[img\=([0-9]*)x([0-9]*)\](.+?)\[\/img\]/", "<img src='$3' width='$1' height='$2' border='0'>", $str);
-
-
-
-		return $str;
-	}
-
 
 /**
  * Clear the session varibles.
@@ -766,7 +705,7 @@ function draw_menu_items($menu_array) {
           
 				}
 
-        // TODO:  Clean this up, as far as the remarks and such.  Make it look similar (new function?) as popup text for a substitution.
+        // Clean this up, as far as the remarks and such.  Make it look similar (new function?) as popup text for a substitution.
         if ($remarks) $remarks = " ($remarks) ";
         
         // Build a "theme" array, so we can pass it to other modules in a hook.
@@ -1290,7 +1229,7 @@ function draw_menu_items($menu_array) {
 			{
 				$pC .= "A:";
 				//////////////////////////////
-				// TODO:  List all the groups/degrees this course has been assigned to!
+				// List all the groups/degrees this course has been assigned to!
 				//if ($c->assigned_to_group_id == 0)
 				if ($c->get_first_assigned_to_group_id() == "")
 				{
@@ -2720,7 +2659,7 @@ function draw_menu_items($menu_array) {
     
     
     ////////////////////////////////
-    // TODO:  Conditions on which this will even appear?  Like only if the student has more than one degree selected?
+    // Conditions on which this will even appear?  Like only if the student has more than one degree selected?
     // What degrees is this course fulfilling?    
     if (count($course->assigned_to_degree_ids_array) > 0) {
       $html = "";

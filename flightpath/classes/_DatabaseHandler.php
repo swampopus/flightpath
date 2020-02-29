@@ -1041,8 +1041,8 @@ class _DatabaseHandler extends stdClass
   function get_advising_session_id($faculty_id = "", $student_id = "", $term_id = "", $degree_id = "", $bool_what_if = false, $bool_draft = true, $bool_load_any_active_if_faculty_id_not_found = TRUE)
   {
     $is_what_if = "0";
-    $is_draft = "0";
-    $draft_line = " and `is_draft`='$is_draft' ";
+    $is_draft = "0";    
+    $draft_line = " and `is_draft`='0' ";
     $faculty_line = " and `faculty_id`='$faculty_id' ";
 
     $advising_session_id = 0;  // init
@@ -1050,7 +1050,7 @@ class _DatabaseHandler extends stdClass
     if ($faculty_id == 0 || $faculty_id == "")
     { // If no faculty is specified, just get the first one to come up.
       $faculty_line = "";
-    }
+    } 
 
     if ($bool_what_if == true){$is_what_if = "1";}
     if ($bool_draft == true)

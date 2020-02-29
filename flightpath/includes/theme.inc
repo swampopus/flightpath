@@ -1239,6 +1239,8 @@ function fp_render_tab_array($tab_array)
 
 
 function display_not_found() {
+
+  header("HTTP/1.0 404 Not Found", TRUE, 404);
   
   $page = array(
     "title" => t("Not Found"),
@@ -1246,17 +1248,21 @@ function display_not_found() {
   );
   
   fp_display_page($page);
+  die;
 }
 
 
 function display_access_denied() {
+      
+  header('HTTP/1.1 403 Forbidden', TRUE, 403);  
   
   $page = array(
     "title" => t("Access Denied"),
     "content" => "<h2>" . t("Access Denied") . "</h2>" . t("Sorry, but you do not have access to the requested page or function."),
   );  
     
-  fp_display_page($page);  
+  fp_display_page($page);
+  die;  
 }
 
 

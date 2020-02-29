@@ -1,6 +1,24 @@
 FlightPath 5.x Changelog
 ========================
 
+2020-02-29
+  Send correct 404 / 403 headers for page not found and accessed denied.
+
+  Added new header() commands in index.php to further secure.
+  
+  Added header option to default .htaccess to make cookies more secure & "nosniff" was turned on.
+
+  Various other modifications.
+
+
+2020-02-25
+  Removing old code.
+  
+
+2020-02-18
+  Minor CSS tweaks.
+  
+
 2020-02-17
   Modified user_has_permission() and user_has_role() function to allow us to specify an account other than the current logged in user.
   
