@@ -14,7 +14,7 @@ FlightPath 5.x Changelog
   when being sorted.
   
   Added the removal of certain characters from "default_redirect_path" from form submissions, to help mitigate
-  attempts at path traversal attacks.  Also changed name to d_r_p, to help obfuscate meaning.
+  attempts at path traversal attacks.
 
 
 2020-02-25

@@ -2293,19 +2293,12 @@ function system_handle_form_submit() {
   else {
     $redirect_path = @$_REQUEST["default_redirect_path"];
     $redirect_query = @$_REQUEST["default_redirect_query"];
-    
-    if ($redirect_path == "") {
-      $redirect_path = @$_REQUEST["d_r_p"];  // shorter name, to help hide what this is for.
-    }
-
-    if ($redirect_query == "") {
-      $redirect_query = @$_REQUEST["d_r_q"];  // shorter name, to help hide what this is for.
-    }
 
     
     // To help prevent directory traversal attacks, the redirect_path cannot contain periods (.) and semi-colons
     $redirect_path = str_replace(".", "", $redirect_path);
     $redirect_path = str_replace(";", "", $redirect_path);
+        
     
   }
   
