@@ -69,7 +69,7 @@ DirectoryIndex index.php
 # Add headers to all responses.
 <IfModule mod_headers.c>  
   # Make cookies a bit more secure
-  Header edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure;SameSite=strict
+  Header edit Set-Cookie ^(.*)$ $1;SameSite=strict
   
   # Disable content sniffing, since it's an attack vector.
   Header always set X-Content-Type-Options nosniff  

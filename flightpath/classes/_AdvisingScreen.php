@@ -2331,6 +2331,8 @@ function draw_menu_items($menu_array) {
 	{
 		$pC = "";
 
+    $db = $this->db;
+
 		if ($course_id != "" && $course_id != 0) {		  
 			$course = new Course($course_id);
 		}
@@ -2364,26 +2366,21 @@ function draw_menu_items($menu_array) {
 			return $pC;
 		}
 
-    // Keep up with original max hours, in case this is from a substitution split.
-    $datastring_max_hours = $course->max_hours;
-        
+    // Not sure I need this line anymore.
+    $datastring_max_hours = $course->max_hours;    
+    
     
     $datastring_bool_new_from_split = $course->get_bool_substitution_new_from_split();
-
-
     $req_by_degree_id = $course->req_by_degree_id;
-
 
 		$advising_term_id = @$GLOBALS["fp_advising"]["advising_term_id"];
     
 		$course->load_descriptive_data(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE);
 
-		$course_hours = $course->get_catalog_hours();
-
+		$course_hours = $course->get_catalog_hours();     
 		if ($course->bool_transfer)
 		{
-
-
+      // Nothing at the moment.
 		}
 
 		// Does this course have more than one valid (non-excluded) name?
@@ -2450,11 +2447,8 @@ function draw_menu_items($menu_array) {
 		} // if course->bool_transfer
 
 
-    /*
-		$pC .= "
-		   	<div style='margin-top: 13px;'>
-				<div class='tenpt'>";
-    */    
+
+    
         
 		if ($course->course_id != 0)
 		{
@@ -2470,6 +2464,18 @@ function draw_menu_items($menu_array) {
 				$new_course->load_descriptive_data();
 				$use_hours = $new_course->get_catalog_hours();
 			}
+						
+			// if this is a substitution, use the number of hours for the ORIGNAL course.			
+      if ($course->get_bool_substitution() == TRUE) {
+        $sub_id = $course->db_substitution_id_array[$course->get_course_substitution()->req_by_degree_id];
+      
+        $temp = $db->get_substitution_details($sub_id);        
+        $sub_hours = @$temp['sub_hours'] * 1;  // trim excess zeros with *1.
+        if ($sub_hours < $use_hours) {
+          $use_hours = $sub_hours;
+        }
+      }
+			
 			$html .= "
 					<b>$course->title ($use_hours " . t("hrs") . ")</b>";
           
@@ -2502,7 +2508,7 @@ function draw_menu_items($menu_array) {
       
       
           
-		}
+		} // if course->course_id != 0
         
     
     
@@ -2511,10 +2517,14 @@ function draw_menu_items($menu_array) {
 		  $html = "";
 			$html .= "<div class='tenpt' style='margin-bottom:5px;'>
 						        <i>" . t("This course's hours were split in a substitution.");
-			
-      
+                    
       if ($course->get_bool_substitution_new_from_split()) {
-        $html .= "<br>" . t("Remaining hours after split:") . "  $datastring_max_hours hrs.";
+        //$html .= "<br>" . t("Remaining hours after split:") . "  $datastring_max_hours hrs.";
+        
+        
+        $sub_remaining_hours = @$course->get_hours_awarded($req_by_degree_id);        
+        
+        $html .= "<br>" . t("Remaining hours after split:") . "  $sub_remaining_hours hrs.";
       }
 			
 						
@@ -2808,10 +2818,8 @@ function draw_menu_items($menu_array) {
 		
       $html = "";
       
-			// Find out who did it and if they left any remarks.
-			
-		  $db = $this->db;
-			
+			// Find out who did it and if they left any remarks.			
+		  $db = $this->db;			
 			$sub_id = $course->db_substitution_id_array[$course->get_course_substitution()->req_by_degree_id];
 			
 		  $temp = $db->get_substitution_details($sub_id);
@@ -2836,7 +2844,7 @@ function draw_menu_items($menu_array) {
 
 		  $forthecourse = t("for the original course
 					requirement of") . " <b>" . $course->get_course_substitution()->subject_id . " 
-					" . $course->get_course_substitution()->course_num . "</b>";
+					" . $course->get_course_substitution()->course_num . " (" . $course->get_course_substitution()->get_hours() . " hrs)</b>";
 		  if ($temp["required_course_id"]*1 == 0)
 		  {
 			  $forthecourse = "";

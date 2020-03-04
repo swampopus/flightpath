@@ -1,6 +1,15 @@
 FlightPath 5.x Changelog
 ========================
 
+2020-03-03
+  Modified .htaccess mod_header rules, to make a little more laxed, for local sites.
+  
+  Fixed a display bug, where the number of hours (in the course description popup) were not showing
+  the correct substitution value, if they were split in a substitution.  Likewise, it was not showing
+  the correct "hours remaining" if we were looking at a "new_from_substitution" course piece.
+  
+  
+
 2020-02-29
   Send correct 404 / 403 headers for page not found and accessed denied.
 
