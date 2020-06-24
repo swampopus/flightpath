@@ -30,6 +30,10 @@ if( (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVE
 
 
  
+// Should we init the session using a specific session_id?
+if (@$_GET['fp_session_id'] != '') {
+  session_id($_GET['fp_session_id']);
+}
  
 session_start();
 

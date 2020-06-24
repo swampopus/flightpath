@@ -971,7 +971,7 @@ function fp_render_greeting() {
   
   $rtn = "";
   
-  $today = date("D, F jS, Y",time("today"));
+  $today = date("D, F jS, Y", strtotime("today"));
   
   $dname = $user->name;
   if ($user->f_name != "" || $user->l_name != "") {
