@@ -345,8 +345,17 @@ function draw_menu_items($menu_array) {
 	  $page_content .= "<div id='updateMsg' class='updateMsg' style='display: none;'>" . t("Updating...") . "</div>
 								<div id='loadMsg' class='updateMsg' style='display: none;'>" . t("Loading...") . "</div>";
 	  
-		
-		include($GLOBALS["fp_system_settings"]["theme"] . "/fp_" . $print_option . "template.php");
+	        
+    // We are going to try to include the theme.  If it can't be found, we will display a CORE theme, and display a message.
+    $template_filename = $GLOBALS["fp_system_settings"]["theme"] . "/fp_" . $print_option . "template.php";
+    if (!file_exists($template_filename)) {
+      print "<p><b>Theme Error:</b> Tried to load template from: $template_filename, but this file could not be found.
+                <br>This is possibly because either the filename or the directory specified does not exist.
+                <br>Contact site administrator.</p>";
+      $template_filename = "themes/fp5_clean" . "/fp_" . $print_option . "template.php";
+    } 
+     
+		include($template_filename);
 	}
 
 	

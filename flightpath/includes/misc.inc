@@ -1602,7 +1602,7 @@ function modules_implement_hook($hook = "example_hook_here") {
  */
 function invoke_hook($hook = "example_hook_here", $params = array()) {
   $rtn = array();
-  $modules = modules_implement_hook($hook);
+  $modules = modules_implement_hook($hook);  
   foreach($modules as $module) {
     $rtn[$module] = call_user_func_array($module . "_" . $hook, $params);
   }

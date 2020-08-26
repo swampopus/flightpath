@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2020-08-25
+  If the theme template file cannot be found, an error is displayed (instead of the entire system crashing with a 
+  white screen because the template.php file can't be included).
+  
+
 2020-06-23
   Added ability to init a specific session_id, based on $_GET['fp_session_id'].
   

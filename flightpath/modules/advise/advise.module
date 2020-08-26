@@ -1520,7 +1520,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
     
   
   $options = array();  
-  if ($degree_array = $db->get_degrees_in_catalog_year($catalog_year, FALSE, $bool_use_draft, $bool_undergrad_only, array(1))) {
+  if ($degree_array = $db->get_degrees_in_catalog_year($catalog_year, FALSE, $bool_use_draft, $bool_undergrad_only, array(1))) {    
     foreach($degree_array as $major_code => $value) {      
       if (trim($value["title"]) == ""){continue;}      
       $options[$major_code] = $value["title"];

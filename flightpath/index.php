@@ -34,7 +34,7 @@ if( (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVE
 if (@$_GET['fp_session_id'] != '') {
   session_id($_GET['fp_session_id']);
 }
- 
+
 session_start();
 
 // Set headers for maximum security
@@ -71,7 +71,7 @@ require_once("bootstrap.inc");
 $page = menu_execute_page_request();
 
 if (!is_int($page)) {
-  // Display the page!  
+  // Display the page!
   fp_display_page($page);
 }
 else {  
