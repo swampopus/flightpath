@@ -717,6 +717,7 @@ label.label-for-checkbox
 }
 
 .form-element-description {
+  font-family: Arial, Verdana, sans-serif;
   font-size: 0.8em;
   padding-left: 10px;
   color: #444;

@@ -1,6 +1,18 @@
 FlightPath 5.x Changelog
 ========================
 
+2020-08-26
+  Adding a "rank descriptions" setting in system module's Configure School Settings form.
+  
+  When loading a student (see _Student.php), we now use this new setting to determine the rank description, rather than
+  it being hard-coded that FR = Freshman, for example.  Also, if the rank isn't found, we just return the original code,
+  instead of a blank.
+  
+  Found a strange bug in Open Sans font, where a ~ (tilda) looks like a dash (-) when font size is exactly 13px.  Since many
+  of the settings require tildas as a separator, added a font-family for descriptions which explicitly set the font to Arial, Verdana,
+  or any other sans-serif font on the user's system.  This makes the tildas look normal again.
+  
+
 2020-08-25
   If the theme template file cannot be found, an error is displayed (instead of the entire system crashing with a 
   white screen because the template.php file can't be included).

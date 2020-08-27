@@ -962,12 +962,28 @@ function system_school_data_form() {
   $form["allowed_student_ranks"] = array(
     "type" => "textfield",
     "label" => t("Allowed student ranks (CSV):"),
-    "value" => variable_get("allowed_student_ranks", ""),
+    "value" => variable_get("allowed_student_ranks", "FR, SO, JR, SR"),
     "description" => t("This is a list of which student ranks are allowed into FlightPath.
                 It should be separated by commas.
                 This also affects which students you may search for on the Advisees
                 tab. Ex: FR, SO, JR, SR"),
   );
+
+
+  $form["rank_descriptions"] = array(
+    "type" => "textarea",
+    "label" => t("Rank descriptions:"),
+    "rows" => 8,
+    "value" => variable_get("rank_descriptions", "FR ~ Freshman\nSO ~ Sophomore\nJR ~ Junior\nSR ~ Senior\nPR ~ Professional\nGR ~ Graduate"),
+    "description" => t("Enter the rank code (from above) and the description which should appear on screen, in the format:
+                        RANK ~ DESC, one per line.
+                        <br>Ex:
+                        <br>&nbsp; FR ~ Freshman
+                        <br>&nbsp; SO ~ Sophomore
+                        <br>&nbsp; JR ~ Junior
+                        <br>&nbsp; SR ~ Senior"),
+  );
+
 
 
   $form["not_allowed_student_message"] = array(

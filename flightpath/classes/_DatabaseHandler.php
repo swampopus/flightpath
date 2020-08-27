@@ -1390,7 +1390,7 @@ class _DatabaseHandler extends stdClass
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT f_name, l_name FROM users 
-                      WHERE cwid = '?'
+                      WHERE cwid = ?
                       AND is_student = 1 ", $cwid);
     
     $cur = $this->db_fetch_array($res);

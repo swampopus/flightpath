@@ -573,16 +573,21 @@ class _Student extends stdClass
 	 *	 
 	 */
 	function get_rank_description($rank_code = "") {
-	  // TODO:  Maybe this should be a setting somewhere instead of hard-coded?
-    $rank_array = array(
-      "FR"=>t("Freshman"), 
-      "SO"=>t("Sophomore"),
-      "JR"=>t("Junior"), 
-      "SR"=>t("Senior"), 
-      "PR"=>t("Professional"),
-    );	  
+
+    // Get our rank descriptions from our setting.	  	  
+    $temp = variable_get("rank_descriptions", "FR ~ Freshman\nSO ~ Sophomore\nJR ~ Junior\nSR ~ Senior\nPR ~ Professional\nGR ~ Graduate");
+    $lines = explode("\n", $temp);
+    foreach ($lines as $line) {
+      $temp = explode("~", $line);
+      $rank_array[trim($temp[0])] = trim($temp[1]);
+    }            
+        
+    $rank_desc = @$rank_array[$rank_code]; 
     
-    return @$rank_array[$rank_code];
+    // If a description isn't found, just return the code itself.
+    if ($rank_desc == '') $rank_desc = $rank_code;
+    
+    return $rank_desc;
         
 	}
 	
