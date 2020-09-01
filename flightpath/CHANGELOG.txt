@@ -1,6 +1,11 @@
 FlightPath 5.x Changelog
 ========================
 
+2020-09-01
+  Added new permission to the course search module as well as the blank degrees module, 
+  controlling who can access the course search/blank degrees, rather than it being assumed to be everyone.
+
+
 2020-08-26
   Adding a "rank descriptions" setting in system module's Configure School Settings form.
   

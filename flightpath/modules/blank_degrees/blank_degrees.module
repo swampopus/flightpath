@@ -12,7 +12,7 @@ function blank_degrees_menu() {
     "description" => "Browse through available degree plans as they appear in " . variable_get("system_name", "FlightPath"),
     "page_callback" => "fp_render_form",
     "page_arguments" => array("blank_degrees_select_degree_form"),
-    "access_callback" => TRUE,
+    "access_arguments" => array('access_blank_degrees'),
     "page_settings" => array(
       "page_has_search" => FALSE,
       "page_banner_is_link" => TRUE,
@@ -27,7 +27,7 @@ function blank_degrees_menu() {
   $items["blank-degrees/display"] = array(
     "title" => "Blank Degrees - Display",
     "page_callback" => "blank_degrees_display_blank_degree",
-    "access_callback" => TRUE,
+    "access_arguments" => array('access_blank_degrees'),
     "page_settings" => array(
       "display_currently_advising" => TRUE,
       "page_has_search" => FALSE,
@@ -221,7 +221,12 @@ function blank_degrees_display_blank_degree() {
 
 
 function blank_degrees_perm() {
-  return array("blank_degrees_view_url_options" => array(
+  return array(
+      'access_blank_degrees' => array(
+        'title' => t('Access blank degrees'),
+        'description' => t('This permission allows the user to view the blank degrees.'),
+      ),
+      "blank_degrees_view_url_options" => array(
                   "title" => t("View URL options"),
                   "description" => t("View URL options at the bottom of blank degrees"), 
   ));

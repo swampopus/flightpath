@@ -14,7 +14,7 @@ function course_search_menu() {
     "title" => "Course Search",
     "description" => "Use this tool to view course descriptions, sample syllabi, and projected course offering schedules.",
     "page_callback" => "course_search_display_search",
-    "access_callback" => TRUE,
+    "access_arguments" => array('access_course_search'),
     "page_settings" => array(
       "page_has_search" => FALSE,
       "page_banner_is_link" => TRUE,
@@ -29,7 +29,7 @@ function course_search_menu() {
   $items["course-search/get-syllabus"] = array(
     "title" => "Course Search",
     "page_callback" => "course_search_download_syllabus",
-    "access_callback" => TRUE,
+    "access_arguments" => array('access_course_search'),
     "type" => MENU_TYPE_CALLBACK,
   );
 
@@ -60,7 +60,7 @@ function course_search_menu() {
   $items["tools/course-search/courses"] = array(
     "title" => "Course Search",
     "page_callback" => "course_search_display_courses",
-    "access_callback" => TRUE,
+    "access_arguments" => array('access_course_search'),
     "page_settings" => array(
       "page_has_search" => FALSE,
       "page_banner_is_link" => TRUE,
@@ -154,6 +154,11 @@ function course_search_menu() {
 
 function course_search_perm() {
   return array(
+          "access_course_search" => array(
+            'title' => t('Access course search'),
+            'description' => t('Users with this setting are allowed to actually view the course search link,
+                                descriptions, syllabi, etc.'),
+          ),
           "administer_course_search" => array(
             "title" => t("Administer course search"),
             "description" => t("Users with this setting will be able
