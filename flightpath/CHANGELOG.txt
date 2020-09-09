@@ -1,6 +1,10 @@
 FlightPath 5.x Changelog
 ========================
 
+2020-09-09
+  Added new field "extra_data" to the student_degrees table, to help module developers.  Ex:  banner_integration.  This field is optional.
+  
+
 2020-09-01
   Added new permission to the course search module as well as the blank degrees module, 
   controlling who can access the course search/blank degrees, rather than it being assumed to be everyone.

@@ -159,6 +159,18 @@ function system_update($old_schema, $new_schema) {
   
   
   
+  if ($old_schema < 8) {
+    // We want to add an "extra_data" field to the student_degrees table.  This is an optional field, meant to be
+    // used by module developers.  It can be empty, and will not affect the core functioning of FlightPath.
+    db_query("alter table `student_degrees` add column `extra_data` VARCHAR(255)  ");
+    
+    // Add an index as well...
+    db_query("alter table `student_degrees` add index `extra_data` (extra_data)");    
+    
+  }
+  
+  
+  
   
 }
 
