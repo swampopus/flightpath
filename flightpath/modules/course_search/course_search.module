@@ -865,7 +865,11 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
 		// Get the term from the end.
 		$ss = trim(substr($t,4,1));
 		if ($ss == "m"){$ss = "1.5";}
-		$ss = $ss * 10;
+		
+    if (is_numeric($ss)) {
+		  $ss = $ss * 10;
+    }
+    
 		$year = trim(substr($t,0,4));
 
 		// We do all this so we can establish an order to the terms
