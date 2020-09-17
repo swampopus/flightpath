@@ -1,6 +1,10 @@
 FlightPath 5.x Changelog
 ========================
 
+2020-09-17
+  Fixed minor bug in student_search, where the red checkmark was appearing for a "blank" advising session.
+  
+
 2020-09-12
   Fixed minor bug in course_search module, which was causing an error to occur if the semester num was not numeric.
   

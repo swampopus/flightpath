@@ -947,9 +947,10 @@ function student_search_query_advisees($sql, $params = array()) {
     $advised_image = "&nbsp;";
     $advising_session_id = "";
     $res2 = db_query("SELECT * FROM advising_sessions WHERE
-                      student_id = '?' AND
-                      term_id = '?' 
-               AND is_draft = '0' 
+                      student_id = ? AND
+                      term_id = ? 
+               AND is_draft = 0 
+               AND is_empty = 0
               ORDER BY posted DESC", $student_id, $term_id);
     if (db_num_rows($res2) > 0) {
       $cur = db_fetch_array($res2);
