@@ -1,5 +1,8 @@
 FlightPath 5.x Changelog
 ========================
+2020-09-28
+  Tweaking a the Student Course List report, in the stats module.
+  
 
 2020-09-17
   Fixed minor bug in student_search, where the red checkmark was appearing for a "blank" advising session.

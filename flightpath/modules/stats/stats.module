@@ -1418,6 +1418,7 @@ function stats_report_student_course_list() {
     $grade = $course->grade;
     $hours = $course->get_hours_awarded();
     
+    $rnd = mt_rand(0,9999);
     
     if (is_object($course->course_transfer)) {
       $subjectID = $course->course_transfer->subject_id;
@@ -1443,10 +1444,12 @@ function stats_report_student_course_list() {
             ";
 
     if ($course->bool_transfer) {
-      $transfer_array["$course->term_id~$subjectID~$courseNum"] = $html_line;
+      // The $rnd makes sure this is unique, in case a course is showing as repeated in the same term.
+      $transfer_array["$course->term_id~$subjectID~$courseNum~$rnd"] = $html_line;
     }
     else {
-      $local_array["$course->term_id~$subjectID~$courseNum"] = $html_line;
+      // The $rnd makes sure this is unique, in case a course is showing as repeated in the same term.
+      $local_array["$course->term_id~$subjectID~$courseNum~$rnd"] = $html_line;
     }
     
        
