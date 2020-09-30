@@ -2699,8 +2699,23 @@ function system_login_form_validate($form, &$form_state) {
     return;    
   }  
   
-  // otherwise, we know it must be correct.  Continue.
   
+  // If this is a student, does this student have an accepted "allowed rank" (ie, FR, SO, JR, etc)?
+  $allowed_ranks_str = variable_get("allowed_student_ranks", "FR, SO, JR, SR");
+  $allowed_ranks = csv_to_array($allowed_ranks_str);
+  if (intval($cur['is_student']) === 1) {
+    $rank_code = db_result(db_query("SELECT rank_code FROM students WHERE cwid = ?", array($cur['cwid'])));
+    if (!in_array($rank_code, $allowed_ranks)) {
+      
+      form_error("password", t("Sorry, your rank/classification is %rc.  At this time FlightPath is only available to students
+                                in the following ranks/classifications: @ranks_str", array("%rc" => $rank_code, "@ranks_str" => $allowed_ranks_str)));
+      return;    
+      
+    }
+  }
+    
+  
+  // otherwise, we know it must be correct.  Continue.  
   $form_state["db_row"] = $cur;
 
   
