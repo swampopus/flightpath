@@ -29,11 +29,11 @@ The license is defined in full here: https://www.gnu.org/licenses/gpl-3.0.en.htm
 in the LICENSE.txt file which is included with FlightPath.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
-even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero 
+even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU  
 General Public License for more details.
 
 FlightPath includes works under other copyright notices and distributed according to the terms of the 
-GNU Affero General Public License or a compatible license.
+GNU General Public License or a compatible license.
 
 You may modify FlightPath's source code, but this copyright and license notice must not be modified, 
 and must be included with the source code.
