@@ -1,34 +1,31 @@
 ====================================
 Copyright Information for FlightPath
 ====================================
-Last updated: 11/20/2016
+Last updated: 10/7/2020
   
 All FlightPath code is Copyright 2006 - Present by the original authors.
 
-FlightPath was originally designed and programmed by the University of Louisiana at Monroe. 
-The original source (version 3x and below) is Copyright (C) by the University of Louisiana at Monroe.
-
-FlightPath is considered "open source" under the GNU Affero General Public License (GNU AGPL), 
+FlightPath is considered "open source" under the GNU General Public License (GNU GPL), 
 version 3 or any later version. This covers any related files and documentation packaged with FlightPath.
 
 This means that you may modify and redistribute part or all of FlightPath's code, but it must remain open 
-source, under the GNU AGPL.  You may NOT use any part of FlightPath's code in a purely commercial product 
-whose source code is not also released under the GNU AGPL, version 3 or any later version.
+source, under the GNU GPL.  You may NOT use any part of FlightPath's code in a purely commercial product 
+whose source code is not also released under the GNU GPL, version 3 or any later version.
 
 In other words, you can only copy FlightPath's code if your project is ALSO open source, 
-specifically under the GNU AGPL.  It cannot be proprietary or "closed source."
+specifically under the GNU GPL.  It cannot be proprietary or "closed source."
 
-If you make changes to FlightPath, note that you are not required to release your code under 
+Note that you are not required to release your code under 
 typical use (see link below for explanation), but you are required to release it under 
-section 13 of the AGPL if you are running FlightPath as a SaaS or similar service, not within the 
-scope of an educational mission.  If you release your changes, it must also be under the GNU AGPL.  
+certain conditions  
 
-See this page for our interpretation of Section 13 of the GNU AGPL: http://getflightpath.com/gnu-agpl
+See this page for our interpretation of the GNU GPL: http://getflightpath.com/gnu-gpl
 
-All FlightPath modules are also released under the GNU AGPL version 3 or any later version, 
+For add-on modules, unless otherwise stated in a separate COPYRIGHT.txt or LICENSE.txt file, 
+all FlightPath modules are also released under the GNU GPL version 3 or any later version, 
 and fall under the same restrictions and protections.
 
-The license is defined in full here: https://www.gnu.org/licenses/agpl-3.0.en.html, and reproduced 
+The license is defined in full here: https://www.gnu.org/licenses/gpl-3.0.en.html, and reproduced 
 in the LICENSE.txt file which is included with FlightPath.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
