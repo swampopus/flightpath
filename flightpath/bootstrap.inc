@@ -63,7 +63,7 @@ invoke_hook('init');
 
 // Constants
 define('FLIGHTPATH_VERSION', '%FP_VERSION%');  // will be replaced automatically by getflightpath.com.
-define('FLIGHTPATH_CORE', '5.x');  // hard-coded core version.
+define('FLIGHTPATH_CORE', '6.x');  // hard-coded core version.
 
 define ('WATCHDOG_NOTICE', 5);
 define ('WATCHDOG_ALERT', 1);
