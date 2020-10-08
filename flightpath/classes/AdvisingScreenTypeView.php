@@ -12,7 +12,7 @@
  *	most of the methods here will be about doing that.
  *
  */
-class AdvisingScreenTypeView extends _AdvisingScreen
+class AdvisingScreenTypeView extends AdvisingScreen
 {
 
 

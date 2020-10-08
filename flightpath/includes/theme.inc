@@ -1289,7 +1289,7 @@ function fp_theme_location($bool_include_base_path = TRUE) {
   
   // The theme hasn't been set for some reason
   if ($p == "") {
-    $p = "themes/classic";
+    $p = "themes/fp6_clean";
   }
   
   if ($bool_include_base_path) {

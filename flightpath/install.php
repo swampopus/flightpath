@@ -326,7 +326,7 @@ $system_settings["db_name"] = "%DB_NAME%"; // Name of the actual database where
 // once the flightpath_system_settings table is read in at the end of the file.
 // Do not alter them.
 $system_settings["display_mysql_errors"] = TRUE;
-$system_settings["theme"] = "themes/classic";
+$system_settings["theme"] = "themes/fp6_clean";
 
 
 ////////////////////////////////////
@@ -520,7 +520,7 @@ function install_display_db_form($msg = "") {
   $page_title = "Install FlightPath";
   $page_hide_report_error = TRUE;
   
-  include("themes/classic/fp_template.php");  
+  include("themes/fp6_clean/fp_template.php");  
 
   
 }
@@ -575,7 +575,7 @@ function install_display_requirements($req_array) {
   $page_title = "Install FlightPath";
   $page_hide_report_error = TRUE;
   
-  include("themes/classic/fp_template.php");  
+  include("themes/fp6_clean/fp_template.php");  
 }
 
 
@@ -583,9 +583,9 @@ function install_display_requirements($req_array) {
 
 
 function install_display_lang_selection() {
-  $pC = "";
+  $html = "";
   
-  $pC .= "<h2 class='title'>Install FlightPath</h2>
+  $html .= "<h2 class='title'>Install FlightPath</h2>
           Please follow the instructions on the following pages to complete
           your installation of FlightPath.
           
@@ -603,9 +603,12 @@ function install_display_lang_selection() {
           please visit http://getflightpath.com/contact before proceeding with installation.";
     
   // Display the screen
-  $page_content = $pC;  
+  $page_content = $html;  
   $page_title = "Install FlightPath";
   $page_hide_report_error = TRUE;
   
-  include("themes/classic/fp_template.php");
+  include("themes/fp6_clean/fp_template.php");
 }
+
+
+
