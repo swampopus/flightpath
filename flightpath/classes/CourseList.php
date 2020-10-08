@@ -2,7 +2,7 @@
 
 require_once("ObjList.php");
 
-class _CourseList extends ObjList
+class CourseList extends ObjList
 {
 	// This inherits most of its classes from ObjList,
 	// but, it has to be able to do special functions

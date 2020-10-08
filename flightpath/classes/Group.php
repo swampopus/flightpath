@@ -1,6 +1,6 @@
 <?php
 
-class _Group extends stdClass
+class Group extends stdClass
 {
   
   const GROUP_COURSE_INFINITE_REPEATS = 9999;

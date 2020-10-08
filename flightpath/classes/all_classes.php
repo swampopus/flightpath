@@ -18,25 +18,21 @@ if (!isset($levels_deep)) $levels_deep = "";
 // without actually editing core files.
 //
 // If you need to make changes, make them in custom/classes.
-require_once("_AdvisingScreen.php");
-require_once("_AdvisingScreenTypeView.php");
-require_once("_DatabaseHandler.php");
-require_once("_Course.php");
+require_once("AdvisingScreen.php");
+require_once("AdvisingScreenTypeView.php");
+require_once("DatabaseHandler.php");
+require_once("Course.php");
 
-require_once("_StandardizedTest.php");
+require_once("StandardizedTest.php");
 require_once("ObjList.php");
-require_once("_CourseList.php");
-require_once("_Group.php");
-require_once("_GroupList.php");
-require_once("_Semester.php");
+require_once("CourseList.php");
+require_once("Group.php");
+require_once("GroupList.php");
+require_once("Semester.php");
 
-require_once("_DegreePlan.php");
-require_once("_Substitution.php");
-require_once("_SubstitutionList.php");
-require_once("_Student.php");
-require_once("_FlightPath.php");
-
-
-// Now, once these are loaded, require the user-created ones...
-require_once("$levels_deep" . "custom/classes/all_custom_classes.php");
+require_once("DegreePlan.php");
+require_once("Substitution.php");
+require_once("SubstitutionList.php");
+require_once("Student.php");
+require_once("FlightPath.php");
 

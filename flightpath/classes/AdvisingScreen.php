@@ -1,7 +1,7 @@
 <?php
 
 
-class _AdvisingScreen extends stdClass
+class AdvisingScreen extends stdClass
 {
 	public $width_array, $popup_width_array, $script_filename, $is_on_left, $box_array;
 	public $degree_plan, $student, $bool_popup, $footnote_array, $flightpath;

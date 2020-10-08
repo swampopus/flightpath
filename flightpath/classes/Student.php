@@ -1,7 +1,7 @@
 <?php
 
 
-class _Student extends stdClass
+class Student extends stdClass
 {
 	public $student_id, $name, $major_code_array, $major_code_csv, $gpa, $cumulative_hours, $catalog_year;
 	public $list_courses_taken, $list_courses_advised, $list_courses_added, $db, $rank, $db_rank;

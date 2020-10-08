@@ -1,4 +1,4 @@
 name = Comments
 description = This module lets you save advising comments for a student.
-core = 5.x
+core = 6.x
 requires = advise 

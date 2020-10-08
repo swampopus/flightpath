@@ -5,7 +5,7 @@
 Class definition for the Course object.
 */
 
-class _Course extends stdClass
+class Course extends stdClass
 {
   // Some public variables and what they are used for.
 
