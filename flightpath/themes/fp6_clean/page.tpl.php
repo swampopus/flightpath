@@ -27,10 +27,11 @@
  * 
  * $page_header   This is the "header content" for the page.  Basically, the logo?  TODO:  do I need this to be a variable?
  * $page_sidebar_left_content      This is the HTML contents that should appear in the left sidebar, if any.
- * 
+ * $page_top_nav_content           This is HTML for the top navigation content.
  * 
  * 
 */
+
 ?>
   
   
@@ -38,6 +39,9 @@
 <body class='<?php print $page_body_classes; ?>'>
 
   <div id='header'>
+    <div id='top-nav'>
+      <?php print $page_top_nav_content; ?>
+    </div>
     <div class='top-banner'>
       <a href='<?php fp_url("<front>"); ?>'>
         <img src='<?php print "$theme_location/images/"; ?>fp_banner_default.png' border='0'>
@@ -47,19 +51,22 @@
   </div>
 
 
-  <?php if ($page_sidebar_left_content) : ?>
-  <div id='sidebar-left'>
-    <?php print $page_sidebar_left_content; ?>
+  <div id='main-contant-wrapper'>
+
+    <?php if ($page_sidebar_left_content) : ?>
+    <div id='sidebar-left'>
+      <?php print $page_sidebar_left_content; ?>
+    </div>
+    <?php endif; ?>
+  
+  
+  
+    <div id='page-content'>
+      <?php print $page_content; ?>
+    </div>
+
+
   </div>
-  <?php endif; ?>
-
-
-
-  <div id='page-content'>
-    <?php print $page_content; ?>
-  </div>
-
-
 
   
   <div class='fp-bottom-message'>

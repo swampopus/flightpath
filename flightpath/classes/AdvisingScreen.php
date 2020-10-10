@@ -303,10 +303,6 @@ function draw_menu_items($menu_array) {
 			$page_body_classes .= " bool-print";
 		}
 
-    // TODO:  this shouldn't be here anymore in FP6.  Should be responsible.
-		if ($this->page_is_mobile == true) {
-		  $page_body_classes .= " bool-page-is-mobile";
-		}
 					
 		// A dummy query-string is added to filenames, to gain control over
     // browser-caching. The string changes on every update or full cache
@@ -354,6 +350,14 @@ function draw_menu_items($menu_array) {
     }
     
     
+    // Grab the appropriate sidebar & top nav content (if any)
+    $page_sidebar_left_content = fp_render_sidebar_left_content();
+    $page_top_nav_content = fp_render_top_nav_content();
+    
+    
+    if ($page_sidebar_left_content) {
+      $page_body_classes .= " has-sidebar-left";
+    }
     
 	        
     // We are going to try to include the theme.  If it can't be found, we will display a CORE theme, and display a message.
@@ -365,7 +369,7 @@ function draw_menu_items($menu_array) {
     $page_template_filename = $theme . "/page.tpl.php";
     
     // If there is a special theme file we should be using based on the URL, set it here.    
-    $q = trim(@strtolower($_GET['q']));
+    $q = trim(@strtolower($_REQUEST['q']));
     if ($q) {
       $q = trim(str_replace("/", "-", $q));
       if ($q) {

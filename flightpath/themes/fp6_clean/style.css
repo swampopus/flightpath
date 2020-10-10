@@ -10,7 +10,8 @@ body
   font-family: "Segoe UI", "Inter", "Open Sans", Arial, Helvetica, sans-serif;  
   padding: 0;
   margin: 0;  
-  background-color: #F2F2F2;
+   z___background-color: #F2F2F2; 
+  background-color: white;
   color: #555;
 }
 
@@ -21,19 +22,15 @@ body
 .top-banner {
 
   background-color: white;
- 
-  text-align: center;
-  width: 100%;
   margin: 0;
   border: 0;
   border-radius: 0;
-
-      
-  padding-bottom: 20px;
-  margin-bottom: 20px;
-  z-index: 9999 !important;
- 
   
+}
+
+.top-banner img {
+  height: 70px;
+  width: auto;
 }
 
 /* Don't display if this is a popup! */
@@ -195,7 +192,7 @@ table.tabs-search-table td.search-td {
 
 .fp-bottom-message {
   font-size: 0.7em;
-  width: 100%;
+  
   color: white;  
   background-color: #373B44;
   
@@ -214,25 +211,7 @@ table.tabs-search-table td.search-td {
   
 }
 
-.page-is-popup .fp-bottom-message {
-  width: 90%;
-  margin: 0;
-  
-  background-color: transparent !important;  
-  min-height: 0;
-  border-top: 0;
-  padding: 0;  
-}
 
-
-
-.fp-bottom-message .popup-contact {
-  display: block;
-  width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-  
-}
 
 .fp-bottom-message a {
   color: #ccc;
@@ -356,9 +335,6 @@ span.advise-checkbox-retake-checked {
 	margin-left: 10px;
 }
 
-.flightpath-greeting-message {
-  font-size: 0.8em;
-}
 
 
 .sub-tabs {
@@ -1042,6 +1018,7 @@ a.form-popup-description {
 /**
  *   General form elements
  */
+___general_form_elements{}
 
 label {
   font-size: 0.9em;
@@ -1074,6 +1051,10 @@ label {
 .element-type-submit input:hover {
   background-color: lightskyblue;
   
+}
+
+input::placeholder {  
+  opacity: 0.7;
 }
 
 
@@ -1172,6 +1153,129 @@ ___page--login{}
   right: 20px;
   
 }
+
+
+
+
+/* All of the top-nav stuff goes here */
+___top_nav{}
+
+#header {
+  border-bottom: 1px solid #ddd;
+}
+
+#header #top-nav ul.top-nav-ul {  
+  list-style-type: none;
+  margin: 0;
+  margin-top: 10px;
+  padding: 0;
+  float: right;  
+  display: inline-block;  
+}
+
+#header #top-nav ul.top-nav-ul li {
+  
+  display: table-cell;  
+  padding-right: 30px;
+  padding-left: 30px;
+  border-right: 1px solid #ccc;  
+  height: 35px;
+  vertical-align: middle;
+}
+
+#header #top-nav ul.top-nav-ul li.last {
+  border-right: 0;
+  margin-right: 10px;
+}
+
+#header #top-nav form {
+  display: inline;
+  padding: 0;
+  margin: 0;
+}
+
+#header #top-nav form .smallinput {
+  width: 300px;
+  padding: 0.5em 1em;
+  border: 1px solid #ccc;
+  font-size: 0.9em;
+  border-radius: 5px;
+}
+
+#header #top-nav form a {
+  font-size: 1.2em;
+  margin-left: 10px;
+}
+
+#header #top-nav ul.top-nav-ul li.user-options i {
+  font-size: 1.2em;
+}
+
+
+#main-contant-wrapper {
+  min-height: calc(100vh - 250px);
+  box-sizing: border-box;
+}
+
+
+___sidebar-left{}
+
+.has-sidebar-left #page-content {
+  display: inline-block;
+  vertical-align: top;
+  padding-left: 20px;
+  padding-top: 10px;
+}
+
+
+#sidebar-left {  
+  
+  display: inline-block;
+  vertical-align: top;
+  
+  width: 120px;
+  
+  background-color: #999999;
+}
+
+#sidebar-left ul.sidebar-left-nav {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#sidebar-left ul.sidebar-left-nav li {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  text-align: center;
+  
+}
+
+#sidebar-left ul.sidebar-left-nav li .desc {
+  color: white;
+  font-weight: 700;
+  font-size: 0.9em;
+}
+
+#sidebar-left ul.sidebar-left-nav li:hover {
+  background-color: #777;
+}
+
+#sidebar-left ul.sidebar-left-nav li i {
+  font-size: 2.1em;
+  color: white;
+}
+
+#sidebar-left ul.sidebar-left-nav li.students i,
+#sidebar-left ul.sidebar-left-nav li.analytics i
+ {
+  font-size: 2em;
+}
+
+
+
+
+
 
 
 

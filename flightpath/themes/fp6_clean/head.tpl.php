@@ -12,6 +12,8 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width" />
 
+  <link rel="stylesheet" href="<?php print $theme_location ?>/font-awesome-4.7.0/css/font-awesome.min.css">
+
   <?php // Bring in jQuery and jQuery UI, as well as jQuery UI's css. ?>
   <script src="<?php print base_path() ?>/inc/jquery-1.8.3.min.js" type="text/javascript"></script>
   <script src="<?php print base_path() ?>/inc/jquery-ui-1.9.2.custom.min.js" type="text/javascript"></script>

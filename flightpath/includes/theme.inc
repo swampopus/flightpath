@@ -112,7 +112,7 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
  * its original menu item (router_item) definition.
  */
 function fp_display_page($page) {
-
+  
   global $current_student_id, $screen;
   $page_title = $page["title"];
   if (@$GLOBALS["fp_set_title"] != "") {
@@ -136,15 +136,6 @@ function fp_display_page($page) {
     fp_add_body_class("student-rank-$student->db_rank  student-catalog-year-$student->catalog_year");
   }  
  
-  // If we don't have permission to search, then hide the little search.
-  if (!user_has_permission("display_search_subtab")) {
-    $screen->page_has_search = FALSE;
-  }
-  
-  // mobile screens never have the search box
-  if (fp_screen_is_mobile()) {
-    $screen->page_has_search = FALSE;
-  }
   
   $screen->page_banner_is_link = @$page["router_item"]["page_settings"]["page_banner_is_link"];
   $screen->page_hide_report_error = @$page["router_item"]["page_settings"]["page_hide_report_error"];
@@ -192,10 +183,7 @@ function fp_display_page($page) {
   if ($page_show_title == TRUE) {
     $content_top .= "<h2 class='title'>" . $page_title . "</h2>";
   } 
-  
-  if (@$page["router_item"]["page_settings"]["display_greeting"] == TRUE) {  
-    $content_top .= fp_render_greeting();
-  }
+    
   
   $c = 0;
   
@@ -285,7 +273,76 @@ function fp_display_page($page) {
   
   
   $screen->output_to_browser();  
-}
+} // fp_display_page
+
+
+
+/**
+ * Returns the HTML for the left sidebar content.
+ */
+function fp_render_sidebar_left_content() {  
+  $html = "";
+  
+  $html .= "<ul class='sidebar-left-nav'>
+              <li class='home first'>
+                <i class='fa fa-home'></i>
+                <div class='desc'>Dashboard</div>
+              </li>
+              <li class='students'>
+                  <i class='fa fa-users'></i>
+                  <div class='desc'>Students</div>
+              </li>
+              <li class='courses'>
+                <i class='fa fa-book'></i>
+                <div class='desc'>Courses</div>                
+              </li>
+              <li class='analytics'>
+                <i class='fa fa-bar-chart'></i>
+                <div class='desc'>Analytics</div>                
+              </li>
+              <li class='admin-tools'>
+                <i class='fa fa-bolt'></i>
+                <div class='desc'>Admin Tools</div>
+              </li>
+              
+            </ul>";
+  
+  
+  
+  return $html;    
+  
+} // fp_render_sidebar_left_content
+
+
+
+/**
+ * Returns the HTML for the top navigation content of the screen itself.
+ */
+function fp_render_top_nav_content() {
+  $html = "";
+  
+  $html .= "
+    <ul class='top-nav-ul'>
+      <li class='greeting first'>" . fp_render_greeting() . "</li>
+      <li class='student-search'>" . student_search_render_small_search() . "</li>
+      <li class='user-options last'>
+        <i class='fa fa-user'></i>
+        <i class='fa fa-caret-down'></i>
+        
+      </li>
+    </ul>
+  ";
+  
+  
+  return $html;
+} // fp_render_top_nav_content
+
+
+
+
+
+
+
 
 
 /**
@@ -973,13 +1030,14 @@ function fp_render_greeting() {
   
   $today = date("D, F jS, Y", strtotime("today"));
   
+  
   $dname = $user->name;
   if ($user->f_name != "" || $user->l_name != "") {
     $dname = trim($user->f_name . " " . $user->l_name) . " ($user->name)";
   }
   
   $rtn .= "<div class='flightpath-greeting-message'>
-              Welcome $dname! Today is $today. " . l("Log out?", "logout") . "
+              " . t("Welcome @dname! Today is @today", array("@dname" => $dname, "@today" => $today)) . "
           </div>";
   
   return $rtn;  
@@ -1141,10 +1199,6 @@ function fp_render_mobile_tab_array($tab_array) {
 function fp_render_tab_array($tab_array)
 {
 
-  // fix mobile tabs
-  if (fp_screen_is_mobile()) {
-    return fp_render_mobile_tab_array($tab_array);         
-  }
     
   
   $rtn = "";

@@ -198,11 +198,9 @@ function student_search_render_small_search() {
   
   $url = fp_url("student-search/search");
   
-  $rtn .= "<form action='" . $url . "' method='post' id='small-search-form'
-              style='padding:0; margin:0; padding-bottom: 5px;'>
-                     <input type='text' class='smallinput' size='30' name='search_for' id='search_bar_value'                       
-                        placeholder = '" . t("Search by name or CWID") . "'>
-                     <input type='submit' name='submit' value='=>' class='smallinput'>
+  $rtn .= "<form action='" . $url . "' method='post' id='small-search-form' >
+                     <input type='text' class='smallinput' name='search_for' id='search_bar_value' placeholder = '" . t("Search students by name or CWID") . "'>                     
+                     <a href='javascript:void(0);' class='small-search-submit' onClick='this.closest(\"form\").submit();'><i class='fa fa-search'></i></a>
                      <input type='hidden' name='current_student_id' value='$current_student_id'>   
                      <input type='hidden' name='did_search' value='true'>                  
                     </form>

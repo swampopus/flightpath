@@ -2805,16 +2805,13 @@ function system_display_main_page() {
   $left_col_blocks = blocks_render_blocks("system_main", "left_col");
   $right_col_blocks = blocks_render_blocks("system_main", "right_col");
   
-  if (fp_screen_is_mobile()) {
-    $rtn .= "<tr><td colspan='2'>$left_col_blocks $right_col_blocks</td></tr>";
-  }
-  else {
+  
     $rtn .= "<tr><td width='50%' valign='top'  style='padding-right: 10px;'>
               $left_col_blocks
               </td><td width='50%' valign='top' style='padding-left: 10px;'>
                     $right_col_blocks
               </td></tr>";
-  }
+  
   
   $rtn .= "</table>";
   
