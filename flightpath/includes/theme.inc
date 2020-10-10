@@ -276,12 +276,12 @@ function fp_display_page($page) {
   $class = str_replace('.', '', $class);
   $class = str_replace('<', '', $class);
   $class = str_replace('>', '', $class);
-  $class = str_replace('/', '', $class);
+  $class = str_replace('/', '-', $class);
   $class = str_replace('\\', '', $class);
   $class = str_replace('#', '', $class);
   $class = str_replace('&', '', $class);  
   
-  $screen->page_body_classes .= " page-" . str_replace("/", "-", $class);
+  $screen->page_body_classes .= " page--" . str_replace("/", "-", $class);
   
   
   $screen->output_to_browser();  
@@ -1317,6 +1317,7 @@ function fp_theme_location($bool_include_base_path = TRUE) {
  * @return string
  */
 function fp_render_curved_line($text) {
+  depricated_message();
   // Will simply draw a curved title bar containing the $title
   // as the text.
 
@@ -1330,6 +1331,17 @@ function fp_render_curved_line($text) {
   return $rtn;
 
 }
+
+
+function fp_render_section_title($text, $extra_class = '') {
+  
+  $rtn = "<div class='section-box-title section-box-title-$extra_class'>$text</div>";
+
+
+  return $rtn;
+  
+}
+
 
 
 

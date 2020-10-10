@@ -274,7 +274,9 @@ function draw_menu_items($menu_array) {
 	{
 		// This method will output the screen to the browser.
 		// outputs the $page_content variable.
-				
+
+		$theme_location = fp_theme_location();  // file location of the theme folder
+	
 		$page_content = $this->page_content;
 		$page_tabs = $this->page_tabs;
 		$page_has_search = $this->page_has_search;
@@ -298,11 +300,12 @@ function draw_menu_items($menu_array) {
 
 		$print_option = "";
 		if ($this->bool_print == true) {
-			$print_option = "print_";
+			$page_body_classes .= " bool-print";
 		}
 
+    // TODO:  this shouldn't be here anymore in FP6.  Should be responsible.
 		if ($this->page_is_mobile == true) {
-		  $print_option = "mobile_";
+		  $page_body_classes .= " bool-page-is-mobile";
 		}
 					
 		// A dummy query-string is added to filenames, to gain control over
@@ -345,18 +348,50 @@ function draw_menu_items($menu_array) {
 	  $page_content .= "<div id='updateMsg' class='updateMsg' style='display: none;'>" . t("Updating...") . "</div>
 								<div id='loadMsg' class='updateMsg' style='display: none;'>" . t("Loading...") . "</div>";
 	  
+
+    if ($page_sidebar_left_content) {
+      $page_body_classes .= " has-sidebar-left";
+    }
+    
+    
+    
 	        
     // We are going to try to include the theme.  If it can't be found, we will display a CORE theme, and display a message.
-    $template_filename = $GLOBALS["fp_system_settings"]["theme"] . "/fp_" . $print_option . "template.php";
-    if (!file_exists($template_filename)) {
-      print "<p><b>Theme Error:</b> Tried to load template from: $template_filename, but this file could not be found.
+    $theme = $GLOBALS["fp_system_settings"]["theme"];
+    
+    //$template_filename = $GLOBALS["fp_system_settings"]["theme"] . "/fp_" . $print_option . "template.php";
+    
+    $head_template_filename = $theme . "/head.tpl.php";
+    $page_template_filename = $theme . "/page.tpl.php";
+    
+    // If there is a special theme file we should be using based on the URL, set it here.    
+    $q = trim(@strtolower($_GET['q']));
+    if ($q) {
+      $q = trim(str_replace("/", "-", $q));
+      if ($q) {
+        if (file_exists($theme . "/page--" . $q . ".tpl.php")) {
+          $page_template_filename = $theme . "/page--" . $q . ".tpl.php";
+        }
+      }
+    }
+    
+    
+    if (!file_exists($page_template_filename)) {
+      print "<p><b>Theme Error:</b> Tried to load template from: $page_template_filename, but this file could not be found.
                 <br>This is possibly because either the filename or the directory specified does not exist.
                 <br>Contact site administrator.</p>";
-      $template_filename = "themes/fp5_clean" . "/fp_" . $print_option . "template.php";
+      $page_template_filename = "themes/fp6_clean" . "/page.tpl.php";
     } 
-     
-		include($template_filename);
-	}
+    
+    
+    /////////////////////////
+    // Output to browser:        
+    
+    include($head_template_filename); 
+		include($page_template_filename);
+    
+    
+	} // output_to_browser
 
 	
 	

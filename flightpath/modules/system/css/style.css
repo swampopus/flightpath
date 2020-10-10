@@ -12,11 +12,7 @@
   width: 105px;
 }
  
-.fp-form-system_login_form #element-user,
-.fp-form-system_login_form #element-password
- {
-  width: 200px;
-}
+
 
 .login-welcome {
   text-align: center;

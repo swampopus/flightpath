@@ -436,7 +436,7 @@ function blocks_get_sections_and_regions() {
  * This function will actually render the HTML for the blocks requested for a particular section
  * and region.
  */
-function blocks_render_blocks($section, $region, $title_style = "curved") {
+function blocks_render_blocks($section, $region) {
   
   $rtn = "";
   
@@ -465,12 +465,7 @@ function blocks_render_blocks($section, $region, $title_style = "curved") {
     $rtn .= "<div class='block-$module-$delta $extra_class'>";
         
     if (@$block["title"] != "") {
-      if ($title_style == "curved") {
-        $rtn .= fp_render_curved_line($block["title"]);
-      }
-      else if ($title_stule == "square") {
-        $rtn .= fp_render_square_line($block["title"]);
-      }
+      $rtn .= fp_render_section_title($block["title"], "block-$module-$delta");
     }
 
     $rtn .= "<div class='block-body'>" . $block["body"] . "</div>";

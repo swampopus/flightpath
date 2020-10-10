@@ -2567,36 +2567,27 @@ function system_display_login_page() {
             before continuing.", array("@FlightPath" => variable_get("system_name", "FlightPath"))) . "</div>
           </noscript>";
   
-  
-  $w1 = 300;
-  if (fp_screen_is_mobile()) $w1 = "90%";
-  
-  $login_box = fp_render_curved_line("Please login below...");
-  $login_box .= fp_render_form("system_login_form");
-  
- 
-  if (fp_screen_is_mobile()) {
-    // the user is viewing this on a mobile device, so make it look
-    // a bit nicer.
-    $rtn .= $top_blocks . $left_col_blocks . $right_col_blocks . $bottom_blocks;    
-  }
-  else {
-    // This is NOT mobile, this is a regular desktop browser.
-    $rtn .= "
-        $top_blocks
-      <table border='0' class='login-content-table'>
-      <tr>
-       <td valign='top' width='40%' class='left-side-content'>
+    
+  $rtn .= $top_blocks;
+  $rtn .= "<div class='login-content-div'>";
+  if ($left_col_blocks) {
+    $rtn .= "        
+       <div class='left-side-content'>
         $left_col_blocks
-       </td>
-      <td valign='top' style='padding-left: 20px;' class='right-side-content'>
-        $right_col_blocks  
-       </td>
-      </tr>
-     </table>
-     $bottom_blocks
-     ";
+       </div>";
   }
+  if ($right_col_blocks) {
+    $rtn .= "     
+      <div class='right-side-content'>
+        $right_col_blocks  
+       </div>
+    ";
+  }    
+  $rtn .= "</div>";
+  if ($bottom_blocks) {
+    $rtn .= $bottom_blocks;
+  }
+   
   
   
   return $rtn;
@@ -2625,6 +2616,7 @@ function system_login_form() {
     "type" => "textfield",
     "size" => 30,
     "required" => TRUE,
+    "description" => t("Enter your username or email address."),
   );
   
   $form["password"] = array(
