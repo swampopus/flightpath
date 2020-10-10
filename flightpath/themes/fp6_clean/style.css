@@ -3,12 +3,11 @@
  * This CSS file pertains to the look of content itself in FlightPath.
  */
 
-@import url(https://fonts.googleapis.com/css?family=Inter:400,300,600,700);
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700);
 
 body
 {
-  font-family: "Inter", "Open Sans", Arial, Helvetica, sans-serif;  
+  font-family: "Segoe UI", "Inter", "Open Sans", Arial, Helvetica, sans-serif;  
   padding: 0;
   margin: 0;  
   background-color: #F2F2F2;
@@ -576,22 +575,15 @@ div.updateMsg
 	cursor: default;
 }
 
-a.nounderline
+a
 {
 	text-decoration: none; 
-	color: blue;
+	color: #0080ff;	
 }
 
-a.nounderline2
-{
-	text-decoration: none;
-	color: blue;
-}
-
-a.nounderline:hover
+a:hover
 {
 	text-decoration: underline; 
-	color: blue;
 }
 
 .falseLink
@@ -989,6 +981,9 @@ label.label-for-checkbox
   padding: 5px;
 }
 
+
+
+
 a.form-popup-description {
   font-weight: normal;
   padding-left: 5px;
@@ -1104,11 +1099,13 @@ ___page--login{}
 }
 
 .page--login #page-login-page__wallpaper {
+  position: relative;
   float: right;
   width: 55%; 
-  background: url('images/bird1.jpg') top left no-repeat;  
+  z___background: url('images/bird1.jpg') top left no-repeat;  
+  background: url('https://www.kedm.org/sites/kedm/files/styles/x_large/public/202001/ulm_ce_classes.jpg') top left no-repeat;  
   
-  background-size: cover;
+  background-size: cover; 
 }
 
 
@@ -1142,14 +1139,48 @@ ___page--login{}
 
 .page--login .element-type-submit input {
   width: 100%;  
-  
 }
+.page--login .login-content-div .element-type-submit {
+  margin-bottom: 10px;
+}
+
 
 .page--login .form-element-description {
   padding-left: 0;
   font-family: inherit;
   color: #777;
 }
+
+.page--login #login-form-forgot-password {
+  text-align: right;  
+}
+
+.page--login a {
+  color: black;
+}
+
+.page--login #school-logo img {
+  width: 200px;
+  height: auto;
+   
+}
+
+.page--login #school-logo {
+  display: inline-block;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  
+}
+
+
+
+
+
+
+
+
+
 
 
 

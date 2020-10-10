@@ -72,6 +72,7 @@
     
     <div id='page-login-page__wallpaper'>
       &nbsp;
+         <!-- <div id='school-logo'><img src='https://www.ulm.edu/_resources/images/ulm-academic-logo-circle.png'></div> -->
     </div>
     
   </div>  

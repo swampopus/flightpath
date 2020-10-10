@@ -2616,7 +2616,7 @@ function system_login_form() {
     "type" => "textfield",
     "size" => 30,
     "required" => TRUE,
-    "description" => t("Enter your username or email address."),
+    "description" => t("Enter your user name or email address."),
   );
   
   $form["password"] = array(
@@ -2629,6 +2629,8 @@ function system_login_form() {
   $form["submit"] = array(
     "type" => "submit",
     "value" => t("Login"),
+    "suffix" => "<div id='login-form-forgot-password'>" . l(t("Need help logging in?"), 'login-help') ."</div>",
+    
   );
     
   $form["#attributes"] = array("onSubmit" => "showUpdate(true);");    
