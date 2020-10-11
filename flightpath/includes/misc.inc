@@ -1465,6 +1465,13 @@ function l($text, $path, $query = "", $attributes = array()) {
  */
 function fp_url($path, $query = "", $include_base_path = TRUE) {
   
+  
+  if ($path == "<front>") {
+    // TODO:  make this a setting.
+    $path = variable_get("default_home_path", "main");
+  }
+  
+  
   // If clean URLs are enabled, we should begin with a ?, if not, use an &
   
   $rtn = "";
@@ -1703,8 +1710,7 @@ function fpmct($val, $var = "") {
  */
 function fp_html_print_r($var, $name = "", $cnt = 0, $max_levels = 20) {  
   $rtn = "";
-
-  
+    
   if ($cnt > $max_levels) {
     // Max levels deep.  Deeper, and PHP might run
     // out of memory or complain.

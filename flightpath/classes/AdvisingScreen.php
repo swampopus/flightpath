@@ -359,6 +359,9 @@ function draw_menu_items($menu_array) {
       $page_body_classes .= " has-sidebar-left";
     }
     
+    if ($page_tabs) {
+      $page_body_classes .= " has-page-tabs";
+    }
 	        
     // We are going to try to include the theme.  If it can't be found, we will display a CORE theme, and display a message.
     $theme = $GLOBALS["fp_system_settings"]["theme"];

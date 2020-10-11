@@ -33,11 +33,11 @@ function student_search_menu() {
     "title" => t("Advisees"),
     "page_callback" => "student_search_subtab_switchboard",
     "access_callback" => "search_user_can_search_for_some_advisees",    
-    "type" => MENU_TYPE_TAB,
-    "tab_family" => "system",
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    /*"tab_family" => "system",
     "page_settings" => array(
       "page_has_search" => TRUE,
-    ),    
+    ),*/    
     "weight" => 20,
   );
   
@@ -45,9 +45,8 @@ function student_search_menu() {
     "title" => t("My Advisees"),
     "page_callback" => "student_search_display_my_advisees",
     "access_arguments" => array("display_my_advisees_subtab"),
-    "type" => MENU_TYPE_SUB_TAB, 
+    "type" => MENU_TYPE_TAB, 
     "tab_family" => "student_search",
-    "tab_parent" => "student-search",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
       "display_greeting" => TRUE,
@@ -63,9 +62,8 @@ function student_search_menu() {
     "title" => t("My Majors"),
     "page_callback" => "student_search_display_my_majors",
     "access_arguments" => array("display_my_majors_subtab"),
-    "type" => MENU_TYPE_SUB_TAB,
+    "type" => MENU_TYPE_TAB,
     "tab_family" => "student_search",
-    "tab_parent" => "student-search",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
       "display_greeting" => TRUE,
@@ -81,9 +79,8 @@ function student_search_menu() {
     "title" => t("Majors"),
     "page_callback" => "student_search_display_majors_search",
     "access_arguments" => array("display_majors_subtab"),
-    "type" => MENU_TYPE_SUB_TAB,
+    "type" => MENU_TYPE_TAB,
     "tab_family" => "student_search",
-    "tab_parent" => "student-search",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
       "display_greeting" => TRUE,
@@ -93,8 +90,26 @@ function student_search_menu() {
     "weight" => 25,
   );  
   
+
+  $items["student-search/search"] = array(
+    "title" => t("Search"),
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("student_search_search_form"),
+    "access_arguments" => array("display_search_subtab"),
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "student_search",
+    //"tab_parent" => "student-search",
+    "page_settings" => array (
+        "display_currently_advising" => TRUE,
+        "display_greeting" => TRUE,
+        "screen_mode" => "not_advising",
+        "page_has_search" => TRUE,      
+    ),    
+    "weight" => 30,
+  );
   
-    
+     
+  /*  This is the OLD method
   $items["student-search/search"] = array(
     "title" => t("Search"),
     "page_callback" => "student_search_display_search",
@@ -110,7 +125,8 @@ function student_search_menu() {
     ),    
     "weight" => 30,
   );
-
+  */
+  
   
   return $items;
 }
@@ -462,7 +478,200 @@ function student_search_display_my_majors() {
 }
 
 
+
+
+
+function student_search_search_form() {
+  $form = array();
+  
+  fp_add_css(fp_get_module_path("student_search") . "/css/student_search.css");
+  
+  
+  $search_for = trim(@$_REQUEST["search_for"]);
+  if ($search_for == "") {
+    $search_for = trim(@$_SESSION["student_search_for"]);
+  }
+  
+  $o_search_for = $search_for;
+  
+   
+  $form['search_for'] = array(
+    'label' => t('Search for students by name or CWID:'),
+    'type' => 'textfield',
+    'value' => $o_search_for,  
+  );
+  
+    
+  $form['submit_btn'] = array(
+    'type' => 'submit',
+    'value' => t("Search"),
+  );
+  
+  $form['search_options'] = array(
+    'label' => 'Options:',
+    'type' => 'checkboxes',
+    'options' => array('inactive' => t('Include inactive students'), 'option2' => 'Second option here', 'option3' => 'Third option here'),
+  );
+  
+  
+  /////////////////////////////////////////
+  // Logic to query for searched student
+  /////////////////////////////////////////
+  
+  
+  $mark = "";
+  
+  // If the user entered an asterisk with their search, we will
+  // skip the extra search conditions (and show more results).
+  $bool_bypass_extra_search_conditions = FALSE;
+  if (strstr($search_for, "*")) {
+    $bool_bypass_extra_search_conditions = TRUE;
+    $search_for = trim(str_replace("*", "", $search_for));
+  }
+
+  // If the user entered an =, then remove all spaces from the query.
+  if (strstr($search_for, "=")) {
+    $search_for = trim(str_replace(" ", "", $search_for));
+  }
+  
+    
+  // remove trouble characters
+  $search_for = str_replace("'","",$search_for);
+  $search_for = str_replace('"','',$search_for);    
+  
+  $adv_array = array();
+  
+  //Get my list of advisees...
+  // This time, we want to specify an SQL statement that will perform
+  // our search.
+
+  $params = array();
+  
+  if($search_for != "" && strlen($search_for) > 2)
+  { // If they typed something greater than 2 chars...
+    
+    $search_action = " AND (u.cwid LIKE :like_search_for 
+                       OR l_name LIKE :like_search_for 
+                       OR f_name LIKE :like_search_for ) 
+                       ";
+    $params[":like_search_for"] = "%$search_for%";
+    
+    // If you searched for 2 things seperated by a space, it is likely you
+    // are searching for a name, so check that...
+    $_SESSION["student_search_for"] = $o_search_for;
+    $temp = explode(" ",$search_for);
+    if (trim(@$temp[1]) != "")
+    {
+      $fn = trim(@$temp[0]);
+      $ln = trim(@$temp[1]);
+      // If there was a comma, then these should be reversed,
+      // as they probably entered last, first.
+      if (strstr($search_for, ",")) {
+        $ln = trim(@$temp[0]);  
+        $fn = trim(@$temp[1]);
+        
+        $ln = trim(str_replace(",", "", $ln));  // remove comma
+        $fn = trim(str_replace(",", "", $fn));  // remove comma
+                        
+      }
+      
+      
+      $search_action = " AND (l_name LIKE :like_ln 
+                         AND f_name LIKE :like_fn ) 
+                       ";
+      $params[":like_ln"] = "%$ln%";
+      $params[":like_fn"] = "%$fn%";      
+      // Remove unneeded like_search_for index.
+      unset($params[":like_search_for"]);
+      
+    }
+
+    $other_table = "";
+    $major_search = "";
+    $group_by = " GROUP BY u.cwid ";
+    
+    $temp = explode("=",$search_for);
+    if (trim(strtolower($temp[0])) == "major")
+    {      
+      $mjsearch = trim(@$temp[1]);
+      $search_action = "";
+      $other_table = ", degrees b";      
+      $major_search = " AND substring_index(c.major_code,'|',1) = b.major_code
+                        AND (b.major_code LIKE :like_mjsearch ) ";
+                        
+      $params[":like_mjsearch"] = "%$mjsearch%";
+      unset($params[':like_search_for']);
+      
+    }
+
+    
+    // Now THIS is odd... what is this strange piece of code here?
+    // I'm no cryptographic genius, but it looks like it is set to display a message when
+    // you search for "info=production" on the Advisees search tab...
+    if (md5(strtolower(@$temp[1]))=="fd89784e59c72499525556f80289b2c7"){$rtn .= base64_decode("DQo8cD4NCjxiPlRoZSBvcmlnaW5hbCBGbGlnaHRQYXRoIFByb2R1Y3Rpb24gVGVhbSwgY2lyY2EgMjAwNywgYXQgVGhlIFVuaXZlcnNpdHkgb2YgTG91aXNpYW5hIGF0IE1vbnJvZTo8L2I+DQo8dWw+DQo8bGk+UmljaGFyZCBQZWFjb2NrIC0gUHJvamVjdCBsZWFkIGFuZCBwcmltYXJ5IGxvZ2ljIHByb2dyYW1tZXIuPC9saT4NCjxsaT5Kb2UgTWFuc291ciAtIERhdGFiYXNlIGFkbWluaXN0cmF0b3IgYW5kIG1haW5mcmFtZS9CYW5uZXIgZGF0YSBjb29yZGluYXRvci48L2xpPg0KPGxpPkpvYW5uIFBlcnJlciAtIERhdGEgZW50cnksIHRlc3RpbmcgYW5kIHNvZnR3YXJlIGNvb3JkaW5hdG9yLjwvbGk+DQo8bGk+UGF1bCBHdWxsZXR0ZSAtIENsYXNzaWMgdGhlbWUgZGVzaWduZXIuPC9saT4NCjxsaT48Yj5PdGhlciBjb250cmlidXRpbmcgcHJvZ3JhbW1lcnM8L2I+OiBDaGFybGVzIEZyb3N0LCBCcmlhbiBUYXlsb3IuPC9saT4NCjwvdWw+DQpUbyBldmVyeW9uZSB3aG8gaGVscGVkIG1ha2UgRmxpZ2h0UGF0aCBwb3NzaWJsZTogVGhhbmsgWW91Lg0KPC9wPg==");}
+
+    $query = "SELECT u.user_id, f_name, l_name, u.cwid, rank_code, a.catalog_year
+              FROM users u, students a, student_degrees c $other_table
+              WHERE 
+                 u.cwid = a.cwid
+                 AND u.cwid = c.student_id
+                 AND u.is_student = 1
+                 AND u.is_disabled = 0                 
+                 $search_action
+              
+                 $major_search
+        ";
+    if (!$bool_bypass_extra_search_conditions) {
+      $query .= "
+              AND rank_code IN %RANKIN%
+              %EXTRA_STUDENTSEARCH_CONDITIONS%
+              ";
+    }    
+    
+    $query .= "
+              $group_by
+              ORDER BY %ORDERBY%
+              LIMIT 300
+              ";
+
+    $adv_array = student_search_query_advisees($query, $params);
+  }
+
+  $s = (count($adv_array) == 1) ? "" : "s"; 
+
+  // Are we showing the maximum number of students?
+  if (count($adv_array) == 300) {
+    $rtn .= "<div class='student-search-max-results'><em>" . t("Showing maximum 300 results. Please narrow search criteria.") . "</em></div>";
+  }
+  
+  
+  
+  $mark .= student_search_render_advisees($adv_array, t("Search Results") . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");  
+  
+  
+  
+  $form['mark_search_results'] = array(
+    'type' => 'markup',
+    'value' => $mark,
+  );
+  
+  
+  
+  
+  
+  return $form;
+} // search_form
+
+
+function student_search_search_form_submit($form, $form_state) {
+  // Not actually doing anything here.  The SQL logic occurs in the form function itself.  
+} // search_form_submit
+
+
+
+
 function student_search_display_search() {
+  depricated_message();
   $rtn = "";
   
   $_SESSION["student_search_last_tab"] = "search";
@@ -676,7 +885,7 @@ function student_search_get_advanced_search_tips() {
 }
 
 
-function student_search_render_advisees($adv_array, $title) {
+function z__student_search_render_advisees($adv_array, $title) {
   $rtn = "";
   
   fp_add_css(fp_get_module_path("student_search") . "/css/student_search.css");
@@ -869,6 +1078,194 @@ function student_search_render_advisees($adv_array, $title) {
   
   return $rtn;
 }
+
+
+
+function student_search_render_advisees($adv_array, $title) {
+  $rtn = "";
+  
+  fp_add_css(fp_get_module_path("student_search") . "/css/student_search.css");
+  
+  $bool_redirect_one = FALSE;
+  
+  if (count($adv_array) == 1 && @$_REQUEST["did_search"] == "true")
+  {
+    // Since there was only 1 result, we want to redirect this person directly.
+    // Draw this person's name...  
+    $student_id = $adv_array[0]["student_id"];
+    $first_name = $adv_array[0]["first_name"];
+    $last_name = $adv_array[0]["last_name"];
+    
+    $rtn .= "<div class='hypo' style='border: 1px solid black;
+              margin: 10px 0px 10px 0px; padding: 10px; 
+              font-size: 12pt; font-weight: bold;'>
+        " .t("Loading") . " <span style='color:blue;'>$first_name $last_name</span> ($student_id).  
+          &nbsp; " . t("Please wait...") . "
+        </div>";
+    $bool_redirect_one = TRUE;
+  }
+  
+  
+  $rtn .= fp_render_section_title($title, "search-results");
+  
+  
+  $rtn .= "<table width='100%' align='left'
+            border='0' cellpadding='0' cellspacing='0'>
+   <tr class='headers'>
+    <th width='5%' valign='top'>&nbsp; </td>
+    <th width='12%' >" . t("CWID") . "</th>
+    <th width='15%' >" . t("First Name") . "</th>
+    <th width='20%' >" . t("Last Name")  . "</th>
+    <th width='15%' >" . t("Major Code") . "</th>
+    <th width='10%' >" . t("Rank") . "</th>
+    <th width='15%' >" . t("Catalog Year") . "</th>
+   </tr> ";
+ 
+  
+  $rtn .= "
+    "; 
+
+  $db = get_global_database_handler();  
+    
+  for ($t = 0; $t < count($adv_array); $t++)
+  {
+    
+    $student_id = $adv_array[$t]["student_id"];
+    $first_name = $adv_array[$t]["first_name"];
+    $last_name = $adv_array[$t]["last_name"];
+    $major = $adv_array[$t]["major"];
+    
+    $advising_what_if = @$adv_array[$t]["advising_what_if"];
+    $what_if_major_code = @$adv_array[$t]["what_if_major_code"];
+    $what_if_track_code = @$adv_array[$t]["what_if_track_code"];
+    $what_if_catalog_year = @$adv_array[$t]["what_if_catalog_year"];
+    $degree_id = @$adv_array[$t]["degree_id"];
+    $rank = @$adv_array[$t]["rank"];
+    $catalog_year = @$adv_array[$t]["catalog_year"];
+    
+    // There is no $screen variable-- old code?
+    //if ($screen->page_is_mobile) {
+    //  $catalog_year = get_shorter_catalog_year_range($catalog_year, false, true);
+    //}
+    
+    $advising_session_id = $adv_array[$t]["advising_session_id"];
+    $advised_image = $adv_array[$t]["advised_image"];
+
+    //fpm($adv_array);
+
+    /*
+    $on_mouse = "onmouseover=\"style.backgroundColor='#FFFF99'\"
+               onmouseout=\"style.backgroundColor='white'\"
+                ";
+     */
+      
+    $on_mouse = "
+            onmouseover='$(this).addClass(\"selection_highlight\");'
+            onmouseout='$(this).removeClass(\"selection_highlight\");'
+    ";      
+    // No screen var defined. Old code?
+    //if ($screen->page_is_mobile) $on_mouse = ""; // Causes problems on mobile devices.
+    
+    // Build up the URL we want to go to when we click this row.
+    $path = "view";
+    $advising_what_if = "no";
+    if ($what_if_major_code != "") {
+      $path = "what-if";
+      $advising_what_if = "yes";            
+    }
+    
+    // Add in the query part.
+    $query = "";
+    $query .= "advising_student_id=$student_id&current_student_id=$student_id&advising_major_code=$major&advising_what_if=$advising_what_if";
+    $query .= "&what_if_major_code=$what_if_major_code&what_if_track_code=$what_if_track_code&what_if_catalog_year=$what_if_catalog_year&advising_load_active=yes&clear_session=yes";
+    
+    $url = fp_url($path, $query);
+
+    // old onCLick:
+    //<!-- onClick='selectStudent(\"$student_id\",\"$major\",\"$what_if_major_code\",\"$what_if_track_code\")' -->
+    
+    $disp_major = "";
+    $temp = csv_to_array($major);
+    foreach ($temp as $code) {
+      $csscode = fp_get_machine_readable($code);
+      // Was this a track code or not?  Meaning, did it contain |_
+      $is_track = "no";
+      if (strstr($code, "|_")) {
+        $is_track = "yes";
+      }
+      
+      $disp_major .= "<div class='ss-major-code ss-major-code-$csscode ss-major-code-is-track-$is_track'>$code</div>";
+    }
+    
+    
+    
+    $rtn .= "
+      <tr class='search-result-row' $on_mouse  onClick='showUpdate(true); window.location=\"$url\"; '>
+          
+            <td class='ss-advised-image'>$advised_image</td>  
+            <td class='ss-student-id'>$student_id</td>
+            <td class='ss-student-fn'>$first_name</td>
+            <td class='ss-student-ln'>$last_name</td>    
+            <td class='ss-student-major'>$disp_major</td>
+            <td class='ss-student-rank'>$rank</td>
+            <td class='ss-student-catalog-year'>$catalog_year</td>
+           
+         </tr>
+         ";
+  
+  }  // for t advisee array
+
+
+ $rtn .= "</table>";
+  
+ 
+ 
+  if ($bool_redirect_one) {
+    // There was only one result, and it was a search, so we want to redirect
+    // this person.
+    // We will use the URL we created in the foreach loop above.  It will still contain exactly
+    // what we need.
+    $rtn .= "<script type='text/javascript'>
+        
+        $(document).ready(function() {
+          setTimeout('window.location=\"$url\";', 0);
+        });
+
+        </script>";
+    
+  }
+  
+  
+  
+  /*
+  // Required to make the changeTab function work...
+  $rtn .= "<form id='mainform' method='POST'>
+      <input type='hidden' id='scrollTop'>
+      <input type='hidden' id='performAction' name='performAction'>
+      <input type='hidden' id='advisingWhatIf' name='advisingWhatIf'>
+      <input type='hidden' id='currentStudentID' name='currentStudentID'>
+      <input type='hidden' id='advisingStudentID' name='advisingStudentID'>
+      <input type='hidden' id='advisingMajorCode' name='advisingMajorCode'>
+      <input type='hidden' id='whatIfMajorCode' name='whatIfMajorCode'>
+      <input type='hidden' id='whatIfTrackCode' name='whatIfTrackCode'>
+      <input type='hidden' id='advisingLoadActive' name='advisingLoadActive'>
+      <input type='hidden' id='clearSession' name='clearSession'>
+      </form>";
+  */
+
+  
+  
+  return $rtn;
+}
+
+
+
+
+
+
+
+
+
 
 
 /**

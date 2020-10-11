@@ -410,36 +410,25 @@ th {
   font-style: italic;
 }
 
-/*
-	Gradiant buttons.... I have to write them out like this,
-	and use onmouse events or else IE won't display them correctly.
-	The onmouse events are like this:
-	
-		$onMouse = "onmouseover='this.className=\"gradbutton_hover hand\";'
-					onmouseout='this.className=\"gradbutton hand\";'
-					onmousedown='this.className=\"gradbutton_down hand\";'
-		";
 
-		And add it to a span like this:
-		<span $onMouse onClick='whateverFunction();'>Button 1</span>
-	
-*/
-
-span.gradbutton
+.fp-render-button
 {  
 	background: url('images/buttonbg1.jpg') #fff bottom left repeat-x;
-	padding: 3px;
+	padding: 5px;
+	padding-left: 20px;
+	padding-right: 20px;
 	border: 1px solid #BBBBBB;
 	display: inline-block;	
-	margin-top: 5px;
+	
+	margin-right: 10px;
 	/*min-width: 55px;	*/
 }
-span.gradbutton_hover
+.fp-render-button:hover
 {
 	border: 1px solid #808080;
 }
 
-span.gradbutton_down
+.fp-render-button:active
 {
 	background: url('images/buttonbg1-down.jpg') #fff top left repeat-x;
 	border: 1px solid #808080;
@@ -1225,6 +1214,7 @@ ___sidebar-left{}
   vertical-align: top;
   padding-left: 20px;
   padding-top: 10px;
+  width: calc(100vw - 200px);
 }
 
 
@@ -1271,6 +1261,61 @@ ___sidebar-left{}
  {
   font-size: 2em;
 }
+
+
+
+___tabs{}
+
+ul.tabs {  
+  margin: 0;
+  padding: 0;
+  padding-left: 20px;
+  list-style: none;
+  border-bottom: 1px solid #ccc;
+}
+
+ul.tabs li.tab {
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  padding: 3px 10px 3px 10px;  
+  border-bottom: 1px solid #ccc;
+}
+
+ul.tabs li.active {
+  border: 1px solid #ccc;
+  border-radius: 5px 5px 0px 0px;
+  border-bottom: 1px solid white;
+  background-color: white;  
+}
+
+ul.tabs li.active a {
+  color: black;
+  font-weight: bold;
+  
+}
+
+ul.tabs li.inactive a {
+  color: #888;
+}
+
+body.has-page-tabs .inner-page-content-wrapper {
+  margin-top: 30px;
+  margin-left: 20px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

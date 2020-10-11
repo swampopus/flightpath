@@ -59,10 +59,22 @@
     </div>
     <?php endif; ?>
   
-  
-  
     <div id='page-content'>
-      <?php print $page_content; ?>
+      <?php 
+      
+      if ($page_title) {
+        print "<h2 class='title'>$page_title</h2>";
+      }
+      
+      if ($page_tabs) {
+        print $page_tabs;
+      }
+      
+      print "<div class='inner-page-content-wrapper'>
+                $page_content
+             </div>"; 
+      
+      ?>
     </div>
 
 

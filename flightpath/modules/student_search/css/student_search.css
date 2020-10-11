@@ -24,3 +24,48 @@
 .student_search_advisee_results .ss-major-code-is-track-yes {
   display: none;
 }
+
+
+#fp-form-student_search_search_form .form-element {
+  margin-bottom: 5px;
+}
+
+#fp-form-student_search_search_form #element-wrapper-search_for {
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 0;
+}
+
+#fp-form-student_search_search_form #element-wrapper-submit_btn {
+  display: inline-block;
+  margin-bottom: 0;  
+}
+
+#fp-form-student_search_search_form #element-inner-wrapper-search_options label, 
+#fp-form-student_search_search_form #element-inner-wrapper-search_options div 
+{
+  display: inline-block;
+  margin-right: 10px;
+}
+#fp-form-student_search_search_form #element-inner-wrapper-search_options div.checkbox-element input[type=checkbox] {
+  position: relative;
+  top: 1px;  
+  
+}
+
+
+#fp-form-student_search_search_form .markup-element-mark_search_results {
+  margin-top: 30px;
+}
+
+.markup-element-mark_search_results tr.search-result-row > td {
+  border-bottom: 1px solid #ddd;
+}
+
+
+
+
+
+
+
+

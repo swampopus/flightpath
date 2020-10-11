@@ -180,8 +180,9 @@ function fp_display_page($page) {
     $page_show_title = $GLOBALS["fp_set_show_title"];
   }
   
-  if ($page_show_title == TRUE) {
-    $content_top .= "<h2 class='title'>" . $page_title . "</h2>";
+  if ($page_show_title == FALSE) {
+    //$content_top .= "<h2 class='title'>" . $page_title . "</h2>";
+    $page_title = "";
   } 
     
   
@@ -244,7 +245,8 @@ function fp_display_page($page) {
 
   // content_top gets the Currently Advising box.
   if (@$page["router_item"]["page_settings"]["display_currently_advising"] == TRUE) {
-    $content_top .= fp_render_currently_advising_box(false, $screen->bool_blank, $screen->bool_print, NULL, $screen->screen_mode);
+    // TODO:  this needs better logic for the new system.    
+    // $content_top .= fp_render_currently_advising_box(false, $screen->bool_blank, $screen->bool_print, NULL, $screen->screen_mode);
   }    
   
   $screen->page_content = $content_top .= $page["content"];
@@ -284,18 +286,25 @@ function fp_render_sidebar_left_content() {
   $html = "";
   
   $html .= "<ul class='sidebar-left-nav'>
-              <li class='home first'>
-                <i class='fa fa-home'></i>
-                <div class='desc'>Dashboard</div>
-              </li>
-              <li class='students'>
-                  <i class='fa fa-users'></i>
-                  <div class='desc'>Students</div>
-              </li>
-              <li class='courses'>
-                <i class='fa fa-book'></i>
-                <div class='desc'>Courses</div>                
-              </li>
+              <a href='" . fp_url("<front>") . "'>
+                <li class='home first'>                
+                  <i class='fa fa-home'></i>
+                  <div class='desc'>Dashboard</div>
+                
+                </li>
+              </a>
+              <a href='" . fp_url("student-search") . "'>
+                <li class='students'>
+                    <i class='fa fa-users'></i>
+                    <div class='desc'>Students</div>
+                </li>
+              </a>
+              <a href='" . fp_url("tools/course-search") . "'>
+                <li class='courses'>
+                  <i class='fa fa-book'></i>
+                  <div class='desc'>Courses</div>                
+                </li>
+              </a>
               <li class='analytics'>
                 <i class='fa fa-bar-chart'></i>
                 <div class='desc'>Analytics</div>                
@@ -528,6 +537,7 @@ function fp_build_tab_array($page) {
       $path = $item["path"];
       $active = FALSE;
       $on_click = @$page["page_settings"]["tab_on_click"];
+      $href = "";
       if ($on_click == "") {
         // Just a simple link to the path
         // Include the current_student_id!
@@ -535,7 +545,8 @@ function fp_build_tab_array($page) {
         
         $turl = fp_url($path, $query, TRUE);
         
-        $on_click = "window.location=\"" . $turl . "\"";
+        //$on_click = "window.location=\"" . $turl . "\"";
+        $href = $turl;
       }
             
       if ($path == $active_tab_path) {
@@ -543,12 +554,14 @@ function fp_build_tab_array($page) {
         $active = TRUE;
         $title = $page["title"];
         $on_click = "";
+        $href = "";
       }            
 
       $tab_array[] = array(
         "title" => $item["title"],
         "active" => $active,
         "on_click" => $on_click,
+        "href" => $href,
       );
       
     }
@@ -1087,39 +1100,14 @@ function fp_render_sub_tab_array($tab_array) {
 /**
  * Returns the HTML to draw a pretty button.
  *
- * @param string $title
- * @param string $on_click
- * @param bool $bool_padd
- * @param string $style
- * @return string
  */
-function fp_render_button($title, $on_click, $bool_padd = true, $style = "", $extra_class = "")
-{
-  // Style is expected to look like:
-  // style='some:thing;'
-  // with SINGLE apostrophes!  not quotes.
-
+function fp_render_button($title, $on_click, $extra_class = "") {
+    
   // we want to add on a variable-name-friendly version of the title to extra_class.
   $extra_class .= " fp-render-button-" . fp_get_machine_readable(strtolower($title));
+
+  $rtn = "<button class='fp-render-button $extra_class' onClick='$on_click'>$title</button>";
   
-  $on_mouse = "onmouseover='this.className=\"gradbutton gradbutton_hover hand $extra_class\";'
-        onmouseout='this.className=\"gradbutton hand $extra_class\";'
-        onmousedown='this.className=\"gradbutton gradbutton_down hand $extra_class\";'
-        onmouseup='this.className=\"gradbutton gradbutton_hover hand $extra_class\";'
-        ";
-
-  if (fp_screen_is_mobile()) $on_mouse = "";  // Causes problems for some mobile devices.
-  
-  if ($bool_padd) {
-    $padd = "&nbsp;&nbsp;";
-  }
-
-
-  $rtn = "<span class='gradbutton hand $extra_class' onClick='$on_click' $on_mouse $style >
-      $padd $title $padd
-      </span>
-
-    ";
   return $rtn;
 }
 
@@ -1192,111 +1180,52 @@ function fp_render_mobile_tab_array($tab_array) {
  *       - Array should have this structure:
  *         - $tab_array[i]["title"] = The title or caption of the tab. "main", or "Edit", etc.
  *         - $tab_array[i]["active"] = boolean.  True if this is the tab we are currently looking at.
- *         - $tab_array[i]["on_click"] = This is a valid onClick='blah blah' that is the result of clicking the tab.
+ *         - $tab_array[i]["href"] = This is a complete href for the link we will create.
+ *         - $tab_array[i]["on_click"] = This is an onClick command for javascript.  If this is set, href will be ignored.
  * 
  * @return string
  */
-function fp_render_tab_array($tab_array)
-{
+function fp_render_tab_array($tab_array) {
 
-    
-  
   $rtn = "";
 
-  $rtn .= "<table border='0' width='100%' cellpadding='0' cellspacing='0'>
-    <tr>
-    ";
+  if (count($tab_array) == 0) return "";
 
   $img_path = fp_theme_location() . "/images";
 
+  $rtn .= "<ul class='tabs'>";
 
   for ($t = 0; $t < count($tab_array); $t++)
   {
     $title = @$tab_array[$t]["title"];
     $active = @$tab_array[$t]["active"];
     $on_click = @$tab_array[$t]["on_click"];
+    $href = @$tab_array[$t]["href"];
 
+    $extra_a = "";
+    if ($on_click != "") {
+      $href = "javascript:void(0);"; 
+      $extra_a = "onclick='$on_click'";
+    }
+ 
     if ($title == "")
     {
       continue;
     }
 
-    $padd = "30px;";
-    if ($t > 0)
-    {
-      $padd = "5px;";
-    }
+    $extra_class = "inactive";
+    if ($active) $extra_class = "active";
 
-    $rtn .= "<td style='padding-right: $padd'></td>
-        <td>";
+    if ($t == 0) $extra_class .= " first";
+    if ($t == count($tab_array) - 1) $extra_class .= " last";
 
-    if ($active != TRUE)
-    { //innactive tabs...
-
-      $theclass = "inactive_tab hand";
-      $overclass = "inactive_tab_over";
-      if ($on_click == "")
-      {
-        $theclass = "inactive_tab";
-        $overclass = "inactive_tab_over_no_link";
-      }
-
-      $rtn .= "
+    $rtn .= "<li class='tab $extra_class'><a href='$href' $extra_a>$title</a></li>";
     
-    <table align='left' cellpadding='0' onClick='$on_click' cellspacing='0' class='$theclass' onmouseover='this.className=\"$overclass\";' onmouseout='this.className=\"inactive_tab\";'>
-    <tr>
-      <td class='tab_tl_i' align='left' valign='baseline'  width='12'></td>
-      <td class='tab_top_i' valign='baseline' ></td>
-      <td class='tab_tr_i' valign='baseline' align='right' width='12'></td>
-    </tr>
-    <tr>
-     <td class='tab_left_i' align='left' valign='baseline' width='12'>
-      <img src='$img_path/tab_left_i.gif' width='12' height='18'>
-    </td>
-    <td align='left' nowrap class='tab_center_i'>
-     <div style='padding-bottom: 3px; margin-top: -2px;' class='tab_text'>$title</div>
-    </td>
-    <td class='tab_right_i' align='right' valign='baseline'>
-     <img src='$img_path/tab_right_i.gif' width='12' height='18'>
-    </td>
-    </tr>
-    </table>
-
-    ";
-
-    } else {
-      // active tab...
-      $rtn .= "
-    <table align='left' cellpadding='0' cellspacing='0' class='active_tab'>
-      <tr>
-        <td class='tab_tl' align='left' valign='baseline' width='12'></td>
-        <td class='tab_top' valign='baseline'></td>
-        <td class='tab_tr' valign='baseline' align='right' width='12'></td>
-      </tr>
-      <tr>
-        <td class='tab_left' align='left' valign='baseline' width='12'>
-        <img src='$img_path/tab_left.gif' width='12' height='18'>
-        </td>
-        <td align='left' nowrap class='tab_center'>
-          <div style='padding-bottom: 3px; margin-top: -2px;' class='tab_text'>$title</div>
-        </td>
-        <td class='tab_right' align='right' valign='baseline'>
-          <img src='$img_path/tab_right.gif' width='12' height='18'>
-        </td>
-      </tr>
-    </table>      
-    ";
-
-    }
-
-    $rtn .= "</td>";
-
   }
 
 
-  $rtn .= "
-     </tr>
-     </table>";
+  $rtn .= "</ul>";
+     
 
   return $rtn;
 
