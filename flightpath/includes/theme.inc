@@ -85,7 +85,7 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
   
   $is_empty = true;
   if ($title != "") {
-    $rtn .= fp_render_curved_line($title);
+    $rtn .= fp_render_section_title($title);
   }
   
   $menu_items = menu_get_items_beginning_with($menu_root);
@@ -309,10 +309,12 @@ function fp_render_sidebar_left_content() {
                 <i class='fa fa-bar-chart'></i>
                 <div class='desc'>Analytics</div>                
               </li>
-              <li class='admin-tools'>
-                <i class='fa fa-bolt'></i>
-                <div class='desc'>Admin Tools</div>
-              </li>
+              <a href='" . fp_url("admin-tools") . "'>
+                <li class='admin-tools'>
+                  <i class='fa fa-bolt'></i>
+                  <div class='desc'>Admin Tools</div>
+                </li>
+              </a>
               
             </ul>";
   
@@ -1336,6 +1338,7 @@ function fp_render_section_title($text, $extra_class = '') {
  * @return string
  */
 function fp_render_square_line($text) {
+  depricated_message("render_square_line");
   $rtn = "";
   
   $rtn .= "

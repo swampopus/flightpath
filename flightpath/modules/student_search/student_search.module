@@ -57,7 +57,7 @@ function student_search_menu() {
   );
   
   
-  
+  /*
   $items["student-search/my-majors"] = array(
     "title" => t("My Majors"),
     "page_callback" => "student_search_display_my_majors",
@@ -89,7 +89,7 @@ function student_search_menu() {
     ),    
     "weight" => 25,
   );  
-  
+  */
 
   $items["student-search/search"] = array(
     "title" => t("Search"),
@@ -313,6 +313,65 @@ function student_search_perm() {
 
 
 
+
+
+
+
+
+/**
+ * Returns an array of majors from the database, suitable for use with our Form API.
+ */
+function student_search_get_majors_for_fapi() {
+       
+  $rtn = array();   
+      
+  // Do we have any extra settings for this search?
+  $current_catalog_year = variable_get("current_catalog_year", 2006);
+  $cur_only = variable_get("student_search_major_search_cur_year", FALSE);
+  $extra_line = "";
+  
+  $params = array();
+  if ($cur_only == TRUE) {
+    $extra_line = " AND catalog_year = :cur_cat_year ";
+    $params[":cur_cat_year"] = $current_catalog_year;
+  }
+  
+  
+  
+  $res = db_query("SELECT * FROM degrees
+                   WHERE exclude = '0'                   
+                   $extra_line
+                   GROUP BY major_code
+                   ORDER BY title
+                   ", $params);
+  while ($cur = db_fetch_object($res)) {
+    $sel = ($major_code == $cur->major_code) ? "selected" : "";
+  
+    $degree_class_details = fp_get_degree_classification_details($cur->degree_class);
+  
+    
+    // Exclude major codes if they are "degree options", meaning, the code has an
+    // underscore in it.
+    if (strpos($cur->major_code, "_")) continue;
+    
+    // If the title is risking being too long, let's truncate it
+    $title = $cur->title;
+    $max_chars = 50;
+    if (strlen($title) > $max_chars) {
+      $title = trim(substr($title, 0, $max_chars)) . "...";
+    }
+    
+    //$rtn .= "<option value='$cur->major_code' $sel>$cur->major_code : $title ({$degree_class_details["title"]})</option>";
+    $rtn[$cur->major_code] = "$cur->major_code : $title ({$degree_class_details["title"]})";
+  }    
+  
+  return $rtn;
+}
+
+
+
+
+
 /**
  * Display the majors search sub-tab, where we can select a major and see the students
  * assigned to it.
@@ -486,26 +545,49 @@ function student_search_search_form() {
   
   fp_add_css(fp_get_module_path("student_search") . "/css/student_search.css");
   
+  // Keep up with our last-visited tab
+  $_SESSION["student_search_last_tab"] = "search";
+  
+  
   
   $search_for = trim(@$_REQUEST["search_for"]);
   if ($search_for == "") {
     $search_for = trim(@$_SESSION["student_search_for"]);
-  }
-  
+  }  
   $o_search_for = $search_for;
+  
+    
+  $major_code = trim(@$_REQUEST["major_code"]);
+  if ($major_code == "") {
+    $major_code = trim(@$_SESSION["student_search_major_code"]);
+  }  
   
    
   $form['search_for'] = array(
     'label' => t('Search for students by name or CWID:'),
-    'type' => 'textfield',
+    'type' => 'search',
     'value' => $o_search_for,  
   );
+  
+  
+  // Also show the majors as a list.
+  $options = array('' => t(" - All Majors -")) + student_search_get_majors_for_fapi();
+  $form['major_code'] = array(
+    'label' => t('Search within major:'),
+    'type' => 'select',
+    'options' => $options,
+    'value' => $major_code,
+    'hide_please_select' => TRUE,
+  );
+  
+  
   
     
   $form['submit_btn'] = array(
     'type' => 'submit',
     'value' => t("Search"),
   );
+  
   
   $form['search_options'] = array(
     'label' => 'Options:',
@@ -515,7 +597,7 @@ function student_search_search_form() {
   
   
   /////////////////////////////////////////
-  // Logic to query for searched student
+  // Logic to query for searched students
   /////////////////////////////////////////
   
   
@@ -539,6 +621,7 @@ function student_search_search_form() {
   $search_for = str_replace("'","",$search_for);
   $search_for = str_replace('"','',$search_for);    
   
+  
   $adv_array = array();
   
   //Get my list of advisees...
@@ -547,62 +630,66 @@ function student_search_search_form() {
 
   $params = array();
   
-  if($search_for != "" && strlen($search_for) > 2)
+  if(strlen($search_for) > 2 || $major_code != "")
   { // If they typed something greater than 2 chars...
     
-    $search_action = " AND (u.cwid LIKE :like_search_for 
-                       OR l_name LIKE :like_search_for 
-                       OR f_name LIKE :like_search_for ) 
-                       ";
-    $params[":like_search_for"] = "%$search_for%";
     
-    // If you searched for 2 things seperated by a space, it is likely you
-    // are searching for a name, so check that...
-    $_SESSION["student_search_for"] = $o_search_for;
-    $temp = explode(" ",$search_for);
-    if (trim(@$temp[1]) != "")
-    {
-      $fn = trim(@$temp[0]);
-      $ln = trim(@$temp[1]);
-      // If there was a comma, then these should be reversed,
-      // as they probably entered last, first.
-      if (strstr($search_for, ",")) {
-        $ln = trim(@$temp[0]);  
-        $fn = trim(@$temp[1]);
+    if ($search_for) {
+    
+      $search_action = " AND (u.cwid LIKE :like_search_for 
+                         OR l_name LIKE :like_search_for 
+                         OR f_name LIKE :like_search_for ) 
+                         ";
+      $params[":like_search_for"] = "%$search_for%";
+      
+      
+      $temp = explode(" ",$search_for);
+      if (trim(@$temp[1]) != "")
+      {
+        $fn = trim(@$temp[0]);
+        $ln = trim(@$temp[1]);
+        // If there was a comma, then these should be reversed,
+        // as they probably entered last, first.
+        if (strstr($search_for, ",")) {
+          $ln = trim(@$temp[0]);  
+          $fn = trim(@$temp[1]);
+          
+          $ln = trim(str_replace(",", "", $ln));  // remove comma
+          $fn = trim(str_replace(",", "", $fn));  // remove comma
+                          
+        }
         
-        $ln = trim(str_replace(",", "", $ln));  // remove comma
-        $fn = trim(str_replace(",", "", $fn));  // remove comma
-                        
+        
+        $search_action = " AND (l_name LIKE :like_ln 
+                           AND f_name LIKE :like_fn ) 
+                         ";
+        $params[":like_ln"] = "%$ln%";
+        $params[":like_fn"] = "%$fn%";      
+        // Remove unneeded like_search_for index.
+        unset($params[":like_search_for"]);
+        
       }
-      
-      
-      $search_action = " AND (l_name LIKE :like_ln 
-                         AND f_name LIKE :like_fn ) 
-                       ";
-      $params[":like_ln"] = "%$ln%";
-      $params[":like_fn"] = "%$fn%";      
-      // Remove unneeded like_search_for index.
-      unset($params[":like_search_for"]);
-      
-    }
 
+    }
+    
     $other_table = "";
     $major_search = "";
-    $group_by = " GROUP BY u.cwid ";
+        
     
-    $temp = explode("=",$search_for);
-    if (trim(strtolower($temp[0])) == "major")
-    {      
-      $mjsearch = trim(@$temp[1]);
-      $search_action = "";
+    if ($major_code != "")
+    {
+      $mjsearch = $major_code;      
       $other_table = ", degrees b";      
       $major_search = " AND substring_index(c.major_code,'|',1) = b.major_code
                         AND (b.major_code LIKE :like_mjsearch ) ";
                         
       $params[":like_mjsearch"] = "%$mjsearch%";
-      unset($params[':like_search_for']);
+      //unset($params[':like_search_for']);
       
     }
+
+
+    $group_by = " GROUP BY u.cwid ";
 
     
     // Now THIS is odd... what is this strange piece of code here?
@@ -634,6 +721,7 @@ function student_search_search_form() {
               LIMIT 300
               ";
 
+              
     $adv_array = student_search_query_advisees($query, $params);
   }
 
@@ -664,13 +752,20 @@ function student_search_search_form() {
 
 
 function student_search_search_form_submit($form, $form_state) {
-  // Not actually doing anything here.  The SQL logic occurs in the form function itself.  
+        
+      
+  // Save values in session for next time.  
+  $_SESSION["student_search_for"] = @$form_state['values']['search_for'];
+  $_SESSION["student_search_major_code"] = @$form_state['values']['major_code'];              
+  $_SESSION["student_search_search_options"] = @$form_state['values']['search_options'];              
+    
+    
 } // search_form_submit
 
 
 
 
-function student_search_display_search() {
+function z__student_search_display_search() {
   depricated_message();
   $rtn = "";
   

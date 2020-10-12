@@ -79,7 +79,7 @@ function advise_display_history() {
   //////////////////////////////////////////////////
   /////////  Advising History
   ///////////////////////////////////////////////////
-  $rtn .= fp_render_curved_line(t("Advising History"));
+  $rtn .= fp_render_section_title(t("Advising History"));
   $render_left = array();  // creating a new render array.
   $render_left["#id"] = "advise_history_left_column";
   $render_left["#student_id"] = $student_id;
@@ -237,7 +237,7 @@ function advise_display_history() {
   //------------------------------ COMMENT HISTORY -----------------------------------------
   //----------------------------------------------------------------------------------------
   $rtn .= "</td><td width='50%' valign='top'>";
-  $rtn .= fp_render_curved_line(t("Comment History"));
+  $rtn .= fp_render_section_title(t("Comment History"));
   //$rtn .= "<table border='0' cellspacing='0'>";
   
   // Prepare a render array for the right-hand side.
@@ -580,7 +580,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
       $txt .= "  " . fp_reduce_whitespace(strip_tags($what_if_message)) . "\n";
     }
     
-    $rtn .= fp_render_curved_line(t("Advised Courses"));
+    $rtn .= fp_render_section_title(t("Advised Courses"));
   
     $txt .= "\nAdvised Courses:\n";
   
@@ -644,7 +644,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     if (!$page_is_mobile) {
       $rtn .= "<br>";
       $rtn .= "<div class='summary-alternate-courses'>";
-      $rtn .= fp_render_curved_line(t("Alternate Courses"));
+      $rtn .= fp_render_section_title(t("Alternate Courses"));
       $rtn .= "<div class='tenpt alt-courses-desc-and-lines'>
           " . t("You may use this space to write in alternate courses 
           the student should enroll in, in the event that an 

@@ -51,7 +51,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
     $is_faculty = (int) @$user->is_faculty;
   }
   
-  $is_mobile = (int) fp_screen_is_mobile();
+  $is_mobile = 0;   //TODO:  not used anymore! //(int) fp_screen_is_mobile();
   
   $ip = @$_SERVER["REMOTE_ADDR"];
   $location = @$_SERVER["REQUEST_URI"];

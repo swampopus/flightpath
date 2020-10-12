@@ -3,11 +3,11 @@
  * This CSS file pertains to the look of content itself in FlightPath.
  */
 
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700);
+/* @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700); */
 
 body
 {
-  font-family: "Segoe UI", "Inter", "Open Sans", Arial, Helvetica, sans-serif;  
+  font-family: "Segoe UI", "Open Sans", Arial, Helvetica, sans-serif;  
   padding: 0;
   margin: 0;  
    z___background-color: #F2F2F2; 
@@ -1014,7 +1014,8 @@ label {
 }
 
 .element-type-textfield input,
-.element-type-password input
+.element-type-password input,
+.element-type-search input
  {
   font-size: 1.0em;
   font-weight: normal;
@@ -1027,7 +1028,8 @@ label {
   filter: none;
 }
 
-.element-type-submit input {
+.element-type-submit input
+ {
   font-size: 1.0em;
   padding: 1rem;
   background-color: #0095ff;
@@ -1042,9 +1044,37 @@ label {
   
 }
 
+.element-type-select select {
+  font-size: 1.0em;
+  font-size: 1.0em;
+  font-weight: normal;
+  border: 1px solid #8E929C;
+  padding: 1rem;  
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0px 1px 2px rgb(0,0,0,0.15);
+  border-radius: 4px;
+  filter: none;
+}
+
+
+
 input::placeholder {  
   opacity: 0.7;
 }
+
+
+.section-box-title {
+  background-color: #aaa;
+  border-bottom: 5px solid #999;
+  color: white;
+  text-align: center;
+  padding: 2px;
+  padding-bottom: 0;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
 
 
 
@@ -1215,6 +1245,7 @@ ___sidebar-left{}
   padding-left: 20px;
   padding-top: 10px;
   width: calc(100vw - 200px);
+  max-width: 1500px;
 }
 
 

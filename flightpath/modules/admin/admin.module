@@ -18,6 +18,22 @@
 function admin_menu() { 
   $items = array();
    
+   
+  $items["admin-tools"] = array(
+     "title" => "Admin Tools",
+     "page_callback" => "admin_display_tools_screen",
+     "access_arguments" => array("can_access_admin_tools"),
+     "tab_family" => "admin",
+     "page_settings" => array(
+       "page_has_search" => FALSE,
+       "page_banner_is_link" => TRUE,
+       "page_hide_report_error" => TRUE,
+     ),     
+     "type" => MENU_TYPE_NORMAL_ITEM,
+  );
+   
+   
+   
   $items["admin-tools/admin"] = array(
      "title" => "FlightPath Admin Console",
      "page_callback" => "admin_display_main",
@@ -529,6 +545,26 @@ function admin_menu() {
      
   return $items;
 }
+
+
+
+
+/**
+ * This page displays all the tools that the user has access to use.
+ */
+function admin_display_tools_screen() {
+  $rtn = "";
+  
+  $rtn .= fp_render_menu_block("", "admin-tools");
+  
+  
+  
+  return $rtn;
+}
+
+
+
+
 
 
 /**
@@ -1588,7 +1624,7 @@ function admin_display_main() {
               
 
   // Advising Settings
-  $rtn .= fp_render_curved_line("Advising Settings");
+  $rtn .= fp_render_section_title("Advising Settings", "admin-advising-settings");
   $rtn .= "<div class='admin-advising-settings'>
              
        <ul>
@@ -1622,7 +1658,7 @@ function admin_display_main() {
   
   
   if (user_has_permission("can_access_data_entry")) {
-    $rtn .= fp_render_curved_line("Data Entry");
+    $rtn .= fp_render_section_title("Degree & Course Management", "degree-course-management");
    
     $rtn .= "<div class='data-entry-cats'>";
 

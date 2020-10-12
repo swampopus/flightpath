@@ -32,7 +32,7 @@ function advise_menu() {
   
    
   $items["view"] = array(
-    "title" => "View",
+    "title" => "Degree",
     "page_callback" => "advise_display_view",
     "page_arguments" => array("view"),
     "access_callback" => "advise_can_access_view",  
@@ -48,7 +48,7 @@ function advise_menu() {
 
 
   $items["view/print"] = array(
-    "title" => "View",
+    "title" => "Degree",
     "page_callback" => "advise_display_view",
     "page_arguments" => array("view"),
     "access_callback" => TRUE,  
@@ -361,7 +361,7 @@ function z__old__advise_display_popup_change_track() {
   
 
   $degree_plan->load_descriptive_data();
-  $rtn .= fp_render_curved_line(t("Select a Degree Option"));
+  $rtn .= fp_render_section_title(t("Select a Degree Option"), 'select-degree-option');
   $rtn .= "<div class='tenpt'>
       " . t("The student's degree has one or more degree options, which affects which courses are required. 
       Please select a degree option (or track) from the list below.") . "
@@ -506,7 +506,7 @@ function advise_display_popup_change_track_non_dynamic_degree() {
   
   
   
-  $rtn .= fp_render_curved_line(t("Select a Degree Option"));
+  $rtn .= fp_render_section_title(t("Select a Degree Option"));
   $rtn .= "<div class='tenpt'>
             " . t("The student's degree has one or more degree options, which affects which courses are required. 
               Please select a degree option (or track) from the list below.") . "
@@ -690,7 +690,7 @@ function advise_display_popup_change_track() {
   
   
      
-  $rtn .= fp_render_curved_line(t("Select a Degree Option"));
+  $rtn .= fp_render_section_title(t("Select a Degree Option"));
   $rtn .= "<div class='tenpt'>
             " . t("The student's degree has one or more degree options, which affects which courses are required. 
               Please select a degree option (or track) from the list below.") . "
@@ -973,7 +973,7 @@ function advise_display_popup_change_term() {
   $current_term = get_term_description($current_term_id);
   
 
-  $rtn .= fp_render_curved_line(t("Select an Advising Term"));
+  $rtn .= fp_render_section_title(t("Select an Advising Term"));
   $rtn .= "<div>
       " . t("You may advise this student for future semesters.  Please select which
       advising term you would like to advise for from the list below.  If you
@@ -1402,14 +1402,12 @@ function advise_display_view($view = "view") {
     $tab_array[1]["title"] = "Display by Type";
     $tab_array[1]["active"] = ($screen->view == "type");
     $tab_array[1]["on_click"] = "changeView(\"type\");";
-        
-        
-    if (!fp_screen_is_mobile()) {
-      $tab_array[2]["title"] = "Print";
-      $tab_array[2]["type"] = "link";    
-      $tab_array[2]["active"] = FALSE;
-      $tab_array[2]["on_click"] = "popupPrintWindow(\"" . fp_url("$view/print", "advising_view=$screen->view") . "\");";  
-    }
+    
+    $tab_array[2]["title"] = "Print";
+    $tab_array[2]["type"] = "link";    
+    $tab_array[2]["active"] = FALSE;
+    $tab_array[2]["on_click"] = "popupPrintWindow(\"" . fp_url("$view/print", "advising_view=$screen->view") . "\");";  
+    
     
     fp_set_page_sub_tabs($tab_array);
     
@@ -1465,7 +1463,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   $major_codes = array();
     
   $form["mark" . $m++] = array(
-   "value" => fp_render_curved_line("What if I change my degree to...") . "<br>",
+   "value" => fp_render_section_title("What if I change my degree to...") . "<br>",
   );
   
 
@@ -1968,7 +1966,7 @@ function z___advise_display_what_if_selection($bool_undergrad_only = TRUE) {
   $url = fp_url("what-if");
   
   $rtn .= "<form action='" . $url . "' id='mainform' method='POST'>";
-  $rtn .= fp_render_curved_line("What if I change my major to...");
+  $rtn .= fp_render_section_title("What if I change my major to...");
 
   
   $rtn .= "<br>

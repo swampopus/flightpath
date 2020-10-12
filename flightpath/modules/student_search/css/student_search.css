@@ -32,14 +32,30 @@
 
 #fp-form-student_search_search_form #element-wrapper-search_for {
   display: inline-block;
-  margin-right: 10px;
+  margin-right: 20px;
   margin-bottom: 0;
 }
+
+#fp-form-student_search_search_form #element-wrapper-search_for input {
+  max-width: 400px;
+}
+
+
+#fp-form-student_search_search_form #element-wrapper-major_code {
+  display: inline-block;
+  margin-right: 20px;
+}
+
+#fp-form-student_search_search_form #element-wrapper-major_code select {
+  max-width: 400px;
+}
+
 
 #fp-form-student_search_search_form #element-wrapper-submit_btn {
   display: inline-block;
   margin-bottom: 0;  
 }
+
 
 #fp-form-student_search_search_form #element-inner-wrapper-search_options label, 
 #fp-form-student_search_search_form #element-inner-wrapper-search_options div 
@@ -62,7 +78,9 @@
   border-bottom: 1px solid #ddd;
 }
 
-
+.search-result-row {
+  cursor: pointer;
+}
 
 
 

@@ -965,7 +965,7 @@ function draw_menu_items($menu_array) {
 		$pC = "";
 		// This will display the substitution management screen.
 
-		$pC .= fp_render_curved_line(t("Manage Substitutions"));
+		$pC .= fp_render_section_title(t("Manage Substitutions"));
 
 		$pC .= "<div class='tenpt'>
 				" . t("The following substitutions have been made for this student:") . "
@@ -1089,7 +1089,7 @@ function draw_menu_items($menu_array) {
 		$pC = "";
 		// This will display the substitution management screen.
 
-		$pC .= fp_render_curved_line(t("Manage Transfer Equivalencies"));
+		$pC .= fp_render_section_title(t("Manage Transfer Equivalencies"));
 
 		$pC .= "<div class='tenpt'>
 				" . t("This student has the following transfer credits and equivalencies.") . "
@@ -1192,7 +1192,7 @@ function draw_menu_items($menu_array) {
 	{
 		$pC = "";
 
-		$pC .= fp_render_curved_line(t("All Student Courses"));
+		$pC .= fp_render_section_title(t("All Student Courses"));
 
 		$csid = $_REQUEST["current_student_id"];
 		$order = $_REQUEST["order"];
@@ -1332,7 +1332,7 @@ function draw_menu_items($menu_array) {
 		$pC = "";
 
 
-		$pC .= fp_render_curved_line(t("Manage Moved Courses"));
+		$pC .= fp_render_section_title(t("Manage Moved Courses"));
 
 		$pC .= "<div class='tenpt'>
 				" . t("This student has the following course movements.") . "
@@ -1614,7 +1614,7 @@ function draw_menu_items($menu_array) {
 		$rtn .= "<table border='0' width='100%'  height='100' class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
  						<tr>
   							<td class='blueTitle' align='center' height='20'>
-    				" . fp_render_square_line($title) . "
+    				" . fp_render_section_title($title) . "
   							</td>
  						</tr>
  						<tr>
@@ -1859,7 +1859,7 @@ function draw_menu_items($menu_array) {
    			                                elevenpt blueBorder' cellpadding='0' cellspacing='0' >
    			<tr class='pie-hidden-charts-label-row'>
     				<td colspan='10' class='blueTitle' align='center' height='20'>
-      			" . fp_render_square_line(t("Progress")) . "
+      			" . fp_render_section_title(t("Progress")) . "
     				</td>
    			</tr>
    			<tr class='pie-hidden-charts-row'>";
@@ -2018,7 +2018,7 @@ function draw_menu_items($menu_array) {
  			<table border='0' width='100%'  class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
  			<tr>
   				<td colspan='4' class='blueTitle' align='center' height='20'>
-    			" . fp_render_square_line(t("Progress")) . "
+    			" . fp_render_section_title(t("Progress")) . "
   				</td>
  			</tr>
  			<tr>
@@ -2161,11 +2161,6 @@ function draw_menu_items($menu_array) {
 			$pC .= $box_array_contents;
 			$pC .= "</td>";
 			
-			if (fp_screen_is_mobile()) {
-			 // If we are on a mobile device, force it to use
-			 // only one column. 
-			 $this->is_on_left = false;
-			}
 			
 			if (!$this->is_on_left) // on right of page
 			{
@@ -2186,9 +2181,8 @@ function draw_menu_items($menu_array) {
       
 			  $pC .= "<tr>";
 			  
-        if (!fp_screen_is_mobile()) {
-          $pC .= "<td>&nbsp;</td>";
-        }
+        $pC .= "<td>&nbsp;</td>";
+
 			  
         $render = array();
         $render['html'] = fp_render_button(t("Submit"),"submitSaveActive();");
@@ -2405,7 +2399,7 @@ function draw_menu_items($menu_array) {
 		if ($course == null)
 		{
 			// No course available!
-			$pC .= fp_render_curved_line(t("Description"));
+			$pC .= fp_render_section_title(t("Description"));
           
       $render["no_course_selected"] = array(
         "value" => t("No course was selected.  Please
@@ -2453,7 +2447,7 @@ function draw_menu_items($menu_array) {
 
     $initials = $GLOBALS["fp_system_settings"]["school_initials"];
 		
-		$pC .= fp_render_curved_line("$course->subject_id $course->course_num$other_valid_names <!--EQV1-->");
+		$pC .= fp_render_section_title("$course->subject_id $course->course_num$other_valid_names <!--EQV1-->");
 		$bool_transferEqv = true;
 		if ($course->bool_transfer)
 		{
@@ -3895,7 +3889,7 @@ function draw_menu_items($menu_array) {
    			<tr>
     		<td colspan='8' class='blueTitle' align='center' valign='top'>
     				";
-		$rtn .= fp_render_curved_line($title);
+		$rtn .= fp_render_section_title($title);
 
 		$rtn .= "
     		</td>
@@ -4361,8 +4355,7 @@ function draw_menu_items($menu_array) {
             onmouseout='$(this).removeClass(\"selection_highlight\");'
     ";
       
-		if (fp_screen_is_mobile()) $on_mouse_over = "";  // Causes problems for some mobile devices.
-		
+				
 		$hand_class = "hand";
 
 		if ($bool_display_check == false) {
@@ -4837,7 +4830,7 @@ if ($course->name_equals('MUAL 265')) {
 			$c_title = t("Substitute an additional course");
 			$bool_sub_add = true;
 		}
-		$pC .= fp_render_curved_line($c_title);
+		$pC .= fp_render_section_title($c_title);
 
 		if ($req_by_degree_id > 0) {
 		  $pC .= "<div class='tenpt sub-req-by-degree-title-line'>" . t("This substitution will only affect the <b>%title</b> degree requirements.", array("%title" => $req_degree_plan->get_title2())) . "
