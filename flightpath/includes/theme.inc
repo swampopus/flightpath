@@ -243,10 +243,12 @@ function fp_display_page($page) {
     unset($_SESSION["fp_messages"]);
   }
 
+  $content_above_tabs = "";
+
   // content_top gets the Currently Advising box.
   if (@$page["router_item"]["page_settings"]["display_currently_advising"] == TRUE) {
     // TODO:  this needs better logic for the new system.    
-    // $content_top .= fp_render_currently_advising_box(false, $screen->bool_blank, $screen->bool_print, NULL, $screen->screen_mode);
+    $content_top .= fp_render_currently_advising_box(false, $screen->bool_blank, $screen->bool_print, NULL, $screen->screen_mode);
   }    
   
   $screen->page_content = $content_top .= $page["content"];
@@ -276,6 +278,36 @@ function fp_display_page($page) {
   
   $screen->output_to_browser();  
 } // fp_display_page
+
+
+
+
+
+/**
+ * Return the HTML for breadcrumbs for the current page we are on.
+ */
+function fp_render_breadcrumbs() {
+  $rtn = "";
+  
+  $z_index = 20;
+  
+  $rtn .= "<div id='breadcrumb-inner-wrapper'>
+             <ul class='breadcrumbs'>
+              <li class='crumbs first' >
+                <a href='" . fp_url("student-search/search") . "' style='z-index: 20;'>Students</a>
+              </li>
+              <li class='crumbs'>
+                <a href='l' style='z-index: 19;'>Test Student (9999)</a>
+              </li>
+                            
+            </ul>
+          </div>";
+  
+  
+  $rtn .= "<div class='clear'></div>";
+  
+  return $rtn;
+} // fp_render_breadcrumbs
 
 
 
@@ -709,10 +741,10 @@ function fp_build_tab_array($page) {
     
     $rtn .= "<tr><td colspan='2' style='padding-bottom: 10px;'>
         $what_if_select
-      <table border='0' width='100%'  class='elevenpt blueBorder' cellpadding='0' cellspacing='0' >
+      <table border='0' width='100%'  class='' cellpadding='0' cellspacing='0' >
       <tr>
-          <td colspan='4' class='blueTitle' align='center' height='20'>
-          " . fp_render_square_line("$ca$whatif$for_term") . "
+          <td colspan='4' class='' align='center' height='20'>
+          " . fp_render_section_title("$ca$whatif$for_term") . "
           </td>                    
       </tr>
       ";
@@ -913,34 +945,27 @@ function fp_build_tab_array($page) {
         $value2 = @trim($temp[1]);
 
 
-        if (fp_screen_is_mobile()) {
-          // Mobile screen.  Needs to be more condensed.
-          $rtn .= "<tr class='$hypoclass'>
-                  <td valign='top'>$value1</td>
-                  <td valign='top'>$value2</td>
-                  </tr>";
-        }
-        else {
+        
          // Regular desktop screen. 
-        
-          $rtn .= "
-        
-            <tr class='$hypoclass' >
-              <td valign='top' width='20%' class='side_padding' style='padding-top: 5px;'>
-                 $name1
-              </td>
-              <td width='30%' valign='top' class='side_padding elevenpt' style='padding-top: 5px;'>
-                $value1
-              </td>
-              <td valign='top' align='left' width='20%' class='side_padding elevenpt' style='padding-top: 5px;'>
-                   $name2
-              </td>
-               <td align='right' width='30%' valign='top' class='side_padding elevenpt' style='padding-top: 5px;'>
-                   $value2
-                </td>
-            </tr>  ";
+                 
+        $rtn .= "
       
-        }
+          <tr class='$hypoclass' >
+            <td valign='top' width='20%' class='side_padding' style='padding-top: 5px;'>
+               $name1
+            </td>
+            <td width='30%' valign='top' class='side_padding elevenpt' style='padding-top: 5px;'>
+              $value1
+            </td>
+            <td valign='top' align='left' width='20%' class='side_padding elevenpt' style='padding-top: 5px;'>
+                 $name2
+            </td>
+             <td align='right' width='30%' valign='top' class='side_padding elevenpt' style='padding-top: 5px;'>
+                 $value2
+              </td>
+          </tr>  ";
+    
+        
         
       }
     } else {

@@ -58,10 +58,15 @@
       <?php print $page_sidebar_left_content; ?>
     </div>
     <?php endif; ?>
+
   
     <div id='page-content'>
       <?php 
-      
+
+      if ($page_breadcrumbs) {
+        print "<div class='breadcrumbs-wrapper'>" . $page_breadcrumbs . "</div>";
+      }
+            
       if ($page_title) {
         print "<h2 class='title'>$page_title</h2>";
       }

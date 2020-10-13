@@ -1382,9 +1382,10 @@ function advise_display_view($view = "view") {
         
     $vurl = fp_url($view);    
         
-    $rtn .= "<form id='mainform' method='POST' action='$vurl'>
-             <input type='hidden' name='form_token' value='$form_token'>
-             <table class='fp-semester-table'>";
+    $rtn .= "<div class='degree-plan-wrapper'>
+               <form id='mainform' method='POST' action='$vurl'>
+               <input type='hidden' name='form_token' value='$form_token'>
+               <table class='fp-semester-table'>";
     $rtn .= $screen->display_screen();
 
     $rtn .= "</table>";
@@ -1392,6 +1393,7 @@ function advise_display_view($view = "view") {
     $rtn .= $screen->get_hidden_advising_variables("save_draft");
         
     $rtn .= "</form>";
+    $rtn .= "</div>"; // degree-plan-wrapper
     
     // Figure out what the page's sub-tabs should be, and set them.
     $tab_array = array();
