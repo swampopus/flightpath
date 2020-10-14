@@ -315,9 +315,6 @@ function course_search_display_courses() {
    
   fp_add_css(fp_get_module_path("course_search") . "/css/course_search_style.css");
   
-  if (fp_screen_is_mobile()) {
-    fp_add_css(fp_get_module_path("course_search") . "/css/course_search_mobile_style.css");    
-  }      
   
   
   $mode = "";
@@ -327,7 +324,7 @@ function course_search_display_courses() {
   $render = array();
   $render["#id"] = "course_search_display_courses";
       
-  $rtn .= fp_render_curved_line(t("Course Search"));
+  $rtn .= fp_render_section_title(t("Course Search"), "course-search-section-title");
 
   $settings = fp_get_system_settings();
   $current_catalog_year = $settings["current_catalog_year"];
@@ -379,16 +376,10 @@ function course_search_display_courses() {
       </div>
       ";
 
-  if (fp_screen_is_mobile()) {
-    // TODO:  implement the fieldset thingy.
-    //$pC .= $screen->draw_c_fieldset($important_notice, "View important notice", true);   
-  }
-  else {
-    //$rtn .= $important_notice;
-    $render["important_notice"] = array(
-      "value" => $important_notice, 
-    );
-  }
+
+  $render["important_notice"] = array(
+    "value" => $important_notice, 
+  );
 
   /*  
   $rtn .= "      
@@ -574,11 +565,6 @@ function course_search_display_courses() {
         
         $twidth = "90%";
         $mleft = "20px;";
-        if (fp_screen_is_mobile()) {
-          $th = explode(",", $avail_mobile_headers);
-          $twidth = "100%";
-          $mleft = "0";
-        }
         
         $schedule_text .= "
               </div>
@@ -704,10 +690,6 @@ function course_search_display_courses() {
 
         $hyp1 = " - ";
         $on_click = "";
-        if (fp_screen_is_mobile()) {
-          $on_click = "onClick='toggleCourseExtra(this);'";
-          $hyp1 = "";
-        }
         
         $html = "";
         
@@ -737,7 +719,7 @@ function course_search_display_courses() {
                  ";
 
         
-        if (user_has_permission("can_update_course_info_details") && !fp_screen_is_mobile()) {
+        if (user_has_permission("can_update_course_info_details")) {
           $html .= "<!-- ADMIN-OPTIONS -->
                     <div class='course-search-admin-options'>
                     " . t("Administrative options:") . " 
@@ -935,18 +917,14 @@ function course_search_display_search() {
    
   fp_add_css(fp_get_module_path("course_search") . "/css/course_search_style.css");
   
-  if (fp_screen_is_mobile()) {
-    fp_add_css(fp_get_module_path("course_search") . "/css/course_search_mobile_style.css");    
-  }      
-  
-  
+    
   $rtn .= "";
   
   if (user_has_permission("can_update_course_info_details")) {
     $rtn .= "<div>" . t("Administrators:") . " " . l(t("Edit course schedules and syllabi"), "tools/course-search/edit-list") . "</div>";
   }
     
-  $rtn .= fp_render_curved_line("Course Search");
+  //$rtn .= fp_render_section_title("Courses");
 
 
   $settings = fp_get_system_settings();
@@ -1000,12 +978,12 @@ function course_search_display_search() {
       $rtn .= "<input type='hidden' name='q' value='tools/course-search/courses'>";
     }
     
-    if (!fp_screen_is_mobile()) {
-      $rtn .= "
-        <div align='center'>
-          <select name='subject_id' style='width: 80%;'>
-        ";    
-    }
+
+    $rtn .= "
+      <div align='center'>
+        <select name='subject_id' style='width: 80%;'>
+      ";    
+
 
     
     // We want to make a pull-down list of all available subjects.
@@ -1038,28 +1016,22 @@ function course_search_display_search() {
     asort($subjects);
     
     foreach ($subjects as $subject_id => $title) {
-      if (!fp_screen_is_mobile()) {
-        $rtn .= "<option value='$subject_id'>$title ($subject_id)</option>";
-      }
-      else {
-        $rtn .= "<a class='course-search-subject-select-line'
-                  href='" . fp_url("tools/course-search/courses", "subject_id=$subject_id") . "'>
-                    <div class='course-search-dept-name'>$title ($subject_id)</div>
-                  </a>";
-      }
+      
+      $rtn .= "<option value='$subject_id'>$title ($subject_id)</option>";
+      
       
       
     }
 
-    if (!fp_screen_is_mobile()) {
-      $rtn .= "
-          </select>       
-          <input type='hidden' name='mode' value='$mode'>
-          </div><br><br><br>
-          <div align='right'>
-          <input type='submit' value='Select ->'>
-        </div>";
-    }
+
+    $rtn .= "
+        </select>       
+        <input type='hidden' name='mode' value='$mode'>
+        </div><br><br><br>
+        <div align='right'>
+        <input type='submit' value='Select ->'>
+      </div>";
+
 
     $rtn .= "</form>";
   

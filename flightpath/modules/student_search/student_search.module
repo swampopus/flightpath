@@ -48,10 +48,7 @@ function student_search_menu() {
     "type" => MENU_TYPE_TAB, 
     "tab_family" => "student_search",
     "page_settings" => array (
-      "display_currently_advising" => TRUE,
-      "display_greeting" => TRUE,
       "screen_mode" => "not_advising",
-      "page_has_search" => TRUE,
     ), 
     "weight" => 10,
   );
@@ -100,32 +97,11 @@ function student_search_menu() {
     "tab_family" => "student_search",
     //"tab_parent" => "student-search",
     "page_settings" => array (
-        "display_currently_advising" => TRUE,
-        "display_greeting" => TRUE,
         "screen_mode" => "not_advising",
         "page_has_search" => TRUE,      
     ),    
     "weight" => 30,
   );
-  
-     
-  /*  This is the OLD method
-  $items["student-search/search"] = array(
-    "title" => t("Search"),
-    "page_callback" => "student_search_display_search",
-    "access_arguments" => array("display_search_subtab"),
-    "type" => MENU_TYPE_SUB_TAB,
-    "tab_family" => "student_search",
-    "tab_parent" => "student-search",
-    "page_settings" => array (
-        "display_currently_advising" => TRUE,
-        "display_greeting" => TRUE,
-        "screen_mode" => "not_advising",
-        "page_has_search" => TRUE,      
-    ),    
-    "weight" => 30,
-  );
-  */
   
   
   return $items;

@@ -208,9 +208,9 @@ function comments_comment_form() {
  * new one (with the right permissions).
  */
 function comments_display_main() {
-  global $current_student_id;
+  global $current_student_id, $screen;
   $rtn = "";
-  
+      
   fp_add_js(fp_get_module_path("comments") . "/js/comments.js");
   fp_add_css(fp_get_module_path("comments") . "/css/comments.css");
   

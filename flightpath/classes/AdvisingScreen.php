@@ -302,13 +302,11 @@ function draw_menu_items($menu_array) {
       $page_display_title = "";
     }
 
-
     
     $page_breadcrumbs = fp_render_breadcrumbs();
-		
+		    
     if ($this->student) {    
-      $page_student_mini_profile = fp_render_student_mini_profile();
-      //$page_student_mini_profile = fp_render_currently_advising_box();
+      $page_student_mini_profile = fp_render_student_mini_profile();      
     }
     
     

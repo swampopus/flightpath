@@ -243,16 +243,15 @@ function fp_display_page($page) {
     unset($_SESSION["fp_messages"]);
   }
 
+
   // content_top gets the Currently Advising box.
   if (@$page["router_item"]["page_settings"]["display_currently_advising"] == TRUE) {
-    // TODO:  this needs better logic for the new system.    
-    //$content_top .= fp_render_currently_advising_box(false, $screen->bool_blank, $screen->bool_print, NULL, $screen->screen_mode);
-    
+    // To do this, we need to make sure the $screen->student object is loaded.
+    if (!$screen->student) {
+      $screen->student = new Student($current_student_id);
+    }   
   }    
-  
-  
-  
-  
+
   
   
   $screen->page_content = $content_top .= $page["content"];
@@ -291,10 +290,12 @@ function fp_display_page($page) {
 function fp_render_student_mini_profile() {
   global $current_student_id, $screen, $user, $student;
   
-  $settings = fp_get_system_settings();
+  $csid = $current_student_id;
   
-    
+  $settings = fp_get_system_settings();
+      
   $rtn = "";
+  
   
   
   if (is_object($screen) && is_object($screen->degree_plan)) {
@@ -414,7 +415,7 @@ function fp_render_student_mini_profile() {
       }
       
       
-      if ($screen_mode == "detailed") {
+      if ($screen->screen_mode == "detailed") {
         $degree_title .= " ($degree_plan->major_code)";
       }
 
@@ -484,7 +485,7 @@ function fp_render_student_mini_profile() {
       $op_link = "<a class='degree-op-link-change-degree-options' href='javascript: popupWindow2(\"" . fp_url("advise/popup-change-track", "advising_what_if=$advising_what_if") . "\",\"\");'
                     title='" . t("Change degree options") . "'><i class='fa fa-pencil'></i></a>";
       
-      if ($screen_mode == "not_advising" || $screen_mode == "detailed") {
+      if ($screen->screen_mode == "not_advising" || $screen->screen_mode == "detailed") {
         $op_link = "";
       }
 
@@ -505,8 +506,8 @@ function fp_render_student_mini_profile() {
 
        
   $right_side_top = "<h2>&nbsp; &nbsp; &nbsp; &nbsp;</h2>"; // need spacers on purpose
-  $whatifclass = "";
-  if (@$GLOBALS["fp_advising"]["advising_what_if"] == "yes" ) {
+  $whatifclass = "";  
+  if (@$GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
     $whatifclass = "student-mini-profile-what-if-mode";
     
       // Set the cat year to whatever our What If cat year was, current if we can't find it.

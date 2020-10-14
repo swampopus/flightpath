@@ -14,6 +14,8 @@ function advise_display_history() {
   $student_id = $current_student_id;
   $db = get_global_database_handler();
   
+  fp_set_title('');
+  
   $extra_style = $ast = "";
   $rtn = "";
   
