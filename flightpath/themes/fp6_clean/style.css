@@ -1347,6 +1347,10 @@ ___breadcrumbs{}
 
 ___tabs{}
 
+.page-tabs-wrapper {
+  margin-top: 10px;
+}
+
 ul.tabs {  
   margin: 0;
   padding: 0;

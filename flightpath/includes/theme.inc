@@ -483,7 +483,7 @@ function fp_render_student_mini_profile() {
       $advising_what_if = @$GLOBALS["fp_advising"]["advising_what_if"];
       // We want to add a link to the popup to let the user select other degree tracks.
       $op_link = "<a class='degree-op-link-change-degree-options' href='javascript: popupWindow2(\"" . fp_url("advise/popup-change-track", "advising_what_if=$advising_what_if") . "\",\"\");'
-                    title='" . t("Change degree options") . "'><i class='fa fa-pencil'></i></a>";
+                    title='" . t("Change degree options") . "'><i class='fa fa-cog'></i></a>";
       
       if ($screen->screen_mode == "not_advising" || $screen->screen_mode == "detailed") {
         $op_link = "";
