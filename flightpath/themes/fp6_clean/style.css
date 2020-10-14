@@ -334,8 +334,8 @@ span.advise-checkbox-retake-checked {
 
 
 .sub-tabs {
-  margin-bottom: 30px;
-  margin-top: 5px;
+  margin-bottom: 10px;
+  margin-top: 0px;
   font-size: 0.9em;
 }
 
@@ -1058,6 +1058,15 @@ input::placeholder {
 }
 
 
+#page-print-options {
+  float: right;
+  padding-left: 20px;
+  padding-right: 10px;
+  font-size: 1.4em;
+}
+
+
+
 
 
 /**
@@ -1372,7 +1381,7 @@ ul.tabs li.inactive a {
 }
 
 body.has-page-tabs .inner-page-content-wrapper {
-  margin-top: 30px;
+  margin-top: 10px;
   margin-left: 20px;
 }
 
@@ -1405,7 +1414,24 @@ table.fp-box-top {
   width: 90%;
 }
 
+.sub-tabs .subtab-link-wrapper label {
+  display: inline-block;
+  font-weight: normal;
+}
 
+.sub-tabs .subtab-link-wrapper a {
+  padding-left: 10px;
+  color: #999;
+}
+
+.sub-tabs .subtab-link-wrapper a:hover {
+  color: inherit;
+}
+ 
+.sub-tabs .change-term-link {
+  padding-left: 30px;
+  font-size: 1.2em;
+}
 
 
 
@@ -1418,6 +1444,7 @@ ___popups{}
 .page-is-popup #header,
 .page-is-popup .fp-bottom-message,
 .page-is-popup h2.title,
+.page-is-popup #breadcrumbs-wrapper,
 .page-is-popup #sidebar-left
  {
   display: none;
@@ -1433,23 +1460,98 @@ ___popups{}
 
 
 
+___student_mini_profile{}
+
+.student-mini-profile .header-profile-image {
+    display: inline-block;
+    width: 80px;
+    height: 100px;
+    overflow: hidden;
+    border-radius: 5px;
+    float: left;
+    margin-right: 20px;
+}
+
+.student-mini-profile .header-profile-image img {
+  width: 100%;
+  height: auto;
+}
+
+.student-mini-profile .profile-top-details-wrapper {
+    float: left;
+    width: calc(100% - 500px);
+    max-width: 550px;
+}
+
+.student-mini-profile .student-header .profile-detail-line {
+    margin-bottom: 3px;
+}
+.student-mini-profile .profile-top-details-wrapper .profile-detail-line {
+    font-size: 1.05em;
+    margin-bottom: 10px;
+    z__border-bottom: 1px solid #ccc;
+}
+
+.student-mini-profile .profile-detail-line label {
+    display: inline-block;
+    min-width: 150px;
+    font-weight: bold;
+}
+
+#page-student-mini-profile-wrapper  {
+  margin-left: 20px;
+  margin-top: 20px;  
+  margin-bottom: 0px;
+  border-bottom: 1px solid #eee;
+}
+
+.student-mini-profile h2 {
+  margin: 0;
+  font-weight: 400;
+}
+
+.student-mini-profile .degree-title {
+  display: inline;
+}
+
+.student-mini-profile .catalog-year-alert-early a {
+  color: orange;  
+  padding-left: 10px;
+}
+
+.student-mini-profile .catalog-year-alert-too-far a {
+  color: orange;  
+  padding-left: 10px;
+}
+
+.student-mini-profile h2.what-if-notice {
+  font-weight: bold;
+  display: inline-block;
+}
+
+.student-mini-profile .what-if-change-settings {
+  padding-left: 20px;
+  font-weight: bold;
+  font-size: 0.8em;
+}
 
 
+.degree-op-link {
+  padding-right: 10px;
+  padding-left: 10px;
+}
 
+.student-mini-profile-what-if-mode {
+  background-color: lemonchiffon;
+  padding: 10px;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+.student-mini-profile a {
+  color: #999;
+}
+.student-mini-profile a:hover {
+  color: inherit;
+}
 
 
 

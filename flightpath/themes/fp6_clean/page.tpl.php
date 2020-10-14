@@ -11,7 +11,8 @@
  * $page_is_popup   Set to either TRUE or FALSE.  If TRUE, do not display the header,
  *          and possibly have different layout parameters.  These are booleans
  *          and not strings.
- * $page_title      The HTML title of the browser window.
+ * $page_title      The title of the page, set in the <head>
+ * $page_display_title  The title we should display for the page.  Blank if none.
  * $page_has_search   Either TRUE or FALSE.  Is a boolean, not a string.  If set to
  *          TRUE, the page will have a search bar at the top.
  * $page_scroll_top   If set, the page will automatically scroll to this position (and
@@ -61,19 +62,28 @@
 
   
     <div id='page-content'>
-      <?php 
+      <?php if ($page_breadcrumbs): ?>
+        <div id='breadcrumbs-wrapper'><?php print $page_breadcrumbs;?></div>
+        <div class='clear'></div>
+      <?php endif; ?>
 
-      if ($page_breadcrumbs) {
-        print "<div class='breadcrumbs-wrapper'>" . $page_breadcrumbs . "</div>";
-      }
+
+      <?php if ($page_display_title): ?>
+        <h2 class='title'><?php print $page_display_title; ?></h2>
+      <?php endif; ?>
+
             
-      if ($page_title) {
-        print "<h2 class='title'>$page_title</h2>";
+      <?php if ($page_tabs): ?>
+        <div id='page-print-options'><a href='javascript:print();' title='Print'><i class='fa fa-print'></i></a></div>      
+        <div class='page-tabs-wrapper'><?php print $page_tabs; ?></div>
+      <?php endif; ?>
+
+      <?php
+      if ($page_student_mini_profile) {
+        print "<div id='page-student-mini-profile-wrapper'>" . $page_student_mini_profile . "</div>
+                <div class='clear'></div>";
       }
-      
-      if ($page_tabs) {
-        print $page_tabs;
-      }
+
       
       print "<div class='inner-page-content-wrapper'>
                 $page_content

@@ -1321,6 +1321,8 @@ function advise_display_view($view = "view") {
   global $user, $fp, $degree_plan, $screen;
   $rtn = "";
  
+  fp_set_title('');
+ 
   if ($view == "what-if") {
     $GLOBALS["fp_advising"]["advising_what_if"] = "yes";  
     $_REQUEST["advising_what_if"] = "yes";
@@ -1397,18 +1399,56 @@ function advise_display_view($view = "view") {
     
     // Figure out what the page's sub-tabs should be, and set them.
     $tab_array = array();
-    $tab_array[0]["title"] = "Display by Year";
-    $tab_array[0]["active"] = ($screen->view != "type");
-    $tab_array[0]["on_click"] = "changeView(\"year\");";
-        
-    $tab_array[1]["title"] = "Display by Type";
-    $tab_array[1]["active"] = ($screen->view == "type");
-    $tab_array[1]["on_click"] = "changeView(\"type\");";
+
     
+    $tab_array[1]["title"] = "Display by Year";
+    $tab_array[1]["active"] = ($screen->view != "type");
+    $tab_array[1]["on_click"] = "changeView(\"year\");";
+        
+    $tab_array[2]["title"] = "Display by Type";
+    $tab_array[2]["active"] = ($screen->view == "type");
+    $tab_array[2]["on_click"] = "changeView(\"type\");";
+    
+    /*
     $tab_array[2]["title"] = "Print";
     $tab_array[2]["type"] = "link";    
     $tab_array[2]["active"] = FALSE;
     $tab_array[2]["on_click"] = "popupPrintWindow(\"" . fp_url("$view/print", "advising_view=$screen->view") . "\");";  
+    */
+    
+    $advising_term_id = @$GLOBALS["fp_advising"]["advising_term_id"];
+        
+    if ($advising_term_id != "" && user_has_permission("can_advise_students")) {
+      // If this is someone who is allowed to change terms. (advisor or above)
+            
+      $t_term_id = $advising_term_id;
+      $for_term = " " . t("for") . " ";
+      $termdesc = get_term_description($t_term_id);
+
+      
+      $furl = fp_url("advise/popup-change-term");
+      
+            
+      
+      /*
+      $for_term .= "<span style='font-size: 8pt; font-weight:normal;'>
+             - <a href='javascript: popupWindow2(\"" . $furl . "\",\"advising_term_id=$t_term_id\");' style='color:blue; background-color: white; border: 1px solid black; padding-left: 3px; padding-right: 3px;'>" . t("change") . "<img src='" . fp_theme_location() . "/images/calendar1.jpg' height='13' border='0' style='vertical-align: bottom;'></a>
+            </span>";
+      */
+
+    }    
+    
+    
+    $tab_array[3]["label"] = "Advising Term: $termdesc ($t_term_id)";
+    $tab_array[3]['text'] = "<i class='fa fa-pencil'></i>";
+    $tab_array[3]['link_title'] = "Change term?";
+    $tab_array[3]['link_class'] = "change-term-link";
+    $tab_array[3]["type"] = "link";    
+    $tab_array[3]["active"] = FALSE;
+    $tab_array[3]["on_click"] = "popupWindow2(\"" . $furl . "\",\"advising_term_id=$t_term_id\");";  
+
+            
+    
     
     
     fp_set_page_sub_tabs($tab_array);

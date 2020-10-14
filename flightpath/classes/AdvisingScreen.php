@@ -289,15 +289,28 @@ function draw_menu_items($menu_array) {
     $page_extra_js_files = "";
     $page_extra_js_settings = "";
     $page_extra_css_files = "";
-    
+            
+    $system_name = variable_get("system_name", "FlightPath");        
+            
   	if ($page_title == "") { 
   	  // By default, page title is this...
-			$page_title = $GLOBALS["fp_system_settings"]["school_initials"] . " FlightPath";
+			$page_title = $GLOBALS["fp_system_settings"]["school_initials"] . " " . $system_name;
 		}
+    
+    $page_display_title = $page_title;
+    if (isset($GLOBALS["fp_set_show_title"]) && $GLOBALS["fp_set_show_title"] === FALSE) {
+      $page_display_title = "";
+    }
+
 
     
     $page_breadcrumbs = fp_render_breadcrumbs();
-		    
+		
+    if ($this->student) {    
+      $page_student_mini_profile = fp_render_student_mini_profile();
+      //$page_student_mini_profile = fp_render_currently_advising_box();
+    }
+    
     
 		$page_hide_report_error = $this->page_hide_report_error;
 

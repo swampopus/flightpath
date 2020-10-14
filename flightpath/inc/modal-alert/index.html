@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>JavaScript alert() Replacement</title>
+
+    <style type="text/css">
+        p, body, td { font-family: "Open Sans", Tahoma, Arial, Helvetica, sans-serif; font-size: 14px; }
+        body { padding: 0px; margin: 0px; background-color: #ffffff; }
+        a { color: #1155a3; }
+        .space { margin: 10px 0px 10px 0px; }
+        .header { background: #003267; background: linear-gradient(to right, #011329 0%,#00639e 44%,#011329 100%); padding:20px 10px; color: white; box-shadow: 0px 0px 10px 5px rgba(0,0,0,0.75); }
+        .header a { color: white; }
+        .header h1 a { text-decoration: none; }
+        .header h1 { padding: 0px; margin: 0px; }
+        .main { padding: 10px }
+
+        .main {
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 80px;
+        }
+
+        .ex {
+            margin-top: 80px;
+            background-color: #fff;
+        }
+
+        .ex-name {
+            padding: 20px 10px;
+            background-color: #f3f3f3;
+            color: #333;
+
+            border: 1px solid #c0c0c0;
+            font-weight: bold;
+        }
+
+        .ex-text {
+            padding: 10px 0px;
+        }
+
+        .ex-code {
+            background-color: #f7f7f9;
+            background-color: #fff;
+            overflow: auto;
+            overflow-x: auto;
+            overflow-y: hidden;
+            font-size: 14px;
+            line-height: 1.42;
+            border-bottom: 1px solid #c0c0c0;
+            border-left: 1px solid #c0c0c0;
+            border-right: 1px solid #c0c0c0;
+            padding: 20px 10px;
+            margin: 0px;
+        }
+
+        .ex-try {
+            margin-top: 10px;
+        }
+
+        .ex-try a {
+            display: inline-block;
+            text-align: center;
+            background-color: #3c78d8;
+            border: 1px solid #1155cc;
+            color: #fff;
+            padding: 6px 20px;
+            border-radius: 2px;
+            cursor: pointer;
+            margin-right: 5px;
+            text-decoration: none;
+        }
+    </style>
+
+    <link rel="stylesheet" href="themes/modal_flat.css" type="text/css" />
+    <link rel="stylesheet" href="themes/modal_rounded.css" type="text/css" />
+
+</head>
+<body>
+<div class="header">
+    <h1><a href='https://code.daypilot.org/11136/javascript-alert-replacement'>JavaScript alert() Replacement</a></h1>
+    <div><a href="https://javascript.daypilot.org/">DayPilot for JavaScript</a> - AJAX Calendar/Scheduling Widgets for JavaScript/HTML5/jQuery/AngularJS</div>
+</div>
+
+<div class="main">
+
+
+<div class="examples">
+    <h1>DayPilot.Modal.alert()</h1>
+
+    <p>Read more in the <a href="https://code.daypilot.org/11136/javascript-alert-replacement">JavaScript alert() Replacement</a> tutorial.</p>
+
+
+    <div class="ex">
+        <div class="ex-name">Hello, World!</div>
+        <pre class="ex-code">DayPilot.Modal.alert("Hello, World!");</pre>
+        <div class="ex-try"><a href="javascript:simple()">Run</a></div>
+    </div>
+
+
+    <div class="ex">
+        <div class="ex-name">CSS Theme ("modal_flat")</div>
+        <pre class="ex-code">DayPilot.Modal.alert("Hello, World!", { theme: "modal_flat" });</pre>
+        <div class="ex-try"><a href="javascript:css('modal_flat')">Run</a></div>
+    </div>
+
+    <div class="ex">
+        <div class="ex-name">CSS Theme ("modal_rounded")</div>
+        <pre class="ex-code">DayPilot.Modal.alert("Hello, World!", { theme: "modal_rounded" });</pre>
+        <div class="ex-try"><a href="javascript:css('modal_rounded')">Run</a></div>
+    </div>
+
+    <div class="ex">
+        <div class="ex-name">Event Handling</div>
+        <pre class="ex-code">
+DayPilot.Modal.alert("Hello, World!")
+.then(function(args) {
+    if (args.canceled) {
+        DayPilot.Modal.alert("You canceled the modal dialog.");
+    }
+    else {
+        DayPilot.Modal.alert("You clicked OK.");
+    }
+});</pre>
+        <div class="ex-try"><a href="javascript:eventHandling()">Run</a></div>
+    </div>
+
+
+</div>
+
+
+<script src="js/daypilot-modal-2.9.js"></script>
+<script>
+    function simple() {
+        DayPilot.Modal.alert("Hello, World!");
+    }
+
+    function css(theme) {
+        DayPilot.Modal.alert("Hello, World!", { theme: theme });
+    }
+
+    function eventHandling() {
+        DayPilot.Modal.alert("Hello, World!")
+            .then(function(args) {
+                if (args.canceled) {
+                  DayPilot.Modal.alert("You canceled the modal dialog.");
+                }
+                else {
+                  DayPilot.Modal.alert("You clicked OK.");
+                }
+            });
+    }
+
+</script>
+
+</div>
+
+</body>
+</html>
+
+
