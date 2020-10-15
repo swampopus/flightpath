@@ -1478,6 +1478,22 @@ function advise_display_view($view = "view") {
     $_SESSION["fp_cache_course_inventory"] = serialize(@$GLOBALS["fp_course_inventory"]);
   }
      
+     
+  // Let's set our breadcrumbs
+  $db = get_global_database_handler();
+  $crumbs = array();
+  $crumbs[] = array(
+    'title' => 'Students',
+    'href' => fp_url('student-search'),
+  );
+  $crumbs[] = array(
+    'title' => $db->get_student_name($screen->student->student_id) . " ({$screen->student->student_id})",
+    'href' => fp_url('student-profile', "current_student_id={$screen->student->student_id}"),
+  );  
+  fp_set_breadcrumbs($crumbs);
+     
+     
+     
   return $rtn;
 }
 

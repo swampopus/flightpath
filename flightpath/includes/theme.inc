@@ -537,13 +537,13 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
   
   
   
+  $img_src = base_path() . "/modules/system/icons/sample_student_female.jpg";
   
   
   $rtn .= "<div class='student-mini-profile $whatifclass'>
-  
-  
+    
              <div class='header-profile-image'>
-                <img src='https://jetstreamportal.com/system/files/profile_pictures/beautiful-brunette-cute-774909.jpg' class='student-profile-image' />
+                <img src='$img_src' class='student-profile-image' />
              </div> <!-- profile-image -->    
       
               <div class='profile-top-details-wrapper profile-top-wrapper-left-side'>
@@ -627,24 +627,36 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
 function fp_render_breadcrumbs() {
   $rtn = "";
   
-  $z_index = 20;
-  
+  $c = 0;
   
   if (isset($GLOBALS['fp_breadcrumbs']) && is_array($GLOBALS['fp_breadcrumbs'])) {
     
     $crumbs = $GLOBALS['fp_breadcrumbs'];
-  
+
     $rtn .= "<div id='breadcrumb-inner-wrapper'>
-               <ul class='breadcrumbs'>
-                <li class='crumbs first' >
-                  <a href='" . fp_url("student-search/search") . "' style='z-index: 20;'>Students</a>
-                </li>
-                <li class='crumbs'>
-                  <a href='l' style='z-index: 19;'>Test Student (9999)</a>
-                </li>
+               <ul class='breadcrumbs'>";
+
+    foreach ($crumbs as $crumb) {      
+      $z_index = 20 - $c;
+  
+      $title = @$crumb['title'];
+      $href = @$crumb['href'];
+  
+      $extra_class = "";
+      if ($c == 0) $extra_class .= "first";
+      if ($c == count($crumbs) -1) $extra_class .= " last";
+  
+      $rtn .= "<li class='crumbs $extra_class' >
+                  <a href='$href' style='z-index: $z_index;'>$title</a>
+               </li>";
+        
+      
+      $c++;
+    }
+    
                               
-              </ul>
-            </div>";
+      $rtn .= "</ul>
+                </div>";
   
   }
   

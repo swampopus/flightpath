@@ -376,6 +376,22 @@ function advise_display_history() {
   
   $rtn .= "</table>";
   
+  
+  // Let's set our breadcrumbs
+  $db = get_global_database_handler();
+  $crumbs = array();
+  $crumbs[] = array(
+    'title' => 'Students',
+    'href' => fp_url('student-search'),
+  );
+  $crumbs[] = array(
+    'title' => $db->get_student_name($current_student_id) . " ({$current_student_id})",
+    'href' => fp_url('student-profile', "current_student_id={$current_student_id}"),
+  );  
+  fp_set_breadcrumbs($crumbs);    
+  
+  
+  
   return $rtn;
 }
 
