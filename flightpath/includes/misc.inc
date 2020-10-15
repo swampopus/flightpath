@@ -981,6 +981,13 @@ function fp_set_page_sub_tabs($tab_array) {
 }
 
 /**
+ * Set our breadcrumbs array.
+ */
+function fp_set_breadcrumbs($arr = array()) {
+  $GLOBALS['fp_breadcrumbs'] = $arr;
+}
+
+/**
  * Allows the programmer to set the title of the page, overwriting any default title.
  *
  * @param unknown_type $title

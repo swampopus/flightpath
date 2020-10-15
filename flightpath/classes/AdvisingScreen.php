@@ -289,6 +289,7 @@ function draw_menu_items($menu_array) {
     $page_extra_js_files = "";
     $page_extra_js_settings = "";
     $page_extra_css_files = "";
+    $page_breadcrumbs = "";
             
     $system_name = variable_get("system_name", "FlightPath");        
             
@@ -304,7 +305,8 @@ function draw_menu_items($menu_array) {
 
     
     $page_breadcrumbs = fp_render_breadcrumbs();
-		    
+    
+        
     if ($this->student) {    
       $page_student_profile_header = fp_render_student_profile_header();      
     }

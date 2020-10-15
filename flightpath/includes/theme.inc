@@ -629,17 +629,24 @@ function fp_render_breadcrumbs() {
   
   $z_index = 20;
   
-  $rtn .= "<div id='breadcrumb-inner-wrapper'>
-             <ul class='breadcrumbs'>
-              <li class='crumbs first' >
-                <a href='" . fp_url("student-search/search") . "' style='z-index: 20;'>Students</a>
-              </li>
-              <li class='crumbs'>
-                <a href='l' style='z-index: 19;'>Test Student (9999)</a>
-              </li>
-                            
-            </ul>
-          </div>";
+  
+  if (isset($GLOBALS['fp_breadcrumbs']) && is_array($GLOBALS['fp_breadcrumbs'])) {
+    
+    $crumbs = $GLOBALS['fp_breadcrumbs'];
+  
+    $rtn .= "<div id='breadcrumb-inner-wrapper'>
+               <ul class='breadcrumbs'>
+                <li class='crumbs first' >
+                  <a href='" . fp_url("student-search/search") . "' style='z-index: 20;'>Students</a>
+                </li>
+                <li class='crumbs'>
+                  <a href='l' style='z-index: 19;'>Test Student (9999)</a>
+                </li>
+                              
+              </ul>
+            </div>";
+  
+  }
   
   return $rtn;
 } // fp_render_breadcrumbs
@@ -700,9 +707,9 @@ function fp_render_top_nav_content() {
   $html = "";
   
   $html .= "
-    <ul class='top-nav-ul'>
-      <li class='greeting first'>" . fp_render_greeting() . "</li>
-      <li class='student-search'>" . student_search_render_small_search() . "</li>
+    <ul class='top-nav-ul'>      
+      <li class='student-search first'>" . student_search_render_small_search() . "</li>
+      <li class='alerts'><i class='fa fa-bell'></i></li>
       <li class='user-options last'>
         <i class='fa fa-user'></i>
         <i class='fa fa-caret-down'></i>
@@ -1846,7 +1853,7 @@ function fp_build_tab_array($page) {
  * This displays a friendly message to the user, and provides
  * a logout link at the top.
  */
-function fp_render_greeting() {
+function z__fp_render_greeting() {
   global $user;
   if ($user->id < 1) {
     // No one is logged in!  Don't display.

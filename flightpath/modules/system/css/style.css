@@ -108,3 +108,90 @@ img.fpmn-item {
 
 
 
+___dashboard{}
+
+.dash-welcome-block {
+    padding: 25px;
+    background-color: #F9F9F9;
+    color: #555555;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+
+.dash-welcome-block .welcome-section {
+    display: inline;
+}
+
+.dash-welcome-block h1 {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin: 0;
+}
+
+.dash-welcome-block h2 {
+    font-size: 0.95em;
+    font-weight: 200;
+    margin: 0;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.dash-left {
+  display: inline-block;
+  width: 48%;
+}
+
+
+.activity-feed-block  {
+  border: 1px solid #ccc;  
+  
+}
+
+.activity-feed-block .contents {
+  padding-left: 10px;
+  max-height: 500px;
+  overflow-y: scroll;
+}
+
+.feed-item {
+  margin-bottom: 15px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+.feed-item .feed-item-icon {
+  float: left;
+  display: inline-block;
+  margin-right: 30px;
+  margin-top: 6px;
+  font-size: 2.1em;
+}
+
+.feed-item .feed-item-title {
+  font-size: 1.1em;
+  font-weight: 500;
+}
+
+.feed-item .feed-item-datetime {
+  text-align: right;
+  padding-right: 20px;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

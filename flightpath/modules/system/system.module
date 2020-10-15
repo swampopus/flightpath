@@ -277,22 +277,18 @@ function system_block_regions() {
 function system_menu() {
   $items = array();
   
-  /*
+  
   $items["main"] = array(
-    "title" => "Main",
-    "page_callback" => "system_display_main_page",
+    "title" => "Dashboard",
+    "page_callback" => "system_display_dashboard_page",
     "access_callback" => TRUE,
-    "type" => MENU_TYPE_TAB,
-    "tab_family" => "system",
+    "type" => MENU_TYPE_NORMAL_ITEM,
     "weight" => 10,
     "page_settings" => array(
-      "display_greeting" => TRUE,
-      "display_currently_advising" => TRUE,
       "screen_mode" => "not_advising",
-      "page_has_search" => TRUE,
     ),
   );
-  */
+  
 
   $items["student-profile"] = array(
     "title" => "Student Profile",
@@ -2950,11 +2946,142 @@ function system_login_form_submit($form, &$form_state) {
 
 
 
+
+
+/**
+ * This is the "dashboard" page for FlightPath, which replaces the "main" page from FP 5. 
+ */
+function system_display_dashboard_page () {
+  global $user;
+  $rtn = "";
+
+  fp_set_title('');
+  
+  // If we are not logged in, then we need to re-direct the user to 
+  // the login page!
+  if ($_SESSION["fp_logged_in"] != TRUE) {
+    $query = "";
+    if (isset($_REQUEST["logout"])) $query = "logout=" . $_REQUEST["logout"];
+    // Since we are not logged in, and are headed to the login page, also clear out any advising variables we might have.
+    foreach ($_REQUEST as $key => $val) {
+      unset($_REQUEST[$key]);
+      unset($_GET[$key]);
+      unset($_POST[$key]);
+    }
+    
+    global $current_student_id;
+    $current_student_id = "";  // clear this so the fp_goto doesn't try to add it.
+    
+    session_destroy();
+    session_commit();
+    fp_goto("login", $query);
+    return;  
+  }
+  
+  fp_add_css(fp_get_module_path("system") . "/css/style.css");
+  
+  //////////////////////////////////////////////////////////
+  // To cut down on how long it takes to load huge groups
+  // like Free Electives, we will pre-load some of the course inventory here.
+  if (@$_SESSION["fp_cached_inventory_flag_one"] != TRUE)
+  {
+    $load_number = $GLOBALS["fp_system_settings"]["load_course_inventory_on_login_number"];
+    if ($load_number > 1) {
+      $fp = new FlightPath();
+      $fp->cache_course_inventory(0,$load_number);
+      $_SESSION["fp_cached_inventory_flag_one"] = TRUE;
+    }
+  }
+  
+  
+  $today = date("D, F jS, Y", strtotime("today"));
+  $dname = $user->name;
+  if ($user->f_name != "" || $user->l_name != "") {
+    $dname = trim($user->f_name . " " . $user->l_name) . " ($user->name)";
+  }
+  
+  
+  $rtn .= "<div class='dashboard-inner-wrapper'>";  
+  
+  $rtn .= "<div class='dash-welcome-block'>
+              <div class='welcome-section'>
+                <h1>Welcome $dname!</h1>
+                <h2>Today is $today</h2>
+              </div>
+           </div>";
+
+  $left_col_blocks = blocks_render_blocks("system_main", "left_col");
+  $right_col_blocks = blocks_render_blocks("system_main", "right_col");
+  
+  $rtn .= "<div class='dash-left'>
+         <div class='activity-feed-block'>
+            " . fp_render_section_title("Advisee Activity Feed") . "
+           <div class='contents'>
+            <div class='feed-item'>
+              <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
+              <div class='feed-item-title'>Bill Thompson (10092838)</div>
+              <div class='feed-item-desc'>Student has dropped below 12 hours.</div>
+              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+            </div>
+
+            <div class='feed-item'>
+              <div class='feed-item-icon'><i class='fa fa-envelope-o'></i></div>
+              <div class='feed-item-title'>Sally McDaniel (10042872)</div>
+              <div class='feed-item-desc'>Student opened email titled \"Schedule appointment\".</div>
+              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+            </div>
+            
+            <div class='feed-item'>
+              <div class='feed-item-icon'><i class='fa fa-comment-o'></i></div>
+              <div class='feed-item-title'>Sally McDaniel (10042872)</div>
+              <div class='feed-item-desc'>Student replied to text message.</div>
+              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+            </div>
+
+            <div class='feed-item'>
+              <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
+              <div class='feed-item-title'>Bill Thompson (10092838)</div>
+              <div class='feed-item-desc'>Student has dropped below 2.5 GPA.</div>
+              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+            </div>
+            
+            <div class='feed-item'>
+              <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
+              <div class='feed-item-title'>Ashley Smith (100776512)</div>
+              <div class='feed-item-desc'>Student has dropped below 12 hours.</div>
+              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+            </div>
+                                    
+            <div class='feed-item'>
+              <div class='feed-item-icon'><i class='fa fa-comment-o'></i></div>
+              <div class='feed-item-title'>Don Draper (100357445)</div>
+              <div class='feed-item-desc'>Student has replied to text message.</div>
+              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+            </div>
+                                    
+            <div class='feed-item'>
+              <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
+              <div class='feed-item-title'>Bill Thompson (10092838)</div>
+              <div class='feed-item-desc'>Student has dropped below 12 hours.</div>
+              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+            </div>
+           </div>
+         </div>                                                
+            </div>";
+
+
+  $rtn .= "</div>";  // dashboard-inner-wrapper
+  
+  return $rtn;
+} // display_dashboard_page
+
+
+
 /**
  * Display the "main" tab-page for FlightPath.  Displays announcements
  * as well as the Tools menu, and the "special administrative tools" menu.
  */
-function system_display_main_page() {
+function z__system_display_main_page() {
   global $user;
   $rtn = "";
 
