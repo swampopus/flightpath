@@ -1,0 +1,97 @@
+<?php
+/**
+ * @file
+ * This is the primary module file for the engagements module.
+*/
+
+
+
+
+
+/**
+ * Implement hook_menu
+ */
+function engagements_menu() {
+  $items = array();
+  
+  $items["engagements"] = array(
+    "title" => t("Engagements"), 
+    "page_callback" => "engagements_display_main",
+    "access_arguments" => array("can_view_engagements"),
+    "tab_family" => "system",
+    "page_settings" => array (
+      "display_currently_advising" => TRUE,
+    ),    
+    "weight" => 20,
+    "type" => MENU_TYPE_TAB,
+  );
+  
+  
+  
+  
+  return $items;
+}
+
+
+function engagements_perm() {
+  return array(
+    'can_view_engagements' => array(
+      'title' => 'Can view Engagements',
+    ),
+  );
+}
+
+
+
+
+/**
+ * displays the main Engagements tab, which shows the history of past engagements.
+ */
+function engagements_display_main() {
+  global $current_student_id;
+  
+  fp_set_title('');
+  
+  $rtn = "";
+
+
+
+
+
+
+
+  
+  
+  
+  // Let's set our breadcrumbs
+  $db = get_global_database_handler();
+  $crumbs = array();
+  $crumbs[] = array(
+    'title' => 'Students',
+    'href' => fp_url('student-search'),
+  );
+  $crumbs[] = array(
+    'title' => $db->get_student_name($current_student_id) . " ({$current_student_id})",
+    'href' => fp_url('student-profile', "current_student_id={$current_student_id}"),
+  );  
+  fp_set_breadcrumbs($crumbs);    
+  
+  
+  return $rtn;
+} // engagements_display_main 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
