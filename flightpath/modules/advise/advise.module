@@ -254,7 +254,7 @@ function advise_menu() {
 
 
 /**
- * Used by the menu to determine if the user can see the View tab for the current student.
+ * Used by the menu to determine if the user can see the View (Degree and What If) tab for the current student.
  */
 function advise_can_access_view($student_id = "") {
   global $current_student_id, $user;

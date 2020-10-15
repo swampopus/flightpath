@@ -285,9 +285,9 @@ function fp_display_page($page) {
 
 
 /**
- * Returns the HTML for the "mini profile" block for a student
+ * Returns the HTML for the "profile" header html for a student
  */
-function fp_render_student_mini_profile() {
+function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_items = array()) {
   global $current_student_id, $screen, $user, $student;
   
   $csid = $current_student_id;
@@ -349,8 +349,8 @@ function fp_render_student_mini_profile() {
     
     $alert_msg = "";
     $alert_msg .= "<b>" . t("Important Notice:") . "</b> " . t("FlightPath cannot display degree plans from catalogs earlier than %earliest.  
-                      The student&#039;s catalog year is %current, which means that the degree plan below may not accurately
-                      display this student&#039;s degree requirements.", array("%earliest" => $settings["earliest_catalog_year"] . "-" . ($settings["earliest_catalog_year"] + 1), "%current" => $cat_year));
+                      The student&#039;s catalog year is %current, which means that the degree plan displayed may not accurately
+                      represent this student&#039;s degree requirements.", array("%earliest" => $settings["earliest_catalog_year"] . "-" . ($settings["earliest_catalog_year"] + 1), "%current" => $cat_year));
                       
                        
    
@@ -485,7 +485,9 @@ function fp_render_student_mini_profile() {
       $op_link = "<a class='degree-op-link-change-degree-options' href='javascript: popupWindow2(\"" . fp_url("advise/popup-change-track", "advising_what_if=$advising_what_if") . "\",\"\");'
                     title='" . t("Change degree options") . "'><i class='fa fa-cog'></i></a>";
       
-      if ($screen->screen_mode == "not_advising" || $screen->screen_mode == "detailed") {
+      
+      
+      if (!$screen || $screen->screen_mode == "not_advising" || $screen->screen_mode == "detailed") {
         $op_link = "";
       }
 
@@ -557,6 +559,20 @@ function fp_render_student_mini_profile() {
                           <div class='profile-detail-line profile-inline-line'>
                             <label>Catalog Year:</label> $cat_year
                           </div>  
+                          ";
+    if (isset($extra_profile_items['left_side'])) {
+      foreach ($extra_profile_items['left_side'] as $details) {
+        $label = @$details['label'];
+        $content = @$details['content'];
+        $extra_class = @$details['extra_class'];
+        $rtn .= "<div class='profile-detail-line profile-inline-line $extra_class'>
+                      <label>$label</label> $content
+                 </div>";
+      }
+    }
+    
+    
+    $rtn .= "
                </div>
                
                
@@ -573,7 +589,22 @@ function fp_render_student_mini_profile() {
                           <div class='profile-detail-line profile-inline-line'>
                             <label>Cumulative:</label> 120hrs / 2.18 GPA
                           </div>
+
+                          ";
                
+    if (isset($extra_profile_items['right_side'])) {
+      foreach ($extra_profile_items['right_side'] as $details) {
+        $label = @$details['label'];
+        $content = @$details['content'];
+        $extra_class = @$details['extra_class'];
+        $rtn .= "<div class='profile-detail-line profile-inline-line $extra_class'>
+                      <label>$label</label> $content
+                 </div>";
+      }
+    }
+               
+                          
+    $rtn .= "                                         
               </div>   
      
   
@@ -1368,7 +1399,13 @@ function fp_build_tab_array($page) {
    * @return string
    */
   function fp_render_currently_advising_box($bool_hide_catalog_warning = false, $bool_blank = FALSE, $bool_print = FALSE, $degree_plan = NULL, $screen_mode = "") {
+    depricated_message();    
+      
     global $current_student_id, $screen, $user, $student;
+    
+    
+    
+    
     
     $rtn  = "";
     $bool_catalog_warning = FALSE;

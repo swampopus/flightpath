@@ -78,18 +78,17 @@
         <div class='page-tabs-wrapper'><?php print $page_tabs; ?></div>
       <?php endif; ?>
 
-      <?php
-      if ($page_student_mini_profile) {
-        print "<div id='page-student-mini-profile-wrapper'>" . $page_student_mini_profile . "</div>
-                <div class='clear'></div>";
-      }
+      <?php if ($page_student_profile_header): ?>
+        <div id='page-student-mini-profile-wrapper'><?php print $page_student_profile_header; ?></div>
+                <div class='clear'></div>
+      <?php endif; ?>
 
       
-      print "<div class='inner-page-content-wrapper'>
-                $page_content
-             </div>"; 
+      <div class='inner-page-content-wrapper'>
+        <?php print $page_content; ?>
+      </div>
       
-      ?>
+      
     </div>
 
 

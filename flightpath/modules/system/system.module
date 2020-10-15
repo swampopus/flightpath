@@ -277,6 +277,7 @@ function system_block_regions() {
 function system_menu() {
   $items = array();
   
+  /*
   $items["main"] = array(
     "title" => "Main",
     "page_callback" => "system_display_main_page",
@@ -291,6 +292,24 @@ function system_menu() {
       "page_has_search" => TRUE,
     ),
   );
+  */
+
+  $items["student-profile"] = array(
+    "title" => "Student Profile",
+    "page_callback" => "system_display_student_profile_page",
+    "access_callback" => "system_can_access_student",
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "system",
+    "weight" => 10,
+    "page_settings" => array(      
+      "display_currently_advising" => FALSE,
+      "screen_mode" => "not_advising",      
+    ),
+  );
+
+  
+  
+  
   
   $items["install-finished"] = array(
     "title" => "Installation Finished",
@@ -546,6 +565,169 @@ function system_menu() {
            
   return $items;
 }
+
+
+
+
+function system_display_student_profile_page($student_id = "") {
+  global $current_student_id, $user;
+  
+  if ($student_id == "") $student_id = $current_student_id;
+  $rtn = "";
+  
+  fp_set_title('');
+  
+  $rtn .= "";
+  
+  $profile_items = array();
+  $profile_items['left_side'][] = array(
+    'label' => 'Status:',
+    'content' => 'Active',
+  );
+  $profile_items['left_side'][] = array(
+    'label' => 'Athlete?:',
+    'content' => 'No',
+  );
+  $profile_items['left_side'][] = array(
+    'label' => 'D%/F%:',
+    'content' => '33.3% D\'s / 11.1% F\'s',
+  );
+  $profile_items['left_side'][] = array(
+    'label' => 'Academic Priority:',
+    'content' => "<span class='profile-priority-bar priority-high'>High</span> <a href='javascript:fp_alert(\"Explainer content goes here.\");'><i class='fa fa-question-circle'></i></a>",
+  );
+    
+  //////
+  
+  $profile_items['right_side'][] = array(
+    'label' => 'Enrollment Code:',
+    'content' => 'C',  
+  );
+  $profile_items['right_side'][] = array(
+    'label' => 'Student Worker?:',
+    'content' => 'No',  
+  );
+  $profile_items['right_side'][] = array(
+    'label' => 'W%:',
+    'content' => "11.2% W's",  
+  );
+  $profile_items['right_side'][] = array(
+    'label' => 'ACT Score:',
+    'content' => '33 (28 E / 35 M)',  
+  );
+    
+  
+  
+  
+  $rtn .= "<div class='student-profile-header-full'>";
+  $rtn .= fp_render_student_profile_header(FALSE, $profile_items); // Send more items since this is a "full" profile.
+  $rtn .= "</div><div class='clear'></div>";  
+  
+  $rtn .= fp_render_section_title(t("Alerts"), "student-profile-alerts");
+  $rtn .= "<table border='0' class='student-alerts'>
+             <thead>
+             <tr>
+               <th>Actions</th>
+               <th>Status</th>
+               <th>Comments</th>
+               <th>Last Updated</th>
+             </tr>
+             </thead>             
+             <tr class='open'>
+              <td><i class='fa fa-eye'></i> <i class='fa fa-pencil'></i></td>
+              <td>Open</td>
+              <td>Student is approaching too many missed classes.</td>
+              <td>06/18/2020 - 2:15pm</td>              
+             </tr>
+
+             <tr class='open'>
+              <td><i class='fa fa-eye'></i> <i class='fa fa-pencil'></i></td>
+              <td>Open</td>
+              <td>Notice: The student's GPA has dropped below 2.50.  Recommend intervention by text message or phone call.</td>
+              <td>06/13/2020 - 10:05am</td>              
+             </tr>
+             
+             <tr class='closed'>
+              <td><i class='fa fa-eye'></i> <i class='fa fa-pencil'></i></td>
+              <td>Closed</td>
+              <td>Student is approaching too many missed classes.</td>
+              <td>05/02/2020 - 8:45am</td>              
+             </tr>
+
+             <tr class='open'>
+              <td><i class='fa fa-eye'></i> <i class='fa fa-pencil'></i></td>
+              <td>Open</td>
+              <td>Student is approaching too many missed classes.</td>
+              <td>01/2/2020 - 1:15pm</td>              
+             </tr>
+
+             <tr class='open'>
+              <td><i class='fa fa-eye'></i> <i class='fa fa-pencil'></i></td>
+              <td>Open</td>
+              <td>Notice: The student's hours have dropped below 12.  Recommend intervention by text message or phone call.</td>
+              <td>11/13/2019 - 11:05am</td>              
+             </tr>
+
+                                       
+           </table>";
+  
+  
+  
+  
+  return $rtn;
+} // display student profile page
+
+
+
+
+
+
+/**
+ * Used by the menu to determine if the user can access some basic information about the student (like Profile page, etc)
+ */
+function system_can_access_student($student_id = "") {
+  global $current_student_id, $user;
+  
+  if ($student_id == "") $student_id = $current_student_id;
+  
+  
+  // must be logged in first...
+  if (!user_has_permission("access_logged_in_content")) return FALSE;
+
+  if ($student_id == "" || $student_id === 0) return FALSE;
+  
+  if ($user->id == 1) return TRUE; // the admin user.
+  
+  // Can the user view ANY advising session?
+  if (user_has_permission("view_any_advising_session")) return TRUE;
+  
+  // can the user only see their own advisees, and is this student one of their advisees?
+  if (user_has_permission("view_advisee_advising_session")) {
+    // Is the student_id in their list of advisees?
+    $advisees = advise_get_advisees();
+  
+    if (in_array($student_id, $advisees)) return TRUE;    
+  }
+  
+  // Is this user viewing THEIR OWN advising session?
+  if (user_has_permission("view_own_advising_session")) {
+  
+    if ($student_id == $user->cwid && ($student_id != "" && $student_id !== 0)) return TRUE;
+  }
+  
+  
+  // All else fails, return FALSE  
+  return FALSE;
+  
+}
+
+
+
+
+
+
+
+
 
 
 function system_display_disable_login_page() {
