@@ -54,6 +54,8 @@ $unfinished_col = hex2rgb($_GET["unfinished_col"]);
 $progress_col = hex2rgb($_GET["progress_col"]);
 
 
+
+
 // Begin constructing the chart.
 $data = new pData();
 $data->addPoints(array($progress, $unfinished), "Value");

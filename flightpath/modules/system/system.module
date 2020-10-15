@@ -3010,64 +3010,163 @@ function system_display_dashboard_page () {
               </div>
            </div>";
 
-  $left_col_blocks = blocks_render_blocks("system_main", "left_col");
-  $right_col_blocks = blocks_render_blocks("system_main", "right_col");
+
+  if (!isset($_SESSION["fp_pie_chart_token"])) {
+    $_SESSION["fp_pie_chart_token"] = md5(fp_token());
+  }
+  //old Google API url: $pie_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
+  $pie_chart_url_1 = base_path() . "/inc/pchart/fp_pie_chart.php?progress=27&unfinished=73&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
+    
+
+  $rtn .= "<div class='dash-full-width'>
+              " . fp_render_section_title("Your Advising Stats for Fall 2020 (20201)") . "
+              <div class='advising-stats-block-inner-wrapper'>
+                
+                <div class='advising-stat-box'>
+                  <div class='stat-box-title'>Completed Advisings</div>
+                  <div class='stat-box-chart'><img src='$pie_chart_url_1'></div>
+                  <div class='stat-box-caption'>27% (59 of 220)</div> 
+                </div>
+
+                <div class='advising-stat-box'>
+                  <div class='stat-box-title'>Advisees Breakdown</div>
+                  <div class='stat-box-chart'> &nbsp; &nbsp; &nbsp; [[[[  SHOW A BAR GRAPH HERE, OF NUM OF FRESHMEN, SOPHOMORE, JR, SR, ETC ]]]]  &nbsp; &nbsp; &nbsp;</div>
+                  <div class='stat-box-chart'> &nbsp; &nbsp; &nbsp; [[[[  SHOW A BAR GRAPH HERE, OF NUM OF FRESHMEN, SOPHOMORE, JR, SR, ETC ]]]]  &nbsp; &nbsp; &nbsp;</div>
+                  <div class='stat-box-chart'> &nbsp; &nbsp; &nbsp; [[[[  SHOW A BAR GRAPH HERE, OF NUM OF FRESHMEN, SOPHOMORE, JR, SR, ETC ]]]]  &nbsp; &nbsp; &nbsp;</div>
+                  <div class='stat-box-chart'> &nbsp; &nbsp; &nbsp; [[[[  SHOW A BAR GRAPH HERE, OF NUM OF FRESHMEN, SOPHOMORE, JR, SR, ETC ]]]]  &nbsp; &nbsp; &nbsp;</div>
+                  <div class='stat-box-chart'> &nbsp; &nbsp; &nbsp; [[[[  SHOW A BAR GRAPH HERE, OF NUM OF FRESHMEN, SOPHOMORE, JR, SR, ETC ]]]]  &nbsp; &nbsp; &nbsp;</div>
+                  <div class='stat-box-chart'> &nbsp; &nbsp; &nbsp; [[[[  SHOW A BAR GRAPH HERE, OF NUM OF FRESHMEN, SOPHOMORE, JR, SR, ETC ]]]]  &nbsp; &nbsp; &nbsp;</div>
+                                     
+                </div>
+
+
+                <div class='advising-stat-box'>
+                  <div class='stat-box-title'>Priority Values</div>
+                  <div class='stat-box-chart'>&nbsp; &nbsp; [[[ PIE CHART SHOWING HIGH, MED, NORMAL ]]] &nbsp; &nbsp;</div>
+                  <div class='stat-box-chart'>&nbsp; &nbsp; [[[ PIE CHART SHOWING HIGH, MED, NORMAL ]]] &nbsp; &nbsp;</div>
+                  <div class='stat-box-chart'>&nbsp; &nbsp; [[[ PIE CHART SHOWING HIGH, MED, NORMAL ]]] &nbsp; &nbsp;</div>
+                  <div class='stat-box-chart'>&nbsp; &nbsp; [[[ PIE CHART SHOWING HIGH, MED, NORMAL ]]] &nbsp; &nbsp;</div>
+                  <div class='stat-box-chart'>&nbsp; &nbsp; [[[ PIE CHART SHOWING HIGH, MED, NORMAL ]]] &nbsp; &nbsp;</div>
+                  <div class='stat-box-chart'>&nbsp; &nbsp; [[[ PIE CHART SHOWING HIGH, MED, NORMAL ]]] &nbsp; &nbsp;</div>
+                   
+                </div>
+                
+                                               
+                
+              </div>
+           </div>";
+
+
   
   $rtn .= "<div class='dash-left'>
-         <div class='activity-feed-block'>
-            " . fp_render_section_title("Advisee Activity Feed") . "
-           <div class='contents'>
-            <div class='feed-item'>
-              <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
-              <div class='feed-item-title'>Bill Thompson (10092838)</div>
-              <div class='feed-item-desc'>Student has dropped below 12 hours.</div>
-              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-            </div>
-
-            <div class='feed-item'>
-              <div class='feed-item-icon'><i class='fa fa-envelope-o'></i></div>
-              <div class='feed-item-title'>Sally McDaniel (10042872)</div>
-              <div class='feed-item-desc'>Student opened email titled \"Schedule appointment\".</div>
-              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-            </div>
-            
-            <div class='feed-item'>
-              <div class='feed-item-icon'><i class='fa fa-comment-o'></i></div>
-              <div class='feed-item-title'>Sally McDaniel (10042872)</div>
-              <div class='feed-item-desc'>Student replied to text message.</div>
-              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-            </div>
-
-            <div class='feed-item'>
-              <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
-              <div class='feed-item-title'>Bill Thompson (10092838)</div>
-              <div class='feed-item-desc'>Student has dropped below 2.5 GPA.</div>
-              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-            </div>
-            
-            <div class='feed-item'>
-              <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
-              <div class='feed-item-title'>Ashley Smith (100776512)</div>
-              <div class='feed-item-desc'>Student has dropped below 12 hours.</div>
-              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-            </div>
-                                    
-            <div class='feed-item'>
-              <div class='feed-item-icon'><i class='fa fa-comment-o'></i></div>
-              <div class='feed-item-title'>Don Draper (100357445)</div>
-              <div class='feed-item-desc'>Student has replied to text message.</div>
-              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-            </div>
-                                    
-            <div class='feed-item'>
-              <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
-              <div class='feed-item-title'>Bill Thompson (10092838)</div>
-              <div class='feed-item-desc'>Student has dropped below 12 hours.</div>
-              <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-            </div>
-           </div>
-         </div>                                                
+             <div class='activity-feed-block'>
+                " . fp_render_section_title("Advisee Activity Feed") . "
+               <div class='contents'>
+                <div class='feed-item'>
+                  <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
+                  <div class='feed-item-title'>Bill Thompson (10092838)</div>
+                  <div class='feed-item-desc'>Student has dropped below 12 hours.</div>
+                  <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+                </div>
+    
+                <div class='feed-item'>
+                  <div class='feed-item-icon'><i class='fa fa-envelope-o'></i></div>
+                  <div class='feed-item-title'>Sally McDaniel (10042872)</div>
+                  <div class='feed-item-desc'>Student opened email titled \"Schedule appointment\".</div>
+                  <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+                </div>
+                
+                <div class='feed-item'>
+                  <div class='feed-item-icon'><i class='fa fa-comment-o'></i></div>
+                  <div class='feed-item-title'>Sally McDaniel (10042872)</div>
+                  <div class='feed-item-desc'>Student replied to text message.</div>
+                  <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+                </div>
+    
+                <div class='feed-item'>
+                  <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
+                  <div class='feed-item-title'>Bill Thompson (10092838)</div>
+                  <div class='feed-item-desc'>Student has dropped below 2.5 GPA.</div>
+                  <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+                </div>
+                
+                <div class='feed-item'>
+                  <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
+                  <div class='feed-item-title'>Ashley Smith (100776512)</div>
+                  <div class='feed-item-desc'>Student has dropped below 12 hours.</div>
+                  <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+                </div>
+                                        
+                <div class='feed-item'>
+                  <div class='feed-item-icon'><i class='fa fa-comment-o'></i></div>
+                  <div class='feed-item-title'>Don Draper (100357445)</div>
+                  <div class='feed-item-desc'>Student has replied to text message.</div>
+                  <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+                </div>
+                                        
+                <div class='feed-item'>
+                  <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
+                  <div class='feed-item-title'>Bill Thompson (10092838)</div>
+                  <div class='feed-item-desc'>Student has dropped below 12 hours.</div>
+                  <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+                </div>
+               </div>
+             </div>                                                
             </div>";
+
+
+  $rtn .= "<div class='dash-right'>
+             <div class='announcements-feed-block'>
+                " . fp_render_section_title("Announcements") . "
+               <div class='contents'>
+                <div class='feed-item'>                  
+                  <div class='feed-item-title'>Supplemental Instruction</div>
+                  <div class='feed-item-desc'>Supplemental Instruction is a free academic support program available to 
+                                              students enrolled in specific sections of BIOL 1014, 1015, 1020; CHEM 1007; 
+                                              and PHYS 2003.  Call the Student Success Center at 555-3667 for more information.</div>
+                  <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+                </div>
+    
+                <div class='feed-item'>                  
+                  <div class='feed-item-title'>Winter Classes Begin</div>
+                  <div class='feed-item-desc'>Full-term and 1st 8-week classes for the Winter semester begin on Monday, Dec 14th.</div>
+                  <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+                </div>
+                
+                <div class='feed-item'>
+                  
+                  <div class='feed-item-title'>Important Upcoming Dates:</div>
+                  <div class='feed-item-desc'><ul>
+                      <li>Sept 1-Nov 16--Application for May Graduation</li>
+                      <li>Sept 7--Labor Day Holiday</li>
+                      <li>Oct 5-16--Mid-Term Grading for Fall full-term</li>
+                      <li>Oct 8-9--Fall Break</li>
+                      </ul>
+                   </div>
+                  <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+                </div>
+
+                <div class='feed-item'>                  
+                  <div class='feed-item-title'>Fall Classes Begin</div>
+                  <div class='feed-item-desc'>Full-term and 1st 8-week classes for the Fall semester begin on Monday, Aug 4th.</div>
+                  <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+                </div>
+
+                <div class='feed-item'>                  
+                  <div class='feed-item-title'>Supplemental Instruction</div>
+                  <div class='feed-item-desc'>Supplemental Instruction is a free academic support program available to 
+                                              students enrolled in specific sections of BIOL 1014, 1015, 1020; CHEM 1007; 
+                                              and PHYS 2003.  Call the Student Success Center at 555-3667 for more information.</div>
+                  <div class='feed-item-datetime'>05/01/2020 8:45am</div>
+                </div>
+                
+               </div>  <!-- contents -->
+             </div> <!-- feed block -->                                                
+            </div>";
+
+            
+  
+
 
 
   $rtn .= "</div>";  // dashboard-inner-wrapper
