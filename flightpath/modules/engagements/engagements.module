@@ -45,6 +45,70 @@ function engagements_perm() {
 
 
 /**
+ * For use with the content module.  We will register our custom content type(s)
+ * for use with this module.
+ */
+function engagements_content_register_content_type() {
+  
+  $arr = array();
+  
+  $arr['engagement'] = array(
+    'title' => 'Engagement',
+    'description' => 'This is a content type meant to track a students activities and communications in the system.',
+  );
+  
+  $fields = array();
+  $fields['field__student_id'] = array(
+    'type' => 'textfield',
+    'label' => 'Student',
+  );
+
+  $fields['field__faculty_id'] = array(
+    'type' => 'textfield',
+    'label' => 'Faculty/Staff',
+  );
+  
+    
+  $fields['field__engagement_type'] = array(
+    'type' => 'textfield',
+    'label' => 'Type',
+  );
+    
+  $fields['field__engagement_msg'] = array(
+    'type' => 'textarea',
+    'label' => 'Message',
+  );
+
+  $fields['field__direction'] = array(
+    'type' => 'textfield',
+    'label' => 'Direction',
+  );  
+  
+  
+  $arr['engagement']['fields'] = $fields;
+  
+      
+  
+  return $arr;
+  
+} // hook_content_register_content_type
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
  * displays the main Engagements tab, which shows the history of past engagements.
  */
 function engagements_display_main() {

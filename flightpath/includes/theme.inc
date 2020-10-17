@@ -896,7 +896,7 @@ function fp_build_sub_tab_array($page) {
 function fp_build_tab_array($page) {
     global $current_student_id;
     $tab_array = array();
-    
+            
     $tab_family = $page["router_item"]["tab_family"];
     $active_tab_path = $page["path"];
     
@@ -915,7 +915,7 @@ function fp_build_tab_array($page) {
     // Also check to make sure the user has access to the tab.   
     $items = menu_get_items_in_tab_family($tab_family);
     foreach ($items as $item) {
-      
+                  
       // Does the user have access to this tab?
       if (!menu_check_user_access($item)) {
         continue;
@@ -923,6 +923,28 @@ function fp_build_tab_array($page) {
       
       $title = $item["title"];
       $path = $item["path"];
+      
+      if (strstr($path, "%")) {
+        // it contains at least one wildcard.  So, let's replace the wildcard with
+        // the coresponding value from arg().  Ex:  content/%/edit  (when we are on content/55/view) would == content/55/edit.
+        $new_path = "";
+        $pieces = explode("/", $path);
+        foreach ($pieces as $c => $piece) {
+          if ($piece != "%") {
+            $new_path .= $piece . "/";
+          }
+          else {
+            // This WAS a wildcard.  Replace with arg() value.
+            $a = @arg($c);
+            $new_path .= $a . "/";
+          } 
+                 
+        }
+        $new_path = rtrim($new_path, "/"); // get rid of trailing slash.
+        $path = $new_path;
+      }
+      
+      
       $active = FALSE;
       $on_click = @$page["page_settings"]["tab_on_click"];
       $href = "";

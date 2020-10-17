@@ -14,24 +14,12 @@ function content_menu() {
     "page_callback" => "content_display_content_admin_list",    
     "access_arguments" => array("admin_content"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
       "menu_icon" => fp_get_module_path('content') . "/icons/application_edit.png",      
-      "page_show_title" => TRUE,
-      "page_banner_is_link" => TRUE,
-      "page_hide_report_error" => TRUE,
-      "menu_links" => array(          
-        0 => array(
-          "text" => "Back to main menu",
-          "path" => "admin-tools/admin",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-      ),
+      "page_show_title" => TRUE,    
     ),    
-    "type" => MENU_TYPE_TAB,
-    "tab_family" => "content_list",
-  );     
+    "type" => MENU_TYPE_NORMAL_ITEM,
     
-
+  );     
  
   
   $items["content/delete"] = array(
@@ -42,69 +30,20 @@ function content_menu() {
 
   
 
-/*  // We will create a new menu item for editing each content type
-  // currently known to the system.
-  $types = content_get_types();
-  foreach ($types as $type => $details) {
-    // content/add/TYPE
-    $items["content/add/$type"] = array(
-      "page_callback" => "fp_render_form",
-      "page_arguments" => array("content_edit_content_form", "", $type, "new"),
-      "access_arguments" => array("edit_$type" . "_content"),
-      "page_settings" => array(
-        "page_has_search" => FALSE,
-        "page_banner_is_link" => TRUE,
-        "page_hide_report_error" => TRUE,
-        "menu_links" => array(          
-          0 => array(
-            "text" => "Back to main menu",
-            "path" => "admin-tools/admin",
-            "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-          ),
-          1 => array(
-            "text" => "Back to content list",
-            "path" => "admin/config/content",
-            "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-          ),          
-        ),
-      ),
-      "type" => MENU_TYPE_TAB,
-      "tab_parent" => "admin/config/content",      
-    );
-  }
-*/
-
-
   // content/add/TYPE
   $items["content/add/%"] = array(
     "page_callback" => "fp_render_form",
     "page_arguments" => array("content_edit_content_form", "", 2, "new"),
     "access_callback" => "content_user_access",
     "access_arguments" => array("add_type", 2),
-    "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
-      "page_hide_report_error" => TRUE,
-      "menu_links" => array(          
-        0 => array(
-          "text" => "Back to main menu",
-          "path" => "admin-tools/admin",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-        1 => array(
-          "text" => "Back to content list",
-          "path" => "admin/config/content",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),          
-      ),
-    ),
     "type" => MENU_TYPE_TAB,
     "tab_parent" => "admin/config/content",      
   );
 
 
-  // content/CID/edit
+  
   $items["content/%/edit"] = array(
+    "title" => "Edit",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("content_edit_content_form", "", "", 1),
     "access_callback" => "content_user_access",
@@ -126,31 +65,25 @@ function content_menu() {
         ),          
       ),
     ),
-    "type" => MENU_TYPE_TAB,
-    "tab_parent" => "admin/config/content",      
+    "type" => MENU_TYPE_TAB,    
+    "tab_family" => "content",
+    "weight" => 20,      
   );
   
   
+  
   $items["content/%"] = array(
-    "page_callback" => "content_view_content",    
+    "title" => "View",
+    "page_callback" => "content_view_content",
     "page_arguments" => array(1),
     "access_callback" => "content_user_access",
     "access_arguments" => array("view_cid", 1),
     "page_settings" => array(
-      "page_has_search" => FALSE,
       "page_show_title" => TRUE,
-      "page_banner_is_link" => TRUE,
-      "page_hide_report_error" => TRUE,
-      "menu_links" => array(          
-          0 => array(
-            "text" => "Edit this content",
-            "path" => "content/%CONTENT_CID%/edit",
-            "query" => "",
-          ),
-        ),      
     ),
     "type" => MENU_TYPE_TAB,
-    "tab_parent" => "admin/config/content",      
+    "tab_family" => "content",    
+    "weight" => 10,      
   );
   
   
@@ -167,8 +100,13 @@ function content_menu() {
  * @param unknown_type $var
  */
 function content_user_access($op, $var) {
+      
+  $cid = intval($var);  
+  
+  // TODO:  implement!
+  
   // for now, just return TRUE
-  //fpm("checking access to $op on $var");
+  
   return TRUE;
 }
 
@@ -205,13 +143,15 @@ function content_menu_handle_replacement_pattern($str) {
  * Display the content specified in the GET's cid.
  *
  */
-function content_view_content() {
+function content_view_content($cid) {
   
-  $rtn = "";
-  $content = content_load($_GET["cid"]);
+  $rtn = "";  
+      
+  $content = content_load($cid);  // assumed to be path/content/CID  So, arg(1) == the cid
   $types = content_get_types();
   $author = fp_load_user($content["user_id"]);
   
+    
   if (!strstr($content["title"], "[hide]")) {
     fp_set_title($content["title"]);
   }  
@@ -253,8 +193,9 @@ function content_edit_content_form($type = "", $cid = "") {
   
   $types = content_get_types();
 
+  fpm($types);
   
- if ($cid != "new") {
+  if ($cid != "new") {
     $content = content_load($cid);
     fp_set_title(t("Editing") . " " . $content["title"] . "");
     // Re-set $type, just in case the user put the wrong type in the
@@ -265,6 +206,19 @@ function content_edit_content_form($type = "", $cid = "") {
     // New piece of content
     $content = array();
     fp_set_title(t("Add new") . " " . $types[$type]["title"]);
+    
+    // Set some breadcrumbs
+    $crumbs = array();
+    $crumbs[0] = array(
+      'title' => 'Admin Console',
+      'href' => fp_url('admin-tools/admin'),
+    );
+    $crumbs[1] = array(
+      'title' => 'Content',
+      'href' => fp_url('admin/config/content'),
+    );
+    fp_set_breadcrumbs($crumbs);    
+    
   }
 
 
@@ -300,6 +254,18 @@ function content_edit_content_form($type = "", $cid = "") {
   );
   
 
+
+  // Are there extra fields?
+  if (is_array($types[$type]['fields'])) {
+    foreach($types[$type]["fields"] as $field_name => $field_details) {      
+      $form[$field_name] = $field_details;
+      // Add in default value previously saved, if available.
+      $form[$field_name]["value"] = $content["values"][$field_name];
+    }    
+  }
+
+
+  /*
   $form["body"] = array(
     "type" => "textarea",
     "label" => t("Body:"),
@@ -315,7 +281,7 @@ function content_edit_content_form($type = "", $cid = "") {
       $form[$field_name]["value"] = $content["settings"][$field_name];
     }
   }
-  
+  */
   
   
   // Draw the controls (buttons)
@@ -434,19 +400,14 @@ function content_edit_content_form_submit(&$form, $form_state) {
  * @param unknown_type $cid
  */
 function content_load($cid) {
-  $rtn = array();
-  $rtn["cid"] = $cid;
+  $content = array();
+  $content["cid"] = $cid;
   $modules = modules_implement_hook("content_load");
   foreach ($modules as $module) {
-    // Since PHP 5.4 removes call-time pass by reference, 
-    // I cannot use call_user_func.  Instead, I will call the
-    // functions directly like so:
-    // $name($val).
-    $function = $module . "_content_load";
-    $function($rtn);
+    call_user_func_array($module . "_content_load", array(&$content));    
   }
   
-  return $rtn;
+  return $content;
 }
 
 
@@ -460,7 +421,7 @@ function content_load($cid) {
  */
 function content_content_load(&$content) {
   
-  $res = db_query("SELECT * FROM content WHERE cid = '?' ", $content["cid"]);
+  $res = db_query("SELECT * FROM content WHERE cid = ? ", array( $content["cid"]));
   $cur = db_fetch_array($res);
 
   if ($cur["settings"] != "") {
@@ -594,6 +555,14 @@ function content_display_content_admin_list() {
   
   $rtn .= "</table>";
    
+  
+  // Set some breadcrumbs
+  $crumbs = array();
+  $crumbs[0] = array(
+    'title' => 'Admin Console',
+    'href' => fp_url('admin-tools/admin'),
+  );
+  fp_set_breadcrumbs($crumbs);
   
     
   return $rtn;
