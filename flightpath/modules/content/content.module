@@ -243,18 +243,14 @@ function content_edit_content_form($type = "", $cid = "") {
     "value" => $cid,    
   );
 
- 
   $form["title"] = array(
     "type" => "textfield",
     "label" => t("Title:"),
     "value" => $content["title"],
-    "required" => TRUE,
-    "description" => t("To hide the title, you may start
-                     it with [hide].  For example: \"[hide] this is a sample.\""), 
+    "required" => TRUE,     
   );
   
-
-
+  
   // Are there extra fields?
   if (is_array($types[$type]['fields'])) {
     foreach($types[$type]["fields"] as $field_name => $field_details) {      
@@ -334,6 +330,17 @@ function content_edit_content_form_submit(&$form, $form_state) {
   }  
   
   
+  // TODO:  If this is a NEW content, then insert once into content table to get cid.  Then, insert into content_versions to get vid.
+  // TODO:  If this is an EXISTING content, then insert once into content_versions to get new vid.  Update title in content table.
+  // TODO:  Insert new row into content__$type table, including all the extra fields and such.  It should
+  //        look like  cid | vid | field__name | field__name | and so on.
+  // 
+  
+  
+  
+  
+  
+  /*
   // Assemble our "settings" array, if available.
   $settings = array();
   if (is_array($types[$type]["settings"])) {    
@@ -378,7 +385,9 @@ function content_edit_content_form_submit(&$form, $form_state) {
     
     
   }
-   
+  
+  
+     
   // Should be we deleting things?
   if ($values["submit_delete"] != "") {
     db_query("DELETE FROM content WHERE cid = '?' ", $values["cid"]);
@@ -387,9 +396,9 @@ function content_edit_content_form_submit(&$form, $form_state) {
       "path" => "admin/config/content",
     );
   }
+  */
   
-  
-}
+} // ... submit
 
 
 

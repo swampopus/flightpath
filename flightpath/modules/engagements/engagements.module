@@ -58,28 +58,28 @@ function engagements_content_register_content_type() {
   );
   
   $fields = array();
-  $fields['field__student_id'] = array(
+  $fields['student_id'] = array(
     'type' => 'textfield',
     'label' => 'Student',
   );
 
-  $fields['field__faculty_id'] = array(
+  $fields['faculty_id'] = array(
     'type' => 'textfield',
     'label' => 'Faculty/Staff',
   );
   
     
-  $fields['field__engagement_type'] = array(
+  $fields['engagement_type'] = array(
     'type' => 'textfield',
     'label' => 'Type',
   );
     
-  $fields['field__engagement_msg'] = array(
+  $fields['engagement_msg'] = array(
     'type' => 'textarea',
     'label' => 'Message',
   );
 
-  $fields['field__direction'] = array(
+  $fields['direction'] = array(
     'type' => 'textfield',
     'label' => 'Direction',
   );  
