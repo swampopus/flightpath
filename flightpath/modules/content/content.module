@@ -193,14 +193,12 @@ function content_edit_content_form($type = "", $cid = "") {
   
   $types = content_get_types();
 
-  fpm($types);
-  
   if ($cid != "new") {
     $content = content_load($cid);
-    fp_set_title(t("Editing") . " " . $content["title"] . "");
+    fp_set_title(t("Editing") . " " . $content->title . "");
     // Re-set $type, just in case the user put the wrong type in the
     // URL
-    $type = $content["type"];
+    $type = $content->type;
   } 
   else {
     // New piece of content
@@ -246,7 +244,7 @@ function content_edit_content_form($type = "", $cid = "") {
   $form["title"] = array(
     "type" => "textfield",
     "label" => t("Title:"),
-    "value" => $content["title"],
+    "value" => $content->title,
     "required" => TRUE,     
   );
   
@@ -256,7 +254,7 @@ function content_edit_content_form($type = "", $cid = "") {
     foreach($types[$type]["fields"] as $field_name => $field_details) {      
       $form[$field_name] = $field_details;
       // Add in default value previously saved, if available.
-      $form[$field_name]["value"] = $content["values"][$field_name];
+      $form[$field_name]["value"] = $content->{"field__$field_name"};
     }    
   }
 
@@ -329,76 +327,129 @@ function content_edit_content_form_submit(&$form, $form_state) {
     return;
   }  
   
-  
-  // TODO:  If this is a NEW content, then insert once into content table to get cid.  Then, insert into content_versions to get vid.
-  // TODO:  If this is an EXISTING content, then insert once into content_versions to get new vid.  Update title in content table.
-  // TODO:  Insert new row into content__$type table, including all the extra fields and such.  It should
-  //        look like  cid | vid | field__name | field__name | and so on.
-  // 
-  
-  
-  
-  
-  
-  /*
-  // Assemble our "settings" array, if available.
-  $settings = array();
-  if (is_array($types[$type]["settings"])) {    
-    
-    foreach($types[$type]["settings"] as $field_name => $field_details) {      
-      $settings[$field_name] = $values[$field_name];
-    }
+  // Assemble into a content object, then call content_save();
+  if ($values['cid'] == 'new') {
+    // This is a NEW content obj!
+    $content = new stdClass();
+    $content->type = $type;
+    $content->cid = "new";    
+  }
+  else {
+    // This is an EXISTING content.  Load it.
+    $content = content_load($values['cid']);
   }
   
+  $content->title = $values['title'];  // required
   
-  if ($values["submit_submit"] != "") {
-    // a submission (not a deletion) is taking place
-    
-    // if the cid == "new" then we should do an insert.  Otherwise,
-    // we should do an update.
-    if ($values["cid"] == "new") {
-      db_query("INSERT INTO content (user_id, type, title, body, settings, posted, updated)
-                VALUES ('?', '?', '?', '?', '?', '?', '?')
-                ", $user->id, $values["type"], $values["title"], $values["body"], serialize($settings), $now, $now);
-      
-      $new_id = db_insert_id();
-      
-      $form["#redirect"] = array(
-        "path" => "content/$new_id/edit",
-      );
-      
-      
-    }
-    else {
-      // We are editing an existing piece of content-- just update.
-      db_query("UPDATE content
-                SET title = '?',
-                    body = '?',
-                    settings = '?',
-                    updated = '?'
-                WHERE cid = '?'
-                ", $values["title"], $values["body"], serialize($settings), $now, $values["cid"]);
-                    
-    }
-    
-    fp_add_message(t("%title has been saved successfully.", array("%title" => $values["title"])));
-    
-    
+  // Add in our new field values.  
+  foreach ($types[$type]['fields'] as $fieldname => $details) {
+    $content->{'field__' . $fieldname} = @$values[$fieldname];
   }
   
+
+  content_save($content);
   
-     
-  // Should be we deleting things?
-  if ($values["submit_delete"] != "") {
-    db_query("DELETE FROM content WHERE cid = '?' ", $values["cid"]);
-    fp_add_message(t("%title has been deleted successfully.", array("%title" => $values["title"])));
-    $form["#redirect"] = array(
-      "path" => "admin/config/content",
-    );
-  }
-  */
+  fp_add_message(t('Saved successfully.'));
+  
+    
   
 } // ... submit
+
+
+
+
+
+/**
+ * Save the content to the database.
+ *
+ * @param unknown_type $cid
+ */
+function content_save(&$content) {
+
+  $modules = modules_implement_hook("content_save");
+  foreach ($modules as $module) {
+    call_user_func_array($module . "_content_save", array(&$content));    
+  }
+
+}
+
+
+/**
+ * Implements hook_content_save.  We will save the content object to the database.
+ */
+function content_content_save(&$content) {
+  global $user;
+  
+  $types = content_get_types();
+  $type = $content->type;
+    
+  // If this is a NEW content, then insert once into content table to get cid.  Then, insert into content_versions to get vid.  Then update content table with vid.
+  if ($content->cid == 'new') {
+    db_query('INSERT INTO content (user_id, `type`, title, posted, updated)
+              VALUES (?, ?, ?, ?, ?)', array($user->id, $type, $content->title, time(), time()));
+    $content->cid = db_insert_id();
+    
+    // insert into content_versions to get the vid.
+    db_query("INSERT INTO content_versions (cid) VALUES (?)", array($content->cid));
+    $content->vid = db_insert_id();
+    
+  }
+  else {
+    // If this is an EXISTING content, then insert once into content_versions to get new vid.  Update title and vid in content table.
+    
+    // insert into content_versions to get the vid.
+    db_query("INSERT INTO content_versions (cid) VALUES (?)", array($content->cid));
+    $content->vid = db_insert_id();
+  }
+  
+
+  // Now we should have a fully created $content object.  Let's update the title and other values in the content table.
+  db_query("UPDATE content SET vid = ?, title = ?, updated = ?, user_id = ? WHERE
+            cid = ?", array($content->vid, $content->title, time(), $user->id, $content->cid));
+
+  
+  // Now we are going to insert all of the field values.  We assume there is a table ALREADY CREATED with our field names
+  // as field__the_name.
+    
+  // Insert new row into content__$type table, including all the extra fields and such.  It should
+  //        look like  cid | vid | field__name | field__name | and so on.
+  //   
+
+  // Add in our new field values.
+  $params = array();  
+  $all_fields = array();
+  $param_names = array();
+  
+  $all_fields[] = 'cid';
+  $all_fields[] = 'vid';
+  
+  $param_names[] = ':cid';
+  $param_names[] = ':vid';
+  
+  $params[':cid'] = $content->cid;
+  $params[':vid'] = $content->vid;
+  
+  foreach ($types[$type]['fields'] as $fieldname => $details) {
+    $db_field_name = "field__$fieldname";  
+    $all_fields[] = $db_field_name;
+    $param_names[] = ":$db_field_name";
+        
+    $params[":field__$fieldname"] = $content->{$db_field_name};
+    
+  }  
+
+  $sql = "INSERT INTO content__$type
+              (" . join(", " , $all_fields) . ")
+              VALUES (" . join(", " , $param_names) . ")";
+    
+  db_query($sql, $params);    
+  
+    
+  
+} // content_content_save
+
+
+
 
 
 
@@ -409,8 +460,8 @@ function content_edit_content_form_submit(&$form, $form_state) {
  * @param unknown_type $cid
  */
 function content_load($cid) {
-  $content = array();
-  $content["cid"] = $cid;
+  $content = new stdClass();
+  $content->cid = $cid;
   $modules = modules_implement_hook("content_load");
   foreach ($modules as $module) {
     call_user_func_array($module . "_content_load", array(&$content));    
@@ -420,27 +471,33 @@ function content_load($cid) {
 }
 
 
+
+
 /**
  * Implementation of content's hook_content_load
  * 
  * We simply wish to load from our db table.  The cid is in
- * $content["cid"].
+ * $content->cid.
  *
  * @param unknown_type $content
  */
 function content_content_load(&$content) {
   
-  $res = db_query("SELECT * FROM content WHERE cid = ? ", array( $content["cid"]));
-  $cur = db_fetch_array($res);
+  $res = db_query("SELECT * FROM content WHERE cid = ? ", array( $content->cid));
+  $content = db_fetch_object($res);
 
-  if ($cur["settings"] != "") {
-    $arr = unserialize($cur["settings"]);
-    $cur["settings"] = $arr;
-  }
+  // Populate our field values in the content object
   
-  if ($cur && is_array($cur) && count($cur) > 0) {
-    $content += $cur;
-  }
+  $res = db_query("SELECT * FROM content__$content->type WHERE vid = ?", array($content->vid));
+  $fieldvals = db_fetch_array($res);
+
+  $types = content_get_types();  
+  foreach ($types[$content->type]['fields'] as $fieldname => $details) {
+    $val = @$fieldvals['field__' . $fieldname];
+    $content->{'field__' . $fieldname} = $val;    
+  }  
+    
+  
      
 }
 
