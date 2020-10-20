@@ -997,6 +997,7 @@ label {
 
 .element-type-textfield input,
 .element-type-password input,
+.element-type-datetime-local input,
 .element-type-search input
  {
   font-size: 1.0em;
@@ -1008,6 +1009,10 @@ label {
   box-shadow: 0px 1px 2px rgb(0,0,0,0.15);
   border-radius: 4px;
   filter: none;
+}
+
+.element-type-datetime-local input {
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .element-type-submit input

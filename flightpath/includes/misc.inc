@@ -456,9 +456,10 @@ function fp_no_html_xss($string) {
  
  
 /**
- * Filter HTML, allowing only certain tags, and removing dangerous attributes.
+ * Filter string with possible HTML, allowing only certain tags, and removing dangerous attributes.
  * 
  * $type can be:
+ *    - "plain" - No HTML tags are allowed.
  *    - "basic" - Only certain tags allowed, no attributes. Safest. New lines = <br>
  *    - "full" - All HTML is allowed through.
  * 
@@ -469,7 +470,11 @@ function filter_markup($str, $type = "basic") {
   $doc = new DOMDocument();
   @$doc->loadHTML($str);
   $str = $doc->saveHTML();  
-  
+
+
+  if ($type == 'plain') {
+    $str = strip_tags($str);
+  }
   
   if ($type == "basic") {
     
@@ -488,6 +493,7 @@ function filter_markup($str, $type = "basic") {
     $str = nl2br($str);
     
   }
+  
   
   
   return $str;

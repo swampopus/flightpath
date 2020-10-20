@@ -190,7 +190,8 @@ function fp_display_page($page) {
   // Are there any "menu_link"s for this?  In order words, little links at the top of the page,
   // where breadcrumbs might appear.
   if (!$screen->bool_print && @is_array($page["router_item"]["page_settings"]["menu_links"])) {
-    $content_top .= "<ul class='top-menu-links'>";
+    //$content_top .= "<ul class='top-menu-links'>";
+    $crumbs = array();
     foreach ($page["router_item"]["page_settings"]["menu_links"] as $item) {
       $lclass = "";
       if ($c == 0) $lclass='first';
@@ -209,10 +210,17 @@ function fp_display_page($page) {
       }
       
       
-      $content_top .= "<li class='$lclass'>" . l($t, $p, $q, $a) . "</li>";
+      //$content_top .= "<li class='$lclass'>" . l($t, $p, $q, $a) . "</li>";
+      $crumbs[] = array('text' => $t, 'path' => $p, 'query' => $q, 'attributes' => $a);
+      
       $c++;
     }
-    $content_top .= "</ul>";
+    //$content_top .= "</ul>";
+    
+    // If not already set!
+    if (!isset($GLOBALS['fp_breadcrumbs'])) {
+      fp_set_breadcrumbs($crumbs);
+    }
   }
 
     
@@ -639,15 +647,26 @@ function fp_render_breadcrumbs() {
     foreach ($crumbs as $crumb) {      
       $z_index = 20 - $c;
   
-      $title = @$crumb['title'];
-      $href = @$crumb['href'];
+      $text = @$crumb['text'];
+      $path = @$crumb['path'];
+      $query = @$crumb['query'];
+      $attributes = @$crumb['attributes'];
+      
+      if (!$attributes || !is_array($attributes)) {
+        $attributes = array();
+      }
+  
+      $attributes['style'] .= " z-index: $z_index;";
+  
+  
+      $link = l($text, $path, $query, $attributes);
   
       $extra_class = "";
       if ($c == 0) $extra_class .= "first";
       if ($c == count($crumbs) -1) $extra_class .= " last";
   
-      $rtn .= "<li class='crumbs $extra_class' >
-                  <a href='$href' style='z-index: $z_index;'>$title</a>
+      $rtn .= "<li class='crumbs $extra_class' style='z-index: $z_index;' >
+                  $link
                </li>";
         
       

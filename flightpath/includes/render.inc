@@ -32,6 +32,8 @@ function fp_render_content($render_array = array()) {
     return "";
   }
 
+  $class = trim(@$render_array['#class']);
+
   // Any hooks to alter this render array?  
   $modules = modules_implement_hook("content_alter");
   foreach ($modules as $module) {
@@ -101,7 +103,7 @@ function fp_render_content($render_array = array()) {
   $render_array = $new_form;
   
   // We can now proceed with rendering this render_array.  It will be similar to fp_render_form.
-  $rtn .= "<div class='renderapi-content' id='render-$render_id'>";
+  $rtn .= "<div class='renderapi-content $class' id='render-$render_id'>";
   $rtn .= fp_render_array($render_array);
   $rtn .= "</div>";
       
@@ -566,7 +568,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     $rtn .= "<textarea name='$name' id='element-$cssname' rows='$rows' $attributes>$value</textarea>";
   }
 
-  if ($type == "textfield" || $type == "text" || $type == "search" || $type == "password") {
+  if ($type == "textfield" || $type == "text" || $type == "search" || $type == "password" || $type == 'datetime-local') {
     if ($type == "textfield") $type = "text";
     $size = (isset($element["size"])) ? $element["size"] : "60";
     $maxlength = (isset($element["maxlength"])) ? $element["maxlength"] : "255";

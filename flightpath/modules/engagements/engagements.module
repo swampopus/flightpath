@@ -68,21 +68,60 @@ function engagements_content_register_content_type() {
     'label' => 'Faculty/Staff',
   );
   
-    
+
+  $fields['activity_datetime'] = array(
+    'type' => 'datetime-local',
+    'label' => 'Date/Time',
+    'value' => date('Y-m-d\TH:i', time()),  // today's date/time by default
+    'format_date' => 'short',
+  );
+      
   $fields['engagement_type'] = array(
-    'type' => 'textfield',
+    'type' => 'select',
+    'options' => array(
+      'phone' => t('Phone Call'),
+      'email' => t('Email'),
+      'in_person' => t('In-Person Meeting'),
+      'video_chat' => t('Video Chat'),
+      'txt_msg' => t('Txt Message'),
+      'social_media' => t('Social Media'),
+      'other' => t('Other'),
+    ),
     'label' => 'Type',
+    'required' => TRUE,
+    'hide_please_select' => TRUE,
   );
     
   $fields['engagement_msg'] = array(
-    'type' => 'textarea',
+    'type' => 'textarea',  
     'label' => 'Message',
+    'filter' => 'plain',
   );
 
   $fields['direction'] = array(
-    'type' => 'textfield',
+    'type' => 'select',
     'label' => 'Direction',
+    'required' => TRUE,
+    'hide_please_select' => TRUE,
+    'options' => array(
+      'sent' => t("Sent"),
+      'received' => t('Received'),
+    ),
   );  
+  
+  $fields['phone_outcome'] = array(
+    'type' => 'select',
+    'label' => 'Phone Outcome',    
+    'hide_please_select' => TRUE,
+    'options' => array(
+      'connected' => t("Connected"),
+      'no_answer' => t('No Answer'),
+      'voicemail' => t('Left Voicemail'),
+      'busy' => t('Busy'),
+      'wrong_number' => t('Wrong Number'),
+    ),
+  );  
+  
   
   
   $arr['engagement']['fields'] = $fields;

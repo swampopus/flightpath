@@ -15,7 +15,14 @@ function content_menu() {
     "access_arguments" => array("admin_content"),
     "page_settings" => array(
       "menu_icon" => fp_get_module_path('content') . "/icons/application_edit.png",      
-      "page_show_title" => TRUE,    
+      "page_show_title" => TRUE,
+      "menu_links" => array(          
+        0 => array(
+          "text" => t("Admin Console"),
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
     
@@ -36,7 +43,22 @@ function content_menu() {
     "page_arguments" => array("content_edit_content_form", "", 2, "new"),
     "access_callback" => "content_user_access",
     "access_arguments" => array("add_type", 2),
-    "type" => MENU_TYPE_TAB,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "page_settings" => array(
+      "menu_links" => array(          
+        0 => array(
+          "text" => "Admin Console",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Content",
+          "path" => "admin/config/content",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),          
+      ),
+        
+    ),
     "tab_parent" => "admin/config/content",      
   );
 
@@ -54,12 +76,12 @@ function content_menu() {
       "page_hide_report_error" => TRUE,
       "menu_links" => array(          
         0 => array(
-          "text" => "Back to main menu",
+          "text" => "Admin Console",
           "path" => "admin-tools/admin",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),
         1 => array(
-          "text" => "Back to content list",
+          "text" => "Content",
           "path" => "admin/config/content",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),          
@@ -80,6 +102,18 @@ function content_menu() {
     "access_arguments" => array("view_cid", 1),
     "page_settings" => array(
       "page_show_title" => TRUE,
+      "menu_links" => array(          
+        0 => array(
+          "text" => "Admin Console",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Content",
+          "path" => "admin/config/content",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),          
+      ),      
     ),
     "type" => MENU_TYPE_TAB,
     "tab_family" => "content",    
@@ -145,28 +179,83 @@ function content_menu_handle_replacement_pattern($str) {
  */
 function content_view_content($cid) {
   
-  $rtn = "";  
+  $render = array();  
+  $render["#id"] = "content_" . $cid;  // We will be doing this as a render array, so other modules can alter.
+    
       
   $content = content_load($cid);  // assumed to be path/content/CID  So, arg(1) == the cid
+  $type = $content->type;
   $types = content_get_types();
-  $author = fp_load_user($content["user_id"]);
+  $author = fp_load_user($content->user_id);
+  
+  $render['#class'] = "content-type-" . $type;
   
     
-  if (!strstr($content["title"], "[hide]")) {
-    fp_set_title($content["title"]);
+  if (!strstr($content->title, "[hide]")) {
+    fp_set_title($content->title);
   }  
-  fp_add_body_class("content-type-" . $content["type"]);
+  fp_add_body_class("content-type-" . $content->type);
   
-  $rtn .= "<div class='content-view content-view-{$content["type"]}'>";
+  //$rtn .= "<div class='content-view content-view-{$content->type}'>";
   
-  $rtn .= "<div class='content-submitted'>" . t("Submitted by") . " " . $author->name . " " . t("on");
-  $rtn .= " " . format_date($content["posted"]) . "</div>";
+
+  $render['content_submitted'] = array(
+    'type' => 'markup',
+    'value' => "<div class='content-submitted'>" . t("Submitted by") . " " . $author->name . " " . t("on") . " " . format_date($content->posted, 'short') . "</div>",
+  );
+
+  // Display all the various fields
+  if (is_array($types[$type]['fields'])) {
+    foreach($types[$type]["fields"] as $field_name => $field_details) {      
+            
+      $value = $content->{"field__$field_name"};
+      
+      if (isset($form[$field_name]['filter']) && $form[$field_name]['filter'] != 'plain') {
+        $value = filter_markup(trim($value), $form[$field_name]['filter']);
+      }
+      else {
+        // Always assumed to be "plain" if no filter is set.
+        $value = filter_markup($value, "plain");
+        // Need to add in line breaks if this was plain.
+        $value = nl2br(trim($value));
+      }
+      
+      // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
+      if ($field_details['type'] == 'datetime-local') {
+        if (trim($value) != '') {
+          //$value = date('Y-m-d\TH:i', strtotime($value));
+          $format = 'standard';
+          if (isset($field_details['format_date'])) {
+            $format = $field_details['format_date'];
+          }
+          $value = format_date(strtotime($value), $format);
+        }
+      }      
+      
+      // if this is a select list, we want to display the option label this value went with.
+      if ($field_details['type'] == 'select') {
+        $temp = @$field_details['options'][$value];
+        if ($temp != "") $value = $temp;
+      }
+      
+      
+      if ($field_details['type'] != 'hidden') {
+      
+        $render['field__' . $field_name] = array(
+          'type' => 'markup',
+          'label' => $field_details['label'],
+          'value' => "<div class='field-value'>$value</div>",
+        );
+        
+      }
+      
+      
+    }    
+  }  
   
-  $rtn .= "<div class='content-body'>" . $content["body"] . "</div>";
   
-  $rtn .= "</div>"; 
   
-  return $rtn;
+  return fp_render_content($render);
   
 }
 
@@ -205,18 +294,6 @@ function content_edit_content_form($type = "", $cid = "") {
     $content = array();
     fp_set_title(t("Add new") . " " . $types[$type]["title"]);
     
-    // Set some breadcrumbs
-    $crumbs = array();
-    $crumbs[0] = array(
-      'title' => 'Admin Console',
-      'href' => fp_url('admin-tools/admin'),
-    );
-    $crumbs[1] = array(
-      'title' => 'Content',
-      'href' => fp_url('admin/config/content'),
-    );
-    fp_set_breadcrumbs($crumbs);    
-    
   }
 
 
@@ -249,12 +326,31 @@ function content_edit_content_form($type = "", $cid = "") {
   );
   
   
-  // Are there extra fields?
+  // Are there extra fields?  If so, add their values in as well.
   if (is_array($types[$type]['fields'])) {
     foreach($types[$type]["fields"] as $field_name => $field_details) {      
       $form[$field_name] = $field_details;
-      // Add in default value previously saved, if available.
-      $form[$field_name]["value"] = $content->{"field__$field_name"};
+      
+      $value = $content->{"field__$field_name"};
+      
+      if (isset($form[$field_name]['filter'])) {
+        $value = filter_markup($value, $form[$field_name]['filter']);
+      }
+      else {
+        // Always assumed to be "plain" if no filter is set.
+        $value = filter_markup($value, "plain");
+      }
+      
+      // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
+      if ($form[$field_name]['type'] == 'datetime-local') {
+        if (trim($value) != '') {
+          $value = date('Y-m-d\TH:i', strtotime($value));
+        }
+      }      
+      
+      
+      $form[$field_name]["value"] = $value;
+      
     }    
   }
 
@@ -621,15 +717,6 @@ function content_display_content_admin_list() {
   
   $rtn .= "</table>";
    
-  
-  // Set some breadcrumbs
-  $crumbs = array();
-  $crumbs[0] = array(
-    'title' => 'Admin Console',
-    'href' => fp_url('admin-tools/admin'),
-  );
-  fp_set_breadcrumbs($crumbs);
-  
     
   return $rtn;
 }
