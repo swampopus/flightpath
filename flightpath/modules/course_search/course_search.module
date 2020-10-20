@@ -48,7 +48,7 @@ function course_search_menu() {
       "menu_icon" => fp_get_module_path('course_search') . "/icons/book_go.png",
       "menu_links" => array(         
         0 => array(
-          "text" => "Back to main menu",
+          "text" => "Admin Console",
           "path" => "admin-tools/admin",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),

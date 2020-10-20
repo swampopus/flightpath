@@ -18,7 +18,7 @@ function student_search_menu() {
       "page_hide_report_error" => TRUE,      
       "menu_links" => array(         
         0 => array(
-          "text" => "Back to main menu",
+          "text" => "Admin Console",
           "path" => "admin-tools/admin",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),
