@@ -10,14 +10,6 @@ function advise_menu() {
     "page_callback" => "fp_render_form",
     "page_arguments" => array("advise_toggle_draft_form"),
     "access_arguments" => array("toggle_draft"),
-    "page_settings" => array(
-      "menu_links" => array(         
-        0 => array(
-          "text" => "Back to Main",
-          "path" => "main",
-        ),
-      ),          
-    ),
     "type" => MENU_TYPE_TAB,
     "tab_parent" => "main",
   );
@@ -39,8 +31,6 @@ function advise_menu() {
     "tab_family" => "system",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
-      "display_greeting" => TRUE,
-      "page_has_search" => TRUE,
     ),    
     "weight" => 30,
     "type" => MENU_TYPE_TAB,
@@ -70,8 +60,6 @@ function advise_menu() {
     "tab_family" => "system",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
-      "display_greeting" => TRUE,
-      "page_has_search" => TRUE,      
     ),    
     "weight" => 60,
     "type" => MENU_TYPE_TAB,
@@ -101,8 +89,6 @@ function advise_menu() {
     "tab_family" => "system",
     "page_settings" => array (
       "display_currently_advising" => TRUE,
-      "display_greeting" => TRUE,
-      "page_has_search" => TRUE,      
     ),    
     "weight" => 40,
     "type" => MENU_TYPE_TAB,
@@ -1483,12 +1469,13 @@ function advise_display_view($view = "view") {
   $db = get_global_database_handler();
   $crumbs = array();
   $crumbs[] = array(
-    'title' => 'Students',
-    'href' => fp_url('student-search'),
+    'text' => 'Students',
+    'path' => 'student-search',
   );
   $crumbs[] = array(
-    'title' => $db->get_student_name($screen->student->student_id) . " ({$screen->student->student_id})",
-    'href' => fp_url('student-profile', "current_student_id={$screen->student->student_id}"),
+    'text' => $db->get_student_name($screen->student->student_id) . " ({$screen->student->student_id})",
+    'path' => 'student-profile', 
+    'query' => "current_student_id={$screen->student->student_id}",
   );  
   fp_set_breadcrumbs($crumbs);
      
