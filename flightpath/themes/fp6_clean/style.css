@@ -1026,10 +1026,12 @@ label {
   cursor: pointer;
 }
 
-.element-type-submit input:hover {
+.element-type-submit input:hover
+ {
   background-color: lightskyblue;
   
 }
+
 
 .element-type-select select {
   font-size: 1.0em;
@@ -1043,6 +1045,8 @@ label {
   border-radius: 4px;
   filter: none;
 }
+
+
 
 
 
@@ -1071,6 +1075,32 @@ input::placeholder {
 }
 
 
+a.button {
+    display: inline-block;
+    color: white;
+    font-weight: bold;
+    border: 1px solid dodgerblue;    
+    background-color: #0095ff;
+    padding: 9px;
+    margin-bottom: 15px;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+a.button:hover {    
+  background-color: lightskyblue;      
+}
+
+
+.pager {
+  text-align: center;
+  border-top: 1px solid #ccc;
+  font-size: 0.9em;
+}
+
+.pager a {
+  text-decoration: none;
+}
 
 
 

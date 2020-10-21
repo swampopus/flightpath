@@ -204,47 +204,20 @@ function content_view_content($cid) {
     'value' => "<div class='content-submitted'>" . t("Submitted by") . " " . $author->name . " " . t("on") . " " . format_date($content->posted, 'short') . "</div>",
   );
 
+fpm($content);
+
   // Display all the various fields
   if (is_array($types[$type]['fields'])) {
     foreach($types[$type]["fields"] as $field_name => $field_details) {      
             
-      $value = $content->{"field__$field_name"};
-      
-      if (isset($form[$field_name]['filter']) && $form[$field_name]['filter'] != 'plain') {
-        $value = filter_markup(trim($value), $form[$field_name]['filter']);
-      }
-      else {
-        // Always assumed to be "plain" if no filter is set.
-        $value = filter_markup($value, "plain");
-        // Need to add in line breaks if this was plain.
-        $value = nl2br(trim($value));
-      }
-      
-      // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
-      if ($field_details['type'] == 'datetime-local') {
-        if (trim($value) != '') {
-          //$value = date('Y-m-d\TH:i', strtotime($value));
-          $format = 'standard';
-          if (isset($field_details['format_date'])) {
-            $format = $field_details['format_date'];
-          }
-          $value = format_date(strtotime($value), $format);
-        }
-      }      
-      
-      // if this is a select list, we want to display the option label this value went with.
-      if ($field_details['type'] == 'select') {
-        $temp = @$field_details['options'][$value];
-        if ($temp != "") $value = $temp;
-      }
-      
+      $display_value = $content->{"field__$field_name"}['display_value'];
       
       if ($field_details['type'] != 'hidden') {
       
         $render['field__' . $field_name] = array(
           'type' => 'markup',
           'label' => $field_details['label'],
-          'value' => "<div class='field-value'>$value</div>",
+          'value' => "<div class='field-value'>$display_value</div>",
         );
         
       }
@@ -331,15 +304,19 @@ function content_edit_content_form($type = "", $cid = "") {
     foreach($types[$type]["fields"] as $field_name => $field_details) {      
       $form[$field_name] = $field_details;
       
-      $value = $content->{"field__$field_name"};
+      $value = $content->{"field__$field_name"}['value'];
       
-      if (isset($form[$field_name]['filter'])) {
-        $value = filter_markup($value, $form[$field_name]['filter']);
-      }
-      else {
-        // Always assumed to be "plain" if no filter is set.
-        $value = filter_markup($value, "plain");
-      }
+      ////////////////////
+      // TODO:  I don't think I need to do the filter_markup stuff here.
+      //if (isset($form[$field_name]['filter'])) {
+      //  $value = filter_markup($value, $form[$field_name]['filter']);
+      //}
+      //else {
+      //  // Always assumed to be "plain" if no filter is set.
+      //  $value = filter_markup($value, "plain");
+      //}
+      /////////////////
+      
       
       // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
       if ($form[$field_name]['type'] == 'datetime-local') {
@@ -462,10 +439,18 @@ function content_edit_content_form_submit(&$form, $form_state) {
  */
 function content_save(&$content) {
 
+  // Remove from our globals cache
+  if ($content->cid != 'new') {
+    unset($GLOBALS['content_cache'][$content->cid]);
+  }
+
   $modules = modules_implement_hook("content_save");
   foreach ($modules as $module) {
     call_user_func_array($module . "_content_save", array(&$content));    
   }
+
+  // Save to globals cache
+  $GLOBALS['content_cache'][$content->cid] = $content;
 
 }
 
@@ -555,13 +540,28 @@ function content_content_save(&$content) {
  *
  * @param unknown_type $cid
  */
-function content_load($cid) {
+function content_load($cid, $reset = FALSE) {
+  if (!$cid) return null;
+    
+  if ($reset) {
+    unset($GLOBALS['content_cache'][$cid]);
+  }  
+
+  if (isset($GLOBALS['content_cache'][$cid])) {
+    return $GLOBALS['content_cache'][$cid];
+  }
+
+    
   $content = new stdClass();
   $content->cid = $cid;
   $modules = modules_implement_hook("content_load");
   foreach ($modules as $module) {
     call_user_func_array($module . "_content_load", array(&$content));    
   }
+  
+  
+  // Add to our globals cache
+  $GLOBALS['content_cache'][$cid] = $content;
   
   return $content;
 }
@@ -590,8 +590,44 @@ function content_content_load(&$content) {
   $types = content_get_types();  
   foreach ($types[$content->type]['fields'] as $fieldname => $details) {
     $val = @$fieldvals['field__' . $fieldname];
-    $content->{'field__' . $fieldname} = $val;    
-  }  
+    $content->{'field__' . $fieldname} = array('value' => $val, 'field' => $details);
+                
+                
+    $display_value = $val;
+      
+    // Figure out the "display_value" for this field.
+      
+    if (isset($details['filter']) && $details['filter'] != 'plain') {
+      $display_value = filter_markup(trim($display_value), $details['filter']);
+    }
+    else {
+      // Always assumed to be "plain" if no filter is set.
+      $display_value = filter_markup($display_value, "plain");
+      // Need to add in line breaks if this was plain.
+      $display_value = nl2br(trim($display_value));
+    }
+      
+    // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
+    if ($details['type'] == 'datetime-local') {
+      if (trim($display_value) != '') {
+        //$value = date('Y-m-d\TH:i', strtotime($value));
+        $format = 'standard';
+        if (isset($details['format_date'])) {
+          $format = $details['format_date'];
+        }
+        $display_value = format_date(strtotime($display_value), $format);
+      }
+    }      
+      
+    // if this is a select list, we want to display the option label this value went with.
+    if ($details['type'] == 'select') {
+      $temp = @$details['options'][$val];
+      if ($temp != "") $display_value = $temp;
+    }
+      
+    $content->{'field__' . $fieldname}['display_value'] = $display_value;  
+    
+  } // foreach  
     
   
      

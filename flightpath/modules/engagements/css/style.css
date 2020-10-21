@@ -1,0 +1,95 @@
+/**
+ *   @file
+ * This CSS file is for the engagements module
+*/
+
+
+#engagements-list-page .add-engagements-buttons {
+  float: right;
+  padding-right: 20px;
+  padding-left: 10px;
+}
+
+
+.engagements-list {
+  
+  padding: 20px;
+  
+}
+
+
+
+#engagements-list-page .activity-feed-teaser {
+    padding: 10px;
+    margin-bottom: 40px;
+    box-shadow: 2px 2px 5px #ccc;
+    color: #555;
+    min-height: 100px;
+}
+
+
+#engagements-list-page .activity-feed-teaser-sent {
+    background-color: #e6f7ff;
+    width: 90%;
+    float: right;
+}
+
+
+#engagements-list-page .activity-feed-teaser-received {
+  background-color: #e6ffe6;
+  width: 90%;  
+}
+
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-icon {
+  display: inline-block;
+  width: 30px;
+  color: #888;
+}
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-email-opens {
+  margin-left: 40px;
+}
+
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-description {
+  font-weight: bold;
+  color: #888;
+}
+
+
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-privacy {
+  float: right;  
+  margin-right: 10px;
+  color: #999;
+}
+
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-author {
+  float: right;
+  font-size: 0.9em;
+  margin-right: 20px;
+}
+
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-date-time {
+  float: right;
+  font-size: 0.9em;
+  margin-right: 10px;
+}
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-edit {
+  float: right;
+  
+}
+
+#engagements-list-page .activity-feed-teaser .activity-contents {
+  margin-left: 30px;
+  margin-top: 10px;
+  
+}
+
+
+
+

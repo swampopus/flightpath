@@ -154,17 +154,90 @@ function engagements_display_main() {
   global $current_student_id;
   
   fp_set_title('');
+
+  fp_add_css(fp_get_module_path("engagements") . "/css/style.css");
+  
+  $types = content_get_types();
+  
+  $icons = array(
+    'phone' => 'fa-phone',
+    'email' => 'fa-envelope', 
+    'txt_msg' => 'fa-comment',   
+    'note' => 'fa-file-text',   
+    'in_person' => 'fa-user',   
+    'social_media' => 'fa-cloud',   
+    'other' => 'fa-asterisk',   
+    'video_chat' => 'fa-video-camera',   
+    'reminder' => 'fa-thumb-tack',   
+  );
+  
   
   $rtn = "";
+  $rtn .= "<div id='engagements-list-page'>";
 
-
-
-
-
-
+  $rtn .= "<div class='add-engagements-buttons'>
+              
+                <a href='l' class='button'><i class='fa fa-envelope-o'></i>&nbsp; New Email</a>
+                <a href='l' class='button'><i class='fa fa-comment-o'></i>&nbsp; New TXT</a>
+                <a href='l' class='button'><i class='fa fa-plus'></i>&nbsp; Log New Engagement</a>
+              
+           </div> <!-- add-engagements-buttons -->
+           <div class='clear'></div>
+           ";
 
   
+  $rtn .= fp_render_section_title("Recent Engagements");
   
+  $rtn .= "<div class='engagements-list'>";
+  
+  // query for this student's engagements in descending order (newest at the top, oldest at the bottom).
+  // TODO:  Check that it is published
+  $res = db_query("SELECT DISTINCT(cid) FROM content__engagement a
+                   WHERE field__student_id = ?                                       
+                   ORDER BY field__activity_datetime DESC, vid DESC
+                   ", array($current_student_id));
+  while ($cur = db_fetch_object($res)) {
+    $cid = $cur->cid;
+    
+    $content = content_load($cid);
+       
+    
+    $icon = $icons[$content->field__engagement_type['value']];     
+
+    $rtn .= "<div class='activity-feed-teaser activity-feed-teaser-{$content->field__direction['value']} activity-feed-teaser-type-{$content->field__engagement_type['value']}'>
+                <div class='activity-header-content'>
+                  <span class='header-icon'><i class='fa $icon'></i></span>
+                  <span class='header-description'>{$content->field__engagement_type['display_value']}</span>
+                  <span class='header-phone-outcome'>: {$content->field__direction['display_value']}</span>
+                  <span class='header-edit'></span>
+                  <span class='header-date-time'>{$content->field__activity_datetime['display_value']}</span>
+                  <span class='header-author'>Richard Peacock</span>
+                </div>
+                <div class='activity-contents'>
+                  <div class='activity-comment'>
+                    {$content->field__engagement_msg['display_value']}
+                  </div>
+                </div>
+             </div>
+             <div class='clear'></div>";
+        
+    
+  } // while cur
+                   
+  
+  
+  // TODO:  We want to do this in a pagenated way.
+  
+  $rtn .= "<div class='pager'>
+              <a href='l'>first &laquo; prev < 1 &bull; 2 &bull; 3 > next &raquo; last</a>
+            </div>";
+  
+  
+  $rtn .= "</div>"; // engagements-list        
+
+
+
+  $rtn .= "</div>"; // engagements-list-page
   
   // Let's set our breadcrumbs
   $db = get_global_database_handler();
