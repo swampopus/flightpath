@@ -997,20 +997,41 @@ function setVar(id, newValue) {
 
 function popupWindowNew(url, extraVars) {
   
+  alert('deprecated.  Use dialog functions instead');
+  return false;
+  
   // Figure out the window's options from our settings, if they exist.
   var win_options = FlightPath.settings.popupAdviseWinOptions;
   if (!win_options) {
     win_options = "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375"; 
   }
   
-  var my_windowx = window.open(url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars,
-  "courseinfox" + FlightPath.settings.currentStudentId, win_options);
-
-  my_windowx.focus();  // make sure the popup window is on top.
+  var myurl = url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars
+  
+  
+  //var my_windowx = window.open(myurl, "courseinfox" + FlightPath.settings.currentStudentId, win_options);
+  //my_windowx.focus();  // make sure the popup window is on top.
+  //openSmallDialog(myurl, 'hey');
+  
   
 }
 
+
+function popupSmallIframeDialog(url, title, extraVars) {
+  var theURL = url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
+  
+  fpOpenSmallIframeDialog(theURL, title);
+  
+} 
+
+
+
+
 function popupPrintWindow(url) {
+  
+  alert('deprecated.  Use dialog functions instead');
+  return false;
+  
   
   // Figure out the window's options from our settings, if they exist.
   var win_options = FlightPath.settings.popupPrintWinOptions;
@@ -1032,6 +1053,11 @@ function popupPrintWindow(url) {
 
 
 function popupHelpWindow(url) {
+  
+  alert('deprecated.  Use dialog functions instead');
+  return false;
+  
+  
   // I don't think this function is used anymore.  Re-route to the popupPrintWindow instead.
   popupPrintWindow(url);
 }
@@ -1048,7 +1074,14 @@ function popupHelpWindow(url) {
 // }
 
 
+
+
 function popupWindow2(url, extraVars) {
+  
+  alert('deprecated.  Use dialog functions instead');
+  return false;
+  
+  
   // I don't think this is used, re-route to popupWindowNew just in case.
   popupWindowNew(url, extraVars);
 

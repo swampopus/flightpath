@@ -12,7 +12,7 @@ class AdvisingScreen extends stdClass
 	// Variables for the template/theme output...
 	public $theme_location, $page_content, $page_has_search, $page_tabs, $page_on_load;
 	public $page_hide_report_error, $page_scroll_top, $page_is_popup, $page_is_mobile;
-	public $page_title, $page_extra_css_files, $page_body_classes;
+	public $page_title, $page_extra_css_files, $page_body_classes, $page_display_currently_advising;
   
 
 
@@ -307,7 +307,7 @@ function draw_menu_items($menu_array) {
     $page_breadcrumbs = fp_render_breadcrumbs();
     
         
-    if ($this->student) {    
+    if ($this->student && $this->page_display_currently_advising == TRUE) {    
       $page_student_profile_header = fp_render_student_profile_header();      
     }
     

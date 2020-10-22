@@ -13,6 +13,7 @@ body
    z___background-color: #F2F2F2; 
   background-color: white;
   color: #555;
+  height: 100%;  /* required for modal dialog to work correctly */
 }
 
 /* 
@@ -1477,7 +1478,7 @@ table.fp-box-top {
 
 
 
-___popups{}
+___popups_and_dialog{}
 
 /* Don't display if this is a popup! */
 .page-is-popup #header,
@@ -1490,10 +1491,51 @@ ___popups{}
 }
 
 .page-is-popup #page-content {
-  width: calc(100vw - 20px) !important;
+  width: calc(100vw - 10px) !important;
+  
   padding-left: 0;
   padding-right: 10px;
 }
+
+.ui-dialog {
+  background-color: white;
+}
+
+
+.ui-dialog .ui-widget-content,
+.ui-widget-content
+{
+  background: white !important;
+}
+
+.ui-dialog .ui-dialog-content {
+  padding: 0;
+  padding-left: 10px;
+}
+
+.ui-dialog iframe {
+  border: 0;
+}
+
+.ui-widget-header {
+  background: #aaa;
+  border: 0;
+  border-bottom: 5px solid #999;
+  border-radius: 0;
+}
+
+.ui-widget-overlay {
+  opacity: 0.2;
+}
+
+
+
+
+
+
+
+
+
 
 
 
