@@ -22,6 +22,10 @@ $(document).ready(function() {
                       $("#fp-iframe-dialog-small iframe").height($(this).height() - heightDifference);
                       $("#fp-iframe-dialog-small iframe").width($(this).width() - widthDifference);
                   },
+      close: function (event, ui) {
+                      url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";      
+                      $("#fp-iframe-dialog-small-iframe").attr('src', url);
+                  },
       autoOpen: false,
       resizable: true,/*
       position: {
@@ -43,8 +47,36 @@ $(document).ready(function() {
     $("#fp-iframe-dialog-small").dialog({title: title});    
     $("#fp-iframe-dialog-small").dialog('open');
 
+
   }
 
+
+  /**
+   * mode can be "blank" or "updating"
+   */
+  function fpCloseSmallIframeDialog(mode) {
+    var url = "";
+    
+    if (mode == 'blank') {
+      url = 'about:blank';
+    }
+    
+    if (mode == 'updating') {
+      url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";      
+    }
+    
+    var mils = 1;
+    
+    if (url) {
+      $("#fp-iframe-dialog-small-iframe").attr('src', url);
+      mils = 300;
+    }
+    // Set it on a slight delay before we close, to give the screen time to load.    
+    window.setTimeout( function() {    
+      $("#fp-iframe-dialog-small").dialog('close');
+    }, mils);
+    
+  }
 
 
   //+ Jonas Raoni Soares Silva  

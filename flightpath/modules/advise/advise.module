@@ -737,8 +737,8 @@ function advise_display_popup_change_track() {
         }
     
     
-        $link = fp_get_js_confirm_link(t("Are you sure you wish to change degree options?"), "opener.changeTrack(\"$temp_tc\"); window.close(); ", $track_title);
-        
+        $link = fp_get_js_confirm_link(t("Are you sure you wish to change degree options?"), "opener.changeTrack(\"$temp_tc\");", $track_title);
+                
         
         
         // We actually don't need to do anything special for what_if, I think.  When
@@ -869,8 +869,7 @@ function advise_display_popup_change_term() {
       $term_desc = "<strong class='current-term'>$term_desc</strong> - " . t("current");
     }
 
-    // TODO: update for dialog logic
-    $link = fp_get_js_confirm_link(t("Are you sure you wish to change advising terms?"), "opener.changeTerm(\"$term_id\"); window.close(); ", $term_desc);
+    $link = fp_get_js_confirm_link(t("Are you sure you wish to change advising terms?"), "parent.fpCloseSmallIframeDialog(\"\");parent.changeTerm(\"$term_id\");", $term_desc);
 
     $rtn .= "<li>$link</li>";
 
