@@ -437,23 +437,31 @@ function adviseSelectCourseFromGroupPopup(str_confirm) {
 
 
 
-function describeCourse(dataString, blankDegreeID) {
+function describeCourse(dataString, blankDegreeID, dialogTitle) {
   //var url = FlightPath.settings.basePath + "/advise/popup-course-description";  
   
+  
   // To make compatible with non-clean URL sites, we will use the "unclean" URL...
-  var url = FlightPath.settings.basePath + "/index.php?q=advise/popup-course-description";
-    
-  popupWindowNew(url,"data_string=" + dataString + "&blank_degree_id=" + blankDegreeID);
+  var url = FlightPath.settings.basePath + "/index.php?q=advise/popup-course-description";    
+  //popupWindowNew(url,"data_string=" + dataString + "&blank_degree_id=" + blankDegreeID);
+  popupSmallIframeDialog(url, dialogTitle, "data_string=" + dataString + "&blank_degree_id=" + blankDegreeID);
+  
+  
 }
 
 
-function selectCourseFromGroup(group_id, semester_num, groupHoursRemaining, blankDegreeID, req_by_degree_id) {
+function selectCourseFromGroup(group_id, semester_num, groupHoursRemaining, blankDegreeID, req_by_degree_id, dialogTitle) {
   //var url = FlightPath.settings.basePath + "/advise/popup-group-select";
   
   // To make compatible with non-clean URL sites, we will use the "unclean" URL...
   var url = FlightPath.settings.basePath + "/index.php?q=advise/popup-group-select";
     
-  popupWindowNew(url,"group_id=" + group_id + "&semester_num=" + semester_num + "&group_hours_remaining=" + groupHoursRemaining + "&blank_degree_id=" + blankDegreeID + "&req_by_degree_id=" + req_by_degree_id);
+  if (!dialogTitle) {
+    dialogTitle = 'Select Course';
+  }
+    
+  //popupWindowNew(url,"group_id=" + group_id + "&semester_num=" + semester_num + "&group_hours_remaining=" + groupHoursRemaining + "&blank_degree_id=" + blankDegreeID + "&req_by_degree_id=" + req_by_degree_id);
+  popupSmallIframeDialog(url, dialogTitle, "group_id=" + group_id + "&semester_num=" + semester_num + "&group_hours_remaining=" + groupHoursRemaining + "&blank_degree_id=" + blankDegreeID + "&req_by_degree_id=" + req_by_degree_id);
 }
 
 /**

@@ -1485,6 +1485,7 @@ ___popups_and_dialog{}
 .page-is-popup .fp-bottom-message,
 .page-is-popup h2.title,
 .page-is-popup #breadcrumbs-wrapper,
+/*.page-is-popup #page-print-options,*/
 .page-is-popup #sidebar-left
  {
   display: none;
@@ -1527,6 +1528,7 @@ ___popups_and_dialog{}
 .ui-widget-overlay {
   opacity: 0.2;
 }
+
 
 
 

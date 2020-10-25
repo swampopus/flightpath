@@ -2301,8 +2301,7 @@ function draw_menu_items($menu_array) {
 		if ($course == null)
 		{
 			// No course available!
-			$pC .= fp_render_section_title(t("Description"));
-          
+			          
       $render["no_course_selected"] = array(
         "value" => t("No course was selected.  Please
           click the Select tab at the top of the screen."),
@@ -2349,7 +2348,7 @@ function draw_menu_items($menu_array) {
 
     $initials = $GLOBALS["fp_system_settings"]["school_initials"];
 		
-		$pC .= fp_render_section_title("$course->subject_id $course->course_num$other_valid_names <!--EQV1-->");
+		$pC .= "<!--EQV1-->";
 		$bool_transferEqv = true;
 		if ($course->bool_transfer)
 		{
@@ -2424,7 +2423,7 @@ function draw_menu_items($menu_array) {
       }
 			
 			$html .= "
-					<b>$course->title ($use_hours " . t("hrs") . ")</b>";
+					<b>$course->subject_id $course->course_num - $course->title ($use_hours " . t("hrs") . ")</b>";
           
           
       $render["course_title_line"] = array(
@@ -3607,13 +3606,22 @@ function draw_menu_items($menu_array) {
       $disp_remaining_hours = ($group->min_hours_allowed - $group->hours_fulfilled) . "-" . $remaining_hours;
     }
 
-
-		$js_code = "selectCourseFromGroup(\"$group->group_id\", \"$group->assigned_to_semester_num\", \"$remaining_hours\", \"$blank_degree_id\",\"$req_by_degree_id\");";
-
-		$row_msg = "<i>Click <font color='red'>&gt;&gt;</font> to select $disp_remaining_hours hour$s.</i>";
+    $dialog_title = t("Select @disp_hrs hour$s from %group_title", array('@disp_hrs' => $disp_remaining_hours, '%group_title' => $group->title));
     if ($remaining_hours > 200) {
       // Don't bother showing the remaining hours number.
-      $row_msg = "<i>Click <font color='red'>&gt;&gt;</font> to select additional courses.</i>";
+      $dialog_title = t("Select additional hour$s from %group_title", array('%group_title' => $group->title));
+      if ($group->group_id == DegreePlan::GROUP_ID_FOR_COURSES_ADDED) {
+        $dialog_title = t("Select additional courses");
+      }
+    }
+
+
+		$js_code = "selectCourseFromGroup(\"$group->group_id\", \"$group->assigned_to_semester_num\", \"$remaining_hours\", \"$blank_degree_id\",\"$req_by_degree_id\",\"$dialog_title\");";
+
+		$row_msg = "<em>Click <span style='color:red;' class='group-select-arrows'>&gt;&gt;</span> to select $disp_remaining_hours hour$s.</em>";
+    if ($remaining_hours > 200) {
+      // Don't bother showing the remaining hours number.
+      $row_msg = "<em>Click <span style='color:red;' class='group-select-arrows'>&gt;&gt;</span> to select additional courses.</em>";
     }
     
 		$hand_class = "hand";
@@ -3621,10 +3629,10 @@ function draw_menu_items($menu_array) {
 		if ($this->bool_print || variable_get("show_group_titles_on_view", "no") == "yes")
 		{
 		  
-      $row_msg = "<i>Select $disp_remaining_hours hour$s from $group->title.</i>";
+      $row_msg = "<em>Select $disp_remaining_hours hour$s from $group->title.</em>";
       if ($remaining_hours > 200) {
         // Don't bother showing the remaining hours number.
-        $row_msg = "<i>Select additional courses from $group->title.</i>";
+        $row_msg = "<em>Select additional courses from $group->title.</em>";
       }
 
       if ($this->bool_print) {            
@@ -4201,7 +4209,7 @@ function draw_menu_items($menu_array) {
 			$blank_degree_id = $this->degree_plan->degree_id;
 		}
 
-		$js_code = "describeCourse(\"$data_string\",\"$blank_degree_id\");";
+		$js_code = "describeCourse(\"$data_string\",\"$blank_degree_id\",\"$subject_id $course_num\");";
 
     $theme["course"]["js_code"] = $js_code;
 
