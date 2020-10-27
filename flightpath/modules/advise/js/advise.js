@@ -77,8 +77,8 @@ function changeView(view) {
 function z__popupChangeTrack(track_code) {
   var x = confirm("Are you sure you wish to change degree options?");
   if (x) {
-    opener.changeTrack(track_code);
-    window.close();
+    parent.changeTrack(track_code);
+    fpCloseSmallIframeDialog();
   } 
 }
 
@@ -86,12 +86,12 @@ function z__popupChangeTrack(track_code) {
 function popupChangeWhatIfTrackNonDynamicDegree(major_and_track_code, question) {
   var x = confirm(question);
   if (x) {
-    opener.document.getElementById("what_if_major_code").value = major_and_track_code;
-    opener.document.getElementById("load_from_cache").value = "no";
-    opener.document.getElementById("log_addition").value = "change_track~" + major_and_track_code;
+    parent.document.getElementById("what_if_major_code").value = major_and_track_code;
+    parent.document.getElementById("load_from_cache").value = "no";
+    parent.document.getElementById("log_addition").value = "change_track~" + major_and_track_code;
     
-    opener.submitForm(true);
-    window.close();
+    parent.submitForm(true);
+    fpCloseSmallIframeDialog();
   }
 }
 
@@ -197,29 +197,29 @@ function popupChangeTrackSelections(is_whatif) {
     
   if (is_whatif == 0) {
     // NOT what if mode.
-    opener.document.getElementById("advising_update_student_degrees_flag").value = "true";
-    opener.document.getElementById("advising_track_degree_ids").value = track_degree_ids;    
+    parent.document.getElementById("advising_update_student_degrees_flag").value = "true";
+    parent.document.getElementById("advising_track_degree_ids").value = track_degree_ids;    
   }
   else {
     // Yes, this IS what-if mode.
-    opener.document.getElementById("advising_update_student_settings_flag").value = "true";
-    opener.document.getElementById("what_if_track_degree_ids").value = track_degree_ids;
+    parent.document.getElementById("advising_update_student_settings_flag").value = "true";
+    parent.document.getElementById("what_if_track_degree_ids").value = track_degree_ids;
     
     // Set the what_if_major_code to be only our top-level major codes, so we can change the tracks.  This is
     // to fix a bug where if you load an advising session directly what was what-if, the major codes include the tracks,
     // and you can't unselect tracks then.
     //alert($("#top_level_majors_csv").val());
     //return false;
-    opener.document.getElementById("what_if_major_code").value = $("#top_level_majors_csv").val();
+    parent.document.getElementById("what_if_major_code").value = $("#top_level_majors_csv").val();
   }
   
-  opener.document.getElementById("log_addition").value = "change_track~" + track_degree_ids;
+  parent.document.getElementById("log_addition").value = "change_track~" + track_degree_ids;
   
   // rebuild the cache.
-  opener.document.getElementById("load_from_cache").value="no";
+  parent.document.getElementById("load_from_cache").value="no";
 
-  opener.submitForm(true);
-  window.close();
+  parent.submitForm(true);
+  fpCloseSmallIframeDialog();
     
     
 } // popupChangeTrackSelections
@@ -279,8 +279,8 @@ function alertSubGhost() {
 function popupUnassignTransferEqv(course_id) {
   var x = confirm("Are you sure you wish to remove this transfer course equivalency?\n\nThis action will only affect the current student.  It will not impact any other student\'s records.");
   if (x) {
-    opener.unassignTransferEqv(course_id);
-    window.close();
+    parent.unassignTransferEqv(course_id);
+    fpCloseSmallIframeDialog();
   }
 }
 
@@ -306,8 +306,8 @@ function popupUnassignFromGroup(course_id, term_id, transferFlag, group_id, degr
   var x = confirm("Are you sure you wish to remove this course?");
   if (x)
   {
-    opener.unassignFromGroup(course_id, term_id, transferFlag, group_id, degree_id);
-    window.close();
+    parent.unassignFromGroup(course_id, term_id, transferFlag, group_id, degree_id);
+    fpCloseSmallIframeDialog();
   }
 }
 
@@ -566,9 +566,9 @@ function popupAssignSelectedCourseToGroup(semester_num, group_id, advising_term_
       
            
       
-      opener.assignSelectedCourseToGroup(course_id, semester_num, group_id, var_hours, advising_term_id, db_group_requirement_id);
-
-      window.close();
+      parent.assignSelectedCourseToGroup(course_id, semester_num, group_id, var_hours, advising_term_id, db_group_requirement_id);
+      fpCloseSmallIframeDialog();
+      
     }
   }
 
@@ -860,8 +860,9 @@ function popupSaveSubstitution(course_id, group_id, semester_num, req_by_degree_
     return;
   }
   
-  opener.saveSubstitution(course_id, group_id, req_by_degree_id, semester_num, subCourseID, subTermID, subTransferFlag, subHours, subAddition, subRemarks);
-  window.close();
+  parent.saveSubstitution(course_id, group_id, req_by_degree_id, semester_num, subCourseID, subTermID, subTransferFlag, subHours, subAddition, subRemarks);
+  fpCloseSmallIframeDialog();
+  
 }
 
 
@@ -942,20 +943,24 @@ function popupRemoveSubstitution(subID) {
   var x = confirm("Are you sure you wish to remove this substitution?");
   if (x)
   {
-    opener.removeSubstitution(subID);
-    window.close();
+    
+    parent.removeSubstitution(subID);
+    fpCloseSmallIframeDialog();
   } 
 }
 
 function popupRestoreTransferEqv(db_unassign_transfer_id) {
 
-  opener.restoreTransferEqv(db_unassign_transfer_id);
-  window.close();
+  
+  parent.restoreTransferEqv(db_unassign_transfer_id);
+  fpCloseSmallIframeDialog();
+  
 }
 
 function popupRestoreUnassignFromGroup(db_unassign_group_id) {
-  opener.restoreUnassignFromGroup(db_unassign_group_id);
-  window.close();
+  
+  parent.restoreUnassignFromGroup(db_unassign_group_id);
+  fpCloseSmallIframeDialog();
 
 }
 
@@ -968,8 +973,11 @@ function popupSetVarHours() {
 
 function popupUpdateSelectedCourse(course_id, group_id, semester_num, random_id, advising_term_id, degree_id) {
   var varHours = document.getElementById("varHours").value;
-  opener.updateSelectedCourse(course_id, group_id, semester_num, varHours, random_id, advising_term_id, degree_id);
-  window.close();
+
+  parent.updateSelectedCourse(course_id, group_id, semester_num, varHours, random_id, advising_term_id, degree_id);
+  fpCloseSmallIframeDialog();
+
+
 
 }
 

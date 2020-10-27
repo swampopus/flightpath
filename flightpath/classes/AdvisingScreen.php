@@ -950,9 +950,9 @@ function draw_menu_items($menu_array) {
 		if (user_has_permission("can_substitute") && $bool_include_box_top) {
 			if ($this->bool_print != true)
 			{// Don't display in print view.
-			  $purl = fp_url("advise/popup-toolbox/transfers"); 
-				$pC .= "<div style=' '>				
-					<a href='javascript: popupWindowNew(\"" . $purl . "\",\"\");'><img src='" . fp_theme_location() . "/images/toolbox.gif' border='0'>" . t("Administrator's Toolbox") . "</a>
+			  $purl = fp_url("advise/popup-toolbox/transfers");        
+				$pC .= "<div style=' '>				 
+					<a href='javascript: popupSmallIframeDialog(\"" . $purl . "\",\"" . t("Administrator&#39;s Toolbox") . "\",\"\");'><img src='" . fp_theme_location() . "/images/toolbox.gif' border='0'>" . t("Administrator's Toolbox") . "</a>
 				</div>";
 				$is_empty = false;
 			}

@@ -3,8 +3,7 @@
 // Set up our modal dialogs on startup.
 $(document).ready(function() {
   
-    // Set up out iframe/dialog (if it is on the page)
-    // TODO:  on close, set back to an "updating" screen.
+    // Set up out iframe/dialog (if it is on the page)    
     var modalWidth = 500;
     var modalHeight = 400;
     $("#fp-iframe-dialog-small").dialog({
@@ -27,19 +26,15 @@ $(document).ready(function() {
                       $("#fp-iframe-dialog-small-iframe").attr('src', url);
                   },
       autoOpen: false,
-      resizable: false,/*
-      position: {
-            my: "center",
-            at: "top",
-            of: window
-      },*/
+      resizable: false,
       width: modalWidth,      
-      height: modalHeight,
+      height: modalHeight
+      /*
       dragStart: function (event, ui) {  // Fixes an issue where dragging causes problems.  Got from: https://stackoverflow.com/questions/7145317/jquery-ui-dialog-around-iframe-performance-issues
             $('iframe', this).each(function() {
                 $('<div class="ui-draggable-iframeFix" style="background: transparent;"></div>')
                 .css({
-                    width: '100%', height: '100%',
+                    width: '95%', height: '100%',
                     position: 'absolute', opacity: '1', zIndex: 1000, overflowX: 'hidden'
                 })
                 .css($(this).position())
@@ -49,7 +44,7 @@ $(document).ready(function() {
         dragStop: function (event, ui) {
             $("div.ui-draggable-iframeFix").each(function() {
               this.parentNode.removeChild(this); }); //Remove frame helpers
-            }      
+            }*/      
     });     
   
     // Give the dialog an initial screen

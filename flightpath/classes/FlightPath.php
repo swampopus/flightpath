@@ -1469,8 +1469,8 @@ class FlightPath extends stdClass
         $temp2 = explode("~",trim($_POST["updatecourse"]));
 
         $tcourse_id = $temp2[0];
-        $tgroup_id = $temp2[1] * 1;
-        $tsemester_num = $temp2[2] * 1;
+        $tgroup_id = $temp2[1];
+        $tsemester_num = $temp2[2];
         $tvar_hours = $temp2[3];
         $trandom_id = $temp2[4];
         $tadvised_term_id = $temp2[5];
@@ -1525,8 +1525,8 @@ class FlightPath extends stdClass
       // get checked for advising.
       $temp2 = explode("~",trim($_POST["updatecourse"]));
       $course_id = $temp2[0];
-      $group_id = $temp2[1] * 1;
-      $semester_num = $temp2[2] * 1;
+      $group_id = $temp2[1];
+      $semester_num = $temp2[2];
       $var_hours = $temp2[3];
       $advised_term_id = $temp2[5];
       $degree_id = $temp2[6];

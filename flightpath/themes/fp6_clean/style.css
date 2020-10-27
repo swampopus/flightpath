@@ -1442,6 +1442,11 @@ ___advising_screens{}
   
 }
 
+.fp-semester-table td.fp-boxes {
+  width: 50%;
+}
+
+
 /*
   This starts off a "box", like "Freshman Year" or "Excess Credits"
 */
@@ -1492,11 +1497,13 @@ ___popups_and_dialog{}
 }
 
 .page-is-popup #page-content {
-  width: calc(100vw - 10px) !important;
+  width: calc(100vw - 30px) !important;
   
   padding-left: 0;
   padding-right: 10px;
 }
+
+
 
 .ui-dialog {
   background-color: white;
@@ -1519,10 +1526,15 @@ ___popups_and_dialog{}
 }
 
 .ui-widget-header {
+  color: white;
   background: #aaa;
   border: 0;
   border-bottom: 5px solid #999;
   border-radius: 0;
+}
+
+.ui-widget-header button:focus {
+  outline: none;  
 }
 
 .ui-widget-overlay {
