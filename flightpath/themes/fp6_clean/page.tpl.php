@@ -108,10 +108,6 @@
   </div>
 
 
-<!-- iframe dialog, for use by javascript later on -->
-<div id='fp-iframe-dialog-small' style='display: none;' title=''>  
-  <iframe id='fp-iframe-dialog-small-iframe' style='width: calc(100% - 10px);'></iframe>
-</div>  
 
 
   

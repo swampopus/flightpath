@@ -364,7 +364,23 @@ function draw_menu_items($menu_array) {
 	  // Add in our hidden divs which we will sometimes display...
 	  $page_content .= "<div id='updateMsg' class='updateMsg' style='display: none;'>" . t("Updating...") . "</div>
 								<div id='loadMsg' class='updateMsg' style='display: none;'>" . t("Loading...") . "</div>";
-	  
+
+								
+    // Add our dialog HTML if the page isn't a popup.
+    if (!$page_is_popup) {
+      $page_content .= "
+              <!-- iframe dialog, for use by javascript later on -->
+                <div id='fp-iframe-dialog-small' style='display: none;' title=''>  
+                  <iframe id='fp-iframe-dialog-small-iframe'></iframe>
+                </div>
+                <div id='fp-iframe-dialog-large' style='display: none;' title=''>  
+                  <iframe id='fp-iframe-dialog-large-iframe'></iframe>
+                </div>
+                
+      ";
+    }
+                
+                	  
 
     if ($page_sidebar_left_content) {
       $page_body_classes .= " has-sidebar-left";
@@ -383,7 +399,8 @@ function draw_menu_items($menu_array) {
     if ($page_tabs) {
       $page_body_classes .= " has-page-tabs";
     }
-	        
+	  
+          
     // We are going to try to include the theme.  If it can't be found, we will display a CORE theme, and display a message.
     $theme = $GLOBALS["fp_system_settings"]["theme"];
     

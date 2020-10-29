@@ -19,8 +19,9 @@ function advise_display_history() {
   $extra_style = $ast = "";
   $rtn = "";
   
-  fp_add_css(fp_get_module_path("advise") . "/css/advise.css");
+  fp_add_css(fp_get_module_path("advise") . "/css/advise.css");  
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
+  
     
   $rtn .= "<table class='fp-semester-table'>";
 
@@ -39,10 +40,19 @@ function advise_display_history() {
         
         $turl = fp_url("advise/popup-display-summary", "advising_session_id=$aid");
         
+        /*
         $click_links .= "<li>
                 <a href='javascript: popupPrintWindow(\"" . $turl . "\");'>
                 <img src='" . fp_theme_location() . "/images/popup.gif' border='0'>
                 $term_name</a>";
+        */
+        $click_links .= "<li class='just-saved-summary'>
+                            <a href='javascript: popupLargeIframeDialog(\"" . $turl . "\",\"" . t("Advising Session @term", array("@term" => $term_name)) . "\",\"\");'>
+                                <i class='fa fa-window-restore'></i> $term_name
+                            </a>
+                         </li>";        
+                
+                
 
       }
     }
@@ -57,11 +67,10 @@ function advise_display_history() {
               margin: 10px 0px 10px 0px; padding: 10px; 
               font-size: 12pt; font-weight: bold;'>
         " . t("You have successfully advised") . " " . $db->get_student_name($student_id) . " ($student_id).
-        <br><span style='color: blue;'>" . t("Click 
-         to view a pop-up printable summary for:") . " 
+        <br>" . t("Click to view a pop-up printable summary for:") . " 
          <ul style='margin-top: 5px; margin-bottom: 5px;'>
         $click_links
-        </ul></span></div>
+        </ul></div>
         
         </td>
         </tr>
@@ -121,24 +130,14 @@ function advise_display_history() {
     $test_d_t = $db_posted;
     if ($old_session_d_t < ($test_d_t - 5) || $old_session_d_t > ($test_d_t + 5))
     {
-      $p = "20px;";
-      if ($a_count == 0)
-      {
-        $p = "10px;";
-      }
 
       $old_session_d_t = $test_d_t;
-      $advised_by = "<div style='padding-top: $p'>
-              <b>" . t("Advised by") . " " . fp_get_faculty_name($db_faculty_id, false) . "</b>
+      $advised_by = "<div class='history-advised-row history-advised-row-$a_count'>
+              <strong>" . t("Advised by") . " " . fp_get_faculty_name($db_faculty_id, false) . "</strong>
             </div>";
-      /*
-      $rtn .= "<tr><td colspan='2' class='tenpt'>
-              $advised_by
-            </td>
-          </tr>";
-      */
       
-      $html .= "<div class='tenpt'>$advised_by</div>";      
+      
+      $html .= "<div class=' '>$advised_by</div>";      
       
       
             
@@ -155,29 +154,15 @@ function advise_display_history() {
     $turl = fp_url("advise/popup-display-summary", "advising_session_id=$db_advising_session_id");
 
     $advising_session_id_array[] = $db_advising_session_id;
-
-    $on_click = "popupPrintWindow(\"" . $turl . "\");";
-
     $term = get_term_description($db_term_id);
 
-    /*
-    $rtn .= "<tr $on_mouse_over style='cursor: pointer; $first_style'
-          onClick='$on_click'>
-          <td valign='top' class='tenpt'
-            style='padding-left:20px;'
-            width='165'>
-            $term
-          </td>
-          <td valign='top' class='tenpt'>
-            $dt
-          </td>
-        </tr>";
-    */
+    $on_click = "popupLargeIframeDialog(\"" . $turl . "\",\"" . t("Advising Session @term - @date", array("@term" => $term, "@date" => $dt)) . "\",\"\");";  
+              
     
     
     $html .= "<div $on_mouse_over style='cursor: pointer; $first_style' onClick='$on_click'>
-                <div class='tenpt' style='display: inline-block; padding-left:20px; width:165px;'>$term</div>
-                <div class='tenpt' style='display: inline-block;'>$dt</div>
+                <div class=' ' style='display: inline-block; padding-left:20px; width:165px;'>$term</div>
+                <div class=' ' style='display: inline-block;'>$dt</div>
               </div>";
 
     // If this is more than X number, let's hide the rest in a collapsible fieldset.
@@ -192,7 +177,7 @@ function advise_display_history() {
       if (!isset($render_left["advising_history_fs"])) {
         $render_left["advising_history_fs"] = array(
           "type" => "cfieldset",
-          "label" => t("View complete advising history"),
+          "label" => t("Show complete advising history"),
           "start_closed" => TRUE,
           "elements" => array(),
           "weight" => $c,          
@@ -211,7 +196,7 @@ function advise_display_history() {
   //$rtn .= "</table>";
 
   if ($is_empty == true) {
-    //$rtn .= "<div class='tenpt'>No advising history available.</div>";
+    //$rtn .= "<div class=' '>No advising history available.</div>";
     
     $render_left["markup_no_adv_history"] = array(
       "value" => t("No advising history available."),
@@ -222,8 +207,9 @@ function advise_display_history() {
     $print_all_url = fp_url("advise/popup-display-summary", "advising_session_id=" . join(",", $advising_session_id_array));
     
     $render_left["markup_print_all"] = array(
-      "value" => "<a href='javascript: popupPrintWindow(\"" . $print_all_url . "\");'  
-          class='nounderline tenpt'><img src='" . fp_theme_location() . "/images/popup.gif' border='0'>view/print all</a>
+      "value" => "<a href='javascript: popupLargeIframeDialog(\"" . $print_all_url . "\",\"" . t("Complete Advising History") . "\",\"\");' class='view-print-all'>
+                      <i class='fa fa-window-restore'></i> " . t("View Complete History") . "
+                  </a>
           ",
       "weight" => -1,
     );
@@ -263,25 +249,15 @@ function advise_display_history() {
 
   
   $turl = fp_url("comments/popup-display-all-comments");
-  
-  /*
-  $rtn .= "<tr><td colspan='3' class='tenpt'>
-        <!--STARTCOM--><div style='padding-top: 10px;'>
-          <b>" . t("Advising Comments") . "</b>
-          &nbsp; 
-        <a href='javascript: popupPrintWindow(\"" . $turl . "\");'  
-          class='nounderline'><img src='" . fp_theme_location() . "/images/popup.gif' border='0'>view/print all</a>
-        </div><!--ENDCOM-->
-        </td></tr>";
-
-   */
+    
    
-  $html .= "<div colspan='3' class='tenpt'>
+  $html .= "<div class=' '>
         <!--STARTCOM--><div style='padding-top: 10px;'>
-          <b>" . t("Advising Comments") . "</b>
+          <strong>" . t("Advising Comments") . "</strong>
           &nbsp; 
-        <a href='javascript: popupPrintWindow(\"" . $turl . "\");'  
-          class='nounderline'><img src='" . fp_theme_location() . "/images/popup.gif' border='0'>view/print all</a>
+          <a href='javascript: popupLargeIframeDialog(\"" . $turl . "\",\"" . t("All Comments for Student") . "\",\"\");' class='view-print-all'>
+            <i class='fa fa-window-restore'></i> " . t("View All Comments") . "
+          </a>
         </div><!--ENDCOM-->
         </div>";
 
@@ -289,17 +265,6 @@ function advise_display_history() {
 // Use the function comments_get_comments instead of a direct query.
 
   $res = comments_get_comments($student_id, FALSE, $access_types);
-
-/*  
-  
-  $res = db_query("SELECT * FROM advising_comments
-            WHERE student_id = '?' 
-            AND delete_flag = '0'
-            $access_line
-            $cat_line
-            order by `posted` desc ", $student_id);
-            */
-  //while ($cur = db_fetch_array($res))
   foreach ($res as $cur)
   {
     extract($cur, 3, "db");
@@ -313,28 +278,16 @@ function advise_display_history() {
 
 
     $turl = fp_url("comments/popup-display-comment", "id=$db_id");
-
-    $on_click = "popupPrintWindow(\"" . $turl . "\");";
-    /*
-    $rtn .= "<tr $on_mouse_over style='cursor:pointer; $first_style $extra_style'
+    
+    $on_click = "popupLargeIframeDialog(\"" . $turl . "\",\"" . t("Comment @date", array("@date" => $dt)) . "\",\"\");";    
+    
+    
+    $html .=  "<div $on_mouse_over class='history-comment-row' style='cursor:pointer; $first_style $extra_style'
           onClick='$on_click'>
-          <td valign='top' width='165' class='tenpt'
-            style='padding-left: 20px;'>
-            " . fp_get_faculty_name($db_faculty_id, false) . "
-          </td>
-          <td valign='top' class='tenpt'>
-          $dt$ast
-          </td>
-        </tr>";
-
-     * 
-     */
-    $html .=  "<div $on_mouse_over style='cursor:pointer; $first_style $extra_style'
-          onClick='$on_click'>
-          <div class='tenpt' style='padding-left: 20px; width:165px; display:inline-block;'>
+          <div class=' ' style='padding-left: 20px; width:165px; display:inline-block;'>
             " . fp_get_faculty_name($db_faculty_id, false) . "
           </div>
-          <div class='tenpt' style='display: inline-block;'>
+          <div class=' ' style='display: inline-block;'>
               $dt$ast
           </div>
         </div>";
@@ -345,7 +298,7 @@ function advise_display_history() {
 
   if ($is_empty == true) {
     /*
-    $rtn .= "<tr><td colspan='4' class='tenpt'>
+    $rtn .= "<tr><td colspan='4' class=' '>
             <div style='padding-left: 20px;'>
               " . t("No comment history available.") . "</div></td></tr>";
     */
@@ -450,7 +403,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     $degree_title_line = "";
     $ds = "";
     $degree_plan = new DegreePlan();
-    if ($db_degree_id != _DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE) {
+    if ($db_degree_id != DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE) {
       $degree_plan->degree_id = $db_degree_id;
       $degree_plan->load_descriptive_data();
       $degree_title_line = $degree_plan->get_title(true);    
@@ -500,11 +453,8 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
                                                               "%official" => $official_degree_title));
     }
   
-    $page_is_mobile = fp_screen_is_mobile();
-  
-    $w = ($page_is_mobile) ? "100%" : "500";
     
-    $rtn .= "<table width='$w'><td valign='top'>";
+    $rtn .= "<table class='adv-history-table' width='100%'><td valign='top'>";
     
     if ($page_is_mobile) {
   
@@ -512,7 +462,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     else {
     
       $rtn .= "
-        <table class='tenpt summary-transaction-details' border='0' width='100%' cellpadding='3' cellspacing='0' style='border-width: 2px; border-style: solid; border-color: black;'>
+        <table class='  summary-transaction-details' border='0' width='100%' cellpadding='3' cellspacing='0' style='border-width: 2px; border-style: solid; border-color: black;'>
          <tr height='7'>
           <td> </td>
          </tr>
@@ -589,8 +539,8 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     $rtn .= "
          </tr>
          </table>
-         <div class='tenpt'><i>" . t("Submitted on") . " $dt.</i></div>
-         <div class='tenpt'>$what_if_message</div>
+         <div class=' '><i>" . t("Submitted on") . " $dt.</i></div>
+         <div class=' '>$what_if_message</div>
          <br>
       ";
   
@@ -609,13 +559,13 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
   
     $rtn .= "<table border='0' cellpadding='3' class='summary-advised-courses'>
         <tr>
-          <td class='tenpt course-si-cn' valign='top' width='25%'>
+          <td class='  course-si-cn' valign='top' width='25%'>
             <b>" . t("Course") . "</b>
           </td>
-          <td class='tenpt course-title' valign='top' width='70%'>
+          <td class='  course-title' valign='top' width='70%'>
             <b>" . t("Title") . "</b>
           </td>
-          <td class='tenpt course-hours' valign='top'>
+          <td class='  course-hours' valign='top'>
             <b>" . t("Hours") . "</b>
           </td>
         </tr>";
@@ -635,13 +585,13 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
       $course->load_descriptive_data(false);
   
       $rtn .= "<tr>
-            <td class='tenpt course-si-cn' valign='top'>
+            <td class='  course-si-cn' valign='top'>
             $course->subject_id $course->course_num
             </td>
-            <td class='tenpt course-title' valign='top'>
+            <td class='  course-title' valign='top'>
             $course->title
             </td>
-            <td class='tenpt course-hours' valign='top' align='center'>
+            <td class='  course-hours' valign='top' align='center'>
             " . $course->get_hours() . " 
             </td>
             
@@ -652,7 +602,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     }
   
     $rtn .= "</table>
-        <div align='right' class='tenpt total-advised-hours' style='padding-top: 10px; padding-right: 15px;'>
+        <div align='right' class='  total-advised-hours' style='padding-top: 10px; padding-right: 15px;'>
           <b>" . t("Total advised hours:") . " &nbsp; " . $advised_courses_list->count_hours() . "</b>
         </div>
         ";
@@ -664,7 +614,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
       $rtn .= "<br>";
       $rtn .= "<div class='summary-alternate-courses'>";
       $rtn .= fp_render_section_title(t("Alternate Courses"));
-      $rtn .= "<div class='tenpt alt-courses-desc-and-lines'>
+      $rtn .= "<div class='  alt-courses-desc-and-lines'>
           " . t("You may use this space to write in alternate courses 
           the student should enroll in, in the event that an 
           advised course is full or unavailable.") . "

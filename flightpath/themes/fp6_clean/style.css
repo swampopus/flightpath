@@ -1427,6 +1427,14 @@ body.has-page-tabs .inner-page-content-wrapper {
 
 
 
+___history_tab{}
+
+.history-comment-row {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+
 
 ___advising_screens{}
 
@@ -1542,7 +1550,13 @@ ___popups_and_dialog{}
 }
 
 
+iframe#fp-iframe-dialog-small-iframe {
+  width: calc(100% - 10px);  
+}
 
+iframe#fp-iframe-dialog-large-iframe {
+  width: calc(100% - 10px);  
+}
 
 
 

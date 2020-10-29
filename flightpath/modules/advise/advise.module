@@ -109,7 +109,8 @@ function advise_menu() {
       "page_hide_report_error" => TRUE,
       "bool_print" => TRUE,
     ),   
-    "type" => MENU_TYPE_CALLBACK,
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "adv_summary",
     "file" => menu_get_module_path("advise") . "/advise.history.inc",
     
   );     

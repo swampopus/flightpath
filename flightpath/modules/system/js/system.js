@@ -4,6 +4,7 @@
 $(document).ready(function() {
   
     // Set up out iframe/dialog (if it is on the page)    
+    // TODO: use settings for width/height, if its been set.  This allows us to let the end user configure the size.
     var modalWidth = 500;
     var modalHeight = 400;
     $("#fp-iframe-dialog-small").dialog({
@@ -51,8 +52,84 @@ $(document).ready(function() {
     url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";
     $("#fp-iframe-dialog-small-iframe").attr('src', url);
   
+    
+  
+    ////////////////////////
+    // Large iframe dialog
+    modalWidth = 700;
+    modalHeight = 600;
+    $("#fp-iframe-dialog-large").dialog({
+      modal: true,
+      resize: function (event, ui) {
+                      var heightDifference = 10;
+                      var widthDifference = 0;
+                      $("#fp-iframe-dialog-large iframe").height($(this).height() - heightDifference);
+                      $("#fp-iframe-dialog-large iframe").width($(this).width() - widthDifference);
+                  },   
+      open: function (event, ui) {
+                      var heightDifference = 10;
+                      var widthDifference = 0;  
+                      $(this).parent().css('position', 'fixed');                     
+                      $("#fp-iframe-dialog-large iframe").height($(this).height() - heightDifference);
+                      $("#fp-iframe-dialog-large iframe").width($(this).width() - widthDifference);
+                  },
+      close: function (event, ui) {
+                      url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";      
+                      $("#fp-iframe-dialog-large-iframe").attr('src', url);
+                  },
+      autoOpen: false,
+      resizable: true,
+      width: modalWidth,      
+      height: modalHeight
+    });     
+  
+    // Give the dialog an initial screen
+    url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";
+    $("#fp-iframe-dialog-large-iframe").attr('src', url);    
+    
+  
+  
+    
   
 });
+
+
+
+  function fpOpenLargeIframeDialog(url, title) {
+    $("#fp-iframe-dialog-large-iframe").attr('src', url);
+    $("#fp-iframe-dialog-large").dialog({title: title});    
+    $("#fp-iframe-dialog-large").dialog('open');
+  }
+
+
+  /**
+   * mode can be "blank" or "updating"
+   */
+  function fpCloseLargeIframeDialog(mode) {
+    var url = "";
+    
+    if (mode == 'blank') {
+      url = 'about:blank';
+    }
+    
+    if (mode == 'updating') {
+      url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";      
+    }
+    
+    var mils = 1;
+    
+    if (url) {
+      $("#fp-iframe-dialog-large-iframe").attr('src', url);
+      mils = 300;
+    }
+    // Set it on a slight delay before we close, to give the screen time to load.    
+    window.setTimeout( function() {    
+      $("#fp-iframe-dialog-large").dialog('close');
+    }, mils);
+    
+  }
+
+
 
 
 
@@ -60,8 +137,6 @@ $(document).ready(function() {
     $("#fp-iframe-dialog-small-iframe").attr('src', url);
     $("#fp-iframe-dialog-small").dialog({title: title});    
     $("#fp-iframe-dialog-small").dialog('open');
-
-
   }
 
 
