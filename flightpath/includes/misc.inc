@@ -2203,6 +2203,30 @@ function fp_truncate_decimals($num, $places = 2) {
   return $new_num;
 }
 
+/**
+ * Adapted from https://api.drupal.org/api/drupal/includes%21common.inc/function/drupal_query_string_encode/6.x
+ */
+function fp_query_string_encode($query, $exclude = array(), $parent = '') {
+  $params = array();
+  foreach ($query as $key => $value) {
+    $key = rawurlencode($key);
+    if ($parent) {
+      $key = $parent . '[' . $key . ']';
+    }
+    if (in_array($key, $exclude)) {
+      continue;
+    }
+    if (is_array($value)) {
+      $params[] = fp_query_string_encode($value, $exclude, $key);
+    }
+    else {
+      $params[] = $key . '=' . rawurlencode($value);
+    }
+  }
+  return implode('&', $params);
+}
+
+
 
 
 /**

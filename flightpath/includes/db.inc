@@ -116,6 +116,78 @@ function fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalo
 
 
 
+/**
+ * Code adapted from Drupal 6: https://api.drupal.org/api/drupal/includes%21pager.inc/function/pager_query/6.x
+ * 
+ * This helps allow us to create a paginated query (where we have Prev and Next links for the results).
+ * 
+ * NOTE!!!!!!!!!  To render the pager, call the function theme_pager() after getting the results of this query
+ * 
+ * Description from the Drupal API page:
+ * 
+ * Use this function when doing select queries you wish to be able to page. The pager uses LIMIT-based queries to fetch only the records 
+ * required to render a certain page. However, it has to learn the total number of records returned by the query to compute the number 
+ * of pages (the number of records / records per page). This is done by inserting "COUNT(*)" in the original query. 
+ * For example, the query "SELECT nid, type FROM node WHERE status = '1' ORDER BY sticky DESC, created DESC" would be 
+ * rewritten to read "SELECT COUNT(*) FROM node WHERE status = '1' ORDER BY sticky DESC, created DESC". Rewriting the query is accomplished 
+ * using a regular expression.
+ * 
+ * Unfortunately, the rewrite rule does not always work as intended for queries that already have a "COUNT(*)" or a "GROUP BY" clause, 
+ * and possibly for other complex queries. In those cases, you can optionally pass a query that will be used to count the records.
+ * 
+ * For example, if you want to page the query "SELECT COUNT(*), TYPE FROM node GROUP BY TYPE", pager_query() 
+ * would invoke the incorrect query "SELECT COUNT(*) FROM node GROUP BY TYPE". So instead, 
+ * you should pass "SELECT COUNT(DISTINCT(TYPE)) FROM node" as the optional $count_query parameter.
+ * 
+ * $query: The SQL query that needs paging.
+ * $limit: The number of query results to display per page.
+ * $element: An optional integer to distinguish between multiple pagers on one page.
+ * $count_query: An SQL query used to count matching records.
+ * 
+ * 
+ */
+function pager_query($query, $args = array(), $limit = 10, $element = 0, $count_query = NULL) {
+  global $pager_page_array, $pager_total, $pager_total_items;
+  $page = isset($_GET['page']) ? $_GET['page'] : '';
+
+  // Construct a count query if none was given.
+  if (!isset($count_query)) {
+    $count_query = preg_replace(array(
+      '/SELECT.*?FROM /As',
+      '/ORDER BY .*/',
+    ), array(
+      'SELECT COUNT(*) FROM ',
+      '',
+    ), $query);
+  }
+
+  // Convert comma-separated $page to an array, used by other functions.
+  $pager_page_array = explode(',', $page);
+
+  // We calculate the total of pages as ceil(items / limit).
+  $pager_total_items[$element] = db_result(db_query($count_query, $args));  
+  $pager_total[$element] = ceil($pager_total_items[$element] / $limit);
+  $pager_page_array[$element] = max(0, min((int) $pager_page_array[$element], (int) $pager_total[$element] - 1));
+  
+    
+  
+  return db_query_range($query, $args, $pager_page_array[$element] * $limit, $limit);
+}
+
+
+
+/**
+ * Adds a simple LIMIT statement to a query.  Adapted from Drupal 6: https://api.drupal.org/api/drupal/includes%21database.mysql.inc/function/db_query_range/6.x
+ */ 
+function db_query_range($query, $args = array(), $from, $count = 10) {
+
+  $query .= ' LIMIT ' . (int) $from . ', ' . (int) $count;
+   
+  return db_query($query, $args);
+}
+
+
+
 
 
 

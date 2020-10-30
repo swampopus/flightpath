@@ -1096,15 +1096,43 @@ a.button:hover {
 }
 
 
-.pager {
-  text-align: center;
-  border-top: 1px solid #ccc;
-  font-size: 0.9em;
+div.pager-wrapper {
+    border-top: 1px solid #ccc;
 }
 
-.pager a {
-  text-decoration: none;
+ul.pager {
+  
+    margin: 1.75em 0 0.75em;
+    clear: both;
+    text-align: center;
 }
+
+
+ul.pager li {
+    background-image: none;
+    display: inline;
+    list-style-type: none;
+    padding: 0.5em;
+    margin: 0 0 0.25em 0.5em;
+    font-size: 14px;
+}
+
+ul.pager li.pager-current {
+    color: #fff;
+    padding: 0.5em;
+    background-color: #bbb;
+    border: 1px solid #000;
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
