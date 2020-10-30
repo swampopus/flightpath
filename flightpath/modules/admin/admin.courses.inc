@@ -51,13 +51,7 @@ function admin_display_courses() {
   $_SESSION["dec_lr"] = $lr;
 
 
-  //fp_set_title(t("Courses for @year", array("@year" => $de_catalog_year)));
-
-  $render['title_top'] = array(
-    'value' => "<h2 class='title'>" . t("Courses for @year", array("@year" => $de_catalog_year)) . "</h2>",
-  );
-  
-  
+  fp_set_title(t("Courses for @year", array("@year" => $de_catalog_year)));  
 
 
   $html = "";

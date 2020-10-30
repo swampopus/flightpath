@@ -1142,12 +1142,9 @@ function admin_display_groups() {
   
   $db2 = new DatabaseHandler();
 
-  //fp_set_title(t("Edit Groups for") . " $de_catalog_year");
-
   
-  $render['title_top'] = array(
-    'value' => "<h2 class='title'>" . t("Edit Groups for @de_catalog_year", array("@de_catalog_year" => $de_catalog_year)) . "</h2>",
-  );
+
+  fp_set_title(t("Edit Groups for @de_catalog_year", array("@de_catalog_year" => $de_catalog_year)));  
   
   
   $render['upper_links'] = array(
@@ -1162,26 +1159,6 @@ function admin_display_groups() {
   );
     
   
-  /*
-  $rtn .= "
-      <h2 class='title'>" . t("Edit Groups for @de_catalog_year", array("@de_catalog_year" => $de_catalog_year)) . "</h2>
-        Options:
-        <ul style='margin-top: 5px;'>          
-          <li>" . l(t("Add a new group to this year"), "admin/groups/edit-group", "de_catalog_year=$de_catalog_year&group_id=new") . "</li>
-          <li>" . l(t("Process all group definitions & catalog repeats for this year"), "admin/groups/process-all-definitions", "de_catalog_year=$de_catalog_year") . "</li>
-          </li>
-        </ul>
-          <div align='center'>" . t("Hint: use CTRL-F to search groups quickly") . "</div>
-        <table border='0' cellpadding='2' width='100%' class='admin-groups-list'>
-        <tr>
-          <th>" . t("Title") . "</th>
-          <th>" . t("Internal Name") . "</th>
-          <th align='center'>Pri</th>
-          <th align='center'>i</th>
-          <th align='center'>" . t("Used") . "</th>
-        </tr>
-      ";
-  */
 
   $render['groups_table_top'] = array(
     'value' => "<table border='0' cellpadding='2' width='100%' class='admin-groups-list'>

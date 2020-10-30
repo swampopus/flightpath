@@ -111,6 +111,19 @@ $(document).ready(function() {
 
 
   function fpOpenLargeIframeDialog(url, title) {
+    
+    // make sure we have the "?initial_dialog_open=yes" set in the URL, so we will know if we
+    // should keep "nudging" or not in Chrome.
+    if (!url.includes("?")) {
+      url = url + "?";
+    }
+    else {
+      url = url + "&";
+    }
+
+    url = url + "initial_dialog_open=yes";    
+    
+    
     $("#fp-iframe-dialog-large-iframe").attr('src', url);
     $("#fp-iframe-dialog-large").dialog({title: title});    
     $("#fp-iframe-dialog-large").dialog('open');
@@ -184,6 +197,18 @@ $(document).ready(function() {
 
 
   function fpOpenSmallIframeDialog(url, title) {
+
+    // make sure we have the "?initial_dialog_open=yes" set in the URL, so we will know if we
+    // should keep "nudging" or not in Chrome.
+    if (!url.includes("?")) {
+      url = url + "?";
+    }
+    else {
+      url = url + "&";
+    }
+
+    url = url + "initial_dialog_open=yes";
+
 
     $("#fp-iframe-dialog-small iframe.dialog-iframe").attr('src', url);
     

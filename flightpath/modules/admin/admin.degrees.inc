@@ -724,19 +724,11 @@ function admin_display_degrees() {
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
 
   
-  //$rtn .= "<h2 class='title'>" . t("Degrees for @year", array("@year" => $de_catalog_year)) . "</h2>";  
+    
+  fp_set_title(t("Degrees for @year", array("@year" => $de_catalog_year)));
+
+    
   
-  $render['title_top'] = array(
-    'value' => "<h2 class='title'>" . t("Degrees for @year", array("@year" => $de_catalog_year)) . "</h2>",
-  );
-  
-  /*
-  $rtn .= "<div class='admin-degrees-upper-links'>";  
-  $rtn .= l("Add new degree plan (major, degree plan, or track)", "admin/degrees/add-degree", "de_catalog_year=$de_catalog_year");
-  $rtn .= " &nbsp; &nbsp; | &nbsp; &nbsp; ";
-  $rtn .= l("Copy a degree plan", "admin/degrees/copy-degree", "de_catalog_year=$de_catalog_year");
-  $rtn .= "</div>";
-  */
 
   $render['upper_links'] = array(
     'value' => "<div class='admin-degrees-upper-links'>  
