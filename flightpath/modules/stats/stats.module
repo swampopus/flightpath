@@ -19,13 +19,11 @@ function stats_menu() {
   $items = array();
   
   $items["admin-tools/stats"] = array(
-    "title" => "Usage Stats & Reports",
+    "title" => "Analytics & Reports",
     "page_callback" => "stats_display_main",
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(
       "page_show_title" => TRUE,
-      "menu_icon" => fp_theme_location() . "/images/popup.gif",
-      "target" => "_blank",      
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
   );
@@ -41,7 +39,7 @@ function stats_menu() {
       "bool_print" => FALSE,
       "menu_links" => array(         
         0 => array(
-          "text" => "Main menu",
+          "text" => t("Analytics"),
           "path" => "admin-tools/stats",
         ),
       ),      
@@ -61,7 +59,7 @@ function stats_menu() {
       "bool_print" => FALSE,
       "menu_links" => array(         
         0 => array(
-          "text" => "Main menu",
+          "text" => t("Analytics"),
           "path" => "admin-tools/stats",
         ),
       ),
@@ -112,7 +110,7 @@ function stats_menu() {
       "bool_print" => FALSE,
       "menu_links" => array(         
         0 => array(
-          "text" => "Main menu",
+          "text" => t("Analytics"),
           "path" => "admin-tools/stats",
         ),
       ),      
@@ -130,10 +128,9 @@ function stats_menu() {
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(
       "page_show_title" => TRUE,
-      "bool_print" => FALSE,
       "menu_links" => array(         
         0 => array(
-          "text" => "Main menu",
+          "text" => t("Analytics"),
           "path" => "admin-tools/stats",
         ),
       ),      
@@ -152,10 +149,9 @@ function stats_menu() {
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(
       "page_show_title" => TRUE,
-      "bool_print" => FALSE,
       "menu_links" => array(         
         0 => array(
-          "text" => "Main menu",
+          "text" => t("Analytics"),
           "path" => "admin-tools/stats",
         ),
       ),      
@@ -175,10 +171,9 @@ function stats_menu() {
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(
       "page_show_title" => TRUE,
-      "bool_print" => FALSE,
       "menu_links" => array(         
         0 => array(
-          "text" => "Main menu",
+          "text" => t("Analytics"),
           "path" => "admin-tools/stats",
         ),
       ),      
@@ -1507,7 +1502,7 @@ function stats_display_main() {
   
   
   
-  $rtn .= "<div class='stats-main-menu' style='font-size:1.2em;'>";
+  $rtn .= "<div class='stats-main-menu'>";
   $rtn .= fp_render_menu_block("System Reports", "stats/reports");
   $rtn .= "</div>";
   
@@ -1517,7 +1512,7 @@ function stats_display_main() {
   $reports = invoke_hook('stats_additional_menublocks');
   if ($reports) {
     foreach ($reports as $module_name => $temp) {
-      $rtn .= "<div class='stats-main-menu stats-additional-menublocks' style='font-size:1.2em;'>";
+      $rtn .= "<div class='stats-main-menu stats-additional-menublocks'>";
       foreach($reports[$module_name] as $title => $menu_block_path) {
         $rtn .= fp_render_menu_block($title, $menu_block_path);        
       }

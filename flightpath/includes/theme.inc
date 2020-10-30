@@ -698,6 +698,8 @@ function fp_render_breadcrumbs() {
 function fp_render_sidebar_left_content() {  
   $html = "";
   
+  //TODO:  Based on user privileges
+  
   $html .= "<ul class='sidebar-left-nav'>
               <a href='" . fp_url("<front>") . "'>
                 <li class='home first'>                
@@ -718,10 +720,12 @@ function fp_render_sidebar_left_content() {
                   <div class='desc'>Courses</div>                
                 </li>
               </a>
+              <a href='" . fp_url("admin-tools/stats") . "'>
               <li class='analytics'>
                 <i class='fa fa-bar-chart'></i>
                 <div class='desc'>Analytics</div>                
               </li>
+              </a>
               <a href='" . fp_url("admin-tools") . "'>
                 <li class='admin-tools'>
                   <i class='fa fa-bolt'></i>

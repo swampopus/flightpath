@@ -40,10 +40,6 @@ function admin_menu() {
      "access_arguments" => array("can_access_admin"),
      "tab_family" => "admin",
      "page_settings" => array(
-       "page_has_search" => FALSE,
-       "page_banner_is_link" => TRUE,
-       "page_hide_report_error" => TRUE,
-       "target" => "_blank",        
      ),     
      "type" => MENU_TYPE_TAB,
   );
@@ -218,33 +214,6 @@ function admin_menu() {
     "tab_family" => "admin_degrees",
   );
    
-  /*  OLD - marked for deletion 
-  $items["admin/degrees/edit-degree"] = array(
-    "title" => "Edit Degree",
-    "page_callback" => "admin_display_edit_degree",
-    "access_arguments" => array("can_edit_data_entry"),
-    "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
-      "page_hide_report_error" => TRUE,
-      "menu_links" => array(
-        0 => array(
-          "text" => "Admin Console",
-          "path" => "admin-tools/admin",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-        1 => array(
-          "text" => "Back to Degrees list",
-          "path" => "admin/degrees",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-      ),
-    ),   
-    "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
-    "type" => MENU_TYPE_NORMAL_ITEM,
-    "tab_parent" => "admin/degrees",
-  );   
-*/
   
   $items["admin/degrees/edit-degree/%/%"] = array(
     "title" => "Edit Degree",
@@ -276,16 +245,6 @@ function admin_menu() {
   
   
   
-  /*  OLD - marked for deletion   
-  $items["admin/degrees/handle-edit-degree-submit"] = array(    
-    "page_callback" => "admin_handle_edit_degree_submit",
-    "access_arguments" => array("can_edit_data_entry"),
-    "file" => menu_get_module_path("admin") . "/admin.degrees.inc",
-    "type" => MENU_TYPE_CALLBACK,
-  );      
-  */ 
-   
-
   $items["admin/degrees/popup-add-group"] = array(
     "title" => "Add Group",
     "page_callback" => "admin_display_degrees_popup_add_group",

@@ -2584,7 +2584,7 @@ function system_perform_clear_cache() {
     
   fp_clear_cache();
   
-  fp_goto("<front>");
+  fp_goto("admin-tools");
   
 }
 

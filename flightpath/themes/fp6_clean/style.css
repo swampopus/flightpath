@@ -451,6 +451,7 @@ div.updateMsg
 	width: 200px;
 	text-align: center;
 	font-weight: bold;
+	z-index: 9999;
 }
 
 .variableHoursList
@@ -808,7 +809,6 @@ Main
   padding-top: 10px;
   padding-bottom: 10px;
   padding-left: 20px;
-  font-size: 0.8em;
 }
 
 .fp-menu-item-tight {
@@ -831,6 +831,10 @@ Main
   font-size: 0.8em;
   color: red;
 }
+
+
+
+
 
 
 /*
@@ -1101,6 +1105,18 @@ a.button:hover {
 .pager a {
   text-decoration: none;
 }
+
+
+
+
+___page--stats{}
+
+.page--admin-tools-stats .stats-main-menu {
+  margin-bottom: 30px;
+}
+
+
+
 
 
 
