@@ -12473,6 +12473,7 @@ $.widget( "ui.dialog", {
 	},
 
 	_blockFrames: function() {
+	  
 		this.iframeBlocks = this.document.find( "iframe" ).map( function() {
 			var iframe = $( this );
 
@@ -12484,7 +12485,9 @@ $.widget( "ui.dialog", {
 				} )
 				.appendTo( iframe.parent() )
 				.offset( iframe.offset() )[ 0 ];
+				
 		} );
+		
 	},
 
 	_unblockFrames: function() {

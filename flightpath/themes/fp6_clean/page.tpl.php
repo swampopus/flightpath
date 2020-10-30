@@ -39,6 +39,7 @@
   
 <body class='<?php print $page_body_classes; ?>'>
 
+  <?php if (!$page_is_popup) : ?>
   <div id='header'>
     <div id='top-nav'>
       <?php print $page_top_nav_content; ?>
@@ -47,9 +48,10 @@
       <a href='<?php fp_url("<front>"); ?>'>
         <img src='<?php print "$theme_location/images/"; ?>fp_banner_default.png' border='0'>
       </a>
-    </div>
-          
+    </div>          
   </div>
+
+  <?php endif; ?>
 
 
   <div id='main-contant-wrapper'>
@@ -94,20 +96,21 @@
 
   </div>
 
-  
-  <div class='fp-bottom-message'>
-    <span class='popup-contact'>
-      <?php
-        if ($page_hide_report_error != TRUE) {
-          print "<a class='nounderline' href='javascript: popupreportcontact()'>" . t("Contact the @FlightPath production team", array("@FlightPath" => variable_get("system_name", "FlightPath"))) . "</a>";
-        }
-      ?>
-    </span>
-  <!-- Optional copyright message could go here.
-      <span>&copy; Date, Institution, etc.</span> -->   
-  </div>
+  <?php if (!$page_is_popup) : ?>
+    
+    <div class='fp-bottom-message'>
+      <span class='popup-contact'>
+        <?php
+          if ($page_hide_report_error != TRUE) {
+            print "<a class='nounderline' href='javascript: popupreportcontact()'>" . t("Contact the @FlightPath production team", array("@FlightPath" => variable_get("system_name", "FlightPath"))) . "</a>";
+          }
+        ?>
+      </span>
+    <!-- Optional copyright message could go here.
+        <span>&copy; Date, Institution, etc.</span> -->   
+    </div>
 
-
+  <?php endif; ?>
 
 
   

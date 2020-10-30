@@ -498,7 +498,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
       // Are we in what_if mode?
       $advising_what_if = @$GLOBALS["fp_advising"]["advising_what_if"];
       // We want to add a link to the popup to let the user select other degree tracks.
-      $op_link = "<a class='degree-op-link-change-degree-options' href='javascript: popupSmallIframeDialog(\"" . fp_url("advise/popup-change-track", "advising_what_if=$advising_what_if") . "\",\"" . t("Select a Degree Optfchangion") . "\");'
+      $op_link = "<a class='degree-op-link-change-degree-options' href='javascript: popupSmallIframeDialog(\"" . fp_url("advise/popup-change-track", "advising_what_if=$advising_what_if") . "\",\"" . t("Select a Degree Option") . "\");'
                     title='" . t("Change degree options") . "'><i class='fa fa-cog'></i></a>";
       
       

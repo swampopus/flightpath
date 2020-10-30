@@ -307,7 +307,7 @@ function draw_menu_items($menu_array) {
     $page_breadcrumbs = fp_render_breadcrumbs();
     
         
-    if ($this->student && $this->page_display_currently_advising == TRUE) {    
+    if ($this->student && $this->page_display_currently_advising == TRUE && !$page_is_popup) {    
       $page_student_profile_header = fp_render_student_profile_header();      
     }
     
@@ -371,13 +371,40 @@ function draw_menu_items($menu_array) {
       $page_content .= "
               <!-- iframe dialog, for use by javascript later on -->
                 <div id='fp-iframe-dialog-small' style='display: none;' title=''>  
-                  <iframe id='fp-iframe-dialog-small-iframe'></iframe>
+                  <iframe id='fp-iframe-dialog-small-iframe' class='dialog-iframe'></iframe>                  
                 </div>
                 <div id='fp-iframe-dialog-large' style='display: none;' title=''>  
-                  <iframe id='fp-iframe-dialog-large-iframe'></iframe>
+                  <iframe id='fp-iframe-dialog-large-iframe' class='dialog-iframe'></iframe>
                 </div>
                 
       ";
+    }
+    else {
+      // The page is in a dialog.  In order to cope with a strange bug in Chrome (as of 10-29-2020), we need
+      // to "nudge" the dialog window 1 pixel, or sometimes the internal iframe will not show up.
+      // We do this after it loads.
+      $page_on_locad .= "\n\n // From: https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser \n\n";      
+      $page_on_load .= ' var browser = (function() {
+                            var test = function(regexp) {return regexp.test(window.navigator.userAgent)}
+                            switch (true) {
+                                case test(/edg/i): return "Microsoft Edge";
+                                case test(/trident/i): return "Microsoft Internet Explorer";
+                                case test(/firefox|fxios/i): return "Mozilla Firefox";
+                                case test(/opr\//i): return "Opera";
+                                case test(/ucbrowser/i): return "UC Browser";
+                                case test(/samsungbrowser/i): return "Samsung Browser";
+                                case test(/chrome|chromium|crios/i): return "Google Chrome";
+                                case test(/safari/i): return "Apple Safari";
+                                default: return "Other";
+                            }
+                        })();';
+      
+      $page_on_load .= " if (browser == 'Google Chrome') {
+                            parent.fpNudgeDialog();
+                          }";
+      
+     
+      
     }
                 
                 	  
@@ -388,8 +415,12 @@ function draw_menu_items($menu_array) {
     
     
     // Grab the appropriate sidebar & top nav content (if any)
-    $page_sidebar_left_content = fp_render_sidebar_left_content();
-    $page_top_nav_content = fp_render_top_nav_content();
+    $page_sidebar_left_content = $page_top_nav_content = "";
+    
+    if (!$page_is_popup) { 
+      $page_sidebar_left_content = fp_render_sidebar_left_content();
+      $page_top_nav_content = fp_render_top_nav_content();
+    }
     
     
     if ($page_sidebar_left_content) {
@@ -432,7 +463,8 @@ function draw_menu_items($menu_array) {
     /////////////////////////
     // Output to browser:        
     
-    include($head_template_filename); 
+    
+    include($head_template_filename);
 		include($page_template_filename);
     
     

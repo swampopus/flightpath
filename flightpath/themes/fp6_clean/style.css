@@ -3,7 +3,6 @@
  * This CSS file pertains to the look of content itself in FlightPath.
  */
 
-/* @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700); */
 
 body
 {
@@ -1494,19 +1493,19 @@ table.fp-box-top {
 ___popups_and_dialog{}
 
 /* Don't display if this is a popup! */
+
 .page-is-popup #header,
 .page-is-popup .fp-bottom-message,
 .page-is-popup h2.title,
 .page-is-popup #breadcrumbs-wrapper,
-/*.page-is-popup #page-print-options,*/
 .page-is-popup #sidebar-left
  {
   display: none;
 }
 
+
 .page-is-popup #page-content {
-  width: calc(100vw - 30px) !important;
-  
+  width: calc(100vw - 30px) !important;  
   padding-left: 0;
   padding-right: 10px;
 }
@@ -1557,7 +1556,6 @@ iframe#fp-iframe-dialog-small-iframe {
 iframe#fp-iframe-dialog-large-iframe {
   width: calc(100% - 10px);  
 }
-
 
 
 

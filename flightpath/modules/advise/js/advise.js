@@ -1034,8 +1034,9 @@ function popupWindowNew(url, extraVars) {
 
 
 function popupSmallIframeDialog(url, title, extraVars) {
+
   var theURL = url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
-  
+ 
   fpOpenSmallIframeDialog(theURL, title);
   
 } 

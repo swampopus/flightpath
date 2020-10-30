@@ -1,58 +1,65 @@
 
+/**
+ * This will allow us to have HTML tags in dialog titles.
+ */
+$.widget("ui.dialog", $.extend({}, $.ui.dialog.prototype, {
+    _title: function(title) {
+        if (!this.options.title ) {
+            title.html("&#160;");
+        } else {
+            title.html(this.options.title);
+        }
+    }
+}));
+
+
 
 // Set up our modal dialogs on startup.
 $(document).ready(function() {
   
-    // Set up out iframe/dialog (if it is on the page)    
+    
     // TODO: use settings for width/height, if its been set.  This allows us to let the end user configure the size.
     var modalWidth = 500;
     var modalHeight = 400;
     $("#fp-iframe-dialog-small").dialog({
-      modal: true,
+      modal: true,      
+      show: {
+        effect: "blind",
+        duration: 300
+      },
       resize: function (event, ui) {
                       var heightDifference = 10;
-                      var widthDifference = 0;
-                      $("#fp-iframe-dialog-small iframe").height($(this).height() - heightDifference);
-                      $("#fp-iframe-dialog-small iframe").width($(this).width() - widthDifference);
+                      var widthDifference = 1;
+                      $("#fp-iframe-dialog-small iframe.dialog-iframe").height($(this).height() - heightDifference);
+                      $("#fp-iframe-dialog-small iframe.dialog-iframe").width($(this).width() - widthDifference);
                   },   
       open: function (event, ui) {
-                      var heightDifference = 10;
-                      var widthDifference = 0;  
-                      $(this).parent().css('position', 'fixed');                     
-                      $("#fp-iframe-dialog-small iframe").height($(this).height() - heightDifference);
-                      $("#fp-iframe-dialog-small iframe").width($(this).width() - widthDifference);
+                      var heightDifference = 10; 
+                      var widthDifference = 1;  
+                                                                 
+                      $("#fp-iframe-dialog-small iframe.dialog-iframe").height($(this).height() - heightDifference);
+                      $("#fp-iframe-dialog-small iframe.dialog-iframe").width($(this).width() - widthDifference);
+                      
+                      // Get rid of annoying focus on close button.
+                      $( this ).siblings( ".ui-dialog-titlebar" ).find( "button" ).blur();                       
+                      
                   },
       close: function (event, ui) {
-                      url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";      
-                      $("#fp-iframe-dialog-small-iframe").attr('src', url);
+                      //url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";      
+                      //$("#fp-iframe-dialog-small iframe.dialog-iframe").attr('src', url);
+                      $("#fp-iframe-dialog-small iframe.dialog-iframe").attr('src', 'about:blank');
+                      
                   },
       autoOpen: false,
       resizable: false,
       width: modalWidth,      
-      height: modalHeight
-      /*
-      dragStart: function (event, ui) {  // Fixes an issue where dragging causes problems.  Got from: https://stackoverflow.com/questions/7145317/jquery-ui-dialog-around-iframe-performance-issues
-            $('iframe', this).each(function() {
-                $('<div class="ui-draggable-iframeFix" style="background: transparent;"></div>')
-                .css({
-                    width: '95%', height: '100%',
-                    position: 'absolute', opacity: '1', zIndex: 1000, overflowX: 'hidden'
-                })
-                .css($(this).position())
-                .appendTo($(this).offsetParent());
-            });
-        },
-        dragStop: function (event, ui) {
-            $("div.ui-draggable-iframeFix").each(function() {
-              this.parentNode.removeChild(this); }); //Remove frame helpers
-            }*/      
+      height: modalHeight      
     });     
-  
-    // Give the dialog an initial screen
-    url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";
-    $("#fp-iframe-dialog-small-iframe").attr('src', url);
-  
     
+    
+  
+  
+  
   
     ////////////////////////
     // Large iframe dialog
@@ -60,33 +67,41 @@ $(document).ready(function() {
     modalHeight = 600;
     $("#fp-iframe-dialog-large").dialog({
       modal: true,
+      show: {
+        effect: "blind",
+        duration: 300
+      },      
       resize: function (event, ui) {
                       var heightDifference = 10;
-                      var widthDifference = 0;
+                      var widthDifference = 1;
                       $("#fp-iframe-dialog-large iframe").height($(this).height() - heightDifference);
                       $("#fp-iframe-dialog-large iframe").width($(this).width() - widthDifference);
                   },   
       open: function (event, ui) {
                       var heightDifference = 10;
-                      var widthDifference = 0;  
-                      $(this).parent().css('position', 'fixed');                     
+                      var widthDifference = 1;  
+                                           
                       $("#fp-iframe-dialog-large iframe").height($(this).height() - heightDifference);
                       $("#fp-iframe-dialog-large iframe").width($(this).width() - widthDifference);
+                      // Get rid of annoying focus on close button.
+                      $( this ).siblings( ".ui-dialog-titlebar" ).find( "button" ).blur();                       
+
                   },
       close: function (event, ui) {
-                      url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";      
-                      $("#fp-iframe-dialog-large-iframe").attr('src', url);
+                      //url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";      
+                      //$("#fp-iframe-dialog-large-iframe").attr('src', url);
+                      $("#fp-iframe-dialog-large-iframe").attr('src', 'about:blank');
                   },
       autoOpen: false,
-      resizable: true,
+      resizable: false,
       width: modalWidth,      
       height: modalHeight
     });     
   
     // Give the dialog an initial screen
-    url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";
-    $("#fp-iframe-dialog-large-iframe").attr('src', url);    
-    
+    //url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";
+    //$("#fp-iframe-dialog-large-iframe").attr('src', url);    
+    $("#fp-iframe-dialog-large-iframe").attr('src', 'about:blank');
   
   
     
@@ -107,6 +122,7 @@ $(document).ready(function() {
    */
   function fpCloseLargeIframeDialog(mode) {
     var url = "";
+    
     
     if (mode == 'blank') {
       url = 'about:blank';
@@ -131,40 +147,62 @@ $(document).ready(function() {
 
 
 
+  /**
+   * This is to fix a bug in Chrome where the iframe does not display any content (though it is there)
+   * until the dialog is moved slightly.  This gets called by the dialog itself, via:  parent.fpNudgeDialog() in its document.ready().
+   */
+  function fpNudgeDialog() {
+
+    setTimeout(function() {
+    
+      $("div[role=dialog]").each(function() {
+        
+        $(this).addClass('ui-draggable-dragging');        
+        $(this).addClass('ui-dialog-dragging');
+        var x = $(this).css('top');
+        var oldx = x;        
+        x = parseFloat(x.replace("px", ""));        
+        var newx = (x + 1) + "px";              
+        $(this).css('top',  newx);
+      
+        var that = $(this);
+              
+        //setTimeout(function() {
+        //  $(that).css('top',  oldx);
+        //}, 10);                
+          
+      });
+        
+      
+      
+    
+    }, 50);
+
+    
+  }
+
 
 
   function fpOpenSmallIframeDialog(url, title) {
-    $("#fp-iframe-dialog-small-iframe").attr('src', url);
-    $("#fp-iframe-dialog-small").dialog({title: title});    
+
+    $("#fp-iframe-dialog-small iframe.dialog-iframe").attr('src', url);
+    
+    $("#fp-iframe-dialog-small").dialog({title: title});
+   
     $("#fp-iframe-dialog-small").dialog('open');
+        
   }
+
+  
 
 
   /**
    * mode can be "blank" or "updating"
    */
   function fpCloseSmallIframeDialog(mode) {
-    var url = "";
-    
-    if (mode == 'blank') {
-      url = 'about:blank';
-    }
-    
-    if (mode == 'updating') {
-      url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";      
-    }
-    
-    var mils = 1;
-    
-    if (url) {
-      $("#fp-iframe-dialog-small-iframe").attr('src', url);
-      mils = 300;
-    }
-    // Set it on a slight delay before we close, to give the screen time to load.    
-    window.setTimeout( function() {    
-      $("#fp-iframe-dialog-small").dialog('close');
-    }, mils);
-    
+
+    $("#fp-iframe-dialog-small").dialog('close');
+      
   }
 
 
@@ -190,6 +228,12 @@ $(document).ready(function() {
   function fp_get_machine_readable(str) {
     return str.replace(/[\W_]+/g,"_");
   }    
+
+
+  // Replacement for built-in alert(str).  Uses the DayPilot code.  See the /inc/ directory.
+  function fp_alert(str) {
+    DayPilot.Modal.alert(str);
+  }
 
 
 
