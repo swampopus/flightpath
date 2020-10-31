@@ -63,6 +63,34 @@ function content_menu() {
   );
 
 
+
+  $items["content/%"] = array(
+    "title" => "View",
+    "page_callback" => "content_view_content",
+    "page_arguments" => array(1),
+    "access_callback" => "content_user_access",
+    "access_arguments" => array("view_cid", 1),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "menu_links" => array(          
+        0 => array(
+          "text" => "Admin Console",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Content",
+          "path" => "admin/config/content",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),          
+      ),      
+    ),
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "content",    
+    "weight" => 10,      
+  );
+  
+
   
   $items["content/%/edit"] = array(
     "title" => "Edit",
@@ -92,16 +120,16 @@ function content_menu() {
     "weight" => 20,      
   );
   
-  
-  
-  $items["content/%"] = array(
-    "title" => "View",
-    "page_callback" => "content_view_content",
-    "page_arguments" => array(1),
-    "access_callback" => "content_user_access",
-    "access_arguments" => array("view_cid", 1),
+
+  $items["content/%/devel"] = array(
+    "title" => "Devel",
+    "page_callback" => "content_display_devel",
+    "page_arguments" => array(1),    
+    "access_arguments" => array("view_fpm_debug"),
     "page_settings" => array(
-      "page_show_title" => TRUE,
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
       "menu_links" => array(          
         0 => array(
           "text" => "Admin Console",
@@ -113,17 +141,38 @@ function content_menu() {
           "path" => "admin/config/content",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),          
-      ),      
+      ),
     ),
-    "type" => MENU_TYPE_TAB,
-    "tab_family" => "content",    
-    "weight" => 10,      
+    "type" => MENU_TYPE_TAB,    
+    "tab_family" => "content",
+    "weight" => 30,      
   );
+
   
+  
+  
+
   
     
   return $items;
 }
+
+
+/**
+ * Simply returns the fpm() results for the supplied content.
+ */
+function content_display_devel($cid) {
+  $rtn = "";
+  
+  $content = content_load($cid);
+  
+  $rtn .= "&nbsp; &nbsp;";
+  
+  fpm($content);
+  
+  return $rtn;
+} 
+
 
 
 /**
@@ -264,11 +313,11 @@ function content_edit_content_form($type = "", $cid = "") {
   } 
   else {
     // New piece of content
-    $content = array();
+    $content = new stdClass();
+    $content->published = 1;
     fp_set_title(t("Add new") . " " . $types[$type]["title"]);
     
   }
-
 
   
   // Does the user have permission to edit this content?
@@ -291,12 +340,16 @@ function content_edit_content_form($type = "", $cid = "") {
     "value" => $cid,    
   );
 
+
+  // TODO:  Does this content type ask us to create an automatic title, and hide this field?
   $form["title"] = array(
     "type" => "textfield",
     "label" => t("Title:"),
     "value" => $content->title,
     "required" => TRUE,     
   );
+  
+  
   
   
   // Are there extra fields?  If so, add their values in as well.
@@ -332,23 +385,12 @@ function content_edit_content_form($type = "", $cid = "") {
   }
 
 
-  /*
-  $form["body"] = array(
-    "type" => "textarea",
-    "label" => t("Body:"),
-    "rows" => 15,
-    "value" => $content["body"],    
+  // Are we published?
+  $form['published'] = array(
+    'type' => 'checkbox',
+    'label' => t('Published'),
+    'value' => (bool) $content->published,
   );
-   
-  // Are there any settings we should show?
-  if (is_array($types[$type]["settings"])) {    
-    foreach($types[$type]["settings"] as $field_name => $field_details) {      
-      $form[$field_name] = $field_details;
-      // Add in default value previously saved, if available.
-      $form[$field_name]["value"] = $content["settings"][$field_name];
-    }
-  }
-  */
   
   
   // Draw the controls (buttons)
@@ -406,6 +448,7 @@ function content_edit_content_form_submit(&$form, $form_state) {
     $content = new stdClass();
     $content->type = $type;
     $content->cid = "new";    
+    $content->published = 1;
   }
   else {
     // This is an EXISTING content.  Load it.
@@ -414,12 +457,14 @@ function content_edit_content_form_submit(&$form, $form_state) {
   
   $content->title = $values['title'];  // required
   
+  // set published status.  0 for not, 1 for published
+  $content->published = (bool) $values['published'];
+  
   // Add in our new field values.  
   foreach ($types[$type]['fields'] as $fieldname => $details) {
     $content->{'field__' . $fieldname} = @$values[$fieldname];
   }
   
-
   content_save($content);
   
   fp_add_message(t('Saved successfully.'));
@@ -466,8 +511,8 @@ function content_content_save(&$content) {
     
   // If this is a NEW content, then insert once into content table to get cid.  Then, insert into content_versions to get vid.  Then update content table with vid.
   if ($content->cid == 'new') {
-    db_query('INSERT INTO content (user_id, `type`, title, posted, updated)
-              VALUES (?, ?, ?, ?, ?)', array($user->id, $type, $content->title, time(), time()));
+    db_query('INSERT INTO content (user_id, `type`, title, posted, updated, published)
+              VALUES (?, ?, ?, ?, ?, ?)', array($user->id, $type, $content->title, time(), time(), $content->published));
     $content->cid = db_insert_id();
     
     // insert into content_versions to get the vid.
@@ -485,8 +530,8 @@ function content_content_save(&$content) {
   
 
   // Now we should have a fully created $content object.  Let's update the title and other values in the content table.
-  db_query("UPDATE content SET vid = ?, title = ?, updated = ?, user_id = ? WHERE
-            cid = ?", array($content->vid, $content->title, time(), $user->id, $content->cid));
+  db_query("UPDATE content SET vid = ?, title = ?, updated = ?, user_id = ?, published = ? WHERE
+            cid = ?", array($content->vid, $content->title, time(), $user->id, $content->published, $content->cid));
 
   
   // Now we are going to insert all of the field values.  We assume there is a table ALREADY CREATED with our field names
