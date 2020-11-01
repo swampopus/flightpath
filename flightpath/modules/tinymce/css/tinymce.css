@@ -1,7 +1,4 @@
-.mceContentBody {
-  font-size: 14px;
-}
-
-.tinymce-extra-instructions {
-  font-size: 0.9em;
+.mce-content-body textarea {
+  display: none;
+  
 }

@@ -482,15 +482,36 @@ function fp_get_student_majors($student_cwid, $bool_return_as_csv = FALSE, $bool
 
 
 
-function fp_get_student_name($cwid) {
+function fp_get_student_name($cwid, $bool_include_cwid = FALSE) {
   if ($cwid == 0) {
     return t("Anonymous");
   }
   $db = get_global_database_handler();
-  $name = $db->get_student_name($cwid);
+  $name = $db->get_student_name($cwid, $bool_include_cwid);
   if (!$name) $name = t("Unknown Student");
   return $name;
 }
+
+
+
+function fp_get_student_email($cwid) {
+  $email = db_result(db_query("SELECT email FROM users
+                               WHERE cwid = ?
+                               AND is_student = 1", array($cwid)));
+
+  if (trim($email)) {
+    return trim($email);
+  }
+  
+  // else, email wasn't set.
+  return FALSE;
+  
+}
+
+
+
+
+
 
 function fp_get_permissions_for_role($rid) {
   $rtn = array();

@@ -179,7 +179,7 @@ function comments_comment_form() {
   );
   
   $form["comment"] = array(
-    "type" => "textarea",
+    "type" => "textarea_editor",    
   );
   
   $form["submit"] = array(

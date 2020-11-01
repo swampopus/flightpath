@@ -490,12 +490,22 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   
   $attributes = @$element["attributes"];
   
+  if ($type == 'textarea_editor') {
+    // Add the "html-editor" class to attributes.
+    if (!is_array($attributes)) $attributes = array();
+    $attributes['class'] .= ' html-editor';
+  }
+  
+  $extra_wrapper_class = "";  // We will give the wrapper a similar class as are defined in attributes, if any.
   if (is_array($attributes)) {
     // Convert the attributes array into a string.
     
     $new_attr = "";
     foreach ($attributes as $key => $val) {
       $new_attr .= " $key='$val' ";
+      if ($key == 'class') {
+        $extra_wrapper_class .= " element-wrapper--" . trim($val);
+      }
     }
     $attributes = $new_attr;
   }
@@ -524,10 +534,11 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
       $value = $_SESSION["fp_form_submissions"][$use_session_submission_values_for_callback]["values"][$name];
     }    
   }
+
   
   
   if ($type != "markup") {
-    $rtn .= "<div id='element-wrapper-$cssname' class='form-element element-type-$type'>";
+    $rtn .= "<div id='element-wrapper-$cssname' class='form-element element-type-$type $extra_wrapper_class'>";
   }
 
   if ($prefix) {
@@ -552,11 +563,6 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
       $rtn .= "<div $attributes>";
     }
     
-    // If a label is set, go ahead and display, even though its markup...
-    if ($label != "") {
-      $rtn .= "<label>$ast$label$popup_help_link</label>";
-    } 
-     
     $rtn .= "$value";
     
     if (is_string($attributes) && $attributes != "") {
@@ -567,7 +573,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     $rtn .= "<label>$ast$label$popup_help_link</label>";
   }
 
-  if ($type == "textarea") {
+  if ($type == "textarea" || $type == 'textarea_editor') {
     $rows = (isset($element["rows"])) ? $element["rows"] : "5";
     $rtn .= "<textarea name='$name' id='element-$cssname' rows='$rows' $attributes>$value</textarea>";
   }
@@ -696,6 +702,9 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     $rtn .= "</div>";  // close the over-all wrapper
   }
 
+  
+    
+  
 
 
   return $rtn;

@@ -40,7 +40,9 @@ function tinymce_init() {
   if ($bool_activate) {
     fp_add_js(array("tinymceModulePath" => fp_get_module_path("tinymce")), "setting");  
     
-    fp_add_js(fp_get_module_path("tinymce") . "/inc/tiny_mce/tiny_mce.js");
+    //fp_add_js(fp_get_module_path("tinymce") . "/inc/tiny_mce/tiny_mce.js");
+    fp_add_js(fp_get_module_path("tinymce") . "/inc/tinymce/js/tinymce/tinymce.min.js");
+    
     fp_add_js(fp_get_module_path("tinymce") . "/js/tinymce_module.js");
     
     // Set to TRUE for pages where tinymce is in use.
@@ -92,11 +94,15 @@ function tinymce_config_form() {
     "type" => "textarea",
     "value" => variable_get("tinymce_include_on_paths", ""),
     "description" => t("Enter FlightPath paths, one per line, where
-                      the TinyMCE plugin should be included.
-                      Ex: comments
+                      the TinyMCE plugin should be included.  This step is required before you
+                      can make use of the textarea_editor element type (see below).
+                      <br>Ex:<br>&nbsp; comments<br>&nbsp; content/*
                       <br>
                       Wildcards are also allowed at the END of the path only.
-                      Ex: content/* "),
+                      Ex: content/* 
+                      <br><br>
+                      Note: For developers, make sure you specify a <b>type=textarea_editor</b> for fields which
+                      should be rendered with TinyMCE.  Use hook_form_alter to change ordinary textareas into textarea_editor."),
   );
 
   
@@ -127,12 +133,20 @@ function tinymce_form_alter(&$form, $form_id) {
     fp_add_css(fp_get_module_path("tinymce") . "/css/tinymce.css");
     
     foreach($form as $key=>$val) {
-      if (@$form[$key]["type"] == "textarea") {        
+      if (@$form[$key]["type"] == "textarea_editor") {        
         @$form[$key]["description"] .= "<div class='tinymce-extra-instructions'>
-                                        " . t("Trouble with Copy/Paste? Try keyboard
-                                              shortcuts CTRL-C and CTRL-V. To single-space, press CTRL-ENTER.") . "</div>";
+                                        " . t("Trouble with Copy/Paste? Try keyboard 
+                                              shortcuts CTRL-C and CTRL-V. To single-space, press SHIFT-ENTER.") . "</div>";
       }
     }
   }
   
 }
+
+
+
+
+
+
+
+

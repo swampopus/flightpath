@@ -907,8 +907,7 @@ label.label-for-checkbox
   font-weight: normal;
 }
 
-.form-element-description {
-  font-family: Arial, Verdana, sans-serif;
+.form-element-description {  
   font-size: 0.8em;
   padding-left: 10px;
   margin-top: 5px;
@@ -1050,6 +1049,15 @@ label {
   filter: none;
 }
 
+.element-wrapper--hidden {
+  display: none;
+}
+
+.form-element-editor-after-wrapper-description {
+  margin-bottom: 10px;
+  padding-left: 10px;
+  font-size: 0.9em;
+}
 
 
 

@@ -1392,7 +1392,7 @@ class DatabaseHandler extends stdClass
    * @param int $student_id
    * @return string
    */
-  function get_student_name($cwid) {
+  function get_student_name($cwid, $bool_include_cwid = FALSE) {
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT f_name, l_name FROM users 
@@ -1404,9 +1404,14 @@ class DatabaseHandler extends stdClass
 
     // Force into pretty capitalization.
     // turns JOHN SMITH into John Smith 
-    $name = ucwords(strtolower($name));
+    $name = trim(ucwords(strtolower($name)));
     
-    return trim($name);
+    if ($bool_include_cwid) {
+      $name .= " ($cwid)";
+    }
+    
+    
+    return $name;
   } 
   
   
@@ -1418,18 +1423,12 @@ class DatabaseHandler extends stdClass
    * @param int $faculty_id
    * @return string
    */
-  function get_faculty_name($cwid) {
-    // Let's pull the needed variables out of our settings, so we know what
-    // to query, because this is a non-FlightPath table.
-    //$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
-    //$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-    //$table_name = $tsettings["table_name"];   
-    
+  function get_faculty_name($cwid, $bool_include_cwid = FALSE) {
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT f_name, l_name FROM users 
-                      WHERE cwid = '?'
-                      AND is_faculty = '1' ", $cwid);
+                      WHERE cwid = ?
+                      AND is_faculty = 1 ", $cwid);
 
     
     $cur = $this->db_fetch_array($res);
@@ -1438,9 +1437,13 @@ class DatabaseHandler extends stdClass
 
     // Force into pretty capitalization.
     // turns JOHN SMITH into John Smith 
-    $name = ucwords(strtolower($name));
+    $name = trim(ucwords(strtolower($name)));
     
-    return trim($name);
+    if ($bool_include_cwid) {
+      $name .= " ($cwid)";
+    }
+    
+    return $name;
   } 
   
   

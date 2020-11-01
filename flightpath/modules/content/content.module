@@ -415,8 +415,6 @@ function content_edit_content_form($type = "", $cid = "") {
     
   }  
     
-  fpm($form);
-    
   
   // Are there extra fields?  If so, add their values in as well.
   if (is_array($types[$type]['fields'])) {
