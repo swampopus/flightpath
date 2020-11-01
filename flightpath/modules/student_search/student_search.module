@@ -612,11 +612,14 @@ function student_search_search_form() {
     
     if ($search_for) {
     
-      $search_action = " AND (u.cwid LIKE :like_search_for 
-                         OR l_name LIKE :like_search_for 
-                         OR f_name LIKE :like_search_for ) 
+      $search_action = " AND (u.cwid LIKE :like_search_for1 
+                         OR l_name LIKE :like_search_for2 
+                         OR f_name LIKE :like_search_for3 ) 
                          ";
-      $params[":like_search_for"] = "%$search_for%";
+                         
+      $params[":like_search_for1"] = "%$search_for%";
+      $params[":like_search_for2"] = "%$search_for%";
+      $params[":like_search_for3"] = "%$search_for%";
       
       
       $temp = explode(" ",$search_for);

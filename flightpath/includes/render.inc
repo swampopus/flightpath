@@ -284,11 +284,9 @@ function fp_render_form($callback, $form_type = "") {
   }
   
   if ($page_title != "") {
-    //$rtn .= "<h2 class='title'>" . $page_title . "</h2>";
     fp_show_title(TRUE);
   }
     
-  //fpm($GLOBALS["fp_current_menu_router_item"]);
   $form_path = $GLOBALS["fp_current_menu_router_item"]["path"];
     
   // Are there any files required to get to the submit handler for this form?
@@ -325,8 +323,14 @@ function fp_render_form($callback, $form_type = "") {
     
   // Did the user specify a submit method (like GET or POST)?  POST is default.
   $submit_method = (@$form["#submit_method"] == "") ? "POST" : $form["#submit_method"];
-    
-  $rtn .= "<form action='" . fp_url("system-handle-form-submit", "", TRUE) .  "' method='$submit_method' id='fp-form-$callback' name='fp_form_name_$callback' $attributes>";
+  
+  // If the window_mode has been set in the _GET, then include it as a query in the fp_url() function.  But force it to either be "popup" or another valid option.
+  $url_query = "";
+  if (isset($_GET['window_mode']) && $_GET['window_mode'] == 'popup') {    
+    $url_query = "window_mode=popup";
+  }
+      
+  $rtn .= "<form action='" . fp_url("system-handle-form-submit", $url_query, TRUE) .  "' method='$submit_method' id='fp-form-$callback' name='fp_form_name_$callback' $attributes>";
   
   $rtn .= "<input type='hidden' name='callback' value='$callback'>";
   $rtn .= "<input type='hidden' name='form_token' value='$form_token'>";

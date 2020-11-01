@@ -42,14 +42,16 @@ class DatabaseHandler extends stdClass
     if (!$this->pdo) {
       $this->pdo = new PDO("mysql:host=$db_host_ip;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass,
         array(
-          PDO::MYSQL_ATTR_LOCAL_INFILE => TRUE,          
+          PDO::MYSQL_ATTR_LOCAL_INFILE => TRUE,
         ));
       // Set our error handling...  (using "silent" so I can catch errors in try/catch and display them, email, etc, if wanted.)
       $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
       
+      
+      // NOTE:  !!!  This causes problems with FlightPath if uncommented.  Leave commented for now.
       // Make sure that when we retrieve integers and floats, they do not get converted to strings.
-      $this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, FALSE);
-      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, FALSE);
+      //$this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, FALSE);
+      //$this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, FALSE);
 
            
     }
@@ -356,7 +358,7 @@ class DatabaseHandler extends stdClass
     
     try {      
       $result = $this->pdo->prepare($sql_query);
-      $result->execute($args);
+      $result->execute($args);      
       $_SESSION["fp_last_insert_id"] = $this->pdo->lastInsertId();  // capture last insert id, in case we ask for it later.   
       return $result;
     } 

@@ -44,7 +44,6 @@ function advise_menu() {
     "access_callback" => TRUE,  
     "page_settings" => array (
       "display_currently_advising" => TRUE,
-      "bool_print" => TRUE,
       "screen_mode" => "not_advising",
     ),    
     "type" => MENU_TYPE_CALLBACK,

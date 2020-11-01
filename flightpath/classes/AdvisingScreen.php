@@ -286,6 +286,11 @@ function draw_menu_items($menu_array) {
 		$page_title = $this->page_title;
 		$page_body_classes = $this->page_body_classes;
 		
+    // Are we explicitly setting that this is a popup in the URL?
+    if ($_REQUEST['window_mode'] == 'popup') {
+      $page_is_popup = TRUE;
+    }
+    
     $page_extra_js_files = "";
     $page_extra_js_settings = "";
     $page_extra_css_files = "";

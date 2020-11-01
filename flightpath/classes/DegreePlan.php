@@ -519,9 +519,9 @@ class DegreePlan extends stdClass
 
 
     $res = $this->db->db_query("SELECT * FROM $table_name1 a, $table_name2 b
-            							WHERE a.degree_id = '?'
+            							WHERE a.degree_id = ?
             							AND a.degree_id = b.degree_id 
-            							ORDER BY semester_num ", $this->degree_id);
+            							ORDER BY semester_num ", array($this->degree_id));
     while ($cur = $this->db->db_fetch_array($res))
     {
       $this->title = $cur["title"];

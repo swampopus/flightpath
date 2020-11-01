@@ -150,6 +150,22 @@ function content_menu() {
 
   
   
+  /**
+   * Generic screen which, if we have saved content from within an iframe dialog,
+   * we want to display a "success" message, then just refresh the screen.
+   */
+  $items["content-dialog-handle-after-save"] = array(     
+    "page_callback" => "content_dialog_handle_after_save",
+    "access_callback" => TRUE,
+    "page_settings" => array (
+      "display_currently_advising" => FALSE,
+      "screen_mode" => "not_advising",
+      "page_is_popup" => TRUE,
+    ),    
+    "type" => MENU_TYPE_CALLBACK,
+  );  
+    
+  
   
 
   
@@ -222,6 +238,44 @@ function content_menu_handle_replacement_pattern($str) {
 }
 
 
+
+
+/**
+ * This is the URL we redirect to after saving a piece of content in a dialog,
+ * so all we really want to do is close the dialog and reload the parent page.
+ * 
+ * Remember, we are inside an iframe.
+ */
+function content_dialog_handle_after_save() {
+  
+  $rtn = "";
+  
+  $rtn = "";
+  
+  $rtn .= "<h2 class='dialog-handle-after-save'>" . t("Your submission has been saved correctly!  Closing window...") . "</h2>";
+  
+  $rtn .= "<br><br><p>" . t("If this windows doesn't close within 3 seconds,") . " <a href='javascript:window.parent.location.reload();'>" . t("click here") . "</a>.</p>";
+  
+  // Add this javascript code to when the page loads.
+  $rtn .= "
+      <script type='text/javascript'>
+        $(document).ready(function() {
+          setTimeout(function() {
+            
+            window.parent.location.reload();
+          
+          }, 1000);  
+        });
+      </script>
+  ";
+  
+  
+  return $rtn;
+}
+
+
+
+
 /**
  * Display the content specified in the GET's cid.
  *
@@ -253,7 +307,6 @@ function content_view_content($cid) {
     'value' => "<div class='content-submitted'>" . t("Submitted by") . " " . $author->name . " " . t("on") . " " . format_date($content->posted, 'short') . "</div>",
   );
 
-fpm($content);
 
   // Display all the various fields
   if (is_array($types[$type]['fields'])) {
@@ -341,7 +394,7 @@ function content_edit_content_form($type = "", $cid = "") {
   );
 
 
-  // TODO:  Does this content type ask us to create an automatic title, and hide this field?
+  
   $form["title"] = array(
     "type" => "textfield",
     "label" => t("Title:"),
@@ -349,8 +402,21 @@ function content_edit_content_form($type = "", $cid = "") {
     "required" => TRUE,     
   );
   
-  
-  
+  // Are there any special settings for the title?
+  if (isset($types[$type]['settings']) && isset($types[$type]['settings']['title'])) {
+    if (is_array($types[$type]['settings']['title'])) {
+      // Use array_merge to just override with whatever we have in our settings for the title.
+      $form['title'] = array_merge($form['title'], $types[$type]['settings']['title']);
+    }
+    
+    if (is_array($types[$type]['settings']['#redirect'])) {
+      $form['#redirect'] = $types[$type]['settings']['#redirect'];
+    }
+    
+  }  
+    
+  fpm($form);
+    
   
   // Are there extra fields?  If so, add their values in as well.
   if (is_array($types[$type]['fields'])) {
@@ -390,28 +456,27 @@ function content_edit_content_form($type = "", $cid = "") {
     'type' => 'checkbox',
     'label' => t('Published'),
     'value' => (bool) $content->published,
+    'weight' => 900,
   );
   
   
   // Draw the controls (buttons)
-  $form["mark" . $m++] = array(
-    "value" => "<div class='content-edit-controls'>",
-  );
   
   $form["submit_submit"] = array(
     "type" => "submit",
-    "value" => t("Submit"),        
+    "value" => t("Submit"),
+    'weight' => 920,            
   );
-   
-  $form["submit_delete"] = array(
-    "type" => "submit",
-    "value" => t("Delete"),    
-    "confirm" => t('Are you sure you wish to delete this?\nThis action cannot be undone.'),
-  );
+  
+  if ($cid != 'new') { 
+    $form["submit_delete"] = array(
+      "type" => "submit",
+      "value" => t("Delete"),    
+      "confirm" => t('Are you sure you wish to delete this?\nThis action cannot be undone.'),
+      'weight' => 930,    
+    );
+  }
 
-  $form["mark" . $m++] = array(
-    "value" => "</div>",
-  );
 
   
   return $form;

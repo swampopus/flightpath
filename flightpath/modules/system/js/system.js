@@ -130,32 +130,8 @@ $(document).ready(function() {
   }
 
 
-  /**
-   * mode can be "blank" or "updating"
-   */
-  function fpCloseLargeIframeDialog(mode) {
-    var url = "";
-    
-    
-    if (mode == 'blank') {
-      url = 'about:blank';
-    }
-    
-    if (mode == 'updating') {
-      url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";      
-    }
-    
-    var mils = 1;
-    
-    if (url) {
-      $("#fp-iframe-dialog-large-iframe").attr('src', url);
-      mils = 300;
-    }
-    // Set it on a slight delay before we close, to give the screen time to load.    
-    window.setTimeout( function() {    
-      $("#fp-iframe-dialog-large").dialog('close');
-    }, mils);
-    
+  function fpCloseLargeIframeDialog() {
+      $("#fp-iframe-dialog-large").dialog('close'); 
   }
 
 
@@ -221,10 +197,7 @@ $(document).ready(function() {
   
 
 
-  /**
-   * mode can be "blank" or "updating"
-   */
-  function fpCloseSmallIframeDialog(mode) {
+  function fpCloseSmallIframeDialog() {
 
     $("#fp-iframe-dialog-small").dialog('close');
       
