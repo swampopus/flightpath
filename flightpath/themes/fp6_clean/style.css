@@ -15,6 +15,9 @@ body
   height: 100%;  /* required for modal dialog to work correctly */
 }
 
+table {
+  border-collapse: collapse;
+}
 /* 
  * Page top banner 
  */
@@ -1712,61 +1715,6 @@ ___student_mini_profile{}
   color: inherit;
 }
 
-
-
-
-___student_profile_page {}
-
-
-.student-profile-header-full {
-  border-bottom: 1px solid #ddd;
-}
-
-.student-profile-header-full .header-profile-image {
-  width: 180px;
-  height: 250px;
-  margin-bottom: 10px;
-}
-
-.priority-high {
-    background-color: red;
-}
-.profile-priority-bar {
-    display: inline-block;
-    min-width: 100px;
-    padding: 0 3px 0 3px;
-    text-align: center;
-    font-weight: bold;
-    font-size: 0.9em;
-    color: white;
-    border-radius: 5px;
-}
-
-table.student-alerts {
-  width: 100%;  
-  border-collapse:collapse;
-}
-
-table.student-alerts td, table.student-alerts th {
-  padding: 0;
-  margin: 0;
-}
-
-table.student-alerts tr {
-  line-height: 35px;
-}
-
-table.student-alerts td {
-  padding: 5px;
-}
-
-table.student-alerts tr:nth-child(even) {
-  background-color: #f8f8f8;
-}
-
-table.student-alerts tr.closed {
-  font-style: italic;
-}
 
 
 

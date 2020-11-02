@@ -1035,7 +1035,10 @@ function popupWindowNew(url, extraVars) {
 
 function popupSmallIframeDialog(url, title, extraVars) {
 
-  var theURL = url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
+  var theURL = url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId;
+  if (extraVars) {
+    theURL += "&" + extraVars;
+  }
  
   fpOpenSmallIframeDialog(theURL, title);
   
@@ -1043,7 +1046,12 @@ function popupSmallIframeDialog(url, title, extraVars) {
 
 
 function popupLargeIframeDialog(url, title, extraVars) {
-  var theURL = url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
+
+  var theURL = url + "&window_mode=popup&current_student_id=" + FlightPath.settings.currentStudentId;
+  if (extraVars) {
+    theURL += "&" + extraVars;
+  }
+
   
   fpOpenLargeIframeDialog(theURL, title);
   
