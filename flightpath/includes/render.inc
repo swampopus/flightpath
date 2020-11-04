@@ -563,7 +563,12 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
       $rtn .= "<div $attributes>";
     }
     
-    $rtn .= "$value";
+    // If a label is set, go ahead and display, even though its markup...
+    if ($label != "") {
+      $rtn .= "<label>$ast$label$popup_help_link</label>";
+    }     
+    
+    $rtn .= $value;
     
     if (is_string($attributes) && $attributes != "") {
       $rtn .= "</div>";

@@ -107,7 +107,7 @@ function changeTrackNonDynamicDegree(track_degree_ids) {
   document.getElementById("advising_track_degree_ids").value = track_degree_ids;    
 
   document.getElementById("log_addition").value = "change_track~" + track_degree_ids;
-  //alert(document.getElementById("logAddition").value);
+  
   // rebuild the cache.
   document.getElementById("load_from_cache").value="no";
 
@@ -151,7 +151,7 @@ function popupChangeTrackSelections(is_whatif) {
       min_tracks = temp[0];
       max_tracks = temp[1];
       
-      //alert("For degree " + degree_id + ", min max is " + min_tracks + " - " + max_tracks);
+      
             
       // if the min and max are both 1 or 0, skip, since that is handled in the HTML.
       if (min_tracks == max_tracks && min_tracks == 1) continue;
@@ -164,7 +164,7 @@ function popupChangeTrackSelections(is_whatif) {
         c++;
       })        
         
-      //alert("I picked " + c + " for " + degree_id);
+      
       
       // Is c > the max_tracks? or < than min_tracks?  If max_tracks is 0 that means "infinite"
       if ((c > max_tracks && max_tracks != 0) || c < min_tracks) {
@@ -174,7 +174,7 @@ function popupChangeTrackSelections(is_whatif) {
           msg = "Sorry, but you must select at least " + min_tracks + " " + class_title + " option(s) for this degree (" + degree_name + ").\n\nPlease try again.";
         }
         
-        alert(msg);
+        fp_alert(msg);
         return;
       }
 
@@ -208,7 +208,7 @@ function popupChangeTrackSelections(is_whatif) {
     // Set the what_if_major_code to be only our top-level major codes, so we can change the tracks.  This is
     // to fix a bug where if you load an advising session directly what was what-if, the major codes include the tracks,
     // and you can't unselect tracks then.
-    //alert($("#top_level_majors_csv").val());
+    
     //return false;
     parent.document.getElementById("what_if_major_code").value = $("#top_level_majors_csv").val();
   }
@@ -247,7 +247,7 @@ function alertSplitSub()
   x = x + "If you have any questions about why this course was split, ";
   x = x + "please ask your advisor.";
   
-  alert(x);
+  fp_alert(x);
 }
 
 function alertSubAddition()
@@ -259,7 +259,7 @@ function alertSubAddition()
   x = x + "\n\nIf you are unsure which kind of substitution to make, ";
   x = x + "then check this box.";
       
-  alert(x);
+  fp_alert(x);
 }   
 
 function alertSubGhost() {
@@ -270,7 +270,7 @@ function alertSubGhost() {
   x = x + "as being worth 1 hour.  This is a limitation of FlightPath, and should not ";
   x = x + "affect the student\'s GPA or other hour calculations.";
       
-  alert(x);
+  fp_alert(x);
 
 }
 
@@ -333,20 +333,6 @@ function unassignFromGroup(course_id, term_id, transferFlag, group_id, degree_id
 
 
 
-
-function toggleDisabledCompleted(x,y,type) {
-  var t = "";
-  if (type == "completed")
-  {
-    t = t + "The student has successfully completed this course.";
-    t = t + "To advise the student to retake this course, please select it from the \"Courses Added by Advisor\" box at the bottom of the screen.";
-  } else if (type == "enrolled")
-  {
-    t = t + "The student is currently enrolled in this course. ";
-    t = t + "To advise the student to retake this course, please select it from the \"Courses Added by Advisor\" box at the bottom of the screen.";
-  }
-  alert(t);
-}
 
 
 /* Toggle an advising checkbox */
@@ -681,7 +667,7 @@ function popupPromptSubManualHours() {
   if (!isNumeric(newManualHours)) {
     $("#subHours").val(0); // set back to first index (max);
     $("#subManual").hide();
-    alert("You entered a non-numeric value.  Please make sure you only enter numeric values.\nEx: 3, 2, 1.25");
+    fp_alert("You entered a non-numeric value.  Please make sure you only enter numeric values.\nEx: 3, 2, 1.25");
     return;
   }
   
@@ -693,13 +679,13 @@ function popupPromptSubManualHours() {
   if (newManualHours <= 0 || newManualHours > maxHours) {
     $("#subHours").val(0); // set back to first index (max);
     $("#subManual").hide();    
-    alert("Sorry, but the value you entered, " + newManualHours + ", isn't valid.\n\nMake sure you enter a number between 0 and " + maxHours + " for this substutution.");
+    fp_alert("Sorry, but the value you entered, " + newManualHours + ", isn't valid.\n\nMake sure you enter a number between 0 and " + maxHours + " for this substutution.");
     return;
   }
   
   // Make sure, if there are decimal places, there aren't too many entered.  If so, reject it.
   if (decimalPlaces(newManualHours) > subDecimalsAllowed) {
-    alert("Sorry, but you entered " + newManualHours + ", which has too many decimal places (only " + subDecimalsAllowed + " are allowed).\n\nPlease re-enter your substitution hours using the correct number of decimal places.");
+    fp_alert("Sorry, but you entered " + newManualHours + ", which has too many decimal places (only " + subDecimalsAllowed + " are allowed).\n\nPlease re-enter your substitution hours using the correct number of decimal places.");
     $("#subHours").val(0); // set back to first index (max);
     $("#subManual").hide();    
     return;
@@ -735,7 +721,7 @@ function decimalPlaces(num) {
 
 /* Saves a substitution from the popup */
 function saveSubstitution(course_id, group_id, req_by_degree_id, semester_num, subCourseID, subTermID, subTransferFlag, subHours, subAddition, subRemarks) {
-  //alert("The user to sub course " + course_id + " for group " + group_id + " in sem " + semester_num + "for course " + subCourseID + " hours: " + subHours + " addition: " + subAddition + "remarks: " + subRemarks);
+  
 
   var hiddenElements = document.getElementById("hidden_elements");
   var e = document.createElement("input");
@@ -759,8 +745,8 @@ function saveSubstitution(course_id, group_id, req_by_degree_id, semester_num, s
 function assignSelectedCourseToGroup(course_id, semester_num, group_id, var_hours, advising_term_id, db_group_requirement_id)
 {
   
-  //alert("The user selected course " + course_id + " for group " + group_id + " in sem " + semester_num + "for var hours " + var_hours + " termid:" + advising_term_id + " grid:" + db_group_requirement_id );
-  //return;
+  
+  
     
   var_hours = var_hours * 1;
   var hiddenElements = document.getElementById("hidden_elements");
@@ -843,7 +829,7 @@ function popupSaveSubstitution(course_id, group_id, semester_num, req_by_degree_
     }
   }
   
-  //alert(course_id);
+  
         
   var subTermID = document.getElementById("subTermID").value;   
   var subTransferFlag = document.getElementById("subTransferFlag").value;   
@@ -852,11 +838,11 @@ function popupSaveSubstitution(course_id, group_id, semester_num, req_by_degree_
   // make sure the remarks do not have a ~ in them.
   subRemarks = str_replace("~", "_", subRemarks);
 
-  //alert(subRemarks)
+  
 
   if (subHours <= 0 || subCourseID == 0)
   {
-    alert("Please select a course to substitute.");
+    fp_alert("Please select a course to substitute.");
     return;
   }
   
@@ -871,7 +857,7 @@ function popupSaveSubstitution(course_id, group_id, semester_num, req_by_degree_
 
 
 function updateSelectedCourse(course_id, group_id, semester_num, varHours, random_id, advising_term_id, degree_id) {
-  //alert("The user selected course " + course_id + " for group " + group_id + " in sem " + semester_num + "for var hours " + varHours + "id: " + random_id + " term:" + advising_term_id);
+  
       
   var hiddenElements = document.getElementById("hidden_elements");
   var e = document.createElement("input");
@@ -987,21 +973,21 @@ function toggleDisabledChangeTerm(x,y,termDescription) {
   t = t + "It cannot be unselected from here.  Please first change the Currently Advising term to \"" + termDescription + "\"";
   t = t + " by clicking the [change] link near the top of the page. ";
 
-  alert(t);
+  fp_alert(t);
 }
 
 function toggleDisabledCompleted(x,y,type) {
   var t = "";
   if (type == "completed")
   {
-    t = t + "The student has successfully completed this course.";
+    t = t + "The student has successfully completed this course. ";
     t = t + "To advise the student to retake this course, please select it from the \"Courses Added by Advisor\" box at the bottom of the screen.";
   } else if (type == "enrolled")
   {
     t = t + "The student is currently enrolled in this course. ";
     t = t + "To advise the student to retake this course, please select it from the \"Courses Added by Advisor\" box at the bottom of the screen.";
   }
-  alert(t);
+  fp_alert(t);
 }
 
 function setVar(id, newValue) {

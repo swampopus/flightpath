@@ -1,0 +1,51 @@
+/**
+ *   @file
+ * CSS file for prereqs module
+*/
+
+
+
+span.advise-checkbox-locked {
+  background: url('images/cb_locked.png') no-repeat top left !important;
+}
+
+span.advise-checkbox-locked-checked {
+  background: url('images/cb_locked-check.png') no-repeat top left !important;
+}
+
+
+
+.popup-prereq-course-req {
+  padding-left: 20px;
+} 
+
+/* in the group select popup... */
+.page-advise-popup-group-select tr.locked img {
+  opacity: 0.5;
+}
+
+/* course description popup */
+
+.prereq-popup-warning-title {
+  font-weight: bold;
+  padding-left: 20px;
+  background: url('images/n.gif') no-repeat top left !important;  
+}
+
+.prereq-popup-warning-msg {
+  padding-left: 20px;
+}
+
+.prereqs-req-branch {
+  padding-left: 20px;
+}
+
+.prereqs-completed-course {
+  color: blue;  
+  opacity: 0.65;
+}
+
+.prereqs-incomplete-course {
+  font-weight: bold;
+}
+

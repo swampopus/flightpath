@@ -74,7 +74,10 @@
   margin-top: 30px;
 }
 
-.markup-element-mark_search_results tr.search-result-row > td {
+.markup-element-mark_search_results tr.search-result-row > td,
+.student-search-my-advisees tr.search-result-row > td
+
+ {
   border-bottom: 1px solid #ddd;
 }
 

@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ * Install file for the prereqs module
+*/
+
+
+/**
+ * hook_install.
+ * 
+ * Create our database table.
+ */
+function prereqs_install() {
+  
+  $q = "
+            CREATE TABLE `prereqs_prereqs` (
+              `course_id` int(11) DEFAULT '0',
+              `prereq_data` text,
+              KEY `course_id` (`course_id`)
+            );   
+          ";
+  
+  db_query($q);   
+  
+  fp_add_message(t("Database table created for prereqs module."));
+  
+  
+} 
+

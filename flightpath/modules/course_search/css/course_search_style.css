@@ -1,9 +1,12 @@
-.page-content {
-  font-size: 10pt;
+
+.subject-title {
+  border-bottom: 3px solid #999;  
 }
+
 
 .course-search-course-title-row {
   font-weight: bold;
+  font-size: 1.2em;
 }
 
 .course-search-repeat {
@@ -12,8 +15,8 @@
 }
 
 .course-search-course-block {
-  margin-bottom:20px; 
-  margin-left: 10px; 
+  margin-bottom:50px; 
+  margin-left: 20px; 
 }
 
 .course-search-sample-syllabus {

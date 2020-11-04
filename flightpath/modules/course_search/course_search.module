@@ -315,7 +315,7 @@ function course_search_display_courses() {
    
   fp_add_css(fp_get_module_path("course_search") . "/css/course_search_style.css");
   
-  
+  fp_set_title('');
   
   $mode = "";
   
@@ -324,7 +324,7 @@ function course_search_display_courses() {
   $render = array();
   $render["#id"] = "course_search_display_courses";
       
-  $rtn .= fp_render_section_title(t("Course Search"), "course-search-section-title");
+  
 
   $settings = fp_get_system_settings();
   $current_catalog_year = $settings["current_catalog_year"];
@@ -364,6 +364,7 @@ function course_search_display_courses() {
     "value" => t("Current catalog year:") . " <b>$catalog_year-" . ($catalog_year +1) . "</b>", 
   );
       
+      /*
   $important_notice = "              
       <div class='tenpt hypo' style='padding: 5px;'>
       <b>Important Notice:</b> <ul style='margin-top: 5px;'>
@@ -380,22 +381,11 @@ function course_search_display_courses() {
   $render["important_notice"] = array(
     "value" => $important_notice, 
   );
-
-  /*  
-  $rtn .= "      
-     <!-- <div>  -->
-      
-      <div style='margin: 10px 0 20px 10px; border-bottom: 2px solid black;'>
-      <span style='font-size: 14pt; font-weight:bold;'>$title</span>
-      " . l("[change]", "tools/course-search", "", array("class" => "nounderline")) . "      
-      </div>
-      ";
-    */  
-  $render["subject_change"] = array(
-    "value" => "<div style='margin: 10px 0 20px 10px; border-bottom: 2px solid black;'>
-                    <span style='font-size: 14pt; font-weight:bold;'>$title</span>
-                    " . l("[change]", "tools/course-search", "", array("class" => "nounderline")) . "      
-                </div>",
+  */
+       
+  
+  $render["subject_title"] = array(
+    "value" => "<div class='subject-title'><h2>$title</h2></div>",
   );
     
   // Draw the term selector.
@@ -719,14 +709,7 @@ function course_search_display_courses() {
                  ";
 
         
-        if (user_has_permission("can_update_course_info_details")) {
-          $html .= "<!-- ADMIN-OPTIONS -->
-                    <div class='course-search-admin-options'>
-                    " . t("Administrative options:") . " 
-                    " . l(t("Edit syllabus and rotation schedule"), "tools/course-search/edit-info-details", "course_id=$n_course_id&subject_id=$n_subject_id&course_num=$n_course_num") . "                  
-                    </div>
-                    <!-- END-ADMIN-OPTIONS -->";
-        }         
+        
                  
         $html .= "</div>
                   <!-- END-COURSE-EXTRA -->"; // div course-search-course-extra
@@ -778,6 +761,22 @@ function course_search_display_courses() {
   );
 
   $rtn .= fp_render_content($render);
+
+
+
+  // Let's set our breadcrumbs
+  $db = get_global_database_handler();
+  $crumbs = array();
+  $crumbs[] = array(
+    'text' => 'Courses',
+    'path' => 'tools/course-search',
+  );
+  fp_set_breadcrumbs($crumbs);    
+
+
+
+
+
 
   return $rtn;
 }

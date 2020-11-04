@@ -392,8 +392,6 @@ function content_edit_content_form($type = "", $cid = "") {
     "type" => "hidden",
     "value" => $cid,    
   );
-
-
   
   $form["title"] = array(
     "type" => "textfield",
@@ -407,6 +405,14 @@ function content_edit_content_form($type = "", $cid = "") {
     if (is_array($types[$type]['settings']['title'])) {
       // Use array_merge to just override with whatever we have in our settings for the title.
       $form['title'] = array_merge($form['title'], $types[$type]['settings']['title']);
+      
+      if ($form['title']['auto'] == TRUE) {
+        // We will set the form to an automatic title, and hide.
+        $form['title']['value'] = $type . ' content saved on ' . format_date(time());
+        $form['title']['type'] = 'hidden';
+        
+      }
+      
     }
     
     if (is_array($types[$type]['settings']['#redirect'])) {

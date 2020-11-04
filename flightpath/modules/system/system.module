@@ -2891,44 +2891,75 @@ function system_display_dashboard_page () {
   }
   //old Google API url: $pie_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
   $pie_chart_url_1 = base_path() . "/inc/pchart/fp_pie_chart.php?progress=27&unfinished=73&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
+  $pie_chart_url_2 = base_path() . "/inc/pchart/fp_pie_chart.php?progress=67&unfinished=33&unfinished_col=cccccc&progress_col=00994d&token=" . $_SESSION["fp_pie_chart_token"];
+  $pie_chart_url_3 = base_path() . "/inc/pchart/fp_pie_chart.php?progress=46&unfinished=54&unfinished_col=cccccc&progress_col=ff4d4d&token=" . $_SESSION["fp_pie_chart_token"];
     
 
   $rtn .= "<div class='dash-full-width'>
-              " . fp_render_section_title("Your Advising Stats for Fall 2020 (20201)") . "
+              " . fp_render_section_title("Your Advising Snapshot") . "
               <div class='advising-stats-block-inner-wrapper'>
+              
                 
                 <div class='advising-stat-box'>
-                  <div class='stat-box-title'>Completed Advisings</div>
+                  <div class='stat-box-title'>Completed Advisings Fall 2020</div>
                   <div class='stat-box-chart'><img src='$pie_chart_url_1'></div>
                   <div class='stat-box-caption'>27% (59 of 220)</div> 
                 </div>
 
                 <div class='advising-stat-box'>
-                  <div class='stat-box-title'>Advisees Breakdown</div>
-                  <div class='stat-box-chart'> &nbsp; &nbsp; &nbsp; [[[[  SHOW A BAR GRAPH HERE, OF NUM OF FRESHMEN, SOPHOMORE, JR, SR, ETC ]]]]  &nbsp; &nbsp; &nbsp;</div>
-                  <div class='stat-box-chart'> &nbsp; &nbsp; &nbsp; [[[[  SHOW A BAR GRAPH HERE, OF NUM OF FRESHMEN, SOPHOMORE, JR, SR, ETC ]]]]  &nbsp; &nbsp; &nbsp;</div>
-                  <div class='stat-box-chart'> &nbsp; &nbsp; &nbsp; [[[[  SHOW A BAR GRAPH HERE, OF NUM OF FRESHMEN, SOPHOMORE, JR, SR, ETC ]]]]  &nbsp; &nbsp; &nbsp;</div>
-                  <div class='stat-box-chart'> &nbsp; &nbsp; &nbsp; [[[[  SHOW A BAR GRAPH HERE, OF NUM OF FRESHMEN, SOPHOMORE, JR, SR, ETC ]]]]  &nbsp; &nbsp; &nbsp;</div>
-                  <div class='stat-box-chart'> &nbsp; &nbsp; &nbsp; [[[[  SHOW A BAR GRAPH HERE, OF NUM OF FRESHMEN, SOPHOMORE, JR, SR, ETC ]]]]  &nbsp; &nbsp; &nbsp;</div>
-                  <div class='stat-box-chart'> &nbsp; &nbsp; &nbsp; [[[[  SHOW A BAR GRAPH HERE, OF NUM OF FRESHMEN, SOPHOMORE, JR, SR, ETC ]]]]  &nbsp; &nbsp; &nbsp;</div>
-                                     
+                  <div class='stat-box-title'>High-Risk Percentage</div>
+                  <div class='stat-box-chart'><img src='$pie_chart_url_3'></div>
+                  <div class='stat-box-caption'>46% (31 / 68)</div> 
                 </div>
 
 
                 <div class='advising-stat-box'>
-                  <div class='stat-box-title'>Priority Values</div>
-                  <div class='stat-box-chart'>&nbsp; &nbsp; [[[ PIE CHART SHOWING HIGH, MED, NORMAL ]]] &nbsp; &nbsp;</div>
-                  <div class='stat-box-chart'>&nbsp; &nbsp; [[[ PIE CHART SHOWING HIGH, MED, NORMAL ]]] &nbsp; &nbsp;</div>
-                  <div class='stat-box-chart'>&nbsp; &nbsp; [[[ PIE CHART SHOWING HIGH, MED, NORMAL ]]] &nbsp; &nbsp;</div>
-                  <div class='stat-box-chart'>&nbsp; &nbsp; [[[ PIE CHART SHOWING HIGH, MED, NORMAL ]]] &nbsp; &nbsp;</div>
-                  <div class='stat-box-chart'>&nbsp; &nbsp; [[[ PIE CHART SHOWING HIGH, MED, NORMAL ]]] &nbsp; &nbsp;</div>
-                  <div class='stat-box-chart'>&nbsp; &nbsp; [[[ PIE CHART SHOWING HIGH, MED, NORMAL ]]] &nbsp; &nbsp;</div>
-                   
+                  <div class='stat-box-title'>Advisees Graduating</div>
+                  <div class='stat-box-chart'><img src='$pie_chart_url_2'></div>
+                  <div class='stat-box-caption'>67% (147 of 220)</div> 
                 </div>
                 
-                                               
-                
-              </div>
+                <div class='advising-stat-box advising-stat-box-wide advising-stat-box-upcoming'>
+                  <div class='stat-box-title'>Upcoming Appointments</div>
+                 <div class='stat-box-wrapper'>
+                  <div class='stat-box-row'>
+                    <div class='stat-box-row-date'>1:00pm - 1:20pm</div>
+                    <div class='stat-box-row-title'>Jamale Smith (10035744)</div>                                         
+                  </div>
+                  <div class='stat-box-row'>
+                    <div class='stat-box-row-date'>1:30pm - 1:45pm</div>
+                    <div class='stat-box-row-title'>Evelain Jonston (1076654)</div>                                         
+                  </div>
+                  <div class='stat-box-row'>
+                    <div class='stat-box-row-date'>1:50pm - 2:15pm</div>
+                    <div class='stat-box-row-title'>Maiku Tashi (1033154)</div>                                         
+                  </div>
+                  <div class='stat-box-row'>
+                    <div class='stat-box-row-date'>2:30pm - 2:45pm</div>
+                    <div class='stat-box-row-title'>Daniel Smithe (1027891)</div>                                         
+                  </div>
+                  <div class='stat-box-row'>
+                    <div class='stat-box-row-date'>3:10pm - 3:25pm</div>
+                    <div class='stat-box-row-title'>Ramon DeAngello (1011155)</div>                                         
+                  </div>
+                  <div class='stat-box-row'>
+                    <div class='stat-box-row-date'>3:30pm - 3:50pm</div>
+                    <div class='stat-box-row-title'>Doug Funnie (1056351)</div>                                         
+                  </div>
+                  <div class='stat-box-row'>
+                    <div class='stat-box-row-date'>4:00pm - 4:15pm</div>
+                    <div class='stat-box-row-title'>Thom Ranci (1033678)</div>                                         
+                  </div>
+                  <div class='stat-box-row'>
+                    <div class='stat-box-row-date'>4:30pm - 4:45pm</div>
+                    <div class='stat-box-row-title'>Jaques Tonies (1003210)</div>                                         
+                  </div>
+                 </div> 
+
+                  
+               </div>
+              
+              
            </div>";
 
 

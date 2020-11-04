@@ -335,6 +335,7 @@ function pager_load_array($value, $element, $old_array) {
  *  - short
  *  - pretty
  *  - just_date
+ *  - just_time
  *
  */
 function format_date($timestamp = 0, $format = "standard", $custom = "") {
@@ -363,6 +364,10 @@ function format_date($timestamp = 0, $format = "standard", $custom = "") {
   
   if ($format == "just_date") {
     $f = "F jS, Y";
+  }
+  
+  if ($format == 'just_time') {
+    $f = "g:ia";
   }
   
   if ($custom != "") $f = $custom;
@@ -1014,6 +1019,12 @@ function fp_render_sidebar_left_content() {
                 
                 </li>
               </a>
+              <a href='" . fp_url("calendar") . "'>
+                <li class='appointments'>
+                    <i class='fa fa-calendar'></i>
+                    <div class='desc'>Appointments</div>
+                </li>
+              </a>              
               <a href='" . fp_url("student-search") . "'>
                 <li class='students'>
                     <i class='fa fa-users'></i>
@@ -1965,7 +1976,7 @@ function fp_render_tab_array($tab_array) {
 
     $extra_a = "";
     if ($on_click != "") {
-      $href = "javascript:void(0);"; 
+      $href = "javascript:void(0);";
       $extra_a = "onclick='$on_click'";
     }
  
@@ -1975,7 +1986,12 @@ function fp_render_tab_array($tab_array) {
     }
 
     $extra_class = "inactive";
-    if ($active) $extra_class = "active";
+    if ($active) {
+       $extra_class = "active";
+       // the active tab is not clickable.
+       $href = 'javascript:void(0);';
+       $extra_a = '';
+    }
 
     if ($t == 0) $extra_class .= " first";
     if ($t == count($tab_array) - 1) $extra_class .= " last";

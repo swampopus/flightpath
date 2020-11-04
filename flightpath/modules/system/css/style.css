@@ -219,6 +219,38 @@ ___dashboard{}
   vertical-align: top:
 }
 
+
+
+.advising-stats-block-inner-wrapper .advising-stat-box-wide {  
+  min-width: 480px;
+  text-align: left;
+}
+
+.advising-stat-box-upcoming .stat-box-wrapper {  
+  width: 100%;
+  overflow-y: scroll;
+  max-height: 150px;
+  height: 150px;
+  padding-right: 20px;
+  padding-bottom: 5px;
+}
+
+
+.advising-stat-box .stat-box-title {
+  text-align: center;
+}
+
+.advising-stat-box .stat-box-row-title {
+  font-size: 1.2em;
+ 
+}
+
+.stat-box-row-date {
+  float: right;
+}
+
+
+
 .advising-stats-block-inner-wrapper .advising-stat-box .stat-box-title {
   font-size: 1.1em;
   font-weight: bold;

@@ -211,7 +211,7 @@ function student_search_display_my_advisees() {
   global $user;
   $rtn = "";
 
-  $rtn .= student_search_get_advanced_search_tips();
+  
   
   $_SESSION["student_search_last_tab"] = "my-advisees";
   
@@ -236,7 +236,7 @@ function student_search_display_my_advisees() {
 
   $adv_array = student_search_query_advisees($query, array(":faculty_cwid" => $faculty_cwid));
   $s = (count($adv_array) == 1) ? "" : "s"; 
-  $rtn .= student_search_render_advisees($adv_array, t("My Advisees Results") . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
+  $rtn .= "<div class='student-search-my-advisees'>" . student_search_render_advisees($adv_array, t("My Advisees Results") . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )") . "</div>";
 
   return $rtn;  
 }
@@ -471,7 +471,7 @@ function student_search_display_my_majors() {
   $rtn = "";
 
   
-  $rtn .= student_search_get_advanced_search_tips();
+  
   
   $_SESSION["student_search_last_tab"] = "my-majors";
   
@@ -568,7 +568,7 @@ function student_search_search_form() {
   $form['search_options'] = array(
     'label' => 'Options:',
     'type' => 'checkboxes',
-    'options' => array('inactive' => t('Include inactive students'), 'option2' => 'Second option here', 'option3' => 'Third option here'),
+    'options' => array('inactive' => t('Include inactive students')),
   );
   
   
@@ -1225,13 +1225,7 @@ function student_search_render_advisees($adv_array, $title) {
     $advising_session_id = $adv_array[$t]["advising_session_id"];
     $advised_image = $adv_array[$t]["advised_image"];
 
-    //fpm($adv_array);
-
-    /*
-    $on_mouse = "onmouseover=\"style.backgroundColor='#FFFF99'\"
-               onmouseout=\"style.backgroundColor='white'\"
-                ";
-     */
+   
       
     $on_mouse = "
             onmouseover='$(this).addClass(\"selection_highlight\");'
@@ -1310,23 +1304,7 @@ function student_search_render_advisees($adv_array, $title) {
   }
   
   
-  
-  /*
-  // Required to make the changeTab function work...
-  $rtn .= "<form id='mainform' method='POST'>
-      <input type='hidden' id='scrollTop'>
-      <input type='hidden' id='performAction' name='performAction'>
-      <input type='hidden' id='advisingWhatIf' name='advisingWhatIf'>
-      <input type='hidden' id='currentStudentID' name='currentStudentID'>
-      <input type='hidden' id='advisingStudentID' name='advisingStudentID'>
-      <input type='hidden' id='advisingMajorCode' name='advisingMajorCode'>
-      <input type='hidden' id='whatIfMajorCode' name='whatIfMajorCode'>
-      <input type='hidden' id='whatIfTrackCode' name='whatIfTrackCode'>
-      <input type='hidden' id='advisingLoadActive' name='advisingLoadActive'>
-      <input type='hidden' id='clearSession' name='clearSession'>
-      </form>";
-  */
-
+ 
   
   
   return $rtn;
