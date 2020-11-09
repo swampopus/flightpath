@@ -230,7 +230,8 @@ function comments_display_main() {
 
       
       if ($then > $del_range) {
-        $delete_link = fp_render_button("Delete", "deleteComment(\"{$comment["id"]}\");");
+        
+        $delete_link = "<a href='javascript:deleteComment(\"{$comment["id"]}\");' class='button'>" . t("Delete") . "</a>";
       }      
     }  
       

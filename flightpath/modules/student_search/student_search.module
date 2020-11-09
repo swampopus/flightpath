@@ -1234,6 +1234,8 @@ function student_search_render_advisees($adv_array, $title) {
     // No screen var defined. Old code?
     //if ($screen->page_is_mobile) $on_mouse = ""; // Causes problems on mobile devices.
     
+    
+    // TODO:  The path could be the student profile instead, depending on the user's settings.    
     // Build up the URL we want to go to when we click this row.
     $path = "view";
     $advising_what_if = "no";

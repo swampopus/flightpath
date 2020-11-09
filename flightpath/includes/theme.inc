@@ -1064,6 +1064,7 @@ function fp_render_sidebar_left_content() {
  * Returns the HTML for the top navigation content of the screen itself.
  */
 function fp_render_top_nav_content() {
+  global $user;
   $html = "";
   
   $html .= "
@@ -1071,12 +1072,34 @@ function fp_render_top_nav_content() {
       <li class='student-search first'>" . student_search_render_small_search() . "</li>
       <li class='alerts'><i class='fa fa-bell'></i></li>
       <li class='user-options last'>
-        <i class='fa fa-user'></i>
-        <i class='fa fa-caret-down'></i>
+      
+          <div class='tub-element tub-float-right-a tub-last-element tub-user-menu tub-icon-element dropdown'>
+              <div class='tub-element-wrapper'>
+                <a href='javascript:fpToggleUserMenu();' class='tub-link dropdown-trigger'>
+                  <i class='fa fa-user'></i><span class='tub-caret-down'><i class='fa fa-caret-down'></i></span>
+                </a>
+              </div>
+
+                <div id='tub-user-pulldown' style='display:none;' >
+                  " . fp_get_faculty_name($user->cwid) . "
+                  <ul class='user-pulldown'>                    
+                    <li>" . l('My Profile', 'user') . "</li>
+                    <li>" . l("Log Out", "logout") . "</li>
+                  </ul>
+
+                </div>
+                
+          </div>  
+      
+      
         
       </li>
     </ul>
   ";
+  
+  
+  
+  
   
   
   return $html;

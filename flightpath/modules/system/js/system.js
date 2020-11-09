@@ -1,4 +1,7 @@
 
+
+var tubUserExpanded = false;  // global var to keep track if the user menu is expanded or not
+
 /**
  * This will allow us to have HTML tags in dialog titles.
  */
@@ -10,12 +13,25 @@ $.widget("ui.dialog", $.extend({}, $.ui.dialog.prototype, {
             title.html(this.options.title);
         }
     }
-}));
+})); 
 
 
 
-// Set up our modal dialogs on startup.
+// Set up our modal dialogs on startup, as well as other settings
 $(document).ready(function() {
+  
+  
+  
+    // Hide our expanded menus when we click outside of them.
+    jQuery(document).click(function (e) {
+      
+        if (!jQuery(e.target).hasClass("dropdown-trigger") 
+            && jQuery(e.target).parents(".dropdown").length === 0  ) 
+        {          
+          fpCloseAllUserMenus();
+        }
+    });
+  
   
     
     // TODO: use settings for width/height, if its been set.  This allows us to let the end user configure the size.
@@ -107,6 +123,43 @@ $(document).ready(function() {
     
   
 });
+
+
+
+function fpToggleUserMenu() {
+  
+  
+  if (tubUserExpanded == false) {
+    jQuery('#tub-user-pulldown').slideDown('fast');
+    tubUserExpanded = true;
+  }
+  else if (tubUserExpanded == true) {
+    jQuery('#tub-user-pulldown').slideUp('fast');
+    tubUserExpanded = false;    
+  }
+  
+}
+
+
+function fpCloseAllUserMenus() {
+  jQuery('#tub-user-pulldown').slideUp('fast');
+  tubUserExpanded = false;    
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

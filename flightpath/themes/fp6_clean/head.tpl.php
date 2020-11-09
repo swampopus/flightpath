@@ -9,14 +9,10 @@
  * 
 */
 
-
+//print $page_on_load;
 if ($page_is_popup) {
   $page_on_load .= '
-  
     //parent.fpNudgeDialog();
-    
-        
-  
   ';
 }
 
@@ -35,14 +31,14 @@ if ($page_is_popup) {
   <script type='text/javascript'>
   <?php print $page_extra_js_settings; ?>     
     // perform any requested actions on page load...
-    $(document).ready(function() { <?php print $page_on_load; ?> });  
+    $(document).ready(function() { <?php print $page_on_load; ?>; });  
   </script>
   
   <link rel='stylesheet' type='text/css' href='<?php print base_path() ?>/inc/jquery-ui-1.12.1.custom/jquery-ui.min.css' />
   
   
   <?php
-   // Add extra JS files.    
+   // Add extra JS files.     
    print $page_extra_js_files;
   
    // Load this theme's CSS file(s)

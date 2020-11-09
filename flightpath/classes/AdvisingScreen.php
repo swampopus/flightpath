@@ -2142,7 +2142,10 @@ function draw_menu_items($menu_array) {
 
 			  
         $render = array();
-        $render['html'] = fp_render_button(t("Submit"),"submitSaveActive();");
+        //$render['html'] = fp_render_button(t("Submit"),"submitSaveActive();");
+        $render['html'] = "<div class='buttons form-element element-type-submit'>
+                            <input type='button' id='mainform_submit_btn' value='" . t("Submit") . "' onClick='submitSaveActive();'>
+                           </div>";
         invoke_hook("content_alter", array(&$render, 'advise_submit_button'));
          
         

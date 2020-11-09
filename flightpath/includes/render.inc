@@ -354,7 +354,7 @@ function fp_render_form($callback, $form_type = "") {
 
   // If this is a system settings form, go ahead and display the save button.
   if ($form_type == "system_settings") {      
-    $rtn .= "<div class='buttons'>";
+    $rtn .= "<div class='buttons form-element element-type-submit'>";
     //$rtn .= fp_render_button("Save settings", "\$(\"#sysform\").submit()");
     $rtn .= "<input type='submit' name='submit_button' value='" . t("Save settings") . "'>";
     $rtn .= "</div>";      

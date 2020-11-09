@@ -6,7 +6,7 @@
 
 body
 {
-  font-family: "Segoe UI", Arial, Helvetica, sans-serif;  
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;   
   padding: 0;
   margin: 0;  
    z___background-color: #F2F2F2; 
@@ -1026,9 +1026,9 @@ label {
   font-size: 1.0em;
   padding: 1rem;
   background-color: #0095ff;
-  border: 1px solid dodgerblue;
+  border: 1px solid #1E90FF;
   color: white;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -1093,8 +1093,8 @@ input::placeholder {
 a.button {
     display: inline-block;
     color: white;
-    font-weight: bold;
-    border: 1px solid dodgerblue;    
+    font-weight: 600;
+    border: 1px solid #1E90FF;    
     background-color: #0095ff;
     padding: 9px;
     margin-bottom: 15px;
@@ -1318,6 +1318,70 @@ ___top_nav{}
 }
 
 
+.top-nav-ul .tub-user-menu .tub-caret-down {
+  font-size: 0.8em;
+  padding-left: 10px;
+}
+
+.top-nav-ul .tub-user-menu {
+  position: relative;
+}
+.top-nav-ul #tub-user-pulldown {
+  z-index: 99;
+  min-width: 200px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background-color: white;
+  color: black;
+  padding: 10px;
+  font-size: 0.85em;
+  border: 1px solid #ccc;
+  position: absolute;
+  right: 10px;
+  top: 45px;
+}
+
+
+#header #top-nav #tub-user-pulldown .user-pulldown {
+  padding-left: 20px ;  
+  list-style-type: circle;
+}
+
+#header #top-nav #tub-user-pulldown .user-pulldown li {
+  display: block;
+  border: 0;
+  padding-left: 10px;
+  list-style-type: circle;
+  height: auto;
+  line-height: 1.9em;
+}
+
+
+.tub-icon-element-alert {
+  position: relative;
+}
+.tub-icon-element-alert .tub-alert-count {
+  position: relative;
+  display: inline-block;
+  min-width: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
+  text-align: center;
+  top: 8px;
+  left: -5px;
+  color: #eee;
+  background-color: #b22222;
+  font-size: 0.7em;
+  font-weight: bold;
+  border-radius: 15px;
+}
+
+
+
+
+
+
+
 ___sidebar-left{}
 
 .has-sidebar-left #page-content {
@@ -1461,13 +1525,17 @@ ul.tabs li.active {
   border: 1px solid #ccc;
   border-radius: 5px 5px 0px 0px;
   border-bottom: 1px solid white;
-  background-color: white;  
+  background-color: white;
 }
 
 ul.tabs li.active a {
   color: black;
   font-weight: bold;
-  
+  cursor: default;
+}
+
+ul.tabs li.active a:hover {
+  text-decoration: none;
 }
 
 ul.tabs li.inactive a {
