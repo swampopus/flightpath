@@ -1083,7 +1083,7 @@ function fp_render_top_nav_content() {
                 <div id='tub-user-pulldown' style='display:none;' >
                   " . fp_get_faculty_name($user->cwid) . "
                   <ul class='user-pulldown'>                    
-                    <li>" . l('My Profile', 'user') . "</li>
+                    <li>" . l("My Settings", 'user-settings') . "</li>
                     <li>" . l("Log Out", "logout") . "</li>
                   </ul>
 

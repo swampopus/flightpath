@@ -2355,7 +2355,7 @@ function system_handle_form_submit() {
   // Figure out where we are supposed to redirect the user.
   $redirect_path = $redirect_query = "";
 
-  if (isset($form["#redirect"]) && is_array($form["#redirect"])) { 
+  if (!form_has_errors() && isset($form["#redirect"]) && is_array($form["#redirect"])) { 
     $redirect_path = $form["#redirect"]["path"];
     $redirect_query = $form["#redirect"]["query"];    
   }
