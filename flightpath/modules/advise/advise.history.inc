@@ -462,7 +462,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     else {
     
       $rtn .= "
-        <table class='  summary-transaction-details' border='0' width='100%' cellpadding='3' cellspacing='0' style='border-width: 2px; border-style: solid; border-color: black;'>
+        <table class='  summary-transaction-details' border='0' width='100%' cellpadding='3' cellspacing='0'>
          <tr height='7'>
           <td> </td>
          </tr>
