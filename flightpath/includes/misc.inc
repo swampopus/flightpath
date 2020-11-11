@@ -7,6 +7,23 @@
  
 
  
+/**
+ * 
+ * From:  https://stackoverflow.com/questions/1369936/check-to-see-if-a-string-is-serialized
+ * 
+ *
+ * Check if a string is serialized
+ *
+ * @param string $string
+ *
+ * @return bool
+ */
+function is_serialized_string($string)
+{
+    return ($string == 'b:0;' || @unserialize($string) !== false);
+} 
+ 
+ 
  
 /**
  * This is our custom error handler, which will intercept PHP warnings, notices, etc, and let us

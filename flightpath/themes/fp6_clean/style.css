@@ -1004,6 +1004,7 @@ label {
 .element-type-textfield input,
 .element-type-password input,
 .element-type-datetime-local input,
+.element-type-time input,
 .element-type-search input
  {
   font-size: 1.0em;
@@ -1017,7 +1018,9 @@ label {
   filter: none;
 }
 
-.element-type-datetime-local input {
+.element-type-datetime-local input,
+.element-type-time input
+ {
   font-family: Arial, Helvetica, sans-serif;
 }
 
