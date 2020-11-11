@@ -751,6 +751,38 @@ function content_load($cid, $reset = FALSE) {
 
 
 
+/**
+ * This function will look for content (in the content tables) for a field called field__faculty_id, and return an array
+ * of fully loaded content objects.
+ */
+function content_get_content_for_faculty_id($content_type, $faculty_id, $order_by = "title ASC", $bool_published_only = TRUE) {
+  $rtn = array();
+  
+  $published_line = " AND n.published = 1 ";
+  if (!$bool_published_only) $published_line = "";
+  
+  
+  
+  // Display all of the event types for this faculty member.
+  $res = db_query("SELECT DISTINCT(a.cid) FROM content__$content_type a, content n
+                   WHERE field__faculty_id = ?
+                   AND a.vid = n.vid
+                   AND a.cid = n.cid
+                   $published_line                                                                          
+                   ORDER BY $order_by, a.vid DESC", array($faculty_id));
+  while ($cur = db_fetch_object($res)) {
+    $cid = $cur->cid;      
+    $content = content_load($cid);  
+    $rtn[$cid] = $content;
+  }
+  
+  return $rtn;
+  
+}
+
+
+
+
 
 /**
  * Implementation of content's hook_content_load
@@ -816,9 +848,11 @@ function content_content_load(&$content) {
       // If this was a set of checkboxes ($val is an array), we want to display the label the values went to.
       if ($details['type'] == 'checkboxes') {
         $display_value .= "<div class='checkbox-values checkbox-values-field__$fieldname'>";
-        foreach ($val as $k => $v) {  
-          $temp = @$details['options'][$v];
-          if ($temp != "") $display_value .= "<div class='checkbox-val'>$temp</div>";
+        if (is_array($val)) {
+          foreach ($val as $k => $v) {  
+            $temp = @$details['options'][$v];
+            if ($temp != "") $display_value .= "<div class='checkbox-val'>$temp</div>";
+          }
         }
         $display_value .= "</div>";
       }

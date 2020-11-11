@@ -1041,6 +1041,10 @@ label {
   
 }
 
+.form-checkboxes label.label-for-checkbox {
+  display: inline-block;
+}
+
 
 .element-type-select select {
   font-size: 1.0em;
