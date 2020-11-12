@@ -4,3 +4,26 @@
   display: inline;
   padding-right: 10px;
 }
+
+body.content-tabs-false .page-tabs-wrapper ul.tabs {
+  display: none !important;
+}
+
+
+.element-wrapper--content-submit-btn,
+.element-wrapper--content-delete-btn
+ {
+  display: inline-block;
+  margin-right: 25px;
+}
+
+.element-wrapper--content-delete-btn input {
+  background-color: #777;
+  border-color: #333;
+}
+
+
+.element-wrapper--content-delete-btn input:hover {
+  background-color: #aaa;
+  
+}

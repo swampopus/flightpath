@@ -284,6 +284,12 @@ function content_view_content($cid) {
   
   $render = array();  
   $render["#id"] = "content_" . $cid;  // We will be doing this as a render array, so other modules can alter.
+  
+  fp_add_css(fp_get_module_path('content') . '/css/content.css');
+    
+  if ($_GET['content_tabs'] == 'false') { // the string "false", not FALSE
+    fp_add_body_class('content-tabs-false');
+  }    
     
       
   $content = content_load($cid);  // assumed to be path/content/CID  So, arg(1) == the cid
@@ -364,6 +370,10 @@ function content_edit_content_form($type = "", $cid = "") {
   
   $form = array();
   $m = 0;
+  
+  if ($_GET['content_tabs'] == 'false') { // the string "false", not FALSE
+    fp_add_body_class('content-tabs-false');
+  }
   
   fp_add_css(fp_get_module_path("content") . "/css/content.css");
   
@@ -497,7 +507,8 @@ function content_edit_content_form($type = "", $cid = "") {
   $form["submit_submit"] = array(
     "type" => "submit",
     "value" => t("Submit"),
-    'weight' => 920,            
+    'weight' => 920,    
+    'attributes' => array('class' => 'content-submit-btn'),        
   );
   
   if ($cid != 'new') { 
@@ -505,7 +516,8 @@ function content_edit_content_form($type = "", $cid = "") {
       "type" => "submit",
       "value" => t("Delete"),    
       "confirm" => t('Are you sure you wish to delete this?\nThis action cannot be undone.'),
-      'weight' => 930,    
+      'weight' => 930,
+      'attributes' => array('class' => 'content-delete-btn'),    
     );
   }
 
