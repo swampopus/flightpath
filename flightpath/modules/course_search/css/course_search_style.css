@@ -40,3 +40,13 @@ table.fp-course-search-avail td {
   min-width: 90px;  
   padding: 5px 0 5px 0;
 }
+
+#element-inner-wrapper-course-search-subject {
+  display: inline-block;
+  width: 500px;
+  margin-right: 10px;
+}
+
+.course-search-buttons {
+  display: inline-block;
+}

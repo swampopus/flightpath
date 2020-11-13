@@ -539,6 +539,16 @@ function content_edit_content_form_submit(&$form, $form_state) {
   
   $values = $form_state["values"];
 
+  // are we trying to delete?
+  if (trim($values['submit_delete']) != '') {
+    // Yes, we are deleting!
+    fpm($form);
+    
+    // TODO: find out if we should redirect anywhere in particular for this deletion.
+    
+  }
+
+
   $now = time();
   
   $types = content_get_types();
@@ -780,6 +790,7 @@ function content_get_content_for_faculty_id($content_type, $faculty_id, $order_b
                    WHERE field__faculty_id = ?
                    AND a.vid = n.vid
                    AND a.cid = n.cid
+                   AND n.delete_flag = 0
                    $published_line                                                                          
                    ORDER BY $order_by, a.vid DESC", array($faculty_id));
   while ($cur = db_fetch_object($res)) {

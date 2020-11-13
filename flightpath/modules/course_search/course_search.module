@@ -457,7 +457,7 @@ function course_search_display_courses() {
             
     $render["term_selected_only_term"] = array(
       "value" => "<div style='font-weight: bold; padding-bottom: 20px;'>
-                 " . t("The following courses are currently scheduled to be offered during") . $term_desc . "
+                 " . t("The following courses are currently scheduled to be offered during ") . $term_desc . "
                 </div>",
      
     );            
@@ -939,8 +939,7 @@ function course_search_display_search() {
     $rtn .= "Please select an available catalog year from the
       list below.<br><br>
       <form action='" . fp_url("tools/course-search") . "' method='GET' name='mainform' id='myform'>
-      <table align='center'>
-      <td width='150' valign='bottom'>
+      
         <select name='catalog_year'>";
     for ($t = $current_catalog_year; $t >= $GLOBALS["fp_system_settings"]["earliest_catalog_year"]; $t--)
     {
@@ -948,11 +947,9 @@ function course_search_display_search() {
 
     }
     $rtn .= "</select>
-      </td>
-      <td valign='bottom'>
+      
         <input type='submit' value='Select ->'>
-      </td>
-      </table>";
+          ";
 
     if (!$clean_urls) {
       // Hack for if clean URLs isn't enabled
@@ -968,8 +965,8 @@ function course_search_display_search() {
     $rtn .= "Current catalog year: <b>$catalog_year-" . ($catalog_year +1) . "</b>
         
         <br><br>
-      Please select an available subject from the list below.<br>       
-      <br>
+      <label>Please select an available subject from the list below.</label>       
+      
       <form action='" . fp_url("tools/course-search/courses") . "' method='GET' name='mainform' id='myform'>";
     
     if (!$clean_urls) {
@@ -979,8 +976,8 @@ function course_search_display_search() {
     
 
     $rtn .= "
-      <div align='center'>
-        <select name='subject_id' style='width: 80%;'>
+      <div id='element-inner-wrapper-course-search-subject' class='form-element element-type-select '>
+        <select class='course-search-subject' name='subject_id'>
       ";    
 
 
@@ -1023,13 +1020,16 @@ function course_search_display_search() {
     }
 
 
-    $rtn .= "
-        </select>       
-        <input type='hidden' name='mode' value='$mode'>
-        </div><br><br><br>
-        <div align='right'>
-        <input type='submit' value='Select ->'>
-      </div>";
+    $rtn .= " </select>       
+            </div>
+        
+        <div class='course-search-buttons buttons form-element element-type-submit'>
+          <input type='submit' value='Select'>
+        </div>
+      
+      <input type='hidden' name='mode' value='$mode'>
+      
+      ";
 
 
     $rtn .= "</form>";

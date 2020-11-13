@@ -65,14 +65,14 @@ function course_search_edit_course_details_form() {
 
   $form["mark" . $m++] = array(
     "value" => "<strong>$course->title (" . $course->get_catalog_hours() . " " . t("hrs.") . ")</strong>
-                <div class='tenpt'>$course->description</div>
+                <div>$course->description</div>
                 ",
   );
 
   $form["syllabus"] = array(
     "type" => "file",
     "label" => t("Submit new sample course syllabus:"),
-    "prefix" => "<br><br>" . t("Current sample syllabus:") . " " . $filelink,
+    "prefix" => "<hr>" . t("Current sample syllabus:") . " " . $filelink,
     "description" => t("Note: selecting a new file will replace any existing
                         syllabus.  Remember to click Submit after selecting a file."),
   );
@@ -392,7 +392,7 @@ function course_search_display_edit_courses()
 	$_SESSION["dec_lr"] = $lr;
 
 
-	$rtn .= "<h2 class='title'>" . t("Update Course Information") . "</h2>
+	$rtn .= "
 			<div class='tenpt' style='margin-bottom: 20px;'>
 				" . t("To update a course's sample syllabus or schedule,
 				please select the course from the list below.") . "

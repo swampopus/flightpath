@@ -271,7 +271,7 @@ function user_user_settings_form() {
   
   // TODO:  if a student, display their mini profile here, with a link to their full profile.  
   
-    fpm('here');
+   
      
   
   $form['submit_btn'] = array(
