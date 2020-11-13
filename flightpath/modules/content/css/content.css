@@ -27,3 +27,9 @@ body.content-tabs-false .page-tabs-wrapper ul.tabs {
   background-color: #aaa;
   
 }
+
+.content-deleted {
+  color: red;
+  font-weight: bold;
+  font-size: 1.1em;
+}

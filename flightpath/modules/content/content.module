@@ -252,7 +252,12 @@ function content_dialog_handle_after_save() {
   
   $rtn = "";
   
-  $rtn .= "<h2 class='dialog-handle-after-save'>" . t("Your submission has been saved correctly!  Closing window...") . "</h2>";
+  if (isset($_REQUEST['del']) && $_REQUEST['del'] != '') {
+    $rtn .= "<h2 class='dialog-handle-after-save'>" . t("The content has been deleted successfully.<br><br>Closing window...") . "</h2>";
+  }
+  else {  
+    $rtn .= "<h2 class='dialog-handle-after-save'>" . t("Your submission has been saved correctly!<br><br>Closing window...") . "</h2>";
+  }
   
   $rtn .= "<br><br><p>" . t("If this windows doesn't close within 3 seconds,") . " <a href='javascript:window.parent.location.reload();'>" . t("click here") . "</a>.</p>";
   
@@ -312,6 +317,14 @@ function content_view_content($cid) {
     'type' => 'markup',
     'value' => "<div class='content-submitted'>" . t("Submitted by") . " " . $author->name . " " . t("on") . " " . format_date($content->posted, 'short') . "</div>",
   );
+
+  if ($content->delete_flag == 1) {
+    $render['content_deleted'] = array(
+      'type' => 'markup',
+      'value' => "<div class='content-deleted'>" . t("NOTE: This content has been marked as deleted, and is scheduled for permanent removal.") . "</div>",
+    );
+    
+  }
 
 
   // Display all the various fields
@@ -452,6 +465,19 @@ function content_edit_content_form($type = "", $cid = "") {
   }  
     
   
+  if ($content->delete_flag == 1) {
+    $form['mark_content_deleted'] = array(
+      'type' => 'markup',
+      'value' => "<div class='content-deleted'>" . t("NOTE: This content has been marked as deleted, and is scheduled for permanent removal.") . "</div>",
+      'weight' => -999, 
+    );
+    
+  }
+    
+  
+  
+  
+  
   // Are there extra fields?  If so, add their values in as well.
   if (is_array($types[$type]['fields'])) {
     foreach($types[$type]["fields"] as $field_name => $field_details) {
@@ -542,9 +568,25 @@ function content_edit_content_form_submit(&$form, $form_state) {
   // are we trying to delete?
   if (trim($values['submit_delete']) != '') {
     // Yes, we are deleting!
-    fpm($form);
     
-    // TODO: find out if we should redirect anywhere in particular for this deletion.
+    $content = content_load($values['cid']);
+    
+    // TODO: check to make sure we have permission to delete.
+        
+    $content->delete_flag = 1;
+    content_save($content);
+        
+    // find out if we should redirect anywhere in particular for this deletion.
+    if (isset($form['#redirect'])) {
+      fp_add_message(t("The content was deleted successfully."));  
+      $form['#redirect']['query'] .= "&del=" . $content->cid;
+    }
+    else {
+      // No redirect was specified, so let's send us to the home page.
+      fp_add_message(t("The content was deleted successfully."));
+      $form['#redirect']['path'] = "<front>";
+    }
+    return;
     
   }
 
@@ -649,8 +691,7 @@ function content_content_save(&$content) {
     
   }
   else {
-    // If this is an EXISTING content, then insert once into content_versions to get new vid.  Update title and vid in content table.
-    
+    // If this is an EXISTING content, then insert once into content_versions to get new vid.  Update title and vid in content table.    
     // insert into content_versions to get the vid.
     db_query("INSERT INTO content_versions (cid) VALUES (?)", array($content->cid));
     $content->vid = db_insert_id();
@@ -658,8 +699,8 @@ function content_content_save(&$content) {
   
 
   // Now we should have a fully created $content object.  Let's update the title and other values in the content table.
-  db_query("UPDATE content SET vid = ?, title = ?, updated = ?, user_id = ?, published = ? WHERE
-            cid = ?", array($content->vid, $content->title, time(), $user->id, $content->published, $content->cid));
+  db_query("UPDATE content SET vid = ?, title = ?, updated = ?, user_id = ?, published = ?, delete_flag = ? WHERE
+            cid = ?", array($content->vid, $content->title, time(), $user->id, $content->published, $content->delete_flag, $content->cid));
 
   
   // Now we are going to insert all of the field values.  We assume there is a table ALREADY CREATED with our field names
@@ -1015,6 +1056,8 @@ function content_display_content_admin_list() {
   $rtn .= "</select><input type='submit' value='-&gt;'> </form>";
           
   
+  // TODO:  convert this to a pager query and nicer-looking table.
+  
   
   $rtn .= "<table width='100%' border='1' class='tenpt'>
             <tr>
@@ -1025,10 +1068,10 @@ function content_display_content_admin_list() {
               <th>" . t("Updated") . "</th>
             </tr>";
   if ($filter != "") {
-    $res = db_query("SELECT * FROM content WHERE type = '?' ORDER BY title", $filter);
+    $res = db_query("SELECT * FROM content WHERE type = ? AND delete_flag = 0 ORDER BY updated DESC", $filter);
   }
   else {
-    $res = db_query("SELECT * FROM content ORDER BY title");
+    $res = db_query("SELECT * FROM content WHERE delete_flag = 0 ORDER BY updated DESC");
   }
   
   while ($cur = db_fetch_array($res)) {
