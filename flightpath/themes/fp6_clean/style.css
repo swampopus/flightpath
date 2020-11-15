@@ -1271,7 +1271,7 @@ ___top_nav{}
   border-bottom: 1px solid #ddd;
 }
 
-#header #top-nav ul.top-nav-ul {  
+ul.top-nav-ul {  
   list-style-type: none;
   margin: 0;
   margin-top: 10px;
@@ -1280,7 +1280,7 @@ ___top_nav{}
   display: inline-block;  
 }
 
-#header #top-nav ul.top-nav-ul li {
+ul.top-nav-ul li {
   
   display: table-cell;  
   padding-right: 30px;
@@ -1290,7 +1290,7 @@ ___top_nav{}
   vertical-align: middle;
 }
 
-#header #top-nav ul.top-nav-ul li.last {
+ul.top-nav-ul li.last {
   border-right: 0;
   margin-right: 10px;
 }
@@ -1314,7 +1314,7 @@ ___top_nav{}
   margin-left: 10px;
 }
 
-#header #top-nav ul.top-nav-ul li.user-options i {
+ul.top-nav-ul li.user-options i {
   font-size: 1.2em;
 }
 
@@ -1389,6 +1389,8 @@ ___top_nav{}
 
 
 
+
+
 ___sidebar-left{}
 
 .has-sidebar-left #page-content {
@@ -1411,36 +1413,36 @@ ___sidebar-left{}
   background-color: #999999;
 }
 
-#sidebar-left ul.sidebar-left-nav {
+ul.sidebar-left-nav {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-#sidebar-left ul.sidebar-left-nav li {
+ul.sidebar-left-nav li {
   padding-top: 20px;
   padding-bottom: 20px;
   text-align: center;
   
 }
 
-#sidebar-left ul.sidebar-left-nav li .desc {
+ul.sidebar-left-nav li .desc {
   color: white;
   font-weight: 700;
   font-size: 0.9em;
 }
 
-#sidebar-left ul.sidebar-left-nav li:hover {
+ul.sidebar-left-nav li:hover {
   background-color: #777;
 }
 
-#sidebar-left ul.sidebar-left-nav li i {
+ul.sidebar-left-nav li i {
   font-size: 2.1em;
   color: white;
 }
 
-#sidebar-left ul.sidebar-left-nav li.students i,
-#sidebar-left ul.sidebar-left-nav li.analytics i
+ul.sidebar-left-nav li.students i,
+ul.sidebar-left-nav li.analytics i
  {
   font-size: 2em;
 }
@@ -1449,6 +1451,51 @@ ___sidebar-left{}
 .clear {
   clear: both;
 }
+
+
+
+
+
+
+___hamburger_menu{}
+
+#mobile-hamburger-menu {
+  z-index: 9999;
+  position: absolute;
+  top: 50px;
+  left: 0px;
+  background-color: #999999;
+  width: 170px;  
+}
+
+#mobile-hamburger-menu .logout {
+  border-top: 1px solid white;
+}
+
+.mobile-top-nav {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mobile-top-nav ul.top-nav-ul{
+  display: inline-block;
+  float: none;
+  
+  font-size: 1.9em;
+  border-bottom: 1px solid white;
+  padding-bottom: 10px;
+  
+}
+
+
+
+
+
+
+
+
+
 
 ___breadcrumbs{}
 

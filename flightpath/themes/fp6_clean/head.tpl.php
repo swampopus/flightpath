@@ -43,6 +43,7 @@ if ($page_is_popup) {
   
    // Load this theme's CSS file(s)
    print "<link rel='stylesheet' type='text/css' href='$theme_location/style.css?$page_css_js_query_string' /> \n";
+   print "<link rel='stylesheet' type='text/css' href='$theme_location/media.css?$page_css_js_query_string' /> \n";
   
    // Load any extra CSS files which addon modules might have added.
    print $page_extra_css_files;

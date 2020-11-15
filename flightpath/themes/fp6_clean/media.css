@@ -1,0 +1,199 @@
+/*
+ * This CSS file is for handling mobile and print media.
+*/
+
+
+
+
+
+
+
+@media screen and (max-width: 1130px) {  
+  
+  .top-banner img {
+    height: 50px;
+    width: auto;
+  }
+  
+  
+}  /* max-width 1130px */
+
+
+
+
+
+
+
+
+
+
+
+@media screen and (max-width: 975px) {  
+  
+  
+  #header #top-nav form .smallinput {
+    width: 150px;
+  }
+  
+  
+}  /* max-width 975px */
+
+
+@media screen and (max-width: 825px) {  
+  
+  
+  #header #top-nav form .smallinput {
+    display: none;
+  }
+  
+  #sidebar-left {
+    width: 75px;
+  }
+  
+  #sidebar-left ul.sidebar-left-nav li {
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+  
+  #sidebar-left ul.sidebar-left-nav li i {
+    font-size: 1.5em !important;
+  }
+  #sidebar-left ul.sidebar-left-nav li .desc {
+    display: none;
+  }
+  
+  
+  .has-sidebar-left #page-content {
+    width: calc(100vw - 100px);
+    padding-left: 5px;
+  }  
+  
+  #page-content {    
+    font-size: 0.9em;
+  }
+  
+  
+}  /* max-width 975px */
+
+
+
+
+
+
+
+
+
+
+
+@media screen and (max-width: 650px) {  
+
+  #page-content {
+    font-size: 0.8em;
+  }
+
+  
+  /* at this point, we need to get rid of ALL the navigation (top and side) and replace with
+   * a single hamburger menu, which expands to show all options.
+   */
+  .mobile-hamburger-icon {
+    display: inline-block !important;    
+    float: left;
+    font-size: 2em;
+    margin-left: 10px;    
+    margin-right: 10px;
+  }
+  
+  .mobile-hamburger-icon a {
+    display: inline-block;
+    width: 50px;
+    padding-bottom: 3px;
+    text-align: center;
+    zborder: 1px solid #ccc;
+    zborder-radius: 5px;    
+  }
+  
+  #sidebar-left,
+  ul.top-nav-ul {
+     display: none !important;
+  }
+    
+
+  .has-sidebar-left #page-content {
+    width: calc(100vw - 5px);
+    padding-left: 5px;
+  }  
+
+  #mobile-hamburger-menu ul.top-nav-ul
+  {
+    display: block !important;
+  }
+
+  #mobile-hamburger-menu .mobile-hamburger-icon {
+    display: none !important;
+  }
+  
+  #mobile-hamburger-menu a {
+    color: white;
+  }
+  
+  #mobile-hamburger-menu .sidebar-left-nav li {
+    font-size: 1.4em !important;
+  }
+  
+  #mobile-hamburger-menu .sidebar-left-nav li i {
+    font-size: 2em !important;
+  }
+  
+}  /* max-width 650px */
+
+
+
+
+
+
+
+
+
+@media screen and (max-width: 450px) {  
+  
+  
+  .top-banner img {
+    height: 40px;
+    width: auto;
+  }
+  
+  .mobile-hamburger-icon {
+    font-size: 1.9em;
+  }  
+  
+  
+}  /* max-width 450px */
+
+
+
+
+
+
+
+@media screen and (max-width: 375px) {  
+  
+  
+  .top-banner img {
+    height: 30px;
+    width: auto;
+  }
+  
+  .mobile-hamburger-icon {
+    font-size: 1.8em;
+  }  
+  
+  
+}  /* max-width 375px */
+
+
+
+
+
+
+
+

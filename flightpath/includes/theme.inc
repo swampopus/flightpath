@@ -582,7 +582,8 @@ function fp_display_page($page) {
   
   
   $screen->page_content = $content_top .= $page["content"];
-  // If there are CSS files to add, add those.
+  
+  $screen->page_content .= fp_render_mobile_hamburger_menu(); // add to the bottom
     
   
   // Add in the body classes
@@ -604,7 +605,7 @@ function fp_display_page($page) {
   $class = str_replace('&', '', $class);  
   
   $screen->page_body_classes .= " page--" . str_replace("/", "-", $class);
-  
+      
   
   $screen->output_to_browser();  
 } // fp_display_page
@@ -1006,7 +1007,7 @@ function fp_render_breadcrumbs() {
 /**
  * Returns the HTML for the left sidebar content.
  */
-function fp_render_sidebar_left_content() {  
+function fp_render_sidebar_left_content($bool_for_hamburger_menu = FALSE) {  
   $html = "";
   
   //TODO:  Based on user privileges
@@ -1049,7 +1050,24 @@ function fp_render_sidebar_left_content() {
                   <div class='desc'>Admin Tools</div>
                 </li>
               </a>
-              
+          ";
+          
+
+  if ($bool_for_hamburger_menu) {
+    // Include a handy log-out on the mobile hamburger menu
+    $html .= "
+            <a href='" . fp_url("logout") . "'>
+                <li class='logout'>
+                  <i class='fa fa-sign-out'></i>
+                  <div class='desc'>Log Out</div>
+                </li>
+              </a>
+    ";
+  }
+
+                    
+          
+   $html .= "           
             </ul>";
   
   
@@ -1059,47 +1077,91 @@ function fp_render_sidebar_left_content() {
 } // fp_render_sidebar_left_content
 
 
+/**
+ * This will create the HTML content for the "mobile hamburger" menu, which appears when we press
+ * the 3 lines icon or "hamburger" icon on a mobile device. 
+ */
+function fp_render_mobile_hamburger_menu() {
+  $rtn = "";
+  
+  $rtn .= "<div id='mobile-hamburger-menu' style='display:none;'>
+              <div class='mobile-top-nav'>";
+  $rtn .= fp_render_top_nav_content(TRUE);
+  $rtn .= "   </div>
+              <div class='clear'></div>
+              <div class='mobile-sidebar-content'>";
+  $rtn .= fp_render_sidebar_left_content(TRUE);
+  $rtn .= "   </div>";
+  
+  return $rtn;
+}
+
+
+
+
 
 /**
  * Returns the HTML for the top navigation content of the screen itself.
+ * 
+ * If the bool_for_hamburger_menu == true, then we are trying to render this for
+ * our mobile hamburger menu, so we will alter a little bit.
+ * 
  */
-function fp_render_top_nav_content() {
+function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
   global $user;
   $html = "";
   
-  $html .= "
-    <ul class='top-nav-ul'>      
-      <li class='student-search first'>" . student_search_render_small_search() . "</li>
-      <li class='alerts'><i class='fa fa-bell'></i></li>
-      <li class='user-options last'>
-      
-          <div class='tub-element tub-float-right-a tub-last-element tub-user-menu tub-icon-element dropdown'>
-              <div class='tub-element-wrapper'>
-                <a href='javascript:fpToggleUserMenu();' class='tub-link dropdown-trigger'>
-                  <i class='fa fa-user'></i><span class='tub-caret-down'><i class='fa fa-caret-down'></i></span>
-                </a>
-              </div>
-
-                <div id='tub-user-pulldown' style='display:none;' >
-                  " . fp_get_faculty_name($user->cwid) . "
-                  <ul class='user-pulldown'>                    
-                    <li>" . l("My Settings", 'user-settings') . "</li>
-                    <li>" . l("Log Out", "logout") . "</li>
-                  </ul>
-
-                </div>
-                
-          </div>  
-      
-      
+  if (!$bool_for_hamburger_menu) {
+  
+    $html .= "
+      <ul class='top-nav-ul'>      
+        <li class='student-search first'>" . student_search_render_small_search() . "</li>
+        <li class='alerts'><i class='fa fa-bell'></i></li>
+        <li class='user-options last'>
         
-      </li>
-    </ul>
-  ";
+            <div class='tub-element tub-float-right-a tub-last-element tub-user-menu tub-icon-element dropdown'>
+                <div class='tub-element-wrapper'>
+                  <a href='javascript:fpToggleUserMenu();' class='tub-link dropdown-trigger'>
+                    <i class='fa fa-user'></i><span class='tub-caret-down'><i class='fa fa-caret-down'></i></span>
+                  </a>
+                </div>
   
+                  <div id='tub-user-pulldown' style='display:none;' >
+                    " . fp_get_faculty_name($user->cwid) . "
+                    <ul class='user-pulldown'>                    
+                      <li>" . l("My Settings", 'user-settings') . "</li>
+                      <li>" . l("Log Out", "logout") . "</li>
+                    </ul>
   
-  
-  
+                  </div>
+                  
+            </div>  
+        
+        
+          
+        </li>      
+      </ul>
+    ";
+    
+    // We are also going to have a hidden "hamburger" icon, which gets displayed
+    // when we shrink to mobile.  It will be invisible by default.
+    $html .= "<div class='mobile-hamburger-icon' style='display: none;'>
+                <a href='javascript:fpToggleHamburgerMenu();'><i class='fa fa-bars'></i></a>
+              </div>";
+    
+  }
+  else {
+    // This IS for our hamburger menu!
+    $html .= "
+      <ul class='top-nav-ul'>
+        <li class='alerts first'><i class='fa fa-bell'></i></li>
+        <li class='user-options last'>  
+          <a href='" . fp_url('user') . "'><i class='fa fa-user'></i></a>
+        </li>      
+      </ul>
+    ";
+        
+  }
   
   
   return $html;

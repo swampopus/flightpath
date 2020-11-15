@@ -150,6 +150,10 @@ function fpCloseAllUserMenus() {
 
 
 
+function fpToggleHamburgerMenu() {
+  $('#mobile-hamburger-menu').slideToggle();
+}
+
 
 
 
