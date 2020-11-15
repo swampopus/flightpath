@@ -45,7 +45,7 @@
       <?php print $page_top_nav_content; ?>
     </div>
     <div class='top-banner'>
-      <a href='<?php fp_url("<front>"); ?>'>
+      <a href='<?php print fp_url("<front>"); ?>'>
         <img src='<?php print "$theme_location/images/"; ?>fp_banner_default.png' border='0'>
       </a>
     </div>          

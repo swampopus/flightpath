@@ -1496,8 +1496,7 @@ function l($text, $path, $query = "", $attributes = array()) {
 function fp_url($path, $query = "", $include_base_path = TRUE) {
   
   
-  if ($path == "<front>") {
-    // TODO:  make this a setting.
+  if ($path == "<front>") {    
     $path = variable_get("default_home_path", "main");
   }
   

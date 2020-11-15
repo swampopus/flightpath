@@ -2138,7 +2138,7 @@ function draw_menu_items($menu_array) {
       
 			  $pC .= "<tr>";
 			  
-        $pC .= "<td>&nbsp;</td>";
+        $pC .= "<td class='fp-boxes fp-boxes-blank'>&nbsp;</td>";
 
 			  
         $render = array();
@@ -2149,7 +2149,7 @@ function draw_menu_items($menu_array) {
         invoke_hook("content_alter", array(&$render, 'advise_submit_button'));
          
         
-				$pC .= "<td align='center'>
+				$pC .= "<td class='fp-boxes fp-boxes-submit-button' align='center'>
 						<div class='  advise_submit_button_wrapper' style='margin-top:35px; margin-bottom:10px; padding: 10px;'>
 						" . $render['html'] . "					
 						</div>

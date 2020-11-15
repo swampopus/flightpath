@@ -6,6 +6,21 @@
 
 
 
+@media screen and (max-width: 1450px) {  
+  
+  .student-mini-profile .profile-top-wrapper-right-side {
+    width: 400px;
+  }
+  
+  .student-mini-profile .profile-inline-line label {
+    min-width: 130px;
+  }
+  
+  
+}  /* max-width 1450px */
+
+
+
 
 
 @media screen and (max-width: 1130px) {  
@@ -15,9 +30,44 @@
     width: auto;
   }
   
+
+  .student-mini-profile {
+    font-size: 1.0em;
+  }
+
+  .student-mini-profile .profile-inline-line label {
+    min-width: 100px;
+  }
+
   
 }  /* max-width 1130px */
 
+
+
+@media screen and (max-width: 1075px) {  
+  
+  .student-mini-profile h2 {
+    font-size: 1.0em;
+    font-weight: bold;
+  }
+
+
+  .student-mini-profile .profile-top-wrapper-left-side {
+    width: 300px;
+  }
+
+  .student-mini-profile .profile-top-wrapper-right-side {
+    width: 200px;
+  }
+
+
+  
+  .student-mini-profile .profile-inline-line label {
+    display: none;
+  }
+
+  
+}  /* max-width 1075px */
 
 
 
@@ -34,6 +84,10 @@
   #header #top-nav form .smallinput {
     width: 150px;
   }
+  
+  .student-mini-profile .header-profile-image {
+    display: none;
+  }  
   
   
 }  /* max-width 975px */
@@ -72,6 +126,11 @@
     font-size: 0.9em;
   }
   
+  
+  
+  .change-term-link {
+    display: block;
+  }
   
 }  /* max-width 975px */
 
@@ -144,6 +203,20 @@
     font-size: 2em !important;
   }
   
+  
+  
+  .student-mini-profile .profile-top-wrapper-left-side {
+    width: 250px;
+  }
+
+  .student-mini-profile .profile-top-wrapper-right-side {
+    width: 150px;
+  }
+  
+  
+  
+  
+  
 }  /* max-width 650px */
 
 
@@ -166,6 +239,44 @@
     font-size: 1.9em;
   }  
   
+  #page-print-options {
+    display: none;
+  }
+  
+  body.has-page-tabs .inner-page-content-wrapper { 
+    margin-left: 0;
+  }
+  
+  #page-student-mini-profile-wrapper {
+    margin-left: 0;
+  }
+  
+  ul.tabs {
+    padding-left: 0;
+  }
+  
+  /* at this width, we go down to displaying the Degree plan in a single column. */
+  .fp-semester-table {
+    width: calc(100% - 10px);
+  }
+  .fp-semester-table td.fp-boxes {
+    display: block;
+    width: 100%;
+    text-align: left !important;
+  }
+  
+  .fp-semester-table td.fp-boxes table {
+    width: 100%;
+    margin-right: 0;
+    padding-right: 0;
+  }
+  
+  .student-mini-profile .profile-detail-line-student-name-cwid,
+  .student-mini-profile .profile-detail-line-empty
+   {
+    display: none;
+  }
+  
   
 }  /* max-width 450px */
 
@@ -186,6 +297,23 @@
   .mobile-hamburger-icon {
     font-size: 1.8em;
   }  
+
+  .student-mini-profile .profile-top-wrapper-left-side {
+    width: 100%;
+  }
+
+  .student-mini-profile .profile-top-wrapper-right-side {
+    width: 100%;
+  }
+
+
+  
+  .student-mini-profile .profile-detail-line-rank,
+  .student-mini-profile .profile-detail-line-cumu
+  {
+    display: inline;
+    padding-right: 20px;
+  }
   
   
 }  /* max-width 375px */

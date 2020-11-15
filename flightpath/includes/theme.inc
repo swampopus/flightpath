@@ -875,16 +875,16 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
              </div> <!-- profile-image -->    
       
               <div class='profile-top-details-wrapper profile-top-wrapper-left-side'>
-                          <div class='profile-detail-line'>
+                          <div class='profile-detail-line profile-detail-line-student-name-cwid'>
                             <h2>$student->name &nbsp; &nbsp; ($student->student_id)</h2>                                                        
                           </div>
             
-                          <div class='profile-detail-line profile-inline-line'>
+                          <div class='profile-detail-line profile-inline-line profile-detail-line-degree'>
                             <label>Degree$s:</label> $degree_title_div
                             
                           </div>
                           
-                          <div class='profile-detail-line profile-inline-line'>
+                          <div class='profile-detail-line profile-inline-line profile-detail-line-cat-year'>
                             <label>Catalog Year:</label> $cat_year
                           </div>  
                           ";
@@ -906,20 +906,20 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
                
               <div class='profile-top-details-wrapper profile-top-wrapper-right-side'>
               
-                          <div class='profile-detail-line'>
+                          <div class='profile-detail-line profile-detail-line-empty'>
                             $right_side_top  <!-- need something here so it lines up correctly -->
                           </div>
             
-                          <div class='profile-detail-line profile-inline-line'>
+                          <div class='profile-detail-line profile-inline-line profile-detail-line-rank'>
                             <label>Classification:</label> $rank
                           </div>
             
-                          <div class='profile-detail-line profile-inline-line'>
+                          <div class='profile-detail-line profile-inline-line profile-detail-line-cumu'>
                             <label>Cumulative:</label> 120hrs / 2.18 GPA
                           </div>
 
                           ";
-               
+                
     if (isset($extra_profile_items['right_side'])) {
       foreach ($extra_profile_items['right_side'] as $details) {
         $label = @$details['label'];
