@@ -2964,8 +2964,8 @@ function system_display_dashboard_page () {
 
 
   
-  $rtn .= "<div class='dash-left'>
-             <div class='activity-feed-block'>
+  $rtn .= "<div class='dash-box dash-left'>
+             <div class='activity-feed-block dash-feed-block'>
                 " . fp_render_section_title("Advisee Activity Feed") . "
                <div class='contents'>
                 <div class='feed-item'>
@@ -3021,8 +3021,8 @@ function system_display_dashboard_page () {
             </div>";
 
 
-  $rtn .= "<div class='dash-right'>
-             <div class='announcements-feed-block'>
+  $rtn .= "<div class='dash-box dash-right'>
+             <div class='announcements-feed-block dash-feed-block'>
                 " . fp_render_section_title("Announcements") . "
                <div class='contents'>
                 <div class='feed-item'>                  

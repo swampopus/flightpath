@@ -122,6 +122,21 @@
     
   }
   
+  .dash-box {
+    display: inline-block !important;
+    width: 100% !important;
+  }
+  
+  
+  .dash-box .contents {    
+    max-height: none !important;
+    overflow-y: auto !important;  
+  }
+  
+  .dash-box .dash-feed-block {
+    margin: 0 !important;    
+  }
+  
 }  /* max-width 1075px */
 
 
@@ -301,7 +316,7 @@
   table.student-alerts .author,
   table.student-alerts .updated
   {
-    display: none;
+    display: none; 
   }
   
   table.student-alerts td.short-desc {
@@ -315,6 +330,15 @@
     text-overflow: ellipsis;
     
   }  
+  
+  
+  .advising-stats-block-inner-wrapper .advising-stat-box {
+    padding-right: 0px !important;
+  }
+  
+ .advising-stats-block-inner-wrapper .advising-stat-box-wide {  
+    min-width: 100% !important;    
+  }
   
   
   

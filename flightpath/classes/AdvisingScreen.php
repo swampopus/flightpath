@@ -11,7 +11,7 @@ class AdvisingScreen extends stdClass
 
 	// Variables for the template/theme output...
 	public $theme_location, $page_content, $page_has_search, $page_tabs, $page_on_load;
-	public $page_hide_report_error, $page_scroll_top, $page_is_popup, $page_is_mobile;
+	public $page_hide_report_error, $page_scroll_top, $page_is_popup;
 	public $page_title, $page_extra_css_files, $page_body_classes, $page_display_currently_advising;
   
 
@@ -66,8 +66,7 @@ class AdvisingScreen extends stdClass
 		//$this->settings = $this->db->get_flightpath_settings();
 	
 		$this->earliest_catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
-		
-		$this->determine_mobile_device();
+				
 				
 	}
 
@@ -80,6 +79,8 @@ class AdvisingScreen extends stdClass
 	 *
 	 */
 function determine_mobile_device(){
+  depricated_message('determine_mobile_device is depricated');    
+    
   $user_agent = $_SERVER['HTTP_USER_AGENT']; 
 
   $look_for = array(
@@ -1895,7 +1896,7 @@ function draw_menu_items($menu_array) {
       
       if (!isset($user->settings["hide_charts"])) $user->settings["hide_charts"] = "";
       
-  		if ($this->bool_force_pie_charts || ($user->settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false && $this->page_is_mobile == false))
+  		if ($this->bool_force_pie_charts || ($user->settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false ))
   		{ // Display the pie charts
     		
     		$bool_charts_are_hidden = FALSE;
@@ -1978,7 +1979,7 @@ function draw_menu_items($menu_array) {
     
     if ($bool_charts_are_hidden) {
       // Charts are hidden, so show the "Show" link.
-      if ($this->bool_print != true && $this->bool_blank != true && $this->page_is_mobile != true)
+      if ($this->bool_print != true && $this->bool_blank != true )
       {
   
         $rtn .= "<div style='font-size: 8pt; text-align:right;' class='pie-show-charts-link'>
@@ -2186,7 +2187,7 @@ function draw_menu_items($menu_array) {
 					onmouseup='this.className=\"gradbutton gradbutton_hover hand\";'
 					";
 
-		if ($this->page_is_mobile) $on_mouse = "";  // Causes problems for some mobile devices.
+		
 		
 		if ($bool_padd)
 		{
@@ -3622,7 +3623,7 @@ function draw_menu_items($menu_array) {
             onmouseout='$(this).removeClass(\"selection_highlight\");'
     ";      
 
-		if ($this->page_is_mobile) $on_mouse_over = "";  // Causes problems for some mobile devices.
+		
 		
 		$w1_1 = $this->width_array[0];
 		$w1_2 = $this->width_array[1];
@@ -4583,7 +4584,7 @@ if ($course->name_equals('MUAL 265')) {
             onmouseout='$(this).removeClass(\"selection_highlight\");'
     ";
     
-		if ($this->page_is_mobile) $on_mouse_over = "";  // Causes problems for some mobile devices.
+		
 		
 		$hand_class = "hand";
 		$extra_style = $extra_classes = $extra_css = $extra_html = "";

@@ -210,21 +210,31 @@ ___dashboard{}
 
 
 
+.advising-stats-block-inner-wrapper {
+  text-align: center;
+}
+
 .advising-stats-block-inner-wrapper .advising-stat-box {
   
-  display: table-cell;
+  display: inline-block;
   min-width: 300px;  
   text-align: center;
   padding-right: 30px;
-  vertical-align: top:
+  margin-left: auto;
+  margin-right: auto;
 }
 
 
 
 .advising-stats-block-inner-wrapper .advising-stat-box-wide {  
-  min-width: 480px;
+  min-width: 400px;
   text-align: left;
 }
+.advising-stat-box-upcoming {
+  padding-right: 0;
+}
+ 
+
 
 .advising-stat-box-upcoming .stat-box-wrapper {  
   width: 100%;
