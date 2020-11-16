@@ -19,9 +19,7 @@ $.widget("ui.dialog", $.extend({}, $.ui.dialog.prototype, {
 
 // Set up our modal dialogs on startup, as well as other settings
 $(document).ready(function() {
-  
-  
-  
+      
     // Hide our expanded menus when we click outside of them.
     jQuery(document).click(function (e) {
       
@@ -35,8 +33,16 @@ $(document).ready(function() {
   
     
     // TODO: use settings for width/height, if its been set.  This allows us to let the end user configure the size.
+    
+    
+    
     var modalWidth = 500;
     var modalHeight = 400;
+    
+    if (jQuery(window).width() < 550) {
+      modalWidth = 390;
+    }
+    
     $("#fp-iframe-dialog-small").dialog({
       modal: true,      
       show: {
@@ -81,6 +87,13 @@ $(document).ready(function() {
     // Large iframe dialog
     modalWidth = 700;
     modalHeight = 600;
+    
+    if (jQuery(window).width() < 550) {
+      modalWidth = 390;
+      modalHeight = 500;
+    }
+    
+    
     $("#fp-iframe-dialog-large").dialog({
       modal: true,
       show: {

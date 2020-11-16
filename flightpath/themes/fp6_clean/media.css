@@ -4,6 +4,24 @@
 
 
 
+@media screen and (max-width: 1550px) {  
+  
+  .student-profile-header-full .profile-top-wrapper-right-side {
+    width: 400px;
+  }
+  
+  .student-profile-header-full .profile-inline-line label {
+    min-width: 130px;
+  }
+  
+  
+  
+  
+  
+  
+}  /* max-width 1450px */
+
+
 
 
 @media screen and (max-width: 1450px) {  
@@ -21,6 +39,19 @@
 
 
 
+@media screen and (max-width: 1380px) {
+  .student-profile-header-full .profile-top-wrapper-right-side {
+    width: 300px;
+  }
+  
+  .student-profile-header-full .profile-top-wrapper-right-side {
+    width: 300px;
+  }
+  
+  
+
+} /* max-width 1380px */
+
 
 
 @media screen and (max-width: 1130px) {  
@@ -37,6 +68,11 @@
 
   .student-mini-profile .profile-inline-line label {
     min-width: 100px;
+  }
+
+
+  table.student-alerts {
+    font-size: 0.9em;
   }
 
   
@@ -66,6 +102,25 @@
     display: none;
   }
 
+  .student-mini-profile .has-mobile-content .profile-line-content{
+    display: none;
+  }
+  .student-mini-profile .has-mobile-content .mobile-profile-line-content {
+    display: inline !important;
+  }
+
+ 
+  table.student-alerts td.short-desc {
+    max-width: 300px;
+  }
+
+  table.student-alerts td.short-desc .short-desc-wrapper {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    
+  }
   
 }  /* max-width 1075px */
 
@@ -89,6 +144,16 @@
     display: none;
   }  
   
+  .student-profile-header-full .header-profile-image {
+    display: block;    
+    width: 100px !important;
+  }
+  
+  .student-profile-header-full .header-profile-image img {
+    width: 90px;
+    height: auto;
+    border-radius: 5px;
+  }
   
 }  /* max-width 975px */
 
@@ -131,6 +196,25 @@
   .change-term-link {
     display: block;
   }
+
+  .student-profile-header-full .header-profile-image {
+    display: none;    
+    
+  }
+
+
+  table.student-alerts td.short-desc {
+    max-width: 200px;
+  }
+
+  table.student-alerts td.short-desc .short-desc-wrapper {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    
+  }
+
   
 }  /* max-width 975px */
 
@@ -214,6 +298,23 @@
   }
   
   
+  table.student-alerts .author,
+  table.student-alerts .updated
+  {
+    display: none;
+  }
+  
+  table.student-alerts td.short-desc {
+    max-width: 100%
+  }
+
+  table.student-alerts td.short-desc .short-desc-wrapper {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    
+  }  
   
   
   
@@ -275,6 +376,14 @@
   .student-mini-profile .profile-detail-line-empty
    {
     display: none;
+  }
+  
+  
+  #engagements-list-page .add-engagements-buttons {
+    font-size: 0.9em;
+    float: none;
+    clear: both;
+    text-align: center;
   }
   
   

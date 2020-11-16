@@ -880,12 +880,12 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
                           </div>
             
                           <div class='profile-detail-line profile-inline-line profile-detail-line-degree'>
-                            <label>Degree$s:</label> $degree_title_div
+                            <label>Degree$s:</label> <span class='profile-line-content'>$degree_title_div</span>
                             
                           </div>
                           
                           <div class='profile-detail-line profile-inline-line profile-detail-line-cat-year'>
-                            <label>Catalog Year:</label> $cat_year
+                            <label>Catalog Year:</label> <span class='profile-line-content'>$cat_year</span>
                           </div>  
                           ";
     if (isset($extra_profile_items['left_side'])) {
@@ -893,8 +893,14 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
         $label = @$details['label'];
         $content = @$details['content'];
         $extra_class = @$details['extra_class'];
+        $mobile_content = @$details['mobile_content'];  // displayed in an initially-hidden span, if provided.
+        if ($mobile_content) {
+          $mobile_content = "<span style='display:none;' class='mobile-profile-line-content'>$mobile_content</span>";
+          $extra_class .= " has-mobile-content";
+        }
+        
         $rtn .= "<div class='profile-detail-line profile-inline-line $extra_class'>
-                      <label>$label</label> $content
+                      <label>$label</label> <span class='profile-line-content'>$content</span>$mobile_content
                  </div>";
       }
     }
@@ -911,11 +917,11 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
                           </div>
             
                           <div class='profile-detail-line profile-inline-line profile-detail-line-rank'>
-                            <label>Classification:</label> $rank
+                            <label>Classification:</label> <span class='profile-line-content'>$rank</span>
                           </div>
             
                           <div class='profile-detail-line profile-inline-line profile-detail-line-cumu'>
-                            <label>Cumulative:</label> 120hrs / 2.18 GPA
+                            <label>Cumulative:</label> <span class='profile-line-content'>120hrs / 2.18 GPA</span>
                           </div>
 
                           ";
@@ -925,8 +931,15 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
         $label = @$details['label'];
         $content = @$details['content'];
         $extra_class = @$details['extra_class'];
+        $mobile_content = @$details['mobile_content'];  // displayed in an initially-hidden span, if provided.
+        
+        if ($mobile_content) {
+          $mobile_content = "<span style='display:none;' class='mobile-profile-line-content'>$mobile_content</span>";
+          $extra_class .= " has-mobile-content";
+        }        
+        
         $rtn .= "<div class='profile-detail-line profile-inline-line $extra_class'>
-                      <label>$label</label> $content
+                      <label>$label</label> <span class='profile-line-content'>$content</span>$mobile_content
                  </div>";
       }
     }
