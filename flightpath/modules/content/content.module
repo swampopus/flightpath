@@ -1221,10 +1221,30 @@ function content_perm() {
   );
   
   $types = content_get_types();
-  foreach ($types as $type => $details) {  
-    $rtn ["edit_$type" . "_content"] = array(
-      "title" => t("Edit") . " " . $details["title"] . " " . t("content"),      
+  foreach ($types as $type => $details) {
+      
+    $rtn ["add_$type" . "_content"] = array(
+      "title" => t("Add new") . " " . $details["title"] . " " . t("content"),      
     );
+      
+    $rtn ["edit_any_$type" . "_content"] = array(
+      "title" => "&nbsp; &nbsp; " . t("Edit any") . " " . $details["title"] . " " . t("content"),      
+    );
+
+    $rtn ["edit_own_$type" . "_content"] = array(
+      "title" => "&nbsp; &nbsp; " . t("Edit own") . " " . $details["title"] . " " . t("content"),      
+    );
+    
+    $rtn ["delete_any_$type" . "_content"] = array(
+      "title" => "&nbsp; &nbsp; " . t("Delete any") . " " . $details["title"] . " " . t("content"),      
+    );
+    
+    $rtn ["delete_own_$type" . "_content"] = array(
+      "title" => "&nbsp; &nbsp; " . t("Delete own") . " " . $details["title"] . " " . t("content"),      
+    );
+    
+    
+    
   }
   
   return $rtn;

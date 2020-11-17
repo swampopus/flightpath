@@ -1020,69 +1020,110 @@ function fp_render_breadcrumbs() {
 /**
  * Returns the HTML for the left sidebar content.
  */
-function fp_render_sidebar_left_content($bool_for_hamburger_menu = FALSE) {  
+function fp_render_sidebar_left_content($bool_for_hamburger_menu = FALSE) {
+  global $user;
+      
   $html = "";
   
-  //TODO:  Based on user privileges
-  
-  $html .= "<ul class='sidebar-left-nav'>
-              <a href='" . fp_url("<front>") . "'>
-                <li class='home first'>                
-                  <i class='fa fa-home'></i>
-                  <div class='desc'>Dashboard</div>
-                
-                </li>
-              </a>
-              <a href='" . fp_url("calendar") . "'>
-                <li class='appointments'>
-                    <i class='fa fa-calendar'></i>
-                    <div class='desc'>Appointments</div>
-                </li>
-              </a>              
-              <a href='" . fp_url("student-search") . "'>
-                <li class='students'>
-                    <i class='fa fa-users'></i>
-                    <div class='desc'>Students</div>
-                </li>
-              </a>
-              <a href='" . fp_url("tools/course-search") . "'>
-                <li class='courses'>
-                  <i class='fa fa-book'></i>
-                  <div class='desc'>Courses</div>                
-                </li>
-              </a>
-              <a href='" . fp_url("admin-tools/stats") . "'>
-              <li class='analytics'>
-                <i class='fa fa-bar-chart'></i>
-                <div class='desc'>Analytics</div>                
-              </li>
-              </a>
-              <a href='" . fp_url("admin-tools") . "'>
-                <li class='admin-tools'>
-                  <i class='fa fa-bolt'></i>
-                  <div class='desc'>Admin Tools</div>
-                </li>
-              </a>
-          ";
-          
-
+  // Our links....  (we will check permissions later based on the path)
+  $links = array();
+  $links[] = array(
+    'path' => '<front>',
+    'icon' => 'fa-home',
+    'desc' => t('Dashboard'),
+    'class' => 'home', 
+  );
+  if ($user->is_student) {
+    $links[] = array(
+      'path' => 'student-profile',
+      'icon' => 'fa-graduation-cap',
+      'desc' => t('My Profile'),
+      'class' => 'my-profile', 
+    );
+  }
+  $links[] = array(
+    'path' => 'calendar',
+    'icon' => 'fa-calendar',
+    'desc' => t('Appointments'),
+    'class' => 'appointments', 
+  );  
+  $links[] = array(
+    'path' => 'student-search',
+    'icon' => 'fa-users',
+    'desc' => t('Students'),
+    'class' => 'students', 
+  );  
+  $links[] = array(
+    'path' => 'tools/course-search',
+    'icon' => 'fa-book',
+    'desc' => t('Courses'),
+    'class' => 'courses', 
+  );  
+  $links[] = array(
+    'path' => 'admin-tools/stats',
+    'icon' => 'fa-bar-chart',
+    'desc' => t('Analytics'),
+    'class' => 'analytics', 
+  );  
+  $links[] = array(
+    'path' => 'admin-tools',
+    'icon' => 'fa-bolt',
+    'desc' => t('Admin Tools'),
+    'class' => 'admin-tools', 
+  );  
+    
   if ($bool_for_hamburger_menu) {
     // Include a handy log-out on the mobile hamburger menu
-    $html .= "
-            <a href='" . fp_url("logout") . "'>
-                <li class='logout'>
-                  <i class='fa fa-sign-out'></i>
-                  <div class='desc'>Log Out</div>
-                </li>
-              </a>
-    ";
+    $links[] = array(
+      'path' => 'logout',
+      'icon' => 'fa-sign-out',
+      'desc' => t('Log Out'),
+      'class' => 'logout', 
+    );
   }
-
-                    
-          
-   $html .= "           
-            </ul>";
   
+  
+  
+  
+
+  $html .= "<ul class='sidebar-left-nav'>";
+  
+  foreach ($links as $c => $link) {
+    $path = $link['path'];
+    $icon = $link['icon'];
+    $desc = $link['desc'];    
+    $query = @$link['query'];
+    $class = @$link['query'];
+    
+    if ($c == 0) $class .= " first";
+    if ($c == count($links) - 1) $class .= " last";
+    
+    // Do we have permission for this menu item?
+    if ($path != "<front>") {
+      $item = menu_get_item($path);
+      if (!menu_check_user_access($item)) {
+        continue;
+      }    
+    }
+    
+    // If we are here, we have access!
+    $html .= "<a href='" . fp_url($path, $query) . "'>
+                <li class='$class'>                
+                  <i class='fa $icon'></i>
+                  <div class='desc'>$desc</div>                
+                </li>
+              </a>";
+    
+    
+  } // foreach
+  
+  $html .= "</ul>";
+  
+  
+  
+
+  
+   
   
   
   return $html;    

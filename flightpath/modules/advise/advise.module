@@ -1304,24 +1304,18 @@ function advise_display_view($view = "view") {
       
       $furl = fp_url("advise/popup-change-term");
       
-            
+      $tab_array[3]["label"] = "Advising Term: $termdesc ($t_term_id)";
+      $tab_array[3]['text'] = "<i class='fa fa-pencil'></i>";
+      $tab_array[3]['link_title'] = "Change term?";
+      $tab_array[3]['link_class'] = "change-term-link";
+      $tab_array[3]["type"] = "link";    
+      $tab_array[3]["active"] = FALSE;
+      $tab_array[3]["on_click"] = "popupSmallIframeDialog(\"" . $furl . "\",\"" . t('Select an Advising Term') . "\",\"advising_term_id=$t_term_id\");";  
       
-      /*
-      $for_term .= "<span style='font-size: 8pt; font-weight:normal;'>
-             - <a href='javascript: popupWindow2(\"" . $furl . "\",\"advising_term_id=$t_term_id\");' style='color:blue; background-color: white; border: 1px solid black; padding-left: 3px; padding-right: 3px;'>" . t("change") . "<img src='" . fp_theme_location() . "/images/calendar1.jpg' height='13' border='0' style='vertical-align: bottom;'></a>
-            </span>";
-      */
 
     }    
     
     
-    $tab_array[3]["label"] = "Advising Term: $termdesc ($t_term_id)";
-    $tab_array[3]['text'] = "<i class='fa fa-pencil'></i>";
-    $tab_array[3]['link_title'] = "Change term?";
-    $tab_array[3]['link_class'] = "change-term-link";
-    $tab_array[3]["type"] = "link";    
-    $tab_array[3]["active"] = FALSE;
-    $tab_array[3]["on_click"] = "popupSmallIframeDialog(\"" . $furl . "\",\"" . t('Select an Advising Term') . "\",\"advising_term_id=$t_term_id\");";  
 
             
     

@@ -164,7 +164,7 @@ function comments_comment_form() {
   $form["type"] = array(
     "type" => "radios",
     "label" => t("Visible to:"),
-    "options" => array("public" => t("Anyone (including students)"), "faculty" => t("Faculty/Staff only")),
+    "options" => array("public" => t("Anyone (incl student)"), "faculty" => t("Faculty/Staff only")),
     "value" => "faculty",
   );
   
@@ -214,6 +214,8 @@ function comments_display_main() {
   
     $rtn .= fp_render_c_fieldset($form, t("Click to enter comment"), true);
   }
+  
+  fp_set_title('');
     
   $access_types = (user_has_permission("view_faculty_comments")) ? array("faculty", "public") : array("public");
     
@@ -297,9 +299,13 @@ function comments_render_comment($comment, $delete_link = "") {
     return "<p>" . t("Sorry, but you do not have permission to view the requested comment (it is marked as faculty-only).") . "</p>";    
   }
 
+  $access_type = t("Anyone (incl. student)");
+  if ($comment['access_type'] == 'faculty') {
+    $access_type = "<i class='fa fa-lock' title='Visibile to Faculty/Staff only'></i> &nbsp; " . t("Faculty/Staff");
+  }
 
   $rtn .= "<div class='comment-comment comment-comment-" . $comment["access_type"] . "'>
-              <div class='comment-by-line'>" .ucwords($comment["access_type"]) . " " . t("comment by") . " " . fp_get_faculty_name($comment["faculty_id"]) . "</div>
+              <div class='comment-by-line'>" .$access_type . " " . t("comment by") . " " . fp_get_faculty_name($comment["faculty_id"]) . "</div>
               <div class='comment-datetime'>" . format_date($comment["posted"], "pretty") . "</div>
               <div class='comment-text'>" . filter_markup($comment["comment"], "full") . "</div>
               ";
