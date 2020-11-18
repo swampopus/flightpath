@@ -50,6 +50,21 @@
   
   
 
+  .page--login #page-login-user-form {
+    float: left;
+    width: calc(100% - 600px);  
+    text-align: center; 
+    
+  }
+  
+  .page--login #page-login-page__wallpaper {
+    width: 600px;       
+  }
+  
+  
+  
+  
+
 } /* max-width 1380px */
 
 
@@ -75,6 +90,19 @@
     font-size: 0.9em;
   }
 
+  
+  .page--login #page-login-user-form {
+    float: left;
+    width: calc(100% - 400px);  
+    text-align: center; 
+    
+  }
+  
+  .page--login #page-login-page__wallpaper {
+    width: 400px;       
+  }
+  
+  
   
 }  /* max-width 1130px */
 
@@ -169,6 +197,24 @@
     height: auto;
     border-radius: 5px;
   }
+  
+  
+  .page--login .login-content-div .left-side-content {
+    width: 100%;
+  }
+  
+  .page--login #page-login-user-form {
+    float: left;
+    width: 100%;  
+    text-align: center; 
+    
+  }
+  
+  .page--login #page-login-page__wallpaper {
+    display: none;       
+  }
+  
+  
   
 }  /* max-width 975px */
 
@@ -340,6 +386,15 @@
     min-width: 100% !important;    
   }
   
+  .element-type-textfield input, 
+  .element-type-password input, 
+  .element-type-datetime-local input, 
+  .element-type-time input, 
+  .element-type-search input {
+    width: 90%;
+  }  
+  
+  
   
   
 }  /* max-width 650px */
@@ -398,10 +453,10 @@
   
   .student-mini-profile .profile-detail-line-student-name-cwid,
   .student-mini-profile .profile-detail-line-empty
-   {
+  {
     display: none;
   }
-  
+    
   
   #engagements-list-page .add-engagements-buttons {
     font-size: 0.9em;
@@ -410,6 +465,7 @@
     text-align: center;
   }
   
+
   
 }  /* max-width 450px */
 

@@ -1194,7 +1194,7 @@ function advise_perm() {
  * 
  */
 function advise_display_view($view = "view") {
-  global $user, $fp, $degree_plan, $screen;
+  global $user, $fp, $degree_plan, $screen, $current_student_id;
   $rtn = "";
  
   fp_set_title('');
@@ -1292,6 +1292,26 @@ function advise_display_view($view = "view") {
     $tab_array[2]["on_click"] = "popupPrintWindow(\"" . fp_url("$view/print", "advising_view=$screen->view") . "\");";  
     */
     
+    
+    
+    if ($view == 'what-if') {
+      
+      //$what_if_select = "<span class='what-if-change-settings'>" . l("<i class='fa fa-cog'></i> " . t("Change Settings"), "what-if", "advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&what_if_track_degree_ids=none&current_student_id=$current_student_id") . "</span>";
+      
+      $tab_array[3]["label"] = "\"What If?\" Mode";
+      $tab_array[3]['text'] = "<i class='fa fa-pencil'></i>";
+      $tab_array[3]['link_title'] = "Change What If settings?";
+      $tab_array[3]['link_class'] = "change-what-if-link";
+      $tab_array[3]["type"] = "link";    
+      $tab_array[3]["active"] = FALSE;
+      $tab_array[3]["on_click"] = "window.location=\"" . fp_url('what-if', "advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&what_if_track_degree_ids=none&current_student_id=$current_student_id") . "\";";  
+      
+      
+    }
+    
+     
+    
+    
     $advising_term_id = @$GLOBALS["fp_advising"]["advising_term_id"];
         
     if ($advising_term_id != "" && user_has_permission("can_advise_students")) {
@@ -1304,13 +1324,13 @@ function advise_display_view($view = "view") {
       
       $furl = fp_url("advise/popup-change-term");
       
-      $tab_array[3]["label"] = "Advising Term: $termdesc ($t_term_id)";
-      $tab_array[3]['text'] = "<i class='fa fa-pencil'></i>";
-      $tab_array[3]['link_title'] = "Change term?";
-      $tab_array[3]['link_class'] = "change-term-link";
-      $tab_array[3]["type"] = "link";    
-      $tab_array[3]["active"] = FALSE;
-      $tab_array[3]["on_click"] = "popupSmallIframeDialog(\"" . $furl . "\",\"" . t('Select an Advising Term') . "\",\"advising_term_id=$t_term_id\");";  
+      $tab_array[4]["label"] = "Advising Term: $termdesc ($t_term_id)";
+      $tab_array[4]['text'] = "<i class='fa fa-pencil'></i>";
+      $tab_array[4]['link_title'] = "Change term?";
+      $tab_array[4]['link_class'] = "change-term-link";
+      $tab_array[4]["type"] = "link";    
+      $tab_array[4]["active"] = FALSE;
+      $tab_array[4]["on_click"] = "popupSmallIframeDialog(\"" . $furl . "\",\"" . t('Select an Advising Term') . "\",\"advising_term_id=$t_term_id\");";  
       
 
     }    

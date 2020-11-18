@@ -1190,7 +1190,7 @@ ___page--login{}
   position: relative;
   float: right;
   width: 55%; 
-  z___background: url('images/bird1.jpg') top left no-repeat;  
+    
   background: url('https://www.kedm.org/sites/kedm/files/styles/x_large/public/202001/ulm_ce_classes.jpg') top left no-repeat;  
   
   background-size: cover; 
@@ -1657,9 +1657,23 @@ table.fp-box-top {
   color: inherit;
 }
  
-.sub-tabs .change-term-link {
+.sub-tabs .change-term-link
+{
   padding-left: 30px;
   font-size: 1.2em;
+}
+
+.sub-tabs .change-what-if-link {
+  display: inline-block;
+  margin-left: 20px;
+  height: 22px;
+  padding: 0px 5px 2px 5px;
+  background-color: lemonchiffon;
+  font-size: 1.2em;
+}
+
+.sub-tabs .change-what-if-link a {
+  
 }
 
 

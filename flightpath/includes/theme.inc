@@ -424,7 +424,7 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
  */
 function fp_display_page($page) {
   
-  global $current_student_id, $screen;
+  global $current_student_id, $screen, $user;
   $page_title = $page["title"];
   if (@$GLOBALS["fp_set_title"] != "") {
     $page_title = $GLOBALS["fp_set_title"];
@@ -583,8 +583,10 @@ function fp_display_page($page) {
   
   $screen->page_content = $content_top .= $page["content"];
   
-  $screen->page_content .= fp_render_mobile_hamburger_menu(); // add to the bottom
-    
+  if ($user->id > 0) {
+    // meaning, they are logged in.
+    $screen->page_content .= fp_render_mobile_hamburger_menu(); // add to the bottom
+  }
   
   // Add in the body classes
   $screen->page_body_classes .= " " . @$GLOBALS["fp_add_body_classes"];  
@@ -840,27 +842,25 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
   if (@$GLOBALS["fp_advising"]["advising_what_if"] == "yes") {
     $whatifclass = "student-mini-profile-what-if-mode";
     
-      // Set the cat year to whatever our What If cat year was, current if we can't find it.
-      $what_if_catalog_year = @$GLOBALS["fp_advising"]["what_if_catalog_year"];
-      if ($what_if_catalog_year != 0 && $what_if_catalog_year != "") {
-        $student->catalog_year = $what_if_catalog_year;
-      }
-      else {
-        
-        // Only change to current if that is how our settings are set...
-        if (variable_get("what_if_catalog_year", "current") == "current") {
-          $student->catalog_year = $settings["current_catalog_year"];
-        }
-      }
+    // Set the cat year to whatever our What If cat year was, current if we can't find it.
+    $what_if_catalog_year = @$GLOBALS["fp_advising"]["what_if_catalog_year"];
+    if ($what_if_catalog_year != 0 && $what_if_catalog_year != "") {
+      $student->catalog_year = $what_if_catalog_year;
+    }
+    else {
       
-      
-      if ($bool_print != true) {
-        $what_if_select = "<span class='what-if-change-settings'>
-          " . l("<i class='fa fa-cog'></i> " . t("Change Settings"), "what-if", "advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&what_if_track_degree_ids=none&current_student_id=$current_student_id") . "
-                  </span>";
-      }    
+      // Only change to current if that is how our settings are set...
+      if (variable_get("what_if_catalog_year", "current") == "current") {
+        $student->catalog_year = $settings["current_catalog_year"];
+      }
+    }
     
-    $right_side_top = "<h2 class='what-if-notice'>" . t("What If Mode") . "</h2>$what_if_select";
+    
+    
+    //$what_if_select = "<span class='what-if-change-settings'>" . l("<i class='fa fa-cog'></i> " . t("Change Settings"), "what-if", "advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&what_if_track_degree_ids=none&current_student_id=$current_student_id") . "</span>";
+        
+    
+    //$right_side_top = "<h2 class='what-if-notice'>" . t("What If Mode") . "</h2>";
   }
   
   
@@ -1145,7 +1145,9 @@ function fp_render_mobile_hamburger_menu() {
               <div class='clear'></div>
               <div class='mobile-sidebar-content'>";
   $rtn .= fp_render_sidebar_left_content(TRUE);
-  $rtn .= "   </div>";
+  $rtn .= "   </div>
+            </div>";
+  
   
   return $rtn;
 }
