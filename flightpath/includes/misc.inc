@@ -23,6 +23,71 @@ function is_serialized_string($string)
     return ($string == 'b:0;' || @unserialize($string) !== false);
 } 
  
+
+
+
+/**
+ * Returns an array of all timezones PHP recognizes.
+ * Inspired by code from: https://stackoverflow.com/questions/1727077/generating-a-drop-down-list-of-timezones-with-php
+ * 
+ * This code will return the common US timezones first, followed by the rest of the timezones that PHP is aware of.
+ * 
+ */
+function get_timezones($bool_include_offset = FALSE) {
+
+  $timezones = array();
+  
+  // These are the common names for the US timezones.  
+  $us_desc_timezones = array(
+    'America/New_York' => 'Eastern',
+    'America/Chicago' => 'Central',
+    'America/Denver' => 'Mountain',
+    'America/Phoenix' => 'Mountain no DST',
+    'America/Los_Angeles' => 'Pacific',
+    'America/Anchorage' => 'Alaska',
+    'America/Adak' => 'Hawaii',
+    'Pacific/Honolulu' =>  'Hawaii no DST',  
+  );
+  
+  
+  $us_timezones = array_keys($us_desc_timezones);
+  
+
+  $timezones = DateTimeZone::listIdentifiers(DateTimeZone::ALL);
+
+  // Place the US timezones at the top of the list.
+  $timezones = array_merge($us_timezones, $timezones);   
+
+       
+  $timezone_offsets = array();
+  foreach( $timezones as $timezone )
+  {
+      $tz = new DateTimeZone($timezone);
+      $timezone_offsets[$timezone] = $tz->getOffset(new DateTime);
+  }
+
+
+  $timezone_list = array();
+  foreach( $timezone_offsets as $timezone => $offset )
+  {
+    $offset_prefix = $offset < 0 ? '-' : '+';
+    $offset_formatted = gmdate( 'H:i', abs($offset) );
+
+    $pretty_offset = $extra = "";
+    if ($bool_include_offset) $pretty_offset = "(UTC${offset_prefix}${offset_formatted}) ";
+
+    if (isset($us_desc_timezones[$timezone])) {
+      $extra = "  - (" . $us_desc_timezones[$timezone] . ")";
+    }
+    
+    $disp_timezone = str_replace("_", " ", $timezone);
+    $timezone_list[$timezone] = "$pretty_offset$disp_timezone$extra";
+  }
+
+  return $timezone_list;  
+}
+
+
  
  
 /**
