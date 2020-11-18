@@ -1172,7 +1172,7 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
     $html .= "
       <ul class='top-nav-ul'>      
         <li class='student-search first'>" . student_search_render_small_search() . "</li>
-        <li class='alerts'><i class='fa fa-bell'></i></li>
+        <li class='alerts'><a href='l'><i class='fa fa-bell'></i></a></li>
         <li class='user-options last'>
         
             <div class='tub-element tub-float-right-a tub-last-element tub-user-menu tub-icon-element dropdown'>
@@ -1210,9 +1210,9 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
     // This IS for our hamburger menu!
     $html .= "
       <ul class='top-nav-ul'>
-        <li class='alerts first'><i class='fa fa-bell'></i></li>
+        <li class='alerts first'><a href='l'><i class='fa fa-bell'></i></a></li>
         <li class='user-options last'>  
-          <a href='" . fp_url('user') . "'><i class='fa fa-user'></i></a>
+          <a href='" . fp_url('user-settings') . "'><i class='fa fa-user'></i></a>
         </li>      
       </ul>
     ";

@@ -165,6 +165,15 @@
     margin: 0 !important;    
   }
   
+  
+  .select-from-event-types a.event-type {
+    margin-right: 0;
+    margin-bottom: 30px;
+  }
+  
+   
+  
+  
 }  /* max-width 1075px */
 
 
@@ -277,7 +286,7 @@
   }
 
   
-}  /* max-width 975px */
+}  /* max-width 825px */
 
 
 
@@ -394,6 +403,17 @@
     width: 90%;
   }  
   
+  
+  .select-from-event-types {
+    width: 100%;
+  }
+  
+  .select-from-event-types a.event-type {
+      display: inline-block;
+      margin-left: 20px;
+      
+      margin-bottom: 30px;
+  }
   
   
   
