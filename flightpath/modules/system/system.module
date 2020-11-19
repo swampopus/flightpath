@@ -1920,6 +1920,13 @@ function system_settings_form() {
     
   );
 
+  
+  $form['system_timezone'] = array(
+    'type' => 'select',
+    'label' => t('System timezone'),
+    'options' => get_timezones(),
+    'value' => variable_get('system_timezone', 'America/Chicago'),
+  );
 
   
   // Can we support clean_urls?

@@ -386,6 +386,16 @@ function fp_load_user($user_id) {
     $rtn->permissions = $rtn->permissions + $perms;
   } 
   
+  // Load settings from the user_settings table (if any exist)
+  $rtn->settings = array();
+  $res = db_query("SELECT * FROM user_settings WHERE user_id = ?", array($user_id));
+  $cur = db_fetch_array($res);
+  if ($cur) {
+    $rtn->settings = $cur;
+  }
+  
+  
+  
   
   return $rtn;  
 }

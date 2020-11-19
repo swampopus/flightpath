@@ -2022,21 +2022,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
     }
   }
-
-
-  // Update the logged-in user's settings?
-  $vars["fp_update_user_settings_flag"] = @$_REQUEST["fp_update_user_settings_flag"];
-  // Make it only come from the POST, for safety.
-  if ($vars["fp_update_user_settings_flag"] == "")
-  {
-    $vars["fp_update_user_settings_flag"] = @$_SESSION["fp_update_user_settings_flag$csid"];
-    if ($vars["fp_update_user_settings_flag"] == "")
-    { // Default value...
-
-    }
-  }
-
-
+  
 
   $settings = fp_get_system_settings();
 
@@ -2376,13 +2362,7 @@ function advise_init_screen() {
 
   
   
-  // Should we update the USER settings for anything?
-  if ($GLOBALS["fp_advising"]["fp_update_user_settings_flag"] != "") {
-    if (!$db->update_user_settings_from_post($user->id)) {
-      fp_add_message(t("Unable to update user settings.  Please try again later."));
-    }
-  }
-
+  
 
   // If the form has been saved, this token is expected.  This protects
   // against XSS attacks.

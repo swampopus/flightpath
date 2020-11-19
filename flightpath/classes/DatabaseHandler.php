@@ -172,64 +172,6 @@ class DatabaseHandler extends stdClass
 
   }
 
-  function update_user_settings_from_post($user_id)
-  {
-    // This will retrieve various user settings from the POST
-    // and write them to the user_settings table as XML.
-    $db = new DatabaseHandler();
-
-    if ($user_id*1 < 1)
-    {
-      
-      return false;
-    }
-
-    // First, we need to GET the user's settings array...
-    if (!$user_settings_array = $this->get_user_settings($user_id))
-    {
-      // No existing userSettingsArray, or it's corrupted.
-      // Make a new one.
-      $user_settings_array = array();
-    }
-
-    // Now, update values in the settingsArray, if they are
-    // present in the POST.
-    if (trim($_POST["hide_charts"]) != "")
-    {
-      $user_settings_array["hide_charts"] = trim($_POST["hide_charts"]);
-    }
-
-    // Now, write it back to the settings table...
-    $res = $this->db_query("REPLACE INTO user_settings(user_id,
-                settings, posted)
-                VALUES ('?','?', '?' )", $user_id, serialize($user_settings_array), time());
-
-    watchdog("update_user_settings", "Hide charts set to: @hide", array("@hide" => $user_settings_array["hide_charts"]));
-
-    return true;
-
-
-
-  }
-
-  function get_user_settings($user_id)
-  {
-    // return an array of this user's current settings.
-
-    $res = $this->db_query("SELECT * FROM user_settings
-                  WHERE 
-                  user_id = '?' ", $user_id);
-    $cur = $this->db_fetch_array($res);
-
-    if (!$rtn = unserialize($cur["settings"])) {
-      $rtn = array();
-    }
-    
-    return $rtn;
-    
-  }
-
-  
 
 
   function get_developmental_requirements($student_cwid)

@@ -1755,7 +1755,7 @@ class FlightPath extends stdClass
 
     // Call a hook so other modules can act when the advising session gets saved.
     invoke_hook('save_advising_session_from_post', array($student_id, $is_draft, $advising_session_id_array));
-        
+
     // Instead of executing the page, we will issue a redirect using fp_goto.
     // This makes it so if the user hits "refresh", it will not re-submit a POST request.
     if ($bool_fp_goto_at_end) {

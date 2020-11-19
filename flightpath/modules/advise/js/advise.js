@@ -228,13 +228,6 @@ function popupChangeTrackSelections(is_whatif) {
 
 
 
-function hideShowCharts(status) {
-  document.getElementById("hide_charts").value = status;    
-  document.getElementById("fp_update_user_settings_flag").value = "true";
-
-  submitForm(true);
-}
-
 
 function alertSplitSub()
 {

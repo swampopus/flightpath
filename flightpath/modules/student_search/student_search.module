@@ -207,7 +207,7 @@ function student_search_render_small_search() {
 /**
  * Displays this user's advisees, if there are any assigned.
  */
-function student_search_display_my_advisees() {
+function student_search_display_my_advisees($bool_only_return_adv_array = FALSE) {
   global $user;
   $rtn = "";
 
@@ -235,6 +235,9 @@ function student_search_display_my_advisees() {
               ";
 
   $adv_array = student_search_query_advisees($query, array(":faculty_cwid" => $faculty_cwid));
+  if ($bool_only_return_adv_array) return $adv_array;
+  
+  
   $s = (count($adv_array) == 1) ? "" : "s"; 
   $rtn .= "<div class='student-search-my-advisees'>" . student_search_render_advisees($adv_array, t("My Advisees Results") . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )") . "</div>";
 
@@ -738,6 +741,7 @@ function student_search_search_form_submit($form, $form_state) {
   $_SESSION["student_search_major_code"] = @$form_state['values']['major_code'];              
   $_SESSION["student_search_search_options"] = @$form_state['values']['search_options'];              
     
+  fp_goto('student-search/search', 'did_search=true');
     
 } // search_form_submit
 
@@ -1166,9 +1170,10 @@ function student_search_render_advisees($adv_array, $title) {
   {
     // Since there was only 1 result, we want to redirect this person directly.
     // Draw this person's name...  
-    $student_id = $adv_array[0]["student_id"];
-    $first_name = $adv_array[0]["first_name"];
-    $last_name = $adv_array[0]["last_name"];
+    $details = reset($adv_array);
+    $student_id = $details["student_id"];
+    $first_name = $details["first_name"];
+    $last_name = $details["last_name"];
     
     $rtn .= "<div class='hypo' style='border: 1px solid black;
               margin: 10px 0px 10px 0px; padding: 10px; 
@@ -1201,8 +1206,7 @@ function student_search_render_advisees($adv_array, $title) {
 
   $db = get_global_database_handler();  
     
-  for ($t = 0; $t < count($adv_array); $t++)
-  {
+  foreach ($adv_array as $t => $details) {
     
     $student_id = $adv_array[$t]["student_id"];
     $first_name = $adv_array[$t]["first_name"];
@@ -1370,11 +1374,11 @@ function student_search_query_advisees($sql, $params = array()) {
       }
     }        
     
-    $rtn_array[$r]["student_id"] = $student_id;
-    $rtn_array[$r]["first_name"] = ucwords(strtolower($cur["f_name"]));
-    $rtn_array[$r]["last_name"] = ucwords(strtolower($cur["l_name"]));
-    $rtn_array[$r]["rank"] = $cur["rank_code"];
-    $rtn_array[$r]["catalog_year"] = $cur["catalog_year"];
+    $rtn_array[$student_id]["student_id"] = $student_id;
+    $rtn_array[$student_id]["first_name"] = ucwords(strtolower($cur["f_name"]));
+    $rtn_array[$student_id]["last_name"] = ucwords(strtolower($cur["l_name"]));
+    $rtn_array[$student_id]["rank"] = $cur["rank_code"];
+    $rtn_array[$student_id]["catalog_year"] = $cur["catalog_year"];
     //$rtn_array[$r]["major"] = $cur["major_code"];
     // Need to get the major_code_csv for this student.
     // Are there more majors for this user?
@@ -1382,7 +1386,7 @@ function student_search_query_advisees($sql, $params = array()) {
     // Get a CSV of this student's majors
     $major = fp_get_student_majors($student_id, TRUE, FALSE, FALSE);
     
-    $rtn_array[$r]["major"] = $major;
+    $rtn_array[$student_id]["major"] = $major;
     
     
 
@@ -1410,17 +1414,17 @@ function student_search_query_advisees($sql, $params = array()) {
       { // Last advising was a What If advising.
         $advised_image = "<span title='This student was last advised in What If mode.'><img src='" . fp_theme_location() . "/images/small_check.gif'><sup>wi</sup></span>";
         $db_major_code_csv = $cur["major_code_csv"];
-        $rtn_array[$r]["what_if_major_code"] = $db_major_code_csv;
+        $rtn_array[$student_id]["what_if_major_code"] = $db_major_code_csv;
         // Capture the catalog year that was saved with what_if
-        $rtn_array[$r]["what_if_catalog_year"] = $cur["catalog_year"];
-        $rtn_array[$r]["last_advised_what_if"] = TRUE;
+        $rtn_array[$student_id]["what_if_catalog_year"] = $cur["catalog_year"];
+        $rtn_array[$student_id]["last_advised_what_if"] = TRUE;
         
       }
     }
 
 
-    $rtn_array[$r]["advising_session_id"] = $advising_session_id;
-    $rtn_array[$r]["advised_image"] = $advised_image;
+    $rtn_array[$student_id]["advising_session_id"] = $advising_session_id;
+    $rtn_array[$student_id]["advised_image"] = $advised_image;
 
     $r++;
   }

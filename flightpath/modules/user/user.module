@@ -268,8 +268,73 @@ function user_user_settings_form() {
   
   fp_set_title($user->f_name . " " . $user->l_name . " (" . $user->cwid . ")");
   
+  $html = "";
   
   // TODO:  if a student, display their mini profile here, with a link to their full profile.  
+  // TODO:  if faculty, display things like email and such which we have in the database.
+  
+  if ($user->is_faculty) {
+    $html .= "<div class='user-profile-markup-faculty'>
+                <div class='profile-item'><strong>" . t("Email:") . "</strong> $user->email</div>
+                <div class='profile-item'><strong>" . t("Roles:") . "</strong>
+                    ";
+    foreach ($user->roles as $role) {
+      $html .= "" . $role . ", ";
+    }              
+    $html = rtrim($html, ', ');
+    $html .= "</div>";
+    
+    $html .= "</div>"; // user-profile-markup-faculty
+  }
+  
+  
+  
+  $form['mark_top'] = array(
+    'type' => 'markup',
+    'value' => $html,
+  );
+  
+  // Are we allowed to change our password?
+  if (user_has_permission('change_own_password')) {
+    $form['current_password'] = array(
+      'label' => t("Current password"),
+      'type' => 'password',
+      'description' => t('If you wish to change your password, enter your current password here, then your new password below.'),
+    );
+    $form['new_password1'] = array(
+      'label' => t("New password"),
+      'type' => 'password',      
+    );
+    $form['new_password2'] = array(
+      'label' => t("New password (re-enter)"),
+      'type' => 'password',   
+      'suffix' => '<hr>',   
+    );
+    
+  } // user has perm change_own_password
+  
+  
+  $system_timezone = variable_get('system_timezone', 'America/Chicago');
+  
+    
+  $form['timezone'] = array(
+    'label' => t('Your timezone (if not %tz)', array('%tz' => $system_timezone)),
+    'type' => 'select',
+    'options' => get_timezones(),
+    'value' => @$user->settings['timezone'],
+    'description' => t("By default, times will be displayed based on the system timezone of %tz.  If you wish to override
+                        with your own timezone, please select it here.", array("%tz" => $system_timezone)),
+  );  
+  
+  
+  $form['hide_charts'] = array(
+    'label' => t('Should student pie charts be displayed?'),
+    'type' => 'select',
+    'options' => array('show' => t('Yes (default)'), 'hide' => t('No, hide pie charts on Degree page')),
+    'value' => @$user->settings['hide_charts'],
+    'description' => t('If set to No, pie charts will not be visible on student Degree tabs.  If you
+                        are unsure what to select, choose "Yes".'),
+  );
   
    
      
@@ -280,17 +345,96 @@ function user_user_settings_form() {
   );
   
   return $form;
-} // user_display_user_settings_form
+} // user_user_settings_form
 
 
+/**
+ * Needed if we are trying to change password.
+ */
+function user_user_settings_form_validate($form, $form_state) {
+  global $user;
+  
+  $values = $form_state['values'];
+  $current_password = $values['current_password'];
+  $new_password1 = $values['new_password1'];
+  $new_password2 = $values['new_password2'];
+  
+  if ($new_password1 != "" || $new_password2 != "") {
+  
+    if ($new_password1 !== $new_password2) {
+      form_error('new_password1', t("Sorry, the passwords you entered do not match.  Please check your spelling and try again."));
+      return;
+    }
+    
+    // Did we get the current password right?
+    $res = db_query("SELECT * FROM users WHERE user_id = ? ", $user->id); 
+     
+    $cur = db_fetch_array($res);
+    
+    // Check the user's password is valid.
+    $stored_hash = @$cur["password"];
+    if (!user_check_password($current_password, $stored_hash)) {
+      form_error("current_password", t("Sorry, but the current password you entered is not correct.  Please check your spelling and try again."));
+      return;    
+    }      
+    
+    
+  }
+  
+  // If we got to here, we're good to proceed.  Other modules might decide to add their own validate function,
+  // to check for password complexity.  They'd do this by adding to the validate_handlers in hook_form_alter.
+  
+}
 
 
+/**
+ * Save values from our settings form into the user_settings table (or other tables), as appropriate.
+ */
+function user_user_settings_form_submit($form, $form_state) {
+  global $user;
+  
+  $timezone = $form_state['values']['timezone'];
+  $hide_charts = $form_state['values']['hide_charts'];
+  
+  
+  // are we updating password?  (If we made it here, we have already passed validation, and may continue.
+  $new_password1 = $form_state['values']['new_password1'];  
+  
+  if ($new_password1 != "") {
+    $new_pass = user_hash_password($new_password1);
+      
+    db_query("UPDATE users 
+                SET password = ? 
+                WHERE user_id = ? ", array($new_pass, $user->id));
+    fp_add_message(t("Password has been updated successfully."));
+  }  
+  
+  
+  
+  // Make sure we have a row in the table.
+  user_init_user_settings_db_row($user);
+    
+  // Now, update with our fields.
+  db_query("UPDATE user_settings
+              SET timezone = ?,
+                  hide_charts = ?,
+                  updated = ?
+            WHERE user_id = ?", array($timezone, $hide_charts, time(), $user->id));
+  
+  fp_add_message(t("User settings saved successfully."));
+  
+  
+} // user_settings_form_submit
 
 
-
-
-
-
+function user_init_user_settings_db_row($user) {
+  // Make sure the user has a record in the user_settings table.
+  $test = db_result(db_query('SELECT user_id FROM user_settings WHERE user_id = ?', array($user->id)));
+  if (!$test || $test == 0 || $test != $user->id) {
+    db_query('INSERT INTO user_settings(user_id) VALUES (?) ', array($user->id));
+  }
+  
+}
 
 
 
@@ -329,7 +473,11 @@ function user_perm() {
     "delete_users" => array(
       "title" => t("Delete users"),
       "description" => t("This is a powerful permission!  It allows the user delete users from the system."),
-    ),    
+    ),
+    "change_own_password" => array(
+      "title" => t("Change own password?"),
+      "description" => t("Check this if the user is allowed to change their own password (from their profile page)."),
+    ),            
   );  
   
 }

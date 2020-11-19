@@ -1737,8 +1737,7 @@ function draw_menu_items($menu_array) {
       $this->db = get_global_database_handler();
     }
     
-    $user->settings = $this->db->get_user_settings($user->id);
-
+        
     $bool_charts_are_hidden = FALSE;
 
  
@@ -1896,7 +1895,7 @@ function draw_menu_items($menu_array) {
       
       if (!isset($user->settings["hide_charts"])) $user->settings["hide_charts"] = "";
       
-  		if ($this->bool_force_pie_charts || ($user->settings["hide_charts"] != "hide" && $this->bool_print == false && $this->bool_blank == false ))
+  		if ($this->bool_force_pie_charts || ($user->settings["hide_charts"] != "hide" && $this->bool_blank == FALSE ))
   		{ // Display the pie charts
     		
     		$bool_charts_are_hidden = FALSE;
@@ -1970,41 +1969,6 @@ function draw_menu_items($menu_array) {
   
 
     } // foreach degree_rows
-
-
-
-    ///////////////////////////////////
-    // Show the show/hide link
-    $rtn .= "<tr class='pie-show-hide-links'><td colspan='2'>";
-    
-    if ($bool_charts_are_hidden) {
-      // Charts are hidden, so show the "Show" link.
-      if ($this->bool_print != true && $this->bool_blank != true )
-      {
-  
-        $rtn .= "<div style='font-size: 8pt; text-align:right;' class='pie-show-charts-link'>
-                     <a href='javascript:hideShowCharts(\"show\");'>" . t("show charts") . "</a>
-                  </div>
-          ";
-      } else {
-        $rtn .= "<div> &nbsp; </div>";
-      }
-            
-    }
-    else {
-      // Charts are visible, so display the "Hide" link
-      if (!$this->bool_force_pie_charts) {
-        $rtn .= "       
-          <div style='font-size: 8pt; text-align:right;' class='pie-hide-charts-link'>
-            <a href='javascript:hideShowCharts(\"hide\");'>" . t("hide charts") . "</a>
-          </div>";
-      }
-            
-    }
-
-    $rtn .= "</td></tr>";
-    
-
 
 
 

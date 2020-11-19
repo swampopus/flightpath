@@ -304,22 +304,12 @@ function user_hash_password($password, $count_log2 = 0) {
  *   TRUE or FALSE.
  */
 function user_check_password($password, $stored_hash) {
-/*
-  if (substr($account->pass, 0, 2) == 'U$') {
-    // This may be an updated password from user_update_7000(). Such hashes
-    // have 'U' added as the first character and need an extra md5().
-    $stored_hash = substr($account->pass, 1);
-    $password = md5($password);
-  }
-  else {
-    $stored_hash = $account->pass;
-  }
-*/
+
 
   $type = substr($stored_hash, 0, 3);  
   switch ($type) {
     case '$S$':
-      // A normal FlightPath 7 password using sha512.
+      // A normal FlightPath 6 password using sha512.
       $hash = _password_crypt('sha512', $password, $stored_hash);      
       break;
     case '$H$':

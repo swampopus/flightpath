@@ -192,6 +192,35 @@ function content_display_devel($cid) {
 
 
 /**
+ * Returns the timestamp of last access, or ZERO if never accessed
+ */
+function content_get_last_access($cid, $account = null) {
+  global $user;
+  if ($account == NULL) $account = $user;
+  
+  $res = db_result(db_query("SELECT last_access FROM content_last_access WHERE cid = ? AND user_id = ?", array($cid, $account->id)));
+  
+  return intval($res);
+  
+}
+
+/**
+ * Sets the content_last_access timestamp for this user and content.  Should be called
+ * whenever a "content" node is viewed by the user.
+ */
+function content_set_last_access($cid, $account = NULL) {
+  global $user;
+  if ($account == NULL) $account = $user;
+  
+  db_query("DELETE FROM content_last_access WHERE cid = ? AND user_id = ?", array($cid, $account->id));
+  db_query("INSERT INTO content_last_access(cid, user_id, last_access)
+              VALUES (?, ?, ?)", array($cid, $account->id, time()));
+    
+}
+
+
+
+/**
  * Custom user access function to determine if the user can add, edit, etc, the content
  * 
  *
@@ -367,6 +396,8 @@ function content_view_content($cid) {
     }    
   }  
   
+  
+  content_set_last_access($cid);
   
   
   return fp_render_content($render);

@@ -1167,14 +1167,26 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
   global $user;
   $html = "";
   
+  $name = "";
+  if ($user->is_faculty) {
+    $name = fp_get_faculty_name($user->cwid);
+  }
+  else {
+    $name = fp_get_student_name($user->cwid);
+  }
+  
   if (!$bool_for_hamburger_menu) {
   
-    $html .= "
-      <ul class='top-nav-ul'>      
-        <li class='student-search first'>" . student_search_render_small_search() . "</li>
-        <li class='alerts'><a href='l'><i class='fa fa-bell'></i></a></li>
-        <li class='user-options last'>
-        
+    $html .= "<ul class='top-nav-ul'>";
+    if (user_has_permission('view_any_advising_session')) {
+      $html .= "<li class='student-search first'>" . student_search_render_small_search() . "</li>";
+    }
+    if (user_has_permission('view_advisee_alerts')) {
+      $html .= "<li class='alerts'><a href='" . fp_url('alerts') . "'><i class='fa fa-bell'></i></a></li>";
+    }
+    $html .= "<li class='user-options last'>";
+    
+    $html .= "    
             <div class='tub-element tub-float-right-a tub-last-element tub-user-menu tub-icon-element dropdown'>
                 <div class='tub-element-wrapper'>
                   <a href='javascript:fpToggleUserMenu();' class='tub-link dropdown-trigger'>
@@ -1183,7 +1195,7 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
                 </div>
   
                   <div id='tub-user-pulldown' style='display:none;' >
-                    " . fp_get_faculty_name($user->cwid) . "
+                      $name
                     <ul class='user-pulldown'>                    
                       <li>" . l("My Settings", 'user-settings') . "</li>
                       <li>" . l("Log Out", "logout") . "</li>
@@ -1208,9 +1220,11 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
   }
   else {
     // This IS for our hamburger menu!
+    $html .= "<ul class='top-nav-ul'>";
+    if (user_has_permission('view_advisee_alerts')) {
+      $html .= "<li class='alerts first'><a href='" . fp_url('alerts') . "'><i class='fa fa-bell'></i></a></li>";
+    }
     $html .= "
-      <ul class='top-nav-ul'>
-        <li class='alerts first'><a href='l'><i class='fa fa-bell'></i></a></li>
         <li class='user-options last'>  
           <a href='" . fp_url('user-settings') . "'><i class='fa fa-user'></i></a>
         </li>      
