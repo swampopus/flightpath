@@ -42,6 +42,11 @@ $(document).ready(function() {
     if (jQuery(window).width() < 550) {
       modalWidth = 390;
     }
+
+    if (jQuery(window).width() < 450) {
+      modalWidth = 350;
+    }
+
     
     $("#fp-iframe-dialog-small").dialog({
       modal: true,      
@@ -93,6 +98,10 @@ $(document).ready(function() {
       modalHeight = 500;
     }
     
+    if (jQuery(window).width() < 450) {
+      modalWidth = 350;
+    }
+
     
     $("#fp-iframe-dialog-large").dialog({
       modal: true,
