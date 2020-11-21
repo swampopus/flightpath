@@ -99,7 +99,7 @@ $(document).ready(function() {
     }
     
     if (jQuery(window).width() < 450) {
-      modalWidth = 350;
+      modalWidth = 380;
     }
 
     
