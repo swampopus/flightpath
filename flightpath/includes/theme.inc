@@ -1220,13 +1220,15 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
   }
   else {
     // This IS for our hamburger menu!
+    $cog_class = "cog-only";
     $html .= "<ul class='top-nav-ul'>";
     if (user_has_permission('view_advisee_alerts')) {
       $html .= "<li class='alerts first'><a href='" . fp_url('alerts') . "'><i class='fa fa-bell'></i></a></li>";
+      $cog_class = "last";
     }
     $html .= "
-        <li class='user-options last'>  
-          <a href='" . fp_url('user-settings') . "'><i class='fa fa-user'></i></a>
+        <li class='user-options last $cog_class'>  
+          <a href='" . fp_url('user-settings') . "'><i class='fa fa-cog'></i></a>
         </li>      
       </ul>
     ";

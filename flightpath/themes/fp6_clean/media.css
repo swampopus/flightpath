@@ -332,13 +332,26 @@
     
 
   .has-sidebar-left #page-content {
-    width: calc(100vw - 5px);
+    width: calc(100% - 10px);
+    
     padding-left: 5px;
   }  
+
+
+  #element-inner-wrapper-course-search-subject {
+    width: 100% !important;
+  } 
 
   #mobile-hamburger-menu ul.top-nav-ul
   {
     display: block !important;
+  }
+
+  #mobile-hamburger-menu ul.top-nav-ul li.cog-only {
+    display: block !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   #mobile-hamburger-menu .mobile-hamburger-icon {
@@ -356,6 +369,8 @@
   #mobile-hamburger-menu .sidebar-left-nav li i {
     font-size: 2em !important;
   }
+  
+  
   
   
   
@@ -379,7 +394,7 @@
   }
 
   table.student-alerts td.short-desc .short-desc-wrapper {
-    max-width: 100%;
+    max-width: 400px;
     white-space: nowrap;
     overflow-x: hidden;
     text-overflow: ellipsis;
@@ -414,6 +429,15 @@
       
       margin-bottom: 30px;
   }
+  
+  table.custom-calendar .calendar-entry {
+    display: none;
+  }
+  table.custom-calendar .mobile-day-count {
+    display: block !important;
+  }
+  
+  
   
   
   
@@ -486,6 +510,14 @@
   }
   
 
+ table.student-alerts td.short-desc .short-desc-wrapper {
+    max-width: 250px;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    
+  }  
+
   
 }  /* max-width 450px */
 
@@ -523,6 +555,15 @@
     display: inline;
     padding-right: 20px;
   }
+  
+  
+ table.student-alerts td.short-desc .short-desc-wrapper {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    
+  }  
   
   
 }  /* max-width 375px */
