@@ -1685,7 +1685,7 @@ function draw_menu_items($menu_array) {
 		  $_SESSION["fp_pie_chart_token"] = md5(fp_token());
 		}
 		//old Google API url: $pie_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
-		$pie_chart_url = base_path() . "/inc/pchart/fp_pie_chart.php?progress=$vval&unfinished=$leftval&unfinished_col=$back_col&progress_col=$fore_col&token=" . $_SESSION["fp_pie_chart_token"];
+		$pie_chart_url = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=$vval&unfinished=$leftval&unfinished_col=$back_col&progress_col=$fore_col&token=" . $_SESSION["fp_pie_chart_token"];
 		
 		
 		$rtn .= "<table border='0' width='100%'  height='100' class='pie-chart-individual-table' cellpadding='0' cellspacing='0' >

@@ -2901,9 +2901,9 @@ function system_display_dashboard_page () {
       $_SESSION["fp_pie_chart_token"] = md5(fp_token());
     }
     //old Google API url: $pie_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
-    $pie_chart_url_1 = base_path() . "/inc/pchart/fp_pie_chart.php?progress=27&unfinished=73&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
-    $pie_chart_url_2 = base_path() . "/inc/pchart/fp_pie_chart.php?progress=67&unfinished=33&unfinished_col=cccccc&progress_col=00994d&token=" . $_SESSION["fp_pie_chart_token"];
-    $pie_chart_url_3 = base_path() . "/inc/pchart/fp_pie_chart.php?progress=46&unfinished=54&unfinished_col=cccccc&progress_col=ff4d4d&token=" . $_SESSION["fp_pie_chart_token"];
+    $pie_chart_url_1 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=27&unfinished=73&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
+    $pie_chart_url_2 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=67&unfinished=33&unfinished_col=cccccc&progress_col=00994d&token=" . $_SESSION["fp_pie_chart_token"];
+    $pie_chart_url_3 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=46&unfinished=54&unfinished_col=cccccc&progress_col=ff4d4d&token=" . $_SESSION["fp_pie_chart_token"];
       
   
       $rtn .= "<div class='dash-full-width'>

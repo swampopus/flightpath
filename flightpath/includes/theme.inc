@@ -964,6 +964,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
 
 /**
  * Return the HTML for breadcrumbs for the current page we are on.
+ * Will skip any breadcrumbs we do not have permission to access.
  */
 function fp_render_breadcrumbs() {
   $rtn = "";
@@ -984,6 +985,15 @@ function fp_render_breadcrumbs() {
       $path = @$crumb['path'];
       $query = @$crumb['query'];
       $attributes = @$crumb['attributes'];
+      
+      
+      // Do we have permission for this menu item?  If not, do not render this breadcrumb.
+      if ($path != "<front>") {
+        $item = menu_get_item($path);
+        if (!menu_check_user_access($item)) {
+          continue;
+        }    
+      }      
       
       if (!$attributes || !is_array($attributes)) {
         $attributes = array();

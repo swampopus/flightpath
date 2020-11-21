@@ -37,17 +37,18 @@ function tinymce_init() {
   } 
 
   
+    
   if ($bool_activate) {
     fp_add_js(array("tinymceModulePath" => fp_get_module_path("tinymce")), "setting");  
     
-    //fp_add_js(fp_get_module_path("tinymce") . "/inc/tiny_mce/tiny_mce.js");
-    fp_add_js(fp_get_module_path("tinymce") . "/inc/tinymce/js/tinymce/tinymce.min.js");
-    
+    fp_add_js(fp_get_module_path("tinymce") . "/lib/tinymce/js/tinymce/tinymce.min.js");
+        
     fp_add_js(fp_get_module_path("tinymce") . "/js/tinymce_module.js");
     
     // Set to TRUE for pages where tinymce is in use.
     $GLOBALS["tinymce_active"] = TRUE;
   }
+   
 }
 
 
