@@ -250,6 +250,25 @@ class CourseList extends ObjList
 		return false;
 	}
 
+
+  /**
+   * Returns a CourseList of courses with this specific grade.
+   */
+  function find_courses_with_grade($grade = 'C') {
+    $rtn = new CourseList();
+    for ($t = 0; $t < $this->count; $t++)
+    {
+      $course = $this->array_list[$t];
+      if ($course->grade == $grade) {
+        $rtn->add($course);
+      }
+    }
+    
+    return $rtn;    
+  }
+
+
+
 	/**
 	 * Go through the list and set the $bool_exclude_repeat flag to TRUE
 	 * for all matches of $course in this list.
@@ -862,6 +881,10 @@ class CourseList extends ObjList
     return $rtn;
 
   }
+  
+  
+  
+  
   
 
 	/**
