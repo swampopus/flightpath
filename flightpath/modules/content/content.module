@@ -291,7 +291,7 @@ function content_dialog_handle_after_save() {
   $rtn .= "<br><br><p>" . t("If this windows doesn't close within 3 seconds,") . " <a href='javascript:window.parent.location.reload();'>" . t("click here") . "</a>.</p>";
   
   // Add this javascript code to when the page loads.
-  ///*  DEV: comment out while testing
+  /*  DEV: comment out while testing
   $rtn .= "
       <script type='text/javascript'>
         $(document).ready(function() {
@@ -592,7 +592,7 @@ function content_edit_content_form($type = "", $cid = "") {
  * @param unknown_type $form
  * @param unknown_type $form_state
  */
-function content_edit_content_form_submit(&$form, $form_state) {
+function content_edit_content_form_submit(&$form, &$form_state) {
   global $user;
   
   $values = $form_state["values"];
@@ -668,6 +668,7 @@ function content_edit_content_form_submit(&$form, $form_state) {
   }
   
   content_save($content);
+  $form_state['content_object'] = $content;
   
   fp_add_message(t('Saved successfully.'));
   
