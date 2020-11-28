@@ -108,7 +108,7 @@ function smtp_settings_form() {
 }
 
 
-function smtp_mail($to, $subject, $msg) {
+function smtp_mail($to, $subject, $msg, $bool_html = FALSE) {
     
   $system_path = trim($GLOBALS["fp_system_settings"]["file_system_path"]);
   require "$system_path/libraries/PHPMailer/src/Exception.php";
@@ -127,7 +127,7 @@ function smtp_mail($to, $subject, $msg) {
   
   $mail->SMTPSecure = variable_get('smtp_secure', '');     // tls, ssl, and none are allowed.
     
-  $mail->SMTPAuth   = true;                  // enable SMTP authentication
+  $mail->SMTPAuth   = TRUE;                  // enable SMTP authentication
   $mail->Port       = variable_get('smtp_port', '');                    // set the SMTP port
   $mail->Username   = variable_get('smtp_username', '');
   $mail->Password   = variable_get('smtp_password', '');        // SMTP account password example
@@ -139,8 +139,17 @@ function smtp_mail($to, $subject, $msg) {
   //$mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
   
   // Content
+  if ($bool_html) {
+    $mail->isHTML(TRUE);
+    $mail->msgHTML($msg);    
+  }
+  else {
+    $mail->Body = $msg;
+  }
+   
   $mail->Subject = $subject;
-  $mail->Body = $msg;
+  
+
      
   $mail->setFrom(variable_get('smtp_from_email_address', 'noreply@yourdomain.com'), variable_get('smtp_from_email_name', 'NoReply - FlightPath'));
   
@@ -152,7 +161,7 @@ function smtp_mail($to, $subject, $msg) {
     if ($line != "") {
       $mail->addAddress($line);     // Add a recipient    
     }
-  }
+  } 
    
   
   //$mail->addAddress('ellen@example.com', 'Ellen Smith');               // Name is optional
@@ -169,7 +178,7 @@ function smtp_mail($to, $subject, $msg) {
     
   
   
-}
+} // smtp_mail
 
 
 

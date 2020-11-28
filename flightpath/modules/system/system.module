@@ -2348,7 +2348,6 @@ function system_handle_form_submit() {
     // Let's go through the form's submit handlers now.
     foreach ($submit_handlers as $submit_callback) {                
       if (function_exists($submit_callback)) {
-        //call_user_func($submit_callback, $form, &$form_state);
         
         call_user_func_array($submit_callback, array(&$form, &$form_state));
         

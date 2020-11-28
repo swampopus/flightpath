@@ -621,7 +621,6 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
   global $current_student_id, $screen, $user, $student;
   
   $csid = $current_student_id;
-  
   $settings = fp_get_system_settings();
       
   $rtn = "";
@@ -633,7 +632,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
   }  
   
   if (!isset($student) || $student == null || !is_object($student)) {
-    $student = new Student($csid);
+    $student = new Student($current_student_id);
   }
 
   if ($degree_plan == null) {
@@ -906,8 +905,9 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
     }
     
     
-    $rtn .= "
-               </div>
+    
+    
+    $rtn .= "</div>
                
                
               <div class='profile-top-details-wrapper profile-top-wrapper-right-side'>
@@ -921,7 +921,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
                           </div>
             
                           <div class='profile-detail-line profile-inline-line profile-detail-line-cumu'>
-                            <label>Cumulative:</label> <span class='profile-line-content'>120hrs / 2.18 GPA</span>
+                            <label>Cumulative:</label> <span class='profile-line-content'>{$student->cumulative_hours}hrs / " . fp_truncate_decimals($student->gpa, 3) . " GPA</span>
                           </div>
 
                           ";

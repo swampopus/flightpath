@@ -181,16 +181,26 @@ function _fp_map_php_error_code($code) {
  * Send an email.  Drop-in replacement for PHP's mail() command,
  * but can use SMTP protocol if enabled.
  */
-function fp_mail($to,$subject,$msg) {
+function fp_mail($to, $subject, $msg, $bool_html = FALSE) {
+  
+  // TODO:  special code to permit HTML?
   
   // TODO: In the future, check to see if there are any other modules which invoke a hook to intercept mail.
   
   if (function_exists('smtp_mail')) {
-    smtp_mail($to, $subject, $msg);
+    smtp_mail($to, $subject, $msg, $bool_html);
     return;
   }
   else {
-    mail($to, $subject, $msg);
+    
+    $headers = array();
+    if ($bool_html) {
+      // To send HTML mail, the Content-type header must be set
+      $headers[] = 'MIME-Version: 1.0';
+      $headers[] = 'Content-type: text/html; charset=iso-8859-1';      
+    }    
+    
+    mail($to, $subject, $msg, implode("\r\n", $headers));
   }
   
   
