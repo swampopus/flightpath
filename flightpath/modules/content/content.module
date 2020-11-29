@@ -714,8 +714,8 @@ function content_content_save(&$content) {
     
   // If this is a NEW content, then insert once into content table to get cid.  Then, insert into content_versions to get vid.  Then update content table with vid.
   if ($content->cid == 'new') {
-    db_query('INSERT INTO content (user_id, `type`, title, posted, updated, published)
-              VALUES (?, ?, ?, ?, ?, ?)', array($user->id, $type, $content->title, time(), time(), $content->published));
+    db_query('INSERT INTO content (user_id, `type`, title, posted, updated, published, delete_flag)
+              VALUES (?, ?, ?, ?, ?, ?, 0)', array($user->id, $type, $content->title, time(), time(), $content->published));
     $content->cid = db_insert_id();
     
     // insert into content_versions to get the vid.
