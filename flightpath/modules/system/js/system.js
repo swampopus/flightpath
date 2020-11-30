@@ -308,7 +308,11 @@ function fpToggleHamburgerMenu() {
 
 
   // Replacement for built-in alert(str).  Uses the DayPilot code.  See the /inc/ directory.
-  function fp_alert(str) {
+  // if string_mode == "base64" we will decode.  Useful for passing HTML.
+  function fp_alert(str, string_mode) {
+    if (string_mode == 'base64') {
+      str = atob(str);
+    }
     DayPilot.Modal.alert(str);
   }
 
