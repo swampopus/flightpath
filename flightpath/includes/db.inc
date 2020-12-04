@@ -395,10 +395,30 @@ function fp_load_user($user_id) {
   }
   
   
-  
-  
+  // If student, load attributes from student_attributes table (if any exist)
+  $rtn->attributes = array();
+  if ($rtn->is_student) {
+    $rtn->attributes = fp_get_student_attributes($rtn->cwid);
+  }
+ 
   return $rtn;  
 }
+
+
+
+function fp_get_student_attributes($student_id) {
+  $rtn = array();
+  
+  $res = db_query("SELECT * FROM student_attributes WHERE student_id = ?", array($student_id));
+  $cur = db_fetch_array($res);
+  if ($cur) {
+    $rtn = $cur;
+  }
+  
+  
+  return $rtn;
+}
+
 
 
 

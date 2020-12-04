@@ -291,7 +291,7 @@ function content_dialog_handle_after_save() {
   $rtn .= "<br><br><p>" . t("If this windows doesn't close within 3 seconds,") . " <a href='javascript:window.parent.location.reload();'>" . t("click here") . "</a>.</p>";
   
   // Add this javascript code to when the page loads.
-  /*  DEV: comment out while testing
+  ///*  DEV: comment out while testing
   $rtn .= "
       <script type='text/javascript'>
         $(document).ready(function() {
@@ -642,6 +642,7 @@ function content_edit_content_form_submit(&$form, &$form_state) {
     $content->type = $type;
     $content->cid = "new";    
     $content->published = 1;
+    $content->delete_flag = 0;
   }
   else {
     // This is an EXISTING content.  Load it.
@@ -715,7 +716,7 @@ function content_content_save(&$content) {
   // If this is a NEW content, then insert once into content table to get cid.  Then, insert into content_versions to get vid.  Then update content table with vid.
   if ($content->cid == 'new') {
     db_query('INSERT INTO content (user_id, `type`, title, posted, updated, published, delete_flag)
-              VALUES (?, ?, ?, ?, ?, ?, 0)', array($user->id, $type, $content->title, time(), time(), $content->published));
+              VALUES (?, ?, ?, ?, ?, ?, ?)', array($user->id, $type, $content->title, time(), time(), $content->published, 0));
     $content->cid = db_insert_id();
     
     // insert into content_versions to get the vid.
@@ -729,6 +730,8 @@ function content_content_save(&$content) {
     db_query("INSERT INTO content_versions (cid) VALUES (?)", array($content->cid));
     $content->vid = db_insert_id();
   }
+  
+  if (!$content->delete_flag) $content->delete_flag = 0;  // force content->delete_flag to equal a value.
   
 
   // Now we should have a fully created $content object.  Let's update the title and other values in the content table.
@@ -1089,53 +1092,66 @@ function content_display_content_admin_list() {
   $rtn .= "</select><input type='submit' value='-&gt;'> </form>";
           
   
-  // TODO:  convert this to a pager query and nicer-looking table.
-  
-  
-  $rtn .= "<table width='100%' border='1' class='tenpt'>
-            <tr>
-              <th>" . t("Title") . "</th>
-              <th>" . t("Edit") . "</th>
-              <th>" . t("Type") . "</th>
-              <th>" . t("Author") . "</th>
-              <th>" . t("Updated") . "</th>
-            </tr>";
   if ($filter != "") {
+    
+    // TODO: convert to pager query
+    
     $res = db_query("SELECT * FROM content WHERE type = ? AND delete_flag = 0 ORDER BY updated DESC", $filter);
   }
   else {
-    $res = db_query("SELECT * FROM content WHERE delete_flag = 0 ORDER BY updated DESC");
+        
+    $res = pager_query("SELECT DISTINCT(cid) FROM content n
+                        WHERE delete_flag = 0                                                       
+                        ORDER BY updated DESC", array(), 20, 0, "SELECT COUNT(DISTINCT(cid)) FROM content n
+                                                          WHERE delete_flag = 0                                                       
+                                                          ORDER BY updated DESC", array());    
   }
+
   
-  while ($cur = db_fetch_array($res)) {
+  $rtn .= "<table width='100%' border='1'>
+            <tr>
+              <th>" . t("Actions") . "</th>
+              <th>" . t("Title") . "</th>              
+              <th>" . t("Type") . "</th>
+              <th>" . t("Author") . "</th>
+              <th>" . t("Updated") . "</th>
+            </tr>";  
     
-    $author = fp_load_user($cur["user_id"]);
+  while ($cur = db_fetch_array($res)) {
+      
+    $content = content_load($cur['cid']);    
+    $author = fp_load_user($content->user_id);
     $author_name = "";
     if ($author && isset($author->name)) {
       $author_name = $author->name;
     }
     
-    $updated = format_date($cur["updated"]);
+    $updated = format_date($content->updated);
     
-    //$rtn .= "<tr><td valign='top'>" . l($cur["title"], "content/{$cur["cid"]}") . "</td>";
-    $rtn .= "<tr><td valign='top'>" . $cur["title"] . "</td>";
+    $view_link = $edit_link = "";
+    $view_link = l("<i class='fa fa-eye'></i>", "content/$content->cid");
     
-    if (user_has_permission("edit_{$cur["type"]}" . "_content")) {
-      $rtn .= "
-                <td valign='top'>" . l(t("edit"), "content/{$cur["cid"]}/edit") . "</td>";
+    if (user_has_permission("edit_{$content->type}" . "_content")) {
+      $edit_link = l("<i class='fa fa-pencil'></i>", "content/{$cur["cid"]}/edit");
     }
-    else {
-      $rtn .= "<td>&nbsp;</td>";
-    }
+    
+    
+    
+    $rtn .= "<tr>
+                <td>$view_link &nbsp; $edit_link</td>
+                <td valign='top'>" . $content->title . "</td>";
     
     $rtn .= "
-                <td valign='top'>" . $cur["type"] . "</td>
+                <td valign='top'>" . $content->type . "</td>
                 <td valign='top'>" . $author_name . "</td>
                 <td valign='top'>" . $updated . "</td>
              </tr>";
   }
   
   $rtn .= "</table>";
+   
+  // Display the pager that was generated by the pager_query above!  
+  $rtn .= theme_pager(); 
    
     
   return $rtn;
