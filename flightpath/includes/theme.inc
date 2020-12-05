@@ -2360,12 +2360,17 @@ function fp_render_menu_item($item, $bool_check_user_access = TRUE) {
 /**
  * Alias of pretty_print($var)
  */
-function ppm($var) {
-  pretty_print($var);
+function ppm($var, $b = FALSE) {
+  return pretty_print($var, $b);
 }
 
-function pretty_print($var) {
-  print "<pre>" . print_r($var, true) . "</pre>";
+function pretty_print($var, $bool_return = FALSE) {
+  $x = "<pre>" . print_r($var, true) . "</pre>";
+  
+  if ($bool_return) return $x;
+  
+ print $x;
+  
 }
 
 
