@@ -560,9 +560,8 @@ function filter_markup($str, $type = "basic") {
   
   // Use the DOM functions to repair any mismatched HTML.
   $doc = new DOMDocument();
-  @$doc->loadHTML($str);
-  $str = $doc->saveHTML();  
-
+  @$doc->loadHTML(mb_convert_encoding($str, 'HTML-ENTITIES', 'UTF-8'));   // ensure we are in UTF8
+  $str = $doc->saveHTML($doc->documentElement);  // Apparently this hels solve a glitch in Linux that isn't in Windows
 
   if ($type == 'plain') {
     $str = strip_tags($str);

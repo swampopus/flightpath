@@ -40,7 +40,7 @@ class DatabaseHandler extends stdClass
 
     // Connect using PDO
     if (!$this->pdo) {
-      $this->pdo = new PDO("mysql:host=$db_host_ip;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass,
+      $this->pdo = new PDO("mysql:host=$db_host_ip;port=$db_port;dbname=$db_name;charset=utf8mb4", $db_user, $db_pass,
         array(
           PDO::MYSQL_ATTR_LOCAL_INFILE => TRUE,
         ));
