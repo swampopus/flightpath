@@ -11,6 +11,143 @@
 
 
 /**
+ * Given an array of table headers (in the format listed below), returns back the HTML to draw it to the screen.
+ * This makes them clickable, to make the table header sortable.  This is meant to be used with queries, by adding
+ * in an "ORDER BY" clause.
+ * 
+ * $headers should look like this:
+ * 0 = array('label' => 'First Name', 'field' => 'field__first_name');
+ * 
+ * If the label should NOT be clickable, then "field" should be blank or absent.
+ * 
+ * 
+ */
+function theme_table_header_sortable($headers = array(), $element_id = "default") {
+  
+  $rtn = "";  
+  $rtn .= "<tr>";
+  
+  foreach ($headers as $header) {
+    $rtn .= "<th>";
+    
+    $label = $header['label'];
+    $field = @$header['field'];
+    $init_dir = @$hader['init_dir'];
+    
+    if (!$field) {
+      $rtn .= $label;
+    }
+    else {
+      // Convert label to a link.  Also, show it as ASC or DESC based on if it is currently selected.
+      
+      // get the current header sort field and dir....
+      $current_fsort = @$_GET['fsort'];
+      $current_fsortdir = @$_GET['fsortdir'];
+      
+      $opposite_fsortdir = 'ASC';
+      if ($current_fsortdir == 'ASC') {
+        $opposite_fsortdir = 'DESC';
+      }
+      
+      if ($field == $current_fsort) {
+        if ($current_fsortdir == 'ASC') {
+          $label .= " <i class='fa fa-chevron-up'></i>";
+        }
+        else {
+          $label .= " <i class='fa fa-chevron-down'></i>";
+        }
+      }
+                            
+      
+      $new_fsortdir = 'ASC';
+      if ($default_sort) $new_fsortdir = $default_sort;
+      
+      
+      
+      // Scenario #1:
+      // We have never clicked this item before.  The link should be for THIS field, and for its "new_fsortdir"
+      if ($current_fsort != $field) {        
+        $link = l($label, $_GET['q'], "fsort=$field&fsortdir=$new_fsortdir");  
+      }
+      
+      // Scenario #2:
+      // We have just recently clcked this item.  We want to REVERSE the sort direction
+      if ($current_fsort == $field) {
+        $link = l($label, $_GET['q'], "fsort=$field&fsortdir=$opposite_fsortdir");
+      }
+      
+                     
+      $rtn .= $link;
+      
+      
+    }  // else
+    
+    
+    
+    $rtn .= "</th>";
+  } // foreach header
+  
+  
+  
+  
+  
+  $rtn .= "</tr>";
+  return $rtn;
+  
+} // theme_table_header_sortable
+
+
+/**
+ * Sets our initial sort, if there isn't already one set.
+ */
+function theme_table_header_sortable_set_initial_sort($field, $dir) {
+  if (@$_GET['fsort'] == '') {
+    $_GET['fsort'] = $field;
+    $_GET['fsortdir'] = $dir;
+  }
+}
+
+
+/**
+ * Used with the theme_table_header_sortable function (meant to be called AFTER headers have been created.)
+ * 
+ * The main thing we want to do is confirm that what we are getting from GET is a valid fieldname in the headers array,
+ * to prevent SQL injection.
+ */
+function theme_table_header_sortable_order_by($headers) {
+  
+  $rtn = "";
+  
+  $fsort = @$_GET['fsort'];
+  $fsortdir = @$_GET['fsortdir'];
+  
+  if (!$fsort) return '';
+  
+  if ($fsort) {
+    // Confirm that this field is in the headers array.
+    $bool_found_it = FALSE;
+    foreach ($headers as $header) {
+      if ($header['field'] == $fsort) {
+        $bool_found_it = TRUE;
+        break;
+      }
+    }
+    if (!$bool_found_it) return ""; // couldn't find it!
+  }
+  
+  if ($fsortdir != "" && $fsortdir != 'ASC' && $fsortdir != 'DESC') {
+    $fsortdir = ''; 
+    
+  }
+  
+  return "ORDER BY $fsort $fsortdir";
+  
+} // ... sortable_order_by
+
+
+
+
+/**
  * Adapted from https://api.drupal.org/api/drupal/includes%21pager.inc/function/theme_pager/6.x
  * 
  * The purpose of this is to return the HTML to display a "pager", as created from the pager_query() function.

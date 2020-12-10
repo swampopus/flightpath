@@ -1093,7 +1093,22 @@ function content_display_content_admin_list() {
     $rtn .= "<option value='$type' $sel>" . $details["title"] . "</option>";
   }
   $rtn .= "</select><input type='submit' value='-&gt;'> </form>";
-          
+
+  
+  
+  $table_headers = array();
+  $table_headers[] = array("label" => "Actions");  
+  $table_headers[] = array("label" => "Title", "field" => "n.title");  
+  $table_headers[] = array("label" => "Type", "field" => "n.type");  
+  $table_headers[] = array("label" => "Author");  
+  $table_headers[] = array("label" => "Updated", "field" => "n.updated");
+     
+  // Set our initial sort, if none is already set.   
+  theme_table_header_sortable_set_initial_sort('n.updated', 'DESC');
+  
+  $rtn .= "<table width='100%' border='1'>";
+  // Draw our our table headers, with links....
+  $rtn .= theme_table_header_sortable($table_headers);  
   
   if ($filter != "") {
     
@@ -1102,23 +1117,17 @@ function content_display_content_admin_list() {
     $res = db_query("SELECT * FROM content WHERE type = ? AND delete_flag = 0 ORDER BY updated DESC", $filter);
   }
   else {
-        
+      
+    // Get our order by clause based on selected table header, if any.    
+    $order_by = theme_table_header_sortable_order_by($table_headers);  
     $res = pager_query("SELECT DISTINCT(cid) FROM content n
                         WHERE delete_flag = 0                                                       
-                        ORDER BY updated DESC", array(), 20, 0, "SELECT COUNT(DISTINCT(cid)) FROM content n
+                        $order_by", array(), 20, 0, "SELECT COUNT(DISTINCT(cid)) FROM content n
                                                           WHERE delete_flag = 0                                                       
-                                                          ORDER BY updated DESC", array());    
+                                                          $order_by", array());    
   }
 
   
-  $rtn .= "<table width='100%' border='1'>
-            <tr>
-              <th>" . t("Actions") . "</th>
-              <th>" . t("Title") . "</th>              
-              <th>" . t("Type") . "</th>
-              <th>" . t("Author") . "</th>
-              <th>" . t("Updated") . "</th>
-            </tr>";  
     
   while ($cur = db_fetch_array($res)) {
       
