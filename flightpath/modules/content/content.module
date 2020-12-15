@@ -525,13 +525,25 @@ function content_edit_content_form($type = "", $cid = "") {
       
       if ($field_details['type'] != 'cfieldset') {
       
-        $value = $content->{"field__$field_name"}['value'];      
-        // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
+        $value = $content->{"field__$field_name"}['value'];
+        // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly. (it was stored as UTC in database)             
         if ($form[$field_name]['type'] == 'datetime-local') {
           if (trim($value) != '') {
-            $value = date('Y-m-d\TH:i', strtotime($value));
+            $value = date('Y-m-d\TH:i', convert_time(strtotime($value)));            
           }
         }
+        
+        // Similar to datetime-local, if this is a "time" field, then it has been stored as UTC in the database, and now
+        // needs to be converted to local timezone.
+        if ($form[$field_name]['type'] == 'time') {
+          if (trim($value) != '') {
+            $value = date('H:i', convert_time(strtotime($value)));            
+          }
+        }
+                
+        
+        
+        
         $form[$field_name]["value"] = $value;
       } // is not cfieldset
       else {
@@ -539,12 +551,22 @@ function content_edit_content_form($type = "", $cid = "") {
         foreach ($form[$field_name]['elements'] as $c => $efields) {
           foreach ($efields as $efield_name => $efield_details) {
             $value = $content->{"field__$efield_name"}['value'];
+            
             // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
             if ($efield_details['type'] == 'datetime-local') {
               if (trim($value) != '') {
-                $value = date('Y-m-d\TH:i', strtotime($value));
+                $value = date('Y-m-d\TH:i', convert_time(strtotime($value)));
               }
             }
+
+            // Similar to datetime-local, if this is a "time" field, then it has been stored as UTC in the database, and now
+            // needs to be converted to local timezone.
+            if ($efield_details['type'] == 'time') {
+              if (trim($value) != '') {
+                $value = date('H:i', convert_time(strtotime($value)));            
+              }
+            }
+
             
             $form[$field_name]['elements'][$c][$efield_name]["value"] = $value;
             if (trim($value)) {
@@ -673,6 +695,18 @@ function content_edit_content_form_submit(&$form, &$form_state) {
         $values[$fieldname] = date('Y-m-d H:i:s', $utc_ts);               
       }
       
+      // Do the same for "time" field type.  We need to convert to UTC from the user's timezone.
+      if ($details['type'] == 'time') {
+        // Since this is time, the value is actually already in the user's timezone.
+        // We want to CHANGE THIS TO UTC, so it saves in the database as UTC.
+        $val_ts = @strtotime("2000-01-01 " . $values[$fieldname]);  // give a bogus date just so our times make since.
+        $utc_ts = convert_time($val_ts, fp_get_user_timezone(), 'UTC');        
+        $values[$fieldname] = date('H:i', $utc_ts);               
+      }
+            
+      
+      
+      
       $content->{'field__' . $fieldname}['value'] = @$values[$fieldname];      
     }
     else {
@@ -686,6 +720,16 @@ function content_edit_content_form_submit(&$form, &$form_state) {
             $utc_ts = convert_time($val_ts, fp_get_user_timezone(), 'UTC');        
             $values[$fieldname] = date('Y-m-d H:i:s', $utc_ts);               
           }          
+
+          // Do the same for "time" field type.  We need to convert to UTC from the user's timezone.
+          if ($details['type'] == 'time') {
+            // Since this is time, the value is actually already in the user's timezone.
+            // We want to CHANGE THIS TO UTC, so it saves in the database as UTC.
+            $val_ts = @strtotime("2000-01-01 " . $values[$fieldname]);  // give a bogus date just so our times make since.
+            $utc_ts = convert_time($val_ts, fp_get_user_timezone(), 'UTC');        
+            $values[$fieldname] = date('H:i', $utc_ts);               
+          }
+
           
           $content->{'field__' . $fieldname}['value'] = @$values[$fieldname];
         }
@@ -1020,6 +1064,21 @@ function content_content_load(&$content) {
           $display_value = format_date(convert_time(strtotime($display_value)), $format);
         }
       }      
+       
+      // if this is a "time" field, then similar to datetime-local, it needs to be adjusted.  That's because
+      // in the database we saved it as UTC.  We ned to now convert into the user's timezone.
+      if ($details['type'] == 'time') {
+        if (trim($display_value) != '') {          
+          $format = 'standard';
+          if (isset($details['format_date'])) {
+            $format = $details['format_date'];
+          }
+          $display_value = format_date(convert_time(strtotime("2001-01-01 $display_value")), 'custom', 'g:ia');
+        }
+      }            
+      
+       
+       
         
       // if this is a select list, we want to display the option label this value went with.
       if ($details['type'] == 'select'  || $details['type'] == 'radios') {
@@ -1062,17 +1121,32 @@ function content_content_load(&$content) {
             $display_value = nl2br(trim($display_value));
           }
             
+            
+          
           // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
           if ($edetails['type'] == 'datetime-local') {
             if (trim($display_value) != '') {
               //$value = date('Y-m-d\TH:i', strtotime($value));
               $format = 'standard';
-              if (isset($edetails['format_date'])) {
-                $format = $edetails['format_date'];
+              if (isset($details['format_date'])) {
+                $format = $details['format_date'];
               }
-              $display_value = format_date(strtotime($display_value), $format);
+              $display_value = format_date(convert_time(strtotime($display_value)), $format);
             }
           }      
+           
+          // if this is a "time" field, then similar to datetime-local, it needs to be adjusted.  That's because
+          // in the database we saved it as UTC.  We ned to now convert into the user's timezone.
+          if ($edetails['type'] == 'time') {
+            if (trim($display_value) != '') {          
+              $format = 'standard';
+              if (isset($details['format_date'])) {
+                $format = $details['format_date'];
+              }
+              $display_value = format_date(convert_time(strtotime("2001-01-01 $display_value")), 'custom', 'g:ia');
+            }
+          }            
+          
             
           // if this is a select list, we want to display the option label this value went with.
           if ($edetails['type'] == 'select') {
