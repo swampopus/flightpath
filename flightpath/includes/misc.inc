@@ -25,6 +25,68 @@ function is_serialized_string($string)
  
 
 
+// From: https://gist.github.com/ryanboswell/cd02add580ddce012469
+/**
+ * The point of this function is to convert between UTC (what we expect all times to start with.).  If we're coming
+ * from the the database or a time() function, it's UTC.  The "end_timezone_string" should be the user's preferred timezone.
+ * 
+ * if end_timezone_string == null, then we will use the user's selected timezone.  If that isn't set, we use they system's.
+ * 
+ * As a convenenience, if the data_format we will get back a formatted date.  Otherwise we'll get back a timestamp. 
+ */
+function convert_time( $time_to_convert = 0, $start_timezone_string = "UTC", $end_timezone_string = NULL, $date_format = null ) {
+  
+  // We require a start time
+  if( empty( $time_to_convert ) ){
+    return false;
+  }
+  
+  if ($end_timezone_string == NULL) {
+    $end_timezone_string = fp_get_user_timezone();
+  }
+    
+  // If the two timezones are different, find the offset
+  if( $start_timezone_string != $end_timezone_string ) {
+    // Create two timezone objects, one for the start and one for
+    // the end
+    $dateTimeZoneStart = new DateTimeZone( $start_timezone_string );
+    $dateTimeZoneEnd = new DateTimeZone( $end_timezone_string );
+    
+    // Create two DateTime objects that will contain the same Unix timestamp, but
+    // have different timezones attached to them.
+    $dateTimeStart = new DateTime("now", $dateTimeZoneStart );
+    $dateTimeEnd = new DateTime("now", $dateTimeZoneEnd );
+    
+    // Calculate the UTC offset for the date/time contained in the $dateTimeStart
+    // object, but using the timezone rules as defined for the end timezone ($dateTimeEnd)
+    $timeOffset = $dateTimeZoneEnd->getOffset($dateTimeStart);
+    
+    // If we are converting FROM non-utc TO UTC, then this logic doesn't work!
+    // We need to basically grab the reverse logic...
+    if ($start_timezone_string != 'UTC' && $end_timezone_string == 'UTC') {
+      $x = $dateTimeZoneStart->getOffset($dateTimeEnd);      
+      $timeOffset = -$x;
+    }
+        
+  } else {
+    // If the timezones are the same, there is no offset    
+    $timeOffset = 0;
+  }
+  
+  // Convert the time by the offset
+  $converted_time = $time_to_convert + $timeOffset;
+  
+  // If we have no given format, just return the time
+  if( empty( $date_format ) ) {
+    return $converted_time;
+  }
+  
+  // Convert to the given date format
+  return date( $date_format, $converted_time );
+}
+
+
+
 
 /**
  * Returns an array of all timezones PHP recognizes.
@@ -581,7 +643,7 @@ function filter_markup($str, $type = "basic") {
     
     $str = filter_xss($str, $allowed_tags);
     $str = trim($str);
-    $str = nl2br($str);
+    //$str = nl2br($str);  // Since this is meant to be basic HTML, new lines are allowed as white space, and should not be converted to br.
     
   }
   

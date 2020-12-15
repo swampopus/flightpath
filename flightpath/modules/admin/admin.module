@@ -1237,7 +1237,7 @@ function admin_display_watchdog_entry($wid) {
   $msg = t($cur->message, unserialize($cur->variables));
   
   $severity = $severity_array[$cur->severity];
-  $when = format_date($cur->timestamp, "short");
+  $when = format_date(convert_time($cur->timestamp), "short");
     
   // Display
   $rtn .= "
@@ -1445,7 +1445,7 @@ function admin_display_watchdog() {
     
     
     $severity = $severity_array[$cur->severity];
-    $when = format_date($cur->timestamp, "short");
+    $when = format_date(convert_time($cur->timestamp), "short");
     
         
     $rtn .= "

@@ -27,6 +27,12 @@ function theme_table_header_sortable($headers = array(), $element_id = "default"
   $rtn = "";  
   $rtn .= "<tr>";
   
+  $filter = trim(@$_GET['filter']); // if there is an existing filter we need to preserve.
+  $filter_line = "";
+  if ($filter) {
+    $filter_line = "&filter=" . $filter;
+  }
+  
   foreach ($headers as $header) {
     $rtn .= "<th>";
     
@@ -67,13 +73,13 @@ function theme_table_header_sortable($headers = array(), $element_id = "default"
       // Scenario #1:
       // We have never clicked this item before.  The link should be for THIS field, and for its "new_fsortdir"
       if ($current_fsort != $field) {        
-        $link = l($label, $_GET['q'], "fsort=$field&fsortdir=$new_fsortdir");  
+        $link = l($label, $_GET['q'], "fsort=$field&fsortdir=$new_fsortdir" . $filter_line);  
       }
       
       // Scenario #2:
       // We have just recently clcked this item.  We want to REVERSE the sort direction
       if ($current_fsort == $field) {
-        $link = l($label, $_GET['q'], "fsort=$field&fsortdir=$opposite_fsortdir");
+        $link = l($label, $_GET['q'], "fsort=$field&fsortdir=$opposite_fsortdir" . $filter_line);
       }
       
                      

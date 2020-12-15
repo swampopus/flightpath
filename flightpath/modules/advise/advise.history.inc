@@ -39,13 +39,7 @@ function advise_display_history() {
         $term_name = get_term_description($term_id);
         
         $turl = fp_url("advise/popup-display-summary", "advising_session_id=$aid");
-        
-        /*
-        $click_links .= "<li>
-                <a href='javascript: popupPrintWindow(\"" . $turl . "\");'>
-                <img src='" . fp_theme_location() . "/images/popup.gif' border='0'>
-                $term_name</a>";
-        */
+                
         $click_links .= "<li class='just-saved-summary'>
                             <a href='javascript: popupLargeIframeDialog(\"" . $turl . "\",\"" . t("Advising Session @term", array("@term" => $term_name)) . "\",\"\");'>
                                 <i class='fa fa-window-restore'></i> $term_name
@@ -117,9 +111,8 @@ function advise_display_history() {
               AND is_empty = '0'
               ORDER BY `posted` DESC, `term_id` DESC ", $student_id);
   while($cur = db_fetch_array($res)) {
-    extract($cur, 3, "db");
 
-    $dt = date("n/j/y g:ia",$db_posted);
+    $dt = date("m/d/Y g:ia",convert_time($cur['posted']));
     $html = "";
 
     // Is this datetime within 5 seconds of the previous datetime?
@@ -127,13 +120,13 @@ function advise_display_history() {
     // of the same advising session.  Otherwise, this is a NEW
     // advising session.  The if statement below is testing is this
     // a new advising session.
-    $test_d_t = $db_posted;
+    $test_d_t = $cur['posted'];
     if ($old_session_d_t < ($test_d_t - 5) || $old_session_d_t > ($test_d_t + 5))
     {
 
       $old_session_d_t = $test_d_t;
       $advised_by = "<div class='history-advised-row history-advised-row-$a_count'>
-              <strong>" . t("Advised by") . " " . fp_get_faculty_name($db_faculty_id, false) . "</strong>
+              <strong>" . t("Advised by") . " " . fp_get_faculty_name($cur['faculty_id'], FALSE) . "</strong>
             </div>";
       
       
@@ -151,10 +144,10 @@ function advise_display_history() {
       $first_style = "";
     }
 
-    $turl = fp_url("advise/popup-display-summary", "advising_session_id=$db_advising_session_id");
+    $turl = fp_url("advise/popup-display-summary", "advising_session_id={$cur['advising_session_id']}");
 
-    $advising_session_id_array[] = $db_advising_session_id;
-    $term = get_term_description($db_term_id);
+    $advising_session_id_array[] = $cur['advising_session_id'];
+    $term = get_term_description($cur['term_id']);
 
     $on_click = "popupLargeIframeDialog(\"" . $turl . "\",\"" . t("Advising Session @term - @date", array("@term" => $term, "@date" => $dt)) . "\",\"\");";  
               
@@ -266,18 +259,15 @@ function advise_display_history() {
 
   $res = comments_get_comments($student_id, FALSE, $access_types);
   foreach ($res as $cur)
-  {
-    extract($cur, 3, "db");
-    $dt = format_date($db_posted);
+  {    
+    $dt = format_date(convert_time($cur['posted']), 'custom', 'm/d/Y g:ia');
 
-    if ($first_style == "first")
-    {
-      $first_style = "color: maroon; font-weight:bold;
-          ";
+    if ($first_style == "first"){
+      $first_style = "color: maroon; font-weight:bold;";
     }
 
 
-    $turl = fp_url("comments/popup-display-comment", "id=$db_id");
+    $turl = fp_url("comments/popup-display-comment", "id=" . $cur['id']);
     
     $on_click = "popupLargeIframeDialog(\"" . $turl . "\",\"" . t("Comment @date", array("@date" => $dt)) . "\",\"\");";    
     
@@ -285,7 +275,7 @@ function advise_display_history() {
     $html .=  "<div $on_mouse_over class='history-comment-row' style='cursor:pointer; $first_style $extra_style'
           onClick='$on_click'>
           <div class=' ' style='padding-left: 20px; width:165px; display:inline-block;'>
-            " . fp_get_faculty_name($db_faculty_id, false) . "
+            " . fp_get_faculty_name($cur['faculty_id'], false) . "
           </div>
           <div class=' ' style='display: inline-block;'>
               $dt$ast
@@ -394,28 +384,27 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
         
   }
   while ($cur = db_fetch_array($res)) {
-    extract($cur, 3, "db");
+      
+    $dt = format_date(convert_time($cur['posted']), "pretty");
   
-    $dt = format_date($db_posted, "pretty");
-  
-    $term = get_term_description($db_term_id);
+    $term = get_term_description($cur['term_id']);
     
     $degree_title_line = "";
     $ds = "";
     $degree_plan = new DegreePlan();
-    if ($db_degree_id != DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE) {
-      $degree_plan->degree_id = $db_degree_id;
+    if ($cur['degree_id'] != DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE) {
+      $degree_plan->degree_id = $cur['degree_id'];
       $degree_plan->load_descriptive_data();
       $degree_title_line = $degree_plan->get_title(true);    
     }
     else {
       // This is a set of combined degrees.  We need to load all of the
       // degrees in the major_code_csv to get their titles.
-      $temp = explode(",", $db_major_code_csv);
+      $temp = explode(",", $cur['major_code_csv']);
       $ds = "s";
       foreach ($temp as $major_code) {
         if ($major_code == "") continue;      
-        $dp = $db->get_degree_plan($major_code, $db_catalog_year);
+        $dp = $db->get_degree_plan($major_code, $cur['catalog_year']);
         if ($dp != null) {
           $degree_title_line .= $dp->get_title2(TRUE, TRUE) . ", ";
         }      
@@ -423,10 +412,10 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
       $degree_title_line = rtrim($degree_title_line, ", ");
     }
   
-    $student = new Student($db_student_id, $db);
+    $student = new Student($cur['student_id'], $db);
   
     $what_if_message = "";
-    if ($db_is_whatif == 1) {
+    if (intval($cur['is_whatif']) == 1) {
         
       $official_degree_title = "";
       $odsverb = " is";
@@ -435,7 +424,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
       foreach ($majors as $major_code) {      
         if ($major_code == "") continue;
               
-        $dp = $db->get_degree_plan($major_code, $db_catalog_year);
+        $dp = $db->get_degree_plan($major_code, $cur['catalog_year']);
         if ($dp != null) {
           $c++;
           $official_degree_title .= $dp->get_title2(TRUE, TRUE) . ", ";
@@ -468,7 +457,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
          </tr>
          <tr>
           <td valign='top' width='15%'>" . t("Student:") . "</td>
-          <td valign='top' width='40%'>" . $db->get_student_name($db_student_id, false) . " ($db_student_id)</td>
+          <td valign='top' width='40%'>" . $db->get_student_name($cur['student_id'], false) . " ({$cur['student_id']})</td>
           <td valign='top' rowspan='3'>
             <table width='100%' cellpadding='0' cellspacing='0'>
           <tr height='20'>
@@ -492,7 +481,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
           </table> ";
       
       $txt .= "\n-----  Advising Summary for $term -----\n";    
-      $txt .= "Student: " . $db->get_student_name($db_student_id, false) . " ($db_student_id) \n";    
+      $txt .= "Student: " . $db->get_student_name($cur['student_id'], false) . " ({$cur['student_id']}) \n";    
           
     } // else 
     
@@ -501,7 +490,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
          </tr>
          <tr>
           <td valign='top' width='10%'>" . t("Advisor:") . "</td>
-          <td valign='top'>" . fp_get_faculty_name($db_faculty_id, false) . "</td>
+          <td valign='top'>" . fp_get_faculty_name($cur['faculty_id'], false) . "</td>
   
          </tr>
          <tr>
@@ -511,7 +500,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
          </tr>
          ";
     
-    $txt .= "Advisor: " . fp_get_faculty_name($db_faculty_id, false) . "\n";
+    $txt .= "Advisor: " . fp_get_faculty_name($cur['faculty_id'], false) . "\n";
     $txt .= "Term: " . $term . "\n";
     
     if (!$page_is_mobile) {
@@ -555,7 +544,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
   
     $fp = new FlightPath($student,$degree_plan, $db);
       
-    $fp->load_advising_session_from_database("","",false,false,$db_advising_session_id);
+    $fp->load_advising_session_from_database("","",false,false,$cur['advising_session_id']);
   
     $rtn .= "<table border='0' cellpadding='3' class='summary-advised-courses'>
         <tr>
@@ -580,7 +569,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     while ($advised_courses_list->has_more()) {
       $course = $advised_courses_list->get_next();
       // set the catalogYear from the term_id.
-      $course->term_id = $db_term_id;
+      $course->term_id = $cur['term_id'];
       $course->set_catalog_year_from_term_id();
       $course->load_descriptive_data(false);
   
@@ -634,7 +623,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     return $txt;
   }
   
-  fp_set_title($db->get_student_name($db_student_id, FALSE) . " ($db_student_id) $term " . t("Advising Summary"));
+  fp_set_title($db->get_student_name($cur['student_id'], FALSE) . " ({$cur['student_id']}) $term " . t("Advising Summary"));
   return $rtn;
 }
 

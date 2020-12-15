@@ -8,6 +8,9 @@
 
 /**
  * Hook install.  Called when the module is installed on the admin modules page.
+ * 
+ * TODO:  Add this as a new content_save() !
+ * 
  */
 function announcements_install() {
   // Install a default announcement when first run.

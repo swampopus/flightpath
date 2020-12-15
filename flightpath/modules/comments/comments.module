@@ -306,7 +306,7 @@ function comments_render_comment($comment, $delete_link = "") {
 
   $rtn .= "<div class='comment-comment comment-comment-" . $comment["access_type"] . "'>
               <div class='comment-by-line'>" .$access_type . " " . t("comment by") . " " . fp_get_faculty_name($comment["faculty_id"]) . "</div>
-              <div class='comment-datetime'>" . format_date($comment["posted"], "pretty") . "</div>
+              <div class='comment-datetime'>" . format_date(convert_time($comment["posted"]), "pretty") . "</div>
               <div class='comment-text'>" . filter_markup($comment["comment"], "full") . "</div>
               ";
   if ($delete_link) {

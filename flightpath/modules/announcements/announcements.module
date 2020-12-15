@@ -23,18 +23,25 @@ function announcements_content_register_content_type() {
   );
   
   
-  // In the settings region, I want some extra fields which will be used
-  // when we display.
   
-  $arr["announcement"]["settings"]["visibility"] = array(
-    "type" => "radios",
-    "label" => t("Visibility:"),
-    "options" => array("public" => t("Public (all users, incl students)"), 
-                       "faculty" => t("Only faculty/staff"), "hidden" => t("Hidden")
-                       ),
-    "required" => TRUE,                       
+  $fields['msg'] = array(
+    'type' => 'textarea_editor',  
+    'label' => 'Message',
+    'filter' => 'basic',
+    'weight' => 70,    
   );
+
   
+  
+  $fields['visibility'] = array(
+    'type' => 'radios',  
+    'label' => 'Visible to:',
+    'options' => array('public' => 'Anyone (incl. student)', 'faculty' => 'Faculty/Staff only'),   
+    'weight' => 80,    
+  );  
+  
+  
+  $arr['announcement']['fields'] = $fields;  
   
   return $arr;
 }
@@ -54,104 +61,8 @@ function announcements_perm() {
 }
 
 
-/**
- * Return the HTML rendering the announcements we have in the database.
- */
-function announcements_render_announcements() {
-  
-  global $user;
-  
-  $rtn = "";
-  
-  $res = db_query("SELECT * FROM content WHERE type = 'announcement'
-                    ORDER BY updated DESC");
-  while ($cur = db_fetch_array($res)) {
-    
-    $announcement = content_load($cur["cid"]);
-    $title = $announcement["title"];
-    if (strstr($title, "[hide]")) {
-      $title = "";
-    }
-    
-    
-    // Visibility?
-    if ($announcement["settings"]["visibility"] == "hidden") {
-      continue;
-    }
-    
-    if ($announcement["settings"]["visibility"] == "faculty") {
-      if (!user_has_permission("view_faculty_announcements")) {
-        continue;
-      }
-    }
-    
-    
-    $rtn .= "<div class='announcement'>";
-    if ($title) {
-      $rtn .= "
-                <div class='announcement-title'>" . filter_markup($title) . "</div>
-                ";
-    }
-    $rtn .= "<div class='announcement-text'>" . filter_markup($announcement["body"], "full") . "</div>
-                <div class='announcement-posted'>";
-    
-    // If we have not updated this announcement before, then print "posted",
-    // else, print "updated" date.
-    if ($announcement["updated"] > $announcement["posted"]) {      
-      $rtn .= t("Updated") . " " . date("D, M jS Y - g:ia", $announcement["updated"]);      
-    }
-    else {
-      $rtn .= t("Posted") . " " . date("D, M jS Y - g:ia", $announcement["posted"]);
-    }
-    
-    $rtn .= "</div>";
-        
-    $rtn .= "</div>";
-  }                    
-  
-  return $rtn;
-}
 
 
 
-/**
- * hook_blocks.  Returns an array of available blocks offered by this module in this format:
- * array(
- *  delta => "This is the title of the block.",
- *  ),
- * );
- * 
- * Delta can be just about anything machine-readable.  Alphanumeric and underscores only.
- * Ex: 0, 1, fun_2, etc.
- * 
- */
-function announcements_blocks() {
-  return array(
-    "primary" => t("Primary announcements block"),
-  );
-}
 
-/**
- * Called when it is time to render the block in question.
- * Expected to return an array which looks like this:
- * array(
- *  "title" => "Some title goes here.",
- *  "body" => "this is the primary body of the block",
- * );
- */
-function announcements_render_block($delta) {
-  
-  $rtn = array();
-  
-  if ($delta == "primary") {
-      
-    fp_add_css(fp_get_module_path("announcements") . "/css/announcements.css");
-    
-    $rtn["title"] = t("Announcements");       
-    $rtn["body"] = announcements_render_announcements();
-  }
-  
-  
-  return $rtn;
-  
-}
+

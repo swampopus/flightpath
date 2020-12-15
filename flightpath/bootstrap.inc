@@ -40,6 +40,10 @@ set_error_handler('_fp_error_handler');  // located in includes/misc.inc
 
 
 
+// To be consistent, we want all internal dates to be in "UTC", and we will convert the display for the
+// benefit of the user later on.
+date_default_timezone_set('UTC'); 
+
 
 
 // Should we load the settings file?  This variable should be

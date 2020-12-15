@@ -346,7 +346,7 @@ function content_view_content($cid) {
 
   $render['content_submitted'] = array(
     'type' => 'markup',
-    'value' => "<div class='content-submitted'>" . t("Submitted by") . " " . $author->name . " " . t("on") . " " . format_date($content->posted, 'short') . "</div>",
+    'value' => "<div class='content-submitted'>" . t("Submitted by") . " " . $author->name . " " . t("on") . " " . format_date(convert_time($content->updated), 'short') . "</div>",
   );
 
   if ($content->delete_flag == 1) {
@@ -484,7 +484,7 @@ function content_edit_content_form($type = "", $cid = "") {
       
       if ($form['title']['auto'] == TRUE) {
         // We will set the form to an automatic title, and hide.
-        $form['title']['value'] = $type . ' content saved on ' . format_date(time());
+        $form['title']['value'] = $type . ' content saved on ' . format_date(convert_time(time()));
         $form['title']['type'] = 'hidden';
         
       }
@@ -496,7 +496,13 @@ function content_edit_content_form($type = "", $cid = "") {
     }
     
   }  
-    
+
+  
+  // If a #redirect has not been set, then we'll go back to this content's "view"...
+  if (!isset($form['#redirect'])) {
+    $form['#redirect'] = array('path' => 'content/' . $cid);      
+  }
+      
   
   if ($content->delete_flag == 1) {
     $form['mark_content_deleted'] = array(
@@ -658,11 +664,29 @@ function content_edit_content_form_submit(&$form, &$form_state) {
   // Add in our new field values.  
   foreach ($types[$type]['fields'] as $fieldname => $details) {
     if ($details['type'] != 'cfieldset') {
-      $content->{'field__' . $fieldname}['value'] = @$values[$fieldname];
+      
+      if ($details['type'] == 'datetime-local') {
+        // Since this is datetime-local, the value is actually already in the user's timezone.
+        // We want to CHANGE THIS TO UTC, so it saves in the database as UTC.
+        $val_ts = @strtotime($values[$fieldname]);
+        $utc_ts = convert_time($val_ts, fp_get_user_timezone(), 'UTC');        
+        $values[$fieldname] = date('Y-m-d H:i:s', $utc_ts);               
+      }
+      
+      $content->{'field__' . $fieldname}['value'] = @$values[$fieldname];      
     }
     else {
       foreach ($details['elements'] as $c => $v) {
         foreach ($details['elements'][$c] as $fieldname => $edetails) {
+          
+          if ($details['type'] == 'datetime-local') {
+            // Since this is datetime-local, the value is actually already in the user's timezone.
+            // We want to CHANGE THIS TO UTC, so it saves in the database as UTC.
+            $val_ts = @strtotime($values[$fieldname]);
+            $utc_ts = convert_time($val_ts, fp_get_user_timezone(), 'UTC');        
+            $values[$fieldname] = date('Y-m-d H:i:s', $utc_ts);               
+          }          
+          
           $content->{'field__' . $fieldname}['value'] = @$values[$fieldname];
         }
       }
@@ -671,6 +695,13 @@ function content_edit_content_form_submit(&$form, &$form_state) {
   
   content_save($content);
   $form_state['content_object'] = $content;
+  
+  
+  if (isset($form['#redirect'])) {
+    if ($form['#redirect']['path'] == 'content/new') {
+      $form['#redirect']['path'] = 'content/' . $content->cid;
+    }
+  }
   
   fp_add_message(t('Saved successfully.'));
   
@@ -851,6 +882,55 @@ function content_load($cid, $reset = FALSE) {
 
 
 
+
+
+/**
+ * Hook form alter, to set some defaults.
+ */
+function content_form_alter(&$form, $form_id) {
+  
+if ($form_id == 'content_edit_content_form') {
+
+    // This is a NEW form.      
+    if ($form['cid']['value'] === 'new') {
+      
+      // Always set the published = TRUE, and hide.        
+      $form['published']['value'] = TRUE;
+      $form['published']['attributes'] = array('class' => 'hidden');
+      
+      
+      // Set visibility to 'faculty' by default, if it exists.
+      if (isset($form['visibility'])) {
+        $form['visibility']['value'] = 'faculty';      
+      }        
+      
+    } // if "new"
+    
+        
+    
+
+  } // if form_id   
+  
+  
+} // hook_form_alter
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * This function will look for content (in the content tables) for a field called field__faculty_id, and return an array
  * of fully loaded content objects.
@@ -919,9 +999,8 @@ function content_content_load(&$content) {
         
       // Figure out the "display_value" for this field.
         
-      if (isset($details['filter']) && $details['filter'] != 'plain') {
-        $display_value = filter_markup(trim($display_value), $details['filter']);
-        
+      if (isset($details['filter']) && $details['filter'] != 'plain') {          
+        $display_value = filter_markup(trim($display_value), $details['filter']);        
       }
       else {
         // Always assumed to be "plain" if no filter is set.
@@ -938,19 +1017,19 @@ function content_content_load(&$content) {
           if (isset($details['format_date'])) {
             $format = $details['format_date'];
           }
-          $display_value = format_date(strtotime($display_value), $format);
+          $display_value = format_date(convert_time(strtotime($display_value)), $format);
         }
       }      
         
       // if this is a select list, we want to display the option label this value went with.
-      if ($details['type'] == 'select') {
+      if ($details['type'] == 'select'  || $details['type'] == 'radios') {
         $temp = @$details['options'][$val];
         if ($temp != "") $display_value = $temp;
       }
       
       // If this was a set of checkboxes ($val is an array), we want to display the label the values went to.
-      if ($details['type'] == 'checkboxes') {
-        $display_value .= "<div class='checkbox-values checkbox-values-field__$fieldname'>";
+      if ($details['type'] == 'checkboxes') {        
+        $display_value .= "<div class='checkbox-values checkbox-values-field__$fieldname'>";        
         if (is_array($val)) {
           foreach ($val as $k => $v) {  
             $temp = @$details['options'][$v];
@@ -1110,22 +1189,23 @@ function content_display_content_admin_list() {
   // Draw our our table headers, with links....
   $rtn .= theme_table_header_sortable($table_headers);  
   
+  $params = array();
+  $filter_line = "";
   if ($filter != "") {
+    $filter_line = "AND type = :ftype";
+    $params[":ftype"] = $filter;
     
-    // TODO: convert to pager query
-    
-    $res = db_query("SELECT * FROM content WHERE type = ? AND delete_flag = 0 ORDER BY updated DESC", $filter);
   }
-  else {
       
-    // Get our order by clause based on selected table header, if any.    
-    $order_by = theme_table_header_sortable_order_by($table_headers);  
-    $res = pager_query("SELECT DISTINCT(cid) FROM content n
-                        WHERE delete_flag = 0                                                       
-                        $order_by", array(), 20, 0, "SELECT COUNT(DISTINCT(cid)) FROM content n
-                                                          WHERE delete_flag = 0                                                       
-                                                          $order_by", array());    
-  }
+  // Get our order by clause based on selected table header, if any.    
+  $order_by = theme_table_header_sortable_order_by($table_headers);  
+  $res = pager_query("SELECT DISTINCT(cid) FROM content n
+                      WHERE delete_flag = 0
+                      $filter_line                                                       
+                      $order_by", $params, 20, 0, "SELECT COUNT(DISTINCT(cid)) FROM content n
+                                                        WHERE delete_flag = 0
+                                                        $filter_line                                                       
+                                                        $order_by", $params);    
 
   
     

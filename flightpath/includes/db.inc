@@ -405,6 +405,29 @@ function fp_load_user($user_id) {
 }
 
 
+/**
+ * Returns back the timezone for this user, if selected.  If not, we return back the system timezone.
+ */
+function fp_get_user_timezone($account = NULL) {
+  global $user;
+  
+  if ($account == NULL) {
+    $account = $user;
+  }
+  
+  
+      
+  $utz = trim(@$account->settings['timezone']);  
+  if ($utz) return $utz;
+  
+  // Else...
+  
+  $system_timezone = variable_get('system_timezone', 'America/Chicago');
+  return $system_timezone;
+  
+  
+}
+
 
 function fp_get_student_attributes($student_id) {
   $rtn = array();

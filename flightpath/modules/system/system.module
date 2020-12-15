@@ -2875,7 +2875,7 @@ function system_display_dashboard_page () {
   }
   
   
-  $today = date("D, F jS, Y", strtotime("today"));
+  $today = date("D, F jS, Y", convert_time(strtotime("today")));
   $dname = $user->name;
   if ($user->f_name != "" || $user->l_name != "") {
     $dname = trim($user->f_name . " " . $user->l_name) . " ($user->name)";
@@ -2892,6 +2892,8 @@ function system_display_dashboard_page () {
            </div>";
 
 
+
+  $announcements = "";
 
   if ($user->is_faculty) {
 
@@ -3031,54 +3033,49 @@ function system_display_dashboard_page () {
                 </div>";
     
     
-      $rtn .= "<div class='dash-box dash-right'>
+    
+
+    
+    $announcements .= "<div class='dash-box dash-right'>
                  <div class='announcements-feed-block dash-feed-block'>
-                    " . fp_render_section_title("Announcements") . "
-                   <div class='contents'>
-                    <div class='feed-item'>                  
-                      <div class='feed-item-title'>Supplemental Instruction</div>
-                      <div class='feed-item-desc'>Supplemental Instruction is a free academic support program available to 
-                                                  students enrolled in specific sections of BIOL 1014, 1015, 1020; CHEM 1007; 
-                                                  and PHYS 2003.  Call the Student Success Center at 555-3667 for more information.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
-        
-                    <div class='feed-item'>                  
-                      <div class='feed-item-title'>Winter Classes Begin</div>
-                      <div class='feed-item-desc'>Full-term and 1st 8-week classes for the Winter semester begin on Monday, Dec 14th.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
-                    
-                    <div class='feed-item'>
-                      
-                      <div class='feed-item-title'>Important Upcoming Dates:</div>
-                      <div class='feed-item-desc'><ul>
-                          <li>Sept 1-Nov 16--Application for May Graduation</li>
-                          <li>Sept 7--Labor Day Holiday</li>
-                          <li>Oct 5-16--Mid-Term Grading for Fall full-term</li>
-                          <li>Oct 8-9--Fall Break</li>
-                          </ul>
-                       </div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
+                    " . fp_render_section_title(t("Announcements")) . "
+                   <div class='contents'>";
     
-                    <div class='feed-item'>                  
-                      <div class='feed-item-title'>Fall Classes Begin</div>
-                      <div class='feed-item-desc'>Full-term and 1st 8-week classes for the Fall semester begin on Monday, Aug 4th.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
+            
+    $res = db_query("SELECT DISTINCT(a.cid) FROM content__announcement a, content n
+                     WHERE a.vid = n.vid
+                     AND a.cid = n.cid
+                     AND n.delete_flag = 0
+                     AND n.published = 1                                    
+                     ORDER BY updated DESC, a.vid DESC");
+     
+    while ($cur = db_fetch_object($res)) {
+      $cid = $cur->cid;      
+      $content = content_load($cid);
+      
+      // is this "faculty" visibility?  If so, do we have access to view?
+      if ($content->field__visibility['value'] == 'faculty' && !user_has_permission('can_view_faculty_engagements')) {        
+        continue;      
+      }    
+
+            
+      $disp_updated = date("m/d/Y g:ia", convert_time($content->updated));
+      
+      $announcements .= "<div class='feed-item'>
+                  <div class='feed-item-title'>$content->title</div>
+                  <div class='feed-item-desc'>{$content->field__msg['display_value']}</div>
+                  <div class='feed-item-datetime'>$disp_updated</div>
+               </div>";
+          
+    } // while
     
-                    <div class='feed-item'>                  
-                      <div class='feed-item-title'>Supplemental Instruction</div>
-                      <div class='feed-item-desc'>Supplemental Instruction is a free academic support program available to 
-                                                  students enrolled in specific sections of BIOL 1014, 1015, 1020; CHEM 1007; 
-                                                  and PHYS 2003.  Call the Student Success Center at 555-3667 for more information.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
-                    
-                   </div>  <!-- contents -->
+    $announcements .=  "</div>  <!-- contents -->
                  </div> <!-- feed block -->                                                
                 </div>";
+    
+    
+    
+    $rtn .= $announcements;
   
   } // if is_faculty
   else if ($user->is_student) {
@@ -3143,67 +3140,15 @@ function system_display_dashboard_page () {
     }    
                 
                    
-    $rtn .= "                   
-        
-                   </div> <!-- contents -->
+    $rtn .= "      </div> <!-- contents -->
                  </div> <!-- feed-block -->                                                
                 
                 
-                </div> <!-- dash-box -->
-                
-                 
-                
+                </div> <!-- dash-box -->                                
                 ";
     
     
-      $rtn .= "<div class='dash-box dash-right'>
-                 <div class='announcements-feed-block dash-feed-block'>
-                    " . fp_render_section_title("Announcements") . "
-                   <div class='contents'>
-                    <div class='feed-item'>                  
-                      <div class='feed-item-title'>Supplemental Instruction</div>
-                      <div class='feed-item-desc'>Supplemental Instruction is a free academic support program available to 
-                                                  students enrolled in specific sections of BIOL 1014, 1015, 1020; CHEM 1007; 
-                                                  and PHYS 2003.  Call the Student Success Center at 555-3667 for more information.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
-        
-                    <div class='feed-item'>                  
-                      <div class='feed-item-title'>Winter Classes Begin</div>
-                      <div class='feed-item-desc'>Full-term and 1st 8-week classes for the Winter semester begin on Monday, Dec 14th.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
-                    
-                    <div class='feed-item'>
-                      
-                      <div class='feed-item-title'>Important Upcoming Dates:</div>
-                      <div class='feed-item-desc'><ul>
-                          <li>Sept 1-Nov 16--Application for May Graduation</li>
-                          <li>Sept 7--Labor Day Holiday</li>
-                          <li>Oct 5-16--Mid-Term Grading for Fall full-term</li>
-                          <li>Oct 8-9--Fall Break</li>
-                          </ul>
-                       </div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
-    
-                    <div class='feed-item'>                  
-                      <div class='feed-item-title'>Fall Classes Begin</div>
-                      <div class='feed-item-desc'>Full-term and 1st 8-week classes for the Fall semester begin on Monday, Aug 4th.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
-    
-                    <div class='feed-item'>                  
-                      <div class='feed-item-title'>Supplemental Instruction</div>
-                      <div class='feed-item-desc'>Supplemental Instruction is a free academic support program available to 
-                                                  students enrolled in specific sections of BIOL 1014, 1015, 1020; CHEM 1007; 
-                                                  and PHYS 2003.  Call the Student Success Center at 555-3667 for more information.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
-                    
-                   </div>  <!-- contents -->
-                 </div> <!-- feed block -->                                                
-                </div> <!-- dash-box -->";
+      $rtn .= $announcements;
     
     
   } // if is_student
