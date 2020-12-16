@@ -6,6 +6,31 @@
 
  
 
+ /**
+  * Returns back the "friendly" timezone string if we have one.
+  */
+function friendly_timezone($str) {
+  
+  $arr = array(
+                'America/Chicago' => 'Central Time - US & Canada',
+                'America/Los_Angeles' => 'Pacific Time - US & Canada',
+                'America/New_York' => 'Eastern Time - US & Canada',
+                'America/Denver' => 'Mountain Time - US & Canada',
+                'America/Phoenix' => 'Arizona Time',
+                'America/Anchorage' => 'Alaska Time',
+                'America/Adak' => 'Hawaii Time',
+                'Pacific/Honolulu' => 'Hawaii Time no DST',        
+              ); 
+  
+  
+  if (isset($arr[$str])) return $arr[$str];
+  
+  return $str;
+  
+  
+} 
+ 
+ 
  
 /**
  * 
