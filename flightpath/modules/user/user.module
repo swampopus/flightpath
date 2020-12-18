@@ -271,8 +271,8 @@ function user_user_settings_form() {
   $html = "";
   
   // TODO:  if a student, display their mini profile here, with a link to their full profile.  
-  // TODO:  if faculty, display things like email and such which we have in the database.
   
+  // if faculty, display things like email and such which we have in the database.  
   if ($user->is_faculty) {
     $html .= "<div class='user-profile-markup-faculty'>
                 <div class='profile-item'><strong>" . t("Email:") . "</strong> $user->email</div>
@@ -336,6 +336,21 @@ function user_user_settings_form() {
                         are unsure what to select, choose "Yes".'),
   );
   
+  
+  
+  
+  if (user_has_permission('view_any_advising_session')) {
+    $form['default_student_load_tab'] = array(
+      'label' => t('What is the default tab you want to see when you load a new student?'),
+      'type' => 'select',
+      'hide_please_select' => TRUE,
+      'options' => array('profile' => t('Student Profile'), 'engagements' => t("Engagements"), 'degree' => t('Degree')),
+      'value' => @$user->settings['default_student_load_tab'],
+      'description' => t('If you are unsure what to select, choose "Student Profile".'),
+    );
+  }
+  
+  
    
      
   
@@ -395,7 +410,7 @@ function user_user_settings_form_submit($form, $form_state) {
   
   $timezone = $form_state['values']['timezone'];
   $hide_charts = $form_state['values']['hide_charts'];
-  
+  $default_student_load_tab = $form_state['values']['default_student_load_tab'];
   
   // are we updating password?  (If we made it here, we have already passed validation, and may continue.
   $new_password1 = $form_state['values']['new_password1'];  
@@ -418,8 +433,9 @@ function user_user_settings_form_submit($form, $form_state) {
   db_query("UPDATE user_settings
               SET timezone = ?,
                   hide_charts = ?,
+                  default_student_load_tab = ?,
                   updated = ?
-            WHERE user_id = ?", array($timezone, $hide_charts, time(), $user->id));
+            WHERE user_id = ?", array($timezone, $hide_charts, $default_student_load_tab, time(), $user->id));
   
   fp_add_message(t("User settings saved successfully."));
   

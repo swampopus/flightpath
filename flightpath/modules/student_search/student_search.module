@@ -41,6 +41,21 @@ function student_search_menu() {
     "weight" => 20,
   );
   
+  
+  $items["student-select"] = array(    
+    "page_callback" => "student_search_student_select_switchboard",
+    "access_callback" => "search_user_can_search_for_some_advisees",    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    /*"tab_family" => "system",
+    "page_settings" => array(
+      "page_has_search" => TRUE,
+    ),*/    
+    "weight" => 20,
+  );  
+  
+  
+  
+  
   $items["student-search/my-advisees"] = array(
     "title" => t("My Advisees"),
     "page_callback" => "student_search_display_my_advisees",
@@ -109,6 +124,74 @@ function student_search_menu() {
 
 
 
+
+/**
+ * The user has selected a student (clicked on a row) from the Search or My Advisees screen.
+ * 
+ * We now decide where the user is sent to, based on their settings.
+ * Ex:  Do they go to the Student Profile page, do they go to the Degree tab, etc?
+ */
+function student_search_student_select_switchboard() {
+    
+  // As in the advise_display_view, we need to "initialize" this student fresh...
+  global $user, $fp, $degree_plan, $screen, $current_student_id;
+ 
+  if ($view == "what-if") {
+    $GLOBALS["fp_advising"]["advising_what_if"] = "yes";  
+    $_REQUEST["advising_what_if"] = "yes";
+  }
+  else {
+    $GLOBALS["fp_advising"]["advising_what_if"] = "no";
+    $_REQUEST["advising_what_if"] = "no";
+  }
+  
+  // Initialize everything we need to initialize for this advising session.
+  advise_init_screen();        
+
+
+  // At this point, we decide where they are going to be redirected to, using fp_goto.
+  $goto_tab = @$user->settings['default_student_load_tab'];
+  if ($goto_tab == "") {
+    $goto_tab = "profile";  // by default
+  }
+  
+  ////////////////////////
+  
+  
+  if ($goto_tab == "profile") {
+    fp_goto("student-profile");
+  }
+  
+  if ($goto_tab == 'engagements') {
+    fp_goto("engagements");
+  }
+  
+  
+  if ($goto_tab == "degree") {
+    // Do we mean their normal "view" URL, or do we mean What If?
+    $query = "";
+    $path = "view";
+    if (@$_REQUEST['what_if_major_code'] != "") {
+      $path = "what-if";
+      //&what_if_major_code=$what_if_major_code&what_if_track_code=$what_if_track_code&what_if_catalog_year=$what_if_catalog_year
+      $query = "what_if_major_code=" . $_REQUEST['what_if_major_code'] . "&what_if_track_code=" . $_REQUEST['what_if_track_code'] . "&what_if_catalog_year=" . $_REQUEST['what_if_catalog_year'];
+    }
+    fp_goto($path, $query);
+  }
+  
+  
+        
+  return "hey";  
+  
+}
+
+
+
+
+
+
+
+
 /**
  * This is a system_settings form for configuring our module.
  *
@@ -168,7 +251,16 @@ function student_search_settings_form() {
 function student_search_subtab_switchboard() {
   
   $last_tab = $_SESSION["student_search_last_tab"];
-  if ($last_tab == "") $last_tab = 'search';
+  if ($last_tab == "") {
+    $last_tab = 'search';
+    
+    // TODO:  If the user has a setting for this, use that instead.
+    
+    
+  }
+  
+  
+  
   
   
   fp_goto("student-search/$last_tab");
@@ -1241,12 +1333,17 @@ function student_search_render_advisees($adv_array, $title) {
     
     // TODO:  The path could be the student profile instead, depending on the user's settings.    
     // Build up the URL we want to go to when we click this row.
+    
+    $path = 'student-select';
+    
+    /*
     $path = "view";
     $advising_what_if = "no";
     if ($what_if_major_code != "") {
       $path = "what-if";
       $advising_what_if = "yes";            
     }
+    */
     
     // Add in the query part.
     $query = "";

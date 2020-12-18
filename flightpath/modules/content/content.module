@@ -521,11 +521,16 @@ function content_edit_content_form($type = "", $cid = "") {
   if (is_array($types[$type]['fields'])) {
     foreach($types[$type]["fields"] as $field_name => $field_details) {
                   
-      $form[$field_name] = $field_details;
-      
+      $form[$field_name] = $field_details;      
       if ($field_details['type'] != 'cfieldset') {
       
         $value = $content->{"field__$field_name"}['value'];
+        if ($cid == 'new') {
+          // value won't be anything.  Use value attr from the form as the initial value
+          $value = @$form[$field_name]['value'];
+        }
+        
+        
         // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly. (it was stored as UTC in database)             
         if ($form[$field_name]['type'] == 'datetime-local') {
           if (trim($value) != '') {

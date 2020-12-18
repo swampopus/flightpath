@@ -23,6 +23,17 @@ function announcements_content_register_content_type() {
   );
   
   
+  $fields['activity_datetime'] = array(
+    'type' => 'datetime-local',
+    'label' => 'Date/Time',    
+    'value' => 'now',
+    'format_date' => 'short',
+    'weight' => 60,
+    'required' => TRUE, 
+  );
+  
+  
+  
   
   $fields['msg'] = array(
     'type' => 'textarea_editor',  
