@@ -411,6 +411,10 @@ function fp_load_user($user_id) {
 function fp_get_user_timezone($account = NULL) {
   global $user;
   
+  if (is_numeric($account)) {
+    $account = fp_load_user($account);
+  }
+    
   if ($account == NULL) {
     $account = $user;
   }
