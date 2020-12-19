@@ -2907,7 +2907,7 @@ function system_display_dashboard_page () {
     $pie_chart_url_3 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=46&unfinished=54&unfinished_col=cccccc&progress_col=ff4d4d&token=" . $_SESSION["fp_pie_chart_token"];
       
   
-      $rtn .= "<div class='dash-full-width'>
+    $rtn .= "<div class='dash-full-width'>
                   " . fp_render_section_title("Your Advising Snapshot") . "
                   <div class='advising-stats-block-inner-wrapper'>
                   
@@ -2975,65 +2975,67 @@ function system_display_dashboard_page () {
                </div>";
     
     
+    
       
       $rtn .= "<div class='dash-box dash-left'>
                  <div class='activity-feed-block dash-feed-block'>
                     " . fp_render_section_title("Advisee Activity Feed") . "
-                   <div class='contents'>
-                    <div class='feed-item'>
-                      <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
-                      <div class='feed-item-title'>Bill Thompson (10092838)</div>
-                      <div class='feed-item-desc'>Student has dropped below 12 hours.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
+                   <div class='contents'>";
+
+
+                         
+    $activity = "";     
+    
+    // Needs to only be within my advisees list....
+    $adv_array = student_search_display_my_advisees(TRUE);
+    $student_ids = array_keys($adv_array);
+    $students_line = "'" . join("','", $student_ids) . "'";
         
-                    <div class='feed-item'>
-                      <div class='feed-item-icon'><i class='fa fa-envelope-o'></i></div>
-                      <div class='feed-item-title'>Sally McDaniel (10042872)</div>
-                      <div class='feed-item-desc'>Student opened email titled \"Schedule appointment\".</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
-                    
-                    <div class='feed-item'>
-                      <div class='feed-item-icon'><i class='fa fa-comment-o'></i></div>
-                      <div class='feed-item-title'>Sally McDaniel (10042872)</div>
-                      <div class='feed-item-desc'>Student replied to text message.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
+    $icons = array(
+      'alert' => 'fa-bell-o',
+      'mail' => 'fa-envelope-o',
+      'comment' => 'fa-comment-o',
+    );
+              
+    $res = db_query("SELECT DISTINCT(a.cid) FROM content__activity_record a, content n
+                       WHERE a.vid = n.vid
+                       AND a.cid = n.cid
+                       AND n.delete_flag = 0
+                       AND n.published = 1
+                       AND field__student_id IN ($students_line)                                    
+                       ORDER BY updated DESC, a.vid DESC
+                       LIMIT 10");
+       
+      while ($cur = db_fetch_object($res)) {
+        $cid = $cur->cid;      
+        $content = content_load($cid);
         
-                    <div class='feed-item'>
-                      <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
-                      <div class='feed-item-title'>Bill Thompson (10092838)</div>
-                      <div class='feed-item-desc'>Student has dropped below 2.5 GPA.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
-                    
-                    <div class='feed-item'>
-                      <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
-                      <div class='feed-item-title'>Ashley Smith (100776512)</div>
-                      <div class='feed-item-desc'>Student has dropped below 12 hours.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
-                                            
-                    <div class='feed-item'>
-                      <div class='feed-item-icon'><i class='fa fa-comment-o'></i></div>
-                      <div class='feed-item-title'>Don Draper (100357445)</div>
-                      <div class='feed-item-desc'>Student has replied to text message.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
-                                            
-                    <div class='feed-item'>
-                      <div class='feed-item-icon'><i class='fa fa-bell-o'></i></div>
-                      <div class='feed-item-title'>Bill Thompson (10092838)</div>
-                      <div class='feed-item-desc'>Student has dropped below 12 hours.</div>
-                      <div class='feed-item-datetime'>05/01/2020 8:45am</div>
-                    </div>
-                   </div>
-                 </div>                                                
-                </div>";
-    
-    
-    
+        $student_name = fp_get_student_name($content->field__student_id['value'], TRUE);
+                      
+        $disp_date = date("m/d/Y g:ia", convert_time($content->updated));
+        
+        $icon = $icons[$content->field__activity_type['value']];
+        
+        $activity .= "<div class='feed-item'>
+                    <div class='feed-item-icon'><i class='fa $icon'></i></div>
+                    <div class='feed-item-title'>$student_name</div>
+                    <div class='feed-item-desc'>$content->title</div>
+                    <div class='feed-item-datetime'>$disp_date</div>
+                 </div>";
+            
+      } // while
+      
+      $activity .=  "</div>  <!-- contents -->
+                   </div> <!-- feed block -->                                                
+                  </div>";
+      
+      
+      
+      $rtn .= $activity;                   
+                   
+                   
+                   
+         
 
     
     $announcements .= "<div class='dash-box dash-right'>
@@ -3047,7 +3049,8 @@ function system_display_dashboard_page () {
                      AND a.cid = n.cid
                      AND n.delete_flag = 0
                      AND n.published = 1                                    
-                     ORDER BY field__activity_datetime DESC, a.vid DESC");
+                     ORDER BY field__activity_datetime DESC, a.vid DESC
+                     LIMIT 7");
      
     while ($cur = db_fetch_object($res)) {
       $cid = $cur->cid;      
