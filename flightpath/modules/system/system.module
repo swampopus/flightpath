@@ -3385,7 +3385,19 @@ function system_modules_form() {
   $module_dirs = array();
   $module_dirs[] = array("start" => "modules", "type" => t("Core"));
   $module_dirs[] = array("start" => "custom/modules", "type" => t("Custom"));
-    
+  // We will also add any directories which begin with an underscore in the custom/modules directory.
+  // For example:   custom/modules/_contrib
+  // Let's find such directories now.
+  $dir_files = scandir("custom/modules");  
+  foreach ($dir_files as $file) {
+    if ($file == '.' || $file == '..') continue;    
+    if (substr($file, 0, 1) == '_' && is_dir("custom/modules/$file")) {      
+      $module_dirs[] = array("start" => "custom/modules/$file", "type" => t("Custom/$file"));
+    }
+  }
+  
+        
+        
   foreach ($module_dirs as $module_dir) {
     $start_dir = $module_dir["start"];
      
@@ -3397,7 +3409,8 @@ function system_modules_form() {
         "value" => "<div class='fp-system-modules-type'>{$module_dir["type"]}</div>
                     <table class='fp-system-modules-table' cellpadding='0' cellspacing='0'>",
       );
-              
+    
+                  
       $pol = "even";
       $dir_files = scandir($start_dir);      
       foreach ($dir_files as $file) {    
@@ -3574,7 +3587,7 @@ function system_modules_form() {
                                                      
             $pol = ($pol == "even") ? "odd" : "even";
             
-          } // if file_exists (xml file)        
+          } // if file_exists (info file)        
         } // if is_dir      
       } // while file=readdir
       
