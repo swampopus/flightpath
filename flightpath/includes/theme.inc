@@ -24,6 +24,12 @@
  */
 function theme_table_header_sortable($headers = array(), $element_id = "default") {
   
+  // Is there a "current student id" being specified in the URL? If so, let's keep it in our links.
+  $csid = trim(@$_REQUEST['current_student_id']);  
+  if ($csid) {
+    $csid = "&current_student_id=$csid";
+  }
+  
   $rtn = "";  
   $rtn .= "<tr>";
   
@@ -73,13 +79,13 @@ function theme_table_header_sortable($headers = array(), $element_id = "default"
       // Scenario #1:
       // We have never clicked this item before.  The link should be for THIS field, and for its "new_fsortdir"
       if ($current_fsort != $field) {        
-        $link = l($label, $_GET['q'], "fsort=$field&fsortdir=$new_fsortdir" . $filter_line);  
+        $link = l($label, $_GET['q'], "fsort=$field&fsortdir=$new_fsortdir" . $filter_line . $csid);  
       }
       
       // Scenario #2:
       // We have just recently clcked this item.  We want to REVERSE the sort direction
       if ($current_fsort == $field) {
-        $link = l($label, $_GET['q'], "fsort=$field&fsortdir=$opposite_fsortdir" . $filter_line);
+        $link = l($label, $_GET['q'], "fsort=$field&fsortdir=$opposite_fsortdir" . $filter_line . $csid);
       }
       
                      

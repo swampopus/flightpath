@@ -10,6 +10,18 @@ body.content-tabs-false .page-tabs-wrapper ul.tabs {
 }
 
 
+.markup-element-content_title {
+  display: none;
+}
+
+body.page-is-popup .markup-element-content_title {
+  display: block;
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+
+
 .element-wrapper--content-submit-btn,
 .element-wrapper--content-delete-btn
  {

@@ -342,8 +342,14 @@ function content_view_content($cid) {
   fp_add_body_class("content-type-" . $content->type);
   
   //$rtn .= "<div class='content-view content-view-{$content->type}'>";
+    
+  $render['content_title'] = array(
+    'type' => 'markup',
+    'value' => "<div class='content-title'>" . $content->title . "</div>",
+  );
   
-
+  
+  
   $render['content_submitted'] = array(
     'type' => 'markup',
     'value' => "<div class='content-submitted'>" . t("Submitted by") . " " . $author->name . " " . t("on") . " " . format_date(convert_time($content->updated), 'short') . "</div>",
