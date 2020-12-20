@@ -37,6 +37,14 @@ table {
 }
 
 
+a.action-link {
+  padding-left: 3px;
+  padding-right: 3px;
+} 
+
+a.action-link-remove {
+  color: indianred;
+}
 
 
 /* Tabs & search */

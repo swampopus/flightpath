@@ -150,6 +150,16 @@ function content_menu() {
 
   
   
+  $items['content/%/remove'] = array(
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("content_unpublish_content_form", "", 1),
+    "access_callback" => TRUE, // TODO:  fix this to make sure the user has haccess to do it!     
+  );  
+  
+  
+  
+  
+  
   /**
    * Generic screen which, if we have saved content from within an iframe dialog,
    * we want to display a "success" message, then just refresh the screen.
@@ -172,6 +182,111 @@ function content_menu() {
     
   return $items;
 }
+
+
+
+
+function content_unpublish_content_form($cid) {
+  
+  
+  $content = content_load($cid);
+
+  fp_add_css(fp_get_module_path("content") . "/css/content.css");
+
+
+  // Display a confirmation page
+
+
+  $types = content_get_types();
+  $type = $content->type;
+  
+    
+  // We want to redirect correctly based on this type's options....
+  // Are there any special settings for the title?
+  if (isset($types[$type]['settings']) && isset($types[$type]['settings']['title'])) {
+    
+    if (is_array($types[$type]['settings']['#redirect'])) {
+      $form['#redirect'] = $types[$type]['settings']['#redirect'];
+    }
+    
+  }    
+  
+  $form['cid'] = array(
+    'type' => 'hidden',
+    'value' => $cid,
+  );
+
+  $form['mark_top'] = array(
+    'type' => 'markup',
+    'value' => "<h2>" . t("Are you sure you wish to remove <em>$content->title</em>?") . "</h2>
+                <p>" . t("This action will cause the content to not appear in reports, and not be easily accessible. It can only be restored by an administrator.") . "</p>
+                <hr>",
+    
+  );
+
+  
+  $form['submit_confirm'] = array(
+    'type' => 'submit',
+    'value' => 'Confirm & Remove',    
+    'attributes' => array('class' => 'content-submit-btn'),
+  );
+  
+  $form['submit_cancel'] = array(
+    'type' => 'submit',
+    'value' => 'Cancel',
+    'attributes' => array('class' => 'content-delete-btn'),
+  );
+
+  
+  return $form;  
+}
+
+
+
+
+function content_unpublish_content_form_submit(&$form, &$form_state) {
+  
+  $values = $form_state['values'];
+  
+  if (trim($values['submit_cancel']) != '') {
+    // We want to CANCEL this operation!
+
+    // find out if we should redirect anywhere in particular for this cancelation
+    if (isset($form['#redirect'])) {
+      fp_add_message(t("The operation was cancelled."));  
+      $form['#redirect']['query'] .= "&cancel=yes";
+    }
+    else {
+      // No redirect was specified, so let's just return.
+      fp_add_message(t("The operation was cancelled."));
+    }
+    return;
+    
+  }  
+  
+  
+      
+  $cid = $form_state['values']['cid'];
+  $content = content_load($cid);
+  $content->published = 0;
+    
+  content_save($content);
+  
+  fp_add_message("Content has been removed.");
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /**
@@ -281,8 +396,13 @@ function content_dialog_handle_after_save() {
   
   $rtn = "";
   
+  $timeout = 1000;
+  
   if (isset($_REQUEST['del']) && $_REQUEST['del'] != '') {
     $rtn .= "<h2 class='dialog-handle-after-save'>" . t("The content has been deleted successfully.<br><br>Closing window...") . "</h2>";
+  }
+  else if (isset($_REQUEST['cancel']) && $_REQUEST['cancel'] != '') {
+    $rtn .= "<h2 class='dialog-handle-after-save'>" . t("Cancellation successful.<br><br>Closing window...") . "</h2>";    
   }
   else {  
     $rtn .= "<h2 class='dialog-handle-after-save'>" . t("Your submission has been saved correctly!<br><br>Closing window...") . "</h2>";
@@ -291,7 +411,7 @@ function content_dialog_handle_after_save() {
   $rtn .= "<br><br><p>" . t("If this windows doesn't close within 3 seconds,") . " <a href='javascript:window.parent.location.reload();'>" . t("click here") . "</a>.</p>";
   
   // Add this javascript code to when the page loads.
-  /*  DEV: comment out while testing
+  ///*  DEV: comment out while testing
 
   $rtn .= "
       <script type='text/javascript'>
@@ -300,7 +420,7 @@ function content_dialog_handle_after_save() {
             
             window.parent.location.reload();
           
-          }, 1000);  
+          }, $timeout);  
         });
       </script>
   ";
