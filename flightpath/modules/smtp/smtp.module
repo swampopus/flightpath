@@ -26,7 +26,7 @@ function smtp_menu() {
       "menu_icon" => fp_get_module_path('smtp') . "/icons/email.png",      
       "menu_links" => array(         
         0 => array(
-          "text" => "Back to main menu",
+          "text" => "Admin Console",
           "path" => "admin-tools/admin",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),
@@ -111,9 +111,9 @@ function smtp_settings_form() {
 function smtp_mail($to, $subject, $msg) {
     
   $system_path = trim($GLOBALS["fp_system_settings"]["file_system_path"]);
-  require "$system_path/inc/PHPMailer/src/Exception.php";
-  require "$system_path/inc/PHPMailer/src/PHPMailer.php";
-  require "$system_path/inc/PHPMailer/src/SMTP.php";  
+  require_once("$system_path/inc/PHPMailer/src/Exception.php");
+  require_once("$system_path/inc/PHPMailer/src/PHPMailer.php");
+  require_once("$system_path/inc/PHPMailer/src/SMTP.php");  
 
   $mail = new PHPMailer();
   

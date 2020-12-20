@@ -1,6 +1,9 @@
 FlightPath 5.x Changelog
 ========================
 
+2020-12-20
+  Made it so the smtp module only require_once's certain files, so as not to cause issues.
+
 
 2020-09-30
   Found a bug in the system module's login, where the allowed student ranks was not being respected.  This has since been changed.
