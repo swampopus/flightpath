@@ -272,6 +272,8 @@ function content_unpublish_content_form_submit(&$form, &$form_state) {
     
   content_save($content);
   
+  watchdog('content', "Content with cid $cid was removed/unpublished.");
+  
   fp_add_message("Content has been removed.");
   
 }
@@ -712,11 +714,19 @@ function content_edit_content_form($type = "", $cid = "") {
 
 
   // Are we published?
+  /* 
   $form['published'] = array(
     'type' => 'checkbox',
     'label' => t('Published'),
     'value' => (bool) $content->published,
     'weight' => 900,
+  );
+  */
+  
+  // We never show the published option, since we will always give the user a way to "remove" and "restore" content.
+  $form['published'] = array(
+    'type' => 'hidden',
+    'value' => intval($content->published),
   );
   
   
@@ -764,7 +774,9 @@ function content_edit_content_form_submit(&$form, &$form_state) {
     $content = content_load($values['cid']);
     
     // TODO: check to make sure we have permission to delete.
-        
+    
+    watchdog('content', "Content with cid $cid was marked for deletion.");
+            
     $content->delete_flag = 1;
     content_save($content);
         
@@ -1013,6 +1025,10 @@ function content_content_save(&$content) {
               VALUES (" . join(", " , $param_names) . ")";
     
   db_query($sql, $params);    
+  
+  
+  watchdog('content', "Content with cid $cid was saved/updated.");
+  
   
     
   
@@ -1384,6 +1400,7 @@ function content_display_content_admin_list() {
   $table_headers[] = array("label" => "Actions");  
   $table_headers[] = array("label" => "Title", "field" => "n.title");  
   $table_headers[] = array("label" => "Type", "field" => "n.type");  
+  $table_headers[] = array("label" => "Published", "field" => "n.published");  
   $table_headers[] = array("label" => "Author");  
   $table_headers[] = array("label" => "Updated", "field" => "n.updated");
      
@@ -1440,6 +1457,7 @@ function content_display_content_admin_list() {
     
     $rtn .= "
                 <td valign='top'>" . $content->type . "</td>
+                <td valign='top'>" . $content->published . "</td>
                 <td valign='top'>" . $author_name . "</td>
                 <td valign='top'>" . $updated . "</td>
              </tr>";
