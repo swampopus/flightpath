@@ -455,6 +455,8 @@ function content_view_content($cid) {
   $types = content_get_types();
   $author = fp_load_user($content->user_id);
   
+  $render['#content-type'] = $type;
+  
   $render['#class'] = "content-type-" . $type;
   
     
