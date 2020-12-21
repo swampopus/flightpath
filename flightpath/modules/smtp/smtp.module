@@ -111,9 +111,9 @@ function smtp_settings_form() {
 function smtp_mail($to, $subject, $msg, $bool_html = FALSE) {
     
   $system_path = trim($GLOBALS["fp_system_settings"]["file_system_path"]);
-  require "$system_path/libraries/PHPMailer/src/Exception.php";
-  require "$system_path/libraries/PHPMailer/src/PHPMailer.php";
-  require "$system_path/libraries/PHPMailer/src/SMTP.php";  
+  require_once("$system_path/libraries/PHPMailer/src/Exception.php");
+  require_once("$system_path/libraries/PHPMailer/src/PHPMailer.php");
+  require_once("$system_path/libraries/PHPMailer/src/SMTP.php");  
 
   $mail = new PHPMailer();
   

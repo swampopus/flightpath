@@ -2893,7 +2893,64 @@ function system_display_dashboard_page () {
 
 
 
+  // Load announcements as HTML
   $announcements = "";
+
+  $announcements .= "<div class='dash-box dash-right'>
+               <div class='announcements-feed-block dash-feed-block'>
+                  " . fp_render_section_title(t("Announcements")) . "
+                 <div class='contents'>";
+  
+          
+  $res = db_query("SELECT DISTINCT(a.cid) FROM content__announcement a, content n
+                   WHERE a.vid = n.vid
+                   AND a.cid = n.cid
+                   AND n.delete_flag = 0
+                   AND n.published = 1                                    
+                   ORDER BY field__activity_datetime DESC, a.vid DESC
+                   LIMIT 7");
+   
+  while ($cur = db_fetch_object($res)) {
+    $cid = $cur->cid;      
+    $content = content_load($cid);
+    
+    // is this "faculty" visibility?  If so, do we have access to view?
+    if ($content->field__visibility['value'] == 'faculty' && !user_has_permission('can_view_faculty_engagements')) {        
+      continue;      
+    }    
+
+          
+    $disp_date = date("m/d/Y g:ia", convert_time(strtotime($content->field__activity_datetime['value'])));
+    
+    $announcements .= "<div class='feed-item'>
+                <div class='feed-item-title'>$content->title</div>
+                <div class='feed-item-desc'>{$content->field__msg['display_value']}</div>
+                <div class='feed-item-datetime'>$disp_date</div>
+             </div>";
+        
+  } // while
+  
+  $announcements .=  "</div>  <!-- contents -->
+               </div> <!-- feed block -->                                                
+              </div>";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   if ($user->is_faculty) {
 
@@ -3038,43 +3095,7 @@ function system_display_dashboard_page () {
          
 
     
-    $announcements .= "<div class='dash-box dash-right'>
-                 <div class='announcements-feed-block dash-feed-block'>
-                    " . fp_render_section_title(t("Announcements")) . "
-                   <div class='contents'>";
-    
-            
-    $res = db_query("SELECT DISTINCT(a.cid) FROM content__announcement a, content n
-                     WHERE a.vid = n.vid
-                     AND a.cid = n.cid
-                     AND n.delete_flag = 0
-                     AND n.published = 1                                    
-                     ORDER BY field__activity_datetime DESC, a.vid DESC
-                     LIMIT 7");
-     
-    while ($cur = db_fetch_object($res)) {
-      $cid = $cur->cid;      
-      $content = content_load($cid);
-      
-      // is this "faculty" visibility?  If so, do we have access to view?
-      if ($content->field__visibility['value'] == 'faculty' && !user_has_permission('can_view_faculty_engagements')) {        
-        continue;      
-      }    
 
-            
-      $disp_date = date("m/d/Y g:ia", convert_time(strtotime($content->field__activity_datetime['value'])));
-      
-      $announcements .= "<div class='feed-item'>
-                  <div class='feed-item-title'>$content->title</div>
-                  <div class='feed-item-desc'>{$content->field__msg['display_value']}</div>
-                  <div class='feed-item-datetime'>$disp_date</div>
-               </div>";
-          
-    } // while
-    
-    $announcements .=  "</div>  <!-- contents -->
-                 </div> <!-- feed block -->                                                
-                </div>";
     
     
     
@@ -3151,7 +3172,7 @@ function system_display_dashboard_page () {
                 ";
     
     
-      $rtn .= $announcements;
+    $rtn .= $announcements;
     
     
   } // if is_student

@@ -1085,6 +1085,11 @@ input::placeholder {
 }
 
 
+.readonly {
+  background-color: #eee;
+}
+
+
 .section-box-title {
   background-color: #aaa;
   border-bottom: 5px solid #999;
