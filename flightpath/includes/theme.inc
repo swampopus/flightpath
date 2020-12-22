@@ -511,6 +511,11 @@ function format_date($timestamp = 0, $format = "standard", $custom = "") {
     $f = "F jS, Y, g:ia";
   }
   
+  if ($format == 'long_no_year') {
+    $f = 'l, F jS \a\t g:ia';
+  }
+  
+  
   if ($format == "just_date") {
     $f = "F jS, Y";
   }

@@ -153,18 +153,25 @@ ___dashboard{}
 
 
 
+
 .activity-feed-block  {
-  border: 1px solid #ccc;  
-  margin-right: 10px;
+  border: 1px solid #ccc;
 }
 
-.activity-feed-block .contents,
-.announcements-feed-block .contents
+.dash-feed-block .contents
  {
   padding-left: 10px;
   max-height: 500px;
   overflow-y: scroll;
 }
+
+
+
+.appointments-feed-block .contents {
+  max-height: 125px;
+  overflow-y: scroll;  
+}
+
 
 .feed-item {
   margin-bottom: 15px;
@@ -193,14 +200,22 @@ ___dashboard{}
 }
 
 
-.announcements-feed-block {
-  margin-left: 10px;
-  border: 1px solid #ccc;
+.dash-feed-block {
+  margin-bottom: 10px;
+  border: 1px solid #ccc;  
+}
+
+
+.dash-right .dash-feed-block {
+  margin-left: 10px;  
 }
 
 .announcements-feed-block .feed-item .feed-item-title {
   margin-bottom: 10px;
 }
+
+
+
 
 
 .dash-full-width {

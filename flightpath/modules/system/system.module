@@ -2896,7 +2896,7 @@ function system_display_dashboard_page () {
   // Load announcements as HTML
   $announcements = "";
 
-  $announcements .= "<div class='dash-box dash-right'>
+  $announcements .= "
                <div class='announcements-feed-block dash-feed-block'>
                   " . fp_render_section_title(t("Announcements")) . "
                  <div class='contents'>";
@@ -2931,22 +2931,44 @@ function system_display_dashboard_page () {
   } // while
   
   $announcements .=  "</div>  <!-- contents -->
-               </div> <!-- feed block -->                                                
-              </div>";
+               </div> <!-- feed block --> ";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+  // Build up the "appoinments" HTML
+  $appointments = "";
+  $appointments .= "<div class='appointments-feed-block dash-feed-block'>
+                    " . fp_render_section_title("Upcoming Appointments") . "
+                   <div class='contents'>";
+    
+    $upcoming = calendar_get_upcoming_appointments_for_cwid($user->cwid);
+    
+    foreach ($upcoming as $details) {
+      
+      $thedate = format_date(convert_time($details['utc_start_ts']), 'long_no_year');      
+      $use_name = $details['faculty_name'];
+      if ($user->is_faculty) {
+        $use_name = $details['student_name'];
+      }            
+                  
+      $msg = t("You have an appointment with @fn on @td.", array("@fn" => $use_name, "@td" => $thedate));
+      
+      
+      $appointments .= "<div class='feed-item'>
+                      <div class='feed-item-icon'><i class='fa fa-calendar'></i></div>
+                      <div class='feed-item-title'>$use_name</div>
+                      <div class='feed-item-desc'>$msg</div>
+               </div>";
+      
+    }
+    
+        
+    
+            
+    $appointments .= "
+                   </div> <!-- contents -->
+                 </div> <!-- feed-block -->                                                
+                ";
 
 
 
@@ -2955,89 +2977,13 @@ function system_display_dashboard_page () {
   if ($user->is_faculty) {
 
   
-    if (!isset($_SESSION["fp_pie_chart_token"])) {
-      $_SESSION["fp_pie_chart_token"] = md5(fp_token());
-    }
-    //old Google API url: $pie_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
-    $pie_chart_url_1 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=27&unfinished=73&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
-    $pie_chart_url_2 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=67&unfinished=33&unfinished_col=cccccc&progress_col=00994d&token=" . $_SESSION["fp_pie_chart_token"];
-    $pie_chart_url_3 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=46&unfinished=54&unfinished_col=cccccc&progress_col=ff4d4d&token=" . $_SESSION["fp_pie_chart_token"];
-      
   
-    $rtn .= "<div class='dash-full-width'>
-                  " . fp_render_section_title("Your Advising Snapshot") . "
-                  <div class='advising-stats-block-inner-wrapper'>
-                  
-                    
-                    <div class='advising-stat-box'>
-                      <div class='stat-box-title'>Completed Advisings Fall 2020</div>
-                      <div class='stat-box-chart'><img src='$pie_chart_url_1'></div>
-                      <div class='stat-box-caption'>27% (59 of 220)</div> 
-                    </div>
-    
-                    <div class='advising-stat-box'>
-                      <div class='stat-box-title'>High-Risk Percentage</div>
-                      <div class='stat-box-chart'><img src='$pie_chart_url_3'></div>
-                      <div class='stat-box-caption'>46% (31 / 68)</div> 
-                    </div>
-    
-    
-                    <div class='advising-stat-box'>
-                      <div class='stat-box-title'>Advisees Graduating</div>
-                      <div class='stat-box-chart'><img src='$pie_chart_url_2'></div>
-                      <div class='stat-box-caption'>67% (147 of 220)</div> 
-                    </div>
-                    
-                    <div class='advising-stat-box advising-stat-box-wide advising-stat-box-upcoming'>
-                      <div class='stat-box-title'>Upcoming Appointments</div>
-                     <div class='stat-box-wrapper'>
-                      <div class='stat-box-row'>
-                        <div class='stat-box-row-date'>1:00pm - 1:20pm</div>
-                        <div class='stat-box-row-title'>Jamale Smith (10035744)</div>                                         
-                      </div>
-                      <div class='stat-box-row'>
-                        <div class='stat-box-row-date'>1:30pm - 1:45pm</div>
-                        <div class='stat-box-row-title'>Evelain Jonston (1076654)</div>                                         
-                      </div>
-                      <div class='stat-box-row'>
-                        <div class='stat-box-row-date'>1:50pm - 2:15pm</div>
-                        <div class='stat-box-row-title'>Maiku Tashi (1033154)</div>                                         
-                      </div>
-                      <div class='stat-box-row'>
-                        <div class='stat-box-row-date'>2:30pm - 2:45pm</div>
-                        <div class='stat-box-row-title'>Daniel Smithe (1027891)</div>                                         
-                      </div>
-                      <div class='stat-box-row'>
-                        <div class='stat-box-row-date'>3:10pm - 3:25pm</div>
-                        <div class='stat-box-row-title'>Ramon DeAngello (1011155)</div>                                         
-                      </div>
-                      <div class='stat-box-row'>
-                        <div class='stat-box-row-date'>3:30pm - 3:50pm</div>
-                        <div class='stat-box-row-title'>Doug Funnie (1056351)</div>                                         
-                      </div>
-                      <div class='stat-box-row'>
-                        <div class='stat-box-row-date'>4:00pm - 4:15pm</div>
-                        <div class='stat-box-row-title'>Thom Ranci (1033678)</div>                                         
-                      </div>
-                      <div class='stat-box-row'>
-                        <div class='stat-box-row-date'>4:30pm - 4:45pm</div>
-                        <div class='stat-box-row-title'>Jaques Tonies (1003210)</div>                                         
-                      </div>
-                     </div> 
-    
-                      
-                   </div>
-                  
-                  
-               </div>";
-    
-    
-    
-      
-      $rtn .= "<div class='dash-box dash-left'>
-                 <div class='activity-feed-block dash-feed-block'>
-                    " . fp_render_section_title("Advisee Activity Feed") . "
-                   <div class='contents'>";
+    $rtn .= "<div class='dash-box dash-left'>";
+    $rtn .= $appointments;
+          
+    $rtn .= "<div class='activity-feed-block dash-feed-block'>
+                " . fp_render_section_title("Advisee Activity Feed") . "
+             <div class='contents'>";
 
 
                          
@@ -3090,43 +3036,66 @@ function system_display_dashboard_page () {
       
       $rtn .= $activity;                   
                    
-                   
-                   
-         
+    $rtn .= "<div class='dash-box dash-right'>";
 
     
+     if (!isset($_SESSION["fp_pie_chart_token"])) {
+        $_SESSION["fp_pie_chart_token"] = md5(fp_token());
+      }
+      //old Google API url: $pie_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
+      $pie_chart_url_1 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=27&unfinished=73&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
+      $pie_chart_url_2 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=67&unfinished=33&unfinished_col=cccccc&progress_col=00994d&token=" . $_SESSION["fp_pie_chart_token"];
+      $pie_chart_url_3 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=46&unfinished=54&unfinished_col=cccccc&progress_col=ff4d4d&token=" . $_SESSION["fp_pie_chart_token"];
+          
 
+    // Get total number of advisees VS number that have been advised for current term.
+    // TODO:  Since this can take a while to load, maybe it loads by javascript async instead?  Or maybe its an iframe which can also be async?
+    $adv_array = student_search_display_my_advisees(TRUE);
+    //fpm($adv_array);
+    $total = count($adv_array);
+    //fpm($total);
+    $advised_count = 0;
+    $advised_percent = 0;
+    if ($total > 0) {
+      foreach ($adv_array as $details) {
+        if (@$details['advised_image'] != "") {
+          $advised_count++;
+        } 
+      }
+      //fpm($advised_count);
+      $advised_percent = round($advised_count/$total * 100, 2) ;      
+    }
+    $unfinished = 100 - $advised_percent;
+    $pie_chart_url_advised_percent = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=$advised_percent&unfinished=$unfinished&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
+    
+    $advising_term_id = variable_get("advising_term_id", "");
+    $advising_term_desc = get_term_description($advising_term_id);
+    
+    // TODO:  make much prettier!
+    
+    $rtn .= "<div class='snapshot-feed-block dash-feed-block'>
+                " . fp_render_section_title("Advising Snapshot") . "
+               <div class='contents'>
+                  $advising_term_desc ($advising_term_id)
+                  <img src='$pie_chart_url_advised_percent'>
+                  you've advised $advised_percent% of advisees ($advised_count / $total)
+               </div>
+             </div>";
     
     
+    
+    
+    /// Do announcements under.
     
     $rtn .= $announcements;
+    $rtn .= "</div>";
   
   } // if is_faculty
   else if ($user->is_student) {
     
-      $rtn .= "<div class='dash-box dash-left'>
-                 <div class='appointments-feed-block dash-feed-block'>
-                    " . fp_render_section_title("Upcoming Appointments") . "
-                   <div class='contents'>
-                    <div class='feed-item'>
-                      <div class='feed-item-icon'><i class='fa fa-calendar'></i></div>
-                      <div class='feed-item-title'>John Adminly</div>
-                      <div class='feed-item-desc'>You have an appointment with your advisor, John Adminly, on Tuesday, December 15th at 10:30am.</div>
-                      
-                    </div>
 
-                    <div class='feed-item'>
-                      <div class='feed-item-icon'><i class='fa fa-calendar'></i></div>
-                      <div class='feed-item-title'>Jose Cordova</div>
-                      <div class='feed-item-desc'>You have an appointment with your professor, Jose Cordova, on Wednesday, December 16th at 1:00pm.</div>
-                      
-                    </div>
-
-        
-                   </div> <!-- contents -->
-                 </div> <!-- feed-block -->                                                
-                ";
-
+    $rtn .= "<div class='dash-box dash-left'>";
+    $rtn .= $appointments;
                 
     fp_add_js(fp_get_module_path('advise') . '/js/advise.js');            
     $rtn .= "                
@@ -3142,7 +3111,7 @@ function system_display_dashboard_page () {
                 ORDER BY `posted` DESC, `term_id` DESC 
                 LIMIT 4", $user->cwid);
     while($cur = db_fetch_array($res)) {
-        
+         
       $dt = date("n/j/y g:ia",$cur['posted']);
       $fac_name = fp_get_faculty_name($cur['faculty_id'], FALSE);
       $html = "";
@@ -3165,15 +3134,14 @@ function system_display_dashboard_page () {
                 
                    
     $rtn .= "      </div> <!-- contents -->
-                 </div> <!-- feed-block -->                                                
-                
-                
+                 </div> <!-- feed-block -->           
                 </div> <!-- dash-box -->                                
                 ";
     
     
+    $rtn .= "<div class='dash-box dash-right'>";
     $rtn .= $announcements;
-    
+    $rtn .= "</div>";
     
   } // if is_student
   
