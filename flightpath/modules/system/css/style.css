@@ -310,8 +310,10 @@ ___dashboard{}
 
 /* don't need scroll bars here */
 .snapshot-feed-block .contents {
-  max-height: none;
-  overflow-y: auto;  
+  max-height: 85px;
+  overflow-y: hidden;
+  background:url('tenor.gif') center center no-repeat; 
+  background-size: 50px;
 }
 
 
