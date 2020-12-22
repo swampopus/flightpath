@@ -64,7 +64,14 @@ $data->addPoints(array($progress, $unfinished), "Value");
 $data->addPoints(array("point1", "point2"), "Legend");
 $data->setAbscissa("Legend");
 
-$picture = new pImage(75, 75, $data);
+
+
+$size = 75;   // the default
+if (@$_GET['size'] != "") {
+  $size = intval($_GET['size']);
+}
+
+$picture = new pImage($size, $size, $data);
 
 
 $chart = new pPie($picture, $data);
@@ -75,7 +82,15 @@ $chart->setSliceColor(1, array("R" => $unfinished_col["r"], "G" => $unfinished_c
 
 
 // Render it out, with a certain size, and a little gap between the value and the remainder
-$chart->draw2DPie(38, 38, array("Radius" => 25, "Border" => TRUE));
+
+$radius = 25;
+if (@$_GET['radius'] != "") {
+  $radius = intval($_GET['radius']);
+}
+
+
+
+$chart->draw2DPie(38, 38, array("Radius" => $radius, "Border" => TRUE));
 
 
 

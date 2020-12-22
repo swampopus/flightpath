@@ -299,7 +299,7 @@ function student_search_render_small_search() {
 /**
  * Displays this user's advisees, if there are any assigned.
  */
-function student_search_display_my_advisees($bool_only_return_adv_array = FALSE) {
+function student_search_display_my_advisees($bool_only_return_adv_array = FALSE, $use_cwid = NULL) {
   global $user;
   $rtn = "";
 
@@ -307,7 +307,12 @@ function student_search_display_my_advisees($bool_only_return_adv_array = FALSE)
   
   $_SESSION["student_search_last_tab"] = "my-advisees";
   
-  $faculty_cwid = $user->cwid;
+  if ($use_cwid == NULL) {
+    $faculty_cwid = $user->cwid;
+  }
+  else {
+    $faculty_cwid = $use_cwid;
+  }
         
   
   $query = "SELECT u.user_id, f_name, u.cwid, l_name, major_code, rank_code, a.catalog_year

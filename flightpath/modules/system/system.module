@@ -291,6 +291,20 @@ function system_menu() {
   
   
   
+  $items["render-advising-snapshot-for-iframe"] = array(
+    "title" => "Dashboard",
+    "page_callback" => "system_render_advising_snapshop_for_iframe",
+    "access_arguments" => array("access_logged_in_content"),
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "weight" => 10,
+    "page_settings" => array(
+      "screen_mode" => "not_advising",
+    ),
+  );
+  
+
+  
+  
   $items["install-finished"] = array(
     "title" => "Installation Finished",
     "page_callback" => "system_display_install_finished_page",
@@ -3039,46 +3053,16 @@ function system_display_dashboard_page () {
     $rtn .= "<div class='dash-box dash-right'>";
 
     
-     if (!isset($_SESSION["fp_pie_chart_token"])) {
-        $_SESSION["fp_pie_chart_token"] = md5(fp_token());
-      }
-      //old Google API url: $pie_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
-      $pie_chart_url_1 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=27&unfinished=73&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
-      $pie_chart_url_2 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=67&unfinished=33&unfinished_col=cccccc&progress_col=00994d&token=" . $_SESSION["fp_pie_chart_token"];
-      $pie_chart_url_3 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=46&unfinished=54&unfinished_col=cccccc&progress_col=ff4d4d&token=" . $_SESSION["fp_pie_chart_token"];
-          
-
-    // Get total number of advisees VS number that have been advised for current term.
-    // TODO:  Since this can take a while to load, maybe it loads by javascript async instead?  Or maybe its an iframe which can also be async?
-    $adv_array = student_search_display_my_advisees(TRUE);
-    //fpm($adv_array);
-    $total = count($adv_array);
-    //fpm($total);
-    $advised_count = 0;
-    $advised_percent = 0;
-    if ($total > 0) {
-      foreach ($adv_array as $details) {
-        if (@$details['advised_image'] != "") {
-          $advised_count++;
-        } 
-      }
-      //fpm($advised_count);
-      $advised_percent = round($advised_count/$total * 100, 2) ;      
-    }
-    $unfinished = 100 - $advised_percent;
-    $pie_chart_url_advised_percent = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=$advised_percent&unfinished=$unfinished&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
-    
     $advising_term_id = variable_get("advising_term_id", "");
     $advising_term_desc = get_term_description($advising_term_id);
-    
-    // TODO:  make much prettier!
-    
+
+    $url = fp_url("render-advising-snapshot-for-iframe", "window_mode=popup");
+
     $rtn .= "<div class='snapshot-feed-block dash-feed-block'>
-                " . fp_render_section_title("Advising Snapshot") . "
+                " . fp_render_section_title("Advising Snapshot for $advising_term_desc") . "
                <div class='contents'>
-                  $advising_term_desc ($advising_term_id)
-                  <img src='$pie_chart_url_advised_percent'>
-                  you've advised $advised_percent% of advisees ($advised_count / $total)
+                <iframe src='$url' frameborder=0 width=100%
+                  onload=\"this.style.height=(this.contentWindow.document.body.scrollHeight)+'px';\"></iframe>
                </div>
              </div>";
     
@@ -3148,6 +3132,79 @@ function system_display_dashboard_page () {
   
   return $rtn;
 } // display_dashboard_page
+
+
+/**
+ * This is meant to be a widget which shows in the dashboard of the advising user, within an iframe, since it can
+ * take a while to load.
+ */
+function system_render_advising_snapshop_for_iframe() {
+  $rtn = "";        
+      
+  fp_add_css(fp_get_module_path("system") . "/css/style.css");
+  
+      
+  if (!isset($_SESSION["fp_pie_chart_token"])) {
+    $_SESSION["fp_pie_chart_token"] = md5(fp_token());
+  }
+  //old Google API url: $pie_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
+  //$pie_chart_url_1 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=27&unfinished=73&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
+  //$pie_chart_url_2 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=67&unfinished=33&unfinished_col=cccccc&progress_col=00994d&token=" . $_SESSION["fp_pie_chart_token"];
+  //$pie_chart_url_3 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=46&unfinished=54&unfinished_col=cccccc&progress_col=ff4d4d&token=" . $_SESSION["fp_pie_chart_token"];
+      
+      
+      
+  // Get total number of advisees VS number that have been advised for current term.
+  // Since this can take a while to load, maybe it loads by javascript async instead?  Or maybe its an iframe which can also be async?
+  $adv_array = student_search_display_my_advisees(TRUE);
+  //fpm($adv_array);
+  $total = count($adv_array);
+  //fpm($total);
+  $advised_count = 0;
+  $advised_percent = 0;
+  if ($total > 0) {
+    foreach ($adv_array as $details) {
+      if (@$details['advised_image'] != "") {
+        $advised_count++;
+      } 
+    }
+    //fpm($advised_count);
+    $advised_percent = round($advised_count/$total * 100, 2) ;      
+  }
+  $unfinished = 100 - $advised_percent;
+  $pie_chart_url_advised_percent = base_path() . "/libraries/pchart/fp_pie_chart.php?size=75&radius=35&progress=$advised_percent&unfinished=$unfinished&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
+  
+  $advising_term_id = variable_get("advising_term_id", "");
+  $advising_term_desc = get_term_description($advising_term_id);
+            
+     
+      
+  $rtn .= "<div class='snapshot-in-iframe'>
+            <div class='pie-image'>
+              <img src='$pie_chart_url_advised_percent'>
+            </div>
+            <div class='pie-term-title'>$advising_term_desc ($advising_term_id)</div>
+            <div class='pie-term-caption'>" . t("You have advised %p of advisees @math", array("%p" => "$advised_percent%", "@math" => "($advised_count / $total)")) . "</div>
+           </div>
+          ";
+    
+  return $rtn;
+  
+  
+} // system_render_advising_snapshop_for_iframe
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

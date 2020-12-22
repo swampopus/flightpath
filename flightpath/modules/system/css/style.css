@@ -292,6 +292,41 @@ ___dashboard{}
 }
 
 
+.snapshot-in-iframe {
+  font-size: 1.2em !important;
+}
+
+.snapshot-in-iframe .pie-image {
+  float: left;
+  margin-right: 10px;
+}
+
+.snapshot-in-iframe .pie-term-title {
+  display: block;
+  font-size: 1.3em ;
+  font-weight: bold;
+  margin-bottom: 7px;
+}
+
+/* don't need scroll bars here */
+.snapshot-feed-block .contents {
+  max-height: none;
+  overflow-y: auto;  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
