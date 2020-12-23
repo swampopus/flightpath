@@ -350,6 +350,28 @@ function user_user_settings_form() {
     );
   }
   
+  $form['c_notification_settings'] = array(
+    'label' => 'Notification Settings (click to expand)',
+    'type' => 'cfieldset',
+    'start_closed' => TRUE,
+  );
+  
+  if (@$user->settings['default_notification_method'] != "") {
+    //$form['c_notification_settings']['start_closed'] = FALSE;
+  }
+  
+  
+  $e['default_notification_method'] = array(
+    'label' => t('Default notification method for generic events'),
+    'type' => 'select',
+    'hide_please_select' => TRUE,
+    'options' => array('email' => t("Email"), 'txt' => t("TXT Message"), 'email_txt' => t("Both email and txt message"), 'none' => t("None - Do not send me notifications for generic events.")),
+    'value' => @$user->settings['default_notification_method'],
+    'description' => t('These would be generic notifications sent out by FlightPath, not covered by other types of notification events listed below.'),    
+  );
+  
+  $form['c_notification_settings']['elements'] = array($e);
+  
   
    
      
@@ -407,11 +429,15 @@ function user_user_settings_form_validate($form, $form_state) {
  */
 function user_user_settings_form_submit($form, $form_state) {
   global $user;
-  
+      
   $timezone = $form_state['values']['timezone'];
   $hide_charts = $form_state['values']['hide_charts'];
   $default_student_load_tab = $form_state['values']['default_student_load_tab'];
+  $default_notification_method = $form_state['values']['default_notification_method'];
   
+  
+  
+    
   // are we updating password?  (If we made it here, we have already passed validation, and may continue.
   $new_password1 = $form_state['values']['new_password1'];  
   
@@ -434,8 +460,9 @@ function user_user_settings_form_submit($form, $form_state) {
               SET timezone = ?,
                   hide_charts = ?,
                   default_student_load_tab = ?,
+                  default_notification_method = ?,
                   updated = ?
-            WHERE user_id = ?", array($timezone, $hide_charts, $default_student_load_tab, time(), $user->id));
+            WHERE user_id = ?", array($timezone, $hide_charts, $default_student_load_tab, $default_notification_method, time(), $user->id));
   
   fp_add_message(t("User settings saved successfully."));
   

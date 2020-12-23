@@ -3181,9 +3181,9 @@ function system_render_advising_snapshop_for_iframe() {
   $rtn .= "<div class='snapshot-in-iframe'>
             <div class='pie-image'>
               <img src='$pie_chart_url_advised_percent'>
-            </div>
+            </div> 
             <div class='pie-term-title'>$advising_term_desc ($advising_term_id)</div>
-            <div class='pie-term-caption'>" . t("You have advised %p of advisees @math", array("%p" => "$advised_percent%", "@math" => "($advised_count / $total)")) . "</div>
+            <div class='pie-term-caption'>" . t("You have advised %p of your advisees @math", array("%p" => "$advised_percent%", "@math" => "($advised_count/$total)")) . "</div>
            </div>
           ";
     
