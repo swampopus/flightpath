@@ -2956,7 +2956,7 @@ function system_display_dashboard_page () {
                    <div class='contents'>";
     
     $upcoming = calendar_get_upcoming_appointments_for_cwid($user->cwid);
-    
+    $bool_is_empty = TRUE;
     foreach ($upcoming as $details) {
       
       $thedate = format_date(convert_time($details['utc_start_ts']), 'long_no_year');      
@@ -2964,7 +2964,9 @@ function system_display_dashboard_page () {
       if ($user->is_faculty) {
         $use_name = $details['student_name'];
       }            
-                  
+      
+      $bool_is_empty = FALSE;
+                        
       $msg = t("You have an appointment with @fn on @td.", array("@fn" => $use_name, "@td" => $thedate));
       
       
@@ -2972,6 +2974,14 @@ function system_display_dashboard_page () {
                       <div class='feed-item-icon'><i class='fa fa-calendar'></i></div>
                       <div class='feed-item-title'>$use_name</div>
                       <div class='feed-item-desc'>$msg</div>
+               </div>";
+      
+    }
+    
+    
+    if ($bool_is_empty) {
+      $appointments .= "<div class='empty'>
+                      <p>" . t("You have no upcoming appointments within the next 5 days.") . "</p> 
                </div>";
       
     }
@@ -3012,8 +3022,9 @@ function system_display_dashboard_page () {
       'alert' => 'fa-bell-o',
       'mail' => 'fa-envelope-o',
       'comment' => 'fa-comment-o',
+      'calendar' => 'fa-calendar-o',
     );
-              
+               
     $res = db_query("SELECT DISTINCT(a.cid) FROM content__activity_record a, content n
                        WHERE a.vid = n.vid
                        AND a.cid = n.cid
