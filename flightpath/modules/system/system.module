@@ -290,7 +290,6 @@ function system_menu() {
   );
   
   
-  
   $items["render-advising-snapshot-for-iframe"] = array(
     "title" => "Dashboard",
     "page_callback" => "system_render_advising_snapshop_for_iframe",
@@ -3053,13 +3052,18 @@ function system_display_dashboard_page () {
             
       } // while
       
+      $activity .= "<div class='activity-view-all'>" . l(t("View All"), "advisee-activities", '', array('class' => 'button')) . "</div>";
+      
       $activity .=  "</div>  <!-- contents -->
                    </div> <!-- feed block -->                                                
                   </div>";
       
       
-      
-      $rtn .= $activity;                   
+    if (user_has_permission('can_view_advisee_activity_records')) {  
+      $rtn .= $activity;
+    }
+    
+                       
                    
     $rtn .= "<div class='dash-box dash-right'>";
 
@@ -3103,7 +3107,7 @@ function system_display_dashboard_page () {
                 AND is_draft = 0
                 AND is_empty = 0
                 ORDER BY `posted` DESC, `term_id` DESC 
-                LIMIT 4", $user->cwid);
+                LIMIT 5", $user->cwid);
     while($cur = db_fetch_array($res)) {
          
       $dt = date("n/j/y g:ia",$cur['posted']);

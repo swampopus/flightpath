@@ -1422,6 +1422,24 @@ function fp_get_files_path() {
 
 
 /**
+ * Simply returns TRUE or FALSE if the user is a student.  (has the is_student == 1
+ * 
+ * If account is null, the global user will be used.
+ */
+function fp_user_is_student($account = null) {
+  global $user;
+  if ($account == NULL) {
+    $account = $user;
+  }
+  
+  return (bool)$account->is_student;
+  
+}
+
+
+
+
+/**
  * Simply returns the module's row from the modules table, if it exists.
  *
  * @param unknown_type $module
