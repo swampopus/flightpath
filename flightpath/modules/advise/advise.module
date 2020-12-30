@@ -294,6 +294,28 @@ function advise_get_advisees($faculty_id = "") {
 }
 
 
+/**
+ * Similar to @see advise_get_advisees, return a list of all advisors assigned to this student.
+ */
+function advise_get_advisors_for_student($student_id = "") {
+
+  $rtn = array();
+  
+  $res = db_query("SELECT * FROM advisor_student WHERE student_id = ?", array($student_id));
+  while ($cur = db_fetch_array($res)) {
+    
+    $faculty_id = $cur['faculty_id'];
+    $rtn[] = $faculty_id;
+  }  
+  
+  return $rtn;
+  
+}
+
+
+
+
+
 function advise_toggle_draft_form() {
   $form = array();
   
