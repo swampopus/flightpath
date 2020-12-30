@@ -311,7 +311,7 @@ function fpToggleHamburgerMenu() {
   // if string_mode == "base64" we will decode.  Useful for passing HTML.
   function fp_alert(str, string_mode) {
     if (string_mode == 'base64') {
-      str = atob(str);
+      str = decodeURIComponent(escape(atob(str)));  // all the extra escape and such is to handle possible emoji.  See: https://stackoverflow.com/questions/56647747/how-to-base64-encode-emojis-in-javascript
     }
     DayPilot.Modal.alert(str);
   }
