@@ -350,27 +350,19 @@ function user_user_settings_form() {
     );
   }
   
-  $form['c_notification_settings'] = array(
-    'label' => 'Notification Settings (click to expand)',
-    'type' => 'cfieldset',
-    'start_closed' => TRUE,
-  );
-  
-  if (@$user->settings['default_notification_method'] != "") {
-    //$form['c_notification_settings']['start_closed'] = FALSE;
-  }
   
   
-  $e['default_notification_method'] = array(
-    'label' => t('Default notification method for generic events'),
+  $form['default_notification_method'] = array(
+    'label' => t('Default notification method for important events'),
     'type' => 'select',
     'hide_please_select' => TRUE,
-    'options' => array('email' => t("Email"), 'txt' => t("TXT Message"), 'email_txt' => t("Both email and txt message"), 'none' => t("None - Do not send me notifications for generic events.")),
+    'options' => array('email' => t("Email"), 'txt' => t("TXT Message"), 'email_txt' => t("Both email and txt message")),
     'value' => @$user->settings['default_notification_method'],
-    'description' => t('These would be generic notifications sent out by FlightPath, not covered by other types of notification events listed below.'),    
+    'description' => t('These would be notifications sent out by FlightPath.  For example, when you schedule an appointment or to send out a reminder.
+                        If you are unsure what to select, choose "Email".'),    
   );
   
-  $form['c_notification_settings']['elements'] = array($e);
+  
   
   
    
