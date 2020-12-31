@@ -490,7 +490,7 @@ function db_get_user_id_from_cwid($cwid, $type = "faculty") {
     $type_line = " is_student='1' ";
   }
     
-  $user_id = db_result(db_query("SELECT user_id FROM users WHERE cwid = '?' AND $type_line ", $cwid));
+  $user_id = db_result(db_query("SELECT user_id FROM users WHERE cwid = ? AND $type_line ", $cwid));
   
   if ($user_id) {
     return $user_id;
@@ -499,6 +499,28 @@ function db_get_user_id_from_cwid($cwid, $type = "faculty") {
   return FALSE;
   
 }
+
+
+function db_get_user_id_from_email($email, $type = "faculty") {
+  
+  $type_line = " is_faculty='1' ";
+  if ($type == "student") {
+    $type_line = " is_student='1' ";
+  }
+    
+  $user_id = db_result(db_query("SELECT user_id FROM users WHERE email = ? AND $type_line ", $email));
+  
+  if ($user_id) {
+    return $user_id;
+  }
+  
+  return FALSE;
+  
+}
+
+
+
+
 
 
 /**
