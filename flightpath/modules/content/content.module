@@ -587,6 +587,10 @@ function content_edit_content_form($type = "", $cid = "") {
   }
   
   
+  // For simplicity, and because it causes no harm except a small amount of extra bandwidth, we will
+  // state that all "content" forms are multipart (so they can handle file uploads) even if there
+  // are no files being uploaded.
+  $form["#attributes"] = array("enctype" => 'multipart/form-data');
   
   
   $form["type"] = array(
@@ -677,6 +681,18 @@ function content_edit_content_form($type = "", $cid = "") {
         }
                 
         
+        // If this is a file, we want to have a way to REMOVE the file, so we can upload a different one, or simply to
+        // have no file there at all.
+        if ($form[$field_name]['type'] == 'file') {
+          $fid = intval($value);
+          $file = content_get_uploaded_file($fid);
+          if ($file) {
+            // TODO:  create a markup field, including a delete option, with the filename listed.
+            
+          }
+        } // type == file
+        
+        
         
         
         $form[$field_name]["value"] = $value;
@@ -757,6 +773,11 @@ function content_edit_content_form($type = "", $cid = "") {
 }
 
 
+function content_get_uploaded_file($fid) {
+  $res = db_query("SELECT * FROM content_files WHERE fid = ?", array($fid));
+  return db_fetch_array($res);
+}
+
 
 /**
  * Submit handler for the edit content form.
@@ -768,6 +789,9 @@ function content_edit_content_form_submit(&$form, &$form_state) {
   global $user;
   
   $values = $form_state["values"];
+
+  fpm($form_state);
+  fpm($_FILES);
 
   // are we trying to delete?
   if (trim($values['submit_delete']) != '') {
@@ -848,6 +872,16 @@ function content_edit_content_form_submit(&$form, &$form_state) {
         $utc_ts = convert_time($val_ts, fp_get_user_timezone(), 'UTC');        
         $values[$fieldname] = date('H:i', $utc_ts);               
       }
+
+
+      // If this field type is "file" then we are going to do something special with it
+      // TODO:  don't need to do this if we are just editing an existing content node and hitting "save"
+      if ($details['type'] == 'file') {        
+        $file = $_FILES[$fieldname];
+        // Now, save to the content_files table.
+        $fid = content_add_new_uploaded_file($file);
+        $values[$fieldname] = $fid; 
+      } // if details = file
             
       
       
@@ -899,7 +933,28 @@ function content_edit_content_form_submit(&$form, &$form_state) {
 } // ... submit
 
 
+function content_add_new_uploaded_file($file) {
+  // Store the file information in the content_files table, and then THIS field contains the fid reference number.
+  $original_filename = $file["name"];
+  $type = $file["type"]; 
+  $tmp_name = $file["tmp_name"];
+  // Figure out the extension of the original filename.
+  $temp = explode(".", $original_filename);
+  $ext = $temp[count($temp) - 1];                     
+  
+  $filename = 'attach__' . time() . '_' . mt_rand(9,999) . $original_filename;  // We will figure out the ext (from mimetype) later.
+  $full_filename = fp_get_files_path() . '/engagements_attachments/' . $filename;              
+  
+  if (!copy($tmp_name, $full_filename)) {
+    fp_add_message(t("Could not upload file.  Possibly because of permission issues on the destination directory,
+                      the disk is full, or some other reason."), "error");
+  }                    
 
+  db_query("INSERT INTO content_files (original_filename, filename, mimetype, posted)
+            VALUES (?, ?, ?, ?)", array($original_filename, $filename, $type, time()));
+  return db_insert_id();
+  
+}
 
 
 /**
