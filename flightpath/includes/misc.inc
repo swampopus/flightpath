@@ -31,6 +31,34 @@ function friendly_timezone($str) {
 } 
  
  
+ 
+/**
+ * Re-order the _FILES array for multiple files, to make it easier to work with.  From:
+ * http://php.net/manual/en/features.file-upload.multiple.php
+ * 
+ * To use:
+ *   $myfiles = fp_re_array_files($_FILES['fieldname'])
+ * 
+ * 
+ */
+function fp_re_array_files($file_post) {
+
+  fpm($file_post);
+
+  $file_ary = array();
+  $file_count = count($file_post['name']);
+  $file_keys = array_keys($file_post);
+
+  for ($i=0; $i<$file_count; $i++) {
+      foreach ($file_keys as $key) {
+          $file_ary[$i][$key] = $file_post[$key][$i];
+      }
+  }
+
+  return $file_ary;
+} 
+ 
+ 
 // From: https://www.php.net/manual/en/function.timezone-offset-get.php
 /**    Returns the offset from the origin timezone to the remote timezone, in seconds.
 *    @param $remote_tz;

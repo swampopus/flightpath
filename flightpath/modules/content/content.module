@@ -552,6 +552,8 @@ function content_edit_content_form($type = "", $cid = "") {
   }
   
   fp_add_css(fp_get_module_path("content") . "/css/content.css");
+  fp_add_js(fp_get_module_path("content") . "/js/content.js");
+  
   
   if ($type == "") {
     @$type = $_REQUEST["type"];    
@@ -668,7 +670,7 @@ function content_edit_content_form($type = "", $cid = "") {
         // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly. (it was stored as UTC in database)             
         if ($form[$field_name]['type'] == 'datetime-local') {
           if (trim($value) != '') {
-            $value = date('Y-m-d\TH:i', convert_time(strtotime($value)));            
+            $form[$field_name]["value"] = date('Y-m-d\TH:i', convert_time(strtotime($value)));  
           }
         }
         
@@ -676,7 +678,7 @@ function content_edit_content_form($type = "", $cid = "") {
         // needs to be converted to local timezone.
         if ($form[$field_name]['type'] == 'time') {
           if (trim($value) != '') {
-            $value = date('H:i', convert_time(strtotime($value)));            
+            $form[$field_name]["value"] = date('H:i', convert_time(strtotime($value)));            
           }
         }
                 
@@ -684,24 +686,66 @@ function content_edit_content_form($type = "", $cid = "") {
         // If this is a file, we want to have a way to REMOVE the file, so we can upload a different one, or simply to
         // have no file there at all.
         if ($form[$field_name]['type'] == 'file') {
-          $fid = intval($value);
-          $file = content_get_uploaded_file($fid);
-          if ($file) {
-            // TODO:  create a markup field, including a delete option, with the filename listed.
-            
+          $limit = intval(@$form[$field_name]['limit']);
+          if ($limit == 0) $limit = 1;
+          
+          // Do we already have a list of files we've attached?
+          $html = "";
+          $ofids = $value;
+          $fids = explode(",", $value);
+          $bool_is_empty = TRUE;
+          foreach ($fids as $fid) {
+            if ($fid == '') continue;
+            $fid = intval($fid);          
+            $file = content_get_uploaded_file($fid);
+            if ($file) {
+              $bool_is_empty = FALSE;            
+              // create a markup field, including a delete option, with the filename listed.
+              $url = $file['url'];                         
+              $delete_link = "<a href='javascript:contentDeleteFile(\"$field_name\",\"$fid\");'>Delete</a>";            
+              $html .= "<div class='file-field-line-$fid'><a href='$url' target='_blank'>" . $file['original_filename'] . "</a>  - $delete_link</div>";
+            } // we already had a file.
+          } // foreach
+          
+          if (!$bool_is_empty) {
+            $html = "<label>" . t("(Existing)") . " " . $form[$field_name]['label'] . "</label>" . $html;
           }
+          
+          $form["markup_$field_name"] = array(
+            'type' => 'markup',
+            'value' => $html,
+            'weight' => @intval($form[$field_name]['weight']) - 1,
+          );
+                
+          // Add a hidden field to note that we have already uploaded this file.
+          $form["previous_upload_$field_name"] = array(
+            'type' => 'hidden',
+            'value' => $ofids,
+            'weight' => @$form[$field_name]['weight'],
+          );            
+          // Finally, hide the original field using CSS.
+          //$form[$field_name]['attributes'] = array("class" => 'hidden');            
+                    
+          
+          if ($limit > 1) {
+            $add_link = "<a href='javascript:contentAddMoreFile(\"$field_name\");'>Add More</a>";
+            $form[$field_name]['suffix'] = $add_link;
+          }
+          
         } // type == file
         
-        
-        
-        
-        $form[$field_name]["value"] = $value;
+                        
       } // is not cfieldset
       else {
         // If this is a fieldset, then we need to assign values to its ELEMENTS.  If not empty, then OPEN the cfieldset!
         foreach ($form[$field_name]['elements'] as $c => $efields) {
           foreach ($efields as $efield_name => $efield_details) {
             $value = $content->{"field__$efield_name"}['value'];
+            
+            if ($cid == 'new') {
+              // value won't be anything.  Use value attr from the form as the initial value
+              $value = @$efield_details['value'];
+            }            
             
             // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
             if ($efield_details['type'] == 'datetime-local') {
@@ -720,6 +764,9 @@ function content_edit_content_form($type = "", $cid = "") {
 
             
             $form[$field_name]['elements'][$c][$efield_name]["value"] = $value;
+            
+            
+            
             if (trim($value)) {
               $form[$field_name]['start_closed'] = FALSE;
             }
@@ -775,7 +822,16 @@ function content_edit_content_form($type = "", $cid = "") {
 
 function content_get_uploaded_file($fid) {
   $res = db_query("SELECT * FROM content_files WHERE fid = ?", array($fid));
-  return db_fetch_array($res);
+  $cur = db_fetch_array($res);
+
+  if ($cur) {
+    $cur['full_filename'] = fp_get_files_path() . '/engagements_attachments/' . $cur['filename']; 
+    // also get the URL for downloading this file.
+    $cur['url'] = base_path() . "/custom/files/engagements_attachments/" . $cur['filename'];
+  }
+  
+  return $cur;
+  
 }
 
 
@@ -789,10 +845,7 @@ function content_edit_content_form_submit(&$form, &$form_state) {
   global $user;
   
   $values = $form_state["values"];
-
-  fpm($form_state);
-  fpm($_FILES);
-
+  
   // are we trying to delete?
   if (trim($values['submit_delete']) != '') {
     // Yes, we are deleting!
@@ -875,12 +928,34 @@ function content_edit_content_form_submit(&$form, &$form_state) {
 
 
       // If this field type is "file" then we are going to do something special with it
-      // TODO:  don't need to do this if we are just editing an existing content node and hitting "save"
-      if ($details['type'] == 'file') {        
-        $file = $_FILES[$fieldname];
-        // Now, save to the content_files table.
-        $fid = content_add_new_uploaded_file($file);
-        $values[$fieldname] = $fid; 
+      // don't need to do this if we are just editing an existing content node and hitting "save"
+      if ($details['type'] == 'file') {
+        
+        $uploaded_files = fp_re_array_files($_FILES[$fieldname]);  // makes them easier to work with.
+        fpm($uploaded_files);
+        $fid = "";        
+        foreach ($uploaded_files as $file) {
+          
+          if ($file && $file['name'] != '') {
+            // Now, save to the content_files table.
+            $fid .= content_add_new_uploaded_file($file) . ",";
+          }
+          
+        } // foreach
+        
+        // Do we have any previously uploaded files we need to include?
+        if (@$form_state['values']['previous_upload_' . $fieldname] != "") {
+          $fid .= "," . $form_state['values']['previous_upload_' . $fieldname] . ",";
+        }
+        
+        $fid = ltrim($fid, ",");
+        for ($t = 0; $t < 10; $t++) {
+          $fid = str_replace(",,", ",", $fid);  // get rid of any duplicate commas
+        }
+        $fid = rtrim($fid, ","); // trim any extra commas
+        $values[$fieldname] = $fid;        
+        
+         
       } // if details = file
             
       
@@ -1302,6 +1377,25 @@ function content_content_load(&$content) {
         $display_value .= "</div>";
       }
       
+      if ($details['type'] == 'file') {
+          
+        if ($val != "") {
+          $display_value = "";
+          $fids = explode(",", $val);          
+          foreach ($fids as $fid) {
+            if ($fid == '') continue;
+            $fid = intval($fid);
+            $file = content_get_uploaded_file($fid);
+            if ($file) {
+              $url = $file['url'];                        
+              $display_value .= "<div class='field-file-attachment-wrapper'><a href='$url'>" . $file['original_filename'] . "</a></div>";          
+            }
+          }
+        }  
+          
+      }
+      
+      
       
       $content->{'field__' . $fieldname}['display_value'] = $display_value;
     } // type != cfieldset
@@ -1357,6 +1451,17 @@ function content_content_load(&$content) {
             $temp = @$edetails['options'][$val];
             if ($temp != "") $display_value = $temp;
           }
+
+
+          if ($edetails['type'] == 'file') {
+            $fid = intval($val);
+            $file = content_get_uploaded_file($fid);
+            if ($file) {
+              $url = $file['url'];                        
+              $display_value = "<a href='$url'>" . $file['original_filename'] . "</a>";          
+            }            
+          }
+
           
           // If this was a set of checkboxes ($val is an array), we want to display the label the values went to.
           if ($edetails['type'] == 'checkboxes') {

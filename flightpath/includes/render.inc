@@ -451,7 +451,6 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   
   
   
-  
   if ($type == "do_not_render") return;  // not supposed to render this element.
   
   // Does the name start with a # character?  If so, do not attempt to render.
@@ -587,7 +586,9 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     if ($type == "textfield") $type = "text";
     $size = (isset($element["size"])) ? $element["size"] : "60";
     $maxlength = (isset($element["maxlength"])) ? $element["maxlength"] : "255";
+    
     $value = htmlentities($value, ENT_QUOTES);    
+    
     $rtn .= "<input type='$type' name='$name' id='element-$cssname' size='$size' maxlength='$maxlength' value='$value' $attributes>";
   }
   
@@ -598,9 +599,10 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
 
   if ($type == "file") {
     $tname = $name;
-    if ($multiple != "") {
+    // Always going to put [] for a file, no matter what.
+    //if ($multiple != "") {
       $tname .= "[]";   // if we allow uploading multiple files, we MUST put a [] behind it, or HTML will not upload correctly.  Weird but true.
-    }
+    //}
     $rtn .= "<input type='file' name='$tname' id='element-$cssname' $multiple $attributes>";
   }
   
