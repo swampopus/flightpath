@@ -24,6 +24,20 @@ function contentDeleteFile(fieldname, fid) {
   $(".markup-element-markup_" + fieldname + " .file-field-line-" + fid).hide();
   
   
+  // manage file_count, and show the add-more-link
+  var file_count = $("#element-file_count").val();
+  var x = $("#element-file_count").val();
+  x--;
+  if (x < 1) x = 1;
+  $("#element-file_count").val(x);
+  
+  var file_limit = $("#element-file_limit").val();
+  if (x < file_limit ) {
+    // hide the add more link.
+    $(".add-more-link-" + fieldname).show();
+  }  
+  
+  
 }
 
 
@@ -35,9 +49,22 @@ function contentDeleteFile(fieldname, fid) {
  */
 function contentAddMoreFile(fieldname) {
   
-  var fe = "<input type='file' name='" + fieldname + "[]' >";
+  var file_count = $("#element-file_count").val();
+  var file_limit = $("#element-file_limit").val();
+  
+  var fe = "<div class='add-more-file'><input type='file' name='" + fieldname + "[]' ></div>";
   
   $('#element-inner-wrapper-attachment').append(fe);
+  
+  var x = $("#element-file_count").val();
+  x++;
+  $("#element-file_count").val(x);
+
+  // if the file count is > than our limit, then we must stop!
+  if (file_count >= file_limit - 1) {
+    // hide the add more link.
+    $(".add-more-link-" + fieldname).hide();
+  }  
   
   
 }

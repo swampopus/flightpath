@@ -687,8 +687,12 @@ function content_edit_content_form($type = "", $cid = "") {
         // have no file there at all.
         if ($form[$field_name]['type'] == 'file') {
           $limit = intval(@$form[$field_name]['limit']);
+          $file_count = 0;
           if ($limit == 0) $limit = 1;
-          
+          $form['file_limit'] = array(
+            'type' => 'hidden',
+            'value' => $limit - 1,
+          );
           // Do we already have a list of files we've attached?
           $html = "";
           $ofids = $value;
@@ -699,7 +703,8 @@ function content_edit_content_form($type = "", $cid = "") {
             $fid = intval($fid);          
             $file = content_get_uploaded_file($fid);
             if ($file) {
-              $bool_is_empty = FALSE;            
+              $bool_is_empty = FALSE;        
+              $file_count++;    
               // create a markup field, including a delete option, with the filename listed.
               $url = $file['url'];                         
               $delete_link = "<a href='javascript:contentDeleteFile(\"$field_name\",\"$fid\");'>Delete</a>";            
@@ -723,14 +728,23 @@ function content_edit_content_form($type = "", $cid = "") {
             'value' => $ofids,
             'weight' => @$form[$field_name]['weight'],
           );            
-          // Finally, hide the original field using CSS.
-          //$form[$field_name]['attributes'] = array("class" => 'hidden');            
-                    
           
-          if ($limit > 1) {
-            $add_link = "<a href='javascript:contentAddMoreFile(\"$field_name\");'>Add More</a>";
+                    
+          $form['file_count'] = array(
+            'type' => 'hidden',
+            'value' => $file_count,
+          );
+          
+          if ($file_count >= $limit) {
+            // hide the original field using CSS.
+            $form[$field_name]['attributes'] = array("class" => 'hidden');            
+          }
+          
+          if ($limit > 1 && $file_count <= $limit) {
+            $add_link = "<a href='javascript:contentAddMoreFile(\"$field_name\");' class='add-more-link-$field_name'>Add More</a>";
             $form[$field_name]['suffix'] = $add_link;
           }
+          
           
         } // type == file
         
