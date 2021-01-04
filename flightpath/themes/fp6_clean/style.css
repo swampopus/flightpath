@@ -1126,6 +1126,15 @@ a.button:hover {
   background-color: lightskyblue;      
 }
 
+a.cancel-button {
+  background-color: crimson;
+  border-color: brown;
+}
+
+a.cancel-button:hover {
+  background-color: pink;
+}
+
 
 div.pager-wrapper {
     border-top: 1px solid #ccc;
