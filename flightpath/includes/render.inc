@@ -329,6 +329,8 @@ function fp_render_form($callback, $form_type = "") {
   if (isset($_GET['window_mode']) && $_GET['window_mode'] == 'popup') {    
     $url_query = "window_mode=popup";
   }
+  
+  $form_q_64 = base64_encode($_REQUEST['q']);  // what was q set to when this form was rendered?
       
   $rtn .= "<form action='" . fp_url("system-handle-form-submit", $url_query, TRUE) .  "' method='$submit_method' id='fp-form-$callback' name='fp_form_name_$callback' $attributes>";
   
@@ -336,6 +338,7 @@ function fp_render_form($callback, $form_type = "") {
   $rtn .= "<input type='hidden' name='form_token' value='$form_token'>";
   $rtn .= "<input type='hidden' name='form_type' value='$form_type'>";
   $rtn .= "<input type='hidden' name='form_path' value='$form_path'>";
+  $rtn .= "<input type='hidden' name='form_q_64' value='$form_q_64'>";
   $rtn .= "<input type='hidden' name='form_params' value='$form_params'>";
   $rtn .= "<input type='hidden' name='form_include' value='$form_include'>";
   $rtn .= "<input type='hidden' name='default_redirect_path' value='$default_path'>";

@@ -102,6 +102,11 @@ function menu_check_user_access($router_item) {
     }
   }
   
+  
+  // Does the access_arguments have any wildcards?
+  
+  
+  
   if (!$access && $router_item["access_callback"] != "") {
     // We need to see if the user has the right permissions to use this item.  We will do this
     // by calling the access_callback, passing it the access_arguments
@@ -221,7 +226,7 @@ function menu_get_item($path) {
   $menu_items = $GLOBALS["fp_menu_items"];
   
   // Okay, first things first, does the path *exactly* match anything in our GLOBALS array?
-  if (in_array($path, $menu_items)) {
+  if (in_array($path, $menu_items)) {    
     return menu_get_menu_router_item_from_db($path);
   }
   
@@ -291,7 +296,7 @@ function menu_get_item($path) {
  * Return array from menu_router for this item. * 
  */
 function menu_get_menu_router_item_from_db($path) {
-  $res = db_query("SELECT * FROM menu_router WHERE path = '?' ", $path);
+  $res = db_query("SELECT * FROM menu_router WHERE path = ?", array($path));
   $cur = db_fetch_array($res);
 
   if ($cur["path"] != $path) {

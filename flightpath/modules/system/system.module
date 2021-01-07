@@ -2177,7 +2177,7 @@ function system_handle_form_submit() {
           as possibly being an invalid or forged submission.  This may constitute a bug
           in the system.  Please report this error to your Systems Administrator."));
   }
-  
+   
   if ($form_include != "") {
     // This is a file we need to include in order to complete the submission process.
     
@@ -2224,8 +2224,13 @@ function system_handle_form_submit() {
   // Check the menu router table for whatever the permissions were for this
   // path, if any.
   if ($form_path != "") {
+    // For the sake of makeing sure our wildcards get replaced correctly,
+    // temporarily set $_REQUEST['q'] to our $form_q.
+    $form_q = base64_decode($_REQUEST["form_q_64"]);
+    $temp_q = $_REQUEST['q'];
+    $_REQUEST['q'] = $form_q;
     $router_item = menu_get_item($form_path) ;
-    if (!menu_check_user_access($router_item)) {
+    if (!menu_check_user_access($router_item)) {      
       // The user does NOT have access to submit this form!  The fact that
       // it has made it this far means this may be some sort of hacking attempt.
       die(t("Sorry, but you have encountered an error.  A form submission was flagged
@@ -2234,6 +2239,7 @@ function system_handle_form_submit() {
           Please report this error to your Systems Administrator."));
       
     }
+    $_REQUEST['q'] = $temp_q;  // set back to original, just in case.
   }  
   
   // Let's get our set of allowed values, by looking at the original form,

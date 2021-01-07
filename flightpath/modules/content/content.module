@@ -650,9 +650,6 @@ function content_edit_content_form($type = "", $cid = "") {
   }
     
   
-  
-  
-  
   // Are there extra fields?  If so, add their values in as well.
   if (is_array($types[$type]['fields'])) {
     foreach($types[$type]["fields"] as $field_name => $field_details) {
@@ -666,6 +663,7 @@ function content_edit_content_form($type = "", $cid = "") {
           $value = @$form[$field_name]['value'];
         }
         
+        $form[$field_name]['value'] = $value;
         
         // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly. (it was stored as UTC in database)             
         if ($form[$field_name]['type'] == 'datetime-local') {
@@ -760,6 +758,8 @@ function content_edit_content_form($type = "", $cid = "") {
               // value won't be anything.  Use value attr from the form as the initial value
               $value = @$efield_details['value'];
             }            
+            
+            $efield_details['value'] = $value;
             
             // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
             if ($efield_details['type'] == 'datetime-local') {
@@ -1380,8 +1380,8 @@ function content_content_load(&$content) {
       }
       
       // If this was a set of checkboxes ($val is an array), we want to display the label the values went to.
-      if ($details['type'] == 'checkboxes') {        
-        $display_value .= "<div class='checkbox-values checkbox-values-field__$fieldname'>";        
+      if ($details['type'] == 'checkboxes') {
+        $display_value .= "<div class='checkbox-values checkbox-values-field__$fieldname'>";
         if (is_array($val)) {
           foreach ($val as $k => $v) {  
             $temp = @$details['options'][$v];
