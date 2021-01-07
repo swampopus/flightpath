@@ -108,7 +108,7 @@ function smtp_settings_form() {
 }
 
 
-function smtp_mail($to, $subject, $msg, $bool_html = FALSE) {
+function smtp_mail($to, $subject, $msg, $bool_html = FALSE, $attachments = array()) {
     
   $system_path = trim($GLOBALS["fp_system_settings"]["file_system_path"]);
   require_once("$system_path/libraries/PHPMailer/src/Exception.php");
@@ -168,6 +168,13 @@ function smtp_mail($to, $subject, $msg, $bool_html = FALSE) {
   //$mail->addReplyTo('info@example.com', 'Information');
   //$mail->addCC('cc@example.com');
   //$mail->addBCC('bcc@example.com');  
+  
+  if (count($attachments) > 0) {
+    foreach ($attachments as $full_filename => $filename) {  
+      $mail->addAttachment($full_filename, $filename);
+    }
+  }
+  
      
   
   $x = $mail->send();    

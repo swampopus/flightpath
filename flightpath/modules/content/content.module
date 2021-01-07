@@ -413,7 +413,7 @@ function content_dialog_handle_after_save() {
   $rtn .= "<br><br><p>" . t("If this windows doesn't close within 3 seconds,") . " <a href='javascript:window.parent.location.reload();'>" . t("click here") . "</a>.</p>";
   
   // Add this javascript code to when the page loads.
-  ///*  DEV: comment out while testing
+  /*  DEV: comment out while testing
 
   $rtn .= "
       <script type='text/javascript'>
@@ -839,14 +839,112 @@ function content_get_uploaded_file($fid) {
   $cur = db_fetch_array($res);
 
   if ($cur) {
+    
+    $temp = explode(".", $cur['filename']);
+    $ext = $temp[count($temp) - 1]; // get the extension.
+    
     $cur['full_filename'] = fp_get_files_path() . '/engagements_attachments/' . $cur['filename']; 
     // also get the URL for downloading this file.
     $cur['url'] = base_path() . "/custom/files/engagements_attachments/" . $cur['filename'];
+    $cur['ext'] = $ext;
   }
   
   return $cur;
   
 }
+
+
+
+/**
+ * Find by mime type OR file extension.
+ */
+function content_get_fontawesome_icon_for_mimetype($mime_type, $ext = "") {
+  // List of official MIME Types: http://www.iana.org/assignments/media-types/media-types.xhtml
+  $icon_classes = array(
+    // Media
+    'image' => 'fa-file-image-o',
+    'audio' => 'fa-file-audio-o',
+    'video' => 'fa-file-video-o',
+    // Documents
+    'application/pdf' => 'fa-file-pdf-o',
+    'application/msword' => 'fa-file-word-o',
+    'application/vnd.ms-word' => 'fa-file-word-o',
+    'application/vnd.oasis.opendocument.text' => 'fa-file-word-o',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml' => 'fa-file-word-o',
+    'application/vnd.ms-excel' => 'fa-file-excel-o',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml' => 'fa-file-excel-o',
+    'application/vnd.oasis.opendocument.spreadsheet' => 'fa-file-excel-o',
+    'application/vnd.ms-powerpoint' => 'fa-file-powerpoint-o',
+    'application/vnd.openxmlformats-officedocument.presentationml' => 'fa-file-powerpoint-o',
+    'application/vnd.oasis.opendocument.presentation' => 'fa-file-powerpoint-o',
+    'text/plain' => 'fa-file-text-o',
+    'text/html' => 'fa-file-code-o',
+    'application/json' => 'fa-file-code-o',
+    // Archives
+    'application/gzip' => 'fa-file-archive-o',
+    'application/zip' => 'fa-file-archive-o',
+  );
+  
+  $rtn = "";
+  
+  foreach ($icon_classes as $text => $icon) {
+    if (strpos($mime_type, $text) === 0) {
+      $rtn = $icon;
+    }
+  }
+  
+  if ($rtn) return $rtn;
+  
+  // else, we search by file extension now....
+  $ext_array = array(
+    'png' => 'fa-file-image-o',
+    'jpg' => 'fa-file-image-o',
+    'jpeg' => 'fa-file-image-o',
+    'gif' => 'fa-file-image-o',
+    "mp3" => "fa-file-audio-o",
+    "mpg" => "fa-file-video-o",
+    "mpeg" => "fa-file-video-o",
+    "mp4" => "fa-file-video-o",    
+    'pdf' => 'fa-file-pdf-o',
+    'doc' => 'fa-file-word-o',
+    'pages' => 'fa-file-word-o',
+    'docx' => 'fa-file-word-o',
+    'rtf' => 'fa-file-word-o',
+    'odt' => 'fa-file-word-o',
+    'xls' => 'fa-file-excel-o',
+    'xlsx' => 'fa-file-excel-o',
+    'numbers' => 'fa-file-excel-o',
+    'csv' => 'fa-file-excel-o',
+    'ppt' => 'fa-file-powerpoint-o',
+    'pptx' => 'fa-file-powerpoint-o',
+    'odp' => 'fa-file-powerpoint-o',
+    'txt' => 'fa-file-text-o',
+    'html' => 'fa-file-code-o',
+    'htm' => 'fa-file-code-o',
+    'json' => 'fa-file-code-o',
+    // Archives
+    'gzip' => 'fa-file-archive-o',
+    'zip' => 'fa-file-archive-o',  
+  );
+  
+  foreach ($ext_array as $text => $icon) {
+    if (strpos($ext, $text) === 0) {
+      $rtn = $icon;
+    }
+  }
+
+  if ($rtn) return $rtn;
+  
+  
+  return 'fa-file-o';
+  
+}
+
+
+
+
+
+
 
 
 /**
@@ -946,7 +1044,7 @@ function content_edit_content_form_submit(&$form, &$form_state) {
       if ($details['type'] == 'file') {
         
         $uploaded_files = fp_re_array_files($_FILES[$fieldname]);  // makes them easier to work with.
-        fpm($uploaded_files);
+
         $fid = "";        
         foreach ($uploaded_files as $file) {
           

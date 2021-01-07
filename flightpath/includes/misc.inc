@@ -43,8 +43,6 @@ function friendly_timezone($str) {
  */
 function fp_re_array_files($file_post) {
 
-  fpm($file_post);
-
   $file_ary = array();
   $file_count = count($file_post['name']);
   $file_keys = array_keys($file_post);
