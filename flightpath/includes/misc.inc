@@ -1362,7 +1362,7 @@ function fp_add_js($js, $type = "file") {
   if ($type == "setting") {
     if (!isset($GLOBALS["fp_extra_js_settings"])) $GLOBALS["fp_extra_js_settings"] = array();
     
-    $GLOBALS["fp_extra_js_settings"] = array_merge($GLOBALS["fp_extra_js_settings"], $js);
+    $GLOBALS["fp_extra_js_settings"] = array_merge_recursive($GLOBALS["fp_extra_js_settings"], $js);
   }
   
 }

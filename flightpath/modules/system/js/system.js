@@ -143,6 +143,31 @@ $(document).ready(function() {
   
   
     
+    
+    // Go through all of our autocomplete_fields (if any) and set that up.
+    if (FlightPath.settings.autocomplete_fields) {
+      for (var t = 0; t < FlightPath.settings.autocomplete_fields.length; t++) {
+        var e = FlightPath.settings.autocomplete_fields[t];
+        var eid = e.id;
+        var epath = e.path;
+        
+        // TODO:  involve jqueryUI to set this up....
+        $("#" + eid).autocomplete({
+          source: FlightPath.settings.basePath + "/index.php?q=" + epath
+        });
+        
+      }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
   
 });
 

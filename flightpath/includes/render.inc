@@ -474,6 +474,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     $multiple = "";
   }
   
+  $autocomplete_path = @$element["autocomplete_path"];
   $required = @$element["required"];
   $no_please_select = @$element["no_please_select"];
   if (isset($element["hide_please_select"])) {
@@ -489,7 +490,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   }
   
 
-  
+
   $attributes = @$element["attributes"];
   
   if ($type == 'textarea_editor') {
@@ -511,6 +512,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     }
     $attributes = $new_attr;
   }
+
 
   $popup_help_link = "";
   if ($popup_description) {        
@@ -537,6 +539,10 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     }    
   }
 
+  
+  
+  
+  
   
   
   if ($type != "markup") {
@@ -589,9 +595,14 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     if ($type == "textfield") $type = "text";
     $size = (isset($element["size"])) ? $element["size"] : "60";
     $maxlength = (isset($element["maxlength"])) ? $element["maxlength"] : "255";
+        
+    // if there is an autocomplete_path, we need to include some javascript.
+    if ($autocomplete_path != "") {
+      fp_add_js(array("autocomplete_fields" => array(array("id" => "element-$cssname", "path" => $autocomplete_path))), 'setting');            
+    }  
     
-    $value = htmlentities($value, ENT_QUOTES);    
     
+    $value = htmlentities($value, ENT_QUOTES);
     $rtn .= "<input type='$type' name='$name' id='element-$cssname' size='$size' maxlength='$maxlength' value='$value' $attributes>";
   }
   

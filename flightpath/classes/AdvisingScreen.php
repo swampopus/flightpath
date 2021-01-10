@@ -359,7 +359,23 @@ function draw_menu_items($menu_array) {
     $page_extra_js_settings .= "var FlightPath = new Object();   \n";
     $page_extra_js_settings .= " FlightPath.settings = new Object();   \n";      
     foreach ($GLOBALS["fp_extra_js_settings"] as $key => $val) {
-      $page_extra_js_settings .= "FlightPath.settings.$key = '$val';  \n";
+      if (is_array($val)) {
+        $page_extra_js_settings .= "FlightPath.settings.$key = new Array();  \n";
+        foreach ($val as $k => $v) {
+          if (is_array($v)) {
+            $page_extra_js_settings .= "FlightPath.settings.$key" . "['" . "$k'] = new Array();  \n";
+            foreach ($v as $kk => $vv) {
+              $page_extra_js_settings .= "FlightPath.settings.$key" . "['" . "$k']['$kk'] = '$vv';  \n";
+            }
+          }
+          else {            
+            $page_extra_js_settings .= "FlightPath.settings.$key" . "['" . "$k'] = '$v';  \n";
+          }
+        }
+      }
+      else {
+        $page_extra_js_settings .= "FlightPath.settings.$key = '$val';  \n";
+      }
     }	 
 	 
     // Scrolling somewhere?  Add it to the page_on_load...    
