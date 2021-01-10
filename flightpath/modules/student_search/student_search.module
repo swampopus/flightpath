@@ -616,7 +616,7 @@ function student_search_display_my_majors() {
 
 
 
-function student_search_search_form() {
+function student_search_search_form($limit = 300) {
   $form = array();
   
   fp_add_css(fp_get_module_path("student_search") . "/css/student_search.css");
@@ -797,7 +797,7 @@ function student_search_search_form() {
     $query .= "
               $group_by
               ORDER BY %ORDERBY%
-              LIMIT 300
+              LIMIT $limit
               ";
 
               
@@ -807,10 +807,14 @@ function student_search_search_form() {
   $s = (count($adv_array) == 1) ? "" : "s"; 
 
   // Are we showing the maximum number of students?
-  if (count($adv_array) == 300) {
+  if (count($adv_array) == $limit) {
     $rtn .= "<div class='student-search-max-results'><em>" . t("Showing maximum 300 results. Please narrow search criteria.") . "</em></div>";
   }
   
+  $form['adv_array'] = array(
+    'type' => 'do_not_render',
+    'value' => $adv_array,
+  );
   
   
   $mark .= student_search_render_advisees($adv_array, t("Search Results") . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");  

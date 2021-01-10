@@ -1174,6 +1174,14 @@ ul.pager li.pager-current {
 
 
 
+___page--popup-report-contact{}
+
+body.page--popup-report-contact,
+body.page--popup-contact-form-thank-you
+{
+  padding: 10px;
+}
+
 
 
 

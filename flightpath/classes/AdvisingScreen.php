@@ -355,7 +355,8 @@ function draw_menu_items($menu_array) {
 	  }		
 		
 		
-	  // Javascript settings...
+	  // Javascript settings...  (I know this would be better as a recursive function.  For now,
+	  // you can have up to 3 layers deep.  Sorry for it looking so ugly.
     $page_extra_js_settings .= "var FlightPath = new Object();   \n";
     $page_extra_js_settings .= " FlightPath.settings = new Object();   \n";      
     foreach ($GLOBALS["fp_extra_js_settings"] as $key => $val) {

@@ -865,7 +865,7 @@ function system_display_install_finished_page() {
 function system_popup_report_contact_thank_you() {
   $rtn = "";
   
-  $rtn .= fp_render_curved_line(t("Contact the @FlightPath Production Team", array("@FlightPath" => variable_get("system_name", "FlightPath"))));
+  $rtn .= fp_render_section_title(t("Contact the @FlightPath Production Team", array("@FlightPath" => variable_get("system_name", "FlightPath"))));
   $rtn .= t("Thank you for submitting to the @FlightPath Production Team.  They 
              have received your comment and will review it shortly.", array("@FlightPath" => variable_get("system_name", "FlightPath"))) . "<br><br>";
   $rtn .= t("You may now close this window.");
@@ -885,7 +885,7 @@ function system_popup_report_contact_form() {
   $m = 0;
   
   $form["mark" . $m++] = array(
-    "value" => fp_render_curved_line(t("Contact the @FlightPath Production Team", array("@FlightPath" => variable_get("system_name", "FlightPath")))),
+    "value" => fp_render_section_title(t("Contact the @FlightPath Production Team", array("@FlightPath" => variable_get("system_name", "FlightPath")))),
   );
   
   if (!user_has_permission("access_logged_in_content")) {
@@ -905,11 +905,16 @@ function system_popup_report_contact_form() {
     "type" => "select",
     "label" => t("Please select a category"),
     "options" => array(
+                     t("Dashboard") => t("Dashboard"),
+                     t("Appointments") => t("Appointments"),
                      t("Advising") => t("Advising"),
                      t("Degree plan") => t("Degree plan"),
                      t("What If?") => t("What If?"),
                      t("Searching") => t("Searching"),
                      t("Comments") => t("Comments"),
+                     t("Audit") => t("Audit"),
+                     t("Engagements") => t("Engagements"),
+                     t("Sending/Receiving TXT") => t("Sending/Receiving TXT"),
                      t("Other") => t("Other"),
                       ),
   );
@@ -925,6 +930,7 @@ function system_popup_report_contact_form() {
   );  
   
   $form["#redirect"] = array("path" => "popup-contact-form/thank-you");    
+  
   return $form;
 }
 
