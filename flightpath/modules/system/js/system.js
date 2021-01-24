@@ -248,28 +248,36 @@ function fpToggleHamburgerMenu() {
 
     setTimeout(function() {
     
+    
       $("div[role=dialog]").each(function() {
         
+        /*
         $(this).addClass('ui-draggable-dragging');        
         $(this).addClass('ui-dialog-dragging');
-        var x = $(this).css('top');
-        var oldx = x;        
-        x = parseFloat(x.replace("px", ""));        
-        var newx = (x + 1) + "px";              
-        $(this).css('top',  newx);
+        var y = $(this).css('top');
+        var oldy = y;        
+        y = parseFloat(y.replace("px", ""));        
+        var newy = (y + 1) + "px";              
+        $(this).css('top',  newy);
       
-        var that = $(this);
-              
-        //setTimeout(function() {
-        //  $(that).css('top',  oldx);
-        //}, 10);                
+      */
+      
+        // Instead of nudging a pixel, we will add a span to the end of the dialog, which should
+        // not affect it's size or position.  This... appears... to fix the weird bug in Chrome.  More
+        // testing is needed.
+        $(this).append("<span></span>");
           
       });
         
       
+     
+      
+      
+      
+      
       
     
-    }, 50);
+    }, 75);
 
     
   }

@@ -9,13 +9,6 @@
  * 
 */
 
-//print $page_on_load;
-if ($page_is_popup) {
-  $page_on_load .= '
-    //parent.fpNudgeDialog();
-  ';
-}
-
 ?>
 <head>  
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />  
