@@ -29,12 +29,13 @@ function content_menu() {
   );     
  
   
+  /*
   $items["content/delete"] = array(
     "page_callback" => "content_handle_delete_content",
     "access_arguments" => array("admin_content"),
     "type" => MENU_TYPE_CALLBACK,
   );
-
+  */
   
 
   // content/add/TYPE
@@ -42,7 +43,7 @@ function content_menu() {
     "page_callback" => "fp_render_form",
     "page_arguments" => array("content_edit_content_form", "", 2, "new"),
     "access_callback" => "content_user_access",
-    "access_arguments" => array("add_type", 2),
+    "access_arguments" => array("add", 2),
     "type" => MENU_TYPE_NORMAL_ITEM,
     "page_settings" => array(
       "menu_links" => array(          
@@ -69,7 +70,7 @@ function content_menu() {
     "page_callback" => "content_view_content",
     "page_arguments" => array(1),
     "access_callback" => "content_user_access",
-    "access_arguments" => array("view_cid", 1),
+    "access_arguments" => array("view", 1),
     "page_settings" => array(
       "page_show_title" => TRUE,
       "menu_links" => array(          
@@ -97,7 +98,7 @@ function content_menu() {
     "page_callback" => "fp_render_form",
     "page_arguments" => array("content_edit_content_form", "", "", 1),
     "access_callback" => "content_user_access",
-    "access_arguments" => array("edit_cid", 1),
+    "access_arguments" => array("edit", 1),
     "page_settings" => array(
       "page_has_search" => FALSE,
       "page_banner_is_link" => TRUE,
@@ -153,7 +154,8 @@ function content_menu() {
   $items['content/%/remove'] = array(
     "page_callback" => "fp_render_form",
     "page_arguments" => array("content_unpublish_content_form", "", 1),
-    "access_callback" => TRUE, // TODO:  fix this to make sure the user has haccess to do it!     
+    "access_callback" => "content_user_access",
+    "access_arguments" => array("edit", 1),  // since we are editing the published field, we simply check for "edit"     
   );  
   
   
@@ -340,19 +342,63 @@ function content_set_last_access($cid, $account = NULL) {
 /**
  * Custom user access function to determine if the user can add, edit, etc, the content
  * 
+ * $op can equal:   "add"   (adding a new piece of content)  $var will be the content_type.  Ex:  "engagement"
+ *                  "view"  (attempting to view the content as a full page)
+ *                  "edit"  (trying to edit an existing piece of content
+ *                  "delete"   (trying to delete the content)
+ * 
  *
  * @param unknown_type $op
  * @param unknown_type $var
  */
 function content_user_access($op, $var) {
+  global $user;
+      
+  if ($user->id == 1) return TRUE;  // the admin user.
+  
       
   $cid = intval($var);  
+  $content = NULL;
   
-  // TODO:  implement!
+  if ($op != "add") {
+    $content = content_load($cid);
+  }
   
-  // for now, just return TRUE
   
-  return TRUE;
+  // Simply trying to view the content.  Do we have permission to view published content of this type?  
+  if ($op == 'view' && user_has_permission("view_" . $content->type . "_content")) {
+    if (intval($content->published === 1)) {
+      return TRUE;
+    }
+  }
+  
+  
+  // Trying to add new content of the type specified in $var.  Do we have permission?
+  if ($op == 'add' && user_has_permission("add_" . $var . "_content")) {
+    return TRUE;
+  }
+  
+  
+  // Trying to edit or delete this content.  
+  if ($op == "edit" || $op == "delete") {
+    
+    // Does the user have permission to edit/delete ANY of this type?
+    if (user_has_permission($op . "_any_" . $content->type . "_content")) {
+      return TRUE;
+    }
+    
+    // Otherwise, does the content belong the the user, and do they have permission to edit/delete their OWN content?
+    if ($content->user_id == $user->id && user_has_permission($op . "_any_" . $content->type . "_content")) {
+      return TRUE;
+    }
+    
+    
+  } // op == edit or delete
+  
+  
+  
+  // Failed all of the previous tests, so return false.  
+  return FALSE;
 }
 
 
@@ -543,6 +589,7 @@ function content_view_content($cid) {
  *
  */
 function content_edit_content_form($type = "", $cid = "") {
+  global $user;
   
   $form = array();
   $m = 0;
@@ -571,6 +618,8 @@ function content_edit_content_form($type = "", $cid = "") {
     // Re-set $type, just in case the user put the wrong type in the
     // URL
     $type = $content->type;
+    
+    
   } 
   else {
     // New piece of content
@@ -580,14 +629,6 @@ function content_edit_content_form($type = "", $cid = "") {
     
   }
 
-  
-  // Does the user have permission to edit this content?
-  if (!user_has_permission("edit_$type" . "_content")) {  
-    fp_add_message(t("Sorry, you do not have permission to edit that content type."));
-    fp_goto("admin/config/content");
-    return;
-  }
-  
   
   // For simplicity, and because it causes no harm except a small amount of extra bandwidth, we will
   // state that all "content" forms are multipart (so they can handle file uploads) even if there
@@ -818,14 +859,18 @@ function content_edit_content_form($type = "", $cid = "") {
     'attributes' => array('class' => 'content-submit-btn'),        
   );
   
-  if ($cid != 'new') { 
-    $form["submit_delete"] = array(
-      "type" => "submit",
-      "value" => t("Delete"),    
-      "confirm" => t('Are you sure you wish to delete this?\nThis action cannot be undone.'),
-      'weight' => 930,
-      'attributes' => array('class' => 'content-delete-btn'),    
-    );
+  if ($cid != 'new') {
+    
+    // Only display the delete button if we have permission
+    if (content_user_access('delete', $content->cid)) {     
+      $form["submit_delete"] = array(
+        "type" => "submit",
+        "value" => t("Delete"),    
+        "confirm" => t('Are you sure you wish to delete this?\nThis action cannot be undone.'),
+        'weight' => 930,
+        'attributes' => array('class' => 'content-delete-btn'),    
+      );
+    }
   }
 
 
@@ -964,7 +1009,13 @@ function content_edit_content_form_submit(&$form, &$form_state) {
     
     $content = content_load($values['cid']);
     
-    // TODO: check to make sure we have permission to delete.
+    
+    if (!content_user_access('delete', $content->cid)) {
+      fp_add_message(t("Sorry, you do not have permission to delete this content."));
+      fp_goto("<front>");
+      return;
+    }
+    
     
     watchdog('content', "Content with cid $cid was marked for deletion.");
             
@@ -1613,17 +1664,6 @@ function hook_content_load(&$content) {
 
 
 
-function content_handle_delete_content() {
-  $aid = $_REQUEST["aid"];
-  db_query("UPDATE content SET delete_flag = '1'
-            WHERE aid = '?' ", $aid);
-  
-  fp_add_message(t("Content successfully deleted."));
-  fp_goto("admin/config/content");
-}
-
-
-
 
 /**
  * Display a list of content for the administrator
@@ -1860,10 +1900,16 @@ function content_perm() {
   
   $types = content_get_types();
   foreach ($types as $type => $details) {
-      
+
     $rtn ["add_$type" . "_content"] = array(
       "title" => t("Add new") . " " . $details["title"] . " " . t("content"),      
     );
+
+
+    $rtn ["view_$type" . "_content"] = array(
+      "title" => "&nbsp; &nbsp; " . t("View published") . " " . $details["title"] . " " . t("content"),      
+    );
+
       
     $rtn ["edit_any_$type" . "_content"] = array(
       "title" => "&nbsp; &nbsp; " . t("Edit any") . " " . $details["title"] . " " . t("content"),      
