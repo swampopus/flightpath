@@ -607,7 +607,8 @@ function install_display_lang_selection() {
   $page_title = "Install FlightPath";
   $page_hide_report_error = TRUE;
   
-  include("themes/fp6_clean/fp_template.php");
+  include("themes/fp6_clean/head.tpl.php");
+  include("themes/fp6_clean/page.tpl.php");
 }
 
 
