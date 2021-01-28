@@ -517,10 +517,7 @@ function install_display_db_form($msg = "") {
   
   // Display the screen
   $page_content = $pC;  
-  $page_title = "Install FlightPath";
-  $page_hide_report_error = TRUE;
-  
-  include("themes/fp6_clean/fp_template.php");  
+  install_output_to_browser($page_content);
 
   
 }
@@ -572,10 +569,7 @@ function install_display_requirements($req_array) {
   
   // Display the screen
   $page_content = $pC;  
-  $page_title = "Install FlightPath";
-  $page_hide_report_error = TRUE;
-  
-  include("themes/fp6_clean/fp_template.php");  
+  install_output_to_browser($page_content);
 }
 
 
@@ -603,13 +597,76 @@ function install_display_lang_selection() {
           please visit http://getflightpath.com/contact before proceeding with installation.";
     
   // Display the screen
-  $page_content = $html;  
-  $page_title = "Install FlightPath";
-  $page_hide_report_error = TRUE;
-  
-  include("themes/fp6_clean/head.tpl.php");
-  include("themes/fp6_clean/page.tpl.php");
+  install_output_to_browser($html);
 }
+
+
+
+
+
+function install_output_to_browser($page_content, $page_title = "Install FlightPath 6") {
+  print "
+          <html>
+            <head>  
+              <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+              <title>$page_title</title>
+              <style>
+
+                  body
+                  {
+                    font-family: Arial, Helvetica, sans serif;
+                    background-color: white;
+                  }
+                  
+                  
+                  .top-banner {
+                    width: 820px;  /* the size of page-content + padding */
+                    margin-left: auto;
+                    margin-right: auto;  
+                    margin-bottom: 1.2em;
+                    background-color: white;
+                    border: 3px solid #ccc;
+                    border-radius: 5px;
+                    
+                  }
+                  
+                  /* Page content */
+                  .page-content {
+                    width: 800px;  
+                    min-height: 400px;
+                    margin-top: 50px;
+                    margin-left: auto;
+                    margin-right: auto;
+                    padding-left: 10px;
+                    padding-right: 10px;
+                    padding-top: 5px;
+                    padding-bottom: 50px;
+                    border: 1px solid #ccc;
+                    box-shadow: 1px 1px 50px #ccc;
+                    border-radius: 5px;
+                    background-color: white;
+                  }
+                  .page-is-popup .page-content {
+                    min-height: 250px;
+                    width: 90%;
+                  }
+                  
+                            
+              </style>
+            </head>
+            <body>
+                    <div class='page-content'>
+                          $page_content
+                    </div>
+            </body>
+          </html>
+          ";
+  
+  
+}
+
+
+
 
 
 
