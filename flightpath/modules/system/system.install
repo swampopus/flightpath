@@ -42,10 +42,24 @@ function system_enable() {
     
 
   // Let's perform installations on the other modules we want enabled by default.
-  $modules = array("admin", "advise", "comments", "student_search", "update_status", "content", "announcements", "tinymce", "course_search", "blank_degrees", "user", "batch");
+  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "content", "announcements", "tinymce", "course_search", "blank_degrees", "user", "batch");
   foreach ($modules as $module) {
     system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => "core"));
   }
+  
+  
+  
+  // Set up some blocks for the system module by default.
+  db_query("INSERT INTO blocks (section, region, module, delta, weight)
+            VALUES ('system_main', 'right_col', 'system', 'tools', 1),
+                   ('system_main', 'right_col', 'system', 'admin_tools', 2), 
+                   ('system_main', 'left_col', 'announcements', 'primary', 0), 
+                   ('system_login', 'left_col', 'blocks', 'block_1', 0), 
+                   ('system_login', 'right_col', 'system', 'login_form', 0),
+                   ('system_login', 'top', 'blocks', 'block_2', 0)
+                   
+                   ");  
+  
   
   // Set up some basic permissions for authenticated user.
   db_query("INSERT INTO role_permissions (rid, perm)
@@ -735,7 +749,7 @@ db_query($q);
 
 $q = "
 CREATE TABLE `transfer_institutions` (
-  `institution_id` varchar(10)  ,
+  `institution_id` varchar(100)  ,
   `name` varchar(200)   DEFAULT '',
   `state` varchar(10)   DEFAULT '',
   PRIMARY KEY (`institution_id`),
@@ -754,12 +768,23 @@ db_query($q);
 
 $q = "
 CREATE TABLE `user_settings` (
-  `user_id` int(11)  ,
-  `settings` text,
-  `posted` int(10) unsigned   DEFAULT '0',
-  PRIMARY KEY (`user_id`)
-); ";
+  `user_id` int NOT NULL,
+  `timezone` varchar(255) DEFAULT NULL,
+  `hide_charts` varchar(255) DEFAULT NULL,
+  `default_student_load_tab` varchar(255) DEFAULT NULL,
+  `default_notification_method` varchar(255)DEFAULT NULL,
+  `updated` int unsigned DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  KEY `timezone` (`timezone`),
+  KEY `hide_charts` (`hide_charts`),
+  KEY `updated` (`updated`),
+  KEY `default_student_load_tab` (`default_student_load_tab`),
+  KEY `default_notification_method` (`default_notification_method`)
+);";
 db_query($q);
+
+
+
 
 $q = "
 CREATE TABLE `users` (
@@ -782,6 +807,8 @@ CREATE TABLE `users` (
 ); ";
 db_query($q);
 
+
+
 $q = "
 CREATE TABLE `variables` (
   `name` varchar(255)  ,
@@ -790,6 +817,49 @@ CREATE TABLE `variables` (
 ); ";
 db_query($q);
 
+
+$q = "
+CREATE TABLE `student_priority` (
+  `student_id` varchar(30) NOT NULL,
+  `priority_value` decimal(8,4) DEFAULT NULL,
+  `results` text,
+  `updated` int unsigned DEFAULT NULL,
+  PRIMARY KEY (`student_id`) ,
+  KEY `priority_value` (`priority_value`) ,
+  KEY `updated` (`updated`) 
+); ";
+db_query($q);
+
+
+
+$q = "
+CREATE TABLE `student_attributes` (
+  `student_id` varchar(30) NOT NULL,
+  `mobile_phone` varchar(255) DEFAULT '',
+  `athlete` varchar(255) DEFAULT '',
+  `student_worker` varchar(255) DEFAULT '',
+  `enrollment_code` varchar(255) DEFAULT '',
+  `financial_aid` varchar(255) DEFAULT '',
+  PRIMARY KEY (`student_id`) ,
+  KEY `mobile_phone` (`mobile_phone`),
+  KEY `athlete` (`athlete`) ,
+  KEY `student_worker` (`student_worker`),
+  KEY `enrollment_code` (`enrollment_code`),
+  KEY `financial_aid` (`financial_aid`) 
+); ";
+db_query($q);
+
+
+$q = "
+CREATE TABLE `faculty_attributes` (
+  `faculty_id` varchar(30) NOT NULL,
+  `mobile_phone` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`faculty_id`) 
+); ";
+db_query($q);
+
+
+ 
 $q = "
 CREATE TABLE `watchdog` (
   `wid` int(11) unsigned   AUTO_INCREMENT,

@@ -9,16 +9,38 @@
 /**
  * Hook install.  Called when the module is installed on the admin modules page.
  * 
- * TODO:  Add this as a new content_save() !
- * 
  */
 function announcements_install() {
-  // Install a default announcement when first run.
-  $body = '<p>This is a sample announcement! You may add new announcements (or delete this one) from the Admin Console, then Content.</p>';
-  db_query("INSERT INTO content (user_id, type, title, body, settings, posted, updated)
-            VALUES ('1', 'announcement', 'Sample Announcement', '?', '?', '?', '?') 
-            ", $body, 'a:1:{s:10:"visibility";s:6:"public";}', time(), time());
-    
+  // Install our table, and insert some sample content.
+  $q = "
+CREATE TABLE `content__announcement` (
+  `cid` int unsigned NOT NULL,
+  `vid` int NOT NULL,
+  `field__activity_datetime` datetime DEFAULT NULL,
+  `field__msg` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `field__visibility` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`vid`),
+  KEY `cid` (`cid`),
+  KEY `visibility` (`field__visibility`),
+  KEY `field__activity_datetime` (`field__activity_datetime`)
+);  
+  ";
+  db_query($q);
+  
+  // Now, add a piece of custom content using content_save() function.
+  
+  $content = new stdClass();
+  $content->type = 'announcement';
+  $content->cid = "new";    
+  $content->published = 1;
+  $content->delete_flag = 0;  
+  $content->title = "Sample Announcement";
+  
+  $content->field__activity_datetime['value'] = date("Y-m-d H:ia");
+  $content->field__msg['value'] = '<p>This is a sample announcement! You may add new announcements (or delete this one) from the Admin Console, then Content.</p>'; 
+  $content->field__visibility['value'] = 'public';
+  
+  content_save($content);  
     
 }
 

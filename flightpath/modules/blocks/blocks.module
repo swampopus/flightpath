@@ -267,23 +267,11 @@ function blocks_render_block($delta) {
   
   
   
-  if (!strstr($content["title"], "[hide]")) {
-    $block["title"] = $content["title"];
+  if (!strstr($content->title, "[hide]")) {
+    $block["title"] = $content->title;
   }
   
-  $block["body"] = $content["body"];
-  
-  
-  // What type of mobile_display_mode has been set?
-  if (fp_screen_is_mobile()) {
-    if ($content["settings"]["mobile_display_mode"] == "hide") {
-      return array();  // return an empty array
-    }
-    else if ($content["settings"]["mobile_display_mode"] == "collapse") {
-      // Place the content in a collapsible fieldset.
-      $block["body"] = fp_render_c_fieldset($block["body"], t("Press to read") . " " . $content["title"], TRUE);
-    }
-  }
+  $block["body"] = $content->body['display_value'];
   
   
   return $block;
