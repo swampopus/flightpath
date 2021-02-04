@@ -1216,7 +1216,8 @@ class DatabaseHandler extends stdClass
 
     if ($catalog_year != "")
     {
-      $catalog_line = "and `catalog_year`='$catalog_year' ";
+      $catalog_year = intval($catalog_year);
+      $catalog_line = "and catalog_year = '$catalog_year' ";
     }
 
     $table_name = "courses";
