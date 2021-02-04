@@ -2890,6 +2890,12 @@ function system_display_dashboard_page () {
   
   fp_add_css(fp_get_module_path("system") . "/css/style.css");
   
+  // It's a cheap hack, but when we don't have anything to show, the boxes get too small.  We're going to force some spaces
+  // in that case, and we can tell it to display:none if we don't need it anymore in CSS.
+  $force_spaces = "<span class='force-spaces'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;
+                      &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;</span>";
+  
+  
   //////////////////////////////////////////////////////////
   // To cut down on how long it takes to load huge groups
   // like Free Electives, we will pre-load some of the course inventory here.
@@ -2938,7 +2944,7 @@ function system_display_dashboard_page () {
                    AND n.published = 1                                    
                    ORDER BY field__activity_datetime DESC, a.vid DESC
                    LIMIT 7");
-   
+  $bool_is_empty = TRUE; 
   while ($cur = db_fetch_object($res)) {
     $cid = $cur->cid;      
     $content = content_load($cid);
@@ -2950,7 +2956,7 @@ function system_display_dashboard_page () {
 
           
     $disp_date = date("m/d/Y g:ia", convert_time(strtotime($content->field__activity_datetime['value'])));
-    
+    $bool_is_empty = FALSE;
     $announcements .= "<div class='feed-item'>
                 <div class='feed-item-title'>$content->title</div>
                 <div class='feed-item-desc'>{$content->field__msg['display_value']}</div>
@@ -2959,7 +2965,15 @@ function system_display_dashboard_page () {
         
   } // while
   
-  $announcements .=  "</div>  <!-- contents -->
+  if ($bool_is_empty) {
+    $rtn .= "<div class='empty'>                
+                <p>" . t("Sorry, there are no announcements available right now.") . "</p>                
+             </div>";
+  }
+  
+  
+  
+  $announcements .=  "$force_spaces</div>  <!-- contents -->
                </div> <!-- feed block --> ";
 
 
@@ -3004,7 +3018,7 @@ function system_display_dashboard_page () {
         
     
             
-    $appointments .= "
+    $appointments .= "$force_spaces
                    </div> <!-- contents -->
                  </div> <!-- feed-block -->                                                
                 ";
