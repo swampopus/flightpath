@@ -18,7 +18,6 @@ function blank_degrees_menu() {
       "page_banner_is_link" => TRUE,
       "page_hide_report_error" => TRUE,
       "target" => "_blank",
-      "menu_icon" => fp_theme_location() . "/images/popup.gif",
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
     "weight" => 10,

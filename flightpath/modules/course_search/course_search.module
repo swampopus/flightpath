@@ -500,7 +500,7 @@ function course_search_display_courses() {
       {
         $syllabus_text = "<div class='course-search-sample-syllabus'>
                           <a href='{$syllabus_array["url"]}' class='nounderline'>
-                 <img src='" . fp_theme_location() . "/images/document_icon.gif' border='0' height='12'> 
+                 <i class='fa fa-file-text-o'></i> 
                   " . t("Sample Syllabus") . "</a>
                   
                 </div>

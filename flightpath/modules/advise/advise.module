@@ -6,20 +6,31 @@ function advise_menu() {
   
   
   $items["admin-tools/toggle-draft"] = array(
-    "title" => "Toggle Draft Mode",
+    "title" => t("Toggle Draft Mode"),
+    "description" => t("View Draft degrees, courses, and groups in blank degrees, rather than the published versions.  This
+                        helps with testing and debugging degree data entry."),
     "page_callback" => "fp_render_form",
     "page_arguments" => array("advise_toggle_draft_form"),
     "access_arguments" => array("toggle_draft"),
     "type" => MENU_TYPE_TAB,
     "tab_parent" => "main",
+    "page_settings" => array(
+      "menu_icon" => fp_get_module_path('system') . "/icons/wand.png",      
+    ),    
+    'weight' => 30,
   );
   
   
  $items["admin-tools/clear-advising-cache"] = array(
-    "title" => "Clear advising cache",    
+    "title" => t("Clear advising cache"),
+    "description" => t("Clear the currently advising student & courses from memory."),    
     "page_callback" => "advise_perform_clear_advising_cache",
     "access_arguments" => array("toggle_draft"),
     "type" => MENU_TYPE_NORMAL_ITEM,
+    "page_settings" => array(
+      "menu_icon" => fp_get_module_path('system') . "/icons/arrow_refresh.png",      
+    ),
+    'weight' => 20,
   );    
   
    

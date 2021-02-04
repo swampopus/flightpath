@@ -114,6 +114,42 @@
 
 
 
+
+
+
+
+
+
+
+___admin-tools-page{}
+
+
+.display-admin-tools-page .fp-menu-item {
+  
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 10px;  
+  padding-bottom: 3px;
+  clear: both;
+}
+
+.display-admin-tools-page .fp-menu-item a {
+  font-size: 1.2em;
+  color: dodgerblue;
+}
+
+.display-admin-tools-page .fp-menu-item img {
+  max-height: 40px;
+  width: auto;  
+  float: left;
+  margin-bottom: 20px;
+}
+
+
+
+
+
+
+
 /*
  * 
  * *********************************************************

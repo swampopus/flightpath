@@ -35,7 +35,8 @@ function admin_menu() {
    
    
   $items["admin-tools/admin"] = array(
-     "title" => "FlightPath Admin Console",
+     "title" => t("FlightPath Admin Console"),
+     "description" => t("This area contains the bulk of settings, degree entry, and other configurations for FlightPath."),
      "page_callback" => "admin_display_main",
      "access_arguments" => array("can_access_admin"),
      "page_settings" => array(
@@ -43,9 +44,11 @@ function admin_menu() {
         0 => array(
           "text" => "Admin Tools",
           "path" => "admin-tools",          
-        ),
-      ),     
+        ),        
+      ),  
+      "menu_icon" => fp_get_module_path('system') . "/icons/FlightPath_Academics_plane_only.png",   
      ),     
+     'weight' => 999,
      "type" => MENU_TYPE_NORMAL_ITEM,
   );
   
@@ -505,9 +508,19 @@ function admin_menu() {
  * This page displays all the tools that the user has access to use.
  */
 function admin_display_tools_screen() {
+    
+  fp_add_css(fp_get_module_path("admin") . '/css/admin.css');
   $rtn = "";
   
+  
+  $rtn .= "<div class='display-admin-tools-page'>"; 
+  
+  
   $rtn .= fp_render_menu_block("", "admin-tools");
+  
+  $rtn .= "</div>";
+  
+  
   
   
   

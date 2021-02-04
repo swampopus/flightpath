@@ -8,9 +8,9 @@ function content_menu() {
 
   $items = array();
 
-  $items["admin/config/content"] = array(
+  $items["admin-tools/content"] = array(
     "title" => "Content",
-    "description" => "Manage content in " . variable_get("system_name", "FlightPath") . ". Ex: Announcements, Pages, etc.",
+    "description" => "Manage content in " . variable_get("system_name", "FlightPath") . ". Ex: Announcements.",
     "page_callback" => "content_display_content_admin_list",    
     "access_arguments" => array("admin_content"),
     "page_settings" => array(
@@ -18,8 +18,8 @@ function content_menu() {
       "page_show_title" => TRUE,
       "menu_links" => array(          
         0 => array(
-          "text" => t("Admin Console"),
-          "path" => "admin-tools/admin",
+          "text" => t("Admin Tools"),
+          "path" => "admin-tools",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),
       ),
@@ -48,19 +48,19 @@ function content_menu() {
     "page_settings" => array(
       "menu_links" => array(          
         0 => array(
-          "text" => "Admin Console",
-          "path" => "admin-tools/admin",
+          "text" => t("Admin Tools"),
+          "path" => "admin-tools",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),
         1 => array(
           "text" => "Content",
-          "path" => "admin/config/content",
+          "path" => "admin-tools/content",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),          
       ),
         
     ),
-    "tab_parent" => "admin/config/content",      
+    "tab_parent" => "admin-tools/content",      
   );
 
 
@@ -75,13 +75,13 @@ function content_menu() {
       "page_show_title" => TRUE,
       "menu_links" => array(          
         0 => array(
-          "text" => "Admin Console",
-          "path" => "admin-tools/admin",
+          "text" => t("Admin Tools"),
+          "path" => "admin-tools",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),
         1 => array(
           "text" => "Content",
-          "path" => "admin/config/content",
+          "path" => "admin-tools/content",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),          
       ),      
@@ -105,13 +105,13 @@ function content_menu() {
       "page_hide_report_error" => TRUE,
       "menu_links" => array(          
         0 => array(
-          "text" => "Admin Console",
-          "path" => "admin-tools/admin",
+          "text" => t("Admin Tools"),
+          "path" => "admin-tools",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),
         1 => array(
           "text" => "Content",
-          "path" => "admin/config/content",
+          "path" => "admin-tools/content",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),          
       ),
@@ -133,13 +133,13 @@ function content_menu() {
       "page_hide_report_error" => TRUE,
       "menu_links" => array(          
         0 => array(
-          "text" => "Admin Console",
-          "path" => "admin-tools/admin",
+          "text" => t("Admin Tools"),
+          "path" => "admin-tools",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),
         1 => array(
           "text" => "Content",
-          "path" => "admin/config/content",
+          "path" => "admin-tools/content",
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),          
       ),
@@ -1045,7 +1045,7 @@ function content_edit_content_form_submit(&$form, &$form_state) {
   // Does the user have permission to edit this content?
   if (!user_has_permission("edit_$type" . "_content")) {  
     fp_add_message(t("Sorry, you do not have permission to edit that content type."));
-    fp_goto("admin/config/content");
+    fp_goto("admin-tools/content");
     return;
   }  
   
@@ -1699,7 +1699,7 @@ function content_display_content_admin_list() {
   $rtn .= "<b>" . t("Existing content:") . "</b>";
   @$filter = $_GET["filter"];
   
-  $rtn .= "<form action='" . fp_url("admin/config/content") . "' method='GET'>
+  $rtn .= "<form action='" . fp_url("admin-tools/content") . "' method='GET'>
               " . t("Display type:") . " &nbsp; <select name='filter'>
                   <option value=''>" . t(" -- Any --") . "</option>";
   foreach ($types as $type => $details) {

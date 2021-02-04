@@ -328,10 +328,14 @@ function system_menu() {
   
   
  $items["admin-tools/clear-cache"] = array(
-    "title" => "Clear all cache",
+    "title" => t("Clear all cache"),
+    "description" => t("Clear and reset all cached items in FlightPath, including menu items, advising, etc."),
     "page_callback" => "system_perform_clear_cache",
     "access_arguments" => array("administer_modules"),
     "type" => MENU_TYPE_NORMAL_ITEM,
+    "page_settings" => array(
+      "menu_icon" => fp_get_module_path('system') . "/icons/arrow_refresh.png",      
+    ),  
   );  
 
 

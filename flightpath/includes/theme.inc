@@ -552,10 +552,12 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
   if ($title != "") {
     $rtn .= fp_render_section_title($title);
   }
-  
+   
   $menu_items = menu_get_items_beginning_with($menu_root);
   
   foreach ($menu_items as $item) {
+    if ($item['path'] === $menu_root) continue;   // don't need to duplicate the menu root link itself
+    
     if ($item["type"] != MENU_TYPE_CALLBACK) {
       $rtn .= fp_render_menu_item($item);
       $is_empty = false;
@@ -1196,44 +1198,51 @@ function fp_render_sidebar_left_content($bool_for_hamburger_menu = FALSE) {
     'icon' => 'fa-home',
     'desc' => t('Dashboard'),
     'class' => 'home', 
+    'weight' => 0,
   );
   if ($user->is_student) {
     $links[] = array(
       'path' => 'student-profile',
       'icon' => 'fa-graduation-cap',
       'desc' => t('My Profile'),
-      'class' => 'my-profile', 
+      'class' => 'my-profile',
+      'weight' => 10, 
     );
   }
   $links[] = array(
     'path' => 'calendar',
     'icon' => 'fa-calendar',
     'desc' => t('Appointments'),
-    'class' => 'appointments', 
+    'class' => 'appointments',
+    'weight' => 20, 
   );  
   $links[] = array(
     'path' => 'student-search',
     'icon' => 'fa-users',
     'desc' => t('Students'),
-    'class' => 'students', 
+    'class' => 'students',
+    'weight' => 30, 
   );  
   $links[] = array(
     'path' => 'tools/course-search',
     'icon' => 'fa-book',
     'desc' => t('Courses'),
-    'class' => 'courses', 
+    'class' => 'courses',
+    'weight' => 40, 
   );  
   $links[] = array(
-    'path' => 'admin-tools/stats',
+    'path' => 'stats',
     'icon' => 'fa-bar-chart',
     'desc' => t('Analytics'),
-    'class' => 'analytics', 
+    'class' => 'analytics',
+    'weight' => 50, 
   );  
   $links[] = array(
     'path' => 'admin-tools',
     'icon' => 'fa-bolt',
     'desc' => t('Admin Tools'),
-    'class' => 'admin-tools', 
+    'class' => 'admin-tools',
+    'weight' => 60, 
   );  
     
   if ($bool_for_hamburger_menu) {
@@ -1242,12 +1251,33 @@ function fp_render_sidebar_left_content($bool_for_hamburger_menu = FALSE) {
       'path' => 'logout',
       'icon' => 'fa-sign-out',
       'desc' => t('Log Out'),
-      'class' => 'logout', 
+      'class' => 'logout',
+      'weight' => 999, 
     );
   }
   
   
+  // TODO:  hook to allow other modules to add to this list or modify it.
   
+  
+  
+  // Sort links by weight
+  $temp = array();
+  foreach ($links as $c => $details) {
+    $weight = @floatval($details['weight']);
+    $temp[] = "$weight ~ $c";    
+  }
+  sort($temp);
+  
+  $new_links = array();
+  foreach ($temp as $line) {
+    $x = explode("~", $line);
+    $i = intval($x[1]);
+    $new_links[] = $links[$i];
+  }
+  $links = $new_links;
+  
+  // Display
   
 
   $html .= "<ul class='sidebar-left-nav'>";

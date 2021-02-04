@@ -18,7 +18,7 @@
 function stats_menu() {
   $items = array();
   
-  $items["admin-tools/stats"] = array(
+  $items["stats"] = array(
     "title" => "Analytics & Reports",
     "page_callback" => "stats_display_main",
     "access_arguments" => array("can_access_stats"),
