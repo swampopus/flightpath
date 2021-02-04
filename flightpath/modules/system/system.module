@@ -2976,7 +2976,7 @@ function system_display_dashboard_page () {
              </div>";
   }
   
-  
+   
   
   $announcements .=  "$force_spaces</div>  <!-- contents -->
                </div> <!-- feed block --> ";
@@ -3016,14 +3016,15 @@ function system_display_dashboard_page () {
     if ($bool_is_empty) {
       $appointments .= "<div class='empty'>
                       <p>" . t("You have no upcoming appointments within the next 5 days.") . "</p> 
-               </div>";
+               </div>
+               $force_spaces";
       
     }
     
         
     
             
-    $appointments .= "$force_spaces
+    $appointments .= "
                    </div> <!-- contents -->
                  </div> <!-- feed-block -->                                                
                 ";
@@ -3093,9 +3094,9 @@ function system_display_dashboard_page () {
       else {
         $activity .= "<div class='empty'>
                       <p>" . t("There is no student activity to report at this time.") . "</p> 
-               </div>";        
+               </div>$force_spaces";        
       }
-      $activity .=  "$force_spaces</div>  <!-- contents -->
+      $activity .=  "</div>  <!-- contents -->
                    </div> <!-- feed block -->                                                
                   </div>";
       
