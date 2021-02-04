@@ -3095,7 +3095,7 @@ function system_display_dashboard_page () {
                       <p>" . t("There is no student activity to report at this time.") . "</p> 
                </div>";        
       }
-      $activity .=  "</div>  <!-- contents -->
+      $activity .=  "$force_spaces</div>  <!-- contents -->
                    </div> <!-- feed block -->                                                
                   </div>";
       

@@ -171,7 +171,9 @@
     margin-bottom: 30px;
   }
   
-   
+  .force-spaces {
+    display: none;
+  } 
   
   
 }  /* max-width 1075px */
