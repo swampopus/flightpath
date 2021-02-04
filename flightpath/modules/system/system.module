@@ -2897,6 +2897,7 @@ function system_display_dashboard_page () {
                       &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
                       &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
                       &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
                       </span>";
   
   
@@ -2971,7 +2972,7 @@ function system_display_dashboard_page () {
   
   if ($bool_is_empty) {
     $announcements .= "<div class='empty'>                
-                <p>" . t("Sorry, there are no announcements available right now.") . "</p>                
+                <p>" . t("Sorry, there are no announcements available at this time.") . "</p>                
              </div>";
   }
   
@@ -3066,7 +3067,7 @@ function system_display_dashboard_page () {
                        AND field__student_id IN ($students_line)                                    
                        ORDER BY updated DESC, a.vid DESC
                        LIMIT 10");
-       
+      $bool_is_empty = TRUE; 
       while ($cur = db_fetch_object($res)) {
         $cid = $cur->cid;      
         $content = content_load($cid);
@@ -3076,7 +3077,7 @@ function system_display_dashboard_page () {
         $disp_date = date("m/d/Y g:ia", convert_time($content->updated));
         
         $icon = $icons[$content->field__activity_type['value']];
-        
+        $bool_is_empty = FALSE;
         $activity .= "<div class='feed-item'>
                     <div class='feed-item-icon'><i class='fa $icon'></i></div>
                     <div class='feed-item-title'>$student_name</div>
@@ -3086,8 +3087,14 @@ function system_display_dashboard_page () {
             
       } // while
       
-      $activity .= "<div class='activity-view-all'>" . l(t("View All"), "advisee-activities", '', array('class' => 'button')) . "</div>";
-      
+      if (!$bool_is_empty) {
+        $activity .= "<div class='activity-view-all'>" . l(t("View All"), "advisee-activities", '', array('class' => 'button')) . "</div>";
+      }
+      else {
+        $activity .= "<div class='empty'>
+                      <p>" . t("There is no student activity to report at this time.") . "</p> 
+               </div>";        
+      }
       $activity .=  "</div>  <!-- contents -->
                    </div> <!-- feed block -->                                                
                   </div>";
