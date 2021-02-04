@@ -3247,9 +3247,6 @@ function system_render_advising_snapshop_for_iframe() {
   else {
     // Meaning, the user does not have any advisees assigned to them.
     $rtn .= "<div class='snapshot-in-iframe'>
-              <div class='pie-image'>
-                &nbsp;
-              </div> 
               <div class='pie-term-title'>" . t("No Advisees") . "</div>
               <div class='pie-term-caption'>" . t("You do not have any advisees assigned to you at this time.") . "</div>
              </div>
