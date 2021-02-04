@@ -592,7 +592,7 @@ function adminSubmitDegreeForm2() {
 
 function adminDelGroup(group_id, semester_num) {
   var dsn = Number(semester_num) + 1;
-  var x = confirm("Are you sure you want to delete this group from block " + dsn + "?");
+  var x = confirm("Are you sure you want to remove this group from block " + dsn + "?");
   if (!x) {
     return;
   }

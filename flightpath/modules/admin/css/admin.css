@@ -177,7 +177,12 @@ ___edit_degree_form{}  /* placeholder for editor */
 }
 
 
-
+a.delgroup-icon {
+  color: firebrick;
+  font-size: 1.3em;
+  padding-right: 5px;
+  padding-left: 5px;
+}
 
 
 #fp-form-admin_edit_degree_form #element-wrapper-degree_class select {

@@ -1687,9 +1687,11 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
         $ghours = $group->min_hours_allowed . "-" . $ghours;
       }
 
+      
+
       $contents .= "<tr>
                       <td valign='middle'>      
-                        <a href='javascript: adminDelGroup(\"" . $group->get_db_group_id() . "\",\"$semester->semester_num\");'><img src='" . fp_theme_location() . "/images/delete.png' border='0'></a>
+                        <a href='javascript: adminDelGroup(\"" . $group->get_db_group_id() . "\",\"$semester->semester_num\");' class='delgroup-icon' title='" . t("Remove group?") . "'><i class='fa fa-times-circle'></i></a>
                       </td>
                       <td valign='top' class='tenpt'>
                         $group->title<br><i>$group->group_name</i>
