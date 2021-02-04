@@ -3225,23 +3225,37 @@ function system_render_advising_snapshop_for_iframe() {
     }
     //fpm($advised_count);
     $advised_percent = round($advised_count/$total * 100, 2) ;      
-  }
-  $unfinished = 100 - $advised_percent;
-  $pie_chart_url_advised_percent = base_path() . "/libraries/pchart/fp_pie_chart.php?size=75&radius=35&progress=$advised_percent&unfinished=$unfinished&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
   
-  $advising_term_id = variable_get("advising_term_id", "");
-  $advising_term_desc = get_term_description($advising_term_id);
-            
-     
-      
-  $rtn .= "<div class='snapshot-in-iframe'>
-            <div class='pie-image'>
-              <img src='$pie_chart_url_advised_percent'>
-            </div> 
-            <div class='pie-term-title'>$advising_term_desc ($advising_term_id)</div>
-            <div class='pie-term-caption'>" . t("You have advised %p of your advisees @math", array("%p" => "$advised_percent%", "@math" => "($advised_count/$total)")) . "</div>
-           </div>
-          ";
+    $unfinished = 100 - $advised_percent;
+    $pie_chart_url_advised_percent = base_path() . "/libraries/pchart/fp_pie_chart.php?size=75&radius=35&progress=$advised_percent&unfinished=$unfinished&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
+    
+    $advising_term_id = variable_get("advising_term_id", "");
+    $advising_term_desc = get_term_description($advising_term_id);
+              
+       
+        
+    $rtn .= "<div class='snapshot-in-iframe'>
+              <div class='pie-image'>
+                <img src='$pie_chart_url_advised_percent'>
+              </div> 
+              <div class='pie-term-title'>$advising_term_desc ($advising_term_id)</div>
+              <div class='pie-term-caption'>" . t("You have advised %p of your advisees @math", array("%p" => "$advised_percent%", "@math" => "($advised_count/$total)")) . "</div>
+             </div>
+            ";
+  
+  } // if total > 0
+  else {
+    // Meaning, the user does not have any advisees assigned to them.
+    $rtn .= "<div class='snapshot-in-iframe'>
+              <div class='pie-image'>
+                &nbsp;
+              </div> 
+              <div class='pie-term-title'>" . t("No Advisees") . "</div>
+              <div class='pie-term-caption'>" . t("You do not have any advisees assigned to you at this time.") . "</div>
+             </div>
+            ";
+        
+  }
     
   return $rtn;
   
