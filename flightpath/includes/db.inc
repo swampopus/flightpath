@@ -395,6 +395,30 @@ function fp_load_user($user_id) {
   }
   
   
+  if ($rtn->is_student) {
+    // See if there are any other modules which might be overriding how we look up user images.  
+    $image_url = $cur->settings['image_url'];  
+    $modules = invoke_hook("get_student_image_url", array($rtn->cwid));
+    // Although there might be several modules which will return an image url, we will only use the last one (even if it's blank or FALSE, meaning no picture).
+    foreach ($modules as $val) {
+      $image_url = trim($val);
+    }
+    $rtn->settings['image_url'] = $image_url;  
+  }
+  
+  if ($rtn->is_faculty) {
+    // See if there are any other modules which might be overriding how we look up user images.  
+    $image_url = $cur->settings['image_url'];  
+    $modules = invoke_hook("get_faculty_image_url", array($rtn->cwid));
+    // Although there might be several modules which will return an image url, we will only use the last one (even if it's blank or FALSE, meaning no picture).
+    foreach ($modules as $val) {
+      $image_url = trim($val);
+    }
+    $rtn->settings['image_url'] = $image_url;  
+  }  
+  
+  
+  
   // If student, load attributes from student_attributes table (if any exist)
   $rtn->attributes = array();
   if ($rtn->is_student) {

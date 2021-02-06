@@ -81,3 +81,31 @@ form.filters {
   margin-top: 5px;
   font-size: 0.8em;
 }
+
+.user-profile-markup-faculty .small-profile-image {
+  float: left;
+  margin-right: 20px;
+}
+
+.user-profile-markup-faculty .small-profile-image img {
+  width: 75px;
+  height: auto;
+  border-radius: 10px;
+}
+
+.user-profile-markup-faculty .profile-item {
+  font-size: 1.3em;
+  line-height: 1.9em;
+}
+
+
+.markup-element-mark_clear {
+  clear: both;
+}
+
+
+
+
+
+
+

@@ -265,17 +265,23 @@ function user_user_settings_form() {
   global $user;
   $form = array();
   
+  fp_add_css(fp_get_module_path("user") . "/css/user.css");
   
   fp_set_title($user->f_name . " " . $user->l_name . " (" . $user->cwid . ")");
   
   $html = "";
   
-  // TODO:  if a student, display their mini profile here, with a link to their full profile.  
+  $image_url = @$user->settings['image_url']; 
   
   // if faculty, display things like email and such which we have in the database.  
   if ($user->is_faculty) {
-    $html .= "<div class='user-profile-markup-faculty'>
-                <div class='profile-item'><strong>" . t("Email:") . "</strong> $user->email</div>
+    $html .= "<div class='user-profile-markup-faculty'>";
+    if ($image_url) {
+      $html .= "<span class='small-profile-image'>
+                  <img src='$image_url'> 
+                </span>";
+    }
+    $html .= "  <div class='profile-item'><strong>" . t("Email:") . "</strong> $user->email</div>
                 <div class='profile-item'><strong>" . t("Roles:") . "</strong>
                     ";
     foreach ($user->roles as $role) {
@@ -294,6 +300,11 @@ function user_user_settings_form() {
     'value' => $html,
   );
   
+  $form['mark_clear'] = array(
+    'type' => 'markup',
+    'value' => "<div class='clear'></div>",
+  );
+   
   // Are we allowed to change our password?
   if (user_has_permission('change_own_password')) {
     $form['current_password'] = array(
@@ -312,6 +323,19 @@ function user_user_settings_form() {
     );
     
   } // user has perm change_own_password
+  
+  if (user_has_permission('change_own_image')) {
+    $form['image_url'] = array(
+      'label' => t('Image URL'),
+      'type' => 'textfield',
+      'value' => @$user->settings['image_url'],
+      'description' => t('Enter the full URL/URI to your profile image.  Make sure your
+                          image is in "portrait" orientation, and generally no larger than 20 or 30kb in filesize.
+                          Also make sure that the originating server is HTTPS and not HTTP.'), 
+      'suffix' => '<hr>',
+    );
+  } // user has permission to change their image
+  
   
   
   $system_timezone = variable_get('system_timezone', 'America/Chicago');
@@ -424,6 +448,7 @@ function user_user_settings_form_submit($form, $form_state) {
       
   $timezone = $form_state['values']['timezone'];
   $hide_charts = $form_state['values']['hide_charts'];
+  $image_url = $form_state['values']['image_url'];
   $default_student_load_tab = $form_state['values']['default_student_load_tab'];
   $default_notification_method = $form_state['values']['default_notification_method'];
   
@@ -453,8 +478,9 @@ function user_user_settings_form_submit($form, $form_state) {
                   hide_charts = ?,
                   default_student_load_tab = ?,
                   default_notification_method = ?,
+                  image_url = ?,                  
                   updated = ?
-            WHERE user_id = ?", array($timezone, $hide_charts, $default_student_load_tab, $default_notification_method, time(), $user->id));
+            WHERE user_id = ?", array($timezone, $hide_charts, $default_student_load_tab, $default_notification_method, $image_url, time(), $user->id));
   
   fp_add_message(t("User settings saved successfully."));
   
@@ -513,6 +539,10 @@ function user_perm() {
       "title" => t("Change own password?"),
       "description" => t("Check this if the user is allowed to change their own password (from their profile page)."),
     ),            
+    "change_own_image" => array( 
+      "title" => t("Change own image?"),
+      "description" => t("This lets the user change their own image URL.  In general, leave this disabled if images are programmed to come from another source."),
+    ),
   );  
   
 }

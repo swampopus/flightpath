@@ -773,6 +773,7 @@ CREATE TABLE `user_settings` (
   `hide_charts` varchar(255) DEFAULT NULL,
   `default_student_load_tab` varchar(255) DEFAULT NULL,
   `default_notification_method` varchar(255)DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
   `updated` int unsigned DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   KEY `timezone` (`timezone`),

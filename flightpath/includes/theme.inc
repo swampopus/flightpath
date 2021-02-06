@@ -1018,18 +1018,29 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
     //$right_side_top = "<h2 class='what-if-notice'>" . t("What If Mode") . "</h2>";
   }
   
+
+  // Figure out what the user's image is based on their account.  
+  $image_url = "";
+  $student_account_user_id = db_get_user_id_from_cwid($student->student_id, 'student');
+  if ($student_account_user_id) {
+    $student_account = fp_load_user($student_account_user_id);
+    if ($student_account) {
+      $image_url = @$student_account->settings['image_url'];
+    }
+  }
   
   
-  $img_src = base_path() . "/modules/system/icons/sample_student_female.jpg";
   
   
   $rtn .= "<div class='student-mini-profile $whatifclass'>
-    
-             <div class='header-profile-image'>
-                <img src='$img_src' class='student-profile-image' />
-             </div> <!-- profile-image -->    
-      
-              <div class='profile-top-details-wrapper profile-top-wrapper-left-side'>
+             ";
+  if ($image_url) {
+    $rtn .= "<div class='header-profile-image'>
+                <img src='$image_url' class='student-profile-image' />
+              </div> <!-- profile-image -->              
+              ";
+  }
+  $rtn .= "        <div class='profile-top-details-wrapper profile-top-wrapper-left-side'>
                           <div class='profile-detail-line profile-detail-line-student-name-cwid'>
                             <h2>$student->name &nbsp; &nbsp; ($student->student_id)</h2>                                                        
                           </div>

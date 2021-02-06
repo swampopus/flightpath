@@ -17,6 +17,29 @@
  
  
  
+ 
+ 
+/**
+ * This accepts a student_id, and returns back a
+ * URL to the student's image, or FALSE if it cannot find one.
+ * 
+ */
+function hook_get_student_image_url($student_id) {  
+  $url = "https://myschool.edu/data/" . $student_id . ".jpg";
+  return $url;
+} 
+
+/**
+ * Similar to hook_get_student_image_url.
+ */
+function hook_get_faculty_image_url($faculty_id) {  
+  $url = "https://myschool.edu/data/" . $faculty_id . ".jpg";
+  return $url;
+} 
+
+ 
+ 
+ 
 /**
  * Alter forms which are created using the Form API
  * 
