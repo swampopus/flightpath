@@ -20,20 +20,23 @@
  
  
 /**
- * This accepts a student_id, and returns back a
- * URL to the student's image, or FALSE if it cannot find one.
+ * This accepts a CWID (student_id or faculty_id), and returns back a
+ * URL to the user's image, or FALSE if it cannot find one.
+ * 
+ * type can be either "student" or "faculty"
  * 
  */
-function hook_get_student_image_url($student_id) {  
-  $url = "https://myschool.edu/data/" . $student_id . ".jpg";
-  return $url;
-} 
+function hook_get_user_image_url($cwid, $type = 'student') {
 
-/**
- * Similar to hook_get_student_image_url.
- */
-function hook_get_faculty_image_url($faculty_id) {  
-  $url = "https://myschool.edu/data/" . $faculty_id . ".jpg";
+  if ($type == 'student') {      
+    $url = "https://myschool.edu/student-data/" . $cwid . ".jpg";
+  }
+  
+  if ($type == 'faculty') {
+    $url = "https://myschool.edu/facstaff-data/" . $cwid . ".jpg";
+  }
+  
+  
   return $url;
 } 
 
