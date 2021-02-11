@@ -746,9 +746,9 @@ function db_table_exists($table_name) {
  * Get a variable from the database.  We will first look in our GLOBALS array,
  * to see that it hasn't already been retrieved this page load.
  *
- * @param unknown_type $name
- * @param unknown_type $default_value
- * @return unknown
+ * @param string $name
+ * @param mixed $default_value
+ * @return mixed
  */
 function variable_get($name, $default_value = "") {
   
