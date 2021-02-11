@@ -82,6 +82,8 @@ define("MENU_TYPE_SUB_TAB", 4);
 define("MENU_ACCESS_DENIED", 61);
 define("MENU_NOT_FOUND", 62);
 
+define('HTTP_REQUEST_TIMEOUT', -1);
+
 
 
 // Set a global variable which confirms the bootstrap has been loaded.

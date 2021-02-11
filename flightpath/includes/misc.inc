@@ -840,7 +840,7 @@ function filter_xss_attributes($attr) {
   $attrarr = array();
   $mode = 0;
   $attrname = '';
-
+  $skip = FALSE;
   while (strlen($attr) != 0) {
     // Was the last operation successful?
     $working = 0;
