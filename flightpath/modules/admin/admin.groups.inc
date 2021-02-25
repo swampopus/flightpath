@@ -41,7 +41,7 @@ function admin_edit_group_form_validate(&$form, &$form_state) {
 
 
 
-function admin_edit_group_form_submit(&$form, $form_state) {
+function admin_edit_group_form_submit(&$form, &$form_state) {
   $values = $form_state["values"];
   $de_catalog_year = $values["de_catalog_year"];
 
@@ -90,6 +90,9 @@ function admin_edit_group_form_submit(&$form, $form_state) {
       "path" => "admin/groups/edit-group",
       "query" => "group_id=$group_id&de_catalog_year=$de_catalog_year",
     );    
+    
+    $form_state['values']['group_id'] = $group_id; // set the new group id back into the array, for other modules to use.
+    
   }
 
   $res = db_query("UPDATE draft_groups

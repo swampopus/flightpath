@@ -361,7 +361,7 @@ class DatabaseHandler extends stdClass
     // If we are on production, email someone!
     if (@$GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"] != "")
     {
-      $server = $_SERVER["SERVER_NAME"];
+      $server = $_SERVER["SERVER_NAME"] . " - " . $GLOBALS['fp_system_settings']['base_url'];
       $email_msg = t("A MYSQL error has occured in FlightPath.") . "  
       Server: $server
       

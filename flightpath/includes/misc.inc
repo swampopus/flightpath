@@ -249,7 +249,7 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
     $tomail = trim(variable_get("notify_php_error_email_address", ""));
     if ($tomail != "") {
       
-      $hostname = php_uname('n');
+      $hostname = php_uname('n') . ' - ' . $GLOBALS['fp_system_settings']['base_url'];
       
       $msg = "";
       $msg .= "SERVER:   $hostname \n";
@@ -2263,7 +2263,7 @@ function user_has_role($role, $account = NULL) {
  *
  * @param String $permission
  */
-function user_has_permission($permission, $account = NULL) {
+function user_has_permission($permission = "", $account = NULL) {
   global $user;  
   
   if ($account == NULL) $account = $user;

@@ -753,6 +753,7 @@ CREATE TABLE `transfer_institutions` (
   `name` varchar(200)   DEFAULT '',
   `state` varchar(10)   DEFAULT '',
   PRIMARY KEY (`institution_id`),
+  KEY `name` (`name`),
   KEY `state` (`state`)
 ); ";
 db_query($q);
