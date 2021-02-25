@@ -33,7 +33,7 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
     $tomail = trim(variable_get("notify_php_error_email_address", ""));
     if ($tomail != "") {
       
-      $hostname = php_uname('n');
+      $hostname = php_uname('n') . ' - ' . $GLOBALS['fp_system_settings']['base_url'];
       
       $msg = "";
       $msg .= "SERVER:   $hostname \n";

@@ -1,6 +1,13 @@
 FlightPath 5.x Changelog
 ========================
 
+2021-02-25
+  Added floatval() to min hours, max hours, etc, in admin_course_submit(), to avoid possible mysql errors.
+
+2021-02-20
+  Added the base_url to the server name when sending mysql errors via email.
+
+
 2020-12-20
   Made it so the smtp module only require_once's certain files, so as not to cause issues.
 

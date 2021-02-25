@@ -470,9 +470,9 @@ function admin_edit_course_form_submit(&$form, $form_submit) {
   }
 
   $title = trim($values["title"]);
-  $min_hours = trim($values["min_hours"]);
-  $max_hours = trim($values["max_hours"]);
-  $repeat_hours = trim($values["repeat_hours"]);
+  $min_hours = floatval(trim($values["min_hours"]));
+  $max_hours = floatval(trim($values["max_hours"]));
+  $repeat_hours = floatval(trim($values["repeat_hours"]));
   //$exclude = trim($_POST["exclude"]);
   $description = trim($values["description"]);
   $data_entry_comment = trim($values["data_entry_comment"]);
