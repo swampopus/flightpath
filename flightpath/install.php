@@ -446,8 +446,11 @@ function install_display_db_form($msg = "") {
 
   $pC .= "<h2 class='title'>" . st("Setup Database and Admin") . "</h2>$msg
           <p>" . st("You should have already set up a database and database user
-                      (with all privileges except Grant) for FlightPath.  Please
-                      enter that information below.") . "</p>
+                      (with all privileges except Grant) for FlightPath.  
+                      <br><br>
+                      <strong>Required:  The database default Character set must be 'utf8mb4'.</strong>                              
+                      <br><br>
+                      Please enter database credentials and information below.") . "</p>
                       
           <hr>
           <form action='install.php?lang=$lang' method='POST'>

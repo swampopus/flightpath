@@ -49,7 +49,7 @@ class DatabaseHandler extends stdClass
       
       
       // NOTE:  !!!  This causes problems with FlightPath if uncommented.  Leave commented for now.
-      // Make sure that when we retrieve integers and floats, they do not get converted to strings.
+      // Make sure in code that when we retrieve integers and floats, they do not get converted to strings.
       //$this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, FALSE);
       //$this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, FALSE);
 

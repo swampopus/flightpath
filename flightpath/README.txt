@@ -5,7 +5,7 @@ FlightPath may be downloaded from:
    
    http://getflightpath.com
 
-Check the above address for updates, modules, and technical assistance.
+Check the above address for updates, modules, and documentation.
 
 Please read the COPYRIGHT.txt and LICENSE.txt files for
 important information as to what you may and may not do with
@@ -18,6 +18,17 @@ documentation, etc.
 
 
 ----------------------
+Professional hosting and support
+----------------------
+
+FlightPath Academics offers professional hosting and support, as well as
+exclusive features for FlightPath not found in this community edition.
+
+Visit https://flightpathacademics.com for more information.
+
+
+
+----------------------
 A brief history...
 ----------------------
 
@@ -25,17 +36,18 @@ FlightPath was created by the University of Louisiana at Monroe
 (http://www.ulm.edu) in 2006, and has been in continuous use
 ever since.
 
-The decision to release the code as open source occured in 2011.
+The decision to release the code as open source (GNU GPLv3) occured in 2011.
 
 While the project is now contributed to by a community of developers,
-the original ULM development team were as follows:
+the original ULM development team from 2006 were as follows:
 
 Richard Peacock - Primary developer
 Joe Mansour - Mainframe/Banner coordinator
 Joann Perrer - Degree and course data coordinator
 
-The "classic" theme was created by Paul Gullette, with the
-original banner graphic designed by Rob Glaze.
+The "classic" theme, seen in FlightPath 1x - 4x, was created by 
+Paul Gullette, with the original "feather" banner graphic designed 
+by Rob Glaze.
 
 Some icons used by FlightPath are part of the Silk icon set, 
 and licensed under the Creative Commons Attribution 3.0 License.

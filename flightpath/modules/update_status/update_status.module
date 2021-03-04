@@ -57,10 +57,10 @@ function update_status_perform_check() {
   // We expect the $result to look like an object, where
   // $result->data contains the returned HTML from the url,
   // and $result->code contains the response code.
-  $response = trim($result->data);
+  $response = trim($result->data);  
   // Response must contain the text "FLIGHTPATH_SUCCESS" for us to believe it is successful.
   if (!strstr($response, "FLIGHTPATH_SUCCESS")) {
-    watchdog("update_status", "Checking update status failed.", array(), WATCHDOG_ERROR);
+    watchdog("update_status", "Checking update status failed. Response: " . print_r($response, TRUE), array(), WATCHDOG_ERROR);
     fp_add_message(t("Checking update status failed.  Perhaps FlightPath cannot access external sites?"));
     return;    
   }
@@ -93,7 +93,7 @@ function update_status_perform_check() {
  */
 function update_status_cron() {
   
-  $check_if_older_than = strtotime("-3 DAY");
+  $check_if_older_than = strtotime("-7 DAY");
   // When was the last time we ran this check?
   // (we only want to run once every few days)
   $last_run = variable_get("update_status_last_run", 0);
@@ -200,7 +200,7 @@ function update_status_get_install_status_url() {
   $domain = "getflightpath.com";
   
   
-  $rtn .= "http://$domain/check-update-status?pa=cv&st=" . urlencode(fp_token());
+  $rtn .= "https://$domain/check-update-status?pa=cv&st=" . urlencode(fp_token());
   $rtn .= "&u=" . urlencode($GLOBALS["fp_system_settings"]["base_url"]);
   $rtn .= "&c=" . FLIGHTPATH_CORE;
   
