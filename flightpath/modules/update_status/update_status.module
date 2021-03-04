@@ -117,6 +117,14 @@ function update_status_status() {
   // Check the data we have for modules, to see if any of them could use an update.
   $updates = variable_get("update_status_need_updates_modules", array());
   $releases = variable_get("update_status_need_updates_release_types", array()); 
+
+  if (!is_array($updates)) {
+    $updates = array(); // just set to empty array if for some reason its null.
+  }
+  if (!is_array($releases)) {
+    $releases = array();
+  }    
+
   
   $release_desc = array(
     "other" => "Other",
@@ -125,6 +133,7 @@ function update_status_status() {
     "bug_fixes" => "Bug fixes",
     "security" => "Security - High Priority!",
   );
+  
   
   ksort($updates);
   
