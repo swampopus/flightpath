@@ -60,7 +60,7 @@ function update_status_perform_check() {
   $response = trim($result->data);  
   // Response must contain the text "FLIGHTPATH_SUCCESS" for us to believe it is successful.
   if (!strstr($response, "FLIGHTPATH_SUCCESS")) {
-    watchdog("update_status", "Checking update status failed. Response: " . print_r($response, TRUE), array(), WATCHDOG_ERROR);
+    watchdog("update_status", "Checking update status failed. URL: $url. Response: " . print_r($response, TRUE), array(), WATCHDOG_ERROR);
     fp_add_message(t("Checking update status failed.  Perhaps FlightPath cannot access external sites?"));
     return;    
   }
