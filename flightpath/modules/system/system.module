@@ -2565,9 +2565,11 @@ function system_status() {
     $rtn["status"] .= t("Cron was last run on %date", array("%date" => format_date($last_run)));
   } 
   
+  $cron_url = $GLOBALS["fp_system_settings"]["base_url"] . "/cron.php?t=" . $GLOBALS["fp_system_settings"]["cron_security_token"];
+  
   $rtn["status"] .= "<p style='font-size: 0.8em;'>" . t("Your site's cron URL is:");
-  $rtn["status"] .= "<br>&nbsp; &nbsp; <i>" . $GLOBALS["fp_system_settings"]["base_url"] . "/cron.php?t=" . $GLOBALS["fp_system_settings"]["cron_security_token"] . "</i>
-                        <br>" . t("Example linux cron command:") . "&nbsp; <i>wget -O - -q -t 1 http://ABOVE_URL</i>";  
+  $rtn["status"] .= "<br>&nbsp; &nbsp; <i>" . $cron_url . "</i>
+                        <br>" . t("Example linux cron command:") . "&nbsp; <i>wget -O - -q -t 1 $cron_url</i>";  
   $rtn["status"] .= "</p>";
   
   
