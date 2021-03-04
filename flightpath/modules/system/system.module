@@ -2569,7 +2569,7 @@ function system_status() {
   
   $rtn["status"] .= "<p style='font-size: 0.8em;'>" . t("Your site's cron URL is:");
   $rtn["status"] .= "&nbsp; <i>" . $cron_url . "</i>
-                        <br>" . t("Ex linux cron command (every 10 min):") . "&nbsp; <i>*/10 * * * * wget -O - -q -t 1 $cron_url</i>";  
+                        <br>" . t("Ex linux cron command (every 10 min):") . "&nbsp; <i style='background-color: beige;'>*/10 * * * * wget -O - -q -t 1 $cron_url</i>";  
   $rtn["status"] .= "</p>";
   
   
