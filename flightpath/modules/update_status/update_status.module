@@ -52,12 +52,8 @@ function update_status_perform_check() {
 
   // Let's assemble our URL which should be fairly long.
   $url = update_status_get_install_status_url();
-  $result = fp_http_request($url);
-
-  // We expect the $result to look like an object, where
-  // $result->data contains the returned HTML from the url,
-  // and $result->code contains the response code.
-  $response = trim($result->data);  
+  $response = fp_url_get_contents($url);
+    
   // Response must contain the text "FLIGHTPATH_SUCCESS" for us to believe it is successful.
   if (!strstr($response, "FLIGHTPATH_SUCCESS")) {
     watchdog("update_status", "Checking update status failed. URL: $url. Response: " . print_r($response, TRUE), array(), WATCHDOG_ERROR);
