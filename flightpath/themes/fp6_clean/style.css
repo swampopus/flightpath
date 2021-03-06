@@ -1221,7 +1221,7 @@ ___page--login{}
   float: right;
   width: 55%; 
     
-  background: url('images/login_wallpaper.jpg') top left no-repeat;
+  background: url('images/login_wallpaper.jpg') bottom center no-repeat;
   background-size: cover; 
 }
 
