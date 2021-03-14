@@ -42,13 +42,13 @@ function system_enable() {
     
 
   // Let's perform installations on the other modules we want enabled by default.
-  $modules = array("admin", "advise", "blocks", "comments", "student_search", "update_status", "content", "announcements", "tinymce", "course_search", "blank_degrees", "user", "batch");
+  $modules = array("admin", "advise", "comments", "student_search", "update_status", "content", "announcements", "tinymce", "course_search", "blank_degrees", "user", "batch");
   foreach ($modules as $module) {
     system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => "core"));
   }
   
   
-  
+  /*
   // Set up some blocks for the system module by default.
   db_query("INSERT INTO blocks (section, region, module, delta, weight)
             VALUES ('system_main', 'right_col', 'system', 'tools', 1),
@@ -59,8 +59,9 @@ function system_enable() {
                    ('system_login', 'top', 'blocks', 'block_2', 0)
                    
                    ");  
-  
-  
+    
+   */
+   
   // Set up some basic permissions for authenticated user.
   db_query("INSERT INTO role_permissions (rid, perm)
             VALUES 

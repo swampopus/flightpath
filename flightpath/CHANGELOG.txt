@@ -1,6 +1,9 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-03-14
+  Removing "blocks" module from Core.
+
 2021-02-20
   Added the base_url to the server name when sending mysql errors via email.
 

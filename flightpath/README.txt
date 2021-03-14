@@ -17,6 +17,14 @@ explained within in regards to FlightPath and any related modules,
 documentation, etc.
 
 
+
+----------------------
+Problems with Installation?
+----------------------
+See: https://getflightpath.com/node/6
+
+
+
 ----------------------
 Professional hosting and support
 ----------------------
