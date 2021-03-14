@@ -40,7 +40,8 @@ CREATE TABLE `content__announcement` (
   $content->field__msg['value'] = '<p>This is a sample announcement! You may add new announcements (or delete this one) from the Admin Tools, then Content.</p>'; 
   $content->field__visibility['value'] = 'public';
   
-  content_save($content);  
+  content_content_save($content);  // Since this is in our install script (which is run on first installation of FlightPath, we will call content_content_save, instead
+                                   // of just content_save, thereby skipping the hook check.  
     
 }
 
