@@ -27,6 +27,13 @@ CREATE TABLE `content__announcement` (
   ";
   db_query($q);
   
+  
+}
+
+
+
+function announcements_enable() {
+  
   // Now, add a piece of custom content using content_save() function.
   
   $content = new stdClass();
@@ -36,6 +43,9 @@ CREATE TABLE `content__announcement` (
   $content->delete_flag = 0;  
   $content->title = "Sample Announcement";
   
+  // TODO:  This extra field data (aside from title) is not getting saved on first install, because hooks do not appear to be working
+  // on first install.  Not a huge deal, but should check into that.
+  
   $content->field__activity_datetime['value'] = date("Y-m-d H:ia");
   $content->field__msg['value'] = '<p>This is a sample announcement! You may add new announcements (or delete this one) from the Admin Tools, then Content.</p>'; 
   $content->field__visibility['value'] = 'public';
@@ -44,4 +54,3 @@ CREATE TABLE `content__announcement` (
                                    // of just content_save, thereby skipping the hook check.  
     
 }
-
