@@ -37,7 +37,7 @@ CREATE TABLE `content__announcement` (
   $content->title = "Sample Announcement";
   
   $content->field__activity_datetime['value'] = date("Y-m-d H:ia");
-  $content->field__msg['value'] = '<p>This is a sample announcement! You may add new announcements (or delete this one) from the Admin Console, then Content.</p>'; 
+  $content->field__msg['value'] = '<p>This is a sample announcement! You may add new announcements (or delete this one) from the Admin Tools, then Content.</p>'; 
   $content->field__visibility['value'] = 'public';
   
   content_save($content);  
