@@ -1,0 +1,514 @@
+
+
+
+___custom-calendar{}
+
+body {
+  min-width: 500px;
+}
+
+
+.tzexplain {
+  text-align: center;
+  padding: 10px;
+}
+
+.tzglobe {
+  color: green;
+  
+}
+
+
+
+.calendar-feed-instructions {
+  text-shadow: none;
+  font-weight: bold;
+}
+
+.custom-calendar .today {
+  background-color: lemonchiffon !important;
+}
+
+.cal-prev-link {
+  float: left;
+  font-size: 16pt;
+}
+
+.cal-next-link {
+  float: right;
+  font-size: 16pt;
+}
+
+.calendar-toggle-times {
+  margin-top: 15px;
+}
+
+.calendar-header {
+  font-size: 2em;
+  
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+table.custom-calendar {
+  width: 100%;
+  
+}
+
+table.custom-calendar td {
+  vertical-align: top;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.custom-calendar .date-box-top {
+  display: block;
+  text-align: right;
+}
+
+.custom-calendar .date-box-top a.add-date {
+  display: inline-block;
+  padding-right: 10px;
+}
+
+.not-logged-in .date-box-top a.add-date {
+  display: none !important;
+}
+
+.custom-calendar .date-box-top .the-day-num {
+  display: inline-block;
+  min-width: 20px;
+}
+
+.custom-calendar .calendar-entry {
+  font-size: 0.7em;
+  border-bottom: 1px dashed #ccc;
+  line-height: 1.5em;
+  text-align: left;
+  margin-bottom: 2px;
+}
+
+.custom-calendar .calendar-entry .name-shift-line {
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.custom-calendar .calendar-entry .no-name-yet {
+  color: #ccc;
+}
+
+.custom-calendar .calendar-entry .time-line {
+  text-align: right;
+  font-size: 10px;
+}
+
+.custom-calendar .out-of-range-day {
+  background-color: #ddd;
+}
+
+
+.ui-dialog .ui-dialog-buttonpane {
+  padding: 0;
+  margin: 0;
+}
+
+.ui-dialog .ui-dialog-buttonpane button {
+  margin: 0;
+}
+
+.ui-button-text-only .ui-button-text {
+  
+}
+
+.ui-button .ui-button-text {
+    font-size: 0.8em;
+}
+
+.mobile-day-count {
+  text-align: center;  
+  position: relative;
+}
+
+.mobile-day-count a {
+  display: inline-block;
+  text-align: center;
+  width: 1.1em;  
+  background-color: #0095ff;
+  padding: 2px 4px 2px 3px;
+  border-radius: 50%;
+  color: white;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  top: 30px;
+}
+
+
+
+
+
+___calendar{}
+
+
+a.calendar-entry-edit-link {
+  float: left;
+  margin-right: 3px;
+  color: #ccc;
+}
+a.calendar-entry-edit-link:hover {
+  color: #999;
+}
+
+
+.vertical-tabs {
+  display: none;
+}
+
+.admin-menu .vertical-tabs {
+  display: block;
+}
+
+.iframe .vertical-tabs {
+  display: none;
+}
+
+li.date-prev a {
+  padding-right: 5px;
+}
+li.date-next a {
+  padding-left: 5px;
+}
+
+
+.calendar-calendar div.day {
+  width: 4em;
+}
+
+.calendar-calendar a.add-date {
+  font-size: 0.9em;
+  padding-left: 10px;
+  padding-right: 10px;
+  color: #ddd !important;
+}
+
+.calendar-calendar .out-of-range-day a.add-date {
+  color: white !important;
+}
+
+.calendar-calendar a.add-date:hover {
+  color: #4b85ac !important;
+}
+
+.calendar-week-add {
+  float: right;
+}
+
+#multi-day-container {
+  clear: both;
+}
+
+
+.calendar-calendar .month-view .item {
+  line-height: 0.9em;
+  margin-bottom: 10px;
+  
+}
+
+.calendar-calendar .month-view .item .monthview {
+  background-color: transparent !important;
+  border-bottom: 1px dashed #ccc;
+}
+
+.calendar-calendar .month-view .item .monthview .date-display-single {
+  font-weight: normal;
+  display: block;
+  text-align: right;
+}
+
+.calendar-calendar .month-view .item .monthview .date-display-single .date-display-start,
+.calendar-calendar .month-view .item .monthview .date-display-single .date-display-end {
+  font-weight: normal;
+}
+
+
+.cal-employee-name,
+.cal-shift-name
+ {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.calendar-calendar th {
+    text-align: center;
+    margin: 0;
+    background: #999;
+    border-right: 1px solid #c8c7c7;
+    color: #fff;
+    padding: 10px;
+    font-weight: bold;    
+}
+
+.calendar-calendar td {
+    width: 14%;
+  
+    border: 1px solid #ccc;
+    color: #777;
+    text-align: right;
+    vertical-align: top;
+    margin: 0;
+    padding: 0;
+}
+/* forces calendar days to be certain height */
+.calendar-calendar td::after {
+  content: "";
+  display: inline-block;
+  vertical-align: top;  
+  min-height: 80px;
+}
+
+
+.mobile-day-page .calendar-entry {
+  font-size: 1.6em;
+  margin-bottom: 10px;
+  border-bottom: 1px dashed #ccc;
+  padding-bottom: 10px;
+}
+
+.mobile-day-page .name-shift-line,
+.mobile-day-page .time-line {
+ display: inline-block;
+}
+
+.mobile-day-page .time-line {
+  float: right;
+  margin-left: 10px;
+}
+
+
+.appt-canceled div
+{
+  text-decoration: line-through;
+  background-color: #eee;
+}
+
+
+
+
+___schedule_appointment {}
+
+
+.small-circle-profile-image {
+  display: block;
+  width: 150px;
+  height: 150px;
+  overflow-y: hidden;
+  border-radius: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.small-circle-profile-image img {
+  width: 100%;
+  height: auto;
+}
+
+.calendar-mini-calendar {
+  display: inline-block;
+  width: 400px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;  
+}
+
+
+.calendar-mini-calendar .month-title {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.calendar-mini-calendar table {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.calendar-mini-calendar table td {
+  padding: 10px 15px 10px 15px;
+  
+}
+
+
+.calendar-mini-calendar table th,
+.calendar-mini-calendar table td
+ {
+  text-align: center;
+}
+
+.calendar-mini-calendar table td.mini-past-date {
+  z__background-color: #eee;
+  
+}
+
+.calendar-mini-calendar table td.mini-day-today {  
+  background-color: lemonchiffon;
+}
+
+.calendar-mini-calendar table td.mini-day a {
+  display: inline-block;
+  text-align: center;
+  width: 1.1em;  
+  background-color: #0095ff;
+  padding: 2px 4px 2px 3px;
+  border-radius: 50%;
+  color: white;
+}
+
+.calendar-mini-calendar table td.mini-day a:hover {
+  text-decoration: none;
+  background-color: lightskyblue;
+}
+
+
+
+p.select-directions {
+  text-align: center;
+}
+
+.select-from-event-types {
+  margin-top: 50px;
+  text-align: center;
+}
+
+.select-from-event-types .event-type,
+.event-type-box
+{
+  display: inline-block;
+  width: 380px;
+  
+  min-height: 120px;
+  text-align: center;
+  margin-right: 50px;
+  vertical-align: top;
+  font-size: 1.1em;
+  padding: 20px;
+  overflow-y:hidden;
+  text-overflow: ellipsis;
+  box-shadow: 1px 1px 10px #ddd;
+}
+
+.select-from-event-types .event-type:hover {
+  text-decoration: none;
+  background-color: #f9f9f9;
+}
+
+.event-type-box {  
+  box-shadow: none;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  margin-right: 10px;
+}
+
+
+.select-from-event-types .event-type .event-type-title,
+.event-type-box .event-type-title
+ {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 10px;
+}
+
+.select-from-event-types .event-type .event-type-description {
+  color: black;
+}
+
+.event-select-time {  
+  display: inline-block;
+  width: 400px;
+  height: 400px;
+  overflow-y: scroll;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-left: auto;
+  margin-right: auto;  
+}
+
+.event-select-time a.select-time {
+  display: block;
+  width: 300px;
+  text-align: center;
+  margin-bottom: 10px;
+  padding: 20px;
+  box-shadow: 1px 1px 10px #ddd;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.event-select-time a.select-time:hover {
+  text-decoration: none;
+  background-color: #f9f9f9;  
+}
+
+
+
+.confirm-schedule-appt-type,
+.confirm-schedule-appt-datetime
+ {
+  font-size: 1.1em;
+  padding-bottom: 10px;
+}
+
+
+
+.appointment-summary-view {
+  font-size: 1.1em;
+  display: block;
+  width: 500px;
+  margin-top: 30px;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid #ccc;
+  padding: 30px;
+}
+
+
+
+
+
+
+
+
+___appointment_settings{}
+
+table.schedule-event-types {
+  width: 90%;
+}
+
+table.schedule-event-types th {
+  
+}
+
+table.schedule-event-types td,
+table.schedule-event-types th
+ {
+  padding: 10px 20px 10px 20px;
+}
+
+table td.actions {
+  width: 70px;
+}
+
+
+___forms{}
+
+.calendar-faculty_id {
+  font-size: 1.2em;
+}
+.calendar-faculty_id label {
+  display: inline-block;
+  margin-right: 20px; 
+}
+
+
+
+
+

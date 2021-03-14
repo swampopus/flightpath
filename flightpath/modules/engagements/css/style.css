@@ -1,0 +1,172 @@
+/**
+ *   @file
+ * This CSS file is for the engagements module
+*/
+
+
+#engagements-list-page .add-engagements-buttons {
+  float: right;
+  padding-right: 20px;
+  padding-left: 10px;
+}
+
+
+.engagements-list {
+  
+  padding: 20px;
+  
+}
+
+
+
+#engagements-list-page .email-body {
+  max-height: 150px;
+  overflow: hidden;
+  transition: max-height 2s;
+}
+
+#engagements-list-page .more-body-link,
+#engagements-list-page .less-body-link
+ {
+  display: block;
+  text-align: center;
+  border-top: 1px solid #ccc;
+  margin-top: 5px;
+}
+
+
+#engagements-list-page .activity-feed-teaser {
+    padding: 10px;
+    margin-bottom: 40px;
+    box-shadow: 2px 2px 5px #ccc;
+    color: #555;
+    min-height: 100px;
+}
+
+
+#engagements-list-page .activity-feed-teaser-sent {
+    background-color: #e6f7ff;
+    width: 90%;
+    float: right;
+}
+
+
+#engagements-list-page .activity-feed-teaser-received {
+  background-color: #e6ffe6;
+  width: 90%;  
+}
+
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-icon {
+  display: inline-block;
+  width: 30px;
+  color: #888;
+}
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-email-opens {
+  margin-left: 40px;
+}
+
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-description {
+  font-weight: bold;
+  color: #888;
+}
+
+
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-privacy {
+  float: right;  
+  margin-right: 10px;
+  color: #999;
+}
+
+#engagements-list-page .header-desc-extra {
+  display: inline-block;
+  margin-left: 40px;
+}
+
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-author {
+  float: right;
+  font-size: 0.9em;
+  margin-right: 20px;
+}
+
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-date-time {
+  float: right;
+  font-size: 0.9em;
+  margin-right: 10px;
+}
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-visibility {
+  float: right;
+  font-size: 0.9em;
+  margin-right: 20px;
+}
+
+
+
+#engagements-list-page .activity-feed-teaser .activity-header-content .header-edit {
+  float: right;
+  
+}
+
+#engagements-list-page .activity-feed-teaser .activity-contents {
+  margin-left: 30px;
+  margin-top: 10px;
+  
+}
+
+
+.activity-feed-teaser .email-subject {
+  display: inline-block;
+  
+  border-bottom: 1px solid #ccc;
+}
+
+
+.page-is-popup #fp-form-content_edit_content_form .element-type-textfield input,
+.page-is-popup #fp-form-content_edit_content_form .element-type-select select,
+.page-is-popup #fp-form-content_edit_content_form .element-type-datetime-local input,
+#ignore .ignoreme
+{
+  width: 95%;
+  max-width: 95%;
+}
+
+
+.engagement-field-mark {
+  font-size: 1.2em;
+}
+
+.engagement-field-mark label {
+  display: inline;
+  font-weight: bold;
+}
+
+.engagement-field-mark .engagement-student-extra-mark {
+  display: inline-block;
+  padding-left: 10px;
+  font-weight: bold;  
+  color: #888;
+}
+
+
+#element-wrapper-visibility .radio-element {
+  display: inline-block;  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

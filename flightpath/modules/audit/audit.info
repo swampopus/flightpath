@@ -1,0 +1,4 @@
+name = Audit
+description = Provides functionality for degree audits
+requires = advise, comments
+core = 6.x

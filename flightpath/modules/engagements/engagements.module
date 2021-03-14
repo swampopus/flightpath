@@ -1,0 +1,2059 @@
+<?php
+/**
+ * @file
+ * This is the primary module file for the engagements module.
+*/
+
+
+
+
+
+/**
+ * Implement hook_menu
+ */
+function engagements_menu() {
+  $items = array();
+  
+  $items["engagements"] = array(
+    "title" => t("Engagements"), 
+    "page_callback" => "engagements_display_main",
+    "access_arguments" => array("can_view_engagements"),
+    "tab_family" => "system",
+    "page_settings" => array (
+      "display_currently_advising" => TRUE,
+    ),    
+    "weight" => 20,
+    "type" => MENU_TYPE_TAB,
+  );
+  
+  
+  $items['engagements-track/%/%/pixel.gif'] = array(
+    'page_callback' => 'engagements_handle_tracking_pixel_request',
+    'page_arguments' => array(1, 2),
+    'access_callback' => TRUE,
+    'type' => MENU_TYPE_CALLBACK,
+  );
+
+
+  $items['engagements-handle-incoming-sms'] = array(
+    'page_callback' => 'engagements_handle_incoming_sms',    
+    'access_callback' => TRUE,
+    'type' => MENU_TYPE_CALLBACK,
+  );
+  
+    
+
+
+  $items["admin/config/imap"] = array(
+    "title" => "Engagements - IMAP settings",
+    "description" => "Configure IMAP settings for Engagements",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("engagements_imap_settings_form", "system_settings"),
+    "access_arguments" => array("administer_engagements"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "menu_icon" => fp_get_module_path('system') . "/icons/cog.png",      
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Admin Console",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  );
+
+
+  $items["admin/config/sms"] = array(
+    "title" => "Engagements - SMS settings",
+    "description" => "Configure SMS settings for Engagements",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("engagements_sms_settings_form", "system_settings"),
+    "access_arguments" => array("administer_engagements"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "menu_icon" => fp_get_module_path('system') . "/icons/cog.png",      
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Admin Console",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",    
+  );
+
+
+
+  
+  
+  return $items;
+}
+
+
+
+
+
+/**
+ * Configure the imap settings used by Engagements
+ */
+function engagements_imap_settings_form() {
+  $form = array();    
+
+
+  $form['mark_top'] = array(
+    'value' => '<p>Configure the connection to your IMAP server here.</p>',
+  );
+  
+  $form['imap_host'] = array(
+    'type' => 'textfield',
+    'label' => t('Host'),
+    'value' => variable_get('imap_host', ''),
+    'description' => 'Ex: mail.example.com',
+  );
+  
+  $form['imap_port'] = array(
+    'type' => 'textfield',
+    'label' => t('Port'),
+    'value' => variable_get('imap_port', ''),
+    'size' => 10,
+    'description' => 'Ex: 143, 993',
+  );
+
+  $form['imap_secure'] = array(
+    'type' => 'select',
+    'label' => t('Security'),
+    'value' => variable_get('imap_secure', ''),
+    'options' => array('none' => 'none', 'tls' => 'TLS', 'ssl' => 'SSL'),
+    'description' => 'Ex: TLS',
+  );
+
+  $form['imap_username'] = array(
+    'type' => 'textfield',
+    'label' => t('Username'),
+    'value' => variable_get('imap_username', ''),
+    'description' => '',
+  );
+  
+  $form['imap_password'] = array(
+    'type' => 'textfield',
+    'label' => t('Password'),
+    'value' => variable_get('imap_password', ''),
+    'description' => t('Note:  The password will be stored within the database, in the Variables table.
+                        Make sure you take the necessary precautions to ensure the security of your database.'),
+  );
+        
+
+
+
+  // TODO:  folder names to look in?
+  // TODO:  other settings on deleting messages once read, etc?
+
+
+    
+  return $form;
+} // engagements_imap_settings_form
+
+
+
+
+/**
+ * Configure the various SMS settings
+ */
+function engagements_sms_settings_form() {
+  
+  
+  
+  
+  $form = array();
+  
+  
+  $form['sms_project_id'] = array(
+    'label' => 'Project ID',
+    'type' => 'textfield',
+    'value' => variable_get('sms_project_id', ''),
+    'description' => t("This is the project id (from SignalWire)."),
+  );
+  
+  $form['sms_auth_token'] = array(
+    'label' => 'Auth Token',
+    'type' => 'textfield',
+    'value' => variable_get('sms_auth_token', ''),
+    'description' => t("Given by the API settings in signalwire"),
+  );
+  
+  
+  $form['sms_space_url'] = array(
+    'label' => 'Space URL',
+    'type' => 'textfield',
+    'value' => variable_get('sms_space_url', 'liftoffacademics.signalwire.com'),
+    'description' => t("The URL you use to access your region of signalwire.  example.signalwire.com.  No http:// or such."),
+  );
+
+
+  $form['sms_from_phone'] = array(
+    'label' => 'From Phone number',
+    'type' => 'textfield',
+    'value' => variable_get('sms_from_phone', '555-555-1234'),
+    'description' => t("The phone number you will be sending txt from, or receiving them at."),
+  );
+
+
+  
+  
+  return $form;
+  
+  
+  
+} // engagements_sms_settings_form
+
+
+
+
+function engagements_get_sms_from_history($message_sid) {
+  $res = db_query("SELECT * FROM sms_history WHERE message_sid = ?", array($message_sid));
+  $cur = db_fetch_array($res);
+  
+  if ($cur) return $cur;
+  
+  return FALSE;
+  
+  
+}
+
+
+/**
+ * Implements hook_cron
+ * 
+ * One of the things we want to do is check on all of our SMS messages.
+ * 
+ * We will also want to check our imap messages 
+ * 
+ */
+function engagements_cron() {
+  
+  
+  
+  $last_sms_check = variable_get('engagements_sms_get_all_last_check', 0);
+  $last_imap_check = variable_get('engagements_imap_get_all_last_check', 0);
+  // TODO:  only check every X minutes at most.  Maybe this is a setting?
+  engagements_sms_get_all_messages();
+  
+  // TODO: check for imap messages in a similar way as the SMS messages.
+  engagements_imap_get_all_received_messages();
+    
+  
+  // TODO:  Look at all appointments happening soon and send notifications
+  // as reminders.  Check notification_history table to see if we've already
+  // reminded the user(s) about this appointment cid.  Send reminders for appointments
+  // happening within 30 minutes.
+  
+  
+  
+  
+  
+} // hook_cron
+
+
+
+
+
+/**
+ * Retrieve all messages, update the ones which don't have prices associated with them yet.
+ * 
+ * We will also be getting voice calls & prices too for our log table.
+ */
+function engagements_sms_get_all_messages() {
+
+  require_once(fp_get_module_path('engagements', TRUE, FALSE) . '/lib/signalwire/vendor/autoload.php');
+  
+  
+  // project id, auth tolen, space url
+  $project_id = variable_get('sms_project_id', '');
+  
+  if ($project_id == "") {
+    return FALSE;
+  }
+  
+  $auth_token = variable_get('sms_auth_token', '');
+  $space_url = variable_get('sms_space_url', 'liftoffacademics.signalwire.com');
+  $from_phone = engagements_convert_to_valid_phone_number(variable_get('sms_from_phone', '555-555-1234'));
+  
+  $client = new SignalWire\Rest\Client($project_id, $auth_token, array("signalwireSpaceUrl" => $space_url));
+
+  // Get all messages so we can update our table.
+  
+  // We only care about messages sent TODAY, since we theoretically already got them yesterday
+  $check_since = date('Y-m-d'); // will get all messages sent after midnight on this date.  TODO: could make this several days into the past to be safe.
+  $messages = $client->messages->read(array('PageSize' => 1000, 'DateSent>' => $check_since));
+
+  foreach ($messages as $record) {
+    
+    $message_sid = $record->sid;
+    
+    // If we have already recorded (but not processed) this record, then we should UPDATE it!
+    $test = engagements_get_sms_from_history($message_sid);    
+    if ($test && $test['price_processed'] != 1) {
+      // update prices
+      $price = $record->price;       
+      $fp_price = engagements_get_fp_price($price, $test['direction'], intval($test['num_segments']));
+      
+      db_query("UPDATE sms_history
+                SET sw_price = ?, fp_price = ?, price_processed = 1
+                WHERE mid = ?", array($price, $fp_price, $test['mid']));
+                
+      continue;
+    }
+    else if ($test && $test['price_processed'] == 1) {
+      continue; // already processed!
+    }
+    
+    
+    
+    
+    $from_mobile = engagements_convert_to_valid_phone_number($record->from);
+    $to_mobile = engagements_convert_to_valid_phone_number($record->to);
+    
+    $body = $record->body; 
+    
+    $date_sent = $record->dateSent;
+    
+    $throw_away = print_r($date_sent, TRUE);  // Not sure why, but I have to do this in order for the data field to populate.
+    
+    $date_sent_ts = strtotime($date_sent->date);
+    $direction = $record->direction;
+    $num_segments = intval($record->numSegments);
+    $price = $record->price;    
+    $fp_price = engagements_get_fp_price($price, $direction, $num_segments);
+        
+    
+    $media_filenames = "";
+        
+    // Is there media?
+    if ($record->numMedia > 0) {
+      
+      // List all media for this message.
+      $allmedia = $client->messages($message_sid)->media->read();      
+      
+      foreach ($allmedia as $mitem) {
+        
+        $media_sid = $mitem->sid;
+        $content_type = $mitem->contentType;
+        $ext = engagements_get_file_extension_from_mime_type($content_type);
+        
+        if (!$ext) continue; // skip if its not a type we care about.
+
+        // Create a new random filename to save it as.
+        $filename = 'sms__' . $from_mobile . '_' . time() . '_' .  mt_rand(1,999999) . '.' . $ext;
+                
+                
+        $media = $client->messages($message_sid)->media($media_sid)->fetch();
+        $file_contents = file_get_contents("https://liftoffacademics.signalwire.com/api/laml/2010-04-01/Accounts/$project_id/Messages/$message_sid/Media/$media_sid");
+        // save it locally as a random filename under /files/
+        $test = file_put_contents(fp_get_files_path() . '/engagements_attachments/' . $filename, $file_contents);    
+        if (!$test) {
+          watchdog('sms', 'Unable to write media file.', array(), 'error');
+          fpm('Unable to write media file.  Permissions issue on custom/files/engagements_attachments?');
+          continue;
+        }    
+                
+        $media_filenames .= $filename . ',';
+        
+      } // foreach media
+      
+      $media_filenames = rtrim($media_filenames, ',');
+      
+    } // there was media!
+    
+    
+    
+    
+    // Figure out what student this came from/to!
+    $from_cwid = "";
+    $student_id = db_result(db_query("SELECT * FROM student_attributes WHERE mobile_phone = ?", array($from_mobile)));
+    if ($student_id) {
+      $from_cwid = $student_id;
+    }
+
+    $to_cwid = "";
+    $student_id = db_result(db_query("SELECT * FROM student_attributes WHERE mobile_phone = ?", array($to_mobile)));
+    if ($student_id) {
+      $to_cwid = $student_id;
+    }
+
+    if ($from_cwid || $to_cwid) {
+          
+      // create an engagement content node for this student!
+      
+      $dir = "received";
+      $fac_cwid = $to_cwid;
+      $stu_cwid = $from_cwid;
+      if (strstr($direction, 'outbound')) {
+        $dir = 'sent';
+        $fac_cwid = $from_cwid;
+        $stu_cwid = $to_cwid;
+      }
+      
+      $content = new stdClass();
+      $content->type = 'engagement';
+      $content->cid = "new";    
+      $content->published = 1;
+      $content->delete_flag = 0;
+      $content->title = "Engagement: txt_msg for student $cwid";  // required
+
+      $content->field__activity_datetime['value'] = date('Y-m-d H:i:s', $date_sent_ts);
+      $content->field__faculty_id['value'] = $fac_cwid;
+      $content->field__student_id['value'] = $stu_cwid;
+      $content->field__engagement_type['value'] = 'txt_msg';
+      $content->field__direction['value'] = $dir;
+      
+      
+      // if we have media, add to the end of body.
+      if ($media_filenames) {
+        $body .= "~~MEDIA~~$media_filenames~~END_MEDIA~~";
+      }
+      
+      $content->field__engagement_msg['value'] = $body;
+            
+      $content->field__visibility['value'] = 'public';
+      
+      content_save($content);
+      
+      // if received, create an activity record.
+      // Create a new "activity record" that the student has sent a txt message
+      
+      $acontent = new stdClass();
+      $acontent->type = 'activity_record';
+      $acontent->cid = "new";    
+      $acontent->published = 1;
+      $acontent->delete_flag = 0;
+      $acontent->title = t('Student replied to text message.');
+      $acontent->field__student_id['value'] = $stu_cwid;
+      $acontent->field__activity_type['value'] = 'comment';
+      content_save($acontent);      
+            
+      // Notify the advisor(s).
+      // get list of all advisors for this student, and send notifications.
+      $advisors = advise_get_advisors_for_student($stu_cwid);      
+      foreach ($advisors as $c => $afaculty_id) {
+        $account_user_id = db_get_user_id_from_cwid($afaculty_id, 'faculty');        
+        if ($account_user_id) {
+          $student_name = fp_get_student_name($stu_cwid, TRUE);
+          $base_url = $GLOBALS['fp_system_settings']['base_url'];
+          $link = $base_url . "/engagements?current_student_id=$stu_cwid";
+          $tmsg = "";
+          $tmsg .= "$student_name has submitted a text message to FlightPath.<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link"; 
+          
+          notify_send_notification_to_user($account_user_id, $tmsg, $content->cid, 'engagement');
+        }
+      }
+            
+      
+      
+      
+      
+      // TODO:  Or, if this email we are coming from is meant to go to a specific person or set or persons, only notify them.
+      
+      
+      
+    }
+    else {
+      // Since a student could not be found, we will not try to do assign it to any particular student here.
+      
+    }
+    
+    // Write our data to our sms_history table.
+    db_query("INSERT INTO sms_history (`message_sid`, sw_type, `body`, `from_number`, `to_number`, `sw_price`, `fp_price`, `from_cwid`, `to_cwid`, `updated`, `direction`, `media_filenames`, `date_sent`, price_processed, num_segments)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ", 
+              array($message_sid, 'sms', $body, $from_mobile, $from_phone, $price, $fp_price, $from_cwid, $to_cwid, time(), $direction, $media_filenames, $date_sent_ts, 1, $num_segments));
+    
+
+    
+    
+          
+    
+  } // foreach messages
+  
+  
+  $body = "";
+  // Now, we also want to get a list of all calls and their prices too.
+  $calls = $client->calls->read(array('StartTime>', $check_since));
+
+  foreach ($calls as $record) {
+        
+    $sid = $record->sid;
+    
+    // Do we already have this in our table?  If so, skip.
+    $test = engagements_get_sms_from_history($sid);    
+    if ($test) continue;
+    
+    $date_sent = $record->startTime;    
+    $throw_away = print_r($date_sent, TRUE);  // Not sure why, but I have to do this in order for the data field to populate.    
+    $date_sent_ts = strtotime($date_sent->date);
+    
+    $to = engagements_convert_to_valid_phone_number($record->to);
+    $from = engagements_convert_to_valid_phone_number($record->from);
+    
+    $from_cwid = "";
+    $student_id = db_result(db_query("SELECT * FROM student_attributes WHERE mobile_phone = ?", array($from)));
+    if ($student_id) {
+      $from_cwid = $student_id;    
+    }
+    
+    $duration = $record->duration;
+    $direction = $record->direction;
+    $price = $record->price;
+    $fp_price = engagements_get_fp_price($price, $direction, 1, 'call');
+    
+
+    // Write our data to our sms_history table.
+    db_query("INSERT INTO sms_history (`message_sid`, sw_type, `body`, `from_number`, `to_number`, `sw_price`, `fp_price`, `from_cwid`, `updated`, `direction`, `media_filenames`, `date_sent`, price_processed, num_segments)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ", 
+              array($sid, 'call', $body, $from, $to, $price, $fp_price, $from_cwid, time(), $direction, '', $date_sent_ts, 1, $duration));
+    
+    
+    
+        
+    
+  }  //foreach calls as record 
+  
+  
+  // Record the last time we called this function.
+  variable_set('engagements_sms_get_all_last_check', time());
+  
+  
+} // function
+
+
+/**
+ * figure out the price we will charge.
+ */
+function engagements_get_fp_price($price, $direction, $num_segments = 1, $type = 'sms') {
+  
+  $rtn = 0;
+  
+  if ($num_segments == 0) {
+    $num_segments = 1;
+  }
+  
+  if (strstr($direction, 'outbound')) {
+    $rtn = 0.0033 * $num_segments;  
+  }
+  
+  if ($price == 0.01) {
+    $rtn = 0.015;
+  }
+     
+  if ($type == 'call') {
+    $rtn = 0.005;
+  }     
+     
+     
+  // Guess at 15% over, if we don't know.
+  $new_price = $price * 1.15; // generic; add 15%.
+  
+  // Return the LARGER of the two prices.
+  if ($new_price > $rtn) {
+    return $new_price;
+  }
+  
+  return $rtn;  
+}
+
+
+
+
+// From: https://stackoverflow.com/questions/16511021/convert-mime-type-to-file-extension-php
+/**
+ * This function will look at the mime type (aka content type) to figure out what the
+ * file extension should be.  This is useful when retrieving txt message media.
+ * 
+ * We will only have the ones we think students might actually try to txt to their teachers.
+ */
+function engagements_get_file_extension_from_mime_type($mime) {
+  $mime_map = array(
+      'video/3gpp2'                                                               => '3g2',
+      'video/3gp'                                                                 => '3gp',
+      'video/3gpp'                                                                => '3gp',
+      'application/x-compressed'                                                  => '7zip',
+      'audio/x-acc'                                                               => 'aac',
+      'audio/ac3'                                                                 => 'ac3',
+      'application/postscript'                                                    => 'ai',
+      'audio/x-aiff'                                                              => 'aif',
+      'audio/aiff'                                                                => 'aif',
+      'audio/x-au'                                                                => 'au',
+      'video/x-msvideo'                                                           => 'avi',
+      'video/msvideo'                                                             => 'avi',
+      'video/avi'                                                                 => 'avi',
+      'application/x-troff-msvideo'                                               => 'avi',
+      //'application/macbinary'                                                     => 'bin',
+      //'application/mac-binary'                                                    => 'bin',
+      //'application/x-binary'                                                      => 'bin',
+      //'application/x-macbinary'                                                   => 'bin',
+      'image/bmp'                                                                 => 'bmp',
+      'image/x-bmp'                                                               => 'bmp',
+      'image/x-bitmap'                                                            => 'bmp',
+      'image/x-xbitmap'                                                           => 'bmp',
+      'image/x-win-bitmap'                                                        => 'bmp',
+      'image/x-windows-bmp'                                                       => 'bmp',
+      'image/ms-bmp'                                                              => 'bmp',
+      'image/x-ms-bmp'                                                            => 'bmp',
+      'application/bmp'                                                           => 'bmp',
+      'application/x-bmp'                                                         => 'bmp',
+      'application/x-win-bitmap'                                                  => 'bmp',
+      //'application/cdr'                                                           => 'cdr',
+      //'application/coreldraw'                                                     => 'cdr',
+      //'application/x-cdr'                                                         => 'cdr',
+      //'application/x-coreldraw'                                                   => 'cdr',
+      //'image/cdr'                                                                 => 'cdr',
+      //'image/x-cdr'                                                               => 'cdr',
+      //'zz-application/zz-winassoc-cdr'                                            => 'cdr',
+      //'application/mac-compactpro'                                                => 'cpt',
+      //'application/pkix-crl'                                                      => 'crl',
+      //'application/pkcs-crl'                                                      => 'crl',
+      //'application/x-x509-ca-cert'                                                => 'crt',
+      //'application/pkix-cert'                                                     => 'crt',
+      'text/css'                                                                  => 'css',
+      'text/x-comma-separated-values'                                             => 'csv',
+      'text/comma-separated-values'                                               => 'csv',
+      'application/vnd.msexcel'                                                   => 'csv',
+      'application/x-director'                                                    => 'dcr',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'   => 'docx',
+      'application/vnd.oasis.opendocument.text'                                   => 'odt',
+      'application/x-dvi'                                                         => 'dvi',
+      'message/rfc822'                                                            => 'eml',
+      //'application/x-msdownload'                                                  => 'exe',
+      'video/x-f4v'                                                               => 'f4v',
+      'audio/x-flac'                                                              => 'flac',
+      'video/x-flv'                                                               => 'flv',
+      'image/gif'                                                                 => 'gif',
+      'application/gpg-keys'                                                      => 'gpg',
+      'application/x-gtar'                                                        => 'gtar',
+      'application/x-gzip'                                                        => 'gzip',
+      'application/mac-binhex40'                                                  => 'hqx',
+      'application/mac-binhex'                                                    => 'hqx',
+      'application/x-binhex40'                                                    => 'hqx',
+      'application/x-mac-binhex40'                                                => 'hqx',
+      'text/html'                                                                 => 'html',
+      'image/x-icon'                                                              => 'ico',
+      'image/x-ico'                                                               => 'ico',
+      'image/vnd.microsoft.icon'                                                  => 'ico',
+      'text/calendar'                                                             => 'ics',
+      'application/java-archive'                                                  => 'jar',
+      'application/x-java-application'                                            => 'jar',
+      'application/x-jar'                                                         => 'jar',
+      'image/jp2'                                                                 => 'jp2',
+      'video/mj2'                                                                 => 'jp2',
+      'image/jpx'                                                                 => 'jp2',
+      'image/jpm'                                                                 => 'jp2',
+      'image/jpeg'                                                                => 'jpg',
+      'image/pjpeg'                                                               => 'jpeg',
+      'application/x-javascript'                                                  => 'js',
+      'application/json'                                                          => 'json',
+      'text/json'                                                                 => 'json',
+      //'application/vnd.google-earth.kml+xml'                                      => 'kml',
+      //'application/vnd.google-earth.kmz'                                          => 'kmz',
+      'text/x-log'                                                                => 'log',
+      'audio/x-m4a'                                                               => 'm4a',
+      'audio/mp4'                                                                 => 'm4a',
+      'application/vnd.mpegurl'                                                   => 'm4u',
+      'audio/midi'                                                                => 'mid',
+      'application/vnd.mif'                                                       => 'mif',
+      'video/quicktime'                                                           => 'mov',
+      'video/x-sgi-movie'                                                         => 'movie',
+      'audio/mpeg'                                                                => 'mp3',
+      'audio/mpg'                                                                 => 'mp3',
+      'audio/mpeg3'                                                               => 'mp3',
+      'audio/mp3'                                                                 => 'mp3',
+      'video/mp4'                                                                 => 'mp4',
+      'video/mpeg'                                                                => 'mpeg',
+      'application/oda'                                                           => 'oda',
+      'audio/ogg'                                                                 => 'ogg',
+      'video/ogg'                                                                 => 'ogg',
+      'application/ogg'                                                           => 'ogg',
+      'font/otf'                                                                  => 'otf',
+      'application/x-pkcs10'                                                      => 'p10',
+      'application/pkcs10'                                                        => 'p10',
+      'application/x-pkcs12'                                                      => 'p12',
+      'application/x-pkcs7-signature'                                             => 'p7a',
+      'application/pkcs7-mime'                                                    => 'p7c',
+      'application/x-pkcs7-mime'                                                  => 'p7c',
+      'application/x-pkcs7-certreqresp'                                           => 'p7r',
+      'application/pkcs7-signature'                                               => 'p7s',
+      'application/pdf'                                                           => 'pdf',
+      'application/octet-stream'                                                  => 'pdf',
+      'application/x-x509-user-cert'                                              => 'pem',
+      'application/x-pem-file'                                                    => 'pem',
+      'application/pgp'                                                           => 'pgp',
+      //'application/x-httpd-php'                                                   => 'php',
+      //'application/php'                                                           => 'php',
+      //'application/x-php'                                                         => 'php',
+      //'text/php'                                                                  => 'php',
+      //'text/x-php'                                                                => 'php',
+      //'application/x-httpd-php-source'                                            => 'php',
+      'image/png'                                                                 => 'png',
+      'image/x-png'                                                               => 'png',
+      'application/powerpoint'                                                    => 'ppt',
+      'application/vnd.ms-powerpoint'                                             => 'ppt',
+      'application/vnd.ms-office'                                                 => 'ppt',
+      'application/msword'                                                        => 'doc',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'pptx',
+      'application/x-photoshop'                                                   => 'psd',
+      'image/vnd.adobe.photoshop'                                                 => 'psd',
+      'audio/x-realaudio'                                                         => 'ra',
+      'audio/x-pn-realaudio'                                                      => 'ram',
+      'application/x-rar'                                                         => 'rar',
+      'application/rar'                                                           => 'rar',
+      'application/x-rar-compressed'                                              => 'rar',
+      'audio/x-pn-realaudio-plugin'                                               => 'rpm',
+      'application/x-pkcs7'                                                       => 'rsa',
+      'text/rtf'                                                                  => 'rtf',
+      'text/richtext'                                                             => 'rtx',
+      'video/vnd.rn-realvideo'                                                    => 'rv',
+      'application/x-stuffit'                                                     => 'sit',
+      'application/smil'                                                          => 'smil',
+      'text/srt'                                                                  => 'srt',
+      'image/svg+xml'                                                             => 'svg',
+      'application/x-shockwave-flash'                                             => 'swf',
+      'application/x-tar'                                                         => 'tar',
+      'application/x-gzip-compressed'                                             => 'tgz',
+      'image/tiff'                                                                => 'tiff',
+      'font/ttf'                                                                  => 'ttf',
+      'text/plain'                                                                => 'txt',
+      'text/x-vcard'                                                              => 'vcf',
+      'application/videolan'                                                      => 'vlc',
+      'text/vtt'                                                                  => 'vtt',
+      'audio/x-wav'                                                               => 'wav',
+      'audio/wave'                                                                => 'wav',
+      'audio/wav'                                                                 => 'wav',
+      'application/wbxml'                                                         => 'wbxml',
+      'video/webm'                                                                => 'webm',
+      'image/webp'                                                                => 'webp',
+      'audio/x-ms-wma'                                                            => 'wma',
+      'application/wmlc'                                                          => 'wmlc',
+      'video/x-ms-wmv'                                                            => 'wmv',
+      'video/x-ms-asf'                                                            => 'wmv',
+      'font/woff'                                                                 => 'woff',
+      'font/woff2'                                                                => 'woff2',
+      'application/xhtml+xml'                                                     => 'xhtml',
+      'application/excel'                                                         => 'xl',
+      'application/msexcel'                                                       => 'xls',
+      'application/x-msexcel'                                                     => 'xls',
+      'application/x-ms-excel'                                                    => 'xls',
+      'application/x-excel'                                                       => 'xls',
+      'application/x-dos_ms_excel'                                                => 'xls',
+      'application/xls'                                                           => 'xls',
+      'application/x-xls'                                                         => 'xls',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'         => 'xlsx',
+      'application/vnd.ms-excel'                                                  => 'xlsx',
+      'application/xml'                                                           => 'xml',
+      'text/xml'                                                                  => 'xml',
+      'text/xsl'                                                                  => 'xsl',
+      'application/xspf+xml'                                                      => 'xspf',
+      'application/x-compress'                                                    => 'z',
+      'application/x-zip'                                                         => 'zip',
+      'application/zip'                                                           => 'zip',
+      'application/x-zip-compressed'                                              => 'zip',
+      'application/s-compressed'                                                  => 'zip',
+      'multipart/x-zip'                                                           => 'zip',
+      //'text/x-scriptzsh'                                                          => 'zsh',
+    );
+
+    return isset($mime_map[$mime]) ? $mime_map[$mime] : FALSE;
+}
+
+
+
+
+
+function test_sms() {
+  // Using SignalWire
+  
+  require_once(fp_get_module_path('engagements', TRUE, FALSE) . '/lib/signalwire/vendor/autoload.php');
+  
+  //use SignalWire\Rest\Client;
+
+  // project id, auth tolen, space url
+  $client = new SignalWire\Rest\Client('f83addc2-4100-46e0-a0f3-4787d1211c39', 'PT7662458edc3b6fd79dd668180079592d058a935c5c202199', 
+                                          array("signalwireSpaceUrl" => "liftoffacademics.signalwire.com"));
+
+  $message = $client->messages
+                    ->create("+13183760584", // to
+                       array("from" => "+13183014306",   // my signalwire account phone number 
+                             "body" => "Hello World! " . time())
+                    );
+
+  fpm($message->sid);  
+  
+  
+  
+} // test_sms
+
+
+/**
+ * Connect to our imap server, download all received messages from students (or others).
+ * We will then delete them, so they don't get read twice.
+ */
+function engagements_imap_get_all_received_messages() {
+  
+  $host = variable_get('imap_host', '');
+  $port = variable_get('imap_port', '');
+  $secure = variable_get('imap_secure', '');
+  
+  $mailbox_server = "{" . "$host:$port/$secure" . "}";
+  $username = variable_get('imap_username', '');
+  $password = variable_get('imap_password', '');
+      
+  if ($username == "") {
+    return FALSE;
+  }    
+      
+      
+  $mbox = imap_open($mailbox_server, $username, $password);
+  if (!$mbox) {
+    watchdog('imap', "Could not connect to imap server!");
+    fp_add_message("Could not connect to IMAP server.", 'error', TRUE);
+  }
+  
+  // We need to get the name of the "Trash" folder, which might contain a lot of weird extra stuff in the name.
+  // TODO:  Maybe save in a cached field so we don't have to retrieve every time it runs?  But, that gets cleared when we clear the cache.
+  $mailboxes = imap_list($mbox, $mailbox_server, "*");
+  $trash_box_name = "Trash";  
+  foreach ($mailboxes as $boxname) {
+    if (stristr($boxname, "trash")) {
+      $trash_box_name = str_replace($mailbox_server, "", $boxname);
+      break;
+    }
+  }
+  
+  
+  
+  $mbox_check = imap_check($mbox);
+    
+  // Fetch an overview for all messages in INBOX, by going from 1 to the max number messages.
+  $result = imap_fetch_overview($mbox,"1:{$mbox_check->Nmsgs}",0);
+  
+  foreach ($result as $overview) {
+    $msgno = $overview->msgno;
+    $subject = $overview->subject;
+    $udate = $overview->udate;    // udate is apparently already in UTC, which is what we want.
+        
+    
+    
+    // We need to get our ONLY the email address from the From field, which
+    // might look like:  Richard Peacock <richard.peacock@school.domain.co.com>
+    // We will use a regular expression to figure it out.  From: https://stackoverflow.com/questions/33865113/extract-email-address-from-string-php
+    $ofrom = $overview->from;    
+    preg_match_all("/[\._a-zA-Z0-9-]+@[\._a-zA-Z0-9-]+/i", $ofrom, $matches);     
+    $from_email = $matches[0][0];  // Since this is a FROM email, we assume there's only one sender.
+    
+    $body = _engagements_imap_get_body($mbox, $msgno);
+    $attachments = _engagements_imap_get_attachments($mbox, $msgno, fp_get_machine_readable($from_email));
+
+    
+    // match the from email to a student
+    $student_user_id = db_get_user_id_from_email($from_email, 'student');
+    if ($student_user_id) {
+      // create this as an engagement for this student.
+      $account = fp_load_user($student_user_id);
+      $student_cwid = $account->cwid;
+      
+      $content = new stdClass();
+      $content->type = 'engagement';
+      $content->cid = "new";    
+      $content->published = 1;
+      $content->delete_flag = 0;
+      $content->title = $subject;  // required
+
+      $content->field__activity_datetime['value'] = date('Y-m-d H:i:s', $udate);      
+      $content->field__student_id['value'] = $student_cwid;
+      $content->field__engagement_type['value'] = 'email';
+      $content->field__direction['value'] = 'received';
+      
+      $content->field__engagement_msg['value'] = $body;
+            
+      // save attachements along with the engagement, if there are any
+      if (count($attachments) > 0) {
+        
+        $fid_line = "";
+        foreach ($attachments as $adetails) {
+          $fid = $adetails['fid'];
+          $fid_line .= $fid . ",";
+        }
+        $fid_line = rtrim($fid_line, ",");
+        $content->field__attachment['value'] = $fid_line;
+        
+      }      
+                  
+            
+      $content->field__visibility['value'] = 'public';
+      
+      content_save($content);
+      
+      // if received, create an activity record.
+      // Create a new "activity record" that the student has sent an email message
+      
+      $acontent = new stdClass();
+      $acontent->type = 'activity_record';
+      $acontent->cid = "new";    
+      $acontent->published = 1;
+      $acontent->delete_flag = 0;
+      $acontent->title = t('Student replied to email message.');
+      $acontent->field__student_id['value'] = $student_cwid;
+      $acontent->field__activity_type['value'] = 'mail';
+      content_save($acontent);      
+            
+      // Notify the advisor(s).
+      // get list of all advisors for this student, and send notifications.
+      $advisors = advise_get_advisors_for_student($student_cwid);      
+      foreach ($advisors as $c => $afaculty_id) {
+        $account_user_id = db_get_user_id_from_cwid($afaculty_id, 'faculty');        
+        if ($account_user_id) {
+          $student_name = fp_get_student_name($student_cwid, TRUE);
+          $base_url = $GLOBALS['fp_system_settings']['base_url'];
+          $link = $base_url . "/engagements?current_student_id=$student_cwid";
+          $tmsg = "";
+          $tmsg .= "$student_name has submitted an email to FlightPath.<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link"; 
+          
+          notify_send_notification_to_user($account_user_id, $tmsg, $content->cid, 'engagement');
+        }
+      }            
+      
+            
+      
+            
+    } // if student_user_id
+    
+    
+    
+    // We are now finished with this email, so we can move it to our trash folder.
+    imap_mail_move($mbox, $msgno, $trash_box_name);
+        
+        
+  } // foreach result as overview
+
+  
+  // Delete all mail marked for deletion...
+  imap_expunge($mbox);
+    
+  // Close connection, we're done.  
+  imap_close($mbox);   
+  
+  
+  // Record the last time we called this function.
+  variable_set('engagements_imap_get_all_last_check', time());  
+  
+  
+} // end of function
+
+
+
+// From https://stackoverflow.com/questions/2649579/downloading-attachments-to-directory-with-imap-in-php-randomly-works
+/**
+ * $inbox is the imap link.  email_number is msg_no. 
+ */
+function _engagements_imap_get_attachments($inbox, $email_number, $from_email_machine_readable) {
+
+  /* get information specific to this email */
+  $overview = imap_fetch_overview($inbox,$email_number,0);
+  $message = imap_fetchbody($inbox,$email_number,2);
+  $structure = imap_fetchstructure($inbox,$email_number);
+  
+  $attachments = array();
+  if(isset($structure->parts) && count($structure->parts)) {
+    for($i = 0; $i < count($structure->parts); $i++) {
+      $attachments[$i] = array(
+         'is_attachment' => false,
+         'filename' => '',
+         'name' => '',
+         'subtype' => '',
+         'attachment' => '');
+         
+      if($structure->parts[$i]->ifdparameters) {        
+        foreach($structure->parts[$i]->dparameters as $object) {          
+          if(strtolower($object->attribute) == 'filename') {
+            $attachments[$i]['is_attachment'] = TRUE;
+            $attachments[$i]['filename'] = $object->value;
+            $attachments[$i]['subtype'] = $structure->parts[$i]->subtype;
+          }
+        }
+      }
+       
+      if($structure->parts[$i]->ifparameters) {
+        foreach($structure->parts[$i]->parameters as $object) {          
+          if(strtolower($object->attribute) == 'name') {
+            $attachments[$i]['is_attachment'] = true;
+            $attachments[$i]['name'] = $object->value;
+            $attachments[$i]['subtype'] = $structure->parts[$i]->subtype;
+          }
+        }
+      }
+       
+      if($attachments[$i]['is_attachment']) {
+        $attachments[$i]['attachment'] = imap_fetchbody($inbox, $email_number, $i+1);
+        if($structure->parts[$i]->encoding == 3) { // 3 = BASE64
+          $attachments[$i]['attachment'] = base64_decode($attachments[$i]['attachment']);
+        }
+        elseif($structure->parts[$i]->encoding == 4) { // 4 = QUOTED-PRINTABLE
+          $attachments[$i]['attachment'] = quoted_printable_decode($attachments[$i]['attachment']);
+        }
+      }             
+    } // for($i = 0; $i < count($structure->parts); $i++)
+  } // if(isset($structure->parts) && count($structure->parts))
+
+  
+  
+  $rtn = array();
+  
+  if(count($attachments)!=0){
+    foreach($attachments as $c => $at){
+      if($at['is_attachment'] == TRUE){
+       
+       
+        // Create a new random filename to save it as.
+        $filename = 'email__' . $from_email_machine_readable . '_' . time() . '_' .  mt_rand(1,999999);  // We will figure out the ext (from mimetype) later.
+        $full_filename = fp_get_files_path() . '/engagements_attachments/' . $filename;         
+        // save it locally as a random filename under /files/
+        $test = file_put_contents($full_filename, $at['attachment']);
+        if (!$test) {
+          watchdog('sms', 'Unable to write media file.', array(), 'error');
+          fpm('Unable to write media file.  Permissions issue on custom/files/engagements_attachments?');              
+        }                
+        
+        // Next, we want to rename it to have the proper file extension, as best we can tell.
+        $ext = strtolower($at['subtype']);  // if we can't figure it out, use this.
+        // Attempt to figure out the mimetype....
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimetype =  finfo_file($finfo, $full_filename);
+        $temp = explode(";", $mimetype);
+        $mimetype = strtolower(trim($temp[0]));
+        
+        $new_ext = engagements_get_file_extension_from_mime_type($mimetype);
+        if ($new_ext) {
+          $ext = $new_ext;
+        }
+        // Rename our file.
+        rename($full_filename, $full_filename . ".$ext");
+        
+        
+        // Add our file to the content_files table, and get back the fid.
+        db_query("INSERT INTO content_files (original_filename, filename, mimetype, posted)
+            VALUES (?, ?, ?, ?)", array($filename . ".$ext", $filename . ".$ext", $mimetype, time()));
+        $fid = db_insert_id();
+                
+        $rtn[] = array(
+          'fid' => $fid,
+          'filename' => $filename . ".$ext",
+          'full_filename' => $full_filename . ".$ext",
+          'mimetime' => $mimetype,
+          'ext' => $ext,
+        );  
+           
+                
+        
+      } // if is_attachment == TRUE
+    } // foreach
+  }
+
+  return $rtn;
+  
+} // ... imap_get_attachments
+
+
+// From: https://stackoverflow.com/questions/4272551/extract-body-text-from-email-php
+function _engagements_imap_get_body($imapLink, $msgno) {
+  
+  $obj_structure = imap_fetchstructure($imapLink, $msgno);  
+  // Recherche de la section contenant le corps du message et extraction du contenu
+  $obj_section = $obj_structure;
+  
+
+  
+  //$text = imap_fetchbody($imapLink, $msgno, $section);
+  
+  // So it turns out the $section for HTML can be 1.2, but it might also be just "2" in simple messages.
+  // Try to get HTML first....
+  $text = trim(imap_fetchbody($imapLink, $msgno, 1.2));
+  if ($text == "") {
+    $text = trim(imap_fetchbody($imapLink, $msgno, 2));
+  }
+  if ($text == "") {
+    $text = trim(imap_fetchbody($imapLink, $msgno, 1.1));
+  }
+  if ($text == "") {
+    $text = trim(imap_fetchbody($imapLink, $msgno, 1));
+  }
+  
+    
+  // Décodage éventuel
+  if ($obj_section->encoding == 3) {
+      $text = imap_base64($text);
+  } else if ($obj_section->encoding == 4) {
+      $text = imap_qprint($text);
+  }
+  // Encodage éventuel
+  foreach ($obj_section->parameters as $obj_param) {
+      if (($obj_param->attribute == "charset") && (mb_strtoupper($obj_param->value) != "UTF-8")) {
+          $text = utf8_encode($text);
+          break;
+      }
+  }
+  
+
+  
+  $text = filter_markup($text, 'basic');
+  
+  
+  return $text;
+
+}
+
+
+
+
+
+
+
+
+/**
+ * The user has opened an email with a tracking pixel.  We will now record that
+ * it was opened in our engagements_tracking table.
+ * 
+ * We also need to actually render the pixel to the browser.
+ */
+function engagements_handle_tracking_pixel_request($cid, $token) {
+  
+  // Record in database
+  // Fist, get the current count, if it exists.
+  $res = db_query("SELECT * FROM engagements_tracking WHERE cid = ? AND token = ?", array($cid, $token));
+  $cur = db_fetch_array($res);  
+  if ($cur['cid'] != $cid || $cur['token'] != $token) {
+    // Means it was not generated, this might be a malicious attempt or an old token or something.
+    die;
+  }
+  $opens = intval($cur['opens']) + 1;
+  db_query('UPDATE engagements_tracking
+              SET opens = ?,
+                  updated = ?
+              WHERE cid = ? AND token = ?', array($opens, time(), $cid, $token));
+    
+  watchdog('engagements_track', "Tracking request for: $cid - $token"); 
+  
+  
+  // Create a new "activity record" that the student has viewed this email.
+  $email_content = content_load($cid);
+  
+  // Create a new actvity_record.
+  $content = new stdClass();
+  $content->type = 'activity_record';
+  $content->cid = "new";    
+  $content->published = 1;
+  $content->delete_flag = 0;
+  $content->title = t('Student opened email titled "@et".', array("@et" => $email_content->title));
+  $content->field__student_id['value'] = $email_content->field__student_id['value'];
+  $content->field__activity_type['value'] = 'mail';
+  content_save($content);
+  
+  
+        
+  // Render pixel to browser and die.  We will be using the 1x1.gif file in our assets folder.  
+  // Output the image to browser
+  header('Content-Type: image/gif');
+  $im = imagecreatefromgif(fp_get_module_path('engagements', TRUE, FALSE) . '/assets/1x1.gif');
+  imagegif($im);
+  imagedestroy($im);    
+  die;
+  
+} // engagements_handle_tracking_pixel_request
+
+
+
+
+
+
+
+function engagements_perm() {
+  return array(
+    'administer_engagements' => array(
+      'title' => 'Administer Engagements',
+      'description' => 'The user can edit the system config settings for the Engagements module.  Only give to admin users.',      
+    ),    
+    'can_view_engagements' => array(
+      'title' => 'Can view Engagements',
+      'description' => 'The user may view engagements (only "everyone" by default)',      
+    ),
+    'can_view_faculty_engagements' => array(
+      'title' => 'View "Faculty/Staff" Engagements',
+      'description' => 'The user is allowed to view engagements marked visible for "Faculty/Staff".',      
+    ),
+    'can_send_email_engagements' => array(
+      'title' => 'Can send email engagements',            
+    ),
+    'can_send_txt_engagements' => array(
+      'title' => 'Can send txt message engagements',            
+    ),            
+    'can_log_engagements' => array(
+      'title' => 'Can log any engagements',            
+    ),    
+  );
+}
+
+
+
+
+
+
+/**
+ * For use with the content module.  We will register our custom content type(s)
+ * for use with this module.
+ */
+function engagements_content_register_content_type() {
+  
+  $arr = array();
+  
+  $arr['engagement'] = array(
+    'title' => 'Engagement',
+    'description' => 'This is a content type meant to track a students activities and communications in the system.',
+    'settings' => array(
+      'title' => array(
+        'label' => t('Subject'),
+        'weight' => 65,
+      ),
+    ),
+  );
+  
+  
+  // If we are in a popup (dialog)...
+  if (@$_GET['window_mode'] == 'popup') {
+    // We want to make sure we redirect to our handler URL, which will close the dialog.
+    $arr['engagement']['settings']['#redirect'] = array(
+      'path' => 'content-dialog-handle-after-save',
+      'query' => '',        
+    );
+    
+  }
+  
+  
+  
+  
+  $fields = array();
+
+  $fields['activity_datetime'] = array(
+    'type' => 'datetime-local',
+    'label' => 'Date/Time',
+    'value' => 'now',    
+    'format_date' => 'short',
+    'weight' => 12,
+  );
+
+  $fields['faculty_id'] = array(
+    'type' => 'textfield',
+    'label' => 'Faculty/Staff',
+    'weight' => 5,
+  );
+  
+  $fields['student_id'] = array(
+    'type' => 'textfield',
+    'label' => 'Student',
+    'weight' => 10,
+  );
+
+      
+  $fields['engagement_type'] = array(
+    'type' => 'select',
+    'options' => array(
+      'phone' => t('Phone Call'),
+      'email' => t('Email'),
+      'in_person' => t('In-Person Meeting'),
+      'video_chat' => t('Video Chat'),
+      'txt_msg' => t('Txt Message'),
+      'social_media' => t('Social Media'),
+      'other' => t('Other'),
+    ),
+    'label' => 'Type',
+    'required' => TRUE,
+    'hide_please_select' => TRUE,
+    'weight' => 40,
+  );
+
+  $fields['direction'] = array(
+    'type' => 'select',
+    'label' => t('Direction'),
+    'required' => TRUE,
+    'hide_please_select' => TRUE,
+    'options' => array(
+      'sent' => t("Sent"),
+      'received' => t('Received'),
+    ),
+    'weight' => 50,
+  );  
+
+
+  $fields['phone_outcome'] = array(
+    'type' => 'select',
+    'label' => t('Phone Outcome'),    
+    'hide_please_select' => TRUE,
+    'options' => array(
+      'connected' => t("Connected"),
+      'no_answer' => t('No Answer'),
+      'voicemail' => t('Left Voicemail'),
+      'busy' => t('Busy'),
+      'wrong_number' => t('Wrong Number'),
+    ),
+    'weight' => 60,
+  );  
+
+    
+  $fields['engagement_msg'] = array(
+    'type' => 'textarea',  
+    'label' => t('Message'),
+    'filter' => 'basic',
+    'weight' => 70,    
+  );
+
+  
+  $fields['attachment'] = array(
+    'type' => 'file',
+    'label' => t('Attach File(s)'),
+    'weight' => 80,
+    'limit' => 999,  // essentially, infinite.
+  );
+
+
+  $fields['visibility'] = array(
+    'type' => 'radios',  
+    'label' => 'Visible to:',
+    'options' => array('public' => 'Anyone (incl. student)', 'faculty' => 'Faculty/Staff only'),   
+    'weight' => 90,    
+  );
+  
+  
+  $fields['manual_entry'] = array(
+    'type' => 'hidden',
+    'value' => '',
+  );
+  
+  
+  
+  $arr['engagement']['fields'] = $fields;
+  
+      
+  
+  return $arr;
+  
+} // hook_content_register_content_type
+
+
+
+/**
+ * Converts the string into a plain phone number, then tests to see if it is valid or not.
+ * RETURNS FALSE if not valid, otherwise, returns the converted phone number.  This will be a valid
+ * number for use with our SMS service. (in the US anyway).
+ */
+function engagements_convert_to_valid_phone_number($num) {
+  
+  // Remove any non-numeric characters from the num.
+  $num = preg_replace("/\D/", '', $num);
+  
+  // The number should be 10 characters.
+  if (strlen($num) == 10) return $num;
+  
+  if (strlen($num) == 11) {
+    // Maybe it starts with a "1", which is not necessary.
+    if (substr($num, 0, 1) == "1") {
+      return substr($num, 1, 10);  // ditch the first character.
+    }
+  }
+  
+  // Bad number, return false.
+  return FALSE;
+}
+
+
+// From: https://stackoverflow.com/questions/4708248/formatting-phone-numbers-in-php
+function engagements_convert_to_pretty_phone_number($phoneNumber, $bool_convert_to_valid_first = TRUE) {
+
+
+    if ($bool_convert_to_valid_first) {
+      $phoneNumber = engagements_convert_to_valid_phone_number($phoneNumber);
+    } 
+   
+
+    $phoneNumber = preg_replace('/[^0-9]/','',$phoneNumber);
+
+    if(strlen($phoneNumber) > 10) {
+        $countryCode = substr($phoneNumber, 0, strlen($phoneNumber)-10);
+        $areaCode = substr($phoneNumber, -10, 3);
+        $nextThree = substr($phoneNumber, -7, 3);
+        $lastFour = substr($phoneNumber, -4, 4);
+
+        $phoneNumber = '+'.$countryCode.' ('.$areaCode.') '.$nextThree.'-'.$lastFour;
+    }
+    else if(strlen($phoneNumber) == 10) {
+        $areaCode = substr($phoneNumber, 0, 3);
+        $nextThree = substr($phoneNumber, 3, 3);
+        $lastFour = substr($phoneNumber, 6, 4);
+
+        $phoneNumber = '('.$areaCode.') '.$nextThree.'-'.$lastFour;
+    }
+    else if(strlen($phoneNumber) == 7) {
+        $nextThree = substr($phoneNumber, 0, 3);
+        $lastFour = substr($phoneNumber, 3, 4);
+
+        $phoneNumber = $nextThree.'-'.$lastFour;
+    }
+
+    return $phoneNumber;
+  
+}
+
+
+
+
+
+
+/**
+ * Implements hook_form_alter
+ * 
+ * We want to make various modifications to our form, based on what we are trying to do to it.  We may also
+ * want to add in some custom javascript as well.
+ * 
+ */
+function engagements_form_alter(&$form, $form_id) {
+  
+  if ($form_id == 'content_edit_content_form') {
+    if (@$form['type']['value'] == 'engagement') {
+
+      $db = get_global_database_handler();
+
+      fp_add_js(fp_get_module_path("engagements") . "/js/engagements.js");
+      fp_add_css(fp_get_module_path("engagements") . "/css/style.css");
+      
+      // If this is a NEW form, then check for values in the URL to auto-fill.      
+      if ($form['cid']['value'] === 'new') {
+        
+        if (!isset($_GET['engagement_type']) || $_GET['engagement_type'] == '' || $_GET['engagement_type'] == 'new') {
+          // This means we are logging a NEW engagement, and not trying to send a txt or email.  We need to
+          // set our manual_entry value to something meaningful.
+          $form['manual_entry']['value'] = 'Y';
+        }
+        
+        if (isset($_GET['engagement_type']) && $_GET['engagement_type'] != '' && $_GET['engagement_type'] != 'new') {
+
+          $form['engagement_type']['value'] = $_GET['engagement_type'];
+          
+          /*
+          // Set a page title (since we are in a dialog, we can't use fp_set_title())
+          $form['mark_title'] = array(
+            'value' => "<h2>New " . $form['engagement_type']['value'] . "</h2>",
+            'weight' => -100,
+          );
+          */
+          
+          // Since we are setting the type, we do not want to display it as an option.
+          $form['engagement_type']['attributes'] = array('class' => 'hidden');
+          // There are other fields we do not wish to display as well:
+          $form['direction']['attributes'] = array('class' => 'hidden');
+          $form['activity_datetime']['attributes'] = array('class' => 'hidden');
+          
+        }   
+
+        $initials = variable_get("school_initials", "DEMO");
+
+        if (isset($_GET['faculty_id'])) {
+          $form['faculty_id']['value'] = $_GET['faculty_id'];
+          
+          $form['faculty_id']['attributes'] = array('class' => 'hidden');
+          $form['mark_from'] = array(
+            'type' => 'markup',
+            'value' => "<div class='engagement-field-mark engagement-from'><label>" . t("From") . ":</label>
+                                " . $db->get_faculty_name($form['faculty_id']['value']) . "
+                        </div>",
+            'weight' => $form['faculty_id']['weight'], 
+          );
+        }  
+
+
+        if (isset($_GET['student_id'])) {
+          $form['student_id']['value'] = $_GET['student_id'];
+          
+          $form['student_id']['attributes'] = array('class' => 'hidden');
+          $extra_mark = "";
+          
+          if ($form['engagement_type']['value'] == 'email') {
+            $extra_mark = fp_get_student_email($form['student_id']['value']);
+          }
+          
+          
+          
+          
+          if ($form['engagement_type']['value'] == 'txt_msg') {
+            // get phone number
+            
+            $extra_mark = "(NO MOBILE NUMBER AVAILABLE)";
+            
+            $temp = fp_get_student_attributes($form['student_id']['value']);
+            $mobile_phone = trim(@$temp['mobile_phone']);
+            if ($mobile_phone) {
+              $extra_mark = engagements_convert_to_pretty_phone_number($mobile_phone, TRUE);
+            }
+                        
+            $form['engagement_msg']['prefix'] = t("Your message will automatically begin with <strong>(@initials) from @name:</strong>", array("@initials" => $initials, "@name" => $db->get_faculty_name($form['faculty_id']['value'])));
+            $form['engagement_msg']['description'] = t("To insert emoji in Windows, press <span style='padding-left: 10px; padding-right: 10px; font-size: 1.3em;'><i class='fa fa-windows'></i> + .</span>  <em>(Windows key + period)</em>"); 
+            
+            
+            $form['attachment']['attributes'] = array('class' => 'hidden');
+            
+          }          
+          
+          
+          $form['mark_to'] = array(
+            'type' => 'markup',
+            'value' => "<div class='engagement-field-mark engagement-to'><label>" . t("To") . ":</label>
+                               " . $db->get_student_name($form['student_id']['value'], TRUE) . "<span class='engagement-student-extra-mark'>$extra_mark</span>
+                        </div>",
+            'weight' => $form['student_id']['weight'], 
+          );          
+        }   
+
+ 
+
+                
+        // Always set the published = TRUE, and hide.        
+        $form['published']['value'] = TRUE;
+        $form['published']['attributes'] = array('class' => 'hidden');
+        
+
+       
+        
+        // Add a validate handler to form, so we can name sure email or mobile phone numbers are valid.
+        $form['#validate_handlers'][] = 'engagements_send_email_or_txt_form_validate';
+        
+        // Add a submit handler to form, so we can send email or txt messages
+        $form['#submit_handlers'][] = 'engagements_send_email_or_txt_form_submit';
+        
+        
+        
+        
+        
+      } // cid == new
+
+      
+
+      
+      if ($form['engagement_type']['value'] != 'txt_msg') {
+        // If this is anything OTHER than a txt_msg, we will show the tinymce editor for the Message
+        $form['engagement_msg']['type'] = 'textarea_editor';
+        
+      }
+      
+      if ($form['engagement_type']['value'] != 'txt_msg' && $form['engagement_type']['value'] != 'email') {
+        // Set visibility to 'faculty' by default.
+        $form['visibility']['value'] = 'faculty';
+      }
+      else {
+        $form['visibility']['value'] = 'public';
+        $form['visibility']['attributes'] = array('class' => 'hidden');
+        
+      }
+      
+    } // form type == engagement
+  } // content_edit_content_form
+  
+} // hook_form_alter
+
+
+
+function engagements_send_email_or_txt_form_validate($form, &$form_state) {
+  
+  $values = $form_state['values'];
+  $cid = $form_state['content_object']->cid;   // At this point, the content has already been saved, so we know its cid.  
+  $engagement_type = $values['engagement_type'];
+  
+  if ($engagement_type != 'email' && $engagement_type != 'txt_msg') {
+    return;   // we are not interested, harmlessly return.
+  }
+  
+  $student_id = $values['student_id'];
+  $faculty_id = $values['faculty_id'];
+  $msg = $values['engagement_msg'];
+  
+  $db = get_global_database_handler();
+  
+  if ($engagement_type == 'email') {    
+    $student_email = fp_get_student_email($student_id);
+    if (!filter_var($student_email, FILTER_VALIDATE_EMAIL)) {  // take advantage of pho built-in email validator
+      form_error('engagement_msg', t("Sorry, but the email provided for the student appears to be invalid."));
+      return;
+    }
+        
+  } // type == 'email'
+  
+  
+  if ($engagement_type == 'txt_msg') {
+    $temp = fp_get_student_attributes($student_id);
+    $mobile_phone = trim(@$temp['mobile_phone']);
+    
+    if (!$mobile_phone) {
+      form_error('enagement_msg', t('Sorry, but the mobile phone number provided for the student appears to be invalid.'));
+      return;
+    }
+    
+        
+    
+    
+  } // type == 'txt_msg'
+  
+  
+} // engagements_send_email_or_txt_form_validate
+
+
+
+
+
+
+function engagements_send_email_or_txt_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  $cid = $form_state['content_object']->cid;   // At this point, the content has already been saved, so we know its cid.
+  $content = $form_state['content_object'];  
+  $engagement_type = $values['engagement_type'];
+  
+  if ($engagement_type != 'email' && $engagement_type != 'txt_msg') {
+    return;   // we are not interested, harmlessly return.
+  }
+  
+  $db = get_global_database_handler();
+  $student_id = $values['student_id'];
+  $faculty_id = $values['faculty_id'];
+  $faculty_name = $db->get_faculty_name($faculty_id);
+  
+  $initials = variable_get("school_initials", "DEMO");
+  
+  // Add header to msg...
+  $header = "($initials) " . t("from") . " $faculty_name:\n";  
+  
+  $msg = $values['engagement_msg'];
+  
+  $db = get_global_database_handler();
+  
+  if ($engagement_type == 'email') {    
+    $student_email = fp_get_student_email($student_id);
+    
+    $subject = $values['title'];
+        
+    // Add our tracking pixel to the end of the email msg (but not what is saved to our database).
+    // We will use that to tell how many times the message gets opened.
+    $tracking_img_url = engagements_create_new_tracking_img_url($cid); 
+    
+    
+    $msg .= "<br><br>----<br>You may respond directly to this email.  It will be stored with FlightPath for $faculty_name to then review.";
+    
+    $msg .= "\n\n<img src='$tracking_img_url'>";
+    
+    
+    // Were there any attachments with this content?
+    
+    $attachments = array();
+    $attachment_csv = trim(@$content->field__attachment['value']);
+    if ($attachment_csv) {
+      $temp = explode(",", $attachment_csv);
+      foreach ($temp as $fid) {
+        if ($fid == "") continue;
+        $file = content_get_uploaded_file($fid);
+        if ($file) {
+          $attachments[$file['full_filename']] = $file['original_filename'];
+        }
+      }
+    }
+    
+    
+    
+    smtp_mail($student_email, $subject, $header . "<br><br>" . $msg, TRUE, $attachments);  // the TRUE sends as HTML.
+    fp_add_message(t("Email has been successfully sent."));    
+        
+  } // type == 'email'
+  
+  
+  if ($engagement_type == 'txt_msg') {
+    
+  
+    
+    $temp = fp_get_student_attributes($student_id);
+    $mobile_phone = engagements_convert_to_valid_phone_number(trim($temp['mobile_phone']));
+    // Since we have passed validation, we will assume we have a valid phone number for this student.
+    
+    // Send the message!
+    $external_msg_id = engagements_send_sms_to_number($mobile_phone, $header . $msg, $student_id);
+    
+    if ($external_msg_id) {
+      fp_add_message(t("TXT Message has been successfully sent."));
+      
+      // TODO:  save the external_msg_id with the content.
+          
+    }
+    
+  } // type == 'txt_msg'
+  
+  
+  
+  
+} // ... send email or txt form submit
+
+
+
+/**
+ * Actually send a text message.  Will drupal_set_message() as an error if there is a problem, and return FALSE. 
+ * Returns TRUE on success, no drupal_set_message is printed.
+ */
+function engagements_send_sms_to_number($to_number, $body, $to_cwid = "") {
+  
+  $to_number = engagements_convert_to_valid_phone_number($to_number);
+  
+  require_once(fp_get_module_path('engagements', TRUE, FALSE) . '/lib/signalwire/vendor/autoload.php');
+  
+  //use SignalWire\Rest\Client;
+
+   // project id, auth tolen, space url
+  $project_id = variable_get('sms_project_id', '');
+  $auth_token = variable_get('sms_auth_token', '');
+  $space_url = variable_get('sms_space_url', 'liftoffacademics.signalwire.com');
+  $from_phone = engagements_convert_to_valid_phone_number(variable_get('sms_from_phone', '555-555-1234'));
+  
+  // project id, auth tolen, space url
+  $client = new SignalWire\Rest\Client($project_id, $auth_token, array("signalwireSpaceUrl" => $space_url));
+  $external_msg_id = FALSE;   
+  
+  try {
+    
+    $message = $client->messages
+                      ->create("+1" . $to_number, // to
+                         array("from" => "+1" . $from_phone,   // my signalwire account phone number 
+                               "body" => $body)
+                      );
+  
+    $external_msg_id = $message->sid;    
+  
+    // save message information to our sms_history table.
+    
+    $record = $message;            
+        
+    $message_sid = $record->sid;
+    
+    $from_mobile = engagements_convert_to_valid_phone_number($record->from);
+    $body = $record->body; 
+    $num_segments = intval($record->numSegments);
+    
+    $date_sent = $record->dateCreated;  // Since we just created it, just dateCreated instead of dateSent.    
+    $throw_away = print_r($date_sent, TRUE);  // Not sure why, but I have to do this in order for the data field to populate.
+    
+    $date_sent_ts = strtotime($date_sent->date);
+        
+    // The price is not available right now, so we will set it...
+    $price = 0.0013 * $num_segments;    
+    //$fp_price = engagements_get_fp_price($price);
+    $fp_price = 0.0033 * $num_segments;
+    
+    
+    $direction = $record->direction;    
+        
+    // Write our data to our sms_history table.
+    db_query("INSERT INTO sms_history (`message_sid`, `body`, `from_number`, `to_number`, `sw_price`, `fp_price`, `to_cwid`, `updated`, `direction`, `media_filenames`, `date_sent`, price_processed, num_segments)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ", 
+              array($message_sid, $body, $from_mobile, $to_number, $price, $fp_price, $to_cwid, time(), $direction, '', $date_sent_ts, 0, $num_segments));
+        
+    
+    
+    
+  }
+  catch (Exception $e) {
+    fp_add_message("An error has occured while trying to send a text message to <em>$to_number</em>.  The
+            error has been logged.  Please have the technical administrator investigate.  Error message:" . $e->getMessage(), "error");
+    watchdog("engagements_sms", "An error has occured while trying to send a text message to <em>$to_number</em>.  Error: " . $e->getMessage() . ".  The complete
+            error is: <pre>" . print_r($e, true) . "</pre>", array(), WATCHDOG_ERROR);    
+    return FALSE;
+  }  
+  
+  watchdog("engagements_sms", "SMS message sent successfully to $to_number. External_msg_id = " . $external_msg_id);
+  
+  return $external_msg_id;
+  
+  
+} // engagements_send_sms_to_number
+
+
+
+
+
+
+/**
+ * Generates a URL to our tracking pixel, based on the cid included.
+ */
+function engagements_create_new_tracking_img_url($cid) {
+  
+  $token = md5(time() . rand(9,99999));
+  $url = $GLOBALS['fp_system_settings']['base_url'] . '/' . fp_url("engagements-track/$cid/$token/pixel.gif", '', FALSE);
+  
+  // Write to database
+  db_query('INSERT INTO engagements_tracking (cid, token, opens, updated)
+            VALUES (?, ?, ?, ?)', array($cid, $token, 0, time()));
+  
+  
+  return $url;
+  
+}
+
+
+
+
+
+
+/**
+ * displays the main Engagements tab, which shows the history of past engagements.
+ */
+function engagements_display_main() {
+  global $user, $current_student_id;
+  
+  $faculty_id = 0;
+  if ($user->is_faculty) {
+    $faculty_id = $user->cwid;
+  }
+  
+  fp_set_title('');
+
+  fp_add_css(fp_get_module_path("engagements") . "/css/style.css");
+  fp_add_js(fp_get_module_path("engagements") . "/js/engagements.js");
+  fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
+  
+  $types = content_get_types();
+  
+  $icons = array(
+    'phone' => 'fa-phone',
+    'email' => 'fa-envelope', 
+    'txt_msg' => 'fa-comment',   
+    'note' => 'fa-file-text',   
+    'in_person' => 'fa-user',   
+    'social_media' => 'fa-cloud',   
+    'other' => 'fa-asterisk',   
+    'video_chat' => 'fa-video-camera',   
+    'reminder' => 'fa-thumb-tack',   
+  );
+  
+  
+  $rtn = "";
+  $rtn .= "<div id='engagements-list-page'>";
+
+  $rtn .= "<div class='add-engagements-buttons'>";
+  if (user_has_permission('can_send_email_engagements')) {
+    $rtn .= "<a href='javascript:engagementsNewEngagementDialog(\"email\",\"New Email\",\"$current_student_id\",\"$faculty_id\");' class='button'><i class='fa fa-envelope-o'></i>&nbsp; New Email</a>";
+  }              
+  if (user_has_permission('can_send_txt_engagements')) {
+    $rtn .= "<a href='javascript:engagementsNewEngagementDialog(\"txt_msg\",\"New TXT Message\",\"$current_student_id\",\"$faculty_id\");' class='button'><i class='fa fa-comment-o'></i>&nbsp; New TXT</a>";
+  }              
+  if (user_has_permission('can_log_engagements')) {
+    $rtn .= "<a href='javascript:engagementsNewEngagementDialog(\"\",\"Log New Engagement\",\"$current_student_id\",\"$faculty_id\");' class='button'><i class='fa fa-plus'></i>&nbsp; Log New Engagement</a>";
+  }              
+  
+  $rtn .= "</div> <!-- add-engagements-buttons -->
+           <div class='clear'></div>
+           ";
+
+  
+  $rtn .= fp_render_section_title("Recent Engagements");
+  
+  $rtn .= "<div class='engagements-list'>";
+  
+  
+  /*
+  // query for this student's engagements in descending order (newest at the top, oldest at the bottom).
+  // TODO:  Check that it is published
+  $res = db_query("SELECT DISTINCT(cid) FROM content__engagement a
+                   WHERE field__student_id = ?                                       
+                   ORDER BY field__activity_datetime DESC, vid DESC
+                   ", array($current_student_id));
+   * 
+   */
+   
+  $res = pager_query("SELECT DISTINCT(a.cid) FROM content__engagement a, content n
+                   WHERE field__student_id = ?
+                   AND a.vid = n.vid
+                   AND a.cid = n.cid
+                   AND n.delete_flag = 0
+                   AND n.published = 1                                    
+                   ORDER BY field__activity_datetime DESC, a.vid DESC", array($current_student_id), 5, 0, "SELECT COUNT(DISTINCT(a.cid)) FROM content__engagement a, content n
+                                                                                                         WHERE field__student_id = ?
+                                                                                                         AND a.vid = n.vid
+                                                                                                         AND a.cid = n.cid
+                                                                                                         AND n.delete_flag = 0
+                                                                                                         AND n.published = 1");
+   
+  while ($cur = db_fetch_object($res)) {
+    $cid = $cur->cid;      
+    $content = content_load($cid);
+    
+    // is this "faculty" visibility?  If so, do we have access to view?
+    if ($content->field__visibility['value'] == 'faculty' && !user_has_permission('can_view_faculty_engagements')) {        
+      continue;      
+    }
+    
+    $visibility_icon = "";
+    
+    if ($content->field__visibility['value'] == 'faculty') {
+      $visibility_icon = "<i class='fa fa-lock' title='Visibile to Faculty/Staff only'></i>";  
+    }
+    
+           
+    $icon = $icons[$content->field__engagement_type['value']];     
+
+    $type = $content->field__engagement_type['value'];
+    $direction = $content->field__direction['value'];
+    $msg = $content->field__engagement_msg['display_value'];
+    
+    $pre_description = "";
+    
+    if ($content->field__manual_entry['value'] == 'Y') {
+      // This was a manually logged engagement.
+      $edit_link = "";
+      // Is the user allowed to EDIT this manual engagement?
+      if (content_user_access("edit", $content->cid)) {
+        $edit_link = "<a href='javascript:fpOpenLargeIframeDialog(\"" . fp_url("content/$cid/edit", "window_mode=popup&content_tabs=false") . "\",\"Edit Alert\");' title='Edit' class='action-link'><i class='fa fa-pencil'></i></a>";
+      }
+      
+      $pre_description .= t("Logged:") . " $edit_link &nbsp; &nbsp;";
+    }
+    
+    // If the $msg contains ~~MEDIA~~ and ~~END_MEDIA~~ then we can assume there are filenames after it, which we assume to be images that got
+    // text messaged.  Add them.
+    if (strstr($msg, "~~MEDIA~~") && strstr($msg, "~~END_MEDIA~~")) {
+      $temp = explode("~~MEDIA~~", $msg);
+      $msg = $temp[0]; // get rid of the media part of the msg.
+      $files = explode(",", $temp[1]);
+      foreach ($files as $filename) {
+        $ttemp = explode("~~END_MEDIA~~", $filename);  
+        $filename = $ttemp[0];        
+        $path = base_path() . '/custom/files/sms/' . $filename;
+        $msg .= "<div class='media-attached'><a href='$path' target='_BLANK'><img src='$path' style='max-width: 200px; height: auto;'></a></div>" . $ttemp[1]; // add on the </p> at the end if its there.
+      }
+    }
+    
+    
+    
+    $header_desc_extra = "";
+    if ($type == 'email' && $direction == 'sent') {
+      //$header_desc_extra = "&nbsp; &nbsp; &nbsp; &nbsp; Opens: 1";
+      $num_opens = intval(db_result(db_query("SELECT opens FROM engagements_tracking WHERE cid = ?", array($content->cid))));
+      $header_desc_extra = "<span class='header-desc-extra'>Opens: $num_opens</span>";
+    }
+    
+    
+    $fid_csv = @trim($content->field__attachment['value']);        
+    if ($fid_csv) {       
+      // were there any attachments?
+      $attachment_icon = "";      
+      if ($fid_csv) {
+        $attachment_icon = "<i class='fa fa-paperclip'></i> ";
+        $attachments = array();
+        $attachment_csv = trim(@$content->field__attachment['value']);
+        if ($attachment_csv) {
+          $temp = explode(",", $attachment_csv);
+          $msg .= "<label>" . t("Attached File(s):") . "</label><div class='attached-files'>";
+          foreach ($temp as $fid) {
+            if ($fid == "") continue;
+            $file = content_get_uploaded_file($fid);
+            if ($file) {
+              $mime_icon = content_get_fontawesome_icon_for_mimetype($file['mimetype'], $file['ext']);
+              $msg .= "<div class='attached-file'><a href='{$file['url']}'><i class='fa $mime_icon'></i> {$file['original_filename']}</a></div>";
+            }
+          }
+          $msg .= "</div>";
+        }      
+              
+      }     
+
+      // We need a random id to assign to this email body.
+      $bodyid = "bid_" . md5(microtime() . mt_rand(9,99999) . mt_rand(9,9999));
+      
+            
+      // If the msg body is too long, let it be expandable.
+      $more_link = $less_link = "";
+      if (strlen($msg) > 500) {
+        $more_link = "<a href='javascript:engagementsExpandBody(\"$bodyid\");' class='more-body-link' id='more_$bodyid'>More</a>";
+        $less_link = "<a href='javascript:engagementsShrinkBody(\"$bodyid\");' class='less-body-link' id='less_$bodyid' style='display:none;'>Less</a>";
+      }
+                  
+      $msg = "<div class='email-subject'>{$attachment_icon}Subject: $content->title</div><div class='email-body' id='$bodyid'>$msg</div>$more_link$less_link";
+      
+    }
+    
+    
+    $rtn .= "<div class='activity-feed-teaser activity-feed-teaser-$direction activity-feed-teaser-type-$type'>
+                <div class='activity-header-content'>
+                  <span class='header-icon'><i class='fa $icon'></i></span>
+                  <span class='header-description'>
+                      <span class='pre-description'>$pre_description</span>
+                      {$content->field__engagement_type['display_value']}                      
+                  </span>
+                  <span class='header-phone-outcome'>: {$content->field__direction['display_value']} $header_desc_extra</span>
+                  <span class='header-edit'></span>
+                  <span class='header-date-time'>" . $content->field__activity_datetime['display_value'] . "</span>                  
+                  <span class='header-author'>Richard Peacock</span>
+                  <span class='header-visibility'>$visibility_icon</span>
+                </div>
+                <div class='activity-contents'>
+                  <div class='activity-comment'>
+                    $msg                    
+                  </div>
+                </div>
+             </div>
+             <div class='clear'></div>";
+        
+    
+  } // while cur
+                   
+  
+  
+  // Display the pager that was generated by the pager_query above!  
+  $rtn .= theme_pager(array(t('« newest'), t('‹ newer'), '', t('older ›'), t('oldest »')));
+  
+  $rtn .= "</div>"; // engagements-list         
+
+
+
+  $rtn .= "</div>"; // engagements-list-page
+  
+  // Let's set our breadcrumbs
+  $db = get_global_database_handler();
+  $crumbs = array();
+  $crumbs[] = array(
+    'text' => 'Students',
+    'path' => 'student-search',
+  );
+  $crumbs[] = array(
+    'text' => $db->get_student_name($current_student_id) . " ({$current_student_id})",
+    'path' => 'student-profile', 
+    'query' => "current_student_id={$current_student_id}",
+  );  
+  fp_set_breadcrumbs($crumbs);    
+  
+  
+  return $rtn;
+} // engagements_display_main 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

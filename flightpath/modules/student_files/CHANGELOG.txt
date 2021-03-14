@@ -1,0 +1,7 @@
+Student Files 6x - Changelog
+=========================
+Richard Peacock - richard@peacocksoftware.com
+
+
+2020-11-09
+  Initial 6x

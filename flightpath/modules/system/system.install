@@ -42,7 +42,8 @@ function system_enable() {
     
 
   // Let's perform installations on the other modules we want enabled by default.
-  $modules = array("admin", "advise", "comments", "student_search", "update_status", "content", "announcements", "tinymce", "course_search", "blank_degrees", "user", "batch");
+  $modules = array("admin", "advise", "comments", "student_search", "update_status", "content", "announcements", "tinymce", "course_search", "blank_degrees", "user", 
+                    "batch", 'calendar', 'alerts', 'engagements', 'notify', 'student_files', 'student_priority', 'student_profile');
   foreach ($modules as $module) {
     system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => "core"));
   }

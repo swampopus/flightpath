@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * @file
+ * This is the install file for the audit module.
+ * 
+ * The primary thing we want to do is create the database table.
+ */
+
+
+
+/**
+ * Implementation of hook_install.
+ *
+ */
+function audit_install() {
+
+  if (!db_table_exists("audit_approvals")) {
+    // Create it.
+    
+    db_query("CREATE TABLE `audit_approvals` (
+                `aid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+                `student_id` varchar(30) DEFAULT '0',
+                `uid` int(11) DEFAULT '0',
+                `faculty_id` varchar(30) DEFAULT '0',
+                `approval_type` varchar(60) DEFAULT '',
+                `approval_value` varchar(40) DEFAULT '',
+                `posted` int(10) unsigned NOT NULL,
+                PRIMARY KEY (`aid`),
+                KEY `student_id` (`student_id`),
+                KEY `faculty_id` (`faculty_id`),
+                KEY `approval_type` (`approval_type`),
+                KEY `approval_value` (`approval_value`),
+                KEY `posted` (`posted`),
+                KEY `uid` (`uid`)
+              ) ");
+  }
+  
+}

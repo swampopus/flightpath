@@ -1,0 +1,82 @@
+<?php
+
+/**
+ * This file should contain only hooks relating to installing, enabling, disabling, and uninstalling this module.
+ *  
+*/
+
+
+/**
+ * Hook install.  Called when the module is installed on the admin modules page.
+ * 
+ */
+function calendar_install() {
+
+  $q = "
+CREATE TABLE `content__appointment` (
+  `cid` int(10) unsigned NOT NULL,
+  `vid` int(10) unsigned NOT NULL,
+  `field__appointment_datetime` datetime DEFAULT NULL,
+  `field__appointment_duration_minutes` int(11) DEFAULT NULL,
+  `field__faculty_id` varchar(255) DEFAULT NULL,
+  `field__student_id` varchar(255) DEFAULT NULL,
+  `field__appointment_type` varchar(255) DEFAULT NULL,
+  `field__appointment_msg` text DEFAULT NULL,
+  PRIMARY KEY (`vid`),
+  KEY `cid` (`cid`),
+  KEY `field__appointment_datetime` (`field__appointment_datetime`),
+  KEY `field__duration_minutes` (`field__appointment_duration_minutes`),
+  KEY `faculty_id` (`field__faculty_id`),
+  KEY `student_id` (`field__student_id`),
+  KEY `appointment_type` (`field__appointment_type`)
+);  
+  ";
+  db_query($q);
+  
+
+  $q = "
+CREATE TABLE `content__schedule_event_type` (
+  `cid` int(10) unsigned NOT NULL,
+  `vid` int(10) unsigned NOT NULL,
+  `field__faculty_id` varchar(255) DEFAULT NULL,
+  `field__enabled` varchar(50) DEFAULT NULL,
+  `field__event_duration_minutes` int(11) DEFAULT NULL,
+  `field__event_buffer_minutes` int(11) DEFAULT NULL,
+  `field__prevent_less_than_hours` int(11) DEFAULT NULL,
+  `field__additional_email_msg` text DEFAULT NULL,
+  `field__description` text DEFAULT NULL,
+  PRIMARY KEY (`vid`),
+  KEY `cid` (`cid`),
+  KEY `field__faculty_id` (`field__faculty_id`),
+  KEY `field__event_duration_minutes` (`field__event_duration_minutes`),
+  KEY `field__event_buffer_minutes` (`field__event_buffer_minutes`),
+  KEY `field__prevent_less_than_hours` (`field__prevent_less_than_hours`),
+  KEY `field__enabled` (`field__enabled`)
+);  
+  ";
+  db_query($q);
+
+
+  $q = "
+CREATE TABLE `content__schedule_unavailable_time` (
+  `cid` int(10) unsigned NOT NULL,
+  `vid` int(10) unsigned NOT NULL,
+  `field__faculty_id` varchar(255) DEFAULT NULL,
+  `field__days` text DEFAULT NULL,
+  `field__start_time` varchar(255) DEFAULT NULL,
+  `field__end_time` varchar(255) DEFAULT NULL,
+  `field__ics_url` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`vid`),
+  KEY `cid` (`cid`),
+  KEY `field__start_time` (`field__start_time`),
+  KEY `field__end_time` (`field__end_time`),
+  KEY `field__ics_url` (`field__ics_url`),
+  KEY `field__faculty_id` (`field__faculty_id`)
+);  
+  ";
+  db_query($q);
+
+
+    
+}
+

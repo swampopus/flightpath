@@ -1,0 +1,311 @@
+<?php
+
+
+
+
+
+/**
+ * Implements hook_menu
+ */
+function student_profile_menu() {
+  $items = array();
+  
+
+  $items["student-profile"] = array(
+    "title" => "Student Profile",
+    "page_callback" => "student_profile_display_student_profile_page",
+    "access_callback" => "system_can_access_student",  // make sure we are allowed to access the student specified by current_student_id.
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "system",
+    "weight" => 10,
+    "page_settings" => array(      
+      "display_currently_advising" => FALSE,
+      "screen_mode" => "not_advising",      
+    ),
+  );
+
+
+
+
+    
+  
+  
+  return $items;
+}
+
+
+
+
+/**
+ * Returns an array where we show the percentage of grades that the student has, compared to the whole.
+ * For example:  50% A's, 10% B's, and so on.
+ * 
+ * For convenience, we will also include the courses in an array so it can be displayed if desired.
+ */
+function student_profile_get_grade_percentages_for_student($student) {
+  $rtn = array();
+
+  // Init some defaults...
+  $rtn['grade_counts']['D']['count'] = 0;
+  $rtn['grade_counts']['F']['count'] = 0;
+  $rtn['grade_counts']['W']['count'] = 0;
+  $rtn['grade_counts']['A']['count'] = 0;
+  $rtn['grade_counts']['B']['count'] = 0;
+  $rtn['grade_counts']['C']['count'] = 0;
+  
+  $total_courses = count($student->list_courses_taken->array_list);
+  if ($total_courses == 0) return $rtn;
+  
+  foreach ($student->list_courses_taken->array_list as $course) {
+    $grade = $course->grade;
+
+    if (!isset($rtn['grade_counts'][$grade]['count'])) $rtn['grade_counts'][$grade]['count'] = 0;
+    
+    $rtn['grade_counts'][$grade]['count']++;
+    
+    $rtn['grade_counts'][$grade]['courses'][] = $course;
+    
+    
+    
+          
+  }
+  
+  foreach ($rtn['grade_counts'] as $grade => $val) {
+    $count = $rtn['grade_counts'][$grade]['count'];
+    $percent = round(($count / $total_courses) * 100, 1);
+    $rtn['grade_counts'][$grade]['percent'] = $percent;
+    
+    $html = "";
+    if ($count > 0) {      
+      foreach ($val['courses'] as $course) {
+        $html .= "<div class='grade-perc-course-row'>$course->subject_id $course->course_num $course->grade ($course->term_id)</div>";
+      }      
+    }
+    $rtn['grade_counts'][$grade]['courses_html'] = $html;
+    
+  }  
+  
+  return $rtn;
+} // student_profile_get_grade_percentages_for_student($student)
+
+
+
+
+function student_profile_display_student_profile_page() {
+  global $current_student_id, $user, $student;
+  
+  if (!isset($student) || $student == null || !is_object($student)) {
+    $student = new Student($current_student_id);
+  }  
+   
+   
+    
+  $student_id = $current_student_id;
+  $rtn = "";
+  
+  fp_add_css(fp_get_module_path('student_profile') . '/css/style.css');
+  fp_add_js(fp_get_module_path('advise') . '/js/advise.js');
+    
+  
+  fp_set_title('');
+  
+  $rtn .= "";
+  
+  
+  $grade_percentages = student_profile_get_grade_percentages_for_student($student);
+  
+  
+  $percent_D = @floatval($grade_percentages['grade_counts']['D']['percent']);
+  $percent_D_html = $grade_percentages['grade_counts']['D']['courses_html'];
+  
+  $percent_F = @floatval($grade_percentages['grade_counts']['F']['percent']);
+  $percent_F_html = $grade_percentages['grade_counts']['F']['courses_html'];
+  
+  $percent_W = @floatval($grade_percentages['grade_counts']['W']['percent']);
+  $percent_W_html = $grade_percentages['grade_counts']['W']['courses_html'];
+  
+  $D_link = "D's";
+  if ($percent_D_html != "") {
+    $D_link = "<a class='grade-percent-link' href='javascript:fp_alert(\"" . base64_encode($percent_D_html) . "\",\"base64\");'>D's</a>";
+  }
+
+  $F_link = "F's";
+  if ($percent_F_html != "") {
+    $F_link = "<a class='grade-percent-link' href='javascript:fp_alert(\"" . base64_encode($percent_F_html) . "\",\"base64\");'>F's</a>";
+  }
+
+  $W_link = "W's";
+  if ($percent_W_html != "") {
+    $W_link = "<a class='grade-percent-link' href='javascript:fp_alert(\"" . base64_encode($percent_W_html) . "\",\"base64\");'>W's</a>";
+  }
+
+  
+    
+  $profile_items = array();
+  
+  $active_status = t('Active');
+  if ($student->is_active !== 1) {
+    $active_status = t('Inactive');
+  }
+  
+  $profile_items['left_side'][] = array(
+    'label' => 'Status:',
+    'content' => $active_status,
+  );
+  $profile_items['left_side'][] = array(
+    'label' => 'Athlete?:',
+    'content' => 'No',
+    'mobile_content' => 'Non-Athlete',
+  );
+  
+  
+  $profile_items['left_side'][] = array(
+    'label' => 'D%/F%:',
+    'content' => "$percent_D% $D_link / $percent_F% $F_link",
+  );
+  
+  $url = fp_url('student-profile/priority-calculations');
+  $title = t("Academic Priority Calculations");
+  
+  if ($user->is_faculty) {
+    
+    $priority_val = student_priority_get_academic_priority_value($student_id, 300);  // Frequently re-calculate, so we get a "fresh" number.
+    $temp = student_priority_get_student_academic_priority_label($priority_val);
+    $machine = $temp['machine'];
+    $label = $temp['label'];
+    
+    $profile_items['left_side'][] = array(
+      'label' => 'Academic Priority:',
+      'content' => "<span class='profile-priority-bar priority-$machine'>$label</span> <a href='javascript:popupLargeIframeDialog(\"$url\",\"$title\");'><i class='fa fa-question-circle'></i></a>",
+    );
+  }
+  //////
+  
+  // TODO:  get this for real
+  $profile_items['right_side'][] = array(
+    'label' => 'Enrollment Code:',
+    'content' => 'C',  
+    'mobile_content' => 'Enrollment Code: C',
+  );
+  
+  // TODO:  get for real
+  $profile_items['right_side'][] = array(
+    'label' => 'Student Worker?:',
+    'content' => 'No',  
+    'mobile_content' => 'Not Student Worker',
+  );
+  $profile_items['right_side'][] = array(
+    'label' => 'W%:',
+    'content' => "$percent_W% $W_link",  
+  );
+  
+  if ($user->is_faculty) {
+    $profile_items['right_side'][] = array(
+      'label' => 'ACT Score:',
+      'content' => '33 (28 E / 35 M)',  
+    );
+  }
+  
+  
+  
+  $rtn .= "<div class='student-profile-header-full'>";
+  $rtn .= fp_render_student_profile_header(FALSE, $profile_items); // Send more items since this is a "full" profile.
+  $rtn .= "</div><div class='clear'></div>";  
+  
+  $rtn .= fp_render_section_title(t("Alerts"), "student-profile-alerts");
+  
+  if (user_has_permission('add_alert_content')) {
+    $url = fp_url('content/add/alert', 'student_id=' . $student_id);
+    $title = t("Add New Alert");  
+    $rtn .= "<a class='button student-profile-add-new-alert-button' href='javascript:popupLargeIframeDialog(\"$url\",\"$title\");'><i class='fa fa-bell'></i> " . t("Add New Alert") . "</a>";
+  }
+  
+  // Take advantage of our "alerts form" from the alerts module.  
+  $rtn .= fp_render_form("alerts_advisees_alerts_form", "normal", $student_id, 5);
+  
+   
+  
+  /*
+  
+  $rtn .= "<table border='0' class='student-alerts'>
+             <thead>
+             <tr>
+               <th>Actions</th>
+               <th>Status</th>
+               <th>Short Description</th>
+               <th class='author'>Updated By</th>
+               <th class='updated'>Updated On</th>
+             </tr>
+             </thead>    ";
+
+
+  // Query for alerts for this student.  We will be using a pager_query, so we can display a complete history, if we wish.
+  $res = pager_query("SELECT DISTINCT(a.cid) FROM content__alert a, content n
+                   WHERE field__student_id = ?
+                   AND a.vid = n.vid
+                   AND a.cid = n.cid
+                   AND n.delete_flag = 0
+                   AND n.published = 1                                    
+                   ORDER BY updated DESC, a.vid DESC", array($current_student_id), 5, 0, "SELECT COUNT(DISTINCT(a.cid)) FROM content__alert a, content n
+                                                                                                         WHERE field__student_id = ?
+                                                                                                         AND a.vid = n.vid
+                                                                                                         AND a.cid = n.cid
+                                                                                                         AND n.delete_flag = 0
+                                                                                                         AND n.published = 1");  
+
+  while ($cur = db_fetch_object($res)) {
+    $cid = $cur->cid;
+    $content = content_load($cid);
+        
+    $updated = format_date(convert_time($content->updated), 'short');
+    $author = "System";
+    if ($content->user_id != ALERT_SYSTEM_USER_ID) {
+      $tuser = fp_load_user($content->user_id);
+      $author = fp_get_faculty_name($tuser->cwid);
+    }
+    
+    $extra_class = "";
+    // If this content hasn't been read by this user, mark as "unread"
+    if (!content_get_last_access($cid)) {
+      $extra_class .= " unread";
+    }    
+        
+     
+    $rtn .= "
+      <tr class='{$content->field__alert_status['value']} $extra_class'>
+        <td class='actions'><i class='fa fa-eye'></i></td>
+        <td class='status'>{$content->field__alert_status['display_value']}</td>
+        <td class='short-desc'><div class='short-desc-wrapper'>{$content->title}</div></td>
+        <td class='author'>$author</td>
+        <td class='updated'>$updated</td>
+      </tr>
+    ";
+  } // while cur
+
+  
+  $rtn .= "</table>";
+  
+  $rtn .= theme_pager(array(t('« newest'), t('‹ newer'), '', t('older ›'), t('oldest »')));
+  
+  */
+  
+  
+  // Let's set our breadcrumbs
+  $db = get_global_database_handler();
+  $crumbs = array();
+  $crumbs[] = array(
+    'text' => 'Students',
+    'path' => 'student-search',
+  );
+  $crumbs[] = array(
+    'text' => $db->get_student_name($current_student_id) . " ($current_student_id)",
+    'path' => 'student-profile', 
+    'query' => "current_student_id=$current_student_id",
+  );  
+  fp_set_breadcrumbs($crumbs);
+  
+  
+  
+  return $rtn;
+} // display student profile page
+

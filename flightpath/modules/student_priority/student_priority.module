@@ -1,0 +1,524 @@
+<?php
+
+
+// TODO:  There should be a UI where organizations can turn on and off calculations, assign scores, etc.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function student_priority_menu() {
+
+  $items = array();
+
+
+  $items["student-profile/priority-calculations"] = array(
+    "title" => "Priority Calculations",
+    "page_callback" => "student_priority_display_priority_calculations_page",
+    "access_callback" => "system_can_access_student",  // make sure we are allowed to access the student specified by current_student_id.
+    "type" => MENU_TYPE_TAB,
+    "tab_family" => "priority-calculations",    
+    "page_settings" => array(
+      "display_currently_advising" => TRUE,
+      "screen_mode" => "not_advising",      
+    ),
+  );
+
+
+  return $items;
+}
+
+
+
+
+
+
+/**
+ * Displays the calculations used to get the priority values.  Can be displayed in either the dialog or stand-alone.
+ */
+function student_priority_display_priority_calculations_page() {
+
+  global $current_student_id, $user;
+  
+  $student_id = $current_student_id;
+  $rtn = "";
+  
+  fp_add_css(fp_get_module_path('student_profile') . '/css/style.css');
+  fp_add_js(fp_get_module_path('advise') . '/js/advise.js');
+   
+  fp_set_title('');
+    
+  $rtn .= "";
+
+  
+  
+  if ($_GET['window_mode'] == 'popup') {
+      
+    $rtn .= "<a class='tests-expand-link' href='javascript:parent.window.location=\"" . fp_url("student-profile/priority-calculations", "current_student_id=$current_student_id") . "\"; void(0);'><i class='fa fa-expand'></i> " . t("View full page") . "</a>";
+  }
+  
+  $rtn .= "<p>" . t("This system is able to make calculations as to the student's \"Academic Priority\", or, how at-risk the 
+                      student is of experiencing significant difficulties.") . "</p>";
+  
+  $rtn .= "<h3>" . t("Current Academic Priority:") . "</h3>";
+  $rtn .= "<!--current-academic-priority-->";
+
+  $rtn .= "<h3>" . t("Calculations:") . "</h3>";
+  $rtn .= "<div>" . t("The following calculations were used to determine the student's current Academic Priority. The score value increases their priority average.") . "</div>";
+
+
+
+  $rtn .= "
+      <table border='1' style='max-width: 600px;' class='calc-tests-table'>
+            <tr>
+              <th width='70%'>Test</th>
+              <th width='15%'>Result</th>
+              <th width='15%'>Score</th>
+            </tr>";
+
+
+  // Get student calculations
+
+
+
+  $calcs = student_priority_get_calculations_for_student($student_id, TRUE);
+    
+  foreach ($calcs['calc_test_results'] as $machine_name => $details) {
+      
+    $result = $details['result'];
+    $score = $details['score'];    
+    $extra = isset($details['extra']) ? trim($details['extra']) : '';
+    
+    $test_title = $calcs['calc_tests'][$machine_name]['title'];
+    $test_description = @$calcs['calc_tests'][$machine_name]['description'];
+    
+    $more_content = "";
+    $more_toggle = "";
+    if ($extra != "") {
+      // click to toggle div
+      $rnd = md5(mt_rand(0,9999) . mt_rand(99,99999) . microtime());
+      $more_toggle = "<a href='javascript:void(0);' onclick='jQuery(\"#test-extra-$rnd\").toggle();' class='test-more-toggle' title='Click for more details'><i class='fa fa-ellipsis-h'></i></a>";
+      $more_content = "<div id='test-extra-$rnd' class='test-extra' style='display:none;'>
+                            $extra
+                          </div>";
+    } 
+        
+    $bgcolor='white';
+    if (is_numeric($score)) {
+       if ($score > 0) $bgcolor = '#fff4f4';    
+      $score = (strlen("$score") == 1) ? number_format($score, 1) : $score; // force at least X num of decimals       
+    }
+    
+    $rtn .= "<tr>
+                <td style='background-color: $bgcolor; color: black;'>$more_toggle$test_title$more_content</td>
+                <td style='background-color: $bgcolor;'>$result</td>
+                <td style='background-color: $bgcolor;'>$score</td>
+             </tr>";
+    
+  } // foreach priority_tests
+  
+  
+  $rtn .= "</table>";
+
+
+  $total_score = $calcs['total'];
+  $count = $calcs['count'];
+  $avg = $calcs['avg'];
+  $percent = $calcs['percent'];
+  $max_possible = $calcs['max_possible'];
+  
+  // TODO: these might be controlled by setting one day
+  $academic_priority_desc = array(
+    "high" => t("High"),
+    "medium" => t("Medium"),
+    "normal" => t("Normal"),
+  );    
+  
+    
+  $rtn .= "<p><b>Totals:</b> $total_score score / $max_possible max = <b>" . $percent . "</b>%.
+          </p>
+          
+          <p>
+            <b>" . t("Percent Scoring:") . "</b>
+            <br><span class='profile-priority-bar priority-normal'>" . $academic_priority_desc['normal'] . "</span> 0 to 30
+            <br><span class='profile-priority-bar priority-medium'>" . $academic_priority_desc['medium'] . "</span> 31 to 70
+            <br><span class='profile-priority-bar priority-high'>" . $academic_priority_desc['high'] . "</span> 71 to 100
+          </p>
+          ";
+  
+  
+  // Update the "academic priority" field at the top of the page, based on ranges.
+  $academic_priority = student_priority_get_student_academic_priority_label($percent);
+  $machine = $academic_priority['machine'];
+  $label = $academic_priority['label'];
+    
+    
+  $priority_html = "<span class='profile-priority-bar priority-$machine'>" . $label . "</span>";
+  $rtn = str_replace("<!--current-academic-priority-->", $priority_html, $rtn);
+
+
+
+  
+  
+  // Let's set our breadcrumbs
+  $db = get_global_database_handler();
+  $crumbs = array();
+  $crumbs[] = array(
+    'text' => 'Students',
+    'path' => 'student-search',
+  );
+  $crumbs[] = array(
+    'text' => $db->get_student_name($current_student_id) . " ($current_student_id)",
+    'path' => 'student-profile', 
+    'query' => "current_student_id=$current_student_id",
+  );  
+  $crumbs[] = array(
+    'text' => t("Student Profile"),
+    'path' => 'student-profile', 
+    'query' => "current_student_id=$current_student_id",
+  );  
+
+  
+  fp_set_breadcrumbs($crumbs);  
+  
+  
+  return $rtn;
+  
+} //student_priority_display_priority_calculations_page
+
+
+
+
+/**
+ * Returns 'normal', 'medium', or 'high' based on values.
+ * 
+ * TODO: Make those values be able to be set by configuration.
+ * 
+ * TODO: If we have have a student specified, then see if we have a special priority value for them?
+ * 
+ */
+function student_priority_get_student_academic_priority_label($priority_val, $student_id = NULL) {
+  
+  $academic_priority_label = array(
+    "high" => "High",
+    "medium" => "Medium",
+    "normal" => "Normal",
+  );    
+  
+  //if ($priority_val == -1) {
+  //  $priority_val = @floatval($student_node->field_priority_value['und'][0]['value']);
+  //}
+  
+  $machine = 'normal';  
+  if ($priority_val >= 31 && $priority_val <= 70) $machine = "medium";
+  if ($priority_val > 70 ) $machine = "high";
+  
+  
+  $rtn = array();
+  $rtn['val'] = $priority_val;
+  $rtn['machine'] = $machine;
+  $rtn['label'] = $academic_priority_label[$machine];
+  
+  return $rtn;
+  
+    
+}
+
+
+
+/**
+ * Queries for the academic priority value, and if its older than the set number of seconds, we will re-calculate for
+ * this student.  Set to zero to force it to recalculate every time.
+ */
+function student_priority_get_academic_priority_value($student_id, $recalculate_if_older_than = 86400) {
+  
+  $check_ts = time() - $recalculate_if_older_than;
+
+  
+  
+  $val = db_result(db_query('SELECT priority_value FROM student_priority WHERE student_id = ? AND updated > ?', array($student_id, $check_ts)));
+  
+  if (!$val) {
+    // Recalculate!
+    //fpm('recalculating');
+    $calcs = student_priority_get_calculations_for_student($student_id, TRUE);
+    $rtn = $calcs['percent'];
+    
+    return $rtn;
+  }
+      
+  return $val;  
+  
+} // .. get academic priority value
+
+
+
+
+/**
+ * Run all of the calculations for a student, and return back the results
+ * in a formatted array.
+ * 
+ * If bool_save_to_student is true, then we will write the results to the student_priority.
+ * 
+ */
+function student_priority_get_calculations_for_student($student_cwid, $bool_save_to_student = FALSE) {
+ 
+  global $current_student_id, $user, $student;
+  
+  if (!isset($student) || $student == null || !is_object($student)) {
+    $student = new Student($current_student_id);
+  }  
+ 
+  $rtn = array();
+  
+  //load student as object for use in the calculation tests.
+  $use_student = $student;
+  if ($student_cwid != $current_student_id) {
+    $use_student = new Student($student_cwid);   
+  } 
+  
+  
+  $calc_test_results = array();
+  $total = 0;
+  $max_possible = 0;
+  $count = 0;
+  
+  // Invoke a hook to run our priority calculations.  
+  // First, get all our tests from all modules.
+  $c_tests = invoke_hook('define_calculation_tests');
+  $calc_tests = array();
+  
+  // Flatten c_tests so that we don't have the module name up front.
+  foreach ($c_tests as $module => $throwaway) {
+    foreach ($c_tests[$module] as $callback => $details) {
+      $calc_tests[$callback] = $details;
+    }
+  }
+  
+  /////////////////////////////////
+  // sort results by weight, title.
+  /////////////////////////////////  
+  $sorted_calc_tests = array();
+  $lines = array();
+  foreach ($calc_tests as $key => $value) {    
+    $lines[] = str_pad($value['weight'], 5, '0', STR_PAD_LEFT) . " ~~~ " . $value['title'] . " ~~~ " . $key;
+  }  
+  sort($lines);  
+  foreach ($lines as $line) {
+    $temp = explode("~~~", $line);
+    $key = trim($temp[2]);
+    $sorted_calc_tests[$key] = $calc_tests[$key];
+  }  
+  $calc_tests = $sorted_calc_tests;
+  //////////////////////////
+  
+    
+  $rtn['calc_tests'] = $calc_tests;
+    
+  foreach ($calc_tests as $callback => $details) {
+     
+    $file = $details['file'];  // 0 = module, 1 = filename
+    
+    $x = include_once(fp_get_module_path($file[0], TRUE, FALSE) . "/" . $file[1]);
+    if (!$x) {
+      fpm('Could not load include file:' . fp_get_module_path($file[0], TRUE, FALSE) . "/" . $file[1]);
+    }
+    
+          
+    // Now execute the callback.
+    $calc_test_results[$callback] = call_user_func_array($callback, array($use_student));
+    
+    // TODO:  are we overriding the "default score" in the settings for this school?  Is that even an option we want to allow?
+    $raw_score = $details['result_scores'][$calc_test_results[$callback]['result']];
+    
+    // If the raw_score is "SKIP" then we don't want to count this at all.
+    //if ($raw_score == 'SKIP') continue;
+        
+    if (is_numeric($raw_score)) {
+      $score = floatval($raw_score);
+      $calc_test_results[$callback]['score'] = $score;
+      
+      // Figure out the max possible score from this test.
+      $test_max_score = 0;      
+      foreach ($details['result_scores'] as $k => $v) {
+        $v = floatval($v);
+        if ($v > $test_max_score) $test_max_score = $v;
+      }
+
+      $max_possible += $test_max_score;
+        
+      $total = $total + $score;
+      $count++;
+    }
+    else {
+      $calc_test_results[$callback]['score'] = $raw_score;
+    }
+  
+  } // foreach
+  
+  $avg = 0;
+  if ($count > 0) {
+    $avg = round($total / $count, 2);
+  }
+  
+  $percent = 0;
+  if ($max_possible > 0) {
+    $percent = round(($total / $max_possible * 100), 2);
+  }
+  
+
+  $rtn['calc_test_results'] = $calc_test_results;
+  $rtn['count'] = $count;
+  $rtn['total'] = $total;
+  $rtn['avg'] = $avg;
+  $rtn['max_possible'] = $max_possible;
+  $rtn['percent'] = $percent;
+
+  
+  // Should we save the value to the student_priority table?  
+  if ($bool_save_to_student) {
+    db_query('REPLACE INTO student_priority (student_id, priority_value, results, updated)
+                VALUES (?, ?, ?, ?) ', array($student_cwid, $percent, serialize($rtn), time()));
+  }
+  
+  return $rtn;
+  
+  
+} // student_priority_get_calculations_for_student($student_nid)
+
+
+
+
+/**
+ * Implements hook_define_calculation_tests
+ */
+function student_priority_define_calculation_tests() {
+  
+  $rtn = array();
+  
+  $rtn['student_priority__does_student_work_on_campus'] = array(  
+    'title' => 'Does the student work on campus?',
+    'description' => 'If the student has a campus job, they are generally more engaged
+                      in campus life and their own success.',        
+    'result_scores' => array(  // Based on the returned 'result' value, what "score" should we use?
+      'Y' => 0,
+      'N' => 0.5
+    ),    
+    'file' => array('student_priority', 'student_priority.calculations.inc'),        
+    'group' => 'FlightPath Core',  // groups multiple tests together this way    
+    'weight' => 100,   // lighter weights float to the top (get evaluated first)
+  );
+   
+
+  $rtn['student_priority__is_student_gpa_above_250'] = array(  
+    'title' => "Is the student's GPA above 2.50?",
+    'result_scores' => array(
+      'Y' => 0,
+      'N' => 0.9
+    ),    
+    'file' => array('student_priority', 'student_priority.calculations.inc'),        
+    'group' => 'FlightPath Core',  // groups multiple tests together this way    
+    'weight' => 110,
+  );
+
+  $rtn['student_priority__does_student_have_more_than_2_d_or_f'] = array(  
+    'title' => "Does the student have more than 2 D's or F's?",
+    'result_scores' => array(
+      'Y' => 1,
+      'N' => 0,
+    ),    
+    'file' => array('student_priority', 'student_priority.calculations.inc'),        
+    'group' => 'FlightPath Core',  // groups multiple tests together this way    
+    'weight' => 130,
+  );
+
+
+
+  $rtn['student_priority__does_student_have_more_than_2_w'] = array(  
+    'title' => "Does the student have more than 2 W's?",
+    'result_scores' => array(
+      'Y' => 0.8,
+      'N' => 0,
+    ),    
+    'file' => array('student_priority', 'student_priority.calculations.inc'),        
+    'group' => 'FlightPath Core',  // groups multiple tests together this way    
+    'weight' => 140,
+  );
+
+
+  $rtn['student_priority__did_student_score_below_b_on_engl_1001'] = array(  
+    'title' => "Did the student score below a 'B' in ENGL 1001?",
+    'result_scores' => array(
+      'Y' => 0.8,
+      'N' => 0,      
+      'N/A' => 'SKIP',
+    ),    
+    'file' => array('student_priority', 'student_priority.calculations.inc'),        
+    'group' => 'FlightPath Core',  // groups multiple tests together this way    
+    'weight' => 150,
+  );
+
+
+
+
+  $rtn['student_priority__how_many_times_has_student_changed_majors'] = array(  
+    'title' => "How many times has the student changed majors?",
+    'result_scores' => array(
+      '0' => 0,
+      '1' => 0.3,
+      '2+' => 0.6,      
+    ),    
+    'file' => array('student_priority', 'student_priority.calculations.inc'),        
+    'group' => 'FlightPath Core',  // groups multiple tests together this way    
+    'weight' => 160,
+  );
+
+
+
+  $rtn['student_priority__did_the_student_attend_underperforming_high_school'] = array(  
+    'title' => "Did the student attend an underperforming high school?",
+    'result_scores' => array(
+      'Y' => 0.4,
+      'N' => 0,            
+    ),    
+    'file' => array('student_priority', 'student_priority.calculations.inc'),        
+    'group' => 'FlightPath Core',  // groups multiple tests together this way    
+    'weight' => 170,
+  );
+
+
+  $rtn['student_priority__does_student_have_federal_financial_aid'] = array(  
+    'title' => "Does the student have federal financial aid?",
+    'result_scores' => array(
+      'Y' => 0,
+      'N' => 0.2,            
+    ),    
+    'file' => array('student_priority', 'student_priority.calculations.inc'),        
+    'group' => 'FlightPath Core',  // groups multiple tests together this way    
+    'weight' => 105,
+  );
+
+
+  
+  return $rtn;
+
+
+  
+} // student_priority_define_calculation_tests()
+
+
+
+
+
+
+
+

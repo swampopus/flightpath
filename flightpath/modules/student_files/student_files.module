@@ -1,0 +1,956 @@
+<?php
+/**
+ * @file
+ * This is the student_files module, which will facilitate uploading (securely) files to be associated with student accounts.
+*/
+ 
+
+/**
+ * Implementation of hook_menu
+ */ 
+function student_files_menu() {
+  $items = array();
+  
+  $items["admin/config/student-files"] = array(
+    "title" => "Student Files settings",
+    "description" => "Configure settings related to the student_files module.",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("student_files_settings_form", "system_settings"),
+    "access_arguments" => array("administer_student_files"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => "Admin Console",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_parent" => "admin-tools/admin",        
+  
+  );
+  
+  
+  // This will receive uploaded files for a student.
+  $items["student-files/handle-upload/%"] = array(
+    "page_callback" => "student_files_handle_upload",
+    "page_arguments" => array(2),
+    "access_arguments" => array("upload_student_files"),
+    "type" => MENU_TYPE_CALLBACK,
+  );
+
+
+  $items["student-files/handle-download/%/%"] = array(
+    "page_callback" => "student_files_handle_download",
+    "page_arguments" => array(2, 3),
+    "access_callback" => "student_files_user_may_download_student_file",
+    "access_arguments" => array(2, 3),  
+    "type" => MENU_TYPE_CALLBACK,
+  );
+
+
+  $items["student-files/handle-delete/%/%"] = array(
+    "page_callback" => "student_files_handle_delete",
+    "page_arguments" => array(2, 3),
+    "access_callback" => "student_files_user_may_delete_student_file",
+    "access_arguments" => array(2, 3),  
+    "type" => MENU_TYPE_CALLBACK,
+  );
+
+  
+  $items["admin-tools/upload-student-files"] = array(
+    "title" => "Upload Student Files",
+    "description" => "Upload files to any student's file area.",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("student_files_upload_any_student_files_form"),
+    "access_arguments" => array("upload_any_student_files"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "menu_icon" => fp_get_module_path("student_files") . "/css/icons/page_add.png",
+      "menu_links" => array(          
+        0 => array(
+          "text" => t("Admin Tools"),
+          "path" => "admin-tools",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+      
+    ),
+    "type" => MENU_TYPE_NORMAL_ITEM,
+    "weight" => 100,
+  ); 
+  
+  
+  
+  return $items;
+}
+
+
+/**
+ * This is where we can upload (en masse?) to any arbitrary student.
+ */
+function student_files_upload_any_student_files_form() {
+  $form = array();
+  
+    
+  // Add our javascript file
+  fp_add_js(fp_get_module_path("student_files") . "/js/student_files.js");
+  
+  $form["#attributes"] = array("enctype" => 'multipart/form-data');  // allow the form itself to submit files.
+  
+  
+  $form["mark_top"] = array(
+    "value" => t("Use this form to upload files to any student, either based on the filename, or by specifying the student's
+                  CWID below."),
+  );
+  
+  $form["student_method"] = array(
+    "type" => "radios",
+    "label" => t("Select how the recipient student will be selected:"),
+    "options" => array(
+                        "filename" => t("Filename - The file(s) you upload must begin with the student's CWID, followed by a _ (underscore).  For example:
+                                          <em>33312943_new_file.txt</em>"),
+                        "manual" => t("Manual - Enter the student's CWID in the box below.  This is the CWID which files will be saved under, regardless of filename."),
+                      ),
+    "value" => "filename",
+    "required" => TRUE,    
+  );  
+  
+  $form["manual_cwid"] = array(
+    "type" => "textfield",
+    "label" => t("Manual CWID:"),
+    "description" => t("Only enter a student's CWID if 'Manual' was selected above."),    
+  );
+
+  
+  $form["access_type"] = array(
+    "type" => "radios",
+    "label" => "Who will be able to see / download the uploaded file(s)?",
+    "options" => array(
+                        "faculty" => "Faculty - Only faculty or staff users",
+                        "public" => "Any user with access to view the student's files, including the student themselves",
+                      ),
+    "value" => "faculty",
+  );
+    
+  
+  
+    
+  $max_upload      = ini_get('upload_max_filesize');
+  $max_post        = ini_get('post_max_size');
+  
+ 
+  $form["student_files"] = array(  
+    "type" => "file",
+    "label" => "Select file(s):",
+    "multiple" => TRUE,  // allow multiple file uploads
+    "description" => t("<b>Allowed files:</b> <em>%ext</em>
+                        <br><br>
+                        
+                        Note:  In your php.ini file, these are the filesize limits in place for any upload here:
+                        <ul>
+                        <li>Upload max filesize: %max_up </li>
+                        
+                        <li>POST max size: %max_post </li>
+                        </ul>
+                        If you have problems with uploading multiple files, adjust these values.", array("%max_up" => $max_upload, "%max_post" => $max_post,
+                                                                                                    "%ext" =>  strtolower(variable_get("student_files_allowed_extensions", "txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")))),
+  );
+  
+  
+  
+  $form["submit_btn"] = array(
+    "type" => "submit",
+    "value" => "Submit",
+  );
+  
+  return $form;
+}
+
+
+/**
+ * Validate function.
+ */
+function student_files_upload_any_student_files_form_validate($form, &$form_state) {
+    
+  $values = $form_state["values"];
+  $db = get_global_database_handler();
+  
+  // Re-order the _FILES array to make it easier to work with
+  $student_files = fp_re_array_files($_FILES["student_files"]);  
+  $form_state["student_files"] = $student_files;
+  
+  // Make sure if "manual" is selected, that the CWID entered actually exists.
+  if ($values["student_method"] == "manual") {
+    $n = @trim($db->get_student_name($values["manual_cwid"]));
+    
+    if (!$n) {
+      // Student not found!  Or at least their name wasn't found.
+      form_error("student_method", t("Sorry, the CWID you entered could not be found."));
+      return;
+    }
+  }    
+  
+  // if a filename method selected, make sure a CWID is detectable and valid.  Maybe save it to form_state for the _submit function.
+  // If more than one file, check all the files...
+  if ($values["student_method"] == "filename") {
+    $is_empty = TRUE;
+    foreach ($form_state["student_files"] as $c => $file) {
+      
+      if (trim($file["name"] == "")) continue;
+      $is_empty = FALSE;
+      
+      $temp = explode("_", $file["name"]);
+      $test_cwid = trim($temp[0]);
+      $n = @trim($db->get_student_name($test_cwid));      
+      if (!$n) {
+        // Student not found!  Or at least their name wasn't found.
+        form_error("student_files", t("Sorry, the file named %file either does not begin with a CWID, or the CWID does not match
+                                        a current student.  Please try again.", array("%file" => $file["name"])));
+        return;
+      }
+      else {
+        // This IS a valid student.  Save the CWID with the form_state to make our lives easier later.
+        $form_state["student_files"][$c]["cwid"] = $test_cwid;
+        // Also save the filename where we have stripped off the CWID
+        $form_state["student_files"][$c]["name"] = str_replace($test_cwid . "_", "", $file["name"]);
+      }
+      
+      
+    }
+    
+    if ($is_empty) {
+      form_error("student_files", t("No files were selected.  Please try again."));
+      return;
+    }
+    
+  } // if student_method = filename
+    
+    
+  
+} // validate
+
+
+/**
+ * We can assume at this point that eveything is peachy, so let's get to uploading!
+ */
+function student_files_upload_any_student_files_form_submit($form, &$form_state) {
+    
+  $values = $form_state["values"];
+  $cwid = @trim($values["manual_cwid"]);
+  $method = $values["student_method"];
+  $access_type = $values["access_type"];
+
+  foreach ($form_state["student_files"] as $file) {
+    $use_cwid = $cwid;    
+    if ($method == "filename") {
+      $use_cwid = $file["cwid"];      
+    }
+    
+    $file["cwid"] = $use_cwid; // make sure its in there.
+    
+    // To get it to correctly save, we need to place a value into the $_FILES global array...
+    $file["access_type"] = $access_type;
+    // Now, call our upload handler.
+
+    student_files_handle_upload($use_cwid, FALSE, $file);  
+  } 
+  
+  // And that's it!  We are now finished. 
+    
+    
+} // submit handler
+
+
+
+
+
+
+
+
+
+/**
+ * Returns TRUE or FALSE if the user has access to download this particular student's file.
+ */
+function student_files_user_may_download_student_file($student_id, $fid) {
+  global $user;
+  
+  $files_array = student_files_get_files_for_student($student_id);
+  $file = @$files_array[$fid];
+  
+  if ($user->id == 1) return TRUE; // this is the admin user.
+  
+  // Is this a faculty only file, and the user is a student?
+  if ($file["access_type"] == "faculty" && $user->is_student == TRUE) {
+    return FALSE;  // nope, can't view it.
+  }
+  
+  // Is this a student, and this is a file for THEM?
+  if ($file["student_id"] == $user->cwid && $file["access_type"] != "faculty") {
+    return TRUE;
+  }
+  
+  // Does this user have access to download advisee's files and is this student someone they are allowed to advise?
+  if (user_has_permission("download_advising_student_files")) {
+    // Now, is this user allowed to view THIS student's advising history?
+    if (advise_can_access_view($student_id)) return TRUE;
+  }
+  
+  
+  
+  // All else failed, return FALSE
+  return FALSE;  
+  
+}
+
+
+/*
+function student_files_perm() {
+  return array(
+    "administer_student_files" => array(
+      "title" => t("Administer student files settings"),
+    ),
+    "upload_any_student_files" => array(
+      "title" => t("Upload any to student's files"),
+      "description" => t("This lets the user upload to any student's files, using the student file upload tool on the Main tab."),
+    ),
+    "upload_student_files" => array(
+      "title" => t("Upload student files"),
+      "description" => t("This permission lets the user upload student files to any student they can normally view the history of.
+                              Files appear on the student's History tab."),
+    ),
+    "delete_own_student_files" => array(
+      "title" => t("Delete own student files that the user uploaded themselves"),
+    ),
+    "delete_any_student_files" => array(
+      "title" => t("Delete ANY student files that were uploaded by anyone"),
+    ),    
+    "download_own_student_files" => array(
+      "title" => t("Download own student files"),
+      "description" => t("Download files for themselves (given to students, for example, but only if they are not faculty-only files.)"),
+    ),    
+    "download_advising_student_files" => array(
+      "title" => t("Download files for any student the user can 'View'"),
+      "description" => t("If this user is also allowed to view the student's View tab, History, etc, then they are allowed to download
+                          files for that student.  For example, the student is one of the user's advisees."),
+    ),    
+        
+  );
+}
+*/
+
+
+
+
+/**
+ * Returns TRUE or FALSE if the current user is allowed to delete the file.
+ */
+function student_files_user_may_delete_student_file($student_id, $fid) {
+
+  global $user;
+  
+  $files_array = student_files_get_files_for_student($student_id);
+  $file = @$files_array[$fid];
+
+  if ($user->id == 1) return TRUE; // this is the admin user.
+
+  // Does this user have access to delete ANY file?
+  if (user_has_permission("delete_any_student_files")) return TRUE;
+  
+  // Does this user have permission to delete OWN files, and they uploaded this file?
+  if (user_has_permission("delete_own_student_files")) {
+    if ($file["uploaded_by_cwid"] == $user->cwid) {
+      // Yes, this user is the one who uploaded this file, so yes, they can delete it.
+      return TRUE;
+    }
+  }
+  
+  
+  
+  // All else failed, so deny
+  return FALSE;
+  
+}
+
+
+
+
+
+/**
+ * This actually finds and downloads the file for the user, decrypting if necessary.
+ */
+function student_files_handle_download($student_id, $fid) {
+  
+  $files_array = student_files_get_files_for_student($student_id);
+  $file = @$files_array[$fid];
+  
+  if (!$file) {
+    display_not_found();
+    die;
+  }
+  
+  // Otherwise, now we proceed.
+  $file_contents = file_get_contents($file["filepath"] . "/" . $file["filename"]);
+  
+  if ($file["is_encrypted"] == 1 && function_exists("encryption_decrypt")) {
+    $file_contents = encryption_decrypt($file_contents);
+  }
+  
+  // Okay, now let's spit it out to the browser for download.
+  header('Content-type: ' . $file["filetype"]);
+  header('Content-Disposition: attachment; filename="' . $file["original_filename"]  . '"');
+  print $file_contents;
+
+  die;      
+  
+}
+
+
+
+function student_files_handle_delete($student_id, $fid) {
+  // Get the file's information so we can unlink it from the file system.
+  
+  $files_array = student_files_get_files_for_student($student_id);
+  $file = @$files_array[$fid];
+  
+  if (!$file) {
+    display_not_found();
+    die;
+  }
+  
+  // Otherwise, now we proceed.
+  if (!unlink($file["filepath"] . "/" . $file["filename"])) {
+    // Couldn't delete for some reason.
+    fp_add_message(t("Unable to delete file:") . " " . $file["filepath"] . "/" . $file["filename"] . t("
+                      Possibly a file permission issue on server, or file already deleted.  If this problem continues, contact
+                      your server administrator."), "error");
+    
+  }
+  else {
+    // We DID delete sucessfully, let's get rid of it from our db table.
+    db_query("DELETE FROM student_files WHERE fid = ?", $fid);
+    fp_add_message(t("File deleted successfully."));
+  }
+   
+  // Return to the history page.
+  fp_goto("history", "current_student_id=$student_id");
+  
+}
+
+
+
+
+
+
+
+/**
+ * Handles the upload of a file which we assume is located at $_FILES["student_file_upload_file"], or the provided $file array.
+ */
+function student_files_handle_upload($student_id, $bool_goto_history_when_done = TRUE, $file = array()) {
+  global $user;
+  $system_files_path = $GLOBALS["fp_system_settings"]["file_system_path"];
+  
+  $access_type = @$file["access_type"];
+  
+  if (count($file) == 0) {
+    $file = $_FILES["student_file_upload_file"];
+    $access_type = $_POST["access_type"];
+  }
+  
+  $files_path = variable_get("student_files_path", "$system_files_path/custom/files/student_files");
+  $sub_dir_pattern = variable_get("student_files_sub_dir_pattern", "%year/%student_cwid");
+  $filename_pattern = variable_get("student_files_filename_pattern", "%student_cwid.%random.%ext");
+  $encryption = variable_get("student_files_encryption", "yes");
+  
+  // Let's set up our eventual replacement pattern values.
+  $r = array();
+  $r["%year"] = date("Y");
+  $r["%student_cwid"] = $student_id;
+  $r["%timestamp"] = time();
+  $r["%random"] = fp_get_random_string(7);   
+  $original_filename = $file["name"];
+  $r["%original_filename"] = $original_filename;
+  $is_encrypted = 0;
+   
+  $type = $file["type"]; 
+  $tmp_name = $file["tmp_name"];    
+  
+  if (trim($tmp_name) == "") {
+    // No file was selected for upload!
+    fp_add_message(t("No file was selected for upload.  Please try again."), "error");
+    if ($bool_goto_history_when_done) {
+      fp_goto("history", "current_student_id=$student_id");
+    }
+    return;
+  }
+  
+  // Figure out the extension of the original filename.
+  $temp = explode(".", $original_filename);
+  $r["%ext"] = $temp[count($temp) - 1];
+  
+  // Make sure that this extension is allowed.
+  $allowed_extensions = csv_to_array(strtolower(variable_get("student_files_allowed_extensions", "txt,pdf,doc,docx,xls,xlsx,ppt,pptx,rtf,odt,jpg,jpeg,png,gif,zip,7z")));
+  if (!in_array(strtolower($r["%ext"]), $allowed_extensions)) {
+    // Meaning, this extension is not allowed!
+    fp_add_message(t("Sorry, the file's type/extension (%ext) is not allowed.  Please rename or select another file, then try again.", array("%ext" => $original_filename)), "error");
+    if ($bool_goto_history_when_done) {
+      fp_goto("history", "current_student_id=$student_id");
+    }
+    return;    
+  }
+  
+  
+  
+  
+  
+    
+  // If we will be encrypting this, then the ext is actually .txt.enc  or .pdf.enc.  So we know its encrypted.
+  if (function_exists("encryption_menu") && $encryption == "yes") {
+    $r["%ext"] .= ".enc";
+  }  
+  
+  // Okay, create the replaced strings...
+  $sub_dir = $filename = "";
+  foreach ($r as $k => $v) {
+    $sub_dir_pattern = str_replace($k, $v, $sub_dir_pattern);
+    $filename_pattern = str_replace($k, $v, $filename_pattern);
+  }
+
+  $sub_dir = $sub_dir_pattern;
+  $filename = $filename_pattern;
+
+  // Okay, now let's make sure we can create the sub_dir if it doesn't already exist.
+  if (!file_exists($files_path . "/" . $sub_dir)) {    
+    if (!mkdir($files_path . "/" . $sub_dir, 0777, TRUE)) {    
+      fp_add_message(t("Could not upload file because destination directory, %dir, could not be created or its parent
+                        directory is not writable.", array("%dir" => $files_path . "/" . $sub_dir)), "error");
+                        
+      return;
+    }
+  }
+
+  // If the filename is too long, shorten it.  Linux won't allow more than 255 chars, Windows its 260.  Let's be safe and stop at 170 chars + ext.
+  if (strlen($filename) > 170) {
+    $filename = substr($filename, 0, 170) . $r["%ext"];
+  }
+
+  // Make sure the filename doesn't already exist.  If it does, we add a little more randomness to the end of the file.
+  if (file_exists($files_path . "/" . $sub_dir . "/" . $filename)) {
+    while (true) {
+      $test_filename = $filename . "." . fp_get_random_string(5) . "." . $r["%ext"];
+      if (!file_exists($files_path . "/" . $sub_dir . "/" . $test_filename)) {
+        $filename = $test_filename;
+        break;
+      }
+    }
+  }
+
+  // Okay, if we are here we can proceed with the copy.
+  
+  // if encryption is enabled, we must use the encryption module to do this instead of a simple copy.
+  if (function_exists("encryption_menu") && $encryption == "yes") {
+    // Yep, we should encrypt this file.
+    
+    // We need to do that by loading the file into memory, then getting the encrypted version, then writing it
+    // out to the destination.
+    $file_contents = file_get_contents($tmp_name);
+    $enc_file_contents = encryption_encrypt($file_contents);
+    if (!file_put_contents($files_path . "/" . $sub_dir . "/" . $filename, $enc_file_contents)) {
+      fp_add_message(t("Could not upload file.  Possibly because of permission issues on the destination directory,
+                        the disk is full, or some other reason."), "error");
+      return;
+    }
+    
+    $is_encrypted = 1;
+    
+  }
+  else {
+       
+    // No encryption-- just copy it the traditional way.
+    
+    if (!copy($tmp_name, $files_path . "/" . $sub_dir . "/" . $filename)) {
+      fp_add_message(t("Could not upload file.  Possibly because of permission issues on the destination directory,
+                        the disk is full, or some other reason."), "error");
+      return;
+    }    
+  }  
+  
+ 
+  // Okay, write to our database table our values.
+  db_query("INSERT INTO student_files(student_id, original_filename, filepath, filename, filetype, uploaded_by_uid, uploaded_by_cwid, is_encrypted, posted, access_type)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $student_id, $original_filename, $files_path . '/' . $sub_dir, $filename, $type,
+                                                 $user->id, $user->cwid, $is_encrypted, time(), $access_type);
+  
+  // Go back to history tab.
+  fp_add_message(t("File %ofile was uploaded successfully for student %cwid.", array("%ofile" => $original_filename, "%cwid" => $student_id)));
+  if ($bool_goto_history_when_done) {
+    fp_goto("history", "current_student_id=$student_id");
+  }
+}
+
+
+
+function student_files_settings_form() {
+  $form = array();
+  
+  $files_path = $GLOBALS["fp_system_settings"]["file_system_path"];
+  
+  $form["student_files_path"] = array(
+    "label" => t("Absolute system path to where student files are located/uploaded to:"),
+    "type" => "textfield",
+    "size" => 80,
+    "maxlength" => 1000,
+    "value" => variable_get("student_files_path", "$files_path/custom/files/student_files"),
+    "description" => t("This is a directory which must be writable by the webserver.  When this module
+                        was installed, %path was created automatically as the default location, but you
+                        may set this to any path which already exists and is writable by the server.", array("%path" => "$files_path/custom/files/student_files")),
+  );
+  
+  $form["student_files_allowed_extensions"] = array(
+    "label" => t("Allowed file extensions (CSV):"),
+    "type" => "textfield",
+    "size" => 80,
+    "maxlength" => 1000,
+    "value" => strtolower(variable_get("student_files_allowed_extensions", "txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")),
+    "description" => t("Enter the allowed file extensions, separated by commas (no dots!), that are allowed to be uploaded.<br>Ex:
+                          <br><em>&nbsp; &nbsp; txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z</em>"), 
+  );
+  
+  
+  
+  
+  
+  $form["student_files_sub_dir_pattern"] = array(
+    "type" => "textfield",
+    "label" => t("Sub directory pattern:"),
+    "value" => variable_get("student_files_sub_dir_pattern", "%year/%student_cwid"),
+    "description" => t("Enter the pattern of the sub directories for uploaded files.
+                        <br> Ex:  %year/%student_cwid   would places files in /2006/12345  under the above
+                        student files directory for a student with CWID 12345.
+                        <br>Available replacement patterns:
+                        <ul>
+                          <li>%year - the year the file was uploaded.</li>
+                          <li>%timestamp - the unix timstamp the file was uploaded.</li>                          
+                          <li>%student_cwid - the CWID of the student the file belongs to.</li>
+                          <li>%random - a random series of numbers and letters.</li>
+                        </ul>
+                        You may also enter static directory names like 'files' or 'uploads'.  If unsure what to enter, leave blank."),
+  );
+
+
+  $form["student_files_filename_pattern"] = array(
+    "type" => "textfield",
+    "label" => t("Saved server filename pattern:"),
+    "value" => variable_get("student_files_filename_pattern", "%student_cwid.%random.%ext"),
+    "description" => t("Enter the pattern for the stored files on the server.
+                        <br> Ex:  %student_cwid.%random.%ext   might create a file named 12345.hgyK76.pdf  under the above
+                        student files directory for a student with CWID 12345.
+                        If there are files with identical names being uploaded, the new file will automatically be given a random string
+                        to ensure nothing is overwritten.
+                        <br><b>Recommended:</b> It is recommended you do not use the original filename, especially if the files might contain
+                        sensitive information.  The use of the %random replacement pattern is recommended.
+                        <br>Available replacement patterns:
+                        <ul>
+                          <li>%year - the year the file was uploaded.</li>
+                          <li>%timestamp - the unix timstamp the file was uploaded.</li>
+                          <li>%student_cwid - the CWID of the student the file belongs to.</li>
+                          <li>%random - a random series of numbers and letters.</li>
+                          <li>%original_filename - The original filename, including extension, of the uploaded file.</li>
+                          <li>%ext - The original filename extension from the uploaded file.</li>
+                        </ul>
+                        You may also enter static directory names like 'files' or 'uploads'.  If unsure what to enter, leave blank."),
+  );
+  
+  if (function_exists("encryption_menu")) {
+    // The encryption module is intalled.  Let's add extra settings for it.
+    
+    
+    $form["student_files_encryption"] = array(
+      "type" => "select",
+      "label" => "Encrypt uploaded files?",
+      "options" => array("yes" => t("Yes"), "no" => t("No")),
+      "value" => variable_get("student_files_encryption", "yes"),
+      "description" => t("Since you have installed the 'encryption' module, when files are uploaded
+                          they can be automatically encrypted before being saved to the server.  Do you wish
+                          to do this?  If so, the extension \".enc\" will be added to the end of encrypted files.
+                          When files are downloaded through the Student Files module, they will be automatically decrypted
+                          for the end user."),
+      "prefix" => "<fieldset><legend>" . t("Encryption Settings") . "</legend>",
+      "suffix" => "</fieldset>",
+    );
+    
+  }
+  
+  
+  
+  
+  return $form;
+}
+
+/**
+ * We mainly want to make sure nothing got entered in an incorrect format here.
+ */
+function student_files_settings_form_validate($form, &$form_state) {
+  $values = $form_state["values"];
+  
+  // Make sure the absolute system path actually exists.
+  $student_files_path = $values["student_files_path"];
+  
+  // Remove any trailing slashes from the student_files_path.
+  $student_files_path = rtrim($student_files_path, "/");
+  $form_state["values"]["student_files_path"] = $student_files_path;
+   
+  if (!file_exists($student_files_path)) {
+    form_error("student_files_path", t("The student files path entered does not exist yet, or the system does not have access
+                                        to view it.  Make sure it exists and the web server user has file access to read and write
+                                        to it."));
+    return;
+  }
+  
+  // Make sure the sub directory pattern doesn't have beginning or trailing slashes.
+  $form_state["values"]["student_files_sub_dir_pattern"] = rtrim($form_state["values"]["student_files_sub_dir_pattern"], "/");
+  $form_state["values"]["student_files_sub_dir_pattern"] = ltrim($form_state["values"]["student_files_sub_dir_pattern"], "/");
+  
+  // Make sure there are no /'s in the server filename pattern.
+  if (strstr($form_state["values"]["student_files_filename_pattern"], "/")) {
+    form_error("student_files_filename_pattern", t("Do not enter forward slashes (/) in the server filename pattern.  If you wish to place
+                                                    files in subdirectories, use the sub directory pattern field."));
+    return;
+  }
+  
+  
+  
+  
+}
+
+
+ 
+ 
+/**
+ * Implements hook_perm
+ */ 
+function student_files_perm() {
+  return array(
+    "administer_student_files" => array(
+      "title" => t("Administer student files settings"),
+    ),
+    "upload_any_student_files" => array(
+      "title" => t("Upload any to student's files"),
+      "description" => t("This lets the user upload to any student's files, using the student file upload tool on the Main tab."),
+    ),
+    "upload_student_files" => array(
+      "title" => t("Upload student files"),
+      "description" => t("This permission lets the user upload student files to any student they can normally view the history of.
+                              Files appear on the student's History tab."),
+    ),
+    "delete_own_student_files" => array(
+      "title" => t("Delete own student files that the user uploaded themselves"),
+    ),
+    "delete_any_student_files" => array(
+      "title" => t("Delete ANY student files that were uploaded by anyone"),
+    ),
+    "download_advising_student_files" => array(
+      "title" => t("Download files for any student the user can 'View'"),
+      "description" => t("If this user is also allowed to view the student's View tab, History, etc, then they are allowed to download
+                          files for that student.  For example, the student is one of the user's advisees."),
+    ),    
+        
+  );
+}
+
+
+/**
+ * Implememnt hook_content_alter
+ */
+function student_files_content_alter(&$render, $content_id) {
+  
+  // We want to place our files area under the Comment History on the history tab.
+  
+  if ($content_id == "advise_history_right_column") {
+    
+    // Add our css.
+    fp_add_css(fp_get_module_path("student_files") . "/css/student_files.css");
+    
+    $html = "";
+     
+    $student_id = $render["#student_id"];
+    $files_array = student_files_get_files_for_student($student_id);
+    
+    $html .= "<div class='student-files-file-list'>
+                <table border='0' width='100%' class='tenpt' cellpadding='0' cellspacing='0'>";
+    
+    $is_empty = TRUE;
+    foreach ($files_array as $cur) {
+      
+      $fid = $cur["fid"]; // file id
+      $posted = format_date(convert_time($cur["posted"]), "", "n/d/Y");
+      $fac_name = fp_get_faculty_name($cur["uploaded_by_cwid"]);
+
+      // Is this user allowed to see this file at all?  (ie, this is a student and the file is for faculty only)
+      if (!student_files_user_may_download_student_file($student_id, $fid)) {
+        continue;
+      }
+      
+      $extra_classes = "";
+      if (strstr($cur["filetype"], "image")) $extra_classes .= " student-files-file-image ";
+      if (strstr($cur["filetype"], "pdf")) $extra_classes .= " student-files-file-pdf ";
+      if (strstr($cur["filetype"], "compressed")) $extra_classes .= " student-files-file-compressed ";
+      if (strstr($cur["original_filename"], ".pdf")) $extra_classes .= " student-files-file-pdf ";
+      if (strstr($cur["original_filename"], ".doc")) $extra_classes .= " student-files-file-word ";
+      if (strstr($cur["original_filename"], ".ppt")) $extra_classes .= " student-files-file-ppt ";
+      if (strstr($cur["original_filename"], ".xls")) $extra_classes .= " student-files-file-xls ";
+      if (strstr($cur["original_filename"], ".zip")) $extra_classes .= " student-files-file-compressed ";
+                  
+                  
+      $row_class = "";
+      $row_class .= "student-files-access-type-" . $cur["access_type"];                  
+                  
+      $del_link = "";
+      if (student_files_user_may_delete_student_file($student_id, $fid)) {
+        $del_link = "<span class='student-files-delete'>" . fp_get_js_confirm_link("Are you sure you wish to delete this file? This action cannot be undone.", 
+                            "window.location=\"" . fp_url("student-files/handle-delete/$student_id/$fid") . "\"", "&nbsp;") . "</span>";
+      }
+            
+      $html .= "<tr class='$row_class'>
+                  <td valign='top' width='50%'>
+                    <div class='student-files-file $extra_classes'>
+                      " . l($cur["original_filename"], "student-files/handle-download/$student_id/$fid") . "</div>
+                  </td>
+                  <td valign='top'>
+                    <div class='student-files-posted'>$posted</div>
+                    <div class='student-files-fac-name'>$fac_name</div>
+                  </td>
+                  <td valign='top'>
+                    $del_link
+                  </td>
+                </tr>";
+      
+
+      $is_empty = FALSE;
+    }
+
+    if ($is_empty) {
+      $html .= "No files have been uploaded for this student yet.";
+    }
+    
+    $html .= "</table>
+              </div>";
+
+    // Create a region for uploading a new file.
+    // Only if they have permission!
+    $upload_form = "";
+    if (user_has_permission("upload_student_files")) {
+        
+      $form = fp_render_form("student_files_little_upload_form", "normal", $student_id);
+  
+      $upload_form = fp_render_c_fieldset($form, t("Click to upload a new file"), TRUE);
+      
+      /*
+      
+      $upload_form = "<form class='tenpt' style='border: 1px solid #ccc; padding: 3px; margin: 5px;'
+                          action='" . fp_url("student-files/handle-upload/$student_id", "current_student_id=$student_id") . "' 
+                          method='POST' enctype='multipart/form-data'>
+                      <b>" . t("Upload a new file:") . "</b>
+                      <input type='file' name='student_file_upload_file' id='student_file_upload_file'>
+                      <br><b>" . t("Visible to:") . "</b>
+                      
+                        &nbsp;<label><input type='radio' value='public' name='access_type'>Anyone (incl. students)</label>
+                        <label><input type='radio' value='faculty' name='access_type' checked=checked>Faculty/Staff</label>
+                      <div style='text-align: right; padding-top: 10px;'>
+                        <input type='submit' value='Upload' onClick='showUpdate(false);'>
+                      </div>
+                     </form>";   
+  
+       * 
+       */
+        
+    }
+
+    
+    $render["student_files"] = array(
+      "value" => "<br>
+                  " . fp_render_section_title(t("Student Files")) . "              
+                  $upload_form
+                  $html",
+    );
+    
+    // Since we rendered a form, make sure we aren't showing the title on screen afterwards.
+    fp_show_title(FALSE);
+    
+  }
+  
+  
+} // hook_content_alter
+
+
+function student_files_little_upload_form($student_id = "") {
+  $form = array();
+  
+  $form["#attributes"] = array("enctype" => 'multipart/form-data');  // allow the form itself to submit files.
+  
+  
+  $form["student_file_upload_file"] = array(
+    "type" => "file",   
+    "description" => t("<b>Allowed files:</b> <em>%ext</em>", array("%ext" => strtolower(variable_get("student_files_allowed_extensions", "txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")))),   
+  );
+  
+  $form["access_type"] = array(
+    "type" => "radios",
+    "label" => t("Visible to:"),
+    "options" => array("public" => t("Anyone (incl students)"), "faculty" => t("Faculty/Staff")),
+    "value" => "faculty",    
+  );
+  
+  $form["student_id"] = array(
+    "type" => "hidden",
+    "value" => $student_id,
+  );
+
+  $form["current_student_id"] = array(
+    "type" => "hidden",
+    "value" => $student_id,
+  );
+
+  
+  $form["submit_btn"] = array(
+    "type" => "submit",
+    "value" => t("Upload"),
+    "attributes" => array("onClick" => "showUpdate(false);"),
+  );
+  
+  return $form;
+}
+
+
+function student_files_little_upload_form_submit($form, $form_state) {
+  
+  $_POST["access_type"] = $form_state["values"]["access_type"];
+ 
+  // Send it on along to be uploaded. 
+  student_files_handle_upload($form_state["values"]["student_id"], FALSE);
+  
+}
+
+
+
+
+/**
+ * Return an array of the files which belong to this student.
+ */
+function student_files_get_files_for_student($student_id) {
+  $rtn = array();
+  $res = db_query("SELECT * FROM student_files 
+                   WHERE student_id = ?
+                   ORDER BY posted DESC ", $student_id); 
+                   
+  while ($cur = db_fetch_array($res)) {
+    $rtn[$cur["fid"]] = $cur;
+  }
+
+  return $rtn;
+
+}
+
+

@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * This file should contain only hooks relating to installing, enabling, disabling, and uninstalling this module.
+ *  
+*/
+
+
+/**
+ * Hook install.  Called when the module is installed on the admin modules page.
+ * 
+ */
+function engagements_install() {
+
+  $q = "
+CREATE TABLE `content__engagement` (
+  `cid` int(10) unsigned NOT NULL,
+  `vid` int(10) unsigned NOT NULL,
+  `field__student_id` varchar(255) DEFAULT NULL,
+  `field__faculty_id` varchar(255) DEFAULT NULL,
+  `field__engagement_type` varchar(255) DEFAULT NULL,
+  `field__engagement_msg` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `field__direction` varchar(255)  DEFAULT NULL,
+  `field__phone_outcome` varchar(255) DEFAULT NULL,
+  `field__activity_datetime` datetime DEFAULT NULL,
+  `field__visibility` varchar(255) DEFAULT NULL,
+  `field__attachment` varchar(255) DEFAULT NULL,
+  `field__manual_entry` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`vid`),
+  KEY `cid` (`cid`),
+  KEY `field__student_id` (`field__student_id`),
+  KEY `field__faculty_id` (`field__faculty_id`),
+  KEY `field__engagement_type` (`field__engagement_type`),
+  KEY `field__direction` (`field__direction`),
+  KEY `field__phone_outcome` (`field__phone_outcome`),
+  KEY `field__activity_datetime` (`field__activity_datetime`),
+  KEY `field__visibility` (`field__visibility`),
+  KEY `field__attachment` (`field__attachment`),
+  KEY `field__manual_entry` (`field__manual_entry`)
+);  
+  ";
+  db_query($q);
+  
+
+
+    
+}
+

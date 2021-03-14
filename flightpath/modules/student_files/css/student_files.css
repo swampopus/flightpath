@@ -1,0 +1,79 @@
+/**
+ *   @file
+ * This is the main CSS file which goes with the student_files module.
+ */
+
+.student-files-file-list {
+  font-size: 10pt;
+  line-height: 1.5em;
+}
+
+.student-files-file a {
+  display: inline-block;
+  text-decoration: none;
+  background: url(icons/page_white.png) no-repeat top left;
+  padding-left: 20px;
+  min-height: 16px;
+   
+}
+
+.student-files-delete a {
+  display: inline-block;
+  text-decoration: none;
+  background: url(icons/delete.png) no-repeat top left;
+  min-width: 16px;
+  min-height: 16px;
+   
+}
+
+
+
+.student-files-file a:hover {
+  text-decoration: underline;
+}
+
+.student-files-file-word a {
+  background: url(icons/page_white_word.png) no-repeat top left;
+}
+
+.student-files-file-pdf a {
+  background: url(icons/page_white_acrobat.png) no-repeat top left;
+}
+
+.student-files-file-compressed a {
+  background: url(icons/page_white_compressed.png) no-repeat top left;
+}
+
+.student-files-file-image a {
+  background: url(icons/page_white_picture.png) no-repeat top left;
+}
+
+.student-files-file-ppt a {
+  background: url(icons/page_white_powerpoint.png) no-repeat top left;
+}
+
+.student-files-file-xls a {
+  background: url(icons/page_white_excel.png) no-repeat top left;
+}
+
+
+/* The little form on the history tab */
+
+#fp-form-student_files_little_upload_form #element-inner-wrapper-access_type div,
+#fp-form-student_files_little_upload_form #element-inner-wrapper-access_type label  {
+  font-size: 9pt;
+  display: inline;
+}
+
+#fp-form-student_files_little_upload_form .form-element {
+  margin-bottom: 0;
+}
+
+#fp-form-student_files_little_upload_form #element-inner-wrapper-access_type {
+  margin-bottom: 10px;
+}
+
+
+
+
+

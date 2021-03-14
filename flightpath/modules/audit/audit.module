@@ -1,0 +1,733 @@
+<?php
+/**
+ * @file
+ * This is the Audit module, which provides functionality relating to degree audits.
+ */
+
+
+/**
+ * Implementation of hook_menu
+ *  
+ */                     
+function audit_menu() {                                    
+             
+  $items = array();
+
+  $items["audit"] = array(                               
+    "title" => "Audit",
+    "page_callback" => "audit_display_audit",    
+    "access_callback" => "audit_can_access_audit",  //should the audit tab show up right now, for this user?
+    "tab_family" => "system",
+    "page_settings" => array (
+      "display_currently_advising" => TRUE,
+    ),                                                                       
+    "weight" => 100,                        
+    "type" => MENU_TYPE_TAB,                                                                                                                  
+  );                                                                              
+                                 
+  // Settings screen
+  $items["admin/config/audit-settings"] = array(
+    "title" => "Audit settings",                                                
+    "description" => "Configure settings for the Audit tab",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("audit_settings_form", "system_settings"),
+    "access_arguments" => array("administer_audit"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_banner_is_link" => TRUE,                                  
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(                    
+        0 => array(                                               
+          "text" => "Back to main menu",                   
+          "path" => "admin-tools/admin",                                                           
+        ),                                                                         
+      ),                                                               
+    ),    
+    "type" => MENU_TYPE_NORMAL_ITEM,            
+    "tab_parent" => "admin-tools/admin",    
+  );
+                                                     
+                 
+  // The edit-approval popup...
+  // audit/popup-edit-approval/TYPE/STUDENT CWID                                             
+  $items["audit/popup-edit-approval/%/%"] = array(
+    "title" => "Edit Approval",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("audit_popup_edit_approval_form", "normal", 2, 3),
+    "access_arguments" => array("edit_audit_approvals"),
+    "page_settings" => array(
+      "page_is_popup" => TRUE,
+      "page_hide_report_error" => TRUE,
+    ),   
+    "type" => MENU_TYPE_CALLBACK,
+  );    
+  
+  
+                             
+  return $items;
+  
+}
+
+                                                                                        
+                                                                                
+function audit_settings_form() {
+  $form = array();
+           
+  
+  $form["audit_approval_types"] = array(
+    "label" => t("Enter approval type definitions, one per line:"),
+    "type" => "textarea",
+    "rows" => 10,
+    "value" => variable_get("audit_approval_types", "coursework ~ Coursework\nmajor_gpa ~ Major GPA\ngraduation_gpa ~ Graduation GPA"),    
+    "description" => t("Enter definitions for the approval types, one per line, like so:
+                        <br>&nbsp;&nbsp;&nbsp; TYPE ~ Title ~ Description
+                      <br>- The TYPE must be unique, and contain ONLY letters, numbers, and underscore (_), and must be no more than 60 characters long.  Ex: coursework  
+                      <br>- The Title should be relatively short, but has no character limit.  Ex: Coursework Requirement
+                      <br>- The Description can be any length, but contain NO line breaks.  It can, however, contain HTML.
+                      <br>
+                      <b>You may skip lines between definitions.</b>
+                      <br>Example:
+                      <br>
+                      &nbsp;&nbsp;&nbsp; coursework ~ Coursework ~ The student must complete all coursework.
+                      <br>&nbsp;&nbsp;&nbsp; major_gpa ~ Major GPA ~ The student's major GPA should be at least 2.5.                      
+                      <br>&nbsp;&nbsp;&nbsp; graduation_gpa ~ Graduation GPA ~ The student's graduation GPA must be at least 2.5."),
+  );
+  
+//array("g" => "General Requirements", "c" => "Core", "m" => "Major", "degree" => "Degree")  
+
+  $school_initials = variable_get("school_initials", "ULM");
+
+  $form["audit_requirement_types"] = array(
+    "label" => t("Enter requirement types & labels to display on Audit tab, one per line:"),
+    "type" => "textarea",
+    "rows" => 15,
+    "value" => variable_get("audit_requirement_types", "g ~ General Requirements\nc ~ Core\nm ~ Major\ndegree ~ Degree"),    
+    "description" => "Enter definitions for the requirement types to display, one per line, like so:
+                        <br>&nbsp;&nbsp;&nbsp; type_code ~ Label
+                      <br>The type_code is one of the 'requirement types' that a course can be defined as. Ex: m, c, etc. 
+                      <br><b>Important:</b> The pseudo-code 'degree' must be defined, and it will display totals for the entire degree.
+                      <br><b>Important:</b> To see ONLY local (non-transfer) courses, add _local to the end of the type code.  Ex:  c_local for Core, not fulfilled by transfer credits.
+                      <br>
+                      For ex:
+                      <br>
+                      &nbsp;&nbsp;&nbsp;g ~ General Requirements
+                      <br>&nbsp;&nbsp;&nbsp;c ~ Core
+                      <br>&nbsp;&nbsp;&nbsp;m ~ Major
+                      <br>&nbsp;&nbsp;&nbsp;degree ~ Degree
+                      <br>&nbsp;&nbsp;&nbsp;c_local ~ Core ($school_initials Courses)
+                      <br>&nbsp;&nbsp;&nbsp;degree_local ~ Degree ($school_initials Courses)
+                      <br>
+                      <b>To insert a BLANK row</b>, for appearances on the Audit tab, 
+                         give the entry a unique type_code, and set the label to BLANK (all caps).
+                         Ex: 
+                         <br> &nbsp;&nbsp;&nbsp;BLANK_1 ~ BLANK
+                         <br> &nbsp;&nbsp;&nbsp;BLANK_2 ~ BLANK
+                         ",
+                      
+  );
+
+
+
+  
+  
+  
+  return $form;
+}
+
+function audit_settings_form_validate($form, $form_state) {
+  
+  // The main thing I want to do here is make sure that the key_codes are acceptable machine names.
+  $val = $form_state["values"]["audit_approval_types"];
+  $lines = explode("\n", $val);
+  foreach ($lines as $line) {
+    if (trim($line) == "") continue;
+    $temp = explode("~", $line);
+    $key = trim($temp[0]);
+    $desc = trim($temp[1]);
+    
+    // Make sure key and desc both have values.
+    if (strlen($key) < 2 || strlen($desc) < 2) {
+      form_error("audit_approval_types", t("KEY_CODEs and Descriptions must be at least 2 characters long.  Please revise."));
+      return;
+    }
+    
+    if (strlen($key) > 40) {
+      form_error("audit_approval_types", t("KEY_CODEs may not be longer than 40 characters.  Please revise."));
+      return;      
+    }
+
+    // Make sure that key_code is machine name.
+    if (fp_get_machine_readable($key) != $key) {
+      form_error("audit_approval_types", t("KEY_CODEs must only contain letters, numbers, and underscores (_).  Please revise."));
+      return;      
+    }
+    
+       
+  }
+  
+  
+}
+
+/**
+ * Return an assoc array of approval types.
+ *
+ */
+function audit_get_approval_types() {
+  $rtn = array();
+  
+  $val = variable_get("audit_approval_types", "coursework ~ Coursework\nmajor_gpa ~ Major GPA\ngraduation_gpa ~ Graduation GPA");
+  $lines = explode("\n", $val);
+  foreach ($lines as $line) {
+    if (trim($line) == "") continue;
+    $temp = explode("~", $line);
+    $key = trim($temp[0]);
+    $title = trim($temp[1]);
+    @$desc = trim($temp[2]);
+    
+    $rtn[$key] = array (
+      "title" => $title,
+      "description" => $desc,
+    );
+    
+  }
+  
+  return $rtn;
+}
+
+
+function audit_get_approval_record($student_id, $approval_type) {
+  $res = db_query("SELECT * FROM audit_approvals
+                                    WHERE student_id = '?'
+                                    AND approval_type = '?' ", $student_id, $approval_type);
+
+  $cur = db_fetch_array($res);
+  return $cur;
+}
+
+
+
+/**
+ * Returns a simple array of the available approval options in the popup.
+ * 
+ *
+ */
+function audit_get_approval_options() {
+  return array("not_complete" => t("Not Complete"), "in_progress" => t("In Progress"), "complete" => t("Complete"), "not_applicable" => t("Not Applicable"));
+                 
+}                                      
+
+
+
+/**
+ * This is the actual form that will be used to change an audit approval for a student.
+ *
+ * @param unknown_type $approval_type
+ * @param unknown_type $student_id
+ */
+function audit_popup_edit_approval_form($approval_type, $student_id) {
+  $form = array();
+
+  fp_add_css(fp_get_module_path("audit") . "/css/audit.css");  
+  fp_add_js(fp_get_module_path("audit") . "/js/audit.js");  
+  
+  
+  $types = audit_get_approval_types();
+  $details = $types[$approval_type];                                                                        
+  $approval_type_title = $details["title"];
+  if ($approval_type_title == "") $approval_type_title = $approval_type;
+  
+  
+  fp_set_title("Edit approval for " . fp_get_student_name($student_id) . " ($student_id)");
+  
+  // Get current value from the database
+  $cur = audit_get_approval_record($student_id, $approval_type);
+  $current_value = $cur["approval_value"];
+  
+  if ($current_value == "") $current_value = "not_complete";
+  
+  $options = audit_get_approval_options();
+  $options["in_progress"] = t("In Progress - will be completed when the student's enrolled courses are completed");
+  
+  $form["approval"] = array(
+    "type" => "radios",
+    "label" => t("Please set the completion status for this type:<br><em style='padding-left: 20px;'>$approval_type_title</em>"),
+    "options" => $options,
+    "value" => $current_value,
+    "no_please_select" => TRUE,
+    /*
+    "description" => "Legend:<div style='padding-left: 10px;'>Complete - The requirement has been completed.
+                              <br>Not Complete - The requirement has not been completed yet.
+                              <br>In Progress - The requirement will be completed when the student's enrolled courses are completed.",
+                              */
+  );
+  
+  $form["comment"] = array(
+    "type" => "textarea",
+    "label" => t("Optional comment:"),
+    "rows" => 3, 
+    "attributes" => array("style" => "width: 90%;"),
+    "description" => t("When you save this form, a brief entry will be made to the audit comment history.
+                        If you wish, you may add an optional comment at this time to explain your
+                        selection."),
+  );
+  
+  
+  $form["submit_btn"] = array(
+    "type" => "submit",
+    "value" => "Submit",
+  );
+  
+
+  $form["#attributes"] = array("onSubmit" => "return auditPopupEditApprovalFormSubmit(\"$approval_type\",\"$student_id\");");
+  
+  return $form;
+}
+
+
+
+
+
+function audit_display_audit() {
+  global $current_student_id, $user, $fp, $degree_plan, $screen;
+  
+  fp_set_title('');
+  
+  $rtn = "";
+
+  fp_add_css(fp_get_module_path("comments") . "/css/comments.css");
+  fp_add_css(fp_get_module_path("audit") . "/css/audit.css");  
+  
+  fp_add_js(fp_get_module_path("audit") . "/js/audit.js");  
+  
+  
+  // We will re-use code from the advise module, to pre-initialize all of our information for the student.    
+  $temp = advise_display_view();
+  // We will get rid of the sub tabs and other values we've added.
+  fp_set_page_sub_tabs(array());
+  $screen->screen_mode = "not_advising";  // do this so the mini profile doesn't get any options added to it from the advise module.  
+  
+
+  $student = $fp->student;
+  
+  
+  
+  // Get this from settings  
+  $audit_requirement_types = array();
+  $tlines = explode("\n", variable_get("audit_requirement_types", "g ~ General Requirements\nc ~ Core\nm ~ Major\ndegree ~ Degree"));
+  foreach ($tlines as $tline) {
+    $temp = explode("~", trim($tline));      
+    if (trim($temp[0]) != "") {
+      $audit_requirement_types[trim($temp[0])] = trim($temp[1]);
+    }
+  }
+
+  $pol = "";
+  
+  $rtn .= " <table class='audit-table'>  ";
+  
+  $degree_plan->calculate_progress_hours(TRUE);
+  $degree_plan->calculate_progress_quality_points(TRUE);
+  
+  foreach ($degree_plan->gpa_calculations as $gpa_degree_id => $gpa_details) {
+
+    if ($gpa_degree_id == 0) {
+      // This is "overall"
+      $rtn .= "<tr class='audit-req audit-req-new-degree-title audit-row-$pol audit-req-degree-title-OVERALL'>
+                    <td colspan='3'>" . t("Overall:") . "</td>
+                 </tr>";
+        $pol = "";  // start over after a blank row      
+    }
+    else {
+      // This is a degree.
+      
+      $dtitle = fp_get_degree_title($gpa_degree_id, TRUE, TRUE);
+      $rtn .= "<tr class='audit-req audit-req-new-degree-title audit-row-$pol audit-req-degree-title-member-degree'>
+                    <td colspan='3'>$dtitle:</td>
+                 </tr>";
+        $pol = "";  // start over after a blank row 
+    }
+    
+    foreach ($audit_requirement_types as $type => $desc) {
+      $gpa = "";
+      if ($pol != "even") {
+        $pol = "even";
+      }
+      else {
+        $pol = "odd";
+      }
+      
+      
+      
+      if (@$degree_plan->gpa_calculations[$gpa_degree_id][$type]["qpts_hours"] > 0) {
+        $gpa = fp_truncate_decimals($degree_plan->gpa_calculations[$gpa_degree_id][$type]["qpts"] / $degree_plan->gpa_calculations[$gpa_degree_id][$type]["qpts_hours"], 3);
+      }
+  
+      $percent = "0";
+      if (@$degree_plan->gpa_calculations[$gpa_degree_id][$type]["total_hours"] > 0) {
+        $percent = fp_truncate_decimals(($degree_plan->gpa_calculations[$gpa_degree_id][$type]["fulfilled_hours"] / $degree_plan->gpa_calculations[$gpa_degree_id][$type]["total_hours"]) * 100, 2);
+      }   
+      
+      
+      // Are we trying to judt have a blank row?
+      if ($desc == "BLANK") {  // if description is BLANK, then yes, make this row blank.
+        $rtn .= "<tr class='audit-req audit-req-BLANK audit-row-$pol audit-row-blank'>
+                    <td colspan='3'>&nbsp; &nbsp;</td>
+                 </tr>";
+        $pol = "";  // start over after a blank row
+        continue;
+      }
+      
+      
+      // Okay, let's display our row normally now:    
+    
+      $rtn .= "    
+        <tr class='audit-req audit-req-$type audit-row-$pol'>
+          <td width='25%'>$desc:</td>
+          <td class='audit-req-hours-percent'><span class='audit-hours'><span class='audit-completed-hours'>{$degree_plan->gpa_calculations[$gpa_degree_id][$type]["fulfilled_hours"]}</span> 
+                    / <span class='audit-total-hours'>{$degree_plan->gpa_calculations[$gpa_degree_id][$type]["total_hours"]} hrs</span>
+               </span>
+                      <span class='audit-percent-completed'>($percent%)</span>
+          </td> 
+          <td class='audit-req-gpa'>GPA: $gpa ({$degree_plan->gpa_calculations[$gpa_degree_id][$type]["qpts"]} qpts 
+                    / {$degree_plan->gpa_calculations[$gpa_degree_id][$type]["qpts_hours"]} qhrs)</td>
+            
+        </tr>";
+      
+      
+    } // foreach audit_requirements
+    
+  } // foreach degreeplan->gpa_calculations
+  
+  
+  
+  $rtn .= "    
+    <tr>
+      <td valign='top'>Footnotes & Messages:</td>
+      <td colspan='2'><table border='0' width='100%'>
+      " . $screen->build_footnotes(FALSE) . "
+          </table>
+      </td>
+    </tr>
+    ";
+  
+        
+    $rtn .= "
+    <tr>
+      <td valign='top'>Approvals:</td>
+      <td colspan='2'>
+        <table border='0' class='approvals' width='100%'>
+      ";
+
+    // Get approval types from our setting
+    $types = audit_get_approval_types();
+    $options = audit_get_approval_options();
+    
+    // Go through our types, displaying completed or not completed lines...
+    foreach ($types as $approval_type => $approval_details) {
+    
+      $approval_title = $approval_details["title"];
+      $approval_description = $approval_details["description"];
+    
+
+      
+      $cur = audit_get_approval_record($student->student_id, $approval_type);
+      
+      $dt = date("m/d/Y", $cur["posted"]);
+      $faculty_name = fp_get_faculty_name($cur["faculty_id"]);
+
+      if ($cur["approval_value"] == "") {
+        $cur["approval_value"] = "not_complete";
+        $dt = $faculty_name = " -- ";
+      }
+        
+      $approval_value_desc = $options[$cur["approval_value"]];
+      if ($approval_value_desc == "") $approval_value_desc = $cur["approval_value"];
+
+      $rtn .= "<tr class='audit-approval-row audit-approval-row-" . $cur["approval_value"] . "'>";
+            
+      $rtn .= "
+        <td><div class='audit-approval-title audit-approval-" . $cur["approval_value"] . "'>$approval_title</div>
+        <td class='audit-approval-value audit-approval-desc-" . $cur["approval_value"] . "'>" . $approval_value_desc . "</td>
+        <td class='audit-approval-datetime'>" . $dt . "</td>
+        <td class='audit-approval-faculty'>" . $faculty_name . "</td>";
+        
+      $rtn .= "      
+              <td>
+                  <a class='approval-edit' href='javascript:popupSmallIframeDialog(\"" . fp_url("audit/popup-edit-approval/$approval_type/$student->student_id") . "\",\"" . t("Edit Approval") . "\",\"\");'><i class='fa fa-pencil'></i> Edit</a>
+              </td>
+          ";
+    
+      $rtn .= "</tr>";
+      
+      // If the is an approval_description, show it in a new row....
+      if ($approval_description != "") {
+        $rtn .= "<tr>
+                  <td colspan='5' class='audit-approval-description audit-approval-description=" . $cur["approval_value"] . "'><div>$approval_description</div></td>
+                 </tr>";
+      }
+      
+      
+    } // foreach types => approval_type
+    
+    
+    $rtn .= "
+              </table> <!-- class approvals -->
+    
+            </td>
+          </tr> 
+      </table> <!-- class audit-table -->";
+
+  
+  $rtn .= "
+
+      <hr>
+      <h2>" . t("Audit Comments") . "</h2>
+      " . t("These comments will be visible to individuals with access to this tab.") . "
+      ";
+
+
+  // Add our audit comments form in the page.  The extra code is about not making the title show
+  // up twice.
+  $temp_title = $GLOBALS["fp_set_title"];
+  $GLOBALS["fp_set_title"] = "";  // prevent page title from showing up here    
+  $form = fp_render_form("audit_comment_form", "normal", $student->student_id, $user->cwid);
+  $GLOBALS["fp_set_title"] = $temp_title;
+  
+  $rtn .= fp_render_c_fieldset($form, t("Click to enter audit comment"), TRUE);
+    
+  $comments = comments_get_comments($student->student_id, FALSE, array("audit private"));
+  
+  foreach($comments as $comment) {
+      
+    $delete_link = "";
+    // Should we present a "delete link" to the user for this comment?
+    if (user_has_permission("can_delete_own_comments_3_months")) {
+      // See if this comment is younger than 3 months.
+      $del_range = strtotime("-3 month");
+      $then = $comment["posted"];
+
+      
+      if ($then > $del_range) {
+
+        // We will use the comment module's delete function for this, and tell it to
+        // redirect back here by setting the destination=audit.
+        $js_action = 'window.location=FlightPath.settings.basePath + "/comments/delete-comment&current_student_id=' . $student->student_id . '&comment_id=' . $comment['id'] . '&destination=audit";';
+        $delete_link = fp_get_js_confirm_link(t("Are you sure you wish to delete this comment?\nThis action cannot be undone."), $js_action, "Delete?");
+      }      
+    }  
+      
+    
+    $rtn .= comments_render_comment($comment, $delete_link);
+  }    
+  
+  
+  
+  
+
+  // We wish to add our hidden form, so the approval popup can write its values to this page,
+  // and then submit them.
+  $temp_title = $GLOBALS["fp_set_title"];
+  $GLOBALS["fp_set_title"] = "";  // prevent page title from showing up here
+  $rtn .= fp_render_form("audit_hidden_approval_form");  
+  $GLOBALS["fp_set_title"] = $temp_title;
+  
+  return $rtn;
+}
+
+
+function audit_comment_form($student_id, $faculty_id) {
+      
+  $form = array();
+  
+  
+  $form["student_id"] = array(
+    "type" => "hidden",
+    "value" => $student_id,
+  );
+  
+  $form["faculty_id"] = array(
+    "type" => "hidden",
+    "value" => $faculty_id,
+  );
+  
+  
+  $form["comment"] = array(
+    "type" => "textarea",
+  );
+  
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => t("Save"),
+  );   
+  
+  return $form;
+}
+
+
+function audit_comment_form_submit($form, $form_state) {
+  global $user, $current_student_id;
+  $faculty_id = $form_state["values"]["faculty_id"];
+  $student_id = $form_state["values"]["student_id"];
+  $type = "audit private";  
+  $comment = trim($form_state["values"]["comment"]);
+    
+  // Perform the save!
+  if ($comment) {
+    db_query("INSERT INTO advising_comments
+              (student_id, faculty_id, term_id,
+                comment, posted, access_type)
+                VALUES
+                ('?', '?', '?', '?', '?', '?')
+                ", $student_id, $faculty_id, 0, $comment, time(), $type);
+               
+    fp_add_message(t("Audit comment saved successfully."));
+  }
+
+  watchdog("save_audit_comment", "Audit comment saved");    
+}
+
+
+function audit_hidden_approval_form() {
+  $form = array();
+  
+  $form["approval_type"] = array(
+    "type" => "text",
+  );
+
+  $form["approval_student_id"] = array(
+    "type" => "text",
+  );
+  
+  $form["approval_value"] = array(
+    "type" => "text",
+  );
+  
+  $form["approval_comment"] = array(
+    "type" => "textarea",
+  );
+  
+  
+  
+  return $form;
+}
+
+
+function audit_hidden_approval_form_submit($form, $form_state) {
+  global $user;
+  $values = $form_state["values"];
+  
+  $faculty_id = $user->cwid;
+  $student_id = $values["approval_student_id"];
+  $approval_type = $values["approval_type"];
+  $approval_value = $values["approval_value"];
+  $comment = trim($values["approval_comment"]);
+
+  
+  //  Check that we have permission to edit the approval for this person?
+  if (!user_has_permission("edit_audit_approvals") || !audit_can_access_audit($student_id)) {
+    fp_add_message(t("You do not have permission to edit audit approvals for this student"), "error");
+    return FALSE;
+  }
+  
+  
+  
+  
+  
+  $types = audit_get_approval_types();
+  $details = $types[$approval_type];
+  $approval_type_title = $details["title"];
+  if ($approval_type_title == "") $approval_type_title = $approval_type;  
+  
+  
+  
+  // Okay, let's save the approval status to our table.
+  // Begin by deleting what's there for this approval type and student.
+  db_query("DELETE FROM audit_approvals 
+            WHERE student_id = '?'
+            AND approval_type = '?' ", $student_id, $approval_type);
+  // Now, add our values
+  $now = time();
+  db_query("INSERT INTO audit_approvals
+            (student_id, uid, faculty_id, approval_type, approval_value, posted)
+            VALUES ('?', '?', '?', '?', '?', '?')
+            ", $student_id, $user->id, $faculty_id, $approval_type, $approval_value, $now);
+  
+  fp_add_message(t("Approval value has been successfully updated for type %title.", array("%type" => $approval_type, "%title" => $approval_type_title)));
+  
+  // Also write to our comments table, and include the comment. 
+  //$approval_desc = ($approval_value == "no_approve") ? t("Not approved") : t("Approved");
+  $options = audit_get_approval_options();
+  $approval_desc = $options[$approval_value];
+  if ($approval_desc == "") $approval_desc = $approval_value;
+  
+  
+  
+  $new_comment = " -- " . t("Automated Audit Comment") . " --<br><br>
+                  " . t("Approval status updated for:") . " <b>$approval_type_title</b>.  " . t("New value:") . " <b>$approval_desc</b>.";
+  if ($comment != "") {
+    $new_comment .= "<br><br>" . t("Additional comment:") . " <br>-----------<br><em>" . nl2br($comment) . "</em>";
+  } 
+  $new_values = array(
+    "student_id" => $student_id,
+    "faculty_id" => $faculty_id,
+    "comment" => $new_comment,
+  );
+  
+  audit_comment_form_submit(array(), array("values" => $new_values)); 
+  
+  
+  
+}
+
+
+
+
+/**
+ * Used by the menu to determine if the user can see the Audit tab at all.
+ * 
+ * Basically, have we selected a student?  AND, do we have the correct
+ * permission?
+ */
+function audit_can_access_audit($student_id = "") {
+  global $current_student_id, $user;
+  
+  if ($student_id == "") $student_id = $current_student_id;
+  
+  // must be logged in first...
+  if (!user_has_permission("access_logged_in_content")) return FALSE;
+
+  
+  if ($student_id != "") {
+    // yes, a student has been selected.  Do we have permission to view audits for THIS student?
+    if (user_has_permission("view_student_audits") && advise_can_access_view($student_id)) return TRUE;
+  }
+  
+  return FALSE;
+  
+}
+
+
+/**
+ * Implementation of hook_perm
+ *
+ */
+function audit_perm() {
+  
+  return array(
+    "administer_audit" => array(
+      "title" => t("Administer audit module settings"),      
+    ),  
+    "view_student_audits" => array(
+      "title" => t("View student audits"),
+      "description" => t("View the Audit tab for selected student, including audit comments."),
+    ),
+    "edit_audit_approvals" => array(
+      "title" => t("Edit audit approvals"),
+      "description" => t("Allows user to edit the 'approvals' for a student audit.  Ex: faculty or other user types."),
+    ),
+    
+  );
+  
+}
+
+

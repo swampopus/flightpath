@@ -1,0 +1,107 @@
+/**
+* @file
+* This is the stylesheet for the Audit module
+*/
+
+
+.audit-table {
+  font-size: 11pt;
+  border-collapse: collapse;  
+  width: 100%;  
+}
+
+.audit-table td {
+  border: 1px solid #ccc;
+  padding: 5px;
+}
+
+.audit-completed-hours {
+  color: blue;
+}
+
+.audit-row-odd {
+  background-color: beige;
+}
+
+
+.audit-row-blank {
+  background-color: #ddd;  
+}
+
+.audit-hours {
+  display: inline-block;
+  width: 100px;
+}
+
+.audit-percent-completed {  
+  font-style: italic;
+  color: #222;
+}
+
+
+.audit-approval-description div {
+  padding-left: 50px;
+  font-size: 0.9em;
+  color: #555;
+}
+
+.audit-approval-complete {
+  color: blue;
+  background: url('small_check.gif') no-repeat left center;  
+  padding-left: 20px;
+}
+
+.audit-approval-desc-complete {
+  color: blue;
+}
+
+.audit-approval-not_complete {
+  /* background: url('n.gif') no-repeat left center; */ 
+  color: red;
+  padding-left: 20px;
+}
+
+.audit-approval-desc-not_complete {
+  color: red;
+}
+
+.audit-approval-not_applicable {
+  /* background: url('n.gif') no-repeat left center; */ 
+  color: gray;
+  font-style: italic;
+  padding-left: 20px;
+}
+
+.audit-approval-desc-not_applicable {
+  color: gray;
+  font-style: italic;
+}
+
+
+.audit-approval-in_progress {
+  background: url('cb_enrolled.gif') no-repeat left center;
+  color: green;
+  padding-left: 20px;
+}
+
+.audit-approval-desc-in_progress {
+  color: green;
+}
+
+
+
+#fp-form-audit_hidden_approval_form {
+  display: none;
+}
+
+.audit-table .approvals td {
+  font-size: 0.9em;
+}
+
+
+.audit-table .audit-req-new-degree-title td{
+  text-align: center;
+}
+.audit-table .audit-req-degree-title-OVERALL td{
+  font-weight: bold;
+}

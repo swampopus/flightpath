@@ -1,0 +1,3 @@
+name = Student Priority
+description = This module is responsible for displaying and calculating the "academic priority" for a student.
+core = 6.x

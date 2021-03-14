@@ -1,0 +1,125 @@
+
+___student_profile_page {}
+
+
+.student-profile-header-full {
+  border-bottom: 1px solid #ddd;
+}
+
+.student-profile-header-full .header-profile-image {
+  width: 180px;
+  height: 250px;
+  margin-bottom: 10px;
+}
+
+.priority-high {
+    background-color: red;
+}
+
+.priority-normal {
+  background-color: green;
+}
+
+.priority-medium {
+  background-color: orange;
+}
+
+.profile-priority-bar {
+    display: inline-block;
+    min-width: 100px;
+    padding: 0 3px 0 3px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.9em;
+    color: white;
+    border-radius: 5px;
+}
+
+table.student-alerts {
+  width: 100%;  
+  border-collapse:collapse;
+}
+
+table.student-alerts td, table.student-alerts th {
+  padding: 0;
+  margin: 0;
+}
+
+table.student-alerts tr {
+  line-height: 35px;
+}
+
+table.student-alerts td {
+  padding: 5px;
+}
+
+table.student-alerts tr:nth-child(even) {
+  background-color: #f8f8f8;
+}
+
+table.student-alerts tr.closed {
+  font-style: italic;
+}
+
+
+.test-more-toggle {
+  font-size: 1.6em;
+  display: inline-block;
+  float: right;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.test-extra {
+  padding-left: 20px;
+  padding-top: 10px;
+  font-size: 0.9em;
+}
+
+.student-mini-profile a.grade-percent-link {
+  
+  color: #0095ff;
+}
+
+.student-mini-profile a.grade-percent-link:hover {
+  color: lightskyblue;
+}
+
+
+.db-course-record {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+table.calc-tests-table {
+  background: #ececec;
+  border: 1px solid #bbbbbb;
+
+}
+
+table.calc-tests-table th {
+  background-color: #999;
+  border-right: 1px solid #c8c7c7;
+  color: #fff;
+  padding: 10px;
+  font-weight: bold;
+}
+
+table.calc-tests-table td {
+  background: #FFF;
+  color: #747474;
+  text-align: left;
+  padding: 10px;
+  border: 1px solid #DBDBDB;
+}
+
+
+.tests-expand-link {
+  font-size: 0.85em;
+}
+
+.student-profile-add-new-alert-button {
+  float: right;  
+}
+
+
+

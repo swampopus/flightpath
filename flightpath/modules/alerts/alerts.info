@@ -1,0 +1,3 @@
+name = Alerts
+description = Alert system (similar to tickets) for FP
+core = 6.x

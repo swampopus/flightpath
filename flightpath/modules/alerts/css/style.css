@@ -1,0 +1,48 @@
+.alert-field-mark {
+  font-size: 1.2em;
+}
+
+.alert-field-mark label {
+  display: inline;
+  font-weight: bold;
+}
+
+.alert-field-mark .alert-student-extra-mark {
+  display: inline-block;
+  padding-left: 10px;
+  font-weight: bold;  
+  color: #888;
+}
+
+
+
+#element-wrapper-visibility .radio-element {
+  display: inline-block;   
+}   
+
+
+table.advisees-alerts
+ {
+  width: 100%;
+  line-height: 2em;
+}
+
+table.advisees-alerts tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+table tr.unread {
+  font-weight: bold;
+} 
+
+
+#fp-form-alerts_advisees_alerts_form #element-wrapper-filter_status,
+#fp-form-alerts_advisees_alerts_form #element-wrapper-submit_btn
+ {
+  display: inline-block;
+  margin-right: 20px;
+}
+
+#fp-form-alerts_advisees_alerts_form #element-wrapper-filter_status select {
+  width: 200px;
+}

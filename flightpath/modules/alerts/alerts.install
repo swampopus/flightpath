@@ -1,0 +1,59 @@
+<?php
+
+/**
+ * This file should contain only hooks relating to installing, enabling, disabling, and uninstalling this module.
+ *  
+*/
+
+
+/**
+ * Hook install.  Called when the module is installed on the admin modules page.
+ * 
+ */
+function alerts_install() {
+
+  $q = "
+CREATE TABLE `content__alert` (
+  `cid` int unsigned NOT NULL,
+  `vid` int unsigned NOT NULL,
+  `field__student_id` varchar(255)DEFAULT NULL,
+  `field__alert_status` varchar(255) DEFAULT NULL,
+  `field__department` varchar(255) DEFAULT NULL,
+  `field__alert_msg` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `field__visibility` varchar(255)  DEFAULT NULL,
+  PRIMARY KEY (`vid`),
+  KEY `cid` (`cid`),
+  KEY `field__student_id` (`field__student_id`),
+  KEY `field__alert_status` (`field__alert_status`),
+  KEY `field__department` (`field__department`),
+  KEY `field__alert_msg` (`field__alert_msg`(768)),
+  KEY `field__visibility` (`field__visibility`)
+);  
+  ";
+  db_query($q);
+  
+
+
+  $q = "
+CREATE TABLE `content__activity_record` (
+  `cid` int unsigned NOT NULL,
+  `vid` int unsigned NOT NULL,
+  `field__student_id` varchar(255) DEFAULT NULL,
+  `field__faculty_id` varchar(255) DEFAULT NULL,
+  `field__activity_type` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`vid`) ,
+  KEY `cid` (`cid`) ,
+  KEY `field__student_id` (`field__student_id`) ,
+  KEY `field__alert_status` (`field__activity_type`),
+  KEY `field__faculty_id` (`field__faculty_id`)
+);  
+  ";
+  db_query($q);
+  
+
+
+
+
+    
+}
+

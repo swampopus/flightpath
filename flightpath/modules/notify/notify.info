@@ -1,0 +1,3 @@
+name = Notify
+description = Provides functions and such for handling notifications of users.
+core = 6.x

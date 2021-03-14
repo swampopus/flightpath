@@ -1,0 +1,3 @@
+name = Student Files
+description = Secure uploads of files associated with student users
+core = 6.x

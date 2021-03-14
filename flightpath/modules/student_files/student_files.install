@@ -1,0 +1,54 @@
+<?php
+/**
+ * @file
+ * This file handles the installation processes (like new db tables) for the student_files module.
+ */
+ 
+ 
+ 
+/**
+ * Implementation of hook_install
+ */ 
+function student_files_install() {
+  
+  $q = "
+       CREATE TABLE `student_files` (
+        `fid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+        `student_id` varchar(30) DEFAULT '',
+        `original_filename` varchar(255) DEFAULT '',
+        `filepath` text DEFAULT '',
+        `filename` varchar(255) DEFAULT '',
+        `filetype` varchar(255) DEFAULT '',
+        `access_type` varchar(20) DEFAULT '',
+        `uploaded_by_uid` int(11) DEFAULT '0',
+        `uploaded_by_cwid` varchar(30) DEFAULT '',
+        `is_encrypted` int(10) unsigned DEFAULT '0',
+        `posted` int(10) unsigned DEFAULT '0',
+        PRIMARY KEY (`fid`),
+        KEY `student_id` (`student_id`),
+        KEY `uploaded_by_uid` (`uploaded_by_uid`),
+        KEY `access_type` (`access_type`),
+        KEY `posted` (`posted`)
+      );   ";
+  
+  db_query($q);  
+  
+  $files_path = $GLOBALS["fp_system_settings"]["file_system_path"];
+  
+  // Create the folder...
+  if (!is_dir("$files_path/custom/files/student_files")) {
+    if (!mkdir("$files_path/custom/files/student_files")) {
+      fp_add_message(t("Student Files module:  Problem creating /custom/files/student_files directory.  Create manually,
+                        and ensure it is allowed to be written to by the system."), "error");
+    }
+    
+    // Add to our variables.
+    variable_set("student_files_path", "$files_path/custom/files/student_files");
+    
+  }  
+  
+}
+
+
+
+
