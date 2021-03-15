@@ -44,7 +44,8 @@ function announcements_enable() {
   $content->title = "Sample Announcement";
   
   // TODO:  This extra field data (aside from title) is not getting saved on first install, because hooks do not appear to be working
-  // on first install.  Not a huge deal, but should check into that.
+  // on first install of FlightPath.  At least, not in this situation.  I think it's because the content_content_save function cannot find
+  // all the fields associated with this content type.
   
   $content->field__activity_datetime['value'] = date("Y-m-d H:ia");
   $content->field__msg['value'] = '<p>This is a sample announcement! You may add new announcements (or delete this one) from the Admin Tools, then Content.</p>'; 
