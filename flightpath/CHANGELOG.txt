@@ -1,6 +1,9 @@
 FlightPath 5.x Changelog
 ========================
 
+2021-03-18
+  Added inval() to priority when editing groups, to avoid possible mysql errors.
+
 2021-02-25
   Added floatval() to min hours, max hours, etc, in admin_course_submit(), to avoid possible mysql errors.
 
@@ -52,7 +55,7 @@ FlightPath 5.x Changelog
 2020-08-25
   If the theme template file cannot be found, an error is displayed (instead of the entire system crashing with a 
   white screen because the template.php file can't be included).
-  
+        
 
 2020-06-23
   Added ability to init a specific session_id, based on $_GET['fp_session_id'].
