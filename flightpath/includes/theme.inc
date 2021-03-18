@@ -1269,7 +1269,7 @@ function fp_render_sidebar_left_content($bool_for_hamburger_menu = FALSE) {
   
   
   // TODO:  hook to allow other modules to add to this list or modify it.
-  
+   
   
   
   // Sort links by weight
@@ -1391,6 +1391,17 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
     }
     $html .= "<li class='user-options last'>";
     
+    
+    
+    
+    $user_menu_links = array(
+      0 => l(t('My Settngs', 'user-settings')),
+      1 => l(t('Log Out', 'logout')),      
+    );
+    
+    // Call a hook to allow others to modify this.
+    invoke_hook('user_menu_links_alter', array(&$user_menu_links));
+    
     $html .= "    
             <div class='tub-element tub-float-right-a tub-last-element tub-user-menu tub-icon-element dropdown'>
                 <div class='tub-element-wrapper'>
@@ -1401,9 +1412,15 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
   
                   <div id='tub-user-pulldown' style='display:none;' >
                       $name
-                    <ul class='user-pulldown'>                    
-                      <li>" . l("My Settings", 'user-settings') . "</li>
-                      <li>" . l("Log Out", "logout") . "</li>
+                    <ul class='user-pulldown'>
+                    ";
+    
+    foreach ($user_menu_links as $link) {
+      $html .= "<li>" . $link . "</li>";
+    }
+    
+    
+    $html .= "
                     </ul>
   
                   </div>

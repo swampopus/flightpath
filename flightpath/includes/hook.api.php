@@ -40,6 +40,14 @@ function hook_get_user_image_url($cwid, $type = 'student') {
   return $url;
 } 
 
+
+/**
+ * This hook allows you to alter the links which appear under the user menu pulldown, in the top-right
+ * of the screen.
+ */
+function hook_user_menu_links_alter(&$links) {
+}
+
  
  
  

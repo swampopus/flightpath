@@ -55,7 +55,7 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
   // priority, icon and comment.
   $group_name = trim($values["group_name"]);
   $title = trim($values["title"]);
-  $priority = trim($values["priority"]);
+  $priority = intval(trim($values["priority"]));
   $icon_filename = trim($values["icon_filename"]);
   $data_entry_comment = trim($values["data_entry_comment"]);
   $catalog_repeat = intval(trim($values["catalog_repeat"]));
