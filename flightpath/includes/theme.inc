@@ -1395,8 +1395,8 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
     
     
     $user_menu_links = array(
-      0 => l(t('My Settngs', 'user-settings')),
-      1 => l(t('Log Out', 'logout')),      
+      0 => l(t('My Settngs'), 'user-settings'),
+      1 => l(t('Log Out'), 'logout'),      
     );
     
     // Call a hook to allow others to modify this.

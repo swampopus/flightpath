@@ -1337,6 +1337,15 @@ function fp_add_message($msg, $type = "status", $bool_no_repeat = FALSE) {
 }
 
 
+/*
+  Does the string end with the provided needed?
+*/
+function fp_str_ends_with ($haystack, $needle) {
+    return substr_compare($haystack, $needle, -strlen($needle)) === 0;
+}
+
+
+
 /**
  * Add an extra CSS file to the page with this function.
  * Ex:    fp_add_css(fp_get_module_path("admin") . '/css/admin.css');
