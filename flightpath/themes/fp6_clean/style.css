@@ -1049,6 +1049,12 @@ label {
   
 }
 
+.element-type-submit input.button-disabled {
+  background-color: #ccc !important;
+  border: 1px solid #999 !important;
+}
+
+
 .form-checkboxes label.label-for-checkbox {
   display: inline-block;
 }

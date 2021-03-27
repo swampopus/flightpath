@@ -1486,6 +1486,9 @@ function engagements_form_alter(&$form, $form_id) {
           
           if ($form['engagement_type']['value'] == 'email') {
             $extra_mark = fp_get_student_email($form['student_id']['value']);
+            
+            // TODO:  The header may need to be a setting with replacement values
+            $form['engagement_msg']['prefix'] = t("Your message will automatically begin with <strong>(@initials) from @name:</strong>", array("@initials" => $initials, "@name" => $db->get_faculty_name($form['faculty_id']['value'])));
           }
           
           
@@ -1501,7 +1504,20 @@ function engagements_form_alter(&$form, $form_id) {
             if ($mobile_phone) {
               $extra_mark = engagements_convert_to_pretty_phone_number($mobile_phone, TRUE);
             }
-                        
+            else {
+              // Mobile phone was never found, so disable submit and message box.
+              
+              $form['engagement_msg']['attributes']['readonly'] = 'readonly';
+              $form['engagement_msg']['attributes']['class'] .= ' readonly';
+              
+              $form['submit_submit']['attributes']['disabled'] = 'disabled';
+              $form['submit_submit']['attributes']['class'] .= ' button-disabled';
+              $form['submit_submit']['suffix'] = "<strong>" . t('NOTE: Cannot send a text message as there is no mobile phone number for this recipient.') . "</strong>";
+              
+              
+            }
+            
+            // TODO:  The header may need to be a setting with replacement values            
             $form['engagement_msg']['prefix'] = t("Your message will automatically begin with <strong>(@initials) from @name:</strong>", array("@initials" => $initials, "@name" => $db->get_faculty_name($form['faculty_id']['value'])));
             $form['engagement_msg']['description'] = t("To insert emoji in Windows, press <span style='padding-left: 10px; padding-right: 10px; font-size: 1.3em;'><i class='fa fa-windows'></i> + .</span>  <em>(Windows key + period)</em>"); 
             
@@ -1633,6 +1649,7 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state) {
   
   $initials = variable_get("school_initials", "DEMO");
   
+  // TODO:  this might need to be a setting with replacement values!
   // Add header to msg...
   $header = "($initials) " . t("from") . " $faculty_name:\n";  
   

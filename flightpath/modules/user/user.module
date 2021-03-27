@@ -1133,8 +1133,8 @@ function user_edit_user_form() {
     "size" => 20,
     "required" => ($faculty_cwid == "new") ? TRUE : FALSE,
     "description" => t("If you enter any value here, it will change the
-                        user's password in FlightPath.  If you are using the LDAP module,
-                        the LDAP password will be unaffected."),    
+                        user's password in FlightPath.  If you are using the LDAP, SAML, or another such external login module,
+                        the external password will be unaffected."),    
   );
 
   $form["email"] = array(
