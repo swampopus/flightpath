@@ -1883,6 +1883,33 @@ function system_get_available_themes() {
 }
 
 
+/**
+ * Returns the "whitelist" (from system settings) as an array.  If empty, it will return FALSE
+ */
+function system_get_user_whitelist() {
+  $rtn = array();
+  
+  $list = trim(variable_get('user_whitelist', ''));
+  if (!$list) return FALSE;
+  
+  $lines = explode("\n", $list);
+  foreach ($lines as $line) {
+    $line = trim($line);
+    if ($line == "") continue;
+    // If the first char is a # then its a comment, skip it.
+    if (substr($line, 0, 1) == '#') continue;
+    
+    // Otherwise, we can add to our rtn array.
+    $rtn[] = $line;
+    
+  } // foreach 
+  
+  if (count($rtn) == 0) return FALSE;
+  
+  return $rtn;
+  
+}
+
 
 
 /**
@@ -1926,6 +1953,21 @@ function system_settings_form() {
                         is useful when trying to perform maintenance on FlightPath.  If unsure
                         what to select, select 'No'."), 
   );                                
+
+
+  $form["user_whitelist"] = array(
+    "type" => "textarea",
+    "label" => t("Only allow certain users to log in:"),    
+    "value" => variable_get('user_whitelist', ''),
+    "description" => t("You may explicitly state which users are allowed to log in to FlightPath at this time.
+                        Enter usernames OR email addresses, one per line.  Users who are not part of this whitelist
+                        will be returned to the login screen, with a message stating that the system is only allowing
+                        certain users to log in at this time.  
+                        <br>Note: the admin user
+                        will always be able to log in.  To disable, simply erase the contents of
+                        this box and save."), 
+  );                                
+
 
 
   
@@ -2733,9 +2775,15 @@ function system_login_form() {
 function system_login_form_validate($form, &$form_state) {
   $user = $form_state["values"]["user"];
   
-  if ($user != 'admin' && variable_get('disable_login_except_admin', 'no') == 'yes') {
-    fp_goto("disable-login");
-    return;
+  // If the $user is an email address, then find out the user it actually belongs to.
+  if (filter_var($user, FILTER_VALIDATE_EMAIL)) {  
+    // This appears to be the user's email address.  Convert to their username
+    // instead.
+    $test = db_result(db_query("SELECT user_name FROM users WHERE email = ?", array($user)));
+    if ($test) {
+      $user = $test;
+      $form_state["values"]["user"] = $test;
+    }
   }
   
   
@@ -2743,7 +2791,6 @@ function system_login_form_validate($form, &$form_state) {
   
   // If the GRANT_FULL_ACCESS is turned on, skip trying to validate
   if ($GLOBALS["fp_system_settings"]["GRANT_FULL_ACCESS"] == TRUE) {
-    $user = "admin";
     $form_state["passed_authentication"] = TRUE;
     $form_state["db_row"]["user_id"] = 1;
     $form_state["db_row"]["user_name"] = "FULL ACCESS USER";
@@ -2762,8 +2809,8 @@ function system_login_form_validate($form, &$form_state) {
   }
   */
   
-  $res = db_query("SELECT * FROM users WHERE user_name = ? AND is_disabled = '0' ", $user); 
-   
+  
+  $res = db_query("SELECT * FROM users WHERE user_name = ? AND is_disabled = '0' ", $user);   
   $cur = db_fetch_array($res);
   
   // Check the user's password is valid.
@@ -2773,6 +2820,14 @@ function system_login_form_validate($form, &$form_state) {
                             be found.  Please check your spelling and try again."));
     return;    
   }  
+  
+  
+  // Have we disabled all logins except for "admin" (user id = 1)?
+  if (intval($cur['user_id']) !== 1 && variable_get('disable_login_except_admin', 'no') == 'yes') {
+    fp_goto("disable-login");
+    return;
+  }
+  
   
   
   // If this is a student, does this student have an accepted "allowed rank" (ie, FR, SO, JR, etc)?
@@ -2788,6 +2843,17 @@ function system_login_form_validate($form, &$form_state) {
       
     }
   }
+
+
+  // Do we have a "whitelist" and is this user part of it?  Note: ignore if we are admin.
+  if (intval($cur['user_id']) !== 1 && $list = system_get_user_whitelist()) {   
+    if (!in_array($cur['user_name'], $list) && ($cur['email'] != '' && !in_array($cur['email'], $list))) {
+      form_error("password", t("Sorry, but only certain users are allowed access at this time.  If you believe you need access, please contact your system administrator."));
+      return; 
+    }
+  }
+
+
     
   
   // otherwise, we know it must be correct.  Continue.  
