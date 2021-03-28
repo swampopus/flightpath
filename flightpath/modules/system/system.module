@@ -2735,7 +2735,7 @@ function system_login_form() {
   
   // Are we here because the user was not found in the whitelist?
   if (isset($_REQUEST['wlist']) && $_REQUEST['wlist'] == 'notfound') {
-    fp_add_mesage(t("Sorry, but only certain users are allowed access at this time.  If you believe you need access, please contact your system administrator."), 'error', TRUE);
+    fp_add_message(t("Sorry, but only certain users are allowed access at this time.  If you believe you need access, please contact your system administrator."), 'error', TRUE);
   }
   
   
