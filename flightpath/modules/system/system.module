@@ -2733,6 +2733,12 @@ function system_login_form() {
     fp_add_message(t("You have been logged out of @FlightPath.", array("@FlightPath" => variable_get("system_name", "FlightPath"))), "status", TRUE);
   }
   
+  // Are we here because the user was not found in the whitelist?
+  if (isset($_REQUEST['wlist']) && $_REQUEST['wlist'] == 'notfound') {
+    fp_add_mesage(t("Sorry, but only certain users are allowed access at this time.  If you believe you need access, please contact your system administrator."), 'error', TRUE);
+  }
+  
+  
   
   $form["user"] = array(
     "label" => t("User:"),
