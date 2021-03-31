@@ -1155,6 +1155,10 @@ function admin_menu_handle_replacement_pattern($str) {
 
 function admin_perm() {
   return array(
+    "can_access_admin_tools" => array(
+      "title" => t("Access Admin Tools"),
+      "description" => t("Allow the user to access the Admin Tools screen."),
+    ),  
     "can_access_admin" => array(
       "title" => t("Access administrative console"),
       "description" => t("This is a powerful permission!  This allows a 
