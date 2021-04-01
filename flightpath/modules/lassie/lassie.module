@@ -121,6 +121,7 @@ function lassie_check($job_machine_name) {
  * Check all of the jobs we are currently waiting on.
  */
 function lassie_check_all() {
+  
   $res = db_query("SELECT * FROM variables WHERE name LIKE 'lassie_job__%' ");
   while ($cur = db_fetch_array($res)) {
     $name = $cur['name'];
@@ -135,7 +136,17 @@ function lassie_check_all() {
  * Implements hook_cron
  */
 function lassie_cron() {
+      
+  // If its been less than 45 minutes since last check, then skip.  Saves checks if our cron is running very frequently.  
+  $last_check = variable_set("lassie_last_check", 0);
+  if (time() < ($last_check + (45 * 60))) return; 
+  
+  watchdog("lassie", "Lassie checking for any long-running jobs....");
+  
   lassie_check_all();
+  
+  variable_set("lassie_last_check", time());
+  
 }
 
 
