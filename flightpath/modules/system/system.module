@@ -1902,6 +1902,9 @@ function system_get_user_whitelist() {
     // Otherwise, we can add to our rtn array.
     $rtn[] = $line;
     
+    // To make sure we catch all occurances, also force lower-case (for emails)
+    $rtn[] = strtolower($line);
+    
   } // foreach 
   
   if (count($rtn) == 0) return FALSE;
@@ -2779,13 +2782,16 @@ function system_login_form() {
  * We will simply verify the password, then let the submit handler take over from there.
  */
 function system_login_form_validate($form, &$form_state) {
-  $user = $form_state["values"]["user"];
+  $user = trim($form_state["values"]["user"]);
   
   // If the $user is an email address, then find out the user it actually belongs to.
   if (filter_var($user, FILTER_VALIDATE_EMAIL)) {  
     // This appears to be the user's email address.  Convert to their username
     // instead.
-    $test = db_result(db_query("SELECT user_name FROM users WHERE email = ?", array($user)));
+    
+    // Force email addresses to be lowercase.
+    
+    $test = db_result(db_query("SELECT user_name FROM users WHERE email = ?", array(strtolower($user))));
     if ($test) {
       $user = $test;
       $form_state["values"]["user"] = $test;

@@ -358,7 +358,7 @@ function fp_load_user($user_id) {
   $rtn->name = $cur->user_name;
   $rtn->f_name = $cur->f_name;
   $rtn->l_name = $cur->l_name;
-  $rtn->email = $cur->email;
+  $rtn->email = trim(strtolower($cur->email));
   $rtn->cwid = $cur->cwid;
   $rtn->is_student = (bool) $cur->is_student;
   $rtn->is_faculty = (bool) $cur->is_faculty;
@@ -520,6 +520,9 @@ function db_get_user_id_from_email($email, $type = "faculty") {
   if ($type == "student") {
     $type_line = " is_student='1' ";
   }
+  
+  // Force email to be lowercase
+  $email = trim(strtolower($email));
     
   $user_id = db_result(db_query("SELECT user_id FROM users WHERE email = ? AND $type_line ", $email));
   
@@ -607,7 +610,7 @@ function fp_get_student_email($cwid) {
                                AND is_student = 1", array($cwid)));
 
   if (trim($email)) {
-    return trim($email);
+    return trim(strtolower($email));
   }
   
   // else, email wasn't set.

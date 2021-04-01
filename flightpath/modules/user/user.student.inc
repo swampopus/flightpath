@@ -717,7 +717,7 @@ function user_edit_student_user_form_submit($form, $form_state) {
                   l_name = '?',
                   is_disabled = '?'
                WHERE cwid = '?'
-               AND is_student = '1' ", $values["email"], $values["f_name"], 
+               AND is_student = '1' ", trim(strtolower($values["email"])), $values["f_name"], 
                                        $values["l_name"], $values["is_disabled"],
                                        $student_cwid);
    
@@ -747,8 +747,9 @@ function user_edit_student_user_form_submit($form, $form_state) {
     
     db_query("INSERT INTO users (user_name, password, is_student, email, cwid, f_name, l_name, is_disabled)
               VALUES ('?', '?', '1', '?', '?', '?', '?', '?')
-              ", $values["new_user_name"], user_hash_password($values["new_password"]), $values["email"], $values["new_student_cwid"],
+              ", $values["new_user_name"], user_hash_password($values["new_password"]), trim(strtolower($values["email"])), $values["new_student_cwid"],
                  $values["f_name"], $values["l_name"], intval($values["is_disabled"]));
+    
     db_query("INSERT INTO students (cwid, cumulative_hours, gpa, rank_code, catalog_year, is_active)
               VALUES ('?', '?', '?', '?', '?', '?')
              ", $values["new_student_cwid"], $values["cumulative_hours"], $values["gpa"], $values["rank_code"],
