@@ -1,0 +1,144 @@
+<?php
+/**
+ * @file
+ * This is the primary module file for the lassie module.
+*/
+
+
+/**
+ * Converts the string into a compatible "machine name" for Lassie to use.
+ */
+function lassie_get_machine_name($str) {
+  $str = fp_get_machine_readable($str);
+  $str = trim(substr($str, 0, 200));  // make sure the name isn't more than 200 chars, which might cause problems.
+  return $str;
+}
+
+
+ 
+/**
+ * Set a new job for Lassie to watch.
+ * 
+ * @param $job_machine_name - The machine name of this job. Must be alphanumeric + underscore.  Ex:  job_123
+ * @param $hours  - must be integer or a warning will be logged and displayed via fpm().
+ * @param $emails - comma separated listed of email addresses to notify if the job fails to finish.
+ */
+function lassie_start($job_machine_name, $hours = 2, $emails = "") {
+  global $user;
+
+  if (!is_int($hours)) {
+    fpm("WARNING: hours ($hours) supplied to lassie_start() function is not an integer.  Casting to int.");
+    fpm(debug_backtrace());
+    watchdog('lassie', "WARNING: hours ($hours) supplied to lassie_start() function is not integer.  Casting to int. Backtrace: <pre>" . print_r(debug_backtrace(), TRUE) . "</pre>", array(), WATCHDOG_ERROR);
+    $hours = intval($hours);
+  }
+
+  $job_machine_name = lassie_get_machine_name($job_machine_name);
+    
+  $data = array( 
+    'start' => time(),
+    'hours' => $hours,
+    'expires' => strtotime("NOW + $hours HOURS"),
+    'emails' => $emails,
+    'user_uid' => $user->uid,
+  );
+  
+  
+  variable_set('lassie_job__' . $job_machine_name, $data);
+  
+  watchdog('lassie', t("Beginning new job: ") . $job_machine_name . ". " . print_r($data, TRUE));
+  
+}
+
+/**
+ * Tell Lassie that we have finished the job.
+ */
+function lassie_finish($job_machine_name) {
+    
+  $job_machine_name = lassie_get_machine_name($job_machine_name);
+  
+  $data = variable_get('lassie_job__' . $job_machine_name, array());
+  $start = $data['start'];
+  $elapsed = round((time() - $start) / 60, 3);
+    
+  watchdog('lassie', t("Finished job: ") . $job_machine_name . ". " . $elapsed . " minutes elapsed.");
+  
+  // TODO:  Implement a hook?
+  
+  db_query("DELETE FROM variables WHERE name = ?", array("lassie_job__$job_machine_name"));
+  
+    
+}
+
+
+/**
+ * Check to see if an email needs to be sent regarding this job.
+ */
+function lassie_check($job_machine_name) {
+  $job_machine_name = lassie_get_machine_name($job_machine_name);
+  
+  $data = variable_get('lassie_job__' . $job_machine_name, array());
+  $start = $data['start'];
+  $elapsed = round((time() - $start) / 60, 3);
+  $expires = $data['expires'];
+  if (time() > $expires) {
+    // YES!  We need to trigger the email, this job has expired.
+    $emails = $data['emails'];
+    // TODO: also include any default emails from settings.
+    
+    
+    $hours = $data['hours'];
+    $user_uid = $data['user_uid'];
+    
+    // TODO:  Implement a hook so other modules can act?
+    
+    
+    // Implement the warning email.
+    $msg = "";
+    $msg .= "FlightPath Lassie module reports that a job has failed to complete in the expected time.\n\n";
+    $msg .= "Current Time: " . format_date(time()) . "\n-------------------------\n";
+    $msg .= "Site: " . $GLOBALS['fp_system_settings']["base_url"] . "\n";
+    $msg .= "Job Name: $job_machine_name \n";
+    $msg .= "Started: " . format_date($start) . "\n";
+    $msg .= "Hours  : $hours \n";
+    $msg .= "Expires: " . format_date($expires) . "\n";
+    $msg .= "Elapsed: $elapsed min.";
+        
+    if ($emails != "") {    
+      fp_mail($emails, "FlightPath job failed to end: $job_machine_name", $msg);    
+    }
+        
+    // Delete from variables table.
+    db_query("DELETE FROM variables WHERE name = ?", array("lassie_job__$job_machine_name"));
+    watchdog('lassie', t("Expired job: ") . $job_machine_name . ". " . $elapsed . " minutes elapsed.", array(), WATCHDOG_ERROR);
+    
+  }
+  
+}
+
+
+/**
+ * Check all of the jobs we are currently waiting on.
+ */
+function lassie_check_all() {
+  $res = db_query("SELECT * FROM variables WHERE name LIKE 'lassie_job__%' ");
+  while ($cur = db_fetch_array($res)) {
+    $name = $cur['name'];
+    $job_name = str_replace("lassie_job__", "", $name);
+    lassie_check($job_name);
+  }
+}
+
+
+
+/**
+ * Implements hook_cron
+ */
+function lassie_cron() {
+  lassie_check_all();
+}
+
+
+
+
+

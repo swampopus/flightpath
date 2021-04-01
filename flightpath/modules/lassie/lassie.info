@@ -1,0 +1,3 @@
+name = Lassie
+description = Warn the admin user(s) if long-running tasks fail to finish.
+core = 6.x
