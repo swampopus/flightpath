@@ -301,7 +301,11 @@ function system_menu() {
     ),
   );
   
-
+  $items['login-help'] = array(
+    "title" => "Login Help",
+    "page_callback" => "system_display_login_help_page",
+    "access_callback" => TRUE,
+  );
   
   
   $items["install-finished"] = array(
@@ -564,6 +568,30 @@ function system_menu() {
 }
 
 
+
+
+/**
+ * This page will be shown when the user clicks the "Need Help Logging In?" link on the login page.
+ */
+function system_display_login_help_page() {
+  //First, are we meant to redirect to a different piece of content?  This is configured in the System Settings.
+  $cid = intval(variable_get("login_help_cid", "0"));
+  
+  if ($cid > 0) {
+    fp_goto("content/$cid");
+    return;
+  }  
+  
+  // Else, display a generic message here.
+  $rtn = "";
+  
+  $rtn .= t("If you need help logging in to FlightPath (eg, you forgot your password or do not have access), contact
+              the system administrator or your IT department.");
+              
+  
+  return $rtn;
+  
+}
 
 
 
@@ -2103,6 +2131,7 @@ function system_settings_form() {
   );
                
   
+  /*  // Removing since we no longer use these popups.
   $form["popup_admin_win_options"] = array(
     "type" => "textfield",
     "size" => 80,
@@ -2135,16 +2164,16 @@ function system_settings_form() {
                          <br><b>DO NOT ENTER ANY SPACES OR QUOTES!  Entering invalid syntax could break your Javascript.</b>
                          <br>If unsure what to enter, use: <em>toolbar=no,status=2,scrollbars=yes,resizable=yes,width=750,height=600</em>"),    
   );
-    
+  */  
 
   $form["admin_degrees_default_allow_dynamic"] = array(
     "type" => "textfield",
     "size" => 5,
     "label" => t("Default 'Allow Dynamic' value for new degrees:"),
-    "value" => variable_get("admin_degrees_default_allow_dynamic", "0"),
+    "value" => variable_get("admin_degrees_default_allow_dynamic", "1"),
     "description" => t("When creating a new degree, this is the default value to set for 'Allow Dynamic'.  If set to 1 (the number one), it means
                         the degree is allowed to be dynamic, meaning it can be combined with other 'dynamic' degrees.  If it is set to 0 (zero), it
-                        means the degree is not allowed to be combined with anything else.  If you are unsure what to enter here, type 0 (zero)."),
+                        means the degree is not allowed to be combined with anything else.  If you are unsure what to enter here, type 1 (one)."),
   );                
                 
         
@@ -2161,7 +2190,16 @@ function system_settings_form() {
   );
                 
         
-        
+  $form['login_help_cid'] = array(
+    'label' => t("Enter the 'Need Help Logging In?' Content ID number:"),
+    'type' => 'textfield',
+    'size' => 5,
+    'value' => variable_get("login_help_cid", "0"),
+    'description' => t("Enter the Content ID number of the web page you'd like the visitor to see if they click the 'Need Help Logging In?' link 
+                        on the login page.  If you leave this blank, a generic message will be shown.  To customize, visit the Content sectiona and
+                        create a new 'Page'.  Once you save, you will see the Content ID number at the end of the URL.  Ex:  flightpath_url/content/543 means
+                        that 543 is the Content ID."),
+  );      
         
                   
   return $form;

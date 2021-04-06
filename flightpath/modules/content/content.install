@@ -75,6 +75,22 @@ CREATE TABLE `content_files` (
    
   db_query($query);
   
+  
+  
+  $query = "
+CREATE TABLE `content__page` (
+  `cid` int(10) unsigned NOT NULL,
+  `vid` int(10) unsigned NOT NULL,
+  `field__body` text DEFAULT NULL,  
+  PRIMARY KEY (`vid`),
+  KEY `cid` (`cid`),
+  KEY `field__body` (`field__body`(768))  
+  );  
+  ";
+  
+  db_query($query);
+  
+  
     
 }
 

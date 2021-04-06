@@ -572,7 +572,7 @@ function admin_add_degree_form_submit($form, $form_submit) {
   $new_major = $values["new_major"];
   $new_track = $values["new_track"];
 
-  $allow_dynamic = variable_get("admin_degrees_default_allow_dynamic", "0");
+  $allow_dynamic = variable_get("admin_degrees_default_allow_dynamic", "1");
 
   //////////////////////////////////////////////
 

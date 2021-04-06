@@ -363,11 +363,11 @@ function content_user_access($op, $var) {
   if ($op != "add") {
     $content = content_load($cid);
   }
-  
-  
+      
   // Simply trying to view the content.  Do we have permission to view published content of this type?  
   if ($op == 'view' && user_has_permission("view_" . $content->type . "_content")) {
-    if (intval($content->published === 1)) {
+    if (intval($content->published) === 1) {
+      
       return TRUE;
     }
   }
@@ -674,6 +674,16 @@ function content_edit_content_form($type = "", $cid = "") {
     
   }  
 
+
+  if (isset($types[$type]['settings']['#validate_handlers'])) {
+    $form['#validate_handlers'] = $types[$type]['settings']['#validate_handlers'];
+  }
+
+  
+  if (isset($types[$type]['settings']['#submit_handlers'])) {
+    $form['#submit_handlers'] = $types[$type]['settings']['#submit_handlers'];
+  }  
+  
   
   // If a #redirect has not been set, then we'll go back to this content's "view"...
   if (!isset($form['#redirect'])) {
@@ -1816,42 +1826,24 @@ function content_get_types() {
  *
  */
 function content_content_register_content_type() {
-  return array(
-    "page" => array(
-      "title" => t("Page"),
-      "description" => t("This is a basic web page."),     
-    ),
-  );
-}
-
-
-
-/**
- * Sample hook other modules implement to register a content type.
- * 
- * Simply return an array as illustrated below to register your
- * module's content types.
- * 
- * IMPORTNAT:  The type's machine name must be a valid variable name.
- * No spaces or strange symbols.
- *
- */
-function hook_content_register_content_type() {
-  $arr = array(
-    "type_1" => array(
-      "title" => t("Type One"),
-      "description" => t("This is a content type."),
-      "settings" => array(),
-    ),
-    "type_2" => array(
-      "title" => t("Type Two"),
-      "description" => t("This is another content type."),
-      "settings" => array(),
-    ),
-    
+  $arr['page'] = array(
+    'title' => 'Page',
+    'description' => 'This is a basic, publically visible web page.',    
   );
   
+  $fields['body'] = array(
+    'type' => 'textarea_editor',  
+    'label' => '',
+    'filter' => 'basic',        
+  );
+  
+  $arr['page']['fields'] = $fields;
+  
+  
+  
+  
   return $arr;
+  
 }
 
 
