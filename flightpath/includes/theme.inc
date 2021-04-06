@@ -1240,20 +1240,27 @@ function fp_render_sidebar_left_content($bool_for_hamburger_menu = FALSE) {
     'desc' => t('Courses'),
     'class' => 'courses',
     'weight' => 40, 
-  );  
+  );
+  $links[] = array(
+    'path' => 'tools/blank-degrees',
+    'icon' => 'fa-university',
+    'desc' => t('Degrees'),
+    'class' => 'degrees',
+    'weight' => 50, 
+  );      
   $links[] = array(
     'path' => 'stats',
     'icon' => 'fa-bar-chart',
     'desc' => t('Analytics'),
     'class' => 'analytics',
-    'weight' => 50, 
+    'weight' => 60, 
   );  
   $links[] = array(
     'path' => 'admin-tools',
     'icon' => 'fa-bolt',
     'desc' => t('Admin Tools'),
     'class' => 'admin-tools',
-    'weight' => 60, 
+    'weight' => 70, 
   );  
     
   if ($bool_for_hamburger_menu) {

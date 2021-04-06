@@ -1318,15 +1318,7 @@ function advise_display_view($view = "view") {
     $tab_array[2]["active"] = ($screen->view == "type");
     $tab_array[2]["on_click"] = "changeView(\"type\");";
     
-    /*
-    $tab_array[2]["title"] = "Print";
-    $tab_array[2]["type"] = "link";    
-    $tab_array[2]["active"] = FALSE;
-    $tab_array[2]["on_click"] = "popupPrintWindow(\"" . fp_url("$view/print", "advising_view=$screen->view") . "\");";  
-    */
-    
-    
-    
+     
     if ($view == 'what-if') {
       
       //$what_if_select = "<span class='what-if-change-settings'>" . l("<i class='fa fa-cog'></i> " . t("Change Settings"), "what-if", "advising_what_if=yes&what_if_major_code=none&what_if_track_code=none&what_if_track_degree_ids=none&current_student_id=$current_student_id") . "</span>";

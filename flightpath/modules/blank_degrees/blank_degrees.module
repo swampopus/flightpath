@@ -26,7 +26,7 @@ function blank_degrees_menu() {
   $items["blank-degrees/display"] = array(
     "title" => "Blank Degrees - Display",
     "page_callback" => "blank_degrees_display_blank_degree",
-    "access_arguments" => array('access_blank_degrees'),
+    "access_arguments" => array('access_blank_degrees'),    
     "page_settings" => array(
       "display_currently_advising" => TRUE,
       "page_has_search" => FALSE,
@@ -35,14 +35,14 @@ function blank_degrees_menu() {
       "page_show_title" => TRUE,
       "menu_links" => array(         
         0 => array(
-          "text" => "Change degree",
+          "text" => "Degrees",
           "path" => "tools/blank-degrees",
           "query" => "blank_catalog_year=%BLANK_CATALOG_YEAR%",
         ),
       ),      
     ),    
-    
-    "type" => MENU_TYPE_NORMAL_ITEM,
+    "tab_family" => "blank_degrees",    
+    "type" => MENU_TYPE_TAB,
   );
     
   
@@ -135,7 +135,7 @@ function blank_degrees_display_blank_degree() {
     $GLOBALS["fp_advising"]["bool_use_draft"] = false;
   }  
   
-  
+  fp_add_css(fp_get_module_path("advise") . "/css/advise.css");  
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
   
   $student = new Student();
@@ -168,9 +168,12 @@ function blank_degrees_display_blank_degree() {
   }
   fp_set_title($title);
   
-  $rtn .= "<table class='fp-semester-table'>";
+  $rtn .= "<div class='degree-plan-wrapper'>
+            <table class='fp-semester-table'>";
   $rtn .= $screen->display_screen();
-  $rtn .= "</table><br><br>";
+  $rtn .= "</table>
+           </div> 
+              <br><br>";
   
 
   if (user_has_permission("blank_degrees_view_url_options") && !$screen->bool_print) {
@@ -201,13 +204,7 @@ function blank_degrees_display_blank_degree() {
   $tab_array[1]["title"] = "Display by Type";
   $tab_array[1]["active"] = ($screen->view == "type");
   $tab_array[1]["on_click"] = "window.location=\"" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year&blank_view=type") . "\";";
-      
-  if (!fp_screen_is_mobile()) {
-    $tab_array[2]["title"] = "Print";
-    $tab_array[2]["type"] = "link";    
-    $tab_array[2]["active"] = FALSE;  
-    $tab_array[2]["on_click"] = "popupPrintWindow(\"" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year&blank_view=$blank_view&blank_print=yes") . "\");";  
-  }      
+
       
   fp_set_page_sub_tabs($tab_array);
   
@@ -227,7 +224,7 @@ function blank_degrees_perm() {
       ),
       "blank_degrees_view_url_options" => array(
                   "title" => t("View URL options"),
-                  "description" => t("View URL options at the bottom of blank degrees"), 
+                  "description" => t("View URL options at the bottom of blank degrees.  Useful if you allow anonymous users to access blank degrees."), 
   ));
 }
 
@@ -250,9 +247,6 @@ function blank_degrees_select_degree_form() {
     $GLOBALS["fp_advising"]["bool_use_draft"] = false;
   }  
   
-  if (fp_screen_is_mobile()) {
-    fp_add_css(fp_get_module_path("blank_degrees") . "/css/mobile.css");    
-  }      
     
   
   @$blank_catalog_year = $_REQUEST["blank_catalog_year"];
@@ -324,21 +318,12 @@ function blank_degrees_select_degree_form() {
       }
     }
 
-    if (fp_screen_is_mobile()) {
-      $form["mark" . $m++] = array(
-        "value" => $mobile_markup,
-      );
-      $bool_show_continue = FALSE;
-    }
-    else {
-      // NOT mobile
-      $form["blank_degree_id"] = array(
-        "label" => t("Please select a degree"),
-        "type" => "select",
-        "options" => $degree_options,
-      );
+    $form["blank_degree_id"] = array(
+      "label" => t("Please select a degree"),
+      "type" => "select",
+      "options" => $degree_options,
+    );
     
-    }
     
   }
   

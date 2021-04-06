@@ -1,6 +1,9 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-04-06
+  Fixing up blank degrees module, make it show if user has permission.
+
 2021-04-05
   Making new degrees "allow dynamic" by default.
   
