@@ -474,6 +474,7 @@ function user_user_settings_form_submit($form, $form_state) {
                 SET password = ? 
                 WHERE user_id = ? ", array($new_pass, $user->id));
     fp_add_message(t("Password has been updated successfully."));
+    watchdog("user_self_edit", "User with user_id @uid changed password", array("@uid" => $user->id));
   }  
   
   
@@ -492,7 +493,11 @@ function user_user_settings_form_submit($form, $form_state) {
             WHERE user_id = ?", array($timezone, $hide_charts, $default_student_load_tab, $default_notification_method, $image_url, time(), $user->id));
   
   fp_add_message(t("User settings saved successfully."));
-  
+  $values = $form_state['values'];
+  unset($values['new_password1']);
+  unset($values['new_password2']);
+  unset($values['current_password']);
+  watchdog("user_self_edit", "User with user_id @uid updated other values: @other", array("@uid" => $user->id, "@other" => ppm($values, TRUE)));
   
 } // user_settings_form_submit
 
@@ -998,6 +1003,9 @@ function user_edit_user_advisees_form_submit($form, $form_state) {
     
   }
 
+  watchdog("user_edit_advisees", "Update faculty (@cwid) advisees values: @other", array("@cwid" => $faculty_cwid, "@other" => ppm($values, TRUE)));
+  
+
   fp_add_message(t("The advisees have been updated for this faculty member."));
     
 }
@@ -1317,6 +1325,9 @@ function user_edit_user_form_submit($form, $form_state) {
      //fpm("inserting $rid");
      db_query("INSERT INTO user_roles (user_id, rid)
                 VALUES (?, ?) ", $user_id, $rid);
+                
+     watchdog("user_edit", "Setting role for user @$user_id", array("@user_id" => $user_id, "@rid" => $rid));
+
     }
   }
   
@@ -1326,6 +1337,8 @@ function user_edit_user_form_submit($form, $form_state) {
     
     db_query("DELETE FROM faculty WHERE cwid = ? ", $faculty_cwid);
     db_query("DELETE FROM users WHERE cwid = ? AND is_faculty = '1' ", $faculty_cwid);      
+    
+    watchdog("user_edit", "Delete faculty user with cwid @$faculty_cwid", array("@faculty_cwid" => $faculty_cwid));
     
     fp_add_message(t("User has been deleted."));
     fp_goto("admin/users/faculty");
@@ -1343,6 +1356,10 @@ function user_edit_user_form_submit($form, $form_state) {
                 SET password = ? 
                 WHERE cwid = ? 
                 AND is_faculty = '1' ", $new_pass, $faculty_cwid);
+                
+      watchdog("user_edit", "Updating faculty user with cwid @faculty_cwid with new password.", array("@faculty_cwid" => $faculty_cwid));                
+                
+      unset($values["new_password"]);          
     }  
     // Okay, now we can just update everything else.
     // Update users table first...
@@ -1364,6 +1381,8 @@ function user_edit_user_form_submit($form, $form_state) {
              WHERE cwid = ? ", $values["college"], $values["department"], 
                                 $values["major_code_csv"], $faculty_cwid);             
 
+    watchdog("user_edit", "Updating faculty user with various other values: @other", array("@other" => ppm($values, TRUE)));                                
+                                
   }
   else {
     // This is a NEW user!  We need to perform inserts.  Thanks to our validate handler,
@@ -1381,7 +1400,10 @@ function user_edit_user_form_submit($form, $form_state) {
     db_query("INSERT INTO faculty (cwid, college, department, major_code_csv)
               VALUES (?, ?, ?, ?)
              ", $values["new_faculty_cwid"], $values["college"], $values["department"], $values["major_code_csv"]);
-                                  
+    
+    unset($values['new_password']);
+    
+    watchdog("user_edit", "Create new faculty user with various values: @other", array("@other" => ppm($values, TRUE)));                                  
     fp_add_message(t("User created successfully."));
     fp_goto("admin/users/edit-user", "faculty_cwid=" . $values["new_faculty_cwid"]);
   }

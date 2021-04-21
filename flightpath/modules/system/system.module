@@ -2844,6 +2844,7 @@ function system_login_form_validate($form, &$form_state) {
     $form_state["passed_authentication"] = TRUE;
     $form_state["db_row"]["user_id"] = 1;
     $form_state["db_row"]["user_name"] = "FULL ACCESS USER";
+    
     return;
   }  
 
@@ -2866,6 +2867,7 @@ function system_login_form_validate($form, &$form_state) {
   // Check the user's password is valid.
   $stored_hash = @$cur["password"];
   if (!user_check_password($password, $stored_hash)) {
+    watchdog("login", "@user has not logged in.  Username/password could not be verified.  Incorrect password?", array("@user" => $user), WATCHDOG_ALERT);
     form_error("password", t("Sorry, but that username and password combination could not
                             be found.  Please check your spelling and try again."));
     return;    
@@ -2874,7 +2876,8 @@ function system_login_form_validate($form, &$form_state) {
   
   // Have we disabled all logins except for "admin" (user id = 1)?
   if (intval($cur['user_id']) !== 1 && variable_get('disable_login_except_admin', 'no') == 'yes') {
-    fp_goto("disable-login");
+    watchdog("login", "@user has not logged in.  All logins except admin are disabled.", array("@user" => $user), WATCHDOG_ALERT);    
+    fp_goto("disable-login");    
     return;
   }
   
@@ -2889,6 +2892,8 @@ function system_login_form_validate($form, &$form_state) {
       
       form_error("password", t("Sorry, your rank/classification is %rc.  At this time FlightPath is only available to students
                                 in the following ranks/classifications: @ranks_str", array("%rc" => $rank_code, "@ranks_str" => $allowed_ranks_str)));
+      watchdog("login", "@user has not logged in.  User rank/classification is %rc.  At this time FlightPath is only available to students
+                                in the following ranks/classifications: @ranks_str", array("@user" => $user, "%rc" => $rank_code, "@ranks_str" => $allowed_ranks_str), WATCHDOG_ALERT);                                
       return;    
       
     }
@@ -2899,6 +2904,7 @@ function system_login_form_validate($form, &$form_state) {
   if (intval($cur['user_id']) !== 1 && $list = system_get_user_whitelist()) {   
     if (!in_array($cur['user_name'], $list) && ($cur['email'] != '' && !in_array($cur['email'], $list))) {
       form_error("password", t("Sorry, but only certain users are allowed access at this time.  If you believe you need access, please contact your system administrator."));
+      watchdog("login", "@user has not logged in.  Only certain users allowed at this time.", array("@user" => $user), WATCHDOG_ALERT);
       return; 
     }
   }
@@ -2934,6 +2940,7 @@ function system_login_form_submit($form, &$form_state) {
   
   if (!$passed) {
     fp_add_message(t("Sorry, there has been an error while trying to authenticate the user."));
+    watchdog("login", "@user has not logged in.  Error while trying to authenticate.  Wrong password?", array("@user" => $user), WATCHDOG_ALERT);
     return;
   }
 

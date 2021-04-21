@@ -278,6 +278,9 @@ function user_student_edit_student_courses_form_submit($form, $form_state) {
    
   }  
 
+  watchdog("user_edit_courses", "Update student (@cwid) courses values: @other", array("@cwid" => $student_id, "@other" => ppm($values, TRUE)));
+   
+  
   fp_add_message(t("Student courses updated."));
   
     
@@ -708,6 +711,9 @@ function user_edit_student_user_form_submit($form, $form_state) {
                 SET password = '?' 
                 WHERE cwid = '?' 
                 AND is_student = '1' ", $new_pass, $student_cwid);
+                
+      unset($values['new_password']);
+      watchdog("user_edit", "Update student user with cwid @cwid with new password", array("@cwid" => $student_cwid));
     }  
     // Okay, now we can just update everything else.
     // Update users table first...
@@ -731,7 +737,7 @@ function user_edit_student_user_form_submit($form, $form_state) {
              WHERE cwid = '?'", $values["cumulative_hours"], $values["gpa"], $values["rank_code"],
                                 $values["catalog_year"], 
                                 $values["is_active"], $student_cwid);             
-
+    watchdog("user_edit", "Update student user with various values: @other", array("@other" => ppm($values, TRUE)));
     fp_add_message(t("User updated successfully."));
 
   }
@@ -758,6 +764,9 @@ function user_edit_student_user_form_submit($form, $form_state) {
     fp_add_message(t("User created successfully."));
     
     $student_cwid = $values["new_student_cwid"];
+    
+    unset($values['new_password']);
+    watchdog("user_edit", "Create new student user with various values: @other", array("@other" => ppm($values, TRUE)));
         
   }
   

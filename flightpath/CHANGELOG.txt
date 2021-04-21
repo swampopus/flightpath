@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-04-20
+  Making sure we log incorrect login attempts.
+  
+
 2021-04-06
   Fixing up blank degrees module, make it show if user has permission.
   
