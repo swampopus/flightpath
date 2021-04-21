@@ -63,6 +63,9 @@ CREATE TABLE `content__schedule_unavailable_time` (
   `vid` int(10) unsigned NOT NULL,
   `field__faculty_id` varchar(255) DEFAULT NULL,
   `field__days` text DEFAULT NULL,
+  `field__time_selector` varchar(255) DEFAULT NULL,
+  `field__day_start_hour` varchar(255) DEFAULT NULL,
+  `field__day_stop_hour` varchar(255) DEFAULT NULL,
   `field__start_time` varchar(255) DEFAULT NULL,
   `field__end_time` varchar(255) DEFAULT NULL,
   `field__ics_url` varchar(255) DEFAULT NULL,
@@ -71,7 +74,10 @@ CREATE TABLE `content__schedule_unavailable_time` (
   KEY `field__start_time` (`field__start_time`),
   KEY `field__end_time` (`field__end_time`),
   KEY `field__ics_url` (`field__ics_url`),
-  KEY `field__faculty_id` (`field__faculty_id`)
+  KEY `field__faculty_id` (`field__faculty_id`),
+  KEY `field__time_selector` (`field__time_selector`),
+  KEY `field__day_start_hour` (`field__day_start_hour`),
+  KEY `field__day_stop_hour` (`field__day_stop_hour`)
 );  
   ";
   db_query($q);

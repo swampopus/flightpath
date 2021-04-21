@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-04-21
+  Made it simpler to define "unavailable days" for scheduling appointments.
+  
+
 2021-04-20
   Making sure we log incorrect login attempts.
   

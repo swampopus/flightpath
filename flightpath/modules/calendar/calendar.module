@@ -1001,40 +1001,98 @@ function calendar_get_available_faculty_schedule($faculty_id, $event_type_cid, $
   foreach ($unavailable_times as $ut_content) {
         // If this is an ICS link, then skip for now.
         if (trim($ut_content->field__ics_url['value']) != '') continue;
+                
+        $time_selector = trim($ut_content->field__time_selector['value']);
+        if ($time_selector == "") $time_selector = "default";
                         
         foreach ($ut_content->field__days['value'] as $dow) {
+
+
           
-          $st = $ut_content->field__start_time['value'];
-          $et = $ut_content->field__end_time['value'];
+          $start_end_array = array();
                     
-          //fpm($st . " " . $et);          
+          if ($time_selector == "manual") {          
+            $st = $ut_content->field__start_time['value'];
+            $et = $ut_content->field__end_time['value'];
+
+            $start_end_array[] = array(
+              'start' => $st,
+              'end' => $et,
+              'convert_tz' => TRUE,  // since these are in UTC, they will indeed need to be converted.
+            );
+                        
+          } // manual
+          else if ($time_selector == "default") {
+            
+            // We will construct times based on the day_start_hour and stop_hour          
+            $st = $ut_content->field__day_start_hour['value'] . ":00:00";
+            $et = $ut_content->field__day_stop_hour['value'] . ":00:00";
+           
+            if ($et == "0:00:00") $et = "23:59:59";  // meaning, we are stopping at midnight
+
+            
+            // The first one is the start.  We go from midnight to $st.
+            $start_end_array[] = array(
+              'start' => "00:00:00",
+              'end' => $st,
+              'convert_tz' => FALSE, // these times are in the faculty member's time zone.  They'll NOT need to be converted to UTC in the next step.
+            );  
+                        
+            // The second one is the end.  We go from $et to 23:59:59
+            $start_end_array[] = array(
+              'start' => $et,
+              'end' => "23:59:59",
+              'convert_tz' => FALSE, // these times are in the faculty member's time zone.  They'll NOT need to be converted to UTC in the next step.
+            );
+                        
+          } // default
+          else if ($time_selector == "none") {
+            // The user doesn't work at all on the selected days.
+            // We go from 00:00:00 to 23:59:59
+            $start_end_array[] = array(
+              'start' => "00:00:00",
+              'end' => "23:59:59",
+              'convert_tz' => FALSE, // these times are in the faculty member's time zone.  They'll NOT need to be converted to UTC in the next step.
+            );
+                        
+          } // none
+
+          
                     
-          // st and et are in UTC.  The original faculty user's timezone is tz.
-          // Let's first convert them to the ORIGINAL timezone FROM UTC.
-             
-          $sample_date = '2020-01-01';
+          // Now, populate our unavailable array          
+          foreach ($start_end_array as $c => $details) {
+                         
+            $st = $details['start'];
+            $et = $details['end'];
+            $convert_tz = $details['convert_tz'];
           
-          // Grab the UTC times.  Since we only care about hours/minutes, it's OK that we use the same date.
-          $utc_st = strtotime($sample_date . " " . $st);
-          $utc_et = strtotime($sample_date . " " . $et);
-          
-          //fpm($utc_st . " " . $utc_et);
-          
-          
-          // Convert the UTC time into faculty member's timezone
-          $tz_st = convert_time($utc_st, 'UTC', $tz);
-          $tz_et = convert_time($utc_et, 'UTC', $tz);
-    
-          //fpm($tz_st . " " . $tz_et);
+            // st and et are in UTC.  The original faculty user's timezone is tz.
+            // Let's first convert them to the ORIGINAL timezone FROM UTC.
+               
+            $sample_date = '2020-01-01';
+            
+            // Grab the UTC times.  Since we only care about hours/minutes, it's OK that we use the same date.
+            $utc_st = strtotime($sample_date . " " . $st);
+            $utc_et = strtotime($sample_date . " " . $et);
+            
+            $tz_st = $utc_st;
+            $tz_et = $utc_et;
+            if ($convert_tz == TRUE) {
+              // Convert the UTC time into faculty member's timezone
+              $tz_st = convert_time($utc_st, 'UTC', $tz);
+              $tz_et = convert_time($utc_et, 'UTC', $tz);
+            }
+            // The start and end times are now in the original faculty member's timezone.
+            $unavailable_by_days[$dow][] = array(
+              'start_time' => date("H:i", $tz_st),  
+              'end_time' => date("H:i", $tz_et),   
+              'tz' => $tz,
+            );
+          }
           
 
-          // The start and end times are now in the original faculty member's timezone.
-          $unavailable_by_days[$dow][] = array(
-            'start_time' => date("H:i", $tz_st),  
-            'end_time' => date("H:i", $tz_et),   
-            'tz' => $tz,
-          );
-        }
+          
+        } // foreach field__days
         
         
   } // foreach unavailable_times  
@@ -1042,7 +1100,8 @@ function calendar_get_available_faculty_schedule($faculty_id, $event_type_cid, $
     // Add to the unavailable_by_days array:
   // existing appointments on our FP calendar
   
- 
+    
+   
   $existing_appointments = calendar_get_appointments_for_faculty($faculty_id, date('Y-m-d', strtotime("NOW - 24 HOURS")), date('Y-m-d', strtotime('NOW + 4 MONTHS')), TRUE);
   
   // Okay, we need to find out how long this event lasts + any buffer time.
@@ -2100,6 +2159,7 @@ function calendar_content_register_content_type() {
       'title' => array(
         'auto' => TRUE,
       ),
+      'css' => fp_get_module_path("calendar") . "/css/style.css",
     ),
   );
 
@@ -2113,6 +2173,7 @@ function calendar_content_register_content_type() {
         'description' => t("This is what the student will select for the type of event they whish to schedule with you.
                              <br>Ex: In-Person Meeting, Phone Call, Video Call"),
       ),
+      'css' => fp_get_module_path("calendar") . "/css/style.css",
     ),
   );
 
@@ -2124,6 +2185,8 @@ function calendar_content_register_content_type() {
       'title' => array(
         'label' => t("Title or Short Description"),
       ),
+      'js' => fp_get_module_path("calendar") . "/js/calendar.js",
+      'css' => fp_get_module_path("calendar") . "/css/style.css",
     ),
   );
 
@@ -2318,9 +2381,51 @@ function calendar_content_register_content_type() {
     'type' => 'checkboxes',
     'label' => 'Days affected',
     'options' => array(0 => 'Sun', 1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6=> 'Sat'),
-    'description' => t("Select the days which this unavailable time refers to."),
+    'description' => t("Select the days which this unavailable time entry refers to."),
     'weight' => 20,
   );
+
+  $hour_options = array();
+  for ($t = 0; $t <= 23; $t++) {
+    $twelve_version = $t . "am";
+    if ($t == 0) {
+      $twelve_version = "12am (midnight)";
+    }
+    
+    if ($t > 12) {
+      $twelve_version = ($t - 12) . "pm";
+    }
+    $hour_options[$t] = $twelve_version;
+  }
+
+  
+  
+  $fields['time_selector'] = array(
+    'type' => 'radios',
+    'label' => t('How would you like to describe when you are unavailable to take appointments on the selected days?'),
+    'options' => array('' => 'Default', 'manual' => 'Manual Entry', 'none' => 'None (no appointments on these days)'),
+    'weight' => 23,
+  );
+
+  $fields['day_start_hour'] = array(
+    'type' => 'select',
+    'label' => t('What time do you <u>begin</u> accepting appointments on the selected days?'),
+    'options' => $hour_options,
+    'required' => TRUE,
+    'hide_please_select' => TRUE,
+    'weight' => 25,
+  );
+
+  $fields['day_stop_hour'] = array(
+    'type' => 'select',
+    'label' => t('What time do you <u>stop</u> accepting appointments on the selected days?'),
+    'options' => $hour_options,
+    'required' => TRUE,
+    'hide_please_select' => TRUE,
+    'weight' => 25,
+  );
+
+  
 
   $fields['start_time'] = array(
     'type' => 'time',
@@ -2517,11 +2622,6 @@ function calendar_form_alter(&$form, $form_id) {
 
       $form['#validate_handlers'][] = 'calendar_appointment_content_form_validate';
 
-      //fp_add_js(fp_get_module_path("calendar") . "/js/engagements.js");
-      //fp_add_css(fp_get_module_path("engagements") . "/css/style.css");
-      
-      fp_add_css(fp_get_module_path("calendar") . "/css/style.css");
-      
       // If this is a NEW form, then check for values in the URL to auto-fill.      
       if ($form['cid']['value'] === 'new') {
         
@@ -2575,7 +2675,7 @@ function calendar_form_alter(&$form, $form_id) {
     
     
     if (@$form['type']['value'] == 'schedule_event_type') {
-      fp_add_css(fp_get_module_path("calendar") . "/css/style.css");
+      
       if ($form['cid']['value'] === 'new') {
             
         $db = get_global_database_handler();  
@@ -2609,7 +2709,7 @@ function calendar_form_alter(&$form, $form_id) {
     
     
     if (@$form['type']['value'] == 'schedule_unavailable_time') {
-      fp_add_css(fp_get_module_path("calendar") . "/css/style.css");
+      
       if ($form['cid']['value'] === 'new') {
             
         $db = get_global_database_handler();  
@@ -3052,7 +3152,7 @@ function calendar_content_alter(&$render, $render_id) {
       if (user_has_permission("can_cancel_own_appointments")) {
         if ($user->cwid == $content->field__student_id['value'] || $user->cwid == $content->field__faculty_id['value'] || $user->id == 1) {
           
-          // TODO: if we are in an iframe, include that in query
+          // if we are in an iframe, include that in query
           $query = "";
           if (isset($_REQUEST['window_mode'])) {
             $query .= "window_mode=" . $_REQUEST['window_mode'];

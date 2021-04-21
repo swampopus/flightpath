@@ -630,6 +630,10 @@ function content_edit_content_form($type = "", $cid = "") {
   }
 
   
+  fp_add_body_class('content-edit-type--' . $type);
+  
+  
+  
   // For simplicity, and because it causes no harm except a small amount of extra bandwidth, we will
   // state that all "content" forms are multipart (so they can handle file uploads) even if there
   // are no files being uploaded.
@@ -690,6 +694,16 @@ function content_edit_content_form($type = "", $cid = "") {
     $form['#redirect'] = array('path' => 'content/' . $cid);      
   }
       
+  
+  // Any js or css to add for this form, defined in the settings?
+  if (isset($types[$type]['settings']['js'])) {
+    fp_add_js($types[$type]['settings']['js']);
+  }
+  if (isset($types[$type]['settings']['css'])) {
+    fp_add_css($types[$type]['settings']['css']);
+  }
+
+  
   
   if ($content->delete_flag == 1) {
     $form['mark_content_deleted'] = array(
