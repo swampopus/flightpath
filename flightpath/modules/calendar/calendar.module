@@ -536,6 +536,7 @@ function calendar_display_user_appointment_settings_page() {
             <th class='actions'>Actions</th>
             <th>Short Name</th>
             <th>Days</th>
+            <th>Unavailable Desc</th>
             <th>Start Time</th>            
             <th>End Time</th>            
             <th>External calendar?</th>            
@@ -563,6 +564,33 @@ function calendar_display_user_appointment_settings_page() {
       $ics = 'Y';
       $start_time = $end_time = "";
     }
+        
+    $time_selector_disp = $content->field__time_selector['display_value'];
+    $time_selector = $content->field__time_selector['value'];
+    
+    if ($time_selector == "none") {
+      $time_selector_disp = t("None on these days");
+      $start_time = "";
+      $end_time = "";
+    }
+    
+    if ($time_selector == "" || $time_selector == "default") {
+      $time_selector_disp = t("No appointments...");
+      $start_time = "before " . $content->field__day_start_hour['display_value'];
+      $end_time = "after " . $content->field__day_stop_hour['display_value'];
+    }
+    
+    if ($time_selector == "manual") {
+      $time_selector_disp = t("No appointments during...");
+    }
+    
+    
+    
+    if ($ics) {
+      $time_selector_disp = "Using external cal";
+      $start_time = "";
+      $end_time = "";
+    }
     
     
     $dtitle = t("Edit Unavailability Time");        
@@ -573,9 +601,9 @@ function calendar_display_user_appointment_settings_page() {
                 <td class='actions'>$edit_link</td>
                 <td>$content->title</td>
                 <td>$days</td>
+                <td>$time_selector_disp</td>
                 <td>$start_time</td>
                 <td>$end_time</td>
-                <td>$ftz</td>
                 <td>$ics</td>
              </tr>";
       
