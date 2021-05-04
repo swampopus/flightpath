@@ -630,6 +630,15 @@ function admin_edit_group_form() {
     "cols" => 80,
     "value" => $courses,
     "weight" => 70,
+    "popup_description" => t("Note:  You may specify <i>hidden</i> courses by placing a - (minus sign) before the course name.
+                              <br> Ex:  - ART 101
+                              <br> This will cause ART 101 not to show to the user as a choice, but FlightPath will still automatically fill in ART 101
+                              into this group, if the student completes it.
+                              <br><br>
+                              You may also <i>recommend</i> a course by place a * (asterisk) before the course name.
+                              <br> Ex:  * ART 101
+                              <br>This will cause <b>ART 101</b> to appear as bold to the user when viewing the list of courses in this group."),
+                              
   );
   // if a definition was specified, we need to disable the courses textarea.
   if (trim($group->definition)) {
