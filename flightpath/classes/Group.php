@@ -10,7 +10,7 @@ class Group extends stdClass
 	public $title, $icon_filename, $group_id, $requirement_type, $min_grade, $group_name;
 	public $hours_required, $min_hours_allowed, $hours_remaining, $hours_fulfilled, $hours_fulfilled_for_credit;
 	public $hours_required_by_type, $req_by_degree_id;
-	public $assigned_to_semester_num, $bool_placeholder, $data_entry_comment;
+	public $assigned_to_semester_num, $bool_placeholder, $data_entry_comment, $public_note;
 	public $list_courses, $list_groups, $db, $count_of_matches, $bool_winning_branch;
 	public $catalog_year;
 	public $priority;
@@ -287,6 +287,7 @@ class Group extends stdClass
   					$course_c = new Course();
   					$course_c->bool_use_draft = $this->bool_use_draft;
   					$course_c->course_id = $cur["course_id"];
+  					$course_c->db_group_attributes = $cur['attributes'];
   					$course_c->db_group_requirement_id = $use_id;
   					$course_c->db = $this->db;
   					$course_c->catalog_year = $this->catalog_year;
@@ -332,6 +333,7 @@ class Group extends stdClass
           $course_c = new Course();
           $course_c->bool_use_draft = $this->bool_use_draft;
           $course_c->course_id = $cur["course_id"];
+          $course_c->db_group_attributes = $cur['attributes'];
           $course_c->db_group_requirement_id = $use_id;
           $course_c->db = $this->db;
           $course_c->catalog_year = $this->catalog_year;
@@ -460,6 +462,7 @@ class Group extends stdClass
 				$course->assigned_to_group_id = $this->group_id;
         $course->requirement_type = $this->requirement_type;
 				$course->db_group_requirement_id = $use_id;
+        $course->db_group_attributes = $cur['attributes'];
 				$course->specified_repeats = $cur["course_repeats"];
 				if ($cur["course_repeats"] > 0)
 				{
@@ -522,8 +525,7 @@ class Group extends stdClass
 
 
 	function load_descriptive_data()
-	{
-	  
+	{	  
     $cur = null;
     static $group_descriptive_data_cache = array();
     if (isset($group_descriptive_data_cache[$this->get_db_group_id()])) {
@@ -550,6 +552,7 @@ class Group extends stdClass
 		$this->db_delete_flag = trim($cur["delete_flag"]);
 		$this->db_catalog_repeat = trim($cur["catalog_repeat"]);
 		$this->catalog_year = trim($cur["catalog_year"]);
+		$this->public_note = trim($cur["public_note"]);
 
 
 		if ($this->group_id == -88)

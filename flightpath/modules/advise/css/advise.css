@@ -13,7 +13,23 @@
   display: none;
 }
 
-.c-fieldset {
+
+.group-public-note {
+  border:1px solid orange;
+  padding: 5px;
+  margin: 10px;  
+}
+
+.group-attr-hidden {
+  display: none;
+}
+
+.group-attr-recommended {
+  font-weight: bold;
+}
+
+
+.c-fieldset { 
   margin-top: 10px;
 }
 

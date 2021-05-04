@@ -16,7 +16,7 @@ class Course extends stdClass
   // Database & misc related:
   public $random_id, $db_advised_courses_id;
   public $bool_placeholder, $db, $db_substitution_id_array, $db_unassign_transfer_id;
-  public $db_exclude, $data_entry_comment, $array_index, $data_entry_value;
+  public $db_exclude, $data_entry_comment, $array_index, $data_entry_value, $db_group_attributes;
   public $db_group_requirement_id;  // the id from the group_requirements table where this was specified.
 
   // Course catalog data related:

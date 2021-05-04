@@ -1,6 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-05-04
+  Added fields to groups and group_requirements tables (incl. draft_) to facilitate public notes in groups,
+  as well as "attributes" on a per-requirement level.
+  
+  Changed popup description to use fp_alert() function, with base64 encoding so we don't have to worry
+  about trouble characters, and can enter HTML as well.
+  
+
 2021-04-21
   Made it simpler to define "unavailable days" for scheduling appointments.
   

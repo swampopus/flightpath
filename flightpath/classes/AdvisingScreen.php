@@ -4482,10 +4482,6 @@ function draw_menu_items($menu_array) {
     $icon_html = "";
     $pts = "";   
 
-if ($course->name_equals('MUAL 265')) {
-  fpm($course);
-}
-
 
     $theme["icon"] = array();
 
@@ -4515,6 +4511,17 @@ if ($course->name_equals('MUAL 265')) {
 		{
 			$w3 = "15%";
 		}
+
+    $attributes = $course->db_group_attributes;
+    $attributes_class = "";
+    if ($attributes == "*") {
+      $attributes_class .= "group-attr-recommended";
+    }
+    if ($attributes == "-") {
+      $attributes_class .= "group-attr-hidden";
+    }
+
+
 
 		$course_id = $course->course_id;
 		//$group_id = $course->assigned_to_group_id;
@@ -4682,7 +4689,7 @@ if ($course->name_equals('MUAL 265')) {
     $js_code = $theme["course"]["js_code"];
     
 		$pC .= "
-   		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left' class='group-course-row'>
+   		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left' class='group-course-row $attributes_class'>
      	<tr height='20' class='$hand_class {$theme["course"]["display_status"]} {$theme["course"]["extra_classes"]}'
       		$on_mouse_over title='{$theme["course"]["title"]}'>
       		<td width='$w1_1' class='group-w1_1' align='left'>$op$hid<span onClick='$js_code'>$icon_html</span></td>
@@ -5205,12 +5212,17 @@ if ($course->name_equals('MUAL 265')) {
 
 		$display_semesterNum = $place_group->assigned_to_semester_num;
 		$pC .= "<!--MSG--><!--MSG2--><!--BOXTOP-->";
-
 		$bool_display_submit = true;
 		$bool_display_back_to_subject_select = false;
 		$bool_subject_select = false;
 		$bool_unselectableCourses = false;
 		$final_course_list = new CourseList();
+
+    $public_note = trim($group->public_note);    
+    if ($public_note) {
+      $pC .= "<tr><td colspan='20'><div class='group-public-note'>" . $public_note . "</div></td></tr>";
+    }
+
 
 		$group->list_courses->reset_counter();
 		if (!($group->list_courses->is_empty))
@@ -5344,7 +5356,7 @@ if ($course->name_equals('MUAL 265')) {
 				// so we should add all the branches to the
 				// newCourseList.
 
-								$group->list_groups->reset_counter();
+				$group->list_groups->reset_counter();
 				while($group->list_groups->has_more())
 				{
 					$branch = $group->list_groups->get_next();
@@ -5680,7 +5692,7 @@ if ($course->name_equals('MUAL 265')) {
 		}
 
 		$old_course = null;
-    
+    $bool_has_recommended = FALSE;
 		$course_list->reset_counter();
 		while($course_list->has_more())
 		{
@@ -5690,7 +5702,10 @@ if ($course->name_equals('MUAL 265')) {
 				continue;
 			}
 
-
+      if ($course->db_group_attributes == "*") {
+        $bool_has_recommended = TRUE;
+      }
+ 
 			$rtn .= "<tr><td colspan='8'>";
       
 			// Only display this course for advising IF it hasn't been fulfilled, or if it has infinite repeats, and only if it isn't already
@@ -5703,6 +5718,10 @@ if ($course->name_equals('MUAL 265')) {
 			} 
 			$rtn .= "</td></tr>";
 		}
+
+    if ($bool_has_recommended) {
+      $rtn .= "<tr><td colspan='8'><span class='group-recommended-message'>" . t("<b>Note:</b> Courses in <strong>bold</strong> are recommended.") . "</span></td></tr>";
+    }
 
 
 		return $rtn;

@@ -59,6 +59,7 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
   $icon_filename = trim($values["icon_filename"]);
   $data_entry_comment = trim($values["data_entry_comment"]);
   $catalog_repeat = intval(trim($values["catalog_repeat"]));
+  $public_note = trim($values["public_note"]);
 
   // Save the entire post to the log.
  
@@ -96,15 +97,16 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
   }
 
   $res = db_query("UPDATE draft_groups
-              SET group_name = '?',
-              title = '?',
-              priority = '?',
-              icon_filename = '?',
-              catalog_repeat = '?',
-              data_entry_comment = '?'
+              SET group_name = ?,
+              title = ?,
+              priority = ?,
+              icon_filename = ?,
+              catalog_repeat = ?,
+              public_note = ?,
+              data_entry_comment = ?              
               WHERE
-                group_id = '?' ", 
-              $group_name, $title, $priority, $icon_filename, $catalog_repeat, $data_entry_comment, $group_id);
+                group_id = ? ", 
+              $group_name, $title, $priority, $icon_filename, $catalog_repeat, $public_note, $data_entry_comment, $group_id);
 
   // We need to delete all the existing course & subgroup requirements from this group.
   // That entails first seeing what subgroups were required and deleting them,
@@ -168,6 +170,9 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
     $line = str_replace("  ", " ", $line);
     $line = str_replace("  ", " ", $line);
     $line = str_replace("  ", " ", $line);
+    $line = str_replace("  ", " ", $line);
+    $line = str_replace("  ", " ", $line);
+    $line = str_replace("  ", " ", $line);
 
     // Does this line contain at least one & symbol?  If it does,
     // then this is a subgroup (branch).  If not, then we can insert
@@ -187,9 +192,16 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
         $res = db_query($query, $group_id, $branch_id);
 
       }
+      
+      $attributes = "";
+      if (substr($line, 0, 1) == "-") $attributes .= "-";  // hidden attribute
+      if (substr($line, 0, 1) == "*") $attributes .= "*";  // recommended attribute            
+      $line = trim(str_replace("-", "", $line));  // get rid of attributes, if any.
+      $line = trim(str_replace("*", "", $line));  // get rid of attributes, if any.
+      
       $c_tokes = explode("&",$line);
       for ($cT = 0; $cT < count($c_tokes); $cT++)
-      {
+      {        
         $tokens = explode(" ", trim($c_tokes[$cT]));
         $subject_id = trim($tokens[0]);
         $course_num = trim($tokens[1]);
@@ -220,9 +232,9 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
                     
           $query = "INSERT INTO draft_group_requirements
                     (group_id, course_id,
-                    course_min_grade, course_repeats, data_entry_value)
-                    values ('?','?','?','?', ?) ";
-          $res = db_query($query, $branch_id, $course_id, $min_grade, $course_repeats, "$subject_id~$course_num");
+                    course_min_grade, course_repeats, attributes, data_entry_value)
+                    values (?,?,?,?, ?, ?) ";
+          $res = db_query($query, $branch_id, $course_id, $min_grade, $course_repeats, $attributes, "$subject_id~$course_num");
         } 
         else {
           // The course_id could not be found!
@@ -244,6 +256,14 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
     else {
       // Did NOT contain an ampersand (&), so this goes in the
       // regular course requirements.
+      
+      $attributes = "";
+      if (substr($line, 0, 1) == "-") $attributes .= "-";  // hidden attribute
+      if (substr($line, 0, 1) == "*") $attributes .= "*";  // recommended attribute            
+      $line = trim(str_replace("-", "", $line));  // get rid of attributes, if any.
+      $line = trim(str_replace("*", "", $line));  // get rid of attributes, if any.
+            
+      
       $tokens = explode(" ", $line);
       $subject_id = @trim($tokens[0]);
       $course_num = @trim($tokens[1]);
@@ -272,9 +292,9 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
       if ($course_id = $db->get_course_id($subject_id, $course_num, "", true)) {
         $query = "INSERT INTO draft_group_requirements
                     (group_id, course_id,
-                    course_min_grade, course_repeats, data_entry_value)
-                    values (?,?,?,?,?) ";
-        $res = db_query($query, $group_id, $course_id, $min_grade, $course_repeats, "$subject_id~$course_num");
+                    course_min_grade, course_repeats, attributes, data_entry_value)
+                    values (?,?,?,?,?,?) ";
+        $res = db_query($query, $group_id, $course_id, $min_grade, $course_repeats, $attributes, "$subject_id~$course_num");
         
       } 
       else {
@@ -544,9 +564,11 @@ function admin_edit_group_form() {
     "value" => $group->group_name,
     "maxlength" => 100,
     "required" => TRUE,
-    "popup_description" => t("The group's \"internal machine name\" is internal to FlightPath, and is never seen by the average user.
-                        You may use this to distinguish between groups with the same title. Ex:
-                        major_electives_sr and major_electives_jr.  The field must be unique within each catalog year, and
+    "popup_description" => t("The group's <b>internal machine name</b> is internal to FlightPath, and is never seen by the average user.
+                        <br>
+                        You may use this to distinguish between groups with the same title. 
+                        <br>Ex: <i>major_electives_sr</i> and <i>major_electives_jr</i>.  
+                        <br>The field must be unique within each catalog year, and
                         consist of only letters, numbers, and underscores.  FlightPath will make
                         sure it is unique when you save, and give you a chance to change it if it
                         is not."),
@@ -635,15 +657,6 @@ function admin_edit_group_form() {
     "weight" => 80,
   );
 
-  $form["data_entry_comment"] = array(
-    "type" => "textarea",
-    "label" => t("Optional Comment: (only seen by other FlightPath administrators)"),
-    "rows" => 3,
-    "cols" => 80,
-    "value" => $group->data_entry_comment,
-    "weight" => 90,
-  );
- 
   
   $form["submit"] = array(
     "type" => "submit",
@@ -651,7 +664,49 @@ function admin_edit_group_form() {
     "prefix" => "<hr>",
     "weight" => 100,
   );
+
   
+  // Advanced options
+  $elements = array();     
+  $bool_start_closed = TRUE;
+  if (@trim($group->public_note) != "" || trim($group->data_entry_comment) != "") {
+    $bool_start_closed = FALSE;
+  }
+     
+  $elements['public_note'] = array(
+    'type' => 'textarea',
+    'label' => t('Public Note'),
+    'rows' => 4,
+    'value' => @$group->public_note,
+    'description' => t("You may enter simple HTML in this field. Ex: &lt;b&gt;bold&lt;/b&gt; or &lt;i&gt;italics&lt;/i&gt;"),
+    'popup_description' => t("A public note will appear at the top of the group when displayed in the dialog popup in FlightPath."),    
+    "weight" => 50010,    
+  ); 
+
+  $elements["data_entry_comment"] = array(
+    "type" => "textarea",
+    "label" => t("Optional Admin Comment: (only seen by other FlightPath administrators)"),
+    "rows" => 3,
+    "cols" => 80,
+    "value" => $group->data_entry_comment,
+    "weight" => 90,
+  );
+  
+  
+    
+  // Place in our advanced options fs.
+  $form['advanced_options_fs'] = array(
+    'type' => 'cfieldset',
+    'label' => t('View advanced options'),
+    'elements' => array($elements),
+    'start_closed' => $bool_start_closed,
+    "weight" => 50100,
+  ); 
+    
+  
+  
+  
+    
   // Only show delete option based on permission  
   if (user_has_permission("can_delete_data_entry")) {  
     $form["mark" . $m++] = array(
@@ -660,7 +715,7 @@ function admin_edit_group_form() {
                         " . t("Delete this group?") . " <input type='button' value='X'
                         onClick='adminDeleteGroup(\"$group_id\");'>
                       </div>",
-      "weight" => 200,
+      "weight" => 600000,
     );
  
   }
@@ -1039,13 +1094,20 @@ function admin_get_group_courses(Group $group) {
   $group->list_courses->reset_counter();
   while($group->list_courses->has_more())
   {
+    $course_line = "";
+    $attributes = "";
     $c = $group->list_courses->get_next();
     if (strstr($c->subject_id , "&"))
     {
       $c->subject_id = str_replace("&", "_A_", $c->subject_id);
 
     }
-    $course_line = "$c->subject_id $c->course_num";
+    
+    if ($c->db_group_attributes != "") {
+      $attributes = $c->db_group_attributes . " ";
+    }
+    
+    $course_line .= "$attributes$c->subject_id $c->course_num";
     //$rtn .= "$c->subject_id $c->course_num";
 
     if ($c->min_grade != "" && $c->min_grade != "D")
@@ -1090,13 +1152,19 @@ function admin_get_group_courses(Group $group) {
       $g->list_courses->reset_counter();
       while($g->list_courses->has_more())
       {
+        $attributes = "";
         $c = $g->list_courses->get_next();
         if (strstr($c->subject_id , "&"))
         {
           $c->subject_id = str_replace("&", "_A_", $c->subject_id);
         }
 
-        $rtn .= "$c->subject_id $c->course_num";
+
+        if ($c->db_group_attributes != "") {
+          $attributes = $c->db_group_attributes . " ";
+        }
+
+        $rtn .= "$attributes$c->subject_id $c->course_num";
 
         if ($c->min_grade != "" && $c->min_grade != "D")
         {

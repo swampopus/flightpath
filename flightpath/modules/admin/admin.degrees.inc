@@ -1425,11 +1425,11 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     "value" => $degree->degree_class,
     "hide_please_select" => TRUE,
     "popup_description" => t("Select which classification this degree plan is listed under.  The number beside the title is the 'level' of the degree classification.
-                            
-                            1 - Degrees which a student may graduate in. Ex: Majors.
-                            2 - Degree plans which are secondary to top level degree plans. Ex: Minors.
-                            3 - Degree plans which are only selectable as add-ons to an existing degree plan. Ex: Concentrations.
-                            
+                            <br>
+                            <br>1 - Degrees which a student may graduate in. Ex: Majors.
+                            <br>2 - Degree plans which are secondary to top level degree plans. Ex: Minors.
+                            <br>3 - Degree plans which are only selectable as add-ons to an existing degree plan. Ex: Concentrations.
+                            <br><br>
                             You may edit these classifications in the Configure School Data form, from the Admin Console."), 
     "weight" => 1030,    
   );
@@ -1457,13 +1457,13 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     "value" => $degree->db_advising_weight,
     "popup_description" => t("If this degree is ever combined with another degree, this value, the advising weight, determines
                               the order in which the degrees will be displayed on the View tab and in What If mode.
-                              
+                              <br><br>
                               The default is zero (0).  To place this degree above normal degrees, set it to a negative value (ex: -1, -10, etc.).
-                              
+                              <br><br>
                               Set it higher to place it below normal degrees.  (Ex: 10, 20, 30, etc).
-                              
+                              <br><br>
                               To prevent confusion, it's recommended that a degree's tracks have the same advising weight as the main degree.
-                              
+                              <br><br>
                               If you are unsure what to enter, leave it set to 0 (zero)."),
     "weight" => 1050,    
   );
@@ -1485,7 +1485,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     "size" => 1,
     "value" => intval($degree->db_exclude),
     "popup_description" => t("If the Exclude value is set to 1 (the number one), then this degree will show up in gray on the list of degrees.  It will also not be selectable in What If mode in FlightPath.
-                              
+                              <br><br>
                               If you are not sure what to enter, either leave it blank or enter a 0 (zero)."),
     "weight" => 1070,    
   );
@@ -1496,7 +1496,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     "size" => 1,
     "value" => intval($degree->db_allow_dynamic),
     "popup_description" => t("If this value is set to 1 (the number one), then this degree plan is able to be combined with other degrees which are also set to Allow Dynamic.
-                              
+                              <br><br>
                               If you are unsure what to enter, either leave blank or enter a 0 (the number zero)."),
     "weight" => 1080,    
   );
@@ -1545,9 +1545,12 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
       'value' => $degree->track_description,
       'description' => t("You may enter simple HTML in this field. Ex: &lt;b&gt;bold&lt;/b&gt; or &lt;i&gt;italics&lt;/i&gt;"),
       'popup_description' => t("This is where you can enter a short description of this Level-3 degree track (also called a Degree Option) which will display for the user in a pop-up when they select to change degree options.
-                                \nTo enter a default message, which will display at the top of the selection window, begin the description with:\n      DEFAULT: \nIt must be in all caps, and you must have the colon (:) after it.
-                                By doing this in ANY of the track descriptions for a major, FP will ignore all other track descriptions and ONLY display the default.
-                                \n\nExample of usage:  DEFAULT: You may select any of these degree options."),
+                                <br><br>
+                                To enter a default message, which will display at the top of the selection window, begin the description with:
+                                <br><b>DEFAULT:</b>                               
+                                (It must be in all caps, and you must have the colon (:) after it.)
+                                <br>By doing this in ANY of the track descriptions for a major, FP will ignore all other track descriptions and ONLY display the default.
+                                <br><br>Example of usage:  DEFAULT: You may select any of these degree options."),
     "weight" => 1140,
     );
       
@@ -1616,7 +1619,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
       'size' => 20,
       'popup_description' =>  t("You may override the default title for a block.  For example, if instead of Freshman Year you want it to read Pre-Pharmacy Year 1 in FlightPath,
                                  then you would enter that in this box and hit save.  
-                                 
+                                 <br><br>
                                  To change a title back to the default, just leave it blank."),
       "weight" => $base_weight + ($semester->semester_num * 100) + 20,      
     );
@@ -1651,10 +1654,12 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
       'value' => $contents,
       'rows' => 10,
       'cols' => 20,
-      'popup_description' => t("Enter course requirements in this format: \n   SUBJECT COURSENUM type (MINGRADE)\n\n
-                              type - lowercase character denoting the requirement type of the course.  Make sure you have a space between it and the course number.  If no type is specified, it is understood to be a major requirement.\n
-                              min grade - Place the min grade (if there is one) in parenthesis after the type.  Make sure there is a space between the min grade and the type (or course number, if there is no type specified).\n   Example:  ACCT 110 s (C)\n\n
-                              Repeats require no special characters or symbols.  Simply enter the course again."),
+      'popup_description' => t("Enter course requirements in this format: 
+                                  <br><br> &nbsp; &nbsp; SUBJECT COURSENUM type (MINGRADE)
+                              <br><br>&bull; type - lowercase character denoting the requirement type of the course.  Make sure you have a space between it and the course number.  If no type is specified, it is understood to be a major requirement.\n
+                              <br>&bull; min grade - Place the min grade (if there is one) in parenthesis after the type.  Make sure there is a space between the min grade and the type (or course number, if there is no type specified).\n   Example:  ACCT 110 s (C)\n\n
+                              
+                              <br><br>Repeats require no special characters or symbols.  Simply enter the course again."),
 
       'suffix' => "</td>",
                   
@@ -1779,7 +1784,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
     'description' => t("You may enter simple HTML in this field. Ex: &lt;b&gt;bold&lt;/b&gt; or &lt;i&gt;italics&lt;/i&gt;"),
     'popup_description' => t("A public note will appear at the top of a degree plan when pulled up in FlightPath.  
                               Use this to pass messages to all students and advisors who pull up this degree plan.
-                              \n\nIt will begin with the text 'Important Message': automatically."),
+                              <br><br>It will begin with the text <b>Important Message:</b> automatically."),
     
     "weight" => 50010,    
   );
@@ -1821,9 +1826,11 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
                        </td>
                        <td valign='top'>",
         'suffix' => "</td>",
-        'popup_description' => t("This is the minimum number of tracks THIS degree must select.  For example, if the degree requires at least one track, enter a 1 (one) in this box.\n\n
-                                  The default is zero (0), which means that no track is required for this degree.  The user is not required to select any at all.\n\n
-                                  If you are unsure what to enter, leave it set to 0 (zero)."),
+        'popup_description' => t("This is the minimum number of tracks THIS degree must select.  For example, if the degree requires at least one track, enter a 1 (one) in this box.
+                                  
+                                  <br><br>The default is zero (0), which means that no track is required for this degree.  The user is not required to select any at all.
+                                  
+                                  <br><br>If you are unsure what to enter, leave it set to 0 (zero)."),
         "weight" => 60000 + $c + 1,    
       );
       
@@ -1835,9 +1842,11 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
         'value' => $max_tracks,
         'prefix' => "<td valign='top'>",
         'suffix' => "</td>",
-        'popup_description' => t("This is the maximum number of tracks THIS degree may select.  For example, if the degree requires the student to have NO MORE than 1 track selected, you would enter 1 (one) in this box.\n\n
-                                  The default is zero (0), which means that there is no maximum; the user may select as many of this degree's tracks as they wish.\n\n
-                                  If you are unsure what to enter, leave it set to 0 (zero)."),
+        'popup_description' => t("This is the maximum number of tracks THIS degree may select.  For example, if the degree requires the student to have NO MORE than 1 track selected, you would enter 1 (one) in this box.
+                                  
+                                  <br><br>The default is zero (0), which means that there is no maximum; the user may select as many of this degree's tracks as they wish.
+                                  
+                                  <br><br>If you are unsure what to enter, leave it set to 0 (zero)."),
         "weight" => 60000 + $c + 5,
       );
       
@@ -1850,9 +1859,9 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
         'suffix' => "</td>
                      </tr>
                      </table>",
-        'popup_description' => t("If THIS degree has one or more 'default' tracks associated with it (ex: for What If mode), enter the FULL major codes here, separated by comma.\n\n
-                                  For example: ART|_SCULP, ART|_PAINT\n\n
-                                  If you are unsure what to enter, leave it blank."),
+        'popup_description' => t("If THIS degree has one or more 'default' tracks associated with it (ex: for What If mode), enter the FULL major codes here, separated by comma.
+                                  <br><br>For example: ART|_SCULP, ART|_PAINT
+                                  <br><br>If you are unsure what to enter, leave it blank."),
         "weight" => 60000 + $c + 7,
       );
                   

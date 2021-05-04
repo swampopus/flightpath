@@ -702,10 +702,10 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   	// Now, let's insert this top-level group back into the table
   	// as the new_year, with the new_group_id.
   	$query = "INSERT INTO draft_groups(`group_id`,`group_name`,
-  							`title`,`definition`,`icon_filename`,`catalog_year`,
+  							`title`,`public_note`,`definition`,`icon_filename`,`catalog_year`,
   							`priority`,`delete_flag`,`data_entry_comment`, `catalog_repeat`)
-  							VALUES ('?','?','?','?','?','?','?','?','?','?') ";  	
-  	$res2 = db_query($query, $new_group_id,$db_group_name,$db_title,
+  							VALUES (?,?,?,?,?,?,?,?,?,?,?) ";  	
+  	$res2 = db_query($query, $new_group_id,$db_group_name,$db_title,$db_public_note,
   								$db_definition,$db_icon_filename,$new_year,
   								$db_priority,$db_delete_flag,$db_data_entry_comment,$db_catalog_repeat);
   
@@ -732,10 +732,10 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   				extract($cur4, 3, "db4");
   				$res5 = db_query("INSERT INTO draft_group_requirements
   										(`group_id`,`course_id`,`course_min_grade`,
-  										`course_repeats`,`data_entry_value`)
-  										VALUES ('?','?','?','?','?') ",
+  										`course_repeats`,`attributes`,`data_entry_value`)
+  										VALUES (?,?,?,?,?,?) ",
   				            $new_sub_group_id,$db4_course_id,
-  										$db4_course_min_grade,$db4_course_repeats,
+  										$db4_course_min_grade,$db4_course_repeats,$db4_attributes,
   										$db4_data_entry_value);
   			}
   			
@@ -747,10 +747,10 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   		// Add the row into the table...
   		$res5 = db_query("INSERT INTO draft_group_requirements
   								(`group_id`,`course_id`,`course_min_grade`,
-  								`course_repeats`,`data_entry_value`,`child_group_id`)
-  								VALUES ('?','?','?','?','?','?') ",
+  								`course_repeats`,`attributes``data_entry_value`,`child_group_id`)
+  								VALUES (?,?,?,?,?,?,?) ",
   		            $new_group_id,$db3_course_id,
-  								$db3_course_min_grade,$db3_course_repeats,
+  								$db3_course_min_grade,$db3_course_repeats,$db3_attributes,
   								$db3_data_entry_value,$child_group_id);
   		
   		
@@ -1072,7 +1072,7 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
     
     // TODO:  Maybe invoke another hook here, to let other modules act on the instruction?
     
-  }
+  } 
 
   // Once this is done, truncate the draft_instructions table.
   $res = db_query("TRUNCATE TABLE draft_instructions");

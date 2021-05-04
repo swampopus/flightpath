@@ -2236,15 +2236,16 @@ function fp_get_js_alert_link($message, $link_text = "", $extra_css_class = "") 
     $link_text = "[?]";
   }
   
+  $message = str_replace("\n", " ", $message);
   $message = fp_reduce_whitespace($message);
   
-  $message = str_replace("\n", "[NL]", $message);
-  $message = htmlentities($message, ENT_QUOTES);
-  $message = str_replace("&quot;", "\&quot;", $message);
-  $message = str_replace("[NL]", "\\n", $message);
+  //$message = htmlentities($message, ENT_QUOTES);
+  //$message = str_replace("&quot;", "\&quot;", $message);
+  //$message = str_replace("[NL]", "<br>", $message);
       
-  $rtn .= "<a href='javascript: alert(\"" . $message . "\");' class='fp-alert-link $extra_css_class'>$link_text</a>";
-
+  //$rtn .= "<a href='javascript: alert(\"" . $message . "\");' class='fp-alert-link $extra_css_class'>$link_text</a>";
+  $rtn .= "<a href='javascript: fp_alert(\"" . base64_encode($message) . "\",\"base64\");' class='fp-alert-link $extra_css_class'>$link_text</a>";
+  
       
   return $rtn;  
   
