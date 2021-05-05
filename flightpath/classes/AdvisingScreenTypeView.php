@@ -126,6 +126,8 @@ class AdvisingScreenTypeView extends AdvisingScreen
 
     $is_empty = TRUE;
     
+    $degree_sort_policy = variable_get("degree_requirement_sort_policy", "alpha");
+    
     $count_hours_completed = 0;
     $list_semesters->reset_counter();
     while($list_semesters->has_more())
@@ -139,7 +141,13 @@ class AdvisingScreenTypeView extends AdvisingScreen
       $last_req_by_degree_id = -1;
             
       // First, display the list of bare courses.
-      $semester->list_courses->sort_alphabetical_order();
+      if ($degree_sort_policy == 'database') {
+        $semester->list_courses->sort_degree_requirement_id();
+      }
+      else {
+        // By default, sort alphabetical      
+        $semester->list_courses->sort_alphabetical_order();  // sort, including the degree title we're sorting for.
+      }
       $semester->list_courses->reset_counter();
       $sem_is_empty = true;
       $html = array();

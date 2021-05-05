@@ -3041,8 +3041,17 @@ function draw_menu_items($menu_array) {
       $GLOBALS["fp_temp_degree_levels"] = array();
     }
 
+
+    $degree_sort_policy = variable_get("degree_requirement_sort_policy", "alpha");
+
     // First, display the list of bare courses.
-    $semester->list_courses->sort_alphabetical_order();  // sort, including the degree title we're sorting for.
+    if ($degree_sort_policy == 'database') {
+      $semester->list_courses->sort_degree_requirement_id();
+    }
+    else {
+      // By default, sort alphabetical      
+      $semester->list_courses->sort_alphabetical_order();  // sort, including the degree title we're sorting for.
+    }
     $semester->list_courses->reset_counter();
 
     while($semester->list_courses->has_more())
@@ -5224,6 +5233,8 @@ function draw_menu_items($menu_array) {
     }
 
 
+    $group_sort_policy = variable_get("group_requirement_sort_policy", "alpha");
+
 		$group->list_courses->reset_counter();
 		if (!($group->list_courses->is_empty))
 		{
@@ -5263,9 +5274,17 @@ function draw_menu_items($menu_array) {
 				}
 			}
 
-			$new_course_list->reset_counter();			
-			$new_course_list->sort_alphabetical_order();
+			
+      if ($group_sort_policy == 'database') {
+        $new_course_list->sort_group_requirement_id();
+      }
+      else {
+        // By default, sort alphabetical      
+        $new_course_list->sort_alphabetical_order();
+      }        
+      		
 
+      $new_course_list->reset_counter();  
 			
 
 			$final_course_list->add_list($new_course_list);
@@ -5410,19 +5429,16 @@ function draw_menu_items($menu_array) {
 
 		}
 
-		$final_course_list->sort_alphabetical_order();
-    /*
-     *   We no longer wish to have a course selected by default.  Instead, it will be up to the user
-     *   to select a course.  
-     * 
-     *   TODO:  Perhaps make this a setting?
-     * 
-		if (!$final_course_list->has_any_course_selected()) {
-			if ($c = $final_course_list->find_first_selectable()) {
-				$c->bool_selected = true;
-			}
-		}
-    */
+
+    if ($group_sort_policy == 'database') {
+      $final_course_list->sort_group_requirement_id();
+    }
+    else {
+      // By default, sort alphabetical      
+      $final_course_list->sort_alphabetical_order();
+    }    
+
+    
      
 		// flag any courses with more hours than are available for this group.
 		if ($final_course_list->assign_unselectable_courses_with_hours_greater_than($group_hours_remaining))

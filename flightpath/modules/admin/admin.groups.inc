@@ -1095,11 +1095,22 @@ function admin_get_group_courses(Group $group) {
   // for use in the edit_group_form.
   $rtn = "";
 
+  $group_sort_policy = variable_get("group_requirement_sort_policy", "alpha");
+
   // courses not in branches...
   $courses = array();
   $c_count = 0;
   $group->list_courses->load_course_descriptive_data();
-  $group->list_courses->sort_alphabetical_order();
+  
+  
+  if ($group_sort_policy == 'database') {
+    $group->list_courses->sort_group_requirement_id();
+  }
+  else {
+    // By default, sort alphabetical      
+    $group->list_courses->sort_alphabetical_order();
+  }  
+      
   $group->list_courses->reset_counter();
   while($group->list_courses->has_more())
   {

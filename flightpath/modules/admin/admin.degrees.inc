@@ -80,7 +80,7 @@ function admin_display_degrees_popup_add_group2() {
   
   $rtn = "";
    
-  $rtn .= "<b>" . t("VERSION 2 - Add an elective group to semester: @semester_num in @de_catalog_year", array("@semester_num" => $semester_num, "@de_catalog_year" => $de_catalog_year)) . "</b><br>
+  $rtn .= "<b>" . t("Add an elective group to semester: @semester_num in @de_catalog_year", array("@semester_num" => $semester_num, "@de_catalog_year" => $de_catalog_year)) . "</b><br>
         <span class='tenpt'>" . t("Use keyboard shortcut CTRL-F to find groups quickly.") . "</span>
         <br><br>
         First, select a group (from $de_catalog_year):
@@ -1568,6 +1568,7 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
   ///////////////////////////////////////
   $groups_counter = 0;  // used to create unique variables for groups 
   $js_existing_semesters = array();
+  $degree_sort_policy = variable_get("degree_requirement_sort_policy", "alpha");
    
   $form['blocks_top_markup'] = array(
     'value' => "<div style='clear: both;'></div>
@@ -1627,7 +1628,13 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
 
     // Show the courses for this semester...
     $contents = "";
-    $semester->list_courses->sort_alphabetical_order();
+    if ($degree_sort_policy == 'database') {      
+      $semester->list_courses->sort_degree_requirement_id();
+    }
+    else {
+      // Default, sort alphabetically
+      $semester->list_courses->sort_alphabetical_order();
+    }
     $semester->list_courses->reset_counter();
     while($semester->list_courses->has_more()) {
       $course = $semester->list_courses->get_next();
@@ -2416,7 +2423,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
  * This screen displays the form which allows the user to actually
  * edit a degree.
  */
-function admin_display_edit_degree() {
+function z__admin_display_edit_degree() {
   $de_catalog_year = admin_get_de_catalog_year();
   $rtn = "";
   
@@ -2562,7 +2569,10 @@ function admin_display_edit_degree() {
             <!--PREVIOUS_SEMESTERS-->";
 
   $first_semester_num = -999;
-            
+
+  
+  
+              
   $degree->list_semesters->reset_counter();
   while ($degree->list_semesters->has_more()) {
     $semester = $degree->list_semesters->get_next();
@@ -2592,7 +2602,10 @@ function admin_display_edit_degree() {
     // Get the courses.
     $rtn .= "<tr><td valign='top'>
           <textarea name='courses_$semester->semester_num' rows='10' cols='20'>";
-    $semester->list_courses->sort_alphabetical_order();
+    if ($degree_sort_policy == 'alpha') {
+      $semester->list_courses->sort_alphabetical_order();
+    }
+    
     $semester->list_courses->reset_counter();
     while($semester->list_courses->has_more()) {
       $course = $semester->list_courses->get_next();
@@ -2617,7 +2630,10 @@ function admin_display_edit_degree() {
             <td valign='top' class='tenpt' width='5'>grd</td>
             <td valign='top' class='tenpt' width='5'>type</td>
             </tr>";
-    $semester->list_groups->sort_alphabetical_order();
+    if ($degree_sort_policy == 'alpha') {        
+      $semester->list_groups->sort_alphabetical_order();
+    }
+    
     $semester->list_groups->reset_counter();
     while($semester->list_groups->has_more()) {
       $group = $semester->list_groups->get_next();

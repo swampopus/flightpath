@@ -1347,6 +1347,70 @@ class CourseList extends ObjList
 	}
 
 
+
+  /**
+  * Sorts the courses based on their db_degree_requirement_id value
+  */
+  function sort_degree_requirement_id() {
+    
+    $sort_list = array();
+    
+    // go through the courses, creating an array keyed by db_degree_requirement_id.
+    for ($t = 0; $t < count($this->array_list); $t++) {
+      $id = intval($this->array_list[$t]->db_degree_requirement_id);
+            
+      $sort_list[$id][] = $this->array_list[$t];
+    }
+    
+    //sort the array in order ascending
+    ksort($sort_list,SORT_NUMERIC);
+    
+    //clear the internal array, then refill it with the now sorted courses.
+    $this->array_list = array();
+    foreach ($sort_list as $courses) {
+      foreach ($courses as $course) {
+        $this->array_list[] = $course;
+      }
+    }
+    $this->reset_counter();    
+    
+    
+  }
+
+
+  /**
+  * Sorts the courses based on their db_group_requirement_id value
+  */
+  function sort_group_requirement_id() {
+    
+    $sort_list = array();
+    
+    // go through the courses, creating an array keyed by db_degree_requirement_id.
+    for ($t = 0; $t < count($this->array_list); $t++) {
+      $id = (string) $this->array_list[$t]->db_group_requirement_id;   // not necessarily an integer, don't cast as one.
+      
+      // make sure that $id is at least 20 digits, padding 0's on the left, so that the sort works even if the id is a different
+      // number of digits.
+      $id = str_pad($id, 20, "0", STR_PAD_LEFT);            
+      $sort_list[$id][] = $this->array_list[$t];
+    }
+    
+    //sort the array in order ascending
+    ksort($sort_list);
+    //clear the internal array, then refill it with the now sorted courses.
+    $this->array_list = array();
+    foreach ($sort_list as $courses) {
+      foreach ($courses as $course) {
+        $this->array_list[] = $course;
+      }
+    }
+    $this->reset_counter();    
+    
+    
+  }
+
+
+
 	/**
 	 * Sorts the course list into alphabetical order.  If load_descriptive_data()
 	 * has not already been called for each course, it will call it.

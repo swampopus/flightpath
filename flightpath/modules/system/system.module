@@ -1157,7 +1157,7 @@ function system_school_data_form() {
     "type" => "select",
     "label" => t("What If mode default catalog year:"),
     "options" => array("current" => t("Current catalog year only"),
-                       "student" => t("Student catalog year only [beta]"),
+                       "student" => t("Student catalog year only"),
                       ),
     "value" => variable_get("what_if_catalog_year", "current"),
     "hide_please_select" => TRUE,
@@ -1367,7 +1367,7 @@ function system_school_data_form() {
   $form["initial_student_course_sort_policy"] = array(
     "type" => "select",
     "label" => t("Initial student course sort policy:"),
-    "options" => array("alpha" => "Alphabetical sort [default]", "grade" => "Best grade first (beta)"),
+    "options" => array("alpha" => "Alphabetical sort [default]", "grade" => "Best grade first"),
     "hide_please_select" => TRUE,
     "value" => variable_get("initial_student_course_sort_policy", "alpha"),
     "description" => t("Student courses are sorted more than once as they are evaluated by FlightPath.
@@ -1751,6 +1751,33 @@ function system_school_data_form() {
   );  
 
 
+  $form["degree_requirement_sort_policy"] = array(
+    "type" => "select",
+    "label" => t("Degree requirement sort policy:"),
+    "options" => array("alpha" => "Alphabetical sort (default)", "database" => "As entered in database [beta]"),
+    "hide_please_select" => TRUE,
+    "value" => variable_get("degree_requirement_sort_policy", "alpha"),
+    "description" => t("How should degree course requirements appear to the end user?  By default, they will be sorted into alphabetical order.
+                       However, if you wish them to appear in the order the were entered on the Edit Degree form, select 'As entered...'.
+                       <br>If unsure, select 'Alphabetical sort'."),
+  );
+  
+
+  
+  $form["group_requirement_sort_policy"] = array(
+    "type" => "select",
+    "label" => t("Group requirement sort policy:"),
+    "options" => array("alpha" => "Alphabetical sort (default)", "database" => "As entered in database [beta]"),
+    "hide_please_select" => TRUE,
+    "value" => variable_get("group_requirement_sort_policy", "alpha"),
+    "description" => t("How should group course requirements appear to the end user in the popup dialog window?  By default, they will be sorted into alphabetical order.
+                       However, if you wish them to appear in the order the were entered on the Edit Group form, select 'As entered...'.
+                       <br>If unsure, select 'Alphabetical sort'."),
+  );
+    
+    
+  
+  
   
   
   return $form;

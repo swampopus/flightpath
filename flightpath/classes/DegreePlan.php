@@ -570,6 +570,7 @@ class DegreePlan extends stdClass
 
         // Set which degree_id this course is a requirement of (for multiple degrees)
         $course_c->req_by_degree_id = $this->degree_id;
+        $course_c->db_degree_requirement_id = $cur['id']; 
 
         //adminDebug($course_c->to_string() . $course_c->getCatalogHours());
         
