@@ -806,6 +806,7 @@ CREATE TABLE `users` (
   `f_name` varchar(100)   DEFAULT '',
   `l_name` varchar(100)   DEFAULT '',
   `is_disabled` tinyint(4)   DEFAULT '0',
+  `last_login` int(10) unsigned DEFAULT 0,
  PRIMARY KEY  (`user_id`),
  KEY `cwid` (`cwid`),
  KEY `user_name` (`user_name`),

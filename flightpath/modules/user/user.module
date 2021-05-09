@@ -1530,16 +1530,16 @@ function user_display_student_users() {
   }               
   $get_search = @$_GET["search"];         
   $rtn .= "
-                         " . t("Search:") . " <input type='text' class='smallinput' name='search' value='$get_search' size='15'>
-                        <input type='submit' name='searchsubmit' class='smallinput' value=' -> '>
+                         " . t("Search:") . " <input type='text'  name='search' value='$get_search' size='15'>
+                        <input type='submit' name='searchsubmit'  value=' > '>
                        
                         &nbsp; &nbsp; " . t("or") . " &nbsp; &nbsp;
-                       <select name='major_code' class='smallinput'>
+                       <select name='major_code' >
                         <option value=''>" . t("Select a major code...") . "</option>
                         <option value=''>--------------------------</option>
                     <!--MAJORCODESEARCH-->
                        </select>
-                       <input type='submit' name='major_code_submit' class='smallinput' value=' -> '>
+                       <input type='submit' name='major_code_submit'  value=' > '>
                        
                        &nbsp; &nbsp; " . t("Set disp:") . "
                        <select name='set_disp'>
@@ -1547,7 +1547,7 @@ function user_display_student_users() {
                         <option value='only_inactive' $sel_only_inactive>" . t("only inactive") . "</option>
                         <option value='both' $sel_both>" . t("show both") . "</option>
                        </select>
-                       <input type='submit' name='show_inactive_submit' class='smallinput' value=' -> '>                                              
+                       <input type='submit' name='show_inactive_submit'  value=' > '>                                              
                        
                        </form>
                        
@@ -1686,12 +1686,14 @@ function user_display_student_users() {
       <table border='0' width='100%' cellpadding='3' cellspacing='0' class='user-list'>
     
         <tr>
+          <th width='5%'>Actions</th>
           <th>CWID</th>
           <th>Name</th>
           <th></th>
           <th>Major code(s)</th>
           <th>Active?</th>
-          <th>&nbsp;</th>
+          <th>Last Login</th>
+          
         </tr>
     
     ";
@@ -1707,6 +1709,14 @@ function user_display_student_users() {
       
     $is_active = ($cur["is_active"] == "1") ? "Y" : "N";
     
+    $last_login = intval($cur['last_login']);
+    if ($last_login == 0) {
+      $last_login = t("Never");
+    }
+    else {
+      $last_login = format_date(convert_time($last_login), 'short');
+    }    
+    
     
 
     
@@ -1718,15 +1728,15 @@ function user_display_student_users() {
     $fgcol = "black";
 
 
-    $rtn .= "<tr class='is-active-$is_active'>
-              
-              <td valign='top' width='15%'>$student_cwid</td>
-          <td valign='top' width='15%'>$f_name</td>
-          <td valign='top' width='15%'>$l_name</td>
-          <td valign='top'>$disp_major_code</td>
-          <td valign='top'>$is_active</td>
-          <td valign='top'>" . l(t("edit"), "admin/users/edit-student-user", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "</td>
-          
+    $rtn .= "
+          <tr class='is-active-$is_active'>
+            <td valign='top'>" . l("<i class='fa fa-pencil' title='Edit'>", "admin/users/edit-student-user", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "</td>          
+            <td valign='top' width='15%'>$student_cwid</td>
+            <td valign='top' width='15%'>$f_name</td>
+            <td valign='top' width='15%'>$l_name</td>
+            <td valign='top'>$disp_major_code</td>
+            <td valign='top'>$is_active</td>
+            <td valign='top'>$last_login</td>
           
         </tr>";
 
@@ -1841,19 +1851,19 @@ function user_display_users() {
                         
   $rtn .= "                        
                         <input type='hidden' name='performAction' value='editUsers'>
-                         " . t("Search:") . " <input type='text' class='smallinput' name='search' value='$get_search' size='15'>
-                        <input type='submit' name='searchsubmit' class='smallinput' value=' -> '>
+                         " . t("Search:") . " <input type='text'  name='search' value='$get_search' size='15'>
+                        <input type='submit' name='searchsubmit'  value=' > '>
                        
                         &nbsp;&nbsp;" . t("or") . "&nbsp;&nbsp;
-                       <select name='department' class='smallinput'>
+                       <select name='department' >
                         <option value=''>" . t("Select a department:") . "</option>
                         <option value=''>--------------------------</option>
                     <!--DEPTSEARCH-->
                        </select>
-                       <input type='submit' name='deptsubmit' class='smallinput' value=' -> '>
+                       <input type='submit' name='deptsubmit' value=' > '>
                        
                        &nbsp;&nbsp;" . t("or") . "&nbsp;&nbsp;
-                       <select name='role' class='smallinput'>
+                       <select name='role' >
                        <option value=''>" . t("Select a role:") . "</option>
                        <option value=''>--------------------------</option>
                        ";
@@ -1880,7 +1890,7 @@ function user_display_users() {
   }
   $rtn .= "</select>
                        
-                       <input type='submit' name='rolesubmit' class='smallinput' value=' -> '>
+                       <input type='submit' name='rolesubmit'  value=' > '>
                        
                        </form>
                        
@@ -2034,12 +2044,13 @@ function user_display_users() {
       <table border='0' width='100%' cellpadding='3' cellspacing='0' class='user-list'>
     
         <tr>
+          <th width='5%'>Actions</th>
           <th>CWID</th>
           <th>Name</th>
           <th></th>
           <th>Department</th>
           <th>Roles</th>
-          <th>&nbsp;</th>
+          <th>Last Login</th>          
         </tr>
     
     ";
@@ -2051,6 +2062,15 @@ function user_display_users() {
     $faculty_cwid = trim($cur["cwid"]);
     $dept_name = trim(ucwords(strtolower($cur["department"])));
 
+    $last_login = intval($cur['last_login']);
+    if ($last_login == 0) {
+      $last_login = t("Never");
+    }
+    else {
+      $last_login = format_date(convert_time($last_login), 'short');
+    }
+    
+    
     
     
     $ast = "";
@@ -2078,14 +2098,15 @@ function user_display_users() {
     //      $pC .= "<a href='edit_users.php?action=load&course_id=$course_id'> user: $f_name $mid_name $l_name </a><br>";
 
     $rtn .= "<tr class='$roles_classes'>
+          
+          <td valign='top'>" . l("<i class='fa fa-pencil' title='Edit'></i>", "admin/users/edit-user", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "</td>
               
-              <td valign='top' width='15%'>$faculty_cwid</td>
+          <td valign='top' width='15%'>$faculty_cwid</td>
           <td valign='top' width='15%'>$f_name</td>
           <td valign='top' width='15%'>$l_name</td>
           <td valign='top'>$dept_name</td>
           <td valign='top'>$roles</td>
-          <td valign='top'>" . l(t("edit"), "admin/users/edit-user", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "</td>
-          
+          <td valign='top'>$last_login</td>
           
         </tr>";
 

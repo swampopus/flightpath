@@ -101,7 +101,7 @@
     <div class='fp-bottom-message'>
       <span class='popup-contact'>
         <?php
-          if ($page_hide_report_error != TRUE) {
+          if ($page_hide_report_error != TRUE && trim(variable_get('contact_email_address', ''))) {
             print "<a class='nounderline' href='javascript: popupreportcontact()'>" . t("Contact the @FlightPath production team", array("@FlightPath" => variable_get("system_name", "FlightPath"))) . "</a>";
           }
         ?>

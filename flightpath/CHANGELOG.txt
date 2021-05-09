@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-05-09
+  Added "last_login" column to users table, and to users screen in admin console.  Also make it so the "contact FlightPath production team" link
+  does not appear if no email address is entered.
+  
+
 2021-05-05
   In the school settings form, you may now choose to sort courses in degrees and groups not by alphabetical, but by the order
   in which they were entered.
