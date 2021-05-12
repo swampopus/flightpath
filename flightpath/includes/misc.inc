@@ -727,8 +727,8 @@ function filter_markup($str, $type = "basic") {
   if ($type == "basic") {
     
     // To reduce extra newlines, remove any newline which is at the END of an existing <br> tag.
-    $str = str_ireplace("<br>\n", "<br />", $str);
-    $str = str_ireplace("<br />\n", "<br />", $str);
+    $str = str_ireplace("<br>\n", "<br>", $str);
+    $str = str_ireplace("<br />\n", "<br>", $str);
      
     $allowed_tags = array('a', 'em', 'strong', 'cite', 
                           'blockquote', 'code', 'ul', 'ol', 'li', 
@@ -738,8 +738,7 @@ function filter_markup($str, $type = "basic") {
     
     $str = filter_xss($str, $allowed_tags);
     $str = trim($str);
-    //$str = nl2br($str);  // Since this is meant to be basic HTML, new lines are allowed as white space, and should not be converted to br.
-    
+        
   }
   
   

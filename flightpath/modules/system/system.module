@@ -2158,40 +2158,6 @@ function system_settings_form() {
   );
                
   
-  /*  // Removing since we no longer use these popups.
-  $form["popup_admin_win_options"] = array(
-    "type" => "textfield",
-    "size" => 80,
-    "label" => t("Javascript Popup Admin Window Options:"),
-    "value" => variable_get("popup_admin_win_options", "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=600,height=400"),
-    "description" => t("This is the popup javascript options for the 'Admin' popup window.  This popup is used for
-                           assigning groups in degree edit, editing definitions, and the popup contact window.
-                         <br><b>DO NOT ENTER ANY SPACES OR QUOTES!  Entering invalid syntax could break your Javascript.</b>
-                         <br>If unsure what to enter, use: <em>toolbar=no,status=2,scrollbars=yes,resizable=yes,width=600,height=400</em>"),    
-  );
-    
-  $form["popup_advise_win_options"] = array(
-    "type" => "textfield",
-    "size" => 80,
-    "label" => t("Javascript Popup Advise Window Options:"),
-    "value" => variable_get("popup_advise_win_options", "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375"),
-    "description" => t("This is the popup javascript options for the 'Advising' popup window.  This popup is used for
-                           course descriptions, group selections, substitutions, etc.
-                         <br><b>DO NOT ENTER ANY SPACES OR QUOTES!  Entering invalid syntax could break your Javascript.</b>
-                         <br>If unsure what to enter, use: <em>toolbar=no,status=2,scrollbars=yes,resizable=yes,width=460,height=375</em>"),    
-  );
-  
-  $form["popup_print_win_options"] = array(
-    "type" => "textfield",
-    "size" => 80,
-    "label" => t("Javascript Popup Print Window Options:"),
-    "value" => variable_get("popup_print_win_options", "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=750,height=600"),
-    "description" => t("This is the popup javascript options for the 'Print' popup window.  This popup is used for
-                           printable views of degree plans.
-                         <br><b>DO NOT ENTER ANY SPACES OR QUOTES!  Entering invalid syntax could break your Javascript.</b>
-                         <br>If unsure what to enter, use: <em>toolbar=no,status=2,scrollbars=yes,resizable=yes,width=750,height=600</em>"),    
-  );
-  */  
 
   $form["admin_degrees_default_allow_dynamic"] = array(
     "type" => "textfield",
@@ -2228,6 +2194,20 @@ function system_settings_form() {
                         that 543 is the Content ID."),
   );      
         
+      
+  $form['logout_message'] = array(
+    'label' => t("Log out message:"),
+    'type' => 'textarea',
+    'value' => variable_get("logout_message", "You have been logged out of FlightPath.\n<br><br>For extra security, close all open windows of your browser."),
+    'description' => t("This message displays to the user when they have logged out of FlightPath.  If unsure what to enter, use the following:
+                          <br><i>You have been logged out of FlightPath.</i>
+                          <br><b>Note:</b> You may use basic HTML in this field to add bold, italics, or links."),
+    
+  );      
+      
+      
+      
+      
                   
   return $form;
 }
@@ -2561,6 +2541,15 @@ function system_handle_logout() {
      $cookie_expires  = time() - date('Z') - 3600;
      setcookie(session_name(), '', $cookie_expires, '/');
   }  
+  
+  if (isset($_COOKIE)) {
+    foreach($_COOKIE as $cook) {
+        setcookie($cook, '', time()-1000);
+        setcookie($cook, '', time()-1000, '/');
+    }    
+  }
+  
+  
     
   // I know this is repetitive, but I want to make ABSOLUTELY SURE
   // I am removing the session by removing it, creating a new one, then killing that one too.
@@ -2795,10 +2784,13 @@ function system_login_form() {
   
   fp_set_title("");
   
+  $bool_clear_cookies = FALSE;
   
   // If we are coming from having just logged out, display a message.
   if (isset($_REQUEST["logout"]) && $_REQUEST["logout"] == "true") {
-    fp_add_message(t("You have been logged out of @FlightPath.", array("@FlightPath" => variable_get("system_name", "FlightPath"))), "status", TRUE);
+    
+    $x = variable_get("logout_message", "You have been logged out of FlightPath.<br><br>For extra security, close all open tabs of your browser.");    
+    fp_add_message(filter_markup($x));
   }
   
   // Are we here because the user was not found in the whitelist?
@@ -2806,7 +2798,12 @@ function system_login_form() {
     fp_add_message(t("Sorry, but only certain users are allowed access at this time.  If you believe you need access, please contact your system administrator."), 'error', TRUE);
   }
   
+  // Are we here because the user was not found in the whitelist?
+  if (isset($_REQUEST['user']) && $_REQUEST['user'] == 'notfound') {
+    fp_add_message(t("Sorry, but the user you specified could not be found in FlightPath's database.  If you believe you need access, please contact your system administrator."), 'error', TRUE);
+  }
   
+    
   
   $form["user"] = array(
     "label" => t("User:"),
