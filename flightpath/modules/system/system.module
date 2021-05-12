@@ -2198,9 +2198,9 @@ function system_settings_form() {
   $form['logout_message'] = array(
     'label' => t("Log out message:"),
     'type' => 'textarea',
-    'value' => variable_get("logout_message", "You have been logged out of FlightPath.\n<br><br>For extra security, close all open windows of your browser."),
+    'value' => variable_get("logout_message", "You have been logged out of FlightPath."),
     'description' => t("This message displays to the user when they have logged out of FlightPath.  If unsure what to enter, use the following:
-                          <br><i>You have been logged out of FlightPath.</i>
+                          <br>&nbsp; &nbsp; <i>You have been logged out of FlightPath.</i>
                           <br><b>Note:</b> You may use basic HTML in this field to add bold, italics, or links."),
     
   );      
@@ -2789,7 +2789,7 @@ function system_login_form() {
   // If we are coming from having just logged out, display a message.
   if (isset($_REQUEST["logout"]) && $_REQUEST["logout"] == "true") {
     
-    $x = variable_get("logout_message", "You have been logged out of FlightPath.<br><br>For extra security, close all open tabs of your browser.");    
+    $x = variable_get("logout_message", "You have been logged out of FlightPath.");    
     fp_add_message(filter_markup($x));
   }
   
