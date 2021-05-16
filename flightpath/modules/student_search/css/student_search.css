@@ -1,4 +1,13 @@
 
+table.advisee-search-results-table {
+  width: 100%;
+}
+
+table .student-first-name {
+  display: inline-block;
+  min-width: 110px;
+}
+
 .major-search-form {
 
   text-align: center;

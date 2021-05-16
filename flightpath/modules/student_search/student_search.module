@@ -300,7 +300,7 @@ function student_search_render_small_search() {
  * Displays this user's advisees, if there are any assigned.
  */
 function student_search_display_my_advisees($bool_only_return_adv_array = FALSE, $use_cwid = NULL) {
-  global $user;
+  global $user, $pager_total_items;
   $rtn = "";
 
   
@@ -315,8 +315,9 @@ function student_search_display_my_advisees($bool_only_return_adv_array = FALSE,
   }
         
   
-  $query = "SELECT u.user_id, f_name, u.cwid, l_name, major_code, rank_code, a.catalog_year
-              FROM users u, students a, advisor_student c, student_degrees d
+  $query = "SELECT u.user_id, f_name, u.cwid, l_name, major_code, rank_code, a.catalog_year, priority_value
+              FROM (users u, students a, advisor_student c, student_degrees d)    
+              LEFT JOIN student_priority ON student_priority.student_id = u.cwid
               WHERE 
                  c.faculty_id = :faculty_cwid
                  AND c.student_id = a.cwid
@@ -324,19 +325,19 @@ function student_search_display_my_advisees($bool_only_return_adv_array = FALSE,
                  AND u.cwid = a.cwid
                  AND u.is_student = 1
                  AND u.is_disabled = 0                 
-              AND rank_code IN %RANKIN%
-              %EXTRA_STUDENTSEARCH_CONDITIONS%
+                 AND rank_code IN %RANKIN%
+                    %EXTRA_STUDENTSEARCH_CONDITIONS%                                             
               GROUP BY u.cwid
-              ORDER BY %ORDERBY%
-              
+              %ORDERBY%              
               ";
 
   $adv_array = student_search_query_advisees($query, array(":faculty_cwid" => $faculty_cwid));
+  
   if ($bool_only_return_adv_array) return $adv_array;
   
-  
+    
   $s = (count($adv_array) == 1) ? "" : "s"; 
-  $rtn .= "<div class='student-search-my-advisees'>" . student_search_render_advisees($adv_array, t("My Advisees Results") . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )") . "</div>";
+  $rtn .= "<div class='student-search-my-advisees'>" . student_search_render_advisees($adv_array, t("My Advisees Results") . " &nbsp; ({$pager_total_items[0]} " . t("student$s") . ")") . "</div>";
 
   return $rtn;  
 }
@@ -597,7 +598,7 @@ function student_search_display_my_majors() {
                 AND rank_code IN %RANKIN%
                 %EXTRA_STUDENTSEARCH_CONDITIONS%
                 GROUP BY u.cwid
-                ORDER BY %ORDERBY%
+                %ORDERBY%
                 ";
   
     $adv_array = student_search_query_advisees($query, array(":major_code" => $major_code));
@@ -616,8 +617,9 @@ function student_search_display_my_majors() {
 
 
 
-function student_search_search_form($limit = 300) {
+function student_search_search_form() {
   $form = array();
+  global $pager_total_items;
   
   fp_add_css(fp_get_module_path("student_search") . "/css/student_search.css");
   
@@ -745,7 +747,9 @@ function student_search_search_form($limit = 300) {
         $params[":like_ln"] = "%$ln%";
         $params[":like_fn"] = "%$fn%";      
         // Remove unneeded like_search_for index.
-        unset($params[":like_search_for"]);
+        unset($params[":like_search_for1"]);
+        unset($params[":like_search_for2"]);
+        unset($params[":like_search_for3"]); 
         
       }
 
@@ -776,8 +780,9 @@ function student_search_search_form($limit = 300) {
     // you search for "info=production" on the Advisees search tab...
     if (md5(strtolower(@$temp[1]))=="fd89784e59c72499525556f80289b2c7"){$rtn .= base64_decode("DQo8cD4NCjxiPlRoZSBvcmlnaW5hbCBGbGlnaHRQYXRoIFByb2R1Y3Rpb24gVGVhbSwgY2lyY2EgMjAwNywgYXQgVGhlIFVuaXZlcnNpdHkgb2YgTG91aXNpYW5hIGF0IE1vbnJvZTo8L2I+DQo8dWw+DQo8bGk+UmljaGFyZCBQZWFjb2NrIC0gUHJvamVjdCBsZWFkIGFuZCBwcmltYXJ5IGxvZ2ljIHByb2dyYW1tZXIuPC9saT4NCjxsaT5Kb2UgTWFuc291ciAtIERhdGFiYXNlIGFkbWluaXN0cmF0b3IgYW5kIG1haW5mcmFtZS9CYW5uZXIgZGF0YSBjb29yZGluYXRvci48L2xpPg0KPGxpPkpvYW5uIFBlcnJlciAtIERhdGEgZW50cnksIHRlc3RpbmcgYW5kIHNvZnR3YXJlIGNvb3JkaW5hdG9yLjwvbGk+DQo8bGk+UGF1bCBHdWxsZXR0ZSAtIENsYXNzaWMgdGhlbWUgZGVzaWduZXIuPC9saT4NCjxsaT48Yj5PdGhlciBjb250cmlidXRpbmcgcHJvZ3JhbW1lcnM8L2I+OiBDaGFybGVzIEZyb3N0LCBCcmlhbiBUYXlsb3IuPC9saT4NCjwvdWw+DQpUbyBldmVyeW9uZSB3aG8gaGVscGVkIG1ha2UgRmxpZ2h0UGF0aCBwb3NzaWJsZTogVGhhbmsgWW91Lg0KPC9wPg==");}
 
-    $query = "SELECT u.user_id, f_name, l_name, u.cwid, rank_code, a.catalog_year
-              FROM users u, students a, student_degrees c $other_table
+    $query = "SELECT u.user_id, f_name, l_name, u.cwid, rank_code, a.catalog_year, priority_value
+              FROM (users u, students a, student_degrees c $other_table)                  
+              LEFT JOIN student_priority ON student_priority.student_id = u.cwid
               WHERE 
                  u.cwid = a.cwid
                  AND u.cwid = c.student_id
@@ -796,8 +801,7 @@ function student_search_search_form($limit = 300) {
     
     $query .= "
               $group_by
-              ORDER BY %ORDERBY%
-              LIMIT $limit
+              %ORDERBY%              
               ";
 
               
@@ -806,10 +810,7 @@ function student_search_search_form($limit = 300) {
 
   $s = (count($adv_array) == 1) ? "" : "s"; 
 
-  // Are we showing the maximum number of students?
-  if (count($adv_array) == $limit) {
-    $rtn .= "<div class='student-search-max-results'><em>" . t("Showing maximum 300 results. Please narrow search criteria.") . "</em></div>";
-  }
+  
   
   $form['adv_array'] = array(
     'type' => 'do_not_render',
@@ -817,7 +818,7 @@ function student_search_search_form($limit = 300) {
   );
   
   
-  $mark .= student_search_render_advisees($adv_array, t("Search Results") . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");  
+  $mark .= student_search_render_advisees($adv_array, t("Search Results") . " &nbsp; ({$pager_total_items[0]} " . t("student$s") . ")");  
   
   
   
@@ -848,184 +849,6 @@ function student_search_search_form_submit($form, $form_state) {
 
 
 
-
-function z__student_search_display_search() {
-  depricated_message();
-  $rtn = "";
-  
-  $_SESSION["student_search_last_tab"] = "search";
-
-  $url = fp_url("student-search/search");
-
-  $rtn .= "<table class='fp-semester-table'>
-           <form id='mainform' name='mainform' method='post'
-                action='" . $url . "' >
-           ";
-
-
-
-  // Get search results from POST -or- past search attempts
-  // from the session.
-  $search_for = trim(@$_REQUEST["search_for"]);
-  if ($search_for == "") {
-    $search_for = trim(@$_SESSION["student_search_for"]);
-  }
-  
-  $o_search_for = $search_for;
-
-  // If the user entered an asterisk with their search, we will
-  // skip the extra search conditions (and show more results).
-  $bool_bypass_extra_search_conditions = FALSE;
-  if (strstr($search_for, "*")) {
-    $bool_bypass_extra_search_conditions = TRUE;
-    $search_for = trim(str_replace("*", "", $search_for));
-  }
-
-  // If the user entered an =, then remove all spaces from the query.
-  if (strstr($search_for, "=")) {
-    $search_for = trim(str_replace(" ", "", $search_for));
-  }
-  
-    
-  // remove trouble characters
-  $search_for = str_replace("'","",$search_for);
-  $search_for = str_replace('"','',$search_for);
-  
-      
-  $isize = "25";
-  // $screen variable is never initialized.  Old code?
-  //if ($screen->page_is_mobile) $isize = "10";
-  
-  $rtn .= "<tr><td valign='top'>
-  
-    <table style='text-align: left; width: 100%; height: 60px;'
-    border='0' cellpadding='0' cellspacing='0'>
-      <tr>
-      <td width='30%' align='right'><font size='2'><b>" . t("Search for advisees:") . "&nbsp;&nbsp;</b></td> 
-      <td width='30%'><input name='search_for' ID='input_search_for' TYPE='text' SIZE='$isize' value='$o_search_for'></font>
-              <input type='hidden' name='did_search' id='input_did_search' value='true'></td>
-      <td class='tenpt'>";
-  $rtn .= fp_render_button("Search","jQuery(\"#mainform\").submit();");
-  $rtn .= "</td><td width='1'>
-            </td></tr>
-            </table>";
-
-  
-  $rtn .= student_search_get_advanced_search_tips();
-  
-  $adv_array = array();
-  
-  //Get my list of advisees...
-  // This time, we want to specify an SQL statement that will perform
-  // our search.
-
-  $params = array();
-  
-  if($search_for != "" && strlen($search_for) > 2)
-  { // If they typed something greater than 2 chars...
-    
-    $search_action = " AND (u.cwid LIKE :like_search_for 
-                       OR l_name LIKE :like_search_for 
-                       OR f_name LIKE :like_search_for ) 
-                       ";
-    $params[":like_search_for"] = "%$search_for%";
-    
-    // If you searched for 2 things seperated by a space, it is likely you
-    // are searching for a name, so check that...
-    $_SESSION["student_search_for"] = $o_search_for;
-    $temp = explode(" ",$search_for);
-    if (trim(@$temp[1]) != "")
-    {
-      $fn = trim(@$temp[0]);
-      $ln = trim(@$temp[1]);
-      // If there was a comma, then these should be reversed,
-      // as they probably entered last, first.
-      if (strstr($search_for, ",")) {
-        $ln = trim(@$temp[0]);  
-        $fn = trim(@$temp[1]);
-        
-        $ln = trim(str_replace(",", "", $ln));  // remove comma
-        $fn = trim(str_replace(",", "", $fn));  // remove comma
-                        
-      }
-      
-      
-      $search_action = " AND (l_name LIKE :like_ln 
-                         AND f_name LIKE :like_fn ) 
-                       ";
-      $params[":like_ln"] = "%$ln%";
-      $params[":like_fn"] = "%$fn%";      
-      // Remove unneeded like_search_for index.
-      unset($params[":like_search_for"]);
-      
-    }
-
-    $other_table = "";
-    $major_search = "";
-    $group_by = " GROUP BY u.cwid ";
-    
-    $temp = explode("=",$search_for);
-    if (trim(strtolower($temp[0])) == "major")
-    {      
-      $mjsearch = trim(@$temp[1]);
-      $search_action = "";
-      $other_table = ", degrees b";      
-      $major_search = " AND substring_index(c.major_code,'|',1) = b.major_code
-                        AND (b.major_code LIKE :like_mjsearch ) ";
-                        
-      $params[":like_mjsearch"] = "%$mjsearch%";
-      unset($params[':like_search_for']);
-      
-    }
-
-    
-    // Now THIS is odd... what is this strange piece of code here?
-    // I'm no cryptographic genius, but it looks like it is set to display a message when
-    // you search for "info=production" on the Advisees search tab...
-    if (md5(strtolower(@$temp[1]))=="fd89784e59c72499525556f80289b2c7"){$rtn .= base64_decode("DQo8cD4NCjxiPlRoZSBvcmlnaW5hbCBGbGlnaHRQYXRoIFByb2R1Y3Rpb24gVGVhbSwgY2lyY2EgMjAwNywgYXQgVGhlIFVuaXZlcnNpdHkgb2YgTG91aXNpYW5hIGF0IE1vbnJvZTo8L2I+DQo8dWw+DQo8bGk+UmljaGFyZCBQZWFjb2NrIC0gUHJvamVjdCBsZWFkIGFuZCBwcmltYXJ5IGxvZ2ljIHByb2dyYW1tZXIuPC9saT4NCjxsaT5Kb2UgTWFuc291ciAtIERhdGFiYXNlIGFkbWluaXN0cmF0b3IgYW5kIG1haW5mcmFtZS9CYW5uZXIgZGF0YSBjb29yZGluYXRvci48L2xpPg0KPGxpPkpvYW5uIFBlcnJlciAtIERhdGEgZW50cnksIHRlc3RpbmcgYW5kIHNvZnR3YXJlIGNvb3JkaW5hdG9yLjwvbGk+DQo8bGk+UGF1bCBHdWxsZXR0ZSAtIENsYXNzaWMgdGhlbWUgZGVzaWduZXIuPC9saT4NCjxsaT48Yj5PdGhlciBjb250cmlidXRpbmcgcHJvZ3JhbW1lcnM8L2I+OiBDaGFybGVzIEZyb3N0LCBCcmlhbiBUYXlsb3IuPC9saT4NCjwvdWw+DQpUbyBldmVyeW9uZSB3aG8gaGVscGVkIG1ha2UgRmxpZ2h0UGF0aCBwb3NzaWJsZTogVGhhbmsgWW91Lg0KPC9wPg==");}
-
-    $query = "SELECT u.user_id, f_name, l_name, u.cwid, rank_code, a.catalog_year
-              FROM users u, students a, student_degrees c $other_table
-              WHERE 
-                 u.cwid = a.cwid
-                 AND u.cwid = c.student_id
-                 AND u.is_student = 1
-                 AND u.is_disabled = 0                 
-                 $search_action
-              
-                 $major_search
-        ";
-    if (!$bool_bypass_extra_search_conditions) {
-      $query .= "
-              AND rank_code IN %RANKIN%
-              %EXTRA_STUDENTSEARCH_CONDITIONS%
-              ";
-    }    
-    
-    $query .= "
-              $group_by
-              ORDER BY %ORDERBY%
-              LIMIT 300
-              ";
-
-    $adv_array = student_search_query_advisees($query, $params);
-  }
-
-  $s = (count($adv_array) == 1) ? "" : "s"; 
-
-  // Are we showing the maximum number of students?
-  if (count($adv_array) == 300) {
-    $rtn .= "<div class='student-search-max-results'><em>" . t("Showing maximum 300 results. Please narrow search criteria.") . "</em></div>";
-  }
-  
-  
-  
-  $rtn .= student_search_render_advisees($adv_array, t("Search Results") . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
-  $rtn .= "</form>";
-  $rtn .= "</table>";
-
-  return $rtn;
-}
 
 
 /**
@@ -1260,7 +1083,200 @@ function z__student_search_render_advisees($adv_array, $title) {
 
 
 
+function student_search_get_advisee_table_headers() {
+  $table_headers = array();
+  $table_headers[] = array("label" => "&nbsp;");  
+  $table_headers[] = array("label" => t("CWID"), "field" => "u.cwid");
+  $table_headers[] = array("label" => "Student", 'field' => 'l_name');
+  $table_headers[] = array("label" => "Major");  
+  $table_headers[] = array("label" => "Rank", "field" => 'a.rank_code');  
+  $table_headers[] = array("label" => "Catalog<span class='mobile-hidden'> Year</span>", "field" => "a.catalog_year");
+  $table_headers[] = array("label" => "<span class='mobile-hidden'>Academic </span>Priority", "field" => "priority_value");
+  
+  return $table_headers;
+    
+}
+
+
 function student_search_render_advisees($adv_array, $title) {
+  $rtn = "";
+  
+  fp_add_css(fp_get_module_path("student_search") . "/css/student_search.css");
+  fp_add_css(fp_get_module_path('student_profile') . '/css/style.css');
+  
+  $bool_redirect_one = FALSE;
+  
+  if (count($adv_array) == 1 && @$_REQUEST["did_search"] == "true")
+  {
+    // Since there was only 1 result, we want to redirect this person directly.
+    // Draw this person's name...  
+    $details = reset($adv_array);
+    $student_id = $details["student_id"];
+    $first_name = $details["first_name"];
+    $last_name = $details["last_name"];
+    
+    $rtn .= "<div class='hypo' style='border: 1px solid black;
+              margin: 10px 0px 10px 0px; padding: 10px; 
+              font-size: 12pt; font-weight: bold;'>
+        " .t("Loading") . " <span style='color:blue;'>$first_name $last_name</span> ($student_id).  
+          &nbsp; " . t("Please wait...") . "
+        </div>";
+    $bool_redirect_one = TRUE;
+  }
+  
+  
+  $rtn .= fp_render_section_title($title, "search-results");
+  
+  
+  $table_headers = student_search_get_advisee_table_headers();
+  
+  $rtn .= "<table border='0' class='advisee-search-results-table'>";
+  // Draw our our table headers, with links....
+  $rtn .= theme_table_header_sortable($table_headers);  
+   
+  $db = get_global_database_handler();  
+    
+  foreach ($adv_array as $t => $details) {
+    
+    $student_id = $adv_array[$t]["student_id"];
+    $first_name = $adv_array[$t]["first_name"];
+    $last_name = $adv_array[$t]["last_name"];
+    $major = $adv_array[$t]["major"];
+    $priority_value = floatval($adv_array[$t]["priority_value"]);
+    
+    $advising_what_if = @$adv_array[$t]["advising_what_if"];
+    $what_if_major_code = @$adv_array[$t]["what_if_major_code"];
+    $what_if_track_code = @$adv_array[$t]["what_if_track_code"];
+    $what_if_catalog_year = @$adv_array[$t]["what_if_catalog_year"];
+    $degree_id = @$adv_array[$t]["degree_id"];
+    $rank = @$adv_array[$t]["rank"];
+    $catalog_year = @$adv_array[$t]["catalog_year"];
+    
+    // There is no $screen variable-- old code?
+    //if ($screen->page_is_mobile) {
+    //  $catalog_year = get_shorter_catalog_year_range($catalog_year, false, true);
+    //}
+    
+    $advising_session_id = $adv_array[$t]["advising_session_id"];
+    $advised_image = $adv_array[$t]["advised_image"];
+
+   
+      
+    $on_mouse = "
+            onmouseover='$(this).addClass(\"selection_highlight\");'
+            onmouseout='$(this).removeClass(\"selection_highlight\");'
+    ";      
+    
+    
+    
+    
+    // Build up the URL we want to go to when we click this row.
+    
+    $path = 'student-select';
+    
+    /*
+    $path = "view";
+    $advising_what_if = "no";
+    if ($what_if_major_code != "") {
+      $path = "what-if";
+      $advising_what_if = "yes";            
+    }
+    */
+    
+    // Add in the query part.
+    $query = "";
+    $query .= "advising_student_id=$student_id&current_student_id=$student_id&advising_major_code=$major&advising_what_if=$advising_what_if";
+    $query .= "&what_if_major_code=$what_if_major_code&what_if_track_code=$what_if_track_code&what_if_catalog_year=$what_if_catalog_year&advising_load_active=yes&clear_session=yes";
+    
+    $url = fp_url($path, $query);
+
+    // old onCLick:
+    //<!-- onClick='selectStudent(\"$student_id\",\"$major\",\"$what_if_major_code\",\"$what_if_track_code\")' -->
+    
+    $disp_major = "";
+    $temp = csv_to_array($major);
+    foreach ($temp as $code) {
+      $csscode = fp_get_machine_readable($code);
+      // Was this a track code or not?  Meaning, did it contain |_
+      $is_track = "no";
+      if (strstr($code, "|_")) {
+        $is_track = "yes";
+      }
+      
+      $disp_major .= "<div class='ss-major-code ss-major-code-$csscode ss-major-code-is-track-$is_track'>$code</div>";
+    }
+    
+    
+    $student_name = "<span class='student-first-name student-fnf'>$first_name</span><span class='student-last-name'>$last_name</span>";
+    
+    
+    $priority = t("N/A");
+    if ($priority_value > 0) {
+      $temp = student_priority_get_student_academic_priority_label($priority_value);
+      $machine = $temp['machine'];
+      $label = $temp['label'];
+      $priority = "<span class='profile-priority-bar priority-$machine'><span class='desc'>$label</desc></span>";
+    }
+    
+    
+    $rtn .= "
+      <tr class='search-result-row' $on_mouse  onClick='showUpdate(true); window.location=\"$url\"; '>
+          
+            <td class='ss-advised-image'>$advised_image</td>  
+            <td class='ss-student-id'>$student_id</td>
+            <td class='ss-student-name'>$student_name</td>            
+            <td class='ss-student-major'>$disp_major</td>
+            <td class='ss-student-rank'>$rank</td>
+            <td class='ss-student-catalog-year'>$catalog_year</td>
+            <td class='ss-student-priority-value'>$priority</td>
+           
+         </tr>
+         ";
+  
+  }  // for t advisee array
+
+
+ $rtn .= "</table>";
+  
+ $rtn .= theme_pager();
+ 
+  if ($bool_redirect_one) {
+    // There was only one result, and it was a search, so we want to redirect
+    // this person.
+    // We will use the URL we created in the foreach loop above.  It will still contain exactly
+    // what we need.
+    $rtn .= "<script type='text/javascript'>
+        
+        $(document).ready(function() {
+          setTimeout('window.location=\"$url\";', 0);
+        });
+
+        </script>";
+    
+  }
+  
+  
+ 
+  
+  
+  return $rtn;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function z______student_search_render_advisees($adv_array, $title) {
   $rtn = "";
   
   fp_add_css(fp_get_module_path("student_search") . "/css/student_search.css");
@@ -1428,10 +1444,6 @@ function student_search_render_advisees($adv_array, $title) {
 
 
 
-
-
-
-
 /**
  * Accepts the SQL, plus an array of parameters compatible with our PDO set up.
  * ex:
@@ -1439,13 +1451,18 @@ function student_search_render_advisees($adv_array, $title) {
  *   and   $sql = " SELECT * where name = :name";
  * 
  */
-function student_search_query_advisees($sql, $params = array()) {
+function z______student_search_query_advisees($sql, $params = array()) {
       
   $db = get_global_database_handler();  
   
   $rank_in = "( '" . join("', '", csv_to_array($GLOBALS["fp_system_settings"]["allowed_student_ranks"])) . "' )";
     
   $order_by = " l_name, f_name ";
+  
+  // TODO:  Change order by based on GET parameters
+  $fsort = trim(@$_GET['fsort']);
+  $fsortdir = trim(@$_GET['fsortdir']);
+  if ($fsortdir != 'ASC') $fsortdir = 'DESC';
   
   // Replace the replacement portion with our derrived variables.
   $sql = str_replace("%RANKIN%", $rank_in, $sql);
@@ -1539,6 +1556,117 @@ function student_search_query_advisees($sql, $params = array()) {
   return $rtn_array;  
 }
 
+
+
+function student_search_query_advisees($sql, $params = array()) {
+      
+  $db = get_global_database_handler();  
+  
+  $rank_in = "( '" . join("', '", csv_to_array($GLOBALS["fp_system_settings"]["allowed_student_ranks"])) . "' )";
+    
+  $table_headers = student_search_get_advisee_table_headers();
+
+  
+  // Set our initial sort, if none is already set.   
+  theme_table_header_sortable_set_initial_sort('l_name', 'ASC');
+    
+  // Get our order by clause based on selected table header, if any.    
+  $order_by = theme_table_header_sortable_order_by($table_headers);    
+  
+  // Replace the replacement portion with our derrived variables.
+  $sql = str_replace("%RANKIN%", $rank_in, $sql);
+  $sql = str_replace("%ORDERBY%", $order_by, $sql);  // now handled by the table header sortable function
+    
+  // By default, the extra_studentsearch_conditions will be checking of is_active = 1.  But, the user may override this
+  // in the settings.
+  $extra_student_search_conditions = variable_get("extra_student_search_conditions", " AND is_active = 1 ");
+  
+  $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $extra_student_search_conditions, $sql);
+  
+  
+  // Returns an array of all of this teacher's advisees.
+  $rtn_array = array();
+  $r = 0;
+
+  $faculty_advisees = advise_get_advisees();
+  
+  //$result = db_query($sql, $params);
+  $limit = 20;
+  // Now, we are going to search for these students, in the form of a pager query.
+  $result = pager_query($sql, $params, $limit, 0);        
+  while ($cur = db_fetch_array($result))
+  {
+
+    $student_id = trim($cur["cwid"]);
+    
+    // If this user does NOT have the "view any advising session" and DOES have the "view advisee advising sessions only",
+    // then see if this student is in their advisees list before continuing.
+    if (!user_has_permission("view_any_advising_session") && user_has_permission("view_advisee_advising_session")) {
+      if (!in_array($student_id, $faculty_advisees)) {
+        // Nope, this student is NOT one of their advisees!  Skip it.
+        continue;
+      }
+    }        
+    
+    $rtn_array[$student_id]["student_id"] = $student_id;
+    $rtn_array[$student_id]["first_name"] = ucwords(strtolower($cur["f_name"]));
+    $rtn_array[$student_id]["last_name"] = ucwords(strtolower($cur["l_name"]));
+    $rtn_array[$student_id]["rank"] = $cur["rank_code"];
+    $rtn_array[$student_id]["catalog_year"] = $cur["catalog_year"];
+    $rtn_array[$student_id]["priority_value"] = $cur["priority_value"];
+    //$rtn_array[$r]["major"] = $cur["major_code"];
+    // Need to get the major_code_csv for this student.
+    // Are there more majors for this user?
+    $major = "";
+    // Get a CSV of this student's majors
+    $major = fp_get_student_majors($student_id, TRUE, FALSE, FALSE);
+    
+    $rtn_array[$student_id]["major"] = $major;
+    
+    
+
+    // We should also mark if the student has been advised for this semester
+    // or not.
+  
+    // Get the current default advising term id.
+    $term_id = variable_get("advising_term_id", "");
+    
+    
+    $advised_image = "";
+    $advising_session_id = "";
+    $res2 = db_query("SELECT * FROM advising_sessions WHERE
+                      student_id = ? AND
+                      term_id = ? 
+               AND is_draft = 0 
+               AND is_empty = 0
+              ORDER BY posted DESC", $student_id, $term_id);
+    if (db_num_rows($res2) > 0) {
+      $cur = db_fetch_array($res2);
+
+      $advised_image = "<img src='" . fp_theme_location() . "/images/small_check.gif' class='advisedImage'>";
+
+      if ($cur["is_whatif"] == "1")
+      { // Last advising was a What If advising.
+        $advised_image = "<span title='This student was last advised in What If mode.'><img src='" . fp_theme_location() . "/images/small_check.gif'><sup>wi</sup></span>";
+        $db_major_code_csv = $cur["major_code_csv"];
+        $rtn_array[$student_id]["what_if_major_code"] = $db_major_code_csv;
+        // Capture the catalog year that was saved with what_if
+        $rtn_array[$student_id]["what_if_catalog_year"] = $cur["catalog_year"];
+        $rtn_array[$student_id]["last_advised_what_if"] = TRUE;
+        
+      }
+    }
+
+
+    $rtn_array[$student_id]["advising_session_id"] = $advising_session_id;
+    $rtn_array[$student_id]["advised_image"] = $advised_image;
+
+    $r++;
+  }
+
+
+  return $rtn_array;  
+}
 
 
 

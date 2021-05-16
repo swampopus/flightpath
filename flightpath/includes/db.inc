@@ -154,23 +154,24 @@ function pager_query($query, $args = array(), $limit = 10, $element = 0, $count_
   if (!isset($count_query)) {
     $count_query = preg_replace(array(
       '/SELECT.*?FROM /As',
-      '/ORDER BY .*/',
+      '/ORDER BY .*/',      
+      '/GROUP BY .*/',      
     ), array(
       'SELECT COUNT(*) FROM ',
+      '',
       '',
     ), $query);
   }
 
   // Convert comma-separated $page to an array, used by other functions.
   $pager_page_array = explode(',', $page);
-
+  
+      
   // We calculate the total of pages as ceil(items / limit).
   $pager_total_items[$element] = db_result(db_query($count_query, $args));  
   $pager_total[$element] = ceil($pager_total_items[$element] / $limit);
   $pager_page_array[$element] = max(0, min((int) $pager_page_array[$element], (int) $pager_total[$element] - 1));
-  
     
-  
   return db_query_range($query, $args, $pager_page_array[$element] * $limit, $limit);
 }
 
