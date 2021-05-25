@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-05-25
+  Added schools module to core, and made changes to system.install as well as other .install files, so that tables
+  now have a school_id field and needed keys.
+  
+
 2021-05-16
   Added lots of changes to student search. We now can see Academic Priority.  Uses pager query and table sort as well.  No
   more limit on 300 students, since we can do pager.  Made table headers responsive, as well as priority vals.

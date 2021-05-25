@@ -1,0 +1,935 @@
+<?php
+/**
+ * @file
+ * Schools module.
+ * 
+ * Lets some of FlightPath's functionality (and the degrees, etc) be separated by "schools" or any other arbitrary
+ * separation
+*/
+
+
+
+
+
+function __schools_add_school_id_to_fp5_tables() {
+  
+  set_time_limit ( 999 );  // might take a while
+  
+  $tables = array(
+    'courses', 'draft_courses', 'degrees', 'draft_degrees', 'groups', 'draft_groups',
+    'faculty * ',
+    'advising_comments',
+    'advising_sessions',
+    'advisor_student *',
+    'audit_approvals',
+    'colleges *',
+    'course_rotation_schedule',
+    'course_syllabi',
+    'degree_college',
+    'degree_tracks', 'draft_degree_tracks',
+    'draft_instructions',
+    'faculty_attributes * ',
+    'standardized_tests',
+    'student_attributes *',
+    'student_courses',
+    'student_degrees *',
+    'student_developmentals *',
+    'student_files',
+    'student_priority *',
+    'student_settings *',
+    'student_substitutions',
+    'student_tests',
+    'student_transfer_courses',
+    'student_unassign_group',
+    'student_unassign_transfer_eqv',
+    'students *',
+    'subjects *',
+    'transfer_courses',
+    'transfer_eqv_per_student',
+    'transfer_institutions',
+    'users',
+    'watchdog',
+    
+  );
+  
+  $needs_primary = array();
+  $show_create = array();
+  foreach ($tables as $table) {
+    $bool_primary = FALSE;
+    
+  
+    if (strstr($table, "*")) {
+      $table = trim(str_replace("*", "", $table));
+      $bool_primary = TRUE;
+    } 
+  
+    $show_create[] = $table;
+
+    // If we were supposed to ALSO add as a primary key, then we should output a message to the user, so they know to do that.
+    if ($bool_primary) {
+      $needs_primary[] = $table;
+    }
+
+  
+  
+    // Does this table already have school_id field?
+    $res = db_query("show columns from `$table` WHERE `Field` = 'school_id'");
+    $cur = db_fetch_array($res);
+    $test = @trim($cur['Field']);
+    if ($test == 'school_id') continue;
+    
+    // Otherwise, we need to add the column to the table, and a key!
+    fpm("Adding to $table...");
+   
+    $q = "ALTER TABLE `$table` ADD COLUMN `school_id` INT NOT NULL DEFAULT 0";
+    db_query($q);
+    
+    // Add regular key    
+    $q = "ALTER TABLE `$table` ADD KEY `school_id` (`school_id`)";
+    db_query($q);
+    
+    
+  } // foreach
+  
+ fpm($needs_primary);
+ 
+ //////////////////////////////////////
+ // Set our new primary keys
+ foreach ($needs_primary as $table) {
+   $res = db_query("SHOW KEYS FROM `$table` WHERE Key_name = 'PRIMARY'");
+   $keys = array();
+   while ($cur = db_fetch_array($res)) {
+     $cn = $cur['Column_name'];
+     if ($cn == 'school_id') continue;  // already in there.
+     $keys[] = $cn;
+   }
+   
+   $keys[] = 'school_id';
+   
+   $kline = join(", ", $keys);
+   
+   db_query("ALTER TABLE `$table` 
+              DROP PRIMARY KEY, 
+              ADD PRIMARY KEY ($kline)");
+   
+ }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ $rtn = "";
+ 
+ foreach ($show_create as $table) {
+   
+   $res = db_query("SHOW CREATE TABLE `$table`");
+   $cur = db_fetch_array($res);
+   $create = $cur['Create Table'];
+   
+   $create = str_ireplace("USING BTREE", "", $create);
+   $create = str_ireplace("CHARACTER SET latin1", "", $create);
+   $create = str_ireplace("COLLATE utf8mb4_unicode_ci", "", $create);
+   
+   $temp = explode("ENGINE=", $create);
+   $create = trim($temp[0]);
+   
+   
+   $rtn .= $create . "; \n\n\n\n";
+   
+ } 
+ 
+ fpm("<textarea>$rtn</textarea>"); 
+  
+  
+  
+} // end function
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Implements hook_init
+ */
+function schools_init() {
+  // Is there an urgent message to display based on school?
+  global $current_student_id;
+  // First, find out what school the current student belongs to.
+
+  $schools = schools_get_schools_for_student($current_student_id);
+  $defs = schools_get_school_definitions();
+  
+  foreach ($schools as $school) {
+    // Are there any urgent messages for students in this school?
+    if ($school == "") continue;
+
+    $urgent_msg = trim(variable_get("urgent_msg_$school", ""));
+    if ($urgent_msg) {
+      fp_add_message("<b>" . t("Important Message for %school_desc students:", array("%school_desc" => @$defs[$school])) . "</b> " . $urgent_msg, "status", TRUE);
+    }  
+
+    
+  }
+  
+} // hook_init
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Implements hook_menu
+ */
+function schools_menu() {
+  
+  $items = array();
+  
+  $items['admin/config/schools'] = array(  
+    'title' => 'Configure Schools',
+    'description' => 'Administer and define the Schools at your institution',
+    'page_callback' => 'fp_render_form',
+    'page_arguments' => array('schools_administer_schools_form', 'system_settings'),
+    'access_arguments' => array('administer_schools'),    
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "page_show_title" => TRUE,
+      "page_banner_is_link" => TRUE,
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        0 => array(
+          "text" => "Admin Console",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),    
+    'type' => MENU_TYPE_TAB,
+    'tab_family' => 'schools',
+  );
+    
+  
+  
+  return $items;
+    
+} // hook_menu
+
+
+
+
+/**
+ * hook_menu_alter
+ * 
+ * We want to alter some system menu items, so we can make sure to check
+ * our new custom permissions.
+ */
+function schools_menu_alter(&$items) {
+  foreach ($items as $path => $item) {
+            
+    if ($path == 'admin/degrees/edit-degree/%/%') {      
+            
+      // alter access_callback and arguments to make sure
+      // the user is able to edit THIS degree.
+      
+      $items[$path]['access_callback'] = 'schools_check_access';
+      $items[$path]['access_arguments'] = array(2, 3, 4);
+       
+    }
+
+
+    // The path for editing a group looks like this:
+    //    admin/groups/edit-group?group_id=XXX&de_catalog_year=XXX
+    if ($path == 'admin/groups/edit-group') {
+        
+      $items[$path]['access_callback'] = 'schools_check_access';
+      $items[$path]['access_arguments'] = array(2, "request_group_id", "group_catalog_year");
+      
+    }
+
+    // The path for editing a course looks like this:
+    //    admin/courses/edit-course?course_id=XXX&de_catalog_year=XXX    
+    if ($path == 'admin/courses/edit-course') {
+        
+      $items[$path]['access_callback'] = 'schools_check_access';
+      $items[$path]['access_arguments'] = array(2, "request_course_id", "course_catalog_year");
+      
+    }
+    
+
+
+  } // foreach
+} // hook_menu_alter
+
+
+
+/**
+ * this is our custom access callback.
+ * 
+ * op is expected to be 'edit-degree', 'edit-course', or 'edit-group'
+ * entity_code is the major code for degrees, group_id for groups, and course_id for courses.
+ * 
+ * 
+ */
+function schools_check_access($op, $entity_code, $catalog_year) {
+            
+  // If the user doesn't have this base permission, they can't edit anything
+  // at all.          
+  if (!user_has_permission("can_edit_data_entry")) {
+    return FALSE;
+  }      
+    
+
+  $school_id = $entity_type = "";
+
+  /////////////////////
+  if ($op == 'edit-degree') {
+    $entity_type = 'degree';
+    $degree_id = db_result(db_query("SELECT degree_id FROM draft_degrees 
+                                     WHERE major_code = ?
+                                     AND catalog_year = ?", $entity_code, $catalog_year));
+        
+    
+    $school_id = schools_get_school_for_entity_type($degree_id, "degree", $catalog_year);
+    
+  }
+  
+    
+
+  ///////////////////////
+  // The path for editing a group looks like this:
+  //    admin/groups/edit-group?group_id=XXX&de_catalog_year=XXX
+  if ($op == 'edit-group') {
+    $entity_type = "group";
+    $group_id = $_REQUEST['group_id'];
+    
+    if ($group_id == 'new') return TRUE;    
+    $catalog_year = db_result(db_query("SELECT catalog_year FROM draft_groups WHERE group_id = ?", $group_id));      
+    $school_id = schools_get_school_for_entity_type($group_id, "group", $catalog_year);    
+    
+  }
+  
+  ///////////////////////
+  // The path for editing a course looks like this:
+  //    admin/courses/edit-course?course_id=XXX&de_catalog_year=XXX    
+  if ($op == 'edit-course') {
+    $entity_type = "course";
+    $course_id = $_REQUEST['course_id'];
+    
+    if ($course_id == 'new') return TRUE;    
+    $catalog_year = db_result(db_query("SELECT catalog_year FROM draft_courses WHERE course_id = ?", $course_id));      
+    $school_id = schools_get_school_for_entity_type($course_id, "course", $catalog_year);
+    
+  }
+      
+
+  
+  
+  
+  // Actually check the permission, IF there is a school_id set.
+  if ($school_id != "" && $entity_type != "") {
+    if (!user_has_permission('administer_' . $school_id . '_' . $entity_type . '_data')) {
+      return FALSE;
+    }
+  }
+  
+
+  
+  // If we got here, then we didn't fail any permission checks, so we can let the user proceed.
+  return TRUE;
+  
+} // schools_check_access
+
+
+
+/**
+ * Return a list of schools in an array, for use in the "options" of
+ * a select list in the Form API.
+ * 
+ * If $bool_check_perm is true, then we will check permissions before adding it to the array.
+ */
+function schools_get_schools_for_fapi($bool_include_none = TRUE, $bool_check_perm = FALSE, $check_perm_type = "degree") {
+    
+  $rtn = array();  
+  $defs = schools_get_school_definitions();
+  
+    
+  if ($bool_include_none) {
+    $rtn[''] = t(' - No school designated -');
+  }
+  
+  foreach ($defs as $school_id => $val) {
+    
+    if ($bool_check_perm) {
+      if (user_has_permission('administer_' . $school_id . '_' . $check_perm_type . '_data')) {
+        $rtn[$school_id] = $val;
+      }
+    }
+    else {
+      $rtn[$school_id] = $val;
+    }
+    
+  }
+  
+  
+  return $rtn;
+  
+  
+}
+
+
+
+function schools_content_alter(&$render, $render_id) {
+
+  if ($render_id == 'admin_display_degrees') {
+    
+    foreach ($render as $key => $val) {
+      if (strstr($key, 'degree_row_')) {
+        // Find out the school_id for this degree, if it exists.
+        $school_id = schools_get_school_for_entity_type($val['data']['degree_id'], 'degree', $val['data']['db_row']['catalog_year']);
+        
+        if ($school_id != '') {
+          // A school id has indeed been set, so we need to see if this user is allowed to edit it or not.          
+          if (!user_has_permission('administer_' . $school_id . '_degree_data')) {
+            // No, so let's hide it.
+            unset($render[$key]);
+          }          
+        }
+        
+      }
+    } // foreach
+    
+  } // admin_display_degrees
+
+  
+  /////////////////////////////////  
+  
+  if ($render_id == 'admin_display_groups') {
+  
+    foreach ($render as $key => $val) {
+      if (strstr($key, 'group_row_')) {
+        // Find out the school_id for this degree, if it exists.
+        $school_id = schools_get_school_for_entity_type($val['data']['group_id'], 'group', $val['data']['db_row']['catalog_year']);
+        
+        if ($school_id != '') {
+          // A school id has indeed been set, so we need to see if this user is allowed to edit it or not.          
+          if (!user_has_permission('administer_' . $school_id . '_group_data')) {
+            // No, so let's hide it.
+            unset($render[$key]);
+          }          
+        }
+        
+      }
+    } // foreach
+  
+  
+  
+  } // admin_display_groups 
+
+  
+  ///////////////////////////////
+
+  if ($render_id == 'admin_display_courses') {
+
+    foreach ($render as $key => $val) {
+      if (strstr($key, 'course_row_')) {
+        // Find out the school_id for this degree, if it exists.
+        $school_id = schools_get_school_for_entity_type($val['data']['course_id'], 'course', $val['data']['db_row']['catalog_year']);
+        
+        if ($school_id != '') {
+          // A school id has indeed been set, so we need to see if this user is allowed to edit it or not.          
+          if (!user_has_permission('administer_' . $school_id . '_course_data')) {
+            // No, so let's hide it.
+            unset($render[$key]);
+          }          
+        }
+        
+      }
+    } // foreach
+  
+  
+  
+  } // admin_display_courses   
+  
+    
+   
+} // hook_content_alter
+
+
+
+
+
+
+
+/**
+ * Implements hook_form_alter
+ */
+function schools_form_alter(&$form, $form_id) {
+      
+      
+  $forms_to_alter = array(
+    'admin_edit_degree_form',
+    'admin_edit_group_form',
+    'admin_edit_course_form',
+  );
+    
+    
+  // Add "school" dropdown to the degrees, groups, and courses form
+
+  if (in_array($form_id, $forms_to_alter)) {
+    
+    $entity_type = 'degree';
+    $weight = 1120;    
+    @$catalog_year = $form['de_catalog_year']['value'];
+    if ($catalog_year == "") {
+      @$catalog_year = $form['catalog_year']['value'];
+    }
+    
+    $value = schools_get_school_for_entity_type(@$form['degree_id']['value'], 'degree', $catalog_year);
+    
+    
+    // Is this a "group" we are editing?
+    if ($form_id == "admin_edit_group_form") {      
+      $entity_type = 'group';
+      $weight = 45;      
+      $value = schools_get_school_for_entity_type(@$form['group_id']['value'], 'group', $catalog_year);
+    }
+    
+    
+    if ($form_id == 'admin_edit_course_form') {
+      $entity_type = 'course';
+      $weight = 55;
+      $value = schools_get_school_for_entity_type(@$form['course_id']['value'], 'course', $catalog_year);
+            
+      // We also want to adjust the description for the "update for all years" checkbox.      
+      $form['all_years']['options']['yes'] = t('Update title, description, hour info, and school selection for all years of this course.');
+    }
+    
+    
+    $options = schools_get_schools_for_fapi(TRUE, TRUE, $entity_type);      
+    
+    $form['schools_school'] = array(
+      'type' => 'select',
+      'label' => 'School:',
+      'options' => $options,
+      'value' => $value,
+      'hide_please_select' => TRUE,
+      'weight' => $weight,
+      'popup_description' => t('Please select a school which this @datatype belongs to.  Schools are defined under the Admin Console -> Configure Schools.', array('@datatype' => $entity_type)),
+    );
+    
+    $form['schools_entity_type'] = array(
+      'type' => 'hidden',
+      'value' => $entity_type,
+    );
+    
+    // We also need to add our custom submit handler so that our selection gets saved correctly.
+    $form['#submit_handlers'][] = 'schools_data_form_submit';
+    
+    
+    // If this is a NEW group, then don't show them anything!
+    
+    if (@$form['group_id']['value'] == 'new' || @$form['course_id']['value'] == 'new') {      
+      $form['schools_school'] = array(
+        'type' => 'markup',
+        'label' => 'School:',
+        'value' => t('<b>Please save this @dt at least once (to establish an ID in the database).  Once you have done this,
+                          the School selection box will appear.</b>', array('@dt' => $entity_type)),
+        'weight' => $weight,
+      );
+            
+      
+    }    
+    
+  }
+
+ 
+ 
+  // When we copy a year or duplicate a degree, make sure we have a chance to interact (so we can
+  // duplicate our schools assignments as well)
+  if ($form_id == "admin_copy_degree_form" || $form_id == "admin_duplicate_year_form") {
+    // Add our own submit handler, so we can also duplicate degree's school when the degree is duplicated.
+    $form['#submit_handlers'][] = 'schools_admin_copy_degree_form_submit';
+  }
+   
+      
+
+
+  // Alter the "urgent message" form, to include new verbiage about how the main one is "global", and add new
+  // boxes for each school.
+  if ($form_id == 'admin_urgent_message_form') {
+    
+    $form["mark_school"] = array(
+      'value' => '<br><hr><p>' . t('<h2>Schools</h2>The following boxes are provided by the Schools module, so that you may display
+                                  urgent messages to <b>students</b>, based on the schools their degrees belong to.  If a student only has
+                                  degrees with no school assigned, they will not see any of the below urgent messages.') . "</p>",
+    );
+
+
+    $defs = schools_get_school_definitions();
+
+    foreach ($defs as $school_id => $school_desc) {
+
+      $form["urgent_msg_$school_id"] = array(
+        "type" => "textarea",
+        "label" => t("Urgent Message for students in %school_desc:", array("%school_desc" => $school_desc)),
+        "value" => variable_get("urgent_msg_$school_id", ""),
+        'description' => t("To delete this message, simple delete all the text in this box and save."),
+      );
+
+    }
+    
+    $form['mark_below_school'] = array(
+      'value' => '<br><hr><br>',
+    );
+    
+  } // form is admin_urgent_message_form
+
+    
+  
+} // hook_form_alter
+
+
+
+function z__schools_admin_copy_degree_form_submit($form, &$form_state) {
+  
+  
+  // If we are duplicating an entire year, then delete that year from our table first.
+  if (isset($form_state['duplication'])) {
+    db_query('DELETE FROM draft_schools_data WHERE catalog_year = ?', $form_state['duplication']['dest_catalog_year']);
+  }
+  
+  
+  // The values we want are in $form_state['degrees'].  We just need to loop through.
+  if (isset($form_state['degrees'])) {
+    foreach ($form_state['degrees'] as $details) {
+      $src_degree_id = $details['src'];
+      $dest_degree_id = $details['dest'];
+      
+      $dest_major_code = @$details['dest_major_code']; // might not exist
+      $dest_catalog_year = @$details['dest_catalog_year']; // might not exist
+      $src_catalog_year = @$details['src_catalog_year']; // might not exist
+      
+      // Get the school for this degree, if it exists.
+      $school_id = schools_get_school_for_entity_type($src_degree_id, "degree", $src_catalog_year);
+              
+      $res2 = db_query('DELETE FROM draft_schools_data WHERE degree_id = ?', $dest_degree_id);
+      $res2 = db_query('INSERT INTO draft_schools_data (school_id, degree_id, catalog_year)
+                        VALUES (?, ?, ?)', (string) $school_id, $dest_degree_id, $dest_catalog_year);    
+              
+    } // foreach degrees  
+  } // if isset degrees
+
+  // groups are  $groups[src id] = dest id
+  
+  if (isset($form_state['groups'])) {
+    foreach ($form_state['groups'] as $src_group_id => $dest_group_id) {
+      
+      // Get the school for this group, if it exists.
+      $school_id = schools_get_school_for_entity_type($src_group_id, "group", $form_state['duplication']['src_catalog_year']);
+              
+      $res2 = db_query('DELETE FROM draft_schools_data WHERE group_id = ?', $dest_group_id);
+      $res2 = db_query('INSERT INTO draft_schools_data (school_id, group_id, catalog_year)
+                        VALUES (?, ?, ?)', (string) $school_id, $dest_group_id, $form_state['duplication']['dest_catalog_year']);    
+              
+    } // foreach groups  
+    
+  } // if isset groups
+  
+  
+  // courses are $courses[] = course_id.
+  if (isset($form_state['courses'])) {
+    foreach ($form_state['courses'] as $src_course_id) {
+      
+      // Get the school for this course, if it exists.
+      $school_id = schools_get_school_for_entity_type($src_course_id, "course", $form_state['duplication']['src_catalog_year']);
+              
+      $res2 = db_query('DELETE FROM draft_schools_data WHERE course_id = ? AND catalog_year = ?', $dest_group_id, $form_state['duplication']['src_catalog_year']);
+      $res2 = db_query('INSERT INTO draft_schools_data (school_id, course_id, catalog_year)
+                        VALUES (?, ?, ?)', (string) $school_id, $src_course_id, $form_state['duplication']['dest_catalog_year']);    
+              
+    } // foreach courses  
+    
+  } // if isset courses
+    
+  
+  
+    
+} // _form_submit
+
+
+
+
+/**
+ * Based on the student's degrees, return an array of schools
+ * that the student belongs to. 
+ */
+function schools_get_schools_for_student($cwid) {
+  
+  $schools = array();
+  
+  $db = get_global_database_handler();
+    
+  $student_majors = fp_get_student_majors($cwid);
+  
+  $catalog_year = $db->get_student_catalog_year($cwid);
+  
+  // For each major, find out what school (if any) it belongs to.
+  foreach ($student_majors as $major) {
+    
+    $degree_id = $db->get_degree_id($major, $catalog_year);
+    
+    $school = schools_get_school_for_entity_type($degree_id, 'degree', $catalog_year, FALSE);
+    
+    $schools[$school] = $school;
+    
+  }
+  
+  return $schools;
+  
+}
+
+
+
+
+
+/**
+ * Get the currently selected school_id for degree, group, or course.
+ * 
+ * entity_id = course_id, degree_id, etc.
+ * entity_type = 'course', 'degree', etc.
+ */
+function schools_get_school_for_entity_type($entity_id, $entity_type, $catalog_year, $bool_draft = TRUE) {
+  
+  $table_name = 'schools_data';
+  if ($bool_draft) $table_name = 'draft_' . $table_name;
+  
+  $res = db_query("SELECT school_id 
+                   FROM $table_name
+                   WHERE {$entity_type}_id = ?
+                   AND catalog_year = ?", array($entity_id, $catalog_year)); 
+  
+  if ($cur = db_fetch_object($res)) {
+  
+    return $cur->school_id;
+    
+  }
+  
+  
+  return '';  // couldn't find it.
+  
+}
+
+
+
+function schools_data_form_submit($form, $form_state) {
+    
+  $schools_entity_type = $form_state['values']['schools_entity_type'];
+  @$degree_id = $form_state['values']['degree_id'];  
+  @$group_id = $form_state['values']['group_id'];  
+  @$course_id = $form_state['values']['course_id'];  
+  @$catalog_year = $form_state['values']['de_catalog_year'];
+  if ($catalog_year == "") {
+    @$catalog_year = $form_state['values']['catalog_year'];
+  }
+  
+  if ($degree_id == "") $degree_id = 0;
+  if ($group_id == "") $group_id = 0;
+  if ($course_id == "") $course_id = 0;
+  
+  if ($degree_id == 0 && $group_id == 0 && $course_id == 0) {
+    // Nothing to save; return.
+    return;
+  }
+    
+  
+  $school_id = $form_state['values']['schools_school'];  
+    
+  
+  // Save to our table.
+  // First, delete what we have, if anything.
+  db_query("DELETE FROM draft_schools_data
+            WHERE degree_id = ?
+            AND group_id = ?
+            AND course_id = ?
+            AND catalog_year = ?
+            ", array($degree_id, $group_id, $course_id, $catalog_year));
+  
+  // Now, insert.
+  db_query("INSERT INTO draft_schools_data
+            (school_id, degree_id, group_id, course_id, catalog_year)
+            VALUES (?, ?, ?, ?, ?)", array($school_id, $degree_id, $group_id, $course_id, $catalog_year));
+  
+
+  if ($schools_entity_type == 'course') {
+    // If this is a course, we might have selected the 'all years' option.  If so, we need to
+    // look up all catalog years that this course exists, and set our data for each catalog year.
+    
+    if (@$form_state['values']['all_years']['yes'] == 'yes') {
+      
+      // First, find all catalog years for this course_id.
+      $res = db_query("SELECT distinct(catalog_year) FROM draft_courses WHERE course_id = ?", array($course_id));
+      while($cur = db_fetch_object($res)) {
+       
+        // Delete existing data...
+        db_query("DELETE FROM draft_schools_data
+                    WHERE degree_id = ?
+                    AND group_id = ?
+                    AND course_id = ?
+                    AND catalog_year = ?
+                    ", array($degree_id, $group_id, $course_id, $cur->catalog_year));
+          
+          // Now, insert.
+          db_query("INSERT INTO draft_schools_data
+                    (school_id, degree_id, group_id, course_id, catalog_year)
+                    VALUES (?, ?, ?, ?, ?)", array($school_id, $degree_id, $group_id, $course_id, $cur->catalog_year));
+          
+      } // while
+      
+      
+    } // yes, we selected 'all years'
+    
+  } // if entity_type is course
+
+
+ 
+}
+
+
+
+
+
+
+
+
+
+/**
+ * Implements hook_apply_draft_changes
+ * 
+ * This runs when the user "applies draft changes".  We want to
+ * copy from our draft_ table to our production table.
+ */
+function schools_apply_draft_changes() {
+    
+  
+  $table_name = "schools_data";
+  $draft_table_name = "draft_$table_name";
+  
+  // First, truncate existing...
+  $query = "truncate table $table_name";
+  $res = db_query($query);
+  
+  // Now, copy in draft changes...
+  $query = "INSERT INTO $table_name
+          SELECT * FROM $draft_table_name ";
+  $res = db_query($query);
+  
+} // hook_apply_draft_changes
+
+
+
+
+
+
+
+function schools_administer_schools_form() {  
+  $form = array();
+  
+  
+  $form['schools_schools'] = array(
+    'label' => t('School Definitions:'),
+    'value' => variable_get('schools_schools', ''),
+    'type' => 'textarea',
+    'description' => 'Enter your school definitions in this box, one per line.
+                      <br>SCHOOL_ID ~~ Description
+                      <br>ex:
+                      <br>&nbsp; &nbsp; UGRAD ~~ Undergraduate School
+                      <br>&nbsp; &nbsp; GRADO ~~ Graduate School Online
+                      <br>Use only letters, numbers, and underscores in the school_id names.  School IDs must also be unique.
+                      <br><br>
+                      <b>Do not use</b> NONE as a school_id, this is a reserved ID which already exists.  It is the
+                      default school when no school_id can be determined, or no school_id has been selected for
+                      a degree.',
+  );
+  
+  
+    
+  
+  return $form;
+  
+} // administer_schools_form
+
+
+
+
+
+// Return an array of school_ids to their definitions
+function schools_get_school_definitions() {
+  $rtn = array();
+  
+  $temp = explode("\n", trim(variable_get('schools_schools', '')));
+  foreach ($temp as $line) {
+    $line = trim($line);
+    if (!$line) continue;
+    $x = explode("~~", $line);
+    $id = trim(strtoupper($x[0]));
+    if (!$id) continue;
+    $desc = trim($x[1]);
+    if (!$desc) $desc = $id;
+    
+    $rtn[$id] = $desc;
+    
+  }
+  
+  return $rtn;
+}
+
+
+
+
+
+
+function schools_perm() {
+  $rtn = array();  
+  $rtn['administer_schools'] = array('title' => 'Administer schools module', 'description' => 'Only give to admin role.');
+  
+  
+  // Add in permissions per school.
+  $defs = schools_get_school_definitions();
+  
+  $types = array('degree', 'group', 'course');
+  
+  foreach ($types as $type) {
+  
+    foreach ($defs as $school_id => $school_desc) {
+      $rtn['administer_' . $school_id . '_' . $type . '_data'] = array('title' => t('Administer %school_desc @type data', array('%school_desc' => $school_desc, '@type' => $type)), 
+                                                                  'description' => t('The user is allowed to edit @type data for %school_desc.
+                                                                      Note: The user MUST also be given the Edit Data Entry permission under Admin module.', 
+                                                                        array('%school_desc' => $school_desc, '@type' => $type)));
+      
+  
+    }
+  
+  }
+   
+  
+  return $rtn;
+}
+
+
+
+
+

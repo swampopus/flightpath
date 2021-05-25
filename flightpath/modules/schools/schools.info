@@ -1,0 +1,3 @@
+name = Schools
+description = Helps separate data and functionality in FlightPath based on "schools"
+core = 6.x

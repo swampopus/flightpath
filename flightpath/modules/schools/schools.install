@@ -1,0 +1,63 @@
+<?php
+/**
+ * @file
+ * 
+ * This is the install file for the Schools module.  Here, we will handle installing the tables
+ * associated with this module.
+*/
+
+
+/**
+ * Implements hook_install
+ * 
+ * This function will create our tables.
+ * 
+ */
+function schools_install() {
+  
+/*
+  $q = "
+            CREATE TABLE `draft_schools_data` (
+              `sid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+              `school_id` varchar(100) NOT NULL,
+              `degree_id` int(10) unsigned DEFAULT '0',
+              `group_id` int(10) unsigned DEFAULT '0',
+              `course_id` int(10) unsigned DEFAULT '0',
+              `catalog_year` int(11) DEFAULT NULL,
+              PRIMARY KEY (`sid`),
+              KEY `school_id` (`school_id`),
+              KEY `degree_id` (`degree_id`),
+              KEY `group_id` (`group_id`),
+              KEY `course_id` (`course_id`),
+              KEY `catalog_year` (`catalog_year`)
+            ) ;   ";
+
+  
+  db_query($q);
+  
+  
+
+  $q = "
+           CREATE TABLE `schools_data` (
+            `sid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+            `school_id` varchar(100) NOT NULL,
+            `degree_id` int(10) unsigned DEFAULT '0',
+            `group_id` int(10) unsigned DEFAULT '0',
+            `course_id` int(10) unsigned DEFAULT '0',
+            `catalog_year` int(11) DEFAULT NULL,
+            PRIMARY KEY (`sid`),
+            KEY `school_id` (`school_id`),
+            KEY `degree_id` (`degree_id`),
+            KEY `group_id` (`group_id`),
+            KEY `course_id` (`course_id`),
+            KEY `catalog_year` (`catalog_year`)
+          );   ";
+
+         
+  db_query($q);    
+  */
+  
+  
+  
+  
+} // hook_install
