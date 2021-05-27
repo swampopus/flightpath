@@ -69,6 +69,20 @@
 
 
 
+
+@media screen and (max-width: 1170px) {
+  
+  .student-mini-profile .profile-top-details-wrapper .profile-detail-line-degree .profile-line-content {
+    display: inline;    
+    vertical-align: top;  
+  }  
+  
+  
+}
+
+
+
+
 @media screen and (max-width: 1130px) {  
   
   .top-banner img {
@@ -439,13 +453,8 @@
     display: block !important;
   }
   
-  .mobile-hidden {
-    display: none;
-  }
-
-  table .student-first-name {
-    min-width: 50px !important;
-  }
+  
+  
   
   
 }  /* max-width 650px */
@@ -525,18 +534,6 @@
     
   }  
 
-  
-  .ss-student-priority-value .profile-priority-bar {    
-    display: inline-block;
-    min-width: 10px;
-    width: 10px;
-    border-radius: 50%;
-  }
-  
-  .ss-student-priority-value .profile-priority-bar .desc {
-    visibility: hidden;
-  }
-  
   
 }  /* max-width 450px */
 

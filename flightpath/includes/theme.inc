@@ -917,6 +917,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
     else {
       // This degree plan is made from combining several other degrees.  let's trot them out and display them as well.
       $t_degree_plan_titles = "";
+      $dc = 0;
       foreach ($degree_plan->combined_degree_ids_array as $t_degree_id) {
         $t_degree_plan = new DegreePlan();
         $t_degree_plan->degree_id = $t_degree_id;
@@ -950,12 +951,13 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
         
         $t_degree_plan_titles .= "<span class='multi-degree-title multi-degree-class-" . $t_class . "
                                       multi-degree-class-level-" . $t_class_details["level_num"] . "
-                                      multi-degree-code-$machine_major_code '> 
-                                      " . $t_title . "</span>,";
+                                      multi-degree-code-$machine_major_code multi-degree-num-$dc'> 
+                                      " . $t_title . "</span><span class='multi-degree-comma'>,</span>";
+        $dc++;
         $s = "s";
       }
       // Trim the last comma off the end of t_degree_plan_titles
-      $t_degree_plan_titles = rtrim($t_degree_plan_titles, ",");
+      $t_degree_plan_titles = rtrim($t_degree_plan_titles, "<span class='multi-degree-comma'>,</span>");
       
       $degree_title_div = $t_degree_plan_titles;
       

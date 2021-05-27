@@ -2065,14 +2065,6 @@ function admin_edit_degree_form_submit($form, $form_state) {
 
 
 
-
-
-
-
-
-
-
-
   ///////////////////////////////////////
   // Okay, time to start actually inserting our data into the db.
 
@@ -2087,7 +2079,12 @@ function admin_edit_degree_form_submit($form, $form_state) {
     // Only look at the groups...
     $temp = explode("_", $key);
     $semester_num = trim($temp[1]);
-  
+
+    if ($semester_num > $highest_semester_num) {
+      $highest_semester_num = $semester_num;
+    }
+    
+      
     $courses = trim(@$values["courses_$semester_num"]);
 
     // Does it contain a single #?  Or, is blank?  If so, insert and move on.
@@ -2098,11 +2095,6 @@ function admin_edit_degree_form_submit($form, $form_state) {
                   values (?,?,?,?,?,?) ";
       $res = db_query($query, $degree_id, $semester_num, 0, '', '', "#");
       continue;         
-    }
-
-
-    if ($semester_num > $highest_semester_num) {
-      $highest_semester_num = $semester_num;
     }
 
     $course_rows = explode("\n",$courses);
@@ -2156,8 +2148,8 @@ function admin_edit_degree_form_submit($form, $form_state) {
                     (degree_id, semester_num, course_id, course_min_grade, course_requirement_type, data_entry_value)
                     values (?,?,?,?,?,?) ";
         $res = db_query($query, $degree_id, $semester_num, $course_id, $min_grade, $requirement_type, "$subject_id~$course_num");
-        //debug_c_t($query);
-      } else {
+      } 
+      else {
         // The course_id could not be found!
         $errors .= "<br><span style='color:red;'><b>Course Not Found!</b>
               In Block " . ($semester_num+1) . ", you specified the course
@@ -2188,7 +2180,11 @@ function admin_edit_degree_form_submit($form, $form_state) {
     $group_id = $temp[0];
     
     $semester_num = $temp[1];
-    
+
+    if ($semester_num > $highest_semester_num) {
+      $highest_semester_num = $semester_num;
+    }
+        
     $hours = $temp[2];
     $min_hours = $hours;
     
@@ -2201,11 +2197,6 @@ function admin_edit_degree_form_submit($form, $form_state) {
     
     $type = $temp[3];
     $min_grade = trim($temp[4]);
-
-    if ($semester_num > $highest_semester_num) {
-      $highest_semester_num = $semester_num;
-    }
-
 
     // Do not add if we are supposed to be deleting this group!
     if (isset($del_group) && is_object($del_group)) {
@@ -2293,7 +2284,6 @@ function admin_edit_degree_form_submit($form, $form_state) {
     $res = db_query($query, $degree_id, $semester_num, $group_id, $type, $hours, $min_hours, $min_grade);
 
   } // if perform_action2 == addGroup
-
 
 
   // Make the semester_titles_csv...

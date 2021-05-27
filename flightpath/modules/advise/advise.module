@@ -659,9 +659,13 @@ function advise_display_popup_change_track() {
       fp_add_js($js, "setting");
       
       $min_max_options = "<div class='advise-select-track-min-max advise-select-track-between'>Please select between $min_tracks and $max_tracks $class_title options.</div>";
+      if ($min_tracks == $max_tracks) {
+        $min_max_options = "<div class='advise-select-track-min-max advise-select-track-exact-number'>Please select $max_tracks $class_title options.</div>";
+      }       
       if ($min_tracks == $max_tracks && $max_tracks == 1) {
         $min_max_options = "<div class='advise-select-track-min-max advise-select-track-exactly-one'>Please select 1 $class_title option.</div>";
       }
+      
   
       if ($min_tracks > 0 && $max_tracks == 0) {
         // Meaning, there is no maximum.  It's infinite.
@@ -1609,6 +1613,9 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
           }
           
           $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-between'>Please select between $min_tracks and $max_tracks $class_title options.</div>";
+          if ($min_tracks == $max_tracks) {
+            $min_max_options = "<div class='advise-select-track-min-max advise-select-track-exact-number'>Please select $max_tracks $class_title options.</div>";
+          }
           if ($min_tracks == $max_tracks && $max_tracks == 1) {
             $min_max_options = "<div class='what-if-select-track-min-max what-if-select-track-exactly-one'>Please select 1 $class_title option.</div>";
           }
