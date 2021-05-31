@@ -1004,7 +1004,7 @@ class DatabaseHandler extends stdClass
     $table_name = "groups";
     if ($bool_use_draft){$table_name = "draft_$table_name";}    
     
-    return intval(db_result(db_query("SELECT school_id FROM $table_name WHERE group_id = ?", array($group_id)))_;
+    return intval(db_result(db_query("SELECT school_id FROM $table_name WHERE group_id = ?", array($group_id))));
   }
 
    

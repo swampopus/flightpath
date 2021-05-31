@@ -161,23 +161,18 @@ function __schools_add_school_id_to_fp5_tables() {
  */
 function schools_init() {
   // Is there an urgent message to display based on school?
-  global $current_student_id;
-  // First, find out what school the current student belongs to.
-
-  $schools = schools_get_schools_for_student($current_student_id);
+  global $user;
+    
+  $school_id = $user->school_id;    
   $defs = schools_get_school_definitions();
   
-  foreach ($schools as $school) {
-    // Are there any urgent messages for students in this school?
-    if ($school == "") continue;
-
-    $urgent_msg = trim(variable_get("urgent_msg_$school", ""));
-    if ($urgent_msg) {
-      fp_add_message("<b>" . t("Important Message for %school_desc students:", array("%school_desc" => @$defs[$school])) . "</b> " . $urgent_msg, "status", TRUE);
-    }  
+  $urgent_msg = trim(variable_get("urgent_msg_$school_id", ""));
+  if ($urgent_msg) {
+    fp_add_message("<b>" . t("Important Message (%school_desc):", array("%school_desc" => @$defs[$school_id])) . "</b> " . $urgent_msg, "status", TRUE);
+  }  
 
     
-  }
+  
   
 } // hook_init
 
@@ -575,8 +570,7 @@ function schools_form_alter(&$form, $form_id) {
     
     $form["mark_school"] = array(
       'value' => '<br><hr><p>' . t('<h2>Schools</h2>The following boxes are provided by the Schools module, so that you may display
-                                  urgent messages to <b>students</b>, based on the schools their degrees belong to.  If a student only has
-                                  degrees with no school assigned, they will not see any of the below urgent messages.') . "</p>",
+                                  urgent messages to <b>students</b> and <b>faculty/staff</b>, based on the school they have been assigned to.') . "</p>",
     );
 
 
@@ -584,9 +578,11 @@ function schools_form_alter(&$form, $form_id) {
 
     foreach ($defs as $school_id => $school_desc) {
 
+      if ($school_id == 0) continue;
+
       $form["urgent_msg_$school_id"] = array(
         "type" => "textarea",
-        "label" => t("Urgent Message for students in %school_desc:", array("%school_desc" => $school_desc)),
+        "label" => t("Urgent Message for users in %school_desc:", array("%school_desc" => $school_desc)),
         "value" => variable_get("urgent_msg_$school_id", ""),
         'description' => t("To delete this message, simple delete all the text in this box and save."),
       );
@@ -678,7 +674,7 @@ function z__schools_admin_copy_degree_form_submit($form, &$form_state) {
  * Based on the student's degrees, return an array of schools
  * that the student belongs to. 
  */
-function schools_get_schools_for_student($cwid) {
+function z__schools_get_schools_for_student($cwid) {
   
   $schools = array();
   
@@ -713,7 +709,7 @@ function schools_get_schools_for_student($cwid) {
  * entity_id = course_id, degree_id, etc.
  * entity_type = 'course', 'degree', etc.
  */
-function schools_get_school_for_entity_type($entity_id, $entity_type, $catalog_year, $bool_draft = TRUE) {
+function z__schools_get_school_for_entity_type($entity_id, $entity_type, $catalog_year, $bool_draft = TRUE) {
   
   $table_name = 'schools_data';
   if ($bool_draft) $table_name = 'draft_' . $table_name;
