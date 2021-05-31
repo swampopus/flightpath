@@ -3,7 +3,7 @@
 
 class StandardizedTest extends stdClass
 {
-	public $categories, $description, $test_id, $date_taken, $bool_date_unavailable;
+	public $categories, $description, $test_id, $date_taken, $bool_date_unavailable, $school_id;
 
 
 
@@ -11,6 +11,7 @@ class StandardizedTest extends stdClass
 	{
 		$this->categories = array();
     $this->bool_date_unavailable = FALSE;
+    $this->school_id = 0;
 	}
 
 

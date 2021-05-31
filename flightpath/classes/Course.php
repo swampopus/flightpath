@@ -23,7 +23,7 @@ class Course extends stdClass
   // Course catalog data related:
   public $subject_id, $course_num, $course_id, $requirement_type, $catalog_year;
   public $min_hours, $max_hours, $list_prereqs, $repeat_hours;
-  public $array_valid_names;
+  public $array_valid_names, $school_id;
 
   // Student record related:
   public $bool_taken, $term_id, $section_number,$quality_points, $grade, $level_code;
@@ -98,6 +98,7 @@ class Course extends stdClass
 
     $array_valid_names = array();  // will hold all "valid" names for this course (non excluded names).
     $this->course_id = intval($course_id);  // Force it to be numeric.
+    
     $this->temp_old_course_id = 0;  // Used in case we delete the course_id, we can get it back (good with substitutions of transfers that are outdated).
     $this->catalog_year = $catalog_year;
     $this->assigned_to_semester_num = -1;
@@ -106,8 +107,7 @@ class Course extends stdClass
     $this->bool_advised_to_take = false;
     $this->bool_added_course = false;
     $this->specified_repeats = 0;
-    $this->bool_specified_repeat = false;
-    
+    $this->bool_specified_repeat = false;    
     // Give this course instance a "random" numeric id, meaning, it doesn't really mean anything.
     // It used to actually be random, but we will use a simple increment instead to ensure it is unique.
     if (!isset($GLOBALS['fp_courses_random_ids'])) {
@@ -639,7 +639,9 @@ class Course extends stdClass
 
     $rtn .= $this->req_by_degree_id . "~";
     $rtn .= $this->disp_for_group_id . "~";
-    
+    $rtn .= $this->school_id . "~";
+        
+        
 
     return $rtn;
   }
@@ -798,6 +800,7 @@ class Course extends stdClass
     $this->req_by_degree_id = intval($temp[26]);
 
     $this->disp_for_group_id = trim($temp[27]);
+    $this->school_id = trim($temp[28]);
     
 
   }
@@ -1322,9 +1325,7 @@ class Course extends stdClass
       $this->load_descriptive_data();
     } 
     else {
-      // This is a transfer course.  Find out its eqv, if any...
-      
-
+      // This is a transfer course.  
   		
       
       $res = $this->db->db_query("SELECT * FROM
@@ -1337,6 +1338,7 @@ class Course extends stdClass
       $this->subject_id = $cur["subject_id"];
       $this->course_num = $cur["course_num"];      
       $this->course_id = $course_id;
+      $this->school_id = $cur['school_id'];
       $this->bool_transfer = true;
       $this->institution_id = $cur["institution_id"];
       $this->institution_name = $cur["name"];
@@ -1580,6 +1582,7 @@ class Course extends stdClass
       $this->title = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["title"];
       $this->description = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["description"];
       $this->min_hours = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["min_hours"];
+      $this->school_id = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["school_id"];
       
       if ($bool_reset_ghost_hours) {
         // Reset the ghosthours to default.
@@ -1621,9 +1624,9 @@ class Course extends stdClass
       $table_name = "courses";
       if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
       $res = $this->db->db_query("SELECT * FROM $table_name
-      							WHERE course_id = '?' 
-      							AND catalog_year = '?' 
-      							AND delete_flag = '0' 
+      							WHERE course_id = ? 
+      							AND catalog_year = ?
+      							AND delete_flag = 0 
       							$exclude_line ", $this->course_id, $this->catalog_year);
       $cur = $this->db->db_fetch_array($res);
 
@@ -1636,9 +1639,9 @@ class Course extends stdClass
         $table_name = "courses";
         if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
         $res2 = $db->db_query("SELECT * FROM $table_name
-							WHERE course_id = '?' 
+							WHERE course_id = ? 
 							AND subject_id != '' 
-							AND delete_flag = '0' 
+							AND delete_flag = 0 
 							$exclude_line
 							AND catalog_year <= '$setting_current_catalog_year'
 							$cat_line
@@ -1655,9 +1658,9 @@ class Course extends stdClass
           $table_name = "courses";
           if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
           $res3 = $db->db_query("SELECT * FROM $table_name
-							WHERE course_id = '?' 
+							WHERE course_id = ? 
 							AND subject_id != '' 
-							AND delete_flag = '0'
+							AND delete_flag = 0
 							AND catalog_year <= '$setting_current_catalog_year'
 							$cat_line
 							ORDER BY `catalog_year` DESC LIMIT 1", $this->course_id);
@@ -1672,6 +1675,7 @@ class Course extends stdClass
       $this->description = trim($cur["description"]);
       $this->subject_id = trim(strtoupper($cur["subject_id"]));
       $this->course_num = trim(strtoupper($cur["course_num"]));
+      $this->school_id = intval($cur["school_id"]);
 
 
       $this->min_hours = $cur["min_hours"] * 1;  //*1 will trim extra zeros from end of decimals
@@ -1714,8 +1718,8 @@ class Course extends stdClass
       if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 
       $res = $this->db->db_query("SELECT * FROM $table_name
-										WHERE course_id = '?'
-										AND exclude = '0' ", $this->course_id);
+										WHERE course_id = ?
+										AND exclude = 0 ", $this->course_id);
       while($cur = $this->db->db_fetch_array($res))
       {
         $si = $cur["subject_id"];
@@ -1783,6 +1787,7 @@ class Course extends stdClass
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["course_num"] = $this->course_num;
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["title"] = $this->title;
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["description"] = $this->description;
+    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["description"] = $this->school_id;
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["min_hours"] = $min_hours;
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["max_hours"] = $max_hours;
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["repeat_hours"] = $this->repeat_hours;
@@ -1821,7 +1826,7 @@ class Course extends stdClass
     
     
     $res = $this->db->db_query("SELECT * FROM transfer_courses
-									     WHERE transfer_course_id = '?' ", $this->course_id);
+									             WHERE transfer_course_id = ? ", $this->course_id);
     $cur = $this->db->db_fetch_array($res);
 
     $this->subject_id = $cur["subject_id"];
@@ -1830,6 +1835,7 @@ class Course extends stdClass
     $this->min_hours = $cur["min_hours"] * 1;
     $this->max_hours = $cur["max_hours"] * 1;
     $this->institution_id = $cur["institution_id"];
+    $this->school_id = intval($cur['school_id']);
     // Try to figure out the institution name for this course...
     $this->institution_name = $this->db->get_institution_name($this->institution_id);
 
@@ -2163,7 +2169,7 @@ class Course extends stdClass
 
     "min_grade", "specified_repeats", "bool_specified_repeat", "required_on_branch_id",
     "assigned_to_group_id", "assigned_to_semester_num", "level_code", "req_by_degree_id",
-    "assigned_to_degree_ids_array", "assigned_to_group_ids_array",
+    "assigned_to_degree_ids_array", "assigned_to_group_ids_array", "school_id",
 
     "advised_hours", "bool_selected", "bool_advised_to_take", "bool_use_draft",
     "course_list_fulfilled_by",

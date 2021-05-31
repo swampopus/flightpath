@@ -39,16 +39,17 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
   
   $user_id = 0;
   $cwid = 0;
-  $user_name = "";
+  $user_name = ""; 
   $is_student = 0;
   $is_faculty = 0;
-      
+  $school_id = 0;    
   if (is_object($user)) {
     $user_id = @$user->id;
     $cwid = @$user->cwid;
     $user_name = @$user->name;
     $is_student = (int) @$user->is_student;
     $is_faculty = (int) @$user->is_faculty;
+    $school_id = $user->school_id;
   }
   
   $is_mobile = 0;   //TODO:  not used anymore! //(int) fp_screen_is_mobile();
@@ -63,10 +64,10 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
   }
   
   db_query("INSERT INTO watchdog 
-            (user_id, user_name, cwid, type, message, variables, severity, extra_data, location, referer, ip, is_mobile, is_student, is_faculty, timestamp)
+            (user_id, user_name, cwid, type, message, variables, severity, extra_data, location, referer, ip, is_mobile, is_student, is_faculty, timestamp, school_id)
             VALUES
-            ('?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?')
-            ", $user_id, $user_name, $cwid, $type, $message, $ser_variables, $severity, $extra_data, $location, $referer, $ip, $is_mobile, $is_student, $is_faculty, time());
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ", $user_id, $user_name, $cwid, $type, $message, $ser_variables, $severity, $extra_data, $location, $referer, $ip, $is_mobile, $is_student, $is_faculty, time(), $school_id);
   
   
 }
@@ -83,13 +84,17 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
  * We will do this by directly querying the database, for speed reasons.
  * 
  */
-function fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalog_year, $bool_draft = TRUE) {
+function fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalog_year, $bool_draft = TRUE, $school_id = 0) {
   $table_name = "courses";
   if ($bool_draft) {
     $table_name = "draft_courses";
   }    
   
-  $res = db_query("SELECT * FROM $table_name WHERE subject_id = ? AND course_num = ? AND catalog_year = ?", $subject_id, $course_num, $catalog_year);
+  $res = db_query("SELECT * FROM $table_name 
+                      WHERE subject_id = ? 
+                      AND course_num = ? 
+                      AND catalog_year = ?
+                      AND school_id = ? ", $subject_id, $course_num, $catalog_year, $school_id);
   $cur = db_fetch_array($res);
   
   $min_hours = $cur['min_hours'];
@@ -323,9 +328,9 @@ function fp_get_degree_title($degree_id, $bool_include_track_title = FALSE, $boo
 /**
  * Returns the faculty member's name based on the ID provided.
  */
-function fp_get_faculty_name($cwid) {
+function fp_get_faculty_name($cwid, $school_id = 0) {
   $db = get_global_database_handler();
-  $name = $db->get_faculty_name($cwid);
+  $name = $db->get_faculty_name($cwid, FALSE, $school_id);
   if (!$name) $name = t("Unknown Advisor");
   return $name;
 }
@@ -351,7 +356,7 @@ function fp_load_user($user_id) {
     return $rtn;        
   }
   
-  $res = db_query("SELECT * FROM users WHERE user_id = '?' ", $user_id);
+  $res = db_query("SELECT * FROM users WHERE user_id = ? ", $user_id);
   
   if (db_num_rows($res) == 0) return NULL;
   $cur = db_fetch_object($res);
@@ -359,6 +364,7 @@ function fp_load_user($user_id) {
   $rtn->name = $cur->user_name;
   $rtn->f_name = $cur->f_name;
   $rtn->l_name = $cur->l_name;
+  $rtn->school_id = intval($cur->school_id);
   $rtn->email = trim(strtolower($cur->email));
   $rtn->cwid = $cur->cwid;
   $rtn->is_student = (bool) $cur->is_student;
@@ -412,10 +418,10 @@ function fp_load_user($user_id) {
   // If student, load attributes from student_attributes table (if any exist)
   $rtn->attributes = array();
   if ($rtn->is_student) {
-    $rtn->attributes = fp_get_student_attributes($rtn->cwid);
+    $rtn->attributes = fp_get_student_attributes($rtn->cwid, $school_id);
   }
   else if ($rtn->is_faculty) {
-    $rtn->attributes = fp_get_faculty_attributes($rtn->cwid);
+    $rtn->attributes = fp_get_faculty_attributes($rtn->cwid, $school_id);
   }
  
   return $rtn;  
@@ -450,10 +456,10 @@ function fp_get_user_timezone($account = NULL) {
 }
 
 
-function fp_get_student_attributes($student_id) {
+function fp_get_student_attributes($student_id, $school_id = 0) {
   $rtn = array();
   
-  $res = db_query("SELECT * FROM student_attributes WHERE student_id = ?", array($student_id));
+  $res = db_query("SELECT * FROM student_attributes WHERE student_id = ? AND school_id = ?", array($student_id, $school_id));
   $cur = db_fetch_array($res);
   if ($cur) {
     $rtn = $cur;
@@ -464,10 +470,10 @@ function fp_get_student_attributes($student_id) {
 }
 
 
-function fp_get_faculty_attributes($faculty_id) {
+function fp_get_faculty_attributes($faculty_id, $school_id = 0) {
   $rtn = array();
   
-  $res = db_query("SELECT * FROM faculty_attributes WHERE faculty_id = ?", array($faculty_id));
+  $res = db_query("SELECT * FROM faculty_attributes WHERE faculty_id = ? AND school_id = ?", array($faculty_id, $school_id));
   $cur = db_fetch_array($res);
   if ($cur) {
     $rtn = $cur;
@@ -497,14 +503,16 @@ function db_get_user_id($user_name) {
 }
 
 
-function db_get_user_id_from_cwid($cwid, $type = "faculty") {
+function db_get_user_id_from_cwid($cwid, $type = "faculty", $school_id = 0) {
   
   $type_line = " is_faculty='1' ";
   if ($type == "student") {
     $type_line = " is_student='1' ";
   }
     
-  $user_id = db_result(db_query("SELECT user_id FROM users WHERE cwid = ? AND $type_line ", $cwid));
+  $user_id = db_result(db_query("SELECT user_id FROM users WHERE cwid = ? 
+                                    AND school_id = ?
+                                    AND $type_line ", $cwid, $school_id));
   
   if ($user_id) {
     return $user_id;
@@ -544,9 +552,9 @@ function db_get_user_id_from_email($email, $type = "faculty") {
   Return back the codes or records for a student's degrees, based on what is in the
   student_degrees table (thanks to system.module), as well as what we get from hooks.
 */
-function fp_get_student_majors($student_cwid, $bool_return_as_csv = FALSE, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE, $bool_skip_directives = TRUE, $bool_check_for_allow_dynamic = TRUE) {
+function fp_get_student_majors($student_cwid, $bool_return_as_csv = FALSE, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE, $bool_skip_directives = TRUE, $bool_check_for_allow_dynamic = TRUE, $school_id = 0) {
     
-  $params = array($student_cwid, $bool_return_as_full_record, $perform_join_with_degrees, $bool_skip_directives, $bool_check_for_allow_dynamic);  
+  $params = array($student_cwid, $bool_return_as_full_record, $perform_join_with_degrees, $bool_skip_directives, $bool_check_for_allow_dynamic, $school_id);  
       
   // Execute hook for this too.
   $arr = invoke_hook("fp_get_student_majors", $params);
@@ -593,22 +601,23 @@ function fp_get_student_majors($student_cwid, $bool_return_as_csv = FALSE, $bool
 
 
 
-function fp_get_student_name($cwid, $bool_include_cwid = FALSE) {
+function fp_get_student_name($cwid, $bool_include_cwid = FALSE, $school_id = 0) {
   if ($cwid == 0) {
     return t("Anonymous");
   }
   $db = get_global_database_handler();
-  $name = $db->get_student_name($cwid, $bool_include_cwid);
+  $name = $db->get_student_name($cwid, $bool_include_cwid, $school_id);
   if (!$name) $name = t("Unknown Student");
   return $name;
 }
 
 
 
-function fp_get_student_email($cwid) {
+function fp_get_student_email($cwid, $school_id = 0) {
   $email = db_result(db_query("SELECT email FROM users
                                WHERE cwid = ?
-                               AND is_student = 1", array($cwid)));
+                               AND school_id = ?
+                               AND is_student = 1", array($cwid, $school_id)));
 
   if (trim($email)) {
     return trim(strtolower($email));

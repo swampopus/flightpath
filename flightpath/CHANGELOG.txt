@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-05-31
+  Adding school_id to api and queries throughout FlightPath.
+  
+
 2021-05-27
   Changing some style issues when listing multiple degrees for a student.
   

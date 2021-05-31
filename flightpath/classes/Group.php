@@ -12,7 +12,7 @@ class Group extends stdClass
 	public $hours_required_by_type, $req_by_degree_id;
 	public $assigned_to_semester_num, $bool_placeholder, $data_entry_comment, $public_note;
 	public $list_courses, $list_groups, $db, $count_of_matches, $bool_winning_branch;
-	public $catalog_year;
+	public $catalog_year, $school_id;
 	public $priority;
 	//////////////////
 	///  From the database...
@@ -51,6 +51,7 @@ class Group extends stdClass
 		$this->count_of_matches = 0;
 		$this->hours_assigned = 0;
     $this->min_hours_allowed = 0;
+    $this->school_id = 0;
 		$this->list_courses = new CourseList();
 		$this->list_groups = new GroupList();
 		$this->bool_use_draft = $bool_use_draft;
@@ -234,13 +235,13 @@ class Group extends stdClass
 		if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 		
 		$res = db_query("SELECT * FROM `$table_name`
-							WHERE group_id = '?'	", $this->get_db_group_id());
+							WHERE group_id = ?	", $this->get_db_group_id());
 		while ($cur = db_fetch_array($res))
 		{
 
 			$id = $cur["id"];
 			$course_id = $cur["course_id"]*1; 
-
+      $this->school_id = intval($cur['school_id']);
 
 			if ($cur["course_id"]*1 > 0)
 			{
@@ -375,6 +376,7 @@ class Group extends stdClass
 					// part of this group, so do not re-create it, just find it
 					// and reload it's missing courses.
 					$temp_g = new Group();
+          $temp_g->school_id = $this->school_id;
 					$temp_g->bool_use_draft = $this->bool_use_draft;
 					$temp_g->group_id = $cur["child_group_id"] . '_' . $this->req_by_degree_id;
 					$temp_g->requirement_type = $this->requirement_type;
@@ -553,6 +555,7 @@ class Group extends stdClass
 		$this->db_catalog_repeat = trim($cur["catalog_repeat"]);
 		$this->catalog_year = trim($cur["catalog_year"]);
 		$this->public_note = trim($cur["public_note"]);
+		$this->school_id = intval($cur["school_id"]);
 
 
 		if ($this->group_id == -88)

@@ -77,58 +77,7 @@ class DatabaseHandler extends stdClass
 
 
 
-  function z__get_help_page($i)
-  {
-    depricated_message();
-    
-    $rtn_array = array();
-
-
-    $res = $this->db_query("SELECT * FROM help WHERE `id`='?' ", $i);
-    $cur = $this->db_fetch_array($res);
-    $rtn_array["title"] = trim($cur["title"]);
-    $rtn_array["body"] = trim($cur["body"]);
-
-    return $rtn_array;
-
-  }
-
   
-  function z__add_to_log($action, $extra_data = "", $notes = "")
-  {
-    
-    depricated_message();
-    
-    // Add a row to the log table.
-    $ip = $_SERVER["REMOTE_ADDR"];
-    $url = mysql_real_escape_string($_SERVER["REQUEST_URI"]);
-    $user_id = $_SESSION["fp_user_id"];
-    $user_type = $_SESSION["fp_user_type"]; 
-    $user_name = mysql_real_escape_string($_SESSION["fp_user_name"]);
-    $action = mysql_real_escape_string($action);
-    $extra_data = mysql_real_escape_string($extra_data);
-    $notes = mysql_real_escape_string($notes);
-    
-    if ($GLOBALS["fp_page_is_mobile"]) {
-      $notes = "M:" . $notes;
-    }
-    
-    // This needs to be mysql_query, instead of "this->db_query", because
-    // otherwise it might get into an infinite loop.
-    $now = time();
-    $query = "INSERT INTO log (user_id,
-            user_name, user_type, action, extra_data, notes,
-             ip, posted, from_url) VALUES (
-            '$user_id','$user_name','$user_type','$action','$extra_data',
-            '$notes',
-            '$ip', '$now' ,'$url') ";
-    $res = mysql_query($query) or die(mysql_error() . " - " . $query);
-
-
-    
-    
-
-  }
 
   /**
    * Sets the maintenance mode.  $val should be either 0 (off) or 1 (on)
@@ -174,7 +123,7 @@ class DatabaseHandler extends stdClass
 
 
 
-  function get_developmental_requirements($student_cwid)
+  function get_developmental_requirements($student_cwid, $school_id = 0)
   {
     // returns an array which states whether or not the student
     // requires any developmental requirements.
@@ -182,7 +131,8 @@ class DatabaseHandler extends stdClass
     $rtn_array = array();
     
     $res = $this->db_query("SELECT * FROM student_developmentals
-                       WHERE student_id = '?' ", $student_cwid);
+                       WHERE student_id = ?
+                       AND school_id = ? ", $student_cwid, $school_id);
     while($cur = $this->db_fetch_array($res)) {
       $rtn_array[] = $cur["requirement"];
     }
@@ -192,39 +142,6 @@ class DatabaseHandler extends stdClass
   }
 
 
-
-  function z__get_table_transfer_data_string($table_name, $table_structure, $where_clause = "")
-  {
-    // This function will return a string of all the data
-    // in a particular table, formatted with delimeters.
-    // %R~ separates rows, %C~ separates columns.
-    // We expect the tableStructure to be a csv of the
-    // column names.
-    $rtn = "";
-
-
-    $res = mysql_query("select $table_structure from $table_name $where_clause") or die_and_mail(mysql_error());
-    while ($cur = mysql_fetch_row($res))
-    {
-      $new_row = "";
-
-      foreach($cur as $key => $value)
-      { // put all the values returned together...
-        $new_row .= $value . "%C~";
-      }
-      // Remove last %C%...
-      $new_row = substr($new_row, 0, -3);
-
-      // Add it to the rtn...
-      $rtn .= $new_row . "%R~";
-
-    }
-
-    // Remove the last %R%...
-    $rtn = substr($rtn, 0, -3);
-
-    return $rtn;
-  }
 
 
   
@@ -427,158 +344,7 @@ class DatabaseHandler extends stdClass
   
   
   
-  /**
-   * This function is used to perform a database query.  It can take simple replacement patterns,
-   * by using ?.  If you actually need to have a ? in the query, you can escape it with ??.
-   * For example:
-   * $result = $db->db_query("SELECT * FROM table WHERE name = '?' and age = ? ", $name, $temp_age);
-   *
-   * @param unknown_type $sql_query
-   * @return unknown
-   */
-  function z__db_query($sql_query) {
-    
-    // If there were any arguments to this function, then we must first apply
-    // replacement patterns.
-    $args = func_get_args();
-    array_shift($args);
-    if (isset($args[0]) && is_array($args[0])) {
-      // If the first argument was an array, it means we passed an array of values instead
-      // of passing them directly.  So use them directly as our args.
-      $args = $args[0];
-    }
 
-    // The query may contain an escaped ?, meaning "??", so I will replace that with something
-    // else first, then change it back afterwards.
-    $sql_query = str_replace("??", "~ESCAPED_Q_MARK~", $sql_query);
-        
-    // If $c (number of replacements performed) does not match the number of replacements
-    // specified, warn the user.
-    if (substr_count($sql_query, "?") != count($args)) {
-      fpm("<br><b>WARNING:</b> Replacement count does not match what was supplied to query: $sql_query<br><br>");
-    }    
-    
-    if (count($args) > 0) {
-      // Replace each occurance of "?" with what's in our array.
-      
-      foreach ($args as $replacement) {
-        // Escape the replacement...
-        // The replacement might ALSO have a question mark in it.  Escape that too.
-        if (strpos($replacement, "?") !== 0) {
-          $replacement = str_replace("?", "~ESCAPED_Q_MARK~", $replacement);
-        }
-        
-        // Because mysql_real_escape_string will allow \' to pass through, I am going to
-        // first use mysql_real_escape_string on all slashes.
-        $replacement = str_replace("\\" , mysql_real_escape_string("\\"), $replacement);
-        // Okay, perform the replacement
-        $replacement = mysql_real_escape_string($replacement);
-        
-        // If we have a $ followed by a number (like $99), preg_replace will remove it.  So, let's escape the $ if so.
-        /// if so.
-        $replacement = addcslashes($replacement, '$');
-        
-        $sql_query = preg_replace("/\?/", $replacement, $sql_query, 1); 
-           
-      }
-      
-    }
-        
-    $sql_query = str_replace("~ESCAPED_Q_MARK~", "?", $sql_query);      
-    
-    //////////////////////////////////////////////
-    
-    // Run the sqlQuery and return the result set.
-    if (!is_resource($this->dbc)) fpm(debug_backtrace());
-    $result = mysql_query($sql_query, $this->dbc);
-    if ($result)
-    {
-      return $result;
-    } else {
-      // Meaning, the query failed...
-      // Do nothing.  Do not attempt to log anything, as that could cause an infinite loop.     
-      
-      // Display the error on screen
-      $this->db_error();
-    }
-  }
-
-
-  /**
-   * Draw out the error onto the screen.
-   *
-   * @param unknown_type $sql
-   */
-  function z__db_error($msg = "")
-  {
-    
-    $arr = debug_backtrace();
-    
-    $when_ts = time();
-    $when_english = format_date($when_ts);
-    
-    $mysql_err = mysql_error();
-    
-    // If we are on production, email someone!
-    if (@$GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"] != "")
-    {
-      $server = $_SERVER["SERVER_NAME"];
-      $email_msg = t("A MYSQL error has occured in FlightPath.") . "  
-      Server: $server
-      
-      Timestamp: $when_ts ($when_english)
-      
-      Error:
-      $mysql_err
-      
-      Comments:
-      $msg
-      
-      Backtrace:
-      " . print_r($arr, true) . "
-      ";
-      fp_mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
-    }
-        
-    fpm(t("A MySQL error has occured:") . " $mysql_err<br><br>" . t("The backtrace:"));
-    fpm($arr);
-
-    if (@$GLOBALS["fp_die_mysql_errors"] == TRUE) {
-      print "\n<br>The script has stopped executing because of a MySQL error:
-                    $mysql_err<br>\n
-             Please fix the error and try again.<br>\n";
-      print "<br><br>Timestamp: $when_ts ($when_english)
-              <br><br>Program backtrace:
-              <pre>" . print_r($arr, true) . "</pre>";
-      die;
-    }
-    
-    // Also, check to see if the mysql_err is because of a lost connection, as in, the
-    // server went down.  In that case, we should also terminate immediately, rather
-    // than risk spamming an email recipient with error emails.
-    if (stristr($mysql_err, "Lost connection to MySQL server")
-        || stristr($mysql_err, "MySQL server has gone away")) {
-
-      print "<h2 style='font-family: Arial, sans serif;'>Database Connection Error</h2>
-              <br>
-              <div style='font-size: 1.2em; font-family: Arial, sans serif; padding-left: 30px;
-                          padding-right: 30px;'>
-              Sorry, but it appears the database is currently unavailable.  This may
-              simply be part of scheduled maintenance to the database server.  Please
-              try again in a few minutes.  If the problem persists for longer
-              than an hour, contact your technical support
-              staff.
-              
-              </div>
-              
-              ";
-      die;          
-    }
-    
-    
-
-  }
-  
   
   function request_new_group_id()
   {
@@ -642,26 +408,7 @@ class DatabaseHandler extends stdClass
 
     $array_valid_names = array();
     
-    /*  NOTE:  This was never running it seems, so commenting it out.
-    // First-- is this course in our GLOBALS cache for courses?
-    // If it is, then load from that.
-    if ($bool_load_from_global_cache == true &&
-    $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["subject_id"] != "")
-    {
-      $subject_id = $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["subject_id"];
-      $course_num = $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["course_num"];
-      $title = $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["title"];
-      $description = $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["description"];
-      $min_hours = $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["min_hours"];
-      $max_hours = $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["max_hours"];
-      $repeat_hours = $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["repeat_hours"];
-      $db_exclude = $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["db_exclude"];
-      $array_valid_names = $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["array_valid_names"];
-      // load this into the course object, if not null.
-
-      return;
-    }
-    */
+   
 
     if ($course_id != 0)
     {
@@ -807,6 +554,7 @@ class DatabaseHandler extends stdClass
     $c = $course;
     $course_id = $c->course_id;
 
+    
 
     $min_hours = $c->min_hours;
     $max_hours = $c->max_hours;
@@ -820,23 +568,26 @@ class DatabaseHandler extends stdClass
     }
     
 
-    $res = $this->db_query("DELETE FROM draft_courses WHERE
-              course_id = '?' AND catalog_year = '?' 
-                AND subject_id = '?' 
-                AND course_num = '?' ", $course_id, $catalog_year, $c->subject_id, $c->course_num);
+    $res = $this->db_query("DELETE FROM draft_courses 
+                            WHERE
+                            course_id = ? 
+                            AND catalog_year = ? 
+                            AND subject_id = ? 
+                            AND course_num = ?
+                            AND school_id = ? ", $course_id, $catalog_year, $c->subject_id, $c->course_num, $c->school_id);
 
     $res2 = $this->db_query("INSERT INTO draft_courses(course_id,
                 subject_id, course_num, catalog_year,
                 title, description, min_hours, max_hours,
-                repeat_hours, exclude) values (
-                '?','?','?','?','?','?','?','?','?','?') 
-                ", $course_id, $c->subject_id,$c->course_num,$catalog_year,$c->title,$c->description,$min_hours,$max_hours,$c->repeat_hours,$c->db_exclude);
+                repeat_hours, exclude, school_id) values (
+                ?,?,?,?,?,?,?,?,?,?,?) 
+                ", $course_id, $c->subject_id,$c->course_num,$catalog_year,$c->title,$c->description,$min_hours,$max_hours,$c->repeat_hours,$c->db_exclude,$c->school_id);
 
 
 
   }
 
-  function update_course_requirement_from_name($subject_id, $course_num, $new_course_id)
+  function update_course_requirement_from_name($subject_id, $course_num, $new_course_id, $school_id = 0)
   {
     // This will convert all instances of subject_id/course_num
     // to use the newCourseID.  It looks through the requirements tables
@@ -848,28 +599,33 @@ class DatabaseHandler extends stdClass
     // not doing the draft tables!
     
     $res = $this->db_query("UPDATE degree_requirements
-                set `course_id`='?'
-                where `data_entry_value`= ? ", $new_course_id, "$subject_id~$course_num") ;
+                set `course_id`= ?
+                where `data_entry_value`= ?
+                AND school_id = ? ", $new_course_id, "$subject_id~$course_num", $school_id) ;
 
     $res = $this->db_query("UPDATE group_requirements
                 SET `course_id`='?'
-                WHERE `data_entry_value`= ? ", $new_course_id, "$subject_id~$course_num") ;
+                WHERE `data_entry_value`= ? 
+                AND school_id = ?", $new_course_id, "$subject_id~$course_num", $school_id) ;
 
 
 
     // Also update substitutions....
     $res = $this->db_query("UPDATE student_substitutions
                 SET `sub_course_id`='?'
-                WHERE `sub_entry_value`= ? ", $new_course_id, "$subject_id~$course_num") ;
+                WHERE `sub_entry_value`= ? 
+                AND school_id = ? ", $new_course_id, "$subject_id~$course_num", $school_id) ;
 
     $res = $this->db_query("UPDATE student_substitutions
                 SET `required_course_id`='?'
-                WHERE `required_entry_value`= ? ", $new_course_id, "$subject_id~$course_num") ;
+                WHERE `required_entry_value`= ? 
+                AND school_id = ?", $new_course_id, "$subject_id~$course_num", $school_id) ;
 
     // Also the advising histories....
     $res = $this->db_query("UPDATE advised_courses
                 SET `course_id`='?'
-                WHERE `entry_value`= ? ", $new_course_id, "$subject_id~$course_num") ;
+                WHERE `entry_value`= ? 
+                AND school_id = ?", $new_course_id, "$subject_id~$course_num", $school_id) ;
     
     
     
@@ -943,7 +699,7 @@ class DatabaseHandler extends stdClass
    * All the values can be left blank to mean "keep what is in there".  If they have values supplied in the arguments to this function,
    * then the new values will be used.
    */
-  function duplicate_advising_session($advising_session_id, $faculty_id = "", $student_id = "", $term_id = "", $degree_id = "", $is_whatif = "", $is_draft = "") {
+  function duplicate_advising_session($advising_session_id, $faculty_id = "", $student_id = "", $term_id = "", $degree_id = "", $is_whatif = "", $is_draft = "", $school_id = NULL) {
     $now = time();     
       
     // First, get the details of this particular advising session....
@@ -960,13 +716,14 @@ class DatabaseHandler extends stdClass
     $db_posted = $now;  
     $db_is_whatif = ($is_whatif == "") ? $cur["is_whatif"] : $is_whatif;
     $db_is_draft = ($is_draft == "") ? $cur["is_draft"] : $is_draft;
+    $db_school_id = ($school_id === NULL) ? $cur['school_id'] : $school_id;
     $db_is_empty = $cur["is_empty"];
     
     // Okay, let's INSERT this record, and capture the new advising_session_id...
     $res = db_query("INSERT INTO advising_sessions
-              (student_id, faculty_id, term_id, degree_id, major_code_csv, catalog_year, posted, is_whatif, is_draft, is_empty)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-              ", $db_student_id, $db_faculty_id, $db_term_id, $db_degree_id, $db_major_code_csv, $db_catalog_year, $db_posted, $db_is_whatif, $db_is_draft, $db_is_empty);
+              (student_id, faculty_id, term_id, degree_id, major_code_csv, catalog_year, posted, is_whatif, is_draft, is_empty, school_id)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              ", $db_student_id, $db_faculty_id, $db_term_id, $db_degree_id, $db_major_code_csv, $db_catalog_year, $db_posted, $db_is_whatif, $db_is_draft, $db_is_empty, $db_school_id);
     
     $new_asid = db_insert_id();
     
@@ -986,7 +743,7 @@ class DatabaseHandler extends stdClass
   }
 
 
-  function get_advising_session_id($faculty_id = "", $student_id = "", $term_id = "", $degree_id = "", $bool_what_if = false, $bool_draft = true, $bool_load_any_active_if_faculty_id_not_found = TRUE)
+  function get_advising_session_id($faculty_id = "", $student_id = "", $term_id = "", $degree_id = "", $bool_what_if = false, $bool_draft = true, $bool_load_any_active_if_faculty_id_not_found = TRUE, $school_id = 0)
   {
     $is_what_if = "0";
     $is_draft = "0";    
@@ -1016,12 +773,13 @@ class DatabaseHandler extends stdClass
                 where
                     student_id = ?
                 $faculty_line
-                and term_id = ?
+                and term_id = ?                
                 and degree_id = ?
                 and is_whatif = ?
+                AND school_id = ?
                 $draft_line
                 order by `posted` desc limit 1";
-    $result = $this->db_query($query, array($student_id, $term_id, $degree_id, $is_what_if)) ;
+    $result = $this->db_query($query, array($student_id, $term_id, $degree_id, $is_what_if, $school_id)) ;
     if ($this->db_num_rows($result) > 0)
     {
       $cur = $this->db_fetch_array($result);
@@ -1095,7 +853,7 @@ class DatabaseHandler extends stdClass
 
 
 
-  function get_group_id($group_name, $catalog_year) {
+  function get_group_id($group_name, $catalog_year, $school_id = 0) {
 
     if ($catalog_year < $GLOBALS["fp_system_settings"]["earliest_catalog_year"])
     {
@@ -1114,8 +872,9 @@ class DatabaseHandler extends stdClass
     $res7 = $this->db_query("SELECT group_id FROM groups
               WHERE group_name = ?
               AND catalog_year = ?
+              AND school_id = ?
               AND delete_flag = 0
-               LIMIT 1 ", $group_name, $catalog_year) ;
+               LIMIT 1 ", $group_name, $catalog_year, $school_id) ;
     if ($this->db_num_rows($res7) > 0)
     {
       $cur7 = $this->db_fetch_array($res7);
@@ -1150,12 +909,13 @@ class DatabaseHandler extends stdClass
   }
 
 
-  function get_institution_name($institution_id)
+  function get_institution_name($institution_id, $school_id = 0)
   {
     // Return the name of the institution...
     
     $res = $this->db_query("SELECT * FROM transfer_institutions
-                where institution_id = '?' ", $institution_id);
+                where institution_id = ? 
+                AND school_id = ?", $institution_id, $school_id);
     $cur = $this->db_fetch_array($res);
     return trim($cur['name']);
   }
@@ -1169,7 +929,7 @@ class DatabaseHandler extends stdClass
    */
   function get_variable($name, $default_value = "") {
     $res = $this->db_query("SELECT value FROM variables
-                           WHERE name = '?' ", $name);
+                           WHERE name = ? ", $name);
     $cur = $this->db_fetch_array($res);
     
     $val = $cur["value"];
@@ -1190,12 +950,68 @@ class DatabaseHandler extends stdClass
   function set_variable($name, $value) {    
 
     $res2 = $this->db_query("REPLACE INTO variables (name, value)
-                              VALUES ('?', '?') ", $name, $value);
+                              VALUES (?, ?) ", $name, $value);
     
   }
   
   
-  function get_course_id($subject_id, $course_num, $catalog_year = "", $bool_use_draft = false)
+  
+  
+  function get_school_id_for_transfer_course_id($transfer_course_id) {
+        
+    return intval(db_result(db_query("SELECT school_id FROM transfer_courses WHERE transfer_course_id = ?", array($transfer_course_id))));
+  }
+    
+  
+  
+  
+  
+  function get_school_id_for_course_id($course_id, $bool_use_draft = FALSE) {
+        
+    // Always override if the global variable is set.
+    if (@$GLOBALS["fp_advising"]["bool_use_draft"] == true) {
+      $bool_use_draft = true;
+    }  
+    
+    $table_name = "courses";
+    if ($bool_use_draft){$table_name = "draft_$table_name";}    
+    
+    return intval(db_result(db_query("SELECT school_id FROM $table_name WHERE course_id = ?", array($course_id))));
+  }
+  
+
+  function get_school_id_for_degree_id($degree_id, $bool_use_draft = FALSE) {
+        
+    // Always override if the global variable is set.
+    if (@$GLOBALS["fp_advising"]["bool_use_draft"] == true) {
+      $bool_use_draft = true;
+    }  
+    
+    $table_name = "degrees";
+    if ($bool_use_draft){$table_name = "draft_$table_name";}    
+    
+    return intval(db_result(db_query("SELECT school_id FROM $table_name WHERE degree_id = ?", array($degree_id))));
+  }
+
+
+  function get_school_id_for_group_id($group_id, $bool_use_draft = FALSE) {
+        
+    // Always override if the global variable is set.
+    if (@$GLOBALS["fp_advising"]["bool_use_draft"] == true) {
+      $bool_use_draft = true;
+    }  
+    
+    $table_name = "groups";
+    if ($bool_use_draft){$table_name = "draft_$table_name";}    
+    
+    return intval(db_result(db_query("SELECT school_id FROM $table_name WHERE group_id = ?", array($group_id)))_;
+  }
+
+   
+  
+  
+  
+  function get_course_id($subject_id, $course_num, $catalog_year = "", $bool_use_draft = false, $school_id = 0)
   {
     // Ignore the colon, if there is one.
     if (strpos($course_num,":"))
@@ -1226,8 +1042,9 @@ class DatabaseHandler extends stdClass
     $res7 = $this->db_query("SELECT course_id FROM $table_name
               WHERE subject_id = ?
               AND course_num = ?
+              AND school_id = ?
               $catalog_line
-               ORDER BY catalog_year DESC LIMIT 1 ", $subject_id, $course_num) ;
+               ORDER BY catalog_year DESC LIMIT 1 ", $subject_id, $course_num, $school_id) ;
     if ($this->db_num_rows($res7) > 0)
     {
       $cur7 = $this->db_fetch_array($res7);
@@ -1237,14 +1054,16 @@ class DatabaseHandler extends stdClass
   }
 
 
-  function get_student_settings($student_cwid)
+  function get_student_settings($student_cwid, $school_id = 0)
   {
+        
     // This returns an array (from the xml) of a student's
     // settings in the student_settings table.  It will
     // return FALSE if the student was not in the table.
 
     $res = $this->db_query("SELECT settings FROM student_settings
-              WHERE student_id = '?' ", $student_cwid) ;
+              WHERE student_id = ? 
+              AND school_id = ? ", $student_cwid, $school_id) ;
     if ($this->db_num_rows($res) < 1)
     {
       return false;
@@ -1261,11 +1080,12 @@ class DatabaseHandler extends stdClass
   }
 
 
-  function get_student_cumulative_hours($student_cwid) {
+  function get_student_cumulative_hours($student_cwid, $school_id = 0) {
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT cumulative_hours FROM students 
-                      WHERE cwid = '?' ", $student_cwid);
+                      WHERE cwid = ?
+                      AND school_id = ? ", $student_cwid, $school_id);
 
     
     $cur = $this->db_fetch_array($res);
@@ -1274,11 +1094,12 @@ class DatabaseHandler extends stdClass
   }
 
 
-  function get_student_gpa($student_cwid) {
+  function get_student_gpa($student_cwid, $school_id = 0) {
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT gpa FROM students 
-                      WHERE cwid = '?' ", $student_cwid);
+                      WHERE cwid = ?
+                      AND school_id = ? ", $student_cwid, $school_id);
 
     
     $cur = $this->db_fetch_array($res);
@@ -1288,11 +1109,12 @@ class DatabaseHandler extends stdClass
 
 
 
-  function get_student_catalog_year($student_cwid) {
+  function get_student_catalog_year($student_cwid, $school_id = 0) {
       
     // Let's perform our queries.
     $res = $this->db_query("SELECT catalog_year FROM students 
-                      WHERE cwid = '?' ", $student_cwid);
+                      WHERE cwid = ?
+                      AND school_id = ? ", $student_cwid, $school_id);
 
     
     $cur = $this->db_fetch_array($res);
@@ -1310,12 +1132,13 @@ class DatabaseHandler extends stdClass
    * @param unknown_type $student_id
    * @return unknown
    */
-  function get_student_rank($student_cwid) {
+  function get_student_rank($student_cwid, $school_id = 0) {
     
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT rank_code FROM students 
-                      WHERE cwid = '?' ", $student_cwid);
+                      WHERE cwid = ?
+                      AND school_id = ? ", $student_cwid, $school_id);
 
     
     $cur = $this->db_fetch_array($res);
@@ -1335,12 +1158,13 @@ class DatabaseHandler extends stdClass
    * @param int $student_id
    * @return string
    */
-  function get_student_name($cwid, $bool_include_cwid = FALSE) {
+  function get_student_name($cwid, $bool_include_cwid = FALSE, $school_id = 0) {
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT f_name, l_name FROM users 
                       WHERE cwid = ?
-                      AND is_student = 1 ", $cwid);
+                      AND school_id = ?
+                      AND is_student = 1 ", $cwid, $school_id);
     
     $cur = $this->db_fetch_array($res);
     $name = $cur["f_name"] . " " . $cur["l_name"];
@@ -1366,12 +1190,13 @@ class DatabaseHandler extends stdClass
    * @param int $faculty_id
    * @return string
    */
-  function get_faculty_name($cwid, $bool_include_cwid = FALSE) {
+  function get_faculty_name($cwid, $bool_include_cwid = FALSE, $school_id = 0) {
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT f_name, l_name FROM users 
                       WHERE cwid = ?
-                      AND is_faculty = 1 ", $cwid);
+                      AND school_id = ?
+                      AND is_faculty = 1 ", $cwid, $school_id);
 
     
     $cur = $this->db_fetch_array($res);
@@ -1399,42 +1224,18 @@ class DatabaseHandler extends stdClass
    * to this faculty member.
    *
    */
-  function get_faculty_major_code_csv($faculty_cwid) {
+  function get_faculty_major_code_csv($faculty_cwid, $school_id = 0) {
             
     // Let's pull the needed variables out of our settings, so we know what
     // to query, because this is a non-FlightPath table.
     
-    $res = $this->db_query("SELECT major_code_csv FROM faculty WHERE cwid = '?' ", $faculty_cwid);
+    $res = $this->db_query("SELECT major_code_csv FROM faculty WHERE cwid = ? AND school_id = ?", $faculty_cwid, $school_id);
     $cur = $this->db_fetch_array($res);
     
     return @$cur["major_code_csv"];      
     
   }
   
-  // Deprecated, use the "_csv" version of this function instead.    
-  function get_faculty_major_code($faculty_cwid) {
-    
-    depricated_message("db->get_faculty_major_code() is deprecated. Use get_faculty_major_code_csv() instead.");
-    return $this->get_faculty_major_code_csv($faculty_cwid);    
-    
-  }
-    
-  
-  function get_student_major_from_db($student_cwid)
-  {
-    depricated_message("db->get_student_major_from_db() is deprecated. use get_student_major*s* instead.");
-    // Returns the student's major code from the DB.  Does not
-    // return the track code.
-    
-    // Let's perform our queries.
-    $res = $this->db_query("SELECT * FROM students 
-                      WHERE cwid = '?' ", $student_cwid);
-    
-    
-    $cur = $this->db_fetch_array($res);
-    return trim($cur["major_code"]);
-  }
-
 
   /**
    * Returns an array (or CSV string) of major_codes from the student_degrees table for this student.
@@ -1446,7 +1247,7 @@ class DatabaseHandler extends stdClass
    *   
    * 
    */
-  function get_student_majors_from_db($student_cwid, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE, $bool_skip_directives = TRUE, $bool_check_for_allow_dynamic = TRUE) {
+  function get_student_majors_from_db($student_cwid, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE, $bool_skip_directives = TRUE, $bool_check_for_allow_dynamic = TRUE, $school_id = 0) {
     // Looks in the student_degrees table and returns an array of major codes.
     $rtn = array();
     
@@ -1457,21 +1258,24 @@ class DatabaseHandler extends stdClass
     
     if ($perform_join_with_degrees) {
         
-      $catalog_year = $this->get_student_catalog_year($student_cwid);
+      $catalog_year = $this->get_student_catalog_year($student_cwid, $school_id);
       
       $res = $this->db_query("SELECT * FROM student_degrees a, degrees b
                               WHERE student_id = ? 
                               AND a.major_code = b.major_code
                               AND b.catalog_year = ?
+                              AND a.school_id = b.school_id
+                              AND a.school_id = ?
                               ORDER BY b.advising_weight, b.major_code
-                              ", $student_cwid, $catalog_year);
+                              ", $student_cwid, $catalog_year, $school_id);
     }
     else {
       // No need to join with degrees table...
       $res = $this->db_query("SELECT * FROM student_degrees a
                               WHERE student_id = ?
+                              AND school_id = ?
                               ORDER BY major_code
-                              ", $student_cwid);      
+                              ", $student_cwid, $school_id);      
     }
     while ($cur = $this->db_fetch_array($res)) {
       
@@ -1543,7 +1347,7 @@ class DatabaseHandler extends stdClass
 
   }
 
-  function get_degrees_in_catalog_year($catalog_year, $bool_include_tracks = false, $bool_use_draft = false, $bool_undergrad_only = TRUE, $only_level_nums = array(1,2))
+  function get_degrees_in_catalog_year($catalog_year, $bool_include_tracks = false, $bool_use_draft = false, $bool_undergrad_only = TRUE, $only_level_nums = array(1,2), $school_id = 0)
   {
     // Returns an array of all the degrees from a particular year
     // which are entered into FlightPath.
@@ -1576,9 +1380,10 @@ class DatabaseHandler extends stdClass
     $res = $this->db_query("SELECT degree_id, major_code, title, degree_class FROM $table_name
                 WHERE exclude = '0'
                 AND catalog_year = ?                
+                AND school_id = ?
                 $undergrad_line
                 $degree_class_line
-                ORDER BY title, major_code ", $catalog_year);
+                ORDER BY title, major_code ", $catalog_year, $school_id = 0);
     if ($this->db_num_rows($res) < 1)
     {
       return false;
@@ -1631,7 +1436,7 @@ class DatabaseHandler extends stdClass
 
   }
 
-  function get_degree_tracks($major_code, $catalog_year)
+  function get_degree_tracks($major_code, $catalog_year, $school_id = 0)
   {
     // Will return an array of all the tracks that a particular major
     // has.  Must match the major_code in degree_tracks table.
@@ -1645,7 +1450,8 @@ class DatabaseHandler extends stdClass
     
     $res = $this->db_query("SELECT * FROM degree_tracks
                 WHERE major_code = ?
-                AND catalog_year = ? ", $major_code, $catalog_year);
+                AND catalog_year = ? 
+                AND school_id = ?", $major_code, $catalog_year, $school_id);
     if ($this->db_num_rows($res) < 1)
     {
       $degree_tracks_data_cache[$catalog_year][$major_code] = false;
@@ -1663,7 +1469,7 @@ class DatabaseHandler extends stdClass
 
   }
 
-  function get_degree_plan($major_and_track_code, $catalog_year = "", $bool_minimal = false)
+  function get_degree_plan($major_and_track_code, $catalog_year = "", $bool_minimal = false, $school_id = 0)
   {
     // Returns a degreePlan object from the supplied information.
     
@@ -1672,7 +1478,7 @@ class DatabaseHandler extends stdClass
       $catalog_year = variable_get("current_catalog_year", "2006");
     }
     
-    $degree_id = $this->get_degree_id(trim($major_and_track_code), $catalog_year);
+    $degree_id = $this->get_degree_id(trim($major_and_track_code), $catalog_year, FALSE, $school_id);
     $dp = new DegreePlan($degree_id,null,$bool_minimal);
     if ($dp->major_code == "")
     {
@@ -1710,7 +1516,7 @@ class DatabaseHandler extends stdClass
   }
   
   
-  function get_degree_id($major_and_track_code, $catalog_year, $bool_use_draft = FALSE)
+  function get_degree_id($major_and_track_code, $catalog_year, $bool_use_draft = FALSE, $school_id = 0)
   {
     // This function expects the major_code and track_code (if it exists)
     // to be joined using |_.  Example:
@@ -1735,7 +1541,8 @@ class DatabaseHandler extends stdClass
     $res7 = $this->db_query("SELECT degree_id FROM $table_name
               WHERE major_code = ?
               AND catalog_year = ?
-               LIMIT 1 ", trim($major_and_track_code), $catalog_year) ;
+              AND school_id = ?
+               LIMIT 1 ", trim($major_and_track_code), $catalog_year, $school_id) ;
     if ($this->db_num_rows($res7) > 0)
     {
       $cur7 = $this->db_fetch_array($res7);
@@ -1747,7 +1554,7 @@ class DatabaseHandler extends stdClass
 
 
   // Returns a simple array of all degree_id's which match this major code, any catalog year.
-  function get_degree_ids($major_code) {
+  function get_degree_ids($major_code, $school_id = 0) {
 
     $rtn = array();
 
@@ -1762,8 +1569,9 @@ class DatabaseHandler extends stdClass
     if ($bool_use_draft){$table_name = "draft_$table_name";}
     
     $res7 = $this->db_query("SELECT degree_id FROM $table_name
-                            WHERE major_code = ?              
-                            ", trim($major_code)) ;
+                            WHERE major_code = ?   
+                            AND school_id = ?           
+                            ", trim($major_code), $school_id) ;
     
     while ($cur7 = $this->db_fetch_array($res7)) {      
       $rtn[$cur7["degree_id"]] = $cur7["degree_id"];
@@ -1810,36 +1618,6 @@ class DatabaseHandler extends stdClass
     return $this->pdo = NULL;  // this is all you need to do to close a PDO connection.
   }
 
-
-///////////////////////////////////////////////////
-///////////////////////////////////////////////////
-///////////////////////////////////////////////////
-
-  function z__db_num_rows($result)  {
-    return mysql_num_rows($result);
-  }
-
-  function z__db_affected_rows() {
-     return mysql_affected_rows();
-  }
-  
-  function z__db_insert_id() {
-    return mysql_insert_id();
-  }
-
-  function z__db_fetch_array($result) {
-    return mysql_fetch_array($result);
-  }
-  
-  
-  function z__db_fetch_object($result) {
-    return mysql_fetch_object($result);
-  }
-  
-
-  function z__db_close() {
-    return mysql_close($this->dbc);
-  }
 
   
   /////////////////////////////////////////////

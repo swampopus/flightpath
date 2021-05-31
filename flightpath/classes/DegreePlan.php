@@ -14,7 +14,7 @@ class DegreePlan extends stdClass
   public $list_semesters, $list_groups, $db, $degree_id, $catalog_year, $is_combined_dynamic_degree_plan, $combined_degree_ids_array;
   public $track_code, $track_title, $track_description, $student_array_significant_courses;
   public $bool_has_tracks, $array_semester_titles, $db_exclude, $db_allow_dynamic, $db_override_degree_hours, $db_advising_weight;
-  public $public_notes_array;
+  public $public_notes_array, $school_id;
 
   public $total_major_hours, $total_core_hours, $total_degree_hours;
   public $fulfilled_major_hours, $fulfilled_core_hours, $fulfilled_degree_hours;
@@ -59,6 +59,8 @@ class DegreePlan extends stdClass
     if (@$GLOBALS["fp_advising"]["bool_use_draft"] == true) {
       $this->bool_use_draft = true;
     }
+
+    $this->school_id = 0;  //default
 
     $this->required_course_id_array = array();
 
@@ -526,6 +528,7 @@ class DegreePlan extends stdClass
     {
       $this->title = $cur["title"];
       $this->major_code = $cur["major_code"];
+      $this->school_id = intval($cur['school_id']);
       $this->degree_level = strtoupper(trim($cur["degree_level"]));
       if ($this->degree_level == "") {
         $this->degree_level = "UG";  // undergrad by default
@@ -901,6 +904,7 @@ class DegreePlan extends stdClass
       $this->db_override_degree_hours = $GLOBALS[$cache_name][$this->degree_id]['db_override_degree_hours'];
       $this->degree_class = $GLOBALS[$cache_name][$this->degree_id]['degree_class'];
       $this->degree_level = $GLOBALS[$cache_name][$this->degree_id]['degree_level'];
+      $this->school_id = $GLOBALS[$cache_name][$this->degree_id]['school_id'];
       
       if ($this->degree_level == "") {
         $this->degree_level = "UG";  // undergrad by default
@@ -939,6 +943,7 @@ class DegreePlan extends stdClass
       $this->db_override_degree_hours = $cur["override_degree_hours"];
       
       $this->title = $cur["title"];
+      $this->school_id = intval($cur['school_id']);
       $this->public_notes_array[$this->degree_id] = $cur["public_note"];
       $this->catalog_year = $cur["catalog_year"];
       $this->degree_type = trim($cur["degree_type"]);
@@ -1015,7 +1020,8 @@ class DegreePlan extends stdClass
       'title' => $this->title,
       'track_code' => $this->track_code,
       'track_description' => $this->track_description,
-      'track_title' => $this->track_title
+      'track_title' => $this->track_title,
+      'school_id' => $this->school_id,
     );    
 
 
@@ -1077,9 +1083,10 @@ class DegreePlan extends stdClass
     if ($this->bool_use_draft) {$table_name2 = "draft_$table_name2";}
 
     $res = db_query("SELECT track_code, track_title, track_description FROM $table_name
-              								WHERE major_code = '?'
-              								AND catalog_year = '?' 
-              								ORDER BY track_title ", $this->major_code, $this->catalog_year);
+              								WHERE major_code = ?
+              								AND catalog_year = ? 
+              								AND school_id = ?
+              								ORDER BY track_title ", $this->major_code, $this->catalog_year, $this->school_id);
     while($cur = db_fetch_array($res))
     {
 
@@ -1120,7 +1127,7 @@ class DegreePlan extends stdClass
     $sem->title = variable_get("developmentals_title", t("Developmental Requirements"));
     $is_empty = true;
 
-    $temp_array = $this->db->get_developmental_requirements($student_id);
+    $temp_array = $this->db->get_developmental_requirements($student_id, $this->school_id);
     // We expect this to give us back an array like:
     // 0 => ART~101
     // 1 => MATH~090

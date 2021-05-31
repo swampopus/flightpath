@@ -17,6 +17,7 @@ class Substitution extends stdClass
 
 	public $outdated_note; // will contain information about WHY this was outdated.
   public $assigned_to_degree_id = 0;
+  public $school_id = 0;
 	
 		
 	function __construct()

@@ -203,7 +203,7 @@ function schools_menu() {
     'title' => 'Configure Schools',
     'description' => 'Administer and define the Schools at your institution',
     'page_callback' => 'fp_render_form',
-    'page_arguments' => array('schools_administer_schools_form', 'system_settings'),
+    'page_arguments' => array('schools_administer_schools_form'),
     'access_arguments' => array('administer_schools'),    
     "page_settings" => array(
       "page_has_search" => FALSE,
@@ -221,7 +221,7 @@ function schools_menu() {
     'type' => MENU_TYPE_TAB,
     'tab_family' => 'schools',
   );
-    
+  
   
   
   return $items;
@@ -368,7 +368,7 @@ function schools_get_schools_for_fapi($bool_include_none = TRUE, $bool_check_per
   
     
   if ($bool_include_none) {
-    $rtn[''] = t(' - No school designated -');
+    $rtn[0] = t(' - Default -');
   }
   
   foreach ($defs as $school_id => $val) {
@@ -485,6 +485,7 @@ function schools_form_alter(&$form, $form_id) {
     'admin_edit_group_form',
     'admin_edit_course_form',
   );
+    
     
     
   // Add "school" dropdown to the degrees, groups, and courses form
@@ -849,50 +850,144 @@ function schools_administer_schools_form() {
   $form = array();
   
   
-  $form['schools_schools'] = array(
-    'label' => t('School Definitions:'),
-    'value' => variable_get('schools_schools', ''),
-    'type' => 'textarea',
-    'description' => 'Enter your school definitions in this box, one per line.
-                      <br>SCHOOL_ID ~~ Description
-                      <br>ex:
-                      <br>&nbsp; &nbsp; UGRAD ~~ Undergraduate School
-                      <br>&nbsp; &nbsp; GRADO ~~ Graduate School Online
-                      <br>Use only letters, numbers, and underscores in the school_id names.  School IDs must also be unique.
-                      <br><br>
-                      <b>Do not use</b> NONE as a school_id, this is a reserved ID which already exists.  It is the
-                      default school when no school_id can be determined, or no school_id has been selected for
-                      a degree.',
+  $form = array();
+  
+  $m = 0;
+  
+  fp_add_css(fp_get_module_path("user") . "/css/user.css");
+  fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
+  
+  
+  
+  $form["mark" . $m++] = array(
+    "type" => "markup",
+    "value" => t("Schools can be divisions within your institution (ex: School or Nursing, School of Pharmacy, etc), distinct campuses
+                  (ex:  Washington Campus, South Campus, etc), or divisions of graduate level (Undergrad, Graduate).
+                  The default school is simply called 'Default' and all users and degree data will be placed under that school
+                  unless otherwise specified. ")
+                . "<br><br><b>" . t("Schools:") . "</b>
+                <table style='padding-left: 20px;'>",
+  );
+
+
+  $form["mark" . $m++] = array(
+    "type" => "markup",
+    "value" => "<tr><td>" . t("Default") . "</td><td></td></tr>", 
+  );    
+
+
+
+  $res = db_query("SELECT * FROM schools ORDER BY school_id");
+  while ($cur = db_fetch_array($res)) {
+    
+    $key = $cur["school_id"];
+    $value = $cur["name"];
+    
+    $prompt_link = fp_get_js_prompt_link("Enter a new name to change this school to:", $value, "document.getElementById(\"element-perform_action2\").value=\"edit~_~$key~_~\" + response; document.getElementById(\"fp-form-schools_administer_schools_form\").submit(); ", "<i class='fa fa-pencil'></i>") . "  |  ";
+    $confirm_link = fp_get_js_confirm_link(t("Are you sure you wish to delete this school_id?\\No data will be deleted, but the record connecting the id $key to this school will be removed from the 'schools' database table.\\n\\nProceed?"), "document.getElementById(\"element-perform_action2\").value=\"del~_~$key\"; document.getElementById(\"fp-form-schools_administer_schools_form\").submit(); ", "<i class='fa fa-remove'></i>");
+    
+    if ($key == 0 ) {
+      $prompt_link = $confirm_link = "";
+    }
+     
+    $form["mark" . $m++] = array(
+      "type" => "markup",
+      "value" => "<tr><td>$value</td><td>&nbsp; &nbsp; &nbsp; " . $prompt_link . " 
+                  " . $confirm_link . "</td></tr>", 
+    );    
+  }
+  
+  $form["mark" . $m++] = array(
+    "type" => "markup",
+    "value" => "</table>",
   );
   
+  $form["perform_action2"] = array(
+    "type" => "hidden",
+  );
   
-    
+  $form["new_school"] = array(
+    "type" => "textfield",
+    "label" => t("Add a new school:"),    
+  );
+  
+  $form["submit"] = array(
+    "type" => "submit",
+    "value" => t("Add new"),
+  );  
   
   return $form;
   
 } // administer_schools_form
 
 
+function schools_administer_schools_form_submit($form, $form_state) {
+  $values = $form_state["values"];
+
+  if (trim($values["new_school"]) != "") {
+    $new_school = trim($values["new_school"]);
+    
+    // Clean up any trouble chars
+    $new_school = preg_replace("/[^a-zA-Z0-9_\-]/", " ", $new_school);
+
+    // Okay, add to the roles table.
+    db_query("INSERT INTO schools (name) VALUES (?) ", $new_school);
+        
+    fp_add_message(t("The new school has been added successfully."));       
+  }
+    
+  
+  if (strstr($values["perform_action2"], "del~_~")) {
+    $temp = explode("~_~", $values["perform_action2"]);
+    $i = trim($temp[1]);
+  
+    // Remove this rid from the table.
+    db_query("DELETE FROM schools WHERE school_id = ? ", $i);
+      
+    fp_add_message(t("The school has been deleted successfully.  All data linking to this school id (%i) still exists.", array("%i" => $i)));    
+            
+  }
+  
+  
+  if (strstr($values["perform_action2"], "edit~_~")) {
+    $temp = explode("~_~", $values["perform_action2"]);
+    $i = trim($temp[1]);
+    $new_name = trim($temp[2]);
+    $new_name = preg_replace("/[^a-zA-Z0-9_\-]/", " ", $new_name);    
+    if (trim($new_name) != "") {  
+      
+      // Let's update the table.
+      db_query("UPDATE schools SET name = ? WHERE school_id = ? ", $new_name, $i);
+  
+      fp_add_message(t("The school name has been edited successfully."));    
+    }
+    
+  }  
+  
+}
+
+
+function schools_get_school_id_for_user($user_id) {
+  return db_result(db_query("SELECT school_id FROM users WHERE user_id = ?", array($user_id)));
+}
 
 
 
-// Return an array of school_ids to their definitions
+// Return an array of school_ids to their names
 function schools_get_school_definitions() {
   $rtn = array();
   
-  $temp = explode("\n", trim(variable_get('schools_schools', '')));
-  foreach ($temp as $line) {
-    $line = trim($line);
-    if (!$line) continue;
-    $x = explode("~~", $line);
-    $id = trim(strtoupper($x[0]));
-    if (!$id) continue;
-    $desc = trim($x[1]);
-    if (!$desc) $desc = $id;
+  $rtn[0] = "Default";
+  
+  $res = db_query("SELECT * FROM schools ORDER BY school_id");
+  while ($cur = db_fetch_array($res)) {    
+    $key = $cur["school_id"];
+    $value = $cur["name"];  
     
-    $rtn[$id] = $desc;
+    $rtn[$key] = $value;
     
   }
+  
   
   return $rtn;
 }
