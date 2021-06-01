@@ -65,6 +65,18 @@ table .student-first-name {
   margin-bottom: 0;  
 }
 
+#fp-form-student_search_search_form #element-wrapper-reset_btn {
+  display: inline-block;
+  margin-left: 40px;
+  margin-bottom: 0;
+}
+
+#fp-form-student_search_search_form #element-wrapper-reset_btn input {
+  /* background-color: pink; */
+ 
+}
+
+
 
 #fp-form-student_search_search_form #element-inner-wrapper-search_options label, 
 #fp-form-student_search_search_form #element-inner-wrapper-search_options div 

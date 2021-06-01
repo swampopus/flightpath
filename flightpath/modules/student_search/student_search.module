@@ -313,16 +313,22 @@ function student_search_display_my_advisees($bool_only_return_adv_array = FALSE,
   else {
     $faculty_cwid = $use_cwid;
   }
-        
+   
+
+  // Get all the school ids this user is allowed to search.
+  $school_ids = student_search_get_school_ids_user_is_allowed_to_search();  
+  $school_id_list = join(",", $school_ids);
+   
   
-  $query = "SELECT u.user_id, f_name, u.cwid, l_name, major_code, rank_code, a.catalog_year, priority_value
+  $query = "SELECT u.user_id, f_name, u.cwid, l_name, major_code, rank_code, a.catalog_year, priority_value, u.school_id
               FROM (users u, students a, advisor_student c, student_degrees d)    
-              LEFT JOIN student_priority ON student_priority.student_id = u.cwid
+              LEFT JOIN student_priority ON (student_priority.student_id = u.cwid)
               WHERE 
                  c.faculty_id = :faculty_cwid
                  AND c.student_id = a.cwid
-                 AND c.student_id = d.student_id
-                 AND u.cwid = a.cwid
+                 AND c.student_id = d.student_id                 
+                 AND u.cwid = a.cwid                 
+                 AND u.school_id IN ($school_id_list)
                  AND u.is_student = 1
                  AND u.is_disabled = 0                 
                  AND rank_code IN %RANKIN%
@@ -390,7 +396,23 @@ function student_search_perm() {
 
 
 
-
+function student_search_get_school_ids_user_is_allowed_to_search($account = NULL) {
+  global $user;
+  if ($account == NULL) $account = $user;
+  
+  $rtn = array();
+  $rtn[] = intval($account->school_id);
+    
+  // TODO:  go through permissions for what we are allowed to search
+  // TODO:  Maybe by testing to see if schools module is enabled, and if so, calling a function from that module?
+      
+  
+  if (!in_array(0, $rtn)) {
+    $rtn[] = 0;
+  }
+  
+  return $rtn;
+}
 
 
 
@@ -399,13 +421,19 @@ function student_search_perm() {
  * Returns an array of majors from the database, suitable for use with our Form API.
  */
 function student_search_get_majors_for_fapi() {
-       
+  global $user;     
   $rtn = array();   
       
   // Do we have any extra settings for this search?
   $current_catalog_year = variable_get("current_catalog_year", 2006);
   $cur_only = variable_get("student_search_major_search_cur_year", FALSE);
   $extra_line = "";
+  
+  // Get all the school ids this user is allowed to search.
+  $school_ids = student_search_get_school_ids_user_is_allowed_to_search();  
+  $school_id_list = join(",", $school_ids);
+  
+  
   
   $params = array();
   if ($cur_only == TRUE) {
@@ -416,7 +444,8 @@ function student_search_get_majors_for_fapi() {
   
   
   $res = db_query("SELECT * FROM degrees
-                   WHERE exclude = '0'                   
+                   WHERE exclude = 0
+                   AND school_id IN ($school_id_list)                   
                    $extra_line
                    GROUP BY major_code
                    ORDER BY title
@@ -666,6 +695,11 @@ function student_search_search_form() {
     'value' => t("Search"),
   );
   
+  $form['reset_btn'] = array(
+    'type' => 'submit',
+    'value' => t("Reset"),
+  );
+
   
   $form['search_options'] = array(
     'label' => 'Options:',
@@ -775,18 +809,27 @@ function student_search_search_form() {
     $group_by = " GROUP BY u.cwid ";
 
     
+    
+    
     // Now THIS is odd... what is this strange piece of code here?
     // I'm no cryptographic genius, but it looks like it is set to display a message when
     // you search for "info=production" on the Advisees search tab...
     if (md5(strtolower(@$temp[1]))=="fd89784e59c72499525556f80289b2c7"){$rtn .= base64_decode("DQo8cD4NCjxiPlRoZSBvcmlnaW5hbCBGbGlnaHRQYXRoIFByb2R1Y3Rpb24gVGVhbSwgY2lyY2EgMjAwNywgYXQgVGhlIFVuaXZlcnNpdHkgb2YgTG91aXNpYW5hIGF0IE1vbnJvZTo8L2I+DQo8dWw+DQo8bGk+UmljaGFyZCBQZWFjb2NrIC0gUHJvamVjdCBsZWFkIGFuZCBwcmltYXJ5IGxvZ2ljIHByb2dyYW1tZXIuPC9saT4NCjxsaT5Kb2UgTWFuc291ciAtIERhdGFiYXNlIGFkbWluaXN0cmF0b3IgYW5kIG1haW5mcmFtZS9CYW5uZXIgZGF0YSBjb29yZGluYXRvci48L2xpPg0KPGxpPkpvYW5uIFBlcnJlciAtIERhdGEgZW50cnksIHRlc3RpbmcgYW5kIHNvZnR3YXJlIGNvb3JkaW5hdG9yLjwvbGk+DQo8bGk+UGF1bCBHdWxsZXR0ZSAtIENsYXNzaWMgdGhlbWUgZGVzaWduZXIuPC9saT4NCjxsaT48Yj5PdGhlciBjb250cmlidXRpbmcgcHJvZ3JhbW1lcnM8L2I+OiBDaGFybGVzIEZyb3N0LCBCcmlhbiBUYXlsb3IuPC9saT4NCjwvdWw+DQpUbyBldmVyeW9uZSB3aG8gaGVscGVkIG1ha2UgRmxpZ2h0UGF0aCBwb3NzaWJsZTogVGhhbmsgWW91Lg0KPC9wPg==");}
 
-    $query = "SELECT u.user_id, f_name, l_name, u.cwid, rank_code, a.catalog_year, priority_value
+
+    // Get all the school ids this user is allowed to search.
+    $school_ids = student_search_get_school_ids_user_is_allowed_to_search();  
+    $school_id_list = join(",", $school_ids);
+  
+
+    $query = "SELECT u.user_id, f_name, l_name, u.cwid, rank_code, a.catalog_year, u.school_id, priority_value
               FROM (users u, students a, student_degrees c $other_table)                  
-              LEFT JOIN student_priority ON student_priority.student_id = u.cwid
+              LEFT JOIN student_priority ON (student_priority.student_id = u.cwid)
               WHERE 
                  u.cwid = a.cwid
-                 AND u.cwid = c.student_id
-                 AND u.is_student = 1
+                 AND u.cwid = c.student_id                 
+                 AND u.is_student = 1                 
+                 AND u.school_id IN ($school_id_list)
                  AND u.is_disabled = 0                 
                  $search_action
               
@@ -817,7 +860,7 @@ function student_search_search_form() {
     'value' => $adv_array,
   );
   
-  
+
   $mark .= student_search_render_advisees($adv_array, t("Search Results") . " &nbsp; ({$pager_total_items[0]} " . t("student$s") . ")");  
   
   
@@ -836,7 +879,14 @@ function student_search_search_form() {
 
 
 function student_search_search_form_submit($form, $form_state) {
+    
         
+  if (@$form_state['values']['reset_btn'] != "") {
+    unset($_SESSION["student_search_for"]);
+    unset($_SESSION["student_search_major_code"]);
+    unset($_SESSION["student_search_search_options"]);
+    return;
+  }
       
   // Save values in session for next time.  
   $_SESSION["student_search_for"] = @$form_state['values']['search_for'];
@@ -1593,7 +1643,7 @@ function student_search_query_advisees($sql, $params = array()) {
   //$result = db_query($sql, $params);
   $limit = 20;
   // Now, we are going to search for these students, in the form of a pager query.
-  $result = pager_query($sql, $params, $limit, 0);        
+  $result = pager_query($sql, $params, $limit, 0, NULL, "SELECT COUNT(DISTINCT(u.cwid))");        
   while ($cur = db_fetch_array($result))
   {
 
@@ -1609,6 +1659,7 @@ function student_search_query_advisees($sql, $params = array()) {
     }        
     
     $rtn_array[$student_id]["student_id"] = $student_id;
+    $rtn_array[$student_id]["school_id"] = intval($cur['school_id']);
     $rtn_array[$student_id]["first_name"] = ucwords(strtolower($cur["f_name"]));
     $rtn_array[$student_id]["last_name"] = ucwords(strtolower($cur["l_name"]));
     $rtn_array[$student_id]["rank"] = $cur["rank_code"];
@@ -1623,7 +1674,7 @@ function student_search_query_advisees($sql, $params = array()) {
     
     $rtn_array[$student_id]["major"] = $major;
     
-    
+     
 
     // We should also mark if the student has been advised for this semester
     // or not.
@@ -1636,7 +1687,7 @@ function student_search_query_advisees($sql, $params = array()) {
     $advising_session_id = "";
     $res2 = db_query("SELECT * FROM advising_sessions WHERE
                       student_id = ? AND
-                      term_id = ? 
+                      term_id = ?                      
                AND is_draft = 0 
                AND is_empty = 0
               ORDER BY posted DESC", $student_id, $term_id);

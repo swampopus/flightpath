@@ -123,7 +123,7 @@ class DatabaseHandler extends stdClass
 
 
 
-  function get_developmental_requirements($student_cwid, $school_id = 0)
+  function get_developmental_requirements($student_cwid)
   {
     // returns an array which states whether or not the student
     // requires any developmental requirements.
@@ -132,7 +132,7 @@ class DatabaseHandler extends stdClass
     
     $res = $this->db_query("SELECT * FROM student_developmentals
                        WHERE student_id = ?
-                       AND school_id = ? ", $student_cwid, $school_id);
+                       ", $student_cwid);
     while($cur = $this->db_fetch_array($res)) {
       $rtn_array[] = $cur["requirement"];
     }
@@ -601,12 +601,12 @@ class DatabaseHandler extends stdClass
     $res = $this->db_query("UPDATE degree_requirements
                 set `course_id`= ?
                 where `data_entry_value`= ?
-                AND school_id = ? ", $new_course_id, "$subject_id~$course_num", $school_id) ;
+                 ", $new_course_id, "$subject_id~$course_num") ;
 
     $res = $this->db_query("UPDATE group_requirements
                 SET `course_id`='?'
                 WHERE `data_entry_value`= ? 
-                AND school_id = ?", $new_course_id, "$subject_id~$course_num", $school_id) ;
+                ", $new_course_id, "$subject_id~$course_num") ;
 
 
 
@@ -614,18 +614,18 @@ class DatabaseHandler extends stdClass
     $res = $this->db_query("UPDATE student_substitutions
                 SET `sub_course_id`='?'
                 WHERE `sub_entry_value`= ? 
-                AND school_id = ? ", $new_course_id, "$subject_id~$course_num", $school_id) ;
+                 ", $new_course_id, "$subject_id~$course_num") ;
 
     $res = $this->db_query("UPDATE student_substitutions
                 SET `required_course_id`='?'
                 WHERE `required_entry_value`= ? 
-                AND school_id = ?", $new_course_id, "$subject_id~$course_num", $school_id) ;
+                ", $new_course_id, "$subject_id~$course_num") ;
 
     // Also the advising histories....
     $res = $this->db_query("UPDATE advised_courses
                 SET `course_id`='?'
                 WHERE `entry_value`= ? 
-                AND school_id = ?", $new_course_id, "$subject_id~$course_num", $school_id) ;
+                ", $new_course_id, "$subject_id~$course_num") ;
     
     
     
@@ -699,7 +699,7 @@ class DatabaseHandler extends stdClass
    * All the values can be left blank to mean "keep what is in there".  If they have values supplied in the arguments to this function,
    * then the new values will be used.
    */
-  function duplicate_advising_session($advising_session_id, $faculty_id = "", $student_id = "", $term_id = "", $degree_id = "", $is_whatif = "", $is_draft = "", $school_id = NULL) {
+  function duplicate_advising_session($advising_session_id, $faculty_id = "", $student_id = "", $term_id = "", $degree_id = "", $is_whatif = "", $is_draft = "") {
     $now = time();     
       
     // First, get the details of this particular advising session....
@@ -715,15 +715,14 @@ class DatabaseHandler extends stdClass
     $db_catalog_year = $cur["catalog_year"];  
     $db_posted = $now;  
     $db_is_whatif = ($is_whatif == "") ? $cur["is_whatif"] : $is_whatif;
-    $db_is_draft = ($is_draft == "") ? $cur["is_draft"] : $is_draft;
-    $db_school_id = ($school_id === NULL) ? $cur['school_id'] : $school_id;
+    $db_is_draft = ($is_draft == "") ? $cur["is_draft"] : $is_draft;    
     $db_is_empty = $cur["is_empty"];
     
     // Okay, let's INSERT this record, and capture the new advising_session_id...
     $res = db_query("INSERT INTO advising_sessions
-              (student_id, faculty_id, term_id, degree_id, major_code_csv, catalog_year, posted, is_whatif, is_draft, is_empty, school_id)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-              ", $db_student_id, $db_faculty_id, $db_term_id, $db_degree_id, $db_major_code_csv, $db_catalog_year, $db_posted, $db_is_whatif, $db_is_draft, $db_is_empty, $db_school_id);
+              (student_id, faculty_id, term_id, degree_id, major_code_csv, catalog_year, posted, is_whatif, is_draft, is_empty)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              ", $db_student_id, $db_faculty_id, $db_term_id, $db_degree_id, $db_major_code_csv, $db_catalog_year, $db_posted, $db_is_whatif, $db_is_draft, $db_is_empty);
     
     $new_asid = db_insert_id();
     
@@ -743,7 +742,7 @@ class DatabaseHandler extends stdClass
   }
 
 
-  function get_advising_session_id($faculty_id = "", $student_id = "", $term_id = "", $degree_id = "", $bool_what_if = false, $bool_draft = true, $bool_load_any_active_if_faculty_id_not_found = TRUE, $school_id = 0)
+  function get_advising_session_id($faculty_id = "", $student_id = "", $term_id = "", $degree_id = "", $bool_what_if = false, $bool_draft = true, $bool_load_any_active_if_faculty_id_not_found = TRUE)
   {
     $is_what_if = "0";
     $is_draft = "0";    
@@ -776,10 +775,9 @@ class DatabaseHandler extends stdClass
                 and term_id = ?                
                 and degree_id = ?
                 and is_whatif = ?
-                AND school_id = ?
                 $draft_line
                 order by `posted` desc limit 1";
-    $result = $this->db_query($query, array($student_id, $term_id, $degree_id, $is_what_if, $school_id)) ;
+    $result = $this->db_query($query, array($student_id, $term_id, $degree_id, $is_what_if)) ;
     if ($this->db_num_rows($result) > 0)
     {
       $cur = $this->db_fetch_array($result);
@@ -863,8 +861,8 @@ class DatabaseHandler extends stdClass
 
     // If it's already in our static cache, just return that.
     static $group_id_cache = array();
-    if (isset($group_id_cache[$group_name][$catalog_year])) {
-      return $group_id_cache[$group_name][$catalog_year];
+    if (isset($group_id_cache[$group_name][$school_id][$catalog_year])) {
+      return $group_id_cache[$group_name][$school_id][$catalog_year];
     }    
 
     
@@ -880,7 +878,7 @@ class DatabaseHandler extends stdClass
       $cur7 = $this->db_fetch_array($res7);
       
       // Save to our cache
-      $group_id_cache[$group_name][$catalog_year] = $cur7['group_id'];
+      $group_id_cache[$group_name][$school_id][$catalog_year] = $cur7['group_id'];
       return $cur7['group_id'];
     }
     return false;
@@ -963,6 +961,16 @@ class DatabaseHandler extends stdClass
   }
     
   
+  
+  function get_school_id_for_student_id($cwid) {
+    return intval(db_result(db_query("SELECT school_id FROM users WHERE cwid = ? AND is_student = 1", array($cwid))));
+  }
+  
+  
+  function get_school_id_for_faculty_id($cwid) {
+    return intval(db_result(db_query("SELECT school_id FROM users WHERE cwid = ? AND is_faculty = 1", array($cwid))));
+  }
+    
   
   
   
@@ -1054,7 +1062,7 @@ class DatabaseHandler extends stdClass
   }
 
 
-  function get_student_settings($student_cwid, $school_id = 0)
+  function get_student_settings($student_cwid)
   {
         
     // This returns an array (from the xml) of a student's
@@ -1063,7 +1071,7 @@ class DatabaseHandler extends stdClass
 
     $res = $this->db_query("SELECT settings FROM student_settings
               WHERE student_id = ? 
-              AND school_id = ? ", $student_cwid, $school_id) ;
+               ", $student_cwid) ;
     if ($this->db_num_rows($res) < 1)
     {
       return false;
@@ -1080,12 +1088,12 @@ class DatabaseHandler extends stdClass
   }
 
 
-  function get_student_cumulative_hours($student_cwid, $school_id = 0) {
+  function get_student_cumulative_hours($student_cwid) {
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT cumulative_hours FROM students 
                       WHERE cwid = ?
-                      AND school_id = ? ", $student_cwid, $school_id);
+                       ", $student_cwid);
 
     
     $cur = $this->db_fetch_array($res);
@@ -1094,12 +1102,12 @@ class DatabaseHandler extends stdClass
   }
 
 
-  function get_student_gpa($student_cwid, $school_id = 0) {
+  function get_student_gpa($student_cwid) {
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT gpa FROM students 
                       WHERE cwid = ?
-                      AND school_id = ? ", $student_cwid, $school_id);
+                       ", $student_cwid);
 
     
     $cur = $this->db_fetch_array($res);
@@ -1109,12 +1117,12 @@ class DatabaseHandler extends stdClass
 
 
 
-  function get_student_catalog_year($student_cwid, $school_id = 0) {
+  function get_student_catalog_year($student_cwid) {
       
     // Let's perform our queries.
     $res = $this->db_query("SELECT catalog_year FROM students 
                       WHERE cwid = ?
-                      AND school_id = ? ", $student_cwid, $school_id);
+                       ", $student_cwid);
 
     
     $cur = $this->db_fetch_array($res);
@@ -1132,13 +1140,13 @@ class DatabaseHandler extends stdClass
    * @param unknown_type $student_id
    * @return unknown
    */
-  function get_student_rank($student_cwid, $school_id = 0) {
+  function get_student_rank($student_cwid) {
     
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT rank_code FROM students 
                       WHERE cwid = ?
-                      AND school_id = ? ", $student_cwid, $school_id);
+                       ", $student_cwid);
 
     
     $cur = $this->db_fetch_array($res);
@@ -1158,13 +1166,12 @@ class DatabaseHandler extends stdClass
    * @param int $student_id
    * @return string
    */
-  function get_student_name($cwid, $bool_include_cwid = FALSE, $school_id = 0) {
+  function get_student_name($cwid, $bool_include_cwid = FALSE) {
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT f_name, l_name FROM users 
-                      WHERE cwid = ?
-                      AND school_id = ?
-                      AND is_student = 1 ", $cwid, $school_id);
+                      WHERE cwid = ?                      
+                      AND is_student = 1 ", $cwid);
     
     $cur = $this->db_fetch_array($res);
     $name = $cur["f_name"] . " " . $cur["l_name"];
@@ -1190,13 +1197,12 @@ class DatabaseHandler extends stdClass
    * @param int $faculty_id
    * @return string
    */
-  function get_faculty_name($cwid, $bool_include_cwid = FALSE, $school_id = 0) {
+  function get_faculty_name($cwid, $bool_include_cwid = FALSE) {
     
     // Let's perform our queries.
     $res = $this->db_query("SELECT f_name, l_name FROM users 
-                      WHERE cwid = ?
-                      AND school_id = ?
-                      AND is_faculty = 1 ", $cwid, $school_id);
+                      WHERE cwid = ?                      
+                      AND is_faculty = 1 ", $cwid);
 
     
     $cur = $this->db_fetch_array($res);
@@ -1224,12 +1230,12 @@ class DatabaseHandler extends stdClass
    * to this faculty member.
    *
    */
-  function get_faculty_major_code_csv($faculty_cwid, $school_id = 0) {
+  function get_faculty_major_code_csv($faculty_cwid) {
             
     // Let's pull the needed variables out of our settings, so we know what
     // to query, because this is a non-FlightPath table.
     
-    $res = $this->db_query("SELECT major_code_csv FROM faculty WHERE cwid = ? AND school_id = ?", $faculty_cwid, $school_id);
+    $res = $this->db_query("SELECT major_code_csv FROM faculty WHERE cwid = ? ", $faculty_cwid);
     $cur = $this->db_fetch_array($res);
     
     return @$cur["major_code_csv"];      
@@ -1247,7 +1253,7 @@ class DatabaseHandler extends stdClass
    *   
    * 
    */
-  function get_student_majors_from_db($student_cwid, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE, $bool_skip_directives = TRUE, $bool_check_for_allow_dynamic = TRUE, $school_id = 0) {
+  function get_student_majors_from_db($student_cwid, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE, $bool_skip_directives = TRUE, $bool_check_for_allow_dynamic = TRUE) {
     // Looks in the student_degrees table and returns an array of major codes.
     $rtn = array();
     
@@ -1258,24 +1264,21 @@ class DatabaseHandler extends stdClass
     
     if ($perform_join_with_degrees) {
         
-      $catalog_year = $this->get_student_catalog_year($student_cwid, $school_id);
+      $catalog_year = $this->get_student_catalog_year($student_cwid);
       
       $res = $this->db_query("SELECT * FROM student_degrees a, degrees b
                               WHERE student_id = ? 
                               AND a.major_code = b.major_code
-                              AND b.catalog_year = ?
-                              AND a.school_id = b.school_id
-                              AND a.school_id = ?
+                              AND b.catalog_year = ?                                                            
                               ORDER BY b.advising_weight, b.major_code
-                              ", $student_cwid, $catalog_year, $school_id);
+                              ", $student_cwid, $catalog_year);
     }
     else {
       // No need to join with degrees table...
       $res = $this->db_query("SELECT * FROM student_degrees a
-                              WHERE student_id = ?
-                              AND school_id = ?
+                              WHERE student_id = ?                              
                               ORDER BY major_code
-                              ", $student_cwid, $school_id);      
+                              ", $student_cwid);      
     }
     while ($cur = $this->db_fetch_array($res)) {
       

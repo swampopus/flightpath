@@ -23,14 +23,13 @@ function student_files_install() {
   `uploaded_by_uid` int(11) DEFAULT 0,
   `uploaded_by_cwid` varchar(30) DEFAULT '',
   `is_encrypted` int(10) unsigned DEFAULT 0,
-  `posted` int(10) unsigned DEFAULT 0,
-  `school_id` int(11) NOT NULL DEFAULT 0,
+  `posted` int(10) unsigned DEFAULT 0,  
   PRIMARY KEY (`fid`),
   KEY `student_id` (`student_id`),
   KEY `uploaded_by_uid` (`uploaded_by_uid`),
   KEY `access_type` (`access_type`),
-  KEY `posted` (`posted`),
-  KEY `school_id` (`school_id`)
+  KEY `posted` (`posted`)
+  
 );    ";
   
   db_query($q);  

@@ -697,7 +697,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
       $attributes .= " onClick='return confirm(\"$confirm\");' ";
     }
     
-    $rtn .= "<input type='submit' name='$name' value='$value' $attributes>";
+    $rtn .= "<input type='$type' name='$name' value='$value' $attributes>";
   }
   
   if ($type == "button") {

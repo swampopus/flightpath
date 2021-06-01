@@ -26,15 +26,13 @@ function audit_install() {
   `approval_type` varchar(60) DEFAULT '',
   `approval_value` varchar(40) DEFAULT '',
   `posted` int(10) unsigned NOT NULL,
-  `school_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`aid`),
   KEY `student_id` (`student_id`),
   KEY `faculty_id` (`faculty_id`),
   KEY `approval_type` (`approval_type`),
   KEY `approval_value` (`approval_value`),
   KEY `posted` (`posted`),
-  KEY `uid` (`uid`),
-  KEY `school_id` (`school_id`)
+  KEY `uid` (`uid`)
 );  ");
   }
   

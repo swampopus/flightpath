@@ -138,13 +138,11 @@ CREATE TABLE `advising_comments` (
   `comment` text DEFAULT NULL,
   `posted` int(10) unsigned DEFAULT 0,
   `access_type` varchar(20) DEFAULT '',
-  `delete_flag` tinyint(4) DEFAULT 0,
-  `school_id` int(11) NOT NULL DEFAULT 0,
+  `delete_flag` tinyint(4) DEFAULT 0,  
   PRIMARY KEY (`id`),
   KEY `student_id` (`student_id`),
   KEY `delete_flag` (`delete_flag`),
-  KEY `access_type` (`access_type`),
-  KEY `school_id` (`school_id`)
+  KEY `access_type` (`access_type`)  
 ); 
   ";
 
@@ -163,11 +161,9 @@ CREATE TABLE `advising_sessions` (
   `is_whatif` tinyint(4) DEFAULT 0,
   `is_draft` tinyint(4) DEFAULT 0,
   `is_empty` tinyint(4) DEFAULT 0,
-  `school_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`advising_session_id`),
   KEY `sid` (`student_id`),
-  KEY `termid` (`term_id`),
-  KEY `school_id` (`school_id`)
+  KEY `termid` (`term_id`)
 );   ";
 db_query($q);
 
@@ -176,13 +172,13 @@ $q = "
 CREATE TABLE `advisor_student` (
   `faculty_id` varchar(30) NOT NULL DEFAULT '0',
   `student_id` varchar(30) NOT NULL DEFAULT '0',
-  `school_id` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`faculty_id`,`student_id`,`school_id`),
-  KEY `school_id` (`school_id`)
+  PRIMARY KEY (`faculty_id`,`student_id`) 
 );  ";
 
 db_query($q);
 
+
+/*
 $q = "
 CREATE TABLE `blocks` (
   `bid` int(10) unsigned   AUTO_INCREMENT,
@@ -194,7 +190,10 @@ CREATE TABLE `blocks` (
   PRIMARY KEY (`bid`)
 ); ";
 db_query($q);
-
+ * 
+ */
+ 
+ 
 $q = "
 CREATE TABLE `courses` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -465,14 +464,12 @@ CREATE TABLE `faculty` (
   `college` varchar(100) DEFAULT '',
   `department_code` varchar(10) DEFAULT '',
   `department` varchar(100) DEFAULT '',
-  `major_code_csv` varchar(255) DEFAULT '',
-  `school_id` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`cwid`,`school_id`),
+  `major_code_csv` varchar(255) DEFAULT '',  
+  PRIMARY KEY (`cwid`),
   KEY `major_code_csv` (`major_code_csv`),
   KEY `dept` (`department`),
   KEY `department_code` (`department_code`),
-  KEY `college` (`college`),
-  KEY `school_id` (`school_id`)
+  KEY `college` (`college`)  
 );  ";
 db_query($q);
 
@@ -598,12 +595,10 @@ CREATE TABLE `student_courses` (
   `hours_awarded` decimal(8,4) DEFAULT 0.0000,
   `grade` varchar(5) DEFAULT '',
   `term_id` varchar(20) DEFAULT '',
-  `level_code` varchar(10) DEFAULT '',
-  `school_id` int(11) NOT NULL DEFAULT 0,
+  `level_code` varchar(10) DEFAULT '',  
   PRIMARY KEY (`id`) ,
   KEY `student_id` (`student_id`) ,
-  KEY `level_code` (`level_code`) ,
-  KEY `school_id` (`school_id`)
+  KEY `level_code` (`level_code`)  
 );  ";
 db_query($q);
 
@@ -616,10 +611,8 @@ CREATE TABLE `student_degrees` (
   `is_editable` tinyint(4) DEFAULT 0,
   `delete_flag` tinyint(4) DEFAULT 0,
   `extra_data` varchar(255) DEFAULT NULL,
-  `school_id` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`student_id`,`major_code`,`school_id`),
-  KEY `extra_data` (`extra_data`) ,
-  KEY `school_id` (`school_id`)
+  PRIMARY KEY (`student_id`,`major_code`),
+  KEY `extra_data` (`extra_data`)
 );   ";
 db_query($q);
 
@@ -628,10 +621,8 @@ $q = "
 CREATE TABLE `student_developmentals` (
   `student_id` varchar(30) NOT NULL,
   `requirement` varchar(15) NOT NULL DEFAULT '',
-  `school_id` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`student_id`,`requirement`,`school_id`),
-  KEY `requirement` (`requirement`),
-  KEY `school_id` (`school_id`)
+  PRIMARY KEY (`student_id`,`requirement`), 
+  KEY `requirement` (`requirement`)
 ); ";
 db_query($q);
 
@@ -640,10 +631,8 @@ CREATE TABLE `student_settings` (
   `student_id` varchar(30) NOT NULL,
   `settings` text DEFAULT NULL,
   `posted` int(10) unsigned DEFAULT 0,
-  `school_id` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`student_id`,`school_id`),
-  KEY `school_id` (`school_id`)
-);  ";
+  PRIMARY KEY (`student_id`)
+) ;  ";
 db_query($q);
 
 $q = "
@@ -663,13 +652,11 @@ CREATE TABLE `student_substitutions` (
   `sub_hours` decimal(8,4) DEFAULT 0.0000,
   `sub_remarks` text DEFAULT NULL,
   `posted` int(10) unsigned DEFAULT 0,
-  `delete_flag` tinyint(4) DEFAULT 0,
-  `school_id` int(11) NOT NULL DEFAULT 0,
+  `delete_flag` tinyint(4) DEFAULT 0,  
   PRIMARY KEY (`id`),
   KEY `student_id` (`student_id`),
   KEY `rev` (`required_entry_value`),
-  KEY `sev` (`sub_entry_value`),
-  KEY `school_id` (`school_id`)
+  KEY `sev` (`sub_entry_value`)  
 );  ";
 db_query($q);
 
@@ -682,8 +669,8 @@ CREATE TABLE `student_tests` (
   `score` varchar(10) DEFAULT '',
   `date_taken` datetime DEFAULT '1970-01-01 00:00:01',
   `school_id` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`) ,
-  KEY `student_id` (`student_id`) ,
+  PRIMARY KEY (`id`),
+  KEY `student_id` (`student_id`),
   KEY `school_id` (`school_id`)
 ); ";
 db_query($q);
@@ -697,16 +684,14 @@ CREATE TABLE `student_transfer_courses` (
   `term_id` varchar(20) DEFAULT '',
   `grade` varchar(5) DEFAULT '',
   `hours_awarded` decimal(8,4) DEFAULT 0.0000,
-  `level_code` varchar(10) DEFAULT '',
-  `school_id` int(11) NOT NULL DEFAULT 0,
+  `level_code` varchar(10) DEFAULT '',  
   PRIMARY KEY (`id`) ,
   KEY `student_id` (`student_id`) ,
   KEY `transfer_id` (`transfer_course_id`) ,
   KEY `term_id` (`term_id`) ,
   KEY `grade` (`grade`) ,
   KEY `level_code` (`level_code`) ,
-  KEY `hrs` (`hours_awarded`) ,
-  KEY `school_id` (`school_id`)
+  KEY `hrs` (`hours_awarded`)  
 );  ";
 db_query($q);
 
@@ -721,13 +706,11 @@ CREATE TABLE `student_unassign_group` (
   `group_id` varchar(50) DEFAULT '',
   `degree_id` int(11) DEFAULT 0,
   `delete_flag` tinyint(4) DEFAULT 0,
-  `posted` int(10) unsigned DEFAULT 0,
-  `school_id` int(11) NOT NULL DEFAULT 0,
+  `posted` int(10) unsigned DEFAULT 0,  
   PRIMARY KEY (`id`),
   KEY `student_id` (`student_id`),
   KEY `faculty_id` (`faculty_id`),
-  KEY `delete_flag` (`delete_flag`),
-  KEY `school_id` (`school_id`)
+  KEY `delete_flag` (`delete_flag`)  
 );  ";
 db_query($q);
 
@@ -757,19 +740,17 @@ CREATE TABLE `students` (
   `rank_code` varchar(5) DEFAULT '',
   `catalog_year` int(11) DEFAULT 2006,
   `is_active` tinyint(11) DEFAULT 0,
-  `school_id` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`cwid`,`school_id`),
-  KEY `rank_code` (`rank_code`) ,
-  KEY `is_active` (`is_active`) ,
-  KEY `school_id` (`school_id`)
+  PRIMARY KEY (`cwid`),
+  KEY `rank_code` (`rank_code`),
+  KEY `is_active` (`is_active`)
 );  ";
 db_query($q);
 
 $q = "
 CREATE TABLE `subjects` (
-  `subject_id` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `college` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subject_id` varchar(10) NOT NULL,
+  `college` varchar(10)  DEFAULT NULL,
+  `title` varchar(255)  DEFAULT NULL,
   `school_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`subject_id`,`school_id`),
   KEY `school_id` (`school_id`)
@@ -798,18 +779,16 @@ db_query($q);
 $q = "
 CREATE TABLE `transfer_eqv_per_student` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `student_id` varchar(30) DEFAULT '',
+  `student_id` varchar(30) DEFAULT '', 
   `transfer_course_id` int(11) DEFAULT 0,
   `local_course_id` int(11) DEFAULT 0,
   `valid_term_id` varchar(20) DEFAULT '',
-  `broken_id` int(11) DEFAULT 0,
-  `school_id` int(11) NOT NULL DEFAULT 0,
+  `broken_id` int(11) DEFAULT 0,  
   PRIMARY KEY (`id`) ,
   KEY `student_id` (`student_id`) ,
   KEY `transfer_course_id` (`transfer_course_id`) ,
   KEY `local_course_id` (`local_course_id`) ,
-  KEY `broken_id` (`broken_id`) ,
-  KEY `school_id` (`school_id`)
+  KEY `broken_id` (`broken_id`)  
 );  ";
 db_query($q);
 
@@ -896,11 +875,9 @@ CREATE TABLE `student_priority` (
   `priority_value` decimal(8,4) DEFAULT NULL,
   `results` text DEFAULT NULL,
   `updated` int(10) unsigned DEFAULT NULL,
-  `school_id` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`student_id`,`school_id`),
+  PRIMARY KEY (`student_id`) ,
   KEY `priority_value` (`priority_value`),
-  KEY `updated` (`updated`),
-  KEY `school_id` (`school_id`)
+  KEY `updated` (`updated`)
 );  ";
 db_query($q);
 
@@ -914,25 +891,21 @@ CREATE TABLE `student_attributes` (
   `student_worker` varchar(255) DEFAULT '',
   `enrollment_code` varchar(255) DEFAULT '',
   `financial_aid` varchar(255) DEFAULT '',
-  `school_id` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`student_id`,`school_id`),
+  PRIMARY KEY (`student_id`),
   KEY `mobile_phone` (`mobile_phone`),
   KEY `athlete` (`athlete`),
   KEY `student_worker` (`student_worker`),
   KEY `enrollment_code` (`enrollment_code`),
-  KEY `financial_aid` (`financial_aid`),
-  KEY `school_id` (`school_id`)
+  KEY `financial_aid` (`financial_aid`)
 );  ";
 db_query($q);
 
 
 $q = "
 CREATE TABLE `faculty_attributes` (
-  `faculty_id` varchar(30) NOT NULL,
-  `mobile_phone` varchar(255) DEFAULT NULL,
-  `school_id` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`faculty_id`,`school_id`),
-  KEY `school_id` (`school_id`)
+  `faculty_id` varchar(30)  NOT NULL,
+  `mobile_phone` varchar(255)  DEFAULT NULL,
+  PRIMARY KEY (`faculty_id`) 
 );  ";
 db_query($q);
 

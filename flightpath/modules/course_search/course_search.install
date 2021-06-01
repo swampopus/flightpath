@@ -13,10 +13,8 @@ function course_search_install() {
   `course_id` int(11) NOT NULL DEFAULT 0,
   `term_id` varchar(20) NOT NULL DEFAULT '',
   `entry_value` varchar(20) NOT NULL DEFAULT '',
-  `posted` int(10) unsigned NOT NULL DEFAULT 0,
-  `school_id` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`),
-  KEY `school_id` (`school_id`)
+  `posted` int(10) unsigned NOT NULL DEFAULT 0,  
+  PRIMARY KEY (`id`)  
 ); ";
   
     db_query($query);
@@ -30,12 +28,10 @@ function course_search_install() {
   `course_id` int(11) NOT NULL DEFAULT 0,
   `course_perm_id` varchar(20) NOT NULL DEFAULT '',
   `filename` varchar(255) NOT NULL DEFAULT '',
-  `posted` int(10) unsigned NOT NULL DEFAULT 0,
-  `school_id` int(11) NOT NULL DEFAULT 0,
+  `posted` int(10) unsigned NOT NULL DEFAULT 0,  
   PRIMARY KEY (`id`),
   KEY `course_id` (`course_id`),
-  KEY `perm` (`course_perm_id`),
-  KEY `school_id` (`school_id`)
+  KEY `perm` (`course_perm_id`)  
 );  ";
           
     db_query($query);    

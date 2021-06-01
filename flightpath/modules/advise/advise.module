@@ -295,7 +295,14 @@ function advise_get_advisees($faculty_id = "") {
   
   $rtn = array();
   
-  $res = db_query("SELECT * FROM advisor_student WHERE faculty_id = ?", $faculty_id);
+  // Get all the school ids this user is allowed to search.
+  $school_ids = student_search_get_school_ids_user_is_allowed_to_search();  
+  $school_id_list = join(",", $school_ids);
+  
+  
+  $res = db_query("SELECT * FROM advisor_student 
+                            WHERE faculty_id = ?
+                            AND school_id IN ($school_id_list) ", $faculty_id);
   foreach ($res as $cur) {
     $rtn[] = $cur["student_id"];
   }
@@ -308,11 +315,15 @@ function advise_get_advisees($faculty_id = "") {
 /**
  * Similar to @see advise_get_advisees, return a list of all advisors assigned to this student.
  */
-function advise_get_advisors_for_student($student_id = "") {
+function advise_get_advisors_for_student($student_id = "", $school_id = 0) {
 
   $rtn = array();
   
-  $res = db_query("SELECT * FROM advisor_student WHERE student_id = ?", array($student_id));
+ 
+  
+  $res = db_query("SELECT * FROM advisor_student 
+                            WHERE student_id = ?
+                            AND school_id = ? ", array($student_id, $school_id));
   while ($cur = db_fetch_array($res)) {
     
     $faculty_id = $cur['faculty_id'];

@@ -151,18 +151,25 @@ function fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalo
  * 
  * 
  */
-function pager_query($query, $args = array(), $limit = 10, $element = 0, $count_query = NULL) {
+function pager_query($query, $args = array(), $limit = 10, $element = 0, $count_query = NULL, $count_query_select_from = NULL) {
   global $pager_page_array, $pager_total, $pager_total_items;
   $page = isset($_GET['page']) ? $_GET['page'] : '';
 
   // Construct a count query if none was given.
   if (!isset($count_query)) {
+    
+    $select_from_replace = 'SELECT COUNT(*) ';
+    if ($count_query_select_from) {
+      $select_from_replace = $count_query_select_from;
+    } 
+    
+    
     $count_query = preg_replace(array(
       '/SELECT.*?FROM /As',
       '/ORDER BY .*/',      
-      '/GROUP BY .*/',      
+      '/GROUP BY .*/',
     ), array(
-      'SELECT COUNT(*) FROM ',
+      $select_from_replace . " FROM ",
       '',
       '',
     ), $query);
@@ -170,7 +177,6 @@ function pager_query($query, $args = array(), $limit = 10, $element = 0, $count_
 
   // Convert comma-separated $page to an array, used by other functions.
   $pager_page_array = explode(',', $page);
-  
       
   // We calculate the total of pages as ceil(items / limit).
   $pager_total_items[$element] = db_result(db_query($count_query, $args));  
@@ -328,9 +334,9 @@ function fp_get_degree_title($degree_id, $bool_include_track_title = FALSE, $boo
 /**
  * Returns the faculty member's name based on the ID provided.
  */
-function fp_get_faculty_name($cwid, $school_id = 0) {
+function fp_get_faculty_name($cwid) {
   $db = get_global_database_handler();
-  $name = $db->get_faculty_name($cwid, FALSE, $school_id);
+  $name = $db->get_faculty_name($cwid, FALSE);
   if (!$name) $name = t("Unknown Advisor");
   return $name;
 }
@@ -418,10 +424,10 @@ function fp_load_user($user_id) {
   // If student, load attributes from student_attributes table (if any exist)
   $rtn->attributes = array();
   if ($rtn->is_student) {
-    $rtn->attributes = fp_get_student_attributes($rtn->cwid, $school_id);
+    $rtn->attributes = fp_get_student_attributes($rtn->cwid);
   }
   else if ($rtn->is_faculty) {
-    $rtn->attributes = fp_get_faculty_attributes($rtn->cwid, $school_id);
+    $rtn->attributes = fp_get_faculty_attributes($rtn->cwid);
   }
  
   return $rtn;  
@@ -456,10 +462,10 @@ function fp_get_user_timezone($account = NULL) {
 }
 
 
-function fp_get_student_attributes($student_id, $school_id = 0) {
+function fp_get_student_attributes($student_id) {
   $rtn = array();
   
-  $res = db_query("SELECT * FROM student_attributes WHERE student_id = ? AND school_id = ?", array($student_id, $school_id));
+  $res = db_query("SELECT * FROM student_attributes WHERE student_id = ? ", array($student_id));
   $cur = db_fetch_array($res);
   if ($cur) {
     $rtn = $cur;
@@ -470,10 +476,10 @@ function fp_get_student_attributes($student_id, $school_id = 0) {
 }
 
 
-function fp_get_faculty_attributes($faculty_id, $school_id = 0) {
+function fp_get_faculty_attributes($faculty_id) {
   $rtn = array();
   
-  $res = db_query("SELECT * FROM faculty_attributes WHERE faculty_id = ? AND school_id = ?", array($faculty_id, $school_id));
+  $res = db_query("SELECT * FROM faculty_attributes WHERE faculty_id = ? ", array($faculty_id));
   $cur = db_fetch_array($res);
   if ($cur) {
     $rtn = $cur;
@@ -503,16 +509,15 @@ function db_get_user_id($user_name) {
 }
 
 
-function db_get_user_id_from_cwid($cwid, $type = "faculty", $school_id = 0) {
+function db_get_user_id_from_cwid($cwid, $type = "faculty") {
   
   $type_line = " is_faculty='1' ";
   if ($type == "student") {
     $type_line = " is_student='1' ";
   }
     
-  $user_id = db_result(db_query("SELECT user_id FROM users WHERE cwid = ? 
-                                    AND school_id = ?
-                                    AND $type_line ", $cwid, $school_id));
+  $user_id = db_result(db_query("SELECT user_id FROM users WHERE cwid = ?                                    
+                                    AND $type_line ", $cwid));
   
   if ($user_id) {
     return $user_id;
@@ -552,9 +557,9 @@ function db_get_user_id_from_email($email, $type = "faculty") {
   Return back the codes or records for a student's degrees, based on what is in the
   student_degrees table (thanks to system.module), as well as what we get from hooks.
 */
-function fp_get_student_majors($student_cwid, $bool_return_as_csv = FALSE, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE, $bool_skip_directives = TRUE, $bool_check_for_allow_dynamic = TRUE, $school_id = 0) {
+function fp_get_student_majors($student_cwid, $bool_return_as_csv = FALSE, $bool_return_as_full_record = FALSE, $perform_join_with_degrees = TRUE, $bool_skip_directives = TRUE, $bool_check_for_allow_dynamic = TRUE) {
     
-  $params = array($student_cwid, $bool_return_as_full_record, $perform_join_with_degrees, $bool_skip_directives, $bool_check_for_allow_dynamic, $school_id);  
+  $params = array($student_cwid, $bool_return_as_full_record, $perform_join_with_degrees, $bool_skip_directives, $bool_check_for_allow_dynamic);  
       
   // Execute hook for this too.
   $arr = invoke_hook("fp_get_student_majors", $params);
@@ -601,23 +606,22 @@ function fp_get_student_majors($student_cwid, $bool_return_as_csv = FALSE, $bool
 
 
 
-function fp_get_student_name($cwid, $bool_include_cwid = FALSE, $school_id = 0) {
+function fp_get_student_name($cwid, $bool_include_cwid = FALSE ) {
   if ($cwid == 0) {
     return t("Anonymous");
   }
   $db = get_global_database_handler();
-  $name = $db->get_student_name($cwid, $bool_include_cwid, $school_id);
+  $name = $db->get_student_name($cwid, $bool_include_cwid);
   if (!$name) $name = t("Unknown Student");
   return $name;
 }
 
 
 
-function fp_get_student_email($cwid, $school_id = 0) {
+function fp_get_student_email($cwid) {
   $email = db_result(db_query("SELECT email FROM users
-                               WHERE cwid = ?
-                               AND school_id = ?
-                               AND is_student = 1", array($cwid, $school_id)));
+                               WHERE cwid = ?                               
+                               AND is_student = 1", array($cwid)));
 
   if (trim($email)) {
     return trim(strtolower($email));

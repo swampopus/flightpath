@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-06-01
+  Fixed bug in pager_query which was sometimes throwing numbers off.  Expanded functionality of the paget_query function.
+  
+  More work on school_id system, amending the need in some tables.  Decided to declare that CWIDs *must be unique* in FlightPath.
+  Therefore, the users table will be the only place that a user's school_id is stored.
+  
+
 2021-05-31
   Adding school_id to api and queries throughout FlightPath.
   
