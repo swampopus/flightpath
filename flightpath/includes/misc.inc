@@ -2175,7 +2175,7 @@ function include_module_install($module, $path) {
  * if they select OK.  The main reason I want to do this is so I can pass the $question through
  * my t() function. (do it when you call this function)
  */
-function fp_get_js_confirm_link($question, $action_if_yes, $link_text) {
+function fp_get_js_confirm_link($question, $action_if_yes, $link_text, $extra_class = "") {
   
   $rtn = "";  
 
@@ -2184,7 +2184,7 @@ function fp_get_js_confirm_link($question, $action_if_yes, $link_text) {
   $question = htmlentities($question, ENT_QUOTES);
   $question = str_replace("\n", "\\n", $question);
   
-  $rtn .= "<a href='javascript: if(confirm(\"$question\")) { $action_if_yes;  }'>$link_text</a>";
+  $rtn .= "<a href='javascript: if(confirm(\"$question\")) { $action_if_yes;  }' class='$extra_class'>$link_text</a>";
 
       
   return $rtn;
@@ -2198,7 +2198,7 @@ function fp_get_js_confirm_link($question, $action_if_yes, $link_text) {
  * 
  * @see fp_get_js_confirm_link
  */
-function fp_get_js_prompt_link($question, $default, $action_if_yes, $link_text) {
+function fp_get_js_prompt_link($question, $default, $action_if_yes, $link_text, $extra_class = "") {
   
   $rtn = "";  
 
@@ -2212,7 +2212,7 @@ function fp_get_js_prompt_link($question, $default, $action_if_yes, $link_text) 
                                 {
                                    $action_if_yes ;  
                                 }
-                                '>$link_text</a>";
+                                ' class='$extra_class'>$link_text</a>";
 
       
   return $rtn;

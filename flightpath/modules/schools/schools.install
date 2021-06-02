@@ -17,11 +17,13 @@ function schools_install() {
 
   $q = "
            CREATE TABLE `schools` (
-            `school_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-            `name` varchar(255) NOT NULL,            
-            PRIMARY KEY (`school_id`),
-            KEY `name` (`name`)
-          );   ";
+              `school_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+              `school_code` varchar(5) NOT NULL,
+              `name` varchar(255) NOT NULL,
+              PRIMARY KEY (`school_id`),
+              KEY `name` (`name`),
+              KEY `school_code` (`school_code`)
+           );   ";
   db_query($q);    
   
 } // hook_install

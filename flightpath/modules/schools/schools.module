@@ -190,9 +190,8 @@ function schools_menu() {
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),
       ),
-    ),    
-    'type' => MENU_TYPE_TAB,
-    'tab_family' => 'schools',
+    ),
+    
   );
   
   
@@ -828,6 +827,7 @@ function schools_administer_schools_form() {
   
   $m = 0;
   
+  fp_add_css(fp_get_module_path("alerts") . "/css/style.css");
   fp_add_css(fp_get_module_path("user") . "/css/user.css");
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
   
@@ -835,18 +835,25 @@ function schools_administer_schools_form() {
   
   $form["mark" . $m++] = array(
     "type" => "markup",
-    "value" => t("Schools can be divisions within your institution (ex: School or Nursing, School of Pharmacy, etc), distinct campuses
+    "value" => t("Schools can be divisions within your institution (ex: School of Nursing, School of Pharmacy, etc), distinct campuses
                   (ex:  Washington Campus, South Campus, etc), or divisions of graduate level (Undergrad, Graduate).
-                  The default school is simply called 'Default' and all users and degree data will be placed under that school
-                  unless otherwise specified. ")
+                  The default school is simply called 'Default' and all users and degree data will be placed under the Default school, in addition
+                  to other schools you may set the degree, user, etc., to.  If you are unsure what to do, <b>leave this page blank</b>.")
                 . "<br><br><b>" . t("Schools:") . "</b>
-                <table style='padding-left: 20px;'>",
+                
+                <table class='advisees-alerts' style='margin-left: 10px;' cellpadding=5>
+                <tr>
+                  <th width='10%'>" . t("Actions") . "</th>
+                  <th width='10%'>" . t("Internal ID") . "</th>
+                  <th width='10%'>" . t("Code") . "</th>
+                  <th>" . t("Name") . "</th>                  
+                </tr>",
   );
 
 
   $form["mark" . $m++] = array(
     "type" => "markup",
-    "value" => "<tr><td>" . t("Default") . "</td><td></td></tr>", 
+    "value" => "<tr><td>-</td><td>0</td><td>-</td><td>" . t("Default") . "</td></tr>", 
   );    
 
 
@@ -854,20 +861,25 @@ function schools_administer_schools_form() {
   $res = db_query("SELECT * FROM schools ORDER BY school_id");
   while ($cur = db_fetch_array($res)) {
     
-    $key = $cur["school_id"];
+    $school_id = $cur["school_id"];
+    $code = $cur["school_code"];
     $value = $cur["name"];
     
-    $prompt_link = fp_get_js_prompt_link("Enter a new name to change this school to:", $value, "document.getElementById(\"element-perform_action2\").value=\"edit~_~$key~_~\" + response; document.getElementById(\"fp-form-schools_administer_schools_form\").submit(); ", "<i class='fa fa-pencil'></i>") . "  |  ";
-    $confirm_link = fp_get_js_confirm_link(t("Are you sure you wish to delete this school_id?\\No data will be deleted, but the record connecting the id $key to this school will be removed from the 'schools' database table.\\n\\nProceed?"), "document.getElementById(\"element-perform_action2\").value=\"del~_~$key\"; document.getElementById(\"fp-form-schools_administer_schools_form\").submit(); ", "<i class='fa fa-remove'></i>");
+    $prompt_link = fp_get_js_prompt_link("Enter a new code (up to 5 chars) and name separated by tilda ~ \\n(ex: ULM ~ University of Louisiana Monroe)\\nto change this school to:", "$code ~ $value", "document.getElementById(\"element-perform_action2\").value=\"edit~_~$school_id~_~\" + response; document.getElementById(\"fp-form-schools_administer_schools_form\").submit(); ", "<i class='fa fa-pencil'></i>");
+    $confirm_link = fp_get_js_confirm_link(t("Are you sure you wish to delete this school_id?\\nNo data will be deleted, but the record connecting the id $school_id to this school will be removed from the 'schools' database table.\\n\\nProceed?"), "document.getElementById(\"element-perform_action2\").value=\"del~_~$school_id\"; document.getElementById(\"fp-form-schools_administer_schools_form\").submit(); ", "<i class='fa fa-remove'></i>", "action-link-remove");
     
-    if ($key == 0 ) {
+    if ($school_id == 0 ) {
       $prompt_link = $confirm_link = "";
     }
      
     $form["mark" . $m++] = array(
       "type" => "markup",
-      "value" => "<tr><td>$value</td><td>&nbsp; &nbsp; &nbsp; " . $prompt_link . " 
-                  " . $confirm_link . "</td></tr>", 
+      "value" => "<tr>
+                      <td >$prompt_link &nbsp; $confirm_link</td>
+                      <td>$school_id</td>
+                      <td>$code</td>
+                      <td>$value</td>
+                  </tr>", 
     );    
   }
   
@@ -882,7 +894,10 @@ function schools_administer_schools_form() {
   
   $form["new_school"] = array(
     "type" => "textfield",
-    "label" => t("Add a new school:"),    
+    "label" => t("Add a new school as <i>code ~ name</i>:"),    
+    "description" => t("Enter a unique, 1 to 5 character, code for this school, then the name, separated by a tilda (~).
+                        <br> Ex:  ULM ~ University of Louisiana Monroe"),
+                        
   );
   
   $form["submit"] = array(
@@ -901,11 +916,35 @@ function schools_administer_schools_form_submit($form, $form_state) {
   if (trim($values["new_school"]) != "") {
     $new_school = trim($values["new_school"]);
     
+    if (!strstr($new_school, "~")) {
+      form_error("new_school", t("Sorry, but the format you entered was not correct. Plase enter a unique 1 to 5 character code for this school, tilda (~), then the name.
+                                  <br> Ex:  ULM ~ University of Louisiana Monroe"));
+      return;
+    }
+    
+    $temp = explode("~", $new_school);
+    $code = trim(strtoupper($temp[0]));
+    $new_school = trim($temp[1]);
+    
     // Clean up any trouble chars
-    $new_school = preg_replace("/[^a-zA-Z0-9_\-]/", " ", $new_school);
-
+    $new_school = preg_replace("/[^a-zA-Z0-9_\-]/", " ", $new_school);    
+    $code = preg_replace("/[^a-zA-Z0-9_]/", "", $code);
+        
+    if ($code == "" || strlen($code) > 5) {
+      form_error("new_school", t("Sorry, but the format you entered was not correct. Plase enter a unique 1 to 5 character code for this school, tilda (~), then the name.
+                                  <br> Ex:  ULM ~ University of Louisiana Monroe"));
+      return;
+    }
+    
+    // Check that code is not already in use.
+    $temp = schools_get_school_id_from_school_code($code);
+    if ($temp) {
+      form_error("new_school", t("Sorry, but the code you specified is already in use."));
+      return;      
+    }    
+    
     // Okay, add to the roles table.
-    db_query("INSERT INTO schools (name) VALUES (?) ", $new_school);
+    db_query("INSERT INTO schools (school_code, name) VALUES (?,?) ", strtoupper($code), $new_school);
         
     fp_add_message(t("The new school has been added successfully."));       
   }
@@ -913,11 +952,9 @@ function schools_administer_schools_form_submit($form, $form_state) {
   
   if (strstr($values["perform_action2"], "del~_~")) {
     $temp = explode("~_~", $values["perform_action2"]);
-    $i = trim($temp[1]);
-  
+    $i = trim($temp[1]);  
     // Remove this rid from the table.
-    db_query("DELETE FROM schools WHERE school_id = ? ", $i);
-      
+    db_query("DELETE FROM schools WHERE school_id = ? ", $i);      
     fp_add_message(t("The school has been deleted successfully.  All data linking to this school id (%i) still exists.", array("%i" => $i)));    
             
   }
@@ -926,19 +963,56 @@ function schools_administer_schools_form_submit($form, $form_state) {
   if (strstr($values["perform_action2"], "edit~_~")) {
     $temp = explode("~_~", $values["perform_action2"]);
     $i = trim($temp[1]);
-    $new_name = trim($temp[2]);
-    $new_name = preg_replace("/[^a-zA-Z0-9_\-]/", " ", $new_name);    
-    if (trim($new_name) != "") {  
+    $new_school = trim($temp[2]);
+
+    if (!strstr($new_school, "~")) {
+      form_error("", t("Sorry, but the format you entered was not correct. Plase enter a unique 1 to 5 character code for this school, tilda (~), then the name.
+                                  <br> Ex:  ULM ~ University of Louisiana Monroexxx"));
+      return;
+    }    
+    
+       
+    $temp = explode("~", $new_school);
+    $code = trim(strtoupper($temp[0]));
+    $new_school = trim($temp[1]);    
+            
+    $new_school = preg_replace("/[^a-zA-Z0-9_\-]/", " ", $new_school);
+    $code = preg_replace("/[^a-zA-Z0-9_]/", "", $code);
+
+    // Check that code is not already in use
+    $temp = schools_get_school_id_from_school_code($code);
+    if ($temp) {
+      if ($temp != $i) {  // meaning, it's not the school we are editing.
+        form_error("new_school", t("Sorry, but the code you specified is already in use."));
+        return;      
+      }
+    }    
+    
+    if ($code == "" || strlen($code) > 5) {
+      form_error("", t("Sorry, but the format you entered was not correct. Plase enter a unique 1 to 5 character code for this school, tilda (~), then the name.
+                                  <br> Ex:  ULM ~ University of Louisiana Monroe"));
+      return;
+    }
+            
+    if (trim($new_school) != "") {  
       
       // Let's update the table.
-      db_query("UPDATE schools SET name = ? WHERE school_id = ? ", $new_name, $i);
+      db_query("UPDATE schools SET name = ?, school_code = ? 
+                WHERE school_id = ? ", $new_school, strtoupper($code), $i);
   
-      fp_add_message(t("The school name has been edited successfully."));    
+      fp_add_message(t("The school has been edited successfully."));    
     }
     
   }  
   
 }
+
+
+function schools_get_school_id_from_school_code($code) {
+  return db_result(db_query("SELECT school_id FROM schools WHERE school_code = ?", strtoupper(trim($code))));
+}
+
+
 
 
 function schools_get_school_id_for_user($user_id) {

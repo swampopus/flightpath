@@ -393,7 +393,7 @@ function user_edit_student_user_form() {
       "type" => "textfield",
       "size" => 20,
       "required" => TRUE,     
-      "description" => t("Enter an ID for this student.  It may be the same
+      "description" => t("Enter an alpha-numeric ID for this student.  It may be the same
                           as a faculty member, but may not be the same as any existing
                           student.  You will not be able to edit this value, once saved."),
       "weight" => 10,
@@ -633,14 +633,7 @@ function user_edit_student_user_form_validate($form, $form_state) {
     $new_cwid = trim($values["new_student_cwid"]);
     $new_user_name = trim($values["new_user_name"]);
 
-    /*  // CWIDS are no longer required to be numeric.
-    // Check that cwid is numeric.
-    if (!is_numeric($new_cwid)) {
-      form_error("new_student_cwid", t("The cwid you entered is not numeric.  CWIDs must contain only numbers.  
-                                    Please select a different cwid."));
-      return;
-    }
-    */
+    
 
     // Check that username is at least 4 characters
     if (strlen($new_user_name) < 4) {
