@@ -352,10 +352,10 @@ class DatabaseHandler extends stdClass
 
     for ($t = 0; $t < 100; $t++)
     {
-      $id = mt_rand(1,9999999);
+      $id = mt_rand(1, 2147483640); // A few less than the max for a signed int in mysql.
       // Check for collisions...
       $res4 = $this->db_query("SELECT * FROM draft_group_requirements
-              WHERE group_id = '$id' LIMIT 1");
+              WHERE group_id = $id LIMIT 1");
       if ($this->db_num_rows($res4) == 0)
       { // Was not in the table already, so use it!
         return $id;
@@ -374,10 +374,10 @@ class DatabaseHandler extends stdClass
 
     for ($t = 0; $t < 100; $t++)
     {
-      $id = mt_rand(1,9999999);
+      $id = mt_rand(1, 2147483640); // A few less than the max for a signed int in mysql.
       // Check for collisions...
       $res4 = $this->db_query("SELECT * FROM draft_courses
-              WHERE course_id = '$id' LIMIT 1");
+              WHERE course_id = $id LIMIT 1");
       if ($this->db_num_rows($res4) == 0)
       { // Was not in the table already, so use it!
         return $id;
@@ -892,7 +892,7 @@ class DatabaseHandler extends stdClass
 
     for ($t = 0; $t < 100; $t++)
     {
-      $id = mt_rand(1,9999999);
+      $id = mt_rand(1, 2147483640);  // A few less than the max for a signed int in mysql.
       // Check for collisions...
       $res4 = $this->db_query("SELECT * FROM draft_degrees
               WHERE `degree_id`='?' limit 1", $id);

@@ -235,7 +235,7 @@ function fp_get_form($form_id, $params = array()) {
  * set the form to save itself in our default submit handler.
  * Valid form_types are:
  * "system_settings" => values automatically saved to variables table.
- * "normal" or BLANK => values are forwarded to $callback_submit() function, if it exists.
+ * "normal" or BLANK => values are sent to {$callback}_validate() and {$callback}_submit() function, if it exists.
 */
 function fp_render_form($callback, $form_type = "") {
   global $current_student_id, $user;

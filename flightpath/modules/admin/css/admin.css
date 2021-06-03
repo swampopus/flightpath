@@ -1,4 +1,7 @@
 
+
+___admin-degrees-page{}
+
 .admin-degrees-list-degree .list-degree-row {
   padding-bottom: 3px; 
   padding-top: 3px; 
@@ -18,6 +21,40 @@
   font-size: 0.8em;
   margin-bottom: 5px;
 }
+
+#fp-form-admin_degrees_list_filter_form .markup-element-mark_top,
+#fp-form-admin_degrees_list_filter_form #element-wrapper-filter_class,
+#fp-form-admin_degrees_list_filter_form #element-wrapper-submit_btn,
+#fp-form-admin_degrees_list_filter_form #element-wrapper-reset_btn,
+#fp-form-admin_degrees_list_filter_form #element-wrapper-filter_class div,
+#fp-form-admin_degrees_list_filter_form #element-wrapper-filter_class label,
+#fp-form-admin_degrees_list_filter_form #element-wrapper-filter_class select,
+#ignore .ignoreme
+ {
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 0;  
+  width: auto;
+}
+
+#fp-form-admin_degrees_list_filter_form #element-wrapper-reset_btn {
+  margin-left: 30px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 .admin-courses-select-letter-bar {

@@ -252,7 +252,7 @@ function schools_menu_alter(&$items) {
  * this is our custom access callback.
  * 
  * op is expected to be 'edit-degree', 'edit-course', or 'edit-group'
- * entity_code is the major code for degrees, group_id for groups, and course_id for courses.
+ * entity_code is the degree_id for degrees, group_id for groups, and course_id for courses.
  * 
  * 
  */
@@ -266,20 +266,19 @@ function schools_check_access($op, $entity_code, $catalog_year) {
     
 
   $school_id = $entity_type = "";
+  $db = get_global_database_handler();
 
   /////////////////////
   if ($op == 'edit-degree') {
-    $entity_type = 'degree';
-    $degree_id = db_result(db_query("SELECT degree_id FROM draft_degrees 
-                                     WHERE major_code = ?
-                                     AND catalog_year = ?", $entity_code, $catalog_year));
-        
     
-    $school_id = schools_get_school_for_entity_type($degree_id, "degree", $catalog_year);
+    $entity_type = 'degree';
+    $school_id = db_result(db_query("SELECT school_id FROM draft_degrees 
+                                     WHERE degree_id = ?
+                                     AND catalog_year = ?", $entity_code, $catalog_year));
     
   }
   
-    
+     
 
   ///////////////////////
   // The path for editing a group looks like this:
@@ -293,6 +292,7 @@ function schools_check_access($op, $entity_code, $catalog_year) {
     $school_id = schools_get_school_for_entity_type($group_id, "group", $catalog_year);    
     
   }
+  
   
   ///////////////////////
   // The path for editing a course looks like this:
@@ -318,7 +318,7 @@ function schools_check_access($op, $entity_code, $catalog_year) {
     }
   }
   
-
+  
   
   // If we got here, then we didn't fail any permission checks, so we can let the user proceed.
   return TRUE;
@@ -366,20 +366,38 @@ function schools_get_schools_for_fapi($bool_include_none = TRUE, $bool_check_per
 
 function schools_content_alter(&$render, $render_id) {
 
+  $defs = schools_get_school_definitions(TRUE);  
+
   if ($render_id == 'admin_display_degrees') {
+    
+    fpm($render);
+    // Add the school to the table.
+    $v = $render['degrees_table_top']['value'];
+    $v = str_replace("</tr>", "<th>School</th></tr>", $v);
+    $render['degrees_table_top']['value'] = $v;
     
     foreach ($render as $key => $val) {
       if (strstr($key, 'degree_row_')) {
         // Find out the school_id for this degree, if it exists.
-        $school_id = schools_get_school_for_entity_type($val['data']['degree_id'], 'degree', $val['data']['db_row']['catalog_year']);
-        
-        if ($school_id != '') {
-          // A school id has indeed been set, so we need to see if this user is allowed to edit it or not.          
-          if (!user_has_permission('administer_' . $school_id . '_degree_data')) {
-            // No, so let's hide it.
-            unset($render[$key]);
-          }          
+        $school_id = intval($val['data']['db_row']['school_id']);
+      
+        $school_code = "-";
+        if ($school_id != 0) {
+          $school_code = $defs[$school_id]['school_code'];
         }
+      
+        // Fill in the school code as the last td in the table row.
+        $render[$key]['value'] = str_replace('</tr>', "<td class='degree-school'>$school_code</td></tr>", $render[$key]['value']);
+      
+      
+        if ($school_id == 0) continue;  // Everyone can edit school_id 0
+        
+        // A school id has indeed been set, so we need to see if this user is allowed to edit it or not.          
+        if (!user_has_permission('administer_' . $school_id . '_degree_data')) {
+          // No, so let's remove it.
+          unset($render[$key]);
+        }          
+        
         
       }
     } // foreach
@@ -461,29 +479,44 @@ function schools_form_alter(&$form, $form_id) {
     
     
   // Add "school" dropdown to the degrees, groups, and courses form
-
   if (in_array($form_id, $forms_to_alter)) {
+  
+    $db = get_global_database_handler();
+    $school_id = 0; // default
+    $entity_id = 0;  // default
     
-    $entity_type = 'degree';
-    $weight = 1120;    
-    @$catalog_year = $form['de_catalog_year']['value'];
-    if ($catalog_year == "") {
-      @$catalog_year = $form['catalog_year']['value'];
+    
+    
+    
+    if ($form_id == 'admin_edit_degree_form') {
+      $entity_type = 'degree';
+      $degree_id = @intval($form['degree_id']['value']);
+      $entity_id = $degree_id;
+      if ($degree_id) {
+        $school_id = $db->get_school_id_for_degree_id($degree_id, TRUE);
+      }
+      $weight = 1120;    
+      
+      @$catalog_year = $form['de_catalog_year']['value'];
+      if ($catalog_year == "") {
+        @$catalog_year = $form['catalog_year']['value'];
+      }      
     }
     
-    $value = schools_get_school_for_entity_type(@$form['degree_id']['value'], 'degree', $catalog_year);
     
     
     // Is this a "group" we are editing?
     if ($form_id == "admin_edit_group_form") {      
       $entity_type = 'group';
       $weight = 45;      
+      $entity_id = @$form['group_id']['value'];
       $value = schools_get_school_for_entity_type(@$form['group_id']['value'], 'group', $catalog_year);
     }
     
     
     if ($form_id == 'admin_edit_course_form') {
       $entity_type = 'course';
+      $entity_id = @$form['course_id']['value'];
       $weight = 55;
       $value = schools_get_school_for_entity_type(@$form['course_id']['value'], 'course', $catalog_year);
             
@@ -498,7 +531,7 @@ function schools_form_alter(&$form, $form_id) {
       'type' => 'select',
       'label' => 'School:',
       'options' => $options,
-      'value' => $value,
+      'value' => $school_id,
       'hide_please_select' => TRUE,
       'weight' => $weight,
       'popup_description' => t('Please select a school which this @datatype belongs to.  Schools are defined under the Admin Console -> Configure Schools.', array('@datatype' => $entity_type)),
@@ -508,6 +541,12 @@ function schools_form_alter(&$form, $form_id) {
       'type' => 'hidden',
       'value' => $entity_type,
     );
+
+    $form['schools_entity_id'] = array(
+      'type' => 'hidden',
+      'value' => $entity_id,
+    );
+
     
     // We also need to add our custom submit handler so that our selection gets saved correctly.
     $form['#submit_handlers'][] = 'schools_data_form_submit';
@@ -712,6 +751,8 @@ function z__schools_get_school_for_entity_type($entity_id, $entity_type, $catalo
 function schools_data_form_submit($form, $form_state) {
     
   $schools_entity_type = $form_state['values']['schools_entity_type'];
+  $entity_id = $form_state['values']['schools_entity_id'];
+  
   @$degree_id = $form_state['values']['degree_id'];  
   @$group_id = $form_state['values']['group_id'];  
   @$course_id = $form_state['values']['course_id'];  
@@ -719,7 +760,7 @@ function schools_data_form_submit($form, $form_state) {
   if ($catalog_year == "") {
     @$catalog_year = $form_state['values']['catalog_year'];
   }
-  
+    
   if ($degree_id == "") $degree_id = 0;
   if ($group_id == "") $group_id = 0;
   if ($course_id == "") $course_id = 0;
@@ -730,22 +771,26 @@ function schools_data_form_submit($form, $form_state) {
   }
     
   
-  $school_id = $form_state['values']['schools_school'];  
+  $school_id = intval($form_state['values']['schools_school']);  
+  
     
   
-  // Save to our table.
-  // First, delete what we have, if anything.
-  db_query("DELETE FROM draft_schools_data
-            WHERE degree_id = ?
-            AND group_id = ?
-            AND course_id = ?
-            AND catalog_year = ?
-            ", array($degree_id, $group_id, $course_id, $catalog_year));
+  // Update the table in question.
+  $table_name = 'draft_degrees';
+  $field_name = "degree_id";
+  if ($schools_entity_type == "group") {
+    $table_name = "draft_groups";
+    $field_name = "group_id";
+  }
+  if ($schools_entity_type == "course") {
+    $table_name = "draft_courses";
+    $field_name = "course_id";
+  }
   
-  // Now, insert.
-  db_query("INSERT INTO draft_schools_data
-            (school_id, degree_id, group_id, course_id, catalog_year)
-            VALUES (?, ?, ?, ?, ?)", array($school_id, $degree_id, $group_id, $course_id, $catalog_year));
+  
+  db_query("UPDATE `$table_name` SET school_id = ? WHERE $field_name = ?", array($school_id, $entity_id));
+  
+  
   
 
   if ($schools_entity_type == 'course') {
@@ -1022,17 +1067,20 @@ function schools_get_school_id_for_user($user_id) {
 
 
 // Return an array of school_ids to their names
-function schools_get_school_definitions() {
+function schools_get_school_definitions($bool_return_db_rows = FALSE) {
   $rtn = array();
   
   $rtn[0] = "Default";
   
   $res = db_query("SELECT * FROM schools ORDER BY school_id");
   while ($cur = db_fetch_array($res)) {    
-    $key = $cur["school_id"];
+    $key = intval($cur["school_id"]);
     $value = $cur["name"];  
     
     $rtn[$key] = $value;
+    if ($bool_return_db_rows) {
+      $rtn[$key] = $cur;
+    }
     
   }
   

@@ -738,10 +738,21 @@ function admin_display_degrees() {
   );
 
   
+  
+  
+  
   $filter_class = @$_REQUEST["filter_class"];
   
+  
+  
   $html = "";
-  $html .= "<div class='degrees-filter'>
+  $html .= "<div class='degrees-filter'>";
+  
+  
+  // TODO:  This filter needs to be a real form we can call and alter using hook_form_alter.
+  
+  /*
+  $html .= "
               <form id='filter-form' action='" . fp_url("admin/degrees") . "' method='GET'>
               <input type='hidden' name='de_catalog_year' value='$de_catalog_year'>
           ";
@@ -768,16 +779,30 @@ function admin_display_degrees() {
       $html .= "<option value='$machine_name' $sel>$level - $title</option>";
     }
   }          
+                                 
+                                 
                                       
-  $html .= " </select>            
-            </form>
-               
-           </div>";
+  $html .= " </select>        
+        
+            </form>";
+  */
+  
+  $html .= fp_render_form("admin_degrees_list_filter_form");
+  
+            
+  $html .= "</div>";
+  
+  
+  
+  
   
   
   $render['degrees_filter'] = array(
     'value' => $html,    
   );
+  
+  
+  
   
   /*
   $rtn .= "<table class='degrees-table' border='0' width='100%' cellpadding='5' cellspacing='0'>
@@ -800,6 +825,10 @@ function admin_display_degrees() {
   );
   
 
+  // TODO:  Instead of this query, we will be looking through results (or just query and params?) saved in a SESSION variable
+  // from the _submit function of the filter form.  This allows other modules to add to the _submit function and alter what is shown here.
+  
+  
   $res = db_query("SELECT * FROM draft_degrees
               WHERE catalog_year = ?
              ORDER BY degree_type, major_code, title ", $de_catalog_year);
@@ -822,7 +851,7 @@ function admin_display_degrees() {
       $extra_class = "list-degree-row-excluded";
     }
     $degree_title = $db_title;
-
+    
     // get JUST the major code...
     $temp = explode("|", $db_major_code);
     $just_major = trim(@$temp[0]);
@@ -865,10 +894,7 @@ function admin_display_degrees() {
     }
 
         
-    //$base_path = $GLOBALS['system_settings']['base_path'];
-    //$url = $base_path . "/index.php?q=admin/degrees/edit-degree/$db_major_code/$de_catalog_year&de_catalog_year=$de_catalog_year";
-
-    $url = fp_url("admin/degrees/edit-degree/$db_major_code/$de_catalog_year", "de_catalog_year=$de_catalog_year", array("class" => "degree-$db_degree_class"));
+    $url = fp_url("admin/degrees/edit-degree/$db_degree_id/$de_catalog_year", "de_catalog_year=$de_catalog_year", array("class" => "degree-$db_degree_class"));
     
             
     $class_details = fp_get_degree_classification_details($db_degree_class);
@@ -878,25 +904,7 @@ function admin_display_degrees() {
             onmouseover='$(this).addClass(\"selection_highlight\");'
             onmouseout='$(this).removeClass(\"selection_highlight\");'
           ";      
-
-
-    
-
-         /*       
-    $rtn .= "<tr
-                  
-                  $on_mouse_over
-                  
-                  style='cursor:pointer;'
-                  onClick='window.location=\"$url\"'
-                  class='$extra_class class-$db_degree_class class-level-" . $class_details["level_num"] . " '
-             >
-              <td valign='top' class='degree-type'>$db_degree_type</td>
-              <td valign='top' class='degreee-class'>$disp_class</td>
-              <td valign='top' class='degree-title'>$outside$db_title</td>
-              <td valign='top' class='degree-major-code'>$db_major_code</td>    
-            </tr>";        
-      */
+      
 
     $render['degree_row_' . $db_degree_id] = array(
       'value' => "<tr
@@ -946,6 +954,58 @@ function admin_display_degrees() {
   return $rtn;
     
 }
+
+
+function admin_degrees_list_filter_form() {
+  $form = array();
+  
+  $form['mark_top'] = array(
+    'type' => 'markup',
+    'value' => "<strong>" . t('Filter by...') . "</strong>",
+    'weight' => 0,
+  );
+  
+  $filter_class_options = array();
+  $degree_classes = fp_get_degree_classifications();
+  foreach ($degree_classes["levels"] as $level => $details) {
+    foreach ($degree_classes["levels"][$level] as $machine_name => $title) {
+      $filter_class_options[$machine_name] = "$level - $title";  
+    }
+  }
+  
+  $filter_class_value = @$_SESSION['degrees_filter_class'];
+  
+  $form['filter_class'] = array(
+    'type' => 'select',
+    'label' => t('Class:'),
+    'options' => $filter_class_options,
+    'value' => $filter_class_value,
+    'weight' => 10,
+  );
+  
+  
+  
+  
+  $form['submit_btn'] = array(
+    'type' => 'submit',
+    'value' => t('Apply'),
+    'weight' => 100,
+  );
+  
+  $form['reset_btn'] = array(
+    'type' => 'submit',
+    'value' => t('Reset'),
+    'weight' => 110,
+  );
+  
+  return $form;
+}
+
+
+
+
+
+
 
 
 function z___admin_handle_edit_degree_submit() {
@@ -1335,8 +1395,13 @@ function z___admin_handle_edit_degree_submit() {
 /**
  * Meant to replace the old-fashioned display_edit_degree function...
  */
-function admin_edit_degree_form($major_code, $de_catalog_year) {
+function admin_edit_degree_form($degree_id, $de_catalog_year) {
   $form = array();
+  
+  $degree = new DegreePlan($degree_id, null, false, false, true);
+  $degree->load_descriptive_data();  
+  
+  $major_code = $degree->major_code;
     
   fp_set_title(t("Edit Degree") . " $major_code - $de_catalog_year");
 
@@ -1349,11 +1414,8 @@ function admin_edit_degree_form($major_code, $de_catalog_year) {
   
   $db = get_global_database_handler();
 
-  $degree_id = intval($db->get_degree_id($major_code, $de_catalog_year, true));
-  // The intval says, if it's false, make it = 0.  otherwise keep the number
-  // that is returned.
-  $degree = new DegreePlan($degree_id, null, false, false, true);
-  $degree->load_descriptive_data();
+  
+  
 
 
   if (user_has_permission("can_view_advanced")) {
