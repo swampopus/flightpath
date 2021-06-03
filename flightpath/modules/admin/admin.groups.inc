@@ -1250,6 +1250,19 @@ function admin_display_groups() {
   );
     
   
+  
+  $html = "";
+  $html .= "<div class='degrees-filter'>";
+  $html .= fp_render_form("admin_groups_list_filter_form");
+  $html .= "</div>";
+  
+  
+  $render['degrees_filter'] = array(
+    'value' => $html,    
+  );
+  
+  
+  
 
   $render['groups_table_top'] = array(
     'value' => "<table border='0' cellpadding='2' width='100%' class='admin-groups-list'>
@@ -1267,10 +1280,31 @@ function admin_display_groups() {
   $on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
               onmouseout=\"style.backgroundColor='white'\" ";
 
+
+  $params = array();
+  $params[":catalog_year"] = $de_catalog_year;
+  
+  $filter_name_value = @trim($_SESSION['groups_filter_name']);
+  $filter_school_value = @intval($_SESSION['groups_filter_school']);
+  $extra_where_conditions = "";
+  
+  // Let's adjust the query based on filter selections (if any exist)
+  if ($filter_name_value) {
+    $extra_where_conditions .= " AND (group_name LIKE :name1 OR title LIKE :name2) ";
+    $params[":name1"] = "%$filter_name_value%";
+    $params[":name2"] = "%$filter_name_value%";
+  }
+  
+  if ($filter_school_value) {
+    $extra_where_conditions .= " AND school_id = :school_id ";
+    $params[":school_id"] = $filter_school_value;
+  }  
+
   $res = db_query("SELECT * FROM draft_groups
-              WHERE catalog_year = '?'
-              AND delete_flag = '0'
-              ORDER BY title, group_name ", $de_catalog_year);
+                    WHERE catalog_year = :catalog_year
+                    AND delete_flag = 0
+                    $extra_where_conditions
+                    ORDER BY title, group_name ", $params);
   while($cur = db_fetch_array($res)) {
     extract($cur, 3, "db");
 
@@ -1293,27 +1327,6 @@ function admin_display_groups() {
       $db_title = "[" . t("NO TITLE SPECIFIED") . "]";
     }
 
-/*
-    $rtn .= "<tr $on_mouse_over>
-          <td valign='top' class='tenpt'><a name='group_$db_group_id'></a>
-            " . l($db_title, "admin/groups/edit-group", "group_id=$db_group_id&de_catalog_year=$de_catalog_year") . "
-          </td>
-          <td valign='top' class='tenpt'>
-            <i>$db_group_name</i>$def_flag
-          </td>
-          <td valign='top' class='tenpt'>
-            $db_priority
-          </td>
-          <td valign='top' class='tenpt'>
-            <img src='" . fp_theme_location() . "/images/icons/$db_icon_filename' width='19'>
-          </td>
-          <td valign='top' class='tenpt'>
-            $use_count <a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-show-group-use", "group_id=$db_group_id") . "\");'><img src='" . fp_theme_location() . "/images/popup.gif' border='0'></a>
-          </td>
-
-          
-        </tr>";
- */
  
  
     $render['group_row_' . $db_group_id] = array(
@@ -1364,6 +1377,84 @@ function admin_display_groups() {
   
   return $rtn;
 }
+
+
+
+
+function admin_groups_list_filter_form() {
+
+  $form = array();
+
+  
+  $form['mark_top'] = array(
+    'type' => 'markup',
+    'value' => "<strong>" . t('Filter by...') . "</strong>",
+    'weight' => 0,
+  );
+  
+  
+  $filter_name_value = trim($_SESSION['groups_filter_name']);
+  $form['filter_name'] = array(
+    'type' => 'textfield',
+    'label' => '',
+    'value' => $filter_name_value,
+    'attributes' => "placeholder='Enter any title or name'",
+    'size' => 20,
+    'weight' => 10,
+  );
+  
+  
+  // If we have enabled the schools module, then have a selector for that as well
+  if (function_exists('schools_get_schools_for_fapi')) {
+  
+    $filter_school_value = @intval($_SESSION['groups_filter_school']);
+    $options = schools_get_schools_for_fapi(TRUE, TRUE, 'group', TRUE);
+    $options[0] = t('- All / Default -');
+    $form['filter_school'] = array(      
+      'type' => 'select',
+      'label' => t('School:'),
+      'options' => $options,
+      'value' => $filter_school_value,
+      'weight' => 20,   
+      'hide_please_select' => TRUE,   
+    );      
+      
+  } // if schools enabled  
+
+  
+  
+  $form['submit_btn'] = array(
+    'type' => 'submit',
+    'value' => t('Apply'),
+    'weight' => 100,
+  );
+  
+  $form['reset_btn'] = array(
+    'type' => 'submit',
+    'value' => t('Reset'),
+    'weight' => 110,
+  );
+  
+  
+  return $form;
+}  
+
+
+
+function admin_groups_list_filter_form_submit($form, $form_state) {
+  $values = $form_state['values'];
+    
+  unset($_SESSION['groups_filter_name']);
+  unset($_SESSION['groups_filter_school']);
+    
+  if ($values['submit_btn'] != '') {
+    $_SESSION['groups_filter_name'] = trim($values['filter_name']);
+    $_SESSION['groups_filter_school'] = $values['filter_school'];
+  }
+    
+}
+
+
 
 
 

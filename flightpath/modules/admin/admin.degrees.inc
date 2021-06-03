@@ -741,60 +741,10 @@ function admin_display_degrees() {
   
   
   
-  $filter_class = @$_REQUEST["filter_class"];
-  
-  
-  
   $html = "";
   $html .= "<div class='degrees-filter'>";
-  
-  
-  // TODO:  This filter needs to be a real form we can call and alter using hook_form_alter.
-  
-  /*
-  $html .= "
-              <form id='filter-form' action='" . fp_url("admin/degrees") . "' method='GET'>
-              <input type='hidden' name='de_catalog_year' value='$de_catalog_year'>
-          ";
-          
-  if (!variable_get("clean_urls", FALSE)) {
-    // Clean URLs is not enabled, so add in the q=admin/degrees, to make this form work.
-    $html .= "<input type='hidden' name='q' value='admin/degrees'>";
-  }
-          
-  $html .= "
-              <b>Filter list by...</b>
-              <br>Class: &nbsp; 
-           
-              <select name='filter_class' onChange='showUpdate(true);$(\"#filter-form\").submit();'> 
-              <option value=''>- Show all -</option>";
-
-  // Display degree_class pulldown.
-  $degree_classes = fp_get_degree_classifications();
-  foreach ($degree_classes["levels"] as $level => $details) {
-    foreach ($degree_classes["levels"][$level] as $machine_name => $title) {
-      $sel = "";
-      if ($machine_name == $filter_class) $sel = "selected";
-              
-      $html .= "<option value='$machine_name' $sel>$level - $title</option>";
-    }
-  }          
-                                 
-                                 
-                                      
-  $html .= " </select>        
-        
-            </form>";
-  */
-  
   $html .= fp_render_form("admin_degrees_list_filter_form");
-  
-            
   $html .= "</div>";
-  
-  
-  
-  
   
   
   $render['degrees_filter'] = array(
@@ -802,18 +752,7 @@ function admin_display_degrees() {
   );
   
   
-  
-  
-  /*
-  $rtn .= "<table class='degrees-table' border='0' width='100%' cellpadding='5' cellspacing='0'>
-            <tr>
-              <th width='8%'>Type</th>
-              <th width='15%'>Class</th>
-              <th width='60%'>Title</th>
-              <th>Code</th>
-            </tr>";
-  */
-  
+    
   $render['degrees_table_top'] = array(
     'value' => "<table class='degrees-table' border='0' width='100%' cellpadding='5' cellspacing='0'>
                   <tr>
@@ -825,21 +764,37 @@ function admin_display_degrees() {
   );
   
 
-  // TODO:  Instead of this query, we will be looking through results (or just query and params?) saved in a SESSION variable
-  // from the _submit function of the filter form.  This allows other modules to add to the _submit function and alter what is shown here.
   
   
+  $params = array();
+  $params[":catalog_year"] = $de_catalog_year;
+  
+  $filter_class_value = @$_SESSION['degrees_filter_class'];
+  $filter_school_value = @intval($_SESSION['degrees_filter_school']);
+  $extra_where_conditions = "";
+  
+  // Let's adjust the query based on filter selections (if any exist)
+  if ($filter_class_value) {
+    $extra_where_conditions .= " AND degree_class = :degree_class ";
+    $params[":degree_class"] = $filter_class_value;
+  }
+  
+  if ($filter_school_value) {
+    $extra_where_conditions .= " AND school_id = :school_id ";
+    $params[":school_id"] = $filter_school_value;
+  }
+  
+  
+    
   $res = db_query("SELECT * FROM draft_degrees
-              WHERE catalog_year = ?
-             ORDER BY degree_type, major_code, title ", $de_catalog_year);
+                    WHERE catalog_year = :catalog_year
+                    $extra_where_conditions
+                    ORDER BY degree_type, major_code, title ", $params);
 
   while($cur = db_fetch_array($res)) {
 
     $db_exclude = 0;
     extract($cur, 3, "db");
-
-    // We filtered for a particular class, and we didn't find it, so skip.
-    if ($filter_class != "" && $db_degree_class != $filter_class) continue;
 
 
     if ($db_degree_type == "NA" && strstr($db_major_code, "|")) {
@@ -872,9 +827,10 @@ function admin_display_degrees() {
       
 
       $res2 = db_query("SELECT * FROM draft_degree_tracks
-                WHERE catalog_year = '?'
-                AND major_code = '?'
-                AND track_code = '?' ", $de_catalog_year, $just_major, $just_track);
+                WHERE catalog_year = ?
+                AND major_code = ?                
+                AND track_code = ?
+                AND school_id = ? ", $de_catalog_year, $just_major, $just_track, $db_school_id);
       if (db_num_rows($res2) > 0) {
         $cur2 = db_fetch_array($res2);
 
@@ -972,7 +928,7 @@ function admin_degrees_list_filter_form() {
       $filter_class_options[$machine_name] = "$level - $title";  
     }
   }
-  
+      
   $filter_class_value = @$_SESSION['degrees_filter_class'];
   
   $form['filter_class'] = array(
@@ -982,6 +938,25 @@ function admin_degrees_list_filter_form() {
     'value' => $filter_class_value,
     'weight' => 10,
   );
+  
+  
+  // If we have enabled the schools module, then have a selector for that as well
+  if (function_exists('schools_get_schools_for_fapi')) {
+    $filter_school_value = @intval($_SESSION['degrees_filter_school']);
+    $options = schools_get_schools_for_fapi(TRUE, TRUE, 'degree', TRUE);
+    $options[0] = t('- All / Default -');
+    $form['filter_school'] = array(      
+      'type' => 'select',
+      'label' => t('School:'),
+      'options' => $options,
+      'value' => $filter_school_value,
+      'weight' => 20,   
+      'hide_please_select' => TRUE,   
+    );      
+      
+    
+  } // if schools enabled
+  
   
   
   
@@ -1000,6 +975,23 @@ function admin_degrees_list_filter_form() {
   
   return $form;
 }
+
+
+
+
+function admin_degrees_list_filter_form_submit($form, $form_state) {
+  $values = $form_state['values'];
+    
+  unset($_SESSION['degrees_filter_class']);
+  unset($_SESSION['degrees_filter_school']);
+    
+  if ($values['submit_btn'] != '') {
+    $_SESSION['degrees_filter_class'] = trim($values['filter_class']);
+    $_SESSION['degrees_filter_school'] = $values['filter_school'];
+  }
+    
+}
+
 
 
 

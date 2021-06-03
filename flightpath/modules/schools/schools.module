@@ -288,8 +288,8 @@ function schools_check_access($op, $entity_code, $catalog_year) {
     $group_id = $_REQUEST['group_id'];
     
     if ($group_id == 'new') return TRUE;    
-    $catalog_year = db_result(db_query("SELECT catalog_year FROM draft_groups WHERE group_id = ?", $group_id));      
-    $school_id = schools_get_school_for_entity_type($group_id, "group", $catalog_year);    
+  
+    $school_id = intval(db_result(db_query("SELECT school_id FROM draft_groups WHERE group_id = ?", $group_id)));
     
   }
   
@@ -333,25 +333,30 @@ function schools_check_access($op, $entity_code, $catalog_year) {
  * 
  * If $bool_check_perm is true, then we will check permissions before adding it to the array.
  */
-function schools_get_schools_for_fapi($bool_include_none = TRUE, $bool_check_perm = FALSE, $check_perm_type = "degree") {
+function schools_get_schools_for_fapi($bool_include_default = TRUE, $bool_check_perm = FALSE, $check_perm_type = "degree", $bool_include_school_code = FALSE) {
     
   $rtn = array();  
-  $defs = schools_get_school_definitions();
+  $defs = schools_get_school_definitions(TRUE);
   
-    
-  if ($bool_include_none) {
+  
+  if ($bool_include_default) {  
     $rtn[0] = t(' - Default -');
   }
   
   foreach ($defs as $school_id => $val) {
+
+    $title = $val['name'];
+    if ($bool_include_school_code) {
+      $title = $val['school_code'] . ' - ' . $val['name'];
+    }
     
     if ($bool_check_perm) {
       if (user_has_permission('administer_' . $school_id . '_' . $check_perm_type . '_data')) {
-        $rtn[$school_id] = $val;
+        $rtn[$school_id] = $title;
       }
     }
     else {
-      $rtn[$school_id] = $val;
+      $rtn[$school_id] = $title;
     }
     
   }
@@ -370,7 +375,7 @@ function schools_content_alter(&$render, $render_id) {
 
   if ($render_id == 'admin_display_degrees') {
     
-    fpm($render);
+    //fpm($render);
     // Add the school to the table.
     $v = $render['degrees_table_top']['value'];
     $v = str_replace("</tr>", "<th>School</th></tr>", $v);
@@ -408,19 +413,36 @@ function schools_content_alter(&$render, $render_id) {
   /////////////////////////////////  
   
   if ($render_id == 'admin_display_groups') {
-  
+       
+    // Add school to our table top.
+    $v = $render['groups_table_top']['value'];
+    $v = str_replace("</tr>", "<th>School</th></tr>", $v);
+    $render['groups_table_top']['value'] = $v;    
+    
     foreach ($render as $key => $val) {
       if (strstr($key, 'group_row_')) {
-        // Find out the school_id for this degree, if it exists.
-        $school_id = schools_get_school_for_entity_type($val['data']['group_id'], 'group', $val['data']['db_row']['catalog_year']);
+        // Find out the school_id for this degree, if it exists.        
+        $school_id = intval($val['data']['db_row']['school_id']);
         
-        if ($school_id != '') {
-          // A school id has indeed been set, so we need to see if this user is allowed to edit it or not.          
-          if (!user_has_permission('administer_' . $school_id . '_group_data')) {
-            // No, so let's hide it.
-            unset($render[$key]);
-          }          
-        }
+        
+        $school_code = "-";
+        if ($school_id != 0) {
+          $school_code = $defs[$school_id]['school_code'];
+        }        
+        
+        // Fill in the school code as the last td in the table row.
+        $render[$key]['value'] = str_replace('</tr>', "<td class='group-school'>$school_code</td></tr>", $render[$key]['value']);
+              
+        
+        
+        if ($school_id == 0) continue; // everyone can edit school_id 0
+       
+        // A school id has indeed been set, so we need to see if this user is allowed to edit it or not.          
+        if (!user_has_permission('administer_' . $school_id . '_group_data')) {
+          // No, so let's hide it.
+          unset($render[$key]);
+        }          
+       
         
       }
     } // foreach
@@ -509,8 +531,10 @@ function schools_form_alter(&$form, $form_id) {
     if ($form_id == "admin_edit_group_form") {      
       $entity_type = 'group';
       $weight = 45;      
-      $entity_id = @$form['group_id']['value'];
-      $value = schools_get_school_for_entity_type(@$form['group_id']['value'], 'group', $catalog_year);
+      $group_id = @$form['group_id']['value'];
+      $entity_id = $group_id;
+      $school_id = $db->get_school_id_for_group_id($group_id, TRUE);
+      
     }
     
     
@@ -525,7 +549,7 @@ function schools_form_alter(&$form, $form_id) {
     }
     
     
-    $options = schools_get_schools_for_fapi(TRUE, TRUE, $entity_type);      
+    $options = schools_get_schools_for_fapi(TRUE, TRUE, $entity_type, TRUE);      
     
     $form['schools_school'] = array(
       'type' => 'select',
@@ -773,7 +797,7 @@ function schools_data_form_submit($form, $form_state) {
   
   $school_id = intval($form_state['values']['schools_school']);  
   
-    
+   
   
   // Update the table in question.
   $table_name = 'draft_degrees';
@@ -788,10 +812,10 @@ function schools_data_form_submit($form, $form_state) {
   }
   
   
+  fpm($entity_id);
+  
   db_query("UPDATE `$table_name` SET school_id = ? WHERE $field_name = ?", array($school_id, $entity_id));
-  
-  
-  
+      
 
   if ($schools_entity_type == 'course') {
     // If this is a course, we might have selected the 'all years' option.  If so, we need to
@@ -1070,7 +1094,15 @@ function schools_get_school_id_for_user($user_id) {
 function schools_get_school_definitions($bool_return_db_rows = FALSE) {
   $rtn = array();
   
-  $rtn[0] = "Default";
+  $rtn[0] = t("Default");
+  
+  if ($bool_return_db_rows) {
+    $rtn[0] = array(
+      'school_id' => 0,
+      'school_code' => '',
+      'name' => t('Default'),
+    );
+  }
   
   $res = db_query("SELECT * FROM schools ORDER BY school_id");
   while ($cur = db_fetch_array($res)) {    
