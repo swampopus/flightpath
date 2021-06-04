@@ -71,6 +71,41 @@ ___admin-groups-page{}
 }
 
 
+___admin-courses-page{}
+#fp-form-admin_courses_list_filter_form .markup-element-mark_top,
+#fp-form-admin_courses_list_filter_form #element-wrapper-filter_school,
+#fp-form-admin_courses_list_filter_form #element-wrapper-filter_exclude,
+#fp-form-admin_courses_list_filter_form #element-wrapper-submit_btn,
+#fp-form-admin_courses_list_filter_form #element-wrapper-reset_btn,
+#fp-form-admin_courses_list_filter_form #element-wrapper-filter_school div,
+#fp-form-admin_courses_list_filter_form #element-wrapper-filter_school label,
+#fp-form-admin_courses_list_filter_form #element-wrapper-filter_school select,
+#fp-form-admin_courses_list_filter_form #element-wrapper-filter_exclude div,
+#fp-form-admin_courses_list_filter_form #element-wrapper-filter_exclude label,
+#fp-form-admin_courses_list_filter_form #element-wrapper-filter_exclude select,
+#ignore .ignoreme
+ {
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 0;  
+  width: auto;
+}
+
+#fp-form-admin_courses_list_filter_form #element-wrapper-reset_btn {
+  margin-left: 30px;
+}
+
+
+.disp-courses-table {
+  width: 100%;
+}
+
+table .rep-msg {
+  display: inline;
+  padding-left: 10px;
+  font-size: 0.9em;
+  font-style: italic;
+}
 
 
 

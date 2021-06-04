@@ -1265,7 +1265,7 @@ function admin_display_groups() {
   
 
   $render['groups_table_top'] = array(
-    'value' => "<table border='0' cellpadding='2' width='100%' class='admin-groups-list'>
+    'value' => "<table border='0' cellpadding='5' cellspacing='5' width='100%' class='admin-groups-list'>
                 <tr>
                   <th>" . t("Title") . "</th>
                   <th>" . t("Internal Name") . "</th>
@@ -1331,20 +1331,20 @@ function admin_display_groups() {
  
     $render['group_row_' . $db_group_id] = array(
       'value' => "<tr $on_mouse_over>
-                    <td valign='top' class='tenpt'><a name='group_$db_group_id'></a>
+                    <td valign='top' ><a name='group_$db_group_id'></a>
                       " . l($db_title, "admin/groups/edit-group", "group_id=$db_group_id&de_catalog_year=$de_catalog_year") . "
                     </td>
-                    <td valign='top' class='tenpt'>
+                    <td valign='top' >
                       <i>$db_group_name</i>$def_flag
                     </td>
-                    <td valign='top' class='tenpt'>
+                    <td valign='top' >
                       $db_priority
                     </td>
-                    <td valign='top' class='tenpt'>
+                    <td valign='top' >
                       <img src='" . fp_theme_location() . "/images/icons/$db_icon_filename' width='19'>
                     </td>
-                    <td valign='top' class='tenpt'>
-                      $use_count <a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-show-group-use", "group_id=$db_group_id") . "\");'><img src='" . fp_theme_location() . "/images/popup.gif' border='0'></a>
+                    <td valign='top' >
+                      $use_count <a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-show-group-use", "group_id=$db_group_id") . "\");'><i class='fa fa-window-restore'></i></a>
                     </td>
           
                     

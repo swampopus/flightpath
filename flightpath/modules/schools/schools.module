@@ -302,8 +302,8 @@ function schools_check_access($op, $entity_code, $catalog_year) {
     $course_id = $_REQUEST['course_id'];
     
     if ($course_id == 'new') return TRUE;    
-    $catalog_year = db_result(db_query("SELECT catalog_year FROM draft_courses WHERE course_id = ?", $course_id));      
-    $school_id = schools_get_school_for_entity_type($course_id, "course", $catalog_year);
+    $school_id = intval(db_result(db_query("SELECT school_id FROM draft_courses WHERE course_id = ?", $course_id)));      
+    
     
   }
       
@@ -421,7 +421,7 @@ function schools_content_alter(&$render, $render_id) {
     
     foreach ($render as $key => $val) {
       if (strstr($key, 'group_row_')) {
-        // Find out the school_id for this degree, if it exists.        
+        // Find out the school_id for this group, if it exists.        
         $school_id = intval($val['data']['db_row']['school_id']);
         
         
@@ -456,18 +456,38 @@ function schools_content_alter(&$render, $render_id) {
 
   if ($render_id == 'admin_display_courses') {
 
+    // Add school to our table top.
+    $v = $render['courses_table_top']['value'];
+    $v = str_replace("</tr>", "<th>School</th></tr>", $v);
+    $render['courses_table_top']['value'] = $v;    
+
+
     foreach ($render as $key => $val) {
       if (strstr($key, 'course_row_')) {
         // Find out the school_id for this degree, if it exists.
-        $school_id = schools_get_school_for_entity_type($val['data']['course_id'], 'course', $val['data']['db_row']['catalog_year']);
+
+        $school_id = intval($val['data']['db_row']['school_id']);
         
-        if ($school_id != '') {
-          // A school id has indeed been set, so we need to see if this user is allowed to edit it or not.          
-          if (!user_has_permission('administer_' . $school_id . '_course_data')) {
-            // No, so let's hide it.
-            unset($render[$key]);
-          }          
-        }
+        
+        $school_code = "-";
+        if ($school_id != 0) {
+          $school_code = $defs[$school_id]['school_code'];
+        }        
+
+        
+        // Fill in the school code as the last td in the table row.
+        $render[$key]['value'] = str_replace('</tr>', "<td class='course-school'>$school_code</td></tr>", $render[$key]['value']);
+        
+        
+        if ($school_id == 0) continue; // everyone can edit school id 0        
+        
+        
+        // A school id has indeed been set, so we need to see if this user is allowed to edit it or not.          
+        if (!user_has_permission('administer_' . $school_id . '_course_data')) {
+          // No, so let's hide it.
+          unset($render[$key]);
+        }          
+
         
       }
     } // foreach
@@ -539,10 +559,11 @@ function schools_form_alter(&$form, $form_id) {
     
     
     if ($form_id == 'admin_edit_course_form') {
-      $entity_type = 'course';
-      $entity_id = @$form['course_id']['value'];
+      $entity_type = 'course';      
+      $course_id = @intval($form['course_id']['value']);
+      $entity_id = $course_id;
       $weight = 55;
-      $value = schools_get_school_for_entity_type(@$form['course_id']['value'], 'course', $catalog_year);
+      $school_id = $db->get_school_id_for_course_id($course_id, TRUE);
             
       // We also want to adjust the description for the "update for all years" checkbox.      
       $form['all_years']['options']['yes'] = t('Update title, description, hour info, and school selection for all years of this course.');
@@ -811,9 +832,7 @@ function schools_data_form_submit($form, $form_state) {
     $field_name = "course_id";
   }
   
-  
-  fpm($entity_id);
-  
+      
   db_query("UPDATE `$table_name` SET school_id = ? WHERE $field_name = ?", array($school_id, $entity_id));
       
 

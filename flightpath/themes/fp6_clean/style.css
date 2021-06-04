@@ -254,7 +254,7 @@ table.tabs-search-table td.search-td {
 
 
 .selection_highlight {
-  background-color: #FFFF99;
+  background-color: #FFFF99 !important;
 }
 
 

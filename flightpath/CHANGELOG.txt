@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-06-04
+  Working on courses with new school_id.  Changed appearance of courses screen to look more like the other degree
+  edit pages.  Made better use of tables and highlighting when you mouse over a row.  Added a filter form like others
+  as well.
+  
+
 2021-06-03
   Added new schools filter option to degrees, and working on groups.  Filters on degrees list now actually
   a form (and added new form to groups) so other modules can modify with hook_form_alter if desired.  Right now,

@@ -86,31 +86,21 @@ function admin_display_courses() {
 
   $html .= "</div>                       
         <div class='tenpt'>             
-        <div style='padding: 5px;'>          
-        " . l(t("Add a course for @year", array("@year" => $de_catalog_year)), "admin/courses/edit-course", "course_id=new&de_catalog_year=$de_catalog_year") . "
-        </div>          
-                       Legend:  <br>&nbsp; &nbsp;[e] = Course has at least one add'l excluded name.  
-                            &nbsp; &nbsp;[v] = Course has at least one add'l valid name.
-                            
+          <div style='padding: 5px;'>          
+          " . l("<i class='fa fa-plus'></i> " . t("Add a course for @year", array("@year" => $de_catalog_year)), "admin/courses/edit-course", "course_id=new&de_catalog_year=$de_catalog_year") . "
+            &nbsp; &nbsp; &nbsp;
+            " . t("Legend:  [e] = Course has at least one add'l excluded name.  &nbsp; &nbsp;[v] = Course has at least one add'l valid name.") . "
+          </div>                   
          </div>
 
          ";
 
-  $exclude_line = "and exclude != 1";
-  if ($show_hidden == "yes") {
-    $html .= "<div class='tenpt'><b>" . t("Showing excluded courses.") . " ";
-    $html .= l(t("Hide?"), "admin/courses", "de_catalog_year=$de_catalog_year&show_hidden=no");
-    $html .= "</b></div>";
-    $exclude_line = "";
 
-  }  
-  else {
-    $html .= "<div class='tenpt'><b>" . t("Hiding excluded courses.") . " ";
-    $html .= l(t("Show?"), "admin/courses", "de_catalog_year=$de_catalog_year&show_hidden=yes");
-    $html .= "</b></div>";   
-  }
 
-  $html .= "<hr><br>";
+  
+  
+  
+  
   
   
 
@@ -118,19 +108,59 @@ function admin_display_courses() {
     'value' => $html,
   );
   
+
+  $mark = "";
+  $mark .= "<div class='degrees-filter'>";
+  $mark .= fp_render_form("admin_courses_list_filter_form");
+  $mark .= "</div>";
+  
+  
+  $render['degrees_filter'] = array(
+    'value' => $mark,    
+  );
+
     
   
   $render['courses_table_top'] = array(
-    'value' => "<table border='0' cellpadding='3' cellspacing='0' class='disp-courses-table'>",
+    'value' => "<table border='0' cellpadding='5' cellspacing='5' class='disp-courses-table'>
+                    <tr>
+                      <th>" . t("Course") . "</th>                      
+                      <th>" . t("Hours") . "</th>
+                      <th width='10%'>" . t("Extra") . "</th>                      
+                    </tr>",
   );  
   
 
+  
+    $on_mouse_over = "
+            onmouseover='$(this).addClass(\"selection_highlight\");'
+            onmouseout='$(this).removeClass(\"selection_highlight\");'
+          ";     
+    
+  
+
+  $extra_where_conditions = "";
+  $extra_where_conditions .= " AND exclude != 1 ";
+  
+  $filter_exclude = @trim($_SESSION['courses_filter_exclude']);
+  
+  if ($filter_exclude == 'yes') {
+    $extra_where_conditions = "";
+  }
+  
+  $filter_school = @intval(trim($_SESSION['courses_filter_school']));
+  
+  if ($filter_school) {
+    $extra_where_conditions .= " AND school_id = $filter_school ";
+  }
+  
+  
   $q = "SELECT * FROM draft_courses
                         WHERE 
-                          catalog_year = '?'
-                          AND subject_id BETWEEN '?' AND '?'
-                          AND delete_flag = '0'
-                          $exclude_line
+                          catalog_year = ?
+                          AND subject_id BETWEEN ? AND ?
+                          AND delete_flag = 0
+                          $extra_where_conditions
                         ORDER BY subject_id, course_num";
   $result = db_query($q, $de_catalog_year, $ur, $lr);
   while ($cur = db_fetch_array($result)) {
@@ -177,34 +207,40 @@ function admin_display_courses() {
       $hrs .= " - $db_max_hours";
     }
 
-    $hrs .= " hrs.";
+    //$hrs .= " hrs";
 
     $rep_hours = "";
     if ($db_repeat_hours > $db_min_hours) {
-      $rep_hours = " rep to $db_repeat_hours hrs.";
+      $rep_hours = "<div class='rep-msg'>rep to $db_repeat_hours</div>";
     }
 
     // remove special chars from subject_id...
     $display_subject_id = $db_subject_id;
     $db_subject_id = str_replace("&","_A_",$db_subject_id);
 
+
+    $url = fp_url("admin/courses/edit-course", "course_id=$db_course_id&subject_id=$db_subject_id&course_num=$db_course_num&de_catalog_year=$de_catalog_year");
+
+
     $render['course_row_' . $db_course_id] = array(
       'value' => "
-                    <tr style='$spanstyle'>
-                      <td valign='top' width='90%'>
+                    <tr style='$spanstyle; cursor:pointer;' $on_mouse_over
+                    
+                    
+                    onClick='window.location=\"$url\"'
+                    
+                    >
+                      <td valign='top' width=''>
                           <a name='course_$db_course_id'></a>
-                          <div style='$spanstyle padding:3px;'>
-    
-           " . l("$display_subject_id $db_course_num - $db_title", "admin/courses/edit-course", "course_id=$db_course_id&subject_id=$db_subject_id&course_num=$db_course_num&de_catalog_year=$de_catalog_year") . " - $hrs$rep_hours</div>
+                          <div>$display_subject_id $db_course_num - $db_title</div>
 
                   </td>
-                  <td valign='top' width='5%'>
-                      $ex_names
+                  <td>
+                    $hrs$rep_hours
                   </td>
-                  
-                  <td valign='top' width='5%'>
-                        $val_names
-                  </td>
+                  <td valign='top' >
+                      $ex_names                  
+                      $val_names
                 </tr>",     
 
            'data' => array(
@@ -237,6 +273,96 @@ function admin_display_courses() {
   return $rtn;
   
 }
+
+
+
+
+
+
+function admin_courses_list_filter_form() {
+
+  $form = array();
+
+  
+  $form['mark_top'] = array(
+    'type' => 'markup',
+    'value' => "<strong>" . t('Filter by...') . "</strong>",
+    'weight' => 0,
+  );
+  
+  
+  $filter_exclude_value = @trim($_SESSION['courses_filter_exclude']);
+  $form['filter_exclude'] = array(
+    'type' => 'select',
+    'label' => '',
+    'options' => array('' => 'Hide excluded courses', 'yes' => 'Show excluded courses'),
+    'value' => $filter_exclude_value,    
+    'hide_please_select' => TRUE,
+    'size' => 20,
+    'weight' => 10,
+  );
+  
+  
+  // If we have enabled the schools module, then have a selector for that as well
+  if (function_exists('schools_get_schools_for_fapi')) {
+  
+    $filter_school_value = @intval($_SESSION['courses_filter_school']);
+    $options = schools_get_schools_for_fapi(TRUE, TRUE, 'course', TRUE);
+    $options[0] = t('- All / Default -');
+    $form['filter_school'] = array(      
+      'type' => 'select',
+      'label' => t('School:'),
+      'options' => $options,
+      'value' => $filter_school_value,
+      'weight' => 20,   
+      'hide_please_select' => TRUE,   
+    );      
+      
+  } // if schools enabled  
+
+  
+  
+  $form['submit_btn'] = array(
+    'type' => 'submit',
+    'value' => t('Apply'),
+    'weight' => 100,
+  );
+  
+  $form['reset_btn'] = array(
+    'type' => 'submit',
+    'value' => t('Reset'),
+    'weight' => 110,
+  );
+  
+  
+  return $form;
+}  
+
+
+
+function admin_courses_list_filter_form_submit($form, $form_state) {
+  $values = $form_state['values'];
+    
+  unset($_SESSION['courses_filter_exclude']);
+  unset($_SESSION['courses_filter_school']);
+    
+  if ($values['submit_btn'] != '') {
+    $_SESSION['courses_filter_exclude'] = trim($values['filter_exclude']);
+    $_SESSION['courses_filter_school'] = $values['filter_school'];
+  }
+    
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 /**
