@@ -1949,10 +1949,16 @@ function user_display_users() {
   $_SESSION["ur"] = $ur;
   $_SESSION["lr"] = $lr;
 
+  /*
   $search = trim(@$_GET["search"]);
   $dept = trim(@$_GET["department"]);
   $role = trim(@$_GET["role"]);
+  */
 
+
+
+
+/*
   if ($search != "" || $dept != "")
   {
     $_SESSION["prev_user_search"] = "";
@@ -1980,14 +1986,14 @@ function user_display_users() {
 
 
   $_SESSION["prev_user_search"] = "";
+*/
+  
 
   
-  // Let's pull the needed variables out of our settings, so we know what
-  // to query, because this is a non-FlightPath table.
-  //$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
-  //$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  //$table_name = $tsettings["table_name"];  
   
+  
+   
+  /*
   
   if ($search != "" && !(@$_GET["deptsubmit"]) && !(@$_GET["rolesubmit"]))
   {
@@ -2064,7 +2070,73 @@ function user_display_users() {
     $displaying = $ur;
   }
   
+  
+  */
+  
+  
+  $filter_name = @trim($_SESSION['users_filter_name']);
+  $filter_school = @intval($_SESSION['users_filter_school']);
+  $filter_dept = @trim($_SESSION['users_filter_dept']);
+  $filter_role = @intval($_SESSION['users_filter_role']);  
+  
+  $extra_where_conditions = "";
+  $params = array();
+  $params[":ur"] = $ur;
+  $params[":lr"] = $lr;
+
+
+  if (isset($_SESSION['users_filter_submit'])) {
+    // We clicked to filter, so the letter range should be ignored.
+    $params[":ur"] = "A";
+    $params[":lr"] = "ZZZZZZZZZZZZ";
+  }
+
+  if ($filter_name) {
+    $extra_where_conditions .= " AND (l_name LIKE :search1 OR f_name LIKE :search2 OR u.cwid LIKE :search3) ";
+    $params[":search1"] = "%$filter_name%";
+    $params[":search2"] = "%$filter_name%";
+    $params[":search3"] = "%$filter_name%";
+  }
+  
+  if ($filter_school > 0) {
+    $extra_where_conditions .= " AND u.school_id = :school_id ";
+    $params[":school_id"] = $filter_school;
+  }
+
+  if ($filter_role > 0) {
+    $extra_where_conditions .= " AND rid = :rid ";
+    $params[":rid"] = $filter_role;
+  }
+  
+    
+  if ($filter_dept) {
+    $extra_where_conditions .= " AND dept_code = :dept ";
+    $params[":dept"] = $filter_dept;
+  }
+    
+      
+  $result = db_query("SELECT * FROM (users u, faculty f)
+                        LEFT JOIN user_roles r ON (r.user_id = u.user_id)
+                      WHERE 
+                        u.is_faculty = 1
+                        AND u.cwid = f.cwid
+                        AND l_name BETWEEN :ur AND :lr
+                        $extra_where_conditions
+                        ORDER BY l_name, f_name", $params);
+  
+  
+  
+  
+  
+  
+  
   $rtn .= "<div class='tenpt' style='padding-bottom: 5px;'><b>" . t("Displaying:") . "</b> $displaying</div>";
+  
+  
+  
+  
+  
+  
   
   $html = "";
   $html .= "
@@ -2088,7 +2160,7 @@ function user_display_users() {
     
   while ($cur = db_fetch_array($result)) {
 
-    $user_id = $cur["user_id"];
+    $user_id = $cur["user_id"];    // Note: will be NULL if no roles are set, due to left join in query.
     $l_name = trim(ucwords(strtolower($cur["l_name"])));
     $f_name = trim(ucwords(strtolower($cur["f_name"])));    
     $faculty_cwid = trim($cur["cwid"]);
@@ -2125,24 +2197,10 @@ function user_display_users() {
       }
     }
 
-
-
-    /*
-    $rtn .= "<tr class='$roles_classes'>
-          
-          <td valign='top'>" . l("<i class='fa fa-pencil' title='Edit'></i>", "admin/users/edit-user", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "</td>              
-          <td valign='top' width='15%'>$faculty_cwid</td>
-          <td valign='top' width='15%'>$f_name</td>
-          <td valign='top' width='15%'>$l_name</td>
-          <td valign='top'>$dept_name</td>
-          <td valign='top'>$roles</td>
-          <td valign='top'>$last_login</td>
-          
-        </tr>";
-     */
+    
      
 
-    $render['user_row_' . $db_user_id] = array(
+    $render['user_row_' . $faculty_cwid] = array(
       'value' => "<tr class='$roles_classes'>          
                     <td valign='top'>" . l("<i class='fa fa-pencil' title='Edit'></i>", "admin/users/edit-user", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "</td>              
                     <td valign='top' width='15%'>$faculty_cwid</td>
@@ -2154,7 +2212,7 @@ function user_display_users() {
                   </tr>",     
 
            'data' => array(
-                    'user_id' => $db_user_id,
+                    'is_faculty' => 1,
                     'cwid' => $faculty_cwid,
                     'db_row' => $cur,                    
                   ),                
@@ -2332,12 +2390,17 @@ function user_list_filter_form_submit($form, $form_state) {
   unset($_SESSION['users_filter_school']);
   unset($_SESSION['users_filter_dept']);
   unset($_SESSION['users_filter_role']);
+  
+  unset($_SESSION['users_filter_submit']);  
     
   if ($values['submit_btn'] != '') {
     $_SESSION['users_filter_name'] = trim($values['filter_name']);
     $_SESSION['users_filter_school'] = $values['filter_school'];
     $_SESSION['users_filter_dept'] = $values['filter_dept'];
     $_SESSION['users_filter_role'] = $values['filter_role'];
+    
+    $_SESSION['users_filter_submit'] = "yes"; // simply notes that we did indeed press the submit btn.
+    
   }
     
 }
