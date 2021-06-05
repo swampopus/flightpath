@@ -81,11 +81,11 @@ function admin_display_courses() {
   $html .= "<div class='admin-courses-select-letter-bar'>
           ";
   foreach($letter_ranges as $disp => $vals) {
-    $html .= l($disp, "admin/courses", "de_catalog_year=$de_catalog_year&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link")) . " &nbsp; ";
+    $html .= l($disp, "admin/courses", "de_catalog_year=$de_catalog_year&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link")) . " &nbsp; &nbsp; ";
   }
 
   $html .= "</div>                       
-        <div class='tenpt'>             
+        <div >             
           <div style='padding: 5px;'>          
           " . l("<i class='fa fa-plus'></i> " . t("Add a course for @year", array("@year" => $de_catalog_year)), "admin/courses/edit-course", "course_id=new&de_catalog_year=$de_catalog_year") . "
             &nbsp; &nbsp; &nbsp;
@@ -95,14 +95,6 @@ function admin_display_courses() {
 
          ";
 
-
-
-  
-  
-  
-  
-  
-  
 
   $render['upper_links'] = array(
     'value' => $html,
@@ -115,7 +107,7 @@ function admin_display_courses() {
   $mark .= "</div>";
   
   
-  $render['degrees_filter'] = array(
+  $render['courses_filter'] = array(
     'value' => $mark,    
   );
 

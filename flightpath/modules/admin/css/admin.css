@@ -121,7 +121,8 @@ table .rep-msg {
 
 
 .admin-courses-select-letter-bar {
-  background-color: #ddd; 
+  background-color: #eee; 
+  border: 1px solid #ddd;
   margin-bottom:10px; 
   text-align: center; 
   padding: 3px; 

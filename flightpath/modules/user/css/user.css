@@ -104,6 +104,43 @@ form.filters {
 }
 
 
+___users-page{}
+#fp-form-user_list_filter_form .markup-element-mark_top,
+#fp-form-user_list_filter_form #element-wrapper-filter_school,
+#fp-form-user_list_filter_form #element-wrapper-filter_role,
+#fp-form-user_list_filter_form #element-wrapper-filter_dept,
+#fp-form-user_list_filter_form #element-wrapper-filter_name,
+#fp-form-user_list_filter_form #element-wrapper-submit_btn,
+#fp-form-user_list_filter_form #element-wrapper-reset_btn,
+#fp-form-user_list_filter_form #element-wrapper-filter_school div,
+#fp-form-user_list_filter_form #element-wrapper-filter_school label,
+#fp-form-user_list_filter_form #element-wrapper-filter_school select,
+#fp-form-user_list_filter_form #element-wrapper-filter_name div,
+#fp-form-user_list_filter_form #element-wrapper-filter_name label,
+#fp-form-user_list_filter_form #element-wrapper-filter_name input,
+#fp-form-user_list_filter_form #element-wrapper-filter_dept div,
+#fp-form-user_list_filter_form #element-wrapper-filter_dept label,
+#fp-form-user_list_filter_form #element-wrapper-filter_dept select,
+#fp-form-user_list_filter_form #element-wrapper-filter_role div,
+#fp-form-user_list_filter_form #element-wrapper-filter_role label,
+#fp-form-user_list_filter_form #element-wrapper-filter_role select,
+#ignore .ignoreme
+ {
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 0;  
+  width: auto; 
+}
+
+#fp-form-user_list_filter_form select
+{
+  max-width: 200px;
+}
+
+#fp-form-user_list_filter_form #element-wrapper-reset_btn {
+  margin-left: 20px;
+}
+
 
 
 

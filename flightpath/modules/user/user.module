@@ -1768,8 +1768,14 @@ function user_display_users() {
 
   $cc = 1;
 
-  $rtn = "";
-
+  
+  // Do this using $render array, so it can be altered
+  // by hook_content_alter
+  $render = array();
+  $render['#id'] = 'user_display_users';  
+  
+  
+  fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
   fp_add_css(fp_get_module_path("user") . "/css/user.css");
 
   // First, let's get our list of departments...
@@ -1794,8 +1800,9 @@ function user_display_users() {
   }
 
 
-  $rtn .= "<h2 class='title' style='margin-bottom: 0;'>" . t("Edit Faculty / Staff Users") . "</h2>";
-  $rtn .= "<div class='add-new-user'>" . l(t("Create a new faculty/staff user"), "admin/users/edit-user", "faculty_cwid=new&de_catalog_year=$de_catalog_year") . "</div>";
+  $html = "";
+
+  $html .= "<div class='add-new-user'>" . l("<i class='fa fa-plus'></i> " . t("Create a new faculty/staff user"), "admin/users/edit-user", "faculty_cwid=new&de_catalog_year=$de_catalog_year") . "</div>";
 
 
   $letter_ranges = array(
@@ -1823,15 +1830,36 @@ function user_display_users() {
   );
 
 
-  $rtn .= "<div class='user-select-letter-bar' style='padding-top: 20px;'>
+  $html .= "<div class='user-select-letter-bar' style='padding-top: 20px;'>
           ";
   foreach($letter_ranges as $disp => $vals) {
-    $rtn .= l($disp, "admin/users/faculty", "de_catalog_year=$de_catalog_year&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link")) . " &nbsp; ";
+    $html .= l($disp, "admin/users/faculty", "de_catalog_year=$de_catalog_year&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link")) . " &nbsp; ";
   }
 
-  $clean_urls = variable_get("clean_urls", FALSE);
 
-  $rtn .= "</div>";
+  $html .= "</div>";
+  
+  $render['upper_links'] = array(
+    'value' => $html,
+  );
+  
+
+  $mark = "";
+  $mark .= "<div class='degrees-filter'>";
+  $mark .= fp_render_form("user_list_filter_form");
+  $mark .= "</div>";
+  
+  
+  $render['users_filter'] = array(
+    'value' => $mark,    
+  );    
+    
+    
+  // TODO:  insert filter form.
+  
+  
+  
+  /*
   $rtn .= "                             
                         <form class='filters' action='" . fp_url("admin/users/faculty") . "' method='GET' >";
   if (!$clean_urls) {
@@ -1889,7 +1917,10 @@ function user_display_users() {
                        <br>
                       ";
 
-
+  */
+  
+  
+  
 
   $displaying = "";
 
@@ -2032,7 +2063,11 @@ function user_display_users() {
                         ORDER BY l_name, f_name ", $ur, $lr);
     $displaying = $ur;
   }
-  $rtn .= "<div class='tenpt' style='padding-bottom: 5px;'><b>" . t("Displaying:") . "</b> $displaying</div>
+  
+  $rtn .= "<div class='tenpt' style='padding-bottom: 5px;'><b>" . t("Displaying:") . "</b> $displaying</div>";
+  
+  $html = "";
+  $html .= "
       <table border='0' width='100%' cellpadding='3' cellspacing='0' class='user-list'>
     
         <tr>
@@ -2046,6 +2081,11 @@ function user_display_users() {
         </tr>
     
     ";
+    
+  $render['users_table_top'] = array(
+    'value' => $html,
+  );  
+    
   while ($cur = db_fetch_array($result)) {
 
     $user_id = $cur["user_id"];
@@ -2087,12 +2127,10 @@ function user_display_users() {
 
 
 
-    //      $pC .= "<a href='edit_users.php?action=load&course_id=$course_id'> user: $f_name $mid_name $l_name </a><br>";
-
+    /*
     $rtn .= "<tr class='$roles_classes'>
           
-          <td valign='top'>" . l("<i class='fa fa-pencil' title='Edit'></i>", "admin/users/edit-user", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "</td>
-              
+          <td valign='top'>" . l("<i class='fa fa-pencil' title='Edit'></i>", "admin/users/edit-user", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "</td>              
           <td valign='top' width='15%'>$faculty_cwid</td>
           <td valign='top' width='15%'>$f_name</td>
           <td valign='top' width='15%'>$l_name</td>
@@ -2101,9 +2139,38 @@ function user_display_users() {
           <td valign='top'>$last_login</td>
           
         </tr>";
+     */
+     
+
+    $render['user_row_' . $db_user_id] = array(
+      'value' => "<tr class='$roles_classes'>          
+                    <td valign='top'>" . l("<i class='fa fa-pencil' title='Edit'></i>", "admin/users/edit-user", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "</td>              
+                    <td valign='top' width='15%'>$faculty_cwid</td>
+                    <td valign='top' width='15%'>$f_name</td>
+                    <td valign='top' width='15%'>$l_name</td>
+                    <td valign='top'>$dept_name</td>
+                    <td valign='top'>$roles</td>
+                    <td valign='top'>$last_login</td>                    
+                  </tr>",     
+
+           'data' => array(
+                    'user_id' => $db_user_id,
+                    'cwid' => $faculty_cwid,
+                    'db_row' => $cur,                    
+                  ),                
+                
+    );
+
+
+
 
   } // while
-  $rtn .= "</table>";
+  
+  
+  $render['users_table_bottom'] = array(
+    'value' => "</table>",
+  );
+  
 
 
 
@@ -2131,9 +2198,159 @@ function user_display_users() {
 
   
   
-  return $rtn;
+  
+  
+  $rtn2 = fp_render_content($render);
+  
+  
+  return $rtn2;
   
 }
+
+
+function user_list_filter_form() {
+
+  $form = array();
+
+  
+  $form['mark_top'] = array(
+    'type' => 'markup',
+    'value' => "<strong>" . t('Filter by...') . "</strong>",
+    'weight' => 0,
+  );
+  
+  
+  $filter_name_value = @trim($_SESSION['users_filter_name']);
+  $form['filter_name'] = array(
+    'type' => 'textfield',
+    'label' => '',
+    'attributes' => "placeholder='" . t("Nname or CWID") . "'",    
+    'value' => $filter_name_value,
+    'size' => 20,
+    'weight' => 10,
+  );
+  
+  
+
+  // Show list of departments
+  $dept_options = array();
+  $res = db_query("SELECT * FROM faculty 
+                   GROUP BY department_code
+                   ORDER BY department");
+  while ($cur = db_fetch_array($res)) {    
+    $key = $cur["department_code"];
+    $value = $cur["department"];
+    $dispval = $value;
+    
+    if (strlen($dispval) > 25) {
+      $dispval = trim(substr($dispval, 0, 22)) . "...";
+    }    
+    $dept_options[$key] = $dispval;
+  }  
+  
+  $filter_dept_value = @trim($_SESSION['users_filter_dept']);
+  $form['filter_dept'] = array(      
+    'type' => 'select',
+    'label' => t('Department:'),
+    'options' => $dept_options,
+    'value' => $filter_dept_value,
+    'weight' => 20,
+  );      
+
+
+  
+  // Show list of roles
+  $role_options = array();
+  $res = db_query("SELECT * FROM roles ORDER BY rid");
+  while ($cur = db_fetch_array($res)) {    
+    $key = $cur["rid"];
+    $value = $cur["name"];
+    $dispval = $value;
+    
+    // Skip anonymous and authenticated
+    if ($key == 1 || $key == 2) continue;
+    
+    if (strlen($dispval) > 25) {
+      $dispval = trim(substr($dispval, 0, 22)) . "...";
+    }    
+    $role_options[$key] = $dispval;
+  }  
+  
+  $filter_role_value = @intval($_SESSION['users_filter_role']);
+  $form['filter_role'] = array(      
+    'type' => 'select',
+    'label' => t('Role:'),
+    'options' => $role_options,
+    'value' => $filter_role_value,
+    'weight' => 30,
+  );      
+  
+  
+  
+  // If we have enabled the schools module, then have a selector for that as well
+  if (function_exists('schools_get_schools_for_fapi')) {
+  
+    $filter_school_value = @intval($_SESSION['users_filter_school']);
+    $options = schools_get_schools_for_fapi(TRUE, TRUE, 'user', TRUE);
+    $options[0] = t('- All / Default -');
+    $form['filter_school'] = array(      
+      'type' => 'select',
+      'label' => t('School:'),
+      'options' => $options,
+      'value' => $filter_school_value,
+      'weight' => 40,   
+      'hide_please_select' => TRUE,   
+    );      
+      
+  } // if schools enabled  
+
+  
+  
+  $form['submit_btn'] = array(
+    'type' => 'submit',
+    'value' => t('Apply'),
+    'weight' => 100,
+  );
+  
+  $form['reset_btn'] = array(
+    'type' => 'submit',
+    'value' => t('Reset'),
+    'weight' => 110,
+  );
+  
+  
+  return $form;
+}  
+
+
+
+
+function user_list_filter_form_submit($form, $form_state) {
+  $values = $form_state['values'];
+    
+  unset($_SESSION['users_filter_name']);
+  unset($_SESSION['users_filter_school']);
+  unset($_SESSION['users_filter_dept']);
+  unset($_SESSION['users_filter_role']);
+    
+  if ($values['submit_btn'] != '') {
+    $_SESSION['users_filter_name'] = trim($values['filter_name']);
+    $_SESSION['users_filter_school'] = $values['filter_school'];
+    $_SESSION['users_filter_dept'] = $values['filter_dept'];
+    $_SESSION['users_filter_role'] = $values['filter_role'];
+  }
+    
+}
+
+
+
+
+
+
+
+
+
+
 
 
 /**
@@ -2145,3 +2362,16 @@ function user_get_role_name($rid) {
   $name = db_result(db_query("SELECT name FROM roles WHERE rid = ? ", $rid));
   return $name;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

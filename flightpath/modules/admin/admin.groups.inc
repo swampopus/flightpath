@@ -1398,7 +1398,7 @@ function admin_groups_list_filter_form() {
     'type' => 'textfield',
     'label' => '',
     'value' => $filter_name_value,
-    'attributes' => "placeholder='Enter any title or name'",
+    'attributes' => "placeholder='" . t("Enter any title or name") . "'",
     'size' => 20,
     'weight' => 10,
   );
