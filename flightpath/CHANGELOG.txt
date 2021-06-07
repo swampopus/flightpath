@@ -8,6 +8,9 @@ FlightPath 6.x Changelog
   college, dept_code, and deparment are varchar 255.  Will use a machine name version of department if no DEPT_CODE
   is entered.
   
+  Found a bug on the dashboard (system.module), where it states what day it is.  I was using strtotime("today"), which apparently
+  was causing issues due to timezone conversions.  Switched it to time() and that fixed the issue.
+  
 
 2021-06-06
   Finishing up users screen for school id, both faculty and students.  Also added filter options to make it look

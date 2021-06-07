@@ -106,7 +106,7 @@ function is_serialized_string($string)
  * 
  * As a convenenience, if the data_format we will get back a formatted date.  Otherwise we'll get back a timestamp. 
  */
-function convert_time( $time_to_convert = 0, $start_timezone_string = "UTC", $end_timezone_string = NULL, $date_format = null ) {
+function convert_time($time_to_convert = 0, $start_timezone_string = "UTC", $end_timezone_string = NULL, $date_format = null ) {
   
   // We require a start time
   if( empty( $time_to_convert ) ){
