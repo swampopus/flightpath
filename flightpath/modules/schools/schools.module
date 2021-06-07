@@ -496,6 +496,47 @@ function schools_content_alter(&$render, $render_id) {
   
   } // admin_display_courses   
   
+  
+  if ($render_id == 'user_display_users') {
+    // Add school to our table top.
+    $v = $render['users_table_top']['value'];
+    $v = str_replace("</tr>", "<th>School</th></tr>", $v);
+    $render['users_table_top']['value'] = $v;    
+    
+    foreach ($render as $key => $val) {
+      if (strstr($key, 'user_row_')) {
+        // Find out the school_id for this degree, if it exists.
+
+        $school_id = intval($val['data']['db_row']['school_id']);
+        
+        
+        $school_code = "-";
+        if ($school_id != 0) {
+          $school_code = $defs[$school_id]['school_code'];
+        }        
+
+        
+        // Fill in the school code as the last td in the table row.
+        $render[$key]['value'] = str_replace('</tr>', "<td class='course-school'>$school_code</td></tr>", $render[$key]['value']);
+        
+        
+        if ($school_id == 0) continue; // everyone can edit school id 0        
+        
+        
+        // A school id has indeed been set, so we need to see if this user is allowed to edit it or not.          
+        if (!user_has_permission('administer_' . $school_id . '_user_data')) {
+          // No, so let's hide it.
+          unset($render[$key]);
+        }          
+
+        
+      }
+    } // foreach    
+    
+    
+  } // user_display_users
+  
+  
     
    
 } // hook_content_alter

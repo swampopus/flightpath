@@ -64,6 +64,7 @@ function user_menu() {
     "type" => MENU_TYPE_SUB_TAB, 
     "tab_family" => "users",    
     "tab_parent" => "admin-tools/admin",
+    "file" => menu_get_module_path("user") . "/user.student.inc",
   );    
 
   
@@ -1411,353 +1412,6 @@ function user_edit_user_form_submit($form, $form_state) {
 }
 
 
-/**
- * Similar to user_display_users, except only for student users.
- */
-function user_display_student_users() {
-  global $db, $screen;
-  $de_catalog_year = @$GLOBALS["de_catalog_year"];
-
-  if ($db == NULL) {
-    $db = get_global_database_handler();
-  }
-    
-  $cc = 1;
-
-  $rtn = "";
-
-  fp_add_css(fp_get_module_path("user") . "/css/user.css");
-
-  // First, let's get our list of departments...
-  $major_code_array = array();
-  $d = 0;
-  
-  // Let's pull the needed variables out of our settings, so we know what
-  // to query, because this is a non-FlightPath table.
-  
-  
-    
-  $res = db_query("SELECT DISTINCT major_code FROM student_degrees ORDER BY major_code ");
-  while ($cur = db_fetch_array($res)) {
-    if (trim($cur["major_code"]) == "")
-    {// skip if blank
-      continue;
-    }
-    
-    $major_code_array[$d] = trim(ucwords($cur["major_code"]));
-    $d++;
-  }
-  
-
-  $rtn .= "<h2 class='title' style='margin-bottom:0;'>" . t("Edit Student Users") . "</h2>";
-
-  $rtn .= "<div class='add-new-student-user'>" . l(t("Create a new student user"), "admin/users/edit-student-user", "student_cwid=new&de_catalog_year=$de_catalog_year") . "</div>";
-
-
-  $letter_ranges = array(
-    "A" => array("A", "AZZZZ"),
-    "B" => array("B", "BZZZZ"),
-    "C" => array("C", "CZZZ"),
-    "D" => array("D", "DZZZZ"),
-    "E" => array("E", "EZZZZ"),
-    "F" => array("F", "FZZZZ"),
-    "G" => array("G", "GZZZZ"),
-    "H" => array("H", "HZZZZ"),
-    "I" => array("I", "IZZZ"),
-    "J" => array("J", "JZZZ"),
-    "K" => array("K", "KZZZ"),
-    "L" => array("L", "LZZZ"),    
-    "M" => array("M", "MZZZ"),
-    "N" => array("N", "NZZZ"),
-    "O" => array("O", "OZZZ"),    
-    "P" => array("P", "PZZZ"),
-    "Q-R" => array("Q", "RZZZZ"),
-    "S" => array("S", "SZZZ"),
-    "T" => array("T", "TZZZZ"),
-    "U" => array("U", "UZZZ"),
-    "V-Z" => array("V", "ZZZZ"),        
-  );
-
-
-  $rtn .= "<div class='user-select-letter-bar' style='padding-top: 20px;'>
-          ";
-  foreach($letter_ranges as $disp => $vals) {
-    $rtn .= l($disp, "admin/users/students", "de_catalog_year=$de_catalog_year&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link")) . " &nbsp; ";
-  }
-
-  // Figure out what type of students to display-- active, inactive, or both
-  $set_disp = @$_REQUEST["set_disp"];
-  if ($set_disp == "") {
-    $set_disp = @$_SESSION["user_set_disp"];
-    if ($set_disp == "") {
-      $set_disp = "only_active";
-    }
-  }
-  // Save into session for ease later
-  $_SESSION["user_set_disp"] = $set_disp;
-  $in_active_query_line = "";
-
-  $sel_only_active = $sel_only_inactive = $sel_both = "";
-  if ($set_disp == "only_active") {
-    $sel_only_active = "selected";
-    $in_active_query_line = " AND is_active = '1' ";
-  }
-  if ($set_disp == "only_inactive") {
-    $sel_only_inactive = "selected";
-    $in_active_query_line = " AND is_active = '0' ";
-  }
-  if ($set_disp == "both") {
-    $sel_both = "selected";
-  }
-  
-  $clean_urls = variable_get("clean_urls", FALSE);
-
-  $rtn .= "</div>";
-  $rtn .= "                             
-                        <form class='filters' action='" . fp_url("admin/users/students") . "' method='GET' >
-                        <input type='hidden' name='performAction' value='editUsers'>";
-  if (!$clean_urls) {
-    // Hack to support non-clean URL sites
-    $rtn .= "<input type='hidden' name='q' value='admin/users/students'>";
-  }               
-  $get_search = @$_GET["search"];         
-  $rtn .= "
-                         " . t("Search:") . " <input type='text'  name='search' value='$get_search' size='15'>
-                        <input type='submit' name='searchsubmit'  value=' > '>
-                       
-                        &nbsp; &nbsp; " . t("or") . " &nbsp; &nbsp;
-                       <select name='major_code' >
-                        <option value=''>" . t("Select a major code...") . "</option>
-                        <option value=''>--------------------------</option>
-                    <!--MAJORCODESEARCH-->
-                       </select>
-                       <input type='submit' name='major_code_submit'  value=' > '>
-                       
-                       &nbsp; &nbsp; " . t("Set disp:") . "
-                       <select name='set_disp'>
-                        <option value='only_active' $sel_only_active>" . t("only active") . "</option>                        
-                        <option value='only_inactive' $sel_only_inactive>" . t("only inactive") . "</option>
-                        <option value='both' $sel_both>" . t("show both") . "</option>
-                       </select>
-                       <input type='submit' name='show_inactive_submit'  value=' > '>                                              
-                       
-                       </form>
-                       
-                       <br>
-                      ";
-
-
-
-  $displaying = "";
-
-
-
-  $ur = trim(@$_GET["ur"]);
-  $lr = trim(@$_GET["lr"]);
-
-  if ($ur != "" || $lr != "")
-  {
-    $_SESSION["prev_user_search"] = "";
-  }
-
-
-  if ($ur == "")
-  { // meaning, no range was set.  Use A - C
-    $ur = @$_SESSION["ur"];
-    $lr = @$_SESSION["lr"];
-    if ($ur == "")
-    { // if still blank, assign it..
-      $ur = "A";
-      $lr = "AZZZZ";
-    }
-
-  }
-  $_SESSION["ur"] = $ur;
-  $_SESSION["lr"] = $lr;
-
-  $search = trim(@$_GET["search"]);
-  $major_code = trim(@$_GET["major_code"]);
-
-  if ($search != "" || $major_code != "")
-  {
-    $_SESSION["prev_user_search"] = "";
-  }
-
-
-  if (@$_SESSION["prev_user_search"] != "")
-  {
-    $temp = explode("%%",$_SESSION["prev_user_search"]);
-    if ($temp[0] == "search")
-    {
-      $search = $temp[1];
-    }
-    if ($temp[0] == "major_code")
-    {
-      $_GET["major_codesubmit"] = "1";
-      $major_code = $temp[1];
-    }
-  }
-
-
-  $_SESSION["prev_user_search"] = "";
-
-  
-  // Let's pull the needed variables out of our settings, so we know what
-  // to query, because this is a non-FlightPath table.
-  //$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
-  //$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  //$table_name = $tsettings["table_name"];  
-  
-  // TODO:  Check if we are searching through "active" as well!
-  
-  
-  if ($search != "" && !($_GET["major_code_submit"]))
-  {
-    // Something was searched for, and the major_code submit button was not pushed.
-    $major_code = "";
-    $temp = explode(" ",$search);
-    $search1 = $temp[0];
-    $search2 = trim($temp[1]);
-
-    $_SESSION["prev_user_search"] = "search%%$search";
-    $displaying = $search;
-    $second_part = "";
-    if ($search2 != "")
-    {
-      // Two search terms, probably a name...
-      $result = db_query("SELECT * FROM users u, students s
-          WHERE
-          u.is_student = 1  
-          AND u.cwid = s.cwid
-          $in_active_query_line
-          AND (l_name LIKE ?
-                AND f_name LIKE ?)
-          ORDER BY l_name, f_name ", "%$search2%", "%$search1%");
-
-    }
-    else {
-
-      // One search term....
-      $result = db_query("SELECT * FROM users u, students s
-          WHERE 
-          u.is_student = 1
-          AND u.cwid = s.cwid
-          $in_active_query_line
-          AND (u.cwid LIKE ? 
-                OR l_name LIKE ?
-                OR f_name LIKE ?)
-          ORDER BY l_name, f_name ", "%$search1%", "%$search1%", "%$search1%");
-    }
-
-  }
-  else if ($major_code != "" && $_GET["major_code_submit"]) {
-    // User select a major_code.  Look for it...
-    $search = "";
-    $_SESSION["prev_user_search"] = "major_code%%$major_code";
-    $result = db_query("SELECT * FROM users a, students b, student_degrees c
-          WHERE a.cwid = b.cwid
-          AND a.cwid = c.student_id
-          AND a.is_student = 1
-          AND c.major_code = ? 
-          $in_active_query_line
-          ORDER BY l_name, f_name ", $major_code);
-    $displaying = $major_code;
-  }
-  else
-  { // No search, so look for the range...
-    $result = db_query("SELECT * FROM users u, students s
-                        WHERE
-                          u.is_student = 1
-                        AND u.cwid = s.cwid
-                        $in_active_query_line
-                        AND l_name BETWEEN ? AND ?
-                        ORDER BY l_name, f_name ", $ur, $lr);
-    $displaying = $ur;
-  }
-  $rtn .= "<div class='tenpt' style='padding-bottom: 5px;'><b>" . t("Displaying:") . "</b> $displaying</div>
-      <table border='0' width='100%' cellpadding='3' cellspacing='0' class='user-list'>
-    
-        <tr>
-          <th width='5%'>Actions</th>
-          <th>CWID</th>
-          <th>Name</th>
-          <th></th>
-          <th>Major code(s)</th>
-          <th>Active?</th>
-          <th>Last Login</th>
-          
-        </tr>
-    
-    ";
-  while ($cur = db_fetch_array($result)) {
-
-    $user_id = $cur["user_id"];
-    $l_name = trim(ucwords(strtolower($cur["l_name"])));
-    $f_name = trim(ucwords(strtolower($cur["f_name"])));    
-    $student_cwid = trim($cur["cwid"]);
-    
-    //$disp_major_code = trim($cur["major_code"]);
-    $disp_major_code = join(", ", $db->get_student_majors_from_db($student_cwid, FALSE, FALSE));
-      
-    $is_active = ($cur["is_active"] == "1") ? "Y" : "N";
-    
-    $last_login = intval($cur['last_login']);
-    if ($last_login == 0) {
-      $last_login = t("Never");
-    }
-    else {
-      $last_login = format_date(convert_time($last_login), 'short');
-    }    
-    
-    
-
-    
-    
-    $ast = "";
-    $reason = "";
-
-
-    $fgcol = "black";
-
-
-    $rtn .= "
-          <tr class='is-active-$is_active'>
-            <td valign='top'>" . l("<i class='fa fa-pencil' title='Edit'>", "admin/users/edit-student-user", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "</td>          
-            <td valign='top' width='15%'>$student_cwid</td>
-            <td valign='top' width='15%'>$f_name</td>
-            <td valign='top' width='15%'>$l_name</td>
-            <td valign='top'>$disp_major_code</td>
-            <td valign='top'>$is_active</td>
-            <td valign='top'>$last_login</td>
-          
-        </tr>";
-
-  } // while
-  $rtn .= "</table>";
-
-
-
-  // Put in the major_code pulldown....
-  $bC = "";
-  for ($t = 0; $t<count($major_code_array); $t++)
-  {
-    $dd = $major_code_array[$t];
-
-    $sel = "";
-    if ($dd == $major_code)
-    {
-      $sel = "selected";
-    }
-    $bC .= "<option value='$dd' $sel>{$major_code_array[$t]}</option> \n";
-  }
-  $rtn = str_replace("<!--MAJORCODESEARCH-->",$bC,$rtn);
-  
-  
-  return $rtn;
-  
-}
-
-
 
 /**
  * Display our list of faculty/staff users in the system.
@@ -1766,6 +1420,11 @@ function user_display_users() {
   global $db, $screen;
   $de_catalog_year = @$GLOBALS["de_catalog_year"];
 
+  if (!$de_catalog_year) {
+    $de_catalog_year = @intval($_REQUEST['de_catalog_year']);
+  }
+  
+  
   $cc = 1;
 
   
@@ -1778,26 +1437,6 @@ function user_display_users() {
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
   fp_add_css(fp_get_module_path("user") . "/css/user.css");
 
-  // First, let's get our list of departments...
-  $dept_array = array();
-  $d = 0;
-  
-  // Let's pull the needed variables out of our settings, so we know what
-  // to query, because this is a non-FlightPath table.
-  //$tsettings = $GLOBALS["fp_system_settings"]["extra_tables"]["human_resources:faculty_staff"];
-  //$tf = (object) $tsettings["fields"];  //Convert to object, makes it easier to work with.  
-  //$table_name = $tsettings["table_name"];    
-  
-  $res = db_query("SELECT DISTINCT department FROM faculty ORDER BY department ");
-  while ($cur = db_fetch_array($res)) {
-    if (trim($cur["department"]) == "")
-    {// skip if blank
-      continue;
-    }
-    
-    $dept_array[$d] = trim(ucwords(strtolower($cur["department"])));
-    $d++;
-  }
 
 
   $html = "";
@@ -1830,10 +1469,22 @@ function user_display_users() {
   );
 
 
+  $ur = trim(@$_GET["ur"]);
+  $lr = trim(@$_GET["lr"]);
+
+  if ($ur == "" && !isset($_SESSION['users_filter_submit'])) {
+    $ur = "A";
+    $lr = "AZZZZZ";  // first time through.
+  }
+  
   $html .= "<div class='user-select-letter-bar' style='padding-top: 20px;'>
           ";
   foreach($letter_ranges as $disp => $vals) {
-    $html .= l($disp, "admin/users/faculty", "de_catalog_year=$de_catalog_year&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link")) . " &nbsp; ";
+    $selected_class = "";  
+    if ($ur == $vals[0]) {
+      $selected_class = "selected";
+    }
+    $html .= l($disp, "admin/users/faculty", "de_catalog_year=$de_catalog_year&clear_filters=true&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link $selected_class")) . " &nbsp; ";
   }
 
 
@@ -1843,96 +1494,6 @@ function user_display_users() {
     'value' => $html,
   );
   
-
-  $mark = "";
-  $mark .= "<div class='degrees-filter'>";
-  $mark .= fp_render_form("user_list_filter_form");
-  $mark .= "</div>";
-  
-  
-  $render['users_filter'] = array(
-    'value' => $mark,    
-  );    
-    
-    
-  // TODO:  insert filter form.
-  
-  
-  
-  /*
-  $rtn .= "                             
-                        <form class='filters' action='" . fp_url("admin/users/faculty") . "' method='GET' >";
-  if (!$clean_urls) {
-    // Hack to support non-clean URL sites
-    $rtn .= "<input type='hidden' name='q' value='admin/users/faculty'>";
-  }                        
-  
-  $get_search = @$_GET["search"];
-                        
-  $rtn .= "                        
-                        <input type='hidden' name='performAction' value='editUsers'>
-                         " . t("Search:") . " <input type='text'  name='search' value='$get_search' size='15'>
-                        <input type='submit' name='searchsubmit'  value=' > '>
-                       
-                        &nbsp;&nbsp;" . t("or") . "&nbsp;&nbsp;
-                       <select name='department' >
-                        <option value=''>" . t("Select a department:") . "</option>
-                        <option value=''>--------------------------</option>
-                    <!--DEPTSEARCH-->
-                       </select>
-                       <input type='submit' name='deptsubmit' value=' > '>
-                       
-                       &nbsp;&nbsp;" . t("or") . "&nbsp;&nbsp;
-                       <select name='role' >
-                       <option value=''>" . t("Select a role:") . "</option>
-                       <option value=''>--------------------------</option>
-                       ";
-  // Show list of roles
-  $res = db_query("SELECT * FROM roles ORDER BY rid");
-  while ($cur = db_fetch_array($res)) {    
-    $key = $cur["rid"];
-    $value = $cur["name"];
-    $dispval = $value;
-    
-    // Skip anonymous and authenticated
-    if ($key == 1 || $key == 2) continue;
-    
-    if (strlen($dispval) > 25) {
-      $dispval = trim(substr($dispval, 0, 22)) . "...";
-    }
-    
-    $sel = "";
-    if ($key == intval(@$_GET["role"])) {
-      $sel = "selected";
-    }
-    
-    $rtn .= "<option value='$key' $sel>$dispval</option>";
-  }
-  $rtn .= "</select>
-                       
-                       <input type='submit' name='rolesubmit'  value=' > '>
-                       
-                       </form>
-                       
-                       <br>
-                      ";
-
-  */
-  
-  
-  
-
-  $displaying = "";
-
-
-
-  $ur = trim(@$_GET["ur"]);
-  $lr = trim(@$_GET["lr"]);
-
-  if ($ur != "" || $lr != "")
-  {
-    $_SESSION["prev_user_search"] = "";
-  }
 
 
   if ($ur == "")
@@ -1947,149 +1508,61 @@ function user_display_users() {
 
   }
   $_SESSION["ur"] = $ur;
-  $_SESSION["lr"] = $lr;
+  $_SESSION["lr"] = $lr;  
 
-  /*
-  $search = trim(@$_GET["search"]);
-  $dept = trim(@$_GET["department"]);
-  $role = trim(@$_GET["role"]);
-  */
+  
 
 
-
-
-/*
-  if ($search != "" || $dept != "")
-  {
-    $_SESSION["prev_user_search"] = "";
+  if (@$_REQUEST['clear_filters'] == 'true') {
+    // Meaning, a letter was specified, so let's reset the filter values.
+    foreach ($_SESSION as $key => $val) {
+      if (strstr($key,"users_filter_")) {
+        unset($_SESSION[$key]);
+      }
+    }        
   }
 
 
-  if (@$_SESSION["prev_user_search"] != "")
-  {
-    $temp = explode("%%",$_SESSION["prev_user_search"]);
-    if ($temp[0] == "search")
-    {
-      $search = $temp[1];
-    }
-    if ($temp[0] == "dept")
-    {
-      @$_GET["deptsubmit"] = "1";
-      $dept = $temp[1];
-    }
-    if ($temp[0] == "role" && ($role == "" || intval($role) == 0)) {      
-      @$_GET["rolesubmit"] = "1";
-      $role = $temp[1];
-      
-    }
-  }
 
 
-  $_SESSION["prev_user_search"] = "";
-*/
-  
 
-  
-  
-  
+
+
    
-  /*
-  
-  if ($search != "" && !(@$_GET["deptsubmit"]) && !(@$_GET["rolesubmit"]))
-  {
-    // Something was searched for, and the dept submit button was not pushed, nor role submit
-    $dept = "";
-    $temp = explode(" ",$search);
-    $search1 = @$temp[0];
-    $search2 = trim(@$temp[1]);
 
-    $_SESSION["prev_user_search"] = "search%%$search";
-    $displaying = $search;
-    $second_part = "";
-    if ($search2 != "")
-    {
-      // Two search terms, probably a name...
-      $result = db_query("SELECT * FROM users u, faculty f
-          WHERE
-          u.is_faculty = 1  
-          AND u.cwid = f.cwid
-          AND (l_name LIKE ?
-                AND f_name LIKE ?)
-          ORDER BY l_name, f_name ", "%$search2%", "%$search1%");
+  $mark = "";
+  $mark .= "<div class='degrees-filter'>";
+  $mark .= fp_render_form("user_list_filter_form");
+  $mark .= "</div>";
+  
+  
+  $render['users_filter'] = array(
+    'value' => $mark,    
+  );    
 
-    }
-    else {
-
-      // One search term....
-      $result = db_query("SELECT * FROM users u, faculty f
-          WHERE 
-          u.is_faculty = 1
-          AND u.cwid = f.cwid
-          AND (u.cwid LIKE ? 
-                OR l_name LIKE ?
-                OR f_name LIKE ?)
-          ORDER BY l_name, f_name ", "%$search1%", "%$search1%", "%$search1%");
-      
-    }
-    
-
-  }
-  else if ($dept != "" && $_GET["deptsubmit"]) {
-    // User select a department.  Look for it...
-    $search = "";
-    $_SESSION["prev_user_search"] = "dept%%$dept";
-    $result = db_query("SELECT * FROM users a, faculty b
-          WHERE a.cwid = b.cwid
-          AND a.is_faculty = 1
-          AND department = ? 
-          ORDER BY l_name, f_name ", $dept);
-    $displaying = $dept;
-  }
-  else if ($role != "" && $_GET["rolesubmit"]) {
-    // User select a role.  Look for it...
-    $search = "";
-    $_SESSION["prev_user_search"] = "role%%$role";
-    
-    $result = db_query("SELECT * FROM users a, faculty b, user_roles c
-          WHERE a.cwid = b.cwid
-          AND a.is_faculty = 1
-          AND a.user_id = c.user_id
-          AND c.rid = ?
-          ORDER BY l_name, f_name ", $role);
-    
-    $displaying = user_get_role_name($role);
-  }    
-  else
-  { // No search, so look for the range...
-    $result = db_query("SELECT * FROM users u, faculty f
-                        WHERE
-                          u.is_faculty = 1
-                        AND u.cwid = f.cwid
-                        AND l_name BETWEEN ? AND ?
-                        ORDER BY l_name, f_name ", $ur, $lr);
-    $displaying = $ur;
-  }
   
   
-  */
-  
-  
-  $filter_name = @trim($_SESSION['users_filter_name']);
-  $filter_school = @intval($_SESSION['users_filter_school']);
-  $filter_dept = @trim($_SESSION['users_filter_dept']);
-  $filter_role = @intval($_SESSION['users_filter_role']);  
   
   $extra_where_conditions = "";
   $params = array();
   $params[":ur"] = $ur;
   $params[":lr"] = $lr;
 
-
+  
   if (isset($_SESSION['users_filter_submit'])) {
     // We clicked to filter, so the letter range should be ignored.
     $params[":ur"] = "A";
     $params[":lr"] = "ZZZZZZZZZZZZ";
   }
+ 
+
+  $filter_name = @trim($_SESSION['users_filter_name']);
+  $filter_school = @intval($_SESSION['users_filter_school']);
+  $filter_dept = @trim($_SESSION['users_filter_dept']);
+  $filter_role = @intval($_SESSION['users_filter_role']);  
+
+
+
 
   if ($filter_name) {
     $extra_where_conditions .= " AND (l_name LIKE :search1 OR f_name LIKE :search2 OR u.cwid LIKE :search3) ";
@@ -2110,7 +1583,7 @@ function user_display_users() {
   
     
   if ($filter_dept) {
-    $extra_where_conditions .= " AND dept_code = :dept ";
+    $extra_where_conditions .= " AND department_code = :dept ";
     $params[":dept"] = $filter_dept;
   }
     
@@ -2124,19 +1597,7 @@ function user_display_users() {
                         $extra_where_conditions
                         ORDER BY l_name, f_name", $params);
   
-  
-  
-  
-  
-  
-  
-  $rtn .= "<div class='tenpt' style='padding-bottom: 5px;'><b>" . t("Displaying:") . "</b> $displaying</div>";
-  
-  
-  
-  
-  
-  
+    
   
   $html = "";
   $html .= "
@@ -2232,36 +1693,10 @@ function user_display_users() {
 
 
 
-  // Put in the dept pulldown....
-  $bC = "";
-  for ($t = 0; $t<count($dept_array); $t++)
-  {
-    $dd = $dept_array[$t];
-
-    $sel = "";
-    if ($dd == $dept)
-    {
-      $sel = "selected";
-    }
-    
-    $dispval = $dd;
-    if (strlen($dispval) > 40) {
-      $dispval = trim(substr($dispval, 0, 37)) . "...";
-    }
-    
-    
-    $bC .= "<option value='$dd' $sel>$dispval</option> \n";
-  }
-  $rtn = str_replace("<!--DEPTSEARCH-->",$bC,$rtn);
-
+  $rtn = fp_render_content($render);
   
   
-  
-  
-  $rtn2 = fp_render_content($render);
-  
-  
-  return $rtn2;
+  return $rtn;
   
 }
 
@@ -2276,6 +1711,13 @@ function user_list_filter_form() {
     'value' => "<strong>" . t('Filter by...') . "</strong>",
     'weight' => 0,
   );
+  
+   
+  $form['de_catalog_year'] = array(
+    'type' => 'hidden',
+    'value' => @$_REQUEST['de_catalog_year'],
+  );
+  
   
   
   $filter_name_value = @trim($_SESSION['users_filter_name']);
@@ -2402,6 +1844,9 @@ function user_list_filter_form_submit($form, $form_state) {
     $_SESSION['users_filter_submit'] = "yes"; // simply notes that we did indeed press the submit btn.
     
   }
+    
+    
+  fp_goto("admin/users/faculty", "de_catalog_year=" . $values['de_catalog_year']);  
     
 }
 

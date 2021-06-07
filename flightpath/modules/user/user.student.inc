@@ -6,6 +6,474 @@
 */
 
 
+
+
+/**
+ * Similar to user_display_users, except only for student users.
+ */
+function user_display_student_users() {
+  global $db, $screen;
+  $de_catalog_year = @$GLOBALS["de_catalog_year"];
+
+  if (!$de_catalog_year) {
+    $de_catalog_year = @intval($_REQUEST['de_catalog_year']);
+  }  
+  
+  if ($db == NULL) {
+    $db = get_global_database_handler();
+  }
+    
+  $cc = 1;
+
+  // Do this using $render array, so it can be altered
+  // by hook_content_alter
+  $render = array();
+  $render['#id'] = 'user_display_users';  
+  
+  
+  fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
+  fp_add_css(fp_get_module_path("user") . "/css/user.css");
+  
+  
+  
+  
+  /*
+  // First, let's get our list of departments...
+  $major_code_array = array();
+  $d = 0;
+  
+  // Let's pull the needed variables out of our settings, so we know what
+  // to query, because this is a non-FlightPath table.
+  
+  
+    
+  $res = db_query("SELECT DISTINCT major_code FROM student_degrees ORDER BY major_code ");
+  while ($cur = db_fetch_array($res)) {
+    if (trim($cur["major_code"]) == "")
+    {// skip if blank
+      continue;
+    }
+    
+    $major_code_array[$d] = trim(ucwords($cur["major_code"]));
+    $d++;
+  }
+  */
+  
+  
+  $html = "";
+
+  $html .= "<div class='add-new-student-user'>" . l("<i class='fa fa-plus'></i> " . t("Create a new student user"), "admin/users/edit-student-user", "student_cwid=new&de_catalog_year=$de_catalog_year") . "</div>";
+    
+
+  $letter_ranges = array(
+    "A" => array("A", "AZZZZ"),
+    "B" => array("B", "BZZZZ"),
+    "C" => array("C", "CZZZ"),
+    "D" => array("D", "DZZZZ"),
+    "E" => array("E", "EZZZZ"),
+    "F" => array("F", "FZZZZ"),
+    "G" => array("G", "GZZZZ"),
+    "H" => array("H", "HZZZZ"),
+    "I" => array("I", "IZZZ"),
+    "J" => array("J", "JZZZ"),
+    "K" => array("K", "KZZZ"),
+    "L" => array("L", "LZZZ"),    
+    "M" => array("M", "MZZZ"),
+    "N" => array("N", "NZZZ"),
+    "O" => array("O", "OZZZ"),    
+    "P" => array("P", "PZZZ"),
+    "Q-R" => array("Q", "RZZZZ"),
+    "S" => array("S", "SZZZ"),
+    "T" => array("T", "TZZZZ"),
+    "U" => array("U", "UZZZ"),
+    "V-Z" => array("V", "ZZZZ"),        
+  );
+
+
+
+  
+  
+  $ur = trim(@$_GET["ur"]);
+  $lr = trim(@$_GET["lr"]);
+
+  if ($ur == "" && !isset($_SESSION['users_filter_submit'])) {
+    $ur = "A";
+    $lr = "AZZZZZ";  // first time through.
+  }  
+  
+  
+  
+  $html .= "<div class='user-select-letter-bar' style='padding-top: 20px;'>
+          ";
+  foreach($letter_ranges as $disp => $vals) {
+    $selected_class = "";  
+    if ($ur == $vals[0]) {
+      $selected_class = "selected";
+    }    
+    $html .= l($disp, "admin/users/students", "de_catalog_year=$de_catalog_year&clear_filters=true&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link $selected_class")) . " &nbsp; ";
+  }
+
+
+  $html .= "</div>";
+  
+  $render['upper_links'] = array(
+    'value' => $html,
+  );
+
+
+
+
+
+
+  if ($ur == "")
+  { // meaning, no range was set.  Use A - C
+    $ur = @$_SESSION["ur"];
+    $lr = @$_SESSION["lr"];
+    if ($ur == "")
+    { // if still blank, assign it..
+      $ur = "A";
+      $lr = "AZZZZ";
+    }
+
+  }
+  $_SESSION["ur"] = $ur;
+  $_SESSION["lr"] = $lr;
+
+
+
+  if (@$_REQUEST['clear_filters'] == 'true') {
+    // Meaning, a letter was specified, so let's reset the filter values.
+    foreach ($_SESSION as $key => $val) {
+      if (strstr($key,"users_filter_")) {
+        unset($_SESSION[$key]);
+      }
+    }        
+  }
+
+
+
+   
+
+  $mark = "";
+  $mark .= "<div class='degrees-filter'>";
+  $mark .= fp_render_form("user_student_list_filter_form");
+  $mark .= "</div>";
+  
+  
+  $render['users_filter'] = array(
+    'value' => $mark,    
+  );    
+
+
+
+  
+
+
+  
+  $extra_where_conditions = "";
+  $params = array();
+  $params[":ur"] = $ur;
+  $params[":lr"] = $lr;
+
+  
+  if (isset($_SESSION['users_filter_submit'])) {
+    // We clicked to filter, so the letter range should be ignored.
+    $params[":ur"] = "A";
+    $params[":lr"] = "ZZZZZZZZZZZZ";
+  }
+ 
+
+  $filter_name = @trim($_SESSION['users_filter_name']);
+  $filter_school = @intval($_SESSION['users_filter_school']);
+  $filter_major = @trim($_SESSION['users_filter_major']);
+  $filter_active = @trim($_SESSION['users_filter_active']);  
+
+
+
+
+  if ($filter_name) {
+    $extra_where_conditions .= " AND (l_name LIKE :search1 OR f_name LIKE :search2 OR u.cwid LIKE :search3) ";
+    $params[":search1"] = "%$filter_name%";
+    $params[":search2"] = "%$filter_name%";
+    $params[":search3"] = "%$filter_name%";
+  }
+  
+  if ($filter_school > 0) {
+    $extra_where_conditions .= " AND u.school_id = :school_id ";
+    $params[":school_id"] = $filter_school;
+  }
+
+  if ($filter_major != '') {    
+    $extra_where_conditions .= " AND major_code = :major_code ";
+    $params[":major_code"] = $filter_major;
+  }
+  
+    
+  if ($filter_active) {
+    $vals = array();
+    if ($filter_active == 'active') {
+      $vals[] = 1;
+    }
+    if ($filter_active == 'inactive') {
+      $vals[] = 0;
+    }
+    if ($filter_active == 'all') {
+      $vals = array(1, 0);
+    }
+    $extra_where_conditions .= " AND is_active IN (" . join(",", $vals) . ") ";    
+  }
+    
+    
+  $html = "";
+  $html .= "
+      <table border='0' width='100%' cellpadding='3' cellspacing='0' class='user-list'>
+    
+        <tr>
+          <th width='5%'>Actions</th>
+          <th>CWID</th>
+          <th>Name</th>
+          <th></th>
+          <th>Major code(s)</th>
+          <th>Active?</th>
+          <th>Last Login</th>
+          
+        </tr>  
+    ";
+    
+  $render['users_table_top'] = array(
+    'value' => $html,
+  );  
+
+  
+  $limit = 30;     
+  $result = pager_query("SELECT * FROM (users u, students s)
+                        LEFT JOIN student_degrees d ON (s.cwid = d.student_id)
+                      WHERE 
+                        u.is_student = 1
+                        AND u.cwid = s.cwid
+                        AND l_name BETWEEN :ur AND :lr
+                        $extra_where_conditions                        
+                        GROUP BY u.cwid
+                        ORDER BY l_name, f_name
+                            ", $params, $limit, 0, NULL, "SELECT COUNT(DISTINCT(u.cwid))");
+  while ($cur = db_fetch_array($result)) {
+
+    $user_id = $cur["user_id"];
+    $l_name = trim(ucwords(strtolower($cur["l_name"])));
+    $f_name = trim(ucwords(strtolower($cur["f_name"])));    
+    $student_cwid = trim($cur["cwid"]);
+    
+    //$disp_major_code = trim($cur["major_code"]);
+    $disp_major_code = join(", ", $db->get_student_majors_from_db($student_cwid, FALSE, FALSE));
+      
+    $is_active = ($cur["is_active"] == "1") ? "Y" : "N";
+    
+    $last_login = intval($cur['last_login']);
+    if ($last_login == 0) {
+      $last_login = t("Never");
+    }
+    else {
+      $last_login = format_date(convert_time($last_login), 'short');
+    }    
+    
+    
+
+    
+    
+    $ast = "";
+    $reason = "";
+
+
+    $fgcol = "black";
+
+
+    $render['user_row_' . $student_cwid] = array(
+      'value' => "<tr class='is-active-$is_active'>          
+                    <td valign='top'>" . l("<i class='fa fa-pencil' title='Edit'></i>", "admin/users/edit-student-user", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "</td>              
+                    <td valign='top' width='15%'>$student_cwid</td>
+                    <td valign='top' width='15%'>$f_name</td>
+                    <td valign='top' width='15%'>$l_name</td>
+                    <td valign='top'>$disp_major_code</td>
+                    <td valign='top'>$is_active</td>
+                    <td valign='top'>$last_login</td>                    
+                  </tr>",     
+
+           'data' => array(
+                    'is_student' => 1,
+                    'cwid' => $student_cwid,
+                    'db_row' => $cur,                    
+                  ),                
+                
+    );
+
+
+
+  } // while
+  
+  
+  $render['users_table_bottom'] = array(
+    'value' => "</table>",
+  );
+
+
+  $render['users_pager'] = array(
+    'value' => theme_pager(),
+  );
+
+
+  $rtn = fp_render_content($render);
+  
+  
+  return $rtn;
+  
+}
+ 
+
+
+
+function user_student_list_filter_form() {
+
+  $form = array();
+
+  
+  $form['mark_top'] = array(
+    'type' => 'markup',
+    'value' => "<strong>" . t('Filter by...') . "</strong>",
+    'weight' => 0,
+  );
+  
+   
+  $form['de_catalog_year'] = array(
+    'type' => 'hidden',
+    'value' => @$_REQUEST['de_catalog_year'],
+  );
+  
+  
+  
+  $filter_name_value = @trim($_SESSION['users_filter_name']);
+  $form['filter_name'] = array(
+    'type' => 'textfield',
+    'label' => '',
+    'attributes' => "placeholder='" . t("Nname or CWID") . "'",    
+    'value' => $filter_name_value,
+    'size' => 20,
+    'weight' => 10,
+  );
+  
+  
+
+  // Show list of majors
+  $options = array();
+  $res = db_query("SELECT DISTINCT major_code FROM students a, student_degrees b 
+                        WHERE a.cwid = b.student_id
+                        ORDER BY major_code ");
+  while ($cur = db_fetch_array($res)) {
+    if (trim($cur["major_code"]) == "")
+    {// skip if blank
+      continue;
+    }    
+    $options[$cur['major_code']] = trim(ucwords($cur["major_code"]));    
+  }  
+  
+  $filter_major_value = @trim($_SESSION['users_filter_major']);
+  $form['filter_major'] = array(      
+    'type' => 'select',
+    'label' => t('Major:'),
+    'options' => $options,
+    'value' => $filter_major_value,
+    'weight' => 20,
+  );      
+
+
+  
+  // Show list of active/inactive options
+  $options = array();
+  $options['active'] = t('Show Active');
+  $options['inactive'] = t('Show Inactive');
+  $options['all'] = t('Show All');
+    
+  $filter_active_value = @$_SESSION['users_filter_active'];
+  $form['filter_active'] = array(      
+    'type' => 'select',
+    'label' => '',
+    'options' => $options,
+    'hide_please_select' => TRUE,
+    'value' => $filter_active_value,
+    'weight' => 30,
+  );      
+  
+  
+  
+  // If we have enabled the schools module, then have a selector for that as well
+  if (function_exists('schools_get_schools_for_fapi')) {
+  
+    $filter_school_value = @intval($_SESSION['users_filter_school']);
+    $options = schools_get_schools_for_fapi(TRUE, TRUE, 'user', TRUE);
+    $options[0] = t('- All / Default -');
+    $form['filter_school'] = array(      
+      'type' => 'select',
+      'label' => t('School:'),
+      'options' => $options,
+      'value' => $filter_school_value,
+      'weight' => 40,   
+      'hide_please_select' => TRUE,   
+    );       
+      
+  } // if schools enabled  
+
+  
+  
+  $form['submit_btn'] = array(
+    'type' => 'submit',
+    'value' => t('Apply'),
+    'weight' => 100,
+  );
+  
+  $form['reset_btn'] = array(
+    'type' => 'submit',
+    'value' => t('Reset'),
+    'weight' => 110,
+  );
+  
+  
+  return $form;
+}  
+
+
+
+
+function user_student_list_filter_form_submit($form, $form_state) {
+  $values = $form_state['values'];
+    
+  unset($_SESSION['users_filter_name']);
+  unset($_SESSION['users_filter_school']);
+  unset($_SESSION['users_filter_major']);
+  unset($_SESSION['users_filter_active']);
+  
+  unset($_SESSION['users_filter_submit']);  
+    
+  if ($values['submit_btn'] != '') {
+    $_SESSION['users_filter_name'] = trim($values['filter_name']);
+    $_SESSION['users_filter_school'] = $values['filter_school'];
+    $_SESSION['users_filter_major'] = $values['filter_major'];
+    $_SESSION['users_filter_active'] = $values['filter_active'];
+    
+    $_SESSION['users_filter_submit'] = "yes"; // simply notes that we did indeed press the submit btn.
+    
+  }
+    
+    
+  fp_goto("admin/users/students", "de_catalog_year=" . $values['de_catalog_year']);  
+    
+}
+
+
+
+
+
+
+
+
 /**
  * This is the form which we will use to manage a student's courses they've taken.
  */

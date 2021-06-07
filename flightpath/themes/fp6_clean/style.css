@@ -18,6 +18,13 @@ body
 table {
   border-collapse: collapse;
 }
+
+.element-type-hidden {
+  display: none;
+  margin: 0;
+  padding: 0;
+}
+
 /* 
  * Page top banner 
  */

@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-06-06
+  Finishing up users screen for school id, both faculty and students.  Also added filter options to make it look
+  more consistent.  Added pager to student users screen, since we might theoretically load the entire student
+  list, both past and present.  It shows 30 at a time now.
+  
+
 2021-06-04
   Working on courses with new school_id.  Changed appearance of courses screen to look more like the other degree
   edit pages.  Made better use of tables and highlighting when you mouse over a row.  Added a filter form like others
