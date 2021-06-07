@@ -653,8 +653,8 @@ function schools_form_alter(&$form, $form_id) {
     
     
     // If this is a NEW group, then don't show them anything!    
-    if (@$form['group_id']['value'] == 'new' || @$form['course_id']['value'] == 'new' || @intval($form['user_id']['value']) == 0) {      
-      $form['schools_school'] = array(
+    if (($entity_type == 'group' && @$form['group_id']['value'] === 'new') || ($entity_type == 'course' && @$form['course_id']['value'] === 'new') || ($entity_type == 'user' && @intval($form['user_id']['value']) === 0)) {      
+      $form['schools_school'] = array( 
         'type' => 'markup',
         'label' => 'School:',
         'value' => t('<b>Please save this @dt at least once (to establish an ID in the database).  Once you have done this,
