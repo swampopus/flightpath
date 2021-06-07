@@ -1038,11 +1038,13 @@ function user_edit_student_user_form() {
   );  
 
   $form["is_active"] = array(
-    "label" => t("Is active:"),
-    "type" => "textfield",
+    "label" => t("Active?:"),
+    "type" => "select",
+    "options" => array(1 => t("Y - Active"), 0 => t("N - Inactive")),
+    "hide_please_select" => TRUE,
     "value" => @$cur["is_active"],
     "size" => 5,
-    "description" => t("Enter only 1 or 0 (number one for 'yes', or number zero for 'no').  This setting means the student
+    "description" => t("This setting means the student
                       will not appear in searches automatically, unless the advisor specifies to search
                       for inactive students."),
     "weight" => 120,
@@ -1067,7 +1069,7 @@ function user_edit_student_user_form() {
                         " . t("Delete this student?") . " <input type='button' value='X'
                         onClick='userDeleteStudent();'>
                       </div>",
-      "weight" => 510, 
+      "weight" => 600, 
     );  
   }
   

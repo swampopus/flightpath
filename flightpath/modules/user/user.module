@@ -1093,6 +1093,7 @@ function user_edit_user_form() {
       "type" => "checkboxes",
       "options" => $options,
       "value" => $default_values,
+      "weight" => 10,
     );
         
   }
@@ -1112,6 +1113,7 @@ function user_edit_user_form() {
       "description" => t("Enter an alpha-numeric ID for this faculty.  It may be the same
                           as a student, but may not be the same as any existing
                           faculty.  You will not be able to edit this value, once saved."),
+      "weight" => 20,
     );
     
     $form["new_user_name"] = array(
@@ -1123,6 +1125,7 @@ function user_edit_user_form() {
                           use to log in.  It must be unique to all users (cannot have both
                           a faculty and a student with the same username).  You will not
                           be able to edit this value, once saved."),
+      "weight" => 30,
     );
         
     
@@ -1142,7 +1145,9 @@ function user_edit_user_form() {
   if ($user_name != "") {
     $form["mark" . $m++] = array(
       "value" => "<p><b>Username:</b> $user_name</p>",
+      "weight" => 40,
     );
+    
   } 
   
   $form["new_password"] = array(
@@ -1153,35 +1158,43 @@ function user_edit_user_form() {
     "description" => t("If you enter any value here, it will change the
                         user's password in FlightPath.  If you are using the LDAP, SAML, or other external login module,
                         the external password will be unaffected."),    
+    "weight" => 50,
   );
 
   $form["email"] = array(
     "label" => t("Email:"),
     "type" => "textfield",
     "value" => @$cur["email"],
+    "weight" => 60,
   );  
 
   $form["f_name"] = array(
     "label" => t("First name:"),
     "type" => "textfield",
     "value" => @$cur["f_name"],
+    "weight" => 70,
   );  
 
   $form["l_name"] = array(
     "label" => t("Last name:"),
     "type" => "textfield",
     "value" => @$cur["l_name"],
+    "weight" => 80,
   );  
 
+
   $form["is_disabled"] = array(
-    "label" => t("Is disabled:"),
-    "type" => "textfield",
-    "value" => @$cur["is_disabled"],
-    "size" => 5,
-    "description" => t("Enter only 1 or 0 (number one for 'yes', or number zero for 'no').  This setting means the user will
+    "label" => t("Active/Disabled status:"),
+    "type" => "select",
+    "options" => array(0 => t("Active (default)"), 1 => t("Disabled")),
+    "hide_please_select" => TRUE,
+    "value" => @$cur["is_disabled"],    
+    "description" => t("If set to 'Disabled', the user will
                         be ignored by FlightPath, and they will not be able to log in or be searched for.
-                        It is safer to disable a user, than delete them."),
-  );  
+                        It is safer to disable a user, than to delete them."),
+    "weight" => 90,
+  );    
+  
   
   
   // Unique to faculty...
@@ -1190,13 +1203,19 @@ function user_edit_user_form() {
     "type" => "textfield",
     "value" => @$cur["college"],
     "size" => 5,
+    "weight" => 100,
   );  
-    
+  
+  $department_code = @$cur['department_code'];
+      
   $form["department"] = array(
     "label" => t("Department:"),
     "type" => "textfield",
-    "value" => @$cur["department"],
+    "value" => $department_code . " ~ " . @$cur["department"],
     "size" => 30,
+    "weight" => 110,
+    "description" => "Enter DEPT_CODE ~ Department Name.<br>&nbsp; &nbsp;Ex:  ENGL ~ English.<br>If DEPT_CODE is not entered,
+                      then the deparment name will be used in searches.  It is recommended to use consistent DEPT_CODEs.",
   );  
     
   $form["major_code_csv"] = array(
@@ -1207,12 +1226,14 @@ function user_edit_user_form() {
     "maxlength" => 255,
     "description" => t("Enter the major codes which this faculty member is over, separated by commas.  Ex: ACCT,MATH
                         <br>If the user is only over 1 major code, just enter that one major code."),
+    "weight" => 120,
   );  
     
   $form["submit"] = array(
     "type" => "submit",  
     "value" => "Submit",    
     "prefix" => "<hr>",
+    "weight" => 500,
   );
   
   
@@ -1223,7 +1244,8 @@ function user_edit_user_form() {
       "value" => "<div align='right'>
                         " . t("Delete this faculty member?") . " <input type='button' value='X'
                         onClick='userDeleteFaculty();'>
-                      </div>", 
+                      </div>",
+      "weight" => 600,
     );  
   }
 
@@ -1309,6 +1331,13 @@ function user_edit_user_form_submit($form, $form_state) {
   
   $user_id = $values["user_id"];
   $faculty_cwid = $values["faculty_cwid"];
+  $department = trim($values['department']);
+  $dept_code = fp_get_machine_readable(strtoupper($department));
+  if (strstr($department, "~")) {
+    $temp = explode("~", $department);
+    $dept_code = trim($temp[0]);
+    $department = trim($temp[1]);
+  }
   // Save the roles into the database for this user.
   // Begin by deleting what's there all ready.
   db_query("DELETE FROM user_roles WHERE user_id = ? ", $user_id);
@@ -1369,9 +1398,10 @@ function user_edit_user_form_submit($form, $form_state) {
    // Now, update the faculty table entry.
    db_query("UPDATE faculty
              SET college = ?,
+                 department_code = ?,
                  department = ?,
                  major_code_csv = ?                
-             WHERE cwid = ? ", $values["college"], $values["department"], 
+             WHERE cwid = ? ", $values["college"], $dept_code, $department, 
                                 $values["major_code_csv"], $faculty_cwid);             
 
     watchdog("user_edit", "Updating faculty user with various other values: @other", array("@other" => ppm($values, TRUE)));                                
@@ -1390,9 +1420,9 @@ function user_edit_user_form_submit($form, $form_state) {
               VALUES (?, ?, '1', ?, ?, ?, ?, ?)
               ", $values["new_user_name"], user_hash_password($values["new_password"]), trim(strtolower($values["email"])), $values["new_faculty_cwid"],
                  $values["f_name"], $values["l_name"], $values["is_disabled"]);
-    db_query("INSERT INTO faculty (cwid, college, department, major_code_csv)
+    db_query("INSERT INTO faculty (cwid, college, department_code, department, major_code_csv)
               VALUES (?, ?, ?, ?)
-             ", $values["new_faculty_cwid"], $values["college"], $values["department"], $values["major_code_csv"]);
+             ", $values["new_faculty_cwid"], $values["college"], $dept_code, $department, $values["major_code_csv"]);
     
     unset($values['new_password']);
     

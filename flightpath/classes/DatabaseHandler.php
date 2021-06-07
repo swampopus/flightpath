@@ -960,7 +960,10 @@ class DatabaseHandler extends stdClass
     return intval(db_result(db_query("SELECT school_id FROM transfer_courses WHERE transfer_course_id = ?", array($transfer_course_id))));
   }
     
-  
+
+  function get_school_id_for_user_id($user_id) {
+    return intval(db_result(db_query("SELECT school_id FROM users WHERE user_id = ?", array($user_id))));
+  }
   
   function get_school_id_for_student_id($cwid) {
     return intval(db_result(db_query("SELECT school_id FROM users WHERE cwid = ? AND is_student = 1", array($cwid))));

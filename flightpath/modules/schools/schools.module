@@ -557,8 +557,9 @@ function schools_form_alter(&$form, $form_id) {
     'admin_edit_degree_form',
     'admin_edit_group_form',
     'admin_edit_course_form',
+    'user_edit_user_form',
+    'user_edit_student_user_form',
   );
-    
     
     
   // Add "school" dropdown to the degrees, groups, and courses form
@@ -611,6 +612,19 @@ function schools_form_alter(&$form, $form_id) {
     }
     
     
+    if ($form_id == 'user_edit_user_form' || $form_id == 'user_edit_student_user_form') {
+      $entity_type = 'user';
+      $user_id = intval($form['user_id']['value']);
+      $entity_id = $user_id;
+      $school_id = $db->get_school_id_for_user_id($user_id, TRUE);
+      $weight = 95;
+    } // user edit form
+    
+    
+    
+    
+    
+    
     $options = schools_get_schools_for_fapi(TRUE, TRUE, $entity_type, TRUE);      
     
     $form['schools_school'] = array(
@@ -638,9 +652,8 @@ function schools_form_alter(&$form, $form_id) {
     $form['#submit_handlers'][] = 'schools_data_form_submit';
     
     
-    // If this is a NEW group, then don't show them anything!
-    
-    if (@$form['group_id']['value'] == 'new' || @$form['course_id']['value'] == 'new') {      
+    // If this is a NEW group, then don't show them anything!    
+    if (@$form['group_id']['value'] == 'new' || @$form['course_id']['value'] == 'new' || @intval($form['user_id']['value']) == 0) {      
       $form['schools_school'] = array(
         'type' => 'markup',
         'label' => 'School:',
@@ -839,21 +852,13 @@ function schools_data_form_submit($form, $form_state) {
   $schools_entity_type = $form_state['values']['schools_entity_type'];
   $entity_id = $form_state['values']['schools_entity_id'];
   
-  @$degree_id = $form_state['values']['degree_id'];  
-  @$group_id = $form_state['values']['group_id'];  
-  @$course_id = $form_state['values']['course_id'];  
+  @$degree_id = intval($form_state['values']['degree_id']);  
+  @$group_id = intval($form_state['values']['group_id']);  
+  @$course_id = intval($form_state['values']['course_id']);  
+  @$user_id = intval($form_state['values']['user_id']);  
   @$catalog_year = $form_state['values']['de_catalog_year'];
   if ($catalog_year == "") {
     @$catalog_year = $form_state['values']['catalog_year'];
-  }
-    
-  if ($degree_id == "") $degree_id = 0;
-  if ($group_id == "") $group_id = 0;
-  if ($course_id == "") $course_id = 0;
-  
-  if ($degree_id == 0 && $group_id == 0 && $course_id == 0) {
-    // Nothing to save; return.
-    return;
   }
     
   
@@ -872,7 +877,11 @@ function schools_data_form_submit($form, $form_state) {
     $table_name = "draft_courses";
     $field_name = "course_id";
   }
-  
+  if ($schools_entity_type == 'user') {
+    $table_name = "users";
+    $field_name = "user_id";
+  }
+      
       
   db_query("UPDATE `$table_name` SET school_id = ? WHERE $field_name = ?", array($school_id, $entity_id));
       

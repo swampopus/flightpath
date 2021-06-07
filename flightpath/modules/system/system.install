@@ -461,9 +461,9 @@ db_query($q);
 $q = "
 CREATE TABLE `faculty` (
   `cwid` varchar(30) NOT NULL,
-  `college` varchar(100) DEFAULT '',
-  `department_code` varchar(10) DEFAULT '',
-  `department` varchar(100) DEFAULT '',
+  `college` varchar(255) DEFAULT '',
+  `department_code` varchar(255) DEFAULT '',
+  `department` varchar(255) DEFAULT '',
   `major_code_csv` varchar(255) DEFAULT '',  
   PRIMARY KEY (`cwid`),
   KEY `major_code_csv` (`major_code_csv`),

@@ -1,6 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-06-07
+  Added schools select list option for user forms, made other cosmetic changes.
+  
+  Changed users module so that you can enter DEPT_CODE along with department.  Change table schema so that
+  college, dept_code, and deparment are varchar 255.  Will use a machine name version of department if no DEPT_CODE
+  is entered.
+  
+
 2021-06-06
   Finishing up users screen for school id, both faculty and students.  Also added filter options to make it look
   more consistent.  Added pager to student users screen, since we might theoretically load the entire student
