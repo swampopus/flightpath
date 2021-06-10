@@ -2,7 +2,7 @@
 
 
 
-function admin_display_degrees_popup_add_group() {
+function z__admin_display_degrees_popup_add_group() {
   $semester_num = trim($_GET["semester_num"]);
   $de_catalog_year = admin_get_de_catalog_year();
   
@@ -112,8 +112,8 @@ function admin_display_degrees_popup_add_group2() {
       " . t("Next, select properties for this group:") . "
       <a href='javascript: adminPopupAlertHelp(\"group_properties\");'>?</a>
       <div class='tenpt' style='padding-top: 5px;'>
-      Hrs: <input type='text' name='hours' id='hours' size='2'>
-      Min Grade: <select name='min_grade' id='min_grade'>
+      " . t("Hrs:") . " <input type='text' name='hours' id='hours' size='2'>
+      " . t("Min Grade:") . " <select name='min_grade' id='min_grade'>
               <option value=''>--</option>
               ";
   foreach ($min_grades as $g) {
@@ -1736,9 +1736,9 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
           <tr>
             <th valign='top' class='tenpt' width='1'>&nbsp;</td>
             <th valign='top' class='tenpt'>" . t("Group") . "</td>
-            <th valign='top' class='tenpt' width='5'>" . t("Hrs") . "</td>
-            <th valign='top' class='tenpt' width='5'>" . t("Grd") . "</td>
-            <th valign='top' class='tenpt' width='5'>" . t("Type") . "</td>
+            <th valign='top' class='tenpt' width='10'>" . t("Hrs") . "</td>
+            <th valign='top' class='tenpt' width='10'>" . t("Grd") . "</td>
+            <th valign='top' class='tenpt' width='10'>" . t("Type") . "</td>
           </tr>    
     ";
     $semester->list_groups->sort_alphabetical_order();
@@ -1748,6 +1748,7 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
       $group->load_descriptive_data();
       
       $ghours = $group->hours_required;
+      fpm($ghours);
       // If min hours are specified, set to MIN-MAX.
       if ($group->has_min_hours_allowed()) {
         $ghours = $group->min_hours_allowed . "-" . $ghours;

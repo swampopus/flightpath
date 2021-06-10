@@ -475,7 +475,7 @@ function adminProcessDefinitions(catalog_year) {
 }
 */
 
-function adminPopupAddGroup(semester_num) {
+function z__adminPopupAddGroup(semester_num) {
 
   var group_id = 0;
   
@@ -537,7 +537,7 @@ function adminPopupAddGroup2(semester_num) {
   hours = str_replace("_", "-", hours);
   
   
-  if (hours < 1 || group_id < 1) {
+  if (hours == "" || !hours || group_id < 1) {
     alert("Please select a group and number of hours!");
     return;
   }

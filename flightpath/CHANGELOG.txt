@@ -1,6 +1,15 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-06-10
+  Added ability to have group requirements (in degrees) with fractional hours.  Ex: 0.5 hours or 1.2 hours, etc.  Previously,
+  when a group was loaded, the hours_required field was being intval()'d.  Changed to floatval().
+  
+  Fixed bug where course descriptions were not being cached correctly due to a typo.
+  
+  Wrapped "hours" and "hrs" with t() function so those words can be translated to "credits" if need be in a hook_translate function.
+  
+
 2021-06-07
   Added schools select list option for user forms, made other cosmetic changes.
   

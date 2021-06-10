@@ -1580,7 +1580,7 @@ class Course extends stdClass
       $this->subject_id = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["subject_id"];
       $this->course_num = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["course_num"];
       $this->title = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["title"];
-      $this->description = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["description"];
+      $this->description = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["description"];      
       $this->min_hours = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["min_hours"];
       $this->school_id = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["school_id"];
       
@@ -1672,7 +1672,7 @@ class Course extends stdClass
 
 
       $this->title = $this->fix_title($cur["title"]);
-      $this->description = trim($cur["description"]);
+      $this->description = trim($cur["description"]);      
       $this->subject_id = trim(strtoupper($cur["subject_id"]));
       $this->course_num = trim(strtoupper($cur["course_num"]));
       $this->school_id = intval($cur["school_id"]);
@@ -1781,13 +1781,13 @@ class Course extends stdClass
     // Since we may have trouble characters in the description (like smart quotes) let's
     // do our best to try to clean it up a little.
     $this->description = utf8_encode($this->description);
-    
+        
     
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["subject_id"] = $this->subject_id;
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["course_num"] = $this->course_num;
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["title"] = $this->title;
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["description"] = $this->description;
-    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["description"] = $this->school_id;
+    $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["school_id"] = $this->school_id;
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["min_hours"] = $min_hours;
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["max_hours"] = $max_hours;
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["repeat_hours"] = $this->repeat_hours;

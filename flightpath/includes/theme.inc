@@ -1086,11 +1086,11 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
                           </div>
             
                           <div class='profile-detail-line profile-inline-line profile-detail-line-rank'>
-                            <label>Classification:</label> <span class='profile-line-content'>$rank</span>
+                            <label>" . t("Classification:") . "</label> <span class='profile-line-content'>$rank</span>
                           </div>
             
                           <div class='profile-detail-line profile-inline-line profile-detail-line-cumu'>
-                            <label>Cumulative:</label> <span class='profile-line-content'>{$student->cumulative_hours}hrs / " . fp_truncate_decimals($student->gpa, 3) . " GPA</span>
+                            <label>" . t("Cumulative:") . "</label> <span class='profile-line-content'>{$student->cumulative_hours} " . t("hrs") . " / " . fp_truncate_decimals($student->gpa, 3) . " " . t("GPA") . "</span>
                           </div>
 
                           ";

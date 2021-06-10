@@ -811,7 +811,7 @@ function draw_menu_items($menu_array) {
 				$using_hours = trim(@$temp[2]);
 				if ($using_hours != "")
 				{
-					$using_hours = "($using_hours hrs)";
+					$using_hours = "($using_hours " . t("hrs") . ")";
 				}
 				$in_group = trim(@$temp[3]);
         $sub_id = trim(@$temp[4]);
@@ -1150,7 +1150,7 @@ function draw_menu_items($menu_array) {
       $substitution_hours = $subbed_course->get_substitution_hours($assigned_to_degree_id);
 
 			$pC .= "<div class=' ' style='margin-bottom: 20px;'>
-						$sub_s_i $sub_c_n $sub_trans_notice ($substitution_hours hrs) $sub_action
+						$sub_s_i $sub_c_n $sub_trans_notice ($substitution_hours " . t("hrs") . ") $sub_action
 						$cr_s_i $cr_c_n$in_group $by$remarks $extra
 						<br>
 							<a href='javascript: popupRemoveSubstitution(\"$db_substitution_id\");'>" . t("Remove substitution?") . "</a>
@@ -1228,7 +1228,7 @@ function draw_menu_items($menu_array) {
 			$t_inst = $this->fix_institution_name($course->institution_name);
 
 			$pC .= "<div class=' ' style='padding-bottom: 15px;'>
-							<b>$t_s_i $t_c_n</b> (" . $c->get_hours_awarded() . " hrs) - $grade - $t_term - $t_inst
+							<b>$t_s_i $t_c_n</b> (" . $c->get_hours_awarded() . " " . t("hrs") . ") - $grade - $t_term - $t_inst
 								";
 			if (isset($c->bool_substitution) && $c->bool_substitution_split == true)
 			{
@@ -2409,7 +2409,7 @@ function draw_menu_items($menu_array) {
 				<b>" . t("Transfer Credit Information:") . "</b><br>
 				<div style='margin-left: 20px;' class=' '>
 					" . t("Course:") . " " . $course->course_transfer->subject_id . " " . $course->course_transfer->course_num . " 
-					- " . $course->course_transfer->title . " ($hrs hrs)<br>
+					- " . $course->course_transfer->title . " ($hrs " . t("hrs") . ")<br>
 					" . t("Institution:") . " " . $this->fix_institution_name($course->course_transfer->institution_name) . "<br>
 					" . t("Term:") . " " . $course->get_term_description() . "<br>
 					<!-- Grade: " . $course->grade . "<br> -->
@@ -2509,7 +2509,7 @@ function draw_menu_items($menu_array) {
         
         $sub_remaining_hours = @$course->get_hours_awarded($req_by_degree_id);        
         
-        $html .= "<br>" . t("Remaining hours after split:") . "  $sub_remaining_hours hrs.";
+        $html .= "<br>" . t("Remaining hours after split:") . "  $sub_remaining_hours " . t("hrs.") . "";
       }
 			
 						
@@ -2829,7 +2829,7 @@ function draw_menu_items($menu_array) {
 
 		  $forthecourse = t("for the original course
 					requirement of") . " <b>" . $course->get_course_substitution()->subject_id . " 
-					" . $course->get_course_substitution()->course_num . " (" . $course->get_course_substitution()->get_hours() . " hrs)</b>";
+					" . $course->get_course_substitution()->course_num . " (" . $course->get_course_substitution()->get_hours() . " " . t("hrs") . ")</b>";
 		  if ($temp["required_course_id"]*1 == 0)
 		  {
 			  $forthecourse = "";
@@ -3677,10 +3677,11 @@ function draw_menu_items($menu_array) {
 		if ($this->bool_print || variable_get("show_group_titles_on_view", "no") == "yes")
 		{
 		  
-      $row_msg = "<em>Select $disp_remaining_hours hour$s from $group->title.</em>";
+      $row_msg = "<em>" . t("Select") . " $disp_remaining_hours " . t("hour$s from") . " $group->title.</em>";
+      
       if ($remaining_hours > 200) {
         // Don't bother showing the remaining hours number.
-        $row_msg = "<em>Select additional courses from $group->title.</em>";
+        $row_msg = "<em>" . t("Select additional courses from") . " $group->title.</em>";
       }
 
       if ($this->bool_print) {            
