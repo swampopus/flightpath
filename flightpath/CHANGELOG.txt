@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-06-11
+  Added _validate function when editing a degree, so we can test for school mis-match.  Also fixed a bug where if there was more than one
+  form_error() for the same element, it wouldn't display the red border around that element.  Also made it so that markup fields
+  can also have form_error called on them.
+
 
 2021-06-10
   Added ability to have group requirements (in degrees) with fractional hours.  Ex: 0.5 hours or 1.2 hours, etc.  Previously,

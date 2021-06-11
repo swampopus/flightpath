@@ -499,19 +499,6 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     $attributes['class'] .= ' html-editor';
   }
   
-  $extra_wrapper_class = "";  // We will give the wrapper a similar class as are defined in attributes, if any.
-  if (is_array($attributes)) {
-    // Convert the attributes array into a string.
-    
-    $new_attr = "";
-    foreach ($attributes as $key => $val) {
-      $new_attr .= " $key='$val' ";
-      if ($key == 'class') {
-        $extra_wrapper_class .= " element-wrapper--" . trim($val);
-      }
-    }
-    $attributes = $new_attr;
-  }
 
 
   $popup_help_link = "";
@@ -526,7 +513,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     foreach ($_SESSION["fp_form_errors"] as $err) {
       if ($err["name"] == $name) {
         // There is an error on this element!  Add an extra CSS element.
-        $element_error_css .= "form-element-error";
+        $element_error_css .= " form-element-error ";
       }
     }
   }
@@ -539,9 +526,35 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     }    
   }
 
+
+  if ($type == "markup" && $element_error_css) {
+    if (!isset($attributes)) {
+      $attributes = array();
+    }
+    if (is_array($attributes)) {
+      $attributes['class'] .= $element_error_css;
+    }
+  }
+
+
+  $extra_wrapper_class = "";  // We will give the wrapper a similar class as are defined in attributes, if any.
+  if (is_array($attributes)) {
+    // Convert the attributes array into a string.
+    
+    $new_attr = "";
+    foreach ($attributes as $key => $val) {
+      $new_attr .= " $key='$val' ";
+      if ($key == 'class') {
+        $extra_wrapper_class .= " element-wrapper--" . trim($val);
+      }
+    }
+    $attributes = $new_attr;
+  }  
+
   
-  
-  
+
+
+
   
   
   

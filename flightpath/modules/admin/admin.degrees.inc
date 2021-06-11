@@ -1791,8 +1791,9 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
     $form["semester_groups_" . $semester->semester_num . "_markup"] = array(
       'prefix' => "<td valign='top'>",
       'label' => t("Groups:"),
-      'value' => $contents,
+      'value' => $contents, 
       "weight" => $base_weight + ($semester->semester_num * 100) + 50,
+      'attributes' => array('class' => 'groups-inner'),
     ); 
 
  
@@ -1970,6 +1971,196 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
 
 
 
+
+function admin_edit_degree_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  
+  // What courses should have their type overwritten as "x"?
+  $ignore_courses = csv_to_array(variable_get("ignore_courses_from_hour_counts", ""));
+  
+  
+  // One of the things we want to do is make sure that the courses & groups specified actually belong to the school_id for this degree.
+  $de_catalog_year = $values["de_catalog_year"];
+  $db = get_global_database_handler();
+    
+  $school_id = 0;
+  $degree_id = @intval($form_state['values']['degree_id']);
+  // If this degree already exists in this
+  // catalog year, then we need to delete it first.
+  //if ($degree_id = $db->get_degree_id($major_code, $de_catalog_year, true, $school_id)) {
+      
+  // Each degree_id is unique to the catalog year, so we should be good with just the id here.  
+  if ($degree_id) {  
+    $degree = new DegreePlan($degree_id, null, false, false, true);
+    $degree->load_descriptive_data();
+    $school_id = intval($degree->school_id);    
+  }
+  else {
+    // Couldn't find degree_id!
+    form_error("", t("There was a problem trying to save this degree.  The degree_id could not be found.  Contact FlightPath admin if
+                      this problem persists."));
+    return;
+  } // else from if(degree_id)   
+  
+  
+  // At this point, we have a school_id and degree_id.
+  
+  
+  // Let's check that all of the courses also belong to this degree and/or can be found at all (no typos).  
+  foreach($values as $key => $value) {
+    if (!strstr($key, "courses_")) {
+      continue;
+    }
+    // Only look at the groups...
+    $temp = explode("_", $key);
+    $semester_num = trim($temp[1]);
+
+    if ($semester_num > $highest_semester_num) {
+      $highest_semester_num = $semester_num;
+    }
+    
+      
+    $courses = trim(@$values["courses_$semester_num"]);
+
+    // Does it contain a single #?  Or, is blank?  If so, insert and move on.
+    // We do this, so we can have blank semesters until someone deletes them.
+    if ($courses == "#" || $courses == "") {
+      continue;         
+    }
+
+    $course_rows = explode("\n",$courses);
+    for ($t = 0; $t < count($course_rows); $t++) {
+      $line = trim($course_rows[$t]);
+      if ($line == "") {
+        continue;
+      }
+      
+      // Take out extra whitespace between tokens.
+      $line = str_replace("   ", " ", $line);
+      $line = str_replace("  ", " ", $line);
+      $line = str_replace("  ", " ", $line);
+      $line = str_replace("  ", " ", $line);
+
+      $tokens = explode(" ", $line);
+      $subject_id = $tokens[0];
+      $course_num = $tokens[1];
+      $requirement_type = strtolower(@$tokens[2]);
+
+      if ($requirement_type == "") { 
+        // major type by default.
+        $requirement_type = "m";
+      }
+
+      // If this course is in our ignore list, override it's type
+      // to be 'x'
+      if (in_array("$subject_id $course_num", $ignore_courses)) {
+        $requirement_type = "x";
+      }
+      
+      
+      $min_grade = strtoupper(@$tokens[3]);
+
+      if (strstr($requirement_type, "(")) {
+        // This means there was no requirement_type specified, so it's "m",
+        // and a min_grade was found in its place.
+        $min_grade = strtoupper($requirement_type);
+        $requirement_type = "m";
+      }
+
+      $min_grade = str_replace("(","",$min_grade);
+      $min_grade = str_replace(")","",$min_grade);
+
+      /////////////////////////////////////////////
+      // Find out what the course_id is.
+      if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id))  // don't care about catalog year.
+      {
+        // This was found correctly, do nothing.
+      } 
+      else {
+        // The course_id could not be found!
+        
+        form_error("courses_" . $semester_num, t("<strong>Your work has NOT been saved.</strong> Course not found.  In block %blocknum, you specified the course %course as a requirement,
+                          but this course could not be found.  This could be due to a typo, or due to the course not belonging to the same 'school'
+                          as the degree.  Please check the course and try again.", array("%blocknum" => ($semester_num+1), "%course" => "$subject_id $course_num")));
+      }
+
+    } // for course_rows
+
+  } // foreach courses
+    
+    
+  // Now, let's check the groups.
+  // Get the groups....
+  foreach($values as $key => $value) {
+    if (!strstr($key, "group_")) {
+      continue;
+    }
+    // Only look at the groups...
+    $temp = explode("_", $value);
+        
+    $group_id = $temp[0];
+    
+    $semester_num = $temp[1];
+
+    if ($semester_num > $highest_semester_num) {
+      $highest_semester_num = $semester_num;
+    }
+        
+    $hours = $temp[2];
+    $min_hours = $hours;
+    
+    if (strstr($hours, "-")) {
+      // Hours has a min hour value specified.  let's grab it.
+      $tt = explode("-", $hours);
+      $min_hours = $tt[0];
+      $hours = $tt[1];
+    }    
+    
+    $type = $temp[3];
+    $min_grade = trim($temp[4]);
+
+    // Do not add if we are supposed to be deleting this group!
+    if (isset($del_group) && is_object($del_group)) {
+      if ($del_group->group_id == $group_id && $del_group->assigned_to_semester_num == $semester_num) {
+        continue;
+      }
+    }
+
+    $adding_group = new Group($group_id);
+    
+    // Is this in the right school?
+    if ($group_id->school_id != $school_id) {
+      
+      form_error("semester_groups_" . $semester_num . "_markup", t("<strong>Your work has NOT been saved.</strong> In block %blocknum, you specified the group %group as a requirement,
+                          but this group could not be found in the degree's school.  You may need to change the degree's school back to its previous value, then remove this group,
+                          in order to continue.", array("%blocknum" => ($semester_num+1), "%group" => $adding_group->title)));
+      
+    }
+    
+    
+    // If this group is already saved in this degree elsewhere, and it has a different type or min_grade,
+    // then we must display a warning message to the user.
+    $res = db_query("SELECT * FROM draft_degree_requirements
+                     WHERE degree_id = ?
+                     AND group_id = ?
+                     AND (group_min_grade <> ? OR group_requirement_type <> ?)", $degree_id, $group_id, $min_grade, $type);
+    while ($cur = db_fetch_array($res)) {
+      
+      form_error("semester_groups_" . $semester_num . "_markup", t("<strong>Your work has NOT been saved.</strong> In block %blocknum, you specified the group %group with a min grade of %mingrade and a requirement type of %req.  
+                                However, the group was previously specified in this degree plan in block %otherblocknum wih a different requirement type or min grade.
+                                FlightPath will not perform calculations correctly for courses assigned to this group.  The duplicate occurance of the group should have the same
+                                type/min grade, or, you need to create a new group to handle these alternate requirements.</strong>"
+                                , array("#blocknum" => ($semester_num+1), "%group"=> $adding_group->title, "%mingrade" => $min_grade, "%req" => $type, "%otherblocknum" => ($cur['semester_num'] + 1))));
+
+            
+    }
+            
+  } // foreach groups
+         
+  
+} // edit_degree_form_validate
+
+
 function admin_edit_degree_form_submit($form, $form_state) {
     
   $values = $form_state['values'];
@@ -2027,7 +2218,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
   }
 
   
-  
+  $school_id = 0;
   $degree_id = @intval($form_state['values']['degree_id']);
   // If this degree already exists in this
   // catalog year, then we need to delete it first.
@@ -2037,7 +2228,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
   if ($degree_id) {  
     $degree = new DegreePlan($degree_id, null, false, false, true);
     $degree->load_descriptive_data();
-
+    $school_id = intval($degree->school_id);
     // Delete from degree_requirements WHERE this degree_id exists.
     $res = db_query("DELETE FROM draft_degree_requirements
                   WHERE degree_id = '?' ", $degree_id);
@@ -2199,7 +2390,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
       /////////////////////////////////////////////
       // Okay, we now have enough information to insert the course.
       // Find out what the course_id is.
-      if ($course_id = $db->get_course_id($subject_id, $course_num, "", true))  // don't care about catalog year.
+      if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id))  // don't care about catalog year.
       {
         $query = "INSERT INTO draft_degree_requirements
                     (degree_id, semester_num, course_id, course_min_grade, course_requirement_type, data_entry_value)
@@ -2211,7 +2402,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
         $errors .= "<br><span style='color:red;'><b>Course Not Found!</b>
               In Block " . ($semester_num+1) . ", you specified the course
               <b>$subject_id $course_num</b> as a requirement, but this course
-              could not be found.
+              could not be found in the degree's school.
               It was removed from that block.
               Are you sure you typed it correctly?  Please go to this
               semester, check your spelling, and add the course again.</span>";
