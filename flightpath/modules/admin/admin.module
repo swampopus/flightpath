@@ -1015,7 +1015,7 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
   
   // Check to make sure they entered the transfer passcode correctly.
     
-  if ($values["passcode"] != variable_get("admin_transfer_passcode", "h24897Ewujflnb7 wy2896432hke w490ukj")) {
+  if ($values["passcode"] != variable_get("admin_transfer_passcode", sha1(mt_rand(1,9999999)))) {
 
     form_error("passcode", t("Error!  The password you entered is not correct.  Check with the FlightPath administrator
                               (or check the admin settings pages) to learn the password."));
@@ -1063,11 +1063,11 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
     $temp = explode(",",$instruction);
 
     if (trim($temp[0]) == "update_course_id") {
-      $db2->update_course_id(trim($temp[1]), trim($temp[2]));
+      $db2->update_course_id(trim($temp[1]), trim($temp[2]), trim($temp[3]));
     }
 
     if (trim($temp[0]) == "update_course_requirement_from_name") {
-      $db2->update_course_requirement_from_name(trim($temp[1]), trim($temp[2]), trim($temp[3]));
+      $db2->update_course_requirement_from_name(trim($temp[1]), trim($temp[2]), trim($temp[3]), trim($temp[4]));
     }
     
     // TODO:  Maybe invoke another hook here, to let other modules act on the instruction?

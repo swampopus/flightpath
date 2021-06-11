@@ -164,7 +164,7 @@ function admin_display_courses() {
     // removed AND `catalog_year`='$de_catalog_year' from query,
     // because we don't care what other cat year it came from.
     $res2 = db_query("SELECT * FROM draft_courses
-                  WHERE course_id = '?'
+                  WHERE course_id = ?
                     ", $db_course_id);
     while ($cur2 = db_fetch_array($res2)) {
       if ($cur2["subject_id"] == $db_subject_id && $cur2["course_num"] == $db_course_num) {
@@ -237,6 +237,7 @@ function admin_display_courses() {
 
            'data' => array(
                     'course_id' => $db_course_id,
+                    'school_id' => $db_school_id,
                     'catalog_year' => $de_catalog_year,
                     'db_row' => $cur,
                     'subject_id' => $db_subject_id,
@@ -402,7 +403,7 @@ function admin_edit_course_form() {
   
   // Begin the form...
 
-  // TODO:  implement this!
+/*
   if (@$_SESSION["de_advanced_mode"] == true)
   {
     $pC .= " <span class='tenpt' style='background-color: yellow; margin-left: 20px;'>
@@ -412,8 +413,9 @@ function admin_edit_course_form() {
           <a href='javascript: popupWindow(\"admin.php?performAction=popup_students_using_course&course_id=$course_id\")'>[students]</a>
           </span>";
   }
+*/
 
-  $course = new Course($course_id,false,null,false,$de_catalog_year, true);
+  $course = new Course($course_id,false,null,false,$de_catalog_year, TRUE);
   $course->catalog_year = $de_catalog_year;  // Since it may be 1900, force it!
   $course->load_descriptive_data(false, true, false, true, true);
 
@@ -431,6 +433,12 @@ function admin_edit_course_form() {
   if ($course->bool_ghost_min_hour) {
     $course->min_hours = 0;
   }
+  
+  
+  $form['school_id'] = array(
+    'type' => 'hidden',
+    'value' => intval($course->school_id),
+  );
   
   $form["course_names"] = array(
     "type" => "textfield",
@@ -570,11 +578,12 @@ function admin_edit_course_form() {
 function admin_edit_course_form_submit(&$form, &$form_submit) {
   $values = $form_submit["values"];
   
-
   $de_catalog_year = $values["de_catalog_year"];
   $course_id = trim($values["course_id"]);
   $course_names = trim($values["course_names"]);
 
+  $school_id = intval($values['school_id']);
+  
   $db = get_global_database_handler();
   
   if ($course_names == "") {
@@ -596,7 +605,7 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
 
 
   // Unlike the degrees and the groups, course_ids are not
-  // unique.  Only a course_id + catalog_year pair are unique.  This
+  // unique.  We can have the same course id over multiple rows, with different catalog years.  This
   // is so we can handle equivalent courses more gracefully.
 
   // So, the first thing we need to do is delete *all* courses with the
@@ -608,8 +617,9 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
     
     $res = db_query("UPDATE draft_courses
           SET course_id = '-12345'
-          WHERE course_id = '?'
-        AND catalog_year = '?' ", $course_id, $de_catalog_year);
+          WHERE course_id = ?          
+        AND catalog_year = ? 
+        AND school_id = ? ", $course_id, $de_catalog_year, $school_id);
   }
 
 
@@ -617,8 +627,9 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
     // That's it.  All we wanted to do was delete the course.
     $query = "DELETE FROM draft_courses
           WHERE course_id = '-12345'
+          AND school_id = ?
           ";
-    $res = db_query($query);
+    $res = db_query($query, $school_id);
     
     fp_add_message(t("Course %course successfully deleted for %year", array("%course" => $course_names, "%year" => $de_catalog_year)));
     // Redirect us to the list of courses.
@@ -679,20 +690,22 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
       $exclude = 1;
       // Set ALL courses with this subject_id and course_num to exclude!
       $res = db_query("UPDATE draft_courses
-                SET exclude = '1'
-                WHERE subject_id = '?'
-                AND course_num = '?' 
-                ", $subject_id, $course_num);
+                SET exclude = 1
+                WHERE subject_id = ?
+                AND course_num = ?
+                AND school_id = ? 
+                ", $subject_id, $course_num, $school_id);
 
 
     } 
     else {
       // Aet all courses with this subject_id and course_num to NOT exclude!
       $res = db_query("UPDATE draft_courses
-                SET exclude = '0'
-                WHERE subject_id = '?'
-                AND course_num = '?' 
-                ", $subject_id, $course_num);
+                SET exclude = 0
+                WHERE subject_id = ?
+                AND course_num = ? 
+                AND school_id = ?
+                ", $subject_id, $course_num, $school_id);
 
     }
 
@@ -700,9 +713,10 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
     // mark that course's ID as -12345...
     $res = db_query("UPDATE draft_courses
                 SET course_id = '-12345'
-                WHERE subject_id = '?'
-                AND course_num = '?' 
-                AND catalog_year = '?' ", $subject_id, $course_num, $de_catalog_year);
+                WHERE subject_id = ?
+                AND course_num = ? 
+                AND catalog_year = ?
+                AND school_id = ? ", $subject_id, $course_num, $de_catalog_year, $school_id);
 
 
 
@@ -711,12 +725,12 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
     $query = "INSERT INTO draft_courses
           (`course_id`,`subject_id`,`course_num`,`catalog_year`,
             `title`,`description`,`min_hours`,`max_hours`,`repeat_hours`,
-            `exclude`,`data_entry_comment`)
-            values ('?','?','?','?','?','?','?','?','?','?','?') ";
+            `exclude`,`data_entry_comment`, `school_id`)
+            values (?,?,?,?,?,?,?,?,?,?,?,?) ";
     //debug_c_t($query);
     $res = db_query($query, $course_id,$subject_id,$course_num,$de_catalog_year,
             $title,$description,$min_hours,$max_hours,$repeat_hours,
-            $exclude,$data_entry_comment);
+            $exclude,$data_entry_comment,$school_id);
 
     // Now, this part is tricky.  Are there any courses which already
     // existed with this subject_id and course_num, but not this course_id?
@@ -730,10 +744,11 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
     // get oldCourseID.
     // call function update_course_id(oldCourseID, newCourseID)
     $res2 = db_query("SELECT * FROM draft_courses WHERE
-                subject_id = '?'
-                AND course_num = '?'
-                AND course_id != '?' 
-                AND course_id != '-12345' ", $subject_id, $course_num, $course_id);
+                subject_id = ?
+                AND course_num = ?
+                AND course_id != ? 
+                AND course_id != '-12345' 
+                AND school_id = ? ", $subject_id, $course_num, $course_id, $school_id);
     while ($cur2 = db_fetch_array($res2)) {
       $old_course_id = $cur2["course_id"];
       // Now, update all the existing references to $old_course_id
@@ -742,7 +757,7 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
       $db2->update_course_id($old_course_id, $course_id, true);
       // Now, add it to our list of things to update when we apply
       // the draft changes...
-      $db2->add_draft_instruction("update_course_id,$old_course_id,$course_id");
+      $db2->add_draft_instruction("update_course_id,$old_course_id,$course_id,$school_id");
     }
 
 
@@ -768,16 +783,18 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
   // and course_num with the new ID, then this is a removed eqv, and
   // that is our cue that it should be it's own course.
   $res = db_query("SELECT * FROM draft_courses
-              WHERE course_id = '-12345' ");
+              WHERE course_id = '-12345' 
+              AND school_id = ? ", $school_id);
   while ($cur = db_fetch_array($res)) {
     $found_s_i = $cur["subject_id"];
     $found_c_n = $cur["course_num"];
     $db2 = new DatabaseHandler();
     $res2 = $db2->db_query("SELECT * FROM draft_courses
-              WHERE course_id = '?'
-              AND subject_id = '?'
-              AND course_num = '?' 
-              AND catalog_year = '?' ", $course_id, $found_s_i, $found_c_n, $de_catalog_year);
+              WHERE course_id = ?
+              AND subject_id = ?
+              AND course_num = ? 
+              AND catalog_year = ?
+              AND school_id = ? ", $course_id, $found_s_i, $found_c_n, $de_catalog_year, $school_id);
     if ($db2->db_num_rows($res2) == 0) {
       // Meaning, this course name is not listed with the course_id,
       // so this is a broken eqv.
@@ -787,15 +804,16 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
       $new_course_id = $db2->request_new_course_id();
       $db3 = new DatabaseHandler();
       $res3 = $db3->db_query("UPDATE draft_courses
-                  SET course_id = '?'
-                  WHERE subject_id = '?'
-                  AND course_num = '?' ", $new_course_id, $found_s_i, $found_c_n);
+                  SET course_id = ?
+                  WHERE subject_id = ?
+                  AND course_num = ?
+                  AND school_id = ? ", $new_course_id, $found_s_i, $found_c_n, $school_id);
       // removed WHERE `course_id`='-12345' from query.  We want to UPDATE
       // this across all years for this course.
       // And also UPDATE every other table that specified foundSI &CN
       // as a requirement.
-      $db3->update_course_requirement_from_name($found_s_i, $found_c_n, $new_course_id);
-      $db3->add_draft_instruction("update_course_requirement_from_name,$found_s_i,$found_c_n,$new_course_id");
+      $db3->update_course_requirement_from_name($found_s_i, $found_c_n, $new_course_id, $school_id);
+      $db3->add_draft_instruction("update_course_requirement_from_name,$found_s_i,$found_c_n,$new_course_id,$school_id");
     }
   }
 
@@ -807,19 +825,20 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
   // of this course, across all available catalog years.
   if (is_array($values["all_years"]) && $values["all_years"]["yes"] == "yes") {
     $res = db_query("UPDATE draft_courses
-                  SET title = '?',
-                    description = '?',
-                    min_hours = '?',
-                    max_hours = '?',
-                    repeat_hours = '?'
-                  WHERE course_id = '?' ", $title, $description, $min_hours, $max_hours, $repeat_hours, $course_id);
+                  SET title = ?,
+                    description = ?,
+                    min_hours = ?,
+                    max_hours = ?,
+                    repeat_hours = ?
+                  WHERE course_id = ?
+                  AND school_id = ? ", $title, $description, $min_hours, $max_hours, $repeat_hours, $course_id, $school_id);
                   
   }
 
 
 
   // Clean up.  Delete the temporary course_id...
-  $res = db_query("DELETE FROM draft_courses WHERE course_id = '-12345'  ");
+  $res = db_query("DELETE FROM draft_courses WHERE course_id = '-12345'  AND school_id = ? ", $school_id);
 
   fp_add_message("Course updated successfully.");  
   

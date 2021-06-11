@@ -649,7 +649,10 @@ function schools_form_alter(&$form, $form_id) {
 
     
     // We also need to add our custom submit handler so that our selection gets saved correctly.
-    $form['#submit_handlers'][] = 'schools_data_form_submit';
+    // Also, use unshift so it's the first thing we do.
+    //$form['#submit_handlers'][] = 'schools_data_form_submit';
+    if (!isset($form['#submit_handlers'])) $form['#submit_handlers'] = array();
+    array_unshift($form['#submit_handlers'], 'schools_data_form_submit');
     
     
     // If this is a NEW group, then don't show them anything!    
@@ -669,13 +672,14 @@ function schools_form_alter(&$form, $form_id) {
 
  
  
+ /*
   // When we copy a year or duplicate a degree, make sure we have a chance to interact (so we can
   // duplicate our schools assignments as well)
   if ($form_id == "admin_copy_degree_form" || $form_id == "admin_duplicate_year_form") {
     // Add our own submit handler, so we can also duplicate degree's school when the degree is duplicated.
     $form['#submit_handlers'][] = 'schools_admin_copy_degree_form_submit';
   }
-   
+   */ // no longer being used.
       
 
 
@@ -847,7 +851,7 @@ function z__schools_get_school_for_entity_type($entity_id, $entity_type, $catalo
 
 
 
-function schools_data_form_submit($form, $form_state) {
+function schools_data_form_submit($form, &$form_state) {
     
   $schools_entity_type = $form_state['values']['schools_entity_type'];
   $entity_id = $form_state['values']['schools_entity_id'];
@@ -863,8 +867,8 @@ function schools_data_form_submit($form, $form_state) {
     
   
   $school_id = intval($form_state['values']['schools_school']);  
-  
-   
+  $form_state['values']['school_id'] = $school_id;
+    
   
   // Update the table in question.
   $table_name = 'draft_degrees';
@@ -886,6 +890,9 @@ function schools_data_form_submit($form, $form_state) {
   db_query("UPDATE `$table_name` SET school_id = ? WHERE $field_name = ?", array($school_id, $entity_id));
       
 
+
+  // This section of code no longer applies.
+/*
   if ($schools_entity_type == 'course') {
     // If this is a course, we might have selected the 'all years' option.  If so, we need to
     // look up all catalog years that this course exists, and set our data for each catalog year.
@@ -915,7 +922,7 @@ function schools_data_form_submit($form, $form_state) {
     } // yes, we selected 'all years'
     
   } // if entity_type is course
-
+*/
 
  
 }

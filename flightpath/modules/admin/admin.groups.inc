@@ -1632,13 +1632,13 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
     // We need a count of how many groups in this year have definitions to process.
     $res = db_query("SELECT count(*) as `count` FROM draft_groups
                        WHERE (definition != '' OR catalog_repeat = 1) 
-                       AND catalog_year = '?' 
+                       AND catalog_year = ? 
                        AND delete_flag = 0 ", $de_catalog_year);
     $cur = db_fetch_array($res);
         
     $batch["results"]["total"] = $cur["count"];
     
-  }
+  } 
   ////////////////////////////////////////////////////////////////////////  
   
   
@@ -1655,7 +1655,7 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
   // First, find every group which has a definition set.
   $res = db_query("SELECT * FROM draft_groups
                        WHERE (definition != '' OR catalog_repeat = 1) 
-                       AND catalog_year = '?' 
+                       AND catalog_year = ? 
                        AND delete_flag = 0 
                        limit $current, $limit", $de_catalog_year);
   while($cur = db_fetch_array($res)) {
@@ -1822,7 +1822,7 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
             $query = "INSERT INTO draft_group_requirements
                       (group_id, course_id,
                       course_min_grade, course_repeats, data_entry_value)
-                      values ('?','?','?','?', ?) ";
+                      values (?,?,?,?,?) ";
             $res2 = db_query($query, $branch_id, $course_id, $min_grade, $course_repeats, "$subject_id~$course_num");
           } 
           else {

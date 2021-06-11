@@ -601,12 +601,14 @@ class DatabaseHandler extends stdClass
     $res = $this->db_query("UPDATE degree_requirements
                 set `course_id`= ?
                 where `data_entry_value`= ?
-                 ", $new_course_id, "$subject_id~$course_num") ;
+                AND school_id = ?
+                 ", $new_course_id, "$subject_id~$course_num", $school_id) ;
 
     $res = $this->db_query("UPDATE group_requirements
                 SET `course_id`='?'
                 WHERE `data_entry_value`= ? 
-                ", $new_course_id, "$subject_id~$course_num") ;
+                AND school_id = ?
+                ", $new_course_id, "$subject_id~$course_num", $school_id) ;
 
 
 
@@ -614,18 +616,21 @@ class DatabaseHandler extends stdClass
     $res = $this->db_query("UPDATE student_substitutions
                 SET `sub_course_id`='?'
                 WHERE `sub_entry_value`= ? 
-                 ", $new_course_id, "$subject_id~$course_num") ;
+                AND school_id = ?
+                 ", $new_course_id, "$subject_id~$course_num", $school_id) ;
 
     $res = $this->db_query("UPDATE student_substitutions
                 SET `required_course_id`='?'
                 WHERE `required_entry_value`= ? 
-                ", $new_course_id, "$subject_id~$course_num") ;
+                AND school_id = ?
+                ", $new_course_id, "$subject_id~$course_num", $school_id) ;
 
     // Also the advising histories....
     $res = $this->db_query("UPDATE advised_courses
                 SET `course_id`='?'
                 WHERE `entry_value`= ? 
-                ", $new_course_id, "$subject_id~$course_num") ;
+                AND school_id = ?
+                ", $new_course_id, "$subject_id~$course_num", $school_id) ;
     
     
     

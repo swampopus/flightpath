@@ -1748,7 +1748,7 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
       $group->load_descriptive_data();
       
       $ghours = $group->hours_required;
-      fpm($ghours);
+      
       // If min hours are specified, set to MIN-MAX.
       if ($group->has_min_hours_allowed()) {
         $ghours = $group->min_hours_allowed . "-" . $ghours;
@@ -1995,7 +1995,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
   if (strstr($perform_action2, "delGroup")) {
     $temp = explode("_",$perform_action2);
     $del_group = new Group();
-    $del_group->bool_use_draft = true;
+    $del_group->bool_use_draft = TRUE;
     $del_group->group_id = $temp[1];
     $del_group->assigned_to_semester_num = $temp[2];
 
@@ -2026,15 +2026,17 @@ function admin_edit_degree_form_submit($form, $form_state) {
     }
   }
 
-
-
-  $degree_id = "";
+  
+  
+  $degree_id = @intval($form_state['values']['degree_id']);
   // If this degree already exists in this
   // catalog year, then we need to delete it first.
-  if ($degree_id = $db->get_degree_id($major_code, $de_catalog_year, true)) {
+  //if ($degree_id = $db->get_degree_id($major_code, $de_catalog_year, true, $school_id)) {
+      
+  // Each degree_id is unique to the catalog year, so we should be good with just the id here.  
+  if ($degree_id) {  
     $degree = new DegreePlan($degree_id, null, false, false, true);
     $degree->load_descriptive_data();
-
 
     // Delete from degree_requirements WHERE this degree_id exists.
     $res = db_query("DELETE FROM draft_degree_requirements
@@ -2073,7 +2075,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
     } // if perform_action2 == delete_degree
 
 
-  } // if degree->id = db->get_degree_id, etc 
+  } // if degree->id
   else {
     // We need to generate a new degreeID for this major_code and catalog_year,
     // because one does not already exist!
