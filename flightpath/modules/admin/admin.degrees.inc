@@ -1974,7 +1974,7 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
 
 function admin_edit_degree_form_validate($form, &$form_state) {
   $values = $form_state['values'];
-  
+
   // What courses should have their type overwritten as "x"?
   $ignore_courses = csv_to_array(variable_get("ignore_courses_from_hour_counts", ""));
   
@@ -1984,16 +1984,15 @@ function admin_edit_degree_form_validate($form, &$form_state) {
   $db = get_global_database_handler();
     
   $school_id = 0;
+  if (isset($values['schools_school'])) { // A school was set from the schools module.
+    $school_id = intval($values['schools_school']);  // Use our NEW school_id for testing.
+  }
   $degree_id = @intval($form_state['values']['degree_id']);
-  // If this degree already exists in this
-  // catalog year, then we need to delete it first.
-  //if ($degree_id = $db->get_degree_id($major_code, $de_catalog_year, true, $school_id)) {
       
   // Each degree_id is unique to the catalog year, so we should be good with just the id here.  
   if ($degree_id) {  
-    $degree = new DegreePlan($degree_id, null, false, false, true);
+    $degree = new DegreePlan($degree_id, null, false, false, TRUE);
     $degree->load_descriptive_data();
-    $school_id = intval($degree->school_id);    
   }
   else {
     // Couldn't find degree_id!
