@@ -564,6 +564,9 @@ function schools_form_alter(&$form, $form_id) {
     
   // Add "school" dropdown to the degrees, groups, and courses form
   if (in_array($form_id, $forms_to_alter)) {
+        
+    fp_add_js(fp_get_module_path("schools") . '/js/schools.js');  
+    
   
     $db = get_global_database_handler();
     $school_id = 0; // default
@@ -631,10 +634,12 @@ function schools_form_alter(&$form, $form_id) {
       'type' => 'select',
       'label' => 'School:',
       'options' => $options,
+      'attributes' => array('onchange' => "return schoolsConfirmChangeSchool($school_id);"),
       'value' => $school_id,
       'hide_please_select' => TRUE,
       'weight' => $weight,
       'popup_description' => t('Please select a school which this @datatype belongs to.  Schools are defined under the Admin Console -> Configure Schools.', array('@datatype' => $entity_type)),
+      'description' => t("<strong>Caution:</strong> changing this value could have unexpected consequences. If unsure what to do, set to Default."),
     );
     
     $form['schools_entity_type'] = array(

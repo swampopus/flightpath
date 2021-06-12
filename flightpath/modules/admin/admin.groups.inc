@@ -37,7 +37,129 @@ function admin_edit_group_form_validate(&$form, &$form_state) {
   }
   
   
-}
+  $db = get_global_database_handler();
+  
+  $school_id = 0;
+  if (isset($values['schools_school'])) { // A school was set from the schools module.
+    $school_id = intval($values['schools_school']);  // Use our NEW school_id for validating.
+  }
+  
+  $school_name = "";
+  if ($school_id > 0) $school_name = "School-" . $school_id;
+  if (function_exists("schools_menu")) {
+    $defs = schools_get_school_definitions();
+    if (isset($defs[$school_id])) $school_name = $defs[$school_id];
+  }
+
+  // Make sure that courses are for the correct school for this group.
+  $courses = $values['courses'];
+  // Okay, now we look at the actual "courses" box and assemble the group
+  // in the database.
+  $lines = explode("\n", $courses);
+  for ($t = 0; $t < count($lines); $t++) {
+    $line = trim($lines[$t]);
+    if ($line == "") { continue; }
+    // Get rid of extra whitespace.
+    $line = str_replace("  ", " ", $line);
+    $line = str_replace("  ", " ", $line);
+    $line = str_replace("  ", " ", $line);
+    $line = str_replace("  ", " ", $line);
+    $line = str_replace("  ", " ", $line);
+    $line = str_replace("  ", " ", $line);
+
+    // Does this line contain at least one & symbol?  If it does,
+    // then this is a subgroup (branch).  If not, then we can insert
+    // the course as-is.
+    if (strstr($line, "&")) {
+      // This line DOES have an ampersand (&), so this is a sub group
+      // within this group.
+      $line = trim(str_replace("-", "", $line));  // get rid of attributes, if any.
+      $line = trim(str_replace("*", "", $line));  // get rid of attributes, if any.
+      
+      $c_tokes = explode("&",$line);
+      for ($cT = 0; $cT < count($c_tokes); $cT++)
+      {        
+        $tokens = explode(" ", trim($c_tokes[$cT]));
+        $subject_id = trim($tokens[0]);
+        $course_num = trim($tokens[1]);
+
+        // If the subject_id had a _A_ in it, convert this back
+        // to an ampersand.
+        $subject_id = str_replace("_A_", "&", $subject_id);
+
+        if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id)) {
+          // Course was found correctly, no need to do anything.                    
+        } 
+        else {
+          // The course_id could not be found!
+
+          // Different message if it's a school_id problem.
+          if (function_exists("schools_menu")) {
+            
+            form_error("courses", t("<strong>Your work has NOT been saved.</strong> Course not found.  You specified the course %course as a requirement,
+                            but this course could not be found.  This could be due to a typo, or due to the course not belonging to the same school
+                            as the group (%schoolname).  Please check the course (and possibly change the group's school back first), then try again.", array("%course" => "$subject_id $course_num", "%schoolname" => $school_name)));
+          }
+          else {
+            // Not related to school (possibly).
+            form_error("courses", t("<strong>Your work has NOT been saved.</strong> Course not found.  You specified the course %course as a requirement,
+                            but this course could not be found.  This could be due to a typo.  
+                            Please check the course and try again.", array("%course" => "$subject_id $course_num")));
+                      
+          }          
+        }    
+
+      } // for cT (tokens)
+
+
+    } // if line contains & 
+    else {
+      // Did NOT contain an ampersand (&), so this goes in the
+      // regular course requirements.
+      
+      $line = trim(str_replace("-", "", $line));  // get rid of attributes, if any.
+      $line = trim(str_replace("*", "", $line));  // get rid of attributes, if any.
+            
+      
+      $tokens = explode(" ", $line);
+      $subject_id = @trim($tokens[0]);
+      $course_num = @trim($tokens[1]);
+
+      // If the subject_id had a _A_ in it, convert this back
+      // to an ampersand.
+      $subject_id = str_replace("_A_", "&", $subject_id);
+
+      // We don't care about catalog year anymore...
+      if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id)) {
+        // Course found normally, do nothing.        
+      } 
+      else {
+            
+          // Different message if it's a school_id problem.
+          if (function_exists("schools_menu")) {
+            
+            form_error("courses", t("<strong>Your work has NOT been saved.</strong> Course not found.  You specified the course %course as a requirement,
+                            but this course could not be found.  This could be due to a typo, or due to the course not belonging to the same school
+                            as the group (%schoolname).  Please check the course (and possibly change the group's school back first), then try again.", array("%course" => "$subject_id $course_num", "%schoolname" => $school_name)));
+          }
+          else {
+            // Not related to school (possibly).
+            form_error("courses", t("<strong>Your work has NOT been saved.</strong> Course not found.  You specified the course %course as a requirement,
+                            but this course could not be found.  This could be due to a typo.  
+                            Please check the course and try again.", array("%course" => "$subject_id $course_num")));
+                      
+          }          
+            
+
+      }
+
+    } // else (did not contain &)
+
+  } // for t (lines of courses)  
+    
+  
+  
+} // .._validate
 
 
 
@@ -591,16 +713,18 @@ function admin_edit_group_form() {
 
 
   $form["icon_filename"] = array(
-    "type" => "hidden",
-    "label" => t("Icon:"),
+    "type" => "hidden",    
     "value" => $group->icon_filename,
-    "suffix" => "
-                <img src='" . fp_theme_location() . "/images/icons/$group->icon_filename' width='19'>
-                $group->icon_filename
-                &nbsp; &nbsp;
-                <a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-select-icon", "group_id=$group_id") . "\");'>[select another]</a>
-                ",
     "weight" => 40,
+  );
+  $form['icon_filename_markup'] = array(
+    "label" => t("Icon:"),
+    "value" => "<img src='" . fp_theme_location() . "/images/icons/$group->icon_filename' width='19'>
+                  $group->icon_filename
+                  &nbsp; &nbsp;
+                  <a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-select-icon", "group_id=$group_id") . "\");'>[select another]</a>
+                ",
+    "weight" => 41,
   );
 
     
@@ -746,6 +870,15 @@ function admin_display_groups_popup_edit_definition() {
   $group = new Group($group_id, null, -1, false, true);
   $group->load_descriptive_data();
 
+  $school_id = intval($group->school_id);
+  
+  $school_name = "";
+  if ($school_id > 0) $school_name = " School-" . $school_id;
+  if (function_exists("schools_menu")) {
+    $defs = schools_get_school_definitions();
+    if (isset($defs[$school_id])) $school_name = $defs[$school_id];
+  }    
+
   if (isset($_REQUEST["definition"])) {
     $definition = trim($_REQUEST["definition"]);
   }
@@ -753,8 +886,7 @@ function admin_display_groups_popup_edit_definition() {
     $definition = $group->definition;
   }
 
-  $results = admin_get_courses_from_definition($definition);
-
+  $results = admin_get_courses_from_definition($definition, "", $school_id);
   
   // This text will be used to describe how the definition works in a javascript alert box:
   $tdef .= t("Definitions provide a very quick way to add or remove many courses from a group.  For example, to add all CSCI courses, enter:") . "\n";
@@ -769,33 +901,45 @@ function admin_display_groups_popup_edit_definition() {
   
   
   
-  $rtn .= "<b>Edit Definition for $group->title ($de_catalog_year)<br><i>$group->group_name</i></b>
+  $rtn .= "" . t("Edit Definition for %group (%cat)
+                       - @name", array("%group" => $group->title, "%cat" => $de_catalog_year, "@name" => $group->title));
+  if ($school_name) {
+    $rtn .= "<br><br>" . t("<strong>Note:</strong> This will only search for courses in the same school as the group <em>since its last save</em>.
+                        <br><strong>Searching in school: %schoolname", array("%schoolname" => $school_name)) . "</strong>";
+  }
+  $rtn .= "
     <br><br><form action='" . fp_url("admin/groups/popup-edit-definition", "de_catalog_year=$de_catalog_year&group_id=$group_id") . "' method='POST' id='mainform'>
-      <table border='0'>
+      <table border='0' width='100%'>
       <tr>
-          <td valign='top' align='right'>
-          <div class='tenpt' align='left'>Working Definition:
-           " . fp_get_js_alert_link($tdef, "[?]") . "</div>
-          <textarea name='definition' id='definition' rows='10' cols='15' >$definition</textarea>
-          <br>
-          <input type='button' value='Generate ->'
-            onClick='showUpdate(); document.getElementById(\"mainform\").submit();'>
-        </td>
-        <td valign='top' align='right' class='tenpt'>
-          <div class='tenpt' align='left'>Results:" . " (" . $results["count"] . ")</div>
-          <textarea rows='10' cols='35' readonly=readonly
-            style='background-color: lightgray;'>{$results["text"]}</textarea>
+          <td valign='top' align='right' width='45%'>
+            <div class='tenpt' align='left'>" . t("Working Definition:") . "
+             " . fp_get_js_alert_link($tdef, "[?]") . "</div>
+            <textarea name='definition' id='definition' rows='10' style='min-width:100%; resize: none;' >$definition</textarea>
             <br>
-            (loads courses from all catalog years)
+            <input type='button' value='" . t("Generate ->") . "'
+              onClick='showUpdate(); document.getElementById(\"mainform\").submit();'>
+              <input type='hidden' name='school_id' value='$school_id'>
+        </td>
+        <td valign='top' align='right' class='tenpt' width='55%'>
+          <div class='tenpt' align='left'>Results:" . " (" . $results["count"] . ")</div>
+            <textarea rows='10' style='min-width:100%; resize: none;' readonly=readonly class='readonly'>{$results["text"]}</textarea>
+              <br>";
+  if ($school_name) {
+    $rtn .= "<div>" . t("loads courses from all cat years in school %schoolname", array("%schoolname" => $school_name)) . "</div>";
+  }
+  else {
+    $rtn .= "<div>" . t("loads courses from all cat years") . "</div>";
+  }
+  $rtn .= "
         </td>
       </tr>
       </table>
       </form>
       " . t("If you are satisfied with the results of this definition, 
-      click the Save to Group button.  Otherwise, simply close this window.") . "
+      click the Save to Group button.  To cancel, simply close this window.") . "
       
-      
-      <input type='button' value='Save to Group' onClick='adminPopupSaveDefinition(\"\");'>
+      <br>
+      <input type='button' value='" . t("Save to Group") . "' onClick='adminPopupSaveDefinition(\"\");'>
   
     ";    
     
@@ -833,7 +977,7 @@ function admin_get_course_array_from_course_id_array($course_idArray) {
 
 
 
-function admin_get_courses_from_definition($definition, $catalog_year = "") {
+function admin_get_courses_from_definition($definition, $catalog_year = "", $school_id = 0) {
    
   
   $group_array = array();
@@ -864,7 +1008,7 @@ function admin_get_courses_from_definition($definition, $catalog_year = "") {
     // and some course data (possibly wild cards) to act on.
     //debugCT("$instruction $subject_data $course_numData");
 
-    $t_array = admin_get_course_array_from_definition_data($subject_data, $course_numData, $catalog_year);
+    $t_array = admin_get_course_array_from_definition_data($subject_data, $course_numData, $catalog_year, $school_id);
     // Okay, we got our list.  Now what do we do with them?
     if ($instruction == "add" || $instruction == "+")
     {
@@ -958,7 +1102,7 @@ function admin_get_course_id_array_from_course_array($course_array) {
 
 
 
-function admin_get_course_array_from_definition_data($subject_data, $course_numData, $catalog_year = "") {
+function admin_get_course_array_from_definition_data($subject_data, $course_numData, $catalog_year = "", $school_id = 0) {
   
    // Looks at the subjectData and course_numData fields, and constructs
   // a query to pull our every course which matches it.
@@ -974,15 +1118,17 @@ function admin_get_course_array_from_definition_data($subject_data, $course_numD
   }
 
   
+  
   $query = "SELECT * FROM draft_courses
         WHERE 
-          subject_id LIKE '?'
-        AND course_num LIKE '?'
+          subject_id LIKE ?
+        AND course_num LIKE ?
         AND course_id > 0
+        AND school_id = ?
         $catalog_line
         GROUP BY subject_id, course_num
         ";
-  $res = db_query($query, $si, $cn) ;
+  $res = db_query($query, $si, $cn, $school_id) ;
   while ($cur = db_fetch_array($res)) {
     $course_id = $cur["course_id"];
     
@@ -1880,38 +2026,57 @@ function admin_display_groups_popup_show_group_use() {
   $group->bool_use_draft = true;
   $group->load_descriptive_data();
 
+  $defs = array();
+  if (function_exists("schools_menu")) {
+    $defs = schools_get_school_definitions(TRUE);
+  }
+
 
   $rtn .= "<b>" . t("Degrees using @group_title (%group_name):", array("@group_title"=>$group->title, "%group_name" => $group->group_name)) . "</b>
     <br><br>
-    <table border='0' cellspacing='5'>
+    <table border='0' cellspacing='5' width='100%'>
     <tr>
       <th>" . t("Degree") . "</th>
       <th>" . t("Code") . "</th>
-      <th>" . t("Semester") . "</th>
+      <th>" . t("Block") . "</th>
       <th>" . t("Year") . "</th>
+      <th>" . t("School") . "</th>
     </tr>
     ";
 
+    
+  $db = get_global_database_handler();   
+    
   $res = db_query("SELECT * FROM draft_degrees a,
                     draft_degree_requirements b
                   WHERE a.degree_id = b.degree_id
-                  AND b.group_id = '?'
+                  AND b.group_id = ?
                   ORDER BY a.title, a.major_code, b.semester_num ", $group_id);
   while($cur = db_fetch_array($res))
   {
     extract($cur, 3, "db");
+    
+    $school_id = $db->get_school_id_for_degree_id($db_degree_id);
+    $school_code = @$defs[$school_id]['school_code'];
+    if ($school_id === 0) {
+      $school_code = "-";
+    }
     $rtn .= "<tr>
-          <td valign='top' class='tenpt' width='200'>
+          <td valign='top' class='tenpt' >
             $db_title
           </td>
-          <td valign='top' class='tenpt' width='100'>
+          <td valign='top' class='tenpt' >
             $db_major_code
           </td>
-          <td valign='top' class='tenpt' align='center'>
-            " . admin_get_semester_name($db_semester_num) . "
+          <td valign='top' class='tenpt' >
+            " . ($db_semester_num + 1) . "
           </td>
-          <td valign='top' class='tenpt' width='100'>
+          <td valign='top' class='tenpt'>
             $db_catalog_year
+          </td>
+          
+          <td valign='top' class='tenpt'>
+            $school_code
           </td>
           
         </tr>

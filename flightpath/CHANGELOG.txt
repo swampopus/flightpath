@@ -1,6 +1,16 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-06-12
+  Working on schools functionlity for groups & definitions.
+  
+  Fixed a bug where icon filename field was no longer visible when editing degrees.
+  
+  Tweaks to popup which displays the degrees using group.
+  
+  Added a confirm dialog when changing schools, since it could cause all sorts of problems.
+  
+
 2021-06-11
   Added _validate function when editing a degree, so we can test for school mis-match.  Also fixed a bug where if there was more than one
   form_error() for the same element, it wouldn't display the red border around that element.  Also made it so that markup fields

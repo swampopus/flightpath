@@ -1101,7 +1101,7 @@ input::placeholder {
 
 
 .readonly {
-  background-color: #eee;
+  background-color: #eee !important;
 }
 
 

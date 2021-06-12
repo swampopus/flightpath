@@ -1,7 +1,6 @@
 <?php
 
 
-
 function z__admin_display_degrees_popup_add_group() {
   $semester_num = trim($_GET["semester_num"]);
   $de_catalog_year = admin_get_de_catalog_year();
@@ -74,25 +73,44 @@ function z__admin_display_degrees_popup_add_group() {
 
 function admin_display_degrees_popup_add_group2() {
   $semester_num = trim($_GET["semester_num"]);
+  $school_id = intval($_GET["school_id"]);  
   $de_catalog_year = admin_get_de_catalog_year();
   
-   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
+  $school_name = "";
+  if ($school_id > 0) $school_name = " School-" . $school_id;
+  if (function_exists("schools_menu")) {
+    $defs = schools_get_school_definitions();
+    if (isset($defs[$school_id])) $school_name = $defs[$school_id];
+  }
+  
+  fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
   
   $rtn = "";
    
-  $rtn .= "<b>" . t("Add an elective group to semester: @semester_num in @de_catalog_year", array("@semester_num" => $semester_num, "@de_catalog_year" => $de_catalog_year)) . "</b><br>
-        <span class='tenpt'>" . t("Use keyboard shortcut CTRL-F to find groups quickly.") . "</span>
+  $rtn .= "<b>" . t("Add an elective group to block number: @semester_num in catalog year @de_catalog_year", array("@semester_num" => ($semester_num + 1), "@de_catalog_year" => $de_catalog_year)) . "</b><br>";
+  
+  if ($school_name) {
+    $rtn .= "<div class='add-group-popup-school-line'><strong>" . t("Groups in School: %school or Default", array("%school" => $school_name)) . "</strong></div>";
+  }
+  
+  $rtn .="<span class='tenpt'>" . t("Use keyboard shortcut CTRL-F to find groups quickly.") . "</span>
         <br><br>
-        First, select a group (from $de_catalog_year):
+        " . t("First, select a group (from  @cat)", array("@cat" => $de_catalog_year));
+  if ($school_name) {
+    $rtn .= " " . t(" and school <b>%school</b>", array("%school" => $school_name));
+    
+  }
+  $rtn .= ":      
         <div class='tenpt' 
           style='height:200px; overflow-y: scroll; border: 1px solid black;
           margin:5px;'>
         <table border='0' cellspacing='5'>";
 
   $res = db_query("SELECT * FROM draft_groups
-              WHERE catalog_year = '?'
-              AND delete_flag = '0'
-              ORDER BY title ", $de_catalog_year);
+              WHERE catalog_year = ?
+              AND delete_flag = 0
+              AND school_id IN (0, ?)
+              ORDER BY title ", $de_catalog_year, $school_id);
   while($cur = db_fetch_array($res)) {
     extract($cur, 3, "db");
     $rtn .= "<tr><td valign='middle'>
@@ -1779,7 +1797,7 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
 
     } // while semester->list_groups    
     
-    $url = fp_url("admin/degrees/popup-add-group2", "semester_num=$semester->semester_num&de_catalog_year=$de_catalog_year");
+    $url = fp_url("admin/degrees/popup-add-group2", "semester_num=$semester->semester_num&de_catalog_year=$de_catalog_year&school_id=$degree->school_id");
     
     $contents .= "</table>
         <div style='margin-top: 10px; margin-left: 20px; font-size:0.8em;'>
@@ -1985,7 +2003,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
     
   $school_id = 0;
   if (isset($values['schools_school'])) { // A school was set from the schools module.
-    $school_id = intval($values['schools_school']);  // Use our NEW school_id for testing.
+    $school_id = intval($values['schools_school']);  // Use our NEW school_id for validating.
   }
   $degree_id = @intval($form_state['values']['degree_id']);
       
@@ -2003,6 +2021,11 @@ function admin_edit_degree_form_validate($form, &$form_state) {
   
   
   // At this point, we have a school_id and degree_id.
+  
+  if (function_exists("schools_menu")) {            
+    $defs = schools_get_school_definitions();          
+    $school_name = $defs[$school_id];
+  }  
   
   
   // Let's check that all of the courses also belong to this degree and/or can be found at all (no typos).  
@@ -2078,9 +2101,19 @@ function admin_edit_degree_form_validate($form, &$form_state) {
       else {
         // The course_id could not be found!
         
-        form_error("courses_" . $semester_num, t("<strong>Your work has NOT been saved.</strong> Course not found.  In block %blocknum, you specified the course %course as a requirement,
-                          but this course could not be found.  This could be due to a typo, or due to the course not belonging to the same 'school'
-                          as the degree.  Please check the course and try again.", array("%blocknum" => ($semester_num+1), "%course" => "$subject_id $course_num")));
+        // Different message if it's a school_id problem.
+        if (function_exists("schools_menu")) {          
+          form_error("courses_" . $semester_num, t("<strong>Your work has NOT been saved.</strong> Course not found.  In block %blocknum, you specified the course %course as a requirement,
+                          but this course could not be found.  This could be due to a typo, or due to the course not belonging to the same school
+                          as the degree (%schoolname) or the Default school.  Please check the course and try again.", array("%blocknum" => ($semester_num+1), "%course" => "$subject_id $course_num", "%schoolname" => $school_name)));
+        }
+        else {
+          // Not related to school (possibly).
+          form_error("courses_" . $semester_num, t("<strong>Your work has NOT been saved.</strong> Course not found.  In block %blocknum, you specified the course %course as a requirement,
+                          but this course could not be found.  This could be due to a typo.  
+                          Please check the course and try again.", array("%blocknum" => ($semester_num+1), "%course" => "$subject_id $course_num")));
+                    
+        }
       }
 
     } // for course_rows
@@ -2128,11 +2161,11 @@ function admin_edit_degree_form_validate($form, &$form_state) {
     $adding_group = new Group($group_id);
     
     // Is this in the right school?
-    if ($group_id->school_id != $school_id) {
+    if ($group_id->school_id != $school_id && $group_id->school_id !== 0) {
       
       form_error("semester_groups_" . $semester_num . "_markup", t("<strong>Your work has NOT been saved.</strong> In block %blocknum, you specified the group %group as a requirement,
-                          but this group could not be found in the degree's school.  You may need to change the degree's school back to its previous value, then remove this group,
-                          in order to continue.", array("%blocknum" => ($semester_num+1), "%group" => $adding_group->title)));
+                          but this group could not be found in the degree's school (%schoolname) or the Default school.<br>You may need to change the degree's school back to its previous value, then remove this group,
+                          in order to continue.", array("%blocknum" => ($semester_num+1), "%group" => $adding_group->title, "%schoolname" => $school_name)));
       
     }
     

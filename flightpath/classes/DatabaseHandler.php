@@ -607,7 +607,7 @@ class DatabaseHandler extends stdClass
     $res = $this->db_query("UPDATE group_requirements
                 SET `course_id`='?'
                 WHERE `data_entry_value`= ? 
-                AND school_id = ?
+                AND school_id = ? 
                 ", $new_course_id, "$subject_id~$course_num", $school_id) ;
 
 
