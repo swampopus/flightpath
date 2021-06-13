@@ -2539,13 +2539,13 @@ function system_handle_logout() {
   if (isset($_COOKIE[session_name()]))  // remove cookie by setting it to expire, if it's there.
   {
      $cookie_expires  = time() - date('Z') - 3600;
-     setcookie(session_name(), '', $cookie_expires, '/');
+     setcookie(session_name(), "", $cookie_expires, '/');
   }  
   
   if (isset($_COOKIE)) {
     foreach($_COOKIE as $cook) {
-        setcookie($cook, '', time()-1000);
-        setcookie($cook, '', time()-1000, '/');
+        setcookie($cook, "", time()-1000);
+        setcookie($cook, "", time()-1000, '/');
     }    
   }
   

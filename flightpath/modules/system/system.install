@@ -760,7 +760,7 @@ db_query($q);
 $q = "
 CREATE TABLE `transfer_courses` (
   `transfer_course_id` int(11) NOT NULL AUTO_INCREMENT,
-  `institution_id` varchar(10) DEFAULT '',
+  `institution_id` varchar(100) DEFAULT '',
   `subject_id` varchar(10) DEFAULT '',
   `course_num` varchar(10) DEFAULT '',
   `title` varchar(100) DEFAULT '',
@@ -794,12 +794,13 @@ db_query($q);
 
 $q = "
 CREATE TABLE `transfer_institutions` (
-  `institution_id` varchar(10) NOT NULL DEFAULT '',
+  `institution_id` varchar(100) NOT NULL DEFAULT '',
   `name` varchar(200) DEFAULT '',
   `state` varchar(10) DEFAULT '',
   `school_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`institution_id`) ,
   KEY `state` (`state`) ,
+  KEY `name` (`name`) ,
   KEY `school_id` (`school_id`)
 ); ";
 db_query($q);

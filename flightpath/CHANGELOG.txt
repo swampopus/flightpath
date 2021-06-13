@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-06-13
+  Changed system.install so that institution_id is a 100 varchar in the database, instead of 10.  Also made `name` an index for transfer_institutions table.
+  
+
 2021-06-12
   Working on schools functionlity for groups & definitions.
   
