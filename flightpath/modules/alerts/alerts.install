@@ -19,7 +19,7 @@ CREATE TABLE `content__alert` (
   `field__student_id` varchar(255)DEFAULT NULL,
   `field__alert_status` varchar(255) DEFAULT NULL,
   `field__department` varchar(255) DEFAULT NULL,
-  `field__alert_msg` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `field__alert_msg` text,
   `field__visibility` varchar(255)  DEFAULT NULL,
   PRIMARY KEY (`vid`),
   KEY `cid` (`cid`),

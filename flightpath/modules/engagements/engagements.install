@@ -19,7 +19,7 @@ CREATE TABLE `content__engagement` (
   `field__student_id` varchar(255) DEFAULT NULL,
   `field__faculty_id` varchar(255) DEFAULT NULL,
   `field__engagement_type` varchar(255) DEFAULT NULL,
-  `field__engagement_msg` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `field__engagement_msg` text DEFAULT NULL,
   `field__direction` varchar(255)  DEFAULT NULL,
   `field__phone_outcome` varchar(255) DEFAULT NULL,
   `field__activity_datetime` datetime DEFAULT NULL,
