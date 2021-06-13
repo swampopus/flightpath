@@ -10,6 +10,7 @@ FlightPath 6.x Changelog
   
   Added a confirm dialog when changing schools, since it could cause all sorts of problems.
   
+  Watchdog insert was failing because anon user school_id was null; wasn't being intval'd.
 
 2021-06-11
   Added _validate function when editing a degree, so we can test for school mis-match.  Also fixed a bug where if there was more than one

@@ -49,7 +49,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
     $user_name = @$user->name;
     $is_student = (int) @$user->is_student;
     $is_faculty = (int) @$user->is_faculty;
-    $school_id = $user->school_id;
+    $school_id = (int) @$user->school_id;
   }
   
   $is_mobile = 0;   //TODO:  not used anymore! //(int) fp_screen_is_mobile();
