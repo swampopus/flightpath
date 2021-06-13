@@ -90,7 +90,7 @@ function admin_display_degrees_popup_add_group2() {
   $rtn .= "<b>" . t("Add an elective group to block number: @semester_num in catalog year @de_catalog_year", array("@semester_num" => ($semester_num + 1), "@de_catalog_year" => $de_catalog_year)) . "</b><br>";
   
   if ($school_name) {
-    $rtn .= "<div class='add-group-popup-school-line'><strong>" . t("Groups in School: %school or Default", array("%school" => $school_name)) . "</strong></div>";
+    $rtn .= "<div class='add-group-popup-school-line'><strong>" . t("Groups in School: %school", array("%school" => $school_name)) . "</strong></div>";
   }
   
   $rtn .="<span class='tenpt'>" . t("Use keyboard shortcut CTRL-F to find groups quickly.") . "</span>
@@ -109,7 +109,7 @@ function admin_display_degrees_popup_add_group2() {
   $res = db_query("SELECT * FROM draft_groups
               WHERE catalog_year = ?
               AND delete_flag = 0
-              AND school_id IN (0, ?)
+              AND school_id = ?
               ORDER BY title ", $de_catalog_year, $school_id);
   while($cur = db_fetch_array($res)) {
     extract($cur, 3, "db");

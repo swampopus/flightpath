@@ -358,7 +358,7 @@ function adminPopupAlertHelp(action)
 
   if (action == "group_properties")
   {
-    t = t + "The Hrs means how many hours are required to fulfill this group in this semester or year?  For example, 6.  Must contain a whole number larger than 0. ";
+    t = t + "The Hrs means how many hours are required to fulfill this group in this semester or year?  For example, 6.  Must contain a number larger than 0. ";
     t = t + "You may also specify 'min' acceptible hours for the group, ex: 3-6 means from 3 (min) to 6 hours.\n\n";    
     t = t + "The Min Grade is the default minimum grade any course taken from this group must have in order to fulfill the group. ";
     t = t + "This is different from the minimum grade set per-course within the group entry screen.  This minimum grade value will always override ";
