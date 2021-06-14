@@ -174,6 +174,7 @@ function admin_copy_degree_form() {
   $form["mark" . $m++] = array(
     "type" => "markup",
     "value" => t("Use this form to duplicate a degree plan in this catalog year."),
+    "weight" => 10,
   );
 
 
@@ -189,16 +190,26 @@ function admin_copy_degree_form() {
     "label" => t("Enter the SOURCE major code you wish to copy:"),
     "required" => TRUE,
     "description" => t("Ex: ART or GBUS. Do not enter any track or concentration codes here."),
+    "weight" => 20,
   );
+
+
+  /* use default school_id */
+  $form['school_id'] = array(
+    'type' => 'hidden',
+    'value' => '0',
+  );
+
 
   $form["include_tracks"] = array(
     "type" => "checkboxes",
-    "label" => t("Include tracks?"),
-    "options" => array("yes" => "Include tracks."),
-    "description" => t("Check this box if you wish to also copy any tracks 
+    "label" => t("Include tracks/level-3 degrees?"),
+    "options" => array("yes" => "Yes, include all associated tracks (level-3 degrees)."),
+    "description" => t("Check this box if you wish to also copy any tracks/level-3 degrees 
                         this major code may have associated with it. If you do not check this box, 
                         only the base degree will be copied. If the major does not have 
-                        tracks, leave this unchecked."),
+                        tracks/level-3 degrees, leave this unchecked."),
+    "weight" => 30,                        
   );
 
   $form["destination_major_code"] = array(
@@ -207,6 +218,7 @@ function admin_copy_degree_form() {
     "label" => t("Enter the DESTINATION major code you wish to create/overwrite:"),
     "required" => TRUE,
     "description" => t("Ex: CHEM or XYZ. Do not enter any track or concentration codes here."),
+    "weight" => 40,    
   );
   
   
@@ -214,10 +226,11 @@ function admin_copy_degree_form() {
     "type" => "radios",
     "label" => t("Overwrite if major code already exists?"),
     "options" => array(
-                  "no" => t("No, DO NOT delete and overwrite any existing major codes & associated tracks.  Instead, return here with a warning message."),
-                  "yes" => t("Yes, if my destination major already exists, overwrite <b>and delete all associated tracks</b> for this year.  (Use caution with this option!)"),
+                  "no" => t("No, DO NOT delete and overwrite any existing major codes & associated tracks/level-3 degrees.  Instead, return here with a warning message."),
+                  "yes" => t("Yes, if my destination major already exists, overwrite <b>and delete all associated tracks/level-3 degrees</b> for this year.  (Use caution with this option!)"),
                 ),
     "value" => "no",
+    "weight" => 50,    
   );
   
   
@@ -227,6 +240,7 @@ function admin_copy_degree_form() {
     "type" => "submit",
     "value" => "Submit",
     "prefix" => "<hr>",
+    "weight" => 200,    
   );
     
   
@@ -247,11 +261,13 @@ function admin_copy_degree_form_validate($form, $form_state) {
     // Check to see if destination major code already exists.
     $de_catalog_year = $values["de_catalog_year"];
     $destination_major_code = trim(strtoupper($values["destination_major_code"]));
+    $school_id = intval($values['school_id']);
     
     // First thing's first.  Make sure the sourceMajorCode exists.
     $res = db_query("SELECT * FROM draft_degrees 
                       WHERE major_code = ?                      
-                      AND catalog_year = ? ", $destination_major_code, $de_catalog_year) ;
+                      AND catalog_year = ? 
+                      AND school_id = ? ", $destination_major_code, $de_catalog_year, $school_id) ;
     if (db_num_rows($res) != 0) {
       // Meaning, it WAS be found.
       form_error("destination_major_code", t("The destination major, %dest, was found for %year.  Since you selected not to overwrite
@@ -274,7 +290,7 @@ function admin_copy_degree_form_submit($form, &$form_state) {
   $values = $form_state["values"];
 
   $de_catalog_year = $values["de_catalog_year"];  
-  
+  $school_id = intval($values['school_id']);
     
   $source_major_code = trim(strtoupper($values["source_major_code"]));
   $destination_major_code = trim(strtoupper($values["destination_major_code"]));
@@ -284,7 +300,8 @@ function admin_copy_degree_form_submit($form, &$form_state) {
   $res = db_query("SELECT * FROM draft_degrees 
                     WHERE (major_code = ?
                     OR major_code LIKE ?)
-                    AND catalog_year = ? ", $source_major_code, "$source_major_code|%", $de_catalog_year) ;
+                    AND catalog_year = ? 
+                    AND school_id = ? ", $source_major_code, "$source_major_code|%", $de_catalog_year, $school_id) ;
   if (db_num_rows($res) == 0) {
     // Meaning, it could not be found.
     
@@ -298,7 +315,8 @@ function admin_copy_degree_form_submit($form, &$form_state) {
   $res = db_query("SELECT * FROM draft_degrees 
                     WHERE (major_code = ?
                     OR major_code LIKE ?)
-                    AND catalog_year = ? ", $destination_major_code, "$destination_major_code|%", $de_catalog_year) ;
+                    AND catalog_year = ? 
+                    AND school_id = ? ", $destination_major_code, "$destination_major_code|%", $de_catalog_year, $school_id ) ;
   if (db_num_rows($res) > 0) {
     while ($cur = db_fetch_array($res)) {
       $degree_id = $cur["degree_id"];
@@ -310,8 +328,9 @@ function admin_copy_degree_form_submit($form, &$form_state) {
     }
     // Now, delete the tracks.
     $res2 = db_query("DELETE FROM draft_degree_tracks
-                          WHERE major_code = '?' 
-                          AND catalog_year='?' ", $destination_major_code, $de_catalog_year) ;
+                          WHERE major_code = ? 
+                          AND catalog_year = ? 
+                          AND school_id = ?", $destination_major_code, $de_catalog_year, $school_id) ;
   }
 
   // Okay, with the destination major good and deleted, we can proceed with
@@ -321,25 +340,28 @@ function admin_copy_degree_form_submit($form, &$form_state) {
   $source_array = array();
   // First, the base degree...
   $res = db_query("SELECT * FROM draft_degrees 
-                    WHERE major_code = '?'
-                    AND catalog_year='?' ", $source_major_code, $de_catalog_year) ;
+                    WHERE major_code = ?
+                    AND catalog_year=? 
+                    AND school_id = ? ", $source_major_code, $de_catalog_year, $school_id) ;
   $cur = db_fetch_array($res);
   $source_array[] = $cur;
   
   // Now, any tracks or concentrations?
   if ($include_tracks == "yes") {
     $res = db_query("SELECT * FROM draft_degrees 
-                      WHERE major_code LIKE '?'
-                      AND catalog_year='?' ", "$source_major_code|%", $de_catalog_year) ;
+                      WHERE major_code LIKE ?
+                      AND catalog_year = ? 
+                      AND school_id = ? ", "$source_major_code|%", $de_catalog_year, $school_id) ;
     while ($cur = db_fetch_array($res)) {
       $source_array[] = $cur;
     }
 
     // While we're here, let's go ahead and make a copy of the tracks.
     $res = db_query("SELECT * FROM draft_degree_tracks
-                        WHERE (major_code = '?'
-                        OR major_code LIKE '?' )
-                        AND catalog_year='?' ", $source_major_code, "$source_major_code|%", $de_catalog_year) ;
+                        WHERE (major_code = ?
+                        OR major_code LIKE ? )
+                        AND catalog_year = ?
+                        AND school_id = ? ", $source_major_code, "$source_major_code|%", $de_catalog_year, $school_id) ;
     while($cur = db_fetch_array($res)) {
       extract($cur, 3, "db");
       $dest_code = $destination_major_code;
@@ -351,12 +373,12 @@ function admin_copy_degree_form_submit($form, &$form_state) {
       
       $res2 = db_query("INSERT INTO draft_degree_tracks
                           (catalog_year, major_code, track_code, 
-                          track_title, track_short_title, track_description)
+                          track_title, track_short_title, track_description, school_id)
                           VALUES
-                          ('?', '?', '?', '?', '?', '?') ",
+                          (?, ?, ?, ?, ?, ?, ?) ",
                           $de_catalog_year, $dest_code, $db_track_code, 
                           $db_track_title, $db_track_short_title, 
-                          $db_track_description) ;
+                          $db_track_description, $school_id) ;
                           
     }       
   }
@@ -383,6 +405,7 @@ function admin_copy_degree_form_submit($form, &$form_state) {
     $form_state['degrees'][] = array(
       'src' => $src_degree_id,
       'src_catalog_year' => $de_catalog_year,
+      'school_id' => $school_id,
       'dest' => $dest_degree_id,
       'dest_major_code' => $dest_code,
       'dest_catalog_year' => $de_catalog_year,
@@ -393,17 +416,17 @@ function admin_copy_degree_form_submit($form, &$form_state) {
                         (degree_id, major_code, degree_type, degree_level, degree_class, title,
                          public_note, semester_titles_csv,
                          catalog_year, exclude, allow_dynamic, advising_weight, override_degree_hours,
-                         min_tracks, max_tracks, default_tracks, track_selection_config)
+                         min_tracks, max_tracks, default_tracks, track_selection_config, school_id)
                          VALUES   
-                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
                          $dest_degree_id, $dest_code, $src_degree_type, $src_degree_level, $src_degree_class, $src_title,
                          $src_public_note, $src_semester_titles_csv,
                          $de_catalog_year, $src_exclude, $src_allow_dynamic, $src_advising_weight, $src_override_degree_hours,
-                         $src_min_tracks, $src_max_tracks, $src_default_tracks, $src_track_selection_config);
+                         $src_min_tracks, $src_max_tracks, $src_default_tracks, $src_track_selection_config, $school_id);
     
     // Now, go through the source's degree requirements and copy those over.
     $res = db_query("SELECT * FROM draft_degree_requirements
-                         WHERE degree_id = '$src_degree_id' ");
+                         WHERE degree_id = ?", array($src_degree_id));
     while ($cur = db_fetch_array($res)) {
       extract($cur, 3, "db");
       
@@ -435,7 +458,7 @@ function admin_copy_degree_form_submit($form, &$form_state) {
   // remind the administrator to apply draft changes.
   $res = db_query("INSERT INTO draft_instructions
                         (instruction) VALUES ('-') ");
-  
+   
   fp_add_message(t("Degree %source has been copied to %dest for %year",
                   array("%source" => $source_major_code, "%dest" => $destination_major_code, "%year" => $de_catalog_year)));
                    

@@ -1383,16 +1383,7 @@ function advise_display_view($view = "view") {
                     
   }
 
-  /*  We aren't doing anything with these variables, so I am commenting-out
-   * 
-  // If we are in WhatIf mode, let's write something special to
-  // the log.
-  if ($GLOBALS["fp_advising"]["advising_what_if"] == "yes" && $GLOBALS["fp_advising"]["what_if_major_code"] != "")
-  {
-    $log_action .= "_whatif";
-    $log_extra = $GLOBALS["fp_advising"]["what_if_major_code"] . " " . $GLOBALS["fp_advising"]["what_if_track_code"];
-  }
-  */
+
 
   
   //  print_pre($student->list_courses_taken->toString());
@@ -1497,12 +1488,15 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
 
   $c = 100;
   
+  $student_school_id = intval($db->get_school_id_for_student_id($current_student_id));
+  
   /////////////////////
   // Select a major....
     
   
   $options = array();  
-  if ($degree_array = $db->get_degrees_in_catalog_year($catalog_year, FALSE, $bool_use_draft, $bool_undergrad_only, array(1))) {    
+  if ($degree_array = $db->get_degrees_in_catalog_year($catalog_year, FALSE, $bool_use_draft, $bool_undergrad_only, array(1), $student_school_id)) {
+        
     foreach($degree_array as $major_code => $value) {      
       if (trim($value["title"]) == ""){continue;}      
       $options[$major_code] = $value["title"];
@@ -1528,7 +1522,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   /////////////////////////
   // Select a minor....
   $options = array();
-  if ($degree_array = $db->get_degrees_in_catalog_year($catalog_year, FALSE, $bool_use_draft, $bool_undergrad_only, array(2))) {    
+  if ($degree_array = $db->get_degrees_in_catalog_year($catalog_year, FALSE, $bool_use_draft, $bool_undergrad_only, array(2), $student_school_id)) {    
     foreach($degree_array as $major_code => $value) {
       if (trim($value["title"]) == ""){continue;}
       $options[$major_code] = $value["title"];
@@ -1559,16 +1553,16 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
     
     foreach ($major_codes as $major_code => $temp) {
       // Let's see if this major has any tracks...
-      if ($tracks = $db->get_degree_tracks($major_code, $catalog_year)) {              
+      if ($tracks = $db->get_degree_tracks($major_code, $catalog_year, $student_school_id)) {              
         // Let's load the original degree plan.
-        $degree_plan = $db->get_degree_plan($major_code, $catalog_year, TRUE);
+        $degree_plan = $db->get_degree_plan($major_code, $catalog_year, TRUE, $student_school_id);
         $degree_plan->load_degree_plan_ancillary();
         
         // Yes, there are indeed tracks for THIS major.  Let's load them up...
         // First, organize them by degree_class...
         $tracks_by_class = array();
         foreach ($tracks as $track) {          
-          $t_degree_plan = $db->get_degree_plan($major_code . "|_" . $track, $catalog_year, TRUE);
+          $t_degree_plan = $db->get_degree_plan($major_code . "|_" . $track, $catalog_year, TRUE, $student_school_id);
           $t_degree_plan->load_degree_plan_ancillary();
           $degree_class = trim($t_degree_plan->degree_class);
           if ($degree_class) {
@@ -1861,6 +1855,7 @@ function advise_what_if_selection_form_submit($form, $form_state) {
   $current_student_id = $form_state["values"]["current_student_id"];
   $catalog_year = $form_state["values"]["catalog_year"];
   
+  
   // Get the major codes CSV
   $what_if_major_code = "";
   foreach (array(1, 2) as $num) {
@@ -2019,22 +2014,6 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   }
 
 
-
-  // Get the track_code.
-  /*
-  $vars["advising_track_code"] = @$_REQUEST["advising_track_code"];
-  if ($vars["advising_track_code"] == "")
-  {
-    $vars["advising_track_code"] = @$_SESSION["advising_track_code$csid"];
-    if ($vars["advising_track_code"] == "")
-    { // Default value...
-      if (!$student) $student = new Student($csid);
-      //$vars["advising_track_code"] = $student->track_code;
-      // NOTE:  Student doesn't have a track_code property...  This code would have never worked.
-    }
-  }
-  */
-
   $vars["advising_track_degree_ids"] = @$_REQUEST["advising_track_degree_ids"];
   if ($vars["advising_track_degree_ids"] == "")
   {    
@@ -2110,22 +2089,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
 
 
-
-  /*
-  @$vars["what_if_track_code"] = $_REQUEST["what_if_track_code"];  // Get it from the GET or POST.
-  if ($vars["what_if_track_code"] == "")
-  {
-    // Will equal "yes" if we ARE in whatIf mode.
-    @$vars["what_if_track_code"] = $_SESSION["what_if_track_code$csid"];
-    if ($vars["what_if_track_code"] == "")
-    {
-      // Default value:
-      $vars["what_if_track_code"] = "";
-    }
-  }
-  */
-
-  
+ 
     
   @$vars["what_if_track_degree_ids"] = $_REQUEST["what_if_track_degree_ids"];  // Get it from the GET or POST.
   if ($vars["what_if_track_degree_ids"] == "")
@@ -2152,10 +2116,6 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
     $vars["what_if_track_degree_ids"] = "";
   }
 
-//  if ($vars["advising_track_code"] == "none")
-//  {
-//    $vars["advising_track_code"] = "";
-//  }
 
   if ($vars["advising_track_degree_ids"] == "none")
   {
@@ -2195,8 +2155,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
   // Place values into session.
   $_SESSION["advising_student_id$csid"] = $vars["advising_student_id"];
   $_SESSION["advising_student_id"] = $vars["advising_student_id"]; // used ONLY in the error report popup!
-  $_SESSION["advising_major_code$csid"] = $vars["advising_major_code"];
-  //$_SESSION["advising_track_code$csid"] = $vars["advising_track_code"];
+  $_SESSION["advising_major_code$csid"] = $vars["advising_major_code"];  
   $_SESSION["advising_track_degree_ids$csid"] = $vars["advising_track_degree_ids"];
   $_SESSION["advising_term_id$csid"] = $vars["advising_term_id"];
   $_SESSION["advising_what_if$csid"] = $vars["advising_what_if"];
@@ -2359,6 +2318,8 @@ function advise_init_screen() {
     $bool_draft = false;
     @$GLOBALS["fp_advising"]["load_from_cache"] = "no";
   }
+
+  $student_school_id = $db->get_school_id_for_student_id($csid);
 
 
   ///////////////////////

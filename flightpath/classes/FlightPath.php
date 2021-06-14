@@ -92,6 +92,9 @@ class FlightPath extends stdClass
 
     }
 
+  
+    $student_school_id = $db->get_school_id_for_student_id($student_id);
+  
 
 
     $settings = fp_get_system_settings();
@@ -158,10 +161,9 @@ class FlightPath extends stdClass
         $degree_id = $t_major_code;
       }
       else {
-        $degree_id = $db->get_degree_id($t_major_code, $catalog_year);
+        $degree_id = $db->get_degree_id($t_major_code, $catalog_year, FALSE, $student_school_id);
       }
-      
-      
+            
       // If we couldn't find the degree_id, then we should just skip it.
       if (!$degree_id || $degree_id == 0) {
         if (variable_get("warning_on_view_if_degree_not_found", "yes") == 'yes') {
@@ -175,23 +177,7 @@ class FlightPath extends stdClass
         continue;
       }
       
-      /*  // NO LONGER NEEDED?
-      if (@$student->array_settings["track_code"] != "" && $this->bool_what_if == false
-      && @$student->array_settings["major_code"] == $major_code)
-      {
-        // The student has a selected track in their settings,
-        // so use that (but only if it is for their current major-- settings
-        // could be old!)
-  
-        $t_major_code = $student->get_major_and_track_code();
-        $temp_degree_id = $db->get_degree_id($t_major_code, $student->catalog_year);
-        if ($temp_degree_id) {
-          $degree_id = $temp_degree_id;
-        }
-      }
-      */
-  
-  
+       
       if ($bool_load_full == true)
       {
         $this->student = $student;
@@ -213,7 +199,7 @@ class FlightPath extends stdClass
       // Okay folks, here's the magic.  We need to combine the degree plans in this array
       // into 1 generated degree plan.
     
-      $combined_degree_plan = $this->combine_degree_plans($degree_plans, $student_id);
+      $combined_degree_plan = $this->combine_degree_plans($degree_plans, $student_id, $student_school_id);
       $combined_degree_plan->db_allow_dynamic = 1;  // since they are combined, we must be allowing dynamic.
     
       $this->degree_plan = $combined_degree_plan;
@@ -250,12 +236,12 @@ class FlightPath extends stdClass
    * This function is responsible for combining multiple degree plans into a single unified degree plan,
    * then returning it.
    */
-  function combine_degree_plans($degree_plans, $student_id) {
+  function combine_degree_plans($degree_plans, $student_id, $school_id = 0) {
     
     //DEV: // return $degree_plans[0];
     
     $new_degree_plan = new DegreePlan();
-    
+    $new_degree_plan->school_id = intval($school_id);
     // Loop through the degree plans one at a time...
     foreach ($degree_plans as $degree_plan) {
       

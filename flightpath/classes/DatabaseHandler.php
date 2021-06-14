@@ -350,7 +350,7 @@ class DatabaseHandler extends stdClass
   {
     // Return a valid new group_id...
 
-    for ($t = 0; $t < 100; $t++)
+    for ($t = 0; $t < 1000; $t++)
     {
       $id = mt_rand(1, 2147483640); // A few less than the max for a signed int in mysql.
       // Check for collisions...
@@ -372,7 +372,7 @@ class DatabaseHandler extends stdClass
   {
     // Return a valid new course_id...
 
-    for ($t = 0; $t < 100; $t++)
+    for ($t = 0; $t < 1000; $t++)
     {
       $id = mt_rand(1, 2147483640); // A few less than the max for a signed int in mysql.
       // Check for collisions...
@@ -863,7 +863,7 @@ class DatabaseHandler extends stdClass
       $catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
     }
 
-
+ 
     // If it's already in our static cache, just return that.
     static $group_id_cache = array();
     if (isset($group_id_cache[$group_name][$school_id][$catalog_year])) {
@@ -895,7 +895,7 @@ class DatabaseHandler extends stdClass
   {
     // Return a valid new id...
 
-    for ($t = 0; $t < 100; $t++)
+    for ($t = 0; $t < 1000; $t++)
     {
       $id = mt_rand(1, 2147483640);  // A few less than the max for a signed int in mysql.
       // Check for collisions...
@@ -1369,7 +1369,7 @@ class DatabaseHandler extends stdClass
     if ($bool_use_draft){$table_name = "draft_$table_name";}    
     
     // change this to be whatever the graduate code actually is.
-    if ($bool_undergrad_only) $undergrad_line = "AND degree_level != 'GR' ";
+    if ($bool_undergrad_only) $undergrad_line = " AND degree_level <> 'GR' ";
     
     $degree_class_line = "";
     if (count($only_level_nums) > 0) { 
@@ -1388,13 +1388,14 @@ class DatabaseHandler extends stdClass
     }
             
     $rtn_array = array();
-    $res = $this->db_query("SELECT degree_id, major_code, title, degree_class FROM $table_name
-                WHERE exclude = '0'
-                AND catalog_year = ?                
-                AND school_id = ?
-                $undergrad_line
-                $degree_class_line
-                ORDER BY title, major_code ", $catalog_year, $school_id = 0);
+    $res = $this->db_query("SELECT `id`, degree_id, major_code, title, degree_class , school_id, catalog_year
+                            FROM $table_name
+                            WHERE exclude = '0'
+                              AND catalog_year = ?                
+                              AND school_id = ?
+                              $undergrad_line
+                              $degree_class_line
+                            ORDER BY title, major_code ", $catalog_year, $school_id);
     if ($this->db_num_rows($res) < 1)
     {
       return false;
@@ -1440,6 +1441,9 @@ class DatabaseHandler extends stdClass
       $rtn_array[$major_code]["title"] = $title;
       $rtn_array[$major_code]["degree_id"] = $degree_id;
       $rtn_array[$major_code]["degree_class"] = trim(strtoupper($cur["degree_class"]));
+      $rtn_array[$major_code]["school_id"] = intval($cur['school_id']);
+      $rtn_array[$major_code]["catalog_year"] = $cur['catalog_year'];
+      $rtn_array[$major_code]["db_id"] = $cur['id'];
 
     }
 

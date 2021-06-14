@@ -6,6 +6,13 @@ FlightPath 6.x Changelog
   
   Removed some default character set and collation vals from .install scripts, as this can cause a problem in MySQL 8+.
   
+  Removed apply_draft_changes logic from schools module, since no longer needed and causing error.  Cleaned up old code.  Made sure
+  What If mode only showed correct degrees based on the students' school.
+  
+  Added logic in schools and admin.degrees.inc when copying a degree, make sure to keep up with school id.
+  
+  Fixed Duplicate entire catalog year function to also respect school_id.
+  
 
 2021-06-12
   Working on schools functionlity for groups & definitions.

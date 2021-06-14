@@ -675,16 +675,31 @@ function schools_form_alter(&$form, $form_id) {
     
   }
 
+
+
  
- 
- /*
-  // When we copy a year or duplicate a degree, make sure we have a chance to interact (so we can
-  // duplicate our schools assignments as well)
-  if ($form_id == "admin_copy_degree_form" || $form_id == "admin_duplicate_year_form") {
-    // Add our own submit handler, so we can also duplicate degree's school when the degree is duplicated.
-    $form['#submit_handlers'][] = 'schools_admin_copy_degree_form_submit';
+  // When we copy a degree, make sure we have a chance to interact (so we can
+  // indicate the degree as well.
+  if ($form_id == "admin_copy_degree_form") {
+    
+    $options = schools_get_schools_for_fapi(TRUE, TRUE, $entity_type, TRUE);      
+    
+    $form['schools_school'] = array(
+      'type' => 'select',
+      'label' => 'Source School:',
+      'options' => $options,      
+      'value' => $school_id,
+      'hide_please_select' => TRUE,
+      'weight' => 25,
+      'popup_description' => t('Please select a school which this degree belongs to.  Schools are defined under the Admin Console -> Configure Schools.'),
+      'description' => t("This must match the source degree.  If you do not know the source degree's school, or are unsure what to select, set to Default."),
+    );    
+    
+    //$form['#validate_handlers'][] = 'schools_admin_copy_degree_form_valudate';    
+    if (!isset($form['#validate_handlers'])) $form['#validate_handlers'] = array();
+    array_unshift($form['#validate_handlers'], 'schools_admin_copy_degree_form_valudate');    
   }
-   */ // no longer being used.
+   
       
 
 
@@ -725,134 +740,25 @@ function schools_form_alter(&$form, $form_id) {
 
 
 
-function z__schools_admin_copy_degree_form_submit($form, &$form_state) {
+
+function schools_admin_copy_degree_form_valudate($form, &$form_state) {
+  $values = $form_state['values'];
+    
+  $source_major_code = $values['source_major_code'];
+  $school_id = $values['schools_school'];
+  $form_state['values']['school_id'] = intval($school_id);  
   
-  
-  // If we are duplicating an entire year, then delete that year from our table first.
-  if (isset($form_state['duplication'])) {
-    db_query('DELETE FROM draft_schools_data WHERE catalog_year = ?', $form_state['duplication']['dest_catalog_year']);
+  // Make sure that this major code exists for this school.
+  $res = db_query("SELECT * FROM draft_degrees WHERE major_code = ? AND school_id = ?", array($source_major_code, $school_id));
+  $cur = db_fetch_array($res);
+  if (!$cur) {
+    form_error("source_major_code", t("Sorry, but the source major code could not be found for the selected school.  Please verify the school that the source degree belongs to."));
+    form_error("schools_school", "");
   }
-  
-  
-  // The values we want are in $form_state['degrees'].  We just need to loop through.
-  if (isset($form_state['degrees'])) {
-    foreach ($form_state['degrees'] as $details) {
-      $src_degree_id = $details['src'];
-      $dest_degree_id = $details['dest'];
       
-      $dest_major_code = @$details['dest_major_code']; // might not exist
-      $dest_catalog_year = @$details['dest_catalog_year']; // might not exist
-      $src_catalog_year = @$details['src_catalog_year']; // might not exist
-      
-      // Get the school for this degree, if it exists.
-      $school_id = schools_get_school_for_entity_type($src_degree_id, "degree", $src_catalog_year);
-              
-      $res2 = db_query('DELETE FROM draft_schools_data WHERE degree_id = ?', $dest_degree_id);
-      $res2 = db_query('INSERT INTO draft_schools_data (school_id, degree_id, catalog_year)
-                        VALUES (?, ?, ?)', (string) $school_id, $dest_degree_id, $dest_catalog_year);    
-              
-    } // foreach degrees  
-  } // if isset degrees
-
-  // groups are  $groups[src id] = dest id
-  
-  if (isset($form_state['groups'])) {
-    foreach ($form_state['groups'] as $src_group_id => $dest_group_id) {
-      
-      // Get the school for this group, if it exists.
-      $school_id = schools_get_school_for_entity_type($src_group_id, "group", $form_state['duplication']['src_catalog_year']);
-              
-      $res2 = db_query('DELETE FROM draft_schools_data WHERE group_id = ?', $dest_group_id);
-      $res2 = db_query('INSERT INTO draft_schools_data (school_id, group_id, catalog_year)
-                        VALUES (?, ?, ?)', (string) $school_id, $dest_group_id, $form_state['duplication']['dest_catalog_year']);    
-              
-    } // foreach groups  
-    
-  } // if isset groups
-  
-  
-  // courses are $courses[] = course_id.
-  if (isset($form_state['courses'])) {
-    foreach ($form_state['courses'] as $src_course_id) {
-      
-      // Get the school for this course, if it exists.
-      $school_id = schools_get_school_for_entity_type($src_course_id, "course", $form_state['duplication']['src_catalog_year']);
-              
-      $res2 = db_query('DELETE FROM draft_schools_data WHERE course_id = ? AND catalog_year = ?', $dest_group_id, $form_state['duplication']['src_catalog_year']);
-      $res2 = db_query('INSERT INTO draft_schools_data (school_id, course_id, catalog_year)
-                        VALUES (?, ?, ?)', (string) $school_id, $src_course_id, $form_state['duplication']['dest_catalog_year']);    
-              
-    } // foreach courses  
-    
-  } // if isset courses
-    
-  
-  
-    
-} // _form_submit
+} 
 
 
-
-
-/**
- * Based on the student's degrees, return an array of schools
- * that the student belongs to. 
- */
-function z__schools_get_schools_for_student($cwid) {
-  
-  $schools = array();
-  
-  $db = get_global_database_handler();
-    
-  $student_majors = fp_get_student_majors($cwid);
-  
-  $catalog_year = $db->get_student_catalog_year($cwid);
-  
-  // For each major, find out what school (if any) it belongs to.
-  foreach ($student_majors as $major) {
-    
-    $degree_id = $db->get_degree_id($major, $catalog_year);
-    
-    $school = schools_get_school_for_entity_type($degree_id, 'degree', $catalog_year, FALSE);
-    
-    $schools[$school] = $school;
-    
-  }
-  
-  return $schools;
-  
-}
-
-
-
-
-
-/**
- * Get the currently selected school_id for degree, group, or course.
- * 
- * entity_id = course_id, degree_id, etc.
- * entity_type = 'course', 'degree', etc.
- */
-function z__schools_get_school_for_entity_type($entity_id, $entity_type, $catalog_year, $bool_draft = TRUE) {
-  
-  $table_name = 'schools_data';
-  if ($bool_draft) $table_name = 'draft_' . $table_name;
-  
-  $res = db_query("SELECT school_id 
-                   FROM $table_name
-                   WHERE {$entity_type}_id = ?
-                   AND catalog_year = ?", array($entity_id, $catalog_year)); 
-  
-  if ($cur = db_fetch_object($res)) {
-  
-    return $cur->school_id;
-    
-  }
-  
-  
-  return '';  // couldn't find it.
-  
-}
 
 
 
@@ -940,15 +846,19 @@ function schools_data_form_submit($form, &$form_state) {
 
 
 
+
+// NOTE:  We no longer need to do anything when we apply draft changes.
 /**
  * Implements hook_apply_draft_changes
  * 
  * This runs when the user "applies draft changes".  We want to
  * copy from our draft_ table to our production table.
  */
-function schools_apply_draft_changes() {
-    
+function z__schools_apply_draft_changes() {
   
+  
+    
+  /*
   $table_name = "schools_data";
   $draft_table_name = "draft_$table_name";
   
@@ -960,6 +870,8 @@ function schools_apply_draft_changes() {
   $query = "INSERT INTO $table_name
           SELECT * FROM $draft_table_name ";
   $res = db_query($query);
+  */
+  
   
 } // hook_apply_draft_changes
 

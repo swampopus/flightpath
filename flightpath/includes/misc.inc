@@ -1996,7 +1996,7 @@ function fpmct($val, $var = "") {
  */
 function fp_html_print_r($var, $name = "", $cnt = 0, $max_levels = 20) {  
   $rtn = "";
-    
+  
   if ($cnt > $max_levels) {
     // Max levels deep.  Deeper, and PHP might run
     // out of memory or complain.
