@@ -3666,7 +3666,7 @@ function draw_menu_items($menu_array) {
 
 		$js_code = "selectCourseFromGroup(\"$group->group_id\", \"$group->assigned_to_semester_num\", \"$remaining_hours\", \"$blank_degree_id\",\"$req_by_degree_id\",\"$dialog_title\");";
 
-		$row_msg = "<em>" . t("Click") . " <span style='color:red;' class='group-select-arrows'>&gt;&gt;</span> " . t("to select %drh hour$s.", array("drh" => $disp_remaining_hours)) . "</em>";
+		$row_msg = "<em>" . t("Click") . " <span style='color:red;' class='group-select-arrows'>&gt;&gt;</span> " . t("to select @drh hour$s.", array("@drh" => $disp_remaining_hours)) . "</em>";
     if ($remaining_hours > 200) {
       // Don't bother showing the remaining hours number.
       $row_msg = "<em>" . t("Click") . " <span style='color:red;' class='group-select-arrows'>&gt;&gt;</span> " . t("to select additional courses.") . "</em>";
