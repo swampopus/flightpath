@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-06-15
+  Added more literal strings to t() function so they can be translated.
+  
+
 2021-06-13
   Changed system.install so that institution_id is a 100 varchar in the database, instead of 10.  Also made `name` an index for transfer_institutions table.
   
