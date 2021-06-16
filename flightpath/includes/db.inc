@@ -375,6 +375,8 @@ function fp_load_user($user_id) {
   $rtn->cwid = $cur->cwid;
   $rtn->is_student = (bool) $cur->is_student;
   $rtn->is_faculty = (bool) $cur->is_faculty;
+  $rtn->is_disabled = (bool) $cur->is_disabled;
+  $rtn->last_login = (int) $cur->last_login;
   $rtn->roles = array();
   $rtn->permissions = array();
     
