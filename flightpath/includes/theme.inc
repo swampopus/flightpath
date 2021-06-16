@@ -781,6 +781,8 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
       
   $rtn = "";
   
+  // Call a hook to possibly add more items to our profile items.
+  invoke_hook("alter_student_profile_items", array($bool_mini, &$extra_profile_items));
   
   
   if (is_object($screen) && is_object($screen->degree_plan)) {
@@ -1042,18 +1044,40 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
               </div> <!-- profile-image -->              
               ";
   }
+  
+  
+  $school_html = $school_name = "";
+  if (function_exists("schools_menu")) {
+    // If we have schools module enabled, let's find out what school this student belongs to and display it
+    $defs = schools_get_school_definitions(TRUE);
+    $temp = @$defs[$student->school_id];
+    if ($temp) {
+      $school_html .= "             
+                          <div class='profile-detail-line profile-inline-line profile-detail-line-school profile-line-detail-school-$student->school_id'>
+                            <label>" . t("School:") . "</label> <span class='profile-line-content'>" . $temp['name'] . "</span>
+                            
+                          </div>
+      ";
+    }
+    
+  }
+  
+  
+  
   $rtn .= "        <div class='profile-top-details-wrapper profile-top-wrapper-left-side'>
                           <div class='profile-detail-line profile-detail-line-student-name-cwid'>
                             <h2>$student->name &nbsp; &nbsp; ($student->student_id)</h2>                                                        
                           </div>
             
+                          $school_html
+            
                           <div class='profile-detail-line profile-inline-line profile-detail-line-degree'>
-                            <label>Degree$s:</label> <span class='profile-line-content'>$degree_title_div</span>
+                            <label>" . t("Degree$s:") . "</label> <span class='profile-line-content'>$degree_title_div</span>
                             
                           </div>
                           
                           <div class='profile-detail-line profile-inline-line profile-detail-line-cat-year'>
-                            <label>Catalog Year:</label> <span class='profile-line-content'>$cat_year</span>
+                            <label>" . t("Catalog Year:") . "</label> <span class='profile-line-content'>$cat_year</span>
                           </div>  
                           ";
     if (isset($extra_profile_items['left_side'])) {

@@ -404,10 +404,12 @@ function fp_load_user($user_id) {
   // Load settings from the user_settings table (if any exist)
   $rtn->settings = array();
   $res = db_query("SELECT * FROM user_settings WHERE user_id = ?", array($user_id));
-  $cur = db_fetch_array($res);
-  if ($cur) {
-    $rtn->settings = $cur;
+  while ($cur = db_fetch_array($res)) {  
+    $rtn->settings[$cur['name']] = $cur['value'];  
   }
+  
+    
+  
   
   // Set the user image url...  
   // See if there are any other modules which might be overriding how we look up user images.  
@@ -423,14 +425,13 @@ function fp_load_user($user_id) {
   
   
   
-  // If student, load attributes from student_attributes table (if any exist)
+  // load attributes from user_attributes table (if any exist)
   $rtn->attributes = array();
-  if ($rtn->is_student) {
-    $rtn->attributes = fp_get_student_attributes($rtn->cwid);
+  $res = db_query("SELECT * FROM user_attributes WHERE user_id = ?", array($user_id));
+  while ($cur = db_fetch_array($res)) {  
+    $rtn->attributes[$cur['name']] = $cur['value'];  
   }
-  else if ($rtn->is_faculty) {
-    $rtn->attributes = fp_get_faculty_attributes($rtn->cwid);
-  }
+
  
   return $rtn;  
 }
@@ -464,32 +465,6 @@ function fp_get_user_timezone($account = NULL) {
 }
 
 
-function fp_get_student_attributes($student_id) {
-  $rtn = array();
-  
-  $res = db_query("SELECT * FROM student_attributes WHERE student_id = ? ", array($student_id));
-  $cur = db_fetch_array($res);
-  if ($cur) {
-    $rtn = $cur;
-  }
-  
-  
-  return $rtn;
-}
-
-
-function fp_get_faculty_attributes($faculty_id) {
-  $rtn = array();
-  
-  $res = db_query("SELECT * FROM faculty_attributes WHERE faculty_id = ? ", array($faculty_id));
-  $cur = db_fetch_array($res);
-  if ($cur) {
-    $rtn = $cur;
-  }
-  
-  
-  return $rtn;
-}
 
 
 

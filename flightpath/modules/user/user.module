@@ -479,19 +479,13 @@ function user_user_settings_form_submit($form, $form_state) {
   }  
   
   
-  
-  // Make sure we have a row in the table.
-  user_init_user_settings_db_row($user);
+
+  user_set_setting($user->id, "timezone", $timezone);
+  user_set_setting($user->id, "hide_charts", $hide_charts);
+  user_set_setting($user->id, "default_student_load_tab", $default_student_load_tab);
+  user_set_setting($user->id, "default_notification_method", $default_notification_method);
+  user_set_setting($user->id, "image_url", $image_url);
     
-  // Now, update with our fields.
-  db_query("UPDATE user_settings
-              SET timezone = ?,
-                  hide_charts = ?,
-                  default_student_load_tab = ?,
-                  default_notification_method = ?,
-                  image_url = ?,                  
-                  updated = ?
-            WHERE user_id = ?", array($timezone, $hide_charts, $default_student_load_tab, $default_notification_method, $image_url, time(), $user->id));
   
   fp_add_message(t("User settings saved successfully."));
   $values = $form_state['values'];
@@ -503,14 +497,57 @@ function user_user_settings_form_submit($form, $form_state) {
 } // user_settings_form_submit
 
 
-function user_init_user_settings_db_row($user) {
-  // Make sure the user has a record in the user_settings table.
-  $test = db_result(db_query('SELECT user_id FROM user_settings WHERE user_id = ?', array($user->id)));
-  if (!$test || $test == 0 || $test != $user->id) {
-    db_query('INSERT INTO user_settings(user_id) VALUES (?) ', array($user->id));
-  }
-  
+
+/**
+ * Very similar to variable_set
+ */
+function user_set_setting($user_id, $name, $value) {
+  db_query("REPLACE INTO user_settings (user_id, name, value, updated) VALUES (?, ?, ?, ?)", array($user_id, $name, $value, time()));
 }
+
+
+
+/**
+ * Very similar to variable_get
+ */
+function user_get_setting($user_id, $name, $default_value = "") {
+  $val = db_result(db_query("SELECT value FROM user_settings WHERE user_id = ? AND name = ?", array($user_id, $name)));
+
+  if (!$val) {
+    $val = $default_value;
+  }
+
+  
+  return $val;
+}
+
+
+
+/**
+ * Very similar to variable_set
+ */
+function user_set_attribute($user_id, $name, $value) {
+  db_query("REPLACE INTO user_attributes (user_id, name, value, updated) VALUES (?, ?, ?, ?)", array($user_id, $name, $value, time()));
+}
+
+
+
+/**
+ * Very similar to variable_get
+ */
+function user_get_attribute($user_id, $name, $default_value = "") {
+  $val = db_result(db_query("SELECT value FROM user_attributes WHERE user_id = ? AND name = ?", array($user_id, $name)));
+
+  if (!$val) {
+    $val = $default_value;
+  }
+
+  
+  return $val;
+}
+
+
+
 
 
 

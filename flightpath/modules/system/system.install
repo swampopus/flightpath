@@ -814,21 +814,18 @@ CREATE TABLE `user_roles` (
 ); ";
 db_query($q);
 
+
 $q = "
 CREATE TABLE `user_settings` (
-  `user_id` int NOT NULL,
-  `timezone` varchar(255) DEFAULT NULL,
-  `hide_charts` varchar(255) DEFAULT NULL,
-  `default_student_load_tab` varchar(255) DEFAULT NULL,
-  `default_notification_method` varchar(255)DEFAULT NULL,
-  `image_url` varchar(255) DEFAULT NULL,
-  `updated` int unsigned DEFAULT NULL,
-  PRIMARY KEY (`user_id`),
-  KEY `timezone` (`timezone`),
-  KEY `hide_charts` (`hide_charts`),
-  KEY `updated` (`updated`),
-  KEY `default_student_load_tab` (`default_student_load_tab`),
-  KEY `default_notification_method` (`default_notification_method`)
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `value` text DEFAULT NULL,
+  `updated` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`user_id`,`name`),
+  KEY `value` (`value`(768)),
+  KEY `user_id` (`user_id`),
+  KEY `name` (`name`),
+  KEY `updated` (`updated`)
 );";
 db_query($q);
 
@@ -885,28 +882,16 @@ db_query($q);
 
 
 $q = "
-CREATE TABLE `student_attributes` (
-  `student_id` varchar(30) NOT NULL,
-  `mobile_phone` varchar(255) DEFAULT '',
-  `athlete` varchar(255) DEFAULT '',
-  `student_worker` varchar(255) DEFAULT '',
-  `enrollment_code` varchar(255) DEFAULT '',
-  `financial_aid` varchar(255) DEFAULT '',
-  PRIMARY KEY (`student_id`),
-  KEY `mobile_phone` (`mobile_phone`),
-  KEY `athlete` (`athlete`),
-  KEY `student_worker` (`student_worker`),
-  KEY `enrollment_code` (`enrollment_code`),
-  KEY `financial_aid` (`financial_aid`)
-);  ";
-db_query($q);
-
-
-$q = "
-CREATE TABLE `faculty_attributes` (
-  `faculty_id` varchar(30)  NOT NULL,
-  `mobile_phone` varchar(255)  DEFAULT NULL,
-  PRIMARY KEY (`faculty_id`) 
+CREATE TABLE `user_attributes` (
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `value` text DEFAULT NULL,
+  `updated` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`user_id`,`name`),
+  KEY `value` (`value`(768)),
+  KEY `user_id` (`user_id`),
+  KEY `name` (`name`),
+  KEY `updated` (`updated`)
 );  ";
 db_query($q);
 

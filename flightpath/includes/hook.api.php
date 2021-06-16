@@ -109,14 +109,34 @@ function fpl_reports_stats_additional_menublocks() {
  * NOTE: Because of when this hook is invoked, the fpm() function will not work
  * correctly to debug variables.  Use ppm($var) instead.
  */
-function hook_alter_currently_advising_box(&$display_array) {
+ /*   No longer being used.  Replaced by @see hook_alter_student_profile_items
+function z__hook_alter_currently_advising_box(&$display_array) {
 
   // Add to the end...  
   $display_array[] = 'Extra: ~~ Values';
   
 }
+*/
 
 
+
+/**
+ * This hook is called before displaying the student profile box (which appears at the top of the screen
+ * on the profile page, as well as other tabs.  If bool_mini is set to TRUE, then it means we are showing an
+ * abbreviated display, like on the Degree tab.  If FALSE, it means we are showing everything, like on the student
+ * profile tab.
+ * 
+ * Notice that the $extra_profile_items are passed by reference.  There is no need to return a value as a result. 
+ */
+function hook_alter_student_profile_items($bool_mini, &$extra_profile_items) {
+  
+  // Add this item for test scores:  
+  $extra_profile_items['right_side'][] = array(
+    'label' => 'ACT Score:',
+    'content' => '33 (28 E / 35 M)',  
+  );
+  
+}
 
 
 

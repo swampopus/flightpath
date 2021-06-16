@@ -1492,15 +1492,15 @@ function engagements_form_alter(&$form, $form_id) {
           }
           
           
-          
+          $student_user_id = db_get_user_id_from_cwid($_GET['student_id'], 'student');
           
           if ($form['engagement_type']['value'] == 'txt_msg') {
             // get phone number
             
             $extra_mark = "(NO MOBILE NUMBER AVAILABLE)";
             
-            $temp = fp_get_student_attributes($form['student_id']['value']);
-            $mobile_phone = trim(@$temp['mobile_phone']);
+            
+            $mobile_phone = user_get_attribute($student_user_id, "mobile_phone");
             if ($mobile_phone) {
               $extra_mark = engagements_convert_to_pretty_phone_number($mobile_phone, TRUE);
             }

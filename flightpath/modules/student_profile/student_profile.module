@@ -97,11 +97,14 @@ function student_profile_display_student_profile_page() {
   if (!isset($student) || $student == null || !is_object($student)) {
     $student = new Student($current_student_id);
   }  
-   
-   
+  
     
   $student_id = $current_student_id;
   $rtn = "";
+  
+  $student_user_id = db_get_user_id_from_cwid($student_id, 'student');
+  $student_user = fp_load_user($student_user_id);
+    
   
   fp_add_css(fp_get_module_path('student_profile') . '/css/style.css');
   fp_add_js(fp_get_module_path('advise') . '/js/advise.js');
@@ -148,18 +151,28 @@ function student_profile_display_student_profile_page() {
     $active_status = t('Inactive');
   }
   
-  $profile_items['left_side'][] = array(
-    'label' => 'Status:',
+  $profile_items['left_side']['active_status'] = array(
+    'label' => t('Status:'),
     'content' => $active_status,
   );
-  $profile_items['left_side'][] = array(
-    'label' => 'Athlete?:',
-    'content' => 'No',
-    'mobile_content' => 'Non-Athlete',
-  );
   
   
-  $profile_items['left_side'][] = array(
+  if (@$student_user->attributes['athlete'] == 'yes') {
+    $profile_items['left_side']['athlete'] = array(
+      'label' => t('Athlete?:'),
+      'content' => t('Yes'),
+      'mobile_content' => t('Athlete'),
+    );    
+  }    
+  else {
+    $profile_items['left_side']['athlete'] = array(
+      'label' => t('Athlete?:'),
+      'content' => t('No'),
+      'mobile_content' => t('Non-Athlete'),
+    );
+  }
+  
+  $profile_items['left_side']['d_f_percent'] = array(
     'label' => 'D%/F%:',
     'content' => "$percent_D% $D_link / $percent_F% $F_link",
   );
@@ -174,38 +187,42 @@ function student_profile_display_student_profile_page() {
     $machine = $temp['machine'];
     $label = $temp['label'];
     
-    $profile_items['left_side'][] = array(
-      'label' => 'Academic Priority:',
+    $profile_items['left_side']['academic_priority'] = array(
+      'label' => t('Academic Priority:'),
       'content' => "<span class='profile-priority-bar priority-$machine'>$label</span> <a href='javascript:popupLargeIframeDialog(\"$url\",\"$title\");'><i class='fa fa-question-circle'></i></a>",
     );
   }
   //////
   
-  // TODO:  get this for real
-  $profile_items['right_side'][] = array(
-    'label' => 'Enrollment Code:',
-    'content' => 'C',  
-    'mobile_content' => 'Enrollment Code: C',
+  
+  $enrollment_code = trim(@$student_user->attributes['enrollment_code']);
+  if ($enrollment_code == "") $enrollment_code = "N/A";
+  
+  $profile_items['right_side']['enrollment_code'] = array(
+    'label' => t('Enrollment Code:'),
+    'content' => $enrollment_code,  
+    'mobile_content' => t('Enrollment Code:') . ' ' . $enrollment_code,
   );
   
-  // TODO:  get for real
-  $profile_items['right_side'][] = array(
-    'label' => 'Student Worker?:',
-    'content' => 'No',  
-    'mobile_content' => 'Not Student Worker',
+  
+  $financial_aid = trim(@$student_user->attributes['financial_aid']);
+  if ($financial_aid == "") $financial_aid = t("None");
+    
+  $profile_items['right_side']['financial_aid'] = array(
+    'label' => t('Financial Aid:'),
+    'content' => $financial_aid,  
+    'mobile_content' => t("Fin. Aid:") . ' ' . $financial_aid,
   );
-  $profile_items['right_side'][] = array(
+  
+  
+  $profile_items['right_side']['w_percent'] = array(
     'label' => 'W%:',
     'content' => "$percent_W% $W_link",  
   );
   
-  if ($user->is_faculty) {
-    $profile_items['right_side'][] = array(
-      'label' => 'ACT Score:',
-      'content' => '33 (28 E / 35 M)',  
-    );
-  }
   
+  
+ 
   
   
   $rtn .= "<div class='student-profile-header-full'>";
@@ -223,72 +240,10 @@ function student_profile_display_student_profile_page() {
   // Take advantage of our "alerts form" from the alerts module.  
   $rtn .= fp_render_form("alerts_advisees_alerts_form", "normal", $student_id, 5);
   
-   
   
-  /*
-  
-  $rtn .= "<table border='0' class='student-alerts'>
-             <thead>
-             <tr>
-               <th>Actions</th>
-               <th>Status</th>
-               <th>Short Description</th>
-               <th class='author'>Updated By</th>
-               <th class='updated'>Updated On</th>
-             </tr>
-             </thead>    ";
-
-
-  // Query for alerts for this student.  We will be using a pager_query, so we can display a complete history, if we wish.
-  $res = pager_query("SELECT DISTINCT(a.cid) FROM content__alert a, content n
-                   WHERE field__student_id = ?
-                   AND a.vid = n.vid
-                   AND a.cid = n.cid
-                   AND n.delete_flag = 0
-                   AND n.published = 1                                    
-                   ORDER BY updated DESC, a.vid DESC", array($current_student_id), 5, 0, "SELECT COUNT(DISTINCT(a.cid)) FROM content__alert a, content n
-                                                                                                         WHERE field__student_id = ?
-                                                                                                         AND a.vid = n.vid
-                                                                                                         AND a.cid = n.cid
-                                                                                                         AND n.delete_flag = 0
-                                                                                                         AND n.published = 1");  
-
-  while ($cur = db_fetch_object($res)) {
-    $cid = $cur->cid;
-    $content = content_load($cid);
-        
-    $updated = format_date(convert_time($content->updated), 'short');
-    $author = "System";
-    if ($content->user_id != ALERT_SYSTEM_USER_ID) {
-      $tuser = fp_load_user($content->user_id);
-      $author = fp_get_faculty_name($tuser->cwid);
-    }
     
-    $extra_class = "";
-    // If this content hasn't been read by this user, mark as "unread"
-    if (!content_get_last_access($cid)) {
-      $extra_class .= " unread";
-    }    
-        
-     
-    $rtn .= "
-      <tr class='{$content->field__alert_status['value']} $extra_class'>
-        <td class='actions'><i class='fa fa-eye'></i></td>
-        <td class='status'>{$content->field__alert_status['display_value']}</td>
-        <td class='short-desc'><div class='short-desc-wrapper'>{$content->title}</div></td>
-        <td class='author'>$author</td>
-        <td class='updated'>$updated</td>
-      </tr>
-    ";
-  } // while cur
-
   
-  $rtn .= "</table>";
-  
-  $rtn .= theme_pager(array(t('« newest'), t('‹ newer'), '', t('older ›'), t('oldest »')));
-  
-  */
-  
+    
   
   // Let's set our breadcrumbs
   $db = get_global_database_handler();
@@ -305,7 +260,11 @@ function student_profile_display_student_profile_page() {
   fp_set_breadcrumbs($crumbs);
   
   
-  
+    
   return $rtn;
 } // display student profile page
+
+
+
+
 

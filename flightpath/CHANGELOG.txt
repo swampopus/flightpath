@@ -4,8 +4,18 @@ FlightPath 6.x Changelog
 
 2021-06-16
   Adding in new setting to disable all student logins (unless whitelisted).  It's in the System Settings form.
-  
+
   Added is_disabled and last_login to fields in the user object.
+
+  Added new hook to allow easy manipulation of student profile items in the "currently advising" box at top of screen.
+
+  Changing user_settings to be a key/value pair type table, making it easy to add new settings in the future.
+
+  Created new table called "user_attributes", and it's used the same as user_settings.  This lets us store details about
+  a student, for example, if they are an athlete or student worker, etc, w/o having to hard-code any values.  We are removing the
+  student_attributes and faculty_attributes tables at the same time; user_attributes will replace both tables.
+  
+  
 
 2021-06-15
   Added more literal strings to t() function so they can be translated.
