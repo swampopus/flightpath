@@ -329,7 +329,15 @@ function system_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
   );
   
+  $items["disable-student-login"] = array(
+    "title" => "Student Logins Disabled",
+    "page_callback" => "system_display_disable_login_page",
+    "page_arguments" => array("student"),
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );
   
+    
   
  $items["admin-tools/clear-cache"] = array(
     "title" => t("Clear all cache"),
@@ -646,14 +654,26 @@ function system_can_access_student($student_id = "") {
 
 
 
-function system_display_disable_login_page() {
+function system_display_disable_login_page($type = "all") {
   $rtn = "";
   
-  $rtn .= "<h2>Logins Currently Disabled</h2>
-          We're sorry, but logins are disabled at this time due to maintenance on FlightPath.
-          <br><br>Please try again later.
-          <br><br>
-          " . l("Return to login page", "<front>") . "";
+  
+  if ($type == "all") {
+  
+    $rtn .= "<h2>Logins Currently Disabled</h2>
+            We're sorry, but logins are disabled at this time due to maintenance on FlightPath.
+            <br><br>Please try again later.
+            <br><br>
+            ";
+  }
+  
+  
+  if ($type == "student") {      
+    $rtn .= t("We're sorry, but student logins are disabled at this time.");
+  }
+  
+  
+  $rtn .= "        " . l("Return to login page", "<front>") . "";
   
   
   
@@ -2012,15 +2032,30 @@ function system_settings_form() {
                         what to select, select 'No'."), 
   );                                
 
+  
+  $form["disable_student_logins"] = array(
+    "type" => "select",
+    "label" => t("Disable all new student logins?"),
+    "hide_please_select" => TRUE,
+    "options" => array("no" => t("No"), "yes" => t("Yes")),
+    "value" => variable_get('disable_student_logins', 'no'),
+    "description" => t("If set to Yes, then when student users (not specified in the whitelist below) attempt to log in, they will be
+                        sent back to the login page, with a message displayed explaning that
+                        student logins are disabled.  Admin and faculty/staff will still be able to log in.  
+                        If unsure what to select, select 'No'."), 
+  );                                
+  
+  
+  
 
   $form["user_whitelist"] = array(
     "type" => "textarea",
-    "label" => t("Only allow certain users to log in:"),    
+    "label" => t("Only allow certain users to log in (whitelist):"),    
     "value" => variable_get('user_whitelist', ''),
     "description" => t("You may explicitly state which users are allowed to log in to FlightPath at this time.
-                        Enter usernames OR email addresses, one per line.  Users who are not part of this whitelist
+                        Enter usernames, email addresses, or CWIDs, one per line.  Users who are not part of this whitelist
                         will be returned to the login screen, with a message stating that the system is only allowing
-                        certain users to log in at this time.  
+                        certain users to log in at this time.   
                         <br>Note: the admin user
                         will always be able to log in.  To disable, simply erase the contents of
                         this box and save."), 
@@ -2798,11 +2833,16 @@ function system_login_form() {
     fp_add_message(t("Sorry, but only certain users are allowed access at this time.  If you believe you need access, please contact your system administrator."), 'error', TRUE);
   }
   
-  // Are we here because the user was not found in the whitelist?
+  // Are we here because the user was not found at all?
   if (isset($_REQUEST['user']) && $_REQUEST['user'] == 'notfound') {
     fp_add_message(t("Sorry, but the user you specified could not be found in FlightPath's database.  If you believe you need access, please contact your system administrator."), 'error', TRUE);
   }
   
+  // Are we here because the user was not found in the whitelist?
+  if (isset($_REQUEST['user']) && $_REQUEST['user'] == 'disabled') {
+    fp_add_message(t("Sorry, but the user you specified has been marked as disabled.  If you believe you need access, please contact your system administrator."), 'error', TRUE);
+  }
+
     
   
   $form["user"] = array(
@@ -2906,7 +2946,6 @@ function system_login_form_validate($form, &$form_state) {
   }
   
   
-  
   // If this is a student, does this student have an accepted "allowed rank" (ie, FR, SO, JR, etc)?
   $allowed_ranks_str = variable_get("allowed_student_ranks", "FR, SO, JR, SR");
   $allowed_ranks = csv_to_array($allowed_ranks_str);
@@ -2925,14 +2964,34 @@ function system_login_form_validate($form, &$form_state) {
 
 
   // Do we have a "whitelist" and is this user part of it?  Note: ignore if we are admin.
-  if (intval($cur['user_id']) !== 1 && $list = system_get_user_whitelist()) {   
-    if (!in_array($cur['user_name'], $list) && ($cur['email'] != '' && !in_array($cur['email'], $list))) {
+  $bool_pass_whitelist_test = FALSE;
+  $list = system_get_user_whitelist();
+  if (intval($cur['user_id']) !== 1 && $list) {   
+    if (!in_array($cur['user_name'], $list) && !in_array($cur['cwid'], $list) && ($cur['email'] != '' && !in_array($cur['email'], $list))) {
       form_error("password", t("Sorry, but only certain users are allowed access at this time.  If you believe you need access, please contact your system administrator."));
       watchdog("login", "@user has not logged in.  Only certain users allowed at this time.", array("@user" => $user), WATCHDOG_ALERT);
       return; 
     }
+    else {
+      // user is listed in the whitelist.
+      $bool_pass_whitelist_test = TRUE;
+    }  
+  }
+  else {
+    // There was no whitelist.
+    $bool_pass_whitelist_test = TRUE;
   }
 
+  
+  // Have we disabled all student logins AND this student was not in the whitelist?
+  if (intval($cur['is_student']) == 1 && variable_get('disable_student_logins', 'no') == 'yes') {
+    if ($list && $bool_pass_whitelist_test == FALSE || !$list) {
+      // There was a whitelist and we didn't pass, OR, there was no whitelist.      
+      watchdog("login", "@user has not logged in.  Student logins are disabled.", array("@user" => $user), WATCHDOG_ALERT);
+      fp_goto("disable-student-login");    
+      return;    
+    }
+  }
 
     
   

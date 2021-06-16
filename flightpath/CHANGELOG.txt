@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2021-06-16
+  Adding in new setting to disable all student logins (unless whitelisted).  It's in the System Settings form.
+  
+
 2021-06-15
   Added more literal strings to t() function so they can be translated.
   
