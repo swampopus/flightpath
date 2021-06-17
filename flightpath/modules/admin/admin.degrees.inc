@@ -2205,7 +2205,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
                                 However, the group was previously specified in this degree plan in block %otherblocknum wih a different requirement type or min grade.
                                 FlightPath will not perform calculations correctly for courses assigned to this group.  The duplicate occurance of the group should have the same
                                 type/min grade, or, you need to create a new group to handle these alternate requirements.</strong>"
-                                , array("#blocknum" => ($semester_num+1), "%group"=> $adding_group->title, "%mingrade" => $min_grade, "%req" => $type, "%otherblocknum" => ($cur['semester_num'] + 1))));
+                                , array("%blocknum" => ($semester_num+1), "%group"=> $adding_group->title, "%mingrade" => $min_grade, "%req" => $type, "%otherblocknum" => ($cur['semester_num'] + 1))));
 
             
     }
