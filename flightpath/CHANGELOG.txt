@@ -5,6 +5,8 @@ FlightPath 6.x Changelog
 2021-06-17
   Fixed small typo in form_error() message when rejecting a saved degree.
   
+  In student_search module, got rid of the "majors"-related permissions.  Also cleaned up code which had been commented out.
+  
 
 2021-06-16
   Adding in new setting to disable all student logins (unless whitelisted).  It's in the System Settings form.

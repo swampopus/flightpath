@@ -34,10 +34,6 @@ function student_search_menu() {
     "page_callback" => "student_search_subtab_switchboard",
     "access_callback" => "search_user_can_search_for_some_advisees",    
     "type" => MENU_TYPE_NORMAL_ITEM,
-    /*"tab_family" => "system",
-    "page_settings" => array(
-      "page_has_search" => TRUE,
-    ),*/    
     "weight" => 20,
   );
   
@@ -45,11 +41,7 @@ function student_search_menu() {
   $items["student-select"] = array(    
     "page_callback" => "student_search_student_select_switchboard",
     "access_callback" => "search_user_can_search_for_some_advisees",    
-    "type" => MENU_TYPE_NORMAL_ITEM,
-    /*"tab_family" => "system",
-    "page_settings" => array(
-      "page_has_search" => TRUE,
-    ),*/    
+    "type" => MENU_TYPE_NORMAL_ITEM,   
     "weight" => 20,
   );  
   
@@ -69,39 +61,6 @@ function student_search_menu() {
   );
   
   
-  /*
-  $items["student-search/my-majors"] = array(
-    "title" => t("My Majors"),
-    "page_callback" => "student_search_display_my_majors",
-    "access_arguments" => array("display_my_majors_subtab"),
-    "type" => MENU_TYPE_TAB,
-    "tab_family" => "student_search",
-    "page_settings" => array (
-      "display_currently_advising" => TRUE,
-      "display_greeting" => TRUE,
-      "screen_mode" => "not_advising",
-      "page_has_search" => TRUE,      
-    ),    
-    "weight" => 20,
-  );
-  
-
-  
-  $items["student-search/majors-search"] = array(
-    "title" => t("Majors"),
-    "page_callback" => "student_search_display_majors_search",
-    "access_arguments" => array("display_majors_subtab"),
-    "type" => MENU_TYPE_TAB,
-    "tab_family" => "student_search",
-    "page_settings" => array (
-      "display_currently_advising" => TRUE,
-      "display_greeting" => TRUE,
-      "screen_mode" => "not_advising",
-      "page_has_search" => TRUE,      
-    ),    
-    "weight" => 25,
-  );  
-  */
 
   $items["student-search/search"] = array(
     "title" => t("Search"),
@@ -110,7 +69,6 @@ function student_search_menu() {
     "access_arguments" => array("display_search_subtab"),
     "type" => MENU_TYPE_TAB,
     "tab_family" => "student_search",
-    //"tab_parent" => "student-search",
     "page_settings" => array (
         "screen_mode" => "not_advising",
         "page_has_search" => TRUE,      
@@ -356,8 +314,6 @@ function student_search_display_my_advisees($bool_only_return_adv_array = FALSE,
 function search_user_can_search_for_some_advisees() {
   if (user_has_permission("display_search_subtab")) return TRUE;
   if (user_has_permission("display_my_advisees_subtab")) return TRUE;
-  if (user_has_permission("display_my_majors_subtab")) return TRUE;
-  if (user_has_permission("display_majors_subtab")) return TRUE;
   
   return FALSE;
 }
@@ -382,7 +338,8 @@ function student_search_perm() {
     "display_my_advisees_subtab" => array(
       "title" => t("Display My Advisees subtab"),
       "description" => t("The user may view the My Advisees subtab under the Advisees tab."),
-    ),    
+    ),
+    /*    
     "display_my_majors_subtab" => array(
       "title" => t("Display My Majors subtab"),
       "description" => t("The user may view the My Majors subtab under the Advisees tab."),
@@ -390,7 +347,9 @@ function student_search_perm() {
     "display_majors_subtab" => array(
       "title" => t("Display Majors subtab"),
       "description" => t("The user may view the Majors (search) subtab under the Advisees tab."),
-    ),        
+    ),
+     * 
+     */        
   );
 }
 
