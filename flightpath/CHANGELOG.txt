@@ -1,6 +1,9 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-06-22
+  Fixed bug in user module where adding a new faculty user caused mysql error.
+  
 
 2021-06-17
   Fixed small typo in form_error() message when rejecting a saved degree.
