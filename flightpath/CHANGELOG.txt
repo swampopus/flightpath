@@ -4,6 +4,10 @@ FlightPath 6.x Changelog
 2021-06-22
   Fixed bug in user module where adding a new faculty user caused mysql error.
   
+  Added a backtrace (like we do for MySQL errors) to the PHP error handler in misc.inc.  Also adding to watchdog
+  when we get a warning or error from the handler.
+  
+  
 
 2021-06-17
   Fixed small typo in form_error() message when rejecting a saved degree.

@@ -239,28 +239,37 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
   
   if (stristr($err_name, 'notice')) return FALSE; // don't care about Notices. 
   
+  $arr = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 10);  // limit of 10 levels deep so as not to eat up all the memory.
   // fpm() only displays for privileged users
   fpm($err_name . ": $message<br>... ($line) $filename");
+  fpm($arr);
+
+
+  $hostname = php_uname('n') . ' - ' . $GLOBALS['fp_system_settings']['base_url'];
+  
+  $msg = "";
+  $msg .= "SERVER:   $hostname \n";
+  $msg .= "DATE:     " . format_date() . "\n";
+  $msg .= "SEVERITY: $err_name \n";
+  $msg .= "--------------------------\n\n";
+  $msg .= "$err_name: $message \n\n";
+  $msg .= "... ($line) $filename\n\n";
+  $msg .= "Backtrace: <pre>\n";
+  $msg .= print_r($arr, TRUE);
+  $msg .= "\n\n</pre>";
+
+
+  watchdog('php_error', $msg, array(), WATCHDOG_ALERT);
+
   
   if (@$user->id !== '1' && @$user->id !== 1) {
-    // We are NOT the admin user.
+    // We are NOT the admin user.  (No need to email, since it would appear on screen with the fpm() calls earlier.
     
     // Should we email someone, as with mysql errors?
     $tomail = trim(variable_get("notify_php_error_email_address", ""));
+      
     if ($tomail != "") {
-      
-      $hostname = php_uname('n') . ' - ' . $GLOBALS['fp_system_settings']['base_url'];
-      
-      $msg = "";
-      $msg .= "SERVER:   $hostname \n";
-      $msg .= "DATE:     " . format_date() . "\n";
-      $msg .= "SEVERITY: $err_name \n";
-      $msg .= "--------------------------\n\n";
-      $msg .= "$err_name: $message \n\n";
-      $msg .= "... ($line) $filename";
-      
-      fp_mail($tomail, "PHP Error in FlightPath", $msg);
-      
+      fp_mail($tomail, "PHP Error in FlightPath", $msg);            
     }
     
   }
