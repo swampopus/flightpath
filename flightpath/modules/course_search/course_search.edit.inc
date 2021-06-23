@@ -196,7 +196,7 @@ function course_search_edit_course_details_form() {
   $form["submit"] = array(
     "type" => "submit",
     "value" => t("Submit"),
-    "prefix" => "<hr>",
+    "prefix" => "<hr>", 
   );
    
   

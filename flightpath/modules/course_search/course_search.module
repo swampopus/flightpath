@@ -277,7 +277,7 @@ function course_search_download_syllabus() {
     return;
   }
   
-  watchdog("syllabus", "get,$c", array(), WATCHDOG_DEBUG);
+  watchdog("syllabus", "get,$c");
   
   $content_type = "application/plain";  // default, save as generic binary file.
   $temp = explode("\.", $filename);
@@ -727,7 +727,7 @@ function course_search_display_courses() {
   }
 
 
-  watchdog("course_search", "User viewed courses in subject: @subject", array("@subject" => $subject_id), WATCHDOG_DEBUG);
+  watchdog("course_search", "User viewed courses in subject: @subject", array("@subject" => $subject_id));
 
 
   //$pC .= $screen->get_java_script_code();

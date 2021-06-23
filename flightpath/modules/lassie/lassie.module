@@ -141,7 +141,7 @@ function lassie_cron() {
   $last_check = variable_set("lassie_last_check", 0);
   if (time() < ($last_check + (45 * 60))) return; 
   
-  watchdog("lassie", "Lassie checking for any long-running jobs....");
+  watchdog("lassie", "Lassie checking for any long-running jobs....", array(), WATCHDOG_DEBUG);
   
   lassie_check_all();
   

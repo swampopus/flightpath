@@ -10,6 +10,10 @@ FlightPath 6.x Changelog
   Changed the way cookies are unset on logout, to fix an issue where they were not being unset correctly, but also
   to handle possible array notation in the cookie names.  See system.module
   
+  Made changes to watchdog severity level for certain types of data, in anticipation of a module which would delete, for example,
+  "WATCHDOG_DEBUG" entries after X amount of time, since they are the least important.  Also made changes to the PHP error handler
+  so it correctly identifies in the watchdog whether it was a PHP error or warning, and adjusts the severity constant accordingly.
+  
 
 2021-06-17
   Fixed small typo in form_error() message when rejecting a saved degree.

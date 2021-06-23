@@ -236,8 +236,17 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
   if (0 === error_reporting()) { return false;} // suppressed with @-operator
    
   $err_name = _fp_map_php_error_code($error_level); 
-  
   if (stristr($err_name, 'notice')) return FALSE; // don't care about Notices. 
+
+  
+  $watchdog_type = "php_error";
+  $watchdog_severity = WATCHDOG_ERROR;
+    
+  
+  if (stristr($err_name, 'warning')) {
+    $watchdog_type = "php_warning";
+    $watchdog_severity = WATCHDOG_ALERT;
+  } 
   
   $arr = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 10);  // limit of 10 levels deep so as not to eat up all the memory.
   // fpm() only displays for privileged users
@@ -259,8 +268,7 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
   $msg .= "\n\n</pre>";
 
 
-  watchdog('php_error', $msg, array(), WATCHDOG_ALERT);
-
+  watchdog($watchdog_type, $msg, array(), $watchdog_severity);
   
   if (@$user->id !== '1' && @$user->id !== 1) {
     // We are NOT the admin user.  (No need to email, since it would appear on screen with the fpm() calls earlier.

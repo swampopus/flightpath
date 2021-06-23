@@ -208,7 +208,7 @@ function blank_degrees_display_blank_degree() {
       
   fp_set_page_sub_tabs($tab_array);
   
-  watchdog("blank_degrees", "User viewed blank degree: @year,@degree,@title", array("@year" => $blank_catalog_year, "@degree" => $blank_degree_id, "@title" => $title), WATCHDOG_DEBUG);
+  watchdog("blank_degrees", "User viewed blank degree: @year,@degree,@title", array("@year" => $blank_catalog_year, "@degree" => $blank_degree_id, "@title" => $title));
   
   
   return $rtn;
@@ -235,7 +235,7 @@ function blank_degrees_perm() {
  */
 function blank_degrees_select_degree_form() {
   $form = array();
-  $m = 0;
+  $m = 0; 
   
   $bool_show_continue = TRUE;
   

@@ -23,7 +23,7 @@ if ($token != @$GLOBALS["fp_system_settings"]["cron_security_token"]) {
       source code for instructions on setting up your site's cron.");
 }
 
-watchdog("cron", "Cron run started", array(), WATCHDOG_NOTICE);
+watchdog("cron", "Cron run started", array(), WATCHDOG_DEBUG);
 invoke_hook("cron");
-watchdog("cron", "Cron run completed", array(), WATCHDOG_NOTICE);
+watchdog("cron", "Cron run completed", array(), WATCHDOG_DEBUG);
 variable_set("cron_last_run", time());
