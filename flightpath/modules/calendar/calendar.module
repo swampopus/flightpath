@@ -149,9 +149,9 @@ function calendar_menu() {
   //handle-zoom-install-redirect 
   $items['handle-zoom-install-redirect'] = array(
     'title' => t('Zoom Installed Successfully'),
-    'page_callback' => 'calendar_display_zoom_install_completed_page',    
+    'page_callback' => 'calendar_handle_zoom_install_redirect',    
     'access_callback' => TRUE,
-    'type' => MENU_TYPE_NORMAL_ITEM,    
+    'type' => MENU_TYPE_CALLBACK,    
   );
    
   
@@ -209,10 +209,13 @@ function calendar_zoom_settings_form() {
 } // calendar_zoom_settings_form
 
 
+
+
+
 /**
  * Return back the full install URL for the Zoom marketplace app, based on the calendar_zoom_settings_form.
  */
-function calendar_get_zoom_install_url($user_id = NULL) {
+function calendar_get_zoom_install_url($user_id = NULL, $bool_only_return_redir_url = FALSE) {
   global $user;
   
   if ($user_id == NULL) {
@@ -226,20 +229,85 @@ function calendar_get_zoom_install_url($user_id = NULL) {
   $state = urlencode(base64_encode($user_id . '~' . md5($user_id . fp_token())));
     
   $url = "https://zoom.us/oauth/authorize?response_type=code&client_id=" . variable_get('zoom_client_id', '') . "&redirect_uri=" . $redir;
-  $url .= "&state=$state";
+  $url .= "&state=$state";  // add our state to the end.
+  
+  if ($bool_only_return_redir_url) {
+    $url = $redir;
+  }
   
   return $url;
   
 }
 
 
-function calendar_display_zoom_install_completed_page() {
-  $rtn = "";
+/**
+ * This function will accept the code and state from the URL, and then redirect the user to their profile
+ * settings page, to declare that Zoom has been set up successfully or not.
+ */
+function calendar_handle_zoom_install_redirect() {
+  global $user;
   
-  $rtn .= "hey";
+  $code = $_GET['code'];
+  $state = base64_decode($_GET['state']); 
   
-  return $rtn;
+  // Test to make sure state is trusted.
+  $temp = explode("~", $state);
+  $state_user_id = intval($temp[0]);
+  $state_hash_secret = $temp[1];
+  
+  if (md5($state_user_id . fp_token()) !== $state_hash_secret) {
+    fp_add_message(t("Sorry, there was an error receiving a valid token from Zoom."), "error");
+    fp_goto("<front>");
+    return;
+  }
+  
+  if (intval($user->id) !== $state_user_id) {
+    fp_add_message(t("Sorry, there was an error validating the token from Zoom."), "error");
+    fp_goto("<front>");
+    return;    
+  }
+  
+  // If we are here, then we succeeded.
+    
+  fpm("the code is $code for user_id $state_user_id");
+  
+  ///////////////////////////////
+  // Let's go ahead and try to get our tokens from Zoom.
+  
+  $headers = array("Content-Type" => "application/x-www-form-urlencoded", 
+                   "Authorization" => "Basic " . base64_encode(variable_get("zoom_client_id", "") . ":" . variable_get("zoom_client_secret", ""))
+                   );
+  $data = "grant_type=authorization_code&code=$code&redirect_uri=" . calendar_get_zoom_install_url($state_user_id, TRUE);
+  $response = fp_http_request("https://zoom.us/oauth/token", $headers, "POST", $data);
+  
+  fpm($response);
+  $resp_data = json_decode($response->data);
+  if (isset($resp_data->error)) {
+    fpm("Error. " . $resp_data->reason);
+  }
+  fpm(ppm($response->request, TRUE));
+  //fpm($test->getBody()->getContents());
+  
+
+  
+  
+  // if we are here, it means we succeeded.
+  $response_data = $response->data;
+  $access_token = $resp_data->access_token;  
+  $refresh_token = $resp_data->refresh_token;  
+  
+
+  // Let's put all our data into our table.
+  db_query("REPLACE INTO zoom_api_data (user_id, install_code, response_data, access_token, refresh_token, last_updated)
+            VALUES (?, ?, ?, ?, ?, ?)", array($state_user_id, $code, $response_data, $access_token, $refresh_token, time())); 
+
+    
+  
+  return "hey";
 }
+
+
+
 
 
 
