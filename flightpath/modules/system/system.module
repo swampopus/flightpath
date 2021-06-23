@@ -2556,7 +2556,7 @@ function system_handle_form_submit() {
 function system_handle_logout() {
   global $user;
   
-  $name = $user->name;
+  $user_name = $user->name;
   $uid = $user->id;
   
   // Finish up logging out. 
@@ -2617,7 +2617,7 @@ function system_handle_logout() {
   }
   
   
-  watchdog("logout", "@user has logged out", array("@user" => "$name ($uid)"));
+  watchdog("logout", "@user has logged out", array("@user" => "$user_name ($uid)"));
   
   fp_goto("<front>", "logout=true");
   
