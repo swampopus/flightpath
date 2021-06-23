@@ -7,6 +7,8 @@ FlightPath 6.x Changelog
   Added a backtrace (like we do for MySQL errors) to the PHP error handler in misc.inc.  Also adding to watchdog
   when we get a warning or error from the handler.
   
+  Changed the way cookies are unset on logout, to fix an issue where they were not being unset correctly, but also
+  to handle possible array notation in the cookie names.  See system.module
   
 
 2021-06-17

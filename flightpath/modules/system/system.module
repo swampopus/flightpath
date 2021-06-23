@@ -2573,16 +2573,31 @@ function system_handle_logout() {
   $_SESSION = array();
   if (isset($_COOKIE[session_name()]))  // remove cookie by setting it to expire, if it's there.
   {
-     $cookie_expires  = time() - date('Z') - 3600;
+     $cookie_expires  = time() - 3600;
      setcookie(session_name(), "", $cookie_expires, '/');
   }  
   
+  /*
   if (isset($_COOKIE)) {
-    foreach($_COOKIE as $cook) {
-        setcookie($cook, "", time()-1000);
-        setcookie($cook, "", time()-1000, '/');
+    foreach($_COOKIE as $key => $val) {
+        setcookie($key, "", time() - 3600);
+        setcookie($key, "", time() - 3600, '/');
     }    
   }
+  */
+  
+  // unset cookies  from https://stackoverflow.com/questions/2310558/how-to-delete-all-cookies-of-my-website-in-php
+  // We won't use $_COOKIE for this, as we might get an array for the $val, if the cookie was set using array notation.  This
+  // code snippit should fix that.
+  if (isset($_SERVER['HTTP_COOKIE'])) {
+      $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
+      foreach($cookies as $cookie) {
+          $parts = explode('=', $cookie);
+          $name = trim($parts[0]);
+          setcookie($name, '', time() - 3600);
+          setcookie($name, '', time() - 3600, '/');
+      }
+  }  
   
   
     
