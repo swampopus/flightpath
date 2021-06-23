@@ -1230,13 +1230,27 @@ function fp_render_sidebar_left_content($bool_for_hamburger_menu = FALSE) {
   
   // Our links....  (we will check permissions later based on the path)
   $links = array();
-  $links[] = array(
-    'path' => '<front>',
-    'icon' => 'fa-home',
-    'desc' => t('Dashboard'),
-    'class' => 'home', 
-    'weight' => 0,
-  );
+  
+  if ($_SESSION["fp_logged_in"] != TRUE) {
+    // user is not logged in.  The top-most link should be to log in.
+    $links[] = array(
+      'path' => 'login',
+      'icon' => 'fa-sign-in',
+      'desc' => t('Login'),
+      'class' => 'login', 
+      'weight' => 0,
+    );        
+  }
+  else {
+    // the user is logged in normally, the top-most link should be the dashboard  
+    $links[] = array(
+      'path' => '<front>',
+      'icon' => 'fa-home',
+      'desc' => t('Dashboard'),
+      'class' => 'home', 
+      'weight' => 0,
+    );
+  }
   if ($user->is_student) {
     $links[] = array(
       'path' => 'student-profile',

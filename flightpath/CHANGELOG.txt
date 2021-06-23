@@ -14,6 +14,10 @@ FlightPath 6.x Changelog
   "WATCHDOG_DEBUG" entries after X amount of time, since they are the least important.  Also made changes to the PHP error handler
   so it correctly identifies in the watchdog whether it was a PHP error or warning, and adjusts the severity constant accordingly.
   
+  Fixed typo in user settings pulldown menu.
+  
+  Made it so if you are not logged in, the left sidebar menu shows a link to the login page.
+  
 
 2021-06-17
   Fixed small typo in form_error() message when rejecting a saved degree.

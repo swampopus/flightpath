@@ -584,7 +584,7 @@ function fp_get_student_majors($student_cwid, $bool_return_as_csv = FALSE, $bool
 
 
 function fp_get_student_name($cwid, $bool_include_cwid = FALSE ) {
-  if (is_numeric($cwid) && $cwid === 0) {
+  if (is_numeric($cwid) && ($cwid === 0 || $cwid === '0')) {
     return t("Anonymous");
   }
   
