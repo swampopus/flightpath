@@ -584,9 +584,10 @@ function fp_get_student_majors($student_cwid, $bool_return_as_csv = FALSE, $bool
 
 
 function fp_get_student_name($cwid, $bool_include_cwid = FALSE ) {
-  if ($cwid == 0) {
+  if (is_numeric($cwid) && $cwid === 0) {
     return t("Anonymous");
   }
+  
   $db = get_global_database_handler();
   $name = $db->get_student_name($cwid, $bool_include_cwid);
   if (!$name) $name = t("Unknown Student");
