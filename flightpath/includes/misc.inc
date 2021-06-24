@@ -1315,6 +1315,58 @@ function fp_token() {
 }
 
 
+
+/**
+ * This function will provide the session_id as a string, as well as a secret token we can
+ * use to make sure the session_id is authentic and came from us and not a hacker.
+ */
+function fp_get_session_str() {
+  $session_id = session_id();  // Get the PHP session_id
+  $ip = @$_SERVER["REMOTE_ADDR"];
+  if ($ip == "") $ip = "000";
+  
+  // NOTE: We cannot use fp_token() here, since the get function (below) is called before the various bootstrap files are loaded.
+    
+  // Create a string where we can confirm the ip and server name the session came from.
+  // TODO: Might be able to add more entropy later on, as long as it does not involve the database, since bootstrap isn't loaded yet when validating.  
+  $str = $session_id . "~_" . md5($session_id . $ip . php_uname('n')); 
+  
+    
+  return $str;  
+}
+
+  
+ 
+/**
+ * This will validate the session str (@see fp_get_session_str()) and return back either FALSE
+ * or the session_id.
+ */
+function fp_get_session_id_from_str($str) {
+  
+  // We expect $str to look like this:
+  // session_id~_md5(session_id . ip . php_uname('n'))
+
+  $temp = explode("~_", $str);
+    
+  $session_id = trim($temp[0]);
+  $hash = trim($temp[1]);
+    
+  $ip = @$_SERVER["REMOTE_ADDR"];
+  if ($ip == "") $ip = "000";  
+  
+  
+  $test_hash = md5($session_id . $ip . php_uname('n'));
+  
+  if ($test_hash === $hash) {
+    // Success!
+    return $session_id;
+  }
+  
+  return FALSE;
+    
+}
+
+
 /**
  * Simple function to split a basic CSV string, trim all elements, then return
  * the resulting array.

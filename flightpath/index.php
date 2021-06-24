@@ -29,10 +29,25 @@ if( (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVE
 }
 
 
+
  
 // Should we init the session using a specific session_id?
-if (@$_GET['fp_session_id'] != '') {
-  session_id($_GET['fp_session_id']);
+if (@$_GET['fp_session_str'] != '') {
+  
+  // For security, the fp_session_str is made of several pieces so we can be sure it is authentic
+  // and not a hacker trying to imitate a known user's session_id.
+  
+  require_once("includes/misc.inc"); // Bring in the functions we need so we can validate the fp_session_str
+      
+  // We will validate now and retrieve the PHP session_id from it, or FALSE.
+  $session_id = fp_get_session_id_from_str($_GET['fp_session_str']);
+  if ($session_id) {
+    session_id($session_id);
+  }
+  else {
+    // The session did not validate.  This might be a hacking attempt.  Kill the script.
+    die("Error: Session could not be validated by FlightPath (index.php).  If this continues, contact your IT administrator.");
+  }  
 }
 
 session_start();
@@ -41,10 +56,8 @@ session_start();
 header("Cache-control: no-cache, no-store, must-revalidate");  // HTTP 1.1
 header("Pragma: no-cache");  // HTTP 1.0
 header("X-XSS-Protection: 1");
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");  // Date in the past, to ensure it expires when we close browser.
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");  // Date in the past, to ensure it expires when we close the browser.
 header('X-Frame-Options: SAMEORIGIN');  // No iframes except from the same website origins.
-
-
 
 
 // If the user is requesting a "clean URLs" check, display a simple success message.
@@ -61,7 +74,9 @@ if (!file_exists("custom/settings.php")) {
   die;
 }
 
+
 require_once("bootstrap.inc");
+
 
 // For development reasons only:
 // To rebuild the cache on every page load, uncomment the following line
@@ -86,6 +101,10 @@ else {
 
 // Call hook_exit as we leave the page.
 invoke_hook("exit"); 
+ 
+ 
+ 
+ 
  
 
  

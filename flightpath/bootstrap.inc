@@ -13,7 +13,6 @@
 // used in routines/routines.php.
 if (!isset($levels_deep)) $levels_deep = "";
 
-
 // Load the includes files, for common functions.
 require_once("$levels_deep" . "includes/theme.inc");
 require_once("$levels_deep" . "includes/misc.inc");

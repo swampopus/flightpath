@@ -1,6 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-06-23
+  Instead of passing the session_id during redirect, we now pass a "fp_session_str" which contains
+  a method of validating the session_id, to make sure it is not a hacker attempting to imitate a valid
+  session.  This was accomplished by new functions in misc.inc and checking in index.php before we
+  trust the session_id in the URL.
+  
+  
+
 2021-06-22
   Fixed bug in user module where adding a new faculty user caused mysql error.
   

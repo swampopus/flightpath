@@ -45,14 +45,16 @@ CREATE TABLE `content__schedule_event_type` (
   `field__prevent_less_than_hours` int(11) DEFAULT NULL,
   `field__additional_email_msg` text DEFAULT NULL,
   `field__description` text DEFAULT NULL,
+  `field__video_meeting` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`vid`),
   KEY `cid` (`cid`),
   KEY `field__faculty_id` (`field__faculty_id`),
   KEY `field__event_duration_minutes` (`field__event_duration_minutes`),
   KEY `field__event_buffer_minutes` (`field__event_buffer_minutes`),
   KEY `field__prevent_less_than_hours` (`field__prevent_less_than_hours`),
-  KEY `field__enabled` (`field__enabled`)
-);  
+  KEY `field__enabled` (`field__enabled`),
+  KEY `field__video_meeting` (`field__video_meeting`)
+);   
   ";
   db_query($q);
 
@@ -85,6 +87,20 @@ CREATE TABLE `content__schedule_unavailable_time` (
 
 
 
+
+
+  $q = "
+CREATE TABLE `zoom_api_data` (
+  `user_id` int(10) unsigned NOT NULL,
+  `install_code` varchar(255) DEFAULT NULL,
+  `response_data` text DEFAULT NULL,
+  `access_token` text DEFAULT NULL,
+  `refresh_token` text DEFAULT NULL,
+  `last_updated` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+);
+  ";
+  db_query($q);
 
 
 

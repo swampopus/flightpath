@@ -137,7 +137,7 @@ function calendar_menu() {
 
 
 
-  $items['user-setings/appointment-settings'] = array(
+  $items['user-settings/appointment-settings'] = array(
     'title' => t('Appointment Settings'),
     'page_callback' => 'calendar_display_user_appointment_settings_page',
     'access_arguments' => array('can_accept_appointments'),
@@ -223,7 +223,7 @@ function calendar_get_zoom_install_url($user_id = NULL, $bool_only_return_redir_
   }
   
   // We need to attach the session_id, since we're about to get redirected around.
-  $redir = urlencode($GLOBALS['fp_system_settings']['base_url'] . "/handle-zoom-install-redirect?fp_session_id=" . session_id());
+  $redir = urlencode($GLOBALS['fp_system_settings']['base_url'] . "/handle-zoom-install-redirect?fp_session_str=" . fp_get_session_str());
   
   // The state will be handed back to us, so it will contain our user_id plus an md5 string we can recreate to make sure this is authentic.
   $state = urlencode(base64_encode($user_id . '~' . md5($user_id . fp_token())));
@@ -250,27 +250,32 @@ function calendar_handle_zoom_install_redirect() {
   $code = $_GET['code'];
   $state = base64_decode($_GET['state']); 
   
+  $fp_session_str = fp_get_session_str();
+  
+  
   // Test to make sure state is trusted.
   $temp = explode("~", $state);
   $state_user_id = intval($temp[0]);
   $state_hash_secret = $temp[1];
   
+  
   if (md5($state_user_id . fp_token()) !== $state_hash_secret) {
     fp_add_message(t("Sorry, there was an error receiving a valid token from Zoom."), "error");
-    fp_goto("<front>");
+    fp_goto("user-settings/appointment-settings", "fp_session_str=$fp_session_str");
     return;
   }
   
   if (intval($user->id) !== $state_user_id) {
     fp_add_message(t("Sorry, there was an error validating the token from Zoom."), "error");
-    fp_goto("<front>");
+    fp_goto("user-settings/appointment-settings", "fp_session_str=$fp_session_str");
     return;    
   }
   
   // If we are here, then we succeeded.
-    
-  fpm("the code is $code for user_id $state_user_id");
   
+  
+  
+    
   ///////////////////////////////
   // Let's go ahead and try to get our tokens from Zoom.
   
@@ -280,14 +285,17 @@ function calendar_handle_zoom_install_redirect() {
   $data = "grant_type=authorization_code&code=$code&redirect_uri=" . calendar_get_zoom_install_url($state_user_id, TRUE);
   $response = fp_http_request("https://zoom.us/oauth/token", $headers, "POST", $data);
   
-  fpm($response);
+  
   $resp_data = json_decode($response->data);
   if (isset($resp_data->error)) {
+    // TODO: watchdog the error.
     fpm("Error. " . $resp_data->reason);
+    fp_add_message(t("Sorry, there was an error linking your Zoom account."), "error");    
+    fp_goto("user-settings/appointment-settings", "fp_session_str=$fp_session_str");
+    return;    
+    
   }
-  fpm(ppm($response->request, TRUE));
-  //fpm($test->getBody()->getContents());
-  
+    
 
   
   
@@ -301,9 +309,16 @@ function calendar_handle_zoom_install_redirect() {
   db_query("REPLACE INTO zoom_api_data (user_id, install_code, response_data, access_token, refresh_token, last_updated)
             VALUES (?, ?, ?, ?, ?, ?)", array($state_user_id, $code, $response_data, $access_token, $refresh_token, time())); 
 
-    
   
-  return "hey";
+  
+  // Success, let's send the user back to their settings page.
+  fp_add_message(t("You have successfully linked your Zoom account.  Edit an existing event type or create a new one to activate automatic Zoom meeting creation."));  
+  fp_goto("user-settings/appointment-settings", "fp_session_str=$fp_session_str");
+  
+  
+  return;
+  
+  
 }
 
 
@@ -703,6 +718,30 @@ function calendar_display_user_appointment_settings_page() {
   
   $rtn .= "</table>";
  
+  // Connect Zoom?
+  if (variable_get("zoom_client_id", "") != "") {
+          
+    $msg = "To enable automatic Zoom meeting creation for video chats, you must first link your Zoom account with your FlightPath account by pressing
+                            the button below:";    
+    $button_text = "Link Zoom Account";  
+    $link_class = "button";    
+    // is the user already set up with Zoom?  If so, display a message, and change the install link to something like "Re-install Zoom", etc.
+    $zoom_api_data = calendar_get_zoom_api_data_for_user(1);
+    
+    if ($zoom_api_data) {
+      $msg = "You have already linked your FlightPath account with Zoom!  If you need to re-link your account, click the following:";
+      $button_text = "Re-Link Zoom Account";
+      $link_class = "";
+    }
+    $rtn .= "<p>" . t("<strong>Zoom:</strong> $msg") . "</p>";
+    $url = calendar_get_zoom_install_url();
+    $rtn .= "<div class='zoom-install-btn'>&nbsp; &nbsp; <a href='$url' class='$link_class' title='" . t($button_text) . "'><i class='fa fa-external-link'></i> " . t($button_text) . "</a> &nbsp;";
+    $rtn .= t("*This will briefly redirect you to a Zoom login / confirmation page, then return you to FlightPath.") . "</div>";
+    
+  } // we have zoom client id set up.
+  
+ 
+ 
   
   $rtn .= "<hr><h3>Unavailabile Times</h3>
             <p>Use the options below to define when you will be <em>unavailable</em> for appointments.  For example, you should set that you are unavailable on
@@ -808,6 +847,27 @@ function calendar_display_user_appointment_settings_page() {
   
   return $rtn;
 } // calendar_display_user_appointment_settings_page
+
+
+
+/**
+ * Return back the database row (or FALSE) for the user of their zoom api details.
+ */
+function calendar_get_zoom_api_data_for_user($user_id) {
+  $res = db_query("SELECT * FROM zoom_api_data WHERE user_id = ?", array($user_id));
+  if ($res) {
+    $cur = db_fetch_array($res);
+    return $cur;
+  }
+  
+  // Else, nothing found, so return false
+  return FALSE;
+  
+}
+
+
+
+
 
 
 /**
@@ -2365,6 +2425,7 @@ function calendar_render_mini_calendar($month, $year, $faculty_user_id, $event_t
  * for use with this module.
  */
 function calendar_content_register_content_type() {
+  global $user;
   
   $arr = array();
   
@@ -2515,21 +2576,37 @@ function calendar_content_register_content_type() {
 
   $fields['enabled'] = array(
     'type' => 'select',
-    'label' => 'Enabled?',
+    'label' => t('Enabled?'),
     'description' => t("Set to Enabled in order to allow students to schedule this appointment type.  If you disable all of your event types,
                         then no student will be able to make appointments with you.  If you are unsure what to do, leave this set to 'Enabled'."),
     'options' => array('enabled' => 'Enabled', 'disabled' => 'Disabled'),
     'hide_please_select' => TRUE,
     'required' => TRUE,    
-    'weight' => 3,
+    'weight' => 30,
   );
+
+  
+  $zoom_api_data = calendar_get_zoom_api_data_for_user($user->id);
+  if ($zoom_api_data) {
+    $fields['video_meeting'] = array(
+      'type' => 'select',
+      'label' => t('Automatically generate Zoom meeting?'),
+      'options' => array('no' => t('No (default)'), 'zoom' => t('Yes - Automatically generate a Zoom meeting and attach URL')),
+      'hide_please_select' => TRUE,
+      'description' => t("If set to Yes, this event will be treated like a video chat, and a Zoom meeting will automatically be
+                          created for the appointment.  The URL for the new Zoom meeting will be included at the end of the notification
+                          and reminder messages sent to the student & faculty/staff members."),
+      'weight' => 40,
+    );
+  }
+
 
   $fields['description'] = array(
     'type' => 'textarea',
     'label' => t('Brief Description'),
     'description' => t('Optional.  This description will appear along side the title of this event.  Provide a brief description to explain what this event type
                         is.  For example, if this is for a Video Call, you might enter: <em>Select this option if you wish to meet via your phone or laptop camera, without appearing in-person.</em>'),
-    'weight' => 5,
+    'weight' => 50,
   );
 
 
@@ -2538,7 +2615,7 @@ function calendar_content_register_content_type() {
     'label' => 'Duration',
     'options' => array('15' => '15 min', '30' => '30 min', '45' => '45 min', '60' => '60 min'),
     'hide_please_select' => TRUE,
-    'weight' => 10,
+    'weight' => 110,
     'required' => TRUE,
     'description' => t('How many minutes will this event last?'),
   );
@@ -2548,7 +2625,7 @@ function calendar_content_register_content_type() {
     'label' => 'Buffer between scheduled appointments',
     'options' => array('5' => '5 min', '10' => '10 min', '15' => '15 min', '30' => '30 min', '45' => '45 min', '60' => '60 min'),
     'hide_please_select' => TRUE,
-    'weight' => 20,
+    'weight' => 120,
     'required' => TRUE,
     'description' => t('How many minutes should there be from the end of one appointment or event, and the start of the next?'),
   );
@@ -2558,7 +2635,7 @@ function calendar_content_register_content_type() {
     'label' => 'Prevent events less than ___ hours away',
     'options' => array('1' => '1 hour', '2' => '2 hours', '3' => '3 hours', '4' => '4 hours', '6' => '6 hours', '7' => '7 hours', '8' => '8 hours', '9' => '9 hours'),
     'hide_please_select' => TRUE,
-    'weight' => 30,
+    'weight' => 130,
     'required' => TRUE,
     'description' => t('This setting stops students from scheduling events too soon, which you might not notice because you are otherwise occupied.
                        For example, if you set this to 1 hour, and the current time is 2pm, then a student would not be able to schedule
@@ -2573,7 +2650,7 @@ function calendar_content_register_content_type() {
                         If you wish, you can add an additional message here.                        
                         <br>For example:
                         <br>&nbsp; &nbsp; <i>Thank you for scheduling this in-person meeting.  My office is in Walker Hall, 3rd floor.  Check in at the reception.</i>'),
-    'weight' => 40,
+    'weight' => 140,
   );
 
 
