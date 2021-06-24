@@ -324,6 +324,79 @@ function calendar_handle_zoom_install_redirect() {
 
 
 
+/**
+ * This function will attempt to create a zoom meeting via the API.  We will return FALSE or the meeting data if successful.
+ * 
+ * gmt_date_time is expected as GMT, in a string in the format: yyyy-MM-ddTHH:mm:ssZ.  For example: 2020-03-31T22:02:00Z 
+ */
+function calendar_create_zoom_meeting($user_id, $gmt_date_time, $duration_minutes = 30, $topic = "FlightPath Appointment") {
+        
+  $zoom_api_data = calendar_get_zoom_api_data_for_user($user_id);
+  if (!$zoom_api_data) return FALSE;      
+    
+  // Otherwise, continue...
+  $access_token = $zoom_api_data['access_token'];
+    
+  $headers = array("Content-Type" => "application/json", 
+                   "Authorization" => "Bearer " . urlencode($access_token),
+                   );
+  
+  $data = json_encode(array(
+    'topic' => $topic,
+    'type' => 2,
+    'start_time' => $gmt_date_time,
+    'duration' => $duration_minutes,    
+  ));
+    
+  $response = fp_http_request("https://api.zoom.us/v2/users/me/meetings", $headers, "POST", $data);    
+  
+  if (intval($response->code) == 201) {
+    // Success.  Let's return our data.  (it is a json string)
+    return $response->data;
+  }
+  
+  if (intval($response->code) == 401) {
+    // Access token has expired, so we need to refresh it and try again.
+    $refresh_token = $zoom_api_data['refresh_token'];
+    $headers = array("Content-Type" => "application/x-www-form-urlencoded", 
+                     "Authorization" => "Basic " . base64_encode(variable_get("zoom_client_id", "") . ":" . variable_get("zoom_client_secret", ""))
+                     );
+    $data = "";
+    $data = "grant_type=refresh_token&refresh_token=" . urlencode($refresh_token);
+    $response = fp_http_request("https://zoom.us/oauth/token", $headers, "POST", $data);
+    
+    $resp_data = json_decode($response->data);
+    if (isset($resp_data->error)) {
+      // TODO: watchdog the error.
+      fpm("Error. " . $resp_data->reason);
+      fp_add_message(t("Sorry, there was an error setting up a Zoom meeting."), "error");
+      return FALSE;          
+    }    
+    
+    // Otherwise, we are here.  Update the database.
+    $response_data = $response->data;
+    $access_token = $resp_data->access_token;  
+    $refresh_token = $resp_data->refresh_token;  
+    
+  
+    // Let's put all our data into our table.
+    db_query("REPLACE INTO zoom_api_data (user_id, response_data, access_token, refresh_token, last_updated)
+              VALUES (?, ?, ?, ?, ?)", array($user_id, $response_data, $access_token, $refresh_token, time())); 
+        
+    // Call ourselves again to try to create meeting.
+    $x = calendar_create_zoom_meeting($user_id, $gmt_date_time, $duration_minutes, $topic);
+    return $x;
+  } // if 401 (access token expired)
+  
+  
+  // If we are here, it means creating the meeting was not successful.
+  return FALSE;
+  
+  
+} // calendar_create_zoom_meeting
+
+
+
 
 
 
