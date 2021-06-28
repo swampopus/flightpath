@@ -7,13 +7,13 @@
 
 
 /**
- * Return back an array of the calculation tests we offer.
+ * Lets us modify an array of calculation tests, either adding to it, or altering the existing ones.
+ * Notice that $arr is passed by reference.
  */
-function hook_define_calculation_tests() {
+function hook_define_calculation_tests(&$arr) {
+   
   
-  $rtn = array();
-  
-  $rtn['my_module__something_test'] = array(   // the key is also the callback function to call!  By convention, use module name, 2 underscores, then test name.
+  $arr['my_module__something_test'] = array(   // the key is also the callback function to call!  By convention, use module name, 2 underscores, then test name.
   
     'title' => 'This is the title of this test.',
     'description' => 'This is a description of this test.',
@@ -31,7 +31,8 @@ function hook_define_calculation_tests() {
   );
   
   
-  return $rtn;
+  // No need to return anything, since $arr is passed by reference.
+  
 }
 
 

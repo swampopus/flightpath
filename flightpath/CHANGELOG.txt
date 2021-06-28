@@ -6,6 +6,12 @@ FlightPath 6.x Changelog
   Made change in content_content_load(), to make sure that when we load based on cid, we order by vid DESC, to make
   sure we always get the most recent version.
   
+  Fixed code in student_search, where the "include inactive students" checkbox was being ignored.  Also changed settings
+  for extra conditions to add to query.
+  
+  Made changes to the way Student Profile hook works, so that other modules can more easily add to the list, and modify existing
+  entries if desired.
+  
 
 2021-06-26
   Added new field to calendar's appointment content type, to keep up with video meeting data.

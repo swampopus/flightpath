@@ -6,16 +6,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
 function student_priority_menu() {
 
   $items = array();
@@ -294,16 +284,10 @@ function student_priority_get_calculations_for_student($student_cwid, $bool_save
   
   // Invoke a hook to run our priority calculations.  
   // First, get all our tests from all modules.
-  $c_tests = invoke_hook('define_calculation_tests');
   $calc_tests = array();
+  invoke_hook('define_calculation_tests', array(&$calc_tests));
   
-  // Flatten c_tests so that we don't have the module name up front.
-  foreach ($c_tests as $module => $throwaway) {
-    foreach ($c_tests[$module] as $callback => $details) {
-      $calc_tests[$callback] = $details;
-    }
-  }
-  
+    
   /////////////////////////////////
   // sort results by weight, title.
   /////////////////////////////////  
@@ -400,12 +384,13 @@ function student_priority_get_calculations_for_student($student_cwid, $bool_save
 
 /**
  * Implements hook_define_calculation_tests
+ * TODO: accept an array so we can alter.  Then, we are just going to add to array.
  */
-function student_priority_define_calculation_tests() {
+function student_priority_define_calculation_tests(&$arr) {
   
-  $rtn = array();
   
-  $rtn['student_priority__does_student_work_on_campus'] = array(  
+  
+  $arr['student_priority__does_student_work_on_campus'] = array(  
     'title' => 'Does the student work on campus?',
     'description' => 'If the student has a campus job, they are generally more engaged
                       in campus life and their own success.',        
@@ -419,7 +404,7 @@ function student_priority_define_calculation_tests() {
   );
    
 
-  $rtn['student_priority__is_student_gpa_above_250'] = array(  
+  $arr['student_priority__is_student_gpa_above_250'] = array(  
     'title' => "Is the student's GPA above 2.50?",
     'result_scores' => array(
       'Y' => 0,
@@ -430,7 +415,7 @@ function student_priority_define_calculation_tests() {
     'weight' => 110,
   );
 
-  $rtn['student_priority__does_student_have_more_than_2_d_or_f'] = array(  
+  $arr['student_priority__does_student_have_more_than_2_d_or_f'] = array(  
     'title' => "Does the student have more than 2 D's or F's?",
     'result_scores' => array(
       'Y' => 1,
@@ -443,7 +428,7 @@ function student_priority_define_calculation_tests() {
 
 
 
-  $rtn['student_priority__does_student_have_more_than_2_w'] = array(  
+  $arr['student_priority__does_student_have_more_than_2_w'] = array(  
     'title' => "Does the student have more than 2 W's?",
     'result_scores' => array(
       'Y' => 0.8,
@@ -455,7 +440,8 @@ function student_priority_define_calculation_tests() {
   );
 
 
-  $rtn['student_priority__did_student_score_below_b_on_engl_1001'] = array(  
+
+  $arr['student_priority__did_student_score_below_b_on_engl_1001'] = array(  
     'title' => "Did the student score below a 'B' in ENGL 1001?",
     'result_scores' => array(
       'Y' => 0.8,
@@ -469,7 +455,7 @@ function student_priority_define_calculation_tests() {
 
 
 
-
+/*
   $rtn['student_priority__how_many_times_has_student_changed_majors'] = array(  
     'title' => "How many times has the student changed majors?",
     'result_scores' => array(
@@ -494,9 +480,9 @@ function student_priority_define_calculation_tests() {
     'group' => 'FlightPath Core',  // groups multiple tests together this way    
     'weight' => 170,
   );
+*/
 
-
-  $rtn['student_priority__does_student_have_federal_financial_aid'] = array(  
+  $arr['student_priority__does_student_have_federal_financial_aid'] = array(  
     'title' => "Does the student have federal financial aid?",
     'result_scores' => array(
       'Y' => 0,
@@ -509,8 +495,7 @@ function student_priority_define_calculation_tests() {
 
 
   
-  return $rtn;
-
+  
 
   
 } // student_priority_define_calculation_tests()

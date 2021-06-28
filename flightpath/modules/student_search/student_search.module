@@ -172,15 +172,16 @@ function student_search_settings_form() {
   $form["extra_student_search_conditions"] = array(
     "type" => "textarea",
     "label" => t("Extra student search conditions:"),
-    "value" => variable_get("extra_student_search_conditions", " AND is_active = 1 "),
+    "value" => variable_get("extra_student_search_conditions", ""),
     "description" => t("This is mysql which will get appended to end of the WHERE clause of every query
                     relating to searching for students.  It is so you can easily add global conditions, 
                     especially if you are overriding the student_search module.  For example,
                     to check that the students are admitted or enrolled.  <b>Probably not necessary</b> if you
-                    are not overriding the student_search module.  If you are unsure what to do, leave this set to default.
-                    <br>Default is:  AND is_active = 1 "),    
+                    are not overriding the student_search module.  If you are unsure what to do, leave this blank."),    
   );
     
+  
+  // TODO:  This setting isn't really necessary anymore.  We should just add is_active = 1 to the stats/report that uses it.
   
   $form["enrolled_student_search_conditions"] = array(
     "type" => "textarea",
@@ -660,10 +661,13 @@ function student_search_search_form() {
   );
 
   
+  $search_options = @$_SESSION["student_search_search_options"];    
+  
   $form['search_options'] = array(
     'label' => 'Options:',
     'type' => 'checkboxes',
     'options' => array('inactive' => t('Include inactive students')),
+    'value' => $search_options,
   );
   
   
@@ -768,7 +772,7 @@ function student_search_search_form() {
     $group_by = " GROUP BY u.cwid ";
 
     
-    
+       
     
     // Now THIS is odd... what is this strange piece of code here?
     // I'm no cryptographic genius, but it looks like it is set to display a message when
@@ -790,17 +794,17 @@ function student_search_search_form() {
                  AND u.is_student = 1                 
                  AND u.school_id IN ($school_id_list)
                  AND u.is_disabled = 0                 
-                 $search_action
-              
+                 $search_action              
                  $major_search
-        ";
-    if (!$bool_bypass_extra_search_conditions) {
-      $query .= "
-              AND rank_code IN %RANKIN%
-              %EXTRA_STUDENTSEARCH_CONDITIONS%
+                 
+                 AND rank_code IN %RANKIN%
+                 %EXTRA_STUDENTSEARCH_CONDITIONS%
               ";
-    }    
     
+    
+    if (!isset($search_options['inactive'])) {      
+      $query .= " AND is_active = 1 ";      
+    }
     $query .= "
               $group_by
               %ORDERBY%              
@@ -1586,9 +1590,9 @@ function student_search_query_advisees($sql, $params = array()) {
   $sql = str_replace("%RANKIN%", $rank_in, $sql);
   $sql = str_replace("%ORDERBY%", $order_by, $sql);  // now handled by the table header sortable function
     
-  // By default, the extra_studentsearch_conditions will be checking of is_active = 1.  But, the user may override this
+  // By default, the extra_studentsearch_conditions will be adding nothing to the query.  But, the user may override this
   // in the settings.
-  $extra_student_search_conditions = variable_get("extra_student_search_conditions", " AND is_active = 1 ");
+  $extra_student_search_conditions = variable_get("extra_student_search_conditions", "");
   
   $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $extra_student_search_conditions, $sql);
   
@@ -1677,11 +1681,4 @@ function student_search_query_advisees($sql, $params = array()) {
 
   return $rtn_array;  
 }
-
-
-
-
-
-
-
 

@@ -143,7 +143,7 @@ function student_priority__did_student_score_below_b_on_engl_1001($student) {
   $courses = $student->list_courses_taken->array_list;
     
   $rtn['result'] = 'N/A';
-  $rtn['extra'] = 'The student has not yet completed ENGL 101.';
+  $rtn['extra'] = 'The student has not yet completed ENGL 1001.';
   
   foreach ($courses as $course) {
     if ($course->subject_id == 'ENGL' && ($course->course_num == '101' || $course->course_num == '1001')) {
