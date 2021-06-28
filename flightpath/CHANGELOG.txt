@@ -1,6 +1,18 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2021-06-28
+  Made change in content_content_load(), to make sure that when we load based on cid, we order by vid DESC, to make
+  sure we always get the most recent version.
+  
+
+2021-06-26
+  Added new field to calendar's appointment content type, to keep up with video meeting data.
+  
+  Fixed typo in the content.module (misspelling of word).
+    
+
 2021-06-23
   Instead of passing the session_id during redirect, we now pass a "fp_session_str" which contains
   a method of validating the session_id, to make sure it is not a hacker attempting to imitate a valid

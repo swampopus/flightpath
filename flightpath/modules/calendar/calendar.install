@@ -15,13 +15,14 @@ function calendar_install() {
   $q = "
 CREATE TABLE `content__appointment` (
   `cid` int(10) unsigned NOT NULL,
-  `vid` int(10) unsigned NOT NULL,
+  `vid` int(10) unsigned NOT NULL, 
   `field__appointment_datetime` datetime DEFAULT NULL,
   `field__appointment_duration_minutes` int(11) DEFAULT NULL,
   `field__faculty_id` varchar(255) DEFAULT NULL,
   `field__student_id` varchar(255) DEFAULT NULL,
   `field__appointment_type` varchar(255) DEFAULT NULL,
   `field__appointment_msg` text DEFAULT NULL,
+  `field__video_data` text DEFAULT NULL,
   PRIMARY KEY (`vid`),
   KEY `cid` (`cid`),
   KEY `field__appointment_datetime` (`field__appointment_datetime`),

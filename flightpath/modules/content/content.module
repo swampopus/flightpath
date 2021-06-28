@@ -1485,7 +1485,9 @@ function content_get_content_for_faculty_id($content_type, $faculty_id, $order_b
  */
 function content_content_load(&$content) {
   
-  $res = db_query("SELECT * FROM content WHERE cid = ? ", array( $content->cid));
+  $res = db_query("SELECT * FROM content WHERE cid = ? 
+                    ORDER BY vid DESC 
+                    LIMIT 1", array( $content->cid));
   $content = db_fetch_object($res);
 
   // Populate our field values in the content object
@@ -1493,7 +1495,7 @@ function content_content_load(&$content) {
   $res = db_query("SELECT * FROM content__$content->type WHERE vid = ?", array($content->vid));
   $fieldvals = db_fetch_array($res);
 
-  $types = content_get_types();  
+  $types = content_get_types();
   foreach ($types[$content->type]['fields'] as $fieldname => $details) {
     
     if ($details['type'] != 'cfieldset') {
@@ -1842,7 +1844,7 @@ function content_get_types() {
 function content_content_register_content_type() {
   $arr['page'] = array(
     'title' => 'Page',
-    'description' => 'This is a basic, publically visible web page.',    
+    'description' => 'This is a basic, publicly visible web page.',    
   );
   
   $fields['body'] = array(
