@@ -70,12 +70,12 @@ class Group extends stdClass
 
 
 		if ($group_id != "")
-		{
+		{		  
 			$this->bool_placeholder = false;
 			$this->load_group(true, $array_significant_courses);
       $this->set_requirement_type($this->requirement_type);
 		}
-
+    
 	}
 
 
@@ -226,9 +226,7 @@ class Group extends stdClass
 			// not missing.
 
 			$array_group_requirement_ids = $this->list_courses->get_group_requirement_id_array();
-
-			//var_dump($array_group_requirement_ids);
-
+			
 		}
 
 		$table_name = "group_requirements";
@@ -239,7 +237,7 @@ class Group extends stdClass
 		while ($cur = db_fetch_array($res))
 		{
 
-			$id = $cur["id"];
+			$id = $cur["id"];      
 			$course_id = $cur["course_id"]*1; 
       $this->school_id = intval($cur['school_id']);
 
@@ -284,7 +282,7 @@ class Group extends stdClass
   							continue;
   						}
   					}
-  
+            
   					$course_c = new Course();
   					$course_c->bool_use_draft = $this->bool_use_draft;
   					$course_c->course_id = $cur["course_id"];
@@ -362,9 +360,6 @@ class Group extends stdClass
 			} // if cur['course_id']
 			
 			
-			
-			
-
 			if ($cur["child_group_id"]*1 > 0)
 			{
 			  
@@ -407,9 +402,7 @@ class Group extends stdClass
 			
 		} // while cur = db_fetch_array(res)
 
-		
-		
-		
+						
     // When we load this group, let's also check for any hooks.
     // Since this class might be used outside of FP, only do this if we know
     // that the bootstrap.inc file has been executed.

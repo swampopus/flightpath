@@ -1007,7 +1007,7 @@ function advise_display_popup_group_select() {
     fpm($degree_plan);
     return;
   }
-
+  
   if ($group_id == -88) { 
     // This is the Add a Course group.  We must initialize it, as it
     // does not exist yet.

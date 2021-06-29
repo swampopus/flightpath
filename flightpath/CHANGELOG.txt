@@ -12,6 +12,9 @@ FlightPath 6.x Changelog
   Made changes to the way Student Profile hook works, so that other modules can more easily add to the list, and modify existing
   entries if desired.
   
+  Fixed bug where recommended and hidden courses were not behaving correctly in groups.  Worked in Blank Degrees but not in What If or 
+  on the actual degree plan.
+  
 
 2021-06-26
   Added new field to calendar's appointment content type, to keep up with video meeting data.

@@ -2158,7 +2158,7 @@ class Course extends stdClass
     "db_advised_courses_id", "random_id",
     "db_substitution_id_array", "db_unassign_transfer_id",
     "db_exclude", "array_index", "db_group_requirement_id", "array_valid_names",
-    "data_entry_value",
+    "data_entry_value", "db_group_attributes",
 
     "subject_id", "course_num", "course_id", "requirement_type", "catalog_year",
     "min_hours", "max_hours", "repeat_hours", "bool_outdated_sub",

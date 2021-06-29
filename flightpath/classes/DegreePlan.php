@@ -592,18 +592,16 @@ class DegreePlan extends stdClass
       if ($cur["group_id"]*1 > 0)
       {
         // A group is the next degree requirement.
-        //$group_g = new Group($cur["group_id"], $this->db, $semester_num);
-
-        
+                
         
         $title = "";
         $icon_filename = "";
         // Add the real Group (with all the courses, branches, etc)
         // to the DegreePlan's group list!
-        // First, see if this group alread exists.  If it does,
+        // First, see if this group already exists.  If it does,
         // simply add the number of hours required to it.  If not,
         // create it fresh.
-        //if ($new_group = $this->find_group($cur["group_id"]))
+        
         if ($new_group = $this->find_group($cur["group_id"] . '_' . $this->degree_id))   // group_id's will always have db_group_id _ degree_id from now on...
         {
           // Was already there (probably in another semester),
@@ -621,9 +619,10 @@ class DegreePlan extends stdClass
           $title = $new_group->title;
           $icon_filename = $new_group->icon_filename;
         } 
-        else {
+        else {          
           // Was not already there; insert it.
           $group_n = new Group($cur["group_id"] . '_' . $this->degree_id, $this->db, $semester_num, $this->student_array_significant_courses, $this->bool_use_draft, $cur["group_requirement_type"]);
+          
           $group_n->hours_required = $cur["group_hours_required"] * 1;          
           
           if (!isset($group_n->hours_required_by_type[$cur["group_requirement_type"]])) $group_n->hours_required_by_type[$cur["group_requirement_type"]] = 0;
@@ -658,8 +657,7 @@ class DegreePlan extends stdClass
         $group_g->min_hours_allowed = floatval($cur["group_min_hours_allowed"]);
         $group_g->bool_placeholder = true;
         $obj_semester->list_groups->add($group_g);
-
-
+        
       }// if group_id > 0
 
     } // while db results

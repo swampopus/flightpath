@@ -3635,8 +3635,7 @@ function draw_menu_items($menu_array) {
     // Add the name of the group to the extra-classes
     $extra_classes .= " gr-" . fp_get_machine_readable($group->group_name);
     
-    
-    
+            
 		$select_icon = "<img src='$img_path/select.gif' border='0'>";
 		$icon_link = "<img src='$img_path/icons/$group->icon_filename' width='19' height='19' border='0' alt='$title_text' title='$title_text'>";
 
@@ -5179,6 +5178,7 @@ function draw_menu_items($menu_array) {
       $req_by_degree_id = $place_group->req_by_degree_id;
     }
     
+    
         
     $bool_no_courses = FALSE;
     
@@ -5190,10 +5190,13 @@ function draw_menu_items($menu_array) {
 			{
 				fpm("Group not found.");
 				return;
-			}      
+			}
+      else {
+        // Found the group... we don't need to do anything.
+      }      
 		} 
 		else {
-			// This is the Add a Course group.
+			// This is the Add a Course group.			
 			$group = $place_group;
       
 		}
@@ -5735,6 +5738,7 @@ function draw_menu_items($menu_array) {
 			} 
 			$rtn .= "</td></tr>";
 		}
+
 
     if ($bool_has_recommended) {
       $rtn .= "<tr><td colspan='8'><span class='group-recommended-message'>" . t("<b>Note:</b> Courses in <strong>bold</strong> are recommended.") . "</span></td></tr>";
