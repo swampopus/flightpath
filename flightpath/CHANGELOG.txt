@@ -1,6 +1,6 @@
 FlightPath 6.x Changelog
 ========================
-
+ 
 2021-07-06
   Converted AdvisingScreen::displaySemester to using render array system.
 
