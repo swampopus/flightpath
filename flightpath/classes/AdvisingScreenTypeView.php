@@ -118,6 +118,9 @@ class AdvisingScreenTypeView extends AdvisingScreen
    */
   function display_semester_list($list_semesters, $requirement_type, $title, $bool_display_hour_count = false)
   {
+    
+    // TODO: convert to using render array.
+    
 
     // Display the contents of a semester object
     // on the screen (in HTML)
@@ -359,7 +362,7 @@ class AdvisingScreenTypeView extends AdvisingScreen
     {
       $pC .= "<tr><td colspan='8'>
         <div class='tenpt advise-completed-hours' style='text-align:right; margin-top: 10px;'>
-        <span class='completed-hours-label'>Completed hours:</span> <span class='count-hours-completed'>$count_hours_completed</span>
+        <span class='completed-hours-label'>" . t("Completed hours:") . "</span> <span class='count-hours-completed'>$count_hours_completed</span>
         </div>
         ";
       $pC .= "</td></tr>";

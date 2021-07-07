@@ -1,6 +1,27 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-07-06
+  Converted AdvisingScreen::displaySemester to using render array system.
+
+  For markup elements in the form_api, if type is not explicitly set to "markup", and is left blank,
+  then the default will be "markup_no_wrappers", which means no wrapping divs will be used. 
+  
+  Converted AdvisingScreen::draw_course_row to use render array system.
+  
+  Fixed bug where remainder of course requirement (after partial sub) wasn't sorting correctly when using 
+  the "sort by database id" setting.
+  
+  Fixed bug in Substitution tab, where split sub "pieces" were not showing the correct number of hours.
+   
+
+
+2021-07-02
+  Modified Calendar module so that event types can be sheduled for longer durations (up to 2 hrs), have longer buffers (up to 2hrs) and have longer "prevent within" times
+  (up to 24 hours).
+  
+  Added more literal strings to t() so they can be translated.
+   
 
 2021-06-28
   Made change in content_content_load(), to make sure that when we load based on cid, we order by vid DESC, to make

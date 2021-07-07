@@ -2083,8 +2083,7 @@ function draw_menu_items($menu_array) {
 		//$pC .= $this->draw_currently_advising_box();
 		$pC .= $this->draw_progress_boxes();
 		
-		$pC .= $this->draw_public_note();
-    
+		$pC .= $this->draw_public_note();    
     $t = 0;
 		foreach ($this->box_array as $index => $box_array_contents) {
 
@@ -3010,7 +3009,8 @@ function draw_menu_items($menu_array) {
 
   /**
    * Given a Semester object, this will generate the HTML to draw it out
-   * to the screen.
+   * to the screen.  We will take advantage of the render engine, so we
+   * can utilize hook_content_alter later on.
    *
    * @param Semester $semester
    * @param bool $bool_display_hour_count
@@ -3024,9 +3024,17 @@ function draw_menu_items($menu_array) {
   {
     // Display the contents of a semester object
     // on the screen (in HTML)
-    $pC = "";
-    $pC .= $this->draw_semester_box_top($semester->title);
-
+    
+    $render = array();
+    $render['#id'] = 'AdvisingScreen_display_semester';
+    $render['#semester'] = $semester;
+    $render['#bool_display_hour_count'] = $bool_display_hour_count;
+    $render_weight = 0;
+    $render['semester_box_top'] = array(
+      'value' => $this->draw_semester_box_top($semester->title),
+      'weight' => $render_weight, 
+     );
+    
     $count_hoursCompleted = 0;
 
         
@@ -3092,12 +3100,13 @@ function draw_menu_items($menu_array) {
         
         // Tell the course what group we are coming from. (in this case: none)
         $course->disp_for_group_id = "";
-                
-        $html[$course->req_by_degree_id]  .= $this->draw_course_row($course);
+        $x = $this->draw_course_row($course);   
+        //fpm(htmlentities($x));             
+        $html[$course->req_by_degree_id]  .= $x;
 
       }
 
-      //$pC .= "</td></tr>";
+      
 
     }
 
@@ -3118,7 +3127,7 @@ function draw_menu_items($menu_array) {
       $html[$group->req_by_degree_id] .= "<tr><td colspan='8'>";
             
                   
-      $html[$group->req_by_degree_id] .= $this->display_group($group);
+      $html[$group->req_by_degree_id] .= $this->display_group($group);  // TODO: draw_group_row should utilize a render array
       $count_hoursCompleted += $group->hours_fulfilled_for_credit;
       $html[$group->req_by_degree_id] .= "</td></tr>";
     } //while groups.
@@ -3161,9 +3170,8 @@ function draw_menu_items($menu_array) {
      
     ksort($new_html);
     
-    
-    
-    
+    $pC = "";
+            
     //////////////////////////
     // Okay, now let's go through our HTML array and add to the screen....
     foreach ($new_html as $w => $html) {
@@ -3219,31 +3227,48 @@ function draw_menu_items($menu_array) {
       }
     }
      
+     
+    $render_weight = $render_weight + 10;
        
-    
+    $render['semester_content'] = array(
+      'value' => $pC,
+      'weight' => $render_weight,
+    );
     
     
     
     // Add hour count to the bottom...
     if ($bool_display_hour_count == true && $count_hoursCompleted > 0)
     {
-      $pC .= "<tr><td colspan='8'>
+      $p = "<tr><td colspan='8'>
         <div class='  advise-completed-hours' style='text-align:right; margin-top: 10px;'>
-        <span class='completed-hours-label'>Completed hours:</span> <span class='count-hours-completed'>$count_hoursCompleted</span>
-        </div>
-        ";
-      $pC .= "</td></tr>";
+        <span class='completed-hours-label'>" . t("Completed hours:") . "</span> <span class='count-hours-completed'>$count_hoursCompleted</span>
+        </div>        
+        </td></tr>";
+
+      $render_weight = $render_weight + 10;
+      $render['semester_disp_hour_count'] = array(
+        'value' => $p,
+        'weight' => $render_weight,
+      );
+        
     }
 
 
     // Does the semester have a notice?
     if ($semester->notice != "")
-    {
-      $pC .= "<tr><td colspan='8'>
+    {      
+      $p = "<tr><td colspan='8'>
           <div class='hypo   advise-semester-notice' style='margin-top: 15px; padding: 5px;'>
-            <b>Important Notice:</b> $semester->notice
+            <b>" . t("Important Notice:") . "</b> $semester->notice
           </div>
           </td></tr>";
+
+      $render_weight = $render_weight + 10;
+      $render['semester_notice'] = array(
+        'value' => $p,
+        'weight' => $render_weight,
+      );
     }
       
     
@@ -3255,9 +3280,16 @@ function draw_menu_items($menu_array) {
     
     
     
-    $pC .= $this->draw_semester_box_bottom();
+    //$pC .= $this->draw_semester_box_bottom();
+    $render_weight = $render_weight + 10;
+    $render['semester_box_bottom'] = array(
+      'value' => $this->draw_semester_box_bottom(),
+      'weight' => $render_weight,
+    ); 
+    
+    
 
-    return $pC;
+    return fp_render_content($render);
   }
 
 
@@ -3910,8 +3942,17 @@ function draw_menu_items($menu_array) {
 	 * @return string
 	 */
 	function draw_course_row(Course $course, $icon_filename = "", $title_text = "", $js_toggle_and_save = false, $bool_display_check = true, $bool_add_footnote = true, $bool_add_asterisk_to_transfers = false)
-	{ 
-		// Display a course itself...
+	{
+	        
+	  // TODO:  Make use of a render array.    
+	  
+	  $render = array();
+    $render['#id'] = 'AdvisingScreen_draw_course_row';
+    $render['#course'] = $course;
+    
+	    
+	   
+		// Display a course itself
 		
 		$theme = array();
     $theme["screen"] = $this;
@@ -4234,17 +4275,6 @@ function draw_menu_items($menu_array) {
       "hidden_field" => "<input type='hidden' name='$hid_name' id='advcr_$unique_id' value='$hid_value'>",
     );                 
                  
-/*
- * 
-          <img src='$img_path/cb_" . $display_status . "$opchecked.gif'
-          border='0'
-          id='cb_$unique_id'
-          onclick='{$op_on_click_function}(\"$unique_id\",\"$display_status\",\"$extra_js_vars\");'
-          >*/
-          
-                           
-		//$hid = "<input type='hidden' name='$hid_name'
-		//				id='advcr_$unique_id' value='$hid_value'>";
 
 		// Okay, we can't actually serialize a course, as it takes too much space.
 		// It was slowing down the page load significantly!  So, I am going
@@ -4258,7 +4288,7 @@ function draw_menu_items($menu_array) {
 		}
 
 		$js_code = "describeCourse(\"$data_string\",\"$blank_degree_id\",\"$subject_id $course_num\");";
-
+ 
     $theme["course"]["js_code"] = $js_code;
 
     // Assemble theme array elements for the course itself.
@@ -4299,31 +4329,23 @@ function draw_menu_items($menu_array) {
       
 		}
 
-    /*
-		$on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
-      				onmouseout=\"style.backgroundColor='white'\" ";
-
-     */
-    
+        
     $on_mouse_over = "
             onmouseover='$(this).addClass(\"selection_highlight\");'
             onmouseout='$(this).removeClass(\"selection_highlight\");'
-    ";
+            ";
       
 				
 		$hand_class = "hand";
 
-		if ($bool_display_check == false) {
-			//$op = $hid = "";
-			
+		if ($bool_display_check == false) {						
       unset($theme["op"]);
 		}
 
 
 		if ($this->bool_print) {
 			// In print view, disable all popups and mouseovers.
-			$on_mouse_over = "";
-			//$js_code = "";
+			$on_mouse_over = "";			
       $theme["course"]["js_code"] = "";
 			$hand_class = "";
 		}
@@ -4361,7 +4383,12 @@ function draw_menu_items($menu_array) {
 
     // Draw the actual course row...
 
-    $pC .= "<tr><td colspan='8'>";
+    //$pC .= "<tr><td colspan='8'>";    
+    $render['start_course_row'] = array(
+      'value' => "<tr class='from-render-api'><td colspan='8'>",
+      'weight' => 0,
+    ); 
+    
 
 		if ($course->get_bool_substitution_new_from_split() != TRUE || ($course->get_bool_substitution_new_from_split() == TRUE && $course->display_status != "eligible")){
 
@@ -4370,7 +4397,65 @@ function draw_menu_items($menu_array) {
 			}
 
       $js_code = $theme["course"]["js_code"];
- 
+  
+      $render['#js_code'] = $js_code;
+  
+      $render['course_row_start_table'] = array(
+        'value' => "<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left' class='draw-course-row'>",
+        'weight' => 100,
+      );
+  
+      $render['course_row_start_tr'] = array(
+        'value' => "<tr height='20' class='$hand_class {$theme["course"]["display_status"]} {$theme["course"]["extra_classes"]}'
+          $on_mouse_over title='{$theme["course"]["title"]}' >",
+        'weight' => 200,          
+      );
+  
+      $render['course_row_td_op_and_hidden'] = array(
+        'value' => "<td style='width:$w1_1; white-space:nowrap;' class='w1_1' align='left'>$op$hid</td>",
+        'weight' => 300,        
+      );
+      
+      $render['course_row_td_icon_html'] = array(
+        'value' => "<td style='width:$w1_2; white-space:nowrap;' align='left'   class='w1_2' onClick='$js_code'>$icon_html</td>",
+        'weight' => 400,        
+      );
+      
+      $render['course_row_td_ast'] = array(
+        'value' => "<td style='width:$w1_3; white-space:nowrap;' align='left'   class='w1_3' onClick='$js_code'>&nbsp;$ast</td>",
+        'weight' => 500,        
+      );
+
+      $render['course_row_td_subject_id'] = array(
+        'value' => "<td align='left' style='width:$w2; white-space:nowrap;' class='underline  w2 '  onClick='$js_code'>
+              {$theme["course"]["subject_id"]}</td>",
+        'weight' => 600,              
+      );
+        
+      $render['course_row_td_course_num'] = array(
+        'value' => "<td class='underline w3' style='width:$w3; white-space:nowrap;' align='left' 
+                     onClick='$js_code'>
+                     {$theme["course"]["course_num"]}{$theme["course"]["footnote"]}</td>",
+        'weight' => 700,                     
+      );
+      
+      $render['course_row_td_hrs'] = array(
+        'value' => "<td class='underline w4' style='width:$w4; max-width:36px; white-space:nowrap;'  onClick='$js_code'>{$theme["course"]["hours"]}{$theme["course"]["var_hour_icon"]}</td>",
+        'weight' => 800,        
+      );
+              
+      $render['course_row_td_grd'] = array(
+        'value' => "<td class='underline w5'  style='width:$w5; max-width:35px; white-space:nowrap;'  onClick='$js_code'>{$theme["course"]["dispgrade"]}&nbsp;</td>",
+        'weight' => 900,        
+      );
+
+      $render['course_row_td_pts'] = array(
+        'value' => "<td class='underline w6' style='width:$w6; max-width:31px; white-space:nowrap;' onClick='$js_code'>{$theme["course"]["pts"]}&nbsp;</td>",
+        'weight' => 1000,        
+      );
+
+        
+      /*
 			$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left' class='draw-course-row'>
      	<tr height='20' class='$hand_class {$theme["course"]["display_status"]} {$theme["course"]["extra_classes"]}'
@@ -4390,11 +4475,68 @@ function draw_menu_items($menu_array) {
        	
      	</tr>
      	</table>";
+     	*/
+     	
+     	
+      $render['course_row_end_row_and_table'] = array(
+        'value' => "</tr></table>",
+        'weight' => 5000,        
+      );
+     	     	
+     	
 
 		} 
 		else {
 			// These are the leftover hours from a partial substitution.
 
+			$render['#leftover_hours_from_partial_sub'] = TRUE;
+			$render['#js_code'] = $js_code;
+			
+      $render['course_row_start_table'] = array(
+        'value' => "<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left' class='draw-course-row-leftover-hours'>",
+        'weight' => 100,
+      );
+  
+      $render['course_row_start_tr'] = array(
+        'value' => "<tr height='20' class='hand {$theme["course"]["display_status"]}'
+          $on_mouse_over title='{$theme["course"]["title"]}'>",
+        'weight' => 200,          
+      );
+  
+      $render['course_row_td_op_and_hidden'] = array(
+        'value' => "<td width='$w1_1'  class='w1_1' align='left'>$op$hid</td>",
+        'weight' => 300,        
+      );
+      
+      $render['course_row_td_icon_html'] = array(
+        'value' => "<td width='$w1_2'  class='w1_2' align='left' onClick='$js_code'>$icon_html</td>",
+        'weight' => 400,        
+      );
+      
+      $render['course_row_td_ast'] = array(
+        'value' => "<td width='$w1_3'  class='w1_3' align='left' onClick='$js_code'>&nbsp;</td>",
+        'weight' => 500,        
+      );
+
+      $render['course_row_td_leftover_course_details'] = array(
+        'value' => "<td align='left' class='underline course-part-sub-hrs-left' onClick='$js_code'
+            colspan='4'>
+              &nbsp; &nbsp; {$theme["course"]["subject_id"]} &nbsp;
+              {$theme["course"]["course_num"]}{$theme["course"]["footnote"]}
+              &nbsp; ({$theme["course"]["hours"]} " . t("hrs left") . ")
+            </td>",
+        'weight' => 600,              
+      );
+        
+                    
+      
+      $render['course_row_end_row_and_table'] = array(
+        'value' => "</tr></table>",
+        'weight' => 5000,        
+      );			
+			 
+			
+			/*
 			$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left' class='draw-course-row-leftover-hours'>
      	<tr height='20' class='hand {$theme["course"]["display_status"]}'
@@ -4410,13 +4552,18 @@ function draw_menu_items($menu_array) {
        	   	</td>
      	</tr>
      	</table>";		
-
+      */
 		}
 
-		$pC .= "</td></tr>";
+		//$pC .= "</td></tr>";
+    $render['end_course_row'] = array(
+      'value' => "</td></tr>",
+      'weight' => 9999,
+    );
 
+    return fp_render_content($render, FALSE);
 
-		return $pC;
+		//return $pC;
 	}
 
 
@@ -4971,9 +5118,7 @@ function draw_menu_items($menu_array) {
         // fix a multi-degree bug, where we see the same course however many times it was split for a DIFFERENT degree.
         // If it's never been split for THIS degree, it should just show up as 1 course.
         $ukey = md5($c->course_id . $c->catalog_year . $c->term_id . $m_hours . $tcourse_id . intval(@$c->db_substitution_id_array[$req_by_degree_id]));
-        if (isset($already_seen[$ukey])) {
-          
-            
+        if (isset($already_seen[$ukey])) {  
           continue;
         }        
         // Else, add it.
@@ -5001,14 +5146,20 @@ function draw_menu_items($menu_array) {
               $used_hours = $used_hours_subs[$ukey];
               // Get the remaining hours by subtracting the ORIGINAL hours for this course against
               // the used hours.
+              
+              // Okay, I believe this is a bug.  Somewhere, I have set the hours_awarded to the remaining hours, so
+              // this math is no longer needed.
+              /*              
               $remaining_hours = $c->get_hours_awarded(0) - $used_hours;  // (0) gets the original hours awarded.
               if ($remaining_hours > 0) {
                 $h = $remaining_hours;
-              } 
+                
+              }*/
+              
             }
             
           }          
-
+ 
 
 
 

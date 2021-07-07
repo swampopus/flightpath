@@ -411,8 +411,6 @@ class Student extends stdClass
 					
 					$new_course->set_hours_awarded($req_by_degree_id, $remaining_hours);					
 					$new_course->req_by_degree_id = $req_by_degree_id;
-          
-					
 					
 					if (is_object($new_course->course_transfer))
 					{
@@ -465,6 +463,7 @@ class Student extends stdClass
 				
 				$course_requirement->assigned_to_semester_num = $cur["required_semester_num"];
         $course_requirement->req_by_degree_id = $req_by_degree_id;
+
 				//$taken_course->assigned_to_group_id = $cur["required_group_id"];
 				$taken_course->assigned_to_group_ids_array[$cur["required_group_id"]] = $cur["required_group_id"];
 				$taken_course->assigned_to_semester_num = $cur["required_semester_num"];

@@ -13,7 +13,7 @@
  * the completed "render_array", which already contains all of our elements.  We will call
  * hooks on it, sort by weights, and then return the rendered HTML.
  */
-function fp_render_content($render_array = array()) {
+function fp_render_content($render_array = array(), $bool_include_wrappers = TRUE) {
 
   $rtn = "";
 
@@ -106,10 +106,16 @@ function fp_render_content($render_array = array()) {
   $render_array = $new_form;
   
   // We can now proceed with rendering this render_array.  It will be similar to fp_render_form.
-  $rtn .= "<div class='renderapi-content $class' id='render-$render_id'>";
+  if ($bool_include_wrappers) {
+    $rtn .= "<div class='renderapi-content $class' id='render-$render_id'>";
+  }
+  
   $rtn .= fp_render_array($render_array);
-  $rtn .= "</div>";
-      
+  
+  if ($bool_include_wrappers) {
+    $rtn .= "</div>";
+  }
+  
   return $rtn;
   
 }
@@ -450,8 +456,8 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   $rtn = "";
 
   $type = @$element["type"]; 
-  if ($type == "") $type = "markup";
-  
+  if ($type == "") $type = "markup_no_wrappers";
+   
   // Make sure the "css name" is friendly.
   $cssname = fp_get_machine_readable($name);
   
@@ -561,7 +567,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   
   
   
-  if ($type != "markup") {
+  if ($type != "markup" && $type != "markup_no_wrappers") {
     $rtn .= "<div id='element-wrapper-$cssname' class='form-element element-type-$type $extra_wrapper_class'>";
   }
 
@@ -570,7 +576,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   }
 
 
-  if ($type != "markup") {
+  if ($type != "markup" && $type != "markup_no_wrappers") {
     $rtn .= "<div id='element-inner-wrapper-$cssname' class='form-element element-type-$type $element_error_css'>";
   }
 
@@ -597,6 +603,15 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     if (is_string($attributes) && $attributes != "") {
       $rtn .= "</div>";
     }
+  }
+  else if ($type == "markup_no_wrappers") {
+
+    // If a label is set, go ahead and display, even though its markup...
+    if ($label != "") {
+      $rtn .= "<label>$ast$label$popup_help_link</label>";
+    }     
+    
+    $rtn .= $value; // plain value, no wrapper divs at all.
   }
   else if ($type != "hidden" && $type != "checkbox") {
     $rtn .= "<label>$ast$label$popup_help_link</label>";
@@ -725,7 +740,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     $rtn .= "<div class='form-element-description'>$description</div>";
   }
 
-  if ($type != "markup") {
+  if ($type != "markup" && $type != 'markup_no_wrappers') {
     $rtn .= "</div>";  // close the inner wrapper
   }
 
@@ -735,7 +750,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     $rtn .= $suffix;
   }
 
-  if ($type != "markup") {
+  if ($type != "markup" && $type != 'markup_no_wrappers') {
     $rtn .= "</div>";  // close the over-all wrapper
   }
 

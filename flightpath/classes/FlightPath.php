@@ -797,6 +797,7 @@ class FlightPath extends stdClass
             $new_course->min_grade = $course_requirement->min_grade;  
             $new_course->req_by_degree_id = $req_by_degree_id; 
             $new_course->assigned_to_degree_ids_array[$req_by_degree_id] = $req_by_degree_id; 
+            $new_course->db_degree_requirement_id = floatval($course_requirement->db_degree_requirement_id . ".1");
 
             $course_requirement->set_bool_substitution_split($req_by_degree_id, TRUE);
             

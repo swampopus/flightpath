@@ -12,10 +12,23 @@ function admin_edit_group_form_validate(&$form, &$form_state) {
   $group_name = trim($values["group_name"]);
   $group_id = $values["group_id"];
   $de_catalog_year = $values["de_catalog_year"];
+
+  $school_id = 0;
+  if (isset($values['schools_school'])) { // A school was set from the schools module.
+    $school_id = intval($values['schools_school']);  // Use our NEW school_id for validating.
+  }
+  
+  $school_name = $andschool = "";
+  if ($school_id > 0) $school_name = "School-" . $school_id;
+  if (function_exists("schools_menu")) {
+    $defs = schools_get_school_definitions();
+    if (isset($defs[$school_id])) $school_name = $defs[$school_id];
+    $andschool = " and school %school";
+  }
   
   
   // We want to make sure the group_name is in a machine-name format,
-  // and we need to make sure it is unique for this catalog year!
+  // and we need to make sure it is unique for this catalog year and school_id!
   $group_name = fp_get_machine_readable(strtolower($group_name));
   
   $form_state['values']['group_name'] = $group_name;
@@ -26,30 +39,21 @@ function admin_edit_group_form_validate(&$form, &$form_state) {
                        WHERE group_name = ?
                        AND group_id != ?
                        AND delete_flag = 0
-                       AND catalog_year = ?", $group_name, $group_id, $de_catalog_year)->fetchColumn();
+                       AND catalog_year = ?
+                       AND school_id = ?", $group_name, $group_id, $de_catalog_year, $school_id)->fetchColumn();
   
   if ($mycount > 0) {    
     form_error("group_name", t("The 'Internal group machine name' %gn is already in use in FlightPath by another group
-                                in the catalog year %cy.  
+                                in the catalog year %cy$andschool.  
                                 Please change to a different name, and submit again. <b>Your work has NOT been saved.</b>
-                                ", array("%gn" => $group_name, "%cy" => $de_catalog_year)));
+                                ", array("%gn" => $group_name, "%cy" => $de_catalog_year, "%school" => $school_name)));
     return;
   }
   
   
   $db = get_global_database_handler();
   
-  $school_id = 0;
-  if (isset($values['schools_school'])) { // A school was set from the schools module.
-    $school_id = intval($values['schools_school']);  // Use our NEW school_id for validating.
-  }
-  
-  $school_name = "";
-  if ($school_id > 0) $school_name = "School-" . $school_id;
-  if (function_exists("schools_menu")) {
-    $defs = schools_get_school_definitions();
-    if (isset($defs[$school_id])) $school_name = $defs[$school_id];
-  }
+
 
   // Make sure that courses are for the correct school for this group.
   $courses = $values['courses'];

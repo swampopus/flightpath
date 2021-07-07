@@ -2786,7 +2786,7 @@ function calendar_content_register_content_type() {
   $fields['event_duration_minutes'] = array(
     'type' => 'select',
     'label' => 'Duration',
-    'options' => array('15' => '15 min', '30' => '30 min', '45' => '45 min', '60' => '60 min'),
+    'options' => array('15' => '15 min', '30' => '30 min', '45' => '45 min', '60' => '60 min', '75' => '1 hr, 15 min', '90' => '1 hr, 30 min', '105' => '1 hr, 45 min', '120' => '2 hours'),
     'hide_please_select' => TRUE,
     'weight' => 110,
     'required' => TRUE,
@@ -2796,17 +2796,24 @@ function calendar_content_register_content_type() {
   $fields['event_buffer_minutes'] = array(
     'type' => 'select',
     'label' => 'Buffer between scheduled appointments',
-    'options' => array('5' => '5 min', '10' => '10 min', '15' => '15 min', '30' => '30 min', '45' => '45 min', '60' => '60 min'),
+    'options' => array('5' => '5 min', '10' => '10 min', '15' => '15 min', '30' => '30 min', '45' => '45 min', '60' => '60 min', '75' => '1 hr, 15 min', '90' => '1 hr, 30 min', '105' => '1 hr, 45 min', '120' => '2 hours'),
     'hide_please_select' => TRUE,
     'weight' => 120,
     'required' => TRUE,
     'description' => t('How many minutes should there be from the end of one appointment or event, and the start of the next?'),
   );
 
+  $options = array();
+  for ($t = 1; $t <= 24; $t++) {
+    $s = "s";
+    if ($t == 1) $s = "";
+    $options[$t] = "$t " . t("hour$s");
+  }
+
   $fields['prevent_less_than_hours'] = array(
     'type' => 'select',
     'label' => 'Prevent events less than ___ hours away',
-    'options' => array('1' => '1 hour', '2' => '2 hours', '3' => '3 hours', '4' => '4 hours', '6' => '6 hours', '7' => '7 hours', '8' => '8 hours', '9' => '9 hours'),
+    'options' => $options,
     'hide_please_select' => TRUE,
     'weight' => 130,
     'required' => TRUE,
