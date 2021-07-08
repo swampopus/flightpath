@@ -1677,14 +1677,75 @@ ___advising_screens{}
   font-size: 1.0em;
 }
 
-.fp-semester-table .fp-box-top {
+.fp-box-top {
   width: 95%;
   
+}
+
+
+table.draw-course-row {
+  table-layout: fixed;
+  width: 100%;
+}
+
+
+.box-headers-row table.header-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.fp-semester-table .fp-box-top th {
+  font-size: 0.9em;
 }
 
 .fp-semester-table td.fp-boxes {
   width: 50%;
 }
+
+.fp-semester-table table.draw-course-row td {
+  white-space: nowrap;
+}
+
+.fp-semester-table table .w1_1 {
+  width: 10%;  
+  text-align: left;
+}
+
+.fp-semester-table table .w1_2 {
+  width: 8%;    
+  text-align: left;
+}
+
+.fp-semester-table table .w1_3 {
+  width: 8%;    
+  text-align: left;
+}
+
+.fp-semester-table table .w2 {
+  width: 17%;  
+  text-align: left;
+}
+
+.fp-semester-table table .w3 {
+  width: 26%;    
+  text-align: left;
+}
+
+.fp-semester-table table .w4 {
+  width: 10%;    
+  text-align: left;
+}
+  
+.fp-semester-table table .w5 {
+  width:10%; 
+  text-align: left; 
+}
+
+.fp-semester-table table .w6 {  
+  width: 9%;
+  text-align: left;
+}
+
 
 
 /*

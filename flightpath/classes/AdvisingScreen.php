@@ -3779,7 +3779,7 @@ function draw_menu_items($menu_array) {
 
 		return $pC;
 	}
-
+ 
 	/**
 	 * Uses the draw_box_top function, specifically for semesters.
 	 *
@@ -3793,7 +3793,7 @@ function draw_menu_items($menu_array) {
 	  $extra_classes = " fp-semester-box-top fp-semester-box-top-" . fp_get_machine_readable(strtolower($title));
     
     
-		return $this->draw_box_top($title, $hideheaders, "95%", $extra_classes);
+		return $this->draw_box_top($title, $hideheaders, $extra_classes);
 	}
 
 	/**
@@ -3831,32 +3831,8 @@ function draw_menu_items($menu_array) {
 	 * 
 	 * @return string
 	 */
-	function draw_box_top($title, $hideheaders=false, $table_width = 300, $extra_classes = ""){ 
-	  // returns the beginnings of the year tables...
-
-		// Get width values from width_array (supplied by calling function,
-		// for example, draw_year_box_top
-		$w1_1 = $this->width_array[0];
-		$w1_2 = $this->width_array[1];
-		$w1_3 = $this->width_array[2];
-		$w2 = $this->width_array[3];
-		$w3 = $this->width_array[4];
-		$w4 = $this->width_array[5];
-		$w5 = $this->width_array[6];
-		$w6 = $this->width_array[7];
-
-		if ($this->bool_popup == true)
-		{
-			$w1_1 = $this->popup_width_array[0];
-			$w1_2 = $this->popup_width_array[1];
-			$w1_3 = $this->popup_width_array[2];
-			$w2 = $this->popup_width_array[3];
-			$w3 = $this->popup_width_array[4];
-			$w4 = $this->popup_width_array[5];
-			$w5 = $this->popup_width_array[6];
-			$w6 = $this->popup_width_array[7];
-		}
-
+	function draw_box_top($title, $hideheaders=false, $extra_classes = ""){ 
+	  // returns the beginnings of the semester block tables...
 
 		$headers = array();
 		if ($hideheaders != true)
@@ -3871,52 +3847,67 @@ function draw_menu_items($menu_array) {
     $extra_classes .= " fp-box-top-" . fp_get_machine_readable(strtolower($title));
 
 
-		$rtn = "
-		   <table border='0' width='$table_width' cellpadding='0' cellspacing='0' class='fp-box-top $extra_classes'>
-   			<tr>
-    		<td colspan='8' class='semester-box-top' align='center' valign='top'>
-    				";
-		$rtn .= fp_render_section_title($title);
+    $render = array();
+    $render['#id'] = 'AdvisingScreen_draw_box_top';
+    $render['#title'] = $title;
+    $render['#hideheaders'] = $hideheaders;
+    $render['#extra_classes'] = $extra_classes;
+    
 
-		$rtn .= "
-    		</td>
-   			</tr>
-   					";
+    $render['table_top'] = array(
+      'value' => "<table border='0' cellpadding='0' cellspacing='0' class='fp-box-top $extra_classes'>",
+    );
+
+    $render['semester_title_box_top'] = array(
+      'value' => "<tr>
+                  <td colspan='20' class='semester-box-top'>
+                  ",
+    );
+
+		
+    $render['section_title'] = array(
+      'value' => fp_render_section_title($title), 
+    );
+    
+		$render['semester_title_box_bottom'] = array(
+		  'value' => "</td>
+                  </tr>",
+		);
+
 		if (!$hideheaders)
 		{
-			$rtn .= "
-   			<tr height='20'>
-
-    			<td width='$w1_1' class='w1_1' align='left'>
-     			&nbsp;
-    			</td>
-
-    			<td width='$w1_2' class='w1_2' align='left'>
-     			&nbsp;
-    			</td>
-
-    			<td width='$w1_3' class='w1_3' align='left'>
-     			&nbsp;
-    			</td>
-    
-        		<td align='left' width='$w2' class='w2' >
-     				<font size='2'><b>$headers[0]</b></font>
-	    		</td>
-
-    			<td width='$w3' class='w3' align='left'>&nbsp;</td>
-    			<td width='$w4' class='w4'>
-     				<font size='2'><b>$headers[1]</b></font>
-    			</td>
-    			<td width='$w5' class='w5'>
-     				<font size='2'><b>$headers[2]</b></font>
-    			</td>
-    			<td width='$w6' class='w6'>
-     				<font size='2'><b>$headers[3]</b></font>
-    			</td>
-   			</tr>
-   				";
+		  
+      $render['headers'] = array(
+        'value' => "<tr class='box-headers-row'>    
+            <td colspan='20'>
+            <table class='header-table' cellpadding='0' cellspacing='0'>        
+                      <th class='w1_1'></th>
+                      <th class='w1_2'></th>
+                      <th class='w1_3'></th>    
+                      <th class='w2'>
+                        $headers[0]
+                      </th>
+                      <th class='w3'></th>
+                      <th class='w4'>
+                        $headers[1]
+                      </th>
+                      <th class='w5'>
+                        $headers[2]
+                      </th>
+                      <th class='w6'>
+                        $headers[3]
+                      </th>  
+                             
+                  </tr>
+             </table>
+             </td>
+             </tr>
+                  ",
+      );
+      
 		}
-		return $rtn;
+
+		return fp_render_content($render);
 
 	} // draw_year_box_top
 
@@ -3960,14 +3951,7 @@ function draw_menu_items($menu_array) {
     $theme["degree_plan"] = $this->degree_plan;
 		
 		$pC = "";
-		$w1_1 = $this->width_array[0];
-		$w1_2 = $this->width_array[1];
-		$w1_3 = $this->width_array[2];
-		$w2 = $this->width_array[3];
-		$w3 = $this->width_array[4];
-		$w4 = $this->width_array[5];
-		$w5 = $this->width_array[6];
-		$w6 = $this->width_array[7];
+
 
 		$img_path = fp_theme_location() . "/images";
 		
@@ -4385,7 +4369,7 @@ function draw_menu_items($menu_array) {
 
     //$pC .= "<tr><td colspan='8'>";    
     $render['start_course_row'] = array(
-      'value' => "<tr class='from-render-api'><td colspan='8'>",
+      'value' => "<tr class='from-render-api'><td colspan='20'>",
       'weight' => 0,
     ); 
     
@@ -4401,7 +4385,7 @@ function draw_menu_items($menu_array) {
       $render['#js_code'] = $js_code;
   
       $render['course_row_start_table'] = array(
-        'value' => "<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left' class='draw-course-row'>",
+        'value' => "<table border='0' cellpadding='0' cellspacing='0' class='draw-course-row'>",
         'weight' => 100,
       );
   
@@ -4412,45 +4396,45 @@ function draw_menu_items($menu_array) {
       );
   
       $render['course_row_td_op_and_hidden'] = array(
-        'value' => "<td style='width:$w1_1; white-space:nowrap;' class='w1_1' align='left'>$op$hid</td>",
+        'value' => "<td class='w1_1'>$op$hid</td>",
         'weight' => 300,        
       );
       
       $render['course_row_td_icon_html'] = array(
-        'value' => "<td style='width:$w1_2; white-space:nowrap;' align='left'   class='w1_2' onClick='$js_code'>$icon_html</td>",
+        'value' => "<td class='w1_2' onClick='$js_code'>$icon_html</td>",
         'weight' => 400,        
       );
       
       $render['course_row_td_ast'] = array(
-        'value' => "<td style='width:$w1_3; white-space:nowrap;' align='left'   class='w1_3' onClick='$js_code'>&nbsp;$ast</td>",
+        'value' => "<td class='w1_3' onClick='$js_code'>&nbsp;$ast</td>",
         'weight' => 500,        
       );
 
       $render['course_row_td_subject_id'] = array(
-        'value' => "<td align='left' style='width:$w2; white-space:nowrap;' class='underline  w2 '  onClick='$js_code'>
+        'value' => "<td class='underline  w2 '  onClick='$js_code'>
               {$theme["course"]["subject_id"]}</td>",
         'weight' => 600,              
       );
         
       $render['course_row_td_course_num'] = array(
-        'value' => "<td class='underline w3' style='width:$w3; white-space:nowrap;' align='left' 
+        'value' => "<td class='underline w3' align='left' 
                      onClick='$js_code'>
                      {$theme["course"]["course_num"]}{$theme["course"]["footnote"]}</td>",
         'weight' => 700,                     
       );
       
       $render['course_row_td_hrs'] = array(
-        'value' => "<td class='underline w4' style='width:$w4; max-width:36px; white-space:nowrap;'  onClick='$js_code'>{$theme["course"]["hours"]}{$theme["course"]["var_hour_icon"]}</td>",
+        'value' => "<td class='underline w4' onClick='$js_code'>{$theme["course"]["hours"]}{$theme["course"]["var_hour_icon"]}</td>",
         'weight' => 800,        
       );
               
       $render['course_row_td_grd'] = array(
-        'value' => "<td class='underline w5'  style='width:$w5; max-width:35px; white-space:nowrap;'  onClick='$js_code'>{$theme["course"]["dispgrade"]}&nbsp;</td>",
+        'value' => "<td class='underline w5' onClick='$js_code'>{$theme["course"]["dispgrade"]}&nbsp;</td>",
         'weight' => 900,        
       );
 
       $render['course_row_td_pts'] = array(
-        'value' => "<td class='underline w6' style='width:$w6; max-width:31px; white-space:nowrap;' onClick='$js_code'>{$theme["course"]["pts"]}&nbsp;</td>",
+        'value' => "<td class='underline w6' onClick='$js_code'>{$theme["course"]["pts"]}&nbsp;</td>",
         'weight' => 1000,        
       );
 
@@ -4498,28 +4482,28 @@ function draw_menu_items($menu_array) {
       );
   
       $render['course_row_start_tr'] = array(
-        'value' => "<tr height='20' class='hand {$theme["course"]["display_status"]}'
+        'value' => "<tr class='hand {$theme["course"]["display_status"]}'
           $on_mouse_over title='{$theme["course"]["title"]}'>",
         'weight' => 200,          
       );
   
       $render['course_row_td_op_and_hidden'] = array(
-        'value' => "<td width='$w1_1'  class='w1_1' align='left'>$op$hid</td>",
+        'value' => "<td class='w1_1'>$op$hid</td>",
         'weight' => 300,        
       );
       
       $render['course_row_td_icon_html'] = array(
-        'value' => "<td width='$w1_2'  class='w1_2' align='left' onClick='$js_code'>$icon_html</td>",
+        'value' => "<td class='w1_2' onClick='$js_code'>$icon_html</td>",
         'weight' => 400,        
       );
       
       $render['course_row_td_ast'] = array(
-        'value' => "<td width='$w1_3'  class='w1_3' align='left' onClick='$js_code'>&nbsp;</td>",
+        'value' => "<td class='w1_3' onClick='$js_code'>&nbsp;</td>",
         'weight' => 500,        
       );
 
       $render['course_row_td_leftover_course_details'] = array(
-        'value' => "<td align='left' class='underline course-part-sub-hrs-left' onClick='$js_code'
+        'value' => "<td class='underline course-part-sub-hrs-left' onClick='$js_code'
             colspan='4'>
               &nbsp; &nbsp; {$theme["course"]["subject_id"]} &nbsp;
               {$theme["course"]["course_num"]}{$theme["course"]["footnote"]}

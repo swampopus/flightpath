@@ -3,6 +3,9 @@ FlightPath 6.x Changelog
  
 2021-07-07
   Converted advise_display_view to use render array system. 
+  
+  Changed when drawing course rows, no longer hard-coding widths, styles, align, etc.
+  elements.  Instead, we are relying entirely only CSS classes for styling.
  
  
 2021-07-06 
