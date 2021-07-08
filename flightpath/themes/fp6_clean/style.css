@@ -1670,6 +1670,9 @@ ___history_tab{}
 
 ___advising_screens{}
 
+
+
+
 .degree-plan-wrapper {
   max-width: 1024px;
 }
@@ -1688,6 +1691,15 @@ table.draw-course-row {
   width: 100%;
 }
 
+
+table.table-group-select-row {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.group-row-msg {
+  font-style: italic;
+}
 
 .box-headers-row table.header-table {
   table-layout: fixed;
@@ -1741,8 +1753,13 @@ table.draw-course-row {
   text-align: left; 
 }
 
+/*  NOTE:
+ * Do not set a width for .w6 (pts column, also last column in table) as that will
+ * mess up the spacing of everything else.  Not sure why it does that,
+ * but it has to do with trying to set widths on td elements.
+ */
 .fp-semester-table table .w6 {  
-  width: 9%;
+  /* width: 9%; */
   text-align: left;
 }
 

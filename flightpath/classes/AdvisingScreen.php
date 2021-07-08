@@ -3124,12 +3124,12 @@ function draw_menu_items($menu_array) {
         $html[$group->req_by_degree_id] = "";
       }
       
-      $html[$group->req_by_degree_id] .= "<tr><td colspan='8'>";
-            
-                  
-      $html[$group->req_by_degree_id] .= $this->display_group($group);  // TODO: draw_group_row should utilize a render array
+      //$html[$group->req_by_degree_id] .= "<tr class='semester-display-group-tr'><td colspan='8'>";
+      $x = $this->display_group($group);
+      //fpm(htmlentities($x, TRUE));
+      $html[$group->req_by_degree_id] .= $x;  
       $count_hoursCompleted += $group->hours_fulfilled_for_credit;
-      $html[$group->req_by_degree_id] .= "</td></tr>";
+      //$html[$group->req_by_degree_id] .= "</td></tr>";
     } //while groups.
 
     
@@ -3540,7 +3540,8 @@ function draw_menu_items($menu_array) {
       }
       
       
-			$rtn .= "<tr class='$rowclass'><td colspan='8' class=' '>";
+			$rtn .= "<tr class='$rowclass'>
+			           <td colspan='8' class='group-select-row-tr'>";
 			$rtn .= $this->draw_group_select_row($place_group, $remaining);
 			$rtn .= "</td></tr>";
 		}
@@ -3632,29 +3633,23 @@ function draw_menu_items($menu_array) {
 	 */
 	function draw_group_select_row(Group $group, $remaining_hours)
 	{
-		$pC = "";
+		
 		$img_path = fp_theme_location() . "/images";
-    /*
-		$on_mouse_over = " onmouseover=\"style.backgroundColor='#FFFF99'\"
-      				onmouseout=\"style.backgroundColor='white'\" ";
-     */
+    
      
     $on_mouse_over = "
             onmouseover='$(this).addClass(\"selection_highlight\");'
-            onmouseout='$(this).removeClass(\"selection_highlight\");'
-    ";      
+            onmouseout='$(this).removeClass(\"selection_highlight\");'   ";      
 
 		
 		
-		$w1_1 = $this->width_array[0];
-		$w1_2 = $this->width_array[1];
-		$w1_3 = $this->width_array[2];
-		$w2 = $this->width_array[3];
-		$w3 = $this->width_array[4];
-		$w4 = $this->width_array[5];
-		$w5 = $this->width_array[6];
-		$w6 = $this->width_array[7];
-
+    $render = array();
+    $render['#id'] = 'AdvisingScreen_draw_group_select_row';
+    $render['#group'] = $group;
+    $render['#remaining_hours'] = $remaining_hours;
+    
+    
+    
 		$s = "s";
 		if ($remaining_hours < 2)
 		{
@@ -3697,10 +3692,10 @@ function draw_menu_items($menu_array) {
 
 		$js_code = "selectCourseFromGroup(\"$group->group_id\", \"$group->assigned_to_semester_num\", \"$remaining_hours\", \"$blank_degree_id\",\"$req_by_degree_id\",\"$dialog_title\");";
 
-		$row_msg = "<em>" . t("Click") . " <span style='color:red;' class='group-select-arrows'>&gt;&gt;</span> " . t("to select @drh hour$s.", array("@drh" => $disp_remaining_hours)) . "</em>";
+		$row_msg = t("Click") . " <span style='color:red;' class='group-select-arrows'>&gt;&gt;</span> " . t("to select @drh hour$s.", array("@drh" => $disp_remaining_hours));
     if ($remaining_hours > 200) {
       // Don't bother showing the remaining hours number.
-      $row_msg = "<em>" . t("Click") . " <span style='color:red;' class='group-select-arrows'>&gt;&gt;</span> " . t("to select additional courses.") . "</em>";
+      $row_msg = t("Click") . " <span style='color:red;' class='group-select-arrows'>&gt;&gt;</span> " . t("to select additional courses.");
     }
      
 		$hand_class = "hand";
@@ -3708,11 +3703,11 @@ function draw_menu_items($menu_array) {
 		if ($this->bool_print || variable_get("show_group_titles_on_view", "no") == "yes")
 		{
 		  
-      $row_msg = "<em>" . t("Select") . " $disp_remaining_hours " . t("hour$s from") . " $group->title.</em>";
+      $row_msg = t("Select") . " $disp_remaining_hours " . t("hour$s from") . " $group->title.";
       
       if ($remaining_hours > 200) {
         // Don't bother showing the remaining hours number.
-        $row_msg = "<em>" . t("Select additional courses from") . " $group->title.</em>";
+        $row_msg = t("Select additional courses from") . " $group->title.";
       }
 
       if ($this->bool_print) {            
@@ -3727,7 +3722,7 @@ function draw_menu_items($menu_array) {
 
 		if ($group->group_id == DegreePlan::GROUP_ID_FOR_COURSES_ADDED)
 		{ // This is the Add a Course group.
-			$row_msg = "<i>" . t("Click to add an additional course.") . "</i>";
+			$row_msg = t("Click to add an additional course.");
 			$select_icon = "<span style='font-size: 16pt; color:blue;'>+</span>";
 			$icon_link = "";
 		}
@@ -3759,25 +3754,46 @@ function draw_menu_items($menu_array) {
     // Invoke a hook on our theme array, so other modules have a chance to change it up.   
     invoke_hook("theme_advise_group_select_row", array(&$theme));     
      
+    $render['#js_code'] = $js_code;
+    $render['#theme'] = $theme;
+        
+    $render['group_select_table_top'] = array(
+      'value' => "<table border='0' cellpadding='0' class='table-group-select-row' cellspacing='0' >",
+    );
 
-		$pC .= "
-   		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left'>
-     	<tr height='20' class='$hand_class {$theme["group"]["extra_classes"]} group-select-row'
-      		$on_mouse_over title='{$theme["group"]["title"]}'>
-      		<td width='$w1_1' class='group-w1_1' align='left'>&nbsp;</td>
-      		<td width='$w1_2' class='group-w1_2' align='left' onClick='{$theme["group"]["js_code"]}'>{$theme["group"]["icon_link"]}</td>
-      		<td width='$w1_3' class='group-w1_3' align='left' onClick='{$theme["group"]["js_code"]}'>{$theme["group"]["select_icon"]}</td>
-      		<td align='left' colspan='5' class='underline group-row-msg' onClick='{$theme["group"]["js_code"]}'>
-      		{$theme["group"]["row_msg"]}
-       				
-     	</tr>
-     	</table>";		
+    $render['group_select_table_tr'] = array(
+      'value' => "<tr class='$hand_class {$theme["group"]["extra_classes"]} group-select-row'
+          $on_mouse_over title='{$theme["group"]["title"]}'>",
+    );
+    
+    $render['group_select_table_w1_1'] = array(
+      'value' => "<td class='group-w1_1 w1_1' ></td>",
+    );
+    
+    $render['group_select_table_icon_link'] = array(
+      'value' => "<td class='group-w1_2 w1_2' onClick='{$theme["group"]["js_code"]}'>{$theme["group"]["icon_link"]}</td>",
+    );
+
+    $render['group_select_table_select_icon'] = array(
+      'value' => "<td class='group-w1_3 w1_3' onClick='{$theme["group"]["js_code"]}'>{$theme["group"]["select_icon"]}</td>",
+    );
+
+    $render['group_select_table_row_msg'] = array(
+      'value' => "<td colspan='5' class='underline group-row-msg' onClick='{$theme["group"]["js_code"]}'>
+          {$theme["group"]["row_msg"]}
+          </td>",
+    );
+
+    
+    $render['group_select_table_bottom'] = array(
+      'value' => "</tr>
+                  </table>",
+    );
+    
 
 
 
-
-
-		return $pC;
+		return fp_render_content($render, FALSE);
 	}
  
 	/**
@@ -3860,7 +3876,7 @@ function draw_menu_items($menu_array) {
 
     $render['semester_title_box_top'] = array(
       'value' => "<tr>
-                  <td colspan='20' class='semester-box-top'>
+                  <td colspan='8' class='semester-box-top'>
                   ",
     );
 
@@ -3879,7 +3895,7 @@ function draw_menu_items($menu_array) {
 		  
       $render['headers'] = array(
         'value' => "<tr class='box-headers-row'>    
-            <td colspan='20'>
+            <td colspan='8'>
             <table class='header-table' cellpadding='0' cellspacing='0'>        
                       <th class='w1_1'></th>
                       <th class='w1_2'></th>
@@ -3896,8 +3912,8 @@ function draw_menu_items($menu_array) {
                       </th>
                       <th class='w6'>
                         $headers[3]
-                      </th>  
-                             
+                      </th>
+                      <!--after_last_th-->  
                   </tr>
              </table>
              </td>
@@ -3907,7 +3923,7 @@ function draw_menu_items($menu_array) {
       
 		}
 
-		return fp_render_content($render);
+		return fp_render_content($render, FALSE);
 
 	} // draw_year_box_top
 
@@ -3950,8 +3966,7 @@ function draw_menu_items($menu_array) {
     $theme["student"] = $this->student;
     $theme["degree_plan"] = $this->degree_plan;
 		
-		$pC = "";
-
+		
 
 		$img_path = fp_theme_location() . "/images";
 		
@@ -4070,7 +4085,6 @@ function draw_menu_items($menu_array) {
 
       $temp_sub_course = $course->get_course_substitution();
       
-      //fpm($temp_sub_course);
       if (is_object($temp_sub_course))
       {
                 
@@ -4242,12 +4256,7 @@ function draw_menu_items($menu_array) {
       $extra_css .= " advise-checkbox-$display_status-checked";
     }
 		
-    /*
-		$op = "<span class='advise-checkbox advise-checkbox-$display_status $extra_css'
-		             id='cb_span_$unique_id'
-		             onClick='{$op_on_click_function}(\"$unique_id\",\"$display_status\",\"$extra_js_vars\");'></span>";
-    */
-                 
+                     
     $theme["op"] = array(
       "display_status" => $display_status,
       "extra_css" => $extra_css,
@@ -4339,6 +4348,8 @@ function draw_menu_items($menu_array) {
     // Invoke a hook on our theme array, so other modules have a chance to change it up.   
     invoke_hook("theme_advise_course_row", array(&$theme));
 
+    $render['#theme'] = $theme;
+
     /////////////////////////////////
     // Actually draw out our $theme array now....
     
@@ -4366,10 +4377,9 @@ function draw_menu_items($menu_array) {
     ////////////////////////////////////
 
     // Draw the actual course row...
-
-    //$pC .= "<tr><td colspan='8'>";    
+    
     $render['start_course_row'] = array(
-      'value' => "<tr class='from-render-api'><td colspan='20'>",
+      'value' => "<tr class='from-render-api'><td colspan='8'>",
       'weight' => 0,
     ); 
     
@@ -4390,7 +4400,7 @@ function draw_menu_items($menu_array) {
       );
   
       $render['course_row_start_tr'] = array(
-        'value' => "<tr height='20' class='$hand_class {$theme["course"]["display_status"]} {$theme["course"]["extra_classes"]}'
+        'value' => "<tr class='$hand_class {$theme["course"]["display_status"]} {$theme["course"]["extra_classes"]}'
           $on_mouse_over title='{$theme["course"]["title"]}' >",
         'weight' => 200,          
       );
@@ -4519,27 +4529,8 @@ function draw_menu_items($menu_array) {
         'weight' => 5000,        
       );			
 			 
-			
-			/*
-			$pC .= "
-   		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left' class='draw-course-row-leftover-hours'>
-     	<tr height='20' class='hand {$theme["course"]["display_status"]}'
-      		$on_mouse_over title='{$theme["course"]["title"]}'>
-      		<td width='$w1_1'  class='w1_1' align='left'>$op$hid</td>
-      		<td width='$w1_2'  class='w1_2' align='left' onClick='$js_code'>$icon_html</td>
-      		<td width='$w1_3'  class='w1_3' align='left' onClick='$js_code'>&nbsp;</td>
-      		<td align='left' class='underline course-part-sub-hrs-left' onClick='$js_code'
-      			colspan='4'>
-       				&nbsp; &nbsp; {$theme["course"]["subject_id"]} &nbsp;
-        			{$theme["course"]["course_num"]}{$theme["course"]["footnote"]}
-	       			&nbsp; ({$theme["course"]["hours"]} " . t("hrs left") . ")
-       	   	</td>
-     	</tr>
-     	</table>";		
-      */
 		}
-
-		//$pC .= "</td></tr>";
+		
     $render['end_course_row'] = array(
       'value' => "</td></tr>",
       'weight' => 9999,
@@ -4830,7 +4821,7 @@ function draw_menu_items($menu_array) {
     
 		$pC .= "
    		<table border='0' cellpadding='0' width='100%' cellspacing='0' align='left' class='group-course-row $attributes_class'>
-     	<tr height='20' class='$hand_class {$theme["course"]["display_status"]} {$theme["course"]["extra_classes"]}'
+     	<tr class='$hand_class {$theme["course"]["display_status"]} {$theme["course"]["extra_classes"]}'
       		$on_mouse_over title='{$theme["course"]["title"]}'>
       		<td width='$w1_1' class='group-w1_1' align='left'>$op$hid<span onClick='$js_code'>$icon_html</span></td>
       		<td width='$w1_2' class='group-w1_2' align='left' onClick='$js_code'> </td>
@@ -5368,7 +5359,7 @@ function draw_menu_items($menu_array) {
 
     $public_note = trim($group->public_note);    
     if ($public_note) {
-      $pC .= "<tr><td colspan='20'><div class='group-public-note'>" . $public_note . "</div></td></tr>";
+      $pC .= "<tr><td colspan='8'><div class='group-public-note'>" . $public_note . "</div></td></tr>";
     }
 
 
