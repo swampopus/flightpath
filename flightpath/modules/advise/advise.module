@@ -1254,6 +1254,16 @@ function advise_display_view($view = "view") {
   // Initialize everything we need to initialize for this advising session.
   
   advise_init_screen();      
+
+
+  $render = array();
+  $render['#id'] = 'advise_display_view';
+  $render['#view'] = $view;
+  $render['#fp'] = $fp;
+  $render['#degree_plan'] = $degree_plan;
+  $render['#screen'] = $screen;
+  $render['#current_student_id'] = $current_student_id;
+
   
   // Add some body classes to the page for this student.
   $student = $screen->student;
@@ -1261,9 +1271,9 @@ function advise_display_view($view = "view") {
     fp_add_body_class("student-rank-$student->db_rank  student-catalog-year-$student->catalog_year");
   }  
   
+  $render['#student'] = $student;
   
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");  
-  // Add advise.css to the screen
   fp_add_css(fp_get_module_path("advise") . "/css/advise.css");
   
   // If we are on a print screen, we need to go out of our
@@ -1289,7 +1299,12 @@ function advise_display_view($view = "view") {
       $bool_undergrad_only = FALSE; 
     }
     
-    $rtn .= fp_render_form("advise_what_if_selection_form", "", $bool_undergrad_only);
+    $render['#bool_undergrad_only'] = $bool_undergrad_only;
+    $render['whatif_selection_form'] = array(
+      'value' => fp_render_form("advise_what_if_selection_form", "", $bool_undergrad_only),
+    );
+    
+    //$rtn .= fp_render_form("advise_what_if_selection_form", "", $bool_undergrad_only);
     
     
   } 
@@ -1302,19 +1317,43 @@ function advise_display_view($view = "view") {
     $form_token = md5("advise_display_view" . fp_token());
         
     $vurl = fp_url($view);    
-        
+    
+    $render['degree_plan_wrapper_top'] = array(
+      'value' => "<div class='degree-plan-wrapper'>
+               <form id='mainform' method='POST' action='$vurl'>
+               <input type='hidden' name='form_token' value='$form_token'>
+               <table class='fp-semester-table'>",
+    );
+      
+    /*    
     $rtn .= "<div class='degree-plan-wrapper'>
                <form id='mainform' method='POST' action='$vurl'>
                <input type='hidden' name='form_token' value='$form_token'>
                <table class='fp-semester-table'>";
-    $rtn .= $screen->display_screen();
+     */
+     
+    $render['display_screen'] = array(
+      'value' => $screen->display_screen(),
+    ); 
+    //$rtn .= $screen->display_screen();
 
-    $rtn .= "</table>";
+    $render['semester_table_close'] = array(
+      'value' => "</table>",
+    );
+    
+    //$rtn .= "</table>";
     // Add in the required "advising variables"
-    $rtn .= $screen->get_hidden_advising_variables("save_draft");
+    $render['hidden_advising_variables'] = array(
+      'value' => $screen->get_hidden_advising_variables("save_draft"),
+    );
+    //$rtn .= $screen->get_hidden_advising_variables("save_draft");
+    
+    $render['close_form_and_wrapper'] = array(
+      'value' => "</form></div>",
+    );
         
-    $rtn .= "</form>";
-    $rtn .= "</div>"; // degree-plan-wrapper
+    //$rtn .= "</form>";
+    //$rtn .= "</div>"; // degree-plan-wrapper
     
     // Figure out what the page's sub-tabs should be, and set them.
     $tab_array = array();
@@ -1401,7 +1440,7 @@ function advise_display_view($view = "view") {
   $crumbs[] = array(
     'text' => 'Students',
     'path' => 'student-search',
-  );
+  ); 
   $crumbs[] = array(
     'text' => $db->get_student_name($screen->student->student_id) . " ({$screen->student->student_id})",
     'path' => 'student-profile', 
@@ -1410,8 +1449,8 @@ function advise_display_view($view = "view") {
   fp_set_breadcrumbs($crumbs);
      
      
-     
-  return $rtn;
+  return fp_render_content($render);   
+  //return $rtn;
 }
 
 
