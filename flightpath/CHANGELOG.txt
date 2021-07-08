@@ -3,6 +3,8 @@ FlightPath 6.x Changelog
  
 2021-07-08
   Cleaning up code, adding more content to render array system.  Cleaning up malformed HTML.
+  
+  Continuing work on themeing and rendering system.
    
  
 2021-07-07

@@ -3646,9 +3646,10 @@ function draw_menu_items($menu_array) {
     $render = array();
     $render['#id'] = 'AdvisingScreen_draw_group_select_row';
     $render['#group'] = $group;
+    $render['#group_name'] = $group->group_name;
     $render['#remaining_hours'] = $remaining_hours;
-    
-    
+    $render['#semester_num'] = $group->assigned_to_semester_num;
+            
     
 		$s = "s";
 		if ($remaining_hours < 2)
@@ -3755,39 +3756,46 @@ function draw_menu_items($menu_array) {
     invoke_hook("theme_advise_group_select_row", array(&$theme));     
      
     $render['#js_code'] = $js_code;
-    $render['#theme'] = $theme;
+    
         
     $render['group_select_table_top'] = array(
       'value' => "<table border='0' cellpadding='0' class='table-group-select-row' cellspacing='0' >",
+      'weight' => 100,
     );
 
     $render['group_select_table_tr'] = array(
       'value' => "<tr class='$hand_class {$theme["group"]["extra_classes"]} group-select-row'
           $on_mouse_over title='{$theme["group"]["title"]}'>",
+      'weight' => 200,          
     );
     
     $render['group_select_table_w1_1'] = array(
       'value' => "<td class='group-w1_1 w1_1' ></td>",
+      'weight' => 300,
     );
     
     $render['group_select_table_icon_link'] = array(
       'value' => "<td class='group-w1_2 w1_2' onClick='{$theme["group"]["js_code"]}'>{$theme["group"]["icon_link"]}</td>",
+      'weight' => 400,
     );
 
     $render['group_select_table_select_icon'] = array(
       'value' => "<td class='group-w1_3 w1_3' onClick='{$theme["group"]["js_code"]}'>{$theme["group"]["select_icon"]}</td>",
+      'weight' => 500,
     );
 
     $render['group_select_table_row_msg'] = array(
-      'value' => "<td colspan='5' class='underline group-row-msg' onClick='{$theme["group"]["js_code"]}'>
+      'value' => "<td class='underline group-row-msg' onClick='{$theme["group"]["js_code"]}'>
           {$theme["group"]["row_msg"]}
           </td>",
+      'weight' => 600,
     );
 
     
-    $render['group_select_table_bottom'] = array(
+    $render['group_select_table_bottom'] = array(    
       'value' => "</tr>
                   </table>",
+      'weight' => 5000,                  
     );
     
 
@@ -4072,7 +4080,7 @@ function draw_menu_items($menu_array) {
 				$footnote .= "$fcount</span>";
 				$this->footnote_array["transfer"][$fcount] = "$o_subject_id $o_course_num ~~ $subject_id $course_num ~~  ~~ $institution_name";
 			}
-		}
+		} // bool_transfer == true
 
 
     $hours = $course->get_hours_awarded();
@@ -4178,6 +4186,10 @@ function draw_menu_items($menu_array) {
 
 		$course_id = $course->course_id;
 		$semester_num = $course->assigned_to_semester_num;
+    
+    $render['#semester_num'] = $semester_num;
+    $render['#course_id'] = $course_id;
+    
 		//$group_id = $course->assigned_to_group_id;
 		$group_id = $course->get_first_assigned_to_group_id();
     $hid_group_id = str_replace("_", "U", $group_id); // replace _ with placeholder U so it doesn't mess up submission.
@@ -4348,8 +4360,8 @@ function draw_menu_items($menu_array) {
     // Invoke a hook on our theme array, so other modules have a chance to change it up.   
     invoke_hook("theme_advise_course_row", array(&$theme));
 
-    $render['#theme'] = $theme;
-
+    $render['#degree_id'] = $this->degree_plan->degree_id;
+ 
     /////////////////////////////////
     // Actually draw out our $theme array now....
     

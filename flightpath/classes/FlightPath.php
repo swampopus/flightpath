@@ -648,7 +648,7 @@ class FlightPath extends stdClass
 
   
 
-  function assign_courses_to_list(ObjList $list_requirements, Student $student, $bool_perform_assignment = true, Group $group = null, $bool_check_significant_courses = false)
+  function assign_courses_to_list(ObjList $list_requirements, Student $student, $bool_perform_assignment = true, Group $group = null, $bool_check_significant_courses = false, $assign_to_semester_num = -1)
   {
 
     $count = 0;
@@ -757,6 +757,9 @@ class FlightPath extends stdClass
             $new_course = new Course();
             $new_course->load_course_from_data_string_for_requirement_clone($temp_ds);
             $new_course->min_grade = $course_requirement->min_grade;
+            if ($assign_to_semester_num !== -1) {
+              $new_course->assigned_to_semester_num = $assign_to_semester_num;
+            }
             $list_requirements->add($new_course);
           }      
           
@@ -798,6 +801,11 @@ class FlightPath extends stdClass
             $new_course->req_by_degree_id = $req_by_degree_id; 
             $new_course->assigned_to_degree_ids_array[$req_by_degree_id] = $req_by_degree_id; 
             $new_course->db_degree_requirement_id = floatval($course_requirement->db_degree_requirement_id . ".1");
+
+            if ($assign_to_semester_num !== -1) {
+              $new_course->assigned_to_semester_num = $assign_to_semester_num;
+            }
+
 
             $course_requirement->set_bool_substitution_split($req_by_degree_id, TRUE);
             
@@ -1000,6 +1008,11 @@ class FlightPath extends stdClass
               $new_course = new Course();
               $new_course->load_course_from_data_string_for_requirement_clone($temp_ds);
               $new_course->min_grade = $course_requirement->min_grade;
+
+              if ($assign_to_semester_num !== -1) {
+                $new_course->assigned_to_semester_num = $assign_to_semester_num;
+              }
+              
               
               $list_requirements->add($new_course);
               
@@ -1022,6 +1035,11 @@ class FlightPath extends stdClass
               //$course_requirement->requirement_type = $group->requirement_type;         
             }
             
+            if ($assign_to_semester_num !== -1) {
+              $c->assigned_to_semester_num = $assign_to_semester_num;
+            }
+            
+            
             // Check what groups it has been assigned to already.
             //$c->assigned_to_group_id = $group_id;
             if ($group_id > 0) {
@@ -1039,7 +1057,7 @@ class FlightPath extends stdClass
               $c->specified_repeats = $course_requirement->specified_repeats;
               $list_requirements->dec_specified_repeats($c);
             }
-          }
+          } // bool_perform_assignment == true
 
 
           $count++;
@@ -1064,10 +1082,11 @@ class FlightPath extends stdClass
     while($this->degree_plan->list_semesters->has_more())
     {
       $semester = $this->degree_plan->list_semesters->get_next();
+      $semester_num = $semester->semester_num;
 
       // Okay, let's look at the courses (not groups) in this
       // semester...
-      $this->assign_courses_to_list($semester->list_courses, $this->student);
+      $this->assign_courses_to_list($semester->list_courses, $this->student, TRUE, null, FALSE, $semester_num);
       
     }
 
