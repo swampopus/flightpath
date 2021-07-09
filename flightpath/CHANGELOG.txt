@@ -1,5 +1,13 @@
 FlightPath 6.x Changelog
 ========================
+
+
+2021-07-09
+  Implemented handling of numeric grades in FlightPath.  Basically, they must be converted to letter grades at the time
+  they are assigned.  There is also now a new field in Course:  db_grade.  This is the actual grade as it is stored in the
+  the database.
+  
+  
  
 2021-07-08
   Cleaning up code, adding more content to render array system.  Cleaning up malformed HTML.

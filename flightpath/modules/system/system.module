@@ -1486,6 +1486,26 @@ function system_school_data_form() {
                           each time a student is loaded.  If unsure what to do, check this box."),    
   );
   
+  
+  
+  $form['numeric_to_letter_grades'] = array(
+    "label" => t("Numeric to Letter Grades:"),
+    "type" => "textarea",
+    "value" => variable_get("numeric_to_letter_grades", ""),
+    "description" => t("If your school supports numeric grades in your SIS (ex: 91, 80, 65, etc), then they must be converted to
+                        letter grades (A, B, D, etc) for FlightPath.  Use this box to define what numeric range translates to which
+                        letter grade.  If you are unsure what to enter here, or if your school does not use numeric grades, leave this blank.
+                        <br>Enter in the form of:  MIN ~ MAX ~ GRADE
+                        <br>Ex:
+                        <br>&nbsp; 0 ~ 59 ~ F
+                        <br>&nbsp; 60 ~ 69 ~ D
+                        <br>&nbsp; 70 ~ 79 ~ C
+                        <br>&nbsp; 80 ~ 89 ~ B
+                        <br>&nbsp; 90 ~ 100 ~ A
+                        <br>&nbsp; 101 ~ 999 ~ A     &nbsp; &nbsp; <em>(In case scores above 100 are possible)</em>"),
+  );
+  
+  
   $form["quality_points_grades"] = array(
     "label" => t("Quality points and grades:"),
     "type" => "textarea",

@@ -2327,8 +2327,8 @@ function draw_menu_items($menu_array) {
     $render["#id"] = "AdvisingScreen_display_popup_course_description";
     
     $render["#course"] = array(
-      "type" => "do_not_render",
-      "value" => $course,
+      'type' => 'do_not_render',
+      'value' => $course,
     );
 
 		
@@ -2341,6 +2341,7 @@ function draw_menu_items($menu_array) {
 			// No course available!
 			          
       $render["no_course_selected"] = array(
+        "type" => "markup",    
         "value" => t("No course was selected.  Please
           click the Select tab at the top of the screen."),
         "attributes" => array("style" => "margin-top: 13px;", "class" => " "),
@@ -2425,6 +2426,7 @@ function draw_menu_items($menu_array) {
 					</div>";
 
       $render["transfer_credit_info"] = array(
+        "type" => "markup",    
         "value" => $html,        
       );
 
@@ -2465,6 +2467,7 @@ function draw_menu_items($menu_array) {
           
           
       $render["course_title_line"] = array(
+        "type" => "markup",         
         "value" => $html,
         "attributes" => array("style" => "margin-top: 13px; margin-bottom: 0;", "class" => " "),
         "weight" => 10,
@@ -2482,6 +2485,7 @@ function draw_menu_items($menu_array) {
         }
 
         $render["course_repeat_line"] = array(
+          "type" => "markup",    
           "value" => $html,
           "attributes" => array("class" => "  course-search-repeat"),
           "weight" => 15,
@@ -2517,6 +2521,7 @@ function draw_menu_items($menu_array) {
 					     </div>";
 					
 			$render["substitution_split"] = array(
+			   "type" => "markup",    
 			   "value" => $html,
 			   "weight" => 20,
 			);		
@@ -2538,6 +2543,7 @@ function draw_menu_items($menu_array) {
       
         
       $render["course_description"] = array(
+        "type" => "markup",    
         "value" => $course->description,
         "attributes" => array("class" => " "),
         "weight" => 30,
@@ -2578,6 +2584,7 @@ function draw_menu_items($menu_array) {
 			$html .= $t_msg;
       
       $render["course_transfer_no_eqv"] = array(
+        "type" => "markup",    
         "value" => $html,
         "weight" => 40,
       );
@@ -2616,6 +2623,7 @@ function draw_menu_items($menu_array) {
 			//$pC .= "</div>";   // not sure what this went to... commenting out.
       
       $render["course_transfer_local_eqv"] = array(
+        "type" => "markup",    
         "value" => $html,
         "weight" => 50,
       );
@@ -2645,11 +2653,31 @@ function draw_menu_items($menu_array) {
 		}
     
     $render["when_enrolled"] = array(
+      "type" => "markup",    
       "value" => $html,
       "weight" => 50,
     );
     
     ///////////////////////////////////
+    
+    // Did the student earn a grade?
+    $html = "";
+    if ($course->grade != "") {
+      
+      $grd = $course->grade;
+      if ($grd !== $course->db_grade) {
+        $grd = $grd .= " ($course->db_grade)";
+      }
+      
+      $html .= t("The student earned a grade of <strong>@grade</strong>.", array("@grade" => $grd));
+      $render['earned_grade'] = array(
+        'type' => 'markup',
+        'value' => $html,
+        'weight' => 55,
+      );
+    }
+    
+    
     
     
     ////////////////////////////////
@@ -2672,11 +2700,12 @@ function draw_menu_items($menu_array) {
       $html .= "$c</div>";              
       
       $render["fulfilling_reqs_for_degrees"] = array(
+        "type" => "markup",    
         "value" => $html,
         "weight" => 60,
       );
       // Also keep track of what degree ids we are fulfilling reqs for, in case we need it later.
-      $render["#fulfilling_reqs_for_degree_ids"] = array(
+      $render["#fulfilling_reqs_for_degree_ids"] = array(            
         "type" => "do_not_render",
         "value" => $d,        
       );
@@ -2713,14 +2742,12 @@ function draw_menu_items($menu_array) {
 			}
       
       $render["course_assigned_to_group"] = array(
+        "type" => "markup",    
         "value" => $html,
         "weight" => 70,
       );
 
-      $render["#group"] = array(
-        "type" => "do_not_render",
-        "value" => $g,
-      );
+      $render["#group"] = $g;
 
       
 		} 
@@ -2739,6 +2766,7 @@ function draw_menu_items($menu_array) {
 			}
 
       $render["course_not_assigned_to_group"] = array(
+        "type" => "markup",    
         "value" => $html,
         "weight" => 80,
       );
@@ -2786,6 +2814,7 @@ function draw_menu_items($menu_array) {
 					</div>";
           
       $render["substitutor_extra"] = array(
+        "type" => "markup",    
         "label" => ("Special administrative information:"),
         "value" => $html,
         "weight" => 90,
@@ -2848,6 +2877,7 @@ function draw_menu_items($menu_array) {
 		  }
 			
       $render["course_sub_this_degree_plan"] = array(
+        "type" => "markup",    
         "value" => $html,
         "weight" => 100,
       );

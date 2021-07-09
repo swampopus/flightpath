@@ -681,7 +681,8 @@ class Student extends stdClass
 			// when the student took it.
 			$new_course->subject_id = $cur["subject_id"];
 			$new_course->course_num = $cur["course_num"];
-			$new_course->grade = $cur["grade"];
+			$new_course->db_grade = $cur["grade"];
+      $new_course->grade = fp_translate_numeric_grade($cur['grade']);
 			$new_course->term_id = $cur["term_id"];
 			$new_course->level_code = $cur["level_code"];
 			
@@ -758,10 +759,12 @@ class Student extends stdClass
 			$new_course->bool_transfer = true;
 
 			$new_course->course_transfer = $t_course;
-			$new_course->grade = $cur['grade'];
+			$new_course->db_grade = $cur['grade'];
+			$new_course->grade = fp_translate_numeric_grade($cur['grade']);
 			$new_course->school_id = intval($cur['school_id']);
-			$t_course->grade = $cur['grade'];
-
+			$t_course->db_grade = $cur['grade'];
+      $t_course->grade = fp_translate_numeric_grade($cur['grade']);
+      
 			$new_course->set_hours_awarded(0, $cur['hours_awarded'] * 1);
 			$t_course->set_hours_awarded(0, $cur['hours_awarded'] * 1);
 			

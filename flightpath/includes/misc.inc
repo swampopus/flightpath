@@ -32,6 +32,64 @@ function friendly_timezone($str) {
  
  
  
+
+/**
+ * This function will use the "Numeric to Letter Grade" setting in the School settings to
+ * translate the given grade (if it is numeric) to a letter grade.  Otherwise, it will return
+ * the grade as-is.
+ */
+function fp_translate_numeric_grade($grade) {
+    
+  
+  if (!is_numeric($grade)) return $grade; // already a letter.
+
+  $translate = array();
+  
+      
+  // Get our translation array from globals cache, if there.
+  if (isset($GLOBALS['fp_translate_numeric_grade'])) {
+    $translate = $GLOBALS['fp_translate_numeric_grade'];
+  }
+  else {
+    $temp = trim(variable_get("numeric_to_letter_grades", ""));
+    if ($temp === '') return $grade;
+    
+    $temp = explode("\n", $temp);
+    foreach ($temp as $line) {
+      $line = trim($line);
+      if ($line == "") continue;
+  
+      $tokens = explode("~", $line);
+      $low = floatval(trim($tokens[0]));
+      $high = floatval(trim($tokens[1]));
+      $letter = trim($tokens[2]);
+      
+      $translate[$low][$high] = $letter;
+          
+    } // foreach
+    
+    $GLOBALS['fp_translate_numeric_grade'] = $translate;
+  }
+  
+  // Okay, now that we have our "translate" array, we can do that with the grade.
+  $grade = floatval($grade);  
+  foreach ($translate as $low => $details) {
+    foreach ($translate[$low] as $high => $letter) {      
+      if ($grade >= $low && $grade <= $high) {
+        return $letter;
+      }
+    }
+  }
+  
+  // Else, return back the original grade.
+  return $grade;
+}
+
+
+ 
+ 
+ 
+ 
 /**
  * Re-order the _FILES array for multiple files, to make it easier to work with.  From:
  * http://php.net/manual/en/features.file-upload.multiple.php

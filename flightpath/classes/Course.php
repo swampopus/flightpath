@@ -26,7 +26,7 @@ class Course extends stdClass
   public $array_valid_names, $school_id;
 
   // Student record related:
-  public $bool_taken, $term_id, $section_number,$quality_points, $grade, $level_code;
+  public $bool_taken, $term_id, $section_number,$quality_points, $grade, $db_grade, $level_code;
   public $bool_transfer, $institution_id, $institution_name, $course_transfer;
   public $transfer_eqv_text, $transfer_footnote;
   
@@ -640,7 +640,7 @@ class Course extends stdClass
     $rtn .= $this->req_by_degree_id . "~";
     $rtn .= $this->disp_for_group_id . "~";
     $rtn .= $this->school_id . "~";
-        
+    $rtn .= $this->db_grade . "~";
         
 
     return $rtn;
@@ -801,6 +801,7 @@ class Course extends stdClass
 
     $this->disp_for_group_id = trim($temp[27]);
     $this->school_id = trim($temp[28]);
+    $this->db_grade = trim($temp[29]);
     
 
   }
@@ -2163,7 +2164,7 @@ class Course extends stdClass
     "subject_id", "course_num", "course_id", "requirement_type", "catalog_year",
     "min_hours", "max_hours", "repeat_hours", "bool_outdated_sub",
 
-    "bool_taken", "term_id", "section_number", "grade", "quality_points",
+    "bool_taken", "term_id", "section_number", "grade", "db_grade", "quality_points",
     "bool_transfer", "institution_id", "institution_name", "course_transfer", "transfer_footnote",    
     "substitution_footnote",    
 
