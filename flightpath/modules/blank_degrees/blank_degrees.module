@@ -187,7 +187,7 @@ function blank_degrees_display_blank_degree() {
                   <li>Major-code $blank_major_code always <b>current</b> catalog: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=major_code_$blank_major_code&blank_catalog_year=current", FALSE) . "'>Link</a></li>
                 </ul>
               </div>
-             ", t("View URL Options"), TRUE);
+             ", t("View URL Options"), TRUE, 'view-url-options-fs');
   }
   
   

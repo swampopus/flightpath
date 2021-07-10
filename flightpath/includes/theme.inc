@@ -40,7 +40,8 @@ function theme_table_header_sortable($headers = array(), $element_id = "default"
   }
   
   foreach ($headers as $header) {
-    $rtn .= "<th>";
+    $th_class = fp_get_machine_readable(strtolower($header['label']));
+    $rtn .= "<th class='header-sortable-$th_class'>";
     
     $label = $header['label'];
     $field = @$header['field'];
@@ -1533,7 +1534,7 @@ function fp_show_title($bool_show = TRUE) {
  * @param bool $bool_start_closed
  * @return String
  */
-function fp_render_c_fieldset($content, $legend = "Click to expand/collapse", $bool_start_closed = false)
+function fp_render_c_fieldset($content, $legend = "Click to expand/collapse", $bool_start_closed = false, $extra_class = "")
 {
   
   // Create a random ID for this fieldset, js, and styles.
@@ -1575,7 +1576,7 @@ function fp_render_c_fieldset($content, $legend = "Click to expand/collapse", $b
   </script>";
   
   $rtn = "  
-    <fieldset class='c-fieldset-$fsstate-$id c-fieldset-$fsstate c-fieldset' id='fs_$id'>
+    <fieldset class='c-fieldset-$fsstate-$id c-fieldset-$fsstate c-fieldset $extra_class' id='fs_$id'>
       <legend><a href='javascript: toggle_fieldset_$id();' class='nounderline'>$legend</a></legend>
       <div id='content_$id' class='c-fieldset-content' style='$content_style'>
         $content

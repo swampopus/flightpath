@@ -493,7 +493,7 @@ function audit_display_audit() {
   $form = fp_render_form("audit_comment_form", "normal", $student->student_id, $user->cwid);
   $GLOBALS["fp_set_title"] = $temp_title;
   
-  $rtn .= fp_render_c_fieldset($form, t("Click to enter audit comment"), TRUE);
+  $rtn .= fp_render_c_fieldset($form, t("Click to enter audit comment"), TRUE, 'enter-audit-comment-fs');
     
   $comments = comments_get_comments($student->student_id, FALSE, array("audit private"));
   

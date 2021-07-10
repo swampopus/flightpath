@@ -263,6 +263,7 @@ function student_search_display_my_advisees($bool_only_return_adv_array = FALSE,
   $rtn = "";
 
   
+  fp_set_title('');
   
   $_SESSION["student_search_last_tab"] = "my-advisees";
   
@@ -615,7 +616,7 @@ function student_search_search_form() {
   // Keep up with our last-visited tab
   $_SESSION["student_search_last_tab"] = "search";
   
-  
+  fp_set_title('');
   
   $search_for = trim(@$_REQUEST["search_for"]);
   if ($search_for == "") {

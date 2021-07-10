@@ -814,15 +814,15 @@ function student_files_content_alter(&$render, $content_id) {
       }
             
       $html .= "<tr class='$row_class'>
-                  <td valign='top' width='50%'>
+                  <td valign='top' width='50%' class='student-files-filenames'>
                     <div class='student-files-file $extra_classes'>
                       " . l($cur["original_filename"], "student-files/handle-download/$student_id/$fid") . "</div>
                   </td>
-                  <td valign='top'>
+                  <td valign='top' class='student-files-details-td'>
                     <div class='student-files-posted'>$posted</div>
                     <div class='student-files-fac-name'>$fac_name</div>
                   </td>
-                  <td valign='top'>
+                  <td valign='top' class='student-files-delete-td'>
                     $del_link
                   </td>
                 </tr>";
@@ -845,7 +845,7 @@ function student_files_content_alter(&$render, $content_id) {
         
       $form = fp_render_form("student_files_little_upload_form", "normal", $student_id);
   
-      $upload_form = fp_render_c_fieldset($form, t("Click to upload a new file"), TRUE);
+      $upload_form = fp_render_c_fieldset($form, t("Click to upload a new file"), TRUE, ' upload-file-fs');
       
       /*
       

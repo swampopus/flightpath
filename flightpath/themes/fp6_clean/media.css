@@ -4,6 +4,63 @@
 
 
 
+
+
+/* hide or alter various elements when we go to print */
+@media print {
+  
+  #top-nav, 
+  #sidebar-left,
+  .dash-welcome-block,
+  #page-print-options,
+  #breadcrumbs-wrapper,
+  a.button,
+  .change-term-link a,
+  .header-profile-image,
+  td.actions, 
+  th.header-sortable-actions,  
+  .fp-boxes-submit-button,
+  .admin-toolbox-link-wrapper,
+  fieldset.new-comment-fs,
+  fieldset.upload-file-fs,
+  #render-advise_history_left_column a.view-print-all,
+  #render-advise_history_right_column a.view-print-all,
+  td.student-files-delete-td,
+  a.approval-edit,
+  fieldset.enter-audit-comment-fs,
+  fieldset.view-url-options-fs,
+  .fp-bottom-message 
+  {
+    display: none !important;
+  }
+  
+   #page-content {
+     width: 100% !important;
+     padding: 0 !important;
+   }
+  
+   .student-mini-profile .profile-top-details-wrapper {
+     width: 50% !important;
+   }
+   
+   .profile-line-content a {
+     display: none;
+   }
+   
+   
+  
+} /* media print */
+
+
+
+
+
+
+
+
+
+
+
 @media screen and (max-width: 1550px) {  
   
   .student-profile-header-full .profile-top-wrapper-right-side {

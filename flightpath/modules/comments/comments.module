@@ -212,7 +212,7 @@ function comments_display_main() {
          
     $form = fp_render_form("comments_comment_form");
   
-    $rtn .= fp_render_c_fieldset($form, t("Click to enter comment"), true);
+    $rtn .= fp_render_c_fieldset($form, t("Click to enter comment"), true, " new-comment-fs");
   }
   
   fp_set_title('');

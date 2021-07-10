@@ -2,6 +2,14 @@ FlightPath 6.x Changelog
 ========================
 
 
+2021-07-10
+  Removed page titles from the Student search pages/forms.
+  
+  Added new CSS for printing.
+  
+  Added ability to add classes to collapsible fieldsets.
+  
+
 2021-07-09
   Implemented handling of numeric grades in FlightPath.  Basically, they must be converted to letter grades at the time
   they are assigned.  There is also now a new field in Course:  db_grade.  This is the actual grade as it is stored in the

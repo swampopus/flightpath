@@ -1008,7 +1008,7 @@ function draw_menu_items($menu_array) {
 		if ($m_is_empty == false)
 		{
 			$mtitle = "<div style='padding-bottom: 10px;'>
-						<div style='padding-bottom: 5px;'>
+						<div style='padding-bottom: 5px;' class='moved-courses'>
 						<b>" . t("Moved Courses") . "</b><br>
 				" . t("These courses have been moved out of their 
 				original positions on your degree plan.") . "</div>";
@@ -1023,7 +1023,7 @@ function draw_menu_items($menu_array) {
 			if ($this->bool_print != true)
 			{// Don't display in print view.
 			  $purl = fp_url("advise/popup-toolbox/transfers");        
-				$pC .= "<div style=' '>				 
+				$pC .= "<div class='admin-toolbox-link-wrapper'>				 
 					<a href='javascript: popupSmallIframeDialog(\"" . $purl . "\",\"" . t("Administrator&#39;s Toolbox") . "\",\"\");'><img src='" . fp_theme_location() . "/images/toolbox.gif' border='0'>" . t("Administrator's Toolbox") . "</a>
 				</div>";
 				$is_empty = false;
@@ -1060,7 +1060,7 @@ function draw_menu_items($menu_array) {
 
 		$pC .= fp_render_section_title(t("Manage Substitutions"));
 
-		$pC .= "<div class=' '>
+		$pC .= "<div class=' manage-substitutions-wrapper'>
 				" . t("The following substitutions have been made for this student:") . "
 				<br><br>
 				";
@@ -1149,7 +1149,7 @@ function draw_menu_items($menu_array) {
 
       $substitution_hours = $subbed_course->get_substitution_hours($assigned_to_degree_id);
 
-			$pC .= "<div class=' ' style='margin-bottom: 20px;'>
+			$pC .= "<div class=' toolbox-remove-sub-wrapper' style='margin-bottom: 20px;'>
 						$sub_s_i $sub_c_n $sub_trans_notice ($substitution_hours " . t("hrs") . ") $sub_action
 						$cr_s_i $cr_c_n$in_group $by$remarks $extra
 						<br>
