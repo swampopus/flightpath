@@ -542,7 +542,7 @@ function fp_http_request($url, $headers = array(), $method = 'GET', $data = NULL
   // at least HEAD/GET requests, and Squid always requires Content-Length in
   // POST/PUT requests.
   $content_length = strlen($data);
-  if ($content_length > 0 || $method == 'POST' || $method == 'PUT') {
+  if ($content_length > 0 || $method == 'POST' || $method == 'PUT' || $method == 'DELETE') {
     $defaults['Content-Length'] = 'Content-Length: ' . $content_length;
   }
 

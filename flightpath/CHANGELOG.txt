@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-07-11
+  Fixed bug in engagements module where it was looking for a table which does not exist.
+  
+  Made it so when an appointment (with Zoom) is cancelled, it also deletes the Zoom meeting from zoom's servers.
+
 
 2021-07-10
   Removed page titles from the Student search pages/forms.

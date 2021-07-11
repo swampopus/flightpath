@@ -325,6 +325,34 @@ function calendar_handle_zoom_install_redirect() {
 
 
 /**
+ * This function will accept a meeting ID and cancel (delete) it.
+ */
+function calendar_cancel_zoom_meeting($meeting_id, $user_id) {
+  $zoom_api_data = calendar_get_zoom_api_data_for_user($user_id);
+  if (!$zoom_api_data) return FALSE;      
+    
+  // Otherwise, continue...
+  $access_token = $zoom_api_data['access_token'];
+    
+  $headers = array( "Content-Type" => "application/json",
+                    "Authorization" => "Bearer " . urlencode($access_token) );  
+
+  
+  $response = fp_http_request("https://api.zoom.us/v2/meetings/$meeting_id", $headers, "DELETE", $data);
+  
+  if (intval($response->code) !== 204) {
+    fp_add_message(t("Sorry, there was an issue trying to delete the Zoom meeting.  Check your Zoom account to manually cancel."), "warning");
+    watchdog("calendar_zoom", "Could not delete zoom meeting with id $meeting_id for user id $user_id.  Response code: $response->code.
+                                  Full response: " . ppm($response, TRUE), array(), WATCHDOG_ERROR);
+  }
+    
+  
+} // ... cancel_zoom_meeting
+
+
+
+
+/**
  * This function will attempt to create a zoom meeting via the API.  We will return FALSE or the meeting data if successful.
  * 
  * gmt_date_time is expected as GMT, in a string in the format: yyyy-MM-ddTHH:mm:ssZ.  For example: 2020-03-31T22:02:00Z 
@@ -470,6 +498,22 @@ function calendar_confirm_cancel_appointment_form($cid) {
     
   );
 
+
+  //If this appointment had meeting data (zoom) then we should include some text here that explains it will be cancelled as well.  
+  if (isset($content->field__video_data) && isset($content->field__video_data['value']) && $content->field__video_data['value'] != "") {
+    $data = json_decode($content->field__video_data['value']);    
+    $video_provider = $data->video_provider;
+    if ($video_provider == "zoom") {
+      $id = $data->id;
+      $form['video_msg_markup'] = array(
+        'type' => 'markup',
+        'value' => t("<strong>Zoom Meeting:</strong> By cancelling this appointment, the scheduled Zoom meeting (ID: $id) will also be cancelled."),
+      );
+    }
+  } 
+
+
+
   $form['msg'] = array(
     'type' => 'textarea',
     'label' => t("Reason"),
@@ -477,8 +521,7 @@ function calendar_confirm_cancel_appointment_form($cid) {
   );
  
   
-  //TODO:  If this appointment had meeting data (zoom) then we should include some text here that explains it will be cancelled as well.
-  
+
   
   
   $form['submit_confirm'] = array(
@@ -489,11 +532,7 @@ function calendar_confirm_cancel_appointment_form($cid) {
   );
   
 
-  
-  return $form;    
-  
-  
-  
+    
   return $form;
   
 } // confirm_cancel_appointment_form
@@ -531,7 +570,17 @@ function calendar_confirm_cancel_appointment_form_submit(&$form, &$form_state) {
   $faculty_cwid = $content->field__faculty_id['value'];
       
   
-  // TODO:  If the appointment had meeting data (eg, Zoom), make sure we send a request to delete the Zoom meeting as well.
+  // If the appointment had meeting data (eg, Zoom), make sure we send a request to delete the Zoom meeting as well.
+  if (isset($content->field__video_data) && isset($content->field__video_data['value']) && $content->field__video_data['value'] != "") {
+    $data = json_decode($content->field__video_data['value']);    
+    $video_provider = $data->video_provider;
+    if ($video_provider == "zoom") {
+      $id = $data->id;
+      $video_account_user_id = $data->video_account_owner_user_id;
+      calendar_cancel_zoom_meeting($id, $video_account_user_id);
+    }
+  }
+  
   
        
   // First, send a notification to the student.
@@ -1996,6 +2045,7 @@ function calendar_schedule_appointment_confirm_form_validate($form, &$form_state
     }
     $form_state['values']['video_data'] = $response;
     $form_state['values']['video_type'] = "zoom";
+    $form_state['values']['video_account_owner_user_id'] = $faculty_user_id;
   }
     
   
@@ -2067,9 +2117,11 @@ function calendar_schedule_appointment_confirm_form_submit($form, &$form_state) 
         $dial_in = engagements_convert_to_pretty_phone_number($dial_in, TRUE);
       }
       
-      $video_info .= "<p><b>" . t("Zoom Meeting:") . "</b> " . $join_url . " \n<br> " . t("Be sure to download the Zoom app on your phone, tablet, or computer.") . " \n<br> " . t("To dial in instead of using video chat, you may dial:<br>\n @dial (ID: @id)", array("@dial" => $dial_in, "@id" => $meeting_id)) . ".</p>\n";                                               
+      $video_info .= "<p><b>" . t("Zoom Meeting:") . "</b> <a href='$join_url'>" . $join_url . "</a> \n<br> " . t("Be sure to download the Zoom app on your phone, tablet, or computer.") . " \n<br> " . t("To dial in instead of using video chat, you may dial:<br>\n @dial (ID: @id)", array("@dial" => $dial_in, "@id" => $meeting_id)) . ".</p>\n";                                               
       
       $decoded->video_info = $video_info;  // add to our json object for ease of use later.
+      $decoded->video_provider = "zoom";  // declare that this is a "zoom" meeting.
+      $decoded->video_account_owner_user_id = $form_state['values']['video_account_owner_user_id'];
       $video_data = json_encode($decoded); // re-encode as a simpl string, so we can add to the database.                     
     }    
   }

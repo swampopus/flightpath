@@ -374,13 +374,13 @@ function engagements_sms_get_all_messages() {
     
     // Figure out what student this came from/to!
     $from_cwid = "";
-    $student_id = db_result(db_query("SELECT * FROM student_attributes WHERE mobile_phone = ?", array($from_mobile)));
+    $student_id = db_result(db_query("SELECT * FROM user_attributes WHERE mobile_phone = ?", array($from_mobile)));
     if ($student_id) {
       $from_cwid = $student_id;
     }
 
     $to_cwid = "";
-    $student_id = db_result(db_query("SELECT * FROM student_attributes WHERE mobile_phone = ?", array($to_mobile)));
+    $student_id = db_result(db_query("SELECT * FROM user_attributes WHERE mobile_phone = ?", array($to_mobile)));
     if ($student_id) {
       $to_cwid = $student_id;
     }
