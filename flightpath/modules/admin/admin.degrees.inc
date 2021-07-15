@@ -1063,6 +1063,7 @@ function z___admin_handle_edit_degree_submit() {
 
   }
 
+
   $major_code = trim($_POST["major_code"]);
   if ($major_code == ""){ die("Fatal error:  major_code not found.");}
 
@@ -1450,7 +1451,6 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
   
   
 
-
   if (user_has_permission("can_view_advanced")) {
     $form["markup_adv"] = array(
       "value" => "<span class='tenpt deg-advanced-msg' style='background-color: yellow; margin-left: 20px;'>
@@ -1664,8 +1664,8 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
   $groups_counter = 0;  // used to create unique variables for groups 
   $js_existing_semesters = array();
   $degree_sort_policy = variable_get("degree_requirement_sort_policy", "alpha");
-   
   $form['blocks_top_markup'] = array(
+    'type' => 'markup',
     'value' => "<div style='clear: both;'></div>
                 <hr>
                 <div class='add-new-sem-block' style='float: right; margin-top: 5px;'>" . fp_render_button(t("Add New Semester Block"), "adminAddNewSemesterBlock();") . "</div>                
@@ -1692,7 +1692,7 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
     if ($first_semester_num == -999) {
       $first_semester_num = $semester->semester_num;
     } 
-    
+     
     $sem_default_title = admin_get_semester_name($semester->semester_num);
     if ($semester->title == $sem_default_title) {
       $semester->title = "";
@@ -1742,16 +1742,17 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
     }
     
 
-    $form["semester_{$semester->semester_num}_top_table_markup"] = array(
+    $form["semester_{$semester->semester_num}_top_table_markup"] = array(      
       "value" => "<div class='edit-degree-semester-block'>
-                   <table border='1' width='100%' class='edit-degree-semester-block-table'>",
+                   <table border='1' width='100%' class='edit-degree-semester-block-table'>
+                    <td valign='top' width='30%'>",
       "weight" => $base_weight + ($semester->semester_num * 100) + 30,
     );
     
         
     $form['courses_' . $semester->semester_num] = array(
       'type' => 'textarea',
-      'prefix' => "<td valign='top' width='30%'>",      
+      'prefix' => "",      
       'label' => 'Courses: ',
       'value' => $contents,
       'rows' => 10,
@@ -1763,7 +1764,7 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
                               
                               <br><br>Repeats require no special characters or symbols.  Simply enter the course again."),
 
-      'suffix' => "</td>",
+      'suffix' => "",
                   
       "weight" => $base_weight + ($semester->semester_num * 100) + 40,      
     );
@@ -1772,7 +1773,9 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
     
     // Show the groups (and option for adding groups) for this semester...
     $contents = "";
-    $contents .= "
+    $contents .= "</td>
+                  <td valign='top'>
+          <label>" . t("Groups:") . "</label>
           <table width='100%' border='0' cellspacing='5' class='edit-degree-semester-groups-table'>
           <tr>
             <th valign='top' class='tenpt' width='1'>&nbsp;</td>
@@ -1829,17 +1832,15 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
     
     
     // Display our contents in a markup element for this semester
-    $form["semester_groups_" . $semester->semester_num . "_markup"] = array(
-      'prefix' => "<td valign='top'>",
-      'label' => t("Groups:"),
+    $form["semester_groups_" . $semester->semester_num . "_markup"] = array(    
       'value' => $contents, 
       "weight" => $base_weight + ($semester->semester_num * 100) + 50,
-      'attributes' => array('class' => 'groups-inner'),
+      'attributes' => array('class' => 'groups-inner'),        
     ); 
 
  
  
-    $form["semester_{$semester->semester_num}_table_bottom_markup"] = array(
+    $form["semester_{$semester->semester_num}_table_bottom_markup"] = array(      
       "value" => "</table>
                    </div> <!-- semester block -->",
       "weight" => $base_weight + ($semester->semester_num * 100) + 60,
@@ -1851,7 +1852,7 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
     );
 
  
-    $form["semester_{$semester->semester_num}_save_draft_markup"] = array(
+    $form["semester_{$semester->semester_num}_save_draft_markup"] = array(      
       "value" => fp_render_button(t("Save Draft for @year", array("@year" => $de_catalog_year)), "adminSubmitDegreeForm2();"),
       "weight" => $base_weight + ($semester->semester_num * 100) + 80,
     );
@@ -2015,7 +2016,9 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
 
 function admin_edit_degree_form_validate($form, &$form_state) {
   $values = $form_state['values'];
-
+  $perform_action2 = trim($values["perform_action2"]);
+  
+      
   // What courses should have their type overwritten as "x"?
   $ignore_courses = csv_to_array(variable_get("ignore_courses_from_hour_counts", ""));
   
@@ -2143,8 +2146,65 @@ function admin_edit_degree_form_validate($form, &$form_state) {
 
   } // foreach courses
     
+  
+  
+
+  
+        
+  // Are we trying to ADD a group?  
+  if (strstr($perform_action2,"addGroup")) {
+    $temp = explode("_",$perform_action2);
+    $group_id = $temp[1];
+    $semester_num = $temp[2];
+    $hours = trim($temp[3]);
+    $min_hours = $hours;
+    if (strstr($hours, "-")) {
+      // Hours has a min hour value specified.  let's grab it.
+      $tt = explode("-", $hours);
+      $min_hours = $tt[0];
+      $hours = $tt[1];
+    }    
+    
+    
+    $type = $temp[4];
+    $min_grade = trim($temp[5]);
+    
+        
+    $adding_group = new Group($group_id);
+    
+    // If this group is already saved in this degree elsewhere, and it has a different type or min_grade,
+    // then we must display a warning message to the user.
+    $res = db_query("SELECT * FROM draft_degree_requirements
+                     WHERE degree_id = '?'
+                     AND group_id = '?'
+                     AND (group_min_grade <> '?' OR group_requirement_type <> '?')", $degree_id, $group_id, $min_grade, $type);
+    while ($cur = db_fetch_array($res)) {
+      form_error("semester_groups_" . $semester_num . "_markup", t("<strong>Your work has NOT been saved.</strong> In block %blocknum, you specified the group %group with a min grade of %mingrade and a requirement type of %req.  
+                                However, the group was previously specified in this degree plan in block %otherblocknum wih a different requirement type or min grade.
+                                FlightPath will not perform calculations correctly for courses assigned to this group.  The duplicate occurance of the group should have the same
+                                type/min grade, or, you need to create a new group to handle these alternate requirements.</strong>"
+                                , array("%blocknum" => ($semester_num+1), "%group"=> $adding_group->title, "%mingrade" => $min_grade, "%req" => $type, "%otherblocknum" => ($cur['semester_num'] + 1))));
+
+                
+    } // while
+  } // addGroup
+   
+    
+  
+  
     
   // Now, let's check the groups.
+  
+  // Are we trying to DELETE a group, but there might be an error with it?  If so, we won't worry about any errors later.
+  $del_group = NULL;
+  if (strstr($perform_action2, "delGroup")) {
+    $temp = explode("_",$perform_action2);
+    $del_group = new Group();
+    $del_group->bool_use_draft = TRUE;
+    $del_group->group_id = $temp[1];
+    $del_group->assigned_to_semester_num = $temp[2];
+  }  
+    
   // Get the groups....
   foreach($values as $key => $value) {
     if (!strstr($key, "group_")) {
@@ -2174,9 +2234,9 @@ function admin_edit_degree_form_validate($form, &$form_state) {
     $type = $temp[3];
     $min_grade = trim($temp[4]);
 
-    // Do not add if we are supposed to be deleting this group!
-    if (isset($del_group) && is_object($del_group)) {
-      if ($del_group->group_id == $group_id && $del_group->assigned_to_semester_num == $semester_num) {
+    // Do not process any further, if we are supposed to be deleting this group!
+    if (isset($del_group) && $del_group != NULL && is_object($del_group)) {      
+      if ($del_group->group_id == $group_id && $del_group->assigned_to_semester_num == $semester_num) {        
         continue;
       }
     }
@@ -2200,7 +2260,14 @@ function admin_edit_degree_form_validate($form, &$form_state) {
                      AND group_id = ?
                      AND (group_min_grade <> ? OR group_requirement_type <> ?)", $degree_id, $group_id, $min_grade, $type);
     while ($cur = db_fetch_array($res)) {
-      
+  
+      // Is the group we found the group we are trying to delete?  If so, skip it; we're going to delete it later.
+      if (isset($del_group) && is_object($del_group)) {          
+        if (intval($del_group->group_id) == intval($cur['group_id']) && intval($del_group->assigned_to_semester_num) == intval($cur['semester_num'])) {
+          continue;
+        }
+      } 
+     
       form_error("semester_groups_" . $semester_num . "_markup", t("<strong>Your work has NOT been saved.</strong> In block %blocknum, you specified the group %group with a min grade of %mingrade and a requirement type of %req.  
                                 However, the group was previously specified in this degree plan in block %otherblocknum wih a different requirement type or min grade.
                                 FlightPath will not perform calculations correctly for courses assigned to this group.  The duplicate occurance of the group should have the same
@@ -2292,7 +2359,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
     // Are we trying to DELETE this degree?  If so, keep deleting!
     if ($perform_action2 == "delete_degree" && user_has_permission("can_delete_data_entry")) {
       $res = db_query("DELETE FROM draft_degrees
-                  WHERE  degree_id = '?' ", $degree_id);
+                  WHERE  degree_id = ? ", $degree_id);
 
       // Also need to get rid of the track, if there is one for this
       // degree.

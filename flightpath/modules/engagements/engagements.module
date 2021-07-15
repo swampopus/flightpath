@@ -172,6 +172,12 @@ function engagements_sms_settings_form() {
   $form = array();
   
   
+  $form['mark_signalwire_top'] = array(
+    'value' => "<fieldset><legend>Settings for SignalWire</legend>
+                <p>The following settings are for the service SignalWire.  You must already have a SignalWire account
+                   set up to use.</p>",
+  );
+  
   $form['sms_project_id'] = array(
     'label' => 'Project ID',
     'type' => 'textfield',
@@ -200,6 +206,10 @@ function engagements_sms_settings_form() {
     'type' => 'textfield',
     'value' => variable_get('sms_from_phone', '555-555-1234'),
     'description' => t("The phone number you will be sending txt from, or receiving them at."),
+  );
+
+  $form['mark_signalwire_bottom'] = array(
+    'value' => "</fieldset><br><br>",
   );
 
 
@@ -240,20 +250,14 @@ function engagements_cron() {
   
   $last_sms_check = variable_get('engagements_sms_get_all_last_check', 0);
   $last_imap_check = variable_get('engagements_imap_get_all_last_check', 0);
+  
   // TODO:  only check every X minutes at most.  Maybe this is a setting?
   engagements_sms_get_all_messages();
   
-  // TODO: check for imap messages in a similar way as the SMS messages.
+  // Check for imap messages in a similar way as the SMS messages.
   engagements_imap_get_all_received_messages();
+     
     
-  
-  // TODO:  Look at all appointments happening soon and send notifications
-  // as reminders.  Check notification_history table to see if we've already
-  // reminded the user(s) about this appointment cid.  Send reminders for appointments
-  // happening within 30 minutes.
-  
-  
-  
   
   
 } // hook_cron
@@ -931,11 +935,11 @@ function engagements_imap_get_all_received_messages() {
     
     
     // We are now finished with this email, so we can move it to our trash folder.
-    imap_mail_move($mbox, $msgno, $trash_box_name);
+    //imap_mail_move($mbox, $msgno, $trash_box_name);
+    imap_delete($mbox, $msgno);
         
         
   } // foreach result as overview
-
   
   // Delete all mail marked for deletion...
   imap_expunge($mbox);

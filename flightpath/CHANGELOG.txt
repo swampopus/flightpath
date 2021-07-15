@@ -1,6 +1,18 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-07-14
+  Fixed bug where form_error's was messing up markup_no_wrappers elements.
+
+  Added extra validation on degree edit form, so that it stops you from adding a duplicate group with mismatched type or min hours.  Also made it
+  so you can delete such a group.
+  
+
+2021-07-12
+  Made it more clear that the currently used SMS service in Engagements is "SignalWire".  Also made sure that emails processed by Engagements were deleted after
+  they were parsed, so they do not fill up the email server's Trash folder.
+  
+
 2021-07-11
   Fixed bug in engagements module where it was looking for a table which does not exist.
   

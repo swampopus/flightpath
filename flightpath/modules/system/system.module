@@ -2415,7 +2415,7 @@ function system_handle_form_submit() {
     foreach ($form as $name => $element) {     
 
       // Save to our $values array, but we don't care about markup.
-      if (@$element["type"] != "" && @$element["type"] != "markup") {
+      if (@$element["type"] != "" && @$element["type"] != "markup" && @$element["type"] != "markup_no_wrappers") {
         $values[$name] = @$_POST[$name];
         
         // Save to save_values, too, if this is not a password field.
@@ -2432,7 +2432,7 @@ function system_handle_form_submit() {
         foreach ($element["elements"] as $k => $v) {
           foreach ($element["elements"][$k] as $cname => $celement) {
             // Save to our $values array, but we don't care about markup.
-            if (@$celement["type"] != "" && @$celement["type"] != "markup") {
+            if (@$celement["type"] != "" && @$celement["type"] != "markup" && @$element["type"] != "markup_no_wrappers") {
               $values[$cname] = @$_POST[$cname];
               
               // Save to save_values, too, if this is not a password field.

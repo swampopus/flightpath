@@ -264,7 +264,9 @@ ___edit_degree_form{}  /* placeholder for editor */
   font-size: 0.85em;  
 }
 
-#fp-form-admin_edit_degree_form .form-element label {
+#fp-form-admin_edit_degree_form .form-element label,
+#fp-form-admin_edit_degree_form .edit-degree-semester-block label
+ {
   font-weight: normal;
   float: left;
   

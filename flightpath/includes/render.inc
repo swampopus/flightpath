@@ -367,7 +367,6 @@ function fp_render_form($callback, $form_type = "") {
   // If this is a system settings form, go ahead and display the save button.
   if ($form_type == "system_settings") {      
     $rtn .= "<div class='buttons form-element element-type-submit'>";
-    //$rtn .= fp_render_button("Save settings", "\$(\"#sysform\").submit()");
     $rtn .= "<input type='submit' name='submit_button' value='" . t("Save settings") . "'>";
     $rtn .= "</div>";      
   }
@@ -456,7 +455,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   $rtn = "";
 
   $type = @$element["type"]; 
-  if ($type == "") $type = "markup_no_wrappers";
+  if ($type == "") $type = "markup_no_wrappers"; 
    
   // Make sure the "css name" is friendly.
   $cssname = fp_get_machine_readable($name);
@@ -529,7 +528,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
 
   if ($use_session_submission_values_for_callback && is_array(@$_SESSION["fp_form_submissions"][$use_session_submission_values_for_callback]["values"])) {
     // Check the SESSION for a previous value which we should use.
-    $ignore_types = array("hidden", "markup", "submit", "password");
+    $ignore_types = array("hidden", "markup", "markup_no_wrappers", "submit", "password");
     if (!in_array($type, $ignore_types)) {
       $value = $_SESSION["fp_form_submissions"][$use_session_submission_values_for_callback]["values"][$name];
     }    
