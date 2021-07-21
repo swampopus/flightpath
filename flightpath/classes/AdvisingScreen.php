@@ -3570,10 +3570,8 @@ function draw_menu_items($menu_array) {
       }
       
       
-			$rtn .= "<tr class='$rowclass'>
-			           <td colspan='8' class='group-select-row-tr'>";
-			$rtn .= $this->draw_group_select_row($place_group, $remaining);
-			$rtn .= "</td></tr>";
+			$rtn .= $this->draw_group_select_row($place_group, $remaining, $rowclass);
+			
 		}
 
 
@@ -3661,7 +3659,7 @@ function draw_menu_items($menu_array) {
 	 * @param int $remaining_hours
 	 * @return string
 	 */
-	function draw_group_select_row(Group $group, $remaining_hours)
+	function draw_group_select_row(Group $group, $remaining_hours, $rowclass = "")
 	{
 		
 		$img_path = fp_theme_location() . "/images";
@@ -3788,6 +3786,14 @@ function draw_menu_items($menu_array) {
     $render['#js_code'] = $js_code;
     
         
+        
+    $render['start_group_select_row'] = array(
+      'value' => "<tr class='from-render-api $rowclass'><td colspan='8' class='group-select-row-tr'>",
+      'weight' => 0,
+    ); 
+        
+        
+        
     $render['group_select_table_top'] = array(
       'value' => "<table border='0' cellpadding='0' class='table-group-select-row' cellspacing='0' >",
       'weight' => 100,
@@ -3829,6 +3835,11 @@ function draw_menu_items($menu_array) {
     );
     
 
+
+    $render['end_group_select_row'] = array(
+      'value' => "</td></tr>",
+      'weight' => 9999,
+    );
 
 
 		return fp_render_content($render, FALSE);
