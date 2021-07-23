@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-07-23
+  Added a few more details to render array in AdvisingScreen, when drawing course rows.  Also added argument to include the group a course is assigned to, if applicable, to
+  draw_course_row().  This also helps the render engine and any modules which need it.
+  
+
 2021-07-14
   Fixed bug where form_error's was messing up markup_no_wrappers elements.
 

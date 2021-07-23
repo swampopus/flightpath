@@ -3639,7 +3639,7 @@ function draw_menu_items($menu_array) {
 			// Tell the course what group we are coming from, so it displays correctly
       $course->disp_for_group_id = $group->group_id;
 					
-			$pC .= $this->draw_course_row($course, $course->icon_filename, $course->title_text, $course->temp_flag);
+			$pC .= $this->draw_course_row($course, $course->icon_filename, $course->title_text, $course->temp_flag, TRUE, TRUE, FALSE, $group);
 
 			// Doesn't matter if its a specified repeat or not.  Just
 			// mark it as having been displayed.
@@ -3702,7 +3702,8 @@ function draw_menu_items($menu_array) {
 		}
 
     $req_by_degree_id = $group->req_by_degree_id;
-
+    $render['#degree_id'] = $req_by_degree_id;
+    
     $disp_remaining_hours = $remaining_hours;
     // If the group has min_hours, then the disp_remaining_hours gets that too.
     if ($group->has_min_hours_allowed()) {     
@@ -3997,15 +3998,14 @@ function draw_menu_items($menu_array) {
 	 *
 	 * @return string
 	 */
-	function draw_course_row(Course $course, $icon_filename = "", $title_text = "", $js_toggle_and_save = false, $bool_display_check = true, $bool_add_footnote = true, $bool_add_asterisk_to_transfers = false)
+	function draw_course_row(Course $course, $icon_filename = "", $title_text = "", $js_toggle_and_save = false, $bool_display_check = true, $bool_add_footnote = true, $bool_add_asterisk_to_transfers = false, $group = null)
 	{
 	        
-	  // TODO:  Make use of a render array.    
 	  
 	  $render = array();
     $render['#id'] = 'AdvisingScreen_draw_course_row';
     $render['#course'] = $course;
-    
+    $render['#group'] = $group; 
 	    
 	   
 		// Display a course itself
@@ -4227,6 +4227,11 @@ function draw_menu_items($menu_array) {
 
 		$course_id = $course->course_id;
 		$semester_num = $course->assigned_to_semester_num;
+    
+    if ($group != NULL) {
+      $semester_num = $group->assigned_to_semester_num;
+    }
+    
     
     $render['#semester_num'] = $semester_num;
     $render['#course_id'] = $course_id;
