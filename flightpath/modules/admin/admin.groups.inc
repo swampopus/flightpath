@@ -187,6 +187,14 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
   $catalog_repeat = intval(trim($values["catalog_repeat"]));
   $public_note = trim($values["public_note"]);
 
+
+  $school_id = 0;
+  if (isset($values['schools_school'])) { // A school was set from the schools module.
+    $school_id = intval($values['schools_school']);  // Use our NEW school_id for validating.
+  }
+
+
+
   // Save the entire post to the log.
  
   // Since we are making a change to the draft table(s), let's add a row
@@ -354,7 +362,7 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
 
         // Commenting out, because we do not care about catalog_year
         // when specifying courses...
-        if ($course_id = $db->get_course_id($subject_id, $course_num, "", true)) {
+        if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id)) {
                     
           $query = "INSERT INTO draft_group_requirements
                     (group_id, course_id,
@@ -414,8 +422,8 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
       // to an ampersand.
       $subject_id = str_replace("_A_", "&", $subject_id);
 
-      // We don't care about catalog year anymore...
-      if ($course_id = $db->get_course_id($subject_id, $course_num, "", true)) {
+      // We don't care about catalog year anymore...      
+      if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id)) {
         $query = "INSERT INTO draft_group_requirements
                     (group_id, course_id,
                     course_min_grade, course_repeats, attributes, data_entry_value)

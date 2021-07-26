@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-07-26
+  Fixed bug when editing groups, where school_id was not correctly being loaded.
+  
+
 2021-07-25
   Configured blank degrees to make use of the render system (so other modules can make changes more easily)
   
