@@ -91,12 +91,14 @@ function blank_degrees_display_blank_degree() {
   $blank_catalog_year = $_REQUEST["blank_catalog_year"];
   @$blank_print = $_REQUEST["blank_print"];
   @$blank_view = $_REQUEST["blank_view"];
-  
+    
   // If we used the word "current" for catalog_year, then find out what the current is.
   if (strtolower($blank_catalog_year) == "current") {
     $blank_catalog_year = variable_get("current_catalog_year", 2006);    
   }
 
+  $blank_degree = NULL;
+  
   // If the blank_degree_id begins with "major_code_" then figure out the degree based on major_code.
   if (strstr($blank_degree_id, "major_code_")) {
     $blank_major_code = str_replace("major_code_", "", $blank_degree_id);
@@ -105,9 +107,9 @@ function blank_degrees_display_blank_degree() {
     $blank_degree_id = $db->get_degree_id($blank_major_code, $blank_catalog_year);
     if (!$blank_degree_id) {
       // Couldn't be found!
-      $rtn = "<br>Checking for major code: $blank_major_code, year: $blank_catalog_year
+      $rtn = "<br>" . t("Checking for major code: %blank_major_code, year: %blank_catalog_year
               <br><br>
-              Sorry, but that major code/track combination and catalog year could not be found.  Please check your URL and try again.";
+              Sorry, but that major code/track combination and catalog year could not be found.  Please check your URL and try again.", array('%blank_major_code' => $blank_major_code, '%blank_catalog_year' => $blank_catalog_year));
       return $rtn;
     }
   }
@@ -123,10 +125,14 @@ function blank_degrees_display_blank_degree() {
     
     
   }
+  
+  
+  $render = array();
+  $render['#id'] = 'blank_degrees_display_blank_degree';
+  $render['#view'] = $blank_view;
+  
+       
       
-  
-  $rtn = "";
-  
   // Are we in draft mode?
   if ($_SESSION["fp_draft_mode"] == "yes") {
     $GLOBALS["fp_advising"]["bool_use_draft"] = true;
@@ -153,12 +159,15 @@ function blank_degrees_display_blank_degree() {
     $screen->view = "type";
   }
   
-  $screen->bool_blank = true;
+  
+  
+  $screen->bool_blank = TRUE;
   
   if ($blank_print == "yes")
   {
-    $screen->bool_print = true;
+    $screen->bool_print = TRUE;
   }    
+  
 
   $screen->build_screen_elements();
 
@@ -168,17 +177,47 @@ function blank_degrees_display_blank_degree() {
   }
   fp_set_title($title);
   
-  $rtn .= "<div class='degree-plan-wrapper'>
-            <table class='fp-semester-table'>";
-  $rtn .= $screen->display_screen();
-  $rtn .= "</table>
-           </div> 
-              <br><br>";
   
+  $render['#fp'] = $fp;
+  $render['#degree_plan'] = $blank_degree;
+  $render['#blank_catalog_year'] = $blank_catalog_year;
+  $render['#screen'] = $screen;    
+  $render['#student'] = $student;    
+    
+  $render['degree_plan_wrapper_top'] = array(
+    'value' => "<div class='degree-plan-wrapper'>",
+    'weight' => 100, 
+  );
+
+
+  $render['semester_table_start'] = array(
+    'value' => "<table class='fp-semester-table'>",
+    'weight' => 200,
+  );
+
+  $render['screen_display_screen'] = array(
+    'value' => $screen->display_screen(),
+    'weight' => 300, 
+  );
+        
+  $render['semester_table_end'] = array(
+    'value' => "</table>",
+    'weight' => 400,
+  );
+
+  $render['degree_plan_wrapper_bottom'] = array(
+    'value' => "</div>",
+    'weight' => 500, 
+  );
+  
+ 
+ 
 
   if (user_has_permission("blank_degrees_view_url_options") && !$screen->bool_print) {
     // If the user has permissions, show them the extra URL options.  (but don't bother in print mode)
-    $rtn .= fp_render_c_fieldset("
+    
+    $render['url_options_html'] = array(
+      'value' => fp_render_c_fieldset("
               <div style='font-size: 0.85em;'>
                 " . t("This degree may be linked to directly using the following URLs:") . "
                 <ul>
@@ -187,7 +226,11 @@ function blank_degrees_display_blank_degree() {
                   <li>Major-code $blank_major_code always <b>current</b> catalog: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=major_code_$blank_major_code&blank_catalog_year=current", FALSE) . "'>Link</a></li>
                 </ul>
               </div>
-             ", t("View URL Options"), TRUE, 'view-url-options-fs');
+             ", t("View URL Options"), TRUE, 'view-url-options-fs'),
+      'weight' => 2000,
+    );
+    
+    
   }
   
   
@@ -211,7 +254,7 @@ function blank_degrees_display_blank_degree() {
   watchdog("blank_degrees", "User viewed blank degree: @year,@degree,@title", array("@year" => $blank_catalog_year, "@degree" => $blank_degree_id, "@title" => $title));
   
   
-  return $rtn;
+  return fp_render_content($render);
   
 }
 
