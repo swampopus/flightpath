@@ -540,6 +540,7 @@ class Group extends stdClass
 
 		$this->title = trim($cur["title"]);
 		$this->icon_filename = trim($cur["icon_filename"]);
+    if ($this->icon_filename == "") $this->icon_filename = "major.gif"; // set a default!
 		$this->group_name = trim($cur["group_name"]);
 		$this->data_entry_comment = trim($cur["data_entry_comment"]);
 		$this->priority = trim($cur["priority"]);

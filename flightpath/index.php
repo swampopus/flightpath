@@ -21,7 +21,6 @@ function __autoload($class) {
 
 
 // Make sure our cookies are the most secure possible:
-
 ini_set('session.cookie_httponly', 'On');
 if( (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443 ){
   //enable secure cookies, since we are on HTTPS.  

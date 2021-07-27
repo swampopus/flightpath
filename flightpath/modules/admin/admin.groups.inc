@@ -264,7 +264,7 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
   if (trim($values["set_definition"] != "")) {
     $def = urldecode(trim($values["set_definition"]));
     //$cc = trim(get_courses_from_definition($def, $de_catalog_year));
-    $temp2 = admin_get_courses_from_definition($def);
+    $temp2 = admin_get_courses_from_definition($def, "", $school_id);
     $cc = trim($temp2["text"]);
     if ($cc != "") {
       $courses = $cc;
@@ -291,7 +291,7 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
 
   // If catalog_repeat == 1, then we need to perform that operation on the $courses text.
   if ($catalog_repeat == 1) {
-    $courses = admin_process_catalog_repeats_for_group_courses_text($courses, $de_catalog_year);
+    $courses = admin_process_catalog_repeats_for_group_courses_text($courses, $de_catalog_year, $school_id);
   }
 
   // Okay, now we look at the actual "courses" box and assemble the group
@@ -468,7 +468,7 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
  * all of the courses, and then assign specified repeats based on what is set for that course
  * in the course catalog.
  */
-function admin_process_catalog_repeats_for_group_courses_text($courses, $catalog_year) {
+function admin_process_catalog_repeats_for_group_courses_text($courses, $catalog_year, $school_id = 0) {
   $rtn = "";
   
   // Okay, now we look at the actual "courses" box and assemble the group
@@ -492,65 +492,7 @@ function admin_process_catalog_repeats_for_group_courses_text($courses, $catalog
       // If this branch contains an ampersand, I don't think I should attempt to process it at all.
       $new_line = $line;
       
-      /*
-      $c_tokes = explode("&",$line);
-      for ($cT = 0; $cT < count($c_tokes); $cT++)
-      {
-        $tokens = explode(" ", trim($c_tokes[$cT]));
-        $subject_id = trim($tokens[0]);
-        $course_num = trim($tokens[1]);
-        $min_grade = @trim($tokens[2]);
-        $course_repeats = @trim($tokens[3]);
-
-        if (strstr($min_grade, "[")) {
-          // This is actually a specified repeat, not a min grade.
-          $course_repeats = $min_grade;
-          $min_grade = "";
-        }
-
-        $min_grade = str_replace("(","",$min_grade);
-        $min_grade = str_replace(")","",$min_grade);
-
-        $course_repeats = str_replace("[","",$course_repeats);
-        $course_repeats = str_replace("]","",$course_repeats);
-        $course_repeats--;
-        if ($course_repeats < 0) { $course_repeats = 0; }
-
-        // If the subject_id had a _A_ in it, convert this back
-        // to an ampersand.
-        $subject_id = str_replace("_A_", "&", $subject_id);
-
-        // Okay, we now have a subject_id and course_number.  Let's find out how many times
-        // it can be repeated for credit.
-        $max_cat_repeats = fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalog_year, TRUE);
-
-        // Okay, now, let's rebuild this line.        
-        $subject_id = str_replace("&", "_A_", $subject_id);
-        
-        $new_line .= "$subject_id $course_num";
-        // Was there a min grade?
-        if ($min_grade != "") {
-          $new_line .= " ($min_grade)";
-        }
-        // Specified repeats?
-        if ($max_cat_repeats > 0) {
-          $new_line .= " [$max_cat_repeats]";
-        }
-        
-        // Put ampersand back at the end?
-        if ($cT < count($c_tokes) - 1) {
-          $new_line .= " & ";
-        }
-        else {
-          // This is the last part.  No need to add an ampersand, but
-          // leave blank, as we will add a \n to the very end later.
-        }
-
-        
-
-      } // for $cT
-
-      */
+      
     } 
     else {
       // Did NOT contain an ampersand (&), so this goes in the
@@ -581,7 +523,7 @@ function admin_process_catalog_repeats_for_group_courses_text($courses, $catalog
 
       // Okay, we now have a subject_id and course_number.  Let's find out how many times
       // it can be repeated for credit.
-      $max_cat_repeats = fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalog_year, TRUE);
+      $max_cat_repeats = fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalog_year, TRUE, $school_id);
 
       // Okay, now, let's rebuild this line.        
       $subject_id = str_replace("&", "_A_", $subject_id);
@@ -723,6 +665,10 @@ function admin_edit_group_form() {
     "weight" => 30,
   );
 
+  
+  if (!$group->icon_filename) {
+    $group->icon_filename = "major.gif";  // set a default if none is specified!
+  }
 
   $form["icon_filename"] = array(
     "type" => "hidden",    
@@ -1827,10 +1773,11 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
     $group_id = $cur["group_id"];
     $group_name = $cur["group_name"];
     $catalog_repeat = intval($cur['catalog_repeat']);
+    $school_id = intval($cur['school_id']);
 
     // Only do definitions if there IS a definition.
     if ($def != "") {
-      $temp = admin_get_courses_from_definition($def);
+      $temp = admin_get_courses_from_definition($def, "", $school_id);
       $courses = trim($temp["text"]);
     }
     else {
@@ -1843,7 +1790,7 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
 
     // If the catalog_repeat flag is set, process that.
     if ($catalog_repeat == 1) {
-      $courses = admin_process_catalog_repeats_for_group_courses_text($courses, $de_catalog_year);
+      $courses = admin_process_catalog_repeats_for_group_courses_text($courses, $de_catalog_year, $school_id);
     }
 
     $ccount = 0;
@@ -1911,7 +1858,7 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
         $subject_id = str_replace("_A_", "&", $subject_id);
 
         // We don't care about catalog year anymore...
-        if ($course_id = $db->get_course_id($subject_id, $course_num, "", true)) {
+        if ($course_id = $db->get_course_id($subject_id, $course_num, "", true, $school_id)) {
           $query = "INSERT INTO draft_group_requirements
                     (`group_id`,`course_id`,
                     `course_min_grade`,`course_repeats`,`data_entry_value`)
@@ -1975,7 +1922,7 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
   
           // Commenting out, because we do not care about catalog_year
           // when specifying courses...
-          if ($course_id = $db->get_course_id($subject_id, $course_num, "", true)) {
+          if ($course_id = $db->get_course_id($subject_id, $course_num, "", true, $school_id)) {
                       
             $query = "INSERT INTO draft_group_requirements
                       (group_id, course_id,
