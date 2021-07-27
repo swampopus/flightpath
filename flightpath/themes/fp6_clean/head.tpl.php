@@ -14,7 +14,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />  
   <meta name="viewport" content="width=device-width" />
 
-  <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico"/> 
+  <link rel="shortcut icon" type="image/x-icon" href="<?php print base_path() ?>/themes/fp6_clean/images/favicon.ico"/>
 
    
   <?php // Bring in jQuery and jQuery UI, as well as jQuery UI's css. ?>
