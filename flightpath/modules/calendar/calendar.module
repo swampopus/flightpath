@@ -56,6 +56,17 @@ function calendar_menu() {
     "weight" => 10,
   );    
 
+
+  $items['calendar/upcoming'] = array(
+    'title' => 'Upcoming Appointments',
+    'page_callback' => 'calendar_display_upcoming_appointments',
+    'access_arguments' => array('access_logged_in_content'),    
+    'type' => MENU_TYPE_TAB,
+    'tab_family' => 'calendar_tabs',    
+    "weight" => 15,
+  );    
+
+
 //calendar/autocomplete-student
   $items['calendar/autocomplete-student'] = array(    
     'page_callback' => '_calendar_autocomplete_student',
@@ -159,6 +170,114 @@ function calendar_menu() {
  
   return $items;  
 } // hook_menu
+
+
+
+
+/**
+ * This tab displays the upcoming appointments for the user.  It's meant to be a tab on their Calendar screen.
+ */
+function calendar_display_upcoming_appointments() {
+  global $user;
+
+  fp_add_css(fp_get_module_path("system") . "/css/style.css");
+  
+  
+  $render = array();
+  $render['#id'] = 'calendar_display_upcoming_appointments';
+  
+  
+  // Build up the "appoinments" HTML
+  
+  $render['mark_top'] = array(
+    'value' => "<h4>" . t("Your upcoming appointments/agenda over the next few weeks:") . "</h4><hr>",
+  );
+    
+  
+  $ranges = array(
+    "today" => array("NOW", "TOMORROW - 1 SECOND"),
+    "tomorrow" => array("TOMORROW", "NOW + 1 DAY"),
+    "this week" => array("NOW + 1 DAY", "NEXT MONDAY - 1 SECOND"),
+    "next 2 weeks" => array("NEXT MONDAY", "NEXT MONDAY + 15 DAYS"),
+  );
+  
+  $user_tz = fp_get_user_timezone();  
+  
+  $bool_is_empty = TRUE;
+  $c = 0;  
+  foreach ($ranges as $when => $details) {
+
+    $when_desc = t("Today");
+    if ($when == "tomorrow") $when_desc = t("Tomorrow");
+    if ($when == "this week") $when_desc = t("Remaining days this week");
+    if ($when == "next 2 weeks") $when_desc = t("Next few weeks");
+    
+       
+    $start_ts = strtotime($details[0]);
+    $end_ts = strtotime($details[1]);
+
+
+    $start_time = date("Y-m-d H:i:s", $start_ts);
+    $end_time = date("Y-m-d H:i:s", $end_ts);
+    $upcoming = calendar_get_upcoming_appointments_for_cwid($user->cwid, $start_time, $end_time);
+    if ($upcoming && count($upcoming) > 0) {
+      $render['mark_' . fp_get_machine_readable($when)] = array(
+        'value' => "<h4>$when_desc</h4>",
+      );
+    }
+    else {
+      continue;
+    }
+    
+    foreach ($upcoming as $details) {
+      
+      $thedate = format_date(convert_time($details['utc_start_ts']), 'long_no_year');      
+      $use_name = $details['faculty_name'];
+      if ($user->is_faculty) {
+        $use_name = $details['student_name'];
+      }            
+      
+      $bool_is_empty = FALSE;
+                        
+      $msg = t("You have an appointment with @fn on @td.", array("@fn" => $use_name, "@td" => $thedate));
+      
+      
+      $render['appointment_' . $c] = array(
+        'value' => "<div class='feed-item'>
+                                <div class='feed-item-icon'><i class='fa fa-calendar'></i></div>
+                                <div class='feed-item-title'>$use_name</div>
+                                <div class='feed-item-desc'>$msg</div>
+                         </div>",
+      );
+      
+      $c++;
+      
+    } // foreach
+  
+  } //foreach ranges
+  
+  if ($bool_is_empty) {
+    $render['no_appointments'] = array(
+      'value' => "<div class='empty'>
+                    <p>" . t("You have no upcoming appointments within the next 30 days.") . "</p> 
+                  </div>",
+    );
+     
+  }
+  
+      
+    
+            
+    
+  
+  
+  return fp_render_content($render);
+    
+  
+} // calendar_display_upcoming_appointments
+
+
+
 
 
 
@@ -3065,8 +3184,6 @@ function calendar_display_mobile_date_page($date, $cids_csv) {
   foreach ($cids as $cid) {
     
     $rtn .= $_SESSION['calendar_cache'][$date][$cid];
-  
-  
     
   } // foreach
   
@@ -3458,8 +3575,10 @@ function calendar_build_custom_calendar($month, $year) {
      }
      
      $month = str_pad($month, 2, "0", STR_PAD_LEFT);
+     $next_month = str_pad($next_month, 2, "0", STR_PAD_LEFT);
      $number_of_weeks_displayed = 1;  
      
+      $db = get_global_database_handler();
     
      $all_appointments = array(); 
      // Get all of our activity dates into an array, so we can then convert them to local timezone, to figure out what dates they belong on.
@@ -3467,14 +3586,13 @@ function calendar_build_custom_calendar($month, $year) {
                    WHERE a.vid = n.vid
                    AND a.cid = n.cid
                    AND delete_flag = 0
-                   AND field__appointment_datetime LIKE ?
+                   AND (field__appointment_datetime LIKE ? OR field__appointment_datetime LIKE ?)
                    AND (field__faculty_id = ? OR field__student_id = ?)                                     
-                   ORDER BY field__appointment_datetime ASC", array("$year-$month%", $user->cwid, $user->cwid));          
-     while ($cur = db_fetch_object($res)) {
+                   ORDER BY field__appointment_datetime ASC", array("$year-$month%", "$next_year-$next_month%", $user->cwid, $user->cwid));  // Because of stupid timezones, I need to grab from the NEXT month as well, just in case.
+     while ($cur = db_fetch_object($res)) { 
        $cid = $cur->cid;
        $content = content_load($cid);
-       
-      
+                                  
        $mobile_day_cids[] = $cid;
        $db_date_ts = strtotime($content->field__appointment_datetime['value']);  // This is in UTC     
        $converted_date_ts = convert_time($db_date_ts);  // Convert to our local timezone

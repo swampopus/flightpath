@@ -7,6 +7,7 @@ class DatabaseHandler extends stdClass
   public $dbc;   // OLD.  DEPRECATED
   public $pdo;
 
+
   function __construct()
   {
    
@@ -218,7 +219,8 @@ class DatabaseHandler extends stdClass
     try {      
       $result = $this->pdo->prepare($sql_query);
       $result->execute($args);      
-      $_SESSION["fp_last_insert_id"] = $this->pdo->lastInsertId();  // capture last insert id, in case we ask for it later.   
+      $_SESSION["fp_last_insert_id"] = $this->pdo->lastInsertId();  // capture last insert id, in case we ask for it later.  
+      
       return $result;
     } 
     catch (Exception $ex) {

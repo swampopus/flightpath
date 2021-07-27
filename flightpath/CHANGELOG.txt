@@ -7,7 +7,9 @@ FlightPath 6.x Changelog
   Fixed bug in group definitions and group course repeats, where FP was not respecting the school_id.
   
   Set a default icon (major.gif) for new groups.
-    
+  
+  Added "upcoming appointments" tab to the Calendar page, which displays events which are approaching.
+  
 
 2021-07-25
   Configured blank degrees to make use of the render system (so other modules can make changes more easily)
