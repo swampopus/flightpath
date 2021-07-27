@@ -4,6 +4,12 @@ FlightPath 6.x Changelog
 2021-07-27
   Implemented check when searching for students, to make sure user has correct permissions to search for student in particular school.
   
+  Added ability to trim only DEBUG messages from the watchdog.
+
+  Added ability to have external CSS files.  This is now a setting in System Settings, under the theme section.
+
+  Added default favicon to fp6_clean theme.
+  
 
 2021-07-26
   Fixed bug when editing groups, where school_id was not correctly being loaded.

@@ -483,6 +483,20 @@ function draw_menu_items($menu_array) {
     } 
     
     
+    
+    // Are we adding any external CSS files?
+    $external_css = variable_get("external_css", "");
+    if ($external_css) {
+      $temp = explode(",",$external_css);
+      foreach ($temp as $line) {
+        if (trim($line) == "") continue;
+        
+        $page_extra_css_files .= "<link rel='stylesheet' type='text/css' href='" . trim($line) . "?$page_css_js_query_string' /> \n";
+        
+      }
+    }
+    
+    
     /////////////////////////
     // Output to browser:        
     

@@ -2143,6 +2143,16 @@ function system_settings_form() {
   );
     
 
+  $form['external_css'] = array(
+    'type' => 'textfield',
+    'label' => t("External CSS file(s):"),
+    'value' => variable_get("external_css", ""),
+    "description" => t("Enter the full URL to one or more external CSS files (separated by comma).  Be aware
+                      that due to the ordering of when your CSS file is loaded, you may need to use the !important keyword on some styles.
+                      <br>Your URL should begin with https:// and may not contain any queries (ex: ?a=b). 
+                      <br>If you are unsure what to enter here, leave it blank."),
+  );
+
 
   $form["notify_apply_draft_changes_email_address"] = array(
     "type" => "textfield",
@@ -2187,10 +2197,18 @@ function system_settings_form() {
   $options = array(
               "90" => "90 days",
               "180" => "180 days",
-              "365" => "1 year (365 days)",
-              "548" => "1.5 years (548 days)",
-              "730" => "2 years (730 days)",
-              "912" => "2.5 years (912 days)",
+              "365" => "1 year",
+              "548" => "1.5 years",
+              "730" => "2 years",
+              "912" => "2.5 years",
+              "1095" => "3 years",
+              "1460" => "4 years",
+              "1825" => "5 years",
+              "2190" => "6 years",
+              "2555" => "7 years",
+              "2920" => "8 years",
+              "3285" => "9 years",
+              "3650" => "10 years",
               "never" => t("Never - Do not trim log table"),
               );
               
@@ -2211,7 +2229,17 @@ function system_settings_form() {
                         watchdog table, it cannot be retrieved again.
                         <br>If you are unsure what to put here, select '1.5 years'."),
   );
-               
+  
+  $form['max_watchdog_debug_age'] = array(
+    "type" => "select",
+    "label" => t("Max watchdog (log) DEBUG entry age:"),
+    "hide_please_select" => TRUE,
+    "options" => array('30' => '30 days', '60' => '60 days', '90' => '90 days', 'never' => t("Never - do not remove debug entries from log table")),
+    "value" => variable_get("max_watchdog_debug_age", "90"),
+    "description" => t("This is similar to the setting above, but this sets how long to keep 'debug' messages in the watchdog (logs).
+                        Debug events are generally useful for tracking down issues or problems, and are not used in any official reporting.
+                        If unsure what to choose, select '90 days'."),    
+  );             
   
 
   $form["admin_degrees_default_allow_dynamic"] = array(
@@ -2304,12 +2332,25 @@ function system_cron() {
     $result = db_query("DELETE FROM watchdog WHERE `timestamp` < ? ", $max_timestamp);
     $rows = db_affected_rows($result);
     if ($rows > 0) {
-      watchdog("system", t("@rows old rows (older than @max days) trimmed from watchdog table on system cron run.", array("@rows" => $rows, "@max" => $max_age_days)));
+      watchdog("system", t("@rows old rows (older than @max days) trimmed from watchdog table on system cron run."), array("@rows" => $rows, "@max" => $max_age_days), WATCHDOG_DEBUG);
     }
     
   }
   
-  
+  // Should we trim the watchdog table of DEBUG records?
+  $max_age_days = variable_get("max_watchdog_debug_age", "90");
+  if ($max_age_days != "never" && ($max_age_days*1) > 0) {
+    
+    // Okay, let's trim the table.
+    $max_timestamp = strtotime("$max_age_days DAYS AGO");
+    
+    $result = db_query("DELETE FROM watchdog WHERE `timestamp` < ? AND severity = ? ", $max_timestamp, WATCHDOG_DEBUG);
+    $rows = db_affected_rows($result);
+    if ($rows > 0) {
+      watchdog("system", t("@rows old 'debug' rows (older than @max days) trimmed from watchdog table on system cron run."), array("@rows" => $rows, "@max" => $max_age_days), WATCHDOG_DEBUG);
+    }
+    
+  }
   
 }
 

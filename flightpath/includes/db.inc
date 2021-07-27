@@ -34,8 +34,6 @@
 function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE, $extra_data = "") {
   global $user;
   
-  // TODO:  Have a setting where, we do not actually log certain severity levels, like notice or debug
-  // (to save space)
   
   $user_id = 0;
   $cwid = 0;
@@ -59,7 +57,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
   $referer = @$_SERVER['HTTP_REFERER'];
   
   $ser_variables = "";
-  if (count($variables) > 0) {
+  if (is_array($variables) && count($variables) > 0) {
     $ser_variables = serialize($variables);
   }
   
