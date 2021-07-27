@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-07-27
+  Implemented check when searching for students, to make sure user has correct permissions to search for student in particular school.
+  
+
 2021-07-26
   Fixed bug when editing groups, where school_id was not correctly being loaded.
 

@@ -364,8 +364,15 @@ function student_search_get_school_ids_user_is_allowed_to_search($account = NULL
   $rtn = array();
   $rtn[] = intval($account->school_id);
     
-  // TODO:  go through permissions for what we are allowed to search
-  // TODO:  Maybe by testing to see if schools module is enabled, and if so, calling a function from that module?
+  // Go through permissions for what we are allowed to search
+  if (function_exists("schools_get_school_definitions")) {
+    $defs = schools_get_school_definitions();
+    foreach ($defs as $school_id => $name) {
+      if (user_has_permission("search_students_$school_id")) {
+        $rtn[] = intval($school_id);
+      }
+    }
+  }
       
   
   if (!in_array(0, $rtn)) {

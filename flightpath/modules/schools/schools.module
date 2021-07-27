@@ -1137,6 +1137,13 @@ function schools_perm() {
                                                                         array('%school_desc' => $school_desc, '@type' => $type)));
       
   
+  
+      $rtn['search_students_' . $school_id] = array('title' => t('Search for students in %school_desc', array('%school_desc' => $school_desc)), 
+                                                                  'description' => t('The user is allowed to search for students belonging to %school_desc.
+                                                                      Note: To advise, the user will need additional permissions.', 
+                                                                        array('%school_desc' => $school_desc)));
+      
+  
     }
   
   }
