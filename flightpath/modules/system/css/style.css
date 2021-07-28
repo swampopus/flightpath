@@ -315,6 +315,24 @@ ___dashboard{}
   margin-bottom: 7px;
 }
 
+.loading-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  background: url('throbber.gif') left center no-repeat;
+  margin-left: 10px;
+  padding-left: 20px;
+}
+
+.disable-element {  
+  pointer-events: none;
+}
+
+input.disable-element {
+  background-color: #bbb;
+}
+
+
 /* don't need scroll bars here */
 .snapshot-feed-block .contents {
   max-height: 85px;

@@ -108,7 +108,20 @@ function smtp_settings_form() {
 }
 
 
-function smtp_mail($to, $subject, $msg, $bool_html = FALSE, $attachments = array()) {
+/**
+ * For attachments, the array can be one of two methods:
+ * 
+ * (1)
+ *   $arr["full_filename"] => "filename"
+ * or
+ * (2)
+ *   $arr['filename'] = "string that makes up atachment"
+ * 
+ * For method #2, $bool_string_attachment must be set to TRUE.
+ * 
+ * 
+ */
+function smtp_mail($to, $subject, $msg, $bool_html = FALSE, $attachments = array(), $bool_string_attachment = FALSE) {
     
   $system_path = trim($GLOBALS["fp_system_settings"]["file_system_path"]);
   require_once("$system_path/libraries/PHPMailer/src/Exception.php");
@@ -169,13 +182,21 @@ function smtp_mail($to, $subject, $msg, $bool_html = FALSE, $attachments = array
   //$mail->addCC('cc@example.com');
   //$mail->addBCC('bcc@example.com');  
   
-  if (count($attachments) > 0) {
-    foreach ($attachments as $full_filename => $filename) {  
-      $mail->addAttachment($full_filename, $filename);
+  if (!$bool_string_attachment) {
+    if (count($attachments) > 0) {
+      foreach ($attachments as $full_filename => $filename) {  
+        $mail->addAttachment($full_filename, $filename);
+      }
     }
   }
-  
-     
+  else {
+    // This IS a string attachment
+    if (count($attachments) > 0) {
+      foreach ($attachments as $filename => $string) {  
+        $mail->addStringAttachment($string, $filename);
+      }
+    }    
+  }  
   
   $x = $mail->send();    
   if (!$x) {

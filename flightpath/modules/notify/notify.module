@@ -7,8 +7,11 @@
 
 /** 
  * $cid is the related content's cid, if applicable.
+ * 
+ * If there is supposed to be an attachment, it's contents should be in $attachments.  At the moment, this is only used by email.
+ * 
  */
-function notify_send_notification_to_user($user_id, $msg, $cid = 0, $content_type = "", $notification_type='default') {
+function notify_send_notification_to_user($user_id, $msg, $cid = 0, $content_type = "", $notification_type='default', $attachments = array()) {
   
   // TODO:  As a safety measure, if the user is getting TOO MANY notifications, we should throttle it.  Could be a hacking
   // attempt or something similar.
@@ -44,7 +47,7 @@ function notify_send_notification_to_user($user_id, $msg, $cid = 0, $content_typ
 
 
   if ($method == 'email') {
-    notify_by_mail($user_email, $subject, $msg);  
+    notify_by_mail($user_email, $subject, $msg, $attachments);  
     notify_save_notification($user_id, $cid, $content_type, 'email', $user_email, $subject, $msg, $notification_type);
   }    
   if ($method == 'txt') {
@@ -54,7 +57,7 @@ function notify_send_notification_to_user($user_id, $msg, $cid = 0, $content_typ
   
   if ($method == 'email_txt') {
     // Sending to both.
-    notify_by_mail($user_email, $subject, $msg);
+    notify_by_mail($user_email, $subject, $msg, $attachments);
     notify_save_notification($user_id, $cid, $content_type, 'email', $user_email, $subject, $msg, $notification_type);
     
     notify_by_sms($mobile_phone, $subject, $msg);
@@ -79,11 +82,14 @@ function notify_save_notification($user_id, $cid = 0, $content_type = "", $metho
 
 
 
-function notify_by_mail($email, $subject, $msg) {
+function notify_by_mail($email, $subject, $msg, $attachments = array()) {
   
-  // TODO: The "from" email here should probably be a noreply@ address, since we don't care about responses to notifications. 
+
+  // We will assume the attachments is in "string" format, if present.
+  $bool_attachment_string = FALSE;
+  if (count($attachments) > 0) $bool_attachment_string = TRUE;
   
-  fp_mail($email, $subject, $msg, TRUE);  
+  fp_mail($email, $subject, $msg, TRUE, $attachments, $bool_attachment_string);  
 }
 
 

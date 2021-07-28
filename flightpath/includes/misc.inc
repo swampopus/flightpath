@@ -390,15 +390,25 @@ function _fp_map_php_error_code($code) {
 /**
  * Send an email.  Drop-in replacement for PHP's mail() command,
  * but can use SMTP protocol if enabled.
+ * 
+ * For attachments (only for use in SMTP), the array can be one of two methods:
+ * 
+ * (1)
+ *   $arr["full_filename"] => "filename"
+ * or
+ * (2)
+ *   $arr['filename'] = "string that makes up attachment"
+ * 
+ * For method #2, $bool_string_attachment must be set to TRUE. 
+ * 
  */
-function fp_mail($to, $subject, $msg, $bool_html = FALSE) {
+function fp_mail($to, $subject, $msg, $bool_html = FALSE, $attachments = array(), $bool_string_attachment = FALSE) {
   
-  // TODO:  special code to permit HTML?
-  
+    
   // TODO: In the future, check to see if there are any other modules which invoke a hook to intercept mail.
   
   if (function_exists('smtp_mail')) {
-    smtp_mail($to, $subject, $msg, $bool_html);
+    smtp_mail($to, $subject, $msg, $bool_html, $attachments, $bool_string_attachment);
     return;
   }
   else {

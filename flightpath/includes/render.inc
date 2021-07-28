@@ -475,6 +475,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   $prefix = @$element["prefix"];
   $suffix = @$element["suffix"];
   $multiple = @$element["multiple"];
+  $spinner = @$element["spinner"];
   if ($multiple == TRUE) {
     $multiple = "multiple=multiple";
   }
@@ -500,14 +501,18 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
 
 
   $attributes = @$element["attributes"];
+  if (!is_array($attributes)) $attributes = array();
   
   if ($type == 'textarea_editor') {
-    // Add the "html-editor" class to attributes.
-    if (!is_array($attributes)) $attributes = array();
+    // Add the "html-editor" class to attributes.    
     $attributes['class'] .= ' html-editor';
   }
   
 
+  if ($spinner) {
+    $attributes['class'] .= " show-spinner ";
+  }
+  
 
   $popup_help_link = "";
   if ($popup_description) {        
@@ -732,6 +737,12 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   
   if ($type == "button") {
     $rtn .= "<input type='button' name='$name' value='$value' $attributes>";    
+  }
+
+  if ($spinner) {
+    fp_add_css(fp_get_module_path("system") . "/css/style.css");
+    fp_add_js(fp_get_module_path("system") . "/js/spinner.js");
+    $rtn .= "<span class='loading-spinner loading-spinner-$name' style='display:none;'></span>";
   }
 
 

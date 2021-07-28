@@ -193,15 +193,15 @@ function calendar_display_upcoming_appointments() {
     'value' => "<h4>" . t("Your upcoming appointments/agenda over the next few weeks:") . "</h4><hr>",
   );
     
+  $user_tz = fp_get_user_timezone();
   
   $ranges = array(
-    "today" => array("NOW", "TOMORROW - 1 SECOND"),
-    "tomorrow" => array("TOMORROW", "NOW + 1 DAY"),
-    "this week" => array("NOW + 1 DAY", "NEXT MONDAY - 1 SECOND"),
-    "next 2 weeks" => array("NEXT MONDAY", "NEXT MONDAY + 15 DAYS"),
+    "today" => array(strtotime("NOW $user_tz"), strtotime("TOMORROW - 1 SECOND $user_tz")),
+    "tomorrow" => array(strtotime("TOMORROW $user_tz"), strtotime("NOW + 1 DAY $user_tz")),
+    "this week" => array(strtotime("NOW + 1 DAY $user_tz"), strtotime("NEXT MONDAY - 1 SECOND $user_tz")),
+    "next 2 weeks" => array(strtotime("NEXT MONDAY $user_tz"), strtotime("NEXT MONDAY + 15 DAYS $user_tz")),
   );
   
-  $user_tz = fp_get_user_timezone();  
   
   $bool_is_empty = TRUE;
   $c = 0;  
@@ -213,12 +213,14 @@ function calendar_display_upcoming_appointments() {
     if ($when == "next 2 weeks") $when_desc = t("Next few weeks");
     
        
-    $start_ts = strtotime($details[0]);
-    $end_ts = strtotime($details[1]);
+    $start_ts = $details[0];
+    $end_ts = $details[1];
 
 
     $start_time = date("Y-m-d H:i:s", $start_ts);
     $end_time = date("Y-m-d H:i:s", $end_ts);
+    
+        
     $upcoming = calendar_get_upcoming_appointments_for_cwid($user->cwid, $start_time, $end_time);
     if ($upcoming && count($upcoming) > 0) {
       $render['mark_' . fp_get_machine_readable($when)] = array(
@@ -229,8 +231,7 @@ function calendar_display_upcoming_appointments() {
       continue;
     }
     
-    foreach ($upcoming as $details) {
-      
+    foreach ($upcoming as $details) {      
       $thedate = format_date(convert_time($details['utc_start_ts']), 'long_no_year');      
       $use_name = $details['faculty_name'];
       if ($user->is_faculty) {
@@ -259,7 +260,7 @@ function calendar_display_upcoming_appointments() {
   if ($bool_is_empty) {
     $render['no_appointments'] = array(
       'value' => "<div class='empty'>
-                    <p>" . t("You have no upcoming appointments within the next 30 days.") . "</p> 
+                    <p>" . t("You have no upcoming appointments within the next few weeks.") . "</p> 
                   </div>",
     );
      
@@ -407,7 +408,7 @@ function calendar_handle_zoom_install_redirect() {
   
   $resp_data = json_decode($response->data);
   if (isset($resp_data->error)) {
-    // TODO: watchdog the error.
+    watchdog("calendar_zoom", "Error handling zoom redirect: " . $resp_data->reason, array(), WATCHDOG_ERROR());
     fpm("Error. " . $resp_data->reason);
     fp_add_message(t("Sorry, there was an error linking your Zoom account."), "error");    
     fp_goto("user-settings/appointment-settings", "fp_session_str=$fp_session_str");
@@ -478,7 +479,7 @@ function calendar_cancel_zoom_meeting($meeting_id, $user_id) {
  */
 function calendar_create_zoom_meeting($user_id, $gmt_date_time, $duration_minutes = 30, $topic = "FlightPath Appointment") {
         
-  $zoom_api_data = calendar_get_zoom_api_data_for_user($user_id);
+  $zoom_api_data = calendar_get_zoom_api_data_for_user($user_id);  
   if (!$zoom_api_data) return FALSE;      
     
   // Otherwise, continue...
@@ -514,7 +515,7 @@ function calendar_create_zoom_meeting($user_id, $gmt_date_time, $duration_minute
     
     $resp_data = json_decode($response->data);
     if (isset($resp_data->error)) {
-      // TODO: watchdog the error.
+      watchdog("calendar_zoom", "Error setting up Zoom meeting: " . $resp_data->reason, array(), WATCHDOG_ERROR());
       fpm("Error. " . $resp_data->reason);
       fp_add_message(t("Sorry, there was an error setting up a Zoom meeting."), "error");
       return FALSE;          
@@ -645,6 +646,7 @@ function calendar_confirm_cancel_appointment_form($cid) {
   
   $form['submit_confirm'] = array(
     'type' => 'submit',
+    'spinner' => TRUE,
     'value' => t('Confirm & Cancel Appointment'),    
     'attributes' => array('class' => 'content-submit-btn'),
     'suffix' => "&nbsp; &nbsp; <a href='javascript:history.go(-1);'>" . t("Cancel") . "</a>",
@@ -1707,7 +1709,7 @@ function calendar_get_available_faculty_schedule($faculty_id, $event_type_cid, $
           $un_start_time_ts = strtotime("$year-$month-$day $un_start_time");          
           $un_end_time_ts = strtotime("$year-$month-$day $un_end_time");
           
-          //fpm($un_start_time_ts);
+          
          
           // Now, does our "slot" conflict with this unavailable time window?
           
@@ -1776,13 +1778,7 @@ function calendar_get_available_faculty_schedule($faculty_id, $event_type_cid, $
           // Ex:  { unavail  [ slot  }    ]      
           if ($un_start_time_ts <= $begin_slot_ts && $un_end_time_ts >= $begin_slot_ts && $un_end_time_ts <= $end_slot_ts ) {
             $bool_conflict = TRUE;   
-            //fpm('here');
-            //fpm(date('g:ia', $un_start_time_ts));    
-            //fpm(date('g:ia', $un_end_time_ts));    
-            //fpm(date('g:ia', $begin_slot_ts));       
-            //fpm(date('g:ia', $end_slot_ts));
-            //fpm("Skipping $begin_slot_ts");    
-            //fpm("Skipping" . convert_time($begin_slot_ts, 'UTC', $tz));   
+               
             $skip_begin_slot[] = convert_time($begin_slot_ts, 'UTC', $tz);
             break;
           }
@@ -2118,13 +2114,7 @@ function calendar_schedule_appointment_confirm_form_validate($form, &$form_state
   $student_comments = trim($form_state['values']['comments']);
   
   
-  //  TODO: make sure this event time is still available!
-  //$available_slots = calendar_get_available_faculty_schedule($faculty_cwid, $event_type_cid, $month, $year);
-  //if (!isset($available_slots[$year][$month][$day][$schedule_time_ts])) {
-    //form_error('', t("Sorry, but the time you selected for your appointment is no longer available.  Please select a new time."));
-    //return;
-  //}
-  
+
   
   $bool_found_it = FALSE;
   $available_slots = calendar_get_available_faculty_schedule($faculty_cwid, $event_type_cid, $month, $year);
@@ -2137,9 +2127,9 @@ function calendar_schedule_appointment_confirm_form_validate($form, &$form_state
   }
   
   if (!$bool_found_it) {
-    // TODO:  Comment out for dev, but remove comments for production!  Otherwise users can hit "back" and save again to enter more than one meeting at the same time.
-    // form_error('', t("Sorry, but the time you selected for your appointment is no longer available.  Please select a new time."));
-    // return; 
+    // NOTE:  Comment out for dev, but remove comments for production!  Otherwise users can hit "back" and save again to enter more than one meeting at the same time.
+    form_error('', t("Sorry, but the time you selected for your appointment is no longer available.  Please select a new time."));
+    return; 
   }
   
   
@@ -2277,7 +2267,7 @@ function calendar_schedule_appointment_confirm_form_submit($form, &$form_state) 
   $content->field__appointment_duration_minutes['value'] = $event_duration_minutes;
   $content->field__faculty_id['value'] = $faculty_cwid;
   $content->field__student_id['value'] = $student_cwid;
-  $content->field__appointment_type['value'] = 'advising';  // TODO: maybe this needs to be something else?
+  $content->field__appointment_type['value'] = 'advising';  
   $content->field__appointment_msg['value'] = $msg;
   $content->field__video_data['value'] = $video_data;
   
@@ -2298,11 +2288,16 @@ function calendar_schedule_appointment_confirm_form_submit($form, &$form_state) 
   $content->field__faculty_id['value'] = $faculty_cwid;
   $acontent->field__activity_type['value'] = 'calendar'; 
   content_save($acontent);
+  
+  
+  
+  // TODO: Let's create an ics attachment for this appointment, so we can attach to notifications. 
+  
+  
+  
           
   // Send notifications
-  
-  
-  
+   
   // First, send a notification to the student.
   $student_user_id = db_get_user_id_from_cwid($student_cwid, 'student');  
   $nmsg = "You have scheduled an appointment with $faculty_name:\n";
@@ -2650,8 +2645,8 @@ function calendar_render_mini_calendar($month, $year, $faculty_user_id, $event_t
   
   $next = '<span class="calendar-next"><a href="' . $next_url . '">' . t("Next") . ' &raquo;</a></span>';
   
-  // TODO:  limit future months/dates based on settings.  Ex: don't let the user go past 3 months.
-  
+  // TODO:  limit future months/dates based on settings?  Ex: don't let the user go past 3 months.
+   
   
   $top_text = '<caption class="calendar-month">' . $prev . "<span class='month-title'>$month_title</span>" . $next . "</caption>";
     
@@ -3256,6 +3251,7 @@ function calendar_get_date_range($first, $last, $step = '+1 day', $output_format
  * 
  */
 function calendar_form_alter(&$form, $form_id) {
+  global $user;
   
   if ($form_id == 'content_edit_content_form') {
     if (@$form['type']['value'] == 'appointment') {
@@ -3308,6 +3304,24 @@ function calendar_form_alter(&$form, $form_id) {
         // Always set the published = TRUE, and hide.        
         $form['published']['value'] = TRUE;
         $form['published']['attributes'] = array('class' => 'hidden');
+        
+        // If this user has Zoom set up, then show an option to make this a zoom meeting.
+        $test = calendar_get_zoom_api_data_for_user($user->id);    
+ 
+        if ($test) {           
+          $form['enable_zoom'] = array(
+            'type' => 'checkbox',
+            'label' => t("Make this a Zoom video meeting?"),            
+            'description' => t("Check this box if this is a Zoom video meeting.  A Zoom meeting will be created automatically
+                                and the recipients will be notified."),
+            'weight' => 5,
+          );
+        }
+        
+        
+        // The submit button should disable itself and we should show a spinner when clicked.
+        
+        
         
       } // cid == new
       
@@ -3396,6 +3410,9 @@ function calendar_form_alter(&$form, $form_id) {
  * and also store ONLY the cwid.
  */
 function calendar_appointment_content_form_validate($form, &$form_state) {
+  global $user;
+  
+  $values = $form_state['values'];
     
   $student_id = $line = $form_state['values']['student_id'];
   // Might look like this:  first last (CWID).  We only want the CWID.
@@ -3416,19 +3433,198 @@ function calendar_appointment_content_form_validate($form, &$form_state) {
   $form_state['values']['student_id'] = $student_id;  
   
   
-  // TODO: Since we have passed validation, we can see if we should try to create a new Zoom meeting.
-  // TODO: Only do this for NEW appointments.
-   
-  
+      
+  // Since we have passed validation, we can see if we should try to create a new Zoom meeting.
   
     
+  $video_info = $location = "";
+  $acid = 0;
+  $location = "In-Person";
+
+  $faculty_user_id = intval($user->id);
+  $faculty_user = $user;
+  $faculty_cwid = $faculty_user->cwid;
+  $faculty_name = $faculty_user->f_name . " " . $faculty_user->l_name;
+  $faculty_tz = fp_get_user_timezone($user);
+                
+  $student_name = $db->get_student_name($student_id);
+  $schedule_time_ts = strtotime($values['appointment_datetime']);
+  $utc_schedule_time_ts = convert_time($schedule_time_ts, $faculty_tz, 'UTC');  // convert to utc time from our current timezone.
+  $event_duration_minutes = intval($values['appointment_duration_minutes']);
+
+  $event_title = "Meeting between $student_name and $faculty_name";
+      
+  // Only do this for NEW appointments.
+  if ($values['cid'] === 'new' && $values['enable_zoom'] === TRUE) {
+    
+    // We want to create a new Zoom meeting!
+    $event_title = "Zoom meeting between $student_name and $faculty_name";  
+    $month = date('n', $schedule_time_ts);
+    $year = date('Y', $schedule_time_ts);
+    $day = date('j', $schedule_time_ts);
+    
+    
+    //gmt_date_time must look like yyyy-MM-ddTHH:mm:ssZ.  For example: 2020-03-31T22:02:00Z.  The Z tells it that we are using GMT/UTC time.
+    $gmt_date_time = date("Y-m-d\TH:i:s\Z", $utc_schedule_time_ts);
+
+    $response = calendar_create_zoom_meeting($faculty_user_id, $gmt_date_time, $event_duration_minutes, "Video meeting - $faculty_name / $student_name");
   
+    if (!$response) {
+      form_error("", t("Sorry, but there was an issue creating the Zoom meeting for this appointment.  Your appointment has not been saved.
+                        Please try another method, or contact the IT administrator to let them know of this issue."));
+      return;
+    }
+        
+    $decoded = json_decode($response);
+          
+    $meeting_id = $decoded->id;
+    $join_url = $decoded->join_url;
+    $location = $join_url;
+    $dial_in = $decoded->settings->global_dial_in_numbers[0]->number;
+    
+    if (function_exists("engagements_convert_to_pretty_phone_number")) {
+      $dial_in = engagements_convert_to_pretty_phone_number($dial_in, TRUE);
+    }
+    
+    $video_info .= "<p><b>" . t("Zoom Meeting:") . "</b> <a href='$join_url'>" . $join_url . "</a> \n<br> " . t("Be sure to download the Zoom app on your phone, tablet, or computer.") . " \n<br> " . t("To dial in instead of using video chat, you may dial:<br>\n @dial (ID: @id)", array("@dial" => $dial_in, "@id" => $meeting_id)) . ".</p>\n";                                               
+    
+    $decoded->video_info = $video_info;  // add to our json object for ease of use later.
+    $decoded->video_provider = "zoom";  // declare that this is a "zoom" meeting.
+    $decoded->video_account_owner_user_id = $user->id;
+    $video_data = json_encode($decoded); // re-encode as a simpl string, so we can add to the database.
+    $form_state['values']['video_data'] = $video_data;                       
+        
+  } // enable_zoom 
+    
+    
+    
+    
+    
+  // Send notifications
+ 
+  
+  // Get ics invitation string for email attachments
+  $start_dt = date("Ymd\THis\Z", $utc_schedule_time_ts);
+  $end_dt = date("Ymd\THis\Z", $utc_schedule_time_ts + ($event_duration_minutes * 60));  
+  $ics = calendar_get_ics_invitation_string($event_title, $location, $video_info, $start_dt, $end_dt);
+
+  $attachment = array(
+    'invite.ics' => $ics,
+  );
+         
+  // First, send a notification to the student.
+  $student_user_id = db_get_user_id_from_cwid($student_id, 'student');  
+  $student_tz = fp_get_user_timezone($student_user_id);
+  $fstudent_tz = friendly_timezone($student_tz);
+  $nmsg = "You have been scheduled for an appointment with $faculty_name:\n";
+  
+  $msg = "";
+  $msg .= "<p><b>" . t("Scheduled:") . "</b> $event_title</p>\n";
+  $msg .= "<p><b>" . t("Date and Time:") . "</b> " . format_date(convert_time($utc_schedule_time_ts, 'UTC', $student_tz), 'pretty') . " ($fstudent_tz)</p>\n";
+  $msg .= "<p><b>" . t("Duration:") . "</b> " . $event_duration_minutes . " min</p>\n";
+  $msg .= $video_info;
+  
+  
+  notify_send_notification_to_user($student_user_id, $nmsg . $msg, $acid, 'appointment', '', $attachment);
+  
+  // Now, send a notification to the faculty member.    
+  $ffaculty_tz = friendly_timezone($faculty_tz);
+  $nmsg = "You have scheduled an appointment with $student_name:\n"; 
+  $msg = "";
+  $msg .= "<p><b>" . t("Scheduled:") . "</b> $event_title</p>\n";
+  $msg .= "<p><b>" . t("Date and Time:") . "</b> " . format_date(convert_time($utc_schedule_time_ts, 'UTC', $faculty_tz), 'pretty') . " ($ffaculty_tz)</p>\n";
+  $msg .= "<p><b>" . t("Duration:") . "</b> " . $event_duration_minutes . " min</p>\n";
+  $msg .= $video_info;
+  
+      
+  notify_send_notification_to_user($user->id, $nmsg . $msg, $acid, 'appointment', '', $attachment);    
+
+  
+} // validate
+
+
+/**
+ * Return back an ics file (as a string) to be used as an attachment for emails, which
+ * will facilitate a calendar invitation.
+ * 
+ * Inspired from: https://gist.github.com/jakebellacera/635416/3c81643cc236a5efdf535fcbf3f876eaaa6c4787
+ * 
+ * start_dt and end_dt should look like Ymd\THis\Z  (in UTC format)
+ * 
+ */
+function calendar_get_ics_invitation_string($event_title, $location, $description = "", $start_dt, $end_dt) {
+  $rtn = "";
+  
+  if ($description == "") $description = $event_title;
+  $description = strip_tags($description);
+  
+  $description = str_replace("\r\n", "\n", $description); // Convert from windows to unix style linebreaks.
+  $description = str_replace("\n", "\\n", $description); // required if we have line breaks in the description.  We have to escape the slash.
+  $description = str_replace(";", "\\;", $description); // We have to escape semi-colons the same way
+  $description = str_replace(",", "\\,", $description); // And commas.
+  
+  // We have to do "line folding" for the description if it is longer than 75 chars.  See: https://icalendar.org/iCalendar-RFC-5545/3-1-content-lines.html
+  
+  
+  $rtn .= "BEGIN:VCALENDAR\n";
+  $rtn .= "VERSION:2.0\n";
+  $rtn .= "PRODID:-//hacksw/handcal//NONSGML v1.0//EN\n";
+  $rtn .= "CALSCALE:GREGORIAN\n";
+  $rtn .= "BEGIN:VEVENT\n";
+  $rtn .= "DTEND:$end_dt\n";
+  $rtn .= "UID:" . md5($event_title . $start_dt . $end_dt) . "\n";
+  $rtn .= "DTSTAMP:" . date("Ymd\THis\Z", time()) . "\n";
+  $rtn .= "LOCATION:$location\n";
+  $rtn .= "DESCRIPTION:" . calendar_ics_split("DESCRIPTION:", $description) . "\n";
+  //$rtn .= "URL;VALUE=URI: http://mydomain.com/events/blah\n";
+  $rtn .= "SUMMARY:$event_title\n";
+  $rtn .= "DTSTART:$start_dt\n";  
+  $rtn .= "END:VEVENT\n";
+  $rtn .= "END:VCALENDAR";      
+  
+  
+  return $rtn;
+} // get_ics_invitation_string
+
+
+/**
+ * This lets us split up a line for ics into 75-char octets, according to the rules
+ * from:  https://icalendar.org/iCalendar-RFC-5545/3-1-content-lines.html
+ * 
+ * This function comes from: https://gist.github.com/hugowetterberg/81747
+ */
+function calendar_ics_split($preamble = "DESCRIPTION:", $value) {
+  $value = trim($value);
+  $value = strip_tags($value);
+  $value = preg_replace('/\n+/', ' ', $value);
+  $value = preg_replace('/\s{2,}/', ' ', $value);
+
+  $preamble_len = strlen($preamble);
+
+  $lines = array();
+  while (strlen($value)>(75-$preamble_len)) {
+    $space = (75-$preamble_len);
+    $mbcc = $space;
+    while ($mbcc) {
+      $line = mb_substr($value, 0, $mbcc);
+      $oct = strlen($line);
+      if ($oct > $space) {
+        $mbcc -= $oct-$space;
+      }
+      else {
+        $lines[] = $line;
+        $preamble_len = 1; // Still take the tab into account
+        $value = mb_substr($value, $mbcc);
+        break;
+      }
+    }
+  }
+  if (!empty($value)) {
+    $lines[] = $value;
+  }
+
+  return join($lines, "\n\t");
 }
-
-
-
-
-
 
 
 
@@ -3807,20 +4003,50 @@ function calendar_content_alter(&$render, $render_id) {
             $query .= "window_mode=" . $_REQUEST['window_mode'];
           }
           $cancel_link = fp_url("calendar/confirm-cancel-appointment/$content->cid", $query);
+
           $render['cancel_link'] = array(
             'value' => "<a href='$cancel_link' title='Cancel appointment' class='button cancel-button'>" . t("Cancel Appointment?") . "</a>",
             'weight' => 99999,
           );
+
+
           
+                    
         } // if user is involved in this, or they are admin.
         
         
       } // user has permission            
       
       
-      // TODO:  If we have valid video data, we should display relevant links to join the meeting and such.
+      // If we have valid video data, we should display relevant links to join the meeting and such.
+      
       unset($render['field__video_data']);
-      // TODO: create new markup field which renders out the video links and such.
+      if ($render['#content_object'] && $render['#content_object']->field__video_data['value'] != "") {
+        // Meaning, we have video meeting data to display!
+          
+        // create new markup field which renders out the video links and such.
+        $decoded = json_decode($render['#content_object']->field__video_data['value']);
+          
+        $meeting_id = $decoded->id;
+        $join_url = $decoded->join_url;
+        $dial_in = $decoded->settings->global_dial_in_numbers[0]->number;
+        
+        if (function_exists("engagements_convert_to_pretty_phone_number")) {
+          $dial_in = engagements_convert_to_pretty_phone_number($dial_in, TRUE);
+        }
+        
+        $video_info .= "<p><b>" . t("Zoom Meeting:") . "</b> <a href='$join_url'>" . $join_url . "</a> \n<br> " . t("Be sure to download the Zoom app on your phone, tablet, or computer.") . " \n<br> " . t("To dial in instead of using video chat, you may dial:<br>\n @dial (ID: @id)", array("@dial" => $dial_in, "@id" => $meeting_id)) . ".</p>\n";                                               
+            
+        $render['video_information'] = array(
+          'type' => 'markup',
+          'value' => "<div class='video-information'>" . $video_info . "</div>",
+          'weight' => 65,
+        );
+        
+        
+      } // video_data != ""
+      
+      
       
       
             

@@ -488,6 +488,7 @@ function content_view_content($cid) {
   
   $render = array();  
   $render["#id"] = "content_" . $cid;  // We will be doing this as a render array, so other modules can alter.
+  $render['#cid'] = intval($cid);
   
   fp_add_css(fp_get_module_path('content') . '/css/content.css');
     
@@ -497,6 +498,7 @@ function content_view_content($cid) {
     
       
   $content = content_load($cid);  // assumed to be path/content/CID  So, arg(1) == the cid
+  $render['#content_object'] = $content;
   $type = $content->type;
   $types = content_get_types();
   $author = fp_load_user($content->user_id);
@@ -504,6 +506,8 @@ function content_view_content($cid) {
   $render['#content-type'] = $type;
   
   $render['#class'] = "content-type-" . $type;
+  
+  $weight = 0;
   
     
   if (!strstr($content->title, "[hide]")) {
@@ -516,6 +520,7 @@ function content_view_content($cid) {
   $render['content_title'] = array(
     'type' => 'markup',
     'value' => "<div class='content-title'>" . $content->title . "</div>",
+    'weight' => $weight,
   );
   
   
@@ -523,12 +528,14 @@ function content_view_content($cid) {
   $render['content_submitted'] = array(
     'type' => 'markup',
     'value' => "<div class='content-submitted'>" . t("Submitted by") . " " . $author->name . " " . t("on") . " " . format_date(convert_time($content->updated), 'short') . "</div>",
+    'weight' => $weight += 10,
   );
 
   if ($content->delete_flag == 1) {
     $render['content_deleted'] = array(
       'type' => 'markup',
       'value' => "<div class='content-deleted'>" . t("NOTE: This content has been marked as deleted, and is scheduled for permanent removal.") . "</div>",
+      'weight' => $weight += 10,
     );
     
   }
@@ -545,6 +552,7 @@ function content_view_content($cid) {
           'type' => 'markup',
           'label' => $field_details['label'],
           'value' => "<div class='field-value'>$display_value</div>",
+          'weight' => $weight += 10,
         );
         
       }
@@ -561,6 +569,7 @@ function content_view_content($cid) {
                 'type' => 'markup',
                 'label' => $edetails['label'],
                 'value' => "<div class='field-value'>$display_value</div>",
+                'weight' => $weight += 10,
               );          
             }
           }
@@ -857,15 +866,6 @@ function content_edit_content_form($type = "", $cid = "") {
   }
 
 
-  // Are we published?
-  /* 
-  $form['published'] = array(
-    'type' => 'checkbox',
-    'label' => t('Published'),
-    'value' => (bool) $content->published,
-    'weight' => 900,
-  );
-  */
   
   // We never show the published option, since we will always give the user a way to "remove" and "restore" content.
   $form['published'] = array(
@@ -879,6 +879,7 @@ function content_edit_content_form($type = "", $cid = "") {
   $form["submit_submit"] = array(
     "type" => "submit",
     "value" => t("Submit"),
+    "spinner" => TRUE,
     'weight' => 920,    
     'attributes' => array('class' => 'content-submit-btn'),        
   );
