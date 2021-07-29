@@ -2018,6 +2018,7 @@ function calendar_schedule_appointment_confirm_form($faculty_user_id) {
   
   $form['submit_btn'] = array(
     'type' => 'submit',
+    'spinner' => TRUE,
     'value' => t('Confirm Appointment & Save!'),    
   );
   
@@ -2114,7 +2115,6 @@ function calendar_schedule_appointment_confirm_form_validate($form, &$form_state
   $student_comments = trim($form_state['values']['comments']);
   
   
-
   
   $bool_found_it = FALSE;
   $available_slots = calendar_get_available_faculty_schedule($faculty_cwid, $event_type_cid, $month, $year);
@@ -2125,9 +2125,15 @@ function calendar_schedule_appointment_confirm_form_validate($form, &$form_state
       break;
     }
   }
-  
+
+  //  make sure this event time is still available!
+  // NOTE:  Comment out for dev, but remove comments for production!  Otherwise users can hit "back" and save again to enter more than one meeting at the same time.
+  $available_slots = calendar_get_available_faculty_schedule($faculty_cwid, $event_type_cid, $month, $year);
+  if (!isset($available_slots[$year][$month][$day][$schedule_time_ts])) {
+    form_error('', t("Sorry, but the time you selected for your appointment is no longer available.  Please select a new time."));
+    return;
+  }  
   if (!$bool_found_it) {
-    // NOTE:  Comment out for dev, but remove comments for production!  Otherwise users can hit "back" and save again to enter more than one meeting at the same time.
     form_error('', t("Sorry, but the time you selected for your appointment is no longer available.  Please select a new time."));
     return; 
   }
@@ -2212,6 +2218,9 @@ function calendar_schedule_appointment_confirm_form_submit($form, &$form_state) 
   $student_comments = trim(filter_markup($form_state['values']['comments'], 'plain'));
 
   $video_info = $video_data = $join_url = $dial_in = $meeting_id = "";
+  $location = t("In-Person");
+  $event_title = "Meeting between $student_name and $faculty_name";
+  
   
   if (isset($form_state['values']['video_data'])) {
     $video_data = $form_state['values']['video_data'];
@@ -2220,11 +2229,15 @@ function calendar_schedule_appointment_confirm_form_submit($form, &$form_state) 
       
       $meeting_id = $decoded->id;
       $join_url = $decoded->join_url;
+      $location = $join_url;
       $dial_in = $decoded->settings->global_dial_in_numbers[0]->number;
       
       if (function_exists("engagements_convert_to_pretty_phone_number")) {
         $dial_in = engagements_convert_to_pretty_phone_number($dial_in, TRUE);
       }
+      
+      $event_title = "Zoom meeting between $student_name and $faculty_name";
+      
       
       $video_info .= "<p><b>" . t("Zoom Meeting:") . "</b> <a href='$join_url'>" . $join_url . "</a> \n<br> " . t("Be sure to download the Zoom app on your phone, tablet, or computer.") . " \n<br> " . t("To dial in instead of using video chat, you may dial:<br>\n @dial (ID: @id)", array("@dial" => $dial_in, "@id" => $meeting_id)) . ".</p>\n";                                               
       
@@ -2291,7 +2304,14 @@ function calendar_schedule_appointment_confirm_form_submit($form, &$form_state) 
   
   
   
-  // TODO: Let's create an ics attachment for this appointment, so we can attach to notifications. 
+  // Get ics invitation string for email attachments
+  $start_dt = date("Ymd\THis\Z", $utc_schedule_time_ts);
+  $end_dt = date("Ymd\THis\Z", $utc_schedule_time_ts + ($event_duration_minutes * 60));  
+  $ics = calendar_get_ics_invitation_string($event_title, $location, $video_info, $start_dt, $end_dt);
+
+  $attachment = array(
+    'invite.ics' => $ics,
+  );
   
   
   
@@ -2302,7 +2322,7 @@ function calendar_schedule_appointment_confirm_form_submit($form, &$form_state) 
   $student_user_id = db_get_user_id_from_cwid($student_cwid, 'student');  
   $nmsg = "You have scheduled an appointment with $faculty_name:\n";
   
-  notify_send_notification_to_user($student_user_id, $nmsg . $msg, $acid, 'appointment');
+  notify_send_notification_to_user($student_user_id, $nmsg . $msg, $acid, 'appointment', '', $attachment);
   
   // Now, send a notification to the faculty member.
   $nmsg = "$student_name has scheduled an appointment with you:\n"; 
@@ -2317,7 +2337,7 @@ function calendar_schedule_appointment_confirm_form_submit($form, &$form_state) 
   $msg .= "<p><b>" . t("Duration:") . "</b> " . $event_duration_minutes . " min</p>\n";
   $msg .= $video_info;
   
-  notify_send_notification_to_user($faculty_user_id, $nmsg . $msg, $acid, 'appointment');
+  notify_send_notification_to_user($faculty_user_id, $nmsg . $msg, $acid, 'appointment', '', $attachment);
       
   
   
@@ -3436,7 +3456,7 @@ function calendar_appointment_content_form_validate($form, &$form_state) {
       
   // Since we have passed validation, we can see if we should try to create a new Zoom meeting.
   
-    
+    // TODO: here
   $video_info = $location = "";
   $acid = 0;
   $location = "In-Person";
