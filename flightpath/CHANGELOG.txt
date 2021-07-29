@@ -10,6 +10,10 @@ FlightPath 6.x Changelog
   
   Added ICS attachmen to notifications for student-initiated appointments.
   
+  Removed dev code for external calendars.
+  
+  Added new code for caching external calendars for at least 5 minutes, to save frequent lookups.
+  
 
 2021-07-28
   Fixed bug in calendar's upcoming appointments tab, wasn't showing date ranges correctly for timezones.

@@ -1351,6 +1351,8 @@ function calendar_get_appointments_for_faculty($faculty_id, $start_date, $end_da
     
   } // while
   
+  $faculty_user_id = db_get_user_id_from_cwid($faculty_id, 'faculty');
+  $faculty_tz = fp_get_user_timezone($faculty_user_id);
   
   if ($bool_include_external_cals) {
     // Meaning, we should also look up the external ics feeds we may have.
@@ -1359,24 +1361,82 @@ function calendar_get_appointments_for_faculty($faculty_id, $start_date, $end_da
     require_once($x);
         
     
-    // TODO:  find all of them in content nodes and/or caches!
+    // Find external feeds (if any exist) for this user.
     $ics_feeds = array();
-    $ics_feeds[] = array(
-      'url' => "https://calendar.google.com/calendar/ical/richard%40liftoffacademics.com/public/basic.ics",
-      'tz' => 'America/Chicago',
-    );      
+    
+    $res = db_query("SELECT * FROM content__schedule_unavailable_time a, content n
+                     WHERE field__faculty_id = ?
+                     AND field__ics_url != ''
+                     AND a.vid = n.vid
+                     AND a.cid = n.cid
+                     AND n.delete_flag = 0
+                     AND published = 1
+                     ORDER BY a.vid DESC", array($faculty_id));
+    while ($cur = db_fetch_array($res)) {
+      $ics_url = trim($cur['field__ics_url']);
+      if ($ics_url) {
+        $ics_feeds[] = array(
+          'url' => $ics_url,
+          'tz' => $faculty_tz,
+          'cid' => $cur['cid'],
+        );
+      }
+    }
+    
+    
+    // DEV
+    //$ics_feeds[] = array(
+    //  'url' => "https://calendar.google.com/calendar/ical/example_url_here/public/basic.ics",
+    //  'tz' => 'America/Chicago',
+    //);      
     
     
     foreach ($ics_feeds as $details) {
       $ics = $details['url'];
-      $tz = $details['tz'];
+      $tz = @$details['tz'];
+      $cid = $details['cid'];
+      if (!$tz) $tz = $faculty_tz;
+      
            
       $ical = NULL;
-      // TODO: grab from cache or re-generate?
-                  
+      $ical_str = "";
+      
       try {
-        $ical = new ICal\ICal();      
-        $ical->initUrl($ics);
+        
+        // grab from cache or re-download the ics file?
+        // See if more than 5 number of minutes have passed since we last pulled this file,
+        // and regenerate it if so. Otherwise, use a database cache.  Maybe serialized into the user_attributes table?        
+        $test = user_get_attribute($faculty_user_id, 'cache_ics_feed__' . $cid . '_reload_after_ts', 0);
+                
+        if (time() < $test) {
+          // It has been cached previously, and the cache is still valid.  Let's see if we can get what's there.           
+          $ical_str = user_get_attribute($faculty_user_id, 'cache_ics_feed__' . $cid, "");
+          watchdog('calendar_ical', "Loading cached ics $ics ($cid)", array(), WATCHDOG_DEBUG);
+        }
+        
+        if (!$ical_str || $ical_str == "") {
+          watchdog('calendar_ical', "Downloading ics $ics ($cid) from web and caching", array(), WATCHDOG_DEBUG);                         
+          $ical_str = fp_url_get_contents($ics);          
+          // Save to user_attributes as a cache for later retrieval
+          user_set_attribute($faculty_user_id, 'cache_ics_feed__' . $cid, $ical_str);
+          user_set_attribute($faculty_user_id, 'cache_ics_feed__' . $cid . '_reload_after_ts', time() + (5 * 60));
+                              
+        }
+        
+        if ($ical_str == "") {
+          watchdog('calendar_ical', "Error trying to read ical: $ics (cid: $cid). String is empty", array(), WATCHDOG_ERROR);
+          fpm("error trying to read ical");
+          return;
+        }
+        
+        $ical = new ICal\ICal();                 
+        $ical->initString($ical_str);        
+        if ($ical == NULL) {
+          watchdog('calendar_ical', "Error trying to load ical: $ics string (cid: $cid) String: $ical_str", array(), WATCHDOG_ERROR);
+          fpm("error trying to load ical_str");
+          return;
+        }
+        
         
         $events = $ical->eventsFromRange($start_date, $end_date);
         
