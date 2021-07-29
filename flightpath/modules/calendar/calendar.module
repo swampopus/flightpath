@@ -3623,7 +3623,7 @@ function calendar_ics_split($preamble = "DESCRIPTION:", $value) {
     $lines[] = $value;
   }
 
-  return join($lines, "\n\t");
+  return join("\n\t", $lines);
 }
 
 

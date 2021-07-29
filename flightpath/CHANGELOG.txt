@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-07-29
+  Fixed deprecated notice.
+  
+
 2021-07-28
   Fixed bug in calendar's upcoming appointments tab, wasn't showing date ranges correctly for timezones.
   
