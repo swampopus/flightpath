@@ -10,6 +10,9 @@ FlightPath 6.x Changelog
   Added ability to limit the number of selections on What If.  It defaults to 5.  This is to help keep students from blowing up the server by selecting
   every degree possible.
   
+  Updated blank degrees (and schools) to be able to search by school.
+  
+  
 
 2021-07-29
   Fixed deprecated notice.

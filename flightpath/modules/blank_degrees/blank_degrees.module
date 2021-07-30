@@ -37,7 +37,7 @@ function blank_degrees_menu() {
         0 => array(
           "text" => "Degrees",
           "path" => "tools/blank-degrees",
-          "query" => "blank_catalog_year=%BLANK_CATALOG_YEAR%",
+          "query" => "blank_catalog_year=%BLANK_CATALOG_YEAR%&school_id=%SCHOOL_ID%",
         ),
       ),      
     ),    
@@ -62,6 +62,18 @@ function blank_degrees_menu_handle_replacement_pattern($str) {
     // It contains this replacement pattern!
     $str = str_replace("%BLANK_CATALOG_YEAR%", @$_REQUEST["blank_catalog_year"], $str);
   }
+  
+  $school_id = 0;
+  if (isset($_REQUEST['school_id'])) {
+    $school_id = intval($_REQUEST['school_id']);
+  }
+
+  if (strpos($str, "%SCHOOL_ID%") !== 0) {
+    // It contains this replacement pattern!
+    $str = str_replace("%SCHOOL_ID%", $school_id, $str);
+  }
+    
+  
   
   return $str;
 }
@@ -89,6 +101,10 @@ function blank_degrees_display_blank_degree() {
   
   $blank_degree_id = $_REQUEST["blank_degree_id"];
   $blank_catalog_year = $_REQUEST["blank_catalog_year"];
+  $school_id = 0;
+  if (isset($_REQUEST['school_id'])) {
+    $school_id = intval($_REQUEST['school_id']);
+  }  
   @$blank_print = $_REQUEST["blank_print"];
   @$blank_view = $_REQUEST["blank_view"];
     
@@ -242,11 +258,11 @@ function blank_degrees_display_blank_degree() {
   $tab_array = array();
   $tab_array[0]["title"] = "Display by Year";
   $tab_array[0]["active"] = ($screen->view != "type");
-  $tab_array[0]["on_click"] = "window.location=\"" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year&blank_view=year") . "\";";
+  $tab_array[0]["on_click"] = "window.location=\"" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year&blank_view=year&school_id=$school_id") . "\";";
       
   $tab_array[1]["title"] = "Display by Type";
   $tab_array[1]["active"] = ($screen->view == "type");
-  $tab_array[1]["on_click"] = "window.location=\"" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year&blank_view=type") . "\";";
+  $tab_array[1]["on_click"] = "window.location=\"" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year&blank_view=type&school_id=$school_id") . "\";";
 
       
   fp_set_page_sub_tabs($tab_array);
@@ -318,6 +334,7 @@ function blank_degrees_select_degree_form() {
       "type" => "select",
       "label" => t("Please begin by selecting a catalog year:"),
       "options" => $catalog_year_options,
+      "weight" => 10,
     );
   }
   else {
@@ -327,15 +344,21 @@ function blank_degrees_select_degree_form() {
       "value" => $blank_catalog_year,
     );
 
-    $form["mark" . $m++] = array(
+    $form["mark_searching_in_year"] = array(
       "value" => t("Searching degrees in %year.", array("%year" => $blank_catalog_year . "-" . ($blank_catalog_year+1))) . "
                    " . l(t("Change?"), "tools/blank-degrees"),
+      "weight" => 0,
     );    
+    
+    $school_id = 0;
+    if (isset($_REQUEST['school_id'])) {
+      $school_id = intval($_REQUEST['school_id']);
+    }
     
     $mobile_markup = "";
     $degree_options = array();
-    $db = get_global_database_handler();    
-    if ($degree_array = $db->get_degrees_in_catalog_year($blank_catalog_year, true, $GLOBALS["fp_advising"]["bool_use_draft"], FALSE)) {
+    $db = get_global_database_handler();
+    if ($degree_array = $db->get_degrees_in_catalog_year($blank_catalog_year, TRUE, $GLOBALS["fp_advising"]["bool_use_draft"], FALSE, array(1,2), $school_id)) {
       foreach($degree_array as $major_code => $value) {
         if (trim($value["title"]) == ""){continue;}
         $degree_id = $value["degree_id"];
@@ -365,6 +388,7 @@ function blank_degrees_select_degree_form() {
       "label" => t("Please select a degree"),
       "type" => "select",
       "options" => $degree_options,
+      "weight" => 50,
     );
     
     
@@ -376,30 +400,34 @@ function blank_degrees_select_degree_form() {
       "type" => "submit",
       "prefix" => "<hr>",
       "value" => t("Continue") . " -&gt;",
+      "weight" => 100,
     );
   }
   
   
   return $form;
 }
-
+ 
 
 /**
  * Submit handler for degree selection
  */
 function blank_degrees_select_degree_form_submit($form, $form_state) {
+    
+  $school_id = 0;
+  if (isset($form_state['POST']['schools_school'])) $school_id = intval($form_state['POST']['schools_school']);
   
   // If all the user did was select catalog year, we need to redirect
   // back to the form with blank_catalog_year set.
   if ($form_state["values"]["blank_degree_id"] == "" && $form_state["values"]["blank_catalog_year"] != "") {
     // Go to degree selection.
-    fp_goto("tools/blank-degrees", "blank_catalog_year=" . $form_state["values"]["blank_catalog_year"]);
+    fp_goto("tools/blank-degrees", "blank_catalog_year=" . $form_state["values"]["blank_catalog_year"] . "&school_id=$school_id");
     return;
   }
   else if ($form_state["values"]["blank_degree_id"] != "" && $form_state["values"]["blank_catalog_year"] != ""){
     // Send them to the blank degree page
     
-    fp_goto("blank-degrees/display", "blank_degree_id=" . $form_state["values"]["blank_degree_id"] . "&blank_catalog_year=" . $form_state["values"]["blank_catalog_year"]);  
+    fp_goto("blank-degrees/display", "blank_degree_id=" . $form_state["values"]["blank_degree_id"] . "&blank_catalog_year=" . $form_state["values"]["blank_catalog_year"] . "&school_id=$school_id");  
     return;
   }
   
