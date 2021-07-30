@@ -14,6 +14,8 @@ FlightPath 6.x Changelog
   
   Added new code for caching external calendars for at least 5 minutes, to save frequent lookups.
   
+  Added new code for Course objects, to keep track of all the semesters it appears in.  Good for combo-degrees.
+  
 
 2021-07-28
   Fixed bug in calendar's upcoming appointments tab, wasn't showing date ranges correctly for timezones.

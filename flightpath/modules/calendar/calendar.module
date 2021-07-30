@@ -2726,7 +2726,7 @@ function calendar_render_mini_calendar($month, $year, $faculty_user_id, $event_t
   $next = '<span class="calendar-next"><a href="' . $next_url . '">' . t("Next") . ' &raquo;</a></span>';
   
   // TODO:  limit future months/dates based on settings?  Ex: don't let the user go past 3 months.
-   
+    
   
   $top_text = '<caption class="calendar-month">' . $prev . "<span class='month-title'>$month_title</span>" . $next . "</caption>";
     
@@ -3515,8 +3515,7 @@ function calendar_appointment_content_form_validate($form, &$form_state) {
   
       
   // Since we have passed validation, we can see if we should try to create a new Zoom meeting.
-  
-    // TODO: here
+      
   $video_info = $location = "";
   $acid = 0;
   $location = "In-Person";

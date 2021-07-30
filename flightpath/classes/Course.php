@@ -26,28 +26,15 @@ class Course extends stdClass
   public $array_valid_names, $school_id;
 
   // Student record related:
-  public $bool_taken, $term_id, $section_number,$quality_points, $grade, $db_grade, $level_code;
+  public $bool_taken, $term_id, $section_number, $quality_points, $grade, $db_grade, $level_code;
   public $bool_transfer, $institution_id, $institution_name, $course_transfer;
   public $transfer_eqv_text, $transfer_footnote;
   
   public $details_by_degree_array;  // meant to hold all details about a substitution, or anything else, keyed by degree id.
   
-  //////////////
-  // These are deprecated now.  Using details_by_degree_array instead for all of them.
-  // TODO:  Remove them from __sleep super function
-  //public $course_substitution_by_degree_array;
-  //public $bool_substitution_by_degree_array;
-  //public $bool_substitution, $course_substitution;
-  //public $substitution_hours, $sub_remarks, $sub_faculty_id, $bool_outdated_sub;
-  //public $bool_substitution_split, $substitution_footnote, $bool_substitution_new_from_split;
-  //public $assigned_to_group_id, $hours_awarded, $bool_has_been_assigned;
-  //public $bool_has_been_displayed, $bool_has_been_displayed_by_degree_array;
-   
-  ///////////
-
   // Major/Degree or Group Requirement related:
   public $min_grade, $specified_repeats, $bool_specified_repeat, $required_on_branch_id;
-  public $assigned_to_semester_num, $req_by_degree_id;
+  public $assigned_to_semester_num, $appears_in_semester_nums, $req_by_degree_id;
   public $assigned_to_degree_ids_array, $assigned_to_group_ids_array;
 
 
@@ -98,7 +85,7 @@ class Course extends stdClass
 
     $array_valid_names = array();  // will hold all "valid" names for this course (non excluded names).
     $this->course_id = intval($course_id);  // Force it to be numeric.
-    
+    $this->appears_in_semester_nums = array();  // for combo-degrees
     $this->temp_old_course_id = 0;  // Used in case we delete the course_id, we can get it back (good with substitutions of transfers that are outdated).
     $this->catalog_year = $catalog_year;
     $this->assigned_to_semester_num = -1;
@@ -724,21 +711,21 @@ class Course extends stdClass
   {    
     $temp = explode("~",$str);
 
-    $this->course_id = 				$temp[0];
+    $this->course_id =        $temp[0];
 
     $this->load_course($this->course_id);
 
-    $this->assigned_to_semester_num = 	$temp[1];
-    $this->assigned_to_group_ids_array 	= 	fp_explode_assoc($temp[2]);
-    $this->bool_advised_to_take 	= 		(bool) $temp[3];
-    $this->specified_repeats   	= 	$temp[4];
-    $this->bool_specified_repeat 	= 	(bool) $temp[5];
-    $this->grade   				= 	$temp[6];
+    $this->assigned_to_semester_num =   $temp[1];
+    $this->assigned_to_group_ids_array  =   fp_explode_assoc($temp[2]);
+    $this->bool_advised_to_take   =     (bool) $temp[3];
+    $this->specified_repeats    =   $temp[4];
+    $this->bool_specified_repeat  =   (bool) $temp[5];
+    $this->grade          =   $temp[6];
     $this->set_hours_awarded(0,$temp[7] * 1);  // *1 to force numeric, and trim extra zeros.
-    $this->term_id				= 	$temp[8];
-    $this->advised_hours			=	$temp[9] * 1;
+    $this->term_id        =   $temp[8];
+    $this->advised_hours      = $temp[9] * 1;
 
-    $this->bool_transfer 		= 	(bool) $temp[10];
+    $this->bool_transfer    =   (bool) $temp[10];
 
     // Was this a transfer course?
     if ($this->bool_transfer == true)
@@ -748,11 +735,11 @@ class Course extends stdClass
       $this->course_transfer = $t_course;
     }
 
-    $this->bool_added_course 		= 	(bool) $temp[12];
-    $this->db_advised_courses_id	= 	$temp[13];
-    $this->random_id				= 	$temp[14];
+    $this->bool_added_course    =   (bool) $temp[12];
+    $this->db_advised_courses_id  =   $temp[13];
+    $this->random_id        =   $temp[14];
 
-    //$this->bool_substitution_by_degree_array		= 	fp_explode_assoc($temp[15]);
+    //$this->bool_substitution_by_degree_array    =   fp_explode_assoc($temp[15]);
     $this->set_degree_details_from_data_array(fp_explode_assoc($temp[15]), "bool_substitution");
 
     // Was this a substitution course?
@@ -776,24 +763,24 @@ class Course extends stdClass
        */
     }
 
-    $this->db_substitution_id_array		= 	fp_explode_assoc($temp[17]);
+    $this->db_substitution_id_array   =   fp_explode_assoc($temp[17]);
     
-    $this->min_hours				= 	$temp[18] * 1;
-    $this->max_hours				= 	$temp[19] * 1;
+    $this->min_hours        =   $temp[18] * 1;
+    $this->max_hours        =   $temp[19] * 1;
 
-    //$this->bool_substitution_new_from_split	= 	(bool) $temp[20];
+    //$this->bool_substitution_new_from_split =   (bool) $temp[20];
     $this->set_degree_details_from_data_array(fp_explode_assoc($temp[20]), "bool_substitution_new_from_split");    
     
-    //$this->bool_substitution_split	= 	(bool) $temp[21];
+    //$this->bool_substitution_split  =   (bool) $temp[21];
     $this->set_degree_details_from_data_array(fp_explode_assoc($temp[21]), "bool_substitution_split");
     
     // No longer used.  Using assigned_to_degree_ids instead.
-    //$this->bool_has_been_assigned	= 	(bool) $temp[22];
+    //$this->bool_has_been_assigned =   (bool) $temp[22];
     $throw_away = $temp[22];  // throw-away value.  Can probably just remove entirely.
         
-    $this->display_status	= 	$temp[23];
+    $this->display_status =   $temp[23];
 
-    $this->bool_ghost_hour	= 	(bool) $temp[24];
+    $this->bool_ghost_hour  =   (bool) $temp[24];
 
     $this->assigned_to_degree_ids_array = fp_explode_assoc($temp[25]);
 
@@ -828,9 +815,9 @@ class Course extends stdClass
     // took out: and `catalog_year`='$this->catalog_year'
     // because we don't care what catalog year it comes from...
     $res = $this->db->db_query("SELECT * FROM $table_name
-						WHERE course_id = '?'
-						AND delete_flag = '0' 
-						ORDER BY subject_id, course_num ", $this->course_id);
+            WHERE course_id = '?'
+            AND delete_flag = '0' 
+            ORDER BY subject_id, course_num ", $this->course_id);
     while($cur = $this->db->db_fetch_array($res))
     {
 
@@ -1173,28 +1160,28 @@ class Course extends stdClass
 
 
   
-	/**
-	 * Calculate the quality points for this course's grade and hours.
-	 *
-	 * @param string $grade
-	 * @param int $hours
-	 * @return int
-	 */
-	function get_quality_points($degree_id = 0){
+  /**
+   * Calculate the quality points for this course's grade and hours.
+   *
+   * @param string $grade
+   * @param int $hours
+   * @return int
+   */
+  function get_quality_points($degree_id = 0){
 
-	  $hours = $this->get_hours($degree_id);
-	  $grade = $this->grade;
-	  
-	  $pts = 0;
-		$qpts_grades = array();
-	  
-	  // Let's find out what our quality point grades & values are...
-	  if (isset($GLOBALS["qpts_grades"])) {
-	    // have we already cached this?
-	    $qpts_grades = $GLOBALS["qpts_grades"];
-	  }	
-	  else {
-	    $tlines = explode("\n", variable_get("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0"));
+    $hours = $this->get_hours($degree_id);
+    $grade = $this->grade;
+    
+    $pts = 0;
+    $qpts_grades = array();
+    
+    // Let's find out what our quality point grades & values are...
+    if (isset($GLOBALS["qpts_grades"])) {
+      // have we already cached this?
+      $qpts_grades = $GLOBALS["qpts_grades"];
+    } 
+    else {
+      $tlines = explode("\n", variable_get("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0"));
       foreach ($tlines as $tline) {
         $temp = explode("~", trim($tline));      
         if (trim($temp[0]) != "") {
@@ -1203,18 +1190,18 @@ class Course extends stdClass
       }
     
       $GLOBALS["qpts_grades"] = $qpts_grades;  // save to cache
-	  }
+    }
     
-	  // Okay, find out what the points are by multiplying value * hours...
+    // Okay, find out what the points are by multiplying value * hours...
     
     if (isset($qpts_grades[$grade])) {
-	   $pts = $qpts_grades[$grade] * $hours;
+     $pts = $qpts_grades[$grade] * $hours;
     }
-	  
-		
-		return $pts;
+    
+    
+    return $pts;
 
-	}  
+  }  
   
   
   
@@ -1327,14 +1314,14 @@ class Course extends stdClass
     } 
     else {
       // This is a transfer course.  
-  		
+      
       
       $res = $this->db->db_query("SELECT * FROM
-										transfer_courses a,
-										transfer_institutions b
-										WHERE 
-									   a.transfer_course_id = '?' 
-									   AND a.institution_id = b.institution_id ", $course_id);
+                    transfer_courses a,
+                    transfer_institutions b
+                    WHERE 
+                     a.transfer_course_id = '?' 
+                     AND a.institution_id = b.institution_id ", $course_id);
       $cur = $this->db->db_fetch_array($res);
       $this->subject_id = $cur["subject_id"];
       $this->course_num = $cur["course_num"];      
@@ -1625,10 +1612,10 @@ class Course extends stdClass
       $table_name = "courses";
       if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
       $res = $this->db->db_query("SELECT * FROM $table_name
-      							WHERE course_id = ? 
-      							AND catalog_year = ?
-      							AND delete_flag = 0 
-      							$exclude_line ", $this->course_id, $this->catalog_year);
+                    WHERE course_id = ? 
+                    AND catalog_year = ?
+                    AND delete_flag = 0 
+                    $exclude_line ", $this->course_id, $this->catalog_year);
       $cur = $this->db->db_fetch_array($res);
 
 
@@ -1640,13 +1627,13 @@ class Course extends stdClass
         $table_name = "courses";
         if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
         $res2 = $db->db_query("SELECT * FROM $table_name
-							WHERE course_id = ? 
-							AND subject_id != '' 
-							AND delete_flag = 0 
-							$exclude_line
-							AND catalog_year <= '$setting_current_catalog_year'
-							$cat_line
-							ORDER BY `catalog_year` DESC LIMIT 1", $this->course_id);
+              WHERE course_id = ? 
+              AND subject_id != '' 
+              AND delete_flag = 0 
+              $exclude_line
+              AND catalog_year <= '$setting_current_catalog_year'
+              $cat_line
+              ORDER BY `catalog_year` DESC LIMIT 1", $this->course_id);
         $cur = $db->db_fetch_array($res2);
 
         if ($db->db_num_rows($res2) < 1)
@@ -1659,12 +1646,12 @@ class Course extends stdClass
           $table_name = "courses";
           if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
           $res3 = $db->db_query("SELECT * FROM $table_name
-							WHERE course_id = ? 
-							AND subject_id != '' 
-							AND delete_flag = 0
-							AND catalog_year <= '$setting_current_catalog_year'
-							$cat_line
-							ORDER BY `catalog_year` DESC LIMIT 1", $this->course_id);
+              WHERE course_id = ? 
+              AND subject_id != '' 
+              AND delete_flag = 0
+              AND catalog_year <= '$setting_current_catalog_year'
+              $cat_line
+              ORDER BY `catalog_year` DESC LIMIT 1", $this->course_id);
           $cur = $db->db_fetch_array($res3);
 
         }
@@ -1719,8 +1706,8 @@ class Course extends stdClass
       if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
 
       $res = $this->db->db_query("SELECT * FROM $table_name
-										WHERE course_id = ?
-										AND exclude = 0 ", $this->course_id);
+                    WHERE course_id = ?
+                    AND exclude = 0 ", $this->course_id);
       while($cur = $this->db->db_fetch_array($res))
       {
         $si = $cur["subject_id"];
@@ -1827,7 +1814,7 @@ class Course extends stdClass
     
     
     $res = $this->db->db_query("SELECT * FROM transfer_courses
-									             WHERE transfer_course_id = ? ", $this->course_id);
+                               WHERE transfer_course_id = ? ", $this->course_id);
     $cur = $this->db->db_fetch_array($res);
 
     $this->subject_id = $cur["subject_id"];
@@ -1845,9 +1832,9 @@ class Course extends stdClass
       // Because transfer credit titles may differ from student
       // to student, let's look up the title in the per-student transfer courses table...
       $res = $this->db->db_query("SELECT * FROM student_transfer_courses
-									WHERE student_id = ?
-									AND transfer_course_id = ? 
-									 ", $student_id, $this->course_id);
+                  WHERE student_id = ?
+                  AND transfer_course_id = ? 
+                   ", $student_id, $this->course_id);
       $cur = $this->db->db_fetch_array($res);
       if (trim($cur["student_specific_course_title"]) != "") {
         $this->title = trim($cur["student_specific_course_title"]);
@@ -1889,16 +1876,16 @@ class Course extends stdClass
       
    
       $res2 = $this->db->db_query("SELECT * FROM transfer_eqv_per_student
-            					WHERE student_id = ?	
-            					AND transfer_course_id = ? 
-            					 ", $student_id, $this->course_id);
+                      WHERE student_id = ?  
+                      AND transfer_course_id = ? 
+                       ", $student_id, $this->course_id);
       while($cur2 = $this->db->db_fetch_array($res2))
       {        
 
         if (!in_array($cur2["local_course_id"], $already)) {
           $c = new Course($cur2["local_course_id"]);
           $this->transfer_eqv_text .= "$c->subject_id $c->course_num
-  							(" . $c->get_catalog_hours() . " " . t("hrs") . ") ";
+                (" . $c->get_catalog_hours() . " " . t("hrs") . ") ";
           $already[] = $cur2["local_course_id"];
         }
       }
@@ -2158,8 +2145,8 @@ class Course extends stdClass
     $arr = array(
     "db_advised_courses_id", "random_id",
     "db_substitution_id_array", "db_unassign_transfer_id",
-    "db_exclude", "array_index", "db_group_requirement_id", "array_valid_names",
-    "data_entry_value", "db_group_attributes",
+    "db_exclude", "array_index", "db_group_requirement_id", "db_degree_requirement_id", "array_valid_names",
+    "data_entry_value", "db_group_attributes", "appears_in_semester_nums",
 
     "subject_id", "course_num", "course_id", "requirement_type", "catalog_year",
     "min_hours", "max_hours", "repeat_hours", "bool_outdated_sub",
@@ -2189,7 +2176,7 @@ class Course extends stdClass
     foreach($arr as $var)
     {
       if (isset($this->$var))  // This checks to see if we are using
-      {						// the variable or not.
+      {           // the variable or not.
         $rtn[] = $var;
       } 
     }

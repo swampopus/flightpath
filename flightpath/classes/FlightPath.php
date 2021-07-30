@@ -238,7 +238,7 @@ class FlightPath extends stdClass
    */
   function combine_degree_plans($degree_plans, $student_id, $school_id = 0) {
     
-    //DEV: // return $degree_plans[0];
+    //DEV: return $degree_plans[0];
     
     $new_degree_plan = new DegreePlan();
     $new_degree_plan->school_id = intval($school_id);
@@ -1009,8 +1009,9 @@ class FlightPath extends stdClass
               $new_course->load_course_from_data_string_for_requirement_clone($temp_ds);
               $new_course->min_grade = $course_requirement->min_grade;
 
-              if ($assign_to_semester_num !== -1) {
+              if ($assign_to_semester_num !== -1) {                
                 $new_course->assigned_to_semester_num = $assign_to_semester_num;
+                $new_course->appears_in_semester_nums[] = $assign_to_semester_num;         // for combo-degrees
               }
               
               
@@ -1035,11 +1036,11 @@ class FlightPath extends stdClass
               //$course_requirement->requirement_type = $group->requirement_type;         
             }
             
-            if ($assign_to_semester_num !== -1) {
-              $c->assigned_to_semester_num = $assign_to_semester_num;
+            if ($assign_to_semester_num !== -1) {              
+              $c->assigned_to_semester_num = $assign_to_semester_num;     
+              $c->appears_in_semester_nums[] = $assign_to_semester_num;         // for combo-degrees
             }
-            
-            
+                                    
             // Check what groups it has been assigned to already.
             //$c->assigned_to_group_id = $group_id;
             if ($group_id > 0) {
