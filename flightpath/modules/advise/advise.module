@@ -1705,38 +1705,6 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   );
 
 
-
-/*
-  $rtn .= "<br><br>
-      <div align='right'>
-      " . fp_render_button("Try It Out!", "showUpdate(true);submitForm();") . "       
-   
-      </div>
-      <br><br>
-      <div class='hypo tenpt'>
-       <b>Important Notice:</b> What If displays degree plans
-       from the most recent catalog year ($current_catalog_year-" . ($current_catalog_year + 1) . "), 
-       as any major change would place the student into the 
-       most recent catalog. 
-      </div>";
-
-
-  // Include only certain variables, so we don't overwrite our selection of what_if_major_code.
-  $rtn .= "
-          <input type='hidden' name='load_from_cache' value='no'>
-          <input type='hidden' name='window_mode' value='screen'>
-          <input type='hidden' id='scroll_top'>
-          <input type='hidden' id='perform_action' name='perform_action'>
-          <input type='hidden' id='advising_what_if' name='advising_what_if' value='yes'>
-          <input type='hidden' id='current_student_id' name='current_student_id' value='$current_student_id'>
-          
-          <input type='hidden' id='from_what_if_selection_form' name='from_what_if_selection_form' value='yes'>
-          
-        ";
-
-  $rtn .= "</form>
-      ";  
-  */
   
   $form["current_student_id"] = array(
     "type" => "hidden",
@@ -1793,6 +1761,7 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
   /////////////////////////
   // Make sure they selected appropriate number of required tracks, if any.
   
+  $selected_tracks = 0;  // just used to keep up with how many we are selecting.
   // Begin by going through each track which was selected, and keep track of how many we selected.
   $selected_for = array();
     
@@ -1814,13 +1783,15 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
           // Did the user select an item?  Val's key and value will be identical if so.
           if ($k == $v && $k != "") {
             // YES.  It was selected!
-            $selected_for[$major_code . "__" . $degree_class]++;          
+            $selected_for[$major_code . "__" . $degree_class]++;
+            $selected_tracks++;          
           }
         }
       } // if is_array (val)
       else if (is_string($val) && trim($val) != ""){
         // Not an array-- was a radio list?  So, this was a selection.
-        $selected_for[$major_code . "__" . $degree_class]++;        
+        $selected_for[$major_code . "__" . $degree_class]++;
+        $selected_tracks++;        
       }
       
     }
@@ -1829,7 +1800,7 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
   
   // Okay, now that we know how many were selected, let's make sure that the number falls within
   // our min/max range for those tracks.
-  //foreach ($selected_for as $key => $count) {
+  
   foreach ($form_state["values"] as $key => $val) {
     if (!strstr($key, "L3__sel__")) { continue; }
 
@@ -1874,11 +1845,16 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
     
     
     
-  }
+  } // foreach
   
   
-  
-    
+  $total_selected = count($selected_degrees) + $selected_tracks;  
+  // If this is more than what is allowed to be selected, then show error.
+  $max = intval(variable_get('max_allowed_selections_in_what_if', 5));
+  if ($max === 0) $max = 5;
+  if ($total_selected > $max) {
+    form_error('', t("Sorry, you have exceeded the maximum number of allowed selections for What If.  Please reduce your number of selections and try again."));
+  }  
     
   
   

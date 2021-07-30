@@ -4,6 +4,12 @@ FlightPath 6.x Changelog
 
 2021-07-30
   Fixed bug in Calendar with Upcoming Appointments still not showing "today" and "tomorrow" appointments correctly.  Went with different approach.
+  
+  Added ability to edit semester block numbers when editing a degree.
+
+  Added ability to limit the number of selections on What If.  It defaults to 5.  This is to help keep students from blowing up the server by selecting
+  every degree possible.
+  
 
 2021-07-29
   Fixed deprecated notice.

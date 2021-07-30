@@ -1706,7 +1706,8 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
     
     $form['semester_title_' . $semester->semester_num] = array(
       'type' => 'textfield',
-      'prefix' => "<div style='padding-bottom: 3px; margin-top:20px;'><b>Block number: " . ($semester->semester_num + 1) . "</b> 
+      'prefix' => "<div style='padding-bottom: 3px; margin-top:20px;'><b>" . t("Block number: ") . ($semester->semester_num + 1) . "</b> 
+                                    <a href='javascript:adminEditBlockNumber($semester->semester_num);' title='" . t("Edit block number") . "'><i class='fa fa-pencil'></i></a> 
                     &nbsp; &nbsp;
                     <a href='javascript:adminDeleteSemesterBlock($semester->semester_num);'>Delete?</a>
                     &nbsp; &nbsp; &nbsp; Default Title: <em>$sem_default_title</em></div>",
@@ -2018,7 +2019,8 @@ function admin_edit_degree_form_validate($form, &$form_state) {
   $values = $form_state['values'];
   $perform_action2 = trim($values["perform_action2"]);
   
-      
+  $semester_nums_in_use = array();
+
   // What courses should have their type overwritten as "x"?
   $ignore_courses = csv_to_array(variable_get("ignore_courses_from_hour_counts", ""));
   
@@ -2062,6 +2064,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
     // Only look at the groups...
     $temp = explode("_", $key);
     $semester_num = trim($temp[1]);
+    $semester_nums_in_use[] = $semester_num;
 
     if ($semester_num > $highest_semester_num) {
       $highest_semester_num = $semester_num;
@@ -2156,6 +2159,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
     $temp = explode("_",$perform_action2);
     $group_id = $temp[1];
     $semester_num = $temp[2];
+    $semester_nums_in_use[] = $semester_num;
     $hours = trim($temp[3]);
     $min_hours = $hours;
     if (strstr($hours, "-")) {
@@ -2216,6 +2220,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
     $group_id = $temp[0];
     
     $semester_num = $temp[1];
+    $semester_nums_in_use[] = $semester_num;
 
     if ($semester_num > $highest_semester_num) {
       $highest_semester_num = $semester_num;
@@ -2279,6 +2284,27 @@ function admin_edit_degree_form_validate($form, &$form_state) {
             
   } // foreach groups
          
+  
+  
+  // Are we trying to change a semester block number?
+  if (strstr($perform_action2,"editSemesterBlockNum")) {
+    // Make sure we don't already have this number in existence elsewhere in the degree.
+    $temp = explode("_",$perform_action2);
+    $old_semester_num = $temp[1];
+    $new_semester_num = $temp[2];    
+    
+    if (in_array($new_semester_num, $semester_nums_in_use)) {
+      form_error('', t("<strong>Your work has NOT been saved.</strong> Sorry, but you requested to change block number %old to %new, but block number %new
+                        is already in use.  Please make the appropriate changes and try again.", array("%old" => ($old_semester_num + 1), "%new" => ($new_semester_num + 1))));
+    }    
+    
+  }  // editSemesterBlockNum
+    
+  
+  
+  
+  
+  
   
 } // edit_degree_form_validate
 
@@ -2656,13 +2682,38 @@ function admin_edit_degree_form_submit($form, $form_state) {
   } // if perform_action2 == addGroup
 
 
+  // Are we trying to change a semester block number?
+  if (strstr($perform_action2,"editSemesterBlockNum")) {
+    // Make sure we don't already have this number in existence elsewhere in the degree.
+    $temp = explode("_",$perform_action2);
+    $old_semester_num = $temp[1];
+    $new_semester_num = $temp[2];    
+    
+    // Since we have already passed validation, we should be able to simply update the draft table.
+    db_query("UPDATE draft_degree_requirements SET semester_num = ? 
+              WHERE degree_id = ? 
+              AND semester_num = ?", array($new_semester_num, $degree_id, $old_semester_num));    
+    
+    // We also need to adjust the semester_title_$semester_num value in the $values, so the title moves over correctly.
+    $temp = $values["semester_title_$old_semester_num"];
+    unset($values["semester_title_$old_semester_num"]);
+    $values["semester_title_$new_semester_num"] = $temp;
+    
+  }  // editSemesterBlockNum
+
+
+
+
   // Make the semester_titles_csv...
-  for ($semester_num = 0; $semester_num <= $highest_semester_num; $semester_num++) {
+  for ($semester_num = 0; $semester_num <= 99; $semester_num++) {
       
     if ($semester_num > 99) break;  // some problem.  Give up.  Don't try to go past 99 semesters!
     
     $semester_titles_csv .= trim(@$values["semester_title_$semester_num"]) . ",";
   }
+
+
+  
 
   // Before we UPDATE, also grab the degree title, degree_type,
   // and exclude value, etc....
@@ -2743,6 +2794,16 @@ function admin_edit_degree_form_submit($form, $form_state) {
 
 
 
+
+
+    
+
+
+
+
+
+
+
   fp_add_message("Degree updated succesfully.");
   $button_msg = urlencode("Degree updated successfully at " . date("H:i:s"));
   $bool_scroll = $bool_button_msg = true;
@@ -2756,7 +2817,6 @@ function admin_edit_degree_form_submit($form, $form_state) {
     $_SESSION["scroll_top"] = 0;
     
   }
-
 
 
   ///////////////////////////////////////////////////////

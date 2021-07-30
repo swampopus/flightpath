@@ -1141,6 +1141,14 @@ function system_school_data_form() {
   );                                
 
   
+  $form['max_allowed_selections_in_what_if'] = array(
+    'type' => 'textfield',
+    'label' => t("Maximum number of allowed selections in What If:"),
+    'value' => variable_get('max_allowed_selections_in_what_if', 5),
+    'description' => t("Selecting multiple degrees and options for What If can significantly impact server performance.  It is recommended
+                      to limit the number of selections to no more than 5.  If you are unsure what to put here, enter '5'."),
+  );
+  
   $form["show_level_3_on_what_if_selection"] = array(
     "type" => "select",
     "label" => t("Show level-3 degree options on What If selection screen?"),

@@ -27,6 +27,36 @@ function adminHideDECats() {
 }
 
 
+
+function adminEditBlockNumber(semester_num) {
+  var x = prompt("\nPlease enter the new number you wish to change block #" + (semester_num + 1) + " to.\n\nEnter only a whole number (1 - 99), no decimals or text.");
+  if (!x) return false;
+  
+  x = x.trim();
+  
+  if (isNaN(x) || x.includes(".") || x*1 <= 0 || x*1 > 99) {
+    alert('Sorry, you did not enter a valid number.  Please enter only a whole number (1 - 99), no decimals or text.');
+    return false;
+  }
+  
+  // Check the FlightPath.settings var for existing blocks we may have.
+  if (FlightPath.settings["semester_" + (x - 1)] == (x-1)) {
+    alert("Sorry!\n\nThe semester block number you entered is already in use.\n\nPlease try again.");
+    return false;    
+  }  
+  
+  x = x -1;  // since the user entered it one ahead, let's reduce by one.
+  
+  // If we are here, we can proceed with the eding block num .
+  document.getElementById("element-perform_action2").value="editSemesterBlockNum_" + (semester_num) + "_" + x;
+  
+  // Submit the form.
+  adminSubmitDegreeForm2();
+  
+  
+}
+
+
 function adminDeleteSemesterBlock(semester_num) {
   var x = confirm("Are you sure you wish to delete block " + (semester_num + 1) + "?  This action cannot be undone.");
   if (!x) return false;
@@ -43,7 +73,7 @@ function adminDeleteSemesterBlock(semester_num) {
 
 
 function adminAddNewSemesterBlock() {
-  var x = prompt("Please enter the number of the new Semester Block below.\n\nThis must be a positive number, which has not already been used\n\nMust be between 1 and 99:");
+  var x = prompt("\nPlease enter the number of the new Semester Block below.\n\nThis must be a positive number, which has not already been used\n\nMust be between 1 and 99:");
   x = x * 1;
   if (x == null) {
     // They pressed cancel, just return.
