@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2021-07-30
+  Fixed bug in Calendar with Upcoming Appointments still not showing "today" and "tomorrow" appointments correctly.  Went with different approach.
+
 2021-07-29
   Fixed deprecated notice.
   
@@ -8,7 +12,7 @@ FlightPath 6.x Changelog
   
   Added "spinner" attribute to button for confirm appointment and save.
   
-  Added ICS attachmen to notifications for student-initiated appointments.
+  Added ICS attachment to notifications for student-initiated appointments.
   
   Removed dev code for external calendars.
   

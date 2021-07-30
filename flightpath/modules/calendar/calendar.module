@@ -177,7 +177,8 @@ function calendar_menu() {
 /**
  * This tab displays the upcoming appointments for the user.  It's meant to be a tab on their Calendar screen.
  */
-function calendar_display_upcoming_appointments() {
+/* 
+function z__calendar_display_upcoming_appointments() {
   global $user;
 
   fp_add_css(fp_get_module_path("system") . "/css/style.css");
@@ -275,11 +276,120 @@ function calendar_display_upcoming_appointments() {
   return fp_render_content($render);
     
   
+} // z__calendar_display_upcoming_appointments
+*/
+
+
+function calendar_display_upcoming_appointments() {
+  global $user;
+
+  fp_add_css(fp_get_module_path("system") . "/css/style.css");
+  
+  
+  $render = array();
+  $render['#id'] = 'calendar_display_upcoming_appointments';
+  
+  
+  // Build up the "appoinments" HTML
+  
+  $render['mark_top'] = array(
+    'value' => "<h4>" . t("Your upcoming appointments/agenda over the next few weeks:") . "</h4><hr>",
+  );
+    
+  $user_tz = fp_get_user_timezone();
+  
+  
+  $bool_is_empty = TRUE;
+  $c = 0;  
+
+    
+  $start_ts = convert_time(time());
+  $end_ts = strtotime("NOW + 21 DAYS");
+
+
+  $start_time = date("Y-m-d H:i:s", $start_ts);
+  $end_time = date("Y-m-d H:i:s", $end_ts);
+  
+      
+  $upcoming = calendar_get_upcoming_appointments_for_cwid($user->cwid, $start_time, $end_time);
+  
+  $today = date('Y-m-d', $start_ts);
+  $tomorrow = date('Y-m-d', $start_ts + (24 * 60 * 60));  // 24 hours later
+  $next_few_weeks_ts = $start_ts + (24 * 60 * 60) + 1;
+  
+  $current_range = "";
+    
+  foreach ($upcoming as $details) {      
+    $thedate = format_date(convert_time($details['utc_start_ts']), 'long_no_year');
+    
+    // Figure out of this is TODAY, TOMORROW, or over the next few weeks.
+    $ymd = date('Y-m-d', convert_time($details['utc_start_ts']));
+  
+    if ($ymd == $today && $current_range != "today") {
+      $render['mark_today_header'] = array(
+        'value' => "<h4>" . t("Today") . "</h4>",
+      );
+      $current_range = "today";
+    }          
+          
+    if ($ymd == $tomorrow && $current_range != "tomorrow") {
+      $render['mark_tomorrow_header'] = array(
+        'value' => "<h4>" . t("Tomorrow") . "</h4>",        
+      );
+      $current_range = "tomorrow";
+    }          
+          
+    if (convert_time($details['utc_start_ts']) >= $next_few_weeks_ts && $current_range != "next_few") {
+      $render['mark_next_few_header'] = array(
+        'value' => "<h4>" . t("Next few weeks") . "</h4>",
+      );
+      $current_range = "next_few";
+    }          
+
+
+                    
+    $use_name = $details['faculty_name'];
+    if ($user->is_faculty) {
+      $use_name = $details['student_name'];
+    }            
+    
+    $bool_is_empty = FALSE;
+                      
+    $msg = t("You have an appointment with @fn on @td.", array("@fn" => $use_name, "@td" => $thedate));
+    
+    
+    $render['appointment_' . $c] = array(
+      'value' => "<div class='feed-item'>
+                              <div class='feed-item-icon'><i class='fa fa-calendar'></i></div>
+                              <div class='feed-item-title'>$use_name</div>
+                              <div class='feed-item-desc'>$msg</div>
+                       </div>",
+    );
+    
+    $c++;
+    
+  } // foreach
+  
+  
+  if ($bool_is_empty) {
+    $render['no_appointments'] = array(
+      'value' => "<div class='empty'>
+                    <p>" . t("You have no upcoming appointments within the next few weeks.") . "</p> 
+                  </div>",
+    );
+     
+  }
+  
+      
+    
+            
+    
+  
+  
+  return fp_render_content($render);
+    
+  
 } // calendar_display_upcoming_appointments
-
-
-
-
 
 
 
