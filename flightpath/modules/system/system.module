@@ -1036,12 +1036,27 @@ function system_popup_report_contact_form_submit($form, $form_state) {
  * This form is for the school-data, like subject code descriptions, colleges, etc.
  *
  */
-function system_school_data_form() {
+function system_school_data_form($school_id = 0) {
   $form = array();
   $m = 0;
   
+  $fs = "";  // The field name suffix.  We will add this to the end of all of our field names.  If this is the default school, leave blank.
+  if (function_exists('schools_menu')) {
+    $school_name = schools_get_school_name_for_id($school_id);
+    fp_set_title(t("Configure @school school settings", array('@school' => $school_name)));
+    if ($school_id !== 0) {
+      $fs = "~~school_" . $school_id;
+    }
+  }
   
-  $form["contact_email_address"] = array(
+  
+  $form['school_id'] = array(
+    'type' => 'hidden',
+    'value' => $school_id,
+  );
+  
+  
+  $form["contact_email_address" . $fs] = array(
     "type" => "textfield",
     "label" => t("Contact email address:"),
     "value" => variable_get("contact_email_address", ""),
@@ -1051,7 +1066,7 @@ function system_school_data_form() {
   );
   
 
-  $form["school_initials"] = array(
+  $form["school_initials" . $fs] = array(
     "type" => "textfield",
     "size" => 20,
     "label" => t("School initials:"),
@@ -1060,7 +1075,7 @@ function system_school_data_form() {
   );
                   
 
-  $form["earliest_catalog_year"] = array(
+  $form["earliest_catalog_year" . $fs] = array(
     "type" => "textfield",
     "size" => 20,
     "label" => t("Earliest catalog year:"),
@@ -1073,7 +1088,7 @@ function system_school_data_form() {
   );
   
 
-  $form["graduate_level_course_num"] = array(
+  $form["graduate_level_course_num" . $fs] = array(
     "type" => "textfield",
     "size" => 20,
     "label" => t("Graduate level course num:"),
@@ -1083,7 +1098,7 @@ function system_school_data_form() {
   );
   
 
-  $form["allowed_student_ranks"] = array(
+  $form["allowed_student_ranks" . $fs] = array(
     "type" => "textfield",
     "label" => t("Allowed student ranks (CSV):"),
     "value" => variable_get("allowed_student_ranks", "FR, SO, JR, SR"),
@@ -1094,7 +1109,7 @@ function system_school_data_form() {
   );
 
 
-  $form["rank_descriptions"] = array(
+  $form["rank_descriptions" . $fs] = array(
     "type" => "textarea",
     "label" => t("Rank descriptions:"),
     "rows" => 8,
@@ -1110,7 +1125,7 @@ function system_school_data_form() {
 
 
 
-  $form["not_allowed_student_message"] = array(
+  $form["not_allowed_student_message" . $fs] = array(
     "type" => "textarea",
     "label" => t("Not allowed student message:"),
     "value" => variable_get("not_allowed_student_message", ""),
@@ -1119,7 +1134,7 @@ function system_school_data_form() {
   );
     
 
-  $form["hiding_grades_message"] = array(
+  $form["hiding_grades_message" . $fs] = array(
     "type" => "textarea",
     "label" => t("Hiding grades message:"),
     "value" => variable_get("hiding_grades_message", ""),
@@ -1129,7 +1144,7 @@ function system_school_data_form() {
   );
   
   
-  $form["show_group_titles_on_view"] = array(
+  $form["show_group_titles_on_view" . $fs] = array(
     "type" => "select",
     "label" => t("Show group titles on View and What If screens?"),
     "hide_please_select" => TRUE,
@@ -1141,7 +1156,7 @@ function system_school_data_form() {
   );                                
 
   
-  $form['max_allowed_selections_in_what_if'] = array(
+  $form['max_allowed_selections_in_what_if' . $fs] = array(
     'type' => 'textfield',
     'label' => t("Maximum number of allowed selections in What If:"),
     'value' => variable_get('max_allowed_selections_in_what_if', 5),
@@ -1149,7 +1164,7 @@ function system_school_data_form() {
                       to limit the number of selections to no more than 5.  If you are unsure what to put here, enter '5'."),
   );
   
-  $form["show_level_3_on_what_if_selection"] = array(
+  $form["show_level_3_on_what_if_selection" . $fs] = array(
     "type" => "select",
     "label" => t("Show level-3 degree options on What If selection screen?"),
     "hide_please_select" => TRUE,
@@ -1163,7 +1178,7 @@ function system_school_data_form() {
   
   
    
-  $form["course_repeat_policy"] = array(
+  $form["course_repeat_policy" . $fs] = array(
     "type" => "select",
     "label" => t("Course repeat policy:"),
     "options" => array("most_recent_exclude_previous" => t("most recent, exclude previous attempts"),
@@ -1181,7 +1196,7 @@ function system_school_data_form() {
   );
   
   
-  $form["what_if_catalog_year"] = array(
+  $form["what_if_catalog_year" . $fs] = array(
     "type" => "select",
     "label" => t("What If mode default catalog year:"),
     "options" => array("current" => t("Current catalog year only"),
@@ -1197,7 +1212,7 @@ function system_school_data_form() {
   
   
   
-  $form["ignore_courses_from_hour_counts"] = array(
+  $form["ignore_courses_from_hour_counts" . $fs] = array(
     "type" => "textfield",
     "label" => t("Ignore courses from hour counts (CSV):"),
     "value" => variable_get("ignore_courses_from_hour_counts", ""),
@@ -1211,7 +1226,7 @@ function system_school_data_form() {
 
 
 
-  $form["term_id_structure"] = array(
+  $form["term_id_structure" . $fs] = array(
     "type" => "textarea",
     "label" => t("Structure of term ID's:"),
     "value" => variable_get("term_id_structure", ""),
@@ -1233,12 +1248,13 @@ function system_school_data_form() {
   $subjects = "";
   $query = "SELECT DISTINCT b.subject_id, a.title, a.college FROM draft_courses b LEFT JOIN subjects a
               ON (a.subject_id = b.subject_id)
-              WHERE exclude = 0              
+              WHERE exclude = 0
+              AND b.school_id = ?              
               ORDER BY b.subject_id
               ";
    
   
-  $result = db_query($query);
+  $result = db_query($query, $school_id);
   while ($cur = db_fetch_array($result))
   {      
     
@@ -1250,7 +1266,7 @@ function system_school_data_form() {
   }
     
   
-  $form["subjects"] = array(
+  $form["subjects" . $fs] = array(
     "type" => "textarea",
     "label" => t("Subjects:"),
     "value" => $subjects,
@@ -1269,12 +1285,12 @@ function system_school_data_form() {
   
   // Load the colleges...
   $colleges = "";
-  $res = db_query("SELECT * FROM colleges ORDER BY college_code");
+  $res = db_query("SELECT * FROM colleges WHERE school_id = ? ORDER BY college_code", array($school_id));
   while ($cur = db_fetch_array($res)) {
     $colleges .= $cur["college_code"] . " ~ " . $cur["title"] . "\n";
   }
   
-  $form["colleges"] = array(
+  $form["colleges" . $fs] = array(
     "type" => "textarea",
     "label" => t("Colleges:"),
     "value" => $colleges,
@@ -1291,7 +1307,7 @@ function system_school_data_form() {
   // Load the degree_college data....
   $degree_college = "";
   
-  $res = db_query("SELECT DISTINCT(major_code) FROM draft_degrees ORDER BY major_code");
+  $res = db_query("SELECT DISTINCT(major_code) FROM draft_degrees WHERE school_id = ? ORDER BY major_code", array($school_id));
   while ($cur = db_fetch_array($res)) {
     $major_code = $cur["major_code"];
     
@@ -1305,7 +1321,7 @@ function system_school_data_form() {
   }
   
 
-  $form["degree_college"] = array(
+  $form["degree_college" . $fs] = array(
     "type" => "textarea",
     "label" => t("Degree Colleges:"),
     "value" => $degree_college,
@@ -1325,7 +1341,7 @@ function system_school_data_form() {
   
   // How many decimal places allowed in substitutions?
   
-  $form["sub_hours_decimals_allowed"] = array(
+  $form["sub_hours_decimals_allowed" . $fs] = array(
     "type" => "select",
     "label" => t("Substitution hours decimal places allowed:"),
     "options" => array(1 => t("1 (ex: 1.1 hrs)"), 2 => t("2 (ex: 1.15 hrs)"), 3 => t("3 (ex: 1.155 hrs)"), 4 => t("4 (ex: 1.1556 hrs)")),
@@ -1341,7 +1357,7 @@ function system_school_data_form() {
   
   
   // Auto-correct course titles?
-  $form["autocapitalize_course_titles"] = array(
+  $form["autocapitalize_course_titles" . $fs] = array(
     "type" => "select",
     "label" => t("Auto-capitalize course titles?"),
     "options" => array("yes" => "Yes", "no" => "No"),
@@ -1357,7 +1373,7 @@ function system_school_data_form() {
   
 
   // Auto-correct institution names?
-  $form["autocapitalize_institution_names"] = array(
+  $form["autocapitalize_institution_names" . $fs] = array(
     "type" => "select",
     "label" => t("Auto-capitalize institution names?"),
     "options" => array("yes" => "Yes", "no" => "No"),
@@ -1376,7 +1392,7 @@ function system_school_data_form() {
 
   
   // Only allow ghost subs for fellow ghost hours?
-  $form["restrict_ghost_subs_to_ghost_hours"] = array(
+  $form["restrict_ghost_subs_to_ghost_hours" . $fs] = array(
     "type" => "select",
     "label" => t("Restrict ghost substitutions to courses with zero hours only?"),
     "options" => array("yes" => "Yes", "no" => "No"),
@@ -1392,7 +1408,7 @@ function system_school_data_form() {
   );
 
   
-  $form["initial_student_course_sort_policy"] = array(
+  $form["initial_student_course_sort_policy" . $fs] = array(
     "type" => "select",
     "label" => t("Initial student course sort policy:"),
     "options" => array("alpha" => "Alphabetical sort [default]", "grade" => "Best grade first"),
@@ -1404,7 +1420,7 @@ function system_school_data_form() {
                         Any student grades not defined below will be considered the lowest possible grade."),
   );
   
-  $form["grade_order"] = array(
+  $form["grade_order" . $fs] = array(
     "type" => "textfield",
     "label" => t("Grade order (CSV):"),
     "value" => variable_get("grade_order", ""),
@@ -1416,7 +1432,7 @@ function system_school_data_form() {
   
   
 
-  $form["retake_grades"] = array(
+  $form["retake_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Retake grades (CSV):"),
     "value" => variable_get("retake_grades", ""),
@@ -1424,7 +1440,7 @@ function system_school_data_form() {
                 retake this course. They did not earn credit.' Ex: F,W,I"),    
   );
          
-  $form["withdrew_grades"] = array(
+  $form["withdrew_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Withdrew grades (CSV):"),
     "value" => variable_get("withdrew_grades", "W"),
@@ -1433,7 +1449,7 @@ function system_school_data_form() {
                 what to enter here, just enter 'W'."),    
   );  
   
-  $form["enrolled_grades"] = array(
+  $form["enrolled_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Enrolled grades (CSV):"),
     "value" => variable_get("enrolled_grades", ""),
@@ -1441,31 +1457,8 @@ function system_school_data_form() {
                 currently enrolled in this course.' Ex: E,AMID,BMID "),    
   );
 
-  /*
-  $form["b_or_better"] = array(
-    "type" => "textfield",
-    "label" => t("B or better grades (CSV):"),
-    "value" => variable_get("b_or_better", ""),
-    "description" => t("List grades, separated by comma, which are either a B or better."),    
-  );
-
-  $form["c_or_better"] = array(
-    "type" => "textfield",
-    "label" => t("C or better grades (CSV):"),
-    "value" => variable_get("c_or_better", ""),
-    "description" => t("List grades, separated by comma, which are either a C or better."),    
-  );
-
-  $form["d_or_better"] = array(
-    "type" => "textfield",
-    "label" => t("D or better grades (CSV):"),
-    "value" => variable_get("d_or_better", ""),
-    "description" => t("List grades, separated by comma, which are either a D or better."),    
-  );
-   * 
-   */
     
-  $form["minimum_substitutable_grade"] = array(
+  $form["minimum_substitutable_grade" . $fs] = array(
     "type" => "textfield",
     "size" => 3,
     "label" => t("Minimum substitutable grade:"),
@@ -1475,7 +1468,7 @@ function system_school_data_form() {
                       new substitutions, not old ones.  If unsure, enter D."),    
   );
   
-  $form["group_min_grades"] = array(
+  $form["group_min_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Group requirement min grades (CSV):"),
     "value" => variable_get("group_min_grades", "D,C,B,A"),
@@ -1485,7 +1478,7 @@ function system_school_data_form() {
 
   
 
-  $form["calculate_cumulative_hours_and_gpa"] = array(
+  $form["calculate_cumulative_hours_and_gpa" . $fs] = array(
     "label" => t("Calculate student cumulative hours and GPA?"),
     "type" => "checkbox",
     "value" => variable_get("calculate_cumulative_hours_and_gpa", FALSE),
@@ -1496,7 +1489,7 @@ function system_school_data_form() {
   
   
   
-  $form['numeric_to_letter_grades'] = array(
+  $form['numeric_to_letter_grades' . $fs] = array(
     "label" => t("Numeric to Letter Grades:"),
     "type" => "textarea",
     "value" => variable_get("numeric_to_letter_grades", ""),
@@ -1514,7 +1507,7 @@ function system_school_data_form() {
   );
   
   
-  $form["quality_points_grades"] = array(
+  $form["quality_points_grades" . $fs] = array(
     "label" => t("Quality points and grades:"),
     "type" => "textarea",
     "value" => variable_get("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0"),
@@ -1530,7 +1523,7 @@ function system_school_data_form() {
   );
   
   
-  $form["requirement_types"] = array(
+  $form["requirement_types" . $fs] = array(
     "label" => t("Requirement types and codes:"),
     "type" => "textarea",
     "value" => variable_get("requirement_types", "g ~ General Requirements\nc ~ Core Requirements\ne ~ Electives\nm ~ Major Requirements\ns ~ Supporting Requirements\nx ~ Additional Requirements"),
@@ -1564,7 +1557,7 @@ function system_school_data_form() {
   // Check to make sure the gd extension is loaded, since that will be required to display
   // the pie charts...
   if (!extension_loaded('gd') && !extension_loaded('gd2')) {
-    $form["mark" . $m++] = array(
+    $form["mark_no_gd_library"] = array(
       "value" => "<p class='hypo'><b>" . t("Note: it appears your web server does not have the 'GD' library
                                 enabled for PHP.  This is required to make the pie charts show up
                                 correctly.  Contact your server administrator about enabling the 'GD'
@@ -1573,7 +1566,7 @@ function system_school_data_form() {
   }
   
   
-  $form["pie_chart_config"] = array(
+  $form["pie_chart_config" . $fs] = array(
     "label" => t("Pie chart configuration:"),
     "type" => "textarea",
     "value" => variable_get("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress"),
@@ -1591,7 +1584,7 @@ function system_school_data_form() {
   );
 
   
-  $form["pie_chart_gpa"] = array(
+  $form["pie_chart_gpa" . $fs] = array(
     "label" => t("Should pie charts show GPAs?"),
     "type" => "select",
     "options" => array("no" => "No", "yes" => "Yes"),
@@ -1604,7 +1597,7 @@ function system_school_data_form() {
   
   
   
-  $form["developmentals_title"] = array(
+  $form["developmentals_title" . $fs] = array(
     "label" => t("Developmentals semester block title:"),
     "type" => "textfield",
     "value" => variable_get("developmentals_title", t("Developmental Requirements")),
@@ -1614,7 +1607,7 @@ function system_school_data_form() {
                         unsure what to enter, use 'Developmental Requirements'."),
   );
   
-  $form["developmentals_notice"] = array(
+  $form["developmentals_notice" . $fs] = array(
     "label" => t("Developmentals notice text:"),
     "type" => "textarea",
     "value" => variable_get("developmentals_notice", t("According to our records, you are required to complete the course(s) listed above. For some transfer students, your record may not be complete. If you have any questions, please ask your advisor.")),
@@ -1626,7 +1619,7 @@ function system_school_data_form() {
 
   
 
-  $form["graduate_level_codes"] = array(
+  $form["graduate_level_codes" . $fs] = array(
     "type" => "textfield",
     "label" => t("Graduate course level codes (CSV):"),
     "value" => variable_get("graduate_level_codes", "GR"),
@@ -1636,7 +1629,7 @@ function system_school_data_form() {
   
   
   
-  $form["disallow_graduate_credits"] = array(
+  $form["disallow_graduate_credits" . $fs] = array(
     "type" => "select",
     "label" => t("Disallow automatic use of graduate credits?"),
     "options" => array("yes" => "Yes", "no" => "No"),
@@ -1649,7 +1642,7 @@ function system_school_data_form() {
   );
   
 
-  $form["display_graduate_credits_block"] = array(
+  $form["display_graduate_credits_block" . $fs] = array(
     "type" => "select",
     "label" => t("Display graduate credits in their own semester block?"),
     "options" => array("yes" => "Yes", "no" => "No"),
@@ -1661,7 +1654,7 @@ function system_school_data_form() {
   );
   
   
-  $form["graduate_credits_block_title"] = array(
+  $form["graduate_credits_block_title" . $fs] = array(
     "label" => t("Graduate Credits block title:"),
     "type" => "textfield",
     "value" => variable_get("graduate_credits_block_title", t("Graduate Credits")),
@@ -1672,7 +1665,7 @@ function system_school_data_form() {
   );
   
 
-  $form["graduate_credits_block_notice"] = array(
+  $form["graduate_credits_block_notice" . $fs] = array(
     "label" => t("Graduate Credits block notice text:"),
     "type" => "textarea",
     "value" => variable_get("graduate_credits_block_notice", t("These courses may not be used for undergraduate credit.")),
@@ -1682,7 +1675,7 @@ function system_school_data_form() {
   );
   
   
-  $form["degree_classifications_level_1"] = array(
+  $form["degree_classifications_level_1" . $fs] = array(
     "label" => t("Degree Classifications - Level 1:"),
     "type" => "textarea",
     "rows" => 3,
@@ -1697,7 +1690,7 @@ function system_school_data_form() {
                                use:  MAJOR ~ Major"),                        
   );
 
-  $form["degree_classifications_level_2"] = array(
+  $form["degree_classifications_level_2" . $fs] = array(
     "label" => t("Degree Classifications - Level 2:"),
     "type" => "textarea",
     "rows" => 3,
@@ -1713,7 +1706,7 @@ function system_school_data_form() {
                               MINOR ~ Minor"),                        
   );
     
-  $form["degree_classifications_level_3"] = array(
+  $form["degree_classifications_level_3" . $fs] = array(
     "label" => t("Degree Classifications - Level 3 (Add-on degrees, attached to other degrees):"),
     "type" => "textarea",
     "rows" => 3,
@@ -1730,7 +1723,7 @@ function system_school_data_form() {
   );
       
   
-  $form["exclude_majors_from_appears_in_counts"] = array(
+  $form["exclude_majors_from_appears_in_counts" . $fs] = array(
     "label" => t("Exclude major codes from \"appears in\" counts (CSV):"),
     "type" => "textfield",
     "maxlength" => 1000,
@@ -1744,7 +1737,7 @@ function system_school_data_form() {
   
   
 
-  $form["group_full_at_min_hours"] = array(
+  $form["group_full_at_min_hours" . $fs] = array(
     "label" => t("Groups should be considered 'full' when min hours are met or exceeded?"),
     "type" => "select",
     "options" => array("yes" => "Yes", "no" => "No"),
@@ -1758,7 +1751,7 @@ function system_school_data_form() {
   );  
   
 
-  $form["remove_advised_when_course_taken"] = array(
+  $form["remove_advised_when_course_taken" . $fs] = array(
     "label" => t("Remove an advised course when a student enrolls in it (or completes it), for the same term?"),
     "type" => "select",
     "options" => array("yes" => "Yes", "no" => "No"),
@@ -1774,7 +1767,7 @@ function system_school_data_form() {
   );  
 
 
-  $form["prevent_course_assignment_to_both_degree_and_track"] = array(
+  $form["prevent_course_assignment_to_both_degree_and_track" . $fs] = array(
     "label" => t("Prevent a course assignment to both a degree and its track(s)?"),
     "type" => "select",
     "options" => array("yes" => "Yes", "no" => "No"),
@@ -1786,7 +1779,7 @@ function system_school_data_form() {
   );  
 
   
-  $form["group_list_course_show_repeat_information"] = array(
+  $form["group_list_course_show_repeat_information" . $fs] = array(
     "label" => t("Display 'Repeat Information' for a course in a group's course list?"),
     "type" => "select",
     "options" => array("yes" => "Yes", "no" => "No"),
@@ -1799,7 +1792,7 @@ function system_school_data_form() {
   );  
 
 
-  $form["degree_requirement_sort_policy"] = array(
+  $form["degree_requirement_sort_policy" . $fs] = array(
     "type" => "select",
     "label" => t("Degree requirement sort policy:"),
     "options" => array("alpha" => "Alphabetical sort (default)", "database" => "As entered in database [beta]"),
@@ -1812,7 +1805,7 @@ function system_school_data_form() {
   
 
   
-  $form["group_requirement_sort_policy"] = array(
+  $form["group_requirement_sort_policy" . $fs] = array(
     "type" => "select",
     "label" => t("Group requirement sort policy:"),
     "options" => array("alpha" => "Alphabetical sort (default)", "database" => "As entered in database [beta]"),
@@ -1870,55 +1863,60 @@ function system_get_exclude_degree_ids_from_appears_in_counts() {
  */
 function system_school_data_form_validate($form, &$form_state) {
 
-  
+  $school_id = intval($form_state['values']['school_id']);
+  $fs = "";
+  if ($school_id !== 0) {
+    $fs = "~~school_" . $school_id;
+  }
   // Subjects...
-  db_query("TRUNCATE TABLE subjects");
+  db_query("DELETE FROM subjects WHERE school_id = ?", $school_id);
+  
      
-  $subjects = trim($form_state["values"]["subjects"]);
+  $subjects = trim($form_state["values"]["subjects" . $fs]);
   $lines = explode("\n", $subjects);
   foreach ($lines as $line) {
     $temp = explode("~", $line);
     
-    db_query("INSERT INTO subjects (subject_id, college, title)
-              VALUES ('?', '?', '?') ", strtoupper(trim($temp[0])), strtoupper(trim($temp[1])), trim($temp[2]));
+    db_query("INSERT INTO subjects (subject_id, college, title, school_id)
+              VALUES (?, ?, ?, ?) ", strtoupper(trim($temp[0])), strtoupper(trim($temp[1])), trim($temp[2]), $school_id);
     
   }
   // Remove the data from our form_state, so it isn't saved twice
-  unset($form_state["values"]["subjects"]);
+  unset($form_state["values"]["subjects" . $fs]);
   
 
   
   // Colleges...
-  db_query("TRUNCATE TABLE colleges");
+  db_query("DELETE FROM colleges WHERE school_id = ?", $school_id);
      
-  $contents = trim($form_state["values"]["colleges"]);
+  $contents = trim($form_state["values"]["colleges" . $fs]);
   $lines = explode("\n", $contents);
   foreach ($lines as $line) {
     $temp = explode("~", $line);
     
-    db_query("INSERT INTO colleges (college_code, title)
-              VALUES ('?', '?') ", strtoupper(trim($temp[0])), trim($temp[1]));
+    db_query("INSERT INTO colleges (college_code, title, school_id)
+              VALUES (?, ?, ?) ", strtoupper(trim($temp[0])), trim($temp[1]), $school_id);
     
   }  
   // Remove the data from our form_state, so it isn't saved twice
-  unset($form_state["values"]["colleges"]);
+  unset($form_state["values"]["colleges" . $fs]);
 
   
 
   // Degree College...
-  db_query("TRUNCATE TABLE degree_college");
+  db_query("DELETE FROM degree_college WHERE school_id = ?", $school_id);
      
-  $contents = trim($form_state["values"]["degree_college"]);
+  $contents = trim($form_state["values"]["degree_college" . $fs]);
   $lines = explode("\n", $contents);
   foreach ($lines as $line) {
     $temp = explode("~", $line);
     
-    db_query("INSERT INTO degree_college (major_code, college_code)
-              VALUES ('?', '?') ", strtoupper(trim($temp[0])), strtoupper(trim($temp[1])));
+    db_query("INSERT INTO degree_college (major_code, college_code, school_id)
+              VALUES (?, ?, ?) ", strtoupper(trim($temp[0])), strtoupper(trim($temp[1])), $school_id);
     
   }  
   // Remove the data from our form_state, so it isn't saved twice
-  unset($form_state["values"]["degree_college"]);
+  unset($form_state["values"]["degree_college" . $fs]);
   
   
   

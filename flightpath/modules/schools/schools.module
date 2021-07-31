@@ -173,7 +173,7 @@ function schools_menu() {
   $items = array();
   
   $items['admin/config/schools'] = array(  
-    'title' => 'Configure Schools',
+    'title' => 'Administer Schools',
     'description' => 'Administer and define the Schools at your institution',
     'page_callback' => 'fp_render_form',
     'page_arguments' => array('schools_administer_schools_form'),
@@ -193,6 +193,42 @@ function schools_menu() {
     ),
     
   );
+  
+  
+  // For each school we have defined, let's create a menu item for configuring
+  // school-specific settings.
+  $defs = schools_get_school_definitions(TRUE);
+  $weight = 0;
+  foreach ($defs as $cur) {
+      
+    $school_name = $cur['name'];
+    $school_id = intval($cur['school_id']);
+    if ($school_id === 0) $school_name = t("Default");
+    
+    $items["admin/config/school-data/$school_id"] = array(
+      "title" => $school_name,
+      "page_callback" => "fp_render_form",
+      "page_arguments" => array("system_school_data_form", "system_settings", 3),
+      "access_arguments" => array("de_can_administer_school_data"),  // TODO: make sure we can administer THIS school data.  Add new perms.
+      "page_settings" => array(
+        "page_hide_report_error" => TRUE,
+        "menu_icon" => fp_get_module_path('system') . "/icons/cog_edit.png",
+        "menu_links" => array(         
+          0 => array(
+            "text" => "Admin Console",
+            "path" => "admin-tools/admin",
+            "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+          ),
+        ),
+      ),    
+      "type" => MENU_TYPE_SUB_TAB,
+      "tab_family" => "config_school_settings",
+      "tab_parent" => "admin-tools/admin",
+      "weight" => $weight,    
+    );      
+  }
+  
+  $weight = $weight + 10;
   
   
   
@@ -241,10 +277,30 @@ function schools_menu_alter(&$items) {
       
     }
     
+    
+    // We want to make this a default tab, because we are going to 
+    // have our other schools have their own tabs as well.
+    if ($path == 'admin/config/school-data') {      
+      $items[$path]['type'] = MENU_TYPE_NORMAL_ITEM;      
+      // Make it go to the schools switchboard, which will take us to the "default" school.
+      $items[$path]['page_callback'] = 'schools_config_school_settings_switchboard';
+      unset($items[$path]['page_arguments']);
+    }
+    
 
 
   } // foreach
 } // hook_menu_alter
+
+
+/**
+ * This function, used in hook_menu_alter, will send is to the default school settings page.
+ */
+function schools_config_school_settings_switchboard() {
+  // TODO: perhaps look at last visited and send there instead?  For now, go to default school.    
+  fp_goto("admin/config/school-data/0");  
+}
+
 
 
 
@@ -1111,9 +1167,13 @@ function schools_administer_schools_form_submit($form, $form_state) {
       fp_add_message(t("The school has been edited successfully."));    
     }
     
-  }  
+  } // if edit
   
-}
+  // Rebuild the menu cache, since other modules have tabs and/other menu items based on schools
+  menu_rebuild_cache(FALSE);
+  
+  
+} // _submit
 
 
 function schools_get_school_id_from_school_code($code) {

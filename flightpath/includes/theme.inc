@@ -559,7 +559,7 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
   foreach ($menu_items as $item) {
     if ($item['path'] === $menu_root) continue;   // don't need to duplicate the menu root link itself
     
-    if ($item["type"] != MENU_TYPE_CALLBACK) {
+    if ($item["type"] != MENU_TYPE_CALLBACK && $item['type'] != MENU_TYPE_SUB_TAB) {
       $rtn .= fp_render_menu_item($item);
       $is_empty = false;
     }

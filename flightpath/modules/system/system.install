@@ -232,7 +232,7 @@ db_query("CREATE TABLE `degree_college` (
   `major_code` varchar(100) NOT NULL DEFAULT '',
   `college_code` varchar(10) DEFAULT '',
   `school_id` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`major_code`),
+  PRIMARY KEY (`major_code`,`school_id`),
   KEY `college_code` (`college_code`),
   KEY `school_id` (`school_id`)
 );  "); 
