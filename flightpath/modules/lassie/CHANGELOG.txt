@@ -1,2 +1,0 @@
-CHANGELOG for Lassie module
-===========================

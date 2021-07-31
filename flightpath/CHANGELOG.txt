@@ -1,6 +1,9 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-07-31
+  Removed extra files from modules that used to be contrib, but are now in core (ex: CHANGELOG files)
+  
 
 2021-07-30
   Fixed bug in Calendar with Upcoming Appointments still not showing "today" and "tomorrow" appointments correctly.  Went with different approach.
