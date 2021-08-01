@@ -3019,7 +3019,7 @@ function draw_menu_items($menu_array) {
     $school_id = db_get_school_id_from_student_id($student_id);
      
     // Should we do this at all?  We will look at the "autocapitalize_institution_names" setting.
-    $auto = $GLOBALS["fp_system_settings"]["autocapitalize_institution_names"];
+    $auto = variable_get_for_school("autocapitalize_institution_names", 'yes', $school_id);
     if ($auto == "no") {
       // Nope!  Just return.      
       return $str;
@@ -4984,8 +4984,11 @@ function draw_menu_items($menu_array) {
    */
   function display_popup_substitute($course_id = 0, $group_id, $semester_num, $hours_avail = "", $req_by_degree_id = 0)
   {
+    global $current_student_id;
     // This lets the user make a substitution for a course.
     $pC = "";
+
+    $school_id = db_get_school_id_from_student_id($current_student_id);
 
     // Bring in advise's css...
     fp_add_css(fp_get_module_path("advise") . "/css/advise.css");
@@ -5114,7 +5117,7 @@ function draw_menu_items($menu_array) {
         }
         // If we are supposed to restrict ghost for ghost, but the course does NOT
         // have a ghost hour, and this $c course does, then disable it
-        if (variable_get("restrict_ghost_subs_to_ghost_hours", "yes") == "yes"
+        if (variable_get_for_school("restrict_ghost_subs_to_ghost_hours", "yes", $school_id) == "yes"
             && $course->bool_ghost_hour != TRUE
             && $c->bool_ghost_hour == TRUE) {
               

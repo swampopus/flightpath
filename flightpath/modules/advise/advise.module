@@ -1101,10 +1101,12 @@ function advise_display_popup_substitute_selected() {
   global $current_student_id, $fp, $screen;
   $rtn = "";
   
+  $school_id = db_get_school_id_from_student_id($current_student_id);
+  
   advise_init_screen();
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
   
-  $sub_decimals_allowed = variable_get("sub_hours_decimals_allowed", 2);
+  $sub_decimals_allowed = variable_get_for_school("sub_hours_decimals_allowed", 2, $school_id);
   // Add our allowed substitution decimals as a js setting for later use.
   fp_add_js(array("subDecimalsAllowed" => $sub_decimals_allowed), "setting");
   

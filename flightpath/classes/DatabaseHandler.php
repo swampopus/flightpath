@@ -975,7 +975,16 @@ class DatabaseHandler extends stdClass
   }
   
   function get_school_id_for_student_id($cwid) {
-    return intval(db_result(db_query("SELECT school_id FROM users WHERE cwid = ? AND is_student = 1", array($cwid))));
+      
+    // Save to cache for quick lookup
+    if (isset($GLOBALS['cache_school_id_for_student_id'][$cwid])) {
+      return $GLOBALS['cache_school_id_for_student_id'][$cwid];
+    }  
+    
+    $rtn = intval(db_result(db_query("SELECT school_id FROM users WHERE cwid = ? AND is_student = 1", array($cwid))));
+    $GLOBALS['cache_school_id_for_student_id'][$cwid] = $rtn;
+    
+    return $rtn;
   }
   
   

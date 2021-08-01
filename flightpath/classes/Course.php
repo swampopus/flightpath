@@ -1368,7 +1368,7 @@ class Course extends stdClass
     }
         
     // Should we do this at all?  We will look at the "autocapitalize_course_titles" setting.
-    $auto = $GLOBALS["fp_system_settings"]["autocapitalize_course_titles"];
+    $auto = variable_get_for_school("autocapitalize_course_titles", 'yes', $this->school_id);
     if ($auto == "no") {                    
       // Nope!  Just return.
       $this->title = $str;

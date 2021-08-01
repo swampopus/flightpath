@@ -1225,7 +1225,7 @@ function system_school_data_form($school_id = 0) {
     $subjects .= $subject_id . " ~ " . $college . " ~ " . $title . "\n";
   }
     
-  // TODO: search and replace in flightpath
+  
   $form["subjects" . $fs] = array(
     "type" => "textarea",
     "label" => t("Subjects:"),
@@ -1250,7 +1250,7 @@ function system_school_data_form($school_id = 0) {
     $colleges .= $cur["college_code"] . " ~ " . $cur["title"] . "\n";
   }
   
-  // TODO: search and replace in flightpath
+  
   $form["colleges" . $fs] = array(
     "type" => "textarea",
     "label" => t("Colleges:"),
@@ -1273,7 +1273,7 @@ function system_school_data_form($school_id = 0) {
     $major_code = $cur["major_code"];
     
     // Is there an assigned college already?
-    $res2 = db_query("SELECT college_code FROM degree_college WHERE major_code = '?' ", $major_code); 
+    $res2 = db_query("SELECT college_code FROM degree_college WHERE major_code = ? AND school_id = ? ", $major_code, $school_id); 
     $cur2 = db_fetch_array($res2);
     $college_code = $cur2["college_code"];
     
@@ -1281,7 +1281,7 @@ function system_school_data_form($school_id = 0) {
      
   }
   
-  // TODO: search and replace in flightpath
+  
   $form["degree_college" . $fs] = array(
     "type" => "textarea",
     "label" => t("Degree Colleges:"),
@@ -1301,7 +1301,6 @@ function system_school_data_form($school_id = 0) {
   
   
   // How many decimal places allowed in substitutions?
-  // TODO: search and replace in flightpath
   $form["sub_hours_decimals_allowed" . $fs] = array(
     "type" => "select",
     "label" => t("Substitution hours decimal places allowed:"),
@@ -1318,7 +1317,6 @@ function system_school_data_form($school_id = 0) {
   
   
   // Auto-correct course titles?
-  // TODO: search and replace in flightpath
   $form["autocapitalize_course_titles" . $fs] = array(
     "type" => "select",
     "label" => t("Auto-capitalize course titles?"),
@@ -1334,8 +1332,7 @@ function system_school_data_form($school_id = 0) {
   );
   
 
-  // Auto-correct institution names?
-  // TODO: search and replace in flightpath
+  // Auto-correct institution names?  
   $form["autocapitalize_institution_names" . $fs] = array(
     "type" => "select",
     "label" => t("Auto-capitalize institution names?"),
@@ -1355,7 +1352,6 @@ function system_school_data_form($school_id = 0) {
 
   
   // Only allow ghost subs for fellow ghost hours?
-  // TODO: search and replace in flightpath
   $form["restrict_ghost_subs_to_ghost_hours" . $fs] = array(
     "type" => "select",
     "label" => t("Restrict ghost substitutions to courses with zero hours only?"),
