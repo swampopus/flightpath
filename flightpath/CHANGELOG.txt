@@ -4,6 +4,7 @@ FlightPath 6.x Changelog
 2021-08-01
   Deprecating fp_get_system_settings() function.  It is now better served by simple use of variable_get().
   
+  Changed school setting "what_if_catalog_year" to "what_if_catalog_year_mode" to disambiguate from advising variables.
   
 
 2021-07-31

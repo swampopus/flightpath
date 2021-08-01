@@ -478,6 +478,7 @@ function prereqs_get_prereq_warnings_for_course(Course $course, Student $student
   
   $rtn = array();
   
+  $school_id = $course->school_id;
   
   $bool_use_term_abbreviation = (variable_get("prereqs_use_term_desc_abbr_in_popup", "yes") == "yes");
   
@@ -507,7 +508,7 @@ function prereqs_get_prereq_warnings_for_course(Course $course, Student $student
     if (!in_array($advising_term_id, $rotation_schedule)) {
       // The course is NOT listed for this advising term!  Therefor, it SHOULD have a warning!
       
-        $rtn["avail"]["plain_text"] = t($warning_msg, array("@term" => htmlentities(get_term_description($advising_term_id, $bool_use_term_abbreviation), ENT_QUOTES)));
+        $rtn["avail"]["plain_text"] = t($warning_msg, array("@term" => htmlentities(get_term_description($advising_term_id, $bool_use_term_abbreviation, $school_id), ENT_QUOTES)));
        
     } // !in_array advising_term_id in rotation_schedule
       
@@ -808,6 +809,8 @@ function prereqs_content_alter(&$render, $content_id) {
     $course = @$render["#course"]["value"];
     if (!is_object($course)) return; // some kind of problem...
     
+    $school_id = $course->school_id;
+    
     // What is the current advising term?
     //fpm($GLOBALS["fp_advising"]);
     $advising_term_id = $GLOBALS["fp_advising"]["advising_term_id"];
@@ -830,7 +833,7 @@ function prereqs_content_alter(&$render, $content_id) {
       $x = "";
       foreach ($rotation_schedule as $term_id)
       {
-        $x .= " <span class='term-rot-avail'>" . htmlentities(get_term_description($term_id, $bool_use_term_abbreviation), ENT_QUOTES) . "</span><span class='comma'>,</span>";
+        $x .= " <span class='term-rot-avail'>" . htmlentities(get_term_description($term_id, $bool_use_term_abbreviation, $school_id), ENT_QUOTES) . "</span><span class='comma'>,</span>";
       }
       $x = rtrim($x, ',');
       

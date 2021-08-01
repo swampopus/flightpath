@@ -1197,10 +1197,10 @@ function fp_get_degree_classification_details($degree_class = "MAJOR", $bool_ret
  * Return an array version of the term_id_structure field from the admin settings
  *
  */
-function get_term_structures() {
+function get_term_structures($school_id = 0) {
   $rtn = array();
 
-  $temp = $GLOBALS["fp_system_settings"]["term_id_structure"];
+  $temp = variable_get_for_school("term_id_structure", "", $school_id);
   $structures = explode("\n", $temp);
     
   foreach ($structures as $structure) {      
@@ -1743,13 +1743,13 @@ function base_path() {
 /**
  * Convert a term ID into a description.  Ex: 20095 = Spring of 2009.
  */
-function get_term_description($term_id, $bool_abbreviate = false) {
+function get_term_description($term_id, $bool_abbreviate = FALSE, $school_id = 0) {
     // Describe the term in plain english, for displays.
     // Ex:  "Fall of 2002."
     $rtn = "";
 
     // See if any modules would like to act on the term_id before we proceed.
-    invoke_hook("alter_term_id_prior_to_description", array(&$term_id, &$bool_abbreviate));
+    invoke_hook("alter_term_id_prior_to_description", array(&$term_id, &$bool_abbreviate, $school_id));
 
 
     if (strstr($term_id, "1111"))
@@ -1774,7 +1774,7 @@ function get_term_description($term_id, $bool_abbreviate = false) {
     // [Y4]60, Spring, Spring of [Y4], Spr '[Y2]
     // [Y4]40, Fall, Fall of [Y4-1], Fall '[Y2-1]
     
-    $temp = @$GLOBALS["fp_system_settings"]["term_id_structure"];
+    $temp = @variable_get_for_school("term_id_structure", '', $school_id);
     $structures = explode("\n", $temp);
     
     foreach ($structures as $structure) {      
@@ -2453,33 +2453,6 @@ function user_has_permission($permission = "", $account = NULL) {
 }
 
 
-/**
- * This looks at the global termIDStructure setting and returns back
- * an array of only term suffixes (like 40, 60, mm, etc).
- *
- */
-function get_term_id_suffixes() {
-  
-  $rtn = array();  
-  
-  $temp = $GLOBALS["fp_system_settings"]["term_id_structure"];
-  $structures = explode("\n", $temp);
-    
-  foreach ($structures as $structure) {      
-    $tokens = explode(",", $structure);
-    $term_def = trim($tokens[0]);
-    
-    // Get rid of the replacement pattern.
-    // Looks like:  [Y4]40.  We want the 40.
-    // Simply explode on "]"
-    $temp = explode("]", $term_def);
-    $rtn[] = trim($temp[1]);    
-  
-  }
-
-  return $rtn;
-  
-}
 
 
 /**

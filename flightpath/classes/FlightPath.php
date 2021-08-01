@@ -650,6 +650,11 @@ class FlightPath extends stdClass
 
     $count = 0;
 
+    $school_id = 0;
+    if ($student) {
+      $school_id = $student->school_id;      
+    }
+
     if ($group == null)
     {
       $group = new Group();
@@ -669,7 +674,7 @@ class FlightPath extends stdClass
     $graduate_level_codes_array = csv_to_array(variable_get("graduate_level_codes", "GR"));   
         
     // Get the course repeat policy.
-    $course_repeat_policy = variable_get("course_repeat_policy", "most_recent_exclude_previous");
+    $course_repeat_policy = variable_get_for_school("course_repeat_policy", "most_recent_exclude_previous", $school_id);
     // Set the $bool_mark_repeats_exclude variable based on the course_repeat_policy.
     $bool_mark_repeats_exclude = ($course_repeat_policy == "most_recent_exclude_previous" || $course_repeat_policy == "best_grade_exclude_others");
     
@@ -1099,19 +1104,21 @@ class FlightPath extends stdClass
    * @param unknown_type $subject_id
    * @return unknown
    */
-  function get_subject_title($subject_id)
+  function get_subject_title($subject_id, $school_id = 0)
   {
     // From the subject_id, get the title.
     // Example: COSC = Computer Science.
   
     $res = $this->db->db_query("SELECT title FROM subjects
-              WHERE subject_id = '?' LIMIT 1 ", $subject_id);
+              WHERE subject_id = ? 
+              AND school_id = ?
+              LIMIT 1 ", $subject_id, $school_id);
     $cur = $this->db->db_fetch_array($res);
     return trim($cur["title"]);
 
   }
 
-
+ 
 
   function get_all_courses_in_catalog_year($catalog_year = "2006", $bool_load_descriptive_data = false, $limit_start = 0, $limit_size = 0, $school_id = 0)
   {

@@ -1944,7 +1944,7 @@ class Course extends stdClass
   function get_term_description($bool_abbreviate = FALSE)
   {
     // Let's use the built-in FP function
-    return get_term_description($this->term_id, $bool_abbreviate);
+    return get_term_description($this->term_id, $bool_abbreviate, $this->school_id);
   }
 
   /**

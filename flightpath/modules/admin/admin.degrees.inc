@@ -978,390 +978,6 @@ function admin_degrees_list_filter_form_submit($form, $form_state) {
 
 
 
-function z___admin_handle_edit_degree_submit() {
-
-  $de_catalog_year = $_REQUEST["de_catalog_year"];
-  $db = get_global_database_handler();
-
-  // What courses should have their type overwritten as "x"?
-  $ignore_courses = csv_to_array(variable_get("ignore_courses_from_hour_counts", ""));
-
-  
-  // This will UPDATE a degree in the system with the courses
-  // and groups that the user selected.
-  $perform_action2 = trim($_POST["perform_action2"]);
-
-  if (strstr($perform_action2, "delGroup")) {
-    $temp = explode("_",$perform_action2);
-    $del_group = new Group();
-    $del_group->bool_use_draft = true;
-    $del_group->group_id = $temp[1];
-    $del_group->assigned_to_semester_num = $temp[2];
-
-  }
-
-
-  $major_code = trim($_POST["major_code"]);
-  if ($major_code == ""){ die("Fatal error:  major_code not found.");}
-
-  // Since we are making a change to the draft table(s), let's add a row
-  // to draft instructions.
-  $db->add_draft_instruction("-");
-
-
-
-  // Let's assemble the track selection config values into one string.  We need to loop through all of the POST
-  // values, looking for each type of track.
-  $db_track_selection_config = "";
-  $degree_classes = fp_get_degree_classifications();
-  foreach ($degree_classes["levels"] as $level => $details) {
-    if (intval($level) != 3) continue;  // we only care about level 3...
-    foreach ($degree_classes["levels"][$level] as $machine_name => $title) {
-      // Got the machine name, now let's see if we have any values for
-      // the track selections...
-      $min_tracks = @intval($_POST["tsc_{$machine_name}_min_tracks"]);
-      $max_tracks = @intval($_POST["tsc_{$machine_name}_max_tracks"]);
-      $default_tracks = @trim($_POST["tsc_{$machine_name}_default_tracks"]);
-      
-      $db_track_selection_config .= $machine_name . "~" . $min_tracks . "~" . $max_tracks . "~" . $default_tracks . "\n";   
-    }
-  }
-
-
-
-  $degree_id = "";
-  // First things first, if this degree already exists in this
-  // catalog year, then we need to delete it first.
-  if ($degree_id = $db->get_degree_id($major_code, $de_catalog_year, true)) {
-    $degree = new DegreePlan($degree_id, null, false, false, true);
-    $degree->load_descriptive_data();
-
-    // Delete from degree_requirements WHERE this degree_id exists.
-    $res = db_query("DELETE FROM draft_degree_requirements
-                  WHERE degree_id = '?' ", $degree_id);
-
-    // Are we trying to DELETE this degree?  If so, keep deleting!
-    if ($perform_action2 == "delete_degree" && user_has_permission("can_delete_data_entry")) {
-      $res = db_query("DELETE FROM draft_degrees
-                  WHERE  degree_id = '?' ", $degree_id);
-
-      // Also need to get rid of the track, if there is one for this
-      // degree.
-      $res = db_query("DELETE FROM draft_degree_tracks
-                  WHERE major_code = '$degree->major_code' 
-                  AND track_code = '$degree->track_code'
-                  AND catalog_year = '?' LIMIT 1", $de_catalog_year);
-
-      // Okay, we have deleted everything.  We need to go back to
-      // just the list of degrees.
-      //display_edit_degrees("<font color='green'><b>The degree $major_code ($de_catalog_year) has been deleted.</b></font>");
-      //die;
-      
-      fp_add_message("The degree $major_code ($de_catalog_year) has been deleted.");
-      fp_goto("admin/degrees", "de_catalog_year=$de_catalog_year");
-      return; 
-      
-    }
-
-
-  } 
-  else {
-    // We need to generate a new degreeID for this major_code and catalog_year,
-    // because one does not already exist!
-    if (!$degree_id = $db->request_new_degree_id()) {
-      die ("Error.  Could not create new degreeID.");
-    }
-  }
-
-  // Save the entire post to the log.
-
-  $errors = "";
-  $semester_titles_csv = "";
-  $highest_semester_num = 0;   // What is the largest semester_num in the system?
-  // Okay, now get the various courses...
-  for ($semester_num = 0; $semester_num < 50; $semester_num++)
-  {
-    // Assuming no more than 50 semesters.
-    $courses = trim(@$_POST["courses_$semester_num"]);
-    if ($courses == "") {
-      continue;
-    }
-
-    if ($semester_num > $highest_semester_num) {
-      $highest_semester_num = $semester_num;
-    }
-
-    $course_rows = explode("\n",$courses);
-    for ($t = 0; $t < count($course_rows); $t++) {
-      $line = trim($course_rows[$t]);
-      if ($line == "") {
-        continue;
-      }
-      // Take out extra whitespace between tokens.
-      $line = str_replace("   ", " ", $line);
-      $line = str_replace("  ", " ", $line);
-      $line = str_replace("  ", " ", $line);
-      $line = str_replace("  ", " ", $line);
-
-      $tokens = explode(" ", $line);
-      $subject_id = $tokens[0];
-      $course_num = $tokens[1];
-      $requirement_type = strtolower(@$tokens[2]);
-
-      if ($requirement_type == "") { 
-        // major type by default.
-        $requirement_type = "m";
-      }
-
-      // If this course is in our ignore list, override it's type
-      // to be 'x'
-      if (in_array("$subject_id $course_num", $ignore_courses)) {
-        $requirement_type = "x";
-      }
-      
-      
-      $min_grade = strtoupper(@$tokens[3]);
-
-      if (strstr($requirement_type, "(")) {
-        // This means there was no requirement_type specified, so it's "m",
-        // and a min_grade was found in its place.
-        $min_grade = strtoupper($requirement_type);
-        $requirement_type = "m";
-      }
-
-      $min_grade = str_replace("(","",$min_grade);
-      $min_grade = str_replace(")","",$min_grade);
-
-      /////////////////////////////////////////////
-      // Okay, we now have enough information to insert the course.
-      // Find out what the course_id is.
-      if ($course_id = $db->get_course_id($subject_id, $course_num, "", true))  // don't care about catalog year.
-      {
-        $query = "INSERT INTO draft_degree_requirements
-                    (degree_id, semester_num, course_id, course_min_grade, course_requirement_type, data_entry_value)
-                    values (?,?,?,?,?,?) ";
-        $res = db_query($query, $degree_id, $semester_num, $course_id, $min_grade, $requirement_type, "$subject_id~$course_num");
-        //debug_c_t($query);
-      } else {
-        // The course_id could not be found!
-        $errors .= "<br><span style='color:red;'><b>Course Not Found!</b>
-              In Block " . ($semester_num+1) . ", you specified the course
-              <b>$subject_id $course_num</b> as a requirement, but this course
-              could not be found.
-              It was removed from that block.
-              Are you sure you typed it correctly?  Please go to this
-              semester, check your spelling, and add the course again.</span>";
-
-      }
-
-    }
-
-
-  }
-
-  // Get the groups....
-  foreach($_POST as $key => $value) {
-    if (!strstr($key, "group_")) {
-      continue;
-    }
-    // Only look at the groups...
-    $temp = explode("_", $value);
-    
-        
-    $group_id = $temp[0];
-    
-    $semester_num = $temp[1];
-    
-    $hours = $temp[2];
-    $min_hours = $hours;
-    
-    if (strstr($hours, "-")) {
-      // Hours has a min hour value specified.  let's grab it.
-      $tt = explode("-", $hours);
-      $min_hours = $tt[0];
-      $hours = $tt[1];
-    }    
-    
-    $type = $temp[3];
-    $min_grade = trim($temp[4]);
-
-    if ($semester_num > $highest_semester_num) {
-      $highest_semester_num = $semester_num;
-    }
-
-
-    // Do not add if we are supposed to be deleting this group!
-    if (isset($del_group) && is_object($del_group)) {
-      if ($del_group->group_id == $group_id && $del_group->assigned_to_semester_num == $semester_num) {
-        continue;
-      }
-    }
-
-    $adding_group = new Group($group_id);
-    
-    // If this group is already saved in this degree elsewhere, and it has a different type or min_grade,
-    // then we must display a warning message to the user.
-    $res = db_query("SELECT * FROM draft_degree_requirements
-                     WHERE degree_id = '?'
-                     AND group_id = '?'
-                     AND (group_min_grade <> '?' OR group_requirement_type <> '?')", $degree_id, $group_id, $min_grade, $type);
-    while ($cur = db_fetch_array($res)) {
-      $errors .= "<br><span style='color:red;'><b>Group type or min grade mismatch!</b>
-                  In Block " . ($semester_num + 1) . ", you specified the group <em>" . $adding_group->title . "</em> ($adding_group->group_name) with a min grade of \"<em>$min_grade</em>\"
-                  and a requirement type of \"<em>$type</em>\".  However, the group was previously specified in this degree plan in Block " . ($cur["semester_num"] + 1) . "
-                  with a different requirement type and/or min grade requirement.  FlightPath will not perform calculations correctly for courses assigned to this group.
-                  You should either set the duplicate occurances of the group to the same type/min grade, or create a new group to handle these alternate requirements.</span>";
-    }
-    
-    
-    
-    
-    // We now have enough information to insert this group.
-    //debugCT("group: $group_id $semester_num $hours $type");
-    $query = "INSERT INTO draft_degree_requirements
-                    (degree_id, semester_num, group_id,
-                    group_requirement_type, group_hours_required, group_min_hours_allowed, group_min_grade)
-                    values (?,?,?,?,?,?,?) ";
-    $res = db_query($query, $degree_id, $semester_num, $group_id, $type, $hours, $min_hours, $min_grade);
-
-
-  }
-
-
-  // Was there a group added or deleted?
-  if (strstr($perform_action2,"addGroup")) {
-    $temp = explode("_",$perform_action2);
-    $group_id = $temp[1];
-    $semester_num = $temp[2];
-    $hours = trim($temp[3]);
-    $min_hours = $hours;
-    if (strstr($hours, "-")) {
-      // Hours has a min hour value specified.  let's grab it.
-      $tt = explode("-", $hours);
-      $min_hours = $tt[0];
-      $hours = $tt[1];
-    }    
-    
-    
-    $type = $temp[4];
-    $min_grade = trim($temp[5]);
-    
-    
-    
-    $adding_group = new Group($group_id);
-    
-    // If this group is already saved in this degree elsewhere, and it has a different type or min_grade,
-    // then we must display a warning message to the user.
-    $res = db_query("SELECT * FROM draft_degree_requirements
-                     WHERE degree_id = '?'
-                     AND group_id = '?'
-                     AND (group_min_grade <> '?' OR group_requirement_type <> '?')", $degree_id, $group_id, $min_grade, $type);
-    while ($cur = db_fetch_array($res)) {
-      $errors .= "<br><span style='color:red;'><b>Group type or min grade mismatch!</b>
-                  In Block " . ($semester_num + 1) . ", you specified the group <em>" . $adding_group->title . "</em> ($adding_group->group_name) with a min grade of \"<em>$min_grade</em>\"
-                  and a requirement type of \"<em>$type</em>\".  However, the group was previously specified in this degree plan in Block " . ($cur["semester_num"] + 1) . "
-                  with a different requirement type and/or min grade requirement.  FlightPath will not perform calculations correctly for courses assigned to this group.
-                  You should either set the duplicate occurances of the group to the same type/min grade, or create a new group to handle these alternate requirements.</span>";
-    }
-    
-    
-    
-    
-    $query = "INSERT INTO draft_degree_requirements
-                    (degree_id,semester_num,group_id,
-                    group_requirement_type,group_hours_required,group_min_hours_allowed,group_min_grade)
-                    VALUES (?,?,?,?,?,?,?) ";
-    $res = db_query($query, $degree_id, $semester_num, $group_id, $type, $hours, $min_hours, $min_grade);
-
-  }
-
-  // Make the semesterTitlesCSV...
-  for ($semester_num = 0; $semester_num <= $highest_semester_num; $semester_num++) {
-      
-    if ($semester_num > 99) break;  // some problem.  Give up.  Don't try to go past 99 semesters!
-    
-    $semester_titles_csv .= trim(@$_POST["semester_title_$semester_num"]) . ",";
-  }
-
-  // Before we UPDATE, also grab the degree title, degree_type,
-  // and exclude value, etc....
-  $degree_title = trim($_POST["title"]);
-  $degree_type = trim($_POST["degree_type"]);
-  $degree_class = trim($_POST["degree_class"]);
-  $degree_level = strtoupper(trim($_POST["degree_level"]));
-  $exclude = trim($_POST["exclude"]);
-  $allow_dynamic = trim($_POST["allow_dynamic"]);
-  $advising_weight = intval($_POST["advising_weight"]);
-  $override_degree_hours = trim($_POST["override_degree_hours"]);
-  $public_note = trim($_POST["public_note"]);
-  $min_tracks = intval($_POST["min_tracks"]);
-  $max_tracks = intval($_POST["max_tracks"]);
-  $default_tracks = trim($_POST["default_tracks"]);
-  
-  $res = db_query("UPDATE draft_degrees
-              SET semester_titles_csv = ?,
-                  title = ?,
-                  degree_type = ?,
-                  degree_class = ?,
-                  degree_level = ?,
-                  exclude = ?,
-                  allow_dynamic = ?,
-                  advising_weight = ?,
-                  override_degree_hours = ?,
-                  track_selection_config = ?,
-                  public_note = ?
-              WHERE degree_id = ? ",
-                $semester_titles_csv, $degree_title, $degree_type, $degree_class, $degree_level, $exclude, $allow_dynamic, $advising_weight, $override_degree_hours, 
-                $db_track_selection_config, $public_note, $degree_id);
-
-  ////  Was there a track title/description?  If so, UPDATE that in the tracks
-  // table...
-  if (strstr($major_code, "_"))  {
-    // There was a track. Update track description.
-    $temp = explode("_",$major_code);
-    $major = trim($temp[0]);
-    // major might now have a | at the end.  If so, take it out.
-    if (substr($major, strlen($major)-1, 1) == "|") {
-      $major = str_replace("|","",$major);
-    }
-
-
-    $track = trim($temp[1]);
-    $track_description = trim($_POST["track_description"]);
-    $track_title = trim($_POST["track_title"]);
-    //debugCT($track_description);
-    $res = db_query("UPDATE draft_degree_tracks
-                SET `track_description`='?',
-                `track_title`='?'
-                WHERE `track_code`='?'
-                AND `major_code`='?' 
-                AND `catalog_year`='?' ", $track_description, $track_title, $track, $major, $de_catalog_year);
-  }
-
-
-
-
-  //$msg = "<font color='green' size='4'>Degree updated successfully at " . get_current_time() . ".</font>";
-  fp_add_message("Degree updated succesfully.");
-  $button_msg = urlencode("Degree updated successfully at " . date("H:i:s"));
-  $bool_scroll = $bool_button_msg = true;
-  if ($errors != "")
-  {
-    fp_add_message("ERRORS/WARNINGS: $errors");
-    $bool_scroll = $bool_button_msg = false;
-
-    $button_msg = urlencode("The degree plan was saved, but an error or warning has occured.  Please see error message at the top of the page.");
-    $_REQUEST["scroll_top"] = 0;
-    
-  }
-
-
-  fp_goto("admin/degrees/edit-degree", "de_catalog_year=$de_catalog_year&major_code=$major_code&scroll_top=" . $_REQUEST["scroll_top"] . "&button_msg=" . $button_msg);
-  return;    
-    
-}
-
-
 
 /**
  * Meant to replace the old-fashioned display_edit_degree function...
@@ -1958,18 +1574,19 @@ function admin_edit_degree_form_validate($form, &$form_state) {
   
   $semester_nums_in_use = array();
 
+  $school_id = 0;
+  if (isset($values['schools_school'])) { // A school was set from the schools module.
+    $school_id = intval($values['schools_school']);  // Use our NEW school_id for validating.
+  }
+
   // What courses should have their type overwritten as "x"?
-  $ignore_courses = csv_to_array(variable_get("ignore_courses_from_hour_counts", ""));
+  $ignore_courses = csv_to_array(variable_get_for_school("ignore_courses_from_hour_counts", "", $school_id));
   
   
   // One of the things we want to do is make sure that the courses & groups specified actually belong to the school_id for this degree.
   $de_catalog_year = $values["de_catalog_year"];
   $db = get_global_database_handler();
     
-  $school_id = 0;
-  if (isset($values['schools_school'])) { // A school was set from the schools module.
-    $school_id = intval($values['schools_school']);  // Use our NEW school_id for validating.
-  }
   $degree_id = @intval($form_state['values']['degree_id']);
       
   // Each degree_id is unique to the catalog year, so we should be good with just the id here.  
@@ -2260,9 +1877,6 @@ function admin_edit_degree_form_submit($form, $form_state) {
   $de_catalog_year = $values["de_catalog_year"];
   $db = get_global_database_handler();
 
-  // What courses should have their type overwritten as "x"?
-  $ignore_courses = csv_to_array(variable_get("ignore_courses_from_hour_counts", ""));
-
   
   // This will UPDATE a degree in the system with the courses
   // and groups that the user selected.
@@ -2359,6 +1973,13 @@ function admin_edit_degree_form_submit($form, $form_state) {
       die ("Error.  Could not create new degree_id.");
     }
   } // ELSE
+
+
+
+  // What courses should have their type overwritten as "x"?
+  $ignore_courses = csv_to_array(variable_get_for_school("ignore_courses_from_hour_counts", "", $school_id));
+
+
 
 
   ///////////////////////////////////////

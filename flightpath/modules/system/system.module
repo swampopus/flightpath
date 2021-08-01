@@ -1091,7 +1091,7 @@ function system_school_data_form($school_id = 0) {
   
 
     
-  // TODO: search and replace in flightpath
+  
   $form["hiding_grades_message" . $fs] = array(
     "type" => "textarea",
     "label" => t("Hiding grades message:"),
@@ -1101,7 +1101,7 @@ function system_school_data_form($school_id = 0) {
                 this functionality, you can leave this blank."),    
   );
   
-  // TODO: search and replace in flightpath
+  
   $form["show_group_titles_on_view" . $fs] = array(
     "type" => "select",
     "label" => t("Show group titles on View and What If screens?"),
@@ -1113,7 +1113,7 @@ function system_school_data_form($school_id = 0) {
                         If unsure what to select, select 'No'."), 
   );                                
 
-  // TODO: search and replace in flightpath
+  
   $form['max_allowed_selections_in_what_if' . $fs] = array(
     'type' => 'textfield',
     'label' => t("Maximum number of allowed selections in What If:"),
@@ -1122,7 +1122,7 @@ function system_school_data_form($school_id = 0) {
                       to limit the number of selections to no more than 5.  If you are unsure what to put here, enter '5'."),
   );
   
-  // TODO: search and replace in flightpath
+  
   $form["show_level_3_on_what_if_selection" . $fs] = array(
     "type" => "select",
     "label" => t("Show level-3 degree options on What If selection screen?"),
@@ -1136,7 +1136,7 @@ function system_school_data_form($school_id = 0) {
   );                                
   
   
-  // TODO: search and replace in flightpath 
+   
   $form["course_repeat_policy" . $fs] = array(
     "type" => "select",
     "label" => t("Course repeat policy:"),
@@ -1155,14 +1155,14 @@ function system_school_data_form($school_id = 0) {
   );
   
   
-  // TODO: search and replace in flightpath
-  $form["what_if_catalog_year" . $fs] = array(
+  
+  $form["what_if_catalog_year_mode" . $fs] = array(
     "type" => "select",
     "label" => t("What If mode default catalog year:"),
     "options" => array("current" => t("Current catalog year only"),
                        "student" => t("Student catalog year only"),
                       ),
-    "value" => variable_get_for_school("what_if_catalog_year", "current", $school_id),
+    "value" => variable_get_for_school("what_if_catalog_year_mode", "current", $school_id),
     "hide_please_select" => TRUE,
     "description" => t("What should be the default catalog year that What If pulls degrees from?  For some schools,
                         changing majors means moving to the current catalog year.  However, at other schools, students
@@ -1171,7 +1171,7 @@ function system_school_data_form($school_id = 0) {
   );
   
   
-  // TODO: search and replace in flightpath
+  
   $form["ignore_courses_from_hour_counts" . $fs] = array(
     "type" => "textfield",
     "label" => t("Ignore courses from hour counts (CSV):"),
@@ -1185,7 +1185,7 @@ function system_school_data_form($school_id = 0) {
   );
 
 
-  // TODO: search and replace in flightpath
+  
   $form["term_id_structure" . $fs] = array(
     "type" => "textarea",
     "label" => t("Structure of term ID's:"),
@@ -1207,7 +1207,7 @@ function system_school_data_form($school_id = 0) {
   // Let's load the subjects...
   $subjects = "";
   $query = "SELECT DISTINCT b.subject_id, a.title, a.college FROM draft_courses b LEFT JOIN subjects a
-              ON (a.subject_id = b.subject_id)
+              ON (a.subject_id = b.subject_id AND a.school_id = b.school_id)
               WHERE exclude = 0
               AND b.school_id = ?              
               ORDER BY b.subject_id
@@ -1850,7 +1850,7 @@ function system_school_data_form_validate($form, &$form_state) {
     db_query("INSERT INTO subjects (subject_id, college, title, school_id)
               VALUES (?, ?, ?, ?) ", strtoupper(trim($temp[0])), strtoupper(trim($temp[1])), trim($temp[2]), $school_id);
     
-  }
+  } 
   // Remove the data from our form_state, so it isn't saved twice
   unset($form_state["values"]["subjects" . $fs]);
   
@@ -3431,7 +3431,7 @@ function system_display_dashboard_page () {
 
     
     $advising_term_id = variable_get("advising_term_id", "");
-    $advising_term_desc = get_term_description($advising_term_id);
+    $advising_term_desc = get_term_description($advising_term_id, FALSE, $user->school_id);  // TODO: might need to do something different for people who advise multiple schools
 
     $url = fp_url("render-advising-snapshot-for-iframe", "window_mode=popup");
 
@@ -3478,7 +3478,7 @@ function system_display_dashboard_page () {
   
       $turl = fp_url("advise/popup-display-summary", "advising_session_id=" . $cur['advising_session_id']);
       $advising_session_id_array[] = $cur['advising_session_id'];
-      $term = get_term_description($cur['term_id']);
+      $term = get_term_description($cur['term_id'], FALSE, $user->student_id);
       $link = "popupLargeIframeDialog(\"" . $turl . "\",\"" . t("Advising Session @term - @date", array("@term" => $term, "@date" => $dt)) . "\",\"\");";  
       $html .= "<div class='feed-item'>
                   <div class='feed-item-icon'><i class='fa fa-graduation-cap'></i></div>
@@ -3519,21 +3519,16 @@ function system_render_advising_snapshop_for_iframe() {
       
   fp_add_css(fp_get_module_path("system") . "/css/style.css");
   
+  
       
   if (!isset($_SESSION["fp_pie_chart_token"])) {
     $_SESSION["fp_pie_chart_token"] = md5(fp_token());
   }
-  //old Google API url: $pie_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
-  //$pie_chart_url_1 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=27&unfinished=73&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
-  //$pie_chart_url_2 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=67&unfinished=33&unfinished_col=cccccc&progress_col=00994d&token=" . $_SESSION["fp_pie_chart_token"];
-  //$pie_chart_url_3 = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=46&unfinished=54&unfinished_col=cccccc&progress_col=ff4d4d&token=" . $_SESSION["fp_pie_chart_token"];
-      
-      
+
       
   // Get total number of advisees VS number that have been advised for current term.
   // Since this can take a while to load, maybe it loads by javascript async instead?  Or maybe its an iframe which can also be async?
-  $adv_array = student_search_display_my_advisees(TRUE);
-  //fpm($adv_array);
+  $adv_array = student_search_display_my_advisees(TRUE);  
   $total = count($adv_array);
   //fpm($total);
   $advised_count = 0;
@@ -3551,7 +3546,7 @@ function system_render_advising_snapshop_for_iframe() {
     $pie_chart_url_advised_percent = base_path() . "/libraries/pchart/fp_pie_chart.php?size=75&radius=35&progress=$advised_percent&unfinished=$unfinished&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
     
     $advising_term_id = variable_get("advising_term_id", "");
-    $advising_term_desc = get_term_description($advising_term_id);
+    $advising_term_desc = get_term_description($advising_term_id, FALSE); // TODO: may need to do something different if user advises over multiple schools
               
        
         

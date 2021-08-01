@@ -2081,12 +2081,14 @@ function draw_menu_items($menu_array) {
     // This will generate the html to display the screen.
     $pC = "";
 
+    $school_id = db_get_school_id_from_student_id($this->student->student_id);
+
 
     if (!$this->db) {
       $this->db = get_global_database_handler();
     }
     
-    if ($this->bool_hiding_grades && !$this->bool_print && $GLOBALS["fp_system_settings"]["hiding_grades_message"] != "")
+    if ($this->bool_hiding_grades && !$this->bool_print && variable_get_for_school("hiding_grades_message", '', $school_id) != "")
     {
       // Display the message about us hiding grades.
       $pC .= "
@@ -2098,7 +2100,7 @@ function draw_menu_items($menu_array) {
                   <img src='" . fp_theme_location() . "/images/alert_lg.gif' >  
                 </td>
                 <td valign='middle' class=' ' style='padding-left: 8px;'>
-                {$GLOBALS["fp_system_settings"]["hiding_grades_message"]}
+                  " . variable_get_for_school("hiding_grades_message", "", $school_id) . "
                 </td>
                 </table>
                 </div>
@@ -3709,6 +3711,7 @@ function draw_menu_items($menu_array) {
     $render['#remaining_hours'] = $remaining_hours;
     $render['#semester_num'] = $group->assigned_to_semester_num;
             
+    $school_id = $group->school_id;
     
     $s = "s";
     if ($remaining_hours < 2)
@@ -3761,7 +3764,7 @@ function draw_menu_items($menu_array) {
      
     $hand_class = "hand";
 
-    if ($this->bool_print || variable_get("show_group_titles_on_view", "no") == "yes")
+    if (variable_get_for_school("show_group_titles_on_view", "no", $school_id) == "yes")
     {
       
       $row_msg = t("Select") . " $disp_remaining_hours " . t("hour$s from") . " $group->title.";
@@ -5848,6 +5851,9 @@ function draw_menu_items($menu_array) {
       $blank_degree_id = $this->degree_plan->degree_id;
     }
     
+    $db = get_global_database_handler();
+    $school_id = $db->get_school_id_for_group_id($group_id);
+    
     $pC = "";
     
     $clean_urls = variable_get("clean_urls", FALSE);
@@ -5877,7 +5883,7 @@ function draw_menu_items($menu_array) {
     foreach($subject_array as $key => $subject_id)
     {
 
-      if ($title = $this->flightpath->get_subject_title($subject_id)) {
+      if ($title = $this->flightpath->get_subject_title($subject_id, $school_id)) {
         $new_array[] = "$title ~~ $subject_id";
       } else {
         $new_array[] = "$subject_id ~~ $subject_id";
@@ -5981,6 +5987,10 @@ function draw_menu_items($menu_array) {
    */
   function get_hidden_advising_variables($perform_action = "")
   {
+    
+    $school_id = db_get_school_id_from_student_id($GLOBALS["fp_advising"]["current_student_id"]);   
+    
+    
     $rtn = "";
 
     if (!isset($GLOBALS["print_view"])) $GLOBALS["print_view"] = "";

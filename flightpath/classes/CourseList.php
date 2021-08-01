@@ -1758,10 +1758,10 @@ class CourseList extends ObjList
 	{
     $rtn = FALSE;
     
-
+    $school_id = $course_c->school_id;    
     
     // We will look at the course_repeat_policy to determine which type of search to do on this list.
-    $course_repeat_policy = variable_get("course_repeat_policy", "most_recent_exclude_previous");
+    $course_repeat_policy = variable_get_for_school("course_repeat_policy", "most_recent_exclude_previous", $school_id);
     
     if ($course_repeat_policy == "best_grade_exclude_others") {
       // Search for best grade, exclude other attempts.
@@ -1820,6 +1820,7 @@ class CourseList extends ObjList
         if ($course->req_by_degree_id != $degree_id && $course->get_has_been_assigned_to_degree_id($degree_id) != TRUE) continue;
       }
       
+      $school_id = $course->school_id;
 
 
 			if ($bool_use_ignore_list == true)
@@ -1828,7 +1829,7 @@ class CourseList extends ObjList
 				$temp_course_name = $course->subject_id . " " . $course->course_num;
 				// Check in our settings to see if we should ignore this course
 				// (configured in /custom/settings.php)
-				if (in_array($temp_course_name, csv_to_array(@$GLOBALS["fp_system_settings"]["ignore_courses_from_hour_counts"]))) {
+				if (in_array($temp_course_name, csv_to_array(@variable_get_for_school("ignore_courses_from_hour_counts", "", $school_id)))) {
 					continue;
 				}
 				
@@ -2170,6 +2171,7 @@ class CourseList extends ObjList
         if ($course->req_by_degree_id != $degree_id && $course->get_has_been_assigned_to_degree_id($degree_id) != TRUE) continue;
       }
       
+      $school_id = $course->school_id;
       
 			if ($bool_use_ignore_list == true)
 			{
@@ -2177,7 +2179,7 @@ class CourseList extends ObjList
         $temp_course_name = $course->subject_id . " " . $course->course_num;
 				// Check in our settings to see if we should ignore this course
 				// (configured in /custom/settings.php)
-				if (in_array($temp_course_name, csv_to_array(@$GLOBALS["fp_system_settings"]["ignore_courses_from_hour_counts"]))) {
+				if (in_array($temp_course_name, csv_to_array(@variable_get_for_school("ignore_courses_from_hour_counts", "", $school_id)))) {
 					continue;
 				}				
 
@@ -2337,6 +2339,7 @@ class CourseList extends ObjList
         if ($course->req_by_degree_id != $degree_id && $course->get_has_been_assigned_to_degree_id($degree_id) != TRUE) continue;
       }
 
+      $school_id = $course->school_id;
 
 			// Correct the course's requirement type, if needed (remove the "u")
       $cr_type = $course->requirement_type;
@@ -2349,7 +2352,7 @@ class CourseList extends ObjList
         $temp_course_name = $course->subject_id . " " . $course->course_num;
 				// Check in our settings to see if we should ignore this course
 				// (configured in /custom/settings.php)
-				if (in_array($temp_course_name, csv_to_array(@$GLOBALS["fp_system_settings"]["ignore_courses_from_hour_counts"]))) {
+				if (in_array($temp_course_name, csv_to_array(@variable_get_for_school("ignore_courses_from_hour_counts", "", $school_id)))) {
 					continue;
 				}				
 

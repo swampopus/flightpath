@@ -885,12 +885,15 @@ function advise_display_popup_change_track() {
  * This popup allows the advisor to change the advising term.
  */
 function advise_display_popup_change_term() {
+  global $current_student_id;  
   $rtn = "";
+  
+  $school_id = db_get_school_id_from_student_id($current_student_id);
   
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
   
   $current_term_id = $_REQUEST["advising_term_id"];
-  $current_term = get_term_description($current_term_id);
+  $current_term = get_term_description($current_term_id, FALSE, $school_id);
   
   
   $rtn .= "<div>
@@ -907,7 +910,7 @@ function advise_display_popup_change_term() {
     $term_id = trim($temp[$t]);
 
     
-    $term_desc = get_term_description($term_id);
+    $term_desc = get_term_description($term_id, FALSE, $school_id);
     if ($term_id == $current_term_id) {
       $term_desc = "<strong class='current-term'>$term_desc</strong> - " . t("current");
     }
@@ -1265,6 +1268,8 @@ function advise_display_view($view = "view") {
   $render['#current_student_id'] = $current_student_id;
 
   
+  $school_id = db_get_school_id_from_student_id($current_student_id);
+  
   // Add some body classes to the page for this student.
   $student = $screen->student;
   if (is_object($student)) {
@@ -1393,7 +1398,7 @@ function advise_display_view($view = "view") {
             
       $t_term_id = $advising_term_id;
       $for_term = " " . t("for") . " ";
-      $termdesc = get_term_description($t_term_id);
+      $termdesc = get_term_description($t_term_id, FALSE, $school_id);
 
       
       $furl = fp_url("advise/popup-change-term");
@@ -1488,7 +1493,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
 
   
   // Use the student's catalog year, based on a setting instead?
-  if (variable_get("what_if_catalog_year", "current") == "student") {
+  if (variable_get_for_school("what_if_catalog_year_mode", "current", $student_school_id) == "student") {
     $db = get_global_database_handler();
     $catalog_year = $db->get_student_catalog_year($current_student_id);
   }
@@ -1587,7 +1592,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   /////////////////////
   // All the tracks...
   
-  if (variable_get("show_level_3_on_what_if_selection", "yes") == 'yes') {
+  if (variable_get_for_school("show_level_3_on_what_if_selection", "yes", $student_school_id) == 'yes') {
     
     foreach ($major_codes as $major_code => $temp) {
       // Let's see if this major has any tracks...
@@ -1721,6 +1726,9 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
  */
 function advise_what_if_selection_form_validate($form, &$form_state) {
   $catalog_year = $form_state['values']['catalog_year'];
+  $current_student_id = $form_state['values']['current_student_id'];
+  $school_id = db_get_school_id_from_student_id($current_student_id);
+  
   // Make sure they selected at least 1 level 1 degree.
   $selected_degrees = array();
   $temp = FALSE;  
@@ -1849,7 +1857,7 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
   
   $total_selected = count($selected_degrees) + $selected_tracks;  
   // If this is more than what is allowed to be selected, then show error.
-  $max = intval(variable_get('max_allowed_selections_in_what_if', 5));
+  $max = intval(variable_get_for_school('max_allowed_selections_in_what_if', 5, $school_id));
   if ($max === 0) $max = 5;
   if ($total_selected > $max) {
     form_error('', t("Sorry, you have exceeded the maximum number of allowed selections for What If.  Please reduce your number of selections and try again."));

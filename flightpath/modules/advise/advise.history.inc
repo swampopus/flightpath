@@ -13,7 +13,7 @@ function advise_display_history() {
   
   $student_id = $current_student_id;
   $db = get_global_database_handler();
-  
+  $school_id = db_get_school_id_from_student_id($student_id);
   fp_set_title('');
   
   $extra_style = $ast = "";
@@ -36,7 +36,7 @@ function advise_display_history() {
       $aid = $advising_session_id_array[$term_id];
       if ($aid != "")
       {        
-        $term_name = get_term_description($term_id);
+        $term_name = get_term_description($term_id, FALSE, $school_id);
         
         $turl = fp_url("advise/popup-display-summary", "advising_session_id=$aid");
                 
@@ -88,6 +88,8 @@ function advise_display_history() {
   $render_left = array();  // creating a new render array.
   $render_left["#id"] = "advise_history_left_column";
   $render_left["#student_id"] = $student_id;
+  
+  $school_id = db_get_school_id_from_student_id($student_id);
   
   //$rtn .= "<table border='0' cellspacing='0'>";
   $old_session_d_t = 0;
@@ -147,7 +149,7 @@ function advise_display_history() {
     $turl = fp_url("advise/popup-display-summary", "advising_session_id={$cur['advising_session_id']}");
 
     $advising_session_id_array[] = $cur['advising_session_id'];
-    $term = get_term_description($cur['term_id']);
+    $term = get_term_description($cur['term_id'], FALSE, $school_id);
 
     $on_click = "popupLargeIframeDialog(\"" . $turl . "\",\"" . t("Advising Session @term - @date", array("@term" => $term, "@date" => $dt)) . "\",\"\");";  
               
@@ -386,9 +388,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
   while ($cur = db_fetch_array($res)) {
       
     $dt = format_date(convert_time($cur['posted']), "pretty");
-  
-    $term = get_term_description($cur['term_id']);
-    
+          
     $degree_title_line = "";
     $ds = "";
     $degree_plan = new DegreePlan();
@@ -416,6 +416,8 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
   
     $student_id = $cur['student_id'];
     $school_id = db_get_school_id_from_student_id($student_id);
+  
+    $term = get_term_description($cur['term_id'], FALSE, $school_id);
   
     $what_if_message = "";
     if (intval($cur['is_whatif']) == 1) {

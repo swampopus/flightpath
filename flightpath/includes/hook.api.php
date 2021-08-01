@@ -190,7 +190,7 @@ function hook_courselist_find_match_allow_course(Course $candidate_course, Cours
  * 
  * Notice that term_id and $bool_abbreviate are passed by reference! 
  */
-function hook_alter_term_id_prior_to_description(&$term_id, &$bool_abbreviate) {
+function hook_alter_term_id_prior_to_description(&$term_id, &$bool_abbreviate, $school_id = 0) {
   if ($term_id == "201740") {
     // change term_id to something else.
     $term_id = "555570";

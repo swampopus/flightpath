@@ -326,12 +326,13 @@ function course_search_display_courses() {
       
   
 
-  $settings = fp_get_system_settings();
+  
   $current_catalog_year = $settings["current_catalog_year"];
 
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;  
   $subject_id = $_REQUEST["subject_id"];
+  $school_id = intval(@$_REQUEST["school_id"]);
 
   $render["#catalog_year"] = array(
     "type" => "do_not_render",
@@ -350,7 +351,8 @@ function course_search_display_courses() {
   // Try to find out the title to this subject, if one exists
   // in our subjects table.
   $res = db_query("SELECT * FROM subjects
-                   WHERE subject_id ='?' ", $subject_id);
+                   WHERE subject_id =?
+                   AND school_id = ? ", $subject_id, $school_id);
   $cur = db_fetch_array($res);
   $title = $cur["title"];
   if ($title == "") $title = $subject_id;
@@ -407,7 +409,6 @@ function course_search_display_courses() {
              <option value=''>Any term</option>
              ";
   
-  //$term_array = get_term_id_suffixes();
   $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
   
   $schedule_text = "";
@@ -464,7 +465,7 @@ function course_search_display_courses() {
             
   }
   
-  $term_structures = get_term_structures();
+  $term_structures = get_term_structures($school_id);
     
   $grad_notice_flag = false;
   $temp_course = new Course();
@@ -917,6 +918,8 @@ function course_search_display_search() {
   fp_add_css(fp_get_module_path("course_search") . "/css/course_search_style.css");
   
     
+  // TODO: we need to get school_id  
+    
   $rtn .= "";
   
   if (user_has_permission("can_update_course_info_details")) {
@@ -991,11 +994,13 @@ function course_search_display_search() {
     $query = "SELECT DISTINCT b.subject_id, a.title FROM courses b LEFT JOIN subjects a
               ON (a.subject_id = b.subject_id)
               WHERE exclude = 0
-              AND catalog_year = '?'
+              AND catalog_year = ?
+              AND a.school_id = b.school_id
+              AND b.school_id = ?
               ";
     
     $subjects = array();
-    $result = db_query($query, $catalog_year);
+    $result = db_query($query, $catalog_year, $school_id);
     while ($cur = db_fetch_array($result))
     {      
       //fpm($cur);

@@ -28,6 +28,8 @@ function course_search_edit_course_details_form() {
   
   $course->load_descriptive_data(false, true, false, true);
 
+  $school_id = $course->school_id;
+
   fp_set_title(t("Edit Course Info for @course", array("@course" => "$subject_id $course_num")));
 
   $form["#attributes"] = array("enctype" => "multipart/form-data");
@@ -99,14 +101,14 @@ function course_search_edit_course_details_form() {
                       will be offered for the next five years."),
   );
   
-  //$term_array = get_term_id_suffixes();
+  
   $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
 
   $form["mark" . $m++] = array(
     "value" => "<div class='rotation-form-checkboxes'>",
   );
   
-  $term_structures = get_term_structures();
+  $term_structures = get_term_structures($school_id);
 
   $y = 1;
   for ($t = $catalog_year; $t <= $catalog_year + 5; $t++) {
@@ -213,7 +215,6 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
   $subject_id = $form_state["values"]["subject_id"];
   $course_num = $form_state["values"]["course_num"];
   
-  //$term_array = get_term_id_suffixes();
   $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
 
       
@@ -624,7 +625,8 @@ function course_search_get_offering_csv() {
 	  
 	  // What college does this course belong to?
     $res2 = db_query("SELECT * FROM subjects
-                          WHERE subject_id = '?' ", $db_subject_id);
+                          WHERE subject_id = ?
+                          AND school_id = ? ", $db_subject_id, $db_school_id);
     $cur2 = db_fetch_array($res2);
     $college = $cur2["college"];
     $dept_name = $cur2["title"];
