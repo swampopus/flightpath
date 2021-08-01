@@ -778,7 +778,8 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
   global $current_student_id, $screen, $user, $student;
   
   $csid = $current_student_id;
-  $settings = fp_get_system_settings();
+  
+  $school_id = db_get_school_id_from_student_id($current_student_id);
       
   $rtn = "";
   
@@ -833,12 +834,12 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
   
   // Should we display a catalog year warning?  This is
   // something that can be part of a settings table.
-  if ($student->catalog_year < $settings["earliest_catalog_year"]) {
+  if ($student->catalog_year < intval(variable_get_for_school("earliest_catalog_year", 2006, $school_id))) {
     
     $alert_msg = "";
     $alert_msg .= "<b>" . t("Important Notice:") . "</b> " . t("FlightPath cannot display degree plans from catalogs earlier than %earliest.  
                       The student&#039;s catalog year is %current, which means that the degree plan displayed may not accurately
-                      represent this student&#039;s degree requirements.", array("%earliest" => $settings["earliest_catalog_year"] . "-" . ($settings["earliest_catalog_year"] + 1), "%current" => $cat_year));
+                      represent this student&#039;s degree requirements.", array("%earliest" => intval(variable_get_for_school("earliest_catalog_year", 2006, $school_id)) . "-" . (intval(variable_get_for_school("earliest_catalog_year", 2006, $school_id)) + 1), "%current" => $cat_year));
                       
                        
    
@@ -847,7 +848,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
     $bool_catalog_warning = true;
   }
 
-  if ($settings["current_catalog_year"] > $settings["earliest_catalog_year"]) {
+  if ($settings["current_catalog_year"] > intval(variable_get_for_school("earliest_catalog_year", 2006, $school_id))) {
     // Is the student's catalog set beyond the range that
     // FP has data for?  If so, show a warning.
     if ($student->catalog_year > $settings["current_catalog_year"])
@@ -1775,10 +1776,8 @@ function fp_build_tab_array($page) {
       
     global $current_student_id, $screen, $user, $student;
     
-    
-    
-    
-    
+    $school_id = db_get_school_id_from_student_id($current_student_id);
+        
     $rtn  = "";
     $bool_catalog_warning = FALSE;
     $bool_future_catalog_warning = FALSE;    
@@ -1825,11 +1824,7 @@ function fp_build_tab_array($page) {
       }
     }
 
-    
-    
-    $settings = fp_get_system_settings();
-          
-    
+        
     $rtn .= "<table class='fp-currently-advising'>";
     
     $for_term = $whatif = $what_if_select = $hypoclass = "";
@@ -1917,12 +1912,12 @@ function fp_build_tab_array($page) {
 
     // Should we display a catalog year warning?  This is
     // something that can be part of a settings table.
-    if ($student->catalog_year < $settings["earliest_catalog_year"]) {
+    if ($student->catalog_year < intval(variable_get_for_school("earliest_catalog_year", 2006, $school_id))) {
       $cat_year = "<b>$cat_year</b>";
       $bool_catalog_warning = true;
     }
 
-    if ($settings["current_catalog_year"] > $settings["earliest_catalog_year"]) {
+    if ($settings["current_catalog_year"] > intval(variable_get_for_school("earliest_catalog_year", 2006, $school_id))) {
       // Is the student's catalog set beyond the range that
       // FP has data for?  If so, show a warning.
       if ($student->catalog_year > $settings["current_catalog_year"])

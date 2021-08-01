@@ -1518,7 +1518,7 @@ class Course extends stdClass
       $setting_current_catalog_year = variable_get("current_draft_catalog_year", 2006) * 1;
     }
     
-    $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);
+    $earliest_catalog_year = variable_get_for_school("earliest_catalog_year", 2006, $this->school_id);
     
     
     if ($setting_current_catalog_year < $earliest_catalog_year)
@@ -1911,7 +1911,8 @@ class Course extends stdClass
 
     if (strstr($this->term_id, "1111"))
     {
-      $this->catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
+      ///$this->catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
+      $this->catalog_year = variable_get_for_school("earliest_catalog_year", 2006, $this->school_id);
     }
 
     $this->catalog_year = trim(substr($this->term_id,0,4));

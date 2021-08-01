@@ -1058,30 +1058,20 @@ function system_school_data_form($school_id = 0) {
   );
   
   
-  $form["contact_email_address" . $fs] = array(
-    "type" => "textfield",
-    "label" => t("Contact email address:"),
-    "value" => variable_get("contact_email_address", ""),
-    "description" => t("Enter the email address to mail when a user accesses the
-                        Contact FlightPath Production Team popup.  Leave blank to disable the link to the popup."),
-    
-  );
-  
-
   $form["school_initials" . $fs] = array(
     "type" => "textfield",
     "size" => 20,
     "label" => t("School initials:"),
-    "value" => variable_get("school_initials", "DEMO"),
+    "value" => variable_get_for_school("school_initials", "DEMO", $school_id),
     "description" => t("Ex: ULM or BPCC"),    
   );
+  
                   
-
   $form["earliest_catalog_year" . $fs] = array(
     "type" => "textfield",
     "size" => 20,
     "label" => t("Earliest catalog year:"),
-    "value" => variable_get("earliest_catalog_year", "2006"),
+    "value" => variable_get_for_school("earliest_catalog_year", "2006", $school_id),
     "description" => t("This is the earliest possible catalog year FlightPath may look 
                 up.  Typically, this is the earliest year for which you have 
                 data (ie, when FlightPath went online.
@@ -1089,89 +1079,56 @@ function system_school_data_form($school_id = 0) {
                 it will default to this one. Ex: 2006"),    
   );
   
-
+  
   $form["graduate_level_course_num" . $fs] = array(
     "type" => "textfield",
     "size" => 20,
     "label" => t("Graduate level course num:"),
-    "value" => variable_get("graduate_level_course_num", "5000"),
+    "value" => variable_get_for_school("graduate_level_course_num", "5000", $school_id),
     "description" => t("This is the course num which means 'graduate level', meaning
                 anything above it is considered a graduate level course. Ex: 5000"),    
   );
   
 
-  $form["allowed_student_ranks" . $fs] = array(
-    "type" => "textfield",
-    "label" => t("Allowed student ranks (CSV):"),
-    "value" => variable_get("allowed_student_ranks", "FR, SO, JR, SR"),
-    "description" => t("This is a list of which student ranks are allowed into FlightPath.
-                It should be separated by commas.
-                This also affects which students you may search for on the Advisees
-                tab. Ex: FR, SO, JR, SR"),
-  );
-
-
-  $form["rank_descriptions" . $fs] = array(
-    "type" => "textarea",
-    "label" => t("Rank descriptions:"),
-    "rows" => 8,
-    "value" => variable_get("rank_descriptions", "FR ~ Freshman\nSO ~ Sophomore\nJR ~ Junior\nSR ~ Senior\nPR ~ Professional\nGR ~ Graduate"),
-    "description" => t("Enter the rank code (from above) and the description which should appear on screen, in the format:
-                        RANK ~ DESC, one per line.
-                        <br>Ex:
-                        <br>&nbsp; FR ~ Freshman
-                        <br>&nbsp; SO ~ Sophomore
-                        <br>&nbsp; JR ~ Junior
-                        <br>&nbsp; SR ~ Senior"),
-  );
-
-
-
-  $form["not_allowed_student_message" . $fs] = array(
-    "type" => "textarea",
-    "label" => t("Not allowed student message:"),
-    "value" => variable_get("not_allowed_student_message", ""),
-    "description" => t("When a student is NOT allowed into FlightPath because of their
-                rank, this message will be displayed."),    
-  );
     
-
+  // TODO: search and replace in flightpath
   $form["hiding_grades_message" . $fs] = array(
     "type" => "textarea",
     "label" => t("Hiding grades message:"),
-    "value" => variable_get("hiding_grades_message", ""),
+    "value" => variable_get_for_school("hiding_grades_message", "", $school_id),
     "description" => t("This message will be displayed when any course on the page
                 has its bool_hide_grade set to TRUE.  If you are not using
                 this functionality, you can leave this blank."),    
   );
   
-  
+  // TODO: search and replace in flightpath
   $form["show_group_titles_on_view" . $fs] = array(
     "type" => "select",
     "label" => t("Show group titles on View and What If screens?"),
     "hide_please_select" => TRUE,
     "options" => array("no" => t("No"), "yes" => t("Yes")),
-    "value" => variable_get("show_group_titles_on_view", "no"),
+    "value" => variable_get_for_school("show_group_titles_on_view", "no", $school_id),
     "description" => t("If set to Yes, then group titles will be displayed in the View
                         and What if screens, similar to how they are displayed when printing.
                         If unsure what to select, select 'No'."), 
   );                                
 
-  
+  // TODO: search and replace in flightpath
   $form['max_allowed_selections_in_what_if' . $fs] = array(
     'type' => 'textfield',
     'label' => t("Maximum number of allowed selections in What If:"),
-    'value' => variable_get('max_allowed_selections_in_what_if', 5),
+    'value' => variable_get_for_school('max_allowed_selections_in_what_if', 5, $school_id),
     'description' => t("Selecting multiple degrees and options for What If can significantly impact server performance.  It is recommended
                       to limit the number of selections to no more than 5.  If you are unsure what to put here, enter '5'."),
   );
   
+  // TODO: search and replace in flightpath
   $form["show_level_3_on_what_if_selection" . $fs] = array(
     "type" => "select",
     "label" => t("Show level-3 degree options on What If selection screen?"),
     "hide_please_select" => TRUE,
     "options" => array("no" => t("No"), "yes" => t("Yes")),
-    "value" => variable_get("show_level_3_on_what_if_selection", "yes"),
+    "value" => variable_get_for_school("show_level_3_on_what_if_selection", "yes", $school_id),
     "description" => t("If set to Yes, then level 3 Track/Options will appear on the What If
                         selection screen, if a degree is selected with available options.
                         Setting to 'no' gives behavior more like FlightPath 4.
@@ -1179,14 +1136,14 @@ function system_school_data_form($school_id = 0) {
   );                                
   
   
-   
+  // TODO: search and replace in flightpath 
   $form["course_repeat_policy" . $fs] = array(
     "type" => "select",
     "label" => t("Course repeat policy:"),
     "options" => array("most_recent_exclude_previous" => t("most recent, exclude previous attempts"),
                        "most_recent_do_not_exclude" => t("most recent, do not exclude previous attempts - \"beta\" feature"),
                        "best_grade_exclude_others" => t("best grade, exclude other attempts - \"beta\" feature")),
-    "value" => variable_get("course_repeat_policy", "most_recent_exclude_previous"),
+    "value" => variable_get_for_school("course_repeat_policy", "most_recent_exclude_previous", $school_id),
     "hide_please_select" => TRUE,
     "description" => t("This setting affects the course repeat policy for FlightPath for normal courses (courses which are not allowed to be repeated normally).
                         <br><b>If you are unsure what to select</b>, choose 'most recent, exclude previous attempts'.
@@ -1198,13 +1155,14 @@ function system_school_data_form($school_id = 0) {
   );
   
   
+  // TODO: search and replace in flightpath
   $form["what_if_catalog_year" . $fs] = array(
     "type" => "select",
     "label" => t("What If mode default catalog year:"),
     "options" => array("current" => t("Current catalog year only"),
                        "student" => t("Student catalog year only"),
                       ),
-    "value" => variable_get("what_if_catalog_year", "current"),
+    "value" => variable_get_for_school("what_if_catalog_year", "current", $school_id),
     "hide_please_select" => TRUE,
     "description" => t("What should be the default catalog year that What If pulls degrees from?  For some schools,
                         changing majors means moving to the current catalog year.  However, at other schools, students
@@ -1213,11 +1171,11 @@ function system_school_data_form($school_id = 0) {
   );
   
   
-  
+  // TODO: search and replace in flightpath
   $form["ignore_courses_from_hour_counts" . $fs] = array(
     "type" => "textfield",
     "label" => t("Ignore courses from hour counts (CSV):"),
-    "value" => variable_get("ignore_courses_from_hour_counts", ""),
+    "value" => variable_get_for_school("ignore_courses_from_hour_counts", "", $school_id),
     "description" => t("List courses, separated by comma, 
                 which should be ignored in hours counts.  This helps
                 remedial courses from being applied to hour counts.
@@ -1227,11 +1185,11 @@ function system_school_data_form($school_id = 0) {
   );
 
 
-
+  // TODO: search and replace in flightpath
   $form["term_id_structure" . $fs] = array(
     "type" => "textarea",
     "label" => t("Structure of term ID's:"),
-    "value" => variable_get("term_id_structure", ""),
+    "value" => variable_get_for_school("term_id_structure", "", $school_id),
     "description" => t("Use this space to define termID structures, one per line.
                 Please see the 
                 <b><a href='http://getflightpath.com/node/1085' target='_blank'>FlightPath documentation</a></b> 
@@ -1267,7 +1225,7 @@ function system_school_data_form($school_id = 0) {
     $subjects .= $subject_id . " ~ " . $college . " ~ " . $title . "\n";
   }
     
-  
+  // TODO: search and replace in flightpath
   $form["subjects" . $fs] = array(
     "type" => "textarea",
     "label" => t("Subjects:"),
@@ -1292,6 +1250,7 @@ function system_school_data_form($school_id = 0) {
     $colleges .= $cur["college_code"] . " ~ " . $cur["title"] . "\n";
   }
   
+  // TODO: search and replace in flightpath
   $form["colleges" . $fs] = array(
     "type" => "textarea",
     "label" => t("Colleges:"),
@@ -1322,7 +1281,7 @@ function system_school_data_form($school_id = 0) {
      
   }
   
-
+  // TODO: search and replace in flightpath
   $form["degree_college" . $fs] = array(
     "type" => "textarea",
     "label" => t("Degree Colleges:"),
@@ -1342,12 +1301,12 @@ function system_school_data_form($school_id = 0) {
   
   
   // How many decimal places allowed in substitutions?
-  
+  // TODO: search and replace in flightpath
   $form["sub_hours_decimals_allowed" . $fs] = array(
     "type" => "select",
     "label" => t("Substitution hours decimal places allowed:"),
     "options" => array(1 => t("1 (ex: 1.1 hrs)"), 2 => t("2 (ex: 1.15 hrs)"), 3 => t("3 (ex: 1.155 hrs)"), 4 => t("4 (ex: 1.1556 hrs)")),
-    "value" => variable_get("sub_hours_decimals_allowed", 2),
+    "value" => variable_get_for_school("sub_hours_decimals_allowed", 2, $school_id),
     "no_please_select" => TRUE,
     "description" => t("For hours with decimals (like 2.25 hours), how many numbers
                       after the decimal place will be allowed?  Affects users performing
@@ -1359,12 +1318,13 @@ function system_school_data_form($school_id = 0) {
   
   
   // Auto-correct course titles?
+  // TODO: search and replace in flightpath
   $form["autocapitalize_course_titles" . $fs] = array(
     "type" => "select",
     "label" => t("Auto-capitalize course titles?"),
     "options" => array("yes" => "Yes", "no" => "No"),
     "hide_please_select" => TRUE,
-    "value" => variable_get("autocapitalize_course_titles", "yes"),
+    "value" => variable_get_for_school("autocapitalize_course_titles", "yes", $school_id),
     "description" => t("If set to yes, course titles in FlightPath will be run through a capitalization
                         filter, so that 'INTRO TO ACCOUNTING' becomes 'Intro to Accounting'.
                         Generally, this makes the course names more attractive, but it can
@@ -1375,12 +1335,13 @@ function system_school_data_form($school_id = 0) {
   
 
   // Auto-correct institution names?
+  // TODO: search and replace in flightpath
   $form["autocapitalize_institution_names" . $fs] = array(
     "type" => "select",
     "label" => t("Auto-capitalize institution names?"),
     "options" => array("yes" => "Yes", "no" => "No"),
     "hide_please_select" => TRUE,
-    "value" => variable_get("autocapitalize_institution_names", "yes"),
+    "value" => variable_get_for_school("autocapitalize_institution_names", "yes", $school_id),
     "description" => t("If set to yes, transfer institution names in 
                         FlightPath will be run through a capitalization
                         filter, so that 'UNIVERSITY OF LOUISIANA AT MONROE' 
@@ -1394,12 +1355,13 @@ function system_school_data_form($school_id = 0) {
 
   
   // Only allow ghost subs for fellow ghost hours?
+  // TODO: search and replace in flightpath
   $form["restrict_ghost_subs_to_ghost_hours" . $fs] = array(
     "type" => "select",
     "label" => t("Restrict ghost substitutions to courses with zero hours only?"),
     "options" => array("yes" => "Yes", "no" => "No"),
     "hide_please_select" => TRUE,
-    "value" => variable_get("restrict_ghost_subs_to_ghost_hours", "yes"),
+    "value" => variable_get_for_school("restrict_ghost_subs_to_ghost_hours", "yes", $school_id),
     "description" => t("If set to yes, courses with \"ghost\" hours may only be
                         substituted for other courses with \"ghost\" hours.  What this
                         means is that if a course is worth zero hours, it may only be
@@ -1409,23 +1371,24 @@ function system_school_data_form($school_id = 0) {
                         <br>If unsure, set to Yes."),
   );
 
-  
+  // TODO: search and replace in flightpath
   $form["initial_student_course_sort_policy" . $fs] = array(
     "type" => "select",
     "label" => t("Initial student course sort policy:"),
     "options" => array("alpha" => "Alphabetical sort [default]", "grade" => "Best grade first"),
     "hide_please_select" => TRUE,
-    "value" => variable_get("initial_student_course_sort_policy", "alpha"),
+    "value" => variable_get_for_school("initial_student_course_sort_policy", "alpha", $school_id),
     "description" => t("Student courses are sorted more than once as they are evaluated by FlightPath.
                         By default, they are sorted alphabetically first.  If you change this to best-grade-first, 
                         courses will be initally sorted according to the grade they earned, in the order defined in 'Grade order CSV' below.
                         Any student grades not defined below will be considered the lowest possible grade."),
   );
   
+  // TODO: search and replace in flightpath
   $form["grade_order" . $fs] = array(
     "type" => "textfield",
     "label" => t("Grade order (CSV):"),
-    "value" => variable_get("grade_order", ""),
+    "value" => variable_get_for_school("grade_order", "", $school_id),
     "description" => t("List all possible grades, separated by comma, from highest to lowest.  This is 
                       used if you select 'Best Grade first' order above, but also is used in determining
                       if a course fulfills a minimum grade requirement.                      
@@ -1433,68 +1396,71 @@ function system_school_data_form($school_id = 0) {
   );
   
   
-
+  // TODO: search and replace in flightpath
   $form["retake_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Retake grades (CSV):"),
-    "value" => variable_get("retake_grades", ""),
+    "value" => variable_get_for_school("retake_grades", "", $school_id),
     "description" => t("List grades, separated by comma, which means 'the student must
                 retake this course. They did not earn credit.' Ex: F,W,I"),    
   );
-         
+  
+  // TODO: search and replace in flightpath       
   $form["withdrew_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Withdrew grades (CSV):"),
-    "value" => variable_get("withdrew_grades", "W"),
+    "value" => variable_get_for_school("withdrew_grades", "W", $school_id),
     "description" => t("List grades, separated by comma, which means 'the student withdrew
                 from this course. They did not earn credit.' Ex: W,WD,WF.  If not sure
                 what to enter here, just enter 'W'."),    
   );  
   
+  // TODO: search and replace in flightpath
   $form["enrolled_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Enrolled grades (CSV):"),
-    "value" => variable_get("enrolled_grades", ""),
+    "value" => variable_get_for_school("enrolled_grades", "", $school_id),
     "description" => t("List grades, separated by comma, which means 'the student is
                 currently enrolled in this course.' Ex: E,AMID,BMID "),    
   );
 
-    
+  // TODO: search and replace in flightpath
   $form["minimum_substitutable_grade" . $fs] = array(
     "type" => "textfield",
     "size" => 3,
     "label" => t("Minimum substitutable grade:"),
-    "value" => variable_get("minimum_substitutable_grade", "D"),
+    "value" => variable_get_for_school("minimum_substitutable_grade", "D", $school_id),
     "description" => t("Enter a grade which is the minimum grade a student must have earned
                       for the course to be allowed in a substitution.  This will affect
                       new substitutions, not old ones.  If unsure, enter D."),    
   );
   
+  // TODO: search and replace in flightpath
   $form["group_min_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Group requirement min grades (CSV):"),
-    "value" => variable_get("group_min_grades", "D,C,B,A"),
+    "value" => variable_get_for_school("group_min_grades", "D,C,B,A", $school_id),
     "description" => t("List grades, separated by comma, which should appear in the min grade pulldown when setting a group requirement
                         in a degree (this also sets the order in which they will appear).  If unsure what to enter, use: D,C,B,A"),    
   );
 
   
-
+  // TODO: search and replace in flightpath
   $form["calculate_cumulative_hours_and_gpa" . $fs] = array(
     "label" => t("Calculate student cumulative hours and GPA?"),
     "type" => "checkbox",
-    "value" => variable_get("calculate_cumulative_hours_and_gpa", FALSE),
+    "value" => variable_get_for_school("calculate_cumulative_hours_and_gpa", FALSE, $school_id),
     "description" => t("If checked, student cumulative hours and GPA will not be read from the
                           'students' database table, but will instead be calculated on the fly
                           each time a student is loaded.  If unsure what to do, check this box."),    
   );
   
   
-  
+  // TODO: search and replace in flightpath
   $form['numeric_to_letter_grades' . $fs] = array(
     "label" => t("Numeric to Letter Grades:"),
     "type" => "textarea",
-    "value" => variable_get("numeric_to_letter_grades", ""),
+    "value" => variable_get_for_school("numeric_to_letter_grades", "", $school_id),
     "description" => t("If your school supports numeric grades in your SIS (ex: 91, 80, 65, etc), then they must be converted to
                         letter grades (A, B, D, etc) for FlightPath.  Use this box to define what numeric range translates to which
                         letter grade.  If you are unsure what to enter here, or if your school does not use numeric grades, leave this blank.
@@ -1508,11 +1474,11 @@ function system_school_data_form($school_id = 0) {
                         <br>&nbsp; 101 ~ 999 ~ A     &nbsp; &nbsp; <em>(In case scores above 100 are possible)</em>"),
   );
   
-  
+  // TODO: search and replace in flightpath
   $form["quality_points_grades" . $fs] = array(
     "label" => t("Quality points and grades:"),
     "type" => "textarea",
-    "value" => variable_get("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0"),
+    "value" => variable_get_for_school("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0", $school_id),
     "description" => t("Enter a grade, and how many quality points it is worth, separated by
                         tilde (~), one per line.  You must include every grade which should count
                         for (or against) a GPA calculation, even if it is worth zero points.  For example,
@@ -1524,11 +1490,11 @@ function system_school_data_form($school_id = 0) {
                         A ~ 4<br>B ~ 3<br>C ~ 2<br>D ~ 1<br>F ~ 0<br>I ~ 0</blockquote>",
   );
   
-  
+  // TODO: search and replace in flightpath
   $form["requirement_types" . $fs] = array(
     "label" => t("Requirement types and codes:"),
     "type" => "textarea",
-    "value" => variable_get("requirement_types", "g ~ General Requirements\nc ~ Core Requirements\ne ~ Electives\nm ~ Major Requirements\ns ~ Supporting Requirements\nx ~ Additional Requirements"),
+    "value" => variable_get_for_school("requirement_types", "g ~ General Requirements\nc ~ Core Requirements\ne ~ Electives\nm ~ Major Requirements\ns ~ Supporting Requirements\nx ~ Additional Requirements", $school_id),
     "description" => t("Enter requirement type codes and descriptions, separated by a tilde (~), one
                         per line.  <b>You may not use the code 'u'</b> as that is reserved in FlightPath.
                         <b>You should define what 'x' means</b>, but be aware that the code 'x' will always
@@ -1567,11 +1533,11 @@ function system_school_data_form($school_id = 0) {
     );
   }
   
-  
+  // TODO: search and replace in flightpath
   $form["pie_chart_config" . $fs] = array(
     "label" => t("Pie chart configuration:"),
     "type" => "textarea",
-    "value" => variable_get("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress"),
+    "value" => variable_get_for_school("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress", $school_id),
     "description" => t("Enter configuration data for the pie charts which graph a student's progress
                         through their degree.  Enter the requirement type code, pie chart label, and optional
                         colors separated by tilde (~).  Requirement types not found for a student will be skipped 
@@ -1585,12 +1551,12 @@ function system_school_data_form($school_id = 0) {
                          
   );
 
-  
+  // TODO: search and replace in flightpath
   $form["pie_chart_gpa" . $fs] = array(
     "label" => t("Should pie charts show GPAs?"),
     "type" => "select",
     "options" => array("no" => "No", "yes" => "Yes"),
-    "value" => variable_get("pie_chart_gpa", "no"),
+    "value" => variable_get_for_school("pie_chart_gpa", "no", $school_id),
     "hide_please_select" => TRUE,
     "description" => t("If set to 'Yes', the GPA will be displayed below each pie chart on the View and What If screens.
                         If unsure what to select, choose 'no'."),
@@ -1598,21 +1564,22 @@ function system_school_data_form($school_id = 0) {
   
   
   
-  
+  // TODO: search and replace in flightpath
   $form["developmentals_title" . $fs] = array(
     "label" => t("Developmentals semester block title:"),
     "type" => "textfield",
-    "value" => variable_get("developmentals_title", t("Developmental Requirements")),
+    "value" => variable_get_for_school("developmentals_title", t("Developmental Requirements", $school_id)),
     "description" => t("This is the title of the Developmental Requirements semester block,
                         which appears on a student's degree plan, near the bottom, when they
                         have remedial courses they are required to take.  If you are
                         unsure what to enter, use 'Developmental Requirements'."),
   );
   
+  // TODO: search and replace in flightpath
   $form["developmentals_notice" . $fs] = array(
     "label" => t("Developmentals notice text:"),
     "type" => "textarea",
-    "value" => variable_get("developmentals_notice", t("According to our records, you are required to complete the course(s) listed above. For some transfer students, your record may not be complete. If you have any questions, please ask your advisor.")),
+    "value" => variable_get_for_school("developmentals_notice", t("According to our records, you are required to complete the course(s) listed above. For some transfer students, your record may not be complete. If you have any questions, please ask your advisor."), $school_id),
     "description" => t("The text you enter here will be displayed below the Developmentals semester
                         block, explaining to the student what these courses are.  For example:
                         'According to our records, you are required to complete the course(s) listed
@@ -1620,68 +1587,69 @@ function system_school_data_form($school_id = 0) {
   );
 
   
-
+  // TODO: search and replace in flightpath
   $form["graduate_level_codes" . $fs] = array(
     "type" => "textfield",
     "label" => t("Graduate course level codes (CSV):"),
-    "value" => variable_get("graduate_level_codes", "GR"),
+    "value" => variable_get_for_school("graduate_level_codes", "GR", $school_id),
     "description" => t("List level codes, separated by comma, which should be considered graduate credit.  If you do not need
                         to distinguish between graduate and undergraduate credit, leave this field blank.<br>If unsure, set to GR."),    
   );
   
   
-  
+  // TODO: search and replace in flightpath
   $form["disallow_graduate_credits" . $fs] = array(
     "type" => "select",
     "label" => t("Disallow automatic use of graduate credits?"),
     "options" => array("yes" => "Yes", "no" => "No"),
     "hide_please_select" => TRUE,
-    "value" => variable_get("disallow_graduate_credits", "yes"),
+    "value" => variable_get_for_school("disallow_graduate_credits", "yes", $school_id),
     "description" => t("If set to yes, FlightPath will not automatically use graduate credits (based on the level code the student's credit
                         is given in the database) to populate elective groups or on the degree plan.  They may still be substituted using the
                         substitution system however.  In order for this setting to work, the 'Graduate course level codes' field must be set above.
                         <br>If unsure, set to Yes."),
   );
   
-
+  // TODO: search and replace in flightpath
   $form["display_graduate_credits_block" . $fs] = array(
     "type" => "select",
     "label" => t("Display graduate credits in their own semester block?"),
     "options" => array("yes" => "Yes", "no" => "No"),
     "hide_please_select" => TRUE,
-    "value" => variable_get("display_graduate_credits_block", "yes"),
+    "value" => variable_get_for_school("display_graduate_credits_block", "yes", $school_id),
     "description" => t("If set to yes, FlightPath will display graduate credits in their own block, and NOT in Excess credits.  The graduate block details
                         are set below.
                         <br>If unsure, set to Yes."),
   );
   
-  
+  // TODO: search and replace in flightpath
   $form["graduate_credits_block_title" . $fs] = array(
     "label" => t("Graduate Credits block title:"),
     "type" => "textfield",
-    "value" => variable_get("graduate_credits_block_title", t("Graduate Credits")),
+    "value" => variable_get_for_school("graduate_credits_block_title", t("Graduate Credits"), $school_id),
     "description" => t("This is the title of the Graduate Credits semester block (setting above),
                         which appears on a student's degree plan, near the bottom, when they
                         have graduate credits in their history (based on the credit's level code).  If you are
                         unsure what to enter, use 'Graduate Credits'."),
   );
   
-
+  // TODO: search and replace in flightpath
   $form["graduate_credits_block_notice" . $fs] = array(
     "label" => t("Graduate Credits block notice text:"),
     "type" => "textarea",
-    "value" => variable_get("graduate_credits_block_notice", t("These courses may not be used for undergraduate credit.")),
+    "value" => variable_get_for_school("graduate_credits_block_notice", t("These courses may not be used for undergraduate credit."), $school_id),
     "description" => t("The text you enter here will be displayed below the Gradute Credits semester
                         block, explaining to the student what these courses are.  For example:
                         'These courses may not be used for undergraduate credit.'"),
   );
   
-  
+  // TODO: search and replace in flightpath
+  // TODO: possibly these go in system settings, and not based on schools
   $form["degree_classifications_level_1" . $fs] = array(
     "label" => t("Degree Classifications - Level 1:"),
     "type" => "textarea",
     "rows" => 3,
-    "value" => variable_get("degree_classifications_level_1", "MAJOR ~ Major"),
+    "value" => variable_get_for_school("degree_classifications_level_1", "MAJOR ~ Major", $school_id),
     "description" => t("Enter the 'level 1' (ie, top level) degree classifications, one per line, in the following format:
                           <br>&nbsp; &nbsp; MACHINE_NAME ~ Title
                           <br> Example:  MAJOR ~ Major
@@ -1692,11 +1660,12 @@ function system_school_data_form($school_id = 0) {
                                use:  MAJOR ~ Major"),                        
   );
 
+  // TODO: search and replace in flightpath
   $form["degree_classifications_level_2" . $fs] = array(
     "label" => t("Degree Classifications - Level 2:"),
     "type" => "textarea",
     "rows" => 3,
-    "value" => variable_get("degree_classifications_level_2", "MINOR ~ Minor"),
+    "value" => variable_get_for_school("degree_classifications_level_2", "MINOR ~ Minor", $school_id),
     "description" => t("Enter the 'level 2' degree classifications, one per line, in the following format:
                           <br>&nbsp; &nbsp; MACHINE_NAME ~ Title
                           <br> Example:  MINOR ~ Minor
@@ -1707,12 +1676,13 @@ function system_school_data_form($school_id = 0) {
                               Math would be classified by this level. If you are unsuare what to enter, use:
                               MINOR ~ Minor"),                        
   );
-    
+  
+  // TODO: search and replace in flightpath  
   $form["degree_classifications_level_3" . $fs] = array(
     "label" => t("Degree Classifications - Level 3 (Add-on degrees, attached to other degrees):"),
     "type" => "textarea",
     "rows" => 3,
-    "value" => variable_get("degree_classifications_level_3", "CONC ~ Concentration"),
+    "value" => variable_get_for_school("degree_classifications_level_3", "CONC ~ Concentration", $school_id),
     "description" => t("Enter the 'level 3' degree classifications, one per line, in the following format:
                           <br>&nbsp; &nbsp; MACHINE_NAME ~ Title
                           <br> Example:  CONC ~ Concentration
@@ -1724,12 +1694,12 @@ function system_school_data_form($school_id = 0) {
                           If unsure what to enter here, use: CONC ~ Concentration"),                        
   );
       
-  
+  // TODO: search and replace in flightpath
   $form["exclude_majors_from_appears_in_counts" . $fs] = array(
     "label" => t("Exclude major codes from \"appears in\" counts (CSV):"),
     "type" => "textfield",
     "maxlength" => 1000,
-    "value" => variable_get("exclude_majors_from_appears_in_counts", ""),
+    "value" => variable_get_for_school("exclude_majors_from_appears_in_counts", "", $school_id),
     "description" => t('When a course appears in more than one degree, it is given an extra CSS class
                         denoting that.  This fields lets you enter major codes for degrees, separated by commas,
                         for any degrees you do not wish to be counted toward the "appears in" counts.
@@ -1738,12 +1708,12 @@ function system_school_data_form($school_id = 0) {
   );
   
   
-
+  // TODO: search and replace in flightpath
   $form["group_full_at_min_hours" . $fs] = array(
     "label" => t("Groups should be considered 'full' when min hours are met or exceeded?"),
     "type" => "select",
     "options" => array("yes" => "Yes", "no" => "No"),
-    "value" => variable_get("group_full_at_min_hours", "yes"),
+    "value" => variable_get_for_school("group_full_at_min_hours", "yes", $school_id),
     "hide_please_select" => TRUE,
     "description" => t("If a group has been added to a degree plan with 'min hours', should FlightPath consider the group
                         'full', and stop assigning courses to it, once the assigned courses meets or goes over the min hours value, 
@@ -1752,12 +1722,12 @@ function system_school_data_form($school_id = 0) {
                         If you are unsure what to enter, select 'Yes'"),
   );  
   
-
+  // TODO: search and replace in flightpath
   $form["remove_advised_when_course_taken" . $fs] = array(
     "label" => t("Remove an advised course when a student enrolls in it (or completes it), for the same term?"),
     "type" => "select",
     "options" => array("yes" => "Yes", "no" => "No"),
-    "value" => variable_get("remove_advised_when_course_taken", "no"),
+    "value" => variable_get_for_school("remove_advised_when_course_taken", "no", $school_id),
     "hide_please_select" => TRUE,
     "description" => t("If a student has been advised into a course, and then enrolls in that course before the next
                         advising term begins, should the advised course (and checkbox) be removed?  This would also affect
@@ -1768,24 +1738,24 @@ function system_school_data_form($school_id = 0) {
                         is enrolled or completes a course within the same advising term.  If you are unsure what to enter, select 'No'."),
   );  
 
-
+  // TODO: search and replace in flightpath
   $form["prevent_course_assignment_to_both_degree_and_track" . $fs] = array(
     "label" => t("Prevent a course assignment to both a degree and its track(s)?"),
     "type" => "select",
     "options" => array("yes" => "Yes", "no" => "No"),
-    "value" => variable_get("prevent_course_assignment_to_both_degree_and_track", "yes"),
+    "value" => variable_get_for_school("prevent_course_assignment_to_both_degree_and_track", "yes", $school_id),
     "hide_please_select" => TRUE,
     "description" => t("If set to 'Yes' (default), then FlightPath will not allow the same course to be assigned to both a Level-1 degree
                        and its tracks.  For example, if a student completes ENGL 101, and it can be assigned to the major COMPSCI, then
                        it cannot also be assigned to the track COMPSCI|_OPT1.  If you are unsure what to select, leave this set to 'Yes'."),
   );  
 
-  
+  // TODO: search and replace in flightpath
   $form["group_list_course_show_repeat_information" . $fs] = array(
     "label" => t("Display 'Repeat Information' for a course in a group's course list?"),
     "type" => "select",
     "options" => array("yes" => "Yes", "no" => "No"),
-    "value" => variable_get("group_list_course_show_repeat_information", "yes"),
+    "value" => variable_get_for_school("group_list_course_show_repeat_information", "yes", $school_id),
     "hide_please_select" => TRUE,
     "description" => t("If set to 'Yes' (default), FlightPath will how many times a groups may be repeated, when viewing a list
                         of a Group's courses in a popup.  If set to 'No', repeat information will not be displayed, and instead
@@ -1793,34 +1763,32 @@ function system_school_data_form($school_id = 0) {
                         are unsure what to select, leave this set to 'Yes'."),
   );  
 
-
+  // TODO: search and replace in flightpath
   $form["degree_requirement_sort_policy" . $fs] = array(
     "type" => "select",
     "label" => t("Degree requirement sort policy:"),
     "options" => array("alpha" => "Alphabetical sort (default)", "database" => "As entered in database [beta]"),
     "hide_please_select" => TRUE,
-    "value" => variable_get("degree_requirement_sort_policy", "alpha"),
+    "value" => variable_get_for_school("degree_requirement_sort_policy", "alpha", $school_id),
     "description" => t("How should degree course requirements appear to the end user?  By default, they will be sorted into alphabetical order.
                        However, if you wish them to appear in the order the were entered on the Edit Degree form, select 'As entered...'.
                        <br>If unsure, select 'Alphabetical sort'."),
   );
   
 
-  
+  // TODO: search and replace in flightpath
   $form["group_requirement_sort_policy" . $fs] = array(
     "type" => "select",
     "label" => t("Group requirement sort policy:"),
     "options" => array("alpha" => "Alphabetical sort (default)", "database" => "As entered in database [beta]"),
     "hide_please_select" => TRUE,
-    "value" => variable_get("group_requirement_sort_policy", "alpha"),
+    "value" => variable_get_for_school("group_requirement_sort_policy", "alpha", $school_id),
     "description" => t("How should group course requirements appear to the end user in the popup dialog window?  By default, they will be sorted into alphabetical order.
                        However, if you wish them to appear in the order the were entered on the Edit Group form, select 'As entered...'.
                        <br>If unsure, select 'Alphabetical sort'."),
   );
     
     
-  
-  
   
   
   return $form;
@@ -2039,6 +2007,8 @@ function system_settings_form() {
   );
   
   
+  
+  
   $form["maintenance_mode"] = array(
     "label" => t("Set maintenance mode?"),
     "type" => "checkbox",
@@ -2162,6 +2132,16 @@ function system_settings_form() {
   );
 
 
+  $form["contact_email_address"] = array(
+    "type" => "textfield",
+    "label" => t("Contact email address:"),
+    "value" => variable_get("contact_email_address", ""),
+    "description" => t("Enter the email address to mail when a user accesses the
+                        Contact FlightPath Production Team popup.  Leave blank to disable the link to the popup."),
+    
+  );
+
+
   $form["notify_apply_draft_changes_email_address"] = array(
     "type" => "textfield",
     "label" => t("Notify apply draft changes email address:"),
@@ -2273,6 +2253,41 @@ function system_settings_form() {
                         may even name it as such.  If you are unsure what to do, leave this unchecked."),    
   );
                 
+        
+  
+  $form["allowed_student_ranks"] = array(
+    "type" => "textfield",
+    "label" => t("Allowed student ranks (CSV):"),
+    "value" => variable_get("allowed_student_ranks", "FR, SO, JR, SR"),
+    "description" => t("This is a list of which student ranks (aka Classifications) are allowed into FlightPath.
+                It should be separated by commas.
+                This also affects which students you may search for on the Advisees
+                tab. Ex: FR, SO, JR, SR"),
+  );
+  
+  $form["rank_descriptions"] = array(
+    "type" => "textarea",
+    "label" => t("Rank descriptions:"),
+    "rows" => 8,
+    "value" => variable_get("rank_descriptions", "FR ~ Freshman\nSO ~ Sophomore\nJR ~ Junior\nSR ~ Senior\nPR ~ Professional\nGR ~ Graduate"),
+    "description" => t("Enter the rank code (from above) and the description which should appear on screen, in the format:
+                        RANK ~ DESC, one per line.
+                        <br>Ex:
+                        <br>&nbsp; FR ~ Freshman
+                        <br>&nbsp; SO ~ Sophomore
+                        <br>&nbsp; JR ~ Junior
+                        <br>&nbsp; SR ~ Senior"),
+  );
+
+  
+  $form["not_allowed_student_message"] = array(
+    "type" => "textarea",
+    "label" => t("Not allowed student message:"),
+    "value" => variable_get("not_allowed_student_message", ""),
+    "description" => t("When a student is NOT allowed into FlightPath because of their
+                rank, this message will be displayed."),    
+  );        
+        
         
   $form['login_help_cid'] = array(
     'label' => t("Enter the 'Need Help Logging In?' Content ID number:"),

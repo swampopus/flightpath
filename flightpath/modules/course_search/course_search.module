@@ -926,8 +926,8 @@ function course_search_display_search() {
   //$rtn .= fp_render_section_title("Courses");
 
 
-  $settings = fp_get_system_settings();
-  $current_catalog_year = $settings["current_catalog_year"];
+  
+  $current_catalog_year = variable_get('current_catalog_year', 2006);  // TODO: school_id?
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;
 
@@ -941,7 +941,7 @@ function course_search_display_search() {
       <form action='" . fp_url("tools/course-search") . "' method='GET' name='mainform' id='myform'>
       
         <select name='catalog_year'>";
-    for ($t = $current_catalog_year; $t >= $GLOBALS["fp_system_settings"]["earliest_catalog_year"]; $t--)
+    for ($t = $current_catalog_year; $t >= variable_get("earliest_catalog_year", 2006); $t--)  // TODO:  school_id?
     {
       $rtn .= "<option value='$t'>$t - " . ($t+1) . "</option> \n";
 

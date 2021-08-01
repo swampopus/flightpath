@@ -558,6 +558,7 @@ function user_subtab_switchboard() {
   
   // For now, we will just always go to the faculty section, though this function
   // is helpful if that needs to change one day.
+  // TODO: school_id? or not needed?
   $de_catalog_year = admin_get_de_catalog_year();
   
   fp_goto("admin/users/faculty", "de_catalog_year=$de_catalog_year");

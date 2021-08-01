@@ -565,8 +565,15 @@ function admin_edit_group_form() {
   $form = array();
   $m = 0;
   
-  $de_catalog_year = admin_get_de_catalog_year();
   $group_id = $_REQUEST["group_id"];
+  $db = get_global_database_handler();
+  $school_id = 0;
+  if ($group_id != "new") {
+    $school_id = $db->get_school_id_for_group_id($group_id);
+  }
+  
+  $de_catalog_year = admin_get_de_catalog_year(TRUE, $school_id);
+  
   
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
@@ -824,11 +831,13 @@ function admin_display_groups_popup_edit_definition() {
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
 
   $group_id = trim($_REQUEST["group_id"]);
-  $de_catalog_year = admin_get_de_catalog_year();
+  
   $group = new Group($group_id, null, -1, false, true);
   $group->load_descriptive_data();
 
   $school_id = intval($group->school_id);
+  
+  $de_catalog_year = admin_get_de_catalog_year(TRUE, $school_id);
   
   $school_name = "";
   if ($school_id > 0) $school_name = " School-" . $school_id;
@@ -1329,7 +1338,7 @@ function admin_display_groups() {
   $render['#id'] = 'admin_display_groups';
   
   
-  
+  // TODO: school_id?
   $de_catalog_year = admin_get_de_catalog_year();
   
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
@@ -1564,6 +1573,8 @@ function admin_groups_list_filter_form_submit($form, $form_state) {
 
 function admin_process_all_definitions_form() {
   $form = array();
+  
+  // TODO: school_id?  Or, not really neceaary?
   $de_catalog_year = admin_get_de_catalog_year();
 
   fp_set_title(t("Process all group definitions and settings for @year", array("@year" => $de_catalog_year)));

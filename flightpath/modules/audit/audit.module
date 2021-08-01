@@ -95,7 +95,9 @@ function audit_settings_form() {
   
 //array("g" => "General Requirements", "c" => "Core", "m" => "Major", "degree" => "Degree")  
 
-  $school_initials = variable_get("school_initials", "ULM");
+  // TODO: separate by school_id
+
+  $school_initials = variable_get("school_initials", "DEMO");
 
   $form["audit_requirement_types"] = array(
     "label" => t("Enter requirement types & labels to display on Audit tab, one per line:"),

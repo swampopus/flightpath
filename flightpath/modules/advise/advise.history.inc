@@ -414,6 +414,9 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
   
     $student = new Student($cur['student_id'], $db);
   
+    $student_id = $cur['student_id'];
+    $school_id = db_get_school_id_from_student_id($student_id);
+  
     $what_if_message = "";
     if (intval($cur['is_whatif']) == 1) {
         
@@ -438,7 +441,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
                 " . t("This advising was saved using <b>What If</b> mode
                 for the degree$ds %degree_title.  According to @initials records,
                 the student's official degree$odsverb %official.", array("%degree_title" => $degree_title_line, 
-                                                              "@initials" => $GLOBALS["fp_system_settings"]["school_initials"], 
+                                                              "@initials" => variable_get_for_school("school_initials", "DEMO", $school_id), 
                                                               "%official" => $official_degree_title));
     }
   

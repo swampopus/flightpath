@@ -1465,7 +1465,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   fp_add_js(fp_get_module_path("advise") . "/js/advise.what-if-selection.js");
   fp_add_css(fp_get_module_path("advise") . "/css/advise.css");    
     
-    
+  $student_school_id = intval($db->get_school_id_for_student_id($current_student_id));  
     
   $form = array();
   $m = 0;
@@ -1484,7 +1484,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   //$settings = fp_get_system_settings();
   $catalog_year = variable_get("current_catalog_year", 0);
   $current_catalog_year = $catalog_year;  // keep track of what the current catalog year is.
-  $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);
+  $earliest_catalog_year = intval(variable_get_for_school("earliest_catalog_year", 2006, $student_school_id));
 
   
   // Use the student's catalog year, based on a setting instead?
@@ -1527,8 +1527,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
 
   $c = 100;
   
-  $student_school_id = intval($db->get_school_id_for_student_id($current_student_id));
-  
+    
   /////////////////////
   // Select a major....
     

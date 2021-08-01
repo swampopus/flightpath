@@ -1023,6 +1023,7 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
   $values = $form_submit["values"];
   
   $db = get_global_database_handler();
+  // TODO: school_id or not needed?
   $de_catalog_year = admin_get_de_catalog_year();
   
   // Check to make sure they entered the transfer passcode correctly.
@@ -1117,14 +1118,19 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
  * Get the "de_catalog_year" from the REQUEST.
  * If it's not there or invalid, pull it from our system settings.
  */
-function admin_get_de_catalog_year($bool_set_earliest_if_blank = TRUE) {
-  
-  $settings = fp_get_system_settings();
+function admin_get_de_catalog_year($bool_set_earliest_if_blank = TRUE, $school_id = 0) {
+  global $current_student_id;
+  $db = get_global_database_handler();
+  if ($current_student_id) {
+    $school_id = $db->get_school_id_for_student_id($current_student_id);
+  }  
+    
+    
   $de_catalog_year = @$_REQUEST["de_catalog_year"];
   
   if ($bool_set_earliest_if_blank) {
-    if (!$de_catalog_year || $de_catalog_year < $settings["earliest_catalog_year"]) {
-      $de_catalog_year = $settings["earliest_catalog_year"];
+    if (!$de_catalog_year || $de_catalog_year < variable_get_for_school("earliest_catalog_year", 2006, $school_id)) {
+      $de_catalog_year = variable_get_for_school("earliest_catalog_year", 2006, $school_id);
     }
   }
   
@@ -1140,6 +1146,7 @@ function admin_menu_handle_replacement_pattern($str) {
   
   if (strpos($str, "%DE_CATALOG_YEAR%") !== 0) {
     // It contains this replacement pattern!
+    // TODO: school_id or not needed?
     $str = str_replace("%DE_CATALOG_YEAR%", admin_get_de_catalog_year(), $str);
   }
   
@@ -1575,7 +1582,9 @@ function admin_display_watchdog() {
  * first sees when the click to go to the Admin page.
  */
 function admin_display_main() {
-  $de_catalog_year = admin_get_de_catalog_year(FALSE);
+  
+  // Use default_school.
+  $de_catalog_year = admin_get_de_catalog_year(FALSE, 0);
   
   // Has the system cron been run recently?
   $cron_last_run = variable_get("cron_last_run", 0);    
@@ -1633,8 +1642,8 @@ function admin_display_main() {
 
   //$settings = fp_get_system_settings();
   
-  $current_catalog_year = variable_get("current_catalog_year", 2006);
-  $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);
+  $current_catalog_year = variable_get("current_catalog_year", 2006);   // TODO: how to figure out school?
+  $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);  // TODO:  how to figure out school?
   
   
   if (user_has_permission("can_access_data_entry")) {

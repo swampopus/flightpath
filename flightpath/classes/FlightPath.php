@@ -96,9 +96,6 @@ class FlightPath extends stdClass
     $student_school_id = $db->get_school_id_for_student_id($student_id);
   
 
-
-    $settings = fp_get_system_settings();
-
     $catalog_year = $student->catalog_year;
     if ($this->bool_what_if)
     {
@@ -114,7 +111,7 @@ class FlightPath extends stdClass
 
     // make sure their catalog year is not past the system's current
     // year setting.
-    if ($catalog_year > $settings["current_catalog_year"] && $settings["current_catalog_year"] > $settings["earliest_catalog_year"])
+    if ($catalog_year > $settings["current_catalog_year"] && $settings["current_catalog_year"] > intval(variable_get_for_year("earliest_catalog_year", 2006, $student_school_id)))
     { // Make sure degree plan is blank if it is!
       $catalog_year = 99999;
     }
@@ -1116,7 +1113,7 @@ class FlightPath extends stdClass
 
 
 
-  function get_all_courses_in_catalog_year($catalog_year = "2006", $bool_load_descriptive_data = false, $limit_start = 0, $limit_size = 0)
+  function get_all_courses_in_catalog_year($catalog_year = "2006", $bool_load_descriptive_data = false, $limit_start = 0, $limit_size = 0, $school_id = 0)
   {
     // Returns a CourseList object of all the
     // undergraduate courses in the
@@ -1131,11 +1128,12 @@ class FlightPath extends stdClass
     $c_array = array();
     $result = $this->db->db_query("SELECT * FROM courses
               WHERE 
-                catalog_year = '?'
-                AND course_num < '{$GLOBALS["fp_system_settings"]["graduate_level_course_num"]}'
+                catalog_year = ?
+                AND course_num < ?
+                AND school_id = ?
               ORDER BY subject_id, course_num
               $lim_line
-              ", $catalog_year);
+              ", $catalog_year, variable_get_for_school("graduate_level_course_num", 5000, $school_id), $school_id);
 
     while($cur = $this->db->db_fetch_array($result))
     { 
@@ -1173,9 +1171,9 @@ class FlightPath extends stdClass
 
     $result = $this->db->db_query("SELECT DISTINCT course_id FROM courses
               WHERE 
-                course_num < '{$GLOBALS["fp_system_settings"]["graduate_level_course_num"]}'
+                course_num < ?
                 LIMIT $limit_start, $limit_size
-              ");
+              ", variable_get("graduate_level_course_num", 5000)); // just use default?
 
     while($cur = $this->db->db_fetch_array($result))
     {

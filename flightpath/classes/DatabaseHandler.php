@@ -478,6 +478,7 @@ class DatabaseHandler extends stdClass
 
 
       $db_exclude = $cur["exclude"];
+      $db_school_id = $cur['school_id'];
       $data_entry_comment = $cur["data_entry_comment"];
 
       // Now, lets get a list of all the valid names for this course.
@@ -528,6 +529,7 @@ class DatabaseHandler extends stdClass
     $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["max_hours"] = $max_hours;
     $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["repeat_hours"] = $repeat_hours;
     $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["db_exclude"] = $db_exclude;
+    $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["school_id"] = $db_school_id;
     $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["array_valid_names"] = $array_valid_names;
 
     $GLOBALS["cache_course_inventory"] = true;  //  rebuild this cache before it closes.
@@ -860,9 +862,9 @@ class DatabaseHandler extends stdClass
 
   function get_group_id($group_name, $catalog_year, $school_id = 0) {
 
-    if ($catalog_year < $GLOBALS["fp_system_settings"]["earliest_catalog_year"])
+    if ($catalog_year < variable_get_for_school("earliest_catalog_year", 2006, $school_id))
     {
-      $catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
+      $catalog_year = variable_get_for_school("earliest_catalog_year", 2006, $school_id);
     }
 
  
@@ -1547,9 +1549,9 @@ class DatabaseHandler extends stdClass
     
     
 
-    if ($catalog_year < $GLOBALS["fp_system_settings"]["earliest_catalog_year"])
+    if ($catalog_year < variable_get_for_school("earliest_catalog_year", 2006, $school_id))
     { // Lowest possible year.
-      $catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
+      $catalog_year = variable_get_for_school("earliest_catalog_year", 2006, $school_id);
     }
 
     $table_name = "degrees";

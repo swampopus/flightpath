@@ -17,6 +17,7 @@ function admin_display_courses() {
   
 
 
+// TODO:  get school_id?
 
   $de_catalog_year = admin_get_de_catalog_year();
 
@@ -364,11 +365,15 @@ function admin_courses_list_filter_form_submit($form, $form_state) {
 function admin_edit_course_form() {
   $form = array();
   
-  $de_catalog_year = admin_get_de_catalog_year();
+  $db = get_global_database_handler();
+  
   $course_id = @$_REQUEST["course_id"];
   $subject_id = @$_REQUEST["subject_id"];
   $subject_id = str_replace("_A_","&",$subject_id);  
   $course_num = @$_REQUEST["course_num"];
+  
+  $school_id = $db->get_school_id_for_course_id($course_id, TRUE);  
+  $de_catalog_year = admin_get_de_catalog_year(TRUE, $school_id);  
   
   $m = 0;
   

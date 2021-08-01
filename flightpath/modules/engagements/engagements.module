@@ -1485,6 +1485,10 @@ function engagements_form_alter(&$form, $form_id) {
         if (isset($_GET['student_id'])) {
           $form['student_id']['value'] = $_GET['student_id'];
           
+          
+          $initials = variable_get_for_school("school_initials", "DEMO", db_get_school_id_for_student_id($_GET['student_id']));
+          
+          
           $form['student_id']['attributes'] = array('class' => 'hidden');
           $extra_mark = "";
           
@@ -1653,6 +1657,9 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state) {
   
   $initials = variable_get("school_initials", "DEMO");
   
+  $initials = variable_get_for_school("school_initials", "DEMO", db_get_school_id_for_student_id($student_id));
+
+   
   // TODO:  this might need to be a setting with replacement values!
   // Add header to msg...
   $header = "($initials) " . t("from") . " $faculty_name:\n";  

@@ -273,9 +273,12 @@ function draw_menu_items($menu_array) {
    */
   function output_to_browser()
   {
+    global $user;
     // This method will output the screen to the browser.
     // outputs the $page_content variable.
 
+    $school_id = $user->school_id;
+    
     $theme_location = fp_theme_location();  // file location of the theme folder
   
     $page_content = $this->page_content;
@@ -301,7 +304,7 @@ function draw_menu_items($menu_array) {
             
     if ($page_title == "") { 
       // By default, page title is this...
-      $page_title = $GLOBALS["fp_system_settings"]["school_initials"] . " " . $system_name;
+      $page_title = variable_get_for_school("school_initials", "DEMO", $school_id) . " " . $system_name;
     }
     
     $page_display_title = $page_title;
@@ -568,6 +571,8 @@ function draw_menu_items($menu_array) {
     // Basically, go through all the courses the student has taken,
     // And only show the transfers.  This is similar to Excess credit.
 
+    $student_id = $this->student->student_id;
+    $school_id = db_get_school_id_from_student_id($student_id);
 
 
     $this->student->list_courses_taken->sort_alphabetical_order(false, true);
@@ -605,7 +610,7 @@ function draw_menu_items($menu_array) {
         <td colspan='10'>
         <div class=' ' style='margin-top: 10px; padding: 3px;'>
         <b>*</b> Courses marked with an asterisk (*) have
-          equivalencies at {$GLOBALS["fp_system_settings"]["school_initials"]}.  
+          equivalencies at " . variable_get_for_school("school_initials", "DEMO", $school_id) . ".  
           Click on the course for more
           details.      
         </div>    
@@ -785,6 +790,9 @@ function draw_menu_items($menu_array) {
   {
     // Display the footnotes & messages.
 
+    $student_id = $this->student->student_id;
+    $school_id = db_get_school_id_from_student_id($student_id);
+    
     $pC = "";
     $is_empty = true;
     if ($bool_include_box_top) {
@@ -798,7 +806,7 @@ function draw_menu_items($menu_array) {
     $fn_name = array("substitution" => t("Substitutions"), 
                     "transfer" => t("Transfer Equivalency Footnotes"));
     $fn_between = array("substitution" => t("for"),
-                       "transfer" => t("for") . " {$GLOBALS["fp_system_settings"]["school_initials"]}'s");
+                       "transfer" => t("for") . " " . variable_get_for_school("school_initials", "DEMO", $school_id) . "'s");
     for ($xx = 0; $xx <= 1; $xx++)
     {
       $fn_type = $fn_type_array[$xx];
@@ -1208,6 +1216,8 @@ function draw_menu_items($menu_array) {
 
     $retake_grades = csv_to_array(variable_get("retake_grades", "F,W"));
     
+    $student_id = $this->student->student_id;
+    $school_id = db_get_school_id_from_student_id($student_id);
     
     $this->student->list_courses_taken->sort_alphabetical_order(false, true);
     $this->student->list_courses_taken->reset_counter();
@@ -1250,7 +1260,7 @@ function draw_menu_items($menu_array) {
       {
         $pC .= "<div class=' '><b> +/- </b> This course's hours were split in a substitution.</div>";
       }
-      $initials = $GLOBALS["fp_system_settings"]["school_initials"];
+      $initials = variable_get_for_school("school_initials", "DEMO", $school_id);
       // Does this course NOT have an equivalency?
       if ($c->course_id == 0)
       {
@@ -1304,6 +1314,7 @@ function draw_menu_items($menu_array) {
     $pC .= fp_render_section_title(t("All Student Courses"));
 
     $csid = $_REQUEST["current_student_id"];
+    $school_id = db_get_school_id_from_student_id($csid);
     $order = $_REQUEST["order"];
     if ($order == "name")
     {
@@ -1351,7 +1362,7 @@ function draw_menu_items($menu_array) {
           $eqv_line = "<tr>
               <td colspan='8' class=' '
                 style='padding-left: 20px;'>
-                <i>*eqv to {$GLOBALS["fp_system_settings"]["school_initials"]} $l_s_i $l_c_n</i></td>
+                <i>*eqv to " . variable_get_for_school("school_initials", "DEMO", $school_id) . " $l_s_i $l_c_n</i></td>
               </tr>";
         }
         $l_s_i = $c->course_transfer->subject_id;
@@ -2367,6 +2378,8 @@ function draw_menu_items($menu_array) {
       return $pC;
     }
 
+    $school_id = $course->school_id;
+
     // Not sure I need this line anymore.
     $datastring_max_hours = $course->max_hours;    
     
@@ -2401,7 +2414,7 @@ function draw_menu_items($menu_array) {
 
     $course->fix_title();
 
-    $initials = $GLOBALS["fp_system_settings"]["school_initials"];
+    $initials = variable_get("school_initials", "DEMO", $school_id);
     
     $pC .= "<!--EQV1-->";
     $bool_transferEqv = true;
@@ -3000,6 +3013,8 @@ function draw_menu_items($menu_array) {
    */
   function fix_institution_name($str)
   {  
+    $student_id = $this->student->student_id;
+    $school_id = db_get_school_id_from_student_id($student_id);
      
     // Should we do this at all?  We will look at the "autocapitalize_institution_names" setting.
     $auto = $GLOBALS["fp_system_settings"]["autocapitalize_institution_names"];
@@ -3020,7 +3035,7 @@ function draw_menu_items($menu_array) {
     
     // Fix school initials.
     // Turns "Ulm" into "ULM"
-    $school_initials = $GLOBALS["fp_system_settings"]["school_initials"];
+    $school_initials = variable_get_for_school("school_initials", "DEMO", $school_id);
     $str = str_replace(ucwords(strtolower($school_initials)), $school_initials, $str);    
     
 
@@ -5053,9 +5068,11 @@ function draw_menu_items($menu_array) {
     
     $this->student->list_courses_taken->sort_alphabetical_order(false, true, FALSE, $req_by_degree_id);
     
+    $school_id = db_get_school_id_from_student_id($this->student->student_id);
+    
     for ($t = 0; $t <= 1; $t++)
     {
-      if ($t == 0) {$the_title = "{$GLOBALS["fp_system_settings"]["school_initials"]} " . t("Credits"); $bool_transferTest = true;}
+      if ($t == 0) {$the_title = variable_get_for_school("school_initials", "DEMO", $school_id) . " " . t("Credits"); $bool_transferTest = true;}
       if ($t == 1) {$the_title = t("Transfer Credits"); $bool_transferTest = false;}
 
       $pC .= "<tr><td colspan='3' valign='top' class=' ' style='padding-bottom: 10px;'>

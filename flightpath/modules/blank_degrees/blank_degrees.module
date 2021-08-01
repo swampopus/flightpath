@@ -325,7 +325,7 @@ function blank_degrees_select_degree_form() {
       $current_catalog_year = variable_get("current_draft_catalog_year", 2006);
     }
     
-    $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);
+    $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);  // TODO: how to handle school_id?
     for($t = $current_catalog_year; $t >= $earliest_catalog_year; $t--) {
       $catalog_year_options[$t] = "$t-" . ($t+1);
     }    
