@@ -746,7 +746,6 @@ function db_table_exists($table_name) {
 function variable_get($name, $default_value = "") {
   
   $val = null;
-  
   // First, check in our GLOBALS array, like a cache...
   if (isset($GLOBALS["fp_system_settings"][$name])) {
     $val = $GLOBALS["fp_system_settings"][$name];        
@@ -754,7 +753,7 @@ function variable_get($name, $default_value = "") {
   else {    
     // Not found-- look in the database for it.
     $res = db_query("SELECT value FROM variables
-                           WHERE name = '?' ", $name);
+                           WHERE name = ? ", array($name));
     $cur = db_fetch_array($res);    
     @$val = unserialize($cur["value"]);
 

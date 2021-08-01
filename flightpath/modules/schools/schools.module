@@ -837,11 +837,13 @@ function schools_form_alter(&$form, $form_id) {
     fp_add_css(fp_get_module_path('schools') . '/css/style.css');
 
     $school_id = intval($form['school_id']['value']);
-    if ($school_id !== 0) {                
-      $form['school_use_default_school_values'] = array(
+    if ($school_id !== 0) {
+            
+      $form['school_use_default_school_values~~school_' . $school_id] = array(
         'label' => t("Use \"Default\" school values?"),
         'type' => 'checkbox',
-        'value' => TRUE,
+        'value' => variable_get("school_use_default_school_values~~school_" . $school_id, TRUE),
+        'attributes' => array('class' => 'school-use-default-values-checkbox'),
         'description' => t("If checked, we will use all of the <em>Default</em> school's settings for this school.  If you need to change any settings
                             for this school, then uncheck this box to make changes.") . "<div id='use-default-remember'>" . t("Remember to save at the bottom of the screen.") . "</div>",
         'weight' => -100,

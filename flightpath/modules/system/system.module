@@ -1040,6 +1040,8 @@ function system_school_data_form($school_id = 0) {
   $form = array();
   $m = 0;
   
+  $school_id = intval($school_id);
+  
   $fs = "";  // The field name suffix.  We will add this to the end of all of our field names.  If this is the default school, leave blank.
   if (function_exists('schools_menu')) {
     $school_name = schools_get_school_name_for_id($school_id);
@@ -2469,6 +2471,20 @@ function system_handle_form_submit() {
         if (@$element["type"] != "password") {
           $safe_values[$name] = @$_POST[$name];
         }
+        
+        
+        // If this is a checkbox, and we have any value in the POST, it should
+        // be saved as boolean TRUE
+        if (isset($element["type"]) && $element["type"] == "checkbox") {
+          if (isset($_POST[$name]) && $_POST[$name] === "1") {
+            $values[$name] = TRUE;          
+          }
+          else {
+            $values[$name] = FALSE;
+          }        
+        }
+        
+        
                 
       }
       // Do we need to alter the value from the POST?
@@ -2486,6 +2502,18 @@ function system_handle_form_submit() {
               if (@$celement["type"] != "password") {
                 $safe_values[$cname] = @$_POST[$cname];
               }
+
+              // If this is a checkbox, and we have any value in the POST, it should
+              // be saved as boolean TRUE
+              if (isset($celement["type"]) && $celement["type"] == "checkbox") {
+                if (isset($_POST[$cname]) && $_POST[$cname] === "1") {
+                  $values[$cname] = TRUE;          
+                }
+                else {
+                  $values[$cname] = FALSE;
+                }        
+              }
+
               
               
             }
@@ -2494,13 +2522,6 @@ function system_handle_form_submit() {
       }
       
       
-      // If this is a checkbox, and we have any value in the POST, it should
-      // be saved as boolean TRUE
-      if (isset($element["type"]) && $element["type"] == "checkbox") {
-        if (isset($_POST[$name]) && $_POST[$name] === "1") {
-          $values[$name] = TRUE;          
-        }        
-      }
 
     }
   }  

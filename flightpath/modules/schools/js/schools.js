@@ -3,7 +3,7 @@ $(document).ready(function() {
   
   schoolsDisableEnableFieldsOnSchoolSettingsForm();
   
-  $("#element-school_use_default_school_values").change(function() {
+  $(".school-use-default-values-checkbox").change(function() {
     var ischecked = $(this).is(':checked');
     
     $("#use-default-remember").show();
@@ -21,7 +21,7 @@ $(document).ready(function() {
 
 
 function schoolsDisableEnableFieldsOnSchoolSettingsForm() {
-  var ischecked = $("#element-school_use_default_school_values").is(':checked');
+  var ischecked = $(".school-use-default-values-checkbox").is(':checked');
   
   if (ischecked == true) {
     
@@ -39,8 +39,8 @@ function schoolsDisableEnableFieldsOnSchoolSettingsForm() {
     $("#fp-form-system_school_data_form .element-type-checkbox .form-element").addClass('disable-element');
 
     // Re-enable our "use default values" checkbox and submit button
-    $("#fp-form-system_school_data_form #element-wrapper-school_use_default_school_values .form-element").removeAttr('readonly');
-    $("#fp-form-system_school_data_form #element-wrapper-school_use_default_school_values .form-element").removeClass('disable-element');
+    $("#fp-form-system_school_data_form .element-wrapper--school-use-default-values-checkbox .form-element").removeAttr('readonly');
+    $("#fp-form-system_school_data_form .element-wrapper--school-use-default-values-checkbox .form-element").removeClass('disable-element');
     
     $("#fp-form-system_school_data_form .element-type-submit input").removeAttr('readonly');
     $("#fp-form-system_school_data_form .element-type-submit input").removeClass('disable-element');
@@ -59,6 +59,10 @@ function schoolsDisableEnableFieldsOnSchoolSettingsForm() {
     
     $("#fp-form-system_school_data_form select").removeAttr('readonly');
     $("#fp-form-system_school_data_form select").removeClass('disable-element');
+
+    $("#fp-form-system_school_data_form .element-type-checkbox .form-element").removeAttr('readonly');
+    $("#fp-form-system_school_data_form .element-type-checkbox .form-element").removeClass('disable-element');
+
     
     
   } // ischecked = false

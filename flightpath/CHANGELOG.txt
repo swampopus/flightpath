@@ -10,6 +10,10 @@ FlightPath 6.x Changelog
   
   Tweaked tabs' css slightly to give a little more whitespace below tabs.
 
+  Fixed bug where unchecked checkbox was never being saved as boolean false, and was instead being saved as NULL.  Also, wasn't working
+  if inside a fieldset.
+  
+
 2021-07-30
   Fixed bug in Calendar with Upcoming Appointments still not showing "today" and "tomorrow" appointments correctly.  Went with different approach.
   
