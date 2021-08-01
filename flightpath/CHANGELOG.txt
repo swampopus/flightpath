@@ -6,7 +6,9 @@ FlightPath 6.x Changelog
   
   Added school_id to primary key for table degree_college
   
+  In AdvisingScreen's output_to_browser(), $page_title has tags stripped before being used as HTML tag <title>
   
+  Tweaked tabs' css slightly to give a little more whitespace below tabs.
 
 2021-07-30
   Fixed bug in Calendar with Upcoming Appointments still not showing "today" and "tomorrow" appointments correctly.  Went with different approach.

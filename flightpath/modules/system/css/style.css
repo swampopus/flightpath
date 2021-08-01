@@ -324,12 +324,13 @@ ___dashboard{}
   padding-left: 20px;
 }
 
-.disable-element {  
-  pointer-events: none;
-}
 
-input.disable-element {
-  background-color: #bbb;
+input.disable-element,
+.disable-element
+{
+  background-color: #eee;
+  color: #777;
+  pointer-events: none;
 }
 
 

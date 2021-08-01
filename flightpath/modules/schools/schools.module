@@ -221,9 +221,8 @@ function schools_menu() {
           ),
         ),
       ),    
-      "type" => MENU_TYPE_SUB_TAB,
-      "tab_family" => "config_school_settings",
-      "tab_parent" => "admin-tools/admin",
+      "type" => MENU_TYPE_TAB,
+      "tab_family" => "config_school_settings",      
       "weight" => $weight,    
     );      
   }
@@ -827,6 +826,31 @@ function schools_form_alter(&$form, $form_id) {
     
   } // form is admin_urgent_message_form
 
+  
+  
+  
+  
+  if ($form_id == "system_school_data_form") {
+    // We want to add a "use default" checkbox at the top, which, if set, will disable all of the form elements.        
+    fp_add_js(fp_get_module_path('schools') . '/js/schools.js');
+    fp_add_css(fp_get_module_path('system') . '/css/style.css');
+    fp_add_css(fp_get_module_path('schools') . '/css/style.css');
+
+    $school_id = intval($form['school_id']['value']);
+    if ($school_id !== 0) {                
+      $form['school_use_default_school_values'] = array(
+        'label' => t("Use \"Default\" school values?"),
+        'type' => 'checkbox',
+        'value' => TRUE,
+        'description' => t("If checked, we will use all of the <em>Default</em> school's settings for this school.  If you need to change any settings
+                            for this school, then uncheck this box to make changes.") . "<div id='use-default-remember'>" . t("Remember to save at the bottom of the screen.") . "</div>",
+        'weight' => -100,
+      );   
+    }
+    
+  } // system_school_data_form
+  
+  
     
   
 } // hook_form_alter

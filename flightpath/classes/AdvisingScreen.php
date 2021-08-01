@@ -309,6 +309,8 @@ function draw_menu_items($menu_array) {
       $page_display_title = "";
     }
 
+    $page_title = strip_tags($page_title);
+    
     
     $page_breadcrumbs = fp_render_breadcrumbs();
     
