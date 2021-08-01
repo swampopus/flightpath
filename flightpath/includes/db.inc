@@ -783,6 +783,23 @@ function variable_get($name, $default_value = "") {
 }
 
 
+function variable_get_for_school($name, $default_value = "", $school_id = 0) {
+  $school_id = intval($school_id);
+  // If this is the default school, OR, we are using default vals fr this school, then use variable_get normally
+  if ($school_id === 0 || variable_get("school_use_default_school_values~~school_" . $school_id, FALSE) === TRUE) {
+    return variable_get($name, $default_value);  // for default school, just work normally.
+  }
+  
+  // If we are here, we need to get using a fieldname suffic with the school id.
+  return variable_get($name . "~~school_" . $school_id, $default_value);
+  
+}
+
+
+
+
+
+
 /**
  * Set a variable value, so we can retrieve it later on.
  * 
