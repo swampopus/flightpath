@@ -1367,7 +1367,7 @@ function system_school_data_form($school_id = 0) {
                         <br>If unsure, set to Yes."),
   );
 
-  // TODO: search and replace in flightpath
+
   $form["initial_student_course_sort_policy" . $fs] = array(
     "type" => "select",
     "label" => t("Initial student course sort policy:"),
@@ -1380,7 +1380,7 @@ function system_school_data_form($school_id = 0) {
                         Any student grades not defined below will be considered the lowest possible grade."),
   );
   
-  // TODO: search and replace in flightpath
+  
   $form["grade_order" . $fs] = array(
     "type" => "textfield",
     "label" => t("Grade order (CSV):"),
@@ -1392,7 +1392,7 @@ function system_school_data_form($school_id = 0) {
   );
   
   
-  // TODO: search and replace in flightpath
+  
   $form["retake_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Retake grades (CSV):"),
@@ -1401,7 +1401,7 @@ function system_school_data_form($school_id = 0) {
                 retake this course. They did not earn credit.' Ex: F,W,I"),    
   );
   
-  // TODO: search and replace in flightpath       
+         
   $form["withdrew_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Withdrew grades (CSV):"),
@@ -1411,7 +1411,7 @@ function system_school_data_form($school_id = 0) {
                 what to enter here, just enter 'W'."),    
   );  
   
-  // TODO: search and replace in flightpath
+  
   $form["enrolled_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Enrolled grades (CSV):"),
@@ -4182,7 +4182,7 @@ function system_disable_module($module_details) {
  * Construct an HTML element and return it.
  *
  */
-function system_build_element($name, $type = "", $label = "", $description = "", $default_value = "", $csv_to_array = FALSE) {
+function z__system_build_element($name, $type = "", $label = "", $description = "", $default_value = "", $csv_to_array = FALSE) {
   
   $rtn = "";
   

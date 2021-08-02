@@ -656,7 +656,7 @@ function db_get_user_settings($user_id) {
 
 function db_get_school_id_from_student_id($student_id) {
   $db = get_global_database_handler();
-  return $db->get_school_id_from_student_id($student_id);
+  return $db->get_school_id_for_student_id($student_id);
 }
 
 
@@ -864,7 +864,7 @@ function fp_rebuild_modules_list($reinclude = TRUE) {
 
 
 
-function fp_get_system_settings($force_rebuild = FALSE) {
+function z__fp_get_system_settings($force_rebuild = FALSE) {
   depricated_message("Using fp_get_system_settings() is deprecated.");
   
   if ($force_rebuild == FALSE && isset($GLOBALS["fp_system_settings"])) {

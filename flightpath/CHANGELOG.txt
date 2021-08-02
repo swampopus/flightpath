@@ -1,6 +1,15 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-08-02
+  Added new menu type:  MENU_TYPE_DEFAULT_TAB. This is a tab which otherwise behaves like a MENU_TYPE_NORMAL_ITEM.
+  
+  Added new page_setting to menu router api:  $item['page_settings']['tab_title'] = "blah". This is an optional special string
+  used just for the tab of a page, separate from it's regular title.
+  
+  Replaced calls to GLOBALS['fp_system_settings'] array with variable_get() where appropriate.  Cleaned up unused functions.
+  
+
 2021-08-01
   Deprecating fp_get_system_settings() function.  It is now better served by simple use of variable_get().
   

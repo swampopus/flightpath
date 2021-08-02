@@ -565,9 +565,9 @@ function z__stats_report_selected_degree_options() {
             GROUP BY a.cwid";      
     
 
-    $rank_in = "( '" . join("', '", csv_to_array($GLOBALS["fp_system_settings"]["allowed_student_ranks"])) . "' )";    
+    $rank_in = "( '" . join("', '", csv_to_array(variable_get("allowed_student_ranks",''))) . "' )";    
     $sql = str_replace("%RANKIN%", $rank_in, $sql);   
-    $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", @$GLOBALS["fp_system_settings"]["extra_student_search_conditions"], $sql);  
+    $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", variable_get("extra_student_search_conditions",''), $sql);  
 
     $result = db_query($sql, $major);
     

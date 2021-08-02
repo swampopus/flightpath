@@ -278,9 +278,9 @@ class DatabaseHandler extends stdClass
     
     
     // If we are on production, email someone!
-    if (@$GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"] != "")
+    if (variable_get("notify_mysql_error_email_address",'') != "")
     {
-      $server = $_SERVER["SERVER_NAME"] . " - " . $GLOBALS['fp_system_settings']['base_url'];
+      $server = $_SERVER["SERVER_NAME"] . " - " . $GLOBALS['fp_system_settings']['base_url'];  // intentionally use the GLOBALS here, since it comes from settings.php file.
       $email_msg = t("A MYSQL error has occured in FlightPath.") . "  
       Server: $server
       
@@ -294,7 +294,7 @@ class DatabaseHandler extends stdClass
       Backtrace:
       " . print_r($arr, true) . "
       ";
-      fp_mail($GLOBALS["fp_system_settings"]["notify_mysql_error_email_address"], "FlightPath MYSQL Error Reported on $server", $email_msg);
+      fp_mail(variable_get("notify_mysql_error_email_address",''), "FlightPath MYSQL Error Reported on $server", $email_msg);
     }
         
     fpm(t("A MySQL error has occured:") . " $message<br><br>Location: $file_and_line<br><br>" . t("The backtrace:"));

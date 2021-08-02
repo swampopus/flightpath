@@ -327,7 +327,7 @@ function course_search_display_courses() {
   
 
   
-  $current_catalog_year = $settings["current_catalog_year"];
+  $current_catalog_year = variable_get("current_catalog_year",'');
 
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;  
@@ -890,7 +890,7 @@ function course_search_get_course_syllabus_details($subject_id = "", $course_num
 	$res = db_query($query);
 	$cur = db_fetch_array($res);
 	
-	//$url = $GLOBALS["fp_system_settings"]["selfURL"] . "/" . get_module_path("course_search") . "/syllabus.php?id=" . $cur["course_id"];
+	
 
 	if ($cur["filename"] != "") {
 	  $rtn_array = array();

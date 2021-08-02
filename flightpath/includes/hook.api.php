@@ -763,11 +763,12 @@ function hook_apply_draft_changes() {
  *    permission, by only setting access_arguments.
  *  - access_arguments: An array containing the arguments to pass to the access_callback function.  If the access_callback
  *    function is omitted, it is assumed to be "user_has_permission", in which case you may simply specify
- *    an array of permissions here. May contain numerican references to wildcards in the URL.
+ *    an array of permissions here. May contain numerical references to wildcards in the URL.
  *  - type: A constant value describing the type of menu item it is.  Examples are: 
  *    - MENU_TYPE_NORMAL_ITEM - A standard menu item.  Will output as a link if the URL conforms to certain requirements.
  *    - MENU_TYPE_CALLBACK - A menu item which will not display itself on any blocks.
  *    - MENU_TYPE_TAB - A menu item which will output the page it draws with a tab at the top, or part of a tab family.
+ *    - MENU_TYPE_DEFAULT_TAB - This is a menu item which will be rendered in a block like a CALLBACK, but is in fact the first in a tab family.
  *    - MENU_TYPE_SUB_TAB - This will output the page as a "sub tab" under the main tab.  Ex: the student search tab's subtabs, or
  *      the View tab's Display by Year and Display By Type sub tabs.
  *  - tab_family: If this menu item is a tab, specifying a machine name for the tab family will group all other tabs
@@ -785,11 +786,10 @@ function hook_apply_draft_changes() {
  *    - page_hide_report_error: TRUE or FALSE.  Should the "Contact the FlightPath Production Team" link be shown at the bottom of the screen.
  *    - page_is_popup: TRUE or FALSE.  Whether or not the page is going to be displayed in a popup.  Will remove the banner and other
  *      elements which might not look good in a popup window.
- *    - display_greeting: TRUE or FALSE. Should the page have the greeting text at the top? Ex: see the Main tab.
  *    - display_currently_advising: TRUE or FALSE. Should the page display the "Currently Advising" box at the top of the page?
  *    - screen_mode: If set to "not_advising" while display_currently_advising is set to TRUE, it will not display the options
  *      to change degree options or advising terms.
- *    - bool_print: Set to TRUE if this page is meant to be printable (it is formatted to print easily).
+ *    - tab_title: This is a string which, if this is a tab, this will be the tab's text.  If not present, we will use the regular title.
  *    - target: The anchor target of this menu item (if it is drawn in a block). Ex: "_blank"
  *    - menu_icon: A string which points to an icon to display with this link, if it is being displayed in a block.
  *    - menu_links: An array of links.  This is an array of parameters which would fit very will into the l() function.

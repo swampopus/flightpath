@@ -936,8 +936,8 @@ class Course extends stdClass
     $grade = $this->grade;
     // Get these grade definitions from our system settings
     // Configure them in custom/settings.php
-    $retake_grades = csv_to_array($GLOBALS["fp_system_settings"]["retake_grades"]);
-    $enrolled_grades = csv_to_array($GLOBALS["fp_system_settings"]["enrolled_grades"]);
+    $retake_grades = csv_to_array(variable_get_for_school("retake_grades", '', $this->school_id));
+    $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades",'', $this->school_id));
 
 
     if (in_array($grade, $retake_grades))
@@ -967,9 +967,9 @@ class Course extends stdClass
 
     // Get these grade definitions from our system settings
     // Configure them in custom/settings.php
-    $retake_grades = csv_to_array($GLOBALS["fp_system_settings"]["retake_grades"]);
-    $enrolled_grades = csv_to_array($GLOBALS["fp_system_settings"]["enrolled_grades"]);
-
+    $retake_grades = csv_to_array(variable_get_for_school("retake_grades", '', $this->school_id));
+    $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades",'', $this->school_id));
+    
     if ($grade == "") {
       return false;
     }
@@ -1009,11 +1009,8 @@ class Course extends stdClass
     // of the supplied course requirement?
 
     // Get these grade definitions from our system settings
-    // Configure them in custom/settings.php
-    $b_or_better = csv_to_array($GLOBALS["fp_system_settings"]["b_or_better"]);
-    $c_or_better = csv_to_array($GLOBALS["fp_system_settings"]["c_or_better"]);
-    $d_or_better = csv_to_array($GLOBALS["fp_system_settings"]["d_or_better"]);
-    $enrolled_grades = csv_to_array($GLOBALS["fp_system_settings"]["enrolled_grades"]);
+    // Configure them in custom/settings.php    
+    $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades", '', $this->school_id));
 
     if ($course_req != null) {
       $min_grade = $course_req->min_grade;
@@ -1035,7 +1032,7 @@ class Course extends stdClass
     }
 
     // Okay, let's check those min grade requirements...
-    $grade_order = csv_to_array(strtoupper(variable_get("grade_order", "AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I")));    
+    $grade_order = csv_to_array(strtoupper(variable_get_for_school("grade_order", "AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I", $this->school_id)));    
   
     // Make it so the indexes are the grades, their numeric values are values.    
     $grade_order = array_flip($grade_order);
@@ -1048,30 +1045,6 @@ class Course extends stdClass
     
     
     if ($this_weight <= $req_weight) return TRUE;  // yay, we have the min grade!
-
- 
-/*
-    if ($min_grade == "A" && $this->grade == "A")
-    {
-      return true;
-    }
-
-    if ($min_grade == "B" && in_array($this->grade, $b_or_better))
-    {
-      return true;
-    }
-
-    if ($min_grade == "C" && in_array($this->grade, $c_or_better))
-    {
-      return true;
-    }
-
-    if ($min_grade == "D" && in_array($this->grade, $d_or_better))
-    {
-      return true;
-    }
-*/
-
 
 
     return false;
@@ -1911,7 +1884,7 @@ class Course extends stdClass
 
     if (strstr($this->term_id, "1111"))
     {
-      ///$this->catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
+      
       $this->catalog_year = variable_get_for_school("earliest_catalog_year", 2006, $this->school_id);
     }
 
@@ -1921,9 +1894,9 @@ class Course extends stdClass
     // setting, then set it to that.
 
 
-    if ($this->catalog_year > $GLOBALS["fp_system_settings"]["current_catalog_year"])
+    if ($this->catalog_year > variable_get("current_catalog_year","")
     {
-      $this->catalog_year = $GLOBALS["fp_system_settings"]["current_catalog_year"];
+      $this->catalog_year = variable_get("current_catalog_year","");
     }
 
 

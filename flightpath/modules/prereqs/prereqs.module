@@ -523,7 +523,7 @@ function prereqs_get_prereq_warnings_for_course(Course $course, Student $student
     // Let's get the prereqs array for this course.
     $prereqs = prereqs_get_prereq_array_for_course($course->course_id);
         
-    $retake_grades = csv_to_array(variable_get("retake_grades", "W,F"));
+    $retake_grades = csv_to_array(variable_get_for_school("retake_grades", "W,F", $course->school_id));
     
     if (count($prereqs) > 0) {
 

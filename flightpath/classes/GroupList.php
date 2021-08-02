@@ -436,8 +436,9 @@ class GroupList extends ObjList
    */
   function sort_best_grade_first_by_student_grades(Student $student) {
 
+    $school_id = $student->school_id;
     
-    $temp = csv_to_array(variable_get("grade_order", "AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I"));    
+    $temp = csv_to_array(variable_get_for_school("grade_order", "AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I", $school_id));    
     // We will use array_flip to get back an assoc array where the grades are the keys and the indexes are the values.
     $temp = array_flip($temp);
     // Go through the grades and convert the integers to strings, padd with zeros so that everything is at least 3 digits.

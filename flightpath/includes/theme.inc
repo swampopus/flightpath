@@ -541,7 +541,7 @@ function format_date($timestamp = 0, $format = "standard", $custom = "") {
  * So if the menu root is tools, it might return items whose paths look like:
  *   tools/fun
  *   tools/here/there
- * So long as the menu type is "MENU_TYPE_NORMAL_ITEM".  Other types will be ignored.
+ * So long as the menu type is "MENU_TYPE_NORMAL_ITEM" or "MENU_TYPE_DEFAULT_TAB".  Other types will be ignored.
  * 
  * 
  * We want to 
@@ -559,7 +559,7 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
   foreach ($menu_items as $item) {
     if ($item['path'] === $menu_root) continue;   // don't need to duplicate the menu root link itself
     
-    if ($item["type"] != MENU_TYPE_CALLBACK && $item['type'] != MENU_TYPE_SUB_TAB) {
+    if ($item["type"] == MENU_TYPE_NORMAL_ITEM || $item['type'] == MENU_TYPE_DEFAULT_TAB) {
       $rtn .= fp_render_menu_item($item);
       $is_empty = false;
     }
@@ -627,7 +627,7 @@ function fp_display_page($page) {
   }
   
   // Was this page a tab?  And if so, are there any other tabs we need to display? //
-  if (@$page["router_item"]["type"] == MENU_TYPE_TAB || @$page["router_item"]["tab_parent"] != "") {
+  if (@$page["router_item"]["type"] == MENU_TYPE_TAB || @$page["router_item"]["type"] == MENU_TYPE_DEFAULT_TAB || @$page["router_item"]["tab_parent"] != "") {
     // We know we should have at least 1 tab for this page.
     $tab_array = fp_build_tab_array($page);        
     $screen->page_tabs = fp_render_tab_array($tab_array);    
@@ -848,17 +848,17 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
     $bool_catalog_warning = true;
   }
 
-  if ($settings["current_catalog_year"] > intval(variable_get_for_school("earliest_catalog_year", 2006, $school_id))) {
+  if (variable_get("current_catalog_year",'') > intval(variable_get_for_school("earliest_catalog_year", 2006, $school_id))) {
     // Is the student's catalog set beyond the range that
     // FP has data for?  If so, show a warning.
-    if ($student->catalog_year > $settings["current_catalog_year"])
+    if ($student->catalog_year > variable_get("current_catalog_year",''))
     {
       
       $alert_msg = t("This student&#039;s catalog year is @cat_year, 
                       and specific curriculum requirements are not yet 
                       available for this year.  
                       To advise this student according to @new_cat
-                      requirements, select the student&#039;s major using What If.", array("@cat_year" => $cat_year, "@new_cat" => "{$settings["current_catalog_year"]}-" . ($settings["current_catalog_year"] + 1)));      
+                      requirements, select the student&#039;s major using What If.", array("@cat_year" => $cat_year, "@new_cat" => variable_get("current_catalog_year",'') . "-" . (variable_get("current_catalog_year",'') + 1)));      
       
       $cat_year = "<span class='catalog-year-alert-too-far'>$cat_year<a href='javascript:fp_alert(\"$alert_msg\");' title='" . t("Important Notice") . "'><i class='fa fa-exclamation-triangle'></i></a></span>";
       $bool_future_catalog_warning = true;
@@ -1012,7 +1012,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
       
       // Only change to current if that is how our settings are set...
       if (variable_get_for_school("what_if_catalog_year_mode", "current", $school_id) == "current") {
-        $student->catalog_year = $settings["current_catalog_year"];
+        $student->catalog_year = variable_get("current_catalog_year",'');
       }
     }
     
@@ -1685,7 +1685,6 @@ function fp_build_tab_array($page) {
       $active_tab_path = $item["path"];
       
     }
-        
     
     // look for other possible tabs, based on the "tab_family" value 
     // Also check to make sure the user has access to the tab.   
@@ -1697,8 +1696,13 @@ function fp_build_tab_array($page) {
         continue;
       }
       
-      $title = $item["title"];
+      $title = $tab_title = $item["title"];
       $path = $item["path"];
+      
+      if (isset($item["page_settings"]["tab_title"])) {
+        $tab_title = $item["page_settings"]["tab_title"];
+      }
+      
       
       if (strstr($path, "%")) {
         // it contains at least one wildcard.  So, let's replace the wildcard with
@@ -1738,13 +1742,13 @@ function fp_build_tab_array($page) {
       if ($path == $active_tab_path) {
         // This is the current page we are on.
         $active = TRUE;
-        $title = $page["title"];
+        $title = $tab_title;
         $on_click = "";
         $href = "";
       }            
 
       $tab_array[] = array(
-        "title" => $item["title"],
+        "title" => $tab_title,
         "active" => $active,
         "on_click" => $on_click,
         "href" => $href,
@@ -1990,7 +1994,7 @@ function display_access_denied() {
  */
 function fp_theme_location($bool_include_base_path = TRUE) {
   
-  $p = @$GLOBALS["fp_system_settings"]["theme"];
+  $p = variable_get("theme",'');
   
   // The theme hasn't been set for some reason
   if ($p == "") {

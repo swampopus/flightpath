@@ -203,7 +203,7 @@ function schools_menu() {
       
     $school_name = $cur['name'];
     $school_id = intval($cur['school_id']);
-    if ($school_id === 0) $school_name = t("Default");
+    if ($school_id === 0) continue; // skip default since that wil be there already
     
     $items["admin/config/school-data/$school_id"] = array(
       "title" => $school_name,
@@ -280,10 +280,11 @@ function schools_menu_alter(&$items) {
     // We want to make this a default tab, because we are going to 
     // have our other schools have their own tabs as well.
     if ($path == 'admin/config/school-data') {      
-      $items[$path]['type'] = MENU_TYPE_NORMAL_ITEM;      
-      // Make it go to the schools switchboard, which will take us to the "default" school.
-      $items[$path]['page_callback'] = 'schools_config_school_settings_switchboard';
-      unset($items[$path]['page_arguments']);
+      $items[$path]['type'] = MENU_TYPE_DEFAULT_TAB;
+      $items[$path]['tab_family'] = 'config_school_settings';
+      $items[$path]['page_settings']['tab_title'] = t('Default');
+      unset($items[$path]['tab_parent']);      
+      
     }
     
 
@@ -291,14 +292,6 @@ function schools_menu_alter(&$items) {
   } // foreach
 } // hook_menu_alter
 
-
-/**
- * This function, used in hook_menu_alter, will send is to the default school settings page.
- */
-function schools_config_school_settings_switchboard() {
-  // TODO: perhaps look at last visited and send there instead?  For now, go to default school.    
-  fp_goto("admin/config/school-data/0");  
-}
 
 
 

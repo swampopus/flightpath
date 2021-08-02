@@ -5,9 +5,9 @@ class AdvisingScreen extends stdClass
 {
   public $width_array, $popup_width_array, $script_filename, $is_on_left, $box_array;
   public $degree_plan, $student, $bool_popup, $footnote_array, $flightpath;
-  public $screen_mode, $db, $bool_print, $view, $settings, $user_settings;
+  public $screen_mode, $db, $bool_print, $view, $user_settings;
   public $bool_blank, $bool_hiding_grades, $bool_force_pie_charts;
-  public $admin_message, $earliest_catalog_year;
+  public $admin_message;
 
   // Variables for the template/theme output...
   public $theme_location, $page_content, $page_has_search, $page_tabs, $page_on_load;
@@ -63,12 +63,10 @@ class AdvisingScreen extends stdClass
 
     $this->screen_mode = $screen_mode;
 
-    //$this->settings = $this->db->get_flightpath_settings();
-  
-    $this->earliest_catalog_year = $GLOBALS["fp_system_settings"]["earliest_catalog_year"];
+    
+            
         
-        
-  }
+  } // construct
 
   
 
@@ -461,10 +459,9 @@ function draw_menu_items($menu_array) {
     
           
     // We are going to try to include the theme.  If it can't be found, we will display a CORE theme, and display a message.
-    $theme = $GLOBALS["fp_system_settings"]["theme"];
+    $theme = variable_get("theme","themes/fp6_clean");
     
-    //$template_filename = $GLOBALS["fp_system_settings"]["theme"] . "/fp_" . $print_option . "template.php";
-    
+        
     $head_template_filename = $theme . "/head.tpl.php";
     $page_template_filename = $theme . "/page.tpl.php";
     
@@ -1214,10 +1211,13 @@ function draw_menu_items($menu_array) {
         ";
     $is_empty = true;
 
-    $retake_grades = csv_to_array(variable_get("retake_grades", "F,W"));
     
     $student_id = $this->student->student_id;
     $school_id = db_get_school_id_from_student_id($student_id);
+        
+    
+    $retake_grades = csv_to_array(variable_get_for_school("retake_grades", "F,W", $school_id));
+    
     
     $this->student->list_courses_taken->sort_alphabetical_order(false, true);
     $this->student->list_courses_taken->reset_counter();

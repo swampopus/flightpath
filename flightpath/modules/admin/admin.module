@@ -1619,8 +1619,7 @@ function admin_display_main() {
   $rtn .= "</table><br>"; // close table
 
 
-  //$settings = fp_get_system_settings();
-  
+    
   $current_catalog_year = variable_get("current_catalog_year", 2006);   // TODO: how to figure out school?
   $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);  // TODO:  how to figure out school?
   

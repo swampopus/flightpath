@@ -104,14 +104,14 @@ class FlightPath extends stdClass
       
       if ($catalog_year == "" || $catalog_year == 0) {
         // Some problem, default to current cat year.
-        $catalog_year = $settings["current_catalog_year"];  
+        $catalog_year = variable_get("current_catalog_year",'');  
       }
       
     }
 
     // make sure their catalog year is not past the system's current
     // year setting.
-    if ($catalog_year > $settings["current_catalog_year"] && $settings["current_catalog_year"] > intval(variable_get_for_year("earliest_catalog_year", 2006, $student_school_id)))
+    if ($catalog_year > variable_get("current_catalog_year",'') && variable_get("current_catalog_year",'') > intval(variable_get_for_school("earliest_catalog_year", 2006, $student_school_id)))
     { // Make sure degree plan is blank if it is!
       $catalog_year = 99999;
     }
@@ -390,6 +390,8 @@ class FlightPath extends stdClass
     // We will be going through the degree plan's master list
     // of groups to decide this.
     $student = $this->student;
+    $school_id = $student->school_id;
+    
     $this->degree_plan->list_groups->sort_priority();
     // Now, sort by the advising weight of the degree itself.    
     $this->degree_plan->list_groups->sort_degree_advising_weight();
@@ -474,7 +476,7 @@ class FlightPath extends stdClass
         $best_branch = -1;
         
         // Sort our list of groups by student's grades, if applicable.        
-        $sort_policy = variable_get("initial_student_course_sort_policy", "alpha"); // will either be "alpha" or "grade"
+        $sort_policy = variable_get_for_school("initial_student_course_sort_policy", "alpha", $school_id); // will either be "alpha" or "grade"
         if ($sort_policy == "grade") {
           $g->list_groups->sort_best_grade_first_by_student_grades($student);
         }
@@ -665,11 +667,11 @@ class FlightPath extends stdClass
     }
 
 
-    $sort_policy = variable_get("initial_student_course_sort_policy", "alpha"); // will either be "alpha" or "grade"
+    $sort_policy = variable_get_for_school("initial_student_course_sort_policy", "alpha", $school_id); // will either be "alpha" or "grade"
     
     
     
-    
+     
     $bool_disallow_graduate_credits = (variable_get("disallow_graduate_credits", "yes") == "yes") ? TRUE : FALSE;
     $graduate_level_codes_array = csv_to_array(variable_get("graduate_level_codes", "GR"));   
         

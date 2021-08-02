@@ -644,7 +644,7 @@ class Student extends stdClass
 	function load_courses_taken($bool_load_transfer_credits = true)
 	{
 
-	  $retake_grades = csv_to_array($GLOBALS["fp_system_settings"]["retake_grades"]);
+	  $retake_grades = csv_to_array(variable_get_for_school("retake_grades",'', $this->school_id));
 	  
     $not_released_grades_terms = csv_to_array(variable_get("not_released_grades_terms"));
     
