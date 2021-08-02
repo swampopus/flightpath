@@ -77,7 +77,7 @@ class Student extends stdClass
 			
 			// If we are supposed to set cumulative hours and gpa, perform that
 			// operation now.
-      if (variable_get("calculate_cumulative_hours_and_gpa", FALSE)) {			
+      if (variable_get_for_school("calculate_cumulative_hours_and_gpa", FALSE, $this->school_id)) {			
 			 $arr = $this->calculate_cumulative_hours_and_gpa();
 			 $this->cumulative_hours = $arr["cumulative_total_hours"];		
 			 $this->gpa = $arr["cumulative_gpa"];		
@@ -682,7 +682,7 @@ class Student extends stdClass
 			$new_course->subject_id = $cur["subject_id"];
 			$new_course->course_num = $cur["course_num"];
 			$new_course->db_grade = $cur["grade"];
-      $new_course->grade = fp_translate_numeric_grade($cur['grade']);
+      $new_course->grade = fp_translate_numeric_grade($cur['grade'], $this->school_id);
 			$new_course->term_id = $cur["term_id"];
 			$new_course->level_code = $cur["level_code"];
 			
@@ -760,10 +760,10 @@ class Student extends stdClass
 
 			$new_course->course_transfer = $t_course;
 			$new_course->db_grade = $cur['grade'];
-			$new_course->grade = fp_translate_numeric_grade($cur['grade']);
+			$new_course->grade = fp_translate_numeric_grade($cur['grade'], $this->school_id);
 			$new_course->school_id = intval($cur['school_id']);
 			$t_course->db_grade = $cur['grade'];
-      $t_course->grade = fp_translate_numeric_grade($cur['grade']);
+      $t_course->grade = fp_translate_numeric_grade($cur['grade'], $this->school_id);
       
 			$new_course->set_hours_awarded(0, $cur['hours_awarded'] * 1);
 			$t_course->set_hours_awarded(0, $cur['hours_awarded'] * 1);

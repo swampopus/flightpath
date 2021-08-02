@@ -1154,7 +1154,7 @@ class Course extends stdClass
       $qpts_grades = $GLOBALS["qpts_grades"];
     } 
     else {
-      $tlines = explode("\n", variable_get("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0"));
+      $tlines = explode("\n", variable_get_for_school("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0", $this->school_id));
       foreach ($tlines as $tline) {
         $temp = explode("~", trim($tline));      
         if (trim($temp[0]) != "") {
@@ -1894,7 +1894,7 @@ class Course extends stdClass
     // setting, then set it to that.
 
 
-    if ($this->catalog_year > variable_get("current_catalog_year","")
+    if ($this->catalog_year > variable_get("current_catalog_year",""))
     {
       $this->catalog_year = variable_get("current_catalog_year","");
     }

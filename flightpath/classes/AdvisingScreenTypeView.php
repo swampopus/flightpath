@@ -35,7 +35,7 @@ class AdvisingScreenTypeView extends AdvisingScreen
 
 		
 		// We want to go through our requirement types, and create a box for each one, if available.
-		$types = fp_get_requirement_types();
+		$types = fp_get_requirement_types($this->student->school_id);
 		foreach ($types as $code => $desc) {
 		  $temp = $this->display_semester_list($list_semesters, $code, $desc, TRUE);
 		  if ($temp) {
@@ -86,7 +86,7 @@ class AdvisingScreenTypeView extends AdvisingScreen
 			// Also, make sure it doesn't begin with a 'u'.  Ex:  um, for University Capstone + m.  That would be undefined as well.
 			$no_u_test_type = ltrim($test_type, 'u');
       
-			$types = fp_get_requirement_types();
+			$types = fp_get_requirement_types($this->student->school_id);
 			
 			if (!isset($types[$test_type]) && !isset($types[$no_u_test_type])) {
 			  // Yes-- the user is using a code NOT defined, so let's just call it
@@ -129,7 +129,7 @@ class AdvisingScreenTypeView extends AdvisingScreen
 
     $is_empty = TRUE;
     
-    $degree_sort_policy = variable_get("degree_requirement_sort_policy", "alpha");
+    $degree_sort_policy = variable_get_for_school("degree_requirement_sort_policy", "alpha", $this->student->school_id);
     
     $count_hours_completed = 0;
     $list_semesters->reset_counter();

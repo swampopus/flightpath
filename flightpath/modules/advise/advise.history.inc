@@ -13,7 +13,7 @@ function advise_display_history() {
   
   $student_id = $current_student_id;
   $db = get_global_database_handler();
-  $school_id = db_get_school_id_from_student_id($student_id);
+  $school_id = db_get_school_id_for_student_id($student_id);
   fp_set_title('');
   
   $extra_style = $ast = "";
@@ -89,7 +89,7 @@ function advise_display_history() {
   $render_left["#id"] = "advise_history_left_column";
   $render_left["#student_id"] = $student_id;
   
-  $school_id = db_get_school_id_from_student_id($student_id);
+  $school_id = db_get_school_id_for_student_id($student_id);
   
   //$rtn .= "<table border='0' cellspacing='0'>";
   $old_session_d_t = 0;
@@ -415,7 +415,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     $student = new Student($cur['student_id'], $db);
   
     $student_id = $cur['student_id'];
-    $school_id = db_get_school_id_from_student_id($student_id);
+    $school_id = db_get_school_id_for_student_id($student_id);
   
     $term = get_term_description($cur['term_id'], FALSE, $school_id);
   

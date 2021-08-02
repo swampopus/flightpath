@@ -38,7 +38,7 @@ function friendly_timezone($str) {
  * translate the given grade (if it is numeric) to a letter grade.  Otherwise, it will return
  * the grade as-is.
  */
-function fp_translate_numeric_grade($grade) {
+function fp_translate_numeric_grade($grade, $school_id = 0) {
     
   
   if (!is_numeric($grade)) return $grade; // already a letter.
@@ -47,11 +47,11 @@ function fp_translate_numeric_grade($grade) {
   
       
   // Get our translation array from globals cache, if there.
-  if (isset($GLOBALS['fp_translate_numeric_grade'])) {
-    $translate = $GLOBALS['fp_translate_numeric_grade'];
+  if (isset($GLOBALS['fp_translate_numeric_grade'][$school_id])) {
+    $translate = $GLOBALS['fp_translate_numeric_grade'][$school_id];
   }
   else {
-    $temp = trim(variable_get("numeric_to_letter_grades", ""));
+    $temp = trim(variable_get_for_school("numeric_to_letter_grades", "", $school_id));
     if ($temp === '') return $grade;
     
     $temp = explode("\n", $temp);
@@ -68,7 +68,7 @@ function fp_translate_numeric_grade($grade) {
           
     } // foreach
     
-    $GLOBALS['fp_translate_numeric_grade'] = $translate;
+    $GLOBALS['fp_translate_numeric_grade'][$school_id] = $translate;
   }
   
   // Okay, now that we have our "translate" array, we can do that with the grade.
@@ -1231,15 +1231,15 @@ function get_term_structures($school_id = 0) {
  * have been defined.
  *
  */
-function fp_get_requirement_types() {
+function fp_get_requirement_types($school_id) {
   $rtn = array();
   
-  if (isset($GLOBALS['fp_temp_cache']['fp_get_requirement_types'])) {
-    return $GLOBALS['fp_temp_cache']['fp_get_requirement_types'];
+  if (isset($GLOBALS['fp_temp_cache']['fp_get_requirement_types'][$school_id])) {
+    return $GLOBALS['fp_temp_cache']['fp_get_requirement_types'][$school_id];
   }
   
   
-  $temp = explode("\n", variable_get("requirement_types", "g ~ General Requirements\nc ~ Core Requirements\ne ~ Electives\nm ~ Major Requirements\ns ~ Supporting Requirements\nx ~ Additional Requirements"));
+  $temp = explode("\n", variable_get_for_school("requirement_types", "g ~ General Requirements\nc ~ Core Requirements\ne ~ Electives\nm ~ Major Requirements\ns ~ Supporting Requirements\nx ~ Additional Requirements", $school_id));
   foreach ($temp as $line) {
     $line = trim($line);
     if ($line == "") continue;
@@ -1267,7 +1267,7 @@ function fp_get_requirement_types() {
     $rtn["m"] = t("Major Requirements");
   }
   
-  $GLOBALS['fp_temp_cache']['fp_get_requirement_types'] = $rtn;
+  $GLOBALS['fp_temp_cache']['fp_get_requirement_types'][$school_id] = $rtn;
   
   return $rtn;
   

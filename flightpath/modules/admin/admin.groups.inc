@@ -1208,7 +1208,7 @@ function admin_get_group_courses(Group $group) {
   // for use in the edit_group_form.
   $rtn = "";
 
-  $group_sort_policy = variable_get("group_requirement_sort_policy", "alpha");
+  $group_sort_policy = variable_get_for_school("group_requirement_sort_policy", "alpha", $group->school_id);
 
   // courses not in branches...
   $courses = array();

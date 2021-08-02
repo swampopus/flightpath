@@ -569,7 +569,7 @@ function draw_menu_items($menu_array) {
     // And only show the transfers.  This is similar to Excess credit.
 
     $student_id = $this->student->student_id;
-    $school_id = db_get_school_id_from_student_id($student_id);
+    $school_id = db_get_school_id_for_student_id($student_id);
 
 
     $this->student->list_courses_taken->sort_alphabetical_order(false, true);
@@ -636,11 +636,11 @@ function draw_menu_items($menu_array) {
   {
     $pC = "";
     $is_empty = true;
-    $pC .= $this->draw_semester_box_top(variable_get("graduate_credits_block_title", t("Graduate Credits")), FALSE);
+    $pC .= $this->draw_semester_box_top(variable_get_for_school("graduate_credits_block_title", t("Graduate Credits"), $this->student->school_id), FALSE);
     // Basically, go through all the courses the student has taken,
     // And only show the graduate credits.  Similar to build_transfer_credits
 
-    $graduate_level_codes_array = csv_to_array(variable_get("graduate_level_codes", "GR"));
+    $graduate_level_codes_array = csv_to_array(variable_get_for_school("graduate_level_codes", "GR", $this->student->school_id));
 
 
     $this->student->list_courses_taken->sort_alphabetical_order(false, true);
@@ -663,7 +663,7 @@ function draw_menu_items($menu_array) {
 
     }
 
-    $notice = trim(variable_get("graduate_credits_block_notice", t("These courses may not be used for undergraduate credit.")));
+    $notice = trim(variable_get_for_school("graduate_credits_block_notice", t("These courses may not be used for undergraduate credit."), $this->student->school_id));
     
     // Do we have a notice to display?
     if ($notice != "")
@@ -721,8 +721,8 @@ function draw_menu_items($menu_array) {
     $is_empty = true;
 
     // Should we exclude graduate credits from this list?
-    $bool_grad_credit_block = (variable_get("display_graduate_credit_block", "yes") == "yes") ? TRUE : FALSE;
-    $graduate_level_codes_array = csv_to_array(variable_get("graduate_level_codes", "GR"));
+    $bool_grad_credit_block = (variable_get_for_school("display_graduate_credits_block", "yes", $this->student->school_id) == "yes") ? TRUE : FALSE;
+    $graduate_level_codes_array = csv_to_array(variable_get_for_school("graduate_level_codes", "GR", $this->student->school_id));
       
     // Basically, go through all the courses the student has taken,
     // selecting out the ones that are not fulfilling any
@@ -788,7 +788,7 @@ function draw_menu_items($menu_array) {
     // Display the footnotes & messages.
 
     $student_id = $this->student->student_id;
-    $school_id = db_get_school_id_from_student_id($student_id);
+    $school_id = db_get_school_id_for_student_id($student_id);
     
     $pC = "";
     $is_empty = true;
@@ -1213,7 +1213,7 @@ function draw_menu_items($menu_array) {
 
     
     $student_id = $this->student->student_id;
-    $school_id = db_get_school_id_from_student_id($student_id);
+    $school_id = db_get_school_id_for_student_id($student_id);
         
     
     $retake_grades = csv_to_array(variable_get_for_school("retake_grades", "F,W", $school_id));
@@ -1314,7 +1314,7 @@ function draw_menu_items($menu_array) {
     $pC .= fp_render_section_title(t("All Student Courses"));
 
     $csid = $_REQUEST["current_student_id"];
-    $school_id = db_get_school_id_from_student_id($csid);
+    $school_id = db_get_school_id_for_student_id($csid);
     $order = $_REQUEST["order"];
     if ($order == "name")
     {
@@ -1642,7 +1642,7 @@ function draw_menu_items($menu_array) {
     
     // Should we add the graduate credit block?
     
-    if (variable_get("display_graduate_credit_block", "yes") == "yes") {
+    if (variable_get("display_graduate_credits_block", "yes") == "yes") {
       $this->build_graduate_credit();
     }
     
@@ -1792,7 +1792,7 @@ function draw_menu_items($menu_array) {
       // Only bother to get the types calculations needed for the piecharts
       // Get the requested piecharts from our config...
       $types = array();
-      $temp = variable_get("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress");
+      $temp = variable_get_for_school("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress", $this->student->school_id);
       $lines = explode("\n", $temp);
       foreach ($lines as $line) {
         if (trim($line) == "") continue;      
@@ -1816,7 +1816,7 @@ function draw_menu_items($menu_array) {
     
 
     // Get the requested piecharts from our config...
-    $temp = variable_get("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress");
+    $temp = variable_get_for_school("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress", $this->student->school_id);
     $config_lines = explode("\n", $temp);
     
     // Go through each of the degrees we have piecharts for
@@ -1869,7 +1869,7 @@ function draw_menu_items($menu_array) {
         
         // Setting to display GPA
         $gpa = $extra_gpa = "";
-        if (variable_get("pie_chart_gpa", "no") == "yes") {           
+        if (variable_get_for_school("pie_chart_gpa", "no", $this->student->school_id) == "yes") {           
           if ($this->degree_plan->gpa_calculations[$degree_id][$requirement_type]["qpts_hours"] > 0) {
             $gpa = fp_truncate_decimals($qpts / $this->degree_plan->gpa_calculations[$degree_id][$requirement_type]["qpts_hours"], 3);
           }
@@ -2081,7 +2081,7 @@ function draw_menu_items($menu_array) {
     // This will generate the html to display the screen.
     $pC = "";
 
-    $school_id = db_get_school_id_from_student_id($this->student->student_id);
+    $school_id = db_get_school_id_for_student_id($this->student->student_id);
 
 
     if (!$this->db) {
@@ -3016,7 +3016,7 @@ function draw_menu_items($menu_array) {
   function fix_institution_name($str)
   {  
     $student_id = $this->student->student_id;
-    $school_id = db_get_school_id_from_student_id($student_id);
+    $school_id = db_get_school_id_for_student_id($student_id);
      
     // Should we do this at all?  We will look at the "autocapitalize_institution_names" setting.
     $auto = variable_get_for_school("autocapitalize_institution_names", 'yes', $school_id);
@@ -3113,7 +3113,7 @@ function draw_menu_items($menu_array) {
     }
 
 
-    $degree_sort_policy = variable_get("degree_requirement_sort_policy", "alpha");
+    $degree_sort_policy = variable_get_for_school("degree_requirement_sort_policy", "alpha", $this->student->school_id);
 
     // First, display the list of bare courses.
     if ($degree_sort_policy == 'database') {
@@ -4657,7 +4657,7 @@ function draw_menu_items($menu_array) {
       $qpts_grades = $GLOBALS["qpts_grades"];
     } 
     else {
-      $tlines = explode("\n", variable_get("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0"));
+      $tlines = explode("\n", variable_get_for_school("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0", $this->student->school_id));
       foreach ($tlines as $tline) {
         $temp = explode("~", trim($tline));      
         if (trim($temp[0]) != "") {
@@ -4715,8 +4715,6 @@ function draw_menu_items($menu_array) {
     $theme["degree_plan"] = $this->degree_plan;
     $theme["from_group_select"] = TRUE;
 
-    //Setting in Configure School Settings:
-    $show_repeat_information = (variable_get("group_list_course_show_repeat_information", "yes") == "yes");
         
 
     if ($course->subject_id == "")
@@ -4744,6 +4742,10 @@ function draw_menu_items($menu_array) {
     if ($attributes == "-") {
       $attributes_class .= "group-attr-hidden";
     }
+
+
+    //Setting in Configure School Settings:
+    $show_repeat_information = (variable_get_for_school("group_list_course_show_repeat_information", "yes", $course->school_id) == "yes");
 
 
 
@@ -4988,7 +4990,7 @@ function draw_menu_items($menu_array) {
     // This lets the user make a substitution for a course.
     $pC = "";
 
-    $school_id = db_get_school_id_from_student_id($current_student_id);
+    $school_id = db_get_school_id_for_student_id($current_student_id);
 
     // Bring in advise's css...
     fp_add_css(fp_get_module_path("advise") . "/css/advise.css");
@@ -5074,7 +5076,7 @@ function draw_menu_items($menu_array) {
     
     $this->student->list_courses_taken->sort_alphabetical_order(false, true, FALSE, $req_by_degree_id);
     
-    $school_id = db_get_school_id_from_student_id($this->student->student_id);
+    $school_id = db_get_school_id_for_student_id($this->student->student_id);
     
     for ($t = 0; $t <= 1; $t++)
     {
@@ -5104,7 +5106,7 @@ function draw_menu_items($menu_array) {
         }
 
         
-        if (!$c->meets_min_grade_requirement_of(null, variable_get("minimum_substitutable_grade", "D")))
+        if (!$c->meets_min_grade_requirement_of(null, variable_get_for_school("minimum_substitutable_grade", "D", $school_id)))
         {// Make sure the grade is OK.
           continue;
         }
@@ -5461,7 +5463,7 @@ function draw_menu_items($menu_array) {
     }
 
 
-    $group_sort_policy = variable_get("group_requirement_sort_policy", "alpha");
+    $group_sort_policy = variable_get_for_school("group_requirement_sort_policy", "alpha", $this->student->school_id);
 
     $group->list_courses->reset_counter();
     if (!($group->list_courses->is_empty))
@@ -5991,7 +5993,7 @@ function draw_menu_items($menu_array) {
   function get_hidden_advising_variables($perform_action = "")
   {
     
-    $school_id = db_get_school_id_from_student_id($GLOBALS["fp_advising"]["current_student_id"]);   
+    $school_id = db_get_school_id_for_student_id($GLOBALS["fp_advising"]["current_student_id"]);   
     
     
     $rtn = "";

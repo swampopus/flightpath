@@ -111,7 +111,7 @@ class DegreePlan extends stdClass
     // array is sectioned like:  course_id | degree_id | group_id.    Group id = 0 means "on the bare degree plan"
     // ex:  $this->required_course_id_array[$course_c->course_id][$this->degree_id][0] = TRUE;      
     
-    $exclude_degree_ids = system_get_exclude_degree_ids_from_appears_in_counts();
+    $exclude_degree_ids = system_get_exclude_degree_ids_from_appears_in_counts($this->school_id);
     
     $courses = array();
     
@@ -178,7 +178,7 @@ class DegreePlan extends stdClass
     // in the gpa_calculations array.
     if (count($types) == 0) {
       // Wasn't set, so use ALL of the known requirement types.
-      $types = fp_get_requirement_types();
+      $types = fp_get_requirement_types($this->school_id);
     }
 
     // Add a pseudo-code in for "degree", which the functions will convert into a blank.
@@ -240,7 +240,7 @@ class DegreePlan extends stdClass
     // Let's go through our requirement types by code, and collect calcuations on them
     // in the gpa_calculations array.
     if (count($types) == 0) {
-      $types = fp_get_requirement_types();
+      $types = fp_get_requirement_types($this->school_id);
     }
     
     // Add a pseudo-code in for "degree", which the functions will convert into a blank.
@@ -517,7 +517,7 @@ class DegreePlan extends stdClass
     }
 
     // Degrees we should exclude from the "appears in" counts.  Used later...
-    $exclude_degree_ids = system_get_exclude_degree_ids_from_appears_in_counts();
+    $exclude_degree_ids = NULL;
 
 
     $res = $this->db->db_query("SELECT * FROM $table_name1 a, $table_name2 b
@@ -529,6 +529,10 @@ class DegreePlan extends stdClass
       $this->title = $cur["title"];
       $this->major_code = $cur["major_code"];
       $this->school_id = intval($cur['school_id']);
+      if (!$exclude_degree_ids) {
+        $exclude_degree_ids = system_get_exclude_degree_ids_from_appears_in_counts($this->school_id);
+      }
+      
       $this->degree_level = strtoupper(trim($cur["degree_level"]));
       if ($this->degree_level == "") {
         $this->degree_level = "UG";  // undergrad by default
@@ -1122,7 +1126,7 @@ class DegreePlan extends stdClass
     // developmentals are required.
     // -55 is the developmental semester.
     $sem = new Semester(DegreePlan::SEMESTER_NUM_FOR_DEVELOPMENTALS);
-    $sem->title = variable_get("developmentals_title", t("Developmental Requirements"));
+    $sem->title = variable_get_for_school("developmentals_title", t("Developmental Requirements", $this->school_id));
     $is_empty = true;
 
     $temp_array = $this->db->get_developmental_requirements($student_id, $this->school_id);
@@ -1139,7 +1143,7 @@ class DegreePlan extends stdClass
       $is_empty = false;      
     }
     
-    $sem->notice = variable_get("developmentals_notice", t("According to our records, you are required to complete the course(s) listed above. For some transfer students, your record may not be complete. If you have any questions, please ask your advisor."));
+    $sem->notice = variable_get_for_school("developmentals_notice", t("According to our records, you are required to complete the course(s) listed above. For some transfer students, your record may not be complete. If you have any questions, please ask your advisor.", $this->school_id));
 
     if (!$is_empty)
     {

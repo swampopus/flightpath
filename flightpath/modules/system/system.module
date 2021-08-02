@@ -90,7 +90,7 @@ function system_flightpath_can_assign_course_to_degree_id($degree_id, Course $co
   // If the configuration is such that a course cannot be assigned to a degree's tracks, then no.
   // Example:  if a course has been assigned to ENGL, then it can't also get assigned to ENGL|_track1
     
-  if (variable_get("prevent_course_assignment_to_both_degree_and_track", "yes") == 'yes') {
+  if (variable_get_for_school("prevent_course_assignment_to_both_degree_and_track", "yes", $course->school_id) == 'yes') {
     // Begin by checking to see what degrees the course has already been assigned to (if any)
     if (count($course->assigned_to_degree_ids_array)) {
           
@@ -1420,7 +1420,7 @@ function system_school_data_form($school_id = 0) {
                 currently enrolled in this course.' Ex: E,AMID,BMID "),    
   );
 
-  // TODO: search and replace in flightpath
+  
   $form["minimum_substitutable_grade" . $fs] = array(
     "type" => "textfield",
     "size" => 3,
@@ -1431,7 +1431,7 @@ function system_school_data_form($school_id = 0) {
                       new substitutions, not old ones.  If unsure, enter D."),    
   );
   
-  // TODO: search and replace in flightpath
+  
   $form["group_min_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Group requirement min grades (CSV):"),
@@ -1441,7 +1441,7 @@ function system_school_data_form($school_id = 0) {
   );
 
   
-  // TODO: search and replace in flightpath
+  
   $form["calculate_cumulative_hours_and_gpa" . $fs] = array(
     "label" => t("Calculate student cumulative hours and GPA?"),
     "type" => "checkbox",
@@ -1452,7 +1452,7 @@ function system_school_data_form($school_id = 0) {
   );
   
   
-  // TODO: search and replace in flightpath
+  
   $form['numeric_to_letter_grades' . $fs] = array(
     "label" => t("Numeric to Letter Grades:"),
     "type" => "textarea",
@@ -1470,7 +1470,7 @@ function system_school_data_form($school_id = 0) {
                         <br>&nbsp; 101 ~ 999 ~ A     &nbsp; &nbsp; <em>(In case scores above 100 are possible)</em>"),
   );
   
-  // TODO: search and replace in flightpath
+  
   $form["quality_points_grades" . $fs] = array(
     "label" => t("Quality points and grades:"),
     "type" => "textarea",
@@ -1486,7 +1486,7 @@ function system_school_data_form($school_id = 0) {
                         A ~ 4<br>B ~ 3<br>C ~ 2<br>D ~ 1<br>F ~ 0<br>I ~ 0</blockquote>",
   );
   
-  // TODO: search and replace in flightpath
+  
   $form["requirement_types" . $fs] = array(
     "label" => t("Requirement types and codes:"),
     "type" => "textarea",
@@ -1529,7 +1529,7 @@ function system_school_data_form($school_id = 0) {
     );
   }
   
-  // TODO: search and replace in flightpath
+  
   $form["pie_chart_config" . $fs] = array(
     "label" => t("Pie chart configuration:"),
     "type" => "textarea",
@@ -1547,7 +1547,7 @@ function system_school_data_form($school_id = 0) {
                          
   );
 
-  // TODO: search and replace in flightpath
+
   $form["pie_chart_gpa" . $fs] = array(
     "label" => t("Should pie charts show GPAs?"),
     "type" => "select",
@@ -1560,7 +1560,7 @@ function system_school_data_form($school_id = 0) {
   
   
   
-  // TODO: search and replace in flightpath
+  
   $form["developmentals_title" . $fs] = array(
     "label" => t("Developmentals semester block title:"),
     "type" => "textfield",
@@ -1571,7 +1571,7 @@ function system_school_data_form($school_id = 0) {
                         unsure what to enter, use 'Developmental Requirements'."),
   );
   
-  // TODO: search and replace in flightpath
+  
   $form["developmentals_notice" . $fs] = array(
     "label" => t("Developmentals notice text:"),
     "type" => "textarea",
@@ -1583,7 +1583,7 @@ function system_school_data_form($school_id = 0) {
   );
 
   
-  // TODO: search and replace in flightpath
+
   $form["graduate_level_codes" . $fs] = array(
     "type" => "textfield",
     "label" => t("Graduate course level codes (CSV):"),
@@ -1593,7 +1593,7 @@ function system_school_data_form($school_id = 0) {
   );
   
   
-  // TODO: search and replace in flightpath
+  
   $form["disallow_graduate_credits" . $fs] = array(
     "type" => "select",
     "label" => t("Disallow automatic use of graduate credits?"),
@@ -1606,7 +1606,8 @@ function system_school_data_form($school_id = 0) {
                         <br>If unsure, set to Yes."),
   );
   
-  // TODO: search and replace in flightpath
+  
+  
   $form["display_graduate_credits_block" . $fs] = array(
     "type" => "select",
     "label" => t("Display graduate credits in their own semester block?"),
@@ -1618,7 +1619,7 @@ function system_school_data_form($school_id = 0) {
                         <br>If unsure, set to Yes."),
   );
   
-  // TODO: search and replace in flightpath
+    
   $form["graduate_credits_block_title" . $fs] = array(
     "label" => t("Graduate Credits block title:"),
     "type" => "textfield",
@@ -1629,7 +1630,7 @@ function system_school_data_form($school_id = 0) {
                         unsure what to enter, use 'Graduate Credits'."),
   );
   
-  // TODO: search and replace in flightpath
+  
   $form["graduate_credits_block_notice" . $fs] = array(
     "label" => t("Graduate Credits block notice text:"),
     "type" => "textarea",
@@ -1639,58 +1640,9 @@ function system_school_data_form($school_id = 0) {
                         'These courses may not be used for undergraduate credit.'"),
   );
   
-  // TODO: search and replace in flightpath
-  // TODO: possibly these go in system settings, and not based on schools
-  $form["degree_classifications_level_1" . $fs] = array(
-    "label" => t("Degree Classifications - Level 1:"),
-    "type" => "textarea",
-    "rows" => 3,
-    "value" => variable_get_for_school("degree_classifications_level_1", "MAJOR ~ Major", $school_id),
-    "description" => t("Enter the 'level 1' (ie, top level) degree classifications, one per line, in the following format:
-                          <br>&nbsp; &nbsp; MACHINE_NAME ~ Title
-                          <br> Example:  MAJOR ~ Major
-                          <br>These are degrees which might be combined with 
-                               another degree, as in a double-major, or selected on their own for graduation.
-                               For example, a degree in Computer Science, by itself would be
-                               classified as a 'Major' by most universities.  If you are unsure what to enter,
-                               use:  MAJOR ~ Major"),                        
-  );
-
-  // TODO: search and replace in flightpath
-  $form["degree_classifications_level_2" . $fs] = array(
-    "label" => t("Degree Classifications - Level 2:"),
-    "type" => "textarea",
-    "rows" => 3,
-    "value" => variable_get_for_school("degree_classifications_level_2", "MINOR ~ Minor", $school_id),
-    "description" => t("Enter the 'level 2' degree classifications, one per line, in the following format:
-                          <br>&nbsp; &nbsp; MACHINE_NAME ~ Title
-                          <br> Example:  MINOR ~ Minor
-                          <br>These are degrees which might be combined with another degree
-                              but are not selected by themselves for graduation.  Most universities
-                              would consider this type to be a 'Minor'.  For example, a student
-                              might Major in Computer Science, with a Minor in Math.  In this instance,
-                              Math would be classified by this level. If you are unsuare what to enter, use:
-                              MINOR ~ Minor"),                        
-  );
   
-  // TODO: search and replace in flightpath  
-  $form["degree_classifications_level_3" . $fs] = array(
-    "label" => t("Degree Classifications - Level 3 (Add-on degrees, attached to other degrees):"),
-    "type" => "textarea",
-    "rows" => 3,
-    "value" => variable_get_for_school("degree_classifications_level_3", "CONC ~ Concentration", $school_id),
-    "description" => t("Enter the 'level 3' degree classifications, one per line, in the following format:
-                          <br>&nbsp; &nbsp; MACHINE_NAME ~ Title
-                          <br> Example:  CONC ~ Concentration
-                          <br>These are degree plans which are only ever 'attached' to other degree plans as an add-on option
-                          to the student.
-                          For example, Computer Science might have an Option or Track or Concentration in 'Business'.
-                          The Business concentration would ONLY be selectable if the student were already majoring in Computer Science,
-                          therefor it would fall into this classification.
-                          If unsure what to enter here, use: CONC ~ Concentration"),                        
-  );
       
-  // TODO: search and replace in flightpath
+  
   $form["exclude_majors_from_appears_in_counts" . $fs] = array(
     "label" => t("Exclude major codes from \"appears in\" counts (CSV):"),
     "type" => "textfield",
@@ -1704,7 +1656,7 @@ function system_school_data_form($school_id = 0) {
   );
   
   
-  // TODO: search and replace in flightpath
+  
   $form["group_full_at_min_hours" . $fs] = array(
     "label" => t("Groups should be considered 'full' when min hours are met or exceeded?"),
     "type" => "select",
@@ -1718,7 +1670,7 @@ function system_school_data_form($school_id = 0) {
                         If you are unsure what to enter, select 'Yes'"),
   );  
   
-  // TODO: search and replace in flightpath
+  
   $form["remove_advised_when_course_taken" . $fs] = array(
     "label" => t("Remove an advised course when a student enrolls in it (or completes it), for the same term?"),
     "type" => "select",
@@ -1734,7 +1686,7 @@ function system_school_data_form($school_id = 0) {
                         is enrolled or completes a course within the same advising term.  If you are unsure what to enter, select 'No'."),
   );  
 
-  // TODO: search and replace in flightpath
+  
   $form["prevent_course_assignment_to_both_degree_and_track" . $fs] = array(
     "label" => t("Prevent a course assignment to both a degree and its track(s)?"),
     "type" => "select",
@@ -1746,7 +1698,7 @@ function system_school_data_form($school_id = 0) {
                        it cannot also be assigned to the track COMPSCI|_OPT1.  If you are unsure what to select, leave this set to 'Yes'."),
   );  
 
-  // TODO: search and replace in flightpath
+  
   $form["group_list_course_show_repeat_information" . $fs] = array(
     "label" => t("Display 'Repeat Information' for a course in a group's course list?"),
     "type" => "select",
@@ -1759,7 +1711,7 @@ function system_school_data_form($school_id = 0) {
                         are unsure what to select, leave this set to 'Yes'."),
   );  
 
-  // TODO: search and replace in flightpath
+  
   $form["degree_requirement_sort_policy" . $fs] = array(
     "type" => "select",
     "label" => t("Degree requirement sort policy:"),
@@ -1772,7 +1724,7 @@ function system_school_data_form($school_id = 0) {
   );
   
 
-  // TODO: search and replace in flightpath
+
   $form["group_requirement_sort_policy" . $fs] = array(
     "type" => "select",
     "label" => t("Group requirement sort policy:"),
@@ -1794,23 +1746,23 @@ function system_school_data_form($school_id = 0) {
 /**
  * Uses the "exclude_majors...." setting, but converts them into an array of degree_ids.
  */
-function system_get_exclude_degree_ids_from_appears_in_counts() {
+function system_get_exclude_degree_ids_from_appears_in_counts($school_id) {
   
   // Have we already cached this for this page load?  
-  if (isset($GLOBALS["exclude_degree_ids_from_appears_in_counts"])) {
-    return $GLOBALS["exclude_degree_ids_from_appears_in_counts"];
+  if (isset($GLOBALS["exclude_degree_ids_from_appears_in_counts"][$school_id])) {
+    return $GLOBALS["exclude_degree_ids_from_appears_in_counts"][$school_id];
   }  
     
   $db = get_global_database_handler();
   $rtn = array();
-  $majors = csv_to_array(variable_get("exclude_majors_from_appears_in_counts", ""));
+  $majors = csv_to_array(variable_get_for_school("exclude_majors_from_appears_in_counts", "", $school_id));
   
   foreach ($majors as $major_code) {
     $rtn = array_merge($rtn, $db->get_degree_ids($major_code));
   }  
   
   
-  $GLOBALS["exclude_degree_ids_from_appears_in_counts"] = $rtn;  // cache for next time.
+  $GLOBALS["exclude_degree_ids_from_appears_in_counts"][$school_id] = $rtn;  // cache for next time.
   return $rtn;
   
 } //system_get_exclude_degree_ids_from_appears_in_counts
@@ -2236,6 +2188,54 @@ function system_settings_form() {
                         means the degree is not allowed to be combined with anything else.  If you are unsure what to enter here, type 1 (one)."),
   );                
                 
+        
+  $form["degree_classifications_level_1"] = array(
+    "label" => t("Degree Classifications - Level 1:"),
+    "type" => "textarea",
+    "rows" => 3,
+    "value" => variable_get("degree_classifications_level_1", "MAJOR ~ Major"),
+    "description" => t("Enter the 'level 1' (ie, top level) degree classifications, one per line, in the following format:
+                          <br>&nbsp; &nbsp; MACHINE_NAME ~ Title
+                          <br> Example:  MAJOR ~ Major
+                          <br>These are degrees which might be combined with 
+                               another degree, as in a double-major, or selected on their own for graduation.
+                               For example, a degree in Computer Science, by itself would be
+                               classified as a 'Major' by most universities.  If you are unsure what to enter,
+                               use:  MAJOR ~ Major"),                        
+  );
+
+  $form["degree_classifications_level_2"] = array(
+    "label" => t("Degree Classifications - Level 2:"),
+    "type" => "textarea",
+    "rows" => 3,
+    "value" => variable_get("degree_classifications_level_2", "MINOR ~ Minor"),
+    "description" => t("Enter the 'level 2' degree classifications, one per line, in the following format:
+                          <br>&nbsp; &nbsp; MACHINE_NAME ~ Title
+                          <br> Example:  MINOR ~ Minor
+                          <br>These are degrees which might be combined with another degree
+                              but are not selected by themselves for graduation.  Most universities
+                              would consider this type to be a 'Minor'.  For example, a student
+                              might Major in Computer Science, with a Minor in Math.  In this instance,
+                              Math would be classified by this level. If you are unsuare what to enter, use:
+                              MINOR ~ Minor"),                        
+  );
+  
+  
+  $form["degree_classifications_level_3"] = array(
+    "label" => t("Degree Classifications - Level 3 (Add-on degrees, attached to other degrees):"),
+    "type" => "textarea",
+    "rows" => 3,
+    "value" => variable_get("degree_classifications_level_3", "CONC ~ Concentration"),
+    "description" => t("Enter the 'level 3' degree classifications, one per line, in the following format:
+                          <br>&nbsp; &nbsp; MACHINE_NAME ~ Title
+                          <br> Example:  CONC ~ Concentration
+                          <br>These are degree plans which are only ever 'attached' to other degree plans as an add-on option
+                          to the student.
+                          For example, Computer Science might have an Option or Track or Concentration in 'Business'.
+                          The Business concentration would ONLY be selectable if the student were already majoring in Computer Science,
+                          therefor it would fall into this classification.
+                          If unsure what to enter here, use: CONC ~ Concentration"),                        
+  );        
         
         
   $form["enable_legacy_concentrations"] = array(

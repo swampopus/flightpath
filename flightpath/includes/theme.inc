@@ -779,7 +779,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
   
   $csid = $current_student_id;
   
-  $school_id = db_get_school_id_from_student_id($current_student_id);
+  $school_id = db_get_school_id_for_student_id($current_student_id);
       
   $rtn = "";
   

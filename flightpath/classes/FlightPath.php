@@ -672,8 +672,8 @@ class FlightPath extends stdClass
     
     
      
-    $bool_disallow_graduate_credits = (variable_get("disallow_graduate_credits", "yes") == "yes") ? TRUE : FALSE;
-    $graduate_level_codes_array = csv_to_array(variable_get("graduate_level_codes", "GR"));   
+    $bool_disallow_graduate_credits = (variable_get_for_school("disallow_graduate_credits", "yes", $school_id) == "yes") ? TRUE : FALSE;
+    $graduate_level_codes_array = csv_to_array(variable_get_for_school("graduate_level_codes", "GR", $school_id));   
         
     // Get the course repeat policy.
     $course_repeat_policy = variable_get_for_school("course_repeat_policy", "most_recent_exclude_previous", $school_id);
@@ -690,7 +690,7 @@ class FlightPath extends stdClass
 
     
     // If the group has min_hours, then we should allow the user to get at least the min hours before we stop trying to fill.
-    if ($group->has_min_hours_allowed() && variable_get("group_full_at_min_hours", "yes") == "yes") {
+    if ($group->has_min_hours_allowed() && variable_get_for_school("group_full_at_min_hours", "yes", $school_id) == "yes") {
       $meet_min_hours = $group->min_hours_allowed;
     }
 
@@ -1804,6 +1804,7 @@ class FlightPath extends stdClass
 
     $degree_id = $this->degree_plan->degree_id;
     $student_id = $this->student->student_id;
+    $school_id = db_get_school_id_for_student_id($student_id);
     $available_terms = variable_get("available_advising_term_ids", "0");
 
     
@@ -1944,7 +1945,7 @@ class FlightPath extends stdClass
               
               // If we have the setting which says we should skip if it's already been completed/enrolled for this term,
               // then we should do that.
-              if (variable_get("remove_advised_when_course_taken", "no") == "yes") {
+              if (variable_get_for_school("remove_advised_when_course_taken", "no", $school_id) == "yes") {
                 // First, see if this advised course has been attempted already.
                 if ($this->student->list_courses_taken->find_specific_course($course->course_id, $advised_term_id)) {
                   // Yep, found it!  So, skip this one.
@@ -2021,7 +2022,7 @@ class FlightPath extends stdClass
 
           // If we have the setting which says we should skip if it's already been completed/enrolled for this term,
           // then we should do that.
-          if (variable_get("remove_advised_when_course_taken", "no") == "yes") {
+          if (variable_get_for_school("remove_advised_when_course_taken", "no", $school_id) == "yes") {
             // First, see if this advised course has been attempted already.            
             if ($taken_course = $this->student->list_courses_taken->find_specific_course($course->course_id, $advised_term_id)) {              
               // Yep, found it!  So, skip this one.              

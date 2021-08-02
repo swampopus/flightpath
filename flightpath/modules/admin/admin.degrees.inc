@@ -55,7 +55,7 @@ function admin_display_degrees_popup_add_group2() {
         "; 
   }                                                         
 
-  $min_grades = csv_to_array(variable_get("group_min_grades", "A,B,C,D"));
+  $min_grades = csv_to_array(variable_get_for_school("group_min_grades", "A,B,C,D", $school_id));
 
 
   $rtn .= "</table></div>
@@ -74,7 +74,7 @@ function admin_display_degrees_popup_add_group2() {
             </select>
       Type: <select name='type' id='type'>";
   // Get our list of requirement types from our settings.
-  $types = fp_get_requirement_types();
+  $types = fp_get_requirement_types($school_id);
   foreach ($types as $code => $desc) {
     $rtn .= "<option value='$code'>$code - $desc</option>";
   }
@@ -1216,7 +1216,7 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
   ///////////////////////////////////////
   $groups_counter = 0;  // used to create unique variables for groups 
   $js_existing_semesters = array();
-  $degree_sort_policy = variable_get("degree_requirement_sort_policy", "alpha");
+  $degree_sort_policy = variable_get_for_school("degree_requirement_sort_policy", "alpha", $degree->school_id);
   $form['blocks_top_markup'] = array(
     'type' => 'markup',
     'value' => "<div style='clear: both;'></div>

@@ -888,7 +888,7 @@ function advise_display_popup_change_term() {
   global $current_student_id;  
   $rtn = "";
   
-  $school_id = db_get_school_id_from_student_id($current_student_id);
+  $school_id = db_get_school_id_for_student_id($current_student_id);
   
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
   
@@ -1100,7 +1100,7 @@ function advise_display_popup_substitute_selected() {
   global $current_student_id, $fp, $screen;
   $rtn = "";
   
-  $school_id = db_get_school_id_from_student_id($current_student_id);
+  $school_id = db_get_school_id_for_student_id($current_student_id);
   
   advise_init_screen();
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
@@ -1269,7 +1269,7 @@ function advise_display_view($view = "view") {
   $render['#current_student_id'] = $current_student_id;
 
   
-  $school_id = db_get_school_id_from_student_id($current_student_id);
+  $school_id = db_get_school_id_for_student_id($current_student_id);
   
   // Add some body classes to the page for this student.
   $student = $screen->student;
@@ -1471,7 +1471,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   fp_add_js(fp_get_module_path("advise") . "/js/advise.what-if-selection.js");
   fp_add_css(fp_get_module_path("advise") . "/css/advise.css");    
     
-  $student_school_id = intval($db->get_school_id_for_student_id($current_student_id));  
+  $student_school_id = intval(db_get_school_id_for_student_id($current_student_id));  
     
   $form = array();
   $m = 0;
@@ -1728,7 +1728,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
 function advise_what_if_selection_form_validate($form, &$form_state) {
   $catalog_year = $form_state['values']['catalog_year'];
   $current_student_id = $form_state['values']['current_student_id'];
-  $school_id = db_get_school_id_from_student_id($current_student_id);
+  $school_id = db_get_school_id_for_student_id($current_student_id);
   
   // Make sure they selected at least 1 level 1 degree.
   $selected_degrees = array();

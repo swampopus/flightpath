@@ -2075,17 +2075,8 @@ class CourseList extends ObjList
 
 		$count = 0;
 
-		// Let's find out what our quality point grades & values are...
-		$qpts_grades = array();
-    $tlines = explode("\n", variable_get("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0"));
-    foreach ($tlines as $tline) {
-      $temp = explode("~", trim($tline));      
-      if (trim($temp[0]) != "") {
-        $qpts_grades[trim($temp[0])] = trim($temp[1]);
-      }
-    }
-    
-    
+		
+		$qpts_grades = NULL;
 		$retake_grades = $enrolled_grades = NULL;
     
 		
@@ -2100,10 +2091,25 @@ class CourseList extends ObjList
       
       $school_id = $course->school_id;
 
+      // Now that we have a school_id, let's figure out some variables....
+
       if (!$retake_grades || !$enrolled_grades) {
         $retake_grades = csv_to_array(variable_get_for_school("retake_grades", '', $school_id));
         $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades",'', $school_id));        
       }
+      
+      if (!$qpts_grades) {
+        $tlines = explode("\n", variable_get_for_school("quality_points_grades", "A ~ 4\nB ~ 3\nC ~ 2\nD ~ 1\nF ~ 0\nI ~ 0", $school_id));
+        foreach ($tlines as $tline) {
+          $temp = explode("~", trim($tline));      
+          if (trim($temp[0]) != "") {
+            $qpts_grades[trim($temp[0])] = trim($temp[1]);
+          }
+        }        
+      }
+      
+      
+      
       
 			if ($bool_use_ignore_list == true)
 			{
@@ -2124,26 +2130,9 @@ class CourseList extends ObjList
 			
 			if ($bool_ignore_enrolled == true)
 			{
-			  
-        if (in_array($course->grade, $enrolled_grades)) {
+			  if (in_array($course->grade, $enrolled_grades)) {
           continue;
         }
-			  
-			  /*
-				if ($course->is_completed() == false)
-				{
-  
-					if ($course->course_list_fulfilled_by->is_empty)
-					{
-						continue;
-					} else {
-						if ($course->course_list_fulfilled_by->get_first()->is_completed() == false)
-						{
-							continue;
-						}
-					}
-				}
-				*/
 			}
 
 			// Only allowing grades which we have quality points for?

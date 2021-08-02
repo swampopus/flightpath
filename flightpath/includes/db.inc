@@ -654,7 +654,7 @@ function db_get_user_settings($user_id) {
   return $db->get_user_settings($user_id);
 }
 
-function db_get_school_id_from_student_id($student_id) {
+function db_get_school_id_for_student_id($student_id) {
   $db = get_global_database_handler();
   return $db->get_school_id_for_student_id($student_id);
 }
