@@ -15,6 +15,13 @@ FlightPath 6.x Changelog
   
   Added ability to search for majors within a school (if user is allowed) on the student search screen.
   
+  Modified course_search to let you search by school, if schools module is enabled.
+  
+  Fixed bug in course_search where it was not uploading syllabi correctly.  Also shortened filename of uploaded
+  syllabi to a more reasonable length.
+  
+  Added "school" column to the list of courses you can edit from course_search module. 
+  
   
 2021-08-01
   Deprecating fp_get_system_settings() function.  It is now better served by simple use of variable_get().

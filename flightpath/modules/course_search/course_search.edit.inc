@@ -29,8 +29,12 @@ function course_search_edit_course_details_form() {
   $course->load_descriptive_data(false, true, false, true);
 
   $school_id = $course->school_id;
+  $school_code = "School #" . $school_id;
+  if (function_exists('schools_menu')) {
+    $school_code = schools_get_school_code_for_id($school_id);
+  }
 
-  fp_set_title(t("Edit Course Info for @course", array("@course" => "$subject_id $course_num")));
+  fp_set_title(t("Edit Course Info for @course - School @school", array("@course" => "$subject_id $course_num", "@school" => $school_code)));
 
   $form["#attributes"] = array("enctype" => "multipart/form-data");
   
@@ -269,7 +273,7 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
   }
 
   // Did the user try to upload a file?
-  if (trim($_FILES["syllabus"]["tmp_name"]) != "")
+  if (trim($_FILES["syllabus"]["tmp_name"][0]) != "")
   {
     $test = course_search_upload_attachment($course_id, $subject_id, $course_num);
     if (!$test)
@@ -291,23 +295,23 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
 function course_search_upload_attachment($course_id, $subject_id, $course_num) {
 
   // If any files were attached, go ahead and upload them.
-  $datetime = date ("_y-j-m_g-i-sa", time());
+  $datetime = date("_Y-j-m_g-i-sa", time());
 
 
-  $tmp_filename = $_FILES["syllabus"]["tmp_name"];
+  $tmp_filename = $_FILES["syllabus"]["tmp_name"][0];
   if (trim($tmp_filename) != "") {
     // Meaning, yes, a file was uploaded.
     $suffix = $datetime;
     // Create the new filename, based on the id's its been assigned.
-    $original_filename = $_FILES["syllabus"]["name"];
+    $original_filename = $_FILES["syllabus"]["name"][0];
     // replace problem characters...
     $original_filename = str_replace("'", "", $original_filename);
     $original_filename = str_replace('"', '', $original_filename);
     $original_filename = str_replace(",", "", $original_filename);
 
-    $temp = explode("\.", $original_filename);
+    $temp = explode(".", $original_filename);
     $ext = $temp[count($temp) - 1];  // get the original extension.
-    $new_filename = $original_filename . ".$suffix.$ext";
+    $new_filename = trim(substr($original_filename, 0, 30)) . ".$suffix.$ext";
 
 
     // Does the directory/files/syllabi exist?
@@ -439,12 +443,13 @@ function course_search_display_edit_courses()
 
 
 
-	$rtn .= "<table border='0' cellpadding='3' cellspacing='0'>
+	$rtn .= "<table border='0' cellpadding='3' cellspacing='0' width='100%'>
 			<tr>
-				<td class='tenpt' width='95%'>Course</td>
-				<td class='tenpt'>Sch</td>
-				<td class='tenpt'>Syl</td>
-				<td class='tenpt'>Updated</td>
+				<th class='tenpt'>Course</td>
+				<th class='tenpt' align='center'>School</td>
+				<th class='tenpt' align='center'>Sched</td>
+				<th class='tenpt' align='center'>Syl</td>
+				<th class='tenpt' align='center'>Updated</td>
 			</tr>";
 
 	$res = db_query("SELECT * FROM courses
@@ -457,9 +462,14 @@ function course_search_display_edit_courses()
 	while ($cur = db_fetch_array($res)) {
 		extract($cur, 3, "db");
 
-		$syl = $sch = $updated = "";
+		$syl = $sch = $school = $updated = "";
 		// Right here, maybe check to see if this course has
 		// a syllabus and/or schedule entered?
+		
+		$school = "#" . $cur['school_id'];
+		if (function_exists('schools_menu')) {
+		  $school = schools_get_school_code_for_id($school_id);
+    }
 		
 		$syllabus_details = course_search_get_course_syllabus_details("", "", $db_course_id);
 		$filename = $syllabus_details["filename"];
@@ -469,7 +479,7 @@ function course_search_display_edit_courses()
       		  
       $url = $syllabus_details["url"];			  
       
-			$syl = "<a href='$url'><img src='" . fp_theme_location() . "/images/document_icon.gif' border='0'></a>";
+			$syl = "<a href='$url'><i class='fa fa-file-o'></i></a>";
 			
 			$updated = $syllabus_details["posted"];
 		}
@@ -491,7 +501,7 @@ function course_search_display_edit_courses()
 		}
 
 		if ($updated != "") {
-			$updated = date("n/d/y",$updated);
+			$updated = date("n/d/Y",$updated);
 		}
 
 
@@ -515,7 +525,7 @@ function course_search_display_edit_courses()
 
 
 		$rtn .= "<tr style='$spanstyle'>
-				<td valign='top' width='90%'>";
+				<td valign='top' >";
 		
 		/*$rtn .= "<div style='padding:3px;'>
 					<a href='$moduleActionURL&performAction=editSpecificCourse&courseID=$db_course_id&subjectID=$db_subject_id&courseNum=$db_course_num'>$displaySubjectID $db_course_num - $db_title</a><!-- - $hrs$repHours --></div>";
@@ -525,6 +535,7 @@ function course_search_display_edit_courses()
 		// https://orion.ulm.edu/flightpath/tools/course-search/edit-info-details?course_id=468798&subject_id=ACCT&course_num=1010
 		
 		$rtn .= "</td>
+				<td align='center'>$school</td>
 				<td align='center'>$sch</td>
 				<td align='center'>$syl</td>
 				<td align='center' style='font-size: 8pt;'>$updated</td>

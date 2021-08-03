@@ -681,7 +681,7 @@ function schools_form_alter(&$form, $form_id) {
         
     $form['schools_school'] = array(
       'type' => 'select',
-      'label' => 'School:',
+      'label' => t('School:'),
       'options' => $options,
       'attributes' => array('onchange' => "return schoolsConfirmChangeSchool($school_id);"),
       'value' => $school_id,
@@ -715,7 +715,7 @@ function schools_form_alter(&$form, $form_id) {
     if (($entity_type == 'group' && @$form['group_id']['value'] === 'new') || ($entity_type == 'course' && @$form['course_id']['value'] === 'new') || ($entity_type == 'user' && @intval($form['user_id']['value']) === 0)) {      
       $form['schools_school'] = array( 
         'type' => 'markup',
-        'label' => 'School:',
+        'label' => t('School:'),
         'value' => t('<b>Please save this @dt at least once (to establish an ID in the database).  Once you have done this,
                           the School selection box will appear.</b>', array('@dt' => $entity_type)),
         'weight' => $weight,
@@ -740,7 +740,7 @@ function schools_form_alter(&$form, $form_id) {
       $options = schools_get_schools_for_fapi(TRUE, FALSE); // we don't need special permissions to view.
       $form['schools_school'] = array(
         'type' => 'select',
-        'label' => 'School:',
+        'label' => t('School:'),
         'options' => $options,        
         'value' => $school_id,
         'hide_please_select' => TRUE,

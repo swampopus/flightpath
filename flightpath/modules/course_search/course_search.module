@@ -334,15 +334,9 @@ function course_search_display_courses() {
   $subject_id = $_REQUEST["subject_id"];
   $school_id = intval(@$_REQUEST["school_id"]);
 
-  $render["#catalog_year"] = array(
-    "type" => "do_not_render",
-    "value" => $catalog_year,    
-  );
-
-  $render["#subject_id"] = array(
-    "type" => "do_not_render",
-    "value" => $subject_id,
-  );
+  $render["#catalog_year"] = $catalog_year;
+  $render["#school_id"] = $school_id; 
+  $render["#subject_id"] = $subject_id;
 
 
 
@@ -361,30 +355,18 @@ function course_search_display_courses() {
   //$rtn .= t("Current catalog year:") . " <b>$catalog_year-" . ($catalog_year +1) . "</b>   
   //    ";
   
+  if (function_exists('schools_menu')) {
+    $render['selected_school_name'] = array(
+      'value' => "<div class='current-school'>" . t("Current school: ") . "<strong>" . schools_get_school_name_for_id($school_id) . "</strong>
+                     - " . l(t("Change?"), "tools/course-search") . "</div>",
+    
+    );
+  }
       
   $render["current_cat_year"] = array(
     "value" => t("Current catalog year:") . " <b>$catalog_year-" . ($catalog_year +1) . "</b>", 
   );
-      
-      /*
-  $important_notice = "              
-      <div class='tenpt hypo' style='padding: 5px;'>
-      <b>Important Notice:</b> <ul style='margin-top: 5px;'>
-      <li>Course descriptions are intended for unofficial use only.  Consult your catalog for the official listing.</li>
-      <li>Anticipated course availability reflects current plans but actual offerings may change because of factors 
-        unknown at planning time.  Consult the schedule of classes for final offerings.</li>
-      <li>Sample syllabi are provided for planning purposes only.  The syllabus used by an instructor may vary from this sample.</li>
-      <li>Please ask your advisor if you have any questions about a course.</li>
-      </ul>               
-      </div>
-      ";
-
-
-  $render["important_notice"] = array(
-    "value" => $important_notice, 
-  );
-  */
-       
+          
   
   $render["subject_title"] = array(
     "value" => "<div class='subject-title'><h2>$title</h2></div>",
@@ -450,12 +432,7 @@ function course_search_display_courses() {
     $temp_course->term_id = $only_term;
     $term_desc = $temp_course->get_term_description(false);
 
-    /*
-    $rtn .= "<div style='font-weight: bold; padding-bottom: 20px;'>
-             The following courses are currently scheduled to be offered during " . $term_desc . ".
-            </div>";
-    */
-            
+                
     $render["term_selected_only_term"] = array(
       "value" => "<div style='font-weight: bold; padding-bottom: 20px;'>
                  " . t("The following courses are currently scheduled to be offered during ") . $term_desc . "
@@ -471,9 +448,11 @@ function course_search_display_courses() {
   $temp_course = new Course();
   // removed course_num < 500 and
   $result = db_query("SELECT * FROM courses
-              WHERE `catalog_year`='?' AND
-              `subject_id`='?' AND              
-              `exclude`='0' ORDER BY `course_num` ", $catalog_year, $subject_id);
+              WHERE catalog_year = ? 
+              AND subject_id = ? 
+              AND exclude = 0 
+              AND school_id = ?
+              ORDER BY course_num ", $catalog_year, $subject_id, $school_id);
   if ($result)
   {
     while ($cur = db_fetch_array($result))
@@ -538,7 +517,7 @@ function course_search_display_courses() {
             &nbsp; | &nbsp;
             <a href='javascript: toggleHideDiv(\"$rnd_div_id\");' class='nounderline'>
               <span id='SPAN$rnd_div_id'>
-                more&raquo;
+                " . t("more&raquo;") . "
                 </span></a> ";
           $s_disp = "none";
         }
@@ -660,22 +639,7 @@ function course_search_display_courses() {
       
       // Draw it on screen...
       if ($bool_hide != true) {
-        /*   
-         * 
-         * TODO:  This section should really only be if the course is designated as a graduate course or not, not based on course_num.
-         *   
-        if ($grad_notice_flag == false && $course_num > 4999)
-        {
-          $grad_notice_flag = true;
-          $rtn .= "<div style='font-size: 10pt; font-weight: bold;
-                border-bottom: 1px solid black;
-                margin-left: 10px;
-                margin-bottom: 20px;
-                margin-top: 50px;'>
-                " . t("The following courses are for Graduate Students only.") . "
-                </div>";
-        }
-         * */
+        
   
         $details = $schedule_text . $syllabus_text;
 
@@ -906,6 +870,33 @@ function course_search_get_course_syllabus_details($subject_id = "", $course_num
 
 
 
+function course_search_select_school_form() {
+  $form = array();
+  
+  $options = schools_get_schools_for_fapi(TRUE, FALSE); // we don't need special permissions to view.
+  $form['school_id'] = array(
+    'type' => 'select',
+    'label' => t('Please begin by selecting a school:'),
+    'options' => $options,        
+    'value' => @$_REQUEST['school_id'],
+    'hide_please_select' => TRUE,
+    'required' => TRUE,    
+  );
+  
+  $form['submit_btn'] = array(
+    'type' => 'submit',
+    'value' => t("Continue"),
+  );
+  
+  return $form;
+}
+
+
+function course_search_select_school_form_submit($form, $form_state) {
+  $values = $form_state['values'];
+  fp_goto('tools/course-search', 'school_id=' . $values['school_id']);
+}
+
 
 /**
  * Displays the search pulldown for the user to use to find courses.
@@ -918,7 +909,6 @@ function course_search_display_search() {
   fp_add_css(fp_get_module_path("course_search") . "/css/course_search_style.css");
   
     
-  // TODO: we need to get school_id  
     
   $rtn .= "";
   
@@ -926,120 +916,108 @@ function course_search_display_search() {
     $rtn .= "<div>" . t("Administrators:") . " " . l(t("Edit course schedules and syllabi"), "tools/course-search/edit-list") . "</div>";
   }
     
-  //$rtn .= fp_render_section_title("Courses");
 
 
+      
+  $school_id = 0;
+  
+  if (function_exists('schools_menu')) {  // The schools module is enabled.  We need to first ask what school we want to look at. 
+    if (!isset($_REQUEST['school_id'])) {
+      
+      $rtn .= fp_render_form('course_search_select_school_form');      
+      return $rtn;
+    } // not isset school_id
+    $school_id = intval($_REQUEST['school_id']);
+    $rtn .= "<div class='current-school'>" . t("Current school: ") . "<strong>" . schools_get_school_name_for_id($school_id) . "</strong>
+                     - " . l(t("Change?"), "tools/course-search") . "</div>";
+  }
+  
+  $clean_urls = variable_get("clean_urls", FALSE);
   
   $current_catalog_year = variable_get('current_catalog_year', 2006);  // TODO: school_id?
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;
-
-  $clean_urls = variable_get("clean_urls", FALSE); // are clean URLs enabled?
-
-  if ($catalog_year == "")
-  {
-    
-    $rtn .= "Please select an available catalog year from the
-      list below.<br><br>
-      <form action='" . fp_url("tools/course-search") . "' method='GET' name='mainform' id='myform'>
-      
-        <select name='catalog_year'>";
-    for ($t = $current_catalog_year; $t >= variable_get("earliest_catalog_year", 2006); $t--)  // TODO:  school_id?
-    {
-      $rtn .= "<option value='$t'>$t - " . ($t+1) . "</option> \n";
-
-    }
-    $rtn .= "</select>
-      
-        <input type='submit' value='Select ->'>
-          ";
-
-    if (!$clean_urls) {
-      // Hack for if clean URLs isn't enabled
-      $rtn .= "<input type='hidden' name='q' value='tools/course-search'>";
-    }
-      
-    $rtn .= "      </form>";
-
-  } 
-  else {
+  
+  
     // Catalog year has been selected.
 
-    $rtn .= "Current catalog year: <b>$catalog_year-" . ($catalog_year +1) . "</b>
-        
-        <br><br>
-      <label>Please select an available subject from the list below.</label>       
+  $rtn .= "Current catalog year: <b>$catalog_year-" . ($catalog_year +1) . "</b>
       
-      <form action='" . fp_url("tools/course-search/courses") . "' method='GET' name='mainform' id='myform'>";
+      <br><br>
+    <label>Please select an available subject from the list below.</label>       
     
-    if (!$clean_urls) {
-      // Hack for if clean URLs isn't enabled
-      $rtn .= "<input type='hidden' name='q' value='tools/course-search/courses'>";
-    }
+    <form action='" . fp_url("tools/course-search/courses") . "' method='GET' name='mainform' id='myform'>
+    <input type='hidden' name='school_id' value='$school_id'> ";
     
-
-    $rtn .= "
-      <div id='element-inner-wrapper-course-search-subject' class='form-element element-type-select '>
-        <select class='course-search-subject' name='subject_id'>
-      ";    
-
-
-    
-    // We want to make a pull-down list of all available subjects.
-    // Keep in mind with this join-- we may have courses who have
-    // a subject_id, for which we don't have that subject in the subjects
-    // table.
-   
-    
-    $query = "SELECT DISTINCT b.subject_id, a.title FROM courses b LEFT JOIN subjects a
-              ON (a.subject_id = b.subject_id)
-              WHERE exclude = 0
-              AND catalog_year = ?
-              AND a.school_id = b.school_id
-              AND b.school_id = ?
-              ";
-    
-    $subjects = array();
-    $result = db_query($query, $catalog_year, $school_id);
-    while ($cur = db_fetch_array($result))
-    {      
-      //fpm($cur);
-      $title = trim($cur["title"]);
-      $subject_id = trim($cur["subject_id"]);
-      
-      if ($title == "") {
-        $title = $subject_id;
-      }
-      
-      $subjects[$subject_id] = $title;
-    }
-    
-    asort($subjects);
-    
-    foreach ($subjects as $subject_id => $title) {
-      
-      $rtn .= "<option value='$subject_id'>$title ($subject_id)</option>";
-      
-      
-      
-    }
-
-
-    $rtn .= " </select>       
-            </div>
-        
-        <div class='course-search-buttons buttons form-element element-type-submit'>
-          <input type='submit' value='Select'>
-        </div>
-      
-      <input type='hidden' name='mode' value='$mode'>
-      
-      ";
-
-
-    $rtn .= "</form>";
   
+  if (!$clean_urls) {
+    // Hack for if clean URLs isn't enabled
+    $rtn .= "<input type='hidden' name='q' value='tools/course-search/courses'>";
   }
+  
+
+  $rtn .= "
+    <div id='element-inner-wrapper-course-search-subject' class='form-element element-type-select '>
+      <select class='course-search-subject' name='subject_id'>
+    ";    
+
+ 
+  
+  // We want to make a pull-down list of all available subjects.
+  // Keep in mind with this join-- we may have courses who have
+  // a subject_id, for which we don't have that subject in the subjects
+  // table.
+ 
+  
+  $query = "SELECT DISTINCT b.subject_id, a.title FROM courses b LEFT JOIN subjects a
+            ON (a.subject_id = b.subject_id)
+            WHERE exclude = 0
+            AND catalog_year = ?
+            AND a.school_id = b.school_id
+            AND b.school_id = ?
+            ";
+  
+  $subjects = array();
+  $result = db_query($query, $catalog_year, $school_id);
+  while ($cur = db_fetch_array($result))
+  {      
+    //fpm($cur);
+    $title = trim($cur["title"]);
+    $subject_id = trim($cur["subject_id"]);
+    
+    if ($title == "") {
+      $title = $subject_id;
+    }
+    
+    $subjects[$subject_id] = $title;
+  }
+  
+  asort($subjects);
+  
+  foreach ($subjects as $subject_id => $title) {
+    
+    $rtn .= "<option value='$subject_id'>$title ($subject_id)</option>";
+    
+    
+    
+  }
+
+
+  $rtn .= " </select>       
+          </div>
+      
+      <div class='course-search-buttons buttons form-element element-type-submit'>
+        <input type='submit' value='Select'>
+      </div>
+    
+    <input type='hidden' name='mode' value='$mode'>
+    
+    ";
+
+
+  $rtn .= "</form>";
+  
+  
 
   
   return $rtn;
