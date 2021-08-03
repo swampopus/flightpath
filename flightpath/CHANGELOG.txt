@@ -9,7 +9,13 @@ FlightPath 6.x Changelog
   
   Replaced calls to GLOBALS['fp_system_settings'] array with variable_get() where appropriate.  Cleaned up unused functions.
   
-
+  Added school column to output for student search of advisees.
+  
+  Added ability to specify optgroups for options in select lists in the Form API.
+  
+  Added ability to search for majors within a school (if user is allowed) on the student search screen.
+  
+  
 2021-08-01
   Deprecating fp_get_system_settings() function.  It is now better served by simple use of variable_get().
   

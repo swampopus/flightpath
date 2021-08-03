@@ -678,11 +678,28 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     }
     
     foreach ($options as $key => $val) {
-      $selected = "";
-      if ($value == $key) {
-        $selected = "selected";
+      
+      if (is_array($val)) {
+        // We need to establish an optgroup and then descend one level.
+        $rtn .= "<optgroup label='" . htmlentities($key) . "'>";
+        foreach ($val as $k => $v) {
+          $selected = "";
+          if ($value == $k) {
+            $selected = "selected";
+          }
+          $rtn .= "<option value='$k' $selected>$v</option>";
+          
+        }
+        $rtn .= "</optgroup>";
       }
-      $rtn .= "<option value='$key' $selected>$val</option>";
+      else {
+        // This is just a normal string, so we can continue as-is  
+        $selected = "";
+        if ($value == $key) {
+          $selected = "selected";
+        }
+        $rtn .= "<option value='$key' $selected>$val</option>";
+      }
     }
     $rtn .= "</select>";
   }
@@ -692,6 +709,8 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   if ($type == "checkboxes") {
     $rtn .= "<div class='form-checkboxes form-checkboxes-$cssname'>";
     foreach ($options as $key => $val) {
+        
+        
       $checked = "";
       if (is_array($value) && isset($value[$key]) && $value[$key] == $key) {
         
@@ -701,6 +720,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
       $rtn .= "<div class='checkbox-element checkbox-element-$csskey'>
                  <label class='label-for-checkbox'><input type='checkbox' name='$name" . "[$key]' id='element-$cssname-$csskey' value='$key' $checked $attributes> $val</label>
                </div>";
+
     }
     $rtn .= "</div>";
   }

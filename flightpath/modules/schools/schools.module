@@ -421,6 +421,7 @@ function schools_content_alter(&$render, $render_id) {
 
   $defs = schools_get_school_definitions(TRUE);  
 
+    
   if ($render_id == 'admin_display_degrees') {
     
     //fpm($render);
@@ -850,6 +851,23 @@ function schools_form_alter(&$form, $form_id) {
   
 } // hook_form_alter
 
+
+
+function schools_get_school_code_for_id($school_id) {
+  
+  $defs = schools_get_school_definitions(TRUE);
+  $rtn = @$defs[$school_id]['school_code'];
+  if ($rtn == "") {
+    $rtn .= t("School ID# ") . $school_id;
+  }
+
+  if (intval($school_id) === 0) {
+    $rtn = "-";
+  }
+
+  return $rtn;
+  
+}
 
 function schools_get_school_name_for_id($school_id) {
   $defs = schools_get_school_definitions(FALSE);

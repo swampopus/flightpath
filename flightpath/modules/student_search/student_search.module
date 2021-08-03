@@ -416,7 +416,7 @@ function student_search_get_majors_for_fapi() {
                    AND school_id IN ($school_id_list)                   
                    $extra_line
                    GROUP BY major_code
-                   ORDER BY title
+                   ORDER BY school_id, title
                    ", $params);
   while ($cur = db_fetch_object($res)) {
     $sel = ($major_code == $cur->major_code) ? "selected" : "";
@@ -435,8 +435,17 @@ function student_search_get_majors_for_fapi() {
       $title = trim(substr($title, 0, $max_chars)) . "...";
     }
     
+    $school_name = "";
+    if (function_exists('schools_menu')) {
+      $school_name = schools_get_school_name_for_id($cur->school_id);
+    }
+    
     //$rtn .= "<option value='$cur->major_code' $sel>$cur->major_code : $title ({$degree_class_details["title"]})</option>";
-    $rtn[$cur->major_code] = "$cur->major_code : $title ({$degree_class_details["title"]})";
+    
+    // Getting fancy.  We are going to have optgroup in this set of options.
+    $rtn[$school_name][$cur->major_code . "~~school_" . $cur->school_id] = "$cur->major_code : $title ({$degree_class_details["title"]})";
+    
+    
   }    
   
   return $rtn;
@@ -630,13 +639,21 @@ function student_search_search_form() {
     $search_for = trim(@$_SESSION["student_search_for"]);
   }  
   $o_search_for = $search_for;
-  
+    
     
   $major_code = trim(@$_REQUEST["major_code"]);
   if ($major_code == "") {
     $major_code = trim(@$_SESSION["student_search_major_code"]);
   }  
-  
+
+  $school_id = -1;
+  $o_major_code = "";  
+  if ($major_code != "") {
+    $o_major_code = $major_code;
+    $temp = explode("~~school_", $major_code);
+    $major_code = $temp[0];
+    $school_id = $temp[1];
+  }
    
   $form['search_for'] = array(
     'label' => t('Search for students by name or CWID:'),
@@ -651,7 +668,7 @@ function student_search_search_form() {
     'label' => t('Search within major:'),
     'type' => 'select',
     'options' => $options,
-    'value' => $major_code,
+    'value' => $o_major_code,
     'hide_please_select' => TRUE,
   );
   
@@ -769,9 +786,11 @@ function student_search_search_form() {
       $mjsearch = $major_code;      
       $other_table = ", degrees b";      
       $major_search = " AND substring_index(c.major_code,'|',1) = b.major_code
+                        AND b.school_id = :b_school_id
                         AND (b.major_code LIKE :like_mjsearch ) ";
                         
       $params[":like_mjsearch"] = "%$mjsearch%";
+      $params[":b_school_id"] = $school_id;
       //unset($params[':like_search_for']);
       
     }
@@ -1109,6 +1128,11 @@ function student_search_get_advisee_table_headers() {
   $table_headers[] = array("label" => "&nbsp;");  
   $table_headers[] = array("label" => t("CWID"), "field" => "u.cwid");
   $table_headers[] = array("label" => "Student", 'field' => 'l_name');
+  
+  if (function_exists('schools_menu')) {
+    $table_headers[] = array("label" => "School");
+  }
+  
   $table_headers[] = array("label" => "Major");  
   $table_headers[] = array("label" => "Rank", "field" => 'a.rank_code');  
   $table_headers[] = array("label" => "Catalog<span class='mobile-hidden'> Year</span>", "field" => "a.catalog_year");
@@ -1163,6 +1187,7 @@ function student_search_render_advisees($adv_array, $title) {
     $first_name = $adv_array[$t]["first_name"];
     $last_name = $adv_array[$t]["last_name"];
     $major = $adv_array[$t]["major"];
+    $school_id = $adv_array[$t]["school_id"];
     $priority_value = floatval($adv_array[$t]["priority_value"]);
     
     $advising_what_if = @$adv_array[$t]["advising_what_if"];
@@ -1245,7 +1270,11 @@ function student_search_render_advisees($adv_array, $title) {
           
             <td class='ss-advised-image'>$advised_image</td>  
             <td class='ss-student-id'>$student_id</td>
-            <td class='ss-student-name'>$student_name</td>            
+            <td class='ss-student-name'>$student_name</td>";
+    if (function_exists('schools_menu')) {
+      $rtn  .= "<td class='ss-student-school'>" . schools_get_school_code_for_id($school_id) . "</td>";
+    }
+    $rtn .= "
             <td class='ss-student-major'>$disp_major</td>
             <td class='ss-student-rank'>$rank</td>
             <td class='ss-student-catalog-year'>$catalog_year</td>
