@@ -95,7 +95,7 @@ function admin_display_degrees_popup_add_group2() {
  * This form lets the user copy a degree and all of it's tracks & concentrations.
  */
 function admin_copy_degree_form() {
-  // TODO: we need school_id
+  
   
   $de_catalog_year = admin_get_de_catalog_year();
   
@@ -406,8 +406,7 @@ function admin_copy_degree_form_submit($form, &$form_state) {
  */
 function admin_add_degree_form() {
   
-  // TODO:  we need school_id  
-      
+        
   $de_catalog_year = admin_get_de_catalog_year();
   
   fp_set_title(t("Add Degree for") . " " . $de_catalog_year);
@@ -695,7 +694,6 @@ function admin_display_degrees() {
   $render = array();
   $render['#id'] = 'admin_display_degrees';
   
-   // TODO: school_id?
   $de_catalog_year = admin_get_de_catalog_year();
   $rtn = "";    
     

@@ -77,7 +77,7 @@ class Student extends stdClass
 			
 			// If we are supposed to set cumulative hours and gpa, perform that
 			// operation now.
-      if (variable_get_for_school("calculate_cumulative_hours_and_gpa", FALSE, $this->school_id)) {			
+      if (variable_get_for_school("calculate_cumulative_hours_and_gpa", 'no', $this->school_id) == 'yes') {			
 			 $arr = $this->calculate_cumulative_hours_and_gpa();
 			 $this->cumulative_hours = $arr["cumulative_total_hours"];		
 			 $this->gpa = $arr["cumulative_gpa"];		

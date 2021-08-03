@@ -17,8 +17,6 @@ function admin_display_courses() {
   
 
 
-// TODO:  get school_id?
-
   $de_catalog_year = admin_get_de_catalog_year();
 
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");

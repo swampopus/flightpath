@@ -868,17 +868,32 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
  * This is a systems settings form, which lets
  * the user edit advising variabled for FlightPath.
  */
-function admin_advising_settings_form() {
+function admin_advising_settings_form($school_id = 0) {
   $form = array();
   
     
-  // TODO:  make this school-friendly like school settings form.
+  $school_id = intval($school_id);
+  
+  $fs = "";  // The field name suffix.  We will add this to the end of all of our field names.  If this is the default school, leave blank.
+  if (function_exists('schools_menu')) {
+    $school_name = schools_get_school_name_for_id($school_id);
+    fp_set_title(t("Edit %school school advising settings", array('%school' => $school_name)));
+    if ($school_id !== 0) {
+      $fs = "~~school_" . $school_id;
+    }
+  }
   
   
-  $form["available_advising_term_ids"] = array(
+  $form['school_id'] = array(
+    'type' => 'hidden',
+    'value' => $school_id,
+  );
+  
+  
+  $form["available_advising_term_ids" . $fs] = array(
     "type" => "textfield",
     "label" => t("Available advising term id's"),
-    "value" => variable_get("available_advising_term_ids", ""),
+    "value" => variable_get_for_school("available_advising_term_ids", "", $school_id),
     "description" => t("These are the terms for which advisors may advise a student to take
                         a course.  They should follow the structure established on the
                         school data settings page.
@@ -886,29 +901,29 @@ function admin_advising_settings_form() {
                         in the order that they should appear in FlightPath."),
   );  
 
-  $form["advising_term_id"] = array(
+  $form["advising_term_id" . $fs] = array(
     "type" => "textfield",
     "label" => t("Default advising term id"),
-    "value" => variable_get("advising_term_id", ""),
+    "value" => variable_get_for_school("advising_term_id", "", $school_id),
     "description" => t("Of the available term ids above, this is the default that FlightPath
                         is set to when an advisor logs in. Ex: 200940."),
   );  
 
 
-  $form["current_catalog_year"] = array(
+  $form["current_catalog_year" . $fs] = array(
     "type" => "textfield",
     "size" => 10,
     "label" => t("Current catalog year"),
-    "value" => variable_get("current_catalog_year", ""),
+    "value" => variable_get_for_school("current_catalog_year", "", $school_id),
     "description" => t("This is the year which What If loads degrees from, as well as other important functions.
                         Only change this once you have fully loaded a new catalog year."),
   );  
 
-  $form["current_draft_catalog_year"] = array(
+  $form["current_draft_catalog_year" . $fs] = array(
     "type" => "textfield",
     "size" => 10,
     "label" => t("Current DRAFT catalog year"),
-    "value" => variable_get("current_draft_catalog_year", ""),
+    "value" => variable_get_for_school("current_draft_catalog_year", "", $school_id),
     "description" => t("While in Draft mode, this is the year which Blank Degree Search loads degrees from.  What If
                         mode will always use the Current catalog year, set above.
                         You may change this while working on a new catalog.  It will not affect any other
@@ -917,10 +932,10 @@ function admin_advising_settings_form() {
   );  
 
 
-  $form["not_released_grades_terms"] = array(
+  $form["not_released_grades_terms" . $fs] = array(
     "type" => "textfield",
     "label" => t("NOT released grades terms"),
-    "value" => variable_get("not_released_grades_terms", ""),
+    "value" => variable_get_for_school("not_released_grades_terms", "", $school_id),
     "description" => t("Enter the term_id's, separated by commas, 
                         which are NOT released and should NOT be visible to either advisors or students. 
                         Coures in these terms will only show midterm grades or no grades at all. 
@@ -1002,7 +1017,7 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
   $values = $form_submit["values"];
   
   $db = get_global_database_handler();
-  // TODO: school_id or not needed?
+  
   $de_catalog_year = admin_get_de_catalog_year();
   
   // Check to make sure they entered the transfer passcode correctly.
@@ -1125,7 +1140,6 @@ function admin_menu_handle_replacement_pattern($str) {
   
   if (strpos($str, "%DE_CATALOG_YEAR%") !== 0) {
     // It contains this replacement pattern!
-    // TODO: school_id or not needed?
     $str = str_replace("%DE_CATALOG_YEAR%", admin_get_de_catalog_year(), $str);
   }
   
@@ -1566,7 +1580,7 @@ function admin_display_main() {
   $de_catalog_year = admin_get_de_catalog_year(FALSE, 0);
   
   // Has the system cron been run recently?
-  $cron_last_run = variable_get("cron_last_run", 0);    
+  $cron_last_run = variable_get("cron_last_run", 0);     
   if ($cron_last_run < strtotime("-7 DAY")) {
     // Warn admin that they need to have cron set up!  It's been over a week!
     fpm(t("Your system's cron process hasn't run in over a week.  In order for FlightPath

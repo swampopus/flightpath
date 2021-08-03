@@ -191,7 +191,7 @@ function schools_menu() {
         ),
       ),
     ),
-    
+    'type' => MENU_TYPE_NORMAL_ITEM,
   );
   
   
@@ -225,11 +225,34 @@ function schools_menu() {
       "tab_family" => "config_school_settings",      
       "weight" => $weight,    
     );      
+  
+
+
+  $items["admin/edit-advising-settings/$school_id"] = array(
+    "title" => $school_name,
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("admin_advising_settings_form", "system_settings"),
+    "access_arguments" => array("can_edit_advising_settings"),
+      "page_settings" => array(
+        "page_hide_report_error" => TRUE,        
+        "menu_links" => array(         
+          0 => array(
+            "text" => "Admin Console",
+            "path" => "admin-tools/admin",
+            "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+          ),
+        ),
+      ),    
+      "type" => MENU_TYPE_TAB,
+      "tab_family" => "edit_advising_settings",      
+      "weight" => $weight,    
+    );      
+  
+  
+  
+    $weight = $weight + 10;
+  
   }
-  
-  $weight = $weight + 10;
-  
-  
   
   return $items;
     
@@ -287,6 +310,13 @@ function schools_menu_alter(&$items) {
       
     }
     
+
+    if ($path == 'admin/edit-advising-settings') {
+      $items[$path]['type'] = MENU_TYPE_DEFAULT_TAB;
+      $items[$path]['tab_family'] = 'edit_advising_settings';
+      $items[$path]['page_settings']['tab_title'] = t('Default');
+      unset($items[$path]['tab_parent']);            
+    }
 
 
   } // foreach
@@ -822,8 +852,7 @@ function schools_form_alter(&$form, $form_id) {
 
   
   
-  
-  
+    
   if ($form_id == "system_school_data_form") {
     // We want to add a "use default" checkbox at the top, which, if set, will disable all of the form elements.        
     fp_add_js(fp_get_module_path('schools') . '/js/schools.js');
@@ -832,17 +861,52 @@ function schools_form_alter(&$form, $form_id) {
 
     $school_id = intval($form['school_id']['value']);
     if ($school_id !== 0) {
-            
-      $form['school_use_default_school_values~~school_' . $school_id] = array(
-        'label' => t("Use \"Default\" school values?"),
-        'type' => 'checkbox',
-        'value' => variable_get("school_use_default_school_values~~school_" . $school_id, TRUE),
-        'attributes' => array('class' => 'school-use-default-values-checkbox'),
-        'description' => t("If checked, we will use all of the <em>Default</em> school's settings for this school.  If you need to change any settings
-                            for this school, then uncheck this box to make changes.") . "<div id='use-default-remember'>" . t("Remember to save at the bottom of the screen.") . "</div>",
+      
+      $school_name = schools_get_school_name_for_id($school_id);
+      
+      $form['markup_school_use_default_school_values'] = array(   
+        'type' => 'markup',     
+        'value' => "<div>" . t("Since this is not the Default school, you have the option to <em>override</em> the Default school's values for each field.  
+                                <br>If <strong>checked</strong>, the value you enter will be used for students, degrees, etc, belonging to this school (%school).  
+                                <br>If <strong>unchecked</strong>, the value you enter will be ignored, and the Default school's value will be used instead.
+                                <br><br>If unsure what to do, leave these 'Override' boxes unchecked.
+                            ", array("%school" => $school_name)) . "</div>",
         'weight' => -100,
       );   
-    }
+      
+    
+    
+      // Add a checkbox to every form element!
+      $fields_to_edit = array('textfield', 'textarea', 'select');
+      $fields_to_check_override = "";
+      foreach ($form as $fieldname => $element) {
+        if (in_array($element['type'], $fields_to_edit)) {
+          // Add an "override" checkbox for this field.           
+          $checked = "";
+          if (variable_get("school_override__$fieldname", "") === "yes") {
+            $checked = "checked=checked";
+          }
+                   
+          if (!isset($form[$fieldname]['prefix'])) $form[$fieldname]['prefix'] = "";
+          
+          $css_id = md5($fieldname) . mt_rand(9,9999);
+          
+          $form[$fieldname]['prefix'] .= "<span class='schools-override-cb'>
+                              <label><input type='checkbox' name='school_override__$fieldname' class='school-override-cb' id='school_override__$css_id' value='yes' $checked>" . t("Override Default school value?") . "</label></span>";
+          // Also add this fieldname to our "fields_to_check_override" string, so we can put it in a hidden textarea for later use in the _submit function.
+          $fields_to_check_override .= $fieldname . ",";
+        }
+      } // foreach
+    
+      $form['markup_fields_to_override'] = array(
+        'value' => "<textarea name='fields_to_check_override' style='display:none;'>$fields_to_check_override</textarea>",
+        'weight' => 999,
+      );
+    
+      // We also need to add a custom submit handler, so we can save the "override" values.
+      $form['#submit_handlers'][] = 'schools_override_elements_form_submit';
+    
+    } // school != 0
     
   } // system_school_data_form
   
@@ -850,6 +914,36 @@ function schools_form_alter(&$form, $form_id) {
     
   
 } // hook_form_alter
+
+
+function schools_override_elements_form_submit($form, $form_state) {
+  
+  // our override values will be in the POST, not the regular "values" area.
+  $school_id = intval($form_state['values']['school_id']);
+  $fields_to_check_override = explode(",", $form_state['POST']['fields_to_check_override']);
+  
+  
+  foreach($fields_to_check_override as $fieldname) {
+    if ($fieldname == "") continue;
+    
+    // get the base fieldname (minus any school designation).
+    $temp = explode("~~", $fieldname);
+    $base_fieldname = $temp[0];
+    
+    if (@$form_state['POST']["school_override__$fieldname"] === 'yes') {
+      // We are overriding the fieldname.
+      variable_set("school_override__$fieldname", "yes");      
+
+                              
+    } // if override == yes
+    else {
+      // We are NOT overriding it.
+      variable_delete("school_override__$fieldname");
+    }
+  } //foreach
+  
+  
+}
 
 
 

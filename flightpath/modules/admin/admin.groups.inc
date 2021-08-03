@@ -1338,7 +1338,7 @@ function admin_display_groups() {
   $render['#id'] = 'admin_display_groups';
   
   
-  // TODO: school_id?
+  
   $de_catalog_year = admin_get_de_catalog_year();
   
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
@@ -1574,7 +1574,7 @@ function admin_groups_list_filter_form_submit($form, $form_state) {
 function admin_process_all_definitions_form() {
   $form = array();
   
-  // TODO: school_id?  Or, not really neceaary?
+  
   $de_catalog_year = admin_get_de_catalog_year();
 
   fp_set_title(t("Process all group definitions and settings for @year", array("@year" => $de_catalog_year)));

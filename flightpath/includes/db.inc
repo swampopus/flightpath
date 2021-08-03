@@ -789,14 +789,19 @@ function variable_get($name, $default_value = "") {
 }
 
 
-function variable_get_for_school($name, $default_value = "", $school_id = 0) {
+/**
+ * Get a value for a particular school.
+ * if bool_ignore_override is TRUE, then we won't worry if it's being overwritten or not.
+ */
+function variable_get_for_school($name, $default_value = "", $school_id = 0, $bool_ignore_override = FALSE) {
   $school_id = intval($school_id);
-  // If this is the default school, OR, we are using default vals fr this school, then use variable_get normally
-  if ($school_id === 0 || variable_get("school_use_default_school_values~~school_" . $school_id, FALSE) === TRUE) {
+  
+  // If this is the default school, OR, we are using NOT overriding the default vals for this school, then use variable_get normally
+  if ($school_id === 0 || ($bool_ignore_override == FALSE && variable_get("school_override__$name~~school_" . $school_id, '') !== 'yes')) {
     return variable_get($name, $default_value);  // for default school, just work normally.
   }
-  
-  // If we are here, we need to get using a fieldname suffic with the school id.
+    
+  // If we are here, we need to get using a fieldname suffix with the school id.
   return variable_get($name . "~~school_" . $school_id, $default_value);
   
 }
@@ -839,6 +844,17 @@ function variable_set($name, $value) {
  
   
 }
+
+
+/**
+ * Remove a variable entirely from the table
+ */
+function variable_delete($name) {
+  unset($GLOBALS["fp_system_settings"][$name]);
+  db_query("DELETE FROM variables WHERE name = ?", $name);
+}
+
+
 
 
 /**
