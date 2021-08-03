@@ -3428,8 +3428,10 @@ function system_display_dashboard_page () {
     $rtn .= "<div class='dash-box dash-right'>";
 
     
+    // TODO: need to do something different for people who advise multiple schools
+    
     $advising_term_id = variable_get("advising_term_id", "");
-    $advising_term_desc = get_term_description($advising_term_id, FALSE, $user->school_id);  // TODO: might need to do something different for people who advise multiple schools
+    $advising_term_desc = get_term_description($advising_term_id, FALSE, $user->school_id);  
 
     $url = fp_url("render-advising-snapshot-for-iframe", "window_mode=popup");
 
@@ -3542,6 +3544,8 @@ function system_render_advising_snapshop_for_iframe() {
   
     $unfinished = 100 - $advised_percent;
     $pie_chart_url_advised_percent = base_path() . "/libraries/pchart/fp_pie_chart.php?size=75&radius=35&progress=$advised_percent&unfinished=$unfinished&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
+    
+    // TODO:  if you advise multiple schools, you need to have more than this one snapshot.
     
     $advising_term_id = variable_get("advising_term_id", "");
     $advising_term_desc = get_term_description($advising_term_id, FALSE); // TODO: may need to do something different if user advises over multiple schools

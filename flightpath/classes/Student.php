@@ -115,7 +115,7 @@ class Student extends stdClass
 
 		// Look in the database of advised courses for ANY course advised in
 		// the range of advisingTermIDs.
-		$advising_term_ids = variable_get("available_advising_term_ids", "0");;
+		$advising_term_ids = variable_get("available_advising_term_ids", "0", $this->school_id);;
 
 		$temp = explode(",",$advising_term_ids);
 		foreach ($temp as $term_id)

@@ -110,7 +110,7 @@ function blank_degrees_display_blank_degree() {
     
   // If we used the word "current" for catalog_year, then find out what the current is.
   if (strtolower($blank_catalog_year) == "current") {
-    $blank_catalog_year = variable_get("current_catalog_year", 2006);    
+    $blank_catalog_year = variable_get_for_school("current_catalog_year", 2006, $school_id);    
   }
 
   $blank_degree = NULL;
@@ -312,14 +312,14 @@ function blank_degrees_select_degree_form() {
   
   // If we used the word "current" for catalog_year, then find out what the current is.
   if (strtolower($blank_catalog_year) == "current") {
-    $blank_catalog_year = variable_get("current_catalog_year", 2006);    
+    $blank_catalog_year = variable_get("current_catalog_year", 2006);   // TODO:  School_id? 
   }
   
   if ($blank_catalog_year == "") {
     // The user must first select the desired catalog year.
     
     $catalog_year_options = array();
-    $current_catalog_year = variable_get("current_catalog_year", 2006);
+    $current_catalog_year = variable_get("current_catalog_year", 2006);  // TODO: school_id?
     
     if ($GLOBALS["fp_advising"]["bool_use_draft"]) {
       $current_catalog_year = variable_get("current_draft_catalog_year", 2006);

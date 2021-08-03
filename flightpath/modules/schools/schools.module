@@ -231,7 +231,7 @@ function schools_menu() {
   $items["admin/edit-advising-settings/$school_id"] = array(
     "title" => $school_name,
     "page_callback" => "fp_render_form",
-    "page_arguments" => array("admin_advising_settings_form", "system_settings"),
+    "page_arguments" => array("admin_advising_settings_form", "system_settings", 2),
     "access_arguments" => array("can_edit_advising_settings"),
       "page_settings" => array(
         "page_hide_report_error" => TRUE,        
@@ -851,9 +851,8 @@ function schools_form_alter(&$form, $form_id) {
   } // form is admin_urgent_message_form
 
   
-  
-    
-  if ($form_id == "system_school_data_form") {
+      
+  if ($form_id == "system_school_data_form" || $form_id == 'admin_advising_settings_form') {    
     // We want to add a "use default" checkbox at the top, which, if set, will disable all of the form elements.        
     fp_add_js(fp_get_module_path('schools') . '/js/schools.js');
     fp_add_css(fp_get_module_path('system') . '/css/style.css');

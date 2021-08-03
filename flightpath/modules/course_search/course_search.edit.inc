@@ -21,14 +21,17 @@ function course_search_edit_course_details_form() {
   $course_id = $_REQUEST["course_id"];
   $subject_id = $_REQUEST["subject_id"];
   $course_num = $_REQUEST["course_num"];
-
-  $catalog_year = variable_get("current_catalog_year", 2006);
+  
+  $db = get_global_database_handler();
+  $school_id = $db->get_school_id_for_course_id($course_id);
+  
+  $catalog_year = variable_get_for_school("current_catalog_year", 2006, $school_id);
 
   $course = new Course($course_id,false,null,false,$catalog_year);
   
   $course->load_descriptive_data(false, true, false, true);
 
-  $school_id = $course->school_id;
+  
   $school_code = "School #" . $school_id;
   if (function_exists('schools_menu')) {
     $school_code = schools_get_school_code_for_id($school_id);
@@ -52,6 +55,12 @@ function course_search_edit_course_details_form() {
     "type" => "hidden",
     "value" => $course_num,
   );
+
+  $form["school_id"] = array(
+    "type" => "hidden",
+    "value" => $school_id,
+  );
+
 
   $course->catalog_year = $catalog_year;
   // Find out filename/link of current syllabus.
@@ -218,6 +227,9 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
   $course_id = $form_state["values"]["course_id"];
   $subject_id = $form_state["values"]["subject_id"];
   $course_num = $form_state["values"]["course_num"];
+  $school_id = intval($form_state["values"]["school_id"]);
+  
+  $_SESSION['last_saved_school_id'] = $school_id;
   
   $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
 
@@ -371,7 +383,19 @@ function course_search_display_edit_courses()
 	
   $rtn = "";
 	
-  $current_catalog_year = variable_get("current_catalog_year", "");
+  $school_id = 0;
+  if (@$_REQUEST['school_id'] != '') {
+    $school_id = intval($_REQUEST['school_id']);
+  }
+  
+  
+  if (function_exists('schools_menu')) {  // The schools module is enabled.  We need to first ask what school we want to look at. 
+    
+    $rtn .= "<div class='current-school'>" . t("Current school: ") . "<strong>" . schools_get_school_name_for_id($school_id) . "</strong>
+                     - " . l(t("Change?"), "tools/course-search") . "</div><br>";
+  }  
+  
+  $current_catalog_year = variable_get_for_school("current_catalog_year", "", $school_id);
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;
   
@@ -433,7 +457,7 @@ function course_search_display_edit_courses()
   $rtn .= "<div class='admin-courses-select-letter-bar'>
           ";
   foreach($letter_ranges as $disp => $vals) {
-    $rtn .= l($disp, "tools/course-search/edit-list", "ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link")) . " &nbsp; ";
+    $rtn .= l($disp, "tools/course-search/edit-list", "school_id=$school_id&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link")) . " &nbsp; ";
   }
 	
   $rtn .= "</div>
@@ -453,12 +477,12 @@ function course_search_display_edit_courses()
 			</tr>";
 
 	$res = db_query("SELECT * FROM courses
-                        WHERE 
-                        `catalog_year`='?' AND
-                        `subject_id` BETWEEN '?' AND '?'
-                        AND `delete_flag`='0'
-                        AND `exclude`='0'
-                        ORDER BY `subject_id`, `course_num` ", $catalog_year, $ur, $lr);
+                        WHERE catalog_year = ? 
+                        AND subject_id BETWEEN ? AND ?
+                        AND delete_flag = 0
+                        AND exclude = 0
+                        AND school_id = ?
+                        ORDER BY subject_id, course_num ", $catalog_year, $ur, $lr, $school_id);
 	while ($cur = db_fetch_array($res)) {
 		extract($cur, 3, "db");
 
@@ -492,7 +516,8 @@ function course_search_display_edit_courses()
 			}
 			// When was the schedule last updated?
 			$res2 = db_query("SELECT * FROM course_rotation_schedule
-							WHERE `course_id`='?' limit 1", $db_course_id);
+							         WHERE course_id = ? 
+							         LIMIT 1", $db_course_id);
 			$cur2 = db_fetch_array($res2);
 			$updated2 = $cur2["posted"];
 			if ($updated2 > $updated) {
@@ -531,14 +556,14 @@ function course_search_display_edit_courses()
 					<a href='$moduleActionURL&performAction=editSpecificCourse&courseID=$db_course_id&subjectID=$db_subject_id&courseNum=$db_course_num'>$displaySubjectID $db_course_num - $db_title</a><!-- - $hrs$repHours --></div>";
 */
 		
-		$rtn .= l("$display_subject_id $db_course_num - $db_title", "tools/course-search/edit-info-details", "course_id=$db_course_id&subject_id=$db_subject_id&course_num=$db_course_num");
+		$rtn .= l("$display_subject_id $db_course_num - $db_title", "tools/course-search/edit-info-details", "school_id=$school_id&course_id=$db_course_id&subject_id=$db_subject_id&course_num=$db_course_num");
 		// https://orion.ulm.edu/flightpath/tools/course-search/edit-info-details?course_id=468798&subject_id=ACCT&course_num=1010
 		
 		$rtn .= "</td>
-				<td align='center'>$school</td>
-				<td align='center'>$sch</td>
-				<td align='center'>$syl</td>
-				<td align='center' style='font-size: 8pt;'>$updated</td>
+				<td >$school</td>
+				<td >$sch</td>
+				<td >$syl</td>
+				<td >$updated</td>
 					</tr>";
 
 	} // while

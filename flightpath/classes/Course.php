@@ -1483,12 +1483,12 @@ class Course extends stdClass
 
     if ($this->catalog_year == "")
     {
-      $this->catalog_year = variable_get("current_catalog_year", 2006);  // current catalog_year.
+      $this->catalog_year = variable_get_for_school("current_catalog_year", 2006, $this->school_id);  // current catalog_year.
     }
 
-    $setting_current_catalog_year = variable_get("current_catalog_year", 2006) * 1;
+    $setting_current_catalog_year = variable_get_for_school("current_catalog_year", 2006, $this->school_id) * 1;
     if ($this->bool_use_draft) {
-      $setting_current_catalog_year = variable_get("current_draft_catalog_year", 2006) * 1;
+      $setting_current_catalog_year = variable_get_for_school("current_draft_catalog_year", 2006, $this->school_id) * 1;
     }
     
     $earliest_catalog_year = variable_get_for_school("earliest_catalog_year", 2006, $this->school_id);
@@ -1894,9 +1894,9 @@ class Course extends stdClass
     // setting, then set it to that.
 
 
-    if ($this->catalog_year > variable_get("current_catalog_year",""))
+    if ($this->catalog_year > variable_get_for_school("current_catalog_year","", $this->school_id))
     {
-      $this->catalog_year = variable_get("current_catalog_year","");
+      $this->catalog_year = variable_get_for_school("current_catalog_year","", $this->school_id);
     }
 
 

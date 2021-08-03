@@ -155,7 +155,9 @@ function comments_comment_form_submit($form, $form_state) {
 function comments_comment_form() {
   global $current_student_id;
   
-  $term_id = variable_get("advising_term_id");
+  $school_id = db_get_school_id_for_student_id($current_student_id);
+  
+  $term_id = variable_get_for_school("advising_term_id", '', $school_id);
     
   fp_set_title("");  
     

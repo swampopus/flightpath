@@ -394,8 +394,16 @@ class DatabaseHandler extends stdClass
 
   function load_course_descriptive_data($course = null, $course_id = 0)
   {
+    
+    $school_id = 0;  
+    if ($course == NULL) {
+      $school_id = $this->get_school_id_for_course_id($course_id);
+    }
+    else {
+      $school_id = $this->get_school_id_for_course_id($course->course_id);
+    }   
 
-    $current_catalog_year = variable_get("current_catalog_year", "2006");
+    $current_catalog_year = variable_get_for_school("current_catalog_year", "2006", $school_id);
     $catalog_year = $current_catalog_year; // currentCatalogYear.
     if ($course != null)
     {
@@ -604,15 +612,13 @@ class DatabaseHandler extends stdClass
     
     $res = $this->db_query("UPDATE degree_requirements
                 set `course_id`= ?
-                where `data_entry_value`= ?
-                AND school_id = ?
-                 ", $new_course_id, "$subject_id~$course_num", $school_id) ;
+                where `data_entry_value`= ?                
+                 ", $new_course_id, "$subject_id~$course_num") ;
 
     $res = $this->db_query("UPDATE group_requirements
                 SET `course_id`='?'
-                WHERE `data_entry_value`= ? 
-                AND school_id = ? 
-                ", $new_course_id, "$subject_id~$course_num", $school_id) ;
+                WHERE `data_entry_value`= ?                 
+                ", $new_course_id, "$subject_id~$course_num") ;
 
 
 
@@ -620,21 +626,19 @@ class DatabaseHandler extends stdClass
     $res = $this->db_query("UPDATE student_substitutions
                 SET `sub_course_id`='?'
                 WHERE `sub_entry_value`= ? 
-                AND school_id = ?
-                 ", $new_course_id, "$subject_id~$course_num", $school_id) ;
+                
+                 ", $new_course_id, "$subject_id~$course_num") ;
 
     $res = $this->db_query("UPDATE student_substitutions
                 SET `required_course_id`='?'
-                WHERE `required_entry_value`= ? 
-                AND school_id = ?
-                ", $new_course_id, "$subject_id~$course_num", $school_id) ;
+                WHERE `required_entry_value`= ?                
+                ", $new_course_id, "$subject_id~$course_num") ;
 
     // Also the advising histories....
     $res = $this->db_query("UPDATE advised_courses
                 SET `course_id`='?'
-                WHERE `entry_value`= ? 
-                AND school_id = ?
-                ", $new_course_id, "$subject_id~$course_num", $school_id) ;
+                WHERE `entry_value`= ?                
+                ", $new_course_id, "$subject_id~$course_num") ;
     
     
     
@@ -1503,7 +1507,7 @@ class DatabaseHandler extends stdClass
     
     // If catalog_year is blank, use whatever the current catalog year is, loaded from our settings table.
     if ($catalog_year == "") {
-      $catalog_year = variable_get("current_catalog_year", "2006");
+      $catalog_year = variable_get_for_school("current_catalog_year", "2006", $school_id);
     }
     
     $degree_id = $this->get_degree_id(trim($major_and_track_code), $catalog_year, FALSE, $school_id);

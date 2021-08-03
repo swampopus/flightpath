@@ -848,17 +848,17 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
     $bool_catalog_warning = true;
   }
 
-  if (variable_get("current_catalog_year",'') > intval(variable_get_for_school("earliest_catalog_year", 2006, $school_id))) {
+  if (variable_get_for_school("current_catalog_year",'', $school_id) > intval(variable_get_for_school("earliest_catalog_year", 2006, $school_id))) {
     // Is the student's catalog set beyond the range that
     // FP has data for?  If so, show a warning.
-    if ($student->catalog_year > variable_get("current_catalog_year",''))
+    if ($student->catalog_year > variable_get_for_school("current_catalog_year",'', $school_id))
     {
       
       $alert_msg = t("This student&#039;s catalog year is @cat_year, 
                       and specific curriculum requirements are not yet 
                       available for this year.  
                       To advise this student according to @new_cat
-                      requirements, select the student&#039;s major using What If.", array("@cat_year" => $cat_year, "@new_cat" => variable_get("current_catalog_year",'') . "-" . (variable_get("current_catalog_year",'') + 1)));      
+                      requirements, select the student&#039;s major using What If.", array("@cat_year" => $cat_year, "@new_cat" => variable_get_for_school("current_catalog_year",'',$school_id) . "-" . (variable_get_for_school("current_catalog_year",'',$school_id) + 1)));      
       
       $cat_year = "<span class='catalog-year-alert-too-far'>$cat_year<a href='javascript:fp_alert(\"$alert_msg\");' title='" . t("Important Notice") . "'><i class='fa fa-exclamation-triangle'></i></a></span>";
       $bool_future_catalog_warning = true;
@@ -1012,7 +1012,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
       
       // Only change to current if that is how our settings are set...
       if (variable_get_for_school("what_if_catalog_year_mode", "current", $school_id) == "current") {
-        $student->catalog_year = variable_get("current_catalog_year",'');
+        $student->catalog_year = variable_get_for_school("current_catalog_year",'',$school_id);
       }
     }
     

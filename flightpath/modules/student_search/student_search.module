@@ -1494,119 +1494,6 @@ function z______student_search_render_advisees($adv_array, $title) {
 
 
 
-/**
- * Accepts the SQL, plus an array of parameters compatible with our PDO set up.
- * ex:
- *   $params[":name"] = "Bob"
- *   and   $sql = " SELECT * where name = :name";
- * 
- */
-function z______student_search_query_advisees($sql, $params = array()) {
-      
-  $db = get_global_database_handler();  
-  
-  $rank_in = "( '" . join("', '", csv_to_array(variable_get("allowed_student_ranks",''))) . "' )";
-    
-  $order_by = " l_name, f_name ";
-  
-  // TODO:  Change order by based on GET parameters
-  $fsort = trim(@$_GET['fsort']);
-  $fsortdir = trim(@$_GET['fsortdir']);
-  if ($fsortdir != 'ASC') $fsortdir = 'DESC';
-  
-  // Replace the replacement portion with our derrived variables.
-  $sql = str_replace("%RANKIN%", $rank_in, $sql);
-  $sql = str_replace("%ORDERBY%", $order_by, $sql);
-  
-  // By default, the extra_studentsearch_conditions will be checking of is_active = 1.  But, the user may override this
-  // in the settings.
-  $extra_student_search_conditions = variable_get("extra_student_search_conditions", " AND is_active = 1 ");
-  
-  $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", $extra_student_search_conditions, $sql);
-  
-  
-  // Returns an array of all of this teacher's advisees.
-  $rtn_array = array();
-  $r = 0;
-
-  $faculty_advisees = advise_get_advisees();
-
-    
-  $result = db_query($sql, $params);
-  while ($cur = db_fetch_array($result))
-  {
-
-    $student_id = trim($cur["cwid"]);
-    
-    // If this user does NOT have the "view any advising session" and DOES have the "view advisee advising sessions only",
-    // then see if this student is in their advisees list before continuing.
-    if (!user_has_permission("view_any_advising_session") && user_has_permission("view_advisee_advising_session")) {
-      if (!in_array($student_id, $faculty_advisees)) {
-        // Nope, this student is NOT one of their advisees!  Skip it.
-        continue;
-      }
-    }        
-    
-    $rtn_array[$student_id]["student_id"] = $student_id;
-    $rtn_array[$student_id]["first_name"] = ucwords(strtolower($cur["f_name"]));
-    $rtn_array[$student_id]["last_name"] = ucwords(strtolower($cur["l_name"]));
-    $rtn_array[$student_id]["rank"] = $cur["rank_code"];
-    $rtn_array[$student_id]["catalog_year"] = $cur["catalog_year"];
-    //$rtn_array[$r]["major"] = $cur["major_code"];
-    // Need to get the major_code_csv for this student.
-    // Are there more majors for this user?
-    $major = "";
-    // Get a CSV of this student's majors
-    $major = fp_get_student_majors($student_id, TRUE, FALSE, FALSE);
-    
-    $rtn_array[$student_id]["major"] = $major;
-    
-    
-
-    // We should also mark if the student has been advised for this semester
-    // or not.
-  
-    // Get the current default advising term id.
-    $term_id = variable_get("advising_term_id", "");
-    
-    
-    $advised_image = "";
-    $advising_session_id = "";
-    $res2 = db_query("SELECT * FROM advising_sessions WHERE
-                      student_id = ? AND
-                      term_id = ? 
-               AND is_draft = 0 
-               AND is_empty = 0
-              ORDER BY posted DESC", $student_id, $term_id);
-    if (db_num_rows($res2) > 0) {
-      $cur = db_fetch_array($res2);
-
-      $advised_image = "<img src='" . fp_theme_location() . "/images/small_check.gif' class='advisedImage'>";
-
-      if ($cur["is_whatif"] == "1")
-      { // Last advising was a What If advising.
-        $advised_image = "<span title='This student was last advised in What If mode.'><img src='" . fp_theme_location() . "/images/small_check.gif'><sup>wi</sup></span>";
-        $db_major_code_csv = $cur["major_code_csv"];
-        $rtn_array[$student_id]["what_if_major_code"] = $db_major_code_csv;
-        // Capture the catalog year that was saved with what_if
-        $rtn_array[$student_id]["what_if_catalog_year"] = $cur["catalog_year"];
-        $rtn_array[$student_id]["last_advised_what_if"] = TRUE;
-        
-      }
-    }
-
-
-    $rtn_array[$student_id]["advising_session_id"] = $advising_session_id;
-    $rtn_array[$student_id]["advised_image"] = $advised_image;
-
-    $r++;
-  }
-
-
-  return $rtn_array;  
-}
-
-
 
 function student_search_query_advisees($sql, $params = array()) {
       
@@ -1680,7 +1567,7 @@ function student_search_query_advisees($sql, $params = array()) {
     // or not.
   
     // Get the current default advising term id.
-    $term_id = variable_get("advising_term_id", "");
+    $term_id = variable_get_for_school("advising_term_id", "", $cur['school_id']);
     
     
     $advised_image = "";

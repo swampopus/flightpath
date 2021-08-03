@@ -741,6 +741,27 @@ function db_table_exists($table_name) {
 }
 
 
+
+/**
+ * Returns TRUE or FALSE if the variable exists in the variables table.
+ */
+function variable_exists($name) {
+  if (isset($GLOBALS["fp_system_settings"][$name])) {
+    return TRUE;
+  }
+  
+  $count = intval(db_result(db_query("SELECT COUNT(name) as my_count 
+                     FROM variables
+                     WHERE name = ?", array($name))));
+                     
+  if ($count > 0) return TRUE;
+  
+  // else....
+  return FALSE;
+  
+}
+
+
 /**
  * Get a variable from the database.  We will first look in our GLOBALS array,
  * to see that it hasn't already been retrieved this page load.
@@ -797,9 +818,14 @@ function variable_get_for_school($name, $default_value = "", $school_id = 0, $bo
   $school_id = intval($school_id);
   
   // If this is the default school, OR, we are using NOT overriding the default vals for this school, then use variable_get normally
-  if ($school_id === 0 || ($bool_ignore_override == FALSE && variable_get("school_override__$name~~school_" . $school_id, '') !== 'yes')) {
+  if ($school_id === 0 || ($bool_ignore_override == FALSE && variable_get("school_override__$name~~school_" . $school_id, '') !== 'yes')) {    
     return variable_get($name, $default_value);  // for default school, just work normally.
   }
+  
+  if ($bool_ignore_override == TRUE && variable_exists("school_override__$name~~school_" . $school_id) == FALSE) {
+    return variable_get($name, $default_value);  // Can't find the override anyway, so get the default.
+  } 
+  
     
   // If we are here, we need to get using a fieldname suffix with the school id.
   return variable_get($name . "~~school_" . $school_id, $default_value);

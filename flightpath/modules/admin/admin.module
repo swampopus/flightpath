@@ -890,10 +890,12 @@ function admin_advising_settings_form($school_id = 0) {
   );
   
   
+  
+  
   $form["available_advising_term_ids" . $fs] = array(
     "type" => "textfield",
     "label" => t("Available advising term id's"),
-    "value" => variable_get_for_school("available_advising_term_ids", "", $school_id),
+    "value" => variable_get_for_school("available_advising_term_ids", "", $school_id, TRUE),
     "description" => t("These are the terms for which advisors may advise a student to take
                         a course.  They should follow the structure established on the
                         school data settings page.
@@ -901,10 +903,11 @@ function admin_advising_settings_form($school_id = 0) {
                         in the order that they should appear in FlightPath."),
   );  
 
+  
   $form["advising_term_id" . $fs] = array(
     "type" => "textfield",
     "label" => t("Default advising term id"),
-    "value" => variable_get_for_school("advising_term_id", "", $school_id),
+    "value" => variable_get_for_school("advising_term_id", "", $school_id, TRUE),
     "description" => t("Of the available term ids above, this is the default that FlightPath
                         is set to when an advisor logs in. Ex: 200940."),
   );  
@@ -914,16 +917,17 @@ function admin_advising_settings_form($school_id = 0) {
     "type" => "textfield",
     "size" => 10,
     "label" => t("Current catalog year"),
-    "value" => variable_get_for_school("current_catalog_year", "", $school_id),
+    "value" => variable_get_for_school("current_catalog_year", "", $school_id, TRUE),
     "description" => t("This is the year which What If loads degrees from, as well as other important functions.
                         Only change this once you have fully loaded a new catalog year."),
-  );  
+  );   
 
+  // TODO:  find/replace
   $form["current_draft_catalog_year" . $fs] = array(
     "type" => "textfield",
     "size" => 10,
     "label" => t("Current DRAFT catalog year"),
-    "value" => variable_get_for_school("current_draft_catalog_year", "", $school_id),
+    "value" => variable_get_for_school("current_draft_catalog_year", "", $school_id, TRUE),
     "description" => t("While in Draft mode, this is the year which Blank Degree Search loads degrees from.  What If
                         mode will always use the Current catalog year, set above.
                         You may change this while working on a new catalog.  It will not affect any other
@@ -931,11 +935,11 @@ function admin_advising_settings_form($school_id = 0) {
                         to the same as the Current catalog year."),
   );  
 
-
+  // TODO:  find/replace
   $form["not_released_grades_terms" . $fs] = array(
     "type" => "textfield",
     "label" => t("NOT released grades terms"),
-    "value" => variable_get_for_school("not_released_grades_terms", "", $school_id),
+    "value" => variable_get_for_school("not_released_grades_terms", "", $school_id, TRUE),
     "description" => t("Enter the term_id's, separated by commas, 
                         which are NOT released and should NOT be visible to either advisors or students. 
                         Coures in these terms will only show midterm grades or no grades at all. 
@@ -1606,23 +1610,45 @@ function admin_display_main() {
               
 
   // Advising Settings
-  $rtn .= fp_render_section_title("Advising Settings", "admin-advising-settings");
-  $rtn .= "<div class='admin-advising-settings'>
-             
-       <ul>
-        <li>" . t("Available terms for advising: %v", array("%v" => variable_get("available_advising_term_ids", ""))) . "</li>
-        <li>" . t("Default advising term: %v", array("%v" => variable_get("advising_term_id", ""))) . "</li>          
-        <li>" . t("Current catalog year: %v", array("%v" => variable_get("current_catalog_year", ""))) . "</li>       
-        <li>" . t("Current draft catalog year: %v", array("%v" => variable_get("current_draft_catalog_year", ""))) . "</li>             
-        <li>" . t("Not released grades terms: %v", array("%v" => variable_get("not_released_grades_terms", ""))) . "</li>             
-        
-      </ul>";
   
-  if (user_has_permission("can_edit_advising_settings")) {
-    $rtn .= l(t("Edit Advising Settings"), "admin/edit-advising-settings");
+  
+  
+  $rtn .= fp_render_section_title("Advising Settings", "admin-advising-settings");
+    
+  $defs = array(0 => '');
+  if (function_exists('schools_menu')) {
+    $defs = schools_get_school_definitions();
   }
   
-  $rtn .= "</div>";
+  foreach ($defs as $school_id => $school_name) {
+    $rtn .= "<div class='admin-advising-settings'><!--SCHOOL_NAME-->
+               
+         <ul>
+          <li>" . t("Available terms for advising: %v", array("%v" => variable_get_for_school("available_advising_term_ids", "", $school_id))) . "</li>
+          <li>" . t("Default advising term: %v", array("%v" => variable_get_for_school("advising_term_id", "", $school_id))) . "</li>          
+          <li>" . t("Current catalog year: %v", array("%v" => variable_get_for_school("current_catalog_year", "", $school_id))) . "</li>       
+          <li>" . t("Current draft catalog year: %v", array("%v" => variable_get_for_school("current_draft_catalog_year", "", $school_id))) . "</li>             
+          <li>" . t("Not released grades terms: %v", array("%v" => variable_get_for_school("not_released_grades_terms", "", $school_id))) . "</li>             
+          
+        </ul>";
+    
+    $url_suffix = "";
+    if (intval($school_id) != 0) {
+      $url_suffix .= "/" . $school_id;
+    }
+    
+    if (user_has_permission("can_edit_advising_settings")) {
+      $rtn .= l("<i class='fa fa-pencil'></i> " . t("Edit Advising Settings") . "<!--SCHOOL_EDIT_LINK-->", "admin/edit-advising-settings" . $url_suffix);
+    }
+  
+    $rtn = str_replace("<!--SCHOOL_NAME-->", "<label>" . $school_name . "</label>", $rtn);
+    $rtn = str_replace("<!--SCHOOL_EDIT_LINK-->", t(" for ") . "<em>$school_name</em>", $rtn);
+    
+    $rtn .= "</div>";
+    
+  } // foreach
+  
+  
     
 
                             
@@ -1633,7 +1659,7 @@ function admin_display_main() {
   $rtn .= "</table><br>"; // close table
 
 
-    
+  // TODO:  Similar to the advising settings, do we just loop for each school?  
   $current_catalog_year = variable_get("current_catalog_year", 2006);   // TODO: how to figure out school?
   $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);  // TODO:  how to figure out school?
   

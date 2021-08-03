@@ -905,7 +905,7 @@ function advise_display_popup_change_term() {
 
   $rtn .= "<ul class='change-terms'>";
 
-  $temp = explode(",", variable_get("available_advising_term_ids", "0"));
+  $temp = explode(",", variable_get_for_school("available_advising_term_ids", "0", $school_id));
   for ($t = 0; $t < count($temp); $t++) {
     $term_id = trim($temp[$t]);
 
@@ -978,7 +978,7 @@ function advise_display_popup_group_select() {
   fp_add_js(fp_get_module_path("advise") . "/js/advise.js");
   fp_add_css(fp_get_module_path("advise") . "/css/advise.css");
   
-  
+  $school_id = db_get_school_id_for_group_id($group_id);
     
   $blank_degree_id = trim(@$_GET["blank_degree_id"]);
   $course_id = trim(@$_GET["course_id"]);  
@@ -1014,7 +1014,7 @@ function advise_display_popup_group_select() {
     // This is the Add a Course group.  We must initialize it, as it
     // does not exist yet.
     // We need to populate this group now.
-    $group->list_courses = $fp->get_all_courses_in_catalog_year(variable_get("current_catalog_year", ''));
+    $group->list_courses = $fp->get_all_courses_in_catalog_year(variable_get_for_school("current_catalog_year", '', $school_id),FALSE,0,0,$school_id);
     $group->title = "Add an Additional Course";
     $group->list_courses->assign_group_id($group_id);
     $group->list_courses->load_course_descriptive_data();
@@ -1488,7 +1488,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   
 
   
-  $catalog_year = variable_get("current_catalog_year", 0);
+  $catalog_year = variable_get_for_school("current_catalog_year", 0, $student_school_id);
   $current_catalog_year = $catalog_year;  // keep track of what the current catalog year is.
   $earliest_catalog_year = intval(variable_get_for_school("earliest_catalog_year", 2006, $student_school_id));
 
@@ -1977,6 +1977,8 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
   $csid = $vars["current_student_id"];
 
+  $school_id = db_get_school_id_for_student_id($csid);
+  
   // Get the student ID.
   $vars["advising_student_id"] = @$_REQUEST["advising_student_id"];
   if ($vars["advising_student_id"] == "")
@@ -2075,7 +2077,7 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
     if ($vars["advising_term_id"] == "")
     {
       // default value:
-      $vars["advising_term_id"] = variable_get("advising_term_id", '');
+      $vars["advising_term_id"] = variable_get_for_school("advising_term_id", '', $school_id);
       if ($vars["advising_term_id"] == "") {
         // It's STILL blank?!  Just use 0 then.
         $vars["advising_term_id"] = "0";
@@ -2149,10 +2151,10 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
 
   // Settings... (from the database)
-  $vars["setting_available_advising_term_ids"] = variable_get("available_advising_term_ids", '');
-  $vars["setting_advising_term_id"] = variable_get("advising_term_id", '');
-  $vars["setting_current_catalog_year"] = variable_get("current_catalog_year",'');
-  $vars["setting_current_draft_catalog_year"] = variable_get("current_draft_catalog_year",'');
+  $vars["setting_available_advising_term_ids"] = variable_get_for_school("available_advising_term_ids", '', $school_id);
+  $vars["setting_advising_term_id"] = variable_get_for_school("advising_term_id", '', $school_id);
+  $vars["setting_current_catalog_year"] = variable_get_for_school("current_catalog_year",'', $school_id);
+  $vars["setting_current_draft_catalog_year"] = variable_get_for_school("current_draft_catalog_year",'', $school_id);
 
   // Are we in Print View?
   @$vars["print_view"] = $_REQUEST["print_view"];

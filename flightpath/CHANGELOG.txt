@@ -4,10 +4,15 @@ FlightPath 6.x Changelog
 2021-08-03
   Added new variable_delete() function to db.inc.
   
+  Added new variable_exists() function to db.inc.  Returns TRUE or FALSE if the variable is even in the variables table.
+  
   Changed schools module to let us override default school settings on a *per field* level.
   
   Modified how variable_get_for_school() checks to see if we are overriding the default school's val.
   
+  Modified admin's edit-advising-settings to handle multiple schools.
+  
+  Fixed bug where db's update_course_requirement_by_name was trying to use school_id in tables which didn't have it.
 
 2021-08-02
   Added new menu type:  MENU_TYPE_DEFAULT_TAB. This is a tab which otherwise behaves like a MENU_TYPE_NORMAL_ITEM.

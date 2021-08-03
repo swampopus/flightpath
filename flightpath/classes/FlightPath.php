@@ -104,14 +104,14 @@ class FlightPath extends stdClass
       
       if ($catalog_year == "" || $catalog_year == 0) {
         // Some problem, default to current cat year.
-        $catalog_year = variable_get("current_catalog_year",'');  
+        $catalog_year = variable_get_for_school("current_catalog_year",'',$student_school_id);  
       }
       
     }
 
     // make sure their catalog year is not past the system's current
     // year setting.
-    if ($catalog_year > variable_get("current_catalog_year",'') && variable_get("current_catalog_year",'') > intval(variable_get_for_school("earliest_catalog_year", 2006, $student_school_id)))
+    if ($catalog_year > variable_get_for_school("current_catalog_year",'',$student_school_id) && variable_get_for_school("current_catalog_year",'',$student_school_id) > intval(variable_get_for_school("earliest_catalog_year", 2006, $student_school_id)))
     { // Make sure degree plan is blank if it is!
       $catalog_year = 99999;
     }
@@ -1265,10 +1265,11 @@ class FlightPath extends stdClass
     
     $bool_found_update_match = false;
     $student_id = $this->student->student_id;
+    $school_id = db_get_school_id_for_student_id($student_id);
     $degree_id = $this->degree_plan->degree_id;
     $major_code_csv = $this->degree_plan->get_major_code_csv();
     $catalog_year = $this->degree_plan->catalog_year;
-    $available_terms = variable_get("available_advising_term_ids", "0");
+    $available_terms = variable_get_for_school("available_advising_term_ids", "0", $school_id);
         
     // Do we need to update the student's settings?
     if (trim($_POST["advising_update_student_settings_flag"]) != "")
@@ -1805,7 +1806,7 @@ class FlightPath extends stdClass
     $degree_id = $this->degree_plan->degree_id;
     $student_id = $this->student->student_id;
     $school_id = db_get_school_id_for_student_id($student_id);
-    $available_terms = variable_get("available_advising_term_ids", "0");
+    $available_terms = variable_get_for_school("available_advising_term_ids", "0", $school_id);
 
     
     // If we are pulling up an active student record, then let's

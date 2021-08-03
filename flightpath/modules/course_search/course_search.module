@@ -104,6 +104,7 @@ function course_search_menu() {
         1 => array(
           "text" => "Back to Course Edit List",
           "path" => "tools/course-search/edit-list",
+          "query" =>"school_id=%SCHOOL_ID%",
         ),
       ),      
     ),        
@@ -144,7 +145,37 @@ function course_search_menu() {
   return $items;
 }
 
+/**
+ * Implements hook
+ */
+function course_search_menu_handle_replacement_pattern($str) {
+  
+  if (strpos($str, "%SCHOOL_ID%") !== 0) {
+    // It contains this replacement pattern!
+    $str = str_replace("%SCHOOL_ID%", intval($_SESSION['last_saved_school_id']), $str);
+    unset($_SESSION['last_saved_school_id']);
+  }
+  
+  if (strpos($str, "%SEV_FILTER%") !== 0) {
+    // It contains this replacement pattern!
+    $str = str_replace("%SEV_FILTER%", @$_GET["sev_filter"], $str);
+  }
 
+  if (strpos($str, "%TYPE_FILTER%") !== 0) {
+    // It contains this replacement pattern!
+    $str = str_replace("%TYPE_FILTER%", @$_GET["type_filter"], $str);
+  }
+  
+  
+  if (strpos($str, "%PAGE%") !== 0) {
+    // It contains this replacement pattern!
+    $str = str_replace("%PAGE%", @$_GET["page"], $str);
+  }
+    
+  
+  
+  return $str;
+}
 
 
 
@@ -337,6 +368,8 @@ function course_search_display_courses() {
   $render["#catalog_year"] = $catalog_year;
   $render["#school_id"] = $school_id; 
   $render["#subject_id"] = $subject_id;
+
+
 
 
 
@@ -912,11 +945,6 @@ function course_search_display_search() {
     
   $rtn .= "";
   
-  if (user_has_permission("can_update_course_info_details")) {
-    $rtn .= "<div>" . t("Administrators:") . " " . l(t("Edit course schedules and syllabi"), "tools/course-search/edit-list") . "</div>";
-  }
-    
-
 
       
   $school_id = 0;
@@ -934,9 +962,14 @@ function course_search_display_search() {
   
   $clean_urls = variable_get("clean_urls", FALSE);
   
-  $current_catalog_year = variable_get('current_catalog_year', 2006);  // TODO: school_id?
+  $school_id = intval($_REQUEST['school_id']);
+  $current_catalog_year = variable_get_for_school('current_catalog_year', 2006, $school_id);  // TODO: school_id?
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;
+  
+  if (user_has_permission("can_update_course_info_details")) {
+    $rtn .= "<div>" . t("Administrators:") . " " . l(t("Edit course schedules and syllabi"), "tools/course-search/edit-list", "school_id=$school_id") . "</div>";
+  }  
   
   
     // Catalog year has been selected.
