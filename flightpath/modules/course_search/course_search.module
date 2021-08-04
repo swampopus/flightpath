@@ -182,13 +182,31 @@ function course_search_perm() {
 /**
  * The system settins form for course_search settings.
  */
-function course_search_settings_form() {
+function course_search_settings_form($school_id = 0) {
   $form = array();
   
-  $form["course_search_avail_term_id_suffix_order"] = array(
+  $school_id = intval($school_id);
+  
+  $fs = "";  // The field name suffix.  We will add this to the end of all of our field names.  If this is the default school, leave blank.
+  if (function_exists('schools_menu')) {
+    $school_name = schools_get_school_name_for_id($school_id);
+    fp_set_title(t("Configure %school Course Search settings", array('%school' => $school_name)));
+    if ($school_id !== 0) {
+      $fs = "~~school_" . $school_id;
+    }
+  }
+  
+  $form['school_id'] = array(
+    'type' => 'hidden',
+    'value' => $school_id,
+  );
+    
+    
+  
+  $form["course_search_avail_term_id_suffix_order" . $fs] = array(
     "type" => "textfield",
     "label" => t("Available Term ID Suffixes & Order"),
-    "value" => variable_get("course_search_avail_term_id_suffix_order", ""),
+    "value" => variable_get_for_school("course_search_avail_term_id_suffix_order", "", $school_id, TRUE),
     "description" => t("Enter the order of term ID suffixes, so that they will display
                 in the correct order in the table of available course
                 offerings.  Separate by comma.") . "
@@ -196,27 +214,33 @@ function course_search_settings_form() {
                 Ex: 60, 40, 41, 80, 81, mm",
   );    
   
-  $form["course_search_avail_term_headers"] = array(
+  
+  $form["course_search_avail_term_headers" . $fs] = array(
     "type" => "textfield",
     "label" => t("Available Term Table Headers"),
-    "value" => variable_get("course_search_avail_term_headers", ""),
+    "value" => variable_get_for_school("course_search_avail_term_headers", "", $school_id, TRUE),
     "description" => t("Enter the table headers for the available table, in the same
                 order as the suffix order above.") . "
                 <br>
                 Ex: Spring, May, Summer 1, Summer 2, Fall, Winter",
   );    
 
-
-  $form["course_search_avail_term_mobile_headers"] = array(
+  
+  // TODO:  I am not sure this is even used anymore.  If not, get rid of it.
+  $form["course_search_avail_term_mobile_headers" . $fs] = array(
     "type" => "textfield",
     "label" => t("Available Term Mobile Table Headers"),
-    "value" => variable_get("course_search_avail_term_mobile_headers", ""),
+    "value" => variable_get_for_school("course_search_avail_term_mobile_headers", "", $school_id, TRUE),
     "description" => t("Enter the table headers for the available table, in the same
                 order as the suffix order above, as it should be displayed on
                 a mobile device (with a smaller screen).") . "
                 <br>
                 Ex: Spr, May, Sum1, Sum2, Fall, Win",
   );    
+    
+
+  
+  
 
   
   return $form;
@@ -389,7 +413,7 @@ function course_search_display_courses() {
              <option value=''>Any term</option>
              ";
   
-  $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
+  $term_array = csv_to_array(variable_get_for_school("course_search_avail_term_id_suffix_order", '', $school_id));
   
   $schedule_text = "";
   
@@ -458,6 +482,7 @@ function course_search_display_courses() {
       $n_subject_id = trim($cur["subject_id"]);
       $n_course_num = trim($cur["course_num"]);
       $n_course_id = $cur["course_id"];
+      $n_school_id = $cur['school_id'];
       $bool_hide = FALSE;
       
       $title = trim($cur["title"]);
@@ -522,11 +547,11 @@ function course_search_display_courses() {
 
 
         // Consult our settings to find out what order our terms should be in.
-        $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
+        $term_array = csv_to_array(variable_get_for_school("course_search_avail_term_id_suffix_order", '', $school_id));
        
         // Get our table headers
-        $avail_headers = variable_get("course_search_avail_term_headers");
-        $avail_mobile_headers = variable_get("course_search_avail_term_mobile_headers");
+        $avail_headers = variable_get_for_school("course_search_avail_term_headers", '', $school_id);
+        $avail_mobile_headers = variable_get_for_school("course_search_avail_term_mobile_headers", '', $school_id);
         
         
         $th = explode(",", $avail_headers);

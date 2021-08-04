@@ -822,7 +822,7 @@ function variable_get_for_school($name, $default_value = "", $school_id = 0, $bo
     return variable_get($name, $default_value);  // for default school, just work normally.
   }
   
-  if ($bool_ignore_override == TRUE && variable_exists("school_override__$name~~school_" . $school_id) == FALSE) {
+  if ($bool_ignore_override == TRUE && !variable_exists("school_override__$name~~school_" . $school_id)) {
     return variable_get($name, $default_value);  // Can't find the override anyway, so get the default.
   } 
   

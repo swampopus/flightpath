@@ -115,7 +115,7 @@ function course_search_edit_course_details_form() {
   );
   
   
-  $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
+  $term_array = csv_to_array(variable_get_for_school("course_search_avail_term_id_suffix_order", '', $school_id));
 
   $form["mark" . $m++] = array(
     "value" => "<div class='rotation-form-checkboxes'>",
@@ -231,7 +231,7 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
   
   $_SESSION['last_saved_school_id'] = $school_id;
   
-  $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));
+  $term_array = csv_to_array(variable_get_for_school("course_search_avail_term_id_suffix_order", '', $school_id));
 
       
   for ($t = 1; $t <= 6; $t++) {

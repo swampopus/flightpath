@@ -38,10 +38,11 @@ function audit_menu() {
       "page_hide_report_error" => TRUE,
       "menu_links" => array(                    
         0 => array(                                               
-          "text" => "Back to main menu",                   
+          "text" => "Admin Console",                   
           "path" => "admin-tools/admin",                                                           
         ),                                                                         
-      ),                                                               
+      ),
+      "menu_icon" => fp_get_module_path('system') . "/icons/report.png",                                                               
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,            
     "tab_parent" => "admin-tools/admin",    
@@ -70,15 +71,32 @@ function audit_menu() {
 
                                                                                         
                                                                                 
-function audit_settings_form() {
+function audit_settings_form($school_id = 0) {
   $form = array();
            
+           
+  $school_id = intval($school_id);
   
-  $form["audit_approval_types"] = array(
+  $fs = "";  // The field name suffix.  We will add this to the end of all of our field names.  If this is the default school, leave blank.
+  if (function_exists('schools_menu')) {
+    $school_name = schools_get_school_name_for_id($school_id);
+    fp_set_title(t("Configure %school Audit settings", array('%school' => $school_name)));
+    if ($school_id !== 0) {
+      $fs = "~~school_" . $school_id;
+    }
+  }
+  
+  $form['school_id'] = array(
+    'type' => 'hidden',
+    'value' => $school_id,
+  );           
+           
+  
+  $form["audit_approval_types" . $fs] = array(
     "label" => t("Enter approval type definitions, one per line:"),
     "type" => "textarea",
     "rows" => 10,
-    "value" => variable_get("audit_approval_types", "coursework ~ Coursework\nmajor_gpa ~ Major GPA\ngraduation_gpa ~ Graduation GPA"),    
+    "value" => variable_get_for_school("audit_approval_types", "coursework ~ Coursework\nmajor_gpa ~ Major GPA\ngraduation_gpa ~ Graduation GPA", $school_id, TRUE),    
     "description" => t("Enter definitions for the approval types, one per line, like so:
                         <br>&nbsp;&nbsp;&nbsp; TYPE ~ Title ~ Description
                       <br>- The TYPE must be unique, and contain ONLY letters, numbers, and underscore (_), and must be no more than 60 characters long.  Ex: coursework  
@@ -93,17 +111,16 @@ function audit_settings_form() {
                       <br>&nbsp;&nbsp;&nbsp; graduation_gpa ~ Graduation GPA ~ The student's graduation GPA must be at least 2.5."),
   );
   
-//array("g" => "General Requirements", "c" => "Core", "m" => "Major", "degree" => "Degree")  
+  
 
-  // TODO: separate by school_id
+  $school_initials = variable_get_for_school("school_initials", "DEMO", $school_id);
 
-  $school_initials = variable_get("school_initials", "DEMO");
-
-  $form["audit_requirement_types"] = array(
+  
+  $form["audit_requirement_types" . $fs] = array(
     "label" => t("Enter requirement types & labels to display on Audit tab, one per line:"),
     "type" => "textarea",
     "rows" => 15,
-    "value" => variable_get("audit_requirement_types", "g ~ General Requirements\nc ~ Core\nm ~ Major\ndegree ~ Degree"),    
+    "value" => variable_get_for_school("audit_requirement_types", "g ~ General Requirements\nc ~ Core\nm ~ Major\ndegree ~ Degree", $school_id, TRUE),    
     "description" => "Enter definitions for the requirement types to display, one per line, like so:
                         <br>&nbsp;&nbsp;&nbsp; type_code ~ Label
                       <br>The type_code is one of the 'requirement types' that a course can be defined as. Ex: m, c, etc. 
@@ -174,10 +191,10 @@ function audit_settings_form_validate($form, $form_state) {
  * Return an assoc array of approval types.
  *
  */
-function audit_get_approval_types() {
+function audit_get_approval_types($school_id = 0) {
   $rtn = array();
   
-  $val = variable_get("audit_approval_types", "coursework ~ Coursework\nmajor_gpa ~ Major GPA\ngraduation_gpa ~ Graduation GPA");
+  $val = variable_get_for_school("audit_approval_types", "coursework ~ Coursework\nmajor_gpa ~ Major GPA\ngraduation_gpa ~ Graduation GPA", '', $school_id);
   $lines = explode("\n", $val);
   foreach ($lines as $line) {
     if (trim($line) == "") continue;
@@ -232,8 +249,10 @@ function audit_popup_edit_approval_form($approval_type, $student_id) {
   fp_add_css(fp_get_module_path("audit") . "/css/audit.css");  
   fp_add_js(fp_get_module_path("audit") . "/js/audit.js");  
   
+  $school_id = db_get_school_id_for_student_id($student_id);
   
-  $types = audit_get_approval_types();
+  
+  $types = audit_get_approval_types($school_id);
   $details = $types[$approval_type];                                                                        
   $approval_type_title = $details["title"];
   if ($approval_type_title == "") $approval_type_title = $approval_type;
@@ -311,11 +330,11 @@ function audit_display_audit() {
 
   $student = $fp->student;
   
-  
+  $school_id = $student->school_id;
   
   // Get this from settings  
   $audit_requirement_types = array();
-  $tlines = explode("\n", variable_get("audit_requirement_types", "g ~ General Requirements\nc ~ Core\nm ~ Major\ndegree ~ Degree"));
+  $tlines = explode("\n", variable_get_for_school("audit_requirement_types", "g ~ General Requirements\nc ~ Core\nm ~ Major\ndegree ~ Degree", '', $school_id));
   foreach ($tlines as $tline) {
     $temp = explode("~", trim($tline));      
     if (trim($temp[0]) != "") {
@@ -354,7 +373,7 @@ function audit_display_audit() {
       if ($pol != "even") {
         $pol = "even";
       }
-      else {
+      else { 
         $pol = "odd";
       }
       
@@ -421,7 +440,7 @@ function audit_display_audit() {
       ";
 
     // Get approval types from our setting
-    $types = audit_get_approval_types();
+    $types = audit_get_approval_types($school_id);
     $options = audit_get_approval_options();
     
     // Go through our types, displaying completed or not completed lines...
@@ -624,6 +643,7 @@ function audit_hidden_approval_form_submit($form, $form_state) {
   $approval_value = $values["approval_value"];
   $comment = trim($values["approval_comment"]);
 
+  $school_id = db_get_school_id_for_student_id($student_id);
   
   //  Check that we have permission to edit the approval for this person?
   if (!user_has_permission("edit_audit_approvals") || !audit_can_access_audit($student_id)) {
@@ -635,7 +655,7 @@ function audit_hidden_approval_form_submit($form, $form_state) {
   
   
   
-  $types = audit_get_approval_types();
+  $types = audit_get_approval_types($school_id);
   $details = $types[$approval_type];
   $approval_type_title = $details["title"];
   if ($approval_type_title == "") $approval_type_title = $approval_type;  

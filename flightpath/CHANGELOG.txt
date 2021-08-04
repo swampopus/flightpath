@@ -12,6 +12,14 @@ FlightPath 6.x Changelog
   
   Updated add new degree and copy degree to pay attention to school_id.
   
+  Added new icons to system, and made sure all core modules had an icon associated with them in the Admin Console.
+  
+  Changed the way we denote that we are NOT overriding a core variable.  Instead of deleting from table, we mark it as 'no'
+  
+  Added multi-school functionality to audit settings.
+  
+  Added multi-school functionality to course search settings.
+  
 
 2021-08-03
   Added new variable_delete() function to db.inc.

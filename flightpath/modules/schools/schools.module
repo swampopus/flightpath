@@ -179,10 +179,8 @@ function schools_menu() {
     'page_arguments' => array('schools_administer_schools_form'),
     'access_arguments' => array('administer_schools'),    
     "page_settings" => array(
-      "page_has_search" => FALSE,
       "page_show_title" => TRUE,
-      "page_banner_is_link" => TRUE,
-      "page_hide_report_error" => TRUE,
+      "menu_icon" => fp_get_module_path('system') . "/icons/building.png",     
       "menu_links" => array(
         0 => array(
           "text" => "Admin Console",
@@ -248,11 +246,60 @@ function schools_menu() {
       "weight" => $weight,    
     );      
   
+
+  $items["admin/config/course-search/$school_id"] = array(
+    "title" => $school_name,
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("course_search_settings_form", "system_settings", 3),
+    "access_arguments" => array("administer_course_search"),
+      "page_settings" => array(
+        "page_hide_report_error" => TRUE,        
+        "menu_links" => array(         
+          0 => array(
+            "text" => "Admin Console",
+            "path" => "admin-tools/admin",
+            "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+          ),
+        ),
+      ),    
+      "type" => MENU_TYPE_TAB,
+      "tab_family" => "course_search_settings",      
+      "weight" => $weight,    
+    );      
+
+
+
+  $items["admin/config/audit-settings/$school_id"] = array(
+    "title" => $school_name,
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("audit_settings_form", "system_settings", 3),
+    "access_arguments" => array("administer_audit"),
+      "page_settings" => array(
+        "page_hide_report_error" => TRUE,        
+        "menu_links" => array(         
+          0 => array(
+            "text" => "Admin Console",
+            "path" => "admin-tools/admin",
+            "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+          ),
+        ),
+      ),    
+      "type" => MENU_TYPE_TAB,
+      "tab_family" => "audit_settings",      
+      "weight" => $weight,    
+    );      
+
+
   
   
     $weight = $weight + 10;
   
   }
+  
+  
+  
+  
+  
   
   return $items;
     
@@ -314,6 +361,21 @@ function schools_menu_alter(&$items) {
     if ($path == 'admin/edit-advising-settings') {
       $items[$path]['type'] = MENU_TYPE_DEFAULT_TAB;
       $items[$path]['tab_family'] = 'edit_advising_settings';
+      $items[$path]['page_settings']['tab_title'] = t('Default');
+      unset($items[$path]['tab_parent']);            
+    }
+
+
+    if ($path == 'admin/config/course-search') {
+      $items[$path]['type'] = MENU_TYPE_DEFAULT_TAB;
+      $items[$path]['tab_family'] = 'course_search_settings';
+      $items[$path]['page_settings']['tab_title'] = t('Default');
+      unset($items[$path]['tab_parent']);            
+    }
+
+    if ($path == 'admin/config/audit-settings') {
+      $items[$path]['type'] = MENU_TYPE_DEFAULT_TAB;
+      $items[$path]['tab_family'] = 'audit_settings';
       $items[$path]['page_settings']['tab_title'] = t('Default');
       unset($items[$path]['tab_parent']);            
     }
@@ -841,13 +903,14 @@ function schools_form_alter(&$form, $form_id) {
 
   
       
-  if ($form_id == "system_school_data_form" || $form_id == 'admin_advising_settings_form') {    
+  if ($form_id == "system_school_data_form" || $form_id == 'admin_advising_settings_form' || $form_id == "course_search_settings_form" || $form_id == 'audit_settings_form') {    
     // We want to add a "use default" checkbox at the top, which, if set, will disable all of the form elements.        
     fp_add_js(fp_get_module_path('schools') . '/js/schools.js');
     fp_add_css(fp_get_module_path('system') . '/css/style.css');
     fp_add_css(fp_get_module_path('schools') . '/css/style.css');
 
     $school_id = intval($form['school_id']['value']);
+    
     if ($school_id !== 0) {
       
       $school_name = schools_get_school_name_for_id($school_id);
@@ -920,13 +983,12 @@ function schools_override_elements_form_submit($form, $form_state) {
     
     if (@$form_state['POST']["school_override__$fieldname"] === 'yes') {
       // We are overriding the fieldname.
-      variable_set("school_override__$fieldname", "yes");      
-
+      variable_set("school_override__$fieldname", "yes");   
                               
     } // if override == yes
     else {
-      // We are NOT overriding it.
-      variable_delete("school_override__$fieldname");
+      // We are NOT overriding it.      
+      variable_set("school_override__$fieldname", "no");
     }
   } //foreach
   

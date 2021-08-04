@@ -429,7 +429,7 @@ function system_menu() {
     "page_callback" => "system_perform_run_cron",
     "access_arguments" => array("run_cron"),
     "page_settings" => array(      
-      "menu_icon" => fp_get_module_path('system') . "/icons/bullet_go.png",
+      "menu_icon" => fp_get_module_path('system') . "/icons/clock.png",
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
   );  
