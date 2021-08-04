@@ -163,9 +163,11 @@ function blank_degrees_display_blank_degree() {
   $student = new Student();
   $student->load_student();
   $student->student_id = "000000000";
+  $student->school_id = $school_id;
   $student->name = "Blank Degree";  
   $degree_plan = new DegreePlan($blank_degree_id);  
   $degree_plan->load_descriptive_data();
+  $degree_plan->school_id = $school_id;
   $student->catalog_year = $degree_plan->catalog_year;
   $fp = new FlightPath($student, $degree_plan);
   $screen = new AdvisingScreen("", $fp, "not_advising");
@@ -237,9 +239,9 @@ function blank_degrees_display_blank_degree() {
               <div style='font-size: 0.85em;'>
                 " . t("This degree may be linked to directly using the following URLs:") . "
                 <ul>
-                  <li>Internal ID for $blank_catalog_year: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year", FALSE) . "'>Link</a></li>
-                  <li>Major-code $blank_major_code for $blank_catalog_year: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=major_code_$blank_major_code&blank_catalog_year=$blank_catalog_year", FALSE) . "'>Link</a></li>
-                  <li>Major-code $blank_major_code always <b>current</b> catalog: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=major_code_$blank_major_code&blank_catalog_year=current", FALSE) . "'>Link</a></li>
+                  <li>Internal ID for $blank_catalog_year: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=$blank_degree_id&blank_catalog_year=$blank_catalog_year&school_id=$school_id", FALSE) . "'>Link</a></li>
+                  <li>Major-code $blank_major_code for $blank_catalog_year: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=major_code_$blank_major_code&blank_catalog_year=$blank_catalog_year&school_id=$school_id", FALSE) . "'>Link</a></li>
+                  <li>Major-code $blank_major_code always <b>current</b> catalog: <a href='" . $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("blank-degrees/display", "blank_degree_id=major_code_$blank_major_code&blank_catalog_year=current&school_id=$school_id", FALSE) . "'>Link</a></li>
                 </ul>
               </div>
              ", t("View URL Options"), TRUE, 'view-url-options-fs'),
@@ -289,6 +291,36 @@ function blank_degrees_perm() {
 
 
 
+
+function blank_degrees_select_school_form() {
+  $form = array();
+  
+  $options = schools_get_schools_for_fapi(TRUE, FALSE); // we don't need special permissions to view.
+  $form['school_id'] = array(
+    'type' => 'select',
+    'label' => t('Please begin by selecting a school:'),
+    'options' => $options,        
+    'value' => @$_REQUEST['school_id'],
+    'hide_please_select' => TRUE,
+    'required' => TRUE,    
+  );
+  
+  $form['from_select_school'] = array(
+    'type' => 'hidden',
+    'value' => 'yes',
+  );
+  
+  $form['submit_btn'] = array(
+    'type' => 'submit',
+    'value' => t("Continue"),
+  );
+  
+  return $form;
+}
+
+
+
+
 /**
  * This form lets the user select which degree they wish to view.
  */
@@ -306,33 +338,59 @@ function blank_degrees_select_degree_form() {
     $GLOBALS["fp_advising"]["bool_use_draft"] = false;
   }  
   
+
+
+  $school_id = 0;
+  
+  if (function_exists('schools_menu')) {  // The schools module is enabled.  We need to first ask what school we want to look at. 
+    if (!isset($_REQUEST['school_id'])) {
+      
+      $form = blank_degrees_select_school_form();      
+      return $form;
+    } // not isset school_id
+    
+    $school_id = intval($_REQUEST['school_id']);
+    
+    $form['mark_current_school'] = array(      
+      'value' => "<div class='current-school'>" . t("Current school: ") . "<strong>" . schools_get_school_name_for_id($school_id) . "</strong>
+                     - " . l(t("Change?"), "tools/blank-degrees") . "</div>", 
+    );
+    
+  }
+
+
+  $form['school_id'] = array(
+    'type' => 'hidden',
+    'value' => $school_id,
+  );
     
   
   @$blank_catalog_year = $_REQUEST["blank_catalog_year"];
   
   // If we used the word "current" for catalog_year, then find out what the current is.
   if (strtolower($blank_catalog_year) == "current") {
-    $blank_catalog_year = variable_get("current_catalog_year", 2006);   // TODO:  School_id? 
+    $blank_catalog_year = variable_get_for_school("current_catalog_year", 2006, $school_id); 
   }
   
   if ($blank_catalog_year == "") {
     // The user must first select the desired catalog year.
     
     $catalog_year_options = array();
-    $current_catalog_year = variable_get("current_catalog_year", 2006);  // TODO: school_id?
+    $current_catalog_year = variable_get_for_school("current_catalog_year", 2006, $school_id);
     
     if ($GLOBALS["fp_advising"]["bool_use_draft"]) {
-      $current_catalog_year = variable_get("current_draft_catalog_year", 2006);
+      $current_catalog_year = variable_get_for_school("current_draft_catalog_year", 2006, $school_id);
     }
     
-    $earliest_catalog_year = variable_get("earliest_catalog_year", 2006);  // TODO: how to handle school_id?
+    $earliest_catalog_year = variable_get_for_school("earliest_catalog_year", 2006, $school_id);
     for($t = $current_catalog_year; $t >= $earliest_catalog_year; $t--) {
       $catalog_year_options[$t] = "$t-" . ($t+1);
     }    
 
     $form["blank_catalog_year"] = array(
       "type" => "select",
-      "label" => t("Please begin by selecting a catalog year:"),
+      "label" => t("Please select a catalog year:"),
+      "hide_please_select" => TRUE,
       "options" => $catalog_year_options,
       "weight" => 10,
     );
@@ -346,7 +404,7 @@ function blank_degrees_select_degree_form() {
 
     $form["mark_searching_in_year"] = array(
       "value" => t("Searching degrees in %year.", array("%year" => $blank_catalog_year . "-" . ($blank_catalog_year+1))) . "
-                   " . l(t("Change?"), "tools/blank-degrees"),
+                   " . l(t("Change?"), "tools/blank-degrees", "school_id=$school_id"),
       "weight" => 0,
     );    
     
@@ -398,8 +456,8 @@ function blank_degrees_select_degree_form() {
   if ($bool_show_continue) {
     $form["submit"] = array(
       "type" => "submit",
-      "prefix" => "<hr>",
-      "value" => t("Continue") . " -&gt;",
+      "prefix" => "",
+      "value" => t("Continue"),
       "weight" => 100,
     );
   }
@@ -413,9 +471,17 @@ function blank_degrees_select_degree_form() {
  * Submit handler for degree selection
  */
 function blank_degrees_select_degree_form_submit($form, $form_state) {
+  
+  
+  // Are we first selecting a school?
+  if (isset($form_state['POST']['from_select_school']) && $form_state['POST']['from_select_school'] == 'yes') {  
+    fp_goto('tools/blank-degrees', 'school_id=' . intval($form_state['POST']['school_id']));
+    return;
+  }  
+  
     
-  $school_id = 0;
-  if (isset($form_state['POST']['schools_school'])) $school_id = intval($form_state['POST']['schools_school']);
+  
+  $school_id = intval($form_state['values']['school_id']);
   
   // If all the user did was select catalog year, we need to redirect
   // back to the form with blank_catalog_year set.

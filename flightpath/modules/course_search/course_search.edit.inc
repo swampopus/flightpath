@@ -66,7 +66,7 @@ function course_search_edit_course_details_form() {
   // Find out filename/link of current syllabus.
   $filelink = "- None currently entered -";
   $filename = "";
-  if ($syllabus_details = course_search_get_course_syllabus_details("", "", $course_id)) {
+  if ($syllabus_details = course_search_get_course_syllabus_details($course_id)) {
     $filename = $syllabus_details["filename"];
   }
 
@@ -273,7 +273,7 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
 
   // Should we delete the current syllabus?
   if ($form_state["values"]["del_syllabus"]["yes"] == "yes") {
-    if ($details = course_search_get_course_syllabus_details("", "", $course_id)) {
+    if ($details = course_search_get_course_syllabus_details($course_id)) {
       $filename = $details["filename"];
       if ($filename != "") {
         unlink("./custom/files/syllabi/$filename");
@@ -346,7 +346,7 @@ function course_search_upload_attachment($course_id, $subject_id, $course_num) {
     // delete the existing entry, if any.
 
     // We need to unlink any existing syllabus file...
-    if ($file_details = course_search_get_course_syllabus_details($subject_id, $course_num, $course_id)) {
+    if ($file_details = course_search_get_course_syllabus_details($course_id)) {
       $filename = $file_details["filename"];    
       if (!unlink("$files_path/custom/files/syllabi/$filename")) {
         fp_add_message(t("Unable to delete existing file:") . " $filename");
@@ -424,9 +424,7 @@ function course_search_display_edit_courses()
 	$rtn .= "
 			<div class='tenpt' style='margin-bottom: 20px;'>
 				" . t("To update a course's sample syllabus or schedule,
-				please select the course from the list below.") . "
-				<br>				
-			  " . l(t("View Reports"), "tools/course-search/view-reports") . "
+				please select the course from the list below.") . "				
 			</div>
 			";
 
@@ -495,7 +493,7 @@ function course_search_display_edit_courses()
 		  $school = schools_get_school_code_for_id($school_id);
     }
 		
-		$syllabus_details = course_search_get_course_syllabus_details("", "", $db_course_id);
+		$syllabus_details = course_search_get_course_syllabus_details($db_course_id);
 		$filename = $syllabus_details["filename"];
 		
 		
@@ -597,11 +595,12 @@ function course_search_display_view_reports() {
 
 
 
-function course_search_get_offering_csv() {
+
+function z__course_search_get_offering_csv($school_id = 0) {
   $csv = "";
   $csv .= "SUBJ, NUM, COL, DEPT, SYL UPDATED, ";
   
-  $catalog_year = variable_get("current_catalog_year", "");
+  $catalog_year = variable_get_for_school("current_catalog_year", "", $school_id);
   
   $course_term_array = array();
   $check_term_array = array();
@@ -620,6 +619,7 @@ function course_search_get_offering_csv() {
 			
       $new_course = new Course();
       $new_course->term_id = $term_id;
+      $new_course->school_id = $school_id;
       $disp_name = $new_course->get_term_description(TRUE);
 			
 			$csv .= " " . $disp_name . " ($term_id) ,";
@@ -628,7 +628,7 @@ function course_search_get_offering_csv() {
 			// which have an entry for this term in our table.  This should make
 			// it faster to look up later.
 			$res = db_query("SELECT * FROM course_rotation_schedule
-													WHERE `term_id`='?' ", $term_id);
+													WHERE term_id = ? ", $term_id);
 			while ($cur = db_fetch_array($res)) {
 			  $course_term_array[$term_id][$cur["course_id"]] = TRUE;
 			}
@@ -639,19 +639,17 @@ function course_search_get_offering_csv() {
 	// Take off last comma of csv.
 	$csv = substr($csv, 0, -1);	
 
-	//var_dump($courseTermArray);
-	
-	//debugCT($csv);
 		
 	$csv .= "\n";
-	//return;
+
    
 	$result = db_query("SELECT * FROM courses
                         WHERE 
-                        `catalog_year`='?'                         
-                        AND `delete_flag`='0'
-                        AND `exclude`='0'
-                        ORDER BY `subject_id`, `course_num` ", $catalog_year);
+                        catalog_year = ?                         
+                        AND delete_flag = 0
+                        AND exclude = 0
+                        AND school_id = ?
+                        ORDER BY subject_id, course_num ", $catalog_year, $school_id);
 	while ($cur = db_fetch_array($result)) {
 	  extract($cur, 3, "db");
 	  //debugCT($db_subject_id . $db_course_num);
@@ -662,7 +660,7 @@ function course_search_get_offering_csv() {
 	  // What college does this course belong to?
     $res2 = db_query("SELECT * FROM subjects
                           WHERE subject_id = ?
-                          AND school_id = ? ", $db_subject_id, $db_school_id);
+                          AND school_id = ? ", $db_subject_id, $school_id);
     $cur2 = db_fetch_array($res2);
     $college = $cur2["college"];
     $dept_name = $cur2["title"];

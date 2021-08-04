@@ -158,15 +158,6 @@ function student_search_settings_form() {
   $form = array();
   
   
-  $form["student_search_major_search_cur_year"] = array(
-    "type" => "checkbox",
-    "label" => "Major search - Only show major choices from current catalog year?",    
-    "value" => variable_get("student_search_major_search_cur_year", FALSE),
-    "description" => t("If checked, the Majors tab will only allow selections of
-                        unexcluded degrees/majors in the current catalog year.
-                        If not sure what to do, leave this CHECKED."),
-  );
-  
   
   
   $form["extra_student_search_conditions"] = array(
@@ -176,18 +167,17 @@ function student_search_settings_form() {
     "description" => t("This is mysql which will get appended to end of the WHERE clause of every query
                     relating to searching for students.  It is so you can easily add global conditions, 
                     especially if you are overriding the student_search module.  For example,
-                    to check that the students are admitted or enrolled.  <b>Probably not necessary</b> if you
-                    are not overriding the student_search module.  If you are unsure what to do, leave this blank."),    
+                    to check that the students are admitted or enrolled.  If you are unsure what to do, leave this blank."),    
   );
     
   
-  // TODO:  This setting isn't really necessary anymore.  We should just add is_active = 1 to the stats/report that uses it.
   
+  // TODO:  This setting isn't really necessary anymore.  We should just add is_active = 1 to the stats/report that uses it.  
   $form["enrolled_student_search_conditions"] = array(
     "type" => "textarea",
     "label" => t("Enrolled student search conditions:"),
     "value" => variable_get("enrolled_student_search_conditions", " AND is_active = 1 "),
-    "description" => t("Similar to the one above it, this is a clause which will only bring up students
+    "description" => t("<b>Soon to be deprecated.</b> Similar to the one above it, this is a clause which will only bring up students
                     who are enrolled at the university, and taking courses.  This might be identical to the
                     one above it.  At the moment, this is only being used in the Stats module, and not
                     for any logic in FlightPath, so you should consider it optional.
@@ -392,9 +382,6 @@ function student_search_get_majors_for_fapi() {
   global $user;     
   $rtn = array();   
       
-  // Do we have any extra settings for this search?
-  $current_catalog_year = variable_get("current_catalog_year", 2006);
-  $cur_only = variable_get("student_search_major_search_cur_year", FALSE);
   $extra_line = "";
   
   // Get all the school ids this user is allowed to search.
@@ -404,10 +391,6 @@ function student_search_get_majors_for_fapi() {
   
   
   $params = array();
-  if ($cur_only == TRUE) {
-    $extra_line = " AND catalog_year = :cur_cat_year ";
-    $params[":cur_cat_year"] = $current_catalog_year;
-  }
   
   
   

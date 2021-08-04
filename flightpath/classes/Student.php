@@ -646,7 +646,7 @@ class Student extends stdClass
 
 	  $retake_grades = csv_to_array(variable_get_for_school("retake_grades",'', $this->school_id));
 	  
-    $not_released_grades_terms = csv_to_array(variable_get("not_released_grades_terms"));
+    $not_released_grades_terms = csv_to_array(variable_get_for_school("not_released_grades_terms", '', $this->school_id));
     
 		// This will create and load the list_courses_taken list.
 		// contains SQL queries to fully create the list_courses_taken.

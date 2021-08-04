@@ -1,6 +1,18 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2021-08-04
+  Removed out-of-date setting for student_search, where we can only search for majors in the current catalog year.
+  
+  Got rid of the course_search "report" where you can download offerings as CSV.  Should be under stats anyway.  For now,
+  simply removed.
+  
+  Updated parts of course_search (dealing with getting syllabus) to only use course_id in queries.
+  
+  Updated add new degree and copy degree to pay attention to school_id.
+  
+
 2021-08-03
   Added new variable_delete() function to db.inc.
   
@@ -13,6 +25,7 @@ FlightPath 6.x Changelog
   Modified admin's edit-advising-settings to handle multiple schools.
   
   Fixed bug where db's update_course_requirement_by_name was trying to use school_id in tables which didn't have it.
+
 
 2021-08-02
   Added new menu type:  MENU_TYPE_DEFAULT_TAB. This is a tab which otherwise behaves like a MENU_TYPE_NORMAL_ITEM.

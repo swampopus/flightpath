@@ -922,7 +922,7 @@ function admin_advising_settings_form($school_id = 0) {
                         Only change this once you have fully loaded a new catalog year."),
   );   
 
-  // TODO:  find/replace
+  
   $form["current_draft_catalog_year" . $fs] = array(
     "type" => "textfield",
     "size" => 10,
@@ -935,7 +935,7 @@ function admin_advising_settings_form($school_id = 0) {
                         to the same as the Current catalog year."),
   );  
 
-  // TODO:  find/replace
+  
   $form["not_released_grades_terms" . $fs] = array(
     "type" => "textfield",
     "label" => t("NOT released grades terms"),

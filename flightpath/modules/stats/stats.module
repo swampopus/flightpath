@@ -283,7 +283,7 @@ function stats_draw_catalog_year_pulldown($selected = "", $display_submit = FALS
           <option value=''>-----------------------------------</option>";
   
   
-  $current_catalog_year = variable_get("current_catalog_year", "");
+  $current_catalog_year = variable_get("current_catalog_year", "");  // TODO: school_id?
 
   if ($selected == "") $selected = $current_catalog_year;
   
@@ -589,7 +589,7 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool
   $options_array = array();
   
   
-  $current_catalog_year = variable_get("current_catalog_year", "");
+  $current_catalog_year = variable_get("current_catalog_year", "");  // TODO: school_id?
 
   $m_a_count = 0;  
   if ($bool_only_current_catalog_year) {

@@ -112,35 +112,6 @@ function course_search_menu() {
     "type" => MENU_TYPE_CALLBACK,
   );
 
-  $items["tools/course-search/view-reports"] = array(
-    "title" => "View Reports",
-    "page_callback" => "course_search_display_view_reports",
-    "access_arguments" => array("can_update_course_info_details"),
-    "page_settings" => array(
-      "page_has_search" => FALSE,      
-      "menu_links" => array(
-        0 => array(
-          "text" => "Back to Course Search",
-          "path" => "tools/course-search",
-        ),
-        1 => array(
-          "text" => "Back to Course Edit List",
-          "path" => "tools/course-search/edit-list",
-        ),
-      ),
-    ),    
-    "file" => menu_get_module_path("course_search") . "/course_search.edit.inc",
-    "type" => MENU_TYPE_CALLBACK,
-  );  
-
-  // Simple callback to download CSV
-  $items["tools/course-search/get-offering-csv"] = array(    
-    "page_callback" => "course_search_get_offering_csv",
-    "access_arguments" => array("can_update_course_info_details"),
-    "file" => menu_get_module_path("course_search") . "/course_search.edit.inc",
-    "type" => MENU_TYPE_CALLBACK,
-  );    
-
     
   return $items;
 }
@@ -261,35 +232,29 @@ function course_search_settings_form() {
 function course_search_download_syllabus() {
   // Get our global variables...
   
-  $c = trim($_REQUEST["c"]);
+  
   $id = trim($_REQUEST["id"]);
   
   $db = get_global_database_handler();
   
-  $temp = explode("_", $c);
-  $subject_id = $temp[0];
-  $course_num = $temp[1];
   
-  // Get the filename in question...
   $query = "select * from course_syllabi
-            where course_perm_id = '?' ";
-  $params = array($subject_id . "_" . $course_num);            
-  if ($id != "") {
-    $query = "select * from course_syllabi
-            where course_id = '?' ";
-    $params = array($id);            
-  }
+          where course_id = ? ";
+  $params = array($id);            
+
   
   $res = db_query($query, $params);
   $cur = db_fetch_array($res);
   $filename = $cur["filename"];
   
   $course_id = $cur["course_id"];
+  $school_id = $db->get_school_id_for_course_id($course_id);
   
   // Get the latest subject_id and course_num for this course!
   $new_course = new Course();
-  $new_course->course_id = $course_id;  
-  $new_course->catalog_year = variable_get("current_catalog_year", 2006);
+  $new_course->course_id = $course_id;
+  $new_course->school_id = $school_id;  
+  $new_course->catalog_year = variable_get_for_school("current_catalog_year", 2006, $school_id);
   $new_course->load_descriptive_data(false, false, true);
   
   $subject_id = $new_course->subject_id;
@@ -355,15 +320,15 @@ function course_search_display_courses() {
   $render = array();
   $render["#id"] = "course_search_display_courses";
       
-  
+  $school_id = intval(@$_REQUEST["school_id"]);
 
   
-  $current_catalog_year = variable_get("current_catalog_year",'');
+  $current_catalog_year = variable_get_for_school("current_catalog_year",'', $school_id);
 
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;  
   $subject_id = $_REQUEST["subject_id"];
-  $school_id = intval(@$_REQUEST["school_id"]);
+  
 
   $render["#catalog_year"] = $catalog_year;
   $render["#school_id"] = $school_id; 
@@ -507,7 +472,7 @@ function course_search_display_courses() {
       }
 
       $syllabus_text = "";     
-      $syllabus_array = course_search_get_course_syllabus_details("", "", $n_course_id);
+      $syllabus_array = course_search_get_course_syllabus_details($n_course_id);
       
       if ($syllabus_array["url"] != "")
       {
@@ -869,7 +834,7 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
 
 
 
-function course_search_get_course_syllabus_details($subject_id = "", $course_num = "", $course_id = -1)
+function course_search_get_course_syllabus_details($course_id)
 {
   
 	// This will return an array containing information
@@ -877,21 +842,17 @@ function course_search_get_course_syllabus_details($subject_id = "", $course_num
 	$rtn_array = FALSE;
 
 	// Does this course have a syllabus?
-	$query = "SELECT * FROM course_syllabi
-				WHERE `course_perm_id`='$subject_id" . "_$course_num'";
-	if ($course_id != -1) {
 	  $query = "SELECT * FROM course_syllabi
-				WHERE `course_id`='$course_id' ";
-	}
+				WHERE course_id = ? ";
 	
-	$res = db_query($query);
+	$res = db_query($query, $course_id);
 	$cur = db_fetch_array($res);
 	
 	
 
 	if ($cur["filename"] != "") {
 	  $rtn_array = array();
-		$rtn_array["url"] = $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("course-search/get-syllabus", "id=" . $cur["course_id"], FALSE);
+		$rtn_array["url"] = $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("course-search/get-syllabus", "id=" . $course_id, FALSE);
 		$rtn_array["filename"] = $cur["filename"];
 		$rtn_array["posted"] = $cur["posted"];
 	}
@@ -963,7 +924,7 @@ function course_search_display_search() {
   $clean_urls = variable_get("clean_urls", FALSE);
   
   $school_id = intval($_REQUEST['school_id']);
-  $current_catalog_year = variable_get_for_school('current_catalog_year', 2006, $school_id);  // TODO: school_id?
+  $current_catalog_year = variable_get_for_school('current_catalog_year', 2006, $school_id);
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;
   
