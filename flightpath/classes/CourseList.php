@@ -1367,6 +1367,8 @@ class CourseList extends ObjList
 		for ($t = 0; $t < $this->count; $t++)
 		{
 			$c = $this->array_list[$t];
+      if ($c == NULL) continue;
+      
 			if ($c->subject_id == "")
 			{
 				$c->load_descriptive_data();
