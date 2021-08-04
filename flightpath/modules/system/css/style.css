@@ -342,8 +342,17 @@ input.disable-element,
   background-size: 50px;
 }
 
+.snapshot-school-selector {
+  font-size: 0.8em;
+  float: right;
+}
 
-
+.snapshot-school-selector select#selected_school_id {
+  border: 1px solid #8E929C;
+  box-shadow: 0px 1px 2px rgb(0 0 0 / 15%);
+  border-radius: 3px;
+  max-width: 120px;
+}
 
 
 

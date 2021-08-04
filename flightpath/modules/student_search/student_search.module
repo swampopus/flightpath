@@ -248,7 +248,7 @@ function student_search_render_small_search() {
 /**
  * Displays this user's advisees, if there are any assigned.
  */
-function student_search_display_my_advisees($bool_only_return_adv_array = FALSE, $use_cwid = NULL) {
+function student_search_display_my_advisees($bool_only_return_adv_array = FALSE, $use_cwid = NULL, $force_school_id = NULL) {
   global $user, $pager_total_items;
   $rtn = "";
 
@@ -266,8 +266,10 @@ function student_search_display_my_advisees($bool_only_return_adv_array = FALSE,
    
 
   // Get all the school ids this user is allowed to search.
-  $school_ids = student_search_get_school_ids_user_is_allowed_to_search();  
+  $school_ids = student_search_get_school_ids_user_is_allowed_to_search();
   $school_id_list = join(",", $school_ids);
+   
+  if ($force_school_id != NULL) $school_id_list = intval($force_school_id);
    
   
   $query = "SELECT u.user_id, f_name, u.cwid, l_name, major_code, rank_code, a.catalog_year, priority_value, u.school_id
@@ -359,7 +361,9 @@ function student_search_get_school_ids_user_is_allowed_to_search($account = NULL
     $defs = schools_get_school_definitions();
     foreach ($defs as $school_id => $name) {
       if (user_has_permission("search_students_$school_id")) {
-        $rtn[] = intval($school_id);
+        if (!in_array(intval($school_id), $rtn)) {
+          $rtn[] = intval($school_id);
+        }
       }
     }
   }

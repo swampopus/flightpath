@@ -20,6 +20,10 @@ FlightPath 6.x Changelog
   
   Added multi-school functionality to course search settings.
   
+  Fixed bug with upcoming appointments.
+  
+  If using schools, made it so the advising snapshot lets you switch between schools.
+  
 
 2021-08-03
   Added new variable_delete() function to db.inc.

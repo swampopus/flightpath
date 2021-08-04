@@ -318,6 +318,7 @@ function calendar_display_upcoming_appointments() {
   $tomorrow = date('Y-m-d', $start_ts + (24 * 60 * 60));  // 24 hours later
   $next_few_weeks_ts = $start_ts + (24 * 60 * 60) + 1;
   
+    
   $current_range = "";
     
   foreach ($upcoming as $details) {      
@@ -325,7 +326,7 @@ function calendar_display_upcoming_appointments() {
     
     // Figure out of this is TODAY, TOMORROW, or over the next few weeks.
     $ymd = date('Y-m-d', convert_time($details['utc_start_ts']));
-  
+      
     if ($ymd == $today && $current_range != "today") {
       $render['mark_today_header'] = array(
         'value' => "<h4>" . t("Today") . "</h4>",
@@ -337,10 +338,12 @@ function calendar_display_upcoming_appointments() {
       $render['mark_tomorrow_header'] = array(
         'value' => "<h4>" . t("Tomorrow") . "</h4>",        
       );
+      
       $current_range = "tomorrow";
     }          
           
-    if (convert_time($details['utc_start_ts']) >= $next_few_weeks_ts && $current_range != "next_few") {
+    //if (convert_time($details['utc_start_ts']) >= $next_few_weeks_ts && $current_range != "next_few") {      
+    if ($ymd != $today && $ymd != $tomorrow && $current_range != "next_few") {      
       $render['mark_next_few_header'] = array(
         'value' => "<h4>" . t("Next few weeks") . "</h4>",
       );

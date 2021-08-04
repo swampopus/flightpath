@@ -3427,13 +3427,24 @@ function system_display_dashboard_page () {
                    
     $rtn .= "<div class='dash-box dash-right'>";
 
-    
-    // TODO: need to do something different for people who advise multiple schools
-    
+
+
     $advising_term_id = variable_get("advising_term_id", "");
     $advising_term_desc = get_term_description($advising_term_id, FALSE, $user->school_id);  
 
     $url = fp_url("render-advising-snapshot-for-iframe", "window_mode=popup");
+    
+    // Show slightly different if we have the schools module enabled
+    if (function_exists('schools_menu')) {      
+      $advising_term_desc = "Current Terms";
+      
+      // Get all the school ids this user is allowed to search.
+      $school_ids = student_search_get_school_ids_user_is_allowed_to_search();
+      $school_id_list = join(",", $school_ids);
+              
+      $url = fp_url("render-advising-snapshot-for-iframe", "window_mode=popup&school_id_list=$school_id_list");
+            
+    }    
 
     $rtn .= "<div class='snapshot-feed-block dash-feed-block'>
                 " . fp_render_section_title("Advising Snapshot for $advising_term_desc") . "
@@ -3525,10 +3536,19 @@ function system_render_advising_snapshop_for_iframe() {
     $_SESSION["fp_pie_chart_token"] = md5(fp_token());
   }
 
+  $school_ids = array(0);
+  if (isset($_REQUEST['school_id_list'])) {
+    $school_ids = explode(",", $_REQUEST['school_id_list']);
+    
+  }
+  
+  $selected_school_id = $school_ids[0];
+  if (isset($_REQUEST['selected_school_id'])) $selected_school_id = intval($_REQUEST['selected_school_id']);
+  
       
   // Get total number of advisees VS number that have been advised for current term.
   // Since this can take a while to load, maybe it loads by javascript async instead?  Or maybe its an iframe which can also be async?
-  $adv_array = student_search_display_my_advisees(TRUE);  
+  $adv_array = student_search_display_my_advisees(TRUE, NULL, $selected_school_id);  
   $total = count($adv_array);
   //fpm($total);
   $advised_count = 0;
@@ -3545,14 +3565,37 @@ function system_render_advising_snapshop_for_iframe() {
     $unfinished = 100 - $advised_percent;
     $pie_chart_url_advised_percent = base_path() . "/libraries/pchart/fp_pie_chart.php?size=75&radius=35&progress=$advised_percent&unfinished=$unfinished&unfinished_col=cccccc&progress_col=5780FF&token=" . $_SESSION["fp_pie_chart_token"];
     
-    // TODO:  if you advise multiple schools, you need to have more than this one snapshot.
-    
-    $advising_term_id = variable_get("advising_term_id", "");
-    $advising_term_desc = get_term_description($advising_term_id, FALSE); // TODO: may need to do something different if user advises over multiple schools
+        
+    $advising_term_id = variable_get_for_school("advising_term_id", "", $selected_school_id);
+    $advising_term_desc = get_term_description($advising_term_id, FALSE, $selected_school_id);
               
+    
+    // If we have more than one school, then we should also display a selector which auto-submits when changed.
+    $school_selector_html = "";
+    if (count($school_ids) > 1 && function_exists('schools_menu')) {
+      fp_add_js(fp_get_module_path("system") . "/js/snapshot.js");
+      
+      $url = fp_url("render-advising-snapshot-for-iframe");
+      
+      $school_selector_html .= "<div class='snapshot-school-selector'>
+                                  <form action='$url' method='GET' id='snapshot-school-selector-form'>
+                                  <input type='hidden' name='window_mode' value='popup'>
+                                  <input type='hidden' name='school_id_list' value='" . join(",", $school_ids) . "'> 
+                                  <strong>School: </strong>                                  
+                                  <select name='selected_school_id' id='selected_school_id'>";
+      foreach ($school_ids as $school_id) {
+        $sel = "";
+        if (intval($school_id) === $selected_school_id) $sel = "selected";
+        $school_selector_html .= "<option value='$school_id' $sel>" . schools_get_school_name_for_id($school_id) . "</option>";
+      }
+      $school_selector_html .= "</select>                                
+                                </form>
+                                </div>";
+    }
        
         
     $rtn .= "<div class='snapshot-in-iframe'>
+              $school_selector_html
               <div class='pie-image'>
                 <img src='$pie_chart_url_advised_percent'>
               </div> 
