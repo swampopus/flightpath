@@ -5857,7 +5857,7 @@ function draw_menu_items($menu_array) {
     }
     
     $db = get_global_database_handler();
-    $school_id = $db->get_school_id_for_group_id($group_id);
+    $school_id = db_get_school_id_for_student_id($this->student->student_id);
     
     $pC = "";
     
