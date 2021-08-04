@@ -988,8 +988,8 @@ function advise_display_popup_group_select() {
   $req_by_degree_id = trim(addslashes(@$_REQUEST["req_by_degree_id"]));
   $perform_action2 = @$_REQUEST["perform_action2"]; 
   
-  $school_id = $db->get_school_id_for_group_id($group_id);
-  
+  $school_id = db_get_school_id_for_student_id($current_student_id);
+    
   // If this is a "blank" degree, make sure we set the degree_id correctly.
   if($blank_degree_id != "") {
     // If req_by_degree_id isn't blank or zero, then use it instead.
@@ -1010,6 +1010,8 @@ function advise_display_popup_group_select() {
     fpm($degree_plan);
     return;
   }
+  
+  
   
   if ($group_id == -88) { 
     // This is the Add a Course group.  We must initialize it, as it
