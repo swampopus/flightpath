@@ -13,6 +13,8 @@ FlightPath 6.x Changelog
   
   Marked a couple unused methods/functions for removal by adding z__ before the name.
   
+  Fixed bug in users' Faculty Advisees list, where in the comment for an advisee you couldn't see their major code correctly.
+  
 
 2021-08-04
   Removed out-of-date setting for student_search, where we can only search for majors in the current catalog year.

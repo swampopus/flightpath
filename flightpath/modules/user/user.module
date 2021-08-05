@@ -958,7 +958,16 @@ function user_edit_user_advisees_form() {
     $contents .= trim($cur["student_id"]);
     // If this student exists, get their name and other info as well, to help with display.
     $name = $db->get_student_name($cur["student_id"]);
-    $majors = $db->get_student_majors_from_db($cur["student_id"], TRUE);
+    $student_majors = $db->get_student_majors_from_db($cur["student_id"], TRUE);
+    $majors = "";
+    foreach ($student_majors as $code => $details) {
+      
+      $majors .= $code . ", ";
+      
+    }
+    
+    $majors = rtrim(trim($majors), ",");
+    
     if ($name || $majors) {
       $contents .= "   #  $name - $majors ";
     }
