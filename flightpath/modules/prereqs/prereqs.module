@@ -269,9 +269,13 @@ function prereqs_form_alter(&$form, $form_id) {
 function prereqs_edit_course_form_validate($form, &$form_state) {
   $prereqs = trim($form_state["values"]["prereqs_prereqs"]);
   if ($prereqs == "") return; //nothing there, so ignore.
+  
+  $db = get_global_database_handler();
+  $school_id = $db->get_school_id_for_course_id($form_state["values"]["course_id"]);
+  // TODO:  If schools_school exists, use THAT id instead?  
     
   // Turn into a friendly array.
-  $prereq_array = prereqs_get_prereq_array_from_string($prereqs);
+  $prereq_array = prereqs_get_prereq_array_from_string($prereqs, $school_id);
 
   // If any of the courses in our array don't have valid course id's, it means
   // the course wasn't found.
@@ -366,31 +370,11 @@ function prereqs_get_prereq_array_for_course($course_id) {
 
   $prereq_data = prereqs_get_prereq_string_for_course($course_id);
 
-  $rtn = prereqs_get_prereq_array_from_string($prereq_data);
+  $db = get_global_database_handler();
+  $school_id = $db->get_school_id_for_course_id($course_id);
 
-/*
-  while ($cur = db_fetch_array($res)) {
-    $x = array(
-      "course_id" => $cur["prereq_course_id"],
-      "min_grade" => $cur["prereq_min_grade"],
-    );
+  $rtn = prereqs_get_prereq_array_from_string($prereq_data, $school_id);
 
-    $i = $cur["prereq_course_id"];
-    
-    if ($bool_load_course) {
-      $course = new Course($cur["prereq_course_id"]);
-      $x["subject_id"] = $course->subject_id;
-      $x["course_num"] = $course->course_num;
-      $i = $course->subject_id . "~~" . $course->course_num;
-      
-    } 
-    
-    
-    
-    $rtn[$i] = $x;
-
-  }
- */
  
   
   return $rtn;
@@ -408,7 +392,7 @@ function prereqs_get_prereq_array_for_course($course_id) {
  * Returns back a friendly array that makes everything easier to read.
  * 
  */
-function prereqs_get_prereq_array_from_string($prereqs_str) {
+function prereqs_get_prereq_array_from_string($prereqs_str, $school_id = 0) {
     
   $rtn = array();      
   
@@ -440,8 +424,8 @@ function prereqs_get_prereq_array_from_string($prereqs_str) {
         $min_grade = trim(str_replace(")", "", $temp2[1]));  
       }
       
-      // Okay, now that we have the subjecd_id and course_num, let's find the course_id (if it exists).
-      $course_id = $db->get_course_id($subject_id, $course_num);
+      // Okay, now that we have the subject_id and course_num, let's find the course_id (if it exists).
+      $course_id = $db->get_course_id($subject_id, $course_num, '', FALSE, $school_id);
       
       // Okay, add to our return array.
       $rtn[$c][] = array(

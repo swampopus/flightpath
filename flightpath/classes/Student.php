@@ -659,7 +659,7 @@ class Student extends stdClass
 
 			// Create a course object for this course...
 			$is_transfer = false;
-			$course_id = $this->db->get_course_id($cur["subject_id"], $cur["course_num"]);
+			$course_id = $this->db->get_course_id($cur["subject_id"], $cur["course_num"], '', FALSE, $this->school_id);
 
 			if (!$course_id) {
 				fpm("Course not found while trying to load student data: {$cur["subject_id"]} {$cur["course_num"]}");

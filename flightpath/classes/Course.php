@@ -1244,6 +1244,9 @@ class Course extends stdClass
 
   
   
+  
+  
+  
   /**
    * Load $this as a new course based on the subject_id and course_num,
    * instead of the course_id.  This is a useful function for when you
@@ -1253,11 +1256,11 @@ class Course extends stdClass
    * @param string $subject_id
    * @param string $course_num
    */
-  function load_course_from_name($subject_id, $course_num)
+  function z__load_course_from_name($subject_id, $course_num, $school_id = 0)
   {
     // Load a course based on its name.  In otherwords,
     // find the CourseID this way first.
-    $course_id = $this->db->get_course_id($subject_id, $course_num);
+    $course_id = $this->db->get_course_id($subject_id, $course_num, '', FALSE, $school_id);
     $this->load_course($course_id);
   }
 

@@ -1129,13 +1129,14 @@ class DegreePlan extends stdClass
     $sem->title = variable_get_for_school("developmentals_title", t("Developmental Requirements", $this->school_id));
     $is_empty = true;
 
+    
     $temp_array = $this->db->get_developmental_requirements($student_id, $this->school_id);
     // We expect this to give us back an array like:
     // 0 => ART~101
     // 1 => MATH~090
     foreach($temp_array as $temp_course_name) {
       $temp = explode("~", $temp_course_name);
-      $c = new Course($this->db->get_course_id($temp[0], $temp[1]));
+      $c = new Course($this->db->get_course_id($temp[0], $temp[1], '', FALSE, $this->school_id));
       $c->min_grade = "C";
       $c->requirement_type = "dev";
       $sem->list_courses->add($c);

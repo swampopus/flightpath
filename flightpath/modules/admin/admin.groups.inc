@@ -1045,7 +1045,7 @@ function admin_get_courses_from_definition($definition, $catalog_year = "", $sch
 
 
 
-function admin_get_course_id_array_from_course_array($course_array) {
+function z__admin_get_course_id_array_from_course_array($course_array) {
   
   $rtn_array = array();
   $db = new DatabaseHandler();
@@ -1059,8 +1059,9 @@ function admin_get_course_id_array_from_course_array($course_array) {
     $temp = explode(" ~~ ", $line);
     $si = trim($temp[0]);
     $cn = trim($temp[1]);
+    $school_id = intval(@$temp[2]);
 
-    $course_id = $db->get_course_id($si, $cn, "", true);
+    $course_id = $db->get_course_id($si, $cn, "", true, $school_id);
     $rtn_array[] = "$course_id";  // force into a string.
   }
 
@@ -1631,101 +1632,6 @@ function admin_process_all_definitions_form_submit($form, $form_submit) {
   batch_set($batch);  
   
   
-  /*
-  
-  
-  
-  
-  // This function will go through every group for this year and
-  // re-run it's definition, saving the result.
-
-  // First, find every group which has a definition set.
-  $res = db_query("SELECT * FROM draft_groups
-                       WHERE definition != '' 
-                       AND catalog_year = '?' 
-                       AND delete_flag = 0 ", $de_catalog_year);
-  while($cur = db_fetch_array($res)) {
-    $def = $cur["definition"];
-    $group_id = $cur["group_id"];
-    $group_name = $cur["group_name"];
-    $temp = admin_get_courses_from_definition($def);
-    $courses = trim($temp["text"]);
-    $ccount = 0;
-
-    fp_add_message(t("Working on %name", array("%name" => $group_name)));
-
-    // Remove all the existing group requirements for this group first.
-    $res2 = db_query("DELETE FROM draft_group_requirements
-                        WHERE group_id = ? ", $group_id);
-
-
-    $lines = explode("\n", $courses);
-    for ($t = 0; $t < count($lines); $t++) {
-      $line = trim($lines[$t]);
-      if ($line == "") { continue; }
-      // Get rid of extra whitespace.
-      $line = str_replace("  ", " ", $line);
-      $line = str_replace("  ", " ", $line);
-      $line = str_replace("  ", " ", $line);
-
-      // Does this line contain at least one & symbol?  If it does,
-      // then this is a subgroup (branch).  If not, then we can insert
-      // the course as-is.
-      if (!strstr($line, "&")) {
-        // Did NOT contain an ampersand (&), so this goes in the
-        // regular course requirements.
-        $tokens = explode(" ", $line);
-        $subject_id = trim($tokens[0]);
-        $course_num = trim($tokens[1]);
-        @$min_grade = trim($tokens[2]);
-        @$course_repeats = trim($tokens[3]);
-
-        if (strstr($min_grade, "[")) {
-          // This is actually a specified repeat, not a min grade.
-          $course_repeats = $min_grade;
-          $min_grade = "";
-        }
-
-        $min_grade = str_replace("(","",$min_grade);
-        $min_grade = strtoupper(str_replace(")","",$min_grade));
-
-        $course_repeats = str_replace("[","",$course_repeats);
-        $course_repeats = str_replace("]","",$course_repeats);
-        $course_repeats--;
-        if ($course_repeats < 0) { $course_repeats = 0; }
-
-        // If the subject_id had a _A_ in it, convert this back
-        // to an ampersand.
-        $subject_id = str_replace("_A_", "&", $subject_id);
-
-        // We don't care about catalog year anymore...
-        if ($course_id = $db->get_course_id($subject_id, $course_num, "", true)) {
-          $query = "INSERT INTO draft_group_requirements
-                    (`group_id`,`course_id`,
-                    `course_min_grade`,`course_repeats`,`data_entry_value`)
-                    values (?, ?, ?, ?, ?) ";
-          $res2 = db_query($query, $group_id, $course_id, $min_grade, $course_repeats, "$subject_id~$course_num");
-          $ccount++;        
-        } 
-        else {
-          // The course_id could not be found!
-
-          fp_add_message(t("Course not found! You specified %course as a requirement in %gname,
-                            but this course could not be found in the catalog.  It was removed from
-                            the list of requirements.  Are you sure you typed it correctly? Please
-                            check your spelling, and add the course again.", array("%course" => "$subject_id $course_num", "%gname" => $group_name)), "error");
-
-        }
-      }
-    }
-
-    fp_add_message(t("%name definition processed. %count courses added.", array("%name" => $group_name, "%count" => $ccount)));    
-
-  }
-  
-    
-  fp_add_message(t("Group definitions have been re-run for @year", array("@year" => $de_catalog_year)));
-   */ 
 }
 
 

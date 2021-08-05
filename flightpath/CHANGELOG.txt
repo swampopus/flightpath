@@ -8,6 +8,11 @@ FlightPath 6.x Changelog
   
   Updated various reports (from stats module) to handle school_id in some way.
   
+  Updated code to make sure school_id was supplied to key functions for determing course_id from name, as well
+  as changes to prereq module to ensure school_id was supplied to key functions.
+  
+  Marked a couple unused methods/functions for removal by adding z__ before the name.
+  
 
 2021-08-04
   Removed out-of-date setting for student_search, where we can only search for majors in the current catalog year.
