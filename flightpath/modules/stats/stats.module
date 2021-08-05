@@ -36,11 +36,10 @@ function stats_menu() {
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(
       "page_show_title" => TRUE,
-      "bool_print" => FALSE,
       "menu_links" => array(         
         0 => array(
-          "text" => t("Analytics"),
-          "path" => "admin-tools/stats",
+          "text" => t("Analytics"),          
+          "path" => "stats",          
         ),
       ),      
     ),    
@@ -55,12 +54,11 @@ function stats_menu() {
     "page_callback" => "stats_report_major_counts",
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(
-      "page_show_title" => TRUE,
-      "bool_print" => FALSE,
+      "page_show_title" => TRUE,      
       "menu_links" => array(         
         0 => array(
           "text" => t("Analytics"),
-          "path" => "admin-tools/stats",
+          "path" => "stats",
         ),
       ),
     ),    
@@ -69,32 +67,29 @@ function stats_menu() {
   );
   
 
-  
-  /**
-   * 
-   * Removing due to lack of use, and incompatibility with FP5
-   * 
-   * 
-  $items["stats/reports/selected-degree-options"] = array(
-    "title" => "Selected Degree Options",
-    "description" => "This report will display information about which degree options students/advisors are selecting for particular majors 
-                    (ex: General Studies)",
-    "page_callback" => "stats_report_selected_degree_options",
+
+
+  $items["stats/reports/major-students-progress"] = array(
+    "title" => "Major Students Progresss",
+    "description" => "Students in a major, and their progress percentages in that major.",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("stats_report_major_students_progress_form"),
     "access_arguments" => array("can_access_stats"),
     "page_settings" => array(
-      "page_show_title" => TRUE,
       "bool_print" => FALSE,
       "menu_links" => array(         
         0 => array(
-          "text" => "Main menu",
-          "path" => "admin-tools/stats",
+          "text" => t("Analytics"),
+          "path" => "stats",
         ),
-      ),            
+      ),      
     ),    
     "type" => MENU_TYPE_NORMAL_ITEM,
-    "weight" => 200,
+    "weight" => 170,
+    "file" => menu_get_module_path("stats") . "/reports.major-students-progress.inc",
   );
-  */
+
+
 
 
 
@@ -111,7 +106,7 @@ function stats_menu() {
       "menu_links" => array(         
         0 => array(
           "text" => t("Analytics"),
-          "path" => "admin-tools/stats",
+          "path" => "stats",
         ),
       ),      
     ),    
@@ -131,7 +126,7 @@ function stats_menu() {
       "menu_links" => array(         
         0 => array(
           "text" => t("Analytics"),
-          "path" => "admin-tools/stats",
+          "path" => "stats",
         ),
       ),      
     ),    
@@ -152,7 +147,7 @@ function stats_menu() {
       "menu_links" => array(         
         0 => array(
           "text" => t("Analytics"),
-          "path" => "admin-tools/stats",
+          "path" => "stats",
         ),
       ),      
     ),    
@@ -174,7 +169,7 @@ function stats_menu() {
       "menu_links" => array(         
         0 => array(
           "text" => t("Analytics"),
-          "path" => "admin-tools/stats",
+          "path" => "stats",
         ),
       ),      
     ),    
@@ -321,6 +316,7 @@ function stats_report_course_use_summary() {
   
   $subject_id = trim(@$_GET["subject_id"]);
   $course_num = trim(@$_GET["course_num"]);
+  $school_id = intval(@$_GET["school_id"]);
   $draft_check = @$_GET["draft"];
   if ($draft_check == "checked") {
     $draft = "draft_";
@@ -328,9 +324,23 @@ function stats_report_course_use_summary() {
   }
   
   $rtn .= "<form action='" . fp_url("stats/reports/course-use-summary") . "' method='GET' >";
-  $rtn .= "Please enter a course's subject ID and course number to search:<br>
-            <input type='text' name='subject_id' placeholder='subject ID' size='10' value='$subject_id'> &nbsp;
-            <input type='text' name='course_num' placeholder='course num' size='10' value='$course_num'> &nbsp;
+  $rtn .= "Please enter a course's subject ID and course number to search:<br>";
+           
+  if (function_exists('schools_menu')) {
+    $options = schools_get_schools_for_fapi();
+    $rtn .= "<select name='school_id'>";
+    foreach ($options as $k => $v) {
+      $sel = "";
+      if (intval($k) === $school_id) $sel = "selected";
+      $rtn .= "<option value='$k' $sel>" . t("School: ") . $v . "</option>";
+    }
+    $rtn .= "</select> &nbsp; ";
+  }
+                      
+              
+  $rtn .= " 
+            <input type='text' name='subject_id' placeholder='Subject ID' size='10' value='$subject_id'> &nbsp;
+            <input type='text' name='course_num' placeholder='Course Num' size='10' value='$course_num'> &nbsp;
             <input type='checkbox' name='draft' value='checked' $draft_check>Check draft tables? &nbsp;
             <input type='submit' value='Search'>
             <br><b>Note:</b> This may take up to a minute to run, please be patient.";
@@ -339,9 +349,10 @@ function stats_report_course_use_summary() {
   
   if ($subject_id && $course_num) {
     $rtn .= "<hr>";
+    
     // First, look up this course's ID.
     $db = get_global_database_handler();
-    $course_id = $db->get_course_id($subject_id, $course_num);
+    $course_id = $db->get_course_id($subject_id, $course_num, '', $use_draft, $school_id);
     
     if ($course_id) {
       $rtn .= "<h2>Course $subject_id $course_num (id is $course_id)</h2>";
@@ -596,14 +607,14 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool
     $query = "SELECT * FROM degrees
   				WHERE  catalog_year = '?'
   				AND `exclude`='0'
-  				ORDER BY `title`  ";
+  				ORDER BY major_code  ";
     $result = db_query($query, $current_catalog_year);
   }
   else { // current catalog year not important.
     $query = "SELECT * FROM degrees
   				WHERE  `exclude`='0'
   				GROUP BY major_code
-  				ORDER BY `title`  ";
+  				ORDER BY major_code  ";
     $result = db_query($query);    
   }
   while ($cur_row = $db->db_fetch_array($result)) {
@@ -620,9 +631,15 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool
     
     $description = trim($cur_row["title"]);
     $type = trim($cur_row["degree_type"]);
+    $school_id = intval($cur_row['school_id']);
+    
     $major_array[$m_a_count]["description"] = $description;
     $major_array[$m_a_count]["major"] = $major;
     $major_array[$m_a_count]["type"] = $type;
+    $major_array[$m_a_count]["school_id"] = $school_id;
+    if (function_exists('schools_menu')) {
+      $major_array[$m_a_count]["school_name"] = t("School: ") . schools_get_school_name_for_id($school_id);
+    }
 
     $m_a_count++;
 
@@ -657,8 +674,14 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool
 					" . $major_array[$t]["description"] . " $hyph " . $major_array[$t]["type"] . "
 					</option>";
     
-    $options_array[$major_array[$t]["major"]] = "(" . $major_array[$t]["major"] . ") " . $major_array[$t]["description"] . " $hyph " . $major_array[$t]["type"];
-    
+    if (function_exists('schools_menu')) {
+      // Create an options array multi-dimentional, organized by school name.
+      $options_array[$major_array[$t]["school_name"]][$major_array[$t]["major"]] = "(" . $major_array[$t]["major"] . ") " . $major_array[$t]["description"] . " $hyph " . $major_array[$t]["type"];
+    }
+    else {
+      // Just create a "flat" options array
+      $options_array[$major_array[$t]["major"]] = "(" . $major_array[$t]["major"] . ") " . $major_array[$t]["description"] . " $hyph " . $major_array[$t]["type"];
+    }
     
   }
 
@@ -691,15 +714,19 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool
  * @param unknown_type $student_cwid
  * @return unknown
  */
-function stats_draw_student_cwid_form($path, $student_cwid = "") {
+function z__stats_draw_student_cwid_form($path, $student_cwid = "") {
   $rtn = "";
   
   $rtn .= "<form action='" . fp_url($path) . "' method='GET' >
             " . t("Enter a student's CWID to see their courses") . "
             <br>
-            <input type='textfield' value='$student_cwid' name='student_cwid'>
-            <br>
-            <input type='submit' value='" . t("Submit") . "'>
+            <span class='form-element element-type-textfield'>
+              <input type='textfield' value='$student_cwid' name='student_cwid'>
+            </span>
+            
+            <span class='buttons form-element element-type-submit'>
+              <input type='submit' value='" . t("Submit") . "'>
+            </span>
           </form> <hr>
           ";  
   
@@ -718,9 +745,13 @@ function stats_report_major_counts() {
   $rtn = "";
 
 
+  $rtn .= "<p>" . t("This report shows number of students in each major or concentration, as defined in FlightPath.") . "</p>";
+
+
 
   $rtn .= "<table border='1'>
         <tr>
+          <th>" . t("School") . "</th>
           <th>" . t("Major") . "</th>
           <th>" . t("Count") . "</th>
           <th colspan='2'>" . t("Description") . "</th>          
@@ -730,12 +761,18 @@ function stats_report_major_counts() {
   
   $result = db_query("SELECT * FROM degrees
                           GROUP BY major_code 
-                          ORDER BY title, major_code ");
+                          ORDER BY school_id, major_code, title ");
   while ($cur = db_fetch_array($result)) {
     $count = 0;
     $major_code = $cur["major_code"];
     $title = $cur["title"];
     $degree_type = $cur["degree_type"];
+    $school_id = intval($cur['school_id']);
+    $school_code = "#$school_id";
+    if ($school_id === 0) $school_code = "-";
+    if (function_exists('schools_menu')) {
+      $school_code = schools_get_school_code_for_id($school_id);
+    }
     
     // If this is a degree option, skip it, as we do not expect
     // the students table to record degree option choices.
@@ -762,6 +799,7 @@ function stats_report_major_counts() {
     $res_array[$major_code]["count"] = $cur2["count"] * 1;
     $res_array[$major_code]["desc"] = $title;
     $res_array[$major_code]["type"] = $degree_type;
+    $res_array[$major_code]["school_code"] = $school_code;
     
   }
   
@@ -769,6 +807,7 @@ function stats_report_major_counts() {
   foreach($res_array as $major => $value) {
 
     $rtn .= "<tr>
+          <td valign='top' class='tenpt'>{$value["school_code"]}</td>
           <td valign='top' class='tenpt'>$major</td>
           <td valign='top' class='tenpt'>{$value["count"]}</td>
           <td valign='top' class='tenpt'>{$value["type"]}</td>
@@ -798,8 +837,8 @@ function stats_report_major_counts() {
 function stats_report_flightpath_use_summary() {
   $rtn = "";    
 
-  $start_date = trim(addslashes(@$_REQUEST["start_date"]));
-  $end_date = trim(addslashes(@$_REQUEST["end_date"]));
+  $start_date = @$_REQUEST["start_date"];
+  $end_date = @$_REQUEST["end_date"];
 
   $rtn .= stats_draw_date_range_form("stats/reports/flightpath-use-summary", $start_date, $end_date);
   
@@ -1001,25 +1040,33 @@ function stats_get_log_count($action = "", $action_array = "", $bool_distinct = 
 /**
  * Displays the HTML for the date range form used by several reports.
  * $path is what is the form's ACTION sending to.
+ * 
+ * start and end date expected in YYYY-MM-DD format
+ * 
  */
 function stats_draw_date_range_form($path, $start_date = "", $end_date = "") {
   $rtn = "";
   
   $rtn .= "<form action='" . fp_url($path) . "' method='GET' >
-            " . t("Enter dates in the format YYYY-MM-DD (ex: 2012-01-01)") . "
+            " . t("Select a date range to begin:") . "
             <br>
-            " . t("Start date:") . " <input type='text' name='start_date' value='$start_date' id='start_date'>
+            " . t("Start date:") . " 
+              <span class='form-element element-type-date element-size-smaller'>
+                <input type='date' name='start_date' value='$start_date' id='start_date'>
+              </span>
             &nbsp; &nbsp;
-            " . t("End date:") . " <input type='text' name='end_date' value='$end_date' id='end_date'>
+            " . t("End date:") . "
+            <span class='form-element element-type-date'> 
+              <input type='date' name='end_date' value='$end_date' id='end_date'>
+            </span>
             &nbsp; &nbsp;
-            <input type='submit' value='" . t("Submit") . "'>
+            
+            <span class='buttons form-element element-type-submit'>
+              <input type='submit' value='" . t("Submit") . "'>
+            </span>
+            
           </form> <hr>
-          <script type='text/javascript'>
-            $(function() {
-               $('#start_date').datepicker({ dateFormat: 'yy-mm-dd'});
-               $('#end_date').datepicker({ dateFormat: 'yy-mm-dd'});
-            });
-          </script>";  
+          ";  
   
   
   return $rtn;
@@ -1249,7 +1296,20 @@ function stats_report_student_course_list() {
 
   $student_cwid = trim(addslashes(@$_REQUEST["student_cwid"]));
   $student_pidm = 0;
-  $rtn .= stats_draw_student_cwid_form("stats/reports/student-course-list", $student_cwid);
+  //$rtn .= stats_draw_student_cwid_form("stats/reports/student-course-list", $student_cwid);
+  
+  $rtn .= "<form action='" . fp_url("stats/reports/student-course-list") . "' method='GET' >
+            " . t("Enter a student's CWID to see their courses:") . "
+            <br>
+            <span class='form-element element-type-textfield'>
+              <input type='textfield' value='$student_cwid' name='student_cwid'>
+            </span>
+            
+            <span class='buttons form-element element-type-submit'>
+              <input type='submit' value='" . t("Submit") . "'>
+            </span>
+          </form> <hr>";
+  
   
   if ($student_cwid == "") {
     return $rtn;
@@ -1261,6 +1321,12 @@ function stats_report_student_course_list() {
   }  
   $student_name = fp_get_student_name($student_cwid);
   $student = new Student($student_cwid);
+  
+  $school_id = db_get_school_id_for_student_id($student_cwid);
+  $school_name = "";
+  if (function_exists('schools_menu')) {    
+    $school_name = schools_get_school_name_for_id($school_id);
+  }
     
   
   $rtn .= "
@@ -1270,7 +1336,7 @@ function stats_report_student_course_list() {
       background-color: white;
     }
     .zebra-odd {
-      background-color: #ddd;
+      background-color: #eee;
     }
   </style>
   
@@ -1278,6 +1344,9 @@ function stats_report_student_course_list() {
       ";
   if ($student_pidm > 0) {
     $rtn .= "<br>PIDM: $student_pidm";
+  }
+  if ($school_name) {
+    $rtn .= "<br>" . t("School:") . "<em>$school_name</em>";
   }
   $rtn .= "</h2>  
 		  <table border='0' cellspacing='0' cellpadding='6'>

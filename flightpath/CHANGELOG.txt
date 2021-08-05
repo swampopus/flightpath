@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-08-05
+  Added styling for "date" and "time" form element types.
+  
+  Added "major student progress" report to core system reports.
+  
+  Updated various reports (from stats module) to handle school_id in some way.
+  
 
 2021-08-04
   Removed out-of-date setting for student_search, where we can only search for majors in the current catalog year.
