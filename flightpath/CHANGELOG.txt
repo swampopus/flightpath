@@ -8,6 +8,8 @@ FlightPath 6.x Changelog
 
   Added new setting to schools where courses from the "default" school can be used in non-default degrees and groups.
 
+  Added create table instructions to enagagements.install for required tables.
+   
 
 2021-08-05
   Added styling for "date" and "time" form element types.

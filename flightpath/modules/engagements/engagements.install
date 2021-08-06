@@ -42,6 +42,69 @@ CREATE TABLE `content__engagement` (
   db_query($q);
   
 
+$q = "
+CREATE TABLE `engagements_tracking` (
+  `cid` INT ( 11 ) NOT NULL,
+  `token` VARCHAR ( 255 ) DEFAULT NULL,
+  `opens` INT ( 10 ) UNSIGNED DEFAULT NULL,
+  `updated` INT ( 10 ) UNSIGNED DEFAULT NULL,
+  PRIMARY KEY ( `cid` ),
+  KEY `opens` ( `opens` ),
+  KEY `updated` ( `updated` ),
+  KEY `token` ( `token` ) 
+);
+";
+db_query($q);
+
+
+$q = "
+CREATE TABLE `sms_history` (
+  `mid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `message_sid` varchar(255) NOT NULL,
+  `sw_type` varchar(255) DEFAULT NULL,
+  `body` text DEFAULT NULL,
+  `num_segments` tinyint(4) DEFAULT 0,
+  `direction` varchar(255) DEFAULT NULL,
+  `from_number` varchar(255) DEFAULT NULL,
+  `to_number` varchar(255) DEFAULT NULL,
+  `sw_price` decimal(15,10) DEFAULT NULL,
+  `fp_price` decimal(15,10) DEFAULT NULL,
+  `to_cwid` varchar(30) DEFAULT NULL,
+  `from_cwid` varchar(30) DEFAULT NULL,
+  `media_filenames` text DEFAULT '',
+  `date_sent` int(10) unsigned DEFAULT NULL,
+  `updated` int(10) unsigned DEFAULT NULL,
+  `price_processed` tinyint(3) unsigned DEFAULT 0,
+  PRIMARY KEY (`mid`),
+  KEY `from_number` (`from_number`),
+  KEY `to_number` (`to_number`),
+  KEY `sw_price` (`sw_price`),
+  KEY `fp_price` (`fp_price`),
+  KEY `updated` (`updated`),
+  KEY `cwid` (`to_cwid`),
+  KEY `direction` (`direction`),
+  KEY `date_sent` (`date_sent`),
+  KEY `from_cwid` (`from_cwid`),
+  KEY `message_sid` (`message_sid`),
+  KEY `num_segements` (`num_segments`),
+  KEY `sw_type` (`sw_type`)
+);
+";
+db_query($q);
+
+
+$q = "
+CREATE TABLE `zoom_api_data` (
+  `user_id` int(10) unsigned NOT NULL,
+  `install_code` varchar(255) DEFAULT NULL,
+  `response_data` text DEFAULT NULL,
+  `access_token` text DEFAULT NULL,
+  `refresh_token` text DEFAULT NULL,
+  `last_updated` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+);
+";
+
 
     
 }
