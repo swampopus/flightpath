@@ -405,7 +405,7 @@ function user_student_list_filter_form() {
   
   
   // If we have enabled the schools module, then have a selector for that as well
-  if (function_exists('schools_get_schools_for_fapi')) {
+  if (module_enabled('schools')) {
   
     $filter_school_value = @intval($_SESSION['users_filter_school']);
     $options = schools_get_schools_for_fapi(TRUE, TRUE, 'user', TRUE);

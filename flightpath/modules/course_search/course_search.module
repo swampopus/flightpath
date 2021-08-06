@@ -188,7 +188,7 @@ function course_search_settings_form($school_id = 0) {
   $school_id = intval($school_id);
   
   $fs = "";  // The field name suffix.  We will add this to the end of all of our field names.  If this is the default school, leave blank.
-  if (function_exists('schools_menu')) {
+  if (module_enabled("schools")) {
     $school_name = schools_get_school_name_for_id($school_id);
     fp_set_title(t("Configure %school Course Search settings", array('%school' => $school_name)));
     if ($school_id !== 0) {
@@ -377,7 +377,7 @@ function course_search_display_courses() {
   //$rtn .= t("Current catalog year:") . " <b>$catalog_year-" . ($catalog_year +1) . "</b>   
   //    ";
   
-  if (function_exists('schools_menu')) {
+  if (module_enabled("schools")) {
     $render['selected_school_name'] = array(
       'value' => "<div class='current-school'>" . t("Current school: ") . "<strong>" . schools_get_school_name_for_id($school_id) . "</strong>
                      - " . l(t("Change?"), "tools/course-search") . "</div>",
@@ -935,7 +935,7 @@ function course_search_display_search() {
       
   $school_id = 0;
   
-  if (function_exists('schools_menu')) {  // The schools module is enabled.  We need to first ask what school we want to look at. 
+  if (module_enabled("schools")) {  // The schools module is enabled.  We need to first ask what school we want to look at. 
     if (!isset($_REQUEST['school_id'])) {
       
       $rtn .= fp_render_form('course_search_select_school_form');      

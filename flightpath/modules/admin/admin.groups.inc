@@ -20,7 +20,7 @@ function admin_edit_group_form_validate(&$form, &$form_state) {
   
   $school_name = $andschool = "";
   if ($school_id > 0) $school_name = "School-" . $school_id;
-  if (function_exists("schools_menu")) {
+  if (module_enabled("schools")) {
     $defs = schools_get_school_definitions();
     if (isset($defs[$school_id])) $school_name = $defs[$school_id];
     $andschool = " and school %school";
@@ -91,14 +91,14 @@ function admin_edit_group_form_validate(&$form, &$form_state) {
         // to an ampersand.
         $subject_id = str_replace("_A_", "&", $subject_id);
 
-        if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id)) {
+        if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id, TRUE)) {
           // Course was found correctly, no need to do anything.                    
         } 
         else {
           // The course_id could not be found!
 
           // Different message if it's a school_id problem.
-          if (function_exists("schools_menu")) {
+          if (module_enabled("schools")) {
             
             form_error("courses", t("<strong>Your work has NOT been saved.</strong> Course not found.  You specified the course %course as a requirement,
                             but this course could not be found.  This could be due to a typo, or due to the course not belonging to the same school
@@ -134,13 +134,13 @@ function admin_edit_group_form_validate(&$form, &$form_state) {
       $subject_id = str_replace("_A_", "&", $subject_id);
 
       // We don't care about catalog year anymore...
-      if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id)) {
+      if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id, TRUE)) {
         // Course found normally, do nothing.        
       } 
       else {
             
           // Different message if it's a school_id problem.
-          if (function_exists("schools_menu")) {
+          if (module_enabled("schools")) {
             
             form_error("courses", t("<strong>Your work has NOT been saved.</strong> Course not found.  You specified the course %course as a requirement,
                             but this course could not be found.  This could be due to a typo, or due to the course not belonging to the same school
@@ -360,9 +360,8 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
         // to an ampersand.
         $subject_id = str_replace("_A_", "&", $subject_id);
 
-        // Commenting out, because we do not care about catalog_year
-        // when specifying courses...
-        if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id)) {
+        
+        if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id, TRUE)) {
                     
           $query = "INSERT INTO draft_group_requirements
                     (group_id, course_id,
@@ -423,7 +422,7 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
       $subject_id = str_replace("_A_", "&", $subject_id);
 
       // We don't care about catalog year anymore...      
-      if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id)) {
+      if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id, TRUE)) {
         $query = "INSERT INTO draft_group_requirements
                     (group_id, course_id,
                     course_min_grade, course_repeats, attributes, data_entry_value)
@@ -841,7 +840,7 @@ function admin_display_groups_popup_edit_definition() {
   
   $school_name = "";
   if ($school_id > 0) $school_name = " School-" . $school_id;
-  if (function_exists("schools_menu")) {
+  if (module_enabled("schools")) {
     $defs = schools_get_school_definitions();
     if (isset($defs[$school_id])) $school_name = $defs[$school_id];
   }    
@@ -1041,31 +1040,6 @@ function admin_get_courses_from_definition($definition, $catalog_year = "", $sch
   $rtn["count"] = $count;
 
   return $rtn;
-}
-
-
-
-function z__admin_get_course_id_array_from_course_array($course_array) {
-  
-  $rtn_array = array();
-  $db = new DatabaseHandler();
-
-  // MUST use foreach instead of for since we did
-  // array_unique!  Can't trust count($arr)!
-  foreach($course_array as $t => $value) {
-    $line = trim($course_array[$t]);
-    if ($line == "~~" || $line == "") continue;
-    $count++;
-    $temp = explode(" ~~ ", $line);
-    $si = trim($temp[0]);
-    $cn = trim($temp[1]);
-    $school_id = intval(@$temp[2]);
-
-    $course_id = $db->get_course_id($si, $cn, "", true, $school_id);
-    $rtn_array[] = "$course_id";  // force into a string.
-  }
-
-  return $rtn_array;
 }
 
 
@@ -1519,7 +1493,7 @@ function admin_groups_list_filter_form() {
   
   
   // If we have enabled the schools module, then have a selector for that as well
-  if (function_exists('schools_get_schools_for_fapi')) {
+  if (module_enabled('schools')) {
   
     $filter_school_value = @intval($_SESSION['groups_filter_school']);
     $options = schools_get_schools_for_fapi(TRUE, TRUE, 'group', TRUE);
@@ -1774,8 +1748,8 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
         // to an ampersand.
         $subject_id = str_replace("_A_", "&", $subject_id);
 
-        // We don't care about catalog year anymore...
-        if ($course_id = $db->get_course_id($subject_id, $course_num, "", true, $school_id)) {
+        
+        if ($course_id = $db->get_course_id($subject_id, $course_num, "", true, $school_id, TRUE)) {
           $query = "INSERT INTO draft_group_requirements
                     (`group_id`,`course_id`,
                     `course_min_grade`,`course_repeats`,`data_entry_value`)
@@ -1837,9 +1811,8 @@ function admin_process_all_definitions_perform_batch_operation(&$batch, $de_cata
           // to an ampersand.
           $subject_id = str_replace("_A_", "&", $subject_id);
   
-          // Commenting out, because we do not care about catalog_year
-          // when specifying courses...
-          if ($course_id = $db->get_course_id($subject_id, $course_num, "", true, $school_id)) {
+
+          if ($course_id = $db->get_course_id($subject_id, $course_num, "", true, $school_id, TRUE)) {
                       
             $query = "INSERT INTO draft_group_requirements
                       (group_id, course_id,
@@ -1903,7 +1876,7 @@ function admin_display_groups_popup_show_group_use() {
   $group->load_descriptive_data();
 
   $defs = array();
-  if (function_exists("schools_menu")) {
+  if (module_enabled("schools")) {
     $defs = schools_get_school_definitions(TRUE);
   }
 

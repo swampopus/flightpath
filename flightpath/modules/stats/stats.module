@@ -326,7 +326,7 @@ function stats_report_course_use_summary() {
   $rtn .= "<form action='" . fp_url("stats/reports/course-use-summary") . "' method='GET' >";
   $rtn .= "Please enter a course's subject ID and course number to search:<br>";
            
-  if (function_exists('schools_menu')) {
+  if (module_enabled("schools")) {
     $options = schools_get_schools_for_fapi();
     $rtn .= "<select name='school_id'>";
     foreach ($options as $k => $v) {
@@ -637,7 +637,7 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool
     $major_array[$m_a_count]["major"] = $major;
     $major_array[$m_a_count]["type"] = $type;
     $major_array[$m_a_count]["school_id"] = $school_id;
-    if (function_exists('schools_menu')) {
+    if (module_enabled("schools")) {
       $major_array[$m_a_count]["school_name"] = t("School: ") . schools_get_school_name_for_id($school_id);
     }
 
@@ -674,7 +674,7 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool
 					" . $major_array[$t]["description"] . " $hyph " . $major_array[$t]["type"] . "
 					</option>";
     
-    if (function_exists('schools_menu')) {
+    if (module_enabled("schools")) {
       // Create an options array multi-dimentional, organized by school name.
       $options_array[$major_array[$t]["school_name"]][$major_array[$t]["major"]] = "(" . $major_array[$t]["major"] . ") " . $major_array[$t]["description"] . " $hyph " . $major_array[$t]["type"];
     }
@@ -770,7 +770,7 @@ function stats_report_major_counts() {
     $school_id = intval($cur['school_id']);
     $school_code = "#$school_id";
     if ($school_id === 0) $school_code = "-";
-    if (function_exists('schools_menu')) {
+    if (module_enabled("schools")) {
       $school_code = schools_get_school_code_for_id($school_id);
     }
     
@@ -1324,7 +1324,7 @@ function stats_report_student_course_list() {
   
   $school_id = db_get_school_id_for_student_id($student_cwid);
   $school_name = "";
-  if (function_exists('schools_menu')) {    
+  if (module_enabled("schools")) {    
     $school_name = schools_get_school_name_for_id($school_id);
   }
     

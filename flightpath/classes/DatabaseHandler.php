@@ -1044,7 +1044,7 @@ class DatabaseHandler extends stdClass
   
   
   
-  function get_course_id($subject_id, $course_num, $catalog_year = "", $bool_use_draft = false, $school_id = 0)
+  function get_course_id($subject_id, $course_num, $catalog_year = "", $bool_use_draft = false, $school_id = 0, $bool_check_allow_default_school = FALSE)
   {
     // Ignore the colon, if there is one.
     if (strpos($course_num,":"))
@@ -1054,13 +1054,24 @@ class DatabaseHandler extends stdClass
       $course_num = trim($temp[0]);
     }
 
+    $params = array();
+
+    $school_line = " AND school_id = :school_id ";
+    
+    // Should we ALSO check the default school, in addition to whatever we specified?  Don't bother if what we specified was the default school.
+    if ($bool_check_allow_default_school && module_enabled('schools') && variable_get('schools_allow_courses_from_default_school', 'yes') === 'yes' && $school_id != 0) {
+      $school_line = " AND (school_id = :school_id OR school_id = 0) ";
+    }
+    
     
     // Always override if the global variable is set.
     if (@$GLOBALS["fp_advising"]["bool_use_draft"] == true) {
       $bool_use_draft = true;
     }
     
+
     
+        
     $catalog_line = "";
 
     if ($catalog_year != "")
@@ -1072,12 +1083,17 @@ class DatabaseHandler extends stdClass
     $table_name = "courses";
     if ($bool_use_draft){$table_name = "draft_$table_name";}
     
+    $params[':subject_id'] = $subject_id;
+    $params[':course_num'] = $course_num;
+    $params[':school_id'] = $school_id;    
+    
+    
     $res7 = $this->db_query("SELECT course_id FROM $table_name
-              WHERE subject_id = ?
-              AND course_num = ?
-              AND school_id = ?
+              WHERE subject_id = :subject_id
+              AND course_num = :course_num
+              $school_line
               $catalog_line
-               ORDER BY catalog_year DESC LIMIT 1 ", $subject_id, $course_num, $school_id) ;
+               ORDER BY catalog_year DESC LIMIT 1 ", $params) ;
     if ($this->db_num_rows($res7) > 0)
     {
       $cur7 = $this->db_fetch_array($res7);

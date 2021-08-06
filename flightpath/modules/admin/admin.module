@@ -875,7 +875,7 @@ function admin_advising_settings_form($school_id = 0) {
   $school_id = intval($school_id);
   
   $fs = "";  // The field name suffix.  We will add this to the end of all of our field names.  If this is the default school, leave blank.
-  if (function_exists('schools_menu')) {
+  if (module_enabled("schools")) {
     $school_name = schools_get_school_name_for_id($school_id);
     fp_set_title(t("Edit %school school advising settings", array('%school' => $school_name)));
     if ($school_id !== 0) {
@@ -1616,7 +1616,7 @@ function admin_display_main() {
   $rtn .= fp_render_section_title("Advising Settings", "admin-advising-settings");
     
   $defs = array(0 => '');
-  if (function_exists('schools_menu')) {
+  if (module_enabled("schools")) {
     $defs = schools_get_school_definitions();
   }
   

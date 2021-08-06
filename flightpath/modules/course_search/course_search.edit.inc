@@ -33,7 +33,7 @@ function course_search_edit_course_details_form() {
 
   
   $school_code = "School #" . $school_id;
-  if (function_exists('schools_menu')) {
+  if (module_enabled("schools")) {
     $school_code = schools_get_school_code_for_id($school_id);
   }
 
@@ -389,7 +389,7 @@ function course_search_display_edit_courses()
   }
   
   
-  if (function_exists('schools_menu')) {  // The schools module is enabled.  We need to first ask what school we want to look at. 
+  if (module_enabled("schools")) {  // The schools module is enabled.  We need to first ask what school we want to look at. 
     
     $rtn .= "<div class='current-school'>" . t("Current school: ") . "<strong>" . schools_get_school_name_for_id($school_id) . "</strong>
                      - " . l(t("Change?"), "tools/course-search") . "</div><br>";
@@ -489,7 +489,7 @@ function course_search_display_edit_courses()
 		// a syllabus and/or schedule entered?
 		
 		$school = "#" . $cur['school_id'];
-		if (function_exists('schools_menu')) {
+		if (module_enabled("schools")) {
 		  $school = schools_get_school_code_for_id($school_id);
     }
 		

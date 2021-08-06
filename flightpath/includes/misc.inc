@@ -407,7 +407,7 @@ function fp_mail($to, $subject, $msg, $bool_html = FALSE, $attachments = array()
     
   // TODO: In the future, check to see if there are any other modules which invoke a hook to intercept mail.
   
-  if (function_exists('smtp_mail')) {
+  if (module_enabled('smtp')) {
     smtp_mail($to, $subject, $msg, $bool_html, $attachments, $bool_string_attachment);
     return;
   }
@@ -1982,12 +1982,18 @@ function fp_screen_is_mobile(){
 
 
 
-////////////////////////////////////////////////////////////////////
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Simple function that returns TRUE if the module is enabled, FALSE otherwise.
+ * 
+ * We also will use our existing GLOBALS cache. 
+ */
+function module_enabled($module_name) {
+    
+  return (isset($GLOBALS["fp_system_settings"]["modules"][$module_name]));
+  
+}
 
 
 

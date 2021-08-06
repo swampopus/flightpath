@@ -425,7 +425,7 @@ function prereqs_get_prereq_array_from_string($prereqs_str, $school_id = 0) {
       }
       
       // Okay, now that we have the subject_id and course_num, let's find the course_id (if it exists).
-      $course_id = $db->get_course_id($subject_id, $course_num, '', FALSE, $school_id);
+      $course_id = $db->get_course_id($subject_id, $course_num, '', FALSE, $school_id, TRUE);
       
       // Okay, add to our return array.
       $rtn[$c][] = array(

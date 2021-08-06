@@ -1182,8 +1182,8 @@ function schools_administer_schools_form() {
     "type" => "markup",
     "value" => t("Schools can be divisions within your institution (ex: School of Nursing, School of Pharmacy, etc), distinct campuses
                   (ex:  Washington Campus, South Campus, etc), or divisions of graduate level (Undergrad, Graduate).
-                  The default school is simply called 'Default' and all users and degree data will be placed under the Default school, in addition
-                  to other schools you may set the degree, user, etc., to.  If you are unsure what to do, <b>leave this page blank</b>.")
+                  The default school is simply called 'Default' and all users and degree data will be placed under the Default school unless otherwise specified.  
+                  <br>If you are unsure what to do, <b>leave this page blank</b>.")
                 . "<br><br><b>" . t("Schools:") . "</b>
                 
                 <table class='advisees-alerts' style='margin-left: 10px;' cellpadding=5>
@@ -1245,9 +1245,32 @@ function schools_administer_schools_form() {
                         
   );
   
+  
+  $form['schools_allow_courses_from_default_school'] = array(
+    'type' => 'select',
+    'label' => t("Allow courses (in degrees and groups) from the Default school as well as their assigned school?"),
+    'options' => array('yes' => t('Yes (default)'), 'no' => t('No')),
+    'hide_please_select' => TRUE,
+    'value' => variable_get('schools_allow_courses_from_default_school', 'yes'),
+    'description' => t("This setting has a <b>very powerful</b> implication.  
+                        <br>&bull; If set to 'No', it means that degrees and groups must <b>only</b> use
+                        courses belonging to the same school as them.  For example, this is useful if you have multiple institutions within FlightPath, 
+                        each with a course named ENGL 101, and you need to be explicit about <em>which</em> ENGL 101 you mean.
+                        
+                        <br>&bull; If set to 'Yes', it means that degrees and groups will allow courses from their same school <b>as well as</b> courses
+                        from the Default school.  This is good if you keep the majority of your courses under Default, and have <em>no duplicates
+                        across schools</em>.  For example, if you have separate schools for 'School of Business' and 'School of Nursing' at the same institution, then
+                        a course like ENGL 101 might be used by degrees in both schools.  So, ENGL 101 would be placed in the Default school.
+                                                
+                        <br>
+                        If you are unsure what to select, choose 'Yes'."),
+                        
+  );
+  
+  
   $form["submit"] = array(
     "type" => "submit",
-    "value" => t("Add new"),
+    "value" => t("Submit"),
   );  
   
   return $form;
@@ -1258,6 +1281,10 @@ function schools_administer_schools_form() {
 function schools_administer_schools_form_submit($form, $form_state) {
   $values = $form_state["values"];
 
+  variable_set("schools_allow_courses_from_default_school", $values["schools_allow_courses_from_default_school"]);
+  
+  fp_add_message(t("Settings saved successfully."));
+  
   if (trim($values["new_school"]) != "") {
     $new_school = trim($values["new_school"]);
     

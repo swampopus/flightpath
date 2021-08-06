@@ -1045,11 +1045,11 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
                 <img src='$image_url' class='student-profile-image' />
               </div> <!-- profile-image -->              
               ";
-  }
+  } 
   
   
   $school_html = $school_name = "";
-  if (function_exists("schools_menu")) {
+  if (module_enabled("schools")) {
     // If we have schools module enabled, let's find out what school this student belongs to and display it
     $defs = schools_get_school_definitions(TRUE);
     $temp = @$defs[$student->school_id];

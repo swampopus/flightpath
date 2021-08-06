@@ -296,7 +296,7 @@ function admin_courses_list_filter_form() {
   
   
   // If we have enabled the schools module, then have a selector for that as well
-  if (function_exists('schools_get_schools_for_fapi')) {
+  if (module_enabled('schools')) {
   
     $filter_school_value = @intval($_SESSION['courses_filter_school']);
     $options = schools_get_schools_for_fapi(TRUE, TRUE, 'course', TRUE);

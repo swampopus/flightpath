@@ -10,7 +10,7 @@ function admin_display_degrees_popup_add_group2() {
   
   $school_name = "";
   if ($school_id > 0) $school_name = " School-" . $school_id;
-  if (function_exists("schools_menu")) {
+  if (module_enabled("schools")) {
     $defs = schools_get_school_definitions();
     if (isset($defs[$school_id])) $school_name = $defs[$school_id];
   }
@@ -208,7 +208,7 @@ function admin_copy_degree_form_validate($form, $form_state) {
   $include_tracks = $values["include_tracks"]["yes"];  
   
   $for_school = $school_name = "";
-  if (function_exists('schools_menu')) {
+  if (module_enabled("schools")) {
     $for_school = " for school %school";
     $source_school_name = schools_get_school_name_for_id($school_id);
     $dest_school_name = schools_get_school_name_for_id($destination_school_id);
@@ -418,7 +418,7 @@ function admin_copy_degree_form_submit($form, &$form_state) {
    
 
   $for_school = $school_name = "";
-  if (function_exists('schools_menu')) {
+  if (module_enabled("schools")) {
     $for_school = " for school %school";
     $school_name = schools_get_school_name_for_id($destination_school_id);
   }     
@@ -595,7 +595,7 @@ function admin_add_degree_form_validate($form, $form_submit) {
 
 
   $for_school = $school_name = "";
-  if (function_exists('schools_menu')) {
+  if (module_enabled("schools")) {
     $for_school = " for school %school";
     $school_name = schools_get_school_name_for_id($school_id);
   }
@@ -650,7 +650,7 @@ function admin_add_degree_form_submit($form, $form_submit) {
 
 
   $for_school = $school_name = "";
-  if (function_exists('schools_menu')) {
+  if (module_enabled("schools")) {
     $for_school = " for school %school";
     $school_name = schools_get_school_name_for_id($school_id);
   }
@@ -966,7 +966,7 @@ function admin_degrees_list_filter_form() {
   
   
   // If we have enabled the schools module, then have a selector for that as well
-  if (function_exists('schools_get_schools_for_fapi')) {
+  if (module_enabled('schools')) {
     $filter_school_value = @intval($_SESSION['degrees_filter_school']);
     $options = schools_get_schools_for_fapi(TRUE, TRUE, 'degree', TRUE);
     $options[0] = t('- All / Default -');
@@ -1651,7 +1651,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
   
   // At this point, we have a school_id and degree_id.
   
-  if (function_exists("schools_menu")) {            
+  if (module_enabled("schools")) {            
     $defs = schools_get_school_definitions();          
     $school_name = $defs[$school_id];
   }  
@@ -1724,7 +1724,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
 
       /////////////////////////////////////////////
       // Find out what the course_id is.
-      if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id))  // don't care about catalog year.
+      if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id, TRUE))  
       {
         // This was found correctly, do nothing.
       } 
@@ -1732,10 +1732,10 @@ function admin_edit_degree_form_validate($form, &$form_state) {
         // The course_id could not be found!
         
         // Different message if it's a school_id problem.
-        if (function_exists("schools_menu")) {          
+        if (module_enabled("schools")) {          
           form_error("courses_" . $semester_num, t("<strong>Your work has NOT been saved.</strong> Course not found.  In block %blocknum, you specified the course %course as a requirement,
                           but this course could not be found.  This could be due to a typo, or due to the course not belonging to the same school
-                          as the degree (%schoolname) or the Default school.  Please check the course and try again.", array("%blocknum" => ($semester_num+1), "%course" => "$subject_id $course_num", "%schoolname" => $school_name)));
+                          as the degree (%schoolname).  Please check the course and try again.", array("%blocknum" => ($semester_num+1), "%course" => "$subject_id $course_num", "%schoolname" => $school_name)));
         }
         else {
           // Not related to school (possibly).
@@ -1853,7 +1853,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
     if ($group_id->school_id != $school_id && $group_id->school_id !== 0) {
       
       form_error("semester_groups_" . $semester_num . "_markup", t("<strong>Your work has NOT been saved.</strong> In block %blocknum, you specified the group %group as a requirement,
-                          but this group could not be found in the degree's school (%schoolname) or the Default school.<br>You may need to change the degree's school back to its previous value, then remove this group,
+                          but this group could not be found in the degree's school (%schoolname).<br>You may need to change the degree's school back to its previous value, then remove this group,
                           in order to continue.", array("%blocknum" => ($semester_num+1), "%group" => $adding_group->title, "%schoolname" => $school_name)));
       
     }
@@ -2143,7 +2143,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
       /////////////////////////////////////////////
       // Okay, we now have enough information to insert the course.
       // Find out what the course_id is.
-      if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id))  // don't care about catalog year.
+      if ($course_id = $db->get_course_id($subject_id, $course_num, "", TRUE, $school_id, TRUE)) 
       {
         $query = "INSERT INTO draft_degree_requirements
                     (degree_id, semester_num, course_id, course_min_grade, course_requirement_type, data_entry_value)

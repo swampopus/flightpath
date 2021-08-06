@@ -1,6 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-08-06
+  Added new module_enabled() function to misc, which, due to caching, will make it faster to see if a module
+  is enabled or not, rather than using function_exists().  Updated various files to use this new function instead
+  of function_exists()
+
+  Added new setting to schools where courses from the "default" school can be used in non-default degrees and groups.
+
+
 2021-08-05
   Added styling for "date" and "time" form element types.
   

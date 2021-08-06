@@ -1043,7 +1043,7 @@ function system_school_data_form($school_id = 0) {
   $school_id = intval($school_id);
   
   $fs = "";  // The field name suffix.  We will add this to the end of all of our field names.  If this is the default school, leave blank.
-  if (function_exists('schools_menu')) {
+  if (module_enabled("schools")) {
     $school_name = schools_get_school_name_for_id($school_id);
     fp_set_title(t("Configure %school school settings", array('%school' => $school_name)));
     if ($school_id !== 0) {
@@ -3435,7 +3435,7 @@ function system_display_dashboard_page () {
     $url = fp_url("render-advising-snapshot-for-iframe", "window_mode=popup");
     
     // Show slightly different if we have the schools module enabled
-    if (function_exists('schools_menu')) {      
+    if (module_enabled("schools")) {      
       $advising_term_desc = "Current Terms";
       
       // Get all the school ids this user is allowed to search.
@@ -3572,7 +3572,7 @@ function system_render_advising_snapshop_for_iframe() {
     
     // If we have more than one school, then we should also display a selector which auto-submits when changed.
     $school_selector_html = "";
-    if (count($school_ids) > 1 && function_exists('schools_menu')) {
+    if (count($school_ids) > 1 && module_enabled("schools")) {
       fp_add_js(fp_get_module_path("system") . "/js/snapshot.js");
       
       $url = fp_url("render-advising-snapshot-for-iframe");
