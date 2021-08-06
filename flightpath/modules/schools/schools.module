@@ -1266,7 +1266,7 @@ function schools_administer_schools_form() {
                         If you are unsure what to select, choose 'Yes'."),
                         
   );
-  
+    
   
   $form["submit"] = array(
     "type" => "submit",
