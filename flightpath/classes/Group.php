@@ -552,7 +552,7 @@ class Group extends stdClass
 		$this->school_id = intval($cur["school_id"]);
 
 
-		if ($this->group_id == -88)
+		if ($this->group_id == DegreePlan::GROUP_ID_FOR_COURSES_ADDED)
 		{
 			$this->title = "Add an Additional Course";
 		}

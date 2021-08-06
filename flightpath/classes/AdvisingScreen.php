@@ -3273,18 +3273,23 @@ function draw_menu_items($menu_array) {
                               "required-by-degree-level-" . fp_get_machine_readable($dlevel)),
           'css_dtitle' => $css_dtitle,
           'degree_id' => $req_by_degree_id,
-          'html' => "<span class='req-by-label'>" . t("Required by") . "</span> <span class='req-by-degree-title'>$dtitle</span>",
+          'required_by_html' => "<span class='req-by-label'>" . t("Required by") . "</span> <span class='req-by-degree-title'>$dtitle</span>",
           'view_by' => 'year',
         );
 
+        
+        // Don't display if we are in the Courses Added semester, or if we are NOT a "combined" degree.
+        if ($semester->semester_num == DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED || (is_object($this->degree_plan)) && !$this->degree_plan->is_combined_dynamic_degree_plan) {
+          $theme['required_by_html'] = '';
+        }
+
         invoke_hook("theme_advise_degree_header_row", array(&$theme));        
           
-  
-        // TODO:  Possibly don't display this if we only have one degree chosen?      
-        $pC .= "<tr><td colspan='8'>
-                  <div class='" . implode(' ',$theme['classes']) ."'>{$theme['html']}</div>
-                </td></tr>";      
-        
+        if ($theme['required_by_html']) {
+          $pC .= "<tr><td colspan='8' class='required-by-td'>
+                    <div class='" . implode(' ',$theme['classes']) ."'>{$theme['required_by_html']}</div>
+                  </td></tr>";      
+        }
          
         $pC .= $content;
       }

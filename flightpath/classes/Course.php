@@ -717,6 +717,7 @@ class Course extends stdClass
 
     $this->assigned_to_semester_num =   $temp[1];
     $this->assigned_to_group_ids_array  =   fp_explode_assoc($temp[2]);
+    
     $this->bool_advised_to_take   =     (bool) $temp[3];
     $this->specified_repeats    =   $temp[4];
     $this->bool_specified_repeat  =   (bool) $temp[5];
@@ -2053,15 +2054,6 @@ class Course extends stdClass
     // Otherwise, return x   
     return $x;     
     
-  }
-
-
-  /**
-   * Similar to get_first_sassigned_to_group_id, except this time we want to the first group_id
-   * that "belongs" to a certain degree.
-   * 
-   */
-  function get_first_assigned_to_group_id_from_degree_id($degree_id = 0) {
   }
 
 

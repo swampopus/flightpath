@@ -10,6 +10,12 @@ FlightPath 6.x Changelog
 
   Added create table instructions to enagagements.install for required tables.
    
+  Modified the fp_join_assoc() and explode functions to use a separator of _S- instead of just - (since we might be sending negative numbers).
+  
+  Removed bug where "Substitute" tab was showing in popup even on "courses added".
+  
+  Removed "Required by" text/line if we are in the Courses Added block, or if we are looking at a degree with only one "degree" (not combined).
+  
 
 2021-08-05
   Added styling for "date" and "time" form element types.

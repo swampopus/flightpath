@@ -1013,7 +1013,7 @@ function advise_display_popup_group_select() {
   
   
   
-  if ($group_id == -88) { 
+  if ($group_id == DegreePlan::GROUP_ID_FOR_COURSES_ADDED) { 
     // This is the Add a Course group.  We must initialize it, as it
     // does not exist yet.
     // We need to populate this group now.
@@ -1060,7 +1060,7 @@ function advise_display_popup_group_select() {
     $tab_array[1]["active"] = true;
 
     // If we are allowed to substitute....
-    if (user_has_permission("can_substitute") && $group_id != -88 && !$screen->bool_blank) {
+    if (user_has_permission("can_substitute") && $group_id != DegreePlan::GROUP_ID_FOR_COURSES_ADDED && !$screen->bool_blank) {
       $tab_array[2]["title"] = "Substitute";
       $tab_array[2]["on_click"] = "popupSubstituteSelected(\"0\",\"$group_id\",\"$semester_num\",\"$req_by_degree_id\",\"group_hours_remaining=$group_hours_remaining\");";
     }
@@ -1079,14 +1079,14 @@ function advise_display_popup_group_select() {
     $tab_array[1]["on_click"] = "popupBackToGroupSelect(\"$course_id\",\"$group_id\",\"$semester_num\",\"req_by_degree_id=$req_by_degree_id&selected_subject=$subject&group_hours_remaining=$group_hours_remaining&blank_degree_id=$blank_degree_id\");";
 
     // If we are allowed to substitute....
-    if (user_has_permission("can_substitute") && $group_id != -88 && !$screen->bool_blank) {
+    if (user_has_permission("can_substitute") && $group_id != DegreePlan::GROUP_ID_FOR_COURSES_ADDED && !$screen->bool_blank) {
       $tab_array[2]["title"] = "Substitute";
       $tab_array[2]["on_click"] = "popupSubstituteSelected(\"$course_id\",\"$group_id\",\"$semester_num\",\"$req_by_degree_id\",\"group_hours_remaining=$group_hours_remaining\");";
     }
    
 
   }
-
+ 
   if ($tab_array) {
     fp_set_page_tabs($tab_array);
   }
@@ -1163,7 +1163,8 @@ function advise_display_popup_course_description() {
   $tab_array = array();
   $tab_array[0]["title"] = "Description";
   $tab_array[0]["active"] = true;
-  if (user_has_permission("can_substitute") && !$screen->bool_blank) {
+    
+  if (user_has_permission("can_substitute") && !$screen->bool_blank && intval($course->get_first_assigned_to_group_id()) != DegreePlan::GROUP_ID_FOR_COURSES_ADDED) {
     if ($course->get_bool_substitution() != TRUE && $course->grade == "") {
       
       // By checking grade, we are making sure this course has NOT already

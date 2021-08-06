@@ -1540,12 +1540,14 @@ function fp_add_js($js, $type = "file") {
 /**
  * This function will create a string from a 1 dimensional assoc array.
  * Ex:   arr = array("pet" => "dog", "name" => "Rex")
- *      will return:    pet-dog,name-Rex    under the default settings.
+ *      will return:    pet_S-dog,name_S-Rex    under the default settings.
+ * 
+ * The separator is meant to be a string extremely unlikely to be used in the key or values.
  * 
  * Use the fp_explode_assoc function to piece it back together.
  * @see fp_explode_assoc
  */
-function fp_join_assoc($arr, $glue = ",", $assign_sep = "-") {
+function fp_join_assoc($arr, $glue = ",", $assign_sep = "_S-") {
   $rtn = "";
   
   foreach ($arr as $key => $val) {
@@ -1560,10 +1562,12 @@ function fp_join_assoc($arr, $glue = ",", $assign_sep = "-") {
 
 /**
  * Takes a string (created by fp_join_assoc()) and re-creates the 1 dimensional assoc array.
- *
+ * 
+ * The separator is meant to be a string extremely unlikely to be used in the key or values.
+ * 
  * @see fp_join_assoc()
  */
-function fp_explode_assoc($string, $delim = ",", $assign_sep = "-") {
+function fp_explode_assoc($string, $delim = ",", $assign_sep = "_S-") {
   $rtn = array();
   
   $temp = explode($delim, $string);

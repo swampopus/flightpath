@@ -198,19 +198,19 @@ class Student extends stdClass
 		// The "Add a Course" box on screen is really just a
 		// semester, with the number -88, with a single group,
 		// also numbered -88.
-		$this->semester_courses_added = new Semester(-88);
+		$this->semester_courses_added = new Semester(DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED);
 		$this->semester_courses_added->title = "Courses Added by Advisor";
 
 		// Now, we want to add the Add a Course group...
 		$g = new Group();
-		$g->group_id = -88;
+		$g->group_id = DegreePlan::GROUP_ID_FOR_COURSES_ADDED;
 		// Since it would take a long time during page load, we will
 		// leave this empty of courses for now.  It doesn't matter anyway,
 		// as we will not be checking this group for course membership
 		// anyway.  We only need to load it in the popup.
 		$g->hours_required = 99999;  // Nearly infinite selections may be made.
-		$g->assigned_to_semester_num = -88;
-		$g->title = "Add an Additional Course";
+		$g->assigned_to_semester_num = DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED;
+		$g->title = t("Add an Additional Course");
 
 		$this->semester_courses_added->list_groups->add($g);
 

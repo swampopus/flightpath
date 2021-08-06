@@ -136,7 +136,7 @@ class AdvisingScreenTypeView extends AdvisingScreen
     while($list_semesters->has_more())
     {
       $semester = $list_semesters->get_next();
-      if ($semester->semester_num == -88)
+      if ($semester->semester_num == DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED)
       { // These are the "added by advisor" courses.  Skip them.
         continue;
       }
@@ -154,7 +154,7 @@ class AdvisingScreenTypeView extends AdvisingScreen
       $semester->list_courses->reset_counter();
       $sem_is_empty = true;
       $html = array();
-      $sem_rnd = rand(0,9999);
+      $sem_rnd = rand(0,99999);
       $pC .= "<tr><td colspan='4' class='tenpt'>
           <span class='advise-type-view-sem-title'><!--SEMTITLE$sem_rnd--></span></td></tr>";
       while($semester->list_courses->has_more())
@@ -277,10 +277,9 @@ class AdvisingScreenTypeView extends AdvisingScreen
         
       }
       
-      // Sort by the first index, the advising weight.   
-      //fpm($new_html); 
+      // Sort by the first index, the advising weight.
       ksort($new_html);
-      //fpm($new_html);
+      
       
       
       
@@ -328,17 +327,23 @@ class AdvisingScreenTypeView extends AdvisingScreen
                                 ),
             'css_dtitle' => $css_dtitle,
             'degree_id' => $req_by_degree_id,
-            'html' => "<span class='req-by-label'>" . t("Required by") . "</span> <span class='req-by-degree-title'>$dtitle</span>",
+            'required_by_html' => "<span class='req-by-label'>" . t("Required by") . "</span> <span class='req-by-degree-title'>$dtitle</span>",
             'view_by' => 'type',
           );
   
           invoke_hook("theme_advise_degree_header_row", array(&$theme));        
             
     
-          // TODO:  Possibly don't display this if we only have one degree chosen?      
-          $pC .= "<tr><td colspan='8'>
-                    <div class='" . implode(' ',$theme['classes']) ."'>{$theme['html']}</div>
-                  </td></tr>";      
+          // Don't display if we are in the Courses Added semester, or if we are NOT a "combined" degree.
+          if ($semester->semester_num == DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED || (is_object($this->degree_plan)) && !$this->degree_plan->is_combined_dynamic_degree_plan) {
+            $theme['required_by_html'] = '';
+          }
+    
+          if ($theme['required_by_html']) {          
+            $pC .= "<tr><td colspan='8'>
+                      <div class='" . implode(' ',$theme['classes']) ."'>{$theme['required_by_html']}</div>
+                    </td></tr>";      
+          }
           
           $pC .= $content;
         }
