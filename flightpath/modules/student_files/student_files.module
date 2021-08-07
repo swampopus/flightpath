@@ -179,7 +179,7 @@ function student_files_upload_any_student_files_form_validate($form, &$form_stat
   $db = get_global_database_handler();
   
   // Re-order the _FILES array to make it easier to work with
-  $student_files = fp_re_array_files($_FILES["student_files"]);  
+  $student_files = fp_re_array_files($_FILES["student_files"]);
   $form_state["student_files"] = $student_files;
   
   // Make sure if "manual" is selected, that the CWID entered actually exists.
@@ -456,6 +456,8 @@ function student_files_handle_upload($student_id, $bool_goto_history_when_done =
   
   if (count($file) == 0) {
     $file = $_FILES["student_file_upload_file"];
+    $temp = fp_re_array_files($file);
+    $file = $temp[0];
     $access_type = $_POST["access_type"];
   }
   

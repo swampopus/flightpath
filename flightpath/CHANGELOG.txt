@@ -16,6 +16,8 @@ FlightPath 6.x Changelog
   
   Removed "Required by" text/line if we are in the Courses Added block, or if we are looking at a degree with only one "degree" (not combined).
   
+  Fixed bug with student_files which was preventing file uploads.
+  
 
 2021-08-05
   Added styling for "date" and "time" form element types.
