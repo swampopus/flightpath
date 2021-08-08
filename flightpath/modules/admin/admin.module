@@ -996,7 +996,7 @@ function admin_apply_draft_changes_form() {
     "type" => "password",
     "label" => t("For added security, you must enter the Apply Draft Changes password:"),
     "required" => TRUE,
-    "description" => t("This is a password set up in FlightPath's settings, to provide an extra layer
+    "description" => t("This is a password set up in FlightPath's System Settings, to provide an extra layer
                         of security for this powerful action."),
         
   );
@@ -1004,7 +1004,8 @@ function admin_apply_draft_changes_form() {
   $form["submit"] = array(
     "type" => "submit",
     "value" => t("Submit"),
-    "description" => t("This action may take several seconds to complete!  Click only ONCE!"),
+    "spinner" => TRUE,
+    "description" => t("Note: This action may take several seconds to complete. Do not close this tab or refresh the browser."),
     "prefix" => "<hr>",
   );
   

@@ -271,11 +271,24 @@ function draw_menu_items($menu_array) {
    */
   function output_to_browser()
   {
-    global $user;
+    global $user, $current_student_id;
     // This method will output the screen to the browser.
     // outputs the $page_content variable.
-
+    
+    // Figure out our school id.
+    
     $school_id = $user->school_id;
+    if ($current_student_id) {
+      $school_id = db_get_school_id_for_student_id($current_student_id);
+    }    
+    else if (isset($this->student) && is_object($this->student)) {
+      $school_id = $this->student->school_id;
+    }
+    else if (isset($this->degree_plan) && is_object($this->degree_plan)) {
+      $school_id = $this->degree_plan->school_id;
+    }
+    
+    
     
     $theme_location = fp_theme_location();  // file location of the theme folder
   
@@ -331,6 +344,12 @@ function draw_menu_items($menu_array) {
 
     if ($page_is_popup) {
       $page_body_classes .= " page-is-popup";
+    }
+
+    
+    $page_body_classes .= " school-id-" . $school_id;
+    if (module_enabled('schools')) {
+      $page_body_classes .= " school-code-" . schools_get_school_code_for_id($school_id);
     }
 
           

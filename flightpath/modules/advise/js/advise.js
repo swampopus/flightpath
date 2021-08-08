@@ -971,7 +971,7 @@ function toggleDisabledChangeTerm(x,y,termDescription) {
   var t = "";
   t = t + "This course was advised for the " + termDescription + ". ";
   t = t + "It cannot be unselected from here.  Please first change the Currently Advising term to \"" + termDescription + "\"";
-  t = t + " by clicking the [change] link near the top of the page. ";
+  t = t + " by clicking the <em>Advising Term</em> <i class='fa fa-pencil'></i> icon near the top of the page. ";
 
   fp_alert(t);
 }
