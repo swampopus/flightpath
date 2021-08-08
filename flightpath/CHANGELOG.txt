@@ -14,6 +14,9 @@ FlightPath 6.x Changelog
   Made it so that when setting attributes on a form element, it must always be in the form of an array.  Updated various files
   throughout FlightPath to make sure that was the case.
   
+  Added new file, cli.php.  It's a command-line-only file.  At the moment, all it can do is clear the system's cache, but more commands
+  will be added eventually.
+  
 
 2021-08-06
   Added new module_enabled() function to misc, which, due to caching, will make it faster to see if a module
