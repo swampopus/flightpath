@@ -425,12 +425,17 @@ function student_search_get_majors_for_fapi() {
     $school_name = "";
     if (module_enabled("schools")) {
       $school_name = schools_get_school_name_for_id($cur->school_id);
+      // Getting fancy.  We are going to have optgroup in this set of options.
+      $rtn[$school_name][$cur->major_code . "~~school_" . $cur->school_id] = "$cur->major_code : $title ({$degree_class_details["title"]})";
+    }
+    else {
+      $rtn[$cur->major_code . "~~school_" . $cur->school_id] = "$cur->major_code : $title ({$degree_class_details["title"]})";
     }
     
     //$rtn .= "<option value='$cur->major_code' $sel>$cur->major_code : $title ({$degree_class_details["title"]})</option>";
     
-    // Getting fancy.  We are going to have optgroup in this set of options.
-    $rtn[$school_name][$cur->major_code . "~~school_" . $cur->school_id] = "$cur->major_code : $title ({$degree_class_details["title"]})";
+    
+    
     
     
   }    
@@ -651,6 +656,7 @@ function student_search_search_form() {
   
   // Also show the majors as a list.
   $options = array('' => t(" - All Majors -")) + student_search_get_majors_for_fapi();
+  
   $form['major_code'] = array(
     'label' => t('Search within major:'),
     'type' => 'select',
