@@ -354,7 +354,7 @@ function user_student_list_filter_form() {
   $form['filter_name'] = array(
     'type' => 'textfield',
     'label' => '',
-    'attributes' => "placeholder='" . t("Nname or CWID") . "'",    
+    'attributes' => array("placeholder=" => t("Nname or CWID")),    
     'value' => $filter_name_value,
     'size' => 20,
     'weight' => 10,

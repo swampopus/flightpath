@@ -729,8 +729,8 @@ function admin_edit_group_form() {
                               
   );
   // if a definition was specified, we need to disable the courses textarea.
-  if (trim($group->definition)) {
-    $form["courses"]["attributes"] = "readonly=readonly style='background-color: #ccc;' ";
+  if (trim($group->definition)) {    
+    $form["courses"]["attributes"] = array("readonly"=>"readonly", "style" => "background-color: #ddd;'" );
     $form["courses"]["prefix"] = "<div class='admin-groups-courses-disabled'>
                                  " . t("Note: Because a definition was specified, you cannot directly
                                       edit the Required Courses.  Manage these courses using the
@@ -974,7 +974,7 @@ function admin_get_courses_from_definition($definition, $catalog_year = "", $sch
     // and some course data (possibly wild cards) to act on.
     //debugCT("$instruction $subject_data $course_numData");
 
-    $t_array = admin_get_course_array_from_definition_data($subject_data, $course_numData, $catalog_year, $school_id);
+    $t_array = admin_get_course_array_from_definition_data($subject_data, $course_numData, $catalog_year, $school_id, TRUE);
     // Okay, we got our list.  Now what do we do with them?
     if ($instruction == "add" || $instruction == "+")
     {
@@ -1044,7 +1044,7 @@ function admin_get_courses_from_definition($definition, $catalog_year = "", $sch
 
 
 
-function admin_get_course_array_from_definition_data($subject_data, $course_numData, $catalog_year = "", $school_id = 0) {
+function admin_get_course_array_from_definition_data($subject_data, $course_numData, $catalog_year = "", $school_id = 0, $bool_check_allow_default_school = FALSE) {
   
    // Looks at the subjectData and course_numData fields, and constructs
   // a query to pull our every course which matches it.
@@ -1054,23 +1054,35 @@ function admin_get_course_array_from_definition_data($subject_data, $course_numD
   $si = str_replace("*","%",$subject_data);
   $cn = str_replace("*","%",$course_numData);
 
+  $params = array();
+
+
   $catalog_line = "";
   if ($catalog_year != "") {
-    $catalog_line = "AND catalog_year = '$catalog_year'";
+    $catalog_line = "AND catalog_year = :catalog_year";
+    $params[":catalog_year"] = $catalog_year;
   }
 
-  
+  $school_line = " AND school_id = :school_id ";
+  // Should we ALSO check the default school, in addition to whatever we specified?  Don't bother if what we specified was the default school.
+  if ($bool_check_allow_default_school && module_enabled('schools') && variable_get('schools_allow_courses_from_default_school', 'yes') === 'yes' && $school_id != 0) {
+    $school_line = " AND (school_id = :school_id OR school_id = 0) ";
+  }  
+
+  $params[':subject_id'] = $si;
+  $params[':course_num'] = $cn;
+  $params[':school_id'] = $school_id;    
+
   
   $query = "SELECT * FROM draft_courses
-        WHERE 
-          subject_id LIKE ?
-        AND course_num LIKE ?
-        AND course_id > 0
-        AND school_id = ?
-        $catalog_line
-        GROUP BY subject_id, course_num
+              WHERE subject_id LIKE :subject_id
+              AND course_num LIKE :course_num
+              AND course_id > 0
+              $school_line
+              $catalog_line
+              GROUP BY subject_id, course_num
         ";
-  $res = db_query($query, $si, $cn, $school_id) ;
+  $res = db_query($query, $params) ;
   while ($cur = db_fetch_array($res)) {
     $course_id = $cur["course_id"];
     
@@ -1486,7 +1498,7 @@ function admin_groups_list_filter_form() {
     'type' => 'textfield',
     'label' => '',
     'value' => $filter_name_value,
-    'attributes' => "placeholder='" . t("Enter any title or name") . "'",
+    'attributes' => array("placeholder" => t("Enter any title or name")),
     'size' => 20,
     'weight' => 10,
   );
@@ -1570,8 +1582,9 @@ function admin_process_all_definitions_form() {
 
   $form["submit"] = array(
     "type" => "submit",
+    "spinner" => TRUE,
     "value" => t("Process groups"),
-    "description" => t("Can take several minutes to run. Only click once!"),
+    "description" => t("Can take several minutes to run. Do not navigate away from this tab or close the browser."),
   );
      
 
