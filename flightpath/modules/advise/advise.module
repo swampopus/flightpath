@@ -1796,14 +1796,14 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
           if ($k == $v && $k != "") {
             // YES.  It was selected!
             $selected_for[$major_code . "__" . $degree_class]++;
-            $selected_tracks++;          
+                  
           }
         }
       } // if is_array (val)
       else if (is_string($val) && trim($val) != ""){
         // Not an array-- was a radio list?  So, this was a selection.
         $selected_for[$major_code . "__" . $degree_class]++;
-        $selected_tracks++;        
+                
       }
       
     }
@@ -1854,7 +1854,7 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
       return;
     }
     
-    
+    $selected_tracks += $count;
     
     
   } // foreach

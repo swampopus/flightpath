@@ -30,6 +30,7 @@ require_once("bootstrap.inc");
 $GLOBALS["fp_die_mysql_errors"] = TRUE;
 
 
+// Get the command being issued to the script.  Ex: php cli.php COMMAND
 $command_one = trim($argv[1]);
 
 

@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-08-09
+  Fixed bug with What If limit on selections; wasn't counting tracks correctly.
+  
+
 2021-08-08
   Added the school_id and school_code to body class when viewing students.  The idea is to help CSS developers down the road.
   
@@ -8,7 +12,7 @@ FlightPath 6.x Changelog
   
   Added "spinner" property to apply draft changes button, changed description text as well.
   
-  Fixed bug in editing group definitipns where it was not respecting the new setting which allows "default" courses as well.
+  Fixed bug in editing group definitions where it was not respecting the new setting which allows "default" courses as well.
   Also it was not properly disabling the Required Courses textarea, as it was using a String and not an Array for attributes.
   
   Made it so that when setting attributes on a form element, it must always be in the form of an array.  Updated various files
