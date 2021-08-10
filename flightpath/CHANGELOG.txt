@@ -6,6 +6,8 @@ FlightPath 6.x Changelog
   
   Added more logging (including WATCHDOG_DEBUG) throughout FlightPath to make it easier to track activity.
   
+  Added more time to setting to keep DEBUG entries, as well as wrapped more strings in t().
+  
 
 2021-08-09
   Fixed bug with What If limit on selections; wasn't counting tracks correctly.

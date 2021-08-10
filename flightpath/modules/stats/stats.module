@@ -1237,8 +1237,8 @@ function stats_report_access_stats() {
     $minago = round((time() - $db_timestamp) / 60, 0);
 
     $message = strip_tags(t($db_message, unserialize($db_variables)));
-    if (strlen($message) > 60) {
-      $message = trim(substr($message, 0, 60)) . "...";
+    if (strlen($message) > 100) {
+      $message = trim(substr($message, 0, 100)) . "...";
     }
     
     
@@ -1258,7 +1258,7 @@ function stats_report_access_stats() {
           <td valign='top'>$user_type</td>
           <td valign='top'>$db_type</td>
           <td valign='top'>$message</td>
-          <td valign='top'>$minago " . t("min ago") . " &nbsp; <font size='1'>$pretty_date</font></td>
+          <td valign='top'>$minago " . t("min ago") . " &nbsp; <em>($pretty_date)</em></td>
         </tr>";
 
     // Let's increase our counters, if this is a new CWID.
