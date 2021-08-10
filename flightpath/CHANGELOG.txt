@@ -8,6 +8,10 @@ FlightPath 6.x Changelog
   
   Added more time to setting to keep DEBUG entries, as well as wrapped more strings in t().
   
+  Made changes to stats to make it easier to add a "school select" form for reports that need it.
+  
+  Adjusted major students progress report to use school_id correctly.
+  
 
 2021-08-09
   Fixed bug with What If limit on selections; wasn't counting tracks correctly.

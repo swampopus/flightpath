@@ -29,6 +29,26 @@ function stats_menu() {
   );
 
   
+  $items["stats/select-school"] = array(
+    "title" => "Select School",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("stats_select_school_form"),
+    "access_arguments" => array("can_access_stats"),
+    "page_settings" => array(
+      "page_show_title" => TRUE,
+      "bool_print" => FALSE,
+      "menu_links" => array(         
+        0 => array(
+          "text" => t("Analytics"),
+          "path" => "stats",
+        ),
+      ),            
+    ),         
+    "type" => MENU_TYPE_CALLBACK,        
+  );   
+  
+  
+  
   $items["stats/reports/access"] = array(
     "title" => "Access Stats",
     "description" => "See recent access within the system.  This can be useful to see if anyone is currently using the system.",
@@ -70,7 +90,7 @@ function stats_menu() {
 
 
   $items["stats/reports/major-students-progress"] = array(
-    "title" => "Major Students Progresss",
+    "title" => "Major Students Progress",
     "description" => "Students in a major, and their progress percentages in that major.",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("stats_report_major_students_progress_form"),
@@ -84,7 +104,7 @@ function stats_menu() {
         ),
       ),      
     ),    
-    "type" => MENU_TYPE_NORMAL_ITEM,
+    "type" => MENU_TYPE_NORMAL_ITEM, 
     "weight" => 170,
     "file" => menu_get_module_path("stats") . "/reports.major-students-progress.inc",
   );
@@ -592,7 +612,7 @@ function z__stats_report_selected_degree_options() {
  * will be displayed.
  *
  */
-function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool_only_majors_with_tracks = FALSE, $label = "Please select a major", $bool_exclude_tracks = FALSE, $bool_only_current_catalog_year = TRUE, $bool_return_options_array = FALSE)
+function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool_only_majors_with_tracks = FALSE, $label = "Please select a major", $bool_exclude_tracks = FALSE, $bool_only_current_catalog_year = TRUE, $bool_return_options_array = FALSE, $school_id = 0)
 {
   
   $rtn = "";
@@ -602,22 +622,24 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool
   $options_array = array();
   
   
-  $current_catalog_year = variable_get("current_catalog_year", "");  // TODO: school_id?
+  $current_catalog_year = variable_get_for_school("current_catalog_year", "", $school_id);  
 
   $m_a_count = 0;  
   if ($bool_only_current_catalog_year) {
     $query = "SELECT * FROM degrees
-  				WHERE  catalog_year = '?'
+  				WHERE  catalog_year = ?
+  				AND school_id = ?
   				AND `exclude`='0'
   				ORDER BY major_code  ";
-    $result = db_query($query, $current_catalog_year);
+    $result = db_query($query, $current_catalog_year, $school_id);
   }
   else { // current catalog year not important.
     $query = "SELECT * FROM degrees
   				WHERE  `exclude`='0'
+  				AND school_id = ?
   				GROUP BY major_code
   				ORDER BY major_code  ";
-    $result = db_query($query);    
+    $result = db_query($query, $school_id);    
   }
   while ($cur_row = $db->db_fetch_array($result)) {
     $major = trim($cur_row["major_code"]);
@@ -735,6 +757,64 @@ function z__stats_draw_student_cwid_form($path, $student_cwid = "") {
   
   return $rtn;
 }
+
+
+
+
+
+function stats_select_school_form() {
+  
+  $form = array();
+  
+  if (isset($_REQUEST['title'])) {  
+    fp_set_title(strip_tags($_REQUEST['title']));
+  }
+  
+  $redirect_path = $_REQUEST['redirect'];
+  
+  $options = schools_get_schools_for_fapi();
+  $form['school_id'] = array(
+    'type' => 'select',
+    'label' => t("Please select a school:"),
+    'options' => $options,
+    'hide_please_select' => TRUE,
+  );
+  $form['select_school'] = array(
+    'type' => 'hidden',
+    'value' => 'yes',
+  );
+  
+  $form['redirect'] = array(
+    'type' => 'hidden',
+    'value' => base64_encode($redirect_path),
+  );
+  
+  $form['submit_btn'] = array(
+    'type' => 'submit',
+    'value' => t("Continue"),
+  );
+   
+  return $form;  
+}
+
+
+
+function stats_select_school_form_submit($form, $form_state) {
+  
+  // We are simply trying to select the school.  Return to the form with our selection.
+  $school_id = intval($form_state['values']['school_id']);
+  $redirect_path = base64_decode($form_state['values']['redirect']);
+  fp_goto($redirect_path, 'school_id=' . $school_id);
+  return;
+  
+}
+
+
+
+
+
+
+
 
 
 

@@ -23,25 +23,57 @@
 function stats_report_major_students_progress_form() {
   $form = array();
   
-  $last_major = @$_SESSION["stats_report_major_students_progress"]["last_major"];
+  
+  $school_id = intval(@$_REQUEST['school_id']);
+  
+  $school_select_title = "Major Students Progress - Select School";
+  // If schools is enabled, first ask for the school.
+  if (module_enabled("schools") && !isset($_REQUEST['school_id'])) {    
+    fp_goto("stats/select-school", "title=$school_select_title&redirect=stats/reports/major-students-progress");
+    return; 
+  }
+  else if (module_enabled('schools')) {
+    // Display what school we selected, link to change.
+  
+    $form['selected_school_name'] = array(
+      'value' => "<div class='current-school'>" . t("Current school: ") . "<strong>" . schools_get_school_name_for_id($school_id) . "</strong>
+                     - " . l(t("Change?"), "stats/select-school", "title=$school_select_title&redirect=stats/reports/major-students-progress") . "</div>",
+    
+    );
+      
+  }  
+  
+  
+  $form['school_id'] = array(
+    'type' => 'hidden',
+    'value' => $school_id,
+  );  
+  
+  
+  
+  
+  
+  
+  $last_major = @$_SESSION["stats_report_major_students_progress"][$school_id]["last_major"];
   
   $form["major"] = array(
     "label" => t("Please select a major:"),
     "type" => "select",
     "hide_please_select" => TRUE,
-    "options" => stats_draw_majors_pulldown($last_major, FALSE, FALSE, t("Please select a major"), TRUE, FALSE, TRUE),
+    "options" => stats_draw_majors_pulldown($last_major, FALSE, FALSE, t("Please select a major"), TRUE, FALSE, TRUE, $school_id),
     "value" => $last_major,  
   );  
   
   $form["submit_btn"] = array(
     "type" => "submit",
+    "spinner" => TRUE,
     "value" => t("Submit and generate CSV"),
   );
   
   
   // If we have previously generated a CSV within the last hour, display it here.
-  $last_timestamp = @$_SESSION["stats_report_major_students_progress"]["last_timestamp"];
-  $last_batch_id = @$_SESSION["stats_report_major_students_progress"]["last_batch_id"];
+  $last_timestamp = @$_SESSION["stats_report_major_students_progress"][$school_id]["last_timestamp"];
+  $last_batch_id = @$_SESSION["stats_report_major_students_progress"][$school_id]["last_batch_id"];
 
   $html = $m = "";
 
@@ -83,19 +115,19 @@ function stats_report_major_students_progress_form_submit($form, $form_state) {
   
   $major = $form_state["values"]["major"];
   
-  // TODO: handle school_id
+  $school_id = intval($form_state['values']['school_id']);
   
   // Okay, set up the batch....
   $batch = array(
-    "operation" => array("stats_report_major_students_progress_perform_batch_operation", array($major)),
+    "operation" => array("stats_report_major_students_progress_perform_batch_operation", array($major, $school_id)),
     "title" => t("Major Students Progress - CSV Export - Major: ") . $major,
-    "file" => menu_get_module_path("fpl_reports") . "/fpl_reports.major-students-progress.inc",
+    "file" => menu_get_module_path("stats") . "/reports.major-students-progress.inc",
     "progress_message" => "Processing student @current of @total",
     "display_percent" => TRUE,
   );
  
  
-  watchdog('stats', "report_major_students_progress major:$major", array());
+  watchdog('stats', "report_major_students_progress major:$major, school_id:$school_id", array());
  
   // Set the batch...
   batch_set($batch);
@@ -110,9 +142,7 @@ function stats_report_major_students_progress_form_submit($form, $form_state) {
  * @param unknown_type $batch
  * @param unknown_type $major
  */
-function stats_report_major_students_progress_perform_batch_operation(&$batch, $major) {
-  
-  // TODO:  What school are we using?
+function stats_report_major_students_progress_perform_batch_operation(&$batch, $major, $school_id = 0) {
   
   
   // For later, let's get our requirement types from the pie chart config...
@@ -162,14 +192,14 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
   	// We need the "total" number of students in the selected major.    
     $res = db_query("SELECT COUNT(*) as count FROM students a, users b, student_degrees c
                      WHERE major_code = ?
-                     AND is_active = '1'
-                     AND is_student = '1'
+                     AND is_active = 1
+                     AND is_student = 1
                      AND a.cwid = b.cwid
-                     AND a.cwid = c.student_id                     
-                     
+                     AND b.school_id = ?
+                     AND a.cwid = c.student_id
                      ORDER BY l_name, f_name 
                      
-                     ", $major);  	
+                     ", array($major, $school_id));  	
     $cur = db_fetch_array($res);
     
     $batch["results"]["total"] = $cur["count"];
@@ -190,14 +220,14 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
   // Find active students with this major
   $res = db_query("SELECT * FROM students a, users b, student_degrees c
                    WHERE major_code = ?
-                   AND is_active = '1'
-                   AND is_student = '1'
-                   AND a.cwid = b.cwid                   
-                   AND a.cwid = c.student_id
-                   
+                   AND is_active = 1
+                   AND is_student = 1
+                   AND a.cwid = b.cwid
+                   AND b.school_id = ?                   
+                   AND a.cwid = c.student_id                   
                    ORDER BY l_name, f_name
                    
-                   LIMIT $current, $limit", $major);
+                   LIMIT $current, $limit", array($major, $school_id));
   while ($cur = db_fetch_array($res)) {
     
     if ($c >= $limit) {
@@ -305,12 +335,11 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
   }
   
   // Add the batch_id to the SESSION so we can call it back later on.
-  $_SESSION["stats_report_major_students_progress"] = array(
-    "last_batch_id" => $batch["batch_id"],
-    "last_timestamp" => time(),
-    "last_major" => $major,
-  );
-  
+  $_SESSION["stats_report_major_students_progress"][$school_id] = array();
+  $_SESSION["stats_report_major_students_progress"][$school_id]["last_batch_id"] = $batch["batch_id"];
+  $_SESSION["stats_report_major_students_progress"][$school_id]["last_timestamp"] = time();
+  $_SESSION["stats_report_major_students_progress"][$school_id]["last_major"] = $major;
+    
   
 }
 

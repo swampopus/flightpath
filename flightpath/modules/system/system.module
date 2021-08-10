@@ -4052,6 +4052,7 @@ function system_modules_form() {
   
   $form["submit"] = array(
     "type" => "submit",
+    "spinner" => TRUE,
     "value" => t("Submit"),
     "prefix" => "<hr>",
   );  
