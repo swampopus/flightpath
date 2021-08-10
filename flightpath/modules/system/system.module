@@ -2382,14 +2382,17 @@ function system_cron() {
  */
 function system_handle_form_submit() {
     
-  $callback = $_REQUEST["callback"];
-  
+  $callback = $_REQUEST["callback"];  
   $form_type = $_REQUEST["form_type"];
-  $form_include = $_REQUEST["form_include"];
   
+  watchdog('system', "handle_form_submit callback:$callback, form_type:$form_type", array());
+  watchdog('system', "(debug) handle_form_submit _REQUEST:" . ppm($_REQUEST, TRUE), array(), WATCHDOG_DEBUG);
+  
+  $form_include = $_REQUEST["form_include"];  
   $form_token = $_REQUEST["form_token"];
   // Make sure the form_token is valid!
   if ($form_token != md5($callback . fp_token())) {
+    watchdog('system', "handle_form_submit - Error; invalid form token. Got: $form_token. Expected: " . md5($callback . fp_token()), array(), WATCHDOG_ERROR);
     die(t("Sorry, but you have encountered an error.  A form submission was flagged
           as possibly being an invalid or forged submission.  This may constitute a bug
           in the system.  Please report this error to your Systems Administrator."));
@@ -2410,7 +2413,8 @@ function system_handle_form_submit() {
     $test_ext = trim($temp[count($temp) - 1]);
 
     if (!in_array($test_ext, $allowed_ext)) {
-      fp_add_message(t("Include file type (%ext) not allowed in form submission.", array("%ext" => $test_ext)), "error");
+      watchdog('system', "handle_form_submit - file type $ext not allowed to be included in form submission.", array(), WATCHDOG_ERROR);
+      fp_add_message(t("Include file type (%ext) not allowed in form submission.  Allowed extensions: .php, .inc, .class, .module.", array("%ext" => $test_ext)), "error");
       fp_goto("<front>");
       return;
     }
@@ -2424,6 +2428,9 @@ function system_handle_form_submit() {
     
         
     if (substr($absolute_path, 0, strlen($file_system_path)) != $file_system_path) {
+      watchdog('system', "handle_form_submit - Include file outside of FlightPath installation directory.
+                                  <br>FlightPath directory path: %fsp
+                          <br>Include file path: %ap", array("%fsp" => $file_system_path, "%ap" => $absolute_path), WATCHDOG_ERROR);
       fp_add_message(t("Include file in form submission is outside of the FlightPath installation directory.
                           <br>FlightPath directory path: %fsp
                           <br>Include file path: %ap", array("%fsp" => $file_system_path, "%ap" => $absolute_path)), "error");
@@ -2450,6 +2457,7 @@ function system_handle_form_submit() {
     if (!menu_check_user_access($router_item)) {      
       // The user does NOT have access to submit this form!  The fact that
       // it has made it this far means this may be some sort of hacking attempt.
+      watchdog('system', "handle_form_submit - Insufficient permissions to submit form.", array(), WATCHDOG_ERROR);
       die(t("Sorry, but you have encountered an error.  A form submission was flagged
           as possibly being an invalid or having insufficient permissions to submit.  
           This may constitute a bug in the system.  
@@ -2595,7 +2603,7 @@ function system_handle_form_submit() {
       foreach ($form_state["values"] as $name => $val) {
         variable_set($name, $val);
       }
-           
+      
       fp_add_message("Settings saved successfully.");      
       
     }
@@ -2644,6 +2652,7 @@ function system_handle_form_submit() {
   }
   else if (isset($_SESSION["fp_batch_id"]) && !function_exists("batch_menu")) {
     // We requested a batch action, but the batch module is not installed.
+    watchdog('system', "handle_form_submit - Batch process attempted, but batch module not enabled", array(), WATCHDOG_ERROR);
     fp_add_message(t("A batch process was attempted, but it appears that the Batch module is not enabled.  Please contact your FlightPath administrator."), "error");
     unset($_SESSION["fp_batch_id"]);
   }

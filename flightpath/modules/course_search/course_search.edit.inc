@@ -296,9 +296,12 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
       // success.
     }
   }      
-   
+
+  
+  watchdog('course_search', "edit_course_details course_id:$course_id, subject_id:$subject_id, course_num:$course_num, school_id:$school_id", array());
+     
   fp_add_message(t("This course's details have been updated successfully."));
-  // TODO:  Do a "goto" back to wherever we came from
+  
 }
 
 
@@ -577,7 +580,7 @@ function course_search_display_edit_courses()
 
 
 
-function course_search_display_view_reports() {
+function z__course_search_display_view_reports() {
   
   $rtn = "";
   

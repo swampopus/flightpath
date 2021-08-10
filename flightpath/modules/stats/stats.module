@@ -211,6 +211,8 @@ function stats_download_csv_from_batch($batch_id) {
   
   $batch = batch_get($batch_id);
 
+  watchdog('stats', "download_csv_from_batch batch_id:$batch_id, filename:$filename.csv", array());
+
   // Give it to the browser...  
   header('Content-type: text/csv');
   header('Content-Disposition: attachment; filename="' . $filename . '.csv"');
@@ -431,7 +433,7 @@ function stats_report_course_use_summary() {
   }
   
   
-  
+  watchdog('stats', "report_course_use_summary subject_id:$subject_id, course_num:$course_num, school_id:$school_id, draft_check:$draft_check", array());
   
   
   return $rtn;
@@ -819,7 +821,7 @@ function stats_report_major_counts() {
       " . t("Total student records:") . " $total.";
 
   
-  
+  watchdog('stats', "report_major_counts", array());
     
   return $rtn;
 }
@@ -963,6 +965,11 @@ function stats_report_flightpath_use_summary() {
         Total substitutions: $t_staff<br>
       </blockquote>
       ";      
+  
+  
+  
+  watchdog('stats', "report_flightpath_use_summary start_date:$start_date, end_date:$end_date", array());
+    
   
   return $rtn;
 }
@@ -1311,7 +1318,7 @@ function stats_report_student_course_list() {
 
   // If we have the banner_integration module installed, then get the pidm from banner too
   if (function_exists("banner_integration_get_pidm_for_cwid")) {
-    $student_pidm = banner_integration_get_pidm_for_cwid($student_cwid);
+    $student_pidm = intval(banner_integration_get_pidm_for_cwid($student_cwid));
   }  
   $student_name = fp_get_student_name($student_cwid);
   $student = new Student($student_cwid);
@@ -1435,6 +1442,8 @@ function stats_report_student_course_list() {
   $rtn .= "<p>" . count($local_array) . " local courses, with $local_hours hours.</p>";
   $rtn .= "<p>" . count($transfer_array) . " transfer courses, with $transfer_hours hours.</p>";
   
+  
+  watchdog('stats', "report_student_course_list student_id:$student_cwid, school_id:$school_id, student_name:$student_name", array());
   
   
   return $rtn;  

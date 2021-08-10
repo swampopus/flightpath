@@ -387,7 +387,7 @@ function calendar_display_upcoming_appointments() {
       
     
             
-    
+  watchdog("calendar", "display_upcoming", array());  
   
   
   return fp_render_content($render);
@@ -852,7 +852,7 @@ function calendar_confirm_cancel_appointment_form_submit(&$form, &$form_state) {
   $content->published = 0;
   content_save($content);
   
-  
+  watchdog("calendar", "appointment_cancel cid:$cid", array());
   
       
 } // .. confirm_cancel_appointment_form_submit
@@ -2514,6 +2514,8 @@ function calendar_schedule_appointment_confirm_form_submit($form, &$form_state) 
   notify_send_notification_to_user($faculty_user_id, $nmsg . $msg, $acid, 'appointment', '', $attachment);
       
   
+  watchdog("calendar", "schedule_appointment student_id:$student_cwid, faculty_id:$faculty_cwid, appointment details: " . ppm($content, TRUE), array());
+  
   
   fp_goto("schedule-appointment-completed/$content->cid");
   
@@ -3337,6 +3339,8 @@ function calendar_display_calendar() {
     $rtn .= calendar_build_custom_calendar($month, $year);
   }
   
+  
+  watchdog("calendar", "display_calendar", array());
   
   return $rtn;
 } //calendar_display_calendar

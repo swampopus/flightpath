@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-08-10
+  Made the access stats report look nicer.
+  
+  Added more logging (including WATCHDOG_DEBUG) throughout FlightPath to make it easier to track activity.
+  
+
 2021-08-09
   Fixed bug with What If limit on selections; wasn't counting tracks correctly.
   

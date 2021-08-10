@@ -83,6 +83,8 @@ function stats_report_major_students_progress_form_submit($form, $form_state) {
   
   $major = $form_state["values"]["major"];
   
+  // TODO: handle school_id
+  
   // Okay, set up the batch....
   $batch = array(
     "operation" => array("stats_report_major_students_progress_perform_batch_operation", array($major)),
@@ -92,6 +94,8 @@ function stats_report_major_students_progress_form_submit($form, $form_state) {
     "display_percent" => TRUE,
   );
  
+ 
+  watchdog('stats', "report_major_students_progress major:$major", array());
  
   // Set the batch...
   batch_set($batch);
