@@ -3013,6 +3013,8 @@ function draw_menu_items($menu_array) {
     );
 
 
+    watchdog("advise", "popup_course_description $course->course_id. <pre>" . print_r($course, TRUE) . "</pre>", array(), WATCHDOG_DEBUG);
+
 
     // Okay, render our render array and return.    
     $pC .= fp_render_content($render);
@@ -5856,6 +5858,12 @@ function draw_menu_items($menu_array) {
     $box_top = $this->draw_semester_box_top("$group->title", !$bool_display_submit);
     $pC = str_replace("<!--BOXTOP-->",$box_top,$pC);
 
+    
+    
+    watchdog("advise", "popup_group_select id:$group->group_id, name:$group->group_name, semester_num:$display_semesterNum", array(), WATCHDOG_DEBUG);
+    
+    
+    
     return $pC;
   }
 

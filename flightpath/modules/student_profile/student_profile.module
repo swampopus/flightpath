@@ -243,6 +243,8 @@ function student_profile_display_student_profile_page() {
   
     
   
+  watchdog("student_profile", "view $student_id");
+  
     
   
   // Let's set our breadcrumbs

@@ -337,6 +337,8 @@ function advise_display_history() {
   fp_set_breadcrumbs($crumbs);    
   
   
+  watchdog("advise", "display_history $current_student_id", array(), WATCHDOG_DEBUG);
+  
   
   return $rtn;
 }
@@ -629,6 +631,9 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
   }
   
   fp_set_title($db->get_student_name($cur['student_id'], FALSE) . " ({$cur['student_id']}) $term " . t("Advising Summary"));
+  
+  watchdog("advise", "popup_display_summary advising_session_id:$advising_session_id", array(), WATCHDOG_DEBUG);
+    
   return $rtn;
 }
 

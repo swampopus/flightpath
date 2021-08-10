@@ -382,7 +382,7 @@ function advise_toggle_draft_form_submit($form, $form_state) {
  * We will basically treat it similarly to how FlightPath 4x did things.
  */
 function advise_display_popup_change_track_non_dynamic_degree() {
-  global $degree_plan, $student;
+  global $degree_plan, $student, $current_student_id;
   $rtn = "";
       
   $db = get_global_database_handler();
@@ -530,7 +530,7 @@ function advise_display_popup_change_track_non_dynamic_degree() {
 
   $rtn .= "</ul>";    
 
-
+  watchdog("advise", "display_popup_change_track_non_dynamic $current_student_id", array(), WATCHDOG_DEBUG);
   
   return $rtn;
 } // popup_change_track_non_dynamic_degree
@@ -541,7 +541,7 @@ function advise_display_popup_change_track_non_dynamic_degree() {
 
 
 function advise_display_popup_change_track() {
-  global $degree_plan, $student;
+  global $degree_plan, $student, $current_student_id;
   $rtn = "";
    
   advise_init_screen();
@@ -875,6 +875,9 @@ function advise_display_popup_change_track() {
   $top_level_majors_csv = rtrim($top_level_majors_csv, ","); // remove trailing comma if exists
   $rtn .= "<input type='hidden' name='top_level_majors_csv' id='top_level_majors_csv' value='$top_level_majors_csv'>";
   
+  
+  watchdog("advise", "display_popup_change_track $current_student_id", array(), WATCHDOG_DEBUG);
+  
   return $rtn;
 } // display_popup_change_track
 
@@ -923,6 +926,7 @@ function advise_display_popup_change_term() {
 
   $rtn .= "</ul>";    
   
+  watchdog("advise", "display_popup_change_term $current_student_id", array(), WATCHDOG_DEBUG);
   
   return $rtn;
 }
@@ -1129,6 +1133,7 @@ function advise_display_popup_substitute_selected() {
     
   $rtn .= $screen->display_popup_substitute($course_id, $group_id, $semester_num, $hours_avail, $req_by_degree_id);
    
+  watchdog("advise", "display_popup_substitute_selected $current_student_id", array(), WATCHDOG_DEBUG);
   
   return $rtn;
 }
@@ -1427,7 +1432,7 @@ function advise_display_view($view = "view") {
     
     fp_set_page_sub_tabs($tab_array);
     
-    watchdog("view_by_$screen->view", "", array());
+    watchdog("view_by_$screen->view", "$current_student_id", array());
     
                     
   }
@@ -1720,6 +1725,8 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
     "value" => $current_student_id,
   );
   
+  
+  watchdog("advise", "what_if_selection_form $current_student_id", array());
  
   return $form;
 }

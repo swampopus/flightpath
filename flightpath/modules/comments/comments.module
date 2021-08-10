@@ -72,6 +72,9 @@ function comments_popup_display_comment() {
   $comment = comments_get_comment($id);
   $rtn .= comments_render_comment($comment);
       
+  watchdog("comments", "popup_display_comment id:$id", array(), WATCHDOG_DEBUG);      
+      
+      
   return $rtn;
 }
 
@@ -112,8 +115,10 @@ function comments_perform_delete_comment() {
     fp_add_message(t("Comment has been deleted successfully."));
   }
   
+  watchdog("comments", "deleted comment for:$current_student_id, comment_id:$comment_id", array());
   
-  if ($_GET["destination"] != "") {
+  
+  if (@$_GET["destination"] != "") {
     fp_goto($_GET["destination"]);
   }
   else {  
@@ -143,7 +148,8 @@ function comments_comment_form_submit($form, $form_state) {
     fp_add_message(t("Comment saved successfully."));
   }
 
-  watchdog("save_comment", "Comment saved");  
+  watchdog("save_comment", "Comment saved for $current_student_id: $comment");  
+    
   
 }
 
@@ -257,6 +263,7 @@ function comments_display_main() {
   );  
   fp_set_breadcrumbs($crumbs);  
   
+  watchdog("comments", "view all $current_student_id", array(), WATCHDOG_DEBUG);
   
   return $rtn;
 }
@@ -279,6 +286,8 @@ function comments_popup_display_all_comments() {
   foreach($comments as $comment) {    
     $rtn .= comments_render_comment($comment, $delete_link);
   }
+  
+  watchdog("comments", "popup_display_all_comments $current_student_id", array(), WATCHDOG_DEBUG);
   
   
   return $rtn;

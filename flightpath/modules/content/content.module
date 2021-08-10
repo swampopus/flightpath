@@ -587,6 +587,8 @@ function content_view_content($cid) {
   content_set_last_access($cid);
   
   
+  watchdog("content", "view @cid", array("@cid" => $cid));
+  
   return fp_render_content($render);
   
 }
@@ -1182,6 +1184,7 @@ function content_edit_content_form_submit(&$form, &$form_state) {
   content_save($content);
   $form_state['content_object'] = $content;
   
+  watchdog("content", "edited/saved @cid", array("@cid" => $content->cid));
   
   if (isset($form['#redirect'])) {
     if ($form['#redirect']['path'] == 'content/new') {

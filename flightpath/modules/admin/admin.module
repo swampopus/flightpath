@@ -1391,7 +1391,9 @@ function admin_display_watchdog() {
             Type:
             <select name='type_filter'>
               <option value=''>-Any-</option>";
-  $res = db_query("SELECT distinct(type) as type FROM watchdog ORDER BY type");
+  $res = db_query("SELECT distinct(type) as type 
+                   FROM watchdog 
+                   ORDER BY type");
   while ($cur = db_fetch_object($res)) {
     $sel = ($type_filter == $cur->type) ? "selected" : "";
     $rtn .= "<option value='$cur->type' $sel>$cur->type</option>";
@@ -1420,7 +1422,7 @@ function admin_display_watchdog() {
   
   
   
-  $rtn .= "<input type='submit' value='-&gt;'>";
+  $rtn .= "<input type='submit' value='&gt;'>";
   // Hack if clean URLs are not enabled:
   $rtn .= "<input type='hidden' name='q' value='admin/config/watchdog'>";
   
@@ -1466,12 +1468,12 @@ function admin_display_watchdog() {
     $o_type = $cur->type;
     
     // shorten msg if necessary
-    $msg = substr($o_msg, 0, 120);
+    $msg = substr(strip_tags($o_msg), 0, 130);
     if ($msg != $o_msg) {
       $msg = trim($msg) . "...";
     }
     
-    $type = substr($o_type, 0, 15);
+    $type = substr($o_type, 0, 20);
     if ($type != $o_type) {
       $type = trim($type) . "...";
     }
@@ -1503,7 +1505,9 @@ function admin_display_watchdog() {
   
   // Figure out the total number of results
   $total = db_result(db_query("SELECT count(wid) as count
-                               FROM watchdog WHERE 1 $type_line $severity_line", $params));
+                               FROM watchdog WHERE 1 
+                               $type_line 
+                               $severity_line", $params));
   
   
   // Now, divide by the number of results per page.

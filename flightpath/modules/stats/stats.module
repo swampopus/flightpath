@@ -1179,8 +1179,10 @@ function stats_report_access_stats() {
   $rtn = "";
 
 
-  $min = trim(addslashes(@$_REQUEST["min"]));
-  if ($min == "")
+  fp_add_css(fp_get_module_path("admin") . '/css/admin.css');
+
+  $min = intval(@$_REQUEST["min"]);
+  if ($min < 1 || $min > 2000)
   {
     $min = "20";
   }
@@ -1194,20 +1196,20 @@ function stats_report_access_stats() {
 
 
 
-  $rtn .= t("minutes") . ": <input type='submit' value='->'>
+  $rtn .= t("minutes") . ": <input type='submit' value='&gt;'>
       </form>
       " . t("Unique students in time frame") . ": <!--STUDENTS-->. " . t("Unique faculty/staff in time frame") . ": <!--STAFF--> <br>";
 
-  $rtn .= "<table border='1' width='700'>
+  $rtn .= "<hr>
+            <table class='watchdog-table' cellspacing='0' cellpadding='4'>
             <tr>
+              <th>" . t("ID") . "</th>
               <th>" . t("User") . "</th>
-              <th>" . t("UID") . "</th>
-              <th>" . t("CWID") . "</th>
-              <th>" . t("Name") . "</th>
-              <th>" . t("Type") . "</th>
+              <th>" . t("User Type") . "</th>
               <th>" . t("Action") . "</th>
-              <th>" . t("Extra") . "</th>
+              <th>" . t("Msg") . "</th>
               <th>" . t("Time") . "</th>
+              
             </tr>";
 
   $cwid_array = array();
@@ -1216,48 +1218,40 @@ function stats_report_access_stats() {
   $interval = time() - ($min * 60);
   
   $res = db_query("SELECT * FROM watchdog
-              WHERE `timestamp` > '?'
+              WHERE `timestamp` > ?
               ORDER BY `timestamp` DESC ", $interval);
   while ($cur = db_fetch_array($res)) {
     extract ($cur, 3, "db");
-
+    $wid = $cur['wid'];
     $account = fp_load_user($db_user_id);
     
-    $bgcol = "white";
-    if ($account->is_student) {
-      $bgcol = "lightblue";
-    }
-    else if ($account->is_faculty){
-       $bgcol = "pink";
-    } 
+    $pol = ($pol == "even") ? "odd" : "even";
     
     $minago = round((time() - $db_timestamp) / 60, 0);
 
-    $extra_data = trim(substr($db_extra_data, 0, 18));
-    if (strlen($extra_data) < strlen($db_extra_data))
-    {
-      $extra_data .= "...";
+    $message = strip_tags(t($db_message, unserialize($db_variables)));
+    if (strlen($message) > 60) {
+      $message = trim(substr($message, 0, 60)) . "...";
     }
-
-    $pretty_date = format_date($db_timestamp);
+    
+    
+    $pretty_date = format_date(convert_time($db_timestamp));
     
     $user_type = "";
     if ($account->is_student) {
-      $user_type .= "<div>" . t("student") . "</div>";
+      $user_type .= "<span>" . t("Student") . "</span>";
     }
     if ($account->is_faculty) {
-      $user_type .= "<div>" . t("faculty") . "</div>";      
+      $user_type .= "<span style='background-color: lightyellow;'>" . t("Faculty") . "</span>";      
     }
     
-    $rtn .= "<tr style='background-color:$bgcol'>
-          <td valign='top' class='tenpt'>$account->name</td>
-          <td valign='top' class='tenpt'>$account->cwid</td>
-          <td valign='top' class='tenpt'>$account->id</td>
-          <td valign='top' class='tenpt'>$account->f_name $account->l_name</td>          
-          <td valign='top' class='tenpt'>$user_type</td>
-          <td valign='top' class='tenpt'>$db_type</td>
-          <td valign='top' class='tenpt'>" . t($db_message, unserialize($db_variables)) . "</td>
-          <td valign='top' class='tenpt'>$minago " . t("min ago") . " &nbsp; <font size='1'>$pretty_date</font></td>
+    $rtn .= "<tr class='row-$pol'>
+          <td valign='top'>" . l($wid, "admin/config/watchdog/$wid") . "</td>
+          <td valign='top'>$account->name</td>
+          <td valign='top'>$user_type</td>
+          <td valign='top'>$db_type</td>
+          <td valign='top'>$message</td>
+          <td valign='top'>$minago " . t("min ago") . " &nbsp; <font size='1'>$pretty_date</font></td>
         </tr>";
 
     // Let's increase our counters, if this is a new CWID.

@@ -1726,6 +1726,8 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state) {
     
   } // type == 'txt_msg'
   
+  watchdog("engagements", "sent $engagement_type to $student_id");
+  watchdog("engagements", "$engagement_type message to $student_id: $header <br> $msg", array(), WATCHDOG_DEBUG);
   
   
   
@@ -1895,15 +1897,6 @@ function engagements_display_main() {
   $rtn .= "<div class='engagements-list'>";
   
   
-  /*
-  // query for this student's engagements in descending order (newest at the top, oldest at the bottom).
-  // TODO:  Check that it is published
-  $res = db_query("SELECT DISTINCT(cid) FROM content__engagement a
-                   WHERE field__student_id = ?                                       
-                   ORDER BY field__activity_datetime DESC, vid DESC
-                   ", array($current_student_id));
-   * 
-   */
    
   $res = pager_query("SELECT DISTINCT(a.cid) FROM content__engagement a, content n
                    WHERE field__student_id = ?
@@ -2065,6 +2058,10 @@ function engagements_display_main() {
     'query' => "current_student_id={$current_student_id}",
   );  
   fp_set_breadcrumbs($crumbs);    
+  
+  
+  
+  watchdog("engagements", "view $current_student_id");
   
   
   return $rtn;

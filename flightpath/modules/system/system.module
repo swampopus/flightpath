@@ -3516,6 +3516,8 @@ function system_display_dashboard_page () {
     
   } // if is_student
   
+  watchdog("display_dashboard", "", array());
+  
   
   return $rtn;
 } // display_dashboard_page
