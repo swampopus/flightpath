@@ -262,13 +262,13 @@ error_reporting(E_ALL ^ E_NOTICE ^ E_STRICT);
 set_time_limit(300);  // 300 seconds = 5 minutes.
 
  
-/**
- * All system settings will be placed (at the end of this script)
- * into a $GLOBALS variable, but for now will be placed into an
- * array.
- */
- 
+////////////////////////////////////
+// All system settings will be placed (at the end of this script)
+// into a $GLOBALS variable, but for now will be placed into the
+// array "$system_settings", defined below:
+
 $system_settings = array();
+
 
 ////////////////////////////////////
 // !!!  *** IMPORTANT !!!  ***    //
@@ -318,19 +318,8 @@ $system_settings["db_name"] = "%DB_NAME%"; // Name of the actual database where
 
 
 
-/////////////////////////////////////
-// *** Defaults ***                //
-/////////////////////////////////////
-// These default settings are for installation reasons only. 
-// They will be overwritten in memory
-// once the flightpath_system_settings table is read in at the end of the file.
-// Do not alter them.
-$system_settings["display_mysql_errors"] = TRUE;
-$system_settings["theme"] = "themes/fp6_clean";
-
-
 ////////////////////////////////////
-// *** Misc Settings ***
+// *** Misc Settings ***          //
 ////////////////////////////////////
 // To cut down on load times when the user loads a large elective group
 // containing many courses, FlightPath can load some of the course inventory
@@ -339,7 +328,7 @@ $system_settings["load_course_inventory_on_login_number"] = 2000;
 
 
 ////////////////////////////////////
-// *** Cron-related ***
+// *** Cron-related ***           //
 ////////////////////////////////////
 // If you wish to use cron.php (which will call every module\'s
 // hook_cron() function), you may set up a cron job like this:
@@ -355,15 +344,44 @@ $system_settings["load_course_inventory_on_login_number"] = 2000;
 $system_settings["cron_security_token"] = "%CRON_SECURITY_TOKEN%";
 
 
-/////////////////////////////////////
-/////////////////////////////////////
-//
-// The end of the settings file!
 
 /////////////////////////////////////
+// *** Defaults ***                //
+/////////////////////////////////////
+// These default settings are for installation reasons only. 
+// They will be overwritten in memory
+// once the flightpath_system_settings table is read in at the end of the file.
+// ** Do not alter them. **
+$system_settings["display_mysql_errors"] = TRUE;
+$system_settings["theme"] = "themes/fp6_clean";
+
+
+
+////////////////////////////////////////////
+/// *** Custom Settings? ***             ///
+////////////////////////////////////////////
+// If you have any custom settings you wish to add to this file, do so here.
+// 
+// As long as you place your settings in a uniquely named $GLOBALS variable, it will be accessible on every page load
+// throughout FlightPath.
+//
+// For example: 
+//     $GLOBALS["fp_my_custom_module_settings"]["secret_string"] = "Shhh... This is a secret.";
+//
+// If you are unsure what this might be used for, leave this section blank.
+
+
+
+
+
+
+/////////////////////////////////////
+// END OF SETTINGS FILE /////////////
+/////////////////////////////////////
+// *** Do not alter or remove below this line!
 /////////////////////////////////////
 /////////////////////////////////////
-// Do not alter or remove!!
+/////////////////////////////////////
 // This will load the contents of the flightpath_system_settings
 // table into the $system_settings variable.  These are extra settings
 // which were set via the web using the system module.
@@ -405,16 +423,18 @@ if ($system_settings["modules"]["system"]["enabled"] != 1) {
   $system_settings["modules"]["system"]["enabled"] = 1;
 }
 
+
+
 ////////////////////////////////////////////
 ////////////////////////////////////////////
-// This must appear at the VERY end!  Nothing should come after it....
+// This must appear at the VERY end!  Nothing involving "system_settings" should come after this....
 //
 // Assign our systemSettings to the GLOBALS array so we can access it anywhere.
 $GLOBALS["fp_system_settings"] = $system_settings;
 
 //////////////////////////////////////////////
 //////////////////////////////////////////////
-// PUT NOTHING BELOW THIS LINE!!!!    
+// PUT NOTHING BELOW THIS LINE ///////////////    
     
   
 ';
