@@ -1,11 +1,17 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2021-08-12
+  Cleaned up some CSS for the permissions form (in the user module).
+  
+  Added "sticky" headers to permissions form to make it easier to use.
+  
+
 2021-08-11
   Added a "custom settings" area to the default settings.php which is created during the installation process.  Also changed some of the wording in the
   settings.php file, for clarity.
-  
-  
+    
 
 2021-08-10
   Made the access stats report look nicer.

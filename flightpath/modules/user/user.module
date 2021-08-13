@@ -643,26 +643,31 @@ function user_permissions_form() {
     
   // Go through all of the modules, then call hook_perm for them, to get their permissions.
   $modules = modules_implement_hook("perm");
-  //fpm($modules);
+  $mcount = 0;
   foreach ($modules as $module) {
+
     $form["mark" . $m++] = array(
       "value" => "<tr><td colspan='$col_count' class='perm-module-name'>" . ucwords($module) . " " . t("module") . "</td></tr>",
     );   
-    
-    // Draw the headers...
-    $form["mark" . $m++] = array(
-      "value" => "<tr class='headers'><th style='min-width: 400px;'>" . t("Permission") . "</th>",
-    );  
-    foreach ($roles as $key => $role) {
+
+      
+    if ($mcount == 0) {
+      
+      // Draw the headers...
       $form["mark" . $m++] = array(
-        "value" => "<th style='min-width: 100px;'>" . $role . "</th>",
-      );       
-    }  
-    $form["mark" . $m++] = array(
-      "value" => "</tr>",
-    );   
-    // End of headers    
-    
+        "value" => "<tr class='headers'><th class='permission-name-and-desc'>" . t("Permission") . "</th>",
+      );  
+      foreach ($roles as $key => $role) {
+        $form["mark" . $m++] = array(
+          "value" => "<th class='role-" . fp_get_machine_readable($role) . "')>" . $role . "</th>",
+        );       
+      }  
+      $form["mark" . $m++] = array(
+        "value" => "</tr>",
+      );   
+      // End of headers    
+    }
+    $mcount++;
     $zebra = "even";
     
     // Let's get all the perms.

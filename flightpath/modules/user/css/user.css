@@ -34,8 +34,10 @@ table.admin-perm-table {
 .admin-perm-table .perm-module-name {
   background-color: #D4E7F3;
   font-weight: bold;
-  padding: 3px;
-  border-top: 1.5em solid white;
+  font-size: 1.2em;
+  padding:10px;
+  
+  border-top: 50px solid white;
 }
 
 .admin-perm-table .perm-cb-row-even {
@@ -62,14 +64,49 @@ table.admin-perm-table {
 }
 
 
+.admin-perm-table {
+  position: relative;
+}
 
 .admin-perm-table .headers th {
-  
+  position: sticky;
+  top: 0px;
   padding-top: 5px;
   border-bottom: 1px solid #ccc;
-  background-color: white;
+  background-color: #faf9f6;
   color: #555;
+  min-width: 75px;
+  vertical-align: middle;  
+
 }
+
+.admin-perm-table .perm-cb-row:hover {
+  background-color: lightyellow;
+}
+
+.admin-perm-table tr.perm-cb-row td {
+  vertical-align: middle;
+}
+
+.admin-perm-table tr.perm-cb-row td div.form-element {
+  margin-bottom: 0px;
+}
+
+.admin-perm-table .headers th.permission-name-and-desc {
+  min-width: 400px;
+}
+
+
+.admin-perm-table .headers th.role-anonymous_user 
+{
+  background-color: #ddd;
+}
+
+.admin-perm-table .headers th.role-authenticated_user {
+  background-color: #eee;
+}
+
+
 
 table.user-list tr.no-roles {
   background-color: #eee;
