@@ -307,15 +307,11 @@ $system_settings["base_path"] = "%BASE_PATH%";
 ////////////////////////////////////
 // *** Database-related settings ***
 ////////////////////////////////////
-$system_settings["db_host"] = "%DB_HOST%"; // domain/ip address of the mysql host. ex: localhost or example.com
-$system_settings["db_port"] = "%DB_PORT%"; 
+$system_settings["db_host"] = "%DB_HOST%"; // domain/ip address of the mysql host. ex: localhost, or 10.10.1.1, or db.example.com
+$system_settings["db_port"] = "%DB_PORT%"; // default for mysql/mariadb is 3306 
+$system_settings["db_name"] = "%DB_NAME%"; // Name of the actual database where flightpath\'s tables are located.
 $system_settings["db_user"] = "%DB_USER%"; 
-$system_settings["db_pass"] = "%DB_PASS%"; 
-$system_settings["db_name"] = "%DB_NAME%"; // Name of the actual database where
-                                              // flightpath\'s tables are located.
-                                              // Usually just "flightpath"
-
-
+$system_settings["db_pass"] = "%DB_PASS%";
 
 
 ////////////////////////////////////
@@ -339,8 +335,14 @@ $system_settings["load_course_inventory_on_login_number"] = 2000;
 // string of *alpha-numeric* characters.
 // This is a security measure to prevent unauthorized users (or web-users) from
 // running cron.php, and is REQUIRED!
-// For example, if the token is "qwss34frwquu" then to run the script you would need
-// to use:   http://url/cron.php?t=CRON_TOKEN  (use wget to access from a system cron job.)
+// For example, if the token is CRON_TOKEN then to run the script you would need
+// to use:   https://example.com/cron.php?t=CRON_TOKEN
+// 
+// In Linux/Unix, you can use the following in your system crontab to run the FlightPath
+// cron every 10 minutes:
+//    */10 * * * * wget -O - -q -t 1 https://example.com/cron.php?t=CRON_TOKEN
+// See the System status page (/admin/config/status) for more instructions.
+// 
 $system_settings["cron_security_token"] = "%CRON_SECURITY_TOKEN%";
 
 
@@ -374,7 +376,8 @@ $system_settings["theme"] = "themes/fp6_clean";
 
 
 
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////
 // END OF SETTINGS FILE /////////////
 /////////////////////////////////////
@@ -382,9 +385,9 @@ $system_settings["theme"] = "themes/fp6_clean";
 /////////////////////////////////////
 /////////////////////////////////////
 /////////////////////////////////////
-// This will load the contents of the flightpath_system_settings
+// This will load the contents of the variables
 // table into the $system_settings variable.  These are extra settings
-// which were set via the web using the system module.
+// which were set via the web, usually in the Admin Console.
 $db_host = $system_settings["db_host"];
 $db_port = $system_settings["db_port"];
 $db_user = $system_settings["db_user"];
@@ -429,13 +432,12 @@ if ($system_settings["modules"]["system"]["enabled"] != 1) {
 ////////////////////////////////////////////
 // This must appear at the VERY end!  Nothing involving "system_settings" should come after this....
 //
-// Assign our systemSettings to the GLOBALS array so we can access it anywhere.
+// Assign our system_settings to the GLOBALS array so we can access it anywhere in FlightPath.
 $GLOBALS["fp_system_settings"] = $system_settings;
 
 //////////////////////////////////////////////
 //////////////////////////////////////////////
-// PUT NOTHING BELOW THIS LINE ///////////////    
-    
+// PUT NOTHING BELOW THIS LINE ///////////////        
   
 ';
 

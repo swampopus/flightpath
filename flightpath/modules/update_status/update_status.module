@@ -156,6 +156,11 @@ function update_status_status() {
       }
       
       $your_version = $module_details["version"];
+            
+      if ($your_version == "%FP_VERSION%") {
+        // This means you are using a version not downloaded from getflightpath.com.  Probably directly from a git repository.
+        $your_version = "GitRepo";    
+      }
       
 
       $status .= "<tr class='release-row release-row-$release_type'>

@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-08-13
+  Made alterations to the default settings.php file, to better explain certain concepts.
+  
+  Fixed system status page to not show %FLIGHTPATH_VERSION% as system version, if it came from git repository.  Instead
+  it just shows "GitRepo".
+  
 
 2021-08-12
   Cleaned up some CSS for the permissions form (in the user module).

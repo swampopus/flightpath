@@ -2816,12 +2816,19 @@ function system_status() {
   $last_run = variable_get("cron_last_run", 0);
   
   // Report on current details about FlightPath.
-  $rtn["status"] .= "<p>" . t("FlightPath version:") . " " . FLIGHTPATH_CORE . "-" . FLIGHTPATH_VERSION . "</p>";
+  $fpversion = FLIGHTPATH_VERSION;
+  if ($fpversion == "%FP_VERSION%") {
+    // This means you are using a version not downloaded from getflightpath.com.  Probably directly from a git repository.
+    $fpversion = "GitRepo";    
+  }
+  $rtn["status"] .= "<p>" . t("FlightPath version:") . " " . FLIGHTPATH_CORE . "-" . $fpversion . "</p>";
   
   if ($last_run < strtotime("-2 DAY")) {
     $rtn["severity"] = "alert";
     $rtn["status"] .= t("Cron hasn't run in over 2 days.  For your installation of FlightPath
-               to function properly, cron.php must be accessed routinely. At least once per day is recommended.");    
+               to function properly, cron.php must be accessed routinely. At least once per day is recommended.  
+               Set for more frequently if making use of text messaging, emails, or notifications in FlightPath.  
+               For example, every 10 minutes.");    
   }
   else {
     $rtn["status"] .= t("Cron was last run on %date", array("%date" => format_date($last_run)));
