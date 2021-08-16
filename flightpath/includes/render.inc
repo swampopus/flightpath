@@ -585,6 +585,17 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   }
 
 
+  if ($type == 'datetime-local') {
+    // As of the time of this comment (8-16-2021) FireFox STILL does not support datetime-local as a field type for their desktop browser,
+    // even though they support it for mobile.  Every other modern browser supports it as well.
+    // Anyway, we will need to include a workaround in jquery as a result if this field is being used:
+    fp_add_js(fp_get_module_path("system") . '/lib/jquery.datetimepicker/jquery.datetimepicker.min.js');
+    fp_add_css(fp_get_module_path("system") . '/lib/jquery.datetimepicker/jquery.datetimepicker.min.css');
+    
+    fp_add_js(fp_get_module_path("system") . '/lib/fp_datetimepicker_shim/fp_datetimepicker_shim.js');
+  }
+
+
 
   $ast = "";
   if ($required) {

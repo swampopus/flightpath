@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-08-16
+  Since FireFox (as of this date) does not support the datetime-local type, I added a "shim" library where we will override the browser's behavior
+  with jquery.datetimepicker, if the browser does not support it. 
+  
+
 2021-08-13
   Made alterations to the default settings.php file, to better explain certain concepts.
   
