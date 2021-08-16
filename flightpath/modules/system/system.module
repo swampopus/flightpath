@@ -2387,8 +2387,7 @@ function system_handle_form_submit() {
   $form_type = $_REQUEST["form_type"];
   
   watchdog('system', "handle_form_submit callback:$callback, form_type:$form_type", array());
-  watchdog('system', "(debug) handle_form_submit _REQUEST:" . ppm($_REQUEST, TRUE), array(), WATCHDOG_DEBUG);
-  
+    
   $form_include = $_REQUEST["form_include"];  
   $form_token = $_REQUEST["form_token"];
   // Make sure the form_token is valid!
