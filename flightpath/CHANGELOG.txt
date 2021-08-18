@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-08-18
+  Fixed bug in edit groups, where it was looking for school_id in prod table, and not draft table.  Same for degrees and courses.
+  
+
 2021-08-16
   Since FireFox (as of this date) does not support the datetime-local type, I added a "shim" library where we will override the browser's behavior
   with jquery.datetimepicker, if the browser does not support it. 

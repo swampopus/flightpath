@@ -568,7 +568,7 @@ function admin_edit_group_form() {
   $db = get_global_database_handler();
   $school_id = 0;
   if ($group_id != "new") {
-    $school_id = $db->get_school_id_for_group_id($group_id);
+    $school_id = $db->get_school_id_for_group_id($group_id, TRUE);
   }
   
   $de_catalog_year = admin_get_de_catalog_year(TRUE, $school_id);
@@ -1894,7 +1894,7 @@ function admin_display_groups_popup_show_group_use() {
   }
 
 
-  $rtn .= "<b>" . t("Degrees using @group_title (%group_name):", array("@group_title"=>$group->title, "%group_name" => $group->group_name)) . "</b>
+  $rtn .= "<b>" . t("Degrees (from draft table) using @group_title (%group_name):", array("@group_title"=>$group->title, "%group_name" => $group->group_name)) . "</b>
     <br><br>
     <table border='0' cellspacing='5' width='100%'>
     <tr>
@@ -1918,7 +1918,7 @@ function admin_display_groups_popup_show_group_use() {
   {
     extract($cur, 3, "db");
     
-    $school_id = $db->get_school_id_for_degree_id($db_degree_id);
+    $school_id = $db->get_school_id_for_degree_id($db_degree_id, TRUE);
     $school_code = @$defs[$school_id]['school_code'];
     if ($school_id === 0) {
       $school_code = "-";

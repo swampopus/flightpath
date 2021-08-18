@@ -271,7 +271,7 @@ function prereqs_edit_course_form_validate($form, &$form_state) {
   if ($prereqs == "") return; //nothing there, so ignore.
   
   $db = get_global_database_handler();
-  $school_id = $db->get_school_id_for_course_id($form_state["values"]["course_id"]);
+  $school_id = $db->get_school_id_for_course_id($form_state["values"]["course_id"], TRUE);
   // TODO:  If schools_school exists, use THAT id instead?  
     
   // Turn into a friendly array.
@@ -371,7 +371,7 @@ function prereqs_get_prereq_array_for_course($course_id) {
   $prereq_data = prereqs_get_prereq_string_for_course($course_id);
 
   $db = get_global_database_handler();
-  $school_id = $db->get_school_id_for_course_id($course_id);
+  $school_id = $db->get_school_id_for_course_id($course_id, TRUE);
 
   $rtn = prereqs_get_prereq_array_from_string($prereq_data, $school_id);
 
