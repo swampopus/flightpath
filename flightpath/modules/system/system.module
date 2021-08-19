@@ -1588,9 +1588,9 @@ function system_school_data_form($school_id = 0) {
 
   $form["graduate_level_codes" . $fs] = array(
     "type" => "textfield",
-    "label" => t("Graduate course level codes (CSV):"),
+    "label" => t("Graduate level codes (CSV):"),
     "value" => variable_get_for_school("graduate_level_codes", "GR", $school_id, TRUE),
-    "description" => t("List level codes, separated by comma, which should be considered graduate credit.  If you do not need
+    "description" => t("List level codes, separated by comma, for both students, courses, and degrees, which should be considered at the Graduate level.  If you do not need
                         to distinguish between graduate and undergraduate credit, leave this field blank.<br>If unsure, set to GR."),    
   );
   

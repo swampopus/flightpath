@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-08-19
+  Made it so that What If selection screen will show grad degree options if the student belongs to a grad rank other than 'GR' by checking
+  setting first.  Also re-worded the description of that school setting for clarity.
+  
+
 2021-08-18
   Fixed bug in edit groups, where it was looking for school_id in prod table, and not draft table.  Same for degrees and courses.
   

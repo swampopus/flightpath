@@ -1303,14 +1303,14 @@ function advise_display_view($view = "view") {
     // We are in WhatIf, but we have not selected a major, so give
     // the user a selection screen.
     $screen->screen_mode = "not_advising";
-    //$rtn .= advise_display_what_if_selection();
     
-    // TODO:  If graduate degree selection is allowed for graduate students, then change bool_undergrad_only to FALSE.
+    // If graduate degree selection is allowed for graduate students, then change bool_undergrad_only to FALSE.
     // (if the student is a grad student!)  
     $bool_undergrad_only = TRUE;
+
+    $grad_level_codes = csv_to_array(variable_get_for_school("graduate_level_codes", "GR", $school_id));
     
-    if ($student->db_rank == 'GR') { // TODO: make it a settings list of graduate ranks?
-      // TODO: check setting to see if we should allow graduate students to see what if (?)  Maybe?
+    if (in_array($student->db_rank, $grad_level_codes)) {      
       $bool_undergrad_only = FALSE; 
     }
     
