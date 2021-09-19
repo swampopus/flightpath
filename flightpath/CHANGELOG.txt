@@ -1,6 +1,16 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-09-18
+  Wrapped some strings in announcements with t().
+  
+  Converted system dashboard to use render array system so other modules can modify it.
+  
+  Made it so that we can pass strings in a render array for simplicity (they appear as plain html markup)
+  
+  Weights in elements can be floats now, instead of only ints.
+  
+
 2021-08-19
   Made it so that What If selection screen will show grad degree options if the student belongs to a grad rank other than 'GR' by checking
   setting first.  Also re-worded the description of that school setting for clarity.

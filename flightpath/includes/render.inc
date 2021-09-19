@@ -46,18 +46,31 @@ function fp_render_content($render_array = array(), $bool_include_wrappers = TRU
   // Okay, now the fun part.  Re-order the elements by weight.  Lighter weights
   // should float to the top.  Elements w/o a weight listed are assumed to have a weight of 0.
   // Unfortunately we cannot use uasort, as it re-orders our indexes when weights are identical.
-    
+  
+  
   // The first the I want to do is find out, what are the defined weights in this form, if any.
   $defined_weights = array();
-  foreach ($render_array as $element) {
-          
-    if (!is_array($element)) continue;    
+  foreach ($render_array as $key => $element) {
+        
+    // If we were just passed a string, treat it as plain HTML markup.
+    if (!strstr($key, "#") && is_string($element)) {
+      $element = array('value' => $element);
+      $render_array[$key] = $element;  // make sure we pick up any changes we've made      
+    }      
+    
+    if (!is_array($element)) {
+      continue;
+    }    
     
     if (!isset($element["weight"])) {
-       $element["weight"] = 0;
+      $element["weight"] = 0;      
     }
     
-    $weight = (int)$element["weight"];
+    
+    
+    
+    
+    $weight = (float)$element["weight"];
     if (!in_array($weight, $defined_weights)) {
       $defined_weights[] = $weight;
     }
@@ -95,7 +108,7 @@ function fp_render_content($render_array = array(), $bool_include_wrappers = TRU
       }
       
       if (!isset($element["weight"])) $element["weight"] = 0;
-      $weight = (int)$element["weight"];
+      $weight = (float)$element["weight"];
       if ($weight == $dw) {
         $new_form[$key] = $element;
       }      
@@ -130,6 +143,9 @@ function fp_render_array($render_array, $use_callback = "") {
   $rtn = "";
   
   foreach ($render_array as $name => $element) {
+    
+    
+    
     if (is_array($element) && (isset($element["type"]) || isset($element["value"]))) {
         
       // Is this a cfieldset (collapsible fieldset)?

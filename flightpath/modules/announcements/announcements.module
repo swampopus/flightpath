@@ -25,7 +25,7 @@ function announcements_content_register_content_type() {
   
   $fields['activity_datetime'] = array(
     'type' => 'datetime-local',
-    'label' => 'Date/Time',    
+    'label' => t('Date/Time'),    
     'value' => 'now',
     'format_date' => 'short',
     'weight' => 60,
@@ -37,7 +37,7 @@ function announcements_content_register_content_type() {
   
   $fields['msg'] = array(
     'type' => 'textarea_editor',  
-    'label' => 'Message',
+    'label' => t('Message'),
     'filter' => 'basic',
     'weight' => 70,    
   );

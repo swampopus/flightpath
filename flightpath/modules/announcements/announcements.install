@@ -11,7 +11,7 @@
  * 
  */
 function announcements_install() {
-  // Install our table, and insert some sample content.
+  // Install our table
   $q = "
 CREATE TABLE `content__announcement` (
   `cid` int unsigned NOT NULL,
