@@ -398,7 +398,7 @@ function content_user_access($op, $var) {
     }
     
     // Otherwise, does the content belong the the user, and do they have permission to edit/delete their OWN content?
-    if ($content->user_id == $user->id && user_has_permission($op . "_any_" . $content->type . "_content")) {
+    if ($content->user_id == $user->id && user_has_permission($op . "_own_" . $content->type . "_content")) {
       return TRUE;
     }
     
@@ -1085,9 +1085,16 @@ function content_edit_content_form_submit(&$form, &$form_state) {
   $types = content_get_types();
     
   
-  // Does the user have permission to edit this content?
-  if (!user_has_permission("edit_$type" . "_content")) {  
-    fp_add_message(t("Sorry, you do not have permission to edit that content type."));
+  // Does the user have permission to edit/add this content?  
+  $access_action = "add";
+  $var = $type;
+  if ($cid !== "new") {
+    $access_action = "edit";
+    $var = $cid;
+  }
+    
+  if (!content_user_access($access_action, $var)) {  
+    fp_add_message(t("Sorry, you do not have permission to @action that content type.", array("@action" => $access_action)));
     fp_goto("admin-tools/content");
     return;
   }  
@@ -1320,7 +1327,7 @@ function content_content_save(&$content) {
   
   foreach ($types[$type]['fields'] as $fieldname => $details) {
     
-    if ($details['type'] != 'cfieldset') {
+    if ($details['type'] != 'cfieldset' && $details['type'] != '' && !strstr($details['type'], 'markup')) { // skip markup and fieldsets
     
       $db_field_name = "field__$fieldname";  
       $all_fields[] = $db_field_name;
@@ -1338,10 +1345,12 @@ function content_content_save(&$content) {
       $params[":field__$fieldname"] = $val;
     
     }
-    else {
+    else if ($details['type'] == 'cfieldset'){
       // This is a fieldset, so now we need to descend into its elements to find the fields we need to save.
       foreach($details['elements'] as $c => $v) {
         foreach ($details['elements'][$c] as $fieldname => $edetails) {
+          if (strstr($edetails['type'], 'markup') || $edetails['type'] == '') continue; // skip markup
+            
           $db_field_name = "field__$fieldname";  
           $all_fields[] = $db_field_name;
           $param_names[] = ":$db_field_name";          
@@ -1354,7 +1363,7 @@ function content_content_save(&$content) {
           
         }
       }
-    }
+    } //else/if
     
     
   } // foreach  

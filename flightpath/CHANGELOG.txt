@@ -7,6 +7,10 @@ FlightPath 6.x Changelog
   
   Fixed bug in the way form submissions were handled, which caused problems if you were depending on wildcards in URL during form submission.
   
+  Fixed bug in Content module where editing content for non-admin wasn't working.
+  
+  Fixed bug in Content module to skip over markup fields.
+   
 
 2021-09-18
   Wrapped some strings in announcements with t().
