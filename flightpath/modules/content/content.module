@@ -64,6 +64,16 @@ function content_menu() {
   );
 
 
+  // Add content/add/TYPE/ with multiple wildcards for future module developers.  Ex:
+  // in hook_form_alter, using the arg() function to find out what these values are.
+  $items["content/add/%/%"] = $items["content/add/%"];
+  $items["content/add/%/%/%"] = $items["content/add/%"];
+  $items["content/add/%/%/%/%"] = $items["content/add/%"];
+  $items["content/add/%/%/%/%/%"] = $items["content/add/%"];
+  $items["content/add/%/%/%/%/%/%"] = $items["content/add/%"];
+
+
+
 
   $items["content/%"] = array(
     "title" => "View",

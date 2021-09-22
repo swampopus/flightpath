@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-09-22
+  Made it so custom content types' add form is automatically allowed up to 4 additional wildcards in the menu, for future module
+  developers to make use of, if desired.
+  
+  Fixed bug in the way form submissions were handled, which caused problems if you were depending on wildcards in URL during form submission.
+  
+
 2021-09-18
   Wrapped some strings in announcements with t().
   

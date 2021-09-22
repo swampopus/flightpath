@@ -2452,7 +2452,7 @@ function system_handle_form_submit() {
     // temporarily set $_REQUEST['q'] to our $form_q.
     $form_q = base64_decode($_REQUEST["form_q_64"]);
     $temp_q = $_REQUEST['q'];
-    $_REQUEST['q'] = $form_q;
+    $_REQUEST['q'] = $form_q;    
     $router_item = menu_get_item($form_path) ;
     if (!menu_check_user_access($router_item)) {      
       // The user does NOT have access to submit this form!  The fact that
@@ -2464,7 +2464,7 @@ function system_handle_form_submit() {
           Please report this error to your Systems Administrator."));
       
     }
-    $_REQUEST['q'] = $temp_q;  // set back to original, just in case.
+    // I don't think this is needed, just causes problems! // $_REQUEST['q'] = $temp_q;  // set back to original, just in case.    
   }  
   
   // Let's get our set of allowed values, by looking at the original form,
@@ -3339,7 +3339,7 @@ function system_display_dashboard_page () {
   // Build up the "appoinments" HTML
   $appointments = "";
   $appointments .= "<div class='appointments-feed-block dash-feed-block'>
-                    " . fp_render_section_title("Upcoming Appointments") . "
+                    " . fp_render_section_title(t("Upcoming Appointments")) . "
                    <div class='contents'>";
     
     $upcoming = calendar_get_upcoming_appointments_for_cwid($user->cwid);
