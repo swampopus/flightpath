@@ -604,6 +604,44 @@ function content_view_content($cid) {
 }
 
 
+/**
+ * Meant to be run by admin, this generates table creation sql for a given type.
+ */
+function _content_generate_create_table_sql($type) {
+  $rtn = "";
+  
+  $keys = "";
+  
+  $types = content_get_types();
+  fpm($types);
+  
+  $rtn .= "CREATE TABLE `content__$type` (
+            `cid` int unsigned NOT NULL,
+            `vid` int NOT NULL, \n";
+
+  foreach ($types[$type]['fields'] as $name => $element) {
+    if ($element['type'] == '' || strstr($element['type'], 'markup')) continue;
+     
+    fpm($name);
+    
+    $rtn .= "  `field__$name` varchar(255) DEFAULT NULL, \n";
+    
+    $keys .= " KEY `field__$name` (`field__$name`), \n";
+              
+    
+  } //foreach
+
+  $keys = "PRIMARY KEY (`vid`),
+          KEY `cid` (`cid`),
+          $keys";
+    
+  $rtn .= rtrim($keys, ", \n") . "\n);";            
+  
+  fpm(ppm($rtn, TRUE));
+  
+} // _content_generate_create_table_sql
+
+
 
 /**
  * This form lets the user edit some piece of content
