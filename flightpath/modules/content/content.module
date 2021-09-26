@@ -930,7 +930,7 @@ function content_edit_content_form($type = "", $cid = "") {
     "type" => "submit",
     "value" => t("Submit"),
     "spinner" => TRUE,
-    'weight' => 920,    
+    'weight' => 9920,    
     'attributes' => array('class' => 'content-submit-btn'),        
   );
   
@@ -942,7 +942,7 @@ function content_edit_content_form($type = "", $cid = "") {
         "type" => "submit",
         "value" => t("Delete"),    
         "confirm" => t('Are you sure you wish to delete this?\nThis action cannot be undone.'),
-        'weight' => 930,
+        'weight' => 9930,
         'attributes' => array('class' => 'content-delete-btn'),    
       );
     }
