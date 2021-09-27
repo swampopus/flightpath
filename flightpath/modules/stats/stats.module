@@ -266,7 +266,7 @@ function stats_perm() {
   
   $perms = array (
     "can_access_stats" => array(
-      "title" => t("Can access/view stats"),
+      "title" => t("Access/view stats & analytics"),
       "description" => t("This allows the user to access the stats module, letting them run
                         reports on usage."),
     ),    

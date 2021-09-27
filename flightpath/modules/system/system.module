@@ -3513,8 +3513,8 @@ function system_display_dashboard_page () {
   else if ($user->is_student) {
     
 
-    $render['dash_left_wrapper'] = array('value' => "<div class='dash-box dash-left'>", 'weight' => 200);
-    $render["appointments"] = array('value' => $appointments, 'weight' => 210);
+    $render['dash_left_wrapper'] = array('value' => "<div class='dash-box dash-left'>", 'weight' => 30);
+    $render["appointments"] = array('value' => $appointments, 'weight' => 40);
     
 
     //$rtn .= "<div class='dash-box dash-left'>";
@@ -3523,7 +3523,7 @@ function system_display_dashboard_page () {
     fp_add_js(fp_get_module_path('advise') . '/js/advise.js');
     $render['recent_advising_history_top'] = array('value' => "<div class='advising-history-feed-block dash-feed-block'>
                                             " . fp_render_section_title(t("Recent Advising History")) . "
-                                           <div class='contents'>", 'weight' => 220);
+                                           <div class='contents'>", 'weight' => 50);
            
     $res = db_query("SELECT * FROM advising_sessions
                 WHERE student_id = ?
@@ -3552,7 +3552,7 @@ function system_display_dashboard_page () {
                 </div>";
       
                 
-      $render['recent_advising_history_row_' . $cur['advising_session_id']] = array('value' => $html, 'weight' => (230 + $c++));
+      $render['recent_advising_history_row_' . $cur['advising_session_id']] = array('value' => $html, 'weight' => (200 + $c++));
     }    
                 
     

@@ -1,10 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-09-27
+  Altered weights in dashboard render array for consistency.
+
 2021-09-26
   Increased weight of submit and delete buttons in content module.
   
-
 2021-09-22
   Made it so custom content types' add form is automatically allowed up to 4 additional wildcards in the menu, for future module
   developers to make use of, if desired.
