@@ -126,6 +126,7 @@ function batch_ajax_callback($batch_id) {
   $rtn["display_percent"] = $batch["display_percent"];
   $rtn["finished"] = "";
   if ($batch["results"]["finished"] == TRUE) {
+    
     $rtn["finished"] = "finished";
   }
   
@@ -149,8 +150,10 @@ function batch_ajax_callback($batch_id) {
  * @param unknown_type $batch_id
  */
 function batch_finished_page($batch_id) {
+  
   $batch = batch_get($batch_id);  
   if ($batch["token"] != batch_get_token()) {
+  
     return "<p>" . t("Sorry, there is a token mismatch or this batch no longer exists.") . "</p>";
   }
   

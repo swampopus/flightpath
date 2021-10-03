@@ -52,4 +52,11 @@ function student_files_install() {
 
 
 
-
+function student_files_update($old_schema, $new_schema) {
+  
+  if (intval($old_schema) < 2) {    
+    db_query("ALTER TABLE student_files MODIFY filepath LONGTEXT");
+    fpm("Altered student_files table to change TEXT to LONGTEXT.");
+  }  
+    
+}

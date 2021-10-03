@@ -19,7 +19,7 @@ CREATE TABLE `content__alert` (
   `field__student_id` varchar(255)DEFAULT NULL,
   `field__alert_status` varchar(255) DEFAULT NULL,
   `field__department` varchar(255) DEFAULT NULL,
-  `field__alert_msg` text,
+  `field__alert_msg` longtext,
   `field__visibility` varchar(255)  DEFAULT NULL,
   PRIMARY KEY (`vid`),
   KEY `cid` (`cid`),
@@ -56,4 +56,18 @@ CREATE TABLE `content__activity_record` (
 
     
 }
+
+
+function alerts_update($old_schema, $new_schema) {
+  
+  if (intval($old_schema) < 2) {
+    // Convert text fields to longtext.
+    db_query("ALTER TABLE content__alert MODIFY field__alert_msg LONGTEXT");
+    fpm("Altered content__alert to use LONGTEXT instead of just TEXT.");
+    
+  }  
+    
+}
+
+
 

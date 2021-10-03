@@ -123,7 +123,7 @@ function batch_test_perform_batch_operation(&$batch, $items_max) {
   if (!isset($batch["results"]["total"])) {
     // Our first time through.  Let's start up.
     $batch["results"]["total"] = $items_max;
-    $batch["results"]["current"] = 0;
+    $batch["results"]["current"] = -1;  // so that we start with zero below
     $batch["results"]["finished"] = FALSE;    
     
   }
@@ -131,12 +131,9 @@ function batch_test_perform_batch_operation(&$batch, $items_max) {
   // Set an arbitrary limit of how many records we are going to examine each time the routine runs.
   // This should be whatever we believe we can safely accomplish before the routine times out.  Set low for safety.
   $limit = rand(5, 15);
-  $c = 0;
+  $c = $t = 0;
 
-  for ($t = $batch["results"]["current"]; $t < $batch["results"]["total"]; $t++) {
-
-    
-    
+  for ($t = $batch["results"]["current"] + 1; $t < $batch["results"]["total"]; $t++) {
     
 
     // ....
@@ -146,15 +143,15 @@ function batch_test_perform_batch_operation(&$batch, $items_max) {
     // ....
     
     $c++;
-    // If we've reached the limit, then break.
-    if ($c > $limit) break;
+    // If we've gone past the limit, then break.
+    if ($c >= $limit) break;
     
   } 
   
   
   // Update our values.
   $batch["results"]["current"] = $t;
-  
+   
   
   // Have we finished?
   if ($batch["results"]["current"] >= $batch["results"]["total"]) {

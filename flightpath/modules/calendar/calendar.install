@@ -21,8 +21,8 @@ CREATE TABLE `content__appointment` (
   `field__faculty_id` varchar(255) DEFAULT NULL,
   `field__student_id` varchar(255) DEFAULT NULL,
   `field__appointment_type` varchar(255) DEFAULT NULL,
-  `field__appointment_msg` text DEFAULT NULL,
-  `field__video_data` text DEFAULT NULL,
+  `field__appointment_msg` longtext DEFAULT NULL,
+  `field__video_data` longtext DEFAULT NULL,
   PRIMARY KEY (`vid`),
   KEY `cid` (`cid`),
   KEY `field__appointment_datetime` (`field__appointment_datetime`),
@@ -44,8 +44,8 @@ CREATE TABLE `content__schedule_event_type` (
   `field__event_duration_minutes` int(11) DEFAULT NULL,
   `field__event_buffer_minutes` int(11) DEFAULT NULL,
   `field__prevent_less_than_hours` int(11) DEFAULT NULL,
-  `field__additional_email_msg` text DEFAULT NULL,
-  `field__description` text DEFAULT NULL,
+  `field__additional_email_msg` longtext DEFAULT NULL,
+  `field__description` longtext DEFAULT NULL,
   `field__video_meeting` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`vid`),
   KEY `cid` (`cid`),
@@ -94,9 +94,9 @@ CREATE TABLE `content__schedule_unavailable_time` (
 CREATE TABLE `zoom_api_data` (
   `user_id` int(10) unsigned NOT NULL,
   `install_code` varchar(255) DEFAULT NULL,
-  `response_data` text DEFAULT NULL,
-  `access_token` text DEFAULT NULL,
-  `refresh_token` text DEFAULT NULL,
+  `response_data` longtext DEFAULT NULL,
+  `access_token` longtext DEFAULT NULL,
+  `refresh_token` longtext DEFAULT NULL,
   `last_updated` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`user_id`)
 );
@@ -105,6 +105,25 @@ CREATE TABLE `zoom_api_data` (
 
 
 
+    
+}
+  
+
+function calendar_update($old_schema, $new_schema) {
+  
+  if (intval($old_schema) < 2) {
+    // Convert text fields to longtext.
+    db_query("ALTER TABLE content__appointment MODIFY field__appointment_msg LONGTEXT");
+    db_query("ALTER TABLE content__appointment MODIFY field__video_data LONGTEXT");
+    db_query("ALTER TABLE content__schedule_event_type MODIFY field__additional_email_msg LONGTEXT");
+    db_query("ALTER TABLE content__schedule_event_type MODIFY field__description LONGTEXT");
+    db_query("ALTER TABLE zoom_api_data MODIFY response_data LONGTEXT");
+    db_query("ALTER TABLE zoom_api_data MODIFY access_token LONGTEXT");
+    db_query("ALTER TABLE zoom_api_data MODIFY refresh_token LONGTEXT");
+    
+    fpm("Altered calendar tables to use LONGTEXT instead of just TEXT.");
+    
+  }  
     
 }
 

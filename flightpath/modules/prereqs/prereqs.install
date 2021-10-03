@@ -28,3 +28,13 @@ function prereqs_install() {
   
 } 
 
+
+
+function prereqs_update($old_schema, $new_schema) {
+  
+  if (intval($old_schema) < 2) {    
+    db_query("ALTER TABLE prereqs_prereqs MODIFY prereq_data LONGTEXT");
+    fpm("Altered prereqs table to change TEXT to LONGTEXT.");
+  }  
+    
+}

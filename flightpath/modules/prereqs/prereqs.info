@@ -1,3 +1,4 @@
 name = Prereqs (Prerequisites)
 description = This module helps manage prereq requirements in FlightPath.
 core = 6.x
+schema = 2

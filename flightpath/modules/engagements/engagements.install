@@ -19,7 +19,7 @@ CREATE TABLE `content__engagement` (
   `field__student_id` varchar(255) DEFAULT NULL,
   `field__faculty_id` varchar(255) DEFAULT NULL,
   `field__engagement_type` varchar(255) DEFAULT NULL,
-  `field__engagement_msg` text DEFAULT NULL,
+  `field__engagement_msg` longtext DEFAULT NULL,
   `field__direction` varchar(255)  DEFAULT NULL,
   `field__phone_outcome` varchar(255) DEFAULT NULL,
   `field__activity_datetime` datetime DEFAULT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE `sms_history` (
   `mid` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `message_sid` varchar(255) NOT NULL,
   `sw_type` varchar(255) DEFAULT NULL,
-  `body` text DEFAULT NULL,
+  `body` longtext DEFAULT NULL,
   `num_segments` tinyint(4) DEFAULT 0,
   `direction` varchar(255) DEFAULT NULL,
   `from_number` varchar(255) DEFAULT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE `sms_history` (
   `fp_price` decimal(15,10) DEFAULT NULL,
   `to_cwid` varchar(30) DEFAULT NULL,
   `from_cwid` varchar(30) DEFAULT NULL,
-  `media_filenames` text DEFAULT '',
+  `media_filenames` longtext DEFAULT '',
   `date_sent` int(10) unsigned DEFAULT NULL,
   `updated` int(10) unsigned DEFAULT NULL,
   `price_processed` tinyint(3) unsigned DEFAULT 0,
@@ -93,19 +93,35 @@ CREATE TABLE `sms_history` (
 db_query($q);
 
 
-$q = "
-CREATE TABLE `zoom_api_data` (
-  `user_id` int(10) unsigned NOT NULL,
-  `install_code` varchar(255) DEFAULT NULL,
-  `response_data` text DEFAULT NULL,
-  `access_token` text DEFAULT NULL,
-  `refresh_token` text DEFAULT NULL,
-  `last_updated` int(10) unsigned DEFAULT NULL,
-  PRIMARY KEY (`user_id`)
-);
-";
-
-
     
 }
+
+
+
+function engagements_update($old_schema, $new_schema) {
+  
+  if (intval($old_schema) < 2) {
+    // Convert text fields to longtext.
+    db_query("ALTER TABLE content__engagement MODIFY field__engagement_msg LONGTEXT");   
+    
+    db_query("ALTER TABLE sms_history MODIFY `body` LONGTEXT");
+    db_query("ALTER TABLE sms_history MODIFY `media_filenames` LONGTEXT");
+    
+    
+    fpm("Altered engagements tables to use LONGTEXT instead of just TEXT.");
+    
+  }  
+    
+}
+
+
+
+
+
+
+
+
+
+
+
 

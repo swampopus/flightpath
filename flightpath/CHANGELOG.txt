@@ -1,11 +1,28 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-10-03  
+  Made it so the db updates system uses the Batch API so it won't timeout over long update jobs.
+  
+  Made it so that the watchdog "message" column is "longtext" instead of just "text".  Same for announcements, alerts, and other core modules' tables.
+  This was to prevent users from entering more than 65kb of text in a single field, something that was indeed a possibility, especially in the watchdog
+  table when debugging complex datatypes.  The decision was made to either use blob or "longtext" from now on, instead of "text", as it can store up to 
+  4gb of data, with only a 2 byte increase in overhead over "text".
+  
+  Modified content module so we only look for content whose modules are enabled.  This was done
+  to prevent a PHP warning message, and to prevent strange behavior if we tried to edit previously
+  submitted content.
+  
+  Made minor edit to batch test routine to better illustrate how limits work.
+  
+
 2021-09-27
   Altered weights in dashboard render array for consistency.
+  
 
 2021-09-26
   Increased weight of submit and delete buttons in content module.
+  
   
 2021-09-22
   Made it so custom content types' add form is automatically allowed up to 4 additional wildcards in the menu, for future module

@@ -1563,6 +1563,12 @@ function content_content_load(&$content) {
   $fieldvals = db_fetch_array($res);
 
   $types = content_get_types();
+  
+  // This condition can occur if we have content from a module which is no longer enables.
+  if (!isset($types[$content->type])) {
+    return;
+  }
+  
   foreach ($types[$content->type]['fields'] as $fieldname => $details) {
     
     if ($details['type'] != 'cfieldset') {
@@ -1825,14 +1831,22 @@ function content_display_content_admin_list() {
     $params[":ftype"] = $filter;
     
   }
+  
+  $content_types = content_get_types();
+  
+  // Only look for types which have been defined (nothing for modules we have since disabled)
+  $types_line = "AND `type` IN ('" . join("','", array_keys($content_types)) . "')";
+  
       
   // Get our order by clause based on selected table header, if any.    
   $order_by = theme_table_header_sortable_order_by($table_headers);  
   $res = pager_query("SELECT DISTINCT(cid) FROM content n
                       WHERE delete_flag = 0
+                      $types_line
                       $filter_line                                                       
                       $order_by", $params, 20, 0, "SELECT COUNT(DISTINCT(cid)) FROM content n
                                                         WHERE delete_flag = 0
+                                                        $types_line
                                                         $filter_line                                                       
                                                         $order_by", $params);    
 
@@ -1841,6 +1855,7 @@ function content_display_content_admin_list() {
   while ($cur = db_fetch_array($res)) {
       
     $content = content_load($cur['cid']);    
+    
     $author = fp_load_user($content->user_id);
     $author_name = "";
     if ($author && isset($author->name)) {

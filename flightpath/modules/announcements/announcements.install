@@ -17,7 +17,7 @@ CREATE TABLE `content__announcement` (
   `cid` int unsigned NOT NULL,
   `vid` int NOT NULL,
   `field__activity_datetime` datetime DEFAULT NULL,
-  `field__msg` text,
+  `field__msg` longtext,
   `field__visibility` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`vid`),
   KEY `cid` (`cid`),
@@ -29,6 +29,19 @@ CREATE TABLE `content__announcement` (
   
   
 }
+
+
+
+function announcements_update($old_schema, $new_schema) {
+  
+  if (intval($old_schema) < 2) {
+    // Convert text fields to longtext.
+    db_query("ALTER TABLE content__announcement MODIFY field__msg LONGTEXT");
+    fpm("Altered content__announcement table to change 'field__msg' to LONGTEXT.");
+  }  
+    
+}
+
 
 
 

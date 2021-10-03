@@ -86,7 +86,80 @@ function system_enable() {
 
 function system_update($old_schema, $new_schema) {
   
+  if (intval($old_schema) < 2) {
+    // We need to make the "watchdog.message" field a longtext instead of just "text".
+    db_query("ALTER TABLE watchdog MODIFY message LONGTEXT");
+    fpm("Altered watchdog table to change 'message' to LONGTEXT.");
+  }  
+
   
+  if (intval($old_schema) < 3) {    
+    db_query("ALTER TABLE advising_comments MODIFY `comment` LONGTEXT");
+
+    db_query("ALTER TABLE courses MODIFY `title` LONGTEXT, 
+                                  MODIFY `description` LONGTEXT, 
+                                  MODIFY `data_entry_comment` LONGTEXT");
+
+    db_query("ALTER TABLE draft_courses MODIFY `title` LONGTEXT, 
+                                  MODIFY `description` LONGTEXT, 
+                                  MODIFY `data_entry_comment` LONGTEXT");
+
+
+    db_query("ALTER TABLE degree_tracks MODIFY `track_description` LONGTEXT");    
+    db_query("ALTER TABLE draft_degree_tracks MODIFY `track_description` LONGTEXT");
+
+    db_query("ALTER TABLE degrees MODIFY `public_note` LONGTEXT,
+                                  MODIFY `semester_titles_csv` LONGTEXT,
+                                  MODIFY `track_selection_config` LONGTEXT");
+
+    db_query("ALTER TABLE draft_degrees MODIFY `public_note` LONGTEXT,
+                                  MODIFY `semester_titles_csv` LONGTEXT,
+                                  MODIFY `track_selection_config` LONGTEXT");
+
+    db_query("ALTER TABLE groups MODIFY `public_note` LONGTEXT,
+                                 MODIFY `definition` LONGTEXT,
+                                 MODIFY `icon_filename` LONGTEXT,
+                                 MODIFY `data_entry_comment` LONGTEXT");
+
+    db_query("ALTER TABLE draft_groups MODIFY `public_note` LONGTEXT,
+                                 MODIFY `definition` LONGTEXT,
+                                 MODIFY `icon_filename` LONGTEXT,
+                                 MODIFY `data_entry_comment` LONGTEXT");
+                                 
+    db_query("ALTER TABLE draft_instructions MODIFY `instruction` LONGTEXT");
+
+    
+    
+    db_query("ALTER TABLE `variables` MODIFY `value` LONGTEXT");   
+    db_query("ALTER TABLE `student_priority` MODIFY `results` LONGTEXT");
+    db_query("ALTER TABLE `user_attributes` MODIFY `value` LONGTEXT");
+    db_query("ALTER TABLE `user_settings` MODIFY `value` LONGTEXT");
+    db_query("ALTER TABLE `transfer_courses` MODIFY `description` LONGTEXT");
+    db_query("ALTER TABLE student_settings MODIFY `settings` LONGTEXT");    
+    db_query("ALTER TABLE student_substitutions MODIFY `sub_remarks` LONGTEXT");
+            
+
+    db_query("ALTER TABLE menu_router MODIFY `access_arguments` LONGTEXT,
+                                      MODIFY `page_arguments` LONGTEXT,
+                                      MODIFY `description` LONGTEXT,
+                                      MODIFY `page_settings` LONGTEXT");
+            
+    db_query("ALTER TABLE modules MODIFY `requires` LONGTEXT,
+                                  MODIFY `info` LONGTEXT");
+                                
+                                 
+    db_query("ALTER TABLE watchdog MODIFY `variables` LONGTEXT,
+                                   MODIFY `location` LONGTEXT,
+                                   MODIFY `referer` LONGTEXT");
+                                 
+           
+           
+                                     
+    fpm("Altered various system tables to change TEXT to LONGTEXT.");
+  }    
+  
+  
+      
 }
 
 
@@ -135,7 +208,7 @@ CREATE TABLE `advising_comments` (
   `student_id` varchar(30) DEFAULT '0',
   `faculty_id` varchar(30) DEFAULT '0',
   `term_id` varchar(20) DEFAULT '',
-  `comment` text DEFAULT NULL,
+  `comment` longtext DEFAULT NULL,
   `posted` int(10) unsigned DEFAULT 0,
   `access_type` varchar(20) DEFAULT '',
   `delete_flag` tinyint(4) DEFAULT 0,  
@@ -201,13 +274,13 @@ CREATE TABLE `courses` (
   `subject_id` varchar(10)  DEFAULT '',
   `course_num` varchar(10)  DEFAULT '',
   `catalog_year` int(11) DEFAULT 0,
-  `title` text  DEFAULT NULL,
-  `description` text  DEFAULT NULL,
+  `title` longtext  DEFAULT NULL,
+  `description` longtext  DEFAULT NULL,
   `min_hours` decimal(8,4) DEFAULT 0.0000,
   `max_hours` decimal(8,4) DEFAULT 0.0000,
   `repeat_hours` decimal(8,4) DEFAULT 0.0000,
   `exclude` tinyint(4) DEFAULT 0,
-  `data_entry_comment` text  DEFAULT NULL,
+  `data_entry_comment` longtext  DEFAULT NULL,
   `delete_flag` tinyint(4) DEFAULT 0,
   `school_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) ,
@@ -267,7 +340,7 @@ CREATE TABLE `degree_tracks` (
   `track_code` varchar(20) DEFAULT '',
   `track_title` varchar(100) DEFAULT '',
   `track_short_title` varchar(50) DEFAULT '',
-  `track_description` text DEFAULT NULL,
+  `track_description` longtext DEFAULT NULL,
   `school_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`track_id`) ,
   KEY `school_id` (`school_id`)
@@ -283,8 +356,8 @@ CREATE TABLE `degrees` (
   `degree_level` varchar(5)  DEFAULT '',
   `degree_class` varchar(40)  DEFAULT 'MAJOR',
   `title` varchar(200)  DEFAULT '',
-  `public_note` text  DEFAULT NULL,
-  `semester_titles_csv` text  DEFAULT NULL,
+  `public_note` longtext  DEFAULT NULL,
+  `semester_titles_csv` longtext  DEFAULT NULL,
   `catalog_year` int(11) DEFAULT 2006,
   `exclude` int(11) DEFAULT 0,
   `allow_dynamic` int(11) DEFAULT 0,
@@ -293,7 +366,7 @@ CREATE TABLE `degrees` (
   `min_tracks` int(11) DEFAULT 0,
   `max_tracks` int(11) DEFAULT 0,
   `default_tracks` varchar(255)  DEFAULT '',
-  `track_selection_config` text  DEFAULT NULL,
+  `track_selection_config` longtext  DEFAULT NULL,
   `school_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) ,
   KEY `degree_id` (`degree_id`) ,
@@ -314,13 +387,13 @@ CREATE TABLE `draft_courses` (
   `subject_id` varchar(10)  DEFAULT '',
   `course_num` varchar(10)  DEFAULT '',
   `catalog_year` int(11) DEFAULT 2006,
-  `title` text  DEFAULT NULL,
-  `description` text  DEFAULT NULL,
+  `title` longtext  DEFAULT NULL,
+  `description` longtext  DEFAULT NULL,
   `min_hours` decimal(8,4) DEFAULT 0.0000,
   `max_hours` decimal(8,4) DEFAULT 0.0000,
   `repeat_hours` decimal(8,4) DEFAULT 0.0000,
   `exclude` tinyint(4) DEFAULT 0,
-  `data_entry_comment` text  DEFAULT NULL,
+  `data_entry_comment` longtext  DEFAULT NULL,
   `delete_flag` tinyint(4) DEFAULT 0,
   `school_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) ,
@@ -361,7 +434,7 @@ CREATE TABLE `draft_degree_tracks` (
   `track_code` varchar(20) DEFAULT '',
   `track_title` varchar(100) DEFAULT '',
   `track_short_title` varchar(50) DEFAULT '',
-  `track_description` text DEFAULT NULL,
+  `track_description` longtext DEFAULT NULL,
   `school_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`track_id`) ,
   KEY `school_id` (`school_id`)
@@ -377,8 +450,8 @@ CREATE TABLE `draft_degrees` (
   `degree_level` varchar(5)  DEFAULT '',
   `degree_class` varchar(40)  DEFAULT 'MAJOR',
   `title` varchar(200)  DEFAULT '',
-  `public_note` text  DEFAULT NULL,
-  `semester_titles_csv` text  DEFAULT NULL,
+  `public_note` longtext  DEFAULT NULL,
+  `semester_titles_csv` longtext  DEFAULT NULL,
   `catalog_year` int(11) DEFAULT 2006,
   `exclude` int(11) DEFAULT 0,
   `allow_dynamic` int(11) DEFAULT 0,
@@ -387,7 +460,7 @@ CREATE TABLE `draft_degrees` (
   `min_tracks` int(11) DEFAULT 0,
   `max_tracks` int(11) DEFAULT 0,
   `default_tracks` varchar(255)  DEFAULT '',
-  `track_selection_config` text  DEFAULT NULL,
+  `track_selection_config` longtext  DEFAULT NULL,
   `school_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) ,
   KEY `degree_id` (`degree_id`) ,
@@ -427,13 +500,13 @@ CREATE TABLE `draft_groups` (
   `group_id` int(11) DEFAULT 0,
   `group_name` varchar(200) DEFAULT '',
   `title` varchar(255) DEFAULT '',
-  `public_note` text DEFAULT NULL,
-  `definition` text DEFAULT NULL,
-  `icon_filename` text DEFAULT NULL,
+  `public_note` longtext DEFAULT NULL,
+  `definition` longtext DEFAULT NULL,
+  `icon_filename` longtext DEFAULT NULL,
   `catalog_year` int(11) DEFAULT 2006,
   `priority` int(11) DEFAULT 50,
   `delete_flag` tinyint(4) DEFAULT 0,
-  `data_entry_comment` text DEFAULT NULL,
+  `data_entry_comment` longtext DEFAULT NULL,
   `catalog_repeat` tinyint(4) DEFAULT 0,
   `school_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) ,
@@ -451,7 +524,7 @@ db_query($q);
 $q = "
 CREATE TABLE `draft_instructions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `instruction` text DEFAULT NULL,
+  `instruction` longtext DEFAULT NULL,
   `school_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) ,
   KEY `school_id` (`school_id`)
@@ -495,13 +568,13 @@ CREATE TABLE `groups` (
   `group_id` int(11) DEFAULT 0,
   `group_name` varchar(200) DEFAULT '',
   `title` varchar(255) DEFAULT '',
-  `public_note` text DEFAULT NULL,
-  `definition` text DEFAULT NULL,
-  `icon_filename` text DEFAULT NULL,
+  `public_note` longtext DEFAULT NULL,
+  `definition` longtext DEFAULT NULL,
+  `icon_filename` longtext DEFAULT NULL,
   `catalog_year` int(11) DEFAULT 2006,
   `priority` int(11) DEFAULT 50,
   `delete_flag` tinyint(4) DEFAULT 0,
-  `data_entry_comment` text DEFAULT NULL,
+  `data_entry_comment` longtext DEFAULT NULL,
   `catalog_repeat` tinyint(4) DEFAULT 0,
   `school_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) ,
@@ -520,17 +593,17 @@ $q = "
 CREATE TABLE `menu_router` (
   `path` varchar(255)  ,
   `access_callback` varchar(255) DEFAULT '',
-  `access_arguments` text,
+  `access_arguments` longtext,
   `page_callback` varchar(255) DEFAULT '',
-  `page_arguments` text,
+  `page_arguments` longtext,
   `title` varchar(255) DEFAULT '',
-  `description` text,
+  `description` longtext,
   `type` tinyint(3) unsigned DEFAULT '0',
   `tab_family` varchar(255) DEFAULT '',
   `tab_parent` varchar(255) DEFAULT '',
   `weight` int(11) DEFAULT '0',
   `icon` varchar(255) DEFAULT '',
-  `page_settings` text,
+  `page_settings` longtext,
   `file` varchar(255) DEFAULT '',
   PRIMARY KEY (`path`),
   KEY `type` (`type`),
@@ -543,12 +616,12 @@ CREATE TABLE `modules` (
   `path` varchar(255)  ,
   `name` varchar(100)   DEFAULT '',
   `version` varchar(20)   DEFAULT '',
-  `requires` text,
+  `requires` longtext,
   `enabled` int(11)   DEFAULT '0',
   `weight` int(11)   DEFAULT '0',
   `type` varchar(20)   DEFAULT '',
   `schema` int(11)   DEFAULT '0',
-  `info` text,
+  `info` longtext,
   PRIMARY KEY (`path`)
 ); ";
 db_query($q);
@@ -629,7 +702,7 @@ db_query($q);
 $q = "
 CREATE TABLE `student_settings` (
   `student_id` varchar(30) NOT NULL,
-  `settings` text DEFAULT NULL,
+  `settings` longtext DEFAULT NULL,
   `posted` int(10) unsigned DEFAULT 0,
   PRIMARY KEY (`student_id`)
 ) ;  ";
@@ -650,7 +723,7 @@ CREATE TABLE `student_substitutions` (
   `sub_term_id` varchar(20) DEFAULT '',
   `sub_transfer_flag` tinyint(4) DEFAULT 0,
   `sub_hours` decimal(8,4) DEFAULT 0.0000,
-  `sub_remarks` text DEFAULT NULL,
+  `sub_remarks` longtext DEFAULT NULL,
   `posted` int(10) unsigned DEFAULT 0,
   `delete_flag` tinyint(4) DEFAULT 0,  
   PRIMARY KEY (`id`),
@@ -764,7 +837,7 @@ CREATE TABLE `transfer_courses` (
   `subject_id` varchar(10) DEFAULT '',
   `course_num` varchar(10) DEFAULT '',
   `title` varchar(100) DEFAULT '',
-  `description` text DEFAULT NULL,
+  `description` longtext DEFAULT NULL,
   `min_hours` decimal(8,4) DEFAULT 0.0000,
   `max_hours` decimal(8,4) DEFAULT 0.0000,
   `school_id` int(11) NOT NULL DEFAULT 0,
@@ -819,7 +892,7 @@ $q = "
 CREATE TABLE `user_settings` (
   `user_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `value` text DEFAULT NULL,
+  `value` longtext DEFAULT NULL,
   `updated` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`user_id`,`name`),
   KEY `value` (`value`(768)),
@@ -861,7 +934,7 @@ db_query($q);
 $q = "
 CREATE TABLE `variables` (
   `name` varchar(255)  ,
-  `value` text,
+  `value` longtext,
   PRIMARY KEY (`name`)
 ); ";
 db_query($q);
@@ -871,7 +944,7 @@ $q = "
 CREATE TABLE `student_priority` (
   `student_id` varchar(30) NOT NULL,
   `priority_value` decimal(8,4) DEFAULT NULL,
-  `results` text DEFAULT NULL,
+  `results` longtext DEFAULT NULL,
   `updated` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`student_id`) ,
   KEY `priority_value` (`priority_value`),
@@ -885,7 +958,7 @@ $q = "
 CREATE TABLE `user_attributes` (
   `user_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `value` text DEFAULT NULL,
+  `value` longtext DEFAULT NULL,
   `updated` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`user_id`,`name`),
   KEY `value` (`value`(768)),
@@ -904,12 +977,12 @@ CREATE TABLE `watchdog` (
   `user_name` varchar(50) DEFAULT '',
   `cwid` varchar(30) DEFAULT '',
   `type` varchar(100) DEFAULT '',
-  `message` text DEFAULT NULL,
-  `variables` text DEFAULT NULL,
+  `message` longtext DEFAULT NULL,
+  `variables` longtext DEFAULT NULL,
   `severity` tinyint(3) unsigned DEFAULT 0,
   `extra_data` varchar(255) DEFAULT '',
-  `location` text DEFAULT NULL,
-  `referer` text DEFAULT NULL,
+  `location` longtext DEFAULT NULL,
+  `referer` longtext DEFAULT NULL,
   `ip` varchar(64) DEFAULT '',
   `is_mobile` tinyint(4) DEFAULT 0,
   `is_student` tinyint(4) DEFAULT 0,
@@ -926,6 +999,5 @@ CREATE TABLE `watchdog` (
 );  ";
   
   db_query($q); 
-    
-  
+      
 }

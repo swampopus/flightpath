@@ -85,7 +85,7 @@ function system_flightpath_can_assign_course_to_degree_id($degree_id, Course $co
   $temp = explode("|", $this_major_code);
   $this_first_part = trim($temp[0]);  // get just the first part. Ex, ENGL|_something => ENGL
   
-  //fpm('here in system fp_can_assign.....');
+  
   
   // If the configuration is such that a course cannot be assigned to a degree's tracks, then no.
   // Example:  if a course has been assigned to ENGL, then it can't also get assigned to ENGL|_track1
@@ -744,8 +744,9 @@ function system_confirm_db_updates_form() {
   );
   
 
-  $form["submit"] = array(
+  $form["submit_btn"] = array(
     "type" => "submit",
+    "spinner" => TRUE,
     "value" => t("Continue"),
     "prefix" => "<hr>",
     "suffix" => "&nbsp; &nbsp; <a href='javascript: history.go(-1);'>" . t("Cancel") . "</a>",    
@@ -767,6 +768,10 @@ function system_confirm_db_updates_form() {
  * @param unknown_type $form_state
  */
 function system_confirm_db_updates_form_submit($form, $form_state) {
+  
+  // Since this could take a little while, let's use the batch system.
+  $modules = array();
+  
   
   
   // We need to find modules whose schema in their .info file
@@ -809,8 +814,20 @@ function system_confirm_db_updates_form_submit($form, $form_state) {
            
             // Does this module need to run db updates?
             if (@$cur["enabled"] == "1" && @$cur["schema"] != @$info_details_array["schema"] && @$info_details_array["schema"] != "") {
-              // YES, we need to run this module's hook_update function, if it exists.
               
+              // Add to our list of modules to run in our batch operations.
+              
+              $modules[] = array(
+                'module' => $module,
+                'path' => $path,
+                'cur_schema' => intval($cur['schema']),
+                'schema' => $info_details_array['schema'],
+              );
+              
+              
+              
+              /*
+               * // YES, we need to run this module's hook_update function, if it exists.              
               // So, let's try to do that.              
 
               // If the module has a .install file, begin by including it.
@@ -833,22 +850,110 @@ function system_confirm_db_updates_form_submit($form, $form_state) {
                                        
               
               fp_add_message(t("The module %module has run its DB updates.", array("%module" => $module)));              
-
+              */
               
               
-            }  
+            } // if enabled & schema != db schema  
   
-          }
-        }
-      }
-    }
-  }  
+          } // if fileexists
+        }//if isdir(file)
+      }// while file = readdir()
+    } // if opendir
+  } // foreach module dirs as module_dir  
   
   // Clear our cache
-  fp_clear_cache();
+  //fp_clear_cache();
   
-  fp_goto("admin/completed-db-updates");
+  //fp_goto("admin/completed-db-updates");
+  
+  
+  
+    
+  
+  // Okay, set up the batch....
+  $batch = array(
+    "operation" => array("system_perform_db_updates_perform_batch_operation", array($modules)),
+    "title" => t("Performing Database Updates"),    
+    "progress_message" => "Processing @current of @total...",
+    "display_percent" => TRUE,
+  );
+ 
+  $batch["finished_callback"] = array("system_finished_db_updates_finished");
+   
+  // Set the batch...
+  batch_set($batch);  
+  
+  
 }
+
+
+function system_finished_db_updates_finished($batch) {
+  // Clear our cache, since menu options might have changed.
+  
+  fp_clear_cache();
+    
+  fp_goto("admin/config/modules");
+}
+
+
+/**
+ * Performs db updates ONE module at a time.
+ */
+function system_perform_db_updates_perform_batch_operation(&$batch, $modules) {  // if this is our first time through, let's init our values.
+  
+  if (!isset($batch["results"]["total"])) {
+    // Our first time through.  Let's start up.
+    $batch["results"]["total"] = count($modules);
+    $batch["results"]["current"] = 0;  
+    $batch["results"]["finished"] = FALSE;    
+ }
+  
+      
+  $t = $batch["results"]["current"];
+
+  
+  $module = $modules[$t]['module'];    
+  $path = $modules[$t]['path'];    
+  $cur_schema = $modules[$t]['cur_schema'];    
+  $schema = $modules[$t]['schema'];    
+  
+  // If the module has a .install file, begin by including it.
+  if (include_module_install($module, $path)) {
+      
+    // Include the original module file first.
+    include_module($module, TRUE, $path);
+                       
+    // Now, we can call hook_update, if it exists.
+    if (function_exists($module . '_update')) {
+      call_user_func_array($module . '_update', array($cur_schema, $schema));
+    }
+       
+  }              
+  
+  // Okay, update the modules table for this module, and set schema to correct version.
+  $res = db_query("UPDATE modules 
+                    SET `schema` = '?'
+                    WHERE path = '?' LIMIT 1 ", $schema, $path);
+                           
+  
+  fp_add_message(t("The module %module has run its DB updates.", array("%module" => $module)));              
+  
+  
+  // Update our values.
+  $batch["results"]["current"] = $t + 1; // go to next one.
+  
+    
+  // Have we finished?
+  if (intval($batch["results"]["current"]) >= intval($batch["results"]["total"])) {
+    
+    $batch["results"]["finished"] = TRUE;    
+  }
+    
+  
+    
+  
+} // system_perform_db_updates_perform_batch_operation
+
 
 
 
@@ -3608,7 +3713,7 @@ function system_render_advising_snapshop_for_iframe() {
   // Since this can take a while to load, maybe it loads by javascript async instead?  Or maybe its an iframe which can also be async?
   $adv_array = student_search_display_my_advisees(TRUE, NULL, $selected_school_id);  
   $total = count($adv_array);
-  //fpm($total);
+  
   $advised_count = 0;
   $advised_percent = 0;
   if ($total > 0) {
@@ -3617,7 +3722,7 @@ function system_render_advising_snapshop_for_iframe() {
         $advised_count++;
       } 
     }
-    //fpm($advised_count);
+    
     $advised_percent = round($advised_count/$total * 100, 2) ;      
   
     $unfinished = 100 - $advised_percent;
