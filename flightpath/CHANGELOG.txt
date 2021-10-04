@@ -17,6 +17,8 @@ FlightPath 6.x Changelog
   
   Minor tweak when loading degree to prevent PHP warning.
   
+  Since "groups" is a reserved keyword in MySQL 8+, edited various files to enclose in backticks when performing sql on that table.
+  
 
 2021-09-27
   Altered weights in dashboard render array for consistency.

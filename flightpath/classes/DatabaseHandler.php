@@ -845,7 +845,7 @@ class DatabaseHandler extends stdClass
     
     
     
-    $res7 = $this->db_query("SELECT group_name FROM groups
+    $res7 = $this->db_query("SELECT group_name FROM `groups`
               WHERE group_id = ?
               AND delete_flag = 0
                LIMIT 1 ", $group_id) ;
@@ -880,7 +880,7 @@ class DatabaseHandler extends stdClass
 
     
 
-    $res7 = $this->db_query("SELECT group_id FROM groups
+    $res7 = $this->db_query("SELECT group_id FROM `groups`
               WHERE group_name = ?
               AND catalog_year = ?
               AND school_id = ?

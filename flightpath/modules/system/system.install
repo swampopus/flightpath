@@ -116,7 +116,7 @@ function system_update($old_schema, $new_schema) {
                                   MODIFY `semester_titles_csv` LONGTEXT,
                                   MODIFY `track_selection_config` LONGTEXT");
 
-    db_query("ALTER TABLE groups MODIFY `public_note` LONGTEXT,
+    db_query("ALTER TABLE `groups` MODIFY `public_note` LONGTEXT,
                                  MODIFY `definition` LONGTEXT,
                                  MODIFY `icon_filename` LONGTEXT,
                                  MODIFY `data_entry_comment` LONGTEXT");
