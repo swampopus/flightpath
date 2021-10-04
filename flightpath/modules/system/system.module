@@ -1855,13 +1855,15 @@ function system_school_data_form($school_id = 0) {
  */
 function system_get_exclude_degree_ids_from_appears_in_counts($school_id) {
   
+  $rtn = array();
+  
   // Have we already cached this for this page load?  
   if (isset($GLOBALS["exclude_degree_ids_from_appears_in_counts"][$school_id])) {
     return $GLOBALS["exclude_degree_ids_from_appears_in_counts"][$school_id];
   }  
     
   $db = get_global_database_handler();
-  $rtn = array();
+  
   $majors = csv_to_array(variable_get_for_school("exclude_majors_from_appears_in_counts", "", $school_id));
   
   foreach ($majors as $major_code) {
@@ -1870,6 +1872,7 @@ function system_get_exclude_degree_ids_from_appears_in_counts($school_id) {
   
   
   $GLOBALS["exclude_degree_ids_from_appears_in_counts"][$school_id] = $rtn;  // cache for next time.
+  
   return $rtn;
   
 } //system_get_exclude_degree_ids_from_appears_in_counts

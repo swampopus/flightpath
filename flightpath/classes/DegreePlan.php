@@ -669,6 +669,8 @@ class DegreePlan extends stdClass
 
     $this->list_groups->sort_priority();
     
+    if (!is_array($exclude_degree_ids)) $exclude_degree_ids = array();
+    
     if (!in_array($this->degree_id, $exclude_degree_ids)) {
       $group_course_id_array = $this->list_groups->get_group_course_id_array();
       // Add to our required_course_id_array.      
