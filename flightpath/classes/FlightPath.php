@@ -1252,6 +1252,8 @@ class FlightPath extends stdClass
       $faculty_id = $user->cwid;
     }
 
+    $advising_session_token = sha1(mt_rand(0, 99999) . microtime());
+
     
     // It's possible the user has simply pressed "refresh" after submitting the form.  If so,
     // there is no reason to re-submit everything, creating duplicate data in some situations.
@@ -1406,10 +1408,10 @@ class FlightPath extends stdClass
       $result = $db->db_query("INSERT INTO advising_sessions
                 (student_id, faculty_id, term_id, degree_id,
                 major_code_csv,
-                catalog_year, posted, is_whatif, is_draft)
+                catalog_year, posted, is_whatif, is_draft, advising_session_token)
                 VALUES
-                ('?', '?','?','?','?','?','?','?','?') 
-                ", $student_id, $faculty_id,$term_id,$degree_id, $major_code_csv, $catalog_year, time(), $is_what_if, $is_draft);
+                (?,?,?,?,?,?,?,?,?,?) 
+                ", $student_id, $faculty_id,$term_id,$degree_id, $major_code_csv, $catalog_year, time(), $is_what_if, $is_draft, $advising_session_token);
       $advising_session_id = db_insert_id();
       $advising_session_id_array[$term_id] = $advising_session_id;
       $advising_session_id_array_count[$term_id] = 0;

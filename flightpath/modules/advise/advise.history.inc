@@ -28,6 +28,7 @@ function advise_display_history() {
  
   // If coming here from a save, display info here.
   if (@$_REQUEST["adv_id_array_serialized"] != "") {
+    $acount = 0;
     $click_links = "";
     $advising_session_id_array = unserialize($_REQUEST["adv_id_array_serialized"]);
  
@@ -46,11 +47,18 @@ function advise_display_history() {
                             </a>
                          </li>";        
                 
-                
+        $acount++;
 
       }
     }
+    $group_link = "";
+    if ($acount > 1) {
+      $turl = fp_url("advise/popup-display-summary", "show_as_group=yes&advising_session_id=" . join(",", $advising_session_id_array));
+      $on_click = "popupLargeIframeDialog(\"" . $turl . "\",\"" . t("Advising Sessions") . "\",\"\");";  
+      $group_link = "<a href='javascript:$on_click' class='advising-summary-group-link'><i class='fa fa-list-ul'></i> " . t("View Combined") . "</a>";    
+    }
 
+    $acount = 0;
 
     $rtn .= "
         <tr>
@@ -61,17 +69,18 @@ function advise_display_history() {
               margin: 10px 0px 10px 0px; padding: 10px; 
               font-size: 12pt; font-weight: bold;'>
         " . t("You have successfully advised") . " " . $db->get_student_name($student_id) . " ($student_id).
-        <br>" . t("Click to view a pop-up printable summary for:") . " 
+        <br>" . t("Click to view a pop-up printable summary for:") . "
          <ul style='margin-top: 5px; margin-bottom: 5px;'>
         $click_links
-        </ul></div>
+        </ul>$group_link</div>
         
         </td>
         </tr>
     ";
 
   }
-    
+  
+  $group_link = "";
 
    
 

@@ -158,9 +158,27 @@ function system_update($old_schema, $new_schema) {
     fpm("Altered various system tables to change TEXT to LONGTEXT.");
   }    
   
+  if (intval($old_schema) < 4) {
+    // We want to add the concept of a "advising_session_token" to the advising_sessions table.
+    db_query("ALTER TABLE advising_sessions ADD COLUMN `advising_session_token` varchar(255) ");
+    db_query("ALTER TABLE advising_sessions ADD INDEX (`advising_session_token`) ");
+
+    // Assign a unique advising session "token" to every advising session/group of sessions saved at the same time.
+    $res = db_query("SELECT distinct(posted), student_id FROM advising_sessions");
+    while ($cur = db_fetch_array($res)) {
+      $p = $cur['posted'];
+      $student_id = $cur['student_id'];
+      $token = sha1(mt_rand(0, 99999) . $p . $student_id);
+      db_query("UPDATE advising_sessions SET advising_session_token = ? WHERE posted = ? AND student_id = ?", array($token, $p, $student_id));
+    }
+
+
+  }
+
+
   
       
-}
+} // update
 
 
 
@@ -234,9 +252,11 @@ CREATE TABLE `advising_sessions` (
   `is_whatif` tinyint(4) DEFAULT 0,
   `is_draft` tinyint(4) DEFAULT 0,
   `is_empty` tinyint(4) DEFAULT 0,
+  `advising_session_token` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`advising_session_id`),
   KEY `sid` (`student_id`),
-  KEY `termid` (`term_id`)
+  KEY `termid` (`term_id`),
+  KEY `advising_session_token` (`advising_session_token`)
 );   ";
 db_query($q);
 

@@ -6,6 +6,10 @@ FlightPath 6.x Changelog
   Added a "view combined" link on History for advisings of multiple terms, so you can see all the selections on
   one screen.
   
+  Added new column to "advising_sessions", called "advising_session_token".  It is the same value when we advise for
+  1 or more terms. It makes it easier to get a list of all the terms that were advised at the same time, and possibly can
+  be useful in the future for other modules.
+  
 
 2021-10-03  
   Made it so the db updates system uses the Batch API so it won't timeout over long update jobs.

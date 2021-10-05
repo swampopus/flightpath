@@ -2521,7 +2521,7 @@ function system_handle_form_submit() {
     $test_ext = trim($temp[count($temp) - 1]);
 
     if (!in_array($test_ext, $allowed_ext)) {
-      watchdog('system', "handle_form_submit - file type $ext not allowed to be included in form submission.", array(), WATCHDOG_ERROR);
+      watchdog('system', "handle_form_submit - file type $test_ext not allowed to be included in form submission.", array(), WATCHDOG_ERROR);
       fp_add_message(t("Include file type (%ext) not allowed in form submission.  Allowed extensions: .php, .inc, .class, .module.", array("%ext" => $test_ext)), "error");
       fp_goto("<front>");
       return;
@@ -3032,7 +3032,7 @@ function system_display_login_page() {
           </noscript>";
   
     
-  $rtn .= $top_blocks;
+  
   $rtn .= "<div class='login-content-div'>";
   
   $rtn .= "        
@@ -3632,7 +3632,12 @@ function system_display_dashboard_page () {
     $render['recent_advising_history_top'] = array('value' => "<div class='advising-history-feed-block dash-feed-block'>
                                             " . fp_render_section_title(t("Recent Advising History")) . "
                                            <div class='contents'>", 'weight' => 50);
-           
+
+                                           
+    // TODO: For the student advisings, we want to group together terms that were advised at the same time.
+    
+
+
     $res = db_query("SELECT * FROM advising_sessions
                 WHERE student_id = ?
                 AND is_draft = 0
@@ -3799,96 +3804,6 @@ function system_render_advising_snapshop_for_iframe() {
 
 
 
-
-
-/**
- * Display the "main" tab-page for FlightPath.  Displays announcements
- * as well as the Tools menu, and the "special administrative tools" menu.
- */
-function z__system_display_main_page() {
-  global $user;
-  $rtn = "";
-
-  // If we are not logged in, then we need to re-direct the user to 
-  // the login page!
-  if ($_SESSION["fp_logged_in"] != TRUE) {
-    $query = "";
-    if (isset($_REQUEST["logout"])) $query = "logout=" . $_REQUEST["logout"];
-    // Since we are not logged in, and are headed to the login page, also clear out any advising variables we might have.
-    foreach ($_REQUEST as $key => $val) {
-      unset($_REQUEST[$key]);
-      unset($_GET[$key]);
-      unset($_POST[$key]);
-    }
-    
-    global $current_student_id;
-    $current_student_id = "";  // clear this so the fp_goto doesn't try to add it.
-    
-    session_destroy();
-    session_commit();
-    fp_goto("login", $query);
-    return;  
-  }
-
-  $rtn .= "<table class='fp-semester-table'>";
-  
-  fp_add_css(fp_get_module_path("system") . "/css/style.css");
-  
-  
-  $left_col_blocks = blocks_render_blocks("system_main", "left_col");
-  $right_col_blocks = blocks_render_blocks("system_main", "right_col");
-  
-  
-    $rtn .= "<tr><td width='50%' valign='top'  style='padding-right: 10px;'>
-              $left_col_blocks
-              </td><td width='50%' valign='top' style='padding-left: 10px;'>
-                    $right_col_blocks
-              </td></tr>";
-  
-  
-  $rtn .= "</table>";
-  
-  $rtn .= "<form id='mainform' method='POST'>
-      <input type='hidden' id='scrollTop'>
-      <input type='hidden' id='performAction' name='performAction'>
-      <input type='hidden' id='advisingWhatIf' name='advisingWhatIf'>
-      <input type='hidden' id='currentStudentID' name='currentStudentID'>
-      </form>";
-
-  //$pC .= $screen->get_javascript_code();
-
-
-/*
-  $screen->page_content = $pC;
-  $screen->page_has_search = true;
-  if ($_SESSION["fp_user_type"] == "student" || $_SESSION["fp_can_advise"] == false)
-  {
-    $screen->page_has_search = false;
-  }
-  $screen->build_system_tabs(0);
-
- */
-
-  //////////////////////////////////////////////////////////
-  // To cut down on how long it takes to load huge groups
-  // like Free Electives, we will pre-load some of the course inventory here.
-  if (@$_SESSION["fp_cached_inventory_flag_one"] != true)
-  {
-    $load_number = $GLOBALS["fp_system_settings"]["load_course_inventory_on_login_number"];
-    if ($load_number > 1) {
-      $fp = new FlightPath();
-      $fp->cache_course_inventory(0,$load_number);
-      $_SESSION["fp_cached_inventory_flag_one"] = true;
-    }
-  }
-
-
-  // send to the browser
-  //$screen->output_to_browser();
-  
-  return $rtn;
-  
-}
 
 
 
@@ -4392,91 +4307,3 @@ function system_disable_module($module_details) {
 
 
 
-
-
-/**
- * Construct an HTML element and return it.
- *
- */
-function z__system_build_element($name, $type = "", $label = "", $description = "", $default_value = "", $csv_to_array = FALSE) {
-  
-  $rtn = "";
-  
-  if (!$default_value) {
-    $default_value = $GLOBALS["fp_system_settings"][$name];
-  }
-  
-  if (is_array($default_value)) {
-    $default_value = @join(", ", $default_value);
-  }
-  
-  if (!$type) {
-    $type = "textfield";
-  }
-  
-  if (!$label) {
-    $label = $name;
-  }
-  
-  
-  if ($type == "textfield") {
-    $rtn .= "<div class='fp-system-settings-element fp-system-settings-textfield'>
-              <label>$label:</label>
-                <div class='fp-system-settings-input'>
-                  <input type='textfield' name='$name' value='$default_value'>
-                </div>
-              ";
-    if ($description) {
-      $rtn .= "<div class='fp-system-settings-element-description'>$description</div>";
-    }
-    $rtn .= "</div>";
-  }
-  
-  
-  if ($type == "textarea") {
-    $rtn .= "<div class='fp-system-settings-element fp-system-settings-textarea'>
-              <label>$label:</label>
-                <div class='fp-system-settings-input'>
-                  <textarea name='$name'>$default_value</textarea>
-                </div>
-              ";
-    if ($description) {
-      $rtn .= "<div class='fp-system-settings-element-description'>$description</div>";
-    }
-    $rtn .= "</div>";
-    
-  }
-  
-  if ($type == "boolean") {
-    $sel_f = $sel_t = "";
-    if ($default_value) {
-      $sel_t = "selected";
-    }    
-    $rtn .= "<div class='fp-system-settings-element fp-system-settings-boolean'>
-              <label>$label:</label>
-                <div class='fp-system-settings-input'>
-                  <select name='$name'>
-                    <option value='' $sel_f>FALSE</option>
-                    <option value='1' $sel_t>TRUE</option>
-                  </select>
-                </div>
-              ";
-    if ($description) {
-      $rtn .= "<div class='fp-system-settings-element-description'>$description</div>";
-    }
-    $rtn .= "</div>";
-    
-  }
-  
-  // We need to convert this CSV back into an array when we save it!
-  if ($csv_to_array) {
-    if (!isset($_SESSION["fp_system"]["csv_to_array"])) {
-      $_SESSION["fp_system"]["csv_to_array"] = array();
-    }
-    // Add to our list.
-    $_SESSION["fp_system"]["csv_to_array"][] = $name;
-  }
-  
-  
-  return $rtn;
-}
