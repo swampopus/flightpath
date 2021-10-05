@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2021-10-05
+  Added a "view combined" link on History for advisings of multiple terms, so you can see all the selections on
+  one screen.
+  
+
 2021-10-03  
   Made it so the db updates system uses the Batch API so it won't timeout over long update jobs.
   
