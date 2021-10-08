@@ -800,7 +800,7 @@ function fp_no_html_xss($string) {
  * 
  */
 function filter_markup($str, $type = "basic") {
-  
+
   // Use the DOM functions to repair any mismatched HTML.
   $doc = new DOMDocument();
   @$doc->loadHTML(mb_convert_encoding($str, 'HTML-ENTITIES', 'UTF-8'));   // ensure we are in UTF8

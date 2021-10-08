@@ -6,6 +6,19 @@
 */
 
 
+
+
+function content_update($old_schema, $new_schema) {
+  if (intval($old_schema) < 2) {
+    // Adding user_id to the content_versions table, so we know which user edited what version.
+    db_query("ALTER TABLE content_versions ADD COLUMN `user_id` int NOT NULL DEFAULT '0' ");
+    db_query("ALTER TABLE content_versions ADD INDEX (`user_id`) ");
+  }
+}
+
+
+
+
 /**
  * Hook install.  Called when the module is installed on the admin modules page.
  */
@@ -40,8 +53,10 @@ function content_install() {
        CREATE TABLE `content_versions` (
   `vid` int unsigned NOT NULL AUTO_INCREMENT,
   `cid` int unsigned NOT NULL,
+  `user_id` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`vid`) ,
-  KEY `cid` (`cid`)
+  KEY `cid` (`cid`),
+  KEY `user_id` (`user_id`)
 );";
   
   db_query($query);

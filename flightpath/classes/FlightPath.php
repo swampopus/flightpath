@@ -1394,7 +1394,7 @@ class FlightPath extends stdClass
     // session ID's are in an array.
     $advising_session_id_array = array();
     $advising_session_id_array_count = array();
-
+    $posted = time();
     $temp = explode(",",$available_terms);
     foreach ($temp as $term_id)
     {
@@ -1411,7 +1411,7 @@ class FlightPath extends stdClass
                 catalog_year, posted, is_whatif, is_draft, advising_session_token)
                 VALUES
                 (?,?,?,?,?,?,?,?,?,?) 
-                ", $student_id, $faculty_id,$term_id,$degree_id, $major_code_csv, $catalog_year, time(), $is_what_if, $is_draft, $advising_session_token);
+                ", $student_id, $faculty_id,$term_id,$degree_id, $major_code_csv, $catalog_year, $posted, $is_what_if, $is_draft, $advising_session_token);
       $advising_session_id = db_insert_id();
       $advising_session_id_array[$term_id] = $advising_session_id;
       $advising_session_id_array_count[$term_id] = 0;

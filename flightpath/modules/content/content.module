@@ -690,8 +690,7 @@ function content_edit_content_form($type = "", $cid = "") {
 
   
   fp_add_body_class('content-edit-type--' . $type);
-  
-  
+    
   
   // For simplicity, and because it causes no harm except a small amount of extra bandwidth, we will
   // state that all "content" forms are multipart (so they can handle file uploads) even if there
@@ -1323,14 +1322,14 @@ function content_content_save(&$content) {
     $content->cid = db_insert_id();
     
     // insert into content_versions to get the vid.
-    db_query("INSERT INTO content_versions (cid) VALUES (?)", array($content->cid));
+    db_query("INSERT INTO content_versions (cid, `user_id`) VALUES (?,?)", array($content->cid, $user->id));
     $content->vid = db_insert_id();
     
   }
   else {
     // If this is an EXISTING content, then insert once into content_versions to get new vid.  Update title and vid in content table.    
     // insert into content_versions to get the vid.
-    db_query("INSERT INTO content_versions (cid) VALUES (?)", array($content->cid));
+    db_query("INSERT INTO content_versions (`cid`, `user_id`) VALUES (?,?)", array($content->cid, $user->id));
     $content->vid = db_insert_id();
   }
   
@@ -1338,8 +1337,8 @@ function content_content_save(&$content) {
   
 
   // Now we should have a fully created $content object.  Let's update the title and other values in the content table.
-  db_query("UPDATE content SET vid = ?, title = ?, updated = ?, user_id = ?, published = ?, delete_flag = ? WHERE
-            cid = ?", array($content->vid, $content->title, time(), $user->id, $content->published, $content->delete_flag, $content->cid));
+  db_query("UPDATE content SET vid = ?, title = ?, updated = ?, published = ?, delete_flag = ? WHERE
+            cid = ?", array($content->vid, $content->title, time(), $content->published, $content->delete_flag, $content->cid));
 
   
   // Now we are going to insert all of the field values.  We assume there is a table ALREADY CREATED with our field names
@@ -1558,7 +1557,7 @@ function content_content_load(&$content) {
   $content = db_fetch_object($res);
 
   // Populate our field values in the content object
-  
+
   $res = db_query("SELECT * FROM content__$content->type WHERE vid = ?", array($content->vid));
   $fieldvals = db_fetch_array($res);
 
@@ -1568,30 +1567,30 @@ function content_content_load(&$content) {
   if (!isset($types[$content->type])) {
     return;
   }
-  
+
   foreach ($types[$content->type]['fields'] as $fieldname => $details) {
     
     if ($details['type'] != 'cfieldset') {
       $val = @$fieldvals['field__' . $fieldname];
+      
       if (is_serialized_string($val)) {
         $val = unserialize($val);
       }
       
       $content->{'field__' . $fieldname} = array('value' => $val, 'field' => $details);
-                  
-                  
+      
       $display_value = $val;
-        
-      // Figure out the "display_value" for this field.
-        
+
+      // Figure out or clean up the "display_value" for this field.        
       if (isset($details['filter']) && $details['filter'] != 'plain') {          
         $display_value = filter_markup(trim($display_value), $details['filter']);        
       }
-      else {
+      else {        
         // Always assumed to be "plain" if no filter is set.
-        $display_value = filter_markup($display_value, "plain");
+        $display_value = filter_markup($display_value, "plain");        
         // Need to add in line breaks if this was plain.
         $display_value = nl2br(trim($display_value));
+        
       }
       
       // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
@@ -1669,6 +1668,7 @@ function content_content_load(&$content) {
           if (is_serialized_string($val)) {
             $val = unserialize($val);
           }
+          
           $content->{'field__' . $fieldname} = array('value' => $val, 'field' => $details);
           $display_value = $val;
           if (isset($edetails['filter']) && $edetails['filter'] != 'plain') {

@@ -1,7 +1,15 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-10-07
+  Made changes to content module, so that we keep track of each version's author (user_id), but the original
+  user_id in the content table doesn't get overwritten.  This lets admin edit an existing piece of content, for example,
+  without us losing track of who the original author was, or who the author is of each version.
 
+  Added some extra CSS to Advising Screen, for the table rows containing the pie charts.  Should make it easier
+  to selectively hide or show them for future CSS devs.
+
+  
 2021-10-05
   Added a "view combined" link on History for advisings of multiple terms, so you can see all the selections on
   one screen.

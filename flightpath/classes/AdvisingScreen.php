@@ -1939,14 +1939,23 @@ function draw_menu_items($menu_array) {
     invoke_hook("theme_pie_charts", array(&$pie_chart_theme_array));
     //////////////////
 
-                     
+    $prcount = 0;
     // Now, cycle through all of the 'rows' of degrees we need to draw. 
     foreach ($pie_chart_theme_array["degree_rows"] as $degree_id => $details) {
       
       if ($details["bool_display"] === FALSE) continue;   // hide the entire row  
       
-                   
-      $rtn .= "<tr class='pie-degree-row pie-degree-row-$degree_id {$details['row_classes']}'><td colspan='2'>
+      // We also want to denote if this is part of a "combined" degree or not.      
+      $extra_pie_trtd_class = "";
+      if ($this->degree_plan->is_combined_dynamic_degree_plan) {
+        $extra_pie_trtd_class .= "pie-combined-dynamic-degree-plan";
+      }
+      else {
+        $extra_pie_trtd_class .= "pie-single-degree-plan";
+      }
+
+      
+      $rtn .= "<tr class='pie-degree-row pie-degree-row-$degree_id pie-row-count-$prcount {$details['row_classes']}'><td colspan='2' class='$extra_pie_trtd_class'>
                 <div class='pie-row-label'>{$details["row_label"]}</div>";
   
       
@@ -2028,7 +2037,7 @@ function draw_menu_items($menu_array) {
 
 
       $rtn .= "</td></tr>";
-  
+      $prcount++;
 
     } // foreach degree_rows
 
