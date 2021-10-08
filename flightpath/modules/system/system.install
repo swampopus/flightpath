@@ -37,7 +37,7 @@ function system_enable() {
   }  
 
   // Set up the modules table-- add the system module first.    
-  db_query("INSERT INTO modules (path, name, version, enabled, weight, type, `schema`)
+  db_query("INSERT INTO modules (`path`, `name`, `version`, `enabled`, `weight`, `type`, `schema`)
             VALUES ('modules/system', 'system', 'core', 1, '-999', 'module', '?') ", $info_details_array["schema"]);
     
 
@@ -45,7 +45,21 @@ function system_enable() {
   $modules = array("admin", "advise", "comments", "student_search", "update_status", "content", "announcements", "tinymce", "course_search", "blank_degrees", "user", 
                     "batch", 'calendar', 'alerts', 'audit', 'engagements', 'notify', 'student_files', 'student_priority', 'student_profile');
   foreach ($modules as $module) {
-    system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => "core"));
+    
+    $info_contents = file_get_contents("modules/$module.info");    
+    // From the info_contents variable, split up and place into an array.
+    $info_details_array = array();
+    $lines = explode("\n", $info_contents);
+    foreach ($lines as $line) {
+      if (trim($line) == "") continue;
+      $temp = explode("=", trim($line));
+      $info_details_array[trim($temp[0])] = trim(substr($line, strlen($temp[0]) + 1)); 
+    }      
+    
+    $schema = 0;
+    if (isset($info_details_array['schema'])) $schema = $info_details_array['schema'];
+    
+    system_enable_module(array("module" => $module, "path" => "modules/$module", "version" => "core", "schema" => $schema));
   }
   
   

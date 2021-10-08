@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-10-08
+  Upon system install, correctly get the modules' schema from their .info file, so we aren't told we need to run updates right off the bat.
+  
+
 2021-10-07
   Made changes to content module, so that we keep track of each version's author (user_id), but the original
   user_id in the content table doesn't get overwritten.  This lets admin edit an existing piece of content, for example,

@@ -4230,13 +4230,16 @@ function system_enable_module($module_details) {
   if (@$module_details["enabled"] == "") {
     // Wasn't in the database, so we need to install it.
 
+    $schema = 0;
+    if (isset($module_details['schema'])) $schema = $module_details['schema'];
+    
     // Add to our table.
     // (delete anything all ready there first)      
-    $res = db_query("DELETE FROM modules WHERE name = '?' ", $module);
+    $res = db_query("DELETE FROM modules WHERE `name` = ? ", $module);
     // Now, add back into the table.
-    $res = db_query("INSERT INTO modules (name, path, version, requires, enabled, type, `schema`, info)
-                     VALUES ('?', '?', '?', '?', '?', '?', '?', '?')
-                     ", $module, $path, @$module_details["version"], @$module_details["required"], "1", "module",
+    $res = db_query("INSERT INTO modules (`name`, `path`, `version`, `requires`, `enabled`, `type`, `schema`, `info`)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                     ", $module, $path, @$module_details["version"], @$module_details["required"], $schema, "module",
                         @intval($module_details["schema"]), serialize($module_details));
     
     $bool_call_hook_install = TRUE;
@@ -4269,7 +4272,7 @@ function system_enable_module($module_details) {
 
 
   // Update our table.
-  $res = db_query("UPDATE modules SET enabled = '1' WHERE name = '?' ", $module);    
+  $res = db_query("UPDATE modules SET `enabled` = '1' WHERE `name` = ? ", $module);    
 
   fp_add_message(t("The module %module has been enabled.", array("%module" => $module)));
 
