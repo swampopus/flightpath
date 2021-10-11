@@ -295,14 +295,14 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
   if (0 === error_reporting()) { return false;} // suppressed with @-operator
    
   $err_name = _fp_map_php_error_code($error_level); 
-  if (stristr($err_name, 'notice')) return FALSE; // don't care about Notices. 
+  if (is_string($err_name) && stristr($err_name, 'notice')) return FALSE; // don't care about Notices. 
 
   
   $watchdog_type = "php_error";
   $watchdog_severity = WATCHDOG_ERROR;
     
   
-  if (stristr($err_name, 'warning')) {
+  if (is_string($err_name) && stristr($err_name, 'warning')) {
     $watchdog_type = "php_warning";
     $watchdog_severity = WATCHDOG_ALERT;
   } 
@@ -1101,8 +1101,8 @@ function fp_validate_utf8($text) {
  * "bad" characters, or characters which might not be allowed for variables, for example,
  * into underscores (_).
  *
- * @param unknown_type $str
- * @return unknown
+ * @param string $str
+ * @return string
  */
 function fp_get_machine_readable($str) {
  return preg_replace('@[^a-zA-Z0-9_]+@','_',$str);  
@@ -1344,7 +1344,7 @@ function fp_set_title($title) {
 /**
  * Add a CSS class to the body tag of the page.  Useful for themeing later on.
  *
- * @param unknown_type $class
+ * @param String $class
  */
 function fp_add_body_class($class) {
   
@@ -2231,8 +2231,9 @@ function fp_html_print_r($var, $name = "", $cnt = 0, $max_levels = 20) {
  * This is used usually when being viewed by a mobile device.
  * It will shorten a catalog year range of 2008-2009 to just
  *  "08-09" or "2008-09"  or even "09-2009".
+ *  
  *
- * @param unknown_type $cat_range
+ * @param string $cat_range - Ex:  2006-2007
  */
 function get_shorter_catalog_year_range($cat_range, $abbr_first = true, $abbr_second = true) {
   
@@ -2344,6 +2345,7 @@ function fp_get_js_confirm_link($question, $action_if_yes, $link_text, $extra_cl
  * Similar to the fp_get_js_confirm_link function, but this is a prompt box
  * which lets the user type in a response.
  * 
+ * 
  * @see fp_get_js_confirm_link
  */
 function fp_get_js_prompt_link($question, $default, $action_if_yes, $link_text, $extra_class = "") {
@@ -2372,6 +2374,7 @@ function fp_get_js_prompt_link($question, $default, $action_if_yes, $link_text, 
  * 
  * Similar to the fp_get_js_confirm_link function, but this is a simple alert message,
  * with no user input.
+ * 
  * 
  * @see fp_get_js_confirm_link
  */
@@ -2402,7 +2405,7 @@ function fp_get_js_alert_link($message, $link_text = "", $extra_css_class = "") 
 /**
  * Simple helper function to reduce whitespace (like double-spaces) 
  *
- * @param unknown_type $str
+ * @param string $str
  */
 function fp_reduce_whitespace($str) {
   // Cheap hack to get rid of whitespace    

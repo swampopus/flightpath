@@ -484,6 +484,11 @@ function db_get_user_id($user_name) {
 }
 
 
+function db_get_cwid_from_user_id($user_id) {
+  return db_result(db_query("SELECT cwid FROM users WHERE user_id = ?", array($user_id)));
+}
+
+
 function db_get_user_id_from_cwid($cwid, $type = "faculty") {
   
   $type_line = " is_faculty='1' ";

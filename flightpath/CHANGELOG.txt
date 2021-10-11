@@ -1,6 +1,17 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-10-10
+  Cleaned up code in various places.
+
+  Fixed bug in Engagements where date_sent was not in correct format.  Also fixed old code which was causing a PHP syntax error for txt messages.
+
+  Added function db_get_cwid_from_user_id() to db.inc file.
+
+  Added missing function engagements_handle_incoming_sms() to engagements to stop 404 error, though at the moment this function is just
+  a placeholder, and might be removed in the future.
+
+
 2021-10-08
   Upon system install, correctly get the modules' schema from their .info file, so we aren't told we need to run updates right off the bat.
   

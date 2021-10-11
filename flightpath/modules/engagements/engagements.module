@@ -263,7 +263,19 @@ function engagements_cron() {
 } // hook_cron
 
 
+function engagements_handle_incoming_sms() {
+  // TODO: At the moment, do nothing.  Instead of handling incoming SMS as they arrive, we retrieve them
+  // during cron run.  This might change later on however.
 
+  watchdog("engagements_sms", "Received from POST: <pre>" . print_r($_POST, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
+
+  // TODO:  see regular message at: https://swampopus.direct.quickconnect.to/gitprojects/flightpath6/flightpath/flightpath/admin/config/watchdog/7547?sev_filter=&type_filter=&page=1
+  // TODO:  see message with media at: https://swampopus.direct.quickconnect.to/gitprojects/flightpath6/flightpath/flightpath/admin/config/watchdog/7548?sev_filter=&type_filter=&page=1
+  //   -> notice the media message claims to have more than one media item.  We don't care about the text/html.
+ 
+
+
+}
 
 
 /**
@@ -292,16 +304,18 @@ function engagements_sms_get_all_messages() {
   // Get all messages so we can update our table.
   
   // We only care about messages sent TODAY, since we theoretically already got them yesterday
-  $check_since = date('Y-m-d'); // will get all messages sent after midnight on this date.  TODO: could make this several days into the past to be safe.
-  $messages = $client->messages->read(array('PageSize' => 1000, 'DateSent>' => $check_since));
+  $check_since = date('Y-m-d', strtotime("NOW - 1 DAY")); // We will get messages from a day in the past, to make sure we don't miss anything.
 
+  $messages = $client->messages->read(array('dateSentAfter' => $check_since));  
   foreach ($messages as $record) {
     
+    watchdog("engagements_sms", "Checking message: <pre>" . print_r($record, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
+
     $message_sid = $record->sid;
     
     // If we have already recorded (but not processed) this record, then we should UPDATE it!
     $test = engagements_get_sms_from_history($message_sid);    
-    if ($test && $test['price_processed'] != 1) {
+    if ($test && intval($test['price_processed']) !== 1) {
       // update prices
       $price = $record->price;       
       $fp_price = engagements_get_fp_price($price, $test['direction'], intval($test['num_segments']));
@@ -309,10 +323,12 @@ function engagements_sms_get_all_messages() {
       db_query("UPDATE sms_history
                 SET sw_price = ?, fp_price = ?, price_processed = 1
                 WHERE mid = ?", array($price, $fp_price, $test['mid']));
-                
+      
       continue;
     }
-    else if ($test && $test['price_processed'] == 1) {
+    else if ($test && intval($test['price_processed']) === 1) {
+      
+      watchdog("engagements_sms", "... already processed, skipping.", array(), WATCHDOG_DEBUG);
       continue; // already processed!
     }
     
@@ -324,11 +340,10 @@ function engagements_sms_get_all_messages() {
     
     $body = $record->body; 
     
-    $date_sent = $record->dateSent;
+    $date_sent = $record->dateSent;  // this is a Datetime object
+    $date_sent_ts = strtotime($date_sent->format("Y-m-d H:i:s"));
+       
     
-    $throw_away = print_r($date_sent, TRUE);  // Not sure why, but I have to do this in order for the data field to populate.
-    
-    $date_sent_ts = strtotime($date_sent->date);
     $direction = $record->direction;
     $num_segments = intval($record->numSegments);
     $price = $record->price;    
@@ -376,21 +391,20 @@ function engagements_sms_get_all_messages() {
     
     
     
-    // Figure out what student this came from/to!
+    // Figure out what user this came from/to!
     $from_cwid = "";
-    $student_id = db_result(db_query("SELECT * FROM user_attributes WHERE mobile_phone = ?", array($from_mobile)));
-    if ($student_id) {
-      $from_cwid = $student_id;
+    $user_id = db_result(db_query("SELECT user_id FROM user_attributes WHERE `name` = 'mobile_phone' AND `value` = ?", array($from_mobile)));
+    if ($user_id) {
+      $from_cwid = db_get_cwid_from_user_id($user_id);
     }
 
     $to_cwid = "";
-    $student_id = db_result(db_query("SELECT * FROM user_attributes WHERE mobile_phone = ?", array($to_mobile)));
-    if ($student_id) {
-      $to_cwid = $student_id;
+    $user_id = db_result(db_query("SELECT user_id FROM user_attributes WHERE `name` = 'mobile_phone' AND `value` = ?", array($to_mobile)));
+    if ($user_id) {
+      $to_cwid = db_get_cwid_from_user_id($user_id);
     }
 
-    if ($from_cwid || $to_cwid) {
-          
+    if ($from_cwid || $to_cwid) {       
       // create an engagement content node for this student!
       
       $dir = "received";
@@ -399,7 +413,7 @@ function engagements_sms_get_all_messages() {
       if (strstr($direction, 'outbound')) {
         $dir = 'sent';
         $fac_cwid = $from_cwid;
-        $stu_cwid = $to_cwid;
+        $stu_cwid = $to_cwid; 
       }
       
       $content = new stdClass();
@@ -407,7 +421,7 @@ function engagements_sms_get_all_messages() {
       $content->cid = "new";    
       $content->published = 1;
       $content->delete_flag = 0;
-      $content->title = "Engagement: txt_msg for student $cwid";  // required
+      $content->title = "Engagement: txt_msg re: student $stu_cwid";  // required
 
       $content->field__activity_datetime['value'] = date('Y-m-d H:i:s', $date_sent_ts);
       $content->field__faculty_id['value'] = $fac_cwid;
@@ -1619,8 +1633,11 @@ function engagements_send_email_or_txt_form_validate($form, &$form_state) {
   
   
   if ($engagement_type == 'txt_msg') {
-    $temp = fp_get_student_attributes($student_id);
-    $mobile_phone = trim(@$temp['mobile_phone']);
+
+    $student_user_id = db_get_user_id_from_cwid($student_id, 'student');
+    
+    $temp = user_get_attribute($student_user_id, 'mobile_phone');
+    $mobile_phone = engagements_convert_to_valid_phone_number(trim($temp));
     
     if (!$mobile_phone) {
       form_error('enagement_msg', t('Sorry, but the mobile phone number provided for the student appears to be invalid.'));
@@ -1660,7 +1677,7 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state) {
   $initials = variable_get_for_school("school_initials", "DEMO", db_get_school_id_for_student_id($student_id));
 
    
-  // TODO:  this might need to be a setting with replacement values!
+  // TODO:  this needs to be a setting with replacement values!
   // Add header to msg...
   $header = "($initials) " . t("from") . " $faculty_name:\n";  
   
@@ -1708,10 +1725,10 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state) {
   
   if ($engagement_type == 'txt_msg') {
     
-  
+    $student_user_id = db_get_user_id_from_cwid($student_id, 'student');
     
-    $temp = fp_get_student_attributes($student_id);
-    $mobile_phone = engagements_convert_to_valid_phone_number(trim($temp['mobile_phone']));
+    $temp = user_get_attribute($student_user_id, 'mobile_phone');
+    $mobile_phone = engagements_convert_to_valid_phone_number(trim($temp));
     // Since we have passed validation, we will assume we have a valid phone number for this student.
     
     // Send the message!
@@ -1780,7 +1797,8 @@ function engagements_send_sms_to_number($to_number, $body, $to_cwid = "") {
     $date_sent = $record->dateCreated;  // Since we just created it, just dateCreated instead of dateSent.    
     $throw_away = print_r($date_sent, TRUE);  // Not sure why, but I have to do this in order for the data field to populate.
     
-    $date_sent_ts = strtotime($date_sent->date);
+    //$date_sent_ts = strtotime($date_sent->date);  // Was causing a mysql error all of a sudden.  Just use current time.
+    $date_sent_ts = time();
         
     // The price is not available right now, so we will set it...
     $price = 0.0013 * $num_segments;    
