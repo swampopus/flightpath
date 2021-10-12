@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-10-11
+  Fixed bug in Engagements, where it was not showing attached files correctly from SMS.
+
+  Changed how we handle incoming SMS messages to better catch "real time" messages.
+
+
 2021-10-10
   Cleaned up code in various places.
 
