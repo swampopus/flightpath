@@ -206,11 +206,36 @@ function engagements_sms_settings_form()
 
 
   $form['sms_from_phone'] = array(
-    'label' => 'From Phone number',
-    'type' => 'textfield',
+    'label' => 'From Phone number(s):',
+    'type' => 'textarea',
     'value' => variable_get('sms_from_phone', '555-555-1234'),
-    'description' => t("The phone number you will be sending txt from, or receiving them at."),
+    'description' => t("These are the phone numbers from your SignalWire account, which you will be receiving SMS text messages at.  
+                        <br>Enter them one per line, with a tilda (~) between the number
+                        and a brief line description, like so:
+                      <br> &nbsp; &nbsp; 555-123-4567 ~ Brief Description ~ default
+                      <br> &nbsp; &nbsp; 555-222-1111 ~ Brief Description2
+                      <br>Notice that the 'default' designation lets FlightPath know what is the default number which standard notifications
+                      will be sent from.  If no default is set, the first number will be used."),
   );
+
+  $form['sms_header'] = array(
+    'label' => 'SMS Header:',
+    'type' => 'textfield',
+    'value' => variable_get('sms_header', '(@initials) from @name:'),
+    'description' => t("All SMS text messages sent from FlightPath will begin with this header, in order to help the student
+                        understand the who the sender of the message is.  
+                        <br>You may leave blank to disable (not recommended),
+                        or use the following replacement patterns:
+                        <ul>
+                          <li><b>@initials</b> - The sender's school initials.  Ex: ULM or UD</li>
+                          <li><b>@school</b> - The sender's school name.  Ex: University of Idaho (this is only applicable if you have the Schools module enabled.)</li>
+                          <li><b>@name</b> - The first and last name of the sending user OR for automated messages, it will simply say FlightPath (or whatever your system has been named).</li>
+                          <li><b>@line-desc</b> - This is the line description for the number the message is being sent from.</li>
+                          <li><b>@line-desc-trimmed</b> - This is a trimmed (to no more than 20 chars) of the line description for the number the message is being sent from.
+                        </ul>"),
+  );
+
+
 
   $form['mark_signalwire_bottom'] = array(
     'value' => "</fieldset><br><br>",
@@ -221,6 +246,92 @@ function engagements_sms_settings_form()
 
   return $form;
 } // engagements_sms_settings_form
+
+
+
+function engagements_sms_replace_patterns($str, $from_mobile = "", $account = NULL) {
+  global $user;
+  if ($account == NULL) $account = $user;
+  $school_id = 0;
+  $school_name = "";
+  if (function_exists('schools_menu')) {
+    $school_id = schools_get_school_id_for_user($account->id);
+    $school_name = schools_get_school_name_for_id($school_id);
+  }
+
+  $name = $account->f_name . " " . $account->l_name;
+
+  $line_desc = $line_desc_trimmed = t("Num/Dept Description");
+
+
+  $phones = engagements_get_from_phones();
+  
+  if ($from_mobile == "") $from_mobile = $phones['default']['num']; // use default if it was left blank
+  if ($from_mobile) {  
+    $line_desc = @$phones['lines'][$from_mobile]['description'];
+    $line_desc_trimmed = substr($line_desc, 0, 20);
+  }
+
+  $str = str_ireplace("@initials", variable_get_for_school('school_initials', '', $school_id), $str);
+  $str = str_ireplace("@school", $school_name, $str);
+  $str = str_ireplace("@name", $name, $str);
+  $str = str_ireplace("@line-desc-trimmed", $line_desc_trimmed, $str);  
+  $str = str_ireplace("@line-desc", $line_desc, $str);
+
+
+  return $str;
+
+} // ...sms_replace_patterns
+
+
+
+
+/**
+ * Get the available "from phone" numbers in an organized array structure.
+ */
+function engagements_get_from_phones()
+{
+  $rtn = array();
+  $val = variable_get('sms_from_phone', '555-555-1234');
+
+  $bool_default_set = FALSE;
+  $first_num = "";
+
+  $lines = explode("\n", $val);
+  foreach ($lines as $line) {
+    $line = trim($line);
+    if ($line == "") continue;
+
+    $temp = explode("~", $line);
+    $num = engagements_convert_to_valid_phone_number(trim($temp[0]));
+    $desc = @trim($temp[1]);
+    $default = @trim(strtolower($temp[2]));
+
+    if ($desc == '') $desc = $num;
+    if ($first_num == '') $first_num = $num;
+
+
+    $rtn['lines'][$num] = array(
+      'num' => $num,
+      'description' => $desc,
+      'default' => $default,
+    );
+
+    if ($default == 'default') {
+      $rtn['default'] = $rtn['lines'][$num];
+      $bool_default_set = TRUE;
+    }
+  }
+
+  // Default not set, so use the first number.
+  if (!$bool_default_set) {
+    $rtn['default'] = $rtn['lines'][$first_num];
+  }
+
+
+
+  return $rtn;
+}
 
 
 
@@ -330,7 +441,6 @@ function engagements_handle_incoming_sms($vars = array())
     } // for t (media)
 
     $media_filenames = rtrim($media_filenames, ',');
-
   } // if num media > 0
 
 
@@ -419,276 +529,14 @@ function engagements_handle_incoming_sms($vars = array())
 
   }
 
-    // Write our data to our sms_history table.
-    db_query(
-      "INSERT INTO sms_history (`message_sid`, sw_type, `body`, `from_number`, `to_number`, `sw_price`, `fp_price`, `from_cwid`, `to_cwid`, `updated`, `direction`, `media_filenames`, `date_sent`, price_processed, num_segments)
+  // Write our data to our sms_history table.
+  db_query(
+    "INSERT INTO sms_history (`message_sid`, sw_type, `body`, `from_number`, `to_number`, `sw_price`, `fp_price`, `from_cwid`, `to_cwid`, `updated`, `direction`, `media_filenames`, `date_sent`, price_processed, num_segments)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
-      array($message_sid, 'sms', $body, $from_mobile, $to_mobile, $price, $fp_price, $from_cwid, $to_cwid, time(), $direction, $media_filenames, $date_sent_ts, 1, $num_segments)
-    );
-
-
-
-
+    array($message_sid, 'sms', $body, $from_mobile, $to_mobile, $price, $fp_price, $from_cwid, $to_cwid, time(), $direction, $media_filenames, $date_sent_ts, 1, $num_segments)
+  );
 } // engagements_handle_incoming_sms
 
-
-/**
- * Retrieve all messages, update the ones which don't have prices associated with them yet.
- * 
- * We will also be getting voice calls & prices too for our log table.
- */
-function z___engagements_sms_get_all_messages()
-{
-
-  require_once(fp_get_module_path('engagements', TRUE, FALSE) . '/lib/signalwire/vendor/autoload.php');
-
-
-  // project id, auth tolen, space url
-  $project_id = variable_get('sms_project_id', '');
-
-  if ($project_id == "") {
-    return FALSE;
-  }
-
-  $auth_token = variable_get('sms_auth_token', '');
-  $space_url = variable_get('sms_space_url', 'liftoffacademics.signalwire.com');
-  $from_phone = engagements_convert_to_valid_phone_number(variable_get('sms_from_phone', '555-555-1234'));
-
-  $client = new SignalWire\Rest\Client($project_id, $auth_token, array("signalwireSpaceUrl" => $space_url));
-
-  // Get all messages so we can update our table.
-
-  // We only care about messages sent TODAY, since we theoretically already got them yesterday
-  $check_since = date('Y-m-d', strtotime("NOW - 1 DAY")); // We will get messages from a day in the past, to make sure we don't miss anything.
-
-  $messages = $client->messages->read(array('dateSentAfter' => $check_since));
-  foreach ($messages as $record) {
-
-    watchdog("engagements_sms", "Checking message: <pre>" . print_r($record, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
-
-    $message_sid = $record->sid;
-
-    // If we have already recorded (but not processed) this record, then we should UPDATE it!
-    $test = engagements_get_sms_from_history($message_sid);
-    if ($test && intval($test['price_processed']) !== 1) {
-      // update prices
-      $price = $record->price;
-      $fp_price = engagements_get_fp_price($price, $test['direction'], intval($test['num_segments']));
-
-      db_query("UPDATE sms_history
-                SET sw_price = ?, fp_price = ?, price_processed = 1
-                WHERE mid = ?", array($price, $fp_price, $test['mid']));
-
-      continue;
-    } else if ($test && intval($test['price_processed']) === 1) {
-
-      watchdog("engagements_sms", "... already processed, skipping.", array(), WATCHDOG_DEBUG);
-      continue; // already processed!
-    }
-
-
-
-
-    $from_mobile = engagements_convert_to_valid_phone_number($record->from);
-    $to_mobile = engagements_convert_to_valid_phone_number($record->to);
-
-    $body = $record->body;
-
-    $date_sent = $record->dateSent;  // this is a Datetime object
-    $date_sent_ts = strtotime($date_sent->format("Y-m-d H:i:s"));
-
-
-    $direction = $record->direction;
-    $num_segments = intval($record->numSegments);
-    $price = $record->price;
-    $fp_price = engagements_get_fp_price($price, $direction, $num_segments);
-
-
-    $media_filenames = "";
-
-    // Is there media?
-    if ($record->numMedia > 0) {
-
-      // List all media for this message.
-      $allmedia = $client->messages($message_sid)->media->read();
-
-      foreach ($allmedia as $mitem) {
-
-        $media_sid = $mitem->sid;
-        $content_type = $mitem->contentType;
-        $ext = engagements_get_file_extension_from_mime_type($content_type);
-
-        if (!$ext) continue; // skip if its not a type we care about.
-
-        // Create a new random filename to save it as.
-        $filename = 'sms__' . $from_mobile . '_' . time() . '_' .  mt_rand(1, 999999) . '.' . $ext;
-
-
-        $media = $client->messages($message_sid)->media($media_sid)->fetch();
-        $file_contents = file_get_contents("https://liftoffacademics.signalwire.com/api/laml/2010-04-01/Accounts/$project_id/Messages/$message_sid/Media/$media_sid");
-        // save it locally as a random filename under /files/
-        $test = file_put_contents(fp_get_files_path() . '/engagements_attachments/' . $filename, $file_contents);
-        if (!$test) {
-          watchdog('sms', 'Unable to write media file.', array(), 'error');
-          fpm('Unable to write media file.  Permissions issue on custom/files/engagements_attachments?');
-          continue;
-        }
-
-        $media_filenames .= $filename . ',';
-      } // foreach media
-
-      $media_filenames = rtrim($media_filenames, ',');
-    } // there was media!
-
-
-
-
-    // Figure out what user this came from/to!
-    $from_cwid = "";
-    $user_id = db_result(db_query("SELECT user_id FROM user_attributes WHERE `name` = 'mobile_phone' AND `value` = ?", array($from_mobile)));
-    if ($user_id) {
-      $from_cwid = db_get_cwid_from_user_id($user_id);
-    }
-
-    $to_cwid = "";
-    $user_id = db_result(db_query("SELECT user_id FROM user_attributes WHERE `name` = 'mobile_phone' AND `value` = ?", array($to_mobile)));
-    if ($user_id) {
-      $to_cwid = db_get_cwid_from_user_id($user_id);
-    }
-
-    if ($from_cwid || $to_cwid) {
-      // create an engagement content node for this student!
-
-      $dir = "received";
-      $fac_cwid = $to_cwid;
-      $stu_cwid = $from_cwid;
-      if (strstr($direction, 'outbound')) {
-        $dir = 'sent';
-        $fac_cwid = $from_cwid;
-        $stu_cwid = $to_cwid;
-      }
-
-      $content = new stdClass();
-      $content->type = 'engagement';
-      $content->cid = "new";
-      $content->published = 1;
-      $content->delete_flag = 0;
-      $content->title = "Engagement: txt_msg re: student $stu_cwid";  // required
-
-      $content->field__activity_datetime['value'] = date('Y-m-d H:i:s', $date_sent_ts);
-      $content->field__faculty_id['value'] = $fac_cwid;
-      $content->field__student_id['value'] = $stu_cwid;
-      $content->field__engagement_type['value'] = 'txt_msg';
-      $content->field__direction['value'] = $dir;
-
-
-      // if we have media, add to the end of body.
-      if ($media_filenames) {
-        $body .= "~~MEDIA~~$media_filenames~~END_MEDIA~~";
-      }
-
-      $content->field__engagement_msg['value'] = $body;
-
-      $content->field__visibility['value'] = 'public';
-
-      content_save($content);
-
-      // if received, create an activity record.
-      // Create a new "activity record" that the student has sent a txt message
-
-      $acontent = new stdClass();
-      $acontent->type = 'activity_record';
-      $acontent->cid = "new";
-      $acontent->published = 1;
-      $acontent->delete_flag = 0;
-      $acontent->title = t('Student replied to text message.');
-      $acontent->field__student_id['value'] = $stu_cwid;
-      $acontent->field__activity_type['value'] = 'comment';
-      content_save($acontent);
-
-      // Notify the advisor(s).
-      // get list of all advisors for this student, and send notifications.
-      $advisors = advise_get_advisors_for_student($stu_cwid);
-      foreach ($advisors as $c => $afaculty_id) {
-        $account_user_id = db_get_user_id_from_cwid($afaculty_id, 'faculty');
-        if ($account_user_id) {
-          $student_name = fp_get_student_name($stu_cwid, TRUE);
-          $base_url = $GLOBALS['fp_system_settings']['base_url'];
-          $link = $base_url . "/engagements?current_student_id=$stu_cwid";
-          $tmsg = "";
-          $tmsg .= "$student_name has submitted a text message to FlightPath.<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link";
-
-          notify_send_notification_to_user($account_user_id, $tmsg, $content->cid, 'engagement');
-        }
-      }
-
-
-
-
-
-      // TODO:  Or, if this email we are coming from is meant to go to a specific person or set or persons, only notify them.
-
-
-
-    } else {
-      // Since a student could not be found, we will not try to do assign it to any particular student here.
-
-    }
-
-    // Write our data to our sms_history table.
-    db_query(
-      "INSERT INTO sms_history (`message_sid`, sw_type, `body`, `from_number`, `to_number`, `sw_price`, `fp_price`, `from_cwid`, `to_cwid`, `updated`, `direction`, `media_filenames`, `date_sent`, price_processed, num_segments)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
-      array($message_sid, 'sms', $body, $from_mobile, $to_mobile, $price, $fp_price, $from_cwid, $to_cwid, time(), $direction, $media_filenames, $date_sent_ts, 1, $num_segments)
-    );
-  } // foreach messages
-
-
-  $body = "";
-  // Now, we also want to get a list of all calls and their prices too.
-  $calls = $client->calls->read(array('StartTime>', $check_since));
-
-  foreach ($calls as $record) {
-
-    $sid = $record->sid;
-
-    // Do we already have this in our table?  If so, skip.
-    $test = engagements_get_sms_from_history($sid);
-    if ($test) continue;
-
-    $date_sent = $record->startTime;
-    $throw_away = print_r($date_sent, TRUE);  // Not sure why, but I have to do this in order for the data field to populate.    
-    $date_sent_ts = strtotime($date_sent->date);
-
-    
-
-    $to = engagements_convert_to_valid_phone_number($record->to);
-    $from = engagements_convert_to_valid_phone_number($record->from);
-
-    $from_cwid = "";
-    $student_id = db_result(db_query("SELECT * FROM student_attributes WHERE mobile_phone = ?", array($from)));
-    if ($student_id) {
-      $from_cwid = $student_id;
-    }
-
-    $duration = $record->duration;
-    $direction = $record->direction;
-    $price = $record->price;
-    $fp_price = engagements_get_fp_price($price, $direction, 1, 'call');
-
-
-    // Write our data to our sms_history table.
-    db_query(
-      "INSERT INTO sms_history (`message_sid`, sw_type, `body`, `from_number`, `to_number`, `sw_price`, `fp_price`, `from_cwid`, `updated`, `direction`, `media_filenames`, `date_sent`, price_processed, num_segments)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
-      array($sid, 'call', $body, $from, $to, $price, $fp_price, $from_cwid, time(), $direction, '', $date_sent_ts, 1, $duration)
-    );
-  }  //foreach calls as record 
-
-
-  // Record the last time we called this function.
-  variable_set('engagements_sms_get_all_last_check', time());
-} // function
 
 
 
@@ -714,7 +562,6 @@ function engagements_sms_get_all_messages()
 
   $auth_token = variable_get('sms_auth_token', '');
   $space_url = variable_get('sms_space_url', 'liftoffacademics.signalwire.com');
-  $from_phone = engagements_convert_to_valid_phone_number(variable_get('sms_from_phone', '555-555-1234'));
 
   $client = new SignalWire\Rest\Client($project_id, $auth_token, array("signalwireSpaceUrl" => $space_url));
 
@@ -760,7 +607,7 @@ function engagements_sms_get_all_messages()
     $direction = $record->direction;
     $num_segments = intval($record->numSegments);
 
-    
+
     $vars['From'] = $from_mobile;
     $vars['To'] = $to_mobile;
     $vars['Body'] = $body;
@@ -772,8 +619,8 @@ function engagements_sms_get_all_messages()
 
     // Is there media?
     if ($record->numMedia > 0) {
-      
-      $vars['NumMedia'] = $record->numMedia;      
+
+      $vars['NumMedia'] = $record->numMedia;
 
       // List all media for this message.
       $allmedia = $client->messages($message_sid)->media->read();
@@ -782,22 +629,20 @@ function engagements_sms_get_all_messages()
 
         $media_sid = $mitem->sid;
         $content_type = $mitem->contentType;
-        
+
         $vars['MediaContentType' . $c] = $content_type;
         $vars['MediaUrl' . $c] = "https://liftoffacademics.signalwire.com/api/laml/2010-04-01/Accounts/$project_id/Messages/$message_sid/Media/$media_sid";
-                
-        
+
+
         $c++;
       } // foreach media
 
-      
+
     } // there was media!
 
 
     // Save this message using our "handle_incoming_sms" function.
     engagements_handle_incoming_sms($vars);
-
-
   } // foreach messages
 
 
@@ -817,7 +662,7 @@ function engagements_sms_get_all_messages()
 
     $date_sent = $record->startTime;  // this is a Datetime object
     $date_sent_ts = strtotime($date_sent->format("Y-m-d H:i:s"));
-    
+
 
     $to_mobile = engagements_convert_to_valid_phone_number($record->to);
     $from_mobile = engagements_convert_to_valid_phone_number($record->from);
@@ -850,6 +695,8 @@ function engagements_sms_get_all_messages()
   }  //foreach calls as record 
 
   watchdog("engagements_sms", "Documented call to $to_mobile.", array(), WATCHDOG_DEBUG);
+
+
 
   // Record the last time we called this function.
   variable_set('engagements_sms_get_all_last_check', time());
@@ -1755,6 +1602,8 @@ function engagements_convert_to_pretty_phone_number($phoneNumber, $bool_convert_
 function engagements_form_alter(&$form, $form_id)
 {
 
+  global $user;
+  
   if ($form_id == 'content_edit_content_form') {
     if (@$form['type']['value'] == 'engagement') {
 
@@ -1776,13 +1625,6 @@ function engagements_form_alter(&$form, $form_id)
 
           $form['engagement_type']['value'] = $_GET['engagement_type'];
 
-          /*
-          // Set a page title (since we are in a dialog, we can't use fp_set_title())
-          $form['mark_title'] = array(
-            'value' => "<h2>New " . $form['engagement_type']['value'] . "</h2>",
-            'weight' => -100,
-          );
-          */
 
           // Since we are setting the type, we do not want to display it as an option.
           $form['engagement_type']['attributes'] = array('class' => 'hidden');
@@ -1791,7 +1633,7 @@ function engagements_form_alter(&$form, $form_id)
           $form['activity_datetime']['attributes'] = array('class' => 'hidden');
         }
 
-        $initials = variable_get("school_initials", "DEMO");
+        $initials = variable_get_for_school("school_initials", "DEMO", $user->school_id);
 
         if (isset($_GET['faculty_id'])) {
           $form['faculty_id']['value'] = $_GET['faculty_id'];
@@ -1847,8 +1689,11 @@ function engagements_form_alter(&$form, $form_id)
               $form['submit_submit']['suffix'] = "<strong>" . t('NOTE: Cannot send a text message as there is no mobile phone number for this recipient.') . "</strong>";
             }
 
-            // TODO:  The header may need to be a setting with replacement values            
-            $form['engagement_msg']['prefix'] = t("Your message will automatically begin with <strong>(@initials) from @name:</strong>", array("@initials" => $initials, "@name" => $db->get_faculty_name($form['faculty_id']['value'])));
+            // The header may need to be a setting with replacement values            
+
+            $sms_header = engagements_sms_replace_patterns(variable_get('sms_header', '(@initials) from @name:'), "", $user);
+
+            $form['engagement_msg']['prefix'] = t("Your message will automatically begin with <strong>@header</strong>", array("@header" => $sms_header));
             $form['engagement_msg']['description'] = t("To insert emoji in Windows, press <span style='padding-left: 10px; padding-right: 10px; font-size: 1.3em;'><i class='fa fa-windows'></i> + .</span>  <em>(Windows key + period)</em>");
 
 
@@ -1953,6 +1798,9 @@ function engagements_send_email_or_txt_form_validate($form, &$form_state)
 
 function engagements_send_email_or_txt_form_submit($form, &$form_state)
 {
+
+  global $user;
+
   $values = $form_state['values'];
   $cid = $form_state['content_object']->cid;   // At this point, the content has already been saved, so we know its cid.
   $content = $form_state['content_object'];
@@ -1972,9 +1820,12 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
   $initials = variable_get_for_school("school_initials", "DEMO", db_get_school_id_for_student_id($student_id));
 
 
-  // TODO:  this needs to be a setting with replacement values!
+  // TODO:  get the "from_number"!
+  $from_number = "";
+
+  // this needs to be a setting with replacement values!
   // Add header to msg...
-  $header = "($initials) " . t("from") . " $faculty_name:\n";
+  $header = engagements_sms_replace_patterns(variable_get('sms_header', '(@initials) from @name:'), $from_number, $user);
 
   $msg = $values['engagement_msg'];
 
@@ -2026,7 +1877,8 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
     // Since we have passed validation, we will assume we have a valid phone number for this student.
 
     // Send the message!
-    $external_msg_id = engagements_send_sms_to_number($mobile_phone, $header . $msg, $student_id);
+    // TODO:  supply "from" number at end of params.
+    $external_msg_id = engagements_send_sms_to_number($mobile_phone, $header . "\n" . $msg, $student_id, $from_number);
 
     if ($external_msg_id) {
       fp_add_message(t("TXT Message has been successfully sent."));
@@ -2046,7 +1898,7 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
  * Actually send a text message.  Will drupal_set_message() as an error if there is a problem, and return FALSE. 
  * Returns TRUE on success, no drupal_set_message is printed.
  */
-function engagements_send_sms_to_number($to_number, $body, $to_cwid = "")
+function engagements_send_sms_to_number($to_number, $body, $to_cwid = "", $from_number = "default")
 {
 
   $to_number = engagements_convert_to_valid_phone_number($to_number);
@@ -2059,7 +1911,14 @@ function engagements_send_sms_to_number($to_number, $body, $to_cwid = "")
   $project_id = variable_get('sms_project_id', '');
   $auth_token = variable_get('sms_auth_token', '');
   $space_url = variable_get('sms_space_url', 'liftoffacademics.signalwire.com');
-  $from_phone = engagements_convert_to_valid_phone_number(variable_get('sms_from_phone', '555-555-1234'));
+
+  $from_phone = "";
+  $phones = engagements_get_from_phones();
+  if ($from_number == "default") {
+    $from_phone = engagements_convert_to_valid_phone_number($phones['default']['num']);  
+  }
+  
+
 
   // project id, auth tolen, space url
   $client = new SignalWire\Rest\Client($project_id, $auth_token, array("signalwireSpaceUrl" => $space_url));
@@ -2269,7 +2128,7 @@ function engagements_display_main()
 
         $ext_temp = explode(".", $filename);
         $ext = strtolower(@$ext_temp[count($ext_temp) - 1]);
-        
+
         $image_exts = array("gif", "tiff", "jpg", "jpeg", "png", "bmp");
         if (!in_array($ext, $image_exts)) {
           $mime_icon = content_get_fontawesome_icon_for_mimetype("", $ext);

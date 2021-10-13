@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-10-12
+  Working on Engagements' ability to have multiple numbers on account they can receive SMS from.
+  
+
 2021-10-11
   Fixed bug in Engagements, where it was not showing attached files correctly from SMS.
 
