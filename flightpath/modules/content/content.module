@@ -1314,11 +1314,13 @@ function content_content_save(&$content) {
   
   $types = content_get_types();
   $type = $content->type;
-    
+  
+  $log = @trim($content->log);
+
   // If this is a NEW content, then insert once into content table to get cid.  Then, insert into content_versions to get vid.  Then update content table with vid.
   if ($content->cid == 'new') {
-    db_query('INSERT INTO content (user_id, `type`, title, posted, updated, published, delete_flag)
-              VALUES (?, ?, ?, ?, ?, ?, ?)', array($user->id, $type, $content->title, time(), time(), $content->published, 0));
+    db_query('INSERT INTO content (user_id, `type`, title, posted, updated, published, delete_flag, `log`)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)', array($user->id, $type, $content->title, time(), time(), $content->published, 0, $log));
     $content->cid = db_insert_id();
     
     // insert into content_versions to get the vid.
@@ -1337,8 +1339,8 @@ function content_content_save(&$content) {
   
 
   // Now we should have a fully created $content object.  Let's update the title and other values in the content table.
-  db_query("UPDATE content SET vid = ?, title = ?, updated = ?, published = ?, delete_flag = ? WHERE
-            cid = ?", array($content->vid, $content->title, time(), $content->published, $content->delete_flag, $content->cid));
+  db_query("UPDATE content SET vid = ?, title = ?, updated = ?, published = ?, delete_flag = ?, `log` = ? WHERE
+            cid = ?", array($content->vid, $content->title, time(), $content->published, $content->delete_flag, $log, $content->cid));
 
   
   // Now we are going to insert all of the field values.  We assume there is a table ALREADY CREATED with our field names

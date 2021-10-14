@@ -1,6 +1,18 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-10-14
+  Fixed bug in notify module, where the notification history table wasn't created.
+
+
+2021-10-13
+  Made changes to engagements schema, so that we can track the SMS number a txt message was sent from, as well as the sms message id, in the table.
+
+  Made change to content_versions table schema, so we have the option of saving a "log" message with the content.  This is accomplished by entering:
+    $content->log = "some text here"; 
+  before calling content_save($content);
+
+
 2021-10-12
   Working on Engagements' ability to have multiple numbers on account they can receive SMS from.
   

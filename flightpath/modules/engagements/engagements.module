@@ -1420,13 +1420,6 @@ function engagements_content_register_content_type()
 
   $fields = array();
 
-  $fields['activity_datetime'] = array(
-    'type' => 'datetime-local',
-    'label' => 'Date/Time',
-    'value' => 'now',
-    'format_date' => 'short',
-    'weight' => 12,
-  );
 
   $fields['faculty_id'] = array(
     'type' => 'textfield',
@@ -1434,10 +1427,28 @@ function engagements_content_register_content_type()
     'weight' => 5,
   );
 
+ 
+  $fields['from_sms_phone'] = array(
+    'type' => 'select',
+    'label' => t('From TXT Phone Line:'),
+    'hide_please_select' => TRUE,
+    'options' => array(),    
+    'weight' => 7,
+  );
+
   $fields['student_id'] = array(
     'type' => 'textfield',
     'label' => 'Student',
     'weight' => 10,
+  );
+
+
+  $fields['activity_datetime'] = array(
+    'type' => 'datetime-local',
+    'label' => 'Date/Time',
+    'value' => 'now',
+    'format_date' => 'short',
+    'weight' => 12,
   );
 
 
@@ -1511,6 +1522,12 @@ function engagements_content_register_content_type()
 
 
   $fields['manual_entry'] = array(
+    'type' => 'hidden',
+    'value' => '',
+  );
+
+
+  $fields['external_msg_id'] = array(
     'type' => 'hidden',
     'value' => '',
   );
@@ -1662,16 +1679,21 @@ function engagements_form_alter(&$form, $form_id)
           if ($form['engagement_type']['value'] == 'email') {
             $extra_mark = fp_get_student_email($form['student_id']['value']);
 
-            // TODO:  The header may need to be a setting with replacement values
+            // TODO:  The EMAIL header may need to be a setting with replacement values
             $form['engagement_msg']['prefix'] = t("Your message will automatically begin with <strong>(@initials) from @name:</strong>", array("@initials" => $initials, "@name" => $db->get_faculty_name($form['faculty_id']['value'])));
           }
 
 
           $student_user_id = db_get_user_id_from_cwid($_GET['student_id'], 'student');
-
+          $student_account = fp_load_user($student_user_id);
           if ($form['engagement_type']['value'] == 'txt_msg') {
-            // get phone number
-
+            
+            // Add in select list of the phone numbers we are allowed to select from.
+            // TODO: here
+            $from_options = engagements_get_from_phones_for_fapi();
+            $form['from_sms_phone']['options'] = $from_options;
+            
+            // get student phone number
             $extra_mark = "(NO MOBILE NUMBER AVAILABLE)";
 
 
@@ -1689,9 +1711,8 @@ function engagements_form_alter(&$form, $form_id)
               $form['submit_submit']['suffix'] = "<strong>" . t('NOTE: Cannot send a text message as there is no mobile phone number for this recipient.') . "</strong>";
             }
 
-            // The header may need to be a setting with replacement values            
-
-            $sms_header = engagements_sms_replace_patterns(variable_get('sms_header', '(@initials) from @name:'), "", $user);
+            // The header needs to be a setting with replacement values           
+            $sms_header = engagements_sms_replace_patterns(variable_get('sms_header', '(@initials) from @name:'), "", $student_account);
 
             $form['engagement_msg']['prefix'] = t("Your message will automatically begin with <strong>@header</strong>", array("@header" => $sms_header));
             $form['engagement_msg']['description'] = t("To insert emoji in Windows, press <span style='padding-left: 10px; padding-right: 10px; font-size: 1.3em;'><i class='fa fa-windows'></i> + .</span>  <em>(Windows key + period)</em>");
@@ -1746,6 +1767,37 @@ function engagements_form_alter(&$form, $form_id)
   } // content_edit_content_form
 
 } // hook_form_alter
+
+
+/**
+ * Returns back the phone lines available.
+ */
+function engagements_get_from_phones_for_fapi($bool_return_all = TRUE, $account = NULL) {
+  global $user;
+  $rtn = array();
+
+  if ($account == NULL) $account = $user;
+
+  $phones = engagements_get_from_phones();
+  $default = $phones['default']['num'];
+  $rtn[$default] = t("[Default] ") . engagements_convert_to_pretty_phone_number($default) . ' - ' . $phones['default']['description'];
+
+  foreach ($phones['lines'] as $num => $details) {
+    // TODO: if bool_return_all != TRUE, then make sure the account has permissing to send from this number.
+    if (!isset($rtn[$details['num']])) {
+      $rtn[$details['num']] = engagements_convert_to_pretty_phone_number($details['num']) . " - " . $details['description'];
+    }
+  }
+
+  // TODO:  Perhaps down here is where we will remove any lines the user does not have permission to send from?
+
+  return $rtn;
+
+} // engagements_get_from_phones_for_fapi()
+
+
+
+
 
 
 
@@ -1819,9 +1871,8 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
 
   $initials = variable_get_for_school("school_initials", "DEMO", db_get_school_id_for_student_id($student_id));
 
-
-  // TODO:  get the "from_number"!
-  $from_number = "";
+  // get the "from_number"
+  $from_number = $values['from_sms_phone'];
 
   // this needs to be a setting with replacement values!
   // Add header to msg...
@@ -1877,13 +1928,14 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
     // Since we have passed validation, we will assume we have a valid phone number for this student.
 
     // Send the message!
-    // TODO:  supply "from" number at end of params.
     $external_msg_id = engagements_send_sms_to_number($mobile_phone, $header . "\n" . $msg, $student_id, $from_number);
 
     if ($external_msg_id) {
       fp_add_message(t("TXT Message has been successfully sent."));
-
-      // TODO:  save the external_msg_id with the content.
+      // save the external_msg_id with the content.
+      $content->field__external_msg_id['value'] = $external_msg_id; 
+      $content->log = "[AUTO] Updating external_msg_id";
+      content_save($content);
 
     }
   } // type == 'txt_msg'
@@ -1912,9 +1964,9 @@ function engagements_send_sms_to_number($to_number, $body, $to_cwid = "", $from_
   $auth_token = variable_get('sms_auth_token', '');
   $space_url = variable_get('sms_space_url', 'liftoffacademics.signalwire.com');
 
-  $from_phone = "";
+  $from_phone = $from_number;
   $phones = engagements_get_from_phones();
-  if ($from_number == "default") {
+  if ($from_phone == "default") {
     $from_phone = engagements_convert_to_valid_phone_number($phones['default']['num']);  
   }
   

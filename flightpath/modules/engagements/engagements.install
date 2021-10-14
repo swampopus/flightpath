@@ -26,6 +26,8 @@ CREATE TABLE `content__engagement` (
   `field__visibility` varchar(255) DEFAULT NULL,
   `field__attachment` varchar(255) DEFAULT NULL,
   `field__manual_entry` varchar(10) DEFAULT NULL,
+  `field__from_sms_phone` varchar(255) DEFAULT NULL,
+  `field__external_msg_id` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`vid`),
   KEY `cid` (`cid`),
   KEY `field__student_id` (`field__student_id`),
@@ -36,6 +38,8 @@ CREATE TABLE `content__engagement` (
   KEY `field__activity_datetime` (`field__activity_datetime`),
   KEY `field__visibility` (`field__visibility`),
   KEY `field__attachment` (`field__attachment`),
+  KEY `field__from_sms_phone` (`field__from_sms_phone`),
+  KEY `field__external_msg_id` (`field__external_msg_id`),
   KEY `field__manual_entry` (`field__manual_entry`)
 );  
   ";
@@ -113,8 +117,20 @@ function engagements_update($old_schema, $new_schema) {
   }  
     
 
+  if (intval($old_schema) < 3) {
+    // Add new fields to content__engagement table.
 
-}
+    db_query("ALTER TABLE content__engagement ADD COLUMN `field__from_sms_phone` varchar(255) DEFAULT NULL ");
+    db_query("ALTER TABLE content__engagement ADD COLUMN `field__external_msg_id` varchar(255) DEFAULT NULL ");
+    
+    db_query("ALTER TABLE content__engagement ADD INDEX (`field__from_sms_phone`) ");
+    db_query("ALTER TABLE content__engagement ADD INDEX (`field__external_msg_id`) ");
+    
+  }  
+
+
+
+} // hook_update
 
 
 

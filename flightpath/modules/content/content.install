@@ -14,6 +14,13 @@ function content_update($old_schema, $new_schema) {
     db_query("ALTER TABLE content_versions ADD COLUMN `user_id` int NOT NULL DEFAULT '0' ");
     db_query("ALTER TABLE content_versions ADD INDEX (`user_id`) ");
   }
+
+  // Skipped 3 intentionally, decided to undo it.
+
+  if (intval($old_schema) < 4) {    
+    db_query("ALTER TABLE content ADD COLUMN `log` longtext DEFAULT NULL ");    
+  }
+
 }
 
 
@@ -37,6 +44,7 @@ function content_install() {
   `updated` int unsigned NOT NULL DEFAULT '0',
   `published` tinyint DEFAULT NULL,
   `delete_flag` tinyint DEFAULT '0',
+  `log` longtext DEFAULT NULL,
   PRIMARY KEY (`cid`),
   KEY `posted` (`posted`),
   KEY `updated` (`updated`),
@@ -53,7 +61,7 @@ function content_install() {
        CREATE TABLE `content_versions` (
   `vid` int unsigned NOT NULL AUTO_INCREMENT,
   `cid` int unsigned NOT NULL,
-  `user_id` int NOT NULL DEFAULT '0',
+  `user_id` int NOT NULL DEFAULT '0',  
   PRIMARY KEY (`vid`) ,
   KEY `cid` (`cid`),
   KEY `user_id` (`user_id`)
