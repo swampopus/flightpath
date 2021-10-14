@@ -1355,29 +1355,49 @@ function engagements_handle_tracking_pixel_request($cid, $token)
 
 function engagements_perm()
 {
-  return array(
+  $rtn = array(
     'administer_engagements' => array(
       'title' => 'Administer Engagements',
-      'description' => 'The user can edit the system config settings for the Engagements module.  Only give to admin users.',
+      'description' => t('The user can edit the system config settings for the Engagements module.  Only give to admin users.'),
     ),
     'can_view_engagements' => array(
       'title' => 'Can view Engagements',
-      'description' => 'The user may view engagements (only "everyone" by default)',
+      'description' => t('The user may view engagements (only "everyone" by default)'),
     ),
     'can_view_faculty_engagements' => array(
       'title' => 'View "Faculty/Staff" Engagements',
-      'description' => 'The user is allowed to view engagements marked visible for "Faculty/Staff".',
+      'description' => t('The user is allowed to view engagements marked visible for "Faculty/Staff".'),
     ),
     'can_send_email_engagements' => array(
-      'title' => 'Can send email engagements',
+      'title' => t('Can send email engagements to students'),
+    ),    
+    'can_log_engagements' => array(
+      'title' => t('Can log engagements with students'),
     ),
     'can_send_txt_engagements' => array(
-      'title' => 'Can send txt message engagements',
-    ),
-    'can_log_engagements' => array(
-      'title' => 'Can log any engagements',
-    ),
+      'title' => t('Can send txt message engagements to students'),
+      'description' => t("<b>Important:</b> Be sure to also select the specific phone number/permissions below."),
+    ),    
   );
+
+  // set up other permissions for each SMS line we have.
+  $phones = engagements_get_from_phones();
+  foreach ($phones['lines'] as $num => $details) {
+    $pretty_num = engagements_convert_to_pretty_phone_number($num);
+    $desc = filter_markup($details['description'], "plain");
+    $desc = str_replace("'", "", $desc);
+    $desc = str_replace('"', "", $desc);
+
+    $rtn["can_send_sms_from_$num"] = array(
+      "title" => t("Can send txt messages from @pretty", array("@pretty" => $pretty_num)),
+      "description" => t("The user may send SMS (txt) messages from @pretty - %desc phone line.", array("@pretty" => $pretty_num, "%desc" => $desc)),
+    );
+
+  }
+
+
+  return $rtn;
+
 }
 
 
@@ -1689,10 +1709,28 @@ function engagements_form_alter(&$form, $form_id)
           if ($form['engagement_type']['value'] == 'txt_msg') {
             
             // Add in select list of the phone numbers we are allowed to select from.
-            // TODO: here
-            $from_options = engagements_get_from_phones_for_fapi();
+            $from_options = engagements_get_from_phones_for_fapi(FALSE, $user);            
             $form['from_sms_phone']['options'] = $from_options;
-            
+            if (count($from_options) == 0) {
+              $form['from_sms_phone']['suffix'] .= "<h3>" . t("Note: You do
+                        not have permission to send txt messages from any number.
+                        See your system administrator for access.") . "</h3>";
+              
+              $form['from_sms_phone']['attributes']['readonly'] = "readonly";
+              $form['from_sms_phone']['attributes']['class'] .= " readonly";
+              $form['from_sms_phone']['attributes']['disabled'] .= "disabled";
+
+              $form['engagement_msg']['attributes']['readonly'] = "readonly";
+              $form['engagement_msg']['attributes']['class'] .= " readonly";
+              $form['engagement_msg']['attributes']['disabled'] .= "disabled";
+
+              $form['submit_submit']['attributes']['disabled'] = 'disabled';
+              $form['submit_submit']['attributes']['class'] .= ' button-disabled';
+
+
+            }
+            $form['from_sms_phone']['required'] = TRUE;
+
             // get student phone number
             $extra_mark = "(NO MOBILE NUMBER AVAILABLE)";
 
@@ -1754,6 +1792,12 @@ function engagements_form_alter(&$form, $form_id)
       if ($form['engagement_type']['value'] != 'txt_msg') {
         // If this is anything OTHER than a txt_msg, we will show the tinymce editor for the Message
         $form['engagement_msg']['type'] = 'textarea_editor';
+        // Also get rid of the sms number field.
+        $form['from_sms_phone'] = array(
+          'type' => 'hidden',
+          'value' => '',
+          'required' => FALSE,          
+        );
       }
 
       if ($form['engagement_type']['value'] != 'txt_msg' && $form['engagement_type']['value'] != 'email') {
@@ -1771,6 +1815,10 @@ function engagements_form_alter(&$form, $form_id)
 
 /**
  * Returns back the phone lines available.
+ * 
+ * If bool_return_all == FALSE, it means we will first check to make sure the user (specified by account) has permission
+ * to send sms for that number.
+ * 
  */
 function engagements_get_from_phones_for_fapi($bool_return_all = TRUE, $account = NULL) {
   global $user;
@@ -1783,13 +1831,24 @@ function engagements_get_from_phones_for_fapi($bool_return_all = TRUE, $account 
   $rtn[$default] = t("[Default] ") . engagements_convert_to_pretty_phone_number($default) . ' - ' . $phones['default']['description'];
 
   foreach ($phones['lines'] as $num => $details) {
-    // TODO: if bool_return_all != TRUE, then make sure the account has permissing to send from this number.
+        
     if (!isset($rtn[$details['num']])) {
       $rtn[$details['num']] = engagements_convert_to_pretty_phone_number($details['num']) . " - " . $details['description'];
     }
   }
 
-  // TODO:  Perhaps down here is where we will remove any lines the user does not have permission to send from?
+
+
+  // if bool_return_all != TRUE, then make sure the account has permissing to send from each number.  If not, remove it.
+  foreach ($rtn as $num => $details) {
+    if (!$bool_return_all) {
+      if (!user_has_permission("can_send_sms_from_$num", $account)) {
+        unset($rtn[$num]);
+      }
+    }
+  }
+
+
 
   return $rtn;
 
@@ -1807,7 +1866,7 @@ function engagements_send_email_or_txt_form_validate($form, &$form_state)
   $values = $form_state['values'];
   $cid = $form_state['content_object']->cid;   // At this point, the content has already been saved, so we know its cid.  
   $engagement_type = $values['engagement_type'];
-
+fpm($values);
   if ($engagement_type != 'email' && $engagement_type != 'txt_msg') {
     return;   // we are not interested, harmlessly return.
   }
@@ -1816,6 +1875,8 @@ function engagements_send_email_or_txt_form_validate($form, &$form_state)
   $faculty_id = $values['faculty_id'];
   $msg = $values['engagement_msg'];
 
+  $from_number = trim($values['from_sms_phone']);
+  
   $db = get_global_database_handler();
 
   if ($engagement_type == 'email') {
@@ -1831,6 +1892,7 @@ function engagements_send_email_or_txt_form_validate($form, &$form_state)
 
     $student_user_id = db_get_user_id_from_cwid($student_id, 'student');
 
+    
     $temp = user_get_attribute($student_user_id, 'mobile_phone');
     $mobile_phone = engagements_convert_to_valid_phone_number(trim($temp));
 

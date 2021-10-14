@@ -4,6 +4,8 @@ FlightPath 6.x Changelog
 2021-10-14
   Fixed bug in notify module, where the notification history table wasn't created.
 
+  Added permissions on a per-phone number level for sending SMS messages.
+
 
 2021-10-13
   Made changes to engagements schema, so that we can track the SMS number a txt message was sent from, as well as the sms message id, in the table.
