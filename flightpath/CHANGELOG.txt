@@ -6,6 +6,8 @@ FlightPath 6.x Changelog
 
   Added permissions on a per-phone number level for sending SMS messages.
 
+  Engagements show which department/description the SMS was sent to or from on the main screen.
+
 
 2021-10-13
   Made changes to engagements schema, so that we can track the SMS number a txt message was sent from, as well as the sms message id, in the table.

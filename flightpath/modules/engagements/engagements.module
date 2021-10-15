@@ -91,10 +91,114 @@ function engagements_menu()
 
 
 
+  $items["admin-tools/mass-sms"] = array(
+    "title" => "Send Mass TXT Messages",
+    "description" => "Send a txt message to multiple recipients.",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("engagements_mass_sms_form"),
+    "access_arguments" => array("can_send_mass_sms"),
+    "page_settings" => array(
+      "page_has_search" => FALSE,
+      "menu_icon" => fp_get_module_path('system') . "/icons/transmit_go.png",
+      "menu_links" => array(
+        0 => array(
+          "text" => "Admin Tools",
+          "path" => "admin-tools",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),
+    "type" => MENU_TYPE_NORMAL_ITEM,    
+  );
+
+
+
 
 
   return $items;
 }
+
+
+
+
+function engagements_mass_sms_form() {
+  global $user;
+  $form = array();
+
+
+  $form['mark_top'] = array(
+    'value' => "<p>" . t("Use this form to send the same SMS (txt) message to multiple recipients at a time.  Your messages will
+                  be queued, and sent out approximately one per second.") . "</p>",
+  );
+
+
+  $form['from_number'] = array(
+    'label' => t("Select which phone number this will be coming from:"),
+    'type' => 'select',
+    'options' => engagements_get_from_phones_for_fapi(FALSE, $user),
+    'required' => TRUE,
+    'hide_please_select' => TRUE,
+  );
+
+  $form['message'] = array(
+    'type' => 'textarea',
+    'label' => t('Your message:'),
+    'description' => t("To insert emoji in Windows, press <span style='padding-left: 10px; padding-right: 10px; font-size: 1.3em;'><i class='fa fa-windows'></i> + .</span>  <em>(Windows key + period)</em>
+                        <br><br>
+                        Keep in mind that pricing is based on 160-chars = 1 message segment.  <b>Important:</b> Your message will NOT have any
+                        header attached.  It would be a good idea to begin by stating what unit/department/school you are sending from.
+                        <br>&nbsp; &nbsp; Ex: &nbsp; <em>From the UFP President's Office:  Welcome students to the new term...</em>"),
+  );
+
+
+  $form['recipients'] = array(
+    'type' => 'textarea',
+    'label' => t('Recipients:'),
+    'rows' => 20,
+    'description' => t("List the recipients you wish to send your message, one per line.  You may enter a valid phone number, CWID, or email address.
+                        The mobile phone number that is on record for the user with the entered CWID or email address is the one which will be used.  Invalid phone numbers
+                        or users missing phone numbers will be skipped, with a report of skipped users displayed after this routine is run.
+                        <br>Ex:
+                        <br> &nbsp; &nbsp; 100556
+                        <br> &nbsp; &nbsp; 100557
+                        <br> &nbsp; &nbsp; 100558
+                        <br> &nbsp; &nbsp; tom431@demo.edu
+                        <br> &nbsp; &nbsp; 555-123-4567 "),
+  );
+
+
+  $form['password'] = array(
+    'label' => t("Enter the Mass SMS password:"),
+    'type' => 'password',
+    'description' => t("To prevent accidental submissions, please enter the Mass SMS password.  This is a word or phrase which is configured on the Engagements SMS settings
+                        screen.  If you do not know this password, ask your system administrator."),
+  );
+
+
+  $form['submit_btn'] = array(
+    'type' => 'submit',
+    'value' => t("Submit"),
+    'spinner' => TRUE,
+    'suffix' => "<a href='javascript:history.go(-1);'>" . t("Cancel") . "</a>",
+  );
+
+  return $form;
+
+} // mass_sms_form
+
+
+/**
+ * Our submit function.  Our main task is simply to set off a batch routine.
+ */
+function engagements_mass_sms_form_submit($form, $form_values) {
+   // TODO: implement a batch process.
+} // ... mass_sms_form_submit
+
+
+// TODO: implement batch operation function
+
+
+
 
 
 
@@ -236,6 +340,13 @@ function engagements_sms_settings_form()
   );
 
 
+  $form['sms_mass_sms_password'] = array(
+    'label' => 'Mass SMS Password:',
+    'type' => 'textfield',
+    'value' => variable_get('sms_mass_sms_password', 'changeMe'),
+    'description' => t("Before a user may use the Send Mass TXT Messages feature (to sent o many recipients), they must enter this password to protect against accidental submissions."),
+  );
+
 
   $form['mark_signalwire_bottom'] = array(
     'value' => "</fieldset><br><br>",
@@ -249,7 +360,8 @@ function engagements_sms_settings_form()
 
 
 
-function engagements_sms_replace_patterns($str, $from_mobile = "", $account = NULL) {
+function engagements_sms_replace_patterns($str, $from_mobile = "", $account = NULL)
+{
   global $user;
   if ($account == NULL) $account = $user;
   $school_id = 0;
@@ -265,9 +377,9 @@ function engagements_sms_replace_patterns($str, $from_mobile = "", $account = NU
 
 
   $phones = engagements_get_from_phones();
-  
+
   if ($from_mobile == "") $from_mobile = $phones['default']['num']; // use default if it was left blank
-  if ($from_mobile) {  
+  if ($from_mobile) {
     $line_desc = @$phones['lines'][$from_mobile]['description'];
     $line_desc_trimmed = substr($line_desc, 0, 20);
   }
@@ -275,12 +387,11 @@ function engagements_sms_replace_patterns($str, $from_mobile = "", $account = NU
   $str = str_ireplace("@initials", variable_get_for_school('school_initials', '', $school_id), $str);
   $str = str_ireplace("@school", $school_name, $str);
   $str = str_ireplace("@name", $name, $str);
-  $str = str_ireplace("@line-desc-trimmed", $line_desc_trimmed, $str);  
+  $str = str_ireplace("@line-desc-trimmed", $line_desc_trimmed, $str);
   $str = str_ireplace("@line-desc", $line_desc, $str);
 
 
   return $str;
-
 } // ...sms_replace_patterns
 
 
@@ -490,6 +601,7 @@ function engagements_handle_incoming_sms($vars = array())
     }
 
     $content->field__engagement_msg['value'] = $body;
+    $content->field__external_msg_id['value'] = $message_sid;
 
     $content->field__visibility['value'] = 'public';
 
@@ -1370,14 +1482,14 @@ function engagements_perm()
     ),
     'can_send_email_engagements' => array(
       'title' => t('Can send email engagements to students'),
-    ),    
+    ),
     'can_log_engagements' => array(
       'title' => t('Can log engagements with students'),
     ),
     'can_send_txt_engagements' => array(
       'title' => t('Can send txt message engagements to students'),
       'description' => t("<b>Important:</b> Be sure to also select the specific phone number/permissions below."),
-    ),    
+    ),
   );
 
   // set up other permissions for each SMS line we have.
@@ -1392,12 +1504,16 @@ function engagements_perm()
       "title" => t("Can send txt messages from @pretty", array("@pretty" => $pretty_num)),
       "description" => t("The user may send SMS (txt) messages from @pretty - %desc phone line.", array("@pretty" => $pretty_num, "%desc" => $desc)),
     );
-
   }
+
+  $rtn['can_send_mass_sms'] = array(
+    'title' => t("Send mass txt messages"),
+    'description' => t("The user may access and send mass SMS (txt) messages to lists of recipients.  Make sure to also select which
+                        phone lines the user may send from. Only give to trusted users."),
+  );
 
 
   return $rtn;
-
 }
 
 
@@ -1447,12 +1563,12 @@ function engagements_content_register_content_type()
     'weight' => 5,
   );
 
- 
+
   $fields['from_sms_phone'] = array(
     'type' => 'select',
     'label' => t('From TXT Phone Line:'),
     'hide_please_select' => TRUE,
-    'options' => array(),    
+    'options' => array(),
     'weight' => 7,
   );
 
@@ -1640,7 +1756,7 @@ function engagements_form_alter(&$form, $form_id)
 {
 
   global $user;
-  
+
   if ($form_id == 'content_edit_content_form') {
     if (@$form['type']['value'] == 'engagement') {
 
@@ -1707,15 +1823,15 @@ function engagements_form_alter(&$form, $form_id)
           $student_user_id = db_get_user_id_from_cwid($_GET['student_id'], 'student');
           $student_account = fp_load_user($student_user_id);
           if ($form['engagement_type']['value'] == 'txt_msg') {
-            
+
             // Add in select list of the phone numbers we are allowed to select from.
-            $from_options = engagements_get_from_phones_for_fapi(FALSE, $user);            
+            $from_options = engagements_get_from_phones_for_fapi(FALSE, $user);
             $form['from_sms_phone']['options'] = $from_options;
             if (count($from_options) == 0) {
               $form['from_sms_phone']['suffix'] .= "<h3>" . t("Note: You do
                         not have permission to send txt messages from any number.
                         See your system administrator for access.") . "</h3>";
-              
+
               $form['from_sms_phone']['attributes']['readonly'] = "readonly";
               $form['from_sms_phone']['attributes']['class'] .= " readonly";
               $form['from_sms_phone']['attributes']['disabled'] .= "disabled";
@@ -1726,8 +1842,6 @@ function engagements_form_alter(&$form, $form_id)
 
               $form['submit_submit']['attributes']['disabled'] = 'disabled';
               $form['submit_submit']['attributes']['class'] .= ' button-disabled';
-
-
             }
             $form['from_sms_phone']['required'] = TRUE;
 
@@ -1796,7 +1910,7 @@ function engagements_form_alter(&$form, $form_id)
         $form['from_sms_phone'] = array(
           'type' => 'hidden',
           'value' => '',
-          'required' => FALSE,          
+          'required' => FALSE,
         );
       }
 
@@ -1820,7 +1934,8 @@ function engagements_form_alter(&$form, $form_id)
  * to send sms for that number.
  * 
  */
-function engagements_get_from_phones_for_fapi($bool_return_all = TRUE, $account = NULL) {
+function engagements_get_from_phones_for_fapi($bool_return_all = TRUE, $account = NULL)
+{
   global $user;
   $rtn = array();
 
@@ -1831,7 +1946,7 @@ function engagements_get_from_phones_for_fapi($bool_return_all = TRUE, $account 
   $rtn[$default] = t("[Default] ") . engagements_convert_to_pretty_phone_number($default) . ' - ' . $phones['default']['description'];
 
   foreach ($phones['lines'] as $num => $details) {
-        
+
     if (!isset($rtn[$details['num']])) {
       $rtn[$details['num']] = engagements_convert_to_pretty_phone_number($details['num']) . " - " . $details['description'];
     }
@@ -1851,7 +1966,6 @@ function engagements_get_from_phones_for_fapi($bool_return_all = TRUE, $account 
 
 
   return $rtn;
-
 } // engagements_get_from_phones_for_fapi()
 
 
@@ -1866,7 +1980,7 @@ function engagements_send_email_or_txt_form_validate($form, &$form_state)
   $values = $form_state['values'];
   $cid = $form_state['content_object']->cid;   // At this point, the content has already been saved, so we know its cid.  
   $engagement_type = $values['engagement_type'];
-fpm($values);
+
   if ($engagement_type != 'email' && $engagement_type != 'txt_msg') {
     return;   // we are not interested, harmlessly return.
   }
@@ -1876,7 +1990,7 @@ fpm($values);
   $msg = $values['engagement_msg'];
 
   $from_number = trim($values['from_sms_phone']);
-  
+
   $db = get_global_database_handler();
 
   if ($engagement_type == 'email') {
@@ -1892,7 +2006,7 @@ fpm($values);
 
     $student_user_id = db_get_user_id_from_cwid($student_id, 'student');
 
-    
+
     $temp = user_get_attribute($student_user_id, 'mobile_phone');
     $mobile_phone = engagements_convert_to_valid_phone_number(trim($temp));
 
@@ -1995,10 +2109,9 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
     if ($external_msg_id) {
       fp_add_message(t("TXT Message has been successfully sent."));
       // save the external_msg_id with the content.
-      $content->field__external_msg_id['value'] = $external_msg_id; 
+      $content->field__external_msg_id['value'] = $external_msg_id;
       $content->log = "[AUTO] Updating external_msg_id";
       content_save($content);
-
     }
   } // type == 'txt_msg'
 
@@ -2029,9 +2142,9 @@ function engagements_send_sms_to_number($to_number, $body, $to_cwid = "", $from_
   $from_phone = $from_number;
   $phones = engagements_get_from_phones();
   if ($from_phone == "default") {
-    $from_phone = engagements_convert_to_valid_phone_number($phones['default']['num']);  
+    $from_phone = engagements_convert_to_valid_phone_number($phones['default']['num']);
   }
-  
+
 
 
   // project id, auth tolen, space url
@@ -2214,7 +2327,28 @@ function engagements_display_main()
     $direction = $content->field__direction['value'];
     $msg = $content->field__engagement_msg['display_value'];
 
+    $external_msg_id = @trim($content->field__external_msg_id['value']);
+
+
     $pre_description = "";
+
+    $sms_extra_details = ""; 
+
+    if ($type == 'txt_msg' && $external_msg_id) {
+
+      $phones = engagements_get_from_phones();
+      $details = engagements_get_sms_from_history($external_msg_id);      
+      if ($details) {
+        $desc = @$phones['lines'][$details['to_number']]['description'];
+        if (!$desc) $desc = @$phones['lines'][$details['from_number']]['description'];
+
+        $sms_extra_details = "<span class='sms-extra-details'>";
+        $sms_extra_details .= t("(%desc)", array('%desc' => $desc));
+        $sms_extra_details .= "</span>";
+      }
+    }
+
+
 
     if ($content->field__manual_entry['value'] == 'Y') {
       // This was a manually logged engagement.
@@ -2309,7 +2443,7 @@ function engagements_display_main()
                   <span class='header-description'>
                       <span class='pre-description'>$pre_description</span>
                       {$content->field__engagement_type['display_value']}                      
-                  </span>
+                  </span>$sms_extra_details
                   <span class='header-phone-outcome'>: {$content->field__direction['display_value']} $header_desc_extra</span>
                   <span class='header-edit'></span>
                   <span class='header-date-time'>" . $content->field__activity_datetime['display_value'] . "</span>                  
