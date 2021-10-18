@@ -127,7 +127,8 @@ function engagements_mass_sms_form() {
 
 
   $form['mark_top'] = array(
-    'value' => "<p>" . t("Use this form to send the same SMS (txt) message to multiple recipients at a time.  Your messages will
+    'value' => "<p>" . t("Use this form to send the same SMS (txt) message to multiple recipients at a time.  <strong>Recipients must be either students
+                          or faculty/staff at your institution, with their mobile numbers already in the database</strong>.  Your messages will
                   be queued, and sent out approximately one per second.") . "</p>",
   );
 
@@ -143,6 +144,7 @@ function engagements_mass_sms_form() {
   $form['message'] = array(
     'type' => 'textarea',
     'label' => t('Your message:'),
+    'required' => TRUE,
     'description' => t("To insert emoji in Windows, press <span style='padding-left: 10px; padding-right: 10px; font-size: 1.3em;'><i class='fa fa-windows'></i> + .</span>  <em>(Windows key + period)</em>
                         <br><br>
                         Keep in mind that pricing is based on 160-chars = 1 message segment.  <b>Important:</b> Your message will NOT have any
@@ -155,6 +157,7 @@ function engagements_mass_sms_form() {
     'type' => 'textarea',
     'label' => t('Recipients:'),
     'rows' => 20,
+    'required' => TRUE,
     'description' => t("List the recipients you wish to send your message, one per line.  You may enter a valid phone number, CWID, or email address.
                         The mobile phone number that is on record for the user with the entered CWID or email address is the one which will be used.  Invalid phone numbers
                         or users missing phone numbers will be skipped, with a report of skipped users displayed after this routine is run.
@@ -187,15 +190,196 @@ function engagements_mass_sms_form() {
 } // mass_sms_form
 
 
+
+function engagements_mass_sms_form_validate($form, $form_state) {
+  $values = $form_state['values'];
+
+  $pass = $values['password'];
+
+  if ($pass !== variable_get('sms_mass_sms_password', 'changeMe')) {
+    form_error('password', t("Sorry, but you did not enter the correct Mass SMS password.  Please try again."));
+  }
+
+}
+
+
 /**
  * Our submit function.  Our main task is simply to set off a batch routine.
  */
-function engagements_mass_sms_form_submit($form, $form_values) {
-   // TODO: implement a batch process.
+function engagements_mass_sms_form_submit($form, $form_state) {
+   
+
+  $values = $form_state['values'];
+  $recipients = trim($values['recipients']);
+  $message = trim($values['message']);
+  $from_number = trim($values['from_number']);
+
+  // Start a batch operation.
+
+
+  // Okay, set up the batch....
+  $batch = array(
+    "operation" => array("engagements_mass_sms_perform_batch_operation", array($recipients, $message, $from_number)),
+    "title" => t("Sending Mass TXT Messages"),
+    "progress_message" => "Attempting to send to recipient @current of @total",
+    "display_percent" => TRUE,
+  );
+
+  // Set the batch...
+  batch_set($batch);
+
+
 } // ... mass_sms_form_submit
 
 
-// TODO: implement batch operation function
+function engagements_mass_sms_perform_batch_operation(&$batch, $recipients, $message, $from_number) {
+
+  // if this is our first time through, let's init our values.
+  if (!isset($batch["results"]["total"])) {
+    // Our first time through.  Let's start up.
+
+    $batch['recipients'] = array();
+    $batch['not_found'] = array();
+    $batch['rejected'] = array();
+    $batch['date_sent_ts'] = time();
+
+    $lines = explode("\n", $recipients);
+    foreach ($lines as $line) {
+      $line = trim($line);
+      if (!$line) continue;
+      // Whatever this is, let's try to get a valid phone number out of it.
+      
+      $num = $cwid = "";
+
+      // First, we were given a CWID?
+      $test = db_get_user_id_from_cwid($line, 'student');
+      if (!$test) {
+        $test = db_get_user_id_from_cwid($line, 'faculty');
+      }
+
+      if (!$test) {
+        // Okay, it was NOT a CWID.  Is this an email address?
+        if (strstr($line, '@')) {
+          $test = db_get_user_id_from_email($line, 'student');
+          if (!$test) {
+            $test = db_get_user_id_from_email($line, 'faculty');
+          }
+        }
+      }
+
+      if (!$test) {
+        // Okay, this was not an email address either.  Perhaps this is simply a phone number all by itself?
+        $num = engagements_convert_to_valid_phone_number($line);
+        if (!$num) {
+          // Okay, we are going to have to give up-- this was not a valid number, nor anything else we might try
+          // to search for.
+          $batch['not_found'][] = $line;
+          continue;
+        }
+        else {
+          // Figure out what user_id this phone number belongs to.
+          // TODO:  This bit of code means it can only be sent to current users, and not non-users.  Perhaps that should be a setting?
+          $test = db_result(db_query("SELECT user_id FROM user_attributes WHERE `name` = 'mobile_phone' AND `value` = ? LIMIT 1", array($num)));
+        }
+      }
+
+      
+      if ($test) {
+        // This means that we found a user_id.  Let's get their mobile_phone number from their user attributes.
+        $num = engagements_convert_to_valid_phone_number(user_get_attribute($test, 'mobile_phone', ''));
+        // Let's also get their CWID.
+        $cwid = db_get_cwid_from_user_id($test);
+      }
+
+      if (!$num || $num == "") {
+        // Okay, we are going to have to give up-- this was not a valid number
+        $batch['not_found'][] = $line;
+        continue;
+      }
+
+      // If we made it here, then we have a valid recipient!
+      // // by using $num as the key, we don't worry about duplicates.
+      $batch['recipients'][$num] = array(
+        'num' => $num,
+        'user_id' => $test,
+        'cwid' => $cwid,
+      );
+
+
+    } // foreach lines of recipients
+
+    $batch["results"] = array();
+    
+    
+    $batch["results"]["total"] = count($batch['recipients']);
+    $batch["results"]["current"] = 0;
+    $batch["results"]["finished"] = FALSE;
+
+    
+  } // if....   (this is our first time through)    
+
+  $current = $batch["results"]["current"];
+  $total = $batch["results"]["total"];
+
+  $limit = 1;  // How many numbers to process this time through
+  $c = 0;  // count of records.      
+
+  $i = 0;
+  foreach ($batch['recipients'] as $num => $details) {
+
+    // Skip the ones we've already done.
+    if ($i < $current) {
+      $i++;
+      continue;
+    }
+
+    if ($c >= $limit) { 
+      break;
+    }
+
+
+    // Send our message to this number, record it as an engagement as well.
+    $external_msg_id = engagements_send_sms_to_number($num, $message, $details['cwid'], $from_number);
+    if (!$external_msg_id) {
+      $batch['rejected'][] = $num;
+    }
+    else {
+      // We can create an engagement for this SMS.  We will make use of our engagements_handle_incoming_sms function.
+      $vars = array(
+        'MessageSid' => $external_msg_id,
+        'From' => $from_number,
+        'To' => $num,
+        'Body' => $message,
+        'NumMedia' => 0,
+        'NumSegements' => ceil(strlen($message) / 160),
+        'direction' => 'outbound-api',
+        'date_sent_ts' => $batch['date_sent_ts'],
+      );
+      
+      engagements_handle_incoming_sms($vars);
+
+    }
+
+    
+    
+    $c++;
+  } // foreach
+
+
+  // Update our $batch results variables
+  $batch["results"]["current"] = $current + $c;
+
+  if ($batch["results"]["current"] >= $total) {
+    // We are finished!
+    $batch["results"]["finished"] = TRUE;
+  }
+
+  // Add the information to the SESSION so we can call on it later.
+  $_SESSION['mass_sms_batch_data'] = $batch;
+
+} // . batch operation
+
+
 
 
 

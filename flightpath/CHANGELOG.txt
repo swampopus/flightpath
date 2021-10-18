@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-10-17
+  Minor change in admin.module to fix typo.
+  
+  Implemented sending mass text messages function as part of the Engagements
+  module.
+
 2021-10-14
   Fixed bug in notify module, where the notification history table wasn't created.
 
