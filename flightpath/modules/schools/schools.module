@@ -491,7 +491,7 @@ function schools_get_schools_for_fapi($bool_include_default = TRUE, $bool_check_
     }
     
     if ($bool_check_perm) {
-      if (user_has_permission('administer_' . $school_id . '_' . $check_perm_type . '_data')) {
+      if (user_has_permission('administer_' . $school_id . '_' . $check_perm_type . '_data') || user_has_permission('manage_' . $school_id . '_' . $check_perm_type . '_data')) {
         $rtn[$school_id] = $title;
       }
     }
@@ -638,6 +638,9 @@ function schools_content_alter(&$render, $render_id) {
   } // admin_display_courses   
   
   
+  
+  
+  
   if ($render_id == 'user_display_users') {
     // Add school to our table top.
     $v = $render['users_table_top']['value'];
@@ -665,7 +668,7 @@ function schools_content_alter(&$render, $render_id) {
         
         
         // A school id has indeed been set, so we need to see if this user is allowed to edit it or not.          
-        if (!user_has_permission('administer_' . $school_id . '_user_data')) {
+        if (!user_has_permission('manage_' . $school_id . '_user_data')) {
           // No, so let's hide it.
           unset($render[$key]);
         }          
@@ -1443,14 +1446,24 @@ function schools_perm() {
   $types = array('degree', 'group', 'course');
   
   foreach ($types as $type) {
-  
+        
+      
+ 
     foreach ($defs as $school_id => $school_desc) {
       $rtn['administer_' . $school_id . '_' . $type . '_data'] = array('title' => t('Administer %school_desc @type data', array('%school_desc' => $school_desc, '@type' => $type)), 
                                                                   'description' => t('The user is allowed to edit @type data for %school_desc.
                                                                       Note: The user MUST also be given the Edit Data Entry permission under Admin module.', 
                                                                         array('%school_desc' => $school_desc, '@type' => $type)));
+
+     
+      $rtn['manage_' . $school_id . '_user_data'] = array('title' => t('Administer %school_desc users', array('%school_desc' => $school_desc)), 
+                                                                  'description' => t('The user is allowed to edit and create users for %school_desc.
+                                                                        Note: the user MUST also be given the Manage users permission under the User module.
+                                                                        ',array('%school_desc' => $school_desc, '@type' => $type)));      
+          
+
       
-  
+ 
   
       $rtn['search_students_' . $school_id] = array('title' => t('Search for students in %school_desc', array('%school_desc' => $school_desc)), 
                                                                   'description' => t('The user is allowed to search for students belonging to %school_desc.

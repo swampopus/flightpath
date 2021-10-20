@@ -397,7 +397,7 @@ function student_search_get_majors_for_fapi() {
   $params = array();
   
   
-  
+  /*
   $res = db_query("SELECT * FROM degrees
                    WHERE exclude = 0
                    AND school_id IN ($school_id_list)                   
@@ -405,6 +405,14 @@ function student_search_get_majors_for_fapi() {
                    GROUP BY major_code
                    ORDER BY school_id, title
                    ", $params);
+   */
+  // Removing "group by major_code" line, as duplicate major codes in more than one school were not showing correctly in the select list.
+  $res = db_query("SELECT * FROM degrees
+                   WHERE exclude = 0
+                   AND school_id IN ($school_id_list)                   
+                   $extra_line                   
+                   ORDER BY school_id, title
+                   ", $params);   
   while ($cur = db_fetch_object($res)) {
     $sel = ($major_code == $cur->major_code) ? "selected" : "";
   
@@ -638,13 +646,16 @@ function student_search_search_form() {
     $major_code = trim(@$_SESSION["student_search_major_code"]);
   }  
 
-  $school_id = -1;
+  $selected_school_id = -1;
   $o_major_code = "";  
   if ($major_code != "") {
     $o_major_code = $major_code;
     $temp = explode("~~school_", $major_code);
     $major_code = $temp[0];
-    $school_id = $temp[1];
+    if (isset($temp[1])) {
+      $selected_school_id = intval($temp[1]);
+    } 
+    
   }
    
   $form['search_for'] = array(
@@ -783,7 +794,7 @@ function student_search_search_form() {
                         AND (b.major_code LIKE :like_mjsearch ) ";
                         
       $params[":like_mjsearch"] = "%$mjsearch%";
-      $params[":b_school_id"] = $school_id;
+      $params[":b_school_id"] = $selected_school_id;
       //unset($params[':like_search_for']);
       
     }
@@ -804,6 +815,11 @@ function student_search_search_form() {
     $school_ids = student_search_get_school_ids_user_is_allowed_to_search();  
     $school_id_list = join(",", $school_ids);
   
+    if ($selected_school_id !== -1) {
+      // Meaning, a specific school was selected.  So, we only want to return results of students from THAT school.
+      $school_id_list = intval($selected_school_id);
+    }
+
 
     $query = "SELECT u.user_id, f_name, l_name, u.cwid, rank_code, a.catalog_year, u.school_id, priority_value
               FROM (users u, students a, student_degrees c $other_table)                  
@@ -870,6 +886,8 @@ function student_search_search_form_submit($form, $form_state) {
     unset($_SESSION["student_search_search_options"]);
     return;
   }
+  
+  
       
   // Save values in session for next time.  
   $_SESSION["student_search_for"] = @$form_state['values']['search_for'];

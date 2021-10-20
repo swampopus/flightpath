@@ -165,10 +165,7 @@ function user_display_student_users() {
   );    
 
 
-
   
-
-
   
   $extra_where_conditions = "";
   $params = array();
@@ -244,7 +241,7 @@ function user_display_student_users() {
     'value' => $html,
   );  
 
-  
+    
   $limit = 30;     
   $result = pager_query("SELECT * FROM (users u, students s)
                         LEFT JOIN student_degrees d ON (s.cwid = d.student_id)
@@ -307,7 +304,6 @@ function user_display_student_users() {
     );
 
 
-
   } // while
   
   
@@ -354,7 +350,7 @@ function user_student_list_filter_form() {
   $form['filter_name'] = array(
     'type' => 'textfield',
     'label' => '',
-    'attributes' => array("placeholder=" => t("Nname or CWID")),    
+    'attributes' => array("placeholder" => t("Name or CWID")),    
     'value' => $filter_name_value,
     'size' => 20,
     'weight' => 10,
