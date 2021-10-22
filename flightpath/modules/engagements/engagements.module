@@ -108,7 +108,7 @@ function engagements_menu()
         ),
       ),
     ),
-    "type" => MENU_TYPE_NORMAL_ITEM,    
+    "type" => MENU_TYPE_NORMAL_ITEM,
   );
 
 
@@ -121,9 +121,12 @@ function engagements_menu()
 
 
 
-function engagements_mass_sms_form() {
+function engagements_mass_sms_form()
+{
   global $user;
   $form = array();
+
+  fp_add_css(fp_get_module_path('engagements') . '/css/style.css');
 
 
   $form['mark_top'] = array(
@@ -131,6 +134,41 @@ function engagements_mass_sms_form() {
                           or faculty/staff at your institution, with their mobile numbers already in the database</strong>.  Your messages will
                   be queued, and sent out approximately one per second.") . "</p>",
   );
+
+
+
+  if (isset($_SESSION['mass_sms_batch_data'])) {
+    $html = "";
+    $html .= "<div class='mass-sms-batch-results'>";
+
+    $message = $_SESSION['mass_sms_batch_data']['message'];
+    if (strlen($message) > 160) $message = substr($message, 0, 160) . "...<em>" . t("trimmed") . "</em>";
+    $message = nl2br($message);
+
+    $last_timestamp = $_SESSION["mass_sms_batch_data"]["last_timestamp"];
+    $last_batch_id = $_SESSION["mass_sms_batch_data"]["batch_id"];
+    $html .= t("The last mass batch of txt messages were sent on %time.", array('%time' => format_date(convert_time($last_timestamp)))) . "<br><br>
+                " . t("The message sent was:") . "
+                <div class='mass-msg-sent-trunc'>$message</div>";
+    $html .= "<p>" . t("You may download a CSV of results relating to this session for the next hour by clicking the following link (valid for 1 hour):") . "</p>";
+    $html .= "<p>" . l(t("Download CSV"), "stats/download-csv-from-batch/$last_batch_id", "filename=" . urlencode("mass_sms_results__" . $last_timestamp), array('class' => 'button')) . "
+                " . t("Note: Row 2 of this CSV shows the actual message that was sent.  It is not repeated per-row, to save space.") . "</p>";
+
+
+    $html .= "</div>";
+
+    $form['mark_last_batch'] = array(
+      'type' => 'markup',
+      'value' => $html,
+    );
+  }
+
+
+
+
+
+
+
 
 
   $form['from_number'] = array(
@@ -144,6 +182,7 @@ function engagements_mass_sms_form() {
   $form['message'] = array(
     'type' => 'textarea',
     'label' => t('Your message:'),
+    'maxlength' => 1600,
     'required' => TRUE,
     'description' => t("To insert emoji in Windows, press <span style='padding-left: 10px; padding-right: 10px; font-size: 1.3em;'><i class='fa fa-windows'></i> + .</span>  <em>(Windows key + period)</em>
                         <br><br>
@@ -186,12 +225,12 @@ function engagements_mass_sms_form() {
   );
 
   return $form;
-
 } // mass_sms_form
 
 
 
-function engagements_mass_sms_form_validate($form, $form_state) {
+function engagements_mass_sms_form_validate($form, $form_state)
+{
   $values = $form_state['values'];
 
   $pass = $values['password'];
@@ -199,15 +238,15 @@ function engagements_mass_sms_form_validate($form, $form_state) {
   if ($pass !== variable_get('sms_mass_sms_password', 'changeMe')) {
     form_error('password', t("Sorry, but you did not enter the correct Mass SMS password.  Please try again."));
   }
-
 }
 
 
 /**
  * Our submit function.  Our main task is simply to set off a batch routine.
  */
-function engagements_mass_sms_form_submit($form, $form_state) {
-   
+function engagements_mass_sms_form_submit($form, $form_state)
+{
+
 
   $values = $form_state['values'];
   $recipients = trim($values['recipients']);
@@ -227,12 +266,11 @@ function engagements_mass_sms_form_submit($form, $form_state) {
 
   // Set the batch...
   batch_set($batch);
-
-
 } // ... mass_sms_form_submit
 
 
-function engagements_mass_sms_perform_batch_operation(&$batch, $recipients, $message, $from_number) {
+function engagements_mass_sms_perform_batch_operation(&$batch, $recipients, $message, $from_number)
+{
 
   // if this is our first time through, let's init our values.
   if (!isset($batch["results"]["total"])) {
@@ -242,108 +280,140 @@ function engagements_mass_sms_perform_batch_operation(&$batch, $recipients, $mes
     $batch['not_found'] = array();
     $batch['rejected'] = array();
     $batch['date_sent_ts'] = time();
+    $batch['date_sent'] = format_date(convert_time(time()));
+    $batch['csv'] = "";
+    $batch['message'] = $message;
+    $safe_message = str_replace('"', "'", $message);
+    $num_segments = ceil(strlen($message) / 160);
+    // Create headers for the csv
+    $batch['csv'] .= "From Number,To Entered Value,Recipient Mobile Number,Recipient Cwid,Recipient User Type,SMS Status,Message,Num Segments,MessageSid,Date Sent\n";
+    // Second row states the message, so we don't have to repeat it each row.
+    $batch['csv'] .= "000,Sending msg:,0,0,0,0,\"$safe_message\",$num_segments,0,0\n";
+    $batch['csv'] .= "--,--,--,--,--,--,--,--,--,--\n";
 
     $lines = explode("\n", $recipients);
-    foreach ($lines as $line) {
-      $line = trim($line);
-      if (!$line) continue;
-      // Whatever this is, let's try to get a valid phone number out of it.
-      
-      $num = $cwid = "";
-
-      // First, we were given a CWID?
-      $test = db_get_user_id_from_cwid($line, 'student');
-      if (!$test) {
-        $test = db_get_user_id_from_cwid($line, 'faculty');
-      }
-
-      if (!$test) {
-        // Okay, it was NOT a CWID.  Is this an email address?
-        if (strstr($line, '@')) {
-          $test = db_get_user_id_from_email($line, 'student');
-          if (!$test) {
-            $test = db_get_user_id_from_email($line, 'faculty');
-          }
-        }
-      }
-
-      if (!$test) {
-        // Okay, this was not an email address either.  Perhaps this is simply a phone number all by itself?
-        $num = engagements_convert_to_valid_phone_number($line);
-        if (!$num) {
-          // Okay, we are going to have to give up-- this was not a valid number, nor anything else we might try
-          // to search for.
-          $batch['not_found'][] = $line;
-          continue;
-        }
-        else {
-          // Figure out what user_id this phone number belongs to.
-          // TODO:  This bit of code means it can only be sent to current users, and not non-users.  Perhaps that should be a setting?
-          $test = db_result(db_query("SELECT user_id FROM user_attributes WHERE `name` = 'mobile_phone' AND `value` = ? LIMIT 1", array($num)));
-        }
-      }
-
-      
-      if ($test) {
-        // This means that we found a user_id.  Let's get their mobile_phone number from their user attributes.
-        $num = engagements_convert_to_valid_phone_number(user_get_attribute($test, 'mobile_phone', ''));
-        // Let's also get their CWID.
-        $cwid = db_get_cwid_from_user_id($test);
-      }
-
-      if (!$num || $num == "") {
-        // Okay, we are going to have to give up-- this was not a valid number
-        $batch['not_found'][] = $line;
-        continue;
-      }
-
-      // If we made it here, then we have a valid recipient!
-      // // by using $num as the key, we don't worry about duplicates.
-      $batch['recipients'][$num] = array(
-        'num' => $num,
-        'user_id' => $test,
-        'cwid' => $cwid,
-      );
-
-
-    } // foreach lines of recipients
 
     $batch["results"] = array();
-    
-    
-    $batch["results"]["total"] = count($batch['recipients']);
+    $batch["results"]["total"] = count($lines);
     $batch["results"]["current"] = 0;
     $batch["results"]["finished"] = FALSE;
-
-    
   } // if....   (this is our first time through)    
 
+
+
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  // Actually go through our lines of recipients, try to find their number, and send!
+  ////////////////////////////////////////////
   $current = $batch["results"]["current"];
   $total = $batch["results"]["total"];
 
   $limit = 1;  // How many numbers to process this time through
   $c = 0;  // count of records.      
 
-  $i = 0;
-  foreach ($batch['recipients'] as $num => $details) {
 
-    // Skip the ones we've already done.
-    if ($i < $current) {
-      $i++;
-      continue;
-    }
+  $lines = explode("\n", $recipients);
 
-    if ($c >= $limit) { 
+  for ($t = $current; $t < count($lines); $t++) {
+
+    if ($c >= $limit) {
       break;
     }
 
+    $line = trim($lines[$t]);
+    if (!$line) {
+      $c++;
+      continue;
+    }
+    // Whatever this is, let's try to get a valid phone number out of it.
+
+    $num = $cwid = $user_type = $user_name = "";
+
+    $user_type = 'student';
+
+    // First, we were given a CWID?
+    $test = db_get_user_id_from_cwid($line, 'student');
+    if (!$test) {
+      $test = db_get_user_id_from_cwid($line, 'faculty');
+      $user_type = 'faculty';
+    }
+
+    if (!$test) {
+      $user_type = '';
+      // Okay, it was NOT a CWID.  Is this an email address?
+      if (strstr($line, '@')) {
+        $test = db_get_user_id_from_email($line, 'student');
+        $user_type = 'student';
+        if (!$test) {
+          $test = db_get_user_id_from_email($line, 'faculty');
+          $user_type = 'faculty';
+        }
+      }
+    }
+
+    if (!$test) {
+      $user_type = '';
+      // Okay, this was not an email address either.  Perhaps this is simply a phone number all by itself?
+      $num = engagements_convert_to_valid_phone_number($line);
+      if (!$num) {
+        // Okay, we are going to have to give up-- this was not a valid number, nor anything else we might try
+        // to search for.
+        $batch['not_found'][] = $line;
+        // add to csv
+        $batch['csv'] .= "\"$from_number\",\"$line\",\"\",\"\",\"\",\"user/number not found\",\"\",\"\",\"\",\"\"\n";
+        $c++;
+        continue;
+      } else {
+        // Figure out what user_id this phone number belongs to.
+        // TODO:  This bit of code means it can only be sent to current users, and not non-users.  Perhaps that should be a setting?
+        $test = db_result(db_query("SELECT user_id FROM user_attributes WHERE `name` = 'mobile_phone' AND `value` = ? LIMIT 1", array($num)));
+      }
+    }
+
+
+    if ($test) {
+      $user_type = 'student';
+      // This means that we found a user_id.  Let's get their mobile_phone number from their user attributes.
+      $num = engagements_convert_to_valid_phone_number(user_get_attribute($test, 'mobile_phone', ''));
+      $test_account = fp_load_user($test);
+      if ($test_account && !$test_account->is_student) {
+        $user_type = 'faculty';
+      }
+      // Let's also get their CWID.
+      $cwid = db_get_cwid_from_user_id($test);
+      // And let's get their name.
+      $user_name = $test_account->l_name . ", " . $test_account->f_name;
+    }
+
+    if (!$num || $num == "") {
+      // Okay, we are going to have to give up-- this was not a valid number
+      $batch['not_found'][] = $line;
+      $batch['csv'] .= "\"$from_number\",\"$line\",\"$cwid\",\"$user_type\",\"\",\"user has no valid mobile number\",\"\",\"\",\"\",\"\"\n";
+      $c++;
+      continue;
+    }
+
+    // If we made it here, then we have a valid recipient!  Let's put it into an array called details.    
+    $details = array(
+      'num' => $num,
+      'user_id' => $test,
+      'cwid' => $cwid,
+      'user_type' => $user_type,
+      'user_name' => $user_name,
+      'line' => $line,
+    );
+
 
     // Send our message to this number, record it as an engagement as well.
+    $num_segments = ceil(strlen($message) / 160);
+    $status = "sent";
+
     $external_msg_id = engagements_send_sms_to_number($num, $message, $details['cwid'], $from_number);
     if (!$external_msg_id) {
       $batch['rejected'][] = $num;
-    }
-    else {
+      $status = "rejected";
+    } else {
       // We can create an engagement for this SMS.  We will make use of our engagements_handle_incoming_sms function.
       $vars = array(
         'MessageSid' => $external_msg_id,
@@ -351,17 +421,19 @@ function engagements_mass_sms_perform_batch_operation(&$batch, $recipients, $mes
         'To' => $num,
         'Body' => $message,
         'NumMedia' => 0,
-        'NumSegements' => ceil(strlen($message) / 160),
+        'NumSegements' => $num_segments,
         'direction' => 'outbound-api',
         'date_sent_ts' => $batch['date_sent_ts'],
       );
-      
-      engagements_handle_incoming_sms($vars);
 
+      engagements_handle_incoming_sms($vars);
     }
 
-    
-    
+    $safe_message_sid = (string) $external_msg_id;
+
+    $batch['csv'] .= "\"$from_number\",\"{$details['line']}\",\"$num\",\"{$details['cwid']}\",\"{$details['user_type']}\",\"$status\",\"\",\"$num_segments\",\"$safe_message_sid\",\"{$batch['date_sent']}\"\n";
+
+
     $c++;
   } // foreach
 
@@ -376,7 +448,7 @@ function engagements_mass_sms_perform_batch_operation(&$batch, $recipients, $mes
 
   // Add the information to the SESSION so we can call on it later.
   $_SESSION['mass_sms_batch_data'] = $batch;
-
+  $_SESSION["mass_sms_batch_data"]["last_timestamp"] = time();
 } // . batch operation
 
 
@@ -805,21 +877,23 @@ function engagements_handle_incoming_sms($vars = array())
     content_save($acontent);
 
     // Notify the advisor(s).
-    // get list of all advisors for this student, and send notifications.
-    $advisors = advise_get_advisors_for_student($stu_cwid);
-    foreach ($advisors as $c => $afaculty_id) {
-      $account_user_id = db_get_user_id_from_cwid($afaculty_id, 'faculty');
-      if ($account_user_id) {
-        $student_name = fp_get_student_name($stu_cwid, TRUE);
-        $base_url = $GLOBALS['fp_system_settings']['base_url'];
-        $link = $base_url . "/engagements?current_student_id=$stu_cwid";
-        $tmsg = "";
-        $tmsg .= "$student_name has submitted a text message to FlightPath.<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link";
+    // get list of all advisors for this student, and send notifications, but only if this was
+    // something we received!
+    if ($dir != "sent") { // meaning, we RECEIVED this message.
+      $advisors = advise_get_advisors_for_student($stu_cwid);
+      foreach ($advisors as $c => $afaculty_id) {
+        $account_user_id = db_get_user_id_from_cwid($afaculty_id, 'faculty');
+        if ($account_user_id) {
+          $student_name = fp_get_student_name($stu_cwid, TRUE);
+          $base_url = $GLOBALS['fp_system_settings']['base_url'];
+          $link = $base_url . "/engagements?current_student_id=$stu_cwid";
+          $tmsg = "";
+          $tmsg .= "$student_name has submitted a text message to FlightPath.<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link";
 
-        notify_send_notification_to_user($account_user_id, $tmsg, $content->cid, 'engagement');
-      }
-    } // foreach advisors
-
+          notify_send_notification_to_user($account_user_id, $tmsg, $content->cid, 'engagement');
+        }
+      } // foreach advisors
+    } // dir != sent
   } else {
     // Since a student could not be found, we will not try to do assign it to any particular student here.
 
@@ -2008,6 +2082,11 @@ function engagements_form_alter(&$form, $form_id)
           $student_account = fp_load_user($student_user_id);
           if ($form['engagement_type']['value'] == 'txt_msg') {
 
+
+            // Since this is a txt message, the textare has a max num of characters (1600)
+            $form['engagement_msg']['maxlength'] = 1600;
+
+
             // Add in select list of the phone numbers we are allowed to select from.
             $from_options = engagements_get_from_phones_for_fapi(FALSE, $user);
             $form['from_sms_phone']['options'] = $from_options;
@@ -2516,12 +2595,12 @@ function engagements_display_main()
 
     $pre_description = "";
 
-    $sms_extra_details = ""; 
+    $sms_extra_details = "";
 
     if ($type == 'txt_msg' && $external_msg_id) {
 
       $phones = engagements_get_from_phones();
-      $details = engagements_get_sms_from_history($external_msg_id);      
+      $details = engagements_get_sms_from_history($external_msg_id);
       if ($details) {
         $desc = @$phones['lines'][$details['to_number']]['description'];
         if (!$desc) $desc = @$phones['lines'][$details['from_number']]['description'];

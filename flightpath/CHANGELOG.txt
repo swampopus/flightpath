@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2021-10-21
+  Added new concept to textareas with a maxlength set.  It will now by default show the character count up to the max.
+
+  Completed sending mass txt messages with Engagements, and getting back results in a CSV.
+
+
 2021-10-20
   Made alteration to student_search so that if you have schools enabled, and search for a major within a school, you only see results for that
   school.  Also, fixed bug where if more than one school had the same major code, it was skipping over them.

@@ -160,9 +160,17 @@
 
 
 
+.mass-sms-batch-results {
+  padding: 0 20px;
+  border: 2px solid gold;
+}
 
-
-
+.mass-msg-sent-trunc {
+  padding: 10px;
+  
+  margin-left: 20px;
+  border: 1px dashed #ccc;
+}
 
 
 

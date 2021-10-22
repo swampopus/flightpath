@@ -486,7 +486,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   $value = @$element["value"];
   $label = @$element["label"];
   $options = @$element["options"];
-  $description = @$element["description"];
+  $description = @$element["description"];  
   $popup_description = @$element["popup_description"];
   $prefix = @$element["prefix"];
   $suffix = @$element["suffix"];
@@ -650,7 +650,20 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
 
   if ($type == "textarea" || $type == 'textarea_editor') {
     $rows = (isset($element["rows"])) ? $element["rows"] : "5";
-    $rtn .= "<textarea name='$name' id='element-$cssname' rows='$rows' $attributes>$value</textarea>";
+    $maxlength = (isset($element["maxlength"])) ? $element["maxlength"] : "";
+    $extra_span = "";
+    // if maxlength is set, then we want to show the char count upon change.
+    if ($maxlength != "") {
+      fp_add_css(fp_get_module_path('system') . '/css/style.css');
+      fp_add_js(fp_get_module_path('system') . '/js/textarea-maxlength.js');
+      $extra_span = "<span class='textarea-maxlength-count' id='textarea-maxlength-count___$cssname'>
+                          <span class='current-count' id='element-{$cssname}__current_count'>0</span>/<span class='maxlength-chars'>$maxlength</span>
+                          <span class='maxlength-description'>" . t("Max Characters") . "</span>
+                      </span>";
+
+    }
+
+    $rtn .= "<textarea name='$name' id='element-$cssname' rows='$rows' maxlength='$maxlength' $attributes>$value</textarea>$extra_span";
   }
 
   if ($type == "textfield" || $type == "text" || $type == "search" || $type == "password" || $type == 'datetime-local' || $type == 'time') {
