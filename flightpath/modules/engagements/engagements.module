@@ -813,16 +813,18 @@ function engagements_handle_incoming_sms($vars = array())
 
 
   // Figure out what user this came from/to!
-  $from_cwid = "";
+  $from_cwid = $from_user_id = $to_user_id = "";
   $user_id = db_result(db_query("SELECT user_id FROM user_attributes WHERE `name` = 'mobile_phone' AND `value` = ?", array($from_mobile)));
   if ($user_id) {
     $from_cwid = db_get_cwid_from_user_id($user_id);
+    $from_user_id = $user_id;
   }
 
   $to_cwid = "";
   $user_id = db_result(db_query("SELECT user_id FROM user_attributes WHERE `name` = 'mobile_phone' AND `value` = ?", array($to_mobile)));
   if ($user_id) {
     $to_cwid = db_get_cwid_from_user_id($user_id);
+    $to_user_id = $user_id;
   }
 
   if ($from_cwid || $to_cwid) {
@@ -880,19 +882,32 @@ function engagements_handle_incoming_sms($vars = array())
     // get list of all advisors for this student, and send notifications, but only if this was
     // something we received!
     if ($dir != "sent") { // meaning, we RECEIVED this message.
+      $already_notified_users = array();
+
+      $student_name = fp_get_student_name($stu_cwid, TRUE);
+      $base_url = $GLOBALS['fp_system_settings']['base_url'];
+      $link = $base_url . "/engagements?current_student_id=$stu_cwid";
+      $tmsg = "";
+      $tmsg .= "$student_name has submitted a text message to FlightPath.<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link";
+
+
       $advisors = advise_get_advisors_for_student($stu_cwid);
       foreach ($advisors as $c => $afaculty_id) {
         $account_user_id = db_get_user_id_from_cwid($afaculty_id, 'faculty');
-        if ($account_user_id) {
-          $student_name = fp_get_student_name($stu_cwid, TRUE);
-          $base_url = $GLOBALS['fp_system_settings']['base_url'];
-          $link = $base_url . "/engagements?current_student_id=$stu_cwid";
-          $tmsg = "";
-          $tmsg .= "$student_name has submitted a text message to FlightPath.<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link";
-
+        if ($account_user_id) {          
           notify_send_notification_to_user($account_user_id, $tmsg, $content->cid, 'engagement');
+          $already_notified_users[] = $account_user_id;
         }
       } // foreach advisors
+
+      // Notify other users who might have been assigned to receive notifications 
+      $to_be_notified = engagements_get_users_to_be_notified_for_sms_on_number($to_mobile);
+      foreach ($to_be_notified as $account_user_id) {
+        if (in_array($account_user_id, $already_notified_users)) continue;
+        notify_send_notification_to_user($account_user_id, $tmsg, $content->cid, 'engagement');
+      } //foreach to_be_notified
+
+
     } // dir != sent
   } else {
     // Since a student could not be found, we will not try to do assign it to any particular student here.
@@ -2187,7 +2202,79 @@ function engagements_form_alter(&$form, $form_id)
     } // form type == engagement
   } // content_edit_content_form
 
+
+
+
+  /**
+   * We want an option for which phone lines should this user receive notifications for.  Should be checkboxes, so it can be multi-select.
+   */
+  if ($form_id == 'user_edit_user_form') {
+    $user_id = intval($form['user_id']['value']);
+    $options = engagements_get_from_phones_for_fapi(TRUE);
+    $default_value = engagements_get_user_notify_sms_receipt_values($user_id);
+    if (count($options) > 0 && $user_id > 0) {
+
+      $form['receive_notifications_from_numbers'] = array(
+        'type' => 'checkboxes',
+        'label' => t("Select the SMS/TXT lines (if any) that this user should be notified of when receiving a TXT message:"),
+        'options' => $options,
+        'value' => $default_value,
+        'weight' => 150,
+        'description' => t("Note: the user will always receive a notification if the sender is designated as one of this user's advisees."),
+      );
+    }
+
+  } // user_edit_user_form
+
+
+
+
+
+
 } // hook_form_alter
+
+
+/**
+ * Get an array of numbers which the user should be notified of when they receive an SMS.
+ */
+function engagements_get_user_notify_sms_receipt_values($user_id = NULL) {
+  global $user;
+
+  $rtn = array();
+
+  if ($user_id === NULL) {
+    $user_id = $user->id;
+  }
+  $options = engagements_get_from_phones_for_fapi(TRUE);
+  
+  foreach ($options as $num => $val) {    
+    $test = user_get_setting($user_id, "notify_sms_receipt__" . $num);    
+    if (intval($test) === intval($num)) {
+      $rtn[$num] = $num;
+    }
+  }
+  return $rtn;
+}
+
+
+/**
+ * Returns an array of all the user who should receive notifications when
+ * we receive an SMS at a particular number.
+ */
+function engagements_get_users_to_be_notified_for_sms_on_number($num) {
+  $rtn = array();
+
+  $res = db_query("SELECT user_id FROM user_settings 
+                    WHERE name = ?", array('notify_sms_receipt__' . $num));
+  while ($cur = db_fetch_array($res)) {
+    $rtn[$cur['user_id']] = intval($cur['user_id']);
+  }
+
+
+  return $rtn;
+}
+
+
 
 
 /**

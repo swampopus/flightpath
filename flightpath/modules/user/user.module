@@ -1381,7 +1381,7 @@ function user_edit_user_form_submit($form, $form_state) {
     }
   }
   
-  $user_id = $values["user_id"];
+  $user_id = intval($values["user_id"]);
   $faculty_cwid = $values["faculty_cwid"];
   $department = trim($values['department']);
   $dept_code = fp_get_machine_readable(strtoupper($department));
@@ -1484,7 +1484,16 @@ function user_edit_user_form_submit($form, $form_state) {
   }
     
   
+  // Do we have any phone lines listed (curtesy of the core module Engagements) that this user should be notified of when they
+  // receive a txt message?  If so, save that information in the user_settings table.
   
+  if (isset($values['receive_notifications_from_numbers']) && is_array($values['receive_notifications_from_numbers'])) {
+    // Delete existing settings values...
+    db_query("DELETE FROM user_settings WHERE user_id = ? AND name LIKE ?", array($user_id, 'notify_sms_receipt__%'));
+    foreach ($values['receive_notifications_from_numbers'] as $num) {
+      user_set_setting($user_id, "notify_sms_receipt__" . $num, $num);
+    }
+  }
   
   
     

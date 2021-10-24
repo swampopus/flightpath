@@ -733,6 +733,7 @@ CREATE TABLE `student_developmentals` (
 ); ";
 db_query($q);
 
+
 $q = "
 CREATE TABLE `student_settings` (
   `student_id` varchar(30) NOT NULL,

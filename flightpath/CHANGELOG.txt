@@ -2,6 +2,11 @@ FlightPath 6.x Changelog
 ========================
 
 
+2021-10-24
+  Added ability to designate notification recipients for when a student sends an SMS to a specific line (advisors will *always* receive
+  such notifications from their advisees).  This is a setting on the admin/user page for faculty-staff members only.
+
+
 2021-10-21
   Added new concept to textareas with a maxlength set.  It will now by default show the character count up to the max.
 
