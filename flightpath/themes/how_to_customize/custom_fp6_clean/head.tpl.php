@@ -9,6 +9,10 @@
  * 
 */
 
+// So that we can "inherit" the base CSS from fp6_clean, let's set an $original_theme_location
+$fp6_clean_original = base_path() . "/themes/fp6_clean";
+
+
 ?>
 <head>  
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />  
@@ -36,13 +40,16 @@
    // Add extra JS files.     
    print $page_extra_js_files;
   
-   // Load this theme's CSS file(s)
-   print "<link rel='stylesheet' type='text/css' href='$theme_location/style.css?$page_css_js_query_string' /> \n";
-   print "<link rel='stylesheet' type='text/css' href='$theme_location/media.css?$page_css_js_query_string' /> \n";
+   // Load the origninal fp6_clean theme's CSS file(s)
+   print "<link rel='stylesheet' type='text/css' href='$fp6_clean_original/style.css?$page_css_js_query_string' /> \n";
+   print "<link rel='stylesheet' type='text/css' href='$fp6_clean_original/media.css?$page_css_js_query_string' /> \n";
   
    // Load any extra CSS files which addon modules might have added.
    print $page_extra_css_files;
     
+   // Load the custom.css file for THIS theme...
+   print "<link rel='stylesheet' type='text/css' href='$theme_location/custom.css?$page_css_js_query_string' /> \n";
+   
   ?>
   
   <link rel="stylesheet" href="<?php print $theme_location ?>/font-awesome-4.7.0/css/font-awesome.min.css">

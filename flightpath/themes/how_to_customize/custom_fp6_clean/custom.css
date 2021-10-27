@@ -1,0 +1,48 @@
+/**
+ * @file
+ * This is where your custom CSS goes, to keep it separate from the "default" CSS definitions
+ * in style.css and mobile.css.
+ * 
+ * You may edit this file freely to override any CSS styles you wish to change in fp6_clean.
+ * 
+ * Depending on the situation, you may need to use the !important directive.
+ * 
+*/
+
+
+/**
+ *   This is an example of how to change the login wallpaper.  It assumes you've placed a jpg file
+ *   called "my_custom_login_wallpaper.jpg" under custom/themes/custom_fp6_theme/images
+ */
+/*
+.page--login #page-login-page__wallpaper {  
+   background: url("images/my_custom_login_wallpaper.jpg") top left no-repeat; 
+   background-size: cover; 
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

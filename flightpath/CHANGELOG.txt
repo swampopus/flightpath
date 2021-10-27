@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-10-27
+  Added a new "how to customize" folder and custom theme which inherits from fp6_clean theme.  It also includes instructions
+  in a README file for copying the theme to your /custom/theme folder and overriding CSS styles.
+
 
 2021-10-24
   Added ability to designate notification recipients for when a student sends an SMS to a specific line (advisors will *always* receive
