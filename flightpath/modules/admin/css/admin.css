@@ -109,8 +109,10 @@ table .rep-msg {
 
 
 
-table.admin-display-main-table td.system-configuration-left {
-  width: 75%;
+table.admin-display-main-table td.advising-settings-right,
+table.admin-display-main-table td.system-configuration-left
+{
+  width: 50%;  
 }
 
 

@@ -640,7 +640,7 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   // For degrees, we first need to select all of the new_year degrees.
   $res = db_query("SELECT * FROM draft_degrees WHERE `catalog_year` = ? ", $new_year);
   while ($cur = db_fetch_array($res)) {
-  	$res2 = db_query("DELETE FROM draft_degree_requirements WHERE `degree_id`='{$cur["degree_id"]}' ");
+    $res2 = db_query("DELETE FROM draft_degree_requirements WHERE `degree_id`='{$cur["degree_id"]}' ");
   }
   
   $res = db_query("DELETE FROM draft_degrees WHERE `catalog_year`=? ", $new_year);
@@ -648,18 +648,18 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   $res = db_query("SELECT * FROM draft_groups WHERE `catalog_year`=? ", $new_year);
   while ($cur = db_fetch_array($res))
   {
-  	// Now, select all the requirements and see if there are any sub groups...
-  	$res2 = db_query("SELECT * FROM draft_group_requirements WHERE `group_id`='{$cur["group_id"]}' ");
-  	while ($cur2 = db_fetch_array($res2))
-  	{
-  		if ($cur2["child_group_id"] > 0)
-  		{
-  			// Delete the child group.
-  			$res3 = db_query("DELETE FROM draft_group_requirements WHERE `group_id`='{$cur2["child_group_id"]}' ");
-  		}
-  	}
-  	// Now, delete the original requirement.
-  	$res3 = db_query("DELETE FROM draft_group_requirements WHERE `group_id`='{$cur["group_id"]}' ");
+    // Now, select all the requirements and see if there are any sub groups...
+    $res2 = db_query("SELECT * FROM draft_group_requirements WHERE `group_id`='{$cur["group_id"]}' ");
+    while ($cur2 = db_fetch_array($res2))
+    {
+      if ($cur2["child_group_id"] > 0)
+      {
+        // Delete the child group.
+        $res3 = db_query("DELETE FROM draft_group_requirements WHERE `group_id`='{$cur2["child_group_id"]}' ");
+      }
+    }
+    // Now, delete the original requirement.
+    $res3 = db_query("DELETE FROM draft_group_requirements WHERE `group_id`='{$cur["group_id"]}' ");
   }
   $res = db_query("DELETE FROM draft_groups WHERE `catalog_year`=? ", $new_year);
   //////////////////////////////////////////////////////////////////////////
@@ -673,19 +673,19 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   $res = db_query("SELECT * FROM draft_courses WHERE `catalog_year`=? ", $old_year);
   while ($cur = db_fetch_array($res))
   {
-  	extract($cur, 3, "db");
+    extract($cur, 3, "db");
   
-  	$course = new Course($db_course_id, false, $db, false, $old_year);
-  	$course->subject_id = $db_subject_id;
-  	$course->course_num = $db_course_num;
-  	$course->db_exclude = $db_exclude;
+    $course = new Course($db_course_id, false, $db, false, $old_year);
+    $course->subject_id = $db_subject_id;
+    $course->course_num = $db_course_num;
+    $course->db_exclude = $db_exclude;
     $course->min_hours = $db_min_hours;
     $course->max_hours = $db_max_hours;
     $course->repeat_hours = $db_repeat_hours;
     $course->school_id = $db_school_id;
-      	
-  	// Now, duplicate it for the new_year.
-  	$db->duplicate_course_for_year($course, $new_year);
+        
+    // Now, duplicate it for the new_year.
+    $db->duplicate_course_for_year($course, $new_year);
   
     // Store what courses we are working on, for other modules.
     $form_state['courses'][] = $db_course_id;  
@@ -702,68 +702,68 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   $res = db_query("SELECT * FROM draft_groups WHERE `catalog_year`=? ", $old_year);
   while ($cur = db_fetch_array($res))
   {
-  	extract($cur, 3, "db");
-  	// First, let's request a new group ID for this new group.
-  	$new_group_id = $db->request_new_group_id();
-  	$group_id_array[$db_group_id] = $new_group_id;
+    extract($cur, 3, "db");
+    // First, let's request a new group ID for this new group.
+    $new_group_id = $db->request_new_group_id();
+    $group_id_array[$db_group_id] = $new_group_id;
   
-  	//$db_data_entry_comment = mysql_real_escape_string($db_data_entry_comment);
-  	// Now, let's insert this top-level group back into the table
-  	// as the new_year, with the new_group_id.
-  	$query = "INSERT INTO draft_groups(`group_id`,`group_name`,
-  							`title`,`public_note`,`definition`,`icon_filename`,`catalog_year`,
-  							`priority`,`delete_flag`,`data_entry_comment`, `catalog_repeat`,school_id)
-  							VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ";  	
-  	$res2 = db_query($query, $new_group_id,$db_group_name,$db_title,$db_public_note,
-  								$db_definition,$db_icon_filename,$new_year,
-  								$db_priority,$db_delete_flag,$db_data_entry_comment,$db_catalog_repeat,$db_school_id);
+    //$db_data_entry_comment = mysql_real_escape_string($db_data_entry_comment);
+    // Now, let's insert this top-level group back into the table
+    // as the new_year, with the new_group_id.
+    $query = "INSERT INTO draft_groups(`group_id`,`group_name`,
+                `title`,`public_note`,`definition`,`icon_filename`,`catalog_year`,
+                `priority`,`delete_flag`,`data_entry_comment`, `catalog_repeat`,school_id)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ";   
+    $res2 = db_query($query, $new_group_id,$db_group_name,$db_title,$db_public_note,
+                  $db_definition,$db_icon_filename,$new_year,
+                  $db_priority,$db_delete_flag,$db_data_entry_comment,$db_catalog_repeat,$db_school_id);
   
-  	// Okay, now we need to go through the requirements for the group, and copy
-  	// those over to the new_year.
-  	$res3 = db_query("SELECT * FROM draft_group_requirements
-  							WHERE `group_id`='$db_group_id' ");
-  	while($cur3 = db_fetch_array($res3))
-  	{
-  		extract($cur3, 3, "db3");
+    // Okay, now we need to go through the requirements for the group, and copy
+    // those over to the new_year.
+    $res3 = db_query("SELECT * FROM draft_group_requirements
+                WHERE `group_id`='$db_group_id' ");
+    while($cur3 = db_fetch_array($res3))
+    {
+      extract($cur3, 3, "db3");
   
-  		$child_group_id = 0;
-  		// Was there a child_group (a branch)?  If so, we need to copy that
-  		// over too, with a new child_group_id.
-  		if ($db3_child_group_id > 0)
-  		{
-  			// First, create the child group...
-  			$new_sub_group_id = $db->request_new_group_id();
-  			$subgroup_id_array[$db3_child_group_id] = $new_sub_group_id;
-  			$res4 = db_query("SELECT * FROM draft_group_requirements
-  							WHERE `group_id`='$db3_child_group_id' ");
-  			while($cur4 = db_fetch_array($res4))
-  			{
-  				extract($cur4, 3, "db4");
-  				$res5 = db_query("INSERT INTO draft_group_requirements
-  										(`group_id`,`course_id`,`course_min_grade`,
-  										`course_repeats`,`attributes`,`data_entry_value`)
-  										VALUES (?,?,?,?,?,?) ",
-  				            $new_sub_group_id,$db4_course_id,
-  										$db4_course_min_grade,$db4_course_repeats,$db4_attributes,
-  										$db4_data_entry_value);
-  			}
-  			
-  			// Now, add the replace the db3_child_group_id with this new id
-  			// so it will get added as a requirement.
-  			$child_group_id = $new_sub_group_id;
-  		}
+      $child_group_id = 0;
+      // Was there a child_group (a branch)?  If so, we need to copy that
+      // over too, with a new child_group_id.
+      if ($db3_child_group_id > 0)
+      {
+        // First, create the child group...
+        $new_sub_group_id = $db->request_new_group_id();
+        $subgroup_id_array[$db3_child_group_id] = $new_sub_group_id;
+        $res4 = db_query("SELECT * FROM draft_group_requirements
+                WHERE `group_id`='$db3_child_group_id' ");
+        while($cur4 = db_fetch_array($res4))
+        {
+          extract($cur4, 3, "db4");
+          $res5 = db_query("INSERT INTO draft_group_requirements
+                      (`group_id`,`course_id`,`course_min_grade`,
+                      `course_repeats`,`attributes`,`data_entry_value`)
+                      VALUES (?,?,?,?,?,?) ",
+                      $new_sub_group_id,$db4_course_id,
+                      $db4_course_min_grade,$db4_course_repeats,$db4_attributes,
+                      $db4_data_entry_value);
+        }
+        
+        // Now, add the replace the db3_child_group_id with this new id
+        // so it will get added as a requirement.
+        $child_group_id = $new_sub_group_id;
+      }
    
-  		// Add the row into the table...
-  		$res5 = db_query("INSERT INTO draft_group_requirements
-  								(`group_id`,`course_id`,`course_min_grade`,
-  								`course_repeats`,`attributes`,`data_entry_value`,`child_group_id`)
-  								VALUES (?,?,?,?,?,?,?) ",
-  		              array($new_group_id,$db3_course_id,
-  								$db3_course_min_grade,$db3_course_repeats,$db3_attributes,
-  								$db3_data_entry_value,$child_group_id));
-  		
-  		
-  	}
+      // Add the row into the table...
+      $res5 = db_query("INSERT INTO draft_group_requirements
+                  (`group_id`,`course_id`,`course_min_grade`,
+                  `course_repeats`,`attributes`,`data_entry_value`,`child_group_id`)
+                  VALUES (?,?,?,?,?,?,?) ",
+                    array($new_group_id,$db3_course_id,
+                  $db3_course_min_grade,$db3_course_repeats,$db3_attributes,
+                  $db3_data_entry_value,$child_group_id));
+      
+      
+    }
   }
   
   // Store what groups we are working on, for other modules.
@@ -779,24 +779,24 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
   $res = db_query("SELECT * FROM draft_degree_tracks WHERE `catalog_year`='$old_year' ");
   while ($cur = db_fetch_array($res))
   {
-  	extract($cur, 3, "db");
-  	
-  	$res2 = db_query("INSERT INTO draft_degree_tracks
-  						(`catalog_year`,`major_code`,`track_code`,`track_title`,
-  						`track_short_title`,`track_description`,school_id)
-  						VALUES
-  						(?,?,?,?,?,?,?) ",
-  	           $new_year,$db_major_code,$db_track_code,$db_track_title,
-  						$db_track_short_title,$db_track_description,$db_school_id);
-  	
+    extract($cur, 3, "db");
+    
+    $res2 = db_query("INSERT INTO draft_degree_tracks
+              (`catalog_year`,`major_code`,`track_code`,`track_title`,
+              `track_short_title`,`track_description`,school_id)
+              VALUES
+              (?,?,?,?,?,?,?) ",
+               $new_year,$db_major_code,$db_track_code,$db_track_title,
+              $db_track_short_title,$db_track_description,$db_school_id);
+    
   }
   // Now, let's do the degrees themselves.
   $res = db_query("SELECT * FROM draft_degrees WHERE `catalog_year`='$old_year' ");
   while ($cur = db_fetch_array($res))
   {
-  	extract($cur, 3, "db");
-  	
-  	$new_degree_id = $db->request_new_degree_id();
+    extract($cur, 3, "db");
+    
+    $new_degree_id = $db->request_new_degree_id();
     
     // Store what degrees we are working on, for other modules.
     $form_state['degrees'][] = array(
@@ -808,50 +808,50 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
       'dest_catalog_year' => $new_year,
     );
     
-  	// add in the top-level degree to the table.
-  	$res2 = db_query("INSERT INTO draft_degrees
-  						(degree_id, major_code, degree_type, degree_level, degree_class, title,
-  						 semester_titles_csv, catalog_year, exclude, public_note,
-  						 allow_dynamic, advising_weight, override_degree_hours, min_tracks, max_tracks, default_tracks, track_selection_config, school_id)
-  						 VALUES
-  						(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  						", $new_degree_id,$db_major_code,$db_degree_type, $db_degree_level, $db_degree_class, $db_title,
-  						 $db_semester_titles_csv, $new_year, $db_exclude, $db_public_note,
-               $db_allow_dynamic, $db_advising_weight, $db_override_degree_hours, $db_min_tracks, $db_max_tracks, $db_default_tracks, $db_track_selection_config,$db_school_id);						 
-  	
-  	// now, pull out all of the degree_requirements.
-  	$res3 = db_query("SELECT * FROM draft_degree_requirements
-  							WHERE `degree_id`='$db_degree_id' ");
-  	while($cur3 = db_fetch_array($res3))
-  	{
-  		extract($cur3, 3, "db3");
-  		// If there is a required group, we must convert it to the
-  		// new groupID !
-  		$required_group_id = $db3_group_id;
-  		if ($db3_group_id > 0)
-  		{
-  			$required_group_id = $group_id_array[$db3_group_id];
-  			if ($required_group_id < 1 || $required_group_id == "")
-  			{
-  				die("could not find group new group for $old_year $db3_group_id !");
-  			}
-  		}
-  		 
-  		
-  		$res4 = db_query("INSERT INTO draft_degree_requirements
-  							(degree_id, semester_num, group_id, group_requirement_type,
-  							group_hours_required, group_min_hours_allowed, group_min_grade, course_id,
-  							course_min_grade, course_requirement_type, data_entry_value)
-  							VALUES
-  							(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  							", $new_degree_id, $db3_semester_num, $required_group_id, $db3_group_requirement_type,
-  							$db3_group_hours_required, $db3_group_min_hours_allowed, $db3_group_min_grade, $db3_course_id,
-  							$db3_course_min_grade, $db3_course_requirement_type, $db3_data_entry_value);
-  		
-  		
-  	}
-  	
-  	
+    // add in the top-level degree to the table.
+    $res2 = db_query("INSERT INTO draft_degrees
+              (degree_id, major_code, degree_type, degree_level, degree_class, title,
+               semester_titles_csv, catalog_year, exclude, public_note,
+               allow_dynamic, advising_weight, override_degree_hours, min_tracks, max_tracks, default_tracks, track_selection_config, school_id)
+               VALUES
+              (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              ", $new_degree_id,$db_major_code,$db_degree_type, $db_degree_level, $db_degree_class, $db_title,
+               $db_semester_titles_csv, $new_year, $db_exclude, $db_public_note,
+               $db_allow_dynamic, $db_advising_weight, $db_override_degree_hours, $db_min_tracks, $db_max_tracks, $db_default_tracks, $db_track_selection_config,$db_school_id);             
+    
+    // now, pull out all of the degree_requirements.
+    $res3 = db_query("SELECT * FROM draft_degree_requirements
+                WHERE `degree_id`='$db_degree_id' ");
+    while($cur3 = db_fetch_array($res3))
+    {
+      extract($cur3, 3, "db3");
+      // If there is a required group, we must convert it to the
+      // new groupID !
+      $required_group_id = $db3_group_id;
+      if ($db3_group_id > 0)
+      {
+        $required_group_id = $group_id_array[$db3_group_id];
+        if ($required_group_id < 1 || $required_group_id == "")
+        {
+          die("could not find group new group for $old_year $db3_group_id !");
+        }
+      }
+       
+      
+      $res4 = db_query("INSERT INTO draft_degree_requirements
+                (degree_id, semester_num, group_id, group_requirement_type,
+                group_hours_required, group_min_hours_allowed, group_min_grade, course_id,
+                course_min_grade, course_requirement_type, data_entry_value)
+                VALUES
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ", $new_degree_id, $db3_semester_num, $required_group_id, $db3_group_requirement_type,
+                $db3_group_hours_required, $db3_group_min_hours_allowed, $db3_group_min_grade, $db3_course_id,
+                $db3_course_min_grade, $db3_course_requirement_type, $db3_data_entry_value);
+      
+      
+    }
+    
+    
   }  
     
      
@@ -893,9 +893,10 @@ function admin_advising_settings_form($school_id = 0) {
   
   
   $form["available_advising_term_ids" . $fs] = array(
-    "type" => "textfield",
-    "label" => t("Available advising term id's"),
-    "value" => variable_get_for_school("available_advising_term_ids", "", $school_id, TRUE),
+    "type" => "textarea",
+    "rows" => 2,
+    "label" => t("Available advising term id(s)"),
+    "value" => fp_space_csv(variable_get_for_school("available_advising_term_ids", "", $school_id, TRUE)),
     "description" => t("These are the terms for which advisors may advise a student to take
                         a course.  They should follow the structure established on the
                         school data settings page.
@@ -905,9 +906,10 @@ function admin_advising_settings_form($school_id = 0) {
 
   
   $form["advising_term_id" . $fs] = array(
-    "type" => "textfield",
-    "label" => t("Default advising term id"),
-    "value" => variable_get_for_school("advising_term_id", "", $school_id, TRUE),
+    "type" => "textarea",
+    "rows" => 2,
+    "label" => t("Default advising term id(s)"),
+    "value" => fp_space_csv(variable_get_for_school("advising_term_id", "", $school_id, TRUE)),
     "description" => t("Of the available term ids above, this is the default that FlightPath
                         is set to when an advisor logs in. Ex: 200940."),
   );  
@@ -937,9 +939,10 @@ function admin_advising_settings_form($school_id = 0) {
 
   
   $form["not_released_grades_terms" . $fs] = array(
-    "type" => "textfield",
+    "type" => "textarea",
+    "rows" => 2,
     "label" => t("NOT released grades terms"),
-    "value" => variable_get_for_school("not_released_grades_terms", "", $school_id, TRUE),
+    "value" => fp_space_csv(variable_get_for_school("not_released_grades_terms", "", $school_id, TRUE)),
     "description" => t("Enter the term_id's, separated by commas, 
                         which are NOT released and should NOT be visible to either advisors or students. 
                         Coures in these terms will only show midterm grades or no grades at all. 
@@ -1629,11 +1632,11 @@ function admin_display_main() {
     $rtn .= "<div class='admin-advising-settings'><!--SCHOOL_NAME-->
                
          <ul>
-          <li>" . t("Available terms for advising: %v", array("%v" => variable_get_for_school("available_advising_term_ids", "", $school_id))) . "</li>
-          <li>" . t("Default advising term: %v", array("%v" => variable_get_for_school("advising_term_id", "", $school_id))) . "</li>          
+          <li>" . t("Available terms for advising: %v", array("%v" => fp_space_csv(variable_get_for_school("available_advising_term_ids", "", $school_id)))) . "</li>
+          <li>" . t("Default advising term(s): %v", array("%v" => fp_space_csv(variable_get_for_school("advising_term_id", "", $school_id)))) . "</li>          
           <li>" . t("Current catalog year: %v", array("%v" => variable_get_for_school("current_catalog_year", "", $school_id))) . "</li>       
           <li>" . t("Current draft catalog year: %v", array("%v" => variable_get_for_school("current_draft_catalog_year", "", $school_id))) . "</li>             
-          <li>" . t("Not released grades terms: %v", array("%v" => variable_get_for_school("not_released_grades_terms", "", $school_id))) . "</li>             
+          <li>" . t("Not released grades terms: %v", array("%v" => fp_space_csv(variable_get_for_school("not_released_grades_terms", "", $school_id)))) . "</li>             
           
         </ul>";
     

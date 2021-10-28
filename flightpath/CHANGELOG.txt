@@ -5,6 +5,9 @@ FlightPath 6.x Changelog
   Added a new "how to customize" folder and custom theme which inherits from fp6_clean theme.  It also includes instructions
   in a README file for copying the theme to your /custom/theme folder and overriding CSS styles.
 
+  Added new function to make CSV strings prettier by adding a space after the comma.  Makes them break correctly in HTML.  Also
+  changed term settings fields for advising settings from textfield to textarea, so you can enter more than 255 chars.
+  
 
 2021-10-24
   Added ability to designate notification recipients for when a student sends an SMS to a specific line (advisors will *always* receive
