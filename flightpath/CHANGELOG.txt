@@ -5,6 +5,12 @@ FlightPath 6.x Changelog
   Fixed bug in course_search module where the filter for "view courses offered" (and you select the term) was not working as expected
   in all situations, because it was not taking the school_id into account.
 
+  Made the users module filter selection more intuitive.  For example, the school selection, and the behavior when you search
+  for a particular name, while a school is selected.  Plus, made sure not to reset ALL filters if you select a letter.  For example,
+  you can now select a school, and then select by letters to see the students/users in that school.  The Major pulldown also gets altered
+  based on selected school.  Also changed the order of the sub tabs so that Student Users comes second.
+
+
 
 2021-10-27
   Added a new "how to customize" folder and custom theme which inherits from fp6_clean theme.  It also includes instructions

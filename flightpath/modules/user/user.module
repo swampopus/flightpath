@@ -65,6 +65,7 @@ function user_menu() {
     "tab_family" => "users",    
     "tab_parent" => "admin-tools/admin",
     "file" => menu_get_module_path("user") . "/user.student.inc",
+    'weight' => 110,
   );    
 
   
@@ -1056,7 +1057,7 @@ function user_edit_user_advisees_form_submit($form, $form_state) {
     
   }
 
-  watchdog("user_edit_advisees", "Update faculty (@cwid) advisees values: @other", array("@cwid" => $faculty_cwid, "@other" => ppm($values, TRUE)));
+  watchdog("user_edit_advisees", "Update faculty (@cwid) advisees values: @other", array("@cwid" => $faculty_cwid, "@other" => ppm($form_state['values'], TRUE)));
   
 
   fp_add_message(t("The advisees have been updated for this faculty member."));
@@ -1563,7 +1564,8 @@ function user_display_users() {
   $ur = trim(@$_GET["ur"]);
   $lr = trim(@$_GET["lr"]);
 
-  if ($ur == "" && !isset($_SESSION['users_filter_submit'])) {
+  //if ($ur == "" && !isset($_SESSION['users_filter_submit'])) {
+  if ($ur == "") {
     $ur = "A";
     $lr = "AZZZZZ";  // first time through.
   }
@@ -1576,6 +1578,7 @@ function user_display_users() {
       $selected_class = "selected";
     }
     $html .= l($disp, "admin/users/faculty", "de_catalog_year=$de_catalog_year&clear_filters=true&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link $selected_class")) . " &nbsp; ";
+   
   }
 
 
@@ -1605,12 +1608,15 @@ function user_display_users() {
 
 
   if (@$_REQUEST['clear_filters'] == 'true') {
+    unset($_SESSION['users_filter_name']);
     // Meaning, a letter was specified, so let's reset the filter values.
+    /*
     foreach ($_SESSION as $key => $val) {
       if (strstr($key,"users_filter_")) {
         unset($_SESSION[$key]);
       }
-    }        
+    } 
+    */       
   }
 
 
@@ -1639,13 +1645,13 @@ function user_display_users() {
   $params[":ur"] = $ur;
   $params[":lr"] = $lr;
 
-  
+  /*
   if (isset($_SESSION['users_filter_submit'])) {
     // We clicked to filter, so the letter range should be ignored.
     $params[":ur"] = "A";
     $params[":lr"] = "ZZZZZZZZZZZZ";
   }
- 
+ */
 
   $filter_name = @trim($_SESSION['users_filter_name']);
   $filter_school = @intval($_SESSION['users_filter_school']);
@@ -1654,18 +1660,22 @@ function user_display_users() {
 
 
 
+  $extra_where_conditions .= " AND u.school_id = :school_id ";
+  $params[":school_id"] = $filter_school;
+
 
   if ($filter_name) {
     $extra_where_conditions .= " AND (l_name LIKE :search1 OR f_name LIKE :search2 OR u.cwid LIKE :search3) ";
     $params[":search1"] = "%$filter_name%";
     $params[":search2"] = "%$filter_name%";
     $params[":search3"] = "%$filter_name%";
+    // If we are searching by name, then we do not care about what letters we selected.
+    $params[":ur"] = "A";
+    $params[":lr"] = "ZZZZZZZZZZZZZZ";    
   }
   
-  if ($filter_school > 0) {
-    $extra_where_conditions .= " AND u.school_id = :school_id ";
-    $params[":school_id"] = $filter_school;
-  }
+
+
 
   if ($filter_role > 0) {
     $extra_where_conditions .= " AND rid = :rid ";
@@ -1883,7 +1893,7 @@ function user_list_filter_form() {
   
     $filter_school_value = @intval($_SESSION['users_filter_school']);
     $options = schools_get_schools_for_fapi(TRUE, TRUE, 'user', TRUE);
-    $options[0] = t('- All / Default -');
+    $options[0] = t('- Default -');
     $form['filter_school'] = array(      
       'type' => 'select',
       'label' => t('School:'),

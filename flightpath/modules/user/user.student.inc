@@ -35,30 +35,7 @@ function user_display_student_users() {
   fp_add_css(fp_get_module_path("user") . "/css/user.css");
   
   
-  
-  
-  /*
-  // First, let's get our list of departments...
-  $major_code_array = array();
-  $d = 0;
-  
-  // Let's pull the needed variables out of our settings, so we know what
-  // to query, because this is a non-FlightPath table.
-  
-  
-    
-  $res = db_query("SELECT DISTINCT major_code FROM student_degrees ORDER BY major_code ");
-  while ($cur = db_fetch_array($res)) {
-    if (trim($cur["major_code"]) == "")
-    {// skip if blank
-      continue;
-    }
-    
-    $major_code_array[$d] = trim(ucwords($cur["major_code"]));
-    $d++;
-  }
-  */
-  
+      
   
   $html = "";
 
@@ -96,7 +73,8 @@ function user_display_student_users() {
   $ur = trim(@$_GET["ur"]);
   $lr = trim(@$_GET["lr"]);
 
-  if ($ur == "" && !isset($_SESSION['users_filter_submit'])) {
+  //if ($ur == "" && !isset($_SESSION['users_filter_submit'])) {
+  if ($ur == "") {
     $ur = "A";
     $lr = "AZZZZZ";  // first time through.
   }  
@@ -111,6 +89,7 @@ function user_display_student_users() {
       $selected_class = "selected";
     }    
     $html .= l($disp, "admin/users/students", "de_catalog_year=$de_catalog_year&clear_filters=true&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link $selected_class")) . " &nbsp; ";
+    
   }
 
 
@@ -143,11 +122,14 @@ function user_display_student_users() {
 
   if (@$_REQUEST['clear_filters'] == 'true') {
     // Meaning, a letter was specified, so let's reset the filter values.
+    unset($_SESSION['users_filter_name']);
+    /*
     foreach ($_SESSION as $key => $val) {
       if (strstr($key,"users_filter_")) {
         unset($_SESSION[$key]);
       }
-    }        
+    }  
+    */      
   }
 
 
@@ -172,13 +154,13 @@ function user_display_student_users() {
   $params[":ur"] = $ur;
   $params[":lr"] = $lr;
 
-  
+  /*
   if (isset($_SESSION['users_filter_submit'])) {
     // We clicked to filter, so the letter range should be ignored.
     $params[":ur"] = "A";
     $params[":lr"] = "ZZZZZZZZZZZZ";
   }
- 
+ */
 
   $filter_name = @trim($_SESSION['users_filter_name']);
   $filter_school = @intval($_SESSION['users_filter_school']);
@@ -193,12 +175,15 @@ function user_display_student_users() {
     $params[":search1"] = "%$filter_name%";
     $params[":search2"] = "%$filter_name%";
     $params[":search3"] = "%$filter_name%";
+    // If we are searching by name, then we do not care about what letters we selected.
+    $params[":ur"] = "A";
+    $params[":lr"] = "ZZZZZZZZZZZZZZ";
   }
   
-  if ($filter_school > 0) {
-    $extra_where_conditions .= " AND u.school_id = :school_id ";
-    $params[":school_id"] = $filter_school;
-  }
+  
+  $extra_where_conditions .= " AND u.school_id = :school_id ";
+  $params[":school_id"] = $filter_school;
+  
 
   if ($filter_major != '') {    
     $extra_where_conditions .= " AND major_code = :major_code ";
@@ -358,17 +343,32 @@ function user_student_list_filter_form() {
   
   
 
-  // Show list of majors
+  // Show list of majors (which are also in FlightPath, and in the selected school, if any)
   $options = array();
-  $res = db_query("SELECT DISTINCT major_code FROM students a, student_degrees b 
+  $test_school_id = @intval($_SESSION['users_filter_school']);
+  $test_school_options = array();
+  if (module_enabled('schools')) {
+    $test_school_options = schools_get_schools_for_fapi(TRUE, TRUE, 'user', TRUE);
+  }
+
+  $res = db_query("SELECT DISTINCT(b.major_code) FROM students a, student_degrees b, `degrees` c
                         WHERE a.cwid = b.student_id
-                        ORDER BY major_code ");
+                        AND b.major_code = c.major_code
+                        AND school_id = ?
+                        ORDER BY b.major_code ", array($test_school_id));
   while ($cur = db_fetch_array($res)) {
     if (trim($cur["major_code"]) == "")
     {// skip if blank
       continue;
     }    
-    $options[$cur['major_code']] = trim(ucwords($cur["major_code"]));    
+    
+
+    if (count($test_school_options) <= 1) {
+      $options[$cur['major_code']] = trim(ucwords($cur["major_code"]));
+    }
+    else {
+      $options[$test_school_options[$test_school_id]][$cur['major_code']] = trim(ucwords($cur["major_code"]));
+    }
   }  
   
   $filter_major_value = @trim($_SESSION['users_filter_major']);
@@ -405,7 +405,7 @@ function user_student_list_filter_form() {
   
     $filter_school_value = @intval($_SESSION['users_filter_school']);
     $options = schools_get_schools_for_fapi(TRUE, TRUE, 'user', TRUE);
-    $options[0] = t('- All / Default -');
+    $options[0] = t('- Default -');
     $form['filter_school'] = array(      
       'type' => 'select',
       'label' => t('School:'),
@@ -444,16 +444,14 @@ function user_student_list_filter_form_submit($form, $form_state) {
   unset($_SESSION['users_filter_name']);
   unset($_SESSION['users_filter_school']);
   unset($_SESSION['users_filter_major']);
-  unset($_SESSION['users_filter_active']);
-  
+  unset($_SESSION['users_filter_active']);  
   unset($_SESSION['users_filter_submit']);  
     
   if ($values['submit_btn'] != '') {
     $_SESSION['users_filter_name'] = trim($values['filter_name']);
     $_SESSION['users_filter_school'] = $values['filter_school'];
     $_SESSION['users_filter_major'] = $values['filter_major'];
-    $_SESSION['users_filter_active'] = $values['filter_active'];
-    
+    $_SESSION['users_filter_active'] = $values['filter_active'];    
     $_SESSION['users_filter_submit'] = "yes"; // simply notes that we did indeed press the submit btn.
     
   }
@@ -742,7 +740,7 @@ function user_student_edit_student_courses_form_submit($form, $form_state) {
    
   }  
 
-  watchdog("user_edit_courses", "Update student (@cwid) courses values: @other", array("@cwid" => $student_id, "@other" => ppm($values, TRUE)));
+  watchdog("user_edit_courses", "Update student (@cwid) courses values: @other", array("@cwid" => $student_id, "@other" => ppm($form_state['values'], TRUE)));
    
   
   fp_add_message(t("Student courses updated."));
@@ -901,8 +899,8 @@ function user_edit_student_user_form() {
     "size" => 20,
     "required" => ($student_cwid == "new") ? TRUE : FALSE,
     "description" => t("If you enter any value here, it will change the
-                        user's password in FlightPath.  If you are using the LDAP module,
-                        the LDAP password will be unaffected."),    
+                        user's password in FlightPath.  If you are using a single-sign-on or similar module (CAS, SAML, LDAP, etc)
+                        for external user password management, the password will be <strong>unaffected</strong> by this setting."),
     "weight" => 20,                        
   );
 
