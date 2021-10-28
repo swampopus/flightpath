@@ -1605,12 +1605,12 @@ function admin_display_main() {
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
   
-  $rtn .= "<table class='fp-semester-table' cellpadding='5'>
+  $rtn .= "<table class='fp-semester-table admin-display-main-table' cellpadding='5'>
            <tr>
-            <td valign='top' width='50%'>
+            <td valign='top' class='system-configuration-left'>
               " . fp_render_menu_block(t("System Configuration"), "admin/config") . "
             </td>
-            <td valign='top' width='50%'>
+            <td valign='top' class='advising-settings-right'>
               ";
               
 

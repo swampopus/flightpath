@@ -109,7 +109,9 @@ table .rep-msg {
 
 
 
-
+table.admin-display-main-table td.system-configuration-left {
+  width: 75%;
+}
 
 
 
