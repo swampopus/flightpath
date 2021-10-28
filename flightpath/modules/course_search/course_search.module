@@ -400,6 +400,7 @@ function course_search_display_courses() {
   $html .= "<form id='term_form' action='" . fp_url("tools/course-search/courses") . "' method='GET'>           
            <input type='hidden' name='mode' value='$subject_id'>
            <input type='hidden' name='subject_id' value='$subject_id'>
+           <input type='hidden' name='school_id' value='$school_id'>
            ";
   
   if (!$clean_urls) {
@@ -457,7 +458,7 @@ function course_search_display_courses() {
                 
     $render["term_selected_only_term"] = array(
       "value" => "<div style='font-weight: bold; padding-bottom: 20px;'>
-                 " . t("The following courses are currently scheduled to be offered during ") . $term_desc . "
+                 " . t("The following courses are currently scheduled to be offered during @termdesc", array("@termdesc" => $term_desc)) . "
                 </div>",
      
     );            
@@ -468,7 +469,7 @@ function course_search_display_courses() {
     
   $grad_notice_flag = false;
   $temp_course = new Course();
-  // removed course_num < 500 and
+  
   $result = db_query("SELECT * FROM courses
               WHERE catalog_year = ? 
               AND subject_id = ? 
@@ -490,8 +491,7 @@ function course_search_display_courses() {
       $title = $temp_course->fix_title($title);
 
       $description = trim($cur["description"]);
-      if ($description == "")
-      {
+      if ($description == "") {
         $description = t("No description is available at this time.  Consult
               the official course catalog for listings.");
       }
@@ -513,14 +513,12 @@ function course_search_display_courses() {
       // Look for all 5 years.
       $long_schedule_array = course_search_get_course_rotation_schedule($n_course_id, $catalog_year, 100, true);
       
-      // Only grab next 2 years.
       $schedule_array = course_search_get_course_rotation_schedule($n_course_id, $catalog_year);  
       
       $full_schedule_array = course_search_get_course_rotation_schedule($n_course_id);
       $schedule_text = "";
 
-      if (count($long_schedule_array) > 0)
-      {
+      if (count($long_schedule_array) > 0) {
         $schedule_text .= "
               <div>
                 <b>" . t("Anticipated availability:") . "</b>
@@ -535,7 +533,7 @@ function course_search_display_courses() {
             $schedule_text .= " " . $temp_course->get_term_description(true) . ",";
           }
           $schedule_text = substr($schedule_text, 0, -1); // take off comma.
-          $rnd_div_id = rand(1,999999);
+          $rnd_div_id = sha1(rand(1,999999) . time());
           $schedule_text .= "
             &nbsp; | &nbsp;
             <a href='javascript: toggleHideDiv(\"$rnd_div_id\");' class='nounderline'>
@@ -790,7 +788,7 @@ function course_search_get_course_rotation_schedule_not_anticipated($course_id)
 
 }
 
-function course_search_get_course_rotation_schedule($course_id, $year = "", $limit = 20, $bool_include_next_five_years = false)
+function course_search_get_course_rotation_schedule($course_id, $year = "", $limit = 20, $bool_include_next_five_years = FALSE)
 {
   // return an array containing the terms that this course
 	// is going to be offered, if any.
@@ -821,7 +819,6 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
 		}
 
 	}
-
 
 	$res = db_query("SELECT * FROM course_rotation_schedule
 							WHERE `course_id`= ?

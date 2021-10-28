@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-10-28
+  Fixed bug in course_search module where the filter for "view courses offered" (and you select the term) was not working as expected
+  in all situations, because it was not taking the school_id into account.
+
+
 2021-10-27
   Added a new "how to customize" folder and custom theme which inherits from fp6_clean theme.  It also includes instructions
   in a README file for copying the theme to your /custom/theme folder and overriding CSS styles.
