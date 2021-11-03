@@ -290,14 +290,14 @@ function course_search_download_syllabus() {
   { // Check to make sure the src file actually exists.
     // Display a message, letting the user know it does not
     // exist.
-    watchdog("syllabus", "fail,$c", array(), WATCHDOG_ERROR);
+    watchdog("syllabus", "fail,$course_id", array(), WATCHDOG_ERROR);
     fp_add_message(t("Sorry, the syllabus for @course could not be found.", array("@course" => "$subject_id $course_num")));
     // Just so admins can see:
     fpm("Admin: file path attempted: $files_path/custom/files/syllabi/$filename");
     return;
   }
   
-  watchdog("syllabus", "get,$c");
+  watchdog("syllabus", "get,$course_id");
   
   $content_type = "application/plain";  // default, save as generic binary file.
   $temp = explode("\.", $filename);
@@ -951,7 +951,7 @@ function course_search_display_search() {
   $catalog_year = $current_catalog_year;
   
   if (user_has_permission("can_update_course_info_details")) {
-    $rtn .= "<div>" . t("Administrators:") . " " . l(t("Edit course schedules and syllabi"), "tools/course-search/edit-list", "school_id=$school_id") . "</div>";
+    $rtn .= "<div>" . t("Administrators:") . " " . l("<i class='fa fa-pencil'></i> " . t("Edit course schedules, capacity, and syllabi"), "tools/course-search/edit-list", "school_id=$school_id") . "</div>";
   }  
   
   

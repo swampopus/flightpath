@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2021-11-02
+  Added concept of "capacity" to course_search module (stored per-term in the course_rotation_schedule table).  Also added extra CSS when editing course schedule 
+  information.
+
+
 2021-10-28
   Fixed bug in course_search module where the filter for "view courses offered" (and you select the term) was not working as expected
   in all situations, because it was not taking the school_id into account.

@@ -37,7 +37,7 @@ table.fp-course-search-avail td {
 
 .rotation-form-checkboxes div.element-type-checkboxes {
   display: inline-block;
-  min-width: 90px;  
+  min-width: 80px;
   padding: 5px 0 5px 0;
 }
 
@@ -49,4 +49,17 @@ table.fp-course-search-avail td {
 
 .course-search-buttons {
   display: inline-block;
+}
+
+.capacity-textfield {
+  width: 60px !important;  
+  padding: 5px !important;
+  margin-left: 5px;
+  font-size: 0.9em !important;
+}
+
+.rotation-form-checkboxes div.course-search-edit-term-wrapper {
+  display: inline-block;
+  min-width: 200px;
+  margin-right: 20px;  
 }

@@ -14,7 +14,12 @@ function course_search_install() {
   `term_id` varchar(20) NOT NULL DEFAULT '',
   `entry_value` varchar(20) NOT NULL DEFAULT '',
   `posted` int(10) unsigned NOT NULL DEFAULT 0,  
-  PRIMARY KEY (`id`)  
+  `capacity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `capacity` (`capacity`),
+  KEY `course_id` (`course_id`),
+  KEY `term_id` (`term_id`),
+  KEY `posted` (`posted`)  
 ); ";
   
     db_query($query);
@@ -37,4 +42,26 @@ function course_search_install() {
     db_query($query);    
   }
   
-}
+} // hook_install
+
+
+
+/**
+ * Implements hook_update
+ */
+function course_search_update($old_schema, $new_schema) {
+
+  if ($old_schema < 2) {
+    // Add new column to course_rotation_schedule to keep up with seat capacity.
+    db_query("ALTER TABLE course_rotation_schedule ADD COLUMN `capacity` int(11)  ");
+    db_query("ALTER TABLE course_rotation_schedule ADD INDEX (`capacity`) ");
+    
+    // Also add extra indexes for better searching
+    db_query("ALTER TABLE course_rotation_schedule ADD INDEX (`course_id`) ");
+    db_query("ALTER TABLE course_rotation_schedule ADD INDEX (`term_id`) ");
+    db_query("ALTER TABLE course_rotation_schedule ADD INDEX (`posted`) ");
+
+  }
+
+
+} // hook_update

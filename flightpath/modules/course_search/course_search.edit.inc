@@ -109,9 +109,10 @@ function course_search_edit_course_details_form() {
   }
 
   $form["mark" . $m++] = array(
-    "value" => "<b>" . t("Course Rotation Schedule:") . "</b>
+    "value" => "<b>" . t("Course Rotation Schedule & Seat Capacity:") . "</b>
                 <br>" . t("Select semesters/terms in which this Course
-                      will be offered for the next five years."),
+                      will be offered for the next five years, as well as how many seats are expected.  Seat capacity will only be saved for courses
+                      which are checked as being offered."),
   );
   
   
@@ -156,25 +157,48 @@ function course_search_edit_course_details_form() {
       
       
       $cb_default_val = array();
+      $capacity_default_val = "";
       // See if this box should be checked...
       $res = db_query("select * from course_rotation_schedule
                 where `course_id`='?'
                 and `term_id`='$term_id' ", $course_id);
       if (db_num_rows($res) > 0) {
         $cb_default_val = array("yes" => "yes");
+        $cur = db_fetch_array($res);
+        if (intval($cur['capacity']) > 0) {
+          $capacity_default_val = intval($cur['capacity']);
+        }
       }
-            
+
+
+      $form['mark_start_' . $cbname] = array(
+        'value' => "<div class='course-search-edit-term-wrapper'>",
+      );
+
       $form["cb_$cbname"] = array(
         "type" => "checkboxes",
         "options" => array("yes" => $cb_disp_name),        
         "value" => $cb_default_val,
       );
       
+
+      $form["capacity_$cbname"] = array( 
+        "type" => "textfield",
+        "attributes" => array("placeholder" => t("# Seats"), "class" => "capacity-textfield"),        
+        "value" => $capacity_default_val,
+      );
+
+
+      $form['mark_end_' . $cbname] = array(
+        'value' => "</div>",
+      );
+
       
-    }
+
+    } // foreach term_array
 
     $form["mark" . $m++] = array(
-      "value" => "<br>",
+      "value" => "<hr style='border:1px dashed #ccc;'><br>",
     );
 
     $y++;
@@ -248,9 +272,10 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
     // then insert into table... blah blah...
     foreach($term_array as $x) {
       if ($form_state["values"]["cb_$year$x"]["yes"] == "yes") {
+        $capacity = intval($form_state["values"]["capacity_$year$x"]);
         db_query("INSERT INTO course_rotation_schedule
-                (faculty_id, course_id, term_id, entry_value, posted)
-                VALUES (?, ?, ?, ?, ?) ", $faculty_id, $course_id, "$year$x", "$subject_id~$course_num", time());                
+                (faculty_id, course_id, term_id, entry_value, posted, capacity)
+                VALUES (?, ?, ?, ?, ?, ?) ", $faculty_id, $course_id, "$year$x", "$subject_id~$course_num", time(), $capacity);                
       }
     }
             
