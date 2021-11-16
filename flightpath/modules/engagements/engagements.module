@@ -753,10 +753,6 @@ function engagements_handle_incoming_sms($vars = array())
 
   watchdog("engagements_sms", "Received from vars (possibly POST): <pre>" . print_r($vars, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
 
-  // see regular message at: https://swampopus.direct.quickconnect.to/gitprojects/flightpath6/flightpath/flightpath/admin/config/watchdog/7547?sev_filter=&type_filter=&page=1
-  // see message with media at: https://swampopus.direct.quickconnect.to/gitprojects/flightpath6/flightpath/flightpath/admin/config/watchdog/7548?sev_filter=&type_filter=&page=1
-  //   -> notice the media message claims to have more than one media item.  We don't care about the text/html.
-
   $message_sid = $vars['MessageSid'];
   $from_mobile = engagements_convert_to_valid_phone_number($vars['From']);
   $to_mobile = engagements_convert_to_valid_phone_number($vars['To']);

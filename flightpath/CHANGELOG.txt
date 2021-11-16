@@ -1,6 +1,9 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-11-16
+  Gave "clear all cache" its own permission.
+  
 
 2021-11-02
   Added concept of "capacity" to course_search module (stored per-term in the course_rotation_schedule table).  Also added extra CSS when editing course schedule 
