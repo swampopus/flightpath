@@ -7,6 +7,8 @@ FlightPath 6.x Changelog
   Fixed bug in install process where current schema of modules were not being set, causing the user to be told they need to run db updates even
   on first install.
   
+  Enable almost all core modules on initial install.
+  
 
 2021-11-18
   Added "spinner" to submit button for duplicating an entire year of degree data.
