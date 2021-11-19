@@ -587,7 +587,8 @@ function admin_duplicate_year_form() {
   $form["submit"] = array(
     "type" => "submit",
     "value" => t("Submit"),
-    "description" => t("This action may take <b><u>several minutes</u></b> to complete!  Click only ONCE!"),
+    "spinner" => TRUE,
+    "description" => t("This action may take <b><u>several moments</u></b> to complete."),
     "prefix" => "<hr>",
   );  
   
@@ -1350,7 +1351,7 @@ function admin_display_watchdog_entry($wid) {
  * Displays recent watchdog entries, from the watchdog table
  *
  */
-function admin_display_watchdog() {
+function z__admin_display_watchdog() {
   
   fp_add_css(fp_get_module_path("admin") . '/css/admin.css');
   
@@ -1454,6 +1455,7 @@ function admin_display_watchdog() {
                 <th>When</th>
                 <th>Type</th>
                 <th>Msg</th>
+                <th>Severity</th>
                 <th>User</th>
               </tr>";
   // Okay, let's display the recent watchdog entries.
@@ -1493,13 +1495,14 @@ function admin_display_watchdog() {
                 <td valign='top'>$when</td>
                 <td valign='top'>$type</td>                
                 <td valign='top'>$msg</td>                
+                <td valign='top'>$severity</td>                
                 <td valign='top'>$cur->user_name</td>                
               
               </tr>    
     
             ";
     
-  }
+  } 
   
   
   $rtn .= "</table>";
@@ -1575,6 +1578,192 @@ function admin_display_watchdog() {
 }
 
 
+
+
+function admin_display_watchdog() {
+  
+  fp_add_css(fp_get_module_path("admin") . '/css/admin.css');
+  
+  $rtn = "";
+
+  $rtn .= "<p>View recent watchdog entries</p>";
+  
+  $severity_array = array(
+    5 => "notice",
+    1 => "alert",
+    3 => "error",
+    7 => "debug",
+  );
+  
+  $results_per_page = 50;
+  
+  
+  
+  $type_line = $severity_line = $limit_start = "";
+
+  @$sev_filter = $_GET["sev_filter"];
+  @$type_filter = $_GET["type_filter"];
+  @$page = $_GET["page"];
+  
+  $limit_start = 0;
+  if ($page != "" && is_numeric($page)) {
+    $limit_start = $results_per_page * ($page - 1);
+  }
+  else {
+    $page = 1;
+  }
+
+  
+  
+  // Filters:
+  $rtn .= "<form method='GET' action='" . fp_url("admin/config/watchdog") . "' class='watchdog-filters'>
+            ";
+  
+  $rtn .= "Filter by:
+           <span class='type-filter'>
+            Type:
+            <select name='type_filter'>
+              <option value=''>-Any-</option>";
+  $res = db_query("SELECT distinct(type) as type 
+                   FROM watchdog 
+                   ORDER BY type");
+  while ($cur = db_fetch_object($res)) {
+    $sel = ($type_filter == $cur->type) ? "selected" : "";
+    $rtn .= "<option value='$cur->type' $sel>$cur->type</option>";
+  }  
+  
+  
+  $rtn .= "</select>
+            </span>";
+
+  
+  $rtn .= "
+            <span class='severity-filter'>
+            Severity:
+            <select name='sev_filter'>
+              <option value=''>-Any-</option>";
+  foreach ($severity_array as $key => $value) {
+    $sel = "";
+    if ($sev_filter == $key) $sel = "selected";
+     
+    $rtn .= "<option value='$key' $sel>$value</option>";
+  }  
+  
+  $rtn .= "</select>
+            </span>";
+  
+  
+  
+  
+  $rtn .= "<input type='submit' value='&gt;'>";
+  // Hack if clean URLs are not enabled:
+  $rtn .= "<input type='hidden' name='q' value='admin/config/watchdog'>";
+  
+  $rtn .= "</form>";
+  
+  
+  
+  
+  
+  $params = array();
+
+  if (@$_GET["type_filter"] != "") {
+    //$type_line = " AND type = '" . mysql_real_escape_string($_GET["type_filter"]) . "' ";
+    $type_line = " AND `type` = :type ";
+    $params[":type"] = $_GET["type_filter"];
+  }
+    
+  if (@$_GET["sev_filter"] != "") {
+    //$severity_line = " AND severity = '" . mysql_real_escape_string($_GET["sev_filter"]) . "' ";
+    $severity_line = " AND severity = :sev ";
+    $params[":sev"] = $_GET["sev_filter"]; 
+  }
+  
+
+  $pol = "even";
+  
+  
+  $table_headers = array();
+  $table_headers[] = array("label" => "ID", "field" => "wid");  
+  $table_headers[] = array("label" => "When", "field" => "a.timestamp");  
+  $table_headers[] = array("label" => "Type", "field" => "a.type");  
+  $table_headers[] = array("label" => "Msg");  
+  $table_headers[] = array("label" => "Severity", "field" => "a.severity");  
+  $table_headers[] = array("label" => "User", "field" => "user_name");
+     
+  // Set our initial sort, if none is already set.   
+  theme_table_header_sortable_set_initial_sort("wid", 'DESC');  
+  
+  $rtn .= "<table class='watchdog-table' cellspacing='0' cellpadding='4'>";
+  // Draw our our table headers, with links....
+  $rtn .= theme_table_header_sortable($table_headers);    
+  
+              
+              
+// Get our order by clause based on selected table header, if any.    
+  $order_by = theme_table_header_sortable_order_by($table_headers);  
+  $res = pager_query("SELECT * FROM watchdog a
+                       WHERE 1
+                       $type_line
+                       $severity_line                                                                              
+                       $order_by", $params, 50, 0, "SELECT COUNT(wid) FROM watchdog a 
+                                                     WHERE 1
+                                                     $type_line
+                                                     $severity_line                                                                              
+                                                     $order_by", $params);      
+  
+  
+  while ($cur = db_fetch_object($res)) {
+    $pol = ($pol == "even") ? "odd" : "even";
+    
+    $o_msg = t($cur->message, unserialize($cur->variables));
+    $o_type = $cur->type;
+    
+    // shorten msg if necessary
+    $msg = substr(strip_tags($o_msg), 0, 130);
+    if ($msg != $o_msg) {
+      $msg = trim($msg) . "...";
+    }
+    
+    $type = substr($o_type, 0, 20);
+    if ($type != $o_type) {
+      $type = trim($type) . "...";
+    }
+
+    
+    
+    $severity = $severity_array[$cur->severity];
+    $when = format_date(convert_time($cur->timestamp), "short");
+    
+        
+    $rtn .= "
+              <tr class='row-$pol row-$severity'>                
+                <td valign='top'>" . l($cur->wid, "admin/config/watchdog/$cur->wid", "sev_filter=$sev_filter&type_filter=$type_filter&page=$page") . "</td>
+                <td valign='top'>$when</td>
+                <td valign='top'>$type</td>                
+                <td valign='top'>$msg</td>                
+                <td valign='top'>$severity</td>                
+                <td valign='top'>$cur->user_name</td>                
+              
+              </tr>    
+    
+            ";
+    
+  } 
+  
+  
+  $rtn .= "</table>";
+  
+  
+  
+  // Display the pager that was generated by the pager_query above!  
+  $rtn .= theme_pager(); 
+  
+  
+  
+  return $rtn;
+  
+} // admin display watchdog
 
 
 

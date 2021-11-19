@@ -28,7 +28,7 @@
  * $page_header   This is the "header content" for the page.  Basically, the logo?  TODO:  do I need this to be a variable?
  * $page_sidebar_left_content      This is the HTML contents that should appear in the left sidebar, if any.
  * 
- * 
+ * $theme_location    This contains the URL to the selected theme's location.  Ex:  "/custom/themes/custom_fp6_clean" 
  * 
 */
 ?>

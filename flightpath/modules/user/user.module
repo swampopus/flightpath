@@ -1825,7 +1825,7 @@ function user_list_filter_form() {
   $form['filter_name'] = array(
     'type' => 'textfield',
     'label' => '',
-    'attributes' => array("placeholder" => t("Nname or CWID")),    
+    'attributes' => array("placeholder" => t("Name or CWID")),    
     'value' => $filter_name_value,
     'size' => 20,
     'weight' => 10,
