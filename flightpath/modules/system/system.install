@@ -46,7 +46,7 @@ function system_enable() {
                     "batch", 'calendar', 'alerts', 'audit', 'engagements', 'notify', 'student_files', 'student_priority', 'student_profile');
   foreach ($modules as $module) {
     
-    $info_contents = file_get_contents("modules/$module.info");    
+    $info_contents = file_get_contents("modules/$module/$module.info");    
     // From the info_contents variable, split up and place into an array.
     $info_details_array = array();
     $lines = explode("\n", $info_contents);

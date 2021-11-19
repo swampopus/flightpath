@@ -3285,7 +3285,8 @@ function calendar_content_register_content_type() {
   );
   
   $fields['advanced_fs']['elements'][0]['ics_url'] = array(
-    'type' => 'textfield',
+    'type' => 'textarea',
+    'rows' => 2,
     'label' => '(Advanced) URL to external calendar feed',
     'description' => t("If a URL is entered here, all other fields will be ignored.  This optional field lets you specify the URL to an external
                         calendar feed (ex: Google Calendar, Outlook, Zoho, etc) in .ics format.  Any event times listed on that calendar

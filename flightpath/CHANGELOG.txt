@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-11-19
+  For the content type "schedule_unavailable_time", changed the ics url field to a textarea and text (in mysql) to be able to handle URLs longer than 255 chars.
+
+  Fixed bug in install process where current schema of modules were not being set, causing the user to be told they need to run db updates even
+  on first install.
+  
+
 2021-11-18
   Added "spinner" to submit button for duplicating an entire year of degree data.
 

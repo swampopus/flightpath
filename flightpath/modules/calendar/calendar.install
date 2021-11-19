@@ -71,12 +71,12 @@ CREATE TABLE `content__schedule_unavailable_time` (
   `field__day_stop_hour` varchar(255) DEFAULT NULL,
   `field__start_time` varchar(255) DEFAULT NULL,
   `field__end_time` varchar(255) DEFAULT NULL,
-  `field__ics_url` varchar(255) DEFAULT NULL,
+  `field__ics_url` text DEFAULT NULL,
   PRIMARY KEY (`vid`),
   KEY `cid` (`cid`),
   KEY `field__start_time` (`field__start_time`),
   KEY `field__end_time` (`field__end_time`),
-  KEY `field__ics_url` (`field__ics_url`),
+  KEY `field__ics_url` (`field__ics_url`(700)),
   KEY `field__faculty_id` (`field__faculty_id`),
   KEY `field__time_selector` (`field__time_selector`),
   KEY `field__day_start_hour` (`field__day_start_hour`),
@@ -123,7 +123,20 @@ function calendar_update($old_schema, $new_schema) {
     
     fpm("Altered calendar tables to use LONGTEXT instead of just TEXT.");
     
-  }  
+  } 
+
+  
+  if (intval($old_schema) < 3) {
+    // Converted ics_url to text
+    db_query("DROP INDEX `field__ics_url` ON content__schedule_unavailable_time ");
+    db_query("ALTER TABLE content__schedule_unavailable_time MODIFY field__ics_url text");
+    db_query("CREATE INDEX `field__ics_url` ON content__schedule_unavailable_time (`field__ics_url`(700)) ");
+    
+  } 
+  
+
+
+
     
 }
 
