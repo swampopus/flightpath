@@ -9,6 +9,8 @@ FlightPath 6.x Changelog
   
   Enable almost all core modules on initial install.
   
+  Modified smtp module so that if we send a blank message it will just not send (but log it) rather than show an error message.
+  
 
 2021-11-18
   Added "spinner" to submit button for duplicating an entire year of degree data.

@@ -128,6 +128,19 @@ function smtp_mail($to, $subject, $msg, $bool_html = FALSE, $attachments = array
   require_once("$system_path/libraries/PHPMailer/src/PHPMailer.php");
   require_once("$system_path/libraries/PHPMailer/src/SMTP.php");  
 
+  $msg = trim($msg);
+  if ($msg == "") {
+    if (count($attachments) == 0) {
+      // This is a completely empty message!  Don't send anything.
+      watchdog("smtp", "Not sending email to $to ($subject).  No message or attachments.", array(), WATCHDOG_DEBUG);
+      return FALSE;
+    }
+    else {
+      $msg = "   ";  // We DO have attachments, so add some spaces so we have a string in the variable.
+    }
+  }
+  
+
   $mail = new PHPMailer();
   
   // Settings
@@ -201,10 +214,11 @@ function smtp_mail($to, $subject, $msg, $bool_html = FALSE, $attachments = array
   $x = $mail->send();    
   if (!$x) {
     fpm("PHPMailer error: " . $mail->ErrorInfo);
-    // TODO:  Log error?
+    watchdog("smtp", "PHPMailer error: " . $mail->ErrorInfo, array(), WATCHDOG_ERROR);
+    return FALSE;
   }
     
-  
+  return TRUE;
   
 } // smtp_mail
 
