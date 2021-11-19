@@ -6,6 +6,8 @@ FlightPath 6.x Changelog
 
   Watchdog page converted to use sortable table and pager query.  Also added severity as column.
   
+  Fixed bug in major students progress report (wasn't paying attention to school properly)
+  
 
 2021-11-16
   Gave "clear all cache" its own permission.

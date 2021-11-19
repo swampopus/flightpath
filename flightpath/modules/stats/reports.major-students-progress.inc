@@ -256,7 +256,7 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
     
     
     
-    $degree_id = $db->get_degree_id($major_code, $catalog_year);
+    $degree_id = $db->get_degree_id($major_code, $catalog_year, FALSE, $school_id);
     if ($degree_id) {
       ///////////////////
       // Fully build up a FlightPath screen in memory, as if the student
