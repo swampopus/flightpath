@@ -8,6 +8,8 @@ FlightPath 6.x Changelog
   
   Fixed bug in major students progress report (wasn't paying attention to school properly)
   
+  Fixed bug where if student's school wasn't set correctly, it would look it up upon object creation.
+  
 
 2021-11-16
   Gave "clear all cache" its own permission.
