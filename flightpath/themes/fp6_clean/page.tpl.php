@@ -104,7 +104,10 @@
       <span class='popup-contact'>
         <?php
           if ($page_hide_report_error != TRUE && trim(variable_get('contact_email_address', ''))) {
-            print "<a class='nounderline' href='javascript: popupreportcontact()'>" . t("Contact the @FlightPath production team", array("@FlightPath" => variable_get("system_name", "FlightPath"))) . "</a>";
+            $contact_title = t("Contact the @FlightPath Production Team", array("@FlightPath" => variable_get("system_name", "FlightPath")));
+            $contact_title = str_replace("'", "", $contact_title);
+            $contact_title = str_replace('"', "", $contact_title);
+            print "<a class='nounderline' href='javascript:fpOpenLargeIframeDialog(\"" . fp_url("popup-report-contact") . "\",\"" . $contact_title . "\")'>" . $contact_title . "</a>";
           }
         ?>
       </span>

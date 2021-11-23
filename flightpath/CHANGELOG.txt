@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-11-23
+  Fixed bug where advising snapshot (on dashboard) wasn't taking all advisees into account, only the first 20.  Simultaneously added
+  code to allow for more than 20 student results at a time.  Previously 20 was hard-coded, not a variable.
+
+  Converted the "Contact the FlightPath Production Team" popup window into a dialog.
+
+
 2021-11-19
   For the content type "schedule_unavailable_time", changed the ics url field to a textarea and text (in mysql) to be able to handle URLs longer than 255 chars.
 

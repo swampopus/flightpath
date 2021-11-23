@@ -248,7 +248,7 @@ function student_search_render_small_search() {
 /**
  * Displays this user's advisees, if there are any assigned.
  */
-function student_search_display_my_advisees($bool_only_return_adv_array = FALSE, $use_cwid = NULL, $force_school_id = NULL) {
+function student_search_display_my_advisees($bool_only_return_adv_array = FALSE, $use_cwid = NULL, $force_school_id = NULL, $limit = 20) {
   global $user, $pager_total_items;
   $rtn = "";
 
@@ -289,7 +289,7 @@ function student_search_display_my_advisees($bool_only_return_adv_array = FALSE,
               %ORDERBY%              
               ";
 
-  $adv_array = student_search_query_advisees($query, array(":faculty_cwid" => $faculty_cwid));
+  $adv_array = student_search_query_advisees($query, array(":faculty_cwid" => $faculty_cwid), $limit);
   
   if ($bool_only_return_adv_array) return $adv_array;
   
@@ -460,7 +460,7 @@ function student_search_get_majors_for_fapi() {
  * assigned to it.
  *
  */
-function student_search_display_majors_search() {
+function student_search_display_majors_search($limit = 20) {
   global $user;
   
   $rtn = "";
@@ -556,7 +556,7 @@ function student_search_display_majors_search() {
   
   
   
-  $adv_array = student_search_query_advisees($query, array(":major_code" => $major_code));
+  $adv_array = student_search_query_advisees($query, array(":major_code" => $major_code), $limit);
   $s = (count($adv_array) == 1) ? "" : "s"; 
   $rtn .= student_search_render_advisees($adv_array, t("Major @major Results", array("@major" => $major_code)) . " &nbsp; ( " . count($adv_array) . " " . t("student$s") . " )");
 
@@ -1505,8 +1505,10 @@ function z______student_search_render_advisees($adv_array, $title) {
 
 
 
-
-function student_search_query_advisees($sql, $params = array()) {
+/**
+ * The limit is how many we will query, and also how many will appear on the page at one time.
+ */
+function student_search_query_advisees($sql, $params = array(), $limit = 20) {
       
   $db = get_global_database_handler();  
   
@@ -1539,7 +1541,7 @@ function student_search_query_advisees($sql, $params = array()) {
   $faculty_advisees = advise_get_advisees();
   
   //$result = db_query($sql, $params);
-  $limit = 20;
+  
   // Now, we are going to search for these students, in the form of a pager query.
   $result = pager_query($sql, $params, $limit, 0, NULL, "SELECT COUNT(DISTINCT(u.cwid))");        
   while ($cur = db_fetch_array($result))
