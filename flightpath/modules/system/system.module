@@ -322,6 +322,16 @@ function system_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,
   );
 
+
+  $items["mfa-login"] = array(
+    "title" => "Multi-Factor Authentication",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("system_mfa_login_form"),    
+    "access_callback" => TRUE,
+    "type" => MENU_TYPE_NORMAL_ITEM,
+  );
+
+
   $items["disable-login"] = array(
     "title" => "Login Disabled",
     "page_callback" => "system_display_disable_login_page",
@@ -2492,7 +2502,23 @@ function system_cron() {
     
   }
   
-}
+  
+  // Should we delete from user_attributes sany mda_validation_codes which are older than X hours?
+  $max_age_hours = 1;      
+  // Okay, let's trim the table.
+  $max_timestamp = strtotime("$max_age_hours HOURS AGO"); 
+  
+  $result = db_query("DELETE FROM user_attributes WHERE `name` = 'mfa_validation_code' AND `updated` < ? ", $max_timestamp);
+  $rows = db_affected_rows($result);
+  if ($rows > 0) {
+    watchdog("system", t("@rows old 'mfa_validation_code' rows (older than @max hours) trimmed from user_attributes table on system cron run."), array("@rows" => $rows, "@max" => $max_age_days), WATCHDOG_DEBUG);
+  }
+  
+  
+    
+  
+  
+} // hook_cron
 
 
 
@@ -3061,6 +3087,96 @@ function system_display_login_page() {
 
 
 
+
+function system_mfa_login_form() {
+  
+  $form = array();
+  
+  $db_row = $_SESSION['mfa__form_state_db_row'];
+    
+  $email = $db_row['email'];
+  $obf_email = substr($email, 0, 5) . str_repeat("*",  strlen($email) - 5);
+  
+  $form['mark_top_msg'] = array(
+    'value' => "<strong>" . t("A message has been sent to your email address (%obfemail) with a code to continue.  Please enter the code below.", array("%obfemail" => $obf_email)) . "</strong>
+                  <div>" . t("Check your Spam or Bulk Mail folder if you do not receive the email within 5 minutes.") . "</div>
+                  <br><br>",
+    'weight' => 10,
+  );
+    
+  $form['mfa_code'] = array(
+    'type' => 'textfield',
+    'label' => t("Code:"),
+    'weight' => 20,
+    'required' => TRUE,
+  );  
+  
+  $form['mfa_remember'] = array(
+    'type' => 'checkbox',
+    'label' => t("Do not ask again for this browser/device for 30 days?"),
+    'weight' => 30,    
+  );
+  
+  $form['submit_btn'] = array(
+    'type' => 'submit',
+    'value' => t("Submit"),
+    'spinner' => TRUE,
+    'weight' => 200,
+  );
+  
+  
+  return $form;
+  
+} // system_mfa_login_form
+
+
+function system_mfa_login_form_validate($form, $form_state) {
+    
+  $db_row = $_SESSION['mfa__form_state_db_row'];    
+  
+  $user_id = $db_row['user_id'];
+  
+  // Validate the code.
+  $db_code = user_get_attribute($user_id, "mfa_validation_code", FALSE);
+  
+    
+  if (intval($form_state['values']['mfa_code']) !== intval($db_code)) {
+    form_error('mfa_code', t("Sorry, but the code you entered is not the same that was sent to your address.  Try again.  If you are unable to log in, have a systems
+                              administrator reset your password."));
+    return;
+  }
+  
+  
+    
+} // mfa_login_form_validate
+
+
+function system_mfa_login_form_submit($form, $form_state) {
+  // If we made it here, the user is allowed to log in.
+  
+  $db_row = $_SESSION['mfa__form_state_db_row'];    
+  
+  $user_id = $db_row['user_id'];  
+  
+  $mfa_remember = intval($form_state['values']['mfa_remember']);
+  // TODO: If we should remember for 30 days, then set cookie.
+  
+  
+  
+  // Actually log in the user.
+  $account = system_perform_user_login($user_id);    
+  
+  // Watchdog
+  watchdog("mfa-login", "@user has logged in via mfa. CWID: @cwid", array("@user" => "$account->name ($account->id)", "@cwid" => $account->cwid));
+  
+  fp_goto("<front>");  
+  
+  
+} // .. submit
+
+
+
+
 /**
  * This draws the form which facilitates logins.
  */
@@ -3277,31 +3393,59 @@ function system_login_form_submit($form, &$form_state) {
     return;
   }
 
+  // if we have MFA turned on, then we should redirect the user now to the MFA form.
+  // TODO:  Also check to see if we have "mfa_remember" cookie set, and is it not expired.
+  $mfa_enabled = variable_get("mfa_enabled", "yes");  // dev set to yes.  prod set to no.
+  if ($mfa_enabled === "yes") {
+    // Craft the query so we can use it.
+    $_SESSION['mfa__form_state_db_row'] = $db_row;
     
+    
+    // Create validation code
+    $mfa_code = mt_rand(111111, 999999);
+    $user_id = $db_row['user_id'];
+    
+    user_set_attribute($user_id, "mfa_validation_code", $mfa_code);
+    
+    // TODO:  Send validation code to email.
+    $email = $db_row['email'];
+    
+    fp_goto("mfa-login");  
+    return;
+  }  
+    
+  
+  // Actually log in the user.
+  $account = system_perform_user_login($db_row['user_id']);    
+  
+  // Watchdog
+  watchdog("login", "@user has logged in. CWID: @cwid", array("@user" => "$account->name ($account->id)", "@cwid" => $account->cwid));
+  
+  fp_goto("<front>");
+  
+}
+
+
+/**
+ * Actually performs the logging in of a user with user_id.
+ */
+function system_perform_user_login($user_id) {
+  
   $_SESSION["fp_logged_in"] = TRUE;
       
     
   // Set up a new $account object.
   $account = new stdClass();
   
-  $account = fp_load_user($db_row["user_id"]);
-  /*
-  // Okay, let's look for all the modules who have implimented hook_user_login
-  $modules = modules_implement_hook("user_login");
-  if (is_array($modules) && count($modules) > 0) {
-    foreach ($modules as $module) {          
-       call_user_func_array($module . '_user_login', array(&$account));        
-    }
-  }*/
+  $account = fp_load_user($user_id);
+
   // Set the $account to the SESSION.
   $_SESSION["fp_user_object"] = $account;
   
   
-  db_query("UPDATE users SET last_login = ? WHERE user_id = ?", array(time(), $db_row['user_id']));
+  db_query("UPDATE users SET last_login = ? WHERE user_id = ?", array(time(), $user_id));
   
-  watchdog("login", "@user has logged in. CWID: @cwid", array("@user" => "$account->name ($account->id)", "@cwid" => $account->cwid));
-  
-  fp_goto("<front>");
+  return $account;
   
 }
 
