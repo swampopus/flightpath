@@ -8,6 +8,7 @@ FlightPath 6.x Changelog
   
   Added convenience string functions like str_starts_with() to misc.inc, if not included.  These are implemented in PHP 8; they are here for users not running PHP 8.
   
+  Added admin email address as a required field in the initial install script for FlightPath.
 
 
 2021-11-23

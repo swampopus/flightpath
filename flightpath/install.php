@@ -89,6 +89,7 @@ function install_perform_install() {
   $admin_pass = trim($_POST["admin_pass"]);
   $admin_pass2 = trim($_POST["admin_pass2"]);
   $admin_name = trim($_POST["admin_name"]);
+  $admin_email = trim($_POST["admin_email"]);
 
   if (strlen($admin_name) < 3) {
     return install_display_db_form("<font color='red'>" . st("Please select another
@@ -105,6 +106,13 @@ function install_perform_install() {
                                                                 'Admin Password' field and the 'Re-enter Password'
                                                                 field.") . "</font>");    
   }  
+  
+  if (!filter_var($admin_email, FILTER_VALIDATE_EMAIL)) {
+    // invalid emailaddress
+    return install_display_db_form("<font color='red'>" . st("You must enter a valid email address for the admin user.") . "</font>");    
+        
+  }
+    
   
 
   // Place into settings so our installation procedures will work.
@@ -198,8 +206,8 @@ function install_perform_install() {
   $new_pass = user_hash_password($admin_pass);  
     
   // Add the admin user to the newly-created users table and the "faculty" table.
-  db_query("INSERT INTO users (user_id, user_name, cwid, password, is_faculty, f_name, l_name)
-            VALUES ('1', '?', '1', '?', '1', 'Admin', 'User') ", $admin_name, $new_pass);
+  db_query("INSERT INTO users (user_id, user_name, cwid, password, email, is_faculty, f_name, l_name)
+            VALUES ('1', ?, '1', ?, ?, '1', 'Admin', 'User') ", $admin_name, $new_pass, $admin_email);
 
   db_query("INSERT INTO faculty (cwid) VALUES ('1') ");
             
@@ -461,6 +469,7 @@ function install_display_db_form($msg = "") {
   $admin_pass = $_POST["admin_pass"];
   $admin_pass2 = $_POST["admin_pass2"];
   $admin_name = $_POST["admin_name"];
+  $admin_email = $_POST["admin_email"];
   
   if ($db_port == "") $db_port = "3306";
   
@@ -493,6 +502,12 @@ function install_display_db_form($msg = "") {
               <td valign='top'>" . st("Admin Password:") . "</td>
               <td valign='top'><input type='password' name='admin_pass' value='$admin_pass' size='20'></td>
             </tr>
+
+            <tr>
+              <td valign='top'>" . st("Admin Email Address:") . "</td>
+              <td valign='top'><input type='text' name='admin_email' value='$admin_email' size='20'></td>
+            </tr>
+
             
             <tr>
               <td valign='top'>" . st("Re-enter Password:") . "</td>
