@@ -2121,8 +2121,6 @@ function system_settings_form() {
                         If unsure what to select, select 'No'."), 
   );                                
   
-  
-  
 
   $form["user_whitelist"] = array(
     "type" => "textarea",
@@ -2139,6 +2137,16 @@ function system_settings_form() {
 
 
 
+  $form['mfa_enabled'] = array(
+    'type' => 'select',
+    'label' => t("Enable multi-factor authentication?"),
+    'options' => array('no' => 'No (default)', 'yes' => 'Yes'),
+    'hide_please_select' => TRUE,
+    'value' => variable_get("mfa_enabled", "no"),
+    'description' => t("If enabled, local users in FlightPath (like admin) will be emailed a validation code upon logging in, if and only if they have
+                        an email address saved for their user account.  This will not affect users which use an alternate method of logging in, such
+                        as SSO, LDAP, etc.  If unsure what to select, set this value to 'No'."),
+  );
   
   
 
@@ -2831,15 +2839,6 @@ function system_handle_logout() {
      setcookie(session_name(), "", $cookie_expires, '/');
   }  
   
-  /*
-  if (isset($_COOKIE)) {
-    foreach($_COOKIE as $key => $val) {
-        setcookie($key, "", time() - 3600);
-        setcookie($key, "", time() - 3600, '/');
-    }    
-  }
-  */
-  
   // unset cookies  from https://stackoverflow.com/questions/2310558/how-to-delete-all-cookies-of-my-website-in-php
   // We won't use $_COOKIE for this, as we might get an array for the $val, if the cookie was set using array notation.  This
   // code snippit should fix that.
@@ -2848,8 +2847,11 @@ function system_handle_logout() {
       foreach($cookies as $cookie) {
           $parts = explode('=', $cookie);
           $name = trim($parts[0]);
-          setcookie($name, '', time() - 3600);
-          setcookie($name, '', time() - 3600, '/');
+          // Only do this for non-mfa related cookies.
+          if (!str_starts_with($name, "flightpath_mfa_remember")) {
+            setcookie($name, '', time() - 3600);
+            setcookie($name, '', time() - 3600, '/');
+          }
       }
   }  
   
@@ -3091,7 +3093,7 @@ function system_display_login_page() {
 function system_mfa_login_form() {
   
   $form = array();
-  
+      
   $db_row = $_SESSION['mfa__form_state_db_row'];
     
   $email = $db_row['email'];
@@ -3099,11 +3101,12 @@ function system_mfa_login_form() {
   
   $form['mark_top_msg'] = array(
     'value' => "<strong>" . t("A message has been sent to your email address (%obfemail) with a code to continue.  Please enter the code below.", array("%obfemail" => $obf_email)) . "</strong>
-                  <div>" . t("Check your Spam or Bulk Mail folder if you do not receive the email within 5 minutes.") . "</div>
-                  <br><br>",
+                  <p>" . t("Check your Spam or Bulk Mail folder if you do not receive the email within 5 minutes.") . "</p>
+                  <p>" . t("To recreate and resend the validation code, simply return to the login page and try again.") . "</p> 
+                  <hr>",
     'weight' => 10,
   );
-    
+
   $form['mfa_code'] = array(
     'type' => 'textfield',
     'label' => t("Code:"),
@@ -3159,8 +3162,14 @@ function system_mfa_login_form_submit($form, $form_state) {
   $user_id = $db_row['user_id'];  
   
   $mfa_remember = intval($form_state['values']['mfa_remember']);
-  // TODO: If we should remember for 30 days, then set cookie.
-  
+  // If we should remember for 30 days, then set cookie.
+  if ($mfa_remember == TRUE) {
+    setcookie("flightpath_mfa_remember__" . $user_id, "yes", strtotime("NOW + 30 DAYS"));
+  }
+  else {
+    // Clear the cookie
+    setcookie("flightpath_mfa_remember__" . $user_id, "no", 1);
+  }
   
   
   // Actually log in the user.
@@ -3387,29 +3396,32 @@ function system_login_form_submit($form, &$form_state) {
   $passed = $form_state["passed_authentication"];
   $db_row = $form_state["db_row"];
   
+  $user_id = $db_row['user_id'];
+  $email = trim($db_row['email']);
+  
   if (!$passed) {
     fp_add_message(t("Sorry, there has been an error while trying to authenticate the user."));
     watchdog("login", "@user has not logged in.  Error while trying to authenticate.  Wrong password?", array("@user" => $user), WATCHDOG_ALERT);
     return;
   }
 
-  // if we have MFA turned on, then we should redirect the user now to the MFA form.
-  // TODO:  Also check to see if we have "mfa_remember" cookie set, and is it not expired.
-  $mfa_enabled = variable_get("mfa_enabled", "yes");  // dev set to yes.  prod set to no.
-  if ($mfa_enabled === "yes") {
+  // if we have MFA turned on AND the user has an email address saved, then we should redirect the user now to the MFA form.
+  // Also check to see if we have "mfa_remember" cookie set, and is it not expired.
+  $mfa_enabled = variable_get("mfa_enabled", "no"); 
+  if ($email && $mfa_enabled === "yes" && (!isset($_COOKIE['flightpath_mfa_remember__' . $user_id]) || $_COOKIE['flightpath_mfa_remember__' . $user_id] !== 'yes')) {
     // Craft the query so we can use it.
     $_SESSION['mfa__form_state_db_row'] = $db_row;
     
     
     // Create validation code
-    $mfa_code = mt_rand(111111, 999999);
-    $user_id = $db_row['user_id'];
+    $mfa_code = mt_rand(100000, 999999);
     
     user_set_attribute($user_id, "mfa_validation_code", $mfa_code);
     
-    // TODO:  Send validation code to email.
-    $email = $db_row['email'];
-    
+    // Send validation code to email.    
+    notify_by_mail($email, "FlightPath - Validation Code", t("Your multi-factor validation code is: <strong>@code</strong>
+                                                              \n\n<br><br>This code will remain valid for approximately one hour.", array("@code" => $mfa_code)));
+        
     fp_goto("mfa-login");  
     return;
   }  

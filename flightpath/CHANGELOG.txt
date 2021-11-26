@@ -1,6 +1,15 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-11-26
+  Implemented multi-factor authentication (via email) for local users.  The user can also choose to have their device "remembered" for 30 days, so they are not asked to
+  re-authenticate every time.  This will only work for local users with email addresses saved.  Users with no email address, or users using LDAP, SSO, etc, will not
+  be prompted to enter MFA code.
+  
+  Added convenience string functions like str_starts_with() to misc.inc, if not included.  These are implemented in PHP 8; they are here for users not running PHP 8.
+  
+
+
 2021-11-23
   Fixed bug where advising snapshot (on dashboard) wasn't taking all advisees into account, only the first 20.  Simultaneously added
   code to allow for more than 20 student results at a time.  Previously 20 was hard-coded, not a variable.
