@@ -1,6 +1,18 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-12-08
+  Fixed error in engagements where test name was being shown as author of engagement.
+   
+
+2021-12-07
+  Small modifications to media.css.
+  
+
+2021-12-02
+  Added a README.txt file under custom/themes so that the themes folder will be created upon install.
+  
+
 2021-11-26
   Implemented multi-factor authentication (via email) for local users.  The user can also choose to have their device "remembered" for 30 days, so they are not asked to
   re-authenticate every time.  This will only work for local users with email addresses saved.  Users with no email address, or users using LDAP, SSO, etc, will not

@@ -143,7 +143,7 @@
 @media screen and (max-width: 1130px) {  
   
   .top-banner img {
-    height: 50px;
+    height: 50px !important;
     width: auto;
   }
   
@@ -528,7 +528,7 @@
   
   
   .top-banner img {
-    height: 40px;
+    height: 40px !important;
     width: auto;
   }
   
@@ -604,7 +604,7 @@
   
   
   .top-banner img {
-    height: 30px;
+    height: 30px !important;
     width: auto;
   }
   
