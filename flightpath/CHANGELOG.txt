@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2021-12-09
+  Added more watchdog (debug) statements having to do with checking IMAP server for messages.
+  
+
 2021-12-08
   Fixed error in engagements where test name was being shown as author of engagement.
    

@@ -1383,9 +1383,10 @@ function engagements_imap_get_all_received_messages()
   }
 
 
+  watchdog('imap', "Attempting to connect to imap server.", array(), WATCHDOG_DEBUG);
   $mbox = imap_open($mailbox_server, $username, $password);
   if (!$mbox) {
-    watchdog('imap', "Could not connect to imap server!");
+    watchdog('imap', "Could not connect to imap server!", array(), WATCHDOG_ERROR);
     fp_add_message("Could not connect to IMAP server.", 'error', TRUE);
   }
 
@@ -1412,7 +1413,7 @@ function engagements_imap_get_all_received_messages()
     $subject = $overview->subject;
     $udate = $overview->udate;    // udate is apparently already in UTC, which is what we want.
 
-
+    watchdog('imap', "Gettign message $msgno. Subject: $subject. Udate: $udate.", array(), WATCHDOG_DEBUG);
 
     // We need to get our ONLY the email address from the From field, which
     // might look like:  Richard Peacock <richard.peacock@school.domain.co.com>
@@ -1424,10 +1425,14 @@ function engagements_imap_get_all_received_messages()
     $body = _engagements_imap_get_body($mbox, $msgno);
     $attachments = _engagements_imap_get_attachments($mbox, $msgno, fp_get_machine_readable($from_email));
 
-
+    watchdog('imap', "Found Body: $body", array(), WATCHDOG_DEBUG);
+    
     // match the from email to a student
     $student_user_id = db_get_user_id_from_email($from_email, 'student');
     if ($student_user_id) {
+      
+      watchdog('imap', "Found from student $student_user_id, creating engagement content.", array(), WATCHDOG_DEBUG);
+      
       // create this as an engagement for this student.
       $account = fp_load_user($student_user_id);
       $student_cwid = $account->cwid;
@@ -1503,6 +1508,7 @@ function engagements_imap_get_all_received_messages()
   // Delete all mail marked for deletion...
   imap_expunge($mbox);
 
+  watchdog('imap', "Closing connection to imap server.", array(), WATCHDOG_DEBUG);
   // Close connection, we're done.  
   imap_close($mbox);
 
