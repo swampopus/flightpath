@@ -21,6 +21,13 @@ function content_update($old_schema, $new_schema) {
     db_query("ALTER TABLE content ADD COLUMN `log` longtext DEFAULT NULL ");    
   }
 
+
+  if (intval($old_schema) < 5) {
+    if (!file_exists(fp_get_files_path() . '/content_uploads/')) {
+      mkdir(fp_get_files_path() . '/content_uploads/');
+    }    
+  }
+
 }
 
 
@@ -113,6 +120,9 @@ CREATE TABLE `content__page` (
   
   db_query($query);
   
+  if (!file_exists(fp_get_files_path() . '/content_uploads/')) {
+    mkdir(fp_get_files_path() . '/content_uploads/');
+  }
   
     
 }

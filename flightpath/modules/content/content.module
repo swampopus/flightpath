@@ -965,9 +965,9 @@ function content_get_uploaded_file($fid) {
     $temp = explode(".", $cur['filename']);
     $ext = $temp[count($temp) - 1]; // get the extension.
     
-    $cur['full_filename'] = fp_get_files_path() . '/engagements_attachments/' . $cur['filename']; 
+    $cur['full_filename'] = fp_get_files_path() . '/content_uploads/' . $cur['filename']; 
     // also get the URL for downloading this file.
-    $cur['url'] = base_path() . "/custom/files/engagements_attachments/" . $cur['filename'];
+    $cur['url'] = base_path() . "/custom/files/content_uploads/" . $cur['filename'];
     $cur['ext'] = $ext;
   }
   
@@ -1269,7 +1269,7 @@ function content_add_new_uploaded_file($file) {
   $ext = $temp[count($temp) - 1];                     
   
   $filename = 'attach__' . time() . '_' . mt_rand(9,999) . $original_filename;  // We will figure out the ext (from mimetype) later.
-  $full_filename = fp_get_files_path() . '/engagements_attachments/' . $filename;              
+  $full_filename = fp_get_files_path() . '/content_uploads/' . $filename;              
   
   if (!copy($tmp_name, $full_filename)) {
     fp_add_message(t("Could not upload file.  Possibly because of permission issues on the destination directory,

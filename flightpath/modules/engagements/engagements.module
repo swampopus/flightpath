@@ -793,10 +793,10 @@ function engagements_handle_incoming_sms($vars = array())
 
       $file_contents = file_get_contents($media_url);
       // save it locally as a random filename under /files/
-      $test = file_put_contents(fp_get_files_path() . '/engagements_attachments/' . $filename, $file_contents);
+      $test = file_put_contents(fp_get_files_path() . '/content_uploads/' . $filename, $file_contents);
       if (!$test) {
         watchdog('engagements_sms', 'Unable to write media file.', array(), 'error');
-        fpm('Unable to write media file.  Permissions issue on custom/files/engagements_attachments?');
+        fpm('Unable to write media file.  Permissions issue on custom/files/content_uploads?');
         continue;
       }
 
@@ -1584,12 +1584,12 @@ function _engagements_imap_get_attachments($inbox, $email_number, $from_email_ma
 
         // Create a new random filename to save it as.
         $filename = 'email__' . $from_email_machine_readable . '_' . time() . '_' .  mt_rand(1, 999999);  // We will figure out the ext (from mimetype) later.
-        $full_filename = fp_get_files_path() . '/engagements_attachments/' . $filename;
+        $full_filename = fp_get_files_path() . '/content_uploads/' . $filename;
         // save it locally as a random filename under /files/
         $test = file_put_contents($full_filename, $at['attachment']);
         if (!$test) {
           watchdog('sms', 'Unable to write media file.', array(), 'error');
-          fpm('Unable to write media file.  Permissions issue on custom/files/engagements_attachments?');
+          fpm('Unable to write media file.  Permissions issue on custom/files/content_uploads?');
         }
 
         // Next, we want to rename it to have the proper file extension, as best we can tell.
@@ -2722,7 +2722,7 @@ function engagements_display_main()
       foreach ($files as $filename) {
         $ttemp = explode("~~END_MEDIA~~", $filename);
         $filename = $ttemp[0];
-        $path = base_path() . '/custom/files/engagements_attachments/' . $filename;
+        $path = base_path() . '/custom/files/content_uploads/' . $filename;
 
         $img_tag = "<img src='$path' style='max-width: 200px; height: auto;'>";
 

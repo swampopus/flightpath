@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-12-13
+  Added code to create /custom/files/content_uploads/ folder.  Updated content module and engagements module
+  to place uploaded files there.
+  
+  Fixed spelling of "README" file.
+  
 
 2021-12-12
   In calendar, when parsing ical feeds, we now correctly ignore time marked as "free" (transp == TRANSPARENT in the event).  Also fixed bug where you couldn't schedule appointments

@@ -1,4 +1,4 @@
 name = Content
 description = Create generic HTML content for use on your site.
 core = 6.x 
-schema = 4
+schema = 5
