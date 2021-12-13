@@ -2,6 +2,13 @@ FlightPath 6.x Changelog
 ========================
 
 
+2021-12-12
+  In calendar, when parsing ical feeds, we now correctly ignore time marked as "free" (transp == TRANSPARENT in the event).  Also fixed bug where you couldn't schedule appointments
+  on the exact start and stop hour of a date's availability window (based on the "default" setting for that unavail time).
+  
+  Altered the way Zoom API works to better support api specs for Zoom marketplace apps.
+  
+
 2021-12-09
   Added more watchdog (debug) statements having to do with checking IMAP server for messages.
   

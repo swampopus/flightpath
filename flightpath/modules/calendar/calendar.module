@@ -458,10 +458,12 @@ function calendar_get_zoom_install_url($user_id = NULL, $bool_only_return_redir_
   }
   
   // We need to attach the session_id, since we're about to get redirected around.
-  $redir = urlencode($GLOBALS['fp_system_settings']['base_url'] . "/handle-zoom-install-redirect?fp_session_str=" . fp_get_session_str());
+  //$redir = urlencode($GLOBALS['fp_system_settings']['base_url'] . "/handle-zoom-install-redirect?fp_session_str=" . fp_get_session_str());
+  $redir = urlencode("https://flightpathacademics.com/sites/flightpathacademics/zoomapp_redirect_handler.php?fp_session_str=" . fp_get_session_str());
+  
   
   // The state will be handed back to us, so it will contain our user_id plus an md5 string we can recreate to make sure this is authentic.
-  $state = urlencode(base64_encode($user_id . '~' . md5($user_id . fp_token())));
+  $state = urlencode(base64_encode($GLOBALS['fp_system_settings']['base_url'] . "~~" . $user_id . '~~' . md5($user_id . fp_token())));
     
   $url = "https://zoom.us/oauth/authorize?response_type=code&client_id=" . variable_get('zoom_client_id', '') . "&redirect_uri=" . $redir;
   $url .= "&state=$state";  // add our state to the end.
@@ -483,16 +485,23 @@ function calendar_handle_zoom_install_redirect() {
   global $user;
   
   $code = $_GET['code'];
+  
+  watchdog("zoom_debug", print_r($_GET, TRUE), array(), WATCHDOG_DEBUG);
+  
   $state = base64_decode($_GET['state']); 
   
   $fp_session_str = fp_get_session_str();
   
-  
+  //fpm($state);
   // Test to make sure state is trusted.
-  $temp = explode("~", $state);
-  $state_user_id = intval($temp[0]);
-  $state_hash_secret = $temp[1];
+  $temp = explode("~~", $state);
+  //fpm($temp);
+  $state_user_id = intval($temp[1]);
+  $state_hash_secret = $temp[2];
   
+  //fpm($state_user_id);
+  //fpm("state secret:" . $state_hash_secret);
+  //fpm("calculated secrect:" . md5($state_user_id . fp_token()));
   
   if (md5($state_user_id . fp_token()) !== $state_hash_secret) {
     fp_add_message(t("Sorry, there was an error receiving a valid token from Zoom."), "error");
@@ -508,8 +517,6 @@ function calendar_handle_zoom_install_redirect() {
   
   // If we are here, then we succeeded.
   
-  
-  
     
   ///////////////////////////////
   // Let's go ahead and try to get our tokens from Zoom.
@@ -519,7 +526,6 @@ function calendar_handle_zoom_install_redirect() {
                    );
   $data = "grant_type=authorization_code&code=$code&redirect_uri=" . calendar_get_zoom_install_url($state_user_id, TRUE);
   $response = fp_http_request("https://zoom.us/oauth/token", $headers, "POST", $data);
-  
   
   $resp_data = json_decode($response->data);
   if (isset($resp_data->error)) {
@@ -531,14 +537,29 @@ function calendar_handle_zoom_install_redirect() {
     
   }
     
-
-  
-  
   // if we are here, it means we succeeded.
   $response_data = $response->data;
   $access_token = $resp_data->access_token;  
   $refresh_token = $resp_data->refresh_token;  
+
+
+  // Let's also get some information about the user's /me context, so we can find out what their zoom id is.  Will be necessary later for 
+  // deauthorization and other functions.
+  $headers = array("Content-Type" => "application/x-www-form-urlencoded", 
+                   "Authorization" => "Bearer $access_token",
+                   );  
+  $response = fp_http_request("https://api.zoom.us/v2/users/me", $headers, "GET");
   
+  $resp_data = json_decode($response->data);
+  $zoom_user_id = $resp_data->id;
+  $zoom_account_id = $resp_data->account_id;
+  $zoom_account_number = $resp_data->account_number;
+  $zoom_user_email = $resp_data->email;
+  
+
+  // TODO:  Add this extra information to the table.
+  // TODO:  Inform flightpathacademics.com that this zoom_user_id == this flightpath id, at this site location.  This will help us
+  // TODO:  deauthorize the user later on.
 
   // Let's put all our data into our table.
   db_query("REPLACE INTO zoom_api_data (user_id, install_code, response_data, access_token, refresh_token, last_updated)
@@ -1556,6 +1577,11 @@ function calendar_get_appointments_for_faculty($faculty_id, $start_date, $end_da
         $events = $ical->eventsFromRange($start_date, $end_date);
         
         foreach ($events as $event) {
+          
+          // if this is a "free" time, then the "transp" property will == "TRANSPARENT".  If it's "busy" it will be "OPAQUE".
+          // We want to ignore anything marked as "free".
+          if (@$event->transp === "TRANSPARENT") continue;
+                   
                     
           $utc_start = $event->dtstart_array[2]; // the UTC timestamp 
           $utc_end = $event->dtend_array[2]; 
@@ -1566,9 +1592,10 @@ function calendar_get_appointments_for_faculty($faculty_id, $start_date, $end_da
           
           $ap_datetime_ts = $converted_start;                    
                     
-          $summary = $event->summary;  // title. basically.
+          $summary = $event->summary;  // title. basically.          
           $location = $event->location;   // zoom link or whatever.  Goes with body.
           $description = $event->description;  // the body.
+          
           
           // In order to catch events which span more than one day, let's add an entry
           // for each day covered between our start and end times.
@@ -1760,16 +1787,32 @@ function calendar_get_available_faculty_schedule($faculty_id, $event_type_cid, $
             if ($et == "0:00:00") $et = "23:59:59";  // meaning, we are stopping at midnight
 
             
-            // The first one is the start.  We go from midnight to $st.
+            // We want to calculate out what our start time is LESS 1 second, so that we can begin accepting appointments
+            // on the time we selected.
+            $st_less_one_sec = $st;  // default
+            $start_hour = intval($ut_content->field__day_start_hour['value']);
+            if ($start_hour > 0) {
+              $st_less_one_sec = ($start_hour - 1) . ":59:59";
+            }            
+            
+            $et_plus_one_sec = $et; // default
+            $stop_hour = intval($ut_content->field__day_stop_hour['value']);
+            if ($stop_hour < 23) {
+              $et_plus_one_sec = ($stop_hour + 1) . ":00:01";
+            }
+            
+             
+            
+            // The first one is the start.  We go from midnight to $st minus 1 second.
             $start_end_array[] = array(
               'start' => "00:00:00",
-              'end' => $st,
+              'end' => $st_less_one_sec,
               'convert_tz' => FALSE, // these times are in the faculty member's time zone.  They'll NOT need to be converted to UTC in the next step.
             );  
                         
-            // The second one is the end.  We go from $et to 23:59:59
+            // The second one is the end.  We go from $et (plus one second) to 23:59:59
             $start_end_array[] = array(
-              'start' => $et,
+              'start' => $et_plus_one_sec,
               'end' => "23:59:59",
               'convert_tz' => FALSE, // these times are in the faculty member's time zone.  They'll NOT need to be converted to UTC in the next step.
             );
