@@ -8,6 +8,8 @@ FlightPath 6.x Changelog
   
   Altered the way Zoom API works to better support api specs for Zoom marketplace apps.
   
+  If SMS is not enabled, then txt messages cannot be selected as a default notification method.
+  
 
 2021-12-09
   Added more watchdog (debug) statements having to do with checking IMAP server for messages.

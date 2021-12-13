@@ -386,12 +386,17 @@ function user_user_settings_form() {
   }
   
   
+  $options = array('email' => t("Email"));
+  if (variable_get('sms_project_id', '') != '') {
+    $options['txt'] = t("TXT Message");
+    $options['email_txt'] = t("Both email and txt message");
+  }
   
   $form['default_notification_method'] = array(
     'label' => t('Default notification method for important events'),
     'type' => 'select',
     'hide_please_select' => TRUE,
-    'options' => array('email' => t("Email"), 'txt' => t("TXT Message"), 'email_txt' => t("Both email and txt message")),
+    'options' => $options,
     'value' => @$user->settings['default_notification_method'],
     'description' => t('These would be notifications sent out by FlightPath.  For example, when you schedule an appointment or to send out a reminder.
                         If you are unsure what to select, choose "Email".'),    
