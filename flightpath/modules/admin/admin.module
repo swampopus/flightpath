@@ -1603,15 +1603,13 @@ function admin_display_watchdog() {
 
   @$sev_filter = $_GET["sev_filter"];
   @$type_filter = $_GET["type_filter"];
-  @$page = $_GET["page"];
+  @$page = intval($_GET["page"]);
   
   $limit_start = 0;
-  if ($page != "" && is_numeric($page)) {
+  if ($page > 0) {
     $limit_start = $results_per_page * ($page - 1);
   }
-  else {
-    $page = 1;
-  }
+  
 
   
   
