@@ -335,6 +335,21 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
   fpm($err_name . ": $message<br>... ($line) $filename");
   fpm($arr);
 
+  // Before we watchdog or mail this backtrace, make sure no field called "password" is in plain text.
+  foreach ($arr as $c => $trace) {
+    if (is_array($trace) && isset($trace['args'])) {
+      foreach ($trace['args'] as $k => $details) {
+        if (is_array($details)) {
+          foreach ($details as $j => $val) {
+            if (stristr($j, 'password')) {
+              $arr[$c]['args'][$k][$j] = "--PASSWORD HIDDEN IN LOG--";
+            }
+          }
+        }
+      }
+    }
+  }
+  
 
   $hostname = php_uname('n') . ' - ' . $GLOBALS['fp_system_settings']['base_url'];
   
