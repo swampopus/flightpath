@@ -353,6 +353,7 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
 
         $course_repeats = str_replace("[","",$course_repeats);
         $course_repeats = str_replace("]","",$course_repeats);
+        $course_repeats = intval($course_repeats);
         $course_repeats--;
         if ($course_repeats < 0) { $course_repeats = 0; }
 
@@ -725,7 +726,13 @@ function admin_edit_group_form() {
                               <br><br>
                               You may also <i>recommend</i> a course by place a * (asterisk) before the course name.
                               <br> Ex:  * ART 101
-                              <br>This will cause <b>ART 101</b> to appear as bold to the user when viewing the list of courses in this group."),
+                              <br>This will cause <b>ART 101</b> to appear as bold to the user when viewing the list of courses in this group.
+                              <br><br>
+                              Courses which may be repeated can be specified by placing the number of acceptible repeats in brackets after
+                              the course.
+                              <br>Ex:  ART 101 [2]
+                              <br>This means that ART 101 may be repeated up to two times for this group.  If using this feature, make sure
+                                  that repeats are permissible for this course."),
                               
   );
   // if a definition was specified, we need to disable the courses textarea.
