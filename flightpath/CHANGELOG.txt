@@ -1,9 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+
 2021-12-15
   Adding some extra instructions for the edit groups page.
-  
+
+  Fixed bug where courses worth less than 1 credit hour were not showing as repeatable in groups, even when the "set catalog repeats" box was checked.
+    
 
 2021-12-14
   Added extra protection in our _fp_error_handler to not accidentally log passwords in plaintext.

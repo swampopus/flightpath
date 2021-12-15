@@ -108,7 +108,7 @@ function fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalo
   // can be taken (repeats) 3 times.
   
   // We will use the min_hours for this calculation.  If zero, then change it to 1.
-  if ($min_hours < 1) $min_hours = 1;
+  if ($min_hours <= 0) $min_hours = 1;
   
   // Use intval so we don't have decimals.  Whole attempts only.
   $repeats = intval($repeat_hours / $min_hours);   
