@@ -188,7 +188,15 @@ function system_update($old_schema, $new_schema) {
     }
 
 
-  }
+  } // schema 4
+  
+  if (intval($old_schema) < 5) {
+    // Add "delete_flag" to advising_sessions table, and a key for it as well.
+    db_query("ALTER TABLE advising_sessions ADD COLUMN `delete_flag` tinyint(4) DEFAULT 0 ");
+    db_query("ALTER TABLE advising_sessions ADD INDEX (`delete_flag`) ");        
+    
+    
+  } // schema 5
 
 
   
@@ -268,9 +276,11 @@ CREATE TABLE `advising_sessions` (
   `is_draft` tinyint(4) DEFAULT 0,
   `is_empty` tinyint(4) DEFAULT 0,
   `advising_session_token` varchar(255) DEFAULT NULL,
+  `delete_flag` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`advising_session_id`),
   KEY `sid` (`student_id`),
   KEY `termid` (`term_id`),
+  KEY `delete_flag` (`delete_flag`),
   KEY `advising_session_token` (`advising_session_token`)
 );   ";
 db_query($q);

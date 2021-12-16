@@ -7,6 +7,8 @@ FlightPath 6.x Changelog
 
   Fixed bug where courses worth less than 1 credit hour were not showing as repeatable in groups, even when the "set catalog repeats" box was checked.
     
+  Adding concept of "delete_flag" to advising_sessions table, similar to the advising_comments table.
+    
 
 2021-12-14
   Added extra protection in our _fp_error_handler to not accidentally log passwords in plaintext.
