@@ -744,6 +744,8 @@ class Student extends stdClass
 
       $new_course = new Course();
 
+      
+      
       // Find out if this course has an eqv.
       if ($course_id = $this->get_transfer_course_eqv($transfer_course_id, FALSE, "", $cur["hours_awarded"]))
       {
@@ -859,11 +861,11 @@ class Student extends stdClass
     $temp_course->course_id = $transfer_course_id;
     if ($bool_ignore_unassigned == false && $this->list_transfer_eqvs_unassigned->find_match($temp_course)) {
       // The transfer course in question has had its eqv removed,
-      // so skip it!
+      // so skip it!      
       return false;
     }
 
-    
+    $require_hours = floatval($require_hours);
     
     $valid_term_line = "";
     if ($require_valid_term_id != "") {
@@ -888,7 +890,10 @@ class Student extends stdClass
       // as the transfer, then check that now.
       if ($require_hours != -1) {
         $temp_course = new Course($local_course_id);
-        if (($temp_course->max_hours*1) != ($require_hours*1)) {
+        $temp_course->max_hours = floatval($temp_course->max_hours);
+        $temp_course->min_hours = floatval($temp_course->min_hours);
+        
+        if (($temp_course->max_hours < $require_hours) || ($temp_course->min_hours > $require_hours)) {          
           return FALSE;
         }
         else {

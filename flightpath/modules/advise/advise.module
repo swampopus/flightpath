@@ -953,7 +953,7 @@ function advise_user_can_view_advising_session_access_callback() {
     
     // First, what was the student's CWID associated with that advising_session_id?
     $res = db_query("SELECT student_id FROM advising_sessions
-                     WHERE advising_session_id = '?' ", $advising_session_id);
+                     WHERE advising_session_id = ? ", $advising_session_id);
     $cur = db_fetch_array($res);
     
     if (user_has_permission("view_own_advising_session") && $user->cwid == $cur["student_id"]) {    
@@ -1216,6 +1216,13 @@ function advise_perm() {
                         For example, the user is a student."),
   );
   
+  
+  $perms["can_delete_own_advising_session_3_months"] = array(
+      "title" => t("Can delete advising session for 3 months (faculty/staff only)"),
+      "description" => t("The faculty/staff user may delete advising sessions they have made for up to 3 months.  After 3 months, they 
+                          will not be able to delete the advising session.  <strong>Note: The user must also have the 'Can advise students' permission as well.</strong>"),
+    );
+  
 
   
   $perms["can_advise_students"] = array(
@@ -1238,6 +1245,9 @@ function advise_perm() {
                         in FlightPath."),
   );
 
+  
+  
+  
   
   
   return $perms;

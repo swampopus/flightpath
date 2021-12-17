@@ -2566,8 +2566,6 @@ function draw_menu_items($menu_array) {
                     <i>" . t("This course's hours were split in a substitution.");
                     
       if ($course->get_bool_substitution_new_from_split()) {
-        //$html .= "<br>" . t("Remaining hours after split:") . "  $datastring_max_hours hrs.";
-        
         
         $sub_remaining_hours = @$course->get_hours_awarded($req_by_degree_id);        
         
@@ -2587,19 +2585,10 @@ function draw_menu_items($menu_array) {
           
     }
 
-    //$pC .= "</div>";
-
+    
     if ($course->course_id != 0)
     {
-      /*
-      $pC .= "
-      <div class=' '>
-          $course->description
-        </div>
-      </div>
-        ";
-        */
-      
+            
         
       $render["course_description"] = array(
         "type" => "markup",    
@@ -2616,13 +2605,7 @@ function draw_menu_items($menu_array) {
       
       $html = "";
       $html .= "<div class=' ' style='margin-top: 10px;'><b>Note:</b> ";
-      /*
-      $pC .= "
-      <b>Note:</b> This course is a transfer credit which
-      the student completed at <i>";
-
-      $pC .= $this->fix_institution_name($course->course_transfer->institution_name) . "</i>.";
-      */
+    
       $pC = str_replace("<!--EQV1-->"," (" . t("Transfer Credit") . ")",$pC);  // place the words "transfer credit" in the curved title line at the top.
       
       if (!$bool_transferEqv)
@@ -2631,7 +2614,9 @@ function draw_menu_items($menu_array) {
               has been removed for this student.
             Ask your advisor if this course will count towards your degree.", array("@initials" => $initials)) . "
           </div>"; 
-      } else {
+      } 
+      else {
+
         $t_msg = t("FlightPath cannot assign this course to a @initials equivalency on
               the student's degree plan, 
               or the equivalency
@@ -2665,9 +2650,7 @@ function draw_menu_items($menu_array) {
       // the new eqv information.
       */
       $pC = str_replace("<!--EQV1-->"," (" . t("Transfer Credit") . " $t_s_i $t_c_n)",$pC);
-      /*      $pC .= $this->fix_institution_name($course->course_transfer->institution_name);
-      $pC .= "</i>.";
-      */
+      
       // Admin function only.
       if (user_has_permission("can_substitute"))
       {
@@ -2778,11 +2761,9 @@ function draw_menu_items($menu_array) {
     {
             
       $html = "";
-    
-      //$g = new Group($course->assigned_to_group_id);
+          
       $g = new Group();
-      //$g->group_id = $course->assigned_to_group_id;
-      //$g->group_id = $course->get_first_assigned_to_group_id();
+      
       $g->group_id = $course->disp_for_group_id;
       $g->load_descriptive_data();
 

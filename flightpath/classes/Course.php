@@ -1628,6 +1628,8 @@ class Course extends stdClass
       $this->min_hours = $cur["min_hours"] * 1;  //*1 will trim extra zeros from end of decimals
       $this->max_hours = $cur["max_hours"] * 1;
 
+            
+      
       if ($bool_reset_ghost_hours) {
         // Reset the ghosthours to default.
         $this->bool_ghost_hour = $this->bool_ghost_min_hour = FALSE;

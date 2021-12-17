@@ -210,7 +210,7 @@ function comments_comment_form() {
  * new one (with the right permissions).
  */
 function comments_display_main() {
-  global $current_student_id, $screen;
+  global $current_student_id, $screen, $user;
   $rtn = "";
       
   fp_add_js(fp_get_module_path("comments") . "/js/comments.js");
@@ -228,15 +228,15 @@ function comments_display_main() {
   $access_types = (user_has_permission("view_faculty_comments")) ? array("faculty", "public") : array("public");
     
   $comments = comments_get_comments($current_student_id, FALSE, $access_types);
-  //fpm($comments);
+  
   foreach($comments as $comment) {
       
     $delete_link = "";
     // Should we present a "delete link" to the user for this comment?
-    if (user_has_permission("can_delete_own_comments_3_months")) {
+    if (user_has_permission("can_delete_own_comments_3_months") && $comment['faculty_id'] == $user->cwid) {
       // See if this comment is younger than 3 months.
-      $del_range = strtotime("-3 month");
-      $then = $comment["posted"];
+      $del_range = strtotime("now -3 months");
+      $then = intval($comment["posted"]);
 
       
       if ($then > $del_range) {

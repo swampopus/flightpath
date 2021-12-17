@@ -2,13 +2,25 @@ FlightPath 6.x Changelog
 ========================
 
 
+2021-12-17
+  Cleaned up old comments.
+  
+  Fixed bug where we were determing a course's transfer eqv.  It was failing even though the souce hours were within the range
+  of min and max hours.  (We were only looking at == max hours, rather than a range from min to max).
+
+
 2021-12-15
   Adding some extra instructions for the edit groups page.
 
   Fixed bug where courses worth less than 1 credit hour were not showing as repeatable in groups, even when the "set catalog repeats" box was checked.
     
-  Adding concept of "delete_flag" to advising_sessions table, similar to the advising_comments table.
+  Adding concept of "delete_flag" to advising_sessions table, similar to the advising_comments table.  Also added permission to let users delete advising sessions
+  for up to 3 months after posting, again, similar to the comments module.
     
+  Updated comments module to make sure only the original author of a comment can delete it.
+  
+  
+      
 
 2021-12-14
   Added extra protection in our _fp_error_handler to not accidentally log passwords in plaintext.

@@ -3808,6 +3808,7 @@ function system_display_dashboard_page () {
                 WHERE student_id = ?
                 AND is_draft = 0
                 AND is_empty = 0
+                AND delete_flag = 0
                 ORDER BY `posted` DESC, `term_id` DESC 
                 LIMIT 5", $user->cwid);
     $c = 0;

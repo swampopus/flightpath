@@ -9,7 +9,7 @@
  * Displays the history tab on screen.
  */
 function advise_display_history() {
-  global $current_student_id;
+  global $current_student_id, $user;
   
   $student_id = $current_student_id;
   $db = get_global_database_handler();
@@ -121,14 +121,33 @@ function advise_display_history() {
   $session_group_code = $old_session_group_code = "";
 
 
+  
   // First, find all of the advising session "groups".  That is, advising sessions over multiple
   // terms which were submitted together.
   $res = db_query("SELECT * FROM advising_sessions
                     WHERE student_id = ?
                     AND is_draft = 0
                     AND is_empty = 0
+                    AND delete_flag = 0
                     ORDER BY `posted` ", $student_id);
   while($cur = db_fetch_array($res)) {
+  
+    // Are we supposed to "delete" an advising session?  We will double-check the user has all needed permissions if so.
+    if (intval(@$_GET['deladv']) === intval($cur['advising_session_id'])) {
+      if (user_has_permission('can_advise_students') && user_has_permission('can_delete_own_advising_session_3_months') && $cur['faculty_id'] == $user->cwid) {
+      
+        $del_range = strtotime("now -3 months");
+        $then = intval($cur["posted"]);
+        if ($then > $del_range) {
+          db_query("UPDATE advising_sessions 
+                    SET delete_flag = 1
+                    WHERE advising_session_id = ?", array($cur['advising_session_id']));
+          fp_add_message(t("Advising session has been successfully deleted."));
+          continue;  // skip this record.    
+        }
+        
+      }
+    }
 
     // Is this datetime within 5 seconds of the previous datetime?
     // If so, they were likely saved together, and are part
@@ -165,8 +184,9 @@ function advise_display_history() {
   // Now, actually assemble the HTML for our advising sessions for the screen.
   $res = db_query("SELECT * FROM advising_sessions
               WHERE student_id = ?
-              AND is_draft = '0'
-              AND is_empty = '0'
+              AND is_draft = 0
+              AND is_empty = 0
+              AND delete_flag = 0
               ORDER BY `posted` DESC, `term_id` DESC ", $student_id);
   while($cur = db_fetch_array($res)) {
 
@@ -233,6 +253,32 @@ function advise_display_history() {
                 <div class=' ' style='display: inline-block; padding-left:20px; width:165px;'>$term</div>
                 <div class=' ' style='display: inline-block;'>$dt</div>
               </div>";
+    // Should we show the "delete" link?    
+    
+    if (user_has_permission('can_advise_students') && user_has_permission('can_delete_own_advising_session_3_months') && $cur['faculty_id'] == $user->cwid) {
+    
+      $del_range = strtotime("now -3 months");
+      $then = intval($cur["posted"]);
+      if ($then > $del_range) {
+        
+        $safe_term = $term;
+        $safe_term = str_replace("'", "", $safe_term);
+        $safe_term = str_replace('"', "", $safe_term);
+        $safe_term = str_replace(';', "", $safe_term);
+        $safe_term = str_replace('\\', "", $safe_term);
+        
+        $confirm_link = fp_get_js_confirm_link(t("Are you sure you wish to delete the advising session from @dt for @term?  \\n\\nThis action cannot be undone.", array("@dt" => $dt, "@term" => $safe_term)),
+                            "window.location=\"" . fp_url("history", "current_student_id=$current_student_id&deladv=" . $cur['advising_session_id']) . "\";", t("Delete this advising session?")); 
+        
+                
+        $html .= "<div class='delete-adv-wrapper'>
+                    $confirm_link
+                    <!-- <a href='javascript:deleteAdvisingSession(\"{$cur['advising_session_id']}\",\"$dt\");'>" . t("Delete this advising session?") . "</a> -->
+                  </div>";
+      }
+      
+      
+    }
 
     // If this is more than X number, let's hide the rest in a collapsible fieldset.
     if ($c < 5) {

@@ -1590,6 +1590,7 @@ function student_search_query_advisees($sql, $params = array(), $limit = 20) {
                       term_id = ?                      
                AND is_draft = 0 
                AND is_empty = 0
+               AND delete_flag = 0
               ORDER BY posted DESC", $student_id, $term_id);
     if (db_num_rows($res2) > 0) {
       $cur = db_fetch_array($res2);

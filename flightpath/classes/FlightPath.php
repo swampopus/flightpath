@@ -1408,9 +1408,9 @@ class FlightPath extends stdClass
       $result = $db->db_query("INSERT INTO advising_sessions
                 (student_id, faculty_id, term_id, degree_id,
                 major_code_csv,
-                catalog_year, posted, is_whatif, is_draft, advising_session_token)
+                catalog_year, posted, is_whatif, is_draft, advising_session_token, delete_flag)
                 VALUES
-                (?,?,?,?,?,?,?,?,?,?) 
+                (?,?,?,?,?,?,?,?,?,?, 0) 
                 ", $student_id, $faculty_id,$term_id,$degree_id, $major_code_csv, $catalog_year, $posted, $is_what_if, $is_draft, $advising_session_token);
       $advising_session_id = db_insert_id();
       $advising_session_id_array[$term_id] = $advising_session_id;
@@ -1759,8 +1759,8 @@ class FlightPath extends stdClass
 
           // This one is blank!  Delete it!
           $res = $db->db_query("UPDATE advising_sessions
-                SET `is_empty`='1'  
-                WHERE `advising_session_id`='?' ", $advising_session_id);
+                SET is_empty = 1  
+                WHERE advising_session_id = ? ", $advising_session_id);
           $advising_session_id_array[$term_id] = "";
         }
       }

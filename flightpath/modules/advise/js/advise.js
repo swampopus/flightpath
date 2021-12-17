@@ -924,6 +924,16 @@ function restoreUnassignFromGroup(db_unassign_group_id)
 }
 
 
+function popupDeleteAdvisingSession(advising_session_id,dt) {
+  var x = confirm("Are you sure you wish to delete this advising session from date " + dt + "?\\n\\nThis action cannot be undone.");
+  if (x)
+  {    
+    parent.removeSubstitution(subID);
+    fpCloseSmallIframeDialog();
+  }  
+}
+
+
 function popupRemoveSubstitution(subID) {
 
   var x = confirm("Are you sure you wish to remove this substitution?");

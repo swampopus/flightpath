@@ -730,12 +730,13 @@ class DatabaseHandler extends stdClass
     $db_is_whatif = ($is_whatif == "") ? $cur["is_whatif"] : $is_whatif;
     $db_is_draft = ($is_draft == "") ? $cur["is_draft"] : $is_draft;    
     $db_is_empty = $cur["is_empty"];
+    $db_delete_flag = $cur['delete_flag'];
     
     // Okay, let's INSERT this record, and capture the new advising_session_id...
     $res = db_query("INSERT INTO advising_sessions
-              (student_id, faculty_id, term_id, degree_id, major_code_csv, catalog_year, posted, is_whatif, is_draft, is_empty)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-              ", $db_student_id, $db_faculty_id, $db_term_id, $db_degree_id, $db_major_code_csv, $db_catalog_year, $db_posted, $db_is_whatif, $db_is_draft, $db_is_empty);
+              (student_id, faculty_id, term_id, degree_id, major_code_csv, catalog_year, posted, is_whatif, is_draft, is_empty, delete_flag)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              ", $db_student_id, $db_faculty_id, $db_term_id, $db_degree_id, $db_major_code_csv, $db_catalog_year, $db_posted, $db_is_whatif, $db_is_draft, $db_is_empty, $db_delete_flag);
     
     $new_asid = db_insert_id();
     
@@ -788,6 +789,7 @@ class DatabaseHandler extends stdClass
                 and term_id = ?                
                 and degree_id = ?
                 and is_whatif = ?
+                AND delete_flag = 0
                 $draft_line
                 order by `posted` desc limit 1";
     $result = $this->db_query($query, array($student_id, $term_id, $degree_id, $is_what_if)) ;
@@ -809,6 +811,7 @@ class DatabaseHandler extends stdClass
                   and degree_id = ?
                   and is_whatif = ?                  
                   and is_draft = 0
+                  AND delete_flag = 0
                   order by `posted` desc limit 1";
       $result = $this->db_query($query, array($student_id, $term_id, $degree_id, $is_what_if)) ;
       if ($this->db_num_rows($result) > 0) {
