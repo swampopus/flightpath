@@ -717,18 +717,22 @@ function system_execute_php_form_submit($form, $form_state) {
   $code = trim($form_state["values"]["system_execute_php"]);
   if ($code == "") return;
 
-  try {
-    $res = @eval($code);
-    
-    // Check for errors less than PHP 7.
-    if ($res === FALSE &&($error = error_get_last())) {
-      fp_add_message("Error: " . $error["message"] . ". See line: " . $error["line"], "error");
+  if (user_has_permission("execute_php")) {  // double-check one more time on this,  just in case.
+  
+    try {
+      $res = @eval($code);
+      
+      // Check for errors less than PHP 7.
+      if ($res === FALSE &&($error = error_get_last())) {
+        fp_add_message("Error: " . $error["message"] . ". See line: " . $error["line"], "error");
+      }
+      
+    }
+    catch (ParseError $e) {    
+      // Catches PHP 7+ ParseError exceptions...
+      fp_add_message("Exception detected: " . $e->getMessage() . ". See line: " . $e->getLine(), "error");
     }
     
-  }
-  catch (ParseError $e) {    
-    // Catches PHP 7+ ParseError exceptions...
-    fp_add_message("Exception detected: " . $e->getMessage() . ". See line: " . $e->getLine(), "error");
   }
   
 }
@@ -3494,7 +3498,7 @@ function system_display_dashboard_page () {
     global $current_student_id;
     $current_student_id = "";  // clear this so the fp_goto doesn't try to add it.
     
-    session_destroy();
+    @session_destroy();  // In a rare occasion, the session hasn't had time to initialize yet, so this destroy triggers a warning.  The @ suppresses it.
     session_commit();
     fp_goto("login", $query);
     return;  

@@ -15,6 +15,10 @@ FlightPath 6.x Changelog
   
   Added "E" to default enrolled grades, and "F,W,I" to default retake grades.
 
+  We now log (as WATCHDOG_DEBUG) when user tries to access a page and gets either a 404 Not Found or 403 Access Denied.
+
+  Suppress rare warning when calling session_destroy().
+  
 
 2021-12-15
   Adding some extra instructions for the edit groups page.
