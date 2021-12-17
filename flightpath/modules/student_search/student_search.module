@@ -107,6 +107,8 @@ function student_search_student_select_switchboard() {
   advise_init_screen();        
 
 
+  $_SESSION["last_student_selected"] = $current_student_id;
+
   // At this point, we decide where they are going to be redirected to, using fp_goto.
   $goto_tab = @$user->settings['default_student_load_tab'];
   if ($goto_tab == "") {
@@ -139,7 +141,7 @@ function student_search_student_select_switchboard() {
   
   
         
-  return "hey";  
+  return "";  
   
 }
 
@@ -232,7 +234,7 @@ function student_search_render_small_search() {
   $url = fp_url("student-search/search");
   
   $rtn .= "<form action='" . $url . "' method='post' id='small-search-form' >
-                     <input type='text' class='smallinput' name='search_for' id='search_bar_value' placeholder = '" . t("Search students by name or CWID") . "'>                     
+                     <input type='text' class='smallinput' name='search_for' id='search_bar_value'  autocomplete='off' placeholder = '" . t("Search students by name or CWID") . "'>                     
                      <a href='javascript:void(0);' class='small-search-submit' onClick='this.closest(\"form\").submit();'><i class='fa fa-search'></i></a>
                      <input type='hidden' name='current_student_id' value='$current_student_id'>   
                      <input type='hidden' name='did_search' value='true'>                  
@@ -637,6 +639,9 @@ function student_search_search_form() {
   $search_for = trim(@$_REQUEST["search_for"]);
   if ($search_for == "") {
     $search_for = trim(@$_SESSION["student_search_for"]);
+  }
+  else {
+    $_SESSION['student_search_for'] = $search_for;
   }  
   $o_search_for = $search_for;
     
@@ -882,6 +887,7 @@ function student_search_search_form_submit($form, $form_state) {
         
   if (@$form_state['values']['reset_btn'] != "") {
     unset($_SESSION["student_search_for"]);
+    unset($_SESSION["last_student_selected"]);
     unset($_SESSION["student_search_major_code"]);
     unset($_SESSION["student_search_search_options"]);
     return;

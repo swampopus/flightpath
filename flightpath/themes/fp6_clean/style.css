@@ -1355,7 +1355,7 @@ ul.top-nav-ul li.last {
 }
 
 #header #top-nav form .smallinput {
-  width: 300px;
+  width: 265px;
   padding: 0.5em 1em;
   border: 1px solid #ccc;
   font-size: 0.9em;
@@ -1399,6 +1399,10 @@ ul.top-nav-ul li.user-options i {
   position: absolute;
   right: 10px;
   top: 45px;
+}
+
+.current-student-link i.fa {
+  font-size: 1.1em;
 }
 
 

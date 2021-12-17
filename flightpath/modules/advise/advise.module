@@ -2301,6 +2301,8 @@ function advise_clear_cache() {
     }
     
   }
+
+  unset($_SESSION["last_student_selected"]);
       
   fp_add_message(t("Advising cache has been cleared."));
   

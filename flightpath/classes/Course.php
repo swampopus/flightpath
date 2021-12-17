@@ -937,8 +937,8 @@ class Course extends stdClass
     $grade = $this->grade;
     // Get these grade definitions from our system settings
     // Configure them in custom/settings.php
-    $retake_grades = csv_to_array(variable_get_for_school("retake_grades", '', $this->school_id));
-    $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades",'', $this->school_id));
+    $retake_grades = csv_to_array(variable_get_for_school("retake_grades", 'F,W,I', $this->school_id));
+    $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades",'E', $this->school_id));
 
 
     if (in_array($grade, $retake_grades))
@@ -968,8 +968,8 @@ class Course extends stdClass
 
     // Get these grade definitions from our system settings
     // Configure them in custom/settings.php
-    $retake_grades = csv_to_array(variable_get_for_school("retake_grades", '', $this->school_id));
-    $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades",'', $this->school_id));
+    $retake_grades = csv_to_array(variable_get_for_school("retake_grades", 'F,W,I', $this->school_id));
+    $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades",'E', $this->school_id));
     
     if ($grade == "") {
       return false;
@@ -1011,7 +1011,7 @@ class Course extends stdClass
 
     // Get these grade definitions from our system settings
     // Configure them in custom/settings.php    
-    $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades", '', $this->school_id));
+    $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades", 'E', $this->school_id));
 
     if ($course_req != null) {
       $min_grade = $course_req->min_grade;
@@ -1033,7 +1033,7 @@ class Course extends stdClass
     }
 
     // Okay, let's check those min grade requirements...
-    $grade_order = csv_to_array(strtoupper(variable_get_for_school("grade_order", "AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I", $this->school_id)));    
+    $grade_order = csv_to_array(strtoupper(variable_get_for_school("grade_order", "E,AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I", $this->school_id)));    
   
     // Make it so the indexes are the grades, their numeric values are values.    
     $grade_order = array_flip($grade_order);

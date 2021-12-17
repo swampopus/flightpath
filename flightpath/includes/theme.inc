@@ -1432,8 +1432,22 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
   if (!$bool_for_hamburger_menu) {
   
     $html .= "<ul class='top-nav-ul'>";
+    
+    // TODO:  If we have a student selected, then we will display a link to go back to that student.
+    if ($user->is_faculty) {      
+      if (@trim($_SESSION["last_student_selected"]) != '') {
+        $csid = trim($_SESSION["last_student_selected"]);
+        $sname = trim(fp_get_student_name($csid));
+        if ($sname) {
+          $sname = htmlentities($sname);
+          $cur_stu_link = l("<i class='fa fa-id-card-o'></i>", "student-select","current_student_id=$csid",array("title" => t("Return to @sname", array("@sname" => $sname))));
+          $html .= "<li class='current-student-link'>$cur_stu_link</li>";
+        }
+      }
+    }
+    
     if (user_has_permission('view_any_advising_session')) {
-      $html .= "<li class='student-search first'>" . student_search_render_small_search() . "</li>";
+      $html .= "<li class='student-search'>" . student_search_render_small_search() . "</li>";
     }
     if (user_has_permission('view_advisee_alerts')) {
       $html .= "<li class='alerts'><a href='" . fp_url('alerts') . "'><i class='fa fa-bell'></i></a></li>";
@@ -1490,7 +1504,7 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
     
   }
   else {
-    // This IS for our hamburger menu!
+    // This IS for our *** hamburger menu **** !
     $cog_class = "cog-only";
     $html .= "<ul class='top-nav-ul'>";
     if (user_has_permission('view_advisee_alerts')) {

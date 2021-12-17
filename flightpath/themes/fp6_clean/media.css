@@ -308,6 +308,10 @@
     display: none;
   }
   
+  #header #top-nav form a {
+    margin-left: 0px;
+  }
+  
   #sidebar-left {
     width: 75px;
   }

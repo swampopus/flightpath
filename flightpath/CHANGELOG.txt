@@ -8,6 +8,13 @@ FlightPath 6.x Changelog
   Fixed bug where we were determing a course's transfer eqv.  It was failing even though the souce hours were within the range
   of min and max hours.  (We were only looking at == max hours, rather than a range from min to max).
 
+  Fixed bug so that the "mini search" at top of the screen will cause the Students tab to "remember" last search.
+  
+  Added concept of "return to student" to the top nav of all pages, so you can quickly return to the last student you had pulled up.
+  This only works for faculty users with something in $_SESSION['last_student_selected'].
+  
+  Added "E" to default enrolled grades, and "F,W,I" to default retake grades.
+
 
 2021-12-15
   Adding some extra instructions for the edit groups page.

@@ -1509,7 +1509,7 @@ function system_school_data_form($school_id = 0) {
   $form["grade_order" . $fs] = array(
     "type" => "textfield",
     "label" => t("Grade order (CSV):"),
-    "value" => variable_get_for_school("grade_order", "", $school_id, TRUE),
+    "value" => variable_get_for_school("grade_order", "E,AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I", $school_id, TRUE),
     "description" => t("List all possible grades, separated by comma, from highest to lowest.  This is 
                       used if you select 'Best Grade first' order above, but also is used in determining
                       if a course fulfills a minimum grade requirement.                      
@@ -1521,7 +1521,7 @@ function system_school_data_form($school_id = 0) {
   $form["retake_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Retake grades (CSV):"),
-    "value" => variable_get_for_school("retake_grades", "", $school_id, TRUE),
+    "value" => variable_get_for_school("retake_grades", "F,W,I", $school_id, TRUE),
     "description" => t("List grades, separated by comma, which means 'the student must
                 retake this course. They did not earn credit.' Ex: F,W,I"),    
   );
@@ -1540,7 +1540,7 @@ function system_school_data_form($school_id = 0) {
   $form["enrolled_grades" . $fs] = array(
     "type" => "textfield",
     "label" => t("Enrolled grades (CSV):"),
-    "value" => variable_get_for_school("enrolled_grades", "", $school_id, TRUE),
+    "value" => variable_get_for_school("enrolled_grades", "E", $school_id, TRUE),
     "description" => t("List grades, separated by comma, which means 'the student is
                 currently enrolled in this course.' Ex: E,AMID,BMID "),    
   );

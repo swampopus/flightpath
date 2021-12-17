@@ -2096,8 +2096,8 @@ class CourseList extends ObjList
       // Now that we have a school_id, let's figure out some variables....
 
       if (!$retake_grades || !$enrolled_grades) {
-        $retake_grades = csv_to_array(variable_get_for_school("retake_grades", '', $school_id));
-        $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades",'', $school_id));        
+        $retake_grades = csv_to_array(variable_get_for_school("retake_grades", 'F,W,I', $school_id));
+        $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades",'E', $school_id));        
       }
       
       if (!$qpts_grades) {
