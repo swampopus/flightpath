@@ -1,6 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-12-19
+  Moved all Zoom functionality into its own (private) module called zoomapi.  Updated other core modules to adjust and check for zoomapi before trying to call
+  functions. 
+
+
+2021-12-18
+  Fixed bug in system_enable_module() where status was being sent the schema value instead of "1"
+
 
 2021-12-17
   Cleaned up old comments.

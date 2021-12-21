@@ -4409,8 +4409,8 @@ function system_enable_module($module_details) {
     // Now, add back into the table.
     $res = db_query("INSERT INTO modules (`name`, `path`, `version`, `requires`, `enabled`, `type`, `schema`, `info`)
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                     ", $module, $path, @$module_details["version"], @$module_details["required"], $schema, "module",
-                        @intval($module_details["schema"]), serialize($module_details));
+                     ", $module, $path, @$module_details["version"], @$module_details["required"], 0, "module",
+                        @intval($schema), serialize($module_details));
     
     $bool_call_hook_install = TRUE;
     

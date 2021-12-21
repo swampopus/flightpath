@@ -125,25 +125,6 @@ function calendar_menu() {
 
 
 
-  $items["admin/config/zoom-settings"] = array(
-    "title" => t("Zoom API settings"),
-    "description" => t("Configure Zoom for FlightPath appointments"),
-    "page_callback" => "fp_render_form",
-    "page_arguments" => array("calendar_zoom_settings_form", "system_settings"),
-    "access_arguments" => array("administer_calendar_zoom_settings"),
-    "page_settings" => array(
-      "menu_icon" => fp_get_module_path('system') . "/icons/cog.png",
-      "menu_links" => array(         
-        0 => array(
-          "text" => t("Admin Console"),
-          "path" => "admin-tools/admin",
-          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
-        ),
-      ),
-    ),    
-    "type" => MENU_TYPE_NORMAL_ITEM,
-    //"tab_parent" => "admin-tools/admin",    
-  );
 
 
 
@@ -158,14 +139,6 @@ function calendar_menu() {
   );
 
   
-  //handle-zoom-install-redirect 
-  $items['handle-zoom-install-redirect'] = array(
-    'title' => t('Zoom Installed Successfully'),
-    'page_callback' => 'calendar_handle_zoom_install_redirect',    
-    'access_callback' => TRUE,
-    'type' => MENU_TYPE_CALLBACK,    
-  );
-   
   
 
  
@@ -400,288 +373,6 @@ function calendar_display_upcoming_appointments() {
 
 
 
-/**
- * Form that lets us configure global Zoom API settings
- */
-function calendar_zoom_settings_form() {
-
-  $form = array();    
-    
-  $form['mark_top'] = array(
-    'value' => t("This form lets you configure the FlightPath Academics Zoom app, so that users may 
-                  connect their Zoom account to FlightPath (and automatically generate meetings for appointments).
-                  <br><br>Enter details from the Zoom marketplace below.
-                  <br><br><b>Remember to add this site's URL to the whitelist of accepted URLs in the Zoom marketplace app.</b>
-                  "), 
-  );
-  
-  
-  $form['zoom_client_id'] = array(
-    'type' => 'textfield',
-    'label' => t("Client ID"),
-    'value' => variable_get("zoom_client_id", ""),    
-  );
-
-  $form['zoom_client_secret'] = array(
-    'type' => 'textfield',
-    'label' => t("Client Secret"),
-    'value' => variable_get("zoom_client_secret", ""),    
-  );
-
-  $url = calendar_get_zoom_install_url();
-
-  $form['mark_install_url'] = array(
-    'value' => "<p>The Zoom install URL (based on last saved settings and current user) will be:
-                  <br><a href='$url'>$url</a>",
-  );
-  
- 
-  
-  
-  
-  return $form;
-  
-} // calendar_zoom_settings_form
-
-
-
-
-
-/**
- * Return back the full install URL for the Zoom marketplace app, based on the calendar_zoom_settings_form.
- */
-function calendar_get_zoom_install_url($user_id = NULL, $bool_only_return_redir_url = FALSE) {
-  global $user;
-  
-  if ($user_id == NULL) {
-    $user_id = $user->id;
-  }
-  
-  // We need to attach the session_id, since we're about to get redirected around.
-  //$redir = urlencode($GLOBALS['fp_system_settings']['base_url'] . "/handle-zoom-install-redirect?fp_session_str=" . fp_get_session_str());
-  $redir = urlencode("https://flightpathacademics.com/sites/flightpathacademics/zoomapp_redirect_handler.php?fp_session_str=" . fp_get_session_str());
-  
-  
-  // The state will be handed back to us, so it will contain our user_id plus an md5 string we can recreate to make sure this is authentic.
-  $state = urlencode(base64_encode($GLOBALS['fp_system_settings']['base_url'] . "~~" . $user_id . '~~' . md5($user_id . fp_token())));
-    
-  $url = "https://zoom.us/oauth/authorize?response_type=code&client_id=" . variable_get('zoom_client_id', '') . "&redirect_uri=" . $redir;
-  $url .= "&state=$state";  // add our state to the end.
-  
-  if ($bool_only_return_redir_url) {
-    $url = $redir;
-  }
-  
-  return $url;
-  
-}
-
-
-/**
- * This function will accept the code and state from the URL, and then redirect the user to their profile
- * settings page, to declare that Zoom has been set up successfully or not.
- */
-function calendar_handle_zoom_install_redirect() {
-  global $user;
-  
-  $code = $_GET['code'];
-  
-  watchdog("zoom_debug", print_r($_GET, TRUE), array(), WATCHDOG_DEBUG);
-  
-  $state = base64_decode($_GET['state']); 
-  
-  $fp_session_str = fp_get_session_str();
-  
-  //fpm($state);
-  // Test to make sure state is trusted.
-  $temp = explode("~~", $state);
-  //fpm($temp);
-  $state_user_id = intval($temp[1]);
-  $state_hash_secret = $temp[2];
-  
-  //fpm($state_user_id);
-  //fpm("state secret:" . $state_hash_secret);
-  //fpm("calculated secrect:" . md5($state_user_id . fp_token()));
-  
-  if (md5($state_user_id . fp_token()) !== $state_hash_secret) {
-    fp_add_message(t("Sorry, there was an error receiving a valid token from Zoom."), "error");
-    fp_goto("user-settings/appointment-settings", "fp_session_str=$fp_session_str");
-    return;
-  }
-  
-  if (intval($user->id) !== $state_user_id) {
-    fp_add_message(t("Sorry, there was an error validating the token from Zoom."), "error");
-    fp_goto("user-settings/appointment-settings", "fp_session_str=$fp_session_str");
-    return;    
-  }
-  
-  // If we are here, then we succeeded.
-  
-    
-  ///////////////////////////////
-  // Let's go ahead and try to get our tokens from Zoom.
-  
-  $headers = array("Content-Type" => "application/x-www-form-urlencoded", 
-                   "Authorization" => "Basic " . base64_encode(variable_get("zoom_client_id", "") . ":" . variable_get("zoom_client_secret", ""))
-                   );
-  $data = "grant_type=authorization_code&code=$code&redirect_uri=" . calendar_get_zoom_install_url($state_user_id, TRUE);
-  $response = fp_http_request("https://zoom.us/oauth/token", $headers, "POST", $data);
-  
-  $resp_data = json_decode($response->data);
-  if (isset($resp_data->error)) {
-    watchdog("calendar_zoom", "Error handling zoom redirect: " . $resp_data->reason, array(), WATCHDOG_ERROR());
-    fpm("Error. " . $resp_data->reason);
-    fp_add_message(t("Sorry, there was an error linking your Zoom account."), "error");    
-    fp_goto("user-settings/appointment-settings", "fp_session_str=$fp_session_str");
-    return;    
-    
-  }
-    
-  // if we are here, it means we succeeded.
-  $response_data = $response->data;
-  $access_token = $resp_data->access_token;  
-  $refresh_token = $resp_data->refresh_token;  
-
-
-  // Let's also get some information about the user's /me context, so we can find out what their zoom id is.  Will be necessary later for 
-  // deauthorization and other functions.
-  $headers = array("Content-Type" => "application/x-www-form-urlencoded", 
-                   "Authorization" => "Bearer $access_token",
-                   );  
-  $response = fp_http_request("https://api.zoom.us/v2/users/me", $headers, "GET");
-  
-  $resp_data = json_decode($response->data);
-  $zoom_user_id = $resp_data->id;
-  $zoom_account_id = $resp_data->account_id;
-  $zoom_account_number = $resp_data->account_number;
-  $zoom_user_email = $resp_data->email;
-  
-
-  // TODO:  Add this extra information to the table.
-  // TODO:  Inform flightpathacademics.com that this zoom_user_id == this flightpath id, at this site location.  This will help us
-  // TODO:  deauthorize the user later on.
-
-  // Let's put all our data into our table.
-  db_query("REPLACE INTO zoom_api_data (user_id, install_code, response_data, access_token, refresh_token, last_updated)
-            VALUES (?, ?, ?, ?, ?, ?)", array($state_user_id, $code, $response_data, $access_token, $refresh_token, time())); 
-
-  
-  
-  // Success, let's send the user back to their settings page.
-  fp_add_message(t("You have successfully linked your Zoom account.  Edit an existing event type or create a new one to activate automatic Zoom meeting creation."));  
-  fp_goto("user-settings/appointment-settings", "fp_session_str=$fp_session_str");
-  
-  
-  return;
-  
-  
-}
-
-
-
-
-/**
- * This function will accept a meeting ID and cancel (delete) it.
- */
-function calendar_cancel_zoom_meeting($meeting_id, $user_id) {
-  $zoom_api_data = calendar_get_zoom_api_data_for_user($user_id);
-  if (!$zoom_api_data) return FALSE;      
-    
-  // Otherwise, continue...
-  $access_token = $zoom_api_data['access_token'];
-    
-  $headers = array( "Content-Type" => "application/json",
-                    "Authorization" => "Bearer " . urlencode($access_token) );  
-
-  
-  $response = fp_http_request("https://api.zoom.us/v2/meetings/$meeting_id", $headers, "DELETE", $data);
-  
-  if (intval($response->code) !== 204) {
-    fp_add_message(t("Sorry, there was an issue trying to delete the Zoom meeting.  Check your Zoom account to manually cancel."), "warning");
-    watchdog("calendar_zoom", "Could not delete zoom meeting with id $meeting_id for user id $user_id.  Response code: $response->code.
-                                  Full response: " . ppm($response, TRUE), array(), WATCHDOG_ERROR);
-  }
-    
-  
-} // ... cancel_zoom_meeting
-
-
-
-
-/**
- * This function will attempt to create a zoom meeting via the API.  We will return FALSE or the meeting data if successful.
- * 
- * gmt_date_time is expected as GMT, in a string in the format: yyyy-MM-ddTHH:mm:ssZ.  For example: 2020-03-31T22:02:00Z 
- */
-function calendar_create_zoom_meeting($user_id, $gmt_date_time, $duration_minutes = 30, $topic = "FlightPath Appointment") {
-        
-  $zoom_api_data = calendar_get_zoom_api_data_for_user($user_id);  
-  if (!$zoom_api_data) return FALSE;      
-    
-  // Otherwise, continue...
-  $access_token = $zoom_api_data['access_token'];
-    
-  $headers = array("Content-Type" => "application/json", 
-                   "Authorization" => "Bearer " . urlencode($access_token),
-                   );
-  
-  $data = json_encode(array(
-    'topic' => $topic,
-    'type' => 2,
-    'start_time' => $gmt_date_time,
-    'duration' => $duration_minutes,    
-  ));
-    
-  $response = fp_http_request("https://api.zoom.us/v2/users/me/meetings", $headers, "POST", $data);    
-  
-  if (intval($response->code) == 201) {
-    // Success.  Let's return our data.  (it is a json string)
-    return $response->data;
-  }
-  
-  if (intval($response->code) == 401) {
-    // Access token has expired, so we need to refresh it and try again.
-    $refresh_token = $zoom_api_data['refresh_token'];
-    $headers = array("Content-Type" => "application/x-www-form-urlencoded", 
-                     "Authorization" => "Basic " . base64_encode(variable_get("zoom_client_id", "") . ":" . variable_get("zoom_client_secret", ""))
-                     );
-    $data = "";
-    $data = "grant_type=refresh_token&refresh_token=" . urlencode($refresh_token);
-    $response = fp_http_request("https://zoom.us/oauth/token", $headers, "POST", $data);
-    
-    $resp_data = json_decode($response->data);
-    if (isset($resp_data->error)) {
-      watchdog("calendar_zoom", "Error setting up Zoom meeting: " . $resp_data->reason, array(), WATCHDOG_ERROR());
-      fpm("Error. " . $resp_data->reason);
-      fp_add_message(t("Sorry, there was an error setting up a Zoom meeting."), "error");
-      return FALSE;          
-    }    
-    
-    // Otherwise, we are here.  Update the database.
-    $response_data = $response->data;
-    $access_token = $resp_data->access_token;  
-    $refresh_token = $resp_data->refresh_token;  
-    
-  
-    // Let's put all our data into our table.
-    db_query("REPLACE INTO zoom_api_data (user_id, response_data, access_token, refresh_token, last_updated)
-              VALUES (?, ?, ?, ?, ?)", array($user_id, $response_data, $access_token, $refresh_token, time())); 
-        
-    // Call ourselves again to try to create meeting.
-    $x = calendar_create_zoom_meeting($user_id, $gmt_date_time, $duration_minutes, $topic);
-    return $x;
-  } // if 401 (access token expired)
-  
-  
-  // If we are here, it means creating the meeting was not successful.
-  return FALSE;
-  
-  
-} // calendar_create_zoom_meeting
-
-
-
-
 
 
 
@@ -759,7 +450,7 @@ function calendar_confirm_cancel_appointment_form($cid) {
   if (isset($content->field__video_data) && isset($content->field__video_data['value']) && $content->field__video_data['value'] != "") {
     $data = json_decode($content->field__video_data['value']);    
     $video_provider = $data->video_provider;
-    if ($video_provider == "zoom") {
+    if ($video_provider == "zoom" && module_enabled('zoomapi')) {
       $id = $data->id;
       $form['video_msg_markup'] = array(
         'type' => 'markup',
@@ -834,7 +525,9 @@ function calendar_confirm_cancel_appointment_form_submit(&$form, &$form_state) {
     if ($video_provider == "zoom") {
       $id = $data->id;
       $video_account_user_id = $data->video_account_owner_user_id;
-      calendar_cancel_zoom_meeting($id, $video_account_user_id);
+      if (module_enabled("zoomapi")) {
+        zoomapi_cancel_zoom_meeting($id, $video_account_user_id);
+      }
     }
   }
   
@@ -1005,11 +698,6 @@ function calendar_perm() {
     'description' => t("The user can cancel appointments which involve themselves.  Give to both students and faculty/staff."),                        
   );
   
-  $arr['administer_calendar_zoom_settings'] = array(
-    'title' => t("Administer Zoom API settings"),
-    'description' => t("The user can change Zoom API settings for FlightPath.  This should only be given to admin users!"),
-  );
-  
   
   
   return $arr;
@@ -1093,7 +781,7 @@ function calendar_display_user_appointment_settings_page() {
     $edit_link = "<a href='javascript:fpOpenLargeIframeDialog(\"$url\",\"$dtitle\");'><i class='fa fa-pencil'></i></a>";    
     
     $video = "-";
-    if ($content->field__video_meeting['value'] == 'zoom') {
+    if ($content->field__video_meeting['value'] == 'zoom' && module_enabled('zoomapi')) {
       $video = "Zoom";
     }
     
@@ -1113,27 +801,27 @@ function calendar_display_user_appointment_settings_page() {
   $rtn .= "</table>";
  
   // Connect Zoom?
-  if (variable_get("zoom_client_id", "") != "") {
+  if (module_enabled("zoomapi") && variable_get("zoom_client_id", "") != "") {
           
-    $msg = "To enable automatic Zoom meeting creation for video chats, you must first link your Zoom account with your FlightPath account by pressing
-                            the button below:";    
-    $button_text = "Link Zoom Account";  
+    $msg = t("To enable automatic Zoom meeting creation for video chats, you must first link your Zoom account with your FlightPath account by pressing
+                            the button below:");    
+    $button_text = t("Link Zoom Account");  
     $link_class = "button";    
     // is the user already set up with Zoom?  If so, display a message, and change the install link to something like "Re-install Zoom", etc.
-    $zoom_api_data = calendar_get_zoom_api_data_for_user(1);
+    $zoomapi_data = zoomapi_get_zoomapi_data_for_user(1);
     
-    if ($zoom_api_data) {
-      $msg = "You have already linked your FlightPath account with Zoom!  If you need to re-link your account, click the following:";
+    if ($zoomapi_data) {
+      $msg = t("You have already linked your FlightPath account with Zoom!  If you need to re-link your account, click the following:");
       $button_text = "Re-Link Zoom Account";
       $link_class = "";
     }
-    $rtn .= "<p>" . t("<strong>Zoom:</strong> $msg") . "</p>";
-    $url = calendar_get_zoom_install_url();
+    $rtn .= "<p>" . t("<strong>Zoom:</strong> @msg", array("@msg" => $msg)) . "</p>";
+    $url = zoomapi_get_zoom_install_url();
     $rtn .= "<div class='zoom-install-btn'>&nbsp; &nbsp; <a href='$url' class='$link_class' title='" . t($button_text) . "'><i class='fa fa-external-link'></i> " . t($button_text) . "</a> &nbsp;";
     $rtn .= t("*This will briefly redirect you to a Zoom login / confirmation page, then return you to FlightPath.") . "</div>";
     
   } // we have zoom client id set up.
-  
+   
  
  
   
@@ -1243,21 +931,6 @@ function calendar_display_user_appointment_settings_page() {
 } // calendar_display_user_appointment_settings_page
 
 
-
-/**
- * Return back the database row (or FALSE) for the user of their zoom api details.
- */
-function calendar_get_zoom_api_data_for_user($user_id) {
-  $res = db_query("SELECT * FROM zoom_api_data WHERE user_id = ?", array($user_id));
-  if ($res) {
-    $cur = db_fetch_array($res);
-    return $cur;
-  }
-  
-  // Else, nothing found, so return false
-  return FALSE;
-  
-}
 
 
 
@@ -1685,12 +1358,10 @@ function test_ical() {
     
     $events = $ical->eventsFromRange('2020-12-14 00:00:01', '2020-12-26 23:59:59');
     foreach ($events as $event) {
-      fpm($event);
+      
       $utc_start = $ical->iCalDateToUnixTimestamp($event->dtstart);
       $utc_end = $ical->iCalDateToUnixTimestamp($event->dtend);
-            
-                  
-      fpm(convert_time($utc_start) . "  " . convert_time($utc_end));
+      
       
       $summary = $event->summary;  // title. basically.
       
@@ -2365,12 +2036,12 @@ function calendar_schedule_appointment_confirm_form_validate($form, &$form_state
   
   // If this is a Zoom meeting, then attempt to create the zoom meeting and save it in form_state['values']['field__video_data'] so it
   // gets saved with the content.    
-  if (@$event_type_content->field__video_meeting['value'] == 'zoom') {
+  if (module_enabled("zoomapi") && @$event_type_content->field__video_meeting['value'] == 'zoom') {
     
     //gmt_date_time must look like yyyy-MM-ddTHH:mm:ssZ.  For example: 2020-03-31T22:02:00Z.  The Z tells it that we are using GMT/UTC time.
     $gmt_date_time = date("Y-m-d\TH:i:s\Z", $utc_schedule_time_ts);
         
-    $response = calendar_create_zoom_meeting($faculty_user_id, $gmt_date_time, $event_duration_minutes, "Video meeting - $faculty_name / $student_name");
+    $response = zoomapi_create_zoom_meeting($faculty_user_id, $gmt_date_time, $event_duration_minutes, "Video meeting - $faculty_name / $student_name");
     if (!$response) {
       form_error("", t("Sorry, but there was an issue creating the Zoom meeting for this appointment.  Your appointment has not been saved.
                         Please try another method, or contact the IT administrator to let them know of this issue."));
@@ -2454,7 +2125,7 @@ function calendar_schedule_appointment_confirm_form_submit($form, &$form_state) 
         $dial_in = engagements_convert_to_pretty_phone_number($dial_in, TRUE);
       }
       
-      $event_title = "Zoom meeting between $student_name and $faculty_name";
+      $event_title = t("Zoom meeting between @stu and @fac", array("@stu" => $student_name, "@fac" => $faculty_name));
       
       
       $video_info .= "<p><b>" . t("Zoom Meeting:") . "</b> <a href='$join_url'>" . $join_url . "</a> \n<br> " . t("Be sure to download the Zoom app on your phone, tablet, or computer.") . " \n<br> " . t("To dial in instead of using video chat, you may dial:<br>\n @dial (ID: @id)", array("@dial" => $dial_in, "@id" => $meeting_id)) . ".</p>\n";                                               
@@ -2474,7 +2145,7 @@ function calendar_schedule_appointment_confirm_form_submit($form, &$form_state) 
     $msg .= "<p>" . $event_additional_msg . "</p>\n-----\n";
   }
       
-  $msg .= "<p><b>" . t("Scheduled:") . "</b> $event_type_content->title between $student_name and $faculty_name</p>\n";
+  $msg .= "<p><b>" . t("Scheduled:") . "</b> $event_type_content->title " . t("between") . " $student_name " . t("and") . " $faculty_name</p>\n";
   $msg .= "<p><b>" . t("Date and Time:") . "</b> " . format_date(convert_time($utc_schedule_time_ts), 'pretty') . " ($fstudent_tz)</p>\n";
   $msg .= "<p><b>" . t("Duration:") . "</b> " . $event_duration_minutes . " min</p>\n";
   $msg .= $video_info;
@@ -3161,22 +2832,29 @@ function calendar_content_register_content_type() {
   );
 
   
-  $zoom_api_data = calendar_get_zoom_api_data_for_user($user->id);
-  if (!$zoom_api_data) {
-    $attr = array("style" => "display: none; ");   // hide this field if the user doesn't have anything set up for Zoom.
+  $zoomapi_data = "";
+  if (module_enabled("zoomapi")) {    
+    $zoomapi_data = zoomapi_get_zoomapi_data_for_user($user->id);
+    if (!$zoomapi_data) {
+      $attr = array("style" => "display: none; ");   // hide this field if the user doesn't have anything set up for Zoom.
+    }
+    
+    $fields['video_meeting'] = array(
+      'type' => 'select',
+      'label' => t('Automatically generate Zoom meeting?'),
+      'options' => array('no' => t('No (default)'), 'zoom' => t('Yes - Automatically generate a Zoom meeting and attach URL')),
+      'hide_please_select' => TRUE,
+      'description' => t("If set to Yes, this event will be treated like a video chat, and a Zoom meeting will automatically be
+                          created for the appointment.  The URL for the new Zoom meeting will be included at the end of the notification
+                          and reminder messages sent to the student & faculty/staff members."),
+      'attributes' => $attr,
+      'weight' => 40,
+    );
+    
+    
   }
   
-  $fields['video_meeting'] = array(
-    'type' => 'select',
-    'label' => t('Automatically generate Zoom meeting?'),
-    'options' => array('no' => t('No (default)'), 'zoom' => t('Yes - Automatically generate a Zoom meeting and attach URL')),
-    'hide_please_select' => TRUE,
-    'description' => t("If set to Yes, this event will be treated like a video chat, and a Zoom meeting will automatically be
-                        created for the appointment.  The URL for the new Zoom meeting will be included at the end of the notification
-                        and reminder messages sent to the student & faculty/staff members."),
-    'attributes' => $attr,
-    'weight' => 40,
-  );
+    
   
 
 
@@ -3549,8 +3227,10 @@ function calendar_form_alter(&$form, $form_id) {
         $form['published']['attributes'] = array('class' => 'hidden');
         
         // If this user has Zoom set up, then show an option to make this a zoom meeting.
-        $test = calendar_get_zoom_api_data_for_user($user->id);    
- 
+        $test = FALSE;
+        if (module_enabled("zoomapi")) {
+          $test = zoomapi_get_zoomapi_data_for_user($user->id);    
+        }
         if ($test) {           
           $form['enable_zoom'] = array(
             'type' => 'checkbox',
@@ -3561,9 +3241,7 @@ function calendar_form_alter(&$form, $form_id) {
           );
         }
         
-        
-        // The submit button should disable itself and we should show a spinner when clicked.
-        
+                        
         
         
       } // cid == new
@@ -3697,10 +3375,10 @@ function calendar_appointment_content_form_validate($form, &$form_state) {
   $event_title = "Meeting between $student_name and $faculty_name";
       
   // Only do this for NEW appointments.
-  if ($values['cid'] === 'new' && $values['enable_zoom'] === TRUE) {
+  if ($values['cid'] === 'new' && module_enabled('zoomapi') && $values['enable_zoom'] === TRUE) {
     
     // We want to create a new Zoom meeting!
-    $event_title = "Zoom meeting between $student_name and $faculty_name";  
+    $event_title = t("Zoom meeting between @stu and @fac", array("@stu" => $student_name, "@fac" => $faculty_name));  
     $month = date('n', $schedule_time_ts);
     $year = date('Y', $schedule_time_ts);
     $day = date('j', $schedule_time_ts);
@@ -3709,7 +3387,7 @@ function calendar_appointment_content_form_validate($form, &$form_state) {
     //gmt_date_time must look like yyyy-MM-ddTHH:mm:ssZ.  For example: 2020-03-31T22:02:00Z.  The Z tells it that we are using GMT/UTC time.
     $gmt_date_time = date("Y-m-d\TH:i:s\Z", $utc_schedule_time_ts);
 
-    $response = calendar_create_zoom_meeting($faculty_user_id, $gmt_date_time, $event_duration_minutes, "Video meeting - $faculty_name / $student_name");
+    $response = zoomapi_create_zoom_meeting($faculty_user_id, $gmt_date_time, $event_duration_minutes, "Video meeting - $faculty_name / $student_name");
   
     if (!$response) {
       form_error("", t("Sorry, but there was an issue creating the Zoom meeting for this appointment.  Your appointment has not been saved.
