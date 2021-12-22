@@ -1906,12 +1906,19 @@ function content_display_content_admin_list() {
  */
 function content_get_types() {
   $rtn = array();
-  
+
+  // Save effort by saving to a globals cache.
+  if (isset($GLOBALS['content_types_cache'])) {
+    return $GLOBALS['content_types_cache'];
+  }
+    
   $modules = modules_implement_hook("content_register_content_type");
   foreach($modules as $module) {
     $types = call_user_func($module . '_content_register_content_type');  
     $rtn += $types;
   }
+  
+  $GLOBALS['content_types_cache'] = $rtn;
   
   return $rtn;
   

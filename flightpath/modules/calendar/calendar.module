@@ -801,7 +801,7 @@ function calendar_display_user_appointment_settings_page() {
   $rtn .= "</table>";
  
   // Connect Zoom?
-  if (module_enabled("zoomapi") && variable_get("zoom_client_id", "") != "") {
+  if (module_enabled("zoomapi") && isset($GLOBALS['zoom_client_id'])) {
           
     $msg = t("To enable automatic Zoom meeting creation for video chats, you must first link your Zoom account with your FlightPath account by pressing
                             the button below:");    
@@ -814,11 +814,14 @@ function calendar_display_user_appointment_settings_page() {
       $msg = t("You have already linked your FlightPath account with Zoom!  If you need to re-link your account, click the following:");
       $button_text = "Re-Link Zoom Account";
       $link_class = "";
-    }
+    } 
     $rtn .= "<p>" . t("<strong>Zoom:</strong> @msg", array("@msg" => $msg)) . "</p>";
     $url = zoomapi_get_zoom_install_url();
     $rtn .= "<div class='zoom-install-btn'>&nbsp; &nbsp; <a href='$url' class='$link_class' title='" . t($button_text) . "'><i class='fa fa-external-link'></i> " . t($button_text) . "</a> &nbsp;";
-    $rtn .= t("*This will briefly redirect you to a Zoom login / confirmation page, then return you to FlightPath.") . "</div>";
+    if ($zoomapi_data) {
+      $rtn .= t("To unlink/de-authorize Zoom from FlightPath, view the instructions here: ") . "<a href='https://flightpathacademics.com/help/61' target='_blank'>Uninstalling Zoom from FlightPath</a>";
+    }
+    $rtn .= "</div>";
     
   } // we have zoom client id set up.
    

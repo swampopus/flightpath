@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-12-21
+  Stored results of content_get_types() to a simple GLOBALS cache to reduce amount of times we look for it.
+  
+  Altered Calendar module to include instructions for de-authorizing Zoom.
+
+
 2021-12-19
   Moved all Zoom functionality into its own (private) module called zoomapi.  Updated other core modules to adjust and check for zoomapi before trying to call
   functions. 
