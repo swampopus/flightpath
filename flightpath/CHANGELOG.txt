@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2021-12-22
+  Added a strip_tags() call in course_search module, just to make sure we do not display dangerous user-supplied input.
+
+
 2021-12-21
   Stored results of content_get_types() to a simple GLOBALS cache to reduce amount of times we look for it.
   

@@ -371,7 +371,7 @@ function course_search_display_courses() {
                    AND school_id = ? ", $subject_id, $school_id);
   $cur = db_fetch_array($res);
   $title = $cur["title"];
-  if ($title == "") $title = $subject_id;
+  if ($title == "") $title = strip_tags($subject_id);
   
   
   //$rtn .= t("Current catalog year:") . " <b>$catalog_year-" . ($catalog_year +1) . "</b>   
@@ -396,7 +396,7 @@ function course_search_display_courses() {
     
   // Draw the term selector.
   $html = "";
-  $only_term = @$_REQUEST["only_term"];
+  $only_term = @strip_tags($_REQUEST["only_term"]);
   $html .= "<form id='term_form' action='" . fp_url("tools/course-search/courses") . "' method='GET'>           
            <input type='hidden' name='mode' value='$subject_id'>
            <input type='hidden' name='subject_id' value='$subject_id'>
