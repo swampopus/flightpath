@@ -6,6 +6,8 @@ FlightPath 6.x Changelog
   
   Altered Calendar module to include instructions for de-authorizing Zoom.
 
+  Fixed bug in Calendar where Zoom was hardcoded to look for user 1 (admin) tokens.
+  
 
 2021-12-19
   Moved all Zoom functionality into its own (private) module called zoomapi.  Updated other core modules to adjust and check for zoomapi before trying to call

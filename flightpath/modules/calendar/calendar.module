@@ -808,7 +808,7 @@ function calendar_display_user_appointment_settings_page() {
     $button_text = t("Link Zoom Account");  
     $link_class = "button";    
     // is the user already set up with Zoom?  If so, display a message, and change the install link to something like "Re-install Zoom", etc.
-    $zoomapi_data = zoomapi_get_zoomapi_data_for_user(1);
+    $zoomapi_data = zoomapi_get_zoomapi_data_for_user($user->id);
     
     if ($zoomapi_data) {
       $msg = t("You have already linked your FlightPath account with Zoom!  If you need to re-link your account, click the following:");
