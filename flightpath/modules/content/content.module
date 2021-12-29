@@ -170,6 +170,16 @@ function content_menu() {
   
   
   
+  $items["content-files/handle-download/%"] = array(
+    "page_callback" => "content_files_handle_download",
+    "page_arguments" => array(2),
+    "access_callback" => "content_files_user_may_download_file",
+    "access_arguments" => array(2),  
+    "type" => MENU_TYPE_CALLBACK,
+  );
+    
+  
+  
   
   
   /**
@@ -194,6 +204,47 @@ function content_menu() {
     
   return $items;
 }
+
+
+/**
+ * Returns TRUE or FALSE if the user has access to download this particular student's file.
+ */
+function content_files_user_may_download_file($fid) {
+  global $user;
+  
+  $file = content_get_uploaded_file($fid);
+  
+  if ($user->id == 1) return TRUE; // this is the admin user.
+  
+  // TODO:  Get cid of original piece of content this file belonged to.
+  
+  
+  // Is this a faculty only file, and the user is a student?
+  if ($file["access_type"] == "faculty" && $user->is_student == TRUE) {
+    return FALSE;  // nope, can't view it.
+  }
+  
+  // Is this a student, and this is a file for THEM?
+  if ($file["student_id"] == $user->cwid && $file["access_type"] != "faculty") {
+    return TRUE;
+  }
+  
+  // Does this user have access to download advisee's files and is this student someone they are allowed to advise?
+  if (user_has_permission("download_advising_student_files")) {
+    // Now, is this user allowed to view THIS student's advising history?
+    if (advise_can_access_view($student_id)) return TRUE;
+  }
+  
+  
+  
+  // All else failed, return FALSE
+  return FALSE;  
+  
+}
+
+
+
+
 
 
 
@@ -967,7 +1018,13 @@ function content_get_uploaded_file($fid) {
     
     $cur['full_filename'] = fp_get_files_path() . '/content_uploads/' . $cur['filename']; 
     // also get the URL for downloading this file.
-    $cur['url'] = base_path() . "/custom/files/content_uploads/" . $cur['filename'];
+    // TODO: If this file was encrypted, then the url should change to the url to decrypt this particular file (probably by passing it the fid)
+    if (intval($cur['is_encrypted']) === 1) {
+      $cur['url'] = fp_url('content-files/handle-download/' . $cur['fid']);
+    } 
+    else {
+      $cur['url'] = base_path() . "/custom/files/content_uploads/" . $cur['filename'];
+    }
     $cur['ext'] = $ext;
   }
   
@@ -1100,6 +1157,8 @@ function content_edit_content_form_submit(&$form, &$form_state) {
     $content->delete_flag = 1;
     content_save($content);
     
+    
+    
     watchdog("content", "delete cid:$cid, type:$type", array());
         
     // find out if we should redirect anywhere in particular for this deletion.
@@ -1144,11 +1203,14 @@ function content_edit_content_form_submit(&$form, &$form_state) {
     $content->cid = "new";    
     $content->published = 1;
     $content->delete_flag = 0;
+    content_save($content);  // Do an initial save, so we get its cid back.    
   }
   else {
     // This is an EXISTING content.  Load it.
     $content = content_load($values['cid']);
   }
+  
+  $cid = $content->cid;
   
   $content->title = $values['title'];  // required
   
@@ -1188,7 +1250,7 @@ function content_edit_content_form_submit(&$form, &$form_state) {
           
           if ($file && $file['name'] != '') {
             // Now, save to the content_files table.
-            $fid .= content_add_new_uploaded_file($file) . ",";
+            $fid .= content_add_new_uploaded_file($file, $cid) . ",";
           }
           
         } // foreach
@@ -1259,25 +1321,39 @@ function content_edit_content_form_submit(&$form, &$form_state) {
 } // ... submit
 
 
-function content_add_new_uploaded_file($file) {
+function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_filename = TRUE) {
   // Store the file information in the content_files table, and then THIS field contains the fid reference number.
-  $original_filename = $file["name"];
-  $type = $file["type"]; 
-  $tmp_name = $file["tmp_name"];
+  $original_filename = @$file["name"];
+  $type = @$file["type"]; 
+  $tmp_name = @$file["tmp_name"];
   // Figure out the extension of the original filename.
   $temp = explode(".", $original_filename);
   $ext = $temp[count($temp) - 1];                     
   
-  $filename = 'attach__' . time() . '_' . mt_rand(9,999) . $original_filename;  // We will figure out the ext (from mimetype) later.
+  $filename = $original_filename;
+  if ($bool_override_original_filename) {
+    $filename = 'attach__' . time() . '_' . mt_rand(9,999) . $original_filename;  // We will figure out the ext (from mimetype) later.
+  }
+  
+  
   $full_filename = fp_get_files_path() . '/content_uploads/' . $filename;              
+  
+  $is_encrypted = 0;
+  // TODO:  If we should be encrypting files, so do here, and set the is_encrypted value correctly.
+  
+  
+  if (!strstr($tmp_name, "/")) {
+    // Doesn't contain the temp location.  Pre-prend to the tmp_name.
+    $tmp_name = sys_get_temp_dir() . "/" . $tmp_name;
+  }
   
   if (!copy($tmp_name, $full_filename)) {
     fp_add_message(t("Could not upload file.  Possibly because of permission issues on the destination directory,
                       the disk is full, or some other reason."), "error");
   }                    
 
-  db_query("INSERT INTO content_files (original_filename, filename, mimetype, posted)
-            VALUES (?, ?, ?, ?)", array($original_filename, $filename, $type, time()));
+  db_query("INSERT INTO content_files (cid, original_filename, filename, mimetype, is_encrypted, posted)
+            VALUES (?, ?, ?, ?, ?, ?)", array($cid, $original_filename, $filename, $type, $is_encrypted, time()));
   return db_insert_id();
   
 }
@@ -1315,6 +1391,10 @@ function content_content_save(&$content) {
   $types = content_get_types();
   $type = $content->type;
   
+  if (!$content->title || $content->title === NULL || $content->title === FALSE) {
+    $content->title = t("Content") . " " . time();  // give a default title, since title cannot be null.
+  }
+  
   $log = @trim($content->log);
 
   // If this is a NEW content, then insert once into content table to get cid.  Then, insert into content_versions to get vid.  Then update content table with vid.
@@ -1341,6 +1421,9 @@ function content_content_save(&$content) {
   // Now we should have a fully created $content object.  Let's update the title and other values in the content table.
   db_query("UPDATE content SET vid = ?, title = ?, updated = ?, published = ?, delete_flag = ?, `log` = ? WHERE
             cid = ?", array($content->vid, $content->title, time(), $content->published, $content->delete_flag, $log, $content->cid));
+
+
+  // TODO:  If deleting, should we delete associated files too?  Maybe we do this on a cron after X number of months?
 
   
   // Now we are going to insert all of the field values.  We assume there is a table ALREADY CREATED with our field names

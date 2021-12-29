@@ -1,0 +1,3 @@
+name = Encryption
+description = Provides functions for other modules wishing to encrypt files or other data.
+core = 6.x

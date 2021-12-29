@@ -1,6 +1,28 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2021-12-28
+  Adding new module to core: encryption, and setting up key variable in settings.php on installation (giving it a random string value at the time of
+  installation).
+  
+
+2021-12-27
+  Adding ability to have encrypted files for content_files.  Also, that table tells which piece of content the file belongs to, if any.
+  
+  Made it so if $content->title is unset, false, or null, then on save we give a simple default value.  This is to stop of mysql integrity
+  constraint where the title cannot be null.
+
+  Altered engagements so that received files (via email or SMS) go to temp directory on server first, before we then attach them to a piece
+  of content via its cid in the content_files table.
+  
+  Fixed minor sorting issue on Engagements main tab screen.
+  
+  Altered content module's install so that is_encrypted and cid are both in the table, so we can figure out which piece of content (and therefor, permissions)
+  the file is related to.
+  
+
+
 2021-12-22
   Added a strip_tags() call in course_search module, just to make sure we do not display dangerous user-supplied input.
 

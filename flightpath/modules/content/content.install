@@ -28,6 +28,18 @@ function content_update($old_schema, $new_schema) {
     }    
   }
 
+  if (intval($old_schema) < 6) {
+    db_query("ALTER TABLE content_files ADD COLUMN `is_encrypted` tinyint(4) DEFAULT 0 ");
+    db_query("ALTER TABLE content_files ADD INDEX (`is_encrypted`) ");    
+  }
+  
+  if (intval($old_schema) < 7) {
+    db_query("ALTER TABLE content_files ADD COLUMN `cid` int(10) unsigned DEFAULT 0 ");
+    db_query("ALTER TABLE content_files ADD INDEX (`cid`) ");    
+  }
+  
+  
+
 }
 
 
@@ -80,10 +92,10 @@ function content_install() {
   
   
   $query = "    
-       CREATE TABLE `content_last_access` (
-  `cid` int unsigned NOT NULL,
-  `user_id` int NOT NULL,
-  `last_access` int unsigned DEFAULT NULL,
+  CREATE TABLE `content_last_access` (
+   `cid` int unsigned NOT NULL,
+   `user_id` int NOT NULL,
+   `last_access` int unsigned DEFAULT NULL,
   PRIMARY KEY (`cid`,`user_id`)
 );";
   
@@ -92,14 +104,18 @@ function content_install() {
   $query = "    
 CREATE TABLE `content_files` (
   `fid` int unsigned NOT NULL AUTO_INCREMENT,
+  `cid` int unsigned DEFAULT 0,
   `original_filename` varchar(255) DEFAULT NULL,
   `filename` varchar(255) DEFAULT NULL,
   `mimetype` varchar(255)  DEFAULT NULL,
+  `is_encrypted` tinyint(4) DEFAULT 0,
   `posted` int unsigned DEFAULT NULL,
   PRIMARY KEY (`fid`),
   KEY `original_filename` (`original_filename`),
   KEY `filename` (`filename`),
+  KEY `cid` (`cid`),
   KEY `mimetype` (`mimetype`),
+  KEY `is_encrypted` (`is_encrypted`),
   KEY `posted` (`posted`) 
 );";
    

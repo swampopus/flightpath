@@ -70,6 +70,22 @@ else {
 die;
 
 
+
+
+// See: https://stackoverflow.com/questions/4356289/php-random-string-generator
+function install_get_random_string($length = 99) {
+  $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@^&#%*';
+  $charlen = strlen($characters);
+  $random_string = '';
+  for ($i = 0; $i < $length; $i++) {
+      $random_string .= $characters[mt_rand(0, $charlen - 1)];
+  }
+
+  return $random_string;  
+}
+
+
+
 /**
  * Actually performs the installation of FlightPath
  */
@@ -154,6 +170,7 @@ function install_perform_install() {
   $settings_template = str_replace("%DB_USER%", $db_user, $settings_template);
   $settings_template = str_replace("%DB_PASS%", $db_pass, $settings_template);
   $settings_template = str_replace("%CRON_SECURITY_TOKEN%", md5(time()), $settings_template);
+  $settings_template = str_replace("%ENCRYPTION_KEY_STRING%", install_get_random_string(99) , $settings_template);
   
   // Attempt to figure out the file_system_path based on __FILE__
   $file_system_path = str_replace("install.php", "", __FILE__);
@@ -351,8 +368,25 @@ $system_settings["load_course_inventory_on_login_number"] = 2000;
 //    */10 * * * * wget -O - -q -t 1 https://example.com/cron.php?t=CRON_TOKEN
 // See the System status page (/admin/config/status) for more instructions.
 // 
+// The following cron_security_token has been randomly generated:
+
 $system_settings["cron_security_token"] = "%CRON_SECURITY_TOKEN%";
 
+
+////////////////////////////////////
+// *** Encryption-related ***     //
+////////////////////////////////////
+// The encryption module is enabled by default, and requires an encryption key string to function
+// correctly. It should be random characters and at least 32 characthers.
+// You may also specify a key file.  See admin/config/encryption for more information.
+//
+// You should PRINT this encryption string, as well as the hash protocol and cipher algorithm
+// in use (see admin/config/encryption) and store in a safe place.  If the encryption key string
+// is lost, you will not be able to decrypt previously encrypted values/files.
+//
+// The encryption key string below has been randomly generated:
+
+$GLOBALS["encryption_key_string"] = "%ENCRYPTION_KEY_STRING%";
 
 
 /////////////////////////////////////
