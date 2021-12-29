@@ -33,8 +33,8 @@ function audit_menu() {
     "page_arguments" => array("audit_settings_form", "system_settings"),
     "access_arguments" => array("administer_audit"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,                                  
+      
+                                        
       "page_hide_report_error" => TRUE,
       "menu_links" => array(                    
         0 => array(                                               

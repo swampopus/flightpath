@@ -25,8 +25,6 @@ function admin_menu() {
      "access_arguments" => array("can_access_admin_tools"),
      "tab_family" => "admin",
      "page_settings" => array(
-       "page_has_search" => FALSE,
-       "page_banner_is_link" => TRUE,
        "page_hide_report_error" => TRUE,
      ),     
      "type" => MENU_TYPE_NORMAL_ITEM,
@@ -58,10 +56,8 @@ function admin_menu() {
     "page_callback" => "fp_render_form",
     "page_arguments" => array("admin_urgent_message_form", "system_settings"),
     "access_arguments" => array("can_edit_urgent_message"),
-    "page_settings" => array(
-      "page_has_search" => FALSE,
-      "menu_icon" => fp_get_module_path('admin') . "/icons/error.png",      
-      "page_banner_is_link" => TRUE,
+    "page_settings" => array(      
+      "menu_icon" => fp_get_module_path('admin') . "/icons/error.png",
       "page_hide_report_error" => TRUE,
       "menu_links" => array(         
         0 => array(
@@ -82,10 +78,10 @@ function admin_menu() {
     "page_callback" => "admin_display_watchdog",    
     "access_arguments" => array("display_watchdog"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
+      
       "menu_icon" => fp_get_module_path('system') . "/icons/application_view_list.png",            
       "page_show_title" => TRUE,
-      "page_banner_is_link" => TRUE,
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(         
         0 => array(
@@ -106,9 +102,9 @@ function admin_menu() {
     "page_arguments" => array(3),    
     "access_arguments" => array("display_watchdog"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
+      
       "page_show_title" => TRUE,
-      "page_banner_is_link" => TRUE,
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(         
         0 => array(
@@ -135,8 +131,8 @@ function admin_menu() {
     "page_arguments" => array("admin_duplicate_year_form"),
     "access_arguments" => array("can_edit_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(         
         0 => array(
@@ -158,8 +154,8 @@ function admin_menu() {
     "page_arguments" => array("admin_advising_settings_form", "system_settings"),
     "access_arguments" => array("can_edit_advising_settings"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(         
         0 => array(
@@ -180,8 +176,8 @@ function admin_menu() {
     "page_arguments" => array("admin_apply_draft_changes_form"),
     "access_arguments" => array("can_apply_draft_changes"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(         
         0 => array(
@@ -203,8 +199,8 @@ function admin_menu() {
     "page_callback" => "admin_display_degrees",
     "access_arguments" => array("can_access_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -225,8 +221,8 @@ function admin_menu() {
     "page_arguments" => array("admin_edit_degree_form", "normal", 3, 4),
     "access_arguments" => array("can_edit_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -253,7 +249,7 @@ function admin_menu() {
     "page_callback" => "admin_display_degrees_popup_add_group",
     "access_arguments" => array("can_edit_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
+      
       "page_is_popup" => TRUE,
       "page_hide_report_error" => TRUE,
     ),   
@@ -266,7 +262,7 @@ function admin_menu() {
     "page_callback" => "admin_display_degrees_popup_add_group2",
     "access_arguments" => array("can_edit_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
+      
       "page_is_popup" => TRUE,
       "page_hide_report_error" => TRUE,
     ),   
@@ -283,8 +279,8 @@ function admin_menu() {
     "page_arguments" => array("admin_add_degree_form"),
     "access_arguments" => array("can_edit_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -309,8 +305,8 @@ function admin_menu() {
     "page_arguments" => array("admin_copy_degree_form"),
     "access_arguments" => array("can_edit_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -339,8 +335,8 @@ function admin_menu() {
     "page_callback" => "admin_display_groups",
     "access_arguments" => array("can_access_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -360,8 +356,8 @@ function admin_menu() {
     "page_arguments" => array("admin_edit_group_form"),
     "access_arguments" => array("can_edit_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -386,7 +382,7 @@ function admin_menu() {
     "page_callback" => "admin_display_groups_popup_select_icon",
     "access_arguments" => array("can_edit_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
+      
       "page_is_popup" => TRUE,
       "page_hide_report_error" => TRUE,
     ),   
@@ -399,7 +395,7 @@ function admin_menu() {
     "page_callback" => "admin_display_groups_popup_edit_definition",
     "access_arguments" => array("can_edit_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
+      
       "page_is_popup" => TRUE,
       "page_hide_report_error" => TRUE,
     ),   
@@ -412,7 +408,7 @@ function admin_menu() {
     "page_callback" => "admin_display_groups_popup_show_group_use",
     "access_arguments" => array("can_edit_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
+      
       "page_is_popup" => TRUE,
       "page_hide_report_error" => TRUE,
     ),   
@@ -426,8 +422,8 @@ function admin_menu() {
     "page_arguments" => array("admin_process_all_definitions_form"),
     "access_arguments" => array("can_edit_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -454,8 +450,8 @@ function admin_menu() {
     "page_callback" => "admin_display_courses",
     "access_arguments" => array("can_access_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -475,8 +471,8 @@ function admin_menu() {
     "page_arguments" => array("admin_edit_course_form"),
     "access_arguments" => array("can_edit_data_entry"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(

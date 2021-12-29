@@ -110,8 +110,8 @@ function content_menu() {
     "access_callback" => "content_user_access",
     "access_arguments" => array("edit", 1),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(          
         0 => array(
@@ -138,8 +138,8 @@ function content_menu() {
     "page_arguments" => array(1),    
     "access_arguments" => array("view_fpm_debug"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(          
         0 => array(

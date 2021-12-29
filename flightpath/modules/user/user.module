@@ -28,8 +28,8 @@ function user_menu() {
     "page_callback" => "user_display_users",
     "access_arguments" => array("manage_users"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(         
         0 => array(
@@ -50,8 +50,8 @@ function user_menu() {
     "page_callback" => "user_display_student_users",
     "access_arguments" => array("manage_users"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(         
         0 => array(
@@ -77,8 +77,8 @@ function user_menu() {
     "access_arguments" => array("can_edit_user_roles"),
     "page_settings" => array(
       "menu_icon" => fp_get_module_path('user') . "/icons/medal_gold_1.png",    
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(         
         0 => array(
@@ -98,8 +98,8 @@ function user_menu() {
     "page_arguments" => array("user_edit_user_form"),
     "access_arguments" => array("manage_users"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -124,8 +124,8 @@ function user_menu() {
     "page_arguments" => array("user_edit_user_advisees_form"),
     "access_arguments" => array("manage_users"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -152,8 +152,8 @@ function user_menu() {
     "page_arguments" => array("user_edit_student_user_form"),
     "access_arguments" => array("manage_users"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -180,8 +180,8 @@ function user_menu() {
     "page_arguments" => array("user_student_edit_student_courses_form"),
     "access_arguments" => array("manage_users"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -217,8 +217,8 @@ function user_menu() {
     "access_arguments" => array("can_edit_permissions"),
     "page_settings" => array(
       "menu_icon" => fp_get_module_path('user') . "/icons/key.png",    
-      "page_has_search" => FALSE,
-      "page_banner_is_link" => TRUE,
+      
+      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(         
         0 => array(

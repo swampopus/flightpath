@@ -67,7 +67,7 @@ function student_files_menu() {
     "page_arguments" => array("student_files_upload_any_student_files_form"),
     "access_arguments" => array("upload_any_student_files"),
     "page_settings" => array(
-      "page_has_search" => FALSE,
+      
       "menu_icon" => fp_get_module_path("student_files") . "/css/icons/page_add.png",
       "menu_links" => array(          
         0 => array(
