@@ -216,32 +216,50 @@ function content_files_user_may_download_file($fid) {
   
   if ($user->id == 1) return TRUE; // this is the admin user.
   
-  // TODO:  Get cid of original piece of content this file belonged to.
+  // Get cid of original piece of content this file belonged to.
+  $cid = intval($file['cid']);
   
+  if ($cid === 0) return TRUE; // no CID attached, so we can assume they can view it.
   
-  // Is this a faculty only file, and the user is a student?
-  if ($file["access_type"] == "faculty" && $user->is_student == TRUE) {
-    return FALSE;  // nope, can't view it.
-  }
-  
-  // Is this a student, and this is a file for THEM?
-  if ($file["student_id"] == $user->cwid && $file["access_type"] != "faculty") {
-    return TRUE;
-  }
-  
-  // Does this user have access to download advisee's files and is this student someone they are allowed to advise?
-  if (user_has_permission("download_advising_student_files")) {
-    // Now, is this user allowed to view THIS student's advising history?
-    if (advise_can_access_view($student_id)) return TRUE;
-  }
-  
-  
-  
-  // All else failed, return FALSE
-  return FALSE;  
+  // Otherwise, see if the user is allowed to "view" this piece of content.  If so, that means they
+  // can view any files attached as well.
+  return content_user_access('view', $cid);  
   
 }
 
+
+
+
+
+
+/**
+ * This actually finds and downloads the file for the user, decrypting if necessary.
+ */
+function content_files_handle_download($fid) {
+  
+  
+  $file = content_get_uploaded_file($fid);
+  
+  if (!$file) {
+    display_not_found();
+    die;
+  }
+  
+  // Otherwise, now we proceed.
+  $file_contents = @file_get_contents($file["full_filename"]);
+  
+  if ($file_contents && intval($file["is_encrypted"]) === 1 && function_exists("encryption_decrypt")) {
+    $file_contents = encryption_decrypt($file_contents);
+  }
+  
+  // Okay, now let's spit it out to the browser for download.
+  header('Content-type: ' . $file["filetype"]);
+  header('Content-Disposition: attachment; filename="' . $file["original_filename"]  . '"');
+  print $file_contents;
+
+  die;      
+  
+}
 
 
 
@@ -428,6 +446,25 @@ function content_user_access($op, $var) {
   // Simply trying to view the content.  Do we have permission to view published content of this type?  
   if ($op == 'view' && user_has_permission("view_" . $content->type . "_content")) {
     if (intval($content->published) === 1) {
+      
+      
+      // If the user is a student, we must take special considerations into account, like if
+      // the visibility is set to faculty/staff only, and if the content is not ABOUT the student.
+      if ($user->is_student == TRUE) {
+              
+        // Is this a faculty only file, and the user is a student?
+        if (isset($content->field__visibility) && $content->field__visibility['value'] == "faculty") {
+          return FALSE;  // nope, can't view it.
+        }
+            
+        // Is the user a student, and is the content ABOUT this student?  If not, then they cannot view it.  In other words,
+        // a student can't see another student's engagements, etc.          
+        if (isset($content->field__student_id) && $content->field__student_id['value'] != $user->cwid) {
+          return FALSE;   // nope, can't view it.
+        }
+          
+      }      
+      
       
       return TRUE;
     }
@@ -1018,13 +1055,16 @@ function content_get_uploaded_file($fid) {
     
     $cur['full_filename'] = fp_get_files_path() . '/content_uploads/' . $cur['filename']; 
     // also get the URL for downloading this file.
-    // TODO: If this file was encrypted, then the url should change to the url to decrypt this particular file (probably by passing it the fid)
-    if (intval($cur['is_encrypted']) === 1) {
-      $cur['url'] = fp_url('content-files/handle-download/' . $cur['fid']);
-    } 
-    else {
-      $cur['url'] = base_path() . "/custom/files/content_uploads/" . $cur['filename'];
-    }
+    // If this file was encrypted, then the url should change to the url to decrypt this particular file (probably by passing it the fid)
+    //if (intval($cur['is_encrypted']) === 1) {
+        
+    // *** Always handle downloads through FlightPath, for security reasons. ***  
+      
+    $cur['url'] = fp_url('content-files/handle-download/' . $cur['fid']);
+    //} 
+    //else {
+    //  $cur['url'] = base_path() . "/custom/files/content_uploads/" . $cur['filename'];
+    //}
     $cur['ext'] = $ext;
   }
   
@@ -1326,32 +1366,64 @@ function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_
   $original_filename = @$file["name"];
   $type = @$file["type"]; 
   $tmp_name = @$file["tmp_name"];
+
+  if (!strstr($tmp_name, "/")) {
+    // Doesn't contain the temp location.  Pre-prend to the tmp_name.
+    $tmp_name = sys_get_temp_dir() . "/" . $tmp_name;
+  }
+
   // Figure out the extension of the original filename.
   $temp = explode(".", $original_filename);
   $ext = $temp[count($temp) - 1];                     
   
   $filename = $original_filename;
   if ($bool_override_original_filename) {
-    $filename = 'attach__' . time() . '_' . mt_rand(9,999) . $original_filename;  // We will figure out the ext (from mimetype) later.
+    $filename = 'attach__' . time() . '_' . mt_rand(9,999) . $original_filename;
   }
   
-  
+  // If the filename is too long, shorten it.  Linux won't allow more than 255 bytes (usually corresponds to chars, depending on file system
+  // it might be as low as ), 
+  // Windows its 260 chars.  Let's be safe and stop at 100 chars + ext.
+  if (strlen($filename) > 100) {
+    $filename = substr($filename, 0, 100) . ".$ext";
+  }
+    
   $full_filename = fp_get_files_path() . '/content_uploads/' . $filename;              
-  
+      
   $is_encrypted = 0;
-  // TODO:  If we should be encrypting files, so do here, and set the is_encrypted value correctly.
+  // If we should be encrypting files, so do here, and set the is_encrypted value correctly.
+  if (module_enabled('encryption') && variable_get("encryption_files_encryption", "yes") === 'yes' && encryption_get_key()) {
+
+    // We need to do that by loading the file into memory, then getting the encrypted version, then writing it
+    // out to the destination.
+    $file_contents = file_get_contents($tmp_name);
+    $enc_file_contents = encryption_encrypt($file_contents);
+    $full_filename .= ".enc";
+    $filename .= ".enc";
+    if (!file_put_contents($full_filename, $enc_file_contents)) {
+      fp_add_message(t("Could not upload file.  Possibly because of permission issues on the destination directory,
+                        the disk is full, or some other reason."), "error");
+      return;
+    }
+
+    $is_encrypted = 1;
   
-  
-  if (!strstr($tmp_name, "/")) {
-    // Doesn't contain the temp location.  Pre-prend to the tmp_name.
-    $tmp_name = sys_get_temp_dir() . "/" . $tmp_name;
+    
+  } // encryption module is enabled and we should be encrypting.
+  else {
+    // No encryption, just copy the normal way.
+    
+    $is_encrypted = 0;
+    
+    if (!copy($tmp_name, $full_filename)) {
+      fp_add_message(t("Could not upload file.  Possibly because of permission issues on the destination directory,
+                        the disk is full, or some other reason."), "error");
+    }                    
+        
   }
   
-  if (!copy($tmp_name, $full_filename)) {
-    fp_add_message(t("Could not upload file.  Possibly because of permission issues on the destination directory,
-                      the disk is full, or some other reason."), "error");
-  }                    
-
+  
+  // Add to the content_files table.
   db_query("INSERT INTO content_files (cid, original_filename, filename, mimetype, is_encrypted, posted)
             VALUES (?, ?, ?, ?, ?, ?)", array($cid, $original_filename, $filename, $type, $is_encrypted, time()));
   return db_insert_id();

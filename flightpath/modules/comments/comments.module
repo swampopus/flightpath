@@ -300,6 +300,7 @@ function comments_popup_display_all_comments() {
  * Display the comment array in a pretty way.
  */
 function comments_render_comment($comment, $delete_link = "") {
+  global $user;
   $rtn = "";
 
   // Make sure the user has access to view it!
@@ -309,6 +310,25 @@ function comments_render_comment($comment, $delete_link = "") {
   if ($comment["access_type"] == "faculty" && !user_has_permission("view_faculty_comments")) {
     return "<p>" . t("Sorry, but you do not have permission to view the requested comment (it is marked as faculty-only).") . "</p>";    
   }
+  if ($comment["access_type"] == "audit private" && module_enabled('audit')) {
+    if (!audit_can_access_audit($comment['student_id'])) {
+      return "<p>" . t("Sorry, but you do not have permission to view the requested comment (it is an audit comment).") . "</p>";
+    }
+  }
+  if ($comment["access_type"] == "audit private" && !module_enabled('audit')) {    
+    return "<p>" . t("Sorry, but you do not have permission to view the requested comment (it is an audit comment, and the audit module is not enabled).") . "</p>";    
+  }
+      
+  
+  // If the comment is visible to students, AND the user is a student, make sure the comment is ABOUT THIS STUDENT.  This prevents
+  // students from seeing each others' comments.
+  if ($user->is_student == TRUE) {
+    if ($comment['student_id'] != $user->cwid) {
+      return "<p>" . t("Sorry, but you do not have permission to view the requested comment (it is saved for a different student).") . "</p>";
+    }
+  }
+  
+   
 
   $access_type = t("Anyone (incl. student)");
   if ($comment['access_type'] == 'faculty') {
@@ -364,10 +384,10 @@ function comments_get_comments($student_id, $bool_included_deleted = FALSE, $acc
   //}
   
   $res = db_query("SELECT * FROM advising_comments
-                   WHERE student_id = '?'
+                   WHERE student_id = ?
                    $deleted_line
                    $access_type_line
-                   ORDER BY posted DESC", $student_id);
+                   ORDER BY posted DESC", array($student_id));
   while ($cur = db_fetch_array($res)) {
     $rtn[$cur["id"]] = $cur;
   }
@@ -381,8 +401,8 @@ function comments_get_comment($comment_id) {
   
   
   $res = db_query("SELECT * FROM advising_comments
-                   WHERE `id` = '?'
-                   ", $comment_id);
+                   WHERE `id` = ?
+                   ", array($comment_id));
   $cur = db_fetch_array($res);
     
   return $cur;

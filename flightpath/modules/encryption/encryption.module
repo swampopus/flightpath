@@ -133,6 +133,28 @@ function encryption_settings_form() {
   );
   
   
+    
+  
+  $form["encryption_files_encryption"] = array(
+    "type" => "select",
+    "label" => "Encrypt uploaded files?",
+    "options" => array("yes" => t("Yes"), "no" => t("No")),
+    "value" => variable_get("encryption_files_encryption", "yes"),
+    "description" => t("When files are uploaded or attached to a piece of content (for example, an email attachment or TXT message attachment) 
+                        they can be automatically encrypted before being saved to the server.  Do you wish
+                        to do this?  If so, the extension \".enc\" will be added to the end of encrypted files.
+                        When files are downloaded through the Encryption module, they will be automatically decrypted
+                        for the end user.
+                        <br><br>
+                        Note: this does not affect files uploaded to a student's History tab.  To configure
+                        encryption of those files, see the Student Files settings page."),
+    "prefix" => "<fieldset><legend>" . t("Encryption Settings") . "</legend>",
+    "suffix" => "</fieldset>",
+  );
+    
+ 
+  
+  
   $form["encryption_confirm"] = array(
     "label" => "Are you sure you want to save changes?",
     "type" => "textfield",
@@ -191,17 +213,14 @@ function encryption_settings_form_submit($form, $form_state) {
  * We are going to convert either one into a SHA1 string
  */
 function encryption_get_key() {
-    
-      
-      
+          
   $encryption_key_path = trim(variable_get("encryption_key_path", ""));  
-  
-  
-  
+      
   if ($encryption_key_path != "") {
     $contents = trim(file_get_contents($encryption_key_path));
-    //$encryption_key_string = hash($hash, $contents);
-    $encryption_key_string = openssl_digest($contents, "sha256", TRUE);
+    if ($contents) {
+      $encryption_key_string = openssl_digest($contents, "sha256", TRUE);
+    }
   }
   else {
     if (!isset($GLOBALS['encryption_key_string'])) {
@@ -211,6 +230,11 @@ function encryption_get_key() {
     $encryption_key_string = openssl_digest($GLOBALS['encryption_key_string'], "sha256", TRUE);  
   }
   
+  
+  if (!$encryption_key_string) {
+    fp_add_message("No encryption key has been set.  The encrypt module will cause unforseen problems.  Do not proceed until this issue is corrected.", "error");
+    return FALSE;    
+  }
   
   
   /*
@@ -317,10 +341,11 @@ function encryption_decrypt($ciphertext) {
 
   
   $calcmac = hash_hmac("sha256", $ciphertext_raw, $key, true);
-  if (hash_equals($hmac, $calcmac)) return base64_decode($original_plaintext);
+  if ($calcmac && $hmac) {
+    if (hash_equals($hmac, $calcmac)) return base64_decode($original_plaintext);
+  }
 
-
-
+  return FALSE;
 
 }
 

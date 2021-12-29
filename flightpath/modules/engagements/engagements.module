@@ -2743,13 +2743,33 @@ function engagements_display_main()
 
 
     ///////////
-    // TODO:  This section we can instead query the content_files table for this cid.
-
+    // This section we can instead query the content_files table for this cid.
+    if ($type == 'txt_msg') {
+      $ttemp = array('','');
+      if (strstr($msg, "~~MEDIA~~") && strstr($msg, "~~END_MEDIA~~")) {
+        $temp = explode("~~MEDIA~~", $msg);
+        $msg = $temp[0]; // get rid of the media part of the msg.
+        $ttemp = explode("~~END_MEDIA~~", $temp[1]);
+      }
+          
+      $res2 = db_query("SELECT * FROM content_files WHERE cid = ? ORDER BY cid", array($cid));
+      while ($cur2 = db_fetch_array($res2)) {
+        $fid = $cur2['fid'];
+        $file = content_get_uploaded_file($fid);
+        $img_tag = "<img src='{$file['url']}' style='max-width: 200px; height: auto;'>";
+        $msg .= "<div class='media-attached'><a href='{$file['url']}' target='_BLANK'>
+                      $img_tag
+                    </a></div>";             
+      }
+      $msg .= $ttemp[1];  // in case there was anything AFTER ~~END_MEDIA~~
+    }
+    
+    
+    
+    /*        
     // If the $msg contains ~~MEDIA~~ and ~~END_MEDIA~~ then we can assume there are filenames after it, which we assume to be images that got
     // text messaged.  Add them.
-    if (strstr($msg, "~~MEDIA~~") && strstr($msg, "~~END_MEDIA~~")) {
-      $temp = explode("~~MEDIA~~", $msg);
-      $msg = $temp[0]; // get rid of the media part of the msg.
+    
       $files = explode(",", $temp[1]);
       foreach ($files as $filename) {
         $ttemp = explode("~~END_MEDIA~~", $filename);
@@ -2772,7 +2792,9 @@ function engagements_display_main()
                   </a></div>" . $ttemp[1]; // add on the </p> at the end if its there.
       }
     } // contains ~~MEDIA~~
-
+    */
+    
+    
     ////////////
     
 
@@ -2794,6 +2816,8 @@ function engagements_display_main()
         $attachments = array();
         $attachment_csv = trim(@$content->field__attachment['value']);
         // TODO:  An option here would be to just query the content_files table for this cid.
+        
+        
         if ($attachment_csv) {
           $temp = explode(",", $attachment_csv);
           $msg .= "<label>" . t("Attached File(s):") . "</label><div class='attached-files'>";
@@ -2807,6 +2831,8 @@ function engagements_display_main()
           }
           $msg .= "</div>";
         }
+        
+        
       }
 
       // We need a random id to assign to this email body.

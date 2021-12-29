@@ -2,9 +2,17 @@ FlightPath 6.x Changelog
 ========================
 
 
+2021-12-29
+  Added more permissions and security checks when accessing files and content, especially of the user is a student and just trying out
+  URLs.  We make sure they do not have access to any content, comments, or files they aren't supposed to see.  
+  
+
 2021-12-28
   Adding new module to core: encryption, and setting up key variable in settings.php on installation (giving it a random string value at the time of
   installation).
+  
+  Adding ability to save all content files as encrypted, and properly decrypt them for end user, based on if the user has permission to view
+  the original content it was attached to.
   
 
 2021-12-27

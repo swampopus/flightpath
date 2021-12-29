@@ -509,7 +509,7 @@ function student_files_handle_upload($student_id, $bool_goto_history_when_done =
   
     
   // If we will be encrypting this, then the ext is actually .txt.enc  or .pdf.enc.  So we know its encrypted.
-  if (function_exists("encryption_menu") && $encryption == "yes") {
+  if (module_enabled("encryption") && $encryption == "yes") {
     $r["%ext"] .= ".enc";
   }  
   
@@ -533,9 +533,10 @@ function student_files_handle_upload($student_id, $bool_goto_history_when_done =
     }
   }
 
-  // If the filename is too long, shorten it.  Linux won't allow more than 255 chars, Windows its 260.  Let's be safe and stop at 170 chars + ext.
-  if (strlen($filename) > 170) {
-    $filename = substr($filename, 0, 170) . $r["%ext"];
+  // If the filename is too long, shorten it.  Linux won't allow more than 255 bytes (usually corresponds to chars, depending on file system), 
+  // Windows its 260 chars.  Let's be safe and stop at 100 chars + ext.
+  if (strlen($filename) > 100) {
+    $filename = substr($filename, 0, 100) . "." . $r["%ext"];
   }
 
   // Make sure the filename doesn't already exist.  If it does, we add a little more randomness to the end of the file.
@@ -552,7 +553,7 @@ function student_files_handle_upload($student_id, $bool_goto_history_when_done =
   // Okay, if we are here we can proceed with the copy.
   
   // if encryption is enabled, we must use the encryption module to do this instead of a simple copy.
-  if (function_exists("encryption_menu") && $encryption == "yes") {
+  if (module_enabled("encryption") && $encryption === "yes" && encryption_get_key()) {
     // Yep, we should encrypt this file.
     
     // We need to do that by loading the file into memory, then getting the encrypted version, then writing it
@@ -665,20 +666,23 @@ function student_files_settings_form() {
                         You may also enter static directory names like 'files' or 'uploads'.  If unsure what to enter, leave blank."),
   );
   
-  if (function_exists("encryption_menu")) {
-    // The encryption module is intalled.  Let's add extra settings for it.
-    
-    
+  
+  if (module_enabled("encryption")) {
+    // The encryption module is installed.  Let's add extra settings for it.
+        
     $form["student_files_encryption"] = array(
       "type" => "select",
       "label" => "Encrypt uploaded files?",
       "options" => array("yes" => t("Yes"), "no" => t("No")),
       "value" => variable_get("student_files_encryption", "yes"),
-      "description" => t("Since you have installed the 'encryption' module, when files are uploaded
+      "description" => t("Since you have installed the 'encryption' module, when files are uploaded to a student's History tab,
                           they can be automatically encrypted before being saved to the server.  Do you wish
                           to do this?  If so, the extension \".enc\" will be added to the end of encrypted files.
                           When files are downloaded through the Student Files module, they will be automatically decrypted
-                          for the end user."),
+                          for the end user.
+                          <br><br>
+                          Note: this does not affect files attached in Engagements, like TXT or email file attachments.  To configure
+                          encryption of those files, see the Encryption settings page."),
       "prefix" => "<fieldset><legend>" . t("Encryption Settings") . "</legend>",
       "suffix" => "</fieldset>",
     );
