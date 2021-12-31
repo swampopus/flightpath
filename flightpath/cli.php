@@ -14,10 +14,12 @@ if (!flightpath_is_cli()) {
   die;
 }
 
+session_start();
 
-print "\n\n----------------------\n";
+
+print "\n\n--------------------------------------------\n";
 print "FlightPath Command-Line Interface Script\n";
-print "----------------------\n\n";
+print "--------------------------------------------\n\n";
 
 
 // Keep the script from timing out prematurely...
@@ -33,6 +35,18 @@ $GLOBALS["fp_die_mysql_errors"] = TRUE;
 // Get the command being issued to the script.  Ex: php cli.php COMMAND
 $command_one = trim($argv[1]);
 
+if ($command_one == "" || $command_one == "-h" || $command_one == "--help" || $command_one == "help" || $command_one == "?") {
+  // show instructions.
+  print "USAGE:  php cli.php <option>";
+  print "\n\nOPTIONS:";
+  print "\n   clear-cache   -  Clear system cache.";
+  print "\n   run-updates   -  Run db updates for modules and system.  Will also clear cache when done.";
+  
+  print "\n\n";  
+}
+
+
+
 
 
 // Based on command, perform action.
@@ -44,6 +58,35 @@ if ($command_one == 'clear-cache') {
 }
 
 
+if ($command_one == 'run-updates') {
+  print "\n - Executing module DB updates...";
+  system_confirm_db_updates_form_submit(array(), array());
+  $batch_id = $_SESSION['fp_batch_id'];
+  $batch = batch_get($batch_id);
+  
+  if ($batch && is_array($batch) && isset($batch['operation'][1][0]) && count($batch['operation'][1][0]) > 0) {
+    $modules = $batch['operation'][1][0];
+    while (true) {
+      system_perform_db_updates_perform_batch_operation($batch, $modules);
+      print "\n -- Updated " . @$modules[$batch['results']['current'] - 1]['module'] . "";
+      if ($batch['results']['finished']) {
+        break;
+      }        
+    } // while
+  }
+  else {
+    print "\n -- No modules have DB updates to perform.";
+  }
+  
+  
+  print "\n --> DB Update of modules completed.";
+
+  print "\n - Clearing cache...";  
+  fp_clear_cache();
+  print "\n --> Cache has been cleared.";
+  
+   
+}
 
 
 

@@ -7,6 +7,10 @@ FlightPath 6.x Changelog
   
   Fixed typo in descriptions in encryption module.
 
+  Updated cli.php to also allow db updates from the command line, as well as display help if no arguments
+  are sent, or if ?, -h, --help, or help or sent.
+  
+
 2021-12-29
   Added more permissions and security checks when accessing files and content, especially of the user is a student and just trying out
   URLs.  We make sure they do not have access to any content, comments, or files they aren't supposed to see.  
