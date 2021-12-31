@@ -198,6 +198,13 @@ function system_update($old_schema, $new_schema) {
     
   } // schema 5
 
+  if (intval($old_schema) < 6) {
+    // Add extra indexes to watchdog table for easier reporting.
+    db_query("ALTER TABLE `watchdog` ADD INDEX (`timestamp`) ");
+    db_query("ALTER TABLE `watchdog` ADD INDEX (`is_student`) ");
+    db_query("ALTER TABLE `watchdog` ADD INDEX (`is_faculty`) ");
+  }
+
 
   
       
@@ -1041,6 +1048,9 @@ CREATE TABLE `watchdog` (
   KEY `uname` (`user_name`),
   KEY `severity` (`severity`),
   KEY `cwid` (`cwid`),
+  KEY `timestamp` (`timestamp`),
+  KEY `is_student` (`is_student`),
+  KEY `is_faculty` (`is_faculty`),  
   KEY `school_id` (`school_id`)
 );  ";
   

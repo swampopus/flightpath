@@ -68,7 +68,7 @@ function encryption_settings_form() {
   }
   else {
     // Couldn't find any values for hash!
-    fp_add_message(t("This module will NOT work correctly, because no SHA hash protocol could be found!
+    fp_add_message(t("This module will NOT work correctly, because no hash protocol could be found!
                       Check your server settings and make sure this page does not display an error before
                       attempting to use this module!"), "error");
     return $form;
@@ -88,7 +88,7 @@ function encryption_settings_form() {
   }
   else {
     // Couldn't find any values for hash!
-    fp_add_message(t("This module will NOT work correctly, because no SHA hash protocol could be found!
+    fp_add_message(t("This module will NOT work correctly, because no cipher protocol could be found!
                       Check your server settings and make sure this page does not display an error before
                       attempting to use this module!"), "error");
     return $form;
