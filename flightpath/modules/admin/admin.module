@@ -1694,7 +1694,7 @@ function admin_display_watchdog() {
   
               
               
-// Get our order by clause based on selected table header, if any.    
+  // Get our order by clause based on selected table header, if any.    
   $order_by = theme_table_header_sortable_order_by($table_headers);  
   $res = pager_query("SELECT * FROM watchdog a
                        WHERE 1

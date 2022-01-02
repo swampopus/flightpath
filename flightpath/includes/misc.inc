@@ -1769,6 +1769,14 @@ function st($str, $vars = array()) {
   return $str;
 }
 
+/**
+ * Shortcut for getting the base_url variable from the global system settings.
+ */
+function base_url() {
+  $p = $GLOBALS["fp_system_settings"]["base_url"];
+ 
+  return $p;
+}
 
 /**
  * Shortcut for getting the base_path variable from the global system settings.

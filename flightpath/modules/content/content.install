@@ -38,6 +38,19 @@ function content_update($old_schema, $new_schema) {
     db_query("ALTER TABLE content_files ADD INDEX (`cid`) ");    
   }
   
+
+  if (intval($old_schema) < 8) {
+    db_query("ALTER TABLE content_files ADD COLUMN `attributes` tinyint(4) unsigned DEFAULT 0 ");
+    db_query("ALTER TABLE content_files ADD INDEX (`attributes`) ");
+    
+    if (!file_exists(fp_get_files_path() . '/content_uploads/public_uploads/')) {
+      mkdir(fp_get_files_path() . '/content_uploads/public_uploads/');
+    }
+        
+    
+    
+  }
+
   
 
 }
@@ -139,6 +152,12 @@ CREATE TABLE `content__page` (
   if (!file_exists(fp_get_files_path() . '/content_uploads/')) {
     mkdir(fp_get_files_path() . '/content_uploads/');
   }
+  
+  
+  if (!file_exists(fp_get_files_path() . '/content_uploads/public_uploads/')) {
+    mkdir(fp_get_files_path() . '/content_uploads/public_uploads/');
+  }
+  
   
     
 }

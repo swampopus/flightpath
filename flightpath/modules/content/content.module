@@ -1,5 +1,11 @@
 <?php
 
+
+// Define constants
+define('CONTENT_PRIVATE_FILE', 0);  // must be logged in to view
+define('CONTENT_PUBLIC_FILE', 1);   // publicly (anonymous) can view with URL
+
+
 /**
  *  This module lets administrators create content, when then appear can appear in a block.  
 */
@@ -23,10 +29,33 @@ function content_menu() {
           "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
         ),
       ),
-    ),    
-    "type" => MENU_TYPE_NORMAL_ITEM,
-    
+    ),
+    'type' => MENU_TYPE_DEFAULT_TAB,
+    'tab_family' => 'content_tabs',    
+    "weight" => 0,    
   );     
+
+
+  $items["admin-tools/content/files"] = array(
+    "title" => "Public Files",    
+    "page_callback" => 'fp_render_form',
+    'page_arguments' => array('content_public_files_form'),    
+    "access_arguments" => array("admin_public_files"),
+    "page_settings" => array(            
+      "page_show_title" => TRUE,
+      "menu_links" => array(          
+        0 => array(
+          "text" => t("Admin Tools"),
+          "path" => "admin-tools",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),
+    'type' => MENU_TYPE_TAB,
+    'tab_family' => 'content_tabs',    
+    "weight" => 10,    
+  );     
+
  
   
   /*
@@ -229,9 +258,6 @@ function content_files_user_may_download_file($fid) {
 
 
 
-
-
-
 /**
  * This actually finds and downloads the file for the user, decrypting if necessary.
  */
@@ -261,6 +287,161 @@ function content_files_handle_download($fid) {
   
 }
 
+
+
+/**
+ * This screen lets the user upload/manage/delete "public files" stored at custom/files/content_uploads/public_uploads/
+ */
+function content_public_files_form() {
+  
+  fp_add_css(fp_get_module_path('content') . '/css/content.css');  
+    
+  $form = array();  
+  fp_set_title('');
+  
+  
+  $form["#attributes"] = array("enctype" => 'multipart/form-data');  // allow the form itself to submit files.
+  
+  
+  $form['mark_top'] = array(
+    'value' => '<p>' . t("This form allows you to upload files which are publicly accessible (without needing to log in) through the web.
+                          For example, you may wish to upload image files, css, etc, for use in other settings.
+                          <br><br>
+                          <strong>Note:</strong> These files will not be encrypted, and will be publicly available.  Do not upload sensitive
+                                                 information, like student records or any personally-identifying details.") . "</p><hr>",
+  );
+  
+  $form['upload_file'] = array(
+    'type' => 'file',
+    'label' => t("Upload file:"),
+    'description' => t("Allowed file extensions: %ext", array('%ext' => strtolower(variable_get("public_files_allowed_extensions", "css, txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")))),  
+  );
+
+  $form['upload_btn'] = array(
+    'type' => 'submit',
+    'value' => t("Upload"),
+  );
+  
+  $form['mark_below_upload'] = array(
+    'value' => "<hr>",
+  );
+  
+  ///////////////////////////////////////////////////////////
+  
+  $html = "";
+  
+  
+  $table_headers = array();
+  $table_headers[] = array("label" => "Actions");  
+  $table_headers[] = array("label" => "FID", "field" => "fid");  
+  $table_headers[] = array("label" => "Filename", "field" => "original_filename");
+  $table_headers[] = array("label" => "Links");
+  $table_headers[] = array("label" => "Uploaded", "field" => "posted");
+     
+  // Set our initial sort, if none is already set.   
+  theme_table_header_sortable_set_initial_sort("posted", 'DESC');  
+  
+  $html .= "<table class='public-files-table' cellspacing='0' cellpadding='4'>";
+  // Draw our our table headers, with links....
+  $html .= theme_table_header_sortable($table_headers);      
+  
+  // Get our order by clause based on selected table header, if any.    
+  $order_by = theme_table_header_sortable_order_by($table_headers);  
+  
+  $res = pager_query("SELECT * FROM content_files WHERE `attributes` = ?
+                      $order_by", array(CONTENT_PUBLIC_FILE), 10, 0);  
+  
+  while ($cur = db_fetch_object($res)) {    
+    $pol = (@$pol == "even") ? "odd" : "even";
+    
+    $posted = format_date(convert_time($cur->posted), "short");
+            
+    $abs = base_url() . "/custom/files/content_uploads/public_uploads/$cur->filename";
+    $rel = base_path() . "/custom/files/content_uploads/public_uploads/$cur->filename";
+    $absolute_link = "<a href='$abs' title='Absolute link' class='abs-link' target='_blank'><i class='fa fa-globe'></i></a>";
+    $relative_link = "<a href='$rel' title='Relative link' class='rel-link' target='_blank'><i class='fa fa-link'></i></a>";
+
+    $del_link = fp_get_js_confirm_link("Are you sure you want to delete this file?\\n\\nThis action cannot be undone.", "window.location=\"" . fp_url("admin-tools/content/files", "del=$cur->fid") . "\";", "<i class='fa fa-remove' title='" . t("Delete?") . "'></i>", "delete-link");
+            
+    $html .= "<tr class='row-$pol'>                
+                <td valign='top'>$del_link</td>
+                <td valign='top'>$cur->fid</td>
+                <td valign='top'>$cur->original_filename</td>
+                <td valign='top'>$relative_link &nbsp; $absolute_link</td>
+                <td valign='top'>$posted</td> 
+              </tr>    
+    
+            ";    
+    
+  } // while
+  
+  $html .= "</table>";
+  $html .= theme_pager();
+  
+  $form['mark_files_table'] = array(
+    'value' => $html,
+  );
+  
+  
+  return $form;
+} // content_public_files_form
+
+
+
+
+
+function content_public_files_form_validate($form, $form_state) {
+  
+  if (isset($form_state['values']['upload_btn']) && $form_state['values']['upload_btn'] != "") {
+    // The user is trying to upload a file.
+        
+    // Make sure there is something there.
+    if (!isset($_FILES['upload_file']) || trim($_FILES['upload_file']['name'][0]) == '') {
+      form_error('upload_file', t('Please select a file from your computer to upload.'));
+      return;
+    }
+    
+    // Make sure it's the correct extension.
+    $original_filename = $_FILES['upload_file']['name'][0];
+    // Figure out the extension of the original filename.
+    $temp = explode(".", $original_filename);
+    $ext = $temp[count($temp) - 1];
+    
+    // Make sure that this extension is allowed.
+    $allowed_extensions = csv_to_array(strtolower(variable_get("public_files_allowed_extensions", "css, txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")));
+    if (!in_array(strtolower($ext), $allowed_extensions)) {
+      // Meaning, this extension is not allowed!
+      form_error('upload_file', t("Sorry, the file's type/extension (%ext) is not allowed.  Please rename or select another file, then try again.", array("%ext" => $ext)));
+      return;    
+    } 
+  
+    // TODO: Should overwrite file if it already exists?
+  
+    // If we made it here, then there's nothing wrong and we can continue to the _submit function.
+    
+    
+  } // upload file 
+     
+  
+} // ... validate
+
+
+function content_public_files_form_submit($form, $form_state) {
+  if (isset($form_state['values']['upload_btn']) && $form_state['values']['upload_btn'] != "") {
+    // The user is trying to upload a file.
+    
+    $file = $_FILES["upload_file"];
+    $temp = fp_re_array_files($file);
+    $file = $temp[0];    
+    
+    fpm($file);
+    content_add_new_uploaded_file($file, 0, TRUE, CONTENT_PUBLIC_FILE);
+        
+    fp_add_message("File uploaded successfully.");
+    
+    
+  }  
+} // ... submit
 
 
 
@@ -1361,7 +1542,7 @@ function content_edit_content_form_submit(&$form, &$form_state) {
 } // ... submit
 
 
-function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_filename = TRUE) {
+function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_filename = TRUE, $attributes = CONTENT_PRIVATE_FILE) {
   // Store the file information in the content_files table, and then THIS field contains the fid reference number.
   $original_filename = @$file["name"];
   $type = @$file["type"]; 
@@ -1378,7 +1559,7 @@ function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_
   
   $filename = $original_filename;
   if ($bool_override_original_filename) {
-    $filename = 'attach__' . time() . '_' . mt_rand(9,999) . $original_filename;
+    $filename = 'file__' . time() . '' . mt_rand(9,9999) . '_' . $original_filename;
   }
   
   // If the filename is too long, shorten it.  Linux won't allow more than 255 bytes (usually corresponds to chars, depending on file system
@@ -1388,11 +1569,18 @@ function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_
     $filename = substr($filename, 0, 100) . ".$ext";
   }
     
-  $full_filename = fp_get_files_path() . '/content_uploads/' . $filename;              
+  $extra = "";
+  if ($attributes === CONTENT_PUBLIC_FILE) {
+    // If this is a "public" file, then put in the correct public files dir.
+    $extra .= "public_uploads/";    
+  }  
+    
+  $full_filename = fp_get_files_path() . '/content_uploads/' . $extra . $filename;              
       
   $is_encrypted = 0;
   // If we should be encrypting files, so do here, and set the is_encrypted value correctly.
-  if (module_enabled('encryption') && variable_get("encryption_files_encryption", "yes") === 'yes' && encryption_get_key()) {
+  if (module_enabled('encryption') && variable_get("encryption_files_encryption", "yes") === 'yes' && encryption_get_key() && $attributes != CONTENT_PUBLIC_FILE) {
+    // (note: public files are never encrypted)
 
     // We need to do that by loading the file into memory, then getting the encrypted version, then writing it
     // out to the destination.
@@ -1424,8 +1612,8 @@ function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_
   
   
   // Add to the content_files table.
-  db_query("INSERT INTO content_files (cid, original_filename, filename, mimetype, is_encrypted, posted)
-            VALUES (?, ?, ?, ?, ?, ?)", array($cid, $original_filename, $filename, $type, $is_encrypted, time()));
+  db_query("INSERT INTO content_files (cid, original_filename, filename, mimetype, is_encrypted, posted, `attributes`)
+            VALUES (?, ?, ?, ?, ?, ?, ?)", array($cid, $original_filename, $filename, $type, $is_encrypted, time(), $attributes));
   return db_insert_id();
   
 }
@@ -1929,7 +2117,9 @@ function content_display_content_admin_list() {
   
   //fp_add_css(fp_get_module_path("content") . "/css/content.css");
   
-
+  fp_set_title('');
+  
+  
   $rtn .= "<br><b>" .t("Create new content:") . "</b>
             <table border='1' width='100%' cellpadding='4'>";
   // Go through all available content types and provide a link.
@@ -2151,6 +2341,13 @@ function content_perm() {
                       addition to specific permissions listed below for editing
                       different content types."),
   );
+  
+  $rtn["admin_public_files"] = array(
+    "title" => t("Administer Public Files"),
+    "description" => t("The user is allowed to upload, modify, or delete 'public files' which are stored in a special location
+                        on the web server.  Only give this permission to admin or developer users."),
+  );
+  
   
   $types = content_get_types();
   foreach ($types as $type => $details) {
