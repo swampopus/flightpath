@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-01-01
+  Added new base_url() function.
+  
+  Created new concept of "public files" which users may upload to a special directory under /custom/files/content_uploads/public_uploads.  This screen is on a subtab
+  from the normal Content screen, and allows users to upload and delete files (with allowed extensions) for use outside of FlightPath, or when linking
+  to CSS or other files from within settings.
+  
 
 2021-12-30
   Added new indexes to watchdog table for faster reporting.

@@ -300,6 +300,36 @@ function content_public_files_form() {
   fp_set_title('');
   
   
+  // Did we receive a request to delete a file?
+  if (isset($_GET['del']) && is_numeric($_GET['del'])) {
+    $del_fid = intval($_GET['del']);
+    $del_file = content_get_uploaded_file($del_fid);
+        
+    // Make sure the file is a "public" file.
+    if (intval($del_file['attributes']) === CONTENT_PUBLIC_FILE) {
+      // Double-check the user has access to delete
+      if (user_has_permission('admin_public_files')) {
+        // Okay, unlink the file.
+        $temp = unlink(fp_get_files_path() . '/content_uploads/public_uploads/' . $del_file['filename']);
+        if ($temp == FALSE) {
+          fp_add_message(t("Unable to delete file.  Possible server permissions issue, or file not found."), 'error');
+        }
+        else {
+          // We did delete from file system, so delete from content_files table as well.
+          db_query("DELETE FROM content_files WHERE fid = ?", array($del_fid));
+          fp_add_message(t("File deleted successfully."));
+        }
+      }
+      
+    } // if public file
+    // Use fp_goto() to avoid issue with user hitting "refresh"
+    fp_goto("admin-tools/content/files");
+  } // trying to delete file
+  
+  
+  
+  
+  
   $form["#attributes"] = array("enctype" => 'multipart/form-data');  // allow the form itself to submit files.
   
   
@@ -414,9 +444,7 @@ function content_public_files_form_validate($form, $form_state) {
       form_error('upload_file', t("Sorry, the file's type/extension (%ext) is not allowed.  Please rename or select another file, then try again.", array("%ext" => $ext)));
       return;    
     } 
-  
-    // TODO: Should overwrite file if it already exists?
-  
+     
     // If we made it here, then there's nothing wrong and we can continue to the _submit function.
     
     
@@ -433,8 +461,7 @@ function content_public_files_form_submit($form, $form_state) {
     $file = $_FILES["upload_file"];
     $temp = fp_re_array_files($file);
     $file = $temp[0];    
-    
-    fpm($file);
+        
     content_add_new_uploaded_file($file, 0, TRUE, CONTENT_PUBLIC_FILE);
         
     fp_add_message("File uploaded successfully.");
