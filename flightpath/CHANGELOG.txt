@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-01-02
+  Added extra verbage to cli.php to make it clear it should be run as the webserver user.
+  
+
 2022-01-01
   Added new base_url() function.
   

@@ -37,7 +37,11 @@ $command_one = trim($argv[1]);
 
 if ($command_one == "" || $command_one == "-h" || $command_one == "--help" || $command_one == "help" || $command_one == "?") {
   // show instructions.
-  print "USAGE:  php cli.php <option>";
+  print "USAGE:  sudo -u www-data php cli.php <option>";
+  print "\n  Note:  The 'sudo -u www-data' prefix ensures this is run as your webserver's user.";
+  print "\n         If www-data is not the name of your webserver's user, replace with whatever it is.";
+  print "\n         Some actions may not work correctly unless being run as the webserver's user.";
+  
   print "\n\nOPTIONS:";
   print "\n   clear-cache   -  Clear system cache.";
   print "\n   run-updates   -  Run db updates for modules and system.  Will also clear cache when done.";

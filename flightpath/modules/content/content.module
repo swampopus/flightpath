@@ -476,8 +476,7 @@ function content_public_files_form_submit($form, $form_state) {
 
 
 function content_unpublish_content_form($cid) {
-  
-  
+    
   $content = content_load($cid);
 
   fp_add_css(fp_get_module_path("content") . "/css/content.css");
