@@ -27,6 +27,12 @@ function system_perm() {
       "description" => t("This will allow a user to install, enable, disable, and uninstall modules."),
     ),    
     
+    "clear_system_cache" => array(
+      "title" => t("Clear system cache"),
+      "description" => t("This will allow a to clear the system cache, including the menu router.  Give to developers and/or admin users."),
+    ),    
+    
+    
     "run_cron" => array(
       "title" => t("Run Cron"),
       "description" => t("The user may run hook_cron functions at will. Causes a new menu link to appear
@@ -353,7 +359,7 @@ function system_menu() {
     "title" => t("Clear all cache"),
     "description" => t("Clear and reset all cached items in FlightPath, including menu items, advising, etc."),
     "page_callback" => "system_perform_clear_cache",
-    "access_arguments" => array("administer_modules"),
+    "access_arguments" => array("clear_system_cache"),
     "type" => MENU_TYPE_NORMAL_ITEM,
     "page_settings" => array(
       "menu_icon" => fp_get_module_path('system') . "/icons/arrow_refresh.png",      
@@ -541,7 +547,7 @@ function system_menu() {
     "title" => "Clear menu cache",
     "description" => "Clear and rebuild menus and URLs",
     "page_callback" => "system_perform_clear_menu_cache",
-    "access_arguments" => array("administer_modules"),
+    "access_arguments" => array("clear_system_cache"),
     "type" => MENU_TYPE_NORMAL_ITEM,
     "page_settings" => array(
       "menu_icon" => fp_get_module_path('system') . "/icons/arrow_refresh.png",      
