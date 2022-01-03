@@ -2707,16 +2707,32 @@ function draw_menu_items($menu_array) {
     if ($course->grade != "") {
       
       $grd = $course->grade;
-      if ($grd !== $course->db_grade) {
-        $grd = $grd .= " ($course->db_grade)";
-      }
       
-      $html .= t("The student earned a grade of <strong>@grade</strong>.", array("@grade" => $grd));
-      $render['earned_grade'] = array(
-        'type' => 'markup',
-        'value' => $html,
-        'weight' => 55,
-      );
+      $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades",'E', $school_id));
+      if (in_array($grd, $enrolled_grades)) {
+        
+        $html .= t("The student is currently enrolled in this course.", array("@grade" => $grd));
+        $render['enrolled_notice'] = array(
+          'type' => 'markup',
+          'value' => $html,
+          'weight' => 54,
+        );
+        
+        
+      }
+      else {
+      
+        if ($grd !== $course->db_grade) {
+          $grd = $grd .= " ($course->db_grade)";
+        }
+        
+        $html .= t("The student earned a grade of <strong>@grade</strong>.", array("@grade" => $grd));
+        $render['earned_grade'] = array(
+          'type' => 'markup',
+          'value' => $html,
+          'weight' => 55,
+        );
+      }
     }
     
     

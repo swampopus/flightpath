@@ -6,6 +6,9 @@ FlightPath 6.x Changelog
   
   Added ability in public files to replace existing filename if it already exists.
   
+  Changed course popup description to note when a student was enrolled in a course, vs. just showing the enrolled
+  grade (ex: "E").
+  
   
 2022-01-02
   Added extra verbage to cli.php to make it clear it should be run as the webserver user.
