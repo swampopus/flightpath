@@ -4,6 +4,8 @@ FlightPath 6.x Changelog
 2022-01-03
   Added new permission just for clearing system cache  (was using administer_modules, which isn't really the same thing)
   
+  Added ability in public files to replace existing filename if it already exists.
+  
   
 2022-01-02
   Added extra verbage to cli.php to make it clear it should be run as the webserver user.

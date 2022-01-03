@@ -347,6 +347,21 @@ function content_public_files_form() {
     'description' => t("Allowed file extensions: %ext", array('%ext' => strtolower(variable_get("public_files_allowed_extensions", "css, txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")))),  
   );
 
+  $overwrite_val = FALSE;
+  if (isset($_SESSION['public_file_form_overwrite_val'])) {
+    $overwrite_val = (bool) $_SESSION['public_file_form_overwrite_val'];
+  }
+  
+  $form['overwrite'] = array(
+    'type' => 'checkbox',
+    'label' => t('Keep original filename and overwrite existing file by the same name?'),
+    'value' => $overwrite_val,
+    'prefix' => t("<strong>Important:</strong> By default, files are given randomized names when uploaded, so as not to overwrite an existing file with the same name.
+                   <br>If you would prefer to overwrite files with the same name, check the box below:"), 
+  );
+  
+  
+  
   $form['upload_btn'] = array(
     'type' => 'submit',
     'value' => t("Upload"),
@@ -424,12 +439,15 @@ function content_public_files_form_validate($form, $form_state) {
   
   if (isset($form_state['values']['upload_btn']) && $form_state['values']['upload_btn'] != "") {
     // The user is trying to upload a file.
+    
         
     // Make sure there is something there.
     if (!isset($_FILES['upload_file']) || trim($_FILES['upload_file']['name'][0]) == '') {
       form_error('upload_file', t('Please select a file from your computer to upload.'));
       return;
     }
+    
+    
     
     // Make sure it's the correct extension.
     $original_filename = $_FILES['upload_file']['name'][0];
@@ -461,8 +479,10 @@ function content_public_files_form_submit($form, $form_state) {
     $file = $_FILES["upload_file"];
     $temp = fp_re_array_files($file);
     $file = $temp[0];    
+    
+    $_SESSION['public_file_form_overwrite_val'] = $form_state['values']['overwrite'];
         
-    content_add_new_uploaded_file($file, 0, TRUE, CONTENT_PUBLIC_FILE);
+    content_add_new_uploaded_file($file, 0, !$form_state['values']['overwrite'], CONTENT_PUBLIC_FILE, TRUE);
         
     fp_add_message("File uploaded successfully.");
     
@@ -1568,7 +1588,10 @@ function content_edit_content_form_submit(&$form, &$form_state) {
 } // ... submit
 
 
-function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_filename = TRUE, $attributes = CONTENT_PRIVATE_FILE) {
+/**
+ * bool_replace_existing means should we replace an existing file (based on filename) with this new one?  Instead of creating an INSERT, that is.
+ */
+function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_filename = TRUE, $attributes = CONTENT_PRIVATE_FILE, $bool_replace_exsting_filename = FALSE) {
   // Store the file information in the content_files table, and then THIS field contains the fid reference number.
   $original_filename = @$file["name"];
   $type = @$file["type"]; 
@@ -1637,6 +1660,21 @@ function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_
   }
   
   
+  if ($bool_replace_exsting_filename) {
+    $fid = db_result(db_query("SELECT fid FROM content_files 
+                               WHERE filename = ?
+                               AND cid = ?
+                               AND `attributes` = ?", array($filename, $cid, $attributes)));
+    if ($fid) {
+      db_query("UPDATE content_files SET posted = ? WHERE fid = ?", array(time(), $fid));
+      return $fid;
+    }
+    else {
+      // File wasn't in there.  Just do nothing here and proceed to a normal insert.
+    }
+  }
+  
+      
   // Add to the content_files table.
   db_query("INSERT INTO content_files (cid, original_filename, filename, mimetype, is_encrypted, posted, `attributes`)
             VALUES (?, ?, ?, ?, ?, ?, ?)", array($cid, $original_filename, $filename, $type, $is_encrypted, time(), $attributes));
