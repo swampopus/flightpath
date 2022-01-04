@@ -531,17 +531,17 @@ function install_display_db_form($msg = "") {
               <td valign='top'>" . st("Admin Username:") . "</td>
               <td valign='top'><input type='text' name='admin_name' value='$admin_name' size='15' maxlength='50'> Ex: admin</td>
             </tr>
-            
-            <tr>
-              <td valign='top'>" . st("Admin Password:") . "</td>
-              <td valign='top'><input type='password' name='admin_pass' value='$admin_pass' size='20'></td>
-            </tr>
 
             <tr>
               <td valign='top'>" . st("Admin Email Address:") . "</td>
               <td valign='top'><input type='text' name='admin_email' value='$admin_email' size='20'></td>
             </tr>
 
+            
+            <tr>
+              <td valign='top'>" . st("Admin Password:") . "</td>
+              <td valign='top'><input type='password' name='admin_pass' value='$admin_pass' size='20'></td>
+            </tr>
             
             <tr>
               <td valign='top'>" . st("Re-enter Password:") . "</td>

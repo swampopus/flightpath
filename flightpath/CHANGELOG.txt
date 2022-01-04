@@ -1,6 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-01-04
+  Added ability to send arguments to fp_goto() as an array.
+  
+  Added ability to install Zoom (if zoomapi module is enabled) from login form.
+  
+  Changed position of email address question in install.php
+  
+
 2022-01-03
   Added new permission just for clearing system cache  (was using administer_modules, which isn't really the same thing)
   

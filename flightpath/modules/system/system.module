@@ -3199,8 +3199,7 @@ function system_login_form() {
   $bool_clear_cookies = FALSE;
   
   // If we are coming from having just logged out, display a message.
-  if (isset($_REQUEST["logout"]) && $_REQUEST["logout"] == "true") {
-    
+  if (isset($_REQUEST["logout"]) && $_REQUEST["logout"] == "true") {    
     $x = variable_get("logout_message", "You have been logged out of FlightPath.");    
     fp_add_message(filter_markup($x));
   }
@@ -3220,6 +3219,16 @@ function system_login_form() {
     fp_add_message(t("Sorry, but the user you specified has been marked as disabled.  If you believe you need access, please contact your system administrator."), 'error', TRUE);
   }
 
+  // Are we here because the user is trying to do a zoom installation from the marketplace?
+  if (module_enabled('zoomapi') && isset($_REQUEST['zoom_install']) && $_REQUEST['zoom_install'] == 'marketplace') {
+    fp_add_message(t("To install FlightPath Academics to your Zoom account (which allows for automatic meeting requests through appointments), please
+                      sign in below."));
+    fp_add_message(t("You may be asked to sign into your Zoom account and authorize FlightPath.<br>You will be returned to FlightPath afterwards."));
+    $form['zoom_install'] = array(
+      'type' => 'hidden',
+      'value' => 'marketplace',
+    );
+  }
     
   
   $form["user"] = array(
@@ -3396,10 +3405,20 @@ function system_login_form_submit($form, &$form_state) {
   $user = $form_state["values"]["user"];
   $password = $form_state["values"]["password"];
   $passed = $form_state["passed_authentication"];
+  
+  // Special case (if we have the zoomapi module enabled).  This
+  // lets us tell if we are trying to install zoom from the marketplace.
+  $zoom_install = @$form_state['values']['zoom_install'];
+  // Used later when we do a fp_goto.
+    
+  
   $db_row = $form_state["db_row"];
   
   $user_id = $db_row['user_id'];
   $email = trim($db_row['email']);
+  
+  
+  
   
   if (!$passed) {
     fp_add_message(t("Sorry, there has been an error while trying to authenticate the user."));
@@ -3434,6 +3453,12 @@ function system_login_form_submit($form, &$form_state) {
   
   // Watchdog
   watchdog("login", "@user has logged in. CWID: @cwid", array("@user" => "$account->name ($account->id)", "@cwid" => $account->cwid));
+  
+  if ($zoom_install == 'marketplace' && module_enabled('zoomapi')) {
+    fp_goto(zoomapi_get_zoom_install_url($account->id, FALSE, TRUE));
+    die();
+  }
+  
   
   fp_goto("<front>");
   

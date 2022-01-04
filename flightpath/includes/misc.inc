@@ -1889,6 +1889,14 @@ function get_term_description($term_id, $bool_abbreviate = FALSE, $school_id = 0
  */
 function fp_goto($path, $query = "") {
   global $current_student_id;
+  
+  
+  // Were we sent an array instead of separate values?  That's OK if so, let's separate them back out.
+  if (is_array($path)) {
+    $query = @$path[1];
+    $path = @$path[0];
+  }
+  
     
   if ($current_student_id != "" && !strstr($query, "current_student_id=")) {
     // If the query doesn't contain the current_student_id, then add it in.
@@ -1901,8 +1909,21 @@ function fp_goto($path, $query = "") {
   if ($path == "<front>") {
     $path = variable_get("front_page", "main");
   }
-    
-  header('Location: ' . fp_url($path, $query));
+
+  $location = fp_url($path, $query);
+  
+  
+  if (str_starts_with($path, "http://") || str_starts_with($path, "https://")) {
+    // We are going to an external address.
+    if (str_starts_with($query, "&")) {
+      // Need to add ? to the query.
+      $query = "?fprnd=" . mt_rand(9,999999) . $query;
+    }
+    $location = $path . $query;
+  }
+  
+      
+  header('Location: ' . $location);
   exit();
   
 }
