@@ -123,12 +123,14 @@ CREATE TABLE `content_files` (
   `mimetype` varchar(255)  DEFAULT NULL,
   `is_encrypted` tinyint(4) DEFAULT 0,
   `posted` int unsigned DEFAULT NULL,
+  `attributes` tinyint(4) unsigned DEFAULT 0,
   PRIMARY KEY (`fid`),
   KEY `original_filename` (`original_filename`),
   KEY `filename` (`filename`),
   KEY `cid` (`cid`),
   KEY `mimetype` (`mimetype`),
   KEY `is_encrypted` (`is_encrypted`),
+  KEY `attributes` (`attributes`),
   KEY `posted` (`posted`) 
 );";
    

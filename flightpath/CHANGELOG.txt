@@ -8,6 +8,8 @@ FlightPath 6.x Changelog
   
   Changed position of email address question in install.php
   
+  Fixed bug in content module where attributes field in db data content_files wasn't being created on install.
+  
 
 2022-01-03
   Added new permission just for clearing system cache  (was using administer_modules, which isn't really the same thing)
