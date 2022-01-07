@@ -850,6 +850,9 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
     
     
   }  
+  
+  
+  watchdog("admin", "Duplicated all degree/group/courses data from $old_year to $new_year");
     
      
   fp_add_message(t("The copy operation is now completed.  You may view the new year

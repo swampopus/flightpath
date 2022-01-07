@@ -1,6 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-01-07
+  Added numerous new watchdog() statements to better track admin actions, like creating and deleting degrees, groups, etc.
+
+  Made the default time to delete watchdog debug statements 1 year instead of 90 days.
+  
+  Made the default time to delete normal watchdog statements 3 years instead of 1.5 years.
+
+
 2022-01-04
   Added ability to send arguments to fp_goto() as an array.
   

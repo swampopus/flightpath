@@ -422,6 +422,10 @@ function admin_copy_degree_form_submit($form, &$form_state) {
     $for_school = " for school %school";
     $school_name = schools_get_school_name_for_id($destination_school_id);
   }     
+  
+  watchdog("admin", "Copied degree $source_major_code to $destination_major_code,school id: $school_id, ($de_catalog_year) successfully. 
+                      Source degree id: $src_degree_id.  New degree id = $dest_degree_id");
+  
    
   fp_add_message(t("Degree %source has been copied to %dest for %year$for_school.",
                   array("%source" => $source_major_code, "%dest" => $destination_major_code, "%year" => $de_catalog_year, "%school" => $school_name)));
@@ -722,6 +726,8 @@ function admin_add_degree_form_submit($form, $form_submit) {
   }
 
  
+  watchdog("admin", "Degree $major_code $track_code,school id: $school_id, ($de_catalog_year) has been created successfully. Degree id = $degree_id");
+ 
   // Success!  We are done.
   fp_add_message(t("The new degree %major_code was added successfully for %year$for_school.  
                       You may add another degree, or use the menu at the top of the page to return to your list
@@ -797,6 +803,8 @@ function admin_display_degrees() {
   $filter_class_value = @$_SESSION['degrees_filter_class'];
   $filter_school_value = @intval($_SESSION['degrees_filter_school']);
   $extra_where_conditions = "";
+    
+  watchdog("admin", "Viewed admin degree list. Class option: $filter_class_value ($de_catalog_year), School id: $filter_school_value", array(), WATCHDOG_DEBUG);
   
   // Let's adjust the query based on filter selections (if any exist)
   if ($filter_class_value) {
@@ -965,6 +973,7 @@ function admin_degrees_list_filter_form() {
   );
   
   
+  $filter_school_value = 0;
   // If we have enabled the schools module, then have a selector for that as well
   if (module_enabled('schools')) {
     $filter_school_value = @intval($_SESSION['degrees_filter_school']);
@@ -982,9 +991,7 @@ function admin_degrees_list_filter_form() {
     
   } // if schools enabled
   
-  
-  
-  
+      
   
   $form['submit_btn'] = array(
     'type' => 'submit',
@@ -2004,6 +2011,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
       //die;
       
       fp_add_message("The degree $major_code ($de_catalog_year) has been deleted.");
+      watchdog("admin", "The degree $major_code ($de_catalog_year) has been deleted.");
       unset($_SESSION['scroll_top']);
       unset($_REQUEST['scroll_top']);
       fp_goto("admin/degrees", "de_catalog_year=$de_catalog_year");
@@ -2017,7 +2025,8 @@ function admin_edit_degree_form_submit($form, $form_state) {
     // We need to generate a new degreeID for this major_code and catalog_year,
     // because one does not already exist!
     if (!$degree_id = $db->request_new_degree_id()) {
-      die ("Error.  Could not create new degree_id.");
+      watchdog("admin", "Could not create new degree.");
+      die ("Error.  Could not create new degree_id.");      
     }
   } // ELSE
 
@@ -2410,6 +2419,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
 
 
   fp_add_message("Degree updated succesfully.");
+  watchdog("admin", "$major_code $track ($de_catalog_year) has been updated successfully.");
   $button_msg = urlencode("Degree updated successfully at " . date("H:i:s"));
   $bool_scroll = $bool_button_msg = true;
   if ($errors != "")

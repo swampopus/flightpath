@@ -205,6 +205,8 @@ function user_display_student_users() {
     $extra_where_conditions .= " AND is_active IN (" . join(",", $vals) . ") ";    
   }
     
+  watchdog("user", "Viewed admin student user list. Range: $ur - $lr. Name: $filter_name. Major: $filter_major. Active: $filter_active. School: $filter_school", array(), WATCHDOG_DEBUG);
+  
     
   $html = "";
   $html .= "
@@ -1151,6 +1153,9 @@ function user_edit_student_user_form_submit($form, $form_state) {
     
     db_query("DELETE FROM students WHERE cwid = '?' ", $student_cwid);
     db_query("DELETE FROM users WHERE cwid = '?' AND is_student = '1' ", $student_cwid);      
+    
+    watchdog("user_edit", "Deleted student user $user_id (cwid $student_cwid)");
+    
     
     fp_add_message(t("User has been deleted."));
     fp_goto("admin/users/students");

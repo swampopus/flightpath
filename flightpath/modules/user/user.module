@@ -1692,6 +1692,9 @@ function user_display_users() {
     $extra_where_conditions .= " AND department_code = :dept ";
     $params[":dept"] = $filter_dept;
   }
+  
+  
+  watchdog("user", "Viewed admin user list. Range: $ur - $lr. Name: $filter_name. Dept: $filter_dept. Role: $filter_role. School: $filter_school", array(), WATCHDOG_DEBUG);
     
       
   $result = db_query("SELECT * FROM (users u, faculty f)

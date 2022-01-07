@@ -892,6 +892,10 @@ function system_confirm_db_updates_form_submit($form, $form_state) {
  
   $batch["finished_callback"] = array("system_finished_db_updates_finished");
    
+  
+  watchdog("admin", "Ran DB updates for modules"); 
+   
+   
   // Set the batch...
   batch_set($batch);  
   
@@ -1153,6 +1157,9 @@ function system_popup_report_contact_form_submit($form, $form_state) {
   } 
 
   $_SESSION["da_error_report_md5"] = $themd5;
+  
+  watchdog("admin", "Sent message with popup report contact form: Category: $category; Comment: $comment");
+  
   
 }
 
@@ -1968,7 +1975,7 @@ function system_school_data_form_validate($form, &$form_state) {
   // Remove the data from our form_state, so it isn't saved twice
   unset($form_state["values"]["degree_college" . $fs]);
   
-  
+  watchdog("system", "Updated school settings (school_id: $school_id)");
   
   
 }
@@ -2295,7 +2302,7 @@ function system_settings_form() {
     "label" => t("Max watchdog (log) entry age:"),
     "hide_please_select" => TRUE,
     "options" => $options,
-    "value" => variable_get("max_watchdog_age", "548"),
+    "value" => variable_get("max_watchdog_age", "1095"),
     "description" => t("Keep entries in the watchdog log tables until they are this old.
                         Entries older than this will be deleted at every cron run.
                         For example, if you only want to keep log entries for 1 year, then
@@ -2303,7 +2310,7 @@ function system_settings_form() {
                         <b>Warning:</b> the Stats module uses data in this table to create
                         statistics and reports about use of FlightPath.  Once data is removed from the
                         watchdog table, it cannot be retrieved again.
-                        <br>If you are unsure what to put here, select '1.5 years'."),
+                        <br>If you are unsure what to put here, select '3 years'."),
   );
   
   $form['max_watchdog_debug_age'] = array(
@@ -2311,11 +2318,11 @@ function system_settings_form() {
     "label" => t("Max watchdog (log) DEBUG entry age:"),
     "hide_please_select" => TRUE,
     "options" => array('30' => t('30 days'), '60' => t('60 days'), '90' => t('90 days'), '180' => t('180 days'), '365' => t('1 year'), 'never' => t("Never - do not remove debug entries from log table")),
-    "value" => variable_get("max_watchdog_debug_age", "90"),
+    "value" => variable_get("max_watchdog_debug_age", "365"),
     "description" => t("This is similar to the setting above, but this sets how long to keep 'debug' messages in the watchdog (logs).
                         Debug events are generally useful for tracking down issues or problems, and are not used in any official reporting.  Removing them
                         helps reduce the size of the watchdog table.
-                        <br>If unsure what to choose, select '90 days'."),    
+                        <br>If unsure what to choose, select '1 year'."),    
   );             
   
 
@@ -2483,7 +2490,7 @@ function system_settings_form_submit($form, &$form_state) {
 function system_cron() {
   
   // Should we "trim" the watchdog table of old entries?
-  $max_age_days = variable_get("max_watchdog_age", "548");
+  $max_age_days = variable_get("max_watchdog_age", "1095");
   if ($max_age_days != "never" && ($max_age_days*1) > 0) {
     
     // Okay, let's trim the table.
@@ -2498,7 +2505,7 @@ function system_cron() {
   }
   
   // Should we trim the watchdog table of DEBUG records?
-  $max_age_days = variable_get("max_watchdog_debug_age", "90");
+  $max_age_days = variable_get("max_watchdog_debug_age", "365");
   if ($max_age_days != "never" && ($max_age_days*1) > 0) {
     
     // Okay, let's trim the table.
@@ -4367,8 +4374,11 @@ function system_modules_form_submit($form, $form_state) {
     // We should clear the cache if we did something.
     fp_clear_cache();
     
+    
+    watchdog("admin", "Saved system modules form (enabled or diabled module)");
+    
   }
-
+   
   
 }
 

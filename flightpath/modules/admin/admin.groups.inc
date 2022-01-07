@@ -210,7 +210,10 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
                 AND catalog_year = '?'
                 ", $group_id, $de_catalog_year);
     fp_add_message(t("The group @title (%name) has been deleted successfully for @year", array("@title" => $title, "%name" => $group_name, "@year" => $de_catalog_year)));
-    fp_goto("admin/groups", "de_catalog_year=$de_catalog_year");
+    
+    watchdog("admin", "Deleted group: $group_name - $group_id ($de_catalog_year), school_id = $school_id");
+    
+    fp_goto("admin/groups", "de_catalog_year=$de_catalog_year");    
     return;
   }
 
@@ -451,6 +454,9 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
 
 
   fp_add_message("Group successfully updated.");
+
+
+  watchdog("admin", "Updated group: $group_name - $group_id ($de_catalog_year), school_id = $school_id");
 
   // Clear previous values to make sure the Required Courses box gets updated,
   // even if its set to readonly.
@@ -1407,6 +1413,9 @@ function admin_display_groups() {
     $params[":school_id"] = $filter_school_value;
   }  
 
+  watchdog("admin", "Viewed admin groups list. Name filter: $filter_name_value. ($de_catalog_year), school_id: $filter_school_value", array(), WATCHDOG_DEBUG);
+
+
   $res = db_query("SELECT * FROM draft_groups
                     WHERE catalog_year = :catalog_year
                     AND delete_flag = 0
@@ -1611,6 +1620,8 @@ function admin_process_all_definitions_form_submit($form, $form_submit) {
   $db = get_global_database_handler();
   $de_catalog_year = $values["de_catalog_year"];
 
+  
+  watchdog("admin", "Processed group definitions for: $de_catalog_year");
   
   // Okay, set up the batch....
   $batch = array(

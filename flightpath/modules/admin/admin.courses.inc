@@ -146,6 +146,9 @@ function admin_display_courses() {
   }
   
   
+  watchdog("admin", "Viewed admin courses list. Exclude option: $filter_exclude, Range: $ur - $lr, ($de_catalog_year), School id: $filter_school", array(), WATCHDOG_DEBUG);
+  
+  
   $q = "SELECT * FROM draft_courses
                         WHERE 
                           catalog_year = ?
@@ -635,6 +638,9 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
     $res = db_query($query, $school_id);
     
     fp_add_message(t("Course %course successfully deleted for %year", array("%course" => $course_names, "%year" => $de_catalog_year)));
+    
+    watchdog("admin", "Course $course_names deleted. Course id: $course_id, ($de_catalog_year), school_id: $school_id");
+    
     // Redirect us to the list of courses.
     $form["#redirect"] = array(
       "path" => "admin/courses",
@@ -837,6 +843,8 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
                   AND school_id = ? ", $title, $description, $min_hours, $max_hours, $repeat_hours, $course_id, $school_id);
                   
   }
+
+  watchdog("admin", "Course $course_names updated. ($de_catalog_year), school_id: $school_id");
 
 
 
