@@ -8,6 +8,11 @@ FlightPath 6.x Changelog
   
   Made the default time to delete normal watchdog statements 3 years instead of 1.5 years.
 
+  Always add a "text STOP to opt-out" type message to the end of every sms message.
+  
+  Altered encounters SMS settings to let user specify which phone numbers are specifically for mass text messages.  The
+  mass text messaging form will only select those.
+
 
 2022-01-04
   Added ability to send arguments to fp_goto() as an array.

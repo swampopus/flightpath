@@ -169,9 +169,9 @@ function engagements_mass_sms_form()
 
 
   $form['from_number'] = array(
-    'label' => t("Select which phone number this will be coming from:"),
+    'label' => t("Select which mass-text phone number this will be coming from:"),
     'type' => 'select',
-    'options' => engagements_get_from_phones_for_fapi(FALSE, $user),
+    'options' => engagements_get_from_phones_for_fapi(FALSE, $user, TRUE),
     'required' => TRUE,
     'hide_please_select' => TRUE,
   );
@@ -183,9 +183,11 @@ function engagements_mass_sms_form()
     'required' => TRUE,
     'description' => t("To insert emoji in Windows, press <span style='padding-left: 10px; padding-right: 10px; font-size: 1.3em;'><i class='fa fa-windows'></i> + .</span>  <em>(Windows key + period)</em>
                         <br><br>
-                        Keep in mind that pricing is based on 160-chars = 1 message segment.  <b>Important:</b> Your message will NOT have any
+                        Keep in mind that pricing is based on 160-chars = 1 message segment.  
+                        <br><b>Important:</b> Your message <u>will NOT</u> have any
                         header attached.  It would be a good idea to begin by stating what unit/department/school you are sending from.
-                        <br>&nbsp; &nbsp; Ex: &nbsp; <em>From the UFP President's Office:  Welcome students to the new term...</em>"),
+                        <br>&nbsp; &nbsp; Ex: &nbsp; <em>From the UFP President's Office:  Welcome students to the new term...</em>
+                        <br><b>Important:</b> Your message <u>WILL automatically</u> have a message appended letting the user know they can reply with STOP to opt-out of receiving text messages."),
   );
 
 
@@ -565,16 +567,31 @@ function engagements_sms_settings_form()
   $form['sms_from_phone'] = array(
     'label' => 'From Phone number(s):',
     'type' => 'textarea',
+    'rows' => 3,
     'value' => variable_get('sms_from_phone', '555-555-1234'),
-    'description' => t("These are the phone numbers from your SignalWire account, which you will be receiving SMS text messages at.  
+    'description' => t("These are the phone numbers from your SignalWire account.  
                         <br>Enter them one per line, with a tilda (~) between the number
                         and a brief line description, like so:
                       <br> &nbsp; &nbsp; 555-123-4567 ~ Brief Description ~ default
                       <br> &nbsp; &nbsp; 555-222-1111 ~ Brief Description2
                       <br>Notice that the 'default' designation lets FlightPath know what is the default number which standard notifications
-                      will be sent from.  If no default is set, the first number will be used."),
+                      will be sent from.  If no default is set, the first number will be used.
+                      <br><strong>Important:</strong> Do not send mass txt messages from these numbers unless your campaign is set to do so.  These
+                          numbers will not appear as options to send mass txt messages."),
   );
 
+  
+  $form['sms_mass_phone'] = array(
+    'label' => 'Mass TXT Phone number(s):',
+    'type' => 'textarea',
+    'rows' => 3,
+    'value' => variable_get('sms_mass_phone', '800-555-1234'),
+    'description' => t("These are phone numbers from your SignalWire account, specifically belonging to a campaign for marketting or otherwise
+                        mass text messages.  At the time of this writing, toll-free numbers do not need to belong to such a campaign.  These
+                        will be the only numbers which appear as options to send mass txt messages to."),
+  );
+    
+  
   $form['sms_header'] = array(
     'label' => 'SMS Header:',
     'type' => 'textfield',
@@ -653,10 +670,14 @@ function engagements_sms_replace_patterns($str, $from_mobile = "", $account = NU
 /**
  * Get the available "from phone" numbers in an organized array structure.
  */
-function engagements_get_from_phones()
+function engagements_get_from_phones($bool_mass_text_numbers = FALSE)
 {
   $rtn = array();
   $val = variable_get('sms_from_phone', '555-555-1234');
+  if ($bool_mass_text_numbers) {
+    $val = variable_get('sms_mass_phone', '800-555-1234');
+  }
+
 
   $bool_default_set = FALSE;
   $first_num = "";
@@ -2310,14 +2331,14 @@ function engagements_get_users_to_be_notified_for_sms_on_number($num) {
  * to send sms for that number.
  * 
  */
-function engagements_get_from_phones_for_fapi($bool_return_all = TRUE, $account = NULL)
+function engagements_get_from_phones_for_fapi($bool_return_all = TRUE, $account = NULL, $bool_only_mass_text_numbers = FALSE)
 {
   global $user;
   $rtn = array();
 
   if ($account == NULL) $account = $user;
 
-  $phones = engagements_get_from_phones();
+  $phones = engagements_get_from_phones($bool_only_mass_text_numbers);
   $default = $phones['default']['num'];
   $rtn[$default] = t("[Default] ") . engagements_convert_to_pretty_phone_number($default) . ' - ' . $phones['default']['description'];
 
@@ -2520,6 +2541,13 @@ function engagements_send_sms_to_number($to_number, $body, $to_cwid = "", $from_
   if ($from_phone == "default") {
     $from_phone = engagements_convert_to_valid_phone_number($phones['default']['num']);
   }
+
+
+  // We must include a "text STOP to opt-out" type message to the bottom of every notification.
+  // TODO:  May be a setting instead, on the signalwire settings page
+  $bodu .= "\n\n" . "Text STOP to opt-out of txt messages.";
+
+
 
 
 
