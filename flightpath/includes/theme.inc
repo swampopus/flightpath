@@ -1983,7 +1983,9 @@ function display_not_found() {
     "content" => "<h2>" . t("Page not found") . "</h2>" . t("Sorry, the requested page could not be found."),
   );
   
-  watchdog("system", "404 - Page not found", array(), WATCHDOG_DEBUG);
+  $location = @$_SERVER["REQUEST_URI"];
+  
+  watchdog("system", "404 - Page not found (" . strip_tags($location) . ")", array(), WATCHDOG_DEBUG);
   
   fp_display_page($page);
   die;
@@ -1999,7 +2001,9 @@ function display_access_denied() {
     "content" => "<h2>" . t("Access Denied") . "</h2>" . t("Sorry, but you do not have access to the requested page or function."),
   );  
   
-  watchdog("system", "403 - Access denied", array(), WATCHDOG_DEBUG);
+  $location = @$_SERVER["REQUEST_URI"];
+  
+  watchdog("system", "403 - Access denied (" . strip_tags($location) . ")", array(), WATCHDOG_DEBUG);
     
   fp_display_page($page);
   die;  

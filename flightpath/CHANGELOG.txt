@@ -4,6 +4,8 @@ FlightPath 6.x Changelog
 2022-01-09
   Removed extraneous testing functions.
     
+  Added to logged 404 and 403 errors, added the location to the msg so it shows in the watchdog view.
+  
 
 2022-01-08
   Fixed bug where "public files" tab was showing on all "add" content screens.
