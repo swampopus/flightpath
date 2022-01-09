@@ -140,7 +140,7 @@ function encryption_settings_form() {
     "label" => "Encrypt uploaded files?",
     "options" => array("yes" => t("Yes"), "no" => t("No")),
     "value" => variable_get("encryption_files_encryption", "yes"),
-    "description" => t("When files are uploaded or attached to a piece of content (for example, an email attachment or TXT message attachment) 
+    "description" => t("When files are uploaded or attached to a piece of content (for example, an email attachment or text message attachment) 
                         they can be automatically encrypted before being saved to the server.  Do you wish
                         to do this?  If so, the extension \".enc\" will be added to the end of encrypted files.
                         When files are downloaded through the Encryption module, they will be automatically decrypted

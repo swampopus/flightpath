@@ -31,7 +31,7 @@ function content_menu() {
       ),
     ),
     'type' => MENU_TYPE_DEFAULT_TAB,
-    'tab_family' => 'content_tabs',    
+    'tab_family' => 'content_man_tabs',    
     "weight" => 0,    
   );     
 
@@ -52,7 +52,7 @@ function content_menu() {
       ),
     ),
     'type' => MENU_TYPE_TAB,
-    'tab_family' => 'content_tabs',    
+    'tab_family' => 'content_man_tabs',    
     "weight" => 10,    
   );     
 
@@ -89,7 +89,7 @@ function content_menu() {
       ),
         
     ),
-    "tab_parent" => "admin-tools/content",      
+      
   );
 
 

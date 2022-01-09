@@ -79,6 +79,10 @@ CREATE TABLE `sms_history` (
   `date_sent` int(10) unsigned DEFAULT NULL,
   `updated` int(10) unsigned DEFAULT NULL,
   `price_processed` tinyint(3) unsigned DEFAULT 0,
+  `delivery_status` varchar(255) DEFAULT NULL,
+  `err_code` varchar(255) DEFAULT NULL,
+  `err_message` varchar(255) DEFAULT NULL,
+  `err_friendly_message` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`mid`),
   KEY `from_number` (`from_number`),
   KEY `to_number` (`to_number`),
@@ -91,10 +95,32 @@ CREATE TABLE `sms_history` (
   KEY `from_cwid` (`from_cwid`),
   KEY `message_sid` (`message_sid`),
   KEY `num_segements` (`num_segments`),
+  KEY `delivery_status` (`delivery_status`),
+  KEY `err_code` (`err_code`),
   KEY `sw_type` (`sw_type`)
 );
 ";
 db_query($q);
+
+
+$q = "
+CREATE TABLE `sms_do_not_txt` (
+  `mid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned DEFAULT NULL,
+  `cwid` varchar(30) DEFAULT NULL,
+  `phone_number` varchar(255) DEFAULT NULL,
+  `prev_notification_method` varchar(255) DEFAULT NULL,
+  `updated` int(10) unsigned DEFAULT NULL,  
+  PRIMARY KEY (`mid`),
+  KEY `phone_number` (`phone_number`),
+  KEY `updated` (`updated`),
+  KEY `cwid` (`cwid`),
+  KEY `user_id` (`user_id`),
+  KEY `prev_notification_method` (`prev_notification_method`)
+);
+";
+db_query($q);
+
 
 
     
@@ -127,6 +153,42 @@ function engagements_update($old_schema, $new_schema) {
     db_query("ALTER TABLE content__engagement ADD INDEX (`field__external_msg_id`) ");
     
   }  
+
+
+  if (intval($old_schema) < 4) {
+    $q = "
+    CREATE TABLE `sms_do_not_txt` (
+      `mid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+      `user_id` int(10) unsigned DEFAULT NULL,
+      `cwid` varchar(30) DEFAULT NULL,
+      `phone_number` varchar(255) DEFAULT NULL,
+      `prev_notification_method` varchar(255) DEFAULT NULL,
+      `updated` int(10) unsigned DEFAULT NULL,  
+      PRIMARY KEY (`mid`),
+      KEY `phone_number` (`phone_number`),
+      KEY `updated` (`updated`),
+      KEY `cwid` (`cwid`),
+      KEY `user_id` (`user_id`),
+      KEY `prev_notification_method` (`prev_notification_method`)
+    );
+    ";
+    db_query($q);    
+  }
+
+
+  if (intval($old_schema) < 5) {
+    
+    db_query("ALTER TABLE sms_history ADD COLUMN `delivery_status` varchar(255) DEFAULT NULL ");
+    db_query("ALTER TABLE sms_history ADD COLUMN `err_code` varchar(255) DEFAULT NULL ");
+    db_query("ALTER TABLE sms_history ADD COLUMN `err_message` varchar(255) DEFAULT NULL ");
+    db_query("ALTER TABLE sms_history ADD COLUMN `err_friendly_message` varchar(255) DEFAULT NULL ");
+      
+    db_query("ALTER TABLE sms_history ADD INDEX (`delivery_status`) ");
+    db_query("ALTER TABLE sms_history ADD INDEX (`err_code`) ");
+
+    
+  }
+
 
 
 

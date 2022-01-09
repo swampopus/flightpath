@@ -387,21 +387,37 @@ function user_user_settings_form() {
   
   
   $options = array('email' => t("Email"));
-  if (variable_get('sms_project_id', '') != '') {
-    $options['txt'] = t("TXT Message");
-    $options['email_txt'] = t("Both email and txt message");
+  $phone_number = user_get_attribute($user->id, 'mobile_phone', '');
+  if (variable_get('sms_project_id', '') != '' && $phone_number != "") {
+    $options['txt'] = t("Text Message");
+    $options['email_txt'] = t("Both email and text message");
   }
   
   $form['default_notification_method'] = array(
     'label' => t('Default notification method for important events'),
     'type' => 'select',
-    'hide_please_select' => TRUE,
+    'hide_please_select' => TRUE, 
     'options' => $options,
     'value' => @$user->settings['default_notification_method'],
     'description' => t('These would be notifications sent out by FlightPath.  For example, when you schedule an appointment or to send out a reminder.
                         If you are unsure what to select, choose "Email".'),    
   );
   
+  
+  if ($phone_number) {
+    $phone_number = engagements_convert_to_valid_phone_number($phone_number);
+    $form['sms_opt_out__' . $phone_number] = array(
+      'label' => t('Opt-out of receiving text messages at %num?', array("%num" => engagements_convert_to_pretty_phone_number($phone_number))),
+      'type' => 'select',
+      'hide_please_select' => TRUE,
+      'options' => array('no' => t('No - Receive text messages normally (default)'), 'yes' => t('Yes - Opt-out, and do not receive text messages from @flightpath', array("@flightpath", variable_get("system_name", "FlightPath")))),
+      'value' => @$user->settings['sms_opt_out__' . $phone_number],
+      'description' => t('This setting controls whether you wish to completely opt-out of receiving text messages on your phone.  If set to "Yes", then your default notification method
+                          above will automatically be set to "Email" only.  If unsure what to select, choose "No".'),    
+    );
+    
+  }
+
   
   
   
@@ -468,8 +484,29 @@ function user_user_settings_form_submit($form, $form_state) {
   $default_student_load_tab = $form_state['values']['default_student_load_tab'];
   $default_notification_method = $form_state['values']['default_notification_method'];
   
+  $phone_number = user_get_attribute($user->id, 'mobile_phone', '');
+  $phone_number = engagements_convert_to_valid_phone_number($phone_number);
+      
+  $sms_opt_out = $form_state['values']['sms_opt_out__' . $phone_number];
   
-  
+  if ($sms_opt_out === 'yes' && $phone_number) {
+                
+    db_query("DELETE FROM sms_do_not_txt WHERE phone_number = ?", array($phone_number));
+    db_query("INSERT INTO sms_do_not_txt (user_id, cwid, phone_number, prev_notification_method, updated)
+                    VALUES (?, ?, ?, ?, ?)", array($user->id, $user->cwid, $phone_number, $default_notification_method, time())); 
+    
+    $default_notification_method = 'email';
+    
+  }
+  else if ($sms_opt_out === 'no' && $phone_number) {
+    // Opt back in!
+    $notification_method = db_result(db_query("SELECT prev_notification_method FROM sms_do_not_txt WHERE phone_number = ?", array($phone_number)));
+    if ($notification_method) {
+      $default_notification_method = $notification_method;
+    } 
+    
+    db_query("DELETE FROM sms_do_not_txt WHERE phone_number = ?", array($phone_number));
+  }
     
   // are we updating password?  (If we made it here, we have already passed validation, and may continue.
   $new_password1 = $form_state['values']['new_password1'];  
@@ -490,6 +527,7 @@ function user_user_settings_form_submit($form, $form_state) {
   user_set_setting($user->id, "hide_charts", $hide_charts);
   user_set_setting($user->id, "default_student_load_tab", $default_student_load_tab);
   user_set_setting($user->id, "default_notification_method", $default_notification_method);
+  user_set_setting($user->id, "sms_opt_out__" . $phone_number, $sms_opt_out);
   user_set_setting($user->id, "image_url", $image_url);
     
   

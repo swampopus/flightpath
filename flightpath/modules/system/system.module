@@ -1094,7 +1094,7 @@ function system_popup_report_contact_form() {
                      t("Comments") => t("Comments"),
                      t("Audit") => t("Audit"),
                      t("Engagements") => t("Engagements"),
-                     t("Sending/Receiving TXT") => t("Sending/Receiving TXT"),
+                     t("Sending/Receiving Text") => t("Sending/Receiving Text"),
                      t("Reports") => t("Reports/Analytics"),
                      t("Other") => t("Other"),
                       ),
@@ -2905,9 +2905,13 @@ function system_perform_clear_cache() {
  * Called from menu, will run hook_cron() for all modules.
  */
 function system_perform_run_cron() {
+  
+  watchdog("cron", "Cron run started", array(), WATCHDOG_DEBUG);
   invoke_hook("cron");
+  watchdog("cron", "Cron run completed", array(), WATCHDOG_DEBUG);
+  variable_set("cron_last_run", time());  
+  
   fp_add_message(t("Cron run completed successfully."));
-  variable_set("cron_last_run", time());
   fp_goto("admin-tools/admin");
 }
 

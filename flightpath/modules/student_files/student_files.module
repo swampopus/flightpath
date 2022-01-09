@@ -681,7 +681,7 @@ function student_files_settings_form() {
                           When files are downloaded through the Student Files module, they will be automatically decrypted
                           for the end user.
                           <br><br>
-                          Note: this does not affect files attached in Engagements, like TXT or email file attachments.  To configure
+                          Note: this does not affect files attached in Engagements, like text messages or email file attachments.  To configure
                           encryption of those files, see the Encryption settings page."),
       "prefix" => "<fieldset><legend>" . t("Encryption Settings") . "</legend>",
       "suffix" => "</fieldset>",

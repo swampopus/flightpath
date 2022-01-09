@@ -1,6 +1,24 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-01-08
+  Fixed bug where "public files" tab was showing on all "add" content screens.
+  
+  Changed verbage so that SMS text messages change from "TXT" to "Text messages" throughout FlightPath modules.
+  
+  Implemented new setting in GUI to opt-out of receiving text messages.
+  
+  Implemented opting-out of text messages if user replies STOP.  Opting back in if they send UNSTOP or SUBSCRIBE.
+    
+  Removed accidental hard-coded signalwire setting.
+  
+  Implemented change to sms_history table so we can also track error messages and delivery status.
+  
+  Only update SMS record (in sms_history table) if price or err_code value changed.
+  
+  Added extra watchdog (debug) statements for when cron starts and stops.
+  
+
 2022-01-07
   Added numerous new watchdog() statements to better track admin actions, like creating and deleting degrees, groups, etc.
 

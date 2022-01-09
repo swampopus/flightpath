@@ -371,7 +371,7 @@ function alerts_content_register_content_type() {
   $arr['activity_record'] = array(
     'title' => 'Activity Record',
     'description' => 'This is generally created directly by FlightPath, and is a note that some activity has occured which, while not an alert, should be
-                        brought to the advisors attention.  For example, the student sent a TXT message, or opened an email.',
+                        brought to the advisors attention.  For example, the student sent a text message, or opened an email.',
     'settings' => array(
       'title' => array(
         'label' => t('Title / Short Description'),    

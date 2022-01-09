@@ -90,8 +90,8 @@ function engagements_menu()
 
 
   $items["admin-tools/mass-sms"] = array(
-    "title" => "Send Mass TXT Messages",
-    "description" => "Send a txt message to multiple recipients.",
+    "title" => "Send Mass Text Messages",
+    "description" => "Send a text message to multiple recipients.",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("engagements_mass_sms_form"),
     "access_arguments" => array("can_send_mass_sms"),
@@ -258,7 +258,7 @@ function engagements_mass_sms_form_submit($form, $form_state)
   // Okay, set up the batch....
   $batch = array(
     "operation" => array("engagements_mass_sms_perform_batch_operation", array($recipients, $message, $from_number)),
-    "title" => t("Sending Mass TXT Messages"),
+    "title" => t("Sending Mass Text Messages"),
     "progress_message" => "Attempting to send to recipient @current of @total",
     "display_percent" => TRUE,
   );
@@ -403,6 +403,13 @@ function engagements_mass_sms_perform_batch_operation(&$batch, $recipients, $mes
       'line' => $line,
     );
 
+    // Has the user opted-out of receiving our txt messages?
+    if (!engagements_can_send_sms_to_number($num)) {
+      $batch['opt_out'][] = $line;
+      $batch['csv'] .= "\"$from_number\",\"$line\",\"$cwid\",\"$user_type\",\"\",\"user opted-out of receiving text\",\"\",\"\",\"\",\"\"\n";
+      $c++;
+      continue;      
+    }
 
     // Send our message to this number, record it as an engagement as well.
     $num_segments = ceil(strlen($message) / 160);
@@ -559,7 +566,7 @@ function engagements_sms_settings_form()
   $form['sms_space_url'] = array(
     'label' => 'Space URL',
     'type' => 'textfield',
-    'value' => variable_get('sms_space_url', 'liftoffacademics.signalwire.com'),
+    'value' => variable_get('sms_space_url', ''),
     'description' => t("The URL you use to access your region of signalwire.  example.signalwire.com.  No http:// or such."),
   );
 
@@ -582,7 +589,7 @@ function engagements_sms_settings_form()
 
   
   $form['sms_mass_phone'] = array(
-    'label' => 'Mass TXT Phone number(s):',
+    'label' => 'Mass Text Phone number(s):',
     'type' => 'textarea',
     'rows' => 3,
     'value' => variable_get('sms_mass_phone', '800-555-1234'),
@@ -614,7 +621,7 @@ function engagements_sms_settings_form()
     'label' => 'Mass SMS Password:',
     'type' => 'textfield',
     'value' => variable_get('sms_mass_sms_password', 'changeMe'),
-    'description' => t("Before a user may use the Send Mass TXT Messages feature (to sent o many recipients), they must enter this password to protect against accidental submissions."),
+    'description' => t("Before a user may use the Send Mass Text Messages feature (to sent o many recipients), they must enter this password to protect against accidental submissions."),
   );
 
 
@@ -723,7 +730,7 @@ function engagements_get_from_phones($bool_mass_text_numbers = FALSE)
 
 function engagements_get_sms_from_history($message_sid)
 {
-  $res = db_query("SELECT * FROM sms_history WHERE message_sid = ?", array($message_sid));
+  $res = db_query("SELECT * FROM sms_history WHERE message_sid = ? ORDER BY mid DESC LIMIT 1", array($message_sid));
   $cur = db_fetch_array($res);
 
   if ($cur) return $cur;
@@ -812,17 +819,35 @@ function engagements_handle_incoming_sms($vars = array())
     $to_user_id = $user_id;
   }
 
+  
+  $dir = "received";
+  $fac_cwid = $to_cwid;
+  $stu_cwid = $from_cwid;
+  if (strstr($direction, 'outbound')) {
+    $dir = 'sent';
+    $fac_cwid = $from_cwid;
+    $stu_cwid = $to_cwid;
+  }
+  
+  // Did we receive STOP?
+  if ($dir == 'received') {
+    if (trim(strtoupper($body)) === 'STOP') {
+      engagements_handle_sms_stop($from_user_id, $from_cwid, $from_mobile, $to_mobile);
+    }
+    // UNSTOP or SUBSCRIBE?
+    if (trim(strtoupper($body)) === 'UNSTOP' || trim(strtoupper($body)) === 'SUBSCRIBE') {
+      engagements_handle_sms_unstop($from_user_id, $from_cwid, $from_mobile, $to_mobile);
+    }
+        
+      // We do not return.  Go ahead and let it create an engagement below, so the
+      // advisor can see that this happened.
+              
+  }  
+  
+  
   if ($from_cwid || $to_cwid) {
     // create an engagement content node for this student!
 
-    $dir = "received";
-    $fac_cwid = $to_cwid;
-    $stu_cwid = $from_cwid;
-    if (strstr($direction, 'outbound')) {
-      $dir = 'sent';
-      $fac_cwid = $from_cwid;
-      $stu_cwid = $to_cwid;
-    }
 
     $content = new stdClass();
     $content->type = 'engagement';
@@ -872,10 +897,8 @@ function engagements_handle_incoming_sms($vars = array())
           'tmp_name' => $tmp_name,          
         );
         
+        // This function will handle encryption of files automatically.
         $fid = content_add_new_uploaded_file($file, $cid, FALSE);
-        
-        // TODO: if encrypted, then the filename should be something else.
-        
         $media_filenames .= $filename . ',';
       } // for t (media)
   
@@ -946,15 +969,172 @@ function engagements_handle_incoming_sms($vars = array())
 
   }
 
+
+
+
+
   // Write our data to our sms_history table.
   db_query(
-    "INSERT INTO sms_history (`message_sid`, sw_type, `body`, `from_number`, `to_number`, `sw_price`, `fp_price`, `from_cwid`, `to_cwid`, `updated`, `direction`, `media_filenames`, `date_sent`, price_processed, num_segments)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
-    array($message_sid, 'sms', $body, $from_mobile, $to_mobile, $price, $fp_price, $from_cwid, $to_cwid, time(), $direction, $media_filenames, $date_sent_ts, 1, $num_segments)
+    "INSERT INTO sms_history (`message_sid`, sw_type, `body`, `from_number`, `to_number`, `sw_price`, `fp_price`, `from_cwid`, `to_cwid`, `updated`, `direction`, 
+                              `media_filenames`, `date_sent`, price_processed, num_segments, delivery_status, err_code, err_message, err_friendly_message)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
+    array($message_sid, 'sms', $body, $from_mobile, $to_mobile, $price, $fp_price, $from_cwid, $to_cwid, time(), $direction, 
+                $media_filenames, $date_sent_ts, 1, $num_segments, @$vars['display_status'], @$vars['err_code'], @$vars['err_message'], @$vars['err_friendly_message'])
   );
 } // engagements_handle_incoming_sms
 
 
+
+
+/**
+ * This function is called by engagements_handle_incoming_sms, when we receive 'STOP' from the user.
+ * We must add them to our "sms_do_not_txt" table, and send a reply letting them know how to re-subscribe in the future.
+ */
+function engagements_handle_sms_stop($user_id = 0, $cwid = '', $phone_number, $from_fp_phone_number) {
+  
+  if ($user_id === 0) {
+    // Try to figure out what the user_id is based on the phone number.
+    $test = db_result(db_query("SELECT user_id FROM user_attributes WHERE name = 'mobile_phone' AND value = ?", array($from_fp_phone_number)));
+    $test = intval($test);
+    if ($test > 0) $user_id = $test;
+  }
+  
+  $phone_number = engagements_convert_to_valid_phone_number($phone_number);
+  if (!$phone_number) {
+    // watchdog that there was an error because phone number not valid.
+    watchdog('enagements_sms', "User tried to opt-out of sms, but invalid phone number: $user_id, $cwid, $phone_number", array(), WATCHDOG_ERROR);    
+    return FALSE;
+  }
+  
+  if ($user_id) {
+    // Get current notification method for this user.
+    $prev_notification_method = user_get_setting($user_id, 'default_notification_method', 'email');
+    // Set their new defailt_notification_method to just email.
+    user_set_setting($user_id, 'default_notification_method', 'email');
+    // also set an opt-out setting value here, so the user can change it from within flightpath.
+    user_set_setting($user_id, "sms_opt_out__" . $phone_number, 'yes');
+  }  
+    
+  // Save everything to do_not_txt table.  (First, delete anything already there for this phone_number, which is the most important to keep track of)
+  db_query('DELETE FROM sms_do_not_txt WHERE phone_number = ?', array($phone_number));
+  db_query("INSERT INTO sms_do_not_txt (user_id, cwid, phone_number, prev_notification_method, updated)
+                    VALUES (?, ?, ?, ?, ?)", array($user_id, $cwid, $phone_number, $prev_notification_method, time()));
+  
+  // Send final sms back to number telling them how to re-enable.
+  $msg = t("You have opted-out of receiving text messages from @flightpath. To re-subscribe, text UNSTOP or SUBSCRIBE.\n\nYou may also log into @flightpath and edit your notification settings.",
+              array("@flightpath" => variable_get("system_name", "FlightPath"))); 
+  
+  engagements_send_sms_to_number($phone_number, $msg, '', $from_fp_phone_number, FALSE);
+  
+  
+  watchdog('enagements_sms', "User opted-out of sms: $user_id, $cwid, $phone_number");
+} // engagements_handle_sms_stop
+
+
+/**
+ * User opted-IN to receiving txt messages.
+ */
+function engagements_handle_sms_unstop($user_id = 0, $cwid = '', $phone_number, $from_fp_phone_number) {
+
+  if ($user_id === 0) {
+    // Try to figure out what the user_id is based on the phone number.
+    $test = db_result(db_query("SELECT user_id FROM user_attributes WHERE name = 'mobile_phone' AND value = ?", array($from_fp_phone_number)));
+    $test = intval($test);
+    if ($test > 0) $user_id = $test;
+  }
+  
+  $phone_number = engagements_convert_to_valid_phone_number($phone_number);
+  
+  if (!$phone_number) {
+    // watchdog that there was an error because phone number not valid.
+    watchdog('enagements_sms', "User tried to opt-in to sms, but invalid phone number: $user_id, $cwid, $phone_number", array(), WATCHDOG_ERROR);    
+    return FALSE;
+  }
+  
+  if ($user_id) {
+    // Get current notification method for this user.
+    $notification_method = db_result(db_query("SELECT prev_notification_method FROM sms_do_not_txt WHERE phone_number = ?", array($phone_number)));
+    if ($notification_method) {
+      // Set their new defailt_notification_method to just email.
+      user_set_setting($user_id, 'default_notification_method', $notification_method);
+    }
+    // also set our opt-out setting value here, so the user can change it from within flightpath.
+    user_set_setting($user_id, "sms_opt_out__" . $phone_number, 'no');
+  }  
+    
+  // Save everything to do_not_txt table.  (First, delete anything already there for this phone_number, which is the most important to keep track of)
+  db_query('DELETE FROM sms_do_not_txt WHERE phone_number = ?', array($phone_number));
+  
+  // Send final sms back to number telling them how to re-enable.
+  $msg = t("You have opted-in to receiving text messages from @flightpath.\nReply STOP to opt-out.\n\nYou may also log into @flightpath and edit your notification settings.",
+              array("@flightpath" => variable_get("system_name", "FlightPath"))); 
+  
+  engagements_send_sms_to_number($phone_number, $msg, '', $from_fp_phone_number, FALSE);
+  
+  
+  watchdog('enagements_sms', "User opted-out of sms: $user_id, $cwid, $phone_number");
+
+}
+
+
+
+
+function engagements_can_send_sms_to_number($phone_number) {
+  $phone_number = engagements_convert_to_valid_phone_number($phone_number);
+  if (!$phone_number) return FALSE;
+  
+  $mid = db_result(db_query("SELECT mid FROM sms_do_not_txt WHERE phone_number = ?", array($phone_number)));
+  
+  // We found an entry in this table, so NO, we cannot txt this number.
+  if ($mid) return FALSE;
+  
+  // else
+  return TRUE;
+  
+  
+}
+
+
+/**
+ * 
+ */
+function engagements_get_signalwire_sms_error_codes_array() {
+  $rtn = array(  
+    "10002" => "Trial account does not support this feature",
+    "11200" => "HTTP Retrieval Failure",
+    "11751" => "MMS -> Media exceeds mobile operator size limit",
+    "12100" => "Document Parse Failure",
+    "12300" => "Invalid Content-Type",
+    "13221" => "Dial -> Number: Invalid Method Value",
+    "15002" => "Call Progress: Queue Timeout",
+    "21210" => "'From' phone number not verified",
+    "21217" => "A call or SMS is placed to a destination which does not represent a valid phone number",
+    "21219" => "'To' phone number not verified",
+    "21601" => "Phone number is not a valid SMS-capable inbound phone number",
+    "21602" => "Message body is required",
+    "21603" => "The source 'From' phone number is required to send an SMS",
+    "21604" => "The destination 'To' phone number is required to send an SMS",
+    "21610" => "Attempt to send to unsubscribed recipient",
+    "21611" => "This 'From' number has exceeded the maximum number of queued messages",
+    "21617" => "The concatenated message body exceeds the 1600 character limit",
+    "21620" => "Invalid media URL(s)",
+    "21623" => "Number of media files exceeds allowed limit",
+    "30002" => "Account suspended",
+    "30003" => "Unreachable destination handset",
+    "30004" => "Message blocked or opted out",
+    "30005" => "Unknown destination handset",
+    "30006" => "Landline or unreachable carrier",
+    "30007" => "Message marked as spam",
+    "30008" => "Unknown error",
+    "30010" => "Message price exceeds max price",
+    "30022" => "Campaign Registry Throughput Limit Exceeded", 
+  );
+  
+  
+  
+  
+  return $rtn;
+}
 
 
 
@@ -970,6 +1150,8 @@ function engagements_sms_get_all_messages()
 
   $vars = array();
 
+  $error_codes = engagements_get_signalwire_sms_error_codes_array();
+
   // project id, auth tolen, space url
   $project_id = variable_get('sms_project_id', '');
 
@@ -978,10 +1160,10 @@ function engagements_sms_get_all_messages()
   }
 
   $auth_token = variable_get('sms_auth_token', '');
-  $space_url = variable_get('sms_space_url', 'liftoffacademics.signalwire.com');
+  $space_url = variable_get('sms_space_url', '');
 
   $client = new SignalWire\Rest\Client($project_id, $auth_token, array("signalwireSpaceUrl" => $space_url));
-
+  
   // Get all messages so we can update our table.
 
   // We only care about messages sent TODAY, since we theoretically already got them yesterday
@@ -989,29 +1171,39 @@ function engagements_sms_get_all_messages()
 
   $messages = $client->messages->read(array('dateSentAfter' => $check_since));
   foreach ($messages as $record) {
+//fpm(ppm($record, TRUE)); 
+//    fpm($record->status);
 
+    $status = strtolower(trim($record->status));     
+    $error_message = $record->errorMessage;
+    $error_code = $record->errorCode;
+    if ($error_code) {
+      $friendly_error_message = @$error_codes[$error_code];
+    }
     $message_sid = $record->sid;
 
     $vars['MessageSid'] = $message_sid;
 
-    // If we have already recorded (but not processed) this record, then we should UPDATE it!
+    // Should we update any details about this message? Price, errors, etc?
     $test = engagements_get_sms_from_history($message_sid);
-    if ($test && intval($test['price_processed']) !== 1) {
+    if ($test && (floatval($record->price) != floatval($test['sw_price']) || trim($error_code) != trim($test['err_code']))) {
+      
       // update prices
       $price = $record->price;
-      $fp_price = engagements_get_fp_price($price, $test['direction'], intval($test['num_segments']));
+      //$fp_price = engagements_get_fp_price($price, $test['direction'], intval($test['num_segments']));
+      $fp_price = 0;  // no longer using this field.
 
       db_query("UPDATE sms_history
-                SET sw_price = ?, fp_price = ?, price_processed = 1
-                WHERE mid = ?", array($price, $fp_price, $test['mid']));
-
+                SET sw_price = ?, fp_price = ?, price_processed = 1, delivery_status = ?, err_code = ?, err_message = ?, err_friendly_message = ?
+                WHERE mid = ?", array($price, $fp_price, $status, $error_code, $error_message, $friendly_error_message, $test['mid']));
+      
+      // Meaning, we already have this one saved, and now that we've updated it, we can continue.
       continue;
-    } else if ($test && intval($test['price_processed']) === 1) {
-
-      //watchdog("engagements_sms", "... already processed, skipping.", array(), WATCHDOG_DEBUG);
-      continue; // already processed!
+    } // if test and we have things to update
+    else if ($test) {
+      // meaning, we already have this one saved.  Skip it.  
+      continue;
     }
-
 
     $from_mobile = engagements_convert_to_valid_phone_number($record->from);
     $to_mobile = engagements_convert_to_valid_phone_number($record->to);
@@ -1031,6 +1223,10 @@ function engagements_sms_get_all_messages()
     $vars['date_sent_ts'] = $date_sent_ts;
     $vars['direction'] = $direction;
     $vars['NumSegements'] = $num_segments;
+    $vars['delivery_status'] = $status;
+    $vars['err_code'] = $error_code;
+    $vars['err_message'] = $error_message;
+    $vars['err_friendly_message'] = $friendly_error_message;
 
     $vars['NumMedia'] = 0;
 
@@ -1048,7 +1244,7 @@ function engagements_sms_get_all_messages()
         $content_type = $mitem->contentType;
 
         $vars['MediaContentType' . $c] = $content_type;
-        $vars['MediaUrl' . $c] = "https://liftoffacademics.signalwire.com/api/laml/2010-04-01/Accounts/$project_id/Messages/$message_sid/Media/$media_sid";
+        $vars['MediaUrl' . $c] = "https://$space_url/api/laml/2010-04-01/Accounts/$project_id/Messages/$message_sid/Media/$media_sid";
 
 
         $c++;
@@ -1061,6 +1257,9 @@ function engagements_sms_get_all_messages()
     // Save this message using our "handle_incoming_sms" function.
     engagements_handle_incoming_sms($vars);
   } // foreach messages
+
+
+  //////////////////////////////////////////////////////////////
 
 
   $body = "";
@@ -1105,13 +1304,17 @@ function engagements_sms_get_all_messages()
 
     // Write our data to our sms_history table.
     db_query(
-      "INSERT INTO sms_history (`message_sid`, sw_type, `body`, `from_number`, `to_number`, `sw_price`, `fp_price`, `from_cwid`, `updated`, `direction`, `media_filenames`, `date_sent`, price_processed, num_segments)
+      "INSERT INTO sms_history (`message_sid`, sw_type, `body`, `from_number`, `to_number`, `sw_price`, `fp_price`, `from_cwid`, `updated`, `direction`, 
+                                `media_filenames`, `date_sent`, price_processed, num_segments)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
       array($sid, 'call', $body, $from_mobile, $to_mobile, $price, $fp_price, $from_cwid, time(), $direction, '', $date_sent_ts, 1, $duration)
     );
+    
+    watchdog("engagements_sms", "Documented call to $to_mobile.", array(), WATCHDOG_DEBUG);    
+    
   }  //foreach calls as record 
 
-  watchdog("engagements_sms", "Documented call to $to_mobile.", array(), WATCHDOG_DEBUG);
+
 
 
 
@@ -1370,33 +1573,6 @@ function engagements_get_file_extension_from_mime_type($mime)
 
 
 
-
-function test_sms()
-{
-  // Using SignalWire
-
-  require_once(fp_get_module_path('engagements', TRUE, FALSE) . '/lib/signalwire/vendor/autoload.php');
-
-  //use SignalWire\Rest\Client;
-
-  // project id, auth tolen, space url
-  $client = new SignalWire\Rest\Client(
-    'f83addc2-4100-46e0-a0f3-4787d1211c39',
-    'PT7662458edc3b6fd79dd668180079592d058a935c5c202199',
-    array("signalwireSpaceUrl" => "liftoffacademics.signalwire.com")
-  );
-
-  $message = $client->messages
-    ->create(
-      "+13183760584", // to
-      array(
-        "from" => "+13183014306",   // my signalwire account phone number 
-        "body" => "Hello World! " . time()
-      )
-    );
-
-  fpm($message->sid);
-} // test_sms
 
 
 /**
@@ -1886,7 +2062,7 @@ function engagements_content_register_content_type()
 
   $fields['from_sms_phone'] = array(
     'type' => 'select',
-    'label' => t('From TXT Phone Line:'),
+    'label' => t('From Text Phone Line:'),
     'hide_please_select' => TRUE,
     'options' => array(),
     'weight' => 7,
@@ -2188,6 +2364,19 @@ function engagements_form_alter(&$form, $form_id)
               $form['submit_submit']['suffix'] = "<strong>" . t('NOTE: Cannot send a text message as there is no mobile phone number for this recipient.') . "</strong>";
             }
 
+            if (!engagements_can_send_sms_to_number($mobile_phone)) {
+              // Meaning, the user has opted-out!  Disable fields and let the user know.
+              $form['engagement_msg']['attributes']['readonly'] = 'readonly';
+              $form['engagement_msg']['attributes']['class'] .= ' readonly';
+
+              $form['submit_submit']['attributes']['disabled'] = 'disabled';
+              $form['submit_submit']['attributes']['class'] .= ' button-disabled';
+              $form['submit_submit']['suffix'] = "<strong>" . t('NOTE: Cannot send a text message as this recipient has opted-out of receving text messages.  Try email or calling instead.') . "</strong>";
+                            
+              
+            }
+
+
             // The header needs to be a setting with replacement values           
             $sms_header = engagements_sms_replace_patterns(variable_get('sms_header', '(@initials) from @name:'), "", $student_account);
 
@@ -2263,7 +2452,7 @@ function engagements_form_alter(&$form, $form_id)
 
       $form['receive_notifications_from_numbers'] = array(
         'type' => 'checkboxes',
-        'label' => t("Select the SMS/TXT lines (if any) that this user should be notified of when receiving a TXT message:"),
+        'label' => t("Select the SMS/Text lines (if any) that this user should be notified of when receiving a Text message:"),
         'options' => $options,
         'value' => $default_value,
         'weight' => 150,
@@ -2504,7 +2693,7 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
     $external_msg_id = engagements_send_sms_to_number($mobile_phone, $header . "\n" . $msg, $student_id, $from_number);
 
     if ($external_msg_id) {
-      fp_add_message(t("TXT Message has been successfully sent."));
+      fp_add_message(t("Text Message has been successfully sent."));
       // save the external_msg_id with the content.
       $content->field__external_msg_id['value'] = $external_msg_id;
       $content->log = "[AUTO] Updating external_msg_id";
@@ -2522,7 +2711,7 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
  * Actually send a text message.  Will drupal_set_message() as an error if there is a problem, and return FALSE. 
  * Returns TRUE on success, no drupal_set_message is printed.
  */
-function engagements_send_sms_to_number($to_number, $body, $to_cwid = "", $from_number = "default")
+function engagements_send_sms_to_number($to_number, $body, $to_cwid = "", $from_number = "default", $bool_send_opt_out_message = TRUE)
 {
 
   $to_number = engagements_convert_to_valid_phone_number($to_number);
@@ -2534,7 +2723,7 @@ function engagements_send_sms_to_number($to_number, $body, $to_cwid = "", $from_
   // project id, auth tolen, space url
   $project_id = variable_get('sms_project_id', '');
   $auth_token = variable_get('sms_auth_token', '');
-  $space_url = variable_get('sms_space_url', 'liftoffacademics.signalwire.com');
+  $space_url = variable_get('sms_space_url', '');
 
   $from_phone = $from_number;
   $phones = engagements_get_from_phones();
@@ -2542,11 +2731,11 @@ function engagements_send_sms_to_number($to_number, $body, $to_cwid = "", $from_
     $from_phone = engagements_convert_to_valid_phone_number($phones['default']['num']);
   }
 
-
-  // We must include a "text STOP to opt-out" type message to the bottom of every notification.
-  // TODO:  May be a setting instead, on the signalwire settings page
-  $bodu .= "\n\n" . "Text STOP to opt-out of txt messages.";
-
+  if ($bool_send_opt_out_message) {
+    // We must include a "text STOP to opt-out" type message to the bottom of every notification.
+    // TODO:  May be a setting instead, on the signalwire settings page
+    $body .= "\n\n" . "Text STOP to opt-out of txt messages.";
+  }
 
 
 
@@ -2594,8 +2783,8 @@ function engagements_send_sms_to_number($to_number, $body, $to_cwid = "", $from_
 
     // Write our data to our sms_history table.
     db_query(
-      "INSERT INTO sms_history (`message_sid`, `body`, `from_number`, `to_number`, `sw_price`, `fp_price`, `to_cwid`, `updated`, `direction`, `media_filenames`, `date_sent`, price_processed, num_segments)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
+      "INSERT INTO sms_history (`message_sid`, `sw_type`, `body`, `from_number`, `to_number`, `sw_price`, `fp_price`, `to_cwid`, `updated`, `direction`, `media_filenames`, `date_sent`, price_processed, num_segments)
+              VALUES (?, 'sms', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
       array($message_sid, $body, $from_mobile, $to_number, $price, $fp_price, $to_cwid, time(), $direction, '', $date_sent_ts, 0, $num_segments)
     );
   } catch (Exception $e) {
@@ -2679,7 +2868,7 @@ function engagements_display_main()
     $rtn .= "<a href='javascript:engagementsNewEngagementDialog(\"email\",\"New Email\",\"$current_student_id\",\"$faculty_id\");' class='button'><i class='fa fa-envelope-o'></i>&nbsp; New Email</a>";
   }
   if (user_has_permission('can_send_txt_engagements')) {
-    $rtn .= "<a href='javascript:engagementsNewEngagementDialog(\"txt_msg\",\"New TXT Message\",\"$current_student_id\",\"$faculty_id\");' class='button'><i class='fa fa-comment-o'></i>&nbsp; New TXT</a>";
+    $rtn .= "<a href='javascript:engagementsNewEngagementDialog(\"txt_msg\",\"New Text Message\",\"$current_student_id\",\"$faculty_id\");' class='button'><i class='fa fa-comment-o'></i>&nbsp; New TXT</a>";
   }
   if (user_has_permission('can_log_engagements')) {
     $rtn .= "<a href='javascript:engagementsNewEngagementDialog(\"\",\"Log New Engagement\",\"$current_student_id\",\"$faculty_id\");' class='button'><i class='fa fa-plus'></i>&nbsp; Log New Engagement</a>";
