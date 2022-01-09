@@ -6,6 +6,10 @@ FlightPath 6.x Changelog
     
   Added to logged 404 and 403 errors, added the location to the msg so it shows in the watchdog view.
   
+  Added function to course_search to get capacity for particular course.
+
+  Updated system to add more indexes to advising tables.
+  
 
 2022-01-08
   Fixed bug where "public files" tab was showing on all "add" content screens.

@@ -788,6 +788,28 @@ function course_search_get_course_rotation_schedule_not_anticipated($course_id)
 
 }
 
+
+
+function course_search_get_course_capacity($course_id, $term_id) {
+  
+  // Return from cache if we already have it.
+  if (isset($GLOBALS['fp_cache_course_capacity'][$course_id])) {
+    return $GLOBALS['fp_cache_course_capacity'][$course_id];
+  }
+  
+  
+  $cap = db_result(db_query("SELECT capacity FROM course_rotation_schedule
+                             WHERE course_id = ?
+                             AND term_id = ?", array($course_id, $term_id)));
+                             
+  $cap = intval($cap);
+  $GLOBALS['fp_cache_course_capacity'][$course_id] = $cap;  // save to simple globals cache
+  
+  return $cap;
+                             
+}
+
+
 function course_search_get_course_rotation_schedule($course_id, $year = "", $limit = 20, $bool_include_next_five_years = FALSE)
 {
   // return an array containing the terms that this course

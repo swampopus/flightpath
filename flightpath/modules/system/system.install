@@ -206,6 +206,23 @@ function system_update($old_schema, $new_schema) {
   }
 
 
+  if (intval($old_schema) < 7) {
+    // Add extra index to tables...
+    db_query("ALTER TABLE `advising_sessions` ADD INDEX (`is_empty`) ");
+    db_query("ALTER TABLE `advising_sessions` ADD INDEX (`posted`) ");
+    db_query("ALTER TABLE `advising_sessions` ADD INDEX (`faculty_id`) ");
+    db_query("ALTER TABLE `advising_sessions` ADD INDEX (`catalog_year`) ");
+    db_query("ALTER TABLE `advising_sessions` ADD INDEX (`is_draft`) ");
+    db_query("ALTER TABLE `advising_sessions` ADD INDEX (`is_whatif`) ");
+
+    db_query("ALTER TABLE `advising_comments` ADD INDEX (`faculty_id`) ");
+    db_query("ALTER TABLE `advising_comments` ADD INDEX (`posted`) ");
+    db_query("ALTER TABLE `advising_comments` ADD INDEX (`term_id`) ");
+    
+    
+  }
+
+
   
       
 } // update
@@ -262,6 +279,9 @@ CREATE TABLE `advising_comments` (
   `delete_flag` tinyint(4) DEFAULT 0,  
   PRIMARY KEY (`id`),
   KEY `student_id` (`student_id`),
+  KEY `faculty_id` (`faculty_id`),
+  KEY `posted` (`posted`),
+  KEY `term_id` (`term_id`),
   KEY `delete_flag` (`delete_flag`),
   KEY `access_type` (`access_type`)  
 ); 
@@ -287,10 +307,20 @@ CREATE TABLE `advising_sessions` (
   PRIMARY KEY (`advising_session_id`),
   KEY `sid` (`student_id`),
   KEY `termid` (`term_id`),
+  KEY `is_empty` (`is_empty`),
+  KEY `posted` (`posted`),
+  KEY `faculty_id` (`faculty_id`),
+  KEY `catalog_year` (`catalog_year`),
+  KEY `is_draft` (`is_draft`),
+  KEY `is_whatif` (`is_whatif`),
   KEY `delete_flag` (`delete_flag`),
   KEY `advising_session_token` (`advising_session_token`)
 );   ";
 db_query($q);
+
+
+
+
 
 $q = "
 
