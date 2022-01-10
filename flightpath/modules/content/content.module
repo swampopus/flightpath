@@ -968,7 +968,7 @@ function content_edit_content_form($type = "", $cid = "") {
   $form = array();
   $m = 0;
   
-  if ($_GET['content_tabs'] == 'false') { // the string "false", not FALSE
+  if ($_GET['content_tabs'] === 'false') { // the string "false", not FALSE
     fp_add_body_class('content-tabs-false');
   }
   
@@ -977,11 +977,11 @@ function content_edit_content_form($type = "", $cid = "") {
   
   
   if ($type == "") {
-    @$type = $_REQUEST["type"];    
+    @$type = strip_tags($_REQUEST["type"]);  // strip_tags to make it safer.    
   }
   
   if ($cid == "") {
-    @$cid = $_REQUEST["cid"];  
+    @$cid = strip_tags($_REQUEST["cid"]);  
   }
   
   $types = content_get_types();
@@ -1045,11 +1045,12 @@ function content_edit_content_form($type = "", $cid = "") {
       
     }
     
-    if (is_array($types[$type]['settings']['#redirect'])) {
-      $form['#redirect'] = $types[$type]['settings']['#redirect'];
-    }
-    
   }  
+
+
+  if (isset($types[$type]['settings']['#redirect'])) {
+    $form['#redirect'] = $types[$type]['settings']['#redirect'];
+  }
 
 
   if (isset($types[$type]['settings']['#validate_handlers'])) {
@@ -1238,8 +1239,7 @@ function content_edit_content_form($type = "", $cid = "") {
   );
   
   
-  // Draw the controls (buttons)
-  
+  // Draw the controls (buttons)  
   $form["submit_submit"] = array(
     "type" => "submit",
     "value" => t("Submit"),

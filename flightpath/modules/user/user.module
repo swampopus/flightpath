@@ -233,10 +233,6 @@ function user_menu() {
   );     
   
   
-  
-
-
-
 
   $items["user-settings"] = array(
     "title" => t("User Settings"),
@@ -251,10 +247,231 @@ function user_menu() {
 
 
   
+  $items["user/%/edit-attribute/%"] = array(
+    "title" => "Edit Attribute",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("user_edit_attribute_form", "", 1, 3),
+    "access_callback" => TRUE, // TODO: set to something else    
+    "page_settings" => array(
+      "page_hide_report_error" => TRUE,
+    ),
+  );  
+  
+
+
+  
   
     
   return $items;
 }
+
+
+/**
+ * invokes the right hook to return back all the "registered" attributes from other modules.
+ */
+function user_get_registered_attributes() {
+        
+  $rtn = array();
+
+  // Save effort by saving to a globals cache.
+  if (isset($GLOBALS['user_registered_attributes_cache'])) {
+    return $GLOBALS['user_registered_attributes_cache'];
+  }
+    
+  $modules = modules_implement_hook("user_register_user_attributes");
+  foreach($modules as $module) {
+    $types = call_user_func($module . '_user_register_user_attributes');  
+    $rtn += $types;
+  }
+  
+  $GLOBALS['user_registered_attributes_cache'] = $rtn;
+  
+  return $rtn;      
+    
+  
+} // user_get_registered_attributes
+
+
+
+
+/**
+ * The form which lets us actually edit this user's attribute (ex: Visa Status)
+ * Meant to be very similar to:
+ *  @see content_edit_content_form()
+ */
+function user_edit_attribute_form($user_id = 0, $attribute_name = "") {
+  
+   
+  $form = array();
+  
+  if ($user_id === 0) {
+    fp_add_message(t("Could not find user."), 'error');
+    return;
+  }
+      
+  $account = fp_load_user($user_id);
+  
+  if ($_GET['tabs'] === 'false') { // the string "false", not FALSE
+    fp_add_body_class('user-tabs-false');
+  }
+  
+  fp_add_css(fp_get_module_path("user") . "/css/user.css");
+  fp_add_js(fp_get_module_path("user") . "/js/user.js");
+  
+  
+  
+  $attributes = user_get_registered_attributes();
+  
+  $name = $attribute_name;
+  
+  $title = $attributes[$name]['title'];
+  fp_set_title(t("Edit %title for @name", array("%title" => $title, "@name" => "$account->f_name $account->l_name ($account->cwid)")));
+  
+  
+  fp_add_body_class('user-edit-attributes--' . $name);
+  
+  
+  // For simplicity, and because it causes no harm except a small amount of extra bandwidth, we will
+  // state that all "attribute" forms are multipart (so they can handle file uploads) even if there
+  // are no files being uploaded.
+  $form["#attributes"] = array("enctype" => 'multipart/form-data');
+  
+  $form["attribute_name"] = array(
+    "type" => "hidden",
+    "value" => $name,    
+  );
+  
+  $form["user_id"] = array(
+    "type" => "hidden",
+    "value" => $account->id,    
+  );
+
+
+  if (isset($attributes[$name]['settings']['#redirect'])) {
+    $form['#redirect'] = $attributes[$name]['settings']['#redirect'];
+  }
+
+
+  if (isset($attributes[$name]['settings']['#validate_handlers'])) {
+    $form['#validate_handlers'] = $attributes[$name]['settings']['#validate_handlers'];
+  }
+
+  
+  if (isset($attributes[$name]['settings']['#submit_handlers'])) {
+    $form['#submit_handlers'] = $attributes[$name]['settings']['#submit_handlers'];
+  }  
+  
+  
+  // If a #redirect has not been set, then we'll go back to this user's attribute edit page...
+  if (!isset($form['#redirect'])) {
+    //$form['#redirect'] = array('path' => 'content/' . $cid);
+    // TODO: go to user's attribute edit page.      
+  }
+
+  // Any js or css to add for this form, defined in the settings?
+  if (isset($attributes[$name]['settings']['js'])) {
+    fp_add_js($attributes[$name]['settings']['js']);
+  }
+  if (isset($attributes[$name]['settings']['css'])) {
+    fp_add_css($attributes[$name]['settings']['css']);
+  }
+      
+
+  // Show the fields.
+  if (isset($attributes[$name]['fields'])) {
+    foreach($attributes[$name]["fields"] as $field_name => $field_details) {
+      
+      $field_name = $name . "_" . $field_name;
+                  
+      $form[$field_name] = $field_details;  
+      
+                
+      if ($field_details['type'] != 'cfieldset') {
+      
+        $value = user_get_attribute($user_id, $field_name, '');
+                
+        $form[$field_name]['value'] = $value;
+        
+        // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly. (it was stored as UTC in database)             
+        if ($form[$field_name]['type'] == 'datetime-local') {
+          if (trim($value) != '') {
+            $form[$field_name]["value"] = date('Y-m-d\TH:i', convert_time(strtotime($value)));  
+          }
+        }
+        
+        // Similar to datetime-local, if this is a "time" field, then it has been stored as UTC in the database, and now
+        // needs to be converted to local timezone.
+        if ($form[$field_name]['type'] == 'time') {
+          if (trim($value) != '') {
+            $form[$field_name]["value"] = date('H:i', convert_time(strtotime($value)));            
+          }
+        }
+                
+                        
+      } // is not cfieldset
+      else {
+        // If this is a fieldset, then we need to assign values to its ELEMENTS.  If not empty, then OPEN the cfieldset!
+        foreach ($form[$field_name]['elements'] as $c => $efields) {
+          foreach ($efields as $efield_name => $efield_details) {
+
+            $value = user_get_attribute($user_id, $field_name, '');
+                        
+            $efield_details['value'] = $value;
+            
+            // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
+            if ($efield_details['type'] == 'datetime-local') {
+              if (trim($value) != '') {
+                $value = date('Y-m-d\TH:i', convert_time(strtotime($value)));
+              }
+            }
+
+            // Similar to datetime-local, if this is a "time" field, then it has been stored as UTC in the database, and now
+            // needs to be converted to local timezone.
+            if ($efield_details['type'] == 'time') {
+              if (trim($value) != '') {
+                $value = date('H:i', convert_time(strtotime($value)));            
+              }
+            }
+
+            
+            $form[$field_name]['elements'][$c][$efield_name]["value"] = $value;
+                        
+            
+            if (trim($value)) {
+              $form[$field_name]['start_closed'] = FALSE;
+            }
+          }
+        }
+        
+      } // else is fieldset
+    } // foreach    
+  } // if isset
+
+
+  // Draw the controls (buttons)  
+  $form["submit_submit"] = array(
+    "type" => "submit",
+    "value" => t("Submit"),
+    "spinner" => TRUE,
+    'weight' => 9920,    
+    'attributes' => array('class' => 'user-attribute-submit-btn'),        
+  );
+
+  
+  watchdog('user', "edit_attribute_form user_id:$user_id name:$name", array(), WATCHDOG_DEBUG);
+    
+  
+  return $form;
+  
+} // user_edit_attribute_form
+
+
+// TODO: implement _submit function
+
+
+
+
+
 
 
 

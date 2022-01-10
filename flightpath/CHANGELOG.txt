@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-01-10
+  Modified content.module to make sure a specific bug didn't happen where redirections might not be seen, as well
+  as added strip_tags() to values read directly from $_REQUEST.
+  
+  
+  
+
 2022-01-09
   Removed extraneous testing functions.
     
