@@ -980,7 +980,7 @@ function user_perm() {
   
   
   $attributes = user_get_registered_attributes();
-  fpm($attributes);
+  
   
   foreach ($attributes as $attr => $definition) {
     $perms['view_attribute_' . $attr] = array(
