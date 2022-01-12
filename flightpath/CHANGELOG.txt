@@ -1,11 +1,21 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-01-12
+  Added ability to register and edit user attributes from the student profile page.  Saves automatically to the user_attributes table.  Created user.api.php
+  to help illustrate how the hook works.
+  
+  The user module also automatically adds permissions for new attributes.
+  
+  Added a convenience function to help "balance" the profile_items array between leftside and rightside, so we can easily "push" items onto it and
+  they automatically fall into place.
+  
+
 2022-01-10
   Modified content.module to make sure a specific bug didn't happen where redirections might not be seen, as well
   as added strip_tags() to values read directly from $_REQUEST.
   
-  
+  Fixed bug in group definitions, where if there was a blank line, or somehow a course with no subject_id, it could cause a problem.
   
 
 2022-01-09

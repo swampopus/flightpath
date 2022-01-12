@@ -266,6 +266,101 @@ function user_menu() {
 }
 
 
+
+/**
+ * Implements hook_alter_student_profile_items
+ * 
+ * We want to see if any modules have registered attributes which are visible or editible in the student profile box.
+ */
+function user_alter_student_profile_items($bool_mini, &$extra_profile_items) {
+  global $current_student_id;
+  
+  $user_id = db_get_user_id_from_cwid($current_student_id, 'student');
+  
+  //fp_add_js(fp_get_module_path('system') . '/js/system.js');  // make sure we have the js we need for dialogs.
+  
+  $attributes = user_get_registered_attributes();
+  if (count($attributes) === 0) return;  // nothing to do.
+  
+  
+  
+  foreach ($attributes as $attr => $definition) {
+    foreach ($definition['display'] as $attr_key => $details) {      
+      $value = user_get_attribute($user_id, $attr . "__" . $attr_key, '');
+      $display_value = filter_markup($value, 'plain');
+      
+      if (isset($definition['fields'][$attr_key]['options'][$value])) {
+        $display_value = $definition['fields'][$attr_key]['options'][$value];
+      }
+      
+      $item = array();
+      $item['label'] = $details['label'];
+      
+      
+      
+      $item['content'] = $details['value'];
+      
+      $item['content'] = str_replace("@value", $display_value, $item['content']);
+      $item['content'] = str_replace("@key", $value, $item['content']);
+      if (trim($item['content']) == "") $item['content'] = $display_value;
+      
+      
+      
+      $bool_add_it = FALSE;
+
+      $edit_link = "";
+      $url = fp_url("user/$user_id/edit-attribute/$attr", "window_mode=popup");
+      $title = t("Edit ") . $definition['title'];
+      $title = htmlentities($title);       
+      if (user_has_permission("edit_attribute_$attr")) {  // TODO:  Use real permission
+        $edit_link = "&nbsp;<a href='javascript:fpOpenSmallIframeDialog(\"$url\", \"$title\");'><i class='fa fa-pencil'></i></a>";
+      }
+       
+            
+      if (!$bool_mini) {
+        if ($definition['settings']['large_profile']) {
+          // We are on the large profile, and this element shoudl show on the large profile.
+          $bool_add_it = TRUE;          
+        } // large_profile
+        if ($definition['settings']['large_profile_editable']) {
+          $bool_add_it = TRUE;
+          // Display link to edit this attribute.
+          $item['content'] .= $edit_link;          
+        }
+      } // if NOT mini
+      else {
+        // This IS mini
+        if ($definition['settings']['mini_profile']) {
+          // We are on the large profile, and this element should show on the mini profile.
+          $bool_add_it = TRUE;
+        }
+        if ($definition['settings']['mini_profile_editable']) {
+          // We are on the large profile, and this element should show on the mini profile.
+          $bool_add_it = TRUE;
+          $item['content'] .= $edit_link;
+        }
+      
+      } // else is mini
+      
+    } // foreach
+   
+   
+    if ($bool_add_it) {      
+      // permission check as to whether it can be viewed at all
+      if (user_has_permission("view_attribute_$attr")) {      
+        fp_push_and_balance_profile_items($extra_profile_items, array($attr_key => $item));
+      }
+    }
+    
+  } // foreach attributes
+  
+  
+} // hook alter_student_profile_items
+
+
+
+
+
 /**
  * invokes the right hook to return back all the "registered" attributes from other modules.
  */
@@ -315,6 +410,7 @@ function user_edit_attribute_form($user_id = 0, $attribute_name = "") {
     fp_add_body_class('user-tabs-false');
   }
   
+    
   fp_add_css(fp_get_module_path("user") . "/css/user.css");
   fp_add_js(fp_get_module_path("user") . "/js/user.js");
   
@@ -326,6 +422,12 @@ function user_edit_attribute_form($user_id = 0, $attribute_name = "") {
   
   $title = $attributes[$name]['title'];
   fp_set_title(t("Edit %title for @name", array("%title" => $title, "@name" => "$account->f_name $account->l_name ($account->cwid)")));
+  
+  if ($_REQUEST['window_mode'] == 'popup') {
+    $form['mark_top'] = array(
+      'value' => '<h2>' . t("Edit %title for @name", array("%title" => $title, "@name" => "$account->f_name $account->l_name ($account->cwid)")) . "</h2>",
+    );
+  }
   
   
   fp_add_body_class('user-edit-attributes--' . $name);
@@ -381,7 +483,7 @@ function user_edit_attribute_form($user_id = 0, $attribute_name = "") {
   if (isset($attributes[$name]['fields'])) {
     foreach($attributes[$name]["fields"] as $field_name => $field_details) {
       
-      $field_name = $name . "_" . $field_name;
+      $field_name = $name . "__" . $field_name;
                   
       $form[$field_name] = $field_details;  
       
@@ -466,9 +568,26 @@ function user_edit_attribute_form($user_id = 0, $attribute_name = "") {
 } // user_edit_attribute_form
 
 
-// TODO: implement _submit function
 
+function user_edit_attribute_form_submit($form, $form_state) {
 
+  $values = $form_state['values'];  
+  $name = $values['attribute_name'];
+  $user_id = intval($values['user_id']);
+
+  
+
+  // Find and save the values from the form....
+  foreach ($values as $key => $val) {
+    if (str_starts_with($key, $name . "__")) {
+      user_set_attribute($user_id, $key, $val);
+    }
+  }
+
+  fp_add_message(t("User attributes have been updated successfully."));
+
+  
+} // ..._submit
 
 
 
@@ -831,7 +950,7 @@ function user_subtab_switchboard() {
 
 function user_perm() {
   
-  return array(
+  $perms = array(
     "can_edit_user_roles" => array(
       "title" => t("Edit user roles"),
       "description" => t("The user may add/edit/delete user roles in the system."),
@@ -859,6 +978,24 @@ function user_perm() {
     ),
   );  
   
+  
+  $attributes = user_get_registered_attributes();
+  fpm($attributes);
+  
+  foreach ($attributes as $attr => $definition) {
+    $perms['view_attribute_' . $attr] = array(
+      'title' => t("View attribute %attr", array("%attr" => $definition['title'])),
+      'description' => t("Check this is the user should be able to view this attribute. (Ex: on student profile page)."),
+    );
+    $perms['edit_attribute_' . $attr] = array(
+      'title' => t("Edit attribute %attr", array("%attr" => $definition['title'])),
+      'description' => t("Check this is the user should be able to edit this attribute. (Ex: on student profile page).  You <strong>must</strong> also
+                            select the View permission above for this attribute."),
+    );
+  }
+  
+  
+  return $perms;
 }
 
 

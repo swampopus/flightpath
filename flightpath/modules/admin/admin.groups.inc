@@ -123,12 +123,16 @@ function admin_edit_group_form_validate(&$form, &$form_state) {
       
       $line = trim(str_replace("-", "", $line));  // get rid of attributes, if any.
       $line = trim(str_replace("*", "", $line));  // get rid of attributes, if any.
+      
+      if ($line == "") continue; // blank line, so skip
             
       
       $tokens = explode(" ", $line);
       $subject_id = @trim($tokens[0]);
       $course_num = @trim($tokens[1]);
 
+      if ($subject_id == "") continue; // blank line, or mal-formed, so skip.
+      
       // If the subject_id had a _A_ in it, convert this back
       // to an ampersand.
       $subject_id = str_replace("_A_", "&", $subject_id);
@@ -148,10 +152,11 @@ function admin_edit_group_form_validate(&$form, &$form_state) {
           }
           else {
             // Not related to school (possibly).
+            
             form_error("courses", t("<strong>Your work has NOT been saved.</strong> Course not found.  You specified the course %course as a requirement,
                             but this course could not be found.  This could be due to a typo.  
                             Please check the course and try again.", array("%course" => "$subject_id $course_num")));
-                      
+                 
           }          
             
 
@@ -972,7 +977,8 @@ function admin_get_courses_from_definition($definition, $catalog_year = "", $sch
   foreach($d_lines as $line)
   {
     $line = trim($line);
-
+    if ($line == "") continue;  // blank line
+    
     // Let's get each of the parts... the instruction, and the course data.
     $tokens = explode(" ", $line);
     $instruction = strtolower(trim($tokens[0]));
@@ -983,6 +989,8 @@ function admin_get_courses_from_definition($definition, $catalog_year = "", $sch
     $subject_data = trim(strtoupper($c_tokens[0]));
     @$course_numData = trim(strtoupper($c_tokens[1]));
 
+    if ($subject_data == "") continue;  // blank or mal-formed?
+    
     // Okay, so now, for this line, we have an instruction,
     // and some course data (possibly wild cards) to act on.
     //debugCT("$instruction $subject_data $course_numData");

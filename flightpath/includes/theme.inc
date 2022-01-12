@@ -772,6 +772,26 @@ function fp_display_page($page) {
 
 
 /**
+ * This function accepts a "profile items" array by reference, which is presumed to have a "left_side" and a "right_side" already
+ * defined.  We can "push" items onto it, and the item will automatically go to the side with the fewest "items" so as to keep
+ * it "balanced."
+ */
+function fp_push_and_balance_profile_items(&$profile_items, array $item) {
+  
+  if (count($profile_items['left_side']) <= count($profile_items['right_side'])) {
+    $profile_items['left_side'] += $item;
+  }
+  else {
+    $profile_items['right_side'] += $item;
+  }
+  
+  // No need to return, since passed by reference.
+  
+} // fp_push_and_balance_profile_items
+
+
+
+/**
  * Returns the HTML for the "profile" header html for a student
  */
 function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_items = array()) {
@@ -782,6 +802,10 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
   $school_id = db_get_school_id_for_student_id($current_student_id);
       
   $rtn = "";
+  
+  if (!isset($extra_profile_items['left_side'])) $extra_profile_items['left_side'] = array();
+  if (!isset($extra_profile_items['right_side'])) $extra_profile_items['right_side'] = array();
+  
   
   // Call a hook to possibly add more items to our profile items.
   invoke_hook("alter_student_profile_items", array($bool_mini, &$extra_profile_items));
@@ -1082,6 +1106,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
                             <label>" . t("Catalog Year:") . "</label> <span class='profile-line-content'>$cat_year</span>
                           </div>  
                           ";
+    
     if (isset($extra_profile_items['left_side'])) {
       foreach ($extra_profile_items['left_side'] as $details) {
         $label = @$details['label'];
@@ -1098,8 +1123,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
                  </div>";
       }
     }
-    
-    
+        
     
     
     $rtn .= "</div>

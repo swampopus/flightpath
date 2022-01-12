@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is meant to demonstrate how to use the content module, as a fellow module developer.
+ * This file is meant to demonstrate how to use hooks in the content module, as a fellow module developer.
 */
 
 
