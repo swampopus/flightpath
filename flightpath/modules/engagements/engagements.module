@@ -2004,8 +2004,8 @@ function engagements_perm()
 
   $rtn['can_send_mass_sms'] = array(
     'title' => t("Send mass txt messages"),
-    'description' => t("The user may access and send mass SMS (txt) messages to lists of recipients.  Make sure to also select which
-                        phone lines the user may send from. Only give to trusted users."),
+    'description' => t("The user may access and send mass SMS (txt) messages to lists of recipients from the designated mass text lines.  
+                        Only give to trusted users."),
   );
 
 
@@ -2543,7 +2543,7 @@ function engagements_get_from_phones_for_fapi($bool_return_all = TRUE, $account 
   // if bool_return_all != TRUE, then make sure the account has permissing to send from each number.  If not, remove it.
   foreach ($rtn as $num => $details) {
     if (!$bool_return_all) {
-      if (!user_has_permission("can_send_sms_from_$num", $account)) {
+      if (!$bool_only_mass_text_numbers && !user_has_permission("can_send_sms_from_$num", $account)) {
         unset($rtn[$num]);
       }
     }

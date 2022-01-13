@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-01-13
+  Minor edit: cleared up wording for mass sms permission.
+  
+  Fixed bug where mass txt was not possible except for admin user because
+  we were checking the wrong permission.
+  
+
 2022-01-12
   Added ability to register and edit user attributes from the student profile page.  Saves automatically to the user_attributes table.  Created user.api.php
   to help illustrate how the hook works.
