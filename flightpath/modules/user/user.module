@@ -152,8 +152,6 @@ function user_menu() {
     "page_arguments" => array("user_edit_student_user_form"),
     "access_arguments" => array("manage_users"),
     "page_settings" => array(
-      
-      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -179,9 +177,7 @@ function user_menu() {
     "page_callback" => "fp_render_form",
     "page_arguments" => array("user_student_edit_student_courses_form"),
     "access_arguments" => array("manage_users"),
-    "page_settings" => array(
-      
-      
+    "page_settings" => array(      
       "page_hide_report_error" => TRUE,
       "menu_links" => array(
         0 => array(
@@ -204,6 +200,37 @@ function user_menu() {
 
 
 
+  // For students...
+  $items["admin/users/edit-student-user/attributes"] = array(
+    "title" => "Edit User Attributes",
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("user_edit_user_attributes_form"),    
+    "access_arguments" => array("manage_users"),
+    "page_settings" => array(      
+      "page_hide_report_error" => TRUE,
+      "menu_links" => array(
+        0 => array(
+          "text" => "Admin Console",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+        1 => array(
+          "text" => "Back to Users list",
+          "path" => "admin/users/students",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),                
+      ),
+    ),   
+    "type" => MENU_TYPE_CALLBACK,
+    "tab_parent" => "admin-tools/admin",
+  );     
+
+  // For faculty, but we are going to copy the entry for students and only change what
+  // we need to.
+  $items["admin/users/edit-user/attributes"] = $items["admin/users/edit-student-user/attributes"];
+  $items["admin/users/edit-user/attributes"]['page_settings']['menu_links'][1]['path'] = 'admin/users/faculty';
+
+  
   
   
   
@@ -264,6 +291,124 @@ function user_menu() {
     
   return $items;
 }
+
+
+
+
+
+
+function user_edit_user_attributes_form() {
+    
+  $form = array();
+  
+  $user_id = intval($_REQUEST['user_id']);
+  $student_cwid = @strip_tags($_REQUEST["student_cwid"]);  // now getting it from argument
+  $de_catalog_year = @strip_tags($_REQUEST["de_catalog_year"]);
+
+  $attributes = user_get_registered_attributes();
+  
+  $account = fp_load_user($user_id);  
+  
+  fp_set_title(t("Edit User Attributes @name", array("@name" => "$account->f_name $account->l_name ($account->cwid)")));
+  
+  
+  $form['user_id'] = array(
+    'type' => 'hidden',
+    'value' => $user_id,
+  );
+  
+  // Set up sub tabs.
+  $tab_array = array();
+  $user_type = strip_tags($_REQUEST['user_type']);
+  if ($user_type == 'student') {    
+    // Figure out what the page's sub-tabs should be, and set them.  
+    $tab_array[0]["title"] = t("Edit Student");
+    $tab_array[0]["active"] = FALSE;
+    $tab_array[0]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-student-user", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";
+        
+    $tab_array[1]["title"] = t("Edit Student Courses");
+    $tab_array[1]["active"] = FALSE;
+    $tab_array[1]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-student-user/courses", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";
+        
+    $tab_array[2]["title"] = t("Edit User Attributes");
+    $tab_array[2]["active"] = TRUE;
+    $tab_array[2]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user/attributes/$user_id", "user_type=$user_type&student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";      
+    fp_set_page_sub_tabs($tab_array);
+    
+  }
+
+
+  $form['mark_top'] = array(
+    'value' => '<p>' . t("The following attributes are available to view/edit, depending on your permission level.") . "</p>",
+  );
+
+  $bool_something_to_edit = FALSE;
+
+  foreach ($attributes as $name => $definition) {
+                
+    foreach($attributes[$name]["fields"] as $field_name => $field_details) {
+      $ofield_name = $field_name;
+      $field_name = $name . "__" . $field_name;
+
+      if (user_has_permission("edit_attribute_$name")) {
+        // We may edit                  
+        $form[$field_name] = $field_details;
+        $form[$field_name]['prefix'] = "<h3>" . $definition['title'] . "</h3>" . $form[$field_name]['prefix'];
+        $form[$field_name]['suffix'] .= "<hr>";
+        $bool_something_to_edit = TRUE;
+      }
+      else if (user_has_permission("view_attribute_$name")) {
+        // We may only view
+        
+        $value = user_get_attribute($user_id, $field_name, '');
+        $display_value = filter_markup($value, 'plain');
+        
+        if (isset($definition['fields'][$field_name]['options'][$value])) {
+          $display_value = $definition['fields'][$field_name]['options'][$value];
+        }
+        
+        $html = "";
+        
+        $details = $definition['display'][$ofield_name];
+        
+        $html .= "<h3>" . $definition['title'] . "</h3>";
+        $html .= "<strong>" . $details['label'] . "</strong> ";        
+        
+        
+        $html .= "<span class='attrib-val'>" . $details['value'];
+        
+        $html = str_replace("@value", $display_value, $html);
+        $html = str_replace("@key", $value, $html);
+        if (trim($html) == "") $html = $display_value;        
+        
+        $html .= "</span><hr>";
+        
+        $form["mark_$field_name"] = array(
+          'value' => $html,
+        );
+        
+      } 
+                
+    }    
+        
+  } // foreach attributes
+
+
+  if ($bool_something_to_edit) {
+    $form['submit_btn'] = array(
+      'type' => 'submit',
+      'value' => 'Submit',
+      'weight' => 9990,
+    );
+  }
+  return $form;
+}
+
+
+
+
+
+
 
 
 

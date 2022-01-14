@@ -494,6 +494,19 @@ function user_student_edit_student_courses_form() {
   $tab_array[1]["active"] = TRUE;
   $tab_array[1]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-student-user/courses", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";
       
+      
+  // If there are attributes for a student, then show the tab.
+  $attributes = user_get_registered_attributes();
+  
+  foreach ($attributes as $def) {
+    if (@$def['settings']['user_type'] == 'student' || @$def['settings']['user_type'] == 'all') {
+      $tab_array[2]["title"] = t("Edit User Attributes");
+      $tab_array[2]["active"] = FALSE;
+      $tab_array[2]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-student-user/attributes", "user_id=$user_id&user_type=student&student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";      
+      break;
+    } 
+  }       
+      
   fp_set_page_sub_tabs($tab_array);
 
 
@@ -779,6 +792,20 @@ function user_edit_student_user_form() {
   $tab_array[1]["title"] = t("Edit Student Courses");
   $tab_array[1]["active"] = FALSE;
   $tab_array[1]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-student-user/courses", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";
+      
+  // If there are attributes for a student, then show the tab.
+  $attributes = user_get_registered_attributes();
+  
+  foreach ($attributes as $def) {
+    if (@$def['settings']['user_type'] == 'student' || @$def['settings']['user_type'] == 'all') {
+      $tab_array[2]["title"] = t("Edit User Attributes");
+      $tab_array[2]["active"] = FALSE;
+      $tab_array[2]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-student-user/attributes", "user_id=$user_id&user_type=student&student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";      
+      break;
+    } 
+  }        
+      
+      
       
   fp_set_page_sub_tabs($tab_array);
 

@@ -29,6 +29,7 @@ function hook_user_register_user_attributes() {
       'large_profile_editable' => TRUE,
       'mini_profile' => TRUE,
       'mini_profile_editable' => FALSE,
+      'user_type' => 'student',  // Can be "student", "faculty", or "all"
     ),
   );
 
