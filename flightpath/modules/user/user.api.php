@@ -33,6 +33,15 @@ function hook_user_register_user_attributes() {
     ),
   );
 
+  
+  $arr['fun_field'] = array(
+    'title' => 'Enter any text you like:',
+    'settings' => array(
+      'user_type' => 'student',
+      'large_profile_editable' => TRUE,
+    ),
+  );
+
 
   // If we are in a popup (dialog)...
   if (@$_GET['window_mode'] == 'popup') {
@@ -41,6 +50,13 @@ function hook_user_register_user_attributes() {
       'path' => 'content-dialog-handle-after-save',
       'query' => '',        
     );
+
+    $arr['fun_field']['settings']['#redirect'] = array(
+      'path' => 'content-dialog-handle-after-save',
+      'query' => '',        
+    );
+
+    
   }
 
 
@@ -61,6 +77,7 @@ function hook_user_register_user_attributes() {
   
   $arr['visa_status']['fields'] = $fields;  
   
+  // ** required! **
   // Display settings
   $arr['visa_status']['display']['visa'] = array(
       'label' => 'Visa Status:',
@@ -68,6 +85,22 @@ function hook_user_register_user_attributes() {
                                              // @value means whatever was selected / typed in.  @key means they key from an options field.
                                              // If 'value' is ommitted, we display @value by default.
   );
+  
+  
+  //////////////////////////////////////////////////
+  
+  $fields = array();
+  
+  $fields['fun_field_val'] = array(
+    'type' => 'textfield',
+    'label' => 'Fun Field:',    
+  ); 
+  
+  $arr['fun_field']['display']['fun_field_val'] = array(
+    'label' => 'Fun Field:',    
+  );
+  
+  $arr['fun_field']['fields'] = $fields;  
     
   return $arr;
     

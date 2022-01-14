@@ -303,8 +303,11 @@ function user_edit_user_attributes_form() {
   
   $user_id = intval($_REQUEST['user_id']);
   $student_cwid = @strip_tags($_REQUEST["student_cwid"]);  // now getting it from argument
+  $faculty_cwid = @strip_tags($_REQUEST["faculty_cwid"]);  // now getting it from argument
   $de_catalog_year = @strip_tags($_REQUEST["de_catalog_year"]);
-
+  $user_type = strip_tags($_REQUEST['user_type']);
+  
+  
   $attributes = user_get_registered_attributes();
   
   $account = fp_load_user($user_id);  
@@ -318,10 +321,10 @@ function user_edit_user_attributes_form() {
   );
   
   // Set up sub tabs.
-  $tab_array = array();
-  $user_type = strip_tags($_REQUEST['user_type']);
-  if ($user_type == 'student') {    
-    // Figure out what the page's sub-tabs should be, and set them.  
+  $tab_array = array();  
+  // Figure out what the page's sub-tabs should be, and set them.  
+    
+  if ($student_cwid != '') {    
     $tab_array[0]["title"] = t("Edit Student");
     $tab_array[0]["active"] = FALSE;
     $tab_array[0]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-student-user", "student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";
@@ -332,10 +335,27 @@ function user_edit_user_attributes_form() {
         
     $tab_array[2]["title"] = t("Edit User Attributes");
     $tab_array[2]["active"] = TRUE;
-    $tab_array[2]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user/attributes/$user_id", "user_type=$user_type&student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";      
-    fp_set_page_sub_tabs($tab_array);
-    
+    $tab_array[2]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user/attributes", "user_id=$user_id&user_type=$user_type&student_cwid=$student_cwid&de_catalog_year=$de_catalog_year") . "\"";
   }
+  else if ($faculty_cwid != '') {
+    
+    $tab_array = array();
+    $tab_array[0]["title"] = t("Edit Faculty/Staff User");
+    $tab_array[0]["active"] = TRUE;
+    $tab_array[0]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "\"";
+        
+    $tab_array[1]["title"] = t("Edit Faculty Advisees");
+    $tab_array[1]["active"] = FALSE;
+    $tab_array[1]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user/advisees", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "\"";
+    
+    $tab_array[2]["title"] = t("Edit User Attributes");
+    $tab_array[2]["active"] = TRUE;
+    $tab_array[2]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user/attributes", "user_id=$user_id&user_type=$user_type&faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "\"";
+          
+  }      
+  fp_set_page_sub_tabs($tab_array);
+    
+
 
 
   $form['mark_top'] = array(
@@ -350,11 +370,79 @@ function user_edit_user_attributes_form() {
       $ofield_name = $field_name;
       $field_name = $name . "__" . $field_name;
 
+
+      if (isset($attributes[$name]['settings']['#validate_handlers'])) {
+        $form['#validate_handlers'] += $attributes[$name]['settings']['#validate_handlers'];
+      }
+      
+      if (isset($attributes[$name]['settings']['#submit_handlers'])) {
+        $form['#submit_handlers'] += $attributes[$name]['settings']['#submit_handlers'];
+      }
+        
+      // Any js or css to add for this form, defined in the settings?
+      if (isset($attributes[$name]['settings']['js'])) {
+        fp_add_js($attributes[$name]['settings']['js']);
+      }
+      if (isset($attributes[$name]['settings']['css'])) {
+        fp_add_css($attributes[$name]['settings']['css']);
+      }
+
+
+
+
       if (user_has_permission("edit_attribute_$name")) {
-        // We may edit                  
+        // We may edit
         $form[$field_name] = $field_details;
         $form[$field_name]['prefix'] = "<h3>" . $definition['title'] . "</h3>" . $form[$field_name]['prefix'];
         $form[$field_name]['suffix'] .= "<hr>";
+        
+        // Set the value properly...
+        if ($field_details['type'] != 'cfieldset') {      
+          $value = user_get_attribute($user_id, $field_name, '');                  
+          $form[$field_name]['value'] = $value;          
+          // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly. (it was stored as UTC in database)             
+          if ($form[$field_name]['type'] == 'datetime-local') {
+            if (trim($value) != '') {
+              $form[$field_name]["value"] = date('Y-m-d\TH:i', convert_time(strtotime($value)));  
+            }
+          }          
+          // Similar to datetime-local, if this is a "time" field, then it has been stored as UTC in the database, and now
+          // needs to be converted to local timezone.
+          if ($form[$field_name]['type'] == 'time') {
+            if (trim($value) != '') {
+              $form[$field_name]["value"] = date('H:i', convert_time(strtotime($value)));            
+            }
+          }               
+        } // is not cfieldset
+        else {
+          // If this is a fieldset, then we need to assign values to its ELEMENTS.  If not empty, then OPEN the cfieldset!
+          foreach ($form[$field_name]['elements'] as $c => $efields) {
+            foreach ($efields as $efield_name => $efield_details) {  
+              $value = user_get_attribute($user_id, $field_name, '');                          
+              $efield_details['value'] = $value;              
+              // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
+              if ($efield_details['type'] == 'datetime-local') {
+                if (trim($value) != '') {
+                  $value = date('Y-m-d\TH:i', convert_time(strtotime($value)));
+                }
+              }  
+              // Similar to datetime-local, if this is a "time" field, then it has been stored as UTC in the database, and now
+              // needs to be converted to local timezone.
+              if ($efield_details['type'] == 'time') {
+                if (trim($value) != '') {
+                  $value = date('H:i', convert_time(strtotime($value)));            
+                }
+              }
+              $form[$field_name]['elements'][$c][$efield_name]["value"] = $value;
+              if (trim($value)) {
+                $form[$field_name]['start_closed'] = FALSE;
+              }
+            }
+          }
+          
+        } // else is fieldset        
+          
+        
         $bool_something_to_edit = TRUE;
       }
       else if (user_has_permission("view_attribute_$name")) {
@@ -366,23 +454,26 @@ function user_edit_user_attributes_form() {
         if (isset($definition['fields'][$field_name]['options'][$value])) {
           $display_value = $definition['fields'][$field_name]['options'][$value];
         }
-        
+                        
         $html = "";
-        
-        $details = $definition['display'][$ofield_name];
-        
+        $html_val = "";
+        $details = array();
+        if (isset($definition['display'][$ofield_name])) {
+          $details = $definition['display'][$ofield_name];
+        }
         $html .= "<h3>" . $definition['title'] . "</h3>";
-        $html .= "<strong>" . $details['label'] . "</strong> ";        
+        $html .= "<strong>" . @$details['label'] . "</strong> ";        
+        $html .= "<span class='attrib-val'>";
         
+        $html_val .= @$details['value'];
         
-        $html .= "<span class='attrib-val'>" . $details['value'];
+        $html_val = str_replace("@value", $display_value, $html_val);
+        $html_val = str_replace("@key", $value, $html_val);
+        if (trim($html_val) == "") {
+          $html_val .= $display_value;  // meaning, it's empty.
+        }        
         
-        $html = str_replace("@value", $display_value, $html);
-        $html = str_replace("@key", $value, $html);
-        if (trim($html) == "") $html = $display_value;        
-        
-        $html .= "</span><hr>";
-        
+        $html .= "$html_val</span><hr>";        
         $form["mark_$field_name"] = array(
           'value' => $html,
         );
@@ -402,7 +493,32 @@ function user_edit_user_attributes_form() {
     );
   }
   return $form;
-}
+} // end function
+
+
+function user_edit_user_attributes_form_submit($form, $form_state) {
+  
+  $values = $form_state['values'];  
+  $user_id = intval($values['user_id']);
+  
+  $attributes = user_get_registered_attributes();
+  foreach ($attributes as $name => $definition) {
+    foreach ($definition['fields'] as $attr_key => $details) {
+      
+      $fieldname = $name . "__" . $attr_key;
+      if (user_has_permission("edit_attribute_" . $name)) {
+        $val = @trim($values[$fieldname]);
+        user_set_attribute($user_id, $fieldname, $val);
+      };
+      
+    }
+  }  
+  
+  fp_add_message(t("User attributes have been updated successfully."));
+ 
+  
+} // ... submit
+
 
 
 
@@ -430,6 +546,8 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items) {
   
   
   foreach ($attributes as $attr => $definition) {
+    
+    
     foreach ($definition['display'] as $attr_key => $details) {      
       $value = user_get_attribute($user_id, $attr . "__" . $attr_key, '');
       $display_value = filter_markup($value, 'plain');
@@ -1447,6 +1565,18 @@ function user_edit_user_advisees_form() {
   $tab_array[1]["active"] = TRUE;
   $tab_array[1]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user/advisees", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "\"";
       
+  // If there are attributes for a student, then show the tab.
+  $attributes = user_get_registered_attributes();
+  
+  foreach ($attributes as $def) {
+    if (@$def['settings']['user_type'] == 'faculty' || @$def['settings']['user_type'] == 'all') {
+      $tab_array[2]["title"] = t("Edit User Attributes");
+      $tab_array[2]["active"] = FALSE;
+      $tab_array[2]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user/attributes", "user_id=$user_id&user_type=faculty&faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "\"";      
+      break;
+    } 
+  }           
+      
   fp_set_page_sub_tabs($tab_array);  
 
 
@@ -1621,9 +1751,9 @@ function user_edit_user_form() {
   $form = array();
   $m = 0;
   
-  $faculty_cwid = $_REQUEST["faculty_cwid"];
+  $faculty_cwid = strip_tags($_REQUEST["faculty_cwid"]);
   $user_id = db_get_user_id_from_cwid($faculty_cwid);
-  $de_catalog_year = @$_REQUEST["de_catalog_year"];
+  $de_catalog_year = @strip_tags($_REQUEST["de_catalog_year"]);
   $name = fp_get_faculty_name($faculty_cwid);
   
   fp_set_title(t("Edit Faculty/Staff User @name (@id)", array("@name" => $name, "@id" => $faculty_cwid)));
@@ -1638,6 +1768,18 @@ function user_edit_user_form() {
   $tab_array[1]["title"] = t("Edit Faculty Advisees");
   $tab_array[1]["active"] = FALSE;
   $tab_array[1]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user/advisees", "faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "\"";
+      
+  // If there are attributes for a student, then show the tab.
+  $attributes = user_get_registered_attributes();
+  
+  foreach ($attributes as $def) {
+    if (@$def['settings']['user_type'] == 'faculty' || @$def['settings']['user_type'] == 'all') {
+      $tab_array[2]["title"] = t("Edit User Attributes");
+      $tab_array[2]["active"] = FALSE;
+      $tab_array[2]["on_click"] = "window.location=\"" . fp_url("admin/users/edit-user/attributes", "user_id=$user_id&user_type=faculty&faculty_cwid=$faculty_cwid&de_catalog_year=$de_catalog_year") . "\"";      
+      break;
+    } 
+  }              
       
   fp_set_page_sub_tabs($tab_array);  
   

@@ -13,6 +13,9 @@ FlightPath 6.x Changelog
   
   Added extra message to schools module.
   
+  Added ability to have user editable attributes for other users.  Must set permission. See user.api.php for help
+  on how to "register" these custom attributes.
+  
 
 2022-01-12
   Added ability to register and edit user attributes from the student profile page.  Saves automatically to the user_attributes table.  Created user.api.php
