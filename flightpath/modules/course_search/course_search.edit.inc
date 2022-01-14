@@ -116,8 +116,11 @@ function course_search_edit_course_details_form() {
   );
   
   
+  
   $term_array = csv_to_array(variable_get_for_school("course_search_avail_term_id_suffix_order", '', $school_id));
 
+  
+  
   $form["mark" . $m++] = array(
     "value" => "<div class='rotation-form-checkboxes'>",
   );
@@ -149,11 +152,9 @@ function course_search_edit_course_details_form() {
       
       
       
-      $new_course = new Course();
-      $new_course->term_id = $term_id;
-      $cb_disp_name = $new_course->get_term_description(TRUE);
+      $cb_disp_name = get_term_description($term_id, TRUE, $school_id);
       
-      $cbname = $new_course->term_id;
+      $cbname = $term_id;
       
       
       $cb_default_val = array();
@@ -408,9 +409,9 @@ function course_search_upload_attachment($course_id, $subject_id, $course_num) {
  */
 function course_search_display_edit_courses()
 {
-	
+  
   $rtn = "";
-	
+  
   $school_id = 0;
   if (@$_REQUEST['school_id'] != '') {
     $school_id = intval($_REQUEST['school_id']);
@@ -427,37 +428,37 @@ function course_search_display_edit_courses()
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;
   
-	
-	$cc = 1;
+  
+  $cc = 1;
 
-	// Get the "upper range" (UR) and
-	// lower range (LR) of the courses in question...
-	$ur = trim($_GET["ur"]);
-	$lr = trim($_GET["lr"]);
-	if ($ur == "")
-	{ // meaning, no range was set.  Use A - AZZZZZ, so, all of the A's.
-		$ur = $_SESSION["dec_ur"];
-		$lr = $_SESSION["dec_lr"];
-		if ($ur == "")
-		{ // if still blank, assign it..
-			$ur = "A";
-			$lr = "AZZZZ";
-		}
+  // Get the "upper range" (UR) and
+  // lower range (LR) of the courses in question...
+  $ur = trim($_GET["ur"]);
+  $lr = trim($_GET["lr"]);
+  if ($ur == "")
+  { // meaning, no range was set.  Use A - AZZZZZ, so, all of the A's.
+    $ur = $_SESSION["dec_ur"];
+    $lr = $_SESSION["dec_lr"];
+    if ($ur == "")
+    { // if still blank, assign it..
+      $ur = "A";
+      $lr = "AZZZZ";
+    }
 
-	}
-	$_SESSION["dec_ur"] = $ur;
-	$_SESSION["dec_lr"] = $lr;
+  }
+  $_SESSION["dec_ur"] = $ur;
+  $_SESSION["dec_lr"] = $lr;
 
 
-	$rtn .= "
-			<div class='tenpt' style='margin-bottom: 20px;'>
-				" . t("To update a course's sample syllabus or schedule,
-				please select the course from the list below.") . "				
-			</div>
-			";
+  $rtn .= "
+      <div class='tenpt' style='margin-bottom: 20px;'>
+        " . t("To update a course's sample syllabus or schedule,
+        please select the course from the list below.") . "       
+      </div>
+      ";
 
-	
-	
+  
+  
   $letter_ranges = array(
     "A" => array("A", "AZZZZ"),
     "B" => array("B", "BZZZZ"),
@@ -485,120 +486,120 @@ function course_search_display_edit_courses()
   foreach($letter_ranges as $disp => $vals) {
     $rtn .= l($disp, "tools/course-search/edit-list", "school_id=$school_id&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link")) . " &nbsp; ";
   }
-	
+  
   $rtn .= "</div>
             <hr>";
-	
-	
+  
+  
 
 
 
-	$rtn .= "<table border='0' cellpadding='3' cellspacing='0' width='100%'>
-			<tr>
-				<th class='tenpt'>Course</td>
-				<th class='tenpt' align='center'>School</td>
-				<th class='tenpt' align='center'>Sched</td>
-				<th class='tenpt' align='center'>Syl</td>
-				<th class='tenpt' align='center'>Updated</td>
-			</tr>";
+  $rtn .= "<table border='0' cellpadding='3' cellspacing='0' width='100%'>
+      <tr>
+        <th class='tenpt'>Course</td>
+        <th class='tenpt' align='center'>School</td>
+        <th class='tenpt' align='center'>Sched</td>
+        <th class='tenpt' align='center'>Syl</td>
+        <th class='tenpt' align='center'>Updated</td>
+      </tr>";
 
-	$res = db_query("SELECT * FROM courses
+  $res = db_query("SELECT * FROM courses
                         WHERE catalog_year = ? 
                         AND subject_id BETWEEN ? AND ?
                         AND delete_flag = 0
                         AND exclude = 0
                         AND school_id = ?
                         ORDER BY subject_id, course_num ", $catalog_year, $ur, $lr, $school_id);
-	while ($cur = db_fetch_array($res)) {
-		extract($cur, 3, "db");
+  while ($cur = db_fetch_array($res)) {
+    extract($cur, 3, "db");
 
-		$syl = $sch = $school = $updated = "";
-		// Right here, maybe check to see if this course has
-		// a syllabus and/or schedule entered?
-		
-		$school = "#" . $cur['school_id'];
-		if (module_enabled("schools")) {
-		  $school = schools_get_school_code_for_id($school_id);
+    $syl = $sch = $school = $updated = "";
+    // Right here, maybe check to see if this course has
+    // a syllabus and/or schedule entered?
+    
+    $school = "#" . $cur['school_id'];
+    if (module_enabled("schools")) {
+      $school = schools_get_school_code_for_id($school_id);
     }
-		
-		$syllabus_details = course_search_get_course_syllabus_details($db_course_id);
-		$filename = $syllabus_details["filename"];
-		
-		
-		if ($filename != "") {
-      		  
-      $url = $syllabus_details["url"];			  
+    
+    $syllabus_details = course_search_get_course_syllabus_details($db_course_id);
+    $filename = $syllabus_details["filename"];
+    
+    
+    if ($filename != "") {
+            
+      $url = $syllabus_details["url"];        
       
-			$syl = "<a href='$url'><i class='fa fa-file-o'></i></a>";
-			
-			$updated = $syllabus_details["posted"];
-		}
-		$schedule_array = course_search_get_course_rotation_schedule($db_course_id, $catalog_year, 100, TRUE);
-		$not_ant = course_search_get_course_rotation_schedule_not_anticipated($db_course_id);
-		if (count($schedule_array) > 0 || $not_ant == true) {
-			$sch = "<img src='" . fp_theme_location() . "/images/small_check.gif'>";
-			if ($not_ant) {
-				$sch = "NA";
-			}
-			// When was the schedule last updated?
-			$res2 = db_query("SELECT * FROM course_rotation_schedule
-							         WHERE course_id = ? 
-							         LIMIT 1", $db_course_id);
-			$cur2 = db_fetch_array($res2);
-			$updated2 = $cur2["posted"];
-			if ($updated2 > $updated) {
-				$updated = $updated2;
-			}
-		}
+      $syl = "<a href='$url'><i class='fa fa-file-o'></i></a>";
+      
+      $updated = $syllabus_details["posted"];
+    }
+    $schedule_array = course_search_get_course_rotation_schedule($db_course_id, $catalog_year, 100, TRUE);
+    $not_ant = course_search_get_course_rotation_schedule_not_anticipated($db_course_id);
+    if (count($schedule_array) > 0 || $not_ant == true) {
+      $sch = "<img src='" . fp_theme_location() . "/images/small_check.gif'>";
+      if ($not_ant) {
+        $sch = "NA";
+      }
+      // When was the schedule last updated?
+      $res2 = db_query("SELECT * FROM course_rotation_schedule
+                       WHERE course_id = ? 
+                       LIMIT 1", $db_course_id);
+      $cur2 = db_fetch_array($res2);
+      $updated2 = $cur2["posted"];
+      if ($updated2 > $updated) {
+        $updated = $updated2;
+      }
+    }
 
-		if ($updated != "") {
-			$updated = date("n/d/Y",$updated);
-		}
-
-
-		
-		$hrs = $db_min_hours;
-		if (trim($db_min_hours) != trim($db_max_hours)) {
-			$hrs .= " - $db_max_hours";
-		}
-
-		$hrs .= " hrs.";
-
-		$rep_hours = "";
-		if ($db_repeat_hours > $db_min_hours)
-		{
-			$rep_hours = " rep to $db_repeat_hours hrs.";
-		}
-
-		// remove special chars from subject_id...
-		$display_subject_id = $db_subject_id;
-		$db_subject_id = urlencode($db_subject_id);
+    if ($updated != "") {
+      $updated = date("n/d/Y",$updated);
+    }
 
 
-		$rtn .= "<tr style='$spanstyle'>
-				<td valign='top' >";
-		
-		/*$rtn .= "<div style='padding:3px;'>
-					<a href='$moduleActionURL&performAction=editSpecificCourse&courseID=$db_course_id&subjectID=$db_subject_id&courseNum=$db_course_num'>$displaySubjectID $db_course_num - $db_title</a><!-- - $hrs$repHours --></div>";
+    
+    $hrs = $db_min_hours;
+    if (trim($db_min_hours) != trim($db_max_hours)) {
+      $hrs .= " - $db_max_hours";
+    }
+
+    $hrs .= " hrs.";
+
+    $rep_hours = "";
+    if ($db_repeat_hours > $db_min_hours)
+    {
+      $rep_hours = " rep to $db_repeat_hours hrs.";
+    }
+
+    // remove special chars from subject_id...
+    $display_subject_id = $db_subject_id;
+    $db_subject_id = urlencode($db_subject_id);
+
+
+    $rtn .= "<tr style='$spanstyle'>
+        <td valign='top' >";
+    
+    /*$rtn .= "<div style='padding:3px;'>
+          <a href='$moduleActionURL&performAction=editSpecificCourse&courseID=$db_course_id&subjectID=$db_subject_id&courseNum=$db_course_num'>$displaySubjectID $db_course_num - $db_title</a><!-- - $hrs$repHours --></div>";
 */
-		
-		$rtn .= l("$display_subject_id $db_course_num - $db_title", "tools/course-search/edit-info-details", "school_id=$school_id&course_id=$db_course_id&subject_id=$db_subject_id&course_num=$db_course_num");
-		// https://orion.ulm.edu/flightpath/tools/course-search/edit-info-details?course_id=468798&subject_id=ACCT&course_num=1010
-		
-		$rtn .= "</td>
-				<td >$school</td>
-				<td >$sch</td>
-				<td >$syl</td>
-				<td >$updated</td>
-					</tr>";
+    
+    $rtn .= l("$display_subject_id $db_course_num - $db_title", "tools/course-search/edit-info-details", "school_id=$school_id&course_id=$db_course_id&subject_id=$db_subject_id&course_num=$db_course_num");
+    // https://orion.ulm.edu/flightpath/tools/course-search/edit-info-details?course_id=468798&subject_id=ACCT&course_num=1010
+    
+    $rtn .= "</td>
+        <td >$school</td>
+        <td >$sch</td>
+        <td >$syl</td>
+        <td >$updated</td>
+          </tr>";
 
-	} // while
-
-
-	$rtn .= "</table>";
+  } // while
 
 
-	return $rtn;
+  $rtn .= "</table>";
+
+
+  return $rtn;
 
 
 }
@@ -635,91 +636,91 @@ function z__course_search_get_offering_csv($school_id = 0) {
     
   $term_array = csv_to_array(variable_get("course_search_avail_term_id_suffix_order"));  
   
-	for ($t = $catalog_year; $t <= $catalog_year + 5; $t++)
-	{
-		foreach($term_array as $x)
-		{
-		  $check_year = $t;
-		  		  
-			$term_id = $check_year . $x;
-			
-			$check_term_array[] = $term_id;
-			
+  for ($t = $catalog_year; $t <= $catalog_year + 5; $t++)
+  {
+    foreach($term_array as $x)
+    {
+      $check_year = $t;
+            
+      $term_id = $check_year . $x;
+      
+      $check_term_array[] = $term_id;
+      
       $new_course = new Course();
       $new_course->term_id = $term_id;
       $new_course->school_id = $school_id;
       $disp_name = $new_course->get_term_description(TRUE);
-			
-			$csv .= " " . $disp_name . " ($term_id) ,";
-			
-			// While we are here, we are going to get an array of ALL the courses
-			// which have an entry for this term in our table.  This should make
-			// it faster to look up later.
-			$res = db_query("SELECT * FROM course_rotation_schedule
-													WHERE term_id = ? ", $term_id);
-			while ($cur = db_fetch_array($res)) {
-			  $course_term_array[$term_id][$cur["course_id"]] = TRUE;
-			}
-			
-		}
-	}
+      
+      $csv .= " " . $disp_name . " ($term_id) ,";
+      
+      // While we are here, we are going to get an array of ALL the courses
+      // which have an entry for this term in our table.  This should make
+      // it faster to look up later.
+      $res = db_query("SELECT * FROM course_rotation_schedule
+                          WHERE term_id = ? ", $term_id);
+      while ($cur = db_fetch_array($res)) {
+        $course_term_array[$term_id][$cur["course_id"]] = TRUE;
+      }
+      
+    }
+  }
   
-	// Take off last comma of csv.
-	$csv = substr($csv, 0, -1);	
+  // Take off last comma of csv.
+  $csv = substr($csv, 0, -1); 
 
-		
-	$csv .= "\n";
+    
+  $csv .= "\n";
 
    
-	$result = db_query("SELECT * FROM courses
+  $result = db_query("SELECT * FROM courses
                         WHERE 
                         catalog_year = ?                         
                         AND delete_flag = 0
                         AND exclude = 0
                         AND school_id = ?
                         ORDER BY subject_id, course_num ", $catalog_year, $school_id);
-	while ($cur = db_fetch_array($result)) {
-	  extract($cur, 3, "db");
-	  //debugCT($db_subject_id . $db_course_num);
-	  
-	  $csv .= "$db_subject_id, $db_course_num, ";
-	  
-	  
-	  // What college does this course belong to?
+  while ($cur = db_fetch_array($result)) {
+    extract($cur, 3, "db");
+    //debugCT($db_subject_id . $db_course_num);
+    
+    $csv .= "$db_subject_id, $db_course_num, ";
+    
+    
+    // What college does this course belong to?
     $res2 = db_query("SELECT * FROM subjects
                           WHERE subject_id = ?
                           AND school_id = ? ", $db_subject_id, $school_id);
     $cur2 = db_fetch_array($res2);
     $college = $cur2["college"];
     $dept_name = $cur2["title"];
-    	  
-	  $csv .= "$college, $dept_name, ";
-    	  
-	  // Also, when was their last syllabus submitted?
-	  $syl = "";
-	  $res2 = db_query("SELECT * FROM course_syllabi WHERE course_id = '?'", $db_course_id);
-	  $cur2 = db_fetch_array($res2);
-	  $syl = format_date($cur2["posted"]);
-	  
-	  $csv .= "$syl, ";
-	  
-	  
-	  // Now, get course offerings for the next X terms...
+        
+    $csv .= "$college, $dept_name, ";
+        
+    // Also, when was their last syllabus submitted?
+    $syl = "";
+    $res2 = db_query("SELECT * FROM course_syllabi WHERE course_id = '?'", $db_course_id);
+    $cur2 = db_fetch_array($res2);
+    $syl = format_date($cur2["posted"]);
+    
+    $csv .= "$syl, ";
+    
+    
+    // Now, get course offerings for the next X terms...
     foreach ($check_term_array as $term_id) {
-			// See if this term is offered for this course
-			if ($course_term_array[$term_id][$db_course_id] == TRUE) {
-				$csv .= " X,";
-			}
-			else {
-			  $csv .= ",";
-			}     
+      // See if this term is offered for this course
+      if ($course_term_array[$term_id][$db_course_id] == TRUE) {
+        $csv .= " X,";
+      }
+      else {
+        $csv .= ",";
+      }     
     }
-	  
-	  // Take off last comma of csv.
-    $csv = substr($csv, 0, -1);	
+    
+    // Take off last comma of csv.
+    $csv = substr($csv, 0, -1); 
     $csv .= "\n";
     
-	}  
+  }  
   
   header('Content-type: text/csv');
   header('Content-Disposition: attachment; filename="report_ant_offering.csv"');

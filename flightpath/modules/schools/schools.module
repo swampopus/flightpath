@@ -1233,7 +1233,9 @@ function schools_administer_schools_form() {
   
   $form["mark" . $m++] = array(
     "type" => "markup",
-    "value" => "</table>",
+    "value" => "</table>
+                  <br><strong>" . t("Important:") . "</strong> " . t("Even if you are not overriding any settings per school, you must still visit each school's <em>Configure school settings</em>
+                      screen from the Admin Console and press the Submit button.  Otherwise, some features in FlightPath may not function correctly."),
   );
   
   $form["perform_action2"] = array(

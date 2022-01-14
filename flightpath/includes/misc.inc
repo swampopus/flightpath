@@ -1477,8 +1477,14 @@ function fp_get_session_id_from_str($str) {
 /**
  * Simple function that adds spaces after commas in CSV strings.  Makes them easier to read.
  */
-function fp_space_csv($str) {
+function fp_space_csv($str) {  
   $str = str_replace(",", ", ", $str);
+  // Get rid of double spaces we might have introduced.
+  $str = str_replace(",  ", ", ", $str);
+  $str = str_replace(",  ", ", ", $str);
+  $str = str_replace(",  ", ", ", $str);
+    
+  
   $str = trim($str);
   return $str;
 }

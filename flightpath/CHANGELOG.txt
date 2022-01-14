@@ -7,6 +7,12 @@ FlightPath 6.x Changelog
   Fixed bug where mass txt was not possible except for admin user because
   we were checking the wrong permission.
   
+  Small change to fp_space_csv function, to reduce double-spaces.
+  
+  Fixed bug in course search edit, where it was not showing terms correctly based on school_id.
+  
+  Added extra message to schools module.
+  
 
 2022-01-12
   Added ability to register and edit user attributes from the student profile page.  Saves automatically to the user_attributes table.  Created user.api.php
