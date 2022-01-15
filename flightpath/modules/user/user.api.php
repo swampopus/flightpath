@@ -114,8 +114,8 @@ function hook_user_register_user_attributes() {
  * 
  * Notice that value is passed by reference.
  */ 
-function hook_alter_user_attribute_display($name, $attr_key, &$value) {
-  if ($attr_key == "name") {
+function hook_alter_user_attribute_display($attribute_id, &$value) {
+  if ($attribute_id == "my_module__name_value") {
     $value = strtoupper($value);
   }
 } 
