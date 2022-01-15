@@ -451,6 +451,11 @@ function user_edit_user_attributes_form() {
         $value = user_get_attribute($user_id, $field_name, '');
         $display_value = filter_markup($value, 'plain');
         
+        // Is there any special way this value is meant to be displayed?
+        // Ex: if its a date field, should we change how that gets displayed?
+        invoke_hook("alter_user_attribute_display", array($name, $ofield_name, &$display_value));
+         
+        
         if (isset($definition['fields'][$field_name]['options'][$value])) {
           $display_value = $definition['fields'][$field_name]['options'][$value];
         }
@@ -551,6 +556,11 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items) {
     foreach ($definition['display'] as $attr_key => $details) {      
       $value = user_get_attribute($user_id, $attr . "__" . $attr_key, '');
       $display_value = filter_markup($value, 'plain');
+      
+      // Is there any special way this value is meant to be displayed?
+      // Ex: if its a date field, should we change how that gets displayed?
+      invoke_hook("alter_user_attribute_display", array($attr, $attr_key, &$display_value));
+      
       
       if (isset($definition['fields'][$attr_key]['options'][$value])) {
         $display_value = $definition['fields'][$attr_key]['options'][$value];

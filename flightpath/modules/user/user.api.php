@@ -106,4 +106,30 @@ function hook_user_register_user_attributes() {
     
 } 
  
+ 
+ 
+ 
+/**
+ * This function lets us alter the value of a user attribute, before it is displayed to the user.
+ * 
+ * Notice that value is passed by reference.
+ */ 
+function hook_alter_user_attribute_display($name, $attr_key, &$value) {
+  if ($attr_key == "name") {
+    $value = strtoupper($value);
+  }
+} 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 

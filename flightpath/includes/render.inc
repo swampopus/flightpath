@@ -665,8 +665,8 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
 
     $rtn .= "<textarea name='$name' id='element-$cssname' rows='$rows' maxlength='$maxlength' $attributes>$value</textarea>$extra_span";
   }
-
-  if ($type == "textfield" || $type == "text" || $type == "search" || $type == "password" || $type == 'datetime-local' || $type == 'time') {
+ 
+  if ($type == "textfield" || $type == "text" || $type == "search" || $type == "password" || $type == 'datetime-local' || $type == 'time' || $type == 'date') {
     if ($type == "textfield") $type = "text";
     $size = (isset($element["size"])) ? $element["size"] : "60";
     $maxlength = (isset($element["maxlength"])) ? $element["maxlength"] : "255";
