@@ -242,6 +242,7 @@ function admin_copy_degree_form_validate($form, $form_state) {
                     AND school_id = ? ", $source_major_code, "$source_major_code|%", $de_catalog_year, $school_id) ;
   if (db_num_rows($res) == 0) {
     // Meaning, it could not be found.    
+
     form_error("source_major_code", t("The source major, %source, could not be found for %year$for_school.", array("%source" => $source_major_code, "%year" => $de_catalog_year, "%school" => $source_school_name)));
    
   }  
@@ -812,11 +813,16 @@ function admin_display_degrees() {
     $params[":degree_class"] = $filter_class_value;
   }
   
-  if ($filter_school_value) {
-    $extra_where_conditions .= " AND school_id = :school_id ";
-    $params[":school_id"] = $filter_school_value;
+  if (module_enabled('schools')) {
+    if ($filter_school_value) {
+      $extra_where_conditions .= " AND school_id = :school_id ";
+      $params[":school_id"] = $filter_school_value;
+    }
   }
-  
+  else {
+    // schools not enabled, so only search for school = 0
+      $extra_where_conditions .= " AND school_id = 0 ";
+  }
   
     
   $res = db_query("SELECT * FROM draft_degrees

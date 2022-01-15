@@ -1416,10 +1416,19 @@ function admin_display_groups() {
     $params[":name2"] = "%$filter_name_value%";
   }
   
-  if ($filter_school_value) {
-    $extra_where_conditions .= " AND school_id = :school_id ";
-    $params[":school_id"] = $filter_school_value;
+  
+  
+  if (module_enabled('schools')) {
+    if ($filter_school_value) {
+      $extra_where_conditions .= " AND school_id = :school_id ";
+      $params[":school_id"] = $filter_school_value;
+    }
+  }
+  else {
+    // schools not enabled, so only search for school = 0
+      $extra_where_conditions .= " AND school_id = 0 ";
   }  
+  
 
   watchdog("admin", "Viewed admin groups list. Name filter: $filter_name_value. ($de_catalog_year), school_id: $filter_school_value", array(), WATCHDOG_DEBUG);
 

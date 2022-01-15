@@ -141,9 +141,15 @@ function admin_display_courses() {
   
   $filter_school = @intval(trim($_SESSION['courses_filter_school']));
   
-  if ($filter_school) {
-    $extra_where_conditions .= " AND school_id = $filter_school ";
+  if (module_enabled('schools')) {
+    if ($filter_school) {
+      $extra_where_conditions .= " AND school_id = $filter_school ";      
+    }
   }
+  else {
+    // schools not enabled, so only search for school = 0
+      $extra_where_conditions .= " AND school_id = 0 ";
+  }  
   
   
   watchdog("admin", "Viewed admin courses list. Exclude option: $filter_exclude, Range: $ur - $lr, ($de_catalog_year), School id: $filter_school", array(), WATCHDOG_DEBUG);

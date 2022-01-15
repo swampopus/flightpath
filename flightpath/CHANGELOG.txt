@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-01-15
+  Fixed bug where degrees, groups, and courses not in school 0 were showing up (and causing problems) when the schools
+  module was turned off.  Changed the logic so that when schools module is not enabled, we will only be shown school=0.
+  
+
 2022-01-13
   Minor edit: cleared up wording for mass sms permission.
   
