@@ -621,7 +621,7 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items) {
     if ($bool_add_it) {      
       // permission check as to whether it can be viewed at all
       if (user_has_permission("view_attribute_$attr")) {      
-        fp_push_and_balance_profile_items($extra_profile_items, array($attr_key => $item));
+        fp_push_and_balance_profile_items($extra_profile_items, array($attr . "__" . $attr_key => $item));
       }
     }
     

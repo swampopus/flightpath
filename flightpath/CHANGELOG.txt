@@ -9,6 +9,7 @@ FlightPath 6.x Changelog
   
   Added new hook to user module, allowing us to change the display value of a user attribute.
   
+  Tweaked function to "balance" the profile items on a page.
 
 2022-01-13
   Minor edit: cleared up wording for mass sms permission.
