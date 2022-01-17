@@ -208,24 +208,43 @@ table.tabs-search-table td.search-td {
 
 .fp-bottom-message {
   font-size: 0.7em;
+  display: table;
+  width: 100%;
   
   color: white;  
   background-color: #373B44;
   
   margin-top: 50px;    
-  margin-left: auto;
-  margin-right: auto;
+  zzmargin-left: auto;
+  zzmargin-right: auto;
   
-  padding-left: 40px;
+  zzpadding-left: 40px;
   padding-top: 20px;
   padding-bottom: 40px;
     
 
-  min-height: 70px;
+  min-height: 80px;
   border-top: 1px solid #030304;
-  
-  
+    
 }
+
+
+
+.fp-bottom-message .popup-contact {
+  display: table-cell;
+  width: 50%;
+  padding-left: 40px;
+}
+
+.fp-bottom-message .powered-by-fpa {
+  display: table-cell;
+  text-align: right;
+  width: 50%;
+  padding-right: 50px;
+}
+
+
+
 
 
 
@@ -1196,8 +1215,6 @@ ul.pager li.pager-current {
 
 
 
-
-
 ___page--popup-report-contact{}
 
 body.page--popup-report-contact,
@@ -1205,6 +1222,10 @@ body.page--popup-contact-form-thank-you
 {
   padding: 10px;
 }
+
+
+
+
 
 
 

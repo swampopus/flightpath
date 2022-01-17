@@ -4,6 +4,8 @@ FlightPath 6.x Changelog
 2022-01-17
   Added ability to change site logo (in system settings).
   
+  Added "powered by FlightPath Academics" to bottom of page template.
+  
 
 2022-01-16
   Changed the 404 error to log as "page_not_found" type, instead of "system", as it shows up quite a bit in the logs and can be

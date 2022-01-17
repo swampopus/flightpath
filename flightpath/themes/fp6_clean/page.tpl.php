@@ -112,6 +112,7 @@
           }
         ?>
       </span>
+      <span class='powered-by-fpa'><?php print t("Powered by ") . "&nbsp; <a href='https://flightpathacademics.com' target='_blank'><i class='fa fa-send'></i> FlightPath Academics</a>"; ?></span>
     <!-- Optional copyright message could go here.
         <span>&copy; Date, Institution, etc.</span> -->   
     </div>
