@@ -479,7 +479,7 @@ class DatabaseHandler extends stdClass
       $min_hours = $cur["min_hours"];
       $max_hours = $cur["max_hours"];
       $repeat_hours = $cur["repeat_hours"];
-      if ($repeat_hours*1 < 1)
+      if ($repeat_hours*1 == 0)
       {
         $repeat_hours = $max_hours;
       }

@@ -180,7 +180,7 @@ class Group extends stdClass
    * Return TRUE or FALSE if we've fulfilled the min hour allowed value, if it's set.
    */
   function get_is_min_hours_allowed_fulfilled($semester_num = -1) {
-    if ($this->min_hours_allowed < 1) return TRUE;
+    if (floatval($this->min_hours_allowed) == 0) return TRUE;
     
     $v = $this->get_fulfilled_hours(true, true, false, $semester_num);
     

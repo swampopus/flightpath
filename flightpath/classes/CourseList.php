@@ -384,7 +384,7 @@ class CourseList extends ObjList
 					// withdrew from a course...
 					if (in_array($c->grade, $withdrew_grades)) { continue; }
 
-          if ($c->min_hours < 1 || $c->min_hours == "") {
+          if (floatval($c->min_hours) == 0 || $c->min_hours == "") {
 					  $c->load_descriptive_data();  // make sure we get hour data for this course.
 					}					
 					
@@ -538,7 +538,7 @@ class CourseList extends ObjList
           // withdrew from a course...
           if (in_array($c->grade, $withdrew_grades)) { continue; }
 
-          if ($c->min_hours < 1 || $c->min_hours == "") {
+          if (floatval($c->min_hours) == 0 || $c->min_hours == "") {
             $c->load_descriptive_data();  // make sure we get hour data for this course.
           }         
           
@@ -1140,7 +1140,7 @@ class CourseList extends ObjList
 		{
 			$c = $this->array_list[$t];
 			$hours = $c->get_hours_awarded();
-			if ($hours < 1)
+			if (floatval($hours) == 0)
 			{
 				$hours = $c->min_hours*1;
 			}

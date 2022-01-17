@@ -6,6 +6,9 @@ FlightPath 6.x Changelog
   
   Added "powered by FlightPath Academics" to bottom of page template.
   
+  Correcting if statements checking for if hours < 1 to if hours == 0, since some courses at some
+  schools may be less than 1 hour.
+  
 
 2022-01-16
   Changed the 404 error to log as "page_not_found" type, instead of "system", as it shows up quite a bit in the logs and can be

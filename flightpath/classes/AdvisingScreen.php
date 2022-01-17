@@ -1890,7 +1890,7 @@ function draw_menu_items($menu_array) {
         $fulfilled_hours = $this->degree_plan->gpa_calculations[$degree_id][$requirement_type]["fulfilled_hours"]*1;
         $qpts = $this->degree_plan->gpa_calculations[$degree_id][$requirement_type]["qpts"]*1;
         
-        if ($total_hours < 1) continue;  // no hours for this requirement type!
+        if (floatval($total_hours) == 0) continue;  // no hours for this requirement type!
         
         // Setting to display GPA
         $gpa = $extra_gpa = "";
@@ -3535,7 +3535,7 @@ function draw_menu_items($menu_array) {
           if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->get_has_been_displayed($req_by_degree_id) != true && $course->get_has_been_displayed($req_by_degree_id) != true)
           {
             $c = $course->course_list_fulfilled_by->get_first();
-            if ($remaining < $c->get_hours() || $remaining < 1)
+            if ($remaining < $c->get_hours() || $remaining == 0)
             {
               continue;
             }
@@ -3564,7 +3564,7 @@ function draw_menu_items($menu_array) {
           {
 
             $c = $course;
-            if ($remaining < $c->get_hours($req_by_degree_id) || $remaining < 1)
+            if ($remaining < $c->get_hours($req_by_degree_id) || $remaining == 0)
             {
 
               continue;
@@ -5211,7 +5211,7 @@ function draw_menu_items($menu_array) {
         }
         */
         
-        if (($hours_avail*1 > 0 && $hours_avail < $m_hours) || ($m_hours < 1))
+        if (($hours_avail*1 > 0 && $hours_avail < $m_hours) || ($m_hours == 0))
         {
           $m_hours = $hours_avail;
         }
