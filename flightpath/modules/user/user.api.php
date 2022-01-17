@@ -56,6 +56,16 @@ function hook_user_register_user_attributes() {
       'query' => '',        
     );
 
+
+    /**
+     * // To do all attributes at once...
+    foreach ($arr as $attr => $details) {
+      $arr[$attr]['settings']['#redirect'] = array(
+        'path' => 'content-dialog-handle-after-save',
+        'query' => '',        
+      );      
+    }
+     */
     
   }
 

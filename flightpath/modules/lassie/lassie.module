@@ -96,12 +96,12 @@ function lassie_check($job_machine_name) {
     // Implement the warning email.
     $msg = "";
     $msg .= "FlightPath Lassie module reports that a job has failed to complete in the expected time.\n\n";
-    $msg .= "Current Time: " . format_date(time()) . "\n-------------------------\n";
+    $msg .= "Current Time: " . format_date(convert_time(time())) . "\n-------------------------\n";
     $msg .= "Site: " . $GLOBALS['fp_system_settings']["base_url"] . "\n";
     $msg .= "Job Name: $job_machine_name \n";
-    $msg .= "Started: " . format_date($start) . "\n";
+    $msg .= "Started: " . format_date(convert_time($start)) . "\n";
     $msg .= "Hours  : $hours \n";
-    $msg .= "Expires: " . format_date($expires) . "\n";
+    $msg .= "Expires: " . format_date(convert_time($expires)) . "\n";
     $msg .= "Elapsed: $elapsed min.";
         
     if ($emails != "") {    

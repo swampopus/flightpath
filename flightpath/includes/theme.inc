@@ -2010,7 +2010,7 @@ function display_not_found() {
   
   $location = @$_SERVER["REQUEST_URI"];
   
-  watchdog("system", "404 - Page not found (" . strip_tags($location) . ")", array(), WATCHDOG_DEBUG);
+  watchdog("page_not_found", "404 - Page not found (" . strip_tags($location) . ")", array(), WATCHDOG_DEBUG);
   
   fp_display_page($page);
   die;
@@ -2028,7 +2028,7 @@ function display_access_denied() {
   
   $location = @$_SERVER["REQUEST_URI"];
   
-  watchdog("system", "403 - Access denied (" . strip_tags($location) . ")", array(), WATCHDOG_DEBUG);
+  watchdog("access_denied", "403 - Access denied (" . strip_tags($location) . ")", array(), WATCHDOG_DEBUG);
     
   fp_display_page($page);
   die;  
