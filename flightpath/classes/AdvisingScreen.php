@@ -292,6 +292,12 @@ function draw_menu_items($menu_array) {
     
     $theme_location = fp_theme_location();  // file location of the theme folder
   
+  
+    $page_logo_url = variable_get("logo_image_url", "");
+    if ($page_logo_url == "") {
+      $page_logo_url = $theme_location . "/images/fp_banner_default.png";
+    }
+  
     $page_content = $this->page_content;
     $page_tabs = $this->page_tabs;
     $page_has_search = $this->page_has_search;

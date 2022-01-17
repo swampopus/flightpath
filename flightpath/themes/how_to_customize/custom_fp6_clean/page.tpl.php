@@ -47,7 +47,7 @@
     </div>
     <div class='top-banner'>
       <a href='<?php print fp_url("<front>"); ?>'>
-        <img src='<?php print "$theme_location/images/"; ?>fp_banner_default.png' border='0'>
+        <img src='<?php print $page_logo_url; ?>' border='0'>
       </a>
     </div>          
   </div>

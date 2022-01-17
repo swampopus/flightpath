@@ -2218,13 +2218,25 @@ function system_settings_form() {
 
   $form['external_css'] = array(
     'type' => 'textfield',
-    'label' => t("External CSS file(s):"),
+    'label' => t("External/Additional CSS file(s):"),
     'value' => variable_get("external_css", ""),
-    "description" => t("Enter the full URL to one or more external CSS files (separated by comma).  Be aware
+    "description" => t("Enter the URL to one or more external or internal CSS files (separated by comma).  Be aware
                       that due to the ordering of when your CSS file is loaded, you may need to use the !important keyword on some styles.
-                      <br>Your URL should begin with https:// and may not contain any queries (ex: ?a=b). 
+                      <br>If using an external source, your URL should begin with https:// and may not contain any queries (ex: ?a=b). 
                       <br>If you are unsure what to enter here, leave it blank."),
   );
+
+
+  $form['logo_image_url'] = array(
+    'type' => 'textfield',
+    'label' => t("Logo image URL:"),
+    'value' => variable_get("logo_image_url", ""),
+    "description" => t("Enter the URL to a logo image.  This is normally the \"FlightPath\" banner image seen in the upper left corner of every page.
+                       <br>The image should be approximately 700x100 pixels, or a smaller size with a 7:1 width to height ratio.                      
+                      <br>If using an external source, your URL should begin with https:// and may not contain any queries (ex: ?a=b). 
+                      <br>If you are unsure what to enter here, leave it blank to use the default logo."),
+  );
+
 
 
   $form["contact_email_address"] = array(

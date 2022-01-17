@@ -6,6 +6,7 @@
  * Available variables (supplied by AdvisingScreen::output_to_browser() method.
  * 
  * $page_content    The primary content of the page.    
+ * $page_logo_url   Will contain the URL to the logo image
  * $page_on_load    If the page performs any javascript onLoad, it goes here.
  * $page_tabs     Contains the HTML to draw the correct tabs at the top of the page.
  * $page_is_popup   Set to either TRUE or FALSE.  If TRUE, do not display the header,
@@ -48,7 +49,7 @@
     </div>
     <div class='top-banner'>
       <a href='<?php print fp_url("<front>"); ?>'>
-        <img src='<?php print "$theme_location/images/"; ?>fp_banner_default.png' border='0'>
+        <img src='<?php print $page_logo_url; ?>' border='0'>
       </a>
     </div>          
   </div>
