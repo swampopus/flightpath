@@ -529,6 +529,27 @@ function db_get_user_id_from_email($email, $type = "faculty") {
 }
 
 
+function db_get_user_id_from_user_name($user_name, $type = "faculty") {
+  
+  $type_line = " is_faculty='1' ";
+  if ($type == "student") {
+    $type_line = " is_student='1' ";
+  }
+  
+  // Force to be lowercase
+  $user_name = trim(strtolower($user_name));
+    
+  $user_id = db_result(db_query("SELECT user_id FROM users WHERE user_name = ? AND $type_line ", $user_name));
+  
+  if ($user_id) {
+    return $user_id;
+  }
+  
+  return FALSE;
+  
+}
+
+
 
 
 

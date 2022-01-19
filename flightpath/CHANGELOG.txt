@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-01-19
+  Added new function: db_get_user_id_from_user_name()
+
+
+
 2022-01-17
   Added ability to change site logo (in system settings).
   
