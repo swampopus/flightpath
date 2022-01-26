@@ -1274,8 +1274,7 @@ function advise_display_view($view = "view") {
     $_REQUEST["advising_what_if"] = "no";
   }
   
-  // Initialize everything we need to initialize for this advising session.
-  
+  // Initialize everything we need to initialize for this advising session.  
   advise_init_screen();      
 
 

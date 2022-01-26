@@ -779,7 +779,11 @@ function fp_display_page($page) {
 function fp_push_and_balance_profile_items(&$profile_items, array $item) {
   
   // We do the -1 to the right_side, because it is already unbalanced by 1 as a default.
-  if (count($profile_items['left_side']) <= count($profile_items['right_side']) - 1) {
+  $dec = 1;
+  
+  if (count($profile_items['right_side']) == 0) $dec = 0;
+  
+  if (count($profile_items['left_side']) <= count($profile_items['right_side']) - $dec) {
     $profile_items['left_side'] += $item;
   }
   else {
