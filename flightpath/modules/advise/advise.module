@@ -917,7 +917,16 @@ function advise_display_popup_change_term() {
       $term_desc = "<strong class='current-term'>$term_desc</strong> - " . t("current");
     }
 
-    $link = fp_get_js_confirm_link(t("Are you sure you wish to change advising terms?"), "parent.fpCloseSmallIframeDialog(\"\");parent.changeTerm(\"$term_id\");", $term_desc);
+    // This bit allows other modules to use this function, but change (by appending a string) to the parent function
+    // we intend to call.
+    // Example: if the append string is "MyModule" then the full function called below will be changeTermMyModule().
+    $perform_parent_function = "changeTerm";
+    if (isset($_REQUEST['append_parent_function'])) {
+      $x = fp_get_machine_readable(trim($_REQUEST['append_parent_function']));  // Make safe from hackers
+      $perform_parent_function .= $x;
+    }
+
+    $link = fp_get_js_confirm_link(t("Are you sure you wish to change advising terms?"), "parent.fpCloseSmallIframeDialog(\"\");parent.$perform_parent_function(\"$term_id\");", $term_desc);
 
     $rtn .= "<li>$link</li>";
 
