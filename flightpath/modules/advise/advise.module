@@ -12,8 +12,7 @@ function advise_menu() {
     "page_callback" => "fp_render_form",
     "page_arguments" => array("advise_toggle_draft_form"),
     "access_arguments" => array("toggle_draft"),
-    "type" => MENU_TYPE_TAB,
-    "tab_parent" => "main",
+    "type" => MENU_TYPE_NORMAL_ITEM,    
     "page_settings" => array(
       "menu_icon" => fp_get_module_path('system') . "/icons/wand.png",      
     ),    
@@ -1021,8 +1020,11 @@ function advise_display_popup_group_select() {
     // This is the Add a Course group.  We must initialize it, as it
     // does not exist yet.
     // We need to populate this group now.
-    $group->list_courses = $fp->get_all_courses_in_catalog_year(variable_get_for_school("current_catalog_year", '', $school_id),FALSE,0,0,$school_id);
-    $group->title = "Add an Additional Course";
+    
+    // TODO:  Maybe a setting to where we only show undergrad courses in this special group?
+    
+    $group->list_courses = $fp->get_all_courses_in_catalog_year(variable_get_for_school("current_catalog_year", '', $school_id),FALSE,0,0,$school_id, FALSE);
+    $group->title = t("Add an Additional Course");
     $group->list_courses->assign_group_id($group_id);
     $group->list_courses->load_course_descriptive_data();
   }
@@ -1274,7 +1276,8 @@ function advise_display_view($view = "view") {
     $_REQUEST["advising_what_if"] = "no";
   }
   
-  // Initialize everything we need to initialize for this advising session.  
+  // Initialize everything we need to initialize for this advising session.
+  
   advise_init_screen();      
 
 

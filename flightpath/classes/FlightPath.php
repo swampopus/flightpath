@@ -1122,11 +1122,10 @@ class FlightPath extends stdClass
 
  
 
-  function get_all_courses_in_catalog_year($catalog_year = "2006", $bool_load_descriptive_data = false, $limit_start = 0, $limit_size = 0, $school_id = 0)
+  function get_all_courses_in_catalog_year($catalog_year = "2006", $bool_load_descriptive_data = false, $limit_start = 0, $limit_size = 0, $school_id = 0, $bool_only_undergrad = TRUE)
   {
     // Returns a CourseList object of all the
-    // undergraduate courses in the
-    // supplied catalog_year.
+    // courses in the supplied catalog_year.
 
     $lim_line = "";
     if ($limit_size > 0)
@@ -1135,14 +1134,27 @@ class FlightPath extends stdClass
     }
     $rtn_list = new CourseList();
     $c_array = array();
+    
+    $params = array();
+    $params[":catalog_year"] = $catalog_year;
+    $params[":school_id"] = $school_id;
+    
+    
+    $course_num_line = "";
+    if ($bool_only_undergrad) {
+      $course_num_line = " AND course_num < :gradnum ";
+      $params[":params"] = variable_get_for_school("graduate_level_course_num", 5000, $school_id);      
+    }
+    
+    
     $result = $this->db->db_query("SELECT * FROM courses
               WHERE 
-                catalog_year = ?
-                AND course_num < ?
-                AND school_id = ?
+                catalog_year = :catalog_year
+                $course_num_line
+                AND school_id = :school_id
               ORDER BY subject_id, course_num
               $lim_line
-              ", $catalog_year, variable_get_for_school("graduate_level_course_num", 5000, $school_id), $school_id);
+              ", $params);
 
     while($cur = $this->db->db_fetch_array($result))
     { 

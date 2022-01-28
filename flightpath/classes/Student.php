@@ -206,7 +206,7 @@ class Student extends stdClass
     // semester, with the number -88, with a single group,
     // also numbered -88.
     $this->semester_courses_added = new Semester(DegreePlan::SEMESTER_NUM_FOR_COURSES_ADDED);
-    $this->semester_courses_added->title = "Courses Added by Advisor";
+    $this->semester_courses_added->title = t("Courses Added by Advisor");
 
     // Now, we want to add the Add a Course group...
     $g = new Group();

@@ -35,20 +35,20 @@ class DegreePlan extends stdClass
   
 
   /**
-	* $major_code		ACCT, CSCI, etc.
-	* $title			Accounting, Computer Science, etc.
-	* $degree_type		BBA, BS, AS, etc.
-	* $short_description	These are a text description of this degree plan.  Useful
-	*					for descriptions of "Tracks" or "Options." The short
-	* $long_description	one appears in a pull down, the long one is a more
-	*					complete text description.  Will probably be unused
-	*					by most degrees.
-	* $list_semesters	A list of semesters that this DegreePlan requires.
-	* $list_degree_plans	If this degree plan has multiple tracks or options, then
-	*					they would be spelled out as other degree plans, and listed
-	*					here.  For example, Biology has multiple "tracks" which,
-	*					internally, should be treated as different degree plans.
-	**/
+  * $major_code   ACCT, CSCI, etc.
+  * $title      Accounting, Computer Science, etc.
+  * $degree_type    BBA, BS, AS, etc.
+  * $short_description  These are a text description of this degree plan.  Useful
+  *         for descriptions of "Tracks" or "Options." The short
+  * $long_description one appears in a pull down, the long one is a more
+  *         complete text description.  Will probably be unused
+  *         by most degrees.
+  * $list_semesters A list of semesters that this DegreePlan requires.
+  * $list_degree_plans  If this degree plan has multiple tracks or options, then
+  *         they would be spelled out as other degree plans, and listed
+  *         here.  For example, Biology has multiple "tracks" which,
+  *         internally, should be treated as different degree plans.
+  **/
 
 
   function __construct($degree_id = "", DatabaseHandler $db = NULL, $bool_load_minimal = FALSE, $array_significant_courses = FALSE, $bool_use_draft = FALSE) {
@@ -521,9 +521,9 @@ class DegreePlan extends stdClass
 
 
     $res = $this->db->db_query("SELECT * FROM $table_name1 a, $table_name2 b
-            							WHERE a.degree_id = ?
-            							AND a.degree_id = b.degree_id 
-            							ORDER BY semester_num ", array($this->degree_id));
+                          WHERE a.degree_id = ?
+                          AND a.degree_id = b.degree_id 
+                          ORDER BY semester_num ", array($this->degree_id));
     while ($cur = $this->db->db_fetch_array($res))
     {
       $this->title = $cur["title"];
@@ -848,8 +848,8 @@ class DegreePlan extends stdClass
       if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
   
       $res = $this->db->db_query("SELECT title FROM $table_name
-              								WHERE major_code = ? 
-              								ORDER BY catalog_year DESC LIMIT 1", $this->major_code);
+                              WHERE major_code = ? 
+                              ORDER BY catalog_year DESC LIMIT 1", $this->major_code);
       $cur = $this->db->db_fetch_array($res);
       $this->title = $cur["title"];
 
@@ -931,7 +931,7 @@ class DegreePlan extends stdClass
 
    
     $res = $this->db->db_query("SELECT * FROM $table_name
-								               WHERE degree_id = ? ", $this->degree_id);
+                               WHERE degree_id = ? ", $this->degree_id);
 
     if ($this->db->db_num_rows($res) > 0)
     {
@@ -1080,32 +1080,32 @@ class DegreePlan extends stdClass
     $rtn_array = array();
 
     $rtn_array[] = "  ~~ None ~~ Select this option to display
-						the base degree plan (may not be available for all majors).";
+            the base degree plan (may not be available for all majors).";
     $table_name = "degree_tracks";
     $table_name2 = "degrees";
     if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
     if ($this->bool_use_draft) {$table_name2 = "draft_$table_name2";}
 
     $res = db_query("SELECT track_code, track_title, track_description FROM $table_name
-              								WHERE major_code = ?
-              								AND catalog_year = ? 
-              								AND school_id = ?
-              								ORDER BY track_title ", $this->major_code, $this->catalog_year, $this->school_id);
+                              WHERE major_code = ?
+                              AND catalog_year = ? 
+                              AND school_id = ?
+                              ORDER BY track_title ", $this->major_code, $this->catalog_year, $this->school_id);
     while($cur = db_fetch_array($res))
     {
 
       $track_code = $cur["track_code"];
       $track_title = $cur["track_title"];
       $track_description = $cur["track_description"];
-      //adminDebug($track_code);
       
+
       // Let's also get the degree_id for this particular track.
-      $track_degree_id = $this->db->get_degree_id($this->major_code . "|_" . $track_code, $this->catalog_year, $this->bool_use_draft);
+      $track_degree_id = $this->db->get_degree_id($this->major_code . "|_" . $track_code, $this->catalog_year, $this->bool_use_draft, $this->school_id);
       
       // Also find out what is the degree_class for this degree_id.
       $degree_class = @trim(db_result(db_query("SELECT degree_class FROM $table_name2
                         WHERE degree_id = ?", $track_degree_id))); 
-      
+  
       
       $rtn_array[] = "$track_code ~~ $track_title ~~ $track_description ~~ $track_degree_id ~~ $degree_class";
     }

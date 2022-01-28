@@ -1,11 +1,19 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-01-27
+  Fixed bug where draft mode was no longer accessible.
+
+  Fixed several bugs where school_id was not being taken into account with regard to track selection.
+  
+  Fixed FlightPath::get_all_courses_in_catalog_year()-- noticed that it was hard-coded to only return undergrad courses.  Added
+  a boolean to change that.
+  
 
 2022-01-26
   Tweaked logic to function that "balances" the student profile attributes.
   
-
+  
 2022-01-19
   Added new function: db_get_user_id_from_user_name()
 

@@ -215,6 +215,12 @@ function admin_copy_degree_form_validate($form, $form_state) {
   }  
   
   
+  if (admin_string_contains_illegal_chars($destination_major_code)) {
+    form_error("destination_major_code", t("Sorry, the destination major code must contain only numbers, letters, and dashes (-)."));
+    return;
+  }
+  
+  
   if ($values["allow_overwrite"] == "no") {
     // Check to see if destination major code already exists.
     
@@ -249,6 +255,31 @@ function admin_copy_degree_form_validate($form, $form_state) {
       
   
 } // validate
+
+
+/*
+From: https://stackoverflow.com/questions/32138089/how-to-check-if-a-string-contains-certain-characters-using-an-array-in-php
+
+We will use this function to make sure a major code doesn't contain any "illegal" characters.
+*/
+function admin_string_contains_illegal_chars($testString) {
+  // These are characters we will not allow:  
+  static $MsgAry1 = array("a","b","c","d",
+         "e","f","g","h","i","j","k","l","m","n",
+         "o","p","q","r","s","t","u","v","w","x",
+         "y","z","1","2","3","4","5","6","7","8",
+         "9","0","-");
+   
+  $test = str_ireplace($MsgAry1, '', $testString);
+  
+  if (strstr($test, " ")) return TRUE; // contains an illegal character!
+  
+  // test should be empty if we only used valid chars!
+  if (trim($test) == "") return FALSE;
+  
+  return TRUE;
+  
+}
 
 
 
@@ -476,7 +507,7 @@ function admin_add_degree_form() {
       "existing" => t("Entering an <b>existing</b> major code (only adding a new Level-3 track)"),
     ),
     "required" => TRUE,
-    "weight" => 10,
+    "weight" => 10,    
   );
 
   
@@ -501,6 +532,7 @@ function admin_add_degree_form() {
     "description" => t($desc),
     "required" => TRUE,
     "weight" => 20,
+    "description" => t("Enter only letters, numbers, or dash (-).  NO other symbols of any kind."),
   );
 
 
@@ -522,7 +554,8 @@ function admin_add_degree_form() {
     "label" => t("Level-3 Track code:"),
     "description" => t("Leave blank if you selected None above.  This code must not contain spaces, 
                         and combined with the major code it must not exceed 18 characters."),
-    "weight" => 40,                        
+    "weight" => 40,       
+    "description" => t("Enter only letters, numbers, or dash (-).  NO other symbols of any kind."),                 
   );
 
 
@@ -556,13 +589,15 @@ function admin_add_degree_form_validate($form, $form_submit) {
   $new_major = $values["new_major"];
   $new_track = $values["new_track"];
   
-    
-  if (strstr($major_code, " ")) {
-    form_error("major_code", t("The major code may not contain spaces.  Please enter a new one containing only letters and numbers."));
+   
+      
+      
+  if ($major_code != "" && admin_string_contains_illegal_chars($major_code)) {
+    form_error("major_code", t("The major code may not contain spaces or symbols.  Please enter a new one containing only letters, numbers, and -."));
    
   }
-  if (strstr($track_code, " ")) {
-    form_error("track_code", t("The track code may not contain spaces.  Please enter a new one containing only letters and numbers."));
+  if ($track_code != "" && admin_string_contains_illegal_chars($track_code)) {
+    form_error("track_code", t("The track code may not contain spaces or symbols.  Please enter a new one containing only letters, numbers, and -."));
    
   }      
 
@@ -575,28 +610,6 @@ function admin_add_degree_form_validate($form, $form_submit) {
   if ($new_track == "new" && $track_code == "") {   
     form_error("track_code", t("You selected to add a track, but did not specify a track code.")); 
   }
-
-  // Make sure user did not enter an underscore (_) in either
-  // the track or major code!
-  if (strstr($track_code, "_") || strstr($major_code, "_")) {
-        
-    form_error("major_code", t("You are not allowed to enter underscores (_) in either the track code
-                    or major code, as this character has a special meaning in FlightPath (it is used in Level-3 degree code prefixes).
-                    Please re-enter your new degree code without using an underscore.")); 
-
-  }
-
-  // make sure no pipes in major or track (if legacy not enabled)
-  if (!variable_get("enable_legacy_concentrations", FALSE)) {
-    if (strstr($track_code, "|") || strstr($major_code, "|")) {
-          
-    form_error("major_code", t("You are not allowed to enter pipes (|) in either the track code
-                    or major code, as this character has a special meaning in FlightPath (it is used in Level-3 degree code prefixes).
-                    Please re-enter your new degree code without using a pipe character.")); 
-  
-    }
-  }            
-
 
 
   $for_school = $school_name = "";
@@ -1512,7 +1525,7 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
   // min/max/default tracks
   $elements['adv_if_tracks_markup'] = array(
     'type' => 'markup',
-    'value' => t('If this degre has tracks, you may enter rules for track selection below, for each
+    'value' => t('If this degree has tracks, you may enter rules for track selection below, for each
                   type of level 3 degree (tracks). <b>You may skip classifications which do not pertain to this degree.</b>'),
     "weight" => 50020,
   );
@@ -1863,7 +1876,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
     $adding_group = new Group($group_id);
     
     // Is this in the right school?
-    if ($group_id->school_id != $school_id && $group_id->school_id !== 0) {
+    if ($adding_group->school_id != $school_id && $adding_group->school_id !== 0) {
       
       form_error("semester_groups_" . $semester_num . "_markup", t("<strong>Your work has NOT been saved.</strong> In block %blocknum, you specified the group %group as a requirement,
                           but this group could not be found in the degree's school (%schoolname).<br>You may need to change the degree's school back to its previous value, then remove this group,
@@ -1978,6 +1991,9 @@ function admin_edit_degree_form_submit($form, $form_state) {
 
   
   $school_id = 0;
+  if (isset($form_state['values']['school_id'])) {
+    $school_id = intval($form_state['values']['school_id']);
+  }
   $degree_id = @intval($form_state['values']['degree_id']);
   // If this degree already exists in this
   // catalog year, then we need to delete it first.
@@ -1986,8 +2002,9 @@ function admin_edit_degree_form_submit($form, $form_state) {
   // Each degree_id is unique to the catalog year, so we should be good with just the id here.  
   if ($degree_id) {  
     $degree = new DegreePlan($degree_id, null, false, false, true);
-    $degree->load_descriptive_data();
-    $school_id = intval($degree->school_id);
+    $degree->load_descriptive_data();    
+    $oschool_id = intval($degree->school_id); // original school_id
+    
     // Delete from degree_requirements WHERE this degree_id exists.
     $res = db_query("DELETE FROM draft_degree_requirements
                   WHERE degree_id = '?' ", $degree_id);
@@ -2008,7 +2025,9 @@ function admin_edit_degree_form_submit($form, $form_state) {
       $res = db_query("DELETE FROM draft_degree_tracks
                   WHERE major_code = ? 
                   AND track_code = ?
-                  AND catalog_year = ? LIMIT 1", $just_major_part, $degree->track_code, $de_catalog_year);
+                  AND catalog_year = ? 
+                  AND school_id = ? 
+                  LIMIT 1", $just_major_part, $degree->track_code, $de_catalog_year, $oschool_id);
 
 
       // Okay, we have deleted everything.  We need to go back to
@@ -2358,10 +2377,11 @@ function admin_edit_degree_form_submit($form, $form_state) {
                   advising_weight = ?,
                   override_degree_hours = ?,
                   track_selection_config = ?,
-                  public_note = ?
+                  public_note = ?,
+                  school_id = ?
               WHERE degree_id = ? ",
                 $semester_titles_csv, $degree_title, $degree_type, $degree_class, $degree_level, $exclude, $allow_dynamic, $advising_weight, $override_degree_hours, 
-                $db_track_selection_config, $public_note, $degree_id);
+                $db_track_selection_config, $public_note, $school_id, $degree_id);
 
   ////  Was there a track title/description?  If so, UPDATE that in the tracks
   // table...
@@ -2383,30 +2403,21 @@ function admin_edit_degree_form_submit($form, $form_state) {
     $track_id = db_result(db_query("SELECT track_id FROM draft_degree_tracks
                      WHERE major_code = ?
                      AND track_code = ?
-                     AND catalog_year = ?", $major, $track, $de_catalog_year));
+                     AND catalog_year = ?
+                     AND school_id = ?", $major, $track, $de_catalog_year, $oschool_id));
     
     if (!$track_id) {
       // Didn't already exist. Let's insert.
-      db_query("INSERT INTO draft_degree_tracks (major_code, track_code, catalog_year)
-                VALUES (?, ?, ?)", $major, $track, $de_catalog_year);
+      db_query("INSERT INTO draft_degree_tracks (major_code, track_code, catalog_year, school_id)
+                VALUES (?, ?, ?, ?)", $major, $track, $de_catalog_year, $school_id);
       $track_id = db_insert_id();
     }
     
-    
-    /*
-    $res = db_query("UPDATE draft_degree_tracks
-                SET `track_description`='?',
-                `track_title`='?'
-                WHERE `track_code`='?'
-                AND `major_code`='?' 
-                AND `catalog_year`='?' ", $track_description, $track_title, $track, $major, $de_catalog_year);
-     */
-
-     
     $res = db_query("UPDATE draft_degree_tracks
                       SET track_description = ?,
-                          track_title = ?
-                      WHERE track_id = ? ", $track_description, $track_title, $track_id);
+                          track_title = ?,
+                          school_id = ?
+                      WHERE track_id = ? ", $track_description, $track_title, $school_id, $track_id);
           
           
   }
