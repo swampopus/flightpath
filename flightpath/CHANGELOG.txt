@@ -1,6 +1,9 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-01-30
+  When drawing pie charts, use base_url() instead of function base_path() to use the pchart library. Added more CSS class to make it easier to theme later.  
+
 2022-01-27
   Fixed bug where draft mode was no longer accessible.
 

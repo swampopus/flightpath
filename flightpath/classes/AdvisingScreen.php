@@ -1753,25 +1753,28 @@ function draw_menu_items($menu_array) {
       $_SESSION["fp_pie_chart_token"] = md5(fp_token());
     }
     //old Google API url: $pie_chart_url = "https://chart.googleapis.com/chart?cht=p&chd=t:$vval,$leftval&chs=75x75&chco=$fore_col|$back_col&chp=91.1";
-    $pie_chart_url = base_path() . "/libraries/pchart/fp_pie_chart.php?progress=$vval&unfinished=$leftval&unfinished_col=$back_col&progress_col=$fore_col&token=" . $_SESSION["fp_pie_chart_token"];
-    
-    
-    $rtn .= "<table border='0' width='100%'  height='100' class='pie-chart-individual-table' cellpadding='0' cellspacing='0' >
-            <tr>
-                <td class='' align='center' height='20'>
+    $pie_chart_url = base_url() . "/libraries/pchart/fp_pie_chart.php?progress=$vval&unfinished=$leftval&unfinished_col=$back_col&progress_col=$fore_col&token=" . $_SESSION["fp_pie_chart_token"];
+      
+    $rtn .= "<table border='0' width='100%'  height='100' class='pie-chart-individual-table pie-chart-individual-table-" . fp_get_machine_readable(strtolower($title)) . "' cellpadding='0' cellspacing='0' >
+            <tr class='pie-chart-title-tr'>
+                <td class='pie-chart-box-title-td' align='center' height='20'>
             " . fp_render_section_title($title, 'pie-chart-box-section') . "
                 </td>
             </tr>
-            <tr>
-              <td>
+            <tr class='pie-chart-inner-table-tr'>
+              <td class='pie-chart-inner-table-td'>
                 <table border='0' class='pie-chart-chart-table'>
                 <td class='pie-visualization'>                  
                   <img src='$pie_chart_url'>
                 </td>
                 <td class='pie-values'>
-                    <span class='pie-val-percent-complete'>$val% " . t("Complete") . "</span><br>
-                    ( <span class='pie-val-top-val'>$top_value</span>
-                   / <span class='pie-val-bottom-val'>$bottom_value " . t("hours") . "</span> )
+                    <div class='pie-val-percent'>
+                      <span class='pie-val-percent-complete'>$val% " . t("Complete") . "</span>
+                    </div>
+                    <div class='pie-val-top-bottom'>
+                        ( <span class='pie-val-top-val'>$top_value</span>
+                      / <span class='pie-val-bottom-val'>$bottom_value " . t("hours") . "</span> )
+                    </div>
                    $extra";
   
     $rtn .= "
