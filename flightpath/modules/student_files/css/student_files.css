@@ -4,8 +4,12 @@
  */
 
 .student-files-file-list {
-  font-size: 10pt;
+  zzzfont-size: 10pt;
   line-height: 1.5em;
+}
+
+.student-files-file {
+  font-size: 0.9em;
 }
 
 .student-files-file a {
@@ -17,13 +21,19 @@
    
 }
 
+.student-files-details-td {
+  font-size 0.9em;
+}
+
 .student-files-delete a {
   display: inline-block;
   text-decoration: none;
+  
+  /*
   background: url(icons/delete.png) no-repeat top left;
   min-width: 16px;
   min-height: 16px;
-   
+   */
 }
 
 

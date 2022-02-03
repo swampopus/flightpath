@@ -8,6 +8,14 @@ FlightPath 6.x Changelog
 
   Added extra spans and css styling when showing pie charts.
 
+  Changed delete links on History tab to use simple "X" from font-awesome, both
+  for advising and student files.
+  
+  Changed queries for advising history to look up "groups" of advising sessions by advising_session_token.
+  
+  Added ability in creating a confirm link (in misc.php) to have a link title
+  so something appears when you hover over link.
+
 2022-01-30
   When drawing pie charts, use base_url() instead of function base_path() to use the pchart library. Added more CSS class to make it easier to theme later.  
 

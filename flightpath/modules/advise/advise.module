@@ -249,6 +249,33 @@ function advise_menu() {
 }
 
 
+
+/**
+ * Returns an array of advising session id's for the given advising token.
+ * Makes sure is_empty is 0 and is_draft is 0
+ * Ordered by term_id DESC
+ * 
+ * returns FALSE if nothing is found.
+ */
+function advise_get_advising_sessions_for_advising_token($adv_token) {
+  $rtn = array();  
+  $res = db_query("SELECT * FROM advising_sessions 
+                   WHERE advising_session_token = ?
+                   AND is_empty = 0
+                   AND is_draft = 0
+                   ORDER BY term_id DESC", array($adv_token));
+  while($cur = db_fetch_array($res)) {
+    $rtn[] = $cur['advising_session_id'];
+  }
+  
+  if (count($rtn) > 0) return $rtn;
+  
+  return FALSE;
+  
+}
+
+
+
 /**
  * Used by the menu to determine if the user can see the View (Degree and What If) tab for the current student.
  */
