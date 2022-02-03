@@ -2364,7 +2364,7 @@ function engagements_form_alter(&$form, $form_id)
               $form['submit_submit']['suffix'] = "<strong>" . t('NOTE: Cannot send a text message as there is no mobile phone number for this recipient.') . "</strong>";
             }
 
-            if (!engagements_can_send_sms_to_number($mobile_phone)) {
+            if (trim($mobile_phone) != "" && !engagements_can_send_sms_to_number($mobile_phone)) {
               // Meaning, the user has opted-out!  Disable fields and let the user know.
               $form['engagement_msg']['attributes']['readonly'] = 'readonly';
               $form['engagement_msg']['attributes']['class'] .= ' readonly';
@@ -2378,7 +2378,7 @@ function engagements_form_alter(&$form, $form_id)
 
 
             // The header needs to be a setting with replacement values           
-            $sms_header = engagements_sms_replace_patterns(variable_get('sms_header', '(@initials) from @name:'), "", $student_account);
+            $sms_header = engagements_sms_replace_patterns(variable_get('sms_header', '(@initials) from @name:'), "", $user);
 
             $form['engagement_msg']['prefix'] = t("Your message will automatically begin with <strong>@header</strong>", array("@header" => $sms_header));
             $form['engagement_msg']['description'] = t("To insert emoji in Windows, press <span style='padding-left: 10px; padding-right: 10px; font-size: 1.3em;'><i class='fa fa-windows'></i> + .</span>  <em>(Windows key + period)</em>");

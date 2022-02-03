@@ -1,8 +1,16 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-02-02
+  Fixed bug where student name was being used instead of faculty name when sending a txt message via Engagements.
+  
+  Also fixed bug where if student has no number, it was showing that they had opted-out, which was not necessarily true.
+
+  Added extra spans and css styling when showing pie charts.
+
 2022-01-30
   When drawing pie charts, use base_url() instead of function base_path() to use the pchart library. Added more CSS class to make it easier to theme later.  
+
 
 2022-01-27
   Fixed bug where draft mode was no longer accessible.

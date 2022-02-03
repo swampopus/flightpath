@@ -1769,11 +1769,11 @@ function draw_menu_items($menu_array) {
                 </td>
                 <td class='pie-values'>
                     <div class='pie-val-percent'>
-                      <span class='pie-val-percent-complete'>$val% " . t("Complete") . "</span>
+                      <span class='pie-val-percent-complete'>$val% <span class='pie-v-cap'>" . t("Complete") . "</span></span>
                     </div>
                     <div class='pie-val-top-bottom'>
                         ( <span class='pie-val-top-val'>$top_value</span>
-                      / <span class='pie-val-bottom-val'>$bottom_value " . t("hours") . "</span> )
+                      / <span class='pie-val-bottom-val'>$bottom_value <span class='pie-v-cap'>" . t("hours") . "</span></span> )
                     </div>
                    $extra";
   
