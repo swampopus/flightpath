@@ -171,6 +171,7 @@ function advise_display_history() {
     $res2 = db_query("SELECT * FROM advising_sessions
                       WHERE advising_session_token = ?
                       AND is_empty = 0
+                      AND delete_flag = 0
                       ORDER BY term_id DESC", array($advtoken));
     while ($cur2 = db_fetch_array($res2)) {
             
@@ -187,7 +188,8 @@ function advise_display_history() {
                       SET delete_flag = 1
                       WHERE advising_session_id = ?", array($cur2['advising_session_id']));
             fp_add_message(t("Advising session has been successfully deleted."));
-            continue;  // skip this record.    
+            fp_goto("history", "current_student_id=$current_student_id");
+            die; // redirect from fp_goto above anyway.    
           }
           
         }
@@ -197,19 +199,16 @@ function advise_display_history() {
       
   
     
-      $turl = fp_url("advise/popup-display-summary", "advising_session_id={$cur2['advising_session_id']}");
-  
+      $turl = fp_url("advise/popup-display-summary", "advising_session_id={$cur2['advising_session_id']}");  
       $advising_session_id_array[] = $cur2['advising_session_id'];
-      $term = get_term_description($cur2['term_id'], FALSE, $school_id);
-  
+      $term = get_term_description($cur2['term_id'], FALSE, $school_id);  
       $on_click = "popupLargeIframeDialog(\"" . $turl . "\",\"" . t("Advising Session @term - @date", array("@term" => $term, "@date" => $dt)) . "\",\"\");";  
                 
       
-      
-      // Should we show the "delete" link?    
-      
+      $delete_html = "";
+      // Should we show the "delete" link?      
       if (user_has_permission('can_advise_students') && user_has_permission('can_delete_own_advising_session_3_months') && $cur2['faculty_id'] == $user->cwid) {
-        $delete_html = "";    
+            
         $del_range = strtotime("now -3 months");
         $then = intval($cur["posted"]);
         if ($then > $del_range) {
@@ -223,8 +222,7 @@ function advise_display_history() {
           $confirm_link = fp_get_js_confirm_link(t("Are you sure you wish to delete the advising session from @dt for @term?  \\n\\nThis action cannot be undone.", array("@dt" => $dt, "@term" => $safe_term)),
                               "window.location=\"" . fp_url("history", "current_student_id=$current_student_id&deladv=" . $cur2['advising_session_id']) . "\";", "<i class='fa fa-remove'></i>", "action-link-remove", t("Delete?")); 
           $delete_html .= "<div class='delete-adv-wrapper'>
-                      $confirm_link
-                      <!-- <a href='javascript:deleteAdvisingSession(\"{$cur['advising_session_id']}\",\"$dt\");'>" . t("Delete this advising session?") . "</a> -->
+                      $confirm_link                      
                     </div>";
           
           
