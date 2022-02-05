@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-02-04
+  Made it so if a numeric grade is supplied with MID at the end, it is converted to a letter grade with MID at the end.
+  
+  Added new function, fp_confirm(), which is meant to work with fp_get_js_confirm_link() to create a modal confirm popup,
+  instead of native javascript popup.  From same creator as the fp_alert() dropin replacement.
+  
+
 2022-02-02
   Fixed bug where student name was being used instead of faculty name when sending a txt message via Engagements.
   

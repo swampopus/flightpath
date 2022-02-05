@@ -340,7 +340,7 @@ function fpToggleHamburgerMenu() {
   }    
 
 
-  // Replacement for built-in alert(str).  Uses the DayPilot code.  See the /inc/ directory.
+  // Replacement for built-in alert(str).  Uses the DayPilot code.  See the /includes/ directory.
   // if string_mode == "base64" we will decode.  Useful for passing HTML.
   function fp_alert(str, string_mode) {
     if (string_mode == 'base64') {
@@ -349,6 +349,32 @@ function fpToggleHamburgerMenu() {
     DayPilot.Modal.alert(str);
   }
 
+
+
+
+
+  // Replacememnt for built in confirm(str).  Uses the DayPilot code, like fp_alert().
+  // if string_mode == "base64" we will decode the str variable.  Useful for passing HTML.
+  // the action_if_yes_64 is javascript code which has been encoded as base64.
+  function fp_confirm(str, string_mode, action_if_yes_64) {
+    if (string_mode == 'base64') {
+      str = decodeURIComponent(escape(atob(str)));  // all the extra escape and such is to handle possible emoji.  See: https://stackoverflow.com/questions/56647747/how-to-base64-encode-emojis-in-javascript
+    }
+
+    
+    DayPilot.Modal.confirm(str).then(function(modal) {
+      if (modal.result) {
+        // they said YES, so perform the action.
+        
+        action_if_yes = decodeURIComponent(escape(atob(action_if_yes_64)));  // all the extra escape and such is to handle possible emoji.  See: https://stackoverflow.com/questions/56647747/how-to-base64-encode-emojis-in-javascript
+        eval(action_if_yes);
+      }
+      else {
+        // do nothing, they cancelled.
+      }
+    });
+      
+  }
 
 
 	

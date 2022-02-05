@@ -62,10 +62,22 @@ if (!function_exists('str_contains')) {
  * the grade as-is.
  */
 function fp_translate_numeric_grade($grade, $school_id = 0) {
-    
   
-  if (!is_numeric($grade)) return $grade; // already a letter.
+  
+  $only_grade = $grade;
+  
+  // We may have included MID at the end of our numeric grade, and if so, it's a midterm grade.
+  
+  $bool_midterm = FALSE;
+  if (strstr($grade, "MID")) {
+    $bool_midterm = TRUE;
+    $only_grade = trim(str_replace("MID", "", $grade));
+  }
+    
+    
+  if (!is_numeric($only_grade)) return $grade; // already a letter, return the original grade.
 
+  
   $translate = array();
   
       
@@ -94,11 +106,13 @@ function fp_translate_numeric_grade($grade, $school_id = 0) {
     $GLOBALS['fp_translate_numeric_grade'][$school_id] = $translate;
   }
   
+  
   // Okay, now that we have our "translate" array, we can do that with the grade.
   $grade = floatval($grade);  
   foreach ($translate as $low => $details) {
     foreach ($translate[$low] as $high => $letter) {      
       if ($grade >= $low && $grade <= $high) {
+        if ($bool_midterm) $letter .= "MID";
         return $letter;
       }
     }
@@ -2413,12 +2427,21 @@ function fp_get_js_confirm_link($question, $action_if_yes, $link_text, $extra_cl
 
   $question = fp_reduce_whitespace($question);
   
-  $question = htmlentities($question, ENT_QUOTES);
-  $question = str_replace("\n", "\\n", $question);
+  //$question = htmlentities($question, ENT_QUOTES);
+  //$question = str_replace("\n", "\\n", $question);
+  
+  $question = str_replace("\\n", "<br>", $question);
+  $question = str_replace("\n", "<br>", $question);
+  $question_64 = base64_encode($question);  // convert to base_64 so we can have HTML
+  
   
   $link_title = htmlentities($link_title, ENT_QUOTES);
   
-  $rtn .= "<a href='javascript: if(confirm(\"$question\")) { $action_if_yes;  }' class='$extra_class' title='$link_title'>$link_text</a>";
+  //$rtn .= "<a href='javascript: if(fp_confirm(\"$question\")) { $action_if_yes;  }' class='$extra_class' title='$link_title'>$link_text</a>";
+  
+  // Using new fp_confirm code
+  $action_if_yes_64 = base64_encode($action_if_yes);
+  $rtn .= "<a href='javascript: fp_confirm(\"$question_64\",\"base64\",\"$action_if_yes_64\");' class='$extra_class' title='$link_title'>$link_text</a>";
 
       
   return $rtn;

@@ -44,7 +44,7 @@ function popupUpdateVarHoursBasedOnSelectedRadio() {
     // Var hours?
     var min_var_hours = $("#" + course_id + "_min_var_hours").val();
     if (min_var_hours != undefined && min_var_hours != "") {
-      console.log(min_var_hours);
+
       $("#varHours").val(min_var_hours);
     }
     
