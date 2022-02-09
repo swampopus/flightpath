@@ -1124,9 +1124,20 @@ function content_edit_content_form($type = "", $cid = "") {
         // have no file there at all.
         if ($form[$field_name]['type'] == 'file') {
           $limit = intval(@$form[$field_name]['limit']);
+          
+          $allowed = trim(@$form[$field_name]['allowed']);
+          if (!$allowed) {
+            $allowed = "txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z";  // default safe files
+          }
+          
+          $form['file_allowed_ext_' . $field_name] = array(
+            'type' => 'hidden',
+            'value' => $allowed,
+          );
+          
           $file_count = 0;
           if ($limit == 0) $limit = 1;
-          $form['file_limit'] = array(
+          $form['file_limit_' . $field_name] = array(
             'type' => 'hidden',
             'value' => $limit - 1,
           );
@@ -1135,8 +1146,8 @@ function content_edit_content_form($type = "", $cid = "") {
           $ofids = $value;
           $fids = explode(",", $value);
           $bool_is_empty = TRUE;
-          foreach ($fids as $fid) {
-            if ($fid == '') continue;
+          foreach ($fids as $fid) {            
+            if ($fid == '' || intval($fid) == 0) continue;
             $fid = intval($fid);          
             $file = content_get_uploaded_file($fid);
             if ($file) {
@@ -1147,8 +1158,7 @@ function content_edit_content_form($type = "", $cid = "") {
               $delete_link = "<a href='javascript:contentDeleteFile(\"$field_name\",\"$fid\");'>Delete</a>";            
               $html .= "<div class='file-field-line-$fid'><a href='$url' target='_blank'>" . $file['original_filename'] . "</a>  - $delete_link</div>";
             } // we already had a file.
-          } // foreach
-          
+          } // foreach          
           if (!$bool_is_empty) {
             $html = "<label>" . t("(Existing)") . " " . $form[$field_name]['label'] . "</label>" . $html;
           }
@@ -1167,7 +1177,7 @@ function content_edit_content_form($type = "", $cid = "") {
           );            
           
                     
-          $form['file_count'] = array(
+          $form["file_count_" . $field_name] = array(
             'type' => 'hidden',
             'value' => $file_count,
           );
@@ -1177,9 +1187,13 @@ function content_edit_content_form($type = "", $cid = "") {
             $form[$field_name]['attributes'] = array("class" => 'hidden');            
           }
           
+          if ($allowed) {
+            $form[$field_name]['description'] .= "<div class='content-allowed-ext'><strong>" . t("Allowed file extensions:") . "</strong> " . $allowed . "</div>";
+          }
+          
           if ($limit > 1 && $file_count <= $limit) {
-            $add_link = "<a href='javascript:contentAddMoreFile(\"$field_name\");' class='add-more-link-$field_name'>Add More</a>";
-            $form[$field_name]['suffix'] = $add_link;
+            $add_link = "<a href='javascript:contentAddMoreFile(\"$field_name\");' class='add-more-link add-more-link-$field_name'><i class='fa fa-plus'></i> " . t("Add More") . "</a>";
+            $form[$field_name]['suffix'] .= $add_link;
           }
           
           
@@ -1261,7 +1275,6 @@ function content_edit_content_form($type = "", $cid = "") {
       );
     }
   }
-
 
 
   watchdog('content', "edit_content_form cid:$cid, type:$type", array(), WATCHDOG_DEBUG);
@@ -1389,6 +1402,52 @@ function content_get_fontawesome_icon_for_mimetype($mime_type, $ext = "") {
 
 
 
+
+function content_edit_content_form_validate(&$form, &$form_state) {
+  
+  // If we are submitting any files, make sure they have allowed extensions.
+  $values = $form_state['values'];  
+  $type = $values["type"];
+  $types = content_get_types();
+  
+  foreach ($types[$type]['fields'] as $fieldname => $details) {
+    if ($details['type'] != 'cfieldset') {
+      
+      // If this field type is "file" then we are going to do something special with it
+      // don't need to do this if we are just editing an existing content node and hitting "save"
+      if ($details['type'] == 'file') {
+        
+        $uploaded_files = fp_re_array_files($_FILES[$fieldname]);  // makes them easier to work with.
+
+        $allowed = trim($details['allowed']);
+        if (!$allowed) {
+          $allowed = "txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z";
+        }
+        
+        $allowed = str_replace(".", "", strtolower($allowed));  // get rid of dots and make lowercase.
+        $allowed = str_replace(" ", "", $allowed);
+        $allowed_csv = csv_to_array($allowed);
+                
+        $fid = "";        
+        foreach ($uploaded_files as $file) {
+          if (trim($file['name']) == "") continue; // blank, so skip it.
+          // Get the extension for the file.
+          $temp = explode(".", $file['name']);
+          $ext = strtolower(trim($temp[count($temp) - 1]));
+                  
+          if (!in_array($ext, $allowed_csv)) {
+            form_error($fieldname, t("Sorry, but the file %file is not allowed to be uploaded (file extension \"%ext\" not allowed).  Please see the list of allowed file types/extensions.", array("%file" => $file['name'], "%ext" => $ext)));
+            return;
+          }
+          
+            
+        } // foreach uploaded files
+      } // if a file
+    } // if not a cfieldset
+  } // foreach
+  
+  
+} // ... validate
 
 
 
@@ -1998,8 +2057,7 @@ function content_content_load(&$content) {
         // Always assumed to be "plain" if no filter is set.
         $display_value = filter_markup($display_value, "plain");        
         // Need to add in line breaks if this was plain.
-        $display_value = nl2br(trim($display_value));
-        
+        $display_value = nl2br(trim($display_value));        
       }
       
       // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
@@ -2033,6 +2091,17 @@ function content_content_load(&$content) {
       if ($details['type'] == 'select'  || $details['type'] == 'radios') {
         $temp = @$details['options'][$val];
         if ($temp != "") $display_value = $temp;
+      }
+
+      // If this is a single checkbox, then the possible values are 1 or blank.  Let's make the display_value a little more interesting
+      if ($details['type'] == 'checkbox') {
+        $val = intval($val);
+        if ($val === 1) {         
+          $display_value = t("Yes / Checked");
+        }
+        else {
+          $display_value = t("No / Unchecked");
+        }
       }
       
       // If this was a set of checkboxes ($val is an array), we want to display the label the values went to.
@@ -2177,6 +2246,8 @@ function hook_content_load(&$content) {
  * Display a list of content for the administrator
  */
 function content_display_content_admin_list() {
+  global $user;
+  
   $rtn = "";
   
   //fp_add_css(fp_get_module_path("content") . "/css/content.css");
@@ -2192,7 +2263,7 @@ function content_display_content_admin_list() {
   // ["page"]["title"] = "Basic Page";
   // ["page"]["description"] = "This is a standard page.";
   foreach ($types as $type => $details) {
-    if (user_has_permission("edit_$type" . "_content")) {
+    if (user_has_permission("add_$type" . "_content")) {
       $rtn .= "<tr>
                 <td>" . l($details["title"], "content/add/$type") . "</td>
                 <td>" . $details["description"] . "</td></tr>";
@@ -2278,7 +2349,7 @@ function content_display_content_admin_list() {
     $view_link = $edit_link = "";
     $view_link = l("<i class='fa fa-eye'></i>", "content/$content->cid");
     
-    if (user_has_permission("edit_{$content->type}" . "_content")) {
+    if (user_has_permission("edit_any_{$content->type}" . "_content") || (user_has_permission("edit_own_{$content->type}" . "_content") && intval($content->user_id) === intval($user->id) && intval($user->id) > 0)) {
       $edit_link = l("<i class='fa fa-pencil'></i>", "content/{$cur["cid"]}/edit");
     }
     

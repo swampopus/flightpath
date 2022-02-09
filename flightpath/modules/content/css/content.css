@@ -58,3 +58,11 @@ body.page-is-popup .markup-element-content_title {
 .public-files-table .row-odd {
   background-color: #ddd;
 }
+
+
+.add-more-link {
+  position: relative;
+  padding-left: 20px;
+  top: -10px;
+}
+

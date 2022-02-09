@@ -1,6 +1,17 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-02-09
+  Fixed bug where we were checking the wrong permission for adding content from the content page.
+  
+
+2022-02-08
+  Fixed bug in content module such that you could only have a "file" field if it was named "attachment".  Also added
+  the ability to have more than one file field per content form.
+  
+  Added a little extra styling for form fields in content forms.
+
+
 2022-02-04
   Made it so if a numeric grade is supplied with MID at the end, it is converted to a letter grade with MID at the end.
   

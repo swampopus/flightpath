@@ -364,8 +364,7 @@ function fpToggleHamburgerMenu() {
     
     DayPilot.Modal.confirm(str).then(function(modal) {
       if (modal.result) {
-        // they said YES, so perform the action.
-        
+        // they said YES, so perform the action.        
         action_if_yes = decodeURIComponent(escape(atob(action_if_yes_64)));  // all the extra escape and such is to handle possible emoji.  See: https://stackoverflow.com/questions/56647747/how-to-base64-encode-emojis-in-javascript
         eval(action_if_yes);
       }
