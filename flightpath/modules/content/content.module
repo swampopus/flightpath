@@ -2349,7 +2349,7 @@ function content_display_content_admin_list() {
     $view_link = $edit_link = "";
     $view_link = l("<i class='fa fa-eye'></i>", "content/$content->cid");
     
-    if (user_has_permission("edit_any_{$content->type}" . "_content") || (user_has_permission("edit_own_{$content->type}" . "_content") && intval($content->user_id) === intval($user->id) && intval($user->id) > 0)) {
+    if ((user_has_permission("edit_any_{$content->type}" . "_content")) || (user_has_permission("edit_own_{$content->type}" . "_content") && intval($content->user_id) === intval($user->id) && intval($user->id) > 0)) {
       $edit_link = l("<i class='fa fa-pencil'></i>", "content/{$cur["cid"]}/edit");
     }
     

@@ -1458,11 +1458,20 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
     $name = fp_get_student_name($user->cwid);
   }
   
+  
+  
+  $badge = "";
+  // TODO:  If user has new alerts to view, we should show a "badge" on the icon over the alerts icon
+  // TODO:  (in system module?) create function that tells us if we should show the badge or not.      
+  //$badge = "<span class='tub-alert-count'><i class='fa fa-circle'></i></span>";
+  
+  
+  
   if (!$bool_for_hamburger_menu) {
   
     $html .= "<ul class='top-nav-ul'>";
     
-    // TODO:  If we have a student selected, then we will display a link to go back to that student.
+    // If we have a student selected, then we will display a link to go back to that student.
     if ($user->is_faculty) {      
       if (@trim($_SESSION["last_student_selected"]) != '') {
         $csid = trim($_SESSION["last_student_selected"]);
@@ -1479,7 +1488,7 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
       $html .= "<li class='student-search'>" . student_search_render_small_search() . "</li>";
     }
     if (user_has_permission('view_advisee_alerts')) {
-      $html .= "<li class='alerts'><a href='" . fp_url('alerts') . "'><i class='fa fa-bell'></i></a></li>";
+      $html .= "<li class='alerts'><span class='tub-icon-element-alert'><a href='" . fp_url('alerts') . "'><i class='fa fa-bell'></i>$badge</a></span></li>";
     }
     $html .= "<li class='user-options last'>";
     
@@ -1537,7 +1546,7 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
     $cog_class = "cog-only";
     $html .= "<ul class='top-nav-ul'>";
     if (user_has_permission('view_advisee_alerts')) {
-      $html .= "<li class='alerts first'><a href='" . fp_url('alerts') . "'><i class='fa fa-bell'></i></a></li>";
+      $html .= "<li class='alerts first'><span class='tub-icon-element-alert'><a href='" . fp_url('alerts') . "'><i class='fa fa-bell'></i>$badge</a></span></li>";
       $cog_class = "last";
     }
     $html .= "

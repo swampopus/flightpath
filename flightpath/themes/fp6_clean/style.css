@@ -1446,19 +1446,16 @@ ul.top-nav-ul li.user-options i {
   position: relative;
 }
 .tub-icon-element-alert .tub-alert-count {
-  position: relative;
+  position: absolute;
   display: inline-block;
-  min-width: 10px;
-  padding-left: 5px;
-  padding-right: 5px;
+  
   text-align: center;
   top: 8px;
-  left: -5px;
-  color: #eee;
-  background-color: #b22222;
+  right: -4px;
+  color: indianred;
+  
   font-size: 0.7em;
-  font-weight: bold;
-  border-radius: 15px;
+  
 }
 
 

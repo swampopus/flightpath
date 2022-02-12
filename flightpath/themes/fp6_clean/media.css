@@ -447,6 +447,18 @@
     font-size: 2em !important;
   }
   
+  #mobile-hamburger-menu .top-nav-ul .tub-icon-element-alert {
+    display: inline-block !important;
+  }
+  
+  #mobile-hamburger-menu .top-nav-ul .tub-icon-element-alert .tub-alert-count {
+    top: 12px;
+    right: -6px;
+    font-size: .65em;
+  }
+  
+  
+}  
   
   
   

@@ -1,8 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-02-12
+  Minor tweaks to CSS
+  
+  Preparing to enable "basge" functionality for the alerts bell.
+
+
 2022-02-09
-  Fixed bug where we were checking the wrong permission for adding content from the content page.
+  Fixed bug where we were checking the wrong permission for adding and editing content from the content page.
   
 
 2022-02-08

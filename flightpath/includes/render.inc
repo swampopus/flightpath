@@ -410,7 +410,7 @@ function clear_session_form_values($callback) {
 
 
 /**
- * This is a very basic valiator for form API submission.
+ * This is a very basic validator for form API submission.
  * All I really care about is making sure required fields have
  * a value in them.  If they do not, we will file a form_error.
  */
