@@ -17,7 +17,68 @@
  
  
  
+
  
+/**
+ * This will allow modules to add to the "count" for alerts,
+ * that generally would trigger a notification badge on the bell at the
+ * top-right of the screen.
+ * 
+ * Below is a functional example from the alerts module.
+ * @see alerts_get_alert_count_by_type()
+ * 
+ * Returns an array containing the calculations for read, unread, and total.
+ * 
+ */ 
+function hook_get_alert_count_by_type($account = NULL) {
+  
+  global $user;
+  if ($account === NULL) $account = $user;
+  
+  $rtn = array();
+  
+  $types = array('alert', 'activity_record');
+  
+  // We need to know this user's list of advisees.
+  $advisees = advise_get_advisees($account->cwid);
+  $advisee_line = " AND b.field__student_id IN (" . join(",", $advisees) . ") ";
+  
+  foreach ($types as $type) {
+        
+    $total_count = db_result(db_query("SELECT COUNT(*) as mycount 
+                      FROM content__$type b,                                            
+                           content n
+                     WHERE n.type = ?
+                     AND n.published = 1
+                     AND n.delete_flag = 0
+                     AND n.cid = b.cid
+                     $advisee_line ", array($type))); 
+    
+    $read_count = db_result(db_query("SELECT COUNT(*) as mycount 
+                      FROM content_last_access a,
+                           content__$type b,                                            
+                           content n
+                     WHERE n.type = ?
+                     AND n.published = 1
+                     AND n.delete_flag = 0
+                     AND n.cid = a.cid
+                     AND n.cid = b.cid
+                     $advisee_line
+                     AND a.user_id = ?", array($type, $account->id)));
+    
+    
+    $rtn[$type]['total'] = intval($total_count);
+    $rtn[$type]['read'] = intval($read_count);
+    $rtn[$type]['unread'] = $total_count - $read_count; 
+        
+  } // foreach types 
+  
+  return $rtn;  
+  
+} 
+ 
+ 
+  
  
 /**
  * This accepts a CWID (student_id or faculty_id), and returns back a

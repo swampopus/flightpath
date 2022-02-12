@@ -2137,6 +2137,37 @@ function modules_implement_hook($hook = "example_hook_here") {
 }
 
 
+
+/**
+ * Invokes a hook to get numbers on the total, read, and unread values from our modules, to find out
+ * if we need to place a badge on the bell icon at the top of the screen.
+ */
+function fp_recalculate_alert_count_by_type($account = NULL) {
+  global $user;
+  if ($account === NULL) $account = $user;  
+  $res = invoke_hook("get_alert_count_by_type", array($account));  
+  $_SESSION['fp_alert_count_by_type'] = $res;  
+}
+
+
+/**
+ * Returns back the total, read, and unread numbers previously calculated to see if we need to place
+ * a badge next to the bell icon at the top of the screen.  If unset, we will call the recalculate function.
+ */
+function fp_get_alert_count_by_type($account = NULL) {
+  global $user;
+  if ($account === NULL) $account = $user;
+
+  if (!isset($_SESSION['fp_alert_count_by_type'])) {
+    fp_recalculate_alert_count_by_type($account);
+  }
+  
+  return $_SESSION['fp_alert_count_by_type'];
+  
+}
+
+
+
 /**
  * Invoke all module hooks for the supplied hook.
  */

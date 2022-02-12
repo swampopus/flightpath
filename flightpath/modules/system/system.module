@@ -3028,7 +3028,7 @@ function system_clear_cache() {
   unset($_SESSION["fp_db_host"]);
   unset($_SESSION["fp_draft_mode"]);
   unset($_SESSION["fp_simple_degree_plan_cache_for_student"]);
-  
+  unset($_SESSION['fp_alert_count_by_type']);
   
   menu_rebuild_cache();
 

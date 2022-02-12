@@ -640,6 +640,9 @@ function content_set_last_access($cid, $account = NULL) {
   db_query("DELETE FROM content_last_access WHERE cid = ? AND user_id = ?", array($cid, $account->id));
   db_query("INSERT INTO content_last_access(cid, user_id, last_access)
               VALUES (?, ?, ?)", array($cid, $account->id, time()));
+  
+  // We need to re-calculate our alerts count just in case now.
+  fp_recalculate_alert_count_by_type($account);
     
 }
 
@@ -1762,6 +1765,7 @@ function content_save(&$content) {
   // Save to globals cache
   $GLOBALS['content_cache'][$content->cid] = $content;
 
+      
 }
 
 
@@ -1878,6 +1882,10 @@ function content_content_save(&$content) {
               VALUES (" . join(", " , $param_names) . ")";
     
   db_query($sql, $params);    
+  
+  
+  // Re-calc our alert counts.
+  fp_recalculate_alert_count_by_type();
   
   
   watchdog('content', "content_save cid:$content->cid");

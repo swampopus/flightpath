@@ -6,6 +6,14 @@ FlightPath 6.x Changelog
   
   Preparing to enable "basge" functionality for the alerts bell.
 
+  Created a new hook "hook_get_alert_count_by_type()" which will let a module declare the total, read, and unread
+  counts of *something* (probably content), we we can decideif we need to place a badge on the bell icon at the top of
+  the screen.
+  
+  Created new functions in misc.inc to interact with the hook, as well as a change to content when we set the "last access"
+  value, as well as when we create, edit, or delete any content.
+  
+  
 
 2022-02-09
   Fixed bug where we were checking the wrong permission for adding and editing content from the content page.
