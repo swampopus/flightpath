@@ -1188,7 +1188,11 @@ function hook_menu_alter(&$items) {
 
 /**
  * This hook is called by the menu system.  It allows each module
- * the change to replace string patterns in its menu items (defined in hook_menu). 
+ * the chance to replace string patterns in its menu items (defined in hook_menu). 
+ * 
+ * It can also be used in the Title of the page or tab.
+ * 
+ * Replacement patterns must begin and end with %.  Ex:  %STUDENT_NAME%
  * 
  * @see hook_menu()
  */

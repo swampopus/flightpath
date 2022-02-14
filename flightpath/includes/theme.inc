@@ -114,6 +114,7 @@ function theme_table_header_sortable($headers = array(), $element_id = "default"
  * Sets our initial sort, if there isn't already one set.
  */
 function theme_table_header_sortable_set_initial_sort($field, $dir) {
+    
   if (@$_GET['fsort'] == '') {
     $_GET['fsort'] = $field;
     $_GET['fsortdir'] = $dir;
@@ -133,7 +134,7 @@ function theme_table_header_sortable_order_by($headers) {
   
   $fsort = @$_GET['fsort'];
   $fsortdir = @$_GET['fsortdir'];
-  
+    
   if (!$fsort) return '';
   
   if ($fsort) {
@@ -152,7 +153,7 @@ function theme_table_header_sortable_order_by($headers) {
     $fsortdir = ''; 
     
   }
-  
+      
   return "ORDER BY $fsort $fsortdir";
   
 } // ... sortable_order_by
@@ -1461,10 +1462,19 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
   
   
   $badge = "";
-  // TODO:  If user has new alerts to view, we should show a "badge" on the icon over the alerts icon
-  // TODO:  (in system module?) create function that tells us if we should show the badge or not.      
-  //$badge = "<span class='tub-alert-count'><i class='fa fa-circle'></i></span>";
-  
+  // If user has new alerts to view, we should show a "badge" on the icon over the alerts icon
+  $alert_count_by_type = fp_get_alert_count_by_type();
+  if ($alert_count_by_type && is_array($alert_count_by_type) && count($alert_count_by_type) > 0) {    
+    $unread_total = 0;   
+    foreach ($alert_count_by_type as $module => $alert_types) {
+      foreach ($alert_types as $k => $details) {
+        $unread_total += $details['unread'];
+      }
+    }   
+    if ($unread_total > 0) {
+      $badge = "<span class='tub-alert-count'><i class='fa fa-circle'></i></span>";
+    }
+  }
   
   
   if (!$bool_for_hamburger_menu) {
@@ -1971,6 +1981,12 @@ function fp_render_tab_array($tab_array) {
   for ($t = 0; $t < count($tab_array); $t++)
   {
     $title = @$tab_array[$t]["title"];
+    
+    // If the title has a replacement pattern in it, then we need to call a hook to see what it should be set to.
+    if (strpos($title, "%") !== 0) {
+      $title = menu_convert_replacement_pattern($title);
+    }
+    
     $active = @$tab_array[$t]["active"];
     $on_click = @$tab_array[$t]["on_click"];
     $href = @$tab_array[$t]["href"];

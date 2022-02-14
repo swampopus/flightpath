@@ -1,6 +1,17 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2022-02-13
+  Added ability to have replacement patterns in menu item titles.  Good for changing values in tabs.
+  
+  Minor tweaking to working and examples in hook.api.php.
+  
+  Modified alerts module to report how many unread alerts there on on tab.
+  
+  More work on the alerts bell "badge" logic.
+  
+
 2022-02-12
   Minor tweaks to CSS
   

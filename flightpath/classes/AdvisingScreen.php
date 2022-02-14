@@ -300,6 +300,7 @@ function draw_menu_items($menu_array) {
   
     $page_content = $this->page_content;
     $page_tabs = $this->page_tabs;
+            
     $page_has_search = $this->page_has_search;
     $page_on_load = $this->page_on_load;
     $page_scroll_top = $this->page_scroll_top;
@@ -324,14 +325,15 @@ function draw_menu_items($menu_array) {
       $page_title = variable_get_for_school("school_initials", "DEMO", $school_id) . " " . $system_name;
     }
     
+    $page_title = menu_convert_replacement_pattern($page_title);
+    
     $page_display_title = $page_title;
     if (isset($GLOBALS["fp_set_show_title"]) && $GLOBALS["fp_set_show_title"] === FALSE) {
       $page_display_title = "";
     }
 
     $page_title = strip_tags($page_title);
-    
-    
+        
     $page_breadcrumbs = fp_render_breadcrumbs();
     
         

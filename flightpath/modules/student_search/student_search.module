@@ -291,7 +291,7 @@ function student_search_display_my_advisees($bool_only_return_adv_array = FALSE,
               %ORDERBY%              
               ";
 
-  $adv_array = student_search_query_advisees($query, array(":faculty_cwid" => $faculty_cwid), $limit);
+  $adv_array = student_search_query_advisees($query, array(":faculty_cwid" => $faculty_cwid), $limit, $bool_only_return_adv_array);
   
   if ($bool_only_return_adv_array) return $adv_array;
   
@@ -1514,20 +1514,20 @@ function z______student_search_render_advisees($adv_array, $title) {
 /**
  * The limit is how many we will query, and also how many will appear on the page at one time.
  */
-function student_search_query_advisees($sql, $params = array(), $limit = 20) {
+function student_search_query_advisees($sql, $params = array(), $limit = 20, $bool_only_return_adv_array = FALSE) {
       
   $db = get_global_database_handler();  
   
   $rank_in = "( '" . join("', '", csv_to_array(variable_get("allowed_student_ranks",''))) . "' )";
-    
-  $table_headers = student_search_get_advisee_table_headers();
 
-  
-  // Set our initial sort, if none is already set.   
-  theme_table_header_sortable_set_initial_sort('l_name', 'ASC');
-    
-  // Get our order by clause based on selected table header, if any.    
-  $order_by = theme_table_header_sortable_order_by($table_headers);    
+  if (!$bool_only_return_adv_array) {    
+    $table_headers = student_search_get_advisee_table_headers();
+    // Set our initial sort, if none is already set.   
+    theme_table_header_sortable_set_initial_sort('l_name', 'ASC');
+    // Get our order by clause based on selected table header, if any.    
+    $order_by = theme_table_header_sortable_order_by($table_headers);    
+  }
+
   
   // Replace the replacement portion with our derrived variables.
   $sql = str_replace("%RANKIN%", $rank_in, $sql);

@@ -15,7 +15,7 @@ function alerts_menu() {
   $items = array();
   
   $items["alerts"] = array(
-    "title" => t("Advisee Alerts"), 
+    "title" => "Advisee Alerts%ALERTS_ADVISEE_ALERTS_COUNT%", 
     "page_callback" => "fp_render_form",
     "page_arguments" => array("alerts_advisees_alerts_form"),
     "access_arguments" => array("view_advisee_alerts"),
@@ -57,6 +57,31 @@ function alerts_menu() {
 }
 
 
+
+/**
+ * implements hook_menu_handle_replacement_pattern
+ */
+function alerts_menu_handle_replacement_pattern($str) {
+      
+  if (strstr($str, "%ALERTS_ADVISEE_ALERTS_COUNT%")) {
+    // Get our count.
+    $alert_counts = fp_get_alert_count_by_type();        
+    $c = intval($alert_counts['alerts']['alert']['unread']);
+    
+    $x = "";
+    if ($c > 0) {
+      $x .= " ($c)";
+    }  
+    
+    $str = str_replace("%ALERTS_ADVISEE_ALERTS_COUNT%", $x, $str);
+  }    
+  
+  return $str;
+}
+
+
+
+
 /**
  * Display all advisee activities since the beginning of time, thanks to pager query.
  * 
@@ -71,8 +96,7 @@ function alerts_display_advisee_activities_page() {
   fp_set_title('');
   
   // Needs to only be within my advisees list....
-  $adv_array = student_search_display_my_advisees(TRUE);
-  $student_ids = array_keys($adv_array);
+  $student_ids = advise_get_advisees($user->cwid); 
   $students_line = "'" . join("','", $student_ids) . "'";
       
   $icons = array(
@@ -172,15 +196,15 @@ function alerts_advisees_alerts_form($only_student_id = "", $limit = 25) {
   $html = "";
   $form = array();
   
-  fp_set_title('');
   
+  fp_set_title('');
+    
   fp_add_css(fp_get_module_path('alerts') . '/css/style.css');
   
   $students_line = "'$only_student_id'";
   
   if ($only_student_id == "") {  
-    $adv_array = student_search_display_my_advisees(TRUE);
-    $student_ids = array_keys($adv_array);
+    $student_ids = advise_get_advisees($user->cwid);    
     $students_line = "'" . join("','", $student_ids) . "'";
   }
   
@@ -195,7 +219,7 @@ function alerts_advisees_alerts_form($only_student_id = "", $limit = 25) {
   
   // filter options form.  Ex:  Status
   $form['filter_status'] = array(
-    //'label' => t('Status:'),
+    'label' => t('Filter by:'),
     'type' => 'select',
     'options' => array('open' => 'Open', 'closed' => 'Closed'),
     'value' => $filter_status,
@@ -218,7 +242,7 @@ function alerts_advisees_alerts_form($only_student_id = "", $limit = 25) {
   $table_headers[] = array("label" => "Author");  
   $table_headers[] = array("label" => "Updated", "field" => "n.updated");
   
-    // Set our initial sort, if none is already set.   
+  // Set our initial sort, if none is already set.   
   theme_table_header_sortable_set_initial_sort('n.updated', 'DESC');
   
   
@@ -284,7 +308,7 @@ function alerts_advisees_alerts_form($only_student_id = "", $limit = 25) {
         
     $remove_link = "";
     if (user_has_permission('can_remove_alerts')) {
-      // TODO: Load dialog with a custom "remove" screen.  Either "Yes" or "Cancel".  If we hit yes, we redirect to wherever we are supposed to, just as if we saved.  Cancel closes
+      // Load dialog with a custom "remove" screen.  Either "Yes" or "Cancel".  If we hit yes, we redirect to wherever we are supposed to, just as if we saved.  Cancel closes
       // the dialog window.
       $remove_url = fp_url("content/$cid/remove", "window_mode=popup&content_tabs=false&type=alert");
       $dtitle = t("Remove Alert");
@@ -355,8 +379,7 @@ function alerts_get_alert_count_by_type($account = NULL) {
   if ($account === NULL) $account = $user;
   
   $rtn = array();
-  
-  $types = array('alert', 'activity_record');
+  $types = array('alert', /*'activity_record'*/); 
   
   // We need to know this user's list of advisees.
   $advisees = advise_get_advisees($account->cwid);
