@@ -2145,8 +2145,13 @@ function modules_implement_hook($hook = "example_hook_here") {
 function fp_recalculate_alert_count_by_type($account = NULL) {
   global $user;
   if ($account === NULL) $account = $user;  
+  
+  if ($account->id == 0) return FALSE;
+  
+    
   $res = invoke_hook("get_alert_count_by_type", array($account));  
   $_SESSION['fp_alert_count_by_type'] = $res;  
+  $_SESSION['fp_alert_count_by_type_last_check'] = time();  
 }
 
 
@@ -2157,6 +2162,19 @@ function fp_recalculate_alert_count_by_type($account = NULL) {
 function fp_get_alert_count_by_type($account = NULL) {
   global $user;
   if ($account === NULL) $account = $user;
+
+  if ($account->id == 0) return FALSE;
+
+  if (!isset($_SESSION['fp_alert_count_by_type_last_check'])) {
+    $_SESSION['fp_alert_count_by_type_last_check'] = 0;
+  }
+
+  // Has it been longer than 5 minutes? Should we recalculate again?
+  $test = time() - (5 * 60);
+
+  if ($_SESSION['fp_alert_count_by_type_last_check'] < $test) {
+    unset($_SESSION['fp_alert_count_by_type']);  // this will force us to recalculate.    
+  }
 
   if (!isset($_SESSION['fp_alert_count_by_type'])) {
     fp_recalculate_alert_count_by_type($account);

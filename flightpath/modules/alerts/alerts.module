@@ -29,8 +29,7 @@ function alerts_menu() {
           "path" => "main",          
         ),
       ),
-    ),
-    
+    ),    
   );  
   
   
@@ -378,6 +377,8 @@ function alerts_get_alert_count_by_type($account = NULL) {
   global $user;
   if ($account === NULL) $account = $user;
   
+  if ($account->id == 0) return FALSE;
+  
   $rtn = array();
   $types = array('alert', /*'activity_record'*/); 
   
@@ -395,6 +396,7 @@ function alerts_get_alert_count_by_type($account = NULL) {
                      AND n.delete_flag = 0
                      AND n.cid = b.cid
                      $advisee_line ", array($type))); 
+    
     
     $read_count = db_result(db_query("SELECT COUNT(*) as mycount 
                       FROM content_last_access a,

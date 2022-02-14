@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-02-14
+  Added new tab to the Alerts (bell icon) page.  Engagements (txt or email) sent by student.
+  
+  Made it so the bell icon badge is recalculated every 5 minutes.
+
 
 2022-02-13
   Added ability to have replacement patterns in menu item titles.  Good for changing values in tabs.
