@@ -2352,7 +2352,7 @@ function content_display_content_admin_list() {
       $author_name = $author->name;
     }
     
-    $updated = format_date($content->updated);
+    $updated = format_date(convert_time($content->updated));
     
     $view_link = $edit_link = "";
     $view_link = l("<i class='fa fa-eye'></i>", "content/$content->cid");

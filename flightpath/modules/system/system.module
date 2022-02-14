@@ -2467,7 +2467,27 @@ function system_settings_form() {
     
   );      
       
-      
+  $form['recalculate_alert_badge_seconds'] = array(
+    'label' => t('How often should we recalculate the alert "bell" count?'),
+    'type' => 'select',
+    'hide_please_select' => TRUE,
+    'options' => array( 1 => "1 second (recalculate on every page load)",
+                        15 => "15 seconds",
+                        30 => "30 seconds (default)",
+                        60 => "1 minute",
+                        300 => "5 minutes",
+                        600 => "10 minutes",
+                        1200 => "20 minutes",                        
+                      ),
+    'value' => variable_get('recalculate_alert_badge_seconds', 30),
+    'description' => t('The alert "bell" at the top-right of the screen will display a notification graphic if there is something important for the user to look at.
+                        For example, a new email or text message sent by the student.  Please select how often we should check to see
+                        if there is anything new.  The alert count will be automatically recalculated when new content is created or deleted.
+                        <br>This process may cause delays in page loads. If you notice slow page loads, set this time higher.
+                        <br>If unsure, set to <em>30 seconds</em>.'),
+  );    
+  
+  
       
       
                   

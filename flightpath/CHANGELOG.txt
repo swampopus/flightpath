@@ -4,7 +4,15 @@ FlightPath 6.x Changelog
 2022-02-14
   Added new tab to the Alerts (bell icon) page.  Engagements (txt or email) sent by student.
   
-  Made it so the bell icon badge is recalculated every 5 minutes.
+  Made it so the bell icon badge is recalculated every 1 second to 20 minutes (based on a system setting).
+  
+  Fixed a bug to where when you logged a received email, it actually SENT the email to the student's address.  Same for SMS.
+  
+  Fixed bug in media.css where it was causing some things to be scrunched up.
+  
+  Made it so the notification (when you receive a txt from a student) says what number/line name they sent it to.
+  
+  Made is to that the student_activity record that is created when we receive a txt message states what number/line it was sent to.
 
 
 2022-02-13

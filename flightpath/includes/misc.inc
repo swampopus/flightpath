@@ -2169,8 +2169,8 @@ function fp_get_alert_count_by_type($account = NULL) {
     $_SESSION['fp_alert_count_by_type_last_check'] = 0;
   }
 
-  // Has it been longer than 5 minutes? Should we recalculate again?
-  $test = time() - (5 * 60);
+  // Should we recalculate again?  
+  $test = time() - intval(variable_get('recalculate_alert_badge_seconds', 30));
 
   if ($_SESSION['fp_alert_count_by_type_last_check'] < $test) {
     unset($_SESSION['fp_alert_count_by_type']);  // this will force us to recalculate.    

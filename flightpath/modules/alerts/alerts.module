@@ -394,6 +394,8 @@ function alerts_get_alert_count_by_type($account = NULL) {
                      WHERE n.type = ?
                      AND n.published = 1
                      AND n.delete_flag = 0
+                     AND b.vid = n.vid
+                     AND b.cid = n.cid                     
                      AND n.cid = b.cid
                      $advisee_line ", array($type))); 
     
@@ -406,6 +408,8 @@ function alerts_get_alert_count_by_type($account = NULL) {
                      AND n.published = 1
                      AND n.delete_flag = 0
                      AND n.cid = a.cid
+                     
+                     AND b.vid = n.vid
                      AND n.cid = b.cid
                      $advisee_line
                      AND a.user_id = ?", array($type, $account->id)));

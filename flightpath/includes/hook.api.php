@@ -52,6 +52,7 @@ function hook_get_alert_count_by_type($account = NULL) {
                      AND n.published = 1
                      AND n.delete_flag = 0
                      AND n.cid = b.cid
+                     AND b.vid = n.vid
                      $advisee_line ", array($type))); 
     
     $read_count = db_result(db_query("SELECT COUNT(*) as mycount 
@@ -63,6 +64,7 @@ function hook_get_alert_count_by_type($account = NULL) {
                      AND n.delete_flag = 0
                      AND n.cid = a.cid
                      AND n.cid = b.cid
+                     AND b.vid = n.vid
                      $advisee_line
                      AND a.user_id = ?", array($type, $account->id)));
     

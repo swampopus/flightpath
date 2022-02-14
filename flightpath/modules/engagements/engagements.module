@@ -185,9 +185,10 @@ function engagements_get_alert_count_by_type($account = NULL) {
                       FROM content__$type b,                                            
                            content n
                      WHERE n.type = ?
+                     AND b.vid = n.vid
+                     AND b.cid = n.cid
                      AND n.published = 1
-                     AND n.delete_flag = 0
-                     AND n.cid = b.cid
+                     AND n.delete_flag = 0                     
                      AND field__direction = 'received'
                      AND field__engagement_type IN ('email', 'txt_msg')
                      AND (field__manual_entry IS NULL OR field__manual_entry != 'Y')
@@ -200,9 +201,10 @@ function engagements_get_alert_count_by_type($account = NULL) {
                            content n
                      WHERE n.type = ?
                      AND n.published = 1
+                     AND b.vid = n.vid
+                     AND b.cid = n.cid                                          
                      AND n.delete_flag = 0
                      AND n.cid = a.cid
-                     AND n.cid = b.cid
                      AND field__direction = 'received'
                      AND field__engagement_type IN ('email', 'txt_msg')
                      AND (field__manual_entry IS NULL OR field__manual_entry != 'Y')
@@ -322,19 +324,20 @@ function engagements_display_advisee_engagements_page() {
         $pretty_to_number = engagements_convert_to_pretty_phone_number($to);
         $desc = @$phones['lines'][$details['to_number']]['description'];
         if (!$desc) $desc = @$phones['lines'][$details['from_number']]['description'];
-        if ($desc) $desc = " ($desc)";
+        if ($desc) $desc = " / $desc";
       }
-      $msg = "$pretty_to_number$desc: $msg";
-      if (strlen($msg) > 60) {
-        $msg = trim(substr($msg, 0, 57)) . "...";
-      }
-      $disp_preview = $msg;
-    } // txt_msg
+      $disp_preview = "$pretty_to_number$desc: $msg";  
+      
+    } // txt_msg    
+    else if ($content->field__engagement_type['value'] == 'email') {
+      $disp_preview = trim(filter_markup($content->field__engagement_msg['value'], 'plain'));
+    }
     
-    // TODO:  if it is email message, what to do with disp_preview
+    if (strlen($disp_preview) > 60) {
+      $disp_preview = trim(substr($disp_preview, 0, 57)) . "...";
+    }
     
-    
-    
+        
     $disp_type = $content->field__engagement_type['display_value'];
     
     
@@ -1178,30 +1181,38 @@ function engagements_handle_incoming_sms($vars = array())
 
     content_save($content);
 
-    // if received, create an activity record.
-    // Create a new "activity record" that the student has sent a txt message
 
-    $acontent = new stdClass();
-    $acontent->type = 'activity_record';
-    $acontent->cid = "new";
-    $acontent->published = 1;
-    $acontent->delete_flag = 0;
-    $acontent->title = t('Student replied to text message.');
-    $acontent->field__student_id['value'] = $stu_cwid;
-    $acontent->field__activity_type['value'] = 'comment';
-    content_save($acontent);
-
-    // Notify the advisor(s).
-    // get list of all advisors for this student, and send notifications, but only if this was
-    // something we received!
     if ($dir != "sent") { // meaning, we RECEIVED this message.
       $already_notified_users = array();
 
       $student_name = fp_get_student_name($stu_cwid, TRUE);
       $base_url = $GLOBALS['fp_system_settings']['base_url'];
       $link = $base_url . "/engagements?current_student_id=$stu_cwid";
+      
+      $phones = engagements_get_from_phones();
+      $desc = "";
+      $to = $to_mobile;
+      $pretty_to_number = engagements_convert_to_pretty_phone_number($to);
+      $desc = @$phones['lines'][$to]['description'];
+      if (!$desc) $desc = @$phones['lines'][$from_mobile]['description'];
+      if ($desc) $desc = " $desc";
+    
+      // Create a new "activity record" that the student has sent a txt message    
+      $acontent = new stdClass();
+      $acontent->type = 'activity_record';
+      $acontent->cid = "new";
+      $acontent->published = 1;
+      $acontent->delete_flag = 0;
+      $acontent->title = t('Student sent a text message to ') . $pretty_to_number . " / " . $desc;
+      $acontent->field__student_id['value'] = $stu_cwid;
+      $acontent->field__activity_type['value'] = 'comment';
+      content_save($acontent);    
+    
+      // Notify the advisor(s).      
+      $system_name = variable_get("system_name", "FlightPath");
+      
       $tmsg = "";
-      $tmsg .= "$student_name has submitted a text message to FlightPath.<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link";
+      $tmsg .= "$student_name has submitted a text message to $system_name (To: $pretty_to_number / $desc).<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link";
 
 
       $advisors = advise_get_advisors_for_student($stu_cwid);
@@ -2825,6 +2836,8 @@ function engagements_send_email_or_txt_form_validate($form, &$form_state)
   $cid = $form_state['content_object']->cid;   // At this point, the content has already been saved, so we know its cid.  
   $engagement_type = $values['engagement_type'];
 
+  $manual_entry = @trim(strtoupper($values['manual_entry']));
+
   if ($engagement_type != 'email' && $engagement_type != 'txt_msg') {
     return;   // we are not interested, harmlessly return.
   }
@@ -2837,7 +2850,7 @@ function engagements_send_email_or_txt_form_validate($form, &$form_state)
 
   $db = get_global_database_handler();
 
-  if ($engagement_type == 'email') {
+  if ($engagement_type == 'email' && $manual_entry != 'Y') {
     $student_email = fp_get_student_email($student_id);
     if (!filter_var($student_email, FILTER_VALIDATE_EMAIL)) {  // take advantage of pho built-in email validator
       form_error('engagement_msg', t("Sorry, but the email provided for the student appears to be invalid."));
@@ -2846,7 +2859,7 @@ function engagements_send_email_or_txt_form_validate($form, &$form_state)
   } // type == 'email'
 
 
-  if ($engagement_type == 'txt_msg') {
+  if ($engagement_type == 'txt_msg' && $manual_entry != 'Y') {
 
     $student_user_id = db_get_user_id_from_cwid($student_id, 'student');
 
@@ -2878,6 +2891,8 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
   $content = $form_state['content_object'];
   $engagement_type = $values['engagement_type'];
 
+  $manual_entry = @trim(strtoupper($values['manual_entry']));
+
   if ($engagement_type != 'email' && $engagement_type != 'txt_msg') {
     return;   // we are not interested, harmlessly return.
   }
@@ -2902,7 +2917,7 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
 
   $db = get_global_database_handler();
 
-  if ($engagement_type == 'email') {
+  if ($engagement_type == 'email' && $manual_entry != 'Y') {
     $student_email = fp_get_student_email($student_id);
 
     $subject = $values['title'];
@@ -2933,13 +2948,13 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
     }
 
 
-
+    
     smtp_mail($student_email, $subject, $header . "<br><br>" . $msg, TRUE, $attachments);  // the TRUE sends as HTML.
     fp_add_message(t("Email has been successfully sent."));
   } // type == 'email'
+ 
 
-
-  if ($engagement_type == 'txt_msg') {
+  if ($engagement_type == 'txt_msg' && $manual_entry != 'Y') {
 
     $student_user_id = db_get_user_id_from_cwid($student_id, 'student');
 
@@ -2959,7 +2974,13 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
     }
   } // type == 'txt_msg'
 
-  watchdog("engagements", "sent $engagement_type to $student_id");
+  if ($manual_entry != 'Y') {
+    watchdog("engagements", "sent $engagement_type to $student_id");
+  }
+  else {
+    watchdog("engagements", "logged $engagement_type to $student_id");
+  }
+  
   watchdog("engagements", "$engagement_type message to $student_id: $header <br> $msg", array(), WATCHDOG_DEBUG);
 } // ... send email or txt form submit
 
@@ -3177,7 +3198,8 @@ function engagements_display_main()
     $type = $content->field__engagement_type['value'];
     $direction = $content->field__direction['value'];
     $msg = $content->field__engagement_msg['display_value'];
-
+    $manual_entry = $content->field__manual_entry['value'];
+    
     $external_msg_id = @trim($content->field__external_msg_id['value']);
 
 
@@ -3201,7 +3223,7 @@ function engagements_display_main()
 
 
 
-    if ($content->field__manual_entry['value'] == 'Y') {
+    if ($manual_entry == 'Y') {
       // This was a manually logged engagement.
       $edit_link = "";
       // Is the user allowed to EDIT this manual engagement?
@@ -3272,7 +3294,7 @@ function engagements_display_main()
 
 
     $header_desc_extra = "";
-    if ($type == 'email' && $direction == 'sent') {
+    if ($type == 'email' && $direction == 'sent' && $manual_entry != 'Y') {
       //$header_desc_extra = "&nbsp; &nbsp; &nbsp; &nbsp; Opens: 1";
       $num_opens = intval(db_result(db_query("SELECT opens FROM engagements_tracking WHERE cid = ?", array($content->cid))));
       $header_desc_extra = "<span class='header-desc-extra'>Opens: $num_opens</span>";
@@ -3347,6 +3369,10 @@ function engagements_display_main()
                 </div>
              </div>
              <div class='clear'></div>";
+
+    // mark this content as "read" since it appeared on the screen.
+    content_set_last_access($content->cid);
+    
   } // while cur
 
 
