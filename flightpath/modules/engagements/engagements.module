@@ -2174,9 +2174,26 @@ function _engagements_imap_get_body($imapLink, $msgno)
 
   $text = filter_markup($text, 'basic');
 
-  // Sometimes, emails contain odd encoding.  Ex:  =C2=A0, which is apparently a non-breaking space.  Let's convert.
-  $text = str_replace("=C2=A0", "&nbsp;", $text);
+  // Sometimes, emails contain odd encoding.  Ex:  =C2=A0, which is apparently a non-breaking space.  Let's convert just in case.
+  // From: https://stackoverflow.com/questions/12682208/parsing-email-body-with-7bit-content-transfer-encoding-php
+  // Manually convert common encoded characters into their UTF-8 equivalents.
+  $characters = array(
+    '=20' => ' ', // space.
+    '=E2=80=99' => "'", // single quote.
+    '=0A' => "\r\n", // line break.
+    '=C2=A0' => '&nbsp;', // non-breaking space.
+    '=A0' => ' ', // non-breaking space.    
+    "=\r\n" => '', // joined line.
+    '=E2=80=A6' => '&#8230;', // ellipsis.
+    '=E2=80=A2' => '&bull;', // bullet.
+  );
 
+  // Loop through the encoded characters and replace any that are found.
+  foreach ($characters as $key => $value) {
+    $text = str_replace($key, $value, $text);
+  }
+  
+  
 
   return $text;
 }
