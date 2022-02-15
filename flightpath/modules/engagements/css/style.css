@@ -18,6 +18,13 @@
 }
 
 
+.sms-undelivered-error {
+  color: red;
+  font-weight: bold;
+  padding: 10px;
+}
+
+
 
 #engagements-list-page .email-body {
   max-height: 150px;

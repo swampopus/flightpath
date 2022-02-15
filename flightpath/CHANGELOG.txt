@@ -1,6 +1,17 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2022-02-15  
+  Added new column to content__engagement:  to_sms_phone.  This is so we can keep up with what number this txt message was sent TO.  Useful for
+  schools with more than one number.  Only applies to engagement type txt_msg.
+  
+  Added a message on engagements screen when a sent txt message is not delivered.
+  
+  Altered "engagements received" tab (under alerts) to show txt messages sent to us even though they may not be our advisee.  This is based on
+  phone numbers which we are marked as should receive notifications for.
+  
+
 2022-02-14
   Added new tab to the Alerts (bell icon) page.  Engagements (txt or email) sent by student.
   
