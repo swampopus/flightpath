@@ -96,8 +96,11 @@ function alerts_display_advisee_activities_page() {
   
   // Needs to only be within my advisees list....
   $student_ids = advise_get_advisees($user->cwid); 
-  $students_line = "'" . join("','", $student_ids) . "'";
-      
+  $students_line = "";
+  if ($student_ids && count($student_ids) > 0) {
+    $students_line = "'" . join("','", $student_ids) . "'";
+  }
+  
   $icons = array(
     'alert' => 'fa-bell-o',
     'mail' => 'fa-envelope-o',
@@ -105,6 +108,9 @@ function alerts_display_advisee_activities_page() {
     'calendar' => 'fa-calendar-o',
   );
              
+  if ($students_line) {
+    $students_line = " AND field__student_id IN ($students_line) ";
+  }
  
   $table_headers = array();
  
@@ -136,14 +142,14 @@ function alerts_display_advisee_activities_page() {
                      AND a.cid = n.cid
                      AND n.delete_flag = 0
                      AND n.published = 1
-                     AND field__student_id IN ($students_line)
+                     $students_line
                      $filter_line                                  
                      $order_by", $filter_params, $limit, 0, "SELECT COUNT(DISTINCT(a.cid)) FROM content__activity_record a, content n
                                                                WHERE a.vid = n.vid
                                                                AND a.cid = n.cid
                                                                AND n.delete_flag = 0
                                                                AND n.published = 1
-                                                               AND field__student_id IN ($students_line)
+                                                               $students_line
                                                                $filter_line
                                                                $order_by");  
     
@@ -204,7 +210,9 @@ function alerts_advisees_alerts_form($only_student_id = "", $limit = 25) {
   
   if ($only_student_id == "") {  
     $student_ids = advise_get_advisees($user->cwid);    
-    $students_line = "'" . join("','", $student_ids) . "'";
+    if ($student_ids && count($student_ids) > 0) {
+      $students_line = "'" . join("','", $student_ids) . "'";
+    }
   }
   
   
@@ -384,7 +392,12 @@ function alerts_get_alert_count_by_type($account = NULL) {
   
   // We need to know this user's list of advisees.
   $advisees = advise_get_advisees($account->cwid);
-  $advisee_line = " AND b.field__student_id IN (" . join(",", $advisees) . ") ";
+  $advisee_line = "";
+  if ($advisees && count($advisees) > 0) {
+    $advisee_line = " AND b.field__student_id IN (" . join(",", $advisees) . ") ";
+  }
+  
+  
   
   foreach ($types as $type) {
         

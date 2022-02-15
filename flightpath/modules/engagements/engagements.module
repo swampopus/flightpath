@@ -177,7 +177,11 @@ function engagements_get_alert_count_by_type($account = NULL) {
   
   // We need to know this user's list of advisees.
   $advisees = advise_get_advisees($account->cwid);
-  $advisee_line = " AND b.field__student_id IN (" . join(",", $advisees) . ") ";
+  
+  $advisee_line = "";
+  if ($advisees && count($advisees) > 0) {
+    $advisee_line = " AND b.field__student_id IN (" . join(",", $advisees) . ") ";
+  }
   
   foreach ($types as $type) {
         
@@ -240,9 +244,14 @@ function engagements_display_advisee_engagements_page() {
   
   
   $student_ids = advise_get_advisees($user->cwid);    
-  $students_line = "'" . join("','", $student_ids) . "'";
+  $student_line = "";
+  if ($student_ids && count($student_ids) > 0) {
+    $students_line = "'" . join("','", $student_ids) . "'";
+  }
   
-  
+  if ($student_line) {
+    $student_line = " AND field__student_id IN ($students_line) ";
+  }
   
   $table_headers = array();
   $table_headers[] = array("label" => "Actions");  
@@ -268,21 +277,21 @@ function engagements_display_advisee_engagements_page() {
   // Now, we are going to search for alerts about these students, in the form of a pager query.
   // Query for alerts for this student.  We will be using a pager_query, so we can display a complete history, if we wish.
   $res = pager_query("SELECT DISTINCT(a.cid) FROM content__engagement a, content n
-                   WHERE field__student_id IN ($students_line) 
-                   AND a.vid = n.vid
+                   WHERE a.vid = n.vid                                  
                    AND a.cid = n.cid
                    AND n.delete_flag = 0
                    AND n.published = 1  
-                   AND field__direction = 'received'    
+                   AND field__direction = 'received'
+                   $student_line    
                    AND field__engagement_type IN ('email', 'txt_msg')   
                    AND (field__manual_entry IS NULL OR field__manual_entry != 'Y')                           
                    $order_by", $filter_params, $limit, 0, "SELECT COUNT(DISTINCT(a.cid)) FROM content__engagement a, content n
-                                                                                                         WHERE field__student_id IN ($students_line)
-                                                                                                         AND a.vid = n.vid
+                                                                                                         WHERE a.vid = n.vid                                                                                                         
                                                                                                          AND a.cid = n.cid
                                                                                                          AND n.delete_flag = 0
                                                                                                          AND n.published = 1
-                                                                                                         AND field__direction = 'received'  
+                                                                                                         AND field__direction = 'received'
+                                                                                                         $student_line  
                                                                                                          AND field__engagement_type IN ('email', 'txt_msg')
                                                                                                          AND (field__manual_entry IS NULL OR field__manual_entry != 'Y')                                                                                                      
                                                                                                          $order_by");  
