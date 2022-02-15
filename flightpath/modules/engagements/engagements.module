@@ -2174,6 +2174,9 @@ function _engagements_imap_get_body($imapLink, $msgno)
 
   $text = filter_markup($text, 'basic');
 
+  // Sometimes, emails contain odd encoding.  Ex:  =C2=A0, which is apparently a non-breaking space.  Let's convert.
+  $text = str_replace("=C2=A0", "&nbsp;", $text);
+
 
   return $text;
 }
