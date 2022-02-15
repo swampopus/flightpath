@@ -178,9 +178,15 @@ function engagements_get_alert_count_by_type($account = NULL) {
   // We need to know this user's list of advisees.
   $advisees = advise_get_advisees($account->cwid);
   
+  // TODO:  We should also include students for which we receive txt messages
+  
   $advisee_line = "";
   if ($advisees && count($advisees) > 0) {
-    $advisee_line = " AND b.field__student_id IN (" . join(",", $advisees) . ") ";
+    
+    $advisees_list = "'" . join("','", $advisees) . "'";
+    
+    $advisee_line = " AND b.field__student_id IN (" . $advisees_list . ") ";
+        
   }
   else {  // No advisees, do ditch out.
     return FALSE;

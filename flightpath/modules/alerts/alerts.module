@@ -394,7 +394,10 @@ function alerts_get_alert_count_by_type($account = NULL) {
   $advisees = advise_get_advisees($account->cwid);
   $advisee_line = "";
   if ($advisees && count($advisees) > 0) {
-    $advisee_line = " AND b.field__student_id IN (" . join(",", $advisees) . ") ";
+    
+    $advisees_list = "'" . join("','", $advisees) . "'";
+    
+    $advisee_line = " AND b.field__student_id IN (" . $advisees_list . ") ";
   }
   else {  // No advisees!  So, no readon to do this query at all.
     return FALSE;
