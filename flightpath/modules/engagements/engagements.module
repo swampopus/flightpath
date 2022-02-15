@@ -247,13 +247,13 @@ function engagements_display_advisee_engagements_page() {
   
   
   $student_ids = advise_get_advisees($user->cwid);    
-  $student_line = "";
+  $student_line = "''";
   if ($student_ids && count($student_ids) > 0) {
-    $students_line = "'" . join("','", $student_ids) . "'";
+    $student_line = "'" . join("','", $student_ids) . "'";
   }
   
   if ($student_line) {
-    $student_line = " AND field__student_id IN ($students_line) ";
+    $student_line = " AND field__student_id IN ($student_line) ";
   }
   
   $table_headers = array();
