@@ -16,6 +16,8 @@ FlightPath 6.x Changelog
 
   Sometimes we get "7BIT" code issues in email bodies, where things like a non-breaking space appears as =C2=A0.  Added functionality
   to convert to standard HTML instead.
+  
+  Fixed bug where if you do not have any advisees, you should see nothing on the "Advisee Activities" tab.
 
 
 2022-02-13

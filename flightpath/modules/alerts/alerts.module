@@ -96,7 +96,7 @@ function alerts_display_advisee_activities_page() {
   
   // Needs to only be within my advisees list....
   $student_ids = advise_get_advisees($user->cwid); 
-  $students_line = "";
+  $students_line = "''";
   if ($student_ids && count($student_ids) > 0) {
     $students_line = "'" . join("','", $student_ids) . "'";
   }
