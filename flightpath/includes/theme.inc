@@ -1467,7 +1467,7 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
   if ($alert_count_by_type && is_array($alert_count_by_type) && count($alert_count_by_type) > 0) {    
     $unread_total = 0;   
     foreach ($alert_count_by_type as $module => $alert_types) {
-      if (is_array($alert_types)) {
+      if ($alert_types && is_array($alert_types)) {
         foreach ($alert_types as $k => $details) {
           $unread_total += $details['unread'];
         }
