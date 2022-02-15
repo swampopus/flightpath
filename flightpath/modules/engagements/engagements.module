@@ -182,6 +182,9 @@ function engagements_get_alert_count_by_type($account = NULL) {
   if ($advisees && count($advisees) > 0) {
     $advisee_line = " AND b.field__student_id IN (" . join(",", $advisees) . ") ";
   }
+  else {  // No advisees, do ditch out.
+    return FALSE;
+  }
   
   foreach ($types as $type) {
         
