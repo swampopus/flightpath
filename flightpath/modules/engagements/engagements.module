@@ -352,13 +352,15 @@ function engagements_display_advisee_engagements_page() {
   
   // We also want to show messages sent to us which might not have been from an advisee, but we are a designated recipient anyway.
   $numbers = engagements_get_user_notify_sms_receipt_values($user->id);
-  $numbers_line = "";    
+  $numbers_line = "";
+  $numbers_list = "''";    
   if ($numbers && is_array($numbers) && count($numbers) > 0) {
     // Were there any txt messages sent to these number, which we have not read?    
     $numbers_line = "";
-    $numbers_list = "'" . join("','", $numbers) . "'";    
-    $numbers_line = " field__to_sms_phone IN (" . $numbers_list . ") ";  
+    $numbers_list = "'" . join("','", $numbers) . "'";
   }
+   
+  $numbers_line = " field__to_sms_phone IN (" . $numbers_list . ") ";
   
   
   $table_headers = array();
