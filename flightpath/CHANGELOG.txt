@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-02-21
+  Modified .htaccess for compatibility with Order directive throwing a 500 error in some implementations of Apache 2.4.  Thanks, Apache!  
+  
+  Added extra class to html when drawing pie charts, to show the degree level num (1-3) as well as the "classification" (MAJOR, CONC, etc).
+   
 
 2022-02-15  
   Added new column to content__engagement:  to_sms_phone.  This is so we can keep up with what number this txt message was sent TO.  Useful for

@@ -1178,6 +1178,7 @@ function fp_get_degree_classifications() {
     if ($machine_name != "") {
       $rtn["levels"][1][$machine_name] = $title;
       $rtn["machine_names"][$machine_name] = $title;
+      $rtn["machine_name_to_level_num"][$machine_name] = 1;
     }
   }
   
@@ -1190,6 +1191,7 @@ function fp_get_degree_classifications() {
     if ($machine_name != "") {
       $rtn["levels"][2][$machine_name] = $title;
       $rtn["machine_names"][$machine_name] = $title;
+      $rtn["machine_name_to_level_num"][$machine_name] = 2;
     }
   }
   
@@ -1203,6 +1205,7 @@ function fp_get_degree_classifications() {
     if ($machine_name != "") {
       $rtn["levels"][3][$machine_name] = $title;
       $rtn["machine_names"][$machine_name] = $title;
+      $rtn["machine_name_to_level_num"][$machine_name] = 3;
     }
   }
   
