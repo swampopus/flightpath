@@ -2740,8 +2740,12 @@ function draw_menu_items($menu_array) {
         if ($grd !== $course->db_grade) {
           $grd = $grd .= " ($course->db_grade)";
         }
+        $disp_grade = $grd;
+        if (strstr($grd, "MID")) {
+          $disp_grade = str_replace("MID", "<span class='superscript'>mid</span>", $grd);
+        }
         
-        $html .= t("The student earned a grade of <strong>@grade</strong>.", array("@grade" => $grd));
+        $html .= t("The student earned a grade of <strong>@grade</strong>.", array("@grade" => $disp_grade));
         $render['earned_grade'] = array(
           'type' => 'markup',
           'value' => $html,

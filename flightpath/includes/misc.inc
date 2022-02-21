@@ -1752,7 +1752,7 @@ function t($str, $vars = array()) {
   @$langcode = isset($langcode) ? $langcode : $GLOBALS["fp_system_settings"]["language"]; 
   
   // First, change $str if any other modules implement hook_translate().
-  invoke_hook("translate", array(&$str, $langcode));  // str is passed by ref, so no return needed.
+  invoke_hook("translate", array(&$str, $langcode, $vars));  // str and vars are passed by ref, so no return needed.
     
   if (is_array($vars) && count($vars) > 0) {
     foreach ($vars as $var => $val) {

@@ -5,6 +5,8 @@ FlightPath 6.x Changelog
   Modified .htaccess for compatibility with Order directive throwing a 500 error in some implementations of Apache 2.4.  Thanks, Apache!  
   
   Added extra class to html when drawing pie charts, to show the degree level num (1-3) as well as the "classification" (MAJOR, CONC, etc).
+  
+  Made the popup course description show midterm grades in a superscript correctly.
    
 
 2022-02-15  
