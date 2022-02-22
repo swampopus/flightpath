@@ -7,6 +7,9 @@ FlightPath 6.x Changelog
   Added extra class to html when drawing pie charts, to show the degree level num (1-3) as well as the "classification" (MAJOR, CONC, etc).
   
   Made the popup course description show midterm grades in a superscript correctly.
+  
+  Fixed a bug when rendering radios, where if we were passed an array for the value, it wouldnt' work, only strings.  However, this
+  caused a problem on the What If selection screen.
    
 
 2022-02-15  

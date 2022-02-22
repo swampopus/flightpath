@@ -700,9 +700,16 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     $rtn .= "<div class='form-radios form-radios-$cssname'>";
     foreach ($options as $key => $val) {
       $checked = "";
-      if ($value == $key) {
+
+      // For radios, it's possible we've been sent an array for the value (though a string is more common and prefered).
+      // We need to check both.  
+      if (is_array($value) && $value[$key] == $key) {
         $checked = "checked=checked";
       }
+      else if (!is_array($value) && $value == $key) {
+        $checked = "checked=checked";
+      }
+      
       $csskey = fp_get_machine_readable($key);
       $rtn .= "<div class='radio-element radio-element-$csskey'>
                  <label class='label-for-radio'><input type='radio' name='$name' id='element-$cssname-$csskey' value='$key' $checked $attributes> $val</label>

@@ -1691,7 +1691,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
           // If we require exactly 1 selection, then make this a radio button, and pre-select either the first element
           // or the first default track.
           if ($min_tracks == 1 && $max_tracks == 1) {
-            $element_type = "radios";
+            $element_type = "radios";            
             $element_value = array($default_tracks_array[0] => $default_tracks_array[0]);
           }
   
