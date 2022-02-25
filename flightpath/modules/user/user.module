@@ -984,13 +984,20 @@ function user_user_settings_form() {
   
   
   if (user_has_permission('view_any_advising_session')) {
+    
+    $value = @$user->settings['default_student_load_tab'];
+    if (!$value || $value == "") {
+      // No specific setting, so use the system's default setting.
+      $value = variable_get('system_default_student_load_tab', 'profile');
+    }    
+    
     $form['default_student_load_tab'] = array(
       'label' => t('What is the default tab you want to see when you load a new student?'),
       'type' => 'select',
       'hide_please_select' => TRUE,
       'options' => array('profile' => t('Student Profile'), 'engagements' => t("Engagements"), 'degree' => t('Degree')),
-      'value' => @$user->settings['default_student_load_tab'],
-      'description' => t('If you are unsure what to select, choose "Student Profile".'),
+      'value' => $value,
+      'description' => t('If you are unsure what to select, choose "Student Profile" or leave set to its current setting.'),
     );
   }
   

@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-02-25
+  Added code so that the system can have a default tab to load for students, if not overridden by the individual user's settings.
+  
+
 2022-02-21
   Modified .htaccess for compatibility with Order directive throwing a 500 error in some implementations of Apache 2.4.  Thanks, Apache!  
   

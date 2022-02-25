@@ -111,8 +111,9 @@ function student_search_student_select_switchboard() {
 
   // At this point, we decide where they are going to be redirected to, using fp_goto.
   $goto_tab = @$user->settings['default_student_load_tab'];
-  if ($goto_tab == "") {
-    $goto_tab = "profile";  // by default
+  if (!$goto_tab || $goto_tab == "") {    
+    // No specific setting, so use the system's default setting.
+    $goto_tab = variable_get('system_default_student_load_tab', 'profile');    
   }
   
   ////////////////////////

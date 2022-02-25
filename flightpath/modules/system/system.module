@@ -2174,9 +2174,21 @@ function system_settings_form() {
   
   $form['system_timezone'] = array(
     'type' => 'select',
-    'label' => t('System timezone'),
+    'label' => t('System timezone:'),
     'options' => get_timezones(),
     'value' => variable_get('system_timezone', 'America/Chicago'),
+  );
+
+
+  $form['system_default_student_load_tab'] = array(
+    'type' => 'select',
+    'label' => t('Default tab to view when loading a new student:'),
+    'options' => array('profile' => t('Student Profile'), 'engagements' => t("Engagements"), 'degree' => t('Degree')),
+    'value' => variable_get('system_default_student_load_tab', 'profile'),
+    'hide_please_select' => TRUE,
+    'description' => t("Unless overridden by the user's settings, this is the tab which
+                        the user will see when pulling up a new student for advising.
+                        <br>If unsure what to select, chose 'Student Profile'."),
   );
 
   

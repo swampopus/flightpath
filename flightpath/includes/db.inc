@@ -406,7 +406,7 @@ function fp_load_user($user_id) {
     $rtn->settings[$cur['name']] = $cur['value'];  
   }
   
-    
+
   
   
   // Set the user image url...  
