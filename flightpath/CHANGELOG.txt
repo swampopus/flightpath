@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-04
+  Fixed typo in code which was causing advisor name not to show on the advising history tab.
+  
+
 2022-02-25
   Added code so that the system can have a default tab to load for students, if not overridden by the individual user's settings.
   

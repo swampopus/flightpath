@@ -153,7 +153,7 @@ function advise_display_history() {
 
 
     $advised_by = "<div class='history-advised-row history-advised-row-$a_count'>
-            <strong>" . t("Advised by") . " " . fp_get_faculty_name($cur2['faculty_id'], FALSE) . "</strong>$group_link
+            <strong>" . t("Advised by") . " " . fp_get_faculty_name($cur['faculty_id'], FALSE) . "</strong>$group_link
           </div>";
 
 
