@@ -255,7 +255,7 @@ class DatabaseHandler extends stdClass
         
     $arr = $ex->getTrace();
     
-    $when_ts = time();
+    $when_ts = convert_time(time());
     $when_english = format_date($when_ts);
     
     $message = $ex->getMessage();
@@ -282,6 +282,7 @@ class DatabaseHandler extends stdClass
     {
       $server = $_SERVER["SERVER_NAME"] . " - " . $GLOBALS['fp_system_settings']['base_url'];  // intentionally use the GLOBALS here, since it comes from settings.php file.
       $email_msg = t("A MYSQL error has occured in FlightPath.") . "  
+      User: $user->name ($user->id)
       Server: $server
       
       Timestamp: $when_ts ($when_english)

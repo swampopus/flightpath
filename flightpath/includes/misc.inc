@@ -368,8 +368,9 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
   $hostname = php_uname('n') . ' - ' . $GLOBALS['fp_system_settings']['base_url'];
   
   $msg = "";
+  $msg .= "USER:   $user->name ($user->id) \n";
   $msg .= "SERVER:   $hostname \n";
-  $msg .= "DATE:     " . format_date() . "\n";
+  $msg .= "DATE:     " . format_date(convert_time(time())) . "\n";
   $msg .= "SEVERITY: $err_name \n";
   $msg .= "--------------------------\n\n";
   $msg .= "$err_name: $message \n\n";
@@ -381,7 +382,7 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
 
   watchdog($watchdog_type, $msg, array(), $watchdog_severity);
   
-  if (@$user->id !== '1' && @$user->id !== 1) {
+  if (@intval($user->id) !== 0) {
     // We are NOT the admin user.  (No need to email, since it would appear on screen with the fpm() calls earlier.
     
     // Should we email someone, as with mysql errors?
@@ -458,6 +459,22 @@ function fp_mail($to, $subject, $msg, $bool_html = FALSE, $attachments = array()
   
     
   // TODO: In the future, check to see if there are any other modules which invoke a hook to intercept mail.
+  
+  
+  // The reason we do this md5 check is so that we don't try to send identical emails over and over.  This can happen if we are trying
+  // to email regarding the mysql server being down, and when we try to do a "watchdog", which has to use the mysql server,
+  // we try to send ANOTHER error, then we are right back here and try to send ANOTHER email, etc, etc.  
+  $md5_check = md5($to . $subject . $msg . time());
+  if (isset($_SESSION['fp_mail_last_sent_md5'])) {
+    if ($_SESSION['fp_mail_last_sent_md5'] == $md5_check) {
+      return;
+    }
+  }  
+  $_SESSION['fp_mail_last_sent_md5'] = $md5_check;
+  
+  
+  watchdog('fp_mail', t("Sending mail to @to, subject: @subject.  Last sent md5: @md5", array("@to" => $to, "@subject" => $subject, "@md5" => $md5_check)), array(), WATCHDOG_DEBUG);
+  
   
   if (module_enabled('smtp')) {
     smtp_mail($to, $subject, $msg, $bool_html, $attachments, $bool_string_attachment);

@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-07
+  Made it to where emails for mysql and PHP errors first convert times into system (or user) timezone, as well as display which user
+  triggered the error.
+  
+  Added watchdog debug statement any time we send an email via fp_mail() function.  Added logic to prevent infinite loops if mysql server is down.
+  
+
 2022-03-04
   Fixed typo in code which was causing advisor name not to show on the advising history tab.
   
