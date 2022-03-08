@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-08
+  Fixed a bug when sending the "Contact the FlightPath Production Team" email, where the last selected student CWID was not appearing.
+  
+  Removed the outdated "addslashes" to the msg of the email from the Contact link.  Also added a "close window" button on the "Thank You" page.
+  
+
 2022-03-07
   Made it to where emails for mysql and PHP errors first convert times into system (or user) timezone, as well as display which user
   triggered the error.

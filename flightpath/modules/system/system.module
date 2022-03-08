@@ -1038,15 +1038,16 @@ function system_display_install_finished_page() {
 function system_popup_report_contact_thank_you() {
   $rtn = "";
   
-  //$rtn .= fp_render_section_title(t("Contact the @FlightPath Production Team", array("@FlightPath" => variable_get("system_name", "FlightPath"))));
-  
-  $rtn .= "<p>";
-  
+    
+  $rtn .= "<p>";  
   $rtn .= t("Thank you for submitting to the @FlightPath Production Team.  We 
              have received your comment and will review it shortly.", array("@FlightPath" => variable_get("system_name", "FlightPath"))) . "<br><br>";
   $rtn .= t("You may now close this window.");
-  
   $rtn .= "</p>";
+  
+  $rtn .= "<p>" . "<a href='javascript:parent.fpCloseLargeIframeDialog();' class='button'>" . t("Close Window") . "</a></p>";
+  
+  
   
   return $rtn;
 }
@@ -1056,12 +1057,12 @@ function system_popup_report_contact_thank_you() {
  * This is the form which lets users send an email to the FlightPath production
  * team, 
  */
-function system_popup_report_contact_form() {
+function system_popup_report_contact_form() {  
   $form = array();
  
   fp_set_title("");
   $m = 0;
-  
+        
   /*
   $form["mark" . $m++] = array(
     "value" => fp_render_section_title(t("Contact the @FlightPath Production Team", array("@FlightPath" => variable_get("system_name", "FlightPath")))),
@@ -1080,6 +1081,8 @@ function system_popup_report_contact_form() {
     "value" => "<p>" . t("If you've noticed an error or have a suggestion, use this
                   form to contact the @FlightPath Production Team.", array("@FlightPath" => variable_get("system_name", "FlightPath"))) . "</p>",
   );  
+  
+  
   
   $form["category"] = array(
     "type" => "select",
@@ -1113,7 +1116,7 @@ function system_popup_report_contact_form() {
   );  
   
   $form["#redirect"] = array("path" => "popup-contact-form/thank-you");    
-  
+      
   return $form;
 }
 
@@ -1121,14 +1124,14 @@ function system_popup_report_contact_form() {
 function system_popup_report_contact_form_submit($form, $form_state) {
   global $user;
   
-  $category = strip_tags($form_state["values"]["category"]);
-  $comment = strip_tags($form_state["values"]["comment"]);
+  $category = filter_markup($form_state["values"]["category"],'plain');
+  $comment = filter_markup($form_state["values"]["comment"], 'plain');
   
-  $possible_student = $_SESSION["advising_student_id"];
+  $possible_student = filter_markup($_SESSION['last_student_selected'], 'plain');
   
-  $user_roles = implode(", ", $user->roles);
+  $user_roles = filter_markup(implode(", ", $user->roles), 'plain');
   
-  $datetime = date("Y-m-d H:i:s", strtotime("now"));
+  $datetime = date("Y-m-d H:i:s", convert_time(strtotime("now")));
 
   //$headers = "From: FlightPath-noreply@noreply.com\n";
   $subject = t("FLIGHTPATH REPORT CONTACT") . " - $category ";
@@ -1136,7 +1139,7 @@ function system_popup_report_contact_form_submit($form, $form_state) {
   $msg .= t("You have received a new report/contact on") . " $datetime.\n";
   $msg .= t("Name:") . " $user->f_name $user->l_name ($user->name)  CWID: $user->cwid  \n" . t("User roles:") . " $user_roles \n\n";
   $msg .= t("Category:") . " $category  \n";
-  $msg .= t("Possible Student:") . " $possible_student  \n";
+  $msg .= t("Last Student Selected:") . " $possible_student  \n";
   $msg .= t("Comment:") . " \n $comment \n\n";
   $msg .= "------------------------------------------------ \n";
 
@@ -1145,12 +1148,10 @@ function system_popup_report_contact_form_submit($form, $form_state) {
   if ($_SESSION["da_error_report_md5"] != $themd5)
   {  // Helps stop people from resubmitting over and over again
     // (by hitting refresh, or by malicious intent)..
-
-    $msg = addslashes($msg);
+    
     $to = variable_get("contact_email_address", "");
     
     if ($to != "") {
-      //mail($to,$subject,$msg,$headers);
       fp_mail($to,$subject,$msg);
     }
 
