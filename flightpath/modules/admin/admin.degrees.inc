@@ -263,7 +263,7 @@ From: https://stackoverflow.com/questions/32138089/how-to-check-if-a-string-cont
 We will use this function to make sure a major code doesn't contain any "illegal" characters.
 */
 function admin_string_contains_illegal_chars($testString) {
-  // These are characters we will not allow:  
+  // These are characters we will allow:  
   static $MsgAry1 = array("a","b","c","d",
          "e","f","g","h","i","j","k","l","m","n",
          "o","p","q","r","s","t","u","v","w","x",
@@ -802,6 +802,7 @@ function admin_display_degrees() {
     'value' => "<table class='degrees-table' border='0' width='100%' cellpadding='5' cellspacing='0'>
                   <tr>
                     <th width='8%'>Type</th>
+                    <th width='8%'>Level</th>
                     <th width='15%'>Class</th>
                     <th width='60%'>Title</th>
                     <th>Code</th>
@@ -815,6 +816,7 @@ function admin_display_degrees() {
   $params[":catalog_year"] = $de_catalog_year;
   
   $filter_class_value = @$_SESSION['degrees_filter_class'];
+  $filter_level_value = @$_SESSION['degrees_filter_level'];
   $filter_school_value = @intval($_SESSION['degrees_filter_school']);
   $extra_where_conditions = "";
     
@@ -825,6 +827,13 @@ function admin_display_degrees() {
     $extra_where_conditions .= " AND degree_class = :degree_class ";
     $params[":degree_class"] = $filter_class_value;
   }
+  
+  if ($filter_level_value) {
+    $extra_where_conditions .= " AND degree_level = :degree_level ";
+    $params[":degree_level"] = $filter_level_value;
+  }
+    
+  
   
   if (module_enabled('schools')) {
     if ($filter_school_value) {
@@ -848,6 +857,7 @@ function admin_display_degrees() {
     $db_exclude = 0;
     extract($cur, 3, "db");
 
+    $disp_level = strtoupper($db_degree_level);
 
     if ($db_degree_type == "NA" && strstr($db_major_code, "|")) {
       $db_degree_type = " -- ";
@@ -924,6 +934,7 @@ function admin_display_degrees() {
                   class='$extra_class class-$db_degree_class class-level-" . $class_details["level_num"] . " '
              >
               <td valign='top' class='degree-type'>$db_degree_type</td>
+              <td valign='top' class='degreee-level'>$disp_level</td>
               <td valign='top' class='degreee-class'>$disp_class</td>
               <td valign='top' class='degree-title'>$outside$db_title</td>
               <td valign='top' class='degree-major-code'>$db_major_code</td>    
@@ -973,7 +984,7 @@ function admin_degrees_list_filter_form() {
     'weight' => 0,
   );
   
-  $filter_class_options = array();
+  $filter_class_options = array('' => t("- All -"));  
   $degree_classes = fp_get_degree_classifications();
   foreach ($degree_classes["levels"] as $level => $details) {
     foreach ($degree_classes["levels"][$level] as $machine_name => $title) {
@@ -988,8 +999,21 @@ function admin_degrees_list_filter_form() {
     'label' => t('Class:'),
     'options' => $filter_class_options,
     'value' => $filter_class_value,
+    'hide_please_select' => TRUE,
     'weight' => 10,
   );
+  
+  
+  $filter_level_options = array('' => t("- All -"), "UG" => t("Under Grad"), "GR" => t("Grad"));
+  $filter_level_value = @$_SESSION['degrees_filter_level'];
+  $form['filter_level'] = array(
+    'type' => 'select',
+    'label' => t('Level:'),
+    'options' => $filter_level_options,
+    'value' => $filter_level_value,
+    'hide_please_select' => TRUE,
+    'weight' => 15,
+  );  
   
   
   $filter_school_value = 0;
@@ -1035,10 +1059,12 @@ function admin_degrees_list_filter_form_submit($form, $form_state) {
     
   unset($_SESSION['degrees_filter_class']);
   unset($_SESSION['degrees_filter_school']);
+  unset($_SESSION['degrees_filter_level']);
     
   if ($values['submit_btn'] != '') {
     $_SESSION['degrees_filter_class'] = trim($values['filter_class']);
     $_SESSION['degrees_filter_school'] = $values['filter_school'];
+    $_SESSION['degrees_filter_level'] = $values['filter_level'];
   }
     
 }

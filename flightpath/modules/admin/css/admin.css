@@ -25,6 +25,7 @@ ___admin-degrees-page{}
 #fp-form-admin_degrees_list_filter_form .markup-element-mark_top,
 #fp-form-admin_degrees_list_filter_form #element-wrapper-filter_class,
 #fp-form-admin_degrees_list_filter_form #element-wrapper-filter_school,
+#fp-form-admin_degrees_list_filter_form #element-wrapper-filter_level,
 #fp-form-admin_degrees_list_filter_form #element-wrapper-submit_btn,
 #fp-form-admin_degrees_list_filter_form #element-wrapper-reset_btn,
 #fp-form-admin_degrees_list_filter_form #element-wrapper-filter_class div,
@@ -33,6 +34,9 @@ ___admin-degrees-page{}
 #fp-form-admin_degrees_list_filter_form #element-wrapper-filter_school div,
 #fp-form-admin_degrees_list_filter_form #element-wrapper-filter_school label,
 #fp-form-admin_degrees_list_filter_form #element-wrapper-filter_school select,
+#fp-form-admin_degrees_list_filter_form #element-wrapper-filter_level div,
+#fp-form-admin_degrees_list_filter_form #element-wrapper-filter_level label,
+#fp-form-admin_degrees_list_filter_form #element-wrapper-filter_level select,
 #ignore .ignoreme
  {
   display: inline-block;

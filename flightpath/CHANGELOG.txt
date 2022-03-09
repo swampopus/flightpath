@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-09
+  Added abiility to filter by degree level (UG or GR) on the admin console -> degree list screen.
+  
+
 2022-03-08
   Fixed a bug when sending the "Contact the FlightPath Production Team" email, where the last selected student CWID was not appearing.
   
