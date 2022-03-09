@@ -639,9 +639,10 @@ function advise_display_history() {
  * sessions we are interested in.
  * 
  * If bool_html is set to FALSE, then we will return results in plain text, suitable for email.
+ * if bool_minimal_text is set to TRUE, then we will return a reduced amount of text.
  * 
  */
-function advise_popup_display_summary($advising_session_id = NULL, $bool_html = TRUE, $bool_show_as_group = FALSE) {
+function advise_popup_display_summary($advising_session_id = NULL, $bool_html = TRUE, $bool_show_as_group = FALSE, $bool_minimal_text = TRUE) {
   $rtn = "";
   $txt = "";
   
@@ -745,11 +746,13 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     }
   
 
-    $txt .= "\n-----  Advising Summary for $term -----\n";    
-    $txt .= "Student: " . $db->get_student_name($cur['student_id'], false) . " ({$cur['student_id']}) \n";    
-    $txt .= "Advisor: " . fp_get_faculty_name($cur['faculty_id'], false) . "\n";
-    $txt .= "Term: " . $term . "\n";
     
+    if (!$bool_minimal_text) {
+      $txt .= "\n-----  " . t("Advising Summary for") . " $term -----\n";    
+      $txt .= t("Student:") . " " . $db->get_student_name($cur['student_id'], false) . " ({$cur['student_id']}) \n";    
+      $txt .= t("Advisor:") . " " . fp_get_faculty_name($cur['faculty_id'], false) . "\n";
+      $txt .= t("Term:") . " " . $term . "\n";
+    }
 
     $rtn .= "<table class='adv-history-table' width='100%'><td valign='top'>";
     
@@ -819,7 +822,9 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
       {
         $rtn .= t("Degree$ds:") . " $degree_title_line";
         
-        $txt .= "Degree$ds: " . $degree_title_line . "\n";
+        if (!$bool_minimal_text) {
+          $txt .= "Degree$ds: " . $degree_title_line . "\n";
+        }
         
       }
     
@@ -837,15 +842,21 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
       
     } // bool_first_time_through
 
-    $txt .= "Submitted on $dt \n";
-    if ($what_if_message) {
-      $txt .= "  " . fp_reduce_whitespace(strip_tags($what_if_message)) . "\n";
+    if (!$bool_minimal_text) {
+      $txt .= t("Submitted on") . " $dt \n";
+      if ($what_if_message) {
+        $txt .= "  " . fp_reduce_whitespace(strip_tags($what_if_message)) . "\n";
+      }
     }
     
     $rtn .= fp_render_section_title(t("Advised Courses for @term", array("@term" => $term)));
   
-    $txt .= "\nAdvised Courses:\n";
-  
+    if (!$bool_minimal_text) {
+      $txt .= "\n" . t("Advised Courses:") . "\n";
+    }
+    else {
+      $txt .= "" . t("Advised Courses for @term", array("@term" => $term)) .  "\n";
+    }
     $fp = new FlightPath($student,$degree_plan, $db);
       
     $fp->load_advising_session_from_database("","",false,false,$cur['advising_session_id']);
@@ -891,7 +902,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
           </tr>
         ";
         
-        $txt .= "  $course->subject_id $course->course_num - $course->title - " . $course->get_hours() . "hrs \n"; 
+        $txt .= "    $course->subject_id $course->course_num - $course->title - " . $course->get_hours() . "hrs \n"; 
     }
   
     $rtn .= "</table>
@@ -900,9 +911,8 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
         </div>
         ";
   
-    $txt .= "Total advised hours: " . $advised_courses_list->count_hours() . "\n";
-    $txt .= "\n\n";
-  
+    $txt .= "Total advised hours: " . $advised_courses_list->count_hours() . "\n\n\n";
+      
 
   
     $rtn .= "</table>";

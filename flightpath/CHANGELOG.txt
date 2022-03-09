@@ -6,6 +6,8 @@ FlightPath 6.x Changelog
   
   Removed the outdated "addslashes" to the msg of the email from the Contact link.  Also added a "close window" button on the "Thank You" page.
   
+  Advising history changed slightly to have a "minimal" text option, specifically for the "email events" module.
+  
 
 2022-03-07
   Made it to where emails for mysql and PHP errors first convert times into system (or user) timezone, as well as display which user

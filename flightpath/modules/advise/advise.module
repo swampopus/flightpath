@@ -275,6 +275,26 @@ function advise_get_advising_sessions_for_advising_token($adv_token) {
 }
 
 
+/**
+ * Returns back the advising row from the database for a particular advising session id.
+ */
+function advise_get_advising_session_from_advising_session_id($adv_id) {
+  $rtn = array();  
+  $res = db_query("SELECT * FROM advising_sessions 
+                   WHERE advising_session_id = ?
+                   ORDER BY term_id DESC", array($adv_id));
+  $cur = db_fetch_array($res);
+  $rtn = $cur;
+  
+  
+  return $rtn;
+    
+  
+}
+
+
+
+
 
 /**
  * Used by the menu to determine if the user can see the View (Degree and What If) tab for the current student.
