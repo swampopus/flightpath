@@ -146,7 +146,7 @@ function hook_form_alter(&$form, $form_id) {
  * To see this in action, examine the stats.module file, function stats_display_main() 
  * @see stats_display_main
  */
-function fpl_reports_stats_additional_menublocks() {
+function hook_stats_additional_menublocks() {
   
   return array(
     'Custom Reports' => 'stats/custom-reports',      

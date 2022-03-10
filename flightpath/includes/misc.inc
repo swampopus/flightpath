@@ -1790,7 +1790,7 @@ function t($str, $vars = array()) {
 /**
  * Provides translation functionality when database is not available.
  * 
- * Not implemented yet
+ * TODO: Not implemented yet
  */
 function st($str, $vars = array()) {
   // Not implemented yet.  For now, just replicate t().
