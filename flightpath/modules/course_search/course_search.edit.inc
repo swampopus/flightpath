@@ -14,10 +14,9 @@
 function course_search_edit_course_details_form() {
   $form = array();
 
-  $m = 0;
-  
+    
   fp_add_css(fp_get_module_path("course_search") . "/css/course_search_style.css");
-  
+  $weight = 0;
   $course_id = $_REQUEST["course_id"];
   $subject_id = $_REQUEST["subject_id"];
   $course_num = $_REQUEST["course_num"];
@@ -78,10 +77,11 @@ function course_search_edit_course_details_form() {
           
   }
 
-  $form["mark" . $m++] = array(
+  $form["mark_course_title_and_description"] = array(
     "value" => "<strong>$course->title (" . $course->get_catalog_hours() . " " . t("hrs.") . ")</strong>
                 <div>$course->description</div>
                 ",
+    'weight' => $weight++,
   );
 
   $form["syllabus"] = array(
@@ -90,12 +90,14 @@ function course_search_edit_course_details_form() {
     "prefix" => "<hr>" . t("Current sample syllabus:") . " " . $filelink,
     "description" => t("Note: selecting a new file will replace any existing
                         syllabus.  Remember to click Submit after selecting a file."),
+    'weight' => $weight++,                        
   );
 
   if ($bool_delete_cb) {
     $form["del_syllabus"] = array(
       "type" => "checkboxes",
       "options" => array("yes" => t("Delete the existing syllabus?")),
+      'weight' => $weight++,
     );
   }
 
@@ -104,15 +106,17 @@ function course_search_edit_course_details_form() {
     
     $form["mark" . $m++] = array(
       "value" => "<p>" . t("Syllabus may be downloaded using this address: ") . "<a href='$s_url'>$s_url</a></p>",
+      'weight' => $weight++,
     );
     
   }
 
-  $form["mark" . $m++] = array(
+  $form["mark_rotation_and_capacity"] = array(
     "value" => "<b>" . t("Course Rotation Schedule & Seat Capacity:") . "</b>
                 <br>" . t("Select semesters/terms in which this Course
                       will be offered for the next five years, as well as how many seats are expected.  Seat capacity will only be saved for courses
                       which are checked as being offered."),
+    'weight' => $weight++,                        
   );
   
   
@@ -121,8 +125,9 @@ function course_search_edit_course_details_form() {
 
   
   
-  $form["mark" . $m++] = array(
+  $form["mark_cb_wrapper"] = array(
     "value" => "<div class='rotation-form-checkboxes'>",
+    'weight' => $weight++,
   );
   
   $term_structures = get_term_structures($school_id);
@@ -174,12 +179,14 @@ function course_search_edit_course_details_form() {
 
       $form['mark_start_' . $cbname] = array(
         'value' => "<div class='course-search-edit-term-wrapper'>",
+        'weight' => $weight++,
       );
 
       $form["cb_$cbname"] = array(
         "type" => "checkboxes",
         "options" => array("yes" => $cb_disp_name),        
         "value" => $cb_default_val,
+        'weight' => $weight++,
       );
       
 
@@ -187,26 +194,30 @@ function course_search_edit_course_details_form() {
         "type" => "textfield",
         "attributes" => array("placeholder" => t("# Seats"), "class" => "capacity-textfield"),        
         "value" => $capacity_default_val,
+        'weight' => $weight++,
       );
 
 
       $form['mark_end_' . $cbname] = array(
         'value' => "</div>",
+        'weight' => $weight++,
       );
 
       
 
     } // foreach term_array
 
-    $form["mark" . $m++] = array(
+    $form["mark_horizontal_line"] = array(
       "value" => "<hr style='border:1px dashed #ccc;'><br>",
+      'weight' => $weight++,
     );
 
     $y++;
   }
 
-  $form["mark" . $m++] = array(
+  $form["mark_close_cb_wrapper"] = array(
     "value" => "</div>",
+    'weight' => $weight++,
   );
 
 
@@ -229,6 +240,7 @@ function course_search_edit_course_details_form() {
     "description" => t("Checking this box means that the course is not
                         anticipated to be offered within the time range above.
                         This will override any selections made above."),
+    'weight' => $weight++,                        
   );
 
 
@@ -236,7 +248,8 @@ function course_search_edit_course_details_form() {
   $form["submit"] = array(
     "type" => "submit",
     "value" => t("Submit"),
-    "prefix" => "<hr>", 
+    "prefix" => "<hr>",
+    'weight' => $weight++, 
   );
    
   
@@ -261,6 +274,8 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
       
   for ($t = 1; $t <= 6; $t++) {
     $year = $form_state["values"]["year$t"];
+    
+    if (!isset($form_state["values"]["$year$t"])) continue;  // Not set, so leave it alone.
     
     // delete the existing entries for this year & course here.
     db_query("DELETE FROM course_rotation_schedule

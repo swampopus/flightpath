@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-11
+  Modified course_search_dislay_search to use render array system, so other modules can make modifications.
+  
+  Added weights to course_search edit form, making it easier for other modules to make modifications.
+  
+  
+
 2022-03-09
   Added abiility to filter by degree level (UG or GR) on the admin console -> degree list screen.
   

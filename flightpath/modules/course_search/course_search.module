@@ -750,8 +750,7 @@ function course_search_display_courses() {
 
 
 
-  // Let's set our breadcrumbs
-  $db = get_global_database_handler();
+  // Let's set our breadcrumbs  
   $crumbs = array();
   $crumbs[] = array(
     'text' => 'Courses',
@@ -941,16 +940,13 @@ function course_search_select_school_form_submit($form, $form_state) {
  */
 function course_search_display_search() {
     
-  $rtn = "";
-  $mode = "";
    
   fp_add_css(fp_get_module_path("course_search") . "/css/course_search_style.css");
   
     
-    
-  $rtn .= "";
-  
-
+   // We are going to be setting up a render array for this screen, so other modules can alter it later.
+  $render = array();
+  $render["#id"] = "course_search_display_search";
       
   $school_id = 0;
   
@@ -961,8 +957,12 @@ function course_search_display_search() {
       return $rtn;
     } // not isset school_id
     $school_id = intval($_REQUEST['school_id']);
-    $rtn .= "<div class='current-school'>" . t("Current school: ") . "<strong>" . schools_get_school_name_for_id($school_id) . "</strong>
-                     - " . l(t("Change?"), "tools/course-search") . "</div>";
+    $render['current_school'] = array(
+      'value' => "<div class='current-school'>" . t("Current school: ") . "<strong>" . schools_get_school_name_for_id($school_id) . "</strong>
+                     - " . l(t("Change?"), "tools/course-search") . "</div>",
+      
+      'weight' => 0,
+    );
   }
   
   $clean_urls = variable_get("clean_urls", FALSE);
@@ -972,16 +972,29 @@ function course_search_display_search() {
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;
   
+  $render['#school_id'] = $school_id;
+  $render['#catalog_year'] = $catalog_year;
+    
+  
   if (user_has_permission("can_update_course_info_details")) {
-    $rtn .= "<div>" . t("Administrators:") . " " . l("<i class='fa fa-pencil'></i> " . t("Edit course schedules, capacity, and syllabi"), "tools/course-search/edit-list", "school_id=$school_id") . "</div>";
+    $html = "<div>" . t("Administrators:") . " " . l("<i class='fa fa-pencil'></i> " . t("Edit course schedules, capacity, and syllabi"), "tools/course-search/edit-list", "school_id=$school_id") . "</div>";
+    $render['edit_course_schedules'] = array(
+      'value' => $html,
+      'weight' => 100,
+    );
   }  
   
   
     // Catalog year has been selected.
 
-  $rtn .= "Current catalog year: <b>$catalog_year-" . ($catalog_year +1) . "</b>
-      
-      <br><br>
+  $html = "<div class='current-cat-year-line'>" . t("Current catalog year: <strong>@cat</strong></div>", array('@cat' => "$catalog_year-" . ($catalog_year +1)));
+  $render['current_catalog_line'] = array(
+    'value' => $html,
+    'weight' => 200,
+  );
+  
+  $html = "";    
+  $html .= "<br><br>
     <label>Please select an available subject from the list below.</label>       
     
     <form action='" . fp_url("tools/course-search/courses") . "' method='GET' name='mainform' id='myform'>
@@ -990,11 +1003,11 @@ function course_search_display_search() {
   
   if (!$clean_urls) {
     // Hack for if clean URLs isn't enabled
-    $rtn .= "<input type='hidden' name='q' value='tools/course-search/courses'>";
+    $html .= "<input type='hidden' name='q' value='tools/course-search/courses'>";
   }
   
 
-  $rtn .= "
+  $html .= "
     <div id='element-inner-wrapper-course-search-subject' class='form-element element-type-select '>
       <select class='course-search-subject' name='subject_id'>
     ";    
@@ -1034,29 +1047,29 @@ function course_search_display_search() {
   
   foreach ($subjects as $subject_id => $title) {
     
-    $rtn .= "<option value='$subject_id'>$title ($subject_id)</option>";
+    $html .= "<option value='$subject_id'>$title ($subject_id)</option>";
     
     
     
   }
 
 
-  $rtn .= " </select>       
+  $html .= " </select>       
           </div>
       
       <div class='course-search-buttons buttons form-element element-type-submit'>
         <input type='submit' value='Select'>
-      </div>
-    
-    <input type='hidden' name='mode' value='$mode'>
-    
-    ";
-
-
-  $rtn .= "</form>";
+      </div>    
   
+    </form>";
+  
+  $render['selection_form'] = array(
+    'value' => $html,
+    'weight' => 300,
+  );
   
 
+  $rtn = fp_render_content($render);
   
   return $rtn;
 }
