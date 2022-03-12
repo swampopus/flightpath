@@ -1214,8 +1214,8 @@ function fp_render_breadcrumbs() {
       
       // Do we have permission for this menu item?  If not, do not render this breadcrumb.
       if ($path != "<front>") {
-        $item = menu_get_item($path);
-        if (!menu_check_user_access($item)) {
+        $item = menu_get_item($path);        
+        if (!menu_check_user_access($item)) {          
           continue;
         }    
       }      

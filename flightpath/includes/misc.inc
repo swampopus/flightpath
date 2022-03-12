@@ -1283,7 +1283,11 @@ function get_term_structures($school_id = 0) {
     // Looks like:  [Y4]40.  We want the 40.
     // Simply explode on "]"
     $temp = explode("]", $term_def);
-    $rtn[trim($temp[1])] = array(
+    
+    $term_suffix = trim($temp[1]);
+    
+    $rtn[$term_suffix] = array(
+      "term_suffix" => $term_suffix,
       "term_def" => $term_def,
       "short" => trim(@$tokens[1]),      
       "full" => trim(@$tokens[2]),

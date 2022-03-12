@@ -768,8 +768,7 @@ function stats_select_school_form() {
   
   if (isset($_REQUEST['title'])) {  
     fp_set_title(strip_tags($_REQUEST['title']));
-  }
-  
+  }  
   $redirect_path = $_REQUEST['redirect'];
   
   $options = schools_get_schools_for_fapi();
@@ -793,6 +792,14 @@ function stats_select_school_form() {
     'type' => 'submit',
     'value' => t("Continue"),
   );
+  
+  // change breadcrumbs based on REQUEST
+  if (isset($_REQUEST['crumbs'])) {
+    $crumbs = unserialize(base64_decode($_REQUEST['crumbs']));
+        
+    fp_set_breadcrumbs($crumbs);    
+  }
+  
    
   return $form;  
 }
