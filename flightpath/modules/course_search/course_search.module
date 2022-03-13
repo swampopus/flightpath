@@ -474,6 +474,7 @@ function course_search_display_courses() {
               WHERE catalog_year = ? 
               AND subject_id = ? 
               AND exclude = 0 
+              AND delete_flag = 0
               AND school_id = ?
               ORDER BY course_num ", $catalog_year, $subject_id, $school_id);
   if ($result)

@@ -7,6 +7,8 @@ FlightPath 6.x Changelog
   
   Altered functions in stats so that we can override the default breadcrumbs on the form where we select the school. 
 
+  Made sure course_search also excluded courses with delete_flag set.
+
 
 2022-03-11
   Modified course_search_dislay_search to use render array system, so other modules can make modifications.
