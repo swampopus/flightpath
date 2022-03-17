@@ -7,6 +7,9 @@ FlightPath 6.x Changelog
   Made sure the logo image for FlightPath had an alt tag.
   
   Made the 'Welcome to FlightPath' message on login page use the system_name variable.
+
+  Added new modal dialog for "loading" and "updating", which dims screen and is more visible than old method that showed
+  when logging in or waiting on dialogs to save (like subs or moving courses).
   
 
 2022-03-12

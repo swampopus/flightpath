@@ -309,6 +309,7 @@ function fpToggleHamburgerMenu() {
   
 
 
+
   function fpCloseSmallIframeDialog() {
 
     $("#fp-iframe-dialog-small").dialog('close');
@@ -349,6 +350,30 @@ function fpToggleHamburgerMenu() {
     DayPilot.Modal.alert(str);
   }
 
+
+
+
+  /**
+   * Show a loading modal with no buttons.
+   *  
+   */
+  function fp_show_loading(msg) {
+    if (!msg) msg = "Updating...";    
+    
+    var modal = new DayPilot.Modal({
+      height: 100,
+      width: 250,
+      top:40
+      });
+    var styles = "<style>body{font-family:'Segoe UI', Arial, Helvetica, sans-serif;text-align:center;padding:50px;font-weight:bold;}</style>";
+    var spinner = "<img src='" + FlightPath.settings.basePath + "/modules/system/css/throbber.gif" + "' height='18' style='position:relative;top:4px;'> &nbsp;";
+    
+    modal.showHtml(styles + spinner + msg);    
+    
+    
+  }  
+  
+  
 
 
 
@@ -401,6 +426,11 @@ function fpToggleHamburgerMenu() {
 
 	function showUpdate(boolShowLoad)
 	{
+	  var msg = "Updating...";
+	  if (boolShowLoad) msg = "Loading...";
+	  fp_show_loading(msg);
+	  
+	  /*
 		var scrollTop = document.body.scrollTop;
 		var updateMsg = document.getElementById("updateMsg");
 		if (boolShowLoad == true)
@@ -416,4 +446,5 @@ function fpToggleHamburgerMenu() {
 
 		updateMsg.style.position = "absolute";  // must use absolute for ie.
 		updateMsg.style.display = "";
+		*/
 	}
