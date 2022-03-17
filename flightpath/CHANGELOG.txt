@@ -1,6 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-17
+  For menu items, if there is an icon, give it an ALT tag of whatever the title of the menu is.
+  
+  Made sure the logo image for FlightPath had an alt tag.
+  
+  Made the 'Welcome to FlightPath' message on login page use the system_name variable.
+  
+
 2022-03-12
   Added new feature to function get_term_structures, where "term_suffix" is now one of the values returned, instead of just being
   in the key of the array.

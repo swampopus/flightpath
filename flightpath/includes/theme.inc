@@ -2176,6 +2176,7 @@ function fp_render_menu_item($item, $bool_check_user_access = TRUE) {
   
   $description = $item["description"];
   $title = $item["title"];
+  $safe_title = htmlentities(trim($title), ENT_QUOTES);
   //$url = $GLOBALS["fp_system_settings"]["base_path"] . "/" . $item["path"];
   $url = fp_url($item["path"], "", TRUE);
   $target = @$item["page_settings"]["target"];
@@ -2195,7 +2196,7 @@ function fp_render_menu_item($item, $bool_check_user_access = TRUE) {
         $menu_icon = $base_url . "/" . $menu_icon;
       }          
     }    
-    $icon_img = "<img src='$menu_icon' border='0' class='fpmn-icon'>";    
+    $icon_img = "<img src='$menu_icon' border='0' class='fpmn-icon' alt='$safe_title'>";    
   } 
   else { 
     $icon_img = "<span class='fp-menu-item-no-icon'></span>";

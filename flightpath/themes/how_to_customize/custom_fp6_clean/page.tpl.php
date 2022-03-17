@@ -47,7 +47,7 @@
     </div>
     <div class='top-banner'>
       <a href='<?php print fp_url("<front>"); ?>'>
-        <img src='<?php print $page_logo_url; ?>' border='0'>
+        <img src='<?php print $page_logo_url; ?>' border='0' alt='<?php print htmlentities(variable_get('system_name', 'FlightPath'), ENT_QUOTES); ?>'>
       </a>
     </div>          
   </div>

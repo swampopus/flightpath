@@ -60,11 +60,11 @@
     <div id='page-login-user-form'>
       <div class='top-banner'>
         <a href='<?php print fp_url("login"); ?>'>
-          <img src='<?php print $page_logo_url; ?>' border='0'>
+          <img src='<?php print $page_logo_url; ?>' border='0' alt='<?php print htmlentities(variable_get('system_name', 'FlightPath'), ENT_QUOTES); ?>'>
         </a>
       </div>
       
-      <h2 class='login-welcome'>Welcome to FlightPath</h2>
+      <?php print "<h2 class='login-welcome'>" . t("Welcome to @FlightPath", array("@FlightPath" => variable_get('system_name', 'FlightPath'))) . "</h2>"; ?>
       <?php print $page_content; ?>
          
       
