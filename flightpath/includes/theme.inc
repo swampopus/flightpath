@@ -616,7 +616,8 @@ function fp_display_page($page) {
     $screen->bool_print = $page["router_item"]["page_settings"]["bool_print"];
   }
 
-  if (@$_REQUEST["scroll_top"] != "") {
+    
+  if (@$_REQUEST["scroll_top"] != "") {    
     $screen->page_scroll_top = $_REQUEST["scroll_top"];    
   }
   

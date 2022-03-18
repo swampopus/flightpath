@@ -173,6 +173,21 @@ $(document).ready(function() {
 
 
 
+function fpGetScrollTop() {
+  var scrollTop = document.documentElement.scrollTop;
+  if (!scrollTop || scrollTop == undefined) {  // Still empty or undefined?
+    scrollTop = window.scrollY;
+    if (!scrollTop || scrollTop == undefined) {  // Still empty or undefined?
+      scrollTop = 0;
+    }
+  }
+  
+  return scrollTop;
+}
+
+
+
+
 function fpToggleUserMenu() {
   
   
@@ -361,11 +376,11 @@ function fpToggleHamburgerMenu() {
     if (!msg) msg = "Updating...";    
     
     var modal = new DayPilot.Modal({
-      height: 100,
+      height: 75,
       width: 250,
       top:40
       });
-    var styles = "<style>body{font-family:'Segoe UI', Arial, Helvetica, sans-serif;text-align:center;padding:50px;font-weight:bold;}</style>";
+    var styles = "<style>body{font-family:'Segoe UI', Arial, Helvetica, sans-serif;text-align:center;padding-top:15px;font-weight:bold;font-size:120%;}</style>";
     var spinner = "<img src='" + FlightPath.settings.basePath + "/modules/system/css/throbber.gif" + "' height='18' style='position:relative;top:4px;'> &nbsp;";
     
     modal.showHtml(styles + spinner + msg);    

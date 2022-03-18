@@ -414,10 +414,7 @@ function draw_menu_items($menu_array) {
       $page_on_load .= " scrollTo(0, $page_scroll_top);";
     }
     
-    // Add in our hidden divs which we will sometimes display...
-    $page_content .= "<div id='updateMsg' class='updateMsg' style='display: none;'>" . t("Updating...") . "</div>
-                <div id='loadMsg' class='updateMsg' style='display: none;'>" . t("Loading...") . "</div>";
-
+    
                 
     // Add our dialog HTML if the page isn't a popup.
     if (!$page_is_popup) {

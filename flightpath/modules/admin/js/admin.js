@@ -447,7 +447,7 @@ function adminPopupSelectIcon(file) {
   opener.document.getElementById("element-icon_filename").value = file;
   // Submit our form..
   opener.showUpdate(false);
-  //opener.document.getElementById("element-scroll_top").value = opener.document.body.scrollTop;
+  
   opener.document.getElementById("fp-form-admin_edit_group_form").submit();
   // Close the window
   window.close();
@@ -605,16 +605,19 @@ function adminSubmitForm() {
   adminSubmitDegreeForm();
 }
 
+
+
+
 function adminSubmitDegreeForm() {
   // Note: due to complexity, the degree form is not a typical form_api form.
-  document.getElementById("scroll_top").value = document.body.scrollTop;
+  document.getElementById("scroll_top").value = fpGetScrollTop();
   document.getElementById("mainform").submit();
 } 
 
 function adminSubmitDegreeForm2() {
   
   showUpdate(false);
-  //document.getElementById("element-scroll_top").value = document.body.scrollTop;
+  
   document.getElementById("fp-form-admin_edit_degree_form").submit();
 } 
 

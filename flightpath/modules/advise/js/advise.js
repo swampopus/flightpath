@@ -771,14 +771,7 @@ function submitSaveActive() {
 }
 
 function submitForm(boolShowUpdating) {
-  var scrollTop = document.body.scrollTop;
-  if (!scrollTop || scrollTop === 0) {  // Chrome, Safari, and others use this new method for getting scrollTop.
-    scrollTop = document.documentElement.scrollTop;
-    if (!scrollTop || scrollTop == undefined) {  // Still empty or undefined?
-      scrollTop = 0;
-    }
-  }
-  
+  var scrollTop = fpGetScrollTop();
   
   document.getElementById("scroll_top").value = scrollTop;
 

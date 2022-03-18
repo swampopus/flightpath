@@ -2849,6 +2849,14 @@ function system_handle_form_submit() {
     
   }
   
+  // Was scroll_top set?  Meaning, are we meant to scroll to a specific position when the page loads?
+  if (isset($_REQUEST["scroll_top"])) {
+    $scroll_top = @floatval($_REQUEST["scroll_top"]);
+    if ($scroll_top > 0) {
+      if ($redirect_query != "") $redirect_query .= "&";  // not blank?  Add this as another property with &.  
+      $redirect_query .= "scroll_top=" . $scroll_top;    
+    }
+  }
   // If there is a Batch process we need to do, do it here instead of the fp_goto.
   if (isset($_SESSION["fp_batch_id"]) && function_exists("batch_menu")) {
     $batch_id = $_SESSION["fp_batch_id"];

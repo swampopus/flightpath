@@ -295,7 +295,7 @@ function fp_render_form($callback, $form_type = "") {
     $val = fp_no_html_xss($val);
       
     
-    if ($key != "q") {
+    if ($key != "q" && $key != "scroll_top") {
       $new_query[] = "$key=$val"; 
     }
   }
@@ -368,7 +368,7 @@ function fp_render_form($callback, $form_type = "") {
   $rtn .= "<input type='hidden' name='form_include' value='$form_include'>";
   $rtn .= "<input type='hidden' name='default_redirect_path' value='$default_path'>";
   $rtn .= "<input type='hidden' name='default_redirect_query' value='$default_query'>";
-    $rtn .= "<input type='hidden' name='current_student_id' value='$current_student_id'>";
+  $rtn .= "<input type='hidden' name='current_student_id' value='$current_student_id'>";
   
   $use_callback = "";
   if (form_has_errors()) {

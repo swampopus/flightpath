@@ -11,6 +11,11 @@ FlightPath 6.x Changelog
   Added new modal dialog for "loading" and "updating", which dims screen and is more visible than old method that showed
   when logging in or waiting on dialogs to save (like subs or moving courses).
   
+  Cleaned up way that scrollTop was calculated for pages.  Will eventually use window.scrollY if no other method can be found.  Also, placed into system.js so it is always
+  available in one spot, as function fpGetScrollTop().
+  
+  Made it so that if "scroll_top" is in the $_REQUEST when we submit a form, it includes that value when the form does an fp_goto and reloads.
+  
 
 2022-03-12
   Added new feature to function get_term_structures, where "term_suffix" is now one of the values returned, instead of just being
