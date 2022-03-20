@@ -1181,10 +1181,6 @@ class FlightPath extends stdClass
 
   function cache_course_inventory($limit_start = 0, $limit_size = 4000)
   {
-      
-    // It doesn't appear like this is even being used anymore.    
-    return;  
-      
     
     // Load courses from the inventory into the inventory cache...
     // Attempt to load the course inventory cache...
