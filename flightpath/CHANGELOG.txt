@@ -2,7 +2,9 @@ FlightPath 6.x Changelog
 ========================
 
 2022-03-20
-  After noticing slowdown, added the "course inventory" code back in for now.  Looking for a better way to handle it.
+  Changed how we cache the course inventory.  Now using a file to cache to hard disk, making it much faster to read into memory than using multiple database queries.
+  
+  When applying draft changes, the courses cache file is automatically deleted and re-written.
   
 
 2022-03-19

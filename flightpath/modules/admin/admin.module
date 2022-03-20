@@ -1037,7 +1037,10 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
     return;
     
   }
-   
+
+  // Keep the script from timing out prematurely...
+  set_time_limit(99999);  // around 27 hours (so it runs a really long time).
+       
 
   // First, set maintenance mode...
   variable_set("maintenance_mode", TRUE);
@@ -1095,6 +1098,19 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
 
   // Invoke a hook to allow other modules to apply_draft_changes as well
   invoke_hook("apply_draft_changes");
+
+
+  // Rebuild our course cache file.
+  if (file_exists(fp_get_files_path() . "/cache_data/courses_serialized.info")) {
+    $x = unlink(fp_get_files_path() . "/cache_data/courses_serialized.info");
+    if (!$x) {
+      fpm("Cannot delete cache_data/courses_serialized.info under custom/files.  Permission error or file does not exist?");
+      watchdog("system", "Cannot delete cache_data/courses_serialized.info under custom/files.  Permission error or file does not exist?", array(), WATCHDOG_ERROR);    
+    }
+  }
+  // Builds new courses cache file on the hard drive.
+  $fp = new FlightPath();
+  $fp->cache_course_inventory();
 
 
   // And we are done!  Set maintenance mode back to none

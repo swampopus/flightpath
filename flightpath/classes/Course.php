@@ -1530,7 +1530,7 @@ class Course extends stdClass
       $this->description = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["description"];      
       $this->min_hours = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["min_hours"];
       $this->school_id = $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["school_id"];
-      
+                 
       if ($bool_reset_ghost_hours) {
         // Reset the ghosthours to default.
         $this->bool_ghost_hour = $this->bool_ghost_min_hour = FALSE;

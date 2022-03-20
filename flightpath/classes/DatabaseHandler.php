@@ -412,11 +412,6 @@ class DatabaseHandler extends stdClass
       $catalog_year = $course->catalog_year;
     }
 
-    
-    $cache_catalog_year = $catalog_year;
-
-    $cache_catalog_year = 0;
-
     $array_valid_names = array();
     
    
@@ -476,7 +471,8 @@ class DatabaseHandler extends stdClass
       $description = trim($cur["description"]);
       $subject_id = trim(strtoupper($cur["subject_id"]));
       $course_num = trim(strtoupper($cur["course_num"]));
-
+      $cache_catalog_year = $cur['catalog_year'];
+      
       $min_hours = $cur["min_hours"];
       $max_hours = $cur["max_hours"];
       $repeat_hours = $cur["repeat_hours"];
@@ -497,7 +493,8 @@ class DatabaseHandler extends stdClass
       // Example: MATH 373 and CSCI 373 are both valid names for that course.
       $res = $this->db_query("SELECT * FROM courses
                     WHERE course_id = '?'
-                    AND exclude = '0' ", $course_id);
+                    AND exclude = 0
+                    AND delete_flag = 0 ", $course_id);
       while($cur = $this->db_fetch_array($res))
       {
         $si = $cur["subject_id"];
@@ -540,6 +537,20 @@ class DatabaseHandler extends stdClass
     $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["db_exclude"] = $db_exclude;
     $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["school_id"] = $db_school_id;
     $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["array_valid_names"] = $array_valid_names;
+
+    $cache_catalog_year = 0;
+
+    $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["subject_id"] = $subject_id;
+    $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["course_num"] = $course_num;
+    $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["title"] = $title;
+    $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["description"] = $description;
+    $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["min_hours"] = $min_hours;
+    $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["max_hours"] = $max_hours;
+    $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["repeat_hours"] = $repeat_hours;
+    $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["db_exclude"] = $db_exclude;
+    $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["school_id"] = $db_school_id;
+    $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["array_valid_names"] = $array_valid_names;
+
 
     $GLOBALS["cache_course_inventory"] = true;  //  rebuild this cache before it closes.
 
@@ -1001,8 +1012,7 @@ class DatabaseHandler extends stdClass
   }
     
   
-  
-  
+    
   function get_school_id_for_course_id($course_id, $bool_use_draft = FALSE) {
         
     // Always override if the global variable is set.
@@ -1013,7 +1023,18 @@ class DatabaseHandler extends stdClass
     $table_name = "courses";
     if ($bool_use_draft){$table_name = "draft_$table_name";}    
     
-    return intval(db_result(db_query("SELECT school_id FROM $table_name WHERE course_id = ?", array($course_id))));
+    
+    // Use GLOBALS cache to make this faster.
+    if (isset($GLOBALS['fp_school_id_for_course_id'][$table_name][$course_id])) {
+      return $GLOBALS['fp_school_id_for_course_id'][$table_name][$course_id];
+    }
+        
+    $val = intval(db_result(db_query("SELECT school_id FROM $table_name WHERE course_id = ?", array($course_id))));
+    
+    $GLOBALS['fp_school_id_for_course_id'][$table_name][$course_id] = $val;
+    
+    return $val;
+    
   }
   
 
