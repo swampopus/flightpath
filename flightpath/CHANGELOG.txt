@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-20
+  After noticing slowdown, added the "course inventory" code back in for now.  Looking for a better way to handle it.
+  
+
 2022-03-19
   Altered prereqs module to better explain how it's hook system works.  Added prereqs.api.php to describe hooks.
   
