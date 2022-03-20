@@ -6,6 +6,8 @@ FlightPath 6.x Changelog
   
   When applying draft changes, the courses cache file is automatically deleted and re-written.
   
+  Added indexs for courses and draft_courses for the exclude and delete_flag columns.
+  
 
 2022-03-19
   Altered prereqs module to better explain how it's hook system works.  Added prereqs.api.php to describe hooks.

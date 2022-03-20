@@ -240,6 +240,15 @@ function system_update($old_schema, $new_schema) {
   }
 
 
+  if (intval($old_schema) < 10) {
+    db_query("ALTER TABLE `courses` ADD INDEX (`exclude`) ");
+    db_query("ALTER TABLE `courses` ADD INDEX (`delete_flag`) ");
+
+    db_query("ALTER TABLE `draft_courses` ADD INDEX (`exclude`) ");
+    db_query("ALTER TABLE `draft_courses` ADD INDEX (`delete_flag`) ");
+    
+  }
+
   
       
 } // update
@@ -388,6 +397,8 @@ CREATE TABLE `courses` (
   KEY `course_id` (`course_id`) ,
   KEY `subject_id` (`subject_id`) ,
   KEY `course_num` (`course_num`) ,
+  KEY `delete_flag` (`delete_flag`) ,
+  KEY `exclude` (`exclude`) ,
   KEY `catalog_year` (`catalog_year`) ,
   KEY `school_id` (`school_id`)
 );  ";
@@ -501,6 +512,8 @@ CREATE TABLE `draft_courses` (
   KEY `course_id` (`course_id`) ,
   KEY `subject_id` (`subject_id`) ,
   KEY `course_num` (`course_num`) ,
+  KEY `delete_flag` (`delete_flag`) ,
+  KEY `exclude` (`exclude`) ,    
   KEY `catalog_year` (`catalog_year`) ,
   KEY `school_id` (`school_id`)
 );  ";
