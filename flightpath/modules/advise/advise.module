@@ -1569,14 +1569,11 @@ function advise_display_view($view = "view") {
   //  print_pre($student->list_courses_taken->toString());
   // Should we re-cache the course inventory?  If there have been any changes
   // to it, then we will see that in a GLOBALS variable...
-  
-  /*  Doesn't appear to be getting used.  No reason to store it in the session.
-  if (@$GLOBALS["cache_course_inventory"] == true)
-  {    
+  if (@$GLOBALS["cache_course_inventory"] == true) {    
     $_SESSION["fp_cache_course_inventory"] = serialize(@$GLOBALS["fp_course_inventory"]);
   }
-  */   
      
+      
   // Let's set our breadcrumbs
   $db = get_global_database_handler();
   $crumbs = array();
@@ -2493,12 +2490,11 @@ function advise_init_screen() {
   //$GLOBALS["load_from_cache"] = "no";
 
 
-  // Attempt to load the course inventory cache...
-  /* not being used anymore?
+  // Attempt to load the course inventory cache...  
   if ($course_inventory = unserialize(@$_SESSION["fp_cache_course_inventory"])) {  
     $GLOBALS["fp_course_inventory"] = $course_inventory;    
   }
-  */
+  
   
   
   $bool_loaded = FALSE;
