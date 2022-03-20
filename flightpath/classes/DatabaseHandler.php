@@ -1045,7 +1045,14 @@ class DatabaseHandler extends stdClass
   }
 
    
-  
+  /**
+   * Returns an object from db query for a row we find with matching course_id, from the most recent catalog year.
+   */ 
+  function get_course_db_row($course_id) {
+    $res = db_query("SELECT * FRM courses WHERE course_id = ? ORDER BY `catalog_year` DESC", array($course_id));
+    $cur = db_fetch_object($res);
+    return $cur;
+  }
   
   
   function get_course_id($subject_id, $course_num, $catalog_year = "", $bool_use_draft = false, $school_id = 0, $bool_check_allow_default_school = FALSE)
@@ -1089,7 +1096,7 @@ class DatabaseHandler extends stdClass
     
     $params[':subject_id'] = $subject_id;
     $params[':course_num'] = $course_num;
-    $params[':school_id'] = $school_id;    
+    $params[':school_id'] = intval($school_id);    
     
     
     $res7 = $this->db_query("SELECT course_id FROM $table_name
@@ -1101,7 +1108,7 @@ class DatabaseHandler extends stdClass
     if ($this->db_num_rows($res7) > 0)
     {
       $cur7 = $this->db_fetch_array($res7);
-      return $cur7["course_id"];
+      return intval($cur7["course_id"]);
     }
     return FALSE;
   }

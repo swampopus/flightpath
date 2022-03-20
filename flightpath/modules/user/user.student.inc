@@ -732,8 +732,12 @@ function user_student_edit_student_courses_form_submit($form, $form_state) {
     
   $student_id = $form_state["values"]["student_cwid"];
   
+  $db = get_global_database_handler();
+  
   // Erase what's there already:
   db_query("DELETE FROM student_courses WHERE student_id = '?' ", $student_id);  
+  
+  $school_id = $db->get_school_id_for_student_id($student_id);
   
   $number_of_courses = intval($form_state["values"]["number_of_courses"]);
   for ($t = 0; $t < $number_of_courses; $t++) {
@@ -744,14 +748,16 @@ function user_student_edit_student_courses_form_submit($form, $form_state) {
     $subject_id = trim($temp[0]);
     $course_num = trim($temp[1]);      
     
+    $course_id = intval($db->get_course_id($subject_id, $course_num, "", FALSE, $school_id));
+    
     $term_id = trim($form_state["values"]["term_$t"]);
     $grade = trim($form_state["values"]["grade_$t"]);
     $hours_awarded = trim($form_state["values"]["hrs_$t"]);
     $level_code = trim($form_state["values"]["lvl_$t"]);
 
     // Add to table
-    db_query("INSERT INTO student_courses (student_id, subject_id, course_num, hours_awarded, grade, term_id, level_code)
-              VALUES ('?', '?', '?', '?', '?', '?', '?')", $student_id, $subject_id, $course_num, $hours_awarded, $grade, $term_id, $level_code);
+    db_query("INSERT INTO student_courses (student_id, subject_id, course_num, hours_awarded, grade, term_id, level_code, course_id)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)", array($student_id, $subject_id, $course_num, $hours_awarded, $grade, $term_id, $level_code, $course_id));
    
   }  
 

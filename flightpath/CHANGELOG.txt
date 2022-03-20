@@ -1,6 +1,18 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-19
+  Altered prereqs module to better explain how it's hook system works.  Added prereqs.api.php to describe hooks.
+  
+  Added new column to advising sessions:  most_recent_session.  This will be set to 1 (one) if this is the most recent advising session (across multiple terms)
+  for the student.  Otherwise, will be zero.  This helps in certain queries and reports. 
+  
+  Removed code which was adding the "course inventory" to the SESSION.  This was only being used in 2 places, and never when actually loading a course.  Therefor,
+  it seems it is not needed.
+
+  Added new column to student_courses: course_id.  This makes it much easier to search for specific courses in this table.  Defaults to zero (0).
+  
+
 2022-03-17
   For menu items, if there is an icon, give it an ALT tag of whatever the title of the menu is.
   

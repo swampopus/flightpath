@@ -462,6 +462,8 @@ function prereqs_get_prereq_warnings_for_course(Course $course, Student $student
   
   $rtn = array();
   
+ 
+  
   $school_id = $course->school_id;
   
   $bool_use_term_abbreviation = (variable_get("prereqs_use_term_desc_abbr_in_popup", "yes") == "yes");
@@ -495,8 +497,13 @@ function prereqs_get_prereq_warnings_for_course(Course $course, Student $student
         $rtn["avail"]["plain_text"] = t($warning_msg, array("@term" => htmlentities(get_term_description($advising_term_id, $bool_use_term_abbreviation, $school_id), ENT_QUOTES)));
        
     } // !in_array advising_term_id in rotation_schedule
+    
+    
+    
+    
+    
       
-  } // advising term based locks
+  } // advising availbility / term based locks
   
   /////////////////////////////////////////
   /////////////////////////////////////////

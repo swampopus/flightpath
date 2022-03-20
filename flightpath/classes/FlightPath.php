@@ -1182,6 +1182,9 @@ class FlightPath extends stdClass
   function cache_course_inventory($limit_start = 0, $limit_size = 4000)
   {
       
+    // It doesn't appear like this is even being used anymore.    
+    return;  
+      
     
     // Load courses from the inventory into the inventory cache...
     // Attempt to load the course inventory cache...
@@ -1381,7 +1384,7 @@ class FlightPath extends stdClass
 
 
     // First, create a new entry in the advising_sessions table,
-    // so we can get the advisingSessionID.
+    // so we can get the advising_session_id.
 
     // But before we can do that, we look for an existing entry
     // which matches this.  If we find it, we delete it so the
@@ -1401,13 +1404,17 @@ class FlightPath extends stdClass
                   AND is_whatif = ? ", $student_id, $faculty_id, $degree_id, $is_what_if);
 
 
-    // The first thing we need to do is go through the availableTerms,
+    // Set all other advising sessions' "most_recent_session" flag to zero (0) for this student.
+    db_query("UPDATE advising_sessions SET most_recent_session = 0 WHERE student_id = ?", array($student_id));
+
+
+    // The first thing we need to do is go through the available_terms,
     // create new entries for them in the table, and store what their
     // session ID's are in an array.
     $advising_session_id_array = array();
     $advising_session_id_array_count = array();
     $posted = time();
-    $temp = explode(",",$available_terms);
+    $temp = explode(",",$available_terms);    
     foreach ($temp as $term_id)
     {
       $term_id = trim($term_id);
@@ -1420,9 +1427,9 @@ class FlightPath extends stdClass
       $result = $db->db_query("INSERT INTO advising_sessions
                 (student_id, faculty_id, term_id, degree_id,
                 major_code_csv,
-                catalog_year, posted, is_whatif, is_draft, advising_session_token, delete_flag)
+                catalog_year, posted, is_whatif, is_draft, advising_session_token, delete_flag, most_recent_session)
                 VALUES
-                (?,?,?,?,?,?,?,?,?,?, 0) 
+                (?,?,?,?,?,?,?,?,?,?, 0, 1) 
                 ", $student_id, $faculty_id,$term_id,$degree_id, $major_code_csv, $catalog_year, $posted, $is_what_if, $is_draft, $advising_session_token);
       $advising_session_id = db_insert_id();
       $advising_session_id_array[$term_id] = $advising_session_id;

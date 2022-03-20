@@ -250,6 +250,64 @@ function advise_menu() {
 
 
 
+
+/**
+ * Returns back an integer of the number of times a particular course was advised (unique per student) for a certain term.
+ */
+function advise_get_count_of_advised_course_for_term($course_id, $term_id) {
+    
+  // Okay, now find the most recent advising session for this student.
+  $res = db_query("SELECT count(a.student_id) as mycount
+                   FROM advising_sessions a, users b, advised_courses c, students d
+                   WHERE a.advising_session_id = c.advising_session_id                                     
+                   AND c.course_id = ?
+                   AND a.term_id = ?
+                   AND a.delete_flag = 0                   
+                   AND a.is_draft = 0   
+                   AND a.most_recent_session = 1                   
+                        
+                   AND a.student_id = b.cwid                   
+                   AND a.student_id = d.cwid
+                   AND d.is_active = 1
+                   
+                   GROUP BY a.student_id
+                   
+                   ", array($course_id, $term_id));
+  $cur = db_fetch_array($res);
+  $count = intval(@$cur["mycount"]);
+  
+  return $count;
+      
+} // advise_get_count_of_advised_course_for_term
+
+
+/**
+ * Returns back an integer for the number of courses which a student was "enrolled" for a certain term.
+ * In this situation, we will not make sure the student is "active", since they may have since graduated or something.
+ */
+function advise_get_count_of_enrolled_course_for_term($course_id, $term_id) {
+     
+  $res = db_query("SELECT count(distinct(a.student_id)) as mycount  
+                   FROM student_courses a, courses c
+                   
+                   WHERE c.course_id = ? 
+                   AND c.delete_flag = 0                   
+                   AND a.course_id = c.course_id
+                   AND a.term_id = ?
+                   
+                   
+                   ", array($course_id, $term_id));
+  $cur = db_fetch_array($res);
+  $count = intval(@$cur["mycount"]);
+  
+  return $count;
+  
+}
+
+
+
+
+
 /**
  * Returns an array of advising session id's for the given advising token.
  * Makes sure is_empty is 0 and is_draft is 0
@@ -1511,11 +1569,13 @@ function advise_display_view($view = "view") {
   //  print_pre($student->list_courses_taken->toString());
   // Should we re-cache the course inventory?  If there have been any changes
   // to it, then we will see that in a GLOBALS variable...
+  
+  /*  Doesn't appear to be getting used.  No reason to store it in the session.
   if (@$GLOBALS["cache_course_inventory"] == true)
   {    
     $_SESSION["fp_cache_course_inventory"] = serialize(@$GLOBALS["fp_course_inventory"]);
   }
-     
+  */   
      
   // Let's set our breadcrumbs
   $db = get_global_database_handler();
@@ -2434,11 +2494,11 @@ function advise_init_screen() {
 
 
   // Attempt to load the course inventory cache...
-  
+  /* not being used anymore?
   if ($course_inventory = unserialize(@$_SESSION["fp_cache_course_inventory"])) {  
     $GLOBALS["fp_course_inventory"] = $course_inventory;    
   }
-  
+  */
   
   
   $bool_loaded = FALSE;

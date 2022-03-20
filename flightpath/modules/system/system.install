@@ -223,6 +223,23 @@ function system_update($old_schema, $new_schema) {
   }
 
 
+
+  if (intval($old_schema) < 8) {
+      
+    db_query("ALTER TABLE advising_sessions ADD COLUMN `most_recent_session` tinyint(4) DEFAULT 0 ");
+    db_query("ALTER TABLE `advising_sessions` ADD INDEX (`most_recent_session`) ");    
+    
+  }
+
+  
+  if (intval($old_schema) < 9) {
+    
+    db_query("ALTER TABLE student_courses ADD COLUMN `course_id` int(11) DEFAULT 0 ");
+    db_query("ALTER TABLE `student_courses` ADD INDEX (`course_id`) ");    
+        
+  }
+
+
   
       
 } // update
@@ -253,7 +270,7 @@ CREATE TABLE `advised_courses` (
   `group_id` varchar(50) DEFAULT '',
   `var_hours` decimal(8,4) DEFAULT '0.0000',
   `term_id` varchar(20) DEFAULT '',
-  `degree_id` int(11) DEFAULT '0',
+  `degree_id` int(11) DEFAULT '0',  
   PRIMARY KEY (`id`),
   KEY `advid` (`advising_session_id`),
   KEY `course_id` (`course_id`),
@@ -304,6 +321,7 @@ CREATE TABLE `advising_sessions` (
   `is_empty` tinyint(4) DEFAULT 0,
   `advising_session_token` varchar(255) DEFAULT NULL,
   `delete_flag` tinyint(4) DEFAULT 0,
+  `most_recent_session` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`advising_session_id`),
   KEY `sid` (`student_id`),
   KEY `termid` (`term_id`),
@@ -314,6 +332,7 @@ CREATE TABLE `advising_sessions` (
   KEY `is_draft` (`is_draft`),
   KEY `is_whatif` (`is_whatif`),
   KEY `delete_flag` (`delete_flag`),
+  KEY `most_recent_session` (`most_recent_session`),
   KEY `advising_session_token` (`advising_session_token`)
 );   ";
 db_query($q);
@@ -751,8 +770,10 @@ CREATE TABLE `student_courses` (
   `grade` varchar(5) DEFAULT '',
   `term_id` varchar(20) DEFAULT '',
   `level_code` varchar(10) DEFAULT '',  
+  `course_id` int(11) DEFAULT 0,  
   PRIMARY KEY (`id`) ,
   KEY `student_id` (`student_id`) ,
+  KEY `course_id` (`course_id`) ,
   KEY `level_code` (`level_code`)  
 );  ";
 db_query($q);
