@@ -3556,6 +3556,160 @@ function system_perform_user_login($user_id) {
 
 
 
+/**
+ * Formerly part of the FlightPath class, this function will read in or reload the course inventory into a
+ * file, which then goes into the SESSION to make it faster to access.
+ */
+function system_reload_and_cache_course_inventory($limit_start = 0, $limit_size = 4000) {
+  
+  // Load from file.  If not there, or if we cannot unserialize, then we will rebuild cache and save new file.
+  if (file_exists(fp_get_files_path() . "/cache_data/courses_serialized.info")) {
+    if ($_SESSION["fp_cache_course_inventory"] = file_get_contents(fp_get_files_path() . "/cache_data/courses_serialized.info"))
+    {
+      if ($GLOBALS["fp_course_inventory"] = unserialize($_SESSION["fp_cache_course_inventory"])) {
+        $last_generated = intval(variable_get('cache_course_inventory_last_generated', 0));
+        $_SESSION['fp_cache_course_inventory_last_generated'] = $last_generated;
+        fpm('reloading from file');
+        return;
+      }
+    }
+  }    
+      
+  $array_valid_names_by_course = array();
+  
+  fpm('rebuilding course cache');
+      
+  //fpm("LIMIT $limit_start, $limit_size");
+  $result = db_query("SELECT * FROM courses
+                      WHERE delete_flag = 0"); 
+
+    while($cur = db_fetch_array($result))
+    {
+      $course_id = $cur["course_id"];
+
+      //$this->db->load_course_descriptive_data(null, $course_id);
+      
+      $title = $cur["title"];
+      $description = trim($cur["description"]);
+      $subject_id = trim(strtoupper($cur["subject_id"]));
+      $course_num = trim(strtoupper($cur["course_num"]));
+      $cache_catalog_year = $cur['catalog_year'];
+      
+      $min_hours = $cur["min_hours"];
+      $max_hours = $cur["max_hours"];
+      $repeat_hours = $cur["repeat_hours"];
+      if ($repeat_hours*1 == 0)
+      {
+        $repeat_hours = $max_hours;
+      }
+
+
+      $db_exclude = $cur["exclude"];
+      $db_school_id = $cur['school_id'];
+      $data_entry_comment = $cur["data_entry_comment"];
+
+      // Now, lets get a list of all the valid names for this course.
+      // In other words, all the non-excluded names.  For most
+      // courses, this will just be one name.  But for cross-listed
+      // courses, this will be 2 or more (probably just 2 though).
+      // Example: MATH 373 and CSCI 373 are both valid names for that course.
+      
+      if (!isset($array_valid_names_by_course[$course_id])) {
+      
+        $array_valid_names = array();
+        $res2 = db_query("SELECT * FROM courses
+                      WHERE course_id = ?                        
+                      AND delete_flag = 0 ", $course_id);
+        while($cur2 = db_fetch_array($res2))
+        {
+          $si = $cur2["subject_id"];
+          $cn = $cur2["course_num"];
+          if (in_array("$si~$cn", $array_valid_names))
+          {
+            continue;
+          }
+          $array_valid_names[] = "$si~$cn";
+        }      
+        $array_valid_names_by_course[$course_id] = $array_valid_names;
+      }
+    
+      $array_valid_names = $array_valid_names_by_course[$course_id];
+    
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["subject_id"] = $subject_id;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["course_num"] = $course_num;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["title"] = $title;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["description"] = $description;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["min_hours"] = $min_hours;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["max_hours"] = $max_hours;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["repeat_hours"] = $repeat_hours;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["db_exclude"] = $db_exclude;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["school_id"] = $db_school_id;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["array_valid_names"] = $array_valid_names;
+  
+      $cache_catalog_year = 0;
+  
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["subject_id"] = $subject_id;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["course_num"] = $course_num;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["title"] = $title;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["description"] = $description;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["min_hours"] = $min_hours;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["max_hours"] = $max_hours;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["repeat_hours"] = $repeat_hours;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["db_exclude"] = $db_exclude;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["school_id"] = $db_school_id;
+      $GLOBALS["fp_course_inventory"][$course_id][$cache_catalog_year]["array_valid_names"] = $array_valid_names;        
+    
+      $GLOBALS["cache_course_inventory"] = TRUE; 
+  } // while cur
+
+  // Should we re-cache the course inventory?  If there have been any changes
+  // to it, then we will see that in a GLOBALS variable...
+  if ($GLOBALS["cache_course_inventory"] == true)
+  {      
+    $_SESSION["fp_cache_course_inventory"] = serialize($GLOBALS["fp_course_inventory"]);
+  }
+
+  // Save to file.
+  if (!is_dir(fp_get_files_path() . "/cache_data")) {
+    $x = mkdir(fp_get_files_path() . "/cache_data");
+    if (!$x) {
+      fpm("Cannot create cache_data directory under custom/files.  Permission error?");
+      watchdog("system", "Cannot create cache_data directory under custom/files.  Permission error?", array(), WATCHDOG_ERROR);
+    }
+  }
+  
+  // It is named .info because in our htaccess, it already says that file extension cannot be downloaded.
+  $x = file_put_contents(fp_get_files_path() . "/cache_data/courses_serialized.info", $_SESSION["fp_cache_course_inventory"]);    
+  if (!$x) {
+    fpm("Cannot create cache_data/courses_serialized.info under custom/files.  Permission error?");
+    watchdog("system", "Cannot create cache_data/courses_serialized.info under custom/files.  Permission error?", array(), WATCHDOG_ERROR);
+  }    
+  
+  // Also put in when we LAST performed this operation in a variable for reading later on.
+  $last_generated = time();
+  $_SESSION['fp_cache_course_inventory_last_generated'] = $last_generated;
+  variable_set('cache_course_inventory_last_generated', $last_generated);      
+  
+  
+} // system_reload_and_cache_course_inventory
+
+
+
+/**
+ * Should the course inventory get reloaded from file?  If so, return TRUE.
+ */
+function system_check_course_inventory_should_be_reloaded() {
+  $x = intval($_SESSION['fp_cache_course_inventory_last_generated']);
+  $last_generated = intval(variable_get('cache_course_inventory_last_generated', 0));  
+  if ($x !== $last_generated) {
+    return TRUE;
+  }
+  
+  return FALSE;
+  
+}
+
+
 
 
 /**
@@ -3607,13 +3761,12 @@ function system_display_dashboard_page () {
   
   //////////////////////////////////////////////////////////
   // To cut down on how long it takes to load huge groups
-  // like Free Electives, we will pre-load some of the course inventory here.
+  // like Free Electives, we will the course inventory from cache here.
   if (@$_SESSION["fp_cached_inventory_flag_one"] != TRUE)
   {
     $load_number = $GLOBALS["fp_system_settings"]["load_course_inventory_on_login_number"];
     if ($load_number > 1) {
-      $fp = new FlightPath();
-      $fp->cache_course_inventory(0,$load_number);
+      system_reload_and_cache_course_inventory(0, $load_number);      
       $_SESSION["fp_cached_inventory_flag_one"] = TRUE;
     }
   }

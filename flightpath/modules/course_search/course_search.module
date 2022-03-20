@@ -944,7 +944,7 @@ function course_search_display_search() {
    
   fp_add_css(fp_get_module_path("course_search") . "/css/course_search_style.css");
   
-    
+  
    // We are going to be setting up a render array for this screen, so other modules can alter it later.
   $render = array();
   $render["#id"] = "course_search_display_search";

@@ -93,6 +93,13 @@ function student_search_student_select_switchboard() {
     
   // As in the advise_display_view, we need to "initialize" this student fresh...
   global $user, $fp, $degree_plan, $screen, $current_student_id;
+
+
+  // Do we need to rebuild the course inventory cache?
+  if (system_check_course_inventory_should_be_reloaded()) {
+    system_reload_and_cache_course_inventory();
+  }
+
  
   if ($view == "what-if") {
     $GLOBALS["fp_advising"]["advising_what_if"] = "yes";  

@@ -8,6 +8,11 @@ FlightPath 6.x Changelog
   
   Added indexs for courses and draft_courses for the exclude and delete_flag columns.
   
+  Added new cache variable which lets us know when course cache was last generated.  Users will check that variable in key places to see if they need to reload
+  their course inventory from file.
+  
+  Moved the logic for generating and saving the course inventory to the system module, to make it easier to work with.
+    
 
 2022-03-19
   Altered prereqs module to better explain how it's hook system works.  Added prereqs.api.php to describe hooks.

@@ -1379,6 +1379,13 @@ function advise_display_view($view = "view") {
   global $user, $fp, $degree_plan, $screen, $current_student_id;
   $rtn = "";
  
+  
+  // Do we need to rebuild the course inventory cache?
+  if (system_check_course_inventory_should_be_reloaded()) {
+    system_reload_and_cache_course_inventory();
+  }
+ 
+ 
   fp_set_title('');
  
   if ($view == "what-if") {
@@ -2404,6 +2411,7 @@ function advise_init() {
  * anything this module has cached.
  */
 function advise_clear_cache() {
+  
   foreach ($_SESSION as $key => $value) {
     if (strstr($key, "cache_")) {
       $_SESSION[$key] = FALSE;
@@ -2417,6 +2425,10 @@ function advise_clear_cache() {
     
   }
 
+  unset($_SESSION['fp_cache_course_inventory_last_generated']);
+  
+  system_reload_and_cache_course_inventory();
+  
   unset($_SESSION["last_student_selected"]);
       
   fp_add_message(t("Advising cache has been cleared."));

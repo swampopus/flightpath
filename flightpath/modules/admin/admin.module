@@ -1101,6 +1101,7 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
 
 
   // Rebuild our course cache file.
+  unset($_SESSION['fp_cache_course_inventory_last_generated']);
   if (file_exists(fp_get_files_path() . "/cache_data/courses_serialized.info")) {
     $x = unlink(fp_get_files_path() . "/cache_data/courses_serialized.info");
     if (!$x) {
@@ -1108,10 +1109,10 @@ function admin_apply_draft_changes_form_submit($form, $form_submit) {
       watchdog("system", "Cannot delete cache_data/courses_serialized.info under custom/files.  Permission error or file does not exist?", array(), WATCHDOG_ERROR);    
     }
   }
+  variable_set('cache_course_inventory_last_generated', 0);  // reset this so it will be regenerated.
+    
   // Builds new courses cache file on the hard drive.
-  $fp = new FlightPath();
-  $fp->cache_course_inventory();
-
+  system_reload_and_cache_course_inventory();
 
   // And we are done!  Set maintenance mode back to none
   variable_set("maintenance_mode", FALSE);
