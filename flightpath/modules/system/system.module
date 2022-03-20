@@ -3569,7 +3569,7 @@ function system_reload_and_cache_course_inventory($limit_start = 0, $limit_size 
       if ($GLOBALS["fp_course_inventory"] = unserialize($_SESSION["fp_cache_course_inventory"])) {
         $last_generated = intval(variable_get('cache_course_inventory_last_generated', 0));
         $_SESSION['fp_cache_course_inventory_last_generated'] = $last_generated;
-        fpm('reloading from file');
+        //fpm('reloading from file');
         return;
       }
     }
@@ -3577,7 +3577,7 @@ function system_reload_and_cache_course_inventory($limit_start = 0, $limit_size 
       
   $array_valid_names_by_course = array();
   
-  fpm('rebuilding course cache');
+  //fpm('rebuilding course cache');
       
   //fpm("LIMIT $limit_start, $limit_size");
   $result = db_query("SELECT * FROM courses
