@@ -2425,8 +2425,7 @@ function advise_clear_cache() {
     
   }
 
-  unset($_SESSION['fp_cache_course_inventory_last_generated']);
-  
+  unset($_SESSION['fp_cache_course_inventory_last_generated']);  
   system_reload_and_cache_course_inventory();
   
   unset($_SESSION["last_student_selected"]);

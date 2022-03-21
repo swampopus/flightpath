@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-21
+  Added hook to course_search, so that other modules can modify the "course rotation schedule".  See new file course_search.api.php.
+
+
 2022-03-20
   Changed how we cache the course inventory.  Now using a file to cache to hard disk, making it much faster to read into memory than using multiple database queries.
   

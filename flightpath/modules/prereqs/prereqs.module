@@ -633,8 +633,7 @@ function prereqs_get_prereq_warnings_for_course(Course $course, Student $student
   
   //////////////////////////////////////
   // Okay, now we invoke a hook, to see if any other modules
-  // would like to add or alter our prereq warnings.
-  
+  // would like to add or alter our prereq warnings.  
   invoke_hook("prereqs_get_prereq_warnings_for_course", array(&$rtn, $course, $student));  
     
   
@@ -799,7 +798,7 @@ function prereqs_content_alter(&$render, $content_id) {
     //fpm($render);
     $course = @$render["#course"]["value"];
     if (!is_object($course)) return; // some kind of problem...
-    
+            
     $school_id = $course->school_id;
     
     // What is the current advising term?

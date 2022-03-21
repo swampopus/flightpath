@@ -812,6 +812,17 @@ function course_search_get_course_capacity($course_id, $term_id) {
 
 function course_search_get_course_rotation_schedule($course_id, $year = "", $limit = 20, $bool_include_next_five_years = FALSE)
 {
+    
+  // Has this already been saved to our globals cache?  If so, just return that.          
+  if (isset($GLOBALS['cache_course_search_rotation_schedule'][$course_id][$year][$limit][intval($bool_include_next_five_years)])) {
+    return $GLOBALS['cache_course_search_rotation_schedule'][$course_id][$year][$limit][intval($bool_include_next_five_years)];
+  }        
+        
+      
+  $year = intval($year);
+  $limit = intval($limit);
+   
+  
   // return an array containing the terms that this course
 	// is going to be offered, if any.
 	$rtn_array = array();
@@ -873,6 +884,17 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
 		$rtn_array[] = trim($temp[2]);
 	}
 
+	
+  //////////////////////////////////////
+  // Okay, now we invoke a hook, to see if any other modules
+  // would like to add or alter our rotation schedule (notice $rtn_array is passed by reference)
+  invoke_hook("course_search_get_course_rotation_schedule", array(&$rtn_array, $course_id, $year, $limit, $bool_include_next_five_years));  
+		
+	
+	// Save to globals cache to make it faster lookup
+	$GLOBALS['cache_course_search_rotation_schedule'][$course_id][$year][$limit][intval($bool_include_next_five_years)] = $rtn_array;
+	
+	
 	return $rtn_array;
 }
 
