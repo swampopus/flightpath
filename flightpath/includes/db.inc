@@ -333,9 +333,19 @@ function fp_get_degree_title($degree_id, $bool_include_track_title = FALSE, $boo
  * Returns the faculty member's name based on the ID provided.
  */
 function fp_get_faculty_name($cwid) {
+  
+  // Already cached?
+  if (isset($GLOBALS['fp_cache_get_faculty_name'][$cwid])) {
+    return $GLOBALS['fp_cache_get_faculty_name'][$cwid];
+  }  
+  
+  
   $db = get_global_database_handler();
   $name = $db->get_faculty_name($cwid, FALSE);
   if (!$name) $name = t("Unknown Advisor");
+  
+  $GLOBALS['fp_cache_get_faculty_name'][$cwid] = $name;
+  
   return $name;
 }
 
@@ -612,9 +622,18 @@ function fp_get_student_name($cwid, $bool_include_cwid = FALSE ) {
     return t("Anonymous");
   }
   
+  // Already cached?
+  if (isset($GLOBALS['fp_cache_get_student_name'][$cwid][intval($bool_include_cwid)])) {
+    return $GLOBALS['fp_cache_get_student_name'][$cwid][intval($bool_include_cwid)];
+  }
+  
   $db = get_global_database_handler();
   $name = $db->get_student_name($cwid, $bool_include_cwid);
   if (!$name) $name = t("Unknown Student");
+  
+  
+  $GLOBALS['fp_cache_get_student_name'][$cwid][intval($bool_include_cwid)] = $name;
+  
   return $name;
 }
 

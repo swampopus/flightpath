@@ -1419,8 +1419,10 @@ class FlightPath extends stdClass
                   AND is_whatif = ? ", $student_id, $faculty_id, $degree_id, $is_what_if);
 
 
-    // Set all other advising sessions' "most_recent_session" flag to zero (0) for this student.
-    db_query("UPDATE advising_sessions SET most_recent_session = 0 WHERE student_id = ?", array($student_id));
+    // Set all other advising sessions' "most_recent_session" flag to zero (0) for this student (but only if this is NOT an "is_draft" save!)
+    if ($is_draft === 0) {
+      db_query("UPDATE advising_sessions SET most_recent_session = 0 WHERE student_id = ?", array($student_id));
+    }
 
 
     // The first thing we need to do is go through the available_terms,
