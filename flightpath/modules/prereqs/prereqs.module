@@ -808,7 +808,7 @@ function prereqs_content_alter(&$render, $content_id) {
     // Get the advising year from the term.
     $year = substr($advising_term_id, 0, 4);
     
-    $rotation_schedule = course_search_get_course_rotation_schedule($course->course_id, $year, 5);
+    $rotation_schedule = course_search_get_course_rotation_schedule($course->course_id, $year, 5);    
     $bool_not_anticipated = course_search_get_course_rotation_schedule_not_anticipated($course->course_id);
     //fpm($rotation_schedule);
     

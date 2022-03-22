@@ -512,7 +512,7 @@ function course_search_display_courses() {
       }
 
       // Look for all 5 years.
-      $long_schedule_array = course_search_get_course_rotation_schedule($n_course_id, $catalog_year, 100, true);
+      $long_schedule_array = course_search_get_course_rotation_schedule($n_course_id, $catalog_year, 100, TRUE);
       
       $schedule_array = course_search_get_course_rotation_schedule($n_course_id, $catalog_year);  
       
@@ -522,13 +522,14 @@ function course_search_display_courses() {
       if (count($long_schedule_array) > 0) {
         $schedule_text .= "
               <div>
-                <b>" . t("Anticipated availability:") . "</b>
+                <b>" . t("Anticipated availability:", array("@cat" => $catalog_year)) . "</b>
                 ";
-        $s_disp = "auto";
+        $s_disp = "auto";        
         if ($mode != "advanced")
         { // only show this in the basic mode, not advanced.
           foreach ($schedule_array as $term_id)
           {
+            
             $temp_course = new Course();
             $temp_course->term_id = $term_id;
             $schedule_text .= " " . $temp_course->get_term_description(true) . ",";
@@ -629,9 +630,11 @@ function course_search_display_courses() {
         // selected to view a particular term.
         $bool_hide = TRUE;
       }
-
+      
+            
       if (course_search_get_course_rotation_schedule_not_anticipated($n_course_id))
       {
+        
         // This course has no anticipated offerings!
         $schedule_text = "<div><b>" . t("Anticipated availability:") . "</b>
               " . t("There are no anticipated course offerings
@@ -771,6 +774,7 @@ function course_search_display_courses() {
 
 function course_search_get_course_rotation_schedule_not_anticipated($course_id)
 {
+  $rtn = FALSE;
   
 	// Returns TRUE if not is NOT ANTICIPATED.  False, if this
 	// is a normal courses which has an offering, or a blank
@@ -781,10 +785,16 @@ function course_search_get_course_rotation_schedule_not_anticipated($course_id)
 							AND term_id = 'NOTA'
 							", $course_id);
 	if (db_num_rows($res) > 0) {
-		return true;
+		$rtn = TRUE;
 	}
 
-	return false;
+  
+  //////////////////////////////////////
+  // Okay, now we invoke a hook, to see if any other modules
+  // would like to add or alter our answer
+  invoke_hook("course_search_get_course_rotation_schedule_not_anticipated", array(&$rtn, $course_id));    
+
+	return $rtn;
 
 }
 
@@ -889,8 +899,8 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
   // Okay, now we invoke a hook, to see if any other modules
   // would like to add or alter our rotation schedule (notice $rtn_array is passed by reference)
   invoke_hook("course_search_get_course_rotation_schedule", array(&$rtn_array, $course_id, $year, $limit, $bool_include_next_five_years));  
-		
 	
+
 	// Save to globals cache to make it faster lookup
 	$GLOBALS['cache_course_search_rotation_schedule'][$course_id][$year][$limit][intval($bool_include_next_five_years)] = $rtn_array;
 	

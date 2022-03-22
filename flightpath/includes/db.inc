@@ -151,7 +151,7 @@ function fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalo
  */
 function pager_query($query, $args = array(), $limit = 10, $element = 0, $count_query = NULL, $count_query_select_from = NULL) {
   global $pager_page_array, $pager_total, $pager_total_items;
-  $page = isset($_GET['page']) ? $_GET['page'] : '';
+  $page = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : '';
 
   // Construct a count query if none was given.
   if (!isset($count_query)) {

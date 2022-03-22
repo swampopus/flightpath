@@ -17,3 +17,18 @@ function hook_course_search_get_course_rotation_schedule(&$schedule_array, $cour
   
   // Nothing to return, since $schedule_array is passed by reference.
 }
+
+
+
+
+/**
+ * This is called AFTER the regular course_search_get_course_rotation_schedule_not_anticipated.  In general, we want to see if 
+ * anything is going to be offered in the next 5 years.
+ */
+function hook_course_search_get_course_rotation_schedule_not_anticipated(&$rtn, $course_id) {
+  
+  // Make changes here...
+  
+  
+  // Nothing to return since our $rtn is passed by reference
+}

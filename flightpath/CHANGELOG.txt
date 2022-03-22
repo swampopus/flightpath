@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-22
+  Added hook to course_search, so that other modules can modify the "course not scheduled" result.  See new file course_search.api.php.
+  
+  For the pager_query() functionality, look for value in $_REQUEST instead of just $_GET.
+  
+
 2022-03-21
   Added hook to course_search, so that other modules can modify the "course rotation schedule".  See new file course_search.api.php.
 
