@@ -1,6 +1,9 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-25
+  Adjusted look of textareas in form elements to have similar rounded corners and such as text fields.
+
 2022-03-22
   Added hook to course_search, so that other modules can modify the "course not scheduled" result.  See new file course_search.api.php.
   
