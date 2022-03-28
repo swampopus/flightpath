@@ -271,12 +271,10 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
   
   $term_array = csv_to_array(variable_get_for_school("course_search_avail_term_id_suffix_order", '', $school_id));
 
-      
+    
   for ($t = 1; $t <= 6; $t++) {
     $year = $form_state["values"]["year$t"];
-    
-    if (!isset($form_state["values"]["$year$t"])) continue;  // Not set, so leave it alone.
-    
+            
     // delete the existing entries for this year & course here.
     db_query("DELETE FROM course_rotation_schedule
             WHERE `course_id`= ?
@@ -286,6 +284,7 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
     // Now, for x = 1 to 5,
     // if ($_request["cb_$year$x"] == "yes")
     // then insert into table... blah blah...
+    
     foreach($term_array as $x) {
       if ($form_state["values"]["cb_$year$x"]["yes"] == "yes") {
         $capacity = intval($form_state["values"]["capacity_$year$x"]);

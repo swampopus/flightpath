@@ -2550,8 +2550,8 @@ function system_cron() {
   }
   
   // Should we trim the watchdog table of DEBUG records?
-  $max_age_days = variable_get("max_watchdog_debug_age", "365");
-  if ($max_age_days != "never" && ($max_age_days*1) > 0) {
+  $max_age_days = intval(variable_get("max_watchdog_debug_age", "365"));
+  if ($max_age_days != "never" && ($max_age_days) > 0) {
     
     // Okay, let's trim the table.
     $max_timestamp = strtotime("$max_age_days DAYS AGO");
@@ -2565,7 +2565,7 @@ function system_cron() {
   }
   
   
-  // Should we delete from user_attributes sany mda_validation_codes which are older than X hours?
+  // Should we delete from user_attributes any mda_validation_codes which are older than X hours?
   $max_age_hours = 1;      
   // Okay, let's trim the table.
   $max_timestamp = strtotime("$max_age_hours HOURS AGO"); 

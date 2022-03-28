@@ -1,8 +1,15 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-28
+  Minor change in System.  When trimming watchdog table of DEBUG statements, made sure that "max age" was an int using intval().
+  
+  Fixed bug in core's course search edit submit, where it would never work.  Probably a result of my recent work.
+  
+
 2022-03-25
   Adjusted look of textareas in form elements to have similar rounded corners and such as text fields.
+
 
 2022-03-22
   Added hook to course_search, so that other modules can modify the "course not scheduled" result.  See new file course_search.api.php.
