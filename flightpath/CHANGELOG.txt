@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-29
+  Fixed a subtle bug where if a course was being advised to take in a group that was split between two different semesters,
+  it was possible that it would attempt to be saved into the first semester num of the group's first appearance.
+
+
 2022-03-28
   Minor change in System.  When trimming watchdog table of DEBUG statements, made sure that "max age" was an int using intval().
   

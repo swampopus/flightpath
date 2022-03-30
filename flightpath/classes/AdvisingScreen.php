@@ -3450,34 +3450,37 @@ function draw_menu_items($menu_array) {
     // What we are trying to do is end up with a list of courses we want to display on the screen (for example,
     // that the student took or were substituted in)
     $group->list_courses->remove_unfulfilled_and_unadvised_courses();
-    
     $group->list_courses->reset_counter();
     while($group->list_courses->has_more())
     {
       $course = $group->list_courses->get_next();     
-      
+    
       // Do we have enough hours to keep going?
       $fulfilled_hours = $display_course_list->count_hours("", FALSE, TRUE, FALSE, FALSE, $req_by_degree_id);
       $remaining = $place_group->hours_required - $fulfilled_hours;
-
       // If the course in question is part of a substitution that is not
       // for this group, then we should skip it.
       if (!($course->course_list_fulfilled_by->is_empty))
       {
         $try_c = $course->course_list_fulfilled_by->get_first();
         if ($try_c->get_bool_substitution($req_by_degree_id) == TRUE && $try_c->get_bool_assigned_to_group_id($group->group_id) != TRUE)
-        {         
+        {
           continue;
         }
       }
       
+      /*
+if (strstr($group->group_id, "7516_")) {
+  fpm("....here1");
+}                 
+        */    
     
       if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->get_has_been_displayed($req_by_degree_id) != TRUE && $course->get_has_been_displayed($req_by_degree_id) != TRUE)
-      //if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->bool_has_been_displayed != true && $course->bool_has_been_displayed != true)
       {
         $c = $course->course_list_fulfilled_by->get_first();
         $ch = $c->get_hours($req_by_degree_id);
         
+                
         
         
         // Because PHP has dumb floating point arithmatic, we are going to round our values to 8 places,
@@ -3485,10 +3488,14 @@ function draw_menu_items($menu_array) {
         // actually cause the values to round and mess up the math.
         $remaining = round($remaining, 8);
         $ch = round($ch, 8);
+
         
+                
         // Is whats remaining actually LESS than the course hours?  If so, we need to skip it.        
         if ($remaining < $ch)
-        {                   
+        {
+            
+                             
           continue;
         }
         
@@ -3498,16 +3505,28 @@ function draw_menu_items($menu_array) {
         $c->title_text = "This course is a member of $group->title." . " ($place_group->requirement_type)";
         $c->requirement_type = $place_group->requirement_type;
         $c->req_by_degree_id = $req_by_degree_id;
+        
+                
+        
         $display_course_list->add($c);
 
         
       }
 
+      
+            
+      
       if ($course->bool_advised_to_take && $course->get_has_been_displayed($req_by_degree_id) != true && $course->assigned_to_semester_num == $display_semesterNum)
       {
+        
+          
+        
         $c = $course;
+        
         if ($remaining < $c->get_hours($req_by_degree_id))
         {
+            
+          
           continue;
         }
 
@@ -3515,6 +3534,9 @@ function draw_menu_items($menu_array) {
         $c->icon_filename = $group->icon_filename;
         $c->req_by_degree_id = $req_by_degree_id;
         $c->title_text = t("The student has been advised to take this course to fulfill a @gt requirement.", array("@gt" => $group->title));
+        
+                
+        
         $display_course_list->add($c);
         
 
@@ -3524,7 +3546,8 @@ function draw_menu_items($menu_array) {
 
     $group->list_groups->reset_counter();
     while($group->list_groups->has_more())
-    {
+    {   
+      
       $branch = $group->list_groups->get_next();
       // look for courses at this level...
       if (!$branch->list_courses->is_empty)
@@ -3604,7 +3627,6 @@ function draw_menu_items($menu_array) {
     // Make sure we're all on the same page, for what degree_id we're being displayed under.
     $display_course_list->set_req_by_degree_id($req_by_degree_id);
 
-    
 
     $rtn .= $this->display_group_course_list($display_course_list, $group, $display_semesterNum);
 
@@ -3654,7 +3676,6 @@ function draw_menu_items($menu_array) {
       $rtn .= $this->draw_group_select_row($place_group, $remaining, $rowclass);
       
     }
-
 
     return $rtn;
   }
@@ -4308,11 +4329,13 @@ function draw_menu_items($menu_array) {
     }
 
     $course_id = $course->course_id;
+    
     $semester_num = $course->assigned_to_semester_num;
     
-    if ($group != NULL) {
+    if ($group != NULL && $course->bool_advised_to_take != TRUE) {
       $semester_num = $group->assigned_to_semester_num;
-    }
+    }        
+    
     
     
     $render['#semester_num'] = $semester_num;
@@ -4332,7 +4355,6 @@ function draw_menu_items($menu_array) {
     if (strstr($hid_name, ".")) {
       $hid_name = str_replace(".", "DoT", $hid_name);
     }
-    
     
     
     $hid_value = "";

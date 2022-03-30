@@ -339,11 +339,11 @@ class Course extends stdClass
     if ($degree_id > 0) {
       //return $this->course_substitution_by_degree_array[$degree_id];
       if (isset($this->details_by_degree_array[$degree_id]["hours_awarded"])) {
-        $x = $this->get_details_by_degree($degree_id, "hours_awarded") * 1;  // *1 forces numeric and trimes extra zeroes.
+        $x = floatval($this->get_details_by_degree($degree_id, "hours_awarded")) * 1;  // *1 forces numeric and trimes extra zeroes.
       }
       else if ($bool_use_first_found_if_not_found_by_degree) {
         // It wasn't set, so get the first value that WAS set.
-        $x = $this->get_first_value_from_any_degree("hours_awarded");
+        $x = floatval($this->get_first_value_from_any_degree("hours_awarded"));
       }
       if ($x) return $x;                  
                   
@@ -351,7 +351,7 @@ class Course extends stdClass
     else {
       
       // We just want the first value of ANY degree returned.
-      $x = $this->get_first_value_from_any_degree("hours_awarded");      
+      $x = floatval($this->get_first_value_from_any_degree("hours_awarded"));      
       if ($x) return $x;
       
     }
@@ -1108,7 +1108,7 @@ class Course extends stdClass
     
     // Was this course used in a substitution?  If so, use the substitution hours.
     if ($this->get_substitution_hours($degree_id) > 0) {
-      return $this->get_substitution_hours($degree_id);
+      return floatval($this->get_substitution_hours($degree_id));
     }
     
        
@@ -1117,18 +1117,18 @@ class Course extends stdClass
     if ($this->get_hours_awarded($degree_id) > 0)
     {
       $h = $this->get_hours_awarded($degree_id);
-      return $h;
+      return floatval($h);
     }
 
     
     if ($this->has_variable_hours() && $this->advised_hours > -1) {
-      return $this->advised_hours * 1;
+      return floatval($this->advised_hours);
     }
     
 
     // No selected hours, but it's a variable hour course.
     // So, return the min_hours for this course.
-    return $this->min_hours * 1;
+    return floatval($this->min_hours);
 
   }
 
