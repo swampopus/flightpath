@@ -802,11 +802,14 @@ function advise_display_popup_change_track() {
   
       $top_level_majors_csv .= $major_code . ",";
   
+      $tracks = array();
       // Get the list of available tracks for this student.
       if (!$tracks = $t_degree_plan->get_available_tracks())
       {
         $html .= "<div class='advise-select-track-none'>&nbsp; &nbsp; &bull; " . t("This degree has no degree options.") . "</div>";        
       }
+  
+      if (!is_array($tracks)) $tracks = array();
   
       // Is there a "default" message for all tracks, which will override
       // any other track descriptions?

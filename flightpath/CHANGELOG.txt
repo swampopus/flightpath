@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-03-31
+  Added small bit of code to advise.module to stop notice/warning from happening.
+  
+
 2022-03-30
   Added extra classes to tabs and sub-tabs to make them targetable by CSS.
   
