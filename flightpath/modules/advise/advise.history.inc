@@ -386,7 +386,7 @@ function advise_display_history() {
     */
     
     $render_right["markup_no_comment_history"] = array(
-      "value" => t("No comment history available."),
+      "value" => "<span class='no-comment-history-msg'>" . t("No comment history available.") . "</span>",
     );                  
               
   }
