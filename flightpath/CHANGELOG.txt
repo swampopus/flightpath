@@ -8,6 +8,8 @@ FlightPath 6.x Changelog
   
   Added extra class to section titles to include machine-readable versions of the title, for CSS.
   
+  Similarly added to student files module to make CSS styling easier.
+  
 
 2022-03-29
   Fixed a subtle bug where if a course was being advised to take in a group that was split between two different semesters,

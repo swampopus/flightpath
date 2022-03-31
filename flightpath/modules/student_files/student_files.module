@@ -876,10 +876,11 @@ function student_files_content_alter(&$render, $content_id) {
 
     
     $render["student_files"] = array(
-      "value" => "<br>
+      "value" => "<div class='student-files-section-block'>
                   " . fp_render_section_title(t("Student Files")) . "              
-                  $upload_form
-                  $html",
+                    $upload_form
+                    $html
+                  </div>",
     );
     
     // Since we rendered a form, make sure we aren't showing the title on screen afterwards.

@@ -379,12 +379,7 @@ function advise_display_history() {
   }
 
   if ($is_empty == true) {
-    /*
-    $rtn .= "<tr><td colspan='4' class=' '>
-            <div style='padding-left: 20px;'>
-              " . t("No comment history available.") . "</div></td></tr>";
-    */
-    
+        
     $render_right["markup_no_comment_history"] = array(
       "value" => "<span class='no-comment-history-msg'>" . t("No comment history available.") . "</span>",
     );                  
@@ -392,7 +387,7 @@ function advise_display_history() {
   }
 
   $render_right["comment_history"] = array(
-    "value" => $html,
+    "value" => "<span class='advising-comment-history-block'>" . $html . "</span>",
     "weight" => 0,
   );
   
