@@ -86,7 +86,7 @@ function advise_display_history() {
 
 
 
-  $rtn .= "<tr><td width='50%' valign='top'  style='padding-right: 10px;'>
+  $rtn .= "<tr><td width='50%' valign='top'  class='left-side' style='padding-right: 10px;'>
           ";
 
   ///////////////////////////////////////////////////
@@ -280,205 +280,7 @@ function advise_display_history() {
   } // while cur group by advising session token 
   
   
-  
-  /*
-  
-  // First, find all of the advising session "groups".  That is, advising sessions over multiple
-  // terms which were submitted together.
-  $res = db_query("SELECT * FROM advising_sessions
-                    WHERE student_id = ?
-                    AND is_draft = 0
-                    AND is_empty = 0
-                    AND delete_flag = 0
-                    ORDER BY `posted` ", $student_id);
-  while($cur = db_fetch_array($res)) {
-  
-    // Are we supposed to "delete" an advising session?  We will double-check the user has all needed permissions if so.
-    if (intval(@$_GET['deladv']) === intval($cur['advising_session_id'])) {
-      if (user_has_permission('can_advise_students') && user_has_permission('can_delete_own_advising_session_3_months') && $cur['faculty_id'] == $user->cwid) {
-      
-        $del_range = strtotime("now -3 months");
-        $then = intval($cur["posted"]);
-        if ($then > $del_range) {
-          db_query("UPDATE advising_sessions 
-                    SET delete_flag = 1
-                    WHERE advising_session_id = ?", array($cur['advising_session_id']));
-          fp_add_message(t("Advising session has been successfully deleted."));
-          continue;  // skip this record.    
-        }
-        
-      }
-    }
-
-    // Is this datetime within 5 seconds of the previous datetime?
-    // If so, they were likely saved together, and are part
-    // of the same advising session.  Otherwise, this is a NEW
-    // advising session.  The if statement below is testing is this
-    // a new advising session.
-    $test_d_t = intval($cur['posted']);
-    
-    //if ($test_d_t == $old_session_d_t || $test_d_t == $old_session_d_t + 1 || $test_d_t == $old_session_d_t + 2 ) {          
-    if ($test_d_t - 5 <= $old_session_d_t ) {          
-      $previous_sessions[$last_session_id] = $last_session_id;
-      $previous_sessions[$cur['advising_session_id']] = $cur['advising_session_id'];
-    }
-    else {      
-      if (count($previous_sessions) > 1) {
-        $session_group_code = md5(join(",", $previous_sessions));
-        $advising_session_groups_array[$session_group_code] = $previous_sessions;        
-      }
-      $previous_sessions = array();
-    }
-    
-    $old_session_d_t = $test_d_t;
-    $last_session_id = $cur['advising_session_id'];
-  } // while
-
-  if (count($previous_sessions) > 1) {
-    $session_group_code = md5(join(",", $previous_sessions));
-    $advising_session_groups_array[$session_group_code] = $previous_sessions;        
-  }
-
-
-  $old_session_d_t = 0;
-
-  // Now, actually assemble the HTML for our advising sessions for the screen.
-  $res = db_query("SELECT * FROM advising_sessions
-              WHERE student_id = ?
-              AND is_draft = 0
-              AND is_empty = 0
-              AND delete_flag = 0
-              ORDER BY `posted` DESC, `term_id` DESC ", $student_id);
-  while($cur = db_fetch_array($res)) {
-
-    $dt = date("m/d/Y g:ia",convert_time($cur['posted']));
-    $html = "";
-    
-    // Is this datetime within 5 seconds of the previous datetime?
-    // If so, they were likely saved together, and are part
-    // of the same advising session.  Otherwise, this is a NEW
-    // advising session.  The if statement below is testing is this
-    // a new advising session.
-    $test_d_t = $cur['posted'];
-    if ($old_session_d_t < ($test_d_t - 5) || $old_session_d_t > ($test_d_t + 5))
-    {
-
-      $old_session_d_t = $test_d_t;
-      
-
-      $group_link = "";      
-      // Figure out which advising group this belongs to (if any!) by searching our advising_session_groups_array for the advising session id
-      $asid = $cur['advising_session_id'];
-      foreach($advising_session_groups_array as $key => $details) {
-        if (in_array($asid, $details)) {                    
-          $turl = fp_url("advise/popup-display-summary", "show_as_group=yes&advising_session_id=" . join(",", $details));
-          $on_click = "popupLargeIframeDialog(\"" . $turl . "\",\"" . t("Advising Sessions - @date", array("@date" => $dt)) . "\",\"\");";  
-          $group_link = "<a href='javascript:$on_click' class='advising-summary-group-link'><i class='fa fa-list-ul'></i> " . t("View Combined") . "</a>";    
-        }
-      }      
-
-      $advised_by = "<div class='history-advised-row history-advised-row-$a_count'>
-              <strong>" . t("Advised by") . " " . fp_get_faculty_name($cur['faculty_id'], FALSE) . "</strong>$group_link
-            </div>";
-
-
-      $html .= "<div class=''>$advised_by</div>";      
-
-      
-
-
-      $a_count++;
-
-    }
-    $is_empty = false;
-    */
-    /*
-    if ($a_count > 1) {
-      $first_style = "";
-    }
-
-
-
-    
-
-
-    $turl = fp_url("advise/popup-display-summary", "advising_session_id={$cur['advising_session_id']}");
-
-    $advising_session_id_array[] = $cur['advising_session_id'];
-    $term = get_term_description($cur['term_id'], FALSE, $school_id);
-
-    $on_click = "popupLargeIframeDialog(\"" . $turl . "\",\"" . t("Advising Session @term - @date", array("@term" => $term, "@date" => $dt)) . "\",\"\");";  
-              
-    
-    
-    // Should we show the "delete" link?    
-    
-    if (user_has_permission('can_advise_students') && user_has_permission('can_delete_own_advising_session_3_months') && $cur['faculty_id'] == $user->cwid) {
-      $delete_html = "";    
-      $del_range = strtotime("now -3 months");
-      $then = intval($cur["posted"]);
-      if ($then > $del_range) {
-        
-        $safe_term = $term;
-        $safe_term = str_replace("'", "", $safe_term);
-        $safe_term = str_replace('"', "", $safe_term);
-        $safe_term = str_replace(';', "", $safe_term);
-        $safe_term = str_replace('\\', "", $safe_term);
-        
-        $confirm_link = fp_get_js_confirm_link(t("Are you sure you wish to delete the advising session from @dt for @term?  \\n\\nThis action cannot be undone.", array("@dt" => $dt, "@term" => $safe_term)),
-                            "window.location=\"" . fp_url("history", "current_student_id=$current_student_id&deladv=" . $cur['advising_session_id']) . "\";", "<i class='fa fa-remove'></i>", "action-link-remove", t("Delete?")); 
-        
-        
-        $delete_html .= "<div class='delete-adv-wrapper'>
-                    $confirm_link
-                    <!-- <a href='javascript:deleteAdvisingSession(\"{$cur['advising_session_id']}\",\"$dt\");'>" . t("Delete this advising session?") . "</a> -->
-                  </div>";
-        
-        
-      }
-      
-      
-    } // user had permission to delete
-
-    $html .= "<div $on_mouse_over style='cursor: pointer; $first_style' class='advhist-row' onClick='$on_click'>
-                <div class='advhist-term' style='display: inline-block; padding-left:20px; width:165px;'>$term</div>
-                <div class='advhist-datetime' style='display: inline-block;'>$dt</div>                
-              </div>
-              $delete_html";
-    
-    
-    
-    // If this is more than X number, let's hide the rest in a collapsible fieldset.
-    if ($c < 5) {
-      $render_left["advising_history_$c"] = array(
-        "value" => $html,
-        "weight" => $c,
-      );
-    }
-    else {
-      // Let's place in a collapsible fieldset!
-      if (!isset($render_left["advising_history_fs"])) {
-        $render_left["advising_history_fs"] = array(
-          "type" => "cfieldset",
-          "label" => t("Show complete advising history"),
-          "start_closed" => TRUE,
-          "elements" => array(),
-          "weight" => $c,          
-        );
-      }
-      $render_left["advising_history_fs"]["elements"][] = array("advising_history_$c" => array(
-        "value" => $html,
-      ));
-        
-      
-    }
-        
-        
-    $c++;
-  }*/
-  //$rtn .= "</table>";
-
-  if ($is_empty == true) {
+   if ($is_empty == true) {
     //$rtn .= "<div class=' '>No advising history available.</div>";
     
     $render_left["markup_no_adv_history"] = array(
@@ -507,7 +309,7 @@ function advise_display_history() {
   //----------------------------------------------------------------------------------------
   //------------------------------ COMMENT HISTORY -----------------------------------------
   //----------------------------------------------------------------------------------------
-  $rtn .= "</td><td width='50%' valign='top'>";
+  $rtn .= "</td><td width='50%' class='right-side' valign='top'>";
   $rtn .= fp_render_section_title(t("Comment History"));
   //$rtn .= "<table border='0' cellspacing='0'>";
   
@@ -534,7 +336,7 @@ function advise_display_history() {
   $turl = fp_url("comments/popup-display-all-comments");
     
    
-  $html .= "<div class=' '>
+  $html .= "<div class='advising-comments-header'>
         <!--STARTCOM--><div style='padding-top: 10px;'>
           <strong>" . t("Advising Comments") . "</strong>
           &nbsp; 

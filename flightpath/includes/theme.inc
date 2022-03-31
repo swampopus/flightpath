@@ -1841,7 +1841,7 @@ function fp_render_sub_tab_array($tab_array) {
   $rtn = "";
   
   $rtn .= "<div class='sub-tabs'>";
-
+  
   foreach ($tab_array as $tab) {
     $title = @$tab["title"];
     $on_click = @$tab["on_click"];
@@ -1851,6 +1851,9 @@ function fp_render_sub_tab_array($tab_array) {
       
     $extra_class = "";
     if ($active) $extra_class = "gradbutton-active";
+    
+    $extra_class .= " sub-tab-title-" . fp_get_machine_readable(strtolower(trim($title)));
+    
     
     if ($type == "link" ) {
       // Render as a standard link
@@ -1872,7 +1875,7 @@ function fp_render_sub_tab_array($tab_array) {
       // Render as a button      
       $rtn .= fp_render_button($title, $on_click, $extra_class);
     }
-    
+  
   }
   
   
@@ -2016,6 +2019,10 @@ function fp_render_tab_array($tab_array) {
     if ($t == 0) $extra_class .= " first";
     if ($t == count($tab_array) - 1) $extra_class .= " last";
 
+    // Also add in a machine-friendly class based on the title and position
+
+    $extra_class .= " tab-count-$t tab-title-" . fp_get_machine_readable(strtolower(trim($title)));
+    
     $rtn .= "<li class='tab $extra_class'><a href='$href' $extra_a>$title</a></li>";
     
   }
@@ -2122,6 +2129,8 @@ function fp_render_curved_line($text) {
 
 
 function fp_render_section_title($text, $extra_class = '') {
+  
+  $extra_class .= " section-box-text-" . fp_get_machine_readable(strtolower(trim($text)));
   
   $rtn = "<div class='section-box-title section-box-title-$extra_class'>$text</div>";
 
