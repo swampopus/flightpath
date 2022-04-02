@@ -468,8 +468,8 @@ function system_menu() {
       ),      
     ),        
     "type" => MENU_TYPE_NORMAL_ITEM,
-    "tab_parent" => "admin-tools/admin",    
-    "weight" => 50,
+    "tab_parent" => "admin-tools/admin",   
+    
   );  
   
 

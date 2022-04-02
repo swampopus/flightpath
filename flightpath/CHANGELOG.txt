@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+202-04-02
+  Adjusted weights to better alphabetize the admin console menu items.
+
+  Added new silk icons to system module directory.
+
+
 2022-03-31
   Added small bit of code to advise.module to stop notice/warning from happening.
   
