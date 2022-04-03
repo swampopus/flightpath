@@ -6,6 +6,9 @@ FlightPath 6.x Changelog
 
   Added new silk icons to system module directory.
 
+  Added ability to have "pseudo" opt-groups for checkboxes fields, where checkboxes can be grouped
+  the same way select lists can, in a multi-dimensional array.
+  
 
 2022-03-31
   Added small bit of code to advise.module to stop notice/warning from happening.

@@ -757,17 +757,33 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     $rtn .= "<div class='form-checkboxes form-checkboxes-$cssname'>";
     foreach ($options as $key => $val) {
         
-        
-      $checked = "";
-      if (is_array($value) && isset($value[$key]) && $value[$key] == $key) {
-        
-        $checked = "checked=checked";
+      if (is_array($val)) {
+        // Similar to select lists above, we need to simulate having "optgroup"s for checkboxes.
+        $rtn .= "<div class='checkbox-pseudo-optgroup-wrapper'>
+                  <label>$key</label>";
+        foreach ($val as $k => $v) {
+          $checked = "";
+          if (is_array($value) && isset($value[$k]) && $value[$k] == $k) {        
+            $checked = "checked=checked";
+          }
+          
+          $csskey = fp_get_machine_readable($key);
+          $rtn .= "<div class='checkbox-element checkbox-element-$csskey'>
+                     <label class='label-for-checkbox'><input type='checkbox' name='$name" . "[$k]' id='element-$cssname-$csskey' value='$k' $checked $attributes> $v</label>
+                   </div>";          
+        }
+        $rtn .= "</div>"; // close the pseudo-optgroup-wrapper
+      } 
+      else {
+        $checked = "";
+        if (is_array($value) && isset($value[$key]) && $value[$key] == $key) {        
+          $checked = "checked=checked";
+        }
+        $csskey = fp_get_machine_readable($key);
+        $rtn .= "<div class='checkbox-element checkbox-element-$csskey'>
+                   <label class='label-for-checkbox'><input type='checkbox' name='$name" . "[$key]' id='element-$cssname-$csskey' value='$key' $checked $attributes> $val</label>
+                 </div>";
       }
-      $csskey = fp_get_machine_readable($key);
-      $rtn .= "<div class='checkbox-element checkbox-element-$csskey'>
-                 <label class='label-for-checkbox'><input type='checkbox' name='$name" . "[$key]' id='element-$cssname-$csskey' value='$key' $checked $attributes> $val</label>
-               </div>";
-
     }
     $rtn .= "</div>";
   }
