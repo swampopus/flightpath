@@ -1,7 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
-202-04-02
+2022-04-04
+  Using font awesome question-circle icon for popup_description link instead of regular question mark.  Also used margin to add a little more spacing.
+  
+
+2022-04-02
   Adjusted weights to better alphabetize the admin console menu items.
 
   Added new silk icons to system module directory.
