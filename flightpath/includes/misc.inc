@@ -1540,6 +1540,23 @@ function csv_to_array($csv_string) {
 
 
 /**
+ * From https://www.php.net/manual/en/function.str-getcsv.php#117692
+ */
+function csv_multiline_to_array($csv_str, $bool_first_row_is_headers = TRUE) {
+  $csv = array_map('str_getcsv', explode("\n", trim($csv_str)));
+  array_walk($csv, function(&$a) use ($csv) {
+    $a = array_combine($csv[0], $a);
+  });
+  if (!$bool_first_row_is_headers) {
+    array_shift($csv); # remove column header
+  }
+    
+  return $csv;    
+      
+}
+
+
+/**
  * Add a "message" to the top of the screen.  Useful for short messages like "You have been logged out"
  * or "Form submitted successfully."
  *

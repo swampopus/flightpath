@@ -149,16 +149,15 @@ function fp_render_array($render_array, $use_callback = "") {
     if (is_array($element) && (isset($element["type"]) || isset($element["value"]))) {
         
       // Is this a cfieldset (collapsible fieldset)?
-      if (@$element["type"] == "cfieldset") {
+      if (@$element["type"] == "cfieldset") {        
         $celements = $element["elements"];  // get our list of form elements within this fieldset.
         // Go through these new elements and prepare to display them inside a collapsible fieldset.
         $html = "";
         foreach ($celements as $k => $v) {
-          foreach ($celements[$k] as $name => $celement) {
+          foreach ($celements[$k] as $name => $celement) {            
             $html .= fp_render_element($name, $celement, $use_callback);
           }
-        }
-        
+        }        
         // add to c_fieldset
         $rtn .= fp_render_c_fieldset($html, @$element["label"], @$element["start_closed"]);
          
