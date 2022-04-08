@@ -159,7 +159,7 @@ function fp_render_array($render_array, $use_callback = "") {
           }
         }        
         // add to c_fieldset
-        $rtn .= fp_render_c_fieldset($html, @$element["label"], @$element["start_closed"]);
+        $rtn .= fp_render_c_fieldset($html, @$element["label"], @$element["start_closed"], @$element['attributes']['class']);
          
       }
       else {
