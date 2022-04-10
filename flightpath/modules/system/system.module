@@ -3278,6 +3278,19 @@ function system_login_form() {
   if (isset($_REQUEST['user']) && $_REQUEST['user'] == 'notfound') {
     fp_add_message(t("Sorry, but the user you specified could not be found in FlightPath's database.  If you believe you need access, please contact your system administrator."), 'error', TRUE);
   }
+
+  // Are we here because only the admin user is allowed in?
+  if (isset($_REQUEST['user']) && $_REQUEST['user'] == 'adminonly') {
+    fp_add_message(t("Sorry, but logins are disabled at this time while maintenance is being performed.  Please try again later."), 'error', TRUE);
+  }
+
+
+  // Are we here because only the user's rank is not allowed?
+  if (isset($_REQUEST['user']) && $_REQUEST['user'] == 'rank') {
+    fp_add_message(t("Sorry, your rank/classification is not allowed.  At this time this system is only available to students
+                                  in the following ranks/classifications: @ranks_str", array("@ranks_str" => $allowed_ranks_str)), 'error', TRUE);
+  }
+
   
   // Are we here because the user was not found in the whitelist?
   if (isset($_REQUEST['user']) && $_REQUEST['user'] == 'disabled') {

@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-04-10
+  Added more messages on login page for if login failed (admin user is only one allowed, students not allowed, etc).
+  
+
 2022-04-04
   Using font awesome question-circle icon for popup_description link instead of regular question mark.  Also used margin to add a little more spacing.
   
