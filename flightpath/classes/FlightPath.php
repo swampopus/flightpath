@@ -1181,14 +1181,18 @@ class FlightPath extends stdClass
 
 
 
+
+
+
+
   /**
    * This function replaces the original method of caching the course inventory, to something which uses 
    * a file instead of database.
    */
-  function cache_course_inventory($limit_start = 0, $limit_size = 4000)  {
+  function z_____cache_course_inventory($limit_start = 0, $limit_size = 4000)  {
     // This functionality has moved to the system module to make it easier to call.
     // This will eventually be depricated.    
-    system_reload_and_cache_course_inventory($limit_start, $limit_size);
+    system_reload_and_cache_course_inventory();
     
   } // function
 

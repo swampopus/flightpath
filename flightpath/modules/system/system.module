@@ -3573,7 +3573,7 @@ function system_perform_user_login($user_id) {
  * Formerly part of the FlightPath class, this function will read in or reload the course inventory into a
  * file, which then goes into the SESSION to make it faster to access.
  */
-function system_reload_and_cache_course_inventory($limit_start = 0, $limit_size = 4000) {
+function system_reload_and_cache_course_inventory() {
   
   // Load from file.  If not there, or if we cannot unserialize, then we will rebuild cache and save new file.
   if (file_exists(fp_get_files_path() . "/cache_data/courses_serialized.info")) {
@@ -3777,11 +3777,7 @@ function system_display_dashboard_page () {
   // like Free Electives, we will the course inventory from cache here.
   if (@$_SESSION["fp_cached_inventory_flag_one"] != TRUE)
   {
-    $load_number = $GLOBALS["fp_system_settings"]["load_course_inventory_on_login_number"];
-    if ($load_number > 1) {
-      system_reload_and_cache_course_inventory(0, $load_number);      
-      $_SESSION["fp_cached_inventory_flag_one"] = TRUE;
-    }
+    system_reload_and_cache_course_inventory();    
   }
   
   

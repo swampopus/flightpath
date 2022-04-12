@@ -385,7 +385,6 @@ function fpToggleHamburgerMenu() {
     
     modal.showHtml(styles + spinner + msg);    
     
-    
   }  
   
   

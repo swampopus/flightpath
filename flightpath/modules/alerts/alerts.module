@@ -15,7 +15,7 @@ function alerts_menu() {
   $items = array();
   
   $items["alerts"] = array(
-    "title" => "Advisee Alerts%ALERTS_ADVISEE_ALERTS_COUNT%", 
+    "title" => "Alerts%ALERTS_ADVISEE_ALERTS_COUNT%", 
     "page_callback" => "fp_render_form",
     "page_arguments" => array("alerts_advisees_alerts_form"),
     "access_arguments" => array("view_advisee_alerts"),

@@ -21,11 +21,9 @@ class DatabaseHandler extends stdClass
 
     $db_host_ip = $db_host;  // set as same as db_host for now.
     
-    
+    $this->pdo = $GLOBALS['pdo'];  // set in our settings.php file.
         
-    //$this->dbc = mysql_connect ($db_host, $db_user, $db_pass) or die('Could not connect to database: ' . mysql_error());
-    //mysql_select_db ($db_name);
-
+/*
     // Connection by IP address is fastest, so let's always try to do that.
     // It can be time-consuming to convert our hostname to IP address.  Cache it in our SESSION
     if (isset($_SESSION["fp_db_host_ip"])) {
@@ -48,14 +46,10 @@ class DatabaseHandler extends stdClass
       // Set our error handling...  (using "silent" so I can catch errors in try/catch and display them, email, etc, if wanted.)
       $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
       
-      
-      // NOTE:  !!!  This causes problems with FlightPath if uncommented.  Leave commented for now.
-      // Make sure in code that when we retrieve integers and floats, they do not get converted to strings.
-      //$this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, FALSE);
-      //$this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, FALSE);
-
+            
            
     }
+  */
     
   }
 

@@ -1186,7 +1186,9 @@ function schools_administer_schools_form() {
     "value" => t("Schools can be divisions within your institution (ex: School of Nursing, School of Pharmacy, etc), distinct campuses
                   (ex:  Washington Campus, South Campus, etc), or divisions of graduate level (Undergrad, Graduate).
                   The default school is simply called 'Default' and all users and degree data will be placed under the Default school unless otherwise specified.  
-                  <br>If you are unsure what to do, <b>leave this page blank</b>.")
+                  <br>If you are unsure what to do, <b>leave this page blank</b>.") . "
+                  <br><br>
+                  <a href='https://getflightpath.com/node/11879' target='_blank'>" . t("For a more thorough explanation of Schools, view this help page (loads in a new window)") . "</a>"
                 . "<br><br><b>" . t("Schools:") . "</b>
                 
                 <table class='advisees-alerts' style='margin-left: 10px;' cellpadding=5>

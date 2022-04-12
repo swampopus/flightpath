@@ -1,6 +1,18 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-04-11
+  Removed concept of trying to "preload" a set number of courses on login.  This is now handled in a more elegant way.
+  
+  Added link to schools help page to schools module settings page.
+  
+  Added "Loading" dialog when you search and receive a single student. 
+  
+  Changed "Advisee Alerts" tab to say just "Alerts".
+  
+  Placed all db connection code in settings.php, and put the pdo into GLOBALS, so we only make 1 database connection per page load.
+  
+  
 2022-04-10
   Added more messages on login page for if login failed (admin user is only one allowed, students not allowed, etc).
   

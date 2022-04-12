@@ -1188,7 +1188,7 @@ function student_search_render_advisees($adv_array, $title) {
     $rtn .= "<div class='hypo' style='border: 1px solid black;
               margin: 10px 0px 10px 0px; padding: 10px; 
               font-size: 12pt; font-weight: bold;'>
-        " .t("Loading") . " <span style='color:blue;'>$first_name $last_name</span> ($student_id).  
+        " .t("Loading") . " $first_name $last_name ($student_id).  
           &nbsp; " . t("Please wait...") . "
         </div>";
     $bool_redirect_one = TRUE;
@@ -1323,7 +1323,7 @@ function student_search_render_advisees($adv_array, $title) {
     $rtn .= "<script type='text/javascript'>
         
         $(document).ready(function() {
-          setTimeout('window.location=\"$url\";', 0);
+          setTimeout('fp_show_loading(\"" . t("Loading...") . "\");window.location=\"$url\";', 0);
         });
 
         </script>";

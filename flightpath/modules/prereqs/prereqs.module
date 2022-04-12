@@ -674,6 +674,10 @@ function prereqs_theme_advise_course_row(&$theme) {
     }
     
     
+    // TODO:  Only allow user with correct permissions actually perform advising (override lock)  If they do NOT have the permission,
+    //        we display a message saying they can't advise that course.
+    
+    
     $confirm = variable_get("prereqs_confirm_msg", "Are you sure you wish to advise the student to enroll in this course anyway?");
     
     $confirm_warning_msg = $warning_msg . "\\n\\n" . $confirm;

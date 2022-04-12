@@ -2249,25 +2249,7 @@ function invoke_hook($hook = "example_hook_here", $params = array()) {
 }
 
 
-/**
- * This method will return a globally-set DatabaseHandler object,
- * creating it if it does not already exist.  This is for efficiency
- * reasons, so every module or method does not need to keep creating
- * databasehandler objects (and re-connecting to the database).
- *
- */
-function get_global_database_handler() {
-  
-  $db = @$GLOBALS["fp_global_database_handler"];
-  
-  if (!is_object($db) || !is_object($db->pdo)) {
-    // Something isn't right, or it wasn't set correctly.  Create a new connection.
-    $GLOBALS["fp_global_database_handler"] = new DatabaseHandler();
-  }
-  
-  return $GLOBALS["fp_global_database_handler"];  
-  
-}
+
 
 
 /**

@@ -340,15 +340,6 @@ $system_settings["db_pass"] = "%DB_PASS%";
 
 
 ////////////////////////////////////
-// *** Misc Settings ***          //
-////////////////////////////////////
-// To cut down on load times when the user loads a large elective group
-// containing many courses, FlightPath can load some of the course inventory
-// upon login.  Set the number of courses to load here.
-$system_settings["load_course_inventory_on_login_number"] = 2000;
-
-
-////////////////////////////////////
 // *** Cron-related ***           //
 ////////////////////////////////////
 // If you wish to use cron.php (which will call every module\'s
@@ -436,30 +427,44 @@ $db_user = $system_settings["db_user"];
 $db_pass = $system_settings["db_pass"];
 $db_name = $system_settings["db_name"];
 
-$pdo = new PDO("mysql:host=$db_host;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass);     
-if (!$pdo) die("Could not connect to database.");
+// Connection by IP address is fastest, so let\'s always try to do that.
+// It can be time-consuming to convert our hostname to IP address.  Cache it in our SESSION
+if (isset($_SESSION["fp_db_host_ip"])) {
+  $db_host_ip = $_SESSION["fp_db_host_ip"];
+  if (!$db_host_ip) $db_host_ip = $db_host;
+}
+else {
+  // Convert our db_host into an IP address, then save to simple SESSION cache.
+  $db_host_ip = trim(gethostbyname($db_host));
+  if (!$db_host_ip) $db_host_ip = $db_host;
+  $_SESSION["fp_db_host_ip"] = $db_host_ip;
+}
 
-$res = $pdo->prepare("SELECT * FROM variables");
+// Connect using PDO
+$GLOBALS["pdo"] = new PDO("mysql:host=$db_host_ip;port=$db_port;dbname=$db_name;charset=utf8mb4", $db_user, $db_pass,
+  array(
+    PDO::MYSQL_ATTR_LOCAL_INFILE => TRUE,
+  ));
+// Set our error handling...  (using "silent" so I can catch errors in try/catch and display them, email, etc, if wanted.)
+$GLOBALS["pdo"]->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+  
+
+$res = $GLOBALS["pdo"]->prepare("SELECT * FROM variables");
 $res->execute();
-
       
 while ($cur = $res->fetch(PDO::FETCH_ASSOC)) {
   if (@$val = unserialize($cur["value"])) {
     $system_settings[$cur["name"]] = $val;
   }
 }
-
       
-$res = $pdo->prepare("SELECT * FROM modules WHERE enabled = 1
+$res = $GLOBALS["pdo"]->prepare("SELECT * FROM modules WHERE enabled = 1
               ORDER BY weight, name");
 $res->execute();
-      
 while ($cur = $res->fetch(PDO::FETCH_ASSOC)) {
   $system_settings["modules"][$cur["name"]] = $cur;
 }
 
-// Close our pdo connection.
-$pdo = NULL;
 
 // We want to make sure the "system" module is enabled, so we will hard-code
 // its values.
