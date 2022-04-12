@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2022-04-12
+  Added extra classes to engagements for text messages, to say which phone number the message was being sent from and to.  This should help with styling if you want
+  to have different colors or other styles based on what phone line it was sent to or from.
+
+
 2022-04-11
   Removed concept of trying to "preload" a set number of courses on login.  This is now handled in a more elegant way.
   

@@ -3529,7 +3529,17 @@ function engagements_display_main()
     $author_account = fp_load_user($author_user_id);    
     $author_name = $author_account->f_name . " " . $author_account->l_name;
 
-    $rtn .= "<div class='activity-feed-teaser activity-feed-teaser-$direction activity-feed-teaser-type-$type'>
+    $act_feed_extra_class = "";
+    if ($content->field__from_sms_phone['value']) {
+      $act_feed_extra_class .= " activity-feed-from-sms-" . engagements_convert_to_valid_phone_number(fp_get_machine_readable($content->field__from_sms_phone['value']));
+    }
+
+    if ($content->field__to_sms_phone['value']) {
+      $act_feed_extra_class .= " activity-feed-to-sms-" . engagements_convert_to_valid_phone_number(fp_get_machine_readable($content->field__to_sms_phone['value']));
+    }
+
+
+    $rtn .= "<div class='activity-feed-teaser activity-feed-teaser-$direction activity-feed-teaser-type-$type $act_feed_extra_class'>
                 <div class='activity-header-content'>
                   <span class='header-icon'><i class='fa $icon'></i></span>
                   <span class='header-description'>
