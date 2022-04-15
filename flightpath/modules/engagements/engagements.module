@@ -3096,14 +3096,19 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
         if ($fid == "") continue;
         $file = content_get_uploaded_file($fid);
         if ($file) {
-          $attachments[$file['full_filename']] = $file['original_filename'];
+          // Handle encrypted files  
+          $fcont = file_get_contents($file['full_filename']);  // the full_filename already contains the path to the file
+          if (intval($file['is_encrypted']) === 1) {
+            $fcont = encryption_decrypt($fcont);
+          }
+          $attachments[$file['original_filename']] = $fcont; 
         }
       }
     }
 
 
     
-    smtp_mail($student_email, $subject, $header . "<br><br>" . $msg, TRUE, $attachments);  // the TRUE sends as HTML.
+    smtp_mail($student_email, $subject, $header . "<br><br>" . $msg, TRUE, $attachments, TRUE);  // the TRUE sends as HTML.
     fp_add_message(t("Email has been successfully sent."));
   } // type == 'email'
  

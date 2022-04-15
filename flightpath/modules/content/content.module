@@ -536,6 +536,7 @@ function content_unpublish_content_form($cid) {
   $form['submit_confirm'] = array(
     'type' => 'submit',
     'value' => 'Confirm & Remove',    
+    'spinner' => TRUE,
     'attributes' => array('class' => 'content-submit-btn'),
   );
   
@@ -1274,6 +1275,7 @@ function content_edit_content_form($type = "", $cid = "") {
         "value" => t("Delete"),    
         "confirm" => t('Are you sure you wish to delete this?\nThis action cannot be undone.'),
         'weight' => 9930,
+        //'spinner' => TRUE,
         'attributes' => array('class' => 'content-delete-btn'),    
       );
     }

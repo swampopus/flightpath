@@ -1,3 +1,20 @@
+$(document).ready(function() {
+      
+    // Attach behavior that we "disable-element" once a content-btn is pressed (submit or delete)
+    /*
+    $(".content-submit-btn").click(function() {
+      $(".content-submit-btn").addClass("disable-element");
+      $(".content-delete-btn").addClass("disable-element");
+    });
+
+    $(".content-delete-btn").click(function() {
+      $(".content-submit-btn").addClass("disable-element");
+      $(".content-delete-btn").addClass("disable-element");
+    });
+    */
+
+});
+
 
 
 
