@@ -1198,8 +1198,15 @@ function advise_display_popup_group_select() {
     $tab_array[0]["active"] = true;
     $tab_array[1]["title"] = "Select";
     $subject = trim($_GET["selected_subject"]);
+    
+    $use_course_id = $course_id;
 
-    $tab_array[1]["on_click"] = "popupBackToGroupSelect(\"$course_id\",\"$group_id\",\"$semester_num\",\"req_by_degree_id=$req_by_degree_id&selected_subject=$subject&group_hours_remaining=$group_hours_remaining&blank_degree_id=$blank_degree_id\");";
+    // if we are unable to advise due to a prereq, then set use_course_id to an invalid course id (so nothing is selected when we change tabs)
+    if (isset($GLOBALS['prereqs_no_advise_course_id']) && in_array($course_id, $GLOBALS['prereqs_no_advise_course_id'])) {
+      $use_course_id = 0;
+    }     
+
+    $tab_array[1]["on_click"] = "popupBackToGroupSelect(\"$use_course_id\",\"$group_id\",\"$semester_num\",\"req_by_degree_id=$req_by_degree_id&selected_subject=$subject&group_hours_remaining=$group_hours_remaining&blank_degree_id=$blank_degree_id\");";
 
     // If we are allowed to substitute....
     if (user_has_permission("can_substitute") && $group_id != DegreePlan::GROUP_ID_FOR_COURSES_ADDED && !$screen->bool_blank) {

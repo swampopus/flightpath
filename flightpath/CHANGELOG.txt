@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-04-15
+  Added extra permission to prereqs module, so that you can only override locks on courses if you have permission.
+  
+  Adjusted the "locked but checked" icon for courses in prereqs, to make the check a little more obvious.
+  
 
 2022-04-12
   Added extra classes to engagements for text messages, to say which phone number the message was being sent from and to.  This should help with styling if you want

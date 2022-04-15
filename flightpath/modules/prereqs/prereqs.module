@@ -46,6 +46,11 @@ function prereqs_perm() {
     "administer_prereqs" => array(
       "title" => t("Administer prereq settings"),
     ),
+    'override_course_locks' => array(
+      'title' => t("Override course locks"),
+      'description' => t("Users with this permission are allowed to 'override' courses with locks for checkboxes, meaning they can 
+                          still advise a course even if the prereqs (or other issues) have not passed."),
+    ),
   );
     
 }
@@ -673,14 +678,20 @@ function prereqs_theme_advise_course_row(&$theme) {
       $warning_msg .= $details["plain_text"] . "\\n \\n";;
     }
     
-    
-    // TODO:  Only allow user with correct permissions actually perform advising (override lock)  If they do NOT have the permission,
-    //        we display a message saying they can't advise that course.
-    
-    
     $confirm = variable_get("prereqs_confirm_msg", "Are you sure you wish to advise the student to enroll in this course anyway?");
     
     $confirm_warning_msg = $warning_msg . "\\n\\n" . $confirm;
+    
+    $function = "toggleSelection";
+    $group_select_function = "";
+    
+    // Only allow user with correct permissions actually perform advising (override lock)  If they do NOT have the permission,
+    // we display a message saying they can't advise that course.
+    if (!user_has_permission('override_course_locks')) {         
+      $confirm_warning_msg = $warning_msg . "<br><br>" . t("You do have have sufficient permissions to override this lock.");
+      $function = "prereqs_no_toggleSelection";
+      $group_select_function = "prereqs_no_group_toggleSelection";
+    }
     
 
     $theme["op"]["display_status"] = "locked";
@@ -689,7 +700,8 @@ function prereqs_theme_advise_course_row(&$theme) {
     
     
     if ($theme["op"]["onclick"]["function"] == "toggleSelection") {
-      // All we need to do is add text to argument 2.
+      // All we need to do is add text to argument 2.      
+      $theme["op"]["onclick"]["function"] = $function;
       $theme["op"]["onclick"]["arguments"][1] = "locked";
       $theme["op"]["onclick"]["arguments"][2] = $confirm_warning_msg;
     } 
@@ -702,6 +714,10 @@ function prereqs_theme_advise_course_row(&$theme) {
       $theme["icon"]["location"] = fp_get_module_path("prereqs") . "/css/images";
       $theme["icon"]["title"] = str_replace("\\n", " ", $warning_msg);
       
+      
+      if ($group_select_function) {
+        $theme["op"]["onclick"]["function"] = $group_select_function;
+      }
       $theme["op"]["onclick"]["arguments"][0] = $confirm_warning_msg;
     }
 
@@ -726,6 +742,9 @@ function prereqs_theme_advise_course_row(&$theme) {
  * Implememnt hook_content_alter
  */
 function prereqs_content_alter(&$render, $content_id) {
+            
+            
+          
           
   // TODO: Make this a setting?
   // Do we simply wish to DISPLAY prereq warnings in the popup window at all?      
@@ -772,6 +791,15 @@ function prereqs_content_alter(&$render, $content_id) {
         "attributes" => array("class" => "popup-description-section tenpt"),
         "weight" => 500,
       );        
+      
+            
+      // Do we have permission to override the prereq for this course?
+      if (!user_has_permission('override_course_locks')) {      
+        // Set a temporary variable in our GLOBALS array so we know this course cannot be advised.  Used in the advise.module, to make sure
+        // if we get a description from within a group, we do not have this course selected when we change tabs back to the list.
+        $GLOBALS['prereqs_no_advise_course_id'][] = $course->course_id;
+        $render['hidden_vars_and_buttons']['value'] = "<p class='no-override-permission'><label>" .t("Cannot Advise") . "</label>" . t("Sorry, but you do not have permission to override the advising lock on this course.") . "<p>";
+      }      
       
       
     } // count of warnings > 0
@@ -841,7 +869,7 @@ function prereqs_content_alter(&$render, $content_id) {
       // Add it to our render array.  Weeee.
       $render["schedule"] = array(
         "label" => t("<b>Anticipated availability:</b>"),
-        "value" => " <span class='prereqs-schedule-text'>" . $schedule_text . "</span>",
+        "value" => " <div class='prereqs-schedule-text'>" . $schedule_text . "</div>",
         "attributes" => array("class" => "popup-description-section tenpt"),
         "weight" => 510,
       );        
