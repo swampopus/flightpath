@@ -11,7 +11,10 @@
  * You can find your site's cron token (and change it if you wish)
  * in your /custom/settings.php file.
  */
- 
+
+// Keep the script from timing out prematurely...
+set_time_limit(99999);  // around 27 hours.
+  
 require_once("bootstrap.inc");
 
 //$GLOBALS["fp_die_mysql_errors"] = TRUE;

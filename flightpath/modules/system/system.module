@@ -2342,8 +2342,8 @@ function system_settings_form() {
     "type" => "select",
     "label" => t("Max watchdog (log) DEBUG entry age:"),
     "hide_please_select" => TRUE,
-    "options" => array('30' => t('30 days'), '60' => t('60 days'), '90' => t('90 days'), '180' => t('180 days'), '365' => t('1 year'), 'never' => t("Never - do not remove debug entries from log table")),
-    "value" => variable_get("max_watchdog_debug_age", "365"),
+    "options" => array('7' => t('7 days'), '15' => t('15 days'), '30' => t('30 days'), '60' => t('60 days'), '90' => t('90 days'), '180' => t('180 days'), '365' => t('1 year'), 'never' => t("Never - do not remove debug entries from log table")),
+    "value" => variable_get("max_watchdog_debug_age", "30"),
     "description" => t("This is similar to the setting above, but this sets how long to keep 'debug' messages in the watchdog (logs).
                         Debug events are generally useful for tracking down issues or problems, and are not used in any official reporting.  Removing them
                         helps reduce the size of the watchdog table.
@@ -2550,7 +2550,7 @@ function system_cron() {
   }
   
   // Should we trim the watchdog table of DEBUG records?
-  $max_age_days = intval(variable_get("max_watchdog_debug_age", "365"));
+  $max_age_days = intval(variable_get("max_watchdog_debug_age", "30"));
   if ($max_age_days != "never" && ($max_age_days) > 0) {
     
     // Okay, let's trim the table.
@@ -2958,6 +2958,9 @@ function system_perform_clear_cache() {
  * Called from menu, will run hook_cron() for all modules.
  */
 function system_perform_run_cron() {
+    
+  // Keep the script from timing out prematurely...
+  set_time_limit(99999);  // around 27 hours.
   
   watchdog("cron", "Cron run started", array(), WATCHDOG_DEBUG);
   invoke_hook("cron");
@@ -3064,6 +3067,8 @@ function system_status() {
  * Take care of clearing caches managed by this module
  */
 function system_clear_cache() {
+      
+    
   
   unset($_SESSION["fp_form_submissions"]);
   unset($_SESSION["fp_db_host"]);

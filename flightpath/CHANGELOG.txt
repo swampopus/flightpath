@@ -1,6 +1,17 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-04-16
+  Added code to lengthen timeout during cron runs.
+  
+  Added code to content module to delete content (and files) marked with delete_flag = 1.  Same for advise module, admin, and comments modules.
+  
+  Fixed bug to where if you try to view content which doesn't exist, we go to a 404 error.
+
+  Removed getting variables in settings.php file.  Instead, they will be "lazy-loaded" as-needed.  Altered stats module to make sure to use variable_get() syntax
+  instead of trying to load directly from globals array.
+  
+
 2022-04-15
   Added extra permission to prereqs module, so that you can only override locks on courses if you have permission.
   

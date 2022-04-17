@@ -448,16 +448,7 @@ $GLOBALS["pdo"] = new PDO("mysql:host=$db_host_ip;port=$db_port;dbname=$db_name;
 // Set our error handling...  (using "silent" so I can catch errors in try/catch and display them, email, etc, if wanted.)
 $GLOBALS["pdo"]->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
   
-
-$res = $GLOBALS["pdo"]->prepare("SELECT * FROM variables");
-$res->execute();
-      
-while ($cur = $res->fetch(PDO::FETCH_ASSOC)) {
-  if (@$val = unserialize($cur["value"])) {
-    $system_settings[$cur["name"]] = $val;
-  }
-}
-      
+     
 $res = $GLOBALS["pdo"]->prepare("SELECT * FROM modules WHERE enabled = 1
               ORDER BY weight, name");
 $res->execute();

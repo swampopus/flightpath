@@ -2033,7 +2033,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
     
     // Delete from degree_requirements WHERE this degree_id exists.
     $res = db_query("DELETE FROM draft_degree_requirements
-                  WHERE degree_id = '?' ", $degree_id);
+                  WHERE degree_id = ? ", $degree_id);
 
     ///////////////////////////////
     // Are we trying to DELETE this degree?  If so, keep deleting!

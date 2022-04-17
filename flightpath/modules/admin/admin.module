@@ -529,6 +529,54 @@ function admin_display_tools_screen() {
 
 
 /**
+ * hook_cron
+ */
+function admin_cron() {
+  
+  // Delete courses and groups which has been marked with "delete_flag = 1"
+  
+  $last_run = intval(variable_get("admin_last_run_delete_flag_removal", 0));
+  $check_against = strtotime("NOW - 7 DAYS");  // don't run any more often than once every 7 days
+  $c = 0;
+  if ($check_against > $last_run) {
+    
+    $res = db_query("DELETE FROM draft_courses 
+                     WHERE delete_flag = 1 ");
+    $c = db_affected_rows($res);
+    
+    watchdog("admin", "Delete from draft_courses db complete. $c items removed.", array(), WATCHDOG_DEBUG);
+
+
+
+    $res = db_query("SELECT * FROM draft_groups 
+                     WHERE delete_flag = 1 ");
+    while ($cur = db_fetch_object($res)) {
+      
+      $group_id = $cur->group_id;
+      $res2 = db_query("DELETE FROM draft_group_requirements WHERE group_id = ?", array($group_id));
+      
+      db_query("DELETE FROM draft_groups WHERE group_id = ?", array($group_id));
+      $c++;
+    }
+    
+    watchdog("admin", "Delete from draft_groups db complete. $c items removed.", array(), WATCHDOG_DEBUG);
+
+    variable_set("admin_last_run_delete_flag_removal", time());
+    
+    
+  } // check against > last_run, so we should do it.
+  
+  
+  
+} // hook_cron
+
+
+
+
+
+
+
+/**
  * This form will allow the user to duplicate an entire year's worth of data to a new
  * catalog year.
  *

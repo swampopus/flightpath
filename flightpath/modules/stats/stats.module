@@ -875,9 +875,9 @@ function stats_report_major_counts() {
             AND rank_code IN %RANKIN%
             %EXTRA_STUDENTSEARCH_CONDITIONS% ";      
     
-    $rank_in = "( '" . join("', '", csv_to_array(@$GLOBALS["fp_system_settings"]["allowed_student_ranks"])) . "' )";    
+    $rank_in = "( '" . join("', '", csv_to_array(variable_get("allowed_student_ranks", "FR,SO,JR,SR"))) . "' )";    
     $sql = str_replace("%RANKIN%", $rank_in, $sql);   
-    $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", @$GLOBALS["fp_system_settings"]["extra_student_search_conditions"], $sql);  
+    $sql = str_replace("%EXTRA_STUDENTSEARCH_CONDITIONS%", variable_get("extra_student_search_conditions",""), $sql);  
     
     $res2 = db_query($sql, $major_code);
     $cur2 = db_fetch_array($res2);
@@ -891,7 +891,7 @@ function stats_report_major_counts() {
     $res_array[$major_code]["school_code"] = $school_code;
     
   }
-  
+   
 
   foreach($res_array as $major => $value) {
 

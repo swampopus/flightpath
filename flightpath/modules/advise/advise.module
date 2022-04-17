@@ -251,6 +251,73 @@ function advise_menu() {
 
 
 
+
+/**
+ * hook_cron
+ */
+function advise_cron() {
+  
+  // Delete advising data which has been marked with "delete_flag = 1"
+  
+  $last_run = intval(variable_get("advise_last_run_delete_flag_removal", 0));
+  $check_against = strtotime("NOW - 7 DAYS");  // don't run any more often than once every 7 days.
+  $c = 0;
+  if ($check_against > $last_run) {
+    
+    $res = db_query("SELECT * FROM advising_sessions 
+                     WHERE delete_flag = 1 ");
+    while ($cur = db_fetch_object($res)) {
+            
+      $asid = $cur->advising_session_id;
+      
+                  
+      // Delete courses that were part of this advising session.      
+      db_query("DELETE FROM advised_courses WHERE advising_session_id = ?", array($asid));
+      
+      // Lastly, delete from advising_sessions table itself.
+      db_query("DELETE FROM advising_sessions WHERE advising_session_id = ?", array($asid));
+      watchdog("advise", "Deleted from db deleted advising_session_id $asid", array(), WATCHDOG_DEBUG);
+      $c++;      
+    } // while cur
+    
+    watchdog("advise", "Delete from advising sessions db complete. $c items removed.", array(), WATCHDOG_DEBUG);
+    
+    
+    $res = db_query("DELETE FROM student_substitutions WHERE delete_flag = 1");
+    $c = db_affected_rows($res);
+    watchdog("advise", "Delete from student substitutions db complete. $c items removed.", array(), WATCHDOG_DEBUG);
+    
+    $res = db_query("DELETE FROM student_unassign_group WHERE delete_flag = 1");
+    $c = db_affected_rows($res);
+    watchdog("advise", "Delete from student unassign group db complete. $c items removed.", array(), WATCHDOG_DEBUG);
+        
+    $res = db_query("DELETE FROM student_unassign_transfer_eqv WHERE delete_flag = 1");
+    $c = db_affected_rows($res);
+    watchdog("advise", "Delete from student unassign transfer eqv db complete. $c items removed.", array(), WATCHDOG_DEBUG);
+    
+    
+    variable_set("advise_last_run_delete_flag_removal", time());
+    
+    
+  } // check against > last_run, so we should do it.
+  
+  
+  
+} // hook_cron
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Returns back an integer of the number of times a particular course was advised (unique per student) for a certain term.
  */

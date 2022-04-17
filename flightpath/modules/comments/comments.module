@@ -61,6 +61,42 @@ function comments_menu() {
 } 
 
 
+
+
+/**
+ * hook_cron
+ */
+function comments_cron() {
+  
+  // Delete comments which has been marked with "delete_flag = 1"
+  
+  $last_run = intval(variable_get("comments_last_run_delete_flag_removal", 0));
+  $check_against = strtotime("NOW - 7 DAYS");  // don't run any more often than once every 7 days
+  $c = 0;
+  if ($check_against > $last_run) {
+    
+    $res = db_query("DELETE FROM advising_comments 
+                     WHERE delete_flag = 1 ");
+    $c = db_affected_rows($res);
+    
+    watchdog("comments", "Delete from db complete. $c items removed.", array(), WATCHDOG_DEBUG);
+    variable_set("comments_last_run_delete_flag_removal", time());
+    
+    
+  } // check against > last_run, so we should do it.
+  
+  
+  
+} // hook_cron
+
+
+
+
+
+
+
+
+
 function comments_popup_display_comment() {
   $rtn = "";
   
