@@ -2273,8 +2273,10 @@ function draw_menu_items($menu_array) {
         continue;
       }
  
-
-      $this->add_to_screen($this->display_semester($semester, true), "SEMESTER_" . $semester->semester_num);
+      $disp_sem = $this->display_semester($semester, TRUE);
+      if ($disp_sem) {
+        $this->add_to_screen($disp_sem, "SEMESTER_" . $semester->semester_num);
+      }
 
     }
         
@@ -3399,7 +3401,13 @@ function draw_menu_items($menu_array) {
     ); 
     
     
-
+    
+    // If the semester has NO content, then just return FALSE.
+    if (trim($render['semester_content']['value']) == "" && !isset($render['semester_notice']) && !isset($render['semester_disp_hour_count'])) {        
+      return FALSE;
+    } 
+       
+    // Otherwise, render out and return the HTML
     return fp_render_content($render);
   }
 

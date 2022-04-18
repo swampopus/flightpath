@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-04-18
+  If a semester block is empty, we do not show it on the degree / what if tabs.
+  
+
 2022-04-17
   Made it so that the theme always defaults to fp6_clean (included with core), and it is not set in the settings file.  Got rid of the
   "display_mysql_errors" line in settings.php, since it is not used any longer anyway.
