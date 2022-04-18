@@ -380,18 +380,6 @@ $system_settings["cron_security_token"] = "%CRON_SECURITY_TOKEN%";
 $GLOBALS["encryption_key_string"] = "%ENCRYPTION_KEY_STRING%";
 
 
-/////////////////////////////////////
-// *** Defaults ***                //
-/////////////////////////////////////
-// These default settings are for installation reasons only. 
-// They will be overwritten in memory
-// once the flightpath_system_settings table is read in at the end of the file.
-// ** Do not alter them. **
-$system_settings["display_mysql_errors"] = TRUE;
-$system_settings["theme"] = "themes/fp6_clean";
-
-
-
 ////////////////////////////////////////////
 /// *** Custom Settings? ***             ///
 ////////////////////////////////////////////

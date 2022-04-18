@@ -2080,7 +2080,7 @@ function display_access_denied() {
  */
 function fp_theme_location($bool_include_base_path = TRUE) {
   
-  $p = variable_get("theme",'');
+  $p = variable_get("theme",'themes/fp6_clean');
   
   // The theme hasn't been set for some reason
   if ($p == "") {
