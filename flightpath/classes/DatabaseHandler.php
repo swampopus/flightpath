@@ -260,8 +260,7 @@ class DatabaseHandler extends stdClass
     	$message .= "<br><br><b>" . t("It appears this error is being caused because of your server's sql_mode setting.") . "</b> ";
     	$message .= t("To set your sql_mode for MySQL, please see the following help page: <a href='http://getflightpath.com/node/1161' target='_blank'>http://getflightpath.com/node/1161</a>");
     }
-    
-    
+        
     $file = $arr[2]["file"];
     if (strlen($file) > 50) {
       $file = "..." . substr($file, strlen($file) - 50);
@@ -270,29 +269,40 @@ class DatabaseHandler extends stdClass
     
     $file_and_line = "Line " . $arr[2]["line"] . ": " . $file;
     
-    
+    @$query_and_args = print_r($arr[2]['args'], TRUE);
+        
     // If we are on production, email someone!
     if (variable_get("notify_mysql_error_email_address",'') != "")
     {
       $server = $_SERVER["SERVER_NAME"] . " - " . $GLOBALS['fp_system_settings']['base_url'];  // intentionally use the GLOBALS here, since it comes from settings.php file.
       $email_msg = t("A MYSQL error has occured in FlightPath.") . "  
-      User: $user->name ($user->id)
-      Server: $server
-      
-      Timestamp: $when_ts ($when_english)
-      
-      Error:
-      $message
-      Location:
-      $file_and_line
-      
-      Backtrace:
-      " . print_r($arr, true) . "
-      ";
+User: $user->name ($user->id)
+Server: $server
+
+Timestamp: $when_ts ($when_english)
+
+*** Error: ***
+$message
+
+/-----------------------------------/
+
+*** Location: ***
+$file_and_line
+
+/-----------------------------------/
+
+*** Query/Args: ***
+$query_and_args
+
+/-----------------------------------/
+
+*** Limited Backtrace: ***
+" . print_r($arr, true) . "
+";
       fp_mail(variable_get("notify_mysql_error_email_address",''), "FlightPath MYSQL Error Reported on $server", $email_msg);
     }
         
-    fpm(t("A MySQL error has occured:") . " $message<br><br>Location: $file_and_line<br><br>" . t("The backtrace:"));
+    fpm(t("A MySQL error has occured:") . " $message<br><br>" . t("Location:") . " $file_and_line<br><br>" . t("The backtrace:"));
     fpm($arr);
 
     if (@$GLOBALS["fp_die_mysql_errors"] == TRUE) {
@@ -328,7 +338,7 @@ class DatabaseHandler extends stdClass
 
       
       // DEV:  Comment out when not needed.
-      print "<pre>" . print_r($arr, TRUE) . "</pre>";
+      // print "<pre>" . print_r($arr, TRUE) . "</pre>";
       
       die;          
     }
