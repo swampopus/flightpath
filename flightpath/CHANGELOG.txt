@@ -4,6 +4,8 @@ FlightPath 6.x Changelog
 2022-04-27
   Modified the email sent out by a db_error to include the query/args, to make it easier to debug.
   
+  Removed jquery ui's package.json file to prevent github from flagging unsafe dependencies (which are not being used)
+  
 
 2022-04-18
   If a semester block is empty, we do not show it on the degree / what if tabs.
