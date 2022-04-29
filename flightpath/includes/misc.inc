@@ -1545,7 +1545,12 @@ function csv_to_array($csv_string) {
 function csv_multiline_to_array($csv_str, $bool_first_row_is_headers = TRUE) {
   $csv = array_map('str_getcsv', explode("\n", trim($csv_str)));
   array_walk($csv, function(&$a) use ($csv) {
-    $a = array_combine($csv[0], $a);
+    if (count($a) == count($csv[0])) {  
+      $a = array_combine($csv[0], $a);
+    }
+    else {
+      fpm("Warning: issue converting multiline CSV to an array within FlightPath.  Not the same number of elements.");
+    }
   });
   if (!$bool_first_row_is_headers) {
     array_shift($csv); # remove column header
