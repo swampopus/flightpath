@@ -548,9 +548,16 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items) {
   $attributes = user_get_registered_attributes();
   if (count($attributes) === 0) return;  // nothing to do.
   
-  
-  
+    
   foreach ($attributes as $attr => $definition) {
+    
+    
+    if (!isset($definition['display'])) {
+      // No display set, so create a "default" one that just uses the title of the attribute
+      $definition['display']['value'] = array(
+        'label' => $definition['title'],
+      );
+    }
     
     
     foreach ($definition['display'] as $attr_key => $details) {      
@@ -751,6 +758,14 @@ function user_edit_attribute_form($user_id = 0, $attribute_name = "") {
     fp_add_css($attributes[$name]['settings']['css']);
   }
       
+
+  if (!isset($attributes[$name]['fields'])) {
+    // Create a "default" field of "value" that's a simple textfield.
+    $attributes[$name]['fields']['value'] = array(
+      'label' => $attributes[$name]['title'],
+      'type' => 'textfield', 
+    );
+  }
 
   // Show the fields.
   if (isset($attributes[$name]['fields'])) {

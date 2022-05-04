@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-05-03
+  Modified user.module so that defining user attributes is easier; it will assume it's a textfield and name "value" if no field or
+  display information is given.
+
+
 2022-04-29
   Modified function csv_multiline_to_array to make it smarter and not throw warnings so easily.
   
