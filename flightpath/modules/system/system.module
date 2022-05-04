@@ -2043,7 +2043,7 @@ function system_get_available_themes() {
 
 
 /**
- * Returns the "whitelist" (from system settings) as an array.  If empty, it will return FALSE
+ * Returns the "whitelist" or "allow list" (from system settings) as an array.  If empty, it will return FALSE
  */
 function system_get_user_whitelist() {
   $rtn = array();
@@ -2134,10 +2134,10 @@ function system_settings_form() {
 
   $form["user_whitelist"] = array(
     "type" => "textarea",
-    "label" => t("Only allow certain users to log in (whitelist):"),    
+    "label" => t("Only allow certain users to log in (allow list):"),    
     "value" => variable_get('user_whitelist', ''),
     "description" => t("You may explicitly state which users are allowed to log in to FlightPath at this time.
-                        Enter usernames, email addresses, or CWIDs, one per line.  Users who are not part of this whitelist
+                        Enter usernames, email addresses, or CWIDs, one per line.  Users who are not part of this \"allow list\"
                         will be returned to the login screen, with a message stating that the system is only allowing
                         certain users to log in at this time.   
                         <br>Note: the admin user
@@ -2145,7 +2145,7 @@ function system_settings_form() {
                         this box and save."), 
   );                                
 
-
+ 
 
   $form['mfa_enabled'] = array(
     'type' => 'select',
@@ -3461,7 +3461,7 @@ function system_login_form_validate($form, &$form_state) {
       return;    
     }
   }
-
+ 
     
   
   // otherwise, we know it must be correct.  Continue.  

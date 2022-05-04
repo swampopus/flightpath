@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-05-04
+  Changed wording of setting in system.module.
+  
+
 2022-05-03
   Modified user.module so that defining user attributes is easier; it will assume it's a textfield and name "value" if no field or
   display information is given.
