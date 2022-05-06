@@ -117,6 +117,17 @@ function hook_user_register_user_attributes() {
 } 
  
  
+/**
+ * Allows other modules to alter the "profile items".  
+ * 
+ * @see user_alter_student_profile_items for a real-life demo of this hook.
+ */ 
+function hook_alter_student_profile_items($bool_mini, &$extra_profile_items, $bool_balance = TRUE, $alt_section = "") {
+  
+  // Code goes here.  See user_alter_student_profile_items for a real-life demo of this hook.
+  
+} 
+ 
  
  
 /**

@@ -538,18 +538,17 @@ function user_edit_user_attributes_form_submit($form, $form_state) {
  * 
  * We want to see if any modules have registered attributes which are visible or editible in the student profile box.
  */
-function user_alter_student_profile_items($bool_mini, &$extra_profile_items) {
+function user_alter_student_profile_items($bool_mini, &$extra_profile_items, $bool_balance = TRUE, $alt_section = "") {
   global $current_student_id;
   
   $user_id = db_get_user_id_from_cwid($current_student_id, 'student');
   
-  //fp_add_js(fp_get_module_path('system') . '/js/system.js');  // make sure we have the js we need for dialogs.
-  
   $attributes = user_get_registered_attributes();
   if (count($attributes) === 0) return;  // nothing to do.
-  
     
   foreach ($attributes as $attr => $definition) {
+    
+    if ($alt_section != "" && @$definition['settings']['alt_section'] != $alt_section) continue;
     
     
     if (!isset($definition['display'])) {
@@ -592,11 +591,10 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items) {
       $url = fp_url("user/$user_id/edit-attribute/$attr", "window_mode=popup");
       $title = t("Edit ") . $definition['title'];
       $title = htmlentities($title);       
-      if (user_has_permission("edit_attribute_$attr")) {  // TODO:  Use real permission
+      if (user_has_permission("edit_attribute_$attr")) {
         $edit_link = "&nbsp;<a href='javascript:fpOpenSmallIframeDialog(\"$url\", \"$title\");'><i class='fa fa-pencil'></i></a>";
       }
-       
-            
+                   
       if (!$bool_mini) {
         if ($definition['settings']['large_profile']) {
           // We are on the large profile, and this element shoudl show on the large profile.
@@ -608,8 +606,8 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items) {
           $item['content'] .= $edit_link;          
         }
       } // if NOT mini
-      else {
-        // This IS mini
+      else if ($bool_mini) {
+        // This IS mini        
         if ($definition['settings']['mini_profile']) {
           // We are on the large profile, and this element should show on the mini profile.
           $bool_add_it = TRUE;
@@ -618,18 +616,39 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items) {
           // We are on the large profile, and this element should show on the mini profile.
           $bool_add_it = TRUE;
           $item['content'] .= $edit_link;
-        }
+        }      
+      } // else is mini      
       
-      } // else is mini
+      
+      
+      if ($alt_section != "" && isset($definition['settings']['alt_section'])) {
+                   
+        // Are we adding to some alt_section?  Is it editable?
+        if ($definition['settings']['alt_section'] == $alt_section) {
+      
+          // We are defined some alt section
+          $bool_add_it = TRUE;
+        }
+        if (@$definition['settings']['alt_editable']) {
+          // We are on the large profile, and this element should show on the mini profile.
+          $bool_add_it = TRUE;
+          $item['content'] .= $edit_link;
+        }        
+      }
+      
+      
       
     } // foreach
    
    
-    if ($bool_add_it) {      
+    if ($bool_add_it && $bool_balance) {      
       // permission check as to whether it can be viewed at all
       if (user_has_permission("view_attribute_$attr")) {      
         fp_push_and_balance_profile_items($extra_profile_items, array($attr . "__" . $attr_key => $item));
       }
+    }
+    else if ($bool_add_it) {
+      $extra_profile_items[$attr . '__' . $attr_key] = $item;
     }
     
   } // foreach attributes

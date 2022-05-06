@@ -315,6 +315,8 @@ function schools_menu() {
  * our new custom permissions.
  */
 function schools_menu_alter(&$items) {
+  if (!is_array($items)) return;
+  
   foreach ($items as $path => $item) {
             
     if ($path == 'admin/degrees/edit-degree/%/%') {      
