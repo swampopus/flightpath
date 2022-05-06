@@ -560,15 +560,17 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items, $bo
     
     
     foreach ($definition['display'] as $attr_key => $details) {      
-      $value = user_get_attribute($user_id, $attr . "__" . $attr_key, '');
+      $value = user_get_attribute($user_id, $attr . "__" . $attr_key, '');      
       $display_value = filter_markup($value, 'plain');
       
       // Is there any special way this value is meant to be displayed?
       // Ex: if its a date field, should we change how that gets displayed?
       invoke_hook("alter_user_attribute_display", array($attr . '__' . $attr_key, &$display_value));
-      
-      
-      if (isset($definition['fields'][$attr_key]['options'][$value])) {
+            
+            
+      // If this attribute had "options", like radios or select, then use THAT value.  Doesn't work with select lists that
+      // make use of optgroups.      
+      if (isset($definition['fields'][$attr_key]['options'][$value])) {        
         $display_value = $definition['fields'][$attr_key]['options'][$value];
       }
       
@@ -586,6 +588,7 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items, $bo
       
       
       $bool_add_it = FALSE;
+      $bool_added_edit = FALSE;
 
       $edit_link = "";
       $url = fp_url("user/$user_id/edit-attribute/$attr", "window_mode=popup");
@@ -603,7 +606,8 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items, $bo
         if ($definition['settings']['large_profile_editable']) {
           $bool_add_it = TRUE;
           // Display link to edit this attribute.
-          $item['content'] .= $edit_link;          
+          $item['content'] .= $edit_link;        
+          $bool_added_edit = TRUE;  
         }
       } // if NOT mini
       else if ($bool_mini) {
@@ -616,6 +620,7 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items, $bo
           // We are on the large profile, and this element should show on the mini profile.
           $bool_add_it = TRUE;
           $item['content'] .= $edit_link;
+          $bool_added_edit = TRUE;
         }      
       } // else is mini      
       
@@ -629,10 +634,11 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items, $bo
           // We are defined some alt section
           $bool_add_it = TRUE;
         }
-        if (@$definition['settings']['alt_editable']) {
+        if (@$definition['settings']['alt_editable'] && $bool_added_edit == FALSE) {
           // We are on the large profile, and this element should show on the mini profile.
           $bool_add_it = TRUE;
           $item['content'] .= $edit_link;
+          $bool_added_edit = TRUE;
         }        
       }
       

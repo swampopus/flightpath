@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-05-06
+  Tweaks in user.module to make custom attributes more configurable.
+  
+
 2022-05-04
   Changed wording of setting in system.module.
   
