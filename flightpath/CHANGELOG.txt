@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-05-08
+  Fixed logic in advise module where number of advised students for a particular course were not being calculated correctly.
+  
+
 2022-05-06
   Tweaks in user.module to make custom attributes more configurable.
   

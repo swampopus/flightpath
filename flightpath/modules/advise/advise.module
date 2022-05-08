@@ -336,9 +336,6 @@ function advise_get_count_of_advised_course_for_term($course_id, $term_id) {
                    AND a.student_id = b.cwid                   
                    AND a.student_id = d.cwid
                    AND d.is_active = 1
-                   
-                   GROUP BY a.student_id
-                   
                    ", array($course_id, $term_id));
   $cur = db_fetch_array($res);
   $count = intval(@$cur["mycount"]);
@@ -361,8 +358,6 @@ function advise_get_count_of_enrolled_course_for_term($course_id, $term_id) {
                    AND c.delete_flag = 0                   
                    AND a.course_id = c.course_id
                    AND a.term_id = ?
-                   
-                   
                    ", array($course_id, $term_id));
   $cur = db_fetch_array($res);
   $count = intval(@$cur["mycount"]);

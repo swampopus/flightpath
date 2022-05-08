@@ -816,7 +816,7 @@ class Course extends stdClass
     // took out: and `catalog_year`='$this->catalog_year'
     // because we don't care what catalog year it comes from...
     $res = $this->db->db_query("SELECT * FROM $table_name
-            WHERE course_id = '?'
+            WHERE course_id = ?
             AND delete_flag = '0' 
             ORDER BY subject_id, course_num ", $this->course_id);
     while($cur = $this->db->db_fetch_array($res))
@@ -1208,6 +1208,8 @@ class Course extends stdClass
     if ($this->subject_id == "") {
       $this->load_descriptive_data();
     }
+    
+    // TODO: We should check ALL names for this course. Use get_all_names to do that.
     
     
     $temp = explode(" ",$str);
