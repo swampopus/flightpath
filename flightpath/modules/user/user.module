@@ -1278,15 +1278,17 @@ function user_perm() {
     "can_edit_permissions" => array(
       "title" => t("Edit permissions"),
       "description" => t("The user may assign permissions to different roles in the system."),
+      "admin_restricted" => TRUE, // means only appears for admin (user_id == 1)
     ),   
     "manage_users" => array(
       "title" => t("Manage users"),
       "description" => t("This is a powerful permission!  It allows the user to edit the details
-                          of other users, as well as create users."),
+                          of other users, as well as create users."),                           
     ),    
     "delete_users" => array(
       "title" => t("Delete users"),
       "description" => t("This is a powerful permission!  It allows the user delete users from the system."),
+      "admin_restricted" => TRUE, // means only appears for admin (user_id == 1)
     ),
     "change_own_password" => array(
       "title" => t("Change own password?"),
@@ -1323,6 +1325,7 @@ function user_perm() {
  * This is the permissions form, where users can set which roles have which permissions.
  */
 function user_permissions_form() {
+  global $user;  
   $form = array();
 
   fp_add_css(fp_get_module_path("user") . "/css/user.css");
@@ -1389,10 +1392,16 @@ function user_permissions_form() {
     $zebra = "even";
     
     // Let's get all the perms.
+    $is_empty = TRUE;
     $perms = call_user_func($module . "_perm");    
     foreach ($perms as $perm_name => $perm_details) {
       $title = @$perm_details["title"];
       $desc = @$perm_details["description"];
+
+      if (isset($perm_details['admin_restricted']) && intval($perm_details['admin_restricted'] === 1) && intval($user->id) !== 1) {
+        // This permission is restricted to admin only.  Meaning only user_id 1 is allowed to grant it.
+        continue;
+      }
 
       $zebra = ($zebra == "even") ? "odd" : "even";
 
@@ -1402,6 +1411,8 @@ function user_permissions_form() {
                       <div class='perm-desc' title='$perm_name'>$desc</div>
                    </td>",
       );   
+
+      $is_empty = FALSE;
 
       foreach ($roles as $key => $role) {
         
@@ -1422,7 +1433,7 @@ function user_permissions_form() {
           "suffix" => "</td>",          
         );   
         
-      }
+      } // foreach roles
      
       
       
@@ -1432,9 +1443,18 @@ function user_permissions_form() {
             
            
       
+    } // foreach perms
+    
+    if ($is_empty) {    
+      $form['mark' . $m++] = array(
+        'value' => "<tr class='perm-cb-row perm-cb-row-$zebra'><td class='perm-details' valign='top' colspan=1000>
+                    <div class='restricted-permissions'>" . t("Sorry, you cannot access the permissions for this section.") . "</div>
+                    </td>",
+      );
     }
     
-  }
+    
+  } // foreach modules
   
     
   

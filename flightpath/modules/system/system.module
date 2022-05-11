@@ -25,6 +25,7 @@ function system_perm() {
     "administer_modules" => array(
       "title" => t("Administer modules"),
       "description" => t("This will allow a user to install, enable, disable, and uninstall modules."),
+      "admin_restricted" => TRUE, // means only appears for admin (user_id == 1)
     ),    
     
     "clear_system_cache" => array(
@@ -68,6 +69,7 @@ function system_perm() {
       "description" => t("WARNING: This is a very VERY powerful and DANGEROUS permission.  Only give it to
                        developers.  An 'Execute PHP' link will appear on the admin menu, which
                        lets the user execute any arbitrary PHP code."),
+      "admin_restricted" => TRUE, // means only appears for admin (user_id == 1)
     ),
                             
        

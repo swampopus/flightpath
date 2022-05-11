@@ -2384,6 +2384,7 @@ function engagements_perm()
     'administer_engagements' => array(
       'title' => 'Administer Engagements',
       'description' => t('The user can edit the system config settings for the Engagements module.  Only give to admin users.'),
+      "admin_restricted" => TRUE, // means only appears for admin (user_id == 1)
     ),
     'can_view_engagements' => array(
       'title' => 'Can view Engagements',

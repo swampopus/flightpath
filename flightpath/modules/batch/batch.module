@@ -383,6 +383,7 @@ function batch_perm() {
     "batch_run_test" => array(
       "title" => t("Run test batch function"),
       "description" => t("This is only useful for developers.  It allows a user to execute a test batch process by visiting example.com/batch-test-form in their browser."),
+      "admin_restricted" => TRUE, // means only appears for admin (user_id == 1)
     ),
   );
 

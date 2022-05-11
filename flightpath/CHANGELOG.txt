@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-05-11
+  Added concept of "admin_restricted" to permissions.  If set, then it will only appear for the admin user (user_id = 1).  This way
+  you can give the "edit permissions" permission to users and still not let them access the potentially dangerous areas.
+  
+  Masquerade will not allow a user to become admin (user id 1).
+
+
 2022-05-08
   Fixed logic in advise module where number of advised students for a particular course were not being calculated correctly.
   

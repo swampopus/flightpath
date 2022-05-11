@@ -13,6 +13,7 @@ function encryption_perm() {
     "administer_encryption" => array(
       "title" => t("Administer encryption module"),
       "description" => t("Configure settings relating to the encryption module."),
+      "admin_restricted" => TRUE, // means only appears for admin (user_id == 1)
     ),
   );
 }

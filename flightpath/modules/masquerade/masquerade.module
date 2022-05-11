@@ -48,7 +48,15 @@ function masquerade_menu() {
 function masquerade_perform_masquerade() {
   global $user;
   
-  $user_id = $_REQUEST["user_id"];
+  $user_id = intval($_REQUEST["user_id"]);
+  
+  // Do not allow user_id 1
+  if ($user_id === 1) {
+    fp_add_message(t("Admin user is not allowed to be selected for masquerade."), "error");
+    fp_goto("<front>");
+    return;
+  }
+  
   
   // Set up a new $account object.
   $account = new stdClass();
@@ -177,28 +185,32 @@ function masquerade_form_submit($form, &$form_state) {
   $res = db_query("SELECT user_id FROM users WHERE user_id LIKE ?
                     LIMIT 20", array("%$username_or_cwid%"));
   while ($cur = db_fetch_array($res)) {
-    $users[$cur['user_id']] = $cur['user_id'];
+    $users[intval($cur['user_id'])] = $cur['user_id'];
   }
   
   $res = db_query("SELECT user_id FROM users WHERE user_name LIKE ?
                     LIMIT 20", array("%$username_or_cwid%"));
   while ($cur = db_fetch_array($res)) {
-    $users[$cur['user_id']] = $cur['user_id'];
+    $users[intval($cur['user_id'])] = $cur['user_id'];
   }
 
   
   $res = db_query("SELECT user_id FROM users WHERE email LIKE ?
                     LIMIT 20", array("%$username_or_cwid%"));
   while ($cur = db_fetch_array($res)) {
-    $users[$cur['user_id']] = $cur['user_id'];
+    $users[intval($cur['user_id'])] = $cur['user_id'];
   }
   
   $res = db_query("SELECT user_id FROM users WHERE l_name LIKE ?
                     LIMIT 20", array("%$username_or_cwid%"));
   while ($cur = db_fetch_array($res)) {
-    $users[$cur['user_id']] = $cur['user_id'];
+    $users[intval($cur['user_id'])] = $cur['user_id'];
   }
     
+  if (isset($users[1])) {
+    unset($users[1]); // do not allow admin user to be selected.
+  }
+  
   
   // Okay, let's add the users we found to the SESSION.
   $_SESSION["masquerade_lookup_users"] = $users;
@@ -218,8 +230,9 @@ function masquerade_perm() {
     "access_masquerade" => array(
       "title" => t("Access masquerade"),
       "description" => t("This is a VERY powerful permission!  It will allow 
-                           a user to become any other user, even admin, without
+                           a user to become any other user (except admin), without
                            knowing their password.  Only give it to very trusted users."),
+      "admin_restricted" => TRUE, // means only appears for admin (user_id == 1)
     ),
   );
 }
