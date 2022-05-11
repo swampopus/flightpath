@@ -1398,7 +1398,7 @@ function user_permissions_form() {
       $title = @$perm_details["title"];
       $desc = @$perm_details["description"];
 
-      if (isset($perm_details['admin_restricted']) && intval($perm_details['admin_restricted'] === 1) && intval($user->id) !== 1) {
+      if (isset($perm_details['admin_restricted']) && intval($perm_details['admin_restricted']) === 1 && intval($user->id) !== 1) {
         // This permission is restricted to admin only.  Meaning only user_id 1 is allowed to grant it.
         continue;
       }
