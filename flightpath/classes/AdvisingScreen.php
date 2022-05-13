@@ -5841,8 +5841,8 @@ if (strstr($group->group_id, "7516_")) {
     $t_degree_plan = new DegreePlan();
     $t_degree_plan->degree_id = $req_by_degree_id;
     $t = $t_degree_plan->get_title2(FALSE, TRUE);
-    if ($t) {        
-        
+    if (trim($t) != "") {        
+ 
       $pC .= "<div class='  group-select-req-by-degree'>
                 " . t("This group is required by ");
       $html = "";

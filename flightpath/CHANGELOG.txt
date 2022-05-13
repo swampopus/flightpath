@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-05-13
+  Made small alteration in DegreePlan, so that if a degree title is blank, we don't see a message like "This groups belongs to" (with no degree
+  title) in the Courses Added by Advisor group.
+  
+
 2022-05-11
   Added concept of "admin_restricted" to permissions.  If set, then it will only appear for the admin user (user_id = 1).  This way
   you can give the "edit permissions" permission to users and still not let them access the potentially dangerous areas.

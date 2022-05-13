@@ -833,7 +833,7 @@ class DegreePlan extends stdClass
     
     $dtitle = "";
 
-    if ($this->title != "") {
+    if ($this->title) {
       $dtitle = $this->title;
       if ($bool_include_html) {
         $dtitle = "<span class='deg-title'>$this->title</span>";
@@ -851,9 +851,9 @@ class DegreePlan extends stdClass
                               WHERE major_code = ? 
                               ORDER BY catalog_year DESC LIMIT 1", $this->major_code);
       $cur = $this->db->db_fetch_array($res);
-      $this->title = $cur["title"];
+      $this->title = trim($cur["title"]);
 
-      if ($bool_include_html) {
+      if ($bool_include_html && $this->title) {
         $dtitle = "<span class='deg-title'>$this->title</span>";
       }
       else {
@@ -863,7 +863,7 @@ class DegreePlan extends stdClass
 
 
     if ($bool_include_track_title && $this->track_title != "") {
-      if ($bool_include_html) {  
+      if ($bool_include_html && $this->title) {  
         $dtitle .= "<span class='level-3-raquo'>&raquo;</span>";
         $dtitle .= "<span class='deg-track-title'>$this->track_title</span>";
       }
