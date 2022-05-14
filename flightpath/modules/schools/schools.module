@@ -269,6 +269,29 @@ function schools_menu() {
 
 
 
+  $items["admin/config/alerts-settings/$school_id"] = array(
+    "title" => $school_name,
+    "page_callback" => "fp_render_form",
+    "page_arguments" => array("alerts_settings_form", "system_settings", 3),
+    "access_arguments" => array("administer_alerts"),
+      "page_settings" => array(
+        "page_hide_report_error" => TRUE,        
+        "menu_links" => array(         
+          0 => array(
+            "text" => "Admin Console",
+            "path" => "admin-tools/admin",
+            "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+          ),
+        ),
+      ),    
+      "type" => MENU_TYPE_TAB,
+      "tab_family" => "alerts_settings",      
+      "weight" => $weight,    
+    );      
+
+
+
+
   $items["admin/config/audit-settings/$school_id"] = array(
     "title" => $school_name,
     "page_callback" => "fp_render_form",
@@ -374,6 +397,15 @@ function schools_menu_alter(&$items) {
       $items[$path]['page_settings']['tab_title'] = t('Default');
       unset($items[$path]['tab_parent']);            
     }
+
+
+    if ($path == 'admin/config/alerts-settings') {
+      $items[$path]['type'] = MENU_TYPE_DEFAULT_TAB;
+      $items[$path]['tab_family'] = 'alerts_settings';
+      $items[$path]['page_settings']['tab_title'] = t('Default');
+      unset($items[$path]['tab_parent']);            
+    }
+
 
     if ($path == 'admin/config/audit-settings') {
       $items[$path]['type'] = MENU_TYPE_DEFAULT_TAB;
@@ -704,10 +736,9 @@ function schools_form_alter(&$form, $form_id) {
     'admin_edit_group_form',
     'admin_edit_course_form',
     'user_edit_user_form',
-    'user_edit_student_user_form',        
+    'user_edit_student_user_form',
   );
     
-
       
   // Add "school" dropdown to the degrees, groups, and courses form
   if (in_array($form_id, $forms_to_alter)) {
@@ -907,8 +938,9 @@ function schools_form_alter(&$form, $form_id) {
   } // form is admin_urgent_message_form
 
   
-      
-  if ($form_id == "system_school_data_form" || $form_id == 'admin_advising_settings_form' || $form_id == "course_search_settings_form" || $form_id == 'audit_settings_form') {    
+  // Forms for which we should allow override values per school.
+  $oforms = array('alerts_settings_form',"system_school_data_form",'admin_advising_settings_form',"course_search_settings_form",'audit_settings_form');    
+  if (in_array($form_id,$oforms)) {    
     // We want to add a "use default" checkbox at the top, which, if set, will disable all of the form elements.        
     fp_add_js(fp_get_module_path('schools') . '/js/schools.js');
     fp_add_css(fp_get_module_path('system') . '/css/style.css');

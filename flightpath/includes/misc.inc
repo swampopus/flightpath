@@ -1538,6 +1538,26 @@ function csv_to_array($csv_string) {
   return $temp;
 }
 
+/**
+ * Splits a basic csv but returns an array suitable for the form_api, retuns assoc array.
+ */
+function csv_to_form_api_array($csv_string, $delimeter = ",", $bool_make_keys_machine_readable = TRUE) {
+  $rtn = array();  
+  $temp = explode($delimeter, $csv_string);
+  foreach ($temp as $line) {
+    $line = trim($line);
+    if (!$line) continue;
+    
+    $key = strtolower(fp_get_machine_readable($line));
+    $rtn[$key] = $line;
+    
+  }  
+  
+  return $rtn;
+  
+}
+
+
 
 /**
  * From https://www.php.net/manual/en/function.str-getcsv.php#117692

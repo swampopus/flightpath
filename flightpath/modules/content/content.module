@@ -1560,6 +1560,8 @@ function content_edit_content_form_submit(&$form, &$form_state) {
   // Add in our new field values.  
   foreach ($types[$type]['fields'] as $fieldname => $details) {
     if ($details['type'] != 'cfieldset') {
+        
+        
       
       if ($details['type'] == 'datetime-local') {
         // Since this is datetime-local, the value is actually already in the user's timezone.
@@ -1855,12 +1857,22 @@ function content_content_save(&$content) {
       
       $val = $content->{$db_field_name}['value'];
               
-      if (is_array($val)) {
-        // Since val is an array, we need to save it in a serialized format.  This isn't the best possible way to do it,
-        // but it is better than nothing.  The only types of fields this would affect would be checkboxes, which (shouldn't)
-        // have any commas or other trouble characters as they values here.
+      if ($details['type'] == 'checkboxes' && is_array($val)) {
+        // Since we came from "checkboxes", and val is an array, we will save the following way:
+        // ~~key~~key~~key~~.  This lets us query like so:  LIKE '%~~key~~%' to find elements with that key.  Not the most
+        // elegant way to do it, but it should work for now.
+        $new_val = "~~";  // always begin with ~~
+        foreach ($val as $k => $v) {
+          $new_val .= $k . "~~";  // always end with ~~.
+        }
+        $val = $new_val;
+      }            
+      else if (is_array($val)) {
+        // Not sure what this is, but we will serialize it.
         $val = serialize($val);
       }            
+
+
    
       $params[":field__$fieldname"] = $val;
     
@@ -1876,9 +1888,22 @@ function content_content_save(&$content) {
           $param_names[] = ":$db_field_name";          
           $val = $content->{$db_field_name}['value'];
                   
-          if (is_array($val)) {
+          if ($edetails['type'] == 'checkboxes' && is_array($val)) {
+            // Since we came from "checkboxes", and val is an array, we will save the following way:
+            // ~~key~~key~~key~~.  This lets us query like so:  LIKE '%~~key~~%' to find elements with that key.  Not the most
+            // elegant way to do it, but it should work for now.
+            $new_val = "~~";  // always begin with ~~
+            foreach ($val as $k => $v) {
+              $new_val .= $k . "~~";  // always end with ~~.
+            }
+            $val = $new_val;
+          }            
+          else if (is_array($val)) {
+            // Not sure what this is, but we will serialize it.
             $val = serialize($val);
-          }
+          }            
+                            
+          
           $params[":field__$fieldname"] = $val;
           
         }
@@ -2127,7 +2152,18 @@ function content_content_load(&$content) {
       
       // If this was a set of checkboxes ($val is an array), we want to display the label the values went to.
       if ($details['type'] == 'checkboxes') {
-        $display_value .= "<div class='checkbox-values checkbox-values-field__$fieldname'>";
+        $display_value = "<div class='checkbox-values checkbox-values-field__$fieldname'>";
+        // Convert val into an array.  It will look like:  ~~key~~key~~key~~ etc.        
+        @$temp = explode("~~", $val);
+        if (!is_array($temp)) $temp = array();
+                
+        $val = array();
+        foreach ($temp as $k) {
+          if (trim($k) == "") continue;
+          $val[$k] = $k;
+        }
+        
+                
         if (is_array($val)) {
           foreach ($val as $k => $v) {  
             $temp = @$details['options'][$v];
@@ -2135,6 +2171,7 @@ function content_content_load(&$content) {
           }
         }
         $display_value .= "</div>";
+        $content->{'field__' . $fieldname}['value'] = $val;
       }
       
       if ($details['type'] == 'file') {
@@ -2226,7 +2263,25 @@ function content_content_load(&$content) {
           
           // If this was a set of checkboxes ($val is an array), we want to display the label the values went to.
           if ($edetails['type'] == 'checkboxes') {
-            // TODO: implement
+            $display_value = "<div class='checkbox-values checkbox-values-field__$fieldname'>";
+            // Convert val into an array.  It will look like:  ~~key~~key~~key~~ etc.
+            $temp = explode("~~", $val);
+            $val = array();
+            foreach ($temp as $k) {
+              if (trim($k) == "") continue;
+              $val[$k] = $k;
+            }
+            
+                    
+            if (is_array($val)) {
+              foreach ($val as $k => $v) {  
+                $temp = @$details['options'][$v];
+                if ($temp != "") $display_value .= "<div class='checkbox-val'>$temp</div>";
+              }
+            }
+            $display_value .= "</div>";
+            $content->{'field__' . $fieldname}['value'] = $val;
+
           }
           
           

@@ -5,6 +5,9 @@ FlightPath 6.x Changelog
   Made small alteration in DegreePlan, so that if a degree title is blank, we don't see a message like "This groups belongs to" (with no degree
   title) in the Courses Added by Advisor group.
   
+  Made content module handle checkboxes a little better.  Instead of saving as serialized array, it saves as a string which can be queried
+  using LIKE.  A little cumbersome, but better than if it is serialized.
+  
 
 2022-05-11
   Added concept of "admin_restricted" to permissions.  If set, then it will only appear for the admin user (user_id = 1).  This way

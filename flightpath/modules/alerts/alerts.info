@@ -1,4 +1,4 @@
 name = Alerts
 description = Alert system (similar to tickets) for FP
 core = 6.x
-schema = 2
+schema = 3

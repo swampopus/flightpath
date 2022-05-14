@@ -1468,12 +1468,14 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
   if ($alert_count_by_type && is_array($alert_count_by_type) && count($alert_count_by_type) > 0) {    
     $unread_total = 0;   
     foreach ($alert_count_by_type as $module => $alert_types) {
-      if ($alert_types && is_array($alert_types)) {
+      if ($alert_types && is_array($alert_types)) {        
         foreach ($alert_types as $k => $details) {
-          $unread_total += $details['unread'];
+          $ur = intval( $details['unread']);
+          if ($ur < 0) $ur = 0;  // bug that can happen after deletions, it can be in negative numbers.
+          $unread_total += $ur;
         }
       }
-    }   
+    }
     if ($unread_total > 0) {
       $badge = "<span class='tub-alert-count'><i class='fa fa-circle'></i></span>";
     }

@@ -14,23 +14,27 @@ function alerts_install() {
 
   $q = "
 CREATE TABLE `content__alert` (
-  `cid` int unsigned NOT NULL,
-  `vid` int unsigned NOT NULL,
-  `field__student_id` varchar(255)DEFAULT NULL,
+  `cid` int(10) unsigned NOT NULL,
+  `vid` int(10) unsigned NOT NULL,
+  `field__student_id` varchar(255) DEFAULT NULL,
   `field__alert_status` varchar(255) DEFAULT NULL,
-  `field__department` varchar(255) DEFAULT NULL,
-  `field__alert_msg` longtext,
-  `field__visibility` varchar(255)  DEFAULT NULL,
+  `field__tags` text DEFAULT NULL,
+  `field__alert_msg` longtext DEFAULT NULL,
+  `field__visibility` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`vid`),
   KEY `cid` (`cid`),
   KEY `field__student_id` (`field__student_id`),
   KEY `field__alert_status` (`field__alert_status`),
-  KEY `field__department` (`field__department`),
   KEY `field__alert_msg` (`field__alert_msg`(768)),
-  KEY `field__visibility` (`field__visibility`)
+  KEY `field__visibility` (`field__visibility`),
+  KEY `field__tags` (`field__tags`(500))
 );  
   ";
   db_query($q);
+
+
+
+
   
 
 
@@ -66,6 +70,17 @@ function alerts_update($old_schema, $new_schema) {
     fpm("Altered content__alert to use LONGTEXT instead of just TEXT.");
     
   }  
+    
+  if (intval($old_schema) < 3) {
+    // Get rid of "field__department", add "field__tags"
+    db_query("ALTER TABLE content__alert DROP COLUMN field__department ");
+    db_query("ALTER TABLE content__alert ADD COLUMN `field__tags` text DEFAULT NULL ");
+    db_query("ALTER TABLE content__alert ADD INDEX (`field__tags`(500)) ");
+    
+    
+  }  
+        
+    
     
 }
 
