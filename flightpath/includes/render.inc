@@ -413,20 +413,42 @@ function clear_session_form_values($callback) {
  * All I really care about is making sure required fields have
  * a value in them.  If they do not, we will file a form_error.
  */
-function form_basic_validate($form, $form_submitted) {
+function form_basic_validate($form, $form_state) {
   
   foreach ($form as $name => $element) {
     if (is_array($element) && @$element["required"]) {
       // Okay, this is a required field.  So, check that it has a non-blank value
       // in form_submitted.
-      if ($form_submitted["values"][$name] == "") {
+      if ($form_state["values"][$name] == "") {
         // It's blank!  ERROR!
         $label = $element["label"];
         if ($label == "") $label = $name;
-        form_error($name, t("You must enter a value for <b>%element_label</b>", array("%element_label" => $label)));
+        form_error($name, t("You must enter a value for <b>%element_label</b>.", array("%element_label" => $label)));
       }
-    }
+      
+      
+    } // if is_array element and required
+    
+    if (is_array($element) && $element['type'] == 'value') {
+      
+      $should_be_value = @trim($form[$name]['value']);
+      $found_value = @trim($form_state['values'][$name]);
+      
+      if ($should_be_value !== $found_value) {
+        form_error('', t("Invalid value found in form, possible hacking attempt or bug.  This incident has been logged.", array("%element_label" => $label)));
+        watchdog('system', "Invalid value found in form, possible hacking attempt or bug.  Should be value: '$should_be_value', Found value: '$found_value' ", array(), WATCHDOG_ERROR);
+      }
+      
+      
+    } // if element is of type "value"
+    
+    
+    
   }
+  
+  
+  
+  
   
 }
 
@@ -680,10 +702,11 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     $rtn .= "<input type='$type' name='$name' id='element-$cssname' size='$size' maxlength='$maxlength' value='$value' $attributes>";
   }
   
-  if ($type == "hidden") {
+  if ($type == "hidden" || $type == "value") {
     $value = htmlentities($value, ENT_QUOTES);    
     $rtn .= "<input type='hidden' name='$name' id='element-$cssname' value='$value'>";
   }
+  
 
   if ($type == "file") {
     $tname = $name;

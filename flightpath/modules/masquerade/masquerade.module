@@ -115,7 +115,8 @@ function masquerade_form() {
   
   $form["submit"] = array(
     "type" => "submit", 
-    "value" => t("Look up") . " ->",
+    "spinner" => TRUE,
+    "value" => t("Look up"),
   );
   
   $users = $_SESSION["masquerade_lookup_users"];

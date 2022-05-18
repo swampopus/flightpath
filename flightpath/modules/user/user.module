@@ -1391,16 +1391,18 @@ function user_permissions_form() {
     $mcount++;
     $zebra = "even";
     
-    // Let's get all the perms.
-    $is_empty = TRUE;
+    // Let's get all the perms.    
     $perms = call_user_func($module . "_perm");    
     foreach ($perms as $perm_name => $perm_details) {
       $title = @$perm_details["title"];
       $desc = @$perm_details["description"];
-
+      $extra_desc = "";
+      $attributes = array();
+      
       if (isset($perm_details['admin_restricted']) && intval($perm_details['admin_restricted']) === 1 && intval($user->id) !== 1) {
         // This permission is restricted to admin only.  Meaning only user_id 1 is allowed to grant it.
-        continue;
+        $extra_desc = "<div class='restricted-permissions'>" . t("Sorry, you cannot access this permission.") . "</div>";        
+        $attributes['disabled'] = 'disabled';
       }
 
       $zebra = ($zebra == "even") ? "odd" : "even";
@@ -1409,11 +1411,11 @@ function user_permissions_form() {
         "value" => "<tr class='perm-cb-row perm-cb-row-$zebra'><td class='perm-details' valign='top'>
                       <div class='perm-title' title='$perm_name'>$title</div>                      
                       <div class='perm-desc' title='$perm_name'>$desc</div>
+                      $extra_desc
                    </td>",
       );   
 
-      $is_empty = FALSE;
-
+      
       foreach ($roles as $key => $role) {
         
         // Should this be checked by default (cause it was all ready in our table?)
@@ -1425,13 +1427,27 @@ function user_permissions_form() {
           $default_value = array($key . "___$perm_name" => $key . "___$perm_name");          
         }
         
-        $form["perm_cb_" . $cb++] = array(
+        $element_name = "perm_cb_" . $cb++;
+        
+        if (isset($attributes['disabled'])) {
+          $form[$element_name] = array(
+            'type' => 'value',
+            'value' => current($default_value),
+          );
+          $element_name = "markperm_disabledcb_" . $cb++;
+        }
+          
+          
+        $form[$element_name] = array(
           "type" => "checkboxes",
           "options" => array("$key" . "___$perm_name" => ""),
           "value" => $default_value,
           "prefix" => "<td class='perm-cb'>",
-          "suffix" => "</td>",          
+          "suffix" => "</td>",             
+          "attributes" => $attributes,         
         );   
+        
+        
         
       } // foreach roles
      
@@ -1444,14 +1460,6 @@ function user_permissions_form() {
            
       
     } // foreach perms
-    
-    if ($is_empty) {    
-      $form['mark' . $m++] = array(
-        'value' => "<tr class='perm-cb-row perm-cb-row-$zebra'><td class='perm-details' valign='top' colspan=1000>
-                    <div class='restricted-permissions'>" . t("Sorry, you cannot access the permissions for this section.") . "</div>
-                    </td>",
-      );
-    }
     
     
   } // foreach modules
@@ -1466,6 +1474,7 @@ function user_permissions_form() {
   $form["submit"] = array(
     "type" => "submit",
     "value" => t("Save permissions"),
+    "spinner" => TRUE,
     "prefix" => "<hr>",
   );
     
@@ -1473,34 +1482,60 @@ function user_permissions_form() {
 }
  
  
+
  
+ 
+ 
+  
 /**
  * Submit handler for the permissions form.
  */
 function user_permissions_form_submit($form, $form_submit) {
+  global $user;
+    
+  // Get all of the perms, so later we can make sure that we aren't trying to save an admin_restricted one (if we are not admin).  
+  $perms = invoke_hook("perm");  
+    
   $values = $form_submit["values"];
+  
+  // Create our temp table.  We do this so we don't truncate the production table, since if a hacker is trying
+  // to circumvent the admin_restricted status of a permission, it would break the system when we fp_goto the front page.
+  db_query("CREATE TEMPORARY TABLE `TEMP_role_permissions` LIKE `role_permissions`");
+  
   
   // We should begin by truncating our permissions table, then re-inserting
   // everything we get from this submission.
-  db_query("TRUNCATE TABLE role_permissions");
+  db_query("TRUNCATE TABLE `TEMP_role_permissions` ");
   
   // Find all the perm checkboxes.  
   foreach($values as $key => $val) {
     if (strstr($key, "perm_cb_")) {
       if (is_array($val)) {
         $cb = current($val);
-        if (strstr($cb, "___")) {
-          $temp = explode("___", $cb);
-          $rid = $temp[0];
-          $perm = $temp[1];
-          
-          // Okay, save this to our table.
-          db_query("INSERT INTO role_permissions (rid, perm)
-                    VALUES (?, ?) ", $rid, $perm);      
-        }
       }
+      else if (trim($val) != "") {
+        $cb = trim($val);
+      }
+      
+      if (strstr($cb, "___")) {
+        $temp = explode("___", $cb);
+        $rid = $temp[0];
+        $perm = $temp[1];
+        
+        // Okay, save this to our table.
+        db_query("INSERT INTO TEMP_role_permissions (rid, perm)
+                  VALUES (?, ?) ", $rid, $perm);      
+      }
+      
     }
   }
+  
+  // Copy everything from temp table to production table...
+  db_query("TRUNCATE role_permissions");
+  db_query("INSERT role_permissions SELECT * FROM `TEMP_role_permissions` ");
+  db_query("DROP TABLE `TEMP_role_permissions` ");  
+    
+  
   
   fp_add_message(t("Permissions saved successfully."));
   

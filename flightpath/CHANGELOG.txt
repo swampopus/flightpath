@@ -1,6 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-05-17
+  Fixed bug in permissions where admin_restricted perms were not being saved correctly.
+  
+  Added a new form element type: "value".  This is a hidden value which must not change.  If it does change from what is defined in the form,
+  the form will not validate and an error message will be shown.  This is a security feature so that malicious users cannot change hidden
+  field values which are meant to be immutable.
+  
+
 2022-05-13
   Made small alteration in DegreePlan, so that if a degree title is blank, we don't see a message like "This groups belongs to" (with no degree
   title) in the Courses Added by Advisor group.

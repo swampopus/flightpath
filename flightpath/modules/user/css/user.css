@@ -140,6 +140,13 @@ form.filters {
   clear: both;
 }
 
+.restricted-permissions {
+  margin-left: 20px;
+  color: red;
+}
+
+
+
 
 .selected {
   border: 1px solid blue;
