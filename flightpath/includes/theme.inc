@@ -2215,6 +2215,12 @@ function fp_render_menu_item($item, $bool_check_user_access = TRUE) {
   } 
   
   if (!$description) $extra_class = "fp-menu-item-tight";
+  
+  
+  $machine_title = strtolower(fp_get_machine_readable($title));
+  $machine_path = strtolower(fp_get_machine_readable($item['path']));
+   
+  $extra_class .= " fp-menu-item-title-$machine_title fp-menu-item-path-$machine_path "; 
    
   $rtn .= "<div class='fp-menu-item $extra_class'>
             <div class='fp-menu-item-link-line'>

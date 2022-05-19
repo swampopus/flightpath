@@ -1569,7 +1569,11 @@ function stats_display_main() {
   $reports = invoke_hook('stats_additional_menublocks');
   if ($reports) {
     foreach ($reports as $module_name => $temp) {
-      $rtn .= "<div class='stats-main-menu stats-additional-menublocks'>";
+      $extraclass = "";
+
+      $extraclass .= "stats-menublock-path-" . strtolower(fp_get_machine_readable(current($reports[$module_name])));
+      
+      $rtn .= "<div class='stats-main-menu stats-additional-menublocks $extraclass'>";
       foreach($reports[$module_name] as $title => $menu_block_path) {
         $rtn .= fp_render_menu_block($title, $menu_block_path);        
       }
