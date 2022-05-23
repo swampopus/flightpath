@@ -1569,7 +1569,7 @@ function stats_display_main() {
   $reports = invoke_hook('stats_additional_menublocks');
   if ($reports) {
     foreach ($reports as $module_name => $temp) {
-      $extraclass = "";
+      $extraclass = "";  
 
       $extraclass .= "stats-menublock-path-" . strtolower(fp_get_machine_readable(current($reports[$module_name])));
       
