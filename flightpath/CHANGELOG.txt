@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-05-23
+  Fixed bug where hook_update() wouldn't be called if the module was under custom/modules/_dirname (beginning with underscore).
+  
+
 2022-05-19
   Modified when we render a menu item in HTML, to include more details about its title and path as CSS classes, making it easier
   to theme or hide as needed.

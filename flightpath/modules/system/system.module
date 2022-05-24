@@ -795,6 +795,19 @@ function system_confirm_db_updates_form_submit($form, $form_state) {
   $module_dirs[] = array("start" => "modules", "type" => t("Core"));
   $module_dirs[] = array("start" => "custom/modules", "type" => t("Custom"));
     
+  // We will also add any directories which begin with an underscore in the custom/modules directory.
+  // For example:   custom/modules/_contrib
+  // Let's find such directories now.
+  $dir_files = scandir("custom/modules");  
+  foreach ($dir_files as $file) {
+    if ($file == '.' || $file == '..') continue;    
+    if (substr($file, 0, 1) == '_' && is_dir("custom/modules/$file")) {      
+      $module_dirs[] = array("start" => "custom/modules/$file", "type" => t("Custom/$file"));
+    }
+  }
+    
+    
+    
   foreach ($module_dirs as $module_dir) {
     $start_dir = $module_dir["start"];
      
@@ -822,12 +835,12 @@ function system_confirm_db_updates_form_submit($form, $form_state) {
             
             $path = "$start_dir/$file";
             
-            $res = db_query("SELECT * FROM modules WHERE path = '?' ", $path);
+            $res = db_query("SELECT * FROM modules WHERE path = ? ", $path);
             $cur = db_fetch_array($res);
-            $info_details_array["enabled"] = $cur["enabled"];
+            $info_details_array["enabled"] = intval($cur["enabled"]);
            
             // Does this module need to run db updates?
-            if (@$cur["enabled"] == "1" && @$cur["schema"] != @$info_details_array["schema"] && @$info_details_array["schema"] != "") {
+            if (@$cur["enabled"] == 1 && @intval($cur["schema"]) != @intval($info_details_array["schema"]) && @$info_details_array["schema"] != "") {
               
               // Add to our list of modules to run in our batch operations.
               
@@ -835,36 +848,9 @@ function system_confirm_db_updates_form_submit($form, $form_state) {
                 'module' => $module,
                 'path' => $path,
                 'cur_schema' => intval($cur['schema']),
-                'schema' => $info_details_array['schema'],
+                'schema' => intval($info_details_array['schema']),
               );
               
-              
-              
-              /*
-               * // YES, we need to run this module's hook_update function, if it exists.              
-              // So, let's try to do that.              
-
-              // If the module has a .install file, begin by including it.
-              if (include_module_install($module, $path)) {
-                  
-                // Include the original module file first.
-                include_module($module, TRUE, $path);
-                                   
-                // Now, we can call hook_update, if it exists.
-                if (function_exists($module . '_update')) {
-                  call_user_func_array($module . '_update', array($cur["schema"], $info_details_array["schema"]));
-                }
-                   
-              }              
-              
-              // Okay, update the modules table for this module, and set schema to correct version.
-              $res = db_query("UPDATE modules 
-                                SET `schema` = '?'
-                                WHERE path = '?' LIMIT 1 ", $info_details_array["schema"], $path);
-                                       
-              
-              fp_add_message(t("The module %module has run its DB updates.", array("%module" => $module)));              
-              */
               
               
             } // if enabled & schema != db schema  
