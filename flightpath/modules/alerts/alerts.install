@@ -17,6 +17,8 @@ CREATE TABLE `content__alert` (
   `cid` int(10) unsigned NOT NULL,
   `vid` int(10) unsigned NOT NULL,
   `field__student_id` varchar(255) DEFAULT NULL,
+  `field__target_faculty_id` varchar(255) DEFAULT NULL,
+  `field__exclude_advisor` tinyint(4) DEFAULT 0,  
   `field__alert_status` varchar(255) DEFAULT NULL,
   `field__tags` text DEFAULT NULL,
   `field__alert_msg` longtext DEFAULT NULL,
@@ -27,6 +29,8 @@ CREATE TABLE `content__alert` (
   KEY `field__alert_status` (`field__alert_status`),
   KEY `field__alert_msg` (`field__alert_msg`(768)),
   KEY `field__visibility` (`field__visibility`),
+  KEY `field__exclude_advisor` (`field__exclude_advisor`),
+  KEY `field__target_faculty_id` (`field__target_faculty_id`)  
   KEY `field__tags` (`field__tags`(500))
 );  
   ";
@@ -59,7 +63,7 @@ CREATE TABLE `content__activity_record` (
 
 
     
-}
+} // hook_install
 
 
 function alerts_update($old_schema, $new_schema) {
@@ -80,9 +84,19 @@ function alerts_update($old_schema, $new_schema) {
     
   }  
         
+        
+  if ($old_schema < 4) {
+    db_query('ALTER TABLE content__alert ADD COLUMN field__target_faculty_id varchar(255) DEFAULT NULL');
+    db_query('ALTER TABLE content__alert ADD COLUMN field__exclude_advisor tinyint(4) DEFAULT 0');
+    
+    db_query("ALTER TABLE content__alert ADD INDEX (`field__exclude_advisor`) ");
+    db_query("ALTER TABLE content__alert ADD INDEX (`field__target_faculty_id`) ");
+      
+    
+  }
     
     
-}
+} // hook_update
 
 
 

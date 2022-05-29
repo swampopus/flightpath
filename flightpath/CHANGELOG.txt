@@ -1,6 +1,16 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-05-29
+  Adjusted hook.api documentation.
+  
+  Altered alerts to allow for targetting specific faculty/staff by CWID, and NOT sending the alert to the student's advisor.  Also, if the student_id
+  field is left blank, it will show as "N/A" on the Alerts page.  This is useful if you have alerts, sent to specific users, which do not
+  directly have anything to do with a student (ie, system alerts).
+  
+  Adjusted displays to cope with new alerts setup.
+  
+    
 2022-05-23
   Fixed bug where hook_update() wouldn't be called if the module was under custom/modules/_dirname (beginning with underscore).
   

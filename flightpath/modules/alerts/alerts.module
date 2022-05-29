@@ -167,11 +167,9 @@ function alerts_get_alert_count_by_type($account = NULL) {
     
     $advisee_line = " AND b.field__student_id IN (" . $advisees_list . ") ";
   }
-  else {  // No advisees!  So, no readon to do this query at all.
-    return FALSE;
-  }
   
-  
+  // If you have no advisees, that's OK, because you might have alerts which are targetting you.  
+    
   foreach ($types as $type) {
         
     $total_count = db_result(db_query("SELECT COUNT(*) as mycount 
@@ -182,7 +180,26 @@ function alerts_get_alert_count_by_type($account = NULL) {
                      AND n.delete_flag = 0
                      AND b.vid = n.vid
                      AND b.cid = n.cid
+                     AND b.field__exclude_advisor != 1
                      $advisee_line ", array($type))); 
+    
+    
+    // Also search for alerts which are targeting the account user.
+    $total_count += db_result(db_query("SELECT COUNT(*) as mycount 
+                      FROM content__$type b,                                            
+                           content n
+                     WHERE n.type = ?
+                     AND n.published = 1
+                     AND n.delete_flag = 0
+                     AND b.vid = n.vid
+                     AND b.cid = n.cid
+                     AND b.field__target_faculty_id = ?
+                      ", array($type, $account->cwid)));     
+    
+    
+    ////////////////////////
+    // Get Read count for alerts
+    
     
     
     $read_count = db_result(db_query("SELECT COUNT(*) as mycount 
@@ -195,13 +212,31 @@ function alerts_get_alert_count_by_type($account = NULL) {
                      AND n.cid = a.cid                     
                      AND b.vid = n.vid
                      AND n.cid = b.cid
+                     AND b.field__exclude_advisor != 1
                      $advisee_line
                      AND a.user_id = ?", array($type, $account->id)));
+    
+    
+    // Also search for read alerts which are targeting the account user.
+    $read_count += db_result(db_query("SELECT COUNT(*) as mycount 
+                      FROM content_last_access a,
+                           content__$type b,                                            
+                           content n
+                     WHERE n.type = ?
+                     AND n.published = 1
+                     AND n.delete_flag = 0
+                     AND n.cid = a.cid                     
+                     AND b.vid = n.vid
+                     AND n.cid = b.cid
+                     AND b.field__target_faculty_id = ?                     
+                     AND a.user_id = ?", array($type, $account->cwid, $account->id)));
+        
     
     
     $rtn[$type]['total'] = intval($total_count);
     $rtn[$type]['read'] = intval($read_count);
     $rtn[$type]['unread'] = $total_count - $read_count; 
+        
         
     // TODO:  A setting such that "read" is actually "closed" and "unread" means "open".    
         
@@ -354,6 +389,9 @@ function alerts_advisees_alerts_form($only_student_id = "", $limit = 25) {
   $filter_status = @trim($_SESSION['alerts_filter_status']);
   $filter_line = "";
   $filter_params = array();
+  
+  $filter_params[':faculty_id'] = $user->cwid;
+  
   if ($filter_status) {
     $filter_line = "AND field__alert_status = :status";
     $filter_params[":status"] = $filter_status;
@@ -375,14 +413,15 @@ function alerts_advisees_alerts_form($only_student_id = "", $limit = 25) {
   
   
   $table_headers = array();
-  $table_headers[] = array("label" => "Actions");  
-  $table_headers[] = array("label" => "Status", "field" => "field__alert_status");
+  $table_headers[] = array("label" => t("Actions"));  
+  $table_headers[] = array("label" => t("Status"), "field" => "field__alert_status");
   if (!$only_student_id) {  
-    $table_headers[] = array("label" => "Student");
+    $table_headers[] = array("label" => t("Student"));
   }  
-  $table_headers[] = array("label" => "Short Description");  
-  $table_headers[] = array("label" => "Author");  
-  $table_headers[] = array("label" => "Updated", "field" => "n.updated");
+  $table_headers[] = array("label" => t("To Faculty/Staff"));  
+  $table_headers[] = array("label" => t("Short Description"));  
+  $table_headers[] = array("label" => t("Author"));  
+  $table_headers[] = array("label" => t("Updated"), "field" => "n.updated");
   
   // Set our initial sort, if none is already set.   
   theme_table_header_sortable_set_initial_sort('n.updated', 'DESC');
@@ -398,14 +437,24 @@ function alerts_advisees_alerts_form($only_student_id = "", $limit = 25) {
   // Now, we are going to search for alerts about these students, in the form of a pager query.
   // Query for alerts for this student.  We will be using a pager_query, so we can display a complete history, if we wish.
   $res = pager_query("SELECT DISTINCT(a.cid) FROM content__alert a, content n
-                   WHERE field__student_id IN ($students_line) 
+                   WHERE 
+                    (
+                      (field__student_id IN ($students_line) AND a.field__exclude_advisor != 1)
+                         OR
+                      (field__target_faculty_id = :faculty_id)
+                    ) 
                    AND a.vid = n.vid
                    AND a.cid = n.cid
                    AND n.delete_flag = 0
                    AND n.published = 1  
                    $filter_line                                  
                    $order_by", $filter_params, $limit, 0, "SELECT COUNT(DISTINCT(a.cid)) FROM content__alert a, content n
-                                                                                                         WHERE field__student_id IN ($students_line)
+                                                                                                         WHERE 
+                                                                                                          (
+                                                                                                            (field__student_id IN ($students_line) AND a.field__exclude_advisor != 1)
+                                                                                                               OR
+                                                                                                            (field__target_faculty_id = :faculty_id)
+                                                                                                          ) 
                                                                                                          AND a.vid = n.vid
                                                                                                          AND a.cid = n.cid
                                                                                                          AND n.delete_flag = 0
@@ -424,8 +473,20 @@ function alerts_advisees_alerts_form($only_student_id = "", $limit = 25) {
       $author = fp_get_faculty_name($tuser->cwid);
     }
     
+    $bool_no_student = TRUE;
     $student_id = $content->field__student_id['value'];
-    $student_name = fp_get_student_name($student_id, TRUE);
+    $faculty_id = $content->field__target_faculty_id['value'];
+    $student_name = t("N/A");
+    if ($student_id) {
+      $bool_no_student = FALSE;
+      $student_name = fp_get_student_name($student_id, TRUE);
+    }
+    $faculty_name = t("- Advisor -");
+    if ($faculty_id) {
+      $faculty_name = fp_get_faculty_name($faculty_id);
+    }    
+        
+        
         
     $extra_class = "";
     // If this content hasn't been read by this user, mark as "unread"
@@ -439,7 +500,8 @@ function alerts_advisees_alerts_form($only_student_id = "", $limit = 25) {
     $view_link = "<a href='javascript:fpOpenLargeIframeDialog(\"$view_url\",\"$dtitle\");' title='" . t("View") . "' class='action-link' ><i class='fa fa-eye'></i></a>";    
 
     $student_profile_link = "<a href='$student_url' title='" . t("Student Profile") . "' class='action-link'><i class='fa fa-user'></i></a>";
-    if ($only_student_id) $student_profile_link = "";    
+    if ($only_student_id || $bool_no_student == TRUE) $student_profile_link = "";    
+    
       
     $edit_link = "";    
     if (user_has_permission('can_edit_alerts')) {
@@ -470,6 +532,7 @@ function alerts_advisees_alerts_form($only_student_id = "", $limit = 25) {
           $html .= "<td class='student'>$student_name</td>";
         }
      $html .= "        
+        <td class='faculty'>$faculty_name</td>
         <td class='short-desc'><div class='short-desc-wrapper'>{$content->title}</div></td>
         <td class='author'>$author</td>
         <td class='updated'>$updated</td>
@@ -579,6 +642,17 @@ function alerts_content_register_content_type() {
     'weight' => 10,
   );
 
+  $fields['target_faculty_id'] = array(
+    'type' => 'hidden',
+    'value' => '', 
+  );
+
+  $fields['exclude_advisor'] = array(
+    'type' => 'hidden',
+    'value' => '0',
+  );
+
+
       
   $fields['alert_status'] = array(
     'type' => 'select',
@@ -686,13 +760,16 @@ if ($form_id == 'content_edit_content_form') {
           $form['student_id']['attributes'] = array('class' => 'hidden');
           $extra_mark = "";
           
-          $form['mark_to'] = array(
-            'type' => 'markup',
-            'value' => "<div class='alert-field-mark alert-student'>
-                               " . $db->get_student_name($form['student_id']['value'], TRUE) . "<span class='alert-student-extra-mark'>$extra_mark</span>
-                        </div>",
-            'weight' => $form['student_id']['weight'], 
-          );          
+          if ($form['student_id']['value'] != "") {
+            $form['mark_to'] = array(
+              'type' => 'markup',
+              'value' => "<div class='alert-field-mark alert-student'>
+                                 " . $db->get_student_name($form['student_id']['value'], TRUE) . "<span class='alert-student-extra-mark'>$extra_mark</span>
+                          </div>",
+              'weight' => $form['student_id']['weight'], 
+            );          
+          }
+          
         } // if _GET[student_id]
       } // if "new"
       else {
@@ -700,16 +777,16 @@ if ($form_id == 'content_edit_content_form') {
                 
         $form['student_id']['attributes'] = array('class' => 'hidden');
         $extra_mark = "";
-        
-        $form['mark_to'] = array(
-          'type' => 'markup',
-          'value' => "<div class='alert-field-mark alert-student'>
-                             " . $db->get_student_name($form['student_id']['value'], TRUE) . "<span class='alert-student-extra-mark'>$extra_mark</span>
-                      </div>",
-          'weight' => $form['student_id']['weight'], 
-        );
+        if ($form['student_id']['value'] != "") {
+          $form['mark_to'] = array(
+            'type' => 'markup',
+            'value' => "<div class='alert-field-mark alert-student'>
+                               " . $db->get_student_name($form['student_id']['value'], TRUE) . "<span class='alert-student-extra-mark'>$extra_mark</span>
+                        </div>",
+            'weight' => $form['student_id']['weight'], 
+          );
                 
-        
+        }
         
       }
       

@@ -598,6 +598,7 @@ function hook_user_login(&$account) {
  * $rtn["machine_name_of_perm"] = array(
  *   "title" => "Human readable title for perm",
  *   "description" => "Optional longer description of what perm allows.",
+ *   "admin_restricted" => FALSE, // Optional.  If TRUE, only admin (user_id 1) can grant this permission to other roles.
  * ); 
  * 
  * @return array
@@ -619,6 +620,7 @@ function hook_perm() {
     "administer_modules" => array(
       "title" => t("Administer modules"),
       "description" => t("This will allow a user to install, enable, disable, and uninstall modules."),
+      "admin_restricted" => TRUE, // means only appears for admin (user_id == 1)
     ),    
     
     "run_cron" => array(
@@ -637,6 +639,7 @@ function hook_perm() {
       "title" => t("View debug output from the fpm() function"),
       "description" => t("The user may view debug output from the fpm() function.
                         Useful for developers."),
+      "admin_restricted" => TRUE, // means only appears for admin (user_id == 1)
     ),                      
        
   );
