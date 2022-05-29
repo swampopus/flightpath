@@ -169,10 +169,10 @@ function alerts_get_alert_count_by_type($account = NULL) {
   }
   
   // If you have no advisees, that's OK, because you might have alerts which are targetting you.  
-    
+  $total_count = $read_count = 0;  
   foreach ($types as $type) {
         
-    $total_count = db_result(db_query("SELECT COUNT(*) as mycount 
+    $total_count = intval(db_result(db_query("SELECT COUNT(*) as mycount 
                       FROM content__$type b,                                            
                            content n
                      WHERE n.type = ?
@@ -181,11 +181,11 @@ function alerts_get_alert_count_by_type($account = NULL) {
                      AND b.vid = n.vid
                      AND b.cid = n.cid
                      AND b.field__exclude_advisor != 1
-                     $advisee_line ", array($type))); 
+                     $advisee_line ", array($type)))); 
     
     
     // Also search for alerts which are targeting the account user.
-    $total_count += db_result(db_query("SELECT COUNT(*) as mycount 
+    $total_count += intval(db_result(db_query("SELECT COUNT(*) as mycount 
                       FROM content__$type b,                                            
                            content n
                      WHERE n.type = ?
@@ -194,7 +194,7 @@ function alerts_get_alert_count_by_type($account = NULL) {
                      AND b.vid = n.vid
                      AND b.cid = n.cid
                      AND b.field__target_faculty_id = ?
-                      ", array($type, $account->cwid)));     
+                      ", array($type, $account->cwid))));     
     
     
     ////////////////////////
@@ -202,7 +202,7 @@ function alerts_get_alert_count_by_type($account = NULL) {
     
     
     
-    $read_count = db_result(db_query("SELECT COUNT(*) as mycount 
+    $read_count = intval(db_result(db_query("SELECT COUNT(*) as mycount 
                       FROM content_last_access a,
                            content__$type b,                                            
                            content n
@@ -214,11 +214,11 @@ function alerts_get_alert_count_by_type($account = NULL) {
                      AND n.cid = b.cid
                      AND b.field__exclude_advisor != 1
                      $advisee_line
-                     AND a.user_id = ?", array($type, $account->id)));
+                     AND a.user_id = ?", array($type, $account->id))));
     
     
     // Also search for read alerts which are targeting the account user.
-    $read_count += db_result(db_query("SELECT COUNT(*) as mycount 
+    $read_count += intval(db_result(db_query("SELECT COUNT(*) as mycount 
                       FROM content_last_access a,
                            content__$type b,                                            
                            content n
@@ -229,12 +229,12 @@ function alerts_get_alert_count_by_type($account = NULL) {
                      AND b.vid = n.vid
                      AND n.cid = b.cid
                      AND b.field__target_faculty_id = ?                     
-                     AND a.user_id = ?", array($type, $account->cwid, $account->id)));
+                     AND a.user_id = ?", array($type, $account->cwid, $account->id))));
         
     
     
-    $rtn[$type]['total'] = intval($total_count);
-    $rtn[$type]['read'] = intval($read_count);
+    $rtn[$type]['total'] = $total_count;
+    $rtn[$type]['read'] = $read_count;
     $rtn[$type]['unread'] = $total_count - $read_count; 
         
         

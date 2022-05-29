@@ -10,6 +10,8 @@ FlightPath 6.x Changelog
   
   Adjusted displays to cope with new alerts setup.
   
+  Fixed bug with alert counts.
+  
     
 2022-05-23
   Fixed bug where hook_update() wouldn't be called if the module was under custom/modules/_dirname (beginning with underscore).
