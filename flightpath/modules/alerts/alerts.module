@@ -167,6 +167,9 @@ function alerts_get_alert_count_by_type($account = NULL) {
     
     $advisee_line = " AND b.field__student_id IN (" . $advisees_list . ") ";
   }
+  else {
+    $advisee_line = " AND b.field__student_id IN ('') ";  // Meaning, no advisees.  We do this so as not to break the queries and return back ALL alerts.
+  }
   
   // If you have no advisees, that's OK, because you might have alerts which are targetting you.  
   $total_count = $read_count = 0;  
