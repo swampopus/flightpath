@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-06-01
+  Small modifications to help eliminate bugs in menu items showing in a menu block.
+  
+
 2022-05-29
   Adjusted hook.api documentation.
   

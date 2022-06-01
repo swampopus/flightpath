@@ -102,12 +102,18 @@ function menu_check_user_access($router_item) {
     }
   }
   
-  
   // Does the access_arguments have any wildcards?
+  if (isset($router_item['access_arguments']) && is_array($router_item['access_arguments'])) {
+    if (count($router_item['access_arguments']) == 1 && !$router_item['access_arguments'][0]) {
+      // Meanng, access arguments has been created, but nothing there.  We likely need to populate it if there are wildcards in this item.      
+      $router_item = menu_get_item($router_item['path']);      
+    } 
+  }
   
   
   
   if (!$access && $router_item["access_callback"] != "") {
+    
     // We need to see if the user has the right permissions to use this item.  We will do this
     // by calling the access_callback, passing it the access_arguments
     $access = call_user_func_array($router_item["access_callback"], $router_item["access_arguments"]);
@@ -118,16 +124,19 @@ function menu_check_user_access($router_item) {
 }
 
 
-function menu_execute_page_request() {
-  $path = @$_GET["q"];
 
+function menu_execute_page_request($path = "") {
+      
+  if ($path == "") {  
+    $path = @$_GET["q"];
+  }
+  
   //If the path is blank, figure out what the "font page" is, and use that path.
   if ($path == "") {
     $path = variable_get("front_page", "main");
   }
   
-  if ($router_item = menu_get_item($path)) {
-    
+  if ($router_item = menu_get_item($path)) {    
     // Let's save the router item in the GLOBALS array, so we can use information from it
     // throughout FlightPath, if we need to.
     $GLOBALS["fp_current_menu_router_item"] = $router_item;
@@ -143,6 +152,9 @@ function menu_execute_page_request() {
        
     // Let's figure out if the user has access to this menu item or not.  
     if (menu_check_user_access($router_item)) {
+          
+        
+          
       if ($router_item['file'] != "") {      
         require_once($router_item['file']);
       }
@@ -152,6 +164,7 @@ function menu_execute_page_request() {
       $page["title"] = $router_item["title"];
       $page["router_item"] = $router_item;
 
+      
       return $page;    
            
     }
@@ -213,6 +226,10 @@ function menu_get_item($path) {
   // to take.
   
   $menu_items = array();
+  
+  if ($bool_reset) {
+    unset($GLOBALS["fp_menu_items"]);
+  }
   
   // To cut down on the amount we need to query, we will use a global variable.
   if (!isset($GLOBALS["fp_menu_items"]) || !is_array($GLOBALS["fp_menu_items"]) || count($GLOBALS["fp_menu_items"]) == 0) {
@@ -332,9 +349,9 @@ function menu_get_menu_router_item_from_db($path) {
   
   // Same situation for access_arguments as the page_arguments above.
   foreach ($cur["access_arguments"] as $c => $arg) {
-    if (is_numeric($arg)) {
-      $temp = explode("/", $_REQUEST["q"]);
-      $cur["access_arguments"][$c] = @$temp[$arg];
+    if (is_numeric($arg)) {      
+      $temp = explode("/", $_REQUEST["q"]);      
+      $cur["access_arguments"][$c] = @$temp[$arg];      
     }
   }
   

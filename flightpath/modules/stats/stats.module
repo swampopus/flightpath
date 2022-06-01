@@ -291,8 +291,8 @@ function stats_draw_catalog_year_pulldown($selected = "", $display_submit = FALS
 
   
   $rtn .= "
-			<table border='0'>
-			
+      <table border='0'>
+      
           <td valign='middle'>
           
           <select name='catalog_year' id='catalog_year'><option value=''>
@@ -627,18 +627,18 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool
   $m_a_count = 0;  
   if ($bool_only_current_catalog_year) {
     $query = "SELECT * FROM degrees
-  				WHERE  catalog_year = ?
-  				AND school_id = ?
-  				AND `exclude`='0'
-  				ORDER BY major_code  ";
+          WHERE  catalog_year = ?
+          AND school_id = ?
+          AND `exclude`='0'
+          ORDER BY major_code  ";
     $result = db_query($query, $current_catalog_year, $school_id);
   }
   else { // current catalog year not important.
     $query = "SELECT * FROM degrees
-  				WHERE  `exclude`='0'
-  				AND school_id = ?
-  				GROUP BY major_code
-  				ORDER BY major_code  ";
+          WHERE  `exclude`='0'
+          AND school_id = ?
+          GROUP BY major_code
+          ORDER BY major_code  ";
     $result = db_query($query, $school_id);    
   }
   while ($cur_row = $db->db_fetch_array($result)) {
@@ -672,8 +672,8 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool
 
 
   $rtn .= "
-			<table border='0'>
-			
+      <table border='0'>
+      
           <td valign='middle'>
           
          <select name='major' id='major'>
@@ -695,8 +695,8 @@ function stats_draw_majors_pulldown($smajor = "", $display_submit = FALSE, $bool
     }
 
     $rtn .= "<option value='" . $major_array[$t]["major"] . "' $sel>(" . $major_array[$t]["major"] . ")
-					" . $major_array[$t]["description"] . " $hyph " . $major_array[$t]["type"] . "
-					</option>";
+          " . $major_array[$t]["description"] . " $hyph " . $major_array[$t]["type"] . "
+          </option>";
     
     if (module_enabled("schools")) {
       // Create an options array multi-dimentional, organized by school name.
@@ -1115,12 +1115,12 @@ function stats_get_log_count($action = "", $action_array = "", $bool_distinct = 
   $end_ts = strtotime($end_date);
   
   $res = db_query("SELECT $count AS count FROM watchdog
-					WHERE
-						`timestamp` > '$start_ts' AND `timestamp` < '$end_ts'
-					AND $user_type
-					AND
-						$action_line
-					");
+          WHERE
+            `timestamp` > '$start_ts' AND `timestamp` < '$end_ts'
+          AND $user_type
+          AND
+            $action_line
+          ");
   $cur = db_fetch_array($res);
   return $cur["count"] * 1;
 
@@ -1437,16 +1437,16 @@ function stats_report_student_course_list() {
     $rtn .= "<br>" . t("School:") . "<em>$school_name</em>";
   }
   $rtn .= "</h2>  
-		  <table border='0' cellspacing='0' cellpadding='6'>
-		    <tr>
-		      <th>Subject</th>
-		      <th>Number</th>
-		      <th>Grade</th>
-		      <th>Hours</th>
-		      <th>Term</th>
-		      <th>Transfer?</th>
-		    </tr>";
-		
+      <table border='0' cellspacing='0' cellpadding='6'>
+        <tr>
+          <th>Subject</th>
+          <th>Number</th>
+          <th>Grade</th>
+          <th>Hours</th>
+          <th>Term</th>
+          <th>Transfer?</th>
+        </tr>";
+    
 
   // So that we can sort our list of courses, we will add them to 
   // 2 arrays, one for local courses, one for transfer.
@@ -1503,8 +1503,8 @@ function stats_report_student_course_list() {
     }
     
        
-  }  	
-		
+  }   
+    
   
   // Okay, now let's sort our arrays and display them.
   ksort($transfer_array);

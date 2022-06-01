@@ -547,7 +547,7 @@ function format_date($timestamp = 0, $format = "standard", $custom = "") {
  * 
  * We want to 
  */
-function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
+function fp_render_menu_block($title = "Tools", $menu_root = "tools", $bool_reset = FALSE) {
   $rtn = "";
   
   $is_empty = true;
@@ -559,11 +559,14 @@ function fp_render_menu_block($title = "Tools", $menu_root = "tools") {
   
   foreach ($menu_items as $item) {
     if ($item['path'] === $menu_root) continue;   // don't need to duplicate the menu root link itself
-    
-    if ($item["type"] == MENU_TYPE_NORMAL_ITEM || $item['type'] == MENU_TYPE_DEFAULT_TAB) {
+
+    if ($item["type"] == MENU_TYPE_NORMAL_ITEM || $item['type'] == MENU_TYPE_DEFAULT_TAB) {      
+      $item = menu_get_item($item['path'], $bool_reset);
+            
       $rtn .= fp_render_menu_item($item);
       $is_empty = false;
     }
+
   }
   
   if ($is_empty) {
