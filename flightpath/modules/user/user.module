@@ -365,7 +365,16 @@ function user_edit_user_attributes_form() {
   $bool_something_to_edit = FALSE;
 
   foreach ($attributes as $name => $definition) {
-                
+
+    if (!isset($attributes[$name]['fields'])) {
+      // Create a "default" field of "value" that's a simple textfield.
+      $attributes[$name]['fields']['value'] = array(
+        'label' => $attributes[$name]['title'],
+        'type' => 'textfield', 
+      );
+    }
+    
+    
     foreach($attributes[$name]["fields"] as $field_name => $field_details) {
       $ofield_name = $field_name;
       $field_name = $name . "__" . $field_name;
@@ -508,7 +517,16 @@ function user_edit_user_attributes_form_submit($form, $form_state) {
   
   $attributes = user_get_registered_attributes();
   foreach ($attributes as $name => $definition) {
-    foreach ($definition['fields'] as $attr_key => $details) {
+        
+    if (!isset($attributes[$name]['fields'])) {
+      // Create a "default" field of "value" that's a simple textfield.
+      $attributes[$name]['fields']['value'] = array(
+        'label' => $attributes[$name]['title'],
+        'type' => 'textfield', 
+      );
+    }      
+    
+    foreach ($attributes[$name]['fields'] as $attr_key => $details) {
       
       $fieldname = $name . "__" . $attr_key;
       if (user_has_permission("edit_attribute_" . $name)) {

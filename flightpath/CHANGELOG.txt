@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-06-07
+  Fixed bug when editing user attributes from the users screen, where if no "fields" index is set, we weren't correctly creating a default
+  field called "value" that's a textfield.
+  
+
 2022-06-01
   Small modifications to help eliminate bugs in menu items showing in a menu block.
   
