@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-06-15
+  Modified user module to make it easier to filter for users.  Made it function more like FP 5, where setting a filter actually shows you
+  all values under that filter, and you don't have to search by letter as well.  For students, this is true, except we do not reset values
+  for "is_active" when searching by letter or other filter values.
+  
+
 2022-06-07
   Fixed bug when editing user attributes from the users screen, where if no "fields" index is set, we weren't correctly creating a default
   field called "value" that's a textfield.

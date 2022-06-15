@@ -2345,6 +2345,20 @@ function user_display_users() {
 
 
 
+  if (@$_REQUEST['clear_filters'] == 'true') {
+    unset($_SESSION['users_filter_name']);
+    // Meaning, a letter was specified, so let's reset the filter values.
+    
+    foreach ($_SESSION as $key => $val) {
+      if (strstr($key,"users_filter_")) {
+        unset($_SESSION[$key]);
+      }
+    } 
+           
+  }
+
+
+
   $html = "";
 
   $html .= "<div class='add-new-user'>" . l("<i class='fa fa-plus'></i> " . t("Create a new faculty/staff user"), "admin/users/edit-user", "faculty_cwid=new&de_catalog_year=$de_catalog_year") . "</div>";
@@ -2378,11 +2392,17 @@ function user_display_users() {
   $ur = trim(@$_GET["ur"]);
   $lr = trim(@$_GET["lr"]);
 
-  //if ($ur == "" && !isset($_SESSION['users_filter_submit'])) {
-  if ($ur == "") {
+  if ($ur == "" && !isset($_SESSION['users_filter_submit'])) {
+  //if ($ur == "") {
     $ur = "A";
     $lr = "AZZZZZ";  // first time through.
   }
+  
+  // If we are going by filters, show that as option and select it.
+  if (isset($_SESSION['users_filter_submit'])) {
+    $letter_ranges[t(" - Filter -")] = array("filter", "filter");
+  }
+  
   
   $html .= "<div class='user-select-letter-bar' style='padding-top: 20px;'>
           ";
@@ -2391,6 +2411,13 @@ function user_display_users() {
     if ($ur == $vals[0]) {
       $selected_class = "selected";
     }
+    
+    if ($vals[0] == 'filter') {
+      $selected_class = "selected";
+      $html .= "<a href='javascript:void(0);' class='admin-courses-letter-link filter-indicator $selected_class'>$disp</a> &nbsp; ";  
+      continue;
+    }
+    
     $html .= l($disp, "admin/users/faculty", "de_catalog_year=$de_catalog_year&clear_filters=true&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link $selected_class")) . " &nbsp; ";
    
   }
@@ -2420,26 +2447,7 @@ function user_display_users() {
 
   
 
-
-  if (@$_REQUEST['clear_filters'] == 'true') {
-    unset($_SESSION['users_filter_name']);
-    // Meaning, a letter was specified, so let's reset the filter values.
-    /*
-    foreach ($_SESSION as $key => $val) {
-      if (strstr($key,"users_filter_")) {
-        unset($_SESSION[$key]);
-      }
-    } 
-    */       
-  }
-
-
-
-
-
-
-
-   
+  
 
   $mark = "";
   $mark .= "<div class='degrees-filter'>";
@@ -2459,13 +2467,14 @@ function user_display_users() {
   $params[":ur"] = $ur;
   $params[":lr"] = $lr;
 
-  /*
+  
   if (isset($_SESSION['users_filter_submit'])) {
     // We clicked to filter, so the letter range should be ignored.
     $params[":ur"] = "A";
     $params[":lr"] = "ZZZZZZZZZZZZ";
   }
- */
+ 
+ 
 
   $filter_name = @trim($_SESSION['users_filter_name']);
   $filter_school = @intval($_SESSION['users_filter_school']);
@@ -2504,7 +2513,7 @@ function user_display_users() {
   
   
   watchdog("user", "Viewed admin user list. Range: $ur - $lr. Name: $filter_name. Dept: $filter_dept. Role: $filter_role. School: $filter_school", array(), WATCHDOG_DEBUG);
-    
+
       
   $result = db_query("SELECT * FROM (users u, faculty f)
                         LEFT JOIN user_roles r ON (r.user_id = u.user_id)

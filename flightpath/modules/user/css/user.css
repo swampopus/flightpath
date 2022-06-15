@@ -191,6 +191,17 @@ ___users-page{}
 }
 
 
+a.filter-indicator {
+  color: black;  
+  padding-left: 10px;
+  padding-right: 10px;
+  cursor: default;
+}
+a.filter-indicator:hover {
+  text-decoration: none;
+}
+
+
 
 ___users-students-page {}
 

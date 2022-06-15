@@ -35,6 +35,20 @@ function user_display_student_users() {
   fp_add_css(fp_get_module_path("user") . "/css/user.css");
   
   
+  if (@$_REQUEST['clear_filters'] == 'true') {
+    // Meaning, a letter was specified, so let's reset the filter values.
+    unset($_SESSION['users_filter_name']);
+    
+    foreach ($_SESSION as $key => $val) {
+      if ($key == 'users_filter_active') continue; // we preserve the "active" filter setting
+      
+      if (strstr($key,"users_filter_")) {
+        unset($_SESSION[$key]);
+      }
+    }     
+  }
+  
+  
       
   
   $html = "";
@@ -73,12 +87,16 @@ function user_display_student_users() {
   $ur = trim(@$_GET["ur"]);
   $lr = trim(@$_GET["lr"]);
 
-  //if ($ur == "" && !isset($_SESSION['users_filter_submit'])) {
-  if ($ur == "") {
+  if ($ur == "" && !isset($_SESSION['users_filter_submit'])) {
+  //if ($ur == "") {
     $ur = "A";
     $lr = "AZZZZZ";  // first time through.
   }  
   
+  // If we are going by filters, show that as option and select it.
+  if (isset($_SESSION['users_filter_submit'])) {
+    $letter_ranges[t(" - Filter -")] = array("filter", "filter");
+  }  
   
   
   $html .= "<div class='user-select-letter-bar' style='padding-top: 20px;'>
@@ -88,6 +106,14 @@ function user_display_student_users() {
     if ($ur == $vals[0]) {
       $selected_class = "selected";
     }    
+    
+    if ($vals[0] == 'filter') {
+      $selected_class = "selected";
+      $html .= "<a href='javascript:void(0);' class='admin-courses-letter-link filter-indicator $selected_class'>$disp</a> &nbsp; ";  
+      continue;
+    }
+    
+    
     $html .= l($disp, "admin/users/students", "de_catalog_year=$de_catalog_year&clear_filters=true&ur=" . $vals[0] . "&lr=" . $vals[1], array("class" => "admin-courses-letter-link $selected_class")) . " &nbsp; ";
     
   }
@@ -119,21 +145,6 @@ function user_display_student_users() {
   $_SESSION["lr"] = $lr;
 
 
-
-  if (@$_REQUEST['clear_filters'] == 'true') {
-    // Meaning, a letter was specified, so let's reset the filter values.
-    unset($_SESSION['users_filter_name']);
-    /*
-    foreach ($_SESSION as $key => $val) {
-      if (strstr($key,"users_filter_")) {
-        unset($_SESSION[$key]);
-      }
-    }  
-    */      
-  }
-
-
-
    
 
   $mark = "";
@@ -154,14 +165,14 @@ function user_display_student_users() {
   $params[":ur"] = $ur;
   $params[":lr"] = $lr;
 
-  /*
+  
   if (isset($_SESSION['users_filter_submit'])) {
     // We clicked to filter, so the letter range should be ignored.
     $params[":ur"] = "A";
     $params[":lr"] = "ZZZZZZZZZZZZ";
   }
- */
-
+ 
+ 
   $filter_name = @trim($_SESSION['users_filter_name']);
   $filter_school = @intval($_SESSION['users_filter_school']);
   $filter_major = @trim($_SESSION['users_filter_major']);
@@ -393,7 +404,7 @@ function user_student_list_filter_form() {
   $filter_active_value = @$_SESSION['users_filter_active'];
   $form['filter_active'] = array(      
     'type' => 'select',
-    'label' => '',
+    'label' => t('Active:'),
     'options' => $options,
     'hide_please_select' => TRUE,
     'value' => $filter_active_value,
@@ -453,9 +464,16 @@ function user_student_list_filter_form_submit($form, $form_state) {
     $_SESSION['users_filter_name'] = trim($values['filter_name']);
     $_SESSION['users_filter_school'] = $values['filter_school'];
     $_SESSION['users_filter_major'] = $values['filter_major'];
-    $_SESSION['users_filter_active'] = $values['filter_active'];    
-    $_SESSION['users_filter_submit'] = "yes"; // simply notes that we did indeed press the submit btn.
+    $_SESSION['users_filter_active'] = $values['filter_active'];
     
+    $_SESSION['users_filter_submit'] = "yes"; // simply notes that we did indeed press the submit btn.
+
+    // If "active" was the only one changed, then we do not set this users_filter_submit
+    if (trim($values['filter_name']) == "" && intval($values['filter_school']) == 0 && $values['filter_major'] == "") {
+      unset($_SESSION['users_filter_submit']);
+    }      
+    
+        
   }
     
     
