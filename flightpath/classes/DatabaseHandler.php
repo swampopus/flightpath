@@ -375,6 +375,31 @@ $query_and_args
 
 
 
+  /**
+   * Generates a new advising session token and makes sure it is unique before returning it.
+   */
+  function request_new_advising_session_token() {
+      
+    for ($t = 0; $t < 1000; $t++) {  // try up to 1000 times
+        
+      $test_token = hash('sha256', mt_rand(0, 99999) . microtime() . mt_rand(0,99999));
+      
+      // check for collisions
+      $res = $this->db_query("SELECT advising_session_id 
+                              FROM advising_sessions 
+                              WHERE advising_session_token = ?", array($test_token));
+      if ($this->db_num_rows($res) == 0) {
+        // Was not in the table, so we can use it.
+        return $test_token;
+      }
+    }
+    
+    return FALSE;  // some kind of problem-- we never found an available token!
+    
+  }
+
+
+
   function request_new_course_id()
   {
     // Return a valid new course_id...

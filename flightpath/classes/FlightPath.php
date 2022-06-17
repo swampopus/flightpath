@@ -1286,7 +1286,7 @@ class FlightPath extends stdClass
       $faculty_id = $user->cwid;
     }
 
-    $advising_session_token = sha1(mt_rand(0, 99999) . microtime());
+    $advising_session_token = $db->request_new_advising_session_token();
 
     
     // It's possible the user has simply pressed "refresh" after submitting the form.  If so,
