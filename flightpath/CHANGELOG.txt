@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-06-23
+  Fixed small bug where CSS class was not being specified on left sidebar items.
+
+
 2022-06-17
   Added new function to DatabaseHandler, where we can request a new advising_session_token, and be guaranteed that it does not already exist.  Updated FlightPath class
   to make use of it. 
