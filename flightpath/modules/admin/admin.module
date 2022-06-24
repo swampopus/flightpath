@@ -866,19 +866,21 @@ function admin_duplicate_year_form_submit($form, &$form_state) {
     
     // now, pull out all of the degree_requirements.
     $res3 = db_query("SELECT * FROM draft_degree_requirements
-                WHERE `degree_id`='$db_degree_id' ");
+                WHERE degree_id = ? ", array($db_degree_id));
     while($cur3 = db_fetch_array($res3))
     {
       extract($cur3, 3, "db3");
       // If there is a required group, we must convert it to the
       // new groupID !
-      $required_group_id = $db3_group_id;
-      if ($db3_group_id > 0)
+      $required_group_id = intval($db3_group_id);
+      if ($db3_group_id > 0 && trim($db3_group_id) != "")
       {
         $required_group_id = $group_id_array[$db3_group_id];
         if ($required_group_id < 1 || $required_group_id == "")
         {
-          die("could not find group new group for $old_year $db3_group_id !");
+          //die("could not find new group for $old_year $db3_group_id!  Group id is $required_group_id");
+          fp_add_message(t("Couldn't find the specified group with ID $db3_group_id in catalog year $old_year, required by degree with ID $db_degree_id ($db_major_code).  The group was possibly deleted?
+                            Be aware that any degrees in the new year will be missing this group requirement."), 'error');
         }
       }
        
