@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-06-27
+  Made it so the system only tries to trim the watchdog once every 7 days, rather than on every cron run.
+  
+  Added extra wording to some watchdog entries for clarity.
+  
+
 2022-06-23
   Fixed small bug where CSS class was not being specified on left sidebar items.
   

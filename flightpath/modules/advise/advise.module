@@ -276,24 +276,24 @@ function advise_cron() {
       
       // Lastly, delete from advising_sessions table itself.
       db_query("DELETE FROM advising_sessions WHERE advising_session_id = ?", array($asid));
-      watchdog("advise", "Deleted from db deleted advising_session_id $asid", array(), WATCHDOG_DEBUG);
+      watchdog("advise", "Deleted from flagged db deleted advising_session_id $asid", array(), WATCHDOG_DEBUG);
       $c++;      
     } // while cur
     
-    watchdog("advise", "Delete from advising sessions db complete. $c items removed.", array(), WATCHDOG_DEBUG);
+    watchdog("advise", "Delete from flagged advising sessions db complete. $c items removed.", array(), WATCHDOG_DEBUG);
     
     
     $res = db_query("DELETE FROM student_substitutions WHERE delete_flag = 1");
     $c = db_affected_rows($res);
-    watchdog("advise", "Delete from student substitutions db complete. $c items removed.", array(), WATCHDOG_DEBUG);
+    watchdog("advise", "Delete from flagged student substitutions db complete. $c items removed.", array(), WATCHDOG_DEBUG);
     
     $res = db_query("DELETE FROM student_unassign_group WHERE delete_flag = 1");
     $c = db_affected_rows($res);
-    watchdog("advise", "Delete from student unassign group db complete. $c items removed.", array(), WATCHDOG_DEBUG);
+    watchdog("advise", "Delete from flagged student unassign group db complete. $c items removed.", array(), WATCHDOG_DEBUG);
         
     $res = db_query("DELETE FROM student_unassign_transfer_eqv WHERE delete_flag = 1");
     $c = db_affected_rows($res);
-    watchdog("advise", "Delete from student unassign transfer eqv db complete. $c items removed.", array(), WATCHDOG_DEBUG);
+    watchdog("advise", "Delete from flagged student unassign transfer eqv db complete. $c items removed.", array(), WATCHDOG_DEBUG);
     
     
     variable_set("advise_last_run_delete_flag_removal", time());

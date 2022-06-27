@@ -544,7 +544,7 @@ function admin_cron() {
                      WHERE delete_flag = 1 ");
     $c = db_affected_rows($res);
     
-    watchdog("admin", "Delete from draft_courses db complete. $c items removed.", array(), WATCHDOG_DEBUG);
+    watchdog("admin", "Delete from flagged draft_courses db complete. $c items removed.", array(), WATCHDOG_DEBUG);
 
 
 
@@ -559,7 +559,7 @@ function admin_cron() {
       $c++;
     }
     
-    watchdog("admin", "Delete from draft_groups db complete. $c items removed.", array(), WATCHDOG_DEBUG);
+    watchdog("admin", "Delete from flagged draft_groups db complete. $c items removed.", array(), WATCHDOG_DEBUG);
 
     variable_set("admin_last_run_delete_flag_removal", time());
     

@@ -2521,36 +2521,51 @@ function system_settings_form_submit($form, &$form_state) {
  *
  */
 function system_cron() {
+    
+  // Should we trim the watchdog table of extra entries?  Only once every so often, not every cron run.
+  $last_run = intval(variable_get("system_last_run_trim_watchdog", 0));
+  $check_against = strtotime("NOW - 7 DAYS");  // don't run any more often than once every 7 days
+  $c = 0;
+  if ($check_against > $last_run) {
   
-  // Should we "trim" the watchdog table of old entries?
-  $max_age_days = variable_get("max_watchdog_age", "1095");
-  if ($max_age_days != "never" && ($max_age_days*1) > 0) {
-    
-    // Okay, let's trim the table.
-    $max_timestamp = strtotime("$max_age_days DAYS AGO");
-    
-    $result = db_query("DELETE FROM watchdog WHERE `timestamp` < ? ", $max_timestamp);
-    $rows = db_affected_rows($result);
-    if ($rows > 0) {
-      watchdog("system", t("@rows old rows (older than @max days) trimmed from watchdog table on system cron run."), array("@rows" => $rows, "@max" => $max_age_days), WATCHDOG_DEBUG);
+    // Should we "trim" the watchdog table of old entries?
+    $max_age_days = variable_get("max_watchdog_age", "1095");
+    if ($max_age_days != "never" && ($max_age_days*1) > 0) {
+      
+      // Okay, let's trim the table.
+      $max_timestamp = strtotime("$max_age_days DAYS AGO");
+      
+      $result = db_query("DELETE FROM watchdog WHERE `timestamp` < ? ", $max_timestamp);
+      $rows = db_affected_rows($result);
+      if ($rows > 0) {
+        watchdog("system", t("@rows old rows (older than @max days) trimmed from watchdog table on system cron run."), array("@rows" => $rows, "@max" => $max_age_days), WATCHDOG_DEBUG);
+      }
+      
     }
+        
+    // Should we trim the watchdog table of DEBUG records?
+    $max_age_days = intval(variable_get("max_watchdog_debug_age", "30"));
+    if ($max_age_days != "never" && ($max_age_days) > 0) {
+      
+      // Okay, let's trim the table.
+      $max_timestamp = strtotime("$max_age_days DAYS AGO");
+      
+      $result = db_query("DELETE FROM watchdog WHERE `timestamp` < ? AND severity = ? ", $max_timestamp, WATCHDOG_DEBUG);
+      $rows = db_affected_rows($result);
+      if ($rows > 0) {
+        watchdog("system", t("@rows old 'debug' rows (older than @max days) trimmed from watchdog table on system cron run."), array("@rows" => $rows, "@max" => $max_age_days), WATCHDOG_DEBUG);
+      }
+      
+    }
+
+
+    variable_set("system_last_run_trim_watchdog", time());
     
-  }
+    
+  } // check against > last_run, so we should do it.
   
-  // Should we trim the watchdog table of DEBUG records?
-  $max_age_days = intval(variable_get("max_watchdog_debug_age", "30"));
-  if ($max_age_days != "never" && ($max_age_days) > 0) {
-    
-    // Okay, let's trim the table.
-    $max_timestamp = strtotime("$max_age_days DAYS AGO");
-    
-    $result = db_query("DELETE FROM watchdog WHERE `timestamp` < ? AND severity = ? ", $max_timestamp, WATCHDOG_DEBUG);
-    $rows = db_affected_rows($result);
-    if ($rows > 0) {
-      watchdog("system", t("@rows old 'debug' rows (older than @max days) trimmed from watchdog table on system cron run."), array("@rows" => $rows, "@max" => $max_age_days), WATCHDOG_DEBUG);
-    }
-    
-  }
+  
+  
   
   
   // Should we delete from user_attributes any mda_validation_codes which are older than X hours?
