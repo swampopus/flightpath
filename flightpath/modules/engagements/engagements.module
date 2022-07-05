@@ -3254,7 +3254,7 @@ function engagements_send_sms_to_number($to_number, $body, $to_cwid = "", $from_
 function engagements_create_new_tracking_img_url($cid)
 {
 
-  $token = md5(time() . rand(9, 99999));
+  $token = hash('sha512', ($cid . microtime() . mt_rand(9, 99999) . mt_rand(9, 99999)));
   $url = $GLOBALS['fp_system_settings']['base_url'] . '/' . fp_url("engagements-track/$cid/$token/pixel.gif", '', FALSE);
 
   // Write to database

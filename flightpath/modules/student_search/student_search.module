@@ -817,12 +817,14 @@ function student_search_search_form() {
 
     
        
-    
+    ///////////////////////////////////////
     // Now THIS is odd... what is this strange piece of code here?
     // I'm no cryptographic genius, but it looks like it is set to display a message when
-    // you search for "info=production" on the Advisees search tab...
-    if (md5(strtolower(@$temp[1]))=="fd89784e59c72499525556f80289b2c7"){$rtn .= base64_decode("DQo8cD4NCjxiPlRoZSBvcmlnaW5hbCBGbGlnaHRQYXRoIFByb2R1Y3Rpb24gVGVhbSwgY2lyY2EgMjAwNywgYXQgVGhlIFVuaXZlcnNpdHkgb2YgTG91aXNpYW5hIGF0IE1vbnJvZTo8L2I+DQo8dWw+DQo8bGk+UmljaGFyZCBQZWFjb2NrIC0gUHJvamVjdCBsZWFkIGFuZCBwcmltYXJ5IGxvZ2ljIHByb2dyYW1tZXIuPC9saT4NCjxsaT5Kb2UgTWFuc291ciAtIERhdGFiYXNlIGFkbWluaXN0cmF0b3IgYW5kIG1haW5mcmFtZS9CYW5uZXIgZGF0YSBjb29yZGluYXRvci48L2xpPg0KPGxpPkpvYW5uIFBlcnJlciAtIERhdGEgZW50cnksIHRlc3RpbmcgYW5kIHNvZnR3YXJlIGNvb3JkaW5hdG9yLjwvbGk+DQo8bGk+UGF1bCBHdWxsZXR0ZSAtIENsYXNzaWMgdGhlbWUgZGVzaWduZXIuPC9saT4NCjxsaT48Yj5PdGhlciBjb250cmlidXRpbmcgcHJvZ3JhbW1lcnM8L2I+OiBDaGFybGVzIEZyb3N0LCBCcmlhbiBUYXlsb3IuPC9saT4NCjwvdWw+DQpUbyBldmVyeW9uZSB3aG8gaGVscGVkIG1ha2UgRmxpZ2h0UGF0aCBwb3NzaWJsZTogVGhhbmsgWW91Lg0KPC9wPg==");}
-
+    // you search for "info=production" on the Students search...    
+    if (hash('sha256', (strtolower(@$search_for)))=="5b260fa2e077d779082ce7e5e7869554a7be02d537ae235a61a4387a9c853981"){
+      $mark .= base64_decode("PHA+CjxiPlRoZSBvcmlnaW5hbCBGbGlnaHRQYXRoIFByb2R1Y3Rpb24gVGVhbSAodmVyc2lvbiAxLjApLCBjaXJjYSAyMDA3LCBhdCBUaGUgVW5pdmVyc2l0eSBvZiBMb3Vpc2lhbmEgTW9ucm9lOjwvYj4KPHVsPgo8bGk+UmljaGFyZCBQZWFjb2NrIC0gUHJvamVjdCBsZWFkIGFuZCBwcm9ncmFtbWVyLjwvbGk+CjxsaT5Kb2UgTWFuc291ciAtIFVMTSBtYWluZnJhbWUgZGF0YSBjb29yZGluYXRvci48L2xpPgo8bGk+Sm9hbm4gUGVycmVyIC0gVUxNIERhdGEgZW50cnkgYW5kIHRlc3RpbmcuPC9saT4KPGxpPlBhdWwgR3VsbGV0dGUgLSBDbGFzc2ljIHRoZW1lIGRlc2lnbmVyICh1c2VkIGJ5IHZlcnNpb25zIDEuMCB0aHJvdWdoIDQuMCkuPC9saT4KPGxpPjxiPk90aGVyIGNvbnRyaWJ1dGluZyBzdGFmZiBmcm9tIFVMTTwvYj46IEJhcmJhcmEgTWljaGFlbGlkZXMsIEFuZ2VsYSBSb2JpbnNvbiwgQ2hhcmxlcyBGcm9zdCwgQnJpYW4gVGF5bG9yLCBSb2IgR2xhemUuPC9saT4KPC91bD4KPHA+SW4gTWFyY2ggb2YgMjAxMywgdGhlIFVMTSBhZG1pbmlzdHJhdGlvbiBkZWNpZGVkIHRvIHJlbGVhc2UgRmxpZ2h0UGF0aCBhcyBvcGVuIHNvdXJjZSBpbiBvcmRlciB0byBlbnJpY2ggc2Nob29scyBhbmQgaW5zdGl0dXRpb25zIGFyb3VuZCB0aGUgd29ybGQuICBPdmVyIHRoZSB5ZWFycywgRmxpZ2h0UGF0aCBoYXMgYmVlbiByZS13cml0dGVuIGZyb20gc2NyYXRjaCA8Yj50d2ljZTwvYj4gYnkgUmljaGFyZCBQZWFjb2NrLCB3aG8gcmVtYWlucyB0aGUgcHJpbWFyeSBkZXZlbG9wZXIgb2YgdGhlIG9wZW4tc291cmNlIHZlcnNpb24sIGF2YWlsYWJsZSBhdCBodHRwczovL2dldGZsaWdodHBhdGguY29tLgo8YnI+PGJyPgpUbyBldmVyeW9uZSB3aG8gaGVscGVkIG1ha2UgRmxpZ2h0UGF0aCBwb3NzaWJsZTogPGVtPlRoYW5rIFlvdTwvZW0+Lgo8L3A+");
+    }
+    ///////////////////////////////////////
 
     // Get all the school ids this user is allowed to search.
     $school_ids = student_search_get_school_ids_user_is_allowed_to_search();  
@@ -901,6 +903,12 @@ function student_search_search_form_submit($form, $form_state) {
     return;
   }
   
+  
+  // Special for the search options (checkboxes).  If none are checked, then
+  // set it to _none=_none.  This fixes a bug where checking to see if it isset() was always failing.
+  if (@$form_state['values']['search_options'] == '') {
+    $form_state['values']['search_options'] = array('_none' => '_none');
+  }
   
       
   // Save values in session for next time.  

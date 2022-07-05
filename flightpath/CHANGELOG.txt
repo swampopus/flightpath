@@ -1,6 +1,16 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-07-04
+  Updated some display code in student_search.
+  
+  Altered checkbox for inactive students code in student_search submit function.
+  
+
+2022-06-30
+  Small adjustment in engagments-- made email tracking token sha512, and based on microtime + extra randomness to try to ensure uniqueness.
+   
+
 2022-06-27
   Made it so the system only tries to trim the watchdog once every 7 days, rather than on every cron run.
   
