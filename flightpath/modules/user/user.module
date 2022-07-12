@@ -611,7 +611,7 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items, $bo
       $edit_link = "";
       $url = fp_url("user/$user_id/edit-attribute/$attr", "window_mode=popup");
       $title = t("Edit ") . $definition['title'];
-      $title = htmlentities($title);       
+      $title = htmlentities($title, ENT_QUOTES);       
       if (user_has_permission("edit_attribute_$attr")) {
         $edit_link = "&nbsp;<a href='javascript:fpOpenSmallIframeDialog(\"$url\", \"$title\");'><i class='fa fa-pencil'></i></a>";
       }

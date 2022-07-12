@@ -1,6 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-07-11
+  Made a small change in user.module, so that attributes with quotes in the title show dialog correctly.
+  
+  Fixed documentation error.
+  
+  Removed hard-coded student priority tests/calculations.  Instead, added to the api.php file.
+    
+
 2022-07-04
   Updated some display code in student_search.
   
