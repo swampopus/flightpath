@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-07-12
+  Made modifications to student_priority module, so that tests can be pulled directly from user attributes, rather than having
+  the need to run an entire function.  Both methods are documented in the .api.php file.
+  
+
 2022-07-11
   Made a small change in user.module, so that attributes with quotes in the title show dialog correctly.
   

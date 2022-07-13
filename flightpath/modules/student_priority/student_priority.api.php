@@ -12,9 +12,8 @@
  */
 function hook_define_calculation_tests(&$arr) {
   
-  // First, get rid of any of the "core" tests which are hard-coded into the example module.
+  // METHOD ONE:  A function runs for each test to get the result.
   
-   
   
   $arr['my_module__something_test'] = array(   // the key is also the callback function to call!  By convention, use module name, 2 underscores, then test name.
     'title' => 'This is the title of this test.',
@@ -26,8 +25,27 @@ function hook_define_calculation_tests(&$arr) {
     'file' => array('my_module', 'my_modules.calculations.inc'),  // module name first, the file next (assuming it is within a module folder.        
     'group' => 'Custom Group A',  // groups multiple tests together this way    
     'weight' => 1010,   // lighter weights float to the top (get evaluated first).
-    
   );
+  
+  
+  
+  // METHOD TWO:  You specifically look at a user's attribute for the test to get the result.  No need for a custom function.
+  // In this example, it assumes there is an attribute called student_is_good, whose data is saved
+  // in the attributes table as student_is_good__value.
+  $arr['mymodule2__student_is_good'] = array(
+      'title' => 'Student is good?', 
+      'result_scores' => array(
+        'Y' => 0,
+        'N' => 1,
+      ),
+      'options' => array(   // optional, but might display nicer on screen.
+        'Y' => 'Yes',
+        'N' => 'No',
+      ),
+      'weight' => $w,
+      'result_from_user_attribute' => 'student_is_good__value',      
+    );
+  
   
   
   // No need to return anything, since $arr is passed by reference.
@@ -39,7 +57,7 @@ function hook_define_calculation_tests(&$arr) {
 
 
 /**
- * Implements hook_define_calculation_tests
+ * Implements hook_define_calculation_tests, "METHOD ONE" from above.
  * Accept an array so we can alter.  Then, we are just going to add to array (or modify).
  */
 function example_define_calculation_tests(&$arr) {

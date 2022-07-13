@@ -82,9 +82,10 @@ function student_priority_display_priority_calculations_page() {
 
   $calcs = student_priority_get_calculations_for_student($student_id, TRUE);
     
-  foreach ($calcs['calc_test_results'] as $machine_name => $details) {
-      
-    $result = $details['result'];
+  foreach ($calcs['calc_test_results'] as $machine_name => $details) {      
+    $result = $result_label = $details['result'];
+    if (isset($details['result_label'])) $result_label = $details['result_label'];
+    
     $score = $details['score'];    
     $extra = isset($details['extra']) ? trim($details['extra']) : '';
     
@@ -110,7 +111,7 @@ function student_priority_display_priority_calculations_page() {
     
     $rtn .= "<tr>
                 <td style='background-color: $bgcolor; color: black;'>$more_toggle$test_title$more_content</td>
-                <td style='background-color: $bgcolor;'>$result</td>
+                <td style='background-color: $bgcolor;'>$result_label</td>
                 <td style='background-color: $bgcolor;'>$score</td>
              </tr>";
     
@@ -276,6 +277,7 @@ function student_priority_get_calculations_for_student($student_cwid, $bool_save
     $use_student = new Student($student_cwid);   
   } 
   
+  $student_user_id = db_get_user_id_from_cwid($use_student->student_id, 'student');
   
   $calc_test_results = array();
   $total = 0;
@@ -310,23 +312,40 @@ function student_priority_get_calculations_for_student($student_cwid, $bool_save
     
   foreach ($calc_tests as $callback => $details) {
      
-    $file = $details['file'];  // 0 = module, 1 = filename
-    
-    $x = include_once(fp_get_module_path($file[0], TRUE, FALSE) . "/" . $file[1]);
-    if (!$x) {
-      fpm('Could not load include file:' . fp_get_module_path($file[0], TRUE, FALSE) . "/" . $file[1]);
+    $file = @$details['file'];  // 0 = module, 1 = filename    
+    if ($file) {    
+      $x = include_once(fp_get_module_path($file[0], TRUE, FALSE) . "/" . $file[1]);
+      if (!$x) {
+        fpm('Could not load include file:' . fp_get_module_path($file[0], TRUE, FALSE) . "/" . $file[1]);
+      }
+      
+            
+      // Now execute the callback.
+      $calc_test_results[$callback] = call_user_func_array($callback, array($use_student));
     }
     
-          
-    // Now execute the callback.
-    $calc_test_results[$callback] = call_user_func_array($callback, array($use_student));
+    // Are we instead looking for a user attribute?
+    if (isset($details['result_from_user_attribute'])) {
+      $val = user_get_attribute($student_user_id, $details['result_from_user_attribute']);      
+      if ($val == '') {
+         $val = 'SKIP';
+      }
+      $calc_test_results[$callback]['result'] = $val;
+      $calc_test_results[$callback]['result_label'] = $val;
+      
+      // If we have the original options we can use for the label, use that.
+      //fpm($details);
+      if (isset($details['options'][$val])) {
+        $calc_test_results[$callback]['result_label'] = $details['options'][$val]; 
+      }
+      
+    }
     
-    // TODO:  are we overriding the "default score" in the settings for this school?  Is that even an option we want to allow?
+    
     $raw_score = $details['result_scores'][$calc_test_results[$callback]['result']];
     
     // If the raw_score is "SKIP" then we don't want to count this at all.
-    //if ($raw_score == 'SKIP') continue;
-        
+            
     if (is_numeric($raw_score)) {
       $score = floatval($raw_score);
       $calc_test_results[$callback]['score'] = $score;
