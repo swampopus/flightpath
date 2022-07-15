@@ -461,6 +461,7 @@ class DegreePlan extends stdClass
   function load_degree_plan_ancillary() {
     $degree_id = $this->degree_id;
 
+    
     $old_semester = "";
     $table_name1 = "degrees";
     $table_name2 = "degree_requirements";

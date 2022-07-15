@@ -1363,7 +1363,6 @@ $query_and_args
     $is_editable_true = array();
     $is_editable_false = array();
     
-    
     if ($perform_join_with_degrees) {
         
       $catalog_year = $this->get_student_catalog_year($student_cwid);
@@ -1388,6 +1387,7 @@ $query_and_args
       
       if ($bool_return_as_full_record) {
         $rtn[$cur["major_code"]] = $cur;
+        
       }
       else {  
         $rtn[$cur["major_code"]] = $cur["major_code"];
