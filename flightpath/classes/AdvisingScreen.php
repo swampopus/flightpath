@@ -2550,7 +2550,7 @@ function draw_menu_items($menu_array) {
       // If the course can be repeated for credit, show that information next.
       if ($course->repeat_hours > $course->min_hours)
       {        
-        $html = t("May be repeated for up to @repeat hours of credit.", array("@repeat" => $course->repeat_hours));
+        $html = t("May be repeated for up to @repeat hours of credit.", array("@repeat" => floatval($course->repeat_hours)));  // floatval trims excess zeroes from display.
        
         // if it is essentially infinite, then we just say it can be repeated for credit, period.
         if ($course->repeat_hours > 20) {
@@ -3476,12 +3476,7 @@ function draw_menu_items($menu_array) {
           continue;
         }
       }
-      
-      /*
-if (strstr($group->group_id, "7516_")) {
-  fpm("....here1");
-}                 
-        */    
+            
     
       if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->get_has_been_displayed($req_by_degree_id) != TRUE && $course->get_has_been_displayed($req_by_degree_id) != TRUE)
       {
@@ -3502,8 +3497,6 @@ if (strstr($group->group_id, "7516_")) {
         // Is whats remaining actually LESS than the course hours?  If so, we need to skip it.        
         if ($remaining < $ch)
         {
-            
-                             
           continue;
         }
         
@@ -3533,9 +3526,7 @@ if (strstr($group->group_id, "7516_")) {
         
         if ($remaining < $c->get_hours($req_by_degree_id))
         {
-            
-          
-          continue;
+           continue;
         }
 
         $c->temp_flag = true;
@@ -3572,7 +3563,6 @@ if (strstr($group->group_id, "7516_")) {
           $remaining = $place_group->hours_required - $fulfilled_hours;
 
 
-
           if (!($course->course_list_fulfilled_by->is_empty) && $course->course_list_fulfilled_by->get_first()->get_has_been_displayed($req_by_degree_id) != true && $course->get_has_been_displayed($req_by_degree_id) != true)
           {
             $c = $course->course_list_fulfilled_by->get_first();
@@ -3587,11 +3577,16 @@ if (strstr($group->group_id, "7516_")) {
             $c->requirement_type = $place_group->requirement_type;
             $c->req_by_degree_id = $req_by_degree_id;
             
-            if (!$display_course_list->find_match($c))
-            { // Make sure it isn't already in the display list.
+            
+            // TODO:  This right here is how we show specified-repeats in groups with branches.
+            // TODO:  Originally we were making sure there wasn't a "match" already in the display_course_list, which was
+            //        of course excluding any of our specified repeats.
+            //if (!$display_course_list->find_match($c))
+            $found_match = $display_course_list->find_match($c);
+            if (!$found_match || ($found_match && $c->bool_specified_repeat == TRUE)) {
               $display_course_list->add($c);
-            } else if (is_object($c->course_transfer))
-            {
+            }            
+            else if (is_object($c->course_transfer)) {
               if (!$display_course_list->find_match($c->course_transfer))
               { // Make sure it isn't already in the display list.
                 $display_course_list->add($c);

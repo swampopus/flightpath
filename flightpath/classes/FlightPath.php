@@ -651,7 +651,6 @@ class FlightPath extends stdClass
   {
 
     $count = 0;
-
     $school_id = 0;
     if ($student) {
       $school_id = $student->school_id;      
@@ -723,7 +722,6 @@ class FlightPath extends stdClass
       if ($group->group_id != "" && $group->req_by_degree_id > 0) {        
         $req_by_degree_id = $group->req_by_degree_id;
       }
-       
      
       if ($bool_check_significant_courses == true)
       {
@@ -741,9 +739,13 @@ class FlightPath extends stdClass
         // Since this requirement has specified repeats, we want
         // to make all of the student's taken courses (for this course)
         // also have specified repeats.
-        $student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);   
+        $student->list_courses_taken->set_specified_repeats($course_requirement, $course_requirement->specified_repeats);
+           
       }
 
+//if ($course_requirement->course_id == '101092') {
+//fpm($course_requirement);
+//}
  
       
       // Does the student have any substitutions for this requirement?
@@ -859,8 +861,8 @@ class FlightPath extends stdClass
       // Has the student taken this course requirement?
       if ($c = $student->list_courses_taken->find_best_match($course_requirement, $course_requirement->min_grade, $bool_mark_repeats_exclude, $req_by_degree_id, TRUE, TRUE, $group_id))
       {
-      
-        
+
+                
         $h_get_hours = $c->get_hours();
         if ($c->bool_ghost_hour) {
           // If this is a ghost hour, then $h_get_hours would == 0 right now,
@@ -919,6 +921,7 @@ class FlightPath extends stdClass
         
 
 
+
         // Check hooks to see if this course is allowed to be assigned to the GROUP in question.
         if ($group_id != "" && $group_id != 0) {
           $bool_can_proceed = TRUE;
@@ -936,7 +939,7 @@ class FlightPath extends stdClass
           
         } // if group_id != ""
 
-        
+       
         // We want to see if this course has already been assigned to THIS degree...
         if (!in_array($req_by_degree_id, $c->assigned_to_degree_ids_array))
         {//Don't count courses which have already been placed in other groups.
@@ -953,7 +956,6 @@ class FlightPath extends stdClass
             continue;  // don't assign!
           } 
 
-
         
           // Has another version of this course already been
           // assigned?  And if so, are repeats allowed for this
@@ -963,9 +965,9 @@ class FlightPath extends stdClass
 
           $course_list_repeats = $student->list_courses_taken->get_previous_assignments($c->course_id);
 
-
           if ($course_list_repeats->get_size() > 0)
           {
+            
             // So, a copy of this course has been assigned more than once...
             // Get the total number of hours taken up by this course.
             $cc = $course_list_repeats->count_hours();
@@ -1021,11 +1023,13 @@ class FlightPath extends stdClass
               
               $list_requirements->add($new_course);
               
-            }
+            } // infinite repeats?
+            
             
             // Which degree is this coming from?  
             //$req_by_degree_id = $course_requirement->req_by_degree_id;
-            $c->assigned_to_degree_ids_array[$req_by_degree_id] = $req_by_degree_id;                            
+            $c->assigned_to_degree_ids_array[$req_by_degree_id] = $req_by_degree_id;    
+                                    
             // Go ahead and state that the requirement was fulfilled.
             $course_requirement->course_list_fulfilled_by->add($c);
             $course_requirement->grade = $c->grade;
@@ -1047,7 +1051,7 @@ class FlightPath extends stdClass
                                     
             // Check what groups it has been assigned to already.
             //$c->assigned_to_group_id = $group_id;
-            if ($group_id > 0) {
+            if ($group_id != '') {
               $c->assigned_to_group_ids_array[$group_id . "_" . $req_by_degree_id] = $group_id;
             }
             
@@ -1057,6 +1061,7 @@ class FlightPath extends stdClass
             // Can it be assigned, based on the number of allowed course repeats?
             if ($course_requirement->bool_specified_repeat == true)
             {
+              
               // $c is what they actually took.
               $c->bool_specified_repeat = true;
               $c->specified_repeats = $course_requirement->specified_repeats;
@@ -1064,7 +1069,7 @@ class FlightPath extends stdClass
             }
           } // bool_perform_assignment == true
 
-
+          
           $count++;
         }
       }

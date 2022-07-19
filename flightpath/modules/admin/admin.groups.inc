@@ -1222,8 +1222,7 @@ function admin_get_group_courses(Group $group) {
   $courses = array();
   $c_count = 0;
   $group->list_courses->load_course_descriptive_data();
-  
-  
+    
   if ($group_sort_policy == 'database') {
     $group->list_courses->sort_group_requirement_id();
   }
@@ -1283,9 +1282,11 @@ function admin_get_group_courses(Group $group) {
   // Now, get them branches!
   if (!$group->list_groups->is_empty)
   {
+    
     $group->list_groups->reset_counter();
     while ($group->list_groups->has_more())
     {
+      $courses = array();
       $g = $group->list_groups->get_next();
 
       $g->list_courses->load_course_descriptive_data();
@@ -1293,7 +1294,7 @@ function admin_get_group_courses(Group $group) {
       $g->list_courses->reset_counter();
       while($g->list_courses->has_more())
       {
-        $attributes = "";
+        $course_line = $attributes = "";
         $c = $g->list_courses->get_next();
         if (strstr($c->subject_id , "&"))
         {
@@ -1305,16 +1306,37 @@ function admin_get_group_courses(Group $group) {
           $attributes = $c->db_group_attributes . " ";
         }
 
-        $rtn .= "$attributes$c->subject_id $c->course_num";
+        $course_line = "$attributes$c->subject_id $c->course_num";
 
         if ($c->min_grade != "" && $c->min_grade != "D")
         {
-          $rtn .= " ($c->min_grade)";
+          $course_line .= " ($c->min_grade)";
         }
 
-        $rtn .= "  &  ";
+        if (!isset($courses[$course_line]))
+        {
+          $courses[$course_line] = 0;
+        }
+        // This is to check for specified repeats.
+        $courses[$course_line]++;
 
+
+    
       }
+
+
+      // Go through the $courses array to check for specified repeats.
+      foreach($courses as $course => $rep_count)
+      {
+        $rep_line = " [$rep_count]";
+        if ($rep_count == 1)
+        {
+          $rep_line = "";
+        }
+        $rtn .= "$course$rep_line & ";
+      }
+      
+
 
       // Take off the last &.
       $rtn = trim($rtn);

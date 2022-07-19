@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-07-19
+  Small change to popup course description, so repeat hours do not show excess zeroes.
+  
+  Made changes so that you can have specified repeats in groups with branches.
+  
+
 2022-07-12
   Made modifications to student_priority module, so that tests can be pulled directly from user attributes, rather than having
   the need to run an entire function.  Both methods are documented in the .api.php file.
