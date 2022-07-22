@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-07-22
+  Added extra class to pie chart rows-- the total number of intended rows.  This lets us target with CSS with more precision.
+
+
 2022-07-19
   Small change to popup course description, so repeat hours do not show excess zeroes.
   

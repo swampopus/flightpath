@@ -1948,6 +1948,7 @@ function draw_menu_items($menu_array) {
     //////////////////
 
     $prcount = 0;
+    $total_rows = count($pie_chart_theme_array["degree_rows"]);
     $degree_classes = fp_get_degree_classifications();    
     // Now, cycle through all of the 'rows' of degrees we need to draw. 
     foreach ($pie_chart_theme_array["degree_rows"] as $degree_id => $details) {
@@ -1967,7 +1968,7 @@ function draw_menu_items($menu_array) {
       if ($degree_class == "") $degree_class = "NOT_SET";
       $degree_level_num = intval(@$degree_classes['machine_name_to_level_num'][$degree_class]);
       
-      $rtn .= "<tr class='pie-degree-row pie-degree-row-$degree_id pie-degree-row-class-$degree_class pie-degree-row-degree-level-num-$degree_level_num pie-row-count-$prcount {$details['row_classes']}'><td colspan='2' class='$extra_pie_trtd_class'>
+      $rtn .= "<tr class='pie-degree-row pie-degree-row-$degree_id pie-degree-row-class-$degree_class pie-total-rows-$total_rows pie-degree-row-degree-level-num-$degree_level_num pie-row-count-$prcount {$details['row_classes']}'><td colspan='2' class='$extra_pie_trtd_class'>
                 <div class='pie-row-label'>{$details["row_label"]}</div>";
   
       
