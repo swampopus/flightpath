@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-07-23
+  In the popup group description function (in AdvisingScreen), we now include the group as a non-rendered object in the $render array, so that other
+  modules can act on it in hook_content_alter().
+  
+  Added weights to render array for displaying view (Degree and What If), so other modules can more easily manipulate.
+
+
 2022-07-22
   Added extra class to pie chart rows-- the total number of intended rows.  This lets us target with CSS with more precision.
 

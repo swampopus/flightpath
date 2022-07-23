@@ -1522,6 +1522,7 @@ function advise_display_view($view = "view") {
     $render['#bool_undergrad_only'] = $bool_undergrad_only;
     $render['whatif_selection_form'] = array(
       'value' => fp_render_form("advise_what_if_selection_form", "", $bool_undergrad_only),
+      'weight' => 100, 
     );
     
     //$rtn .= fp_render_form("advise_what_if_selection_form", "", $bool_undergrad_only);
@@ -1543,6 +1544,7 @@ function advise_display_view($view = "view") {
                <form id='mainform' method='POST' action='$vurl'>
                <input type='hidden' name='form_token' value='$form_token'>
                <table class='fp-semester-table'>",
+      'weight' => 200,               
     );
       
     /*    
@@ -1554,22 +1556,26 @@ function advise_display_view($view = "view") {
      
     $render['display_screen'] = array(
       'value' => $screen->display_screen(),
+      'weight' => 300,
     ); 
     //$rtn .= $screen->display_screen();
 
     $render['semester_table_close'] = array(
       'value' => "</table>",
+      'weight' => 350,
     );
     
     //$rtn .= "</table>";
     // Add in the required "advising variables"
     $render['hidden_advising_variables'] = array(
       'value' => $screen->get_hidden_advising_variables("save_draft"),
+      'weight' => 400,
     );
     //$rtn .= $screen->get_hidden_advising_variables("save_draft");
     
     $render['close_form_and_wrapper'] = array(
       'value' => "</form></div>",
+      'weight' => 500,
     );
         
     //$rtn .= "</form>";

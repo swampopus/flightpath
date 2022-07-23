@@ -2384,7 +2384,7 @@ function draw_menu_items($menu_array) {
    * 
    * @return string
    */
-  function display_popup_course_description($course_id = "", Course $course = null, $group = null, $show_advising_buttons = false)
+  function display_popup_course_description($course_id = "", Course $course = NULL, $group = NULL, $show_advising_buttons = FALSE)
   {
     $pC = "";
 
@@ -2403,6 +2403,13 @@ function draw_menu_items($menu_array) {
       'value' => $course,
     );
 
+
+    $render['#group'] = array(
+      'type' => 'do_not_render',
+      'value' => $group,
+    );
+
+    
     
     $db_group_requirement_id = @$_REQUEST["db_group_requirement_id"];
     
