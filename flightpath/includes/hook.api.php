@@ -1098,7 +1098,7 @@ function hook_menu() {
 
 
 /**
- * This function allowes the user to theme footnotes before they are draw onto the screen.
+ * This function allows the user to theme footnotes before they are drawn onto the screen.
  * 
  */
 function hook_theme_advise_footnote(&$theme) {

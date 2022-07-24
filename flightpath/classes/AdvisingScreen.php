@@ -812,16 +812,40 @@ function draw_menu_items($menu_array) {
     // Display the footnotes & messages.
 
     $student_id = $this->student->student_id;
+    
+    
+    $render = array();
+    $render['#id'] = 'AdvisingScreen_build_footnotes';
+    $render['#student_id'] = $student_id;
+    $render['#degree_id'] = $this->degree_plan->degree_id;
+    $render['#footnote_array'] = $this->footnote_array;
+    
+            
+    
     $school_id = db_get_school_id_for_student_id($student_id);
     
-    $pC = "";
+    //$pC = "";
     $is_empty = true;
     if ($bool_include_box_top) {
-      $pC .= $this->draw_semester_box_top(t("Footnotes & Messages"), true);
+      //$pC .= $this->draw_semester_box_top(t("Footnotes & Messages"), true);
+      
+      $render['box_top'] = array(
+        'value' => $this->draw_semester_box_top(t("Footnotes & Messages"), true),
+        'weight' => 100,
+      );
+      
     }
 
-    $pC .= "<tr><td colspan='8' class=' '>
-          ";
+    //$pC .= "<tr><td colspan='8' class=' '>";
+          
+    $render['tr_td_start'] = array(
+      'value' => "<tr><td colspan='8' class=' '>",
+      'weight' => 110,
+    );
+          
+    
+    $weight = 200;
+          
     $fn_type_array = array("substitution","transfer");
     $fn_char = array("substitution" => "S", "transfer"=>"T");
     $fn_name = array("substitution" => t("Substitutions"), 
@@ -836,8 +860,16 @@ function draw_menu_items($menu_array) {
         continue;
       }
 
-      $pC .= "<div style='padding-bottom: 10px;'>
-            <b>{$fn_name[$fn_type]}</b>";
+      //$pC .= "<div style='padding-bottom: 10px;'><b>{$fn_name[$fn_type]}</b>";
+            
+
+      $render['section_' . $fn_name[$fn_type] . '_start'] = array(
+        'value' => "<div style='padding-bottom: 10px;'><b>{$fn_name[$fn_type]}</b>",
+        'weight' => $weight,      
+      );
+            
+      $weight = $weight + 10;      
+            
       $is_empty = false;
       for ($t = 1; $t <= @count($this->footnote_array[$fn_type]); $t++)
       {
@@ -941,11 +973,22 @@ function draw_menu_items($menu_array) {
         }
         
         
-        $pC .= $html;
-
+        $render['section_' . $fn_name[$fn_type] . '_item_' . $t] = array(
+          'value' => $html,
+          'weight' => $weight,      
+        );
+        
+        $weight = $weight + 10;
+        
+        //$pC .= $html;
+        
 
       }
-      $pC .= "</div>";
+      //$pC .= "</div>";
+      $render['section_' . $fn_name[$fn_type] . '_end'] = array(
+        'value' => "</div>",
+        'weight' => $weight,      
+      );
     }
 
     
@@ -955,7 +998,7 @@ function draw_menu_items($menu_array) {
     $this->student->list_transfer_eqvs_unassigned->sort_alphabetical_order();
     $this->student->list_transfer_eqvs_unassigned->reset_counter();
     $ut_is_empty = TRUE;
-    $pC .= "<!--TRANS_UN_COURSES-->";
+    $html = "<!--TRANS_UN_COURSES-->";
     while ($this->student->list_transfer_eqvs_unassigned->has_more()) {
       
       $c = $this->student->list_transfer_eqvs_unassigned->get_next();
@@ -964,13 +1007,13 @@ function draw_menu_items($menu_array) {
       $l_cn = $c->course_num;
       $l_term = $c->get_term_description(true);
 
-      $pC .= "<div class=' ' style='padding-left: 10px; padding-bottom: 5px;
+      $html .= "<div class=' ' style='padding-left: 10px; padding-bottom: 5px;
                                        margin-left: 1.5em; text-indent: -1.5em;'>
               $l_si $l_cn (" . $c->get_hours() . " " . t("hrs") . ") from <em>$c->institution_name</em>.
                 ";
       
       
-      $pC .= "</div>";
+      $html .= "</div>";
       
       $ut_is_empty = false;
       $is_empty = false;
@@ -984,8 +1027,14 @@ function draw_menu_items($menu_array) {
             <b>" . t("Transfer Equivalency Removed Courses") . "</b><br>
         " . t("These courses have had their default transfer equivalencies removed.
                 ") . "</div>";
-      $pC = str_replace("<!--TRANS_UN_COURSES-->",$mtitle,$pC);
-      $pC .= "</div>";
+      $html = str_replace("<!--TRANS_UN_COURSES-->",$mtitle,$html);
+      $html .= "</div>";
+      
+      $render['section_trans_un_courses'] = array(
+        'value' => $html,
+        'weight' => 400,      
+      );      
+      
     }   
     
     
@@ -993,7 +1042,7 @@ function draw_menu_items($menu_array) {
     ////////////////////////////////////
     ////  Moved Courses...
     $m_is_empty = TRUE;
-    $pC .= "<!--MOVEDCOURSES-->";
+    $html = "<!--MOVEDCOURSES-->";
     $this->student->list_courses_taken->sort_alphabetical_order();
     $this->student->list_courses_taken->reset_counter();
     while($this->student->list_courses_taken->has_more())
@@ -1016,7 +1065,7 @@ function draw_menu_items($menu_array) {
       $c->group_list_unassigned->reset_counter();
       while($c->group_list_unassigned->has_more()) {
         
-        $pC .= "<div class=' ' style='padding-left: 10px; padding-bottom: 5px;
+        $html .= "<div class=' ' style='padding-left: 10px; padding-bottom: 5px;
                                        margin-left: 1.5em; text-indent: -1.5em;'>
                       $l_s_i $l_c_n (" . $c->get_hours_awarded() . " " . t("hrs") . ") - $c->grade - $l_term
                     ";
@@ -1036,15 +1085,11 @@ function draw_menu_items($menu_array) {
         } else {
           $group_title = t("the degree plan");
         }
-        $pC .= t("was removed from") . " $group_title$degree_title.";
+        $html .= t("was removed from") . " $group_title$degree_title.";
         
-        $pC .= "</div>";        
+        $html .= "</div>";        
         
       }
-
-
-
-
 
       $m_is_empty = false;
       $is_empty = false;
@@ -1057,8 +1102,13 @@ function draw_menu_items($menu_array) {
             <b>" . t("Moved Courses") . "</b><br>
         " . t("These courses have been moved out of their 
         original positions on your degree plan.") . "</div>";
-      $pC = str_replace("<!--MOVEDCOURSES-->",$mtitle,$pC);
-      $pC .= "</div>";
+      $html = str_replace("<!--MOVEDCOURSES-->",$mtitle,$html);
+      $html .= "</div>";
+     
+      $render['section_moved_courses'] = array(
+        'value' => $html,
+        'weight' => 410,      
+      );      
     }
 
 
@@ -1068,27 +1118,46 @@ function draw_menu_items($menu_array) {
       if ($this->bool_print != true)
       {// Don't display in print view.
         $purl = fp_url("advise/popup-toolbox/transfers");        
-        $pC .= "<div class='admin-toolbox-link-wrapper'>         
+        $html = "<div class='admin-toolbox-link-wrapper'>         
           <a href='javascript: popupSmallIframeDialog(\"" . $purl . "\",\"" . t("Administrator&#39;s Toolbox") . "\",\"\");'><img src='" . fp_theme_location() . "/images/toolbox.gif' border='0'>" . t("Administrator's Toolbox") . "</a>
         </div>";
         $is_empty = false;
+
+        $render['section_administrator_toolbox_link'] = array(
+          'value' => $html,
+          'weight' => 700,      
+        );      
+        
       }
     }
 
 
-    $pC .= "</td></tr>";
+    //$pC .= "</td></tr>";
+
+    $render['tr_td_end'] = array(
+      'value' => "</td></tr>",
+      'weight' => 800,      
+    );      
+
 
     if ($bool_include_box_top) {
-      $pC .= $this->draw_semester_box_bottom();
+      //$pC .= $this->draw_semester_box_bottom();
+      $render['box_bottom'] = array(
+        'value' => $this->draw_semester_box_bottom(),
+        'weight' => 810,      
+      );      
+      
     }
     
+    $output = fp_render_content($render, FALSE);    
+    
     if (!$is_empty)
-    {
-      $this->add_to_screen($pC, "FOOTNOTES");
+    {      
+      $this->add_to_screen($output, "FOOTNOTES");
     }
     
     // Return so other functions can use this output, if needed.
-    return $pC;
+    return $output;
   }
 
 

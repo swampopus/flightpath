@@ -1099,7 +1099,7 @@ $query_and_args
    * Returns an object from db query for a row we find with matching course_id, from the most recent catalog year.
    */ 
   function get_course_db_row($course_id) {
-    $res = db_query("SELECT * FRM courses WHERE course_id = ? ORDER BY `catalog_year` DESC", array($course_id));
+    $res = db_query("SELECT * FROM courses WHERE course_id = ? ORDER BY `catalog_year` DESC", array($course_id));
     $cur = db_fetch_object($res);
     return $cur;
   }
