@@ -1371,7 +1371,7 @@ function draw_menu_items($menu_array) {
         // This course *DOES* have an equivalency.
         $pC .= "<div class=' '>$initials eqv: $l_s_i $l_c_n - $l_title</div>";
 
-        $pC .= "<div class=' ' align='right'>
+        $pC .= "<div>
               <a href='javascript: popupUnassignTransferEqv(\"" . $course->course_id . "\");'>" . t("Remove this equivalency?") . "</a>
               </div>";
 
@@ -2473,10 +2473,7 @@ function draw_menu_items($menu_array) {
     );
 
 
-    $render['#group'] = array(
-      'type' => 'do_not_render',
-      'value' => $group,
-    );
+    // Note: $render['#group'] is set lower in this function.
 
     
     

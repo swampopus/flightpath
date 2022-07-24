@@ -2677,13 +2677,13 @@ function advise_init_screen() {
   if (@$GLOBALS["fp_advising"]["load_from_cache"] != "yes") { 
     // do not load from cache....  load the student fresh....
     
- 
     // Only do if we need to re-init after save
-    if (@$_REQUEST['reinit_fp_after_draft_save'] == 'yes') {   
+    if (@$_REQUEST['reinit_fp_after_draft_save'] == 'yes') {        
       $fp = new FlightPath();
       $fp->init();    
       $student = $fp->student;
-      $degree_plan = $fp->degree_plan;    
+      $degree_plan = $fp->degree_plan;
+      
       $GLOBALS["fp_advising"]["load_from_cache"] = "no";    
     }
     

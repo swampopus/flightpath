@@ -179,6 +179,7 @@ class FlightPath extends stdClass
       {
         $this->student = $student;
         $degree_plan = fp_load_degree($degree_id, $db, FALSE, $student->array_significant_courses);
+        //$degree_plan = new DegreePlan($degree_id, $db, FALSE, $student->array_significant_courses);
         $degree_plan->add_semester_developmental($student->student_id);
         //$this->degree_plan = $degree_plan;
         $degree_plans[$degree_plan->degree_id] = $degree_plan;
