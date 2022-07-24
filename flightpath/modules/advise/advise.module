@@ -2678,13 +2678,15 @@ function advise_init_screen() {
     // do not load from cache....  load the student fresh....
     
     // Only do if we need to re-init after save
-    if (@$_REQUEST['reinit_fp_after_draft_save'] == 'yes') {        
+    if (@$_REQUEST['reinit_fp_after_draft_save'] == 'yes') {
+
       $fp = new FlightPath();
       $fp->init();    
       $student = $fp->student;
       $degree_plan = $fp->degree_plan;
       
-      $GLOBALS["fp_advising"]["load_from_cache"] = "no";    
+      $GLOBALS["fp_advising"]["load_from_cache"] = "no";
+        
     }
     
     $student->load_student();
@@ -2695,6 +2697,7 @@ function advise_init_screen() {
     $fp->student = $student;     
     $screen->flightpath = $fp;
     $screen->student = $fp->student;
+    $screen->degree_plan = $fp->degree_plan;
           
     $fp->flag_outdated_substitutions();
     $fp->assign_courses_to_semesters(); // bare degree plan. not groups.
@@ -2718,7 +2721,7 @@ function advise_init_screen() {
     
   }
 
-
+  
 
 
   if (@$GLOBALS["fp_advising"]["save_to_cache"] != "no" && $window_mode != "popup") {

@@ -182,6 +182,7 @@ class FlightPath extends stdClass
         //$degree_plan = new DegreePlan($degree_id, $db, FALSE, $student->array_significant_courses);
         $degree_plan->add_semester_developmental($student->student_id);
         //$this->degree_plan = $degree_plan;
+                
         $degree_plans[$degree_plan->degree_id] = $degree_plan;
       }
 
@@ -208,6 +209,8 @@ class FlightPath extends stdClass
       $this->degree_plan = new DegreePlan();
       $this->student = $student;      
     }
+
+
         
     // Invoke a hook which lets other modules act on this student and degree plan we just loaded.
     invoke_hook('init_flightpath_degree', array($this->student->student_id, &$this->degree_plan));    
@@ -226,7 +229,7 @@ class FlightPath extends stdClass
       );
     }
 
-
+ 
 
 
   }  // end of function fp_init
@@ -246,7 +249,7 @@ class FlightPath extends stdClass
     // Loop through the degree plans one at a time...
     foreach ($degree_plans as $degree_plan) {
       
-      $new_degree_plan->combined_degree_ids_array[] = $degree_plan->degree_id;
+      $new_degree_plan->combined_degree_ids_array[] = intval($degree_plan->degree_id);
       
       $new_degree_plan->add_to_required_course_id_array($degree_plan->required_course_id_array);
       

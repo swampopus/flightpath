@@ -817,6 +817,7 @@ function draw_menu_items($menu_array) {
     $render = array();
     $render['#id'] = 'AdvisingScreen_build_footnotes';
     $render['#student_id'] = $student_id;
+    $render['#degree_plan'] = $this->degree_plan;
     $render['#degree_id'] = $this->degree_plan->degree_id;
     $render['#footnote_array'] = $this->footnote_array;
     
@@ -2343,6 +2344,8 @@ function draw_menu_items($menu_array) {
         continue;
       }
  
+      $semester->req_by_degree_id = $this->degree_plan->degree_id;
+      
       $disp_sem = $this->display_semester($semester, TRUE);
       if ($disp_sem) {
         $this->add_to_screen($disp_sem, "SEMESTER_" . $semester->semester_num);
@@ -3428,7 +3431,7 @@ function draw_menu_items($menu_array) {
     if ($bool_display_hour_count == true && $count_hoursCompleted > 0)
     {
       $p = "<tr><td colspan='8'>
-        <div class='  advise-completed-hours' style='text-align:right; margin-top: 10px;'>
+        <div class='advise-completed-hours' style='text-align:right; margin-top: 10px;'>
         <span class='completed-hours-label'>" . t("Completed hours:") . "</span> <span class='count-hours-completed'>$count_hoursCompleted</span>
         </div>        
         </td></tr>";

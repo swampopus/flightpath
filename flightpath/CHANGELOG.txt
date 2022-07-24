@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-07-24
+  When building semesters on the Degree or What If screen, made sure that their "req_by_degree_id" was set correctly.
+  
+  Modifications to advise_init_screen() function, and others, for extended support for other modules.
+
 2022-07-23
   In the popup group description function (in AdvisingScreen), we now include the group as a non-rendered object in the $render array, so that other
   modules can act on it in hook_content_alter().
