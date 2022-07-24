@@ -7,6 +7,14 @@ FlightPath 6.x Changelog
   
   Added weights to render array for displaying view (Degree and What If), so other modules can more easily manipulate.
 
+  Created new hook: hook_init_flightpath_degree().  This allowes modules to act after FlightPath::init() has been called.  
+  
+  Added new method to ObjList, to refresh_indexes().  Should be called after we remove a course from a list manually.
+  
+  Added new hidden variable to advising screen: reinit_fp_after_draft_save.  If set to 'yes', then after a draft save the $fp variable with
+  perform a fresh init() after a draft save.  This is primarily used by other modules which might be making changes to the degree plan in real time,
+  and do not want to reload the entire student.  By default it is set to 'no', replicating existing functionlity that skips that step.
+  
 
 2022-07-22
   Added extra class to pie chart rows-- the total number of intended rows.  This lets us target with CSS with more precision.

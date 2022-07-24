@@ -2612,7 +2612,7 @@ class CourseList extends ObjList
         continue;
       }
       
-      if ($c < $limit && $course->course_id == $course_id) {
+      if ($c < $limit && intval($course->course_id) == intval($course_id)) {
         // We found the course.  Since we do not want it to be part of the list,
         // we will skip adding it to the new_list.
         $c++;

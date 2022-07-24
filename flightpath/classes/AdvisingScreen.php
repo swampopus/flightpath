@@ -6121,6 +6121,8 @@ function draw_menu_items($menu_array) {
       
       <input type='hidden' name='advising_update_student_degrees_flag' id='advising_update_student_degrees_flag' value=''>
       
+      <input type='hidden' name='reinit_fp_after_draft_save' id='reinit_fp_after_draft_save' value='no'>
+      
       </span>
       ";
 

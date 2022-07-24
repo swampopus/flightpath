@@ -189,6 +189,22 @@ class ObjList
 		return $rtn;
 	}
 
+
+
+  function refresh_indexes() {
+    $new_array_list = array();
+    foreach ($this->array_list as $obj) {
+      $new_array_list[] = $obj;
+    }
+    $this->array_list = $new_array_list;
+    $this->reset_counter();
+  }
+
+
+
+
+
+
 	function has_more()
 	{
 		//adminDebug("here " . count($this->array_list));

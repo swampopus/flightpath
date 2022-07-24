@@ -339,6 +339,20 @@ function hook_status() {
 
 
 /**
+ * Allows a module to act on the degree_plan object AFTER being initialized by the FlightPath module.
+ * 
+ * This happens BEFORE any of the student's courses are assigned to the degree plan.
+ * 
+ */
+function hook_init_flightpath_degree($student_id, &$degree_plan) {
+  // Perform actions
+  
+  // Nothing is returned, since we are using pass-by-reference
+}
+
+
+
+/**
  * Returns a full listing of the student's majors.
  * 
  * @see fp_get_student_majors()

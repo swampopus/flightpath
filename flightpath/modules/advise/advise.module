@@ -2535,8 +2535,8 @@ function advise_init_screen() {
   
   // Insert our advising vars into the GLOBALS array for easy use later.
   advise_init_advising_variables();    
-    
-    
+
+
   $perform_action = trim(addslashes(@$_REQUEST["perform_action"]));
 
   if (@$_REQUEST["clear_session"] == "yes") {
@@ -2584,11 +2584,8 @@ function advise_init_screen() {
     $GLOBALS["fp_course_inventory"] = $course_inventory;    
   }
   
-  
-  
   $bool_loaded = FALSE;
   if ($GLOBALS["fp_advising"]["load_from_cache"] == "yes" && $cache != "" && $fp = unserialize($cache)) {
-        
     $bool_loaded = TRUE;    
     $fp->db = get_global_database_handler();
     $student = $fp->student;
@@ -2599,11 +2596,10 @@ function advise_init_screen() {
     
   }
    
-  
-    
-  if (!$bool_loaded) {       
+      
+  if (!$bool_loaded) {
     $fp = new FlightPath();    
-    $fp->init();        
+    $fp->init();
     $student = $fp->student;
     $degree_plan = $fp->degree_plan;    
     $GLOBALS["fp_advising"]["load_from_cache"] = "no";
@@ -2627,9 +2623,6 @@ function advise_init_screen() {
     // Save, then reload the student.
     $adv_id_array = $fp->save_advising_session_from_post(0,true);
     
-    // Look for hook_save_advising_session()...
-    invoke_hook("save_advising_session", $adv_id_array);
-    
     $bool_draft = TRUE;  // load draft, since we just saved it (and changed something)
     
 
@@ -2643,9 +2636,6 @@ function advise_init_screen() {
     
     // Save, then go to the history screen.
     $adv_id_array = $fp->save_advising_session_from_post(0,false);
-    
-    // Look for hook_save_advising_session()...
-    invoke_hook("save_advising_session", $adv_id_array);
     
     // Use an fp_goto command here to go to the History screen
     // Serialize the adv_id_array so we can send it along in our fp_goto command...
@@ -2688,13 +2678,14 @@ function advise_init_screen() {
     // do not load from cache....  load the student fresh....
     
  
-    /*
-    $fp = new FlightPath();
-    $fp->init();    
-    $student = $fp->student;
-    $degree_plan = $fp->degree_plan;    
-    $GLOBALS["fp_advising"]["load_from_cache"] = "no";    
-    */
+    // Only do if we need to re-init after save
+    if (@$_REQUEST['reinit_fp_after_draft_save'] == 'yes') {   
+      $fp = new FlightPath();
+      $fp->init();    
+      $student = $fp->student;
+      $degree_plan = $fp->degree_plan;    
+      $GLOBALS["fp_advising"]["load_from_cache"] = "no";    
+    }
     
     $student->load_student();
     $student->load_student_substitutions();

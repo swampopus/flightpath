@@ -207,7 +207,10 @@ class FlightPath extends stdClass
       $this->degree_plan = new DegreePlan();
       $this->student = $student;      
     }
-    
+        
+    // Invoke a hook which lets other modules act on this student and degree plan we just loaded.
+    invoke_hook('init_flightpath_degree', array($this->student->student_id, &$this->degree_plan));    
+           
     
     $wi = "";
     if ($this->bool_what_if) $wi = "_what_if";
