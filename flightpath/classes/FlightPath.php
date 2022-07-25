@@ -210,10 +210,10 @@ class FlightPath extends stdClass
       $this->student = $student;      
     }
 
-
-        
     // Invoke a hook which lets other modules act on this student and degree plan we just loaded.
     invoke_hook('init_flightpath_degree', array($this->student->student_id, &$this->degree_plan));    
+
+        
            
     
     $wi = "";
@@ -1042,6 +1042,9 @@ class FlightPath extends stdClass
             $course_requirement->grade = $c->grade;
             $course_requirement->set_hours_awarded($req_by_degree_id, $c->get_hours_awarded($req_by_degree_id));
             $course_requirement->bool_ghost_hour = $c->bool_ghost_hour;
+            if ($course_requirement->extra_attribs != "") {
+              $c->extra_attribs = $course_requirement->extra_attribs;
+            }
 
             // No longer using... using the assigned_to_degree_ids_array instead. // $c->bool_has_been_assigned = true;
             //$c->requirement_type = $course_requirement->requirement_type;

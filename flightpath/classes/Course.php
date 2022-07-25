@@ -19,6 +19,7 @@ class Course extends stdClass
   public $db_exclude, $data_entry_comment, $array_index, $data_entry_value, $db_group_attributes;
   public $db_group_requirement_id;  // the id from the group_requirements table where this was specified.
   public $db_degree_requirement_id;  // the id from the degree_requirements table where this was specified.
+  public $extra_attribs;
 
   // Course catalog data related:
   public $subject_id, $course_num, $course_id, $requirement_type, $catalog_year;
@@ -628,6 +629,7 @@ class Course extends stdClass
     $rtn .= $this->disp_for_group_id . "~";
     $rtn .= $this->school_id . "~";
     $rtn .= $this->db_grade . "~";
+    $rtn .= $this->extra_attribs . "~";
         
 
     return $rtn;
@@ -790,6 +792,7 @@ class Course extends stdClass
     $this->disp_for_group_id = trim($temp[27]);
     $this->school_id = trim($temp[28]);
     $this->db_grade = trim($temp[29]);
+    $this->extra_attribs = trim($temp[30]);
     
 
   }
@@ -2101,8 +2104,8 @@ class Course extends stdClass
     "db_advised_courses_id", "random_id",
     "db_substitution_id_array", "db_unassign_transfer_id",
     "db_exclude", "array_index", "db_group_requirement_id", "db_degree_requirement_id", "array_valid_names",
-    "data_entry_value", "db_group_attributes", "appears_in_semester_nums",
-
+    "data_entry_value", "db_group_attributes", "appears_in_semester_nums", "extra_attribs",
+ 
     "subject_id", "course_num", "course_id", "requirement_type", "catalog_year",
     "min_hours", "max_hours", "repeat_hours", "bool_outdated_sub",
 

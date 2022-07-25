@@ -2912,7 +2912,7 @@ function draw_menu_items($menu_array) {
         $tflag = intval($course->bool_transfer);
         $html .= "<div align='left' class=' '>
           <b>" . t("Special administrative function:") . "</b>
-            <a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"0\",\"$req_by_degree_id\");'>" . t("Remove from the degree plan?") . "</a></div>";
+            <a href='javascript: popupUnassignFromGroup(\"$course->course_id\",\"$course->term_id\",\"$tflag\",\"0\",\"$req_by_degree_id\");'>" . t("Unassign fulfillment?") . "</a></div>";
         $html .= "</div>";
       }
 
