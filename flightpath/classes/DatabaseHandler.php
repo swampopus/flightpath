@@ -1122,7 +1122,7 @@ $query_and_args
   }
   
   
-  function get_course_id($subject_id, $course_num, $catalog_year = "", $bool_use_draft = false, $school_id = 0, $bool_check_allow_default_school = FALSE)
+  function get_course_id($subject_id, $course_num, $catalog_year = "", $bool_use_draft = FALSE, $school_id = 0, $bool_check_allow_default_school = FALSE)
   {
     // Ignore the colon, if there is one.
     if (strpos($course_num,":"))

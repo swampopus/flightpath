@@ -800,7 +800,7 @@ function content_dialog_handle_after_save() {
           }, $timeout);  
         });
       </script>
-  ";
+  "; 
   //*/
   
   return $rtn;

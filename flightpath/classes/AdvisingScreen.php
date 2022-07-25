@@ -3213,6 +3213,7 @@ function draw_menu_items($menu_array) {
     $render = array();
     $render['#id'] = 'AdvisingScreen_display_semester';
     $render['#semester'] = $semester;
+    $render['#degree_plan'] = $this->degree_plan;
     $render['#bool_display_hour_count'] = $bool_display_hour_count;
     $render_weight = 0;
     $render['semester_box_top'] = array(
