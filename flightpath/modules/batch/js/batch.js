@@ -63,7 +63,7 @@ function batchContinueBatch() {
     
     
     // We now need to go back through the loop.  Call this function after a brief delay...
-    setTimeout(batchContinueBatch(), 500);
+    setTimeout(batchContinueBatch(), 250);
     
     
     
