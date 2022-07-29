@@ -96,7 +96,7 @@ function smtp_settings_form() {
 
   $form['smtp_from_email_name'] = array(
     'type' => 'textfield',
-    'label' => t('From Email Address'),
+    'label' => t('From Email Name'),
     'value' => variable_get('smtp_from_email_name', 'NoReply - FlightPath'),
     'description' => 'What is the default "from" name on emails we send?',    
   );

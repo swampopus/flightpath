@@ -3030,7 +3030,7 @@ function system_status() {
   $rtn["severity"] = "normal";
   $rtn["status"] = "";
   // Check on the last time cron was run; make sure it's working properly.
-  $last_run = variable_get("cron_last_run", 0);
+  $last_run = convert_time(variable_get("cron_last_run", 0));
   
   // Report on current details about FlightPath.
   $fpversion = FLIGHTPATH_VERSION;

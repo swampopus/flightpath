@@ -1,8 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-07-28
+  On the Status page, the last cron run wasn't being displayed in the user's timezone.
+  
+
 2022-07-27
   Added small change to batch.js, to make it run slightly faster.
+  
+  Fixed on-screen text for SMTP module settings page.
   
 
 2022-07-25
