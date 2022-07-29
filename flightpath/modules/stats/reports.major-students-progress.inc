@@ -79,7 +79,7 @@ function stats_report_major_students_progress_form() {
 
   if (time() < $last_timestamp + (60 * 60)) {
     
-    $html .= "<hr><p>" . t("Last CSV report was generated for @major on @time.  It will remain for 1 hour.", array("@major" => $last_major, "@time" => format_date($last_timestamp))) . "</p>";
+    $html .= "<hr><p>" . t("Last CSV report was generated for @major on @time.  It will remain for 1 hour.", array("@major" => $last_major, "@time" => format_date(convert_time($last_timestamp)))) . "</p>";
     $html .= "<p>" . l(t("Download CSV for ") . $last_major, "stats/download-csv-from-batch/$last_batch_id", "filename=" . urlencode("major_student_progress__" . $last_major)) . "</p>";
     
     

@@ -3601,8 +3601,23 @@ function system_reload_and_cache_course_inventory() {
   //fpm('rebuilding course cache');
       
   //fpm("LIMIT $limit_start, $limit_size");
+  
+  // To save memory, we're only going to keep a certain number of catalog years in the cache, and even then, only up to a max number of rows. 
+  
+  $start_year = intval(date('Y', strtotime('NOW + 1 YEAR'))); // start with one year into the future.
+  $end_year = intval(date('Y', strtotime('NOW - 10 YEARS'))); // end with 10 years into the past
+  
+  $in_years = "";
+  for ($t = $end_year; $t <= $start_year; $t++) {
+    $in_years .= $t . ",";
+  }
+  $in_years .= "1900";  // add in the 1900 year as well.
+  
   $result = db_query("SELECT * FROM courses
-                      WHERE delete_flag = 0"); 
+                      WHERE delete_flag = 0
+                      AND catalog_year IN ($in_years)
+                      ORDER BY catalog_year DESC
+                      LIMIT 50000"); 
 
     while($cur = db_fetch_array($result))
     {

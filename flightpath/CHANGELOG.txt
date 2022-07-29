@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-07-29
+  Made an adjustment to system.module's function system_reload_and_cache_course_inventory(), such that we only get the 10 most recent catalog years
+  when building the course inventory file.  We also limit it to 50,000 records, though this might be changed in the future.  By making this
+  change, it keeps the files/cache_data/courses_serialized.info file relatively small and keeps it from growing out of control as more courses
+  are added and duplicated each year.  This in turn uses up less RAM on the server.  
+  
+
 2022-07-28
   On the Status page, the last cron run wasn't being displayed in the user's timezone.
   
