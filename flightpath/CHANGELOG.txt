@@ -7,6 +7,8 @@ FlightPath 6.x Changelog
   change, it keeps the files/cache_data/courses_serialized.info file relatively small and keeps it from growing out of control as more courses
   are added and duplicated each year.  This in turn uses up less RAM on the server.  
   
+  Added extra css class to edit link for user attributes, making it easier to style later on.
+  
 
 2022-07-28
   On the Status page, the last cron run wasn't being displayed in the user's timezone.
