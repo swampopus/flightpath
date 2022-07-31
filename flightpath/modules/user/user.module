@@ -1385,8 +1385,11 @@ function user_permissions_form() {
   $mcount = 0;
   foreach ($modules as $module) {
 
+    $disp_module = $module;
+    $disp_module = ucwords(str_replace("_", " ", $disp_module));
+    
     $form["mark" . $m++] = array(
-      "value" => "<tr><td colspan='$col_count' class='perm-module-name'>" . ucwords($module) . " " . t("module") . "</td></tr>",
+      "value" => "<tr><td colspan='$col_count' class='perm-module-name'>" . $disp_module . " " . t("module") . "</td></tr>",
     );   
 
       
