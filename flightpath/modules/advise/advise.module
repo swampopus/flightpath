@@ -1519,6 +1519,12 @@ function advise_display_view($view = "view") {
       $bool_undergrad_only = FALSE; 
     }
     
+    // Check school setting: should we show all (both grad and undergrad) degrees on What If?
+    // This will overwrite the logic above.
+    if (variable_get_for_school('show_both_undergrad_and_grad_degrees_in_what_if', 'no', $school_id) == 'yes') {
+      $bool_undergrad_only = FALSE;
+    }
+    
     $render['#bool_undergrad_only'] = $bool_undergrad_only;
     $render['whatif_selection_form'] = array(
       'value' => fp_render_form("advise_what_if_selection_form", "", $bool_undergrad_only),

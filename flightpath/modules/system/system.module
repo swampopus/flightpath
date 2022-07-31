@@ -1244,6 +1244,18 @@ function system_school_data_form($school_id = 0) {
     'description' => t("Selecting multiple degrees and options for What If can significantly impact server performance.  It is recommended
                       to limit the number of selections to no more than 5.  If you are unsure what to put here, enter '5'."),
   );
+
+  $form['show_both_undergrad_and_grad_degrees_in_what_if' . $fs] = array(
+    'type' => 'select',
+    'label' => t("Show both undergraduate and graduate degrees for every student in What If?"),
+    'options' => array('no' => t('No (default behavior)'), 'yes' => t('Yes')),
+    'hide_please_select' => TRUE,
+    'value' => variable_get_for_school('show_both_undergrad_and_grad_degrees_in_what_if', 'no', $school_id, TRUE),
+    'description' => t("Normally on the What If selection screen, undergrad students can only select from undergrad degrees, and
+                        graduate students can only select from graduate degrees.  However, if this is set to 'Yes', then 
+                        students will be able to see and select from any degree in What If.  If unsure what to select,
+                        choose 'No'."),
+  );
   
   
   $form["show_level_3_on_what_if_selection" . $fs] = array(

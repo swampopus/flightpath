@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-07-31
+  Added new school setting that allows What If to show all degrees (not just undergrad or grad based on student's rank).
+  
+
 2022-07-29
   Made an adjustment to system.module's function system_reload_and_cache_course_inventory(), such that we only get the 10 most recent catalog years
   when building the course inventory file.  We also limit it to 50,000 records, though this might be changed in the future.  By making this
