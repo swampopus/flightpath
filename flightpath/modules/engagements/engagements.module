@@ -2865,26 +2865,7 @@ function engagements_form_alter(&$form, $form_id)
 
 
 
-  /**
-   * We want an option for which phone lines should this user receive notifications for.  Should be checkboxes, so it can be multi-select.
-   */
-  if ($form_id == 'user_edit_user_form') {
-    $user_id = intval($form['user_id']['value']);
-    $options = engagements_get_from_phones_for_fapi(TRUE);
-    $default_value = engagements_get_user_notify_sms_receipt_values($user_id);
-    if (count($options) > 0 && $user_id > 0) {
 
-      $form['receive_notifications_from_numbers'] = array(
-        'type' => 'checkboxes',
-        'label' => t("Select the SMS/Text lines (if any) that this user should be notified of when receiving a Text message:"),
-        'options' => $options,
-        'value' => $default_value,
-        'weight' => 150,
-        'description' => t("Note: the user will always receive a notification if the sender is designated as one of this user's advisees."),
-      );
-    }
-
-  } // user_edit_user_form
 
 
 

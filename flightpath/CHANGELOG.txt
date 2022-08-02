@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-08-02
+  Moved around code so that the user module is responsible for displaying text message recipient options (instead of the code being
+  in hook_form_alter from engagements).
+  
+  Fixed bug where deleteing last txt message option wasn't allowed when editing user.
+  
+
 2022-07-31
   Added new school setting that allows What If to show all degrees (not just undergrad or grad based on student's rank).
   
