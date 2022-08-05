@@ -16,8 +16,6 @@ function course_search_menu() {
     "page_callback" => "course_search_display_search",
     "access_arguments" => array('access_course_search'),
     "page_settings" => array(
-      
-      
       "page_hide_report_error" => TRUE,
       "target" => "_blank",
       "menu_icon" => fp_get_module_path('course_search') . "/icons/book_go.png",
@@ -36,7 +34,7 @@ function course_search_menu() {
   
   
   $items["admin/config/course-search"] = array(
-    "title" => "Course Search Settings",
+    "title" => "Course Search settings",
     "description" => "Administer the Course Search module's settings",    
     "page_callback" => "fp_render_form",
     "page_arguments" => array("course_search_settings_form", "system_settings"),

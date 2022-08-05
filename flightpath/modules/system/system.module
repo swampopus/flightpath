@@ -1435,6 +1435,25 @@ function system_school_data_form($school_id = 0) {
   
   
   
+  
+  $form['departments' . $fs] = array(
+    "type" => 'textarea',
+    'label' => t("Departments:"),
+    'value' => variable_get_for_school('departments', '', $school_id, TRUE),
+    'rows' => 15,
+    'description' => t("Enter each department, one per line, in this format:
+                        <br>DEPT_CODE ~ Department Name
+                        <br>
+                        For example:
+                        <br> &nbsp; FINAID ~ Financial Aid
+                        <br> &nbsp; REGST ~ Registrar
+                        <br><b>Important:</b> The DEPT_CODE must be <strong>unique</strong> and contain only
+                        letters, numbers, and underscores.  The Department Name must not contain any tildes (~) or line breaks, and should be relatively short.
+                        <br>The separator between the DEPT_CODE and the Department Name is a single tilde (~)."),
+  );
+  
+  
+  
   // How many decimal places allowed in substitutions?
   $form["sub_hours_decimals_allowed" . $fs] = array(
     "type" => "select",

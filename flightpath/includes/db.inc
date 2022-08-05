@@ -726,6 +726,12 @@ function db_get_school_id_for_student_id($student_id) {
 }
 
 
+function db_get_school_id_for_user_id($user_id) {
+  $db = get_global_database_handler();
+  return $db->get_school_id_for_user_id($user_id);
+}
+
+
 /**
  * Return a specific setting's value, based on the var_name given.
  *

@@ -173,7 +173,7 @@ function schools_menu() {
   $items = array();
   
   $items['admin/config/schools'] = array(  
-    'title' => 'Administer Schools',
+    'title' => 'Schools settings',
     'description' => 'Administer and define the Schools at your institution',
     'page_callback' => 'fp_render_form',
     'page_arguments' => array('schools_administer_schools_form'),
@@ -268,6 +268,29 @@ function schools_menu() {
     );      
 
 
+  $items["admin/config/appointments/$school_id"] = array(  
+    'title' => $school_name,    
+    'page_callback' => 'fp_render_form',
+    'page_arguments' => array('calendar_appointment_settings_form', 'system_settings', 3),
+    'access_arguments' => array('administer_appointment_settings'),    
+    "page_settings" => array(
+      "page_hide_report_error" => TRUE,     
+      "menu_links" => array(
+        0 => array(
+          "text" => "Admin Console",
+          "path" => "admin-tools/admin",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),
+    ),
+    'type' => MENU_TYPE_TAB,
+    "tab_family" => "appointment_settings",   // REMEMBER TO ALSO EDIT SCHOOLS_MENU_ALTER
+    'weight' => $weight,
+  );
+
+
+
+
 
   $items["admin/config/alerts-settings/$school_id"] = array(
     "title" => $school_name,
@@ -320,8 +343,7 @@ function schools_menu() {
   }
   
   
-  
-  
+    
   
   
   return $items;
@@ -413,6 +435,14 @@ function schools_menu_alter(&$items) {
       $items[$path]['page_settings']['tab_title'] = t('Default');
       unset($items[$path]['tab_parent']);            
     }
+
+    if ($path == 'admin/config/appointments') {
+      $items[$path]['type'] = MENU_TYPE_DEFAULT_TAB;
+      $items[$path]['tab_family'] = 'appointment_settings';
+      $items[$path]['page_settings']['tab_title'] = t('Default');
+      unset($items[$path]['tab_parent']);            
+    }
+
 
 
   } // foreach
@@ -736,7 +766,7 @@ function schools_form_alter(&$form, $form_id) {
     'admin_edit_group_form',
     'admin_edit_course_form',
     'user_edit_user_form',
-    'user_edit_student_user_form',
+    'user_edit_student_user_form',    
   );
     
       
@@ -939,7 +969,7 @@ function schools_form_alter(&$form, $form_id) {
 
   
   // Forms for which we should allow override values per school.
-  $oforms = array('alerts_settings_form',"system_school_data_form",'admin_advising_settings_form',"course_search_settings_form",'audit_settings_form');    
+  $oforms = array('alerts_settings_form',"system_school_data_form",'admin_advising_settings_form',"course_search_settings_form",'audit_settings_form','calendar_appointment_settings_form');    
   if (in_array($form_id,$oforms)) {    
     // We want to add a "use default" checkbox at the top, which, if set, will disable all of the form elements.        
     fp_add_js(fp_get_module_path('schools') . '/js/schools.js');
@@ -965,7 +995,7 @@ function schools_form_alter(&$form, $form_id) {
     
     
       // Add a checkbox to every form element!
-      $fields_to_edit = array('textfield', 'textarea', 'select');
+      $fields_to_edit = array('textfield', 'textarea', 'select', 'checkboxes');
       $fields_to_check_override = "";
       foreach ($form as $fieldname => $element) {
         if (in_array($element['type'], $fields_to_edit)) {
@@ -977,10 +1007,15 @@ function schools_form_alter(&$form, $form_id) {
                    
           if (!isset($form[$fieldname]['prefix'])) $form[$fieldname]['prefix'] = "";
           
+          $n_fieldname = $fieldname;
+          if ($element['type'] == 'checkboxes') {
+            $n_fieldname = 'inner-wrapper-' . $fieldname;
+          }
+          
           $css_id = md5($fieldname) . mt_rand(9,9999);
           
           $form[$fieldname]['prefix'] .= "<span class='schools-override-cb'>
-                              <label><input type='checkbox' name='school_override__$fieldname' class='school-override-cb' id='school_override__$css_id' value='yes' $checked>" . t("Override Default school value?") . "</label></span>";
+                              <label><input type='checkbox' name='school_override__$n_fieldname' class='school-override-cb' id='school_override__$css_id' value='yes' $checked>" . t("Override Default school value?") . "</label></span>";
           // Also add this fieldname to our "fields_to_check_override" string, so we can put it in a hidden textarea for later use in the _submit function.
           $fields_to_check_override .= $fieldname . ",";
         }

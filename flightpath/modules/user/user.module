@@ -1886,6 +1886,7 @@ function user_edit_user_form() {
   
   $faculty_cwid = strip_tags($_REQUEST["faculty_cwid"]);
   $user_id = db_get_user_id_from_cwid($faculty_cwid);
+  $school_id = db_get_school_id_for_user_id($user_id);
   $de_catalog_year = @strip_tags($_REQUEST["de_catalog_year"]);
   $name = fp_get_faculty_name($faculty_cwid);
   
@@ -2077,16 +2078,19 @@ function user_edit_user_form() {
   );  
   
   $department_code = @$cur['department_code'];
-      
+  
+  $departments = fp_get_departments($school_id);
+
+
   $form["department"] = array(
     "label" => t("Department:"),
-    "type" => "textfield",
-    "value" => $department_code . " ~ " . @$cur["department"],
-    "size" => 30,
+    "type" => "select",
+    "options" => $departments,
+    "value" => $department_code,    
     "weight" => 110,
-    "description" => "Enter DEPT_CODE ~ Department Name.<br>&nbsp; &nbsp;Ex:  ENGL ~ English.<br>If DEPT_CODE is not entered,
-                      then the deparment name will be used in searches.  It is recommended to use consistent DEPT_CODEs.",
+    "description" => "Select which department this user belongs to (if any).  Note: departments are defined on the 'Configure school settings' admin page.",
   );  
+    
     
   $form["major_code_csv"] = array(
     "label" => t("Major code CSV:"),
@@ -2226,13 +2230,8 @@ function user_edit_user_form_submit($form, $form_state) {
   
   $user_id = intval($values["user_id"]);
   $faculty_cwid = $values["faculty_cwid"];
-  $department = trim($values['department']);
-  $dept_code = fp_get_machine_readable(strtoupper($department));
-  if (strstr($department, "~")) {
-    $temp = explode("~", $department);
-    $dept_code = trim($temp[0]);
-    $department = trim($temp[1]);
-  }
+  $dept_code = trim($values['department']);
+  
   // Save the roles into the database for this user.
   // Begin by deleting what's there all ready.
   db_query("DELETE FROM user_roles WHERE user_id = ? ", $user_id);
@@ -2293,10 +2292,9 @@ function user_edit_user_form_submit($form, $form_state) {
    // Now, update the faculty table entry.
    db_query("UPDATE faculty
              SET college = ?,
-                 department_code = ?,
-                 department = ?,
+                 department_code = ?,                 
                  major_code_csv = ?                
-             WHERE cwid = ? ", $values["college"], $dept_code, $department, 
+             WHERE cwid = ? ", $values["college"], $dept_code, 
                                 $values["major_code_csv"], $faculty_cwid);             
 
     watchdog("user_edit", "Updating faculty user with various other values: @other", array("@other" => ppm($values, TRUE)));                                
@@ -2315,9 +2313,9 @@ function user_edit_user_form_submit($form, $form_state) {
               VALUES (?, ?, '1', ?, ?, ?, ?, ?)
               ", $values["new_user_name"], user_hash_password($values["new_password"]), trim(strtolower($values["email"])), $values["new_faculty_cwid"],
                  $values["f_name"], $values["l_name"], $values["is_disabled"]);
-    db_query("INSERT INTO faculty (cwid, college, department_code, department, major_code_csv)
+    db_query("INSERT INTO faculty (cwid, college, department_code, major_code_csv)
               VALUES (?, ?, ?, ?, ?)
-             ", $values["new_faculty_cwid"], $values["college"], $dept_code, $department, $values["major_code_csv"]);
+             ", $values["new_faculty_cwid"], $values["college"], $dept_code, $values["major_code_csv"]);
     
     unset($values['new_password']);
     
@@ -2362,7 +2360,7 @@ function user_display_users() {
   
   $cc = 1;
 
-  
+
   // Do this using $render array, so it can be altered
   // by hook_content_alter
   $render = array();
@@ -2578,11 +2576,14 @@ function user_display_users() {
   while ($cur = db_fetch_array($result)) {
 
     $user_id = $cur["user_id"];    // Note: will be NULL if no roles are set, due to left join in query.
+    $school_id = db_get_school_id_for_user_id($user_id);
+    $departments = fp_get_departments($school_id);
     $l_name = trim(ucwords(strtolower($cur["l_name"])));
     $f_name = trim(ucwords(strtolower($cur["f_name"])));    
     $faculty_cwid = trim($cur["cwid"]);
-    $dept_name = trim(ucwords(strtolower($cur["department"])));
-
+    $dept_name = @$departments[$cur["department_code"]];
+    if ($dept_name == "") $dept_name = $cur['department_code'];
+    
     $last_login = intval($cur['last_login']);
     if ($last_login == 0) {
       $last_login = t("Never");
@@ -2689,20 +2690,12 @@ function user_list_filter_form() {
   
 
   // Show list of departments
-  $dept_options = array();
-  $res = db_query("SELECT * FROM faculty 
-                   GROUP BY department_code
-                   ORDER BY department");
-  while ($cur = db_fetch_array($res)) {    
-    $key = $cur["department_code"];
-    $value = $cur["department"];
-    $dispval = $value;
-    
-    if (strlen($dispval) > 25) {
-      $dispval = trim(substr($dispval, 0, 22)) . "...";
-    }    
-    $dept_options[$key] = $dispval;
-  }  
+  if (module_enabled('schools')) {
+    $dept_options = fp_get_departments(0, TRUE); 
+  }
+  else {
+    $dept_options = fp_get_departments();
+  }
   
   $filter_dept_value = @trim($_SESSION['users_filter_dept']);
   $form['filter_dept'] = array(      

@@ -1,6 +1,18 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-08-04
+  Added new function to db.inc, making it easier to get school_id from a user_id.
+  
+  Added new setting to School Settings, for specifying departments.
+  
+  Made changes in School settings to accomodate new 'Appointment settings' form.  
+  
+  Altered User module to make use of the new "departments" setting as a select list rather than a free-type field.
+  
+  Built new 'Appointment settings' form, so admins may edit global settings having to do with who may accept appointments.
+  
+
 2022-08-02
   Moved around code so that the user module is responsible for displaying text message recipient options (instead of the code being
   in hook_form_alter from engagements).

@@ -249,6 +249,32 @@ function system_update($old_schema, $new_schema) {
     
   }
 
+
+  if (intval($old_schema) < 11) {
+      
+    $dept_val = "";
+    $res = db_query("SELECT * FROM faculty 
+                     GROUP BY department_code
+                     ORDER BY department");
+    while ($cur = db_fetch_array($res)) {    
+      $key = trim($cur["department_code"]);
+      $value = trim($cur["department"]);
+     
+      if ($key == "") {
+        $key = "UNSPECIFIED";
+      }
+              
+      //$dept_options[$key] = $dispval;
+
+      $dept_val .= $key . " ~ " . $value . "\n";
+            
+    }       
+    
+    variable_set('departments', $dept_val);
+    
+  }
+
+
   
       
 } // update

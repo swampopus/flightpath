@@ -53,6 +53,76 @@ if (!function_exists('str_contains')) {
 } 
  
  
+
+/**
+ * Returns an array (suitable for form api) of departments on campus which
+ * faculty/staff can be members of.
+ */
+function fp_get_departments($school_id = 0, $bool_get_all_by_schools = FALSE) {
+    
+  $rtn = array();
+  
+  
+  $cache_key = md5(serialize(func_get_args()));
+  
+  // Get from cache if already loaded once this page load
+  if (isset($GLOBALS['fp_cache_departments'][$cache_key])) {    
+    return $GLOBALS['fp_cache_departments'][$cache_key];
+  }
+    
+  
+  if (!$bool_get_all_by_schools) {
+    $val = variable_get_for_school('departments', '', $school_id);  
+    $lines = explode("\n", $val);
+    foreach ($lines as $line) {
+      $line = trim($line);
+      if (!$line) continue;
+      
+      $temp = explode("~", $line);    
+      $rtn[trim($temp[0])] = trim($temp[1]);    
+    }
+  }
+  else if (module_enabled('schools') && $bool_get_all_by_schools == TRUE) {
+    // We should return a multi-dimensional array where the school name is first, followed by dept_code.
+    // Ex: $rtn['SCHOOL_ABC']['ENGL'] = "English";
+    // We would need to go through all of our schools in a for loop first.    
+    $schools = schools_get_school_definitions();
+    foreach ($schools as $school_id => $throw_away) {
+      $school_code = schools_get_school_code_for_id($school_id);
+      
+      if ($school_id == 0) $school_code = "- Default -";
+      
+      $val = variable_get_for_school('departments', '', $school_id);  
+      $lines = explode("\n", $val);
+      foreach ($lines as $line) {
+        $line = trim($line);
+        if (!$line) continue;
+        
+        $temp = explode("~", $line);    
+        $rtn[$school_code][trim($temp[0])] = trim($temp[1]);    
+      }
+      
+      
+    }  
+    
+  }   
+    
+  
+  
+  
+  
+  $GLOBALS['fp_cache_departments'][$cache_key] = $rtn;  // store in cache
+  
+  return $rtn;  
+  
+}
+
+
+
+
+
+
+
  
  
 

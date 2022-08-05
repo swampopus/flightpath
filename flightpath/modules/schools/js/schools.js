@@ -26,6 +26,7 @@ function schoolsDisableEnableFieldFromOverride(id) {
   var fieldname = temp[1];
     
   var css_fieldname = str_replace("~~", "_", fieldname);
+  
   if (ischecked === true) {
     // Meaning, we are indeed going to override, so enable the field.
     $("#element-" + css_fieldname).removeAttr('readonly');
