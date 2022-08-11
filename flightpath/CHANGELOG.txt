@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-08-11
+  Cleaned up logic which loads permissions for users, using less memory.
+  
+  Added ability for students to schedule appointments with faculty & staff in other departments (not just their
+  advisors).
+
+
 2022-08-10
   Added breadcrumbs to certain admin functions.
   

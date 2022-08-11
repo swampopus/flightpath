@@ -655,6 +655,7 @@ function calendar_display_schedule_staff_page() {
   global $user;
   
   fp_set_title('');
+  fp_add_css(fp_get_module_path('calendar') . '/css/style.css');
   $db = get_global_database_handler();
   if ($user->is_student) {
     
@@ -674,62 +675,102 @@ function calendar_display_schedule_staff_page() {
       }
     
       if ($bool_at_least_one_enabled) {
-        $your_options['advisors'][] = $faculty_id;
+        $your_options['advisors'][0][$faculty_id] = $faculty_id;
       }
       
     } // foreach
 
        
-    // Any other staff at the university who have appointments allowed.
-    $res = db_query("SELECT * FROM users 
-                     WHERE is_faculty = 1 
-                     AND is_disabled = 0 
-                     ORDER BY l_name, f_name ");
-    while ($cur = db_fetch_array($res)) {
-      
-      $faculty_id = $cur['faculty_id'];
-      
-      // Does this faculty member accept appointments?
-      $event_types = content_get_content_for_faculty_id('schedule_event_type', $faculty_id);
-
-      $bool_at_least_one_enabled = FALSE;
-      foreach ($event_types as $content) {
-        if ($content->field__enabled['value'] == 'enabled') {
-          $bool_at_least_one_enabled = TRUE;
-        }
+       
+    $dept_line = "";
+    $params = array();
+    $departments = fp_get_departments($user->school_id);
+    $apt_from_depts = variable_get_for_school('appointments_from_departments', array(), intval($user->school_id));
+    if (count($apt_from_depts) > 0) {
+      $dept_line = "AND f.department_code IN (";
+      foreach ($apt_from_depts as $dept_code) {
+        $mdept_code = fp_get_machine_readable($dept_code);
+        $dept_line .= ":dept_$mdept_code,";
+        $params[":dept_$mdept_code"] = $dept_code;
       }
+      $dept_line = rtrim($dept_line, ",");
+      $dept_line .= ")";
+    }
     
-      if ($bool_at_least_one_enabled) {
-        $your_options['staff'][] = $faculty_id;
-      }
-      
-    } // while
+    // Any other staff at the university who have appointments allowed.
+    if ($dept_line) {
+      $res = db_query("SELECT * FROM users u, faculty f
+                       WHERE is_faculty = 1 
+                       AND is_disabled = 0
+                       $dept_line 
+                       ORDER BY l_name, f_name ", $params);
+      while ($cur = db_fetch_array($res)) {
         
+        $faculty_id = $cur['cwid'];
+        $uid = intval($cur['uid']);
+        $dept_code = $cur['department_code'];
+        
+        // Does this faculty member accept appointments?
+        $event_types = content_get_content_for_faculty_id('schedule_event_type', $faculty_id);
+//  fpm($event_types);
+        $bool_at_least_one_enabled = FALSE;
+        foreach ($event_types as $content) {
+          if ($content->field__enabled['value'] == 'enabled') {
+            $bool_at_least_one_enabled = TRUE;
+          }
+        }
+      
+        if ($bool_at_least_one_enabled && !in_array($faculty_id, $your_options['advisors'][0])) {
+          $your_options['staff'][$dept_code][$faculty_id] = $faculty_id;
+        }
+        
+      } // while
+      
+    } // if dept_line
+    
+    
+    
+    
+    // TODO:  Hook that modifies $your_options array, so that other modules can add or remove people
+    //        from it.     
+    
+    
+    
+    
     
     // Display the various links
-    
-    
+    $c = 0;
     foreach ($your_options as $type => $details) {
-      foreach ($your_options[$type] as $faculty_id) {
-        
-        $faculty_name = fp_get_faculty_name($faculty_id);
-        $faculty_user_id = db_get_user_id_from_cwid($faculty_id);
-        
-        $title = t("Your Advisor(s)");
-        if ($type == 'staff') {
-          $title = t("Other Faculty/Staff");
-        }
-        
-        $rtn .= "<h3>" . $title . "</h3>
-                  <ul>";    
-        $base_url = $GLOBALS['fp_system_settings']['base_url'];
-        $link = $base_url . '/' . fp_url("schedule-appointment/$faculty_user_id", '', FALSE);        
-              
-        $rtn .= "<li>" . $faculty_name . " - <a href='$link'><i class='fa fa-calendar-plus-o'></i> Schedule appointment</a></li>";
-        
-        $rtn .= "</ul>";
-      } // foreach
       
+      foreach ($your_options[$type] as $dept_code => $details2) {
+        
+        foreach ($your_options[$type][$dept_code] as $faculty_id) {
+          
+          $faculty_name = fp_get_faculty_name($faculty_id);
+          $faculty_user_id = db_get_user_id_from_cwid($faculty_id);
+          
+          $title = t("Your Advisor(s)");
+          if ($type == 'staff') {
+            $dept_title = @$departments[$dept_code];
+            if (!$dept_title) $dept_title = $dept_code;
+            $title = $dept_title . " - " . t("(Department/Unit)");
+            if ($c == 0) {
+              $rtn .= "<div class='schedule-appt-sep'>" . t("Other faculty/staff you may schedule appointments with:") . "</div>";
+            }
+            $c++;            
+          }
+          
+          $rtn .= "<h3>" . $title . "</h3>
+                    <ul>";    
+          $base_url = $GLOBALS['fp_system_settings']['base_url'];
+          $link = $base_url . '/' . fp_url("schedule-appointment/$faculty_user_id", '', FALSE);        
+                
+          $rtn .= "<li>" . $faculty_name . " - <a href='$link'><i class='fa fa-calendar-plus-o'></i> Schedule appointment</a></li>";
+          
+          $rtn .= "</ul>";
+        } // foreach
+        
+      }
     }
     
     

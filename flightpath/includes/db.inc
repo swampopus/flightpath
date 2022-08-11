@@ -412,10 +412,12 @@ function fp_load_user($user_id) {
   // Load the user's roles and    
   $res = db_query("SELECT * FROM user_roles a,                                
                                 roles c
-                  WHERE a.user_id = '?'
-                  AND a.rid = c.rid", $user_id);
+                  WHERE a.user_id = ?
+                  AND a.rid = c.rid ", array($user_id));
   while($cur = db_fetch_array($res)) {
-    $rtn->roles[$cur["rid"]] = $cur["name"];
+    if (!isset($rtn->roles[$cur['rid']])) {
+      $rtn->roles[$cur["rid"]] = $cur["name"];
+    }
   }
   
         
@@ -682,9 +684,13 @@ function fp_get_student_email($cwid) {
 function fp_get_permissions_for_role($rid) {
   $rtn = array();
   $res = db_query("SELECT pid, perm FROM role_permissions
-                   WHERE rid = '?' ", $rid);
+                   WHERE rid = ?                   
+                   GROUP BY perm
+                   ORDER BY perm", array($rid));
   while($cur = db_fetch_array($res)) {
-    $rtn[$cur["pid"]] = $cur["perm"];
+    if (!in_array($cur['perm'], $rtn)) {
+      $rtn[$cur["pid"]] = $cur["perm"];
+    }
   }
   return $rtn;
 }

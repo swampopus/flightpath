@@ -19,6 +19,15 @@ body {
 }
 
 
+.schedule-appt-sep {
+  margin-top: 50px;
+  border-top: 1px solid #ccc;
+  padding-top: 20px;
+  font-size: 1.3em;
+  margin-bottom: 50px;
+}
+
+
 
 .calendar-feed-instructions {
   text-shadow: none;
