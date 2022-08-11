@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-08-10
+  Added breadcrumbs to certain admin functions.
+  
+
 2022-08-04
   Added new function to db.inc, making it easier to get school_id from a user_id.
   

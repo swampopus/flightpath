@@ -14,6 +14,13 @@ function advise_menu() {
     "access_arguments" => array("toggle_draft"),
     "type" => MENU_TYPE_NORMAL_ITEM,    
     "page_settings" => array(
+      "menu_links" => array(          
+        0 => array(
+          "text" => t("Admin Tools"),
+          "path" => "admin-tools",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),    
       "menu_icon" => fp_get_module_path('system') . "/icons/wand.png",      
     ),    
     'weight' => 30,

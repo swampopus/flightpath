@@ -22,6 +22,13 @@ function masquerade_menu() {
     "page_arguments" => array("masquerade_form"),
     "access_arguments" => array("access_masquerade"),
     "page_settings" => array(      
+      "menu_links" => array(          
+        0 => array(
+          "text" => t("Admin Tools"),
+          "path" => "admin-tools",
+          "query" => "de_catalog_year=%DE_CATALOG_YEAR%",
+        ),
+      ),    
       "menu_icon" => fp_get_module_path('masquerade') . "/icons/mask.png",
     ),        
     "type" => MENU_TYPE_NORMAL_ITEM,
