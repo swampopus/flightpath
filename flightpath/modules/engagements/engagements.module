@@ -1394,7 +1394,7 @@ function engagements_handle_sms_stop($user_id = 0, $cwid = '', $phone_number, $f
   $phone_number = engagements_convert_to_valid_phone_number($phone_number);
   if (!$phone_number) {
     // watchdog that there was an error because phone number not valid.
-    watchdog('enagements_sms', "User tried to opt-out of sms, but invalid phone number: $user_id, $cwid, $phone_number", array(), WATCHDOG_ERROR);    
+    watchdog('engagements_sms', "User tried to opt-out of sms, but invalid phone number: $user_id, $cwid, $phone_number", array(), WATCHDOG_ERROR);    
     return FALSE;
   }
   
@@ -1419,7 +1419,7 @@ function engagements_handle_sms_stop($user_id = 0, $cwid = '', $phone_number, $f
   engagements_send_sms_to_number($phone_number, $msg, '', $from_fp_phone_number, FALSE);
   
   
-  watchdog('enagements_sms', "User opted-out of sms: $user_id, $cwid, $phone_number");
+  watchdog('engagements_sms', "User opted-out of sms: $user_id, $cwid, $phone_number");
 } // engagements_handle_sms_stop
 
 
@@ -1439,7 +1439,7 @@ function engagements_handle_sms_unstop($user_id = 0, $cwid = '', $phone_number, 
   
   if (!$phone_number) {
     // watchdog that there was an error because phone number not valid.
-    watchdog('enagements_sms', "User tried to opt-in to sms, but invalid phone number: $user_id, $cwid, $phone_number", array(), WATCHDOG_ERROR);    
+    watchdog('engagements_sms', "User tried to opt-in to sms, but invalid phone number: $user_id, $cwid, $phone_number", array(), WATCHDOG_ERROR);    
     return FALSE;
   }
   
@@ -1464,7 +1464,7 @@ function engagements_handle_sms_unstop($user_id = 0, $cwid = '', $phone_number, 
   engagements_send_sms_to_number($phone_number, $msg, '', $from_fp_phone_number, FALSE);
   
   
-  watchdog('enagements_sms', "User opted-out of sms: $user_id, $cwid, $phone_number");
+  watchdog('engagements_sms', "User opted-out of sms: $user_id, $cwid, $phone_number");
 
 }
 
@@ -1566,6 +1566,8 @@ function engagements_sms_get_all_messages()
 //fpm(ppm($record, TRUE)); 
 //    fpm($record->status);
 
+    watchdog('engagements_debug', "In engagements_sms_get_all_messages().  Reviewing message: <pre>" . print_r($message, TRUE) . "</pre>", array(), WATCHDOG_DEBUG);
+
     $status = strtolower(trim($record->status));     
     $error_message = $record->errorMessage;
     $error_code = $record->errorCode;
@@ -1585,6 +1587,8 @@ function engagements_sms_get_all_messages()
       //$fp_price = engagements_get_fp_price($price, $test['direction'], intval($test['num_segments']));
       $fp_price = 0;  // no longer using this field.
 
+      watchdog('engagements_debug', "In engagements_sms_get_all_messages().  Updating sms_history table.", array(), WATCHDOG_DEBUG); 
+      
       db_query("UPDATE sms_history
                 SET sw_price = ?, fp_price = ?, price_processed = 1, delivery_status = ?, err_code = ?, err_message = ?, err_friendly_message = ?
                 WHERE mid = ?", array($price, $fp_price, $status, $error_code, $error_message, $friendly_error_message, $test['mid']));
@@ -1623,9 +1627,9 @@ function engagements_sms_get_all_messages()
     $vars['NumMedia'] = 0;
 
     // Is there media?
-    if ($record->numMedia > 0) {
+    if (intval($record->numMedia) > 0) {
 
-      $vars['NumMedia'] = $record->numMedia;
+      $vars['NumMedia'] = intval($record->numMedia);
 
       // List all media for this message.
       $allmedia = $client->messages($message_sid)->media->read();
@@ -1646,6 +1650,8 @@ function engagements_sms_get_all_messages()
     } // there was media!
 
 
+    watchdog('engagements_debug', "In engagements_sms_get_all_messages().  Sending to engagements_handle_incoming_sms: <pre>" . print_r($vars, TRUE) . "</pre>", array(), WATCHDOG_DEBUG); 
+
     // Save this message using our "handle_incoming_sms" function.
     engagements_handle_incoming_sms($vars);
   } // foreach messages
@@ -1657,10 +1663,13 @@ function engagements_sms_get_all_messages()
   $body = "";
   // Now, we also want to get a list of all calls and their prices too.
   $calls = $client->calls->read(array('startTimeAfter', $check_since));
-
+ 
 
 
   foreach ($calls as $record) {
+
+
+    watchdog('engagements_debug', "In engagements_sms_get_all_messages().  Reviewing CALL: <pre>" . print_r($message, TRUE) . "</pre>", array(), WATCHDOG_DEBUG);
 
     $sid = $record->sid;
 
@@ -3004,7 +3013,7 @@ function engagements_send_email_or_txt_form_validate($form, &$form_state)
     $mobile_phone = engagements_convert_to_valid_phone_number(trim($temp));
 
     if (!$mobile_phone) {
-      form_error('enagement_msg', t('Sorry, but the mobile phone number provided for the student appears to be invalid.'));
+      form_error('engagement_msg', t('Sorry, but the mobile phone number provided for the student appears to be invalid.'));
       return;
     }
   } // type == 'txt_msg'

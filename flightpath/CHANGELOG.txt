@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-08-12
+  Fixed typos in watchdog() command in the engagements module.
+
+
 2022-08-11
   Cleaned up logic which loads permissions for users, using less memory.
   
