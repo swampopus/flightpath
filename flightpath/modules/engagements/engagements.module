@@ -1338,6 +1338,7 @@ function engagements_handle_incoming_sms($vars = array())
       $tmsg = "";
       $tmsg .= "$student_name has submitted a text message to $system_name (To: $pretty_to_number / $desc).<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link";
 
+/*
       if (trim($stu_cwid) == "") {
         // Meaning, we couldn't find this student in our system!
         $tmsg .= "A text message has been received for $system_name. (To: $pretty_to_number / $desc).<br><br> No student could be found which is
@@ -1345,7 +1346,7 @@ function engagements_handle_incoming_sms($vars = array())
                   $body<br><br>Message SID:$message_sid."; 
         
       }
-      
+  */    
 
       $advisors = advise_get_advisors_for_student($stu_cwid);
       foreach ($advisors as $c => $afaculty_id) {
