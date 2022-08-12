@@ -1230,7 +1230,6 @@ function engagements_handle_incoming_sms($vars = array())
   if ($from_cwid || $to_cwid) {
     // create an engagement content node for this student!
 
-
     $content = new stdClass();
     $content->type = 'engagement';
     $content->cid = "new";
@@ -1305,6 +1304,7 @@ function engagements_handle_incoming_sms($vars = array())
     content_save($content);
 
 
+
     if ($dir != "sent") { // meaning, we RECEIVED this message.
       $already_notified_users = array();
 
@@ -1320,23 +1320,32 @@ function engagements_handle_incoming_sms($vars = array())
       if (!$desc) $desc = @$phones['lines'][$from_mobile]['description'];
       if ($desc) $desc = " $desc";
     
-      // Create a new "activity record" that the student has sent a txt message    
-      $acontent = new stdClass();
-      $acontent->type = 'activity_record';
-      $acontent->cid = "new";
-      $acontent->published = 1;
-      $acontent->delete_flag = 0;
-      $acontent->title = t('Student sent a text message to ') . $pretty_to_number . " / " . $desc;
-      $acontent->field__student_id['value'] = $stu_cwid;
-      $acontent->field__activity_type['value'] = 'comment';
-      content_save($acontent);    
-    
+      if (trim($stu_cwid) != "") {
+        // Create a new "activity record" that the student has sent a txt message    
+        $acontent = new stdClass();
+        $acontent->type = 'activity_record';
+        $acontent->cid = "new";
+        $acontent->published = 1;
+        $acontent->delete_flag = 0;
+        $acontent->title = t('Student sent a text message to ') . $pretty_to_number . " / " . $desc;
+        $acontent->field__student_id['value'] = $stu_cwid;
+        $acontent->field__activity_type['value'] = 'comment';
+        content_save($acontent);    
+      }
       // Notify the advisor(s).      
       $system_name = variable_get("system_name", "FlightPath");
       
       $tmsg = "";
       $tmsg .= "$student_name has submitted a text message to $system_name (To: $pretty_to_number / $desc).<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link";
 
+      if (trim($stu_cwid) == "") {
+        // Meaning, we couldn't find this student in our system!
+        $tmsg .= "A text message has been received for $system_name. (To: $pretty_to_number / $desc).<br><br> No student could be found which is
+                  associated with the sending number ($from_mobile).<br><br>Message body:<br>---------<br>
+                  $body<br><br>Message SID:$message_sid."; 
+        
+      }
+      
 
       $advisors = advise_get_advisors_for_student($stu_cwid);
       foreach ($advisors as $c => $afaculty_id) {
@@ -1570,7 +1579,14 @@ function engagements_sms_get_all_messages()
 
     $status = strtolower(trim($record->status));     
     $error_message = $record->errorMessage;
-    $error_code = $record->errorCode;
+    $error_code = intval($record->errorCode);
+    
+    if ($error_code == 12100 || $error_code == 11200) {
+      // We don't care about these code, as they appear on EVERY message.
+      $error_code = NULL;
+      $status = NULL;
+    }
+    
     if ($error_code) {
       $friendly_error_message = @$error_codes[$error_code];
     }
