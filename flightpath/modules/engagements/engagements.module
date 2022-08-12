@@ -1566,7 +1566,7 @@ function engagements_sms_get_all_messages()
 //fpm(ppm($record, TRUE)); 
 //    fpm($record->status);
 
-    watchdog('engagements_debug', "In engagements_sms_get_all_messages().  Reviewing message: <pre>" . print_r($message, TRUE) . "</pre>", array(), WATCHDOG_DEBUG);
+    watchdog('engagements_debug', "In engagements_sms_get_all_messages().  Reviewing message: <pre>" . print_r($record, TRUE) . "</pre>", array(), WATCHDOG_DEBUG);
 
     $status = strtolower(trim($record->status));     
     $error_message = $record->errorMessage;
@@ -1669,7 +1669,7 @@ function engagements_sms_get_all_messages()
   foreach ($calls as $record) {
 
 
-    watchdog('engagements_debug', "In engagements_sms_get_all_messages().  Reviewing CALL: <pre>" . print_r($message, TRUE) . "</pre>", array(), WATCHDOG_DEBUG);
+    watchdog('engagements_debug', "In engagements_sms_get_all_messages().  Reviewing CALL: <pre>" . print_r($record, TRUE) . "</pre>", array(), WATCHDOG_DEBUG);
 
     $sid = $record->sid;
 
