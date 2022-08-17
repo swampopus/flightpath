@@ -1,12 +1,21 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-08-17
+  Added tweaks to the static screen "dialog-empty", so that it displays a throbber graphic while loading.
+  
+  Changed name of dialog-empty to dialog-loading.php, for clarity.
+  
+  In clone_advising, made it so you can enter comments after # symbol.
+
 2022-08-12
   Fixed typos in watchdog() command in the engagements module.
   
   Fixed issue in engagements where all incoming SMS got an error relating to reading media which wasn't there.
 
   If a number sends a text message, and their CWID cannot be found, the notification message changes to reflect that.
+  
+  When saving a new notification, the insert id (hid in table notification_history) is returned.  
 
 
 2022-08-11

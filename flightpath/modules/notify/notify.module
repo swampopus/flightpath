@@ -76,6 +76,8 @@ function notify_send_notification_to_user($user_id, $msg, $cid = 0, $content_typ
 function notify_save_notification($user_id, $cid = 0, $content_type = "", $method, $address_or_num, $subject, $msg, $type = 'default') {
   db_query("INSERT INTO notification_history (cid, content_type, to_user_id, notification_method, to_address, subject, msg, notification_type, submitted)
               VALUES (?,?,?,?,?,?,?,?,?) ", array($cid, $content_type, intval($user_id), $method, $address_or_num, $subject, $msg, $type, time()));
+
+  return db_insert_id();
 }
 
 

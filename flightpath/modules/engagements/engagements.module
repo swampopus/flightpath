@@ -1339,8 +1339,13 @@ function engagements_handle_incoming_sms($vars = array())
       $tmsg .= "$student_name has submitted a text message to $system_name (To: $pretty_to_number / $desc).<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link";
 
 /*
+ *    TODO:  Only do this if we have a setting set?  
+ *    TODO:  Note: don't send the full message, but instead send link to an alert that we create for the recipient?  We'd have to do this in the foreach loop below.
+ * 
       if (trim($stu_cwid) == "") {
         // Meaning, we couldn't find this student in our system!
+        // TODO:  Create an alert for the recipient which does show the full txt message.  The notification provides a link to the alert.  We'd do this in
+        // TODO:  the foreach loop below.
         $tmsg .= "A text message has been received for $system_name. (To: $pretty_to_number / $desc).<br><br> No student could be found which is
                   associated with the sending number ($from_mobile).<br><br>Message body:<br>---------<br>
                   $body<br><br>Message SID:$message_sid."; 
