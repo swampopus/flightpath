@@ -25,11 +25,11 @@
  </style>
  <script type='text/javascript'>
   
-  // Once this page is fully loaded, we assume there is a function on the parent page, to call named $modulefunc_finishedLoadingEmptyDialog.  $modulefunc is from 
+  // Once this page is fully loaded, we assume there is a function on the parent page, to call named $modulefunc_finishedLoadingDialog.  $modulefunc is from 
   // the GET.
   document.addEventListener("DOMContentLoaded", function(){
     //dom is fully loaded, but maybe waiting on images & css files
-    parent.<?php print $modulefunc;?>_finishedLoadingEmptyDialog();    
+    parent.<?php print $modulefunc;?>_finishedLoadingDialog();    
   });  
   
  </script>
