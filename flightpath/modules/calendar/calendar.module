@@ -2,41 +2,6 @@
 
 
 
-/**
- * Meant to return results of the ajax autocomplete field in appointment, for selecting a student.
- * Code inspiration from: https://www.drupal.org/node/854216
- */
-function _calendar_autocomplete_student() {
- 
-  $term = $_GET['term'];  // this is what the user is starting to type.
- 
-  // actually search based on this term.  make use of the studentsearch module
- 
- 
-  // Use the student_search module to query based on what we've typed so far. 
-  $_REQUEST["search_for"] = $term;
-  $form = student_search_search_form(5);  // limit to only 5 results.
-  $matches = array();  
-  
-  // Result will be in $form['adv_array']['value'];
-  //watchdog('debug', pretty_print($form['adv_array']['value'], TRUE));
-  $adv_array = $form['adv_array']['value'];
-  if (is_array($adv_array)) {
-    foreach ($adv_array as $cwid => $details) {
-      $matches[] = $details['first_name'] . " " . $details['last_name'] . " ($cwid)";
-    }
-  }
-  
-   
-
-
- 
- 
-  header('Content-Type: application/json');
-  print json_encode($matches);
-  die;
-  
-}
 
 
 
@@ -64,14 +29,6 @@ function calendar_menu() {
     'type' => MENU_TYPE_TAB,
     'tab_family' => 'calendar_tabs',    
     "weight" => 15,
-  );    
-
-
-//calendar/autocomplete-student
-  $items['calendar/autocomplete-student'] = array(    
-    'page_callback' => '_calendar_autocomplete_student',
-    'access_arguments' => array('access_logged_in_content'),    
-    'type' => MENU_TYPE_CALLBACK,
   );    
 
 
@@ -2815,7 +2772,7 @@ function calendar_content_register_content_type() {
   $fields['student_id'] = array(
     'type' => 'textfield',
     'label' => 'Student',
-    'autocomplete_path' => 'calendar/autocomplete-student',
+    'autocomplete_path' => 'student-search/autocomplete-student/default',  // Convenient endpoint in the student_search module
     'weight' => 30,
   );
 

@@ -1,6 +1,68 @@
 <?php
 
 
+
+
+
+
+
+/**
+ * Meant to return results of the ajax autocomplete field, for selecting a student by name or cwid.
+ * Code inspiration from: https://www.drupal.org/node/854216
+ * 
+ * Output format can be:  default, cwid_pound_name
+ *    default         = First Last (CWID)
+ *    cwid_pound_name = CWID # First Last 
+ * 
+ */
+function student_search_ajax_autocomplete_student($output_format = "default") {
+ 
+  $term = $_GET['term'];  // this is what the user is starting to type.
+ 
+  // actually search based on this term.  make use of the studentsearch module
+ 
+ 
+  // Use the student_search module to query based on what we've typed so far. 
+  $_REQUEST["search_for"] = $term;
+  $form = student_search_search_form(5);  // limit to only 5 results.
+  $matches = array();  
+  
+  // Result will be in $form['adv_array']['value'];
+  //watchdog('debug', pretty_print($form['adv_array']['value'], TRUE));
+  $adv_array = $form['adv_array']['value'];
+  if (is_array($adv_array)) {
+    foreach ($adv_array as $cwid => $details) {
+      $line = "";  
+      if ($output_format == 'cwid_pound_name') {
+        // Output like:  12345 # first last
+        $line = "$cwid # " . $details['first_name'] . " " . $details['last_name'];
+      }
+      else {
+        // default
+        $line = $details['first_name'] . " " . $details['last_name'] . " ($cwid)";
+      }
+      
+      
+      $matches[] = $line;
+    }
+  }
+  
+   
+
+
+ 
+ 
+  header('Content-Type: application/json');
+  print json_encode($matches);
+  die;
+  
+}
+
+
+
+
+
+
 function student_search_menu() {
   $items = array();
   
@@ -29,6 +91,14 @@ function student_search_menu() {
   );
   
   
+  $items['student-search/autocomplete-student/%'] = array(    
+    'page_callback' => 'student_search_ajax_autocomplete_student',
+    'page_arguments' => array(2),
+    'access_arguments' => array('access_logged_in_content'),    
+    'type' => MENU_TYPE_CALLBACK,
+  );    
+  
+  
   $items["student-search"] = array(
     "title" => t("Advisees"),
     "page_callback" => "student_search_subtab_switchboard",
@@ -44,6 +114,7 @@ function student_search_menu() {
     "type" => MENU_TYPE_NORMAL_ITEM,   
     "weight" => 20,
   );  
+  
   
   
   
