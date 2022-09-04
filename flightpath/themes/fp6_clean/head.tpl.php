@@ -1,4 +1,5 @@
 <!DOCTYPE HTML>
+<html lang="en">
 <?php
 /**
  * @file
@@ -13,6 +14,7 @@
 <head>  
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />  
   <meta name="viewport" content="width=device-width" />
+  <meta http-equiv="content-language" content="en" />
 
   <link rel="shortcut icon" type="image/x-icon" href="<?php print base_path() ?>/themes/fp6_clean/images/favicon.ico"/>
 

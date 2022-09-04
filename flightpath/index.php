@@ -9,15 +9,16 @@
  */
        
  
+ // __AUTOLOAD NOT NEEDED.  JUST LOAD THE ALL_CLASSES.PHP FILE.
  /**
  * This function makes sure we auto-load our classes, if we need to.
  * Largely used when loading objects our of our SESSION cache.
  */
-function __autoload($class) {
-  // Load all of the classes, as well as the custom classes.
+//function __autoload($class) {
+// Load all of the classes, as well as the custom classes.
   require_once("classes/all_classes.php");
   
-}
+//}
 
 
 // Make sure our cookies are the most secure possible:

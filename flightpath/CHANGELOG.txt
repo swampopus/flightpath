@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-08-29
+  Added lang='en' to <html> tag in core fp6_clean theme. This is for greater accessibility.
+  
+
+2022-08-18
+  Removed unnecessary __autoload() function in index.php; was causing incompatibility with PHP 8.x.
+
 
 2022-08-17
   Added tweaks to the static screen "dialog-empty", so that it displays a throbber graphic while loading.
