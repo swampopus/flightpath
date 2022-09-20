@@ -839,8 +839,11 @@ function stats_report_major_counts() {
 
 
   $rtn .= "<table border='1'>
-        <tr>
-          <th>" . t("School") . "</th>
+        <tr>";
+  if (module_enabled('schools')) {
+    $rtn .= "<th>" . t("School") . "</th>";
+  }
+  $rtn .= "          
           <th>" . t("Major") . "</th>
           <th>" . t("Count") . "</th>
           <th colspan='2'>" . t("Description") . "</th>          
@@ -863,11 +866,7 @@ function stats_report_major_counts() {
       $school_code = schools_get_school_code_for_id($school_id);
     }
     
-    // If this is a degree option, skip it, as we do not expect
-    // the students table to record degree option choices.
-    if (strstr($major_code, "|_")) continue;
-    
-    // Find out how many students have this major.
+    // Find out how many students have this major code.
 
     $sql = "SELECT count(cwid) AS count FROM students a, student_degrees b
             WHERE b.major_code = ?
@@ -895,8 +894,11 @@ function stats_report_major_counts() {
 
   foreach($res_array as $major => $value) {
 
-    $rtn .= "<tr>
-          <td valign='top' class='tenpt'>{$value["school_code"]}</td>
+    $rtn .= "<tr>";
+    if (module_enabled('schools')) {
+      $rtn .= "<td valign='top' class='tenpt'>{$value["school_code"]}</td>";
+    }
+    $rtn .= "
           <td valign='top' class='tenpt'>$major</td>
           <td valign='top' class='tenpt'>{$value["count"]}</td>
           <td valign='top' class='tenpt'>{$value["type"]}</td>
@@ -1198,6 +1200,7 @@ function stats_report_advisor_use() {
   $f_array = array();
   $s_array = array();
   
+    
   $result = db_query("SELECT * FROM watchdog a, faculty b, users c
             WHERE 
               a.timestamp > '?' AND a.timestamp < '?'
@@ -1206,18 +1209,26 @@ function stats_report_advisor_use() {
             AND a.cwid = b.cwid
             AND a.cwid = c.cwid
             AND c.is_faculty = 1
-            ORDER BY b.department ", $start_ts, $end_ts);
+            ORDER BY b.department_code ", $start_ts, $end_ts);
 
   while($cur = db_fetch_array($result)) {
     $faculty_id = trim($cur["cwid"]);
 
+    $school_id = intval($cur['school_id']);
+    $departments = fp_get_departments($school_id);
+
     if (!isset($f_array[$faculty_id])) $f_array[$faculty_id] = 0;
+    
+    $dept_name = @$departments[$cur['department_code']];
+    if (!$dept_name) $dept_name = $cur['department_code'];
+    
     
     $f_array[$faculty_id] = intval($f_array[$faculty_id]); // make it a number.
     $f_array[$faculty_id]++;
 
-    $s_array[$faculty_id]["dept_name"] = ucwords(strtolower(trim($cur["department"])));
+    $s_array[$faculty_id]["dept_name"] = $dept_name;
     $s_array[$faculty_id]["college_name"] = ucwords(strtolower(trim($cur["college"])));
+    $s_array[$faculty_id]["school_id"] = $school_id;
     $s_array[$faculty_id]["name"] = ucwords(strtolower(trim($cur["f_name"]) . " " . trim($cur["l_name"])));
 
 
@@ -1235,7 +1246,13 @@ function stats_report_advisor_use() {
   // Now, output the results...
   $rtn .= "
       <table border='1' width='650'>
-        <tr>
+        <tr>";
+  
+  if (module_enabled('schools')) {
+    $rtn .= "<th>" . t("School") . "</th>";
+  }
+        
+  $rtn .= "      
           <th>" . t("Name") . "</th>
           <th>" . t("Dept") . "</th>
           <th>#</th>
@@ -1245,8 +1262,16 @@ function stats_report_advisor_use() {
     $name = $s_array[$faculty_id]["name"];
     $college_name = $s_array[$faculty_id]["college_name"];
     $dept_name = $s_array[$faculty_id]["dept_name"];
-
-    $rtn .= "<tr>
+    $school_id = $s_array[$faculty_id]["school_id"];
+    
+    
+    $rtn .= "<tr>";
+    
+    if (module_enabled('schools')) {
+      $rtn .= "<td valign='top'>" . schools_get_school_name_for_id($school_id) . "</td>";
+    }
+    
+    $rtn .= "
        <td valign='top'>$name</td>
        <td valign='top'>$dept_name</td>
        <td valign='top' align='center'>$value</td>

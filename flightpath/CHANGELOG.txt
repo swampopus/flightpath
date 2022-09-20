@@ -1,6 +1,22 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-09-19
+  Fixed bug in Masquerade module where it wasn't allowing users to search by CWID.
+  
+  Added caching when fetching school name or code by id.
+  
+  Removed "department" from faculty table.
+  
+  Added indexes to student_degrees table.
+  
+  Fixed the "Advisor Use" report to pull department correctly.
+  
+  Adjusted the "Major Counts" report to not show school code if schools module not enabled.
+  
+  Altered the "Major Counts" report to show all degree levels (1, 2 and 3) not just 1 and 2.
+  
+
 2022-08-29
   Added lang='en' to <html> tag in core fp6_clean theme. This is for greater accessibility.
   

@@ -1070,6 +1070,11 @@ function schools_override_elements_form_submit($form, $form_state) {
 
 
 function schools_get_school_code_for_id($school_id) {
+
+  if (isset($GLOBALS["fp_cache_school_code_for_id"][intval($school_id)])) {
+    return $GLOBALS["fp_cache_school_code_for_id"][intval($school_id)];
+  }
+
   
   $defs = schools_get_school_definitions(TRUE);
   $rtn = @$defs[$school_id]['school_code'];
@@ -1081,16 +1086,26 @@ function schools_get_school_code_for_id($school_id) {
     $rtn = "-";
   }
 
+  $GLOBALS["fp_cache_school_code_for_id"][intval($school_id)] = $rtn;
+
   return $rtn;
   
 }
 
 function schools_get_school_name_for_id($school_id) {
+  
+  if (isset($GLOBALS["fp_cache_school_name_for_id"][intval($school_id)])) {
+    return $GLOBALS["fp_cache_school_name_for_id"][intval($school_id)];
+  }
+  
   $defs = schools_get_school_definitions(FALSE);
   $rtn = @$defs[$school_id];
   if ($rtn == "") {
     $rtn .= t("School ID# ") . $school_id;
   }
+  
+  $GLOBALS["fp_cache_school_name_for_id"][intval($school_id)] = $rtn;
+  
   return $rtn;
 }
 

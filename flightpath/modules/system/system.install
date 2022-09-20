@@ -275,6 +275,18 @@ function system_update($old_schema, $new_schema) {
   }
 
 
+  if (intval($old_schema) < 12) {
+    // Adding indexs to student_degrees table.
+    db_query("ALTER TABLE `student_degrees` ADD INDEX (`major_code`) ");
+    db_query("ALTER TABLE `student_degrees` ADD INDEX (`delete_flag`) ");
+    
+    // Remove "department" column from faculty table.
+    db_query("ALTER TABLE faculty DROP COLUMN `department`");
+    
+    
+  }
+
+
   
       
 } // update
@@ -675,12 +687,10 @@ $q = "
 CREATE TABLE `faculty` (
   `cwid` varchar(30) NOT NULL,
   `college` varchar(255) DEFAULT '',
-  `department_code` varchar(255) DEFAULT '',
-  `department` varchar(255) DEFAULT '',
+  `department_code` varchar(255) DEFAULT '',  
   `major_code_csv` varchar(255) DEFAULT '',  
   PRIMARY KEY (`cwid`),
-  KEY `major_code_csv` (`major_code_csv`),
-  KEY `dept` (`department`),
+  KEY `major_code_csv` (`major_code_csv`),  
   KEY `department_code` (`department_code`),
   KEY `college` (`college`)  
 );  ";
@@ -823,11 +833,13 @@ $q = "
 CREATE TABLE `student_degrees` (
   `student_id` varchar(30) NOT NULL DEFAULT '',
   `major_code` varchar(100) NOT NULL DEFAULT '',
-  `is_editable` tinyint(4) DEFAULT 0,
-  `delete_flag` tinyint(4) DEFAULT 0,
+  `is_editable` tinyint DEFAULT '0',
+  `delete_flag` tinyint DEFAULT '0',
   `extra_data` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`student_id`,`major_code`),
-  KEY `extra_data` (`extra_data`)
+  KEY `extra_data` (`extra_data`(250)),
+  KEY `major_code` (`major_code`),
+  KEY `delete_flag` (`delete_flag`)
 );   ";
 db_query($q);
 
