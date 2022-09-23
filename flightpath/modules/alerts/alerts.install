@@ -30,7 +30,7 @@ CREATE TABLE `content__alert` (
   KEY `field__alert_msg` (`field__alert_msg`(768)),
   KEY `field__visibility` (`field__visibility`),
   KEY `field__exclude_advisor` (`field__exclude_advisor`),
-  KEY `field__target_faculty_id` (`field__target_faculty_id`)  
+  KEY `field__target_faculty_id` (`field__target_faculty_id`),  
   KEY `field__tags` (`field__tags`(500))
 );  
   ";
