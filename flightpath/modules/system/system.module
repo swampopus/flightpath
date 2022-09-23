@@ -3747,7 +3747,7 @@ function system_reload_and_cache_course_inventory() {
   
   // It is named .info because in our htaccess, it already says that file extension cannot be downloaded.
   $x = file_put_contents(fp_get_files_path() . "/cache_data/courses_serialized.info", $_SESSION["fp_cache_course_inventory"]);    
-  if (!$x) {
+  if ($x === FALSE) {
     fpm("Cannot create cache_data/courses_serialized.info under custom/files.  Permission error?");
     watchdog("system", "Cannot create cache_data/courses_serialized.info under custom/files.  Permission error?", array(), WATCHDOG_ERROR);
   }    

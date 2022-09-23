@@ -4,6 +4,9 @@ FlightPath 6.x Changelog
 2022-09-22
   Fixed bug in install.php where we were not correctly setting up our GLOBALS['pdo'] object, causing fresh installs to fail.
   
+  Fixed bug in system.module, where when we try to first store our serialized course cache, it incorrectly shows a permission error (because
+  the file has 0 bytes).
+  
 
 2022-09-19
   Fixed bug in Masquerade module where it wasn't allowing users to search by CWID.
