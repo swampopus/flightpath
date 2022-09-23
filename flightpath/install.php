@@ -147,7 +147,8 @@ function install_perform_install() {
   // We will attempt to connect to this database.  If we have any problems, we will go back to
   // the form and inform the user.
   try {
-    $pdo = new PDO("mysql:host=$db_host;port=$db_port;dbname=$db_name;charset=utf8", $db_user, $db_pass);
+    $pdo = new PDO("mysql:host=$db_host;port=$db_port;dbname=$db_name;charset=utf8mb4", $db_user, $db_pass);
+    $GLOBALS['pdo'] = $pdo;
   } 
   catch (Exception $e) {
     // Connection failed!
