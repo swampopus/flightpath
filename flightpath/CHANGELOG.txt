@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-09-26
+  Added additional code to help prevent issues when invalid courses are defined in group definitions.
+  
+
 2022-09-22
   Fixed bug in install.php where we were not correctly setting up our GLOBALS['pdo'] object, causing fresh installs to fail.
   

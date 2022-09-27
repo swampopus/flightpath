@@ -1026,9 +1026,7 @@ function admin_get_courses_from_definition($definition, $catalog_year = "", $sch
   $course_idArray = $group_array;
   // Take out duplicate entries (caused by eqv courses)...
 
-  $course_idArray = array_unique($course_idArray);
-  //print_r($course_idArray);
-  //debugCT(sizeof($course_idArray));
+  $course_idArray = array_unique($course_idArray);  
   // Now, convert BACK into the "groupArray" structure (subject_id and course_num)...
   $group_array2 = admin_get_course_array_from_course_id_array($course_idArray);
 
@@ -1247,8 +1245,12 @@ function admin_get_group_courses(Group $group) {
       $attributes = $c->db_group_attributes . " ";
     }
     
-    $course_line .= "$attributes$c->subject_id $c->course_num";
-    //$rtn .= "$c->subject_id $c->course_num";
+    $course_line .= trim("$attributes$c->subject_id $c->course_num");
+    
+    if (!$course_line) {
+      // Some kind of problem, just skip this because it's blank.
+      continue;
+    }
 
     if ($c->min_grade != "" && $c->min_grade != "D")
     {
@@ -1306,8 +1308,13 @@ function admin_get_group_courses(Group $group) {
           $attributes = $c->db_group_attributes . " ";
         }
 
-        $course_line = "$attributes$c->subject_id $c->course_num";
-
+        $course_line = trim("$attributes$c->subject_id $c->course_num");
+        if (!$course_line) {
+          // Some kind of problem, just skip this because it's blank.
+          continue;
+        }
+        
+        
         if ($c->min_grade != "" && $c->min_grade != "D")
         {
           $course_line .= " ($c->min_grade)";
