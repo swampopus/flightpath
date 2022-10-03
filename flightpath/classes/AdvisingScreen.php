@@ -2813,8 +2813,8 @@ function draw_menu_items($menu_array) {
       }
       else {
       
-        if ($grd !== $course->db_grade) {
-          $grd = $grd .= " ($course->db_grade)";
+        if (trim($grd) != trim($course->db_grade)) {
+          $grd = "$course->db_grade ($grd)";
         }
         $disp_grade = $grd;
         if (strstr($grd, "MID")) {
