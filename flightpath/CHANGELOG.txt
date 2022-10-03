@@ -5,6 +5,8 @@ FlightPath 6.x Changelog
   Re-arranging in popup course description how we show that the db_grade is different than the assigned grade.  Only
   applies when we've made a modification due to the grade being numeric.  We will now show the original numeric grade first.
   
+  Fixed bug where + was being converted to a space when passed through the URL for Course::to_data_string(). Using a replacement text now.
+  
 
 2022-09-26
   Added additional code to help prevent issues when invalid courses are defined in group definitions.

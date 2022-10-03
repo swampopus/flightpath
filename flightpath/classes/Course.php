@@ -559,7 +559,14 @@ class Course extends stdClass
     $rtn .= intval($this->bool_advised_to_take) . "~";
     $rtn .= $this->specified_repeats . "~";
     $rtn .= intval($this->bool_specified_repeat) . "~";
-    $rtn .= $this->grade . "~";
+    
+    $grd = $this->grade;
+    if (strstr($grd, "+")) {
+      $grd = str_replace("+", "_pls_", $grd);
+    }
+    
+    $rtn .= $grd . "~";
+    
     $rtn .= $this->get_hours_awarded() * 1 . "~";
     $rtn .= $this->term_id . "~";
     $rtn .= $this->advised_hours * 1 . "~";
@@ -724,6 +731,12 @@ class Course extends stdClass
     $this->specified_repeats    =   $temp[4];
     $this->bool_specified_repeat  =   (bool) $temp[5];
     $this->grade          =   $temp[6];
+    
+    if (strstr($this->grade, "_pls_")) {
+      $this->grade = str_replace("_pls_", "+", $this->grade);
+    }
+    
+    
     $this->set_hours_awarded(0,$temp[7] * 1);  // *1 to force numeric, and trim extra zeros.
     $this->term_id        =   $temp[8];
     $this->advised_hours      = $temp[9] * 1;
