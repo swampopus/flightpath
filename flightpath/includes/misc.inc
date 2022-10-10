@@ -1465,10 +1465,34 @@ function fp_set_page_sub_tabs($tab_array) {
   $GLOBALS["fp_set_page_sub_tabs"] = $tab_array;
 }
 
+
+
+
 /**
  * Set our breadcrumbs array.
+ * 
+ * We expect the array to look like this:
+ * [0]['text'] = "Alerts";
+ * [0]['path'] = "my/alerts";
+ * [0]['query'] (optional)
+ * [0]['attributes']  (optional.  Used exactly as in the l() function.  @see l() )
+ * 
+ * [1] .... etc.
+ * @see fp_render_breadcrumbs();
+ * 
+ * 
+ * Here is a practical example of how to call this function:
+ * 
+ *    $crumbs = array();
+ *    $crumbs[] = array(
+ *      'text' => 'Alerts',
+ *      'path' => 'alerts',
+ *    );
+ * 
+ *    fp_set_breadcrumbs($crumbs);
+ * 
  */
-function fp_set_breadcrumbs($arr = array()) {
+function fp_set_breadcrumbs($arr = array()) {  
   $GLOBALS['fp_breadcrumbs'] = $arr;
 }
 

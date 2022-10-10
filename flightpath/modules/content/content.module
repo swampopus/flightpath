@@ -921,6 +921,18 @@ function content_view_content($cid) {
   content_set_last_access($cid);
   
   
+  if (isset($_GET['content_crumbs'])) {
+    if ($_GET['content_crumbs'] == 'alerts') {
+      $crumbs = array();
+      $crumbs[] = array(
+        'text' => 'Alerts',
+        'path' => 'alerts',
+      );
+      fp_set_breadcrumbs($crumbs);
+    }
+  }
+  
+  
   watchdog("content", "view cid:$cid, type:$type", array());
   
   return fp_render_content($render);

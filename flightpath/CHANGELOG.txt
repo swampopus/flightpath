@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-10-09
+  Added ability to set breadcrumbs on content view.  
+  
+  Working on what happens when an unknown number sends a text message.  It should send a notification
+  to appropriate recipient, and save message as an Alert.
+
+
 2022-10-03
   Re-arranging in popup course description how we show that the db_grade is different than the assigned grade.  Only
   applies when we've made a modification due to the grade being numeric.  We will now show the original numeric grade first.
