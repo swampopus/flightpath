@@ -90,6 +90,7 @@ function menu_get_module_path($module, $bool_include_file_system_path = FALSE) {
  * and returns TRUE or FALSE if the user can access this item. 
  */
 function menu_check_user_access($router_item) {
+      
   $access = FALSE;
   if ($router_item["access_callback"] == 1) {
     $access = TRUE;

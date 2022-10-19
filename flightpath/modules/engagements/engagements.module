@@ -1163,6 +1163,7 @@ function engagements_handle_incoming_sms($vars = array())
   $message_sid = $vars['MessageSid'];
   $from_mobile = engagements_convert_to_valid_phone_number($vars['From']);
   $to_mobile = engagements_convert_to_valid_phone_number($vars['To']);
+  $system_name = variable_get("system_name", "FlightPath");
 
   $body = $vars['Body'];
 
@@ -1337,7 +1338,6 @@ function engagements_handle_incoming_sms($vars = array())
       content_save($acontent);    
     
       // Notify the advisor(s).      
-      $system_name = variable_get("system_name", "FlightPath");
       
       $tmsg = "$student_name has submitted a text message to $system_name 
                     (To: $pretty_to_number / $desc).
@@ -1383,8 +1383,8 @@ function engagements_handle_incoming_sms($vars = array())
         // Meaning, we couldn't find this student in our system!
         // TODO:  Create an alert for the recipient which does show the full txt message.  The notification provides a link to the alert.
         $alert = new stdClass();
-        $acontent->type = 'alert';
-        $alert = "new";
+        $alert->type = 'alert';
+        $alert->cid = "new";
         $alert->published = 1;
         $alert->delete_flag = 0;
         $alert->title = t('Unrecognized sender sent a text message to ') . $pretty_to_number . " / " . $desc;
@@ -1395,11 +1395,13 @@ function engagements_handle_incoming_sms($vars = array())
         $alert->exclude_advisor = 1;
         
         content_save($alert);    
+        
         $alert_link = $base_url . "/content/$alert->cid?content_crumbs=alerts";
                 
         $tmsg = "A text message has been received for $system_name. (To: $pretty_to_number / $desc).<br><br> No student could be found which is
                   associated with the sending number ($from_mobile).<br><br>Message SID: $message_sid.
-                  <br><br>To view the full message, view the Alert by logging in and clicking here: $alert_link"; 
+                  <br><br>To view the full message, view the Alert by logging in and clicking here: 
+                  <a href='$alert_link'>$alert_link</a>"; 
                   
         notify_send_notification_to_user($account_user_id, $tmsg, $alert->cid, 'alert');
       }

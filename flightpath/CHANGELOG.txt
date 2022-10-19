@@ -4,6 +4,10 @@ FlightPath 6.x Changelog
 2022-10-18
   Modified email that engagements sends out, so that the link is wrapped in <a> tag.
   
+  Moved $system_name variable in engagements so it is available when receiving unknown text messages.
+  
+  Fixed bugs when creating an altert from engagements (when receiving unknown text message).
+  
 
 2022-10-09
   Added ability to set breadcrumbs on content view.  
