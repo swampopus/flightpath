@@ -1389,6 +1389,7 @@ function engagements_handle_incoming_sms($vars = array())
         $alert->delete_flag = 0;
         $alert->title = t('Unrecognized sender sent a text message to ') . $pretty_to_number . " / " . $desc;
         $alert->field__alert_msg['value'] = $body;
+        $alert->field__alert_status['value'] = 'open';
         $alert->field__visibility['value'] = 'faculty';
         $alert->field__target_faculty_id['value'] = db_get_cwid_from_user_id($account_user_id);
         $alert->field__student_id['value'] = "N/A";
