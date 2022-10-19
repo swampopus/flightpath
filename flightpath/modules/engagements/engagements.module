@@ -1388,11 +1388,11 @@ function engagements_handle_incoming_sms($vars = array())
         $alert->published = 1;
         $alert->delete_flag = 0;
         $alert->title = t('Unrecognized sender sent a text message to ') . $pretty_to_number . " / " . $desc;
-        $alert->msg = $body;
-        $alert->visibility = 'faculty';
-        $alert->target_faculty_id = db_get_cwid_from_user_id($account_user_id);
-        $alert->student_id = "N/A";
-        $alert->exclude_advisor = 1;
+        $alert->field__alert_msg['value'] = $body;
+        $alert->field__visibility['value'] = 'faculty';
+        $alert->field__target_faculty_id['value'] = db_get_cwid_from_user_id($account_user_id);
+        $alert->field__student_id['value'] = "N/A";
+        $alert->field__exclude_advisor['value'] = 1;
         
         content_save($alert);    
         
