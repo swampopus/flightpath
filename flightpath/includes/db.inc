@@ -678,6 +678,20 @@ function fp_get_student_email($cwid) {
 
 
 
+function fp_get_faculty_email($cwid) {
+  $email = db_result(db_query("SELECT email FROM users
+                               WHERE cwid = ?                               
+                               AND is_faculty = 1", array($cwid)));
+
+  if (trim($email)) {
+    return trim(strtolower($email));
+  }
+  
+  // else, email wasn't set.
+  return FALSE;
+  
+}
+
 
 
 
