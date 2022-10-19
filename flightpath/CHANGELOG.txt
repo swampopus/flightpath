@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-10-18
+  Modified email that engagements sends out, so that the link is wrapped in <a> tag.
+  
+
 2022-10-09
   Added ability to set breadcrumbs on content view.  
   

@@ -1339,7 +1339,11 @@ function engagements_handle_incoming_sms($vars = array())
       // Notify the advisor(s).      
       $system_name = variable_get("system_name", "FlightPath");
       
-      $tmsg = "$student_name has submitted a text message to $system_name (To: $pretty_to_number / $desc).<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link";
+      $tmsg = "$student_name has submitted a text message to $system_name 
+                    (To: $pretty_to_number / $desc).
+                    <br><br>\n\n
+                    To view, visit the student's Engagements tab by logging in and following this link:<br>\n 
+                    <a href='$link'>$link</a>";
   
       $advisors = advise_get_advisors_for_student($stu_cwid);
       foreach ($advisors as $c => $afaculty_id) {
@@ -1401,7 +1405,10 @@ function engagements_handle_incoming_sms($vars = array())
       }
       else {
         // We DO have a student this came from.  Let this user know normally.
-        $tmsg = "$student_name has submitted a text message to $system_name (To: $pretty_to_number / $desc).<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link";
+        $tmsg = "$student_name has submitted a text message to $system_name (To: $pretty_to_number / $desc).
+                  <br><br>\n\n
+                  To view, visit the student's Engagements tab by logging in and following this link:<br>\n 
+                  <a href='$link'>$link</a>";
         notify_send_notification_to_user($account_user_id, $tmsg, $content->cid, 'engagement');
       }
     } //foreach to_be_notified
@@ -2166,7 +2173,9 @@ function engagements_imap_get_all_received_messages()
           $base_url = $GLOBALS['fp_system_settings']['base_url'];
           $link = $base_url . "/engagements?current_student_id=$student_cwid";
           $tmsg = "";
-          $tmsg .= "$student_name has submitted an email to FlightPath.<br><br>\n\nTo view, visit the student's Engagements tab by logging in and following this link:<br>\n $link";
+          $tmsg .= "$student_name has submitted an email to FlightPath.<br><br>\n\n
+                    To view, visit the student's Engagements tab by logging in and following this link:<br>\n 
+                    <a href='$link'>$link</a>";
 
           notify_send_notification_to_user($account_user_id, $tmsg, $content->cid, 'engagement');
         }
