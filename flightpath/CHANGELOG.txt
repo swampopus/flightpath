@@ -1,6 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-10-25
+  For the _fp_error_handler() function, made it so the $msg saved to watchdog (and possibly emailed)
+  is no more than 10,000 characters.
+  
+  Fixed bug in lassie_cron() where we were not getting the most recent "last check" correctly.  It was causing
+  us to check for long-running jobs on every cron run, rather than no more than once every 45 minutes (as intended).
+  
+
 2022-10-19
   Added function get_faculty_email() to db.inc file.
   

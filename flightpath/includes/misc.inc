@@ -450,6 +450,11 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
   $msg .= "\n\n</pre>";
 
 
+  // Because we can have EXTREMELY long $msg due to the backtrace, limit it to a reasonable number.
+  if (strlen($msg) > 10000) {
+    $msg = substr($msg, 0, 10000) . "\n\n\n... truncated to 10,000 characters to save space.  Full length was: " . strlen($msg);
+  }
+
   watchdog($watchdog_type, $msg, array(), $watchdog_severity);
   
   if (@intval($user->id) !== 0) {

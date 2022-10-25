@@ -138,7 +138,7 @@ function lassie_check_all() {
 function lassie_cron() {
       
   // If its been less than 45 minutes since last check, then skip.  Saves checks if our cron is running very frequently.  
-  $last_check = variable_set("lassie_last_check", 0);
+  $last_check = variable_get("lassie_last_check", 0);
   if (time() < ($last_check + (45 * 60))) return; 
   
   watchdog("lassie", "Lassie checking for any long-running jobs....", array(), WATCHDOG_DEBUG);
