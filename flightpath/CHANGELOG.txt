@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-10-27
+  Improved documentation for definitions.
+  
+
 2022-10-25
   For the _fp_error_handler() function, made it so the $msg saved to watchdog (and possibly emailed)
   is no more than 10,000 characters.

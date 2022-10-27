@@ -873,17 +873,9 @@ function admin_display_groups_popup_edit_definition() {
   $results = admin_get_courses_from_definition($definition, "", $school_id);
   
   // This text will be used to describe how the definition works in a javascript alert box:
-  $tdef .= t("Definitions provide a very quick way to add or remove many courses from a group.  For example, to add all CSCI courses, enter:") . "\n";
-  $tdef .= "       add CSCI.*\n";
-  $tdef .= t("The . is used to seperate the subject from the course number.  The * means \"any value.\"  You may also use it in the subject.  For example, ");
-  $tdef .= t("to add all CSCI and any course with a subject that begins with A, enter:") . "\n";
-  $tdef .= "       add CSCI.*\n       add A*.*\n";
-  $tdef .= t("Removing courses is done the same way.  For example, you can add all courses, then remove any course with a number lower than 400:") . "\n";
-  $tdef .= "       add *.*\n       rem *.1*\n       rem *.2*\n       rem *.3*\n";
-  $tdef .= "\n\n" . t("It should be stated that add statements will include courses which have been marked as \"exclude.\"  This is normal.  Those courses will not") . " ";
-  $tdef .= t("show up in group selection screens, but they will be added to a group if a student has completed that course in the past.");
-  
-  
+  $tdef .= t("Definitions provide a very quick way to add or remove many courses from a group.") . "<br><br>
+          " . t("To view a complete set of instructions, <a href='https://getflightpath.com/node/11941' target='_balnk'>visit the documentation page by clicking here</a>.");  
+            
   
   $rtn .= "" . t("Edit Definition for %group (%cat)
                        - @name", array("%group" => $group->title, "%cat" => $de_catalog_year, "@name" => $group->title));
@@ -897,7 +889,7 @@ function admin_display_groups_popup_edit_definition() {
       <tr>
           <td valign='top' align='right' width='45%'>
             <div class='tenpt' align='left'>" . t("Working Definition:") . "
-             " . fp_get_js_alert_link($tdef, "[?]") . "</div>
+             " . fp_get_js_alert_link($tdef, "<span class='pop-q-mark'><i class='fa fa-question-circle'></i></span>") . "</div>
             <textarea name='definition' id='definition' rows='10' style='min-width:100%; resize: none;' >$definition</textarea>
             <br>
             <input type='button' value='" . t("Generate ->") . "'
@@ -930,7 +922,9 @@ function admin_display_groups_popup_edit_definition() {
     
      
   
-  return $rtn;
+  // Give a little padding.
+  return "<body style='padding:5px;'>$rtn</body>";
+  
 }
 
 
