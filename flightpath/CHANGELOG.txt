@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-10-31
+  Clarified instructions for default advising term.
+  
+
 2022-10-27
   Improved documentation for definitions.
   

@@ -958,10 +958,11 @@ function admin_advising_settings_form($school_id = 0) {
   $form["advising_term_id" . $fs] = array(
     "type" => "textarea",
     "rows" => 2,
-    "label" => t("Default advising term id(s)"),
+    "label" => t("Default advising term id"),
     "value" => fp_space_csv(variable_get_for_school("advising_term_id", "", $school_id, TRUE)),
     "description" => t("Of the available term ids above, this is the default that FlightPath
-                        is set to when an advisor logs in. Ex: 200940."),
+                        is set to when an advisor logs in. Ex: 200940.
+                        <br><strong>Only enter one Term ID in this box.</strong>"),
   );  
 
 
