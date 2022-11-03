@@ -30,20 +30,21 @@ $(document).ready(function() {
       });
   */
   
-  // TODO:  make it look prettier.
+  
+    var toolbar = FlightPath.settings.tinymceToolbar;
   
     tinymce.init({
       selector: '.html-editor',
+      resize: true,
       elementpath: false,
       menubar: false,
       skin: 'oxide',
-      statusbar: false,
+      statusbar: true,
       toolbar_mode: 'wrap',
       browser_spellcheck: true,
-      plugins: 'lists',
-      toolbar: 'bold italic underline | cut copy paste | undo redo | alignleft aligncenter | bullist numlist outdent indent | removeformat',
-      
-      
+      plugins: 'lists link',
+      toolbar: toolbar,
+
       branding: false   
       
     });  

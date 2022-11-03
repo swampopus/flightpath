@@ -2,3 +2,12 @@
   display: none;
   
 }
+
+.tox .tox-statusbar {
+  border-top: 0 !important;
+}
+
+#element-tinymce_toolbar {
+  width: 100% !important;
+  max-width: 100% !important;
+}

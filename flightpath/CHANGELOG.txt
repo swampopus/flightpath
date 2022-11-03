@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-11-03
+  Changed "Login" button to "Log in" to be consistent with English rules.
+  
+  Added more options for TinyMCE, including links and the ability to resize the editor.
+  
+
 2022-10-31
   Clarified instructions for default advising term.
   

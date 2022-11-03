@@ -41,6 +41,10 @@ function tinymce_init() {
   if ($bool_activate) {
     fp_add_js(array("tinymceModulePath" => fp_get_module_path("tinymce")), "setting");  
     
+    $toolbar = variable_get("tinymce_toolbar", "bold italic underline | cut copy paste | undo redo | alignleft aligncenter | bullist numlist outdent indent | link unlink | removeformat");
+    
+    fp_add_js(array("tinymceToolbar" => $toolbar), "setting");
+    
     fp_add_js(fp_get_module_path("tinymce") . "/lib/tinymce/js/tinymce/tinymce.min.js");
         
     fp_add_js(fp_get_module_path("tinymce") . "/js/tinymce_module.js");
@@ -90,6 +94,8 @@ function tinymce_menu() {
 function tinymce_config_form() {
   $form = array();
   
+  fp_add_css(fp_get_module_path("tinymce") . "/css/tinymce.css");
+  
   $form["tinymce_include_on_paths"] = array(
     "label" => t("Include on paths:"),
     "type" => "textarea",
@@ -105,6 +111,17 @@ function tinymce_config_form() {
                       Note: For developers, make sure you specify a <b>type=textarea_editor</b> for fields which
                       should be rendered with TinyMCE.  Use hook_form_alter to change ordinary textareas into textarea_editor."),
   );
+
+
+  $form["tinymce_toolbar"] = array(
+    "label" => t("Toolbar:"),
+    "type" => "textfield",
+    "value" => variable_get("tinymce_toolbar", "bold italic underline | cut copy paste | undo redo | alignleft aligncenter | bullist numlist outdent indent | link unlink | removeformat"),
+    "description" => t("Enter the toolbar components (based on TinyMCE's documentation) that you would like to as part of TinyMCE.
+                        <br>If unsure what to enter, use:
+                        <br>&nbsp; &nbsp; bold italic underline | cut copy paste | undo redo | alignleft aligncenter | bullist numlist outdent indent | link unlink | removeformat"),
+  );
+
 
   
   

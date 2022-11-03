@@ -594,7 +594,7 @@ function system_menu() {
 function system_display_login_help_page() {
   //First, are we meant to redirect to a different piece of content?  This is configured in the System Settings.
   $cid = intval(variable_get("login_help_cid", "0"));
-  
+
   if ($cid > 0) {
     fp_goto("content/$cid");
     return;
@@ -3365,7 +3365,7 @@ function system_login_form() {
   
   $form["submit"] = array(
     "type" => "submit",
-    "value" => t("Login"),
+    "value" => t("Log in"),
     "suffix" => "<div id='login-form-forgot-password'>" . l(t("Need help logging in?"), 'login-help') ."</div>",
     
   );
