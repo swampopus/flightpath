@@ -1606,7 +1606,8 @@ function student_search_query_advisees($sql, $params = array(), $limit = 20, $bo
   $db = get_global_database_handler();  
   
   $rank_in = "( '" . join("', '", csv_to_array(variable_get("allowed_student_ranks",''))) . "' )";
-
+  $order_by = "";
+  
   if (!$bool_only_return_adv_array) {    
     $table_headers = student_search_get_advisee_table_headers();
     // Set our initial sort, if none is already set.   

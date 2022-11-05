@@ -596,8 +596,7 @@ function user_alter_student_profile_items($bool_mini, &$extra_profile_items, $bo
       $item['label'] = $details['label'];
       
       
-      
-      $item['content'] = $details['value'];
+      $item['content'] = (isset($details['value']) == TRUE) ? $details['value'] : '';
       
       $item['content'] = str_replace("@value", $display_value, $item['content']);
       $item['content'] = str_replace("@key", $value, $item['content']);

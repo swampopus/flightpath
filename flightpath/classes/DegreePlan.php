@@ -845,6 +845,7 @@ class DegreePlan extends stdClass
 
       // Still no title?  Try to load ANY degree title with this degree's
       // major_code.
+      $this->title = '';
       $table_name = "degrees";
       if ($this->bool_use_draft) {$table_name = "draft_$table_name";}
   
@@ -852,8 +853,9 @@ class DegreePlan extends stdClass
                               WHERE major_code = ? 
                               ORDER BY catalog_year DESC LIMIT 1", $this->major_code);
       $cur = $this->db->db_fetch_array($res);
-      $this->title = trim($cur["title"]);
-
+      if ($cur) {
+        $this->title = trim($cur["title"]);
+      }
       if ($bool_include_html && $this->title) {
         $dtitle = "<span class='deg-title'>$this->title</span>";
       }

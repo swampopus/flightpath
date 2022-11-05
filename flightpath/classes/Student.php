@@ -173,10 +173,12 @@ class Student extends stdClass
                   ", $this->student_id);
     $cur = $this->db->db_fetch_array($res);
 
-    if ($arr = unserialize($cur["settings"])) {
-      $this->array_settings = $arr;
+    if ($cur) {
+      if ($arr = unserialize($cur["settings"])) {
+        $this->array_settings = $arr;
+      }
     }
-    
+        
   }
 
   function load_transfer_eqvs_unassigned()
@@ -516,20 +518,25 @@ class Student extends stdClass
       $cur = $this->db->db_fetch_array($res);
       $GLOBALS['load_student_data'][$this->student_id] = $cur;
     }
-    $this->is_active = intval($cur['is_active']);
-    $this->cumulative_hours = $cur['cumulative_hours'];
-    $this->school_id = $this->db->get_school_id_for_student_id($this->student_id);
-    $this->gpa = $cur['gpa'];
-    $this->db_rank = $cur['rank_code'];
-    $this->catalog_year = $cur['catalog_year'];
-    $this->rank = $this->get_rank_description($this->db_rank);
+    
+    if ($cur) {    
+      $this->is_active = intval($cur['is_active']);
+      $this->cumulative_hours = $cur['cumulative_hours'];
+      $this->school_id = $this->db->get_school_id_for_student_id($this->student_id);
+      $this->gpa = $cur['gpa'];
+      $this->db_rank = $cur['rank_code'];
+      $this->catalog_year = $cur['catalog_year'];
+      $this->rank = $this->get_rank_description($this->db_rank);
+      $this->name = $this->db->get_student_name($this->student_id);
+    }
+    
     $this->major_code_array = fp_get_student_majors($this->student_id, FALSE);
     $this->major_code_csv = '';
     foreach ($this->major_code_array as $k => $v) {
       $this->major_code_csv .= $k . ',';
     }
     $this->major_code_csv = rtrim($this->major_code_csv,',');
-    $this->name = $this->db->get_student_name($this->student_id);
+
 
    
   }

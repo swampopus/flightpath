@@ -1131,7 +1131,9 @@ class FlightPath extends stdClass
               AND school_id = ?
               LIMIT 1 ", $subject_id, $school_id);
     $cur = $this->db->db_fetch_array($res);
-    return trim($cur["title"]);
+    if ($cur) {
+      return trim($cur["title"]);
+    }
 
   }
 

@@ -83,7 +83,7 @@
         <div class='page-tabs-wrapper'><?php print $page_tabs; ?></div>
       <?php endif; ?>
 
-      <?php if ($page_student_profile_header): ?>
+      <?php if (isset($page_student_profile_header) && $page_student_profile_header != ""): ?>
         <div id='page-student-mini-profile-wrapper'><?php print $page_student_profile_header; ?></div>
                 <div class='clear'></div>
       <?php endif; ?>

@@ -309,7 +309,7 @@ function draw_menu_items($menu_array) {
     $page_body_classes = $this->page_body_classes;
     
     // Are we explicitly setting that this is a popup in the URL?
-    if ($_REQUEST['window_mode'] == 'popup') {
+    if (isset($_REQUEST['window_mode']) && $_REQUEST['window_mode'] == 'popup') {
       $page_is_popup = TRUE;
     }
     
@@ -458,11 +458,6 @@ function draw_menu_items($menu_array) {
     }
                 
                     
-
-    if ($page_sidebar_left_content) {
-      $page_body_classes .= " has-sidebar-left";
-    }
-    
     
     // Grab the appropriate sidebar & top nav content (if any)
     $page_sidebar_left_content = $page_top_nav_content = "";
@@ -872,9 +867,14 @@ function draw_menu_items($menu_array) {
       $weight = $weight + 10;      
             
       $is_empty = false;
-      for ($t = 1; $t <= @count($this->footnote_array[$fn_type]); $t++)
+      $ccount = 0;
+      if (isset($this->footnote_array) && is_array($this->footnote_array) && isset($this->footnote_array[$fn_type])) {
+        $ccount = count($this->footnote_array[$fn_type]);
+      }
+      
+      for ($t = 1; $t <= $ccount; $t++)
       {
-        $line = $this->footnote_array[$fn_type][$t];
+        $line = @$this->footnote_array[$fn_type][$t];
 
         if ($line == "")
         {
@@ -4294,7 +4294,11 @@ function draw_menu_items($menu_array) {
         $footnote = "";
 
         $footnote .= "<span class='superscript'>T";
-        $fcount = @count($this->footnote_array["transfer"]) + 1;
+        $fcount = 0;
+        if (isset($this->footnote_array) && is_array($this->footnote_array) && isset($this->footnote_array["transfer"])) {
+          $fcount = @count($this->footnote_array["transfer"]) + 1;
+        }
+        
         if ($course->get_has_been_displayed() == true)
         { // If we've already displayed this course once, and are
           // now showing it again (like in the Transfer Credit list)
@@ -4356,13 +4360,15 @@ function draw_menu_items($menu_array) {
 
     
 
-    if ($hours <= 0) {
+    if (is_numeric($hours) && $hours <= 0) {
       // Some kind of error-- default to catalog hours
       $hours = $course->get_catalog_hours();
     }
 
-    $hours = $hours * 1;  // force numeric, trim extra zeros.
-
+    if (is_numeric($hours)) {
+      $hours = $hours * 1;  // force numeric, trim extra zeros.
+    }
+    
     $var_hour_icon = "&nbsp;";
     
     

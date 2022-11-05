@@ -447,12 +447,12 @@ function course_search_display_edit_courses()
 
   // Get the "upper range" (UR) and
   // lower range (LR) of the courses in question...
-  $ur = trim($_GET["ur"]);
-  $lr = trim($_GET["lr"]);
+  $ur = trim(@$_GET["ur"]);
+  $lr = trim(@$_GET["lr"]);
   if ($ur == "")
   { // meaning, no range was set.  Use A - AZZZZZ, so, all of the A's.
-    $ur = $_SESSION["dec_ur"];
-    $lr = $_SESSION["dec_lr"];
+    $ur = @$_SESSION["dec_ur"];
+    $lr = @$_SESSION["dec_lr"];
     if ($ur == "")
     { // if still blank, assign it..
       $ur = "A";
@@ -537,7 +537,7 @@ function course_search_display_edit_courses()
     }
     
     $syllabus_details = course_search_get_course_syllabus_details($db_course_id);
-    $filename = $syllabus_details["filename"];
+    $filename = @$syllabus_details["filename"];
     
     
     if ($filename != "") {
@@ -560,9 +560,11 @@ function course_search_display_edit_courses()
                        WHERE course_id = ? 
                        LIMIT 1", $db_course_id);
       $cur2 = db_fetch_array($res2);
-      $updated2 = $cur2["posted"];
-      if ($updated2 > $updated) {
-        $updated = $updated2;
+      if ($cur2) {
+        $updated2 = $cur2["posted"];
+        if ($updated2 > $updated) {
+          $updated = $updated2;
+        }
       }
     }
 
@@ -590,7 +592,7 @@ function course_search_display_edit_courses()
     $db_subject_id = urlencode($db_subject_id);
 
 
-    $rtn .= "<tr style='$spanstyle'>
+    $rtn .= "<tr>
         <td valign='top' >";
     
     /*$rtn .= "<div style='padding:3px;'>

@@ -3564,6 +3564,7 @@ function calendar_build_custom_calendar($month, $year) {
      
      fp_add_css(fp_get_module_path('calendar') . '/css/style.css');
           
+     $extra = "";
      
      $today = date('Y-m-d', convert_time(time()));
 

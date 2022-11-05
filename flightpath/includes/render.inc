@@ -429,7 +429,7 @@ function form_basic_validate($form, $form_state) {
       
     } // if is_array element and required
     
-    if (is_array($element) && $element['type'] == 'value') {
+    if (is_array($element) && isset($element['type']) && $element['type'] == 'value') {
       
       $should_be_value = @trim($form[$name]['value']);
       $found_value = @trim($form_state['values'][$name]);
@@ -469,6 +469,9 @@ function form_error($element_name, $message) {
  * (We will just look in the SESSION to find out).
  */
 function form_has_errors() {
+  
+  if (!isset($_SESSION["fp_form_errors"]) || !is_array($_SESSION["fp_form_errors"])) return FALSE;
+  
   if (@count($_SESSION["fp_form_errors"]) > 0) {
     return TRUE;
   }
@@ -538,7 +541,11 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
 
 
   $attributes = @$element["attributes"];
-  if (!is_array($attributes)) $attributes = array();
+  if (!is_array($attributes)) {
+    $attributes = array();
+    $attributes['style'] = '';
+    $attributes['class'] = '';    
+  }
   
   if ($type == 'textarea_editor') {
     // Add the "html-editor" class to attributes.    

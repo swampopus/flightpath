@@ -73,7 +73,8 @@ function theme_table_header_sortable($headers = array(), $element_id = "default"
                             
       
       $new_fsortdir = 'ASC';
-      if ($default_sort) $new_fsortdir = $default_sort;
+      
+      //if ($default_sort) $new_fsortdir = $default_sort;
       
       
       
@@ -141,7 +142,7 @@ function theme_table_header_sortable_order_by($headers) {
     // Confirm that this field is in the headers array.
     $bool_found_it = FALSE;
     foreach ($headers as $header) {
-      if ($header['field'] == $fsort) {
+      if (isset($header['field']) && $header['field'] == $fsort) {
         $bool_found_it = TRUE;
         break;
       }
@@ -713,7 +714,7 @@ function fp_display_page($page) {
 
       
   // If there are "messages" waiting, then let's add them to the top of content.
-  if (@count($_SESSION["fp_messages"]) > 0) {
+  if (isset($_SESSION["fp_messages"]) && is_array($_SESSION["fp_messages"]) && count($_SESSION["fp_messages"]) > 0) {
     $content_top .= "<div class='fp-messages'>";
     foreach ($_SESSION["fp_messages"] as $key => $tmsg) {
       $type = $tmsg["type"];
@@ -1226,6 +1227,7 @@ function fp_render_breadcrumbs() {
       
       if (!$attributes || !is_array($attributes)) {
         $attributes = array();
+        $attributes['style'] = '';
       }
   
       $attributes['style'] .= " z-index: $z_index;";

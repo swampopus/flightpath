@@ -48,8 +48,8 @@ include_once("pchart/class/pPie.class.php");
 include_once("pchart/class/pImage.class.php");
 
 
-$progress = addslashes($_GET["progress"])*1;
-$unfinished = addslashes($_GET["unfinished"])*1;
+$progress = floatval($_GET["progress"]);
+$unfinished = floatval($_GET["unfinished"]);
 $unfinished_col = hex2rgb($_GET["unfinished_col"]);
 $progress_col = hex2rgb($_GET["progress_col"]);
 

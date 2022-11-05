@@ -236,9 +236,13 @@ function fp_get_degree_major_code($degree_id, $bool_reset_cache = FALSE) {
     return $GLOBALS['fp_temp_degree_major_codes'][$degree_id];
   }
   
+  $major_code = '';
+  
   $res = db_query("SELECT major_code FROM degrees WHERE degree_id = ?", $degree_id);
   $cur = db_fetch_array($res);
-  $major_code = trim($cur['major_code']);
+  if ($cur) {
+    $major_code = trim($cur['major_code']);
+  }
   
   if ($major_code) {
     $GLOBALS['fp_temp_degree_major_codes'][$degree_id] = $major_code;
@@ -258,11 +262,15 @@ function fp_get_degree_advising_weight($degree_id, $bool_reset_cache = FALSE) {
   if (isset($GLOBALS['fp_temp_degree_advising_weights'][$degree_id])) {
     return $GLOBALS['fp_temp_degree_advising_weights'][$degree_id];
   }
+
+  $advising_weight = 0;
   
   $res = db_query("SELECT advising_weight FROM degrees WHERE degree_id = ?", $degree_id);
   $cur = db_fetch_array($res);
-  $advising_weight = intval(trim($cur['advising_weight']));
-  
+  if ($cur) {
+    $advising_weight = intval(trim($cur['advising_weight']));
+  }
+
   if ($advising_weight) {
     $GLOBALS['fp_temp_degree_advising_weights'][$degree_id] = $advising_weight;
   }
@@ -382,12 +390,14 @@ function fp_load_user($user_id) {
   
   $rtn = new stdClass();
   
-  if ($user_id == 0) {
+  if ($user_id <= 0) {
     // Return the anonymous user.
     $rtn->id = 0;
     $rtn->name = t("Anonymous");
     $rtn->roles = array(1 => "anonymous user");
     $rtn->permissions = fp_get_permissions_for_role(1);
+    $rtn->email = '';
+    $rtn->school_id = 0;
     return $rtn;        
   }
   
@@ -444,7 +454,7 @@ function fp_load_user($user_id) {
   
   // Set the user image url...  
   // See if there are any other modules which might be overriding how we look up user images.  
-  $image_url = $cur->settings['image_url'];
+  $image_url = @$cur->settings['image_url'];
   $type = 'student';
   if ($rtn->is_faculty) $type = 'faculty';  
   $modules = invoke_hook("get_user_image_url", array($rtn->cwid, $type));

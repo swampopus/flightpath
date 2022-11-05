@@ -398,13 +398,22 @@ function get_timezones($bool_include_offset = FALSE) {
  */ 
 function _fp_error_handler($error_level, $message, $filename, $line, $context = array()) {
   global $user;
+
+  // In case we have not loaded bootstrap.inc yet.  
+  @define ('WATCHDOG_NOTICE', 5);
+  @define ('WATCHDOG_ALERT', 1);
+  @define ('WATCHDOG_ERROR', 3);
+  @define ('WATCHDOG_DEBUG', 7);  
   
-  if (0 === error_reporting()) { return false;} // suppressed with @-operator
+  $PHP_8_0_SUPPRESSED_ERROR = E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR | E_PARSE;
+  $er = error_reporting();
+  if ($er === 0 || $er === $PHP_8_0_SUPPRESSED_ERROR) { return false;} // suppressed with @-operator  (0 for pre-php8, the variable for 8.0)
+  
+  
    
   $err_name = _fp_map_php_error_code($error_level); 
   if (is_string($err_name) && stristr($err_name, 'notice')) return FALSE; // don't care about Notices. 
 
-  
   $watchdog_type = "php_error";
   $watchdog_severity = WATCHDOG_ERROR;
     
@@ -413,8 +422,13 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
     $watchdog_type = "php_warning";
     $watchdog_severity = WATCHDOG_ALERT;
   } 
+
+  if (is_string($err_name) && stristr($err_name, 'recoverable error')) {
+    $watchdog_type = "php_warning";
+    $watchdog_severity = WATCHDOG_ALERT;
+  } 
   
-  $arr = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 10);  // limit of 10 levels deep so as not to eat up all the memory.
+  $arr = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);  // limit of 10 levels deep so as not to eat up all the memory.
   // fpm() only displays for privileged users
   fpm($err_name . ": $message<br>... ($line) $filename");
   fpm($arr);
@@ -491,10 +505,10 @@ function _fp_map_php_error_code($code) {
             break;
         case E_WARNING:
         case E_USER_WARNING:
-        case E_COMPILE_WARNING:
+        case E_COMPILE_WARNING:                      
         case E_RECOVERABLE_ERROR:
             $error = 'Warning';            
-            break;
+            break;          
         case E_NOTICE:
         case E_USER_NOTICE:
             $error = 'Notice';            
@@ -510,6 +524,7 @@ function _fp_map_php_error_code($code) {
         default :
             break;
     }
+    
     return $error;
 }
 
@@ -945,10 +960,12 @@ function fp_no_html_xss($string) {
  */
 function filter_markup($str, $type = "basic") {
 
+  if (!$str) return $str;
+
   // Use the DOM functions to repair any mismatched HTML.
   $doc = new DOMDocument();
   @$doc->loadHTML(mb_convert_encoding($str, 'HTML-ENTITIES', 'UTF-8'));   // ensure we are in UTF8
-  $str = $doc->saveHTML($doc->documentElement);  // Apparently this hels solve a glitch in Linux that isn't in Windows
+  $str = $doc->saveHTML($doc->documentElement);  // Apparently this helps solve a glitch in Linux that isn't in Windows
 
   if ($type == 'plain') {
     $str = strip_tags($str);
@@ -2767,6 +2784,8 @@ function user_has_permission($permission = "", $account = NULL) {
   
   // If the user is admin (id == 1) then they always have access.
   if ($account->id == 1) return TRUE;
+  
+  if (!isset($account->permissions) || !is_array($account->permissions)) return FALSE;   // not set up yet; anonymous user most likely.
   
   // Otherwise, simply check their permissions array.
   if (in_array($permission, $account->permissions)) {

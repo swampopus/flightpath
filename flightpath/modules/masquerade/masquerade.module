@@ -89,7 +89,7 @@ function masquerade_perform_masquerade() {
 function masquerade_init() {
   global $user;
   
-  if ($_SESSION["masquerade_active"]) {
+  if (isset($_SESSION["masquerade_active"]) && $_SESSION["masquerade_active"]) {
     fp_add_message(t("You are currently masquerading as %user (originally %ou).  To return to your previous
                       account, log out, then log in normally.", 
                       array("%user" => $user->name, "%ou"=>$_SESSION["masquerade_original_user"]->name)), 

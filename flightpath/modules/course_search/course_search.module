@@ -120,6 +120,7 @@ function course_search_menu() {
 function course_search_menu_handle_replacement_pattern($str) {
   
   if (strpos($str, "%SCHOOL_ID%") !== 0) {
+    if (!isset($_SESSION['last_saved_school_id'])) $_SESSION['last_saved_school_id'] = 0;
     // It contains this replacement pattern!
     $str = str_replace("%SCHOOL_ID%", intval($_SESSION['last_saved_school_id']), $str);
     unset($_SESSION['last_saved_school_id']);
@@ -498,7 +499,7 @@ function course_search_display_courses() {
       $syllabus_text = "";     
       $syllabus_array = course_search_get_course_syllabus_details($n_course_id);
       
-      if ($syllabus_array["url"] != "")
+      if (@$syllabus_array["url"] != "")
       {
         $syllabus_text = "<div class='course-search-sample-syllabus'>
                           <a href='{$syllabus_array["url"]}' class='nounderline'>
@@ -924,7 +925,7 @@ function course_search_get_course_syllabus_details($course_id)
 	
 	
 
-	if ($cur["filename"] != "") {
+	if (isset($cur["filename"]) && $cur['filename'] != "") {
 	  $rtn_array = array();
 		$rtn_array["url"] = $GLOBALS["fp_system_settings"]["base_url"] . "/" . fp_url("course-search/get-syllabus", "id=" . $course_id, FALSE);
 		$rtn_array["filename"] = $cur["filename"];
@@ -998,7 +999,7 @@ function course_search_display_search() {
   
   $clean_urls = variable_get("clean_urls", FALSE);
   
-  $school_id = intval($_REQUEST['school_id']);
+  $school_id = intval(@$_REQUEST['school_id']);
   $current_catalog_year = variable_get_for_school('current_catalog_year', 2006, $school_id);
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;

@@ -238,8 +238,10 @@ class Group extends stdClass
 		{
 
 			$id = $cur["id"];      
-			$course_id = $cur["course_id"]*1; 
-      $this->school_id = intval($cur['school_id']);
+			$course_id = intval($cur["course_id"]); 
+      
+      // The group requirements table doesn't have a school_id.
+      //$this->school_id = intval($cur['school_id']);
 
 			if ($cur["course_id"]*1 > 0)
 			{
@@ -537,20 +539,22 @@ class Group extends stdClass
       $group_descriptive_data_cache[$this->get_db_group_id()] = $cur;
     }    
        
+    if ($cur) {
 
-		$this->title = trim($cur["title"]);
-		$this->icon_filename = trim($cur["icon_filename"]);
-    if ($this->icon_filename == "") $this->icon_filename = "major.gif"; // set a default!
-		$this->group_name = trim($cur["group_name"]);
-		$this->data_entry_comment = trim($cur["data_entry_comment"]);
-		$this->priority = trim($cur["priority"]);
-		$this->definition = trim($cur["definition"]);
-		$this->db_delete_flag = trim($cur["delete_flag"]);
-		$this->db_catalog_repeat = trim($cur["catalog_repeat"]);
-		$this->catalog_year = trim($cur["catalog_year"]);
-		$this->public_note = trim($cur["public_note"]);
-		$this->school_id = intval($cur["school_id"]);
-
+  		$this->title = trim($cur["title"]);
+  		$this->icon_filename = trim($cur["icon_filename"]);
+      if ($this->icon_filename == "") $this->icon_filename = "major.gif"; // set a default!
+  		$this->group_name = trim($cur["group_name"]);
+  		$this->data_entry_comment = trim($cur["data_entry_comment"]);
+  		$this->priority = trim($cur["priority"]);
+  		$this->definition = trim($cur["definition"]);
+  		$this->db_delete_flag = trim($cur["delete_flag"]);
+  		$this->db_catalog_repeat = trim($cur["catalog_repeat"]);
+  		$this->catalog_year = trim($cur["catalog_year"]);
+  		$this->public_note = trim($cur["public_note"]);
+  		$this->school_id = intval($cur["school_id"]);
+      
+    }
 
 		if ($this->group_id == DegreePlan::GROUP_ID_FOR_COURSES_ADDED)
 		{

@@ -227,10 +227,12 @@ function menu_get_item($path) {
   // to take.
   
   $menu_items = array();
-  
+
+  /*  
   if ($bool_reset) {
     unset($GLOBALS["fp_menu_items"]);
   }
+  */
   
   // To cut down on the amount we need to query, we will use a global variable.
   if (!isset($GLOBALS["fp_menu_items"]) || !is_array($GLOBALS["fp_menu_items"]) || count($GLOBALS["fp_menu_items"]) == 0) {

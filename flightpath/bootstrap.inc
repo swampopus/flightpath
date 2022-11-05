@@ -68,10 +68,11 @@ invoke_hook('init');
 define('FLIGHTPATH_VERSION', '%FP_VERSION%');  // will be replaced automatically by getflightpath.com.
 define('FLIGHTPATH_CORE', '6.x');  // hard-coded core version.
 
-define ('WATCHDOG_NOTICE', 5);
-define ('WATCHDOG_ALERT', 1);
-define ('WATCHDOG_ERROR', 3);
-define ('WATCHDOG_DEBUG', 7);
+// The watchdog constants are also defined in misc.inc, so add the @ here so we do not define them twice.
+@define ('WATCHDOG_NOTICE', 5);
+@define ('WATCHDOG_ALERT', 1);
+@define ('WATCHDOG_ERROR', 3);
+@define ('WATCHDOG_DEBUG', 7);
 
 define("MENU_TYPE_NORMAL_ITEM", 1);
 define("MENU_TYPE_CALLBACK", 2);

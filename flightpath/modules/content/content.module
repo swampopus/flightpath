@@ -989,7 +989,7 @@ function content_edit_content_form($type = "", $cid = "") {
   $form = array();
   $m = 0;
   
-  if ($_GET['content_tabs'] === 'false') { // the string "false", not FALSE
+  if (@$_GET['content_tabs'] === 'false') { // the string "false", not FALSE
     fp_add_body_class('content-tabs-false');
   }
   
@@ -1024,6 +1024,8 @@ function content_edit_content_form($type = "", $cid = "") {
     // New piece of content
     $content = new stdClass();
     $content->published = 1;
+    $content->title = "";
+    $content->delete_flag = 0;
     fp_set_title(t("Add new") . " " . $types[$type]["title"]);
     
   }
@@ -1121,7 +1123,10 @@ function content_edit_content_form($type = "", $cid = "") {
       $form[$field_name] = $field_details;      
       if ($field_details['type'] != 'cfieldset') {
       
-        $value = $content->{"field__$field_name"}['value'];
+        $value = NULL;
+        if (isset($content->{"field__$field_name"}['value'])) {
+          $value = $content->{"field__$field_name"}['value'];
+        }        
         if ($cid == 'new') {
           // value won't be anything.  Use value attr from the form as the initial value
           $value = @$form[$field_name]['value'];

@@ -1079,7 +1079,7 @@ function stats_report_flightpath_use_summary() {
  * @param unknown_type $bool_mobile_only
  * @return unknown
  */
-function stats_get_log_count($action = "", $action_array = "", $bool_distinct = false, $start_date, $end_date, $bool_students = true, $bool_mobile_only = false)
+function stats_get_log_count($action = "", $action_array = "", $bool_distinct = false, $start_date = '', $end_date = '', $bool_students = true, $bool_mobile_only = false)
 {
   
   $action_line = " `type` = '$action' ";
@@ -1335,10 +1335,11 @@ function stats_report_access_stats() {
   $student_actions = $staff_actions = 0;
 
   $interval = time() - ($min * 60);
-  
+  $pol = "";
   $res = db_query("SELECT * FROM watchdog
               WHERE `timestamp` > ?
-              ORDER BY `timestamp` DESC ", $interval);
+              ORDER BY `timestamp` DESC 
+              ", $interval);
   while ($cur = db_fetch_array($res)) {
     extract ($cur, 3, "db");
     $wid = $cur['wid'];
@@ -1348,7 +1349,10 @@ function stats_report_access_stats() {
     
     $minago = round((time() - $db_timestamp) / 60, 0);
 
-    $message = strip_tags(t($db_message, unserialize($db_variables)));
+    $vars = @unserialize($db_variables);
+    if (!$vars) $vars = '';
+    
+    $message = strip_tags(t($db_message, $vars));
     if (strlen($message) > 100) {
       $message = trim(substr($message, 0, 100)) . "...";
     }
