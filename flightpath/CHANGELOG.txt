@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-11-05
+  Cleaned up Administrator's Toolbox (courses) to make it cleaner.  Also fixed bug where it was not showing where
+  a course was assigned.
+  
+  Continuing work to increase compatibility with PHP 8.0.
+  
+
 2022-11-04
   Added code to increase compatibility with PHP 8.0.
 

@@ -181,6 +181,12 @@ function theme_pager($tags = array(), $limit = 10, $element = 0, $parameters = a
   // Middle is used to "center" pages around the current page.
   $pager_middle = ceil($quantity / 2);
 
+  if (!isset($pager_page_array)) $pager_page_array = array();
+  if (!isset($pager_page_array[$element])) $pager_page_array[$element] = 0;
+
+  if (!isset($pager_total)) $pager_total = array();
+  if (!isset($pager_total[$element])) $pager_total[$element] = 0;
+
   // current is the page we are currently paged to
   $pager_current = $pager_page_array[$element] + 1;
 

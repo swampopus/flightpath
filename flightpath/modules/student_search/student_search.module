@@ -172,14 +172,9 @@ function student_search_student_select_switchboard() {
   }
 
  
-  if ($view == "what-if") {
-    $GLOBALS["fp_advising"]["advising_what_if"] = "yes";  
-    $_REQUEST["advising_what_if"] = "yes";
-  }
-  else {
-    $GLOBALS["fp_advising"]["advising_what_if"] = "no";
-    $_REQUEST["advising_what_if"] = "no";
-  }
+  $GLOBALS["fp_advising"]["advising_what_if"] = "no";
+  $_REQUEST["advising_what_if"] = "no";
+
   
   // Initialize everything we need to initialize for this advising session.
   advise_init_screen();        
@@ -478,15 +473,6 @@ function student_search_get_majors_for_fapi() {
   $params = array();
   
   
-  /*
-  $res = db_query("SELECT * FROM degrees
-                   WHERE exclude = 0
-                   AND school_id IN ($school_id_list)                   
-                   $extra_line
-                   GROUP BY major_code
-                   ORDER BY school_id, title
-                   ", $params);
-   */
   // Removing "group by major_code" line, as duplicate major codes in more than one school were not showing correctly in the select list.
   $res = db_query("SELECT * FROM degrees
                    WHERE exclude = 0
@@ -495,8 +481,8 @@ function student_search_get_majors_for_fapi() {
                    ORDER BY school_id, title
                    ", $params);   
   while ($cur = db_fetch_object($res)) {
-    $sel = ($major_code == $cur->major_code) ? "selected" : "";
-  
+      
+      
     $degree_class_details = fp_get_degree_classification_details($cur->degree_class);
   
     
@@ -521,8 +507,7 @@ function student_search_get_majors_for_fapi() {
       $rtn[$cur->major_code . "~~school_" . $cur->school_id] = "$cur->major_code : $title ({$degree_class_details["title"]})";
     }
     
-    //$rtn .= "<option value='$cur->major_code' $sel>$cur->major_code : $title ({$degree_class_details["title"]})</option>";
-    
+        
     
     
     
@@ -809,6 +794,7 @@ function student_search_search_form() {
   $search_for = str_replace("'","",$search_for);
   $search_for = str_replace('"','',$search_for);    
   
+  $search_action = '';
   
   $adv_array = array();
   
@@ -945,8 +931,9 @@ function student_search_search_form() {
     'value' => $adv_array,
   );
   
+  $student_count = @intval($pager_total_items[0]);
 
-  $mark .= student_search_render_advisees($adv_array, t("Search Results") . " &nbsp; ({$pager_total_items[0]} " . t("student$s") . ")");  
+  $mark .= student_search_render_advisees($adv_array, t("Search Results") . " &nbsp; ($student_count " . t("student$s") . ")");  
   
   
   

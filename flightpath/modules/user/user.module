@@ -728,7 +728,7 @@ function user_edit_attribute_form($user_id = 0, $attribute_name = "") {
       
   $account = fp_load_user($user_id);
   
-  if ($_GET['tabs'] === 'false') { // the string "false", not FALSE
+  if (isset($_GET['tabs']) && $_GET['tabs'] === 'false') { // the string "false", not FALSE
     fp_add_body_class('user-tabs-false');
   }
   

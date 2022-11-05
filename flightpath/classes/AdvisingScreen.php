@@ -1404,29 +1404,39 @@ function draw_menu_items($menu_array) {
   function display_toolbox_courses()
   {
     $pC = "";
-
+    $ns = $os = $fan = $fat = "";
     $pC .= fp_render_section_title(t("All Student Courses"));
 
-    $csid = $_REQUEST["current_student_id"];
+    $csid = @$_REQUEST["current_student_id"];
     $school_id = db_get_school_id_for_student_id($csid);
-    $order = $_REQUEST["order"];
+    $order = @$_REQUEST["order"];
     if ($order == "name")
     {
-      $ns = "font-weight: bold; color: black; text-decoration: none;";
+      $ns = "font-weight: bold; text-decoration: none;";
+      $fan = " <i class='fa fa-angle-up' style='font-weight:bold;'></i>"; 
     } else {
-      $os = "font-weight: bold; color: black; text-decoration: none;";
+      $os = "font-weight: bold; text-decoration: none;";
+      $fat = " <i class='fa fa-angle-down' style='font-weight:bold;'></i>";
     }
 
+    /*
     $pC .= "<div class=' '>
         " . t("This window displays all of the student's courses
         which FlightPath is able to load.") . "         
         <br><br>
         " . t("Order by:") . " &nbsp; &nbsp;";
     $pC .= l(t("Name"), "advise/popup-toolbox/courses", "order=name&current_student_id=$csid", array("style" => $ns)) . "&nbsp; &nbsp;";
-    $pC .= l(t("Date Taken"), "advise/popup-toolbox/courses", "order=date&current_student_id=$csid", array("style" => $os));
-
-    $pC .= "<hr>
-        <table border='0' cellpadding='2'>
+    $pC .= l(t("Term"), "advise/popup-toolbox/courses", "order=date&current_student_id=$csid", array("style" => $os));
+*/
+    $pC .= "
+        <table border='0' cellpadding='2' cellspacing='3'>
+          <tr>
+            <th colspan='2'>" . l(t("Name") . $fan, "advise/popup-toolbox/courses", "order=name&current_student_id=$csid", array("style" => $ns)) . "</th>
+            <th>Hr</th>
+            <th>Gr</th>
+            <th width=50>" . l(t("Term") . $fat, "advise/popup-toolbox/courses", "order=date&current_student_id=$csid", array("style" => $os)) . "</th>
+            <th>Attributes</th>
+          </tr>
           ";
     $is_empty = true;
     if ($order == "name")
@@ -1449,7 +1459,7 @@ function draw_menu_items($menu_array) {
       $l_c_n = $c->course_num;
       $eqv_line = "";
 
-      if ($c->course_transfer->course_id > 0)
+      if (isset($c->course_transfer) && $c->course_transfer->course_id > 0)
       {
         if ($c->course_id > 0)
         {
@@ -1490,12 +1500,11 @@ function draw_menu_items($menu_array) {
 
 
 
-      if ($c->bool_has_been_assigned)     
+      if ($c->get_has_been_assigned_to_any_degree())     
       {
         $pC .= "A:";
         //////////////////////////////
-        // List all the groups/degrees this course has been assigned to!
-        //if ($c->assigned_to_group_id == 0)
+        // List all the groups/degrees this course has been assigned to!        
         if ($c->get_first_assigned_to_group_id() == "")
         {
           $pC .= "degree plan";
@@ -1527,6 +1536,9 @@ function draw_menu_items($menu_array) {
     $pC .= "</table>";
 
     $pC .= "</div>";
+
+    $pC .= "<hr><p>" . t("Attrib Legend: T = Transfer credit, A = Assigned to (group or degree plan)") . "</p>";
+
 
     watchdog("toolbox", "courses", array(), WATCHDOG_DEBUG);    
     

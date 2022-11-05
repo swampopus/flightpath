@@ -2077,6 +2077,14 @@ class Course extends stdClass
   }
 
 
+  /**
+   * Has the course been assigned to ANY degree?
+   */
+  function get_has_been_assigned_to_any_degree() {
+    if (isset($this->assigned_to_degree_ids_array) && count($this->assigned_to_degree_ids_array) > 0) return TRUE;
+    
+    return FALSE;
+  }
 
 
   function get_has_been_assigned_to_degree_id($degree_id = 0) {

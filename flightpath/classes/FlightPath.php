@@ -1265,11 +1265,13 @@ class FlightPath extends stdClass
     // then that course probably was originally removed
     // from the group.  So, put it back in.
 
+    // Were we given a valid group_id?
+    if (!$group_id) return;
 
     // First, find the group.
     if (!$group = $this->degree_plan->find_group($group_id))
-    {
-      fpm(" ~~ could not find group $group_id for replacemMissingCourseInGroup");
+    {      
+      fpm("Admin note: could not find group '$group_id' for replace_missing_course_in_group, for course '$course_id'.");
       return;
     }
 
