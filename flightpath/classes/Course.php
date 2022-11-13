@@ -1815,61 +1815,63 @@ class Course extends stdClass
                   AND transfer_course_id = ? 
                    ", $student_id, $this->course_id);
       $cur = $this->db->db_fetch_array($res);
-      if (trim($cur["student_specific_course_title"]) != "") {
-        $this->title = trim($cur["student_specific_course_title"]);
-      }
-      // Also assign hours_awarded and other values while we are here
-      $this->set_hours_awarded(0, $cur["hours_awarded"] * 1);
-      $this->grade = $cur["grade"];
-      $this->term_id = $cur["term_id"];
-      
-      ///////////////////
-      // If a term_id was specified, then let's try to see if we can get more specific information for this course.
-      if ($term_id != NULL) {
-        $res = $this->db->db_query("SELECT * FROM student_transfer_courses
-                    WHERE student_id = ?
-                    AND transfer_course_id = ?
-                    AND term_id = ? 
-                     ", $student_id, $this->course_id, $term_id);
-        if ($res) {                     
-          $cur = $this->db->db_fetch_array($res);
-          if ($cur) {
-            if (trim($cur["student_specific_course_title"]) != "") {
-              $this->title = trim($cur["student_specific_course_title"]);
-            }
-            // Also assign hours_awarded and other values while we are here
-            if ($cur["grade"] != "" || $cur["hours_awarded"] != "") {
-              $this->set_hours_awarded(0, $cur["hours_awarded"] * 1);
-              $this->grade = $cur["grade"];
-            }
-            $this->term_id = $cur["term_id"];
-          }      
+      if ($cur) {
+        if (trim(@$cur["student_specific_course_title"]) != "") {
+          $this->title = trim($cur["student_specific_course_title"]);
         }
-      } // if term_id != NULL
-      
-      
-      
-
-      $already = array();  // to prevent duplicates from showing up, keep up with
-                           // eqv's we've already recorded.
-      
-   
-      $res2 = $this->db->db_query("SELECT * FROM transfer_eqv_per_student
-                      WHERE student_id = ?  
-                      AND transfer_course_id = ? 
-                       ", $student_id, $this->course_id);
-      while($cur2 = $this->db->db_fetch_array($res2))
-      {        
-
-        if (!in_array($cur2["local_course_id"], $already)) {
-          $c = new Course($cur2["local_course_id"]);
-          $this->transfer_eqv_text .= "$c->subject_id $c->course_num
-                (" . $c->get_catalog_hours() . " " . t("hrs") . ") ";
-          $already[] = $cur2["local_course_id"];
+        // Also assign hours_awarded and other values while we are here
+        $this->set_hours_awarded(0, floatval($cur["hours_awarded"]));
+        $this->grade = $cur["grade"];
+        $this->term_id = $cur["term_id"];
+        
+        ///////////////////
+        // If a term_id was specified, then let's try to see if we can get more specific information for this course.
+        if ($term_id != NULL) {
+          $res = $this->db->db_query("SELECT * FROM student_transfer_courses
+                      WHERE student_id = ?
+                      AND transfer_course_id = ?
+                      AND term_id = ? 
+                       ", $student_id, $this->course_id, $term_id);
+          if ($res) {                     
+            $cur = $this->db->db_fetch_array($res);
+            if ($cur) {
+              if (trim($cur["student_specific_course_title"]) != "") {
+                $this->title = trim($cur["student_specific_course_title"]);
+              }
+              // Also assign hours_awarded and other values while we are here
+              if ($cur["grade"] != "" || $cur["hours_awarded"] != "") {
+                $this->set_hours_awarded(0, $cur["hours_awarded"] * 1);
+                $this->grade = $cur["grade"];
+              }
+              $this->term_id = $cur["term_id"];
+            }      
+          }
+        } // if term_id != NULL
+        
+        
+        
+  
+        $already = array();  // to prevent duplicates from showing up, keep up with
+                             // eqv's we've already recorded.
+        
+     
+        $res2 = $this->db->db_query("SELECT * FROM transfer_eqv_per_student
+                        WHERE student_id = ?  
+                        AND transfer_course_id = ? 
+                         ", $student_id, $this->course_id);
+        while($cur2 = $this->db->db_fetch_array($res2))
+        {        
+  
+          if (!in_array($cur2["local_course_id"], $already)) {
+            $c = new Course($cur2["local_course_id"]);
+            $this->transfer_eqv_text .= "$c->subject_id $c->course_num
+                  (" . $c->get_catalog_hours() . " " . t("hrs") . ") ";
+            $already[] = $cur2["local_course_id"];
+          }
         }
-      }
 
-    }
+      } // if cur
+    } // if student_id
 
 
   }

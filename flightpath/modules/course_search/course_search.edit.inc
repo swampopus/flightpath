@@ -34,9 +34,13 @@ function course_search_edit_course_details_form() {
   $school_code = "School #" . $school_id;
   if (module_enabled("schools")) {
     $school_code = schools_get_school_code_for_id($school_id);
+    fp_set_title(t("Edit Course Info for @course - School @school", array("@course" => "$subject_id $course_num", "@school" => $school_code)));
+  }
+  else {
+    fp_set_title(t("Edit Course Info for @course", array("@course" => "$subject_id $course_num")));
   }
 
-  fp_set_title(t("Edit Course Info for @course - School @school", array("@course" => "$subject_id $course_num", "@school" => $school_code)));
+
 
   $form["#attributes"] = array("enctype" => "multipart/form-data");
   
@@ -104,7 +108,7 @@ function course_search_edit_course_details_form() {
   if ($filename != "") {   
     $s_url = $syllabus_details["url"];
     
-    $form["mark" . $m++] = array(
+    $form["mark_syl_download_info"] = array(
       "value" => "<p>" . t("Syllabus may be downloaded using this address: ") . "<a href='$s_url'>$s_url</a></p>",
       'weight' => $weight++,
     );
@@ -286,7 +290,7 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
     // then insert into table... blah blah...
     
     foreach($term_array as $x) {
-      if ($form_state["values"]["cb_$year$x"]["yes"] == "yes") {
+      if (isset($form_state["values"]["cb_$year$x"]) && $form_state["values"]["cb_$year$x"]["yes"] == "yes") {
         $capacity = intval($form_state["values"]["capacity_$year$x"]);
         db_query("INSERT INTO course_rotation_schedule
                 (faculty_id, course_id, term_id, entry_value, posted, capacity)
@@ -304,7 +308,7 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
             WHERE course_id = ?
             AND term_id = 'NOTA' ", $course_id);
 
-  if ($form_state["values"]["not_anticipated"]["yes"] == "yes") {
+  if (isset($form_state["values"]["not_anticipated"]) && $form_state["values"]["not_anticipated"]["yes"] == "yes") {
     db_query("INSERT INTO course_rotation_schedule              
             (faculty_id, course_id, term_id, entry_value, posted)
             VALUES (?, ?, ?, ?, ?) ", $faculty_id, $course_id, "NOTA", "$subject_id~$course_num", time());
@@ -312,7 +316,7 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
   }
 
   // Should we delete the current syllabus?
-  if ($form_state["values"]["del_syllabus"]["yes"] == "yes") {
+  if (isset($form_state["values"]["del_syllabus"]) && $form_state["values"]["del_syllabus"]["yes"] == "yes") {
     if ($details = course_search_get_course_syllabus_details($course_id)) {
       $filename = $details["filename"];
       if ($filename != "") {
@@ -510,8 +514,13 @@ function course_search_display_edit_courses()
 
   $rtn .= "<table border='0' cellpadding='3' cellspacing='0' width='100%'>
       <tr>
-        <th class='tenpt'>Course</td>
+        <th class='tenpt'>Course</td>";
+  if (module_enabled('schools')) {
+    $rtn .= "       
         <th class='tenpt' align='center'>School</td>
+        ";
+  }
+  $rtn .= "        
         <th class='tenpt' align='center'>Sched</td>
         <th class='tenpt' align='center'>Syl</td>
         <th class='tenpt' align='center'>Updated</td>
@@ -602,8 +611,11 @@ function course_search_display_edit_courses()
     $rtn .= l("$display_subject_id $db_course_num - $db_title", "tools/course-search/edit-info-details", "school_id=$school_id&course_id=$db_course_id&subject_id=$db_subject_id&course_num=$db_course_num");
     // https://orion.ulm.edu/flightpath/tools/course-search/edit-info-details?course_id=468798&subject_id=ACCT&course_num=1010
     
-    $rtn .= "</td>
-        <td >$school</td>
+    $rtn .= "</td>";
+    if (module_enabled('schools')) {
+     $rtn .= "   <td >$school</td>";
+    }
+    $rtn .= "
         <td >$sch</td>
         <td >$syl</td>
         <td >$updated</td>

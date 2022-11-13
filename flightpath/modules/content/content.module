@@ -788,7 +788,7 @@ function content_dialog_handle_after_save() {
   $rtn .= "<br><br><p>" . t("If this windows doesn't close within 3 seconds,") . " <a href='javascript:window.parent.location.reload();'>" . t("click here") . "</a>.</p>";
   
   // Add this javascript code to when the page loads.
-  ///*  DEV: comment out while testing
+  /*  DEV: comment out while testing
 
   $rtn .= "
       <script type='text/javascript'>
@@ -1063,7 +1063,7 @@ function content_edit_content_form($type = "", $cid = "") {
       // Use array_merge to just override with whatever we have in our settings for the title.
       $form['title'] = array_merge($form['title'], $types[$type]['settings']['title']);
       
-      if ($form['title']['auto'] == TRUE) {
+      if (isset($form['title']['auto']) && $form['title']['auto'] == TRUE) {
         // We will set the form to an automatic title, and hide.
         $form['title']['value'] = $type . ' content saved on ' . format_date(convert_time(time()));
         $form['title']['type'] = 'hidden';
@@ -1218,11 +1218,13 @@ function content_edit_content_form($type = "", $cid = "") {
           }
           
           if ($allowed) {
+            if (!isset($form[$field_name]['description'])) $form[$field_name]['description'] = '';
             $form[$field_name]['description'] .= "<div class='content-allowed-ext'><strong>" . t("Allowed file extensions:") . "</strong> " . $allowed . "</div>";
           }
           
           if ($limit > 1 && $file_count <= $limit) {
             $add_link = "<a href='javascript:contentAddMoreFile(\"$field_name\");' class='add-more-link add-more-link-$field_name'><i class='fa fa-plus'></i> " . t("Add More") . "</a>";
+            if (!isset($form[$field_name]['suffix'])) $form[$field_name]['suffix'] = '';
             $form[$field_name]['suffix'] .= $add_link;
           }
           
@@ -1450,7 +1452,11 @@ function content_edit_content_form_validate(&$form, &$form_state) {
         
         $uploaded_files = fp_re_array_files($_FILES[$fieldname]);  // makes them easier to work with.
 
-        $allowed = trim($details['allowed']);
+        $allowed = '';
+        
+        if (isset($details['allowed'])) {
+          $allowed = trim($details['allowed']);
+        }
         if (!$allowed) {
           $allowed = "txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z";
         }
@@ -1497,7 +1503,7 @@ function content_edit_content_form_submit(&$form, &$form_state) {
   $type = $values["type"];
   
   // are we trying to delete?
-  if (trim($values['submit_delete']) != '') {
+  if (isset($values['submit_delete']) && trim($values['submit_delete']) != '') {
     // Yes, we are deleting!
     
     $content = content_load($cid);
@@ -1808,7 +1814,9 @@ function content_content_save(&$content) {
   $types = content_get_types();
   $type = $content->type;
   
-  if (!$content->title || $content->title === NULL || $content->title === FALSE) {
+  
+  
+  if (!isset($content->title) || !$content->title || $content->title === NULL || $content->title === FALSE) {
     $content->title = t("Content") . " " . time();  // give a default title, since title cannot be null.
   }
   
@@ -1871,9 +1879,11 @@ function content_content_save(&$content) {
       $db_field_name = "field__$fieldname";  
       $all_fields[] = $db_field_name;
       $param_names[] = ":$db_field_name";
+      $val = NULL;
+      if (isset($content->{$db_field_name}) && isset($content->{$db_field_name}['value'])) {
+        $val = $content->{$db_field_name}['value'];
+      }
       
-      $val = $content->{$db_field_name}['value'];
-              
       if ($details['type'] == 'checkboxes' && is_array($val)) {
         // Since we came from "checkboxes", and val is an array, we will save the following way:
         // ~~key~~key~~key~~.  This lets us query like so:  LIKE '%~~key~~%' to find elements with that key.  Not the most
@@ -1902,9 +1912,13 @@ function content_content_save(&$content) {
             
           $db_field_name = "field__$fieldname";  
           $all_fields[] = $db_field_name;
-          $param_names[] = ":$db_field_name";          
-          $val = $content->{$db_field_name}['value'];
-                  
+          $param_names[] = ":$db_field_name";      
+          
+          $val = NULL;
+          if (isset($content->{$db_field_name}) && isset($content->{$db_field_name}['value'])) {
+            $val = $content->{$db_field_name}['value'];
+          }          
+                            
           if ($edetails['type'] == 'checkboxes' && is_array($val)) {
             // Since we came from "checkboxes", and val is an array, we will save the following way:
             // ~~key~~key~~key~~.  This lets us query like so:  LIKE '%~~key~~%' to find elements with that key.  Not the most
@@ -1933,6 +1947,7 @@ function content_content_save(&$content) {
   $sql = "INSERT INTO content__$type
               (" . join(", " , $all_fields) . ")
               VALUES (" . join(", " , $param_names) . ")";
+  
     
   db_query($sql, $params);    
   

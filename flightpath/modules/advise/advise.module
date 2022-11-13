@@ -1696,7 +1696,7 @@ function advise_display_view($view = "view") {
 function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
   global $screen, $current_student_id;
     
-  if ($screen->bool_print) {
+  if ($screen && $screen->bool_print) {
     return array();
   }  
       
@@ -1968,7 +1968,7 @@ function advise_what_if_selection_form_validate($form, &$form_state) {
   $selected_degrees = array();
   $temp = FALSE;  
   foreach (array(1,2) as $num) {    
-    if (is_array($form_state["values"]["select_level_{$num}_degrees"])) {
+    if (isset($form_state["values"]["select_level_{$num}_degrees"]) && is_array($form_state["values"]["select_level_{$num}_degrees"])) {
       foreach ($form_state["values"]["select_level_{$num}_degrees"] as $k => $v) {
         if ((string)$k === (string)$v && $k != "") {
           $temp = TRUE;
@@ -2116,7 +2116,7 @@ function advise_what_if_selection_form_submit($form, $form_state) {
   // Get the major codes CSV
   $what_if_major_code = "";
   foreach (array(1, 2) as $num) {
-    if (is_array($form_state["values"]["select_level_{$num}_degrees"])) {
+    if (isset($form_state["values"]["select_level_{$num}_degrees"]) && is_array($form_state["values"]["select_level_{$num}_degrees"])) {
       foreach ($form_state["values"]["select_level_{$num}_degrees"] as $k => $v) {
         if ((string)$k === (string)$v && $k != "") {
           $what_if_major_code .= $k . ",";

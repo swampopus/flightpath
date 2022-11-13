@@ -261,8 +261,11 @@ function audit_popup_edit_approval_form($approval_type, $student_id) {
   fp_set_title("Edit approval for " . fp_get_student_name($student_id) . " ($student_id)");
   
   // Get current value from the database
+  $current_value = "";
   $cur = audit_get_approval_record($student_id, $approval_type);
-  $current_value = $cur["approval_value"];
+  if ($cur && isset($cur['approval_value'])) {
+    $current_value = $cur["approval_value"];
+  }
   
   if ($current_value == "") $current_value = "not_complete";
   
@@ -451,26 +454,35 @@ function audit_display_audit() {
       $approval_title = $approval_details["title"];
       $approval_description = $approval_details["description"];
     
-
+      $approval_value = '';
+      $faculty_id = '';
+      $posted = 0;
       
       $cur = audit_get_approval_record($student->student_id, $approval_type);
       
-      $dt = date("m/d/Y", $cur["posted"]);
-      $faculty_name = fp_get_faculty_name($cur["faculty_id"]);
+      if ($cur) {
+        $posted = $cur['posted'];
+        $faculty_id = $cur['faculty_id'];
+        $approval_value = $cur['approval_value'];
+      }
+      
+                        
+      $dt = date("m/d/Y", $posted);
+      $faculty_name = fp_get_faculty_name($faculty_id);
 
-      if ($cur["approval_value"] == "") {
-        $cur["approval_value"] = "not_complete";
+      if ($approval_value == "") {
+        $approval_value = "not_complete";
         $dt = $faculty_name = " -- ";
       }
         
-      $approval_value_desc = $options[$cur["approval_value"]];
-      if ($approval_value_desc == "") $approval_value_desc = $cur["approval_value"];
+      $approval_value_desc = $options[$approval_value];
+      if ($approval_value_desc == "") @$approval_value_desc = $approval_value;
 
-      $rtn .= "<tr class='audit-approval-row audit-approval-row-" . $cur["approval_value"] . "'>";
+      $rtn .= "<tr class='audit-approval-row audit-approval-row-" . $approval_value . "'>";
             
       $rtn .= "
-        <td><div class='audit-approval-title audit-approval-" . $cur["approval_value"] . "'>$approval_title</div>
-        <td class='audit-approval-value audit-approval-desc-" . $cur["approval_value"] . "'>" . $approval_value_desc . "</td>
+        <td><div class='audit-approval-title audit-approval-" . $approval_value . "'>$approval_title</div>
+        <td class='audit-approval-value audit-approval-desc-" . $approval_value . "'>" . $approval_value_desc . "</td>
         <td class='audit-approval-datetime'>" . $dt . "</td>
         <td class='audit-approval-faculty'>" . $faculty_name . "</td>";
         
@@ -485,7 +497,7 @@ function audit_display_audit() {
       // If the is an approval_description, show it in a new row....
       if ($approval_description != "") {
         $rtn .= "<tr>
-                  <td colspan='5' class='audit-approval-description audit-approval-description=" . $cur["approval_value"] . "'><div>$approval_description</div></td>
+                  <td colspan='5' class='audit-approval-description audit-approval-description=" . $approval_value . "'><div>$approval_description</div></td>
                  </tr>";
       }
       

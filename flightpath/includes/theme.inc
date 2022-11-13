@@ -817,7 +817,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
   $csid = $current_student_id;
   
   $school_id = db_get_school_id_for_student_id($current_student_id);
-      
+  $degree_plan = NULL;    
   $rtn = "";
   
   if (!isset($extra_profile_items['left_side'])) $extra_profile_items['left_side'] = array();
@@ -832,11 +832,11 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
     $degree_plan = $screen->degree_plan;      
   }  
   
-  if (!isset($student) || $student == null || !is_object($student)) {
+  if (!isset($student) || $student == NULL || !is_object($student)) {
     $student = new Student($current_student_id);
   }
 
-  if ($degree_plan == null) {
+  if ($degree_plan == NULL) {
     // Degree plan is still null.  This probably means we are NOT on an advising screen, so, let's
     // use a FlightPath object to init our degree plan, which might actually be a combination of degrees.
     

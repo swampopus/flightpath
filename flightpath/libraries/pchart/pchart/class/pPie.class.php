@@ -31,18 +31,20 @@
  /* pPie class definition */
  class pPie
   {
-   var $pChartObject = array();
-   var $pDataObject = array();
-   var $LabelPos = "" ;
+   public $pChartObject = null;
+   public $pDataObject = null;
+   public $LabelPos = "" ;
 
    /* Class creator */
-   function pPie($Object,$pDataObject)
-    {
+   //function pPie($Object,$pDataObject)
+   function __construct($Object,$pDataObject)
+   {
      /* Cache the pChart object reference */
      $this->pChartObject = $Object;
 
      /* Cache the pData object reference */
-     $this->pDataObject  = $pDataObject;
+     $this->pDataObject = $pDataObject;
+     file_put_contents('/volume1/web/flightpath6/flightpath/flightpath/custom/files/log.txt', 'here - ' . date("H:i:s") . " " . print_r($this->pDataObject, TRUE));
     }
 
    /* Draw a pie chart */

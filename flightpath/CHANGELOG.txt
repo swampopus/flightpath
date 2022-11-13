@@ -1,6 +1,18 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-11-12
+  Edited pChart library to use new __construct() instead of class name for constructor functions.  This made it compatible with PHP 8.0.
+  Also changed "var" keyword to "public" for variables, and set them to NULL instead of array(), especially since some of them
+  are actually supposed to be objects.
+    
+  Made various other clean-up changes to make compatible with PHP 8.0.
+  
+
+2022-11-06
+  Continued work to make compatible with PHP 8.0.
+    
+
 2022-11-05
   Cleaned up Administrator's Toolbox (courses) to make it cleaner.  Also fixed bug where it was not showing where
   a course was assigned.

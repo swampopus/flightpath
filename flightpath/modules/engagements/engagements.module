@@ -1443,7 +1443,7 @@ function engagements_handle_incoming_sms($vars = array())
  * This function is called by engagements_handle_incoming_sms, when we receive 'STOP' from the user.
  * We must add them to our "sms_do_not_txt" table, and send a reply letting them know how to re-subscribe in the future.
  */
-function engagements_handle_sms_stop($user_id = 0, $cwid = '', $phone_number, $from_fp_phone_number) {
+function engagements_handle_sms_stop($user_id = 0, $cwid = '', $phone_number = '', $from_fp_phone_number = '') {
   
   if ($user_id === 0) {
     // Try to figure out what the user_id is based on the phone number.
@@ -1487,7 +1487,7 @@ function engagements_handle_sms_stop($user_id = 0, $cwid = '', $phone_number, $f
 /**
  * User opted-IN to receiving txt messages.
  */
-function engagements_handle_sms_unstop($user_id = 0, $cwid = '', $phone_number, $from_fp_phone_number) {
+function engagements_handle_sms_unstop($user_id = 0, $cwid = '', $phone_number = '', $from_fp_phone_number = '') {
 
   if ($user_id === 0) {
     // Try to figure out what the user_id is based on the phone number.
@@ -3049,7 +3049,16 @@ function engagements_send_email_or_txt_form_validate($form, &$form_state)
 {
 
   $values = $form_state['values'];
-  $cid = $form_state['content_object']->cid;   // At this point, the content has already been saved, so we know its cid.  
+  
+  ////////
+  // TODO: I am not sure I even need to get the cid here...  delete it?  
+  $cid = NULL;
+  if (isset($form_state['content_object']) && is_object($form_state['content_object'])) {
+    $cid = $form_state['content_object']->cid;   // At this point, the content has already been saved, so we know its cid.
+  }  
+  ////////
+  
+    
   $engagement_type = $values['engagement_type'];
 
   $manual_entry = @trim(strtoupper($values['manual_entry']));
@@ -3175,6 +3184,8 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
   } // type == 'email'
  
 
+  $mobile_phone = '';
+  
   if ($engagement_type == 'txt_msg' && $manual_entry != 'Y') {
 
     $student_user_id = db_get_user_id_from_cwid($student_id, 'student');

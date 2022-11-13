@@ -295,15 +295,17 @@ function fp_get_degree_title($degree_id, $bool_include_track_title = FALSE, $boo
   $table_name = "degrees";
   if ($bool_use_draft) {$table_name = "draft_$table_name";}
 
-  $res = db_query("SELECT title, major_code FROM $table_name
+  $res = db_query("SELECT * FROM $table_name
                           WHERE degree_id = ? 
                           ORDER BY catalog_year DESC LIMIT 1", $degree_id);
   $cur = db_fetch_array($res);
+  if (!$cur) return '';
+
   $dtitle = $cur["title"];
   $major_code = $cur['major_code'];
   $o_major_code = $cur['major_code'];
   $catalog_year = $cur['catalog_year'];
-
+  
   if ($bool_include_track_title) {
     
     // Get track title

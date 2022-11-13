@@ -3382,7 +3382,7 @@ function calendar_appointment_content_form_validate($form, &$form_state) {
   $event_title = "Meeting between $student_name and $faculty_name";
       
   // Only do this for NEW appointments.
-  if ($values['cid'] === 'new' && module_enabled('zoomapi') && $values['enable_zoom'] === TRUE) {
+  if ($values['cid'] === 'new' && module_enabled('zoomapi') && isset($values['enable_zoom']) && $values['enable_zoom'] === TRUE) {
     
     // We want to create a new Zoom meeting!
     $event_title = t("Zoom meeting between @stu and @fac", array("@stu" => $student_name, "@fac" => $faculty_name));  
@@ -3479,7 +3479,7 @@ function calendar_appointment_content_form_validate($form, &$form_state) {
  * start_dt and end_dt should look like Ymd\THis\Z  (in UTC format)
  * 
  */
-function calendar_get_ics_invitation_string($event_title, $location, $description = "", $start_dt, $end_dt) {
+function calendar_get_ics_invitation_string($event_title, $location, $description = "", $start_dt = 0, $end_dt = 0) {
   $rtn = "";
   
   if ($description == "") $description = $event_title;
@@ -3832,7 +3832,7 @@ function calendar_build_custom_calendar($month, $year) {
                 
                 
                 $html = "<div class='calendar-entry $appt_extra_class'>
-                                <div class='name-shift-line $shiftline_extra_class '>$view_link</div>
+                                <div class='name-shift-line'>$view_link</div>
                                 $time_line
                               </div>";            
     
@@ -3852,7 +3852,8 @@ function calendar_build_custom_calendar($month, $year) {
           
           
           if ($mobile_day_count > 0) {
-            $url = fp_url('calendar', "year_month=$year_month&mobile_date=$date&mobile_cids=" . join(",", $mobile_day_cids));
+            //$url = fp_url('calendar', "year_month=$year_month&mobile_date=$date&mobile_cids=" . join(",", $mobile_day_cids));
+            $url = fp_url('calendar', "mobile_date=$date&mobile_cids=" . join(",", $mobile_day_cids));
             $calendar .= "<div style='display: none;' class='mobile-day-count'>
                             <a href='" . $url . "'>$mobile_day_count</a>
                           </div>";  

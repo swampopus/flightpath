@@ -4454,31 +4454,32 @@ function system_modules_form() {
             $default_value = array();
             $res = db_query("SELECT * FROM modules WHERE path = '?' ", $path);
             $cur = db_fetch_array($res);
-            $info_details_array["enabled"] = $cur["enabled"];
-            if ($cur["enabled"] == "1") {
-              // Yes, it is checked!
-              $default_value = array($module => $module);              
-            }
-            else if ($cur["enabled"] == "") {
-              $installation_status = t("not installed");
-            }
-            else if ($cur["enabled"] == "0") {
-              $installation_status = fp_get_js_confirm_link(t("Are you sure you wish to uninstall @module?\\nThis may remove saved data belonging to the module.", array("@module" => $module)), 
-                                                            ' window.location="' . fp_url("system/uninstall-module", "module=$module&path=" . urlencode($path) . "") . '"; ', t("uninstall?")); 
-            }
+            if ($cur) {
+              $info_details_array["enabled"] = $cur["enabled"];
+              if ($cur["enabled"] == "1") {
+                // Yes, it is checked!
+                $default_value = array($module => $module);              
+              }
+              else if ($cur["enabled"] == "") {
+                $installation_status = t("not installed");
+              }
+              else if ($cur["enabled"] == "0") {
+                $installation_status = fp_get_js_confirm_link(t("Are you sure you wish to uninstall @module?\\nThis may remove saved data belonging to the module.", array("@module" => $module)), 
+                                                              ' window.location="' . fp_url("system/uninstall-module", "module=$module&path=" . urlencode($path) . "") . '"; ', t("uninstall?")); 
+              }
             
             
-            // Does this module need to run db updates?
-            if ($cur["enabled"] == "1" && $cur["schema"] != $info_details_array["schema"] && $info_details_array["schema"] != "") {
-              $installation_status = "<b>" . l(t("Run db updates"), "admin/db-updates") . "</b>";
-              
-              // Let's also make sure to enable a message at the top of the screen, letting the user
-              // know that there are needed updates.
-              fp_add_message("<b>" . t("Note:") . "</b> " . t("There are modules which have been updated.  Please back up your database,
-                                then run the DB Updates function below as soon as possible."), "error", TRUE); 
+              // Does this module need to run db updates?
+              if ($cur["enabled"] == "1" && $cur["schema"] != $info_details_array["schema"] && $info_details_array["schema"] != "") {
+                $installation_status = "<b>" . l(t("Run db updates"), "admin/db-updates") . "</b>";
+                
+                // Let's also make sure to enable a message at the top of the screen, letting the user
+                // know that there are needed updates.
+                fp_add_message("<b>" . t("Note:") . "</b> " . t("There are modules which have been updated.  Please back up your database,
+                                  then run the DB Updates function below as soon as possible."), "error", TRUE); 
+              }
+            
             }
-            
-            
             
                         
             $attributes = array();
@@ -4624,14 +4625,14 @@ function system_modules_form_submit($form, $form_state) {
         $module = $module_details["module"];
         
         // Disabling a module.
-        if ($module_details["enabled"] == "1" && !isset($form_state["values"]["cb__$module"])) {
+        if (@$module_details["enabled"] == "1" && !isset($form_state["values"]["cb__$module"])) {
           // So it WAS enabled, but now the checkbox wasn't checked.  So disable it!
           system_disable_module($module_details);
           $did_something = TRUE;
         }
         
         // Enabling a module
-        if ($module_details["enabled"] != "1" && isset($form_state["values"]["cb__$module"])) {
+        if (@$module_details["enabled"] != "1" && isset($form_state["values"]["cb__$module"])) {
           system_enable_module($module_details);
           $did_something = TRUE;
         }

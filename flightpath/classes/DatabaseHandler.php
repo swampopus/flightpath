@@ -1321,7 +1321,8 @@ $query_and_args
    * @return string
    */
   function get_faculty_name($cwid, $bool_include_cwid = FALSE) {
-    
+
+    $name = '';    
     // Let's perform our queries.
     $res = $this->db_query("SELECT f_name, l_name FROM users 
                       WHERE cwid = ?                      
@@ -1329,15 +1330,17 @@ $query_and_args
 
     
     $cur = $this->db_fetch_array($res);
-    $name = $cur["f_name"] . " " . $cur["l_name"];
-
-
-    // Force into pretty capitalization.
-    // turns JOHN SMITH into John Smith 
-    $name = trim(ucwords(strtolower($name)));
-    
-    if ($bool_include_cwid) {
-      $name .= " ($cwid)";
+    if ($cur) {
+      $name = $cur["f_name"] . " " . $cur["l_name"];
+  
+  
+      // Force into pretty capitalization.
+      // turns JOHN SMITH into John Smith 
+      $name = trim(ucwords(strtolower($name)));
+      
+      if ($bool_include_cwid) {
+        $name .= " ($cwid)";
+      }
     }
     
     return $name;

@@ -450,13 +450,13 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     $advising_session_id = rtrim(trim($_REQUEST["advising_session_id"]), ",");
   }
   
-  if ($_REQUEST['show_as_group'] === 'yes') {
+  if (@$_REQUEST['show_as_group'] === 'yes') {
     $bool_show_as_group = TRUE;
   }
 
   $bool_multiple = FALSE;
   $bool_show_transaction_details = TRUE;
-  $terms = "";
+  $terms = $student_id = "";
   // If we have commas in our advising_session_id, it means we had more than one that were passed to us!  We want to show
   // them all. 
   
@@ -746,7 +746,7 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
     return $txt;
   }
   
-  fp_set_title($db->get_student_name($cur['student_id'], FALSE) . " ({$cur['student_id']}) $term " . t("Advising Summary"));
+  fp_set_title($db->get_student_name($student_id, FALSE) . " ($student_id) $term " . t("Advising Summary"));
   
   watchdog("advise", "popup_display_summary advising_session_id:$advising_session_id", array(), WATCHDOG_DEBUG);
     

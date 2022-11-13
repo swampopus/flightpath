@@ -37,6 +37,7 @@ $token = $_GET["token"];
 $sess_token = $_SESSION["fp_pie_chart_token"];
 
 if ($token == "" || $sess_token == "" || ($token != $sess_token && $sess_token != "")) {
+  
   die("Token mismatch");
 }
 
@@ -54,16 +55,16 @@ $unfinished_col = hex2rgb($_GET["unfinished_col"]);
 $progress_col = hex2rgb($_GET["progress_col"]);
 
 
-
-
 // Begin constructing the chart.
 $data = new pData();
 $data->addPoints(array($progress, $unfinished), "Value");
 
+
+
+
 // Required before chart will show up...
 $data->addPoints(array("point1", "point2"), "Legend");
 $data->setAbscissa("Legend");
-
 
 
 $size = 75;   // the default
@@ -73,13 +74,14 @@ if (@$_GET['size'] != "") {
 
 $picture = new pImage($size, $size, $data);
 
-
 $chart = new pPie($picture, $data);
 
-// Set colors
-$chart->setSliceColor(0, array("R" => $progress_col["r"], "G" => $progress_col["g"], "B" => $progress_col["b"]));  // first val (progress)
-$chart->setSliceColor(1, array("R" => $unfinished_col["r"], "G" => $unfinished_col["g"], "B" => $unfinished_col["b"]));  // remainder, unfinished col
 
+
+
+// Set colors
+$chart->setSliceColor(0, array("R" => @$progress_col["r"], "G" => @$progress_col["g"], "B" => @$progress_col["b"]));  // first val (progress)
+$chart->setSliceColor(1, array("R" => @$unfinished_col["r"], "G" => @$unfinished_col["g"], "B" => @$unfinished_col["b"]));  // remainder, unfinished col
 
 // Render it out, with a certain size, and a little gap between the value and the remainder
 
@@ -91,7 +93,6 @@ if (@$_GET['radius'] != "") {
 
 
 $chart->draw2DPie(38, 38, array("Radius" => $radius, "Border" => TRUE));
-
 
 
 // Render the graphic to the browser

@@ -428,10 +428,26 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
     $watchdog_severity = WATCHDOG_ALERT;
   } 
   
-  $arr = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);  // limit of 10 levels deep so as not to eat up all the memory.
+  $arr = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 10);  // limit of 10 levels deep so as not to eat up all the memory.
+  
   // fpm() only displays for privileged users
-  fpm($err_name . ": $message<br>... ($line) $filename");
-  fpm($arr);
+  
+  // We don't want to bother repeating the same message more than once for errors.  The following code
+  // will prevent that.
+  // TODO: Make this a setting?
+  $errmsg = $err_name . ": $message<br>... ($line) $filename";
+  $errmsg_hash = hash('sha256', $errmsg);
+  
+  if (!isset($GLOBALS['fp_error_handler__already_shown_error'][$errmsg_hash])) {  
+    fpm($errmsg);
+    fpm($arr);
+    $GLOBALS['fp_error_handler__already_shown_error'][$errmsg_hash] = TRUE;
+  }
+  else {
+    return;  // we've already displayed this error message; we can harmlessly return.
+  }
+  
+  
 
   // Before we watchdog or mail this backtrace, make sure no field called "password" is in plain text.
   foreach ($arr as $c => $trace) {
@@ -2592,7 +2608,11 @@ function include_module($module, $bool_call_init = TRUE, $use_module_path = "") 
 
   $system_path = trim($GLOBALS["fp_system_settings"]["file_system_path"]);
   
-  $module_path = $GLOBALS["fp_system_settings"]["modules"][$module]["path"];
+  $module_path = "";  
+  if (isset($GLOBALS["fp_system_settings"]["modules"][$module])) {  
+    $module_path = $GLOBALS["fp_system_settings"]["modules"][$module]["path"];
+  }
+  
   if ($use_module_path != "") {
     $module_path = $use_module_path;
   }
