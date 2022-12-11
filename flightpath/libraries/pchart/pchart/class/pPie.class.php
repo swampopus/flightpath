@@ -44,7 +44,6 @@
 
      /* Cache the pData object reference */
      $this->pDataObject = $pDataObject;
-     file_put_contents('/volume1/web/flightpath6/flightpath/flightpath/custom/files/log.txt', 'here - ' . date("H:i:s") . " " . print_r($this->pDataObject, TRUE));
     }
 
    /* Draw a pie chart */

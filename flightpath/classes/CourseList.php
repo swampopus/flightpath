@@ -27,6 +27,8 @@ class CourseList extends ObjList
 		$new_c_l->is_empty = $obj->is_empty;
 		$new_c_l->reset_counter();
 
+    
+
 		return $new_c_l;
 
 	}

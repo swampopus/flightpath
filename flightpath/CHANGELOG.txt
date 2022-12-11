@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2022-12-10
+  Fixed bug which was introduced in last version to the piechart engine, which made it stop working.
+  
+
 2022-11-12
   Edited pChart library to use new __construct() instead of class name for constructor functions.  This made it compatible with PHP 8.0.
   Also changed "var" keyword to "public" for variables, and set them to NULL instead of array(), especially since some of them
