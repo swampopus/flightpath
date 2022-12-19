@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2022-12-19
+  Fixed bug where dialogs were not closing after save (javascript had been disabled).
+
+
 2022-12-10
   Fixed bug which was introduced in last version to the piechart engine, which made it stop working.
   
