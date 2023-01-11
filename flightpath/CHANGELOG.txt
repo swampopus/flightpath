@@ -1,6 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-01-11
+  Added hook_...validate() functions to admin copy degree and admin duplicate year forms, so it won't mess up
+  other modules.
+  
+
+2023-01-10
+  Small tweak to system.js, so that the "large" dialog resizes better on a medium-sized tablets.
+
 
 2022-12-19
   Fixed bug where dialogs were not closing after save (javascript had been disabled).

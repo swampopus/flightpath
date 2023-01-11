@@ -93,6 +93,12 @@ $(document).ready(function() {
     modalWidth = 700;
     modalHeight = 600;
     
+    
+    if (jQuery(window).width() < 695) {
+      modalWidth = 600;
+      modalHeight = 550;
+    }
+    
     if (jQuery(window).width() < 550) {
       modalWidth = 390;
       modalHeight = 500;
