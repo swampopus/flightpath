@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-01-18
+  Made a change to engagements module, when checking for all SMS messages.  Instead of checking for NOW - 1 DAY, it only checks
+  for NOW - 3 HOURS.  For most of the time, this means it will only check for *today's* messages, except around midnight, where it will
+  get the previous day's as well.  The aim is to retrieve less data, to lighten the amount of processing being done.
+  
+
 2023-01-11
   Added hook_...validate() functions to admin copy degree and admin duplicate year forms, so it won't mess up
   other modules.

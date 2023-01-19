@@ -1620,7 +1620,10 @@ function engagements_sms_get_all_messages()
   // Get all messages so we can update our table.
 
   // We only care about messages sent TODAY, since we theoretically already got them yesterday
-  $check_since = date('Y-m-d', strtotime("NOW - 1 DAY")); // We will get messages from a day in the past, to make sure we don't miss anything.
+  $check_since = date('Y-m-d', strtotime("NOW - 3 HOURS")); // We will get messages from 3 hours in the past and today, 
+                                                            // (in case it's close to ***midnight***) 
+                                                            // to make sure we don't miss anything.  The idea being that we have a cron 
+                                                            // running frequently enough that this gives us lots of chances to retrieve information.
 
   $messages = $client->messages->read(array('dateSentAfter' => $check_since));
   foreach ($messages as $record) {
