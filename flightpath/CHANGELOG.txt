@@ -6,6 +6,9 @@ FlightPath 6.x Changelog
   for NOW - 3 HOURS.  For most of the time, this means it will only check for *today's* messages, except around midnight, where it will
   get the previous day's as well.  The aim is to retrieve less data, to lighten the amount of processing being done.
   
+  Also made it so that we will not run the check for SMS messages (which simply refreshes delivery status, price, etc) more than
+  once every 30 minutes.  This is also meant to lighten the amount of processing as well as how often we are contacting the signalwire API.
+  
 
 2023-01-11
   Added hook_...validate() functions to admin copy degree and admin duplicate year forms, so it won't mess up

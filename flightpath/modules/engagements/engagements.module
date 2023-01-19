@@ -1134,12 +1134,17 @@ function engagements_cron()
 
 
 
-  $last_sms_check = variable_get('engagements_sms_get_all_last_check', 0);
+  $last_sms_check = intval(variable_get('engagements_sms_get_all_last_check', 0));
   $last_imap_check = variable_get('engagements_imap_get_all_last_check', 0);
 
-  // TODO:  only check every X minutes at most.  Maybe this is a setting?
-  engagements_sms_get_all_messages();
 
+  
+  // only check every X minutes at most.  Maybe this is a setting?
+  $sms_check_against = strtotime("NOW - 30 MINUTES");
+  if ($sms_check_against >= $last_imap_check) {  
+    engagements_sms_get_all_messages();  // refreshes sms information for messages we've sent and received
+  }
+  
   // Check for imap messages in a similar way as the SMS messages.
   engagements_imap_get_all_received_messages();
 } // hook_cron
