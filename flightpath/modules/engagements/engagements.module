@@ -1139,7 +1139,8 @@ function engagements_cron()
 
 
   
-  // only check every X minutes at most.  Maybe this is a setting?
+  // only check every X minutes at most.  
+  // TODO: Maybe this is a setting?
   $sms_check_against = strtotime("NOW - 30 MINUTES");
   if ($sms_check_against >= $last_sms_check) {  
     engagements_sms_get_all_messages();  // refreshes sms information for messages we've sent and received
