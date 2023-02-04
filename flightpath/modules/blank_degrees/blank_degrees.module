@@ -403,8 +403,8 @@ function blank_degrees_select_degree_form() {
     );
 
     $form["mark_searching_in_year"] = array(
-      "value" => t("Searching degrees in %year.", array("%year" => $blank_catalog_year . "-" . ($blank_catalog_year+1))) . "
-                   " . l(t("Change?"), "tools/blank-degrees", "school_id=$school_id"),
+      "value" => "<div class='search-degrees-in-catalog-year'>" . t("Searching degrees in %year.", array("%year" => $blank_catalog_year . "-" . ($blank_catalog_year+1))) . "
+                   " . l(t("Change?"), "tools/blank-degrees", "school_id=$school_id") . "</div>",
       "weight" => 0,
     );    
     
