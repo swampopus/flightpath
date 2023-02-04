@@ -385,7 +385,7 @@ function course_search_display_courses() {
   }
       
   $render["current_cat_year"] = array(
-    "value" => t("Current catalog year:") . " <b>$catalog_year-" . ($catalog_year +1) . "</b>", 
+    "value" => "<div class='current-cat-year-line'>" . t("Current catalog year:") . " <strong>$catalog_year-" . ($catalog_year +1) . "</strong></div>", 
   );
           
   
