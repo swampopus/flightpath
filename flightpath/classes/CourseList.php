@@ -855,10 +855,14 @@ class CourseList extends ObjList
 					continue;
 				}
 
-				if ($course->db_exclude == 1)
-				{
+				if (intval($course->db_exclude) === 1) {
 					continue;
 				}
+
+        // probably because it was excluded.
+        if ($subj != $course->subject_id) {
+          continue;
+        }
 
 
 				// We have a new subject.  Add it to the array.
