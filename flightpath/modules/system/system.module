@@ -3644,9 +3644,11 @@ function system_reload_and_cache_course_inventory() {
   }
   $in_years .= "1900";  // add in the 1900 year as well.
   
+  // For speed and accuracy, ignore the "excluded" courses.
   $result = db_query("SELECT * FROM courses
                       WHERE delete_flag = 0
                       AND catalog_year IN ($in_years)
+                      AND exclude = 0
                       ORDER BY catalog_year DESC
                       LIMIT 50000"); 
 

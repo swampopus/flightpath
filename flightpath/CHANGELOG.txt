@@ -1,5 +1,9 @@
 FlightPath 6.x Changelog
 ========================
+2023-02-16
+  Fixed by in system.module, where when we load courses and save to our course cache file, we were not excluding the excluded courses.
+  This was causing a bug in certain situations.
+  
 
 2023-02-09
   Modified Audit module to have new hooks which allow the module developer to add to the audit screen custom calculations and approvals.
