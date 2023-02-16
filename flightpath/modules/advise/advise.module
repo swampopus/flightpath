@@ -1209,7 +1209,7 @@ function advise_display_popup_group_select() {
     
     // TODO:  Maybe a setting to where we only show undergrad courses in this special group?
     
-    $group->list_courses = $fp->get_all_courses_in_catalog_year(variable_get_for_school("current_catalog_year", '', $school_id),FALSE,0,0,$school_id, FALSE);
+    $group->list_courses = $fp->get_all_courses_in_catalog_year(variable_get_for_school("current_catalog_year", '', $school_id),FALSE,0,0,$school_id, FALSE, TRUE);
     $group->title = t("Add an Additional Course");
     $group->list_courses->assign_group_id($group_id);
     $group->list_courses->load_course_descriptive_data();

@@ -1139,7 +1139,7 @@ class FlightPath extends stdClass
 
  
 
-  function get_all_courses_in_catalog_year($catalog_year = "2006", $bool_load_descriptive_data = false, $limit_start = 0, $limit_size = 0, $school_id = 0, $bool_only_undergrad = TRUE)
+  function get_all_courses_in_catalog_year($catalog_year = "2006", $bool_load_descriptive_data = false, $limit_start = 0, $limit_size = 0, $school_id = 0, $bool_only_undergrad = TRUE, $bool_skip_excluded = FALSE)
   {
     // Returns a CourseList object of all the
     // courses in the supplied catalog_year.
@@ -1156,6 +1156,11 @@ class FlightPath extends stdClass
     $params[":catalog_year"] = $catalog_year;
     $params[":school_id"] = $school_id;
     
+  
+    $exclude_line = "";
+    if ($bool_skip_excluded) {
+      $exclude_line = " AND exclude = 0 ";
+    }
     
     $course_num_line = "";
     if ($bool_only_undergrad) {
@@ -1169,6 +1174,7 @@ class FlightPath extends stdClass
                 catalog_year = :catalog_year
                 $course_num_line
                 AND school_id = :school_id
+                $exclude_line
               ORDER BY subject_id, course_num
               $lim_line
               ", $params);
