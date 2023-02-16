@@ -7,6 +7,8 @@ FlightPath 6.x Changelog
   Added code to FlightPath object's function to load entire course catalog-- it was included *excluded* courses by default, which was throwing
   off the subject select menu in the Courses Added by Advisor group.
   
+  Modified system.install to include more indexes on courses and draft_courses table.
+  
 
 2023-02-09
   Modified Audit module to have new hooks which allow the module developer to add to the audit screen custom calculations and approvals.

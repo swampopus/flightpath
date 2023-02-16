@@ -1174,6 +1174,7 @@ class FlightPath extends stdClass
                 catalog_year = :catalog_year
                 $course_num_line
                 AND school_id = :school_id
+                AND delete_flag = 0
                 $exclude_line
               ORDER BY subject_id, course_num
               $lim_line

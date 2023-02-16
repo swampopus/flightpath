@@ -438,7 +438,10 @@ CREATE TABLE `courses` (
   KEY `delete_flag` (`delete_flag`) ,
   KEY `exclude` (`exclude`) ,
   KEY `catalog_year` (`catalog_year`) ,
-  KEY `school_id` (`school_id`)
+  KEY `school_id` (`school_id`),
+  KEY `catalog_year_2` (`catalog_year`,`exclude`,`school_id`,`delete_flag`),
+  KEY `course_num_2` (`course_num`,`catalog_year`,`exclude`,`delete_flag`,`school_id`),
+  KEY `catalog_year_3` (`catalog_year`,`exclude`,`delete_flag`)
 );  ";
 db_query($q);
 
@@ -553,7 +556,10 @@ CREATE TABLE `draft_courses` (
   KEY `delete_flag` (`delete_flag`) ,
   KEY `exclude` (`exclude`) ,    
   KEY `catalog_year` (`catalog_year`) ,
-  KEY `school_id` (`school_id`)
+  KEY `school_id` (`school_id`),
+  KEY `catalog_year_2` (`catalog_year`,`exclude`,`school_id`,`delete_flag`),
+  KEY `course_num_2` (`course_num`,`catalog_year`,`exclude`,`delete_flag`,`school_id`),
+  KEY `catalog_year_3` (`catalog_year`,`exclude`,`delete_flag`)
 );  ";
 db_query($q);
 
