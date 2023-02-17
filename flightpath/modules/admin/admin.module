@@ -1913,7 +1913,7 @@ function admin_display_main() {
                
          <ul>
           <li>" . t("Available terms for advising: %v", array("%v" => fp_space_csv(variable_get_for_school("available_advising_term_ids", "", $school_id)))) . "</li>
-          <li>" . t("Default advising term(s): %v", array("%v" => fp_space_csv(variable_get_for_school("advising_term_id", "", $school_id)))) . "</li>          
+          <li>" . t("Default advising term: %v", array("%v" => fp_space_csv(variable_get_for_school("advising_term_id", "", $school_id)))) . "</li>          
           <li>" . t("Current catalog year: %v", array("%v" => variable_get_for_school("current_catalog_year", "", $school_id))) . "</li>       
           <li>" . t("Current draft catalog year: %v", array("%v" => variable_get_for_school("current_draft_catalog_year", "", $school_id))) . "</li>             
           <li>" . t("Not released grades terms: %v", array("%v" => fp_space_csv(variable_get_for_school("not_released_grades_terms", "", $school_id)))) . "</li>             
