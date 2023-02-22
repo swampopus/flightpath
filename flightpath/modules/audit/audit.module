@@ -441,27 +441,29 @@ function audit_display_audit() {
              </tr>";
              
     foreach ($res as $module_name => $thow_away) {
-      foreach ($res[$module_name] as $c => $calcs) {
-        
-        if ($pol != "even") {
-          $pol = "even";
-        }
-        else { 
-          $pol = "odd";
-        }        
-
-        $title = $calcs['title'];
-        $sec_1 = $calcs['section_1_html'];
-        $sec_2 = $calcs['section_2_html'];
-        
-        $rtn .= "    
-          <tr class='audit-req audit-req-additional-from-hook audit-row-$pol'>
-            <td width='25%'>$title</td>
-            <td class='audit-req-hours-percent'>$sec_1</td> 
-            <td class='audit-req-gpa'>$sec_2</td>              
-          </tr>";        
-                
-      }     
+      if (isset($res[$module_name]) && is_array($res[$module_name])) {
+        foreach ($res[$module_name] as $c => $calcs) {
+          
+          if ($pol != "even") {
+            $pol = "even";
+          }
+          else { 
+            $pol = "odd";
+          }        
+  
+          $title = $calcs['title'];
+          $sec_1 = $calcs['section_1_html'];
+          $sec_2 = $calcs['section_2_html'];
+          
+          $rtn .= "    
+            <tr class='audit-req audit-req-additional-from-hook audit-row-$pol'>
+              <td width='25%'>$title</td>
+              <td class='audit-req-hours-percent'>$sec_1</td> 
+              <td class='audit-req-gpa'>$sec_2</td>              
+            </tr>";        
+                  
+        }     
+      }
     }
     
    
