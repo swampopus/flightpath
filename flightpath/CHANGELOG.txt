@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-02-22
+  Minor warning fix in audit module.
+  
+
 2023-02-17
   Slight change to wording on Admin Console.
     

@@ -434,11 +434,12 @@ function audit_display_audit() {
   
   // invoke hook to check for more "overall" / calculations information for audit tab
   $res = invoke_hook('audit_get_additional_overall_calculations', array($student, $school_id));
-  if (count($res) > 0) {
+  if (is_array($res) && count($res) > 0) {
     $pol = "";
     $rtn .= "<tr class='audit-req audit-req-new-degree-title audit-row-$pol audit-req-degree-title-OVERALL'>
                 <td colspan='3'>" . t("Additional:") . "</td>
              </tr>";
+             
     foreach ($res as $module_name => $thow_away) {
       foreach ($res[$module_name] as $c => $calcs) {
         
@@ -462,7 +463,7 @@ function audit_display_audit() {
                 
       }     
     }
-   
+    
    
     // Add a blank row at the end to make it easier to read.
     $rtn .= "<tr class='audit-req audit-req-BLANK audit-row-$pol '>
