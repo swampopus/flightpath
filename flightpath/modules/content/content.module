@@ -344,7 +344,7 @@ function content_public_files_form() {
   $form['upload_file'] = array(
     'type' => 'file',
     'label' => t("Upload file:"),
-    'description' => t("Allowed file extensions: %ext", array('%ext' => strtolower(variable_get("public_files_allowed_extensions", "css, txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")))),  
+    'description' => t("Allowed file extensions: %ext", array('%ext' => strtolower(variable_get("public_files_allowed_extensions", "css, txt, pdf, doc, docx, csv, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")))),  
   );
 
   $overwrite_val = FALSE;
@@ -455,7 +455,7 @@ function content_public_files_form_validate($form, $form_state) {
     $ext = $temp[count($temp) - 1];
     
     // Make sure that this extension is allowed.
-    $allowed_extensions = csv_to_array(strtolower(variable_get("public_files_allowed_extensions", "css, txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")));
+    $allowed_extensions = csv_to_array(strtolower(variable_get("public_files_allowed_extensions", "css, txt, pdf, doc, docx, csv, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")));
     if (!in_array(strtolower($ext), $allowed_extensions)) {
       // Meaning, this extension is not allowed!
       form_error('upload_file', t("Sorry, the file's type/extension (%ext) is not allowed.  Please rename or select another file, then try again.", array("%ext" => $ext)));

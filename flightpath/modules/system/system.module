@@ -2271,6 +2271,20 @@ function system_settings_form() {
 
 
 
+  $form['public_files_allowed_extensions'] = array(
+    'type' => 'textfield',
+    'label' => t('Allowed file extensions for public file uploads:'),
+    'value' => variable_get("public_files_allowed_extensions", "css, txt, pdf, doc, docx, csv, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z"),
+    'description' => t('The Content module permits "public" (non-encrypted) files to be uploaded and stored on the web server.
+                        Enter the entensions, separated by comma, that you wish to allow.  Do not enter periods before the extension.
+                        If you are unsure what to enter, use the
+                        following: 
+                        <br>css, txt, pdf, doc, docx, csv, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z'),
+  );
+
+
+
+
   $form["contact_email_address"] = array(
     "type" => "textfield",
     "label" => t("Contact email address:"),

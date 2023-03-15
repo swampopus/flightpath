@@ -54,6 +54,43 @@ if (!function_exists('str_contains')) {
  
  
 
+
+/**
+ * Returns back a FAPI-compatible array of all term codes for the specified years, inclusive 
+ */
+function fp_get_terms_by_year_range($start_year, $end_year, $school_id = 0, $bool_include_term_id_in_description = TRUE) {
+  
+  // Let the user select a term for this school (starting at now - $min years, and going out to now + max years)
+  $options = array();    
+  $temp = get_term_structures($school_id);
+    
+  for ($year = $start_year; $year <= $end_year; $year++) {
+    foreach ($temp as $k => $details) {
+      $term_id = $year . $k;
+      
+      // Adding year as the first element causes it to separate out the terms by year in the pulldown.  Makes it cleaner.
+      $options[$year][$term_id] = "[$term_id] &nbsp;" . get_term_description($term_id, FALSE, $school_id);
+      
+      if (!$bool_include_term_id_in_description) {
+        $options[$year][$term_id] = get_term_description($term_id, FALSE, $school_id);
+      }
+      
+    }
+    
+  } //for t
+  
+  ksort($options);
+    
+  return $options;
+
+  
+  
+  
+  
+} 
+
+
+
 /**
  * Returns an array (suitable for form api) of departments on campus which
  * faculty/staff can be members of.
