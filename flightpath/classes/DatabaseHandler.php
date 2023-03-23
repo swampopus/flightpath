@@ -210,9 +210,11 @@ class DatabaseHandler extends stdClass
     if (!isset($this->pdo) || $this->pdo == NULL) fpm(debug_backtrace());
     
     
-    try {      
+    try {
+              
       $result = $this->pdo->prepare($sql_query);
-      $result->execute($args);      
+      $result->execute($args);  
+          
       $_SESSION["fp_last_insert_id"] = $this->pdo->lastInsertId();  // capture last insert id, in case we ask for it later.  
       
       return $result;

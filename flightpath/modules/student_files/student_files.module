@@ -156,7 +156,7 @@ function student_files_upload_any_student_files_form() {
                         <li>POST max size: %max_post </li>
                         </ul>
                         If you have problems with uploading multiple files, adjust these values.", array("%max_up" => $max_upload, "%max_post" => $max_post,
-                                                                                                    "%ext" =>  strtolower(variable_get("student_files_allowed_extensions", "txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")))),
+                                                                                                    "%ext" =>  strtolower(variable_get("student_files_allowed_extensions", "txt, pdf, doc, docx, csv, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")))),
   );
   
   
@@ -493,7 +493,7 @@ function student_files_handle_upload($student_id, $bool_goto_history_when_done =
   $r["%ext"] = $temp[count($temp) - 1];
   
   // Make sure that this extension is allowed.
-  $allowed_extensions = csv_to_array(strtolower(variable_get("student_files_allowed_extensions", "txt,pdf,doc,docx,xls,xlsx,ppt,pptx,rtf,odt,jpg,jpeg,png,gif,zip,7z")));
+  $allowed_extensions = csv_to_array(strtolower(variable_get("student_files_allowed_extensions", "txt,pdf,doc,docx,csv,xls,xlsx,ppt,pptx,rtf,odt,jpg,jpeg,png,gif,zip,7z")));
   if (!in_array(strtolower($r["%ext"]), $allowed_extensions)) {
     // Meaning, this extension is not allowed!
     fp_add_message(t("Sorry, the file's type/extension (%ext) is not allowed.  Please rename or select another file, then try again.", array("%ext" => $original_filename)), "error");
@@ -616,9 +616,9 @@ function student_files_settings_form() {
     "type" => "textfield",
     "size" => 80,
     "maxlength" => 1000,
-    "value" => strtolower(variable_get("student_files_allowed_extensions", "txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")),
-    "description" => t("Enter the allowed file extensions, separated by commas (no dots!), that are allowed to be uploaded.<br>Ex:
-                          <br><em>&nbsp; &nbsp; txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z</em>"), 
+    "value" => strtolower(variable_get("student_files_allowed_extensions", "txt, pdf, doc, docx, csv, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")),
+    "description" => t("Enter the allowed file extensions, separated by commas (no periods!), that are allowed to be uploaded.<br>Ex:
+                          <br><em>&nbsp; &nbsp; txt, pdf, doc, docx, csv, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z</em>"), 
   );
   
   
@@ -900,7 +900,7 @@ function student_files_little_upload_form($student_id = "") {
   
   $form["student_file_upload_file"] = array(
     "type" => "file",   
-    "description" => t("<b>Allowed files:</b> <em>%ext</em>", array("%ext" => strtolower(variable_get("student_files_allowed_extensions", "txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")))),   
+    "description" => t("<b>Allowed files:</b> <em>%ext</em>", array("%ext" => strtolower(variable_get("student_files_allowed_extensions", "txt, pdf, doc, docx, csv, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z")))),   
   );
   
   $form["access_type"] = array(
