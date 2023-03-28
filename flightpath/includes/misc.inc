@@ -666,6 +666,7 @@ function arg($index) {
  */
 function fp_url_get_contents($url) {
   
+  /*
   $ch = curl_init();
   
   curl_setopt( $ch, CURLOPT_AUTOREFERER, TRUE );
@@ -678,7 +679,16 @@ function fp_url_get_contents($url) {
   curl_close( $ch );
 
   return $data;  
+  */
   
+  // Make use of the superior fp_http_request instead.
+  
+  $res = fp_http_request($url);
+  if (is_object($res) && isset($res->data)) {
+    return $res->data;
+  }
+  
+  return FALSE;
   
 }
 
