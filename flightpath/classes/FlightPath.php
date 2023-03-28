@@ -794,9 +794,8 @@ class FlightPath extends stdClass
           // coureRequirement into 2 pieces, and add the second piece just
           // after this one in the list.
           $course_sub = $substitution->course_list_substitutions->get_first();
-          if ($course_requirement->min_hours*1 > $course_sub->get_hours_awarded($req_by_degree_id))
+          if (floatval($course_requirement->min_hours) > floatval($course_sub->get_hours_awarded($req_by_degree_id)))
           { 
-                   
             // Because float math can create some very strange results, we must
             // perform some rounding.  We will round to 6 decimal places, which should
             // provide us the accuracy w/o losing precision (since we can only represent a max
@@ -817,9 +816,7 @@ class FlightPath extends stdClass
 
             if ($assign_to_semester_num !== -1) {
               $new_course->assigned_to_semester_num = $assign_to_semester_num;
-            }
-
-
+            }            
             $course_requirement->set_bool_substitution_split($req_by_degree_id, TRUE);
             
             // I am commenting this out-- if we split up a sub multiple times, then we shouldn't

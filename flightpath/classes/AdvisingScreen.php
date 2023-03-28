@@ -591,6 +591,8 @@ function draw_menu_items($menu_array) {
     $school_id = db_get_school_id_for_student_id($student_id);
 
 
+    // Now, sort alphabetical and display on screen.
+
     $this->student->list_courses_taken->sort_alphabetical_order(false, true);
     $this->student->list_courses_taken->reset_counter();
     while($this->student->list_courses_taken->has_more())
@@ -612,7 +614,7 @@ function draw_menu_items($menu_array) {
 
       // Tell the course what group we are coming from. (in this case: none)
       $course->disp_for_group_id = "";
-            
+      
       $pC .= $this->draw_course_row($course,"","",false,false,$bool_add_footnote,true);
       $is_empty = false;
 
@@ -4272,6 +4274,8 @@ function draw_menu_items($menu_array) {
       $course->load_descriptive_data();
     }
 
+    $bool_transfer = FALSE;
+    
     $subject_id = $course->subject_id;
     $course_num = $course->course_num; 
 
@@ -4286,13 +4290,14 @@ function draw_menu_items($menu_array) {
     // original subject_id and course_num.
     if ($course->bool_transfer == true)
     {
+      $bool_transfer = TRUE;
       $subject_id = $course->course_transfer->subject_id;
       $course_num = $course->course_transfer->course_num;
       $institution_name = $course->course_transfer->institution_name;
 
       if ($bool_add_asterisk_to_transfers == true)
       {
-        $course->course_transfer->load_descriptive_transfer_data($this->student->student_id);
+        $course->course_transfer->load_descriptive_transfer_data($this->student->student_id);        
         if ($course->course_transfer->transfer_eqv_text != "")
         {
           $ast = "*";
@@ -4384,8 +4389,9 @@ function draw_menu_items($menu_array) {
     $var_hour_icon = "&nbsp;";
     
     
-    if ($course->has_variable_hours() == true && !$course->bool_taken)
-    {
+    // Show the var_hour icon if this has variable hours and is NOT from a split substitution.
+    if ($course->has_variable_hours() == TRUE && !$course->bool_taken && !$course->get_bool_substitution_split() && !$course->get_bool_substitution_new_from_split())
+    {      
       // The bool_taken part of this IF statement is because if the course
       // has been completed, we should only use the hours_awarded.
       

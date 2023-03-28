@@ -717,7 +717,7 @@ class Course extends stdClass
    * @param string $str
    */
   function load_course_from_data_string($str)
-  {    
+  {
     $temp = explode("~",$str);
 
     $this->course_id =        $temp[0];
@@ -737,7 +737,7 @@ class Course extends stdClass
     }
     
     
-    $this->set_hours_awarded(0,$temp[7] * 1);  // *1 to force numeric, and trim extra zeros.
+    $this->set_hours_awarded(0,floatval($temp[7]) * 1);  // *1 to force numeric, and trim extra zeros.
     $this->term_id        =   $temp[8];
     $this->advised_hours      = $temp[9] * 1;
 
