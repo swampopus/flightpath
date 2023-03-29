@@ -3836,6 +3836,7 @@ function draw_menu_items($menu_array) {
       // Tell the course what group we are coming from, so it displays correctly
       $course->disp_for_group_id = $group->group_id;
           
+          
       $pC .= $this->draw_course_row($course, $course->icon_filename, $course->title_text, $course->temp_flag, TRUE, TRUE, FALSE, $group);
 
       // Doesn't matter if its a specified repeat or not.  Just
@@ -4198,7 +4199,7 @@ function draw_menu_items($menu_array) {
    */
   function draw_course_row(Course $course, $icon_filename = "", $title_text = "", $js_toggle_and_save = false, $bool_display_check = true, $bool_add_footnote = true, $bool_add_asterisk_to_transfers = false, $group = null)
   {
-          
+            
     
     $render = array();
     $render['#id'] = 'AdvisingScreen_draw_course_row';
@@ -4213,7 +4214,7 @@ function draw_menu_items($menu_array) {
     $theme["student"] = $this->student;
     $theme["degree_plan"] = $this->degree_plan;
     
-    
+
 
     $img_path = fp_theme_location() . "/images";
     
@@ -4291,6 +4292,9 @@ function draw_menu_items($menu_array) {
     if ($course->bool_transfer == true)
     {
       $bool_transfer = TRUE;
+      if ($course->course_transfer->subject_id == '') {
+        $course->course_transfer->load_descriptive_transfer_data($this->student->student_id);
+      }
       $subject_id = $course->course_transfer->subject_id;
       $course_num = $course->course_transfer->course_num;
       $institution_name = $course->course_transfer->institution_name;
