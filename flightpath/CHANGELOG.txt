@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-03-29
+  Modified Course::meets_min_grade_requirement_of to automatically exclude failing or withdrew grades.
+
+
 2023-03-28
   Changed fp_url_get_contents() to make use of the superior fp_http_request() function.
   

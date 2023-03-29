@@ -1020,7 +1020,7 @@ class Course extends stdClass
    * 
    * @return bool
    */
-  function meets_min_grade_requirement_of(Course $course_req = NULL, $m_grade = "")
+  function meets_min_grade_requirement_of(Course $course_req = NULL, $m_grade = "", $bool_exclude_W_and_F = TRUE)
   {
     // Does $this course meet the min grade requirement
     // of the supplied course requirement?
@@ -1028,7 +1028,10 @@ class Course extends stdClass
     // Get these grade definitions from our system settings
     // Configure them in custom/settings.php    
     $enrolled_grades = csv_to_array(variable_get_for_school("enrolled_grades", 'E', $this->school_id));
-
+    $retake_grades = csv_to_array(variable_get_for_school("retake_grades",'', $this->school_id));
+    $withdrew_grades = csv_to_array(variable_get_for_school("withdrew_grades", "W", $this->school_id));
+    
+    
     if ($course_req != null) {
       $min_grade = $course_req->min_grade;
     } else {
@@ -1042,12 +1045,19 @@ class Course extends stdClass
       return true;
     }
 
+
     // If the student is currently enrolled, return true.
     if (in_array($this->grade, $enrolled_grades))
     {
       return true;
     }
-
+    
+    if ($bool_exclude_W_and_F) {
+      if (in_array($this->grade, $retake_grades) || in_array($this->grade, $withdrew_grades)) {
+        return FALSE;
+      }
+    }
+    
     // Okay, let's check those min grade requirements...
     $grade_order = csv_to_array(strtoupper(variable_get_for_school("grade_order", "E,AMID,BMID,CMID,DMID,FMID,A,B,C,D,F,W,I", $this->school_id)));    
   
