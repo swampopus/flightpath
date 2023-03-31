@@ -66,7 +66,7 @@ db_query($q);
 $q = "
 CREATE TABLE `sms_history` (
   `mid` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `message_sid` varchar(255) NOT NULL,
+  `message_sid` varchar(255) DEFAULT NULL,
   `sw_type` varchar(255) DEFAULT NULL,
   `body` longtext DEFAULT NULL,
   `num_segments` tinyint(4) DEFAULT 0,

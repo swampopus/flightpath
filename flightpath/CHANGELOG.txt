@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-03-31
+  Added a "minimum_passing_grade" setting, rather than hard-coding "D" for default min grade requirements.  This
+  fixed a bug where for schools that use D- as a grade, courses were not filling in when they should.
+  
+
 2023-03-29
   Modified Course::meets_min_grade_requirement_of to automatically exclude failing or withdrew grades.
 

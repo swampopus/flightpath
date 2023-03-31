@@ -571,8 +571,9 @@ class DegreePlan extends stdClass
         $course_c->min_grade = trim(strtoupper($cur["course_min_grade"]));
         if ($course_c->min_grade == "")
         { // By default, all courses have a
-          // min grade requirement of D.
-          $course_c->min_grade = "D";
+          // min grade requirement of the lowest passing grade.          
+          $course_c->min_grade = variable_get_for_school("minimum_passing_grade", "D", $this->school_id);
+          
         }
         $course_c->requirement_type = trim($cur["course_requirement_type"]);
 

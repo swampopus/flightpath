@@ -1388,7 +1388,7 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
       $course = $semester->list_courses->get_next();
       $course->load_descriptive_data();
       $contents .= "$course->subject_id $course->course_num $course->requirement_type";
-      if ($course->min_grade != "D" && $course->min_grade != "") {
+      if ($course->min_grade != variable_get_for_school("minimum_passing_grade", "D", $degree->school_id) && $course->min_grade != "") {
         $contents .= " ($course->min_grade)";
       }
       $contents .= "\n";

@@ -1546,6 +1546,17 @@ function system_school_data_form($school_id = 0) {
   );
   
   
+  $form["minimum_passing_grade" . $fs] = array(
+    "type" => "textfield",
+    "size" => 3,
+    "label" => t("Minimum passing grade:"),
+    "value" => variable_get_for_school("minimum_passing_grade", "D", $school_id, TRUE),
+    "description" => t("Enter a grade which is the default minimum grade a student must have earned
+                      for the course to be considered for credit. This will affect course requirements
+                      on degree plans which do not have a min grade set.  This value will be used
+                      by default. If unsure, enter D."),    
+  );  
+  
   
   $form["retake_grades" . $fs] = array(
     "type" => "textfield",
