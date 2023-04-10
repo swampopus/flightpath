@@ -4456,8 +4456,15 @@ function draw_menu_items($menu_array) {
     $random_id = $course->random_id;
     $advised_hours = $course->advised_hours*1;
 
-    $unique_id = $course_id . "_" . $semester_num . "_" . mt_rand(1,99999);
-    $hid_name = "advcr_$course_id" . "_$semester_num" . "_$hid_group_id" . "_$advised_hours" . "_$random_id" . "_$advising_term_id" . "_$degree_id" . "_r" . mt_rand(1,99);
+    $row_random_num = mt_rand(1,99999);
+    $render['#row_random_num'] = $row_random_num;
+
+    $unique_id = $course_id . "_" . $semester_num . "_" . $row_random_num;
+    $hid_name = "advcr_$course_id" . "_$semester_num" . "_$hid_group_id" . "_$advised_hours" . "_$random_id" . "_$advising_term_id" . "_$degree_id" . "_r" . $row_random_num;
+    
+    $render['#row_unique_id'] = $unique_id;
+    $render['#row_hid_name'] = $hid_name;
+    $render['#row_hid_id'] = "advcr_$unique_id";
     
     // Due to an interesting bug, the hid_name cannot contain periods.  So, if a course
     // has decimal hours, we need to replace the decimal with a placeholder.

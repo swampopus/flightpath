@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-04-09
+  Made a small change to AdvisingScreen.  In draw_course_row(), there was always a random number added
+  to the end of the checkbox (and hidden element) for a course row.  Added what that random number was to the $render array,
+  so other modules can target the toggleSelect() function.  Also added other similar ids and names to the $render array per row for
+  future-proofing.
+    
+
 2023-03-31
   Added a "minimum_passing_grade" setting, rather than hard-coding "D" for default min grade requirements.  This
   fixed a bug where for schools that use D- as a grade, courses were not filling in when they should.
