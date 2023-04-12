@@ -2277,15 +2277,19 @@ function draw_menu_items($menu_array) {
         
         $render = array();
         //$render['html'] = fp_render_button(t("Submit"),"submitSaveActive();");
-        $render['html'] = "<div class='buttons form-element element-type-submit'>
+        $render['submit_button_html'] = array(
+          'value' => "<div class='buttons form-element element-type-submit'>
                             <input type='button' id='mainform_submit_btn' value='" . t("Submit") . "' onClick='submitSaveActive();'>
-                           </div>";
+                           </div>",
+          'weight' => 100,
+        );
+        
         invoke_hook("content_alter", array(&$render, 'advise_submit_button'));
          
         
         $pC .= "<td class='fp-boxes fp-boxes-submit-button' align='center'>
             <div class='  advise_submit_button_wrapper' style='margin-top:35px; margin-bottom:10px; padding: 10px;'>
-            " . $render['html'] . "         
+            " . fp_render_content($render) . "         
             </div>
             </td></tr>
             ";    
