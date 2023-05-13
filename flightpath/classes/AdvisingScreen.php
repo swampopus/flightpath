@@ -2494,6 +2494,8 @@ function draw_menu_items($menu_array) {
     );
 
 
+    
+
     // Note: $render['#group'] is set lower in this function.
 
     
@@ -4470,6 +4472,11 @@ function draw_menu_items($menu_array) {
     $render['#row_hid_name'] = $hid_name;
     $render['#row_hid_id'] = "advcr_$unique_id";
     
+    // Add unique_id to the course object for later use.
+    $course->unique_id = $unique_id;
+
+    
+    
     // Due to an interesting bug, the hid_name cannot contain periods.  So, if a course
     // has decimal hours, we need to replace the decimal with a placeholder.
     if (strstr($hid_name, ".")) {
@@ -4585,6 +4592,9 @@ function draw_menu_items($menu_array) {
     );
 
 
+    $theme['course']['row_unique_id'] = $unique_id;
+    $theme['course']['row_hid_name'] = $hid_name;
+    $theme['course']['row_hid_id'] = "advcr_$unique_id";
 
 
 

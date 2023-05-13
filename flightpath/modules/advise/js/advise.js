@@ -363,6 +363,27 @@ function toggleSelection(uniqueID, display_status, warningMsg) {
 }
 
 
+/* Similar to toggleSelection, except we always set it to checked. */
+function setSelection(uniqueID, display_status) {
+  var cb_span = $("#cb_span_" + uniqueID);
+  // This is the hidden variable for this course, to
+  // determine if it has been selected or not.
+  var course = $("#advcr_" + uniqueID);
+
+  // Reset to blank just in case
+  course.val("");
+  $(cb_span).removeClass("advise-checkbox-" + display_status + "-checked");
+  
+  // Now select it!
+  
+  course.val("true");
+  $(cb_span).addClass("advise-checkbox-" + display_status + "-checked");
+  
+}
+
+
+
+
 
 function z__toggleSelection(uniqueID, display_status, warningMsg) {
   // We expect this to be the graphic of the checkbox.

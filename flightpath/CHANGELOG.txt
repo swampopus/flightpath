@@ -1,6 +1,14 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-05-12
+  Added extra data to $theme and $render when drawing course row and displaying the popup course information.
+  
+  To help with new registration module, added extra $unique_id variable to Course object.
+
+  Added function to advise.js to set the course to advised, regardless of previous 
+  state.
+
 2023-04-11
   Changed the way that the Degree submit button is rendered, to make it easier for other modules to modify
   using hook_content_alter.

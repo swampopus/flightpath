@@ -52,6 +52,7 @@ class Course extends stdClass
   public $title_text, $temp_flag, $disp_for_group_id;
   public $bool_unselectable;
   public $bool_hide_grade, $bool_ghost_hour, $bool_ghost_min_hour;
+  public $unique_id;
 
   
 /**
@@ -637,7 +638,7 @@ class Course extends stdClass
     $rtn .= $this->school_id . "~";
     $rtn .= $this->db_grade . "~";
     $rtn .= $this->extra_attribs . "~";
-        
+    $rtn .= $this->unique_id . "~";    
 
     return $rtn;
   }
@@ -806,7 +807,7 @@ class Course extends stdClass
     $this->school_id = trim($temp[28]);
     $this->db_grade = trim($temp[29]);
     $this->extra_attribs = trim($temp[30]);
-    
+    $this->unique_id = trim($temp[31]);
 
   }
 
