@@ -3111,16 +3111,25 @@ function draw_menu_items($menu_array) {
           style='display: none;'>
           <input type='hidden' name='varHours' id='varHours' value='$var_hours_default'>";
 
+      $render['#group_assigned_to_semester_num'] = $group->assigned_to_semester_num;
+      $render['#group_id'] = $group->group_id;
+      $render['#advising_term_id'] = $advising_term_id;
+      $render['#db_group_requirement_id'] = $db_group_requirement_id;
+      $render['#req_by_degree_id'] = $req_by_degree_id;
+
+      $group_js_select = "popupAssignSelectedCourseToGroup(\"$group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"$db_group_requirement_id\",\"$req_by_degree_id\");";
+
+      $render['#group_js_select'] = $group_js_select;
+      
       if (user_has_permission("can_advise_students"))
       {
-        $html .= fp_render_button(t("Select Course"), "popupAssignSelectedCourseToGroup(\"$group->assigned_to_semester_num\", \"$group->group_id\",\"$advising_term_id\",\"$db_group_requirement_id\",\"$req_by_degree_id\");", true, "style='font-size: 10pt;'");
+        $html .= fp_render_button(t("Select Course"), $group_js_select, TRUE, "style='font-size: 10pt;'");
       }
     } 
     else if ($show_advising_buttons == false && $course->has_variable_hours() == true && $course->grade == "" && user_has_permission("can_advise_students") && !$this->bool_blank) {
       // Show an "update" button, and use the course's assigned_to_group_id and
       // assigned_to_semester_num.
-      $html .= "
-          <input type='hidden' name='varHours' id='varHours' value='$var_hours_default'>";
+      $html .= "<input type='hidden' name='varHours' id='varHours' value='$var_hours_default'> \n";
 
       // Same situation about the group_id.  I guess need to find out exactly which group it was assigned to?
 
@@ -3140,7 +3149,8 @@ function draw_menu_items($menu_array) {
     // Okay, render our render array and return.    
     $pC .= fp_render_content($render);
     return $pC;
-  }
+    
+  } // end function
 
 
 
