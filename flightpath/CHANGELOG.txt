@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-05-15
+  Modified fp_add_js() so that "setting" values do not re-use keys.
+  
+  
 2023-05-12
   Added extra data to $theme and $render when drawing course row and displaying the popup course information.
   
@@ -8,6 +12,7 @@ FlightPath 6.x Changelog
 
   Added function to advise.js to set the course to advised, regardless of previous 
   state.
+
 
 2023-04-11
   Changed the way that the Degree submit button is rendered, to make it easier for other modules to modify

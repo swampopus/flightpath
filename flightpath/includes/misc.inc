@@ -1844,7 +1844,12 @@ function fp_add_js($js, $type = "file") {
   if ($type == "setting") {
     if (!isset($GLOBALS["fp_extra_js_settings"])) $GLOBALS["fp_extra_js_settings"] = array();
     
-    $GLOBALS["fp_extra_js_settings"] = array_merge_recursive($GLOBALS["fp_extra_js_settings"], $js);
+    // Instead of using array_merge_recursive, this guarantees that keys are not re-used.    
+    foreach ($js as $key => $val) {
+      $GLOBALS["fp_extra_js_settings"][$key] = $val;
+    }
+    
+    
   }
   
 }
