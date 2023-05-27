@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-05-27
+  Added advisingTermId and all fp_advising variables to javascript settings when viewing a student.
+  
+  Added advising_term_id to the render array when rendering an advising view screen.
+  
+
 2023-05-15
   Modified fp_add_js() so that "setting" values do not re-use keys.
   

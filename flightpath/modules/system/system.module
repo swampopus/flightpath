@@ -4369,7 +4369,7 @@ function system_init() {
   // Add in our custom JS settings.
   $settings = array(
       "themeLocation" => fp_theme_location(), 
-      "currentStudentId" => $current_student_id, 
+      "currentStudentId" => $current_student_id,      
       "basePath" => base_path(),
       // Add in the popup window options....      
       "popupAdminWinOptions" => variable_get("popup_admin_win_options", "toolbar=no,status=2,scrollbars=yes,resizable=yes,width=600,height=400"),  // used by admin groups, edit definitions, degrees, and popup contact form.    

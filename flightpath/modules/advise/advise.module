@@ -1480,6 +1480,9 @@ function advise_display_view($view = "view") {
   
   advise_init_screen();      
 
+  
+  
+
 
   $render = array();
   $render['#id'] = 'advise_display_view';
@@ -1488,6 +1491,7 @@ function advise_display_view($view = "view") {
   $render['#degree_plan'] = $degree_plan;
   $render['#screen'] = $screen;
   $render['#current_student_id'] = $current_student_id;
+  $render['#advising_term_id'] = $GLOBALS['fp_advising']['advising_term_id'];
 
   
   $school_id = db_get_school_id_for_student_id($current_student_id);
@@ -2444,6 +2448,14 @@ function advise_init_advising_variables($bool_ignore_what_if_variables = FALSE) 
 
 
   $GLOBALS["fp_advising"] = $vars;
+ 
+ 
+  // Add our current advising term (and our other settings) to javascript settings.
+  $js_settings = array( 
+    "advisingTermId" => $GLOBALS['fp_advising']['advising_term_id'],  // The currently selected advising term_id.
+    "fp_advising_variables" => $vars,
+  ); 
+  fp_add_js($js_settings, "setting");
         
 }
 
