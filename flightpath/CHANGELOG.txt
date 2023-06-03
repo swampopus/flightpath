@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-06-03
+  Gave lassie module the ability to disable "maintenance mode" when a job fails.  See lassie modules'
+  README.txt file for details.
+  
+
 2023-05-27
   Added advisingTermId and all fp_advising variables to javascript settings when viewing a student.
   

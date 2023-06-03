@@ -111,6 +111,12 @@ function lassie_check($job_machine_name) {
     // Delete from variables table.
     db_query("DELETE FROM variables WHERE name = ?", array("lassie_job__$job_machine_name"));
     watchdog('lassie', t("Expired job: ") . $job_machine_name . ". " . $elapsed . " minutes elapsed.", array(), WATCHDOG_ERROR);
+   
+   
+    if (isset($GLOBALS['lassie_disable_maintenance_mode_on_fail']) && $GLOBALS['lassie_disable_maintenance_mode_on_fail'] == TRUE) {
+      // We should set maintenance mode to FALSE.  See README.txt file for an explanation.
+      variable_set("maintenance_mode", FALSE);      
+    }
     
   }
   

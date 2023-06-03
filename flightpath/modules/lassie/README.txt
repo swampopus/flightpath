@@ -20,7 +20,6 @@ In order to function correctly, you should set your site's cron to run at least 
 
 
 USE
-
 In your code, "start" a job for Lassie to monitor like so:
 
   lassie_start($job_name, $hours, $emails);
@@ -35,4 +34,16 @@ In your code, "start" a job for Lassie to monitor like so:
 
 To tell Lassie that you have finished the job, always end your routine with:
 
-  lassie_finish($job_name);  
+  lassie_finish($job_name);
+  
+  
+  
+EXTRA
+If you wish Lassie to automatically disable "maintenance mode" when a job fails, then add the following to
+your custom/settings.php file (in the "Custom Settings" area):
+
+    $GLOBALS['lassie_disable_maintenance_mode_on_fail'] = TRUE;
+    
+NOTE:  You can also add this right before calling lassie_start(), if you would prefer it be configured per-job.    
+    
+This is useful if a routine fails to complete, but you do not want the maintenance mode message to be continued to be displayed.
