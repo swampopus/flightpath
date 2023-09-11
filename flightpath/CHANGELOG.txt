@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-08-07
+  Fixed minor issue with the way URLs were being displayed in the location and ref fields when viewing a watchdog entry.
+  
+
 2023-06-03
   Gave lassie module the ability to disable "maintenance mode" when a job fails.  See lassie modules'
   README.txt file for details.
