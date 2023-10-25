@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-10-25
+  Modified stats.module, so that the "FlightPath Use Summary" report looks at "display_dashboard" to determine logins, 
+  rather than "login" entries in the watchdog table, as that is not an accurate count if the user used SAML or LDAP to
+  log in.
+   
+
 2023-08-07
   Fixed minor issue with the way URLs were being displayed in the location and ref fields when viewing a watchdog entry.
   

@@ -941,17 +941,17 @@ function stats_report_flightpath_use_summary() {
   // Okay, now we get our various counts....
 
   // Logins...
-  $u_student = stats_get_log_count("login","",true,$start_date,$end_date,true);
-  $t_student = stats_get_log_count("login","",false,$start_date,$end_date,true);
-  $u_staff = stats_get_log_count("login","",true,$start_date,$end_date,false);
-  $t_staff = stats_get_log_count("login","",false,$start_date,$end_date,false);
+  $u_student = stats_get_log_count("display_dashboard","",true,$start_date,$end_date,true);
+  $t_student = stats_get_log_count("display_dashboard","",false,$start_date,$end_date,true);
+  $u_staff = stats_get_log_count("display_dashboard","",true,$start_date,$end_date,false);
+  $t_staff = stats_get_log_count("display_dashboard","",false,$start_date,$end_date,false);
   $rtn .= "<b>System Logins</b>
       <blockquote>
         Unique student logins: $u_student<br>
-        Total student logins: $t_student<br>
+        Total student views of dashboard: $t_student<br>
         ------- <br>
         Unique faculty/staff logins: $u_staff<br>
-        Total faculty/staff logins: $t_staff
+        Total faculty/staff views of dashboard: $t_staff
       </blockquote>
       ";
 
