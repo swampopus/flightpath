@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-11-06
+  Made it so pages can request that "messages" (from fp_add_message) are not shown, by adding ?fp_messages=none to the URL.  Useful in iframes.
+  
+
 2023-10-25
   Modified stats.module, so that the "FlightPath Use Summary" report looks at "display_dashboard" to determine logins, 
   rather than "login" entries in the watchdog table, as that is not an accurate count if the user used SAML or LDAP to

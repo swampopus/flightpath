@@ -4089,7 +4089,7 @@ function system_display_dashboard_page () {
     $advising_term_id = variable_get("advising_term_id", "");
     $advising_term_desc = get_term_description($advising_term_id, FALSE, $user->school_id);  
 
-    $url = fp_url("render-advising-snapshot-for-iframe", "window_mode=popup");
+    $url = fp_url("render-advising-snapshot-for-iframe", "window_mode=popup&fp_messages=none");
     
     // Show slightly different if we have the schools module enabled
     if (module_enabled("schools")) {      
@@ -4099,7 +4099,7 @@ function system_display_dashboard_page () {
       $school_ids = student_search_get_school_ids_user_is_allowed_to_search();
       $school_id_list = join(",", $school_ids);
               
-      $url = fp_url("render-advising-snapshot-for-iframe", "window_mode=popup&school_id_list=$school_id_list");
+      $url = fp_url("render-advising-snapshot-for-iframe", "window_mode=popup&fp_messages=none&school_id_list=$school_id_list");
             
     }    
 

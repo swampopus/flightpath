@@ -718,16 +718,23 @@ function fp_display_page($page) {
   }
   
 
+  // If the REQUEST specifically asks NOT to show waiting fp_messages, then clear them from the session.
+  if (isset($_REQUEST['fp_messages']) && $_REQUEST['fp_messages'] == 'none') {
+    unset($_SESSION['fp_messages']);
+  }
+
       
   // If there are "messages" waiting, then let's add them to the top of content.
   if (isset($_SESSION["fp_messages"]) && is_array($_SESSION["fp_messages"]) && count($_SESSION["fp_messages"]) > 0) {
+   
     $content_top .= "<div class='fp-messages'>";
     foreach ($_SESSION["fp_messages"] as $key => $tmsg) {
       $type = $tmsg["type"];
       $message = $tmsg["msg"];
       $content_top .= "<div class='fp-message fp-message-$type'>$message</div>";
     }
-    $content_top .= "</div>";    
+    $content_top .= "</div>";
+        
     unset($_SESSION["fp_messages"]);
   }
 
