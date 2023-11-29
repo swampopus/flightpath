@@ -1243,7 +1243,8 @@ function stats_report_advisor_use() {
                         AND faculty_id = ?
                         AND student_id = ?
                         AND is_empty = 0
-                        AND is_draft = 0                        
+                        AND is_draft = 0     
+                        GROUP BY advising_session_token                   
                         ", array($watchdog_timestamp - 1, $watchdog_timestamp + 1, $faculty_id, $student_id));
     while ($cur2 = db_fetch_array($res2)) {
       //fpm($cur2);
