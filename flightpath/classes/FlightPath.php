@@ -1485,10 +1485,10 @@ class FlightPath extends stdClass
     if ($is_what_if == "1"){$wi = "_whatif";}
 
     if ($bool_draft) {
-      watchdog("save_adv_draft$wi", "$student_id,major_code_csv:$major_code_csv");
+      watchdog("save_adv_draft$wi", "$student_id,major_code_csv:$major_code_csv~adv_session_token:$advising_session_token");
     } 
     else {
-      watchdog("save_adv_active$wi", "$student_id,major_code_csv:$major_code_csv");
+      watchdog("save_adv_active$wi", "$student_id,major_code_csv:$major_code_csv~adv_session_token:$advising_session_token");
     }
 
     // Go through the POST, looking for the

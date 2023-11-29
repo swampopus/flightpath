@@ -29,4 +29,11 @@ if ($token != @$GLOBALS["fp_system_settings"]["cron_security_token"]) {
 watchdog("cron", "Cron run started", array(), WATCHDOG_DEBUG);
 invoke_hook("cron");
 watchdog("cron", "Cron run completed", array(), WATCHDOG_DEBUG);
+
+
+// TODO: also run hook_clicron jobs, which need to be run from the command line. 
+
+
+
+
 variable_set("cron_last_run", time());

@@ -1199,11 +1199,11 @@ function stats_report_advisor_use() {
   // to be sorted by college/department.
   $f_array = array();
   $s_array = array();
-  
+  $terms = array();
     
   $result = db_query("SELECT * FROM watchdog a, faculty b, users c
             WHERE 
-              a.timestamp > '?' AND a.timestamp < '?'
+              a.timestamp > ? AND a.timestamp < ?
             AND
               (a.type = 'save_adv_active' OR a.type = 'save_adv_active_whatif')
             AND a.cwid = b.cwid
@@ -1232,10 +1232,35 @@ function stats_report_advisor_use() {
     $s_array[$faculty_id]["name"] = ucwords(strtolower(trim($cur["f_name"]) . " " . trim($cur["l_name"])));
 
 
+    // Try to find the term(s) this was for based on the time.
+    
+    $temp = explode(",", $cur['message']);
+    $student_id = trim($temp[0]);
+    
+    $watchdog_timestamp = intval($cur['timestamp']);
+    $res2 = db_query("SELECT * FROM advising_sessions WHERE 
+                        (`posted` >= ? AND `posted` <= ?)
+                        AND faculty_id = ?
+                        AND student_id = ?
+                        AND is_empty = 0
+                        AND is_draft = 0                        
+                        ", array($watchdog_timestamp - 1, $watchdog_timestamp + 1, $faculty_id, $student_id));
+    while ($cur2 = db_fetch_array($res2)) {
+      //fpm($cur2);
+      $term_id = $cur2['term_id'];
+      if (!isset($s_array[$faculty_id][$term_id])) $s_array[$faculty_id][$term_id] = 0;
+      $s_array[$faculty_id][$term_id]++;
+      
+      $terms[$term_id] = get_term_description($term_id);      
+    }
+    
 
-  }
+
+  } // while
   
 
+  ksort($terms);
+  
 
   // Sort based on who has advised the most...
   //arsort($f_array);
@@ -1245,18 +1270,24 @@ function stats_report_advisor_use() {
 
   // Now, output the results...
   $rtn .= "
-      <table border='1' width='650'>
+      <table border='1' cellpadding='10' style='min-width:700px;'>
         <tr>";
   
   if (module_enabled('schools')) {
     $rtn .= "<th>" . t("School") . "</th>";
   }
         
-  $rtn .= "      
-          <th>" . t("Name") . "</th>
+  $rtn .= "<th>" . t("Name") . "</th>
           <th>" . t("Dept") . "</th>
-          <th>#</th>
-      </tr>";
+          <th>Total #</th>";
+          
+  // loop through and add in the terms          
+  foreach ($terms as $term_id => $term_desc) {
+    $rtn .= "<th>$term_desc #</th>";
+  }
+  
+          
+  $rtn .= "</tr>";
   foreach($f_array as $faculty_id => $value)
   {
     $name = $s_array[$faculty_id]["name"];
@@ -1274,7 +1305,16 @@ function stats_report_advisor_use() {
     $rtn .= "
        <td valign='top'>$name</td>
        <td valign='top'>$dept_name</td>
-       <td valign='top' align='center'>$value</td>
+       <td valign='top' align='center'>$value</td>";
+
+    // loop through and add in the terms          
+    foreach ($terms as $term_id => $term_desc) {
+      $rtn .= "<td>" . $s_array[$faculty_id][$term_id] . "</td>";
+    }
+
+
+
+    $rtn .= "       
       </tr>
       
       ";

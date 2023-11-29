@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-11-29
+  Made modifications to watchdog entries when an advising session is saved (to contain the advising session token).
+  
+  Made changes to the Advisor Use report to show number of advisings per term.
+  
+
 2023-11-06
   Made it so pages can request that "messages" (from fp_add_message) are not shown, by adding ?fp_messages=none to the URL.  Useful in iframes.
   
