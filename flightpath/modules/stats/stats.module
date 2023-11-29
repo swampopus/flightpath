@@ -1240,12 +1240,11 @@ function stats_report_advisor_use() {
     $watchdog_timestamp = intval($cur['timestamp']);
     $res2 = db_query("SELECT * FROM advising_sessions WHERE 
                         (`posted` >= ? AND `posted` <= ?)
-                        AND faculty_id = ?
-                        AND student_id = ?
+                        AND faculty_id = ?                        
                         AND is_empty = 0
                         AND is_draft = 0     
                         GROUP BY advising_session_token                   
-                        ", array($watchdog_timestamp - 1, $watchdog_timestamp + 1, $faculty_id, $student_id));
+                        ", array($watchdog_timestamp - 1, $watchdog_timestamp + 1, $faculty_id));
     while ($cur2 = db_fetch_array($res2)) {
       //fpm($cur2);
       $term_id = $cur2['term_id'];
