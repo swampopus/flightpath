@@ -1397,7 +1397,7 @@ function stats_report_advisor_use() {
 
     // loop through and add in the terms          
     foreach ($terms as $term_id => $term_desc) {
-      $rtn .= "<td>" . $s_array[$faculty_id][$term_id] . "</td>";
+      $rtn .= "<td align='center'>" . $s_array[$faculty_id][$term_id] . "</td>";
     }
 
 
