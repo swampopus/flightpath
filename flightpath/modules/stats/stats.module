@@ -956,6 +956,7 @@ function stats_report_flightpath_use_summary() {
       ";
 
   // Advisings...
+  /*  // This legacy code is not accurate.  Going to use the "advisor use report" to get this data". - RP 11/30/2023
   $regular_advisings = stats_get_log_count("save_adv_active","",false,$start_date,$end_date,false);
   $wi_advisings = stats_get_log_count("save_adv_active_whatif","",false,$start_date,$end_date,false);
   $total_advisings = $regular_advisings + $wi_advisings;
@@ -967,7 +968,27 @@ function stats_report_flightpath_use_summary() {
         What If advisings: $wi_advisings
       </blockquote>
       ";
+  */
+  
+  // Advisings
+  $_REQUEST['report_type'] = 'unique';
+  $_REQUEST['is_whatif'] = 'no';
+  $regular_advisings = stats_report_advisor_use(TRUE);
 
+  $_REQUEST['report_type'] = 'unique';
+  $_REQUEST['is_whatif'] = 'yes';
+  $wi_advisings = stats_report_advisor_use(TRUE);
+  $total_advisings = $regular_advisings + $wi_advisings;
+  $rtn .= "<b>Advisings</b>
+      <blockquote>
+        Total unique student advisings: $total_advisings <br>
+        ------- <br>
+        Regular unique advisings: $regular_advisings<br>
+        What If advisings: $wi_advisings
+      </blockquote>
+    ";
+  
+  
   // Comments...
   $total = stats_get_log_count("save_comment","",false,$start_date,$end_date,false);
   $unique = stats_get_log_count("save_comment","",true,$start_date,$end_date,false);
@@ -1162,11 +1183,16 @@ function stats_draw_date_range_form($path, $start_date = "", $end_date = "", $ad
     $rtn .= $additional_form_elements;
   }
 
+  fp_add_css(fp_get_module_path("system") . "/css/style.css");
+  fp_add_js(fp_get_module_path("system") . "/js/spinner.js");
+    
   $rtn .= "
             
             <span class='buttons form-element element-type-submit'>
-              <input type='submit' value='" . t("Submit") . "'>
+              <input type='submit' value='" . t("Submit") . "' onclick='$(\".loading-spinner\").show();'>
             </span>
+  
+            <span class='loading-spinner loading-spinner-$name' style='display:none;'></span>
             
           </form> <hr>
           ";  
@@ -1182,13 +1208,15 @@ function stats_draw_date_range_form($path, $start_date = "", $end_date = "", $ad
  *
  * @return unknown
  */
-function stats_report_advisor_use() {
+function stats_report_advisor_use($bool_only_return_total_number = FALSE) {
   $rtn = "";
 
   $start_date = trim(addslashes(@$_REQUEST["start_date"]));
   $end_date = trim(addslashes(@$_REQUEST["end_date"]));
   $report_type = trim(addslashes(@$_REQUEST["report_type"]));
 
+  $whatif = trim(@$_REQUEST['is_whatif']);
+  
   $selall = $selunique = "";
   if ($report_type == 'unique') $selunique = 'selected';
   
@@ -1228,16 +1256,27 @@ function stats_report_advisor_use() {
     
   $s_array = array();  
 
+  
+  $whatif_line = "";
+  if ($whatif == 'yes') {
+    $whatif_line = "AND a.is_whatif = 1 ";
+  }
+  else if ($whatif == 'no') {
+    $whatif_line = "AND a.is_whatif != 1 ";
+  }
+  
+  
   $res = db_query("SELECT * 
                       FROM advising_sessions a, users u, faculty f
                       WHERE 
                       (`posted` > ? AND `posted` < ?)                                                
                       AND a.is_empty != 1
                       AND a.is_draft != 1
-                      AND a.delete_flag != 1                         
+                      AND a.delete_flag != 1
+                      $whatif_line                                             
                       AND is_faculty = 1
                       AND a.faculty_id = u.cwid
-                      AND u.cwid = f.cwid 
+                      AND u.cwid = f.cwid
                       ORDER BY l_name, f_name  
                       ", array($start_ts, $end_ts));
     while ($cur = db_fetch_array($res)) {
@@ -1246,9 +1285,12 @@ function stats_report_advisor_use() {
       $student_id = $cur['student_id'];  
       $term_id = $cur['term_id'];
       
+      $is_whatif = intval($cur['is_whatif']);
+      
+      
       if ($report_type == 'unique') {
-        if (in_array("$faculty_id~$student_id~$term_id", $already_found_student_and_term)) continue;
-        $already_found_student_and_term[] = "$faculty_id~$student_id~$term_id";     
+        if (in_array("$faculty_id~$student_id~$term_id~$is_whatif", $already_found_student_and_term)) continue;
+        $already_found_student_and_term[] = "$faculty_id~$student_id~$term_id~$is_whatif";     
       }
   
       if (!isset($f_array[$faculty_id])) $f_array[$faculty_id] = 0;
@@ -1292,6 +1334,8 @@ function stats_report_advisor_use() {
   $start_date = trim(addslashes($_REQUEST["start_date"]));
   $end_date = trim(addslashes($_REQUEST["end_date"]));
 
+  $grand_total = 0;
+
   // Now, output the results...
   if ($report_type == 'all') {
   $rtn .= "<p><b>Note:</b> This Report Type (selected above) shows the total number of advising sessions saved by the advisor, <em>including</em> sessions which were saved
@@ -1300,8 +1344,8 @@ function stats_report_advisor_use() {
   else if ($report_type == 'unique') {
       
     $rtn .= "<p><b>Note:</b> This Report Type (selected above) shows the number of advising sessions saved by the advisor, 
-                  <em>unique to a student</em>. It ignores sessions which were saved
-                  more than once.  Deleted advising sessions are not counted.</p>";
+                  <em>unique to a student AND What If mode</em>. It ignores sessions which were saved
+                  more than once, unless the second time was in What If mode.  Deleted advising sessions are not counted.</p>";
   }
   
   $rtn .= "
@@ -1330,6 +1374,7 @@ function stats_report_advisor_use() {
     $dept_name = $s_array[$faculty_id]["dept_name"];
     $school_id = $s_array[$faculty_id]["school_id"];
     
+    $grand_total = $grand_total + intval($value);
     
     $rtn .= "<tr>";
     
@@ -1355,7 +1400,11 @@ function stats_report_advisor_use() {
       ";
   }
   $rtn .= "</table>";  
-
+  $rtn .= "<p><b>Total in selected date range:</b> $grand_total</p>";
+  
+  if ($bool_only_return_total_number) {
+    return intval($grand_total);
+  }
   
   
   return $rtn;

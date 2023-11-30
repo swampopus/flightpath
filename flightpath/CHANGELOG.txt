@@ -7,6 +7,10 @@ FlightPath 6.x Changelog
   
   Modified style.css to allow for shorter (less wide) select lists.
   
+  Added "spinner" graphic to submit button for FlightPath Use Summary and other reports that use the date range select form.
+  
+  Modified FlightPath Use Summary to use Advisor Use results for better accuracy.
+  
 
 2023-11-29
   Made modifications to watchdog entries when an advising session is saved (to contain the advising session token).
