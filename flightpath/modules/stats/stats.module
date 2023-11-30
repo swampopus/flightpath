@@ -1140,7 +1140,7 @@ function stats_get_log_count($action = "", $action_array = "", $bool_distinct = 
  * start and end date expected in YYYY-MM-DD format
  * 
  */
-function stats_draw_date_range_form($path, $start_date = "", $end_date = "") {
+function stats_draw_date_range_form($path, $start_date = "", $end_date = "", $additional_form_elements = "") {
   $rtn = "";
   
   $rtn .= "<form action='" . fp_url($path) . "' method='GET' >
@@ -1155,7 +1155,14 @@ function stats_draw_date_range_form($path, $start_date = "", $end_date = "") {
             <span class='form-element element-type-date'> 
               <input type='date' name='end_date' value='$end_date' id='end_date'>
             </span>
-            &nbsp; &nbsp;
+            &nbsp; &nbsp;";
+
+
+  if ($additional_form_elements != "") {
+    $rtn .= $additional_form_elements;
+  }
+
+  $rtn .= "
             
             <span class='buttons form-element element-type-submit'>
               <input type='submit' value='" . t("Submit") . "'>
@@ -1180,8 +1187,22 @@ function stats_report_advisor_use() {
 
   $start_date = trim(addslashes(@$_REQUEST["start_date"]));
   $end_date = trim(addslashes(@$_REQUEST["end_date"]));
+  $report_type = trim(addslashes(@$_REQUEST["report_type"]));
 
-  $rtn .= stats_draw_date_range_form("stats/reports/advisor-use", $start_date, $end_date);
+  $selall = $selunique = "";
+  if ($report_type == 'unique') $selunique = 'selected';
+  
+  $additional_form_elements = t("Report Type:") . "
+            <span class='form-element element-type-select-smaller'> 
+              <select name='report_type' id='report_type'>
+                <option value='all' $selall>" . t("All saved advisings") . "</option>
+                <option value='unique' $selunique>" . t("Unique student advisings") . "</option>
+              </select>
+            </span>
+            &nbsp; &nbsp;";
+  
+  
+  $rtn .= stats_draw_date_range_form("stats/reports/advisor-use", $start_date, $end_date, $additional_form_elements);
   
   if ($start_date == "" || $end_date == "") {
     return $rtn;
@@ -1201,117 +1222,34 @@ function stats_report_advisor_use() {
   $s_array = array();
   $terms = array();
   
-  
+  $already_found_student_and_term = array();
+    
   $departments = fp_get_departments($school_id);
-  
-  /*  
-  $result = db_query("SELECT * FROM watchdog a, faculty b, users c
-            WHERE 
-              a.timestamp > ? AND a.timestamp < ?
-            AND
-              (a.type = 'save_adv_active' OR a.type = 'save_adv_active_whatif')
-            AND a.cwid = b.cwid
-            AND a.cwid = c.cwid
-            AND c.is_faculty = 1
-            ORDER BY b.department_code ", $start_ts, $end_ts);
-
-  while($cur = db_fetch_array($result)) {
-    $faculty_id = trim($cur["cwid"]);
-
-    $school_id = intval($cur['school_id']);    
-
-    if (!isset($f_array[$faculty_id])) $f_array[$faculty_id] = 0;
     
-    $dept_name = @$departments[$cur['department_code']];
-    if (!$dept_name) $dept_name = $cur['department_code'];
-    
-    
-    $f_array[$faculty_id] = intval($f_array[$faculty_id]); // make it a number.
-    $f_array[$faculty_id]++;
+  $s_array = array();  
 
-    $s_array[$faculty_id]["dept_name"] = $dept_name;
-    $s_array[$faculty_id]["college_name"] = ucwords(strtolower(trim($cur["college"])));
-    $s_array[$faculty_id]["school_id"] = $school_id;
-    $s_array[$faculty_id]["name"] = ucwords(strtolower(trim($cur["f_name"]) . " " . trim($cur["l_name"])));
-  */
-
-
-    /*
-    // Try to find the term(s) this was for based on the time.
-    if (!in_array($faculty_id, $already)) {    
-      $temp = explode(",", $cur['message']);
-      $student_id = trim($temp[0]);
-      
-      $watchdog_timestamp = intval($cur['timestamp']);
-      $res2 = db_query("SELECT * 
-                          FROM advising_sessions WHERE 
-                          (`posted` >= ? AND `posted` <= ?)
-                          AND faculty_id = ?                        
-                          AND is_empty = 0
-                          AND is_draft = 0   
-                          ", array($start_ts - 1, $end_ts + 1, $faculty_id));
-      while ($cur2 = db_fetch_array($res2)) {
-        //fpm($cur2);
-        $term_id = $cur2['term_id'];
-        if (!isset($s_array[$faculty_id][$term_id])) $s_array[$faculty_id][$term_id] = 0;
-        $s_array[$faculty_id][$term_id]++;
-        
-        $terms[$term_id] = get_term_description($term_id);      
-      }
-      
-      $already[] = $faculty_id;
-    }
-
-     */
-  //} // while
-  
-  
-  
-  /*
-  foreach ($s_array as $faculty_id => $throw_away) {
-    
-    
-    $res2 = db_query("SELECT * 
-                        FROM advising_sessions WHERE 
-                        (`posted` > ? AND `posted` < ?)
-                        AND faculty_id = ?                        
-                        AND is_empty != 1
-                        AND is_draft != 1   
-                        ", array($start_ts, $end_ts, $faculty_id));
-    while ($cur2 = db_fetch_array($res2)) {
-      //fpm($cur2);
-      $term_id = $cur2['term_id'];
-      if (!isset($s_array[$faculty_id][$term_id])) $s_array[$faculty_id][$term_id] = 0;
-      $s_array[$faculty_id][$term_id]++;
-      
-      $terms[$term_id] = get_term_description($term_id);      
-    }
-      
-    
-  }
-  */
-
-  
-    $s_array = array();  
-  
-    $res = db_query("SELECT * 
-                        FROM advising_sessions a, users u, faculty f
-                        WHERE 
-                        (`posted` > ? AND `posted` < ?)                                                
-                        AND a.is_empty != 1
-                        AND a.is_draft != 1
-                        AND a.delete_flag != 1                         
-                        AND is_faculty = 1
-                        AND a.faculty_id = u.cwid
-                        AND u.cwid = f.cwid 
-                        ORDER BY l_name, f_name  
-                        ", array($start_ts, $end_ts));
+  $res = db_query("SELECT * 
+                      FROM advising_sessions a, users u, faculty f
+                      WHERE 
+                      (`posted` > ? AND `posted` < ?)                                                
+                      AND a.is_empty != 1
+                      AND a.is_draft != 1
+                      AND a.delete_flag != 1                         
+                      AND is_faculty = 1
+                      AND a.faculty_id = u.cwid
+                      AND u.cwid = f.cwid 
+                      ORDER BY l_name, f_name  
+                      ", array($start_ts, $end_ts));
     while ($cur = db_fetch_array($res)) {
           
       $faculty_id = $cur['faculty_id'];
-        
-    
-          
+      $student_id = $cur['student_id'];  
+      $term_id = $cur['term_id'];
+      
+      if ($report_type == 'unique') {
+        if (in_array("$faculty_id~$student_id~$term_id", $already_found_student_and_term)) continue;
+        $already_found_student_and_term[] = "$faculty_id~$student_id~$term_id";     
+      }
   
       if (!isset($f_array[$faculty_id])) $f_array[$faculty_id] = 0;
       
@@ -1333,7 +1271,7 @@ function stats_report_advisor_use() {
         
         
       
-      $term_id = $cur['term_id'];
+      
       if (!isset($s_array[$faculty_id][$term_id])) $s_array[$faculty_id][$term_id] = 0;
       $s_array[$faculty_id][$term_id]++;
       
@@ -1355,9 +1293,18 @@ function stats_report_advisor_use() {
   $end_date = trim(addslashes($_REQUEST["end_date"]));
 
   // Now, output the results...
+  if ($report_type == 'all') {
+  $rtn .= "<p><b>Note:</b> This Report Type (selected above) shows the total number of advising sessions saved by the advisor, <em>including</em> sessions which were saved
+                  more than once.  Deleted advising sessions are not counted.</p>";
+  }
+  else if ($report_type == 'unique') {
+      
+    $rtn .= "<p><b>Note:</b> This Report Type (selected above) shows the number of advising sessions saved by the advisor, 
+                  <em>unique to a student</em>. It ignores sessions which were saved
+                  more than once.  Deleted advising sessions are not counted.</p>";
+  }
+  
   $rtn .= "
-      <p><b>Note:</b> This report shows the total number of advising sessions saved by the advisor, <em>including</em> sessions which were saved
-                  more than once.  Deleted advising sessions are not counted.</p>
       <table border='1' cellpadding='10' style='min-width:700px;'>
         <tr>";
   

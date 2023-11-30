@@ -1,6 +1,13 @@
 FlightPath 6.x Changelog
 ========================
 
+
+2023-11-30
+  Made further modifications to the Advisor Use report, adding the ability to select only unique student advisings.
+  
+  Modified style.css to allow for shorter (less wide) select lists.
+  
+
 2023-11-29
   Made modifications to watchdog entries when an advising session is saved (to contain the advising session token).
   
