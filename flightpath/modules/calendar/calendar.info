@@ -1,4 +1,3 @@
 name = Calendar
 description = Appointment calendar system for FlightPath
-core = 6.x
-schema = 3
+core = 7.x

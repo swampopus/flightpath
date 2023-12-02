@@ -451,12 +451,12 @@ function course_search_display_edit_courses()
 
   // Get the "upper range" (UR) and
   // lower range (LR) of the courses in question...
-  $ur = trim(@$_GET["ur"]);
-  $lr = trim(@$_GET["lr"]);
+  $ur = trim((string) @$_GET["ur"]);
+  $lr = trim((string) @$_GET["lr"]);
   if ($ur == "")
   { // meaning, no range was set.  Use A - AZZZZZ, so, all of the A's.
-    $ur = @$_SESSION["dec_ur"];
-    $lr = @$_SESSION["dec_lr"];
+    $ur = (string) @$_SESSION["dec_ur"];
+    $lr = (string) @$_SESSION["dec_lr"];
     if ($ur == "")
     { // if still blank, assign it..
       $ur = "A";

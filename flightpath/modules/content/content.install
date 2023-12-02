@@ -8,55 +8,6 @@
 
 
 
-function content_update($old_schema, $new_schema) {
-  if (intval($old_schema) < 2) {
-    // Adding user_id to the content_versions table, so we know which user edited what version.
-    db_query("ALTER TABLE content_versions ADD COLUMN `user_id` int NOT NULL DEFAULT '0' ");
-    db_query("ALTER TABLE content_versions ADD INDEX (`user_id`) ");
-  }
-
-  // Skipped 3 intentionally, decided to undo it.
-
-  if (intval($old_schema) < 4) {    
-    db_query("ALTER TABLE content ADD COLUMN `log` longtext DEFAULT NULL ");    
-  }
-
-
-  if (intval($old_schema) < 5) {
-    if (!file_exists(fp_get_files_path() . '/content_uploads/')) {
-      mkdir(fp_get_files_path() . '/content_uploads/');
-    }    
-  }
-
-  if (intval($old_schema) < 6) {
-    db_query("ALTER TABLE content_files ADD COLUMN `is_encrypted` tinyint(4) DEFAULT 0 ");
-    db_query("ALTER TABLE content_files ADD INDEX (`is_encrypted`) ");    
-  }
-  
-  if (intval($old_schema) < 7) {
-    db_query("ALTER TABLE content_files ADD COLUMN `cid` int(10) unsigned DEFAULT 0 ");
-    db_query("ALTER TABLE content_files ADD INDEX (`cid`) ");    
-  }
-  
-
-  if (intval($old_schema) < 8) {
-    db_query("ALTER TABLE content_files ADD COLUMN `attributes` tinyint(4) unsigned DEFAULT 0 ");
-    db_query("ALTER TABLE content_files ADD INDEX (`attributes`) ");
-    
-    if (!file_exists(fp_get_files_path() . '/content_uploads/public_uploads/')) {
-      mkdir(fp_get_files_path() . '/content_uploads/public_uploads/');
-    }
-        
-    
-    
-  }
-
-  
-
-}
-
-
-
 
 /**
  * Hook install.  Called when the module is installed on the admin modules page.
@@ -163,4 +114,16 @@ CREATE TABLE `content__page` (
   
     
 }
+
+
+
+
+function content_update($old_schema, $new_schema) {
+   
+
+}
+
+
+
+
 

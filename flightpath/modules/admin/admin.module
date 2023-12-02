@@ -1239,6 +1239,8 @@ function admin_get_de_catalog_year($bool_set_earliest_if_blank = TRUE, $school_i
  * It will search for and replace replacement patterns which we are aware of it in $str.
  */
 function admin_menu_handle_replacement_pattern($str) {
+      
+  if (!$str) $str = "";  // Compat for PHP 8.2, force it to be a string if it was NULL or FALSE.  
   
   if (strpos($str, "%DE_CATALOG_YEAR%") !== 0) {
     // It contains this replacement pattern!
@@ -1247,18 +1249,21 @@ function admin_menu_handle_replacement_pattern($str) {
   
   if (strpos($str, "%SEV_FILTER%") !== 0) {
     // It contains this replacement pattern!
-    $str = str_replace("%SEV_FILTER%", @$_GET["sev_filter"], $str);
+    $sev_filter = (string) @$_GET["sev_filter"];
+    $str = str_replace("%SEV_FILTER%", $sev_filter, $str);
   }
 
   if (strpos($str, "%TYPE_FILTER%") !== 0) {
     // It contains this replacement pattern!
-    $str = str_replace("%TYPE_FILTER%", @$_GET["type_filter"], $str);
+    $type_filter = (string) @$_GET["type_filter"];
+    $str = str_replace("%TYPE_FILTER%", $type_filter, $str);
   }
   
   
   if (strpos($str, "%PAGE%") !== 0) {
     // It contains this replacement pattern!
-    $str = str_replace("%PAGE%", @$_GET["page"], $str);
+    $page = (string) @$_GET["page"];
+    $str = str_replace("%PAGE%", $page, $str);
   }
     
   

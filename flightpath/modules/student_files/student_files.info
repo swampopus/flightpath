@@ -1,4 +1,4 @@
 name = Student Files
 description = Secure uploads of files associated with student users
-core = 6.x
+core = 7.x
 schema = 2

@@ -35,7 +35,7 @@ function fp_render_content($render_array = array(), $bool_include_wrappers = TRU
     return "";
   }
 
-  $class = trim(@$render_array['#class']);
+  $class = trim((string) @$render_array['#class']);
 
   // Any hooks to alter this render array?  
   $modules = modules_implement_hook("content_alter");
@@ -705,7 +705,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     }  
     
     
-    $value = htmlentities($value, ENT_QUOTES);
+    $value = htmlentities((string) $value, ENT_QUOTES);
     $rtn .= "<input type='$type' name='$name' id='element-$cssname' size='$size' maxlength='$maxlength' value='$value' $attributes>";
   }
   

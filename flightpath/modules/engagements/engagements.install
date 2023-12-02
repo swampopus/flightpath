@@ -132,78 +132,7 @@ db_query($q);
 
 function engagements_update($old_schema, $new_schema) {
   
-  if (intval($old_schema) < 2) {
-    // Convert text fields to longtext.
-    db_query("ALTER TABLE content__engagement MODIFY field__engagement_msg LONGTEXT");   
-    
-    db_query("ALTER TABLE sms_history MODIFY `body` LONGTEXT");
-    db_query("ALTER TABLE sms_history MODIFY `media_filenames` LONGTEXT");
-    
-    
-    fpm("Altered engagements tables to use LONGTEXT instead of just TEXT.");
-    
-  }  
-    
-
-  if (intval($old_schema) < 3) {
-    // Add new fields to content__engagement table.
-
-    db_query("ALTER TABLE content__engagement ADD COLUMN `field__from_sms_phone` varchar(255) DEFAULT NULL ");
-    db_query("ALTER TABLE content__engagement ADD COLUMN `field__external_msg_id` varchar(255) DEFAULT NULL ");
-    
-    db_query("ALTER TABLE content__engagement ADD INDEX (`field__from_sms_phone`) ");
-    db_query("ALTER TABLE content__engagement ADD INDEX (`field__external_msg_id`) ");
-    
-  }  
-
-
-  if (intval($old_schema) < 4) {
-    $q = "
-    CREATE TABLE `sms_do_not_txt` (
-      `mid` int(10) unsigned NOT NULL AUTO_INCREMENT,
-      `user_id` int(10) unsigned DEFAULT NULL,
-      `cwid` varchar(30) DEFAULT NULL,
-      `phone_number` varchar(255) DEFAULT NULL,
-      `prev_notification_method` varchar(255) DEFAULT NULL,
-      `updated` int(10) unsigned DEFAULT NULL,  
-      PRIMARY KEY (`mid`),
-      KEY `phone_number` (`phone_number`),
-      KEY `updated` (`updated`),
-      KEY `cwid` (`cwid`),
-      KEY `user_id` (`user_id`),
-      KEY `prev_notification_method` (`prev_notification_method`)
-    );
-    ";
-    db_query($q);    
-  }
-
-
-  if (intval($old_schema) < 5) {
-    
-    db_query("ALTER TABLE sms_history ADD COLUMN `delivery_status` varchar(255) DEFAULT NULL ");
-    db_query("ALTER TABLE sms_history ADD COLUMN `err_code` varchar(255) DEFAULT NULL ");
-    db_query("ALTER TABLE sms_history ADD COLUMN `err_message` varchar(255) DEFAULT NULL ");
-    db_query("ALTER TABLE sms_history ADD COLUMN `err_friendly_message` varchar(255) DEFAULT NULL ");
-      
-    db_query("ALTER TABLE sms_history ADD INDEX (`delivery_status`) ");
-    db_query("ALTER TABLE sms_history ADD INDEX (`err_code`) ");
-
-    
-  }
-
-  
-  if (intval($old_schema < 6)) {
-      
-    db_query("ALTER TABLE content__engagement ADD COLUMN `field__to_sms_phone` varchar(255) DEFAULT NULL ");
-          
-    db_query("ALTER TABLE content__engagement ADD INDEX (`field__to_sms_phone`) ");
-        
-    
-  }
-
-
-
-
+ 
 } // hook_update
 
 

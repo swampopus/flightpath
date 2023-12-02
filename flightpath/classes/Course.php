@@ -561,7 +561,7 @@ class Course extends stdClass
     $rtn .= $this->specified_repeats . "~";
     $rtn .= intval($this->bool_specified_repeat) . "~";
     
-    $grd = $this->grade;
+    $grd = (string) $this->grade;
     if (strstr($grd, "+")) {
       $grd = str_replace("+", "_pls_", $grd);
     }
@@ -1758,7 +1758,9 @@ class Course extends stdClass
     
     // Since we may have trouble characters in the description (like smart quotes) let's
     // do our best to try to clean it up a little.
-    $this->description = utf8_encode($this->description);
+    //$this->description = utf8_encode($this->description);
+    // utf8_encode is deprecated in php 8.2 and will be removed in PHP 9.  Let's use a more modern approach:
+    $this->description = fp_utf8_encode($this->description);
         
     
     $GLOBALS["fp_course_inventory"][$this->course_id][$cache_catalog_year]["subject_id"] = $this->subject_id;

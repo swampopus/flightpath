@@ -4361,7 +4361,9 @@ function system_init() {
   
   
   // Since current_student_id is coming from the REQUEST, sanitize it.
-  $current_student_id = @$_REQUEST['current_student_id'];
+  //$current_student_id = "";
+  
+  $current_student_id = (string) @$_REQUEST['current_student_id'];
   $current_student_id = str_replace("'", "", $current_student_id);  // remove single quotes
   $current_student_id = str_replace('"', "", $current_student_id);  // remove back quotes
   $current_student_id = str_replace(';', "", $current_student_id);  // remove semicolons

@@ -31,30 +31,5 @@ function notify_install()
 }
 
 function notify_update($old_schema, $new_schema) {
-  if ($old_schema < 2) {
-
-    db_query("CREATE TABLE IF NOT EXISTS `notification_history` (
-      `hid` int unsigned NOT NULL AUTO_INCREMENT,
-      `cid` int DEFAULT NULL,
-      `notification_type` varchar(255) DEFAULT NULL,
-      `content_type` varchar(255) DEFAULT NULL,
-      `to_user_id` int DEFAULT NULL,
-      `notification_method` varchar(255) DEFAULT NULL,
-      `to_address` varchar(255) DEFAULT NULL,
-      `subject` varchar(255) DEFAULT NULL,
-      `msg` longtext DEFAULT NULL, 
-      `submitted` int unsigned DEFAULT NULL,
-      PRIMARY KEY (`hid`) ,
-      KEY `submitted` (`submitted`) ,
-      KEY `cid` (`cid`) ,
-      KEY `to_user_id` (`to_user_id`) ,
-      KEY `subject` (`subject`) ,
-      KEY `notification_method` (`notification_method`) ,
-      KEY `to_address` (`to_address`) ,
-      KEY `content_type` (`content_type`) ,
-      KEY `notification_type` (`notification_type`) 
-    );");
-
-
-  }
+  
 }

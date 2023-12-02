@@ -60,7 +60,8 @@ function blank_degrees_menu_handle_replacement_pattern($str) {
   
   if (strpos($str, "%BLANK_CATALOG_YEAR%") !== 0) {
     // It contains this replacement pattern!
-    $str = str_replace("%BLANK_CATALOG_YEAR%", @$_REQUEST["blank_catalog_year"], $str);
+    $bcy = (string) @$_REQUEST["blank_catalog_year"];
+    $str = str_replace("%BLANK_CATALOG_YEAR%", $bcy, $str);
   }
   
   $school_id = 0;
@@ -365,7 +366,7 @@ function blank_degrees_select_degree_form() {
   );
     
   
-  @$blank_catalog_year = $_REQUEST["blank_catalog_year"];
+  $blank_catalog_year = (string) @$_REQUEST["blank_catalog_year"];
   
   // If we used the word "current" for catalog_year, then find out what the current is.
   if (strtolower($blank_catalog_year) == "current") {

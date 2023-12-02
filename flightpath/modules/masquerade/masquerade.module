@@ -107,6 +107,8 @@ function masquerade_init() {
 function masquerade_form() {
   $form = array();
   
+  $m = 1;
+  
   $form["mark" . $m++] = array(
     "value" => "<p>" . t("Use this form to decide which user you wish to impersonate.  Once selected,
                   you will experience FlightPath as that user would until you log out.") . "</p>",
@@ -115,7 +117,7 @@ function masquerade_form() {
   $form["username_or_cwid"] = array(
     "label" => t("Last name, Email, Username, or CWID:"),
     "type" => "textfield",
-    "value" => $_REQUEST["username_or_cwid"],
+    "value" => (string) @$_REQUEST["username_or_cwid"],
     "description" => t("Enter the last name, email, username, or CWID of the person you wish to impersonate.  Will display the first 20 results only.
                       <br>Ex:  peacocrj7  or  10022312."),
   );
@@ -126,7 +128,7 @@ function masquerade_form() {
     "value" => t("Look up"),
   );
   
-  $users = $_SESSION["masquerade_lookup_users"];
+  $users = @$_SESSION["masquerade_lookup_users"];
   if (is_array($users) && count($users) > 0) {
     $form["mark" . $m++] = array(
       "value" => "<hr><p>" . t("Please click on the user you wish to impersonate:") . "</p>

@@ -396,7 +396,7 @@ function engagements_display_advisee_engagements_page() {
                    AND field__engagement_type IN ('email', 'txt_msg')   
                    AND (field__manual_entry IS NULL OR field__manual_entry != 'Y')    
                    GROUP BY a.cid                       
-                   $order_by", $filter_params, $limit, 0, "SELECT COUNT(DISTINCT(a.cid)) FROM content__engagement a, content n
+                   $order_by", array(), $limit, 0, "SELECT COUNT(DISTINCT(a.cid)) FROM content__engagement a, content n
                                                                                                          WHERE a.vid = n.vid                                                                                                         
                                                                                                          AND a.cid = n.cid
                                                                                                          AND n.delete_flag = 0
@@ -462,10 +462,11 @@ function engagements_display_advisee_engagements_page() {
     $disp_type = $content->field__engagement_type['display_value'];
     
     
+    $status_value = (string) @$content->field__alert_status['value'];
         
     $rtn .= "
-      <tr class='{$content->field__alert_status['value']} $extra_class'>
-        <td class='actions'>$view_link $edit_link $remove_link $student_profile_link</td>
+      <tr class='$status_value $extra_class'>
+        <td class='actions'>$view_link $student_profile_link</td>
         ";
      $rtn .= "<td class='student'>$student_name</td>";
      $rtn .= "        

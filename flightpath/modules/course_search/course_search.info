@@ -1,4 +1,3 @@
 name = Course Search
 description = Lets users search through courses and descriptions.
-core = 6.x 
-schema = 2
+core = 7.x 

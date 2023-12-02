@@ -5,3 +5,4 @@ FlightPath 7.x Changelog
   Initial move to new 7.x branch, from the 6.x branch.  The primary goal of this branch (while in a "dev" state) is
   to move to compatibility with PHP 8.x.
 
+  Cleaning code of deprecated & warning messages.

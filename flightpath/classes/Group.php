@@ -545,13 +545,13 @@ class Group extends stdClass
   		$this->icon_filename = trim($cur["icon_filename"]);
       if ($this->icon_filename == "") $this->icon_filename = "major.gif"; // set a default!
   		$this->group_name = trim($cur["group_name"]);
-  		$this->data_entry_comment = trim($cur["data_entry_comment"]);
+  		$this->data_entry_comment = trim((string) $cur["data_entry_comment"]);
   		$this->priority = trim($cur["priority"]);
-  		$this->definition = trim($cur["definition"]);
+  		$this->definition = trim((string) $cur["definition"]);
   		$this->db_delete_flag = trim($cur["delete_flag"]);
   		$this->db_catalog_repeat = trim($cur["catalog_repeat"]);
   		$this->catalog_year = trim($cur["catalog_year"]);
-  		$this->public_note = trim($cur["public_note"]);
+  		$this->public_note = trim((string) $cur["public_note"]);
   		$this->school_id = intval($cur["school_id"]);
       
     }

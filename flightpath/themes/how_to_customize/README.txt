@@ -13,16 +13,16 @@ STEPS:
 ==================
 
 
-1) Copy the "custom_fp6_clean" directory and all of
+1) Copy the "custom_fp7_clean" directory and all of
    its contents to custom/themes/.
 
    For example, in a linux/unix environment, the following commands would work:
    
-       cp -r /path/to/flightpath/themes/how_to_customize/custom_fp6_clean /path/to/flightpath/custom/themes/.
+       cp -r /path/to/flightpath/themes/how_to_customize/custom_fp7_clean /path/to/flightpath/custom/themes/.
    
    
 2) Log into FlightPath as an administrator, visit the System Settings, and set the new
-   "Custom - FlightPath 6 Clean Theme" theme as the default theme.
+   "Custom - FlightPath 7 Clean Theme" theme as the default theme.
 
 
 3) You may now edit the theme's custom.css file to change or override any of the core

@@ -128,18 +128,18 @@ function course_search_menu_handle_replacement_pattern($str) {
   
   if (strpos($str, "%SEV_FILTER%") !== 0) {
     // It contains this replacement pattern!
-    $str = str_replace("%SEV_FILTER%", @$_GET["sev_filter"], $str);
+    $str = str_replace("%SEV_FILTER%", (@$_GET["sev_filter"] OR ""), $str);
   }
 
   if (strpos($str, "%TYPE_FILTER%") !== 0) {
     // It contains this replacement pattern!
-    $str = str_replace("%TYPE_FILTER%", @$_GET["type_filter"], $str);
+    $str = str_replace("%TYPE_FILTER%", (@$_GET["type_filter"] OR ""), $str);
   }
   
   
   if (strpos($str, "%PAGE%") !== 0) {
     // It contains this replacement pattern!
-    $str = str_replace("%PAGE%", @$_GET["page"], $str);
+    $str = str_replace("%PAGE%", (@$_GET["page"] OR ""), $str);
   }
     
   

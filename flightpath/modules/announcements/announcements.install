@@ -33,13 +33,7 @@ CREATE TABLE `content__announcement` (
 
 
 function announcements_update($old_schema, $new_schema) {
-  
-  if (intval($old_schema) < 2) {
-    // Convert text fields to longtext.
-    db_query("ALTER TABLE content__announcement MODIFY field__msg LONGTEXT");
-    fpm("Altered content__announcement table to change 'field__msg' to LONGTEXT.");
-  }  
-    
+     
 }
 
 

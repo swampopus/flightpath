@@ -4429,11 +4429,11 @@ function draw_menu_items($menu_array) {
       $hours = "0";
     }
     
-    $grade = $course->grade;
+    $grade = (string) $course->grade;
 
     $dispgrade = $grade;
     // If there is a MID, then this is a midterm grade.
-    $dispgrade = str_replace("MID","<span class='superscript'>" . t("mid") . "</span>",$dispgrade);
+    $dispgrade = str_replace("MID","<span class='superscript'>" . t("mid") . "</span>", $dispgrade);
 
     if (strtoupper($grade) == "E")
     { // Currently enrolled.  Show no grade.

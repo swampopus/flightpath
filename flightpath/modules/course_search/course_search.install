@@ -5,7 +5,7 @@
  * Implementation of hook_install
  */
 function course_search_install() {
-  if (!db_table_exists("course_rotation_schedule")) {
+  
     $query = "
         CREATE TABLE `course_rotation_schedule` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -23,10 +23,10 @@ function course_search_install() {
 ); ";
   
     db_query($query);
-  }
+  
   
 
-  if (!db_table_exists("course_syllabi")) {
+  
     $query = "
         CREATE TABLE `course_syllabi` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -40,7 +40,7 @@ function course_search_install() {
 );  ";
           
     db_query($query);    
-  }
+  
   
 } // hook_install
 
@@ -51,17 +51,6 @@ function course_search_install() {
  */
 function course_search_update($old_schema, $new_schema) {
 
-  if ($old_schema < 2) {
-    // Add new column to course_rotation_schedule to keep up with seat capacity.
-    db_query("ALTER TABLE course_rotation_schedule ADD COLUMN `capacity` int(11)  ");
-    db_query("ALTER TABLE course_rotation_schedule ADD INDEX (`capacity`) ");
-    
-    // Also add extra indexes for better searching
-    db_query("ALTER TABLE course_rotation_schedule ADD INDEX (`course_id`) ");
-    db_query("ALTER TABLE course_rotation_schedule ADD INDEX (`term_id`) ");
-    db_query("ALTER TABLE course_rotation_schedule ADD INDEX (`posted`) ");
-
-  }
-
+  
 
 } // hook_update

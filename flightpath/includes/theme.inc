@@ -33,7 +33,7 @@ function theme_table_header_sortable($headers = array(), $element_id = "default"
   $rtn = "";  
   $rtn .= "<tr>";
   
-  $filter = trim(@$_GET['filter']); // if there is an existing filter we need to preserve.
+  $filter = trim((string) @$_GET['filter']); // if there is an existing filter we need to preserve.
   $filter_line = "";
   if ($filter) {
     $filter_line = "&filter=" . $filter;

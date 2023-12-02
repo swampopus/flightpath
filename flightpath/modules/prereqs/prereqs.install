@@ -14,11 +14,11 @@
 function prereqs_install() {
   
   $q = "
-            CREATE TABLE `prereqs_prereqs` (
-              `course_id` int(11) DEFAULT '0',
-              `prereq_data` text,
-              KEY `course_id` (`course_id`)
-            );   
+          CREATE TABLE `prereqs_prereqs` (
+            `course_id` int(11) DEFAULT '0',
+            `prereq_data` longtext,
+            KEY `course_id` (`course_id`)
+          );   
           ";
   
   db_query($q);   
@@ -32,9 +32,5 @@ function prereqs_install() {
 
 function prereqs_update($old_schema, $new_schema) {
   
-  if (intval($old_schema) < 2) {    
-    db_query("ALTER TABLE prereqs_prereqs MODIFY prereq_data LONGTEXT");
-    fpm("Altered prereqs table to change TEXT to LONGTEXT.");
-  }  
     
 }

@@ -68,33 +68,7 @@ CREATE TABLE `content__activity_record` (
 
 function alerts_update($old_schema, $new_schema) {
   
-  if (intval($old_schema) < 2) {
-    // Convert text fields to longtext.
-    db_query("ALTER TABLE content__alert MODIFY field__alert_msg LONGTEXT");
-    fpm("Altered content__alert to use LONGTEXT instead of just TEXT.");
-    
-  }  
-    
-  if (intval($old_schema) < 3) {
-    // Get rid of "field__department", add "field__tags"
-    db_query("ALTER TABLE content__alert DROP COLUMN field__department ");
-    db_query("ALTER TABLE content__alert ADD COLUMN `field__tags` text DEFAULT NULL ");
-    db_query("ALTER TABLE content__alert ADD INDEX (`field__tags`(500)) ");
-    
-    
-  }  
-        
-        
-  if ($old_schema < 4) {
-    db_query('ALTER TABLE content__alert ADD COLUMN field__target_faculty_id varchar(255) DEFAULT NULL');
-    db_query('ALTER TABLE content__alert ADD COLUMN field__exclude_advisor tinyint(4) DEFAULT 0');
-    
-    db_query("ALTER TABLE content__alert ADD INDEX (`field__exclude_advisor`) ");
-    db_query("ALTER TABLE content__alert ADD INDEX (`field__target_faculty_id`) ");
       
-    
-  }
-    
     
 } // hook_update
 

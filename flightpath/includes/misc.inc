@@ -30,6 +30,58 @@ function friendly_timezone($str) {
   
 } 
  
+
+// From https://php.watch/versions/8.2/utf8_encode-utf8_decode-deprecated
+// In PHP 8.2, utf8_encode and _decode are deprecated.  This code replicates
+// the same functionality as a drop-in replacement.
+function fp_utf8_encode(string $s) {
+    $s .= $s;
+    $len = \strlen($s);
+
+    for ($i = $len >> 1, $j = 0; $i < $len; ++$i, ++$j) {
+        switch (true) {
+            case $s[$i] < "\x80": $s[$j] = $s[$i]; break;
+            case $s[$i] < "\xC0": $s[$j] = "\xC2"; $s[++$j] = $s[$i]; break;
+            default: $s[$j] = "\xC3"; $s[++$j] = \chr(\ord($s[$i]) - 64); break;
+        }
+    }
+
+    return substr($s, 0, $j);
+}
+
+/**
+ * @see fp_utf8_encode for an explanation of why this function exists. 
+ */
+function fp_utf8_decode(string $string) {
+    $s = (string) $string;
+    $len = \strlen($s);
+
+    for ($i = 0, $j = 0; $i < $len; ++$i, ++$j) {
+        switch ($s[$i] & "\xF0") {
+            case "\xC0":
+            case "\xD0":
+                $c = (\ord($s[$i] & "\x1F") << 6) | \ord($s[++$i] & "\x3F");
+                $s[$j] = $c < 256 ? \chr($c) : '?';
+                break;
+
+            case "\xF0":
+                ++$i;
+                // no break
+
+            case "\xE0":
+                $s[$j] = '?';
+                $i += 2;
+                break;
+
+            default:
+                $s[$j] = $s[$i];
+        }
+    }
+
+    return substr($s, 0, $j);
+}
+
+
  
  
  
@@ -1024,6 +1076,10 @@ function fp_no_html_xss($string) {
 function filter_markup($str, $type = "basic") {
 
   if (!$str) return $str;
+
+  if (!is_string($str)) {
+    return $str;  
+  }
 
   // Use the DOM functions to repair any mismatched HTML.
   $doc = new DOMDocument();
@@ -2215,6 +2271,8 @@ function fp_goto($path, $query = "") {
 function l($text, $path, $query = "", $attributes = array()) {
   $rtn = "";
 
+  if (!$query) $query = "";  // For compatibility with PHP 8.2, make sure it isn't NULL or FALSE
+
   if ($path == "<front>") {
     $path = variable_get("front_page", "main");
   }
@@ -2250,6 +2308,7 @@ function l($text, $path, $query = "", $attributes = array()) {
  */
 function fp_url($path, $query = "", $include_base_path = TRUE) {
   
+  if (!$query) $query = "";  // For compatibility with PHP 8.2, make sure it isn't NULL or FALSE
   
   if ($path == "<front>") {    
     $path = variable_get("default_home_path", "main");

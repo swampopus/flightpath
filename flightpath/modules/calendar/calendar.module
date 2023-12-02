@@ -933,7 +933,7 @@ function calendar_display_user_appointment_settings_page() {
   $unavail_time = content_get_content_for_faculty_id('schedule_unavailable_time', $user->cwid);
   foreach($unavail_time as $cid => $content) {
       
-    $tz = $content->field__timezone['value'];
+    $tz = (string) @$content->field__timezone['value'];
     $ftz = friendly_timezone($tz);
     
     $start_time = date('g:ia', convert_time(strtotime("2020-01-01 " . $content->field__start_time['value']), 'UTC', $tz));    
@@ -3520,7 +3520,7 @@ function calendar_get_ics_invitation_string($event_title, $location, $descriptio
  * 
  * This function comes from: https://gist.github.com/hugowetterberg/81747
  */
-function calendar_ics_split($preamble = "DESCRIPTION:", $value) {
+function calendar_ics_split($preamble = "DESCRIPTION:", $value = "") {
   $value = trim($value);
   $value = strip_tags($value);
   $value = preg_replace('/\n+/', ' ', $value);

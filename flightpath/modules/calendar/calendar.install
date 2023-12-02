@@ -97,27 +97,6 @@ CREATE TABLE `content__schedule_unavailable_time` (
   
 
 function calendar_update($old_schema, $new_schema) {
-  
-  if (intval($old_schema) < 2) {
-    // Convert text fields to longtext.
-    db_query("ALTER TABLE content__appointment MODIFY field__appointment_msg LONGTEXT");
-    db_query("ALTER TABLE content__appointment MODIFY field__video_data LONGTEXT");
-    db_query("ALTER TABLE content__schedule_event_type MODIFY field__additional_email_msg LONGTEXT");
-    db_query("ALTER TABLE content__schedule_event_type MODIFY field__description LONGTEXT");
-    
-  } 
-
-  
-  if (intval($old_schema) < 3) {
-    // Converted ics_url to text
-    db_query("DROP INDEX `field__ics_url` ON content__schedule_unavailable_time ");
-    db_query("ALTER TABLE content__schedule_unavailable_time MODIFY field__ics_url text");
-    db_query("CREATE INDEX `field__ics_url` ON content__schedule_unavailable_time (`field__ics_url`(700)) ");
-    
-  } 
-  
-
-
 
     
 }

@@ -1,4 +1,4 @@
 name = Stats
 description = Look up various usage stats & run reports about FlightPath
-core = 6.x
+core = 7.x
 requires = batch

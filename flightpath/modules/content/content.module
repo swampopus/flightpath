@@ -1143,7 +1143,7 @@ function content_edit_content_form($type = "", $cid = "") {
         // Similar to datetime-local, if this is a "time" field, then it has been stored as UTC in the database, and now
         // needs to be converted to local timezone.
         if ($form[$field_name]['type'] == 'time') {
-          if (trim($value) != '') {
+          if ($value) {
             $form[$field_name]["value"] = date('H:i', convert_time(strtotime($value)));            
           }
         }
@@ -1236,11 +1236,11 @@ function content_edit_content_form($type = "", $cid = "") {
         // If this is a fieldset, then we need to assign values to its ELEMENTS.  If not empty, then OPEN the cfieldset!
         foreach ($form[$field_name]['elements'] as $c => $efields) {
           foreach ($efields as $efield_name => $efield_details) {
-            $value = $content->{"field__$efield_name"}['value'];
+            $value = (string) @$content->{"field__$efield_name"}['value'];
             
             if ($cid == 'new') {
               // value won't be anything.  Use value attr from the form as the initial value
-              $value = @$efield_details['value'];
+              $value = (string) @$efield_details['value'];
             }            
             
             $efield_details['value'] = $value;
@@ -1265,7 +1265,7 @@ function content_edit_content_form($type = "", $cid = "") {
             
             
             
-            if (trim($value)) {
+            if ($value) {
               $form[$field_name]['start_closed'] = FALSE;
             }
           }
@@ -2116,12 +2116,13 @@ function content_content_load(&$content) {
   foreach ($types[$content->type]['fields'] as $fieldname => $details) {
     
     if ($details['type'] != 'cfieldset') {
-      $val = @$fieldvals['field__' . $fieldname];
+      $val = (string) @$fieldvals['field__' . $fieldname];
       
       if (is_serialized_string($val)) {
         $val = unserialize($val);
       }
       
+           
       $content->{'field__' . $fieldname} = array('value' => $val, 'field' => $details);
       
       $display_value = $val;
@@ -2132,9 +2133,11 @@ function content_content_load(&$content) {
       }
       else {        
         // Always assumed to be "plain" if no filter is set.
-        $display_value = filter_markup($display_value, "plain");        
-        // Need to add in line breaks if this was plain.
-        $display_value = nl2br(trim($display_value));        
+        if (is_string($display_value)) {
+          $display_value = filter_markup($display_value, "plain");                
+          // Need to add in line breaks if this was plain.
+          $display_value = nl2br(trim($display_value));
+        }        
       }
       
       // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
@@ -2184,25 +2187,31 @@ function content_content_load(&$content) {
       // If this was a set of checkboxes ($val is an array), we want to display the label the values went to.
       if ($details['type'] == 'checkboxes') {
         $display_value = "<div class='checkbox-values checkbox-values-field__$fieldname'>";
-        // Convert val into an array.  It will look like:  ~~key~~key~~key~~ etc.        
-        @$temp = explode("~~", $val);
-        if (!is_array($temp)) $temp = array();
-                
-        $val = array();
-        foreach ($temp as $k) {
-          if (trim($k) == "") continue;
-          $val[$k] = $k;
+        // Convert val into an array.  It will look like:  ~~key~~key~~key~~ etc.
+        // Only do this if it is not ALREADY an array.        
+        if (is_string($val)) {        
+        
+          @$temp = explode("~~", $val);
+          if (!is_array($temp)) $temp = array();
+                  
+          $val = array();
+          foreach ($temp as $k) {
+            if (trim($k) == "") continue;
+            $val[$k] = $k;
+          }
+          
         }
         
-                
         if (is_array($val)) {
           foreach ($val as $k => $v) {  
-            $temp = @$details['options'][$v];
+            $temp = @$details['options'][$v];            
             if ($temp != "") $display_value .= "<div class='checkbox-val'>$temp</div>";
           }
         }
+        
         $display_value .= "</div>";
         $content->{'field__' . $fieldname}['value'] = $val;
+        
       }
       
       if ($details['type'] == 'file') {
