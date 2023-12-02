@@ -2891,11 +2891,11 @@ function system_handle_form_submit() {
 
   if (!form_has_errors() && isset($form["#redirect"]) && is_array($form["#redirect"])) { 
     $redirect_path = $form["#redirect"]["path"];
-    $redirect_query = $form["#redirect"]["query"];    
+    $redirect_query = (string) @$form["#redirect"]["query"];    
   }
   else {
     $redirect_path = @$_REQUEST["default_redirect_path"];
-    $redirect_query = @$_REQUEST["default_redirect_query"];
+    $redirect_query = (string) @$_REQUEST["default_redirect_query"];
 
     
     // To help prevent directory traversal attacks, the redirect_path cannot contain periods (.) and semi-colons, and other trouble characters

@@ -1385,7 +1385,8 @@ function fp_validate_utf8($text) {
  * @return string
  */
 function fp_get_machine_readable($str) {
- return preg_replace('@[^a-zA-Z0-9_]+@','_',$str);  
+ if (!$str) return (string) $str;
+ return preg_replace('@[^a-zA-Z0-9_]+@', '_', $str);  
 }
 
  
@@ -2228,8 +2229,9 @@ function fp_goto($path, $query = "") {
   
   // Were we sent an array instead of separate values?  That's OK if so, let's separate them back out.
   if (is_array($path)) {
-    $query = @$path[1];
-    $path = @$path[0];
+    $path = @$path[0];  
+    $query = (string) @$path[1];
+    
   }
   
     

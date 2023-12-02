@@ -936,7 +936,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
       /**
        * This degree is in fact a track.
        */
-      if (strstr($degree_plan->major_code, "_")) {
+      if ($degree_plan->major_code && strstr($degree_plan->major_code, "_")) {
         $degree_title = $degree_plan->get_title2(TRUE, TRUE);
         
         if ($degree_plan->db_allow_dynamic == 0) {
@@ -952,7 +952,7 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
       }
       
       
-      if ($screen->screen_mode == "detailed") {
+      if (isset($screen) && $screen->screen_mode == "detailed") {
         $degree_title .= " ($degree_plan->major_code)";
       }
 
@@ -1868,7 +1868,8 @@ function fp_render_sub_tab_array($tab_array) {
     $active = @$tab["active"];
     $type = @$tab["type"];  
     
-      
+    if (!$title) $title = "";
+    
     $extra_class = "";
     if ($active) $extra_class = "gradbutton-active";
     

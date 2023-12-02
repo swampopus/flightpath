@@ -14,28 +14,28 @@ class Course extends stdClass
   
   
   // Database & misc related:
-  public $random_id, $db_advised_courses_id;
+  public $random_id = 0, $db_advised_courses_id = 0;
   public $bool_placeholder, $db, $db_substitution_id_array, $db_unassign_transfer_id;
   public $db_exclude, $data_entry_comment, $array_index, $data_entry_value, $db_group_attributes;
   public $db_group_requirement_id;  // the id from the group_requirements table where this was specified.
   public $db_degree_requirement_id;  // the id from the degree_requirements table where this was specified.
-  public $extra_attribs;
+  public $extra_attribs = '';
 
   // Course catalog data related:
-  public $subject_id, $course_num, $course_id, $requirement_type, $catalog_year;
-  public $min_hours, $max_hours, $list_prereqs, $repeat_hours;
-  public $array_valid_names, $school_id;
+  public $subject_id = '', $course_num = '', $course_id = 0, $requirement_type = '', $catalog_year = '';
+  public $min_hours = 0, $max_hours = 0, $list_prereqs = '', $repeat_hours = 0;
+  public $array_valid_names, $school_id = 0;
 
   // Student record related:
-  public $bool_taken, $term_id, $section_number, $quality_points, $grade, $db_grade, $level_code;
-  public $bool_transfer, $institution_id, $institution_name, $course_transfer;
+  public $bool_taken, $term_id = '', $section_number = '', $quality_points = 0, $grade = '', $db_grade = '', $level_code = '';
+  public $bool_transfer, $institution_id = '', $institution_name = '', $course_transfer;
   public $transfer_eqv_text, $transfer_footnote;
   
   public $details_by_degree_array;  // meant to hold all details about a substitution, or anything else, keyed by degree id.
   
   // Major/Degree or Group Requirement related:
-  public $min_grade, $specified_repeats, $bool_specified_repeat, $required_on_branch_id;
-  public $assigned_to_semester_num, $appears_in_semester_nums, $req_by_degree_id;
+  public $min_grade = '', $specified_repeats = '', $bool_specified_repeat, $required_on_branch_id;
+  public $assigned_to_semester_num = '', $appears_in_semester_nums, $req_by_degree_id;
   public $assigned_to_degree_ids_array, $assigned_to_group_ids_array;
 
 
@@ -48,11 +48,11 @@ class Course extends stdClass
 
 
   // Display related:
-  public $display_status, $icon_filename, $description, $title;
-  public $title_text, $temp_flag, $disp_for_group_id;
+  public $display_status = '', $icon_filename = '', $description = '', $title = '';
+  public $title_text = '', $temp_flag, $disp_for_group_id;
   public $bool_unselectable;
   public $bool_hide_grade, $bool_ghost_hour, $bool_ghost_min_hour;
-  public $unique_id;
+  public $unique_id = '';
 
   
 /**
@@ -614,8 +614,8 @@ class Course extends stdClass
 
 
     $rtn .= fp_join_assoc($this->db_substitution_id_array) . "~";
-    $rtn .= $this->min_hours * 1 . "~";
-    $rtn .= $this->max_hours *1 . "~";
+    $rtn .= floatval($this->min_hours)  . "~";
+    $rtn .= floatval($this->max_hours)  . "~";
 
     //$rtn .= intval($this->get_bool_substitution_new_from_split()) . "~";
     $rtn .= fp_join_assoc($this->get_degree_details_data_string("bool_substitution_new_from_split")) . "~";

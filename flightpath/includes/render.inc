@@ -500,8 +500,6 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   // Make sure the "css name" is friendly.
   $cssname = fp_get_machine_readable($name);
   
-  
-  
   if ($type == "do_not_render") return;  // not supposed to render this element.
   
   // Does the name start with a # character?  If so, do not attempt to render.
@@ -703,9 +701,8 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
     if ($autocomplete_path != "") {
       fp_add_js(array("autocomplete_fields" => array(array("id" => "element-$cssname", "path" => $autocomplete_path))), 'setting');            
     }  
-    
-    
-    $value = htmlentities((string) $value, ENT_QUOTES);
+        
+    $value = htmlentities((string) $value, ENT_QUOTES);        
     $rtn .= "<input type='$type' name='$name' id='element-$cssname' size='$size' maxlength='$maxlength' value='$value' $attributes>";
   }
   

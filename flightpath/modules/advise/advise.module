@@ -1169,13 +1169,13 @@ function advise_display_popup_group_select() {
   
   $db = get_global_database_handler();
   
-  $blank_degree_id = trim(@$_GET["blank_degree_id"]);
-  $course_id = trim(@$_GET["course_id"]);  
-  $group_id = trim(addslashes(@$_GET["group_id"]));
-  $group_hours_remaining = trim(addslashes(@$_GET["group_hours_remaining"]));
-  $semester_num = trim(addslashes(@$_GET["semester_num"]));
-  $req_by_degree_id = trim(addslashes(@$_REQUEST["req_by_degree_id"]));
-  $perform_action2 = @$_REQUEST["perform_action2"]; 
+  $blank_degree_id = trim((string) @$_GET["blank_degree_id"]);
+  $course_id = trim((string) @$_GET["course_id"]);  
+  $group_id = trim((string) @$_GET["group_id"]);
+  $group_hours_remaining = trim((string) @$_GET["group_hours_remaining"]);
+  $semester_num = trim((string) @$_GET["semester_num"]);
+  $req_by_degree_id = trim((string) @$_REQUEST["req_by_degree_id"]);
+  $perform_action2 = (string) @$_REQUEST["perform_action2"]; 
   
   $school_id = db_get_school_id_for_student_id($current_student_id);
     
@@ -1844,7 +1844,7 @@ function advise_what_if_selection_form($bool_undergrad_only = TRUE) {
         foreach ($tracks as $track) {          
           $t_degree_plan = $db->get_degree_plan($major_code . "|_" . $track, $catalog_year, TRUE, $student_school_id);
           $t_degree_plan->load_degree_plan_ancillary();
-          $degree_class = trim($t_degree_plan->degree_class);
+          $degree_class = $t_degree_plan->degree_class;
           if ($degree_class) {
             $tracks_by_class[$degree_class][] = $t_degree_plan;  
           }       
@@ -2562,7 +2562,7 @@ function advise_init_screen() {
   advise_init_advising_variables();    
 
 
-  $perform_action = trim(addslashes(@$_REQUEST["perform_action"]));
+  $perform_action = trim((string) @$_REQUEST["perform_action"]);
 
   if (@$_REQUEST["clear_session"] == "yes") {
     //advise_save_advising_variables_to_db();

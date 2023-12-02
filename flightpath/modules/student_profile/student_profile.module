@@ -195,8 +195,8 @@ function student_profile_display_student_profile_page() {
   //////
   
   
-  $enrollment_code = trim(@$student_user->attributes['enrollment_code']);
-  if ($enrollment_code == "") $enrollment_code = "N/A";
+  $enrollment_code = @$student_user->attributes['enrollment_code'];
+  if (!$enrollment_code || $enrollment_code == '') $enrollment_code = "N/A";
   
   $profile_items['right_side']['enrollment_code'] = array(
     'label' => t('Enrollment Code:'),
@@ -205,8 +205,8 @@ function student_profile_display_student_profile_page() {
   );
   
   
-  $financial_aid = trim(@$student_user->attributes['financial_aid']);
-  if ($financial_aid == "") $financial_aid = t("None");
+  $financial_aid = @$student_user->attributes['financial_aid'];
+  if (!$financial_aid || $financial_aid == "") $financial_aid = t("None");
     
   $profile_items['right_side']['financial_aid'] = array(
     'label' => t('Financial Aid:'),

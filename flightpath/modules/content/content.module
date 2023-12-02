@@ -820,7 +820,7 @@ function content_view_content($cid) {
   
   fp_add_css(fp_get_module_path('content') . '/css/content.css');
     
-  if ($_GET['content_tabs'] == 'false') { // the string "false", not FALSE
+  if (isset($_GET['content_tabs']) && $_GET['content_tabs'] == 'false') { // the string "false", not FALSE
     fp_add_body_class('content-tabs-false');
   }    
     
@@ -1061,7 +1061,7 @@ function content_edit_content_form($type = "", $cid = "") {
     if (is_array($types[$type]['settings']['title'])) {
       // Use array_merge to just override with whatever we have in our settings for the title.
       $form['title'] = array_merge($form['title'], $types[$type]['settings']['title']);
-      
+
       if (isset($form['title']['auto']) && $form['title']['auto'] == TRUE) {
         // We will set the form to an automatic title, and hide.
         $form['title']['value'] = $type . ' content saved on ' . format_date(convert_time(time()));
@@ -1120,7 +1120,7 @@ function content_edit_content_form($type = "", $cid = "") {
     foreach($types[$type]["fields"] as $field_name => $field_details) {
                   
       $form[$field_name] = $field_details;      
-      if ($field_details['type'] != 'cfieldset') {
+      if (isset($field_details['type']) && $field_details['type'] != 'cfieldset') {
       
         $value = NULL;
         if (isset($content->{"field__$field_name"}['value'])) {
@@ -1131,10 +1131,12 @@ function content_edit_content_form($type = "", $cid = "") {
           $value = @$form[$field_name]['value'];
         }
         
+        if (!$value) $value = '';
+        
         $form[$field_name]['value'] = $value;
         
         // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly. (it was stored as UTC in database)             
-        if ($form[$field_name]['type'] == 'datetime-local') {
+        if (isset($form[$field_name]['type']) && $form[$field_name]['type'] == 'datetime-local') {
           if (trim($value) != '') {
             $form[$field_name]["value"] = date('Y-m-d\TH:i', convert_time(strtotime($value)));  
           }
@@ -1142,7 +1144,7 @@ function content_edit_content_form($type = "", $cid = "") {
         
         // Similar to datetime-local, if this is a "time" field, then it has been stored as UTC in the database, and now
         // needs to be converted to local timezone.
-        if ($form[$field_name]['type'] == 'time') {
+        if (isset($form[$field_name]['type']) && $form[$field_name]['type'] == 'time') {
           if ($value) {
             $form[$field_name]["value"] = date('H:i', convert_time(strtotime($value)));            
           }
@@ -1151,10 +1153,10 @@ function content_edit_content_form($type = "", $cid = "") {
         
         // If this is a file, we want to have a way to REMOVE the file, so we can upload a different one, or simply to
         // have no file there at all.
-        if ($form[$field_name]['type'] == 'file') {
+        if (isset($form[$field_name]['type']) && $form[$field_name]['type'] == 'file') {
           $limit = intval(@$form[$field_name]['limit']);
           
-          $allowed = trim(@$form[$field_name]['allowed']);
+          $allowed = @$form[$field_name]['allowed'];
           if (!$allowed) {
             $allowed = "txt, pdf, doc, docx, xls, xlsx, ppt, pptx, rtf, odt, jpg, jpeg, png, gif, zip, 7z";  // default safe files
           }
@@ -1234,42 +1236,45 @@ function content_edit_content_form($type = "", $cid = "") {
       } // is not cfieldset
       else {
         // If this is a fieldset, then we need to assign values to its ELEMENTS.  If not empty, then OPEN the cfieldset!
-        foreach ($form[$field_name]['elements'] as $c => $efields) {
-          foreach ($efields as $efield_name => $efield_details) {
-            $value = (string) @$content->{"field__$efield_name"}['value'];
-            
-            if ($cid == 'new') {
-              // value won't be anything.  Use value attr from the form as the initial value
-              $value = (string) @$efield_details['value'];
-            }            
-            
-            $efield_details['value'] = $value;
-            
-            // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
-            if ($efield_details['type'] == 'datetime-local') {
-              if (trim($value) != '') {
-                $value = date('Y-m-d\TH:i', convert_time(strtotime($value)));
+        if (isset($form[$field_name]['elements'])) {
+          foreach ($form[$field_name]['elements'] as $c => $efields) {
+            foreach ($efields as $efield_name => $efield_details) {
+              $value = (string) @$content->{"field__$efield_name"}['value'];
+              
+              if ($cid == 'new') {
+                // value won't be anything.  Use value attr from the form as the initial value
+                $value = (string) @$efield_details['value'];
+              }            
+              
+              $efield_details['value'] = $value;
+              
+              // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
+              if ($efield_details['type'] == 'datetime-local') {
+                if (trim($value) != '') {
+                  $value = date('Y-m-d\TH:i', convert_time(strtotime($value)));
+                }
               }
-            }
-
-            // Similar to datetime-local, if this is a "time" field, then it has been stored as UTC in the database, and now
-            // needs to be converted to local timezone.
-            if ($efield_details['type'] == 'time') {
-              if (trim($value) != '') {
-                $value = date('H:i', convert_time(strtotime($value)));            
+  
+              // Similar to datetime-local, if this is a "time" field, then it has been stored as UTC in the database, and now
+              // needs to be converted to local timezone.
+              if ($efield_details['type'] == 'time') {
+                if (trim($value) != '') {
+                  $value = date('H:i', convert_time(strtotime($value)));            
+                }
               }
-            }
-
-            
-            $form[$field_name]['elements'][$c][$efield_name]["value"] = $value;
-            
-            
-            
-            if ($value) {
-              $form[$field_name]['start_closed'] = FALSE;
-            }
-          }
-        }
+  
+              
+              $form[$field_name]['elements'][$c][$efield_name]["value"] = $value;
+              
+              
+              
+              if ($value) {
+                $form[$field_name]['start_closed'] = FALSE;
+              }
+            } // foreach (inner)
+          } //foreach (outer) 
+          
+        } // if isset 'elements'
         
       } // else is fieldset
     }    
@@ -1526,6 +1531,7 @@ function content_edit_content_form_submit(&$form, &$form_state) {
     // find out if we should redirect anywhere in particular for this deletion.
     if (isset($form['#redirect'])) {
       fp_add_message(t("The content was deleted successfully."));  
+      if (!isset($form['#redirect']['query'])) $form['#redirect']['query'] = "";
       $form['#redirect']['query'] .= "&del=" . $content->cid;
     }
     else {

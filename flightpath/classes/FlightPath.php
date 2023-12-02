@@ -1348,7 +1348,7 @@ class FlightPath extends stdClass
     //var_dump($_POST);
     //    die;
     // We have changed tracks, so we are to edit the student degrees table.
-    if ($_POST["advising_update_student_degrees_flag"] == "true") {
+    if (isset($_POST["advising_update_student_degrees_flag"]) && $_POST["advising_update_student_degrees_flag"] == "true") {
       // Begin by deleting all the "editable" rows for this student
       // in student_degrees.
       db_query("DELETE FROM student_degrees 
@@ -1402,9 +1402,9 @@ class FlightPath extends stdClass
 
         
     // Is there anything in "log_addition" which we should write to the log?
-    if ($_POST["log_addition"] != "")
+    if (isset($_POST["log_addition"]) && $_POST["log_addition"])
     {
-      $temp = explode("~",$_POST["log_addition"]);
+      $temp = explode("~", (string) $_POST["log_addition"]);
       if ($temp[0] == "change_term") {        
         watchdog("change_term", "$student_id," . $temp[1]);        
       }
@@ -1544,7 +1544,7 @@ class FlightPath extends stdClass
       // Some particular course should be updated.  Possibly this one.
       // Updates happen because of a student changing the
       // variable hours, for example.
-      if (trim(@$_POST["updatecourse"]) != "")
+      if (isset($_POST["updatecourse"]) && trim(@$_POST["updatecourse"]) != "")
       {
         $temp2 = explode("~",trim($_POST["updatecourse"]));
 
@@ -1597,7 +1597,7 @@ class FlightPath extends stdClass
     }
 
     // Did we have to perform an update-- but no course was found?
-    if (trim(@$_POST["updatecourse"]) != "" && $bool_found_update_match == false)
+    if (isset($_POST["updatecourse"]) && trim($_POST["updatecourse"]) != "" && $bool_found_update_match == false)
     {
       // This means that the course was probably on the bare
       // degree program, and not already checked for advising.  So,
@@ -1642,7 +1642,7 @@ class FlightPath extends stdClass
     //
     //-------------------------------------------------------
     // check permissions for substitutions before saving
-    if (trim(@$_POST["savesubstitution"]) != "" && user_has_permission("can_substitute")) {
+    if (isset($_POST["savesubstitution"]) && trim(@$_POST["savesubstitution"]) != "" && user_has_permission("can_substitute")) {
       $temp = explode("~",trim($_POST["savesubstitution"]));
       $course_id = $temp[0];  // required course
       $group_id = trim($temp[1]);
@@ -1710,7 +1710,7 @@ class FlightPath extends stdClass
     } 
 
 
-    if (trim(@$_POST["removesubstitution"]) != "")
+    if (isset($_POST["removesubstitution"]) && trim(@$_POST["removesubstitution"]) != "")
     {
       $temp = explode("~",trim($_POST["removesubstitution"]));
       $sub_id = trim($temp[0]) * 1;
@@ -1730,7 +1730,7 @@ class FlightPath extends stdClass
     //             Group Unassignments
     //
     //-------------------------------------------------------
-    if (trim(@$_POST["unassign_group"]) != "")
+    if (isset($_POST["unassign_group"]) && trim(@$_POST["unassign_group"]) != "")
     {
       $temp = explode("~",trim($_POST["unassign_group"]));
       $course_id = $temp[0];
@@ -1751,7 +1751,8 @@ class FlightPath extends stdClass
 
     }
 
-    if (trim(@$_POST["restore_unassign_group"]) != "")
+    
+    if (isset($_POST["restore_unassign_group"]) && trim(@$_POST["restore_unassign_group"]) != "")
     {
       $temp = explode("~",trim($_POST["restore_unassign_group"]));
       $unassign_id = trim($temp[0]) * 1;
@@ -1771,7 +1772,7 @@ class FlightPath extends stdClass
     //             Transfer EQV Unassignments
     //
     //-------------------------------------------------------
-    if (trim(@$_POST["unassign_transfer_eqv"]) != "")
+    if (isset($_POST["unassign_transfer_eqv"]) && trim(@$_POST["unassign_transfer_eqv"]) != "")
     {
       $temp = explode("~",trim($_POST["unassign_transfer_eqv"]));
       $course_id = $temp[0];
@@ -1787,7 +1788,7 @@ class FlightPath extends stdClass
 
     }
 
-    if (trim(@$_POST["restore_transfer_eqv"]) != "")
+    if (isset($_POST["restore_transfer_eqv"]) && trim(@$_POST["restore_transfer_eqv"]) != "")
     {
       $temp = explode("~",trim($_POST["restore_transfer_eqv"]));
       $unassign_id = trim($temp[0]) * 1;
