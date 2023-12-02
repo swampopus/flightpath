@@ -1,6 +1,12 @@
 FlightPath 6.x Changelog
 ========================
 
+2023-12-02
+  Small change in advise.js to escape DOM input for added security.
+
+2023-12-01
+  Fixed bug in alerts module where $user was not being read correctly.
+  
 
 2023-11-30
   Made further modifications to the Advisor Use report, adding the ability to select only unique student advisings.

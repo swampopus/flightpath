@@ -261,6 +261,8 @@ function alerts_get_alert_count_by_type($account = NULL) {
  *  
  */
 function alerts_display_advisee_activities_page() {
+  global $user;
+    
   $rtn = "";
   
   fp_add_css(fp_get_module_path('alerts') . '/css/style.css');
