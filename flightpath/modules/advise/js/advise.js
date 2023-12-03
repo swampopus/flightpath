@@ -501,7 +501,7 @@ function popupDescribeSelected(group_id, semester_num, optionalCourseID, selecte
   }
 
   // To make compatible with non-clean URLs, we need to always supply the "unclean" URL version.
-  window.location = FlightPath.settings.basePath + "/index.php?q=advise/popup-group-select" + "&window_mode=popup&perform_action2=describe_course&course_id=" + encodeURI(course_id) + "&group_id=" + group_id + "&semester_num=" + semester_num + "&selected_subject=" + selectedSubject + "&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
+  window.location = FlightPath.settings.basePath + "/index.php?q=advise/popup-group-select" + "&window_mode=popup&perform_action2=describe_course&course_id=" + encodeURI(course_id) + "&group_id=" + group_id + "&semester_num=" + semester_num + "&selected_subject=" + encodeURI(selectedSubject) + "&current_student_id=" + FlightPath.settings.currentStudentId + "&" + extraVars;
 
 }
 
