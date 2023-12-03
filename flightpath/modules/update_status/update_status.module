@@ -65,12 +65,13 @@ function update_status_perform_check() {
   
   // Parse result and set variables where needed.
   $res_array = array();
+  
   parse_str($response, $res_array);
   
   // The modules which have different versions than what we have installed
   // are in $res_array["modules"] and ["release_types"]
-  variable_set("update_status_need_updates_modules", $res_array["modules"]);
-  variable_set("update_status_need_updates_release_types", $res_array["release_types"]);
+  variable_set("update_status_need_updates_modules", @$res_array["modules"]);
+  variable_set("update_status_need_updates_release_types", @$res_array["release_types"]);
   
     
   variable_set("update_status_last_run", time());

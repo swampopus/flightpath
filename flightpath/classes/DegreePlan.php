@@ -543,7 +543,7 @@ class DegreePlan extends stdClass
       $this->db_advising_weight = intval($cur["advising_weight"]);
       $data_entry_value = trim($cur['data_entry_value']);
 
-      $this->db_track_selection_config = trim($cur["track_selection_config"]);
+      $this->db_track_selection_config = trim((string) $cur["track_selection_config"]);
       $this->parse_track_selection_config();  // load into the track_selection_config_array as needed.
 
       $semester_num = $cur["semester_num"];
@@ -552,7 +552,7 @@ class DegreePlan extends stdClass
         // This is a new semester object we are dealing with.
         $old_semester = $semester_num;
         $obj_semester = new Semester($semester_num);
-        $obj_semester->title = trim(@$this->array_semester_titles[$semester_num]);
+        $obj_semester->title = trim((string) @$this->array_semester_titles[$semester_num]);
         if ($obj_semester->title == "") {
            $obj_semester->assign_title();
         }
@@ -960,7 +960,7 @@ class DegreePlan extends stdClass
       $this->db_advising_weight = intval($cur["advising_weight"]);
 
       // Get the semester titles.
-      $temp = trim($cur["semester_titles_csv"]);
+      $temp = trim((string) $cur["semester_titles_csv"]);
       $this->array_semester_titles = explode(",",$temp);
 
       $just_major_code = $this->major_code;

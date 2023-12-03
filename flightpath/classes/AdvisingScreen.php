@@ -478,7 +478,7 @@ function draw_menu_items($menu_array) {
     
           
     // We are going to try to include the theme.  If it can't be found, we will display a CORE theme, and display a message.
-    $theme = variable_get("theme","themes/fp6_clean");
+    $theme = variable_get("theme","themes/fp_clean");
     
         
     $head_template_filename = $theme . "/head.tpl.php";
@@ -500,7 +500,7 @@ function draw_menu_items($menu_array) {
       print "<p><b>Theme Error:</b> Tried to load template from: $page_template_filename, but this file could not be found.
                 <br>This is possibly because either the filename or the directory specified does not exist.
                 <br>Contact site administrator.</p>";
-      $page_template_filename = "themes/fp6_clean" . "/page.tpl.php";
+      $page_template_filename = "themes/fp_clean" . "/page.tpl.php";
     } 
     
     

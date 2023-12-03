@@ -1,6 +1,18 @@
 FlightPath 7.x Changelog
 ========================
 
+2023-12-02
+  Updated TinyMCE to version 5.10.9 (current stable release at the time of this writing)
+  
+  Updated jQuery to 3.7.1 (current stable release at the time of this writing)
+  
+  Updated jQuery UI to 13.1.2 (current stable release at the time of this writing)
+  
+  Renamed the "core" theme to simply fp_clean, instead of "fp6_clean".  Made adjustments to code to use this name.
+  
+  Continuing to clean code of deprecated and warning messages.
+  
+
 2023-12-01
   Initial move to new 7.x branch, from the 6.x branch.  The primary goal of this branch (while in a "dev" state) is
   to move to compatibility with PHP 8.x.

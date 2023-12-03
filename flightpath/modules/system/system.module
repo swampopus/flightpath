@@ -2254,8 +2254,8 @@ function system_settings_form() {
     "type" => "radios",
     "label" => t("Theme:"),
     "options" => system_get_available_themes(),
-    "value" => variable_get("theme", "themes/fp6_clean"),
-    "description" => t("Select the theme you wish to use.  Ex:  Classic (themes/fp6_clean)"),
+    "value" => variable_get("theme", "themes/fp_clean"),
+    "description" => t("Select the theme you wish to use.  Ex:  Classic (themes/fp_clean)"),
   );
     
 

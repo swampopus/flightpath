@@ -826,7 +826,10 @@ function fp_http_request($url, $headers = array(), $method = 'GET', $data = NULL
   // or PUT request. Some non-standard servers get confused by Content-Length in
   // at least HEAD/GET requests, and Squid always requires Content-Length in
   // POST/PUT requests.
-  $content_length = strlen($data);
+  $content_length = 0;
+  if ($data) {
+    $content_length = strlen($data);
+  }
   if ($content_length > 0 || $method == 'POST' || $method == 'PUT' || $method == 'DELETE') {
     $defaults['Content-Length'] = 'Content-Length: ' . $content_length;
   }
@@ -883,7 +886,7 @@ function fp_http_request($url, $headers = array(), $method = 'GET', $data = NULL
   $result->headers = array();
 
   // Parse headers.
-  while ($line = trim(array_shift($split))) {
+  while ($line = trim((string) array_shift($split))) {
     list($header, $value) = explode(':', $line, 2);
     if (isset($result->headers[$header]) && $header == 'Set-Cookie') {
       // RFC 2109: the Set-Cookie response header comprises the token Set-

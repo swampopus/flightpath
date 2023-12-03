@@ -205,7 +205,7 @@ function admin_copy_degree_form_validate($form, $form_state) {
   $destination_school_id = intval($values['destination_school_id']);
 
   $source_major_code = trim(strtoupper($values["source_major_code"]));
-  $include_tracks = $values["include_tracks"]["yes"];  
+  $include_tracks = @$values["include_tracks"]["yes"];  
   
   $for_school = $school_name = "";
   if (module_enabled("schools")) {
@@ -295,7 +295,7 @@ function admin_copy_degree_form_submit($form, &$form_state) {
     
   $source_major_code = trim(strtoupper($values["source_major_code"]));
   $destination_major_code = trim(strtoupper($values["destination_major_code"]));
-  $include_tracks = $values["include_tracks"]["yes"];
+  $include_tracks = @$values["include_tracks"]["yes"];
   
 
 
@@ -584,7 +584,7 @@ function admin_add_degree_form_validate($form, $form_submit) {
   $de_catalog_year = $values["de_catalog_year"];
   $major_code = trim(strtoupper($values["major_code"]));
   $track_code = trim(strtoupper($values["track_code"]));
-  $school_id = intval($values["school_id"]);
+  $school_id = intval(@$values["school_id"]);
 
   $new_major = $values["new_major"];
   $new_track = $values["new_track"];
@@ -659,7 +659,7 @@ function admin_add_degree_form_submit($form, $form_submit) {
   // to the database.
   $major_code = trim(strtoupper($values["major_code"]));
   $track_code = trim(strtoupper($values["track_code"]));
-  $school_id = intval($values["school_id"]);
+  $school_id = intval(@$values["school_id"]);
   
   $new_major = $values["new_major"];
   $new_track = $values["new_track"];
@@ -872,7 +872,7 @@ function admin_display_degrees() {
     // get JUST the major code...
     $temp = explode("|", $db_major_code);
     $just_major = trim(@$temp[0]);
-    $just_conc = trim(@$temp[1]);
+    $just_conc = trim((string) @$temp[1]);
     $outside = "";
 
     //if ($just_conc != "" && strstr($just_conc, "_"))
@@ -1062,9 +1062,9 @@ function admin_degrees_list_filter_form_submit($form, $form_state) {
   unset($_SESSION['degrees_filter_level']);
     
   if ($values['submit_btn'] != '') {
-    $_SESSION['degrees_filter_class'] = trim($values['filter_class']);
-    $_SESSION['degrees_filter_school'] = $values['filter_school'];
-    $_SESSION['degrees_filter_level'] = $values['filter_level'];
+    $_SESSION['degrees_filter_class'] = @$values['filter_class'];
+    $_SESSION['degrees_filter_school'] = @$values['filter_school'];
+    $_SESSION['degrees_filter_level'] = @$values['filter_level'];
   }
     
 }
@@ -1096,7 +1096,7 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
 
-  $button_msg = trim(addslashes(@$_REQUEST["button_msg"]));  
+  $button_msg = trim(addslashes((string) @$_REQUEST["button_msg"]));  
   
   $db = get_global_database_handler();
 
@@ -1708,6 +1708,8 @@ function admin_edit_degree_form_validate($form, &$form_state) {
     $school_name = $defs[$school_id];
   }  
   
+  $highest_semester_num = 0;
+  
   
   // Let's check that all of the courses also belong to this degree and/or can be found at all (no typos).  
   foreach($values as $key => $value) {
@@ -1762,7 +1764,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
       }
       
       
-      $min_grade = strtoupper(@$tokens[3]);
+      $min_grade = strtoupper((string) @$tokens[3]);
 
       if (strstr($requirement_type, "(")) {
         // This means there was no requirement_type specified, so it's "m",
@@ -2188,7 +2190,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
       }
       
       
-      $min_grade = strtoupper(@$tokens[3]);
+      $min_grade = strtoupper((string) @$tokens[3]);
 
       if (strstr($requirement_type, "(")) {
         // This means there was no requirement_type specified, so it's "m",
@@ -2374,7 +2376,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
       
     if ($semester_num > 99) break;  // some problem.  Give up.  Don't try to go past 99 semesters!
     
-    $semester_titles_csv .= trim(@$values["semester_title_$semester_num"]) . ",";
+    $semester_titles_csv .= trim((string) @$values["semester_title_$semester_num"]) . ",";
   }
 
 
@@ -2411,6 +2413,8 @@ function admin_edit_degree_form_submit($form, $form_state) {
 
   ////  Was there a track title/description?  If so, UPDATE that in the tracks
   // table...
+  
+  $major = $track = "";  
   if (strstr($major_code, "_"))  {
     // There was a track. Update track description.
     $temp = explode("_",$major_code);

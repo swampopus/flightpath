@@ -896,7 +896,7 @@ function advise_display_popup_change_track() {
         $track_description = trim(@$temp[2]);
         
         // if this track is NOT of the same classification as the current machine_code, we skip it.        
-        $track_machine_name = trim(@$temp[4]);
+        $track_machine_name = trim((string) @$temp[4]);
                         
         if ($track_machine_name != $machine_name) continue; // not the right degree_class
     
@@ -919,11 +919,11 @@ function advise_display_popup_change_track() {
         $temp = explode(" ~~ ", $tracks[$t]);
         $track_code = trim(@$temp[0]);
         $track_title = trim(@$temp[1]);
-        $track_degree_id = intval(trim(@$temp[3]));
+        $track_degree_id = intval(trim((string) @$temp[3]));
         $track_description = "";
         
         // if this track is NOT of the same classification as the current machine_code, we skip it.
-        $track_machine_name = trim(@$temp[4]);
+        $track_machine_name = trim((string) @$temp[4]);
         if ($track_machine_name != $machine_name) continue; // not the right degree_class
     
         
