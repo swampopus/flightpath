@@ -1142,7 +1142,7 @@ function engagements_cron()
   
   // only check every X minutes at most.  
   // TODO: Maybe this is a setting?
-  $sms_check_against = strtotime("NOW - 30 MINUTES");
+  $sms_check_against = strtotime("NOW - 1 MINUTES");
   if ($sms_check_against >= $last_sms_check) {  
     engagements_sms_get_all_messages();  // refreshes sms information for messages we've sent and received
   }
@@ -1175,7 +1175,7 @@ function engagements_handle_incoming_sms($vars = array())
   $body = $vars['Body'];
 
   $num_media = intval($vars['NumMedia']);
-  $num_segments = intval($vars['NumSegments']);
+  $num_segments = @intval($vars['NumSegments']);
   $price = 0;  // We know this is an SMS, so this is the price per segment inbound (SignalWire does not charge us for basic SMS inbound).
   if ($num_media > 0) {
     $price = 0.01;  // Contained at least one piece of media, so price increases.  This is SignalWire's price.
@@ -1649,6 +1649,7 @@ function engagements_sms_get_all_messages()
       $status = NULL;
     }
     
+    $friendly_error_message = '';
     if ($error_code) {
       $friendly_error_message = @$error_codes[$error_code];
     }
@@ -1658,7 +1659,7 @@ function engagements_sms_get_all_messages()
 
     // Should we update any details about this message? Price, errors, etc?
     $test = engagements_get_sms_from_history($message_sid);
-    if ($test && (floatval($record->price) != floatval($test['sw_price']) || trim($error_code) != trim($test['err_code']))) {
+    if ($test && (floatval($record->price) != floatval($test['sw_price']) || $error_code != $test['err_code'])) {
       
       // update prices
       $price = $record->price;
@@ -3243,7 +3244,6 @@ function engagements_send_sms_to_number($to_number, $body, $to_cwid = "", $from_
 
   require_once(fp_get_module_path('engagements', TRUE, FALSE) . '/lib/signalwire/vendor/autoload.php');
 
-  //use SignalWire\Rest\Client;
 
   // project id, auth tolen, space url
   $project_id = variable_get('sms_project_id', '');

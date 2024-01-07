@@ -23,31 +23,37 @@ use Twilio\VersionInfo;
  * @property Api $api
  * @property Autopilot $autopilot
  * @property Chat $chat
+ * @property Content $content
  * @property Conversations $conversations
  * @property Events $events
- * @property Fax $fax
  * @property FlexApi $flexApi
+ * @property FrontlineApi $frontlineApi
  * @property Insights $insights
  * @property IpMessaging $ipMessaging
  * @property Lookups $lookups
+ * @property Media $media
  * @property Messaging $messaging
  * @property Monitor $monitor
  * @property Notify $notify
  * @property Numbers $numbers
+ * @property Oauth $oauth
  * @property Preview $preview
  * @property Pricing $pricing
  * @property Proxy $proxy
+ * @property Routes $routes
  * @property Serverless $serverless
  * @property Studio $studio
  * @property Sync $sync
  * @property Taskrouter $taskrouter
  * @property Trunking $trunking
+ * @property Trusthub $trusthub
  * @property Verify $verify
  * @property Video $video
  * @property Voice $voice
  * @property Wireless $wireless
  * @property Supersim $supersim
  * @property Bulkexports $bulkexports
+ * @property Microvisor $microvisor
  * @property \Twilio\Rest\Api\V2010\AccountInstance $account
  * @property \Twilio\Rest\Api\V2010\Account\AddressList $addresses
  * @property \Twilio\Rest\Api\V2010\Account\ApplicationList $applications
@@ -98,6 +104,7 @@ class Client {
     const ENV_REGION = 'TWILIO_REGION';
     const ENV_EDGE = 'TWILIO_EDGE';
     const DEFAULT_REGION = 'us1';
+    const ENV_LOG = 'TWILIO_LOG_LEVEL';
 
     protected $username;
     protected $password;
@@ -106,58 +113,69 @@ class Client {
     protected $edge;
     protected $httpClient;
     protected $environment;
+    protected $userAgentExtensions;
+    protected $logLevel;
     protected $_account;
     protected $_accounts;
     protected $_api;
     protected $_autopilot;
     protected $_chat;
+    protected $_content;
     protected $_conversations;
     protected $_events;
-    protected $_fax;
     protected $_flexApi;
+    protected $_frontlineApi;
     protected $_insights;
     protected $_ipMessaging;
     protected $_lookups;
+    protected $_media;
     protected $_messaging;
     protected $_monitor;
     protected $_notify;
     protected $_numbers;
+    protected $_oauth;
     protected $_preview;
     protected $_pricing;
     protected $_proxy;
+    protected $_routes;
     protected $_serverless;
     protected $_studio;
     protected $_sync;
     protected $_taskrouter;
     protected $_trunking;
+    protected $_trusthub;
     protected $_verify;
     protected $_video;
     protected $_voice;
     protected $_wireless;
     protected $_supersim;
     protected $_bulkexports;
+    protected $_microvisor;
 
     /**
      * Initializes the Twilio Client
      *
      * @param string $username Username to authenticate with
      * @param string $password Password to authenticate with
-     * @param string $accountSid Account Sid to authenticate with, defaults to
+     * @param string $accountSid Account SID to authenticate with, defaults to
      *                           $username
      * @param string $region Region to send requests to, defaults to 'us1' if Edge
      *                       provided
      * @param HttpClient $httpClient HttpClient, defaults to CurlClient
      * @param mixed[] $environment Environment to look for auth details, defaults
      *                             to $_ENV
+     * @param string[] $userAgentExtensions Additions to the user agent string
      * @throws ConfigurationException If valid authentication is not present
      */
-    public function __construct(string $username = null, string $password = null, string $accountSid = null, string $region = null, HttpClient $httpClient = null, array $environment = null) {
+    public function __construct(string $username = null, string $password = null, string $accountSid = null, string $region = null, HttpClient $httpClient = null, array $environment = null, array $userAgentExtensions = null) {
         $this->environment = $environment ?: \getenv();
 
         $this->username = $this->getArg($username, self::ENV_ACCOUNT_SID);
         $this->password = $this->getArg($password, self::ENV_AUTH_TOKEN);
         $this->region = $this->getArg($region, self::ENV_REGION);
         $this->edge = $this->getArg(null, self::ENV_EDGE);
+        $this->logLevel = $this->getArg(null, self::ENV_LOG);
+        $this->userAgentExtensions = $userAgentExtensions ?: [];
 
         if (!$this->username || !$this->password) {
             throw new ConfigurationException('Credentials are required to create a Client');
@@ -208,13 +226,15 @@ class Client {
     public function request(string $method, string $uri, array $params = [], array $data = [], array $headers = [], string $username = null, string $password = null, int $timeout = null): \Twilio\Http\Response {
         $username = $username ?: $this->username;
         $password = $password ?: $this->password;
+        $logLevel = (getenv('DEBUG_HTTP_TRAFFIC') === 'true' ? 'debug' : $this->getLogLevel());
 
         $headers['User-Agent'] = 'twilio-php/' . VersionInfo::string() .
-                                 ' (PHP ' . PHP_VERSION . ')';
+                                 ' (' . php_uname("s") . ' ' . php_uname("m") . ')' .
+                                 ' PHP/' . PHP_VERSION;
         $headers['Accept-Charset'] = 'utf-8';
 
-        if ($method === 'POST' && !\array_key_exists('Content-Type', $headers)) {
-            $headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        if ($this->userAgentExtensions) {
+            $headers['User-Agent'] .= ' ' . implode(' ', $this->userAgentExtensions);
         }
 
         if (!\array_key_exists('Accept', $headers)) {
@@ -223,7 +243,26 @@ class Client {
 
         $uri = $this->buildUri($uri);
 
-        return $this->getHttpClient()->request(
+        if ($logLevel === 'debug') {
+            error_log('-- BEGIN Twilio API Request --');
+            error_log('Request Method: ' . $method);
+            $u = parse_url($uri);
+            if (isset($u['path'])) {
+                error_log('Request URL: ' . $u['path']);
+            }
+            if (isset($u['query']) && strlen($u['query']) > 0) {
+                error_log('Query Params: ' . $u['query']);
+            }
+            error_log('Request Headers: ');
+            foreach ($headers as $key => $value) {
+                if (strpos(strtolower($key), 'authorization') === false) {
+                    error_log("$key: $value");
+                }
+            }
+            error_log('-- END Twilio API Request --');
+        }
+
+        $response = $this->getHttpClient()->request(
             $method,
             $uri,
             $params,
@@ -233,6 +272,17 @@ class Client {
             $password,
             $timeout
         );
+
+        if ($logLevel === 'debug') {
+            error_log('Status Code: ' . $response->getStatusCode());
+            error_log('Response Headers:');
+            $responseHeaders = $response->getHeaders();
+            foreach ($responseHeaders as $key => $value) {
+                error_log("$key: $value");
+            }
+        }
+
+        return $response;
     }
 
     /**
@@ -337,6 +387,24 @@ class Client {
      */
     public function setHttpClient(HttpClient $httpClient): void {
         $this->httpClient = $httpClient;
+    }
+
+    /**
+     * Retrieve the log level
+     *
+     * @return ?string Current log level
+     */
+    public function getLogLevel(): ?string {
+        return $this->logLevel;
+    }
+
+    /**
+     * Set log level to debug
+     *
+     * @param string $logLevel log level to use
+     */
+    public function setLogLevel(string $logLevel = null): void {
+        $this->logLevel = $this->getArg($logLevel, self::ENV_LOG);
     }
 
     /**
@@ -612,6 +680,18 @@ class Client {
     }
 
     /**
+     * Access the Content Twilio Domain
+     *
+     * @return Content Content Twilio Domain
+     */
+    protected function getContent(): Content {
+        if (!$this->_content) {
+            $this->_content = new Content($this);
+        }
+        return $this->_content;
+    }
+
+    /**
      * Access the Conversations Twilio Domain
      *
      * @return Conversations Conversations Twilio Domain
@@ -636,18 +716,6 @@ class Client {
     }
 
     /**
-     * Access the Fax Twilio Domain
-     *
-     * @return Fax Fax Twilio Domain
-     */
-    protected function getFax(): Fax {
-        if (!$this->_fax) {
-            $this->_fax = new Fax($this);
-        }
-        return $this->_fax;
-    }
-
-    /**
      * Access the FlexApi Twilio Domain
      *
      * @return FlexApi FlexApi Twilio Domain
@@ -657,6 +725,18 @@ class Client {
             $this->_flexApi = new FlexApi($this);
         }
         return $this->_flexApi;
+    }
+
+    /**
+     * Access the FrontlineApi Twilio Domain
+     *
+     * @return FrontlineApi FrontlineApi Twilio Domain
+     */
+    protected function getFrontlineApi(): FrontlineApi {
+        if (!$this->_frontlineApi) {
+            $this->_frontlineApi = new FrontlineApi($this);
+        }
+        return $this->_frontlineApi;
     }
 
     /**
@@ -693,6 +773,18 @@ class Client {
             $this->_lookups = new Lookups($this);
         }
         return $this->_lookups;
+    }
+
+    /**
+     * Access the Media Twilio Domain
+     *
+     * @return Media Media Twilio Domain
+     */
+    protected function getMedia(): Media {
+        if (!$this->_media) {
+            $this->_media = new Media($this);
+        }
+        return $this->_media;
     }
 
     /**
@@ -744,6 +836,18 @@ class Client {
     }
 
     /**
+     * Access the Oauth Twilio Domain
+     *
+     * @return Oauth Oauth Twilio Domain
+     */
+    protected function getOauth(): Oauth {
+        if (!$this->_oauth) {
+            $this->_oauth = new Oauth($this);
+        }
+        return $this->_oauth;
+    }
+
+    /**
      * Access the Preview Twilio Domain
      *
      * @return Preview Preview Twilio Domain
@@ -777,6 +881,18 @@ class Client {
             $this->_proxy = new Proxy($this);
         }
         return $this->_proxy;
+    }
+
+    /**
+     * Access the Routes Twilio Domain
+     *
+     * @return Routes Routes Twilio Domain
+     */
+    protected function getRoutes(): Routes {
+        if (!$this->_routes) {
+            $this->_routes = new Routes($this);
+        }
+        return $this->_routes;
     }
 
     /**
@@ -837,6 +953,18 @@ class Client {
             $this->_trunking = new Trunking($this);
         }
         return $this->_trunking;
+    }
+
+    /**
+     * Access the Trusthub Twilio Domain
+     *
+     * @return Trusthub Trusthub Twilio Domain
+     */
+    protected function getTrusthub(): Trusthub {
+        if (!$this->_trusthub) {
+            $this->_trusthub = new Trusthub($this);
+        }
+        return $this->_trusthub;
     }
 
     /**
@@ -909,6 +1037,18 @@ class Client {
             $this->_bulkexports = new Bulkexports($this);
         }
         return $this->_bulkexports;
+    }
+
+    /**
+     * Access the Microvisor Twilio Domain
+     *
+     * @return Microvisor Microvisor Twilio Domain
+     */
+    protected function getMicrovisor(): Microvisor {
+        if (!$this->_microvisor) {
+            $this->_microvisor = new Microvisor($this);
+        }
+        return $this->_microvisor;
     }
 
     /**

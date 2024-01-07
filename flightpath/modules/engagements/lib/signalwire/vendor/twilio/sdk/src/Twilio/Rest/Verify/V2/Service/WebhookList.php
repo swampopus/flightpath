@@ -17,9 +17,6 @@ use Twilio\Stream;
 use Twilio\Values;
 use Twilio\Version;
 
-/**
- * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
- */
 class WebhookList extends ListResource {
     /**
      * Construct the WebhookList
@@ -56,6 +53,7 @@ class WebhookList extends ListResource {
             'EventTypes' => Serialize::map($eventTypes, function($e) { return $e; }),
             'WebhookUrl' => $webhookUrl,
             'Status' => $options['status'],
+            'Version' => $options['version'],
         ]);
 
         $payload = $this->version->create('POST', $this->uri, [], $data);

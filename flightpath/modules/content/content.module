@@ -279,7 +279,9 @@ function content_files_handle_download($fid) {
   }
   
   // Okay, now let's spit it out to the browser for download.
-  header('Content-type: ' . $file["filetype"]);
+  if (isset($file['filetype'])) {
+    header('Content-type: ' . $file["filetype"]);
+  }
   header('Content-Disposition: attachment; filename="' . $file["original_filename"]  . '"');
   print $file_contents;
 
@@ -787,7 +789,7 @@ function content_dialog_handle_after_save() {
   $rtn .= "<br><br><p>" . t("If this windows doesn't close within 3 seconds,") . " <a href='javascript:window.parent.location.reload();'>" . t("click here") . "</a>.</p>";
   
   // Add this javascript code to when the page loads.
-  ///*  DEV: comment out while testing
+  /*  DEV: comment out while testing
 
   $rtn .= "
       <script type='text/javascript'>
@@ -1119,7 +1121,7 @@ function content_edit_content_form($type = "", $cid = "") {
   if (is_array($types[$type]['fields'])) {
     foreach($types[$type]["fields"] as $field_name => $field_details) {
                   
-      $form[$field_name] = $field_details;      
+      $form[$field_name] = $field_details;
       if (isset($field_details['type']) && $field_details['type'] != 'cfieldset') {
       
         $value = NULL;
@@ -1131,7 +1133,9 @@ function content_edit_content_form($type = "", $cid = "") {
           $value = @$form[$field_name]['value'];
         }
         
-        if (!$value) $value = '';
+        if (!$value && $value !== 0 && $value !== '0') {  // Make sure if value is zero, it is still saved correctly.          
+          $value = '';
+        }
         
         $form[$field_name]['value'] = $value;
         
@@ -1246,6 +1250,10 @@ function content_edit_content_form($type = "", $cid = "") {
                 $value = (string) @$efield_details['value'];
               }            
               
+              if (!$value && $value !== 0 && $value !== '0') {  // Make sure if value is zero, it is still saved correctly.          
+                $value = '';
+              }              
+              
               $efield_details['value'] = $value;
               
               // If this is a datetime-local field, then the value needs to be adjusted for it to work correctly.
@@ -1279,7 +1287,6 @@ function content_edit_content_form($type = "", $cid = "") {
       } // else is fieldset
     }    
   }
-
 
   
   // We never show the published option, since we will always give the user a way to "remove" and "restore" content.
@@ -1641,7 +1648,7 @@ function content_edit_content_form_submit(&$form, &$form_state) {
       } // if details = file
             
       
-      
+          
       
       $content->{'field__' . $fieldname}['value'] = @$values[$fieldname];      
     }
@@ -1666,7 +1673,8 @@ function content_edit_content_form_submit(&$form, &$form_state) {
             $values[$fieldname] = date('H:i', $utc_ts);               
           }
 
-          
+
+         
           $content->{'field__' . $fieldname}['value'] = @$values[$fieldname];
         }
       }
@@ -1953,7 +1961,6 @@ function content_content_save(&$content) {
               (" . join(", " , $all_fields) . ")
               VALUES (" . join(", " , $param_names) . ")";
   
-    
   db_query($sql, $params);    
   
   

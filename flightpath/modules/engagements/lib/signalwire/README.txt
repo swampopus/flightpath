@@ -1,4 +1,14 @@
-Retrieved via composer on 12-3-2020
+Retrieved via composer on 12-31-2023
+Using community SDK for PHP 8.x: https://signalwire-community.github.io/docs/php/
+REQUIRES PHP 8.x!
+
+
+**********
+Important note:  Modifications to signalwire-community/signalwire/src/Rest/Client.php were made to remove
+                 references to Fax object, which for whatever reason is not included.  As FlightPath
+                 does not use this functionality anyway, the original code was commented out and modified.
+**********
+
 
 
 

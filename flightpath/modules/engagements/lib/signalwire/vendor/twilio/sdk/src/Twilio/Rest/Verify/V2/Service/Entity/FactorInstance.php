@@ -17,8 +17,6 @@ use Twilio\Values;
 use Twilio\Version;
 
 /**
- * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
- *
  * @property string $sid
  * @property string $accountSid
  * @property string $serviceSid
@@ -30,6 +28,7 @@ use Twilio\Version;
  * @property string $status
  * @property string $factorType
  * @property array $config
+ * @property array $metadata
  * @property string $url
  */
 class FactorInstance extends InstanceResource {
@@ -58,6 +57,7 @@ class FactorInstance extends InstanceResource {
             'status' => Values::array_get($payload, 'status'),
             'factorType' => Values::array_get($payload, 'factor_type'),
             'config' => Values::array_get($payload, 'config'),
+            'metadata' => Values::array_get($payload, 'metadata'),
             'url' => Values::array_get($payload, 'url'),
         ];
 
@@ -90,23 +90,21 @@ class FactorInstance extends InstanceResource {
     /**
      * Delete the FactorInstance
      *
-     * @param array|Options $options Optional Arguments
      * @return bool True if delete succeeds, false otherwise
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function delete(array $options = []): bool {
-        return $this->proxy()->delete($options);
+    public function delete(): bool {
+        return $this->proxy()->delete();
     }
 
     /**
      * Fetch the FactorInstance
      *
-     * @param array|Options $options Optional Arguments
      * @return FactorInstance Fetched FactorInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch(array $options = []): FactorInstance {
-        return $this->proxy()->fetch($options);
+    public function fetch(): FactorInstance {
+        return $this->proxy()->fetch();
     }
 
     /**

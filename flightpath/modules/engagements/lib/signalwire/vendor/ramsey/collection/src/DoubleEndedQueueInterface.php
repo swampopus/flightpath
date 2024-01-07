@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Ramsey\Collection;
 
 use Ramsey\Collection\Exception\NoSuchElementException;
+use RuntimeException;
 
 /**
  * A linear collection that supports element insertion and removal at both ends.
@@ -158,6 +159,9 @@ use Ramsey\Collection\Exception\NoSuchElementException;
  * ability to insert nulls. This is so because `null` is used as a special
  * return value by various methods to indicated that the double-ended queue is
  * empty.
+ *
+ * @template T
+ * @extends QueueInterface<T>
  */
 interface DoubleEndedQueueInterface extends QueueInterface
 {
@@ -168,15 +172,16 @@ interface DoubleEndedQueueInterface extends QueueInterface
      * When using a capacity-restricted double-ended queue, it is generally
      * preferable to use the `offerFirst()` method.
      *
-     * @param mixed $element The element to add to the front of this queue.
+     * @param T $element The element to add to the front of this queue.
      *
      * @return bool `true` if this queue changed as a result of the call.
      *
-     * @throws \RuntimeException if a queue refuses to add a particular element
+     * @throws RuntimeException if a queue refuses to add a particular element
      *     for any reason other than that it already contains the element.
      *     Implementations should use a more-specific exception that extends
      *     `\RuntimeException`.
      */
+    // phpcs:ignore SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
     public function addFirst($element): bool;
 
     /**
@@ -188,15 +193,16 @@ interface DoubleEndedQueueInterface extends QueueInterface
      *
      * This method is equivalent to `add()`.
      *
-     * @param mixed $element The element to add to the end of this queue.
+     * @param T $element The element to add to the end of this queue.
      *
      * @return bool `true` if this queue changed as a result of the call.
      *
-     * @throws \RuntimeException if a queue refuses to add a particular element
+     * @throws RuntimeException if a queue refuses to add a particular element
      *     for any reason other than that it already contains the element.
      *     Implementations should use a more-specific exception that extends
      *     `\RuntimeException`.
      */
+    // phpcs:ignore SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
     public function addLast($element): bool;
 
     /**
@@ -207,10 +213,11 @@ interface DoubleEndedQueueInterface extends QueueInterface
      * preferable to `addFirst()`, which can fail to insert an element only by
      * throwing an exception.
      *
-     * @param mixed $element The element to add to the front of this queue.
+     * @param T $element The element to add to the front of this queue.
      *
      * @return bool `true` if the element was added to this queue, else `false`.
      */
+    // phpcs:ignore SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
     public function offerFirst($element): bool;
 
     /**
@@ -221,10 +228,11 @@ interface DoubleEndedQueueInterface extends QueueInterface
      * preferable to `addLast()` which can fail to insert an element only by
      * throwing an exception.
      *
-     * @param mixed $element The element to add to the end of this queue.
+     * @param T $element The element to add to the end of this queue.
      *
      * @return bool `true` if the element was added to this queue, else `false`.
      */
+    // phpcs:ignore SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
     public function offerLast($element): bool;
 
     /**
@@ -233,7 +241,7 @@ interface DoubleEndedQueueInterface extends QueueInterface
      * This method differs from `pollFirst()` only in that it throws an
      * exception if this queue is empty.
      *
-     * @return mixed the first element in this queue.
+     * @return T the first element in this queue.
      *
      * @throws NoSuchElementException if this queue is empty.
      */
@@ -245,7 +253,7 @@ interface DoubleEndedQueueInterface extends QueueInterface
      * This method differs from `pollLast()` only in that it throws an exception
      * if this queue is empty.
      *
-     * @return mixed the last element in this queue.
+     * @return T the last element in this queue.
      *
      * @throws NoSuchElementException if this queue is empty.
      */
@@ -255,7 +263,7 @@ interface DoubleEndedQueueInterface extends QueueInterface
      * Retrieves and removes the head of this queue, or returns `null` if this
      * queue is empty.
      *
-     * @return mixed|null the head of this queue, or `null` if this queue is empty.
+     * @return T|null the head of this queue, or `null` if this queue is empty.
      */
     public function pollFirst();
 
@@ -263,7 +271,7 @@ interface DoubleEndedQueueInterface extends QueueInterface
      * Retrieves and removes the tail of this queue, or returns `null` if this
      * queue is empty.
      *
-     * @return mixed|null the tail of this queue, or `null` if this queue is empty.
+     * @return T|null the tail of this queue, or `null` if this queue is empty.
      */
     public function pollLast();
 
@@ -273,7 +281,7 @@ interface DoubleEndedQueueInterface extends QueueInterface
      * This method differs from `peekFirst()` only in that it throws an
      * exception if this queue is empty.
      *
-     * @return mixed the head of this queue.
+     * @return T the head of this queue.
      *
      * @throws NoSuchElementException if this queue is empty.
      */
@@ -285,7 +293,7 @@ interface DoubleEndedQueueInterface extends QueueInterface
      * This method differs from `peekLast()` only in that it throws an exception
      * if this queue is empty.
      *
-     * @return mixed the tail of this queue.
+     * @return T the tail of this queue.
      *
      * @throws NoSuchElementException if this queue is empty.
      */
@@ -295,7 +303,7 @@ interface DoubleEndedQueueInterface extends QueueInterface
      * Retrieves, but does not remove, the head of this queue, or returns `null`
      * if this queue is empty.
      *
-     * @return mixed|null the head of this queue, or `null` if this queue is empty.
+     * @return T|null the head of this queue, or `null` if this queue is empty.
      */
     public function peekFirst();
 
@@ -303,7 +311,7 @@ interface DoubleEndedQueueInterface extends QueueInterface
      * Retrieves, but does not remove, the tail of this queue, or returns `null`
      * if this queue is empty.
      *
-     * @return mixed|null the tail of this queue, or `null` if this queue is empty.
+     * @return T|null the tail of this queue, or `null` if this queue is empty.
      */
     public function peekLast();
 }

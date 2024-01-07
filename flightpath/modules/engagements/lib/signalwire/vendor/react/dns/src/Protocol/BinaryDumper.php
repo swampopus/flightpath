@@ -92,6 +92,7 @@ final class BinaryDumper
                     $binary = $this->domainNameToBinary($record->data);
                     break;
                 case Message::TYPE_TXT:
+                case Message::TYPE_SPF:
                     $binary = $this->textsToBinary($record->data);
                     break;
                 case Message::TYPE_MX:
@@ -145,7 +146,7 @@ final class BinaryDumper
                         if ($opt === Message::OPT_TCP_KEEPALIVE && $value !== null) {
                             $value = \pack('n', round($value * 10));
                         }
-                        $binary .= \pack('n*', $opt, \strlen($value)) . $value;
+                        $binary .= \pack('n*', $opt, \strlen((string) $value)) . $value;
                     }
                     break;
                 default:

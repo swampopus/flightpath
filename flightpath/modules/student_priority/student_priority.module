@@ -51,7 +51,7 @@ function student_priority_display_priority_calculations_page() {
 
   
   
-  if ($_GET['window_mode'] == 'popup') {
+  if (@$_GET['window_mode'] == 'popup') {
       
     $rtn .= "<a class='tests-expand-link' href='javascript:parent.window.location=\"" . fp_url("student-profile/priority-calculations", "current_student_id=$current_student_id") . "\"; void(0);'><i class='fa fa-expand'></i> " . t("View full page") . "</a>";
   }

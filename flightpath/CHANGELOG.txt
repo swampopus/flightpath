@@ -1,6 +1,19 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-01-07
+  Updated signalwire library for PHP 8.x, made modifications to it for FlightPath (removed need for \twilio\Fax, which wasn't included)
+
+  Continuing to clean code of deprecated an warning messages.
+  
+  Added a more robust UID when sending calendar invites, to better ensure uniqueness.
+ 
+  DatabaseHandler->get_student_name() returns "Unknown Student" if it cannot find the student.
+
+  Had an issue where if a hidden form variable (using FAPI) was '0', then it was not correctly
+  being handled in the Content module.
+
+
 2023-12-02
   Updated TinyMCE to version 5.10.9 (current stable release at the time of this writing)
   

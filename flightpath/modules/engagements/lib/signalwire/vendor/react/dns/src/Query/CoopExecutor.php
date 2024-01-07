@@ -27,9 +27,8 @@ use React\Promise\Promise;
  * $executor = new CoopExecutor(
  *     new RetryExecutor(
  *         new TimeoutExecutor(
- *             new UdpTransportExecutor($nameserver, $loop),
- *             3.0,
- *             $loop
+ *             new UdpTransportExecutor($nameserver),
+ *             3.0
  *         )
  *     )
  * );
@@ -81,7 +80,7 @@ final class CoopExecutor implements ExecutorInterface
                 $promise->cancel();
                 $promise = null;
             }
-            throw new \RuntimeException('DNS query for ' . $query->name . ' has been cancelled');
+            throw new \RuntimeException('DNS query for ' . $query->describe() . ' has been cancelled');
         });
     }
 

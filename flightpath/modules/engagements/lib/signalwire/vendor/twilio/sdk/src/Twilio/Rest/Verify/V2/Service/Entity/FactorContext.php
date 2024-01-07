@@ -15,9 +15,6 @@ use Twilio\Options;
 use Twilio\Values;
 use Twilio\Version;
 
-/**
- * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
- */
 class FactorContext extends InstanceContext {
     /**
      * Initialize the FactorContext
@@ -39,31 +36,21 @@ class FactorContext extends InstanceContext {
     /**
      * Delete the FactorInstance
      *
-     * @param array|Options $options Optional Arguments
      * @return bool True if delete succeeds, false otherwise
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function delete(array $options = []): bool {
-        $options = new Values($options);
-
-        $headers = Values::of(['Twilio-Sandbox-Mode' => $options['twilioSandboxMode'], ]);
-
-        return $this->version->delete('DELETE', $this->uri, [], [], $headers);
+    public function delete(): bool {
+        return $this->version->delete('DELETE', $this->uri);
     }
 
     /**
      * Fetch the FactorInstance
      *
-     * @param array|Options $options Optional Arguments
      * @return FactorInstance Fetched FactorInstance
      * @throws TwilioException When an HTTP error occurs.
      */
-    public function fetch(array $options = []): FactorInstance {
-        $options = new Values($options);
-
-        $headers = Values::of(['Twilio-Sandbox-Mode' => $options['twilioSandboxMode'], ]);
-
-        $payload = $this->version->fetch('GET', $this->uri, [], [], $headers);
+    public function fetch(): FactorInstance {
+        $payload = $this->version->fetch('GET', $this->uri);
 
         return new FactorInstance(
             $this->version,
@@ -87,11 +74,16 @@ class FactorContext extends InstanceContext {
         $data = Values::of([
             'AuthPayload' => $options['authPayload'],
             'FriendlyName' => $options['friendlyName'],
-            'Config' => $options['config'],
+            'Config.NotificationToken' => $options['configNotificationToken'],
+            'Config.SdkVersion' => $options['configSdkVersion'],
+            'Config.TimeStep' => $options['configTimeStep'],
+            'Config.Skew' => $options['configSkew'],
+            'Config.CodeLength' => $options['configCodeLength'],
+            'Config.Alg' => $options['configAlg'],
+            'Config.NotificationPlatform' => $options['configNotificationPlatform'],
         ]);
-        $headers = Values::of(['Twilio-Sandbox-Mode' => $options['twilioSandboxMode'], ]);
 
-        $payload = $this->version->update('POST', $this->uri, [], $data, $headers);
+        $payload = $this->version->update('POST', $this->uri, [], $data);
 
         return new FactorInstance(
             $this->version,

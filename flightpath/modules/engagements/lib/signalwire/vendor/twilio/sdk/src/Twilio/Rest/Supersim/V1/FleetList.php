@@ -18,7 +18,7 @@ use Twilio\Values;
 use Twilio\Version;
 
 /**
- * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
+ * PLEASE NOTE that this class contains beta products that are subject to change. Use them with caution.
  */
 class FleetList extends ListResource {
     /**
@@ -52,9 +52,11 @@ class FleetList extends ListResource {
             'UniqueName' => $options['uniqueName'],
             'DataEnabled' => Serialize::booleanToString($options['dataEnabled']),
             'DataLimit' => $options['dataLimit'],
-            'CommandsEnabled' => Serialize::booleanToString($options['commandsEnabled']),
-            'CommandsUrl' => $options['commandsUrl'],
-            'CommandsMethod' => $options['commandsMethod'],
+            'IpCommandsUrl' => $options['ipCommandsUrl'],
+            'IpCommandsMethod' => $options['ipCommandsMethod'],
+            'SmsCommandsEnabled' => Serialize::booleanToString($options['smsCommandsEnabled']),
+            'SmsCommandsUrl' => $options['smsCommandsUrl'],
+            'SmsCommandsMethod' => $options['smsCommandsMethod'],
         ]);
 
         $payload = $this->version->create('POST', $this->uri, [], $data);

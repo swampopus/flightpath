@@ -20,7 +20,7 @@ use Ramsey\Collection\Tool\TypeTrait;
  * A `TypedMap` represents a map of elements where key and value are typed.
  *
  * Each element is identified by a key with defined type and a value of defined
- * type. The keys of the map must be unique. The values on the map can be=
+ * type. The keys of the map must be unique. The values on the map can be
  * repeated but each with its own different key.
  *
  * The most common case is to use a string type key, but it's not limited to
@@ -79,6 +79,10 @@ use Ramsey\Collection\Tool\TypeTrait;
  *     }
  * }
  * ```
+ *
+ * @template K of array-key
+ * @template T
+ * @extends AbstractTypedMap<K, T>
  */
 class TypedMap extends AbstractTypedMap
 {
@@ -89,20 +93,16 @@ class TypedMap extends AbstractTypedMap
      *
      * A map key's type is immutable once it is set. For this reason, this
      * property is set private.
-     *
-     * @var string data type of the map key.
      */
-    private $keyType;
+    private string $keyType;
 
     /**
      * The data type of values stored in this collection.
      *
-     * A map values's type is immutable once it is set. For this reason, this
+     * A map value's type is immutable once it is set. For this reason, this
      * property is set private.
-     *
-     * @var string data type of the map value.
      */
-    private $valueType;
+    private string $valueType;
 
     /**
      * Constructs a map object of the specified key and value types,
@@ -110,26 +110,21 @@ class TypedMap extends AbstractTypedMap
      *
      * @param string $keyType The data type of the map's keys.
      * @param string $valueType The data type of the map's values.
-     * @param mixed[] $data The initial data to set for this map.
+     * @param array<K, T> $data The initial data to set for this map.
      */
     public function __construct(string $keyType, string $valueType, array $data = [])
     {
         $this->keyType = $keyType;
         $this->valueType = $valueType;
+
         parent::__construct($data);
     }
 
-    /**
-     * Return the type used on the key.
-     */
     public function getKeyType(): string
     {
         return $this->keyType;
     }
 
-    /**
-     * Return the type forced on the values.
-     */
     public function getValueType(): string
     {
         return $this->valueType;

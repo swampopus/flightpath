@@ -653,7 +653,7 @@ function alerts_content_register_content_type() {
 
   $fields['exclude_advisor'] = array(
     'type' => 'hidden',
-    'value' => '0',
+    'value' => "0",
   );
 
 

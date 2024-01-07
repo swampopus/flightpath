@@ -1299,7 +1299,12 @@ $query_and_args
                       AND is_student = 1 ", $cwid);
     
     $cur = $this->db_fetch_array($res);
-    $name = $cur["f_name"] . " " . $cur["l_name"];
+    if ($cur) {
+      $name = $cur["f_name"] . " " . $cur["l_name"];
+    }
+    else {
+      $name = t("Unknown Student");
+    }
 
     // Force into pretty capitalization.
     // turns JOHN SMITH into John Smith 

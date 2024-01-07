@@ -17,13 +17,13 @@ use Twilio\Values;
 use Twilio\Version;
 
 /**
- * PLEASE NOTE that this class contains preview products that are subject to change. Use them with caution. If you currently do not have developer preview access, please contact help@twilio.com.
- *
  * @property string $accountSid
  * @property string $callSid
  * @property string $callType
  * @property string $callState
+ * @property string $answeredBy
  * @property string $processingState
+ * @property \DateTime $createdTime
  * @property \DateTime $startTime
  * @property \DateTime $endTime
  * @property int $duration
@@ -38,6 +38,8 @@ use Twilio\Version;
  * @property string $url
  * @property array $attributes
  * @property array $properties
+ * @property array $trust
+ * @property array $annotation
  */
 class CallSummaryInstance extends InstanceResource {
     /**
@@ -56,7 +58,9 @@ class CallSummaryInstance extends InstanceResource {
             'callSid' => Values::array_get($payload, 'call_sid'),
             'callType' => Values::array_get($payload, 'call_type'),
             'callState' => Values::array_get($payload, 'call_state'),
+            'answeredBy' => Values::array_get($payload, 'answered_by'),
             'processingState' => Values::array_get($payload, 'processing_state'),
+            'createdTime' => Deserialize::dateTime(Values::array_get($payload, 'created_time')),
             'startTime' => Deserialize::dateTime(Values::array_get($payload, 'start_time')),
             'endTime' => Deserialize::dateTime(Values::array_get($payload, 'end_time')),
             'duration' => Values::array_get($payload, 'duration'),
@@ -71,6 +75,8 @@ class CallSummaryInstance extends InstanceResource {
             'url' => Values::array_get($payload, 'url'),
             'attributes' => Values::array_get($payload, 'attributes'),
             'properties' => Values::array_get($payload, 'properties'),
+            'trust' => Values::array_get($payload, 'trust'),
+            'annotation' => Values::array_get($payload, 'annotation'),
         ];
 
         $this->solution = ['callSid' => $callSid, ];
