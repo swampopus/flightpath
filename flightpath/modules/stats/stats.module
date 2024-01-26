@@ -335,11 +335,20 @@ function stats_report_course_use_summary() {
   
   $draft = "";
   $use_draft = FALSE;
+
+  $school_id = 0;  // TODO: school is selectable / based on user's school?
   
-  $subject_id = trim(@$_GET["subject_id"]);
-  $course_num = trim(@$_GET["course_num"]);
-  $school_id = intval(@$_GET["school_id"]);
-  $draft_check = @$_GET["draft"];
+  $subject_id = $course_num = $draft_check = "";
+  
+  if (isset($_GET["subject_id"])) {
+    $subject_id = trim($_GET["subject_id"]);
+    $course_num = trim($_GET["course_num"]);
+    // $school_id = intval($_GET["school_id"]);  // TODO: not supported yet.
+    if (isset($_GET['draft'])) {
+      $draft_check = $_GET["draft"];
+    }
+  }
+    
   if ($draft_check == "checked") {
     $draft = "draft_";
     $use_draft = TRUE;
@@ -1185,6 +1194,8 @@ function stats_draw_date_range_form($path, $start_date = "", $end_date = "", $ad
 
   fp_add_css(fp_get_module_path("system") . "/css/style.css");
   fp_add_js(fp_get_module_path("system") . "/js/spinner.js");
+  
+  $name = fp_get_machine_readable($path);
     
   $rtn .= "
             
@@ -1211,11 +1222,16 @@ function stats_draw_date_range_form($path, $start_date = "", $end_date = "", $ad
 function stats_report_advisor_use($bool_only_return_total_number = FALSE) {
   $rtn = "";
 
-  $start_date = trim(addslashes(@$_REQUEST["start_date"]));
-  $end_date = trim(addslashes(@$_REQUEST["end_date"]));
-  $report_type = trim(addslashes(@$_REQUEST["report_type"]));
+  $start_date = $end_date = $report_type = $whatif = $report_type = "";
 
-  $whatif = trim(@$_REQUEST['is_whatif']);
+  if (isset($_REQUEST["start_date"])) {
+    $start_date = trim(addslashes(@$_REQUEST["start_date"]));
+    $end_date = trim(addslashes(@$_REQUEST["end_date"]));
+    $report_type = trim(addslashes(@$_REQUEST["report_type"]));
+  }
+  if (isset($_REQUEST['is_whatif'])) {
+    $whatif = trim(@$_REQUEST['is_whatif']);
+  }
   
   $selall = $selunique = "";
   if ($report_type == 'unique') $selunique = 'selected';
@@ -1252,7 +1268,8 @@ function stats_report_advisor_use($bool_only_return_total_number = FALSE) {
   
   $already_found_student_and_term = array();
     
-  $departments = fp_get_departments($school_id);
+  // TODO: get by school that user belongs to?  
+  $departments = fp_get_departments();
     
   $s_array = array();  
 
@@ -1535,7 +1552,11 @@ function stats_report_student_course_list() {
   
   $rtn = "";
 
-  $student_cwid = trim(addslashes(@$_REQUEST["student_cwid"]));
+  $student_cwid = "";
+  
+  if (isset($_REQUEST["student_cwid"])) {
+    $student_cwid = trim(addslashes($_REQUEST["student_cwid"]));
+  }
   $student_pidm = 0;
   //$rtn .= stats_draw_student_cwid_form("stats/reports/student-course-list", $student_cwid);
   

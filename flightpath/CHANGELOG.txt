@@ -1,6 +1,10 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-01-26
+  Fixing warnings in stats module.
+  
+
 2024-01-07
   Updated signalwire library for PHP 8.x, made modifications to it for FlightPath (removed need for \twilio\Fax, which wasn't included)
 
