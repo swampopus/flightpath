@@ -3499,7 +3499,8 @@ function calendar_get_ics_invitation_string($event_title, $location, $descriptio
   $rtn .= "CALSCALE:GREGORIAN\n";
   $rtn .= "BEGIN:VEVENT\n";
   $rtn .= "DTEND:$end_dt\n";
-  $rtn .= "UID:" . md5($event_title . $start_dt . $end_dt) . "\n";
+  $rtn .= "UID:" . sha1("FlightPath ~~" . $event_title . $start_dt . $end_dt) . "\n";
+  $rtn .= "SEQUENCE:0\n";
   $rtn .= "DTSTAMP:" . date("Ymd\THis\Z", time()) . "\n";
   $rtn .= "LOCATION:$location\n";
   $rtn .= "DESCRIPTION:" . calendar_ics_split("DESCRIPTION:", $description) . "\n";

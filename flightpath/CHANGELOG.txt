@@ -1,8 +1,22 @@
 FlightPath 6.x Changelog
 ========================
 
+2024-01-26
+  Fixing warnings (backport from FP7x) 
+  
+
+2023-12-13
+  Made the "view_fpm_debug" permission admin_restricted.
+  
+
+2023-12-06
+  Small change to how invite.ics files are created in calendar.module, to ensure UID is unique.  Also
+  set SEQUENCE number, to future-proof in case we want to send cancellation invite.ics one day.
+  
+
 2023-12-02
   Small change in advise.js to escape DOM input for added security.
+
 
 2023-12-01
   Fixed bug in alerts module where $user was not being read correctly.

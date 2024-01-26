@@ -400,6 +400,9 @@ function fp_load_user($user_id) {
     $rtn->permissions = fp_get_permissions_for_role(1);
     $rtn->email = '';
     $rtn->school_id = 0;
+    $rtn->is_student = FALSE;
+    $rtn->is_faculty = FALSE;
+    $rtn->is_disabled = FALSE;    
     return $rtn;        
   }
   
@@ -495,8 +498,10 @@ function fp_get_user_timezone($account = NULL) {
   }
   
   
-      
-  $utz = trim(@$account->settings['timezone']);  
+  $utz = NULL;
+  if (isset($account->settings['timezone'])) {    
+    $utz = trim(@$account->settings['timezone']);
+  }  
   if ($utz) return $utz;
   
   // Else...

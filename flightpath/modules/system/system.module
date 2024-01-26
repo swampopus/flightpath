@@ -57,6 +57,7 @@ function system_perm() {
       "title" => t("View debug output from the fpm() function"),
       "description" => t("The user may view debug output from the fpm() function.
                         Useful for developers."),
+      "admin_restricted" => TRUE, // means only appears for admin (user_id == 1)
     ),
     
     "view_system_status" => array(
