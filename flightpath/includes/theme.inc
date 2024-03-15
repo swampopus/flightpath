@@ -25,7 +25,7 @@
 function theme_table_header_sortable($headers = array(), $element_id = "default") {
   
   // Is there a "current student id" being specified in the URL? If so, let's keep it in our links.
-  $csid = trim(@$_REQUEST['current_student_id']);  
+  $csid = fp_trim(@$_REQUEST['current_student_id']);  
   if ($csid) {
     $csid = "&current_student_id=$csid";
   }

@@ -1,6 +1,17 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-03-15
+  Fixed various deprecated warnings for PHP 8.2.
+  
+  Fixed issue where substitutions were no longer working, due to changes in how PHP 8.2
+  compares numbers and strings.
+  
+  Added new function fp_trim(), which is meant to act as a drop-in replacement for trim(),
+  except that it can accept NULL or FALSE and return ''.  Regular trim() cannot do this
+  without triggering a deprecated warning.
+  
+
 2024-01-26
   Fixing warnings in stats module.
   

@@ -2102,7 +2102,7 @@ function calendar_schedule_appointment_confirm_form_submit($form, &$form_state) 
   
   $event_type_cid = intval($form_state['values']['event_type_cid']);
   $event_type_content = content_load($event_type_cid);
-  $event_additional_msg = trim(@$event_type_content->field__additional_email_msg['display_value']);
+  $event_additional_msg = fp_trim(@$event_type_content->field__additional_email_msg['display_value']);
   
     
   $event_duration_minutes = intval($event_type_content->field__event_duration_minutes['value']);
@@ -2330,7 +2330,7 @@ function calendar_display_schedule_appointment_page($faculty_user_id) {
     $content = content_load($event_type_cid);
     
     
-    $month_year = trim(@$_REQUEST['month_year']);
+    $month_year = fp_trim(@$_REQUEST['month_year']);
     if (!$month_year) {
       // Not set, so use today's month and year.
       $month = date('n');
@@ -2387,7 +2387,7 @@ function calendar_display_schedule_appointment_page($faculty_user_id) {
     $event_type_cid = intval($_REQUEST['event_type_cid']);
     $content = content_load($event_type_cid);
     
-    $month_year = trim(@$_REQUEST['month_year']);
+    $month_year = fp_trim(@$_REQUEST['month_year']);
     if (!$month_year) {
       // Not set, so use today's month and year.
       $month = date('n');

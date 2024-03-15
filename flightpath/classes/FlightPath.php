@@ -291,7 +291,7 @@ class FlightPath extends stdClass
         
         // Should we rename the_semester's title (because the semester we are grabbing is overriding?)
         //$degree_plan->load_descriptive_data();   // Doesn't appear to be necessary at this stage.     
-        $stitle = trim(@$degree_plan->array_semester_titles[$sem->semester_num]);
+        $stitle = fp_trim(@$degree_plan->array_semester_titles[$sem->semester_num]);
         if ($stitle != "") {          
            // Meaning we should overwrite the semester title, because this degree isn't using the default title
            $the_semester->title = $stitle;
@@ -544,14 +544,14 @@ class FlightPath extends stdClass
 
       ////////////////////////////
       // Ticket #2316, from Logan Buth, this is to better detect outdated subs for combined degrees.
-      $bool_sub_valid = true;
+      $bool_sub_valid = TRUE;
       $outdated_note = "";
       
       if ($this->degree_plan->degree_id == DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE &&
           !in_array($substitution->db_required_degree_id, $this->degree_plan->combined_degree_ids_array)) {
           //combined degree plan, degree id not in it.
           
-          $bool_sub_valid = false;
+          $bool_sub_valid = FALSE;
           $sub_degree_title = fp_get_degree_title($substitution->db_required_degree_id, TRUE, TRUE, FALSE, TRUE);
           
           $outdated_note = t("This substitution is for the degree %did
@@ -560,7 +560,7 @@ class FlightPath extends stdClass
       else if ($this->degree_plan->degree_id != DegreePlan::DEGREE_ID_FOR_COMBINED_DEGREE &&
                  $this->degree_plan->degree_id != $substitution->db_required_degree_id) {
           
-          $bool_sub_valid = false;
+          $bool_sub_valid = FALSE;
           $sub_degree_title = fp_get_degree_title($substitution->db_required_degree_id, TRUE, TRUE, FALSE, TRUE);
           $outdated_note = t("This substitution is for the degree %did
                             which is no longer the student's degree", array("%did" => $sub_degree_title));
@@ -574,23 +574,23 @@ class FlightPath extends stdClass
       //$required_group_id = $substitution->course_requirement->assigned_to_group_id;
       $required_group_id = $substitution->course_requirement->get_first_assigned_to_group_id(); // we assume there's only one group to get
 
-
       // First check-- does this degree even have this group ID?
-      if ($bool_sub_valid && $required_group_id == 0) {
+      if ($bool_sub_valid && ($required_group_id == 0 || $required_group_id == '' || $required_group_id == NULL)) {
         // bare degree plan.
         // Does the bare degree plan list the course_requirement
         // anywhere?
-        $bool_sub_valid = false;
+        $bool_sub_valid = FALSE;
         $this->degree_plan->list_semesters->reset_counter();
-        while($this->degree_plan->list_semesters->has_more() && $bool_sub_valid == false)
+        while($this->degree_plan->list_semesters->has_more() && $bool_sub_valid == FALSE)
         {
           $sem = $this->degree_plan->list_semesters->get_next();
           if ($sem->list_courses->find_match($substitution->course_requirement))
-          {
-            $bool_sub_valid = true;
-          } else {
+          {            
+            $bool_sub_valid = TRUE;
+          } 
+          else {
             // Could not find the course requirement in question.
-            $bool_sub_valid = false;
+            $bool_sub_valid = FALSE;
             $scr = $substitution->course_requirement;
             $scr->load_descriptive_data();
             $outdated_note = t("This substitution is for the course %info on the 
@@ -601,7 +601,7 @@ class FlightPath extends stdClass
 
 
       } 
-      else if ($bool_sub_valid && $required_group_id != 0) {
+      else if ($bool_sub_valid && $required_group_id != 0 && $required_group_id != '' && $required_group_id != NULL) {
         // required_group_id != 0, meaning, NOT the bare degree plan.
         // So, does this degree plan have a group with this id (required_group_id)?
         $bool_sub_valid = false;
@@ -611,7 +611,7 @@ class FlightPath extends stdClass
         else {
           // Could not find the group in question.  Add an "outdated_note"
           // to the sub...
-          $bool_sub_valid = false;
+          $bool_sub_valid = FALSE;
           $new_group = new Group();
           $new_group->group_id = $required_group_id;
           $new_group->load_descriptive_data();
@@ -627,12 +627,12 @@ class FlightPath extends stdClass
       }
 
 
-      if ($bool_sub_valid == false) {
+      if ($bool_sub_valid == FALSE) {
 
         // Couldn't find a match, so remove this sub!
-        $substitution->bool_outdated = true;
+        $substitution->bool_outdated = TRUE;
         $substitution->outdated_note = $outdated_note;
-        $substitution->course_list_substitutions->get_first()->bool_outdated_sub = true;
+        $substitution->course_list_substitutions->get_first()->bool_outdated_sub = TRUE;
         $substitution->course_list_substitutions->get_first()->set_bool_outdated_sub(0, TRUE);
         //$substitution->course_list_substitutions->get_first()->bool_substitution = false;
         $substitution->course_list_substitutions->get_first()->set_bool_substitution(0, FALSE);
@@ -663,7 +663,7 @@ class FlightPath extends stdClass
       $school_id = $student->school_id;      
     }
 
-    if ($group == null)
+    if ($group == NULL || $group == '' || $group == 0 || $group == FALSE)
     {
       $group = new Group();
       $group->group_id = 0;
@@ -687,7 +687,7 @@ class FlightPath extends stdClass
     $bool_mark_repeats_exclude = ($course_repeat_policy == "most_recent_exclude_previous" || $course_repeat_policy == "best_grade_exclude_others");
     
     $group_id = $group->group_id;
-    // If the group_id == 0, we may be talking about the bare degree plan.
+    // If the group_id == 0 or blank or null, we may be talking about the bare degree plan.
 
     $hours_required = $group->hours_required*1;
     $hours_assigned = $group->hours_assigned;
@@ -726,7 +726,7 @@ class FlightPath extends stdClass
       $req_by_degree_id = $course_requirement->req_by_degree_id;  // what degree is requiring this course?
 
       // If we're dealing with a group, use it's required by degree id.
-      if ($group->group_id != "" && $group->req_by_degree_id > 0) {        
+      if (($group->group_id != "" && $group->group_id != 0 && $group->group_id != NULL) && ($group->req_by_degree_id != '' && $group->req_by_degree_id != 0 && $group->req_by_degree_id != NULL)) {        
         $req_by_degree_id = $group->req_by_degree_id;
       }
      
@@ -750,14 +750,11 @@ class FlightPath extends stdClass
            
       }
 
-//if ($course_requirement->course_id == '101092') {
-//fpm($course_requirement);
-//}
- 
       
       // Does the student have any substitutions for this requirement?
       if ($substitution = $student->list_substitutions->find_requirement($course_requirement, true, $group_id, $req_by_degree_id))
-      {       
+      {
+           
         // Since the substitution was made, I don't really care about
         // min grades or the like.  Let's just put it in.
 
@@ -830,7 +827,7 @@ class FlightPath extends stdClass
             
             // Only do this if we are NOT in a group!  This is to correct a bug where split additions to groups wound up
             // being displayed like available selections in the group.  It was like, weird man.  
-            if ($group_id == 0) {
+            if ($group_id == 0 || $group_id == '' || $group_id == NULL) {
               // Now, add this into the list, right after the course_requirement.
               $current_i = $list_requirements->i;
               $list_requirements->insert_after_index($current_i, $new_course);
@@ -927,7 +924,7 @@ class FlightPath extends stdClass
 
 
         // Check hooks to see if this course is allowed to be assigned to the GROUP in question.
-        if ($group_id != "" && $group_id != 0) {
+        if ($group_id != "" && $group_id != 0 && $group_id != NULL) {
           $bool_can_proceed = TRUE;
 
           
@@ -1094,7 +1091,7 @@ class FlightPath extends stdClass
     // and decide if they should be assigned to degree requirements
     // which have been spelled out in each semester.  This
     // is not where it looks into groups.
-    
+    //fpm($this->degree_plan, 5);
     $this->degree_plan->list_semesters->reset_counter();
     while($this->degree_plan->list_semesters->has_more())
     {
@@ -1103,7 +1100,7 @@ class FlightPath extends stdClass
 
       // Okay, let's look at the courses (not groups) in this
       // semester...
-      $this->assign_courses_to_list($semester->list_courses, $this->student, TRUE, null, FALSE, $semester_num);
+      $this->assign_courses_to_list($semester->list_courses, $this->student, TRUE, NULL, FALSE, $semester_num);
       
     }
 
@@ -1544,7 +1541,7 @@ class FlightPath extends stdClass
       // Some particular course should be updated.  Possibly this one.
       // Updates happen because of a student changing the
       // variable hours, for example.
-      if (isset($_POST["updatecourse"]) && trim(@$_POST["updatecourse"]) != "")
+      if (isset($_POST["updatecourse"]) && trim($_POST["updatecourse"]) != "")
       {
         $temp2 = explode("~",trim($_POST["updatecourse"]));
 
@@ -1572,7 +1569,7 @@ class FlightPath extends stdClass
       }
 
 
-      if ($group_id != 0)
+      if ($group_id != 0 && $group_id != '' && $group_id != NULL)
       {
         $this->replace_missing_course_in_group($course_id, $group_id);
       }
@@ -1626,7 +1623,7 @@ class FlightPath extends stdClass
 
       $advising_session_id_array_count[$advised_term_id]++;
 
-      if ($group_id != 0)
+      if ($group_id != 0 && $group_id != '' && $group_id != NULL)
       {
         $this->replace_missing_course_in_group($course_id, $group_id);
       }
@@ -1642,7 +1639,7 @@ class FlightPath extends stdClass
     //
     //-------------------------------------------------------
     // check permissions for substitutions before saving
-    if (isset($_POST["savesubstitution"]) && trim(@$_POST["savesubstitution"]) != "" && user_has_permission("can_substitute")) {
+    if (isset($_POST["savesubstitution"]) && trim($_POST["savesubstitution"]) != "" && user_has_permission("can_substitute")) {
       $temp = explode("~",trim($_POST["savesubstitution"]));
       $course_id = $temp[0];  // required course
       $group_id = trim($temp[1]);
@@ -1655,6 +1652,8 @@ class FlightPath extends stdClass
       $sub_hours = $temp[7] * 1;
       $sub_addition = $temp[8];
       $sub_remarks = urldecode($temp[9]);
+
+      
 
       if ($sub_addition == "true")
       {
@@ -1678,7 +1677,7 @@ class FlightPath extends stdClass
 
       }
 
-      if ($group_id != 0 && $course_id != 0)
+      if (($group_id != 0 && $group_id != '' && $group_id != NULL) && $course_id != 0)
       {
         $this->replace_missing_course_in_group($course_id, $group_id);
       }
@@ -1710,7 +1709,7 @@ class FlightPath extends stdClass
     } 
 
 
-    if (isset($_POST["removesubstitution"]) && trim(@$_POST["removesubstitution"]) != "")
+    if (isset($_POST["removesubstitution"]) && trim($_POST["removesubstitution"]) != "")
     {
       $temp = explode("~",trim($_POST["removesubstitution"]));
       $sub_id = trim($temp[0]) * 1;
@@ -1730,7 +1729,7 @@ class FlightPath extends stdClass
     //             Group Unassignments
     //
     //-------------------------------------------------------
-    if (isset($_POST["unassign_group"]) && trim(@$_POST["unassign_group"]) != "")
+    if (isset($_POST["unassign_group"]) && trim($_POST["unassign_group"]) != "")
     {
       $temp = explode("~",trim($_POST["unassign_group"]));
       $course_id = $temp[0];
@@ -1752,7 +1751,7 @@ class FlightPath extends stdClass
     }
 
     
-    if (isset($_POST["restore_unassign_group"]) && trim(@$_POST["restore_unassign_group"]) != "")
+    if (isset($_POST["restore_unassign_group"]) && trim($_POST["restore_unassign_group"]) != "")
     {
       $temp = explode("~",trim($_POST["restore_unassign_group"]));
       $unassign_id = trim($temp[0]) * 1;
@@ -1772,7 +1771,7 @@ class FlightPath extends stdClass
     //             Transfer EQV Unassignments
     //
     //-------------------------------------------------------
-    if (isset($_POST["unassign_transfer_eqv"]) && trim(@$_POST["unassign_transfer_eqv"]) != "")
+    if (isset($_POST["unassign_transfer_eqv"]) && trim($_POST["unassign_transfer_eqv"]) != "")
     {
       $temp = explode("~",trim($_POST["unassign_transfer_eqv"]));
       $course_id = $temp[0];
@@ -1788,7 +1787,7 @@ class FlightPath extends stdClass
 
     }
 
-    if (isset($_POST["restore_transfer_eqv"]) && trim(@$_POST["restore_transfer_eqv"]) != "")
+    if (isset($_POST["restore_transfer_eqv"]) && trim($_POST["restore_transfer_eqv"]) != "")
     {
       $temp = explode("~",trim($_POST["restore_transfer_eqv"]));
       $unassign_id = trim($temp[0]) * 1;

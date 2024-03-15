@@ -891,9 +891,9 @@ function advise_display_popup_change_track() {
       for ($t = 0; $t < count($tracks); $t++)
       {
         $temp = explode(" ~~ ", $tracks[$t]);
-        $track_code = trim(@$temp[0]);
-        $track_title = trim(@$temp[1]);
-        $track_description = trim(@$temp[2]);
+        $track_code = fp_trim(@$temp[0]);
+        $track_title = fp_trim(@$temp[1]);
+        $track_description = fp_trim(@$temp[2]);
         
         // if this track is NOT of the same classification as the current machine_code, we skip it.        
         $track_machine_name = trim((string) @$temp[4]);
@@ -917,8 +917,8 @@ function advise_display_popup_change_track() {
       for ($t = 0; $t < count($tracks); $t++)
       {
         $temp = explode(" ~~ ", $tracks[$t]);
-        $track_code = trim(@$temp[0]);
-        $track_title = trim(@$temp[1]);
+        $track_code = fp_trim(@$temp[0]);
+        $track_title = fp_trim(@$temp[1]);
         $track_degree_id = intval(trim((string) @$temp[3]));
         $track_description = "";
         
@@ -947,7 +947,7 @@ function advise_display_popup_change_track() {
                 
     
         if ($bool_default_description == false) {
-          $track_description = filter_markup(trim(@$temp[2]));
+          $track_description = filter_markup(fp_trim(@$temp[2]));
         }
     
         $temp_tc = $track_code;
@@ -1312,11 +1312,16 @@ function advise_display_popup_substitute_selected() {
   fp_add_js(array("subDecimalsAllowed" => $sub_decimals_allowed), "setting");
   
   
-  $course_id = trim(@$_GET["course_id"]);
-  $group_id = trim(addslashes(@$_GET["group_id"]));
-  $semester_num = trim(addslashes(@$_GET["semester_num"]));
-  $req_by_degree_id = trim(addslashes(@$_GET["req_by_degree_id"]));
-  $hours_avail = trim(addslashes(@$_GET["group_hours_remaining"]));
+    
+  $course_id = fp_trim(@$_GET["course_id"]);
+  $group_id = fp_trim(@$_GET["group_id"]);
+  $semester_num = fp_trim(@$_GET["semester_num"]);
+  $req_by_degree_id = fp_trim(@$_GET["req_by_degree_id"]);
+  
+  $hours_avail = '';
+  if (isset($_GET["group_hours_remaining"])) {
+    $hours_avail = fp_trim($_GET["group_hours_remaining"]);
+  }
   
   if (@$_GET["hours_avail"] * 1 > 0) {
     $hours_avail = $_GET["hours_avail"] * 1;

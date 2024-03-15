@@ -27,7 +27,7 @@ function fp_render_content($render_array = array(), $bool_include_wrappers = TRU
   }
 
   // First, check to see if this render array has an "#id" field defined.  This is required.
-  $render_id = fp_get_machine_readable(trim(@$render_array["#id"]));
+  $render_id = fp_get_machine_readable(fp_trim(@$render_array["#id"]));
   if ($render_id == "") {
     fp_add_message(t("The render array supplied does not have an #id field set.  This must be
                      machine-readable and unique.<br>Ex:  \$arr['#id'] = 'advise_course_description_popup';

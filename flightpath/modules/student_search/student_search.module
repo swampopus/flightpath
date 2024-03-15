@@ -535,7 +535,7 @@ function student_search_display_majors_search($limit = 20) {
   $_SESSION["student_search_last_tab"] = "majors-search";
     
   // Get the $major_code from the REQUEST, or from the user's saved settings.
-  $major_code = trim(@$_REQUEST["major_code"]);
+  $major_code = fp_trim(@$_REQUEST["major_code"]);
   if ($major_code == "") {
     // Get from their settings
     $major_code = db_get_user_setting($user->id, "major_search");
@@ -700,19 +700,29 @@ function student_search_search_form() {
   
   fp_set_title('');
   
-  $search_for = trim(@$_REQUEST["search_for"]);
-  if ($search_for == "") {
-    $search_for = trim(@$_SESSION["student_search_for"]);
+  $search_for = '';
+  
+  if (isset($_REQUEST['search_for'])) {
+    $search_for = trim($_REQUEST["search_for"]);
+  }
+  
+  if ($search_for == "" && isset($_SESSION["student_search_for"])) {
+    $search_for = trim($_SESSION["student_search_for"]);
   }
   else {
     $_SESSION['student_search_for'] = $search_for;
   }  
   $o_search_for = $search_for;
     
-    
-  $major_code = trim(@$_REQUEST["major_code"]);
+  $major_code = '';
+  if (isset($_REQUEST['major_code'])) {    
+    $major_code = trim($_REQUEST["major_code"]);
+  }
+  
   if ($major_code == "") {
-    $major_code = trim(@$_SESSION["student_search_major_code"]);
+    if (isset($_SESSION["student_search_major_code"])) {
+      $major_code = trim($_SESSION["student_search_major_code"]);
+    }
   }  
 
   $selected_school_id = -1;
@@ -821,15 +831,15 @@ function student_search_search_form() {
       
       
       $temp = explode(" ",$search_for);
-      if (trim(@$temp[1]) != "")
+      if (isset($temp[1]) && fp_trim(@$temp[1]) != "")
       {
-        $fn = trim(@$temp[0]);
-        $ln = trim(@$temp[1]);
+        $fn = trim($temp[0]);
+        $ln = trim($temp[1]);
         // If there was a comma, then these should be reversed,
         // as they probably entered last, first.
         if (strstr($search_for, ",")) {
-          $ln = trim(@$temp[0]);  
-          $fn = trim(@$temp[1]);
+          $ln = trim($temp[0]);  
+          $fn = trim($temp[1]);
           
           $ln = trim(str_replace(",", "", $ln));  // remove comma
           $fn = trim(str_replace(",", "", $fn));  // remove comma

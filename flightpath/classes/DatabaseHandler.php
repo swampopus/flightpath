@@ -878,7 +878,7 @@ $query_and_args
    */
   function get_group_name($group_id) {
     $temp = explode("_", $group_id);
-    $group_id = trim(@$temp[0]);
+    $group_id = fp_trim(@$temp[0]);
     
 
     // If it's already in our static cache, just return that.

@@ -1289,7 +1289,7 @@ class DegreePlan extends stdClass
     
     // Okay, if the course is within a group, then
     // we can first use the find_group method.
-    if ($group_id != "" && $group_id != 0)
+    if ($group_id != "" && $group_id != 0 && $group_id != NULL)
     {
       if ($group = $this->find_group($group_id))
       {

@@ -484,7 +484,7 @@ function z__stats_report_selected_degree_options() {
   
   
   // What major have they selected?
-  $major = trim(@$_GET["major"]);
+  $major = fp_trim((string) @$_GET["major"]);
 
   $rtn .= "<form action='" . fp_url("stats/reports/selected-degree-options") . "' method='GET' >";
   $rtn .= stats_draw_majors_pulldown($major, TRUE, TRUE, t("Please select a major with degree options"));
@@ -1225,12 +1225,12 @@ function stats_report_advisor_use($bool_only_return_total_number = FALSE) {
   $start_date = $end_date = $report_type = $whatif = $report_type = "";
 
   if (isset($_REQUEST["start_date"])) {
-    $start_date = trim(addslashes(@$_REQUEST["start_date"]));
-    $end_date = trim(addslashes(@$_REQUEST["end_date"]));
-    $report_type = trim(addslashes(@$_REQUEST["report_type"]));
+    $start_date = fp_trim(addslashes((string) @$_REQUEST["start_date"]));
+    $end_date = fp_trim(addslashes((string) @$_REQUEST["end_date"]));
+    $report_type = fp_trim(addslashes((string) @$_REQUEST["report_type"]));
   }
   if (isset($_REQUEST['is_whatif'])) {
-    $whatif = trim(@$_REQUEST['is_whatif']);
+    $whatif = fp_trim((string) @$_REQUEST['is_whatif']);
   }
   
   $selall = $selunique = "";

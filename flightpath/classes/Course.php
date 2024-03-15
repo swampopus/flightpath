@@ -1829,7 +1829,7 @@ class Course extends stdClass
                    ", $student_id, $this->course_id);
       $cur = $this->db->db_fetch_array($res);
       if ($cur) {
-        if (trim(@$cur["student_specific_course_title"]) != "") {
+        if (fp_trim(@$cur["student_specific_course_title"]) != "") {
           $this->title = trim($cur["student_specific_course_title"]);
         }
         // Also assign hours_awarded and other values while we are here
@@ -2050,16 +2050,28 @@ class Course extends stdClass
    */
   function get_bool_assigned_to_group_id($group_id) {
     
+    // Trim and force NULL or 0 to be ''.  This is for PHP 8 compatibility.
+    $group_id = fp_trim($group_id);
+    if (is_numeric($group_id) && intval($group_id) == 0) {
+      $group_id = '';
+    } 
+            
     $bool_yes_specific_group = FALSE;
     $bool_yes_any_group = FALSE;
     
     foreach ($this->assigned_to_group_ids_array as $k => $v) {
-      if (intval($v) > 0) {
+      if (intval($v) > 0 || strlen($v) > 0) {
         $bool_yes_any_group = TRUE;  
       } 
+      
+      // Convert 0 and NULL to '' for PHP 8 compatibility 
+      if (is_numeric($v) && intval($v) == 0) $v = '';
+      if ($v == NULL) $v = '';
+      
       if ($group_id == $v) {
         $bool_yes_specific_group = TRUE;        
       }
+      
     }
     
     

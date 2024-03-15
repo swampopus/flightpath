@@ -1504,10 +1504,10 @@ function get_term_structures($school_id = 0) {
     $rtn[$term_suffix] = array(
       "term_suffix" => $term_suffix,
       "term_def" => $term_def,
-      "short" => trim(@$tokens[1]),      
-      "full" => trim(@$tokens[2]),
-      "abbr" => trim(@$tokens[3]),
-      "disp_adjust" => trim(@$tokens[4]),
+      "short" => fp_trim(@$tokens[1]),      
+      "full" => fp_trim(@$tokens[2]),
+      "abbr" => fp_trim(@$tokens[3]),
+      "disp_adjust" => fp_trim(@$tokens[4]),
     );
   
   }
@@ -2475,6 +2475,36 @@ function fp_recalculate_alert_count_by_type($account = NULL) {
   $res = invoke_hook("get_alert_count_by_type", array($account));  
   $_SESSION['fp_alert_count_by_type'] = $res;  
   $_SESSION['fp_alert_count_by_type_last_check'] = time();  
+}
+
+
+
+/**
+ * This is a simple function which attempts to trim a String.  However, if $val is NOT a string, it will
+ * cast it to string.
+ * 
+ * This is to prevent deprecated warnings in PHP 8+, and can be used as
+ * a drop-in replacement in place of trim()
+ */
+function fp_trim($val = NULL) {
+  
+  if (is_string($val)) {
+    return trim($val);
+  }
+
+  if (is_numeric($val)) {
+    $val = "" . $val;
+    return trim($val);
+  }
+  
+  if ($val === NULL || $val === FALSE) {
+    return '';
+  }
+
+
+  // if $val is an array or object, intentionally return the trim() so it will cause a warning.
+  return trim($val);  
+      
 }
 
 

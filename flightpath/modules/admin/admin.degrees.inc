@@ -871,7 +871,7 @@ function admin_display_degrees() {
     
     // get JUST the major code...
     $temp = explode("|", $db_major_code);
-    $just_major = trim(@$temp[0]);
+    $just_major = trim((string) @$temp[0]);
     $just_conc = trim((string) @$temp[1]);
     $outside = "";
 
@@ -1096,7 +1096,7 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
 
-  $button_msg = trim(addslashes((string) @$_REQUEST["button_msg"]));  
+  $button_msg = fp_trim(addslashes((string) @$_REQUEST["button_msg"]));  
   
   $db = get_global_database_handler();
 
@@ -1726,7 +1726,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
     }
     
       
-    $courses = trim(@$values["courses_$semester_num"]);
+    $courses = fp_trim(@$values["courses_$semester_num"]);
 
     // Does it contain a single #?  Or, is blank?  If so, insert and move on.
     // We do this, so we can have blank semesters until someone deletes them.
@@ -2148,7 +2148,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
     }
     
       
-    $courses = trim(@$values["courses_$semester_num"]);
+    $courses = fp_trim(@$values["courses_$semester_num"]);
 
     // Does it contain a single #?  Or, is blank?  If so, insert and move on.
     // We do this, so we can have blank semesters until someone deletes them.

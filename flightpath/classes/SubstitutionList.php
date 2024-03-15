@@ -3,19 +3,20 @@
 class SubstitutionList extends ObjList
 {
 
-
-	function find_requirement($course_requirement, $bool_exclude_has_been_applied = false, $group_id = 0, $degree_id = 0, $exclude_ids = array()) {
+  // If group_id == -1 or 0 or '' or null, no particular group is required.
+	function find_requirement($course_requirement, $bool_exclude_has_been_applied = FALSE, $group_id = '', $degree_id = 0, $exclude_ids = array()) {
 	  
 		// Look through the array for a substitution which has this
 		// course requirement.
-		// If group_id == -1, no particular group is required.
+		
+		$flag = FALSE;
 		for ($t = 0; $t < count($this->array_list); $t++)
 		{
 			$substitution = $this->array_list[$t];
-
       // Skip if this substitution id is in our list to exclude.
+
       if (in_array($substitution->db_substitution_id,$exclude_ids)) continue;
-      
+
 
 			if ($bool_exclude_has_been_applied == true && $substitution->bool_has_been_applied == true)
 			{
@@ -32,7 +33,8 @@ class SubstitutionList extends ObjList
 
 			$cr = $substitution->course_requirement;
 			//adminDebug($cr->course_id . " " . $course_requirement->course_id);
-			if ($group_id == -1)
+
+			if ($group_id === -1 || $group_id === 0 || $group_id == '' || $group_id == NULL)
 			{ // No particular group_id is required...
 				if ($cr->course_id == $course_requirement->course_id)
 				{
@@ -47,7 +49,6 @@ class SubstitutionList extends ObjList
 
 			}
 		}
-
 		return false;
 	}
 

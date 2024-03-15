@@ -84,8 +84,8 @@ function user_display_student_users() {
 
   
   
-  $ur = trim(@$_GET["ur"]);
-  $lr = trim(@$_GET["lr"]);
+  $ur = fp_trim(@$_GET["ur"]);
+  $lr = fp_trim(@$_GET["lr"]);
 
   if ($ur == "" && !isset($_SESSION['users_filter_submit'])) {
   //if ($ur == "") {

@@ -175,7 +175,7 @@ function hook_content_alter(&$render, $render_id) {
  */
 function hook_courselist_find_match_allow_course(Course $candidate_course, Course $needle_course, CourseList $haystack_list_matches, $degree_id = 0, $group_id = 0) {
   
-  if ($degree_id == 12345 && $candidate_course->name_equals('ART 101') && $group_id != 0) {
+  if ($degree_id == 12345 && $candidate_course->name_equals('ART 101') && ($group_id != 0 && $group_id != '')) {
     return FALSE;
   }
   

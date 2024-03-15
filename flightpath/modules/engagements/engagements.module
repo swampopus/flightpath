@@ -2573,6 +2573,7 @@ function engagements_content_register_content_type()
     'label' => t('From Text Phone Line:'),
     'hide_please_select' => TRUE,
     'options' => array(),
+    'attributes' => array('class' => ''),
     'weight' => 7,
   );
 
@@ -2642,6 +2643,7 @@ function engagements_content_register_content_type()
     'label' => t('Message'),
     'filter' => 'basic',
     'weight' => 70,
+    'attributes' => array('class' => ''),    
   );
 
 
@@ -2848,13 +2850,16 @@ function engagements_form_alter(&$form, $form_id)
                         not have permission to send txt messages from any number.
                         See your system administrator for access.") . "</h3>";
 
+              
+
+                        
               $form['from_sms_phone']['attributes']['readonly'] = "readonly";
               $form['from_sms_phone']['attributes']['class'] .= " readonly";
-              $form['from_sms_phone']['attributes']['disabled'] .= "disabled";
+              $form['from_sms_phone']['attributes']['disabled'] = "disabled";
 
               $form['engagement_msg']['attributes']['readonly'] = "readonly";
               $form['engagement_msg']['attributes']['class'] .= " readonly";
-              $form['engagement_msg']['attributes']['disabled'] .= "disabled";
+              $form['engagement_msg']['attributes']['disabled'] = "disabled";
 
               $form['submit_submit']['attributes']['disabled'] = 'disabled';
               $form['submit_submit']['attributes']['class'] .= ' button-disabled';
@@ -2872,6 +2877,8 @@ function engagements_form_alter(&$form, $form_id)
               // Mobile phone was never found, so disable submit and message box.
 
               $form['engagement_msg']['attributes']['readonly'] = 'readonly';
+              
+                            
               $form['engagement_msg']['attributes']['class'] .= ' readonly';
 
               $form['submit_submit']['attributes']['disabled'] = 'disabled';
@@ -3171,7 +3178,7 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
     // Were there any attachments with this content?
 
     $attachments = array();
-    $attachment_csv = trim(@$content->field__attachment['value']);
+    $attachment_csv = fp_trim(@$content->field__attachment['value']);
     if ($attachment_csv) {
       $temp = explode(",", $attachment_csv);
       foreach ($temp as $fid) {
@@ -3576,7 +3583,7 @@ function engagements_display_main()
       if ($fid_csv) {
         $attachment_icon = "<i class='fa fa-paperclip'></i> ";
         $attachments = array();
-        $attachment_csv = trim(@$content->field__attachment['value']);
+        $attachment_csv = fp_trim(@$content->field__attachment['value']);
         // TODO:  An option here would be to just query the content_files table for this cid.
         
         

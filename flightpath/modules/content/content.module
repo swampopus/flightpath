@@ -558,7 +558,7 @@ function content_unpublish_content_form_submit(&$form, &$form_state) {
   
   $values = $form_state['values'];
   
-  if (trim($values['submit_cancel']) != '') {
+  if (isset($values['submit_cancel']) && trim($values['submit_cancel']) != '') {
     // We want to CANCEL this operation!
 
     // find out if we should redirect anywhere in particular for this cancelation

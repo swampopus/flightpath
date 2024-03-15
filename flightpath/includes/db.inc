@@ -500,7 +500,7 @@ function fp_get_user_timezone($account = NULL) {
   
   $utz = NULL;
   if (isset($account->settings['timezone'])) {    
-    $utz = trim(@$account->settings['timezone']);
+    $utz = fp_trim($account->settings['timezone']);
   }  
   if ($utz) return $utz;
   
