@@ -1858,7 +1858,16 @@ table.fp-box-top {
   
 }
 
+img.advising-course-row-icon {
+  width: 19px;
+  height: 19px;
+}
 
+.advising-course-transfer-ast {
+  font-size: 10px !important;
+  position: relative;
+  top: -2px;
+}
 
 
 

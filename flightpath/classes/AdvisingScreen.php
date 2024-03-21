@@ -1121,8 +1121,8 @@ function draw_menu_items($menu_array) {
       if ($this->bool_print != true)
       {// Don't display in print view.
         $purl = fp_url("advise/popup-toolbox/transfers");        
-        $html = "<div class='admin-toolbox-link-wrapper'>         
-          <a href='javascript: popupSmallIframeDialog(\"" . $purl . "\",\"" . t("Administrator&#39;s Toolbox") . "\",\"\");'><img src='" . fp_theme_location() . "/images/toolbox.gif' border='0'>" . t("Administrator's Toolbox") . "</a>
+        $html = "<div class='admin-toolbox-link-wrapper'>                 
+          <a href='javascript: popupSmallIframeDialog(\"" . $purl . "\",\"" . t("Administrator&#39;s Toolbox") . "\",\"\");'><i class='fa fa-gears'></i> " . t("Administrator's Toolbox") . "</a>
         </div>";
         $is_empty = false;
 
@@ -2899,7 +2899,7 @@ function draw_menu_items($menu_array) {
       $g->load_descriptive_data();
 
       $html .= "<div class=' ' style='margin-top: 10px;'>
-            <img src='" . fp_theme_location() . "/images/icons/$g->icon_filename' width='19' height='19'>
+            <img src='" . fp_theme_location() . "/images/icons/$g->icon_filename' class='advising-course-row-icon advising-course-row-icon-in-group'>
             &nbsp;
             " . t("This course is a member of") . " $g->title.
           ";
@@ -3907,8 +3907,8 @@ function draw_menu_items($menu_array) {
     $extra_classes .= " gr-" . fp_get_machine_readable($group->group_name);
     
             
-    $select_icon = "<img src='$img_path/select.gif' border='0'>";
-    $icon_link = "<img src='$img_path/icons/$group->icon_filename' width='19' height='19' border='0' alt='$title_text' title='$title_text'>";
+    $select_icon = "<img src='$img_path/select.gif' class='advising-course-row-select-icon'>";
+    $icon_link = "<img src='$img_path/icons/$group->icon_filename' class='advising-course-row-icon advising-group-select-icon' alt='$title_text' title='$title_text'>";
 
     $blank_degree_id = "";
     if ($this->bool_blank)
@@ -3968,7 +3968,7 @@ function draw_menu_items($menu_array) {
     if ($group->group_id == DegreePlan::GROUP_ID_FOR_COURSES_ADDED)
     { // This is the Add a Course group.
       $row_msg = t("Click to add an additional course.");
-      $select_icon = "<span style='font-size: 16pt; color:blue;'>+</span>";
+      $select_icon = "<span style='color:#0080ff;'><i class='fa fa-plus'></i></span>";
       $icon_link = "";
     }
 
@@ -4320,7 +4320,7 @@ function draw_menu_items($menu_array) {
         $course->course_transfer->load_descriptive_transfer_data($this->student->student_id);        
         if ($course->course_transfer->transfer_eqv_text != "")
         {
-          $ast = "*";
+          $ast = "<i class='advising-course-transfer-ast fa fa-asterisk'></i>";
           $GLOBALS["advising_course_has_asterisk"] = true;
         }
       }
@@ -4672,7 +4672,7 @@ function draw_menu_items($menu_array) {
     $icon_html = "";
     if (isset($theme["icon"]) && count($theme["icon"]) > 0) {
       $icon_html = "<img class='advising-course-row-icon'
-                      src='{$theme["icon"]["location"]}/{$theme["icon"]["filename"]}' width='19' height='19' border='0' alt='{$theme["icon"]["title"]}' title='{$theme["icon"]["title"]}'>";      
+                      src='{$theme["icon"]["location"]}/{$theme["icon"]["filename"]}' alt='{$theme["icon"]["title"]}' title='{$theme["icon"]["title"]}'>";      
     }
     
 
@@ -5092,7 +5092,7 @@ function draw_menu_items($menu_array) {
     $icon_html = "";
     if (isset($theme["icon"]) && count($theme["icon"]) > 0) {
       
-      $icon_html = "<img class='advising-course-row-icon'
+      $icon_html = "<img class='advising-popup-group-select-course-icon'
                       src='{$theme["icon"]["location"]}/{$theme["icon"]["filename"]}' width='14' height='14' border='0' alt='{$theme["icon"]["title"]}' title='{$theme["icon"]["title"]}'>";      
     }
 
@@ -5666,7 +5666,7 @@ function draw_menu_items($menu_array) {
     $bool_unselectableCourses = false;
     $final_course_list = new CourseList();
 
-    $public_note = trim($group->public_note);    
+    $public_note = fp_trim($group->public_note);    
     if ($public_note) {
       $pC .= "<tr><td colspan='8'><div class='group-public-note'>" . $public_note . "</div></td></tr>";
     }

@@ -1,6 +1,10 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-03-20
+  To fix XSS vulnerability, modified Content module to disallow dangerous HTML (like script tags)
+  in titles.
+
 2024-03-15
   Fixed various deprecated warnings for PHP 8.2.
   
