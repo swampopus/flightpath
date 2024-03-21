@@ -21,8 +21,8 @@
    
   <?php // Bring in jQuery and jQuery UI, as well as jQuery UI's css. ?>
   
-  <script src="<?php print base_path() ?>/libraries/jquery-3.5.1.min.js" type="text/javascript"></script>
-  <script src="<?php print base_path() ?>/libraries/jquery-ui-1.12.1.custom/jquery-ui.min.js" type="text/javascript"></script>  
+  <script src="<?php print base_path() ?>/libraries/jquery-3.7.1.min.js" type="text/javascript"></script>
+  <script src="<?php print base_path() ?>/libraries/jquery-ui-1.13.2.custom/jquery-ui.min.js" type="text/javascript"></script>  
   <script src="<?php print base_path() ?>/libraries/modal-alert/js/daypilot-modal-2.9.js" type="text/javascript"></script>
   
   <script type='text/javascript'>
@@ -31,7 +31,7 @@
     $(document).ready(function() { <?php print $page_on_load; ?>; });  
   </script>
   
-  <link rel='stylesheet' type='text/css' href='<?php print base_path() ?>/libraries/jquery-ui-1.12.1.custom/jquery-ui.min.css' />
+  <link rel='stylesheet' type='text/css' href='<?php print base_path() ?>/libraries/jquery-ui-1.13.2.custom/jquery-ui.min.css' />
   
   
   <?php
