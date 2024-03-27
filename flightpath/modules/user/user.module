@@ -1529,12 +1529,14 @@ function user_permissions_form_submit($form, $form_submit) {
   
   // Find all the perm checkboxes.  
   foreach($values as $key => $val) {
+    $cb = "";
+    
     if (strstr($key, "perm_cb_")) {
       if (is_array($val)) {
         $cb = current($val);
       }
-      else if (trim($val) != "") {
-        $cb = trim($val);
+      else if (fp_trim($val) != "") {
+        $cb = fp_trim($val);
       }
       
       if (strstr($cb, "___")) {
@@ -2223,13 +2225,13 @@ function user_edit_user_form_submit($form, $form_state) {
   
   foreach ($values as $key => $val) {
     if (!is_array($val)) {
-      $values[$key] = trim($val);
+      $values[$key] = fp_trim($val);
     }
   }
   
   $user_id = intval($values["user_id"]);
   $faculty_cwid = $values["faculty_cwid"];
-  $dept_code = trim($values['department']);
+  $dept_code = fp_trim(@$values['department']);
   
   // Save the roles into the database for this user.
   // Begin by deleting what's there all ready.
@@ -2784,10 +2786,10 @@ function user_list_filter_form_submit($form, $form_state) {
   unset($_SESSION['users_filter_submit']);  
     
   if ($values['submit_btn'] != '') {
-    $_SESSION['users_filter_name'] = trim($values['filter_name']);
-    $_SESSION['users_filter_school'] = $values['filter_school'];
-    $_SESSION['users_filter_dept'] = $values['filter_dept'];
-    $_SESSION['users_filter_role'] = $values['filter_role'];
+    $_SESSION['users_filter_name'] = fp_trim(@$values['filter_name']);
+    $_SESSION['users_filter_school'] = fp_trim(@$values['filter_school']);
+    $_SESSION['users_filter_dept'] = fp_trim(@$values['filter_dept']);
+    $_SESSION['users_filter_role'] = fp_trim(@$values['filter_role']);
     
     $_SESSION['users_filter_submit'] = "yes"; // simply notes that we did indeed press the submit btn.
     

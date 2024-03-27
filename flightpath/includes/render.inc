@@ -707,6 +707,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   }
   
   if ($type == "hidden" || $type == "value") {
+    if (!$value) $value = '';  // Force it to be a string  
     $value = htmlentities($value, ENT_QUOTES);    
     $rtn .= "<input type='hidden' name='$name' id='element-$cssname' value='$value'>";
   }

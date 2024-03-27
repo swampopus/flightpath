@@ -838,24 +838,27 @@ function system_confirm_db_updates_form_submit($form, $form_state) {
             
             $res = db_query("SELECT * FROM modules WHERE path = ? ", $path);
             $cur = db_fetch_array($res);
-            $info_details_array["enabled"] = intval($cur["enabled"]);
-           
-            // Does this module need to run db updates?
-            if (@$cur["enabled"] == 1 && @intval($cur["schema"]) != @intval($info_details_array["schema"]) && @$info_details_array["schema"] != "") {
-              
-              // Add to our list of modules to run in our batch operations.
-              
-              $modules[] = array(
-                'module' => $module,
-                'path' => $path,
-                'cur_schema' => intval($cur['schema']),
-                'schema' => intval($info_details_array['schema']),
-              );
-              
-              
-              
-            } // if enabled & schema != db schema  
-  
+            if ($cur) {
+              $info_details_array["enabled"] = intval($cur["enabled"]);
+             
+              // Does this module need to run db updates?
+              if (@$cur["enabled"] == 1 && @intval($cur["schema"]) != @intval($info_details_array["schema"]) && @$info_details_array["schema"] != "") {
+                
+                // Add to our list of modules to run in our batch operations.
+                
+                $modules[] = array(
+                  'module' => $module,
+                  'path' => $path,
+                  'cur_schema' => intval($cur['schema']),
+                  'schema' => intval($info_details_array['schema']),
+                );
+                
+                
+                
+              } // if enabled & schema != db schema
+                
+            } // if cur
+            
           } // if fileexists
         }//if isdir(file)
       }// while file = readdir()
@@ -914,35 +917,39 @@ function system_perform_db_updates_perform_batch_operation(&$batch, $modules) { 
  }
   
       
-  $t = $batch["results"]["current"];
+  $t = intval($batch["results"]["current"]);
 
+  if (!isset($modules[$t])) {
+    $modules[$t] = array();  // not set, so just make it a blank array.
+  }  
+    
+  $module = fp_trim(@$modules[$t]['module']);    
+  $path = @$modules[$t]['path'];    
+  $cur_schema = @$modules[$t]['cur_schema'];    
+  $schema = @$modules[$t]['schema'];    
   
-  $module = $modules[$t]['module'];    
-  $path = $modules[$t]['path'];    
-  $cur_schema = $modules[$t]['cur_schema'];    
-  $schema = $modules[$t]['schema'];    
-  
-  // If the module has a .install file, begin by including it.
-  if (include_module_install($module, $path)) {
-      
-    // Include the original module file first.
-    include_module($module, TRUE, $path);
-                       
-    // Now, we can call hook_update, if it exists.
-    if (function_exists($module . '_update')) {
-      call_user_func_array($module . '_update', array($cur_schema, $schema));
-    }
-       
-  }              
-  
-  // Okay, update the modules table for this module, and set schema to correct version.
-  $res = db_query("UPDATE modules 
-                    SET `schema` = '?'
-                    WHERE path = '?' LIMIT 1 ", $schema, $path);
-                           
-  
-  fp_add_message(t("The module %module has run its DB updates.", array("%module" => $module)));              
-  
+  if ($module) {
+    // If the module has a .install file, begin by including it.
+    if (include_module_install($module, $path)) {
+        
+      // Include the original module file first.
+      include_module($module, TRUE, $path);
+                         
+      // Now, we can call hook_update, if it exists.
+      if (function_exists($module . '_update')) {
+        call_user_func_array($module . '_update', array($cur_schema, $schema));
+      }
+         
+    }              
+    
+    // Okay, update the modules table for this module, and set schema to correct version.
+    $res = db_query("UPDATE modules 
+                      SET `schema` = ?
+                      WHERE path = ? LIMIT 1 ", $schema, $path);
+                             
+    
+    fp_add_message(t("The module %module has run its DB updates.", array("%module" => $module)));              
+  }
   
   // Update our values.
   $batch["results"]["current"] = $t + 1; // go to next one.
@@ -4156,7 +4163,7 @@ function system_display_dashboard_page () {
   
       $turl = fp_url("advise/popup-display-summary", "advising_session_id=" . $cur['advising_session_id']);
       $advising_session_id_array[] = $cur['advising_session_id'];
-      $term = get_term_description($cur['term_id'], FALSE, $user->student_id);
+      $term = get_term_description($cur['term_id'], FALSE, $user->school_id);
       $link = "popupLargeIframeDialog(\"" . $turl . "\",\"" . t("Advising Session @term - @date", array("@term" => $term, "@date" => $dt)) . "\",\"\");";  
       $html .= "<div class='feed-item'>
                   <div class='feed-item-icon'><i class='fa fa-graduation-cap'></i></div>

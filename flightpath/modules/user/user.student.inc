@@ -461,15 +461,15 @@ function user_student_list_filter_form_submit($form, $form_state) {
   unset($_SESSION['users_filter_submit']);  
     
   if ($values['submit_btn'] != '') {
-    $_SESSION['users_filter_name'] = trim($values['filter_name']);
-    $_SESSION['users_filter_school'] = $values['filter_school'];
-    $_SESSION['users_filter_major'] = $values['filter_major'];
-    $_SESSION['users_filter_active'] = $values['filter_active'];
+    $_SESSION['users_filter_name'] = fp_trim(@$values['filter_name']);
+    $_SESSION['users_filter_school'] = fp_trim(@$values['filter_school']);
+    $_SESSION['users_filter_major'] = fp_trim(@$values['filter_major']);
+    $_SESSION['users_filter_active'] = fp_trim(@$values['filter_active']);
     
     $_SESSION['users_filter_submit'] = "yes"; // simply notes that we did indeed press the submit btn.
 
     // If "active" was the only one changed, then we do not set this users_filter_submit
-    if (trim($values['filter_name']) == "" && intval($values['filter_school']) == 0 && $values['filter_major'] == "") {
+    if (fp_trim(@$values['filter_name']) == "" && intval(@$values['filter_school']) === 0 && fp_trim(@$values['filter_major']) == "") {
       unset($_SESSION['users_filter_submit']);
     }      
     

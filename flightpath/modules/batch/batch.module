@@ -164,9 +164,11 @@ function batch_finished_page($batch_id) {
     require_once($batch["file"]);    
   }
   $finished_callback = $batch["finished_callback"][0];
-  $finished_args = $batch["finished_callback"][1];
-  if (!is_array($finished_args)) $finished_args = array();
-
+  $finished_args = array();
+  if (isset($batch['finished_callback'][1])) {
+    $finished_args = $batch["finished_callback"][1];
+  }
+  
   $params = array();
 
   // If we are NOT going to fp_goto, then add the $batch as the first argument.

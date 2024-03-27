@@ -509,7 +509,7 @@ function advise_get_advisors_for_student($student_id = "") {
 function advise_toggle_draft_form() {
   $form = array();
   
-  $form["mark" . $m++] = array(
+  $form["mark_top"] = array(
     "value" => "<p>" . t("By turning Draft Mode on, you will be able
                   to view degree plans which are still in 'Draft' mode
                   in both the regular View tab, as well as the Blank Degrees module,
