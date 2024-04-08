@@ -1,6 +1,11 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-04-08
+  Removed possible exploit vector that would have allowed users without the proper permissions to submit
+  the "report contact" form.
+  
+
 2024-03-26
   Various changes and fixes to remove warnings for PHP 8.2
   

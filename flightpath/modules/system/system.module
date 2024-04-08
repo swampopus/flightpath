@@ -33,6 +33,12 @@ function system_perm() {
       "description" => t("This will allow a to clear the system cache, including the menu router.  Give to developers and/or admin users."),
     ),    
     
+    "access_popup_report_contact" => array(
+      "title" => t("Access and Submit the report-contact form"),
+      "description" => t("Only give to authenticated users. If allowed, users will see a link
+                          to 'Contact the FlightPath Production Team' at the bottom of most pages."),
+      
+    ),        
     
     "run_cron" => array(
       "title" => t("Run Cron"),
@@ -418,7 +424,7 @@ function system_menu() {
     "title" => "Report/Contact",
     "page_callback" => "fp_render_form",
     "page_arguments" => array("system_popup_report_contact_form"),
-    "access_callback" => TRUE,
+    "access_arguments" => array('access_popup_report_contact'),
     "page_settings" => array(
       "page_is_popup" => TRUE,
       "page_hide_report_error" => TRUE,
@@ -1059,20 +1065,7 @@ function system_popup_report_contact_form() {
   fp_set_title("");
   $m = 0;
         
-  /*
-  $form["mark" . $m++] = array(
-    "value" => fp_render_section_title(t("Contact the @FlightPath Production Team", array("@FlightPath" => variable_get("system_name", "FlightPath")))),
-  );
-  */
-  
-  if (!user_has_permission("access_logged_in_content")) {
-    $form["mark" . $m++] = array(
-      "value" => t("We're sorry, but for security reasons you may only access this form
-                    if you are logged in to @FlightPath.", array("@FlightPath" => variable_get("system_name", "FlightPath"))),
-    );
-    return $form;
-  }
-  
+    
   $form["mark" . $m++] = array(
     "value" => "<p>" . t("If you've noticed an error or have a suggestion, use this
                   form to contact the @FlightPath Production Team.", array("@FlightPath" => variable_get("system_name", "FlightPath"))) . "</p>",
