@@ -1,6 +1,11 @@
 FlightPath 6.x Changelog
 ========================
 
+2024-04-08
+  Removed possible exploit vector that would have allowed users without the proper permissions to submit
+  the "report contact" form.
+   
+
 2024-03-20
   To fix security vulnerabilities, upgraded jQuery UI and jQuery to higher versions.
   

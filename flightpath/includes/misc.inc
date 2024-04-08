@@ -30,6 +30,14 @@ function friendly_timezone($str) {
   
 } 
  
+
+
+/**
+ * Adding fp_trim function for backwards compatibility with FP 7
+ */
+function fp_trim($str) {
+  return trim($str);
+} 
  
  
  

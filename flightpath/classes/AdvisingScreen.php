@@ -344,6 +344,12 @@ function draw_menu_items($menu_array) {
     
     $page_hide_report_error = $this->page_hide_report_error;
 
+    
+    // We don't have permission, so do not show the report error link regardless.
+    if (!user_has_permission('access_popup_report_contact')) {
+      $page_hide_report_error = TRUE;
+    }
+
     $print_option = "";
     if ($this->bool_print == true) {
       $page_body_classes .= " bool-print";
