@@ -71,9 +71,7 @@ $(document).ready(function() {
                       $( this ).siblings( ".ui-dialog-titlebar" ).find( "button" ).blur();                       
                       
                   },
-      close: function (event, ui) {
-                      //url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";      
-                      //$("#fp-iframe-dialog-small iframe.dialog-iframe").attr('src', url);
+      close: function (event, ui) {                      
                       $("#fp-iframe-dialog-small iframe.dialog-iframe").attr('src', 'about:blank');
                       
                   },
@@ -131,9 +129,7 @@ $(document).ready(function() {
                       $( this ).siblings( ".ui-dialog-titlebar" ).find( "button" ).blur();                       
 
                   },
-      close: function (event, ui) {
-                      //url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";      
-                      //$("#fp-iframe-dialog-large-iframe").attr('src', url);
+      close: function (event, ui) {                      
                       $("#fp-iframe-dialog-large-iframe").attr('src', 'about:blank');
                   },
       autoOpen: false,
@@ -142,9 +138,7 @@ $(document).ready(function() {
       height: modalHeight
     });     
   
-    // Give the dialog an initial screen
-    //url = FlightPath.settings.basePath + "/inc/static-screens/dialog-empty.php?mode=loading";
-    //$("#fp-iframe-dialog-large-iframe").attr('src', url);    
+    // Give the dialog an initial screen        
     $("#fp-iframe-dialog-large-iframe").attr('src', 'about:blank');
   
   

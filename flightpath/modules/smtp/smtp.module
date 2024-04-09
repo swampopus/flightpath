@@ -179,6 +179,12 @@ function smtp_mail($to, $subject, $msg, $bool_html = FALSE, $attachments = array
      
   $mail->setFrom(variable_get('smtp_from_email_address', 'noreply@yourdomain.com'), variable_get('smtp_from_email_name', 'NoReply - FlightPath'));
   
+  // Set a unique MessageID
+  $temp = explode("@", variable_get('smtp_from_email_address', 'noreply@yourdomain.com'));
+  $dom = $temp[1];
+  $mail->MessageID = "<" . mt_rand(1,9999) . sha1(time() * mt_rand(9,999)) . sha1($msg) . "@" . $dom .  ">";
+    
+  
   
   //Recipients
   $temp = explode(',', $to);

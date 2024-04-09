@@ -5,6 +5,13 @@ FlightPath 7.x Changelog
   Removed possible exploit vector that would have allowed users without the proper permissions to submit
   the "report contact" form.
   
+  Added new constants to bootstrap.inc, indiating location of jquery and jquery ui.  This lets us update 
+  either of those files/locations later on, without disrupting custom scripts.
+  
+  Modification to SMTP module to add MessageID to sent emails.
+
+  General cleanup of old files.
+
 
 2024-03-26
   Various changes and fixes to remove warnings for PHP 8.2

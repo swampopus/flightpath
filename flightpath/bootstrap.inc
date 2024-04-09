@@ -74,16 +74,24 @@ define('FLIGHTPATH_CORE', '7.x');  // hard-coded core version.
 @define ('WATCHDOG_ERROR', 3);
 @define ('WATCHDOG_DEBUG', 7);
 
+
+// Menu constants used in hook_menu functions
 define("MENU_TYPE_NORMAL_ITEM", 1);
 define("MENU_TYPE_CALLBACK", 2);
 define("MENU_TYPE_TAB", 3);
 define("MENU_TYPE_SUB_TAB", 4);
 define("MENU_TYPE_DEFAULT_TAB", 5);
 
+// Misc constants
 define("MENU_ACCESS_DENIED", 61);
 define("MENU_NOT_FOUND", 62);
-
 define('HTTP_REQUEST_TIMEOUT', -1);
+
+define('JQUERY_FILE', 'jquery-3.7.1.min.js');
+define('JQUERY_UI_DIRECTORY', 'jquery-ui-1.13.2.custom');
+
+
+
 
 
 
