@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2024-04-24
+  Updated README.txt for information re: the silk icon set.
+
+
 2024-04-08
   Removed possible exploit vector that would have allowed users without the proper permissions to submit
   the "report contact" form.
