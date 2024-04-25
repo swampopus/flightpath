@@ -57,6 +57,6 @@ The "classic" theme, seen in FlightPath 1x - 4x, was created by
 Paul Gullette, with the original "feather" banner graphic designed 
 by Rob Glaze.
 
-Some icons used by FlightPath are part of the Silk icon set, 
-and licensed under the Creative Commons Attribution 3.0 License.
-For more details: http://www.famfamfam.com/lab/icons/silk/
+Some icons used by FlightPath are part of the Silk icon set, created by Mark James, 
+and licensed under the Creative Commons Attribution 2.5 License.
+For more details: https://github.com/markjames/famfamfam-silk-icons
