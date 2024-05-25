@@ -349,7 +349,7 @@ function admin_courses_list_filter_form_submit($form, $form_state) {
     
   if ($values['submit_btn'] != '') {
     $_SESSION['courses_filter_exclude'] = trim($values['filter_exclude']);
-    $_SESSION['courses_filter_school'] = $values['filter_school'];
+    $_SESSION['courses_filter_school'] = @$values['filter_school'];
   }
     
 }
@@ -701,7 +701,7 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
 
     $exclude = 0;
     // Do we exclude?
-    if (strtolower(trim($temp[2])) == "exclude") {
+    if (isset($temp[2]) && strtolower(fp_trim($temp[2])) == "exclude") {
       $exclude = 1;
       // Set ALL courses with this subject_id and course_num to exclude!
       $res = db_query("UPDATE draft_courses

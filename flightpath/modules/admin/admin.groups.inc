@@ -619,9 +619,14 @@ function admin_edit_group_form() {
     "value" => "",
   );
 
+  $definition = '';
+  if (isset($group->definition)) {
+    $definition = $group->definition;
+  }  
+  
   $form["set_definition"] = array(
     "type" => "hidden",
-    "value" => urlencode($group->definition),
+    "value" => urlencode($definition),
   );
 
   $form["scroll_top"] = array(
@@ -707,7 +712,7 @@ function admin_edit_group_form() {
   $form["definition"] = array(
     "type" => "markup",
     "label" => t("Definition:"),
-    "value" => "<i>" . nl2br($group->definition) . "</i>",
+    "value" => "<i>" . nl2br($definition) . "</i>",
     "prefix" => "<div style='overflow: auto; max-height: 150px;' class='admin-groups-show-definition'>",
     "suffix" => "</div><a href='javascript: adminPopupWindow(\"" . fp_url("admin/groups/popup-edit-definition", "de_catalog_year=$de_catalog_year&group_id=$group_id") . "\");'
                             >[" . t("edit definition") . "]</a>",
@@ -747,7 +752,7 @@ function admin_edit_group_form() {
                               
   );
   // if a definition was specified, we need to disable the courses textarea.
-  if (trim($group->definition)) {    
+  if (trim($definition)) {    
     $form["courses"]["attributes"] = array("readonly"=>"readonly", "style" => "background-color: #ddd;'" );
     $form["courses"]["prefix"] = "<div class='admin-groups-courses-disabled'>
                                  " . t("Note: Because a definition was specified, you cannot directly
@@ -784,7 +789,7 @@ function admin_edit_group_form() {
   // Advanced options
   $elements = array();     
   $bool_start_closed = TRUE;
-  if (@trim($group->public_note) != "" || trim($group->data_entry_comment) != "") {
+  if (fp_trim($group->public_note) != "" || fp_trim($group->data_entry_comment) != "") {
     $bool_start_closed = FALSE;
   }
      
@@ -1548,8 +1553,10 @@ function admin_groups_list_filter_form() {
     'weight' => 0,
   );
   
-  
-  $filter_name_value = trim($_SESSION['groups_filter_name']);
+  $filter_name_value = '';
+  if (isset($_SESSION['groups_filter_name'])) {
+    $filter_name_value = fp_trim($_SESSION['groups_filter_name']);
+  }
   $form['filter_name'] = array(
     'type' => 'textfield',
     'label' => '',
@@ -1605,7 +1612,7 @@ function admin_groups_list_filter_form_submit($form, $form_state) {
     
   if ($values['submit_btn'] != '') {
     $_SESSION['groups_filter_name'] = trim($values['filter_name']);
-    $_SESSION['groups_filter_school'] = $values['filter_school'];
+    $_SESSION['groups_filter_school'] = @$values['filter_school'];
   }
     
 }

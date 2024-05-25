@@ -1,6 +1,15 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-05-25
+  Added PHP version to System status page.
+  
+  Removed more warnings which appear in PHP 8.2.
+  
+  Added extra help (and the way that fp_get_js_alert() function shows a ? link) for selecting a catalog year from
+  the admin console.
+  
+
 2024-04-24
   Updated README.txt for information re: the silk icon set.
 

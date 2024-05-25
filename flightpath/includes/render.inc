@@ -560,7 +560,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
   if ($popup_description) {        
     
     //$popup_help_link = " <a href='javascript: alert(\"" . $popup_description . "\");' class='form-popup-description'>[?]</a>";
-    $popup_help_link = fp_get_js_alert_link($popup_description, "<span class='pop-q-mark'><i class='fa fa-question-circle'></i></span>", "form-popup-description");
+    $popup_help_link = fp_get_js_alert_link($popup_description, NULL, "form-popup-description");
   }
 
   $element_error_css = "";

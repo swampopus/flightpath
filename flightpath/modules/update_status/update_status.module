@@ -169,7 +169,7 @@ function update_status_status() {
                     <a href='http://getflightpath.com/project/$module' target='_blank'>$display_name</a></td>
                   <td valign='top' class='update-status-status-your-version'>$your_version</td>
                   <td valign='top' class='update-status-status-version'>$version</td>
-                  <td valign='top' class='update-status-status-type'>{$release_desc[$releases[$module]]}</td>
+                  <td valign='top' class='update-status-status-type'>" . @$release_desc[$releases[$module]] . "</td>
                   
                   </tr>";
     }

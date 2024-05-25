@@ -1972,7 +1972,8 @@ function admin_display_main() {
       $sel = ($t == $selected_cat) ? "selected" : "";
       $rtn .= "<option value='$t' $sel>$t-" . ($t+1) . "</option>";
     }
-    $rtn .= "</select>";
+    $rtn .= "</select> &nbsp; &nbsp;" . fp_get_js_alert_link(t("Newly duplicated year not showing up?<br><br>Make sure you have the correct 'Current Catalog Year' set under Edit Advising Settings."));
+      
     
     for ($t = $current_catalog_year +1; $t >= $earliest_catalog_year; $t--) {
       $rtn .= "<ul class='data-entry-for-cat data-entry-for-cat-$t'>";

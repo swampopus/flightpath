@@ -3044,15 +3044,27 @@ function system_display_status_page() {
   
   $status_array = invoke_hook("status");  // get everyone's hook_status.
   
+  
+  
+  
   $rtn .= "<p>" . t("This page will show you important status messages
                      about FlightPath.  For example, what modules (if any) have
                      an update available.") . "</p>";
-
+  
+  
+  
   $rtn .= "<table width='100%' border='1' class='status-table' cellpadding='4'>
             <tr class='header-row'>
-              <th width='10%' class='package-header'>" . t("Package") . "</th>
+              <th width='10%' class='package-header'>" . t("Package/Module") . "</th>
               <th>" . t("Status") . "</th>
-            </tr>";
+            </tr>
+            
+            <tr class='status-row'>
+              <td>" . t("PHP") . "</td>
+              <td>" . t("Version:") . ' ' . phpversion() . "</td>
+            </tr>
+            
+            "; 
   foreach ($status_array as $module => $details) {
     $pol = ($pol == "even") ? "odd" : "even";
     

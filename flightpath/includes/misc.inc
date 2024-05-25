@@ -2874,23 +2874,20 @@ function fp_get_js_prompt_link($question, $default, $action_if_yes, $link_text, 
  * 
  * @see fp_get_js_confirm_link
  */
-function fp_get_js_alert_link($message, $link_text = "", $extra_css_class = "") {
+function fp_get_js_alert_link($message, $link_text = NULL, $extra_css_class = "") {
   
   $rtn = "";  
 
-  if ($link_text == "") {
-    $link_text = "[?]";
+  if ($link_text == "" || $link_text == NULL) {
+
+    $link_text = "<span class='pop-q-mark'><i class='fa fa-question-circle'></i></span>";
   }
   
   $message = str_replace("\n", " ", $message);
   $message = fp_reduce_whitespace($message);
-  
-  //$message = htmlentities($message, ENT_QUOTES);
-  //$message = str_replace("&quot;", "\&quot;", $message);
-  //$message = str_replace("[NL]", "<br>", $message);
-      
-  //$rtn .= "<a href='javascript: alert(\"" . $message . "\");' class='fp-alert-link $extra_css_class'>$link_text</a>";
-  $rtn .= "<a href='javascript: fp_alert(\"" . base64_encode($message) . "\",\"base64\");' class='fp-alert-link $extra_css_class'>$link_text</a>";
+
+
+  $rtn .= "<a href='javascript: fp_alert(\"" . base64_encode($message) . "\",\"base64\");' title='" . t("View help for this item.") . "' class='fp-alert-link $extra_css_class'>$link_text</a>";
   
       
   return $rtn;  
