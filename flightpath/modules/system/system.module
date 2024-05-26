@@ -2276,7 +2276,8 @@ function system_settings_form() {
     'label' => t("Logo image URL:"),
     'value' => variable_get("logo_image_url", ""),
     "description" => t("Enter the URL to a logo image.  This is normally the \"FlightPath\" banner image seen in the upper left corner of every page.
-                       <br>The image should be approximately 700x100 pixels, or a smaller size with a 7:1 width to height ratio.                      
+                       <br>The image should be in a horizontal layout. Images with a height of at least 70px work best, as that is the height
+                            it will be resized to using CSS.                                                   
                       <br>If using an external source, your URL should begin with https:// and may not contain any queries (ex: ?a=b). 
                       <br>If you are unsure what to enter here, leave it blank to use the default logo."),
   );

@@ -13,6 +13,8 @@ FlightPath 7.x Changelog
   
   Fixed spot where theme was defaulting to "fp6_clean"
   
+  Made modifications to the default banner to bring in a consistent style.
+  
 
 2024-04-24
   Updated README.txt for information re: the silk icon set.
