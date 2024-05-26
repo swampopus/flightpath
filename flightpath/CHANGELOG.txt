@@ -1,6 +1,10 @@
 FlightPath 6.x Changelog
 ========================
 
+2024-05-25
+  Moving to no longer be the default branch on github.  Instead, that will be the 7x branch.
+  
+
 2024-04-24
   Updated README.txt for information re: the silk icon set.
 
