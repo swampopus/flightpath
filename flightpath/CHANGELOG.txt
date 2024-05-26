@@ -5,6 +5,8 @@ FlightPath 7.x Changelog
   Made modifications to install.php so that bare-domain installs go more smoothly.
 
   Fixed warnings for PHP 8.2
+
+  Tagging this point as RC1 (Release Candidate 1); no longer in "dev".
   
 
 2024-05-25
