@@ -2842,6 +2842,7 @@ function calendar_content_register_content_type() {
   $zoomapi_data = "";
   if (module_enabled("zoomapi")) {    
     $zoomapi_data = zoomapi_get_zoomapi_data_for_user($user->id);
+    $attr = array();
     if (!$zoomapi_data) {
       $attr = array("style" => "display: none; ");   // hide this field if the user doesn't have anything set up for Zoom.
     }

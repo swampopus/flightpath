@@ -3621,8 +3621,11 @@ function engagements_display_main()
 
     
     $author_user_id = intval($content->user_id);
-    $author_account = fp_load_user($author_user_id);    
-    $author_name = $author_account->f_name . " " . $author_account->l_name;
+    $author_account = fp_load_user($author_user_id);
+    $author_name = "";
+    if (isset($author_account->f_name) && isset($author_account->l_name)) {    
+      $author_name = $author_account->f_name . " " . $author_account->l_name;
+    }
 
     $act_feed_extra_class = "";
     if ($content->field__from_sms_phone['value']) {

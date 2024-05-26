@@ -188,7 +188,12 @@ function install_perform_install() {
   $settings_template = str_replace("%FILE_SYSTEM_PATH%", $file_system_path, $settings_template);
   
   // Attempt to figure out the base URL.
-  $protocol = strpos(strtolower($_SERVER['SERVER_PROTOCOL']),'https') === FALSE ? 'http' : 'https';
+  $protocol = "http";
+  if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') { $protocol = "https"; } 
+  
+  // This method of determining protocol no longer seems to work
+  //$protocol = strpos(strtolower($_SERVER['SERVER_PROTOCOL']),'https') === FALSE ? 'http' : 'https';
+  
   $host = $_SERVER['HTTP_HOST'];
   $script = $_SERVER['SCRIPT_NAME'];
   $base_url = $protocol . "://" . $host . $script;
@@ -198,6 +203,7 @@ function install_perform_install() {
     
   // Figure out the base_path and add it in.
   $base_path = str_replace($protocol . "://" . $host, "", $base_url);
+  if ($base_path == "") $base_path = "/";  // If it is empty, then we are on a bare URL and it should just be /
   
   $settings_template = str_replace("%BASE_PATH%", $base_path, $settings_template);
     

@@ -119,13 +119,13 @@ function student_profile_display_student_profile_page() {
   
   
   $percent_D = @floatval($grade_percentages['grade_counts']['D']['percent']);
-  $percent_D_html = $grade_percentages['grade_counts']['D']['courses_html'];
+  $percent_D_html = @$grade_percentages['grade_counts']['D']['courses_html'];
   
   $percent_F = @floatval($grade_percentages['grade_counts']['F']['percent']);
-  $percent_F_html = $grade_percentages['grade_counts']['F']['courses_html'];
+  $percent_F_html = @$grade_percentages['grade_counts']['F']['courses_html'];
   
   $percent_W = @floatval($grade_percentages['grade_counts']['W']['percent']);
-  $percent_W_html = $grade_percentages['grade_counts']['W']['courses_html'];
+  $percent_W_html = @$grade_percentages['grade_counts']['W']['courses_html'];
   
   $D_link = "D's";
   if ($percent_D_html != "") {
