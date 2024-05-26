@@ -23,7 +23,6 @@ require("bootstrap.inc");
 // Load needed modules 
 require_once("modules/system/system.module"); 
 
-
 // Check here to see if FlightPath has already been installed.
 // We will do this by simply looking for the settings.php file.
 if (file_exists("custom/settings.php")) {
@@ -37,10 +36,12 @@ if (file_exists("custom/settings.php")) {
  * two other steps-- select language, and pass the requirements
  * check.
  */
+$lang = "";
+if (isset($_REQUEST["lang"])) {
+  $lang = $_REQUEST["lang"];
+}
 
-$lang = $_REQUEST["lang"];
-
-if ($lang == "") {
+if ($lang == "") {  
   install_display_lang_selection();
   die;
 }
@@ -52,6 +53,9 @@ if ($req_array = install_check_requirements()) {
   install_display_requirements($req_array);
   die;
 }
+
+// Set to blank if not already there.
+if (!isset($_REQUEST['perform_action'])) $_REQUEST['perform_action'] = '';
 
 if ($_REQUEST["perform_action"] != "install") {
   // If we made it this far, it means we have no unfulfilled requirements.
@@ -149,6 +153,7 @@ function install_perform_install() {
   try {
     $pdo = new PDO("mysql:host=$db_host;port=$db_port;dbname=$db_name;charset=utf8mb4", $db_user, $db_pass);
     $GLOBALS['pdo'] = $pdo;
+
   } 
   catch (Exception $e) {
     // Connection failed!
@@ -212,8 +217,9 @@ function install_perform_install() {
   
   $GLOBALS["fp_die_mysql_errors"] = TRUE;
   // call system_install() to perform our numerous DB table creations.
+  
   system_install();
-     
+  
   // With db tables created, let's include our settings file so we can get some
   // important GLOBAL variables set up.
   include("custom/settings.php");
@@ -347,7 +353,7 @@ $system_settings["db_pass"] = "%DB_PASS%";
 // hook_cron() function), you may set up a cron job like this:
 //      php cron.php security_token_string
  
-// SecurityToken:  This is something which
+// Cron Security Token:  This is something which
 // must be the first argument passed to cron.php.  It can be any continuous
 // string of *alpha-numeric* characters.
 // This is a security measure to prevent unauthorized users (or web-users) from
@@ -479,16 +485,22 @@ $GLOBALS["fp_system_settings"] = $system_settings;
 function install_display_db_form($msg = "") {
   global $lang;
   
-  $db_name = $_POST["db_name"];
-  $db_host = $_POST["db_host"];
-  $db_port = $_POST["db_port"];
-  $db_user = $_POST["db_user"];
-  $db_pass = $_POST["db_pass"];
-
-  $admin_pass = $_POST["admin_pass"];
-  $admin_pass2 = $_POST["admin_pass2"];
-  $admin_name = $_POST["admin_name"];
-  $admin_email = $_POST["admin_email"];
+  
+  $db_name = $db_host = $db_port = $db_user = $db_pass = $admin_pass = $admin_pass2 = $admin_name = $admin_email = '';
+  
+  if (isset($_POST['db_name'])) {
+    $db_name = $_POST["db_name"];
+    $db_host = $_POST["db_host"];
+    $db_port = $_POST["db_port"];
+    $db_user = $_POST["db_user"];
+    $db_pass = $_POST["db_pass"];
+  
+    $admin_pass = $_POST["admin_pass"];
+    $admin_pass2 = $_POST["admin_pass2"];
+    $admin_name = $_POST["admin_name"];
+    $admin_email = $_POST["admin_email"];
+  }
+  
   
   if ($db_port == "") $db_port = "3306";
   
@@ -595,7 +607,7 @@ function install_check_requirements() {
   $rtn = array();
   
   // Is the /custom directory writable?
-  if (!is_writable("custom")) {
+  if (!is_writable("custom")) {    
     $rtn[] = st("Please make sure the <em>/custom</em> directory is writable to the web server.
                <br>Ex: chmod 777 custom");    
   }
@@ -661,9 +673,9 @@ function install_display_lang_selection() {
 
 
 
+ 
 
-
-function install_output_to_browser($page_content, $page_title = "Install FlightPath 6") {
+function install_output_to_browser($page_content, $page_title = "Install FlightPath 7") {
   print "
           <html>
             <head>  

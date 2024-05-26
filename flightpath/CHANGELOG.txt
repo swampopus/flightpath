@@ -9,6 +9,10 @@ FlightPath 7.x Changelog
   Added extra help (and the way that fp_get_js_alert() function shows a ? link) for selecting a catalog year from
   the admin console.
   
+  Fixed issues with installation.
+  
+  Fixed spot where theme was defaulting to "fp6_clean"
+  
 
 2024-04-24
   Updated README.txt for information re: the silk icon set.

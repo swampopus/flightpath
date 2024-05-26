@@ -14,8 +14,12 @@
  *
  */
 function get_global_database_handler() {
+    
+  $db = NULL;
   
-  $db = @$GLOBALS["fp_global_database_handler"];
+  if (isset($GLOBALS["fp_global_database_handler"])) {
+    $db = $GLOBALS["fp_global_database_handler"];
+  }
   
   if (!is_object($db) || !is_object($db->pdo)) {
     // Something isn't right, or it wasn't set correctly.  Create a new connection.
@@ -804,11 +808,12 @@ function db_set_user_setting($user_id, $var_name, $value) {
 function db_query($query) {
   // Capture arguments to this function, to pass along to our $db object.
 
-    $args = func_get_args();
+  $args = func_get_args();
       
   array_shift($args);  
   
   $db = get_global_database_handler();  
+    
   $res = $db->db_query($query, $args);
 
   return $res;    

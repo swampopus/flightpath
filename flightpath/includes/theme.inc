@@ -2101,11 +2101,11 @@ function display_access_denied() {
  */
 function fp_theme_location($bool_include_base_path = TRUE) {
   
-  $p = variable_get("theme",'themes/fp6_clean');
+  $p = variable_get("theme",'themes/fp_clean');
   
   // The theme hasn't been set for some reason
   if ($p == "") {
-    $p = "themes/fp6_clean";
+    $p = "themes/fp_clean";
   }
   
   if ($bool_include_base_path) {
