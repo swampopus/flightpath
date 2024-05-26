@@ -2369,7 +2369,7 @@ function fp_url($path, $query = "", $include_base_path = TRUE) {
    */
 function fp_screen_is_mobile(){
   
-  depricated_message("calling fp_screen_is_mobile is no longer used in FP6");
+  depricated_message("calling fp_screen_is_mobile is no longer used as of FP 6.x");
   
   if (isset($GLOBALS["fp_page_is_mobile"])) {
     return $GLOBALS["fp_page_is_mobile"];

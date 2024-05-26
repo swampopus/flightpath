@@ -309,7 +309,7 @@ function user_check_password($password, $stored_hash) {
   $type = substr($stored_hash, 0, 3);  
   switch ($type) {
     case '$S$':
-      // A normal FlightPath 6 password using sha512.
+      // A normal FlightPath password using sha512.
       $hash = _password_crypt('sha512', $password, $stored_hash);      
       break;
     case '$H$':

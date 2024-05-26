@@ -3771,7 +3771,8 @@ function system_reload_and_cache_course_inventory() {
 
   // Should we re-cache the course inventory?  If there have been any changes
   // to it, then we will see that in a GLOBALS variable...
-  if ($GLOBALS["cache_course_inventory"] == true)
+  $_SESSION["fp_cache_course_inventory"] = "";
+  if (isset($GLOBALS["cache_course_inventory"]) && $GLOBALS["cache_course_inventory"] === TRUE)
   {      
     $_SESSION["fp_cache_course_inventory"] = serialize($GLOBALS["fp_course_inventory"]);
   }
