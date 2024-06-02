@@ -1412,12 +1412,12 @@ function admin_display_watchdog_entry($wid) {
                               
       <div class='watchdog-field'>
         <label>Location:</label>
-        " . str_replace("&curren", "&amp;curren", $cur->location) . "
+        " . str_replace("&curren", "&amp;curren", fp_trim($cur->location)) . "
       </div>
                       
       <div class='watchdog-field'>
         <label>Ref:</label>
-        " . str_replace("&curren", "&amp;curren", $cur->referer) . "
+        " . str_replace("&curren", "&amp;curren", fp_trim($cur->referer)) . "
       </div>
 
       <hr>

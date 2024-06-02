@@ -527,7 +527,7 @@ function fp_get_user_timezone($account = NULL) {
  * @param unknown_type $user_name
  */
 function db_get_user_id($user_name) {
-  $user_id = db_result(db_query("SELECT user_id FROM users WHERE user_name = '?' ", $user_name));
+  $user_id = db_result(db_query("SELECT user_id FROM users WHERE user_name = ?", $user_name));
   
   if ($user_id) {
     return $user_id;

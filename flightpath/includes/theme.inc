@@ -1471,13 +1471,15 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
   $html = "";
   
   $name = "";
-  if ($user->is_faculty) {
-    $name = fp_get_faculty_name($user->cwid);
+
+  if (intval($user->id) !== 2) { // 2 == anonymous user
+    if ($user->is_faculty) {
+      $name = fp_get_faculty_name($user->cwid);
+    }
+    else {
+      $name = fp_get_student_name($user->cwid);
+    }
   }
-  else {
-    $name = fp_get_student_name($user->cwid);
-  }
-  
   
   
   $badge = "";

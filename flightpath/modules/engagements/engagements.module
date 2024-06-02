@@ -848,7 +848,9 @@ function engagements_mass_sms_perform_batch_operation(&$batch, $recipients, $mes
 
 
 
-
+// TODO: change to generic "receive email" form?  Use fieldsets?
+// TODO: For one thing, check off that we are using mailgun for receipt of email if that's what we are doing.  Other
+// TODO: settings might be needed later on.
 /**
  * Configure the imap settings used by Engagements
  */
@@ -858,7 +860,9 @@ function engagements_imap_settings_form()
 
 
   $form['mark_top'] = array(
-    'value' => '<p>Configure the connection to your IMAP server here.</p>',
+    'value' => '<p>Configure the connection to check & receive emails.</p>
+                <p><b>Important:</b> If you are <b>not</b> using IMAP to check & receive emails, leave this section <b>blank</b>.
+                    <br>If you are instead using a Webhook or similar, see below.</p>',
   );
 
   $form['imap_host'] = array(

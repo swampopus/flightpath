@@ -3838,7 +3838,7 @@ function system_display_dashboard_page () {
   
   // If we are not logged in, then we need to re-direct the user to 
   // the login page!
-  if ($_SESSION["fp_logged_in"] != TRUE) {
+  if (!isset($_SESSION["fp_logged_in"]) || $_SESSION["fp_logged_in"] != TRUE) {
     $query = "";
     if (isset($_REQUEST["logout"])) $query = "logout=" . $_REQUEST["logout"];
     // Since we are not logged in, and are headed to the login page, also clear out any advising variables we might have.
