@@ -1116,7 +1116,7 @@ function system_popup_report_contact_form_submit($form, $form_state) {
   $category = filter_markup($form_state["values"]["category"],'plain');
   $comment = filter_markup($form_state["values"]["comment"], 'plain');
   
-  $possible_student = filter_markup($_SESSION['last_student_selected'], 'plain');
+  $possible_student = filter_markup(@$_SESSION['last_student_selected'], 'plain');
   
   $user_roles = filter_markup(implode(", ", $user->roles), 'plain');
   
@@ -1134,7 +1134,7 @@ function system_popup_report_contact_form_submit($form, $form_state) {
 
   $themd5 = md5($user->name . $user->cwid . $comment . $user_roles . $category);
 
-  if ($_SESSION["da_error_report_md5"] != $themd5)
+  if (!isset($_SESSION["da_error_report_md5"]) || $_SESSION["da_error_report_md5"] != $themd5)
   {  // Helps stop people from resubmitting over and over again
     // (by hitting refresh, or by malicious intent)..
     
