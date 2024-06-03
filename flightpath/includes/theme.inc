@@ -1282,7 +1282,7 @@ function fp_render_sidebar_left_content($bool_for_hamburger_menu = FALSE) {
   // Our links....  (we will check permissions later based on the path)
   $links = array();
   
-  if ($_SESSION["fp_logged_in"] != TRUE) {
+  if (!isset($_SESSION["fp_logged_in"]) || $_SESSION["fp_logged_in"] != TRUE) {
     // user is not logged in.  The top-most link should be to log in.
     $links[] = array(
       'path' => 'login',

@@ -44,6 +44,15 @@ function engagements_menu()
   );
 
 
+  $items['engagements-handle-incoming-mailgun-email'] = array(
+    'page_callback' => 'engagements_handle_incoming_mailgun_email',
+    'access_callback' => TRUE,
+    'type' => MENU_TYPE_CALLBACK,
+  );
+
+
+
+
 
 
   $items["admin/config/imap"] = array(
@@ -135,6 +144,101 @@ function engagements_menu()
 
   return $items;
 }
+
+
+
+
+function engagements_handle_incoming_mailgun_email() {
+  watchdog('debug', 'From Post: <pre>' . print_r($_POST, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
+  watchdog('debug', 'From Files: <pre>' . print_r($_FILES, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
+  
+  // TODO: See Mailgun's Securing Web hooks documentation to know what to do with "signature" and "token", to confirm
+  //       it came from MailGun.  https://www.mailgun.com/blog/email/your-guide-to-webhooks/#chapter-5
+  // TODO:  This code shows how we verify....
+  //     if (isset($event->signature) && hash_hmac('sha256', $event->signature->timestamp.$event->signature->token, $key) === $event->signature->signature) {
+  // In this case, $key is our mailgun api key.  This obviously should not be hard-coded, but rather something you enter in the settings.
+  // This should be the "HTTP webhook signing Key".  Go to mailgun dashboard.  Lower right will be a link to the API Keys
+  
+  
+  $sender = $_POST['sender'];
+  $recipient = $_POST['recipient'];
+  $body_html = $_POST['body-html'];
+  $body_stripped_html = $_POST['stripped-html'];
+  $body_stripped_text = $_POST['stripped-text'];
+  $subject = $_POST['subject'];
+  $timestamp = intval($_POST['timestamp']);
+  $message_id = fp_trim($_POST['Message-Id']);
+  $date = $_POST['Date'];
+  
+  // This will map any inline images in the body of the email to their attachment names.
+  // Example, this is in the body_html where an inline image was:
+  // <img title="Inline image" alt="Inline image" src="cid:285ac981-ff52-55bb-f766-fb05ec0c9a74@yahoo.com" class="yahoo-inline-image" draggable="false" style="max-width: 800px; width: 100%;" data-id="<285ac981-ff52-55bb-f766-fb05ec0c9a74@yahoo.com>">
+  // Notice the src.
+  // Now, in the content-id-map, we see this:
+  // {"<06d5a647-5600-086a-12e2-29a3dc32a7c8@yahoo.com>":"attachment-3",
+  //      "<138bab3e-5b05-91d2-133b-adbba379dd23@yahoo.com>":"attachment-2",
+  //      "<285ac981-ff52-55bb-f766-fb05ec0c9a74@yahoo.com>":"attachment-1"}
+  // Notice that 285ac......@yahoo.com says it matches "attachment-1".  That is the same src= for our inline image tag.
+  // 
+  // Note: From gmail, the content-id-map has no useful information.  Very strange.  But what we DO have is the "alt" tag.
+  // See: <img src="cid:ii_lwy9bb9j1" alt="um actually.png" width="399" height="398">
+  // We can use THAT to figure out the inline image, since [name] in the FILES states the filename.
+  $content_id_map = $_POST['content-id-map']; 
+  
+  // Our attachments are in $_FILES...
+  /*
+   * Array
+    (
+    [attachment-1] => Array
+        (
+            [name] => The_More_You_Know_0-0_screenshot.jpg
+            [full_path] => The_More_You_Know_0-0_screenshot.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpV7mds1
+            [error] => 0
+            [size] => 33147
+        )
+
+    [attachment-2] => Array
+        (
+            [name] => ATS notes.rtf
+            [full_path] => ATS notes.rtf
+            [type] => application/rtf
+            [tmp_name] => /tmp/phph4nE9m
+            [error] => 0
+            [size] => 10728
+        )
+
+    [attachment-3] => Array
+        (
+            [name] => jetstream script.odt
+            [full_path] => jetstream script.odt
+            [type] => application/vnd.oasis.opendocument.text
+            [tmp_name] => /tmp/phpbbQK2W
+            [error] => 0
+            [size] => 32185
+        )
+
+    )
+   */
+  
+  // TODO: Curiously, it sent me the same email twice.  We didn't have attachments with the first POST, but we did on the second.  We should
+  // TODO: always overwrite any email we've already got with a new one, if such comes in.
+  // TODO: We can use the Message-Id.
+  // TODO: Note: from Gmail, the Message-Id is blank!  In that case, we can hash the date, sender, recipient, subject, message, etc, to create a bogus ID.
+  //          Also, the message-headers could be hashed instead of having to concat everything else, to get an Id.
+  
+  
+  
+  // To tell MailGun not to retry this message, we need to deliver a 200 response.  Otherwise they will keep trying for 3 days.
+  http_response_code(200); exit; 
+    
+} // engagements_handle_incoming_mailgun_email
+
+
+
+
+
 
 
 /**

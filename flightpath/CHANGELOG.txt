@@ -4,6 +4,8 @@ FlightPath 7.x Changelog
 2024-06-02
   Various modifications to remove compatibility issues for PHP 8.2.
   
+  Working on adding MailGun route (web hook) functionality for receiving emails, to replace IMAP method.
+    
 
 2024-05-26
   Made modifications to install.php so that bare-domain installs go more smoothly.
