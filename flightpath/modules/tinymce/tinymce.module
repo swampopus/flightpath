@@ -7,6 +7,10 @@
  */
 
 function tinymce_init() {
+  global $user;
+  
+  // User id 0 is anonymous in software, === 2 in the database.
+  if (intval($user->id) === 0 || intval($user->id) === 2) return;
   
   $bool_activate = FALSE;
   
@@ -28,7 +32,7 @@ function tinymce_init() {
     // Contains a wildcard!  So, is the ipath partially in the request?
     if (strstr($ipath, "*")) {
       $ipath = str_replace("*", "", $ipath);
-      if (substr(@$_REQUEST["q"], 0, strlen($ipath)) == $ipath) {
+      if (substr(fp_trim($_REQUEST["q"]), 0, strlen($ipath)) == $ipath) {
         $bool_activate = TRUE;
         break;
       }

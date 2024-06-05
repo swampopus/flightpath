@@ -1472,7 +1472,7 @@ function fp_render_top_nav_content($bool_for_hamburger_menu = FALSE) {
   
   $name = "";
 
-  if (intval($user->id) !== 2) { // 2 == anonymous user
+  if (intval($user->id) !== 2 && intval($user->id) !== 0) { // 0 = anon user, 2 == anonymous user in database
     if ($user->is_faculty) {
       $name = fp_get_faculty_name($user->cwid);
     }

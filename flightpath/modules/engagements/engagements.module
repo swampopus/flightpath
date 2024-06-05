@@ -154,10 +154,32 @@ function engagements_handle_incoming_mailgun_email() {
   
   // TODO: See Mailgun's Securing Web hooks documentation to know what to do with "signature" and "token", to confirm
   //       it came from MailGun.  https://www.mailgun.com/blog/email/your-guide-to-webhooks/#chapter-5
-  // TODO:  This code shows how we verify....
+  // This code shows how we verify....
   //     if (isset($event->signature) && hash_hmac('sha256', $event->signature->timestamp.$event->signature->token, $key) === $event->signature->signature) {
-  // In this case, $key is our mailgun api key.  This obviously should not be hard-coded, but rather something you enter in the settings.
+  // In this case, $key is our mailgun api key. Configured in the Engagements - email settings section.
   // This should be the "HTTP webhook signing Key".  Go to mailgun dashboard.  Lower right will be a link to the API Keys
+  
+  $timestamp = fp_trim(@$_POST['timestamp']);
+  $token = fp_trim(@$_POST['token']);
+  $signature = fp_trim(@$_POST['signature']);  
+  $api_key = variable_get('engagements_mailgun_api_key', 'NONE SET');
+  
+  $confirm_hash = hash_hmac('sha256', $timestamp . $token, $api_key);
+  
+  // Before continuing, verify that the signature is correct (that we really came from MailGun)
+  if (!$signature || strlen($signature) == 0 || $confirm_hash !== $signature) {
+    watchdog('engagements_mailgun', "Tried to receive mailgun email, but could not verify signature. timestamp: $timestamp, token: $token, signature: $signature, confirm_hash = $confirm_hash", array(), WATCHDOG_ERROR);
+    
+    // As this was some sort of hacking attempt, we don't want mailgun to keep trying to notify us of the message,
+    // so send back 200 and exit.
+    
+    // To tell MailGun not to retry this message, we need to deliver a 200 response.  Otherwise they will keep trying for 3 days.
+    http_response_code(200); exit; 
+  } 
+  
+  
+  // If we are here, it means this email is valid and we can continue.
+  
   
   
   $sender = $_POST['sender'];
@@ -166,8 +188,7 @@ function engagements_handle_incoming_mailgun_email() {
   $body_stripped_html = $_POST['stripped-html'];
   $body_stripped_text = $_POST['stripped-text'];
   $subject = $_POST['subject'];
-  $timestamp = intval($_POST['timestamp']);
-  $message_id = fp_trim($_POST['Message-Id']);
+  $timestamp = intval($_POST['timestamp']);  
   $date = $_POST['Date'];
   
   // This will map any inline images in the body of the email to their attachment names.
@@ -224,9 +245,24 @@ function engagements_handle_incoming_mailgun_email() {
   
   // TODO: Curiously, it sent me the same email twice.  We didn't have attachments with the first POST, but we did on the second.  We should
   // TODO: always overwrite any email we've already got with a new one, if such comes in.
-  // TODO: We can use the Message-Id.
+  // TODO: We can't use the Message-Id:
   // TODO: Note: from Gmail, the Message-Id is blank!  In that case, we can hash the date, sender, recipient, subject, message, etc, to create a bogus ID.
-  //          Also, the message-headers could be hashed instead of having to concat everything else, to get an Id.
+  //          Also, the message-headers could be hashed instead of having to concat everything else, to get an ID?
+  
+  
+  
+  
+  // TODO: Correctly handle receiving an email (and files).  See _imap_get_all_received_messages.
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
