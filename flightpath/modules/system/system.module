@@ -2395,7 +2395,21 @@ function system_settings_form() {
                         helps reduce the size of the watchdog table.
                         <br>If unsure what to choose, select '1 year'."),    
   );             
+
+  $form['max_watchdog_error_age'] = array(
+    "type" => "select",
+    "label" => t("Max watchdog (log) ERROR entry age:"),
+    "hide_please_select" => TRUE,
+    "options" => array('7' => t('7 days'), '15' => t('15 days'), '30' => t('30 days'), '60' => t('60 days'), '90' => t('90 days'), '180' => t('180 days'), '365' => t('1 year'), 'never' => t("Never - do not remove debug entries from log table")),
+    "value" => variable_get("max_watchdog_error_age", "30"),
+    "description" => t("This is similar to the setting above, but this sets how long to keep 'error' messages in the watchdog (logs).
+                        Error messages are useful for finding bugs or database issues, but are not used in any official reporting.  Removing them
+                        helps reduce the size of the watchdog table.
+                        <br>If unsure what to choose, select '1 year'."),
+  );             
   
+  
+    
 
   $form["admin_degrees_default_allow_dynamic"] = array(
     "type" => "textfield",
@@ -2615,6 +2629,23 @@ function system_cron() {
       }
       
     }
+
+
+    // Should we trim the watchdog table of ERROR records?
+    $max_age_days = intval(variable_get("max_watchdog_error_age", "30"));
+    if ($max_age_days != "never" && ($max_age_days) > 0) {
+      
+      // Okay, let's trim the table.
+      $max_timestamp = strtotime("$max_age_days DAYS AGO");
+      
+      $result = db_query("DELETE FROM watchdog WHERE `timestamp` < ? AND severity = ? ", $max_timestamp, WATCHDOG_ERROR);
+      $rows = db_affected_rows($result);
+      if ($rows > 0) {
+        watchdog("system", t("@rows old 'error' rows (older than @max days) trimmed from watchdog table on system cron run."), array("@rows" => $rows, "@max" => $max_age_days), WATCHDOG_DEBUG);
+      }
+      
+    }
+
 
 
     variable_set("system_last_run_trim_watchdog", time());
