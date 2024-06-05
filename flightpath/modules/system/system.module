@@ -2400,8 +2400,8 @@ function system_settings_form() {
     "type" => "select",
     "label" => t("Max watchdog (log) ERROR entry age:"),
     "hide_please_select" => TRUE,
-    "options" => array('7' => t('7 days'), '15' => t('15 days'), '30' => t('30 days'), '60' => t('60 days'), '90' => t('90 days'), '180' => t('180 days'), '365' => t('1 year'), 'never' => t("Never - do not remove debug entries from log table")),
-    "value" => variable_get("max_watchdog_error_age", "30"),
+    "options" => array('7' => t('7 days'), '15' => t('15 days'), '30' => t('30 days'), '60' => t('60 days'), '90' => t('90 days'), '180' => t('180 days'), '365' => t('1 year'), 'never' => t("Never - do not remove error entries from log table")),
+    "value" => variable_get("max_watchdog_error_age", "90"),
     "description" => t("This is similar to the setting above, but this sets how long to keep 'error' messages in the watchdog (logs).
                         Error messages are useful for finding bugs or database issues, but are not used in any official reporting.  Removing them
                         helps reduce the size of the watchdog table.
