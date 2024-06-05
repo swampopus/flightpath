@@ -55,11 +55,11 @@ function engagements_menu()
 
 
 
-  $items["admin/config/imap"] = array(
-    "title" => "Engagements - IMAP settings",
-    "description" => "Configure IMAP settings for Engagements",
+  $items["admin/config/email"] = array(
+    "title" => "Engagements - email settings",
+    "description" => "Configure email settings for Engagements",
     "page_callback" => "fp_render_form",
-    "page_arguments" => array("engagements_imap_settings_form", "system_settings"),
+    "page_arguments" => array("engagements_email_settings_form", "system_settings"),
     "access_arguments" => array("administer_engagements"),
     "page_settings" => array(
       "menu_icon" => fp_get_module_path('system') . "/icons/cog.png",
@@ -956,9 +956,9 @@ function engagements_mass_sms_perform_batch_operation(&$batch, $recipients, $mes
 // TODO: For one thing, check off that we are using mailgun for receipt of email if that's what we are doing.  Other
 // TODO: settings might be needed later on.
 /**
- * Configure the imap settings used by Engagements
+ * Configure the email (reception) settings used by Engagements
  */
-function engagements_imap_settings_form()
+function engagements_email_settings_form()
 {
   $form = array();
 
@@ -969,14 +969,47 @@ function engagements_imap_settings_form()
                     <br>If you are instead using a Webhook or similar, see below.</p>',
   );
 
-  $form['imap_host'] = array(
+  
+  $form['engagements_send_email_method'] = array(
+    'type' => 'radios',
+    'label' => t("Method to send emails"),
+    'options' => array('smtp' => 'SMTP'),
+    'value' => variable_get('engagements_send_email_method', 'smtp'),
+    'required' => TRUE,
+    'description' => t("What method will FlightPath use to send emails?  If unsure, select SMTP (the default) and configure 
+                        the SMTP settings from the Admin Console link."),
+  );
+  
+  
+  $form['engagements_receive_email_method'] = array(
+    'type' => 'select',
+    'label' => t("Method to receive emails"),
+    'options' => array('none' => 'None', 'mailgun' => 'MailGun Webhook/Route', 'imap' => 'IMAP'),
+    'value' => variable_get('engagements_receive_email_method', 'none'),
+    'required' => TRUE,
+    'description' => t("What method will FlightPath use to <b>receive</b> emails?  If unsure, or
+                          if you do not wish to receive emails in FlightPath, select None."),
+  );
+  
+  
+  
+  $form['mark_based_on_receive_method'] = array(
+    'value' => '<br><br><hr><p>' . t("Based on your <b>receive method</b> selected above, please expand the correct section below
+                   and continue configuration:") . '</p><br><br>',
+  );
+  
+  
+  // Set up fieldsets for our different receive methods...
+  
+  $e = array();
+  $e[]['imap_host'] = array(
     'type' => 'textfield',
     'label' => t('Host'),
     'value' => variable_get('imap_host', ''),
     'description' => 'Ex: mail.example.com',
   );
 
-  $form['imap_port'] = array(
+  $e[]['imap_port'] = array(
     'type' => 'textfield',
     'label' => t('Port'),
     'value' => variable_get('imap_port', ''),
@@ -984,7 +1017,7 @@ function engagements_imap_settings_form()
     'description' => 'Ex: 143, 993',
   );
 
-  $form['imap_secure'] = array(
+  $e[]['imap_secure'] = array(
     'type' => 'select',
     'label' => t('Security'),
     'value' => variable_get('imap_secure', ''),
@@ -992,14 +1025,14 @@ function engagements_imap_settings_form()
     'description' => 'Ex: TLS',
   );
 
-  $form['imap_username'] = array(
+  $e[]['imap_username'] = array(
     'type' => 'textfield',
     'label' => t('Username'),
     'value' => variable_get('imap_username', ''),
     'description' => '',
   );
 
-  $form['imap_password'] = array(
+  $e[]['imap_password'] = array(
     'type' => 'textfield',
     'label' => t('Password'),
     'value' => variable_get('imap_password', ''),
@@ -1007,11 +1040,60 @@ function engagements_imap_settings_form()
                         Make sure you take the necessary precautions to ensure the security of your database.'),
   );
 
-
-
-
   // TODO:  folder names to look in?
   // TODO:  other settings on deleting messages once read, etc?
+
+    
+  $bool_start_closed = TRUE;
+  if (variable_get('engagements_receive_email_method', 'none') == 'imap') {
+    $bool_start_closed = FALSE;
+  }
+                        
+                        
+  // Add imap elements to a fieldset.
+  $form['imap_settings_fs'] = array(
+    'type' => 'cfieldset',
+    'label' => 'IMAP Settings',
+    'start_closed' => $bool_start_closed,
+    'elements' => $e,
+  );
+
+
+
+
+  $e = array();
+  $e[]['engagements_mailgun_markup'] = array(
+    'value' => t("To use this feature, make sure your MailGun account (which is not in any way affiliated with FlightPath, and is a 3rd party service)
+                  has a webhook or 'Route' set up to forward emails to this FlightPath installation.") . "
+                  <br><br>
+                  ". t("The URL to forward the emails to is:") . " " . base_url() . "/engagements-handle-incoming-mailgun-email
+                  <br><br>",
+  );
+  
+  $e[]['engagements_mailgun_api_key'] = array(
+    'type' => 'textfield',
+    'label' => t('Enter your MailGun API Key for Webhooks'),
+    'value' => variable_get('engagements_mailgun_api_key', ''),
+    'description' => 'This is a value found in your MailGun account, under API Keys.  It may be called something like "HTTP Webhook Signing Key" or similar.',
+  );
+  
+  $bool_start_closed = TRUE;
+  if (variable_get('engagements_receive_email_method', 'none') == 'mailgun') {
+    $bool_start_closed = FALSE;
+  }
+                        
+                        
+  // Add imap elements to a fieldset.
+  $form['engagements_mailgun_settings_fs'] = array(
+    'type' => 'cfieldset',
+    'label' => 'MailGun Webhook Settings',
+    'start_closed' => $bool_start_closed,
+    'elements' => $e,
+  );
+
+
+
+
 
 
 
@@ -1241,11 +1323,8 @@ function engagements_get_sms_from_history($message_sid)
 function engagements_cron()
 {
 
-
-
   $last_sms_check = intval(variable_get('engagements_sms_get_all_last_check', 0));
   $last_imap_check = variable_get('engagements_imap_get_all_last_check', 0);
-
 
   
   // only check every X minutes at most.  
@@ -1255,8 +1334,13 @@ function engagements_cron()
     engagements_sms_get_all_messages();  // refreshes sms information for messages we've sent and received
   }
   
-  // Check for imap messages in a similar way as the SMS messages.
-  engagements_imap_get_all_received_messages();
+  
+  
+  if (variable_get('engagements_receive_email_method', 'none') == 'imap') {
+    // Check for imap messages in a similar way as the SMS messages (if we have selected imap as our method to receive emails)
+    engagements_imap_get_all_received_messages();
+  }
+  
 } // hook_cron
 
 

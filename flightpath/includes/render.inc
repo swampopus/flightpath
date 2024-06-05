@@ -151,7 +151,7 @@ function fp_render_array($render_array, $use_callback = "") {
       // Is this a cfieldset (collapsible fieldset)?
       if (@$element["type"] == "cfieldset") {        
         $celements = $element["elements"];  // get our list of form elements within this fieldset.
-        // Go through these new elements and prepare to display them inside a collapsible fieldset.
+        // Go through these new elements and prepare to display them inside a collapsible fieldset.        
         $html = "";
         foreach ($celements as $k => $v) {
           foreach ($celements[$k] as $name => $celement) {            
