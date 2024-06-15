@@ -1422,7 +1422,7 @@ function engagements_handle_incoming_sms($vars = array())
 
   $content = NULL;
 
-  $link = $alert_link = "";
+  $link = $alert_link = $media_filenames = "";
   
   // Figure out what user this came from/to!
   $from_cwid = $from_user_id = $to_user_id = "";
