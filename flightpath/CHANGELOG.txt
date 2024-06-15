@@ -1,6 +1,10 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-06-15
+  Various changes to suppress warnings and deprecated notices in PHP 8.x
+  
+
 2024-06-04
   Added new system setting, allowing the trimming of ERROR messages from the watchdog table based on age.
   

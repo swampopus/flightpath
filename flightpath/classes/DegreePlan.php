@@ -806,7 +806,7 @@ class DegreePlan extends stdClass
   function get_track_title($bool_include_classification = FALSE) {
     $this->load_descriptive_data();
     
-    $ttitle = trim($this->track_title);
+    $ttitle = fp_trim($this->track_title);
     if ($ttitle == "") return FALSE;  // there is no track?
             
     if ($bool_include_classification) {
