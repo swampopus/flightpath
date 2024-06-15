@@ -599,6 +599,7 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
   }
   
 } // _fp_error_handler
+  
  
  
 
@@ -643,6 +644,7 @@ function _fp_map_php_error_code($code) {
     return $error;
 }
 
+ 
  
 
 /**
