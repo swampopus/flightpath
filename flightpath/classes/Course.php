@@ -1646,47 +1646,52 @@ class Course extends stdClass
 
       }
 
+      if ($cur) {
+        // Meaning, we DID find something.
 
-      $this->title = $this->fix_title($cur["title"]);
-      $this->description = trim($cur["description"]);      
-      $this->subject_id = trim(strtoupper($cur["subject_id"]));
-      $this->course_num = trim(strtoupper($cur["course_num"]));
-      $this->school_id = intval($cur["school_id"]);
-
-
-      $this->min_hours = $cur["min_hours"] * 1;  //*1 will trim extra zeros from end of decimals
-      $this->max_hours = $cur["max_hours"] * 1;
-
-            
-      
-      if ($bool_reset_ghost_hours) {
-        // Reset the ghosthours to default.
-        $this->bool_ghost_hour = $this->bool_ghost_min_hour = FALSE;
-      }
-      
-      if ($this->min_hours <= 0) {
-        $this->min_hours = 1;
+        $this->title = $this->fix_title($cur["title"]);
+        $this->description = trim($cur["description"]);      
+        $this->subject_id = trim(strtoupper($cur["subject_id"]));
+        $this->course_num = trim(strtoupper($cur["course_num"]));
+        $this->school_id = intval($cur["school_id"]);
+  
+  
+        $this->min_hours = $cur["min_hours"] * 1;  //*1 will trim extra zeros from end of decimals
+        $this->max_hours = $cur["max_hours"] * 1;
+  
+              
+        
         if ($bool_reset_ghost_hours) {
-          $this->bool_ghost_min_hour = TRUE;
+          // Reset the ghosthours to default.
+          $this->bool_ghost_hour = $this->bool_ghost_min_hour = FALSE;
         }
-      }
-      if ($this->max_hours <= 0) {
-        $this->max_hours = 1;
-        if ($bool_reset_ghost_hours) {
-          $this->bool_ghost_hour = TRUE;
+        
+        if ($this->min_hours <= 0) {
+          $this->min_hours = 1;
+          if ($bool_reset_ghost_hours) {
+            $this->bool_ghost_min_hour = TRUE;
+          }
         }
-      }
+        if ($this->max_hours <= 0) {
+          $this->max_hours = 1;
+          if ($bool_reset_ghost_hours) {
+            $this->bool_ghost_hour = TRUE;
+          }
+        }
+        
+        
+        $this->repeat_hours = $cur["repeat_hours"] * 1;
+        if ($this->repeat_hours <= 0)
+        {
+          $this->repeat_hours = $this->max_hours;
+        }
+  
+        $this->db_exclude = $cur["exclude"];
+        $this->data_entry_comment = $cur["data_entry_comment"];
+        
+      } // if cur
       
       
-      $this->repeat_hours = $cur["repeat_hours"] * 1;
-      if ($this->repeat_hours <= 0)
-      {
-        $this->repeat_hours = $this->max_hours;
-      }
-
-      $this->db_exclude = $cur["exclude"];
-      $this->data_entry_comment = $cur["data_entry_comment"];
-
       // Now, lets get a list of all the valid names for this course.
       // In other words, all the non-excluded names.  For most
       // courses, this will just be one name.  But for cross-listed
