@@ -2331,9 +2331,26 @@ function system_settings_form() {
     "type" => "textfield",
     "label" => t("Notify PHP error email address:"),
     "value" => variable_get("notify_php_error_email_address", ""),
-    "description" => t("Enter 1 or more email addresses (separated by comma) to notify when
-                a PHP warning or error occurs.  Leave blank to disable.  Recommendation: disable
-                on development, but enable on production."),
+    "description" => t("Enter 1 or more email addresses (separated by comma) to notify of
+                PHP warnings or errors.  Leave blank to disable.  Recommendation: disable
+                on development, but enable on production.
+                <br><b>Note:</b> Messages will be stored in the temporary directory (below) and emailed out
+                as a digest every cron run."),
+  );
+
+
+  $form["tmp_path"] = array(
+    "type" => "textfield",
+    "label" => t("Temporary directory path"),
+    "value" => variable_get("tmp_path", "/tmp"),
+    "description" => t("An absolute system path where temporary files will be stored. The directory <b>must</b> already
+                        exist, and be writable by the web user. 
+                        <br>The directory
+                        should not be accessible over the web. 
+                        <br>Path <b>MUST</b> begin with a proceeding slash (/) and should NOT include
+                        a trailing slash.
+                        <br>
+                        &nbsp; &nbsp; Ex: &nbsp;&nbsp; /tmp"),
   );
 
 
@@ -2649,8 +2666,7 @@ function system_cron() {
 
 
     variable_set("system_last_run_trim_watchdog", time());
-    
-    
+        
   } // check against > last_run, so we should do it.
   
   
@@ -2669,7 +2685,24 @@ function system_cron() {
   }
   
   
+  // Should we email someone of php errors?
+  $tomail = trim(variable_get("notify_php_error_email_address", ""));
     
+  if ($tomail != "") {
+        
+    // We should add this to our "to email" file, which will get emailed to this mail address later on.
+    $error_files_dir = fp_get_tmp_path();
+
+    // is there anything for us to email?
+    $emsg = file_get_contents($error_files_dir . '/fp_php_errors_to_email_log.txt');    
+    if ($emsg && fp_trim($emsg) != "") {
+      fp_mail($tomail, "PHP Error(s) in FlightPath", $emsg);
+      // Make the file blank.
+      file_put_contents($error_files_dir . '/fp_php_errors_to_email_log.txt', '');
+    }
+    
+  }
+  
   
   
 } // hook_cron

@@ -564,6 +564,9 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
   $msg .= "--------------------------\n\n";
   $msg .= "$err_name: $message \n\n";
   $msg .= "... ($line) $filename\n\n";
+  
+  $emsg = $msg;   // We don't need the full backtrace for our "email" message.
+  
   $msg .= "Backtrace: <pre>\n";
   $msg .= print_r($arr, TRUE);
   $msg .= "\n\n</pre>";
@@ -579,11 +582,18 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
   if (@intval($user->id) !== 0) {
     // We are NOT the admin user.  (No need to email, since it would appear on screen with the fpm() calls earlier.
     
-    // Should we email someone, as with mysql errors?
+    // Should we email someone of php errors?
     $tomail = trim(variable_get("notify_php_error_email_address", ""));
       
     if ($tomail != "") {
-      fp_mail($tomail, "PHP Error in FlightPath", $msg);            
+      //fp_mail($tomail, "PHP Error in FlightPath", $msg);
+      
+      // We should add this to our "to email" file, which will get emailed to this mail address later on.
+      $error_files_dir = fp_get_tmp_path();
+
+      file_put_contents($error_files_dir . '/fp_php_errors_to_email_log.txt', $emsg . "\n------------------------------------------------\n\n", FILE_APPEND);
+      
+                  
     }
     
   }
@@ -1994,6 +2004,15 @@ function fp_get_module_path($module, $bool_include_file_system_path = FALSE, $bo
  */
 function fp_get_files_path() {
   return $GLOBALS["fp_system_settings"]["file_system_path"] . "/custom/files";
+}
+
+
+/**
+ * Convenience function to return the temporary directory path. Does NOT end with a trailing slash.
+ * Ex:  /tmp
+ */
+function fp_get_tmp_path() {  
+  return variable_get("tmp_path", "/tmp");
 }
 
 
