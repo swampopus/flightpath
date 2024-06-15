@@ -730,7 +730,7 @@ function fp_render_element($name, $element, $use_session_submission_values_for_c
 
       // For radios, it's possible we've been sent an array for the value (though a string is more common and prefered).
       // We need to check both.  
-      if (is_array($value) && $value[$key] == $key) {
+      if (is_array($value) && isset($value[$key]) && $value[$key] == $key) {
         $checked = "checked=checked";
       }
       else if (!is_array($value) && $value == $key) {
