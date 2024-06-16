@@ -7,6 +7,11 @@ FlightPath 7.x Changelog
   Updated the README.txt file.
   
   Added .htaccess file to files directory
+  
+  Created ability for FlightPath to manage a "private" files directory within custom/files, which
+  contains a special .htaccess file to keep Apache from serving any files in that dir.  Changed
+  the error handling functionality (which emails on php errors) to use this new private dir.  
+  
 
 2024-06-15
   Various changes to suppress warnings and deprecated notices in PHP 8.x

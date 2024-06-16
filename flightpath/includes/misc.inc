@@ -589,7 +589,13 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
       //fp_mail($tomail, "PHP Error in FlightPath", $msg);
       
       // We should add this to our "to email" file, which will get emailed to this mail address later on.
-      $error_files_dir = fp_get_tmp_path();
+      $error_files_dir = fp_get_files_path() . "/" . variable_get("private_files_directory", "private");
+      if (!is_dir($error_files_dir)) {
+        $t = mkdir($error_files_dir);
+        if (!$t) {
+          watchdog('system', "Unable to create private files directory @priv", array("@priv" => $error_files_dir), WATCHDOG_ERROR);
+        }
+      }
 
       $x = file_put_contents($error_files_dir . '/fp_php_errors_to_email_log.txt', $emsg . "\n------------------------------------------------\n\n", FILE_APPEND);
 
