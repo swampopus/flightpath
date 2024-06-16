@@ -3860,6 +3860,9 @@ function system_reload_and_cache_course_inventory() {
     watchdog("system", "Cannot create cache_data/courses_serialized.info under custom/files.  Permission error?", array(), WATCHDOG_ERROR);
   }    
   
+  // We also want to add in a custom .htaccess file, for security.
+  file_put_contents(fp_get_files_path() . "/cache_data/.htaccess", system_get_private_htaccess());
+  
   // Also put in when we LAST performed this operation in a variable for reading later on.
   $last_generated = time();
   $_SESSION['fp_cache_course_inventory_last_generated'] = $last_generated;
@@ -3883,6 +3886,47 @@ function system_check_course_inventory_should_be_reloaded() {
   return FALSE;
   
 }
+
+
+
+/**
+ * Returns back a string for an .htaccess file which doesn't allow Apache to serve any
+ * files from that directory.  Used in the /files/cache_data directory and other
+ * directories as needed.
+ */
+function system_get_private_htaccess() {
+  $x = "
+    # Deny all requests from Apache 2.4+.
+    <IfModule mod_authz_core.c>
+      Require all denied
+    </IfModule>
+    
+    # Deny all requests from Apache 2.0-2.2.
+    <IfModule !mod_authz_core.c>
+      Deny from all
+    </IfModule>
+    
+    # Turn off all options we don't need.
+    Options None
+    Options +FollowSymLinks
+    
+    # Set the catch-all handler to prevent scripts from being executed.
+    # This is borrowed from Drupal SA-2006-006
+    SetHandler FlightPath_Security_Do_Not_Remove_See_SA_2006_006
+    <Files *>
+      # Override the handler again if we're run later in the evaluation list.
+      # This is borrowed from Drupal SA-2006-006
+      SetHandler FlightPath_Security_Do_Not_Remove_See_SA_2006_006
+    </Files>
+    
+    # If we know how to do it safely, disable the PHP engine entirely.
+    <IfModule mod_php5.c>
+      php_flag engine off
+    </IfModule>  
+  ";
+  
+  return trim($x);
+} // system_get_private_htaccess()
 
 
 

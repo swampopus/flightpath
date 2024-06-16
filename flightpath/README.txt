@@ -1,29 +1,5 @@
-FlightPath - The Electronic Student Advising System
+FlightPath - Academic Advising and Student Success
 ===================================================
-
-FlightPath may be downloaded from:
-   
-   http://getflightpath.com
-
-Check the above address for updates, modules, and documentation.
-
-Please read the COPYRIGHT.txt and LICENSE.txt files for
-important information as to what you may and may not do with
-FlightPath's source code.
-
-Your use of FlightPath means you have read both the COPYRIGHT.txt
-and LICENSE.txt files and agree to act according to the requirements
-explained within in regards to FlightPath and any related modules,
-documentation, etc.
-
-
-
-----------------------
-Problems with Installation?
-----------------------
-See: https://getflightpath.com/node/6
-
-
 
 ----------------------
 Professional hosting and support
@@ -35,18 +11,37 @@ exclusive features for FlightPath not found in this community edition.
 Visit https://flightpathacademics.com for more information.
 
 
+----------------------
+Important Notice
+----------------------
+
+Please read the COPYRIGHT.txt and LICENSE.txt files for
+important information as to what you may and may not do with
+FlightPath's source code.
+
+Your use of FlightPath means you have read both the COPYRIGHT.txt
+and LICENSE.txt files and agree to act according to the requirements
+explained within in regards to FlightPath and any related modules,
+documentation, etc.
+
 
 ----------------------
-A brief history...
+Problems with Installation?
+----------------------
+See: https://getflightpath.com/node/6
+
+
+----------------------
+A brief history, and Credits
 ----------------------
 
-FlightPath was created by the University of Louisiana at Monroe
+FlightPath was originally created by the University of Louisiana at Monroe
 (http://www.ulm.edu) in 2006, and has been in continuous use
-ever since.
+and development ever since.
 
 The decision to release the code as open source (GNU GPLv3) occured in 2011.
 
-While the project is now contributed to by a community of developers,
+While the open-source project is now contributed to by a community of developers,
 the original ULM development team from 2006 were as follows:
 
 Richard Peacock - Primary developer

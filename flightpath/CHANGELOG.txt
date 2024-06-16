@@ -1,6 +1,13 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-06-16
+  Added a robots.txt file to the project directory.
+  
+  Updated the README.txt file.
+  
+  Added .htaccess file to files directory
+
 2024-06-15
   Various changes to suppress warnings and deprecated notices in PHP 8.x
   

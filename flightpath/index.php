@@ -6,20 +6,12 @@
  * 
  * This script will determine which page the user is trying to view, 
  * and display it for them.
- */
-       
- 
- // __AUTOLOAD NOT NEEDED.  JUST LOAD THE ALL_CLASSES.PHP FILE.
- /**
- * This function makes sure we auto-load our classes, if we need to.
- * Largely used when loading objects our of our SESSION cache.
- */
-//function __autoload($class) {
-// Load all of the classes, as well as the custom classes.
-  require_once("classes/all_classes.php");
-  
-//}
+*/
 
+
+// Load all of the classes, as well as the custom classes.
+require_once("classes/all_classes.php");
+  
 
 // Make sure our cookies are the most secure possible:
 ini_set('session.cookie_httponly', 'On');
@@ -79,7 +71,7 @@ require_once("bootstrap.inc");
 
 
 // For development reasons only:
-// To rebuild the cache on every page load, uncomment the following line
+// To rebuild the cache on every page load, un-comment the following line
 // menu_rebuild_cache();
 
 // FlightPath will now look at the request in the query to decide what page we are going to display.
