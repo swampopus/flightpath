@@ -592,8 +592,7 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
       $error_files_dir = fp_get_tmp_path();
 
       $x = file_put_contents($error_files_dir . '/fp_php_errors_to_email_log.txt', $emsg . "\n------------------------------------------------\n\n", FILE_APPEND);
-      fpm($error_files_dir);
-      fpm($x);
+
                   
     }
     

@@ -8,6 +8,9 @@ FlightPath 7.x Changelog
   
   Added code so that PHP errors collect in a temporary file, then get emailed as a digest once per cron run.
   
+  When executing PHP code from the Admin Console, warnings are not suppressed with @.  This allows for testing
+  error handling.
+  
 
 2024-06-04
   Added new system setting, allowing the trimming of ERROR messages from the watchdog table based on age.
