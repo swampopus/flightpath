@@ -474,7 +474,9 @@ function alerts_advisees_alerts_form($only_student_id = "", $limit = 25) {
     $author = "System";
     if ($content->user_id != ALERT_SYSTEM_USER_ID) {
       $tuser = fp_load_user($content->user_id);
-      $author = fp_get_faculty_name($tuser->cwid);
+      if ($tuser && isset($tuser->cwid)) {
+        $author = fp_get_faculty_name($tuser->cwid);
+      }
     }
     
     $bool_no_student = TRUE;
