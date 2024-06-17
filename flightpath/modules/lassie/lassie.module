@@ -40,7 +40,7 @@ function lassie_start($job_machine_name, $hours = 2, $emails = "") {
     'hours' => $hours,
     'expires' => strtotime("NOW + $hours HOURS"),
     'emails' => $emails,
-    'user_uid' => $user->uid,
+    'user_uid' => $user->id,
   );
   
   
