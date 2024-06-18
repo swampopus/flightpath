@@ -1527,7 +1527,9 @@ class FlightPath extends stdClass
       if ($degree_id == "group") {
         // Get degree_id from the group_id.
         $tt = explode("_", $group_id);
-        $degree_id = $tt[1];
+        // Fixed this bug, where originally we didn't check to see if $tt has an element [1].  If this
+        // causes problems, then we will just use @$tt[1].
+        if (isset($tt[1])) $degree_id = $tt[1];
       }
 
       $advising_session_id = $advising_session_id_array[$advised_term_id];

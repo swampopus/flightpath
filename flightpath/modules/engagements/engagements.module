@@ -3054,10 +3054,29 @@ function engagements_form_alter(&$form, $form_id)
           $extra_mark = "";
 
           if ($form['engagement_type']['value'] == 'email') {
-            $extra_mark = fp_get_student_email($form['student_id']['value']);
+            $extra_mark = fp_trim(fp_get_student_email($form['student_id']['value']));
+            $bool_no_email = FALSE;
+            if ($extra_mark == "") {
+              $extra_mark = "(" . t("NO EMAIL ADDRESS AVAILABLE") . ")";
+              $bool_no_email = TRUE;
+            }
 
             // TODO:  The EMAIL header may need to be a setting with replacement values
             $form['engagement_msg']['prefix'] = t("Your message will automatically begin with <strong>(@initials) from @name:</strong>", array("@initials" => $initials, "@name" => $db->get_faculty_name($form['faculty_id']['value'])));
+            
+            
+            if (trim($extra_mark) != "" && $bool_no_email) {
+              // Meaning, the student has no email address (or opted out?)  Disable fields and let the user know.
+              $form['engagement_msg']['attributes']['readonly'] = 'readonly';
+              $form['engagement_msg']['attributes']['class'] .= ' readonly';
+
+              $form['submit_submit']['attributes']['disabled'] = 'disabled';
+              $form['submit_submit']['attributes']['class'] .= ' button-disabled';
+              $form['submit_submit']['suffix'] = "<strong>" . t('NOTE: Cannot send an email message as there is no email address on file for this recipient.  Try text message or calling instead.') . "</strong>";
+                            
+              
+            }
+            
           }
 
 
