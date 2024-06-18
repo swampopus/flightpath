@@ -3062,13 +3062,16 @@ function engagements_form_alter(&$form, $form_id)
             }
 
             // TODO:  The EMAIL header may need to be a setting with replacement values
-            $form['engagement_msg']['prefix'] = t("Your message will automatically begin with <strong>(@initials) from @name:</strong>", array("@initials" => $initials, "@name" => $db->get_faculty_name($form['faculty_id']['value'])));
+            $form['engagement_msg']['prefix'] = "<div>" . t("Your message will automatically begin with <strong>(@initials) from @name:</strong>", array("@initials" => $initials, "@name" => $db->get_faculty_name($form['faculty_id']['value']))) . "</div>";
             
             
             if (trim($extra_mark) != "" && $bool_no_email) {
               // Meaning, the student has no email address (or opted out?)  Disable fields and let the user know.
-              $form['engagement_msg']['attributes']['readonly'] = 'readonly';
-              $form['engagement_msg']['attributes']['class'] .= ' readonly';
+              
+              if (!isset($form['title']['attributes']['class'])) $form['title']['attributes']['class'] = ' ';
+              
+              $form['title']['attributes']['readonly'] = 'readonly';
+              $form['title']['attributes']['class'] .= ' readonly';
 
               $form['submit_submit']['attributes']['disabled'] = 'disabled';
               $form['submit_submit']['attributes']['class'] .= ' button-disabled';
