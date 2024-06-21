@@ -152,7 +152,7 @@ function engagements_handle_incoming_mailgun_email() {
   watchdog('debug', 'From Post: <pre>' . print_r($_POST, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
   watchdog('debug', 'From Files: <pre>' . print_r($_FILES, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
   
-  // TODO: See Mailgun's Securing Web hooks documentation to know what to do with "signature" and "token", to confirm
+  // See Mailgun's Securing Web hooks documentation to know what to do with "signature" and "token", to confirm
   //       it came from MailGun.  https://www.mailgun.com/blog/email/your-guide-to-webhooks/#chapter-5
   // This code shows how we verify....
   //     if (isset($event->signature) && hash_hmac('sha256', $event->signature->timestamp.$event->signature->token, $key) === $event->signature->signature) {
@@ -185,12 +185,50 @@ function engagements_handle_incoming_mailgun_email() {
   $sender = $_POST['sender'];
   $recipient = $_POST['recipient'];
   $body_html = $_POST['body-html'];
+  $body_plain = $_POST['body-plain'];
   $body_stripped_html = $_POST['stripped-html'];
   $body_stripped_text = $_POST['stripped-text'];
   $subject = $_POST['subject'];
-  $timestamp = intval($_POST['timestamp']);  
+  $timestamp = intval($_POST['timestamp']);  // in UTC already?  
   $date = $_POST['Date'];
   
+  $body = $body_stripped_text;
+  if ($body_plain) {
+    $body = $body_plain;
+  }
+  if ($body_html) {
+    $body = $body_html;
+  }
+   
+  $body = filter_markup($body, 'basic');
+
+  // Sometimes, emails contain odd encoding.  Ex:  =C2=A0, which is apparently a non-breaking space.  Let's convert just in case.
+  // From: https://stackoverflow.com/questions/12682208/parsing-email-body-with-7bit-content-transfer-encoding-php
+  // and: https://github.com/geerlingguy/Imap/blob/c4b54e52576bf71a93045d2a4581589eab9a00b6/JJG/Imap.php#L398
+  // Manually convert common encoded characters into their UTF-8 equivalents.
+  $characters = array(
+      '=20' => ' ', // space.
+      '=2C' => ',', // comma.
+      '=E2=80=99' => "'", // single quote.
+      '=C2=A0' => ' ', // non-breaking space.      
+      '=0A' => "\r\n", // line break.
+      '=0D' => "\r\n", // carriage return.
+      '=A0' => ' ', // non-breaking space.
+      "=\r\n" => '', // joined line.
+      '=E2=80=A6' => '&hellip;', // ellipsis.
+      '=E2=80=A2' => '&bull;', // bullet.
+      '=E2=80=93' => '&ndash;', // en dash.
+      '=E2=80=94' => '&mdash;', // em dash.
+  );
+
+  // Loop through the encoded characters and replace any that are found.
+  foreach ($characters as $key => $value) {
+    $body = str_replace($key, $value, $body);
+  }
+      
+   
+    
+        
   // This will map any inline images in the body of the email to their attachment names.
   // Example, this is in the body_html where an inline image was:
   // <img title="Inline image" alt="Inline image" src="cid:285ac981-ff52-55bb-f766-fb05ec0c9a74@yahoo.com" class="yahoo-inline-image" draggable="false" style="max-width: 800px; width: 100%;" data-id="<285ac981-ff52-55bb-f766-fb05ec0c9a74@yahoo.com>">
@@ -204,7 +242,7 @@ function engagements_handle_incoming_mailgun_email() {
   // Note: From gmail, the content-id-map has no useful information.  Very strange.  But what we DO have is the "alt" tag.
   // See: <img src="cid:ii_lwy9bb9j1" alt="um actually.png" width="399" height="398">
   // We can use THAT to figure out the inline image, since [name] in the FILES states the filename.
-  $content_id_map = $_POST['content-id-map']; 
+  $content_id_map = fp_trim(@$_POST['content-id-map']); 
   
   // Our attachments are in $_FILES...
   /*
@@ -243,22 +281,141 @@ function engagements_handle_incoming_mailgun_email() {
     )
    */
   
-  // TODO: Curiously, it sent me the same email twice.  We didn't have attachments with the first POST, but we did on the second.  We should
-  // TODO: always overwrite any email we've already got with a new one, if such comes in.
-  // TODO: We can't use the Message-Id:
-  // TODO: Note: from Gmail, the Message-Id is blank!  In that case, we can hash the date, sender, recipient, subject, message, etc, to create a bogus ID.
-  //          Also, the message-headers could be hashed instead of having to concat everything else, to get an ID?
-  
-  
-  
+  // Curiously, mailgun one time sent me the same email twice.  We didn't have attachments with the first POST, but we did on the second.  We should
+  // always overwrite any email we've already got with a new one, if such comes in.
+  // We can't use the Message-Id to identify unique messages!
+  // Note: from Gmail, the Message-Id is blank!  In that case, we can hash the date, sender, recipient, subject, message, etc, to create our own ID.
+    
+  $external_msg_id = hash('sha256', $sender . $subject . $date . $recipient . $body . $body_html . $body_plain . $body_stripped_text . $content_id_map);  
   
   // TODO: Correctly handle receiving an email (and files).  See _imap_get_all_received_messages.
+    
+    
   
+  // TODO: Create the email entry in FlightPath:
   
-  
-  
-  
-  
+    // Match the sender's email to a student.
+    $student_user_id = db_get_user_id_from_email($sender, 'student');
+    if ($student_user_id) {
+      
+      watchdog('engagements_mailgun', "Found from student $student_user_id, creating engagement content.", array(), WATCHDOG_DEBUG);
+      
+      // create this as an engagement for this student.
+      $account = fp_load_user($student_user_id);
+      $student_cwid = $account->cwid;
+
+      // TODO: If another engagement with external_msg_id exists, then load that instead of
+      // TODO: creating a new one.
+      $content = new stdClass();
+      $content->type = 'engagement';
+      $content->cid = "new";
+      
+      
+      $content->published = 1;
+      $content->delete_flag = 0;
+      $content->title = $subject;  // required
+
+      $content->field__activity_datetime['value'] = date('Y-m-d H:i:s', $timestamp);
+      $content->field__student_id['value'] = $student_cwid;
+      $content->field__engagement_type['value'] = 'email';
+      $content->field__direction['value'] = 'received';
+
+      $content->field__engagement_msg['value'] = $body;
+      $content->field__external_msg_id['value'] = $external_msg_id;
+
+      content_save($content);
+      $cid = $content->cid;  // We need the cid to already be created in order to save attachments
+
+      //$attachments = _engagements_imap_get_attachments($mbox, $msgno, fp_get_machine_readable($from_email), $cid);
+      // TODO: add attachments
+      $attachments = array();
+      if ($content_id_map) {
+        $map = json_decode($content_id_map);
+        watchdog('debug', 'map is: <pre>' . print_r($map, TRUE) . "</pre>", array(), WATCHDOG_DEBUG);
+        
+        $sender_machine_readable = fp_get_machine_readable($sender);
+        
+        foreach ($_FILES as $xid => $details) {
+          $filename_prefix = "email__" . $sender_machine_readable;          
+          
+          $file = array(
+            'name' => $details['name'],
+            'type' => $details['type'],
+            'tmp_name' => $details['tmp_name'],            
+          );
+          
+          
+          //$fid = content_add_new_uploaded_file($file, $cid                    
+                    
+                    
+                    
+          //if (!$test) {
+          //  watchdog('engagements_mailgun', 'Unable to write media file at server temp location: ' . sys_get_temp_dir(), array(), 'error');            
+          //  $body .= "\n\n[ATTACHMENT UNABLE TO SAVE. Check with system administrator.]";
+          //}          
+          
+        } // foreach FILES
+          
+      } // if content_id_map
+      
+      
+      
+      
+      // save attachements along with the engagement, if there are any
+      if (count($attachments) > 0) {
+
+        $fid_line = "";
+        foreach ($attachments as $adetails) {
+          $fid = $adetails['fid'];
+          $fid_line .= $fid . ",";
+        }
+        $fid_line = rtrim($fid_line, ",");
+        $content->field__attachment['value'] = $fid_line;
+      }
+
+
+      // We may have modified $body, so re-add it.
+      $content->field__engagement_msg['value'] = $body;
+
+      $content->field__visibility['value'] = 'public';
+
+      content_save($content);
+
+      // if received, create an activity record.
+      // Create a new "activity record" that the student has sent an email message
+
+      $acontent = new stdClass();
+      $acontent->type = 'activity_record';
+      $acontent->cid = "new";
+      $acontent->published = 1;
+      $acontent->delete_flag = 0;
+      $acontent->title = t('Student replied to email message.');
+      $acontent->field__student_id['value'] = $student_cwid;
+      $acontent->field__activity_type['value'] = 'mail';
+      content_save($acontent);
+
+      // Notify the advisor(s).
+      // get list of all advisors for this student, and send notifications.
+      $advisors = advise_get_advisors_for_student($student_cwid);
+      foreach ($advisors as $c => $afaculty_id) {
+        $account_user_id = db_get_user_id_from_cwid($afaculty_id, 'faculty');
+        if ($account_user_id) {
+          $student_name = fp_get_student_name($student_cwid, TRUE);
+          $base_url = $GLOBALS['fp_system_settings']['base_url'];
+          $link = $base_url . "/engagements?current_student_id=$student_cwid";
+          $tmsg = "";
+          $tmsg .= "$student_name has submitted an email to FlightPath.<br><br>\n\n
+                    To view, visit the student's Engagements tab by logging in and following this link:<br>\n 
+                    <a href='$link'>$link</a>";
+
+          notify_send_notification_to_user($account_user_id, $tmsg, $content->cid, 'engagement');
+        }
+      }
+    } // if student_user_id    
+    else {
+      // The student_user_id could not be found!  This is possibly spam.
+      // TODO: handle the rejection of this email?
+    }
   
   
   

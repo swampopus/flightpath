@@ -1,6 +1,13 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-06-21
+  Worked on Mailgun webhook integration.  Made it so that all email attachments are encrypted.
+  
+  Renamed content.module's constant CONTENT_PRIVATE_FILE to CONTENT_ENCRYPTED_FILE to better describe what it is.
+  Also changed some of the code in content.module's content_add_new_uploaded_file() function to better handle from emails.
+
+
 2024-06-18
   Show message on new Email form when the student has no email address available.
   

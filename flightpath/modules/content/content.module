@@ -2,7 +2,7 @@
 
 
 // Define constants
-define('CONTENT_PRIVATE_FILE', 0);  // must be logged in to view
+define('CONTENT_ENCRYPTED_FILE', 0);  // must be logged in to view, and file is encrypted
 define('CONTENT_PUBLIC_FILE', 1);   // publicly (anonymous) can view with URL
 
 
@@ -1703,8 +1703,16 @@ function content_edit_content_form_submit(&$form, &$form_state) {
 
 /**
  * bool_replace_existing means should we replace an existing file (based on filename) with this new one?  Instead of creating an INSERT, that is.
+ * 
+ * $file is expected to be an array containing these elements:
+ *  [
+ *    "name"   (original filename)
+ *    "type"   (the mimetime)
+ *    "tmp_name"   (the system filepath to the file)
+ *  ]
+ * 
  */
-function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_filename = TRUE, $attributes = CONTENT_PRIVATE_FILE, $bool_replace_exsting_filename = FALSE) {
+function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_filename = TRUE, $attributes = CONTENT_ENCRYPTED_FILE, $bool_replace_exsting_filename = FALSE, $filename_prefix = "file__") {
   // Store the file information in the content_files table, and then THIS field contains the fid reference number.
   $original_filename = @$file["name"];
   $type = @$file["type"]; 
@@ -1721,7 +1729,7 @@ function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_
   
   $filename = $original_filename;
   if ($bool_override_original_filename) {
-    $filename = 'file__' . time() . '' . mt_rand(9,9999) . '_' . $original_filename;
+    $filename = $filename_prefix . time() . '' . mt_rand(9,9999) . '_' . fp_get_machine_readable($original_filename);
   }
   
   // If the filename is too long, shorten it.  Linux won't allow more than 255 bytes (usually corresponds to chars, depending on file system
@@ -1741,7 +1749,7 @@ function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_
       
   $is_encrypted = 0;
   // If we should be encrypting files, so do here, and set the is_encrypted value correctly.
-  if (module_enabled('encryption') && variable_get("encryption_files_encryption", "yes") === 'yes' && encryption_get_key() && $attributes != CONTENT_PUBLIC_FILE) {
+  if (module_enabled('encryption') && variable_get("encryption_files_encryption", "yes") === 'yes' && encryption_get_key() && $attributes == CONTENT_ENCRYPTED_FILE) {
     // (note: public files are never encrypted)
 
     // We need to do that by loading the file into memory, then getting the encrypted version, then writing it
