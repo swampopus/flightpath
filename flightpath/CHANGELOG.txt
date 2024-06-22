@@ -1,6 +1,14 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-06-22
+  Fixed PHP 8 warnings.
+  
+  Added watchdog entry if our custom error handler is unable to write to the errors file (that gets emailed out).
+  
+  Fixed bug where anon users (which triggered PHP errors) were not being added to the errors file to email.
+  
+
 2024-06-21
   Worked on Mailgun webhook integration.  Made it so that all email attachments are encrypted.
   

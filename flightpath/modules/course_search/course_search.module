@@ -350,7 +350,7 @@ function course_search_display_courses() {
 
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;  
-  $subject_id = $_REQUEST["subject_id"];
+  $subject_id = fp_trim(@$_REQUEST["subject_id"]);
   
 
   $render["#catalog_year"] = $catalog_year;
@@ -365,11 +365,14 @@ function course_search_display_courses() {
   
   // Try to find out the title to this subject, if one exists
   // in our subjects table.
+  $title = "";
   $res = db_query("SELECT * FROM subjects
                    WHERE subject_id =?
                    AND school_id = ? ", $subject_id, $school_id);
   $cur = db_fetch_array($res);
-  $title = $cur["title"];
+  if ($cur) {
+    $title = $cur["title"];
+  }
   if ($title == "") $title = strip_tags($subject_id);
   
   

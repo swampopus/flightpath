@@ -579,8 +579,8 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
 
   watchdog($watchdog_type, $msg, array(), $watchdog_severity);
   
-  if (@intval($user->id) !== 0) {
-    // We are NOT the admin user.  (No need to email, since it would appear on screen with the fpm() calls earlier.
+  if (@intval($user->id) !== 1) {
+    // We are NOT the admin user (user id 1).  (No need to email, since it would appear on screen with the fpm() calls earlier.
     
     // Should we email someone of php errors?
     $tomail = trim(variable_get("notify_php_error_email_address", ""));
@@ -598,6 +598,9 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
       }
 
       $x = file_put_contents($error_files_dir . '/fp_php_errors_to_email_log.txt', $emsg . "\n------------------------------------------------\n\n", FILE_APPEND);
+      if (!$x) {
+        watchdog('system', "Unable to write PHP error to email log file", array(), WATCHDOG_ERROR);
+      }
 
                   
     }
