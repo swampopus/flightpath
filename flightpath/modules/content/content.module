@@ -1759,9 +1759,13 @@ function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_
     $full_filename .= ".enc";
     $filename .= ".enc";
     if (!file_put_contents($full_filename, $enc_file_contents)) {
-      fp_add_message(t("Could not upload file.  Possibly because of permission issues on the destination directory,
+      fp_add_message(t("Could not upload encrypted file.  Possibly because of permission issues on the destination directory,
                         the disk is full, or some other reason."), "error");
-      return;
+
+      watchdog('content', "Could not upload encrypted file.  Possibly because of permission issues on the destination directory,
+                        the disk is full, or some other reason.", array(), WATCHDOG_ERROR);
+
+      return FALSE;
     }
 
     $is_encrypted = 1;
@@ -1776,6 +1780,12 @@ function content_add_new_uploaded_file($file, $cid = 0, $bool_override_original_
     if (!copy($tmp_name, $full_filename)) {
       fp_add_message(t("Could not upload file.  Possibly because of permission issues on the destination directory,
                         the disk is full, or some other reason."), "error");
+                        
+      watchdog('content', "Could not upload and copy file to destination.  Possibly because of permission issues on the destination directory,
+                        the disk is full, or some other reason.", array(), WATCHDOG_ERROR);
+                        
+      return FALSE;
+                        
     }                    
         
   }

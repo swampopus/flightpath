@@ -8,6 +8,12 @@ FlightPath 7.x Changelog
   
   Fixed bug where anon users (which triggered PHP errors) were not being added to the errors file to email.
   
+  Fixed warning where if php errors file isn't in the private dir, it will be created on cron run.
+
+  Completed Mailgun webhook integration functionality.  All email attachments are encrypted.
+  
+  Moved the "attached files" section of received emails to be always visible, and numbered.
+
 
 2024-06-21
   Worked on Mailgun webhook integration.  Made it so that all email attachments are encrypted.

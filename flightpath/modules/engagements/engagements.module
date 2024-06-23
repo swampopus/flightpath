@@ -200,7 +200,7 @@ function engagements_handle_incoming_mailgun_email() {
     $body = $body_html;
   }
    
-  $body = filter_markup($body, 'basic');
+  
 
   // Sometimes, emails contain odd encoding.  Ex:  =C2=A0, which is apparently a non-breaking space.  Let's convert just in case.
   // From: https://stackoverflow.com/questions/12682208/parsing-email-body-with-7bit-content-transfer-encoding-php
@@ -320,7 +320,7 @@ function engagements_handle_incoming_mailgun_email() {
       $content->field__engagement_type['value'] = 'email';
       $content->field__direction['value'] = 'received';
 
-      $content->field__engagement_msg['value'] = $body;
+      $content->field__engagement_msg['value'] = filter_markup($body, 'basic');
       $content->field__external_msg_id['value'] = $external_msg_id;
 
       content_save($content);
@@ -330,7 +330,7 @@ function engagements_handle_incoming_mailgun_email() {
       // TODO: add attachments
       $attachments = array();
       if ($content_id_map) {
-        $map = json_decode($content_id_map);
+        $map = json_decode($content_id_map, TRUE);
         watchdog('debug', 'map is: <pre>' . print_r($map, TRUE) . "</pre>", array(), WATCHDOG_DEBUG);
         
         $sender_machine_readable = fp_get_machine_readable($sender);
@@ -345,14 +345,36 @@ function engagements_handle_incoming_mailgun_email() {
           );
           
           
-          //$fid = content_add_new_uploaded_file($file, $cid                    
+          $fid = content_add_new_uploaded_file($file, $cid, TRUE, CONTENT_ENCRYPTED_FILE, FALSE, $filename_prefix);                       
                     
+          if (!$fid) {
+            watchdog('engagements_mailgun', 'Unable to save email attachment file: @fn', array('@fn' => $file['name']), WATCHDOG_ERROR);            
+            $body .= "\n\n[ATTACHMENT UNABLE TO SAVE. Check with system administrator.]";
+            continue;
+          }            
+          
+          // If we are here, it means we DID save the file.
+          // Modify body as necessary.  Replace embedded <img> tag with a message stating that for
+          // security, the image is encrypted and stored with attachments?
+          if (strstr($body, "<img")) {
+            
+            // Go through and replace elements from our map with names...  Helps fix a bug with Yahoo where the preg_replace breaks.
+            $c = 1;
+            foreach ($map as $e => $v) {
+              $body = str_replace($e, $v, $body);
+              $body = preg_replace("/<img[^>]+\>/i", "<div class='email-inline-img-replace'>Inline image #$c securely encrypted - See attachments</div> ", $body, 1);
+              $c++;
+            }
+            
+            // Get any others left not replaced in the foreach above.
+            $body = preg_replace("/<img[^>]+\>/i", "<div class='email-inline-img-replace'>Inline image securely encrypted - See attachments</div> ", $body); 
+          }
+          
                     
+
+          // Add to our list of attachments
+          $attachments[] = array('fid' => $fid);
                     
-          //if (!$test) {
-          //  watchdog('engagements_mailgun', 'Unable to write media file at server temp location: ' . sys_get_temp_dir(), array(), 'error');            
-          //  $body .= "\n\n[ATTACHMENT UNABLE TO SAVE. Check with system administrator.]";
-          //}          
           
         } // foreach FILES
           
@@ -373,10 +395,9 @@ function engagements_handle_incoming_mailgun_email() {
         $content->field__attachment['value'] = $fid_line;
       }
 
-
-      // We may have modified $body, so re-add it.
-      $content->field__engagement_msg['value'] = $body;
-
+      
+      // Re-add body, as it may have changed because of attachments.      
+      $content->field__engagement_msg['value'] = filter_markup($body, 'basic');
       $content->field__visibility['value'] = 'public';
 
       content_save($content);
@@ -3994,18 +4015,21 @@ function engagements_display_main()
         // TODO:  An option here would be to just query the content_files table for this cid.
         
         
+        $attachmsg = "";
+        $c = 1;
         if ($attachment_csv) {
           $temp = explode(",", $attachment_csv);
-          $msg .= "<label>" . t("Attached File(s):") . "</label><div class='attached-files'>";
+          $attachmsg .= "<label>" . t("Attached File(s):") . "</label><div class='attached-files'>";
           foreach ($temp as $fid) {
             if ($fid == "") continue;
             $file = content_get_uploaded_file($fid);
             if ($file) {
               $mime_icon = content_get_fontawesome_icon_for_mimetype($file['mimetype'], $file['ext']);
-              $msg .= "<div class='attached-file'><a href='{$file['url']}'><i class='fa $mime_icon'></i> {$file['original_filename']}</a></div>";
-            }
+              $attachmsg .= "<div class='attached-file'>#$c &nbsp; <a href='{$file['url']}'><i class='fa $mime_icon'></i> {$file['original_filename']}</a></div>";
+              $c++;
+            }            
           }
-          $msg .= "</div>";
+          $attachmsg .= "</div>";
         }
         
         
@@ -4022,7 +4046,7 @@ function engagements_display_main()
         $less_link = "<a href='javascript:engagementsShrinkBody(\"$bodyid\");' class='less-body-link' id='less_$bodyid' style='display:none;'>Less</a>";
       }
 
-      $msg = "<div class='email-subject'>{$attachment_icon}Subject: $content->title</div><div class='email-body' id='$bodyid'>$msg</div>$more_link$less_link";
+      $msg = "<div class='email-subject'>{$attachment_icon}Subject: $content->title</div><div class='email-body' id='$bodyid'>$msg</div>$more_link$less_link$attachmsg";
     }
 
 

@@ -2728,14 +2728,21 @@ function system_cron() {
     // We should add this to our "to email" file, which will get emailed to this mail address later on.
     $error_files_dir = fp_get_files_path() . "/" . variable_get("private_files_directory", "private");
     
+    // Make sure our log file exists
+    if (file_exists($error_files_dir . '/fp_php_errors_to_email_log.txt')) {
 
-    // is there anything for us to email?
-    $emsg = file_get_contents($error_files_dir . '/fp_php_errors_to_email_log.txt');    
-    if ($emsg && fp_trim($emsg) != "") {
-      fp_mail($tomail, "PHP Error(s) in FlightPath", $emsg);
-      // Make the file blank.
-      file_put_contents($error_files_dir . '/fp_php_errors_to_email_log.txt', '');
+      // is there anything for us to email?
+      $emsg = file_get_contents($error_files_dir . '/fp_php_errors_to_email_log.txt');    
+      if ($emsg && fp_trim($emsg) != "") {
+        fp_mail($tomail, "PHP Error(s) in FlightPath", $emsg);
+        // Make the file blank.
+        file_put_contents($error_files_dir . '/fp_php_errors_to_email_log.txt', '');
+      }
+      
     }
+    
+
+        
     
   }
   

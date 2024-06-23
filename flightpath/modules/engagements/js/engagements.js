@@ -42,13 +42,14 @@ function engagementsExpandBody(bodyid) {
 
 function engagementsShrinkBody(bodyid) {  
   var p = $("#" + bodyid);  
-  p.css('transition', 'max-height 500ms');  // hack to make it go faster. Need a more elegant solution
+  p.css('transition', 'max-height 200ms');  // hack to make it go faster. Need a more elegant solution
   p.css('max-height', '150px');  
   
-  $("#more_" + bodyid).show();
   $("#less_" + bodyid).hide();
+  $("#more_" + bodyid).show();
   
-  p.css('transition', 'max-height 2s');
+  
+  p.css('transition', 'max-height 1s');
   
   
 }

@@ -126,6 +126,22 @@
   
 }
 
+#engagements-list-page .email-inline-img-replace {
+  margin: 10px;
+  display: inline-block;
+  border: 1px dashed #aaa;
+  padding: 3px;
+  
+}
+
+#engagements-list-page .email-inline-img-replace:before {
+  font-family: FontAwesome; 
+  content: '\f1c5';  /* image icon */
+  margin-right: 5px;
+}
+
+
+
 
 .activity-feed-teaser .email-subject {
   display: inline-block;
