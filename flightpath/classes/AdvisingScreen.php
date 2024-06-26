@@ -492,7 +492,7 @@ function draw_menu_items($menu_array) {
     $page_template_filename = $theme . "/page.tpl.php";
     
     // If there is a special theme file we should be using based on the URL, set it here.    
-    $q = fp_trim(strtolower((string) $_REQUEST['q']));
+    $q = fp_trim(strtolower((string) @$_REQUEST['q']));
     if ($q) {
       $q = trim(str_replace("/", "-", $q));
       if ($q) {

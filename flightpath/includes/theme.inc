@@ -769,6 +769,7 @@ function fp_display_page($page) {
   
   // Add in our URL  (after we sanitize it appropriately)
   $class = @$_REQUEST['q'];
+  if (!$class) $class = ''; // force it to be a normal string.
   $class = str_replace("'", '', $class);
   $class = str_replace('"', '', $class);
   $class = str_replace('(', '', $class);

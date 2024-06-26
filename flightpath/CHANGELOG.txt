@@ -1,6 +1,10 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-06-26
+  Fixes for PHP 8 warnings.
+
+
 2024-06-22
   Fixed PHP 8 warnings.
   
