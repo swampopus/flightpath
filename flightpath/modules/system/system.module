@@ -1411,7 +1411,8 @@ function system_school_data_form($school_id = 0) {
     // Is there an assigned college already?
     $res2 = db_query("SELECT college_code FROM degree_college WHERE major_code = ? AND school_id = ? ", $major_code, $school_id); 
     $cur2 = db_fetch_array($res2);
-    $college_code = $cur2["college_code"];
+    $college_code = "";
+    if ($cur2) $college_code = $cur2["college_code"];
     
     $degree_college .= $major_code . " ~ " . $college_code . "\n";
      
