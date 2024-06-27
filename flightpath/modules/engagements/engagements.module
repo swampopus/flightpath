@@ -1800,7 +1800,10 @@ function engagements_handle_incoming_sms($vars = array())
         $alert->cid = "new";
         $alert->published = 1;
         $alert->delete_flag = 0;
-        $alert->title = t('Unrecognized sender sent a text message to ') . $pretty_to_number . " / " . $desc;
+        
+        
+        $from_mobile_pretty = engagements_convert_to_pretty_phone_number($from_mobile);
+        $alert->title = t('Unrecognized sender (@fmb) sent a text message to ', array("@fmb" => $from_mobile_pretty)) . $pretty_to_number . " / " . $desc;
         $alert->field__alert_msg['value'] = $body;
         $alert->field__alert_status['value'] = 'open';
         $alert->field__visibility['value'] = 'faculty';

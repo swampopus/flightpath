@@ -1,6 +1,11 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-06-27
+  When receiving a text message form an unrecognized sender, their phone number
+  will appear in the Alert title that is generated.
+  
+
 2024-06-26
   Fixes for PHP 8 warnings.
 
