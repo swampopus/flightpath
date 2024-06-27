@@ -2758,13 +2758,13 @@ function system_cron() {
  */
 function system_handle_form_submit() {
     
-  $callback = $_REQUEST["callback"];  
-  $form_type = $_REQUEST["form_type"];
+  $callback = @$_REQUEST["callback"];  
+  $form_type = @$_REQUEST["form_type"];
   
   watchdog('system', "handle_form_submit callback:$callback, form_type:$form_type", array());
     
-  $form_include = $_REQUEST["form_include"];  
-  $form_token = $_REQUEST["form_token"];
+  $form_include = @$_REQUEST["form_include"];  
+  $form_token = @$_REQUEST["form_token"];
   // Make sure the form_token is valid!
   if ($form_token != md5($callback . fp_token())) {
     watchdog('system', "handle_form_submit - Error; invalid form token. Got: $form_token. Expected: " . md5($callback . fp_token()), array(), WATCHDOG_ERROR);
