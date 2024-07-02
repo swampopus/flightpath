@@ -1,6 +1,14 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-07-02
+  Added default values to when the anonymous user object is created.  Ex: cwid, f_name, l_name, etc.
+  
+
+2024-06-29
+  Modified .htaccess file to disallow downloading .enc (encrypted) files directly from the files directory.
+  
+
 2024-06-27
   When receiving a text message form an unrecognized sender, their phone number
   will appear in the Alert title that is generated.

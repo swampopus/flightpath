@@ -9,7 +9,7 @@
 Header always unset X-Frame-Options
 
 # Protect files and directories from prying eyes.
-<FilesMatch "\.(engine|inc|info|install|module|profile|test|sh|.*sql|theme|tpl(\.php)?|xtmpl|svn-base)$|^(code-style\.pl|Entries.*|Repository|Root|Tag|Template|all-wcprops|entries|format)$">
+<FilesMatch "\.(engine|inc|info|install|module|profile|enc|test|sh|.*sql|theme|tpl(\.php)?|xtmpl|svn-base)$|^(code-style\.pl|Entries.*|Repository|Root|Tag|Template|all-wcprops|entries|format)$">
   # Apache 2.4 now gives a 500 error if you try to use "Order", so we need
   # to do this if statement to check if its allowed or not.
   <IfModule mod_authz_core.c>
