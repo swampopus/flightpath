@@ -412,17 +412,22 @@ function audit_display_audit() {
       
       
       // Okay, let's display our row normally now:    
-    
+
+      $fhrs = fp_trim(@$degree_plan->gpa_calculations[$gpa_degree_id][$type]["fulfilled_hours"]);
+      $thrs = fp_trim(@$degree_plan->gpa_calculations[$gpa_degree_id][$type]["total_hours"]);
+      $qpts = fp_trim(@$degree_plan->gpa_calculations[$gpa_degree_id][$type]["qpts"]);    
+      $qhrs = fp_trim(@$degree_plan->gpa_calculations[$gpa_degree_id][$type]["qpts_hours"]);
+          
       $rtn .= "    
         <tr class='audit-req audit-req-$type audit-row-$pol'>
           <td width='25%'>$desc:</td>
-          <td class='audit-req-hours-percent'><span class='audit-hours'><span class='audit-completed-hours'>{$degree_plan->gpa_calculations[$gpa_degree_id][$type]["fulfilled_hours"]}</span> 
-                    / <span class='audit-total-hours'>{$degree_plan->gpa_calculations[$gpa_degree_id][$type]["total_hours"]} hrs</span>
+          <td class='audit-req-hours-percent'><span class='audit-hours'><span class='audit-completed-hours'>$fhrs</span> 
+                    / <span class='audit-total-hours'>$thrs hrs</span>
                </span>
                       <span class='audit-percent-completed'>($percent%)</span>
           </td> 
-          <td class='audit-req-gpa'>GPA: $gpa ({$degree_plan->gpa_calculations[$gpa_degree_id][$type]["qpts"]} qpts 
-                    / {$degree_plan->gpa_calculations[$gpa_degree_id][$type]["qpts_hours"]} qhrs)</td>
+          <td class='audit-req-gpa'>GPA: $gpa ($qpts qpts 
+                    / $qhrs qhrs)</td>
             
         </tr>";
       
