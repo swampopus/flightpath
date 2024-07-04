@@ -1,6 +1,10 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-07-03
+  Changed the default max_levels value for fpm() from 20 to 15, to make it a little less likely to run out of memory.
+  
+
 2024-07-02
   Added default values to when the anonymous user object is created.  Ex: cwid, f_name, l_name, etc.
   

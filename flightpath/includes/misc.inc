@@ -2596,7 +2596,7 @@ function invoke_hook($hook = "example_hook_here", $params = array()) {
  * Note: If you attempt to fpm() an array
  * or object with too many levels of nesting, it may run out of memory and your script will die.
  */
-function fpm($var, $max_levels = 20) {
+function fpm($var, $max_levels = 15) {
   
   if (!user_has_permission("view_fpm_debug")) {
     return;
