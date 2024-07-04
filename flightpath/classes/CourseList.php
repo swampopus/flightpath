@@ -1372,7 +1372,11 @@ class CourseList extends ObjList
     // myself...
     for ($t = 0; $t < $this->count; $t++)
     {
-      $c = $this->array_list[$t];
+      $c = NULL;
+      if (isset($this->array_list[$t])) {  
+        $c = $this->array_list[$t];
+      }
+      
       if ($c == NULL) continue;
       
 
