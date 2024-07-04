@@ -2064,7 +2064,7 @@ function draw_menu_items($menu_array) {
   
       
       $td_width = "";
-      if (@count($pie_chart_html_array) > 0) {
+      if (is_array($pie_chart_html_array) && count($pie_chart_html_array) > 0) {
         $td_width = round(100 / count($pie_chart_html_array));
       }
       
