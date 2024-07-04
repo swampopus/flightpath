@@ -1933,6 +1933,8 @@ function draw_menu_items($menu_array) {
     $pie_chart_theme_array["degree_plan"] = $this->degree_plan;
     
 
+    $pie_chart_html_array = array();  // init for later
+
     // Get the requested piecharts from our config...
     $temp = variable_get_for_school("pie_chart_config", "c ~ Core Requirements\nm ~ Major Requirements\ndegree ~ Degree Progress", $this->student->school_id);
     $config_lines = explode("\n", $temp);
