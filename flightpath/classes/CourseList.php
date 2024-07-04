@@ -1188,7 +1188,7 @@ class CourseList extends ObjList
     for ($t = 0; $t < count($this->array_list); $t++) {
       $hrs = $this->array_list[$t]->get_hours();
       if ($this->array_list[$t]->bool_ghost_hour) $hrs = 0;
-      
+      $hrs = "$hrs";  // force into a string so hours with decimals are preserved. Prevents warning in PHP 8
       $sort_list[$hrs][] = $this->array_list[$t];
     }
     

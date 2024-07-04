@@ -587,7 +587,7 @@ class Student extends stdClass
     $lines = explode("\n", $temp);
     foreach ($lines as $line) {
       $temp = explode("~", $line);
-      $rank_array[trim($temp[0])] = trim($temp[1]);
+      $rank_array[trim($temp[0])] = fp_trim(@$temp[1]);
     }            
         
     $rank_desc = @$rank_array[$rank_code]; 
