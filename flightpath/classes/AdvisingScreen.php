@@ -4255,7 +4255,7 @@ function draw_menu_items($menu_array) {
     $course->assign_display_status();
     // If the course has already been advised in a different semester,
     // we should set the advising_term_id to that and disable unchecking.
-    if ($course->advised_term_id*1 > 0 && $course->bool_advised_to_take == true && $course->advised_term_id != $advising_term_id)
+    if ($course->advised_term_id != NULL && $course->advised_term_id != 0 && $course->advised_term_id != '' && $course->bool_advised_to_take == true && $course->advised_term_id != $advising_term_id)
     {
       $course->display_status = "disabled";
       $advising_term_id = $course->advised_term_id;
