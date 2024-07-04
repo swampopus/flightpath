@@ -1,6 +1,13 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-07-04
+  Various changes to remove PHP deprecated warnings in PHP 8.
+  
+  Made a slight change to password.inc where if any values are not supplied, it immediately
+  returns FALSE when checking if a password is valid.
+  
+
 2024-07-03
   Changed the default max_levels value for fpm() from 20 to 15, to make it a little less likely to run out of memory.
   
