@@ -676,7 +676,7 @@ function content_user_access($op, $var) {
   }
       
   // Simply trying to view the content.  Do we have permission to view published content of this type?  
-  if ($op == 'view' && user_has_permission("view_" . $content->type . "_content")) {
+  if ($op == 'view' && is_object($content) && user_has_permission("view_" . $content->type . "_content")) {
     if (intval($content->published) === 1) {
       
       
