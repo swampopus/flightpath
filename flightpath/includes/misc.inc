@@ -2985,6 +2985,12 @@ function user_has_permission($permission = "", $account = NULL) {
   if ($account == NULL) $account = $user;
   //fpm("checking permission $permission");
   
+  if ($account == NULL) {
+    // The account is STILL null, so return FALSE.
+    // Most likely anonymous user.
+    return FALSE;
+  }
+  
   // If the user is admin (id == 1) then they always have access.
   if ($account->id == 1) return TRUE;
   
