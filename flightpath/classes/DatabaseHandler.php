@@ -598,7 +598,7 @@ $query_and_args
 
 
 
-  function duplicate_course_for_year($course = null, $catalog_year)
+  function duplicate_course_for_year($course = NULL, $catalog_year = 0)
   {
     // Duplicate the course for the given catalog_year.
     // If it already exists for that catalog_year, delete it from the

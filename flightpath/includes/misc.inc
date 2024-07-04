@@ -556,8 +556,18 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
 
   $hostname = php_uname('n') . ' - ' . $GLOBALS['fp_system_settings']['base_url'];
   
+  $user_name = '';
+  $user_id = 0;
+  if (!$user) {
+    $user_name = 'Anonymous';    
+  }
+  else {
+    $user_name = $user->name;
+    $user_id = $user->id;
+  }
+  
   $msg = "";
-  $msg .= "USER:   $user->name ($user->id) \n";
+  $msg .= "USER:   $user_name ($user_id) \n";
   $msg .= "SERVER:   $hostname \n";
   $msg .= "DATE:     " . format_date(convert_time(time())) . "\n";
   $msg .= "SEVERITY: $err_name \n";
@@ -579,7 +589,7 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
 
   watchdog($watchdog_type, $msg, array(), $watchdog_severity);
   
-  if (@intval($user->id) !== 1) {
+  if (@intval($user_id) !== 1) {
     // We are NOT the admin user (user id 1).  (No need to email, since it would appear on screen with the fpm() calls earlier.
     
     // Should we email someone of php errors?

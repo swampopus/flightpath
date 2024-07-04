@@ -146,7 +146,7 @@ class Course extends stdClass
 
 
 
-  function set_bool_substitution_split($degree_id = 0, $val) {
+  function set_bool_substitution_split($degree_id = 0, $val = '') {
     // If degree_id is zero, then use the course's currently req_by_degree_id.    
     if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
     
@@ -178,7 +178,7 @@ class Course extends stdClass
 
 
 
-  function set_bool_outdated_sub($degree_id = 0, $val) {
+  function set_bool_outdated_sub($degree_id = 0, $val = '') {
     // If degree_id is zero, then use the course's currently req_by_degree_id.    
     if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
     
@@ -215,7 +215,7 @@ class Course extends stdClass
 
 
 
-  function set_bool_substitution_new_from_split($degree_id = 0, $val) {
+  function set_bool_substitution_new_from_split($degree_id = 0, $val = '') {
     // If degree_id is zero, then use the course's currently req_by_degree_id.    
     if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
     
@@ -249,7 +249,7 @@ class Course extends stdClass
 
 
 
-  function set_substitution_hours($degree_id = 0, $val) {
+  function set_substitution_hours($degree_id = 0, $val = '') {
       
     // If degree_id is zero, then use the course's currently req_by_degree_id.    
     if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
@@ -284,17 +284,17 @@ class Course extends stdClass
 
 
 
-  function set_hours_awarded($degree_id = 0, $val) {
+  function set_hours_awarded($degree_id = 0, $val = 0) {
     // If degree_id is zero, then use the course's currently req_by_degree_id.    
     if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
         
-    $this->set_details_by_degree($degree_id, "hours_awarded", $val*1);  // *1 to force integer and to trim extra zeroes.
+    $this->set_details_by_degree($degree_id, "hours_awarded", floatval($val)*1);  // *1 to force to a number and to trim extra zeroes.
     
   }
 
 
 
-  function set_course_substitution($degree_id = 0, Course $course) {
+  function set_course_substitution($degree_id = 0, Course $course = NULL) {
     // If degree_id is zero, then use the course's currently req_by_degree_id.    
     if ($degree_id == 0) $degree_id = $this->req_by_degree_id;
     

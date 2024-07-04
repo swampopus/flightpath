@@ -708,7 +708,7 @@ class CourseList extends ObjList
    * @param SubstitutionList $list_substitutions
    * @param $degree_id  The degree id to look for.  If it's -1, then ignore it. If it's 0, use the course's req_by_degree_id.
    */
-  function remove_previously_fulfilled(CourseList $list_courses, $group_id, $bool_keep_repeatable_courses = true, $list_substitutions, $degree_id = 0)
+  function remove_previously_fulfilled(CourseList $list_courses, $group_id, $bool_keep_repeatable_courses = true, $list_substitutions = NULL, $degree_id = 0)
   {
 
     $rtn_list = new CourseList();
@@ -727,7 +727,7 @@ class CourseList extends ObjList
       }
 
       // Has the course been substituted?
-      if ($test_sub = $list_substitutions->find_requirement($course, false, -1))
+      if ($list_substitutions != NULL && $test_sub = $list_substitutions->find_requirement($course, false, -1))
       {
         // it WAS substituted, so we should NOT add it to our
         // rtnList.       

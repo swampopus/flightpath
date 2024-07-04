@@ -1279,7 +1279,7 @@ class DegreePlan extends stdClass
    * If degree_id != 0, then we will remove any course from the finished list that is NOT in the degree plan.
    *   0 means "give me all of matches back"
    */
-  function find_courses($course_id, $group_id = 0, $semester_num, $degree_id = 0)
+  function find_courses($course_id, $group_id = 0, $semester_num = 0, $degree_id = 0)
   {
     // This will locate a course within the degree plan, and return
     // back either that course object, or FALSE.

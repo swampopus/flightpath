@@ -5202,7 +5202,7 @@ function draw_menu_items($menu_array) {
    * 
    * @return string
    */
-  function display_popup_substitute($course_id = 0, $group_id, $semester_num, $hours_avail = "", $req_by_degree_id = 0)
+  function display_popup_substitute($course_id = 0, $group_id = '', $semester_num = 0, $hours_avail = "", $req_by_degree_id = 0)
   {
     global $current_student_id;
     // This lets the user make a substitution for a course.
