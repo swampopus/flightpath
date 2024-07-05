@@ -1311,14 +1311,15 @@ class Course extends stdClass
                      a.transfer_course_id = '?' 
                      AND a.institution_id = b.institution_id ", $course_id);
       $cur = $this->db->db_fetch_array($res);
-      $this->subject_id = $cur["subject_id"];
-      $this->course_num = $cur["course_num"];      
-      $this->course_id = $course_id;
-      $this->school_id = $cur['school_id'];
-      $this->bool_transfer = true;
-      $this->institution_id = $cur["institution_id"];
-      $this->institution_name = $cur["name"];
-      
+      if ($cur) {
+        $this->subject_id = $cur["subject_id"];
+        $this->course_num = $cur["course_num"];      
+        $this->course_id = $course_id;
+        $this->school_id = $cur['school_id'];
+        $this->bool_transfer = true;
+        $this->institution_id = $cur["institution_id"];
+        $this->institution_name = $cur["name"];
+      }
     }
 
     $this->assign_display_status();

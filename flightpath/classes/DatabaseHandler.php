@@ -974,7 +974,12 @@ $query_and_args
                 where institution_id = ? 
                 AND school_id = ?", $institution_id, $school_id);
     $cur = $this->db_fetch_array($res);
-    return trim($cur['name']);
+    if ($cur) {    
+      return fp_trim(@$cur['name']);
+    }
+
+    return ''; // nothing found, so return blank
+
   }
 
 
