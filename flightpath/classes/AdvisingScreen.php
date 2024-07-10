@@ -4933,7 +4933,9 @@ function draw_menu_items($menu_array) {
     $theme["degree_plan"] = $this->degree_plan;
     $theme["from_group_select"] = TRUE;
 
-        
+
+    //Setting in Configure School Settings:
+    $show_repeat_information = (variable_get_for_school("group_list_course_show_repeat_information", "yes", $course->school_id) == "yes");
 
     if ($course->subject_id == "")
     {
@@ -4960,11 +4962,6 @@ function draw_menu_items($menu_array) {
     if ($attributes == "-") {
       $attributes_class .= "group-attr-hidden";
     }
-
-
-    //Setting in Configure School Settings:
-    $show_repeat_information = (variable_get_for_school("group_list_course_show_repeat_information", "yes", $course->school_id) == "yes");
-
 
 
     $course_id = $course->course_id;
