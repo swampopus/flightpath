@@ -1,6 +1,10 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-07-19
+  Various small tweaks to remove PHP deprecated warnings in PHP 8x.
+  
+
 2024-07-04
   Various changes to remove PHP deprecated warnings in PHP 8.
   

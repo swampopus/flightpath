@@ -2609,9 +2609,11 @@ function advise_init_screen() {
   //$GLOBALS["load_from_cache"] = "no";
 
 
-  // Attempt to load the course inventory cache...  
-  if ($course_inventory = unserialize(@$_SESSION["fp_cache_course_inventory"])) {  
-    $GLOBALS["fp_course_inventory"] = $course_inventory;    
+  // Attempt to load the course inventory cache...
+  if (isset($_SESSION["fp_cache_course_inventory"]) && fp_trim($_SESSION["fp_cache_course_inventory"]) != '') {  
+    if ($course_inventory = unserialize($_SESSION["fp_cache_course_inventory"])) {  
+      $GLOBALS["fp_course_inventory"] = $course_inventory;    
+    }
   }
   
   $bool_loaded = FALSE;
