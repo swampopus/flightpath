@@ -728,7 +728,7 @@ function engagements_display_advisee_engagements_page() {
     $cid = $cur->cid;
     $content = content_load($cid);
         
-    $updated = format_date($content->updated, 'short');
+    $updated = format_date(convert_time($content->updated), 'short');
 
     $student_id = $content->field__student_id['value'];
     $student_name = fp_get_student_name($student_id, TRUE);
