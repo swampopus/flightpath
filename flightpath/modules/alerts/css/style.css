@@ -27,6 +27,10 @@ table.advisees-alerts
   line-height: 2em;
 }
 
+table.advisees-alerts td.actions {
+  min-width: 120px;
+}
+
 table.advisees-alerts tr:nth-child(even) {
   background-color: #f2f2f2;
 }
