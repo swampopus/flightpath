@@ -756,7 +756,7 @@ function engagements_display_advisee_engagements_page() {
         $msg = $temp[0];
       }
       
-      $desc = "";      
+      $desc = $pretty_to_number = "";      
       $details = engagements_get_sms_from_history($content->field__external_msg_id['value']);
       if ($details) {
         $to = $details['to_number'];
