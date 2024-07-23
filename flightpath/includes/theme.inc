@@ -1119,9 +1119,9 @@ function fp_render_student_profile_header($bool_mini = TRUE, $extra_profile_item
     // This person may not be in the "students" table, and so their name may not show up.  Look in
     // the users table only to see if we can get a name.
     $student_name = fp_get_student_name($student->student_id);
-    $student_name .= " <span class='catalog-year-alert-early'>" . fp_get_js_alert_link("This student's name was not found. 
+    $student_name .= "<span class='catalog-year-alert-early'>" . fp_get_js_alert_link(t("This student's name was not found in the normal way. 
                                                 Either they are not imported correctly as a student, 
-                                                or their name is blank in the database.", "<i class='fa fa-exclamation-triangle'></i>", "", "Important Notice") . "</span>";
+                                                or their name is blank in the database."), "<i class='fa fa-exclamation-triangle'></i>", "", "Important Notice") . "</span>";
   }
   
   
