@@ -723,8 +723,7 @@ function engagements_display_advisee_engagements_page() {
                                                                                                          AND ($student_line OR $numbers_line)  
                                                                                                          AND field__engagement_type IN ('email', 'txt_msg')
                                                                                                          AND (field__manual_entry IS NULL OR field__manual_entry != 'Y')
-                                                                                                         GROUP BY a.cid                                                                                                      
-                                                                                                         $order_by");  
+                                                                                                         $order_by");  // NOTE: remove the "GROUP BY" clause because it was causing this to not work.  
   while ($cur = db_fetch_object($res)) {
     $cid = $cur->cid;
     $content = content_load($cid);
@@ -798,8 +797,8 @@ function engagements_display_advisee_engagements_page() {
   
   $rtn .= "</table>";
   
-  $rtn .= theme_pager(array(t('« newest'), t('‹ newer'), '', t('older ›'), t('oldest »')));
-    
+  $rtn .= theme_pager(array(t('« newest'), t('‹ newer'), '', t('older ›'), t('oldest »')), $limit);
+  //$rtn .= theme_pager();  
     
   
   

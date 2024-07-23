@@ -1,6 +1,11 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-07-23
+  Fixed a bug in Engagements where the "Engagements Received" list (under the Alerts screen) was not showing the pager
+  correctly.
+  
+
 2024-07-19
   Various small tweaks to remove PHP deprecated warnings in PHP 8x.
   
