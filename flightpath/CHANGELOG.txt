@@ -7,6 +7,9 @@ FlightPath 7.x Changelog
   
   Also corrected timezone not being factored in on the above mentioned screen.
   
+  If a student's name cannot be found because they aren't in the "students" table, we will show their name from the "users"
+  table on their profile, with an alert icon.
+  
 
 2024-07-19
   Various small tweaks to remove PHP deprecated warnings in PHP 8x.
