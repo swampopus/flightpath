@@ -281,15 +281,17 @@ class Student extends stdClass
       if (!isset($db_position)) $db_position = 0;
       
       // Get the test's description, if available.
-            
+      $db_test_description = $db_category_description = "";      
       $res2 = db_query("SELECT * FROM standardized_tests
                         WHERE test_id = ?
                         AND category_id = ?
                         AND school_id = ?
                         ORDER BY position", $db_test_id, $db_category_id, $this->school_id);
       $cur2 = db_fetch_array($res2);
-      $db_test_description = trim($cur2["test_description"]);
-      $db_category_description = trim($cur2["category_description"]);
+      if ($cur2) {
+        $db_test_description = fp_trim($cur2["test_description"]);
+        $db_category_description = fp_trim($cur2["category_description"]);
+      }
       
       // Did we find anything in the table?  If not, just use the codes themselves
       if ($db_test_description == "") $db_test_description = t("Test code:") . " " . $db_test_id;
