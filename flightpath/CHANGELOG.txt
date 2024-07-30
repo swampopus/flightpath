@@ -1,6 +1,10 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-07-30
+  Fixed bug in course_search where anticipated availability was not showing correctly in PHP 8, since "" no longer equals integer 0.
+  
+
 2024-07-23
   Fixed a bug in Engagements where the "Engagements Received" list (under the Alerts screen) was not showing the pager
   correctly.

@@ -520,8 +520,8 @@ function course_search_display_courses() {
       
       $full_schedule_array = course_search_get_course_rotation_schedule($n_course_id);
       $schedule_text = "";
-
       if (count($long_schedule_array) > 0) {
+        
         $schedule_text .= "
               <div>
                 <b>" . t("Anticipated availability:", array("@cat" => $catalog_year)) . "</b>
@@ -822,7 +822,7 @@ function course_search_get_course_capacity($course_id, $term_id) {
 }
 
 
-function course_search_get_course_rotation_schedule($course_id, $year = "", $limit = 20, $bool_include_next_five_years = FALSE)
+function course_search_get_course_rotation_schedule($course_id, $year = 0, $limit = 20, $bool_include_next_five_years = FALSE)
 {
     
   // Has this already been saved to our globals cache?  If so, just return that.          
@@ -830,7 +830,7 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
     return $GLOBALS['cache_course_search_rotation_schedule'][$course_id][$year][$limit][intval($bool_include_next_five_years)];
   }        
         
-      
+        
   $year = intval($year);
   $limit = intval($limit);
    
@@ -840,7 +840,7 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
 	$rtn_array = array();
 	$arr = array();
 	$year_line = "";
-	if ($year != "")
+	if ($year !== 0)
 	{ // if a year is entered, we will get the next few years, and the previous
 	  // one for good measure.
 		$year_line = "and (`term_id` LIKE '$year%' or `term_id` LIKE '" . ($year+1) . "%') ";
@@ -866,12 +866,13 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
 	}
 
 	$res = db_query("SELECT * FROM course_rotation_schedule
-							WHERE `course_id`= ?
+							WHERE course_id = ?
 							$year_line
 							ORDER BY term_id DESC
-							LIMIT $limit", $course_id);
+							LIMIT $limit", array($course_id));
 	while($cur = db_fetch_array($res))
 	{
+	  
 		$t = $cur["term_id"];
 		// Get the term from the end.
 		$ss = trim(substr($t,4,1));
@@ -905,8 +906,8 @@ function course_search_get_course_rotation_schedule($course_id, $year = "", $lim
 
 	// Save to globals cache to make it faster lookup
 	$GLOBALS['cache_course_search_rotation_schedule'][$course_id][$year][$limit][intval($bool_include_next_five_years)] = $rtn_array;
-	
-	
+
+
 	return $rtn_array;
 }
 
