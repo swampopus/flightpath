@@ -1580,6 +1580,8 @@ function engagements_handle_incoming_sms($vars = array())
 
   // If we did not supply a set of variables, use the POST superglobal
   if (count($vars) === 0) {
+    // Meaning, we are NOT calling this manually from cron, but rather this is
+    // being sent to us from the webhook.  So, we will want to verify using the signing key.
     $vars = $_POST;    
     $signing_key = variable_get('sms_signing_key', 'none');
   }
@@ -1594,7 +1596,6 @@ function engagements_handle_incoming_sms($vars = array())
     // See: https://www.twilio.com/docs/usage/webhooks/webhooks-security
     // see: https://developer.signalwire.com/guides/webhook-security/
     
-    //$validator = new Twilio\Security\RequestValidator(variable_get('sms_auth_token', ''));
     $validator = new Twilio\Security\RequestValidator($signing_key);
     $headers = getallheaders();
     $signature = $headers['X-Twilio-Signature'];
@@ -1605,14 +1606,28 @@ function engagements_handle_incoming_sms($vars = array())
     unset($vars['advising_student_id']);
     ksort($vars); // needs to be in alphabetical order by keys
     
-    $result = $validator->validate($signature . 'hey', $url, $vars);
+    $result = $validator->validate($signature, $url, $vars);
     watchdog('engagements_sms', "Validator result with $signature, $url and vars...: <pre>" . print_r(intval($result), TRUE) . "</pre>", array(), WATCHDOG_DEBUG);
     
-    // TODO: reject if intval($result) === 0
-    
+    // reject if intval($result) === 0    
+    if (intval($result) === 0) {
+      // As this was some sort of hacking attempt, we don't want signalwire to keep trying to notify us of the message,
+      // so send back 200 and exit.
+      watchdog('engagements_sms', "Tried to receive signalwire sms, but could not verify signature. Signature given: $signature", array(), WATCHDOG_ERROR);
+      
+      // Email php error contact to let them know this happened.
+      // Dev: comment this out when we know it is working correctly?
+      // smtp_mail(variable_get("notify_php_error_email_address", ""), "Error validating incoming SMS", "Tried to receive signalwire sms, but could not verify signature. Signature given: $signature.");
+      
+      
+      // To tell not to retry this message, we need to deliver a 200 response.  Otherwise they will keep trying.
+      http_response_code(200); exit;     
+    }
     
   } // if signing_key
 
+  
+  // If we made it here, then it's proven to be from SignalWire, and we can continue.
     
 
   $message_sid = $vars['MessageSid'];
@@ -1899,6 +1914,9 @@ function engagements_handle_incoming_sms($vars = array())
     array($message_sid, 'sms', $body, $from_mobile, $to_mobile, $price, $fp_price, $from_cwid, $to_cwid, time(), $direction, 
                 $media_filenames, $date_sent_ts, 1, $num_segments, @$vars['display_status'], @$vars['err_code'], @$vars['err_message'], @$vars['err_friendly_message'])
   );
+  
+    
+  
 } // engagements_handle_incoming_sms
 
 
