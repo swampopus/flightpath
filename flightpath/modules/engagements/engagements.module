@@ -1349,6 +1349,15 @@ function engagements_sms_settings_form()
   );
 
 
+  $form['sms_signing_key'] = array(
+    'label' => 'Signing Key',
+    'type' => 'textfield',
+    'value' => variable_get('sms_signing_key', ''),
+    'description' => t("Given by the API settings in signalwire"),
+  );
+
+
+
   $form['sms_space_url'] = array(
     'label' => 'Space URL',
     'type' => 'textfield',
@@ -1567,11 +1576,19 @@ function engagements_cron()
 function engagements_handle_incoming_sms($vars = array())
 {
 
+  $signing_key = NULL;
+
   // If we did not supply a set of variables, use the POST superglobal
-  if (count($vars) === 0) $vars = $_POST;
+  if (count($vars) === 0) {
+    $vars = $_POST;
+    $signing_key = variable_get('sms_signing_key', 'none');
+  }
 
   watchdog("engagements_sms", "Received from vars (possibly POST): <pre>" . print_r($vars, TRUE) . '</pre>
                                 <br>Headers:<pre>' . print_r(getallheaders(), TRUE) . "</pre>", array(), WATCHDOG_DEBUG);
+
+
+    
 
   $message_sid = $vars['MessageSid'];
   $from_mobile = engagements_convert_to_valid_phone_number($vars['From']);
