@@ -1,6 +1,12 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-08-02
+  SignalWire will send an MMS's body as a media attachment.  Changing how we receive that in the engagements module.
+  
+  Also updating prices in the engagements module to better match SignalWire's.
+    
+
 2024-07-30
   Fixed bug in course_search where anticipated availability was not showing correctly in PHP 8, since "" no longer equals integer 0.
   
