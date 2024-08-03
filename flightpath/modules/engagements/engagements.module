@@ -1580,13 +1580,38 @@ function engagements_handle_incoming_sms($vars = array())
 
   // If we did not supply a set of variables, use the POST superglobal
   if (count($vars) === 0) {
-    $vars = $_POST;
+    $vars = $_POST;    
     $signing_key = variable_get('sms_signing_key', 'none');
   }
 
   watchdog("engagements_sms", "Received from vars (possibly POST): <pre>" . print_r($vars, TRUE) . '</pre>
                                 <br>Headers:<pre>' . print_r(getallheaders(), TRUE) . "</pre>", array(), WATCHDOG_DEBUG);
 
+
+  if ($signing_key) {
+    // We want to make sure this was sent from SendGrid and not a forgery.
+    require_once(fp_get_module_path('engagements', TRUE, FALSE) . '/lib/signalwire/vendor/autoload.php');
+    // See: https://www.twilio.com/docs/usage/webhooks/webhooks-security
+    // see: https://developer.signalwire.com/guides/webhook-security/
+    
+    //$validator = new Twilio\Security\RequestValidator(variable_get('sms_auth_token', ''));
+    $validator = new Twilio\Security\RequestValidator($signing_key);
+    $headers = getallheaders();
+    $signature = $headers['X-Twilio-Signature'];
+    $url = base_url() . "/engagements-handle-incoming-sms";
+
+    // Remove unrelated variables which might be in our vars array.
+    unset($vars['current_student_id']);
+    unset($vars['advising_student_id']);
+    ksort($vars); // needs to be in alphabetical order by keys
+    
+    $result = $validator->validate($signature . 'hey', $url, $vars);
+    watchdog('engagements_sms', "Validator result with $signature, $url and vars...: <pre>" . print_r(intval($result), TRUE) . "</pre>", array(), WATCHDOG_DEBUG);
+    
+    // TODO: reject if intval($result) === 0
+    
+    
+  } // if signing_key
 
     
 
