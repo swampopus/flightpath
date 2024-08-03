@@ -1679,6 +1679,13 @@ function engagements_handle_incoming_sms($vars = array())
         $tmp_name = sha1($filename . mt_rand(1,9999) . time() . mt_rand(1,9999));
   
         $file_contents = file_get_contents($media_url);
+
+        if ($media_type == "text/plain") {
+          // The body for whatever reason has been sent as a kookie media attachment.  Add it to the body and skip adding it to media.
+          $body .= $file_contents;
+          continue;
+        }
+
         
         // Save to our temporary location on the server.
         $test = file_put_contents(sys_get_temp_dir() . '/' . $tmp_name, $file_contents);
