@@ -306,7 +306,7 @@ function user_hash_password($password, $count_log2 = 0) {
 function user_check_password($password, $stored_hash) {
     
   if (!$password) return FALSE;
-  if (!$stored_hash) return FALSE;
+  if (!$stored_hash) return FALSE; 
 
   $type = substr($stored_hash, 0, 3);  
   switch ($type) {
