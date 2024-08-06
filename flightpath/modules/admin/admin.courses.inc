@@ -685,8 +685,8 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
     if ($course == "") { continue; }
 
     $temp = explode(" ", $course);
-    $subject_id = trim($temp[0]);
-    $course_num = trim($temp[1]);
+    $subject_id = fp_trim(@$temp[0]);
+    $course_num = fp_trim(@$temp[1]);
 
     ////////////
     ///  Error conditions...

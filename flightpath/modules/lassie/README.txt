@@ -44,6 +44,4 @@ your custom/settings.php file (in the "Custom Settings" area):
 
     $GLOBALS['lassie_disable_maintenance_mode_on_fail'] = TRUE;
     
-NOTE:  You can also add this right before calling lassie_start(), if you would prefer it be configured per-job.    
-    
 This is useful if a routine fails to complete, but you do not want the maintenance mode message to be continued to be displayed.

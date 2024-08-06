@@ -120,6 +120,11 @@ function fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalo
                       AND school_id = ? ", $subject_id, $course_num, $catalog_year, $school_id);
   $cur = db_fetch_array($res);
   
+  if (!$cur) {
+    // Meaning, this query didn't find the course we were looking for.  Return NULL.
+    return NULL;
+  }
+  
   $min_hours = $cur['min_hours'];
   $max_hours = $cur['max_hours'];
   $repeat_hours = $cur['repeat_hours'];
@@ -318,8 +323,8 @@ function fp_get_degree_title($degree_id, $bool_include_track_title = FALSE, $boo
       // This means that there is a track.  Get all the information
       // you can about it.
       $temp = explode("_", $major_code);
-      $track_code = trim($temp[1]);
-      $major_code = trim($temp[0]);
+      $track_code = fp_trim(@$temp[1]);
+      $major_code = fp_trim(@$temp[0]);
   
       // The major_code might now have a | at the very end.  If so,
       // get rid of it.

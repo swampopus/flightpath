@@ -1,6 +1,12 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-08-04
+  Minor tweaks for PHP 8.
+  
+  Updated information in lassie module's readme file.
+  
+
 2024-08-03
   Updated logic for incoming SMS messages in engagements module.  It now verifies the message came from SignalWire correctly.
   

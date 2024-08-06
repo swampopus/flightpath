@@ -736,7 +736,7 @@ function arg($index) {
   $q = $_REQUEST["q"];
   $temp = explode("/", $q);
 
-  $rtn = @trim($temp[$index]);
+  $rtn = fp_trim(@$temp[$index]);
   
   return $rtn;
   

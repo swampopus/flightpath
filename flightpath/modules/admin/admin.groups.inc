@@ -535,6 +535,7 @@ function admin_process_catalog_repeats_for_group_courses_text($courses, $catalog
       // Okay, we now have a subject_id and course_number.  Let's find out how many times
       // it can be repeated for credit.
       $max_cat_repeats = fp_get_max_catalog_repeats_for_course($subject_id, $course_num, $catalog_year, TRUE, $school_id);
+      if (!$max_cat_repeats) $max_cat_repeats = 0;
 
       // Okay, now, let's rebuild this line.        
       $subject_id = str_replace("&", "_A_", $subject_id);
