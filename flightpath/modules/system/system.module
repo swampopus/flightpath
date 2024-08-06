@@ -2717,7 +2717,7 @@ function system_cron() {
   $result = db_query("DELETE FROM user_attributes WHERE `name` = 'mfa_validation_code' AND `updated` < ? ", $max_timestamp);
   $rows = db_affected_rows($result);
   if ($rows > 0) {
-    watchdog("system", t("@rows old 'mfa_validation_code' rows (older than @max hours) trimmed from user_attributes table on system cron run."), array("@rows" => $rows, "@max" => $max_age_days), WATCHDOG_DEBUG);
+    watchdog("system", t("@rows old 'mfa_validation_code' rows (older than @max hours) trimmed from user_attributes table on system cron run."), array("@rows" => $rows, "@max" => $max_age_hours), WATCHDOG_DEBUG);
   }
   
   

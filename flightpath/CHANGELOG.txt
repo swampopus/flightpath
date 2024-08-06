@@ -1,6 +1,11 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-08-06
+  Fixed bug in system.module where mfa verification codes were being deleted every cron run, instead of
+  (at most) once per hour.
+
+
 2024-08-04
   Minor tweaks for PHP 8.
   
