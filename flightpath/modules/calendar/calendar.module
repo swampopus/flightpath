@@ -611,6 +611,8 @@ function calendar_confirm_cancel_appointment_form_submit(&$form, &$form_state) {
 function calendar_display_schedule_staff_page() {
   global $user;
   
+  $rtn = "";
+  
   fp_set_title('');
   fp_add_css(fp_get_module_path('calendar') . '/css/style.css');
   $db = get_global_database_handler();
