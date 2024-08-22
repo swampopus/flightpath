@@ -2109,6 +2109,8 @@ function t($str, $vars = array()) {
         $val = "<em>$val</em>";
       }
       
+      if ($val === NULL || $val === FALSE) $val = "";  // change to empty string for PHP 8x
+      
       $str = str_replace($var, $val, $str);
     }
   }

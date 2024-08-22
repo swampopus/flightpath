@@ -3473,6 +3473,8 @@ function system_login_form() {
 
   // Are we here because only the user's rank is not allowed?
   if (isset($_REQUEST['user']) && $_REQUEST['user'] == 'rank') {
+    
+    $allowed_ranks_str = variable_get("allowed_student_ranks", "FR, SO, JR, SR");
     fp_add_message(t("Sorry, your rank/classification is not allowed.  At this time this system is only available to students
                                   in the following ranks/classifications: @ranks_str", array("@ranks_str" => $allowed_ranks_str)), 'error', TRUE);
   }

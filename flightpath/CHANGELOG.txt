@@ -1,6 +1,10 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-08-22
+  Fixed bug in system where if a disallowed student rank was trying to log in, the message displayed didn't show what ranks *were* allowed in.
+    
+
 2024-08-21
   Fixed bug in engagements module, where we were checking for calls.  It was not correctly requesting the calls, and was therefor getting
   *every* call in the account history on every cron run.  Fixed that, and simplified what gets added to the watchdog.
