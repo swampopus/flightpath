@@ -1436,8 +1436,8 @@ function fp_get_degree_classifications() {
   $temp = explode("\n", variable_get("degree_classifications_level_1", "MAJOR ~ Major"));
   foreach ($temp as $line) {
     $temp2 = explode("~", $line);
-    $machine_name = trim($temp2[0]);
-    $title = trim($temp2[1]);
+    $machine_name = fp_trim(@$temp2[0]);
+    $title = fp_trim(@$temp2[1]);
     if ($machine_name != "") {
       $rtn["levels"][1][$machine_name] = $title;
       $rtn["machine_names"][$machine_name] = $title;
@@ -1449,8 +1449,8 @@ function fp_get_degree_classifications() {
   $temp = explode("\n", variable_get("degree_classifications_level_2", "MINOR ~ Minor"));
   foreach ($temp as $line) {
     $temp2 = explode("~", $line);
-    $machine_name = trim($temp2[0]);
-    $title = trim($temp2[1]);
+    $machine_name = fp_trim(@$temp2[0]);
+    $title = fp_trim(@$temp2[1]);
     if ($machine_name != "") {
       $rtn["levels"][2][$machine_name] = $title;
       $rtn["machine_names"][$machine_name] = $title;
@@ -1463,8 +1463,8 @@ function fp_get_degree_classifications() {
   $temp = explode("\n", variable_get("degree_classifications_level_3", "CONC ~ Concentration"));
   foreach ($temp as $line) {
     $temp2 = explode("~", $line);
-    $machine_name = trim($temp2[0]);
-    $title = trim($temp2[1]);
+    $machine_name = fp_trim(@$temp2[0]);
+    $title = fp_trim(@$temp2[1]);
     if ($machine_name != "") {
       $rtn["levels"][3][$machine_name] = $title;
       $rtn["machine_names"][$machine_name] = $title;
