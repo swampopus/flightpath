@@ -2410,6 +2410,7 @@ function engagements_get_file_extension_from_mime_type($mime)
     'image/jpx'                                                                 => 'jp2',
     'image/jpm'                                                                 => 'jp2',
     'image/jpeg'                                                                => 'jpg',
+    'image/jpg'                                                                 => 'jpg',
     'image/pjpeg'                                                               => 'jpeg',
     'application/x-javascript'                                                  => 'js',
     'application/json'                                                          => 'json',

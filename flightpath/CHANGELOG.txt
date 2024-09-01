@@ -1,6 +1,12 @@
 FlightPath 7.x Changelog
 ========================
 
+
+2024-08-27
+  In engagements module, added "image/jpg" to list of accepted mime types for incoming sms/email, even though *officially* 
+  that mime type is invalid.  It should only ever be "image/jpeg".  This is to accomodate incoming sms/emails which don't follow the official rules.
+  
+
 2024-08-22
   Fixed bug in system where if a disallowed student rank was trying to log in, the message displayed didn't show what ranks *were* allowed in.
     

@@ -85,7 +85,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
   if (is_array($variables) && count($variables) > 0) {
     $ser_variables = serialize($variables);
   }
-      
+  
   db_query("INSERT INTO watchdog 
             (user_id, user_name, cwid, type, message, variables, severity, extra_data, location, referer, ip, is_mobile, is_student, is_faculty, timestamp, school_id)
             VALUES
