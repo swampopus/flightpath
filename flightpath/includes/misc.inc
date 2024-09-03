@@ -612,6 +612,14 @@ function _fp_error_handler($error_level, $message, $filename, $line, $context = 
         watchdog('system', "Unable to write PHP error to email log file", array(), WATCHDOG_ERROR);
       }
 
+      // Check to see if there is a .htaccess file there; create if not.
+      if (!file_exists($error_files_dir . '/.htaccess')) {
+        $x = file_put_contents($error_files_dir . '/.htaccess', system_get_private_htaccess());
+        if (!$x) {
+          watchdog('system', "Unable to create .htaccess file in Private Files Directory. Permission issue?", array(), WATCHDOG_ERROR);
+        }
+        
+      }
                   
     }
     

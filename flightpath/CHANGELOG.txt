@@ -1,6 +1,9 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-08-30
+  Made an extra check to make sure there is an .htaccess file in the "private" files directory. If not, one is created.
+
 
 2024-08-27
   In engagements module, added "image/jpg" to list of accepted mime types for incoming sms/email, even though *officially* 
