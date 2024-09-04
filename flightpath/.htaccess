@@ -81,10 +81,15 @@ DirectoryIndex index.php
 # Add headers to all responses.
 <IfModule mod_headers.c>  
   # Make cookies a bit more secure
-  Header edit Set-Cookie ^(.*)$ $1;SameSite=strict
+  ## Header edit Set-Cookie ^(.*)$ $1;SameSite=strict
+  # Commenting-out because this caused us to not be able to provide links
+  # in emails for users who are already logged in.
   
   # Disable content sniffing, since it's an attack vector.
   Header always set X-Content-Type-Options nosniff  
+  
+  # Disable Proxy header, since it's an attack vector.
+  RequestHeader unset Proxy   
 </IfModule>
 
 

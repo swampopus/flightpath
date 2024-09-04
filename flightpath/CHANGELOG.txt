@@ -5,7 +5,9 @@ FlightPath 7.x Changelog
   Various tweaks for PHP 8.
   
   Added option in Engagements - SMS Settings, to allow the full contents of an SMS message to be sent to specified recipients, instead of a simple
-  notification that they should log in to view.  
+  notification that they should log in to view.
+  
+  Removed a line from .htaccess which was affecting cookies and being able to open links to FlightPath from emails.  
   
 
 2024-08-30
