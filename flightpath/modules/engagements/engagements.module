@@ -1865,7 +1865,7 @@ function engagements_handle_incoming_sms($vars = array())
                       $tbody
                     </blockquote>
                     To view/respond to the full message, visit the student's Engagements tab by logging in and following this link:<br>\n 
-                    $link";
+                    <a href='$link'>$link</a>";
         
       } 
   
