@@ -789,7 +789,7 @@ function content_dialog_handle_after_save() {
   $rtn .= "<br><br><p>" . t("If this windows doesn't close within 3 seconds,") . " <a href='javascript:window.parent.location.reload();'>" . t("click here") . "</a>.</p>";
   
   // Add this javascript code to when the page loads.
-  /*  DEV: comment out while testing
+  ///*  DEV: comment out while testing
 
   $rtn .= "
       <script type='text/javascript'>
