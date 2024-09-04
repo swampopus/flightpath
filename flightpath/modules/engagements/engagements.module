@@ -1852,7 +1852,7 @@ function engagements_handle_incoming_sms($vars = array())
       $tmsg = "$student_name has submitted a text message to $system_name 
                     (To: $pretty_to_number / $desc).
                     <br><br>\n\n
-                    To view, visit the student's Engagements tab by logging in and following this link:<br>\n 
+                    To view/respond, visit the student's Engagements tab by logging in and following this link:<br>\n 
                     <a href='$link'>$link</a>";
   
       // If we have enabled sending the full contents, then send that (stripped of HTML):
@@ -1864,7 +1864,7 @@ function engagements_handle_incoming_sms($vars = array())
                     <blockquote>\n\n
                       $tbody
                     </blockquote>
-                    To view the full message, visit the student's Engagements tab by logging in and following this link:<br>\n 
+                    To view/respond to the full message, visit the student's Engagements tab by logging in and following this link:<br>\n 
                     <a href='$link'>$link</a>";
         
       } 
