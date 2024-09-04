@@ -1798,7 +1798,7 @@ function engagements_handle_incoming_sms($vars = array())
           
     
     
-    $tbody = $body;
+    $tbody = trim($body);
     
     // if we have media, add to the end of body.
     if ($media_filenames) {
