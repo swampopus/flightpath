@@ -1803,8 +1803,11 @@ function engagements_handle_incoming_sms($vars = array())
     // if we have media, add to the end of body.
     if ($media_filenames) {
       $body .= "~~MEDIA~~$media_filenames~~END_MEDIA~~";
-      $tbody .= "\n<br>[SMS includes attached image(s)]";
+      $tbody .= "\n\n[SMS includes attached image(s)]";
     }
+
+    $tbody = filter_markup($tbody, 'plain');
+    $tbody = nl2br($tbody);
 
     $content->field__engagement_msg['value'] = $body;
     $content->field__external_msg_id['value'] = $message_sid;
@@ -1859,7 +1862,7 @@ function engagements_handle_incoming_sms($vars = array())
                     <br><br>\n\n
                     The filtered contents of the message are as follows:
                     <blockquote>\n\n
-                    " . filter_markup($tbody, 'plain') . "\n\n
+                      $tbody
                     </blockquote>
                     To view the full message, visit the student's Engagements tab by logging in and following this link:<br>\n 
                     <a href='$link'>$link</a>";
