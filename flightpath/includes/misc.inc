@@ -1110,8 +1110,8 @@ function fp_no_html_xss($string) {
  * Filter string with possible HTML, allowing only certain tags, and removing dangerous attributes.
  * 
  * $type can be:
- *    - "plain" - No HTML tags are allowed.
- *    - "basic" - Only certain tags allowed, no attributes. Safest. New lines = <br>
+ *    - "plain" - No HTML tags are allowed. Safest.
+ *    - "basic" - Only certain tags allowed, no attributes. Safest. New lines are converted to HTML break tags.
  *    - "full" - All HTML is allowed through.
  * 
  */

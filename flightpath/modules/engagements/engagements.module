@@ -1327,6 +1327,32 @@ function engagements_sms_settings_form()
 
   $form = array();
 
+    
+  ///////////////////
+  $form['mark_general_top'] = array(
+    'value' => "<fieldset><legend>General SMS Settings</legend>",
+  );
+  
+  $form['engagements_send_incoming_sms_contents_in_email'] = array(
+    'type' => 'checkbox',
+    'label' => t('Send incoming (received) text message contents in recipient notification emails?'),
+    'value' => variable_get('engagements_send_incoming_sms_contents_in_email', FALSE),
+    'description' => t('If set in the Users section, incoming SMS text messages will trigger a notification
+                      email to be sent to a particular user or users.  Normally, to protect privacy, the notification
+                      simply states that a message was received, and the user will need to log in to view it.
+                      <br>
+                      However, if this box is checked, then the <i>contents</i> of the text message are also sent
+                      in the email notification.  This may expose student PII, and should only be enabled if you
+                      are willing to accept that risk.
+                      <br>If unsure, leave this box <b>unchecked</b>.'),
+  );
+  
+  $form['mark_general_bottom'] = array(
+    'value' => "</fieldset><br><br>",
+  );
+  //////////////////////  
+  
+  
 
   $form['mark_signalwire_top'] = array(
     'value' => "<fieldset><legend>Settings for SignalWire</legend>
@@ -1423,6 +1449,8 @@ function engagements_sms_settings_form()
   $form['mark_signalwire_bottom'] = array(
     'value' => "</fieldset><br><br>",
   );
+
+
 
 
 
@@ -1821,6 +1849,21 @@ function engagements_handle_incoming_sms($vars = array())
                     <br><br>\n\n
                     To view, visit the student's Engagements tab by logging in and following this link:<br>\n 
                     <a href='$link'>$link</a>";
+  
+      // If we have enabled sending the full contents, then send that (stripped of HTML):
+      if (intval(variable_get('engagements_send_incoming_sms_contents_in_email', FALSE)) === 1) {
+        $tmsg = "$student_name has submitted a text message to $system_name 
+                    (To: $pretty_to_number / $desc).
+                    <br><br>\n\n
+                    The filtered contents of the message are as follows:
+                    <br><br>\n\n
+                    " . filter_markup($body, 'plain') . "\n\n
+                    <br><br>
+                    To view the full message, visit the student's Engagements tab by logging in and following this link:<br>\n 
+                    <a href='$link'>$link</a>";
+        
+      } 
+  
   
       $advisors = advise_get_advisors_for_student($stu_cwid);
       foreach ($advisors as $c => $afaculty_id) {
