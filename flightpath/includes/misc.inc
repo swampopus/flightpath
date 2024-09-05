@@ -29,6 +29,24 @@ function friendly_timezone($str) {
   
   
 } 
+
+
+
+
+/**
+ * Convenience function for getting an array value by the specified key,
+ * or, return $default_val (default empty string) if it doesn't exist.
+ * Meant to be similar to the @see variable_get() functionality.
+ */
+function array_get($arr, $key, $default_val = "") {
+  
+  if (isset($arr[$key])) return $arr[$key];
+  
+  return $default_val;
+}
+
+
+
  
 
 // From https://php.watch/versions/8.2/utf8_encode-utf8_decode-deprecated
