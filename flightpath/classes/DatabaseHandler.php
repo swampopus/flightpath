@@ -1291,7 +1291,7 @@ $query_and_args
   
   /**
    * Returns the student's first and last name, put together.
-   * Ex: John Smith or John W Smith.
+   * Ex: John Smith.
    *
    * @param int $student_id
    * @return string
