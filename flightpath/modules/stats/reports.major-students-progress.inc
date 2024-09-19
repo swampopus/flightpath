@@ -211,7 +211,7 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
   $current = $batch["results"]["current"];
   $total = $batch["results"]["total"];
 
-  $limit = 7;  // how many records to examine for THIS time through the function.
+  $limit = 1;  // how many records to examine for THIS time through the function.
   $c = 0;  // count of records.
   
   $db = get_global_database_handler();
@@ -321,6 +321,9 @@ function stats_report_major_students_progress_perform_batch_operation(&$batch, $
     
     
     $c++;
+    
+    
+    
     
   } // while $cur = db_fetch_array  
   
