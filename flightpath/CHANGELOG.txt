@@ -1,6 +1,13 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-09-19
+  Added server hostname to the PHP mail errors email.
+    
+  Cleaning up some code in the batch module.
+  
+  
+
 2024-09-05
   Created a convenience function and added it to misc.inc: array_get().  This lets you get a value from an array (if it exists), or,
   if it does not exist, you get back an empty string ("") or whatever you specify.  

@@ -810,9 +810,13 @@ function course_search_get_course_capacity($course_id, $term_id) {
   }
   
   
+   
   $cap = db_result(db_query("SELECT capacity FROM course_rotation_schedule
                              WHERE course_id = ?
                              AND term_id = ?", array($course_id, $term_id)));
+                      
+                      
+                      
                              
   $cap = intval($cap);
   $GLOBALS['fp_cache_course_capacity'][$course_id] = $cap;  // save to simple globals cache

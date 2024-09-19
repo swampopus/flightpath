@@ -2735,7 +2735,8 @@ function system_cron() {
       // is there anything for us to email?
       $emsg = file_get_contents($error_files_dir . '/fp_php_errors_to_email_log.txt');    
       if ($emsg && fp_trim($emsg) != "") {
-        fp_mail($tomail, "PHP Error(s) in FlightPath", $emsg);
+        $hostname = php_uname('n');
+        fp_mail($tomail, "PHP Error(s) in FlightPath ($hostname)", $emsg);
         // Make the file blank.
         file_put_contents($error_files_dir . '/fp_php_errors_to_email_log.txt', '');
       }

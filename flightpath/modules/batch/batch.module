@@ -95,7 +95,6 @@ function batch_ajax_callback($batch_id) {
   
   $operation_args = $batch["operation"][1];
   // Add our $batch to the beginning of the $args array.
-  //array_unshift($operation_args, $batch);
   $params = array(0 => &$batch);
   foreach ($operation_args as $val) {
     $params[] = $val;
@@ -108,8 +107,8 @@ function batch_ajax_callback($batch_id) {
   // Coming out of this, $batch should be modified
   // Save it back to the database.
   db_query("UPDATE batch_queue 
-            SET batch_data = '?'
-            WHERE batch_id = '?' ", serialize($batch), $batch_id);
+            SET batch_data = ?
+            WHERE batch_id = ? ", serialize($batch), $batch_id);
   
   
   // Output relavant results....
