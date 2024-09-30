@@ -115,24 +115,30 @@ function hook_content_register_content_type() {
 
 /**
  * This hook is called by the function content_load($cid), and allows other modules
- * to act on content which is being loaded.  As with other hooks, modules
- * act on the hook based on their weight in the modules table in the database.
+ * to act on content which is being loaded.
  * 
- * It should be noted that the content module itself makes use of this
- * hook, with its function content_content_load()
+ * Note: we will always call "content_content_load" FIRST, before calling other modules' hook_content_load functions.
+ * 
  */
 function hook_content_load(&$content) {
   $content->title = "Change the Title";
+  
   // No need to return since we passes by reference.
 }
 
 
 
 /**
- * Functionally works the same as hook_content_load() above.
- * @see hook_content_load()
+ * This hook is called just before saving the content to the database, and allows other modules to act on
+ * content before it is writen to the database.
+ * 
+ * Note: we will always call "content_content_save" LAST, after calling the other modules' possible hooks.
+ * 
  */
 function hook_content_save(&$content) {
+  $content->title = "Foo " . time();
+  
+  // No need to return since we passes by reference.
 }
 
 

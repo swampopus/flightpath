@@ -58,14 +58,6 @@ function content_menu() {
 
  
   
-  /*
-  $items["content/delete"] = array(
-    "page_callback" => "content_handle_delete_content",
-    "access_arguments" => array("admin_content"),
-    "type" => MENU_TYPE_CALLBACK,
-  );
-  */
-  
 
   // content/add/TYPE
   $items["content/add/%"] = array(
@@ -1825,11 +1817,16 @@ function content_save(&$content) {
   if ($content->cid != 'new') {
     unset($GLOBALS['content_cache'][$content->cid]);
   }
-
-  $modules = modules_implement_hook("content_save");
+  
+  // First, see if any modules want to make changes before we save to the database.
+  $modules = modules_implement_hook("content_save", array("content"));
   foreach ($modules as $module) {
     call_user_func_array($module . "_content_save", array(&$content));    
   }
+
+  // Last, call content_content_save to finally write to the database.
+  call_user_func_array("content_content_save", array(&$content));
+
 
   // Save to globals cache
   $GLOBALS['content_cache'][$content->cid] = $content;
@@ -2020,7 +2017,12 @@ function content_load($cid, $reset = FALSE) {
     
   $content = new stdClass();
   $content->cid = $cid;
-  $modules = modules_implement_hook("content_load");
+  
+  // First, always call content_content_load.
+  call_user_func_array("content_content_load", array(&$content));
+  
+  // Next, go through all other modules (NOT "content") that might implement this hook.
+  $modules = modules_implement_hook("content_load", array('content'));
   foreach ($modules as $module) {
     call_user_func_array($module . "_content_load", array(&$content));    
   }

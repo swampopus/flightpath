@@ -1917,7 +1917,7 @@ function engagements_handle_incoming_sms($vars = array())
         
         content_save($alert);    
         
-        // If there were any files attached, show them.
+        // If there were any files attached, save them with the ALERT here, since this is from an unknown sender.
         foreach ($files as $file) {
           // This function will handle encryption of files automatically.
           $fid = content_add_new_uploaded_file($file, $alert->cid, FALSE);
@@ -4112,37 +4112,7 @@ function engagements_display_main()
       $msg .= $ttemp[1];  // in case there was anything AFTER ~~END_MEDIA~~
     }
     
-    
-    
-    /*        
-    // If the $msg contains ~~MEDIA~~ and ~~END_MEDIA~~ then we can assume there are filenames after it, which we assume to be images that got
-    // text messaged.  Add them.
-    
-      $files = explode(",", $temp[1]);
-      foreach ($files as $filename) {
-        $ttemp = explode("~~END_MEDIA~~", $filename);
-        $filename = $ttemp[0];
-        $path = base_path() . '/custom/files/content_uploads/' . $filename;
-
-        $img_tag = "<img src='$path' style='max-width: 200px; height: auto;'>";
-
-        $ext_temp = explode(".", $filename);
-        $ext = strtolower(@$ext_temp[count($ext_temp) - 1]);
-
-        $image_exts = array("gif", "tiff", "jpg", "jpeg", "png", "bmp");
-        if (!in_array($ext, $image_exts)) {
-          $mime_icon = content_get_fontawesome_icon_for_mimetype("", $ext);
-          $img_tag = "<div class='atached-file'><i class='fa $mime_icon'></i>" . " " . t("View %ext attachment in new window", array("%ext" => $ext)) . "</div>";
-        }
-
-        $msg .= "<div class='media-attached'><a href='$path' target='_BLANK'>
-                    $img_tag
-                  </a></div>" . $ttemp[1]; // add on the </p> at the end if its there.
-      }
-    } // contains ~~MEDIA~~
-    */
-    
-    
+       
     ////////////
     
 

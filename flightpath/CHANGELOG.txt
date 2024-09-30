@@ -3,6 +3,15 @@ FlightPath 7.x Changelog
 
 2024-09-30
   Fixing bug when receiving SMS, where it wasn't sending full contents of SMS to non-advisor users, if set.
+  
+  Made a non-breaking change to modules_implement_hook() function, so we can specified modules to skip when
+  checking to see which ones implement a hook.
+  
+  Made changes to the order in which content is loaded and saved, to make sure content is fully created before
+  being passed to a hook.
+  
+  Added alerts_content_load() hook to alerts module, so if there are attached media we will show them in the
+  alert, similar to email and text messages.
 
 
 2024-09-19

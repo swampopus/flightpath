@@ -2493,8 +2493,11 @@ function module_enabled($module_name) {
 /**
  * Return an array of enabled modules which implement the provided hook.
  * Do not include the preceeding "_" on the hook name!
+ * 
+ * We can optionally provide the names of modules to skip.  Ex:  array('my_module', 'other_module', ... etc)
+ *  
  */
-function modules_implement_hook($hook = "example_hook_here") {
+function modules_implement_hook($hook = "example_hook_here", $skip_modules = array()) {
   
   // Going to use a global array to keep track of what hooks exist.  
   if (!isset($GLOBALS['hook_cache'])) $GLOBALS['hook_cache'] = array();  
@@ -2517,6 +2520,9 @@ function modules_implement_hook($hook = "example_hook_here") {
       // Module is not enabled.  Skip it.
       continue;
     }
+    
+    if (in_array($module, $skip_modules)) continue;
+    
     if (function_exists($module . '_' . $hook)) {
       $rtn[] = $module;
     }

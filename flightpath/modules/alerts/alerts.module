@@ -748,6 +748,54 @@ function alerts_content_register_content_type() {
 
 
 
+
+
+/**
+ * Implements hook_content_load.
+ */
+function alerts_content_load(&$content) {
+  
+  if ($content->type != 'alert') return;  // We only care about the 'alert' content type.
+  
+  // If there are any media files in this alert, search for and add them to the content object so they are displayed.  
+  $cid = $content->cid;
+  
+  $msg = $content->field__alert_msg['value'];
+  
+  $ttemp = array('', '');
+  if (strstr($msg, "~~MEDIA~~") && strstr($msg, "~~END_MEDIA~~")) {
+    $temp = explode("~~MEDIA~~", $msg);
+    $msg = $temp[0]; // get rid of the media part of the msg.
+    $ttemp = explode("~~END_MEDIA~~", $temp[1]);
+  }
+      
+  $res2 = db_query("SELECT * FROM content_files WHERE cid = ? ORDER BY cid", array($cid));
+  while ($cur2 = db_fetch_array($res2)) {
+    $fid = $cur2['fid'];
+    $file = content_get_uploaded_file($fid);
+    $img_tag = "<img src='{$file['url']}' style='max-width: 200px; height: auto;'>";
+    $msg .= "<div class='media-attached'><a href='{$file['url']}' target='_BLANK'>
+                  $img_tag
+                </a></div>";             
+  }
+  $msg .= $ttemp[1];  // in case there was anything AFTER ~~END_MEDIA~~
+  
+  // Add it back into our $content now.
+  $content->field__alert_msg['value'] = $msg;
+  $content->field__alert_display_value = filter_markup($msg, $content->field__alert_msg['field']['filter']);
+    
+  
+  
+} // hook_content_load
+
+
+
+
+
+
+
+
+
 function alerts_form_alter(&$form, $form_id) {
   
 if ($form_id == 'content_edit_content_form') {
