@@ -1917,6 +1917,13 @@ function engagements_handle_incoming_sms($vars = array())
         
         content_save($alert);    
         
+        // If there were any files attached, show them.
+        foreach ($files as $file) {
+          // This function will handle encryption of files automatically.
+          $fid = content_add_new_uploaded_file($file, $alert->cid, FALSE);
+        }
+        
+        
         $alert_link = $base_url . "/content/$alert->cid?content_crumbs=alerts";
                 
         $tmsg = "A text message has been received for $system_name. (To: $pretty_to_number / $desc).<br><br> No student could be found which is
@@ -1934,7 +1941,7 @@ function engagements_handle_incoming_sms($vars = array())
                       <br><br>Message SID: $message_sid.  The filtered contents of the message are as follows:
                       <blockquote>\n\n
                         $tbody
-                      </blockquote>Note: If any attached images are listed, see the SMS History Report.<br><br>
+                      </blockquote>
                       To view the full message, view the Alert by logging in and clicking here: 
                       <a href='$alert_link'>$alert_link</a>";
           
