@@ -1331,16 +1331,10 @@ function content_get_uploaded_file($fid) {
     
     $cur['full_filename'] = fp_get_files_path() . '/content_uploads/' . $cur['filename']; 
     // also get the URL for downloading this file.
-    // If this file was encrypted, then the url should change to the url to decrypt this particular file (probably by passing it the fid)
-    //if (intval($cur['is_encrypted']) === 1) {
-        
-    // *** Always handle downloads through FlightPath, for security reasons. ***  
-      
+                
+    // *** Always handle downloads through FlightPath, for security reasons. ***
     $cur['url'] = fp_url('content-files/handle-download/' . $cur['fid']);
-    //} 
-    //else {
-    //  $cur['url'] = base_path() . "/custom/files/content_uploads/" . $cur['filename'];
-    //}
+    
     $cur['ext'] = $ext;
   }
   

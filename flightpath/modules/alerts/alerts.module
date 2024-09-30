@@ -760,7 +760,7 @@ function alerts_content_load(&$content) {
   // If there are any media files in this alert, search for and add them to the content object so they are displayed.  
   $cid = $content->cid;
   
-  $msg = $content->field__alert_msg['value'];
+  $msg = $content->field__alert_msg['display_value'];
   
   $ttemp = array('', '');
   if (strstr($msg, "~~MEDIA~~") && strstr($msg, "~~END_MEDIA~~")) {
@@ -773,16 +773,15 @@ function alerts_content_load(&$content) {
   while ($cur2 = db_fetch_array($res2)) {
     $fid = $cur2['fid'];
     $file = content_get_uploaded_file($fid);
-    $img_tag = "<img src='{$file['url']}' style='max-width: 200px; height: auto;'>";
+    $img_tag = "<img src='{$file['url']}' style='max-width:200px;height:auto;'>";
     $msg .= "<div class='media-attached'><a href='{$file['url']}' target='_BLANK'>
                   $img_tag
                 </a></div>";             
   }
   $msg .= $ttemp[1];  // in case there was anything AFTER ~~END_MEDIA~~
   
-  // Add it back into our $content now.
-  $content->field__alert_msg['value'] = $msg;
-  $content->field__alert_msg['display_value'] = filter_markup($msg, $content->field__alert_msg['field']['filter']);
+  // Add it back into our $content now.  
+  $content->field__alert_msg['display_value'] = $msg;
     
   
   

@@ -1156,7 +1156,7 @@ function filter_markup($str, $type = "basic") {
     $str = str_ireplace("<br>\n", "<br>", $str);
     $str = str_ireplace("<br />\n", "<br>", $str);
      
-    $allowed_tags = array('a', 'em', 'strong', 'cite', 'img', 
+    $allowed_tags = array('a', 'em', 'strong', 'cite', 
                           'blockquote', 'code', 'ul', 'ol', 'li', 
                           'dl', 'dt', 'dd', 'span', 'div', 
                           'b', 'i', 'u', 'br', 'p', 'table', 'tr', 
