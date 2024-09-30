@@ -782,7 +782,7 @@ function alerts_content_load(&$content) {
   
   // Add it back into our $content now.
   $content->field__alert_msg['value'] = $msg;
-  $content->field__alert_display_value = filter_markup($msg, $content->field__alert_msg['field']['filter']);
+  $content->field__alert_msg['display_value'] = filter_markup($msg, $content->field__alert_msg['field']['filter']);
     
   
   
