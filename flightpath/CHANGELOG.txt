@@ -1,11 +1,14 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-09-30
+  Fixing bug when receiving SMS, where it wasn't sending full contents of SMS to non-advisor users, if set.
+
+
 2024-09-19
   Added server hostname to the PHP mail errors email.
     
   Cleaning up some code in the batch module.
-  
   
 
 2024-09-05
