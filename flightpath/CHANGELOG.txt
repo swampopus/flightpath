@@ -1,6 +1,13 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-10-04
+  Modified Engagements display so that engagements are sorted by activity_datetime desc FIRST, then by vid DESC.  Otherwise, this
+  caused a bug where the most recently modified was appearing first.
+  
+  Modified Engagements display so that emails show their subject line.
+
+
 2024-09-30
   Fixing bug when receiving SMS, where it wasn't sending full contents of SMS to non-advisor users, if set.
   

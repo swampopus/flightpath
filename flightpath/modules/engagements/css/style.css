@@ -120,6 +120,18 @@
   
 }
 
+#engagements-list-page .activity-feed-teaser .activity-subject label {
+  display: inline;
+  padding-right: 10px;  
+  color: #888;
+}
+
+#engagements-list-page .activity-feed-teaser .activity-subject {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+  margin-bottom: 10px;  
+}
+
 #engagements-list-page .activity-feed-teaser .activity-contents {
   margin-left: 30px;
   margin-top: 10px;

@@ -4002,7 +4002,7 @@ function engagements_display_main()
                    AND a.cid = n.cid
                    AND n.delete_flag = 0
                    AND n.published = 1                                    
-                   ORDER BY a.vid DESC, field__activity_datetime DESC", array($current_student_id), 5, 0, "SELECT COUNT(DISTINCT(a.cid)) FROM content__engagement a, content n
+                   ORDER BY field__activity_datetime DESC, a.vid DESC", array($current_student_id), 5, 0, "SELECT COUNT(DISTINCT(a.cid)) FROM content__engagement a, content n
                                                                                                          WHERE field__student_id = ?
                                                                                                          AND a.vid = n.vid
                                                                                                          AND a.cid = n.cid
@@ -4031,7 +4031,13 @@ function engagements_display_main()
     $direction = $content->field__direction['value'];
     $msg = $content->field__engagement_msg['display_value'];
     $manual_entry = $content->field__manual_entry['value'];
+
+    $subject = '';
+    if ($type == 'email') {
+      $subject = $content->title;
+    }
     
+        
     $external_msg_id = @trim($content->field__external_msg_id['value']);
 
 
@@ -4203,8 +4209,12 @@ function engagements_display_main()
                   <span class='header-author'>$author_name</span>
                   <span class='header-visibility'>$visibility_icon</span>
                 </div>
-                <div class='activity-contents'>
-                  <div class='activity-comment'>
+                <div class='activity-contents'>";
+    if ($subject != '') {
+      $rtn .= "<div class='activity-subject'><label>" . t("Subject:") . "</label>$subject</div>";
+    }
+                    
+    $rtn .= "   <div class='activity-comment'>
                     $msg                    
                   </div>
                 </div>
