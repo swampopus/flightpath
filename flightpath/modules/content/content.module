@@ -1574,7 +1574,7 @@ function content_edit_content_form_submit(&$form, &$form_state) {
   $cid = $content->cid;
   
   // Clean the title of any XSS attempts
-  $title = filter_markup($values['title']);  
+  $title = filter_markup($values['title'], 'plain');  
   $content->title = $title;  // required
   
   // set published status.  0 for not, 1 for published

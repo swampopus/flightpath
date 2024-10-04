@@ -7,6 +7,9 @@ FlightPath 7.x Changelog
   
   Modified Engagements display so that emails show their subject line.
 
+  Fixed a bug in content module, where titles were being passed through filter_markup, and consequently having <p></p> added to
+  them.
+  
 
 2024-09-30
   Fixing bug when receiving SMS, where it wasn't sending full contents of SMS to non-advisor users, if set.
