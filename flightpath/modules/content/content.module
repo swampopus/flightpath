@@ -1820,7 +1820,7 @@ function content_save(&$content) {
 
   // Last, call content_content_save to finally write to the database.
   call_user_func_array("content_content_save", array(&$content));
-
+  
 
   // Save to globals cache
   $GLOBALS['content_cache'][$content->cid] = $content;
@@ -1838,6 +1838,8 @@ function content_content_save(&$content) {
   $types = content_get_types();
   $type = $content->type;
   
+  // Force $content->title to be plain (no html tags allowed)
+  $content->title = filter_markup($content->title, 'plain');
   
   
   if (!isset($content->title) || !$content->title || $content->title === NULL || $content->title === FALSE) {
