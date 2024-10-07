@@ -34,9 +34,20 @@
     display: none !important;
   }
   
+   #header {
+     width: 100% !important;     
+   }
+  
+  #main-content-wrapper {
+    height: auto !important;
+    box-sizing: auto !important;
+  }
+  
    #page-content {
      width: 100% !important;
+     max-width: 100% !important;
      padding: 0 !important;
+     display: block !important;
    }
   
    .student-mini-profile .profile-top-details-wrapper {

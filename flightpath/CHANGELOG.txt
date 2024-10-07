@@ -1,6 +1,10 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-10-07
+  Fixed CSS bug where sometimes when printing, the body of the page would appear on a different sheet than the header.
+  
+
 2024-10-04
   Modified Engagements display so that engagements are sorted by activity_datetime desc FIRST, then by vid DESC.  Otherwise, this
   caused a bug where the most recently modified was appearing first.
