@@ -90,12 +90,16 @@ function menu_get_module_path($module, $bool_include_file_system_path = FALSE) {
  * and returns TRUE or FALSE if the user can access this item. 
  */
 function menu_check_user_access($router_item) {
+  
+  if (!$router_item || $router_item == NULL || $router_item == FALSE || $router_item == '') {
+    return FALSE;  // No router item given, so return FALSE.
+  }
       
   $access = FALSE;
-  if ($router_item["access_callback"] == 1) {
+  if ($router_item["access_callback"] == 1 || $router_item["access_callback"] == TRUE) {
     $access = TRUE;
   }
-  if (is_array($router_item["access_arguments"])) {
+  if (isset($router_item["access_arguments"]) && is_array($router_item["access_arguments"])) {
     if ($router_item["access_callback"] == "") {
       // If we specified access arguments, but not a callback, assume it
       // is the function user_has_permission().
