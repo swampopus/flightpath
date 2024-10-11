@@ -1,6 +1,10 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-10-11
+  Fixed warning from content->title in PHP 8.
+
+
 2024-10-07
   Fixed CSS bug where sometimes when printing, the body of the page would appear on a different sheet than the header.
   

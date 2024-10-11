@@ -1838,13 +1838,13 @@ function content_content_save(&$content) {
   $types = content_get_types();
   $type = $content->type;
   
-  // Force $content->title to be plain (no html tags allowed)
-  $content->title = filter_markup($content->title, 'plain');
-  
-  
   if (!isset($content->title) || !$content->title || $content->title === NULL || $content->title === FALSE) {
     $content->title = t("Content") . " " . time();  // give a default title, since title cannot be null.
   }
+
+  // Force $content->title to be plain (no html tags allowed)  
+  $content->title = filter_markup($content->title, 'plain');
+
   
   $log = @trim($content->log);
 
