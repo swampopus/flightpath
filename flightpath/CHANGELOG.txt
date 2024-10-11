@@ -2,7 +2,9 @@ FlightPath 7.x Changelog
 ========================
 
 2024-10-11
-  Fixed warning from content->title in PHP 8.
+  Fixed warning from content->title (content.module) in PHP 8.
+  
+  Fixed warnings in prereqs module in PHP 8 if the advising_term_id isn't set.
 
 
 2024-10-07

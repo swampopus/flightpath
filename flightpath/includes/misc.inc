@@ -2216,8 +2216,7 @@ function get_term_description($term_id, $bool_abbreviate = FALSE, $school_id = 0
     invoke_hook("alter_term_id_prior_to_description", array(&$term_id, &$bool_abbreviate, $school_id));
 
 
-    if (strstr($term_id, "1111"))
-    {
+    if (strstr($term_id, "1111")) {
       return "(data unavailable at this time)";
     }
 

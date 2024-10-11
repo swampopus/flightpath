@@ -482,7 +482,7 @@ function prereqs_get_prereq_warnings_for_course(Course $course, Student $student
     $warning_msg = variable_get("prereqs_lock_msg_avail", "This course is not listed as being available for the selected advising term (@term).  Are you sure you wish to advise the student to enroll in it?");
   
     // Find out what the rotation schedule is for this course.
-    $advising_term_id = @$GLOBALS["fp_advising"]["advising_term_id"];    
+    $advising_term_id = fp_trim(@$GLOBALS["fp_advising"]["advising_term_id"]);    
     // Get the advising year from the term.
     $year = substr($advising_term_id, 0, 4);    
     $rotation_schedule = course_search_get_course_rotation_schedule($course->course_id, $year, 5);
