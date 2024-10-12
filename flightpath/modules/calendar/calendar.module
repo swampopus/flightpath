@@ -2216,12 +2216,13 @@ function calendar_schedule_appointment_confirm_form_submit($form, &$form_state) 
           
   // Send notifications
    
-  // First, send a notification to the student.
+  // First, send a notification to the student 
   $student_user_id = db_get_user_id_from_cwid($student_cwid, 'student');  
-  $nmsg = "You have scheduled an appointment with $faculty_name:\n";
-  
+  $nmsg = "You have scheduled an appointment with $faculty_name:\n";    
   notify_send_notification_to_user($student_user_id, $nmsg . $msg, $acid, 'appointment', '', $attachment);
+    
   
+
   // Now, send a notification to the faculty member.
   $nmsg = "$student_name has scheduled an appointment with you:\n"; 
   $msg = "";  
@@ -2776,6 +2777,7 @@ function calendar_content_register_content_type() {
     'label' => 'Student',
     'autocomplete_path' => 'student-search/autocomplete-student/default',  // Convenient endpoint in the student_search module
     'weight' => 30,
+    'required' => TRUE,
   );
 
       

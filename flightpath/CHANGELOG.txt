@@ -10,6 +10,8 @@ FlightPath 7.x Changelog
   
   Modified menu.inc menu_check_user_access to prevent warnings in PHP 8. 
   
+  Upgraded jQuery UI to version 1.14.0.
+  
 
 2024-10-07
   Fixed CSS bug where sometimes when printing, the body of the page would appear on a different sheet than the header.
