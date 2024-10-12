@@ -630,7 +630,7 @@ function system_can_access_student($student_id = "") {
   global $current_student_id, $user;
   
   if ($student_id == "") $student_id = $current_student_id;
-  
+   
   
   // must be logged in first...
   if (!user_has_permission("access_logged_in_content")) return FALSE;

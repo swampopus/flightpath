@@ -96,11 +96,13 @@ function menu_check_user_access($router_item) {
   }
       
   $access = FALSE;
-  if ($router_item["access_callback"] == 1 || $router_item["access_callback"] == TRUE) {
-    $access = TRUE;
+  
+  if ($router_item['access_callback'] === '1' || $router_item["access_callback"] === 1 || $router_item["access_callback"] === TRUE) {    
+    $access = TRUE;    
   }
+  
   if (isset($router_item["access_arguments"]) && is_array($router_item["access_arguments"])) {
-    if ($router_item["access_callback"] == "") {
+    if (!isset($router_item['access_callback']) || $router_item["access_callback"] == "") {
       // If we specified access arguments, but not a callback, assume it
       // is the function user_has_permission().
       $router_item["access_callback"] = "user_has_permission";
