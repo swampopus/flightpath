@@ -1114,15 +1114,50 @@ nonsense.
 From:  https://paragonie.com/blog/2015/06/preventing-xss-vulnerabilities-in-php-everything-you-need-know
 */
 function fp_no_html_xss($string) {
-  return htmlentities($string, ENT_QUOTES, 'UTF-8');
-  //return htmlentities($string, ENT_QUOTES | ENT_HTML5, 'UTF-8');  // ENT_HTML5 requires PGP 5.4+
+  return htmlentities($string, ENT_QUOTES, 'UTF-8');  
 } 
  
  
+
+ 
+// From: https://gist.github.com/hubgit/1322324
+function repair_html($html){
+  // hide DOM parsing errors
+  libxml_use_internal_errors(true);
+  libxml_clear_errors();
+
+  // load the possibly malformed HTML into a DOMDocument
+  $dom = new DOMDocument();
+  $dom->recover = true;
+  $rnd = mt_rand(9, 9999) . time();  // just in case we have something else with ID "repair"
+  $dom->loadHTML('<?xml encoding="UTF-8"><body id="repair' . $rnd . '">' . $html . '</body>'); // input UTF-8
+
+  // copy the document content into a new document
+  $doc = new DOMDocument();
+  foreach ($dom->getElementById('repair' . $rnd)->childNodes as $child) {
+    $doc->appendChild($doc->importNode($child, true));
+  }
+  
+  // output the new document as HTML
+  $doc->encoding = 'UTF-8'; // output UTF-8
+  $doc->formatOutput = false;
+  return trim($doc->saveHTML());
+}
+
  
  
- 
- 
+/**
+ * Convenience function for @see filter_markup($str, "plain")
+ */
+function filter_plain($str, $bool_trim = TRUE) {
+  $x = filter_markup($str, "plain");
+  if ($bool_trim) {
+    $x = fp_trim($x);
+  }
+  return $x;
+}
+
+
  
 /**
  * Filter string with possible HTML, allowing only certain tags, and removing dangerous attributes.
@@ -1141,14 +1176,16 @@ function filter_markup($str, $type = "basic") {
     return $str;  
   }
 
-  // Use the DOM functions to repair any mismatched HTML.
-  $doc = new DOMDocument();
-  @$doc->loadHTML(mb_convert_encoding($str, 'HTML-ENTITIES', 'UTF-8'));   // ensure we are in UTF8
-  $str = $doc->saveHTML($doc->documentElement);  // Apparently this helps solve a glitch in Linux that isn't in Windows
-
   if ($type == 'plain') {
     $str = strip_tags($str);
+    return $str;
   }
+
+  // If we are here, we're doing something with HTML...
+
+  
+  // Fix mismatched HTML (without adding new tags).
+  $str = repair_html($str);   
   
   if ($type == "basic") {
     
@@ -1163,8 +1200,16 @@ function filter_markup($str, $type = "basic") {
                           'td', 'th', 'tbody', );
     
     $str = filter_xss($str, $allowed_tags);
+    
+        
     $str = trim($str);
         
+  }
+  
+  if ($type == "full") {
+    
+    // Essentially, do nothing. All HTML is allowed through.
+    
   }
   
   
@@ -1200,6 +1245,8 @@ function filter_xss($string, $allowed_tags = array('a', 'em', 'strong', 'cite', 
   // Remove Netscape 4 JS entities.
   $string = preg_replace('%&\s*\{[^}]*(\}\s*;?|$)%', '', $string);
 
+
+
   // Defuse all HTML entities.
   $string = str_replace('&', '&amp;', $string);
   // Change back only well-formed entities in our whitelist:
@@ -1209,6 +1256,7 @@ function filter_xss($string, $allowed_tags = array('a', 'em', 'strong', 'cite', 
   $string = preg_replace('/&amp;#[Xx]0*((?:[0-9A-Fa-f]{2})+;)/', '&#x\1', $string);
   // Named entities.
   $string = preg_replace('/&amp;([A-Za-z][A-Za-z0-9]*;)/', '&\1', $string);
+
 
   return preg_replace_callback('%
     (
@@ -1220,6 +1268,7 @@ function filter_xss($string, $allowed_tags = array('a', 'em', 'strong', 'cite', 
     |                 # or
     >                 # just a >
     )%x', 'filter_xss_split', $string);
+    
 } 
  
 /**

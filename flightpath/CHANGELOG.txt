@@ -1,6 +1,19 @@
 FlightPath 7.x Changelog
 ========================
 
+2024-10-12
+  Was alerted to possible XSS vulnerabilities (fixing in this release) by Rauf Giray Doğan (https://github.com/redhotchilihacker1)
+  
+  Added convenience function filter_plain($str) to help sanitize fields which obviously should not contain HTML tags.
+  
+  Modified various spots in the codebase to use either filter_plain() or filter_markup() where appropriate, to mitigate
+  any possible XSS vulnerabilities.
+    
+  Changed the way filter_markup cleans malformed HTML, so it doesn't add extra <p> tags.
+  
+  Fixed bug in content module where a file field in a fieldset wouldn't perform upload.
+  
+
 2024-10-11
   Fixed warning from content->title (content.module) in PHP 8.
   

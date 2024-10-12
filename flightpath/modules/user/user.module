@@ -512,6 +512,17 @@ function user_edit_user_attributes_form() {
 
 function user_edit_user_attributes_form_submit($form, $form_state) {
   
+  
+  // Trim and sanitize as needed  
+  foreach ($form_state['values'] as $key => $val) {
+    if (!is_array($val)) {
+      $form_state['values'][$key] = fp_trim($val);
+      if (!strstr($key, "password")) {
+        $form_state['values'][$key] = filter_plain($val);
+      }
+    }
+  }  
+  
   $values = $form_state['values'];  
   $user_id = intval($values['user_id']);
   
@@ -904,8 +915,6 @@ function user_edit_attribute_form_submit($form, $form_state) {
   $values = $form_state['values'];  
   $name = $values['attribute_name'];
   $user_id = intval($values['user_id']);
-
-  
 
   // Find and save the values from the form....
   foreach ($values as $key => $val) {
@@ -1854,7 +1863,7 @@ function user_edit_user_advisees_form_submit($form, $form_state) {
   $lines = explode("\n", $students);
   foreach($lines as $line) {
     $temp = explode("#", $line);
-    $line = trim($temp[0]);
+    $line = trim(filter_plain($temp[0]));
     if ($line == "") continue;
     // Okay, $line should now contain the CWID.
     // Insert into db.  (use REPLACE to prevent an error if data was entered twice)
@@ -2182,7 +2191,7 @@ function user_edit_user_form_validate($form, $form_state) {
   // already in use.
   if ($values["faculty_cwid"] == "new") {
     $new_cwid = trim($values["new_faculty_cwid"]);
-    $new_user_name = trim($values["new_user_name"]);
+    $new_user_name = fp_trim(filter_plain($values["new_user_name"]));
     
         
     // Check that username is at least 4 characters
@@ -2221,13 +2230,18 @@ function user_edit_user_form_validate($form, $form_state) {
  */
 function user_edit_user_form_submit($form, $form_state) {
   
-  $values = $form_state["values"];
-  
-  foreach ($values as $key => $val) {
+  // Trim and sanitize as needed  
+  foreach ($form_state['values'] as $key => $val) {
     if (!is_array($val)) {
-      $values[$key] = fp_trim($val);
+      $form_state['values'][$key] = fp_trim($val);
+      if (!strstr($key, "password")) {
+        $form_state['values'][$key] = filter_plain($val);
+      }
     }
   }
+
+  $values = $form_state["values"];
+  
   
   $user_id = intval($values["user_id"]);
   $faculty_cwid = $values["faculty_cwid"];

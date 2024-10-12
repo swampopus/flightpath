@@ -266,9 +266,9 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
   
   $faculty_id = $user->cwid;
   
-  $course_id = $form_state["values"]["course_id"];
-  $subject_id = $form_state["values"]["subject_id"];
-  $course_num = $form_state["values"]["course_num"];
+  $course_id = filter_plain($form_state["values"]["course_id"]);
+  $subject_id = filter_plain($form_state["values"]["subject_id"]);
+  $course_num = filter_plain($form_state["values"]["course_num"]);
   $school_id = intval($form_state["values"]["school_id"]);
   
   $_SESSION['last_saved_school_id'] = $school_id;
@@ -277,7 +277,7 @@ function course_search_edit_course_details_form_submit($form, $form_state) {
 
     
   for ($t = 1; $t <= 6; $t++) {
-    $year = $form_state["values"]["year$t"];
+    $year = filter_plain($form_state["values"]["year$t"]);
             
     // delete the existing entries for this year & course here.
     db_query("DELETE FROM course_rotation_schedule

@@ -590,25 +590,25 @@ function admin_edit_course_form() {
 function admin_edit_course_form_submit(&$form, &$form_submit) {
   $values = $form_submit["values"];
   
-  $de_catalog_year = $values["de_catalog_year"];
-  $course_id = trim($values["course_id"]);
-  $course_names = trim($values["course_names"]);
+  $de_catalog_year = filter_plain($values["de_catalog_year"]);
+  $course_id = filter_plain($values["course_id"]);
+  $course_names = filter_plain($values["course_names"]);
 
   $school_id = intval($values['school_id']);
   
   $db = get_global_database_handler();
   
   if ($course_names == "") {
-    $course_names = $values["subject_id"] . " " . $values["course_num"];
+    $course_names = filter_plain($values["subject_id"] . " " . $values["course_num"]);
   }
 
-  $title = trim($values["title"]);
-  $min_hours = floatval(trim($values["min_hours"]));
-  $max_hours = floatval(trim($values["max_hours"]));
-  $repeat_hours = floatval(trim($values["repeat_hours"]));
+  $title = filter_plain($values["title"]);
+  $min_hours = floatval(filter_plain($values["min_hours"]));
+  $max_hours = floatval(filter_plain($values["max_hours"]));
+  $repeat_hours = floatval(filter_plain($values["repeat_hours"]));
   //$exclude = trim($_POST["exclude"]);
-  $description = trim($values["description"]);
-  $data_entry_comment = trim($values["data_entry_comment"]);
+  $description = filter_markup($values["description"]);
+  $data_entry_comment = filter_plain($values["data_entry_comment"]);
 
   // Since we are making a change to the draft table(s), let's add a row
   // to draft instructions.

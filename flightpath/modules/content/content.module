@@ -1574,7 +1574,7 @@ function content_edit_content_form_submit(&$form, &$form_state) {
   $cid = $content->cid;
   
   // Clean the title of any XSS attempts
-  $title = filter_markup($values['title'], 'plain');  
+  $title = filter_plain($values['title']);  
   $content->title = $title;  // required
   
   // set published status.  0 for not, 1 for published
@@ -1582,9 +1582,7 @@ function content_edit_content_form_submit(&$form, &$form_state) {
   
   // Add in our new field values.  
   foreach ($types[$type]['fields'] as $fieldname => $details) {
-    if ($details['type'] != 'cfieldset') {
-        
-        
+    if ($details['type'] != 'cfieldset') {  // NOT a fieldset. Normal form element.
       
       if ($details['type'] == 'datetime-local') {
         // Since this is datetime-local, the value is actually already in the user's timezone.
@@ -1634,17 +1632,23 @@ function content_edit_content_form_submit(&$form, &$form_state) {
         
          
       } // if details = file
-            
+
+      // Was a filter (plain, basic, full) specified?  If not, assume PLAIN.  Else, use the selected filter.                      
+      if (!isset($details['filter']) || $details['filter'] == 'plain') {
+        $values[$fieldname] = filter_plain($values[$fieldname]);
+      }
+      else if (isset($details['filter']) && $details['filter'] != 'plain') {
+        $values[$fieldname] = filter_markup($values[$fieldname], $details['filter']);
+      }
       
-          
       
       $content->{'field__' . $fieldname}['value'] = @$values[$fieldname];      
     }
-    else {
+    else {  // We are within a fieldset.
       foreach ($details['elements'] as $c => $v) {
         foreach ($details['elements'][$c] as $fieldname => $edetails) {
           
-          if ($details['type'] == 'datetime-local') {
+          if ($edetails['type'] == 'datetime-local') {
             // Since this is datetime-local, the value is actually already in the user's timezone.
             // We want to CHANGE THIS TO UTC, so it saves in the database as UTC.
             $val_ts = @strtotime($values[$fieldname]);
@@ -1653,12 +1657,50 @@ function content_edit_content_form_submit(&$form, &$form_state) {
           }          
 
           // Do the same for "time" field type.  We need to convert to UTC from the user's timezone.
-          if ($details['type'] == 'time') {
+          if ($edetails['type'] == 'time') {
             // Since this is time, the value is actually already in the user's timezone.
             // We want to CHANGE THIS TO UTC, so it saves in the database as UTC.
             $val_ts = @strtotime("2000-01-01 " . $values[$fieldname]);  // give a bogus date just so our times make since.
             $utc_ts = convert_time($val_ts, fp_get_user_timezone(), 'UTC');        
             $values[$fieldname] = date('H:i', $utc_ts);               
+          }
+
+
+          // If this field type is "file" then we are going to do something special with it
+          // don't need to do this if we are just editing an existing content node and hitting "save"
+          if ($edetails['type'] == 'file') {
+            
+            $uploaded_files = fp_re_array_files($_FILES[$fieldname]);  // makes them easier to work with.
+    
+            $fid = "";        
+            foreach ($uploaded_files as $file) {
+              
+              if ($file && $file['name'] != '') {
+                // Now, save to the content_files table.
+                $fid .= content_add_new_uploaded_file($file, $cid) . ",";
+              }
+              
+            } // foreach
+            
+            // Do we have any previously uploaded files we need to include?
+            if (@$form_state['values']['previous_upload_' . $fieldname] != "") {
+              $fid .= "," . $form_state['values']['previous_upload_' . $fieldname] . ",";
+            }
+            
+            $fid = ltrim($fid, ",");
+            for ($t = 0; $t < 10; $t++) {
+              $fid = str_replace(",,", ",", $fid);  // get rid of any duplicate commas
+            }
+            $fid = rtrim($fid, ","); // trim any extra commas
+            $values[$fieldname] = $fid; 
+          } // if edetails = file
+
+
+          if (!isset($edetails['filter']) || $edetails['filter'] == 'plain') {
+            $values[$fieldname] = filter_plain($values[$fieldname]);
+          }
+          else if (isset($edetails['filter']) && $edetails['filter'] != 'plain') {
+            $values[$fieldname] = filter_markup($values[$fieldname], $details['filter']);
           }
 
 

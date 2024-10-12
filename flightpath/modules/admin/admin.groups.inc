@@ -184,13 +184,13 @@ function admin_edit_group_form_submit(&$form, &$form_state) {
   // Okay, we are trying to save the details of this group.
   // First thing we need to do is UPDATE the title, group_name,
   // priority, icon and comment.
-  $group_name = trim($values["group_name"]);
-  $title = trim($values["title"]);
+  $group_name = filter_plain($values["group_name"]);
+  $title = filter_plain($values["title"]);
   $priority = intval(trim($values["priority"]));
-  $icon_filename = trim($values["icon_filename"]);
-  $data_entry_comment = trim($values["data_entry_comment"]);
+  $icon_filename = filter_plain($values["icon_filename"]);
+  $data_entry_comment = filter_plain($values["data_entry_comment"]);
   $catalog_repeat = intval(trim($values["catalog_repeat"]));
-  $public_note = trim($values["public_note"]);
+  $public_note = filter_markup($values["public_note"]);
 
 
   $school_id = 0;

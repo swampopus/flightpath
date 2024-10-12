@@ -452,6 +452,7 @@ function user_student_list_filter_form() {
 
 
 function user_student_list_filter_form_submit($form, $form_state) {
+
   $values = $form_state['values'];
     
   unset($_SESSION['users_filter_name']);
@@ -749,6 +750,17 @@ function user_student_edit_student_courses_form_validate($form, $form_state) {
 function user_student_edit_student_courses_form_submit($form, $form_state) {
     
   $student_id = $form_state["values"]["student_cwid"];
+  
+  
+  // Trim and sanitize as needed  
+  foreach ($form_state['values'] as $key => $val) {
+    if (!is_array($val)) {
+      $form_state['values'][$key] = fp_trim($val);
+      if (!strstr($key, "password")) {
+        $form_state['values'][$key] = filter_plain($val);
+      }
+    }
+  }
   
   $db = get_global_database_handler();
   
@@ -1187,13 +1199,21 @@ function user_edit_student_user_form_validate($form, $form_state) {
  * Submit handler for editing student users.
  */
 function user_edit_student_user_form_submit($form, $form_state) {
-  
-  $values = $form_state["values"];
-  foreach ($values as $key => $val) {
+      
+    
+  // Trim and sanitize as needed  
+  foreach ($form_state['values'] as $key => $val) {
     if (!is_array($val)) {
-      $values[$key] = trim($val);
+      $form_state['values'][$key] = fp_trim($val);
+      if (!strstr($key, "password")) {
+        $form_state['values'][$key] = filter_plain($val);
+      }
     }
   }
+        
+  
+  $values = $form_state["values"];
+
   //fpm($values);
   $user_id = $values["user_id"];
   $student_cwid = $values["student_cwid"];
