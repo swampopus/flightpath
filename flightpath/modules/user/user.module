@@ -512,6 +512,16 @@ function user_edit_user_attributes_form() {
 
 function user_edit_user_attributes_form_submit($form, $form_state) {
   
+  // Trim and sanitize as needed  
+  foreach ($form_state['values'] as $key => $val) {
+    if (!is_array($val)) {
+      $form_state['values'][$key] = fp_trim($val);
+      if (!strstr($key, "password")) {
+        $form_state['values'][$key] = filter_plain($val);
+      }
+    }
+  }  
+  
   $values = $form_state['values'];  
   $user_id = intval($values['user_id']);
   
@@ -1843,6 +1853,17 @@ function user_edit_user_advisees_form_validate($form, $form_state) {
  * Save to the advisor_student table
  */
 function user_edit_user_advisees_form_submit($form, $form_state) {
+
+
+  // Trim and sanitize as needed  
+  foreach ($form_state['values'] as $key => $val) {
+    if (!is_array($val)) {
+      $form_state['values'][$key] = fp_trim($val);
+      if (!strstr($key, "password")) {
+        $form_state['values'][$key] = filter_plain($val);
+      }
+    }
+  }
 
   // Begin by clearing the table for this advisor.
   $faculty_cwid = trim($form_state["values"]["faculty_cwid"]);

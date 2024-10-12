@@ -660,7 +660,7 @@ function audit_comment_form_submit($form, $form_state) {
   $faculty_id = $form_state["values"]["faculty_id"];
   $student_id = $form_state["values"]["student_id"];
   $type = "audit private";  
-  $comment = trim($form_state["values"]["comment"]);
+  $comment = filter_plain($form_state["values"]["comment"]);
     
   // Perform the save!
   if ($comment) {
@@ -711,7 +711,7 @@ function audit_hidden_approval_form_submit($form, $form_state) {
   $student_id = $values["approval_student_id"];
   $approval_type = $values["approval_type"];
   $approval_value = $values["approval_value"];
-  $comment = trim($values["approval_comment"]);
+  $comment = filter_plain($values["approval_comment"]);
 
   $school_id = db_get_school_id_for_student_id($student_id);
   

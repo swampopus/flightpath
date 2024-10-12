@@ -963,7 +963,7 @@ function course_search_select_school_form() {
 
 function course_search_select_school_form_submit($form, $form_state) {
   $values = $form_state['values'];
-  fp_goto('tools/course-search', 'school_id=' . $values['school_id']);
+  fp_goto('tools/course-search', 'school_id=' . intval($values['school_id']));
 }
 
 

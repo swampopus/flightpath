@@ -289,12 +289,12 @@ function admin_copy_degree_form_submit($form, &$form_state) {
   
   $values = $form_state["values"];
 
-  $de_catalog_year = $values["de_catalog_year"];  
+  $de_catalog_year = filter_plain($values["de_catalog_year"]);  
   $school_id = intval($values['school_id']);
   $destination_school_id = intval($values['destination_school_id']);
     
-  $source_major_code = trim(strtoupper($values["source_major_code"]));
-  $destination_major_code = trim(strtoupper($values["destination_major_code"]));
+  $source_major_code = filter_plain(strtoupper($values["source_major_code"]));
+  $destination_major_code = filter_plain(strtoupper($values["destination_major_code"]));
   $include_tracks = $values["include_tracks"]["yes"];
   
 
@@ -654,15 +654,15 @@ function admin_add_degree_form_submit($form, $form_submit) {
 
   $degree_id = -1;
 
-  $de_catalog_year = $values["de_catalog_year"];
+  $de_catalog_year = filter_plain($values["de_catalog_year"]);
   // This will be used to add a new degree (and possibly track)
   // to the database.
-  $major_code = trim(strtoupper($values["major_code"]));
-  $track_code = trim(strtoupper($values["track_code"]));
+  $major_code = filter_plain(strtoupper($values["major_code"]));
+  $track_code = filter_plain(strtoupper($values["track_code"]));
   $school_id = intval($values["school_id"]);
   
-  $new_major = $values["new_major"];
-  $new_track = $values["new_track"];
+  $new_major = filter_plain($values["new_major"]);
+  $new_track = filter_plain($values["new_track"]);
 
   $allow_dynamic = variable_get("admin_degrees_default_allow_dynamic", "1");
 
@@ -1969,7 +1969,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
   // Set the scroll_top position, if it is set.
   $scroll_top = $form_state['values']['scroll_top'];  
   if (@$scroll_top != "" && intval($scroll_top) > 0) {
-    $_SESSION['scroll_top'] = $scroll_top;
+    $_SESSION['scroll_top'] = intval($scroll_top);
   }
   
   // Perform actual saves to database
@@ -1979,7 +1979,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
   
   // This will UPDATE a degree in the system with the courses
   // and groups that the user selected.
-  $perform_action2 = trim($values["perform_action2"]);
+  $perform_action2 = filter_plain($values["perform_action2"]);
 
   if (strstr($perform_action2, "delGroup")) {
     $temp = explode("_",$perform_action2);
@@ -1991,7 +1991,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
   }
 
 
-  $major_code = trim($values["major_code"]);
+  $major_code = filter_plain($values["major_code"]);
   if ($major_code == ""){ die("Fatal error:  major_code not found.");}
 
   // Since we are making a change to the draft table(s), let's add a row
@@ -2094,8 +2094,8 @@ function admin_edit_degree_form_submit($form, $form_state) {
   
   if (strstr($perform_action2, "editSemester")) {
     $temp = explode("_",$perform_action2);
-    $act = $temp[1];
-    $semester_num = $temp[2];
+    $act = filter_plain($temp[1]);
+    $semester_num = filter_plain($temp[2]);
 
     if ($act == "new") {
       // We will add a comment to the courses box, just to keep it alive, which will be ignored later.
@@ -2146,7 +2146,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
     }
     
       
-    $courses = trim(@$values["courses_$semester_num"]);
+    $courses = filter_plain(@$values["courses_$semester_num"]);
 
     // Does it contain a single #?  Or, is blank?  If so, insert and move on.
     // We do this, so we can have blank semesters until someone deletes them.
@@ -2236,7 +2236,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
       continue;
     }
     // Only look at the groups...
-    $temp = explode("_", $value);
+    $temp = explode("_", filter_plain($value));
         
     $group_id = $temp[0];
     
@@ -2382,15 +2382,15 @@ function admin_edit_degree_form_submit($form, $form_state) {
 
   // Before we UPDATE, also grab the degree title, degree_type,
   // and exclude value, etc....
-  $degree_title = trim($values["title"]);
-  $degree_type = trim($values["degree_type"]);
-  $degree_class = trim($values["degree_class"]);
-  $degree_level = strtoupper(trim($values["degree_level"]));
+  $degree_title = filter_plain($values["title"]);
+  $degree_type = filter_plain($values["degree_type"]);
+  $degree_class = filter_plain($values["degree_class"]);
+  $degree_level = strtoupper(filter_plain($values["degree_level"]));
   $exclude = intval($values["exclude"]);
   $allow_dynamic = intval($values["allow_dynamic"]);
   $advising_weight = intval($values["advising_weight"]);
-  $override_degree_hours = trim($values["override_degree_hours"]);
-  $public_note = trim($values["public_note"]);
+  $override_degree_hours = filter_plain($values["override_degree_hours"]);
+  $public_note = filter_markup($values["public_note"]);
   
   $res = db_query("UPDATE draft_degrees
               SET semester_titles_csv = ?,
@@ -2422,8 +2422,8 @@ function admin_edit_degree_form_submit($form, $form_state) {
 
 
     $track = trim($temp[1]);
-    $track_description = trim($values["track_description"]);
-    $track_title = trim($values["track_title"]);
+    $track_description = filter_markup($values["track_description"]);
+    $track_title = filter_plain($values["track_title"]);
     
     // Make sure the track exists in our draft_degree_tracks table...
     $track_id = db_result(db_query("SELECT track_id FROM draft_degree_tracks

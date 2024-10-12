@@ -1018,7 +1018,18 @@ function fp_no_html_xss($string) {
  
  
  
- 
+/**
+ * Convenience function for @see filter_markup($str, "plain")
+ */
+function filter_plain($str, $bool_trim = TRUE) {
+  $x = filter_markup($str, "plain");
+  
+  if ($bool_trim) {
+    $x = fp_trim($x);
+  }
+  
+  return $x;
+}
  
 /**
  * Filter string with possible HTML, allowing only certain tags, and removing dangerous attributes.
