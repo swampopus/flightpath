@@ -1,6 +1,11 @@
 FlightPath 7.x Changelog
 ========================
 
+
+2024-10-16
+  Tidying up code relating to querying for course_id.
+
+
 2024-10-12
   Was alerted to possible XSS vulnerabilities (fixing in this release) by Rauf Giray Doğan (https://github.com/redhotchilihacker1)
   

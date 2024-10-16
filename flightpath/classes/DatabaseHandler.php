@@ -1131,8 +1131,12 @@ $query_and_args
   
   function get_course_id($subject_id, $course_num, $catalog_year = "", $bool_use_draft = FALSE, $school_id = 0, $bool_check_allow_default_school = FALSE)
   {
+    
+    // If we were not sent a valid course name, return FALSE right away.
+    if (!$subject_id && !$course_num) return FALSE;
+    
     // Ignore the colon, if there is one.
-    if (strpos($course_num,":"))
+    if (strpos($course_num, ":") !== FALSE)
     {
       //$course_num = substr($course_num,0,-2);
       $temp = explode(":", $course_num);
