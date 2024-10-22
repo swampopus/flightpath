@@ -2255,6 +2255,8 @@ function get_term_description($term_id, $bool_abbreviate = FALSE, $school_id = 0
     // Ex:  "Fall of 2002."
     $rtn = "";
 
+    if (!$term_id) $term_id = '';
+
     // If already in our GLOBALS cache, then just return that.
     if (isset($GLOBALS['fp_cache_get_term_description'][$term_id][intval($bool_abbreviate)][$school_id])) {
       return $GLOBALS['fp_cache_get_term_description'][$term_id][intval($bool_abbreviate)][$school_id];
