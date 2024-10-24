@@ -1750,7 +1750,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
       $tokens = explode(" ", $line);
       $subject_id = $tokens[0];
       $course_num = $tokens[1];
-      $requirement_type = strtolower(@$tokens[2]);
+      $requirement_type = strtolower(fp_trim(@$tokens[2]));
 
       if ($requirement_type == "") { 
         // major type by default.
@@ -2176,7 +2176,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
       $tokens = explode(" ", $line);
       $subject_id = $tokens[0];
       $course_num = $tokens[1];
-      $requirement_type = strtolower(@$tokens[2]);
+      $requirement_type = strtolower(fp_trim(@$tokens[2]));
 
       if ($requirement_type == "") { 
         // major type by default.
