@@ -1354,9 +1354,9 @@ function system_school_data_form($school_id = 0) {
   while ($cur = db_fetch_array($result))
   {      
     
-    $title = trim($cur["title"]);
-    $subject_id = trim($cur["subject_id"]);
-    $college = trim($cur["college"]);
+    $title = fp_trim($cur["title"]);
+    $subject_id = fp_trim($cur["subject_id"]);
+    $college = fp_trim($cur["college"]);
         
     $subjects .= $subject_id . " ~ " . $college . " ~ " . $title . "\n";
   }
