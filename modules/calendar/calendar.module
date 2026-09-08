@@ -1773,12 +1773,12 @@ function calendar_schedule_appointment_confirm_form($faculty_user_id) {
   $event_type_cid = intval($_REQUEST['event_type_cid']);
   $content = content_load($event_type_cid);
 
-  $date = $_REQUEST['date'];
-  $begin_hm = $_REQUEST['begin_hm'];
+  $date = $_REQUEST['date'] ?? '';
+  $begin_hm = $_REQUEST['begin_hm'] ?? '';
   $temp = explode('-', $date);
-  $year = intval($temp[0]);
-  $month = intval($temp[1]);
-  $day = intval($temp[2]);
+  $year = intval($temp[0] ?? 0);
+  $month = intval($temp[1] ?? 0);
+  $day = intval($temp[2] ?? 0);
 
   $month_year = $month . '_' . $year;
 

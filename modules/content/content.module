@@ -1912,7 +1912,9 @@ function content_content_save(&$content) {
     $content->vid = db_insert_id();
   }
 
-  if (!$content->delete_flag) $content->delete_flag = 0;  // force content->delete_flag to equal a value.
+  if (!isset($content->delete_flag)) {
+    $content->delete_flag = 0;  // init content->delete_flag to equal a value.
+  }
 
 
   // Now we should have a fully created $content object.  Let's update the title and other values in the content table.
