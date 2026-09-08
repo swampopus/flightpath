@@ -859,7 +859,7 @@ function calendar_display_user_appointment_settings_page() {
     $edit_link = "<a href='javascript:fpOpenLargeIframeDialog(\"$url\",\"$dtitle\");'><i class='fa fa-pencil'></i></a>";
 
     $video = "-";
-    if ($content->field__video_meeting['value'] == 'zoom' && module_enabled('zoomapi')) {
+    if (module_enabled('zoomapi') && ($content->field__video_meeting['value'] ?? '') == 'zoom') {
       $video = "Zoom";
     }
 
@@ -2290,7 +2290,7 @@ function calendar_display_schedule_appointment_page($faculty_user_id) {
   }
 
 
-  $stage = trim($_REQUEST['stage']);
+  $stage = trim($_REQUEST['stage'] ?? '');
 
 
   if ($stage == '' || $stage == '1') {
@@ -2506,7 +2506,6 @@ function calendar_get_available_times_on_date($available_slots, $faculty_user_id
 
 
 
-// From: https://stackoverflow.com/questions/10309094/display-calendar-on-php/18752260
 function calendar_render_mini_calendar($month, $year, $faculty_user_id, $event_type_cid = 0, $available_slots = array()) {
 
   $today_num = intval(date('j', convert_time(time())));
@@ -2532,12 +2531,24 @@ function calendar_render_mini_calendar($month, $year, $faculty_user_id, $event_t
   $day_names = array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
 
 
-  list($month, $year, $month_name, $weekday) = explode(',', strftime('%m, %Y, %B, %w', $first_of_month));
-  $weekday = (intval($weekday) + 7 - intval($first_day)) % 7; //adjust for $first_day
-
+  // This code is deprecated in PHP 8.1...
+  //list($month, $year, $month_name, $weekday) = explode(',', strftime('%m, %Y, %B, %w', $first_of_month));
+  //$weekday = (intval($weekday) + 7 - intval($first_day)) % 7; //adjust for $first_day
   // Make sure they are integers.
-  $month = intval($month);
-  $year = intval($year);
+  //$month = intval($month);
+  //$year = intval($year);
+
+  // New code:
+
+  $date = new DateTimeImmutable('@' . $first_of_month);
+
+  $month = intval($date->format('m'));
+  $year = intval($date->format('Y'));
+  $month_name = $date->format('F');
+  $weekday = intval($date->format('w'));
+
+  $weekday = ($weekday + 7 - $first_day) % 7; //adjust for $first_day
+
 
 
 
