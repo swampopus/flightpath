@@ -3363,6 +3363,8 @@ function engagements_content_register_content_type()
 function engagements_convert_to_valid_phone_number($num)
 {
 
+  if (!$num) return FALSE;
+
   // Remove any non-numeric characters from the num.
   $num = preg_replace("/\D/", '', $num);
 
