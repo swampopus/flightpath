@@ -1157,12 +1157,12 @@ function stats_report_advisor_use($bool_only_return_total_number = FALSE) {
   $start_date = $end_date = $report_type = $whatif = $report_type = "";
 
   if (isset($_REQUEST["start_date"])) {
-    $start_date = fp_trim(addslashes((string) @$_REQUEST["start_date"]));
-    $end_date = fp_trim(addslashes((string) @$_REQUEST["end_date"]));
-    $report_type = fp_trim(addslashes((string) @$_REQUEST["report_type"]));
+    $start_date = trim(addslashes($_REQUEST["start_date"] ?? ''));
+    $end_date = trim(addslashes($_REQUEST["end_date"] ?? ''));
+    $report_type = trim(addslashes($_REQUEST["report_type"] ?? ''));
   }
   if (isset($_REQUEST['is_whatif'])) {
-    $whatif = fp_trim((string) @$_REQUEST['is_whatif']);
+    $whatif = trim($_REQUEST['is_whatif'] ?? '');
   }
 
   $selall = $selunique = "";
@@ -1338,7 +1338,7 @@ function stats_report_advisor_use($bool_only_return_total_number = FALSE) {
 
     // loop through and add in the terms
     foreach ($terms as $term_id => $term_desc) {
-      $rtn .= "<td align='center'>" . fp_trim(@$s_array[$faculty_id][$term_id]) . "</td>";
+      $rtn .= "<td align='center'>" . trim($s_array[$faculty_id][$term_id] ?? '') . "</td>";
     }
 
 
@@ -1414,7 +1414,7 @@ function stats_report_access_stats() {
               ORDER BY `timestamp` DESC
               ", $interval);
   while ($cur = db_fetch_array($res)) {
-    // extract ($cur, 3, "db");
+
 
     $wid = $cur['wid'];
     $account = fp_load_user($cur['user_id']);

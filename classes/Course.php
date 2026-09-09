@@ -1835,7 +1835,7 @@ class Course extends stdClass
                    ", $student_id, $this->course_id);
       $cur = $this->db->db_fetch_array($res);
       if ($cur) {
-        if (fp_trim(@$cur["student_specific_course_title"]) != "") {
+        if (trim($cur["student_specific_course_title"] ?? '') != "") {
           $this->title = trim($cur["student_specific_course_title"]);
         }
         // Also assign hours_awarded and other values while we are here
@@ -1855,11 +1855,11 @@ class Course extends stdClass
             $cur = $this->db->db_fetch_array($res);
             if ($cur) {
               if (trim($cur["student_specific_course_title"]) != "") {
-                $this->title = trim($cur["student_specific_course_title"]);
+                $this->title = trim($cur["student_specific_course_title"] ?? '');
               }
               // Also assign hours_awarded and other values while we are here
               if ($cur["grade"] != "" || $cur["hours_awarded"] != "") {
-                $this->set_hours_awarded(0, $cur["hours_awarded"] * 1);
+                $this->set_hours_awarded(0, floatval($cur["hours_awarded"] ?? 0) * 1);
                 $this->grade = $cur["grade"];
               }
               $this->term_id = $cur["term_id"];
@@ -2057,7 +2057,7 @@ class Course extends stdClass
   function get_bool_assigned_to_group_id($group_id) {
 
     // Trim and force NULL or 0 to be ''.  This is for PHP 8 compatibility.
-    $group_id = fp_trim($group_id);
+    $group_id = trim($group_id);
     if (is_numeric($group_id) && intval($group_id) == 0) {
       $group_id = '';
     }

@@ -986,7 +986,7 @@ function admin_duplicate_year_perform_batch_operation(&$batch, $ops, $old_year, 
     $res = db_query("SELECT * FROM draft_degrees WHERE catalog_year = ?
                         LIMIT $start_position, 15 ", $old_year);
     while ($cur = db_fetch_array($res)) {
-      //extract($cur, 3, "db");
+
 
       $db_degree_id = $cur['degree_id'];
       $db_school_id = $cur['school_id'];
@@ -1036,7 +1036,7 @@ function admin_duplicate_year_perform_batch_operation(&$batch, $ops, $old_year, 
                 WHERE degree_id = ? ", array($db_degree_id));
       while($cur3 = db_fetch_array($res3))
       {
-        //extract($cur3, 3, "db3");
+
         // If there is a required group, we must convert it to the
         // new groupID !
         $required_group_id = intval($cur3['group_id']);
@@ -1688,12 +1688,12 @@ function admin_display_watchdog_entry($wid) {
 
       <div class='watchdog-field'>
         <label>Location:</label>
-        " . str_replace("&curren", "&amp;curren", fp_trim($cur->location)) . "
+        " . str_replace("&curren", "&amp;curren", trim($cur->location ?? '')) . "
       </div>
 
       <div class='watchdog-field'>
         <label>Ref:</label>
-        " . str_replace("&curren", "&amp;curren", fp_trim($cur->referer)) . "
+        " . str_replace("&curren", "&amp;curren", trim($cur->referer ?? '')) . "
       </div>
 
       <hr>

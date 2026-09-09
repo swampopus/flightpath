@@ -292,7 +292,7 @@ class FlightPath extends stdClass
 
         // Should we rename the_semester's title (because the semester we are grabbing is overriding?)
         //$degree_plan->load_descriptive_data();   // Doesn't appear to be necessary at this stage.
-        $stitle = fp_trim(@$degree_plan->array_semester_titles[$sem->semester_num]);
+        $stitle = trim($degree_plan->array_semester_titles[$sem->semester_num] ?? '');
         if ($stitle != "") {
            // Meaning we should overwrite the semester title, because this degree isn't using the default title
            $the_semester->title = $stitle;

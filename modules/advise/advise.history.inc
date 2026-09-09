@@ -438,10 +438,10 @@ function advise_popup_display_summary($advising_session_id = NULL, $bool_html = 
   $db = get_global_database_handler();
 
   if ($advising_session_id == NULL) {
-    $advising_session_id = rtrim(fp_trim(@$_REQUEST["advising_session_id"]), ",");
+    $advising_session_id = rtrim(trim($_REQUEST["advising_session_id"] ?? ''), ",");
   }
 
-  if (@$_REQUEST['show_as_group'] === 'yes') {
+  if (($_REQUEST['show_as_group'] ?? '') === 'yes') {
     $bool_show_as_group = TRUE;
   }
 

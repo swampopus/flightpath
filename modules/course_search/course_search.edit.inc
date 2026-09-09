@@ -534,7 +534,7 @@ function course_search_display_edit_courses()
                         AND school_id = ?
                         ORDER BY subject_id, course_num ", $catalog_year, $ur, $lr, $school_id);
   while ($cur = db_fetch_array($res)) {
-    //extract($cur, 3, "db");
+
 
     $db_course_id = $cur['course_id'];
     $db_min_hours = $cur['min_hours'];
@@ -712,7 +712,7 @@ function z__course_search_get_offering_csv($school_id = 0) {
                         AND school_id = ?
                         ORDER BY subject_id, course_num ", $catalog_year, $school_id);
   while ($cur = db_fetch_array($result)) {
-    //extract($cur, 3, "db");
+
 
     $db_course_id = $cur['course_id'];
     $db_subject_id = $cur['subject_id'];

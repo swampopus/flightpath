@@ -357,7 +357,7 @@ function admin_copy_degree_form_submit($form, &$form_state) {
                         AND catalog_year = ?
                         AND school_id = ? ", $source_major_code, "$source_major_code|%", $de_catalog_year, $school_id) ;
     while($cur = db_fetch_array($res)) {
-      //extract($cur, 3, "db");
+
       $dest_code = $destination_major_code;
       if (strstr($cur['major_code'], "|")) {
         // We need to adjust the destCode to match
@@ -382,7 +382,7 @@ function admin_copy_degree_form_submit($form, &$form_state) {
   // Okay, now it's time to go through the sourceArray
   // and duplicate them.
   foreach ($source_array as $src) {
-    //extract($src, 3, "src");
+
 
     $src_major_code = $src['major_code'];
     $src_degree_id = $src['degree_id'];
@@ -874,7 +874,7 @@ function admin_display_degrees() {
   while($cur = db_fetch_array($res)) {
 
     $db_exclude = 0;
-    //extract($cur, 3, "db");
+
 
     $db_degree_id = $cur['degree_id'];
     $db_school_id = $cur['school_id'];
@@ -1136,7 +1136,7 @@ function admin_edit_degree_form($degree_id, $de_catalog_year) {
   fp_add_js(fp_get_module_path("admin") . "/js/admin.js");
   fp_add_css(fp_get_module_path("admin") . "/css/admin.css");
 
-  $button_msg = fp_trim(addslashes((string) @$_REQUEST["button_msg"]));
+  $button_msg = trim(addslashes((string) ($_REQUEST["button_msg"] ?? '')));
 
   $db = get_global_database_handler();
 
@@ -1789,7 +1789,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
     }
 
 
-    $courses = fp_trim(@$values["courses_$semester_num"]);
+    $courses = trim($values["courses_$semester_num"] ?? '');
 
     // Does it contain a single #?  Or, is blank?  If so, insert and move on.
     // We do this, so we can have blank semesters until someone deletes them.
@@ -1813,7 +1813,7 @@ function admin_edit_degree_form_validate($form, &$form_state) {
       $tokens = explode(" ", $line);
       $subject_id = $tokens[0];
       $course_num = $tokens[1];
-      $requirement_type = strtolower(fp_trim(@$tokens[2]));
+      $requirement_type = strtolower(trim($tokens[2] ?? ''));
 
       if ($requirement_type == "") {
         // major type by default.
@@ -2242,7 +2242,7 @@ function admin_edit_degree_form_submit($form, $form_state) {
       $tokens = explode(" ", $line);
       $subject_id = $tokens[0];
       $course_num = $tokens[1];
-      $requirement_type = strtolower(fp_trim(@$tokens[2]));
+      $requirement_type = strtolower(trim($tokens[2] ?? ''));
 
       if ($requirement_type == "") {
         // major type by default.

@@ -585,7 +585,7 @@ class Student extends stdClass
     $lines = explode("\n", $temp);
     foreach ($lines as $line) {
       $temp = explode("~", $line);
-      $rank_array[trim($temp[0])] = fp_trim(@$temp[1]);
+      $rank_array[trim($temp[0])] = trim($temp[1] ?? '');
     }
 
     $rank_desc = @$rank_array[$rank_code];
@@ -801,7 +801,7 @@ class Student extends stdClass
 
 
       $new_course->term_id = $cur['term_id'];
-      if (strstr(fp_trim(@$new_course->term_id), "9999")) {
+      if (strstr(trim($new_course->term_id ?? ''), "9999")) {
         // was an unknown semester.  Let's set it lower so
         // it doesn't screw up my sorting.
         $new_course->term_id = Course::COURSE_UNKNOWN_TERM_ID;

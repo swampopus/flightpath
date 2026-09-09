@@ -323,8 +323,8 @@ function fp_get_degree_title($degree_id, $bool_include_track_title = FALSE, $boo
       // This means that there is a track.  Get all the information
       // you can about it.
       $temp = explode("_", $major_code);
-      $track_code = fp_trim(@$temp[1]);
-      $major_code = fp_trim(@$temp[0]);
+      $track_code = trim($temp[1] ?? '');
+      $major_code = trim($temp[0] ?? '');
 
       // The major_code might now have a | at the very end.  If so,
       // get rid of it.
@@ -523,9 +523,9 @@ function fp_get_user_timezone($account = NULL) {
 
   $utz = NULL;
   if (isset($account->settings['timezone'])) {
-    $utz = fp_trim($account->settings['timezone']);
+    $utz = trim($account->settings['timezone'] ?? '');
   }
-  if ($utz) return $utz;
+  if ($utz && $utz != '') return $utz;
 
   // Else...
 

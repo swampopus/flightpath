@@ -2,13 +2,13 @@
 
 /**
  * This file should contain only hooks relating to installing, enabling, disabling, and uninstalling this module.
- *  
+ *
 */
 
 
 /**
  * Hook install.  Called when the module is installed on the admin modules page.
- * 
+ *
  */
 function alerts_install() {
 
@@ -18,7 +18,7 @@ CREATE TABLE `content__alert` (
   `vid` int(10) unsigned NOT NULL,
   `field__student_id` varchar(255) DEFAULT NULL,
   `field__target_faculty_id` varchar(255) DEFAULT NULL,
-  `field__exclude_advisor` tinyint(4) DEFAULT 0,  
+  `field__exclude_advisor` tinyint(4) DEFAULT 0,
   `field__alert_status` varchar(255) DEFAULT NULL,
   `field__tags` text DEFAULT NULL,
   `field__alert_msg` longtext DEFAULT NULL,
@@ -30,16 +30,16 @@ CREATE TABLE `content__alert` (
   KEY `field__alert_msg` (`field__alert_msg`(768)),
   KEY `field__visibility` (`field__visibility`),
   KEY `field__exclude_advisor` (`field__exclude_advisor`),
-  KEY `field__target_faculty_id` (`field__target_faculty_id`),  
+  KEY `field__target_faculty_id` (`field__target_faculty_id`),
   KEY `field__tags` (`field__tags`(500))
-);  
+);
   ";
   db_query($q);
 
 
 
 
-  
+
 
 
   $q = "
@@ -54,22 +54,22 @@ CREATE TABLE `content__activity_record` (
   KEY `field__student_id` (`field__student_id`) ,
   KEY `field__alert_status` (`field__activity_type`),
   KEY `field__faculty_id` (`field__faculty_id`)
-);  
+);
   ";
   db_query($q);
-  
 
 
 
 
-    
+
+
 } // hook_install
 
 
 function alerts_update($old_schema, $new_schema) {
-  
-      
-    
+
+
+
 } // hook_update
 
 

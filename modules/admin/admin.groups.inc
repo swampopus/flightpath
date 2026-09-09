@@ -806,7 +806,7 @@ function admin_edit_group_form() {
   // Advanced options
   $elements = array();
   $bool_start_closed = TRUE;
-  if (fp_trim($group->public_note) != "" || fp_trim($group->data_entry_comment) != "") {
+  if (trim($group->public_note ?? '') != "" || trim($group->data_entry_comment ?? '') != "") {
     $bool_start_closed = FALSE;
   }
 
@@ -814,7 +814,7 @@ function admin_edit_group_form() {
     'type' => 'textarea',
     'label' => t('Public Note'),
     'rows' => 4,
-    'value' => @$group->public_note,
+    'value' => $group->public_note ?? '',
     'description' => t("You may enter simple HTML in this field. Ex: &lt;b&gt;bold&lt;/b&gt; or &lt;i&gt;italics&lt;/i&gt;"),
     'popup_description' => t("A public note will appear at the top of the group when displayed in the dialog popup in FlightPath."),
     "weight" => 50010,
@@ -1065,8 +1065,8 @@ function admin_get_courses_from_definition($definition, $catalog_year = "", $sch
     if ($line == "~~" || $line == "") continue;
     $count++;
     $temp = explode(" ~~ ", $line);
-    $si = fp_trim(@$temp[0]);
-    $cn = fp_trim(@$temp[1]);
+    $si = trim($temp[0] ?? '');
+    $cn = trim($temp[1] ?? '');
 
     @$rtn["text"] .= "$si $cn\n";
 
@@ -1580,7 +1580,7 @@ function admin_groups_list_filter_form() {
 
   $filter_name_value = '';
   if (isset($_SESSION['groups_filter_name'])) {
-    $filter_name_value = fp_trim($_SESSION['groups_filter_name']);
+    $filter_name_value = trim($_SESSION['groups_filter_name'] ?? '');
   }
   $form['filter_name'] = array(
     'type' => 'textfield',

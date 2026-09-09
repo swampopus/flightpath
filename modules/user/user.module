@@ -516,7 +516,7 @@ function user_edit_user_attributes_form_submit($form, $form_state) {
   // Trim and sanitize as needed
   foreach ($form_state['values'] as $key => $val) {
     if (!is_array($val)) {
-      $form_state['values'][$key] = fp_trim($val);
+      $form_state['values'][$key] = trim($val);
       if (!strstr($key, "password")) {
         $form_state['values'][$key] = filter_plain($val);
       }
@@ -1147,9 +1147,9 @@ function user_user_settings_form_validate($form, $form_state) {
   global $user;
 
   $values = $form_state['values'];
-  $current_password = fp_trim(@$values['current_password']);
-  $new_password1 = fp_trim(@$values['new_password1']);
-  $new_password2 = fp_trim(@$values['new_password2']);
+  $current_password = trim($values['current_password'] ?? '');
+  $new_password1 = trim($values['new_password1'] ?? '');
+  $new_password2 = trim($values['new_password2'] ?? '');
 
   if ($new_password1 != "" || $new_password2 != "") {
 
@@ -1188,16 +1188,16 @@ function user_user_settings_form_validate($form, $form_state) {
 function user_user_settings_form_submit($form, $form_state) {
   global $user;
 
-  $timezone = fp_trim(@$form_state['values']['timezone']);
-  $hide_charts = fp_trim(@$form_state['values']['hide_charts']);
-  $image_url = fp_trim(@$form_state['values']['image_url']);
-  $default_student_load_tab = fp_trim(@$form_state['values']['default_student_load_tab']);
-  $default_notification_method = fp_trim(@$form_state['values']['default_notification_method']);
+  $timezone = trim($form_state['values']['timezone'] ?? '');
+  $hide_charts = trim($form_state['values']['hide_charts'] ?? '');
+  $image_url = trim($form_state['values']['image_url'] ?? '');
+  $default_student_load_tab = trim($form_state['values']['default_student_load_tab'] ?? '');
+  $default_notification_method = trim($form_state['values']['default_notification_method'] ?? '');
 
   $phone_number = user_get_attribute($user->id, 'mobile_phone', '');
   $phone_number = engagements_convert_to_valid_phone_number($phone_number);
 
-  $sms_opt_out = fp_trim(@$form_state['values']['sms_opt_out__' . $phone_number]);
+  $sms_opt_out = trim($form_state['values']['sms_opt_out__' . $phone_number] ?? '');
 
   if ($sms_opt_out === 'yes' && $phone_number) {
 
@@ -1219,7 +1219,7 @@ function user_user_settings_form_submit($form, $form_state) {
   }
 
   // are we updating password?  (If we made it here, we have already passed validation, and may continue.
-  $new_password1 = fp_trim(@$form_state['values']['new_password1']);
+  $new_password1 = trim(@$form_state['values']['new_password1'] ?? '');
 
   if ($new_password1 != "") {
     $new_pass = user_hash_password($new_password1);
@@ -1572,8 +1572,8 @@ function user_permissions_form_submit($form, $form_submit) {
       if (is_array($val)) {
         $cb = current($val);
       }
-      else if (fp_trim($val) != "") {
-        $cb = fp_trim($val);
+      else if (trim($val) != "") {
+        $cb = trim($val);
       }
 
       if (strstr($cb, "___")) {
@@ -2224,7 +2224,7 @@ function user_edit_user_form_validate($form, $form_state) {
   // already in use.
   if ($values["faculty_cwid"] == "new") {
     $new_cwid = trim($values["new_faculty_cwid"]);
-    $new_user_name = fp_trim(filter_plain($values["new_user_name"]));
+    $new_user_name = trim(filter_plain($values["new_user_name"] ?? ''));
 
 
     // Check that username is at least 4 characters
@@ -2266,7 +2266,7 @@ function user_edit_user_form_submit($form, $form_state) {
   // Trim and sanitize as needed
   foreach ($form_state['values'] as $key => $val) {
     if (!is_array($val)) {
-      $form_state['values'][$key] = fp_trim($val);
+      $form_state['values'][$key] = trim($val);
       if (!strstr($key, "password")) {
         $form_state['values'][$key] = filter_plain($val);
       }
@@ -2464,8 +2464,8 @@ function user_display_users() {
   );
 
 
-  $ur = fp_trim(@$_GET["ur"]);
-  $lr = fp_trim(@$_GET["lr"]);
+  $ur = trim($_GET["ur"] ?? '');
+  $lr = trim($_GET["lr"] ?? '');
 
   if ($ur == "" && !isset($_SESSION['users_filter_submit'])) {
   //if ($ur == "") {
@@ -2833,10 +2833,10 @@ function user_list_filter_form_submit($form, $form_state) {
   unset($_SESSION['users_filter_submit']);
 
   if ($values['submit_btn'] != '') {
-    $_SESSION['users_filter_name'] = fp_trim(@$values['filter_name']);
-    $_SESSION['users_filter_school'] = fp_trim(@$values['filter_school']);
-    $_SESSION['users_filter_dept'] = fp_trim(@$values['filter_dept']);
-    $_SESSION['users_filter_role'] = fp_trim(@$values['filter_role']);
+    $_SESSION['users_filter_name'] = trim($values['filter_name'] ?? '');
+    $_SESSION['users_filter_school'] = trim($values['filter_school'] ?? '');
+    $_SESSION['users_filter_dept'] = trim($values['filter_dept'] ?? '');
+    $_SESSION['users_filter_role'] = trim($values['filter_role'] ?? '');
 
     $_SESSION['users_filter_submit'] = "yes"; // simply notes that we did indeed press the submit btn.
 

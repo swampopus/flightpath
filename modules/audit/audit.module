@@ -411,10 +411,10 @@ function audit_display_audit() {
 
       // Okay, let's display our row normally now:
 
-      $fhrs = fp_trim(@$degree_plan->gpa_calculations[$gpa_degree_id][$type]["fulfilled_hours"]);
-      $thrs = fp_trim(@$degree_plan->gpa_calculations[$gpa_degree_id][$type]["total_hours"]);
-      $qpts = fp_trim(@$degree_plan->gpa_calculations[$gpa_degree_id][$type]["qpts"]);
-      $qhrs = fp_trim(@$degree_plan->gpa_calculations[$gpa_degree_id][$type]["qpts_hours"]);
+      $fhrs = trim($degree_plan->gpa_calculations[$gpa_degree_id][$type]["fulfilled_hours"] ?? '');
+      $thrs = trim($degree_plan->gpa_calculations[$gpa_degree_id][$type]["total_hours"] ?? '');
+      $qpts = trim($degree_plan->gpa_calculations[$gpa_degree_id][$type]["qpts"] ?? '');
+      $qhrs = trim($degree_plan->gpa_calculations[$gpa_degree_id][$type]["qpts_hours"] ?? '');
 
       $rtn .= "
         <tr class='audit-req audit-req-$type audit-row-$pol'>

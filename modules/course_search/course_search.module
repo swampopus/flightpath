@@ -350,7 +350,7 @@ function course_search_display_courses() {
 
   // catalog_year is always just whatever the current year is.
   $catalog_year = $current_catalog_year;
-  $subject_id = fp_trim(@$_REQUEST["subject_id"]);
+  $subject_id = trim($_REQUEST["subject_id"] ?? '');
 
 
 

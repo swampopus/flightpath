@@ -824,7 +824,7 @@ fp_mail(variable_get("notify_mysql_error_email_address",''), "FlightPath MYSQL E
    */
   function get_group_name($group_id) {
     $temp = explode("_", $group_id);
-    $group_id = fp_trim(@$temp[0]);
+    $group_id = trim($temp[0] ?? '');
 
 
     // If it's already in our static cache, just return that.
@@ -921,7 +921,7 @@ fp_mail(variable_get("notify_mysql_error_email_address",''), "FlightPath MYSQL E
                 AND school_id = ?", $institution_id, $school_id);
     $cur = $this->db_fetch_array($res);
     if ($cur) {
-      return fp_trim(@$cur['name']);
+      return trim($cur['name'] ?? '');
     }
 
     return ''; // nothing found, so return blank

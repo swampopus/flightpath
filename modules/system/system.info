@@ -2,4 +2,3 @@ name = System
 description = This module controls various settings for FlightPath, and is required for FlightPath to run.  It cannot be disabled.
 core = 8.x
 required = true
-schema = 7

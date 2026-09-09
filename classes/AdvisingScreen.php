@@ -492,7 +492,7 @@ function draw_menu_items($menu_array) {
     $page_template_filename = $theme . "/page.tpl.php";
 
     // If there is a special theme file we should be using based on the URL, set it here.
-    $q = fp_trim(strtolower((string) @$_REQUEST['q']));
+    $q = trim(strtolower((string) ($_REQUEST['q'] ?? '')));
     if ($q) {
       $q = trim(str_replace("/", "-", $q));
       if ($q) {
@@ -893,23 +893,23 @@ function draw_menu_items($menu_array) {
         $extra = ".";
 
         $temp = explode(" ~~ ", $line);
-        $o_course = fp_trim(@$temp[0]);
-        $new_course = fp_trim(@$temp[1]);
-        $using_hours = fp_trim(@$temp[2]);
+        $o_course = trim($temp[0] ?? '');
+        $new_course = trim($temp[1] ?? '');
+        $using_hours = trim($temp[2] ?? '');
         if ($using_hours != "")
         {
           $using_hours = "($using_hours " . t("hrs") . ")";
         }
-        $in_group = fp_trim(@$temp[3]);
-        $sub_id = fp_trim(@$temp[4]);
+        $in_group = trim($temp[3] ?? '');
+        $sub_id = trim($temp[4] ?? '');
 
 
         $fbetween = $fn_between[$fn_type];
 
         $sub_details = $this->db->get_substitution_details($sub_id);
 
-        $remarks = fp_trim(@$sub_details["remarks"]);
-        $sub_faculty_id = @$sub_details["faculty_id"];
+        $remarks = trim(@$sub_details["remarks"] ?? '');
+        $sub_faculty_id = $sub_details["faculty_id"] ?? '';
 
         $sub_degree_plan = new DegreePlan();
         $sub_degree_plan->degree_id = @$sub_details["required_degree_id"];
@@ -5603,8 +5603,8 @@ function draw_menu_items($menu_array) {
     $bool_unselectableCourses = false;
     $final_course_list = new CourseList();
 
-    $public_note = fp_trim($group->public_note);
-    if ($public_note) {
+    $public_note = trim($group->public_note ?? '');
+    if ($public_note && $public_note != '') {
       $pC .= "<tr><td colspan='8'><div class='group-public-note'>" . $public_note . "</div></td></tr>";
     }
 
@@ -5633,7 +5633,7 @@ function draw_menu_items($menu_array) {
         {
           // First, check to see if the user has already
           // selected a subject.
-          $selected_subject = addslashes(fp_trim(@$_GET["selected_subject"]));
+          $selected_subject = addslashes(trim($_GET["selected_subject"] ?? ''));
           if ($selected_subject == "")
           {
             // Prompt them to select a subject first.

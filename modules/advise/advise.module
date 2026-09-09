@@ -909,12 +909,12 @@ function advise_display_popup_change_track() {
       for ($t = 0; $t < count($tracks); $t++)
       {
         $temp = explode(" ~~ ", $tracks[$t]);
-        $track_code = fp_trim(@$temp[0]);
-        $track_title = fp_trim(@$temp[1]);
-        $track_description = fp_trim(@$temp[2]);
+        $track_code = trim($temp[0] ?? '');
+        $track_title = trim($temp[1] ?? '');
+        $track_description = trim($temp[2] ?? '');
 
         // if this track is NOT of the same classification as the current machine_code, we skip it.
-        $track_machine_name = trim((string) @$temp[4]);
+        $track_machine_name = trim((string) ($temp[4] ?? ''));
 
         if ($track_machine_name != $machine_name) continue; // not the right degree_class
 
@@ -935,9 +935,9 @@ function advise_display_popup_change_track() {
       for ($t = 0; $t < count($tracks); $t++)
       {
         $temp = explode(" ~~ ", $tracks[$t]);
-        $track_code = fp_trim(@$temp[0]);
-        $track_title = fp_trim(@$temp[1]);
-        $track_degree_id = intval(trim((string) @$temp[3]));
+        $track_code = trim($temp[0] ?? '');
+        $track_title = trim($temp[1] ?? '');
+        $track_degree_id = intval(trim((string) ($temp[3] ?? '')));
         $track_description = "";
 
         // if this track is NOT of the same classification as the current machine_code, we skip it.
@@ -965,7 +965,7 @@ function advise_display_popup_change_track() {
 
 
         if ($bool_default_description == false) {
-          $track_description = filter_markup(fp_trim(@$temp[2]));
+          $track_description = filter_markup(trim($temp[2] ?? ''));
         }
 
         $temp_tc = $track_code;
@@ -1333,18 +1333,18 @@ function advise_display_popup_substitute_selected() {
 
 
 
-  $course_id = fp_trim(@$_GET["course_id"]);
-  $group_id = fp_trim(@$_GET["group_id"]);
-  $semester_num = fp_trim(@$_GET["semester_num"]);
-  $req_by_degree_id = fp_trim(@$_GET["req_by_degree_id"]);
+  $course_id = trim($_GET["course_id"] ?? '');
+  $group_id = trim($_GET["group_id"] ?? '');
+  $semester_num = trim($_GET["semester_num"] ?? '');
+  $req_by_degree_id = trim($_GET["req_by_degree_id"] ?? '');
 
   $hours_avail = '';
   if (isset($_GET["group_hours_remaining"])) {
-    $hours_avail = fp_trim($_GET["group_hours_remaining"]);
+    $hours_avail = trim($_GET["group_hours_remaining"] ?? '');
   }
 
-  if (@$_GET["hours_avail"] * 1 > 0) {
-    $hours_avail = $_GET["hours_avail"] * 1;
+  if (($_GET["hours_avail"] ?? 0) * 1 > 0) {
+    $hours_avail = floatval($_GET["hours_avail"] ?? 0) * 1;
   }
 
 
@@ -2634,7 +2634,7 @@ function advise_init_screen() {
 
 
   // Attempt to load the course inventory cache...
-  if (isset($_SESSION["fp_cache_course_inventory"]) && fp_trim($_SESSION["fp_cache_course_inventory"]) != '') {
+  if (isset($_SESSION["fp_cache_course_inventory"]) && trim($_SESSION["fp_cache_course_inventory"] ?? '') != '') {
     if ($course_inventory = unserialize($_SESSION["fp_cache_course_inventory"])) {
       $GLOBALS["fp_course_inventory"] = $course_inventory;
     }

@@ -760,7 +760,7 @@ function arg($index) {
   $q = $_REQUEST["q"];
   $temp = explode("/", $q);
 
-  $rtn = fp_trim(@$temp[$index]);
+  $rtn = trim($temp[$index] ?? '');
 
   return $rtn;
 
@@ -1202,7 +1202,7 @@ function repair_html($html){
 function filter_plain($str, $bool_trim = TRUE) {
   $x = filter_markup($str, "plain");
   if ($bool_trim) {
-    $x = fp_trim($x);
+    $x = trim($x ?? '');
   }
   return $x;
 }
@@ -1589,8 +1589,8 @@ function fp_get_degree_classifications() {
   $temp = explode("\n", variable_get("degree_classifications_level_1", "MAJOR ~ Major"));
   foreach ($temp as $line) {
     $temp2 = explode("~", $line);
-    $machine_name = fp_trim(@$temp2[0]);
-    $title = fp_trim(@$temp2[1]);
+    $machine_name = trim($temp2[0] ?? '');
+    $title = trim($temp2[1] ?? '');
     if ($machine_name != "") {
       $rtn["levels"][1][$machine_name] = $title;
       $rtn["machine_names"][$machine_name] = $title;
@@ -1602,8 +1602,8 @@ function fp_get_degree_classifications() {
   $temp = explode("\n", variable_get("degree_classifications_level_2", "MINOR ~ Minor"));
   foreach ($temp as $line) {
     $temp2 = explode("~", $line);
-    $machine_name = fp_trim(@$temp2[0]);
-    $title = fp_trim(@$temp2[1]);
+    $machine_name = trim($temp2[0] ?? '');
+    $title = trim($temp2[1] ?? '');
     if ($machine_name != "") {
       $rtn["levels"][2][$machine_name] = $title;
       $rtn["machine_names"][$machine_name] = $title;
@@ -1616,8 +1616,8 @@ function fp_get_degree_classifications() {
   $temp = explode("\n", variable_get("degree_classifications_level_3", "CONC ~ Concentration"));
   foreach ($temp as $line) {
     $temp2 = explode("~", $line);
-    $machine_name = fp_trim(@$temp2[0]);
-    $title = fp_trim(@$temp2[1]);
+    $machine_name = trim($temp2[0] ?? '');
+    $title = trim($temp2[1] ?? '');
     if ($machine_name != "") {
       $rtn["levels"][3][$machine_name] = $title;
       $rtn["machine_names"][$machine_name] = $title;
@@ -2730,33 +2730,6 @@ function fp_recalculate_alert_count_by_type($account = NULL) {
 
 
 
-/**
- * This is a simple function which attempts to trim a String.  However, if $val is NOT a string, it will
- * cast it to string.
- *
- * This is to prevent deprecated warnings in PHP 8+, and can be used as
- * a drop-in replacement in place of trim()
- */
-function fp_trim($val = NULL) {
-
-  if (is_string($val)) {
-    return trim($val);
-  }
-
-  if (is_numeric($val)) {
-    $val = "" . $val;
-    return trim($val);
-  }
-
-  if ($val === NULL || $val === FALSE) {
-    return '';
-  }
-
-
-  // if $val is an array or object, intentionally return the trim() so it will cause a warning.
-  return trim($val);
-
-}
 
 
 /**

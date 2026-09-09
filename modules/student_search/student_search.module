@@ -545,7 +545,7 @@ function student_search_display_majors_search($limit = 20) {
   $_SESSION["student_search_last_tab"] = "majors-search";
 
   // Get the $major_code from the REQUEST, or from the user's saved settings.
-  $major_code = fp_trim(@$_REQUEST["major_code"]);
+  $major_code = trim($_REQUEST["major_code"] ?? '');
   if ($major_code == "") {
     // Get from their settings
     $major_code = db_get_user_setting($user->id, "major_search");
@@ -841,7 +841,7 @@ function student_search_search_form() {
 
 
       $temp = explode(" ",$search_for);
-      if (isset($temp[1]) && fp_trim(@$temp[1]) != "")
+      if (isset($temp[1]) && trim($temp[1]) != "")
       {
         $fn = trim($temp[0]);
         $ln = trim($temp[1]);

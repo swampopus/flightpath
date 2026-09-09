@@ -222,9 +222,9 @@ function engagements_handle_incoming_mailgun_email() {
   // In this case, $key is our mailgun api key. Configured in the Engagements - email settings section.
   // This should be the "HTTP webhook signing Key".  Go to mailgun dashboard.  Lower right will be a link to the API Keys
 
-  $timestamp = fp_trim(@$_POST['timestamp']);
-  $token = fp_trim(@$_POST['token']);
-  $signature = fp_trim(@$_POST['signature']);
+  $timestamp = trim($_POST['timestamp'] ?? '');
+  $token = trim($_POST['token'] ?? '');
+  $signature = trim($_POST['signature'] ?? '');
   $api_key = variable_get('engagements_mailgun_api_key', 'NONE SET');
 
   $confirm_hash = hash_hmac('sha256', $timestamp . $token, $api_key);
@@ -305,7 +305,7 @@ function engagements_handle_incoming_mailgun_email() {
   // Note: From gmail, the content-id-map has no useful information.  Very strange.  But what we DO have is the "alt" tag.
   // See: <img src="cid:ii_lwy9bb9j1" alt="um actually.png" width="399" height="398">
   // We can use THAT to figure out the inline image, since [name] in the FILES states the filename.
-  $content_id_map = fp_trim(@$_POST['content-id-map']);
+  $content_id_map = trim($_POST['content-id-map'] ?? '');
 
   // Our attachments are in $_FILES...
   /*
@@ -3492,7 +3492,7 @@ function engagements_form_alter(&$form, $form_id)
           $extra_mark = "";
 
           if ($form['engagement_type']['value'] == 'email') {
-            $extra_mark = fp_trim(fp_get_student_email($form['student_id']['value']));
+            $extra_mark = trim(fp_get_student_email($form['student_id']['value'] ?? ''));
             $bool_no_email = FALSE;
             if ($extra_mark == "") {
               $extra_mark = "(" . t("NO EMAIL ADDRESS AVAILABLE") . ")";
@@ -3881,7 +3881,7 @@ function engagements_send_email_or_txt_form_submit($form, &$form_state)
     // Were there any attachments with this content?
 
     $attachments = array();
-    $attachment_csv = fp_trim(@$content->field__attachment['value']);
+    $attachment_csv = trim($content->field__attachment['value'] ?? '');
     if ($attachment_csv) {
       $temp = explode(",", $attachment_csv);
       foreach ($temp as $fid) {
@@ -4269,7 +4269,7 @@ function engagements_display_main()
       if ($fid_csv) {
         $attachment_icon = "<i class='fa fa-paperclip'></i> ";
         $attachments = array();
-        $attachment_csv = fp_trim(@$content->field__attachment['value']);
+        $attachment_csv = trim($content->field__attachment['value'] ?? '');
         // TODO:  An option here would be to just query the content_files table for this cid.
 
 

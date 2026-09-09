@@ -1225,10 +1225,10 @@ function system_perform_db_updates_perform_batch_operation(&$batch, $modules) { 
     $modules[$t] = array();  // not set, so just make it a blank array.
   }
 
-  $module = fp_trim(@$modules[$t]['module']);
-  $path = @$modules[$t]['path'];
-  $cur_schema = @$modules[$t]['cur_schema'];
-  $schema = @$modules[$t]['schema'];
+  $module = trim($modules[$t]['module'] ?? '');
+  $path = $modules[$t]['path'] ?? '';
+  $cur_schema = $modules[$t]['cur_schema'] ?? 0;
+  $schema = $modules[$t]['schema'] ?? 0;
 
   if ($module) {
     // If the module has a .install file, begin by including it.
@@ -1659,9 +1659,9 @@ function system_school_data_form($school_id = 0) {
   while ($cur = db_fetch_array($result))
   {
 
-    $title = fp_trim($cur["title"]);
-    $subject_id = fp_trim($cur["subject_id"]);
-    $college = fp_trim($cur["college"]);
+    $title = trim($cur["title"] ?? '');
+    $subject_id = trim($cur["subject_id"] ?? '');
+    $college = trim($cur["college"] ?? '');
 
     $subjects .= $subject_id . " ~ " . $college . " ~ " . $title . "\n";
   }
@@ -3038,7 +3038,7 @@ function system_cron() {
 
       // is there anything for us to email?
       $emsg = file_get_contents($error_files_dir . '/fp_php_errors_to_email_log.txt');
-      if ($emsg && fp_trim($emsg) != "") {
+      if ($emsg && trim($emsg ?? '') != "") {
         $hostname = php_uname('n');
         fp_mail($tomail, "PHP Error(s) in FlightPath ($hostname)", $emsg);
         // Make the file blank.

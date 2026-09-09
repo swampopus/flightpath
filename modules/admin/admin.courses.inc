@@ -23,18 +23,18 @@ function admin_display_courses() {
 
   $cc = 1;
 
-  $show_hidden = fp_trim(@$_GET["show_hidden"]);
+  $show_hidden = trim($_GET["show_hidden"] ?? '');
   if ($show_hidden != "") {
     $_SESSION["dehidden"] = $show_hidden;
   }
   else {
-    $show_hidden = @$_SESSION["dehidden"];
+    $show_hidden = $_SESSION["dehidden"] ?? '';
   }
 
   // Get the "upper range" (UR) and
   // lower range (LR) of the courses in question...
-  $ur = fp_trim(@$_GET["ur"]);
-  $lr = fp_trim(@$_GET["lr"]);
+  $ur = trim($_GET["ur"] ?? '');
+  $lr = trim($_GET["lr"] ?? '');
   if ($ur == "") {
     // meaning, no range was set.  Use A - AZZZZZ, so, all of the A's.
     $ur = @$_SESSION["dec_ur"];
@@ -164,7 +164,6 @@ function admin_display_courses() {
                         ORDER BY subject_id, course_num";
   $result = db_query($q, $de_catalog_year, $ur, $lr);
   while ($cur = db_fetch_array($result)) {
-    //extract($cur, 3, "db");
 
     $db_course_id = $cur['course_id'];
     $db_subject_id = $cur['subject_id'];
@@ -385,10 +384,10 @@ function admin_edit_course_form() {
 
   $db = get_global_database_handler();
 
-  $course_id = fp_trim(@$_REQUEST["course_id"]);
-  $subject_id = fp_trim(@$_REQUEST["subject_id"]);
+  $course_id = trim($_REQUEST["course_id"] ?? '');
+  $subject_id = trim($_REQUEST["subject_id"] ?? '');
   $subject_id = str_replace("_A_","&",$subject_id);
-  $course_num = fp_trim(@$_REQUEST["course_num"]);
+  $course_num = trim($_REQUEST["course_num"] ?? '');
 
   $school_id = $db->get_school_id_for_course_id($course_id, TRUE);
   $de_catalog_year = admin_get_de_catalog_year(TRUE, $school_id);
@@ -696,8 +695,8 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
     if ($course == "") { continue; }
 
     $temp = explode(" ", $course);
-    $subject_id = fp_trim(@$temp[0]);
-    $course_num = fp_trim(@$temp[1]);
+    $subject_id = trim($temp[0] ?? '');
+    $course_num = trim($temp[1] ?? '');
 
     ////////////
     ///  Error conditions...
@@ -712,7 +711,7 @@ function admin_edit_course_form_submit(&$form, &$form_submit) {
 
     $exclude = 0;
     // Do we exclude?
-    if (isset($temp[2]) && strtolower(fp_trim($temp[2])) == "exclude") {
+    if (isset($temp[2]) && strtolower(trim($temp[2] ?? '')) == "exclude") {
       $exclude = 1;
       // Set ALL courses with this subject_id and course_num to exclude!
       $res = db_query("UPDATE draft_courses
