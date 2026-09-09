@@ -689,7 +689,7 @@ function install_display_lang_selection() {
 
 
 
-function install_output_to_browser($page_content, $page_title = "Install FlightPath 7") {
+function install_output_to_browser($page_content, $page_title = "Install FlightPath 8") {
   print "
           <html>
             <head>

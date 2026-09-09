@@ -1,9 +1,9 @@
 <?php
 /**
  * This file is meant to be used entirely via the command-line interface.  It will not function for web browsers.
- * 
+ *
  * Example use:  php cli.php clear-cache   (clears all cache)
- * 
+ *
 */
 
 
@@ -41,12 +41,12 @@ if ($command_one == "" || $command_one == "-h" || $command_one == "--help" || $c
   print "\n  Note:  The 'sudo -u www-data' prefix ensures this is run as your webserver's user.";
   print "\n         If www-data is not the name of your webserver's user, replace with whatever it is.";
   print "\n         Some actions may not work correctly unless being run as the webserver's user.";
-  
+
   print "\n\nOPTIONS:";
   print "\n   clear-cache   -  Clear system cache.";
   print "\n   run-updates   -  Run db updates for modules and system.  Will also clear cache when done.";
-  
-  print "\n\n";  
+
+  print "\n\n";
 }
 
 
@@ -56,7 +56,7 @@ if ($command_one == "" || $command_one == "-h" || $command_one == "--help" || $c
 // Based on command, perform action.
 
 if ($command_one == 'clear-cache') {
-  print "\n - Clearing cache...";  
+  print "\n - Clearing cache...";
   fp_clear_cache();
   print "\n --> Cache has been cleared.";
 }
@@ -67,7 +67,7 @@ if ($command_one == 'run-updates') {
   system_confirm_db_updates_form_submit(array(), array());
   $batch_id = $_SESSION['fp_batch_id'];
   $batch = batch_get($batch_id);
-  
+
   if ($batch && is_array($batch) && isset($batch['operation'][1][0]) && count($batch['operation'][1][0]) > 0) {
     $modules = $batch['operation'][1][0];
     while (true) {
@@ -75,21 +75,21 @@ if ($command_one == 'run-updates') {
       print "\n -- Updated " . @$modules[$batch['results']['current'] - 1]['module'] . "";
       if ($batch['results']['finished']) {
         break;
-      }        
+      }
     } // while
   }
   else {
     print "\n -- No modules have DB updates to perform.";
   }
-  
-  
+
+
   print "\n --> DB Update of modules completed.";
 
-  print "\n - Clearing cache...";  
+  print "\n - Clearing cache...";
   fp_clear_cache();
   print "\n --> Cache has been cleared.";
-  
-   
+
+
 }
 
 
@@ -108,7 +108,7 @@ die;  // Finished with the script.  Functions go below to make it more tidy.
 ///////////////////////////////////////////////////
 ///////////////////////////////////////////////////
 /**
- *  Returns TRUE or FALSE if we are in CLI mode.  Borrowed code from Drupal 7: https://api.drupal.org/api/drupal/includes!bootstrap.inc/function/drupal_is_cli/7.x
+ *  Returns TRUE or FALSE if we are in CLI mode.
  */
 function flightpath_is_cli() {
   return !isset($_SERVER['SERVER_SOFTWARE']) && (php_sapi_name() == 'cli' || is_numeric($_SERVER['argc']) && $_SERVER['argc'] > 0);

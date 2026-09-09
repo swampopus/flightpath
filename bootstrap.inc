@@ -4,7 +4,7 @@
  * @file
  * This file should be included by every public-facing page of FlightPath.
  * It will include all the classes, as well as settings and function files, and modules.
- * 
+ *
 */
 
 
@@ -41,7 +41,7 @@ set_error_handler('_fp_error_handler');  // located in includes/misc.inc
 
 // To be consistent, we want all internal dates to be in "UTC", and we will convert the display for the
 // benefit of the user later on.
-date_default_timezone_set('UTC'); 
+date_default_timezone_set('UTC');
 
 
 
@@ -53,7 +53,7 @@ if (!isset($skip_flightpath_modules) || $skip_flightpath_modules != TRUE) {
     if (isset($value["enabled"]) && $value["enabled"] != "1") {
       // Module is not enabled.  Skip it.
       continue;
-    }  
+    }
     include_module($module, FALSE);  // simply include the module, do not call hook_init yet.
   }
 }
@@ -66,7 +66,7 @@ invoke_hook('init');
 
 // Constants
 define('FLIGHTPATH_VERSION', '%FP_VERSION%');  // will be set automatically by github release version.
-define('FLIGHTPATH_CORE', '7.x');  // hard-coded core version.
+define('FLIGHTPATH_CORE', '8.x');  // hard-coded core version.
 
 // The watchdog constants are also defined in misc.inc, so add the @ here so we do not define them twice.
 @define ('WATCHDOG_NOTICE', 5);

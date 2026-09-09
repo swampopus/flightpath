@@ -1,4 +1,4 @@
 name = Announcements
 description = Administrators may enter announcements which can then be displayed in a block for specific users.
-core = 7.x
+core = 8.x
 requires = content
